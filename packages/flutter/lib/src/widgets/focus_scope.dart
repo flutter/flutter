@@ -72,13 +72,41 @@ class FocusScope extends StatefulWidget {
 
   /// Returns the [node] of the [FocusScope] that most tightly encloses the
   /// given [BuildContext].
+  ///
+  /// The [context] argument must not be null.
   static FocusScopeNode of(BuildContext context) {
+    assert(context != null);
     final _FocusScopeMarker scope = context.inheritFromWidgetOfExactType(_FocusScopeMarker);
     return scope?.node ?? context.owner.focusManager.rootScope;
   }
 
+  /// A list of the [FocusScopeNode]s for each [FocusScope] ancestor of
+  /// the given [BuildContext]. The first element of the list is the
+  /// nearest ancestor's [FocusScopeNode].
+  ///
+  /// The returned list does not include the [FocusManager]'s `rootScope`.
+  /// Only the [FocusScopeNode]s that belong to [FocusScope] widgets are
+  /// returned.
+  ///
+  /// The [context] argument must not be null.
+  static List<FocusScopeNode> ancestorsOf(BuildContext context) {
+    assert(context != null);
+    final List<FocusScopeNode> ancestors = <FocusScopeNode>[];
+    while (true) {
+      context = context.ancestorInheritedElementForWidgetOfExactType(_FocusScopeMarker);
+      if (context == null)
+        return ancestors;
+      final _FocusScopeMarker scope = context.widget;
+      ancestors.add(scope.node);
+      context.visitAncestorElements((Element parent) {
+        context = parent;
+        return false;
+      });
+    }
+  }
+
   @override
-  _FocusScopeState createState() => new _FocusScopeState();
+  _FocusScopeState createState() => _FocusScopeState();
 }
 
 class _FocusScopeState extends State<FocusScope> {
@@ -102,9 +130,9 @@ class _FocusScopeState extends State<FocusScope> {
   @override
   Widget build(BuildContext context) {
     FocusScope.of(context).reparentScopeIfNeeded(widget.node);
-    return new Semantics(
+    return Semantics(
       explicitChildNodes: true,
-      child: new _FocusScopeMarker(
+      child: _FocusScopeMarker(
         node: widget.node,
         child: widget.child,
       ),

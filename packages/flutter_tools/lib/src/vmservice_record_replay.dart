@@ -3,13 +3,13 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:file/file.dart';
 import 'package:stream_channel/stream_channel.dart';
 
 import 'base/io.dart';
 import 'base/process.dart';
+import 'convert.dart';
 import 'globals.dart';
 
 const String _kManifest = 'MANIFEST.txt';
@@ -22,11 +22,6 @@ const String _kData = 'data';
 /// A [StreamChannel] that expects VM service (JSON-rpc) protocol messages and
 /// serializes all such messages to the file system for later playback.
 class RecordingVMServiceChannel extends DelegatingStreamChannel<String> {
-  final List<_Message> _messages = <_Message>[];
-
-  _RecordingStream _streamRecorder;
-  _RecordingSink _sinkRecorder;
-
   RecordingVMServiceChannel(StreamChannel<String> delegate, Directory location)
       : super(delegate) {
     addShutdownHook(() async {
@@ -41,28 +36,33 @@ class RecordingVMServiceChannel extends DelegatingStreamChannel<String> {
     }, ShutdownStage.SERIALIZE_RECORDING);
   }
 
+  final List<_Message> _messages = <_Message>[];
+
+  _RecordingStream _streamRecorder;
+  _RecordingSink _sinkRecorder;
+
   @override
   Stream<String> get stream {
-    _streamRecorder ??= new _RecordingStream(super.stream, _messages);
+    _streamRecorder ??= _RecordingStream(super.stream, _messages);
     return _streamRecorder.stream;
   }
 
   @override
-  StreamSink<String> get sink => _sinkRecorder ??= new _RecordingSink(super.sink, _messages);
+  StreamSink<String> get sink => _sinkRecorder ??= _RecordingSink(super.sink, _messages);
 }
 
 /// Base class for request and response JSON-rpc messages.
 abstract class _Message implements Comparable<_Message> {
-  final String type;
-  final Map<String, dynamic> data;
-
   _Message(this.type, this.data);
 
   factory _Message.fromRecording(Map<String, dynamic> recordingData) {
     return recordingData[_kType] == _kRequest
-        ? new _Request(recordingData[_kData])
-        : new _Response(recordingData[_kData]);
+        ? _Request(recordingData[_kData])
+        : _Response(recordingData[_kData]);
   }
+
+  final String type;
+  final Map<String, dynamic> data;
 
   int get id => data[_kId];
 
@@ -115,16 +115,11 @@ class _Transaction {
 /// A helper class that monitors a [Stream] of VM service JSON-rpc responses
 /// and saves the responses to a recording.
 class _RecordingStream {
-  final Stream<String> _delegate;
-  final StreamController<String> _controller;
-  final List<_Message> _recording;
-  StreamSubscription<String> _subscription;
-
   _RecordingStream(Stream<String> stream, this._recording)
       : _delegate = stream,
         _controller = stream.isBroadcast
-            ? new StreamController<String>.broadcast()
-            : new StreamController<String>() {
+            ? StreamController<String>.broadcast()
+            : StreamController<String>() {
     _controller.onListen = () {
       assert(_subscription == null);
       _subscription = _listenToStream();
@@ -144,10 +139,15 @@ class _RecordingStream {
     };
   }
 
+  final Stream<String> _delegate;
+  final StreamController<String> _controller;
+  final List<_Message> _recording;
+  StreamSubscription<String> _subscription;
+
   StreamSubscription<String> _listenToStream() {
     return _delegate.listen(
       (String element) {
-        _recording.add(new _Response.fromString(element));
+        _recording.add(_Response.fromString(element));
         _controller.add(element);
       },
       onError: _controller.addError, // We currently don't support recording of errors.
@@ -162,10 +162,10 @@ class _RecordingStream {
 /// A [StreamSink] that monitors VM service JSON-rpc requests and saves the
 /// requests to a recording.
 class _RecordingSink implements StreamSink<String> {
+  _RecordingSink(this._delegate, this._recording);
+
   final StreamSink<String> _delegate;
   final List<_Message> _recording;
-
-  _RecordingSink(this._delegate, this._recording);
 
   @override
   Future<dynamic> close() => _delegate.close();
@@ -176,17 +176,17 @@ class _RecordingSink implements StreamSink<String> {
   @override
   void add(String data) {
     _delegate.add(data);
-    _recording.add(new _Request.fromString(data));
+    _recording.add(_Request.fromString(data));
   }
 
   @override
-  void addError(dynamic errorEvent, [StackTrace stackTrace]) {
-    throw new UnimplementedError('Add support for this if the need ever arises');
+  void addError(dynamic errorEvent, [ StackTrace stackTrace ]) {
+    throw UnimplementedError('Add support for this if the need ever arises');
   }
 
   @override
   Future<dynamic> addStream(Stream<String> stream) {
-    throw new UnimplementedError('Add support for this if the need ever arises');
+    throw UnimplementedError('Add support for this if the need ever arises');
   }
 }
 
@@ -194,12 +194,12 @@ class _RecordingSink implements StreamSink<String> {
 /// to its [StreamChannel.sink], looks up those requests in a recording, and
 /// replays the corresponding responses back from the recording.
 class ReplayVMServiceChannel extends StreamChannelMixin<String> {
-  final Map<int, _Transaction> _transactions;
-  final StreamController<String> _controller = new StreamController<String>();
-  _ReplaySink _replaySink;
-
   ReplayVMServiceChannel(Directory location)
-      : _transactions = _loadTransactions(location);
+    : _transactions = _loadTransactions(location);
+
+  final Map<int, _Transaction> _transactions;
+  final StreamController<String> _controller = StreamController<String>();
+  _ReplaySink _replaySink;
 
   static Map<int, _Transaction> _loadTransactions(Directory location) {
     final File file = _getManifest(location);
@@ -208,7 +208,7 @@ class ReplayVMServiceChannel extends StreamChannelMixin<String> {
     final Map<int, _Transaction> transactions = <int, _Transaction>{};
     for (_Message message in messages) {
       final _Transaction transaction =
-          transactions.putIfAbsent(message.id, () => new _Transaction());
+          transactions.putIfAbsent(message.id, () => _Transaction());
       if (message.type == _kRequest) {
         assert(transaction.request == null);
         transaction.request = message;
@@ -221,12 +221,12 @@ class ReplayVMServiceChannel extends StreamChannelMixin<String> {
   }
 
   static _Message _toMessage(Map<String, dynamic> jsonData) {
-    return new _Message.fromRecording(jsonData);
+    return _Message.fromRecording(jsonData);
   }
 
   void send(_Request request) {
     if (!_transactions.containsKey(request.id))
-      throw new ArgumentError('No matching invocation found');
+      throw ArgumentError('No matching invocation found');
     final _Transaction transaction = _transactions.remove(request.id);
     // TODO(tvolkert): validate that `transaction.request` matches `request`
     if (transaction.response == null) {
@@ -243,17 +243,17 @@ class ReplayVMServiceChannel extends StreamChannelMixin<String> {
   }
 
   @override
-  StreamSink<String> get sink => _replaySink ??= new _ReplaySink(this);
+  StreamSink<String> get sink => _replaySink ??= _ReplaySink(this);
 
   @override
   Stream<String> get stream => _controller.stream;
 }
 
 class _ReplaySink implements StreamSink<String> {
-  final ReplayVMServiceChannel channel;
-  final Completer<Null> _completer = new Completer<Null>();
-
   _ReplaySink(this.channel);
+
+  final ReplayVMServiceChannel channel;
+  final Completer<void> _completer = Completer<void>();
 
   @override
   Future<dynamic> close() {
@@ -267,18 +267,18 @@ class _ReplaySink implements StreamSink<String> {
   @override
   void add(String data) {
     if (_completer.isCompleted)
-      throw new StateError('Sink already closed');
-    channel.send(new _Request.fromString(data));
+      throw StateError('Sink already closed');
+    channel.send(_Request.fromString(data));
   }
 
   @override
-  void addError(dynamic errorEvent, [StackTrace stackTrace]) {
-    throw new UnimplementedError('Add support for this if the need ever arises');
+  void addError(dynamic errorEvent, [ StackTrace stackTrace ]) {
+    throw UnimplementedError('Add support for this if the need ever arises');
   }
 
   @override
   Future<dynamic> addStream(Stream<String> stream) {
-    throw new UnimplementedError('Add support for this if the need ever arises');
+    throw UnimplementedError('Add support for this if the need ever arises');
   }
 }
 

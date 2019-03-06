@@ -21,31 +21,31 @@ void main() {
     expect(kAlwaysCompleteAnimation, hasOneLineDescription);
     expect(kAlwaysDismissedAnimation, hasOneLineDescription);
     expect(const AlwaysStoppedAnimation<double>(0.5), hasOneLineDescription);
-    CurvedAnimation curvedAnimation = new CurvedAnimation(
+    CurvedAnimation curvedAnimation = CurvedAnimation(
       parent: kAlwaysDismissedAnimation,
-      curve: Curves.ease
+      curve: Curves.ease,
     );
     expect(curvedAnimation, hasOneLineDescription);
     curvedAnimation.reverseCurve = Curves.elasticOut;
     expect(curvedAnimation, hasOneLineDescription);
-    final AnimationController controller = new AnimationController(
+    final AnimationController controller = AnimationController(
       duration: const Duration(milliseconds: 500),
       vsync: const TestVSync(),
     );
     controller
       ..value = 0.5
       ..reverse();
-    curvedAnimation = new CurvedAnimation(
+    curvedAnimation = CurvedAnimation(
       parent: controller,
       curve: Curves.ease,
-      reverseCurve: Curves.elasticOut
+      reverseCurve: Curves.elasticOut,
     );
     expect(curvedAnimation, hasOneLineDescription);
     controller.stop();
   });
 
   test('ProxyAnimation.toString control test', () {
-    final ProxyAnimation animation = new ProxyAnimation();
+    final ProxyAnimation animation = ProxyAnimation();
     expect(animation.value, 0.0);
     expect(animation.status, AnimationStatus.dismissed);
     expect(animation, hasOneLineDescription);
@@ -54,12 +54,12 @@ void main() {
   });
 
   test('ProxyAnimation set parent generates value changed', () {
-    final AnimationController controller = new AnimationController(
+    final AnimationController controller = AnimationController(
       vsync: const TestVSync(),
     );
     controller.value = 0.5;
     bool didReceiveCallback = false;
-    final ProxyAnimation animation = new ProxyAnimation()
+    final ProxyAnimation animation = ProxyAnimation()
       ..addListener(() {
         didReceiveCallback = true;
       });
@@ -73,7 +73,7 @@ void main() {
   });
 
   test('ReverseAnimation calls listeners', () {
-    final AnimationController controller = new AnimationController(
+    final AnimationController controller = AnimationController(
       vsync: const TestVSync(),
     );
     controller.value = 0.5;
@@ -81,7 +81,7 @@ void main() {
     void listener() {
       didReceiveCallback = true;
     }
-    final ReverseAnimation animation = new ReverseAnimation(controller)
+    final ReverseAnimation animation = ReverseAnimation(controller)
       ..addListener(listener);
     expect(didReceiveCallback, isFalse);
     controller.value = 0.6;
@@ -95,16 +95,16 @@ void main() {
   });
 
   test('TrainHoppingAnimation', () {
-    final AnimationController currentTrain = new AnimationController(
+    final AnimationController currentTrain = AnimationController(
       vsync: const TestVSync(),
     );
-    final AnimationController nextTrain = new AnimationController(
+    final AnimationController nextTrain = AnimationController(
       vsync: const TestVSync(),
     );
     currentTrain.value = 0.5;
     nextTrain.value = 0.75;
     bool didSwitchTrains = false;
-    final TrainHoppingAnimation animation = new TrainHoppingAnimation(
+    final TrainHoppingAnimation animation = TrainHoppingAnimation(
       currentTrain, nextTrain, onSwitchedTrain: () {
         didSwitchTrains = true;
       });
@@ -119,15 +119,15 @@ void main() {
   });
 
   test('AnimationMean control test', () {
-    final AnimationController left = new AnimationController(
+    final AnimationController left = AnimationController(
       value: 0.5,
       vsync: const TestVSync(),
     );
-    final AnimationController right = new AnimationController(
+    final AnimationController right = AnimationController(
       vsync: const TestVSync(),
     );
 
-    final AnimationMean mean = new AnimationMean(left: left, right: right);
+    final AnimationMean mean = AnimationMean(left: left, right: right);
 
     expect(mean, hasOneLineDescription);
     expect(mean.value, equals(0.25));
@@ -154,15 +154,15 @@ void main() {
   });
 
   test('AnimationMax control test', () {
-    final AnimationController first = new AnimationController(
+    final AnimationController first = AnimationController(
       value: 0.5,
       vsync: const TestVSync(),
     );
-    final AnimationController second = new AnimationController(
+    final AnimationController second = AnimationController(
       vsync: const TestVSync(),
     );
 
-    final AnimationMax<double> max = new AnimationMax<double>(first, second);
+    final AnimationMax<double> max = AnimationMax<double>(first, second);
 
     expect(max, hasOneLineDescription);
     expect(max.value, equals(0.5));
@@ -189,15 +189,15 @@ void main() {
   });
 
   test('AnimationMin control test', () {
-    final AnimationController first = new AnimationController(
+    final AnimationController first = AnimationController(
       value: 0.5,
       vsync: const TestVSync(),
     );
-    final AnimationController second = new AnimationController(
+    final AnimationController second = AnimationController(
       vsync: const TestVSync(),
     );
 
-    final AnimationMin<double> min = new AnimationMin<double>(first, second);
+    final AnimationMin<double> min = AnimationMin<double>(first, second);
 
     expect(min, hasOneLineDescription);
     expect(min.value, equals(0.0));
@@ -224,11 +224,118 @@ void main() {
   });
 
   test('CurvedAnimation with bogus curve', () {
-    final AnimationController controller = new AnimationController(
+    final AnimationController controller = AnimationController(
       vsync: const TestVSync(),
     );
-    final CurvedAnimation curved = new CurvedAnimation(parent: controller, curve: new BogusCurve());
+    final CurvedAnimation curved = CurvedAnimation(parent: controller, curve: BogusCurve());
 
     expect(() { curved.value; }, throwsFlutterError);
   });
+
+  test('TweenSequence', () {
+    final AnimationController controller = AnimationController(
+      vsync: const TestVSync(),
+    );
+
+    final Animation<double> animation = TweenSequence<double>(
+      <TweenSequenceItem<double>>[
+        TweenSequenceItem<double>(
+          tween: Tween<double>(begin: 5.0, end: 10.0),
+          weight: 4.0,
+        ),
+        TweenSequenceItem<double>(
+          tween: ConstantTween<double>(10.0),
+          weight: 2.0,
+        ),
+        TweenSequenceItem<double>(
+          tween: Tween<double>(begin: 10.0, end: 5.0),
+          weight: 4.0,
+        ),
+      ],
+    ).animate(controller);
+
+    expect(animation.value, 5.0);
+
+    controller.value = 0.2;
+    expect(animation.value, 7.5);
+
+    controller.value = 0.4;
+    expect(animation.value, 10.0);
+
+    controller.value = 0.6;
+    expect(animation.value, 10.0);
+
+    controller.value = 0.8;
+    expect(animation.value, 7.5);
+
+    controller.value = 1.0;
+    expect(animation.value, 5.0);
+  });
+
+  test('TweenSequence with curves', () {
+    final AnimationController controller = AnimationController(
+      vsync: const TestVSync(),
+    );
+
+    final Animation<double> animation = TweenSequence<double>(
+      <TweenSequenceItem<double>>[
+        TweenSequenceItem<double>(
+          tween: Tween<double>(begin: 5.0, end: 10.0)
+            .chain(CurveTween(curve: const Interval(0.5, 1.0))),
+          weight: 4.0,
+        ),
+        TweenSequenceItem<double>(
+          tween: ConstantTween<double>(10.0)
+            .chain(CurveTween(curve: Curves.linear)), // linear is a no-op
+          weight: 2.0,
+        ),
+        TweenSequenceItem<double>(
+          tween: Tween<double>(begin: 10.0, end: 5.0)
+            .chain(CurveTween(curve: const Interval(0.0, 0.5))),
+          weight: 4.0,
+        ),
+      ],
+    ).animate(controller);
+
+    expect(animation.value, 5.0);
+
+    controller.value = 0.2;
+    expect(animation.value, 5.0);
+
+    controller.value = 0.4;
+    expect(animation.value, 10.0);
+
+    controller.value = 0.6;
+    expect(animation.value, 10.0);
+
+    controller.value = 0.8;
+    expect(animation.value, 5.0);
+
+    controller.value = 1.0;
+    expect(animation.value, 5.0);
+  });
+
+  test('TweenSequence, one tween', () {
+    final AnimationController controller = AnimationController(
+      vsync: const TestVSync(),
+    );
+
+    final Animation<double> animation = TweenSequence<double>(
+      <TweenSequenceItem<double>>[
+        TweenSequenceItem<double>(
+          tween: Tween<double>(begin: 5.0, end: 10.0),
+          weight: 1.0,
+        ),
+      ],
+    ).animate(controller);
+
+    expect(animation.value, 5.0);
+
+    controller.value = 0.5;
+    expect(animation.value, 7.5);
+
+    controller.value = 1.0;
+    expect(animation.value, 10.0);
+  });
+
 }

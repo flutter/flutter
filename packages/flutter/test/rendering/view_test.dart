@@ -10,7 +10,7 @@ import 'rendering_tester.dart';
 void main() {
   group('RenderView', () {
     test('accounts for device pixel ratio in paintBounds', () {
-      layout(new RenderAspectRatio(aspectRatio: 1.0));
+      layout(RenderAspectRatio(aspectRatio: 1.0));
       pumpFrame();
       final Size logicalSize = renderer.renderView.configuration.size;
       final double devicePixelRatio = renderer.renderView.configuration.devicePixelRatio;

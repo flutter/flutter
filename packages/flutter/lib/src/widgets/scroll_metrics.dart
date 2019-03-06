@@ -47,7 +47,7 @@ abstract class ScrollMetrics {
     double viewportDimension,
     AxisDirection axisDirection,
   }) {
-    return new FixedScrollMetrics(
+    return FixedScrollMetrics(
       minScrollExtent: minScrollExtent ?? this.minScrollExtent,
       maxScrollExtent: maxScrollExtent ?? this.maxScrollExtent,
       pixels: pixels ?? this.pixels,

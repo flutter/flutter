@@ -7,20 +7,20 @@ import 'package:flutter/material.dart';
 
 void main() {
   testWidgets('ListView can handle shrinking top elements', (WidgetTester tester) async {
-    final ScrollController controller = new ScrollController();
+    final ScrollController controller = ScrollController();
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new ListView(
+        child: ListView(
           cacheExtent: 0.0,
           controller: controller,
           children: <Widget>[
-            new Container(height: 400.0, child: const Text('1')),
-            new Container(height: 400.0, child: const Text('2')),
-            new Container(height: 400.0, child: const Text('3')),
-            new Container(height: 400.0, child: const Text('4')),
-            new Container(height: 400.0, child: const Text('5')),
-            new Container(height: 400.0, child: const Text('6')),
+            Container(height: 400.0, child: const Text('1')),
+            Container(height: 400.0, child: const Text('2')),
+            Container(height: 400.0, child: const Text('3')),
+            Container(height: 400.0, child: const Text('4')),
+            Container(height: 400.0, child: const Text('5')),
+            Container(height: 400.0, child: const Text('6')),
           ],
         ),
       ),
@@ -32,18 +32,18 @@ void main() {
     expect(tester.getTopLeft(find.text('4')).dy, equals(200.0));
 
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new ListView(
+        child: ListView(
           cacheExtent: 0.0,
           controller: controller,
           children: <Widget>[
-            new Container(height: 200.0, child: const Text('1')),
-            new Container(height: 400.0, child: const Text('2')),
-            new Container(height: 400.0, child: const Text('3')),
-            new Container(height: 400.0, child: const Text('4')),
-            new Container(height: 400.0, child: const Text('5')),
-            new Container(height: 400.0, child: const Text('6')),
+            Container(height: 200.0, child: const Text('1')),
+            Container(height: 400.0, child: const Text('2')),
+            Container(height: 400.0, child: const Text('3')),
+            Container(height: 400.0, child: const Text('4')),
+            Container(height: 400.0, child: const Text('5')),
+            Container(height: 400.0, child: const Text('6')),
           ],
         ),
       ),
@@ -66,19 +66,19 @@ void main() {
   });
 
   testWidgets('ListView can handle shrinking top elements with cache extent', (WidgetTester tester) async {
-    final ScrollController controller = new ScrollController();
+    final ScrollController controller = ScrollController();
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new ListView(
+        child: ListView(
           controller: controller,
           children: <Widget>[
-            new Container(height: 400.0, child: const Text('1')),
-            new Container(height: 400.0, child: const Text('2')),
-            new Container(height: 400.0, child: const Text('3')),
-            new Container(height: 400.0, child: const Text('4')),
-            new Container(height: 400.0, child: const Text('5')),
-            new Container(height: 400.0, child: const Text('6')),
+            Container(height: 400.0, child: const Text('1')),
+            Container(height: 400.0, child: const Text('2')),
+            Container(height: 400.0, child: const Text('3')),
+            Container(height: 400.0, child: const Text('4')),
+            Container(height: 400.0, child: const Text('5')),
+            Container(height: 400.0, child: const Text('6')),
           ],
         ),
       ),
@@ -90,17 +90,17 @@ void main() {
     expect(tester.getTopLeft(find.text('4')).dy, equals(200.0));
 
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new ListView(
+        child: ListView(
           controller: controller,
           children: <Widget>[
-            new Container(height: 200.0, child: const Text('1')),
-            new Container(height: 400.0, child: const Text('2')),
-            new Container(height: 400.0, child: const Text('3')),
-            new Container(height: 400.0, child: const Text('4')),
-            new Container(height: 400.0, child: const Text('5')),
-            new Container(height: 400.0, child: const Text('6')),
+            Container(height: 200.0, child: const Text('1')),
+            Container(height: 400.0, child: const Text('2')),
+            Container(height: 400.0, child: const Text('3')),
+            Container(height: 400.0, child: const Text('4')),
+            Container(height: 400.0, child: const Text('5')),
+            Container(height: 400.0, child: const Text('6')),
           ],
         ),
       ),
@@ -123,17 +123,17 @@ void main() {
   });
 
   testWidgets('ListView can handle inserts at 0', (WidgetTester tester) async {
-    final ScrollController controller = new ScrollController();
+    final ScrollController controller = ScrollController();
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new ListView(
+        child: ListView(
           controller: controller,
           children: <Widget>[
-            new Container(height: 400.0, child: const Text('0')),
-            new Container(height: 400.0, child: const Text('1')),
-            new Container(height: 400.0, child: const Text('2')),
-            new Container(height: 400.0, child: const Text('3')),
+            Container(height: 400.0, child: const Text('0')),
+            Container(height: 400.0, child: const Text('1')),
+            Container(height: 400.0, child: const Text('2')),
+            Container(height: 400.0, child: const Text('3')),
           ],
         ),
       ),
@@ -146,17 +146,17 @@ void main() {
     final Finder findItemA = find.descendant(of: find.byType(Container), matching: find.text('A'));
     final Finder findItemB = find.descendant(of: find.byType(Container), matching: find.text('B'));
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new ListView(
+        child: ListView(
           controller: controller,
           children: <Widget>[
-            new Container(height: 10.0, child: const Text('A')),
-            new Container(height: 10.0, child: const Text('B')),
-            new Container(height: 400.0, child: const Text('0')),
-            new Container(height: 400.0, child: const Text('1')),
-            new Container(height: 400.0, child: const Text('2')),
-            new Container(height: 400.0, child: const Text('3')),
+            Container(height: 10.0, child: const Text('A')),
+            Container(height: 10.0, child: const Text('B')),
+            Container(height: 400.0, child: const Text('0')),
+            Container(height: 400.0, child: const Text('1')),
+            Container(height: 400.0, child: const Text('2')),
+            Container(height: 400.0, child: const Text('3')),
           ],
         ),
       ),
@@ -175,17 +175,17 @@ void main() {
     expect(find.text('B'), findsNothing);
 
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new ListView(
+        child: ListView(
           controller: controller,
           children: <Widget>[
-            new Container(height: 200.0, child: const Text('A')),
-            new Container(height: 200.0, child: const Text('B')),
-            new Container(height: 400.0, child: const Text('0')),
-            new Container(height: 400.0, child: const Text('1')),
-            new Container(height: 400.0, child: const Text('2')),
-            new Container(height: 400.0, child: const Text('3')),
+            Container(height: 200.0, child: const Text('A')),
+            Container(height: 200.0, child: const Text('B')),
+            Container(height: 400.0, child: const Text('0')),
+            Container(height: 400.0, child: const Text('1')),
+            Container(height: 400.0, child: const Text('2')),
+            Container(height: 400.0, child: const Text('3')),
           ],
         ),
       ),

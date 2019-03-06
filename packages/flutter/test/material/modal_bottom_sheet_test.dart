@@ -7,28 +7,29 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/gestures.dart';
 
+import '../widgets/semantics_tester.dart';
+
 void main() {
   testWidgets('Verify that a tap dismisses a modal BottomSheet', (WidgetTester tester) async {
     BuildContext savedContext;
 
-    await tester.pumpWidget(new MaterialApp(
-      home: new Builder(
+    await tester.pumpWidget(MaterialApp(
+      home: Builder(
         builder: (BuildContext context) {
           savedContext = context;
-          return new Container();
+          return Container();
         }
-      )
+      ),
     ));
 
     await tester.pump();
     expect(find.text('BottomSheet'), findsNothing);
 
     bool showBottomSheetThenCalled = false;
-    showModalBottomSheet<Null>(
+    showModalBottomSheet<void>(
       context: savedContext,
-      builder: (BuildContext context) => const Text('BottomSheet')
-    ).then<void>((Null result) {
-      expectSync(result, isNull);
+      builder: (BuildContext context) => const Text('BottomSheet'),
+    ).then<void>((void value) {
       showBottomSheetThenCalled = true;
     });
 
@@ -46,11 +47,10 @@ void main() {
     expect(find.text('BottomSheet'), findsNothing);
 
     showBottomSheetThenCalled = false;
-    showModalBottomSheet<Null>(
+    showModalBottomSheet<void>(
       context: savedContext,
       builder: (BuildContext context) => const Text('BottomSheet'),
-    ).then<void>((Null result) {
-      expectSync(result, isNull);
+    ).then<void>((void value) {
       showBottomSheetThenCalled = true;
     });
     await tester.pump(); // bottom sheet show animation starts
@@ -68,23 +68,23 @@ void main() {
   });
 
   testWidgets('Verify that a downwards fling dismisses a persistent BottomSheet', (WidgetTester tester) async {
-    final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     bool showBottomSheetThenCalled = false;
 
-    await tester.pumpWidget(new MaterialApp(
-      home: new Scaffold(
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
         key: scaffoldKey,
-        body: const Center(child: const Text('body'))
-      )
+        body: const Center(child: Text('body')),
+      ),
     ));
 
     expect(showBottomSheetThenCalled, isFalse);
     expect(find.text('BottomSheet'), findsNothing);
 
-    scaffoldKey.currentState.showBottomSheet<Null>((BuildContext context) {
-      return new Container(
+    scaffoldKey.currentState.showBottomSheet<void>((BuildContext context) {
+      return Container(
         margin: const EdgeInsets.all(40.0),
-        child: const Text('BottomSheet')
+        child: const Text('BottomSheet'),
       );
     }).closed.whenComplete(() {
       showBottomSheetThenCalled = true;
@@ -126,19 +126,19 @@ void main() {
 
   testWidgets('Verify that dragging past the bottom dismisses a persistent BottomSheet', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/5528
-    final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
-    await tester.pumpWidget(new MaterialApp(
-      home: new Scaffold(
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
         key: scaffoldKey,
-        body: const Center(child: const Text('body'))
-      )
+        body: const Center(child: Text('body')),
+      ),
     ));
 
-    scaffoldKey.currentState.showBottomSheet<Null>((BuildContext context) {
-      return new Container(
+    scaffoldKey.currentState.showBottomSheet<void>((BuildContext context) {
+      return Container(
         margin: const EdgeInsets.all(40.0),
-        child: const Text('BottomSheet')
+        child: const Text('BottomSheet'),
       );
     });
 
@@ -158,24 +158,24 @@ void main() {
     BuildContext outerContext;
     BuildContext innerContext;
 
-    await tester.pumpWidget(new Localizations(
+    await tester.pumpWidget(Localizations(
       locale: const Locale('en', 'US'),
       delegates: const <LocalizationsDelegate<dynamic>>[
         DefaultWidgetsLocalizations.delegate,
         DefaultMaterialLocalizations.delegate,
       ],
-      child: new Directionality(
+      child: Directionality(
         textDirection: TextDirection.ltr,
-        child: new MediaQuery(
+        child: MediaQuery(
           data: const MediaQueryData(
-            padding: const EdgeInsets.all(50.0),
+            padding: EdgeInsets.all(50.0),
           ),
-          child: new Navigator(
+          child: Navigator(
             onGenerateRoute: (_) {
-              return new PageRouteBuilder<void>(
+              return PageRouteBuilder<void>(
                 pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
                   outerContext = context;
-                  return new Container();
+                  return Container();
                 },
               );
             },
@@ -188,7 +188,7 @@ void main() {
       context: outerContext,
       builder: (BuildContext context) {
         innerContext = context;
-        return new Container();
+        return Container();
       },
     );
     await tester.pump();
@@ -202,5 +202,51 @@ void main() {
       MediaQuery.of(innerContext).padding,
       const EdgeInsets.only(left: 50.0, right: 50.0, bottom: 50.0),
     );
+  });
+
+  testWidgets('modal BottomSheet has semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        key: scaffoldKey,
+        body: const Center(child: Text('body')),
+      ),
+    ));
+
+
+    showModalBottomSheet<void>(context: scaffoldKey.currentContext, builder: (BuildContext context) {
+      return Container(
+        child: const Text('BottomSheet'),
+      );
+    });
+
+    await tester.pump(); // bottom sheet show animation starts
+    await tester.pump(const Duration(seconds: 1)); // animation done
+
+    expect(semantics, hasSemantics(TestSemantics.root(
+      children: <TestSemantics>[
+        TestSemantics.rootChild(
+          children: <TestSemantics>[
+            TestSemantics(
+              label: 'Dialog',
+              textDirection: TextDirection.ltr,
+              flags: <SemanticsFlag>[
+                SemanticsFlag.scopesRoute,
+                SemanticsFlag.namesRoute,
+              ],
+              children: <TestSemantics>[
+                TestSemantics(
+                  label: 'BottomSheet',
+                  textDirection: TextDirection.ltr,
+                ),
+              ],
+            ),
+          ],
+        ),
+      ],
+    ), ignoreTransform: true, ignoreRect: true, ignoreId: true));
+    semantics.dispose();
   });
 }

@@ -10,8 +10,8 @@ import 'package:flutter/widgets.dart';
 import 'theme.dart';
 
 const double _kScrollbarThickness = 6.0;
-const Duration _kScrollbarFadeDuration = const Duration(milliseconds: 300);
-const Duration _kScrollbarTimeToFade = const Duration(milliseconds: 600);
+const Duration _kScrollbarFadeDuration = Duration(milliseconds: 300);
+const Duration _kScrollbarTimeToFade = Duration(milliseconds: 600);
 
 /// A material design scrollbar.
 ///
@@ -47,7 +47,7 @@ class Scrollbar extends StatefulWidget {
   final Widget child;
 
   @override
-  _ScrollbarState createState() => new _ScrollbarState();
+  _ScrollbarState createState() => _ScrollbarState();
 }
 
 
@@ -64,13 +64,13 @@ class _ScrollbarState extends State<Scrollbar> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    _fadeoutAnimationController = new AnimationController(
+    _fadeoutAnimationController = AnimationController(
       vsync: this,
       duration: _kScrollbarFadeDuration,
     );
-    _fadeoutOpacityAnimation = new CurvedAnimation(
+    _fadeoutOpacityAnimation = CurvedAnimation(
       parent: _fadeoutAnimationController,
-      curve: Curves.fastOutSlowIn
+      curve: Curves.fastOutSlowIn,
     );
   }
 
@@ -99,7 +99,7 @@ class _ScrollbarState extends State<Scrollbar> with TickerProviderStateMixin {
   }
 
   ScrollbarPainter _buildMaterialScrollbarPainter() {
-    return new ScrollbarPainter(
+    return ScrollbarPainter(
         color: _themeColor,
         textDirection: _textDirection,
         thickness: _kScrollbarThickness,
@@ -119,7 +119,7 @@ class _ScrollbarState extends State<Scrollbar> with TickerProviderStateMixin {
 
       _materialPainter.update(notification.metrics, notification.metrics.axisDirection);
       _fadeoutTimer?.cancel();
-      _fadeoutTimer = new Timer(_kScrollbarTimeToFade, () {
+      _fadeoutTimer = Timer(_kScrollbarTimeToFade, () {
         _fadeoutAnimationController.reverse();
         _fadeoutTimer = null;
       });
@@ -139,23 +139,23 @@ class _ScrollbarState extends State<Scrollbar> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     switch (_currentPlatform) {
       case TargetPlatform.iOS:
-        return new CupertinoScrollbar(
+        return CupertinoScrollbar(
           child: widget.child,
         );
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
-        return new NotificationListener<ScrollNotification>(
+        return NotificationListener<ScrollNotification>(
           onNotification: _handleScrollNotification,
-          child: new RepaintBoundary(
-            child: new CustomPaint(
+          child: RepaintBoundary(
+            child: CustomPaint(
               foregroundPainter: _materialPainter,
-              child: new RepaintBoundary(
+              child: RepaintBoundary(
                 child: widget.child,
               ),
             ),
           ),
         );
     }
-    throw new FlutterError('Unknown platform for scrollbar insertion');
+    throw FlutterError('Unknown platform for scrollbar insertion');
   }
 }

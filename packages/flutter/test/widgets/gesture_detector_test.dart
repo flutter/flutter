@@ -8,12 +8,14 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/gestures.dart';
 
 void main() {
+  const Offset forcePressOffset = Offset(400.0, 50.0);
+
   testWidgets('Uncontested scrolls start immediately', (WidgetTester tester) async {
     bool didStartDrag = false;
     double updatedDragDelta;
     bool didEndDrag = false;
 
-    final Widget widget = new GestureDetector(
+    final Widget widget = GestureDetector(
       onVerticalDragStart: (DragStartDetails details) {
         didStartDrag = true;
       },
@@ -23,7 +25,7 @@ void main() {
       onVerticalDragEnd: (DragEndDetails details) {
         didEndDrag = true;
       },
-      child: new Container(
+      child: Container(
         color: const Color(0xFF00FF00),
       ),
     );
@@ -33,14 +35,14 @@ void main() {
     expect(updatedDragDelta, isNull);
     expect(didEndDrag, isFalse);
 
-    const Offset firstLocation = const Offset(10.0, 10.0);
+    const Offset firstLocation = Offset(10.0, 10.0);
     final TestGesture gesture = await tester.startGesture(firstLocation, pointer: 7);
     expect(didStartDrag, isTrue);
     didStartDrag = false;
     expect(updatedDragDelta, isNull);
     expect(didEndDrag, isFalse);
 
-    const Offset secondLocation = const Offset(10.0, 9.0);
+    const Offset secondLocation = Offset(10.0, 9.0);
     await gesture.moveTo(secondLocation);
     expect(didStartDrag, isFalse);
     expect(updatedDragDelta, -1.0);
@@ -53,22 +55,23 @@ void main() {
     expect(didEndDrag, isTrue);
     didEndDrag = false;
 
-    await tester.pumpWidget(new Container());
+    await tester.pumpWidget(Container());
   });
 
   testWidgets('Match two scroll gestures in succession', (WidgetTester tester) async {
     int gestureCount = 0;
     double dragDistance = 0.0;
 
-    const Offset downLocation = const Offset(10.0, 10.0);
-    const Offset upLocation = const Offset(10.0, 50.0); // must be far enough to be more than kTouchSlop
+    const Offset downLocation = Offset(10.0, 10.0);
+    const Offset upLocation = Offset(10.0, 50.0); // must be far enough to be more than kTouchSlop
 
-    final Widget widget = new GestureDetector(
+    final Widget widget = GestureDetector(
+      dragStartBehavior: DragStartBehavior.down,
       onVerticalDragUpdate: (DragUpdateDetails details) { dragDistance += details.primaryDelta; },
       onVerticalDragEnd: (DragEndDetails details) { gestureCount += 1; },
       onHorizontalDragUpdate: (DragUpdateDetails details) { fail('gesture should not match'); },
       onHorizontalDragEnd: (DragEndDetails details) { fail('gesture should not match'); },
-      child: new Container(
+      child: Container(
         color: const Color(0xFF00FF00),
       ),
     );
@@ -85,7 +88,7 @@ void main() {
     expect(gestureCount, 2);
     expect(dragDistance, 40.0 * 2.0); // delta between down and up, twice
 
-    await tester.pumpWidget(new Container());
+    await tester.pumpWidget(Container());
   });
 
   testWidgets('Pan doesn\'t crash', (WidgetTester tester) async {
@@ -94,17 +97,17 @@ void main() {
     bool didEndPan = false;
 
     await tester.pumpWidget(
-      new GestureDetector(
+      GestureDetector(
         onPanStart: (DragStartDetails details) {
           didStartPan = true;
         },
         onPanUpdate: (DragUpdateDetails details) {
-          panDelta = details.delta;
+          panDelta = panDelta == null ? details.delta : panDelta + details.delta;
         },
         onPanEnd: (DragEndDetails details) {
           didEndPan = true;
         },
-        child: new Container(
+        child: Container(
           color: const Color(0xFF00FF00),
         ),
       ),
@@ -126,26 +129,26 @@ void main() {
     bool didReceivePointerDown;
     bool didTap;
 
-    Future<Null> pumpWidgetTree(HitTestBehavior behavior) {
+    Future<void> pumpWidgetTree(HitTestBehavior behavior) {
       return tester.pumpWidget(
-        new Directionality(
+        Directionality(
           textDirection: TextDirection.ltr,
-          child: new Stack(
+          child: Stack(
             children: <Widget>[
-              new Listener(
+              Listener(
                 onPointerDown: (_) {
                   didReceivePointerDown = true;
                 },
-                child: new Container(
+                child: Container(
                   width: 100.0,
                   height: 100.0,
                   color: const Color(0xFF00FF00),
                 ),
               ),
-              new Container(
+              Container(
                 width: 100.0,
                 height: 100.0,
-                child: new GestureDetector(
+                child: GestureDetector(
                   onTap: () {
                     didTap = true;
                   },
@@ -191,8 +194,8 @@ void main() {
   testWidgets('Empty', (WidgetTester tester) async {
     bool didTap = false;
     await tester.pumpWidget(
-      new Center(
-        child: new GestureDetector(
+      Center(
+        child: GestureDetector(
           onTap: () {
             didTap = true;
           },
@@ -207,12 +210,12 @@ void main() {
   testWidgets('Only container', (WidgetTester tester) async {
     bool didTap = false;
     await tester.pumpWidget(
-      new Center(
-        child: new GestureDetector(
+      Center(
+        child: GestureDetector(
           onTap: () {
             didTap = true;
           },
-          child: new Container(),
+          child: Container(),
         ),
       ),
     );
@@ -225,10 +228,10 @@ void main() {
     final GestureTapCallback inputCallback = () {};
 
     await tester.pumpWidget(
-      new Center(
-        child: new GestureDetector(
+      Center(
+        child: GestureDetector(
           onTap: inputCallback,
-          child: new Container(),
+          child: Container(),
         ),
       ),
     );
@@ -237,10 +240,10 @@ void main() {
     final GestureTapCallback actualCallback1 = renderObj1.onTap;
 
     await tester.pumpWidget(
-      new Center(
-        child: new GestureDetector(
+      Center(
+        child: GestureDetector(
           onTap: inputCallback,
-          child: new Container(),
+          child: Container(),
         ),
       ),
     );
@@ -259,13 +262,13 @@ void main() {
     int longPress = 0;
 
     await tester.pumpWidget(
-      new Container(
+      Container(
         alignment: Alignment.topLeft,
-        child: new Container(
+        child: Container(
           alignment: Alignment.center,
           height: 100.0,
           color: const Color(0xFF00FF00),
-          child: new GestureDetector(
+          child: GestureDetector(
             onTapDown: (TapDownDetails details) {
               tapDown += 1;
             },
@@ -284,34 +287,242 @@ void main() {
     );
 
     // Pointer is dragged from the center of the 800x100 gesture detector
-    // to a point (400,300) below it. This always causes onTapCancel to be
-    // called; onTap should never be called.
-    Future<Null> dragOut(Duration timeout) async {
+    // to a point (400,300) below it. This should never call onTap.
+    Future<void> dragOut(Duration timeout) async {
       final TestGesture gesture = await tester.startGesture(const Offset(400.0, 50.0));
-      // If the timeout is less than kPressTimeout the recognizer will just trigger
-      // the onTapCancel callback. If the timeout is greater than kLongPressTimeout
+      // If the timeout is less than kPressTimeout the recognizer will not
+      // trigger any callbacks. If the timeout is greater than kLongPressTimeout
       // then onTapDown, onLongPress, and onCancel will be called.
       await tester.pump(timeout);
       await gesture.moveTo(const Offset(400.0, 300.0));
       await gesture.up();
     }
 
-    await dragOut(kPressTimeout * 0.5); // generates tapCancel
+    await dragOut(kPressTimeout * 0.5); // generates nothing
     expect(tapDown, 0);
-    expect(tapCancel, 1);
+    expect(tapCancel, 0);
     expect(tap, 0);
     expect(longPress, 0);
 
     await dragOut(kPressTimeout); // generates tapDown, tapCancel
     expect(tapDown, 1);
-    expect(tapCancel, 2);
+    expect(tapCancel, 1);
     expect(tap, 0);
     expect(longPress, 0);
 
     await dragOut(kLongPressTimeout); // generates tapDown, longPress, tapCancel
     expect(tapDown, 2);
-    expect(tapCancel, 3);
+    expect(tapCancel, 2);
     expect(tap, 0);
     expect(longPress, 1);
+  });
+
+  testWidgets('Long Press Up Callback called after long press', (WidgetTester tester) async {
+    int longPressUp = 0;
+
+    await tester.pumpWidget(
+      Container(
+        alignment: Alignment.topLeft,
+        child: Container(
+          alignment: Alignment.center,
+          height: 100.0,
+          color: const Color(0xFF00FF00),
+          child: GestureDetector(
+            onLongPressUp: () {
+              longPressUp += 1;
+            },
+          ),
+        ),
+      ),
+    );
+
+    Future<void> longPress(Duration timeout) async {
+      final TestGesture gesture = await tester.startGesture(const Offset(400.0, 50.0));
+      await tester.pump(timeout);
+      await gesture.up();
+    }
+
+    await longPress(kLongPressTimeout + const Duration(seconds: 1)); // To make sure the time for long press has occurred
+    expect(longPressUp, 1);
+  });
+
+  testWidgets('Force Press Callback called after force press', (WidgetTester tester) async {
+    int forcePressStart = 0;
+    int forcePressPeaked = 0;
+    int forcePressUpdate = 0;
+    int forcePressEnded = 0;
+
+    await tester.pumpWidget(
+      Container(
+        alignment: Alignment.topLeft,
+        child: Container(
+          alignment: Alignment.center,
+          height: 100.0,
+          color: const Color(0xFF00FF00),
+          child: GestureDetector(
+            onForcePressStart: (_) => forcePressStart += 1,
+            onForcePressEnd: (_) => forcePressEnded += 1,
+            onForcePressPeak: (_) => forcePressPeaked += 1,
+            onForcePressUpdate: (_) => forcePressUpdate += 1,
+          ),
+        ),
+      ),
+    );
+    const int pointerValue = 1;
+
+    final TestGesture gesture = await tester.createGesture();
+    await gesture.downWithCustomEvent(
+      forcePressOffset,
+      const PointerDownEvent(
+        pointer: pointerValue,
+        position: forcePressOffset,
+        pressure: 0.0,
+        pressureMax: 6.0,
+        pressureMin: 0.0,
+      ),
+    );
+
+    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(0.0, 0.0), pressure: 0.3, pressureMin: 0, pressureMax: 1));
+
+    expect(forcePressStart, 0);
+    expect(forcePressPeaked, 0);
+    expect(forcePressUpdate, 0);
+    expect(forcePressEnded, 0);
+
+    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(0.0, 0.0), pressure: 0.5, pressureMin: 0, pressureMax: 1));
+
+    expect(forcePressStart, 1);
+    expect(forcePressPeaked, 0);
+    expect(forcePressUpdate, 1);
+    expect(forcePressEnded, 0);
+
+    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(0.0, 0.0), pressure: 0.6, pressureMin: 0, pressureMax: 1));
+    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(0.0, 0.0), pressure: 0.7, pressureMin: 0, pressureMax: 1));
+    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(0.0, 0.0), pressure: 0.2, pressureMin: 0, pressureMax: 1));
+    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(0.0, 0.0), pressure: 0.3, pressureMin: 0, pressureMax: 1));
+
+    expect(forcePressStart, 1);
+    expect(forcePressPeaked, 0);
+    expect(forcePressUpdate, 5);
+    expect(forcePressEnded, 0);
+
+    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(0.0, 0.0), pressure: 0.9, pressureMin: 0, pressureMax: 1));
+
+    expect(forcePressStart, 1);
+    expect(forcePressPeaked, 1);
+    expect(forcePressUpdate, 6);
+    expect(forcePressEnded, 0);
+
+    await gesture.up();
+
+    expect(forcePressStart, 1);
+    expect(forcePressPeaked, 1);
+    expect(forcePressUpdate, 6);
+    expect(forcePressEnded, 1);
+  });
+
+  testWidgets('Force Press Callback not called if long press triggered before force press', (WidgetTester tester) async {
+    int forcePressStart = 0;
+    int longPressTimes = 0;
+
+    await tester.pumpWidget(
+      Container(
+        alignment: Alignment.topLeft,
+        child: Container(
+          alignment: Alignment.center,
+          height: 100.0,
+          color: const Color(0xFF00FF00),
+          child: GestureDetector(
+            onForcePressStart: (_) => forcePressStart += 1,
+            onLongPress: () => longPressTimes += 1,
+          ),
+        ),
+      ),
+    );
+
+    const int pointerValue = 1;
+    const double maxPressure = 6.0;
+
+    final TestGesture gesture = await tester.createGesture();
+
+    await gesture.downWithCustomEvent(
+      forcePressOffset,
+      const PointerDownEvent(
+        pointer: pointerValue,
+        position: forcePressOffset,
+        pressure: 0.0,
+        pressureMax: maxPressure,
+        pressureMin: 0.0,
+      ),
+    );
+
+    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(400.0, 50.0), pressure: 0.3, pressureMin: 0, pressureMax: maxPressure));
+
+    expect(forcePressStart, 0);
+    expect(longPressTimes, 0);
+
+    // Trigger the long press.
+    await tester.pump(kLongPressTimeout + const Duration(seconds: 1));
+
+    expect(longPressTimes, 1);
+    expect(forcePressStart, 0);
+
+    // Failed attempt to trigger the force press.
+    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(400.0, 50.0), pressure: 0.5, pressureMin: 0, pressureMax: maxPressure));
+
+    expect(longPressTimes, 1);
+    expect(forcePressStart, 0);
+  });
+
+  testWidgets('Force Press Callback not called if drag triggered before force press', (WidgetTester tester) async {
+    int forcePressStart = 0;
+    int horizontalDragStart = 0;
+
+    await tester.pumpWidget(
+      Container(
+        alignment: Alignment.topLeft,
+        child: Container(
+          alignment: Alignment.center,
+          height: 100.0,
+          color: const Color(0xFF00FF00),
+          child: GestureDetector(
+            onForcePressStart: (_) => forcePressStart += 1,
+            onHorizontalDragStart: (_) => horizontalDragStart += 1,
+          ),
+        ),
+      ),
+    );
+
+    const int pointerValue = 1;
+
+    final TestGesture gesture = await tester.createGesture();
+
+    await gesture.downWithCustomEvent(
+      forcePressOffset,
+      const PointerDownEvent(
+        pointer: pointerValue,
+        position: forcePressOffset,
+        pressure: 0.0,
+        pressureMax: 6.0,
+        pressureMin: 0.0,
+      ),
+    );
+
+    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(0.0, 0.0), pressure: 0.3, pressureMin: 0, pressureMax: 1));
+
+    expect(forcePressStart, 0);
+    expect(horizontalDragStart, 0);
+
+    // Trigger horizontal drag.
+    await gesture.moveBy(const Offset(100, 0));
+
+    expect(horizontalDragStart, 1);
+    expect(forcePressStart, 0);
+
+    // Failed attempt to trigger the force press.
+    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(0.0, 0.0), pressure: 0.5, pressureMin: 0, pressureMax: 1));
+
+    expect(horizontalDragStart, 1);
+    expect(forcePressStart, 0);
   });
 }

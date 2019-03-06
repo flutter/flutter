@@ -4,6 +4,8 @@
 
 import 'package:flutter/material.dart';
 
+import '../../gallery/demo.dart';
+
 const String _introText =
   'Tooltips are short identifying messages that briefly appear in response to '
   'a long press. Tooltip messages are also used by services that make Flutter '
@@ -16,57 +18,58 @@ class TooltipDemo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    return new Scaffold(
-      appBar: new AppBar(
-        title: const Text('Tooltips')
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Tooltips'),
+        actions: <Widget>[MaterialDemoDocumentationButton(routeName)],
       ),
-      body: new Builder(
+      body: Builder(
         builder: (BuildContext context) {
-          return new SafeArea(
+          return SafeArea(
             top: false,
             bottom: false,
-            child: new ListView(
+            child: ListView(
               children: <Widget>[
-                new Text(_introText, style: theme.textTheme.subhead),
-                new Row(
+                Text(_introText, style: theme.textTheme.subhead),
+                Row(
                   children: <Widget>[
-                    new Text('Long press the ', style: theme.textTheme.subhead),
-                    new Tooltip(
+                    Text('Long press the ', style: theme.textTheme.subhead),
+                    Tooltip(
                       message: 'call icon',
-                      child: new Icon(
+                      child: Icon(
                         Icons.call,
                         size: 18.0,
-                        color: theme.iconTheme.color
-                      )
+                        color: theme.iconTheme.color,
+                      ),
                     ),
-                    new Text(' icon.', style: theme.textTheme.subhead)
-                  ]
+                    Text(' icon.', style: theme.textTheme.subhead),
+                  ],
                 ),
-                new Center(
-                  child: new IconButton(
+                Center(
+                  child: IconButton(
                     iconSize: 48.0,
                     icon: const Icon(Icons.call),
                     color: theme.iconTheme.color,
                     tooltip: 'Place a phone call',
                     onPressed: () {
                       Scaffold.of(context).showSnackBar(const SnackBar(
-                         content: const Text('That was an ordinary tap.')
+                         content: Text('That was an ordinary tap.'),
                       ));
-                    }
-                  )
-                )
+                    },
+                  ),
+                ),
               ]
-              .map((Widget widget) {
-                return new Padding(
+              .map<Widget>((Widget widget) {
+                return Padding(
                   padding: const EdgeInsets.only(top: 16.0, left: 16.0, right: 16.0),
-                  child: widget
+                  child: widget,
                 );
               })
-              .toList()
+              .toList(),
             ),
           );
         }
-      )
+      ),
     );
   }
 }

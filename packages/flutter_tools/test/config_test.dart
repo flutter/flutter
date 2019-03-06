@@ -4,15 +4,21 @@
 
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:test/test.dart';
+
+import 'src/common.dart';
 
 void main() {
   Config config;
+  Directory tempDir;
 
   setUp(() {
-    final Directory tempDirectory = fs.systemTempDirectory.createTempSync('flutter_test');
-    final File file = fs.file(fs.path.join(tempDirectory.path, '.settings'));
-    config = new Config(file);
+    tempDir = fs.systemTempDirectory.createTempSync('flutter_config_test.');
+    final File file = fs.file(fs.path.join(tempDir.path, '.settings'));
+    config = Config(file);
+  });
+
+  tearDown(() {
+    tryToDelete(tempDir);
   });
 
   group('config', () {

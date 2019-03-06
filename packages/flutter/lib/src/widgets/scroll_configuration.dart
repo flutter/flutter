@@ -1,4 +1,4 @@
-/// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2016 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -9,7 +9,7 @@ import 'framework.dart';
 import 'overscroll_indicator.dart';
 import 'scroll_physics.dart';
 
-const Color _kDefaultGlowColor = const Color(0xFFFFFFFF);
+const Color _kDefaultGlowColor = Color(0xFFFFFFFF);
 
 /// Describes how [Scrollable] widgets should behave.
 ///
@@ -38,7 +38,7 @@ class ScrollBehavior {
         return child;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
-        return new GlowingOverscrollIndicator(
+        return GlowingOverscrollIndicator(
           child: child,
           axisDirection: axisDirection,
           color: _kDefaultGlowColor,
@@ -114,6 +114,6 @@ class ScrollConfiguration extends InheritedWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new DiagnosticsProperty<ScrollBehavior>('behavior', behavior));
+    properties.add(DiagnosticsProperty<ScrollBehavior>('behavior', behavior));
   }
 }

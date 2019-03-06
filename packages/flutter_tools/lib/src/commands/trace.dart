@@ -3,12 +3,12 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/utils.dart';
 import '../cache.dart';
+import '../convert.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
 import '../tracing.dart';
@@ -23,7 +23,7 @@ class TraceCommand extends FlutterCommand {
     argParser.addFlag('stop', negatable: false, help: 'Stop tracing. Implied if --start is also omitted.');
     argParser.addOption('duration',
       abbr: 'd',
-      help: 'Time to wait after starting (if --start is specified or implied) and before\n'
+      help: 'Time to wait after starting (if --start is specified or implied) and before '
             'stopping (if --stop is specified or implied).\n'
             'Defaults to ten seconds if --stop is specified or implied, zero otherwise.',
     );
@@ -38,13 +38,13 @@ class TraceCommand extends FlutterCommand {
 
   @override
   final String usageFooter =
-    '\`trace\` called without the --start or --stop flags will automatically start tracing,\n'
-    'delay a set amount of time (controlled by --duration), and stop tracing. To explicitly\n'
+    '\`trace\` called without the --start or --stop flags will automatically start tracing, '
+    'delay a set amount of time (controlled by --duration), and stop tracing. To explicitly '
     'control tracing, call trace with --start and later with --stop.\n'
     'The --debug-port argument is required.';
 
   @override
-  Future<Null> runCommand() async {
+  Future<FlutterCommandResult> runCommand() async {
     int observatoryPort;
     if (argResults.wasParsed('debug-port')) {
       observatoryPort = int.tryParse(argResults['debug-port']);
@@ -64,7 +64,7 @@ class TraceCommand extends FlutterCommand {
     Duration duration;
     if (argResults.wasParsed('duration')) {
       try {
-        duration = new Duration(seconds: int.parse(argResults['duration']));
+        duration = Duration(seconds: int.parse(argResults['duration']));
       } on FormatException {
         throwToolExit('Invalid duration passed to --duration; it should be a positive number of seconds.');
       }
@@ -88,12 +88,14 @@ class TraceCommand extends FlutterCommand {
 
     if (start)
       await tracing.startTracing();
-    await new Future<Null>.delayed(duration);
+    await Future<void>.delayed(duration);
     if (stop)
       await _stopTracing(tracing);
+
+    return null;
   }
 
-  Future<Null> _stopTracing(Tracing tracing) async {
+  Future<void> _stopTracing(Tracing tracing) async {
     final Map<String, dynamic> timeline = await tracing.stopTracingAndDownloadTimeline();
     File localFile;
 

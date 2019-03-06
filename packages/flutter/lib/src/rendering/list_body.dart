@@ -10,7 +10,7 @@ import 'object.dart';
 /// Parent data for use with [RenderListBody].
 class ListBodyParentData extends ContainerBoxParentData<RenderBox> { }
 
-typedef double _ChildSizingFunction(RenderBox child);
+typedef _ChildSizingFunction = double Function(RenderBox child);
 
 /// Displays its children sequentially along a given axis, forcing them to the
 /// dimensions of the parent in the other axis.
@@ -40,7 +40,7 @@ class RenderListBody extends RenderBox
   @override
   void setupParentData(RenderBox child) {
     if (child.parentData is! ListBodyParentData)
-      child.parentData = new ListBodyParentData();
+      child.parentData = ListBodyParentData();
   }
 
   /// The direction in which the children are laid out.
@@ -74,7 +74,7 @@ class RenderListBody extends RenderBox
             return true;
           break;
       }
-      throw new FlutterError(
+      throw FlutterError(
         'RenderListBody must have unlimited space along its main axis.\n'
         'RenderListBody does not clip or resize its children, so it must be '
         'placed in a parent that does not constrain the main '
@@ -96,7 +96,7 @@ class RenderListBody extends RenderBox
       // TODO(ianh): Detect if we're actually nested blocks and say something
       // more specific to the exact situation in that case, and don't mention
       // nesting blocks in the negative case.
-      throw new FlutterError(
+      throw FlutterError(
         'RenderListBody must have a bounded constraint for its cross axis.\n'
         'RenderListBody forces its children to expand to fit the RenderListBody\'s container, '
         'so it must be placed in a parent that constrains the cross '
@@ -111,19 +111,19 @@ class RenderListBody extends RenderBox
     RenderBox child = firstChild;
     switch (axisDirection) {
     case AxisDirection.right:
-      final BoxConstraints innerConstraints = new BoxConstraints.tightFor(height: constraints.maxHeight);
+      final BoxConstraints innerConstraints = BoxConstraints.tightFor(height: constraints.maxHeight);
       while (child != null) {
         child.layout(innerConstraints, parentUsesSize: true);
         final ListBodyParentData childParentData = child.parentData;
-        childParentData.offset = new Offset(mainAxisExtent, 0.0);
+        childParentData.offset = Offset(mainAxisExtent, 0.0);
         mainAxisExtent += child.size.width;
         assert(child.parentData == childParentData);
         child = childParentData.nextSibling;
       }
-      size = constraints.constrain(new Size(mainAxisExtent, constraints.maxHeight));
+      size = constraints.constrain(Size(mainAxisExtent, constraints.maxHeight));
       break;
     case AxisDirection.left:
-      final BoxConstraints innerConstraints = new BoxConstraints.tightFor(height: constraints.maxHeight);
+      final BoxConstraints innerConstraints = BoxConstraints.tightFor(height: constraints.maxHeight);
       while (child != null) {
         child.layout(innerConstraints, parentUsesSize: true);
         final ListBodyParentData childParentData = child.parentData;
@@ -136,26 +136,26 @@ class RenderListBody extends RenderBox
       while (child != null) {
         final ListBodyParentData childParentData = child.parentData;
         position += child.size.width;
-        childParentData.offset = new Offset(mainAxisExtent - position, 0.0);
+        childParentData.offset = Offset(mainAxisExtent - position, 0.0);
         assert(child.parentData == childParentData);
         child = childParentData.nextSibling;
       }
-      size = constraints.constrain(new Size(mainAxisExtent, constraints.maxHeight));
+      size = constraints.constrain(Size(mainAxisExtent, constraints.maxHeight));
       break;
     case AxisDirection.down:
-      final BoxConstraints innerConstraints = new BoxConstraints.tightFor(width: constraints.maxWidth);
+      final BoxConstraints innerConstraints = BoxConstraints.tightFor(width: constraints.maxWidth);
       while (child != null) {
         child.layout(innerConstraints, parentUsesSize: true);
         final ListBodyParentData childParentData = child.parentData;
-        childParentData.offset = new Offset(0.0, mainAxisExtent);
-          mainAxisExtent += child.size.height;
+        childParentData.offset = Offset(0.0, mainAxisExtent);
+        mainAxisExtent += child.size.height;
         assert(child.parentData == childParentData);
         child = childParentData.nextSibling;
       }
-      size = constraints.constrain(new Size(constraints.maxWidth, mainAxisExtent));
+      size = constraints.constrain(Size(constraints.maxWidth, mainAxisExtent));
       break;
     case AxisDirection.up:
-      final BoxConstraints innerConstraints = new BoxConstraints.tightFor(width: constraints.maxWidth);
+      final BoxConstraints innerConstraints = BoxConstraints.tightFor(width: constraints.maxWidth);
       while (child != null) {
         child.layout(innerConstraints, parentUsesSize: true);
         final ListBodyParentData childParentData = child.parentData;
@@ -168,11 +168,11 @@ class RenderListBody extends RenderBox
       while (child != null) {
         final ListBodyParentData childParentData = child.parentData;
         position += child.size.height;
-        childParentData.offset = new Offset(0.0, mainAxisExtent - position);
+        childParentData.offset = Offset(0.0, mainAxisExtent - position);
         assert(child.parentData == childParentData);
         child = childParentData.nextSibling;
       }
-      size = constraints.constrain(new Size(constraints.maxWidth, mainAxisExtent));
+      size = constraints.constrain(Size(constraints.maxWidth, mainAxisExtent));
       break;
     }
     assert(size.isFinite);
@@ -181,7 +181,7 @@ class RenderListBody extends RenderBox
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new EnumProperty<AxisDirection>('axisDirection', axisDirection));
+    properties.add(EnumProperty<AxisDirection>('axisDirection', axisDirection));
   }
 
   double _getIntrinsicCrossAxis(_ChildSizingFunction childSize) {

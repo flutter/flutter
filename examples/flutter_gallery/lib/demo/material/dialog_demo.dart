@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 
+import '../../gallery/demo.dart';
 import 'full_screen_dialog_demo.dart';
 
 enum DialogDemoAction {
@@ -29,16 +30,16 @@ class DialogDemoItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new SimpleDialogOption(
+    return SimpleDialogOption(
       onPressed: onPressed,
-      child: new Row(
+      child: Row(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
-          new Icon(icon, size: 36.0, color: color),
-          new Padding(
+          Icon(icon, size: 36.0, color: color),
+          Padding(
             padding: const EdgeInsets.only(left: 16.0),
-            child: new Text(text),
+            child: Text(text),
           ),
         ],
       ),
@@ -50,19 +51,19 @@ class DialogDemo extends StatefulWidget {
   static const String routeName = '/material/dialog';
 
   @override
-  DialogDemoState createState() => new DialogDemoState();
+  DialogDemoState createState() => DialogDemoState();
 }
 
 class DialogDemoState extends State<DialogDemo> {
-  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   TimeOfDay _selectedTime;
 
   @override
   void initState() {
     super.initState();
-    final DateTime now = new DateTime.now();
-    _selectedTime = new TimeOfDay(hour: now.hour, minute: now.minute);
+    final DateTime now = DateTime.now();
+    _selectedTime = TimeOfDay(hour: now.hour, minute: now.minute);
   }
 
   void showDemoDialog<T>({ BuildContext context, Widget child }) {
@@ -72,8 +73,8 @@ class DialogDemoState extends State<DialogDemo> {
     )
     .then<void>((T value) { // The value passed to Navigator.pop() or null.
       if (value != null) {
-        _scaffoldKey.currentState.showSnackBar(new SnackBar(
-          content: new Text('You selected: $value')
+        _scaffoldKey.currentState.showSnackBar(SnackBar(
+          content: Text('You selected: $value'),
         ));
       }
     });
@@ -84,129 +85,130 @@ class DialogDemoState extends State<DialogDemo> {
     final ThemeData theme = Theme.of(context);
     final TextStyle dialogTextStyle = theme.textTheme.subhead.copyWith(color: theme.textTheme.caption.color);
 
-    return new Scaffold(
+    return Scaffold(
       key: _scaffoldKey,
-      appBar: new AppBar(
-        title: const Text('Dialogs')
+      appBar: AppBar(
+        title: const Text('Dialogs'),
+        actions: <Widget>[MaterialDemoDocumentationButton(DialogDemo.routeName)],
       ),
-      body: new ListView(
+      body: ListView(
         padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 72.0),
         children: <Widget>[
-          new RaisedButton(
+          RaisedButton(
             child: const Text('ALERT'),
             onPressed: () {
               showDemoDialog<DialogDemoAction>(
                 context: context,
-                child: new AlertDialog(
-                  content: new Text(
+                child: AlertDialog(
+                  content: Text(
                     _alertWithoutTitleText,
-                    style: dialogTextStyle
+                    style: dialogTextStyle,
                   ),
                   actions: <Widget>[
-                    new FlatButton(
+                    FlatButton(
                       child: const Text('CANCEL'),
-                      onPressed: () { Navigator.pop(context, DialogDemoAction.cancel); }
+                      onPressed: () { Navigator.pop(context, DialogDemoAction.cancel); },
                     ),
-                    new FlatButton(
+                    FlatButton(
                       child: const Text('DISCARD'),
-                      onPressed: () { Navigator.pop(context, DialogDemoAction.discard); }
-                    )
-                  ]
-                )
+                      onPressed: () { Navigator.pop(context, DialogDemoAction.discard); },
+                    ),
+                  ],
+                ),
               );
-            }
+            },
           ),
-          new RaisedButton(
+          RaisedButton(
             child: const Text('ALERT WITH TITLE'),
             onPressed: () {
               showDemoDialog<DialogDemoAction>(
                 context: context,
-                child: new AlertDialog(
+                child: AlertDialog(
                   title: const Text('Use Google\'s location service?'),
-                  content: new Text(
+                  content: Text(
                     _alertWithTitleText,
-                    style: dialogTextStyle
+                    style: dialogTextStyle,
                   ),
                   actions: <Widget>[
-                    new FlatButton(
+                    FlatButton(
                       child: const Text('DISAGREE'),
-                      onPressed: () { Navigator.pop(context, DialogDemoAction.disagree); }
+                      onPressed: () { Navigator.pop(context, DialogDemoAction.disagree); },
                     ),
-                    new FlatButton(
+                    FlatButton(
                       child: const Text('AGREE'),
-                      onPressed: () { Navigator.pop(context, DialogDemoAction.agree); }
-                    )
-                  ]
-                )
+                      onPressed: () { Navigator.pop(context, DialogDemoAction.agree); },
+                    ),
+                  ],
+                ),
               );
-            }
+            },
           ),
-          new RaisedButton(
+          RaisedButton(
             child: const Text('SIMPLE'),
             onPressed: () {
               showDemoDialog<String>(
                 context: context,
-                child: new SimpleDialog(
+                child: SimpleDialog(
                   title: const Text('Set backup account'),
                   children: <Widget>[
-                    new DialogDemoItem(
+                    DialogDemoItem(
                       icon: Icons.account_circle,
                       color: theme.primaryColor,
                       text: 'username@gmail.com',
-                      onPressed: () { Navigator.pop(context, 'username@gmail.com'); }
+                      onPressed: () { Navigator.pop(context, 'username@gmail.com'); },
                     ),
-                    new DialogDemoItem(
+                    DialogDemoItem(
                       icon: Icons.account_circle,
                       color: theme.primaryColor,
                       text: 'user02@gmail.com',
-                      onPressed: () { Navigator.pop(context, 'user02@gmail.com'); }
+                      onPressed: () { Navigator.pop(context, 'user02@gmail.com'); },
                     ),
-                    new DialogDemoItem(
+                    DialogDemoItem(
                       icon: Icons.add_circle,
                       text: 'add account',
-                      color: theme.disabledColor
-                    )
-                  ]
-                )
+                      color: theme.disabledColor,
+                    ),
+                  ],
+                ),
               );
-            }
+            },
           ),
-          new RaisedButton(
+          RaisedButton(
             child: const Text('CONFIRMATION'),
             onPressed: () {
               showTimePicker(
                 context: context,
-                initialTime: _selectedTime
+                initialTime: _selectedTime,
               )
-              .then<Null>((TimeOfDay value) {
+              .then<void>((TimeOfDay value) {
                 if (value != null && value != _selectedTime) {
                   _selectedTime = value;
-                  _scaffoldKey.currentState.showSnackBar(new SnackBar(
-                    content: new Text('You selected: ${value.format(context)}')
+                  _scaffoldKey.currentState.showSnackBar(SnackBar(
+                    content: Text('You selected: ${value.format(context)}'),
                   ));
                 }
               });
-            }
+            },
           ),
-          new RaisedButton(
+          RaisedButton(
             child: const Text('FULLSCREEN'),
             onPressed: () {
-              Navigator.push(context, new MaterialPageRoute<DismissDialogAction>(
-                builder: (BuildContext context) => new FullScreenDialogDemo(),
+              Navigator.push(context, MaterialPageRoute<DismissDialogAction>(
+                builder: (BuildContext context) => FullScreenDialogDemo(),
                 fullscreenDialog: true,
               ));
-            }
+            },
           ),
         ]
         // Add a little space between the buttons
-        .map((Widget button) {
-          return new Container(
+        .map<Widget>((Widget button) {
+          return Container(
             padding: const EdgeInsets.symmetric(vertical: 8.0),
-            child: button
+            child: button,
           );
         })
-        .toList()
-      )
+        .toList(),
+      ),
     );
   }
 }

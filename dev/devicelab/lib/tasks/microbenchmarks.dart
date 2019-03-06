@@ -13,9 +13,6 @@ import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/ios.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 
-/// The maximum amount of time a single microbenchmark is allowed to take.
-const Duration _kBenchmarkTimeout = const Duration(minutes: 10);
-
 /// Creates a device lab task that runs benchmarks in
 /// `dev/benchmarks/microbenchmarks` reports results to the dashboard.
 TaskFunction createMicrobenchmarkTask() {
@@ -23,7 +20,7 @@ TaskFunction createMicrobenchmarkTask() {
     final Device device = await devices.workingDevice;
     await device.unlock();
 
-    Future<Map<String, double>> _runMicrobench(String benchmarkPath, {bool previewDart2 = true}) async {
+    Future<Map<String, double>> _runMicrobench(String benchmarkPath) async {
       Future<Map<String, double>> _run() async {
         print('Running $benchmarkPath');
         final Directory appDir = dir(
@@ -38,10 +35,6 @@ TaskFunction createMicrobenchmarkTask() {
             '-d',
             device.deviceId,
           ];
-          if (previewDart2)
-            options.add('--preview-dart-2');
-          else
-            options.add('--no-preview-dart-2');
           setLocalEngineOptionIfNecessary(options);
           options.add(benchmarkPath);
           return await _startFlutter(
@@ -52,7 +45,7 @@ TaskFunction createMicrobenchmarkTask() {
 
         return await _readJsonResults(flutterProcess);
       }
-      return _run().timeout(_kBenchmarkTimeout);
+      return _run();
     }
 
     final Map<String, double> allResults = <String, double>{};
@@ -61,25 +54,7 @@ TaskFunction createMicrobenchmarkTask() {
     allResults.addAll(await _runMicrobench('lib/gestures/velocity_tracker_bench.dart'));
     allResults.addAll(await _runMicrobench('lib/stocks/animation_bench.dart'));
 
-    // Run micro-benchmarks once again in --no-preview-dart-2 mode.
-    // Append "_dart1" suffix to the result keys to distinguish them from
-    // the original results.
-
-    void addDart1Results(Map<String, double> benchmarkResults) {
-      benchmarkResults.forEach((String key, double result) {
-        allResults[key + '_dart1'] = result;
-      });
-    }
-
-    addDart1Results(await _runMicrobench(
-        'lib/stocks/layout_bench.dart', previewDart2: false));
-    addDart1Results(await _runMicrobench(
-        'lib/stocks/build_bench.dart', previewDart2: false));
-    addDart1Results(await _runMicrobench(
-        'lib/gestures/velocity_tracker_bench.dart', previewDart2: false));
-    addDart1Results(await _runMicrobench(
-        'lib/stocks/animation_bench.dart', previewDart2: false));
-    return new TaskResult.success(allResults, benchmarkScoreKeys: allResults.keys.toList());
+    return TaskResult.success(allResults, benchmarkScoreKeys: allResults.keys.toList());
   };
 }
 
@@ -99,12 +74,12 @@ Future<Map<String, double>> _readJsonResults(Process process) {
   const String jsonEnd = '================ FORMATTED ==============';
   const String jsonPrefix = ':::JSON:::';
   bool jsonStarted = false;
-  final StringBuffer jsonBuf = new StringBuffer();
-  final Completer<Map<String, double>> completer = new Completer<Map<String, double>>();
+  final StringBuffer jsonBuf = StringBuffer();
+  final Completer<Map<String, double>> completer = Completer<Map<String, double>>();
 
   final StreamSubscription<String> stderrSub = process.stderr
-      .transform(const Utf8Decoder())
-      .transform(const LineSplitter())
+      .transform<String>(const Utf8Decoder())
+      .transform<String>(const LineSplitter())
       .listen((String line) {
         stderr.writeln('[STDERR] $line');
       });
@@ -112,9 +87,9 @@ Future<Map<String, double>> _readJsonResults(Process process) {
   bool processWasKilledIntentionally = false;
   bool resultsHaveBeenParsed = false;
   final StreamSubscription<String> stdoutSub = process.stdout
-      .transform(const Utf8Decoder())
-      .transform(const LineSplitter())
-      .listen((String line) {
+      .transform<String>(const Utf8Decoder())
+      .transform<String>(const LineSplitter())
+      .listen((String line) async {
     print(line);
 
     if (line.contains(jsonStart)) {
@@ -142,10 +117,16 @@ Future<Map<String, double>> _readJsonResults(Process process) {
       jsonStarted = false;
       processWasKilledIntentionally = true;
       resultsHaveBeenParsed = true;
-      // ignore: deprecated_member_use
-      process.kill(ProcessSignal.SIGINT); // flutter run doesn't quit automatically
+      // Sending a SIGINT/SIGTERM to the process here isn't reliable because [process] is
+      // the shell (flutter is a shell script) and doesn't pass the signal on.
+      // Sending a `q` is an instruction to quit using the console runner.
+      // See https://github.com/flutter/flutter/issues/19208
+      process.stdin.write('q');
+      await process.stdin.flush();
+      // Also send a kill signal in case the `q` above didn't work.
+      process.kill(ProcessSignal.sigint);
       try {
-        completer.complete(new Map<String, double>.from(json.decode(jsonOutput)));
+        completer.complete(Map<String, double>.from(json.decode(jsonOutput)));
       } catch (ex) {
         completer.completeError('Decoding JSON failed ($ex). JSON string was: $jsonOutput');
       }
@@ -156,7 +137,7 @@ Future<Map<String, double>> _readJsonResults(Process process) {
       jsonBuf.writeln(line.substring(line.indexOf(jsonPrefix) + jsonPrefix.length));
   });
 
-  process.exitCode.then<int>((int code) async {
+  process.exitCode.then<void>((int code) async {
     await Future.wait<void>(<Future<void>>[
       stdoutSub.cancel(),
       stderrSub.cancel(),

@@ -6,13 +6,15 @@ import 'dart:async';
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/tester/flutter_tester.dart';
+import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
-import 'package:test/test.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -22,7 +24,7 @@ void main() {
   MemoryFileSystem fs;
 
   setUp(() {
-    fs = new MemoryFileSystem();
+    fs = MemoryFileSystem();
   });
 
   group('FlutterTesterApp', () {
@@ -31,9 +33,9 @@ void main() {
       await fs.directory(projectPath).create(recursive: true);
       fs.currentDirectory = projectPath;
 
-      final FlutterTesterApp app = new FlutterTesterApp.fromCurrentDirectory();
+      final FlutterTesterApp app = FlutterTesterApp.fromCurrentDirectory();
       expect(app.name, 'my_project');
-      expect(app.packagePath, fs.path.join(projectPath, '.packages'));
+      expect(app.packagesFile.path, fs.path.join(projectPath, '.packages'));
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
     });
@@ -45,7 +47,7 @@ void main() {
     });
 
     testUsingContext('no device', () async {
-      final FlutterTesterDevices discoverer = new FlutterTesterDevices();
+      final FlutterTesterDevices discoverer = FlutterTesterDevices();
 
       final List<Device> devices = await discoverer.devices;
       expect(devices, isEmpty);
@@ -53,13 +55,13 @@ void main() {
 
     testUsingContext('has device', () async {
       FlutterTesterDevices.showFlutterTesterDevice = true;
-      final FlutterTesterDevices discoverer = new FlutterTesterDevices();
+      final FlutterTesterDevices discoverer = FlutterTesterDevices();
 
       final List<Device> devices = await discoverer.devices;
       expect(devices, hasLength(1));
 
       final Device device = devices.single;
-      expect(device, const isInstanceOf<FlutterTesterDevice>());
+      expect(device, isInstanceOf<FlutterTesterDevice>());
       expect(device.id, 'flutter-tester');
     });
   });
@@ -69,7 +71,7 @@ void main() {
     List<String> logLines;
 
     setUp(() {
-      device = new FlutterTesterDevice('flutter-tester');
+      device = FlutterTesterDevice('flutter-tester');
 
       logLines = <String>[];
       device.getLogReader().logLines.listen(logLines.add);
@@ -79,7 +81,7 @@ void main() {
       expect(device.id, 'flutter-tester');
       expect(await device.isLocalEmulator, isFalse);
       expect(device.name, 'Flutter test device');
-      expect(device.portForwarder, isNull);
+      expect(device.portForwarder, isNot(isNull));
       expect(await device.targetPlatform, TargetPlatform.tester);
 
       expect(await device.installApp(null), isTrue);
@@ -97,14 +99,18 @@ void main() {
       String projectPath;
       String mainPath;
 
+      MockArtifacts mockArtifacts;
+      MockKernelCompiler mockKernelCompiler;
       MockProcessManager mockProcessManager;
       MockProcess mockProcess;
 
       final Map<Type, Generator> startOverrides = <Type, Generator>{
-        Platform: () => new FakePlatform(operatingSystem: 'linux'),
+        Platform: () => FakePlatform(operatingSystem: 'linux'),
         FileSystem: () => fs,
-        Cache: () => new Cache(rootOverride: fs.directory(flutterRoot)),
+        Cache: () => Cache(rootOverride: fs.directory(flutterRoot)),
         ProcessManager: () => mockProcessManager,
+        KernelCompiler: () => mockKernelCompiler,
+        Artifacts: () => mockArtifacts,
       };
 
       setUp(() {
@@ -119,16 +125,22 @@ void main() {
         projectPath = fs.path.join('home', 'me', 'hello');
         mainPath = fs.path.join(projectPath, 'lin', 'main.dart');
 
-        mockProcessManager = new MockProcessManager();
+        mockProcessManager = MockProcessManager();
         mockProcessManager.processFactory =
             (List<String> commands) => mockProcess;
+
+        mockArtifacts = MockArtifacts();
+        final String artifactPath = fs.path.join(flutterRoot, 'artifact');
+        fs.file(artifactPath).createSync(recursive: true);
+        when(mockArtifacts.getArtifactPath(any)).thenReturn(artifactPath);
+
+        mockKernelCompiler = MockKernelCompiler();
       });
 
       testUsingContext('not debug', () async {
         final LaunchResult result = await device.startApp(null,
             mainPath: mainPath,
-            debuggingOptions: new DebuggingOptions.disabled(
-                const BuildInfo(BuildMode.release, null)));
+            debuggingOptions: DebuggingOptions.disabled(const BuildInfo(BuildMode.release, null)));
         expect(result.started, isFalse);
       }, overrides: startOverrides);
 
@@ -137,26 +149,40 @@ void main() {
         expect(() async {
           await device.startApp(null,
               mainPath: mainPath,
-              debuggingOptions: new DebuggingOptions.disabled(
-                  const BuildInfo(BuildMode.debug, null)));
+              debuggingOptions: DebuggingOptions.disabled(const BuildInfo(BuildMode.debug, null)));
         }, throwsToolExit());
       }, overrides: startOverrides);
 
       testUsingContext('start', () async {
         final Uri observatoryUri = Uri.parse('http://127.0.0.1:6666/');
-        mockProcess = new MockProcess(
-            stdout: new Stream<List<int>>.fromIterable(<List<int>>[
+        mockProcess = MockProcess(
+            stdout: Stream<List<int>>.fromIterable(<List<int>>[
           '''
 Observatory listening on $observatoryUri
 Hello!
 '''
-              .codeUnits
+              .codeUnits,
         ]));
+
+        when(mockKernelCompiler.compile(
+          sdkRoot: anyNamed('sdkRoot'),
+          incrementalCompilerByteStorePath: anyNamed('incrementalCompilerByteStorePath'),
+          mainPath: anyNamed('mainPath'),
+          outputFilePath: anyNamed('outputFilePath'),
+          depFilePath: anyNamed('depFilePath'),
+          trackWidgetCreation: anyNamed('trackWidgetCreation'),
+          extraFrontEndOptions: anyNamed('extraFrontEndOptions'),
+          fileSystemRoots: anyNamed('fileSystemRoots'),
+          fileSystemScheme: anyNamed('fileSystemScheme'),
+          packagesPath: anyNamed('packagesPath'),
+        )).thenAnswer((_) async {
+          fs.file('$mainPath.dill').createSync(recursive: true);
+          return CompilerOutput('$mainPath.dill', 0);
+        });
 
         final LaunchResult result = await device.startApp(null,
             mainPath: mainPath,
-            debuggingOptions: new DebuggingOptions.enabled(
-                const BuildInfo(BuildMode.debug, null)));
+            debuggingOptions: DebuggingOptions.enabled(const BuildInfo(BuildMode.debug, null)));
         expect(result.started, isTrue);
         expect(result.observatoryUri, observatoryUri);
 
@@ -165,3 +191,6 @@ Hello!
     });
   });
 }
+
+class MockArtifacts extends Mock implements Artifacts {}
+class MockKernelCompiler extends Mock implements KernelCompiler {}

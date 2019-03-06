@@ -37,7 +37,7 @@ class CupertinoActivityIndicator extends StatefulWidget {
   final double radius;
 
   @override
-  _CupertinoActivityIndicatorState createState() => new _CupertinoActivityIndicatorState();
+  _CupertinoActivityIndicatorState createState() => _CupertinoActivityIndicatorState();
 }
 
 
@@ -47,7 +47,7 @@ class _CupertinoActivityIndicatorState extends State<CupertinoActivityIndicator>
   @override
   void initState() {
     super.initState();
-    _controller = new AnimationController(
+    _controller = AnimationController(
       duration: const Duration(seconds: 1),
       vsync: this,
     );
@@ -75,11 +75,11 @@ class _CupertinoActivityIndicatorState extends State<CupertinoActivityIndicator>
 
   @override
   Widget build(BuildContext context) {
-    return new SizedBox(
+    return SizedBox(
       height: widget.radius * 2,
       width: widget.radius * 2,
-      child: new CustomPaint(
-        painter: new _CupertinoActivityIndicatorPainter(
+      child: CustomPaint(
+        painter: _CupertinoActivityIndicatorPainter(
           position: _controller,
           radius: widget.radius,
         ),
@@ -92,19 +92,19 @@ const double _kTwoPI = math.pi * 2.0;
 const int _kTickCount = 12;
 const int _kHalfTickCount = _kTickCount ~/ 2;
 const Color _kTickColor = CupertinoColors.lightBackgroundGray;
-const Color _kActiveTickColor = const Color(0xFF9D9D9D);
+const Color _kActiveTickColor = Color(0xFF9D9D9D);
 
 class _CupertinoActivityIndicatorPainter extends CustomPainter {
   _CupertinoActivityIndicatorPainter({
     this.position,
     double radius,
-  }) : tickFundamentalRRect = new RRect.fromLTRBXY(
+  }) : tickFundamentalRRect = RRect.fromLTRBXY(
            -radius,
            1.0 * radius / _kDefaultIndicatorRadius,
            -radius / 2.0,
            -1.0 * radius / _kDefaultIndicatorRadius,
            1.0,
-           1.0
+           1.0,
        ),
        super(repaint: position);
 
@@ -113,7 +113,7 @@ class _CupertinoActivityIndicatorPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final Paint paint = new Paint();
+    final Paint paint = Paint();
 
     canvas.save();
     canvas.translate(size.width / 2.0, size.height / 2.0);

@@ -14,11 +14,11 @@ void main() {
       log.add(message);
     };
     debugPrintBuildScope = true;
-    final AnimationController controller = new AnimationController(
+    final AnimationController controller = AnimationController(
       vsync: const TestVSync(),
       duration: const Duration(seconds: 2),
     );
-    await tester.pumpWidget(new FadeTransition(
+    await tester.pumpWidget(FadeTransition(
       opacity: controller,
       child: const Placeholder(),
     ));

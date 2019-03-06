@@ -11,12 +11,12 @@ class TestTestBinding extends AutomatedTestWidgetsFlutterBinding {
   static void testPrint(String message, { int wrapWidth }) { print(message); }
 }
 
-Future<Null> helperFunction(WidgetTester tester) async {
+Future<void> helperFunction(WidgetTester tester) async {
   await tester.pump();
 }
 
 void main() {
-  new TestTestBinding();
+  TestTestBinding();
   testWidgets('TestAsyncUtils - handling unguarded async helper functions', (WidgetTester tester) async {
     helperFunction(tester);
     helperFunction(tester);

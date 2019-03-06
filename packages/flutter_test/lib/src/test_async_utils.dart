@@ -40,7 +40,7 @@ class _AsyncScope {
 /// in a call to TestAsyncUtils.guard(), as follows:
 ///
 /// ```dart
-/// Future<Null> myTestFunction() => TestAsyncUtils.guard(() async {
+/// Future<void> myTestFunction() => TestAsyncUtils.guard(() async {
 ///   // ...
 /// });
 /// ```
@@ -57,22 +57,23 @@ class TestAsyncUtils {
   /// this one before this one has finished will throw an exception.
   ///
   /// This method first calls [guardSync].
-  static Future<Null> guard(Future<Null> body()) {
+  static Future<T> guard<T>(Future<T> body()) {
     guardSync();
     final Zone zone = Zone.current.fork(
       zoneValues: <dynamic, dynamic>{
-        _scopeStack: true // so we can recognize this as our own zone
+        _scopeStack: true, // so we can recognize this as our own zone
       }
     );
-    final _AsyncScope scope = new _AsyncScope(StackTrace.current, zone);
+    final _AsyncScope scope = _AsyncScope(StackTrace.current, zone);
     _scopeStack.add(scope);
-    final Future<Null> result = scope.zone.run(body);
-    Future<Null> completionHandler(dynamic error, StackTrace stack) {
+    final Future<T> result = scope.zone.run<Future<T>>(body);
+    T resultValue; // This is set when the body of work completes with a result value.
+    Future<T> completionHandler(dynamic error, StackTrace stack) {
       assert(_scopeStack.isNotEmpty);
       assert(_scopeStack.contains(scope));
       bool leaked = false;
       _AsyncScope closedScope;
-      final StringBuffer message = new StringBuffer();
+      final StringBuffer message = StringBuffer();
       while (_scopeStack.isNotEmpty) {
         closedScope = _scopeStack.removeLast();
         if (closedScope == scope)
@@ -99,17 +100,18 @@ class TestAsyncUtils {
           message.writeln('The stack trace associated with this exception was:');
           FlutterError.defaultStackFilter(stack.toString().trimRight().split('\n')).forEach(message.writeln);
         }
-        throw new FlutterError(message.toString().trimRight());
+        throw FlutterError(message.toString().trimRight());
       }
       if (error != null)
-        return new Future<Null>.error(error, stack);
-      return new Future<Null>.value(null);
+        return Future<T>.error(error, stack);
+      return Future<T>.value(resultValue);
     }
-    return result.then<Null>(
-      (Null value) {
+    return result.then<T>(
+      (T value) {
+        resultValue = value;
         return completionHandler(null, null);
       },
-      onError: completionHandler
+      onError: completionHandler,
     );
   }
 
@@ -180,7 +182,7 @@ class TestAsyncUtils {
       assert(candidateScope.zone != null);
     } while (candidateScope.zone != zone);
     assert(scope != null);
-    final StringBuffer message = new StringBuffer();
+    final StringBuffer message = StringBuffer();
     message.writeln('Guarded function conflict. You must use "await" with all Future-returning test APIs.');
     final _StackEntry originalGuarder = _findResponsibleMethod(scope.creationStack, 'guard', message);
     final _StackEntry collidingGuarder = _findResponsibleMethod(StackTrace.current, 'guardSync', message);
@@ -256,7 +258,7 @@ class TestAsyncUtils {
       );
       message.writeln(FlutterError.defaultStackFilter(scope.creationStack.toString().trimRight().split('\n')).join('\n'));
     }
-    throw new FlutterError(message.toString().trimRight());
+    throw FlutterError(message.toString().trimRight());
   }
 
   /// Verifies that there are no guarded methods currently pending (see [guard]).
@@ -264,7 +266,7 @@ class TestAsyncUtils {
   /// This is used at the end of tests to ensure that nothing leaks out of the test.
   static void verifyAllScopesClosed() {
     if (_scopeStack.isNotEmpty) {
-      final StringBuffer message = new StringBuffer();
+      final StringBuffer message = StringBuffer();
       message.writeln('Asynchronous call to guarded function leaked. You must use "await" with all Future-returning test APIs.');
       for (_AsyncScope scope in _scopeStack) {
         final _StackEntry guarder = _findResponsibleMethod(scope.creationStack, 'guard', message);
@@ -278,7 +280,7 @@ class TestAsyncUtils {
           );
         }
       }
-      throw new FlutterError(message.toString().trimRight());
+      throw FlutterError(message.toString().trimRight());
     }
   }
 
@@ -291,7 +293,7 @@ class TestAsyncUtils {
     final List<String> stack = rawStack.toString().split('\n').where(_stripAsynchronousSuspensions).toList();
     assert(stack.last == '');
     stack.removeLast();
-    final RegExp getClassPattern = new RegExp(r'^#[0-9]+ +([^. ]+)');
+    final RegExp getClassPattern = RegExp(r'^#[0-9]+ +([^. ]+)');
     Match lineMatch;
     int index = -1;
     do { // skip past frames that are from this class
@@ -303,7 +305,7 @@ class TestAsyncUtils {
     } while (lineMatch.group(1) == _className);
     // try to parse the stack to find the interesting frame
     if (index < stack.length) {
-      final RegExp guardPattern = new RegExp(r'^#[0-9]+ +(?:([^. ]+)\.)?([^. ]+)');
+      final RegExp guardPattern = RegExp(r'^#[0-9]+ +(?:([^. ]+)\.)?([^. ]+)');
       final Match guardMatch = guardPattern.matchAsPrefix(stack[index]); // find the class that called us
       if (guardMatch != null) {
         assert(guardMatch.groupCount == 2);
@@ -321,13 +323,13 @@ class TestAsyncUtils {
           break;
         }
         if (index < stack.length) {
-          final RegExp callerPattern = new RegExp(r'^#[0-9]+ .* \((.+?):([0-9]+)(?::[0-9]+)?\)$');
+          final RegExp callerPattern = RegExp(r'^#[0-9]+ .* \((.+?):([0-9]+)(?::[0-9]+)?\)$');
           final Match callerMatch = callerPattern.matchAsPrefix(stack[index]); // extract the caller's info
           if (callerMatch != null) {
             assert(callerMatch.groupCount == 2);
             final String callerFile = callerMatch.group(1);
             final String callerLine = callerMatch.group(2);
-            return new _StackEntry(guardClass, guardMethod, callerFile, callerLine);
+            return _StackEntry(guardClass, guardMethod, callerFile, callerLine);
           } else {
             // One reason you might get here is if the guarding method was called directly from
             // a 'dart:' API, like from the Future/microtask mechanism, because dart: URLs in the

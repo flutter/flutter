@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/gestures.dart' show DragStartBehavior;
 
 import 'data_table_test_utils.dart';
 
@@ -21,12 +22,12 @@ class TestDataSource extends DataTableSource {
   DataRow getRow(int index) {
     final Dessert dessert = kDesserts[index % kDesserts.length];
     final int page = index ~/ kDesserts.length;
-    return new DataRow.byIndex(
+    return DataRow.byIndex(
       index: index,
       cells: <DataCell>[
-        new DataCell(new Text('${dessert.name} ($page)')),
-        new DataCell(new Text('${dessert.calories}')),
-        new DataCell(new Text('$generation')),
+        DataCell(Text('${dessert.name} ($page)')),
+        DataCell(Text('${dessert.calories}')),
+        DataCell(Text('$generation')),
       ],
     );
   }
@@ -43,12 +44,12 @@ class TestDataSource extends DataTableSource {
 
 void main() {
   testWidgets('PaginatedDataTable paging', (WidgetTester tester) async {
-    final TestDataSource source = new TestDataSource();
+    final TestDataSource source = TestDataSource();
 
     final List<String> log = <String>[];
 
-    await tester.pumpWidget(new MaterialApp(
-      home: new PaginatedDataTable(
+    await tester.pumpWidget(MaterialApp(
+      home: PaginatedDataTable(
         header: const Text('Test table'),
         source: source,
         rowsPerPage: 2,
@@ -62,11 +63,11 @@ void main() {
           log.add('page-changed: $rowIndex');
         },
         columns: const <DataColumn>[
-          const DataColumn(label: const Text('Name')),
-          const DataColumn(label: const Text('Calories'), numeric: true),
-          const DataColumn(label: const Text('Generation')),
+          DataColumn(label: Text('Name')),
+          DataColumn(label: Text('Calories'), numeric: true),
+          DataColumn(label: Text('Generation')),
         ],
-      )
+      ),
     ));
 
     await tester.tap(find.byTooltip('Next page'));
@@ -106,13 +107,13 @@ void main() {
   });
 
   testWidgets('PaginatedDataTable control test', (WidgetTester tester) async {
-    TestDataSource source = new TestDataSource()
+    TestDataSource source = TestDataSource()
       ..generation = 42;
 
     final List<String> log = <String>[];
 
     Widget buildTable(TestDataSource source) {
-      return new PaginatedDataTable(
+      return PaginatedDataTable(
         header: const Text('Test table'),
         source: source,
         onPageChanged: (int rowIndex) {
@@ -120,24 +121,24 @@ void main() {
         },
         columns: <DataColumn>[
           const DataColumn(
-            label: const Text('Name'),
+            label: Text('Name'),
             tooltip: 'Name',
           ),
-          new DataColumn(
+          DataColumn(
             label: const Text('Calories'),
             tooltip: 'Calories',
             numeric: true,
             onSort: (int columnIndex, bool ascending) {
               log.add('column-sort: $columnIndex $ascending');
-            }
+            },
           ),
           const DataColumn(
-            label: const Text('Generation'),
+            label: Text('Generation'),
             tooltip: 'Generation',
           ),
         ],
         actions: <Widget>[
-          new IconButton(
+          IconButton(
             icon: const Icon(Icons.adjust),
             onPressed: () {
               log.add('action: adjust');
@@ -147,7 +148,7 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(new MaterialApp(
+    await tester.pumpWidget(MaterialApp(
       home: buildTable(source),
     ));
 
@@ -164,10 +165,10 @@ void main() {
     expect(find.text('42'), findsNothing);
     expect(find.text('43'), findsNWidgets(10));
 
-    source = new TestDataSource()
+    source = TestDataSource()
       ..generation = 15;
 
-    await tester.pumpWidget(new MaterialApp(
+    await tester.pumpWidget(MaterialApp(
       home: buildTable(source),
     ));
 
@@ -194,19 +195,19 @@ void main() {
   });
 
   testWidgets('PaginatedDataTable text alignment', (WidgetTester tester) async {
-    await tester.pumpWidget(new MaterialApp(
-      home: new PaginatedDataTable(
+    await tester.pumpWidget(MaterialApp(
+      home: PaginatedDataTable(
         header: const Text('HEADER'),
-        source: new TestDataSource(),
+        source: TestDataSource(),
         rowsPerPage: 8,
         availableRowsPerPage: const <int>[
           8, 9,
         ],
         onRowsPerPageChanged: (int rowsPerPage) { },
         columns: const <DataColumn>[
-          const DataColumn(label: const Text('COL1')),
-          const DataColumn(label: const Text('COL2')),
-          const DataColumn(label: const Text('COL3')),
+          DataColumn(label: Text('COL1')),
+          DataColumn(label: Text('COL2')),
+          DataColumn(label: Text('COL3')),
         ],
       ),
     ));
@@ -216,22 +217,22 @@ void main() {
   });
 
   testWidgets('PaginatedDataTable with large text', (WidgetTester tester) async {
-    final TestDataSource source = new TestDataSource();
-    await tester.pumpWidget(new MaterialApp(
-      home: new MediaQuery(
+    final TestDataSource source = TestDataSource();
+    await tester.pumpWidget(MaterialApp(
+      home: MediaQuery(
         data: const MediaQueryData(
           textScaleFactor: 20.0,
         ),
-        child: new PaginatedDataTable(
+        child: PaginatedDataTable(
           header: const Text('HEADER'),
           source: source,
           rowsPerPage: 501,
           availableRowsPerPage: const <int>[ 501 ],
           onRowsPerPageChanged: (int rowsPerPage) { },
           columns: const <DataColumn>[
-            const DataColumn(label: const Text('COL1')),
-            const DataColumn(label: const Text('COL2')),
-            const DataColumn(label: const Text('COL3')),
+            DataColumn(label: Text('COL1')),
+            DataColumn(label: Text('COL2')),
+            DataColumn(label: Text('COL3')),
           ],
         ),
       ),
@@ -247,31 +248,34 @@ void main() {
   });
 
   testWidgets('PaginatedDataTable footer scrolls', (WidgetTester tester) async {
-    final TestDataSource source = new TestDataSource();
-    await tester.pumpWidget(new MaterialApp(
-      home: new Align(
-        alignment: Alignment.topLeft,
-        child: new SizedBox(
-          width: 100.0,
-          child: new PaginatedDataTable(
-            header: const Text('HEADER'),
-            source: source,
-            rowsPerPage: 5,
-            availableRowsPerPage: const <int>[ 5 ],
-            onRowsPerPageChanged: (int rowsPerPage) { },
-            columns: const <DataColumn>[
-              const DataColumn(label: const Text('COL1')),
-              const DataColumn(label: const Text('COL2')),
-              const DataColumn(label: const Text('COL3')),
-            ],
+    final TestDataSource source = TestDataSource();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Align(
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            width: 100.0,
+            child: PaginatedDataTable(
+              header: const Text('HEADER'),
+              source: source,
+              rowsPerPage: 5,
+              dragStartBehavior: DragStartBehavior.down,
+              availableRowsPerPage: const <int>[ 5 ],
+              onRowsPerPageChanged: (int rowsPerPage) { },
+              columns: const <DataColumn>[
+                DataColumn(label: Text('COL1')),
+                DataColumn(label: Text('COL2')),
+                DataColumn(label: Text('COL3')),
+              ],
+            ),
           ),
         ),
       ),
-    ));
+    );
     expect(find.text('Rows per page:'), findsOneWidget);
     expect(tester.getTopLeft(find.text('Rows per page:')).dx, lessThan(0.0)); // off screen
     await tester.dragFrom(
-      new Offset(50.0, tester.getTopLeft(find.text('Rows per page:')).dy),
+      Offset(50.0, tester.getTopLeft(find.text('Rows per page:')).dy),
       const Offset(1000.0, 0.0),
     );
     await tester.pump();

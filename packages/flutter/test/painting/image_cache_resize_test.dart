@@ -3,13 +3,13 @@
 // found in the LICENSE file.
 
 import 'package:flutter/painting.dart';
-import 'package:test/test.dart';
+import '../flutter_test_alternative.dart';
 
 import '../rendering/rendering_tester.dart';
 import 'mocks_for_image_cache.dart';
 
 void main() {
-  new TestRenderingFlutterBinding(); // initializes the imageCache
+  TestRenderingFlutterBinding(); // initializes the imageCache
   group(ImageCache, () {
      tearDown(() {
        imageCache.clear();
@@ -47,7 +47,7 @@ void main() {
      });
 
      test('Image cache resizing based on size', () async {
-       const TestImage testImage = const TestImage(width: 8, height: 8); // 256 B.
+       const TestImage testImage = TestImage(width: 8, height: 8); // 256 B.
        imageCache.maximumSizeBytes = 256 * 2;
 
        final TestImageInfo a = await extractOneFrame(const TestImageProvider(1, 1, image: testImage).resolve(ImageConfiguration.empty));

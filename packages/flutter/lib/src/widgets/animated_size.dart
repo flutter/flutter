@@ -57,7 +57,7 @@ class AnimatedSize extends SingleChildRenderObjectWidget {
 
   @override
   RenderAnimatedSize createRenderObject(BuildContext context) {
-    return new RenderAnimatedSize(
+    return RenderAnimatedSize(
       alignment: alignment,
       duration: duration,
       curve: curve,

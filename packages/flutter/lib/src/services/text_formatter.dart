@@ -39,36 +39,36 @@ abstract class TextInputFormatter {
   /// [TextEditingValue] at the beginning of the chain.
   TextEditingValue formatEditUpdate(
     TextEditingValue oldValue,
-    TextEditingValue newValue
+    TextEditingValue newValue,
   );
 
   /// A shorthand to creating a custom [TextInputFormatter] which formats
   /// incoming text input changes with the given function.
   static TextInputFormatter withFunction(
-    TextInputFormatFunction formatFunction
+    TextInputFormatFunction formatFunction,
   ) {
-    return new _SimpleTextInputFormatter(formatFunction);
+    return _SimpleTextInputFormatter(formatFunction);
   }
 }
 
 /// Function signature expected for creating custom [TextInputFormatter]
 /// shorthands via [TextInputFormatter.withFunction];
-typedef TextEditingValue TextInputFormatFunction(
-    TextEditingValue oldValue,
-    TextEditingValue newValue,
+typedef TextInputFormatFunction = TextEditingValue Function(
+  TextEditingValue oldValue,
+  TextEditingValue newValue,
 );
 
 /// Wiring for [TextInputFormatter.withFunction].
 class _SimpleTextInputFormatter extends TextInputFormatter {
-  _SimpleTextInputFormatter(this.formatFunction) :
-    assert(formatFunction != null);
+  _SimpleTextInputFormatter(this.formatFunction)
+    : assert(formatFunction != null);
 
   final TextInputFormatFunction formatFunction;
 
   @override
   TextEditingValue formatEditUpdate(
     TextEditingValue oldValue,
-    TextEditingValue newValue
+    TextEditingValue newValue,
   ) {
     return formatFunction(oldValue, newValue);
   }
@@ -119,7 +119,7 @@ class BlacklistingTextInputFormatter extends TextInputFormatter {
 
   /// A [BlacklistingTextInputFormatter] that forces input to be a single line.
   static final BlacklistingTextInputFormatter singleLineFormatter
-      = new BlacklistingTextInputFormatter(new RegExp(r'\n'));
+      = BlacklistingTextInputFormatter(RegExp(r'\n'));
 }
 
 /// A [TextInputFormatter] that prevents the insertion of more characters
@@ -134,10 +134,10 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
   /// Creates a formatter that prevents the insertion of more characters than a
   /// limit.
   ///
-  /// The [maxLength] must be null or greater than zero. If it is null, then no
-  /// limit is enforced.
+  /// The [maxLength] must be null, -1 or greater than zero. If it is null or -1
+  /// then no limit is enforced.
   LengthLimitingTextInputFormatter(this.maxLength)
-    : assert(maxLength == null || maxLength > 0);
+    : assert(maxLength == null || maxLength == -1 || maxLength > 0);
 
   /// The limit on the number of characters (i.e. Unicode scalar values) this formatter
   /// will allow.
@@ -171,7 +171,7 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
     TextEditingValue oldValue, // unused.
     TextEditingValue newValue,
   ) {
-    if (maxLength != null && newValue.text.runes.length > maxLength) {
+    if (maxLength != null && maxLength > 0 && newValue.text.runes.length > maxLength) {
       final TextSelection newSelection = newValue.selection.copyWith(
           baseOffset: math.min(newValue.selection.start, maxLength),
           extentOffset: math.min(newValue.selection.end, maxLength),
@@ -184,13 +184,13 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
       // address this in Dart.
       // TODO(gspencer): convert this to count actual characters when Dart
       // supports that.
-      final RuneIterator iterator = new RuneIterator(newValue.text);
+      final RuneIterator iterator = RuneIterator(newValue.text);
       if (iterator.moveNext())
         for (int count = 0; count < maxLength; ++count)
           if (!iterator.moveNext())
             break;
       final String truncated = newValue.text.substring(0, iterator.rawIndex);
-      return new TextEditingValue(
+      return TextEditingValue(
         text: truncated,
         selection: newSelection,
         composing: TextRange.empty,
@@ -215,8 +215,8 @@ class WhitelistingTextInputFormatter extends TextInputFormatter {
   /// Creates a formatter that allows only the insertion of whitelisted characters patterns.
   ///
   /// The [whitelistedPattern] must not be null.
-  WhitelistingTextInputFormatter(this.whitelistedPattern) :
-    assert(whitelistedPattern != null);
+  WhitelistingTextInputFormatter(this.whitelistedPattern)
+    : assert(whitelistedPattern != null);
 
   /// A [Pattern] to extract all instances of allowed characters.
   ///
@@ -233,7 +233,7 @@ class WhitelistingTextInputFormatter extends TextInputFormatter {
       (String substring) {
         return whitelistedPattern
             .allMatches(substring)
-            .map((Match match) => match.group(0))
+            .map<String>((Match match) => match.group(0))
             .join();
       } ,
     );
@@ -241,7 +241,7 @@ class WhitelistingTextInputFormatter extends TextInputFormatter {
 
   /// A [WhitelistingTextInputFormatter] that takes in digits `[0-9]` only.
   static final WhitelistingTextInputFormatter digitsOnly
-      = new WhitelistingTextInputFormatter(new RegExp(r'\d+'));
+      = WhitelistingTextInputFormatter(RegExp(r'\d+'));
 }
 
 TextEditingValue _selectionAwareTextManipulation(
@@ -277,7 +277,7 @@ TextEditingValue _selectionAwareTextManipulation(
       );
     }
   }
-  return new TextEditingValue(
+  return TextEditingValue(
     text: manipulatedText,
     selection: manipulatedSelection ?? const TextSelection.collapsed(offset: -1),
     composing: manipulatedText == value.text

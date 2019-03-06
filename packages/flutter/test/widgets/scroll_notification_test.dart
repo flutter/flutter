@@ -10,15 +10,15 @@ void main() {
   testWidgets('Scroll notification basics', (WidgetTester tester) async {
     ScrollNotification notification;
 
-    await tester.pumpWidget(new NotificationListener<ScrollNotification>(
+    await tester.pumpWidget(NotificationListener<ScrollNotification>(
       onNotification: (ScrollNotification value) {
         if (value is ScrollStartNotification || value is ScrollUpdateNotification || value is ScrollEndNotification)
           notification = value;
         return false;
       },
-      child: new SingleChildScrollView(
-        child: const SizedBox(height: 1200.0)
-      )
+      child: const SingleChildScrollView(
+        child: SizedBox(height: 1200.0),
+      ),
     ));
 
     final TestGesture gesture = await tester.startGesture(const Offset(100.0, 100.0));
@@ -53,28 +53,32 @@ void main() {
     final List<int> depth0Values = <int>[];
     final List<int> depth1Values = <int>[];
 
-    await tester.pumpWidget(new NotificationListener<ScrollNotification>(
+    await tester.pumpWidget(NotificationListener<ScrollNotification>(
       onNotification: (ScrollNotification value) {
         depth1Types.add(value.runtimeType);
         depth1Values.add(value.depth);
         return false;
       },
-      child: new SingleChildScrollView(
-        child: new SizedBox(
+      child: SingleChildScrollView(
+        dragStartBehavior: DragStartBehavior.down,
+        child: SizedBox(
           height: 1200.0,
-          child: new NotificationListener<ScrollNotification>(
+          child: NotificationListener<ScrollNotification>(
             onNotification: (ScrollNotification value) {
               depth0Types.add(value.runtimeType);
               depth0Values.add(value.depth);
               return false;
             },
-            child: new Container(
+            child: Container(
               padding: const EdgeInsets.all(50.0),
-              child: new SingleChildScrollView(child: const SizedBox(height: 1200.0))
-            )
-          )
-        )
-      )
+              child: const SingleChildScrollView(
+                child: SizedBox(height: 1200.0),
+                dragStartBehavior: DragStartBehavior.down,
+              ),
+            ),
+          ),
+        ),
+      ),
     ));
 
     final TestGesture gesture = await tester.startGesture(const Offset(100.0, 100.0));

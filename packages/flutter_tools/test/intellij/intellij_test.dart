@@ -9,8 +9,8 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/intellij/intellij.dart';
-import 'package:test/test.dart';
 
+import '../src/common.dart';
 import '../src/context.dart';
 
 void main() {
@@ -23,13 +23,13 @@ void main() {
   }
 
   setUp(() {
-    fs = new MemoryFileSystem();
+    fs = MemoryFileSystem();
   });
 
   group('IntelliJ', () {
     group('plugins', () {
       testUsingContext('found', () async {
-        final IntelliJPlugins plugins = new IntelliJPlugins(_kPluginsPath);
+        final IntelliJPlugins plugins = IntelliJPlugins(_kPluginsPath);
 
         final Archive dartJarArchive =
             buildSingleFileArchive('META-INF/plugin.xml', r'''
@@ -40,7 +40,7 @@ void main() {
 ''');
         writeFileCreatingDirectories(
             fs.path.join(_kPluginsPath, 'Dart', 'lib', 'Dart.jar'),
-            new ZipEncoder().encode(dartJarArchive));
+            ZipEncoder().encode(dartJarArchive));
 
         final Archive flutterJarArchive =
             buildSingleFileArchive('META-INF/plugin.xml', r'''
@@ -51,7 +51,7 @@ void main() {
 ''');
         writeFileCreatingDirectories(
             fs.path.join(_kPluginsPath, 'flutter-intellij.jar'),
-            new ZipEncoder().encode(flutterJarArchive));
+            ZipEncoder().encode(flutterJarArchive));
 
         final List<ValidationMessage> messages = <ValidationMessage>[];
         plugins.validatePackage(messages, <String>['Dart'], 'Dart');
@@ -72,7 +72,7 @@ void main() {
       });
 
       testUsingContext('not found', () async {
-        final IntelliJPlugins plugins = new IntelliJPlugins(_kPluginsPath);
+        final IntelliJPlugins plugins = IntelliJPlugins(_kPluginsPath);
 
         final List<ValidationMessage> messages = <ValidationMessage>[];
         plugins.validatePackage(messages, <String>['Dart'], 'Dart');
@@ -97,10 +97,10 @@ void main() {
 const String _kPluginsPath = '/data/intellij/plugins';
 
 Archive buildSingleFileArchive(String path, String content) {
-  final Archive archive = new Archive();
+  final Archive archive = Archive();
 
   final List<int> bytes = utf8.encode(content);
-  archive.addFile(new ArchiveFile(path, bytes.length, bytes));
+  archive.addFile(ArchiveFile(path, bytes.length, bytes));
 
   return archive;
 }

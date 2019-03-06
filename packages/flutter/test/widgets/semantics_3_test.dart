@@ -10,18 +10,18 @@ import 'semantics_tester.dart';
 
 void main() {
   testWidgets('Semantics 3', (WidgetTester tester) async {
-    final SemanticsTester semantics = new SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
 
     // implicit annotators
     await tester.pumpWidget(
-      new Semantics(
+      Semantics(
         container: true,
-        child: new Container(
-          child: new Semantics(
+        child: Container(
+          child: Semantics(
             label: 'test',
             textDirection: TextDirection.ltr,
-            child: new Container(
-              child: new Semantics(
+            child: Container(
+              child: Semantics(
                 checked: true
               ),
             ),
@@ -31,24 +31,24 @@ void main() {
     );
 
     expect(semantics, hasSemantics(
-      new TestSemantics.root(
+      TestSemantics.root(
         children: <TestSemantics>[
-          new TestSemantics.rootChild(
+          TestSemantics.rootChild(
             id: 1,
             flags: SemanticsFlag.hasCheckedState.index | SemanticsFlag.isChecked.index,
             label: 'test',
             rect: TestSemantics.fullScreen,
-          )
+          ),
         ]
       )
     ));
 
     // remove one
     await tester.pumpWidget(
-      new Semantics(
+      Semantics(
         container: true,
-        child: new Container(
-          child: new Semantics(
+        child: Container(
+          child: Semantics(
              checked: true,
           ),
         ),
@@ -56,9 +56,9 @@ void main() {
     );
 
     expect(semantics, hasSemantics(
-      new TestSemantics.root(
+      TestSemantics.root(
         children: <TestSemantics>[
-          new TestSemantics.rootChild(
+          TestSemantics.rootChild(
             id: 1,
             flags: SemanticsFlag.hasCheckedState.index | SemanticsFlag.isChecked.index,
             rect: TestSemantics.fullScreen,
@@ -69,10 +69,10 @@ void main() {
 
     // change what it says
     await tester.pumpWidget(
-      new Semantics(
+      Semantics(
         container: true,
-        child: new Container(
-          child: new Semantics(
+        child: Container(
+          child: Semantics(
             label: 'test',
             textDirection: TextDirection.ltr,
           ),
@@ -81,9 +81,9 @@ void main() {
     );
 
     expect(semantics, hasSemantics(
-      new TestSemantics.root(
+      TestSemantics.root(
         children: <TestSemantics>[
-          new TestSemantics.rootChild(
+          TestSemantics.rootChild(
             id: 1,
             label: 'test',
             textDirection: TextDirection.ltr,
@@ -95,12 +95,12 @@ void main() {
 
     // add a node
     await tester.pumpWidget(
-      new Semantics(
+      Semantics(
         container: true,
-        child: new Container(
-          child: new Semantics(
+        child: Container(
+          child: Semantics(
             checked: true,
-            child: new Semantics(
+            child: Semantics(
               label: 'test',
               textDirection: TextDirection.ltr,
             ),
@@ -110,14 +110,14 @@ void main() {
     );
 
     expect(semantics, hasSemantics(
-      new TestSemantics.root(
+      TestSemantics.root(
         children: <TestSemantics>[
-          new TestSemantics.rootChild(
+          TestSemantics.rootChild(
             id: 1,
             flags: SemanticsFlag.hasCheckedState.index | SemanticsFlag.isChecked.index,
             label: 'test',
             rect: TestSemantics.fullScreen,
-          )
+          ),
         ],
       ),
     ));
@@ -129,12 +129,12 @@ void main() {
 
     // make no changes
     await tester.pumpWidget(
-      new Semantics(
+      Semantics(
         container: true,
-        child: new Container(
-          child: new Semantics(
+        child: Container(
+          child: Semantics(
             checked: true,
-            child: new Semantics(
+            child: Semantics(
               label: 'test',
               textDirection: TextDirection.ltr,
             ),

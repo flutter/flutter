@@ -9,6 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 
+import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
@@ -18,13 +19,13 @@ void main() {
 
   testWidgets('Checkbox size is configurable by ThemeData.materialTapTargetSize', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Theme(
-        data: new ThemeData(materialTapTargetSize: MaterialTapTargetSize.padded),
-        child: new Directionality(
+      Theme(
+        data: ThemeData(materialTapTargetSize: MaterialTapTargetSize.padded),
+        child: Directionality(
           textDirection: TextDirection.ltr,
-          child: new Material(
-            child: new Center(
-              child: new Checkbox(
+          child: Material(
+            child: Center(
+              child: Checkbox(
                 value: true,
                 onChanged: (bool newValue) {},
               ),
@@ -37,13 +38,13 @@ void main() {
     expect(tester.getSize(find.byType(Checkbox)), const Size(48.0, 48.0));
 
     await tester.pumpWidget(
-      new Theme(
-        data: new ThemeData(materialTapTargetSize: MaterialTapTargetSize.shrinkWrap),
-        child: new Directionality(
+      Theme(
+        data: ThemeData(materialTapTargetSize: MaterialTapTargetSize.shrinkWrap),
+        child: Directionality(
           textDirection: TextDirection.ltr,
-          child: new Material(
-            child: new Center(
-              child: new Checkbox(
+          child: Material(
+            child: Center(
+              child: Checkbox(
                 value: true,
                 onChanged: (bool newValue) {},
               ),
@@ -59,28 +60,28 @@ void main() {
   testWidgets('CheckBox semantics', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
 
-    await tester.pumpWidget(new Material(
-      child: new Checkbox(
+    await tester.pumpWidget(Material(
+      child: Checkbox(
         value: false,
         onChanged: (bool b) { },
       ),
     ));
 
-    expect(tester.getSemanticsData(find.byType(Checkbox)), matchesSemanticsData(
+    expect(tester.getSemantics(find.byType(Checkbox)), matchesSemantics(
       hasCheckedState: true,
       hasEnabledState: true,
       isEnabled: true,
       hasTapAction: true,
     ));
 
-    await tester.pumpWidget(new Material(
-      child: new Checkbox(
+    await tester.pumpWidget(Material(
+      child: Checkbox(
         value: true,
         onChanged: (bool b) { },
       ),
     ));
 
-    expect(tester.getSemanticsData(find.byType(Checkbox)), matchesSemanticsData(
+    expect(tester.getSemantics(find.byType(Checkbox)), matchesSemantics(
       hasCheckedState: true,
       hasEnabledState: true,
       isChecked: true,
@@ -89,25 +90,25 @@ void main() {
     ));
 
     await tester.pumpWidget(const Material(
-      child: const Checkbox(
+      child: Checkbox(
         value: false,
         onChanged: null,
       ),
     ));
 
-    expect(tester.getSemanticsData(find.byType(Checkbox)), matchesSemanticsData(
+    expect(tester.getSemantics(find.byType(Checkbox)), matchesSemantics(
       hasCheckedState: true,
       hasEnabledState: true,
     ));
 
     await tester.pumpWidget(const Material(
-      child: const Checkbox(
+      child: Checkbox(
         value: true,
         onChanged: null,
       ),
     ));
 
-    expect(tester.getSemanticsData(find.byType(Checkbox)), matchesSemanticsData(
+    expect(tester.getSemantics(find.byType(Checkbox)), matchesSemantics(
       hasCheckedState: true,
       hasEnabledState: true,
       isChecked: true,
@@ -118,18 +119,18 @@ void main() {
   testWidgets('Can wrap CheckBox with Semantics', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
 
-    await tester.pumpWidget(new Material(
-      child: new Semantics(
+    await tester.pumpWidget(Material(
+      child: Semantics(
         label: 'foo',
         textDirection: TextDirection.ltr,
-        child: new Checkbox(
+        child: Checkbox(
           value: false,
           onChanged: (bool b) { },
         ),
       ),
     ));
 
-    expect(tester.getSemanticsData(find.byType(Checkbox)), matchesSemanticsData(
+    expect(tester.getSemantics(find.byType(Checkbox)), matchesSemantics(
       label: 'foo',
       textDirection: TextDirection.ltr,
       hasCheckedState: true,
@@ -144,10 +145,10 @@ void main() {
     bool checkBoxValue;
 
     await tester.pumpWidget(
-      new Material(
-        child: new StatefulBuilder(
+      Material(
+        child: StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
-            return new Checkbox(
+            return Checkbox(
               tristate: true,
               value: checkBoxValue,
               onChanged: (bool value) {
@@ -185,10 +186,10 @@ void main() {
   });
 
   testWidgets('has semantics for tristate', (WidgetTester tester) async {
-    final SemanticsTester semantics = new SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(
-      new Material(
-        child: new Checkbox(
+      Material(
+        child: Checkbox(
           tristate: true,
           value: null,
           onChanged: (bool newValue) {},
@@ -200,14 +201,14 @@ void main() {
       flags: <SemanticsFlag>[
         SemanticsFlag.hasCheckedState,
         SemanticsFlag.hasEnabledState,
-        SemanticsFlag.isEnabled
+        SemanticsFlag.isEnabled,
       ],
       actions: <SemanticsAction>[SemanticsAction.tap],
     ), hasLength(1));
 
     await tester.pumpWidget(
-      new Material(
-        child: new Checkbox(
+      Material(
+        child: Checkbox(
           tristate: true,
           value: true,
           onChanged: (bool newValue) {},
@@ -226,8 +227,8 @@ void main() {
     ), hasLength(1));
 
     await tester.pumpWidget(
-      new Material(
-        child: new Checkbox(
+      Material(
+        child: Checkbox(
           tristate: true,
           value: false,
           onChanged: (bool newValue) {},
@@ -250,16 +251,16 @@ void main() {
   testWidgets('has semantic events', (WidgetTester tester) async {
     dynamic semanticEvent;
     bool checkboxValue = false;
-    SystemChannels.accessibility.setMockMessageHandler((dynamic message) {
+    SystemChannels.accessibility.setMockMessageHandler((dynamic message) async {
       semanticEvent = message;
     });
-    final SemanticsTester semanticsTester = new SemanticsTester(tester);
+    final SemanticsTester semanticsTester = SemanticsTester(tester);
 
     await tester.pumpWidget(
-      new Material(
-        child: new StatefulBuilder(
+      Material(
+        child: StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
-            return new Checkbox(
+            return Checkbox(
               value: checkboxValue,
               onChanged: (bool value) {
                 setState(() {
@@ -286,4 +287,81 @@ void main() {
     SystemChannels.accessibility.setMockMessageHandler(null);
     semanticsTester.dispose();
   });
+
+  testWidgets('CheckBox tristate rendering, programmatic transitions', (WidgetTester tester) async {
+    Widget buildFrame(bool checkboxValue) {
+      return Material(
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Checkbox(
+              tristate: true,
+              value: checkboxValue,
+              onChanged: (bool value) { },
+            );
+          },
+        ),
+      );
+    }
+
+    RenderToggleable getCheckboxRenderer() {
+      return tester.renderObject<RenderToggleable>(find.byType(Checkbox));
+    }
+
+    await tester.pumpWidget(buildFrame(false));
+    await tester.pumpAndSettle();
+    expect(getCheckboxRenderer(), isNot(paints..path())); // checkmark is rendered as a path
+    expect(getCheckboxRenderer(), isNot(paints..line())); // null is rendered as a line (a "dash")
+    expect(getCheckboxRenderer(), paints..drrect()); // empty checkbox
+
+    await tester.pumpWidget(buildFrame(true));
+    await tester.pumpAndSettle();
+    expect(getCheckboxRenderer(), paints..path()); // checkmark is rendered as a path
+
+    await tester.pumpWidget(buildFrame(false));
+    await tester.pumpAndSettle();
+    expect(getCheckboxRenderer(), isNot(paints..path())); // checkmark is rendered as a path
+    expect(getCheckboxRenderer(), isNot(paints..line())); // null is rendered as a line (a "dash")
+    expect(getCheckboxRenderer(), paints..drrect()); // empty checkbox
+
+    await tester.pumpWidget(buildFrame(null));
+    await tester.pumpAndSettle();
+    expect(getCheckboxRenderer(), paints..line()); // null is rendered as a line (a "dash")
+
+    await tester.pumpWidget(buildFrame(true));
+    await tester.pumpAndSettle();
+    expect(getCheckboxRenderer(), paints..path()); // checkmark is rendered as a path
+
+    await tester.pumpWidget(buildFrame(null));
+    await tester.pumpAndSettle();
+    expect(getCheckboxRenderer(), paints..line()); // null is rendered as a line (a "dash")
+  });
+
+  testWidgets('CheckBox color rendering', (WidgetTester tester) async {
+    Widget buildFrame(Color color) {
+      return Material(
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Checkbox(
+              value: true,
+              checkColor: color,
+              onChanged: (bool value) { },
+            );
+          },
+        ),
+      );
+    }
+
+    RenderToggleable getCheckboxRenderer() {
+      return tester.renderObject<RenderToggleable>(find.byType(Checkbox));
+    }
+
+    await tester.pumpWidget(buildFrame(null));
+    await tester.pumpAndSettle();
+    expect(getCheckboxRenderer(), paints..path(color: const Color(0xFFFFFFFF))); // paints's color is 0xFFFFFFFF (default color)
+
+    await tester.pumpWidget(buildFrame(const Color(0xFF000000)));
+    await tester.pumpAndSettle();
+    expect(getCheckboxRenderer(), paints..path(color: const Color(0xFF000000))); // paints's color is 0xFF000000 (params)
+  });
+
 }

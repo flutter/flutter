@@ -72,7 +72,7 @@ class _GestureArena {
 
   @override
   String toString() {
-    final StringBuffer buffer = new StringBuffer();
+    final StringBuffer buffer = StringBuffer();
     if (members.isEmpty) {
       buffer.write('<empty>');
     } else {
@@ -92,9 +92,9 @@ class _GestureArena {
   }
 }
 
-/// The first member to accept or the last member to not to reject wins.
+/// The first member to accept or the last member to not reject wins.
 ///
-/// See [https://flutter.io/gestures/#gesture-disambiguation] for more
+/// See <https://flutter.io/gestures/#gesture-disambiguation> for more
 /// information about the role this class plays in the gesture system.
 ///
 /// To debug problems with gestures, consider using
@@ -106,11 +106,11 @@ class GestureArenaManager {
   GestureArenaEntry add(int pointer, GestureArenaMember member) {
     final _GestureArena state = _arenas.putIfAbsent(pointer, () {
       assert(_debugLogDiagnostic(pointer, '★ Opening new gesture arena.'));
-      return new _GestureArena();
+      return _GestureArena();
     });
     state.add(member);
     assert(_debugLogDiagnostic(pointer, 'Adding: $member'));
-    return new GestureArenaEntry._(this, pointer, member);
+    return GestureArenaEntry._(this, pointer, member);
   }
 
   /// Prevents new members from entering the arena.

@@ -75,7 +75,7 @@ abstract class FlowDelegate {
   /// Override to control the layout constraints given to each child.
   ///
   /// By default, the children will receive the given constraints, which are the
-  /// constrains the constraints used to size the container. The children need
+  /// constraints used to size the container. The children need
   /// not respect the given constraints, but they are required to respect the
   /// returned constraints. For example, the incoming constraints might require
   /// the container to have a width of exactly 100.0 and a height of exactly
@@ -181,7 +181,7 @@ class RenderFlow extends RenderBox
   /// [isRepaintBoundary].
   RenderFlow({
     List<RenderBox> children,
-    @required FlowDelegate delegate
+    @required FlowDelegate delegate,
   }) : assert(delegate != null),
        _delegate = delegate {
     addAll(children);
@@ -193,7 +193,7 @@ class RenderFlow extends RenderBox
     if (childParentData is FlowParentData)
       childParentData._transform = null;
     else
-      child.parentData = new FlowParentData();
+      child.parentData = FlowParentData();
   }
 
   /// The delegate that controls the transformation matrices of the children.
@@ -248,7 +248,7 @@ class RenderFlow extends RenderBox
 
   @override
   double computeMinIntrinsicWidth(double height) {
-    final double width = _getSize(new BoxConstraints.tightForFinite(height: height)).width;
+    final double width = _getSize(BoxConstraints.tightForFinite(height: height)).width;
     if (width.isFinite)
       return width;
     return 0.0;
@@ -256,7 +256,7 @@ class RenderFlow extends RenderBox
 
   @override
   double computeMaxIntrinsicWidth(double height) {
-    final double width = _getSize(new BoxConstraints.tightForFinite(height: height)).width;
+    final double width = _getSize(BoxConstraints.tightForFinite(height: height)).width;
     if (width.isFinite)
       return width;
     return 0.0;
@@ -264,7 +264,7 @@ class RenderFlow extends RenderBox
 
   @override
   double computeMinIntrinsicHeight(double width) {
-    final double height = _getSize(new BoxConstraints.tightForFinite(width: width)).height;
+    final double height = _getSize(BoxConstraints.tightForFinite(width: width)).height;
     if (height.isFinite)
       return height;
     return 0.0;
@@ -272,7 +272,7 @@ class RenderFlow extends RenderBox
 
   @override
   double computeMaxIntrinsicHeight(double width) {
-    final double height = _getSize(new BoxConstraints.tightForFinite(width: width)).height;
+    final double height = _getSize(BoxConstraints.tightForFinite(width: width)).height;
     if (height.isFinite)
       return height;
     return 0.0;
@@ -314,12 +314,12 @@ class RenderFlow extends RenderBox
 
   @override
   void paintChild(int i, { Matrix4 transform, double opacity = 1.0 }) {
-    transform ??= new Matrix4.identity();
+    transform ??= Matrix4.identity();
     final RenderBox child = _randomAccessChildren[i];
     final FlowParentData childParentData = child.parentData;
     assert(() {
       if (childParentData._transform != null) {
-        throw new FlutterError(
+        throw FlutterError(
           'Cannot call paintChild twice for the same child.\n'
           'The flow delegate of type ${_delegate.runtimeType} attempted to '
           'paint child $i multiple times, which is not permitted.'
@@ -380,7 +380,7 @@ class RenderFlow extends RenderBox
       final Matrix4 transform = childParentData._transform;
       if (transform == null)
         continue;
-      final Matrix4 inverse = new Matrix4.zero();
+      final Matrix4 inverse = Matrix4.zero();
       final double determinate = inverse.copyInverse(transform);
       if (determinate == 0.0) {
         // We cannot invert the transform. That means the child doesn't appear

@@ -21,18 +21,18 @@ void main() {
 
   test('parsePoints', () {
     expect(parsePoints('1.0, 2.0'),
-        const <Point<double>>[const Point<double>(1.0, 2.0)]
+        const <Point<double>>[Point<double>(1.0, 2.0)]
     );
     expect(parsePoints('12.0, 34.0 5.0, 6.6'),
         const <Point<double>>[
-          const Point<double>(12.0, 34.0),
-          const Point<double>(5.0, 6.6),
+          Point<double>(12.0, 34.0),
+          Point<double>(5.0, 6.6),
         ]
     );
     expect(parsePoints('12.0 34.0 5.0 6.6'),
         const <Point<double>>[
-          const Point<double>(12.0, 34.0),
-          const Point<double>(5.0, 6.6),
+          Point<double>(12.0, 34.0),
+          Point<double>(5.0, 6.6),
         ]
     );
   });
@@ -65,12 +65,12 @@ void main() {
     test('horizontal bar', () {
       final FrameData frameData = interpretSvg(testAsset('horizontal_bar.svg'));
       expect(frameData.paths, <SvgPath>[
-        const SvgPath('path_1', const<SvgPathCommand>[
-          const SvgPathCommand('M', const <Point<double>>[const Point<double>(0.0, 19.0)]),
-          const SvgPathCommand('L', const <Point<double>>[const Point<double>(48.0, 19.0)]),
-          const SvgPathCommand('L', const <Point<double>>[const Point<double>(48.0, 29.0)]),
-          const SvgPathCommand('L', const <Point<double>>[const Point<double>(0.0, 29.0)]),
-          const SvgPathCommand('Z', const <Point<double>>[]),
+        const SvgPath('path_1', <SvgPathCommand>[
+          SvgPathCommand('M', <Point<double>>[Point<double>(0.0, 19.0)]),
+          SvgPathCommand('L', <Point<double>>[Point<double>(48.0, 19.0)]),
+          SvgPathCommand('L', <Point<double>>[Point<double>(48.0, 29.0)]),
+          SvgPathCommand('L', <Point<double>>[Point<double>(0.0, 29.0)]),
+          SvgPathCommand('Z', <Point<double>>[]),
         ]),
       ]);
     });
@@ -90,19 +90,19 @@ void main() {
     test('SVG group', () {
       final FrameData frameData = interpretSvg(testAsset('bars_group.svg'));
       expect(frameData.paths, const <SvgPath>[
-        const SvgPath('path_1', const<SvgPathCommand>[
-          const SvgPathCommand('M', const <Point<double>>[const Point<double>(0.0, 19.0)]),
-          const SvgPathCommand('L', const <Point<double>>[const Point<double>(48.0, 19.0)]),
-          const SvgPathCommand('L', const <Point<double>>[const Point<double>(48.0, 29.0)]),
-          const SvgPathCommand('L', const <Point<double>>[const Point<double>(0.0, 29.0)]),
-          const SvgPathCommand('Z', const <Point<double>>[]),
+        SvgPath('path_1', <SvgPathCommand>[
+          SvgPathCommand('M', <Point<double>>[Point<double>(0.0, 19.0)]),
+          SvgPathCommand('L', <Point<double>>[Point<double>(48.0, 19.0)]),
+          SvgPathCommand('L', <Point<double>>[Point<double>(48.0, 29.0)]),
+          SvgPathCommand('L', <Point<double>>[Point<double>(0.0, 29.0)]),
+          SvgPathCommand('Z', <Point<double>>[]),
         ]),
-        const SvgPath('path_2', const<SvgPathCommand>[
-          const SvgPathCommand('M', const <Point<double>>[const Point<double>(0.0, 34.0)]),
-          const SvgPathCommand('L', const <Point<double>>[const Point<double>(48.0, 34.0)]),
-          const SvgPathCommand('L', const <Point<double>>[const Point<double>(48.0, 44.0)]),
-          const SvgPathCommand('L', const <Point<double>>[const Point<double>(0.0, 44.0)]),
-          const SvgPathCommand('Z', const <Point<double>>[]),
+        SvgPath('path_2', <SvgPathCommand>[
+          SvgPathCommand('M', <Point<double>>[Point<double>(0.0, 34.0)]),
+          SvgPathCommand('L', <Point<double>>[Point<double>(48.0, 34.0)]),
+          SvgPathCommand('L', <Point<double>>[Point<double>(48.0, 44.0)]),
+          SvgPathCommand('L', <Point<double>>[Point<double>(0.0, 44.0)]),
+          SvgPathCommand('Z', <Point<double>>[]),
         ]),
       ]);
     });
@@ -110,12 +110,12 @@ void main() {
     test('SVG group translate', () {
       final FrameData frameData = interpretSvg(testAsset('bar_group_translate.svg'));
       expect(frameData.paths, const <SvgPath>[
-        const SvgPath('path_1', const<SvgPathCommand>[
-          const SvgPathCommand('M', const <Point<double>>[const Point<double>(0.0, 34.0)]),
-          const SvgPathCommand('L', const <Point<double>>[const Point<double>(48.0, 34.0)]),
-          const SvgPathCommand('L', const <Point<double>>[const Point<double>(48.0, 44.0)]),
-          const SvgPathCommand('L', const <Point<double>>[const Point<double>(0.0, 44.0)]),
-          const SvgPathCommand('Z', const <Point<double>>[]),
+        SvgPath('path_1', <SvgPathCommand>[
+          SvgPathCommand('M', <Point<double>>[Point<double>(0.0, 34.0)]),
+          SvgPathCommand('L', <Point<double>>[Point<double>(48.0, 34.0)]),
+          SvgPathCommand('L', <Point<double>>[Point<double>(48.0, 44.0)]),
+          SvgPathCommand('L', <Point<double>>[Point<double>(0.0, 44.0)]),
+          SvgPathCommand('Z', <Point<double>>[]),
         ]),
       ]);
     });
@@ -123,13 +123,13 @@ void main() {
     test('SVG group scale', () {
       final FrameData frameData = interpretSvg(testAsset('bar_group_scale.svg'));
       expect(frameData.paths, const <SvgPath>[
-        const SvgPath(
-            'path_1', const<SvgPathCommand>[
-          const SvgPathCommand('M', const <Point<double>>[const Point<double>(0.0, 9.5)]),
-          const SvgPathCommand('L', const <Point<double>>[const Point<double>(24.0, 9.5)]),
-          const SvgPathCommand('L', const <Point<double>>[const Point<double>(24.0, 14.5)]),
-          const SvgPathCommand('L', const <Point<double>>[const Point<double>(0.0, 14.5)]),
-          const SvgPathCommand('Z', const <Point<double>>[]),
+        SvgPath(
+            'path_1', <SvgPathCommand>[
+          SvgPathCommand('M', <Point<double>>[Point<double>(0.0, 9.5)]),
+          SvgPathCommand('L', <Point<double>>[Point<double>(24.0, 9.5)]),
+          SvgPathCommand('L', <Point<double>>[Point<double>(24.0, 14.5)]),
+          SvgPathCommand('L', <Point<double>>[Point<double>(0.0, 14.5)]),
+          SvgPathCommand('Z', <Point<double>>[]),
         ]),
       ]);
     });
@@ -137,14 +137,14 @@ void main() {
     test('SVG group rotate scale', () {
       final FrameData frameData = interpretSvg(testAsset('bar_group_rotate_scale.svg'));
       expect(frameData.paths, const <PathMatcher>[
-        const PathMatcher(
-            const SvgPath(
-                'path_1', const<SvgPathCommand>[
-              const SvgPathCommand('L', const <Point<double>>[const Point<double>(29.0, 0.0)]),
-              const SvgPathCommand('L', const <Point<double>>[const Point<double>(29.0, 48.0)]),
-              const SvgPathCommand('L', const <Point<double>>[const Point<double>(19.0, 48.0)]),
-              const SvgPathCommand('M', const <Point<double>>[const Point<double>(19.0, 0.0)]),
-              const SvgPathCommand('Z', const <Point<double>>[]),
+        PathMatcher(
+            SvgPath(
+                'path_1', <SvgPathCommand>[
+              SvgPathCommand('L', <Point<double>>[Point<double>(29.0, 0.0)]),
+              SvgPathCommand('L', <Point<double>>[Point<double>(29.0, 48.0)]),
+              SvgPathCommand('L', <Point<double>>[Point<double>(19.0, 48.0)]),
+              SvgPathCommand('M', <Point<double>>[Point<double>(19.0, 0.0)]),
+              SvgPathCommand('Z', <Point<double>>[]),
             ]),
             margin: 0.000000001
         )
@@ -161,14 +161,14 @@ void main() {
     test('SVG group opacity', () {
       final FrameData frameData = interpretSvg(testAsset('bar_group_opacity.svg'));
       expect(frameData.paths, const <SvgPath>[
-        const SvgPath(
+        SvgPath(
           'path_1',
-          const<SvgPathCommand>[
-            const SvgPathCommand('M', const <Point<double>>[const Point<double>(0.0, 19.0)]),
-            const SvgPathCommand('L', const <Point<double>>[const Point<double>(48.0, 19.0)]),
-            const SvgPathCommand('L', const <Point<double>>[const Point<double>(48.0, 29.0)]),
-            const SvgPathCommand('L', const <Point<double>>[const Point<double>(0.0, 29.0)]),
-            const SvgPathCommand('Z', const <Point<double>>[]),
+          <SvgPathCommand>[
+            SvgPathCommand('M', <Point<double>>[Point<double>(0.0, 19.0)]),
+            SvgPathCommand('L', <Point<double>>[Point<double>(48.0, 19.0)]),
+            SvgPathCommand('L', <Point<double>>[Point<double>(48.0, 29.0)]),
+            SvgPathCommand('L', <Point<double>>[Point<double>(0.0, 29.0)]),
+            SvgPathCommand('Z', <Point<double>>[]),
           ],
           opacity: 0.5,
         ),
@@ -179,13 +179,13 @@ void main() {
       // This asset uses the relative 'l' command instead of 'L'.
       final FrameData frameData = interpretSvg(testAsset('horizontal_bar_relative.svg'));
       expect(frameData.paths, const <SvgPath>[
-        const SvgPath(
-            'path_1', const<SvgPathCommand>[
-          const SvgPathCommand('M', const <Point<double>>[const Point<double>(0.0, 19.0)]),
-          const SvgPathCommand('L', const <Point<double>>[const Point<double>(48.0, 19.0)]),
-          const SvgPathCommand('L', const <Point<double>>[const Point<double>(48.0, 29.0)]),
-          const SvgPathCommand('L', const <Point<double>>[const Point<double>(0.0, 29.0)]),
-          const SvgPathCommand('Z', const <Point<double>>[]),
+        SvgPath(
+            'path_1', <SvgPathCommand>[
+          SvgPathCommand('M', <Point<double>>[Point<double>(0.0, 19.0)]),
+          SvgPathCommand('L', <Point<double>>[Point<double>(48.0, 19.0)]),
+          SvgPathCommand('L', <Point<double>>[Point<double>(48.0, 29.0)]),
+          SvgPathCommand('L', <Point<double>>[Point<double>(0.0, 29.0)]),
+          SvgPathCommand('Z', <Point<double>>[]),
         ]),
       ]);
     });
@@ -194,15 +194,15 @@ void main() {
       // This asset uses the relative 'l' command instead of 'L'.
       final FrameData frameData = interpretSvg(testAsset('close_path_in_middle.svg'));
       expect(frameData.paths, const <SvgPath>[
-        const SvgPath(
-            'path_1', const<SvgPathCommand>[
-          const SvgPathCommand('M', const <Point<double>>[const Point<double>(50.0, 50.0)]),
-          const SvgPathCommand('L', const <Point<double>>[const Point<double>(60.0, 50.0)]),
-          const SvgPathCommand('L', const <Point<double>>[const Point<double>(60.0, 60.0)]),
-          const SvgPathCommand('Z', const <Point<double>>[]),
-          const SvgPathCommand('L', const <Point<double>>[const Point<double>(50.0, 40.0)]),
-          const SvgPathCommand('L', const <Point<double>>[const Point<double>(40.0, 40.0)]),
-          const SvgPathCommand('Z', const <Point<double>>[]),
+        SvgPath(
+            'path_1', <SvgPathCommand>[
+          SvgPathCommand('M', <Point<double>>[Point<double>(50.0, 50.0)]),
+          SvgPathCommand('L', <Point<double>>[Point<double>(60.0, 50.0)]),
+          SvgPathCommand('L', <Point<double>>[Point<double>(60.0, 60.0)]),
+          SvgPathCommand('Z', <Point<double>>[]),
+          SvgPathCommand('L', <Point<double>>[Point<double>(50.0, 40.0)]),
+          SvgPathCommand('L', <Point<double>>[Point<double>(40.0, 40.0)]),
+          SvgPathCommand('Z', <Point<double>>[]),
         ]),
       ]);
     });
@@ -210,115 +210,115 @@ void main() {
 
   group('create PathAnimation', () {
     test('single path', () {
-      const List<FrameData> frameData = const <FrameData>[
-        const FrameData(
-          const Point<double>(10.0, 10.0),
-          const <SvgPath>[
-            const SvgPath(
+      const List<FrameData> frameData = <FrameData>[
+        FrameData(
+          Point<double>(10.0, 10.0),
+          <SvgPath>[
+            SvgPath(
               'path_1',
-              const <SvgPathCommand>[
-                const SvgPathCommand('M', const <Point<double>>[const Point<double>(0.0, 0.0)]),
-                const SvgPathCommand('L', const <Point<double>>[const Point<double>(10.0, 10.0)]),
+              <SvgPathCommand>[
+                SvgPathCommand('M', <Point<double>>[Point<double>(0.0, 0.0)]),
+                SvgPathCommand('L', <Point<double>>[Point<double>(10.0, 10.0)]),
               ],
             ),
           ],
         ),
       ];
-      expect(new PathAnimation.fromFrameData(frameData, 0),
-          const PathAnimationMatcher(const PathAnimation(
-              const <PathCommandAnimation>[
-                const PathCommandAnimation('M', const <List<Point<double>>>[
-                  const <Point<double>>[const Point<double>(0.0, 0.0)],
+      expect(PathAnimation.fromFrameData(frameData, 0),
+          const PathAnimationMatcher(PathAnimation(
+              <PathCommandAnimation>[
+                PathCommandAnimation('M', <List<Point<double>>>[
+                  <Point<double>>[Point<double>(0.0, 0.0)],
                 ]),
-                const PathCommandAnimation('L', const <List<Point<double>>>[
-                  const <Point<double>>[const Point<double>(10.0, 10.0)],
+                PathCommandAnimation('L', <List<Point<double>>>[
+                  <Point<double>>[Point<double>(10.0, 10.0)],
                 ]),
               ],
-              opacities: const <double>[1.0]
+              opacities: <double>[1.0]
           ))
       );
     });
 
     test('multiple paths', () {
-      const List<FrameData> frameData = const <FrameData>[
-        const FrameData(
-          const Point<double>(10.0, 10.0),
-          const <SvgPath>[
-            const SvgPath(
+      const List<FrameData> frameData = <FrameData>[
+        FrameData(
+          Point<double>(10.0, 10.0),
+          <SvgPath>[
+            SvgPath(
               'path_1',
-              const <SvgPathCommand>[
-                const SvgPathCommand('M', const <Point<double>>[const Point<double>(0.0, 0.0)]),
+              <SvgPathCommand>[
+                SvgPathCommand('M', <Point<double>>[Point<double>(0.0, 0.0)]),
               ],
             ),
-            const SvgPath(
+            SvgPath(
               'path_2',
-              const <SvgPathCommand>[
-                const SvgPathCommand('M', const <Point<double>>[const Point<double>(5.0, 6.0)]),
+              <SvgPathCommand>[
+                SvgPathCommand('M', <Point<double>>[Point<double>(5.0, 6.0)]),
               ],
             ),
           ],
         ),
       ];
-      expect(new PathAnimation.fromFrameData(frameData, 0),
-          const PathAnimationMatcher(const PathAnimation(
-              const <PathCommandAnimation>[
-                const PathCommandAnimation('M', const <List<Point<double>>>[
-                  const <Point<double>>[const Point<double>(0.0, 0.0)],
+      expect(PathAnimation.fromFrameData(frameData, 0),
+          const PathAnimationMatcher(PathAnimation(
+              <PathCommandAnimation>[
+                PathCommandAnimation('M', <List<Point<double>>>[
+                  <Point<double>>[Point<double>(0.0, 0.0)],
                 ])
               ],
-              opacities: const <double>[1.0]
+              opacities: <double>[1.0]
           ))
       );
 
-      expect(new PathAnimation.fromFrameData(frameData, 1),
-          const PathAnimationMatcher(const PathAnimation(
-              const <PathCommandAnimation>[
-                const PathCommandAnimation('M', const <List<Point<double>>>[
-                  const <Point<double>>[const Point<double>(5.0, 6.0)],
+      expect(PathAnimation.fromFrameData(frameData, 1),
+          const PathAnimationMatcher(PathAnimation(
+              <PathCommandAnimation>[
+                PathCommandAnimation('M', <List<Point<double>>>[
+                  <Point<double>>[Point<double>(5.0, 6.0)],
                 ])
               ],
-              opacities: const <double>[1.0]
+              opacities: <double>[1.0]
           ))
       );
     });
 
     test('multiple frames', () {
-      const List<FrameData> frameData = const <FrameData>[
-        const FrameData(
-          const Point<double>(10.0, 10.0),
-          const <SvgPath>[
-            const SvgPath(
+      const List<FrameData> frameData = <FrameData>[
+        FrameData(
+          Point<double>(10.0, 10.0),
+          <SvgPath>[
+            SvgPath(
               'path_1',
-              const <SvgPathCommand>[
-                const SvgPathCommand('M', const <Point<double>>[const Point<double>(0.0, 0.0)])
+              <SvgPathCommand>[
+                SvgPathCommand('M', <Point<double>>[Point<double>(0.0, 0.0)])
               ],
               opacity: 0.5,
             ),
           ],
         ),
-        const FrameData(
-          const Point<double>(10.0, 10.0),
-          const <SvgPath>[
-            const SvgPath(
+        FrameData(
+          Point<double>(10.0, 10.0),
+          <SvgPath>[
+            SvgPath(
               'path_1',
-              const <SvgPathCommand>[
-                const SvgPathCommand('M', const <Point<double>>[const Point<double>(10.0, 10.0)])
+              <SvgPathCommand>[
+                SvgPathCommand('M', <Point<double>>[Point<double>(10.0, 10.0)])
               ],
             ),
           ],
         ),
       ];
-      expect(new PathAnimation.fromFrameData(frameData, 0),
-          const PathAnimationMatcher(const PathAnimation(
-              const <PathCommandAnimation>[
-                const PathCommandAnimation('M', const <List<Point<double>>>[
-                  const <Point<double>>[
-                    const Point<double>(0.0, 0.0),
-                    const Point<double>(10.0, 10.0),
+      expect(PathAnimation.fromFrameData(frameData, 0),
+          const PathAnimationMatcher(PathAnimation(
+              <PathCommandAnimation>[
+                PathCommandAnimation('M', <List<Point<double>>>[
+                  <Point<double>>[
+                    Point<double>(0.0, 0.0),
+                    Point<double>(10.0, 10.0),
                   ],
                 ]),
               ],
-              opacities: const <double>[0.5, 1.0]
+              opacities: <double>[0.5, 1.0]
           ))
       );
     });
@@ -326,45 +326,45 @@ void main() {
 
   group('create Animation', () {
     test('multiple paths', () {
-      const List<FrameData> frameData = const <FrameData>[
-        const FrameData(
-          const Point<double>(10.0, 10.0),
-          const <SvgPath>[
-            const SvgPath(
+      const List<FrameData> frameData = <FrameData>[
+        FrameData(
+          Point<double>(10.0, 10.0),
+          <SvgPath>[
+            SvgPath(
               'path_1',
-              const <SvgPathCommand>[
-                const SvgPathCommand('M', const <Point<double>>[const Point<double>(0.0, 0.0)]),
+              <SvgPathCommand>[
+                SvgPathCommand('M', <Point<double>>[Point<double>(0.0, 0.0)]),
               ],
             ),
-            const SvgPath(
+            SvgPath(
               'path_1',
-              const <SvgPathCommand>[
-                const SvgPathCommand('M', const <Point<double>>[const Point<double>(5.0, 6.0)]),
+              <SvgPathCommand>[
+                SvgPathCommand('M', <Point<double>>[Point<double>(5.0, 6.0)]),
               ],
             ),
           ],
         ),
       ];
-      final Animation animation = new Animation.fromFrameData(frameData);
+      final Animation animation = Animation.fromFrameData(frameData);
       expect(animation.paths[0],
-          const PathAnimationMatcher(const PathAnimation(
-              const <PathCommandAnimation>[
-                const PathCommandAnimation('M', const <List<Point<double>>>[
-                  const <Point<double>>[const Point<double>(0.0, 0.0)],
+          const PathAnimationMatcher(PathAnimation(
+              <PathCommandAnimation>[
+                PathCommandAnimation('M', <List<Point<double>>>[
+                  <Point<double>>[Point<double>(0.0, 0.0)],
                 ])
               ],
-              opacities: const <double>[1.0]
+              opacities: <double>[1.0]
           ))
       );
 
       expect(animation.paths[1],
-          const PathAnimationMatcher(const PathAnimation(
-              const <PathCommandAnimation>[
-                const PathCommandAnimation('M', const <List<Point<double>>>[
-                  const <Point<double>>[const Point<double>(5.0, 6.0)],
+          const PathAnimationMatcher(PathAnimation(
+              <PathCommandAnimation>[
+                PathCommandAnimation('M', <List<Point<double>>>[
+                  <Point<double>>[Point<double>(5.0, 6.0)],
                 ])
               ],
-              opacities: const <double>[1.0]
+              opacities: <double>[1.0]
           ))
       );
 
@@ -374,12 +374,12 @@ void main() {
 
   group('toDart', () {
     test('_PathMoveTo', () {
-      const PathCommandAnimation command = const PathCommandAnimation(
+      const PathCommandAnimation command = PathCommandAnimation(
         'M',
-        const <List<Point<double>>>[
-          const <Point<double>>[
-            const Point<double>(1.0, 2.0),
-            const Point<double>(3.0, 4.0),
+        <List<Point<double>>>[
+          <Point<double>>[
+            Point<double>(1.0, 2.0),
+            Point<double>(3.0, 4.0),
           ],
         ],
       );
@@ -396,12 +396,12 @@ void main() {
     });
 
     test('_PathLineTo', () {
-      const PathCommandAnimation command = const PathCommandAnimation(
+      const PathCommandAnimation command = PathCommandAnimation(
         'L',
-        const <List<Point<double>>>[
-          const <Point<double>>[
-            const Point<double>(1.0, 2.0),
-            const Point<double>(3.0, 4.0),
+        <List<Point<double>>>[
+          <Point<double>>[
+            Point<double>(1.0, 2.0),
+            Point<double>(3.0, 4.0),
           ],
         ],
       );
@@ -418,20 +418,20 @@ void main() {
     });
 
     test('_PathCubicTo', () {
-      const PathCommandAnimation command = const PathCommandAnimation(
+      const PathCommandAnimation command = PathCommandAnimation(
         'C',
-        const <List<Point<double>>>[
-          const <Point<double>>[
-            const Point<double>(16.0, 24.0),
-            const Point<double>(16.0, 10.0),
+        <List<Point<double>>>[
+          <Point<double>>[
+            Point<double>(16.0, 24.0),
+            Point<double>(16.0, 10.0),
           ],
-          const <Point<double>>[
-            const Point<double>(16.0, 25.0),
-            const Point<double>(16.0, 11.0),
+          <Point<double>>[
+            Point<double>(16.0, 25.0),
+            Point<double>(16.0, 11.0),
           ],
-          const <Point<double>>[
-            const Point<double>(40.0, 40.0),
-            const Point<double>(40.0, 40.0),
+          <Point<double>>[
+            Point<double>(40.0, 40.0),
+            Point<double>(40.0, 40.0),
           ],
         ],
       );
@@ -456,9 +456,9 @@ void main() {
     });
 
     test('_PathClose', () {
-      const PathCommandAnimation command = const PathCommandAnimation(
+      const PathCommandAnimation command = PathCommandAnimation(
         'Z',
-        const <List<Point<double>>>[],
+        <List<Point<double>>>[],
       );
 
       expect(command.toDart(),
@@ -469,9 +469,9 @@ void main() {
     });
 
     test('Unsupported path command', () {
-      const PathCommandAnimation command = const PathCommandAnimation(
+      const PathCommandAnimation command = PathCommandAnimation(
         'h',
-        const <List<Point<double>>>[],
+        <List<Point<double>>>[],
       );
 
       expect(
@@ -481,22 +481,22 @@ void main() {
     });
 
     test('_PathFrames', () {
-      const PathAnimation pathAnimation = const PathAnimation(
-          const <PathCommandAnimation>[
-            const PathCommandAnimation('M', const <List<Point<double>>>[
-              const <Point<double>>[
-                const Point<double>(0.0, 0.0),
-                const Point<double>(10.0, 10.0),
+      const PathAnimation pathAnimation = PathAnimation(
+          <PathCommandAnimation>[
+            PathCommandAnimation('M', <List<Point<double>>>[
+              <Point<double>>[
+                Point<double>(0.0, 0.0),
+                Point<double>(10.0, 10.0),
               ],
             ]),
-            const PathCommandAnimation('L', const <List<Point<double>>>[
-              const <Point<double>>[
-                const Point<double>(48.0, 10.0),
-                const Point<double>(0.0, 0.0),
+            PathCommandAnimation('L', <List<Point<double>>>[
+              <Point<double>>[
+                Point<double>(48.0, 10.0),
+                Point<double>(0.0, 0.0),
               ],
             ]),
           ],
-          opacities: const <double>[0.5, 1.0]
+          opacities: <double>[0.5, 1.0]
       );
 
       expect(pathAnimation.toDart(),
@@ -524,37 +524,37 @@ void main() {
     });
 
     test('Animation', () {
-      const Animation animation = const Animation(
-          const Point<double>(48.0, 48.0),
-          const <PathAnimation>[
-            const PathAnimation(
-                const <PathCommandAnimation>[
-                  const PathCommandAnimation('M', const <List<Point<double>>>[
-                    const <Point<double>>[
-                      const Point<double>(0.0, 0.0),
-                      const Point<double>(10.0, 10.0),
+      const Animation animation = Animation(
+          Point<double>(48.0, 48.0),
+          <PathAnimation>[
+            PathAnimation(
+                <PathCommandAnimation>[
+                  PathCommandAnimation('M', <List<Point<double>>>[
+                    <Point<double>>[
+                      Point<double>(0.0, 0.0),
+                      Point<double>(10.0, 10.0),
                     ],
                   ]),
-                  const PathCommandAnimation('L', const <List<Point<double>>>[
-                    const <Point<double>>[
-                      const Point<double>(48.0, 10.0),
-                      const Point<double>(0.0, 0.0),
+                  PathCommandAnimation('L', <List<Point<double>>>[
+                    <Point<double>>[
+                      Point<double>(48.0, 10.0),
+                      Point<double>(0.0, 0.0),
                     ],
                   ]),
                 ],
-                opacities: const <double>[0.5, 1.0]
+                opacities: <double>[0.5, 1.0]
             ),
 
-            const PathAnimation(
-                const <PathCommandAnimation>[
-                  const PathCommandAnimation('M', const <List<Point<double>>>[
-                    const <Point<double>>[
-                      const Point<double>(0.0, 0.0),
-                      const Point<double>(10.0, 10.0),
+            PathAnimation(
+                <PathCommandAnimation>[
+                  PathCommandAnimation('M', <List<Point<double>>>[
+                    <Point<double>>[
+                      Point<double>(0.0, 0.0),
+                      Point<double>(10.0, 10.0),
                     ],
                   ]),
                 ],
-                opacities: const <double>[0.5, 1.0]
+                opacities: <double>[0.5, 1.0]
             ),
           ]);
 

@@ -38,6 +38,18 @@
   "drawerLabel": "导航菜单",
   "popupMenuLabel": "弹出菜单",
   "dialogLabel": "对话框",
-  "alertDialogLabel": "警报",
-  "searchFieldLabel": "搜索"
+  "alertDialogLabel": "提醒",
+  "searchFieldLabel": "搜索",
+  "reorderItemToStart": "移到开头",
+  "reorderItemToEnd": "移到末尾",
+  "reorderItemUp": "上移",
+  "reorderItemDown": "下移",
+  "reorderItemLeft": "左移",
+  "reorderItemRight": "右移",
+  "expandedIconTapHint": "收起",
+  "collapsedIconTapHint": "展开",
+  "remainingTextFieldCharacterCountZero": "TBD",
+  "remainingTextFieldCharacterCountOne": "还可输入 1 个字符",
+  "remainingTextFieldCharacterCountOther": "还可输入 $remainingCount 个字符",
+  "refreshIndicatorSemanticLabel": "刷新"
 }

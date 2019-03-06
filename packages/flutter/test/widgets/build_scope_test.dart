@@ -9,7 +9,7 @@ import 'test_widgets.dart';
 
 class ProbeWidget extends StatefulWidget {
   @override
-  ProbeWidgetState createState() => new ProbeWidgetState();
+  ProbeWidgetState createState() => ProbeWidgetState();
 }
 
 class ProbeWidgetState extends State<ProbeWidget> {
@@ -31,7 +31,7 @@ class ProbeWidgetState extends State<ProbeWidget> {
   Widget build(BuildContext context) {
     setState(() {});
     buildCount++;
-    return new Container();
+    return Container();
   }
 }
 
@@ -43,13 +43,13 @@ class BadWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     parentState._markNeedsBuild();
-    return new Container();
+    return Container();
   }
 }
 
 class BadWidgetParent extends StatefulWidget {
   @override
-  BadWidgetParentState createState() => new BadWidgetParentState();
+  BadWidgetParentState createState() => BadWidgetParentState();
 }
 
 class BadWidgetParentState extends State<BadWidgetParent> {
@@ -62,19 +62,19 @@ class BadWidgetParentState extends State<BadWidgetParent> {
 
   @override
   Widget build(BuildContext context) {
-    return new BadWidget(this);
+    return BadWidget(this);
   }
 }
 
 class BadDisposeWidget extends StatefulWidget {
   @override
-  BadDisposeWidgetState createState() => new BadDisposeWidgetState();
+  BadDisposeWidgetState createState() => BadDisposeWidgetState();
 }
 
 class BadDisposeWidgetState extends State<BadDisposeWidget> {
   @override
   Widget build(BuildContext context) {
-    return new Container();
+    return Container();
   }
 
   @override
@@ -93,7 +93,7 @@ class StatefulWrapper extends StatefulWidget {
   final Widget child;
 
   @override
-  StatefulWrapperState createState() => new StatefulWrapperState();
+  StatefulWrapperState createState() => StatefulWrapperState();
 }
 
 class StatefulWrapperState extends State<StatefulWrapper> {
@@ -131,16 +131,16 @@ class Wrapper extends StatelessWidget {
 
 void main() {
   testWidgets('Legal times for setState', (WidgetTester tester) async {
-    final GlobalKey flipKey = new GlobalKey();
+    final GlobalKey flipKey = GlobalKey();
     expect(ProbeWidgetState.buildCount, equals(0));
-    await tester.pumpWidget(new ProbeWidget());
+    await tester.pumpWidget(ProbeWidget());
     expect(ProbeWidgetState.buildCount, equals(1));
-    await tester.pumpWidget(new ProbeWidget());
+    await tester.pumpWidget(ProbeWidget());
     expect(ProbeWidgetState.buildCount, equals(2));
-    await tester.pumpWidget(new FlipWidget(
+    await tester.pumpWidget(FlipWidget(
       key: flipKey,
-      left: new Container(),
-      right: new ProbeWidget()
+      left: Container(),
+      right: ProbeWidget(),
     ));
     expect(ProbeWidgetState.buildCount, equals(2));
     final FlipWidgetState flipState1 = flipKey.currentState;
@@ -151,26 +151,26 @@ void main() {
     flipState2.flip();
     await tester.pump();
     expect(ProbeWidgetState.buildCount, equals(3));
-    await tester.pumpWidget(new Container());
+    await tester.pumpWidget(Container());
     expect(ProbeWidgetState.buildCount, equals(3));
   });
 
   testWidgets('Setting parent state during build is forbidden', (WidgetTester tester) async {
-    await tester.pumpWidget(new BadWidgetParent());
+    await tester.pumpWidget(BadWidgetParent());
     expect(tester.takeException(), isFlutterError);
-    await tester.pumpWidget(new Container());
+    await tester.pumpWidget(Container());
   });
 
   testWidgets('Setting state during dispose is forbidden', (WidgetTester tester) async {
-    await tester.pumpWidget(new BadDisposeWidget());
+    await tester.pumpWidget(BadDisposeWidget());
     expect(tester.takeException(), isNull);
-    await tester.pumpWidget(new Container());
+    await tester.pumpWidget(Container());
     expect(tester.takeException(), isNotNull);
   });
 
   testWidgets('Dirty element list sort order', (WidgetTester tester) async {
-    final GlobalKey key1 = new GlobalKey(debugLabel: 'key1');
-    final GlobalKey key2 = new GlobalKey(debugLabel: 'key2');
+    final GlobalKey key1 = GlobalKey(debugLabel: 'key1');
+    final GlobalKey key2 = GlobalKey(debugLabel: 'key2');
 
     bool didMiddle = false;
     Widget middle;
@@ -179,26 +179,26 @@ void main() {
       setStates.add(setState);
       final bool returnMiddle = !didMiddle;
       didMiddle = true;
-      return new Wrapper(
-        child: new Wrapper(
-          child: new StatefulWrapper(
-            child: returnMiddle ? middle : new Container(),
+      return Wrapper(
+        child: Wrapper(
+          child: StatefulWrapper(
+            child: returnMiddle ? middle : Container(),
           ),
         ),
       );
     }
-    final Widget part1 = new Wrapper(
-      child: new KeyedSubtree(
+    final Widget part1 = Wrapper(
+      child: KeyedSubtree(
         key: key1,
-        child: new StatefulBuilder(
+        child: StatefulBuilder(
           builder: builder,
         ),
       ),
     );
-    final Widget part2 = new Wrapper(
-      child: new KeyedSubtree(
+    final Widget part2 = Wrapper(
+      child: KeyedSubtree(
         key: key2,
-        child: new StatefulBuilder(
+        child: StatefulBuilder(
           builder: builder,
         ),
       ),

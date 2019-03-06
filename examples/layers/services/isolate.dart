@@ -9,8 +9,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-typedef void OnProgressListener(double completed, double total);
-typedef void OnResultListener(String result);
+typedef OnProgressListener = void Function(double completed, double total);
+typedef OnResultListener = void Function(String result);
 
 // An encapsulation of a large amount of synchronous processing.
 //
@@ -36,7 +36,7 @@ class Calculator {
   // Run the computation associated with this Calculator.
   void run() {
     int i = 0;
-    final JsonDecoder decoder = new JsonDecoder(
+    final JsonDecoder decoder = JsonDecoder(
       (dynamic key, dynamic value) {
         if (key is int && i++ % _NOTIFY_INTERVAL == 0)
           onProgressListener(i.toDouble(), _NUM_ITEMS.toDouble());
@@ -54,7 +54,7 @@ class Calculator {
   }
 
   static String _replicateJson(String data, int count) {
-    final StringBuffer buffer = new StringBuffer()..write('[');
+    final StringBuffer buffer = StringBuffer()..write('[');
     for (int i = 0; i < count; i++) {
       buffer.write(data);
       if (i < count - 1)
@@ -88,7 +88,7 @@ class CalculationManager {
   CalculationManager({ @required this.onProgressListener, @required this.onResultListener })
     : assert(onProgressListener != null),
       assert(onResultListener != null),
-      _receivePort = new ReceivePort() {
+      _receivePort = ReceivePort() {
     _receivePort.listen(_handleMessage);
   }
 
@@ -132,17 +132,16 @@ class CalculationManager {
   Isolate _isolate;
 
   void _runCalculation() {
-    // Load the JSON string. Note that this is done in the main isolate; at the
-    // moment, spawned isolates do not have access to Mojo services, including
-    // the root bundle (see https://github.com/flutter/flutter/issues/3294).
-    // However, the loading process is asynchronous, so the UI will not block
-    // while the file is loaded.
-    rootBundle.loadString('services/data.json').then<Null>((String data) {
+    // Load the JSON string. This is done in the main isolate because spawned
+    // isolates do not have access to the root bundle. However, the loading
+    // process is asynchronous, so the UI will not block while the file is
+    // loaded.
+    rootBundle.loadString('services/data.json').then<void>((String data) {
       if (isRunning) {
-        final CalculationMessage message = new CalculationMessage(data, _receivePort.sendPort);
+        final CalculationMessage message = CalculationMessage(data, _receivePort.sendPort);
         // Spawn an isolate to JSON-parse the file contents. The JSON parsing
         // is synchronous, so if done in the main isolate, the UI would block.
-        Isolate.spawn(_calculate, message).then<Null>((Isolate isolate) {
+        Isolate.spawn<CalculationMessage>(_calculate, message).then<void>((Isolate isolate) {
           if (!isRunning) {
             isolate.kill(priority: Isolate.immediate);
           } else {
@@ -179,12 +178,12 @@ class CalculationManager {
   // in a separate memory space.
   static void _calculate(CalculationMessage message) {
     final SendPort sender = message.sendPort;
-    final Calculator calculator = new Calculator(
+    final Calculator calculator = Calculator(
       onProgressListener: (double completed, double total) {
         sender.send(<double>[ completed, total ]);
       },
       onResultListener: sender.send,
-      data: message.data
+      data: message.data,
     );
     calculator.run();
   }
@@ -200,7 +199,7 @@ class CalculationManager {
 // the AnimationController for the running animation.
 class IsolateExampleWidget extends StatefulWidget {
   @override
-  IsolateExampleState createState() => new IsolateExampleState();
+  IsolateExampleState createState() => IsolateExampleState();
 }
 
 // Main application state.
@@ -216,13 +215,13 @@ class IsolateExampleState extends State<StatefulWidget> with SingleTickerProvide
   @override
   void initState() {
     super.initState();
-    _animation = new AnimationController(
+    _animation = AnimationController(
       duration: const Duration(milliseconds: 3600),
       vsync: this,
     )..repeat();
-    _calculationManager = new CalculationManager(
+    _calculationManager = CalculationManager(
       onProgressListener: _handleProgressUpdate,
-      onResultListener: _handleResult
+      onResultListener: _handleResult,
     );
   }
 
@@ -234,34 +233,34 @@ class IsolateExampleState extends State<StatefulWidget> with SingleTickerProvide
 
   @override
   Widget build(BuildContext context) {
-    return new Material(
-      child: new Column(
+    return Material(
+      child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: <Widget>[
-          new RotationTransition(
+          RotationTransition(
             turns: _animation,
-            child: new Container(
+            child: Container(
               width: 120.0,
               height: 120.0,
               color: const Color(0xFF882222),
-            )
+            ),
           ),
-          new Opacity(
+          Opacity(
             opacity: _calculationManager.isRunning ? 1.0 : 0.0,
-            child: new CircularProgressIndicator(
+            child: CircularProgressIndicator(
               value: _progress
-            )
+            ),
           ),
-          new Text(_status),
-          new Center(
-            child: new RaisedButton(
-              child: new Text(_label),
-              onPressed: _handleButtonPressed
-            )
+          Text(_status),
+          Center(
+            child: RaisedButton(
+              child: Text(_label),
+              onPressed: _handleButtonPressed,
+            ),
           ),
-          new Text(_result)
-        ]
-      )
+          Text(_result),
+        ],
+      ),
     );
   }
 
@@ -304,5 +303,5 @@ class IsolateExampleState extends State<StatefulWidget> with SingleTickerProvide
 }
 
 void main() {
-  runApp(new MaterialApp(home: new IsolateExampleWidget()));
+  runApp(MaterialApp(home: IsolateExampleWidget()));
 }

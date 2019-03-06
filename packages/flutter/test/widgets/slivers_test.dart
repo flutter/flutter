@@ -6,19 +6,19 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
 
-Future<Null> test(WidgetTester tester, double offset, { double anchor = 0.0 }) {
+Future<void> test(WidgetTester tester, double offset, { double anchor = 0.0 }) {
   return tester.pumpWidget(
-    new Directionality(
+    Directionality(
       textDirection: TextDirection.ltr,
-      child: new Viewport(
+      child: Viewport(
         anchor: anchor / 600.0,
-        offset: new ViewportOffset.fixed(offset),
+        offset: ViewportOffset.fixed(offset),
         slivers: const <Widget>[
-          const SliverToBoxAdapter(child: const SizedBox(height: 400.0)),
-          const SliverToBoxAdapter(child: const SizedBox(height: 400.0)),
-          const SliverToBoxAdapter(child: const SizedBox(height: 400.0)),
-          const SliverToBoxAdapter(child: const SizedBox(height: 400.0)),
-          const SliverToBoxAdapter(child: const SizedBox(height: 400.0)),
+          SliverToBoxAdapter(child: SizedBox(height: 400.0)),
+          SliverToBoxAdapter(child: SizedBox(height: 400.0)),
+          SliverToBoxAdapter(child: SizedBox(height: 400.0)),
+          SliverToBoxAdapter(child: SizedBox(height: 400.0)),
+          SliverToBoxAdapter(child: SizedBox(height: 400.0)),
         ],
       ),
     ),
@@ -117,51 +117,51 @@ void main() {
 
   testWidgets('Multiple grids and lists', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Center(
-        child: new SizedBox(
+      Center(
+        child: SizedBox(
           width: 44.4,
           height: 60.0,
-          child: new Directionality(
+          child: Directionality(
             textDirection: TextDirection.ltr,
-            child: new CustomScrollView(
+            child: CustomScrollView(
               slivers: <Widget>[
-                new SliverList(
-                  delegate: new SliverChildListDelegate(
+                SliverList(
+                  delegate: SliverChildListDelegate(
                     <Widget>[
-                      new Container(height: 22.2, child: const Text('TOP')),
-                      new Container(height: 22.2),
-                      new Container(height: 22.2),
+                      Container(height: 22.2, child: const Text('TOP')),
+                      Container(height: 22.2),
+                      Container(height: 22.2),
                     ],
                   ),
                 ),
-                new SliverFixedExtentList(
+                SliverFixedExtentList(
                   itemExtent: 22.2,
-                  delegate: new SliverChildListDelegate(
+                  delegate: SliverChildListDelegate(
                     <Widget>[
-                      new Container(),
-                      new Container(child: const Text('A')),
-                      new Container(),
+                      Container(),
+                      Container(child: const Text('A')),
+                      Container(),
                     ],
                   ),
                 ),
-                new SliverGrid(
+                SliverGrid(
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
                   ),
-                  delegate: new SliverChildListDelegate(
+                  delegate: SliverChildListDelegate(
                     <Widget>[
-                      new Container(),
-                      new Container(child: const Text('B')),
-                      new Container(),
+                      Container(),
+                      Container(child: const Text('B')),
+                      Container(),
                     ],
                   ),
                 ),
-                new SliverList(
-                  delegate: new SliverChildListDelegate(
+                SliverList(
+                  delegate: SliverChildListDelegate(
                     <Widget>[
-                      new Container(height: 22.2),
-                      new Container(height: 22.2),
-                      new Container(height: 22.2, child: const Text('BOTTOM')),
+                      Container(height: 22.2),
+                      Container(height: 22.2),
+                      Container(height: 22.2, child: const Text('BOTTOM')),
                     ],
                   ),
                 ),

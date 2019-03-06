@@ -13,8 +13,8 @@ import 'package:flutter/rendering.dart';
 import 'sections.dart';
 import 'widgets.dart';
 
-const Color _kAppBackgroundColor = const Color(0xFF353662);
-const Duration _kScrollDuration = const Duration(milliseconds: 400);
+const Color _kAppBackgroundColor = Color(0xFF353662);
+const Duration _kScrollDuration = Duration(milliseconds: 400);
 const Curve _kScrollCurve = Curves.fastOutSlowIn;
 
 // This app's contents start out at _kHeadingMaxHeight and they function like
@@ -65,7 +65,7 @@ class _RenderStatusBarPaddingSliver extends RenderSliver {
   @override
   void performLayout() {
     final double height = (maxHeight - constraints.scrollOffset / scrollFactor).clamp(0.0, maxHeight);
-    geometry = new SliverGeometry(
+    geometry = SliverGeometry(
       paintExtent: math.min(height, constraints.remainingPaintExtent),
       scrollExtent: maxHeight,
       maxPaintExtent: maxHeight,
@@ -87,7 +87,7 @@ class _StatusBarPaddingSliver extends SingleChildRenderObjectWidget {
 
   @override
   _RenderStatusBarPaddingSliver createRenderObject(BuildContext context) {
-    return new _RenderStatusBarPaddingSliver(
+    return _RenderStatusBarPaddingSliver(
       maxHeight: maxHeight,
       scrollFactor: scrollFactor,
     );
@@ -103,8 +103,8 @@ class _StatusBarPaddingSliver extends SingleChildRenderObjectWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
-    description.add(new DoubleProperty('maxHeight', maxHeight));
-    description.add(new DoubleProperty('scrollFactor', scrollFactor));
+    description.add(DoubleProperty('maxHeight', maxHeight));
+    description.add(DoubleProperty('scrollFactor', scrollFactor));
   }
 }
 
@@ -124,7 +124,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return new SizedBox.expand(child: child);
+    return SizedBox.expand(child: child);
   }
 
   @override
@@ -210,34 +210,34 @@ class _AllSectionsLayout extends MultiChildLayoutDelegate {
     for (int index = 0; index < cardCount; index++) {
 
       // Layout the card for index.
-      final Rect columnCardRect = new Rect.fromLTWH(columnCardX, columnCardY, columnCardWidth, columnCardHeight);
-      final Rect rowCardRect = new Rect.fromLTWH(rowCardX, 0.0, rowCardWidth, size.height);
+      final Rect columnCardRect = Rect.fromLTWH(columnCardX, columnCardY, columnCardWidth, columnCardHeight);
+      final Rect rowCardRect = Rect.fromLTWH(rowCardX, 0.0, rowCardWidth, size.height);
       final Rect cardRect = _interpolateRect(columnCardRect, rowCardRect).shift(offset);
       final String cardId = 'card$index';
       if (hasChild(cardId)) {
-        layoutChild(cardId, new BoxConstraints.tight(cardRect.size));
+        layoutChild(cardId, BoxConstraints.tight(cardRect.size));
         positionChild(cardId, cardRect.topLeft);
       }
 
       // Layout the title for index.
-      final Size titleSize = layoutChild('title$index', new BoxConstraints.loose(cardRect.size));
+      final Size titleSize = layoutChild('title$index', BoxConstraints.loose(cardRect.size));
       final double columnTitleY = columnCardRect.centerLeft.dy - titleSize.height / 2.0;
       final double rowTitleY = rowCardRect.centerLeft.dy - titleSize.height / 2.0;
       final double centeredRowTitleX = rowTitleX + (rowTitleWidth - titleSize.width) / 2.0;
-      final Offset columnTitleOrigin = new Offset(columnTitleX, columnTitleY);
-      final Offset rowTitleOrigin = new Offset(centeredRowTitleX, rowTitleY);
+      final Offset columnTitleOrigin = Offset(columnTitleX, columnTitleY);
+      final Offset rowTitleOrigin = Offset(centeredRowTitleX, rowTitleY);
       final Offset titleOrigin = _interpolatePoint(columnTitleOrigin, rowTitleOrigin);
       positionChild('title$index', titleOrigin + offset);
 
       // Layout the selection indicator for index.
-      final Size indicatorSize = layoutChild('indicator$index', new BoxConstraints.loose(cardRect.size));
+      final Size indicatorSize = layoutChild('indicator$index', BoxConstraints.loose(cardRect.size));
       final double columnIndicatorX = cardRect.centerRight.dx - indicatorSize.width - 16.0;
       final double columnIndicatorY = cardRect.bottomRight.dy - indicatorSize.height - 16.0;
-      final Offset columnIndicatorOrigin = new Offset(columnIndicatorX, columnIndicatorY);
-      final Rect titleRect = new Rect.fromPoints(titleOrigin, titleSize.bottomRight(titleOrigin));
+      final Offset columnIndicatorOrigin = Offset(columnIndicatorX, columnIndicatorY);
+      final Rect titleRect = Rect.fromPoints(titleOrigin, titleSize.bottomRight(titleOrigin));
       final double centeredRowIndicatorX = rowIndicatorX + (rowIndicatorWidth - indicatorSize.width) / 2.0;
       final double rowIndicatorY = titleRect.bottomCenter.dy + 16.0;
-      final Offset rowIndicatorOrigin = new Offset(centeredRowIndicatorX, rowIndicatorY);
+      final Offset rowIndicatorOrigin = Offset(centeredRowIndicatorX, rowIndicatorY);
       final Offset indicatorOrigin = _interpolatePoint(columnIndicatorOrigin, rowIndicatorOrigin);
       positionChild('indicator$index', indicatorOrigin + offset);
 
@@ -292,9 +292,6 @@ class _AllSectionsView extends AnimatedWidget {
     // The layout's progress from from a column to a row. Its value is
     // 0.0 when size.height equals the maxHeight, 1.0 when the size.height
     // equals the midHeight.
-    // The layout's progress from from a column to a row. Its value is
-    // 0.0 when size.height equals the maxHeight, 1.0 when the size.height
-    // equals the midHeight.
     final double tColumnToRow =
       1.0 - ((size.height - midHeight) /
              (maxHeight - midHeight)).clamp(0.0, 1.0);
@@ -319,13 +316,13 @@ class _AllSectionsView extends AnimatedWidget {
       return 1.0 - _selectedIndexDelta(index) * tColumnToRow * 0.15;
     }
 
-    final List<Widget> children = new List<Widget>.from(sectionCards);
+    final List<Widget> children = List<Widget>.from(sectionCards);
 
     for (int index = 0; index < sections.length; index++) {
       final Section section = sections[index];
-      children.add(new LayoutId(
+      children.add(LayoutId(
         id: 'title$index',
-        child: new SectionTitle(
+        child: SectionTitle(
           section: section,
           scale: _titleScale(index),
           opacity: _titleOpacity(index),
@@ -334,17 +331,17 @@ class _AllSectionsView extends AnimatedWidget {
     }
 
     for (int index = 0; index < sections.length; index++) {
-      children.add(new LayoutId(
+      children.add(LayoutId(
         id: 'indicator$index',
-        child: new SectionIndicator(
+        child: SectionIndicator(
           opacity: _indicatorOpacity(index),
         ),
       ));
     }
 
-    return new CustomMultiChildLayout(
-      delegate: new _AllSectionsLayout(
-        translation: new Alignment((selectedIndex.value - sectionIndex) * 2.0 - 1.0, -1.0),
+    return CustomMultiChildLayout(
+      delegate: _AllSectionsLayout(
+        translation: Alignment((selectedIndex.value - sectionIndex) * 2.0 - 1.0, -1.0),
         tColumnToRow: tColumnToRow,
         tCollapsed: tCollapsed,
         cardCount: sections.length,
@@ -356,7 +353,7 @@ class _AllSectionsView extends AnimatedWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new LayoutBuilder(builder: _build);
+    return LayoutBuilder(builder: _build);
   }
 }
 
@@ -374,17 +371,17 @@ class _SnappingScrollPhysics extends ClampingScrollPhysics {
 
   @override
   _SnappingScrollPhysics applyTo(ScrollPhysics ancestor) {
-    return new _SnappingScrollPhysics(parent: buildParent(ancestor), midScrollOffset: midScrollOffset);
+    return _SnappingScrollPhysics(parent: buildParent(ancestor), midScrollOffset: midScrollOffset);
   }
 
   Simulation _toMidScrollOffsetSimulation(double offset, double dragVelocity) {
     final double velocity = math.max(dragVelocity, minFlingVelocity);
-    return new ScrollSpringSimulation(spring, offset, midScrollOffset, velocity, tolerance: tolerance);
+    return ScrollSpringSimulation(spring, offset, midScrollOffset, velocity, tolerance: tolerance);
   }
 
   Simulation _toZeroScrollOffsetSimulation(double offset, double dragVelocity) {
     final double velocity = math.max(dragVelocity, minFlingVelocity);
-    return new ScrollSpringSimulation(spring, offset, 0.0, velocity, tolerance: tolerance);
+    return ScrollSpringSimulation(spring, offset, 0.0, velocity, tolerance: tolerance);
   }
 
   @override
@@ -425,21 +422,21 @@ class AnimationDemoHome extends StatefulWidget {
   static const String routeName = '/animation';
 
   @override
-  _AnimationDemoHomeState createState() => new _AnimationDemoHomeState();
+  _AnimationDemoHomeState createState() => _AnimationDemoHomeState();
 }
 
 class _AnimationDemoHomeState extends State<AnimationDemoHome> {
-  final ScrollController _scrollController = new ScrollController();
-  final PageController _headingPageController = new PageController();
-  final PageController _detailsPageController = new PageController();
+  final ScrollController _scrollController = ScrollController();
+  final PageController _headingPageController = PageController();
+  final PageController _detailsPageController = PageController();
   ScrollPhysics _headingScrollPhysics = const NeverScrollableScrollPhysics();
-  ValueNotifier<double> selectedIndex = new ValueNotifier<double>(0.0);
+  ValueNotifier<double> selectedIndex = ValueNotifier<double>(0.0);
 
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
+    return Scaffold(
       backgroundColor: _kAppBackgroundColor,
-      body: new Builder(
+      body: Builder(
         // Insert an element so that _buildBody can find the PrimaryScrollController.
         builder: _buildBody,
       ),
@@ -493,8 +490,8 @@ class _AnimationDemoHomeState extends State<AnimationDemoHome> {
   }
 
   Iterable<Widget> _detailItemsFor(Section section) {
-    final Iterable<Widget> detailItems = section.details.map((SectionDetail detail) {
-      return new SectionDetailView(detail: detail);
+    final Iterable<Widget> detailItems = section.details.map<Widget>((SectionDetail detail) {
+      return SectionDetailView(detail: detail);
     });
     return ListTile.divideTiles(context: context, tiles: detailItems);
   }
@@ -502,27 +499,27 @@ class _AnimationDemoHomeState extends State<AnimationDemoHome> {
   Iterable<Widget> _allHeadingItems(double maxHeight, double midScrollOffset) {
     final List<Widget> sectionCards = <Widget>[];
     for (int index = 0; index < allSections.length; index++) {
-      sectionCards.add(new LayoutId(
+      sectionCards.add(LayoutId(
         id: 'card$index',
-        child: new GestureDetector(
+        child: GestureDetector(
           behavior: HitTestBehavior.opaque,
-          child: new SectionCard(section: allSections[index]),
+          child: SectionCard(section: allSections[index]),
           onTapUp: (TapUpDetails details) {
             final double xOffset = details.globalPosition.dx;
             setState(() {
               _maybeScroll(midScrollOffset, index, xOffset);
             });
-          }
+          },
         ),
       ));
     }
 
     final List<Widget> headings = <Widget>[];
     for (int index = 0; index < allSections.length; index++) {
-      headings.add(new Container(
+      headings.add(Container(
           color: _kAppBackgroundColor,
-          child: new ClipRect(
-            child: new _AllSectionsView(
+          child: ClipRect(
+            child: _AllSectionsView(
               sectionIndex: index,
               sections: allSections,
               selectedIndex: selectedIndex,
@@ -547,33 +544,33 @@ class _AnimationDemoHomeState extends State<AnimationDemoHome> {
     // The scroll offset that reveals the appBarMidHeight appbar.
     final double appBarMidScrollOffset = statusBarHeight + appBarMaxHeight - _kAppBarMidHeight;
 
-    return new SizedBox.expand(
-      child: new Stack(
+    return SizedBox.expand(
+      child: Stack(
         children: <Widget>[
-          new NotificationListener<ScrollNotification>(
+          NotificationListener<ScrollNotification>(
             onNotification: (ScrollNotification notification) {
               return _handleScrollNotification(notification, appBarMidScrollOffset);
             },
-            child: new CustomScrollView(
+            child: CustomScrollView(
               controller: _scrollController,
-              physics: new _SnappingScrollPhysics(midScrollOffset: appBarMidScrollOffset),
+              physics: _SnappingScrollPhysics(midScrollOffset: appBarMidScrollOffset),
               slivers: <Widget>[
                 // Start out below the status bar, gradually move to the top of the screen.
-                new _StatusBarPaddingSliver(
+                _StatusBarPaddingSliver(
                   maxHeight: statusBarHeight,
                   scrollFactor: 7.0,
                 ),
                 // Section Headings
-                new SliverPersistentHeader(
+                SliverPersistentHeader(
                   pinned: true,
-                  delegate: new _SliverAppBarDelegate(
+                  delegate: _SliverAppBarDelegate(
                     minHeight: _kAppBarMinHeight,
                     maxHeight: appBarMaxHeight,
-                    child: new NotificationListener<ScrollNotification>(
+                    child: NotificationListener<ScrollNotification>(
                       onNotification: (ScrollNotification notification) {
                         return _handlePageNotification(notification, _headingPageController, _detailsPageController);
                       },
-                      child: new PageView(
+                      child: PageView(
                         physics: _headingScrollPhysics,
                         controller: _headingPageController,
                         children: _allHeadingItems(appBarMaxHeight, appBarMidScrollOffset),
@@ -582,17 +579,17 @@ class _AnimationDemoHomeState extends State<AnimationDemoHome> {
                   ),
                 ),
                 // Details
-                new SliverToBoxAdapter(
-                  child: new SizedBox(
+                SliverToBoxAdapter(
+                  child: SizedBox(
                     height: 610.0,
-                    child: new NotificationListener<ScrollNotification>(
+                    child: NotificationListener<ScrollNotification>(
                       onNotification: (ScrollNotification notification) {
                         return _handlePageNotification(notification, _detailsPageController, _headingPageController);
                       },
-                      child: new PageView(
+                      child: PageView(
                         controller: _detailsPageController,
-                        children: allSections.map((Section section) {
-                          return new Column(
+                        children: allSections.map<Widget>((Section section) {
+                          return Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: _detailItemsFor(section).toList(),
                           );
@@ -604,20 +601,20 @@ class _AnimationDemoHomeState extends State<AnimationDemoHome> {
               ],
             ),
           ),
-          new Positioned(
+          Positioned(
             top: statusBarHeight,
             left: 0.0,
-            child: new IconTheme(
+            child: IconTheme(
               data: const IconThemeData(color: Colors.white),
-              child: new SafeArea(
+              child: SafeArea(
                 top: false,
                 bottom: false,
-                child: new IconButton(
+                child: IconButton(
                   icon: const BackButtonIcon(),
                   tooltip: 'Back',
                   onPressed: () {
                     _handleBackButton(appBarMidScrollOffset);
-                  }
+                  },
                 ),
               ),
             ),

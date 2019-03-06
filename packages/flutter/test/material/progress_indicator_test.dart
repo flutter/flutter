@@ -13,42 +13,50 @@ void main() {
   // The "can be constructed" tests that follow are primarily to ensure that any
   // animations started by the progress indicators are stopped at dispose() time.
 
-  testWidgets('LinearProgressIndicator(value: 0.0) can be constructed', (WidgetTester tester) async {
+  testWidgets('LinearProgressIndicator(value: 0.0) can be constructed and has empty semantics by default', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: const Center(
-          child: const SizedBox(
+        child: Center(
+          child: SizedBox(
             width: 200.0,
-            child: const LinearProgressIndicator(value: 0.0),
+            child: LinearProgressIndicator(value: 0.0),
           ),
         ),
       ),
     );
+
+    expect(tester.getSemantics(find.byType(LinearProgressIndicator)), matchesSemantics());
+    handle.dispose();
   });
 
-  testWidgets('LinearProgressIndicator(value: null) can be constructed', (WidgetTester tester) async {
+  testWidgets('LinearProgressIndicator(value: null) can be constructed and has empty semantics by default', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.rtl,
-        child: const Center(
-          child: const SizedBox(
+        child: Center(
+          child: SizedBox(
             width: 200.0,
-            child: const LinearProgressIndicator(value: null),
+            child: LinearProgressIndicator(value: null),
           ),
         ),
       ),
     );
+
+    expect(tester.getSemantics(find.byType(LinearProgressIndicator)), matchesSemantics());
+    handle.dispose();
   });
 
   testWidgets('LinearProgressIndicator paint (LTR)', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: const Center(
-          child: const SizedBox(
+        child: Center(
+          child: SizedBox(
             width: 200.0,
-            child: const LinearProgressIndicator(value: 0.25),
+            child: LinearProgressIndicator(value: 0.25),
           ),
         ),
       ),
@@ -57,8 +65,8 @@ void main() {
     expect(
       find.byType(LinearProgressIndicator),
       paints
-        ..rect(rect: new Rect.fromLTRB(0.0, 0.0, 200.0, 6.0))
-        ..rect(rect: new Rect.fromLTRB(0.0, 0.0, 50.0, 6.0))
+        ..rect(rect: Rect.fromLTRB(0.0, 0.0, 200.0, 6.0))
+        ..rect(rect: Rect.fromLTRB(0.0, 0.0, 50.0, 6.0)),
     );
 
     expect(tester.binding.transientCallbackCount, 0);
@@ -68,10 +76,10 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.rtl,
-        child: const Center(
-          child: const SizedBox(
+        child: Center(
+          child: SizedBox(
             width: 200.0,
-            child: const LinearProgressIndicator(value: 0.25),
+            child: LinearProgressIndicator(value: 0.25),
           ),
         ),
       ),
@@ -80,8 +88,8 @@ void main() {
     expect(
       find.byType(LinearProgressIndicator),
       paints
-        ..rect(rect: new Rect.fromLTRB(0.0, 0.0, 200.0, 6.0))
-        ..rect(rect: new Rect.fromLTRB(150.0, 0.0, 200.0, 6.0))
+        ..rect(rect: Rect.fromLTRB(0.0, 0.0, 200.0, 6.0))
+        ..rect(rect: Rect.fromLTRB(150.0, 0.0, 200.0, 6.0)),
     );
 
     expect(tester.binding.transientCallbackCount, 0);
@@ -91,24 +99,24 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: const Center(
-          child: const SizedBox(
+        child: Center(
+          child: SizedBox(
             width: 200.0,
-            child: const LinearProgressIndicator(),
+            child: LinearProgressIndicator(),
           ),
         ),
       ),
     );
 
     await tester.pump(const Duration(milliseconds: 300));
-    final double animationValue = const Interval(0.0, 750.0 / 1800.0, curve: const Cubic(0.2, 0.0, 0.8, 1.0))
+    final double animationValue = const Interval(0.0, 750.0 / 1800.0, curve: Cubic(0.2, 0.0, 0.8, 1.0))
       .transform(300.0 / 1800.0);
 
     expect(
       find.byType(LinearProgressIndicator),
       paints
-        ..rect(rect: new Rect.fromLTRB(0.0, 0.0, 200.0, 6.0))
-        ..rect(rect: new Rect.fromLTRB(0.0, 0.0, animationValue * 200.0, 6.0))
+        ..rect(rect: Rect.fromLTRB(0.0, 0.0, 200.0, 6.0))
+        ..rect(rect: Rect.fromLTRB(0.0, 0.0, animationValue * 200.0, 6.0)),
     );
 
     expect(tester.binding.transientCallbackCount, 1);
@@ -118,24 +126,24 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.rtl,
-        child: const Center(
-          child: const SizedBox(
+        child: Center(
+          child: SizedBox(
             width: 200.0,
-            child: const LinearProgressIndicator(),
+            child: LinearProgressIndicator(),
           ),
         ),
       ),
     );
 
     await tester.pump(const Duration(milliseconds: 300));
-    final double animationValue = const Interval(0.0, 750.0 / 1800.0, curve: const Cubic(0.2, 0.0, 0.8, 1.0))
+    final double animationValue = const Interval(0.0, 750.0 / 1800.0, curve: Cubic(0.2, 0.0, 0.8, 1.0))
       .transform(300.0 / 1800.0);
 
     expect(
       find.byType(LinearProgressIndicator),
       paints
-        ..rect(rect: new Rect.fromLTRB(0.0, 0.0, 200.0, 6.0))
-        ..rect(rect: new Rect.fromLTRB(200.0 - animationValue * 200.0, 0.0, 200.0, 6.0))
+        ..rect(rect: Rect.fromLTRB(0.0, 0.0, 200.0, 6.0))
+        ..rect(rect: Rect.fromLTRB(200.0 - animationValue * 200.0, 0.0, 200.0, 6.0)),
     );
 
     expect(tester.binding.transientCallbackCount, 1);
@@ -145,12 +153,12 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: const Center(
-          child: const SizedBox(
+        child: Center(
+          child: SizedBox(
             width: 200.0,
-            child: const LinearProgressIndicator(
+            child: LinearProgressIndicator(
               value: 0.25,
-              valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
               backgroundColor: Colors.black,
             ),
           ),
@@ -161,36 +169,50 @@ void main() {
     expect(
       find.byType(LinearProgressIndicator),
       paints
-        ..rect(rect: new Rect.fromLTRB(0.0, 0.0, 200.0, 6.0))
-        ..rect(rect: new Rect.fromLTRB(0.0, 0.0, 50.0, 6.0), color: Colors.white)
+        ..rect(rect: Rect.fromLTRB(0.0, 0.0, 200.0, 6.0))
+        ..rect(rect: Rect.fromLTRB(0.0, 0.0, 50.0, 6.0), color: Colors.white),
     );
   });
 
-  testWidgets('CircularProgressIndicator(value: 0.0) can be constructed', (WidgetTester tester) async {
+  testWidgets('CircularProgressIndicator(value: 0.0) can be constructed and has value semantics by default', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
     await tester.pumpWidget(
-      const Center(
-        child: const CircularProgressIndicator(value: 0.0)
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: CircularProgressIndicator(value: 0.0),
+        ),
       )
     );
+
+    expect(tester.getSemantics(find.byType(CircularProgressIndicator)), matchesSemantics(
+      value: '0%',
+      textDirection: TextDirection.ltr,
+    ));
+    handle.dispose();
   });
 
-  testWidgets('CircularProgressIndicator(value: null) can be constructed', (WidgetTester tester) async {
+  testWidgets('CircularProgressIndicator(value: null) can be constructed and has empty semantics by default', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
     await tester.pumpWidget(
       const Center(
-        child: const CircularProgressIndicator(value: null)
+        child: CircularProgressIndicator(value: null),
       )
     );
+
+    expect(tester.getSemantics(find.byType(CircularProgressIndicator)), matchesSemantics());
+    handle.dispose();
   });
 
   testWidgets('LinearProgressIndicator causes a repaint when it changes', (WidgetTester tester) async {
-    await tester.pumpWidget(new Directionality(
+    await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
-      child: new ListView(children: const <Widget>[const LinearProgressIndicator(value: 0.0)]),
+      child: ListView(children: const <Widget>[LinearProgressIndicator(value: 0.0)]),
     ));
     final List<Layer> layers1 = tester.layers;
-    await tester.pumpWidget(new Directionality(
+    await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
-      child: new ListView(children: const <Widget>[const LinearProgressIndicator(value: 0.5)])),
+      child: ListView(children: const <Widget>[LinearProgressIndicator(value: 0.5)])),
     );
     final List<Layer> layers2 = tester.layers;
     expect(layers1, isNot(equals(layers2)));
@@ -212,17 +234,17 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: const Center(
-          child: const SizedBox(
+        child: Center(
+          child: SizedBox(
             width: 200.0,
-            child: const RefreshProgressIndicator(),
+            child: RefreshProgressIndicator(),
           ),
         ),
       ),
     );
     expect(tester.hasRunningAnimations, isTrue);
 
-    await tester.pump(const Duration(milliseconds: 6666));
+    await tester.pump(const Duration(seconds: 5));
     expect(tester.hasRunningAnimations, isTrue);
 
     await tester.pump(const Duration(milliseconds: 1));
@@ -232,4 +254,236 @@ void main() {
     expect(tester.hasRunningAnimations, isTrue);
   });
 
+  testWidgets('Determinate CircularProgressIndicator stops the animator', (WidgetTester tester) async {
+    double progressValue;
+    StateSetter setState;
+    await tester.pumpWidget(
+      Center(
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setter) {
+            setState = setter;
+            return CircularProgressIndicator(value: progressValue);
+          }
+        ),
+      )
+    );
+    expect(tester.hasRunningAnimations, isTrue);
+
+    setState(() { progressValue = 1.0; });
+    await tester.pump(const Duration(milliseconds: 1));
+    expect(tester.hasRunningAnimations, isFalse);
+
+    setState(() { progressValue = null; });
+    await tester.pump(const Duration(milliseconds: 1));
+    expect(tester.hasRunningAnimations, isTrue);
+  });
+
+  testWidgets('LinearProgressIndicator with height 12.0', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox(
+            width: 100.0,
+            height: 12.0,
+            child: LinearProgressIndicator(value: 0.25),
+          ),
+        ),
+      ),
+    );
+    expect(
+        find.byType(LinearProgressIndicator),
+        paints
+          ..rect(rect: Rect.fromLTRB(0.0, 0.0, 100.0, 12.0))
+          ..rect(rect: Rect.fromLTRB(0.0, 0.0, 25.0, 12.0)),
+    );
+    expect(tester.binding.transientCallbackCount, 0);
+  });
+
+  testWidgets('LinearProgressIndicator with a height less than the minumum', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox(
+            width: 100.0,
+            height: 3.0,
+            child: LinearProgressIndicator(value: 0.25),
+          ),
+        ),
+      ),
+    );
+    expect(
+        find.byType(LinearProgressIndicator),
+        paints
+          ..rect(rect: Rect.fromLTRB(0.0, 0.0, 100.0, 3.0))
+          ..rect(rect: Rect.fromLTRB(0.0, 0.0, 25.0, 3.0)),
+    );
+    expect(tester.binding.transientCallbackCount, 0);
+  });
+
+  testWidgets('LinearProgressIndicator with default height', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox(
+            width: 100.0,
+            height: 4.0,
+            child: LinearProgressIndicator(value: 0.25),
+          ),
+        ),
+      ),
+    );
+    expect(
+        find.byType(LinearProgressIndicator),
+        paints
+          ..rect(rect: Rect.fromLTRB(0.0, 0.0, 100.0, 4.0))
+          ..rect(rect: Rect.fromLTRB(0.0, 0.0, 25.0, 4.0)),
+    );
+    expect(tester.binding.transientCallbackCount, 0);
+  });
+
+  testWidgets('LinearProgressIndicator can be made accessible', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    final GlobalKey key = GlobalKey();
+    const String label = 'Label';
+    const String value = '25%';
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: LinearProgressIndicator(
+          key: key,
+          value: 0.25,
+          semanticsLabel: label,
+          semanticsValue: value,
+        ),
+      ),
+    );
+
+    expect(tester.getSemantics(find.byKey(key)), matchesSemantics(
+      textDirection: TextDirection.ltr,
+      label: label,
+      value: value,
+    ));
+
+    handle.dispose();
+  });
+
+  testWidgets('LinearProgressIndicator that is determinate gets default a11y value', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    final GlobalKey key = GlobalKey();
+    const String label = 'Label';
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: LinearProgressIndicator(
+          key: key,
+          value: 0.25,
+          semanticsLabel: label,
+        ),
+      ),
+    );
+
+    expect(tester.getSemantics(find.byKey(key)), matchesSemantics(
+      textDirection: TextDirection.ltr,
+      label: label,
+      value: '25%',
+    ));
+
+    handle.dispose();
+  });
+
+  testWidgets('LinearProgressIndicator that is determinate does not default a11y value when label is null', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    final GlobalKey key = GlobalKey();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: LinearProgressIndicator(
+          key: key,
+          value: 0.25,
+        ),
+      ),
+    );
+
+    expect(tester.getSemantics(find.byKey(key)), matchesSemantics());
+
+    handle.dispose();
+  });
+
+  testWidgets('LinearProgressIndicator that is indeterminate does not default a11y value', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    final GlobalKey key = GlobalKey();
+    const String label = 'Progress';
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: LinearProgressIndicator(
+          key: key,
+          value: 0.25,
+          semanticsLabel: label,
+        ),
+      ),
+    );
+
+    expect(tester.getSemantics(find.byKey(key)), matchesSemantics(
+      textDirection: TextDirection.ltr,
+      label: label,
+    ));
+
+    handle.dispose();
+  });
+
+  testWidgets('CircularProgressIndicator can be made accessible', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    final GlobalKey key = GlobalKey();
+    const String label = 'Label';
+    const String value = '25%';
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: CircularProgressIndicator(
+          key: key,
+          value: 0.25,
+          semanticsLabel: label,
+          semanticsValue: value,
+        ),
+      ),
+    );
+
+    expect(tester.getSemantics(find.byKey(key)), matchesSemantics(
+      textDirection: TextDirection.ltr,
+      label: label,
+      value: value,
+    ));
+
+    handle.dispose();
+  });
+
+  testWidgets('RefreshProgressIndicator can be made accessible', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    final GlobalKey key = GlobalKey();
+    const String label = 'Label';
+    const String value = '25%';
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: RefreshProgressIndicator(
+          key: key,
+          semanticsLabel: label,
+          semanticsValue: value,
+        ),
+      ),
+    );
+
+    expect(tester.getSemantics(find.byKey(key)), matchesSemantics(
+      textDirection: TextDirection.ltr,
+      label: label,
+      value: value,
+    ));
+
+
+    handle.dispose();
+  });
 }

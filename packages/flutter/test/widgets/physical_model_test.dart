@@ -1,3 +1,7 @@
+// Copyright 2018 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -6,14 +10,18 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('PhysicalModel - creates a physical model layer when it needs compositing', (WidgetTester tester) async {
     debugDisableShadows = false;
-    await tester.pumpWidget(new Directionality(
-        textDirection: TextDirection.ltr,
-        child: new PhysicalModel(
-          shape: BoxShape.rectangle,
-          color: Colors.grey,
-          shadowColor: Colors.red,
-          elevation: 1.0,
-          child: new Material(child: new TextField(controller: new TextEditingController())),
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(devicePixelRatio: 1.0),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: PhysicalModel(
+            shape: BoxShape.rectangle,
+            color: Colors.grey,
+            shadowColor: Colors.red,
+            elevation: 1.0,
+            child: Material(child: TextField(controller: TextEditingController())),
+          ),
         ),
       ),
     );

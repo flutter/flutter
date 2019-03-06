@@ -48,14 +48,14 @@ class _IgnoreDrag extends Drag {
 class _PointDemoPainter extends CustomPainter {
   _PointDemoPainter({
     Animation<double> repaint,
-    this.arc
+    this.arc,
   }) : _repaint = repaint, super(repaint: repaint);
 
   final MaterialPointArcTween arc;
   final Animation<double> _repaint;
 
   void drawPoint(Canvas canvas, Offset point, Color color) {
-    final Paint paint = new Paint()
+    final Paint paint = Paint()
       ..color = color.withOpacity(0.25)
       ..style = PaintingStyle.fill;
     canvas.drawCircle(point, _kPointRadius, paint);
@@ -68,7 +68,7 @@ class _PointDemoPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final Paint paint = new Paint();
+    final Paint paint = Paint();
 
     if (arc.center != null)
       drawPoint(canvas, arc.center, Colors.grey.shade400);
@@ -108,11 +108,11 @@ class _PointDemo extends StatefulWidget {
   final AnimationController controller;
 
   @override
-  _PointDemoState createState() => new _PointDemoState();
+  _PointDemoState createState() => _PointDemoState();
 }
 
 class _PointDemoState extends State<_PointDemo> {
-  final GlobalKey _painterKey = new GlobalKey();
+  final GlobalKey _painterKey = GlobalKey();
 
   CurvedAnimation _animation;
   _DragTarget _dragTarget;
@@ -123,7 +123,7 @@ class _PointDemoState extends State<_PointDemo> {
   @override
   void initState() {
     super.initState();
-    _animation = new CurvedAnimation(parent: widget.controller, curve: Curves.fastOutSlowIn);
+    _animation = CurvedAnimation(parent: widget.controller, curve: Curves.fastOutSlowIn);
   }
 
   @override
@@ -135,7 +135,7 @@ class _PointDemoState extends State<_PointDemo> {
   Drag _handleOnStart(Offset position) {
     // TODO(hansmuller): allow the user to drag both points at the same time.
     if (_dragTarget != null)
-      return new _IgnoreDrag();
+      return _IgnoreDrag();
 
     final RenderBox box = _painterKey.currentContext.findRenderObject();
     final double startOffset = (box.localToGlobal(_begin) - position).distanceSquared;
@@ -149,7 +149,7 @@ class _PointDemoState extends State<_PointDemo> {
         _dragTarget = null;
     });
 
-    return new _DragHandler(_handleDragUpdate, _handleDragCancel, _handleDragEnd);
+    return _DragHandler(_handleDragUpdate, _handleDragCancel, _handleDragEnd);
   }
 
   void _handleDragUpdate(DragUpdateDetails details) {
@@ -181,44 +181,44 @@ class _PointDemoState extends State<_PointDemo> {
     final Size screenSize = MediaQuery.of(context).size;
     if (_screenSize == null || _screenSize != screenSize) {
       _screenSize = screenSize;
-      _begin = new Offset(screenSize.width * 0.5, screenSize.height * 0.2);
-      _end = new Offset(screenSize.width * 0.1, screenSize.height * 0.4);
+      _begin = Offset(screenSize.width * 0.5, screenSize.height * 0.2);
+      _end = Offset(screenSize.width * 0.1, screenSize.height * 0.4);
     }
 
-    final MaterialPointArcTween arc = new MaterialPointArcTween(begin: _begin, end: _end);
-    return new RawGestureDetector(
+    final MaterialPointArcTween arc = MaterialPointArcTween(begin: _begin, end: _end);
+    return RawGestureDetector(
       behavior: _dragTarget == null ? HitTestBehavior.deferToChild : HitTestBehavior.opaque,
       gestures: <Type, GestureRecognizerFactory>{
-        ImmediateMultiDragGestureRecognizer: new GestureRecognizerFactoryWithHandlers<ImmediateMultiDragGestureRecognizer>(
-          () => new ImmediateMultiDragGestureRecognizer(),
+        ImmediateMultiDragGestureRecognizer: GestureRecognizerFactoryWithHandlers<ImmediateMultiDragGestureRecognizer>(
+          () => ImmediateMultiDragGestureRecognizer(),
           (ImmediateMultiDragGestureRecognizer instance) {
             instance
               ..onStart = _handleOnStart;
           },
         ),
       },
-      child: new ClipRect(
-        child: new CustomPaint(
+      child: ClipRect(
+        child: CustomPaint(
           key: _painterKey,
-          foregroundPainter: new _PointDemoPainter(
+          foregroundPainter: _PointDemoPainter(
             repaint: _animation,
-            arc: arc
+            arc: arc,
           ),
           // Watch out: if this IgnorePointer is left out, then gestures that
           // fail _PointDemoPainter.hitTest() will still be recognized because
           // they do overlap this child, which is as big as the CustomPaint.
-          child: new IgnorePointer(
-            child: new Padding(
+          child: IgnorePointer(
+            child: Padding(
               padding: const EdgeInsets.all(16.0),
-              child: new Text(
+              child: Text(
                 'Tap the refresh button to run the animation. Drag the green '
                 "and red points to change the animation's path.",
-                style: Theme.of(context).textTheme.caption.copyWith(fontSize: 16.0)
-              )
-            )
-          )
-        )
-      )
+                style: Theme.of(context).textTheme.caption.copyWith(fontSize: 16.0),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
@@ -226,14 +226,14 @@ class _PointDemoState extends State<_PointDemo> {
 class _RectangleDemoPainter extends CustomPainter {
   _RectangleDemoPainter({
     Animation<double> repaint,
-    this.arc
+    this.arc,
   }) : _repaint = repaint, super(repaint: repaint);
 
   final MaterialRectArcTween arc;
   final Animation<double> _repaint;
 
   void drawPoint(Canvas canvas, Offset p, Color color) {
-    final Paint paint = new Paint()
+    final Paint paint = Paint()
       ..color = color.withOpacity(0.25)
       ..style = PaintingStyle.fill;
     canvas.drawCircle(p, _kPointRadius, paint);
@@ -245,7 +245,7 @@ class _RectangleDemoPainter extends CustomPainter {
   }
 
   void drawRect(Canvas canvas, Rect rect, Color color) {
-    final Paint paint = new Paint()
+    final Paint paint = Paint()
       ..color = color.withOpacity(0.25)
       ..strokeWidth = 4.0
       ..style = PaintingStyle.stroke;
@@ -276,11 +276,11 @@ class _RectangleDemo extends StatefulWidget {
   final AnimationController controller;
 
   @override
-  _RectangleDemoState createState() => new _RectangleDemoState();
+  _RectangleDemoState createState() => _RectangleDemoState();
 }
 
 class _RectangleDemoState extends State<_RectangleDemo> {
-  final GlobalKey _painterKey = new GlobalKey();
+  final GlobalKey _painterKey = GlobalKey();
 
   CurvedAnimation _animation;
   _DragTarget _dragTarget;
@@ -291,7 +291,7 @@ class _RectangleDemoState extends State<_RectangleDemo> {
   @override
   void initState() {
     super.initState();
-    _animation = new CurvedAnimation(parent: widget.controller, curve: Curves.fastOutSlowIn);
+    _animation = CurvedAnimation(parent: widget.controller, curve: Curves.fastOutSlowIn);
   }
 
   @override
@@ -303,7 +303,7 @@ class _RectangleDemoState extends State<_RectangleDemo> {
   Drag _handleOnStart(Offset position) {
     // TODO(hansmuller): allow the user to drag both points at the same time.
     if (_dragTarget != null)
-      return new _IgnoreDrag();
+      return _IgnoreDrag();
 
     final RenderBox box = _painterKey.currentContext.findRenderObject();
     final double startOffset = (box.localToGlobal(_begin.center) - position).distanceSquared;
@@ -316,7 +316,7 @@ class _RectangleDemoState extends State<_RectangleDemo> {
       else
         _dragTarget = null;
     });
-    return new _DragHandler(_handleDragUpdate, _handleDragCancel, _handleDragEnd);
+    return _DragHandler(_handleDragUpdate, _handleDragCancel, _handleDragEnd);
   }
 
   void _handleDragUpdate(DragUpdateDetails details) {
@@ -348,60 +348,60 @@ class _RectangleDemoState extends State<_RectangleDemo> {
     final Size screenSize = MediaQuery.of(context).size;
     if (_screenSize == null || _screenSize != screenSize) {
       _screenSize = screenSize;
-      _begin = new Rect.fromLTWH(
+      _begin = Rect.fromLTWH(
         screenSize.width * 0.5, screenSize.height * 0.2,
-        screenSize.width * 0.4, screenSize.height * 0.2
+        screenSize.width * 0.4, screenSize.height * 0.2,
       );
-      _end = new Rect.fromLTWH(
+      _end = Rect.fromLTWH(
         screenSize.width * 0.1, screenSize.height * 0.4,
-        screenSize.width * 0.3, screenSize.height * 0.3
+        screenSize.width * 0.3, screenSize.height * 0.3,
       );
     }
 
-    final MaterialRectArcTween arc = new MaterialRectArcTween(begin: _begin, end: _end);
-    return new RawGestureDetector(
+    final MaterialRectArcTween arc = MaterialRectArcTween(begin: _begin, end: _end);
+    return RawGestureDetector(
       behavior: _dragTarget == null ? HitTestBehavior.deferToChild : HitTestBehavior.opaque,
       gestures: <Type, GestureRecognizerFactory>{
-        ImmediateMultiDragGestureRecognizer: new GestureRecognizerFactoryWithHandlers<ImmediateMultiDragGestureRecognizer>(
-          () => new ImmediateMultiDragGestureRecognizer(),
+        ImmediateMultiDragGestureRecognizer: GestureRecognizerFactoryWithHandlers<ImmediateMultiDragGestureRecognizer>(
+          () => ImmediateMultiDragGestureRecognizer(),
           (ImmediateMultiDragGestureRecognizer instance) {
             instance
               ..onStart = _handleOnStart;
           },
         ),
       },
-      child: new ClipRect(
-        child: new CustomPaint(
+      child: ClipRect(
+        child: CustomPaint(
           key: _painterKey,
-          foregroundPainter: new _RectangleDemoPainter(
+          foregroundPainter: _RectangleDemoPainter(
             repaint: _animation,
-            arc: arc
+            arc: arc,
           ),
           // Watch out: if this IgnorePointer is left out, then gestures that
           // fail _RectDemoPainter.hitTest() will still be recognized because
           // they do overlap this child, which is as big as the CustomPaint.
-          child: new IgnorePointer(
-            child: new Padding(
+          child: IgnorePointer(
+            child: Padding(
               padding: const EdgeInsets.all(16.0),
-              child: new Text(
+              child: Text(
                 'Tap the refresh button to run the animation. Drag the rectangles '
                 "to change the animation's path.",
-                style: Theme.of(context).textTheme.caption.copyWith(fontSize: 16.0)
-              )
-            )
-          )
-        )
-      )
+                style: Theme.of(context).textTheme.caption.copyWith(fontSize: 16.0),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
 
-typedef Widget _DemoBuilder(_ArcDemo demo);
+typedef _DemoBuilder = Widget Function(_ArcDemo demo);
 
 class _ArcDemo {
   _ArcDemo(this.title, this.builder, TickerProvider vsync)
-    : controller = new AnimationController(duration: const Duration(milliseconds: 500), vsync: vsync),
-      key = new GlobalKey(debugLabel: title);
+    : controller = AnimationController(duration: const Duration(milliseconds: 500), vsync: vsync),
+      key = GlobalKey(debugLabel: title);
 
   final String title;
   final _DemoBuilder builder;
@@ -413,7 +413,7 @@ class AnimationDemo extends StatefulWidget {
   const AnimationDemo({ Key key }) : super(key: key);
 
   @override
-  _AnimationDemoState createState() => new _AnimationDemoState();
+  _AnimationDemoState createState() => _AnimationDemoState();
 }
 
 class _AnimationDemoState extends State<AnimationDemo> with TickerProviderStateMixin {
@@ -423,22 +423,22 @@ class _AnimationDemoState extends State<AnimationDemo> with TickerProviderStateM
   void initState() {
     super.initState();
     _allDemos = <_ArcDemo>[
-      new _ArcDemo('POINT', (_ArcDemo demo) {
-        return new _PointDemo(
+      _ArcDemo('POINT', (_ArcDemo demo) {
+        return _PointDemo(
           key: demo.key,
-          controller: demo.controller
+          controller: demo.controller,
         );
       }, this),
-      new _ArcDemo('RECTANGLE', (_ArcDemo demo) {
-        return new _RectangleDemo(
+      _ArcDemo('RECTANGLE', (_ArcDemo demo) {
+        return _RectangleDemo(
           key: demo.key,
-          controller: demo.controller
+          controller: demo.controller,
         );
       }, this),
     ];
   }
 
-  Future<Null> _play(_ArcDemo demo) async {
+  Future<void> _play(_ArcDemo demo) async {
     await demo.controller.forward();
     if (demo.key.currentState != null && demo.key.currentState.mounted)
       demo.controller.reverse();
@@ -446,18 +446,18 @@ class _AnimationDemoState extends State<AnimationDemo> with TickerProviderStateM
 
   @override
   Widget build(BuildContext context) {
-    return new DefaultTabController(
+    return DefaultTabController(
       length: _allDemos.length,
-      child: new Scaffold(
-        appBar: new AppBar(
+      child: Scaffold(
+        appBar: AppBar(
           title: const Text('Animation'),
-          bottom: new TabBar(
-            tabs: _allDemos.map((_ArcDemo demo) => new Tab(text: demo.title)).toList(),
+          bottom: TabBar(
+            tabs: _allDemos.map<Tab>((_ArcDemo demo) => Tab(text: demo.title)).toList(),
           ),
         ),
-        floatingActionButton: new Builder(
+        floatingActionButton: Builder(
           builder: (BuildContext context) {
-            return new FloatingActionButton(
+            return FloatingActionButton(
               child: const Icon(Icons.refresh),
               onPressed: () {
                 _play(_allDemos[DefaultTabController.of(context).index]);
@@ -465,16 +465,16 @@ class _AnimationDemoState extends State<AnimationDemo> with TickerProviderStateM
             );
           },
         ),
-        body: new TabBarView(
-          children: _allDemos.map((_ArcDemo demo) => demo.builder(demo)).toList()
-        )
-      )
+        body: TabBarView(
+          children: _allDemos.map<Widget>((_ArcDemo demo) => demo.builder(demo)).toList(),
+        ),
+      ),
     );
   }
 }
 
 void main() {
-  runApp(new MaterialApp(
-    home: const AnimationDemo(),
+  runApp(const MaterialApp(
+    home: AnimationDemo(),
   ));
 }

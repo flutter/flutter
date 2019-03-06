@@ -2,30 +2,38 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
-
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/platform.dart';
 import '../base/version.dart';
+import '../convert.dart';
+import '../doctor.dart';
 
 // Include VS Code insiders (useful for debugging).
 const bool _includeInsiders = false;
 
-class VsCode {
-  static const String extensionIdentifier = 'Dart-Code.flutter';
 
+const String extensionIdentifier = 'Dart-Code.flutter';
+const String extensionMarketplaceUrl =
+  'https://marketplace.visualstudio.com/items?itemName=$extensionIdentifier';
+
+class VsCode {
   VsCode._(this.directory, this.extensionDirectory, { Version version, this.edition })
-      : this.version = version ?? Version.unknown {
+      : version = version ?? Version.unknown {
 
     if (!fs.isDirectorySync(directory)) {
-      _validationMessages.add('VS Code not found at $directory');
+      _validationMessages.add(ValidationMessage.error('VS Code not found at $directory'));
       return;
+    } else {
+      _validationMessages.add(ValidationMessage('VS Code at $directory'));
     }
 
     // If the extensions directory doesn't exist at all, the listSync()
     // below will fail, so just bail out early.
+    final ValidationMessage notInstalledMessage = ValidationMessage.error(
+          'Flutter extension not installed; install from\n$extensionMarketplaceUrl');
     if (!fs.isDirectorySync(extensionDirectory)) {
+      _validationMessages.add(notInstalledMessage);
       return;
     }
 
@@ -34,18 +42,30 @@ class VsCode {
     final Iterable<FileSystemEntity> extensionDirs = fs
         .directory(extensionDirectory)
         .listSync()
-        .where((FileSystemEntity d) => d is Directory)
-        .where(
-            (FileSystemEntity d) => d.basename.toLowerCase().startsWith(extensionIdentifierLower));
+        .whereType<Directory>()
+        .where((Directory d) => d.basename.toLowerCase().startsWith(extensionIdentifierLower));
 
     if (extensionDirs.isNotEmpty) {
       final FileSystemEntity extensionDir = extensionDirs.first;
 
       _isValid = true;
-      _extensionVersion = new Version.parse(
+      _extensionVersion = Version.parse(
           extensionDir.basename.substring('$extensionIdentifier-'.length));
-      _validationMessages.add('Flutter extension version $_extensionVersion');
+      _validationMessages.add(ValidationMessage('Flutter extension version $_extensionVersion'));
+    } else {
+      _validationMessages.add(notInstalledMessage);
     }
+  }
+
+  factory VsCode.fromDirectory(String installPath, String extensionDirectory,
+      { String edition }) {
+    final String packageJsonPath =
+        fs.path.join(installPath, 'resources', 'app', 'package.json');
+    final String versionString = _getVersionFromPackageJson(packageJsonPath);
+    Version version;
+    if (versionString != null)
+      version = Version.parse(versionString);
+    return VsCode._(installPath, extensionDirectory, version: version, edition: edition);
   }
 
   final String directory;
@@ -55,23 +75,12 @@ class VsCode {
 
   bool _isValid = false;
   Version _extensionVersion;
-  final List<String> _validationMessages = <String>[];
-
-  factory VsCode.fromDirectory(String installPath, String extensionDirectory,
-      { String edition }) {
-    final String packageJsonPath =
-        fs.path.join(installPath, 'resources', 'app', 'package.json');
-    final String versionString = _getVersionFromPackageJson(packageJsonPath);
-    Version version;
-    if (versionString != null)
-      version = new Version.parse(versionString);
-    return new VsCode._(installPath, extensionDirectory, version: version, edition: edition);
-  }
+  final List<ValidationMessage> _validationMessages = <ValidationMessage>[];
 
   bool get isValid => _isValid;
   String get productName => 'VS Code' + (edition != null ? ', $edition' : '');
 
-  Iterable<String> get validationMessages => _validationMessages;
+  Iterable<ValidationMessage> get validationMessages => _validationMessages;
 
   static List<VsCode> allInstalled() {
     if (platform.isMacOS)
@@ -95,31 +104,34 @@ class VsCode {
   //   $HOME/.vscode-insiders/extensions
   static List<VsCode> _installedMacOS() {
     return _findInstalled(<_VsCodeInstallLocation>[
-      new _VsCodeInstallLocation(
+      _VsCodeInstallLocation(
         fs.path.join('/Applications', 'Visual Studio Code.app', 'Contents'),
         '.vscode',
       ),
-      new _VsCodeInstallLocation(
+      _VsCodeInstallLocation(
         fs.path.join(homeDirPath, 'Applications', 'Visual Studio Code.app', 'Contents'),
         '.vscode',
       ),
-      new _VsCodeInstallLocation(
+      _VsCodeInstallLocation(
         fs.path.join('/Applications', 'Visual Studio Code - Insiders.app', 'Contents'),
         '.vscode-insiders',
         isInsiders: true,
       ),
-      new _VsCodeInstallLocation(
+      _VsCodeInstallLocation(
         fs.path.join(homeDirPath, 'Applications', 'Visual Studio Code - Insiders.app', 'Contents'),
         '.vscode-insiders',
         isInsiders: true,
-      )
+      ),
     ]);
   }
 
   // Windows:
   //   $programfiles(x86)\Microsoft VS Code
   //   $programfiles(x86)\Microsoft VS Code Insiders
-  // TODO: Confirm these are correct for 64bit
+  // User install:
+  //   $localappdata\Programs\Microsoft VS Code
+  //   $localappdata\Programs\Microsoft VS Code Insiders
+  // TODO(dantup): Confirm these are correct for 64bit
   //   $programfiles\Microsoft VS Code
   //   $programfiles\Microsoft VS Code Insiders
   // Windows Extensions:
@@ -128,17 +140,40 @@ class VsCode {
   static List<VsCode> _installedWindows() {
     final String progFiles86 = platform.environment['programfiles(x86)'];
     final String progFiles = platform.environment['programfiles'];
+    final String localAppData = platform.environment['localappdata'];
 
-    return _findInstalled(<_VsCodeInstallLocation>[
-      new _VsCodeInstallLocation(fs.path.join(progFiles86, 'Microsoft VS Code'), '.vscode',
-          edition: '32-bit edition'),
-      new _VsCodeInstallLocation(fs.path.join(progFiles, 'Microsoft VS Code'), '.vscode',
-          edition: '64-bit edition'),
-      new _VsCodeInstallLocation(fs.path.join(progFiles86 , 'Microsoft VS Code Insiders'), '.vscode-insiders',
-          edition: '32-bit edition', isInsiders: true),
-      new _VsCodeInstallLocation(fs.path.join(progFiles, 'Microsoft VS Code Insiders'), '.vscode-insiders',
-          edition: '64-bit edition', isInsiders: true),
-    ]);
+    final List<_VsCodeInstallLocation> searchLocations =
+        <_VsCodeInstallLocation>[];
+
+    if (localAppData != null) {
+      searchLocations.add(_VsCodeInstallLocation(
+          fs.path.join(localAppData, 'Programs\\Microsoft VS Code'),
+          '.vscode'));
+    }
+    searchLocations.add(_VsCodeInstallLocation(
+        fs.path.join(progFiles86, 'Microsoft VS Code'), '.vscode',
+        edition: '32-bit edition'));
+    searchLocations.add(_VsCodeInstallLocation(
+        fs.path.join(progFiles, 'Microsoft VS Code'), '.vscode',
+        edition: '64-bit edition'));
+    if (localAppData != null) {
+      searchLocations.add(_VsCodeInstallLocation(
+          fs.path.join(localAppData, 'Programs\\Microsoft VS Code Insiders'),
+          '.vscode-insiders',
+          isInsiders: true));
+    }
+    searchLocations.add(_VsCodeInstallLocation(
+        fs.path.join(progFiles86, 'Microsoft VS Code Insiders'),
+        '.vscode-insiders',
+        edition: '32-bit edition',
+        isInsiders: true));
+    searchLocations.add(_VsCodeInstallLocation(
+        fs.path.join(progFiles, 'Microsoft VS Code Insiders'),
+        '.vscode-insiders',
+        edition: '64-bit edition',
+        isInsiders: true));
+
+    return _findInstalled(searchLocations);
   }
 
   // Linux:
@@ -154,8 +189,7 @@ class VsCode {
     ]);
   }
 
-  static List<VsCode> _findInstalled(
-      List<_VsCodeInstallLocation> allLocations) {
+  static List<VsCode> _findInstalled(List<_VsCodeInstallLocation> allLocations) {
     final Iterable<_VsCodeInstallLocation> searchLocations =
       _includeInsiders
         ? allLocations
@@ -167,7 +201,7 @@ class VsCode {
       if (fs.isDirectorySync(searchLocation.installPath)) {
         final String extensionDirectory =
             fs.path.join(homeDirPath, searchLocation.extensionsFolder, 'extensions');
-        results.add(new VsCode.fromDirectory(searchLocation.installPath, extensionDirectory, edition: searchLocation.edition));
+        results.add(VsCode.fromDirectory(searchLocation.installPath, extensionDirectory, edition: searchLocation.edition));
       }
     }
 
@@ -188,10 +222,10 @@ class VsCode {
 }
 
 class _VsCodeInstallLocation {
+  const _VsCodeInstallLocation(this.installPath, this.extensionsFolder, { this.edition, bool isInsiders })
+    : isInsiders = isInsiders ?? false;
   final String installPath;
   final String extensionsFolder;
   final String edition;
   final bool isInsiders;
-  const _VsCodeInstallLocation(this.installPath, this.extensionsFolder, { this.edition, bool isInsiders })
-    : this.isInsiders = isInsiders ?? false;
 }

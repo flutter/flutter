@@ -4,18 +4,18 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:test/test.dart';
+import '../flutter_test_alternative.dart';
 
 import 'rendering_tester.dart';
 
 
 void main() {
   test('only send semantics update if semantics have changed', () {
-    final TestRender testRender = new TestRender()
+    final TestRender testRender = TestRender()
       ..label = 'hello'
       ..textDirection = TextDirection.ltr;
 
-    final RenderObject tree = new RenderConstrainedBox(
+    final RenderObject tree = RenderConstrainedBox(
       additionalConstraints: const BoxConstraints.tightFor(height: 20.0, width: 20.0),
       child: testRender,
     );

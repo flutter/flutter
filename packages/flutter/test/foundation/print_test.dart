@@ -4,7 +4,7 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:quiver/testing/async.dart';
-import 'package:test/test.dart';
+import '../flutter_test_alternative.dart';
 
 import 'capture_output.dart';
 
@@ -12,34 +12,34 @@ void main() {
   test('debugPrint', () {
     expect(
       captureOutput(() { debugPrintSynchronously('Hello, world'); }),
-      equals(<String>['Hello, world'])
+      equals(<String>['Hello, world']),
     );
 
     expect(
       captureOutput(() { debugPrintSynchronously('Hello, world', wrapWidth: 10); }),
-      equals(<String>['Hello,\nworld'])
+      equals(<String>['Hello,\nworld']),
     );
 
     for (int i = 0; i < 14; ++i) {
       expect(
         captureOutput(() { debugPrintSynchronously('Hello,   world', wrapWidth: i); }),
-        equals(<String>['Hello,\nworld'])
+        equals(<String>['Hello,\nworld']),
       );
     }
 
     expect(
       captureOutput(() { debugPrintThrottled('Hello, world'); }),
-      equals(<String>['Hello, world'])
+      equals(<String>['Hello, world']),
     );
 
     expect(
       captureOutput(() { debugPrintThrottled('Hello, world', wrapWidth: 10); }),
-      equals(<String>['Hello,', 'world'])
+      equals(<String>['Hello,', 'world']),
     );
   });
 
   test('debugPrint throttling', () {
-    new FakeAsync().run((FakeAsync async) {
+    FakeAsync().run((FakeAsync async) {
       List<String> log = captureOutput(() {
         debugPrintThrottled('A' * (22 * 1024) + '\nB');
       });
@@ -56,5 +56,17 @@ void main() {
       async.elapse(const Duration(seconds: 2));
       expect(log.length, 2);
     });
+  });
+
+  test('debugPrint can print null', () {
+    expect(
+      captureOutput(() { debugPrintThrottled(null); }),
+      equals(<String>['null']),
+    );
+
+    expect(
+      captureOutput(() { debugPrintThrottled(null, wrapWidth: 80); }),
+      equals(<String>['null']),
+    );
   });
 }

@@ -14,7 +14,7 @@ class StockArrowPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final Paint paint = new Paint()..color = color;
+    final Paint paint = Paint()..color = color;
     paint.strokeWidth = 1.0;
     const double padding = 2.0;
     assert(padding > paint.strokeWidth / 2.0); // make sure the circle remains inside the box
@@ -32,7 +32,7 @@ class StockArrowPainter extends CustomPainter {
     } else {
       arrowY = centerX - 1.0;
     }
-    final Path path = new Path();
+    final Path path = Path();
     path.moveTo(centerX, arrowY - h); // top of the arrow
     path.lineTo(centerX + w, arrowY + h);
     path.lineTo(centerX - w, arrowY + h);
@@ -42,7 +42,7 @@ class StockArrowPainter extends CustomPainter {
 
     // Draw a circle that circumscribes the arrow.
     paint.style = PaintingStyle.stroke;
-    canvas.drawCircle(new Offset(centerX, centerY), r, paint);
+    canvas.drawCircle(Offset(centerX, centerY), r, paint);
   }
 
   @override
@@ -71,17 +71,17 @@ class StockArrow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new Container(
+    return Container(
       width: 40.0,
       height: 40.0,
       margin: const EdgeInsets.symmetric(horizontal: 5.0),
-      child: new CustomPaint(
-        painter: new StockArrowPainter(
+      child: CustomPaint(
+        painter: StockArrowPainter(
           // TODO(jackson): This should change colors with the theme
           color: _colorForPercentChange(percentChange),
-          percentChange: percentChange
-        )
-      )
+          percentChange: percentChange,
+        ),
+      ),
     );
   }
 }

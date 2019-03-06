@@ -29,7 +29,7 @@ void main() {
     });
     section('TEST WHETHER `flutter run --route` WORKS');
     await inDirectory(appDir, () async {
-      final Completer<Null> ready = new Completer<Null>();
+      final Completer<void> ready = Completer<void>();
       bool ok;
       print('run: starting...');
       final Process run = await startProcess(
@@ -37,8 +37,8 @@ void main() {
         <String>['run', '--verbose', '-d', device.deviceId, '--route', '/smuggle-it', 'lib/route.dart'],
       );
       run.stdout
-        .transform(utf8.decoder)
-        .transform(const LineSplitter())
+        .transform<String>(utf8.decoder)
+        .transform<String>(const LineSplitter())
         .listen((String line) {
           print('run:stdout: $line');
           if (vmServicePort == null) {
@@ -52,12 +52,12 @@ void main() {
           }
         });
       run.stderr
-        .transform(utf8.decoder)
-        .transform(const LineSplitter())
+        .transform<String>(utf8.decoder)
+        .transform<String>(const LineSplitter())
         .listen((String line) {
           stderr.writeln('run:stderr: $line');
         });
-      run.exitCode.then((int exitCode) { ok = false; });
+      run.exitCode.then<void>((int exitCode) { ok = false; });
       await Future.any<dynamic>(<Future<dynamic>>[ ready.future, run.exitCode ]);
       if (!ok)
         throw 'Failed to run test app.';
@@ -67,14 +67,14 @@ void main() {
         <String>['drive', '--use-existing-app', 'http://127.0.0.1:$vmServicePort/', '--no-keep-app-running', 'lib/route.dart'],
       );
       drive.stdout
-        .transform(utf8.decoder)
-        .transform(const LineSplitter())
+        .transform<String>(utf8.decoder)
+        .transform<String>(const LineSplitter())
         .listen((String line) {
           print('drive:stdout: $line');
         });
       drive.stderr
-        .transform(utf8.decoder)
-        .transform(const LineSplitter())
+        .transform<String>(utf8.decoder)
+        .transform<String>(const LineSplitter())
         .listen((String line) {
           stderr.writeln('drive:stderr: $line');
         });
@@ -86,6 +86,6 @@ void main() {
       if (result != 0)
         throw 'Received unexpected exit code $result from run process.';
     });
-    return new TaskResult.success(null);
+    return TaskResult.success(null);
   });
 }

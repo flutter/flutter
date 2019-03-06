@@ -7,18 +7,18 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 Future<Size> _getSize(WidgetTester tester, BoxConstraints constraints, double aspectRatio) async {
-  final Key childKey = new UniqueKey();
+  final Key childKey = UniqueKey();
   await tester.pumpWidget(
-    new Center(
-      child: new ConstrainedBox(
+    Center(
+      child: ConstrainedBox(
         constraints: constraints,
-        child: new AspectRatio(
+        child: AspectRatio(
           aspectRatio: aspectRatio,
-          child: new Container(
+          child: Container(
             key: childKey
-          )
-        )
-      )
+          ),
+        ),
+      ),
     )
   );
   final RenderBox box = tester.renderObject(find.byKey(childKey));
@@ -27,25 +27,25 @@ Future<Size> _getSize(WidgetTester tester, BoxConstraints constraints, double as
 
 void main() {
   testWidgets('Aspect ratio control test', (WidgetTester tester) async {
-    expect(await _getSize(tester, new BoxConstraints.loose(const Size(500.0, 500.0)), 2.0), equals(const Size(500.0, 250.0)));
-    expect(await _getSize(tester, new BoxConstraints.loose(const Size(500.0, 500.0)), 0.5), equals(const Size(250.0, 500.0)));
+    expect(await _getSize(tester, BoxConstraints.loose(const Size(500.0, 500.0)), 2.0), equals(const Size(500.0, 250.0)));
+    expect(await _getSize(tester, BoxConstraints.loose(const Size(500.0, 500.0)), 0.5), equals(const Size(250.0, 500.0)));
   });
 
   testWidgets('Aspect ratio infinite width', (WidgetTester tester) async {
-    final Key childKey = new UniqueKey();
-    await tester.pumpWidget(new Directionality(
+    final Key childKey = UniqueKey();
+    await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
-      child: new Center(
-        child: new SingleChildScrollView(
+      child: Center(
+        child: SingleChildScrollView(
           scrollDirection: Axis.horizontal,
-          child: new AspectRatio(
+          child: AspectRatio(
             aspectRatio: 2.0,
-            child: new Container(
+            child: Container(
               key: childKey
-            )
-          )
-        )
-      )
+            ),
+          ),
+        ),
+      ),
     ));
     final RenderBox box = tester.renderObject(find.byKey(childKey));
     expect(box.size, equals(const Size(1200.0, 600.0)));

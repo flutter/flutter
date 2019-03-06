@@ -8,7 +8,8 @@ import 'dart:io';
 
 import 'package:process/process.dart';
 import 'package:mockito/mockito.dart';
-import 'package:test/test.dart';
+
+import 'common.dart';
 
 /// A mock that can be used to fake a process manager that runs commands
 /// and returns results.
@@ -35,7 +36,7 @@ class FakeProcessManager extends Mock implements ProcessManager {
     _fakeResults = <String, List<ProcessResult>>{};
     for (String key in value.keys) {
       _fakeResults[key] = <ProcessResult>[]
-        ..addAll(value[key] ?? <ProcessResult>[new ProcessResult(0, 0, '', '')]);
+        ..addAll(value[key] ?? <ProcessResult>[ProcessResult(0, 0, '', '')]);
     }
   }
 
@@ -62,11 +63,11 @@ class FakeProcessManager extends Mock implements ProcessManager {
   }
 
   FakeProcess _popProcess(List<String> command) =>
-      new FakeProcess(_popResult(command), stdinResults: stdinResults);
+      FakeProcess(_popResult(command), stdinResults: stdinResults);
 
   Future<Process> _nextProcess(Invocation invocation) async {
     invocations.add(invocation);
-    return new Future<Process>.value(_popProcess(invocation.positionalArguments[0]));
+    return Future<Process>.value(_popProcess(invocation.positionalArguments[0]));
   }
 
   ProcessResult _nextResultSync(Invocation invocation) {
@@ -76,11 +77,11 @@ class FakeProcessManager extends Mock implements ProcessManager {
 
   Future<ProcessResult> _nextResult(Invocation invocation) async {
     invocations.add(invocation);
-    return new Future<ProcessResult>.value(_popResult(invocation.positionalArguments[0]));
+    return Future<ProcessResult>.value(_popResult(invocation.positionalArguments[0]));
   }
 
   void _setupMock() {
-    // Note that not all possible types of invocations are covered here, just the ones
+    // Not all possible types of invocations are covered here, just the ones
     // expected to be called.
     // TODO(gspencer): make this more general so that any call will be captured.
     when(start(
@@ -102,7 +103,7 @@ class FakeProcessManager extends Mock implements ProcessManager {
     when(runSync(
       any,
       environment: anyNamed('environment'),
-      workingDirectory: anyNamed('workingDirectory')
+      workingDirectory: anyNamed('workingDirectory'),
     )).thenAnswer(_nextResultSync);
 
     when(runSync(any)).thenAnswer(_nextResultSync);
@@ -117,10 +118,10 @@ class FakeProcessManager extends Mock implements ProcessManager {
 /// A fake process that can be used to interact with a process "started" by the FakeProcessManager.
 class FakeProcess extends Mock implements Process {
   FakeProcess(ProcessResult result, {void stdinResults(String input)})
-      : stdoutStream = new Stream<List<int>>.fromIterable(<List<int>>[result.stdout.codeUnits]),
-        stderrStream = new Stream<List<int>>.fromIterable(<List<int>>[result.stderr.codeUnits]),
+      : stdoutStream = Stream<List<int>>.fromIterable(<List<int>>[result.stdout.codeUnits]),
+        stderrStream = Stream<List<int>>.fromIterable(<List<int>>[result.stderr.codeUnits]),
         desiredExitCode = result.exitCode,
-        stdinSink = new IOSink(new StringStreamConsumer(stdinResults)) {
+        stdinSink = IOSink(StringStreamConsumer(stdinResults)) {
     _setupMock();
   }
 
@@ -134,7 +135,7 @@ class FakeProcess extends Mock implements Process {
   }
 
   @override
-  Future<int> get exitCode => new Future<int>.value(desiredExitCode);
+  Future<int> get exitCode => Future<int>.value(desiredExitCode);
 
   @override
   int get pid => 0;
@@ -150,7 +151,7 @@ class FakeProcess extends Mock implements Process {
 }
 
 /// Callback used to receive stdin input when it occurs.
-typedef void StringReceivedCallback(String received);
+typedef StringReceivedCallback = void Function(String received);
 
 /// A stream consumer class that consumes UTF8 strings as lists of ints.
 class StringStreamConsumer implements StreamConsumer<List<int>> {
@@ -166,14 +167,14 @@ class StringStreamConsumer implements StreamConsumer<List<int>> {
   @override
   Future<dynamic> addStream(Stream<List<int>> value) {
     streams.add(value);
-    completers.add(new Completer<dynamic>());
+    completers.add(Completer<dynamic>());
     subscriptions.add(
       value.listen((List<int> data) {
         sendString(utf8.decode(data));
       }),
     );
     subscriptions.last.onDone(() => completers.last.complete(null));
-    return new Future<dynamic>.value(null);
+    return Future<dynamic>.value(null);
   }
 
   @override
@@ -184,6 +185,6 @@ class StringStreamConsumer implements StreamConsumer<List<int>> {
     completers.clear();
     streams.clear();
     subscriptions.clear();
-    return new Future<dynamic>.value(null);
+    return Future<dynamic>.value(null);
   }
 }

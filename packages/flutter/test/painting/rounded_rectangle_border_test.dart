@@ -10,9 +10,9 @@ import 'common_matchers.dart';
 
 void main() {
   test('RoundedRectangleBorder', () {
-    final RoundedRectangleBorder c10 = new RoundedRectangleBorder(side: const BorderSide(width: 10.0), borderRadius: new BorderRadius.circular(100.0));
-    final RoundedRectangleBorder c15 = new RoundedRectangleBorder(side: const BorderSide(width: 15.0), borderRadius: new BorderRadius.circular(150.0));
-    final RoundedRectangleBorder c20 = new RoundedRectangleBorder(side: const BorderSide(width: 20.0), borderRadius: new BorderRadius.circular(200.0));
+    final RoundedRectangleBorder c10 = RoundedRectangleBorder(side: const BorderSide(width: 10.0), borderRadius: BorderRadius.circular(100.0));
+    final RoundedRectangleBorder c15 = RoundedRectangleBorder(side: const BorderSide(width: 15.0), borderRadius: BorderRadius.circular(150.0));
+    final RoundedRectangleBorder c20 = RoundedRectangleBorder(side: const BorderSide(width: 20.0), borderRadius: BorderRadius.circular(200.0));
     expect(c10.dimensions, const EdgeInsets.all(10.0));
     expect(c10.scale(2.0), c20);
     expect(c20.scale(0.5), c10);
@@ -20,33 +20,39 @@ void main() {
     expect(ShapeBorder.lerp(c10, c20, 0.5), c15);
     expect(ShapeBorder.lerp(c10, c20, 1.0), c20);
 
-    final RoundedRectangleBorder c1 = new RoundedRectangleBorder(side: const BorderSide(width: 1.0), borderRadius: new BorderRadius.circular(1.0));
-    final RoundedRectangleBorder c2 = new RoundedRectangleBorder(side: const BorderSide(width: 1.0), borderRadius: new BorderRadius.circular(2.0));
-    expect(c2.getInnerPath(new Rect.fromCircle(center: Offset.zero, radius: 2.0)), isUnitCircle);
-    expect(c1.getOuterPath(new Rect.fromCircle(center: Offset.zero, radius: 1.0)), isUnitCircle);
-    final Rect rect = new Rect.fromLTRB(10.0, 20.0, 80.0, 190.0);
+    final RoundedRectangleBorder c1 = RoundedRectangleBorder(side: const BorderSide(width: 1.0), borderRadius: BorderRadius.circular(1.0));
+    final RoundedRectangleBorder c2 = RoundedRectangleBorder(side: const BorderSide(width: 1.0), borderRadius: BorderRadius.circular(2.0));
+    expect(c2.getInnerPath(Rect.fromCircle(center: Offset.zero, radius: 2.0)), isUnitCircle);
+    expect(c1.getOuterPath(Rect.fromCircle(center: Offset.zero, radius: 1.0)), isUnitCircle);
+    final Rect rect = Rect.fromLTRB(10.0, 20.0, 80.0, 190.0);
     expect(
       (Canvas canvas) => c10.paint(canvas, rect),
       paints
         ..drrect(
-          outer: new RRect.fromRectAndRadius(rect, const Radius.circular(100.0)),
-          inner: new RRect.fromRectAndRadius(rect.deflate(10.0), const Radius.circular(90.0)),
+          outer: RRect.fromRectAndRadius(rect, const Radius.circular(100.0)),
+          inner: RRect.fromRectAndRadius(rect.deflate(10.0), const Radius.circular(90.0)),
           strokeWidth: 0.0,
-        )
+        ),
     );
+
+    const RoundedRectangleBorder directional = RoundedRectangleBorder(
+      borderRadius: BorderRadiusDirectional.only(topStart: Radius.circular(20)),
+    );
+    expect(ShapeBorder.lerp(directional, c10, 1.0),
+           ShapeBorder.lerp(c10, directional, 0.0));
   });
 
   test('RoundedRectangleBorder and CircleBorder', () {
-    final RoundedRectangleBorder r = new RoundedRectangleBorder(side: BorderSide.none, borderRadius: new BorderRadius.circular(10.0));
-    const CircleBorder c = const CircleBorder(side: BorderSide.none);
-    final Rect rect = new Rect.fromLTWH(0.0, 0.0, 100.0, 20.0); // center is x=40..60 y=10
+    final RoundedRectangleBorder r = RoundedRectangleBorder(side: BorderSide.none, borderRadius: BorderRadius.circular(10.0));
+    const CircleBorder c = CircleBorder(side: BorderSide.none);
+    final Rect rect = Rect.fromLTWH(0.0, 0.0, 100.0, 20.0); // center is x=40..60 y=10
     final Matcher looksLikeR = isPathThat(
-      includes: const <Offset>[ const Offset(30.0, 10.0), const Offset(50.0, 10.0), ],
-      excludes: const <Offset>[ const Offset(1.0, 1.0), const Offset(99.0, 19.0), ],
+      includes: const <Offset>[ Offset(30.0, 10.0), Offset(50.0, 10.0), ],
+      excludes: const <Offset>[ Offset(1.0, 1.0), Offset(99.0, 19.0), ],
     );
     final Matcher looksLikeC = isPathThat(
-      includes: const <Offset>[ const Offset(50.0, 10.0), ],
-      excludes: const <Offset>[ const Offset(1.0, 1.0), const Offset(30.0, 10.0), const Offset(99.0, 19.0), ],
+      includes: const <Offset>[ Offset(50.0, 10.0), ],
+      excludes: const <Offset>[ Offset(1.0, 1.0), Offset(30.0, 10.0), Offset(99.0, 19.0), ],
     );
     expect(r.getOuterPath(rect), looksLikeR);
     expect(c.getOuterPath(rect), looksLikeC);

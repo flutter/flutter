@@ -8,22 +8,22 @@ import 'package:flutter/widgets.dart';
 
 void main() {
   testWidgets('Can size according to aspect ratio', (WidgetTester tester) async {
-    final Key outside = new UniqueKey();
-    final Key inside = new UniqueKey();
+    final Key outside = UniqueKey();
+    final Key inside = UniqueKey();
 
     await tester.pumpWidget(
-      new Center(
-        child: new Container(
+      Center(
+        child: Container(
           width: 200.0,
-          child: new FittedBox(
+          child: FittedBox(
             key: outside,
-            child: new Container(
+            child: Container(
               key: inside,
               width: 100.0,
               height: 50.0,
-            )
-          )
-        )
+            ),
+          ),
+        ),
       )
     );
 
@@ -43,23 +43,23 @@ void main() {
   });
 
   testWidgets('Can contain child', (WidgetTester tester) async {
-    final Key outside = new UniqueKey();
-    final Key inside = new UniqueKey();
+    final Key outside = UniqueKey();
+    final Key inside = UniqueKey();
 
     await tester.pumpWidget(
-      new Center(
-        child: new Container(
+      Center(
+        child: Container(
           width: 200.0,
           height: 200.0,
-          child: new FittedBox(
+          child: FittedBox(
             key: outside,
-            child: new Container(
+            child: Container(
               key: inside,
               width: 100.0,
               height: 50.0,
-            )
-          )
-        )
+            ),
+          ),
+        ),
       )
     );
 
@@ -78,24 +78,24 @@ void main() {
   });
 
   testWidgets('Child can conver', (WidgetTester tester) async {
-    final Key outside = new UniqueKey();
-    final Key inside = new UniqueKey();
+    final Key outside = UniqueKey();
+    final Key inside = UniqueKey();
 
     await tester.pumpWidget(
-      new Center(
-        child: new Container(
+      Center(
+        child: Container(
           width: 200.0,
           height: 200.0,
-          child: new FittedBox(
+          child: FittedBox(
             key: outside,
             fit: BoxFit.cover,
-            child: new Container(
+            child: Container(
               key: inside,
               width: 100.0,
               height: 50.0,
-            )
-          )
-        )
+            ),
+          ),
+        ),
       )
     );
 
@@ -114,10 +114,10 @@ void main() {
   });
 
   testWidgets('FittedBox with no child', (WidgetTester tester) async {
-    final Key key = new UniqueKey();
+    final Key key = UniqueKey();
     await tester.pumpWidget(
-      new Center(
-        child: new FittedBox(
+      Center(
+        child: FittedBox(
           key: key,
           fit: BoxFit.cover,
         ),
@@ -130,23 +130,23 @@ void main() {
   });
 
   testWidgets('Child can be aligned multiple ways in a row', (WidgetTester tester) async {
-    final Key outside = new UniqueKey();
-    final Key inside = new UniqueKey();
+    final Key outside = UniqueKey();
+    final Key inside = UniqueKey();
 
     { // align RTL
 
       await tester.pumpWidget(
-        new Directionality(
+        Directionality(
           textDirection: TextDirection.rtl,
-          child: new Center(
-            child: new Container(
+          child: Center(
+            child: Container(
               width: 100.0,
               height: 100.0,
-              child: new FittedBox(
+              child: FittedBox(
                 key: outside,
                 fit: BoxFit.scaleDown,
                 alignment: AlignmentDirectional.bottomEnd,
-                child: new Container(
+                child: Container(
                   key: inside,
                   width: 10.0,
                   height: 10.0,
@@ -177,17 +177,17 @@ void main() {
     { // change direction
 
       await tester.pumpWidget(
-        new Directionality(
+        Directionality(
           textDirection: TextDirection.ltr,
-          child: new Center(
-            child: new Container(
+          child: Center(
+            child: Container(
               width: 100.0,
               height: 100.0,
-              child: new FittedBox(
+              child: FittedBox(
                 key: outside,
                 fit: BoxFit.scaleDown,
                 alignment: AlignmentDirectional.bottomEnd,
-                child: new Container(
+                child: Container(
                   key: inside,
                   width: 10.0,
                   height: 10.0,
@@ -218,17 +218,17 @@ void main() {
     { // change alignment
 
       await tester.pumpWidget(
-        new Directionality(
+        Directionality(
           textDirection: TextDirection.ltr,
-          child: new Center(
-            child: new Container(
+          child: Center(
+            child: Container(
               width: 100.0,
               height: 100.0,
-              child: new FittedBox(
+              child: FittedBox(
                 key: outside,
                 fit: BoxFit.scaleDown,
                 alignment: AlignmentDirectional.center,
-                child: new Container(
+                child: Container(
                   key: inside,
                   width: 10.0,
                   height: 10.0,
@@ -259,17 +259,17 @@ void main() {
     { // change size
 
       await tester.pumpWidget(
-        new Directionality(
+        Directionality(
           textDirection: TextDirection.ltr,
-          child: new Center(
-            child: new Container(
+          child: Center(
+            child: Container(
               width: 100.0,
               height: 100.0,
-              child: new FittedBox(
+              child: FittedBox(
                 key: outside,
                 fit: BoxFit.scaleDown,
                 alignment: AlignmentDirectional.center,
-                child: new Container(
+                child: Container(
                   key: inside,
                   width: 30.0,
                   height: 10.0,
@@ -300,17 +300,17 @@ void main() {
     { // change fit
 
       await tester.pumpWidget(
-        new Directionality(
+        Directionality(
           textDirection: TextDirection.ltr,
-          child: new Center(
-            child: new Container(
+          child: Center(
+            child: Container(
               width: 100.0,
               height: 100.0,
-              child: new FittedBox(
+              child: FittedBox(
                 key: outside,
                 fit: BoxFit.fill,
                 alignment: AlignmentDirectional.center,
-                child: new Container(
+                child: Container(
                   key: inside,
                   width: 30.0,
                   height: 10.0,
@@ -342,16 +342,16 @@ void main() {
   testWidgets('FittedBox layers - contain', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Center(
-        child: const SizedBox(
+        child: SizedBox(
           width: 100.0,
           height: 10.0,
-          child: const FittedBox(
+          child: FittedBox(
             fit: BoxFit.contain,
-            child: const SizedBox(
+            child: SizedBox(
               width: 50.0,
               height: 50.0,
-              child: const RepaintBoundary(
-                child: const Placeholder(),
+              child: RepaintBoundary(
+                child: Placeholder(),
               ),
             ),
           ),
@@ -364,16 +364,16 @@ void main() {
   testWidgets('FittedBox layers - cover - horizontal', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Center(
-        child: const SizedBox(
+        child: SizedBox(
           width: 100.0,
           height: 10.0,
-          child: const FittedBox(
+          child: FittedBox(
             fit: BoxFit.cover,
-            child: const SizedBox(
+            child: SizedBox(
               width: 10.0,
               height: 50.0,
-              child: const RepaintBoundary(
-                child: const Placeholder(),
+              child: RepaintBoundary(
+                child: Placeholder(),
               ),
             ),
           ),
@@ -386,16 +386,16 @@ void main() {
   testWidgets('FittedBox layers - cover - vertical', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Center(
-        child: const SizedBox(
+        child: SizedBox(
           width: 10.0,
           height: 100.0,
-          child: const FittedBox(
+          child: FittedBox(
             fit: BoxFit.cover,
-            child: const SizedBox(
+            child: SizedBox(
               width: 50.0,
               height: 10.0,
-              child: const RepaintBoundary(
-                child: const Placeholder(),
+              child: RepaintBoundary(
+                child: Placeholder(),
               ),
             ),
           ),
@@ -412,17 +412,17 @@ void main() {
         for (double c in values) {
           for (double d in values) {
             await tester.pumpWidget(
-              new Center(
-                child: new SizedBox(
+              Center(
+                child: SizedBox(
                   width: a,
                   height: b,
-                  child: new FittedBox(
+                  child: FittedBox(
                     fit: BoxFit.none,
-                    child: new SizedBox(
+                    child: SizedBox(
                       width: c,
                       height: d,
                       child: const RepaintBoundary(
-                        child: const Placeholder(),
+                        child: Placeholder(),
                       ),
                     ),
                   ),
@@ -441,31 +441,31 @@ void main() {
   });
 
   testWidgets('Big child into small fitted box - hit testing', (WidgetTester tester) async {
-    final GlobalKey key1 = new GlobalKey();
+    final GlobalKey key1 = GlobalKey();
     bool _pointerDown = false;
     await tester.pumpWidget(
-      new Center(
-        child: new SizedBox(
+      Center(
+        child: SizedBox(
           width: 100.0,
           height: 100.0,
-          child: new FittedBox(
+          child: FittedBox(
             fit: BoxFit.contain,
             alignment: FractionalOffset.center,
-            child: new SizedBox(
+            child: SizedBox(
               width: 1000.0,
               height: 1000.0,
-              child: new Listener(
+              child: Listener(
                 onPointerDown: (PointerDownEvent event) {
                   _pointerDown = true;
                 },
-                child: new Container(
+                child: Container(
                   key: key1,
                   color: const Color(0xFF000000),
-                )
-              )
-            )
-          )
-        )
+                ),
+              ),
+            ),
+          ),
+        ),
       )
     );
     expect(_pointerDown, isFalse);

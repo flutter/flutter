@@ -2,28 +2,32 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../widgets/semantics_tester.dart';
+
 void main() {
   testWidgets('Drawer control test', (WidgetTester tester) async {
-    const Key containerKey = const Key('container');
+    const Key containerKey = Key('container');
 
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new Scaffold(
-          drawer: new Drawer(
-            child: new ListView(
+      MaterialApp(
+        home: Scaffold(
+          drawer: Drawer(
+            child: ListView(
               children: <Widget>[
-                new DrawerHeader(
-                  child: new Container(
+                DrawerHeader(
+                  child: Container(
                     key: containerKey,
                     child: const Text('header'),
                   ),
                 ),
                 const ListTile(
-                  leading: const Icon(Icons.archive),
-                  title: const Text('Archive'),
+                  leading: Icon(Icons.archive),
+                  title: Text('Archive'),
                 ),
               ],
             ),
@@ -51,5 +55,55 @@ void main() {
     expect(box.size.height, equals(drawerHeight - 2 * 16.0));
 
     expect(find.text('header'), findsOneWidget);
+  });
+
+  testWidgets('Drawer dismiss barrier has label on iOS', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          drawer: Drawer(),
+        ),
+      ),
+    );
+
+    final ScaffoldState state = tester.firstState(find.byType(Scaffold));
+    state.openDrawer();
+
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(semantics, includesNodeWith(
+      label: const DefaultMaterialLocalizations().modalBarrierDismissLabel,
+      actions: <SemanticsAction>[SemanticsAction.tap],
+    ));
+
+    semantics.dispose();
+    debugDefaultTargetPlatformOverride = null;
+  });
+
+  testWidgets('Drawer dismiss barrier has no label on Android', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+            drawer: Drawer(),
+        ),
+      ),
+    );
+
+    final ScaffoldState state = tester.firstState(find.byType(Scaffold));
+    state.openDrawer();
+
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(semantics, isNot(includesNodeWith(
+      label: const DefaultMaterialLocalizations().modalBarrierDismissLabel,
+      actions: <SemanticsAction>[SemanticsAction.tap],
+    )));
+
+    semantics.dispose();
   });
 }

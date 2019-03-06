@@ -3,17 +3,17 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert' show json;
 
 import 'package:crypto/crypto.dart' show md5;
 import 'package:meta/meta.dart';
 import 'package:quiver/core.dart' show hash2;
 
+import '../convert.dart' show json;
 import '../globals.dart';
 import '../version.dart';
 import 'file_system.dart';
 
-typedef bool FingerprintPathFilter(String path);
+typedef FingerprintPathFilter = bool Function(String path);
 
 /// A tool that can be used to compute, compare, and write [Fingerprint]s for a
 /// set of input files and associated build settings.
@@ -30,7 +30,7 @@ class Fingerprinter {
     Iterable<String> depfilePaths = const <String>[],
     FingerprintPathFilter pathFilter,
   }) : _paths = paths.toList(),
-       _properties = new Map<String, String>.from(properties),
+       _properties = Map<String, String>.from(properties),
        _depfilePaths = depfilePaths.toList(),
        _pathFilter = pathFilter,
        assert(fingerprintPath != null),
@@ -46,7 +46,7 @@ class Fingerprinter {
 
   Future<Fingerprint> buildFingerprint() async {
     final List<String> paths = await _getPaths();
-    return new Fingerprint.fromBuildInputs(_properties, paths);
+    return Fingerprint.fromBuildInputs(_properties, paths);
   }
 
   Future<bool> doesFingerprintMatch() async {
@@ -62,7 +62,7 @@ class Fingerprinter {
       if (!paths.every(fs.isFileSync))
         return false;
 
-      final Fingerprint oldFingerprint = new Fingerprint.fromJson(await fingerprintFile.readAsString());
+      final Fingerprint oldFingerprint = Fingerprint.fromJson(await fingerprintFile.readAsString());
       final Fingerprint newFingerprint = await buildFingerprint();
       return oldFingerprint == newFingerprint;
     } catch (e) {
@@ -97,10 +97,10 @@ class Fingerprinter {
 /// See [Fingerprinter].
 class Fingerprint {
   Fingerprint.fromBuildInputs(Map<String, String> properties, Iterable<String> inputPaths) {
-    final Iterable<File> files = inputPaths.map(fs.file);
+    final Iterable<File> files = inputPaths.map<File>(fs.file);
     final Iterable<File> missingInputs = files.where((File file) => !file.existsSync());
     if (missingInputs.isNotEmpty)
-      throw new ArgumentError('Missing input files:\n' + missingInputs.join('\n'));
+      throw ArgumentError('Missing input files:\n' + missingInputs.join('\n'));
 
     _checksums = <String, String>{};
     for (File file in files) {
@@ -119,7 +119,7 @@ class Fingerprint {
 
     final String version = content['version'];
     if (version != FlutterVersion.instance.frameworkRevision)
-      throw new ArgumentError('Incompatible fingerprint version: $version');
+      throw ArgumentError('Incompatible fingerprint version: $version');
     _checksums = content['files']?.cast<String,String>() ?? <String, String>{};
     _properties = content['properties']?.cast<String,String>() ?? <String, String>{};
   }
@@ -158,8 +158,8 @@ class Fingerprint {
   String toString() => '{checksums: $_checksums, properties: $_properties}';
 }
 
-final RegExp _separatorExpr = new RegExp(r'([^\\]) ');
-final RegExp _escapeExpr = new RegExp(r'\\(.)');
+final RegExp _separatorExpr = RegExp(r'([^\\]) ');
+final RegExp _escapeExpr = RegExp(r'\\(.)');
 
 /// Parses a VM snapshot dependency file.
 ///
@@ -179,7 +179,7 @@ Future<Set<String>> readDepfile(String depfilePath) async {
   return dependencies
       .replaceAllMapped(_separatorExpr, (Match match) => '${match.group(1)}\n')
       .split('\n')
-      .map((String path) => path.replaceAllMapped(_escapeExpr, (Match match) => match.group(1)).trim())
+      .map<String>((String path) => path.replaceAllMapped(_escapeExpr, (Match match) => match.group(1)).trim())
       .where((String path) => path.isNotEmpty)
       .toSet();
 }

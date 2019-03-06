@@ -30,6 +30,26 @@ import 'table.dart';
 /// See also the discussion at [WidgetsBinding.drawFrame].
 bool debugPrintRebuildDirtyWidgets = false;
 
+/// Signature for [debugOnRebuildDirtyWidget] implementations.
+typedef RebuildDirtyWidgetCallback = void Function(Element e, bool builtOnce);
+
+/// Callback invoked for every dirty widget built each frame.
+///
+/// This callback is only invoked in debug builds.
+///
+/// See also:
+///
+///  * [debugPrintRebuildDirtyWidgets], which does something similar but logs
+///    to the console instead of invoking a callback.
+///  * [debugOnProfilePaint], which does something similar for [RenderObject]
+///    painting.
+///  * [WidgetInspectorService], which uses the [debugOnRebuildDirtyWidget]
+///    callback to generate aggregate profile statistics describing which widget
+///    rebuilds occurred when the
+///    `ext.flutter.inspector.trackRebuildDirtyWidgets` service extension is
+///    enabled.
+RebuildDirtyWidgetCallback debugOnRebuildDirtyWidget;
+
 /// Log all calls to [BuildOwner.buildScope].
 ///
 /// Combined with [debugPrintScheduleBuildForStacks], this allows you to track
@@ -76,7 +96,7 @@ bool debugProfileBuildsEnabled = false;
 bool debugHighlightDeprecatedWidgets = false;
 
 Key _firstNonUniqueKey(Iterable<Widget> widgets) {
-  final Set<Key> keySet = new HashSet<Key>();
+  final Set<Key> keySet = HashSet<Key>();
   for (Widget widget in widgets) {
     assert(widget != null);
     if (widget.key == null)
@@ -105,7 +125,7 @@ bool debugChildrenHaveDuplicateKeys(Widget parent, Iterable<Widget> children) {
   assert(() {
     final Key nonUniqueKey = _firstNonUniqueKey(children);
     if (nonUniqueKey != null) {
-      throw new FlutterError(
+      throw FlutterError(
         'Duplicate keys found.\n'
         'If multiple keyed nodes exist as children of another node, they must have unique keys.\n'
         '$parent has multiple children with key $nonUniqueKey.'
@@ -132,7 +152,7 @@ bool debugItemsHaveDuplicateKeys(Iterable<Widget> items) {
   assert(() {
     final Key nonUniqueKey = _firstNonUniqueKey(items);
     if (nonUniqueKey != null)
-      throw new FlutterError('Duplicate key found: $nonUniqueKey.');
+      throw FlutterError('Duplicate key found: $nonUniqueKey.');
     return true;
   }());
   return false;
@@ -154,7 +174,7 @@ bool debugCheckHasTable(BuildContext context) {
   assert(() {
     if (context.widget is! Table && context.ancestorWidgetOfExactType(Table) == null) {
       final Element element = context;
-      throw new FlutterError(
+      throw FlutterError(
         'No Table widget found.\n'
         '${context.widget.runtimeType} widgets require a Table widget ancestor.\n'
         'The specific widget that could not find a Table ancestor was:\n'
@@ -185,7 +205,7 @@ bool debugCheckHasMediaQuery(BuildContext context) {
   assert(() {
     if (context.widget is! MediaQuery && context.ancestorWidgetOfExactType(MediaQuery) == null) {
       final Element element = context;
-      throw new FlutterError(
+      throw FlutterError(
         'No MediaQuery widget found.\n'
         '${context.widget.runtimeType} widgets require a MediaQuery widget ancestor.\n'
         'The specific widget that could not find a MediaQuery ancestor was:\n'
@@ -218,7 +238,7 @@ bool debugCheckHasDirectionality(BuildContext context) {
   assert(() {
     if (context.widget is! Directionality && context.ancestorWidgetOfExactType(Directionality) == null) {
       final Element element = context;
-      throw new FlutterError(
+      throw FlutterError(
         'No Directionality widget found.\n'
         '${context.widget.runtimeType} widgets require a Directionality widget ancestor.\n'
         'The specific widget that could not find a Directionality ancestor was:\n'
@@ -247,12 +267,20 @@ bool debugCheckHasDirectionality(BuildContext context) {
 void debugWidgetBuilderValue(Widget widget, Widget built) {
   assert(() {
     if (built == null) {
-      throw new FlutterError(
+      throw FlutterError(
         'A build function returned null.\n'
         'The offending widget is: $widget\n'
         'Build functions must never return null. '
         'To return an empty space that causes the building widget to fill available room, return "new Container()". '
         'To return an empty space that takes as little room as possible, return "new Container(width: 0.0, height: 0.0)".'
+      );
+    }
+    if (widget == built) {
+      throw FlutterError(
+        'A build function returned context.widget.\n'
+        'The offending widget is: $widget\n'
+        'Build functions must never return their BuildContext parameter\'s widget or a child that contains "context.widget". '
+        'Doing so introduces a loop in the widget tree that can cause the app to crash.'
       );
     }
     return true;
@@ -274,7 +302,7 @@ bool debugAssertAllWidgetVarsUnset(String reason) {
         debugPrintGlobalKeyedWidgetLifecycle ||
         debugProfileBuildsEnabled ||
         debugHighlightDeprecatedWidgets) {
-      throw new FlutterError(reason);
+      throw FlutterError(reason);
     }
     return true;
   }());

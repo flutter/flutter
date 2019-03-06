@@ -1,4 +1,7 @@
 {
+  "remainingTextFieldCharacterCountTwo": "حرفان ($remainingCount) متبقيان",
+  "remainingTextFieldCharacterCountMany": "$remainingCount حرفًا متبقيًا",
+  "remainingTextFieldCharacterCountFew": "$remainingCount أحرف متبقية",
   "selectedRowCountTitleOne": "تم اختيار عنصر واحد",
   "selectedRowCountTitleZero": "لم يتم اختيار أي عنصر",
   "selectedRowCountTitleTwo": "تم اختيار عنصرين ($selectedRowCount)",
@@ -42,6 +45,18 @@
   "drawerLabel": "قائمة تنقل",
   "popupMenuLabel": "قائمة منبثقة",
   "dialogLabel": "مربع حوار",
-  "alertDialogLabel": "مربع حوار التنبيه",
-  "searchFieldLabel": "بحث"
+  "alertDialogLabel": "تنبيه",
+  "searchFieldLabel": "بحث",
+  "reorderItemToStart": "نقل إلى بداية القائمة",
+  "reorderItemToEnd": "نقل إلى نهاية القائمة",
+  "reorderItemUp": "نقل لأعلى",
+  "reorderItemDown": "نقل لأسفل",
+  "reorderItemLeft": "نقل لليمين",
+  "reorderItemRight": "نقل لليسار",
+  "expandedIconTapHint": "تصغير",
+  "collapsedIconTapHint": "توسيع",
+  "remainingTextFieldCharacterCountZero": "لا أحرف متبقية",
+  "remainingTextFieldCharacterCountOne": "حرف واحد متبقٍ",
+  "remainingTextFieldCharacterCountOther": "$remainingCount حرف متبقٍ",
+  "refreshIndicatorSemanticLabel": "إعادة تحميل"
 }

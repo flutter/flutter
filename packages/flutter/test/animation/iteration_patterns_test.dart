@@ -13,7 +13,7 @@ void main() {
   });
 
   test('AnimationController with mutating listener', () {
-    final AnimationController controller = new AnimationController(
+    final AnimationController controller = AnimationController(
       duration: const Duration(milliseconds: 100),
       vsync: const TestVSync(),
     );
@@ -46,7 +46,7 @@ void main() {
   });
 
   test('AnimationController with mutating status listener', () {
-    final AnimationController controller = new AnimationController(
+    final AnimationController controller = AnimationController(
       duration: const Duration(milliseconds: 100),
       vsync: const TestVSync(),
     );
@@ -81,7 +81,7 @@ void main() {
   });
 
   testWidgets('AnimationController with throwing listener', (WidgetTester tester) async {
-    final AnimationController controller = new AnimationController(
+    final AnimationController controller = AnimationController(
       duration: const Duration(milliseconds: 100),
       vsync: const TestVSync(),
     );
@@ -101,7 +101,7 @@ void main() {
   });
 
   testWidgets('AnimationController with throwing status listener', (WidgetTester tester) async {
-    final AnimationController controller = new AnimationController(
+    final AnimationController controller = AnimationController(
       duration: const Duration(milliseconds: 100),
       vsync: const TestVSync(),
     );

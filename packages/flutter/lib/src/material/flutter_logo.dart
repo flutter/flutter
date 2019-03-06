@@ -7,6 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'colors.dart';
 
 /// The Flutter logo, in widget form. This widget respects the [IconTheme].
+/// For guidelines on using the Flutter logo, visit https://flutter.io/brand.
 ///
 /// See also:
 ///
@@ -70,12 +71,12 @@ class FlutterLogo extends StatelessWidget {
     final IconThemeData iconTheme = IconTheme.of(context);
     final double iconSize = size ?? iconTheme.size;
     final MaterialColor logoColors = colors ?? Colors.blue;
-    return new AnimatedContainer(
+    return AnimatedContainer(
       width: iconSize,
       height: iconSize,
       duration: duration,
       curve: curve,
-      decoration: new FlutterLogoDecoration(
+      decoration: FlutterLogoDecoration(
         lightColor: logoColors.shade400,
         darkColor: logoColors.shade900,
         style: style,

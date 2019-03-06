@@ -4,24 +4,24 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
-import 'package:test/test.dart';
+import '../flutter_test_alternative.dart';
 
 import 'rendering_tester.dart';
 
 void main() {
   test('RenderViewport calculates correct constraints, RenderSliverToBoxAdapter calculates correct geometry', () {
-    final List<RenderSliver> children = new List<RenderSliver>.generate(30, (int index) {
-      return new RenderSliverToBoxAdapter(
-        child: new RenderSizedBox(const Size(400.0, 100.0)),
+    final List<RenderSliver> children = List<RenderSliver>.generate(30, (int index) {
+      return RenderSliverToBoxAdapter(
+        child: RenderSizedBox(const Size(400.0, 100.0)),
       );
     });
 
     // Viewport is 800x600, can show 6 children at a time.
 
-    final RenderViewport root = new RenderViewport(
+    final RenderViewport root = RenderViewport(
       axisDirection: AxisDirection.down,
       crossAxisDirection: AxisDirection.right,
-      offset: new ViewportOffset.zero(),
+      offset: ViewportOffset.zero(),
       cacheExtent: 250.0,
       children: children,
     );
@@ -103,7 +103,7 @@ void main() {
     );
 
     // scroll down half a sliver
-    root.offset = new ViewportOffset.fixed(50.0);
+    root.offset = ViewportOffset.fixed(50.0);
     pumpFrame();
 
     firstVisible = children[0];
@@ -182,7 +182,7 @@ void main() {
     );
 
     // scroll down 1.5 slivers
-    root.offset = new ViewportOffset.fixed(150.0);
+    root.offset = ViewportOffset.fixed(150.0);
     pumpFrame();
 
     RenderSliver firstInPreCache = children[0];
@@ -216,7 +216,7 @@ void main() {
     );
 
     // scroll down 10 slivers
-    root.offset = new ViewportOffset.fixed(1000.0);
+    root.offset = ViewportOffset.fixed(1000.0);
     pumpFrame();
 
     final RenderSliver first = children[0];
@@ -282,17 +282,17 @@ void main() {
 
   test('RenderSliverFixedExtentList calculates correct geometry', () {
     // Viewport is 800x600, can show 6 full children at a time
-    final List<RenderBox> children = new List<RenderBox>.generate(30, (int index) {
-      return new RenderSizedBox(const Size(400.0, 100.0));
+    final List<RenderBox> children = List<RenderBox>.generate(30, (int index) {
+      return RenderSizedBox(const Size(400.0, 100.0));
     });
-    final TestRenderSliverBoxChildManager childManager = new TestRenderSliverBoxChildManager(
+    final TestRenderSliverBoxChildManager childManager = TestRenderSliverBoxChildManager(
       children: children,
     );
     RenderSliverFixedExtentList inner;
-    final RenderViewport root = new RenderViewport(
+    final RenderViewport root = RenderViewport(
       axisDirection: AxisDirection.down,
       crossAxisDirection: AxisDirection.right,
-      offset: new ViewportOffset.zero(),
+      offset: ViewportOffset.zero(),
       cacheExtent: 250.0,
       children: <RenderSliver>[
         inner = childManager.createRenderSliverFixedExtentList(),
@@ -317,7 +317,7 @@ void main() {
     expect(children.sublist(9, 30).any((RenderBox r) => r.attached), false);
 
     // scroll half an item down
-    root.offset = new ViewportOffset.fixed(50.0);
+    root.offset = ViewportOffset.fixed(50.0);
     pumpFrame();
 
     expectSliverConstraints(
@@ -338,7 +338,7 @@ void main() {
 
 
     // scroll to the middle
-    root.offset = new ViewportOffset.fixed(1500.0);
+    root.offset = ViewportOffset.fixed(1500.0);
     pumpFrame();
 
     expectSliverConstraints(
@@ -360,7 +360,7 @@ void main() {
     expect(children.sublist(24, 30).any((RenderBox r) => r.attached), false);
 
     // scroll to the end
-    root.offset = new ViewportOffset.fixed(2400.0);
+    root.offset = ViewportOffset.fixed(2400.0);
     pumpFrame();
 
     expectSliverConstraints(
@@ -382,17 +382,17 @@ void main() {
 
   test('RenderSliverList calculates correct geometry', () {
     // Viewport is 800x600, can show 6 full children at a time
-    final List<RenderBox> children = new List<RenderBox>.generate(30, (int index) {
-      return new RenderSizedBox(const Size(400.0, 100.0));
+    final List<RenderBox> children = List<RenderBox>.generate(30, (int index) {
+      return RenderSizedBox(const Size(400.0, 100.0));
     });
-    final TestRenderSliverBoxChildManager childManager = new TestRenderSliverBoxChildManager(
+    final TestRenderSliverBoxChildManager childManager = TestRenderSliverBoxChildManager(
       children: children,
     );
     RenderSliverList inner;
-    final RenderViewport root = new RenderViewport(
+    final RenderViewport root = RenderViewport(
       axisDirection: AxisDirection.down,
       crossAxisDirection: AxisDirection.right,
-      offset: new ViewportOffset.zero(),
+      offset: ViewportOffset.zero(),
       cacheExtent: 250.0,
       children: <RenderSliver>[
         inner = childManager.createRenderSliverList(),
@@ -417,7 +417,7 @@ void main() {
     expect(children.sublist(9, 30).any((RenderBox r) => r.attached), false);
 
     // scroll half an item down
-    root.offset = new ViewportOffset.fixed(50.0);
+    root.offset = ViewportOffset.fixed(50.0);
     pumpFrame();
 
     expectSliverConstraints(
@@ -438,7 +438,7 @@ void main() {
 
 
     // scroll to the middle
-    root.offset = new ViewportOffset.fixed(1500.0);
+    root.offset = ViewportOffset.fixed(1500.0);
     pumpFrame();
 
     expectSliverConstraints(
@@ -460,7 +460,7 @@ void main() {
     expect(children.sublist(24, 30).any((RenderBox r) => r.attached), false);
 
     // scroll to the end
-    root.offset = new ViewportOffset.fixed(2400.0);
+    root.offset = ViewportOffset.fixed(2400.0);
     pumpFrame();
 
     expectSliverConstraints(
@@ -482,17 +482,17 @@ void main() {
 
   test('RenderSliverGrid calculates correct geometry', () {
     // Viewport is 800x600, each grid element is 400x100, giving us space for 12 visible children
-    final List<RenderBox> children = new List<RenderBox>.generate(60, (int index) {
-      return new RenderSizedBox(const Size(400.0, 100.0));
+    final List<RenderBox> children = List<RenderBox>.generate(60, (int index) {
+      return RenderSizedBox(const Size(400.0, 100.0));
     });
-    final TestRenderSliverBoxChildManager childManager = new TestRenderSliverBoxChildManager(
+    final TestRenderSliverBoxChildManager childManager = TestRenderSliverBoxChildManager(
       children: children,
     );
     RenderSliverGrid inner;
-    final RenderViewport root = new RenderViewport(
+    final RenderViewport root = RenderViewport(
       axisDirection: AxisDirection.down,
       crossAxisDirection: AxisDirection.right,
-      offset: new ViewportOffset.zero(),
+      offset: ViewportOffset.zero(),
       cacheExtent: 250.0,
       children: <RenderSliver>[
         inner = childManager.createRenderSliverGrid(),
@@ -517,7 +517,7 @@ void main() {
     expect(children.sublist(18, 60).any((RenderBox r) => r.attached), false);
 
     // scroll half an item down
-    root.offset = new ViewportOffset.fixed(50.0);
+    root.offset = ViewportOffset.fixed(50.0);
     pumpFrame();
 
     expectSliverConstraints(
@@ -538,7 +538,7 @@ void main() {
 
 
     // scroll to the middle
-    root.offset = new ViewportOffset.fixed(1500.0);
+    root.offset = ViewportOffset.fixed(1500.0);
     pumpFrame();
 
     expectSliverConstraints(
@@ -560,7 +560,7 @@ void main() {
     expect(children.sublist(48, 60).any((RenderBox r) => r.attached), false);
 
     // scroll to the end
-    root.offset = new ViewportOffset.fixed(2400.0);
+    root.offset = ViewportOffset.fixed(2400.0);
     pumpFrame();
 
     expectSliverConstraints(
@@ -584,12 +584,12 @@ void main() {
     // Viewport is 800x600, each item is 100px high with 50px before and after = 200px
 
     final List<RenderSliverToBoxAdapter> adapters = <RenderSliverToBoxAdapter>[];
-    final List<RenderSliverPadding> paddings = new List<RenderSliverPadding>.generate(30, (int index) {
+    final List<RenderSliverPadding> paddings = List<RenderSliverPadding>.generate(30, (int index) {
       RenderSliverToBoxAdapter adapter;
-      final RenderSliverPadding padding = new RenderSliverPadding(
+      final RenderSliverPadding padding = RenderSliverPadding(
         padding: const EdgeInsets.symmetric(vertical: 50.0),
-        child: adapter = new RenderSliverToBoxAdapter(
-          child: new RenderSizedBox(const Size(400.0, 100.0)),
+        child: adapter = RenderSliverToBoxAdapter(
+          child: RenderSizedBox(const Size(400.0, 100.0)),
         ),
       );
       adapters.add(adapter);
@@ -597,10 +597,10 @@ void main() {
     });
 
 
-    final RenderViewport root = new RenderViewport(
+    final RenderViewport root = RenderViewport(
       axisDirection: AxisDirection.down,
       crossAxisDirection: AxisDirection.right,
-      offset: new ViewportOffset.zero(),
+      offset: ViewportOffset.zero(),
       cacheExtent: 250.0,
       children: paddings,
     );
@@ -723,7 +723,7 @@ void main() {
     );
 
     // scroll first padding off screen
-    root.offset = new ViewportOffset.fixed(50.0);
+    root.offset = ViewportOffset.fixed(50.0);
     pumpFrame();
 
     firstVisiblePadding = paddings[0];
@@ -756,7 +756,7 @@ void main() {
     );
 
     // scroll to the end
-    root.offset = new ViewportOffset.fixed(5400.0);
+    root.offset = ViewportOffset.fixed(5400.0);
     pumpFrame();
 
 
@@ -878,14 +878,14 @@ void main() {
   });
 }
 
-void expectSliverConstraints({RenderSliver sliver, double cacheOrigin, double remainingPaintExtent, double remainingCacheExtent, double scrollOffset}) {
+void expectSliverConstraints({ RenderSliver sliver, double cacheOrigin, double remainingPaintExtent, double remainingCacheExtent, double scrollOffset }) {
   expect(sliver.constraints.cacheOrigin, cacheOrigin, reason: 'cacheOrigin');
   expect(sliver.constraints.remainingPaintExtent, remainingPaintExtent, reason: 'remainingPaintExtent');
   expect(sliver.constraints.remainingCacheExtent, remainingCacheExtent, reason: 'remainingCacheExtent');
   expect(sliver.constraints.scrollOffset, scrollOffset, reason: 'scrollOffset');
 }
 
-void expectSliverGeometry({RenderSliver sliver, double paintExtent, double cacheExtent, bool visible}) {
+void expectSliverGeometry({ RenderSliver sliver, double paintExtent, double cacheExtent, bool visible }) {
   expect(sliver.geometry.paintExtent, paintExtent, reason: 'paintExtent');
   expect(sliver.geometry.cacheExtent, cacheExtent, reason: 'cacheExtent');
   expect(sliver.geometry.visible, visible, reason: 'visible');
@@ -901,13 +901,13 @@ class TestRenderSliverBoxChildManager extends RenderSliverBoxChildManager {
 
   RenderSliverList createRenderSliverList() {
     assert(_renderObject == null);
-    _renderObject = new RenderSliverList(childManager: this);
+    _renderObject = RenderSliverList(childManager: this);
     return _renderObject;
   }
 
   RenderSliverFixedExtentList createRenderSliverFixedExtentList() {
     assert(_renderObject == null);
-    _renderObject = new RenderSliverFixedExtentList(
+    _renderObject = RenderSliverFixedExtentList(
       childManager: this,
       itemExtent: 100.0,
     );
@@ -916,7 +916,7 @@ class TestRenderSliverBoxChildManager extends RenderSliverBoxChildManager {
 
   RenderSliverGrid createRenderSliverGrid() {
     assert(_renderObject == null);
-    _renderObject = new RenderSliverGrid(
+    _renderObject = RenderSliverGrid(
       childManager: this,
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
@@ -931,7 +931,7 @@ class TestRenderSliverBoxChildManager extends RenderSliverBoxChildManager {
   @override
   void createChild(int index, { @required RenderBox after }) {
     if (index < 0 || index >= children.length)
-      return null;
+      return;
     try {
       _currentlyUpdatingChildIndex = index;
       _renderObject.insert(children[index], after: after);
@@ -946,7 +946,8 @@ class TestRenderSliverBoxChildManager extends RenderSliverBoxChildManager {
   }
 
   @override
-  double estimateMaxScrollOffset(SliverConstraints constraints, {
+  double estimateMaxScrollOffset(
+    SliverConstraints constraints, {
     int firstIndex,
     int lastIndex,
     double leadingScrollOffset,

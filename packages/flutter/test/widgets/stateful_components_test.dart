@@ -9,7 +9,7 @@ class InnerWidget extends StatefulWidget {
   const InnerWidget({ Key key }) : super(key: key);
 
   @override
-  InnerWidgetState createState() => new InnerWidgetState();
+  InnerWidgetState createState() => InnerWidgetState();
 }
 
 class InnerWidgetState extends State<InnerWidget> {
@@ -23,7 +23,7 @@ class InnerWidgetState extends State<InnerWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return new Container();
+    return Container();
   }
 }
 
@@ -33,7 +33,7 @@ class OuterContainer extends StatefulWidget {
   final InnerWidget child;
 
   @override
-  OuterContainerState createState() => new OuterContainerState();
+  OuterContainerState createState() => OuterContainerState();
 }
 
 class OuterContainerState extends State<OuterContainer> {
@@ -45,12 +45,12 @@ class OuterContainerState extends State<OuterContainer> {
 
 void main() {
   testWidgets('resync stateful widget', (WidgetTester tester) async {
-    const Key innerKey = const Key('inner');
-    const Key outerKey = const Key('outer');
+    const Key innerKey = Key('inner');
+    const Key outerKey = Key('outer');
 
-    const InnerWidget inner1 = const InnerWidget(key: innerKey);
+    const InnerWidget inner1 = InnerWidget(key: innerKey);
     InnerWidget inner2;
-    const OuterContainer outer1 = const OuterContainer(key: outerKey, child: inner1);
+    const OuterContainer outer1 = OuterContainer(key: outerKey, child: inner1);
     OuterContainer outer2;
 
     await tester.pumpWidget(outer1);
@@ -62,7 +62,7 @@ void main() {
     expect(innerElement.renderObject.attached, isTrue);
 
     inner2 = const InnerWidget(key: innerKey);
-    outer2 = new OuterContainer(key: outerKey, child: inner2);
+    outer2 = OuterContainer(key: outerKey, child: inner2);
 
     await tester.pumpWidget(outer2);
 

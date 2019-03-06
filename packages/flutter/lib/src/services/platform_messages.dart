@@ -8,22 +8,22 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 
+import 'binding.dart' show ServicesBinding;
 import 'platform_channel.dart';
 
-typedef Future<ByteData> _MessageHandler(ByteData message);
+typedef _MessageHandler = Future<ByteData> Function(ByteData message);
 
 /// Sends binary messages to and receives binary messages from platform plugins.
 ///
 /// See also:
 ///
-/// * [BasicMessageChannel], which provides basic messaging services similar to
-///   `BinaryMessages`, but with pluggable message codecs in support of sending
-///   strings or semi-structured messages.
-/// * [MethodChannel], which provides platform communication using asynchronous
-///   method calls.
-/// * [EventChannel], which provides platform communication using event streams.
-///
-/// See: <https://flutter.io/platform-channels/>
+///  * [BasicMessageChannel], which provides basic messaging services similar to
+///    `BinaryMessages`, but with pluggable message codecs in support of sending
+///    strings or semi-structured messages.
+///  * [MethodChannel], which provides platform communication using asynchronous
+///    method calls.
+///  * [EventChannel], which provides platform communication using event streams.
+///  * <https://flutter.io/platform-channels/>
 class BinaryMessages {
   BinaryMessages._();
 
@@ -36,12 +36,18 @@ class BinaryMessages {
       <String, _MessageHandler>{};
 
   static Future<ByteData> _sendPlatformMessage(String channel, ByteData message) {
-    final Completer<ByteData> completer = new Completer<ByteData>();
+    final Completer<ByteData> completer = Completer<ByteData>();
+    // ui.window is accessed directly instead of using ServicesBinding.instance.window
+    // because this method might be invoked before any binding is initialized.
+    // This issue was reported in #27541. It is not ideal to statically access
+    // ui.window because the Window may be dependency injected elsewhere with
+    // a different instance. However, static access at this location seems to be
+    // the least bad option.
     ui.window.sendPlatformMessage(channel, message, (ByteData reply) {
       try {
         completer.complete(reply);
       } catch (exception, stack) {
-        FlutterError.reportError(new FlutterErrorDetails(
+        FlutterError.reportError(FlutterErrorDetails(
           exception: exception,
           stack: stack,
           library: 'services library',
@@ -58,15 +64,18 @@ class BinaryMessages {
   /// from [Window.onPlatformMessage].
   ///
   /// To register a handler for a given message channel, see [setMessageHandler].
-  static Future<Null> handlePlatformMessage(
-        String channel, ByteData data, ui.PlatformMessageResponseCallback callback) async {
+  static Future<void> handlePlatformMessage(
+    String channel,
+    ByteData data,
+    ui.PlatformMessageResponseCallback callback,
+  ) async {
     ByteData response;
     try {
       final _MessageHandler handler = _handlers[channel];
       if (handler != null)
         response = await handler(data);
     } catch (exception, stack) {
-      FlutterError.reportError(new FlutterErrorDetails(
+      FlutterError.reportError(FlutterErrorDetails(
         exception: exception,
         stack: stack,
         library: 'services library',

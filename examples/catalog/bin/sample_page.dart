@@ -33,18 +33,18 @@ void logMessage(String s) { print(s); }
 void logError(String s) { print(s); }
 
 File inputFile(String dir, String name) {
-  return new File(dir + Platform.pathSeparator + name);
+  return File(dir + Platform.pathSeparator + name);
 }
 
 File outputFile(String name, [Directory directory]) {
-  return new File((directory ?? outputDirectory).path + Platform.pathSeparator + name);
+  return File((directory ?? outputDirectory).path + Platform.pathSeparator + name);
 }
 
 void initialize() {
-  outputDirectory = new Directory('.generated');
-  sampleDirectory = new Directory('lib');
-  testDirectory = new Directory('test');
-  driverDirectory = new Directory('test_driver');
+  outputDirectory = Directory('.generated');
+  sampleDirectory = Directory('lib');
+  testDirectory = Directory('test');
+  driverDirectory = Directory('test_driver');
   outputDirectory.createSync();
 }
 
@@ -52,10 +52,10 @@ void initialize() {
 // by values[foo].
 String expandTemplate(String template, Map<String, String> values) {
   // Matches @(foo), match[1] == 'foo'
-  final RegExp tokenRE = new RegExp(r'@\(([\w ]+)\)', multiLine: true);
+  final RegExp tokenRE = RegExp(r'@\(([\w ]+)\)', multiLine: true);
   return template.replaceAllMapped(tokenRE, (Match match) {
     if (match.groupCount != 1)
-      throw new SampleError('bad template keyword $match[0]');
+      throw SampleError('bad template keyword $match[0]');
     final String keyword = match[1];
     return values[keyword] ?? '';
   });
@@ -89,7 +89,7 @@ class SampleInfo {
     final String classNames = commentValues['classes'];
     if (classNames == null)
       return const <String>[];
-    return classNames.split(',').map((String s) => s.trim()).where((String s) => s.isNotEmpty);
+    return classNames.split(',').map<String>((String s) => s.trim()).where((String s) => s.isNotEmpty);
   }
 
   // The relative import path for this sample, like '../lib/foo.dart'.
@@ -102,8 +102,8 @@ class SampleInfo {
   bool initialize() {
     final String contents = sourceFile.readAsStringSync();
 
-    final RegExp startRE = new RegExp(r'^/\*\s+^Sample\s+Catalog', multiLine: true);
-    final RegExp endRE = new RegExp(r'^\*/', multiLine: true);
+    final RegExp startRE = RegExp(r'^/\*\s+^Sample\s+Catalog', multiLine: true);
+    final RegExp endRE = RegExp(r'^\*/', multiLine: true);
     final Match startMatch = startRE.firstMatch(contents);
     if (startMatch == null)
       return false;
@@ -116,12 +116,12 @@ class SampleInfo {
     final String comment = contents.substring(startIndex, startIndex + endMatch.start);
     sourceCode = contents.substring(0, startMatch.start) + contents.substring(startIndex + endMatch.end);
     if (sourceCode.trim().isEmpty)
-      throw new SampleError('did not find any source code in $sourceFile');
+      throw SampleError('did not find any source code in $sourceFile');
 
-    final RegExp keywordsRE = new RegExp(sampleCatalogKeywords, multiLine: true);
+    final RegExp keywordsRE = RegExp(sampleCatalogKeywords, multiLine: true);
     final List<Match> keywordMatches = keywordsRE.allMatches(comment).toList();
     if (keywordMatches.isEmpty)
-      throw new SampleError('did not find any keywords in the Sample Catalog comment in $sourceFile');
+      throw SampleError('did not find any keywords in the Sample Catalog comment in $sourceFile');
 
     commentValues = <String, String>{};
     for (int i = 0; i < keywordMatches.length; i += 1) {
@@ -148,7 +148,7 @@ void generate(String commit) {
   final List<SampleInfo> samples = <SampleInfo>[];
   for (FileSystemEntity entity in sampleDirectory.listSync()) {
     if (entity is File && entity.path.endsWith('.dart')) {
-      final SampleInfo sample = new SampleInfo(entity, commit);
+      final SampleInfo sample = SampleInfo(entity, commit);
       if (sample.initialize()) // skip files that lack the Sample Catalog comment
         samples.add(sample);
     }
@@ -163,7 +163,7 @@ void generate(String commit) {
   final String entryTemplate = inputFile('bin', 'entry.md.template').readAsStringSync();
 
   // Write the sample catalog's home page: index.md
-  final Iterable<String> entries = samples.map((SampleInfo sample) {
+  final Iterable<String> entries = samples.map<String>((SampleInfo sample) {
     return expandTemplate(entryTemplate, sample.commentValues);
   });
   writeExpandedTemplate(
@@ -195,7 +195,7 @@ void generate(String commit) {
     }
   }
   for (String className in classToSamples.keys) {
-    final Iterable<String> entries = classToSamples[className].map((SampleInfo sample) {
+    final Iterable<String> entries = classToSamples[className].map<String>((SampleInfo sample) {
       return expandTemplate(entryTemplate, sample.commentValues);
     });
     writeExpandedTemplate(
@@ -215,10 +215,10 @@ void generate(String commit) {
     outputFile('screenshot.dart', driverDirectory),
     inputFile('bin', 'screenshot.dart.template').readAsStringSync(),
     <String, String>{
-      'imports': samples.map((SampleInfo page) {
+      'imports': samples.map<String>((SampleInfo page) {
         return "import '${page.importPath}' show ${page.sampleClass};\n";
       }).toList().join(),
-      'widgets': samples.map((SampleInfo sample) {
+      'widgets': samples.map<String>((SampleInfo sample) {
         return 'new ${sample.sampleClass}(),\n';
       }).toList().join(),
     },
@@ -230,7 +230,7 @@ void generate(String commit) {
     outputFile('screenshot_test.dart', driverDirectory),
     inputFile('bin', 'screenshot_test.dart.template').readAsStringSync(),
     <String, String>{
-      'paths': samples.map((SampleInfo sample) {
+      'paths': samples.map<String>((SampleInfo sample) {
         return "'${outputFile(sample.sourceName + '.png').path}'";
       }).toList().join(',\n'),
     },

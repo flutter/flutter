@@ -7,17 +7,17 @@ import 'package:flutter/widgets.dart';
 
 void main() {
   testWidgets('SliverFillRemaining control test', (WidgetTester tester) async {
-    final List<Widget> children = new List<Widget>.generate(20, (int i) {
-      return new Container(child: new Text('$i', textDirection: TextDirection.ltr));
+    final List<Widget> children = List<Widget>.generate(20, (int i) {
+      return Container(child: Text('$i', textDirection: TextDirection.ltr));
     });
 
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new CustomScrollView(
+        child: CustomScrollView(
           slivers: <Widget>[
-            new SliverFillViewport(
-              delegate: new SliverChildListDelegate(children, addAutomaticKeepAlives: false),
+            SliverFillViewport(
+              delegate: SliverChildListDelegate(children, addAutomaticKeepAlives: false, addSemanticIndexes: false),
             ),
           ],
         ),

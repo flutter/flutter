@@ -35,13 +35,13 @@ class _StocksLocalizationsDelegate extends LocalizationsDelegate<StockStrings> {
 
 class StocksApp extends StatefulWidget {
   @override
-  StocksAppState createState() => new StocksAppState();
+  StocksAppState createState() => StocksAppState();
 }
 
 class StocksAppState extends State<StocksApp> {
   StockData stocks;
 
-  StockConfiguration _configuration = new StockConfiguration(
+  StockConfiguration _configuration = StockConfiguration(
     stockMode: StockMode.optimistic,
     backupMode: BackupMode.enabled,
     debugShowGrid: false,
@@ -51,13 +51,13 @@ class StocksAppState extends State<StocksApp> {
     debugShowPointers: false,
     debugShowRainbow: false,
     showPerformanceOverlay: false,
-    showSemanticsDebugger: false
+    showSemanticsDebugger: false,
   );
 
   @override
   void initState() {
     super.initState();
-    stocks = new StockData();
+    stocks = StockData();
   }
 
   void configurationUpdater(StockConfiguration value) {
@@ -69,14 +69,14 @@ class StocksAppState extends State<StocksApp> {
   ThemeData get theme {
     switch (_configuration.stockMode) {
       case StockMode.optimistic:
-        return new ThemeData(
+        return ThemeData(
           brightness: Brightness.light,
-          primarySwatch: Colors.purple
+          primarySwatch: Colors.purple,
         );
       case StockMode.pessimistic:
-        return new ThemeData(
+        return ThemeData(
           brightness: Brightness.dark,
-          accentColor: Colors.redAccent
+          accentColor: Colors.redAccent,
         );
     }
     assert(_configuration.stockMode != null);
@@ -84,25 +84,11 @@ class StocksAppState extends State<StocksApp> {
   }
 
   Route<dynamic> _getRoute(RouteSettings settings) {
-    // Routes, by convention, are split on slashes, like filesystem paths.
-    final List<String> path = settings.name.split('/');
-    // We only support paths that start with a slash, so bail if
-    // the first component is not empty:
-    if (path[0] != '')
-      return null;
-    // If the path is "/stock:..." then show a stock page for the
-    // specified stock symbol.
-    if (path[1].startsWith('stock:')) {
-      // We don't yet support subpages of a stock, so bail if there's
-      // any more path components.
-      if (path.length != 2)
-        return null;
-      // Extract the symbol part of "stock:..." and return a route
-      // for that symbol.
-      final String symbol = path[1].substring(6);
-      return new MaterialPageRoute<void>(
+    if (settings.name == '/stocks') {
+      final String symbol = settings.arguments;
+      return MaterialPageRoute<void>(
         settings: settings,
-        builder: (BuildContext context) => new StockSymbolPage(symbol: symbol, stocks: stocks),
+        builder: (BuildContext context) => StockSymbolPage(symbol: symbol, stocks: stocks),
       );
     }
     // The other paths we support are in the routes table.
@@ -119,24 +105,24 @@ class StocksAppState extends State<StocksApp> {
       debugRepaintRainbowEnabled = _configuration.debugShowRainbow;
       return true;
     }());
-    return new MaterialApp(
+    return MaterialApp(
       title: 'Stocks',
       theme: theme,
       localizationsDelegates: <LocalizationsDelegate<dynamic>>[
-        new _StocksLocalizationsDelegate(),
+        _StocksLocalizationsDelegate(),
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
       ],
       supportedLocales: const <Locale>[
-        const Locale('en', 'US'),
-        const Locale('es', 'ES'),
+        Locale('en', 'US'),
+        Locale('es', 'ES'),
       ],
       debugShowMaterialGrid: _configuration.debugShowGrid,
       showPerformanceOverlay: _configuration.showPerformanceOverlay,
       showSemanticsDebugger: _configuration.showSemanticsDebugger,
       routes: <String, WidgetBuilder>{
-         '/':         (BuildContext context) => new StockHome(stocks, _configuration, configurationUpdater),
-         '/settings': (BuildContext context) => new StockSettings(_configuration, configurationUpdater)
+         '/':         (BuildContext context) => StockHome(stocks, _configuration, configurationUpdater),
+         '/settings': (BuildContext context) => StockSettings(_configuration, configurationUpdater),
       },
       onGenerateRoute: _getRoute,
     );
@@ -144,5 +130,5 @@ class StocksAppState extends State<StocksApp> {
 }
 
 void main() {
-  runApp(new StocksApp());
+  runApp(StocksApp());
 }

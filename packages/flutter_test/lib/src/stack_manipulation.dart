@@ -12,11 +12,11 @@
 /// the test_widgets [expect] function, this will fill the given StringBuffer
 /// with the precise file and line number that called that function.
 int reportExpectCall(StackTrace stack, StringBuffer information) {
-  final RegExp line0 = new RegExp(r'^#0 +fail \(.+\)$');
-  final RegExp line1 = new RegExp(r'^#1 +_expect \(.+\)$');
-  final RegExp line2 = new RegExp(r'^#2 +expect \(.+\)$');
-  final RegExp line3 = new RegExp(r'^#3 +expect \(.+\)$');
-  final RegExp line4 = new RegExp(r'^#4 +[^(]+ \((.+?):([0-9]+)(?::[0-9]+)?\)$');
+  final RegExp line0 = RegExp(r'^#0 +fail \(.+\)$');
+  final RegExp line1 = RegExp(r'^#1 +_expect \(.+\)$');
+  final RegExp line2 = RegExp(r'^#2 +expect \(.+\)$');
+  final RegExp line3 = RegExp(r'^#3 +expect \(.+\)$');
+  final RegExp line4 = RegExp(r'^#4 +[^(]+ \((.+?):([0-9]+)(?::[0-9]+)?\)$');
   final List<String> stackLines = stack.toString().split('\n');
   if (line0.firstMatch(stackLines[0]) != null &&
       line1.firstMatch(stackLines[1]) != null &&

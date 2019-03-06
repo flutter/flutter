@@ -12,6 +12,7 @@ import io.flutter.plugin.common.BasicMessageChannel.MessageHandler;
 import io.flutter.plugin.common.BasicMessageChannel.Reply;
 import io.flutter.plugin.common.StringCodec;
 import io.flutter.view.FlutterMain;
+import io.flutter.view.FlutterRunArguments;
 import io.flutter.view.FlutterView;
 import java.util.ArrayList;
 
@@ -58,8 +59,12 @@ public class MainActivity extends AppCompatActivity {
             supportActionBar.hide();
         }
 
+        FlutterRunArguments runArguments = new FlutterRunArguments();
+        runArguments.bundlePath = FlutterMain.findAppBundlePath(getApplicationContext());
+        runArguments.entrypoint = "main";
+
         flutterView = findViewById(R.id.flutter_view);
-        flutterView.runFromBundle(FlutterMain.findAppBundlePath(getApplicationContext()), null);
+        flutterView.runFromBundle(runArguments);
 
         messageChannel = new BasicMessageChannel<>(flutterView, CHANNEL, StringCodec.INSTANCE);
         messageChannel.

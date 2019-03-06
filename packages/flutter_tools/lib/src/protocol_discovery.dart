@@ -17,8 +17,7 @@ class ProtocolDiscovery {
     this.portForwarder,
     this.hostPort,
     this.ipv6,
-  }) : assert(logReader != null),
-       _prefix = '$serviceName listening on ' {
+  }) : assert(logReader != null) {
     _deviceLogSubscription = logReader.logLines.listen(_handleLine);
   }
 
@@ -29,8 +28,9 @@ class ProtocolDiscovery {
     bool ipv6 = false,
   }) {
     const String kObservatoryService = 'Observatory';
-    return new ProtocolDiscovery._(
-      logReader, kObservatoryService,
+    return ProtocolDiscovery._(
+      logReader,
+      kObservatoryService,
       portForwarder: portForwarder,
       hostPort: hostPort,
       ipv6: ipv6,
@@ -43,27 +43,29 @@ class ProtocolDiscovery {
   final int hostPort;
   final bool ipv6;
 
-  final String _prefix;
-  final Completer<Uri> _completer = new Completer<Uri>();
+  final Completer<Uri> _completer = Completer<Uri>();
 
   StreamSubscription<String> _deviceLogSubscription;
 
   /// The discovered service URI.
   Future<Uri> get uri => _completer.future;
 
-  Future<Null> cancel() => _stopScrapingLogs();
+  Future<void> cancel() => _stopScrapingLogs();
 
-  Future<Null> _stopScrapingLogs() async {
+  Future<void> _stopScrapingLogs() async {
     await _deviceLogSubscription?.cancel();
     _deviceLogSubscription = null;
   }
 
   void _handleLine(String line) {
     Uri uri;
-    final int index = line.indexOf(_prefix + 'http://');
-    if (index >= 0) {
+
+    final RegExp r = RegExp('${RegExp.escape(serviceName)} listening on ((http|\/\/)[a-zA-Z0-9:/=\.\\[\\]]+)');
+    final Match match = r.firstMatch(line);
+
+    if (match != null) {
       try {
-        uri = Uri.parse(line.substring(index + _prefix.length));
+        uri = Uri.parse(match[1]);
       } catch (error) {
         _stopScrapingLogs();
         _completer.completeError(error);
@@ -75,6 +77,7 @@ class ProtocolDiscovery {
       _stopScrapingLogs();
       _completer.complete(_forwardPort(uri));
     }
+
   }
 
   Future<Uri> _forwardPort(Uri deviceUri) async {
@@ -88,7 +91,7 @@ class ProtocolDiscovery {
       hostUri = deviceUri.replace(port: actualHostPort);
     }
 
-    assert(new InternetAddress(hostUri.host).isLoopback);
+    assert(InternetAddress(hostUri.host).isLoopback);
     if (ipv6) {
       hostUri = hostUri.replace(host: InternetAddress.loopbackIPv6.host);
     }

@@ -9,6 +9,9 @@ import 'list_tile.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
+// Examples can assume:
+// void setState(VoidCallback fn) { }
+
 /// A [ListTile] with a [Checkbox]. In other words, a checkbox with a label.
 ///
 /// The entire list tile is interactive: tapping anywhere in the tile toggles
@@ -34,13 +37,16 @@ import 'theme_data.dart';
 /// To show the [CheckboxListTile] as disabled, pass null as the [onChanged]
 /// callback.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// This widget shows a checkbox that, when checked, slows down all animations
 /// (including the animation of the checkbox itself getting checked!).
 ///
+/// This sample requires that you also import 'package:flutter/scheduler.dart',
+/// so that you can reference [timeDilation].
+///
 /// ```dart
-/// new CheckboxListTile(
+/// CheckboxListTile(
 ///   title: const Text('Animate Slowly'),
 ///   value: timeDilation != 1.0,
 ///   onChanged: (bool value) {
@@ -49,9 +55,7 @@ import 'theme_data.dart';
 ///   secondary: const Icon(Icons.hourglass_empty),
 /// )
 /// ```
-///
-/// This sample requires that you also import 'package:flutter/scheduler.dart',
-/// so that you can reference [timeDilation].
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -113,14 +117,14 @@ class CheckboxListTile extends StatelessWidget {
   /// gets rebuilt; for example:
   ///
   /// ```dart
-  /// new CheckboxListTile(
+  /// CheckboxListTile(
   ///   value: _throwShotAway,
   ///   onChanged: (bool newValue) {
   ///     setState(() {
   ///       _throwShotAway = newValue;
   ///     });
   ///   },
-  ///   title: new Text('Throw away your shot'),
+  ///   title: Text('Throw away your shot'),
   /// )
   /// ```
   final ValueChanged<bool> onChanged;
@@ -170,7 +174,7 @@ class CheckboxListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Widget control = new Checkbox(
+    final Widget control = Checkbox(
       value: value,
       onChanged: onChanged,
       activeColor: activeColor,
@@ -188,10 +192,10 @@ class CheckboxListTile extends StatelessWidget {
         trailing = control;
         break;
     }
-    return new MergeSemantics(
+    return MergeSemantics(
       child: ListTileTheme.merge(
         selectedColor: activeColor ?? Theme.of(context).accentColor,
-        child: new ListTile(
+        child: ListTile(
           leading: leading,
           title: title,
           subtitle: subtitle,

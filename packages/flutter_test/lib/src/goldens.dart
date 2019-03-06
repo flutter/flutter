@@ -8,7 +8,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as path;
-import 'package:test/test.dart' show TestFailure;
+import 'package:test_api/test_api.dart' as test_package show TestFailure;
 
 /// Compares rasterized image bytes against a golden image file.
 ///
@@ -119,13 +119,13 @@ class TrivialComparator implements GoldenFileComparator {
   @override
   Future<bool> compare(Uint8List imageBytes, Uri golden) {
     debugPrint('Golden file comparison requested for "$golden"; skipping...');
-    return new Future<bool>.value(true);
+    return Future<bool>.value(true);
   }
 
   @override
   Future<void> update(Uri golden, Uint8List imageBytes) {
     // [autoUpdateGoldenFiles] should never be set in a live widget binding.
-    throw new StateError('goldenFileComparator has not been initialized');
+    throw StateError('goldenFileComparator has not been initialized');
   }
 }
 
@@ -149,11 +149,11 @@ class LocalFileComparator implements GoldenFileComparator {
   ///
   /// The [testFile] URL must represent a file.
   LocalFileComparator(Uri testFile, {path.Style pathStyle})
-      : basedir = _getBasedir(testFile, pathStyle),
-        _path = _getPath(pathStyle);
+    : basedir = _getBasedir(testFile, pathStyle),
+      _path = _getPath(pathStyle);
 
   static path.Context _getPath(path.Style style) {
-    return new path.Context(style: style ?? path.Style.platform);
+    return path.Context(style: style ?? path.Style.platform);
   }
 
   static Uri _getBasedir(Uri testFile, path.Style pathStyle) {
@@ -178,10 +178,10 @@ class LocalFileComparator implements GoldenFileComparator {
   Future<bool> compare(Uint8List imageBytes, Uri golden) async {
     final File goldenFile = _getFile(golden);
     if (!goldenFile.existsSync()) {
-      throw new TestFailure('Could not be compared against non-existent file: "$golden"');
+      throw test_package.TestFailure('Could not be compared against non-existent file: "$golden"');
     }
     final List<int> goldenBytes = await goldenFile.readAsBytes();
-    return _areListsEqual(imageBytes, goldenBytes);
+    return _areListsEqual<int>(imageBytes, goldenBytes);
   }
 
   @override
@@ -192,7 +192,7 @@ class LocalFileComparator implements GoldenFileComparator {
   }
 
   File _getFile(Uri golden) {
-    return new File(_path.join(_path.fromUri(basedir), _path.fromUri(golden.path)));
+    return File(_path.join(_path.fromUri(basedir), _path.fromUri(golden.path)));
   }
 
   static bool _areListsEqual<T>(List<T> list1, List<T> list2) {

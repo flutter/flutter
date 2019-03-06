@@ -6,6 +6,7 @@ import 'dart:ui' as ui show Gradient, Shader, TextBox;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/painting.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 
@@ -24,6 +25,9 @@ enum TextOverflow {
 
   /// Use an ellipsis to indicate that the text has overflowed.
   ellipsis,
+
+  /// Render overflowing text outside of its container.
+  visible,
 }
 
 const String _kEllipsis = '\u2026';
@@ -45,6 +49,7 @@ class RenderParagraph extends RenderBox {
     double textScaleFactor = 1.0,
     int maxLines,
     Locale locale,
+    StrutStyle strutStyle,
   }) : assert(text != null),
        assert(text.debugAssertIsValid()),
        assert(textAlign != null),
@@ -55,7 +60,7 @@ class RenderParagraph extends RenderBox {
        assert(maxLines == null || maxLines > 0),
        _softWrap = softWrap,
        _overflow = overflow,
-       _textPainter = new TextPainter(
+       _textPainter = TextPainter(
          text: text,
          textAlign: textAlign,
          textDirection: textDirection,
@@ -63,6 +68,7 @@ class RenderParagraph extends RenderBox {
          maxLines: maxLines,
          ellipsis: overflow == TextOverflow.ellipsis ? _kEllipsis : null,
          locale: locale,
+         strutStyle: strutStyle,
        );
 
   final TextPainter _textPainter;
@@ -78,6 +84,7 @@ class RenderParagraph extends RenderBox {
       case RenderComparison.paint:
         _textPainter.text = value;
         markNeedsPaint();
+        markNeedsSemanticsUpdate();
         break;
       case RenderComparison.layout:
         _textPainter.text = value;
@@ -193,6 +200,17 @@ class RenderParagraph extends RenderBox {
     markNeedsLayout();
   }
 
+  /// {@macro flutter.painting.textPainter.strutStyle}
+  StrutStyle get strutStyle => _textPainter.strutStyle;
+  /// The value may be null.
+  set strutStyle(StrutStyle value) {
+    if (_textPainter.strutStyle == value)
+      return;
+    _textPainter.strutStyle = value;
+    _overflowShader = null;
+    markNeedsLayout();
+  }
+
   void _layoutText({ double minWidth = 0.0, double maxWidth = double.infinity }) {
     final bool widthMatters = softWrap || overflow == TextOverflow.ellipsis;
     _textPainter.layout(minWidth: minWidth, maxWidth: widthMatters ? maxWidth : double.infinity);
@@ -253,7 +271,7 @@ class RenderParagraph extends RenderBox {
     span?.recognizer?.addPointer(event);
   }
 
-  bool _hasVisualOverflow = false;
+  bool _needsClipping = false;
   ui.Shader _overflowShader;
 
   /// Whether this paragraph currently has a [dart:ui.Shader] for its overflow
@@ -266,32 +284,39 @@ class RenderParagraph extends RenderBox {
   @override
   void performLayout() {
     _layoutTextWithConstraints(constraints);
-    // We grab _textPainter.size here because assigning to `size` will trigger
-    // us to validate our intrinsic sizes, which will change _textPainter's
-    // layout because the intrinsic size calculations are destructive.
-    // Other _textPainter state like didExceedMaxLines will also be affected.
-    // See also RenderEditable which has a similar issue.
+    // We grab _textPainter.size and _textPainter.didExceedMaxLines here because
+    // assigning to `size` will trigger us to validate our intrinsic sizes,
+    // which will change _textPainter's layout because the intrinsic size
+    // calculations are destructive. Other _textPainter state will also be
+    // affected. See also RenderEditable which has a similar issue.
     final Size textSize = _textPainter.size;
-    final bool didOverflowHeight = _textPainter.didExceedMaxLines;
+    final bool textDidExceedMaxLines = _textPainter.didExceedMaxLines;
     size = constraints.constrain(textSize);
 
+    final bool didOverflowHeight = size.height < textSize.height || textDidExceedMaxLines;
     final bool didOverflowWidth = size.width < textSize.width;
     // TODO(abarth): We're only measuring the sizes of the line boxes here. If
     // the glyphs draw outside the line boxes, we might think that there isn't
     // visual overflow when there actually is visual overflow. This can become
     // a problem if we start having horizontal overflow and introduce a clip
     // that affects the actual (but undetected) vertical overflow.
-    _hasVisualOverflow = didOverflowWidth || didOverflowHeight;
-    if (_hasVisualOverflow) {
+    final bool hasVisualOverflow = didOverflowWidth || didOverflowHeight;
+    if (hasVisualOverflow) {
       switch (_overflow) {
+        case TextOverflow.visible:
+          _needsClipping = false;
+          _overflowShader = null;
+          break;
         case TextOverflow.clip:
         case TextOverflow.ellipsis:
+          _needsClipping = true;
           _overflowShader = null;
           break;
         case TextOverflow.fade:
           assert(textDirection != null);
-          final TextPainter fadeSizePainter = new TextPainter(
-            text: new TextSpan(style: _textPainter.text.style, text: '\u2026'),
+          _needsClipping = true;
+          final TextPainter fadeSizePainter = TextPainter(
+            text: TextSpan(style: _textPainter.text.style, text: '\u2026'),
             textDirection: textDirection,
             textScaleFactor: textScaleFactor,
             locale: locale,
@@ -308,23 +333,24 @@ class RenderParagraph extends RenderBox {
                 fadeStart = fadeEnd - fadeSizePainter.width;
                 break;
             }
-            _overflowShader = new ui.Gradient.linear(
-              new Offset(fadeStart, 0.0),
-              new Offset(fadeEnd, 0.0),
+            _overflowShader = ui.Gradient.linear(
+              Offset(fadeStart, 0.0),
+              Offset(fadeEnd, 0.0),
               <Color>[const Color(0xFFFFFFFF), const Color(0x00FFFFFF)],
             );
           } else {
             final double fadeEnd = size.height;
             final double fadeStart = fadeEnd - fadeSizePainter.height / 2.0;
-            _overflowShader = new ui.Gradient.linear(
-              new Offset(0.0, fadeStart),
-              new Offset(0.0, fadeEnd),
+            _overflowShader = ui.Gradient.linear(
+              Offset(0.0, fadeStart),
+              Offset(0.0, fadeEnd),
               <Color>[const Color(0xFFFFFFFF), const Color(0x00FFFFFF)],
             );
           }
           break;
       }
     } else {
+      _needsClipping = false;
       _overflowShader = null;
     }
   }
@@ -346,29 +372,29 @@ class RenderParagraph extends RenderBox {
 
     assert(() {
       if (debugRepaintTextRainbowEnabled) {
-        final Paint paint = new Paint()
+        final Paint paint = Paint()
           ..color = debugCurrentRepaintColor.toColor();
         canvas.drawRect(offset & size, paint);
       }
       return true;
     }());
 
-    if (_hasVisualOverflow) {
+    if (_needsClipping) {
       final Rect bounds = offset & size;
       if (_overflowShader != null) {
         // This layer limits what the shader below blends with to be just the text
         // (as opposed to the text and its background).
-        canvas.saveLayer(bounds, new Paint());
+        canvas.saveLayer(bounds, Paint());
       } else {
         canvas.save();
       }
       canvas.clipRect(bounds);
     }
     _textPainter.paint(canvas, offset);
-    if (_hasVisualOverflow) {
+    if (_needsClipping) {
       if (_overflowShader != null) {
         canvas.translate(offset.dx, offset.dy);
-        final Paint paint = new Paint()
+        final Paint paint = Paint()
           ..blendMode = BlendMode.modulate
           ..shader = _overflowShader;
         canvas.drawRect(Offset.zero & size, paint);
@@ -437,12 +463,105 @@ class RenderParagraph extends RenderBox {
     return _textPainter.size;
   }
 
+  final List<int> _recognizerOffsets = <int>[];
+  final List<GestureRecognizer> _recognizers = <GestureRecognizer>[];
+
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
-    config
-      ..label = text.toPlainText()
-      ..textDirection = textDirection;
+    _recognizerOffsets.clear();
+    _recognizers.clear();
+    int offset = 0;
+    text.visitTextSpan((TextSpan span) {
+      if (span.recognizer != null && (span.recognizer is TapGestureRecognizer || span.recognizer is LongPressGestureRecognizer)) {
+        _recognizerOffsets.add(offset);
+        _recognizerOffsets.add(offset + span.text.length);
+        _recognizers.add(span.recognizer);
+      }
+      offset += span.text.length;
+      return true;
+    });
+    if (_recognizerOffsets.isNotEmpty) {
+      config.explicitChildNodes = true;
+      config.isSemanticBoundary = true;
+    } else {
+      config.label = text.toPlainText();
+      config.textDirection = textDirection;
+    }
+  }
+
+  @override
+  void assembleSemanticsNode(SemanticsNode node, SemanticsConfiguration config, Iterable<SemanticsNode> children) {
+    assert(_recognizerOffsets.isNotEmpty);
+    assert(_recognizerOffsets.length.isEven);
+    assert(_recognizers.isNotEmpty);
+    assert(children.isEmpty);
+    final List<SemanticsNode> newChildren = <SemanticsNode>[];
+    final String rawLabel = text.toPlainText();
+    int current = 0;
+    double order = -1.0;
+    TextDirection currentDirection = textDirection;
+    Rect currentRect;
+
+    SemanticsConfiguration buildSemanticsConfig(int start, int end) {
+      final TextDirection initialDirection = currentDirection;
+      final TextSelection selection = TextSelection(baseOffset: start, extentOffset: end);
+      final List<ui.TextBox> rects = getBoxesForSelection(selection);
+      Rect rect;
+      for (ui.TextBox textBox in rects) {
+        rect ??= textBox.toRect();
+        rect = rect.expandToInclude(textBox.toRect());
+        currentDirection = textBox.direction;
+      }
+      // round the current rectangle to make this API testable and add some
+      // padding so that the accessibility rects do not overlap with the text.
+      // TODO(jonahwilliams): implement this for all text accessibility rects.
+      currentRect = Rect.fromLTRB(
+        rect.left.floorToDouble() - 4.0,
+        rect.top.floorToDouble() - 4.0,
+        rect.right.ceilToDouble() + 4.0,
+        rect.bottom.ceilToDouble() + 4.0,
+      );
+      order += 1;
+      return SemanticsConfiguration()
+        ..sortKey = OrdinalSortKey(order)
+        ..textDirection = initialDirection
+        ..label = rawLabel.substring(start, end);
+    }
+
+    for (int i = 0, j = 0; i < _recognizerOffsets.length; i += 2, j++) {
+      final int start = _recognizerOffsets[i];
+      final int end = _recognizerOffsets[i + 1];
+      if (current != start) {
+        final SemanticsNode node = SemanticsNode();
+        final SemanticsConfiguration configuration = buildSemanticsConfig(current, start);
+        node.updateWith(config: configuration);
+        node.rect = currentRect;
+        newChildren.add(node);
+      }
+      final SemanticsNode node = SemanticsNode();
+      final SemanticsConfiguration configuration = buildSemanticsConfig(start, end);
+      final GestureRecognizer recognizer = _recognizers[j];
+      if (recognizer is TapGestureRecognizer) {
+        configuration.onTap = recognizer.onTap;
+      } else if (recognizer is LongPressGestureRecognizer) {
+        configuration.onLongPress = recognizer.onLongPress;
+      } else {
+        assert(false);
+      }
+      node.updateWith(config: configuration);
+      node.rect = currentRect;
+      newChildren.add(node);
+      current = end;
+    }
+    if (current < rawLabel.length) {
+      final SemanticsNode node = SemanticsNode();
+      final SemanticsConfiguration configuration = buildSemanticsConfig(current, rawLabel.length);
+      node.updateWith(config: configuration);
+      node.rect = currentRect;
+      newChildren.add(node);
+    }
+    node.updateWith(config: config, childrenInInversePaintOrder: newChildren);
   }
 
   @override
@@ -453,12 +572,12 @@ class RenderParagraph extends RenderBox {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new EnumProperty<TextAlign>('textAlign', textAlign));
-    properties.add(new EnumProperty<TextDirection>('textDirection', textDirection));
-    properties.add(new FlagProperty('softWrap', value: softWrap, ifTrue: 'wrapping at box width', ifFalse: 'no wrapping except at line break characters', showName: true));
-    properties.add(new EnumProperty<TextOverflow>('overflow', overflow));
-    properties.add(new DoubleProperty('textScaleFactor', textScaleFactor, defaultValue: 1.0));
-    properties.add(new DiagnosticsProperty<Locale>('locale', locale, defaultValue: null));
-    properties.add(new IntProperty('maxLines', maxLines, ifNull: 'unlimited'));
+    properties.add(EnumProperty<TextAlign>('textAlign', textAlign));
+    properties.add(EnumProperty<TextDirection>('textDirection', textDirection));
+    properties.add(FlagProperty('softWrap', value: softWrap, ifTrue: 'wrapping at box width', ifFalse: 'no wrapping except at line break characters', showName: true));
+    properties.add(EnumProperty<TextOverflow>('overflow', overflow));
+    properties.add(DoubleProperty('textScaleFactor', textScaleFactor, defaultValue: 1.0));
+    properties.add(DiagnosticsProperty<Locale>('locale', locale, defaultValue: null));
+    properties.add(IntProperty('maxLines', maxLines, ifNull: 'unlimited'));
   }
 }

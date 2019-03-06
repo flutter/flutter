@@ -14,7 +14,7 @@ class SizeChanger extends StatefulWidget {
   final Widget child;
 
   @override
-  SizeChangerState createState() => new SizeChangerState();
+  SizeChangerState createState() => SizeChangerState();
 }
 
 class SizeChangerState extends State<SizeChanger> {
@@ -28,14 +28,14 @@ class SizeChangerState extends State<SizeChanger> {
 
   @override
   Widget build(BuildContext context) {
-    return new Row(
+    return Row(
       textDirection: TextDirection.ltr,
       children: <Widget>[
-        new SizedBox(
+        SizedBox(
           height: _flag ? 50.0 : 100.0,
           width: 100.0,
-          child: widget.child
-        )
+          child: widget.child,
+        ),
       ],
     );
   }
@@ -58,13 +58,13 @@ class Wrapper extends StatelessWidget {
 void main() {
   testWidgets('Applying parent data inside a LayoutBuilder', (WidgetTester tester) async {
     int frame = 1;
-    await tester.pumpWidget(new SizeChanger( // when this is triggered, the child LayoutBuilder will build again
-      child: new LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
-        return new Column(children: <Widget>[new Expanded(
+    await tester.pumpWidget(SizeChanger( // when this is triggered, the child LayoutBuilder will build again
+      child: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+        return Column(children: <Widget>[Expanded(
           flex: frame, // this is different after the next pump, so that the parentData has to be applied again
-          child: new Container(height: 100.0),
+          child: Container(height: 100.0),
         )]);
-      })
+      }),
     ));
     frame += 1;
     tester.state<SizeChangerState>(find.byType(SizeChanger)).trigger();

@@ -68,8 +68,8 @@ abstract class InteractiveInkFeature extends InkFeature {
   }
 }
 
-/// An encapsulation of an [InteractiveInkFeature] constructor used by [InkWell]
-/// [InkResponse] and [ThemeData].
+/// An encapsulation of an [InteractiveInkFeature] constructor used by
+/// [InkWell], [InkResponse], and [ThemeData].
 ///
 /// Interactive ink feature implementations should provide a static const
 /// `splashFactory` value that's an instance of this class. The `splashFactory`
@@ -92,9 +92,11 @@ abstract class InteractiveInkFeatureFactory {
     @required RenderBox referenceBox,
     @required Offset position,
     @required Color color,
+    @required TextDirection textDirection,
     bool containedInkWell = false,
     RectCallback rectCallback,
     BorderRadius borderRadius,
+    ShapeBorder customBorder,
     double radius,
     VoidCallback onRemoved,
   });
@@ -201,6 +203,7 @@ class InkResponse extends StatefulWidget {
     this.highlightShape = BoxShape.circle,
     this.radius,
     this.borderRadius,
+    this.customBorder,
     this.highlightColor,
     this.splashColor,
     this.splashFactory,
@@ -239,6 +242,12 @@ class InkResponse extends StatefulWidget {
   /// The value passed to the callback is true if this part of the material has
   /// become highlighted and false if this part of the material has stopped
   /// being highlighted.
+  ///
+  /// If all of [onTap], [onDoubleTap], and [onLongPress] become null while a
+  /// gesture is ongoing, then [onTapCancel] will be fired and
+  /// [onHighlightChanged] will be fired with the value false _during the
+  /// build_. This means, for instance, that in that scenario [State.setState]
+  /// cannot be called.
   final ValueChanged<bool> onHighlightChanged;
 
   /// Whether this ink response should be clipped its bounds.
@@ -285,10 +294,14 @@ class InkResponse extends StatefulWidget {
   ///  * [splashFactory], which defines the appearance of the splash.
   final double radius;
 
-  /// The clipping radius of the containing rect.
+  /// The clipping radius of the containing rect. This is effective only if
+  /// [customBorder] is null.
   ///
   /// If this is null, it is interpreted as [BorderRadius.zero].
   final BorderRadius borderRadius;
+
+  /// The custom clip border which overrides [borderRadius].
+  final ShapeBorder customBorder;
 
   /// The highlight color of the ink response. If this property is null then the
   /// highlight color of the theme, [ThemeData.highlightColor], will be used.
@@ -366,11 +379,12 @@ class InkResponse extends StatefulWidget {
   @mustCallSuper
   bool debugCheckContext(BuildContext context) {
     assert(debugCheckHasMaterial(context));
+    assert(debugCheckHasDirectionality(context));
     return true;
   }
 
   @override
-  _InkResponseState<InkResponse> createState() => new _InkResponseState<InkResponse>();
+  _InkResponseState<InkResponse> createState() => _InkResponseState<InkResponse>();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -386,9 +400,9 @@ class InkResponse extends StatefulWidget {
       gestures.add('tap down');
     if (onTapCancel != null)
       gestures.add('tap cancel');
-    properties.add(new IterableProperty<String>('gestures', gestures, ifEmpty: '<none>'));
-    properties.add(new DiagnosticsProperty<bool>('containedInkWell', containedInkWell, level: DiagnosticLevel.fine));
-    properties.add(new DiagnosticsProperty<BoxShape>(
+    properties.add(IterableProperty<String>('gestures', gestures, ifEmpty: '<none>'));
+    properties.add(DiagnosticsProperty<bool>('containedInkWell', containedInkWell, level: DiagnosticLevel.fine));
+    properties.add(DiagnosticsProperty<BoxShape>(
       'highlightShape',
       highlightShape,
       description: '${containedInkWell ? "clipped to " : ""}$highlightShape',
@@ -397,7 +411,7 @@ class InkResponse extends StatefulWidget {
   }
 }
 
-class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKeepAliveClientMixin {
+class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKeepAliveClientMixin<T> {
   Set<InteractiveInkFeature> _splashes;
   InteractiveInkFeature _currentSplash;
   InkHighlight _lastHighlight;
@@ -411,14 +425,16 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
     if (value) {
       if (_lastHighlight == null) {
         final RenderBox referenceBox = context.findRenderObject();
-        _lastHighlight = new InkHighlight(
+        _lastHighlight = InkHighlight(
           controller: Material.of(context),
           referenceBox: referenceBox,
           color: widget.highlightColor ?? Theme.of(context).highlightColor,
           shape: widget.highlightShape,
           borderRadius: widget.borderRadius,
+          customBorder: widget.customBorder,
           rectCallback: widget.getRectCallback(referenceBox),
           onRemoved: _handleInkHighlightRemoval,
+          textDirection: Directionality.of(context),
         );
         updateKeepAlive();
       } else {
@@ -445,6 +461,7 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
     final Color color = widget.splashColor ?? Theme.of(context).splashColor;
     final RectCallback rectCallback = widget.containedInkWell ? widget.getRectCallback(referenceBox) : null;
     final BorderRadius borderRadius = widget.borderRadius;
+    final ShapeBorder customBorder = widget.customBorder;
 
     InteractiveInkFeature splash;
     void onRemoved() {
@@ -466,7 +483,9 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
       rectCallback: rectCallback,
       radius: widget.radius,
       borderRadius: borderRadius,
+      customBorder: customBorder,
       onRemoved: onRemoved,
+      textDirection: Directionality.of(context),
     );
 
     return splash;
@@ -474,7 +493,7 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
 
   void _handleTapDown(TapDownDetails details) {
     final InteractiveInkFeature splash = _createInkFeature(details);
-    _splashes ??= new HashSet<InteractiveInkFeature>();
+    _splashes ??= HashSet<InteractiveInkFeature>();
     _splashes.add(splash);
     _currentSplash = splash;
     if (widget.onTapDown != null) {
@@ -544,7 +563,7 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
     _lastHighlight?.color = widget.highlightColor ?? themeData.highlightColor;
     _currentSplash?.color = widget.splashColor ?? themeData.splashColor;
     final bool enabled = widget.onTap != null || widget.onDoubleTap != null || widget.onLongPress != null;
-    return new GestureDetector(
+    return GestureDetector(
       onTapDown: enabled ? _handleTapDown : null,
       onTap: enabled ? () => _handleTap(context) : null,
       onTapCancel: enabled ? _handleTapCancel : null,
@@ -626,6 +645,7 @@ class InkWell extends InkResponse {
     InteractiveInkFeatureFactory splashFactory,
     double radius,
     BorderRadius borderRadius,
+    ShapeBorder customBorder,
     bool enableFeedback = true,
     bool excludeFromSemantics = false,
   }) : super(
@@ -644,6 +664,7 @@ class InkWell extends InkResponse {
     splashFactory: splashFactory,
     radius: radius,
     borderRadius: borderRadius,
+    customBorder: customBorder,
     enableFeedback: enableFeedback,
     excludeFromSemantics: excludeFromSemantics,
   );

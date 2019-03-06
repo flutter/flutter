@@ -9,17 +9,17 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('BackButton control test', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new MaterialApp(
-        home: const Material(child: const Text('Home')),
+      MaterialApp(
+        home: const Material(child: Text('Home')),
         routes: <String, WidgetBuilder>{
           '/next': (BuildContext context) {
             return const Material(
-              child: const Center(
-                child: const BackButton(),
-              )
+              child: Center(
+                child: BackButton(),
+              ),
             );
           },
-        }
+        },
       )
     );
 
@@ -35,21 +35,21 @@ void main() {
   });
 
   testWidgets('BackButton icon', (WidgetTester tester) async {
-    final Key iOSKey = new UniqueKey();
-    final Key androidKey = new UniqueKey();
+    final Key iOSKey = UniqueKey();
+    final Key androidKey = UniqueKey();
 
 
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new Column(
+      MaterialApp(
+        home: Column(
           children: <Widget>[
-            new Theme(
-              data: new ThemeData(platform: TargetPlatform.iOS),
-              child: new BackButtonIcon(key: iOSKey),
+            Theme(
+              data: ThemeData(platform: TargetPlatform.iOS),
+              child: BackButtonIcon(key: iOSKey),
             ),
-            new Theme(
-              data: new ThemeData(platform: TargetPlatform.android),
-              child: new BackButtonIcon(key: androidKey),
+            Theme(
+              data: ThemeData(platform: TargetPlatform.android),
+              child: BackButtonIcon(key: androidKey),
             ),
           ],
         ),
@@ -64,13 +64,13 @@ void main() {
   testWidgets('BackButton semantics', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
     await tester.pumpWidget(
-      new MaterialApp(
-        home: const Material(child: const Text('Home')),
+      MaterialApp(
+        home: const Material(child: Text('Home')),
         routes: <String, WidgetBuilder>{
           '/next': (BuildContext context) {
             return const Material(
-              child: const Center(
-                child: const BackButton(),
+              child: Center(
+                child: BackButton(),
               ),
             );
           },
@@ -82,7 +82,7 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    expect(tester.getSemanticsData(find.byType(BackButton)), matchesSemanticsData(
+    expect(tester.getSemantics(find.byType(BackButton)), matchesSemantics(
       label: 'Back',
       isButton: true,
       hasEnabledState: true,

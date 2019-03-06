@@ -8,7 +8,7 @@ import 'package:flutter/widgets.dart';
 import 'ink_well.dart' show InteractiveInkFeature;
 import 'material.dart';
 
-const Duration _kHighlightFadeDuration = const Duration(milliseconds: 200);
+const Duration _kHighlightFadeDuration = Duration(milliseconds: 200);
 
 /// A visual emphasis on a part of a [Material] receiving user interaction.
 ///
@@ -39,31 +39,38 @@ class InkHighlight extends InteractiveInkFeature {
     @required MaterialInkController controller,
     @required RenderBox referenceBox,
     @required Color color,
+    @required TextDirection textDirection,
     BoxShape shape = BoxShape.rectangle,
     BorderRadius borderRadius,
+    ShapeBorder customBorder,
     RectCallback rectCallback,
     VoidCallback onRemoved,
   }) : assert(color != null),
        assert(shape != null),
+       assert(textDirection != null),
        _shape = shape,
        _borderRadius = borderRadius ?? BorderRadius.zero,
+       _customBorder = customBorder,
+       _textDirection = textDirection,
        _rectCallback = rectCallback,
        super(controller: controller, referenceBox: referenceBox, color: color, onRemoved: onRemoved) {
-    _alphaController = new AnimationController(duration: _kHighlightFadeDuration, vsync: controller.vsync)
+    _alphaController = AnimationController(duration: _kHighlightFadeDuration, vsync: controller.vsync)
       ..addListener(controller.markNeedsPaint)
       ..addStatusListener(_handleAlphaStatusChanged)
       ..forward();
-    _alpha = new IntTween(
+    _alpha = _alphaController.drive(IntTween(
       begin: 0,
-      end: color.alpha
-    ).animate(_alphaController);
+      end: color.alpha,
+    ));
 
     controller.addInkFeature(this);
   }
 
   final BoxShape _shape;
   final BorderRadius _borderRadius;
+  final ShapeBorder _customBorder;
   final RectCallback _rectCallback;
+  final TextDirection _textDirection;
 
   Animation<int> _alpha;
   AnimationController _alphaController;
@@ -97,13 +104,17 @@ class InkHighlight extends InteractiveInkFeature {
 
   void _paintHighlight(Canvas canvas, Rect rect, Paint paint) {
     assert(_shape != null);
+    canvas.save();
+    if (_customBorder != null) {
+      canvas.clipPath(_customBorder.getOuterPath(rect, textDirection: _textDirection));
+    }
     switch (_shape) {
       case BoxShape.circle:
         canvas.drawCircle(rect.center, Material.defaultSplashRadius, paint);
         break;
       case BoxShape.rectangle:
         if (_borderRadius != BorderRadius.zero) {
-          final RRect clipRRect = new RRect.fromRectAndCorners(
+          final RRect clipRRect = RRect.fromRectAndCorners(
             rect,
             topLeft: _borderRadius.topLeft, topRight: _borderRadius.topRight,
             bottomLeft: _borderRadius.bottomLeft, bottomRight: _borderRadius.bottomRight,
@@ -114,11 +125,12 @@ class InkHighlight extends InteractiveInkFeature {
         }
         break;
     }
+    canvas.restore();
   }
 
   @override
   void paintFeature(Canvas canvas, Matrix4 transform) {
-    final Paint paint = new Paint()..color = color.withAlpha(_alpha.value);
+    final Paint paint = Paint()..color = color.withAlpha(_alpha.value);
     final Offset originOffset = MatrixUtils.getAsTranslation(transform);
     final Rect rect = _rectCallback != null ? _rectCallback() : Offset.zero & referenceBox.size;
     if (originOffset == null) {

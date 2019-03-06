@@ -21,7 +21,7 @@ export 'package:flutter/painting.dart' show
 class RenderImage extends RenderBox {
   /// Creates a render box that displays an image.
   ///
-  /// The [scale], [alignment], [repeat], and [matchTextDirection] arguments
+  /// The [scale], [alignment], [repeat], [matchTextDirection] and [filterQuality] arguments
   /// must not be null. The [textDirection] argument must not be null if
   /// [alignment] will need resolving or if [matchTextDirection] is true.
   RenderImage({
@@ -37,9 +37,12 @@ class RenderImage extends RenderBox {
     Rect centerSlice,
     bool matchTextDirection = false,
     TextDirection textDirection,
+    bool invertColors = false,
+    FilterQuality filterQuality = FilterQuality.low,
   }) : assert(scale != null),
        assert(repeat != null),
        assert(alignment != null),
+       assert(filterQuality != null),
        assert(matchTextDirection != null),
        _image = image,
        _width = width,
@@ -52,7 +55,9 @@ class RenderImage extends RenderBox {
        _repeat = repeat,
        _centerSlice = centerSlice,
        _matchTextDirection = matchTextDirection,
-       _textDirection = textDirection {
+       _invertColors = invertColors,
+       _textDirection = textDirection,
+       _filterQuality = filterQuality {
     _updateColorFilter();
   }
 
@@ -129,7 +134,7 @@ class RenderImage extends RenderBox {
     if (_color == null)
       _colorFilter = null;
     else
-      _colorFilter = new ColorFilter.mode(_color, _colorBlendMode ?? BlendMode.srcIn);
+      _colorFilter = ColorFilter.mode(_color, _colorBlendMode ?? BlendMode.srcIn);
   }
 
   /// If non-null, this color is blended with each image pixel using [colorBlendMode].
@@ -142,6 +147,21 @@ class RenderImage extends RenderBox {
     _updateColorFilter();
     markNeedsPaint();
   }
+
+  /// Used to set the filterQuality of the image
+  /// Use the [FilterQuality.low] quality setting to scale the image, which corresponds to
+  /// bilinear interpolation, rather than the default [FilterQuality.none] which corresponds
+  /// to nearest-neighbor.
+  FilterQuality get filterQuality => _filterQuality;
+  FilterQuality _filterQuality;
+  set filterQuality(FilterQuality value) {
+    assert(value != null);
+    if(value == _filterQuality)
+      return;
+    _filterQuality = value;
+    markNeedsPaint();
+  }
+
 
   /// Used to combine [color] with this image.
   ///
@@ -215,6 +235,20 @@ class RenderImage extends RenderBox {
     markNeedsPaint();
   }
 
+  /// Whether to invert the colors of the image.
+  ///
+  /// inverting the colors of an image applies a new color filter to the paint.
+  /// If there is another specified color filter, the invert will be applied
+  /// after it. This is primarily used for implementing smart invert on iOS.
+  bool get invertColors => _invertColors;
+  bool _invertColors;
+  set invertColors(bool value) {
+    if (value == _invertColors)
+      return;
+    _invertColors = value;
+    markNeedsPaint();
+  }
+
   /// Whether to paint the image in the direction of the [TextDirection].
   ///
   /// If this is true, then in [TextDirection.ltr] contexts, the image will be
@@ -263,17 +297,17 @@ class RenderImage extends RenderBox {
   Size _sizeForConstraints(BoxConstraints constraints) {
     // Folds the given |width| and |height| into |constraints| so they can all
     // be treated uniformly.
-    constraints = new BoxConstraints.tightFor(
+    constraints = BoxConstraints.tightFor(
       width: _width,
-      height: _height
+      height: _height,
     ).enforce(constraints);
 
     if (_image == null)
       return constraints.smallest;
 
-    return constraints.constrainSizeAndAttemptToPreserveAspectRatio(new Size(
+    return constraints.constrainSizeAndAttemptToPreserveAspectRatio(Size(
       _image.width.toDouble() / _scale,
-      _image.height.toDouble() / _scale
+      _image.height.toDouble() / _scale,
     ));
   }
 
@@ -282,13 +316,13 @@ class RenderImage extends RenderBox {
     assert(height >= 0.0);
     if (_width == null && _height == null)
       return 0.0;
-    return _sizeForConstraints(new BoxConstraints.tightForFinite(height: height)).width;
+    return _sizeForConstraints(BoxConstraints.tightForFinite(height: height)).width;
   }
 
   @override
   double computeMaxIntrinsicWidth(double height) {
     assert(height >= 0.0);
-    return _sizeForConstraints(new BoxConstraints.tightForFinite(height: height)).width;
+    return _sizeForConstraints(BoxConstraints.tightForFinite(height: height)).width;
   }
 
   @override
@@ -296,13 +330,13 @@ class RenderImage extends RenderBox {
     assert(width >= 0.0);
     if (_width == null && _height == null)
       return 0.0;
-    return _sizeForConstraints(new BoxConstraints.tightForFinite(width: width)).height;
+    return _sizeForConstraints(BoxConstraints.tightForFinite(width: width)).height;
   }
 
   @override
   double computeMaxIntrinsicHeight(double width) {
     assert(width >= 0.0);
-    return _sizeForConstraints(new BoxConstraints.tightForFinite(width: width)).height;
+    return _sizeForConstraints(BoxConstraints.tightForFinite(width: width)).height;
   }
 
   @override
@@ -324,29 +358,34 @@ class RenderImage extends RenderBox {
       canvas: context.canvas,
       rect: offset & size,
       image: _image,
+      scale: _scale,
       colorFilter: _colorFilter,
       fit: _fit,
       alignment: _resolvedAlignment,
       centerSlice: _centerSlice,
       repeat: _repeat,
       flipHorizontally: _flipHorizontally,
+      invertColors: invertColors,
+      filterQuality: _filterQuality,
     );
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new DiagnosticsProperty<ui.Image>('image', image));
-    properties.add(new DoubleProperty('width', width, defaultValue: null));
-    properties.add(new DoubleProperty('height', height, defaultValue: null));
-    properties.add(new DoubleProperty('scale', scale, defaultValue: 1.0));
-    properties.add(new DiagnosticsProperty<Color>('color', color, defaultValue: null));
-    properties.add(new EnumProperty<BlendMode>('colorBlendMode', colorBlendMode, defaultValue: null));
-    properties.add(new EnumProperty<BoxFit>('fit', fit, defaultValue: null));
-    properties.add(new DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, defaultValue: null));
-    properties.add(new EnumProperty<ImageRepeat>('repeat', repeat, defaultValue: ImageRepeat.noRepeat));
-    properties.add(new DiagnosticsProperty<Rect>('centerSlice', centerSlice, defaultValue: null));
-    properties.add(new FlagProperty('matchTextDirection', value: matchTextDirection, ifTrue: 'match text direction'));
-    properties.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
+    properties.add(DiagnosticsProperty<ui.Image>('image', image));
+    properties.add(DoubleProperty('width', width, defaultValue: null));
+    properties.add(DoubleProperty('height', height, defaultValue: null));
+    properties.add(DoubleProperty('scale', scale, defaultValue: 1.0));
+    properties.add(DiagnosticsProperty<Color>('color', color, defaultValue: null));
+    properties.add(EnumProperty<BlendMode>('colorBlendMode', colorBlendMode, defaultValue: null));
+    properties.add(EnumProperty<BoxFit>('fit', fit, defaultValue: null));
+    properties.add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, defaultValue: null));
+    properties.add(EnumProperty<ImageRepeat>('repeat', repeat, defaultValue: ImageRepeat.noRepeat));
+    properties.add(DiagnosticsProperty<Rect>('centerSlice', centerSlice, defaultValue: null));
+    properties.add(FlagProperty('matchTextDirection', value: matchTextDirection, ifTrue: 'match text direction'));
+    properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
+    properties.add(DiagnosticsProperty<bool>('invertColors', invertColors));
+    properties.add(EnumProperty<FilterQuality>('filterQuality', filterQuality));
   }
 }

@@ -7,6 +7,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../../gallery/demo.dart';
+
 class _InputDropdown extends StatelessWidget {
   const _InputDropdown({
     Key key,
@@ -24,20 +26,20 @@ class _InputDropdown extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new InkWell(
+    return InkWell(
       onTap: onPressed,
-      child: new InputDecorator(
-        decoration: new InputDecoration(
+      child: InputDecorator(
+        decoration: InputDecoration(
           labelText: labelText,
         ),
         baseStyle: valueStyle,
-        child: new Row(
+        child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            new Text(valueText, style: valueStyle),
-            new Icon(Icons.arrow_drop_down,
-              color: Theme.of(context).brightness == Brightness.light ? Colors.grey.shade700 : Colors.white70
+            Text(valueText, style: valueStyle),
+            Icon(Icons.arrow_drop_down,
+              color: Theme.of(context).brightness == Brightness.light ? Colors.grey.shade700 : Colors.white70,
             ),
           ],
         ),
@@ -53,7 +55,7 @@ class _DateTimePicker extends StatelessWidget {
     this.selectedDate,
     this.selectedTime,
     this.selectDate,
-    this.selectTime
+    this.selectTime,
   }) : super(key: key);
 
   final String labelText;
@@ -62,21 +64,21 @@ class _DateTimePicker extends StatelessWidget {
   final ValueChanged<DateTime> selectDate;
   final ValueChanged<TimeOfDay> selectTime;
 
-  Future<Null> _selectDate(BuildContext context) async {
+  Future<void> _selectDate(BuildContext context) async {
     final DateTime picked = await showDatePicker(
       context: context,
       initialDate: selectedDate,
-      firstDate: new DateTime(2015, 8),
-      lastDate: new DateTime(2101)
+      firstDate: DateTime(2015, 8),
+      lastDate: DateTime(2101),
     );
     if (picked != null && picked != selectedDate)
       selectDate(picked);
   }
 
-  Future<Null> _selectTime(BuildContext context) async {
+  Future<void> _selectTime(BuildContext context) async {
     final TimeOfDay picked = await showTimePicker(
       context: context,
-      initialTime: selectedTime
+      initialTime: selectedTime,
     );
     if (picked != null && picked != selectedTime)
       selectTime(picked);
@@ -85,22 +87,22 @@ class _DateTimePicker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final TextStyle valueStyle = Theme.of(context).textTheme.title;
-    return new Row(
+    return Row(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: <Widget>[
-        new Expanded(
+        Expanded(
           flex: 4,
-          child: new _InputDropdown(
+          child: _InputDropdown(
             labelText: labelText,
-            valueText: new DateFormat.yMMMd().format(selectedDate),
+            valueText: DateFormat.yMMMd().format(selectedDate),
             valueStyle: valueStyle,
             onPressed: () { _selectDate(context); },
           ),
         ),
         const SizedBox(width: 12.0),
-        new Expanded(
+        Expanded(
           flex: 3,
-          child: new _InputDropdown(
+          child: _InputDropdown(
             valueText: selectedTime.format(context),
             valueStyle: valueStyle,
             onPressed: () { _selectTime(context); },
@@ -115,43 +117,46 @@ class DateAndTimePickerDemo extends StatefulWidget {
   static const String routeName = '/material/date-and-time-pickers';
 
   @override
-  _DateAndTimePickerDemoState createState() => new _DateAndTimePickerDemoState();
+  _DateAndTimePickerDemoState createState() => _DateAndTimePickerDemoState();
 }
 
 class _DateAndTimePickerDemoState extends State<DateAndTimePickerDemo> {
-  DateTime _fromDate = new DateTime.now();
+  DateTime _fromDate = DateTime.now();
   TimeOfDay _fromTime = const TimeOfDay(hour: 7, minute: 28);
-  DateTime _toDate = new DateTime.now();
+  DateTime _toDate = DateTime.now();
   TimeOfDay _toTime = const TimeOfDay(hour: 7, minute: 28);
   final List<String> _allActivities = <String>['hiking', 'swimming', 'boating', 'fishing'];
   String _activity = 'fishing';
 
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
-      appBar: new AppBar(title: const Text('Date and time pickers')),
-      body: new DropdownButtonHideUnderline(
-        child: new SafeArea(
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Date and time pickers'),
+        actions: <Widget>[MaterialDemoDocumentationButton(DateAndTimePickerDemo.routeName)],
+      ),
+      body: DropdownButtonHideUnderline(
+        child: SafeArea(
           top: false,
           bottom: false,
-          child: new ListView(
+          child: ListView(
             padding: const EdgeInsets.all(16.0),
             children: <Widget>[
-              new TextField(
+              TextField(
                 enabled: true,
                 decoration: const InputDecoration(
                   labelText: 'Event name',
-                  border: const OutlineInputBorder(),
+                  border: OutlineInputBorder(),
                 ),
                 style: Theme.of(context).textTheme.display1,
               ),
-              new TextField(
+              TextField(
                 decoration: const InputDecoration(
                   labelText: 'Location',
                 ),
                 style: Theme.of(context).textTheme.display1.copyWith(fontSize: 20.0),
               ),
-              new _DateTimePicker(
+              _DateTimePicker(
                 labelText: 'From',
                 selectedDate: _fromDate,
                 selectedTime: _fromTime,
@@ -166,7 +171,7 @@ class _DateAndTimePickerDemoState extends State<DateAndTimePickerDemo> {
                   });
                 },
               ),
-              new _DateTimePicker(
+              _DateTimePicker(
                 labelText: 'To',
                 selectedDate: _toDate,
                 selectedTime: _toTime,
@@ -181,24 +186,25 @@ class _DateAndTimePickerDemoState extends State<DateAndTimePickerDemo> {
                   });
                 },
               ),
-              new InputDecorator(
+              const SizedBox(height: 8.0),
+              InputDecorator(
                 decoration: const InputDecoration(
                   labelText: 'Activity',
                   hintText: 'Choose an activity',
+                  contentPadding: EdgeInsets.zero,
                 ),
                 isEmpty: _activity == null,
-                child: new DropdownButton<String>(
+                child: DropdownButton<String>(
                   value: _activity,
-                  isDense: true,
                   onChanged: (String newValue) {
                     setState(() {
                       _activity = newValue;
                     });
                   },
-                  items: _allActivities.map((String value) {
-                    return new DropdownMenuItem<String>(
+                  items: _allActivities.map<DropdownMenuItem<String>>((String value) {
+                    return DropdownMenuItem<String>(
                       value: value,
-                      child: new Text(value),
+                      child: Text(value),
                     );
                   }).toList(),
                 ),

@@ -212,7 +212,7 @@ bool _startIsTopLeft(Axis direction, TextDirection textDirection, VerticalDirect
   return null;
 }
 
-typedef double _ChildSizingFunction(RenderBox child, double extent);
+typedef _ChildSizingFunction = double Function(RenderBox child, double extent);
 
 /// Displays its children in a one-dimensional array.
 ///
@@ -453,8 +453,8 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
           assert(verticalDirection != null, 'Vertical $runtimeType with $mainAxisAlignment has a null verticalDirection, so the alignment cannot be resolved.');
           break;
       }
-   }
-   if (crossAxisAlignment == CrossAxisAlignment.start ||
+    }
+    if (crossAxisAlignment == CrossAxisAlignment.start ||
         crossAxisAlignment == CrossAxisAlignment.end) {
       switch (direction) {
         case Axis.horizontal:
@@ -474,13 +474,13 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   @override
   void setupParentData(RenderBox child) {
     if (child.parentData is! FlexParentData)
-      child.parentData = new FlexParentData();
+      child.parentData = FlexParentData();
   }
 
   double _getIntrinsicSize({
     Axis sizingDirection,
     double extent, // the extent in the direction that isn't the sizing direction
-    _ChildSizingFunction childSize // a method to find the size in the sizing direction
+    _ChildSizingFunction childSize, // a method to find the size in the sizing direction
   }) {
     if (_direction == sizingDirection) {
       // INTRINSIC MAIN SIZE
@@ -563,7 +563,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     return _getIntrinsicSize(
       sizingDirection: Axis.horizontal,
       extent: height,
-      childSize: (RenderBox child, double extent) => child.getMinIntrinsicWidth(extent)
+      childSize: (RenderBox child, double extent) => child.getMinIntrinsicWidth(extent),
     );
   }
 
@@ -572,7 +572,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     return _getIntrinsicSize(
       sizingDirection: Axis.horizontal,
       extent: height,
-      childSize: (RenderBox child, double extent) => child.getMaxIntrinsicWidth(extent)
+      childSize: (RenderBox child, double extent) => child.getMaxIntrinsicWidth(extent),
     );
   }
 
@@ -581,7 +581,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     return _getIntrinsicSize(
       sizingDirection: Axis.vertical,
       extent: width,
-      childSize: (RenderBox child, double extent) => child.getMinIntrinsicHeight(extent)
+      childSize: (RenderBox child, double extent) => child.getMinIntrinsicHeight(extent),
     );
   }
 
@@ -590,7 +590,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     return _getIntrinsicSize(
       sizingDirection: Axis.vertical,
       extent: width,
-      childSize: (RenderBox child, double extent) => child.getMaxIntrinsicHeight(extent)
+      childSize: (RenderBox child, double extent) => child.getMaxIntrinsicHeight(extent),
     );
   }
 
@@ -662,7 +662,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
                       'if it is in a $axis scrollable, it will try to shrink-wrap its children along the $axis '
                       'axis. Setting a flex on a child (e.g. using Expanded) indicates that the child is to '
                       'expand to fill the remaining space in the $axis direction.';
-            final StringBuffer information = new StringBuffer();
+            final StringBuffer information = StringBuffer();
             RenderBox node = this;
             switch (_direction) {
               case Axis.horizontal:
@@ -688,7 +688,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
           } else {
             return true;
           }
-          throw new FlutterError(
+          throw FlutterError(
             '$error\n'
             '$message\n'
             'These two directives are mutually exclusive. If a parent is to shrink-wrap its child, the child '
@@ -707,7 +707,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
             '  https://flutter.io/debugging/#rendering-layer\n'
             '  http://docs.flutter.io/flutter/rendering/debugDumpRenderTree.html\n'
             'If none of the above helps enough to fix this problem, please don\'t hesitate to file a bug:\n'
-            '  https://github.com/flutter/flutter/issues/new'
+            '  https://github.com/flutter/flutter/issues/new?template=BUG.md'
           );
         }());
         totalFlex += childParentData.flex;
@@ -717,21 +717,21 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
         if (crossAxisAlignment == CrossAxisAlignment.stretch) {
           switch (_direction) {
             case Axis.horizontal:
-              innerConstraints = new BoxConstraints(minHeight: constraints.maxHeight,
+              innerConstraints = BoxConstraints(minHeight: constraints.maxHeight,
                                                     maxHeight: constraints.maxHeight);
               break;
             case Axis.vertical:
-              innerConstraints = new BoxConstraints(minWidth: constraints.maxWidth,
+              innerConstraints = BoxConstraints(minWidth: constraints.maxWidth,
                                                     maxWidth: constraints.maxWidth);
               break;
           }
         } else {
           switch (_direction) {
             case Axis.horizontal:
-              innerConstraints = new BoxConstraints(maxHeight: constraints.maxHeight);
+              innerConstraints = BoxConstraints(maxHeight: constraints.maxHeight);
               break;
             case Axis.vertical:
-              innerConstraints = new BoxConstraints(maxWidth: constraints.maxWidth);
+              innerConstraints = BoxConstraints(maxWidth: constraints.maxWidth);
               break;
           }
         }
@@ -769,13 +769,13 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
           if (crossAxisAlignment == CrossAxisAlignment.stretch) {
             switch (_direction) {
               case Axis.horizontal:
-                innerConstraints = new BoxConstraints(minWidth: minChildExtent,
+                innerConstraints = BoxConstraints(minWidth: minChildExtent,
                                                       maxWidth: maxChildExtent,
                                                       minHeight: constraints.maxHeight,
                                                       maxHeight: constraints.maxHeight);
                 break;
               case Axis.vertical:
-                innerConstraints = new BoxConstraints(minWidth: constraints.maxWidth,
+                innerConstraints = BoxConstraints(minWidth: constraints.maxWidth,
                                                       maxWidth: constraints.maxWidth,
                                                       minHeight: minChildExtent,
                                                       maxHeight: maxChildExtent);
@@ -784,12 +784,12 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
           } else {
             switch (_direction) {
               case Axis.horizontal:
-                innerConstraints = new BoxConstraints(minWidth: minChildExtent,
+                innerConstraints = BoxConstraints(minWidth: minChildExtent,
                                                       maxWidth: maxChildExtent,
                                                       maxHeight: constraints.maxHeight);
                 break;
               case Axis.vertical:
-                innerConstraints = new BoxConstraints(maxWidth: constraints.maxWidth,
+                innerConstraints = BoxConstraints(maxWidth: constraints.maxWidth,
                                                       minHeight: minChildExtent,
                                                       maxHeight: maxChildExtent);
                 break;
@@ -805,7 +805,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
         if (crossAxisAlignment == CrossAxisAlignment.baseline) {
           assert(() {
             if (textBaseline == null)
-              throw new FlutterError('To use FlexAlignItems.baseline, you must also specify which baseline to use using the "baseline" argument.');
+              throw FlutterError('To use FlexAlignItems.baseline, you must also specify which baseline to use using the "baseline" argument.');
             return true;
           }());
           final double distance = child.getDistanceToBaseline(textBaseline, onlyReal: true);
@@ -823,12 +823,12 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     double actualSizeDelta;
     switch (_direction) {
       case Axis.horizontal:
-        size = constraints.constrain(new Size(idealSize, crossSize));
+        size = constraints.constrain(Size(idealSize, crossSize));
         actualSize = size.width;
         crossSize = size.height;
         break;
       case Axis.vertical:
-        size = constraints.constrain(new Size(crossSize, idealSize));
+        size = constraints.constrain(Size(crossSize, idealSize));
         actualSize = size.height;
         crossSize = size.width;
         break;
@@ -905,10 +905,10 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
         childMainPosition -= _getMainSize(child);
       switch (_direction) {
         case Axis.horizontal:
-          childParentData.offset = new Offset(childMainPosition, childCrossPosition);
+          childParentData.offset = Offset(childMainPosition, childCrossPosition);
           break;
         case Axis.vertical:
-          childParentData.offset = new Offset(childCrossPosition, childMainPosition);
+          childParentData.offset = Offset(childCrossPosition, childMainPosition);
           break;
       }
       if (flipMainAxis) {
@@ -962,10 +962,10 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
       Rect overflowChildRect;
       switch (_direction) {
         case Axis.horizontal:
-          overflowChildRect = new Rect.fromLTWH(0.0, 0.0, size.width + _overflow, 0.0);
+          overflowChildRect = Rect.fromLTWH(0.0, 0.0, size.width + _overflow, 0.0);
           break;
         case Axis.vertical:
-          overflowChildRect = new Rect.fromLTWH(0.0, 0.0, 0.0, size.height + _overflow);
+          overflowChildRect = Rect.fromLTWH(0.0, 0.0, 0.0, size.height + _overflow);
           break;
       }
       paintOverflowIndicator(context, offset, Offset.zero & size, overflowChildRect, overflowHints: debugOverflowHints);
@@ -987,12 +987,12 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new EnumProperty<Axis>('direction', direction));
-    properties.add(new EnumProperty<MainAxisAlignment>('mainAxisAlignment', mainAxisAlignment));
-    properties.add(new EnumProperty<MainAxisSize>('mainAxisSize', mainAxisSize));
-    properties.add(new EnumProperty<CrossAxisAlignment>('crossAxisAlignment', crossAxisAlignment));
-    properties.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
-    properties.add(new EnumProperty<VerticalDirection>('verticalDirection', verticalDirection, defaultValue: null));
-    properties.add(new EnumProperty<TextBaseline>('textBaseline', textBaseline, defaultValue: null));
+    properties.add(EnumProperty<Axis>('direction', direction));
+    properties.add(EnumProperty<MainAxisAlignment>('mainAxisAlignment', mainAxisAlignment));
+    properties.add(EnumProperty<MainAxisSize>('mainAxisSize', mainAxisSize));
+    properties.add(EnumProperty<CrossAxisAlignment>('crossAxisAlignment', crossAxisAlignment));
+    properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
+    properties.add(EnumProperty<VerticalDirection>('verticalDirection', verticalDirection, defaultValue: null));
+    properties.add(EnumProperty<TextBaseline>('textBaseline', textBaseline, defaultValue: null));
   }
 }

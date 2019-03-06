@@ -18,16 +18,16 @@ void main() {
     // so if our widget is 100 pixels tall, it should fit exactly 6 times.
 
     Widget builder() {
-      return new Directionality(
+      return Directionality(
         textDirection: TextDirection.ltr,
-        child: new FlipWidget(
-          left: new ListView.builder(
+        child: FlipWidget(
+          left: ListView.builder(
             itemBuilder: (BuildContext context, int index) {
               callbackTracker.add(index);
-              return new Container(
-                key: new ValueKey<int>(index),
+              return Container(
+                key: ValueKey<int>(index),
                 height: 100.0,
-                child: new Text('$index'),
+                child: Text('$index'),
               );
             },
           ),
@@ -42,7 +42,7 @@ void main() {
 
     expect(callbackTracker, equals(<int>[
       0, 1, 2, 3, 4, 5, // visible
-      6, 7, 8 // in cached area
+      6, 7, 8, // in cached area
     ]));
 
     callbackTracker.clear();
@@ -70,20 +70,20 @@ void main() {
 
     final IndexedWidgetBuilder itemBuilder = (BuildContext context, int index) {
       callbackTracker.add(index);
-      return new Container(
-        key: new ValueKey<int>(index),
+      return Container(
+        key: ValueKey<int>(index),
         width: 500.0, // this should be ignored
         height: 200.0,
-        child: new Text('$index', textDirection: TextDirection.ltr),
+        child: Text('$index', textDirection: TextDirection.ltr),
       );
     };
 
     Widget builder() {
-      return new Directionality(
+      return Directionality(
         textDirection: TextDirection.ltr,
-        child: new FlipWidget(
-          left: new ListView.builder(
-            controller: new ScrollController(initialScrollOffset: 300.0),
+        child: FlipWidget(
+          left: ListView.builder(
+            controller: ScrollController(initialScrollOffset: 300.0),
             itemBuilder: itemBuilder,
           ),
           right: const Text('Not Today'),
@@ -109,7 +109,7 @@ void main() {
     expect(callbackTracker, equals(<int>[
       0, 1, 2,
       3, 4, 5, //visible
-      6, 7
+      6, 7,
     ]));
     callbackTracker.clear();
 
@@ -134,21 +134,21 @@ void main() {
 
     final IndexedWidgetBuilder itemBuilder = (BuildContext context, int index) {
       callbackTracker.add(index);
-      return new Container(
-        key: new ValueKey<int>(index),
+      return Container(
+        key: ValueKey<int>(index),
         height: 500.0, // this should be ignored
         width: 200.0,
-        child: new Text('$index', textDirection: TextDirection.ltr),
+        child: Text('$index', textDirection: TextDirection.ltr),
       );
     };
 
     Widget builder() {
-      return new Directionality(
+      return Directionality(
         textDirection: TextDirection.ltr,
-        child: new FlipWidget(
-          left: new ListView.builder(
+        child: FlipWidget(
+          left: ListView.builder(
             scrollDirection: Axis.horizontal,
-            controller: new ScrollController(initialScrollOffset: 500.0),
+            controller: ScrollController(initialScrollOffset: 500.0),
             itemBuilder: itemBuilder,
           ),
           right: const Text('Not Today'),
@@ -185,11 +185,11 @@ void main() {
 
     final IndexedWidgetBuilder itemBuilder = (BuildContext context, int index) {
       callbackTracker.add(index);
-      return new Container(
-        key: new ValueKey<int>(index),
+      return Container(
+        key: ValueKey<int>(index),
         width: 500.0, // this should be ignored
         height: 220.0,
-        child: new Text('$index', textDirection: TextDirection.ltr)
+        child: Text('$index', textDirection: TextDirection.ltr),
       );
     };
 
@@ -199,9 +199,9 @@ void main() {
     }
 
     Widget builder() {
-      return new Directionality(
+      return Directionality(
         textDirection: TextDirection.ltr,
-        child: new ListView.builder(
+        child: ListView.builder(
           itemBuilder: itemBuilder,
         ),
       );
@@ -232,29 +232,29 @@ void main() {
 
   testWidgets('ListView reinvoke builders', (WidgetTester tester) async {
     StateSetter setState;
-    ThemeData themeData = new ThemeData.light();
+    ThemeData themeData = ThemeData.light();
 
     final IndexedWidgetBuilder itemBuilder = (BuildContext context, int index) {
-      return new Container(
-        key: new ValueKey<int>(index),
+      return Container(
+        key: ValueKey<int>(index),
         width: 500.0, // this should be ignored
         height: 220.0,
         color: Theme.of(context).primaryColor,
-        child: new Text('$index', textDirection: TextDirection.ltr),
+        child: Text('$index', textDirection: TextDirection.ltr),
       );
     };
 
-    final Widget viewport = new ListView.builder(
+    final Widget viewport = ListView.builder(
       itemBuilder: itemBuilder,
     );
 
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new StatefulBuilder(
+        child: StatefulBuilder(
           builder: (BuildContext context, StateSetter setter) {
             setState = setter;
-            return new Theme(data: themeData, child: viewport);
+            return Theme(data: themeData, child: viewport);
           },
         ),
       ),
@@ -265,7 +265,7 @@ void main() {
     expect(decoration.color, equals(Colors.blue));
 
     setState(() {
-      themeData = new ThemeData(primarySwatch: Colors.green);
+      themeData = ThemeData(primarySwatch: Colors.green);
     });
 
     await tester.pump();
@@ -277,19 +277,19 @@ void main() {
 
   testWidgets('ListView padding', (WidgetTester tester) async {
     final IndexedWidgetBuilder itemBuilder = (BuildContext context, int index) {
-      return new Container(
-        key: new ValueKey<int>(index),
+      return Container(
+        key: ValueKey<int>(index),
         width: 500.0, // this should be ignored
         height: 220.0,
         color: Colors.green[500],
-        child: new Text('$index', textDirection: TextDirection.ltr),
+        child: Text('$index', textDirection: TextDirection.ltr),
       );
     };
 
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new ListView.builder(
+        child: ListView.builder(
           padding: const EdgeInsets.fromLTRB(7.0, 3.0, 5.0, 11.0),
           itemBuilder: itemBuilder,
         ),
@@ -304,14 +304,15 @@ void main() {
 
   testWidgets('ListView underflow extents', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new ListView(
+        child: ListView(
           addAutomaticKeepAlives: false,
+          addSemanticIndexes: false,
           children: <Widget>[
-            new Container(height: 100.0),
-            new Container(height: 100.0),
-            new Container(height: 100.0),
+            Container(height: 100.0),
+            Container(height: 100.0),
+            Container(height: 100.0),
           ],
         ),
       ),
@@ -433,27 +434,27 @@ void main() {
   });
 
   testWidgets('ListView should not paint hidden children', (WidgetTester tester) async {
-    const Text text = const Text('test');
+    const Text text = Text('test');
     await tester.pumpWidget(
-        new Directionality(
+        Directionality(
             textDirection: TextDirection.ltr,
-            child: new Center(
-              child: new Container(
+            child: Center(
+              child: Container(
                   height: 200.0,
-                  child: new ListView(
+                  child: ListView(
                     cacheExtent: 500.0,
-                    controller: new ScrollController(initialScrollOffset: 300.0),
+                    controller: ScrollController(initialScrollOffset: 300.0),
                     children: <Widget>[
-                      new Container(height: 140.0, child: text),
-                      new Container(height: 160.0, child: text),
-                      new Container(height: 90.0, child: text),
-                      new Container(height: 110.0, child: text),
-                      new Container(height: 80.0, child: text),
-                      new Container(height: 70.0, child: text),
+                      Container(height: 140.0, child: text),
+                      Container(height: 160.0, child: text),
+                      Container(height: 90.0, child: text),
+                      Container(height: 110.0, child: text),
+                      Container(height: 80.0, child: text),
+                      Container(height: 70.0, child: text),
                     ],
-                  )
+                  ),
               ),
-            )
+            ),
         )
     );
 
@@ -463,28 +464,28 @@ void main() {
 
   testWidgets('ListView should paint with offset', (WidgetTester tester) async {
     await tester.pumpWidget(
-        new MaterialApp(
-            home: new Scaffold(
-                body: new Container(
+        MaterialApp(
+            home: Scaffold(
+                body: Container(
                     height: 500.0,
-                    child: new CustomScrollView(
-                      controller: new ScrollController(initialScrollOffset: 120.0),
+                    child: CustomScrollView(
+                      controller: ScrollController(initialScrollOffset: 120.0),
                       slivers: <Widget>[
                         const SliverAppBar(
                           expandedHeight: 250.0,
                         ),
-                        new SliverList(
-                            delegate: new ListView.builder(
+                        SliverList(
+                            delegate: ListView.builder(
                                 itemExtent: 100.0,
                                 itemCount: 100,
-                                itemBuilder: (_, __) => new Container(
+                                itemBuilder: (_, __) => Container(
                                   height: 40.0,
                                   child: const Text('hey'),
                                 )).childrenDelegate),
                       ],
-                    )
-                )
-            )
+                    ),
+                ),
+            ),
         )
     );
 
@@ -494,17 +495,17 @@ void main() {
 
   testWidgets('ListView should paint with rtl', (WidgetTester tester) async {
     await tester.pumpWidget(
-        new Directionality(
+        Directionality(
           textDirection: TextDirection.rtl,
-          child: new Container(
+          child: Container(
             height: 200.0,
-            child: new ListView.builder(
+            child: ListView.builder(
               padding: const EdgeInsets.symmetric(
                   horizontal: 0.0, vertical: 0.0),
               scrollDirection: Axis.horizontal,
               itemExtent: 200.0,
               itemCount: 10,
-              itemBuilder: (_, int i) => new Container(
+              itemBuilder: (_, int i) => Container(
                 height: 200.0,
                 width: 200.0,
                 color: i % 2 == 0 ? Colors.black : Colors.red,

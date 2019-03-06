@@ -31,7 +31,7 @@ void main() {
     });
 
     final String dataPath = p.join(complexLayoutPath, 'build', 'complex_layout_semantics_perf.json');
-    return new TaskResult.successFromFile(file(dataPath), benchmarkScoreKeys: <String>[
+    return TaskResult.successFromFile(file(dataPath), benchmarkScoreKeys: <String>[
       'initialSemanticsTreeCreation',
     ]);
   });

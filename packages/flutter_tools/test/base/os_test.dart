@@ -8,9 +8,8 @@ import 'package:flutter_tools/src/base/os.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 import 'package:platform/platform.dart';
-import 'package:test/test.dart';
 
-
+import '../src/common.dart';
 import '../src/context.dart';
 
 const String kExecutable = 'foo';
@@ -21,42 +20,42 @@ void main() {
   ProcessManager mockProcessManager;
 
   setUp(() {
-    mockProcessManager = new MockProcessManager();
+    mockProcessManager = MockProcessManager();
   });
 
   group('which on POSIX', () {
 
     testUsingContext('returns null when executable does not exist', () async {
       when(mockProcessManager.runSync(<String>['which', kExecutable]))
-          .thenReturn(new ProcessResult(0, 1, null, null));
-      final OperatingSystemUtils utils = new OperatingSystemUtils();
+          .thenReturn(ProcessResult(0, 1, null, null));
+      final OperatingSystemUtils utils = OperatingSystemUtils();
       expect(utils.which(kExecutable), isNull);
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
-      Platform: () => new FakePlatform(operatingSystem: 'linux')
+      Platform: () => FakePlatform(operatingSystem: 'linux'),
     });
 
     testUsingContext('returns exactly one result', () async {
       when(mockProcessManager.runSync(<String>['which', 'foo']))
-          .thenReturn(new ProcessResult(0, 0, kPath1, null));
-      final OperatingSystemUtils utils = new OperatingSystemUtils();
+          .thenReturn(ProcessResult(0, 0, kPath1, null));
+      final OperatingSystemUtils utils = OperatingSystemUtils();
       expect(utils.which(kExecutable).path, kPath1);
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
-      Platform: () => new FakePlatform(operatingSystem: 'linux')
+      Platform: () => FakePlatform(operatingSystem: 'linux'),
     });
 
     testUsingContext('returns all results for whichAll', () async {
       when(mockProcessManager.runSync(<String>['which', '-a', kExecutable]))
-          .thenReturn(new ProcessResult(0, 0, '$kPath1\n$kPath2', null));
-      final OperatingSystemUtils utils = new OperatingSystemUtils();
+          .thenReturn(ProcessResult(0, 0, '$kPath1\n$kPath2', null));
+      final OperatingSystemUtils utils = OperatingSystemUtils();
       final List<File> result = utils.whichAll(kExecutable);
       expect(result, hasLength(2));
       expect(result[0].path, kPath1);
       expect(result[1].path, kPath2);
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
-      Platform: () => new FakePlatform(operatingSystem: 'linux')
+      Platform: () => FakePlatform(operatingSystem: 'linux'),
     });
   });
 
@@ -64,35 +63,35 @@ void main() {
 
     testUsingContext('returns null when executable does not exist', () async {
       when(mockProcessManager.runSync(<String>['where', kExecutable]))
-          .thenReturn(new ProcessResult(0, 1, null, null));
-      final OperatingSystemUtils utils = new OperatingSystemUtils();
+          .thenReturn(ProcessResult(0, 1, null, null));
+      final OperatingSystemUtils utils = OperatingSystemUtils();
       expect(utils.which(kExecutable), isNull);
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
-      Platform: () => new FakePlatform(operatingSystem: 'windows')
+      Platform: () => FakePlatform(operatingSystem: 'windows'),
     });
 
     testUsingContext('returns exactly one result', () async {
       when(mockProcessManager.runSync(<String>['where', 'foo']))
-          .thenReturn(new ProcessResult(0, 0, '$kPath1\n$kPath2', null));
-      final OperatingSystemUtils utils = new OperatingSystemUtils();
+          .thenReturn(ProcessResult(0, 0, '$kPath1\n$kPath2', null));
+      final OperatingSystemUtils utils = OperatingSystemUtils();
       expect(utils.which(kExecutable).path, kPath1);
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
-      Platform: () => new FakePlatform(operatingSystem: 'windows')
+      Platform: () => FakePlatform(operatingSystem: 'windows'),
     });
 
     testUsingContext('returns all results for whichAll', () async {
       when(mockProcessManager.runSync(<String>['where', kExecutable]))
-          .thenReturn(new ProcessResult(0, 0, '$kPath1\n$kPath2', null));
-      final OperatingSystemUtils utils = new OperatingSystemUtils();
+          .thenReturn(ProcessResult(0, 0, '$kPath1\n$kPath2', null));
+      final OperatingSystemUtils utils = OperatingSystemUtils();
       final List<File> result = utils.whichAll(kExecutable);
       expect(result, hasLength(2));
       expect(result[0].path, kPath1);
       expect(result[1].path, kPath2);
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
-      Platform: () => new FakePlatform(operatingSystem: 'windows')
+      Platform: () => FakePlatform(operatingSystem: 'windows'),
     });
   });
 }

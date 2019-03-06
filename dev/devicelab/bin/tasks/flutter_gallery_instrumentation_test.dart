@@ -9,7 +9,11 @@ import 'package:flutter_devicelab/framework/adb.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 
-Future<Null> main() async {
+// This test runs "//examples/flutter_gallery/test/live_smoketest.dart", which communicates
+// with the Java code to report its status. If this test fails due to a problem on the Dart
+// side, you can debug that by just running that file directly using `flutter run`.
+
+Future<void> main() async {
   deviceOperatingSystem = DeviceOperatingSystem.android;
 
   await task(() async {
@@ -26,6 +30,6 @@ Future<Null> main() async {
       });
     });
 
-    return new TaskResult.success(null);
+    return TaskResult.success(null);
   });
 }

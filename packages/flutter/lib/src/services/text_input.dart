@@ -4,7 +4,7 @@
 
 import 'dart:async';
 import 'dart:io' show Platform;
-import 'dart:ui' show TextAffinity, hashValues;
+import 'dart:ui' show TextAffinity, hashValues, Offset;
 
 import 'package:flutter/foundation.dart';
 
@@ -23,7 +23,9 @@ export 'dart:ui' show TextAffinity;
 /// for additional flags for some input types. For example, numeric input
 /// can specify whether it supports decimal numbers and/or signed numbers.
 class TextInputType {
-  const TextInputType._(this.index) : signed = null, decimal = null;
+  const TextInputType._(this.index)
+    : signed = null,
+      decimal = null;
 
   /// Optimize for numerical information.
   ///
@@ -52,26 +54,26 @@ class TextInputType {
   /// Optimize for textual information.
   ///
   /// Requests the default platform keyboard.
-  static const TextInputType text = const TextInputType._(0);
+  static const TextInputType text = TextInputType._(0);
 
   /// Optimize for multi-line textual information.
   ///
   /// Requests the default platform keyboard, but accepts newlines when the
   /// enter key is pressed. This is the input type used for all multi-line text
   /// fields.
-  static const TextInputType multiline = const TextInputType._(1);
+  static const TextInputType multiline = TextInputType._(1);
 
   /// Optimize for unsigned numerical information without a decimal point.
   ///
   /// Requests a default keyboard with ready access to the number keys.
   /// Additional options, such as decimal point and/or positive/negative
   /// signs, can be requested using [new TextInputType.numberWithOptions].
-  static const TextInputType number = const TextInputType.numberWithOptions();
+  static const TextInputType number = TextInputType.numberWithOptions();
 
   /// Optimize for telephone numbers.
   ///
   /// Requests a keyboard with ready access to the number keys, "*", and "#".
-  static const TextInputType phone = const TextInputType._(3);
+  static const TextInputType phone = TextInputType._(3);
 
   /// Optimize for date and time information.
   ///
@@ -79,25 +81,25 @@ class TextInputType {
   ///
   /// On Android, requests a keyboard with ready access to the number keys,
   /// ":", and "-".
-  static const TextInputType datetime = const TextInputType._(4);
+  static const TextInputType datetime = TextInputType._(4);
 
   /// Optimize for email addresses.
   ///
   /// Requests a keyboard with ready access to the "@" and "." keys.
-  static const TextInputType emailAddress = const TextInputType._(5);
+  static const TextInputType emailAddress = TextInputType._(5);
 
   /// Optimize for URLs.
   ///
   /// Requests a keyboard with ready access to the "/" and "." keys.
-  static const TextInputType url = const TextInputType._(6);
+  static const TextInputType url = TextInputType._(6);
 
   /// All possible enum values.
-  static const List<TextInputType> values = const <TextInputType>[
+  static const List<TextInputType> values = <TextInputType>[
     text, multiline, number, phone, datetime, emailAddress, url,
   ];
 
   // Corresponding string name for each of the [values].
-  static const List<String> _names = const <String>[
+  static const List<String> _names = <String>[
     'text', 'multiline', 'number', 'phone', 'datetime', 'emailAddress', 'url',
   ];
 
@@ -314,6 +316,34 @@ enum TextInputAction {
   newline,
 }
 
+/// Configures how the platform keyboard will select an uppercase or
+/// lowercase keyboard.
+///
+/// Only supports text keyboards, other keyboard types will ignore this
+/// configuration. Capitalization is locale-aware.
+enum TextCapitalization {
+  /// Defaults to an uppercase keyboard for the first letter of each word.
+  ///
+  /// Corresponds to `InputType.TYPE_TEXT_FLAG_CAP_WORDS` on Android, and
+  /// `UITextAutocapitalizationTypeWords` on iOS.
+  words,
+
+  /// Defaults to an uppercase keyboard for the first letter of each sentence.
+  ///
+  /// Corresponds to `InputType.TYPE_TEXT_FLAG_CAP_SENTENCES` on Android, and
+  /// `UITextAutocapitalizationTypeSentences` on iOS.
+  sentences,
+
+  /// Defaults to an uppercase keyboard for each character.
+  ///
+  /// Corresponds to `InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS` on Android, and
+  /// `UITextAutocapitalizationTypeAllCharacters` on iOS.
+  characters,
+
+  /// Defaults to a lowercase keyboard.
+  none,
+}
+
 /// Controls the visual appearance of the text input control.
 ///
 /// Many [TextInputAction]s are common between Android and iOS. However, if an
@@ -343,11 +373,13 @@ class TextInputConfiguration {
     this.actionLabel,
     this.inputAction = TextInputAction.done,
     this.keyboardAppearance = Brightness.light,
+    this.textCapitalization = TextCapitalization.none,
   }) : assert(inputType != null),
        assert(obscureText != null),
        assert(autocorrect != null),
        assert(keyboardAppearance != null),
-       assert(inputAction != null);
+       assert(inputAction != null),
+       assert(textCapitalization != null);
 
   /// The type of information for which to optimize the text input control.
   final TextInputType inputType;
@@ -357,7 +389,7 @@ class TextInputConfiguration {
   /// Defaults to false.
   final bool obscureText;
 
-  /// Whether to enable autocorrection.
+  /// Whether to enable auto-correction.
   ///
   /// Defaults to true.
   final bool autocorrect;
@@ -368,10 +400,20 @@ class TextInputConfiguration {
   /// What kind of action to request for the action button on the IME.
   final TextInputAction inputAction;
 
+  /// Specifies how platforms may automatically capitalize text entered by the
+  /// user.
+  ///
+  /// Defaults to [TextCapitalization.none].
+  ///
+  /// See also:
+  ///
+  ///  * [TextCapitalization], for a description of each capitalization behavior.
+  final TextCapitalization textCapitalization;
+
   /// The appearance of the keyboard.
-  /// 
+  ///
   /// This setting is only honored on iOS devices.
-  /// 
+  ///
   /// Defaults to [Brightness.light].
   final Brightness keyboardAppearance;
 
@@ -383,6 +425,7 @@ class TextInputConfiguration {
       'autocorrect': autocorrect,
       'actionLabel': actionLabel,
       'inputAction': inputAction.toString(),
+      'textCapitalization': textCapitalization.toString(),
       'keyboardAppearance': keyboardAppearance.toString(),
     };
   }
@@ -398,6 +441,40 @@ TextAffinity _toTextAffinity(String affinity) {
   return null;
 }
 
+/// A floating cursor state the user has induced by force pressing an iOS
+/// keyboard.
+enum FloatingCursorDragState {
+  /// A user has just activated a floating cursor.
+  Start,
+
+  /// A user is dragging a floating cursor.
+  Update,
+
+  /// A user has lifted their finger off the screen after using a floating
+  /// cursor.
+  End,
+}
+
+/// The current state and position of the floating cursor.
+class RawFloatingCursorPoint {
+  /// Creates information for setting the position and state of a floating
+  /// cursor.
+  ///
+  /// [state] must not be null and [offset] must not be null if the state is
+  /// [FloatingCursorDragState.Update].
+  RawFloatingCursorPoint({
+    this.offset,
+    @required this.state,
+  }) : assert(state != null),
+       assert(state == FloatingCursorDragState.Update ? offset != null : true);
+
+  /// The raw position of the floating cursor as determined by the iOS sdk.
+  final Offset offset;
+
+  /// The state of the floating cursor.
+  final FloatingCursorDragState state;
+}
+
 /// The current text, selection, and composing state for editing a run of text.
 @immutable
 class TextEditingValue {
@@ -410,22 +487,22 @@ class TextEditingValue {
   const TextEditingValue({
     this.text = '',
     this.selection = const TextSelection.collapsed(offset: -1),
-    this.composing = TextRange.empty
+    this.composing = TextRange.empty,
   }) : assert(text != null),
        assert(selection != null),
        assert(composing != null);
 
   /// Creates an instance of this class from a JSON object.
   factory TextEditingValue.fromJSON(Map<String, dynamic> encoded) {
-    return new TextEditingValue(
+    return TextEditingValue(
       text: encoded['text'],
-      selection: new TextSelection(
+      selection: TextSelection(
         baseOffset: encoded['selectionBase'] ?? -1,
         extentOffset: encoded['selectionExtent'] ?? -1,
         affinity: _toTextAffinity(encoded['selectionAffinity']) ?? TextAffinity.downstream,
         isDirectional: encoded['selectionIsDirectional'] ?? false,
       ),
-      composing: new TextRange(
+      composing: TextRange(
         start: encoded['composingBase'] ?? -1,
         end: encoded['composingExtent'] ?? -1,
       ),
@@ -455,18 +532,18 @@ class TextEditingValue {
   final TextRange composing;
 
   /// A value that corresponds to the empty string with no selection and no composing range.
-  static const TextEditingValue empty = const TextEditingValue();
+  static const TextEditingValue empty = TextEditingValue();
 
   /// Creates a copy of this value but with the given fields replaced with the new values.
   TextEditingValue copyWith({
     String text,
     TextSelection selection,
-    TextRange composing
+    TextRange composing,
   }) {
-    return new TextEditingValue(
+    return TextEditingValue(
       text: text ?? this.text,
       selection: selection ?? this.selection,
-      composing: composing ?? this.composing
+      composing: composing ?? this.composing,
     );
   }
 
@@ -489,8 +566,25 @@ class TextEditingValue {
   int get hashCode => hashValues(
     text.hashCode,
     selection.hashCode,
-    composing.hashCode
+    composing.hashCode,
   );
+}
+
+/// An interface for manipulating the selection, to be used by the implementor
+/// of the toolbar widget.
+abstract class TextSelectionDelegate {
+  /// Gets the current text input.
+  TextEditingValue get textEditingValue;
+
+  /// Sets the current text input (replaces the whole line).
+  set textEditingValue(TextEditingValue value);
+
+  /// Hides the text selection toolbar.
+  void hideToolbar();
+
+  /// Brings the provided [TextPosition] into the visible area of the text
+  /// input.
+  void bringIntoView(TextPosition position);
 }
 
 /// An interface to receive information from [TextInput].
@@ -508,6 +602,9 @@ abstract class TextInputClient {
 
   /// Requests that this client perform the given action.
   void performAction(TextInputAction action);
+
+  /// Updates the floating cursor position and state.
+  void updateFloatingCursor(RawFloatingCursorPoint point);
 }
 
 /// An interface for interacting with a text input control.
@@ -531,13 +628,13 @@ class TextInputConnection {
   /// Requests that the text input control become visible.
   void show() {
     assert(attached);
-    SystemChannels.textInput.invokeMethod('TextInput.show');
+    SystemChannels.textInput.invokeMethod<void>('TextInput.show');
   }
 
   /// Requests that the text input control change its internal state to match the given state.
   void setEditingState(TextEditingValue value) {
     assert(attached);
-    SystemChannels.textInput.invokeMethod(
+    SystemChannels.textInput.invokeMethod<void>(
       'TextInput.setEditingState',
       value.toJSON(),
     );
@@ -549,7 +646,7 @@ class TextInputConnection {
   /// other client attaches to it within this animation frame.
   void close() {
     if (attached) {
-      SystemChannels.textInput.invokeMethod('TextInput.clearClient');
+      SystemChannels.textInput.invokeMethod<void>('TextInput.clearClient');
       _clientHandler
         .._currentConnection = null
         .._scheduleHide();
@@ -587,7 +684,27 @@ TextInputAction _toTextInputAction(String action) {
     case 'TextInputAction.newline':
       return TextInputAction.newline;
   }
-  throw new FlutterError('Unknown text input action: $action');
+  throw FlutterError('Unknown text input action: $action');
+}
+
+FloatingCursorDragState _toTextCursorAction(String state) {
+  switch (state) {
+    case 'FloatingCursorDragState.start':
+      return FloatingCursorDragState.Start;
+    case 'FloatingCursorDragState.update':
+      return FloatingCursorDragState.Update;
+    case 'FloatingCursorDragState.end':
+      return FloatingCursorDragState.End;
+  }
+  throw FlutterError('Unknown text cursor action: $state');
+}
+
+RawFloatingCursorPoint _toTextPoint(FloatingCursorDragState state, Map<String, dynamic> encoded) {
+  assert(state != null, 'You must provide a state to set a new editing point.');
+  assert(encoded['X'] != null, 'You must provide a value for the horizontal location of the floating cursor.');
+  assert(encoded['Y'] != null, 'You must provide a value for the vertical location of the floating cursor.');
+  final Offset offset = state == FloatingCursorDragState.Update ? Offset(encoded['X'], encoded['Y']) : const Offset(0, 0);
+  return RawFloatingCursorPoint(offset: offset, state: state);
 }
 
 class _TextInputClientHandler {
@@ -608,13 +725,16 @@ class _TextInputClientHandler {
       return;
     switch (method) {
       case 'TextInputClient.updateEditingState':
-        _currentConnection._client.updateEditingValue(new TextEditingValue.fromJSON(args[1]));
+        _currentConnection._client.updateEditingValue(TextEditingValue.fromJSON(args[1]));
         break;
       case 'TextInputClient.performAction':
         _currentConnection._client.performAction(_toTextInputAction(args[1]));
         break;
+      case 'TextInputClient.updateFloatingCursor':
+        _currentConnection._client.updateFloatingCursor(_toTextPoint(_toTextCursorAction(args[1]), args[2]));
+        break;
       default:
-        throw new MissingPluginException();
+        throw MissingPluginException();
     }
   }
 
@@ -631,15 +751,17 @@ class _TextInputClientHandler {
     scheduleMicrotask(() {
       _hidePending = false;
       if (_currentConnection == null)
-        SystemChannels.textInput.invokeMethod('TextInput.hide');
+        SystemChannels.textInput.invokeMethod<void>('TextInput.hide');
     });
   }
 }
 
-final _TextInputClientHandler _clientHandler = new _TextInputClientHandler();
+final _TextInputClientHandler _clientHandler = _TextInputClientHandler();
 
 /// An interface to the system's text input control.
 class TextInput {
+  TextInput._();
+
   static const List<TextInputAction> _androidSupportedInputActions = <TextInputAction>[
     TextInputAction.none,
     TextInputAction.unspecified,
@@ -666,8 +788,6 @@ class TextInput {
     TextInputAction.emergencyCall,
   ];
 
-  TextInput._();
-
   /// Begin interacting with the text input control.
   ///
   /// Calling this function helps multiple clients coordinate about which one is
@@ -682,9 +802,9 @@ class TextInput {
     assert(client != null);
     assert(configuration != null);
     assert(_debugEnsureInputActionWorksOnPlatform(configuration.inputAction));
-    final TextInputConnection connection = new TextInputConnection._(client);
+    final TextInputConnection connection = TextInputConnection._(client);
     _clientHandler._currentConnection = connection;
-    SystemChannels.textInput.invokeMethod(
+    SystemChannels.textInput.invokeMethod<void>(
       'TextInput.setClient',
       <dynamic>[ connection._id, configuration.toJson() ],
     );

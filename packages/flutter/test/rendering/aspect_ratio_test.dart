@@ -4,12 +4,12 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
-import 'package:test/test.dart';
+import '../flutter_test_alternative.dart';
 import 'rendering_tester.dart';
 
 void main() {
   test('RenderAspectRatio: Intrinsic sizing 2.0', () {
-    final RenderAspectRatio box = new RenderAspectRatio(aspectRatio: 2.0);
+    final RenderAspectRatio box = RenderAspectRatio(aspectRatio: 2.0);
 
     expect(box.getMinIntrinsicWidth(200.0), 400.0);
     expect(box.getMinIntrinsicWidth(400.0), 800.0);
@@ -30,7 +30,7 @@ void main() {
   });
 
   test('RenderAspectRatio: Intrinsic sizing 0.5', () {
-    final RenderAspectRatio box = new RenderAspectRatio(aspectRatio: 0.5);
+    final RenderAspectRatio box = RenderAspectRatio(aspectRatio: 0.5);
 
     expect(box.getMinIntrinsicWidth(200.0), 100.0);
     expect(box.getMinIntrinsicWidth(400.0), 200.0);
@@ -51,9 +51,9 @@ void main() {
   });
 
   test('RenderAspectRatio: Intrinsic sizing 2.0', () {
-    final RenderAspectRatio box = new RenderAspectRatio(
+    final RenderAspectRatio box = RenderAspectRatio(
       aspectRatio: 2.0,
-      child: new RenderSizedBox(const Size(90.0, 70.0))
+      child: RenderSizedBox(const Size(90.0, 70.0)),
     );
 
     expect(box.getMinIntrinsicWidth(200.0), 400.0);
@@ -75,9 +75,9 @@ void main() {
   });
 
   test('RenderAspectRatio: Intrinsic sizing 0.5', () {
-    final RenderAspectRatio box = new RenderAspectRatio(
+    final RenderAspectRatio box = RenderAspectRatio(
       aspectRatio: 0.5,
-      child: new RenderSizedBox(const Size(90.0, 70.0))
+      child: RenderSizedBox(const Size(90.0, 70.0)),
     );
 
     expect(box.getMinIntrinsicWidth(200.0), 100.0);
@@ -104,12 +104,12 @@ void main() {
     FlutterError.onError = (FlutterErrorDetails details) {
       hadError = true;
     };
-    final RenderBox box = new RenderConstrainedOverflowBox(
+    final RenderBox box = RenderConstrainedOverflowBox(
       maxWidth: double.infinity,
       maxHeight: double.infinity,
-      child: new RenderAspectRatio(
+      child: RenderAspectRatio(
         aspectRatio: 0.5,
-        child: new RenderSizedBox(const Size(90.0, 70.0))
+        child: RenderSizedBox(const Size(90.0, 70.0)),
       ),
     );
     expect(hadError, false);
@@ -121,8 +121,8 @@ void main() {
   test('RenderAspectRatio: Sizing', () {
     RenderConstrainedOverflowBox outside;
     RenderAspectRatio inside;
-    layout(outside = new RenderConstrainedOverflowBox(
-      child: inside = new RenderAspectRatio(aspectRatio: 1.0),
+    layout(outside = RenderConstrainedOverflowBox(
+      child: inside = RenderAspectRatio(aspectRatio: 1.0),
     ));
     pumpFrame();
     expect(inside.size, const Size(800.0, 600.0));

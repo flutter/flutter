@@ -1,4 +1,6 @@
 {
+  "remainingTextFieldCharacterCountFew": "Jeszcze $remainingCount znaki",
+  "remainingTextFieldCharacterCountMany": "Jeszcze $remainingCount znaków",
   "scriptCategory": "English-like",
   "timeOfDayFormat": "HH:mm",
   "selectedRowCountTitleFew": "$selectedRowCount wybrane elementy",
@@ -40,6 +42,18 @@
   "drawerLabel": "Menu nawigacyjne",
   "popupMenuLabel": "Wyskakujące menu",
   "dialogLabel": "Okno dialogowe",
-  "alertDialogLabel": "Alarm",
-  "searchFieldLabel": "Szukaj"
+  "alertDialogLabel": "Alert",
+  "searchFieldLabel": "Szukaj",
+  "reorderItemToStart": "Przenieś na początek",
+  "reorderItemToEnd": "Przenieś na koniec",
+  "reorderItemUp": "Przenieś w górę",
+  "reorderItemDown": "Przenieś w dół",
+  "reorderItemLeft": "Przenieś w lewo",
+  "reorderItemRight": "Przenieś w prawo",
+  "expandedIconTapHint": "Zwiń",
+  "collapsedIconTapHint": "Rozwiń",
+  "remainingTextFieldCharacterCountZero": "TBD",
+  "remainingTextFieldCharacterCountOne": "Jeszcze 1 znak",
+  "remainingTextFieldCharacterCountOther": "Jeszcze $remainingCount znaku",
+  "refreshIndicatorSemanticLabel": "Odśwież"
 }

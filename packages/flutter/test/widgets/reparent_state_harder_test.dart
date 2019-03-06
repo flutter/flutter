@@ -14,7 +14,7 @@ class OrderSwitcher extends StatefulWidget {
   final Widget b;
 
   @override
-  OrderSwitcherState createState() => new OrderSwitcherState();
+  OrderSwitcherState createState() => OrderSwitcherState();
 }
 
 class OrderSwitcherState extends State<OrderSwitcher> {
@@ -31,13 +31,13 @@ class OrderSwitcherState extends State<OrderSwitcher> {
   Widget build(BuildContext context) {
     final List<Widget> children = <Widget>[];
     if (_aFirst) {
-      children.add(new KeyedSubtree(child: widget.a));
+      children.add(KeyedSubtree(child: widget.a));
       children.add(widget.b);
     } else {
-      children.add(new KeyedSubtree(child: widget.b));
+      children.add(KeyedSubtree(child: widget.b));
       children.add(widget.a);
     }
-    return new Stack(
+    return Stack(
       textDirection: TextDirection.ltr,
       children: children,
     );
@@ -48,7 +48,7 @@ class DummyStatefulWidget extends StatefulWidget {
   const DummyStatefulWidget(Key key) : super(key: key);
 
   @override
-  DummyStatefulWidgetState createState() => new DummyStatefulWidgetState();
+  DummyStatefulWidgetState createState() => DummyStatefulWidgetState();
 }
 
 class DummyStatefulWidgetState extends State<DummyStatefulWidget> {
@@ -61,7 +61,7 @@ class RekeyableDummyStatefulWidgetWrapper extends StatefulWidget {
   final Widget child;
   final GlobalKey initialKey;
   @override
-  RekeyableDummyStatefulWidgetWrapperState createState() => new RekeyableDummyStatefulWidgetWrapperState();
+  RekeyableDummyStatefulWidgetWrapperState createState() => RekeyableDummyStatefulWidgetWrapperState();
 }
 
 class RekeyableDummyStatefulWidgetWrapperState extends State<RekeyableDummyStatefulWidgetWrapper> {
@@ -81,7 +81,7 @@ class RekeyableDummyStatefulWidgetWrapperState extends State<RekeyableDummyState
 
   @override
   Widget build(BuildContext context) {
-    return new DummyStatefulWidget(_key);
+    return DummyStatefulWidget(_key);
   }
 }
 
@@ -110,30 +110,30 @@ void main() {
     //
     // This test verifies that none of the asserts go off during this dance.
 
-    final GlobalKey<OrderSwitcherState> keyRoot = new GlobalKey(debugLabel: 'Root');
-    final GlobalKey keyA = new GlobalKey(debugLabel: 'A');
-    final GlobalKey keyB = new GlobalKey(debugLabel: 'B');
-    final GlobalKey keyC = new GlobalKey(debugLabel: 'C');
-    final GlobalKey keyD = new GlobalKey(debugLabel: 'D');
-    await tester.pumpWidget(new OrderSwitcher(
+    final GlobalKey<OrderSwitcherState> keyRoot = GlobalKey(debugLabel: 'Root');
+    final GlobalKey keyA = GlobalKey(debugLabel: 'A');
+    final GlobalKey keyB = GlobalKey(debugLabel: 'B');
+    final GlobalKey keyC = GlobalKey(debugLabel: 'C');
+    final GlobalKey keyD = GlobalKey(debugLabel: 'D');
+    await tester.pumpWidget(OrderSwitcher(
       key: keyRoot,
-      a: new KeyedSubtree(
+      a: KeyedSubtree(
         key: keyA,
-        child: new RekeyableDummyStatefulWidgetWrapper(
+        child: RekeyableDummyStatefulWidgetWrapper(
           initialKey: keyC
         ),
       ),
-      b: new KeyedSubtree(
+      b: KeyedSubtree(
         key: keyB,
-        child: new Builder(
+        child: Builder(
           builder: (BuildContext context) {
-            return new Builder(
+            return Builder(
               builder: (BuildContext context) {
-                return new Builder(
+                return Builder(
                   builder: (BuildContext context) {
-                    return new LayoutBuilder(
+                    return LayoutBuilder(
                       builder: (BuildContext context, BoxConstraints constraints) {
-                        return new RekeyableDummyStatefulWidgetWrapper(
+                        return RekeyableDummyStatefulWidgetWrapper(
                           initialKey: keyD
                         );
                       }
@@ -143,7 +143,7 @@ void main() {
               }
             );
           }
-        )
+        ),
       ),
     ));
 

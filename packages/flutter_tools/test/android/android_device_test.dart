@@ -4,24 +4,48 @@
 
 import 'dart:async';
 
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_device.dart';
+import 'package:flutter_tools/src/android/android_sdk.dart';
+import 'package:flutter_tools/src/base/config.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
-import 'package:test/test.dart';
 
+import '../src/common.dart';
 import '../src/context.dart';
+import '../src/mocks.dart';
 
 void main() {
   group('android_device', () {
     testUsingContext('stores the requested id', () {
       const String deviceId = '1234';
-      final AndroidDevice device = new AndroidDevice(deviceId);
+      final AndroidDevice device = AndroidDevice(deviceId);
       expect(device.id, deviceId);
     });
   });
 
   group('getAdbDevices', () {
+    final MockProcessManager mockProcessManager = MockProcessManager();
+    testUsingContext('throws on missing adb path', () {
+      final Directory sdkDir = MockAndroidSdk.createSdkDirectory();
+      Config.instance.setValue('android-sdk', sdkDir.path);
+
+      final File adbExe = fs.file(getAdbPath(androidSdk));
+      when(mockProcessManager.runSync(
+        <String>[adbExe.path, 'devices', '-l'],
+      ))
+      .thenAnswer(
+        (_) => throw ArgumentError(adbExe.path),
+      );
+      expect(() => getAdbDevices(), throwsToolExit(message: RegExp('Unable to run "adb".*${adbExe.path}')));
+    }, overrides: <Type, Generator>{
+      AndroidSdk: () => MockAndroidSdk(),
+      FileSystem: () => MemoryFileSystem(),
+      ProcessManager: () => mockProcessManager,
+    });
+
     testUsingContext('physical devices', () {
       final List<AndroidDevice> devices = <AndroidDevice>[];
       parseADBDeviceOutput('''
@@ -81,7 +105,7 @@ Use the 'android' tool to install them:
   });
 
   group('isLocalEmulator', () {
-    final ProcessManager mockProcessManager = new MockProcessManager();
+    final ProcessManager mockProcessManager = MockProcessManager();
     String hardware;
     String buildCharacteristics;
 
@@ -91,17 +115,17 @@ Use the 'android' tool to install them:
       when(mockProcessManager.run(argThat(contains('getprop')),
           stderrEncoding: anyNamed('stderrEncoding'),
           stdoutEncoding: anyNamed('stdoutEncoding'))).thenAnswer((_) {
-        final StringBuffer buf = new StringBuffer()
+        final StringBuffer buf = StringBuffer()
           ..writeln('[ro.hardware]: [$hardware]')
           ..writeln('[ro.build.characteristics]: [$buildCharacteristics]');
-        final ProcessResult result = new ProcessResult(1, 0, buf.toString(), '');
-        return new Future<ProcessResult>.value(result);
+        final ProcessResult result = ProcessResult(1, 0, buf.toString(), '');
+        return Future<ProcessResult>.value(result);
       });
     });
 
     testUsingContext('knownPhysical', () async {
       hardware = 'samsungexynos7420';
-      final AndroidDevice device = new AndroidDevice('test');
+      final AndroidDevice device = AndroidDevice('test');
       expect(await device.isLocalEmulator, false);
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
@@ -109,7 +133,7 @@ Use the 'android' tool to install them:
 
     testUsingContext('knownEmulator', () async {
       hardware = 'goldfish';
-      final AndroidDevice device = new AndroidDevice('test');
+      final AndroidDevice device = AndroidDevice('test');
       expect(await device.isLocalEmulator, true);
       expect(await device.supportsHardwareRendering, true);
     }, overrides: <Type, Generator>{
@@ -118,7 +142,7 @@ Use the 'android' tool to install them:
 
     testUsingContext('unknownPhysical', () async {
       buildCharacteristics = 'att';
-      final AndroidDevice device = new AndroidDevice('test');
+      final AndroidDevice device = AndroidDevice('test');
       expect(await device.isLocalEmulator, false);
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
@@ -126,7 +150,7 @@ Use the 'android' tool to install them:
 
     testUsingContext('unknownEmulator', () async {
       buildCharacteristics = 'att,emulator';
-      final AndroidDevice device = new AndroidDevice('test');
+      final AndroidDevice device = AndroidDevice('test');
       expect(await device.isLocalEmulator, true);
       expect(await device.supportsHardwareRendering, true);
     }, overrides: <Type, Generator>{

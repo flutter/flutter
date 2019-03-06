@@ -26,7 +26,7 @@ class _LinkTextSpan extends TextSpan {
   _LinkTextSpan({ TextStyle style, String url, String text }) : super(
     style: style,
     text: text ?? url,
-    recognizer: new TapGestureRecognizer()..onTap = () {
+    recognizer: TapGestureRecognizer()..onTap = () {
       launch(url, forceSafariVC: false);
     }
   );
@@ -39,38 +39,38 @@ void showGalleryAboutDialog(BuildContext context) {
 
   showAboutDialog(
     context: context,
-    applicationVersion: 'April 2018 Preview',
+    applicationVersion: 'January 2019',
     applicationIcon: const FlutterLogo(),
-    applicationLegalese: '© 2017 The Chromium Authors',
+    applicationLegalese: '© 2019 The Chromium Authors',
     children: <Widget>[
-      new Padding(
+      Padding(
         padding: const EdgeInsets.only(top: 24.0),
-        child: new RichText(
-          text: new TextSpan(
+        child: RichText(
+          text: TextSpan(
             children: <TextSpan>[
-              new TextSpan(
+              TextSpan(
                 style: aboutTextStyle,
-                text: 'Flutter is an early-stage, open-source project to help developers '
+                text: 'Flutter is an open-source project to help developers '
                       'build high-performance, high-fidelity, mobile apps for '
                       '${defaultTargetPlatform == TargetPlatform.iOS ? 'multiple platforms' : 'iOS and Android'} '
-                      'from a single codebase. This gallery is a preview of '
-                      "Flutter's many widgets, behaviors, animations, layouts, "
-                      'and more. Learn more about Flutter at '
+                      'from a single codebase. This design lab is a playground '
+                      "and showcase of Flutter's many widgets, behaviors, "
+                      'animations, layouts, and more. Learn more about Flutter at ',
               ),
-              new _LinkTextSpan(
+              _LinkTextSpan(
                 style: linkStyle,
                 url: 'https://flutter.io',
               ),
-              new TextSpan(
+              TextSpan(
                 style: aboutTextStyle,
                 text: '.\n\nTo see the source code for this app, please visit the ',
               ),
-              new _LinkTextSpan(
+              _LinkTextSpan(
                 style: linkStyle,
                 url: 'https://goo.gl/iv1p4G',
                 text: 'flutter github repo',
               ),
-              new TextSpan(
+              TextSpan(
                 style: aboutTextStyle,
                 text: '.',
               ),

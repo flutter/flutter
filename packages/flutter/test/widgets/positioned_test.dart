@@ -10,8 +10,8 @@ import 'package:flutter/widgets.dart';
 
 void main() {
   testWidgets('Positioned constructors', (WidgetTester tester) async {
-    final Widget child = new Container();
-    final Positioned a = new Positioned(
+    final Widget child = Container();
+    final Positioned a = Positioned(
       left: 101.0,
       right: 201.0,
       top: 301.0,
@@ -24,8 +24,8 @@ void main() {
     expect(a.bottom, 401.0);
     expect(a.width, null);
     expect(a.height, null);
-    final Positioned b = new Positioned.fromRect(
-      rect: new Rect.fromLTRB(
+    final Positioned b = Positioned.fromRect(
+      rect: Rect.fromLTRB(
         102.0,
         302.0,
         202.0,
@@ -39,7 +39,7 @@ void main() {
     expect(b.bottom, null);
     expect(b.width, 100.0);
     expect(b.height, 200.0);
-    final Positioned c = new Positioned.fromRelativeRect(
+    final Positioned c = Positioned.fromRelativeRect(
       rect: const RelativeRect.fromLTRB(
         103.0,
         303.0,
@@ -57,23 +57,23 @@ void main() {
   });
 
   testWidgets('Can animate position data', (WidgetTester tester) async {
-    final RelativeRectTween rect = new RelativeRectTween(
-      begin: new RelativeRect.fromRect(
-        new Rect.fromLTRB(10.0, 20.0, 20.0, 30.0),
-        new Rect.fromLTRB(0.0, 10.0, 100.0, 110.0),
+    final RelativeRectTween rect = RelativeRectTween(
+      begin: RelativeRect.fromRect(
+        Rect.fromLTRB(10.0, 20.0, 20.0, 30.0),
+        Rect.fromLTRB(0.0, 10.0, 100.0, 110.0),
       ),
-      end: new RelativeRect.fromRect(
-        new Rect.fromLTRB(80.0, 90.0, 90.0, 100.0),
-        new Rect.fromLTRB(0.0, 10.0, 100.0, 110.0),
-      )
+      end: RelativeRect.fromRect(
+        Rect.fromLTRB(80.0, 90.0, 90.0, 100.0),
+        Rect.fromLTRB(0.0, 10.0, 100.0, 110.0),
+      ),
     );
-    final AnimationController controller = new AnimationController(
+    final AnimationController controller = AnimationController(
       duration: const Duration(seconds: 10),
       vsync: tester,
     );
     final List<Size> sizes = <Size>[];
     final List<Offset> positions = <Offset>[];
-    final GlobalKey key = new GlobalKey();
+    final GlobalKey key = GlobalKey();
 
     void recordMetrics() {
       final RenderBox box = key.currentContext.findRenderObject();
@@ -83,17 +83,17 @@ void main() {
     }
 
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new Center(
-          child: new Container(
+        child: Center(
+          child: Container(
             height: 100.0,
             width: 100.0,
-            child: new Stack(
+            child: Stack(
               children: <Widget>[
-                new PositionedTransition(
+                PositionedTransition(
                   rect: rect.animate(controller),
-                  child: new Container(
+                  child: Container(
                     key: key,
                   ),
                 ),
@@ -104,7 +104,7 @@ void main() {
       ),
     ); // t=0
     recordMetrics();
-    final Completer<Null> completer = new Completer<Null>();
+    final Completer<void> completer = Completer<void>();
     controller.forward().whenComplete(completer.complete);
     expect(completer.isCompleted, isFalse);
     await tester.pump(); // t=0 again

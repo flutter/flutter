@@ -12,14 +12,14 @@ const double _kFrontClosedHeight = 92.0; // front layer height when closed
 const double _kBackAppBarHeight = 56.0; // back layer (options) appbar height
 
 // The size of the front layer heading's left and right beveled corners.
-final Tween<BorderRadius> _kFrontHeadingBevelRadius = new BorderRadiusTween(
+final Animatable<BorderRadius> _kFrontHeadingBevelRadius = BorderRadiusTween(
   begin: const BorderRadius.only(
-    topLeft: const Radius.circular(12.0),
-    topRight: const Radius.circular(12.0),
+    topLeft: Radius.circular(12.0),
+    topRight: Radius.circular(12.0),
   ),
   end: const BorderRadius.only(
-    topLeft: const Radius.circular(_kFrontHeadingHeight),
-    topRight: const Radius.circular(_kFrontHeadingHeight),
+    topLeft: Radius.circular(_kFrontHeadingHeight),
+    topRight: Radius.circular(_kFrontHeadingHeight),
   ),
 );
 
@@ -35,7 +35,7 @@ class _TappableWhileStatusIs extends StatefulWidget {
   final Widget child;
 
   @override
-  _TappableWhileStatusIsState createState() => new _TappableWhileStatusIsState();
+  _TappableWhileStatusIsState createState() => _TappableWhileStatusIsState();
 }
 
 class _TappableWhileStatusIsState extends State<_TappableWhileStatusIs> {
@@ -65,13 +65,9 @@ class _TappableWhileStatusIsState extends State<_TappableWhileStatusIs> {
 
   @override
   Widget build(BuildContext context) {
-    return new AbsorbPointer(
+    return AbsorbPointer(
       absorbing: !_active,
-      // Redundant. TODO(xster): remove after https://github.com/flutter/flutter/issues/17179.
-      child: new IgnorePointer(
-        ignoring: !_active,
-        child: widget.child
-      ),
+      child: widget.child,
     );
   }
 }
@@ -93,30 +89,30 @@ class _CrossFadeTransition extends AnimatedWidget {
   Widget build(BuildContext context) {
     final Animation<double> progress = listenable;
 
-    final double opacity1 = new CurvedAnimation(
-      parent: new ReverseAnimation(progress),
+    final double opacity1 = CurvedAnimation(
+      parent: ReverseAnimation(progress),
       curve: const Interval(0.5, 1.0),
     ).value;
 
-    final double opacity2 = new CurvedAnimation(
+    final double opacity2 = CurvedAnimation(
       parent: progress,
       curve: const Interval(0.5, 1.0),
     ).value;
 
-    return new Stack(
+    return Stack(
       alignment: alignment,
       children: <Widget>[
-        new Opacity(
+        Opacity(
           opacity: opacity1,
-          child: new Semantics(
+          child: Semantics(
             scopesRoute: true,
             explicitChildNodes: true,
             child: child1,
           ),
         ),
-        new Opacity(
+        Opacity(
           opacity: opacity2,
-          child: new Semantics(
+          child: Semantics(
             scopesRoute: true,
             explicitChildNodes: true,
             child: child0,
@@ -142,19 +138,19 @@ class _BackAppBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final List<Widget> children = <Widget>[
-      new Container(
+      Container(
         alignment: Alignment.center,
         width: 56.0,
         child: leading,
       ),
-      new Expanded(
+      Expanded(
         child: title,
       ),
     ];
 
     if (trailing != null) {
       children.add(
-        new Container(
+        Container(
           alignment: Alignment.center,
           width: 56.0,
           child: trailing,
@@ -166,11 +162,11 @@ class _BackAppBar extends StatelessWidget {
 
     return IconTheme.merge(
       data: theme.primaryIconTheme,
-      child: new DefaultTextStyle(
+      child: DefaultTextStyle(
         style: theme.primaryTextTheme.title,
-        child: new SizedBox(
+        child: SizedBox(
           height: _kBackAppBarHeight,
-          child: new Row(children: children),
+          child: Row(children: children),
         ),
       ),
     );
@@ -195,30 +191,26 @@ class Backdrop extends StatefulWidget {
   final Widget backLayer;
 
   @override
-  _BackdropState createState() => new _BackdropState();
+  _BackdropState createState() => _BackdropState();
 }
 
 class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin {
-  final GlobalKey _backdropKey = new GlobalKey(debugLabel: 'Backdrop');
+  final GlobalKey _backdropKey = GlobalKey(debugLabel: 'Backdrop');
   AnimationController _controller;
   Animation<double> _frontOpacity;
+
+  static final Animatable<double> _frontOpacityTween = Tween<double>(begin: 0.2, end: 1.0)
+    .chain(CurveTween(curve: const Interval(0.0, 0.4, curve: Curves.easeInOut)));
 
   @override
   void initState() {
     super.initState();
-    _controller = new AnimationController(
+    _controller = AnimationController(
       duration: const Duration(milliseconds: 300),
       value: 1.0,
       vsync: this,
     );
-
-    _frontOpacity =
-      new Tween<double>(begin: 0.2, end: 1.0).animate(
-        new CurvedAnimation(
-          parent: _controller,
-          curve: const Interval(0.0, 0.4, curve: Curves.easeInOut),
-        ),
-      );
+    _frontOpacity = _controller.drive(_frontOpacityTween);
   }
 
   @override
@@ -258,63 +250,64 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
   }
 
   Widget _buildStack(BuildContext context, BoxConstraints constraints) {
-    final Animation<RelativeRect> frontRelativeRect = new RelativeRectTween(
-      begin: new RelativeRect.fromLTRB(0.0, constraints.biggest.height - _kFrontClosedHeight, 0.0, 0.0),
+    final Animation<RelativeRect> frontRelativeRect = _controller.drive(RelativeRectTween(
+      begin: RelativeRect.fromLTRB(0.0, constraints.biggest.height - _kFrontClosedHeight, 0.0, 0.0),
       end: const RelativeRect.fromLTRB(0.0, _kBackAppBarHeight, 0.0, 0.0),
-    ).animate(_controller);
+    ));
 
     final List<Widget> layers = <Widget>[
       // Back layer
-      new Column(
+      Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          new _BackAppBar(
+          _BackAppBar(
             leading: widget.frontAction,
-            title: new _CrossFadeTransition(
+            title: _CrossFadeTransition(
               progress: _controller,
               alignment: AlignmentDirectional.centerStart,
-              child0: new Semantics(namesRoute: true, child: widget.frontTitle),
-              child1: new Semantics(namesRoute: true, child: widget.backTitle),
+              child0: Semantics(namesRoute: true, child: widget.frontTitle),
+              child1: Semantics(namesRoute: true, child: widget.backTitle),
             ),
-            trailing: new IconButton(
+            trailing: IconButton(
               onPressed: _toggleFrontLayer,
               tooltip: 'Toggle options page',
-              icon: new AnimatedIcon(
+              icon: AnimatedIcon(
                 icon: AnimatedIcons.close_menu,
                 progress: _controller,
               ),
             ),
           ),
-          new Expanded(
-            child: new _TappableWhileStatusIs(
-              AnimationStatus.dismissed,
-              controller: _controller,
+          Expanded(
+            child: Visibility(
               child: widget.backLayer,
+              visible: _controller.status != AnimationStatus.completed,
+              maintainState: true,
             ),
           ),
         ],
       ),
       // Front layer
-      new PositionedTransition(
+      PositionedTransition(
         rect: frontRelativeRect,
-        child: new AnimatedBuilder(
+        child: AnimatedBuilder(
           animation: _controller,
           builder: (BuildContext context, Widget child) {
-            return new PhysicalShape(
+            return PhysicalShape(
               elevation: 12.0,
               color: Theme.of(context).canvasColor,
-              clipper: new ShapeBorderClipper(
-                shape: new BeveledRectangleBorder(
-                  borderRadius: _kFrontHeadingBevelRadius.lerp(_controller.value),
+              clipper: ShapeBorderClipper(
+                shape: BeveledRectangleBorder(
+                  borderRadius: _kFrontHeadingBevelRadius.transform(_controller.value),
                 ),
               ),
+              clipBehavior: Clip.antiAlias,
               child: child,
             );
           },
-          child: new _TappableWhileStatusIs(
+          child: _TappableWhileStatusIs(
             AnimationStatus.completed,
             controller: _controller,
-            child: new FadeTransition(
+            child: FadeTransition(
               opacity: _frontOpacity,
               child: widget.frontLayer,
             ),
@@ -329,12 +322,12 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
     // with a tap. It may obscure part of the front layer's topmost child.
     if (widget.frontHeading != null) {
       layers.add(
-        new PositionedTransition(
+        PositionedTransition(
           rect: frontRelativeRect,
-          child: new ExcludeSemantics(
-            child: new Container(
+          child: ExcludeSemantics(
+            child: Container(
               alignment: Alignment.topLeft,
-              child: new GestureDetector(
+              child: GestureDetector(
                 behavior: HitTestBehavior.opaque,
                 onTap: _toggleFrontLayer,
                 onVerticalDragUpdate: _handleDragUpdate,
@@ -347,7 +340,7 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
       );
     }
 
-    return new Stack(
+    return Stack(
       key: _backdropKey,
       children: layers,
     );
@@ -355,6 +348,6 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
 
   @override
   Widget build(BuildContext context) {
-    return new LayoutBuilder(builder: _buildStack);
+    return LayoutBuilder(builder: _buildStack);
   }
 }

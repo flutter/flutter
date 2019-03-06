@@ -15,17 +15,17 @@ void main() {
     // so if our widget is 100 pixels tall, it should fit exactly 6 times.
 
     Widget builder() {
-      return new Directionality(
+      return Directionality(
         textDirection: TextDirection.ltr,
-        child: new FlipWidget(
-          left: new ListView.builder(
+        child: FlipWidget(
+          left: ListView.builder(
             itemExtent: 100.0,
             itemBuilder: (BuildContext context, int index) {
               callbackTracker.add(index);
-              return new Container(
-                key: new ValueKey<int>(index),
+              return Container(
+                key: ValueKey<int>(index),
                 height: 100.0,
-                child: new Text('$index'),
+                child: Text('$index'),
               );
             },
           ),
@@ -70,20 +70,20 @@ void main() {
 
     final IndexedWidgetBuilder itemBuilder = (BuildContext context, int index) {
       callbackTracker.add(index);
-      return new Container(
-        key: new ValueKey<int>(index),
+      return Container(
+        key: ValueKey<int>(index),
         width: 500.0, // this should be ignored
         height: 400.0, // should be overridden by itemExtent
-        child: new Text('$index', textDirection: TextDirection.ltr)
+        child: Text('$index', textDirection: TextDirection.ltr),
       );
     };
 
     Widget buildWidget() {
-      return new Directionality(
+      return Directionality(
         textDirection: TextDirection.ltr,
-        child: new FlipWidget(
-          left: new ListView.builder(
-            controller: new ScrollController(initialScrollOffset: 300.0),
+        child: FlipWidget(
+          left: ListView.builder(
+            controller: ScrollController(initialScrollOffset: 300.0),
             itemExtent: 200.0,
             itemBuilder: itemBuilder,
           ),
@@ -143,20 +143,20 @@ void main() {
 
     final IndexedWidgetBuilder itemBuilder = (BuildContext context, int index) {
       callbackTracker.add(index);
-      return new Container(
-        key: new ValueKey<int>(index),
+      return Container(
+        key: ValueKey<int>(index),
         width: 400.0, // this should be overridden by itemExtent
         height: 500.0, // this should be ignored
-        child: new Text('$index'),
+        child: Text('$index'),
       );
     };
 
     Widget buildWidget() {
-      return new Directionality(
+      return Directionality(
         textDirection: TextDirection.ltr,
-        child: new FlipWidget(
-          left: new ListView.builder(
-            controller: new ScrollController(initialScrollOffset: 300.0),
+        child: FlipWidget(
+          left: ListView.builder(
+            controller: ScrollController(initialScrollOffset: 300.0),
             itemBuilder: itemBuilder,
             itemExtent: 200.0,
             scrollDirection: Axis.horizontal,
@@ -217,12 +217,12 @@ void main() {
 
     final IndexedWidgetBuilder itemBuilder = (BuildContext context, int index) {
       callbackTracker.add(index);
-      return new Text('$index', key: new ValueKey<int>(index), textDirection: TextDirection.ltr);
+      return Text('$index', key: ValueKey<int>(index), textDirection: TextDirection.ltr);
     };
 
-    final Widget testWidget = new Directionality(
+    final Widget testWidget = Directionality(
       textDirection: TextDirection.ltr,
-      child: new ListView.builder(
+      child: ListView.builder(
         itemBuilder: itemBuilder,
         itemExtent: 300.0,
         itemCount: 10,
@@ -263,20 +263,20 @@ void main() {
 
   testWidgets('ListView.separated', (WidgetTester tester) async {
     Widget buildFrame({ int itemCount }) {
-      return new Directionality(
+      return Directionality(
         textDirection: TextDirection.ltr,
-        child: new ListView.separated(
+        child: ListView.separated(
           itemCount: itemCount,
           itemBuilder: (BuildContext context, int index) {
-            return new SizedBox(
+            return SizedBox(
               height: 100.0,
-              child: new Text('i$index'),
+              child: Text('i$index'),
             );
           },
           separatorBuilder: (BuildContext context, int index) {
-            return new SizedBox(
+            return SizedBox(
               height: 10.0,
-              child: new Text('s$index'),
+              child: Text('s$index'),
             );
           },
         ),
@@ -306,7 +306,7 @@ void main() {
   });
 }
 
-void check({List<int> visible = const <int>[], List<int> hidden = const <int>[]}) {
+void check({ List<int> visible = const <int>[], List<int> hidden = const <int>[] }) {
   for (int i in visible) {
     expect(find.text('$i'), findsOneWidget);
   }

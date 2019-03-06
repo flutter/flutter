@@ -4,17 +4,22 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:test/test.dart';
+import 'package:flutter_test/src/binding.dart' show TestWidgetsFlutterBinding;
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('ensure frame is scheduled for markNeedsSemanticsUpdate', () {
-    final TestRenderObject renderObject = new TestRenderObject();
+    // Initialize all bindings because owner.flushSemantics() requires a window
+    TestWidgetsFlutterBinding.ensureInitialized();
+
+    final TestRenderObject renderObject = TestRenderObject();
     int onNeedVisualUpdateCallCount = 0;
-    final PipelineOwner owner = new PipelineOwner(onNeedVisualUpdate: () {
+    final PipelineOwner owner = PipelineOwner(onNeedVisualUpdate: () {
       onNeedVisualUpdateCallCount +=1;
     });
     owner.ensureSemantics();
     renderObject.attach(owner);
+    renderObject.layout(const BoxConstraints.tightForFinite());  // semantics are only calculated if layout information is up to date.
     owner.flushSemantics();
 
     expect(onNeedVisualUpdateCallCount, 1);
@@ -23,7 +28,7 @@ void main() {
   });
 
   test('detached RenderObject does not do semantics', () {
-    final TestRenderObject renderObject = new TestRenderObject();
+    final TestRenderObject renderObject = TestRenderObject();
     expect(renderObject.attached, isFalse);
     expect(renderObject.describeSemanticsConfigurationCallCount, 0);
 
@@ -46,7 +51,7 @@ class TestRenderObject extends RenderObject {
   void performResize() {}
 
   @override
-  Rect get semanticBounds => new Rect.fromLTWH(0.0, 0.0, 10.0, 20.0);
+  Rect get semanticBounds => Rect.fromLTWH(0.0, 0.0, 10.0, 20.0);
 
   int describeSemanticsConfigurationCallCount = 0;
 

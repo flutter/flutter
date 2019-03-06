@@ -11,7 +11,7 @@ import 'semantics_tester.dart';
 
 void main() {
   testWidgets('can cease to be semantics boundary after markNeedsSemanticsUpdate() has already been called once', (WidgetTester tester) async {
-    final SemanticsTester semantics = new SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
       buildTestWidgets(
@@ -34,23 +34,23 @@ void main() {
   });
 }
 
-Widget buildTestWidgets({bool excludeSemantics, String label, bool isSemanticsBoundary}) {
-  return new Directionality(
+Widget buildTestWidgets({ bool excludeSemantics, String label, bool isSemanticsBoundary }) {
+  return Directionality(
     textDirection: TextDirection.ltr,
-    child: new Semantics(
+    child: Semantics(
       label: 'container',
       container: true,
-      child: new ExcludeSemantics(
+      child: ExcludeSemantics(
         excluding: excludeSemantics,
-        child: new TestWidget(
+        child: TestWidget(
           label: label,
           isSemanticBoundary: isSemanticsBoundary,
-          child: new Column(
+          child: Column(
             children: <Widget>[
-              new Semantics(
+              Semantics(
                 label: 'child1',
               ),
-              new Semantics(
+              Semantics(
                 label: 'child2',
               ),
             ],
@@ -74,7 +74,7 @@ class TestWidget extends SingleChildRenderObjectWidget {
 
   @override
   RenderTest createRenderObject(BuildContext context) {
-    return new RenderTest()
+    return RenderTest()
       ..label = label
       ..isSemanticBoundary = isSemanticBoundary;
   }

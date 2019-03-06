@@ -37,7 +37,7 @@ class WillPopScope extends StatefulWidget {
   final WillPopCallback onWillPop;
 
   @override
-  _WillPopScopeState createState() => new _WillPopScopeState();
+  _WillPopScopeState createState() => _WillPopScopeState();
 }
 
 class _WillPopScopeState extends State<WillPopScope> {

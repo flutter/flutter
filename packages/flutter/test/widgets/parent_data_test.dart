@@ -45,71 +45,71 @@ void checkTree(WidgetTester tester, List<TestParentData> expectedParentData) {
   }
 }
 
-final TestParentData kNonPositioned = new TestParentData();
+final TestParentData kNonPositioned = TestParentData();
 
 void main() {
   testWidgets('ParentDataWidget control test', (WidgetTester tester) async {
 
     await tester.pumpWidget(
-      new Stack(
+      Stack(
         textDirection: TextDirection.ltr,
         children: const <Widget>[
-          const DecoratedBox(decoration: kBoxDecorationA),
-          const Positioned(
+          DecoratedBox(decoration: kBoxDecorationA),
+          Positioned(
             top: 10.0,
             left: 10.0,
-            child: const DecoratedBox(decoration: kBoxDecorationB),
+            child: DecoratedBox(decoration: kBoxDecorationB),
           ),
-          const DecoratedBox(decoration: kBoxDecorationC),
+          DecoratedBox(decoration: kBoxDecorationC),
         ],
       ),
     );
 
     checkTree(tester, <TestParentData>[
       kNonPositioned,
-      new TestParentData(top: 10.0, left: 10.0),
+      TestParentData(top: 10.0, left: 10.0),
       kNonPositioned,
     ]);
 
     await tester.pumpWidget(
-      new Stack(
+      Stack(
         textDirection: TextDirection.ltr,
         children: const <Widget>[
-          const Positioned(
+          Positioned(
             bottom: 5.0,
             right: 7.0,
-            child: const DecoratedBox(decoration: kBoxDecorationA),
+            child: DecoratedBox(decoration: kBoxDecorationA),
           ),
-          const Positioned(
+          Positioned(
             top: 10.0,
             left: 10.0,
-            child: const DecoratedBox(decoration: kBoxDecorationB),
+            child: DecoratedBox(decoration: kBoxDecorationB),
           ),
-          const DecoratedBox(decoration: kBoxDecorationC),
+          DecoratedBox(decoration: kBoxDecorationC),
         ],
       ),
     );
 
     checkTree(tester, <TestParentData>[
-      new TestParentData(bottom: 5.0, right: 7.0),
-      new TestParentData(top: 10.0, left: 10.0),
+      TestParentData(bottom: 5.0, right: 7.0),
+      TestParentData(top: 10.0, left: 10.0),
       kNonPositioned,
     ]);
 
-    const DecoratedBox kDecoratedBoxA = const DecoratedBox(decoration: kBoxDecorationA);
-    const DecoratedBox kDecoratedBoxB = const DecoratedBox(decoration: kBoxDecorationB);
-    const DecoratedBox kDecoratedBoxC = const DecoratedBox(decoration: kBoxDecorationC);
+    const DecoratedBox kDecoratedBoxA = DecoratedBox(decoration: kBoxDecorationA);
+    const DecoratedBox kDecoratedBoxB = DecoratedBox(decoration: kBoxDecorationB);
+    const DecoratedBox kDecoratedBoxC = DecoratedBox(decoration: kBoxDecorationC);
 
     await tester.pumpWidget(
-      new Stack(
+      Stack(
         textDirection: TextDirection.ltr,
         children: const <Widget>[
-          const Positioned(
+          Positioned(
             bottom: 5.0,
             right: 7.0,
             child: kDecoratedBoxA,
           ),
-          const Positioned(
+          Positioned(
             top: 10.0,
             left: 10.0,
             child: kDecoratedBoxB,
@@ -120,21 +120,21 @@ void main() {
     );
 
     checkTree(tester, <TestParentData>[
-      new TestParentData(bottom: 5.0, right: 7.0),
-      new TestParentData(top: 10.0, left: 10.0),
+      TestParentData(bottom: 5.0, right: 7.0),
+      TestParentData(top: 10.0, left: 10.0),
       kNonPositioned,
     ]);
 
     await tester.pumpWidget(
-      new Stack(
+      Stack(
         textDirection: TextDirection.ltr,
         children: const <Widget>[
-          const Positioned(
+          Positioned(
             bottom: 6.0,
             right: 8.0,
             child: kDecoratedBoxA,
           ),
-          const Positioned(
+          Positioned(
             left: 10.0,
             right: 10.0,
             child: kDecoratedBoxB,
@@ -145,20 +145,20 @@ void main() {
     );
 
     checkTree(tester, <TestParentData>[
-      new TestParentData(bottom: 6.0, right: 8.0),
-      new TestParentData(left: 10.0, right: 10.0),
+      TestParentData(bottom: 6.0, right: 8.0),
+      TestParentData(left: 10.0, right: 10.0),
       kNonPositioned,
     ]);
 
     await tester.pumpWidget(
-      new Stack(
+      Stack(
         textDirection: TextDirection.ltr,
         children: <Widget>[
           kDecoratedBoxA,
-          new Positioned(
+          Positioned(
             left: 11.0,
             right: 12.0,
-            child: new Container(child: kDecoratedBoxB),
+            child: Container(child: kDecoratedBoxB),
           ),
           kDecoratedBoxC,
         ],
@@ -167,20 +167,20 @@ void main() {
 
     checkTree(tester, <TestParentData>[
       kNonPositioned,
-      new TestParentData(left: 11.0, right: 12.0),
+      TestParentData(left: 11.0, right: 12.0),
       kNonPositioned,
     ]);
 
     await tester.pumpWidget(
-      new Stack(
+      Stack(
         textDirection: TextDirection.ltr,
         children: <Widget>[
           kDecoratedBoxA,
-          new Positioned(
+          Positioned(
             right: 10.0,
-            child: new Container(child: kDecoratedBoxB),
+            child: Container(child: kDecoratedBoxB),
           ),
-          new Container(
+          Container(
             child: const Positioned(
               top: 8.0,
               child: kDecoratedBoxC,
@@ -192,58 +192,58 @@ void main() {
 
     checkTree(tester, <TestParentData>[
       kNonPositioned,
-      new TestParentData(right: 10.0),
-      new TestParentData(top: 8.0),
+      TestParentData(right: 10.0),
+      TestParentData(top: 8.0),
     ]);
 
     await tester.pumpWidget(
-      new Stack(
+      Stack(
         textDirection: TextDirection.ltr,
         children: const <Widget>[
-          const Positioned(
+          Positioned(
             right: 10.0,
-            child: const FlipWidget(left: kDecoratedBoxA, right: kDecoratedBoxB),
+            child: FlipWidget(left: kDecoratedBoxA, right: kDecoratedBoxB),
           ),
         ],
       ),
     );
 
     checkTree(tester, <TestParentData>[
-      new TestParentData(right: 10.0),
+      TestParentData(right: 10.0),
     ]);
 
     flipStatefulWidget(tester);
     await tester.pump();
 
     checkTree(tester, <TestParentData>[
-      new TestParentData(right: 10.0),
+      TestParentData(right: 10.0),
     ]);
 
     await tester.pumpWidget(
-      new Stack(
+      Stack(
         textDirection: TextDirection.ltr,
         children: const <Widget>[
-          const Positioned(
+          Positioned(
             top: 7.0,
-            child: const FlipWidget(left: kDecoratedBoxA, right: kDecoratedBoxB),
+            child: FlipWidget(left: kDecoratedBoxA, right: kDecoratedBoxB),
           ),
         ],
       ),
     );
 
     checkTree(tester, <TestParentData>[
-      new TestParentData(top: 7.0),
+      TestParentData(top: 7.0),
     ]);
 
     flipStatefulWidget(tester);
     await tester.pump();
 
     checkTree(tester, <TestParentData>[
-      new TestParentData(top: 7.0),
+      TestParentData(top: 7.0),
     ]);
 
     await tester.pumpWidget(
-      new Stack(textDirection: TextDirection.ltr)
+      Stack(textDirection: TextDirection.ltr)
     );
 
     checkTree(tester, <TestParentData>[]);
@@ -251,16 +251,16 @@ void main() {
 
   testWidgets('ParentDataWidget conflicting data', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Stack(
+      Stack(
         textDirection: TextDirection.ltr,
         children: const <Widget>[
-          const Positioned(
+          Positioned(
             top: 5.0,
             bottom: 8.0,
-            child: const Positioned(
+            child: Positioned(
               top: 6.0,
               left: 7.0,
-              child: const DecoratedBox(decoration: kBoxDecorationB),
+              child: DecoratedBox(decoration: kBoxDecorationB),
             ),
           ),
         ],
@@ -268,18 +268,18 @@ void main() {
     );
     expect(tester.takeException(), isFlutterError);
 
-    await tester.pumpWidget(new Stack(textDirection: TextDirection.ltr));
+    await tester.pumpWidget(Stack(textDirection: TextDirection.ltr));
 
     checkTree(tester, <TestParentData>[]);
 
     await tester.pumpWidget(
-      new Container(
-        child: new Row(
+      Container(
+        child: Row(
           children: const <Widget>[
-            const Positioned(
+            Positioned(
               top: 6.0,
               left: 7.0,
-              child: const DecoratedBox(decoration: kBoxDecorationB),
+              child: DecoratedBox(decoration: kBoxDecorationB),
             ),
           ],
         ),
@@ -288,42 +288,42 @@ void main() {
     expect(tester.takeException(), isFlutterError);
 
     await tester.pumpWidget(
-      new Stack(textDirection: TextDirection.ltr)
+      Stack(textDirection: TextDirection.ltr)
     );
 
     checkTree(tester, <TestParentData>[]);
   });
 
   testWidgets('ParentDataWidget interacts with global keys', (WidgetTester tester) async {
-    final GlobalKey key = new GlobalKey();
+    final GlobalKey key = GlobalKey();
 
     await tester.pumpWidget(
-      new Stack(
+      Stack(
         textDirection: TextDirection.ltr,
         children: <Widget>[
-          new Positioned(
+          Positioned(
             top: 10.0,
             left: 10.0,
-            child: new DecoratedBox(key: key, decoration: kBoxDecorationA),
+            child: DecoratedBox(key: key, decoration: kBoxDecorationA),
           ),
         ],
       ),
     );
 
     checkTree(tester, <TestParentData>[
-      new TestParentData(top: 10.0, left: 10.0),
+      TestParentData(top: 10.0, left: 10.0),
     ]);
 
     await tester.pumpWidget(
-      new Stack(
+      Stack(
         textDirection: TextDirection.ltr,
         children: <Widget>[
-          new Positioned(
+          Positioned(
             top: 10.0,
             left: 10.0,
-            child: new DecoratedBox(
+            child: DecoratedBox(
               decoration: kBoxDecorationB,
-              child: new DecoratedBox(key: key, decoration: kBoxDecorationA),
+              child: DecoratedBox(key: key, decoration: kBoxDecorationA),
             ),
           ),
         ],
@@ -331,35 +331,35 @@ void main() {
     );
 
     checkTree(tester, <TestParentData>[
-      new TestParentData(top: 10.0, left: 10.0),
+      TestParentData(top: 10.0, left: 10.0),
     ]);
 
     await tester.pumpWidget(
-      new Stack(
+      Stack(
         textDirection: TextDirection.ltr,
         children: <Widget>[
-          new Positioned(
+          Positioned(
             top: 10.0,
             left: 10.0,
-            child: new DecoratedBox(key: key, decoration: kBoxDecorationA),
+            child: DecoratedBox(key: key, decoration: kBoxDecorationA),
           ),
         ],
       ),
     );
 
     checkTree(tester, <TestParentData>[
-      new TestParentData(top: 10.0, left: 10.0),
+      TestParentData(top: 10.0, left: 10.0),
     ]);
   });
 
   testWidgets('Parent data invalid ancestor', (WidgetTester tester) async {
-    await tester.pumpWidget(new Row(
+    await tester.pumpWidget(Row(
       children: <Widget>[
-        new Stack(
+        Stack(
         textDirection: TextDirection.ltr,
           children: <Widget>[
-            new Expanded(
-              child: new Container()
+            Expanded(
+              child: Container(),
             ),
           ],
         ),

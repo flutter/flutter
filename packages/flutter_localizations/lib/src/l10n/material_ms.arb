@@ -39,6 +39,18 @@
   "drawerLabel": "Menu navigasi",
   "popupMenuLabel": "Menu pop timbul",
   "dialogLabel": "Dialog",
-  "alertDialogLabel": "Amaran",
-  "searchFieldLabel": "Carian"
+  "alertDialogLabel": "Makluman",
+  "searchFieldLabel": "Cari",
+  "reorderItemToStart": "Alih ke permulaan",
+  "reorderItemToEnd": "Alih ke penghujung",
+  "reorderItemUp": "Alih ke atas",
+  "reorderItemDown": "Alih ke bawah",
+  "reorderItemLeft": "Alih ke kiri",
+  "reorderItemRight": "Alih ke kanan",
+  "expandedIconTapHint": "Runtuhkan",
+  "collapsedIconTapHint": "Kembangkan",
+  "remainingTextFieldCharacterCountZero": "TBD",
+  "remainingTextFieldCharacterCountOne": "1 aksara lagi",
+  "remainingTextFieldCharacterCountOther": "$remainingCount aksara lagi",
+  "refreshIndicatorSemanticLabel": "Muat semula"
 }

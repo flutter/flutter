@@ -38,6 +38,18 @@
   "drawerLabel": "Navigasjonsmeny",
   "popupMenuLabel": "Forgrunnsmeny",
   "dialogLabel": "Dialogboks",
-  "alertDialogLabel": "Varsling",
-  "searchFieldLabel": "Søke"
+  "alertDialogLabel": "Varsel",
+  "searchFieldLabel": "Søk",
+  "reorderItemToStart": "Flytt til starten",
+  "reorderItemToEnd": "Flytt til slutten",
+  "reorderItemUp": "Flytt opp",
+  "reorderItemDown": "Flytt ned",
+  "reorderItemLeft": "Flytt til venstre",
+  "reorderItemRight": "Flytt til høyre",
+  "expandedIconTapHint": "Skjul",
+  "collapsedIconTapHint": "Vis",
+  "remainingTextFieldCharacterCountZero": "TBD",
+  "remainingTextFieldCharacterCountOne": "1 tegn gjenstår",
+  "remainingTextFieldCharacterCountOther": "$remainingCount tegn gjenstår",
+  "refreshIndicatorSemanticLabel": "Laster inn på nytt"
 }

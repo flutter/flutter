@@ -38,6 +38,18 @@
   "drawerLabel": "Menu di navigazione",
   "popupMenuLabel": "Menu popup",
   "dialogLabel": "Finestra di dialogo",
-  "alertDialogLabel": "Mettere in guardia",
-  "searchFieldLabel": "Ricerca"
+  "alertDialogLabel": "Avviso",
+  "searchFieldLabel": "Cerca",
+  "reorderItemToStart": "Sposta all'inizio",
+  "reorderItemToEnd": "Sposta alla fine",
+  "reorderItemUp": "Sposta su",
+  "reorderItemDown": "Sposta giù",
+  "reorderItemLeft": "Sposta a sinistra",
+  "reorderItemRight": "Sposta a destra",
+  "expandedIconTapHint": "Comprimi",
+  "collapsedIconTapHint": "Espandi",
+  "remainingTextFieldCharacterCountZero": "TBD",
+  "remainingTextFieldCharacterCountOne": "1 carattere rimanente",
+  "remainingTextFieldCharacterCountOther": "$remainingCount caratteri rimanenti",
+  "refreshIndicatorSemanticLabel": "Aggiorna"
 }

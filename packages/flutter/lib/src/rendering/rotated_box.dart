@@ -25,7 +25,7 @@ class RenderRotatedBox extends RenderBox with RenderObjectWithChildMixin<RenderB
   /// The [quarterTurns] argument must not be null.
   RenderRotatedBox({
     @required int quarterTurns,
-    RenderBox child
+    RenderBox child,
   }) : assert(quarterTurns != null),
        _quarterTurns = quarterTurns {
     this.child = child;
@@ -79,8 +79,8 @@ class RenderRotatedBox extends RenderBox with RenderObjectWithChildMixin<RenderB
     _paintTransform = null;
     if (child != null) {
       child.layout(_isVertical ? constraints.flipped : constraints, parentUsesSize: true);
-      size = _isVertical ? new Size(child.size.height, child.size.width) : child.size;
-      _paintTransform = new Matrix4.identity()
+      size = _isVertical ? Size(child.size.height, child.size.width) : child.size;
+      _paintTransform = Matrix4.identity()
         ..translate(size.width / 2.0, size.height / 2.0)
         ..rotateZ(_kQuarterTurnsInRadians * (quarterTurns % 4))
         ..translate(-child.size.width / 2.0, -child.size.height / 2.0);
@@ -94,7 +94,7 @@ class RenderRotatedBox extends RenderBox with RenderObjectWithChildMixin<RenderB
     assert(_paintTransform != null || debugNeedsLayout || child == null);
     if (child == null || _paintTransform == null)
       return false;
-    final Matrix4 inverse = new Matrix4.inverted(_paintTransform);
+    final Matrix4 inverse = Matrix4.inverted(_paintTransform);
     return child.hitTest(result, position: MatrixUtils.transformPoint(inverse, position));
   }
 

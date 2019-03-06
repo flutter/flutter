@@ -3,32 +3,34 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
+import 'dart:math' as math;
 
+import '../base/common.dart';
 import '../base/file_system.dart' hide IOSink;
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/platform.dart';
 import '../base/process_manager.dart';
+import '../base/terminal.dart';
 import '../base/utils.dart';
+import '../convert.dart';
 import '../globals.dart';
 
 class AnalysisServer {
-  AnalysisServer(this.sdkPath, this.directories, {this.previewDart2 = false});
+  AnalysisServer(this.sdkPath, this.directories);
 
   final String sdkPath;
   final List<String> directories;
-  final bool previewDart2;
 
   Process _process;
   final StreamController<bool> _analyzingController =
-      new StreamController<bool>.broadcast();
+      StreamController<bool>.broadcast();
   final StreamController<FileAnalysisErrors> _errorsController =
-      new StreamController<FileAnalysisErrors>.broadcast();
+      StreamController<FileAnalysisErrors>.broadcast();
 
   int _id = 0;
 
-  Future<Null> start() async {
+  Future<void> start() async {
     final String snapshot =
         fs.path.join(sdkPath, 'bin/snapshots/analysis_server.dart.snapshot');
     final List<String> command = <String>[
@@ -38,35 +40,21 @@ class AnalysisServer {
       sdkPath,
     ];
 
-    if (previewDart2) {
-      command.add('--preview-dart-2');
-    } else {
-      command.add('--no-preview-dart-2');
-    }
-
     printTrace('dart ${command.skip(1).join(' ')}');
     _process = await processManager.start(command);
     // This callback hookup can't throw.
-    _process.exitCode
-        .whenComplete(() => _process = null); // ignore: unawaited_futures
+    unawaited(_process.exitCode.whenComplete(() => _process = null));
 
     final Stream<String> errorStream =
-        _process.stderr.transform(utf8.decoder).transform(const LineSplitter());
+        _process.stderr.transform<String>(utf8.decoder).transform<String>(const LineSplitter());
     errorStream.listen(printError);
 
     final Stream<String> inStream =
-        _process.stdout.transform(utf8.decoder).transform(const LineSplitter());
+        _process.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter());
     inStream.listen(_handleServerResponse);
 
-    // Available options (many of these are obsolete):
-    //   enableAsync, enableDeferredLoading, enableEnums, enableNullAwareOperators,
-    //   enableSuperMixins, generateDart2jsHints, generateHints, generateLints
-    _sendCommand('analysis.updateOptions', <String, dynamic>{
-      'options': <String, dynamic>{'enableSuperMixins': true}
-    });
-
     _sendCommand('server.setSubscriptions', <String, dynamic>{
-      'subscriptions': <String>['STATUS']
+      'subscriptions': <String>['STATUS'],
     });
 
     _sendCommand('analysis.setAnalysisRoots',
@@ -82,7 +70,7 @@ class AnalysisServer {
     final String message = json.encode(<String, dynamic>{
       'id': (++_id).toString(),
       'method': method,
-      'params': params
+      'params': params,
     });
     _process.stdin.writeln(message);
     printTrace('==> $message');
@@ -140,10 +128,10 @@ class AnalysisServer {
     final List<dynamic> errorsList = issueInfo['errors'];
     final List<AnalysisError> errors = errorsList
         .map<Map<String, dynamic>>(castStringKeyedMap)
-        .map<AnalysisError>((Map<String, dynamic> json) => new AnalysisError(json))
+        .map<AnalysisError>((Map<String, dynamic> json) => AnalysisError(json))
         .toList();
     if (!_errorsController.isClosed)
-      _errorsController.add(new FileAnalysisErrors(file, errors));
+      _errorsController.add(FileAnalysisErrors(file, errors));
   }
 
   Future<bool> dispose() async {
@@ -153,13 +141,20 @@ class AnalysisServer {
   }
 }
 
+enum _AnalysisSeverity {
+  error,
+  warning,
+  info,
+  none,
+}
+
 class AnalysisError implements Comparable<AnalysisError> {
   AnalysisError(this.json);
 
-  static final Map<String, int> _severityMap = <String, int>{
-    'ERROR': 3,
-    'WARNING': 2,
-    'INFO': 1
+  static final Map<String, _AnalysisSeverity> _severityMap = <String, _AnalysisSeverity>{
+    'INFO': _AnalysisSeverity.info,
+    'WARNING': _AnalysisSeverity.warning,
+    'ERROR': _AnalysisSeverity.error,
   };
 
   static final String _separator = platform.isWindows ? '-' : '•';
@@ -170,7 +165,19 @@ class AnalysisError implements Comparable<AnalysisError> {
   Map<String, dynamic> json;
 
   String get severity => json['severity'];
-  int get severityLevel => _severityMap[severity] ?? 0;
+  String get colorSeverity {
+    switch(_severityLevel) {
+      case _AnalysisSeverity.error:
+        return terminal.color(severity, TerminalColor.red);
+      case _AnalysisSeverity.warning:
+        return terminal.color(severity, TerminalColor.yellow);
+      case _AnalysisSeverity.info:
+      case _AnalysisSeverity.none:
+        return severity;
+    }
+    return null;
+  }
+  _AnalysisSeverity get _severityLevel => _severityMap[severity] ?? _AnalysisSeverity.none;
   String get type => json['type'];
   String get message => json['message'];
   String get code => json['code'];
@@ -197,7 +204,7 @@ class AnalysisError implements Comparable<AnalysisError> {
     if (offset != other.offset)
       return offset - other.offset;
 
-    final int diff = other.severityLevel - severityLevel;
+    final int diff = other._severityLevel.index - _severityLevel.index;
     if (diff != 0)
       return diff;
 
@@ -206,9 +213,13 @@ class AnalysisError implements Comparable<AnalysisError> {
 
   @override
   String toString() {
-    return '${severity.toLowerCase().padLeft(7)} $_separator '
+    // Can't use "padLeft" because of ANSI color sequences in the colorized
+    // severity.
+    final String padding = ' ' * math.max(0, 7 - severity.length);
+    return '$padding${colorSeverity.toLowerCase()} $_separator '
         '$messageSentenceFragment $_separator '
-        '${fs.path.relative(file)}:$startLine:$startColumn';
+        '${fs.path.relative(file)}:$startLine:$startColumn $_separator '
+        '$code';
   }
 
   String toLegacyString() {

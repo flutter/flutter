@@ -85,22 +85,22 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
        assert(curve != null),
        _vsync = vsync,
        super(child: child, alignment: alignment, textDirection: textDirection) {
-    _controller = new AnimationController(
+    _controller = AnimationController(
       vsync: vsync,
       duration: duration,
     )..addListener(() {
       if (_controller.value != _lastValue)
         markNeedsLayout();
     });
-    _animation = new CurvedAnimation(
+    _animation = CurvedAnimation(
       parent: _controller,
-      curve: curve
+      curve: curve,
     );
   }
 
   AnimationController _controller;
   CurvedAnimation _animation;
-  final SizeTween _sizeTween = new SizeTween();
+  final SizeTween _sizeTween = SizeTween();
   bool _hasVisualOverflow;
   double _lastValue;
 

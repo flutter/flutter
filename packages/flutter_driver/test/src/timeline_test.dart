@@ -2,13 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:test/test.dart';
 import 'package:flutter_driver/src/driver/timeline.dart';
+
+import '../common.dart';
 
 void main() {
   group('Timeline', () {
     test('parses JSON', () {
-      final Timeline timeline = new Timeline.fromJson(<String, dynamic>{
+      final Timeline timeline = Timeline.fromJson(<String, dynamic>{
         'traceEvents': <Map<String, dynamic>>[
           <String, dynamic>{
             'name': 'test event',
@@ -22,11 +23,11 @@ void main() {
             'tts': 567,
             'args': <String, dynamic>{
               'arg1': true,
-            }
+            },
           },
           // Tests that we don't choke on missing data
-          <String, dynamic>{}
-        ]
+          <String, dynamic>{},
+        ],
       });
 
       expect(timeline.events, hasLength(2));

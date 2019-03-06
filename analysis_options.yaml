@@ -7,7 +7,9 @@
 # See the configuration guide for more
 # https://github.com/dart-lang/sdk/tree/master/pkg/analyzer#configuring-the-analyzer
 #
-# There are four similar analysis options files in the flutter repos:
+# There are other similar analysis options files in the flutter repos,
+# which should be kept in sync with this file:
+#
 #   - analysis_options.yaml (this file)
 #   - packages/flutter/lib/analysis_options_user.yaml
 #   - https://github.com/flutter/plugins/blob/master/analysis_options.yaml
@@ -15,13 +17,8 @@
 #
 # This file contains the analysis options used by Flutter tools, such as IntelliJ,
 # Android Studio, and the `flutter analyze` command.
-#
-# The flutter/plugins repo contains a copy of this file, which should be kept
-# in sync with this file.
 
 analyzer:
-  language:
-    enableSuperMixins: true
   strong-mode:
     implicit-dynamic: false
   errors:
@@ -31,6 +28,10 @@ analyzer:
     missing_return: warning
     # allow having TODOs in the code
     todo: ignore
+    # Ignore analyzer hints for updating pubspecs when using Future or
+    # Stream and not importing dart:async
+    # Please see https://github.com/flutter/flutter/pull/24528 for details.
+    sdk_version_async_exported_from_core: ignore
   exclude:
     - 'bin/cache/**'
     # the following two are relative to the stocks example and the flutter package respectively
@@ -59,6 +60,7 @@ linter:
     - avoid_empty_else
     - avoid_field_initializers_in_const_classes
     - avoid_function_literals_in_foreach_calls
+    # - avoid_implementing_value_types # not yet tested
     - avoid_init_to_null
     # - avoid_js_rounded_ints # only useful when targeting JS runtime
     - avoid_null_checks_in_equality_operators
@@ -67,38 +69,47 @@ linter:
     - avoid_relative_lib_imports
     - avoid_renaming_method_parameters
     - avoid_return_types_on_setters
-    # - avoid_returning_null # we do this commonly
-    # - avoid_returning_this # https://github.com/dart-lang/linter/issues/842
+    # - avoid_returning_null # there are plenty of valid reasons to return null
+    # - avoid_returning_null_for_future # not yet tested
+    - avoid_returning_null_for_void
+    # - avoid_returning_this # there are plenty of valid reasons to return this
     # - avoid_setters_without_getters # not yet tested
+    # - avoid_shadowing_type_parameters # not yet tested
     # - avoid_single_cascade_in_expression_statements # not yet tested
     - avoid_slow_async_io
-    # - avoid_types_as_parameter_names # https://github.com/dart-lang/linter/pull/954/files
+    - avoid_types_as_parameter_names
     # - avoid_types_on_closure_parameters # conflicts with always_specify_types
-    # - avoid_unused_constructor_parameters # https://github.com/dart-lang/linter/pull/847
+    - avoid_unused_constructor_parameters
+    - avoid_void_async
     - await_only_futures
     - camel_case_types
     - cancel_subscriptions
     # - cascade_invocations # not yet tested
-    # - close_sinks # https://github.com/flutter/flutter/issues/5789
-    # - comment_references # blocked on https://github.com/dart-lang/dartdoc/issues/1153
-    # - constant_identifier_names # https://github.com/dart-lang/linter/issues/204
+    # - close_sinks # not reliable enough
+    # - comment_references # blocked on https://github.com/flutter/flutter/issues/20765
+    # - constant_identifier_names # needs an opt-out https://github.com/dart-lang/linter/issues/204
     - control_flow_in_finally
+    # - curly_braces_in_flow_control_structures # not yet tested
     - directives_ordering
     - empty_catches
     - empty_constructor_bodies
     - empty_statements
+    # - file_names # not yet tested
+    - flutter_style_todos
     - hash_and_equals
     - implementation_imports
-    # - invariant_booleans # https://github.com/flutter/flutter/issues/5790
+    # - invariant_booleans # too many false positives: https://github.com/dart-lang/linter/issues/811
     - iterable_contains_unrelated_type
     # - join_return_with_assignment # not yet tested
     - library_names
     - library_prefixes
+    # - lines_longer_than_80_chars # not yet tested
     - list_remove_unrelated_type
-    # - literal_only_boolean_expressions # https://github.com/flutter/flutter/issues/5791
+    # - literal_only_boolean_expressions # too many false positives: https://github.com/dart-lang/sdk/issues/34181
     - no_adjacent_strings_in_list
     - no_duplicate_case_values
     - non_constant_identifier_names
+    # - null_closures  # not yet tested
     # - omit_local_variable_types # opposite of always_specify_types
     # - one_member_abstracts # too many false positives
     # - only_throw_errors # https://github.com/flutter/flutter/issues/5792
@@ -109,8 +120,7 @@ linter:
     # - parameter_assignments # we do this commonly
     - prefer_adjacent_string_concatenation
     - prefer_asserts_in_initializer_lists
-    - prefer_bool_in_asserts
-    - prefer_collection_literals
+    # - prefer_collection_literals # temporary until all platforms support set literals
     - prefer_conditional_assignment
     - prefer_const_constructors
     - prefer_const_constructors_in_immutables
@@ -124,36 +134,46 @@ linter:
     - prefer_final_locals
     - prefer_foreach
     # - prefer_function_declarations_over_variables # not yet tested
+    - prefer_generic_function_type_aliases
     - prefer_initializing_formals
+    # - prefer_int_literals # not yet tested
     # - prefer_interpolation_to_compose_strings # not yet tested
-    # - prefer_iterable_whereType # https://github.com/dart-lang/sdk/issues/32463
     - prefer_is_empty
     - prefer_is_not_empty
+    - prefer_iterable_whereType
+    # - prefer_mixin # https://github.com/dart-lang/language/issues/32
     - prefer_single_quotes
     - prefer_typing_uninitialized_variables
+    - prefer_void_to_null
+    # - public_member_api_docs # enabled on a case-by-case basis; see e.g. packages/analysis_options.yaml
     - recursive_getters
     - slash_for_doc_comments
     - sort_constructors_first
+    - sort_pub_dependencies
     - sort_unnamed_constructors_first
-    - super_goes_last
+    # - super_goes_last # no longer needed w/ Dart 2
     - test_types_in_equals
     - throw_in_finally
     # - type_annotate_public_apis # subset of always_specify_types
     - type_init_formals
-    # - unawaited_futures # https://github.com/flutter/flutter/issues/5793
+    # - unawaited_futures # too many false positives
+    # - unnecessary_await_in_return # not yet tested
     - unnecessary_brace_in_string_interps
+    - unnecessary_const
     - unnecessary_getters_setters
-    # - unnecessary_lambdas # https://github.com/dart-lang/linter/issues/498
+    # - unnecessary_lambdas # has false positives: https://github.com/dart-lang/linter/issues/498
+    - unnecessary_new
     - unnecessary_null_aware_assignments
     - unnecessary_null_in_if_null_operators
     - unnecessary_overrides
     - unnecessary_parenthesis
-    # - unnecessary_statements # not yet tested
+    - unnecessary_statements
     - unnecessary_this
     - unrelated_type_equality_checks
+    # - use_function_type_syntax_for_parameters # not yet tested
     - use_rethrow_when_possible
     # - use_setters_to_change_properties # not yet tested
-    # - use_string_buffers # https://github.com/dart-lang/linter/pull/664
+    # - use_string_buffers # has false positives: https://github.com/dart-lang/sdk/issues/34182
     # - use_to_and_as_if_applicable # has false positives, so we prefer to catch this by code-review
     - valid_regexps
     # - void_checks # not yet tested

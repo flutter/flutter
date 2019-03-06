@@ -21,17 +21,17 @@ void main() {
     await device.unlock();
     final Directory appDir = dir(path.join(flutterDirectory.path, 'dev/integration_tests/ui'));
     await inDirectory(appDir, () async {
-      final Completer<Null> ready = new Completer<Null>();
+      final Completer<void> ready = Completer<void>();
       bool ok;
       print('run: starting...');
       final Process run = await startProcess(
         path.join(flutterDirectory.path, 'bin', 'flutter'),
         <String>['run', '--verbose', '-d', device.deviceId, 'lib/commands.dart'],
       );
-      final StreamController<String> stdout = new StreamController<String>.broadcast();
+      final StreamController<String> stdout = StreamController<String>.broadcast();
       run.stdout
-        .transform(utf8.decoder)
-        .transform(const LineSplitter())
+        .transform<String>(utf8.decoder)
+        .transform<String>(const LineSplitter())
         .listen((String line) {
           print('run:stdout: $line');
           stdout.add(line);
@@ -46,19 +46,19 @@ void main() {
           }
         });
       run.stderr
-        .transform(utf8.decoder)
-        .transform(const LineSplitter())
+        .transform<String>(utf8.decoder)
+        .transform<String>(const LineSplitter())
         .listen((String line) {
           stderr.writeln('run:stderr: $line');
         });
-      run.exitCode.then((int exitCode) { ok = false; });
+      run.exitCode.then<void>((int exitCode) { ok = false; });
       await Future.any<dynamic>(<Future<dynamic>>[ ready.future, run.exitCode ]);
       if (!ok)
         throw 'Failed to run test app.';
 
-      final VMServiceClient client = new VMServiceClient.connect('ws://localhost:$vmServicePort/ws');
+      final VMServiceClient client = VMServiceClient.connect('ws://localhost:$vmServicePort/ws');
 
-      final DriveHelper driver = new DriveHelper(vmServicePort);
+      final DriveHelper driver = DriveHelper(vmServicePort);
 
       await driver.drive('none');
       print('test: pressing "p" to enable debugPaintSize...');
@@ -74,18 +74,18 @@ void main() {
       run.stdin.write('P');
       await driver.drive('none');
       final Future<String> reloadStartingText =
-        stdout.stream.firstWhere((String line) => line.endsWith('hot reload...'));
+        stdout.stream.firstWhere((String line) => line.endsWith('] Initializing hot reload...'));
       final Future<String> reloadEndingText =
-        stdout.stream.firstWhere((String line) => line.contains('Hot reload performed in '));
+        stdout.stream.firstWhere((String line) => line.contains('] Reloaded ') && line.endsWith('ms.'));
       print('test: pressing "r" to perform a hot reload...');
       run.stdin.write('r');
       await reloadStartingText;
       await reloadEndingText;
       await driver.drive('none');
       final Future<String> restartStartingText =
-        stdout.stream.firstWhere((String line) => line.endsWith('hot restart...'));
+        stdout.stream.firstWhere((String line) => line.endsWith('Performing hot restart...'));
       final Future<String> restartEndingText =
-        stdout.stream.firstWhere((String line) => line.contains('Restart performed in '));
+        stdout.stream.firstWhere((String line) => line.contains('] Restarted application in '));
       print('test: pressing "R" to perform a full reload...');
       run.stdin.write('R');
       await restartStartingText;
@@ -98,7 +98,7 @@ void main() {
       print('test: validating that the app has in fact closed...');
       await client.done.timeout(const Duration(seconds: 5));
     });
-    return new TaskResult.success(null);
+    return TaskResult.success(null);
   });
 }
 
@@ -107,21 +107,21 @@ class DriveHelper {
 
   final int vmServicePort;
 
-  Future<Null> drive(String name) async {
+  Future<void> drive(String name) async {
     print('drive: running commands_$name check...');
     final Process drive = await startProcess(
       path.join(flutterDirectory.path, 'bin', 'flutter'),
       <String>['drive', '--use-existing-app', 'http://127.0.0.1:$vmServicePort/', '--keep-app-running', '--driver', 'test_driver/commands_${name}_test.dart'],
     );
     drive.stdout
-        .transform(utf8.decoder)
-        .transform(const LineSplitter())
+        .transform<String>(utf8.decoder)
+        .transform<String>(const LineSplitter())
         .listen((String line) {
       print('drive:stdout: $line');
     });
     drive.stderr
-        .transform(utf8.decoder)
-        .transform(const LineSplitter())
+        .transform<String>(utf8.decoder)
+        .transform<String>(const LineSplitter())
         .listen((String line) {
       stderr.writeln('drive:stderr: $line');
     });

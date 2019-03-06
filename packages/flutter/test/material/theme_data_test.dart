@@ -7,13 +7,13 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('Theme data control test', () {
-    final ThemeData dark = new ThemeData.dark();
+    final ThemeData dark = ThemeData.dark();
 
     expect(dark, hasOneLineDescription);
     expect(dark, equals(dark.copyWith()));
     expect(dark.hashCode, equals(dark.copyWith().hashCode));
 
-    final ThemeData light = new ThemeData.light();
+    final ThemeData light = ThemeData.light();
     final ThemeData dawn = ThemeData.lerp(dark, light, 0.25);
 
     expect(dawn.brightness, Brightness.dark);
@@ -22,95 +22,95 @@ void main() {
 
   test('Defaults to the default typography for the platform', () {
     for (TargetPlatform platform in TargetPlatform.values) {
-      final ThemeData theme = new ThemeData(platform: platform);
-      final Typography typography = new Typography(platform: platform);
+      final ThemeData theme = ThemeData(platform: platform);
+      final Typography typography = Typography(platform: platform);
       expect(theme.textTheme, typography.black.apply(decoration: TextDecoration.none),
           reason: 'Not using default typography for $platform');
     }
   });
 
   test('Default text theme contrasts with brightness', () {
-    final ThemeData lightTheme = new ThemeData(brightness: Brightness.light);
-    final ThemeData darkTheme = new ThemeData(brightness: Brightness.dark);
-    final Typography typography = new Typography(platform: lightTheme.platform);
+    final ThemeData lightTheme = ThemeData(brightness: Brightness.light);
+    final ThemeData darkTheme = ThemeData(brightness: Brightness.dark);
+    final Typography typography = Typography(platform: lightTheme.platform);
 
     expect(lightTheme.textTheme.title.color, typography.black.title.color);
     expect(darkTheme.textTheme.title.color, typography.white.title.color);
   });
 
   test('Default primary text theme contrasts with primary brightness', () {
-    final ThemeData lightTheme = new ThemeData(primaryColorBrightness: Brightness.light);
-    final ThemeData darkTheme = new ThemeData(primaryColorBrightness: Brightness.dark);
-    final Typography typography = new Typography(platform: lightTheme.platform);
+    final ThemeData lightTheme = ThemeData(primaryColorBrightness: Brightness.light);
+    final ThemeData darkTheme = ThemeData(primaryColorBrightness: Brightness.dark);
+    final Typography typography = Typography(platform: lightTheme.platform);
 
     expect(lightTheme.primaryTextTheme.title.color, typography.black.title.color);
     expect(darkTheme.primaryTextTheme.title.color, typography.white.title.color);
   });
 
   test('Default accent text theme contrasts with accent brightness', () {
-    final ThemeData lightTheme = new ThemeData(accentColorBrightness: Brightness.light);
-    final ThemeData darkTheme = new ThemeData(accentColorBrightness: Brightness.dark);
-    final Typography typography = new Typography(platform: lightTheme.platform);
+    final ThemeData lightTheme = ThemeData(accentColorBrightness: Brightness.light);
+    final ThemeData darkTheme = ThemeData(accentColorBrightness: Brightness.dark);
+    final Typography typography = Typography(platform: lightTheme.platform);
 
     expect(lightTheme.accentTextTheme.title.color, typography.black.title.color);
     expect(darkTheme.accentTextTheme.title.color, typography.white.title.color);
   });
 
   test('Default slider indicator style gets a default body2 if accentTextTheme.body2 is null', () {
-    const TextTheme noBody2TextTheme = const TextTheme(body2: null);
-    final ThemeData lightTheme = new ThemeData(brightness: Brightness.light, accentTextTheme: noBody2TextTheme);
-    final ThemeData darkTheme = new ThemeData(brightness: Brightness.dark, accentTextTheme: noBody2TextTheme);
-    final Typography typography = new Typography(platform: lightTheme.platform);
+    const TextTheme noBody2TextTheme = TextTheme(body2: null);
+    final ThemeData lightTheme = ThemeData(brightness: Brightness.light, accentTextTheme: noBody2TextTheme);
+    final ThemeData darkTheme = ThemeData(brightness: Brightness.dark, accentTextTheme: noBody2TextTheme);
+    final Typography typography = Typography(platform: lightTheme.platform);
 
     expect(lightTheme.sliderTheme.valueIndicatorTextStyle, equals(typography.white.body2));
     expect(darkTheme.sliderTheme.valueIndicatorTextStyle, equals(typography.black.body2));
   });
 
   test('Default chip label style gets a default body2 if textTheme.body2 is null', () {
-    const TextTheme noBody2TextTheme = const TextTheme(body2: null);
-    final ThemeData lightTheme = new ThemeData(brightness: Brightness.light, textTheme: noBody2TextTheme);
-    final ThemeData darkTheme = new ThemeData(brightness: Brightness.dark, textTheme: noBody2TextTheme);
-    final Typography typography = new Typography(platform: lightTheme.platform);
+    const TextTheme noBody2TextTheme = TextTheme(body2: null);
+    final ThemeData lightTheme = ThemeData(brightness: Brightness.light, textTheme: noBody2TextTheme);
+    final ThemeData darkTheme = ThemeData(brightness: Brightness.dark, textTheme: noBody2TextTheme);
+    final Typography typography = Typography(platform: lightTheme.platform);
 
     expect(lightTheme.chipTheme.labelStyle.color, equals(typography.black.body2.color.withAlpha(0xde)));
     expect(darkTheme.chipTheme.labelStyle.color, equals(typography.white.body2.color.withAlpha(0xde)));
   });
 
   test('Default icon theme contrasts with brightness', () {
-    final ThemeData lightTheme = new ThemeData(brightness: Brightness.light);
-    final ThemeData darkTheme = new ThemeData(brightness: Brightness.dark);
-    final Typography typography = new Typography(platform: lightTheme.platform);
+    final ThemeData lightTheme = ThemeData(brightness: Brightness.light);
+    final ThemeData darkTheme = ThemeData(brightness: Brightness.dark);
+    final Typography typography = Typography(platform: lightTheme.platform);
 
     expect(lightTheme.textTheme.title.color, typography.black.title.color);
     expect(darkTheme.textTheme.title.color, typography.white.title.color);
   });
 
   test('Default primary icon theme contrasts with primary brightness', () {
-    final ThemeData lightTheme = new ThemeData(primaryColorBrightness: Brightness.light);
-    final ThemeData darkTheme = new ThemeData(primaryColorBrightness: Brightness.dark);
-    final Typography typography = new Typography(platform: lightTheme.platform);
+    final ThemeData lightTheme = ThemeData(primaryColorBrightness: Brightness.light);
+    final ThemeData darkTheme = ThemeData(primaryColorBrightness: Brightness.dark);
+    final Typography typography = Typography(platform: lightTheme.platform);
 
     expect(lightTheme.primaryTextTheme.title.color, typography.black.title.color);
     expect(darkTheme.primaryTextTheme.title.color, typography.white.title.color);
   });
 
   test('Default accent icon theme contrasts with accent brightness', () {
-    final ThemeData lightTheme = new ThemeData(accentColorBrightness: Brightness.light);
-    final ThemeData darkTheme = new ThemeData(accentColorBrightness: Brightness.dark);
-    final Typography typography = new Typography(platform: lightTheme.platform);
+    final ThemeData lightTheme = ThemeData(accentColorBrightness: Brightness.light);
+    final ThemeData darkTheme = ThemeData(accentColorBrightness: Brightness.dark);
+    final Typography typography = Typography(platform: lightTheme.platform);
 
     expect(lightTheme.accentTextTheme.title.color, typography.black.title.color);
     expect(darkTheme.accentTextTheme.title.color, typography.white.title.color);
   });
 
   test('Defaults to MaterialTapTargetBehavior.expanded', () {
-    final ThemeData themeData = new ThemeData();
+    final ThemeData themeData = ThemeData();
 
     expect(themeData.materialTapTargetSize, MaterialTapTargetSize.padded);
   });
 
   test('Can control fontFamily', () {
-    final ThemeData themeData = new ThemeData(fontFamily: 'Ahem');
+    final ThemeData themeData = ThemeData(fontFamily: 'Ahem');
 
     expect(themeData.textTheme.body2.fontFamily, equals('Ahem'));
     expect(themeData.primaryTextTheme.title.fontFamily, equals('Ahem'));
@@ -131,15 +131,19 @@ void main() {
   });
 
   test('Can estimate brightness - indirectly', () {
-    expect(new ThemeData(primaryColor: Colors.white).primaryColorBrightness, equals(Brightness.light));
-    expect(new ThemeData(primaryColor: Colors.black).primaryColorBrightness, equals(Brightness.dark));
-    expect(new ThemeData(primaryColor: Colors.blue).primaryColorBrightness, equals(Brightness.dark));
-    expect(new ThemeData(primaryColor: Colors.yellow).primaryColorBrightness, equals(Brightness.light));
-    expect(new ThemeData(primaryColor: Colors.deepOrange).primaryColorBrightness, equals(Brightness.dark));
-    expect(new ThemeData(primaryColor: Colors.orange).primaryColorBrightness, equals(Brightness.light));
-    expect(new ThemeData(primaryColor: Colors.lime).primaryColorBrightness, equals(Brightness.light));
-    expect(new ThemeData(primaryColor: Colors.grey).primaryColorBrightness, equals(Brightness.light));
-    expect(new ThemeData(primaryColor: Colors.teal).primaryColorBrightness, equals(Brightness.dark));
-    expect(new ThemeData(primaryColor: Colors.indigo).primaryColorBrightness, equals(Brightness.dark));
+    expect(ThemeData(primaryColor: Colors.white).primaryColorBrightness, equals(Brightness.light));
+    expect(ThemeData(primaryColor: Colors.black).primaryColorBrightness, equals(Brightness.dark));
+    expect(ThemeData(primaryColor: Colors.blue).primaryColorBrightness, equals(Brightness.dark));
+    expect(ThemeData(primaryColor: Colors.yellow).primaryColorBrightness, equals(Brightness.light));
+    expect(ThemeData(primaryColor: Colors.deepOrange).primaryColorBrightness, equals(Brightness.dark));
+    expect(ThemeData(primaryColor: Colors.orange).primaryColorBrightness, equals(Brightness.light));
+    expect(ThemeData(primaryColor: Colors.lime).primaryColorBrightness, equals(Brightness.light));
+    expect(ThemeData(primaryColor: Colors.grey).primaryColorBrightness, equals(Brightness.light));
+    expect(ThemeData(primaryColor: Colors.teal).primaryColorBrightness, equals(Brightness.dark));
+    expect(ThemeData(primaryColor: Colors.indigo).primaryColorBrightness, equals(Brightness.dark));
+  });
+
+  test('cursorColor', () {
+    expect(ThemeData(cursorColor: Colors.red).cursorColor, Colors.red);
   });
 }

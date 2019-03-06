@@ -6,7 +6,8 @@ import 'dart:ui' show TextDirection;
 
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart' show SystemChannels;
-import 'package:test/test.dart';
+
+import '../flutter_test_alternative.dart';
 
 void main() {
   test('Semantic announcement', () async {

@@ -10,8 +10,8 @@ import 'data/velocity_tracker_data.dart';
 const int _kNumIters = 10000;
 
 void main() {
-  final VelocityTracker tracker = new VelocityTracker();
-  final Stopwatch watch = new Stopwatch();
+  final VelocityTracker tracker = VelocityTracker();
+  final Stopwatch watch = Stopwatch();
   print('Velocity tracker benchmark...');
   watch.start();
   for (int i = 0; i < _kNumIters; i += 1) {
@@ -24,7 +24,7 @@ void main() {
   }
   watch.stop();
 
-  final BenchmarkResultPrinter printer = new BenchmarkResultPrinter();
+  final BenchmarkResultPrinter printer = BenchmarkResultPrinter();
   printer.addResult(
     description: 'Velocity tracker',
     value: watch.elapsedMicroseconds / _kNumIters,

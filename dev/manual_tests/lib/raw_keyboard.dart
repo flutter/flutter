@@ -6,28 +6,28 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 void main() {
-  runApp(new MaterialApp(
+  runApp(MaterialApp(
     title: 'Hardware Key Demo',
-    home: new Scaffold(
-      appBar: new AppBar(
+    home: Scaffold(
+      appBar: AppBar(
         title: const Text('Hardware Key Demo'),
       ),
       body: const Center(
-        child: const RawKeyboardDemo(),
+        child: RawKeyboardDemo(),
       ),
     ),
   ));
 }
 
 class RawKeyboardDemo extends StatefulWidget {
-  const RawKeyboardDemo({ Key key }) : super(key: key);
+  const RawKeyboardDemo({Key key}) : super(key: key);
 
   @override
-  _HardwareKeyDemoState createState() => new _HardwareKeyDemoState();
+  _HardwareKeyDemoState createState() => _HardwareKeyDemoState();
 }
 
 class _HardwareKeyDemoState extends State<RawKeyboardDemo> {
-  final FocusNode _focusNode = new FocusNode();
+  final FocusNode _focusNode = FocusNode();
   RawKeyEvent _event;
 
   @override
@@ -42,46 +42,77 @@ class _HardwareKeyDemoState extends State<RawKeyboardDemo> {
     });
   }
 
+  String _asHex(int value) => value != null ? '0x${value.toRadixString(16)}' : 'null';
+
+  String _getEnumName(dynamic enumItem) {
+    final String name = '$enumItem';
+    final int index = name.indexOf('.');
+    return index == -1 ? name : name.substring(index + 1);
+  }
+
   @override
   Widget build(BuildContext context) {
     final TextTheme textTheme = Theme.of(context).textTheme;
-    return new RawKeyboardListener(
+    return RawKeyboardListener(
       focusNode: _focusNode,
       onKey: _handleKeyEvent,
-      child: new AnimatedBuilder(
+      child: AnimatedBuilder(
         animation: _focusNode,
         builder: (BuildContext context, Widget child) {
           if (!_focusNode.hasFocus) {
-            return new GestureDetector(
+            return GestureDetector(
               onTap: () {
                 FocusScope.of(context).requestFocus(_focusNode);
               },
-              child: new Text('Tap to focus', style: textTheme.display1),
+              child: Text('Tap to focus', style: textTheme.display1),
             );
           }
 
-          if (_event == null)
-            return new Text('Press a key', style: textTheme.display1);
-
-          int codePoint;
-          int keyCode;
-          int hidUsage;
-          final RawKeyEventData data = _event.data;
-          if (data is RawKeyEventDataAndroid) {
-            codePoint = data.codePoint;
-            keyCode = data.keyCode;
-          } else if (data is RawKeyEventDataFuchsia) {
-            codePoint = data.codePoint;
-            hidUsage = data.hidUsage;
+          if (_event == null) {
+            return Text('Press a key', style: textTheme.display1);
           }
-          return new Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              new Text('${_event.runtimeType}', style: textTheme.body2),
-              new Text('codePoint: $codePoint', style: textTheme.display4),
-              new Text('keyCode: $keyCode', style: textTheme.display4),
-              new Text('hidUsage: $hidUsage', style: textTheme.display4),
-            ],
+
+          final RawKeyEventData data = _event.data;
+          final String modifierList = data.modifiersPressed.keys.map<String>(_getEnumName).join(', ').replaceAll('Modifier', '');
+          final List<Widget> dataText = <Widget>[
+            Text('${_event.runtimeType}'),
+            Text('modifiers set: $modifierList'),
+          ];
+          if (data is RawKeyEventDataAndroid) {
+            const int combiningCharacterMask = 0x7fffffff;
+            final String codePointChar = String.fromCharCode(combiningCharacterMask & data.codePoint);
+            dataText.add(Text('codePoint: ${data.codePoint} (${_asHex(data.codePoint)}: $codePointChar)'));
+            final String plainCodePointChar = String.fromCharCode(combiningCharacterMask & data.plainCodePoint);
+            dataText.add(Text('plainCodePoint: ${data.plainCodePoint} (${_asHex(data.plainCodePoint)}: $plainCodePointChar)'));
+            dataText.add(Text('keyCode: ${data.keyCode} (${_asHex(data.keyCode)})'));
+            dataText.add(Text('scanCode: ${data.scanCode} (${_asHex(data.scanCode)})'));
+            dataText.add(Text('metaState: ${data.metaState} (${_asHex(data.metaState)})'));
+            dataText.add(Text('flags: ${data.flags} (${_asHex(data.flags)})'));
+          } else if (data is RawKeyEventDataFuchsia) {
+            dataText.add(Text('codePoint: ${data.codePoint} (${_asHex(data.codePoint)})'));
+            dataText.add(Text('hidUsage: ${data.hidUsage} (${_asHex(data.hidUsage)})'));
+            dataText.add(Text('modifiers: ${data.modifiers} (${_asHex(data.modifiers)})'));
+          }
+          dataText.add(Text('logical: ${_event.logicalKey}'));
+          dataText.add(Text('physical: ${_event.physicalKey}'));
+          if (_event.character != null) {
+            dataText.add(Text('character: ${_event.character}'));
+          }
+          for (ModifierKey modifier in data.modifiersPressed.keys) {
+            for (KeyboardSide side in KeyboardSide.values) {
+              if (data.isModifierPressed(modifier, side: side)) {
+                dataText.add(
+                  Text('${_getEnumName(side)} ${_getEnumName(modifier).replaceAll('Modifier', '')} pressed'),
+                );
+              }
+            }
+          }
+          return DefaultTextStyle(
+            style: textTheme.headline,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: dataText,
+            ),
           );
         },
       ),

@@ -24,78 +24,78 @@ class TestCustomPainter extends CustomPainter {
 void main() {
   testWidgets('Control test for custom painting', (WidgetTester tester) async {
     final List<String> log = <String>[];
-    await tester.pumpWidget(new CustomPaint(
-      painter: new TestCustomPainter(
+    await tester.pumpWidget(CustomPaint(
+      painter: TestCustomPainter(
         log: log,
-        name: 'background'
+        name: 'background',
       ),
-      foregroundPainter: new TestCustomPainter(
+      foregroundPainter: TestCustomPainter(
         log: log,
-        name: 'foreground'
+        name: 'foreground',
       ),
-      child: new CustomPaint(
-        painter: new TestCustomPainter(
+      child: CustomPaint(
+        painter: TestCustomPainter(
           log: log,
-          name: 'child'
-        )
-      )
+          name: 'child',
+        ),
+      ),
     ));
 
     expect(log, equals(<String>['background', 'child', 'foreground']));
   });
 
   testWidgets('CustomPaint sizing', (WidgetTester tester) async {
-    final GlobalKey target = new GlobalKey();
+    final GlobalKey target = GlobalKey();
 
-    await tester.pumpWidget(new Center(
-      child: new CustomPaint(key: target)
+    await tester.pumpWidget(Center(
+      child: CustomPaint(key: target),
     ));
     expect(target.currentContext.size, Size.zero);
 
-    await tester.pumpWidget(new Center(
-      child: new CustomPaint(key: target, child: new Container())
+    await tester.pumpWidget(Center(
+      child: CustomPaint(key: target, child: Container()),
     ));
     expect(target.currentContext.size, const Size(800.0, 600.0));
 
-    await tester.pumpWidget(new Center(
-      child: new CustomPaint(key: target, size: const Size(20.0, 20.0))
+    await tester.pumpWidget(Center(
+      child: CustomPaint(key: target, size: const Size(20.0, 20.0)),
     ));
     expect(target.currentContext.size, const Size(20.0, 20.0));
 
-    await tester.pumpWidget(new Center(
-      child: new CustomPaint(key: target, size: const Size(2000.0, 100.0))
+    await tester.pumpWidget(Center(
+      child: CustomPaint(key: target, size: const Size(2000.0, 100.0)),
     ));
     expect(target.currentContext.size, const Size(800.0, 100.0));
 
-    await tester.pumpWidget(new Center(
-      child: new CustomPaint(key: target, size: Size.zero, child: new Container())
+    await tester.pumpWidget(Center(
+      child: CustomPaint(key: target, size: Size.zero, child: Container()),
     ));
     expect(target.currentContext.size, const Size(800.0, 600.0));
 
-    await tester.pumpWidget(new Center(
-      child: new CustomPaint(key: target, child: new Container(height: 0.0, width: 0.0))
+    await tester.pumpWidget(Center(
+      child: CustomPaint(key: target, child: Container(height: 0.0, width: 0.0)),
     ));
     expect(target.currentContext.size, Size.zero);
 
   });
 
   testWidgets('Raster cache hints', (WidgetTester tester) async {
-    final GlobalKey target = new GlobalKey();
+    final GlobalKey target = GlobalKey();
 
     final List<String> log = <String>[];
-    await tester.pumpWidget(new CustomPaint(
+    await tester.pumpWidget(CustomPaint(
       key: target,
       isComplex: true,
-      painter: new TestCustomPainter(log: log),
+      painter: TestCustomPainter(log: log),
     ));
     RenderCustomPaint renderCustom = target.currentContext.findRenderObject();
     expect(renderCustom.isComplex, true);
     expect(renderCustom.willChange, false);
 
-    await tester.pumpWidget(new CustomPaint(
+    await tester.pumpWidget(CustomPaint(
       key: target,
       willChange: true,
-      foregroundPainter: new TestCustomPainter(log: log),
+      foregroundPainter: TestCustomPainter(log: log),
     ));
     renderCustom = target.currentContext.findRenderObject();
     expect(renderCustom.isComplex, false);

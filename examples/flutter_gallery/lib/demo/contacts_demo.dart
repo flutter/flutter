@@ -14,25 +14,25 @@ class _ContactCategory extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData themeData = Theme.of(context);
-    return new Container(
+    return Container(
       padding: const EdgeInsets.symmetric(vertical: 16.0),
-      decoration: new BoxDecoration(
-        border: new Border(bottom: new BorderSide(color: themeData.dividerColor))
+      decoration: BoxDecoration(
+        border: Border(bottom: BorderSide(color: themeData.dividerColor))
       ),
-      child: new DefaultTextStyle(
+      child: DefaultTextStyle(
         style: Theme.of(context).textTheme.subhead,
-        child: new SafeArea(
+        child: SafeArea(
           top: false,
           bottom: false,
-          child: new Row(
+          child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              new Container(
+              Container(
                 padding: const EdgeInsets.symmetric(vertical: 24.0),
                 width: 72.0,
-                child: new Icon(icon, color: themeData.primaryColor)
+                child: Icon(icon, color: themeData.primaryColor),
               ),
-              new Expanded(child: new Column(children: children))
+              Expanded(child: Column(children: children)),
             ],
           ),
         ),
@@ -54,34 +54,34 @@ class _ContactItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData themeData = Theme.of(context);
-    final List<Widget> columnChildren = lines.sublist(0, lines.length - 1).map((String line) => new Text(line)).toList();
-    columnChildren.add(new Text(lines.last, style: themeData.textTheme.caption));
+    final List<Widget> columnChildren = lines.sublist(0, lines.length - 1).map<Widget>((String line) => Text(line)).toList();
+    columnChildren.add(Text(lines.last, style: themeData.textTheme.caption));
 
     final List<Widget> rowChildren = <Widget>[
-      new Expanded(
-        child: new Column(
+      Expanded(
+        child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: columnChildren
-        )
-      )
+          children: columnChildren,
+        ),
+      ),
     ];
     if (icon != null) {
-      rowChildren.add(new SizedBox(
+      rowChildren.add(SizedBox(
         width: 72.0,
-        child: new IconButton(
-          icon: new Icon(icon),
+        child: IconButton(
+          icon: Icon(icon),
           color: themeData.primaryColor,
-          onPressed: onPressed
-        )
+          onPressed: onPressed,
+        ),
       ));
     }
-    return new MergeSemantics(
-      child: new Padding(
+    return MergeSemantics(
+      child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 16.0),
-        child: new Row(
+        child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: rowChildren
-        )
+          children: rowChildren,
+        ),
       ),
     );
   }
@@ -91,45 +91,45 @@ class ContactsDemo extends StatefulWidget {
   static const String routeName = '/contacts';
 
   @override
-  ContactsDemoState createState() => new ContactsDemoState();
+  ContactsDemoState createState() => ContactsDemoState();
 }
 
 enum AppBarBehavior { normal, pinned, floating, snapping }
 
 class ContactsDemoState extends State<ContactsDemo> {
-  static final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+  static final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final double _appBarHeight = 256.0;
 
   AppBarBehavior _appBarBehavior = AppBarBehavior.pinned;
 
   @override
   Widget build(BuildContext context) {
-    return new Theme(
-      data: new ThemeData(
+    return Theme(
+      data: ThemeData(
         brightness: Brightness.light,
         primarySwatch: Colors.indigo,
         platform: Theme.of(context).platform,
       ),
-      child: new Scaffold(
+      child: Scaffold(
         key: _scaffoldKey,
-        body: new CustomScrollView(
+        body: CustomScrollView(
           slivers: <Widget>[
-            new SliverAppBar(
+            SliverAppBar(
               expandedHeight: _appBarHeight,
               pinned: _appBarBehavior == AppBarBehavior.pinned,
               floating: _appBarBehavior == AppBarBehavior.floating || _appBarBehavior == AppBarBehavior.snapping,
               snap: _appBarBehavior == AppBarBehavior.snapping,
               actions: <Widget>[
-                new IconButton(
+                IconButton(
                   icon: const Icon(Icons.create),
                   tooltip: 'Edit',
                   onPressed: () {
                     _scaffoldKey.currentState.showSnackBar(const SnackBar(
-                      content: const Text("Editing isn't supported in this screen.")
+                      content: Text("Editing isn't supported in this screen."),
                     ));
                   },
                 ),
-                new PopupMenuButton<AppBarBehavior>(
+                PopupMenuButton<AppBarBehavior>(
                   onSelected: (AppBarBehavior value) {
                     setState(() {
                       _appBarBehavior = value;
@@ -138,29 +138,29 @@ class ContactsDemoState extends State<ContactsDemo> {
                   itemBuilder: (BuildContext context) => <PopupMenuItem<AppBarBehavior>>[
                     const PopupMenuItem<AppBarBehavior>(
                       value: AppBarBehavior.normal,
-                      child: const Text('App bar scrolls away')
+                      child: Text('App bar scrolls away'),
                     ),
                     const PopupMenuItem<AppBarBehavior>(
                       value: AppBarBehavior.pinned,
-                      child: const Text('App bar stays put')
+                      child: Text('App bar stays put'),
                     ),
                     const PopupMenuItem<AppBarBehavior>(
                       value: AppBarBehavior.floating,
-                      child: const Text('App bar floats')
+                      child: Text('App bar floats'),
                     ),
                     const PopupMenuItem<AppBarBehavior>(
                       value: AppBarBehavior.snapping,
-                      child: const Text('App bar snaps')
+                      child: Text('App bar snaps'),
                     ),
                   ],
                 ),
               ],
-              flexibleSpace: new FlexibleSpaceBar(
+              flexibleSpace: FlexibleSpaceBar(
                 title: const Text('Ali Connors'),
-                background: new Stack(
+                background: Stack(
                   fit: StackFit.expand,
                   children: <Widget>[
-                    new Image.asset(
+                    Image.asset(
                       'people/ali_landscape.png',
                       package: 'flutter_gallery_assets',
                       fit: BoxFit.cover,
@@ -169,11 +169,11 @@ class ContactsDemoState extends State<ContactsDemo> {
                     // This gradient ensures that the toolbar icons are distinct
                     // against the background image.
                     const DecoratedBox(
-                      decoration: const BoxDecoration(
-                        gradient: const LinearGradient(
-                          begin: const Alignment(0.0, -1.0),
-                          end: const Alignment(0.0, -0.4),
-                          colors: const <Color>[const Color(0x60000000), const Color(0x00000000)],
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment(0.0, -1.0),
+                          end: Alignment(0.0, -0.4),
+                          colors: <Color>[Color(0x60000000), Color(0x00000000)],
                         ),
                       ),
                     ),
@@ -181,19 +181,19 @@ class ContactsDemoState extends State<ContactsDemo> {
                 ),
               ),
             ),
-            new SliverList(
-              delegate: new SliverChildListDelegate(<Widget>[
-                new AnnotatedRegion<SystemUiOverlayStyle>(
+            SliverList(
+              delegate: SliverChildListDelegate(<Widget>[
+                AnnotatedRegion<SystemUiOverlayStyle>(
                   value: SystemUiOverlayStyle.dark,
-                  child: new _ContactCategory(
+                  child: _ContactCategory(
                     icon: Icons.call,
                     children: <Widget>[
-                      new _ContactItem(
+                      _ContactItem(
                         icon: Icons.message,
                         tooltip: 'Send message',
                         onPressed: () {
                           _scaffoldKey.currentState.showSnackBar(const SnackBar(
-                            content: const Text('Pretend that this opened your SMS application.')
+                            content: Text('Pretend that this opened your SMS application.'),
                           ));
                         },
                         lines: const <String>[
@@ -201,12 +201,12 @@ class ContactsDemoState extends State<ContactsDemo> {
                           'Mobile',
                         ],
                       ),
-                      new _ContactItem(
+                      _ContactItem(
                         icon: Icons.message,
                         tooltip: 'Send message',
                         onPressed: () {
                           _scaffoldKey.currentState.showSnackBar(const SnackBar(
-                            content: const Text('A messaging app appears.')
+                            content: Text('A messaging app appears.'),
                           ));
                         },
                         lines: const <String>[
@@ -214,12 +214,12 @@ class ContactsDemoState extends State<ContactsDemo> {
                           'Work',
                         ],
                       ),
-                      new _ContactItem(
+                      _ContactItem(
                         icon: Icons.message,
                         tooltip: 'Send message',
                         onPressed: () {
                           _scaffoldKey.currentState.showSnackBar(const SnackBar(
-                            content: const Text('Imagine if you will, a messaging application.')
+                            content: Text('Imagine if you will, a messaging application.'),
                           ));
                         },
                         lines: const <String>[
@@ -230,15 +230,15 @@ class ContactsDemoState extends State<ContactsDemo> {
                     ],
                   ),
                 ),
-                new _ContactCategory(
+                _ContactCategory(
                   icon: Icons.contact_mail,
                   children: <Widget>[
-                    new _ContactItem(
+                    _ContactItem(
                       icon: Icons.email,
                       tooltip: 'Send personal e-mail',
                       onPressed: () {
                         _scaffoldKey.currentState.showSnackBar(const SnackBar(
-                          content: const Text('Here, your e-mail application would open.')
+                          content: Text('Here, your e-mail application would open.'),
                         ));
                       },
                       lines: const <String>[
@@ -246,12 +246,12 @@ class ContactsDemoState extends State<ContactsDemo> {
                         'Personal',
                       ],
                     ),
-                    new _ContactItem(
+                    _ContactItem(
                       icon: Icons.email,
                       tooltip: 'Send work e-mail',
                       onPressed: () {
                         _scaffoldKey.currentState.showSnackBar(const SnackBar(
-                          content: const Text('Summon your favorite e-mail application here.')
+                          content: Text('Summon your favorite e-mail application here.'),
                         ));
                       },
                       lines: const <String>[
@@ -261,15 +261,15 @@ class ContactsDemoState extends State<ContactsDemo> {
                     ),
                   ],
                 ),
-                new _ContactCategory(
+                _ContactCategory(
                   icon: Icons.location_on,
                   children: <Widget>[
-                    new _ContactItem(
+                    _ContactItem(
                       icon: Icons.map,
                       tooltip: 'Open map',
                       onPressed: () {
                         _scaffoldKey.currentState.showSnackBar(const SnackBar(
-                          content: const Text('This would show a map of San Francisco.')
+                          content: Text('This would show a map of San Francisco.'),
                         ));
                       },
                       lines: const <String>[
@@ -278,12 +278,12 @@ class ContactsDemoState extends State<ContactsDemo> {
                         'Home',
                       ],
                     ),
-                    new _ContactItem(
+                    _ContactItem(
                       icon: Icons.map,
                       tooltip: 'Open map',
                       onPressed: () {
                         _scaffoldKey.currentState.showSnackBar(const SnackBar(
-                          content: const Text('This would show a map of Mountain View.')
+                          content: Text('This would show a map of Mountain View.'),
                         ));
                       },
                       lines: const <String>[
@@ -292,12 +292,12 @@ class ContactsDemoState extends State<ContactsDemo> {
                         'Work',
                       ],
                     ),
-                    new _ContactItem(
+                    _ContactItem(
                       icon: Icons.map,
                       tooltip: 'Open map',
                       onPressed: () {
                         _scaffoldKey.currentState.showSnackBar(const SnackBar(
-                          content: const Text('This would also show a map, if this was not a demo.')
+                          content: Text('This would also show a map, if this was not a demo.'),
                         ));
                       },
                       lines: const <String>[
@@ -308,28 +308,28 @@ class ContactsDemoState extends State<ContactsDemo> {
                     ),
                   ],
                 ),
-                new _ContactCategory(
+                _ContactCategory(
                   icon: Icons.today,
                   children: <Widget>[
-                    new _ContactItem(
+                    _ContactItem(
                       lines: const <String>[
                         'Birthday',
                         'January 9th, 1989',
                       ],
                     ),
-                    new _ContactItem(
+                    _ContactItem(
                       lines: const <String>[
                         'Wedding anniversary',
                         'June 21st, 2014',
                       ],
                     ),
-                    new _ContactItem(
+                    _ContactItem(
                       lines: const <String>[
                         'First day in office',
                         'January 20th, 2015',
                       ],
                     ),
-                    new _ContactItem(
+                    _ContactItem(
                       lines: const <String>[
                         'Last day in office',
                         'August 9th, 2018',

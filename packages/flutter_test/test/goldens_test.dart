@@ -7,12 +7,10 @@ import 'dart:io' as io;
 import 'dart:typed_data';
 
 import 'package:file/memory.dart';
-import 'package:test/test.dart' as test_package;
-import 'package:test/test.dart' hide test;
+import 'package:flutter_test/flutter_test.dart' hide test;
+import 'package:flutter_test/flutter_test.dart' as test_package;
 
-import 'package:flutter_test/flutter_test.dart' show goldenFileComparator, LocalFileComparator;
-
-const List<int> _kExpectedBytes = const <int>[1, 2, 3];
+const List<int> _kExpectedBytes = <int>[1, 2, 3];
 
 void main() {
   MemoryFileSystem fs;
@@ -21,7 +19,7 @@ void main() {
     final FileSystemStyle style = io.Platform.isWindows
         ? FileSystemStyle.windows
         : FileSystemStyle.posix;
-    fs = new MemoryFileSystem(style: style);
+    fs = MemoryFileSystem(style: style);
   });
 
   /// Converts posix-style paths to the style associated with [fs].
@@ -36,7 +34,7 @@ void main() {
 
   void test(String description, FutureOr<void> body()) {
     test_package.test(description, () {
-      return io.IOOverrides.runZoned(
+      return io.IOOverrides.runZoned<FutureOr<void>>(
         body,
         createDirectory: (String path) => fs.directory(path),
         createFile: (String path) => fs.file(path),
@@ -50,7 +48,7 @@ void main() {
         fseIdenticalSync: (String p1, String p2) => fs.identicalSync(p1, p2),
         fseGetType: (String path, bool followLinks) => fs.type(path, followLinks: followLinks),
         fseGetTypeSync: (String path, bool followLinks) => fs.typeSync(path, followLinks: followLinks),
-        fsWatch: (String a, int b, bool c) => throw new UnsupportedError('unsupported'),
+        fsWatch: (String a, int b, bool c) => throw UnsupportedError('unsupported'),
         fsWatchIsSupported: () => fs.isWatchSupported,
       );
     });
@@ -59,7 +57,7 @@ void main() {
   group('goldenFileComparator', () {
     test('is initialized by test framework', () {
       expect(goldenFileComparator, isNotNull);
-      expect(goldenFileComparator, const isInstanceOf<LocalFileComparator>());
+      expect(goldenFileComparator, isInstanceOf<LocalFileComparator>());
       final LocalFileComparator comparator = goldenFileComparator;
       expect(comparator.basedir.path, contains('flutter_test'));
     });
@@ -69,25 +67,25 @@ void main() {
     LocalFileComparator comparator;
 
     setUp(() {
-      comparator = new LocalFileComparator(fs.file(fix('/golden_test.dart')).uri, pathStyle: fs.path.style);
+      comparator = LocalFileComparator(fs.file(fix('/golden_test.dart')).uri, pathStyle: fs.path.style);
     });
 
     test('calculates basedir correctly', () {
       expect(comparator.basedir, fs.file(fix('/')).uri);
-      comparator = new LocalFileComparator(fs.file(fix('/foo/bar/golden_test.dart')).uri, pathStyle: fs.path.style);
+      comparator = LocalFileComparator(fs.file(fix('/foo/bar/golden_test.dart')).uri, pathStyle: fs.path.style);
       expect(comparator.basedir, fs.directory(fix('/foo/bar/')).uri);
     });
 
     test('can be instantiated with uri that represents file in same folder', () {
-      comparator = new LocalFileComparator(Uri.parse('foo_test.dart'), pathStyle: fs.path.style);
+      comparator = LocalFileComparator(Uri.parse('foo_test.dart'), pathStyle: fs.path.style);
       expect(comparator.basedir, Uri.parse('./'));
     });
 
     group('compare', () {
-      Future<bool> doComparison([String golden = 'golden.png']) {
+      Future<bool> doComparison([ String golden = 'golden.png' ]) {
         final Uri uri = fs.file(fix(golden)).uri;
         return comparator.compare(
-          new Uint8List.fromList(_kExpectedBytes),
+          Uint8List.fromList(_kExpectedBytes),
           uri,
         );
       }
@@ -113,7 +111,7 @@ void main() {
               ..createSync(recursive: true)
               ..writeAsBytesSync(_kExpectedBytes);
             fs.currentDirectory = fix('/foo/bar');
-            comparator = new LocalFileComparator(Uri.parse('local_test.dart'), pathStyle: fs.path.style);
+            comparator = LocalFileComparator(Uri.parse('local_test.dart'), pathStyle: fs.path.style);
             final bool success = await doComparison('golden.png');
             expect(success, isTrue);
           });
@@ -123,7 +121,7 @@ void main() {
               ..createSync(recursive: true)
               ..writeAsBytesSync(_kExpectedBytes);
             fs.currentDirectory = fix('/foo/bar');
-            comparator = new LocalFileComparator(Uri.parse('local_test.dart'), pathStyle: fs.path.style);
+            comparator = LocalFileComparator(Uri.parse('local_test.dart'), pathStyle: fs.path.style);
             final bool success = await doComparison('baz/golden.png');
             expect(success, isTrue);
           });
@@ -133,7 +131,7 @@ void main() {
       group('fails', () {
         test('when golden file does not exist', () async {
           final Future<bool> comparison = doComparison();
-          expect(comparison, throwsA(const isInstanceOf<TestFailure>()));
+          expect(comparison, throwsA(isInstanceOf<TestFailure>()));
         });
 
         test('when golden bytes are leading subset of image bytes', () async {
@@ -171,15 +169,15 @@ void main() {
     group('update', () {
       test('updates existing file', () async {
         fs.file(fix('/golden.png')).writeAsBytesSync(_kExpectedBytes);
-        const List<int> newBytes = const <int>[11, 12, 13];
-        await comparator.update(fs.file('golden.png').uri, new Uint8List.fromList(newBytes));
+        const List<int> newBytes = <int>[11, 12, 13];
+        await comparator.update(fs.file('golden.png').uri, Uint8List.fromList(newBytes));
         expect(fs.file(fix('/golden.png')).readAsBytesSync(), newBytes);
       });
 
       test('creates non-existent file', () async {
         expect(fs.file(fix('/foo.png')).existsSync(), isFalse);
-        const List<int> newBytes = const <int>[11, 12, 13];
-        await comparator.update(fs.file('foo.png').uri, new Uint8List.fromList(newBytes));
+        const List<int> newBytes = <int>[11, 12, 13];
+        await comparator.update(fs.file('foo.png').uri, Uint8List.fromList(newBytes));
         expect(fs.file(fix('/foo.png')).existsSync(), isTrue);
         expect(fs.file(fix('/foo.png')).readAsBytesSync(), newBytes);
       });

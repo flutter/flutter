@@ -8,28 +8,28 @@ import 'package:flutter/material.dart';
 void main() {
   testWidgets('Rotated box control test', (WidgetTester tester) async {
     final List<String> log = <String>[];
-    final Key rotatedBoxKey = new UniqueKey();
+    final Key rotatedBoxKey = UniqueKey();
 
     await tester.pumpWidget(
-      new Center(
-        child: new RotatedBox(
+      Center(
+        child: RotatedBox(
           key: rotatedBoxKey,
           quarterTurns: 1,
-          child: new Row(
+          child: Row(
             textDirection: TextDirection.ltr,
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              new GestureDetector(
+              GestureDetector(
                 onTap: () { log.add('left'); },
-                child: new Container(
+                child: Container(
                   width: 100.0,
                   height: 40.0,
                   color: Colors.blue[500],
                 ),
               ),
-              new GestureDetector(
+              GestureDetector(
                 onTap: () { log.add('right'); },
-                child: new Container(
+                child: Container(
                   width: 75.0,
                   height: 65.0,
                   color: Colors.blue[500],

@@ -11,7 +11,9 @@ import 'device.dart';
 import 'globals.dart';
 import 'resident_runner.dart';
 import 'tracing.dart';
+import 'vmservice.dart';
 
+// TODO(mklim): Test this, flutter/flutter#23031.
 class ColdRunner extends ResidentRunner {
   ColdRunner(
     List<FlutterDevice> devices, {
@@ -19,25 +21,30 @@ class ColdRunner extends ResidentRunner {
     DebuggingOptions debuggingOptions,
     bool usesTerminalUI = true,
     this.traceStartup = false,
+    this.awaitFirstFrameWhenTracing = true,
     this.applicationBinary,
+    bool saveCompilationTrace = false,
     bool stayResident = true,
     bool ipv6 = false,
   }) : super(devices,
              target: target,
              debuggingOptions: debuggingOptions,
              usesTerminalUI: usesTerminalUI,
+             saveCompilationTrace: saveCompilationTrace,
              stayResident: stayResident,
              ipv6: ipv6);
 
   final bool traceStartup;
-  final String applicationBinary;
+  final bool awaitFirstFrameWhenTracing;
+  final File applicationBinary;
+  bool _didAttach = false;
 
   @override
   Future<int> run({
     Completer<DebugConnectionInfo> connectionInfoCompleter,
-    Completer<Null> appStartedCompleter,
+    Completer<void> appStartedCompleter,
     String route,
-    bool shouldBuild = true
+    bool shouldBuild = true,
   }) async {
     final bool prebuiltMode = applicationBinary != null;
     if (!prebuiltMode) {
@@ -61,12 +68,18 @@ class ColdRunner extends ResidentRunner {
     }
 
     // Connect to observatory.
-    if (debuggingOptions.debuggingEnabled)
-      await connectToServiceProtocol();
+    if (debuggingOptions.debuggingEnabled) {
+      try {
+        await connectToServiceProtocol();
+      } on String catch (message) {
+        printError(message);
+        return 2;
+      }
+    }
 
     if (flutterDevices.first.observatoryUris != null) {
       // For now, only support one debugger connection.
-      connectionInfoCompleter?.complete(new DebugConnectionInfo(
+      connectionInfoCompleter?.complete(DebugConnectionInfo(
         httpUri: flutterDevices.first.observatoryUris.first,
         wsUri: flutterDevices.first.vmServices.first.wsAddress,
       ));
@@ -86,13 +99,11 @@ class ColdRunner extends ResidentRunner {
       // Only trace startup for the first device.
       final FlutterDevice device = flutterDevices.first;
       if (device.vmServices != null && device.vmServices.isNotEmpty) {
-        printStatus('Downloading startup trace info for ${device.device.name}');
-        try {
-          await downloadStartupTrace(device.vmServices.first);
-        } catch (error) {
-          printError('Error downloading startup trace: $error');
-          return 2;
-        }
+        printStatus('Tracing startup on ${device.device.name}.');
+        await downloadStartupTrace(
+          device.vmServices.first,
+          awaitFirstFrame: awaitFirstFrameWhenTracing,
+        );
       }
       appFinished();
     } else if (stayResident) {
@@ -102,23 +113,61 @@ class ColdRunner extends ResidentRunner {
 
     appStartedCompleter?.complete();
 
-    if (stayResident)
+    if (stayResident && !traceStartup)
       return waitForAppToFinish();
     await cleanupAtFinish();
     return 0;
   }
 
   @override
-  Future<Null> handleTerminalCommand(String code) async => null;
+  Future<int> attach({
+    Completer<DebugConnectionInfo> connectionInfoCompleter,
+    Completer<void> appStartedCompleter,
+  }) async {
+    _didAttach = true;
+    try {
+      await connectToServiceProtocol();
+    } catch (error) {
+      printError('Error connecting to the service protocol: $error');
+      return 2;
+    }
+    for (FlutterDevice device in flutterDevices) {
+      device.initLogReader();
+    }
+    await refreshViews();
+    for (FlutterDevice device in flutterDevices) {
+      for (FlutterView view in device.views) {
+        printTrace('Connected to $view.');
+      }
+    }
+    if (stayResident) {
+      setupTerminal();
+      registerSignalHandlers();
+    }
+    appStartedCompleter?.complete();
+    if (stayResident) {
+      return waitForAppToFinish();
+    }
+    await cleanupAtFinish();
+    return 0;
+  }
 
   @override
-  Future<Null> cleanupAfterSignal() async {
+  Future<void> handleTerminalCommand(String code) async { }
+
+  @override
+  Future<void> cleanupAfterSignal() async {
     await stopEchoingDeviceLog();
+    if (_didAttach) {
+      appFinished();
+    } else {
+      await stopApp();
+    }
     await stopApp();
   }
 
   @override
-  Future<Null> cleanupAtFinish() async {
+  Future<void> cleanupAtFinish() async {
     await stopEchoingDeviceLog();
   }
 
@@ -142,17 +191,23 @@ class ColdRunner extends ResidentRunner {
         haveAnything = true;
       }
     }
+    final String quitMessage = _didAttach
+      ? 'To detach, press "d"; to quit, press "q".'
+      : 'To quit, press "q".';
     if (haveDetails && !details) {
-      printStatus('For a more detailed help message, press "h". To quit, press "q".');
+      if (saveCompilationTrace) {
+        printStatus('Compilation training data will be saved when flutter run quits...');
+      }
+      printStatus('For a more detailed help message, press "h". $quitMessage');
     } else if (haveAnything) {
-      printStatus('To repeat this help message, press "h". To quit, press "q".');
+      printStatus('To repeat this help message, press "h". $quitMessage');
     } else {
-      printStatus('To quit, press "q".');
+      printStatus(quitMessage);
     }
   }
 
   @override
-  Future<Null> preStop() async {
+  Future<void> preStop() async {
     for (FlutterDevice device in flutterDevices) {
       // If we're running in release mode, stop the app using the device logic.
       if (device.vmServices == null || device.vmServices.isEmpty)

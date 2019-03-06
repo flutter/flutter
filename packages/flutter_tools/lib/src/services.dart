@@ -3,12 +3,12 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:yaml/yaml.dart';
 
 import 'android/android_sdk.dart';
 import 'base/file_system.dart';
+import 'convert.dart';
 import 'dart/package_map.dart';
 import 'globals.dart';
 
@@ -25,12 +25,13 @@ dynamic _loadYamlFile(String path) {
 
 /// Loads all services specified in `pubspec.yaml`. Parses each service config file,
 /// storing meta data in [services] and the list of jar files in [jars].
-Future<Null> parseServiceConfigs(
-  List<Map<String, String>> services, { List<File> jars }
-) async {
+Future<void> parseServiceConfigs(
+  List<Map<String, String>> services, {
+  List<File> jars,
+}) async {
   Map<String, Uri> packageMap;
   try {
-    packageMap = new PackageMap(PackageMap.globalPackagesPath).map;
+    packageMap = PackageMap(PackageMap.globalPackagesPath).map;
   } on FormatException catch (error) {
     printTrace('Invalid ".packages" file while parsing service configs:\n$error');
     return;
@@ -63,7 +64,7 @@ Future<Null> parseServiceConfigs(
         'root': serviceRoot,
         'name': service['name'],
         'android-class': service['android-class'],
-        'ios-framework': service['ios-framework']
+        'ios-framework': service['ios-framework'],
       });
     }
 
@@ -95,16 +96,17 @@ Future<String> getServiceFromUrl(String url, String rootDir, String serviceName)
 ///   ]
 /// }
 File generateServiceDefinitions(
-  String dir, List<Map<String, String>> servicesIn
+  String dir,
+  List<Map<String, String>> servicesIn,
 ) {
   final List<Map<String, String>> services =
-      servicesIn.map((Map<String, String> service) => <String, String>{
+      servicesIn.map<Map<String, String>>((Map<String, String> service) => <String, String>{
         'name': service['name'],
-        'class': service['android-class']
+        'class': service['android-class'],
       }).toList();
 
   final Map<String, dynamic> jsonObject = <String, dynamic>{ 'services': services };
   final File servicesFile = fs.file(fs.path.join(dir, 'services.json'));
-  servicesFile.writeAsStringSync(json.encode(jsonObject), mode: FileMode.WRITE, flush: true); // ignore: deprecated_member_use
+  servicesFile.writeAsStringSync(json.encode(jsonObject), mode: FileMode.write, flush: true);
   return servicesFile;
 }

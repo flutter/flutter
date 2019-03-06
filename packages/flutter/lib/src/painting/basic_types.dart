@@ -8,6 +8,7 @@ export 'dart:ui' show
   BlendMode,
   BlurStyle,
   Canvas,
+  Clip,
   Color,
   ColorFilter,
   FilterQuality,

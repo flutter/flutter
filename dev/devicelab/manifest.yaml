@@ -17,7 +17,7 @@
 # * stage: one of "devicelab", "devicelab_ios", "devicelab_win"
 #       tasks are grouped by stage so they appear next to each on the dashboard and have a distinct
 #       icon attached to them. Stages can be used to create dependencies, e.g. we may decide to not
-#       run device tests on red Travis.
+#       run device tests on red Cirrus builds.
 # * required_agent_capabilities: a list of strings
 #       list of capabilities a devicelab agent must have to be able to run this task.
 #
@@ -76,6 +76,14 @@ tasks:
     stage: devicelab_win
     required_agent_capabilities: ["windows/android"]
 
+  codegen_integration_test:
+    description: >
+      Runs codegeneration and verifies that it can execute
+      correctly.
+    stage: devicelab_win
+    required_agent_capabilities: ["windows/android"]
+    flaky: true
+
   flutter_gallery_android__compile:
     description: >
       Collects various performance metrics of compiling the Flutter
@@ -106,6 +114,32 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
+  tiles_scroll_perf__timeline_summary:
+    description: >
+      Measures the runtime performance of the tiles tab in the Complex Layout sample app on Android.
+    stage: devicelab
+    required_agent_capabilities: ["mac/android"]
+
+  home_scroll_perf__timeline_summary:
+    description: >
+      Measures the runtime performance of scrolling the material page in the
+      flutter_gallery app on Android.
+    stage: devicelab
+    required_agent_capabilities: ["mac/android"]
+
+  cull_opacity_perf__timeline_summary:
+    description: >
+      Measures the runtime performance of culling opacity widgets on Android.
+    stage: devicelab
+    required_agent_capabilities: ["mac/android"]
+
+  cubic_bezier_perf__timeline_summary:
+    description: >
+      Measures the runtime performance of cubic bezier animations on Android.
+    stage: devicelab
+    required_agent_capabilities: ["mac/android"]
+    flaky: true
+
   flavors_test:
     description: >
       Checks that flavored builds work on Android.
@@ -121,6 +155,18 @@ tasks:
   external_ui_integration_test:
     description: >
       Checks that external UIs work on Android.
+    stage: devicelab
+    required_agent_capabilities: ["mac/android"]
+
+  embedded_android_views_integration_test:
+    description: >
+      Tests embedded Android views.
+    stage: devicelab
+    required_agent_capabilities: ["mac/android"]
+
+  android_semantics_integration_test:
+    description: >
+      Tests that the Android accessibility bridge produces correct semantics.
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
@@ -159,21 +205,6 @@ tasks:
       Measures the performance of Dart VM hot patching feature.
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
-
-  hot_mode_dev_cycle__benchmark_dart1:
-    description: >
-      Measures the performance of Dart VM hot patching feature under
-      --no-preview-dart-2 option, that disables Dart 2.0 frontend.
-    stage: devicelab
-    required_agent_capabilities: ["mac/android"]
-
-  hot_mode_dev_cycle_ios__benchmark_dart1:
-    description: >
-      Measures the performance of Dart VM hot patching feature under
-      --no-preview-dart-2 option, that disables Dart 2.0 frontend.
-    stage: devicelab_ios
-    required_agent_capabilities: ["mac/ios"]
-    flaky: true
 
   complex_layout_scroll_perf__memory:
     description: >
@@ -273,13 +304,36 @@ tasks:
       test can run on off-the-shelf infrastructures, such as Firebase Test Lab.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
-    flaky: true
 
   flutter_attach_test:
     description: >
       Tests the `flutter attach` command.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
+
+  named_isolates_test:
+    description: >
+      Tests naming and attaching to specific isolates.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+
+  flutter_create_offline_test_linux:
+    description: >
+      Tests the `flutter create --offline` command.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+
+  flutter_create_offline_test_windows:
+    description: >
+      Tests the `flutter create --offline` command.
+    stage: devicelab
+    required_agent_capabilities: ["windows/android"]
+
+  flutter_create_offline_test_mac:
+    description: >
+      Tests the `flutter create --offline` command.
+    stage: devicelab
+    required_agent_capabilities: ["mac/android"]
 
   # iOS on-device tests
 
@@ -293,6 +347,12 @@ tasks:
     description: >
       Checks that the project template works and supports plugins on iOS.
     stage: devicelab_ios
+    required_agent_capabilities: ["mac/ios"]
+
+  module_test_ios:
+    description: >
+      Checks that the module project template works and supports add2app on iOS.
+    stage: devicelab
     required_agent_capabilities: ["mac/ios"]
 
   external_ui_integration_test_ios:
@@ -376,6 +436,7 @@ tasks:
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
     timeout_in_minutes: 20
+    flaky: true
 
   ios_sample_catalog_generator:
     description: >
@@ -447,7 +508,6 @@ tasks:
       Android.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
-    flaky: true
 
   flutter_gallery__transition_perf_with_semantics:
     description: >
@@ -455,7 +515,6 @@ tasks:
       with semantics enabled.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
-    flaky: true
 
   flutter_gallery__memory_nav:
     description: >

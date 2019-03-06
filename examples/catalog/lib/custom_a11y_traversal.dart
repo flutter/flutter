@@ -59,27 +59,27 @@ class RowColumnTraversal extends StatelessWidget {
   /// This function expresses the sort keys as a hierarchy, but it could just as
   /// easily have been a flat list:
   ///
-  /// ```
-  ///  Widget build(BuildContext context) {
-  ///    return new Semantics(
-  ///      sortOrder: new SemanticsSortOrder(
-  ///        keys: <SemanticsSortKey>[
-  ///          new OrdinalSortKey(columnOrder.toDouble()),
-  ///          new OrdinalSortKey(rowOrder.toDouble())
-  ///        ],
-  ///      ),
-  ///      child: child,
-  ///    );
-  ///  }
+  /// ```dart
+  /// Widget build(BuildContext context) {
+  ///   return new Semantics(
+  ///     sortOrder: new SemanticsSortOrder(
+  ///       keys: <SemanticsSortKey>[
+  ///         new OrdinalSortKey(columnOrder.toDouble()),
+  ///         new OrdinalSortKey(rowOrder.toDouble())
+  ///       ],
+  ///     ),
+  ///     child: child,
+  ///   );
+  /// }
   /// ```
   ///
   /// The resulting order is the same.
   @override
   Widget build(BuildContext context) {
-    return new Semantics(
-      sortKey: new OrdinalSortKey(columnOrder.toDouble()),
-      child: new Semantics(
-        sortKey: new OrdinalSortKey(rowOrder.toDouble()),
+    return Semantics(
+      sortKey: OrdinalSortKey(columnOrder.toDouble()),
+      child: Semantics(
+        sortKey: OrdinalSortKey(rowOrder.toDouble()),
         child: child,
       ),
     );
@@ -111,12 +111,12 @@ class SpinnerButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final String label = '${increment ? 'Increment' : 'Decrement'} ${_fieldToName(field)}';
 
-    return new RowColumnTraversal(
+    return RowColumnTraversal(
       rowOrder: rowOrder,
       columnOrder: columnOrder,
-      child: new Center(
-        child: new IconButton(
-          icon: new Icon(icon),
+      child: Center(
+        child: IconButton(
+          icon: Icon(icon),
           onPressed: onPressed,
           tooltip: label,
         ),
@@ -151,17 +151,17 @@ class FieldWidget extends StatelessWidget {
     final String increasedValue = '${_fieldToName(field)} ${value + 1}';
     final String decreasedValue = '${_fieldToName(field)} ${value - 1}';
 
-    return new RowColumnTraversal(
+    return RowColumnTraversal(
       rowOrder: rowOrder,
       columnOrder: columnOrder,
-      child: new Center(
-        child: new Semantics(
+      child: Center(
+        child: Semantics(
           onDecrease: onDecrease,
           onIncrease: onIncrease,
           value: stringValue,
           increasedValue: increasedValue,
           decreasedValue: decreasedValue,
-          child: new ExcludeSemantics(child: new Text(value.toString())),
+          child: ExcludeSemantics(child: Text(value.toString())),
         ),
       ),
     );
@@ -190,7 +190,7 @@ String _fieldToName(Field field) {
 /// The top-level example widget that serves as the body of the app.
 class CustomTraversalExample extends StatefulWidget {
   @override
-  CustomTraversalExampleState createState() => new CustomTraversalExampleState();
+  CustomTraversalExampleState createState() => CustomTraversalExampleState();
 }
 
 /// The state object for the top level example widget.
@@ -206,15 +206,15 @@ class CustomTraversalExampleState extends State<CustomTraversalExample> {
   }
 
   Widget _makeFieldHeader(int rowOrder, int columnOrder, Field field) {
-    return new RowColumnTraversal(
+    return RowColumnTraversal(
       rowOrder: rowOrder,
       columnOrder: columnOrder,
-      child: new Text(_fieldToName(field)),
+      child: Text(_fieldToName(field)),
     );
   }
 
   Widget _makeSpinnerButton(int rowOrder, int columnOrder, Field field, {bool increment = true}) {
-    return new SpinnerButton(
+    return SpinnerButton(
       rowOrder: rowOrder,
       columnOrder: columnOrder,
       icon: increment ? Icons.arrow_upward : Icons.arrow_downward,
@@ -225,7 +225,7 @@ class CustomTraversalExampleState extends State<CustomTraversalExample> {
   }
 
   Widget _makeEntryField(int rowOrder, int columnOrder, Field field) {
-    return new FieldWidget(
+    return FieldWidget(
       rowOrder: rowOrder,
       columnOrder: columnOrder,
       onIncrease: () => _addToField(field, 1),
@@ -237,20 +237,20 @@ class CustomTraversalExampleState extends State<CustomTraversalExample> {
 
   @override
   Widget build(BuildContext context) {
-    return new MaterialApp(
-      home: new Scaffold(
-        appBar: new AppBar(
+    return MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(
           title: const Text('Pet Inventory'),
         ),
-        body: new Builder(
+        body: Builder(
           builder: (BuildContext context) {
-            return new DefaultTextStyle(
+            return DefaultTextStyle(
               style: DefaultTextStyle.of(context).style.copyWith(fontSize: 21.0),
-              child: new Column(
+              child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
-                  new Semantics(
+                  Semantics(
                     // Since this is the only sort key that the text has, it
                     // will be compared with the 'column' OrdinalSortKeys of all the
                     // fields, because the column sort keys are first in the other fields.
@@ -261,8 +261,8 @@ class CustomTraversalExampleState extends State<CustomTraversalExample> {
                       'How many pets do you own?',
                     ),
                   ),
-                  const Padding(padding: const EdgeInsets.symmetric(vertical: 10.0)),
-                  new Row(
+                  const Padding(padding: EdgeInsets.symmetric(vertical: 10.0)),
+                  Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: <Widget>[
                       _makeFieldHeader(1, 0, Field.DOGS),
@@ -270,7 +270,7 @@ class CustomTraversalExampleState extends State<CustomTraversalExample> {
                       _makeFieldHeader(1, 2, Field.FISH),
                     ],
                   ),
-                  new Row(
+                  Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: <Widget>[
                       _makeSpinnerButton(3, 0, Field.DOGS, increment: true),
@@ -278,7 +278,7 @@ class CustomTraversalExampleState extends State<CustomTraversalExample> {
                       _makeSpinnerButton(3, 2, Field.FISH, increment: true),
                     ],
                   ),
-                  new Row(
+                  Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: <Widget>[
                       _makeEntryField(2, 0, Field.DOGS),
@@ -286,7 +286,7 @@ class CustomTraversalExampleState extends State<CustomTraversalExample> {
                       _makeEntryField(2, 2, Field.FISH),
                     ],
                   ),
-                  new Row(
+                  Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: <Widget>[
                       _makeSpinnerButton(4, 0, Field.DOGS, increment: false),
@@ -294,15 +294,15 @@ class CustomTraversalExampleState extends State<CustomTraversalExample> {
                       _makeSpinnerButton(4, 2, Field.FISH, increment: false),
                     ],
                   ),
-                  const Padding(padding: const EdgeInsets.symmetric(vertical: 10.0)),
-                  new Semantics(
+                  const Padding(padding: EdgeInsets.symmetric(vertical: 10.0)),
+                  Semantics(
                     // Since this is the only sort key that the reset button has, it
                     // will be compared with the 'column' OrdinalSortKeys of all the
                     // fields, because the column sort keys are first in the other fields.
                     //
                     // an ordinal of "5.0" means that it will be traversed after column 4.
                     sortKey: const OrdinalSortKey(5.0),
-                    child: new MaterialButton(
+                    child: MaterialButton(
                       child: const Text('RESET'),
                       textTheme: ButtonTextTheme.normal,
                       textColor: Colors.blue,
@@ -324,7 +324,7 @@ class CustomTraversalExampleState extends State<CustomTraversalExample> {
 }
 
 void main() {
-  runApp(new CustomTraversalExample());
+  runApp(CustomTraversalExample());
 }
 
 /*

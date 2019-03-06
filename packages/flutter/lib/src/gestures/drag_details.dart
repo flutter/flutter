@@ -38,7 +38,7 @@ class DragDownDetails {
 /// The `details` object provides the position of the touch.
 ///
 /// See [DragGestureRecognizer.onDown].
-typedef void GestureDragDownCallback(DragDownDetails details);
+typedef GestureDragDownCallback = void Function(DragDownDetails details);
 
 /// Details object for callbacks that use [GestureDragStartCallback].
 ///
@@ -80,7 +80,7 @@ class DragStartDetails {
 /// touched the surface.
 ///
 /// See [DragGestureRecognizer.onStart].
-typedef void GestureDragStartCallback(DragStartDetails details);
+typedef GestureDragStartCallback = void Function(DragStartDetails details);
 
 /// Details object for callbacks that use [GestureDragUpdateCallback].
 ///
@@ -103,7 +103,7 @@ class DragUpdateDetails {
     this.sourceTimeStamp,
     this.delta = Offset.zero,
     this.primaryDelta,
-    @required this.globalPosition
+    @required this.globalPosition,
   }) : assert(delta != null),
        assert(primaryDelta == null
            || (primaryDelta == delta.dx && delta.dy == 0.0)
@@ -150,7 +150,7 @@ class DragUpdateDetails {
 /// has travelled since the last update.
 ///
 /// See [DragGestureRecognizer.onUpdate].
-typedef void GestureDragUpdateCallback(DragUpdateDetails details);
+typedef GestureDragUpdateCallback = void Function(DragUpdateDetails details);
 
 /// Details object for callbacks that use [GestureDragEndCallback].
 ///

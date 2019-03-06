@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(dnfield): This will be removed when @jonahwilliams' work on build lands
+// ignore: deprecated_member_use
 import 'package:analyzer/analyzer.dart' as analyzer;
 
 import '../base/file_system.dart';
@@ -26,10 +28,10 @@ String _dottedNameToString(analyzer.DottedName dottedName) {
 }
 
 class DartDependencySetBuilder {
-  DartDependencySetBuilder(String mainScriptPath, String packagesFilePath) :
-    _mainScriptPath = canonicalizePath(mainScriptPath),
-    _mainScriptUri = fs.path.toUri(mainScriptPath),
-    _packagesFilePath = canonicalizePath(packagesFilePath);
+  DartDependencySetBuilder(String mainScriptPath, String packagesFilePath)
+    : _mainScriptPath = canonicalizePath(mainScriptPath),
+      _mainScriptUri = fs.path.toUri(mainScriptPath),
+      _packagesFilePath = canonicalizePath(packagesFilePath);
 
   final String _mainScriptPath;
   final String _packagesFilePath;
@@ -39,7 +41,7 @@ class DartDependencySetBuilder {
   Set<String> build() {
     final List<String> dependencies = <String>[_mainScriptPath, _packagesFilePath];
     final List<Uri> toProcess = <Uri>[_mainScriptUri];
-    final PackageMap packageMap = new PackageMap(_packagesFilePath);
+    final PackageMap packageMap = PackageMap(_packagesFilePath);
 
     while (toProcess.isNotEmpty) {
       final Uri currentUri = toProcess.removeLast();
@@ -69,7 +71,7 @@ class DartDependencySetBuilder {
         try {
           uri = Uri.parse(uriAsString);
         } on FormatException {
-          throw new DartDependencyException('Unable to parse URI: $uriAsString');
+          throw DartDependencyException('Unable to parse URI: $uriAsString');
         }
         Uri resolvedUri = analyzer.resolveRelativeUri(currentUri, uri);
         if (resolvedUri.scheme.startsWith('dart'))
@@ -77,7 +79,7 @@ class DartDependencySetBuilder {
         if (resolvedUri.scheme == 'package') {
           final Uri newResolvedUri = packageMap.uriForPackage(resolvedUri);
           if (newResolvedUri == null) {
-            throw new DartDependencyException(
+            throw DartDependencyException(
               'The following Dart file:\n'
               '  ${currentUri.toFilePath()}\n'
               '...refers, in an import, to the following library:\n'
@@ -91,7 +93,7 @@ class DartDependencySetBuilder {
         final String path = canonicalizePath(resolvedUri.toFilePath());
         if (!dependencies.contains(path)) {
           if (!fs.isFileSync(path)) {
-            throw new DartDependencyException(
+            throw DartDependencyException(
               'The following Dart file:\n'
               '  ${currentUri.toFilePath()}\n'
               '...refers, in an import, to the following library:\n'
@@ -112,7 +114,7 @@ class DartDependencySetBuilder {
     try {
       body = fs.file(path).readAsStringSync();
     } on FileSystemException catch (error) {
-      throw new DartDependencyException(
+      throw DartDependencyException(
         'Could not read "$path" when determining Dart dependencies.',
         error,
       );
@@ -120,7 +122,7 @@ class DartDependencySetBuilder {
     try {
       return analyzer.parseDirectives(body, name: path);
     } on analyzer.AnalyzerError catch (error) {
-      throw new DartDependencyException(
+      throw DartDependencyException(
         'When trying to parse this Dart file to find its dependencies:\n'
         '  $path\n'
         '...the analyzer failed with the following error:\n'
@@ -128,7 +130,7 @@ class DartDependencySetBuilder {
         error,
       );
     } on analyzer.AnalyzerErrorGroup catch (error) {
-      throw new DartDependencyException(
+      throw DartDependencyException(
         'When trying to parse this Dart file to find its dependencies:\n'
         '  $path\n'
         '...the analyzer failed with the following error:\n'

@@ -12,19 +12,19 @@ void main() {
   testWidgets('Viewport getOffsetToReveal - down', (WidgetTester tester) async {
     List<Widget> children;
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new Center(
+        child: Center(
           child: Container(
             height: 200.0,
             width: 300.0,
-            child: new ListView(
-              controller: new ScrollController(initialScrollOffset: 300.0),
-              children: children = new List<Widget>.generate(20, (int i) {
-                return new Container(
+            child: ListView(
+              controller: ScrollController(initialScrollOffset: 300.0),
+              children: children = List<Widget>.generate(20, (int i) {
+                return Container(
                   height: 100.0,
                   width: 300.0,
-                  child: new Text('Tile $i'),
+                  child: Text('Tile $i'),
                 );
               }),
             ),
@@ -38,39 +38,39 @@ void main() {
     final RenderObject target = tester.renderObject(find.byWidget(children[5], skipOffstage: false));
     RevealedOffset revealed = viewport.getOffsetToReveal(target, 0.0);
     expect(revealed.offset, 500.0);
-    expect(revealed.rect, new Rect.fromLTWH(0.0, 0.0, 300.0, 100.0));
+    expect(revealed.rect, Rect.fromLTWH(0.0, 0.0, 300.0, 100.0));
 
     revealed = viewport.getOffsetToReveal(target, 1.0);
     expect(revealed.offset, 400.0);
-    expect(revealed.rect, new Rect.fromLTWH(0.0, 100.0, 300.0, 100.0));
+    expect(revealed.rect, Rect.fromLTWH(0.0, 100.0, 300.0, 100.0));
 
-    revealed = viewport.getOffsetToReveal(target, 0.0, rect: new Rect.fromLTWH(40.0, 40.0, 10.0, 10.0));
+    revealed = viewport.getOffsetToReveal(target, 0.0, rect: Rect.fromLTWH(40.0, 40.0, 10.0, 10.0));
     expect(revealed.offset, 540.0);
-    expect(revealed.rect, new Rect.fromLTWH(40.0, 0.0, 10.0, 10.0));
+    expect(revealed.rect, Rect.fromLTWH(40.0, 0.0, 10.0, 10.0));
 
-    revealed = viewport.getOffsetToReveal(target, 1.0, rect: new Rect.fromLTWH(40.0, 40.0, 10.0, 10.0));
+    revealed = viewport.getOffsetToReveal(target, 1.0, rect: Rect.fromLTWH(40.0, 40.0, 10.0, 10.0));
     expect(revealed.offset, 350.0);
-    expect(revealed.rect, new Rect.fromLTWH(40.0, 190.0, 10.0, 10.0));
+    expect(revealed.rect, Rect.fromLTWH(40.0, 190.0, 10.0, 10.0));
   });
 
   testWidgets('Viewport getOffsetToReveal - right', (WidgetTester tester) async {
     List<Widget> children;
 
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new Center(
+        child: Center(
           child: Container(
             height: 300.0,
             width: 200.0,
-            child: new ListView(
+            child: ListView(
               scrollDirection: Axis.horizontal,
-              controller: new ScrollController(initialScrollOffset: 300.0),
-              children: children = new List<Widget>.generate(20, (int i) {
-                return new Container(
+              controller: ScrollController(initialScrollOffset: 300.0),
+              children: children = List<Widget>.generate(20, (int i) {
+                return Container(
                   height: 300.0,
                   width: 100.0,
-                  child: new Text('Tile $i'),
+                  child: Text('Tile $i'),
                 );
               }),
             ),
@@ -84,39 +84,39 @@ void main() {
     final RenderObject target = tester.renderObject(find.byWidget(children[5], skipOffstage: false));
     RevealedOffset revealed = viewport.getOffsetToReveal(target, 0.0);
     expect(revealed.offset, 500.0);
-    expect(revealed.rect, new Rect.fromLTWH(0.0, 0.0, 100.0, 300.0));
+    expect(revealed.rect, Rect.fromLTWH(0.0, 0.0, 100.0, 300.0));
 
     revealed = viewport.getOffsetToReveal(target, 1.0);
     expect(revealed.offset, 400.0);
-    expect(revealed.rect, new Rect.fromLTWH(100.0, 0.0, 100.0, 300.0));
+    expect(revealed.rect, Rect.fromLTWH(100.0, 0.0, 100.0, 300.0));
 
-    revealed = viewport.getOffsetToReveal(target, 0.0, rect: new Rect.fromLTWH(40.0, 40.0, 10.0, 10.0));
+    revealed = viewport.getOffsetToReveal(target, 0.0, rect: Rect.fromLTWH(40.0, 40.0, 10.0, 10.0));
     expect(revealed.offset, 540.0);
-    expect(revealed.rect, new Rect.fromLTWH(0.0, 40.0, 10.0, 10.0));
+    expect(revealed.rect, Rect.fromLTWH(0.0, 40.0, 10.0, 10.0));
 
-    revealed = viewport.getOffsetToReveal(target, 1.0, rect: new Rect.fromLTWH(40.0, 40.0, 10.0, 10.0));
+    revealed = viewport.getOffsetToReveal(target, 1.0, rect: Rect.fromLTWH(40.0, 40.0, 10.0, 10.0));
     expect(revealed.offset, 350.0);
-    expect(revealed.rect, new Rect.fromLTWH(190.0, 40.0, 10.0, 10.0));
+    expect(revealed.rect, Rect.fromLTWH(190.0, 40.0, 10.0, 10.0));
   });
 
   testWidgets('Viewport getOffsetToReveal - up', (WidgetTester tester) async {
     List<Widget> children;
 
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new Center(
+        child: Center(
           child: Container(
             height: 200.0,
             width: 300.0,
-            child: new ListView(
-              controller: new ScrollController(initialScrollOffset: 300.0),
+            child: ListView(
+              controller: ScrollController(initialScrollOffset: 300.0),
               reverse: true,
-              children: children = new List<Widget>.generate(20, (int i) {
-                return new Container(
+              children: children = List<Widget>.generate(20, (int i) {
+                return Container(
                   height: 100.0,
                   width: 300.0,
-                  child: new Text('Tile $i'),
+                  child: Text('Tile $i'),
                 );
               }),
             ),
@@ -130,40 +130,40 @@ void main() {
     final RenderObject target = tester.renderObject(find.byWidget(children[5], skipOffstage: false));
     RevealedOffset revealed = viewport.getOffsetToReveal(target, 0.0);
     expect(revealed.offset, 500.0);
-    expect(revealed.rect, new Rect.fromLTWH(0.0, 100.0, 300.0, 100.0));
+    expect(revealed.rect, Rect.fromLTWH(0.0, 100.0, 300.0, 100.0));
 
     revealed = viewport.getOffsetToReveal(target, 1.0);
     expect(revealed.offset, 400.0);
-    expect(revealed.rect, new Rect.fromLTWH(0.0, 0.0, 300.0, 100.0));
+    expect(revealed.rect, Rect.fromLTWH(0.0, 0.0, 300.0, 100.0));
 
-    revealed = viewport.getOffsetToReveal(target, 0.0, rect: new Rect.fromLTWH(40.0, 40.0, 10.0, 10.0));
+    revealed = viewport.getOffsetToReveal(target, 0.0, rect: Rect.fromLTWH(40.0, 40.0, 10.0, 10.0));
     expect(revealed.offset, 550.0);
-    expect(revealed.rect, new Rect.fromLTWH(40.0, 190.0, 10.0, 10.0));
+    expect(revealed.rect, Rect.fromLTWH(40.0, 190.0, 10.0, 10.0));
 
-    revealed = viewport.getOffsetToReveal(target, 1.0, rect: new Rect.fromLTWH(40.0, 40.0, 10.0, 10.0));
+    revealed = viewport.getOffsetToReveal(target, 1.0, rect: Rect.fromLTWH(40.0, 40.0, 10.0, 10.0));
     expect(revealed.offset, 360.0);
-    expect(revealed.rect, new Rect.fromLTWH(40.0, 0.0, 10.0, 10.0));
+    expect(revealed.rect, Rect.fromLTWH(40.0, 0.0, 10.0, 10.0));
   });
 
   testWidgets('Viewport getOffsetToReveal - left', (WidgetTester tester) async {
     List<Widget> children;
 
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new Center(
+        child: Center(
           child: Container(
             height: 300.0,
             width: 200.0,
-            child: new ListView(
+            child: ListView(
               scrollDirection: Axis.horizontal,
               reverse: true,
-              controller: new ScrollController(initialScrollOffset: 300.0),
-              children: children = new List<Widget>.generate(20, (int i) {
-                return new Container(
+              controller: ScrollController(initialScrollOffset: 300.0),
+              children: children = List<Widget>.generate(20, (int i) {
+                return Container(
                   height: 300.0,
                   width: 100.0,
-                  child: new Text('Tile $i'),
+                  child: Text('Tile $i'),
                 );
               }),
             ),
@@ -177,25 +177,189 @@ void main() {
     final RenderObject target = tester.renderObject(find.byWidget(children[5], skipOffstage: false));
     RevealedOffset revealed = viewport.getOffsetToReveal(target, 0.0);
     expect(revealed.offset, 500.0);
-    expect(revealed.rect, new Rect.fromLTWH(100.0, 0.0, 100.0, 300.0));
+    expect(revealed.rect, Rect.fromLTWH(100.0, 0.0, 100.0, 300.0));
 
     revealed = viewport.getOffsetToReveal(target, 1.0);
     expect(revealed.offset, 400.0);
-    expect(revealed.rect, new Rect.fromLTWH(0.0, 0.0, 100.0, 300.0));
+    expect(revealed.rect, Rect.fromLTWH(0.0, 0.0, 100.0, 300.0));
 
-    revealed = viewport.getOffsetToReveal(target, 0.0, rect: new Rect.fromLTWH(40.0, 40.0, 10.0, 10.0));
+    revealed = viewport.getOffsetToReveal(target, 0.0, rect: Rect.fromLTWH(40.0, 40.0, 10.0, 10.0));
     expect(revealed.offset, 550.0);
-    expect(revealed.rect, new Rect.fromLTWH(190.0, 40.0, 10.0, 10.0));
+    expect(revealed.rect, Rect.fromLTWH(190.0, 40.0, 10.0, 10.0));
 
-    revealed = viewport.getOffsetToReveal(target, 1.0, rect: new Rect.fromLTWH(40.0, 40.0, 10.0, 10.0));
+    revealed = viewport.getOffsetToReveal(target, 1.0, rect: Rect.fromLTWH(40.0, 40.0, 10.0, 10.0));
     expect(revealed.offset, 360.0);
-    expect(revealed.rect, new Rect.fromLTWH(0.0, 40.0, 10.0, 10.0));
+    expect(revealed.rect, Rect.fromLTWH(0.0, 40.0, 10.0, 10.0));
+  });
+
+  testWidgets('Viewport getOffsetToReveal Sliver - down', (WidgetTester tester) async {
+    final List<Widget> children = <Widget>[];
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: Container(
+            height: 200.0,
+            width: 300.0,
+            child: CustomScrollView(
+              controller: ScrollController(initialScrollOffset: 300.0),
+              slivers: List<Widget>.generate(20, (int i) {
+                final Widget sliver = SliverToBoxAdapter(
+                  child: Container(
+                    height: 100.0,
+                    child: Text('Tile $i'),
+                  ),
+                );
+                children.add(sliver);
+                return SliverPadding(
+                  padding: const EdgeInsets.all(22.0),
+                  sliver: sliver,
+                );
+              }),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final RenderAbstractViewport viewport = tester.allRenderObjects.firstWhere((RenderObject r) => r is RenderAbstractViewport);
+
+    final RenderObject target = tester.renderObject(find.byWidget(children[5], skipOffstage: false));
+    RevealedOffset revealed = viewport.getOffsetToReveal(target, 0.0);
+    expect(revealed.offset, 5 * (100 + 22 + 22) + 22);
+
+    revealed = viewport.getOffsetToReveal(target, 1.0);
+    expect(revealed.offset, 5 * (100 + 22 + 22) + 22 - 100);
+  });
+
+  testWidgets('Viewport getOffsetToReveal Sliver - right', (WidgetTester tester) async {
+    final List<Widget> children = <Widget>[];
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: Container(
+            height: 300.0,
+            width: 200.0,
+            child: CustomScrollView(
+              scrollDirection: Axis.horizontal,
+              controller: ScrollController(initialScrollOffset: 300.0),
+              slivers: List<Widget>.generate(20, (int i) {
+                final Widget sliver = SliverToBoxAdapter(
+                    child: Container(
+                      width: 100.0,
+                      child: Text('Tile $i'),
+                    ),
+                );
+                children.add(sliver);
+                return SliverPadding(
+                  padding: const EdgeInsets.all(22.0),
+                  sliver: sliver,
+                );
+              }),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final RenderAbstractViewport viewport = tester.allRenderObjects.firstWhere((RenderObject r) => r is RenderAbstractViewport);
+
+    final RenderObject target = tester.renderObject(find.byWidget(children[5], skipOffstage: false));
+    RevealedOffset revealed = viewport.getOffsetToReveal(target, 0.0);
+    expect(revealed.offset, 5 * (100 + 22 + 22) + 22);
+
+    revealed = viewport.getOffsetToReveal(target, 1.0);
+    expect(revealed.offset, 5 * (100 + 22 + 22) + 22 - 100);
+  });
+
+  testWidgets('Viewport getOffsetToReveal Sliver - up', (WidgetTester tester) async {
+    final List<Widget> children = <Widget>[];
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: Container(
+            height: 200.0,
+            width: 300.0,
+            child: CustomScrollView(
+              controller: ScrollController(initialScrollOffset: 300.0),
+              reverse: true,
+              slivers: List<Widget>.generate(20, (int i) {
+                final Widget sliver = SliverToBoxAdapter(
+                    child: Container(
+                      height: 100.0,
+                      child: Text('Tile $i'),
+                    ),
+                );
+                children.add(sliver);
+                return SliverPadding(
+                  padding: const EdgeInsets.all(22.0),
+                  sliver: sliver,
+                );
+              }),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final RenderAbstractViewport viewport = tester.allRenderObjects.firstWhere((RenderObject r) => r is RenderAbstractViewport);
+
+    final RenderObject target = tester.renderObject(find.byWidget(children[5], skipOffstage: false));
+    RevealedOffset revealed = viewport.getOffsetToReveal(target, 0.0);
+    expect(revealed.offset, 5 * (100 + 22 + 22) + 22);
+
+    revealed = viewport.getOffsetToReveal(target, 1.0);
+    expect(revealed.offset, 5 * (100 + 22 + 22) + 22 - 100);
+  });
+
+  testWidgets('Viewport getOffsetToReveal Sliver - left', (WidgetTester tester) async {
+    final List<Widget> children = <Widget>[];
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: Container(
+            height: 300.0,
+            width: 200.0,
+            child: CustomScrollView(
+              scrollDirection: Axis.horizontal,
+              reverse: true,
+              controller: ScrollController(initialScrollOffset: 300.0),
+              slivers: List<Widget>.generate(20, (int i) {
+                final Widget sliver = SliverToBoxAdapter(
+                    child: Container(
+                      width: 100.0,
+                      child: Text('Tile $i'),
+                    ),
+                );
+                children.add(sliver);
+                return SliverPadding(
+                  padding: const EdgeInsets.all(22.0),
+                  sliver: sliver,
+                );
+              }),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final RenderAbstractViewport viewport = tester.allRenderObjects.firstWhere((RenderObject r) => r is RenderAbstractViewport);
+
+    final RenderObject target = tester.renderObject(find.byWidget(children[5], skipOffstage: false));
+    RevealedOffset revealed = viewport.getOffsetToReveal(target, 0.0);
+    expect(revealed.offset, 5 * (100 + 22 + 22) + 22);
+
+    revealed = viewport.getOffsetToReveal(target, 1.0);
+    expect(revealed.offset, 5 * (100 + 22 + 22) + 22 - 100);
   });
 
   testWidgets('Nested Viewports showOnScreen', (WidgetTester tester) async {
-    final List<List<Widget>> children = new List<List<Widget>>(10);
-    final List<ScrollController> controllersX = new List<ScrollController>.generate(10, (int i) => new ScrollController(initialScrollOffset: 400.0));
-    final ScrollController controllerY  = new ScrollController(initialScrollOffset: 400.0);
+    final List<List<Widget>> children = List<List<Widget>>(10);
+    final List<ScrollController> controllersX = List<ScrollController>.generate(10, (int i) => ScrollController(initialScrollOffset: 400.0));
+    final ScrollController controllerY  = ScrollController(initialScrollOffset: 400.0);
 
     /// Builds a gird:
     ///
@@ -216,25 +380,25 @@ void main() {
     /// viewport.
 
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new Center(
+        child: Center(
           child: Container(
             height: 200.0,
             width: 200.0,
-            child: new ListView(
+            child: ListView(
               controller: controllerY,
-              children: new List<Widget>.generate(10, (int y) {
+              children: List<Widget>.generate(10, (int y) {
                 return Container(
                   height: 100.0,
-                  child: new ListView(
+                  child: ListView(
                     scrollDirection: Axis.horizontal,
                     controller: controllersX[y],
-                    children: children[y] = new List<Widget>.generate(10, (int x) {
-                      return new Container(
+                    children: children[y] = List<Widget>.generate(10, (int x) {
+                      return Container(
                         height: 100.0,
                         width: 100.0,
-                        child: new Text('$x,$y'),
+                        child: Text('$x,$y'),
                       );
                     }),
                   ),
@@ -353,37 +517,37 @@ void main() {
   group('Nested viewports (same orientation) showOnScreen', () {
     List<Widget> children;
 
-    Future<Null> buildNestedScroller({WidgetTester tester, ScrollController inner, ScrollController outer}) {
+    Future<void> buildNestedScroller({ WidgetTester tester, ScrollController inner, ScrollController outer }) {
       return tester.pumpWidget(
-        new Directionality(
+        Directionality(
           textDirection: TextDirection.ltr,
-          child: new Center(
+          child: Center(
             child: Container(
               height: 200.0,
               width: 300.0,
-              child: new ListView(
+              child: ListView(
                 controller: outer,
                 children: <Widget>[
-                  new Container(
+                  Container(
                     height: 200.0,
                   ),
-                  new Container(
+                  Container(
                     height: 200.0,
                     width: 300.0,
-                    child: new ListView(
+                    child: ListView(
                       controller: inner,
-                      children: children = new List<Widget>.generate(10, (int i) {
-                        return new Container(
+                      children: children = List<Widget>.generate(10, (int i) {
+                        return Container(
                           height: 100.0,
                           width: 300.0,
-                          child: new Text('$i'),
+                          child: Text('$i'),
                         );
                       }),
                     ),
                   ),
-                  new Container(
+                  Container(
                     height: 200.0,
-                  )
+                  ),
                 ],
               ),
             ),
@@ -393,8 +557,8 @@ void main() {
     }
 
     testWidgets('in view in inner, but not in outer', (WidgetTester tester) async {
-      final ScrollController inner = new ScrollController();
-      final ScrollController outer = new ScrollController();
+      final ScrollController inner = ScrollController();
+      final ScrollController outer = ScrollController();
       await buildNestedScroller(
         tester: tester,
         inner: inner,
@@ -410,8 +574,8 @@ void main() {
     });
 
     testWidgets('not in view of neither inner nor outer', (WidgetTester tester) async {
-      final ScrollController inner = new ScrollController();
-      final ScrollController outer = new ScrollController();
+      final ScrollController inner = ScrollController();
+      final ScrollController outer = ScrollController();
       await buildNestedScroller(
         tester: tester,
         inner: inner,
@@ -427,8 +591,8 @@ void main() {
     });
 
     testWidgets('in view in inner and outer', (WidgetTester tester) async {
-      final ScrollController inner = new ScrollController(initialScrollOffset: 200.0);
-      final ScrollController outer = new ScrollController(initialScrollOffset: 200.0);
+      final ScrollController inner = ScrollController(initialScrollOffset: 200.0);
+      final ScrollController outer = ScrollController(initialScrollOffset: 200.0);
       await buildNestedScroller(
         tester: tester,
         inner: inner,
@@ -444,8 +608,8 @@ void main() {
     });
 
     testWidgets('inner shown in outer, but item not visible', (WidgetTester tester) async {
-      final ScrollController inner = new ScrollController(initialScrollOffset: 200.0);
-      final ScrollController outer = new ScrollController(initialScrollOffset: 200.0);
+      final ScrollController inner = ScrollController(initialScrollOffset: 200.0);
+      final ScrollController outer = ScrollController(initialScrollOffset: 200.0);
       await buildNestedScroller(
         tester: tester,
         inner: inner,
@@ -461,8 +625,8 @@ void main() {
     });
 
     testWidgets('inner half shown in outer, item only visible in inner', (WidgetTester tester) async {
-      final ScrollController inner = new ScrollController();
-      final ScrollController outer = new ScrollController(initialScrollOffset: 100.0);
+      final ScrollController inner = ScrollController();
+      final ScrollController outer = ScrollController(initialScrollOffset: 100.0);
       await buildNestedScroller(
         tester: tester,
         inner: inner,
@@ -478,22 +642,134 @@ void main() {
     });
   });
 
+  testWidgets('Nested Viewports showOnScreen with allowImplicitScrolling=false for inner viewport', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/20893.
+
+    List<Widget> slivers;
+    final ScrollController controllerX =  ScrollController(initialScrollOffset: 0.0);
+    final ScrollController controllerY  = ScrollController(initialScrollOffset: 0.0);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: Container(
+            height: 200.0,
+            width: 200.0,
+            child: ListView(
+              controller: controllerY,
+              children: <Widget>[
+                Container(
+                  height: 150.0,
+                ),
+                Container(
+                  height: 100.0,
+                  child: ListView(
+                    physics: const PageScrollPhysics(), // Turns off `allowImplicitScrolling`
+                    scrollDirection: Axis.horizontal,
+                    controller: controllerX,
+                    children: slivers = <Widget>[
+                      Container(
+                        width: 150.0,
+                      ),
+                      Container(
+                        width: 150.0,
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  height: 150.0,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    tester.renderObject(find.byWidget(slivers[1])).showOnScreen();
+    await tester.pumpAndSettle();
+    expect(controllerX.offset, 0.0);
+    expect(controllerY.offset, 50.0);
+  });
+
+  testWidgets('Nested Viewports showOnScreen on Sliver with allowImplicitScrolling=false for inner viewport', (WidgetTester tester) async {
+    Widget sliver;
+    final ScrollController controllerX =  ScrollController(initialScrollOffset: 0.0);
+    final ScrollController controllerY  = ScrollController(initialScrollOffset: 0.0);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: Container(
+            height: 200.0,
+            width: 200.0,
+            child: ListView(
+              controller: controllerY,
+              children: <Widget>[
+                Container(
+                  height: 150.0,
+                ),
+                Container(
+                  height: 100.0,
+                  child: CustomScrollView(
+                    physics: const PageScrollPhysics(), // Turns off `allowImplicitScrolling`
+                    scrollDirection: Axis.horizontal,
+                    controller: controllerX,
+                    slivers: <Widget>[
+                      SliverPadding(
+                        padding: const EdgeInsets.all(25.0),
+                        sliver: SliverToBoxAdapter(
+                          child: Container(
+                            width: 100.0,
+                          ),
+                        ),
+                      ),
+                      SliverPadding(
+                        padding: const EdgeInsets.all(25.0),
+                        sliver: sliver = SliverToBoxAdapter(
+                          child: Container(
+                            width: 100.0,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  height: 150.0,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    tester.renderObject(find.byWidget(sliver)).showOnScreen();
+    await tester.pumpAndSettle();
+    expect(controllerX.offset, 0.0);
+    expect(controllerY.offset, 25.0);
+  });
+
   testWidgets('Viewport showOnScreen with objects larger than viewport', (WidgetTester tester) async {
     List<Widget> children;
     ScrollController controller;
 
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new Center(
+        child: Center(
           child: Container(
             height: 200.0,
-            child: new ListView(
-              controller: controller = new ScrollController(initialScrollOffset: 300.0),
-              children: children = new List<Widget>.generate(20, (int i) {
-                return new Container(
+            child: ListView(
+              controller: controller = ScrollController(initialScrollOffset: 300.0),
+              children: children = List<Widget>.generate(20, (int i) {
+                return Container(
                   height: 300.0,
-                  child: new Text('Tile $i'),
+                  child: Text('Tile $i'),
                 );
               }),
             ),

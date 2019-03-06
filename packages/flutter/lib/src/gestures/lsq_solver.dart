@@ -7,10 +7,15 @@ import 'dart:typed_data';
 
 // TODO(abarth): Consider using vector_math.
 class _Vector {
-  _Vector(int size) : _offset = 0, _length = size, _elements = new Float64List(size);
+  _Vector(int size)
+    : _offset = 0,
+      _length = size,
+      _elements = Float64List(size);
 
   _Vector.fromVOL(List<double> values, int offset, int length)
-    : _offset = offset, _length = length, _elements = values;
+    : _offset = offset,
+      _length = length,
+      _elements = values;
 
   final int _offset;
 
@@ -36,8 +41,8 @@ class _Vector {
 // TODO(abarth): Consider using vector_math.
 class _Matrix {
   _Matrix(int rows, int cols)
-  : _columns = cols,
-    _elements = new Float64List(rows * cols);
+    : _columns = cols,
+      _elements = Float64List(rows * cols);
 
   final int _columns;
   final List<double> _elements;
@@ -47,10 +52,10 @@ class _Matrix {
     _elements[row * _columns + col] = value;
   }
 
-  _Vector getRow(int row) => new _Vector.fromVOL(
+  _Vector getRow(int row) => _Vector.fromVOL(
     _elements,
     row * _columns,
-    _columns
+    _columns,
   );
 }
 
@@ -59,7 +64,7 @@ class PolynomialFit {
   /// Creates a polynomial fit of the given degree.
   ///
   /// There are n + 1 coefficients in a fit of degree n.
-  PolynomialFit(int degree) : coefficients = new Float64List(degree + 1);
+  PolynomialFit(int degree) : coefficients = Float64List(degree + 1);
 
   /// The polynomial coefficients of the fit.
   final List<double> coefficients;
@@ -93,14 +98,14 @@ class LeastSquaresSolver {
     if (degree > x.length) // Not enough data to fit a curve.
       return null;
 
-    final PolynomialFit result = new PolynomialFit(degree);
+    final PolynomialFit result = PolynomialFit(degree);
 
     // Shorthands for the purpose of notation equivalence to original C++ code.
     final int m = x.length;
     final int n = degree + 1;
 
     // Expand the X vector to a matrix A, pre-multiplied by the weights.
-    final _Matrix a = new _Matrix(n, m);
+    final _Matrix a = _Matrix(n, m);
     for (int h = 0; h < m; h += 1) {
       a.set(0, h, w[h]);
       for (int i = 1; i < n; i += 1)
@@ -110,9 +115,9 @@ class LeastSquaresSolver {
     // Apply the Gram-Schmidt process to A to obtain its QR decomposition.
 
     // Orthonormal basis, column-major ordVectorer.
-    final _Matrix q = new _Matrix(n, m);
+    final _Matrix q = _Matrix(n, m);
     // Upper triangular matrix, row-major order.
-    final _Matrix r = new _Matrix(n, n);
+    final _Matrix r = _Matrix(n, n);
     for (int j = 0; j < n; j += 1) {
       for (int h = 0; h < m; h += 1)
         q.set(j, h, a.get(j, h));
@@ -137,7 +142,7 @@ class LeastSquaresSolver {
 
     // Solve R B = Qt W Y to find B. This is easy because R is upper triangular.
     // We just work from bottom-right to top-left calculating B's coefficients.
-    final _Vector wy = new _Vector(m);
+    final _Vector wy = _Vector(m);
     for (int h = 0; h < m; h += 1)
       wy[h] = y[h] * w[h];
     for (int i = n - 1; i >= 0; i -= 1) {

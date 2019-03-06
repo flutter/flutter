@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' as ui;
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -20,13 +23,13 @@ import 'theme.dart';
 /// which sets a specific [DefaultTextStyle]. If you're seeing text that uses
 /// this text style, consider putting your text in a [Material] widget (or
 /// another widget that sets a [DefaultTextStyle]).
-const TextStyle _errorTextStyle = const TextStyle(
-  color: const Color(0xD0FF0000),
+const TextStyle _errorTextStyle = TextStyle(
+  color: Color(0xD0FF0000),
   fontFamily: 'monospace',
   fontSize: 48.0,
   fontWeight: FontWeight.w900,
   decoration: TextDecoration.underline,
-  decorationColor: const Color(0xFFFFFF00),
+  decorationColor: Color(0xFFFFFF00),
   decorationStyle: TextDecorationStyle.double,
   debugLabel: 'fallback style; consider putting your text in a Material',
 );
@@ -67,6 +70,8 @@ const TextStyle _errorTextStyle = const TextStyle(
 ///  * [Navigator], which is used to manage the app's stack of pages.
 ///  * [MaterialPageRoute], which defines an app page that transitions in a material-specific way.
 ///  * [WidgetsApp], which defines the basic app elements but does not depend on the material library.
+///  * The Flutter Internationalization Tutorial,
+///    <https://flutter.io/tutorials/internationalization/>.
 class MaterialApp extends StatefulWidget {
   /// Creates a MaterialApp.
   ///
@@ -79,7 +84,7 @@ class MaterialApp extends StatefulWidget {
   /// This class creates an instance of [WidgetsApp].
   ///
   /// The boolean arguments, [routes], and [navigatorObservers], must not be null.
-  MaterialApp({ // can't be const because the asserts use methods on Map :-(
+  const MaterialApp({
     Key key,
     this.navigatorKey,
     this.home,
@@ -93,10 +98,12 @@ class MaterialApp extends StatefulWidget {
     this.onGenerateTitle,
     this.color,
     this.theme,
+    this.darkTheme,
     this.locale,
     this.localizationsDelegates,
+    this.localeListResolutionCallback,
     this.localeResolutionCallback,
-    this.supportedLocales = const <Locale>[const Locale('en', 'US')],
+    this.supportedLocales = const <Locale>[Locale('en', 'US')],
     this.debugShowMaterialGrid = false,
     this.showPerformanceOverlay = false,
     this.checkerboardRasterCacheImages = false,
@@ -105,44 +112,6 @@ class MaterialApp extends StatefulWidget {
     this.debugShowCheckedModeBanner = true,
   }) : assert(routes != null),
        assert(navigatorObservers != null),
-       assert(
-         home == null ||
-         !routes.containsKey(Navigator.defaultRouteName),
-         'If the home property is specified, the routes table '
-         'cannot include an entry for "/", since it would be redundant.'
-       ),
-       assert(
-         builder != null ||
-         home != null ||
-         routes.containsKey(Navigator.defaultRouteName) ||
-         onGenerateRoute != null ||
-         onUnknownRoute != null,
-         'Either the home property must be specified, '
-         'or the routes table must include an entry for "/", '
-         'or there must be on onGenerateRoute callback specified, '
-         'or there must be an onUnknownRoute callback specified, '
-         'or the builder property must be specified, '
-         'because otherwise there is nothing to fall back on if the '
-         'app is started with an intent that specifies an unknown route.'
-       ),
-       assert(
-         (home != null ||
-          routes.isNotEmpty ||
-          onGenerateRoute != null ||
-          onUnknownRoute != null)
-         ||
-         (builder != null &&
-          navigatorKey == null &&
-          initialRoute == null &&
-          navigatorObservers.isEmpty),
-         'If no route is provided using '
-         'home, routes, onGenerateRoute, or onUnknownRoute, '
-         'a non-null callback for the builder property must be provided, '
-         'and the other navigator-related properties, '
-         'navigatorKey, initialRoute, and navigatorObservers, '
-         'must have their initial values '
-         '(null, null, and the empty list, respectively).'
-       ),
        assert(title != null),
        assert(debugShowMaterialGrid != null),
        assert(showPerformanceOverlay != null),
@@ -152,48 +121,10 @@ class MaterialApp extends StatefulWidget {
        assert(debugShowCheckedModeBanner != null),
        super(key: key);
 
-  /// A key to use when building the [Navigator].
-  ///
-  /// If a [navigatorKey] is specified, the [Navigator] can be directly
-  /// manipulated without first obtaining it from a [BuildContext] via
-  /// [Navigator.of]: from the [navigatorKey], use the [GlobalKey.currentState]
-  /// getter.
-  ///
-  /// If this is changed, a new [Navigator] will be created, losing all the
-  /// application state in the process; in that case, the [navigatorObservers]
-  /// must also be changed, since the previous observers will be attached to the
-  /// previous navigator.
-  ///
-  /// The [Navigator] is only built if routes are provided (either via [home],
-  /// [routes], [onGenerateRoute], or [onUnknownRoute]); if they are not,
-  /// [navigatorKey] must be null and [builder] must not be null.
+  /// {@macro flutter.widgets.widgetsApp.navigatorKey}
   final GlobalKey<NavigatorState> navigatorKey;
 
-  /// The widget for the default route of the app ([Navigator.defaultRouteName],
-  /// which is `/`).
-  ///
-  /// This is the route that is displayed first when the application is started
-  /// normally, unless [initialRoute] is specified. It's also the route that's
-  /// displayed if the [initialRoute] can't be displayed.
-  ///
-  /// To be able to directly call [Theme.of], [MediaQuery.of], etc, in the code
-  /// that sets the [home] argument in the constructor, you can use a [Builder]
-  /// widget to get a [BuildContext].
-  ///
-  /// If [home] is specified, then [routes] must not include an entry for `/`,
-  /// as [home] takes its place.
-  ///
-  /// The [Navigator] is only built if routes are provided (either via [home],
-  /// [routes], [onGenerateRoute], or [onUnknownRoute]); if they are not,
-  /// [builder] must not be null.
-  ///
-  /// The difference between using [home] and using [builder] is that the [home]
-  /// subtree is inserted into the application below a [Navigator] (and thus
-  /// below an [Overlay], which [Navigator] uses). With [home], therefore,
-  /// dialog boxes will work automatically, [Tooltip]s will work, the [routes]
-  /// table will be used, and APIs such as [Navigator.push] and [Navigator.pop]
-  /// will work as expected. In contrast, the widget returned from [builder] is
-  /// inserted _above_ the [MaterialApp]'s [Navigator] (if any).
+  /// {@macro flutter.widgets.widgetsApp.home}
   final Widget home;
 
   /// The application's top-level routing table.
@@ -203,82 +134,25 @@ class MaterialApp extends StatefulWidget {
   /// [WidgetBuilder] is used to construct a [MaterialPageRoute] that performs
   /// an appropriate transition, including [Hero] animations, to the new route.
   ///
-  /// If the app only has one page, then you can specify it using [home] instead.
-  ///
-  /// If [home] is specified, then it implies an entry in this table for the
-  /// [Navigator.defaultRouteName] route (`/`), and it is an error to
-  /// redundantly provide such a route in the [routes] table.
-  ///
-  /// If a route is requested that is not specified in this table (or by
-  /// [home]), then the [onGenerateRoute] callback is called to build the page
-  /// instead.
-  ///
-  /// The [Navigator] is only built if routes are provided (either via [home],
-  /// [routes], [onGenerateRoute], or [onUnknownRoute]); if they are not,
-  /// [builder] must not be null.
+  /// {@macro flutter.widgets.widgetsApp.routes}
   final Map<String, WidgetBuilder> routes;
 
   /// {@macro flutter.widgets.widgetsApp.initialRoute}
-  ///
-  /// The [Navigator] is only built if routes are provided (either via [home],
-  /// [routes], [onGenerateRoute], or [onUnknownRoute]); if they are not,
-  /// [initialRoute] must be null and [builder] must not be null.
-  ///
-  /// See also:
-  ///
-  ///  * [Navigator.initialRoute], which is used to implement this property.
-  ///  * [Navigator.push], for pushing additional routes.
-  ///  * [Navigator.pop], for removing a route from the stack.
   final String initialRoute;
 
   /// {@macro flutter.widgets.widgetsApp.onGenerateRoute}
-  ///
-  /// This is used if [routes] does not contain the requested route.
-  ///
-  /// The [Navigator] is only built if routes are provided (either via [home],
-  /// [routes], [onGenerateRoute], or [onUnknownRoute]); if they are not,
-  /// [builder] must not be null.
   final RouteFactory onGenerateRoute;
 
-  /// Called when [onGenerateRoute] fails to generate a route, except for the
-  /// [initialRoute].
-  ///
   /// {@macro flutter.widgets.widgetsApp.onUnknownRoute}
-  ///
-  /// The [Navigator] is only built if routes are provided (either via [home],
-  /// [routes], [onGenerateRoute], or [onUnknownRoute]); if they are not,
-  /// [builder] must not be null.
   final RouteFactory onUnknownRoute;
 
   /// {@macro flutter.widgets.widgetsApp.navigatorObservers}
-  ///
-  /// The [Navigator] is only built if routes are provided (either via [home],
-  /// [routes], [onGenerateRoute], or [onUnknownRoute]); if they are not,
-  /// [navigatorObservers] must be the empty list and [builder] must not be null.
   final List<NavigatorObserver> navigatorObservers;
 
   /// {@macro flutter.widgets.widgetsApp.builder}
   ///
-  /// If no routes are provided using [home], [routes], [onGenerateRoute], or
-  /// [onUnknownRoute], the `child` will be null, and it is the responsibility
-  /// of the [builder] to provide the application's routing machinery.
-  ///
-  /// If routes _are_ provided using one or more of those properties, then
-  /// `child` is not null, and the returned value should include the `child` in
-  /// the widget subtree; if it does not, then the application will have no
-  /// navigator and the [navigatorKey], [home], [routes], [onGenerateRoute],
-  /// [onUnknownRoute], [initialRoute], and [navigatorObservers] properties will
-  /// have no effect.
-  ///
-  /// If [builder] is null, it is as if a builder was specified that returned
-  /// the `child` directly. If it is null, routes must be provided using one of
-  /// the other properties listed above.
-  ///
-  /// Unless a [Navigator] is provided, either implicitly from [builder] being
-  /// null, or by a [builder] including its `child` argument, or by a [builder]
-  /// explicitly providing a [Navigator] of its own, features such as
-  /// [showDialog] and [showMenu], widgets such as [Tooltip], [PopupMenuButton],
-  /// or [Hero], and APIs such as [Navigator.push] and [Navigator.pop], will not
+  /// Material specific features such as [showDialog] and [showMenu], and widgets
+  /// such as [Tooltip], [PopupMenuButton], also require a [Navigator] to properly
   /// function.
   final TransitionBuilder builder;
 
@@ -292,8 +166,43 @@ class MaterialApp extends StatefulWidget {
   /// This value is passed unmodified to [WidgetsApp.onGenerateTitle].
   final GenerateAppTitle onGenerateTitle;
 
-  /// The colors to use for the application's widgets.
+  /// Default visual properties, like colors fonts and shapes, for this app's
+  /// material widgets.
+  ///
+  /// A second [darkTheme] [ThemeData] value, which is used when the underlying
+  /// platform requests a "dark mode" UI, can also be specified.
+  ///
+  /// The default value of this property is the value of [ThemeData.light()].
+  ///
+  /// See also:
+  ///
+  ///  * [MediaQueryData.platformBrightness], which indicates the platform's
+  ///    desired brightness and is used to automatically toggle between [theme]
+  ///    and [darkTheme] in [MaterialApp].
+  ///  * [ThemeData.brightness], which indicates the [Brightness] of a theme's
+  ///    colors.
   final ThemeData theme;
+
+  /// The [ThemeData] to use when the platform specifically requests a dark
+  /// themed UI.
+  ///
+  /// Host platforms such as Android Pie can request a system-wide "dark mode"
+  /// when entering battery saver mode.
+  ///
+  /// When the host platform requests a [Brightness.dark] mode, you may want to
+  /// supply a [ThemeData.brightness] that's also [Brightness.dark].
+  ///
+  /// Uses [theme] instead when null. Defaults to the value of
+  /// [ThemeData.light()] when both [darkTheme] and [theme] are null.
+  ///
+  /// See also:
+  ///
+  ///  * [MediaQueryData.platformBrightness], which indicates the platform's
+  ///    desired brightness and is used to automatically toggle between [theme]
+  ///    and [darkTheme] in [MaterialApp].
+  ///  * [ThemeData.brightness], which is typically set to the value of
+  ///    [MediaQueryData.platformBrightness].
+  final ThemeData darkTheme;
 
   /// {@macro flutter.widgets.widgetsApp.color}
   final Color color;
@@ -302,6 +211,33 @@ class MaterialApp extends StatefulWidget {
   final Locale locale;
 
   /// {@macro flutter.widgets.widgetsApp.localizationsDelegates}
+  ///
+  /// Internationalized apps that require translations for one of the locales
+  /// listed in [GlobalMaterialLocalizations] should specify this parameter
+  /// and list the [supportedLocales] that the application can handle.
+  ///
+  /// ```dart
+  /// import 'package:flutter_localizations/flutter_localizations.dart';
+  /// MaterialApp(
+  ///   localizationsDelegates: [
+  ///     // ... app-specific localization delegate[s] here
+  ///     GlobalMaterialLocalizations.delegate,
+  ///     GlobalWidgetsLocalizations.delegate,
+  ///   ],
+  ///   supportedLocales: [
+  ///     const Locale('en', 'US'), // English
+  ///     const Locale('he', 'IL'), // Hebrew
+  ///     // ... other locales the app supports
+  ///   ],
+  ///   // ...
+  /// )
+  /// ```
+  ///
+  /// ## Adding localizations for a new locale
+  ///
+  /// The information that follows applies to the unusual case of an app
+  /// adding translations for a language not already supported by
+  /// [GlobalMaterialLocalizations].
   ///
   /// Delegates that produce [WidgetsLocalizations] and [MaterialLocalizations]
   /// are included automatically. Apps can provide their own versions of these
@@ -336,7 +272,7 @@ class MaterialApp extends StatefulWidget {
   ///   const FooLocalizationsDelegate();
   ///   @override
   ///   Future<FooLocalizations> load(Locale locale) {
-  ///     return new SynchronousFuture(new FooLocalizations(locale));
+  ///     return SynchronousFuture(FooLocalizations(locale));
   ///   }
   ///   @override
   ///   bool shouldReload(FooLocalizationsDelegate old) => false;
@@ -350,14 +286,27 @@ class MaterialApp extends StatefulWidget {
   /// [localizationsDelegates] list.
   ///
   /// ```dart
-  /// new MaterialApp(
+  /// MaterialApp(
   ///   localizationsDelegates: [
   ///     const FooLocalizationsDelegate(),
   ///   ],
   ///   // ...
   /// )
   /// ```
+  /// See also:
+  ///
+  ///  * [supportedLocales], which must be specified along with
+  ///    [localizationsDelegates].
+  ///  * [GlobalMaterialLocalizations], a [localizationsDelegates] value
+  ///    which provides material localizations for many languages.
+  ///  * The Flutter Internationalization Tutorial,
+  ///    <https://flutter.io/tutorials/internationalization/>.
   final Iterable<LocalizationsDelegate<dynamic>> localizationsDelegates;
+
+  /// {@macro flutter.widgets.widgetsApp.localeListResolutionCallback}
+  ///
+  /// This callback is passed along to the [WidgetsApp] built by this widget.
+  final LocaleListResolutionCallback localeListResolutionCallback;
 
   /// {@macro flutter.widgets.widgetsApp.localeResolutionCallback}
   ///
@@ -368,26 +317,14 @@ class MaterialApp extends StatefulWidget {
   ///
   /// It is passed along unmodified to the [WidgetsApp] built by this widget.
   ///
-  /// The material widgets include translations for locales with the following
-  /// language codes:
-  /// ```
-  /// ar - Arabic
-  /// de - German
-  /// en - English
-  /// es - Spanish
-  /// fa - Farsi (Persian)
-  /// fr - French
-  /// he - Hebrew
-  /// it - Italian
-  /// ja - Japanese
-  /// ps - Pashto
-  /// pt - Portugese
-  /// ro - Romanian
-  /// ru - Russian
-  /// sd - Sindhi
-  /// ur - Urdu
-  /// zh - Chinese (simplified)
-  /// ```
+  /// See also:
+  ///
+  ///  * [localizationsDelegates], which must be specified for localized
+  ///    applications.
+  ///  * [GlobalMaterialLocalizations], a [localizationsDelegates] value
+  ///    which provides material localizations for many languages.
+  ///  * The Flutter Internationalization Tutorial,
+  ///    <https://flutter.io/tutorials/internationalization/>.
   final Iterable<Locale> supportedLocales;
 
   /// Turns on a performance overlay.
@@ -417,11 +354,11 @@ class MaterialApp extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///  * <https://material.google.com/layout/metrics-keylines.html>
+  ///  * <https://material.io/design/layout/spacing-methods.html>
   final bool debugShowMaterialGrid;
 
   @override
-  _MaterialAppState createState() => new _MaterialAppState();
+  _MaterialAppState createState() => _MaterialAppState();
 }
 
 class _MaterialScrollBehavior extends ScrollBehavior {
@@ -439,7 +376,7 @@ class _MaterialScrollBehavior extends ScrollBehavior {
         return child;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
-        return new GlowingOverscrollIndicator(
+        return GlowingOverscrollIndicator(
           child: child,
           axisDirection: axisDirection,
           color: Theme.of(context).accentColor,
@@ -455,7 +392,7 @@ class _MaterialAppState extends State<MaterialApp> {
   @override
   void initState() {
     super.initState();
-    _heroController = new HeroController(createRectTween: _createRectTween);
+    _heroController = HeroController(createRectTween: _createRectTween);
     _updateNavigator();
   }
 
@@ -467,76 +404,27 @@ class _MaterialAppState extends State<MaterialApp> {
       // old Navigator won't be disposed (and thus won't unregister with its
       // observers) until after the new one has been created (because the
       // Navigator has a GlobalKey).
-      _heroController = new HeroController(createRectTween: _createRectTween);
+      _heroController = HeroController(createRectTween: _createRectTween);
     }
     _updateNavigator();
   }
 
-  bool _haveNavigator;
   List<NavigatorObserver> _navigatorObservers;
 
   void _updateNavigator() {
-    _haveNavigator = widget.home != null ||
-                     widget.routes.isNotEmpty ||
-                     widget.onGenerateRoute != null ||
-                     widget.onUnknownRoute != null;
-    _navigatorObservers = new List<NavigatorObserver>.from(widget.navigatorObservers)
-      ..add(_heroController);
+    if (widget.home != null ||
+        widget.routes.isNotEmpty ||
+        widget.onGenerateRoute != null ||
+        widget.onUnknownRoute != null) {
+      _navigatorObservers = List<NavigatorObserver>.from(widget.navigatorObservers)
+        ..add(_heroController);
+    } else {
+      _navigatorObservers = null;
+    }
   }
 
   RectTween _createRectTween(Rect begin, Rect end) {
-    return new MaterialRectArcTween(begin: begin, end: end);
-  }
-
-  Route<dynamic> _onGenerateRoute(RouteSettings settings) {
-    final String name = settings.name;
-    WidgetBuilder builder;
-    if (name == Navigator.defaultRouteName && widget.home != null) {
-      builder = (BuildContext context) => widget.home;
-    } else {
-      builder = widget.routes[name];
-    }
-    if (builder != null) {
-      return new MaterialPageRoute<dynamic>(
-        builder: builder,
-        settings: settings,
-      );
-    }
-    if (widget.onGenerateRoute != null)
-      return widget.onGenerateRoute(settings);
-    return null;
-  }
-
-  Route<dynamic> _onUnknownRoute(RouteSettings settings) {
-    assert(() {
-      if (widget.onUnknownRoute == null) {
-        throw new FlutterError(
-          'Could not find a generator for route $settings in the $runtimeType.\n'
-          'Generators for routes are searched for in the following order:\n'
-          ' 1. For the "/" route, the "home" property, if non-null, is used.\n'
-          ' 2. Otherwise, the "routes" table is used, if it has an entry for '
-          'the route.\n'
-          ' 3. Otherwise, onGenerateRoute is called. It should return a '
-          'non-null value for any valid route not handled by "home" and "routes".\n'
-          ' 4. Finally if all else fails onUnknownRoute is called.\n'
-          'Unfortunately, onUnknownRoute was not set.'
-        );
-      }
-      return true;
-    }());
-    final Route<dynamic> result = widget.onUnknownRoute(settings);
-    assert(() {
-      if (result == null) {
-        throw new FlutterError(
-          'The onUnknownRoute callback returned null.\n'
-          'When the $runtimeType requested the route $settings from its '
-          'onUnknownRoute callback, the callback returned null. Such callbacks '
-          'must never return null.'
-        );
-      }
-      return true;
-    }());
-    return result;
+    return MaterialRectArcTween(begin: begin, end: end);
   }
 
   // Combine the Localizations for Material with the ones contributed
@@ -548,49 +436,90 @@ class _MaterialAppState extends State<MaterialApp> {
     if (widget.localizationsDelegates != null)
       yield* widget.localizationsDelegates;
     yield DefaultMaterialLocalizations.delegate;
+    yield DefaultCupertinoLocalizations.delegate;
   }
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = widget.theme ?? new ThemeData.fallback();
-    Widget result = new AnimatedTheme(
-      data: theme,
-      isMaterialAppTheme: true,
-      child: new WidgetsApp(
-        key: new GlobalObjectKey(this),
-        navigatorKey: widget.navigatorKey,
-        navigatorObservers: _haveNavigator ? _navigatorObservers : null,
-        initialRoute: widget.initialRoute,
-        onGenerateRoute: _haveNavigator ? _onGenerateRoute : null,
-        onUnknownRoute: _haveNavigator ? _onUnknownRoute : null,
-        builder: widget.builder,
-        title: widget.title,
-        onGenerateTitle: widget.onGenerateTitle,
-        textStyle: _errorTextStyle,
-        // blue is the primary color of the default theme
-        color: widget.color ?? theme?.primaryColor ?? Colors.blue,
-        locale: widget.locale,
-        localizationsDelegates: _localizationsDelegates,
-        localeResolutionCallback: widget.localeResolutionCallback,
-        supportedLocales: widget.supportedLocales,
-        showPerformanceOverlay: widget.showPerformanceOverlay,
-        checkerboardRasterCacheImages: widget.checkerboardRasterCacheImages,
-        checkerboardOffscreenLayers: widget.checkerboardOffscreenLayers,
-        showSemanticsDebugger: widget.showSemanticsDebugger,
-        debugShowCheckedModeBanner: widget.debugShowCheckedModeBanner,
-        inspectorSelectButtonBuilder: (BuildContext context, VoidCallback onPressed) {
-          return new FloatingActionButton(
-            child: const Icon(Icons.search),
-            onPressed: onPressed,
-            mini: true,
-          );
-        },
-      )
+    Widget result = WidgetsApp(
+      key: GlobalObjectKey(this),
+      navigatorKey: widget.navigatorKey,
+      navigatorObservers: _navigatorObservers,
+        pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) =>
+            MaterialPageRoute<T>(settings: settings, builder: builder),
+      home: widget.home,
+      routes: widget.routes,
+      initialRoute: widget.initialRoute,
+      onGenerateRoute: widget.onGenerateRoute,
+      onUnknownRoute: widget.onUnknownRoute,
+      builder: (BuildContext context, Widget child) {
+        // Use a light theme, dark theme, or fallback theme.
+        ThemeData theme;
+        final ui.Brightness platformBrightness = MediaQuery.platformBrightnessOf(context);
+        if (platformBrightness == ui.Brightness.dark && widget.darkTheme != null) {
+          theme = widget.darkTheme;
+        } else if (widget.theme != null) {
+          theme = widget.theme;
+        } else {
+          theme = ThemeData.fallback();
+        }
+
+        return AnimatedTheme(
+          data: theme,
+          isMaterialAppTheme: true,
+          child: widget.builder != null
+              ? Builder(
+                  builder: (BuildContext context) {
+                    // Why are we surrounding a builder with a builder?
+                    //
+                    // The widget.builder may contain code that invokes
+                    // Theme.of(), which should return the theme we selected
+                    // above in AnimatedTheme. However, if we invoke
+                    // widget.builder() directly as the child of AnimatedTheme
+                    // then there is no Context separating them, and the
+                    // widget.builder() will not find the theme. Therefore, we
+                    // surround widget.builder with yet another builder so that
+                    // a context separates them and Theme.of() correctly
+                    // resolves to the theme we passed to AnimatedTheme.
+                    return widget.builder(context, child);
+                  },
+                )
+              : child,
+        );
+      },
+      title: widget.title,
+      onGenerateTitle: widget.onGenerateTitle,
+      textStyle: _errorTextStyle,
+      // The color property is always pulled from the light theme, even if dark
+      // mode is activated. This was done to simplify the technical details
+      // of switching themes and it was deemed acceptable because this color
+      // property is only used on old Android OSes to color the app bar in
+      // Android's switcher UI.
+      //
+      // blue is the primary color of the default theme
+      color: widget.color ?? widget.theme?.primaryColor ?? Colors.blue,
+      locale: widget.locale,
+      localizationsDelegates: _localizationsDelegates,
+      localeResolutionCallback: widget.localeResolutionCallback,
+      localeListResolutionCallback: widget.localeListResolutionCallback,
+      supportedLocales: widget.supportedLocales,
+      showPerformanceOverlay: widget.showPerformanceOverlay,
+      checkerboardRasterCacheImages: widget.checkerboardRasterCacheImages,
+      checkerboardOffscreenLayers: widget.checkerboardOffscreenLayers,
+      showSemanticsDebugger: widget.showSemanticsDebugger,
+      debugShowCheckedModeBanner: widget.debugShowCheckedModeBanner,
+      inspectorSelectButtonBuilder: (BuildContext context, VoidCallback onPressed) {
+        return FloatingActionButton(
+          child: const Icon(Icons.search),
+          onPressed: onPressed,
+          mini: true,
+        );
+      },
     );
-    
+
     assert(() {
       if (widget.debugShowMaterialGrid) {
-        result = new GridPaper(
+        result = GridPaper(
           color: const Color(0xE0F9BBE0),
           interval: 8.0,
           divisions: 2,
@@ -601,8 +530,8 @@ class _MaterialAppState extends State<MaterialApp> {
       return true;
     }());
 
-    return new ScrollConfiguration(
-      behavior: new _MaterialScrollBehavior(),
+    return ScrollConfiguration(
+      behavior: _MaterialScrollBehavior(),
       child: result,
     );
   }

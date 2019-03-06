@@ -3,12 +3,13 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:path/path.dart' as path;
 
-typedef Future<Null> ShardRunner();
+import 'run_command.dart';
+
+typedef ShardRunner = Future<void> Function();
 
 final String flutterRoot = path.dirname(path.dirname(path.dirname(path.fromUri(Platform.script))));
 final String flutter = path.join(flutterRoot, 'bin', Platform.isWindows ? 'flutter.bat' : 'flutter');
@@ -16,37 +17,29 @@ final String dart = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', Pl
 final String pub = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', Platform.isWindows ? 'pub.bat' : 'pub');
 final String pubCache = path.join(flutterRoot, '.pub-cache');
 final List<String> flutterTestArgs = <String>[];
-final bool hasColor = stdout.supportsAnsiEscapes;
 
-final String bold = hasColor ? '\x1B[1m' : '';
-final String red = hasColor ? '\x1B[31m' : '';
-final String green = hasColor ? '\x1B[32m' : '';
-final String yellow = hasColor ? '\x1B[33m' : '';
-final String cyan = hasColor ? '\x1B[36m' : '';
-final String reset = hasColor ? '\x1B[0m' : '';
-
-const Map<String, ShardRunner> _kShards = const <String, ShardRunner>{
-  'analyze': _analyzeRepo,
+const Map<String, ShardRunner> _kShards = <String, ShardRunner>{
   'tests': _runTests,
+  'tool_tests': _runToolTests,
+  'build_tests': _runBuildTests,
   'coverage': _runCoverage,
-  // 'docs': handled by travis_script.sh and docs.sh
-  // 'build_and_deploy_gallery': handled by travis_script.sh
+  'add2app_test': _runAdd2AppTest,
 };
 
-const Duration _kLongTimeout = const Duration(minutes: 45);
-const Duration _kShortTimeout = const Duration(minutes: 5);
+const Duration _kLongTimeout = Duration(minutes: 45);
+const Duration _kShortTimeout = Duration(minutes: 5);
 
 /// When you call this, you can pass additional arguments to pass custom
 /// arguments to flutter test. For example, you might want to call this
 /// script with the parameter --local-engine=host_debug_unopt to
 /// use your own build of the engine.
 ///
-/// To run the analysis part, run it with SHARD=analyze
+/// To run the tool_tests part, run it with SHARD=tool_tests
 ///
 /// For example:
-/// SHARD=analyze bin/cache/dart-sdk/bin/dart dev/bots/test.dart
+/// SHARD=tool_tests bin/cache/dart-sdk/bin/dart dev/bots/test.dart
 /// bin/cache/dart-sdk/bin/dart dev/bots/test.dart --local-engine=host_debug_unopt
-Future<Null> main(List<String> args) async {
+Future<void> main(List<String> args) async {
   flutterTestArgs.addAll(args);
 
   final String shard = Platform.environment['SHARD'];
@@ -67,75 +60,7 @@ Future<Null> main(List<String> args) async {
   }
 }
 
-Future<Null> _verifyInternationalizations() async {
-  final EvalResult genResult = await _evalCommand(
-    dart,
-    <String>[
-      '--preview-dart-2',
-      path.join('dev', 'tools', 'gen_localizations.dart'),
-    ],
-    workingDirectory: flutterRoot,
-  );
-
-  final String localizationsFile = path.join('packages', 'flutter_localizations', 'lib', 'src', 'l10n', 'localizations.dart');
-  final String expectedResult = await new File(localizationsFile).readAsString();
-
-  if (genResult.stdout.trim() != expectedResult.trim()) {
-    stderr
-      ..writeln('<<<<<<< $localizationsFile')
-      ..writeln(expectedResult.trim())
-      ..writeln('=======')
-      ..writeln(genResult.stdout.trim())
-      ..writeln('>>>>>>> gen_localizations')
-      ..writeln('The contents of $localizationsFile are different from that produced by gen_localizations.')
-      ..writeln()
-      ..writeln('Did you forget to run gen_localizations.dart after updating a .arb file?');
-    exit(1);
-  }
-  print('Contents of $localizationsFile matches output of gen_localizations.dart script.');
-}
-
-Future<Null> _analyzeRepo() async {
-  await _verifyGeneratedPluginRegistrants(flutterRoot);
-  await _verifyNoBadImportsInFlutter(flutterRoot);
-  await _verifyNoBadImportsInFlutterTools(flutterRoot);
-  await _verifyInternationalizations();
-
-  // Analyze all the Dart code in the repo.
-  await _runFlutterAnalyze(flutterRoot,
-    options: <String>['--flutter-repo'],
-  );
-
-  // Ensure that all package dependencies are in sync.
-  await _runCommand(flutter, <String>['update-packages', '--verify-only'],
-    workingDirectory: flutterRoot,
-  );
-
-  // Analyze all the sample code in the repo
-  await _runCommand(dart,
-    <String>['--preview-dart-2', path.join(flutterRoot, 'dev', 'bots', 'analyze-sample-code.dart')],
-    workingDirectory: flutterRoot,
-  );
-
-  // Try with the --watch analyzer, to make sure it returns success also.
-  // The --benchmark argument exits after one run.
-  await _runFlutterAnalyze(flutterRoot,
-    options: <String>['--flutter-repo', '--watch', '--benchmark'],
-  );
-
-  // Try an analysis against a big version of the gallery.
-  await _runCommand(dart,
-    <String>['--preview-dart-2', path.join(flutterRoot, 'dev', 'tools', 'mega_gallery.dart')],
-    workingDirectory: flutterRoot,
-  );
-  await _runFlutterAnalyze(path.join(flutterRoot, 'dev', 'benchmarks', 'mega_gallery'),
-    options: <String>['--watch', '--benchmark'],
-  );
-
-  print('${bold}DONE: Analysis successful.$reset');
-}
-
-Future<Null> _runTests() async {
+Future<void> _runSmokeTests() async {
   // Verify that the tests actually return failure on failure and success on
   // success.
   final String automatedTests = path.join(flutterRoot, 'dev', 'automated_tests');
@@ -201,10 +126,10 @@ Future<Null> _runTests() async {
         printOutput: false,
         timeout: _kShortTimeout,
       ),
-      _runCommand(flutter,
+      runCommand(flutter,
         <String>['drive', '--use-existing-app', '-t', path.join('test_driver', 'failure.dart')],
         workingDirectory: path.join(flutterRoot, 'packages', 'flutter_driver'),
-        expectFailure: true,
+        expectNonZeroExit: true,
         printOutput: false,
         timeout: _kShortTimeout,
       ),
@@ -213,29 +138,155 @@ Future<Null> _runTests() async {
 
   // Verify that we correctly generated the version file.
   await _verifyVersion(path.join(flutterRoot, 'version'));
+}
 
-  // Run tests.
+Future<void> _runToolTests() async {
+  await _runSmokeTests();
+
+  await _buildRunnerTest(
+    path.join(flutterRoot, 'packages', 'flutter_tools'),
+    flutterRoot,
+    enableFlutterToolAsserts: true,
+  );
+
+  print('${bold}DONE: All tests successful.$reset');
+}
+
+/// Verifies that AOT, APK, and IPA (if on macOS) builds of some
+/// examples apps finish without crashing. It does not actually
+/// launch the apps. That happens later in the devicelab. This is
+/// just a smoke-test. In particular, this will verify we can build
+/// when there are spaces in the path name for the Flutter SDK and
+/// target app.
+Future<void> _runBuildTests() async {
+  final List<String> paths = <String>[
+    path.join('examples', 'hello_world'),
+    path.join('examples', 'flutter_gallery'),
+    path.join('examples', 'flutter_view'),
+  ];
+  for (String path in paths) {
+    await _flutterBuildAot(path);
+    await _flutterBuildApk(path);
+    await _flutterBuildIpa(path);
+  }
+  // TODO(jonahwilliams): re-enable when engine rolls.
+  //await _flutterBuildDart2js(path.join('dev', 'integration_tests', 'web'));
+
+  print('${bold}DONE: All build tests successful.$reset');
+}
+
+// Future<void> _flutterBuildDart2js(String relativePathToApplication) async {
+//   print('Running Dart2JS build tests...');
+//   await runCommand(flutter,
+//     <String>['build', 'web', '-v'],
+//     workingDirectory: path.join(flutterRoot, relativePathToApplication),
+//     expectNonZeroExit: false,
+//     timeout: _kShortTimeout,
+//   );
+//   print('Done.');
+// }
+
+Future<void> _flutterBuildAot(String relativePathToApplication) async {
+  print('Running AOT build tests...');
+  await runCommand(flutter,
+    <String>['build', 'aot', '-v'],
+    workingDirectory: path.join(flutterRoot, relativePathToApplication),
+    expectNonZeroExit: false,
+    timeout: _kShortTimeout,
+  );
+  print('Done.');
+}
+
+Future<void> _flutterBuildApk(String relativePathToApplication) async {
+  // TODO(dnfield): See if we can get Android SDK on all Cirrus platforms.
+  if (
+        (Platform.environment['ANDROID_HOME']?.isEmpty ?? true) &&
+        (Platform.environment['ANDROID_SDK_ROOT']?.isEmpty ?? true)) {
+    return;
+  }
+  print('Running APK build tests...');
+  await runCommand(flutter,
+    <String>['build', 'apk', '--debug', '-v'],
+    workingDirectory: path.join(flutterRoot, relativePathToApplication),
+    expectNonZeroExit: false,
+    timeout: _kShortTimeout,
+  );
+  print('Done.');
+}
+
+Future<void> _flutterBuildIpa(String relativePathToApplication) async {
+  if (!Platform.isMacOS) {
+    return;
+  }
+  print('Running IPA build tests...');
+  // Install Cocoapods.  We don't have these checked in for the examples,
+  // and build ios doesn't take care of it automatically.
+  final File podfile = File(path.join(flutterRoot, relativePathToApplication, 'ios', 'Podfile'));
+  if (podfile.existsSync()) {
+    await runCommand('pod',
+      <String>['install'],
+      workingDirectory: podfile.parent.path,
+      expectNonZeroExit: false,
+      timeout: _kShortTimeout,
+    );
+  }
+  await runCommand(flutter,
+    <String>['build', 'ios', '--no-codesign', '--debug', '-v'],
+    workingDirectory: path.join(flutterRoot, relativePathToApplication),
+    expectNonZeroExit: false,
+    timeout: _kShortTimeout,
+  );
+  print('Done.');
+}
+
+Future<void> _runAdd2AppTest() async {
+  if (!Platform.isMacOS) {
+    return;
+  }
+  print('Running Add2App iOS integration tests...');
+  final String add2AppDir = path.join(flutterRoot, 'dev', 'integration_tests', 'ios_add2app');
+  await runCommand('./build_and_test.sh',
+    <String>[],
+    workingDirectory: add2AppDir,
+    expectNonZeroExit: false,
+    timeout: _kShortTimeout,
+  );
+  print('Done.');
+}
+
+Future<void> _runTests() async {
+  await _runSmokeTests();
+
   await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter'));
+  // Only packages/flutter/test/widgets/widget_inspector_test.dart really
+  // needs to be run with --track-widget-creation but it is nice to run
+  // all of the tests in package:flutter with the flag to ensure that
+  // the Dart kernel transformer triggered by the flag does not break anything.
+  await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter'), options: <String>['--track-widget-creation']);
   await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_localizations'));
   await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_driver'));
   await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_test'));
   await _runFlutterTest(path.join(flutterRoot, 'packages', 'fuchsia_remote_debug_protocol'));
-  await _pubRunTest(path.join(flutterRoot, 'packages', 'flutter_tools'));
   await _pubRunTest(path.join(flutterRoot, 'dev', 'bots'));
   await _pubRunTest(path.join(flutterRoot, 'dev', 'devicelab'));
+  await _pubRunTest(path.join(flutterRoot, 'dev', 'snippets'));
+  await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'android_semantics_testing'));
   await _runFlutterTest(path.join(flutterRoot, 'dev', 'manual_tests'));
   await _runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'vitool'));
   await _runFlutterTest(path.join(flutterRoot, 'examples', 'hello_world'));
   await _runFlutterTest(path.join(flutterRoot, 'examples', 'layers'));
   await _runFlutterTest(path.join(flutterRoot, 'examples', 'stocks'));
   await _runFlutterTest(path.join(flutterRoot, 'examples', 'flutter_gallery'));
+  // Regression test to ensure that code outside of package:flutter can run
+  // with --track-widget-creation.
+  await _runFlutterTest(path.join(flutterRoot, 'examples', 'flutter_gallery'), options: <String>['--track-widget-creation']);
   await _runFlutterTest(path.join(flutterRoot, 'examples', 'catalog'));
 
   print('${bold}DONE: All tests successful.$reset');
 }
 
-Future<Null> _runCoverage() async {
-  final File coverageFile = new File(path.join(flutterRoot, 'packages', 'flutter', 'coverage', 'lcov.info'));
+Future<void> _runCoverage() async {
+  final File coverageFile = File(path.join(flutterRoot, 'packages', 'flutter', 'coverage', 'lcov.info'));
   if (!coverageFile.existsSync()) {
     print('${red}Coverage file not found.$reset');
     print('Expected to find: ${coverageFile.absolute}');
@@ -256,20 +307,64 @@ Future<Null> _runCoverage() async {
   print('${bold}DONE: Coverage collection successful.$reset');
 }
 
-Future<Null> _pubRunTest(
+Future<void> _buildRunnerTest(
+  String workingDirectory,
+  String flutterRoot, {
+   String testPath,
+   bool enableFlutterToolAsserts = false,
+  }
+) {
+  final List<String> args = <String>['run', 'build_runner', 'test', '--', '-rcompact', '-j1'];
+  if (!hasColor) {
+    args.add('--no-color');
+  }
+  if (testPath != null) {
+    args.add(testPath);
+  }
+  final Map<String, String> pubEnvironment = <String, String>{
+    'FLUTTER_ROOT': flutterRoot,
+  };
+  if (Directory(pubCache).existsSync()) {
+    pubEnvironment['PUB_CACHE'] = pubCache;
+  }
+  if (enableFlutterToolAsserts) {
+    // If an existing env variable exists append to it, but only if
+    // it doesn't appear to already include enable-asserts.
+    String toolsArgs = Platform.environment['FLUTTER_TOOL_ARGS'] ?? '';
+    if (!toolsArgs.contains('--enable-asserts'))
+        toolsArgs += ' --enable-asserts';
+    pubEnvironment['FLUTTER_TOOL_ARGS'] = toolsArgs.trim();
+  }
+  return runCommand(
+    pub, args,
+    workingDirectory: workingDirectory,
+    environment: pubEnvironment,
+  );
+}
+
+Future<void> _pubRunTest(
   String workingDirectory, {
   String testPath,
+  bool enableFlutterToolAsserts = false,
 }) {
-  final List<String> args = <String>['run', 'test', '-j1', '-rcompact'];
+  final List<String> args = <String>['run', 'test', '-rcompact', '-j1'];
   if (!hasColor)
     args.add('--no-color');
   if (testPath != null)
     args.add(testPath);
   final Map<String, String> pubEnvironment = <String, String>{};
-  if (new Directory(pubCache).existsSync()) {
+  if (Directory(pubCache).existsSync()) {
     pubEnvironment['PUB_CACHE'] = pubCache;
   }
-  return _runCommand(
+  if (enableFlutterToolAsserts) {
+    // If an existing env variable exists append to it, but only if
+    // it doesn't appear to already include enable-asserts.
+    String toolsArgs = Platform.environment['FLUTTER_TOOL_ARGS'] ?? '';
+    if (!toolsArgs.contains('--enable-asserts'))
+        toolsArgs += ' --enable-asserts';
+    pubEnvironment['FLUTTER_TOOL_ARGS'] = toolsArgs.trim();
+  }
+  return runCommand(
     pub, args,
     workingDirectory: workingDirectory,
     environment: pubEnvironment,
@@ -280,104 +375,15 @@ class EvalResult {
   EvalResult({
     this.stdout,
     this.stderr,
+    this.exitCode = 0,
   });
 
   final String stdout;
   final String stderr;
+  final int exitCode;
 }
 
-Future<EvalResult> _evalCommand(String executable, List<String> arguments, {
-  String workingDirectory,
-  Map<String, String> environment,
-  bool skip = false,
-}) async {
-  final String commandDescription = '${path.relative(executable, from: workingDirectory)} ${arguments.join(' ')}';
-  final String relativeWorkingDir = path.relative(workingDirectory);
-  if (skip) {
-    _printProgress('SKIPPING', relativeWorkingDir, commandDescription);
-    return null;
-  }
-  _printProgress('RUNNING', relativeWorkingDir, commandDescription);
-
-  final Process process = await Process.start(executable, arguments,
-    workingDirectory: workingDirectory,
-    environment: environment,
-  );
-
-  final Future<List<List<int>>> savedStdout = process.stdout.toList();
-  final Future<List<List<int>>> savedStderr = process.stderr.toList();
-  final int exitCode = await process.exitCode;
-  final EvalResult result = new EvalResult(
-    stdout: utf8.decode((await savedStdout).expand((List<int> ints) => ints).toList()),
-    stderr: utf8.decode((await savedStderr).expand((List<int> ints) => ints).toList()),
-  );
-
-  if (exitCode != 0) {
-    stderr.write(result.stderr);
-    print(
-      '$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset\n'
-      '${bold}ERROR:$red Last command exited with $exitCode.$reset\n'
-      '${bold}Command:$red $commandDescription$reset\n'
-      '${bold}Relative working directory:$red $relativeWorkingDir$reset\n'
-      '$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset'
-    );
-    exit(1);
-  }
-
-  return result;
-}
-
-Future<Null> _runCommand(String executable, List<String> arguments, {
-  String workingDirectory,
-  Map<String, String> environment,
-  bool expectFailure = false,
-  bool printOutput = true,
-  bool skip = false,
-  Duration timeout = _kLongTimeout,
-}) async {
-  final String commandDescription = '${path.relative(executable, from: workingDirectory)} ${arguments.join(' ')}';
-  final String relativeWorkingDir = path.relative(workingDirectory);
-  if (skip) {
-    _printProgress('SKIPPING', relativeWorkingDir, commandDescription);
-    return null;
-  }
-  _printProgress('RUNNING', relativeWorkingDir, commandDescription);
-
-  final Process process = await Process.start(executable, arguments,
-    workingDirectory: workingDirectory,
-    environment: environment,
-  );
-
-  Future<List<List<int>>> savedStdout, savedStderr;
-  if (printOutput) {
-    await Future.wait(<Future<void>>[
-      stdout.addStream(process.stdout),
-      stderr.addStream(process.stderr)
-    ]);
-  } else {
-    savedStdout = process.stdout.toList();
-    savedStderr = process.stderr.toList();
-  }
-
-  final int exitCode = await process.exitCode.timeout(timeout, onTimeout: () {
-    stderr.writeln('Process timed out after $timeout');
-    return expectFailure ? 0 : 1;
-  });
-  if ((exitCode == 0) == expectFailure) {
-    if (!printOutput) {
-      stdout.writeln(utf8.decode((await savedStdout).expand((List<int> ints) => ints).toList()));
-      stderr.writeln(utf8.decode((await savedStderr).expand((List<int> ints) => ints).toList()));
-    }
-    print(
-      '$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset\n'
-      '${bold}ERROR:$red Last command exited with $exitCode (expected: ${expectFailure ? 'non-zero' : 'zero'}).$reset\n'
-      '$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset'
-    );
-    exit(1);
-  }
-}
-
-Future<Null> _runFlutterTest(String workingDirectory, {
+Future<void> _runFlutterTest(String workingDirectory, {
   String script,
   bool expectFailure = false,
   bool printOutput = true,
@@ -402,256 +408,34 @@ Future<Null> _runFlutterTest(String workingDirectory, {
     }
     args.add(script);
   }
-  return _runCommand(flutter, args,
+  return runCommand(flutter, args,
     workingDirectory: workingDirectory,
-    expectFailure: expectFailure,
+    expectNonZeroExit: expectFailure,
     printOutput: printOutput,
     skip: skip,
     timeout: timeout,
   );
 }
 
-Future<Null> _runFlutterAnalyze(String workingDirectory, {
-  List<String> options = const <String>[]
-}) {
-  return _runCommand(flutter, <String>['analyze']..addAll(options),
-    workingDirectory: workingDirectory,
-  );
-}
-
-Future<Null> _verifyNoBadImportsInFlutter(String workingDirectory) async {
-  final List<String> errors = <String>[];
-  final String libPath = path.join(workingDirectory, 'packages', 'flutter', 'lib');
-  final String srcPath = path.join(workingDirectory, 'packages', 'flutter', 'lib', 'src');
-  // Verify there's one libPath/*.dart for each srcPath/*/.
-  final List<String> packages = new Directory(libPath).listSync()
-    .where((FileSystemEntity entity) => entity is File && path.extension(entity.path) == '.dart')
-    .map<String>((FileSystemEntity entity) => path.basenameWithoutExtension(entity.path))
-    .toList()..sort();
-  final List<String> directories = new Directory(srcPath).listSync()
-    .where((FileSystemEntity entity) => entity is Directory)
-    .map<String>((FileSystemEntity entity) => path.basename(entity.path))
-    .toList()..sort();
-  if (!_matches(packages, directories)) {
-    errors.add(
-      'flutter/lib/*.dart does not match flutter/lib/src/*/:\n'
-      'These are the exported packages:\n' +
-      packages.map((String path) => '  lib/$path.dart').join('\n') +
-      'These are the directories:\n' +
-      directories.map((String path) => '  lib/src/$path/').join('\n')
-    );
-  }
-  // Verify that the imports are well-ordered.
-  final Map<String, Set<String>> dependencyMap = <String, Set<String>>{};
-  for (String directory in directories) {
-    dependencyMap[directory] = _findDependencies(path.join(srcPath, directory), errors, checkForMeta: directory != 'foundation');
-  }
-  for (String package in dependencyMap.keys) {
-    if (dependencyMap[package].contains(package)) {
-      errors.add(
-        'One of the files in the $yellow$package$reset package imports that package recursively.'
-      );
-    }
-  }
-  for (String package in dependencyMap.keys) {
-    final List<String> loop = _deepSearch(dependencyMap, package);
-    if (loop != null) {
-      errors.add(
-        '${yellow}Dependency loop:$reset ' +
-        loop.join(' depends on ')
-      );
-    }
-  }
-  // Fail if any errors
-  if (errors.isNotEmpty) {
-    print('$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset');
-    if (errors.length == 1) {
-      print('${bold}An error was detected when looking at import dependencies within the Flutter package:$reset\n');
-    } else {
-      print('${bold}Multiple errors were detected when looking at import dependencies within the Flutter package:$reset\n');
-    }
-    print(errors.join('\n\n'));
-    print('$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset\n');
-    exit(1);
-  }
-}
-
-bool _matches<T>(List<T> a, List<T> b) {
-  assert(a != null);
-  assert(b != null);
-  if (a.length != b.length)
-    return false;
-  for (int index = 0; index < a.length; index += 1) {
-    if (a[index] != b[index])
-      return false;
-  }
-  return true;
-}
-
-final RegExp _importPattern = new RegExp(r"import 'package:flutter/([^.]+)\.dart'");
-final RegExp _importMetaPattern = new RegExp(r"import 'package:meta/meta.dart'");
-
-Set<String> _findDependencies(String srcPath, List<String> errors, { bool checkForMeta = false }) {
-  return new Directory(srcPath).listSync(recursive: true).where((FileSystemEntity entity) {
-    return entity is File && path.extension(entity.path) == '.dart';
-  }).map<Set<String>>((FileSystemEntity entity) {
-    final Set<String> result = new Set<String>();
-    final File file = entity;
-    for (String line in file.readAsLinesSync()) {
-      Match match = _importPattern.firstMatch(line);
-      if (match != null)
-        result.add(match.group(1));
-      if (checkForMeta) {
-        match = _importMetaPattern.firstMatch(line);
-        if (match != null) {
-          errors.add(
-            '${file.path}\nThis package imports the ${yellow}meta$reset package.\n'
-            'You should instead import the "foundation.dart" library.'
-          );
-        }
-      }
-    }
-    return result;
-  }).reduce((Set<String> value, Set<String> element) {
-    value ??= new Set<String>();
-    value.addAll(element);
-    return value;
-  });
-}
-
-List<T> _deepSearch<T>(Map<T, Set<T>> map, T start, [ Set<T> seen ]) {
-  for (T key in map[start]) {
-    if (key == start)
-      continue; // we catch these separately
-    if (seen != null && seen.contains(key))
-      return <T>[start, key];
-    final List<T> result = _deepSearch(
-      map,
-      key,
-      (seen == null ? new Set<T>.from(<T>[start]) : new Set<T>.from(seen))..add(key),
-    );
-    if (result != null) {
-      result.insert(0, start);
-      // Only report the shortest chains.
-      // For example a->b->a, rather than c->a->b->a.
-      // Since we visit every node, we know the shortest chains are those
-      // that start and end on the loop.
-      if (result.first == result.last)
-        return result;
-    }
-  }
-  return null;
-}
-
-Future<Null> _verifyNoBadImportsInFlutterTools(String workingDirectory) async {
-  final List<String> errors = <String>[];
-  for (FileSystemEntity entity in new Directory(path.join(workingDirectory, 'packages', 'flutter_tools', 'lib'))
-    .listSync(recursive: true)
-    .where((FileSystemEntity entity) => entity is File && path.extension(entity.path) == '.dart')) {
-    final File file = entity;
-    if (file.readAsStringSync().contains('package:flutter_tools/')) {
-      errors.add('$yellow${file.path}$reset imports flutter_tools.');
-    }
-  }
-  // Fail if any errors
-  if (errors.isNotEmpty) {
-    print('$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset');
-    if (errors.length == 1) {
-      print('${bold}An error was detected when looking at import dependencies within the flutter_tools package:$reset\n');
-    } else {
-      print('${bold}Multiple errors were detected when looking at import dependencies within the flutter_tools package:$reset\n');
-    }
-    print(errors.join('\n\n'));
-    print('$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset\n');
-    exit(1);
-  }
-}
-
-void _printProgress(String action, String workingDir, String command) {
-  const String arrow = '⏩';
-  print('$arrow $action: cd $cyan$workingDir$reset; $yellow$command$reset');
-}
-
-Future<Null> _verifyGeneratedPluginRegistrants(String flutterRoot) async {
-  final Directory flutterRootDir = new Directory(flutterRoot);
-
-  final Map<String, List<File>> packageToRegistrants = <String, List<File>>{};
-
-  for (FileSystemEntity entity in flutterRootDir.listSync(recursive: true)) {
-    if (entity is! File)
-      continue;
-    if (_isGeneratedPluginRegistrant(entity)) {
-      final String package = _getPackageFor(entity, flutterRootDir);
-      final List<File> registrants = packageToRegistrants.putIfAbsent(package, () => <File>[]);
-      registrants.add(entity);
-    }
-  }
-
-  final Set<String> outOfDate = new Set<String>();
-
-  for (String package in packageToRegistrants.keys) {
-    final Map<File, String> fileToContent = <File, String>{};
-    for (File f in packageToRegistrants[package]) {
-      fileToContent[f] = f.readAsStringSync();
-    }
-    await _runCommand(flutter, <String>['inject-plugins'],
-      workingDirectory: package,
-      printOutput: false,
-    );
-    for (File registrant in fileToContent.keys) {
-      if (registrant.readAsStringSync() != fileToContent[registrant]) {
-        outOfDate.add(registrant.path);
-      }
-    }
-  }
-
-  if (outOfDate.isNotEmpty) {
-    print('$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset');
-    print('${bold}The following GeneratedPluginRegistrants are out of date:$reset');
-    for (String registrant in outOfDate) {
-      print(' - $registrant');
-    }
-    print('\nRun "flutter inject-plugins" in the package that\'s out of date.');
-    print('$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset');
-    exit(1);
-  }
-}
-
-String _getPackageFor(File entity, Directory flutterRootDir) {
-  for (Directory dir = entity.parent; dir != flutterRootDir; dir = dir.parent) {
-    if (new File(path.join(dir.path, 'pubspec.yaml')).existsSync()) {
-      return dir.path;
-    }
-  }
-  throw new ArgumentError('$entity is not within a dart package.');
-}
-
-bool _isGeneratedPluginRegistrant(File file) {
-  final String filename = path.basename(file.path);
-  return filename == 'GeneratedPluginRegistrant.java' ||
-      filename == 'GeneratedPluginRegistrant.h' ||
-      filename == 'GeneratedPluginRegistrant.m';
-}
-
-Future<Null> _verifyVersion(String filename) async {
-  if (!new File(filename).existsSync()) {
-    print('$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset');
+Future<void> _verifyVersion(String filename) async {
+  if (!File(filename).existsSync()) {
+    print('$redLine');
     print('The version logic failed to create the Flutter version file.');
-    print('$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset');
+    print('$redLine');
     exit(1);
   }
-  final String version = await new File(filename).readAsString();
+  final String version = await File(filename).readAsString();
   if (version == '0.0.0-unknown') {
-    print('$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset');
+    print('$redLine');
     print('The version logic failed to determine the Flutter version.');
-    print('$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset');
+    print('$redLine');
     exit(1);
   }
-  final RegExp pattern = new RegExp(r'^[0-9]+\.[0-9]+\.[0-9]+(-pre\.[0-9]+)?$');
+  final RegExp pattern = RegExp(r'^[0-9]+\.[0-9]+\.[0-9]+(-pre\.[0-9]+)?$');
   if (!version.contains(pattern)) {
-    print('$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset');
+    print('$redLine');
     print('The version logic generated an invalid version string.');
-    print('$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset');
+    print('$redLine');
     exit(1);
   }
 }

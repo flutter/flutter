@@ -2,53 +2,23 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('TextTheme control test', () {
-    final Typography typography = new Typography(platform: TargetPlatform.android);
-    expect(typography.black, equals(typography.black.copyWith()));
-    expect(typography.black, equals(typography.black.apply()));
-    expect(typography.black.hashCode, equals(typography.black.copyWith().hashCode));
-    expect(typography.black, isNot(equals(typography.white)));
-  });
-
   test('Typography is defined for all target platforms', () {
     for (TargetPlatform platform in TargetPlatform.values) {
-      final Typography typography = new Typography(platform: platform);
+      final Typography typography = Typography(platform: platform);
       expect(typography, isNotNull, reason: 'null typography for $platform');
       expect(typography.black, isNotNull, reason: 'null black typography for $platform');
       expect(typography.white, isNotNull, reason: 'null white typography for $platform');
     }
   });
 
-  test('TextTheme merges properly in the presence of null fields.', () {
-    const TextTheme partialTheme = const TextTheme(title: const TextStyle(color: const Color(0xcafefeed)));
-    final TextTheme fullTheme = ThemeData.fallback().textTheme.merge(partialTheme);
-    expect(fullTheme.title.color, equals(partialTheme.title.color));
-
-    const TextTheme onlyHeadlineAndTitle = const TextTheme(
-      headline: const TextStyle(color: const Color(0xcafefeed)),
-      title: const TextStyle(color: const Color(0xbeefcafe)),
-    );
-    const TextTheme onlyBody1AndTitle = const TextTheme(
-      body1: const TextStyle(color: const Color(0xfeedfeed)),
-      title: const TextStyle(color: const Color(0xdeadcafe)),
-    );
-    TextTheme merged = onlyHeadlineAndTitle.merge(onlyBody1AndTitle);
-    expect(merged.body2, isNull);
-    expect(merged.body1.color, equals(onlyBody1AndTitle.body1.color));
-    expect(merged.headline.color, equals(onlyHeadlineAndTitle.headline.color));
-    expect(merged.title.color, equals(onlyBody1AndTitle.title.color));
-
-    merged = onlyHeadlineAndTitle.merge(null);
-    expect(merged, equals(onlyHeadlineAndTitle));
-  });
-
   test('Typography on Android, Fuchsia defaults to Roboto', () {
-    expect(new Typography(platform: TargetPlatform.android).black.title.fontFamily, 'Roboto');
-    expect(new Typography(platform: TargetPlatform.fuchsia).black.title.fontFamily, 'Roboto');
+    expect(Typography(platform: TargetPlatform.android).black.title.fontFamily, 'Roboto');
+    expect(Typography(platform: TargetPlatform.fuchsia).black.title.fontFamily, 'Roboto');
   });
 
   test('Typography on iOS defaults to the correct SF font family based on size', () {
@@ -61,7 +31,7 @@ void main() {
       return s.fontFamily == '.SF UI Text';
     }, 'Uses SF Text font');
 
-    final Typography typography = new Typography(platform: TargetPlatform.iOS);
+    final Typography typography = Typography(platform: TargetPlatform.iOS);
     for (TextTheme textTheme in <TextTheme>[typography.black, typography.white]) {
       expect(textTheme.display4, isDisplayFont);
       expect(textTheme.display3, isDisplayFont);
@@ -74,6 +44,26 @@ void main() {
       expect(textTheme.body1, isTextFont);
       expect(textTheme.caption, isTextFont);
       expect(textTheme.button, isTextFont);
+      expect(textTheme.subtitle, isTextFont);
+      expect(textTheme.overline, isTextFont);
     }
+  });
+
+  testWidgets('Typography implements debugFillProperties', (WidgetTester tester) async {
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    Typography(
+      platform: TargetPlatform.android,
+      black: Typography.blackCupertino,
+      white: Typography.whiteCupertino,
+      englishLike: Typography.englishLike2018,
+      dense: Typography.dense2018,
+      tall: Typography.tall2018,
+    ).debugFillProperties(builder);
+
+    final List<String> nonDefaultPropertyNames = builder.properties
+      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((DiagnosticsNode node) => node.name).toList();
+
+    expect(nonDefaultPropertyNames, <String>['black', 'white', 'englishLike', 'dense', 'tall']);
   });
 }

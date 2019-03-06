@@ -28,13 +28,6 @@ import 'package:flutter/widgets.dart';
 ///    rounded rectangle around the input decorator's container.
 ///  * [InputDecoration], which is used to configure an [InputDecorator].
 abstract class InputBorder extends ShapeBorder {
-  /// No input border.
-  ///
-  /// Use this value with [InputDecoration.border] to specify that no border
-  /// should be drawn. The [InputDecoration.shrinkWrap] constructor sets
-  /// its border to this value.
-  static const InputBorder none = const _NoInputBorder();
-
   /// Creates a border for an [InputDecorator].
   ///
   /// The [borderSide] parameter must not be null. Applications typically do
@@ -44,6 +37,13 @@ abstract class InputBorder extends ShapeBorder {
   const InputBorder({
     this.borderSide = BorderSide.none,
   }) : assert(borderSide != null);
+
+  /// No input border.
+  ///
+  /// Use this value with [InputDecoration.border] to specify that no border
+  /// should be drawn. The [InputDecoration.shrinkWrap] constructor sets
+  /// its border to this value.
+  static const InputBorder none = _NoInputBorder();
 
   /// Defines the border line's color and weight.
   ///
@@ -71,11 +71,13 @@ abstract class InputBorder extends ShapeBorder {
   /// [gapExtent] parameters define a floating label width interval, and
   /// [gapPercentage] defines the animation's progress (0.0 to 1.0).
   @override
-  void paint(Canvas canvas, Rect rect, {
-      double gapStart,
-      double gapExtent = 0.0,
-      double gapPercentage = 0.0,
-      TextDirection textDirection,
+  void paint(
+    Canvas canvas,
+    Rect rect, {
+    double gapStart,
+    double gapExtent = 0.0,
+    double gapPercentage = 0.0,
+    TextDirection textDirection,
   });
 }
 
@@ -97,20 +99,22 @@ class _NoInputBorder extends InputBorder {
 
   @override
   Path getInnerPath(Rect rect, { TextDirection textDirection }) {
-    return new Path()..addRect(rect);
+    return Path()..addRect(rect);
   }
 
   @override
   Path getOuterPath(Rect rect, { TextDirection textDirection }) {
-    return new Path()..addRect(rect);
+    return Path()..addRect(rect);
   }
 
   @override
-  void paint(Canvas canvas, Rect rect, {
-      double gapStart,
-      double gapExtent = 0.0,
-      double gapPercentage = 0.0,
-      TextDirection textDirection,
+  void paint(
+    Canvas canvas,
+    Rect rect, {
+    double gapStart,
+    double gapExtent = 0.0,
+    double gapPercentage = 0.0,
+    TextDirection textDirection,
   }) {
     // Do not paint.
   }
@@ -139,10 +143,10 @@ class UnderlineInputBorder extends InputBorder {
   /// and right corners have a circular radius of 4.0. The [borderRadius]
   /// parameter must not be null.
   const UnderlineInputBorder({
-    BorderSide borderSide = BorderSide.none,
+    BorderSide borderSide = const BorderSide(),
     this.borderRadius = const BorderRadius.only(
-      topLeft: const Radius.circular(4.0),
-      topRight: const Radius.circular(4.0),
+      topLeft: Radius.circular(4.0),
+      topRight: Radius.circular(4.0),
     ),
   }) : assert(borderRadius != null),
        super(borderSide: borderSide);
@@ -163,7 +167,7 @@ class UnderlineInputBorder extends InputBorder {
 
   @override
   UnderlineInputBorder copyWith({ BorderSide borderSide, BorderRadius borderRadius }) {
-    return new UnderlineInputBorder(
+    return UnderlineInputBorder(
       borderSide: borderSide ?? this.borderSide,
       borderRadius: borderRadius ?? this.borderRadius,
     );
@@ -171,30 +175,31 @@ class UnderlineInputBorder extends InputBorder {
 
   @override
   EdgeInsetsGeometry get dimensions {
-    return new EdgeInsets.only(bottom: borderSide.width);
+    return EdgeInsets.only(bottom: borderSide.width);
   }
 
   @override
   UnderlineInputBorder scale(double t) {
-    return new UnderlineInputBorder(borderSide: borderSide.scale(t));
+    return UnderlineInputBorder(borderSide: borderSide.scale(t));
   }
 
   @override
   Path getInnerPath(Rect rect, { TextDirection textDirection }) {
-    return new Path()
-      ..addRect(new Rect.fromLTWH(rect.left, rect.top, rect.width, math.max(0.0, rect.height - borderSide.width)));
+    return Path()
+      ..addRect(Rect.fromLTWH(rect.left, rect.top, rect.width, math.max(0.0, rect.height - borderSide.width)));
   }
 
   @override
   Path getOuterPath(Rect rect, { TextDirection textDirection }) {
-    return new Path()..addRRect(borderRadius.resolve(textDirection).toRRect(rect));
+    return Path()..addRRect(borderRadius.resolve(textDirection).toRRect(rect));
   }
 
   @override
   ShapeBorder lerpFrom(ShapeBorder a, double t) {
     if (a is UnderlineInputBorder) {
-      return new UnderlineInputBorder(
+      return UnderlineInputBorder(
         borderSide: BorderSide.lerp(a.borderSide, borderSide, t),
+        borderRadius: BorderRadius.lerp(a.borderRadius, borderRadius, t),
       );
     }
     return super.lerpFrom(a, t);
@@ -203,8 +208,9 @@ class UnderlineInputBorder extends InputBorder {
   @override
   ShapeBorder lerpTo(ShapeBorder b, double t) {
     if (b is UnderlineInputBorder) {
-      return new UnderlineInputBorder(
+      return UnderlineInputBorder(
         borderSide: BorderSide.lerp(borderSide, b.borderSide, t),
+        borderRadius: BorderRadius.lerp(borderRadius, b.borderRadius, t),
       );
     }
     return super.lerpTo(b, t);
@@ -215,11 +221,13 @@ class UnderlineInputBorder extends InputBorder {
   /// The [borderSide] defines the line's color and weight. The `textDirection`
   /// `gap` and `textDirection` parameters are ignored.
   @override
-  void paint(Canvas canvas, Rect rect, {
-      double gapStart,
-      double gapExtent = 0.0,
-      double gapPercentage = 0.0,
-      TextDirection textDirection,
+  void paint(
+    Canvas canvas,
+    Rect rect, {
+    double gapStart,
+    double gapExtent = 0.0,
+    double gapPercentage = 0.0,
+    TextDirection textDirection,
   }) {
     if (borderRadius.bottomLeft != Radius.zero || borderRadius.bottomRight != Radius.zero)
       canvas.clipPath(getOuterPath(rect, textDirection: textDirection));
@@ -256,18 +264,28 @@ class UnderlineInputBorder extends InputBorder {
 class OutlineInputBorder extends InputBorder {
   /// Creates a rounded rectangle outline border for an [InputDecorator].
   ///
-  /// The [borderSide] parameter defaults to [BorderSide.none] (it must not be
-  /// null). Applications typically do not specify a [borderSide] parameter
-  /// because the input decorator substitutes its own, using [copyWith], based
-  /// on the current theme and [InputDecorator.isFocused].
+  /// If the [borderSide] parameter is [BorderSide.none], it will not draw a
+  /// border. However, it will still define a shape (which you can see if
+  /// [InputDecoration.filled] is true).
+  ///
+  /// If an application does not specify a [borderSide] parameter of
+  /// value [BorderSide.none], the input decorator substitutes its own, using
+  /// [copyWith], based on the current theme and [InputDecorator.isFocused].
   ///
   /// The [borderRadius] parameter defaults to a value where all four
   /// corners have a circular radius of 4.0. The [borderRadius] parameter
   /// must not be null and the corner radii must be circular, i.e. their
   /// [Radius.x] and [Radius.y] values must be the same.
+  ///
+  /// See also:
+  ///
+  ///  * [InputDecoration.hasFloatingPlaceholder], which should be set to false
+  ///    when the [borderSide] is [BorderSide.none]. If let as true, the label
+  ///    will extend beyond the container as if the border were still being
+  ///    drawn.
   const OutlineInputBorder({
-    BorderSide borderSide = BorderSide.none,
-    this.borderRadius = const BorderRadius.all(const Radius.circular(4.0)),
+    BorderSide borderSide = const BorderSide(),
+    this.borderRadius = const BorderRadius.all(Radius.circular(4.0)),
     this.gapPadding = 4.0,
   }) : assert(borderRadius != null),
        assert(gapPadding != null && gapPadding >= 0.0),
@@ -307,7 +325,7 @@ class OutlineInputBorder extends InputBorder {
     BorderRadius borderRadius,
     double gapPadding,
   }) {
-    return new OutlineInputBorder(
+    return OutlineInputBorder(
       borderSide: borderSide ?? this.borderSide,
       borderRadius: borderRadius ?? this.borderRadius,
       gapPadding: gapPadding ?? this.gapPadding,
@@ -316,12 +334,12 @@ class OutlineInputBorder extends InputBorder {
 
   @override
   EdgeInsetsGeometry get dimensions {
-    return new EdgeInsets.all(borderSide.width);
+    return EdgeInsets.all(borderSide.width);
   }
 
   @override
   OutlineInputBorder scale(double t) {
-    return new OutlineInputBorder(
+    return OutlineInputBorder(
       borderSide: borderSide.scale(t),
       borderRadius: borderRadius * t,
       gapPadding: gapPadding * t,
@@ -332,7 +350,7 @@ class OutlineInputBorder extends InputBorder {
   ShapeBorder lerpFrom(ShapeBorder a, double t) {
     if (a is OutlineInputBorder) {
       final OutlineInputBorder outline = a;
-      return new OutlineInputBorder(
+      return OutlineInputBorder(
         borderRadius: BorderRadius.lerp(outline.borderRadius, borderRadius, t),
         borderSide: BorderSide.lerp(outline.borderSide, borderSide, t),
         gapPadding: outline.gapPadding,
@@ -345,7 +363,7 @@ class OutlineInputBorder extends InputBorder {
   ShapeBorder lerpTo(ShapeBorder b, double t) {
     if (b is OutlineInputBorder) {
       final OutlineInputBorder outline = b;
-      return new OutlineInputBorder(
+      return OutlineInputBorder(
         borderRadius: BorderRadius.lerp(borderRadius, outline.borderRadius, t),
         borderSide: BorderSide.lerp(borderSide, outline.borderSide, t),
         gapPadding: outline.gapPadding,
@@ -356,36 +374,36 @@ class OutlineInputBorder extends InputBorder {
 
   @override
   Path getInnerPath(Rect rect, { TextDirection textDirection }) {
-    return new Path()
+    return Path()
       ..addRRect(borderRadius.resolve(textDirection).toRRect(rect).deflate(borderSide.width));
   }
 
   @override
   Path getOuterPath(Rect rect, { TextDirection textDirection }) {
-    return new Path()
+    return Path()
       ..addRRect(borderRadius.resolve(textDirection).toRRect(rect));
   }
 
   Path _gapBorderPath(Canvas canvas, RRect center, double start, double extent) {
-    final Rect tlCorner = new Rect.fromLTWH(
+    final Rect tlCorner = Rect.fromLTWH(
       center.left,
       center.top,
       center.tlRadiusX * 2.0,
       center.tlRadiusY * 2.0,
     );
-    final Rect trCorner = new Rect.fromLTWH(
+    final Rect trCorner = Rect.fromLTWH(
       center.right - center.trRadiusX * 2.0,
       center.top,
       center.trRadiusX * 2.0,
       center.trRadiusY * 2.0,
     );
-    final Rect brCorner = new Rect.fromLTWH(
+    final Rect brCorner = Rect.fromLTWH(
       center.right - center.brRadiusX * 2.0,
       center.bottom - center.brRadiusY * 2.0,
       center.brRadiusX * 2.0,
       center.brRadiusY * 2.0,
     );
-    final Rect blCorner = new Rect.fromLTWH(
+    final Rect blCorner = Rect.fromLTWH(
       center.left,
       center.bottom - center.brRadiusY * 2.0,
       center.blRadiusX * 2.0,
@@ -397,7 +415,7 @@ class OutlineInputBorder extends InputBorder {
       ? math.asin(start / center.tlRadiusX)
       : math.pi / 2.0;
 
-    final Path path = new Path()
+    final Path path = Path()
       ..addArc(tlCorner, math.pi, tlCornerArcSweep)
       ..moveTo(center.left + center.tlRadiusX, center.top);
 
@@ -435,11 +453,13 @@ class OutlineInputBorder extends InputBorder {
   /// `gapStart - gapPadding` (assuming that the [textDirection] is [TextDirection.ltr]).
   /// The gap's width is `(gapPadding + gapExtent + gapPadding) * gapPercentage`.
   @override
-  void paint(Canvas canvas, Rect rect, {
-      double gapStart,
-      double gapExtent = 0.0,
-      double gapPercentage = 0.0,
-      TextDirection textDirection,
+  void paint(
+    Canvas canvas,
+    Rect rect, {
+    double gapStart,
+    double gapExtent = 0.0,
+    double gapPercentage = 0.0,
+    TextDirection textDirection,
   }) {
     assert(gapExtent != null);
     assert(gapPercentage >= 0.0 && gapPercentage <= 1.0);

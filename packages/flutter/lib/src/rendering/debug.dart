@@ -5,12 +5,14 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
+import 'object.dart';
+
 export 'package:flutter/foundation.dart' show debugPrint;
 
 // Any changes to this file should be reflected in the debugAssertAllRenderVarsUnset()
 // function below.
 
-const HSVColor _kDebugDefaultRepaintColor = const HSVColor.fromAHSV(0.4, 60.0, 1.0, 1.0);
+const HSVColor _kDebugDefaultRepaintColor = HSVColor.fromAHSV(0.4, 60.0, 1.0, 1.0);
 
 /// Causes each RenderBox to paint a box around its bounds, and some extra
 /// boxes, such as [RenderPadding], to draw construction lines.
@@ -81,10 +83,8 @@ bool debugPrintMarkNeedsPaintStacks = false;
 ///
 ///  * [debugProfilePaintsEnabled], which does something similar for
 ///    painting but using the timeline view.
-///
 ///  * [debugPrintRebuildDirtyWidgets], which does something similar for widgets
 ///    being rebuilt.
-///
 ///  * The discussion at [RendererBinding.drawFrame].
 bool debugPrintLayouts = false;
 
@@ -115,6 +115,25 @@ bool debugCheckIntrinsicSizes = false;
 ///  * [RepaintBoundary], which can be used to contain repaints when unchanged
 ///    areas are being excessively repainted.
 bool debugProfilePaintsEnabled = false;
+
+/// Signature for [debugOnProfilePaint] implementations.
+typedef ProfilePaintCallback = void Function(RenderObject renderObject);
+
+/// Callback invoked for every [RenderObject] painted each frame.
+///
+/// This callback is only invoked in debug builds.
+///
+/// See also:
+///
+///  * [debugProfilePaintsEnabled], which does something similar but adds
+///    [dart:developer.Timeline] events instead of invoking a callback.
+///  * [debugOnRebuildDirtyWidget], which does something similar for widgets
+///    being built.
+///  * [WidgetInspectorService], which uses the [debugOnProfilePaint]
+///    callback to generate aggregate profile statistics describing what paints
+///    occurred when the `ext.flutter.inspector.trackRepaintWidgets` service
+///    extension is enabled.
+ProfilePaintCallback debugOnProfilePaint;
 
 /// Setting to true will cause all clipping effects from the layer tree to be
 /// ignored.
@@ -154,11 +173,11 @@ bool debugDisablePhysicalShapeLayers = false;
 bool debugDisableOpacityLayers = false;
 
 void _debugDrawDoubleRect(Canvas canvas, Rect outerRect, Rect innerRect, Color color) {
-  final Path path = new Path()
+  final Path path = Path()
     ..fillType = PathFillType.evenOdd
     ..addRect(outerRect)
     ..addRect(innerRect);
-  final Paint paint = new Paint()
+  final Paint paint = Paint()
     ..color = color;
   canvas.drawPath(path, paint);
 }
@@ -173,7 +192,7 @@ void debugPaintPadding(Canvas canvas, Rect outerRect, Rect innerRect, { double o
       _debugDrawDoubleRect(canvas, outerRect, innerRect, const Color(0x900090FF));
       _debugDrawDoubleRect(canvas, innerRect.inflate(outlineWidth).intersect(outerRect), innerRect, const Color(0xFF0090FF));
     } else {
-      final Paint paint = new Paint()
+      final Paint paint = Paint()
         ..color = const Color(0x90909090);
       canvas.drawRect(outerRect, paint);
     }
@@ -205,8 +224,9 @@ bool debugAssertAllRenderVarsUnset(String reason, { bool debugCheckIntrinsicSize
         debugPrintMarkNeedsPaintStacks ||
         debugPrintLayouts ||
         debugCheckIntrinsicSizes != debugCheckIntrinsicSizesOverride ||
-        debugProfilePaintsEnabled) {
-      throw new FlutterError(reason);
+        debugProfilePaintsEnabled ||
+        debugOnProfilePaint != null) {
+      throw FlutterError(reason);
     }
     return true;
   }());

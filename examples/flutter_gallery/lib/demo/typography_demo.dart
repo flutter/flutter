@@ -23,20 +23,20 @@ class TextStyleItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final TextStyle nameStyle = theme.textTheme.caption.copyWith(color: theme.textTheme.caption.color);
-    return new Padding(
+    return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 16.0),
-      child: new Row(
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          new SizedBox(
+          SizedBox(
             width: 72.0,
-            child: new Text(name, style: nameStyle)
+            child: Text(name, style: nameStyle),
           ),
-          new Expanded(
-            child: new Text(text, style: style.copyWith(height: 1.0))
-          )
-        ]
-      )
+          Expanded(
+            child: Text(text, style: style.copyWith(height: 1.0)),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -48,32 +48,32 @@ class TypographyDemo extends StatelessWidget {
   Widget build(BuildContext context) {
     final TextTheme textTheme = Theme.of(context).textTheme;
     final List<Widget> styleItems = <Widget>[
-      new TextStyleItem(name: 'Display 3', style: textTheme.display3, text: 'Regular 56sp'),
-      new TextStyleItem(name: 'Display 2', style: textTheme.display2, text: 'Regular 45sp'),
-      new TextStyleItem(name: 'Display 1', style: textTheme.display1, text: 'Regular 34sp'),
-      new TextStyleItem(name: 'Headline', style: textTheme.headline, text: 'Regular 24sp'),
-      new TextStyleItem(name: 'Title', style: textTheme.title, text: 'Medium 20sp'),
-      new TextStyleItem(name: 'Subheading', style: textTheme.subhead, text: 'Regular 16sp'),
-      new TextStyleItem(name: 'Body 2', style: textTheme.body2, text: 'Medium 14sp'),
-      new TextStyleItem(name: 'Body 1', style: textTheme.body1, text: 'Regular 14sp'),
-      new TextStyleItem(name: 'Caption', style: textTheme.caption, text: 'Regular 12sp'),
-      new TextStyleItem(name: 'Button', style: textTheme.button, text: 'MEDIUM (ALL CAPS) 14sp')
+      TextStyleItem(name: 'Display 3', style: textTheme.display3, text: 'Regular 56sp'),
+      TextStyleItem(name: 'Display 2', style: textTheme.display2, text: 'Regular 45sp'),
+      TextStyleItem(name: 'Display 1', style: textTheme.display1, text: 'Regular 34sp'),
+      TextStyleItem(name: 'Headline', style: textTheme.headline, text: 'Regular 24sp'),
+      TextStyleItem(name: 'Title', style: textTheme.title, text: 'Medium 20sp'),
+      TextStyleItem(name: 'Subheading', style: textTheme.subhead, text: 'Regular 16sp'),
+      TextStyleItem(name: 'Body 2', style: textTheme.body2, text: 'Medium 14sp'),
+      TextStyleItem(name: 'Body 1', style: textTheme.body1, text: 'Regular 14sp'),
+      TextStyleItem(name: 'Caption', style: textTheme.caption, text: 'Regular 12sp'),
+      TextStyleItem(name: 'Button', style: textTheme.button, text: 'MEDIUM (ALL CAPS) 14sp'),
     ];
 
     if (MediaQuery.of(context).size.width > 500.0) {
-      styleItems.insert(0, new TextStyleItem(
+      styleItems.insert(0, TextStyleItem(
         name: 'Display 4',
         style: textTheme.display4,
-        text: 'Light 112sp'
+        text: 'Light 112sp',
       ));
     }
 
-    return new Scaffold(
-      appBar: new AppBar(title: const Text('Typography')),
-      body: new SafeArea(
+    return Scaffold(
+      appBar: AppBar(title: const Text('Typography')),
+      body: SafeArea(
         top: false,
         bottom: false,
-        child: new ListView(children: styleItems),
+        child: ListView(children: styleItems),
       ),
     );
   }

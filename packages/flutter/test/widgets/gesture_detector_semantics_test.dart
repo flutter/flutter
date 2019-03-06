@@ -10,25 +10,25 @@ import 'semantics_tester.dart';
 
 void main() {
   testWidgets('Vertical gesture detector has up/down actions', (WidgetTester tester) async {
-    final SemanticsTester semantics = new SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
 
     int callCount = 0;
-    final GlobalKey detectorKey = new GlobalKey();
+    final GlobalKey detectorKey = GlobalKey();
 
     await tester.pumpWidget(
-      new Center(
-        child: new GestureDetector(
+      Center(
+        child: GestureDetector(
           key: detectorKey,
           onVerticalDragStart: (DragStartDetails _) {
             callCount += 1;
           },
-          child: new Container(),
+          child: Container(),
         ),
       )
     );
 
     expect(semantics, includesNodeWith(
-        actions: <SemanticsAction>[SemanticsAction.scrollUp, SemanticsAction.scrollDown])
+        actions: <SemanticsAction>[SemanticsAction.scrollUp, SemanticsAction.scrollDown]),
     );
 
     final int detectorId = detectorKey.currentContext.findRenderObject().debugSemantics.id;
@@ -44,25 +44,25 @@ void main() {
   });
 
   testWidgets('Horizontal gesture detector has up/down actions', (WidgetTester tester) async {
-    final SemanticsTester semantics = new SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
 
     int callCount = 0;
-    final GlobalKey detectorKey = new GlobalKey();
+    final GlobalKey detectorKey = GlobalKey();
 
     await tester.pumpWidget(
-        new Center(
-          child: new GestureDetector(
+        Center(
+          child: GestureDetector(
             key: detectorKey,
             onHorizontalDragStart: (DragStartDetails _) {
               callCount += 1;
             },
-            child: new Container(),
+            child: Container(),
           ),
         )
     );
 
     expect(semantics, includesNodeWith(
-        actions: <SemanticsAction>[SemanticsAction.scrollLeft, SemanticsAction.scrollRight])
+        actions: <SemanticsAction>[SemanticsAction.scrollLeft, SemanticsAction.scrollRight]),
     );
 
     final int detectorId = detectorKey.currentContext.findRenderObject().debugSemantics.id;

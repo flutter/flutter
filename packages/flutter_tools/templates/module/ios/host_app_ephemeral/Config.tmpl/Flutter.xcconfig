@@ -1,0 +1,2 @@
+#include "../Flutter/Generated.xcconfig"
+ENABLE_BITCODE=NO

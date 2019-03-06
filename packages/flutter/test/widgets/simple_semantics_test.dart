@@ -13,23 +13,23 @@ import 'semantics_tester.dart';
 
 void main() {
   testWidgets('Simple tree is simple', (WidgetTester tester) async {
-    final SemanticsTester semantics = new SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
       const Center(
-          child: const Text('Hello!', textDirection: TextDirection.ltr)
+          child: Text('Hello!', textDirection: TextDirection.ltr),
       ),
     );
 
-    expect(semantics, hasSemantics(new TestSemantics.root(
+    expect(semantics, hasSemantics(TestSemantics.root(
       children: <TestSemantics>[
-        new TestSemantics.rootChild(
+        TestSemantics.rootChild(
           id: 1,
           label: 'Hello!',
           textDirection: TextDirection.ltr,
-          rect: new Rect.fromLTRB(0.0, 0.0, 84.0, 14.0),
-          transform: new Matrix4.translationValues(358.0, 293.0, 0.0),
-        )
+          rect: Rect.fromLTRB(0.0, 0.0, 84.0, 14.0),
+          transform: Matrix4.translationValues(358.0, 293.0, 0.0),
+        ),
       ],
     )));
 
@@ -37,14 +37,14 @@ void main() {
   });
 
   testWidgets('Simple tree is simple - material', (WidgetTester tester) async {
-    final SemanticsTester semantics = new SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
 
     // Not using Text widget because of https://github.com/flutter/flutter/issues/12357.
-    await tester.pumpWidget(new MaterialApp(
-      home: new Center(
-        child: new Semantics(
+    await tester.pumpWidget(MaterialApp(
+      home: Center(
+        child: Semantics(
           label: 'Hello!',
-          child: new Container(
+          child: Container(
             width: 10.0,
             height: 10.0,
           ),
@@ -52,24 +52,24 @@ void main() {
       ),
     ));
 
-    expect(semantics, hasSemantics(new TestSemantics.root(
+    expect(semantics, hasSemantics(TestSemantics.root(
       children: <TestSemantics>[
-        new TestSemantics.rootChild(
+        TestSemantics.rootChild(
           id: 2,
-          rect: new Rect.fromLTWH(0.0, 0.0, 800.0, 600.0),
+          rect: Rect.fromLTWH(0.0, 0.0, 800.0, 600.0),
           children: <TestSemantics>[
-            new TestSemantics(
+            TestSemantics(
               id: 3,
-              rect: new Rect.fromLTWH(0.0, 0.0, 800.0, 600.0),
+              rect: Rect.fromLTWH(0.0, 0.0, 800.0, 600.0),
               flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
               children: <TestSemantics>[
-                new TestSemantics(
+                TestSemantics(
                   id: 4,
                   label: 'Hello!',
                   textDirection: TextDirection.ltr,
-                  rect: new Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
-                  transform: new Matrix4.translationValues(395.0, 295.0, 0.0),
-                )
+                  rect: Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
+                  transform: Matrix4.translationValues(395.0, 295.0, 0.0),
+                ),
               ],
             ),
           ],

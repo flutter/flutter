@@ -4,16 +4,16 @@
 
 import 'dart:ui';
 
-import 'package:test/test.dart';
+import 'package:test_api/test_api.dart' hide TypeMatcher, isInstanceOf;
 
 void main() {
   test('Should be able to build and layout a paragraph', () {
-    final ParagraphBuilder builder = new ParagraphBuilder(new ParagraphStyle());
+    final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle());
     builder.addText('Hello');
     final Paragraph paragraph = builder.build();
     expect(paragraph, isNotNull);
 
-    paragraph.layout(new ParagraphConstraints(width: 800.0));
+    paragraph.layout(const ParagraphConstraints(width: 800.0));
     expect(paragraph.width, isNonZero);
     expect(paragraph.height, isNonZero);
   });

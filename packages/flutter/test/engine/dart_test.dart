@@ -4,7 +4,7 @@
 
 import 'dart:async';
 
-import 'package:test/test.dart';
+import 'package:test_api/test_api.dart' hide TypeMatcher, isInstanceOf;
 
 /// Verifies Dart semantics governed by flags set by Flutter tooling.
 void main() {
@@ -12,7 +12,7 @@ void main() {
     String greeting = 'hello';
     Future<void> changeGreeting() async {
       greeting += ' 1';
-      await new Future<void>.value(null);
+      await Future<void>.value(null);
       greeting += ' 2';
     }
     test('execution of async method starts synchronously', () async {

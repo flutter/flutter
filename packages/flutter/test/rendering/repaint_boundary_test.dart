@@ -3,25 +3,25 @@
 // found in the LICENSE file.
 
 import 'package:flutter/rendering.dart';
-import 'package:test/test.dart';
+import '../flutter_test_alternative.dart';
 
 import 'rendering_tester.dart';
 
 void main() {
   test('nested repaint boundaries - smoke test', () {
     RenderOpacity a, b, c;
-    a = new RenderOpacity(
+    a = RenderOpacity(
       opacity: 1.0,
-      child: new RenderRepaintBoundary(
-        child: b = new RenderOpacity(
+      child: RenderRepaintBoundary(
+        child: b = RenderOpacity(
           opacity: 1.0,
-          child: new RenderRepaintBoundary(
-            child: c = new RenderOpacity(
+          child: RenderRepaintBoundary(
+            child: c = RenderOpacity(
               opacity: 1.0
             )
-          )
+          ),
         )
-      )
+      ),
     );
     layout(a, phase: EnginePhase.flushSemantics);
     c.opacity = 0.9;
@@ -32,6 +32,23 @@ void main() {
     a.opacity = 0.7;
     b.opacity = 0.7;
     c.opacity = 0.7;
+    pumpFrame(phase: EnginePhase.flushSemantics);
+  });
+
+  test('Repaint boundary can get new parent after markNeedsCompositingBitsUpdate', () {
+    // Regression test for https://github.com/flutter/flutter/issues/24029.
+
+    final RenderRepaintBoundary repaintBoundary = RenderRepaintBoundary();
+    layout(repaintBoundary, phase: EnginePhase.flushSemantics);
+
+    repaintBoundary.markNeedsCompositingBitsUpdate();
+
+    renderer.renderView.child = null;
+    final RenderPadding padding = RenderPadding(
+      padding: const EdgeInsets.all(50),
+    );
+    renderer.renderView.child = padding;
+    padding.child = repaintBoundary;
     pumpFrame(phase: EnginePhase.flushSemantics);
   });
 }

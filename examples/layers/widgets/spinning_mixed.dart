@@ -9,7 +9,7 @@ import '../rendering/src/solid_color_box.dart';
 
 // Solid colour, RenderObject version
 void addFlexChildSolidColor(RenderFlex parent, Color backgroundColor, { int flex = 0 }) {
-  final RenderSolidColorBox child = new RenderSolidColorBox(backgroundColor);
+  final RenderSolidColorBox child = RenderSolidColorBox(backgroundColor);
   parent.add(child);
   final FlexParentData childParentData = child.parentData;
   childParentData.flex = flex;
@@ -23,37 +23,37 @@ class Rectangle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new Expanded(
-      child: new Container(
+    return Expanded(
+      child: Container(
         color: color,
-      )
+      ),
     );
   }
 }
 
 double value;
 RenderObjectToWidgetElement<RenderBox> element;
-BuildOwner owner = new BuildOwner();
+BuildOwner owner = BuildOwner();
 void attachWidgetTreeToRenderTree(RenderProxyBox container) {
-  element = new RenderObjectToWidgetAdapter<RenderBox>(
+  element = RenderObjectToWidgetAdapter<RenderBox>(
     container: container,
-    child: new Directionality(
+    child: Directionality(
       textDirection: TextDirection.ltr,
-      child: new Container(
+      child: Container(
         height: 300.0,
-        child: new Column(
+        child: Column(
           children: <Widget>[
-            const Rectangle(const Color(0xFF00FFFF)),
-            new Material(
-              child: new Container(
+            const Rectangle(Color(0xFF00FFFF)),
+            Material(
+              child: Container(
                 padding: const EdgeInsets.all(10.0),
                 margin: const EdgeInsets.all(10.0),
-                child: new Row(
+                child: Row(
                   children: <Widget>[
-                    new RaisedButton(
-                      child: new Row(
+                    RaisedButton(
+                      child: Row(
                         children: <Widget>[
-                          new Image.network('https://flutter.io/images/favicon.png'),
+                          Image.network('https://flutter.io/images/favicon.png'),
                           const Text('PRESS ME'),
                         ],
                       ),
@@ -62,13 +62,13 @@ void attachWidgetTreeToRenderTree(RenderProxyBox container) {
                         attachWidgetTreeToRenderTree(container);
                       },
                     ),
-                    new CircularProgressIndicator(value: value),
+                    CircularProgressIndicator(value: value),
                   ],
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                 ),
               ),
             ),
-            const Rectangle(const Color(0xFFFFFF00)),
+            const Rectangle(Color(0xFFFFFF00)),
           ],
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
         ),
@@ -92,16 +92,16 @@ void rotate(Duration timeStamp) {
 
 void main() {
   final WidgetsBinding binding = WidgetsFlutterBinding.ensureInitialized();
-  final RenderProxyBox proxy = new RenderProxyBox();
+  final RenderProxyBox proxy = RenderProxyBox();
   attachWidgetTreeToRenderTree(proxy);
 
-  final RenderFlex flexRoot = new RenderFlex(direction: Axis.vertical);
+  final RenderFlex flexRoot = RenderFlex(direction: Axis.vertical);
   addFlexChildSolidColor(flexRoot, const Color(0xFFFF00FF), flex: 1);
   flexRoot.add(proxy);
   addFlexChildSolidColor(flexRoot, const Color(0xFF0000FF), flex: 1);
 
-  transformBox = new RenderTransform(child: flexRoot, transform: new Matrix4.identity(), alignment: Alignment.center);
-  final RenderPadding root = new RenderPadding(padding: const EdgeInsets.all(80.0), child: transformBox);
+  transformBox = RenderTransform(child: flexRoot, transform: Matrix4.identity(), alignment: Alignment.center);
+  final RenderPadding root = RenderPadding(padding: const EdgeInsets.all(80.0), child: transformBox);
 
   binding.renderView.child = root;
   binding.addPersistentFrameCallback(rotate);

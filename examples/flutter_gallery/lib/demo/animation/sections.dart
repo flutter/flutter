@@ -6,10 +6,10 @@
 
 import 'package:flutter/material.dart';
 
-const Color _mariner = const Color(0xFF3B5F8F);
-const Color _mediumPurple = const Color(0xFF8266D4);
-const Color _tomato = const Color(0xFFF95B57);
-const Color _mySin = const Color(0xFFF3A646);
+const Color _mariner = Color(0xFF3B5F8F);
+const Color _mediumPurple = Color(0xFF8266D4);
+const Color _tomato = Color(0xFFF95B57);
+const Color _mySin = Color(0xFFF3A646);
 
 const String _kGalleryAssetsPackage = 'flutter_gallery_assets';
 
@@ -58,50 +58,50 @@ class Section {
 // the const vars like _eyeglassesDetail and insert a variety of titles and
 // image SectionDetails in the allSections list.
 
-const SectionDetail _eyeglassesDetail = const SectionDetail(
+const SectionDetail _eyeglassesDetail = SectionDetail(
   imageAsset: 'products/sunnies.png',
   imageAssetPackage: _kGalleryAssetsPackage,
   title: 'Flutter enables interactive animation',
   subtitle: '3K views - 5 days',
 );
 
-const SectionDetail _eyeglassesImageDetail = const SectionDetail(
+const SectionDetail _eyeglassesImageDetail = SectionDetail(
   imageAsset: 'products/sunnies.png',
   imageAssetPackage: _kGalleryAssetsPackage,
 );
 
-const SectionDetail _seatingDetail = const SectionDetail(
+const SectionDetail _seatingDetail = SectionDetail(
   imageAsset: 'products/table.png',
   imageAssetPackage: _kGalleryAssetsPackage,
   title: 'Flutter enables interactive animation',
   subtitle: '3K views - 5 days',
 );
 
-const SectionDetail _seatingImageDetail = const SectionDetail(
+const SectionDetail _seatingImageDetail = SectionDetail(
   imageAsset: 'products/table.png',
   imageAssetPackage: _kGalleryAssetsPackage,
 );
 
-const SectionDetail _decorationDetail = const SectionDetail(
+const SectionDetail _decorationDetail = SectionDetail(
   imageAsset: 'products/earrings.png',
   imageAssetPackage: _kGalleryAssetsPackage,
   title: 'Flutter enables interactive animation',
   subtitle: '3K views - 5 days',
 );
 
-const SectionDetail _decorationImageDetail = const SectionDetail(
+const SectionDetail _decorationImageDetail = SectionDetail(
   imageAsset: 'products/earrings.png',
   imageAssetPackage: _kGalleryAssetsPackage,
 );
 
-const SectionDetail _protectionDetail = const SectionDetail(
+const SectionDetail _protectionDetail = SectionDetail(
   imageAsset: 'products/hat.png',
   imageAssetPackage: _kGalleryAssetsPackage,
   title: 'Flutter enables interactive animation',
   subtitle: '3K views - 5 days',
 );
 
-const SectionDetail _protectionImageDetail = const SectionDetail(
+const SectionDetail _protectionImageDetail = SectionDetail(
   imageAsset: 'products/hat.png',
   imageAssetPackage: _kGalleryAssetsPackage,
 );
@@ -113,7 +113,7 @@ final List<Section> allSections = <Section>[
     rightColor: _mariner,
     backgroundAsset: 'products/sunnies.png',
     backgroundAssetPackage: _kGalleryAssetsPackage,
-    details: const <SectionDetail>[
+    details: <SectionDetail>[
       _eyeglassesDetail,
       _eyeglassesImageDetail,
       _eyeglassesDetail,
@@ -128,7 +128,7 @@ final List<Section> allSections = <Section>[
     rightColor: _mediumPurple,
     backgroundAsset: 'products/table.png',
     backgroundAssetPackage: _kGalleryAssetsPackage,
-    details: const <SectionDetail>[
+    details: <SectionDetail>[
       _seatingDetail,
       _seatingImageDetail,
       _seatingDetail,
@@ -143,7 +143,7 @@ final List<Section> allSections = <Section>[
     rightColor: _tomato,
     backgroundAsset: 'products/earrings.png',
     backgroundAssetPackage: _kGalleryAssetsPackage,
-    details: const <SectionDetail>[
+    details: <SectionDetail>[
       _decorationDetail,
       _decorationImageDetail,
       _decorationDetail,
@@ -158,7 +158,7 @@ final List<Section> allSections = <Section>[
     rightColor: _tomato,
     backgroundAsset: 'products/hat.png',
     backgroundAssetPackage: _kGalleryAssetsPackage,
-    details: const <SectionDetail>[
+    details: <SectionDetail>[
       _protectionDetail,
       _protectionImageDetail,
       _protectionDetail,

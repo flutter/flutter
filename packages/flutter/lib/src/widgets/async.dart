@@ -12,6 +12,7 @@ import 'framework.dart';
 
 // Examples can assume:
 // dynamic _lot;
+// Future<String> _calculation;
 
 /// Base class for widgets that build themselves based on interaction with
 /// a specified [Stream].
@@ -35,14 +36,14 @@ import 'framework.dart';
 /// termination by overriding [afterDone]. Finally, the summary may be updated
 /// on change of stream by overriding [afterDisconnected] and [afterConnected].
 ///
-/// [T] is the type of stream events.
+/// `T` is the type of stream events.
 ///
-/// [S] is the type of interaction summary.
+/// `S` is the type of interaction summary.
 ///
 /// See also:
 ///
-///  * [StreamBuilder], which is specialized to the case where only the most
-///  recent interaction is needed for widget building.
+///  * [StreamBuilder], which is specialized for the case where only the most
+///    recent interaction is needed for widget building.
 abstract class StreamBuilderBase<T, S> extends StatefulWidget {
   /// Creates a [StreamBuilderBase] connected to the specified [stream].
   const StreamBuilderBase({ Key key, this.stream }) : super(key: key);
@@ -93,7 +94,7 @@ abstract class StreamBuilderBase<T, S> extends StatefulWidget {
   Widget build(BuildContext context, S currentSummary);
 
   @override
-  State<StreamBuilderBase<T, S>> createState() => new _StreamBuilderBaseState<T, S>();
+  State<StreamBuilderBase<T, S>> createState() => _StreamBuilderBaseState<T, S>();
 }
 
 /// State for [StreamBuilderBase].
@@ -160,8 +161,8 @@ class _StreamBuilderBaseState<T, S> extends State<StreamBuilderBase<T, S>> {
 ///
 /// See also:
 ///
-/// * [AsyncSnapshot], which augments a connection state with information
-/// received from the asynchronous computation.
+///  * [AsyncSnapshot], which augments a connection state with information
+///    received from the asynchronous computation.
 enum ConnectionState {
   /// Not currently connected to any asynchronous computation.
   ///
@@ -186,17 +187,17 @@ enum ConnectionState {
 ///
 /// See also:
 ///
-/// * [StreamBuilder], which builds itself based on a snapshot from interacting
-///   with a [Stream].
-/// * [FutureBuilder], which builds itself based on a snapshot from interacting
-///   with a [Future].
+///  * [StreamBuilder], which builds itself based on a snapshot from interacting
+///    with a [Stream].
+///  * [FutureBuilder], which builds itself based on a snapshot from interacting
+///    with a [Future].
 @immutable
 class AsyncSnapshot<T> {
   /// Creates an [AsyncSnapshot] with the specified [connectionState],
   /// and optionally either [data] or [error] (but not both).
   const AsyncSnapshot._(this.connectionState, this.data, this.error)
-      : assert(connectionState != null),
-        assert(!(data != null && error != null));
+    : assert(connectionState != null),
+      assert(!(data != null && error != null));
 
   /// Creates an [AsyncSnapshot] in [ConnectionState.none] with null data and error.
   const AsyncSnapshot.nothing() : this._(ConnectionState.none, null, null);
@@ -230,7 +231,7 @@ class AsyncSnapshot<T> {
       return data;
     if (hasError)
       throw error;
-    throw new StateError('Snapshot has neither data nor error');
+    throw StateError('Snapshot has neither data nor error');
   }
 
   /// The latest error object received by the asynchronous computation.
@@ -244,7 +245,7 @@ class AsyncSnapshot<T> {
   ///
   /// The [data] and [error] fields persist unmodified, even if the new state is
   /// [ConnectionState.none].
-  AsyncSnapshot<T> inState(ConnectionState state) => new AsyncSnapshot<T>._(state, data, error);
+  AsyncSnapshot<T> inState(ConnectionState state) => AsyncSnapshot<T>._(state, data, error);
 
   /// Returns whether this snapshot contains a non-null [data] value.
   ///
@@ -284,11 +285,11 @@ class AsyncSnapshot<T> {
 ///
 /// See also:
 ///
-/// * [StreamBuilder], which delegates to an [AsyncWidgetBuilder] to build
-/// itself based on a snapshot from interacting with a [Stream].
-/// * [FutureBuilder], which delegates to an [AsyncWidgetBuilder] to build
-/// itself based on a snapshot from interacting with a [Future].
-typedef Widget AsyncWidgetBuilder<T>(BuildContext context, AsyncSnapshot<T> snapshot);
+///  * [StreamBuilder], which delegates to an [AsyncWidgetBuilder] to build
+///    itself based on a snapshot from interacting with a [Stream].
+///  * [FutureBuilder], which delegates to an [AsyncWidgetBuilder] to build
+///    itself based on a snapshot from interacting with a [Future].
+typedef AsyncWidgetBuilder<T> = Widget Function(BuildContext context, AsyncSnapshot<T> snapshot);
 
 /// Widget that builds itself based on the latest snapshot of interaction with
 /// a [Stream].
@@ -332,70 +333,84 @@ typedef Widget AsyncWidgetBuilder<T>(BuildContext context, AsyncSnapshot<T> snap
 /// state is `ConnectionState.active`.
 ///
 /// The initial snapshot data can be controlled by specifying [initialData].
-/// You would use this facility to ensure that if the [builder] is invoked
-/// before the first event arrives on the stream, the snapshot carries data of
-/// your choice rather than the default null value.
+/// This should be used to ensure that the first frame has the expected value,
+/// as the builder will always be called before the stream listener has a chance
+/// to be processed.
 ///
-/// See also:
-///
-/// * [StreamBuilderBase], which supports widget building based on a computation
-/// that spans all interactions made with the stream.
-///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// This sample shows a [StreamBuilder] configuring a text label to show the
 /// latest bid received for a lot in an auction. Assume the `_lot` field is
 /// set by a selector elsewhere in the UI.
 ///
 /// ```dart
-/// new StreamBuilder<int>(
+/// StreamBuilder<int>(
 ///   stream: _lot?.bids, // a Stream<int> or null
 ///   builder: (BuildContext context, AsyncSnapshot<int> snapshot) {
 ///     if (snapshot.hasError)
-///       return new Text('Error: ${snapshot.error}');
+///       return Text('Error: ${snapshot.error}');
 ///     switch (snapshot.connectionState) {
-///       case ConnectionState.none: return new Text('Select lot');
-///       case ConnectionState.waiting: return new Text('Awaiting bids...');
-///       case ConnectionState.active: return new Text('\$${snapshot.data}');
-///       case ConnectionState.done: return new Text('\$${snapshot.data} (closed)');
+///       case ConnectionState.none: return Text('Select lot');
+///       case ConnectionState.waiting: return Text('Awaiting bids...');
+///       case ConnectionState.active: return Text('\$${snapshot.data}');
+///       case ConnectionState.done: return Text('\$${snapshot.data} (closed)');
 ///     }
+///     return null; // unreachable
 ///   },
 /// )
 /// ```
+/// {@end-tool}
+///
+/// See also:
+///
+///  * [ValueListenableBuilder], which wraps a [ValueListenable] instead of a
+///    [Stream].
+///  * [StreamBuilderBase], which supports widget building based on a computation
+///    that spans all interactions made with the stream.
+// TODO(ianh): remove unreachable code above once https://github.com/dart-lang/linter/issues/1139 is fixed
 class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
   /// Creates a new [StreamBuilder] that builds itself based on the latest
   /// snapshot of interaction with the specified [stream] and whose build
-  /// strategy is given by [builder]. The [initialData] is used to create the
-  /// initial snapshot. It is null by default.
+  /// strategy is given by [builder].
+  ///
+  /// The [initialData] is used to create the initial snapshot.
+  ///
+  /// The [builder] must not be null.
   const StreamBuilder({
     Key key,
     this.initialData,
     Stream<T> stream,
-    @required this.builder
-  })
-      : assert(builder != null),
-        super(key: key, stream: stream);
+    @required this.builder,
+  }) : assert(builder != null),
+       super(key: key, stream: stream);
 
-  /// The build strategy currently used by this builder. Cannot be null.
+  /// The build strategy currently used by this builder.
   final AsyncWidgetBuilder<T> builder;
 
-  /// The data that will be used to create the initial snapshot. Null by default.
+  /// The data that will be used to create the initial snapshot.
+  ///
+  /// Providing this value (presumably obtained synchronously somehow when the
+  /// [Stream] was created) ensures that the first frame will show useful data.
+  /// Otherwise, the first frame will be built with the value null, regardless
+  /// of whether a value is available on the stream: since streams are
+  /// asynchronous, no events from the stream can be obtained before the initial
+  /// build.
   final T initialData;
 
   @override
-  AsyncSnapshot<T> initial() => new AsyncSnapshot<T>.withData(ConnectionState.none, initialData);
+  AsyncSnapshot<T> initial() => AsyncSnapshot<T>.withData(ConnectionState.none, initialData);
 
   @override
   AsyncSnapshot<T> afterConnected(AsyncSnapshot<T> current) => current.inState(ConnectionState.waiting);
 
   @override
   AsyncSnapshot<T> afterData(AsyncSnapshot<T> current, T data) {
-    return new AsyncSnapshot<T>.withData(ConnectionState.active, data);
+    return AsyncSnapshot<T>.withData(ConnectionState.active, data);
   }
 
   @override
   AsyncSnapshot<T> afterError(AsyncSnapshot<T> current, Object error) {
-    return new AsyncSnapshot<T>.withError(ConnectionState.active, error);
+    return AsyncSnapshot<T>.withError(ConnectionState.active, error);
   }
 
   @override
@@ -411,11 +426,30 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
 /// Widget that builds itself based on the latest snapshot of interaction with
 /// a [Future].
 ///
+/// The [future] must have been obtained earlier, e.g. during [State.initState],
+/// [State.didUpdateConfig], or [State.didChangeDependencies]. It must not be
+/// created during the [State.build] or [StatelessWidget.build] method call when
+/// constructing the [FutureBuilder]. If the [future] is created at the same
+/// time as the [FutureBuilder], then every time the [FutureBuilder]'s parent is
+/// rebuilt, the asynchronous task will be restarted.
+///
+/// A general guideline is to assume that every `build` method could get called
+/// every frame, and to treat omitted calls as an optimization.
+///
+/// ## Timing
+///
 /// Widget rebuilding is scheduled by the completion of the future, using
 /// [State.setState], but is otherwise decoupled from the timing of the future.
 /// The [builder] callback is called at the discretion of the Flutter pipeline, and
 /// will thus receive a timing-dependent sub-sequence of the snapshots that
 /// represent the interaction with the future.
+///
+/// A side-effect of this is that providing a new but already-completed future
+/// to a [FutureBuilder] will result in a single frame in the
+/// [ConnectionState.waiting] state. This is because there is no way to
+/// synchronously determine that a [Future] has already completed.
+///
+/// ## Builder contract
 ///
 /// For a future that completes successfully with data, assuming [initialData]
 /// is null, the [builder] will be called with either both or only the latter of
@@ -451,28 +485,33 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
 /// `future?.asStream()`, except that snapshots with `ConnectionState.active`
 /// may appear for the latter, depending on how the stream is implemented.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// This sample shows a [FutureBuilder] configuring a text label to show the
 /// state of an asynchronous calculation returning a string. Assume the
 /// `_calculation` field is set by pressing a button elsewhere in the UI.
 ///
 /// ```dart
-/// new FutureBuilder<String>(
-///   future: _calculation, // a Future<String> or null
+/// FutureBuilder<String>(
+///   future: _calculation, // a previously-obtained Future<String> or null
 ///   builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
 ///     switch (snapshot.connectionState) {
-///       case ConnectionState.none: return new Text('Press button to start');
-///       case ConnectionState.waiting: return new Text('Awaiting result...');
-///       default:
+///       case ConnectionState.none:
+///         return Text('Press button to start.');
+///       case ConnectionState.active:
+///       case ConnectionState.waiting:
+///         return Text('Awaiting result...');
+///       case ConnectionState.done:
 ///         if (snapshot.hasError)
-///           return new Text('Error: ${snapshot.error}');
-///         else
-///           return new Text('Result: ${snapshot.data}');
+///           return Text('Error: ${snapshot.error}');
+///         return Text('Result: ${snapshot.data}');
 ///     }
+///     return null; // unreachable
 ///   },
 /// )
 /// ```
+/// {@end-tool}
+// TODO(ianh): remove unreachable code above once https://github.com/dart-lang/linter/issues/1141 is fixed
 class FutureBuilder<T> extends StatefulWidget {
   /// Creates a widget that builds itself based on the latest snapshot of
   /// interaction with a [Future].
@@ -482,7 +521,7 @@ class FutureBuilder<T> extends StatefulWidget {
     Key key,
     this.future,
     this.initialData,
-    @required this.builder
+    @required this.builder,
   }) : assert(builder != null),
        super(key: key);
 
@@ -525,7 +564,7 @@ class FutureBuilder<T> extends StatefulWidget {
   final T initialData;
 
   @override
-  State<FutureBuilder<T>> createState() => new _FutureBuilderState<T>();
+  State<FutureBuilder<T>> createState() => _FutureBuilderState<T>();
 }
 
 /// State for [FutureBuilder].
@@ -539,7 +578,7 @@ class _FutureBuilderState<T> extends State<FutureBuilder<T>> {
   @override
   void initState() {
     super.initState();
-    _snapshot = new AsyncSnapshot<T>.withData(ConnectionState.none, widget.initialData);
+    _snapshot = AsyncSnapshot<T>.withData(ConnectionState.none, widget.initialData);
     _subscribe();
   }
 
@@ -566,18 +605,18 @@ class _FutureBuilderState<T> extends State<FutureBuilder<T>> {
 
   void _subscribe() {
     if (widget.future != null) {
-      final Object callbackIdentity = new Object();
+      final Object callbackIdentity = Object();
       _activeCallbackIdentity = callbackIdentity;
       widget.future.then<void>((T data) {
         if (_activeCallbackIdentity == callbackIdentity) {
           setState(() {
-            _snapshot = new AsyncSnapshot<T>.withData(ConnectionState.done, data);
+            _snapshot = AsyncSnapshot<T>.withData(ConnectionState.done, data);
           });
         }
       }, onError: (Object error) {
         if (_activeCallbackIdentity == callbackIdentity) {
           setState(() {
-            _snapshot = new AsyncSnapshot<T>.withError(ConnectionState.done, error);
+            _snapshot = AsyncSnapshot<T>.withError(ConnectionState.done, error);
           });
         }
       });

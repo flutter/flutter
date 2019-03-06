@@ -13,12 +13,12 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: const IconTheme(
-          data: const IconThemeData(
-            color: const Color(0xFF666666),
-            opacity: 0.5
+        child: IconTheme(
+          data: IconThemeData(
+            color: Color(0xFF666666),
+            opacity: 0.5,
           ),
-          child: const Icon(const IconData(0xd0a0, fontFamily: 'Arial'))
+          child: Icon(IconData(0xd0a0, fontFamily: 'Arial')),
         ),
       ),
     );
@@ -30,8 +30,8 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: const Center(
-          child: const Icon(null),
+        child: Center(
+          child: Icon(null),
         ),
       ),
     );
@@ -44,8 +44,8 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: const Center(
-          child: const Icon(
+        child: Center(
+          child: Icon(
             null,
             size: 96.0,
           ),
@@ -61,10 +61,10 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: const Center(
-          child: const IconTheme(
-            data: const IconThemeData(size: 36.0),
-            child: const Icon(null),
+        child: Center(
+          child: IconTheme(
+            data: IconThemeData(size: 36.0),
+            child: Icon(null),
           ),
         ),
       ),
@@ -78,10 +78,10 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: const Center(
-          child: const IconTheme(
-            data: const IconThemeData(size: 36.0),
-            child: const Icon(
+        child: Center(
+          child: IconTheme(
+            data: IconThemeData(size: 36.0),
+            child: Icon(
               null,
               size: 48.0,
             ),
@@ -98,10 +98,10 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: const Center(
-          child: const IconTheme(
-            data: const IconThemeData(),
-            child: const Icon(null),
+        child: Center(
+          child: IconTheme(
+            data: IconThemeData(),
+            child: Icon(null),
           ),
         ),
       ),
@@ -116,8 +116,8 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: const Center(
-          child: const Icon(const IconData(0x41, fontFamily: 'Roboto')),
+        child: Center(
+          child: Icon(IconData(0x41, fontFamily: 'Roboto')),
         ),
       ),
     );
@@ -127,13 +127,13 @@ void main() {
   });
 
   testWidgets('Icon with semantic label', (WidgetTester tester) async {
-    final SemanticsTester semantics = new SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: const Center(
-          child: const Icon(
+        child: Center(
+          child: Icon(
             Icons.title,
             semanticLabel: 'a label',
           ),
@@ -147,13 +147,13 @@ void main() {
   });
 
   testWidgets('Null icon with semantic label', (WidgetTester tester) async {
-    final SemanticsTester semantics = new SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: const Center(
-          child: const Icon(
+        child: Center(
+          child: Icon(
             null,
             semanticLabel: 'a label',
           ),
@@ -170,8 +170,8 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: const Center(
-          child: const Icon(Icons.time_to_leave),
+        child: Center(
+          child: Icon(Icons.time_to_leave),
         ),
       ),
     );
@@ -181,8 +181,8 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: const Center(
-          child: const Icon(
+        child: Center(
+          child: Icon(
             Icons.time_to_leave,
             semanticLabel: 'a label',
           ),

@@ -4,7 +4,6 @@
 
 import 'dart:math' as math;
 import 'dart:ui' show SemanticsFlag;
-import 'dart:ui' as ui show window;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
@@ -31,7 +30,7 @@ class SemanticsDebugger extends StatefulWidget {
   final Widget child;
 
   @override
-  _SemanticsDebuggerState createState() => new _SemanticsDebuggerState();
+  _SemanticsDebuggerState createState() => _SemanticsDebuggerState();
 }
 
 class _SemanticsDebuggerState extends State<SemanticsDebugger> with WidgetsBindingObserver {
@@ -44,7 +43,7 @@ class _SemanticsDebuggerState extends State<SemanticsDebugger> with WidgetsBindi
     // static here because we might not be in a tree that's attached to that
     // binding. Instead, we should find a way to get to the PipelineOwner from
     // the BuildContext.
-    _client = new _SemanticsClient(WidgetsBinding.instance.pipelineOwner)
+    _client = _SemanticsClient(WidgetsBinding.instance.pipelineOwner)
       ..addListener(_update);
     WidgetsBinding.instance.addObserver(this);
   }
@@ -89,7 +88,7 @@ class _SemanticsDebuggerState extends State<SemanticsDebugger> with WidgetsBindi
   Offset _lastPointerDownLocation;
   void _handlePointerDown(PointerDownEvent event) {
     setState(() {
-      _lastPointerDownLocation = event.position * ui.window.devicePixelRatio;
+      _lastPointerDownLocation = event.position * WidgetsBinding.instance.window.devicePixelRatio;
     });
     // TODO(ianh): Use a gesture recognizer so that we can reset the
     // _lastPointerDownLocation when none of the other gesture recognizers win.
@@ -145,23 +144,23 @@ class _SemanticsDebuggerState extends State<SemanticsDebugger> with WidgetsBindi
 
   @override
   Widget build(BuildContext context) {
-    return new CustomPaint(
-      foregroundPainter: new _SemanticsDebuggerPainter(
+    return CustomPaint(
+      foregroundPainter: _SemanticsDebuggerPainter(
         _pipelineOwner,
         _client.generation,
         _lastPointerDownLocation, // in physical pixels
-        ui.window.devicePixelRatio,
+        WidgetsBinding.instance.window.devicePixelRatio,
       ),
-      child: new GestureDetector(
+      child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: _handleTap,
         onLongPress: _handleLongPress,
         onPanEnd: _handlePanEnd,
         excludeFromSemantics: true, // otherwise if you don't hit anything, we end up receiving it, which causes an infinite loop...
-        child: new Listener(
+        child: Listener(
           onPointerDown: _handlePointerDown,
           behavior: HitTestBehavior.opaque,
-          child: new IgnorePointer(
+          child: IgnorePointer(
             ignoringSemantics: false,
             child: widget.child,
           ),
@@ -259,10 +258,10 @@ String _getMessage(SemanticsNode node) {
   return message.trim();
 }
 
-const TextStyle _messageStyle = const TextStyle(
-  color: const Color(0xFF000000),
+const TextStyle _messageStyle = TextStyle(
+  color: Color(0xFF000000),
   fontSize: 10.0,
-  height: 0.8
+  height: 0.8,
 );
 
 void _paintMessage(Canvas canvas, SemanticsNode node) {
@@ -272,8 +271,8 @@ void _paintMessage(Canvas canvas, SemanticsNode node) {
   final Rect rect = node.rect;
   canvas.save();
   canvas.clipRect(rect);
-  final TextPainter textPainter = new TextPainter()
-    ..text = new TextSpan(
+  final TextPainter textPainter = TextPainter()
+    ..text = TextSpan(
       style: _messageStyle,
       text: message,
     )
@@ -302,19 +301,19 @@ void _paint(Canvas canvas, SemanticsNode node, int rank) {
     canvas.transform(node.transform.storage);
   final Rect rect = node.rect;
   if (!rect.isEmpty) {
-    final Color lineColor = new Color(0xFF000000 + new math.Random(node.id).nextInt(0xFFFFFF));
+    final Color lineColor = Color(0xFF000000 + math.Random(node.id).nextInt(0xFFFFFF));
     final Rect innerRect = rect.deflate(rank * 1.0);
     if (innerRect.isEmpty) {
-      final Paint fill = new Paint()
+      final Paint fill = Paint()
        ..color = lineColor
        ..style = PaintingStyle.fill;
       canvas.drawRect(rect, fill);
     } else {
-      final Paint fill = new Paint()
+      final Paint fill = Paint()
        ..color = const Color(0xFFFFFFFF)
        ..style = PaintingStyle.fill;
       canvas.drawRect(rect, fill);
-      final Paint line = new Paint()
+      final Paint line = Paint()
        ..strokeWidth = rank * 2.0
        ..color = lineColor
        ..style = PaintingStyle.stroke;
@@ -352,7 +351,7 @@ class _SemanticsDebuggerPainter extends CustomPainter {
     if (rootNode != null)
       _paint(canvas, rootNode, _findDepth(rootNode));
     if (pointerPosition != null) {
-      final Paint paint = new Paint();
+      final Paint paint = Paint();
       paint.color = const Color(0x7F0090FF);
       canvas.drawCircle(pointerPosition, 10.0 * devicePixelRatio, paint);
     }

@@ -3,21 +3,22 @@
 // found in the LICENSE file.
 
 import 'package:flutter/services.dart';
-import 'package:test/test.dart';
+import '../flutter_test_alternative.dart';
 
 void main() {
   group('TextInputConfiguration', () {
     test('sets expected defaults', () {
-      const TextInputConfiguration configuration = const TextInputConfiguration();
+      const TextInputConfiguration configuration = TextInputConfiguration();
       expect(configuration.inputType, TextInputType.text);
       expect(configuration.obscureText, false);
       expect(configuration.autocorrect, true);
       expect(configuration.actionLabel, null);
+      expect(configuration.textCapitalization, TextCapitalization.none);
       expect(configuration.keyboardAppearance, Brightness.light);
     });
 
     test('text serializes to JSON', () async {
-      const TextInputConfiguration configuration = const TextInputConfiguration(
+      const TextInputConfiguration configuration = TextInputConfiguration(
         inputType: TextInputType.text,
         obscureText: true,
         autocorrect: false,
@@ -25,7 +26,7 @@ void main() {
       );
       final Map<String, dynamic> json = configuration.toJson();
       expect(json['inputType'], <String, dynamic>{
-        'name': 'TextInputType.text', 'signed': null, 'decimal': null
+        'name': 'TextInputType.text', 'signed': null, 'decimal': null,
       });
       expect(json['obscureText'], true);
       expect(json['autocorrect'], false);
@@ -33,15 +34,15 @@ void main() {
     });
 
     test('number serializes to JSON', () async {
-      const TextInputConfiguration configuration = const TextInputConfiguration(
-        inputType: const TextInputType.numberWithOptions(decimal: true),
+      const TextInputConfiguration configuration = TextInputConfiguration(
+        inputType: TextInputType.numberWithOptions(decimal: true),
         obscureText: true,
         autocorrect: false,
         actionLabel: 'xyzzy',
       );
       final Map<String, dynamic> json = configuration.toJson();
       expect(json['inputType'], <String, dynamic>{
-        'name': 'TextInputType.number', 'signed': false, 'decimal': true
+        'name': 'TextInputType.number', 'signed': false, 'decimal': true,
       });
       expect(json['obscureText'], true);
       expect(json['autocorrect'], false);
@@ -51,12 +52,12 @@ void main() {
     test('basic structure', () async {
       const TextInputType text = TextInputType.text;
       const TextInputType number = TextInputType.number;
-      const TextInputType number2 = const TextInputType.numberWithOptions();
-      const TextInputType signed = const TextInputType.numberWithOptions(signed: true);
-      const TextInputType signed2 = const TextInputType.numberWithOptions(signed: true);
-      const TextInputType decimal = const TextInputType.numberWithOptions(decimal: true);
+      const TextInputType number2 = TextInputType.numberWithOptions();
+      const TextInputType signed = TextInputType.numberWithOptions(signed: true);
+      const TextInputType signed2 = TextInputType.numberWithOptions(signed: true);
+      const TextInputType decimal = TextInputType.numberWithOptions(decimal: true);
       const TextInputType signedDecimal =
-        const TextInputType.numberWithOptions(signed: true, decimal: true);
+        TextInputType.numberWithOptions(signed: true, decimal: true);
 
       expect(text.toString(), 'TextInputType(name: TextInputType.text, signed: null, decimal: null)');
       expect(number.toString(), 'TextInputType(name: TextInputType.number, signed: false, decimal: false)');

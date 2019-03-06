@@ -2,8 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:test/test.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
+
+import 'common.dart';
 
 void main() {
   group('grep', () {
@@ -12,7 +13,7 @@ void main() {
     });
 
     test('understands RegExp', () {
-      expect(grep(new RegExp('^b'), from: 'ab\nba'), <String>['ba']);
+      expect(grep(RegExp('^b'), from: 'ab\nba'), <String>['ba']);
     });
   });
 }

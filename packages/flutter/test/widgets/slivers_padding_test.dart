@@ -6,20 +6,20 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-Future<Null> test(WidgetTester tester, double offset, EdgeInsetsGeometry padding, AxisDirection axisDirection, TextDirection textDirection) {
+Future<void> test(WidgetTester tester, double offset, EdgeInsetsGeometry padding, AxisDirection axisDirection, TextDirection textDirection) {
   return tester.pumpWidget(
-    new Directionality(
+    Directionality(
       textDirection: textDirection,
-      child: new Viewport(
-        offset: new ViewportOffset.fixed(offset),
+      child: Viewport(
+        offset: ViewportOffset.fixed(offset),
         axisDirection: axisDirection,
         slivers: <Widget>[
-          const SliverToBoxAdapter(child: const SizedBox(width: 400.0, height: 400.0, child: const Text('before'))),
-          new SliverPadding(
+          const SliverToBoxAdapter(child: SizedBox(width: 400.0, height: 400.0, child: Text('before'))),
+          SliverPadding(
             padding: padding,
-            sliver: const SliverToBoxAdapter(child: const SizedBox(width: 400.0, height: 400.0, child: const Text('padded'))),
+            sliver: const SliverToBoxAdapter(child: SizedBox(width: 400.0, height: 400.0, child: Text('padded'))),
           ),
-          const SliverToBoxAdapter(child: const SizedBox(width: 400.0, height: 400.0, child: const Text('after'))),
+          const SliverToBoxAdapter(child: SizedBox(width: 400.0, height: 400.0, child: Text('after'))),
         ],
       ),
     ),
@@ -31,7 +31,7 @@ void verify(WidgetTester tester, List<Rect> answerKey) {
     (RenderBox target) {
       final Offset topLeft = target.localToGlobal(Offset.zero);
       final Offset bottomRight = target.localToGlobal(target.size.bottomRight(Offset.zero));
-      return new Rect.fromPoints(topLeft, bottomRight);
+      return Rect.fromPoints(topLeft, bottomRight);
     }
   ).toList();
   expect(testAnswers, equals(answerKey));
@@ -39,130 +39,130 @@ void verify(WidgetTester tester, List<Rect> answerKey) {
 
 void main() {
   testWidgets('Viewport+SliverPadding basic test (VISUAL)', (WidgetTester tester) async {
-    const EdgeInsets padding = const EdgeInsets.fromLTRB(25.0, 20.0, 15.0, 35.0);
+    const EdgeInsets padding = EdgeInsets.fromLTRB(25.0, 20.0, 15.0, 35.0);
     await test(tester, 0.0, padding, AxisDirection.down, TextDirection.ltr);
     expect(tester.renderObject<RenderBox>(find.byType(Viewport)).size, equals(const Size(800.0, 600.0)));
     verify(tester, <Rect>[
-      new Rect.fromLTWH(0.0, 0.0, 800.0, 400.0),
-      new Rect.fromLTWH(25.0, 420.0, 760.0, 400.0),
-      new Rect.fromLTWH(0.0, 855.0, 800.0, 400.0),
+      Rect.fromLTWH(0.0, 0.0, 800.0, 400.0),
+      Rect.fromLTWH(25.0, 420.0, 760.0, 400.0),
+      Rect.fromLTWH(0.0, 855.0, 800.0, 400.0),
     ]);
 
     await test(tester, 200.0, padding, AxisDirection.down, TextDirection.ltr);
     verify(tester, <Rect>[
-      new Rect.fromLTWH(0.0, -200.0, 800.0, 400.0),
-      new Rect.fromLTWH(25.0, 220.0, 760.0, 400.0),
-      new Rect.fromLTWH(0.0, 655.0, 800.0, 400.0),
+      Rect.fromLTWH(0.0, -200.0, 800.0, 400.0),
+      Rect.fromLTWH(25.0, 220.0, 760.0, 400.0),
+      Rect.fromLTWH(0.0, 655.0, 800.0, 400.0),
     ]);
 
     await test(tester, 390.0, padding, AxisDirection.down, TextDirection.ltr);
     verify(tester, <Rect>[
-      new Rect.fromLTWH(0.0, -390.0, 800.0, 400.0),
-      new Rect.fromLTWH(25.0, 30.0, 760.0, 400.0),
-      new Rect.fromLTWH(0.0, 465.0, 800.0, 400.0),
+      Rect.fromLTWH(0.0, -390.0, 800.0, 400.0),
+      Rect.fromLTWH(25.0, 30.0, 760.0, 400.0),
+      Rect.fromLTWH(0.0, 465.0, 800.0, 400.0),
     ]);
 
     await test(tester, 490.0, padding, AxisDirection.down, TextDirection.ltr);
     verify(tester, <Rect>[
-      new Rect.fromLTWH(0.0, -490.0, 800.0, 400.0),
-      new Rect.fromLTWH(25.0, -70.0, 760.0, 400.0),
-      new Rect.fromLTWH(0.0, 365.0, 800.0, 400.0),
+      Rect.fromLTWH(0.0, -490.0, 800.0, 400.0),
+      Rect.fromLTWH(25.0, -70.0, 760.0, 400.0),
+      Rect.fromLTWH(0.0, 365.0, 800.0, 400.0),
     ]);
 
     await test(tester, 10000.0, padding, AxisDirection.down, TextDirection.ltr);
     verify(tester, <Rect>[
-      new Rect.fromLTWH(0.0, -10000.0, 800.0, 400.0),
-      new Rect.fromLTWH(25.0, -9580.0, 760.0, 400.0),
-      new Rect.fromLTWH(0.0, -9145.0, 800.0, 400.0),
+      Rect.fromLTWH(0.0, -10000.0, 800.0, 400.0),
+      Rect.fromLTWH(25.0, -9580.0, 760.0, 400.0),
+      Rect.fromLTWH(0.0, -9145.0, 800.0, 400.0),
     ]);
   });
 
   testWidgets('Viewport+SliverPadding basic test (LTR)', (WidgetTester tester) async {
-    const EdgeInsetsDirectional padding = const EdgeInsetsDirectional.fromSTEB(25.0, 20.0, 15.0, 35.0);
+    const EdgeInsetsDirectional padding = EdgeInsetsDirectional.fromSTEB(25.0, 20.0, 15.0, 35.0);
     await test(tester, 0.0, padding, AxisDirection.down, TextDirection.ltr);
     expect(tester.renderObject<RenderBox>(find.byType(Viewport)).size, equals(const Size(800.0, 600.0)));
     verify(tester, <Rect>[
-      new Rect.fromLTWH(0.0, 0.0, 800.0, 400.0),
-      new Rect.fromLTWH(25.0, 420.0, 760.0, 400.0),
-      new Rect.fromLTWH(0.0, 855.0, 800.0, 400.0),
+      Rect.fromLTWH(0.0, 0.0, 800.0, 400.0),
+      Rect.fromLTWH(25.0, 420.0, 760.0, 400.0),
+      Rect.fromLTWH(0.0, 855.0, 800.0, 400.0),
     ]);
 
     await test(tester, 200.0, padding, AxisDirection.down, TextDirection.ltr);
     verify(tester, <Rect>[
-      new Rect.fromLTWH(0.0, -200.0, 800.0, 400.0),
-      new Rect.fromLTWH(25.0, 220.0, 760.0, 400.0),
-      new Rect.fromLTWH(0.0, 655.0, 800.0, 400.0),
+      Rect.fromLTWH(0.0, -200.0, 800.0, 400.0),
+      Rect.fromLTWH(25.0, 220.0, 760.0, 400.0),
+      Rect.fromLTWH(0.0, 655.0, 800.0, 400.0),
     ]);
 
     await test(tester, 390.0, padding, AxisDirection.down, TextDirection.ltr);
     verify(tester, <Rect>[
-      new Rect.fromLTWH(0.0, -390.0, 800.0, 400.0),
-      new Rect.fromLTWH(25.0, 30.0, 760.0, 400.0),
-      new Rect.fromLTWH(0.0, 465.0, 800.0, 400.0),
+      Rect.fromLTWH(0.0, -390.0, 800.0, 400.0),
+      Rect.fromLTWH(25.0, 30.0, 760.0, 400.0),
+      Rect.fromLTWH(0.0, 465.0, 800.0, 400.0),
     ]);
 
     await test(tester, 490.0, padding, AxisDirection.down, TextDirection.ltr);
     verify(tester, <Rect>[
-      new Rect.fromLTWH(0.0, -490.0, 800.0, 400.0),
-      new Rect.fromLTWH(25.0, -70.0, 760.0, 400.0),
-      new Rect.fromLTWH(0.0, 365.0, 800.0, 400.0),
+      Rect.fromLTWH(0.0, -490.0, 800.0, 400.0),
+      Rect.fromLTWH(25.0, -70.0, 760.0, 400.0),
+      Rect.fromLTWH(0.0, 365.0, 800.0, 400.0),
     ]);
 
     await test(tester, 10000.0, padding, AxisDirection.down, TextDirection.ltr);
     verify(tester, <Rect>[
-      new Rect.fromLTWH(0.0, -10000.0, 800.0, 400.0),
-      new Rect.fromLTWH(25.0, -9580.0, 760.0, 400.0),
-      new Rect.fromLTWH(0.0, -9145.0, 800.0, 400.0),
+      Rect.fromLTWH(0.0, -10000.0, 800.0, 400.0),
+      Rect.fromLTWH(25.0, -9580.0, 760.0, 400.0),
+      Rect.fromLTWH(0.0, -9145.0, 800.0, 400.0),
     ]);
   });
 
   testWidgets('Viewport+SliverPadding basic test (RTL)', (WidgetTester tester) async {
-    const EdgeInsetsDirectional padding = const EdgeInsetsDirectional.fromSTEB(25.0, 20.0, 15.0, 35.0);
+    const EdgeInsetsDirectional padding = EdgeInsetsDirectional.fromSTEB(25.0, 20.0, 15.0, 35.0);
     await test(tester, 0.0, padding, AxisDirection.down, TextDirection.rtl);
     expect(tester.renderObject<RenderBox>(find.byType(Viewport)).size, equals(const Size(800.0, 600.0)));
     verify(tester, <Rect>[
-      new Rect.fromLTWH(0.0, 0.0, 800.0, 400.0),
-      new Rect.fromLTWH(15.0, 420.0, 760.0, 400.0),
-      new Rect.fromLTWH(0.0, 855.0, 800.0, 400.0),
+      Rect.fromLTWH(0.0, 0.0, 800.0, 400.0),
+      Rect.fromLTWH(15.0, 420.0, 760.0, 400.0),
+      Rect.fromLTWH(0.0, 855.0, 800.0, 400.0),
     ]);
 
     await test(tester, 200.0, padding, AxisDirection.down, TextDirection.rtl);
     verify(tester, <Rect>[
-      new Rect.fromLTWH(0.0, -200.0, 800.0, 400.0),
-      new Rect.fromLTWH(15.0, 220.0, 760.0, 400.0),
-      new Rect.fromLTWH(0.0, 655.0, 800.0, 400.0),
+      Rect.fromLTWH(0.0, -200.0, 800.0, 400.0),
+      Rect.fromLTWH(15.0, 220.0, 760.0, 400.0),
+      Rect.fromLTWH(0.0, 655.0, 800.0, 400.0),
     ]);
 
     await test(tester, 390.0, padding, AxisDirection.down, TextDirection.rtl);
     verify(tester, <Rect>[
-      new Rect.fromLTWH(0.0, -390.0, 800.0, 400.0),
-      new Rect.fromLTWH(15.0, 30.0, 760.0, 400.0),
-      new Rect.fromLTWH(0.0, 465.0, 800.0, 400.0),
+      Rect.fromLTWH(0.0, -390.0, 800.0, 400.0),
+      Rect.fromLTWH(15.0, 30.0, 760.0, 400.0),
+      Rect.fromLTWH(0.0, 465.0, 800.0, 400.0),
     ]);
 
     await test(tester, 490.0, padding, AxisDirection.down, TextDirection.rtl);
     verify(tester, <Rect>[
-      new Rect.fromLTWH(0.0, -490.0, 800.0, 400.0),
-      new Rect.fromLTWH(15.0, -70.0, 760.0, 400.0),
-      new Rect.fromLTWH(0.0, 365.0, 800.0, 400.0),
+      Rect.fromLTWH(0.0, -490.0, 800.0, 400.0),
+      Rect.fromLTWH(15.0, -70.0, 760.0, 400.0),
+      Rect.fromLTWH(0.0, 365.0, 800.0, 400.0),
     ]);
 
     await test(tester, 10000.0, padding, AxisDirection.down, TextDirection.rtl);
     verify(tester, <Rect>[
-      new Rect.fromLTWH(0.0, -10000.0, 800.0, 400.0),
-      new Rect.fromLTWH(15.0, -9580.0, 760.0, 400.0),
-      new Rect.fromLTWH(0.0, -9145.0, 800.0, 400.0),
+      Rect.fromLTWH(0.0, -10000.0, 800.0, 400.0),
+      Rect.fromLTWH(15.0, -9580.0, 760.0, 400.0),
+      Rect.fromLTWH(0.0, -9145.0, 800.0, 400.0),
     ]);
   });
 
   testWidgets('Viewport+SliverPadding hit testing', (WidgetTester tester) async {
-    const EdgeInsets padding = const EdgeInsets.all(30.0);
+    const EdgeInsets padding = EdgeInsets.all(30.0);
     await test(tester, 350.0, padding, AxisDirection.down, TextDirection.ltr);
     expect(tester.renderObject<RenderBox>(find.byType(Viewport)).size, equals(const Size(800.0, 600.0)));
     verify(tester, <Rect>[
-      new Rect.fromLTWH(0.0, -350.0, 800.0, 400.0),
-      new Rect.fromLTWH(30.0, 80.0, 740.0, 400.0),
-      new Rect.fromLTWH(0.0, 510.0, 800.0, 400.0),
+      Rect.fromLTWH(0.0, -350.0, 800.0, 400.0),
+      Rect.fromLTWH(30.0, 80.0, 740.0, 400.0),
+      Rect.fromLTWH(0.0, 510.0, 800.0, 400.0),
     ]);
     HitTestResult result;
     result = tester.hitTestOnBinding(const Offset(10.0, 10.0));
@@ -178,13 +178,13 @@ void main() {
   });
 
   testWidgets('Viewport+SliverPadding hit testing up', (WidgetTester tester) async {
-    const EdgeInsets padding = const EdgeInsets.all(30.0);
+    const EdgeInsets padding = EdgeInsets.all(30.0);
     await test(tester, 350.0, padding, AxisDirection.up, TextDirection.ltr);
     expect(tester.renderObject<RenderBox>(find.byType(Viewport)).size, equals(const Size(800.0, 600.0)));
     verify(tester, <Rect>[
-      new Rect.fromLTWH(0.0, 600.0+350.0-400.0, 800.0, 400.0),
-      new Rect.fromLTWH(30.0, 600.0-80.0-400.0, 740.0, 400.0),
-      new Rect.fromLTWH(0.0, 600.0-510.0-400.0, 800.0, 400.0),
+      Rect.fromLTWH(0.0, 600.0+350.0-400.0, 800.0, 400.0),
+      Rect.fromLTWH(30.0, 600.0-80.0-400.0, 740.0, 400.0),
+      Rect.fromLTWH(0.0, 600.0-510.0-400.0, 800.0, 400.0),
     ]);
     HitTestResult result;
     result = tester.hitTestOnBinding(const Offset(10.0, 600.0-10.0));
@@ -200,13 +200,13 @@ void main() {
   });
 
   testWidgets('Viewport+SliverPadding hit testing left', (WidgetTester tester) async {
-    const EdgeInsets padding = const EdgeInsets.all(30.0);
+    const EdgeInsets padding = EdgeInsets.all(30.0);
     await test(tester, 350.0, padding, AxisDirection.left, TextDirection.ltr);
     expect(tester.renderObject<RenderBox>(find.byType(Viewport)).size, equals(const Size(800.0, 600.0)));
     verify(tester, <Rect>[
-      new Rect.fromLTWH(800.0+350.0-400.0, 0.0, 400.0, 600.0),
-      new Rect.fromLTWH(800.0-80.0-400.0, 30.0, 400.0, 540.0),
-      new Rect.fromLTWH(800.0-510.0-400.0, 0.0, 400.0, 600.0),
+      Rect.fromLTWH(800.0+350.0-400.0, 0.0, 400.0, 600.0),
+      Rect.fromLTWH(800.0-80.0-400.0, 30.0, 400.0, 540.0),
+      Rect.fromLTWH(800.0-510.0-400.0, 0.0, 400.0, 600.0),
     ]);
     HitTestResult result;
     result = tester.hitTestOnBinding(const Offset(800.0-10.0, 10.0));
@@ -222,13 +222,13 @@ void main() {
   });
 
   testWidgets('Viewport+SliverPadding hit testing right', (WidgetTester tester) async {
-    const EdgeInsets padding = const EdgeInsets.all(30.0);
+    const EdgeInsets padding = EdgeInsets.all(30.0);
     await test(tester, 350.0, padding, AxisDirection.right, TextDirection.ltr);
     expect(tester.renderObject<RenderBox>(find.byType(Viewport)).size, equals(const Size(800.0, 600.0)));
     verify(tester, <Rect>[
-      new Rect.fromLTWH(-350.0, 0.0, 400.0, 600.0),
-      new Rect.fromLTWH(80.0, 30.0, 400.0, 540.0),
-      new Rect.fromLTWH(510.0, 0.0, 400.0, 600.0),
+      Rect.fromLTWH(-350.0, 0.0, 400.0, 600.0),
+      Rect.fromLTWH(80.0, 30.0, 400.0, 540.0),
+      Rect.fromLTWH(510.0, 0.0, 400.0, 600.0),
     ]);
     HitTestResult result;
     result = tester.hitTestOnBinding(const Offset(10.0, 10.0));
@@ -245,13 +245,13 @@ void main() {
 
   testWidgets('Viewport+SliverPadding no child', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new Viewport(
-          offset: new ViewportOffset.fixed(0.0),
+        child: Viewport(
+          offset: ViewportOffset.fixed(0.0),
           slivers: const <Widget>[
-            const SliverPadding(padding: const EdgeInsets.all(100.0)),
-            const SliverToBoxAdapter(child: const SizedBox(width: 400.0, height: 400.0, child: const Text('x'))),
+            SliverPadding(padding: EdgeInsets.all(100.0)),
+            SliverToBoxAdapter(child: SizedBox(width: 400.0, height: 400.0, child: Text('x'))),
           ],
         ),
       ),
@@ -261,28 +261,28 @@ void main() {
 
   testWidgets('Viewport+SliverPadding changing padding', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new Viewport(
+        child: Viewport(
           axisDirection: AxisDirection.left,
-          offset: new ViewportOffset.fixed(0.0),
+          offset: ViewportOffset.fixed(0.0),
           slivers: const <Widget>[
-            const SliverPadding(padding: const EdgeInsets.fromLTRB(90.0, 1.0, 110.0, 2.0)),
-            const SliverToBoxAdapter(child: const SizedBox(width: 201.0, child: const Text('x'))),
+            SliverPadding(padding: EdgeInsets.fromLTRB(90.0, 1.0, 110.0, 2.0)),
+            SliverToBoxAdapter(child: SizedBox(width: 201.0, child: Text('x'))),
           ],
         ),
       ),
     );
     expect(tester.renderObject<RenderBox>(find.text('x')).localToGlobal(Offset.zero), const Offset(399.0, 0.0));
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new Viewport(
+        child: Viewport(
           axisDirection: AxisDirection.left,
-          offset: new ViewportOffset.fixed(0.0),
+          offset: ViewportOffset.fixed(0.0),
           slivers: const <Widget>[
-            const SliverPadding(padding: const EdgeInsets.fromLTRB(110.0, 1.0, 80.0, 2.0)),
-            const SliverToBoxAdapter(child: const SizedBox(width: 201.0, child: const Text('x'))),
+            SliverPadding(padding: EdgeInsets.fromLTRB(110.0, 1.0, 80.0, 2.0)),
+            SliverToBoxAdapter(child: SizedBox(width: 201.0, child: Text('x'))),
           ],
         ),
       ),
@@ -292,65 +292,65 @@ void main() {
 
   testWidgets('Viewport+SliverPadding changing direction', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new Viewport(
+        child: Viewport(
           axisDirection: AxisDirection.up,
-          offset: new ViewportOffset.fixed(0.0),
+          offset: ViewportOffset.fixed(0.0),
           slivers: const <Widget>[
-            const SliverPadding(padding: const EdgeInsets.fromLTRB(1.0, 2.0, 4.0, 8.0)),
+            SliverPadding(padding: EdgeInsets.fromLTRB(1.0, 2.0, 4.0, 8.0)),
           ],
         ),
       ),
     );
     expect(tester.renderObject<RenderSliverPadding>(find.byType(SliverPadding)).afterPadding, 2.0);
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new Viewport(
+        child: Viewport(
           axisDirection: AxisDirection.down,
-          offset: new ViewportOffset.fixed(0.0),
+          offset: ViewportOffset.fixed(0.0),
           slivers: const <Widget>[
-            const SliverPadding(padding: const EdgeInsets.fromLTRB(1.0, 2.0, 4.0, 8.0)),
+            SliverPadding(padding: EdgeInsets.fromLTRB(1.0, 2.0, 4.0, 8.0)),
           ],
         ),
       ),
     );
     expect(tester.renderObject<RenderSliverPadding>(find.byType(SliverPadding)).afterPadding, 8.0);
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new Viewport(
+        child: Viewport(
           axisDirection: AxisDirection.right,
-          offset: new ViewportOffset.fixed(0.0),
+          offset: ViewportOffset.fixed(0.0),
           slivers: const <Widget>[
-            const SliverPadding(padding: const EdgeInsets.fromLTRB(1.0, 2.0, 4.0, 8.0)),
+            SliverPadding(padding: EdgeInsets.fromLTRB(1.0, 2.0, 4.0, 8.0)),
           ],
         ),
       ),
     );
     expect(tester.renderObject<RenderSliverPadding>(find.byType(SliverPadding)).afterPadding, 4.0);
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new Viewport(
+        child: Viewport(
           axisDirection: AxisDirection.left,
-          offset: new ViewportOffset.fixed(0.0),
+          offset: ViewportOffset.fixed(0.0),
           slivers: const <Widget>[
-            const SliverPadding(padding: const EdgeInsets.fromLTRB(1.0, 2.0, 4.0, 8.0)),
+            SliverPadding(padding: EdgeInsets.fromLTRB(1.0, 2.0, 4.0, 8.0)),
           ],
         ),
       ),
     );
     expect(tester.renderObject<RenderSliverPadding>(find.byType(SliverPadding)).afterPadding, 1.0);
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new Viewport(
+        child: Viewport(
           axisDirection: AxisDirection.left,
-          offset: new ViewportOffset.fixed(99999.9),
+          offset: ViewportOffset.fixed(99999.9),
           slivers: const <Widget>[
-            const SliverPadding(padding: const EdgeInsets.fromLTRB(1.0, 2.0, 4.0, 8.0)),
+            SliverPadding(padding: EdgeInsets.fromLTRB(1.0, 2.0, 4.0, 8.0)),
           ],
         ),
       ),
@@ -360,15 +360,15 @@ void main() {
 
   testWidgets('SliverPadding propagates geometry offset corrections', (WidgetTester tester) async {
     Widget listBuilder(IndexedWidgetBuilder sliverChildBuilder) {
-      return new Directionality(
+      return Directionality(
         textDirection: TextDirection.ltr,
-        child: new CustomScrollView(
+        child: CustomScrollView(
           cacheExtent: 0.0,
           slivers: <Widget>[
-            new SliverPadding(
+            SliverPadding(
               padding: EdgeInsets.zero,
-              sliver: new SliverList(
-                delegate: new SliverChildBuilderDelegate(
+              sliver: SliverList(
+                delegate: SliverChildBuilderDelegate(
                   sliverChildBuilder,
                   childCount: 10,
                 ),
@@ -382,10 +382,10 @@ void main() {
     await tester.pumpWidget(
       listBuilder(
         (BuildContext context, int index) {
-          return new Container(
+          return Container(
             height: 200.0,
-            child: new Center(
-              child: new Text(index.toString()),
+            child: Center(
+              child: Text(index.toString()),
             ),
           );
         },
@@ -397,17 +397,17 @@ void main() {
 
     expect(
       tester.getRect(find.widgetWithText(Container, '2')),
-      new Rect.fromLTRB(0.0, 100.0, 800.0, 300.0),
+      Rect.fromLTRB(0.0, 100.0, 800.0, 300.0),
     );
 
     // Now item 0 is 400.0px and going back will underflow.
     await tester.pumpWidget(
       listBuilder(
         (BuildContext context, int index) {
-          return new Container(
+          return Container(
             height: index == 0 ? 400.0 : 200.0,
-            child: new Center(
-              child: new Text(index.toString()),
+            child: Center(
+              child: Text(index.toString()),
             ),
           );
         },
@@ -420,7 +420,7 @@ void main() {
 
     expect(
       tester.getRect(find.widgetWithText(Container, '0')),
-      new Rect.fromLTRB(0.0, -200.0, 800.0, 200.0),
+      Rect.fromLTRB(0.0, -200.0, 800.0, 200.0),
     );
   });
 }

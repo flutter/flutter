@@ -1,9 +1,14 @@
+// Copyright 2017 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
-import 'package:test/test.dart';
 import 'package:mockito/mockito.dart';
+
+import '../flutter_test_alternative.dart';
 
 void main() {
   group(consolidateHttpClientResponseBytes, () {
@@ -12,19 +17,19 @@ void main() {
     MockHttpClientResponse response;
 
     setUp(() {
-      response = new MockHttpClientResponse();
+      response = MockHttpClientResponse();
        when(response.listen(
          any,
          onDone: anyNamed('onDone'),
          onError: anyNamed('onError'),
-         cancelOnError: anyNamed('cancelOnError')
+         cancelOnError: anyNamed('cancelOnError'),
       )).thenAnswer((Invocation invocation) {
         final void Function(List<int>) onData = invocation.positionalArguments[0];
         final void Function(Object) onError = invocation.namedArguments[#onError];
         final void Function() onDone = invocation.namedArguments[#onDone];
         final bool cancelOnError = invocation.namedArguments[#cancelOnError];
 
-        return new Stream<List<int>>.fromIterable(
+        return Stream<List<int>>.fromIterable(
             <List<int>>[chunkOne, chunkTwo]).listen(
           onData,
           onDone: onDone,
@@ -67,15 +72,15 @@ void main() {
         any,
         onDone: anyNamed('onDone'),
         onError: anyNamed('onError'),
-        cancelOnError: anyNamed('cancelOnError')
+        cancelOnError: anyNamed('cancelOnError'),
       )).thenAnswer((Invocation invocation) {
         final void Function(List<int>) onData = invocation.positionalArguments[0];
         final void Function(Object) onError = invocation.namedArguments[#onError];
         final void Function() onDone = invocation.namedArguments[#onDone];
         final bool cancelOnError = invocation.namedArguments[#cancelOnError];
 
-        return new Stream<List<int>>.fromFuture(
-                new Future<List<int>>.error(new Exception('Test Error')))
+        return Stream<List<int>>.fromFuture(
+                Future<List<int>>.error(Exception('Test Error')))
             .listen(
           onData,
           onDone: onDone,
@@ -86,7 +91,7 @@ void main() {
       when(response.contentLength).thenReturn(-1);
 
       expect(consolidateHttpClientResponseBytes(response),
-          throwsA(const isInstanceOf<Exception>()));
+          throwsA(isInstanceOf<Exception>()));
     });
   });
 }

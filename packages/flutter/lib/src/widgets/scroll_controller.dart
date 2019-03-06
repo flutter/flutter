@@ -78,7 +78,7 @@ class ScrollController extends ChangeNotifier {
   /// See also:
   ///
   ///  * [PageStorageKey], which should be used when more than one
-  ///   scrollable appears in the same route, to distinguish the [PageStorage]
+  ///    scrollable appears in the same route, to distinguish the [PageStorage]
   ///    locations used to save scroll offsets.
   final bool keepScrollOffset;
 
@@ -142,15 +142,16 @@ class ScrollController extends ChangeNotifier {
   ///
   /// The duration must not be zero. To jump to a particular value without an
   /// animation, use [jumpTo].
-  Future<Null> animateTo(double offset, {
+  Future<void> animateTo(
+    double offset, {
     @required Duration duration,
     @required Curve curve,
   }) {
     assert(_positions.isNotEmpty, 'ScrollController not attached to any scroll views.');
-    final List<Future<Null>> animations = new List<Future<Null>>(_positions.length);
+    final List<Future<void>> animations = List<Future<void>>(_positions.length);
     for (int i = 0; i < _positions.length; i += 1)
       animations[i] = _positions[i].animateTo(offset, duration: duration, curve: curve);
-    return Future.wait<Null>(animations).then((List<Null> _) => null);
+    return Future.wait<void>(animations).then<void>((List<void> _) => null);
   }
 
   /// Jumps the scroll position from its current value to the given value,
@@ -167,7 +168,7 @@ class ScrollController extends ChangeNotifier {
   /// value was out of range.
   void jumpTo(double value) {
     assert(_positions.isNotEmpty, 'ScrollController not attached to any scroll views.');
-    for (ScrollPosition position in new List<ScrollPosition>.from(_positions))
+    for (ScrollPosition position in List<ScrollPosition>.from(_positions))
       position.jumpTo(value);
   }
 
@@ -224,12 +225,12 @@ class ScrollController extends ChangeNotifier {
   ///    This is used when the environment has changed and the [Scrollable]
   ///    needs to recreate the [ScrollPosition] object. It is null the first
   ///    time the [ScrollPosition] is created.
- ScrollPosition createScrollPosition(
+  ScrollPosition createScrollPosition(
     ScrollPhysics physics,
     ScrollContext context,
     ScrollPosition oldPosition,
   ) {
-    return new ScrollPositionWithSingleContext(
+    return ScrollPositionWithSingleContext(
       physics: physics,
       context: context,
       initialPixels: initialScrollOffset,
@@ -283,7 +284,7 @@ class ScrollController extends ChangeNotifier {
 /// It tracks the most recently updated scroll position and reports it as its
 /// `initialScrollOffset`.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// In this example each [PageView] page contains a [ListView] and all three
 /// [ListView]'s share a [TrackingScrollController]. The scroll offsets of all
@@ -291,23 +292,24 @@ class ScrollController extends ChangeNotifier {
 /// the different list lengths.
 ///
 /// ```dart
-/// new PageView(
+/// PageView(
 ///   children: <Widget>[
-///     new ListView(
+///     ListView(
 ///       controller: _trackingScrollController,
-///       children: new List<Widget>.generate(100, (int i) => new Text('page 0 item $i')).toList(),
+///       children: List<Widget>.generate(100, (int i) => Text('page 0 item $i')).toList(),
 ///     ),
-///    new ListView(
+///     ListView(
+///       controller: _trackingScrollController,
+///       children: List<Widget>.generate(200, (int i) => Text('page 1 item $i')).toList(),
+///     ),
+///     ListView(
 ///      controller: _trackingScrollController,
-///      children: new List<Widget>.generate(200, (int i) => new Text('page 1 item $i')).toList(),
-///    ),
-///    new ListView(
-///      controller: _trackingScrollController,
-///      children: new List<Widget>.generate(300, (int i) => new Text('page 2 item $i')).toList(),
+///      children: List<Widget>.generate(300, (int i) => Text('page 2 item $i')).toList(),
 ///     ),
 ///   ],
 /// )
 /// ```
+/// {@end-tool}
 ///
 /// In this example the `_trackingController` would have been created by the
 /// stateful widget that built the widget tree.

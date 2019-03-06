@@ -8,10 +8,11 @@ import 'dart/dependencies.dart';
 import 'globals.dart';
 
 class DependencyChecker {
-  final DartDependencySetBuilder builder;
-  final Set<String> _dependencies = new Set<String>();
-  final AssetBundle assets;
   DependencyChecker(this.builder, this.assets);
+
+  final DartDependencySetBuilder builder;
+  final Set<String> _dependencies = Set<String>();
+  final AssetBundle assets;
 
   /// Returns [true] if any components have been modified after [threshold] or
   /// if it cannot be determined.
@@ -30,7 +31,7 @@ class DependencyChecker {
     for (String path in _dependencies) {
       final File file = fs.file(path);
       final FileStat stat = file.statSync();
-      if (stat.type == FileSystemEntityType.NOT_FOUND) { // ignore: deprecated_member_use
+      if (stat.type == FileSystemEntityType.notFound) {
         printTrace('DependencyChecker: Error stating $path.');
         return true;
       }

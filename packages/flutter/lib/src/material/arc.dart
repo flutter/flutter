@@ -50,14 +50,14 @@ class MaterialPointArcTween extends Tween<Offset> {
     final double deltaX = delta.dx.abs();
     final double deltaY = delta.dy.abs();
     final double distanceFromAtoB = delta.distance;
-    final Offset c = new Offset(end.dx, begin.dy);
+    final Offset c = Offset(end.dx, begin.dy);
 
     double sweepAngle() => 2.0 * math.asin(distanceFromAtoB / (2.0 * _radius));
 
     if (deltaX > _kOnAxisDelta && deltaY > _kOnAxisDelta) {
       if (deltaX < deltaY) {
         _radius = distanceFromAtoB * distanceFromAtoB / (c - begin).distance / 2.0;
-        _center = new Offset(end.dx + _radius * (begin.dx - end.dx).sign, end.dy);
+        _center = Offset(end.dx + _radius * (begin.dx - end.dx).sign, end.dy);
         if (begin.dx < end.dx) {
           _beginAngle = sweepAngle() * (begin.dy - end.dy).sign;
           _endAngle = 0.0;
@@ -67,7 +67,7 @@ class MaterialPointArcTween extends Tween<Offset> {
         }
       } else {
         _radius = distanceFromAtoB * distanceFromAtoB / (c - end).distance / 2.0;
-        _center = new Offset(begin.dx, begin.dy + (end.dy - begin.dy).sign * _radius);
+        _center = Offset(begin.dx, begin.dy + (end.dy - begin.dy).sign * _radius);
         if (begin.dy < end.dy) {
           _beginAngle = -math.pi / 2.0;
           _endAngle = _beginAngle + sweepAngle() * (end.dx - begin.dx).sign;
@@ -164,7 +164,7 @@ class MaterialPointArcTween extends Tween<Offset> {
     final double angle = lerpDouble(_beginAngle, _endAngle, t);
     final double x = math.cos(angle) * _radius;
     final double y = math.sin(angle) * _radius;
-    return _center + new Offset(x, y);
+    return _center + Offset(x, y);
   }
 
   @override
@@ -186,14 +186,14 @@ class _Diagonal {
   final _CornerId endId;
 }
 
-const List<_Diagonal> _allDiagonals = const <_Diagonal>[
-  const _Diagonal(_CornerId.topLeft, _CornerId.bottomRight),
-  const _Diagonal(_CornerId.bottomRight, _CornerId.topLeft),
-  const _Diagonal(_CornerId.topRight, _CornerId.bottomLeft),
-  const _Diagonal(_CornerId.bottomLeft, _CornerId.topRight),
+const List<_Diagonal> _allDiagonals = <_Diagonal>[
+  _Diagonal(_CornerId.topLeft, _CornerId.bottomRight),
+  _Diagonal(_CornerId.bottomRight, _CornerId.topLeft),
+  _Diagonal(_CornerId.topRight, _CornerId.bottomLeft),
+  _Diagonal(_CornerId.bottomLeft, _CornerId.topRight),
 ];
 
-typedef dynamic _KeyFunc<T>(T input);
+typedef _KeyFunc<T> = dynamic Function(T input);
 
 // Select the element for which the key function returns the maximum value.
 T _maxBy<T>(Iterable<T> input, _KeyFunc<T> keyFunc) {
@@ -246,13 +246,13 @@ class MaterialRectArcTween extends RectTween {
     assert(end != null);
     final Offset centersVector = end.center - begin.center;
     final _Diagonal diagonal = _maxBy<_Diagonal>(_allDiagonals, (_Diagonal d) => _diagonalSupport(centersVector, d));
-    _beginArc = new MaterialPointArcTween(
+    _beginArc = MaterialPointArcTween(
       begin: _cornerFor(begin, diagonal.beginId),
-      end: _cornerFor(end, diagonal.beginId)
+      end: _cornerFor(end, diagonal.beginId),
     );
-    _endArc = new MaterialPointArcTween(
+    _endArc = MaterialPointArcTween(
       begin: _cornerFor(begin, diagonal.endId),
-      end: _cornerFor(end, diagonal.endId)
+      end: _cornerFor(end, diagonal.endId),
     );
     _dirty = false;
   }
@@ -319,7 +319,7 @@ class MaterialRectArcTween extends RectTween {
       return begin;
     if (t == 1.0)
       return end;
-    return new Rect.fromPoints(_beginArc.lerp(t), _endArc.lerp(t));
+    return Rect.fromPoints(_beginArc.lerp(t), _endArc.lerp(t));
   }
 
   @override
@@ -360,7 +360,7 @@ class MaterialRectCenterArcTween extends RectTween {
   void _initialize() {
     assert(begin != null);
     assert(end != null);
-    _centerArc = new MaterialPointArcTween(
+    _centerArc = MaterialPointArcTween(
       begin: begin.center,
       end: end.center,
     );
@@ -405,7 +405,7 @@ class MaterialRectCenterArcTween extends RectTween {
     final Offset center = _centerArc.lerp(t);
     final double width = lerpDouble(begin.width, end.width, t);
     final double height = lerpDouble(begin.height, end.height, t);
-    return new Rect.fromLTWH(center.dx - width / 2.0, center.dy - height / 2.0, width, height);
+    return Rect.fromLTWH(center.dx - width / 2.0, center.dy - height / 2.0, width, height);
   }
 
   @override

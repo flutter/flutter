@@ -11,11 +11,11 @@ import 'package:flutter_test/flutter_test.dart';
 
 class Bar extends StatefulWidget {
   @override
-  BarState createState() => new BarState();
+  BarState createState() => BarState();
 }
 
 class BarState extends State<Bar> {
-  final GlobalKey _fooKey = new GlobalKey();
+  final GlobalKey _fooKey = GlobalKey();
 
   bool _mode = false;
 
@@ -28,17 +28,17 @@ class BarState extends State<Bar> {
   @override
   Widget build(BuildContext context) {
     if (_mode) {
-      return new SizedBox(
-        child: new LayoutBuilder(
+      return SizedBox(
+        child: LayoutBuilder(
           builder: (BuildContext context, BoxConstraints constraints) {
-            return new StatefulCreationCounter(key: _fooKey);
+            return StatefulCreationCounter(key: _fooKey);
           },
         ),
       );
     } else {
-      return new LayoutBuilder(
+      return LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
-          return new StatefulCreationCounter(key: _fooKey);
+          return StatefulCreationCounter(key: _fooKey);
         },
       );
     }
@@ -49,7 +49,7 @@ class StatefulCreationCounter extends StatefulWidget {
   const StatefulCreationCounter({ Key key }) : super(key: key);
 
   @override
-  StatefulCreationCounterState createState() => new StatefulCreationCounterState();
+  StatefulCreationCounterState createState() => StatefulCreationCounterState();
 }
 
 class StatefulCreationCounterState extends State<StatefulCreationCounter> {
@@ -62,14 +62,14 @@ class StatefulCreationCounterState extends State<StatefulCreationCounter> {
   }
 
   @override
-  Widget build(BuildContext context) => new Container();
+  Widget build(BuildContext context) => Container();
 }
 
 void main() {
   testWidgets('reparent state with layout builder',
       (WidgetTester tester) async {
     expect(StatefulCreationCounterState.creationCount, 0);
-    await tester.pumpWidget(new Bar());
+    await tester.pumpWidget(Bar());
     expect(StatefulCreationCounterState.creationCount, 1);
     final BarState s = tester.state<BarState>(find.byType(Bar));
     s.trigger();
@@ -86,40 +86,40 @@ void main() {
     StateSetter layoutBuilderSetState;
     StateSetter childSetState;
 
-    final GlobalKey key = new GlobalKey();
-    final Widget keyedWidget = new StatefulBuilder(
+    final GlobalKey key = GlobalKey();
+    final Widget keyedWidget = StatefulBuilder(
       key: key,
       builder: (BuildContext context, StateSetter setState) {
         keyedSetState = setState;
         MediaQuery.of(context);
-        return new Container();
+        return Container();
       },
     );
 
     Widget layoutBuilderChild = keyedWidget;
-    Widget deepChild = new Container();
+    Widget deepChild = Container();
 
-    await tester.pumpWidget(new MediaQuery(
-      data: new MediaQueryData.fromWindow(ui.window),
-      child: new Column(
+    await tester.pumpWidget(MediaQuery(
+      data: MediaQueryData.fromWindow(ui.window),
+      child: Column(
         children: <Widget>[
-          new StatefulBuilder(
+          StatefulBuilder(
               builder: (BuildContext context, StateSetter setState) {
             layoutBuilderSetState = setState;
-            return new LayoutBuilder(
+            return LayoutBuilder(
               builder: (BuildContext context, BoxConstraints constraints) {
                 layoutBuilderBuildCount += 1;
                 return layoutBuilderChild; // initially keyedWidget above, but then a new Container
               },
             );
           }),
-          new Container(
-            child: new Container(
-              child: new Container(
-                child: new Container(
-                  child: new Container(
-                    child: new Container(
-                      child: new StatefulBuilder(builder:
+          Container(
+            child: Container(
+              child: Container(
+                child: Container(
+                  child: Container(
+                    child: Container(
+                      child: StatefulBuilder(builder:
                           (BuildContext context, StateSetter setState) {
                         childSetState = setState;
                         return deepChild; // initially a Container, but then the keyedWidget above
@@ -146,7 +146,7 @@ void main() {
     layoutBuilderSetState(() {
       // The layout builder will build in a separate build scope. This delays
       // the removal of the keyed child until this build scope.
-      layoutBuilderChild = new Container();
+      layoutBuilderChild = Container();
     });
 
     // The essential part of this test is that this call to pump doesn't throw.

@@ -5,7 +5,6 @@
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:platform/platform.dart';
-import 'package:test/test.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -15,7 +14,7 @@ void main() {
     MemoryFileSystem fs;
 
     setUp(() {
-      fs = new MemoryFileSystem();
+      fs = MemoryFileSystem();
     });
 
     testUsingContext('recursively creates a directory if it does not exist', () async {
@@ -33,7 +32,7 @@ void main() {
     /// Test file_systems.copyDirectorySync() using MemoryFileSystem.
     /// Copies between 2 instances of file systems which is also supported by copyDirectorySync().
     test('test directory copy', () async {
-      final MemoryFileSystem sourceMemoryFs = new MemoryFileSystem();
+      final MemoryFileSystem sourceMemoryFs = MemoryFileSystem();
       const String sourcePath = '/some/origin';
       final Directory sourceDirectory = await sourceMemoryFs.directory(sourcePath).create(recursive: true);
       sourceMemoryFs.currentDirectory = sourcePath;
@@ -43,7 +42,7 @@ void main() {
       sourceMemoryFs.directory('empty_directory').createSync();
 
       // Copy to another memory file system instance.
-      final MemoryFileSystem targetMemoryFs = new MemoryFileSystem();
+      final MemoryFileSystem targetMemoryFs = MemoryFileSystem();
       const String targetPath = '/some/non-existent/target';
       final Directory targetDirectory = targetMemoryFs.directory(targetPath);
       copyDirectorySync(sourceDirectory, targetDirectory);
@@ -93,7 +92,7 @@ void main() {
       expect(escapePath('foo\\bar\\cool.dart'), 'foo\\\\bar\\\\cool.dart');
       expect(escapePath('C:/foo/bar/cool.dart'), 'C:/foo/bar/cool.dart');
     }, overrides: <Type, Generator>{
-      Platform: () => new FakePlatform(operatingSystem: 'windows')
+      Platform: () => FakePlatform(operatingSystem: 'windows'),
     });
 
     testUsingContext('on Linux', () {
@@ -101,7 +100,7 @@ void main() {
       expect(escapePath('foo/bar/cool.dart'), 'foo/bar/cool.dart');
       expect(escapePath('foo\\cool.dart'), 'foo\\cool.dart');
     }, overrides: <Type, Generator>{
-      Platform: () => new FakePlatform(operatingSystem: 'linux')
+      Platform: () => FakePlatform(operatingSystem: 'linux'),
     });
   });
 }

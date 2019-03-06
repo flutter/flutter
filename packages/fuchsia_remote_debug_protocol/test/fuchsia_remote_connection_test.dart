@@ -4,11 +4,12 @@
 
 import 'dart:async';
 
-import 'package:test/test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:json_rpc_2/json_rpc_2.dart' as json_rpc;
 
 import 'package:fuchsia_remote_debug_protocol/fuchsia_remote_debug_protocol.dart';
+
+import 'common.dart';
 
 void main() {
   group('FuchsiaRemoteConnection.connect', () {
@@ -18,10 +19,13 @@ void main() {
     List<Uri> uriConnections;
 
     setUp(() {
-      mockRunner = new MockSshCommandRunner();
+      mockRunner = MockSshCommandRunner();
       // Adds some extra junk to make sure the strings will be cleaned up.
-      when(mockRunner.run(any)).thenAnswer((_) =>
-          new Future<List<String>>.value(
+      when(mockRunner.run(argThat(startsWith('/bin/find')))).thenAnswer(
+          (_) => Future<List<String>>.value(
+              <String>['/hub/blah/blah/blah/vmservice-port\n']));
+      when(mockRunner.run(argThat(startsWith('/bin/ls')))).thenAnswer(
+          (_) => Future<List<String>>.value(
               <String>['123\n\n\n', '456  ', '789']));
       const String address = 'fe80::8eae:4cff:fef4:9247';
       const String interface = 'eno1';
@@ -30,10 +34,13 @@ void main() {
       forwardedPorts = <MockPortForwarder>[];
       int port = 0;
       Future<PortForwarder> mockPortForwardingFunction(
-          String address, int remotePort,
-          [String interface = '', String configFile]) {
-        return new Future<PortForwarder>(() {
-          final MockPortForwarder pf = new MockPortForwarder();
+        String address,
+        int remotePort, [
+        String interface = '',
+        String configFile,
+      ]) {
+        return Future<PortForwarder>(() {
+          final MockPortForwarder pf = MockPortForwarder();
           forwardedPorts.add(pf);
           when(pf.port).thenReturn(port++);
           when(pf.remotePort).thenReturn(remotePort);
@@ -63,7 +70,7 @@ void main() {
                 'name': 'file://flutterBinary1',
                 'number': '1',
               },
-            }
+            },
           ],
         },
         <String, dynamic>{
@@ -78,22 +85,25 @@ void main() {
                 'name': 'file://flutterBinary2',
                 'number': '2',
               },
-            }
+            },
           ],
         },
       ];
 
       mockPeerConnections = <MockPeer>[];
       uriConnections = <Uri>[];
-      Future<json_rpc.Peer> mockVmConnectionFunction(Uri uri) {
-        return new Future<json_rpc.Peer>(() async {
-          final MockPeer mp = new MockPeer();
+      Future<json_rpc.Peer> mockVmConnectionFunction(
+        Uri uri, {
+        Duration timeout,
+      }) {
+        return Future<json_rpc.Peer>(() async {
+          final MockPeer mp = MockPeer();
           mockPeerConnections.add(mp);
           uriConnections.add(uri);
           when(mp.sendRequest(any, any))
               // The local ports match the desired indices for now, so get the
               // canned response from the URI port.
-              .thenAnswer((_) => new Future<Map<String, dynamic>>(
+              .thenAnswer((_) => Future<Map<String, dynamic>>(
                   () => flutterViewCannedResponses[uri.port]));
           return mp;
         });
@@ -146,13 +156,13 @@ void main() {
     });
 
     test('env variable test without remote addr', () async {
-      Future<Null> failingFunction() async {
+      Future<void> failingFunction() async {
         await FuchsiaRemoteConnection.connect();
       }
 
       // Should fail as no env variable has been passed.
       expect(failingFunction,
-          throwsA(const isInstanceOf<FuchsiaRemoteConnectionError>()));
+          throwsA(isInstanceOf<FuchsiaRemoteConnectionError>()));
     });
   });
 }

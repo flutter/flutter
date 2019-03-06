@@ -15,7 +15,7 @@ import 'package:flutter/widgets.dart';
 ///  * [GridView], which is a scrollable grid of tiles.
 ///  * [GridTileBar], which is typically used in either the [header] or
 ///    [footer].
-///  * <https://material.google.com/components/grid-lists.html>
+///  * <https://material.io/design/components/image-lists.html>
 class GridTile extends StatelessWidget {
   /// Creates a grid tile.
   ///
@@ -49,12 +49,12 @@ class GridTile extends StatelessWidget {
       return child;
 
     final List<Widget> children = <Widget>[
-      new Positioned.fill(
+      Positioned.fill(
         child: child,
       ),
     ];
     if (header != null) {
-      children.add(new Positioned(
+      children.add(Positioned(
         top: 0.0,
         left: 0.0,
         right: 0.0,
@@ -62,13 +62,13 @@ class GridTile extends StatelessWidget {
       ));
     }
     if (footer != null) {
-      children.add(new Positioned(
+      children.add(Positioned(
         left: 0.0,
         bottom: 0.0,
         right: 0.0,
         child: footer,
       ));
     }
-    return new Stack(children: children);
+    return Stack(children: children);
   }
 }

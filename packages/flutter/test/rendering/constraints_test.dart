@@ -3,24 +3,24 @@
 // found in the LICENSE file.
 
 import 'package:flutter/rendering.dart';
-import 'package:test/test.dart';
+import '../flutter_test_alternative.dart';
 
 import 'rendering_tester.dart';
 
 void main() {
   test('RenderFractionallySizedBox constraints', () {
     RenderBox root, leaf, test;
-    root = new RenderPositionedBox(
-      child: new RenderConstrainedBox(
-        additionalConstraints: new BoxConstraints.tight(const Size(200.0, 200.0)),
-        child: test = new RenderFractionallySizedOverflowBox(
+    root = RenderPositionedBox(
+      child: RenderConstrainedBox(
+        additionalConstraints: BoxConstraints.tight(const Size(200.0, 200.0)),
+        child: test = RenderFractionallySizedOverflowBox(
           widthFactor: 2.0,
           heightFactor: 0.5,
-          child: leaf = new RenderConstrainedBox(
+          child: leaf = RenderConstrainedBox(
             additionalConstraints: const BoxConstraints.expand()
-          )
-        )
-      )
+          ),
+        ),
+      ),
     );
     layout(root);
     expect(root.size.width, equals(800.0));
@@ -36,7 +36,7 @@ void main() {
 
     result = 'no exception';
     try {
-      const BoxConstraints constraints = const BoxConstraints(minWidth: double.nan, maxWidth: double.nan, minHeight: 2.0, maxHeight: double.nan);
+      const BoxConstraints constraints = BoxConstraints(minWidth: double.nan, maxWidth: double.nan, minHeight: 2.0, maxHeight: double.nan);
       assert(constraints.debugAssertIsValid());
     } on FlutterError catch (e) {
       result = '$e';
@@ -49,7 +49,7 @@ void main() {
 
     result = 'no exception';
     try {
-      const BoxConstraints constraints = const BoxConstraints(minHeight: double.nan);
+      const BoxConstraints constraints = BoxConstraints(minHeight: double.nan);
       assert(constraints.debugAssertIsValid());
     } on FlutterError catch (e) {
       result = '$e';
@@ -62,7 +62,7 @@ void main() {
 
     result = 'no exception';
     try {
-      const BoxConstraints constraints = const BoxConstraints(minHeight: double.nan, maxWidth: 0.0/0.0);
+      const BoxConstraints constraints = BoxConstraints(minHeight: double.nan, maxWidth: 0.0/0.0);
       assert(constraints.debugAssertIsValid());
     } on FlutterError catch (e) {
       result = '$e';

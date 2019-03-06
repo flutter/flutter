@@ -10,6 +10,46 @@ import 'diagnostics.dart';
 import 'observer_list.dart';
 
 /// An object that maintains a list of listeners.
+///
+/// The listeners are typically used to notify clients that the object has been
+/// updated.
+///
+/// There are two variants of this interface:
+///
+///  * [ValueListenable], an interface that augments the [Listenable] interface
+///    with the concept of a _current value_.
+///
+///  * [Animation], an interface that augments the [ValueListenable] interface
+///    to add the concept of direction (forward or reverse).
+///
+/// Many classes in the Flutter API use or implement these interfaces. The
+/// following subclasses are especially relevant:
+///
+///  * [ChangeNotifier], which can be subclassed or mixed in to create objects
+///    that implement the [Listenable] interface.
+///
+///  * [ValueNotifier], which implements the [ValueListenable] interface with
+///    a mutable value that triggers the notifications when modified.
+///
+/// The terms "notify clients", "send notifications", "trigger notifications",
+/// and "fire notifications" are used interchangeably.
+///
+/// See also:
+///
+///  * [AnimatedBuilder], a widget that uses a builder callback to rebuild
+///    whenever a given [Listenable] triggers its notifications. This widget is
+///    commonly used with [Animation] subclasses, wherein its name. It is a
+///    subclass of [AnimatedWidget], which can be used to create widgets that
+///    are driven from a [Listenable].
+///  * [ValueListenableBuilder], a widget that uses a builder callback to
+///    rebuild whenever a [ValueListenable] object triggers its notifications,
+///    providing the builder with the value of the object.
+///  * [InheritedNotifier], an abstract superclass for widgets that use a
+///    [Listenable]'s notifications to trigger rebuilds in descendant widgets
+///    that declare a dependency on them, using the [InheritedWidget] mechanism.
+///  * [new Listenable.merge], which creates a [Listenable] that triggers
+///    notifications whenever any of a list of other [Listenable]s trigger their
+///    notifications.
 abstract class Listenable {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -37,6 +77,10 @@ abstract class Listenable {
 /// This interface is implemented by [ValueNotifier<T>] and [Animation<T>], and
 /// allows other APIs to accept either of those implementations interchangeably.
 abstract class ValueListenable<T> extends Listenable {
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
+  const ValueListenable();
+
   /// The current value of the object. When the value changes, the callbacks
   /// registered with [addListener] will be invoked.
   T get value;
@@ -52,13 +96,13 @@ abstract class ValueListenable<T> extends Listenable {
 /// See also:
 ///
 ///  * [ValueNotifier], which is a [ChangeNotifier] that wraps a single value.
-class ChangeNotifier extends Listenable {
-  ObserverList<VoidCallback> _listeners = new ObserverList<VoidCallback>();
+class ChangeNotifier implements Listenable {
+  ObserverList<VoidCallback> _listeners = ObserverList<VoidCallback>();
 
   bool _debugAssertNotDisposed() {
     assert(() {
       if (_listeners == null) {
-        throw new FlutterError(
+        throw FlutterError(
           'A $runtimeType was used after being disposed.\n'
           'Once you have called dispose() on a $runtimeType, it can no longer be used.'
         );
@@ -151,16 +195,17 @@ class ChangeNotifier extends Listenable {
   /// in response to a notification) that has been registered multiple times.
   /// See the discussion at [removeListener].
   @protected
+  @visibleForTesting
   void notifyListeners() {
     assert(_debugAssertNotDisposed());
     if (_listeners != null) {
-      final List<VoidCallback> localListeners = new List<VoidCallback>.from(_listeners);
+      final List<VoidCallback> localListeners = List<VoidCallback>.from(_listeners);
       for (VoidCallback listener in localListeners) {
         try {
           if (_listeners.contains(listener))
             listener();
         } catch (exception, stack) {
-          FlutterError.reportError(new FlutterErrorDetails(
+          FlutterError.reportError(FlutterErrorDetails(
             exception: exception,
             stack: stack,
             library: 'foundation library',
@@ -168,7 +213,7 @@ class ChangeNotifier extends Listenable {
             informationCollector: (StringBuffer information) {
               information.writeln('The $runtimeType sending notification was:');
               information.write('  $this');
-            }
+            },
           ));
         }
       }
@@ -176,19 +221,23 @@ class ChangeNotifier extends Listenable {
   }
 }
 
-class _MergingListenable extends ChangeNotifier {
-  _MergingListenable(this._children) {
-    for (Listenable child in _children)
-      child?.addListener(notifyListeners);
-  }
+class _MergingListenable extends Listenable {
+  _MergingListenable(this._children);
 
   final List<Listenable> _children;
 
   @override
-  void dispose() {
-    for (Listenable child in _children)
-      child?.removeListener(notifyListeners);
-    super.dispose();
+  void addListener(VoidCallback listener) {
+    for (final Listenable child  in _children) {
+      child?.addListener(listener);
+    }
+  }
+
+  @override
+  void removeListener(VoidCallback listener) {
+    for (final Listenable child in _children) {
+      child?.removeListener(listener);
+    }
   }
 
   @override

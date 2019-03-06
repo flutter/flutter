@@ -23,13 +23,13 @@ void main() {
   MockOnPressedFunction mockOnPressedFunction;
 
   setUp(() {
-    mockOnPressedFunction = new MockOnPressedFunction();
+    mockOnPressedFunction = MockOnPressedFunction();
   });
 
   testWidgets('test default icon buttons are sized up to 48', (WidgetTester tester) async {
     await tester.pumpWidget(
       wrap(
-          child: new IconButton(
+          child: IconButton(
             onPressed: mockOnPressedFunction,
             icon: const Icon(Icons.link),
           ),
@@ -46,7 +46,7 @@ void main() {
   testWidgets('test small icons are sized up to 48dp', (WidgetTester tester) async {
     await tester.pumpWidget(
       wrap(
-          child: new IconButton(
+          child: IconButton(
             iconSize: 10.0,
             onPressed: mockOnPressedFunction,
             icon: const Icon(Icons.link),
@@ -61,7 +61,7 @@ void main() {
   testWidgets('test icons can be small when total size is >48dp', (WidgetTester tester) async {
     await tester.pumpWidget(
       wrap(
-          child: new IconButton(
+          child: IconButton(
             iconSize: 10.0,
             padding: const EdgeInsets.all(30.0),
             onPressed: mockOnPressedFunction,
@@ -77,7 +77,7 @@ void main() {
   testWidgets('test default icon buttons are constrained', (WidgetTester tester) async {
     await tester.pumpWidget(
       wrap(
-          child: new IconButton(
+          child: IconButton(
             padding: EdgeInsets.zero,
             onPressed: mockOnPressedFunction,
             icon: const Icon(Icons.ac_unit),
@@ -94,13 +94,13 @@ void main() {
     'test default icon buttons can be stretched if specified',
     (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new Material(
-          child: new Row(
+        child: Material(
+          child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget> [
-              new IconButton(
+              IconButton(
                 onPressed: mockOnPressedFunction,
                 icon: const Icon(Icons.ac_unit),
               ),
@@ -117,7 +117,7 @@ void main() {
   testWidgets('test default padding', (WidgetTester tester) async {
     await tester.pumpWidget(
       wrap(
-          child: new IconButton(
+          child: IconButton(
             onPressed: mockOnPressedFunction,
             icon: const Icon(Icons.ac_unit),
             iconSize: 80.0,
@@ -131,10 +131,10 @@ void main() {
 
   testWidgets('test tooltip', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new Material(
-          child: new Center(
-            child: new IconButton(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: IconButton(
               onPressed: mockOnPressedFunction,
               icon: const Icon(Icons.ac_unit),
             ),
@@ -146,13 +146,13 @@ void main() {
     expect(find.byType(Tooltip), findsNothing);
 
     // Clear the widget tree.
-    await tester.pumpWidget(new Container(key: new UniqueKey()));
+    await tester.pumpWidget(Container(key: UniqueKey()));
 
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new Material(
-          child: new Center(
-            child: new IconButton(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: IconButton(
               onPressed: mockOnPressedFunction,
               icon: const Icon(Icons.ac_unit),
               tooltip: 'Test tooltip',
@@ -171,11 +171,11 @@ void main() {
 
   testWidgets('IconButton AppBar size', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new Scaffold(
-          appBar: new AppBar(
+      MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(
             actions: <Widget>[
-              new IconButton(
+              IconButton(
                 padding: EdgeInsets.zero,
                 onPressed: mockOnPressedFunction,
                 icon: const Icon(Icons.ac_unit),
@@ -194,11 +194,11 @@ void main() {
   // This test is very similar to the '...explicit splashColor and highlightColor' test
   // in buttons_test.dart. If you change this one, you may want to also change that one.
   testWidgets('IconButton with explicit splashColor and highlightColor', (WidgetTester tester) async {
-    const Color directSplashColor = const Color(0xFF00000F);
-    const Color directHighlightColor = const Color(0xFF0000F0);
+    const Color directSplashColor = Color(0xFF00000F);
+    const Color directHighlightColor = Color(0xFF0000F0);
 
     Widget buttonWidget = wrap(
-        child: new IconButton(
+        child: IconButton(
           icon: const Icon(Icons.android),
           splashColor: directSplashColor,
           highlightColor: directHighlightColor,
@@ -207,8 +207,8 @@ void main() {
     );
 
     await tester.pumpWidget(
-      new Theme(
-        data: new ThemeData(),
+      Theme(
+        data: ThemeData(),
         child: buttonWidget,
       ),
     );
@@ -222,22 +222,22 @@ void main() {
       Material.of(tester.element(find.byType(IconButton))),
       paints
         ..circle(color: directSplashColor)
-        ..circle(color: directHighlightColor)
+        ..circle(color: directHighlightColor),
     );
 
-    const Color themeSplashColor1 = const Color(0xFF000F00);
-    const Color themeHighlightColor1 = const Color(0xFF00FF00);
+    const Color themeSplashColor1 = Color(0xFF000F00);
+    const Color themeHighlightColor1 = Color(0xFF00FF00);
 
     buttonWidget = wrap(
-        child: new IconButton(
+        child: IconButton(
           icon: const Icon(Icons.android),
           onPressed: () { /* enable the button */ },
         ),
     );
 
     await tester.pumpWidget(
-      new Theme(
-        data: new ThemeData(
+      Theme(
+        data: ThemeData(
           highlightColor: themeHighlightColor1,
           splashColor: themeSplashColor1,
         ),
@@ -249,15 +249,15 @@ void main() {
       Material.of(tester.element(find.byType(IconButton))),
       paints
         ..circle(color: themeSplashColor1)
-        ..circle(color: themeHighlightColor1)
+        ..circle(color: themeHighlightColor1),
     );
 
-    const Color themeSplashColor2 = const Color(0xFF002200);
-    const Color themeHighlightColor2 = const Color(0xFF001100);
+    const Color themeSplashColor2 = Color(0xFF002200);
+    const Color themeHighlightColor2 = Color(0xFF001100);
 
     await tester.pumpWidget(
-      new Theme(
-        data: new ThemeData(
+      Theme(
+        data: ThemeData(
           highlightColor: themeHighlightColor2,
           splashColor: themeSplashColor2,
         ),
@@ -269,38 +269,38 @@ void main() {
       Material.of(tester.element(find.byType(IconButton))),
       paints
         ..circle(color: themeSplashColor2)
-        ..circle(color: themeHighlightColor2)
+        ..circle(color: themeHighlightColor2),
     );
 
     await gesture.up();
   });
 
   testWidgets('IconButton Semantics (enabled)', (WidgetTester tester) async {
-    final SemanticsTester semantics = new SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
       wrap(
-        child: new IconButton(
+        child: IconButton(
           onPressed: mockOnPressedFunction,
           icon: const Icon(Icons.link, semanticLabel: 'link'),
         ),
       ),
     );
 
-    expect(semantics, hasSemantics(new TestSemantics.root(
+    expect(semantics, hasSemantics(TestSemantics.root(
       children: <TestSemantics>[
-        new TestSemantics.rootChild(
-          rect: new Rect.fromLTRB(0.0, 0.0, 48.0, 48.0),
+        TestSemantics.rootChild(
+          rect: Rect.fromLTRB(0.0, 0.0, 48.0, 48.0),
           actions: <SemanticsAction>[
-            SemanticsAction.tap
+            SemanticsAction.tap,
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.hasEnabledState,
             SemanticsFlag.isEnabled,
-            SemanticsFlag.isButton
+            SemanticsFlag.isButton,
           ],
           label: 'link',
-        )
+        ),
       ]
     ), ignoreId: true, ignoreTransform: true));
 
@@ -308,27 +308,27 @@ void main() {
   });
 
   testWidgets('IconButton Semantics (disabled)', (WidgetTester tester) async {
-    final SemanticsTester semantics = new SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
       wrap(
         child: const IconButton(
           onPressed: null,
-          icon: const Icon(Icons.link, semanticLabel: 'link'),
+          icon: Icon(Icons.link, semanticLabel: 'link'),
         ),
       ),
     );
 
-    expect(semantics, hasSemantics(new TestSemantics.root(
+    expect(semantics, hasSemantics(TestSemantics.root(
         children: <TestSemantics>[
-          new TestSemantics.rootChild(
-            rect: new Rect.fromLTRB(0.0, 0.0, 48.0, 48.0),
+          TestSemantics.rootChild(
+            rect: Rect.fromLTRB(0.0, 0.0, 48.0, 48.0),
             flags: <SemanticsFlag>[
               SemanticsFlag.hasEnabledState,
-              SemanticsFlag.isButton
+              SemanticsFlag.isButton,
             ],
             label: 'link',
-          )
+          ),
         ]
     ), ignoreId: true, ignoreTransform: true));
 
@@ -337,10 +337,10 @@ void main() {
 }
 
 Widget wrap({ Widget child }) {
-  return new Directionality(
+  return Directionality(
     textDirection: TextDirection.ltr,
-    child: new Material(
-      child: new Center(child: child),
+    child: Material(
+      child: Center(child: child),
     ),
   );
 }

@@ -18,7 +18,7 @@ void verifyPaintPosition(GlobalKey key, Offset ideal, bool visible) {
 
 void verifyActualBoxPosition(WidgetTester tester, Finder finder, int index, Rect ideal) {
   final RenderBox box = tester.renderObjectList<RenderBox>(finder).elementAt(index);
-  final Rect rect = new Rect.fromPoints(box.localToGlobal(Offset.zero), box.localToGlobal(box.size.bottomRight(Offset.zero)));
+  final Rect rect = Rect.fromPoints(box.localToGlobal(Offset.zero), box.localToGlobal(box.size.bottomRight(Offset.zero)));
   expect(rect, equals(ideal));
 }
 
@@ -26,19 +26,19 @@ void main() {
   testWidgets('Sliver appbars - floating - scroll offset doesn\'t change', (WidgetTester tester) async {
     const double bigHeight = 1000.0;
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new CustomScrollView(
+        child: CustomScrollView(
           slivers: <Widget>[
             const BigSliver(height: bigHeight),
-            new SliverPersistentHeader(delegate: new TestDelegate(), floating: true),
+            SliverPersistentHeader(delegate: TestDelegate(), floating: true),
             const BigSliver(height: bigHeight),
           ],
         ),
       ),
     );
     final ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
-    final double max = bigHeight * 2.0 + new TestDelegate().maxExtent - 600.0; // 600 is the height of the test viewport
+    final double max = bigHeight * 2.0 + TestDelegate().maxExtent - 600.0; // 600 is the height of the test viewport
     assert(max < 10000.0);
     expect(max, 1600.0);
     expect(position.pixels, 0.0);
@@ -52,17 +52,17 @@ void main() {
   });
 
   testWidgets('Sliver appbars - floating - normal behavior works', (WidgetTester tester) async {
-    final TestDelegate delegate = new TestDelegate();
+    final TestDelegate delegate = TestDelegate();
     const double bigHeight = 1000.0;
     GlobalKey key1, key2, key3;
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new CustomScrollView(
+        child: CustomScrollView(
           slivers: <Widget>[
-            new BigSliver(key: key1 = new GlobalKey(), height: bigHeight),
-            new SliverPersistentHeader(key: key2 = new GlobalKey(), delegate: delegate, floating: true),
-            new BigSliver(key: key3 = new GlobalKey(), height: bigHeight),
+            BigSliver(key: key1 = GlobalKey(), height: bigHeight),
+            SliverPersistentHeader(key: key2 = GlobalKey(), delegate: delegate, floating: true),
+            BigSliver(key: key3 = GlobalKey(), height: bigHeight),
           ],
         ),
       ),
@@ -76,45 +76,45 @@ void main() {
     position.animateTo(bigHeight - 600.0 + delegate.maxExtent, curve: Curves.linear, duration: const Duration(minutes: 1));
     await tester.pumpAndSettle(const Duration(milliseconds: 1000));
     verifyPaintPosition(key1, const Offset(0.0, 0.0), true);
-    verifyPaintPosition(key2, new Offset(0.0, 600.0 - delegate.maxExtent), true);
-    verifyActualBoxPosition(tester, find.byType(Container), 0, new Rect.fromLTWH(0.0, 600.0 - delegate.maxExtent, 800.0, delegate.maxExtent));
+    verifyPaintPosition(key2, Offset(0.0, 600.0 - delegate.maxExtent), true);
+    verifyActualBoxPosition(tester, find.byType(Container), 0, Rect.fromLTWH(0.0, 600.0 - delegate.maxExtent, 800.0, delegate.maxExtent));
     verifyPaintPosition(key3, const Offset(0.0, 600.0), false);
 
     assert(delegate.maxExtent * 2.0 < 600.0); // make sure this fits on the test screen...
     position.animateTo(bigHeight - 600.0 + delegate.maxExtent * 2.0, curve: Curves.linear, duration: const Duration(minutes: 1));
     await tester.pumpAndSettle(const Duration(milliseconds: 1000));
     verifyPaintPosition(key1, const Offset(0.0, 0.0), true);
-    verifyPaintPosition(key2, new Offset(0.0, 600.0 - delegate.maxExtent * 2.0), true);
-    verifyActualBoxPosition(tester, find.byType(Container), 0, new Rect.fromLTWH(0.0, 600.0 - delegate.maxExtent * 2.0, 800.0, delegate.maxExtent));
-    verifyPaintPosition(key3, new Offset(0.0, 600.0 - delegate.maxExtent), true);
+    verifyPaintPosition(key2, Offset(0.0, 600.0 - delegate.maxExtent * 2.0), true);
+    verifyActualBoxPosition(tester, find.byType(Container), 0, Rect.fromLTWH(0.0, 600.0 - delegate.maxExtent * 2.0, 800.0, delegate.maxExtent));
+    verifyPaintPosition(key3, Offset(0.0, 600.0 - delegate.maxExtent), true);
 
     position.animateTo(bigHeight, curve: Curves.linear, duration: const Duration(minutes: 1));
     await tester.pumpAndSettle(const Duration(milliseconds: 1000));
     verifyPaintPosition(key1, const Offset(0.0, 0.0), false);
     verifyPaintPosition(key2, const Offset(0.0, 0.0), true);
-    verifyActualBoxPosition(tester, find.byType(Container), 0, new Rect.fromLTWH(0.0, 0.0, 800.0, delegate.maxExtent));
-    verifyPaintPosition(key3, new Offset(0.0, delegate.maxExtent), true);
+    verifyActualBoxPosition(tester, find.byType(Container), 0, Rect.fromLTWH(0.0, 0.0, 800.0, delegate.maxExtent));
+    verifyPaintPosition(key3, Offset(0.0, delegate.maxExtent), true);
 
     position.animateTo(bigHeight + delegate.maxExtent * 0.1, curve: Curves.linear, duration: const Duration(minutes: 1));
     await tester.pumpAndSettle(const Duration(milliseconds: 1000));
     verifyPaintPosition(key1, const Offset(0.0, 0.0), false);
     verifyPaintPosition(key2, const Offset(0.0, 0.0), true);
-    verifyActualBoxPosition(tester, find.byType(Container), 0, new Rect.fromLTWH(0.0, 0.0, 800.0, delegate.maxExtent * 0.9));
-    verifyPaintPosition(key3, new Offset(0.0, delegate.maxExtent * 0.9), true);
+    verifyActualBoxPosition(tester, find.byType(Container), 0, Rect.fromLTWH(0.0, 0.0, 800.0, delegate.maxExtent * 0.9));
+    verifyPaintPosition(key3, Offset(0.0, delegate.maxExtent * 0.9), true);
 
     position.animateTo(bigHeight + delegate.maxExtent * 0.5, curve: Curves.linear, duration: const Duration(minutes: 1));
     await tester.pumpAndSettle(const Duration(milliseconds: 1000));
     verifyPaintPosition(key1, const Offset(0.0, 0.0), false);
     verifyPaintPosition(key2, const Offset(0.0, 0.0), true);
-    verifyActualBoxPosition(tester, find.byType(Container), 0, new Rect.fromLTWH(0.0, 0.0, 800.0, delegate.maxExtent * 0.5));
-    verifyPaintPosition(key3, new Offset(0.0, delegate.maxExtent * 0.5), true);
+    verifyActualBoxPosition(tester, find.byType(Container), 0, Rect.fromLTWH(0.0, 0.0, 800.0, delegate.maxExtent * 0.5));
+    verifyPaintPosition(key3, Offset(0.0, delegate.maxExtent * 0.5), true);
 
     position.animateTo(bigHeight + delegate.maxExtent * 0.9, curve: Curves.linear, duration: const Duration(minutes: 1));
     await tester.pumpAndSettle(const Duration(milliseconds: 1000));
     verifyPaintPosition(key1, const Offset(0.0, 0.0), false);
     verifyPaintPosition(key2, const Offset(0.0, 0.0), true);
-    verifyActualBoxPosition(tester, find.byType(Container), 0, new Rect.fromLTWH(0.0, -delegate.maxExtent * 0.4, 800.0, delegate.maxExtent * 0.5));
-    verifyPaintPosition(key3, new Offset(0.0, delegate.maxExtent * 0.1), true);
+    verifyActualBoxPosition(tester, find.byType(Container), 0, Rect.fromLTWH(0.0, -delegate.maxExtent * 0.4, 800.0, delegate.maxExtent * 0.5));
+    verifyPaintPosition(key3, Offset(0.0, delegate.maxExtent * 0.1), true);
 
     position.animateTo(bigHeight + delegate.maxExtent * 2.0, curve: Curves.linear, duration: const Duration(minutes: 1));
     await tester.pumpAndSettle(const Duration(milliseconds: 1000));
@@ -124,17 +124,17 @@ void main() {
   });
 
   testWidgets('Sliver appbars - floating - no floating behavior when animating', (WidgetTester tester) async {
-    final TestDelegate delegate = new TestDelegate();
+    final TestDelegate delegate = TestDelegate();
     const double bigHeight = 1000.0;
     GlobalKey key1, key2, key3;
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new CustomScrollView(
+        child: CustomScrollView(
           slivers: <Widget>[
-            new BigSliver(key: key1 = new GlobalKey(), height: bigHeight),
-            new SliverPersistentHeader(key: key2 = new GlobalKey(), delegate: delegate, floating: true),
-            new BigSliver(key: key3 = new GlobalKey(), height: bigHeight),
+            BigSliver(key: key1 = GlobalKey(), height: bigHeight),
+            SliverPersistentHeader(key: key2 = GlobalKey(), delegate: delegate, floating: true),
+            BigSliver(key: key3 = GlobalKey(), height: bigHeight),
           ],
         ),
       ),
@@ -159,17 +159,17 @@ void main() {
   });
 
   testWidgets('Sliver appbars - floating - floating behavior when dragging down', (WidgetTester tester) async {
-    final TestDelegate delegate = new TestDelegate();
+    final TestDelegate delegate = TestDelegate();
     const double bigHeight = 1000.0;
     GlobalKey key1, key2, key3;
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new CustomScrollView(
+        child: CustomScrollView(
           slivers: <Widget>[
-            new BigSliver(key: key1 = new GlobalKey(), height: bigHeight),
-            new SliverPersistentHeader(key: key2 = new GlobalKey(), delegate: delegate, floating: true),
-            new BigSliver(key: key3 = new GlobalKey(), height: bigHeight),
+            BigSliver(key: key1 = GlobalKey(), height: bigHeight),
+            SliverPersistentHeader(key: key2 = GlobalKey(), delegate: delegate, floating: true),
+            BigSliver(key: key3 = GlobalKey(), height: bigHeight),
           ],
         ),
       ),
@@ -187,27 +187,27 @@ void main() {
     verifyPaintPosition(key3, const Offset(0.0, 0.0), true);
 
     position.animateTo(bigHeight + delegate.maxExtent * 1.9, curve: Curves.linear, duration: const Duration(minutes: 1));
-    position.updateUserScrollDirection(ScrollDirection.forward); // ignore: invalid_use_of_protected_member
+    position.updateUserScrollDirection(ScrollDirection.forward);
     await tester.pumpAndSettle(const Duration(milliseconds: 1000));
     verifyPaintPosition(key1, const Offset(0.0, 0.0), false);
     verifyPaintPosition(key2, const Offset(0.0, 0.0), true);
-    verifyActualBoxPosition(tester, find.byType(Container), 0, new Rect.fromLTWH(0.0, -delegate.maxExtent * 0.4, 800.0, delegate.maxExtent * 0.5));
+    verifyActualBoxPosition(tester, find.byType(Container), 0, Rect.fromLTWH(0.0, -delegate.maxExtent * 0.4, 800.0, delegate.maxExtent * 0.5));
     verifyPaintPosition(key3, const Offset(0.0, 0.0), true);
   });
 
   testWidgets('Sliver appbars - floating - overscroll gap is below header', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new CustomScrollView(
+        child: CustomScrollView(
           physics: const BouncingScrollPhysics(),
           slivers: <Widget>[
-            new SliverPersistentHeader(delegate: new TestDelegate(), floating: true),
+            SliverPersistentHeader(delegate: TestDelegate(), floating: true),
             const SliverList(
-              delegate: const SliverChildListDelegate(const <Widget>[
-                const SizedBox(
+              delegate: SliverChildListDelegate(<Widget>[
+                SizedBox(
                   height: 300.0,
-                  child: const Text('X'),
+                  child: Text('X'),
                 ),
               ]),
             ),
@@ -237,7 +237,7 @@ class TestDelegate extends SliverPersistentHeaderDelegate {
 
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return new Container(constraints: new BoxConstraints(minHeight: minExtent, maxHeight: maxExtent));
+    return Container(constraints: BoxConstraints(minHeight: minExtent, maxHeight: maxExtent));
   }
 
   @override
@@ -261,7 +261,7 @@ class RenderBigSliver extends RenderSliver {
 
   @override
   void performLayout() {
-    geometry = new SliverGeometry(
+    geometry = SliverGeometry(
       scrollExtent: height,
       paintExtent: paintExtent,
       maxPaintExtent: height,
@@ -276,7 +276,7 @@ class BigSliver extends LeafRenderObjectWidget {
 
   @override
   RenderBigSliver createRenderObject(BuildContext context) {
-    return new RenderBigSliver(height);
+    return RenderBigSliver(height);
   }
 
   @override

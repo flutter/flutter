@@ -14,43 +14,43 @@ import '../rendering/mock_canvas.dart';
 import '../rendering/rendering_tester.dart';
 
 void main() {
-  new TestRenderingFlutterBinding(); // initializes the imageCache
+  TestRenderingFlutterBinding(); // initializes the imageCache
 
   test('ShapeDecoration constructor', () {
-    const Color colorR = const Color(0xffff0000);
-    const Color colorG = const Color(0xff00ff00);
-    const Gradient gradient = const LinearGradient(colors: const <Color>[colorR, colorG]);
-    expect(const ShapeDecoration(shape: const Border()), const ShapeDecoration(shape: const Border()));
-    expect(() => new ShapeDecoration(color: colorR, gradient: nonconst(gradient), shape: const Border()), throwsAssertionError);
-    expect(() => new ShapeDecoration(gradient: nonconst(gradient), shape: null), throwsAssertionError);
+    const Color colorR = Color(0xffff0000);
+    const Color colorG = Color(0xff00ff00);
+    const Gradient gradient = LinearGradient(colors: <Color>[colorR, colorG]);
+    expect(const ShapeDecoration(shape: Border()), const ShapeDecoration(shape: Border()));
+    expect(() => ShapeDecoration(color: colorR, gradient: nonconst(gradient), shape: const Border()), throwsAssertionError);
+    expect(() => ShapeDecoration(gradient: nonconst(gradient), shape: null), throwsAssertionError);
     expect(
-      new ShapeDecoration.fromBoxDecoration(const BoxDecoration(shape: BoxShape.circle)),
-      const ShapeDecoration(shape: const CircleBorder(side: BorderSide.none)),
+      ShapeDecoration.fromBoxDecoration(const BoxDecoration(shape: BoxShape.circle)),
+      const ShapeDecoration(shape: CircleBorder(side: BorderSide.none)),
     );
     expect(
-      new ShapeDecoration.fromBoxDecoration(new BoxDecoration(shape: BoxShape.rectangle, borderRadius: new BorderRadiusDirectional.circular(100.0))),
-      new ShapeDecoration(shape: new RoundedRectangleBorder(borderRadius: new BorderRadiusDirectional.circular(100.0))),
+      ShapeDecoration.fromBoxDecoration(BoxDecoration(shape: BoxShape.rectangle, borderRadius: BorderRadiusDirectional.circular(100.0))),
+      ShapeDecoration(shape: RoundedRectangleBorder(borderRadius: BorderRadiusDirectional.circular(100.0))),
     );
     expect(
-      new ShapeDecoration.fromBoxDecoration(new BoxDecoration(shape: BoxShape.circle, border: new Border.all(color: colorG))),
-      const ShapeDecoration(shape: const CircleBorder(side: const BorderSide(color: colorG))),
+      ShapeDecoration.fromBoxDecoration(BoxDecoration(shape: BoxShape.circle, border: Border.all(color: colorG))),
+      const ShapeDecoration(shape: CircleBorder(side: BorderSide(color: colorG))),
     );
     expect(
-      new ShapeDecoration.fromBoxDecoration(new BoxDecoration(shape: BoxShape.rectangle, border: new Border.all(color: colorR))),
-      new ShapeDecoration(shape: new Border.all(color: colorR)),
+      ShapeDecoration.fromBoxDecoration(BoxDecoration(shape: BoxShape.rectangle, border: Border.all(color: colorR))),
+      ShapeDecoration(shape: Border.all(color: colorR)),
     );
     expect(
-      new ShapeDecoration.fromBoxDecoration(const BoxDecoration(shape: BoxShape.rectangle, border: const BorderDirectional(start: const BorderSide()))),
-      const ShapeDecoration(shape: const BorderDirectional(start: const BorderSide())),
+      ShapeDecoration.fromBoxDecoration(const BoxDecoration(shape: BoxShape.rectangle, border: BorderDirectional(start: BorderSide()))),
+      const ShapeDecoration(shape: BorderDirectional(start: BorderSide())),
     );
   });
 
   test('ShapeDecoration.lerp and hit test', () {
-    const Decoration a = const ShapeDecoration(shape: const CircleBorder());
-    const Decoration b = const ShapeDecoration(shape: const RoundedRectangleBorder());
+    const Decoration a = ShapeDecoration(shape: CircleBorder());
+    const Decoration b = ShapeDecoration(shape: RoundedRectangleBorder());
     expect(Decoration.lerp(a, b, 0.0), a);
     expect(Decoration.lerp(a, b, 1.0), b);
-    const Size size = const Size(200.0, 100.0); // at t=0.5, width will be 150 (x=25 to x=175).
+    const Size size = Size(200.0, 100.0); // at t=0.5, width will be 150 (x=25 to x=175).
     expect(a.hitTest(size, const Offset(20.0, 50.0)), isFalse);
     expect(Decoration.lerp(a, b, 0.1).hitTest(size, const Offset(20.0, 50.0)), isFalse);
     expect(Decoration.lerp(a, b, 0.5).hitTest(size, const Offset(20.0, 50.0)), isFalse);
@@ -60,28 +60,28 @@ void main() {
 
   test('ShapeDecoration.image RTL test', () {
     final List<int> log = <int>[];
-    final ShapeDecoration decoration = new ShapeDecoration(
+    final ShapeDecoration decoration = ShapeDecoration(
       shape: const CircleBorder(),
-      image: new DecorationImage(
-        image: new TestImageProvider(),
+      image: DecorationImage(
+        image: TestImageProvider(),
         alignment: AlignmentDirectional.bottomEnd,
       ),
     );
     final BoxPainter painter = decoration.createBoxPainter(() { log.add(0); });
-    expect((Canvas canvas) => painter.paint(canvas, Offset.zero, const ImageConfiguration(size: const Size(100.0, 100.0))), paintsAssertion);
+    expect((Canvas canvas) => painter.paint(canvas, Offset.zero, const ImageConfiguration(size: Size(100.0, 100.0))), paintsAssertion);
     expect(
       (Canvas canvas) {
         return painter.paint(
           canvas,
           const Offset(20.0, -40.0),
           const ImageConfiguration(
-            size: const Size(1000.0, 1000.0),
+            size: Size(1000.0, 1000.0),
             textDirection: TextDirection.rtl,
           ),
         );
       },
       paints
-        ..drawImageRect(source: new Rect.fromLTRB(0.0, 0.0, 100.0, 200.0), destination: new Rect.fromLTRB(20.0, 1000.0 - 40.0 - 200.0, 20.0 + 100.0, 1000.0 - 40.0))
+        ..drawImageRect(source: Rect.fromLTRB(0.0, 0.0, 100.0, 200.0), destination: Rect.fromLTRB(20.0, 1000.0 - 40.0 - 200.0, 20.0 + 100.0, 1000.0 - 40.0)),
     );
     expect(
       (Canvas canvas) {
@@ -89,12 +89,12 @@ void main() {
           canvas,
           Offset.zero,
           const ImageConfiguration(
-            size: const Size(100.0, 200.0),
+            size: Size(100.0, 200.0),
             textDirection: TextDirection.ltr,
           ),
         );
       },
-      isNot(paints..image()) // we always use drawImageRect
+      isNot(paints..image()), // we always use drawImageRect
     );
     expect(log, isEmpty);
   });
@@ -103,13 +103,13 @@ void main() {
 class TestImageProvider extends ImageProvider<TestImageProvider> {
   @override
   Future<TestImageProvider> obtainKey(ImageConfiguration configuration) {
-    return new SynchronousFuture<TestImageProvider>(this);
+    return SynchronousFuture<TestImageProvider>(this);
   }
 
   @override
   ImageStreamCompleter load(TestImageProvider key) {
-    return new OneFrameImageStreamCompleter(
-      new SynchronousFuture<ImageInfo>(new ImageInfo(image: new TestImage(), scale: 1.0)),
+    return OneFrameImageStreamCompleter(
+      SynchronousFuture<ImageInfo>(ImageInfo(image: TestImage(), scale: 1.0)),
     );
   }
 }
@@ -125,7 +125,7 @@ class TestImage implements ui.Image {
   void dispose() { }
 
   @override
-  Future<ByteData> toByteData({ui.ImageByteFormat format}) async {
-    throw new UnsupportedError('Cannot encode test image');
+  Future<ByteData> toByteData({ ui.ImageByteFormat format = ui.ImageByteFormat.rawRgba }) async {
+    throw UnsupportedError('Cannot encode test image');
   }
 }

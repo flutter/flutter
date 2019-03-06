@@ -5,7 +5,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
-final RouteFactory generateRoute = (RouteSettings settings) => new PageRouteBuilder<void>(
+final RouteFactory generateRoute = (RouteSettings settings) => PageRouteBuilder<void>(
   settings: settings,
   pageBuilder: (BuildContext context, Animation<double> animation1, Animation<double> animation2) {
     return const Placeholder();
@@ -14,19 +14,19 @@ final RouteFactory generateRoute = (RouteSettings settings) => new PageRouteBuil
 
 void main() {
   testWidgets('WidgetsApp.navigatorKey', (WidgetTester tester) async {
-    final GlobalKey<NavigatorState> key = new GlobalKey<NavigatorState>();
-    await tester.pumpWidget(new WidgetsApp(
+    final GlobalKey<NavigatorState> key = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(WidgetsApp(
       navigatorKey: key,
       color: const Color(0xFF112233),
       onGenerateRoute: generateRoute,
     ));
     expect(key.currentState, isInstanceOf<NavigatorState>());
-    await tester.pumpWidget(new WidgetsApp(
+    await tester.pumpWidget(WidgetsApp(
       color: const Color(0xFF112233),
       onGenerateRoute: generateRoute,
     ));
     expect(key.currentState, isNull);
-    await tester.pumpWidget(new WidgetsApp(
+    await tester.pumpWidget(WidgetsApp(
       navigatorKey: key,
       color: const Color(0xFF112233),
       onGenerateRoute: generateRoute,

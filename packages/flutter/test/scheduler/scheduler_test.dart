@@ -6,7 +6,8 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
-import 'package:test/test.dart';
+
+import '../flutter_test_alternative.dart';
 
 class TestSchedulerBinding extends BindingBase with ServicesBinding, SchedulerBinding { }
 
@@ -21,11 +22,11 @@ class TestStrategy {
 void main() {
   SchedulerBinding scheduler;
   setUpAll(() {
-    scheduler = new TestSchedulerBinding();
+    scheduler = TestSchedulerBinding();
   });
 
   test('Tasks are executed in the right order', () {
-    final TestStrategy strategy = new TestStrategy();
+    final TestStrategy strategy = TestStrategy();
     scheduler.schedulingStrategy = strategy.shouldRunTaskWithPriority;
     final List<int> input = <int>[2, 23, 23, 11, 0, 80, 3];
     final List<int> executedTasks = <int>[];
@@ -93,14 +94,14 @@ void main() {
   test('2 calls to scheduleWarmUpFrame just schedules it once', () {
     final List<VoidCallback> timerQueueTasks = <VoidCallback>[];
     bool taskExecuted = false;
-    runZoned(
+    runZoned<void>(
       () {
         // Run it twice without processing the queued tasks.
         scheduler.scheduleWarmUpFrame();
         scheduler.scheduleWarmUpFrame();
         scheduler.scheduleTask(() { taskExecuted = true; }, Priority.touch);
       },
-      zoneSpecification: new ZoneSpecification(
+      zoneSpecification: ZoneSpecification(
         createTimer: (Zone self, ZoneDelegate parent, Zone zone, Duration duration, void f()) {
           // Don't actually run the tasks, just record that it was scheduled.
           timerQueueTasks.add(f);

@@ -19,7 +19,7 @@ import 'constants.dart';
 /// ancestor, a [TabController] can be shared by providing a
 /// [DefaultTabController] inherited widget.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// This widget introduces a [Scaffold] with an [AppBar] and a [TabBar].
 ///
@@ -27,13 +27,13 @@ import 'constants.dart';
 /// class MyTabbedPage extends StatefulWidget {
 ///   const MyTabbedPage({ Key key }) : super(key: key);
 ///   @override
-///   _MyTabbedPageState createState() => new _MyTabbedPageState();
+///   _MyTabbedPageState createState() => _MyTabbedPageState();
 /// }
 ///
 /// class _MyTabbedPageState extends State<MyTabbedPage> with SingleTickerProviderStateMixin {
 ///   final List<Tab> myTabs = <Tab>[
-///     new Tab(text: 'LEFT'),
-///     new Tab(text: 'RIGHT'),
+///     Tab(text: 'LEFT'),
+///     Tab(text: 'RIGHT'),
 ///   ];
 ///
 ///   TabController _tabController;
@@ -41,7 +41,7 @@ import 'constants.dart';
 ///   @override
 ///   void initState() {
 ///     super.initState();
-///     _tabController = new TabController(vsync: this, length: myTabs.length);
+///     _tabController = TabController(vsync: this, length: myTabs.length);
 ///   }
 ///
 ///  @override
@@ -52,23 +52,24 @@ import 'constants.dart';
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
-///     return new Scaffold(
-///       appBar: new AppBar(
-///         bottom: new TabBar(
+///     return Scaffold(
+///       appBar: AppBar(
+///         bottom: TabBar(
 ///           controller: _tabController,
 ///           tabs: myTabs,
 ///         ),
 ///       ),
-///       body: new TabBarView(
+///       body: TabBarView(
 ///         controller: _tabController,
 ///         children: myTabs.map((Tab tab) {
-///           return new Center(child: new Text(tab.text));
+///           return Center(child: Text(tab.text));
 ///         }).toList(),
 ///       ),
 ///     );
 ///   }
 /// }
 /// ```
+/// {@end-tool}
 class TabController extends ChangeNotifier {
   /// Creates an object that manages the state required by [TabBar] and a [TabBarView].
   ///
@@ -82,10 +83,10 @@ class TabController extends ChangeNotifier {
       assert(initialIndex != null && initialIndex >= 0 && (length == 0 || initialIndex < length)),
       _index = initialIndex,
       _previousIndex = initialIndex,
-      _animationController = length < 2 ? null : new AnimationController(
+      _animationController = length < 2 ? null : AnimationController(
         value: initialIndex.toDouble(),
         upperBound: (length - 1).toDouble(),
-        vsync: vsync
+        vsync: vsync,
       );
 
   /// An animation whose value represents the current position of the [TabBar]'s
@@ -149,7 +150,12 @@ class TabController extends ChangeNotifier {
   int get previousIndex => _previousIndex;
   int _previousIndex;
 
-  /// True while we're animating from [previousIndex] to [index].
+  /// True while we're animating from [previousIndex] to [index] as a
+  /// consequence of calling [animateTo].
+  ///
+  /// This value is true during the [animateTo] animation that's triggered when
+  /// the user taps a [TabBar] tab. It is false when [offset] is changing as a
+  /// consequence of the user dragging (and "flinging") the [TabBarView].
   bool get indexIsChanging => _indexIsChangingCount != 0;
   int _indexIsChangingCount = 0;
 
@@ -192,7 +198,7 @@ class _TabControllerScope extends InheritedWidget {
     Key key,
     this.controller,
     this.enabled,
-    Widget child
+    Widget child,
   }) : super(key: key, child: child);
 
   final TabController controller;
@@ -216,23 +222,23 @@ class _TabControllerScope extends InheritedWidget {
 /// ```dart
 /// class MyDemo extends StatelessWidget {
 ///   final List<Tab> myTabs = <Tab>[
-///     new Tab(text: 'LEFT'),
-///     new Tab(text: 'RIGHT'),
+///     Tab(text: 'LEFT'),
+///     Tab(text: 'RIGHT'),
 ///   ];
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
-///     return new DefaultTabController(
+///     return DefaultTabController(
 ///       length: myTabs.length,
-///       child: new Scaffold(
-///         appBar: new AppBar(
-///           bottom: new TabBar(
+///       child: Scaffold(
+///         appBar: AppBar(
+///           bottom: TabBar(
 ///             tabs: myTabs,
 ///           ),
 ///         ),
-///         body: new TabBarView(
+///         body: TabBarView(
 ///           children: myTabs.map((Tab tab) {
-///             return new Center(child: new Text(tab.text));
+///             return Center(child: Text(tab.text));
 ///           }).toList(),
 ///         ),
 ///       ),
@@ -282,7 +288,7 @@ class DefaultTabController extends StatefulWidget {
   }
 
   @override
-  _DefaultTabControllerState createState() => new _DefaultTabControllerState();
+  _DefaultTabControllerState createState() => _DefaultTabControllerState();
 }
 
 class _DefaultTabControllerState extends State<DefaultTabController> with SingleTickerProviderStateMixin {
@@ -291,7 +297,7 @@ class _DefaultTabControllerState extends State<DefaultTabController> with Single
   @override
   void initState() {
     super.initState();
-    _controller = new TabController(
+    _controller = TabController(
       vsync: this,
       length: widget.length,
       initialIndex: widget.initialIndex,
@@ -306,7 +312,7 @@ class _DefaultTabControllerState extends State<DefaultTabController> with Single
 
   @override
   Widget build(BuildContext context) {
-    return new _TabControllerScope(
+    return _TabControllerScope(
       controller: _controller,
       enabled: TickerMode.of(context),
       child: widget.child,

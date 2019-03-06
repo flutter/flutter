@@ -13,7 +13,7 @@ import 'file_system.dart';
 import 'process.dart';
 
 const String _kRecordingType = 'process';
-const ProcessManager _kLocalProcessManager = const LocalProcessManager();
+const ProcessManager _kLocalProcessManager = LocalProcessManager();
 
 /// The active process manager.
 ProcessManager get processManager => context[ProcessManager] ?? _kLocalProcessManager;
@@ -27,8 +27,8 @@ ProcessManager get processManager => context[ProcessManager] ?? _kLocalProcessMa
 /// subdirectory.
 RecordingProcessManager getRecordingProcessManager(String location) {
   final Directory dir = getRecordingSink(location, _kRecordingType);
-  const ProcessManager delegate = const LocalProcessManager();
-  final RecordingProcessManager manager = new RecordingProcessManager(delegate, dir);
+  const ProcessManager delegate = LocalProcessManager();
+  final RecordingProcessManager manager = RecordingProcessManager(delegate, dir);
   addShutdownHook(() async {
     await manager.flush(finishRunningProcesses: true);
   }, ShutdownStage.SERIALIZE_RECORDING);
@@ -46,14 +46,7 @@ Future<ReplayProcessManager> getReplayProcessManager(String location) async {
 
   ProcessManager manager;
   try {
-    manager = await ReplayProcessManager.create(dir,
-      // TODO(tvolkert): Once https://github.com/flutter/flutter/issues/7166 is
-      //     resolved, we can use the default `streamDelay`. In the
-      //     meantime, native file I/O operations cause our `tail` process
-      //     streams to flush before our protocol discovery is listening on
-      //     them, causing us to timeout waiting for the observatory port.
-      streamDelay: const Duration(milliseconds: 50),
-    );
+    manager = await ReplayProcessManager.create(dir);
   } on ArgumentError catch (error) {
     throwToolExit('Invalid replay-from: $error');
   }

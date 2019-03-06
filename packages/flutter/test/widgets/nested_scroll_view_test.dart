@@ -5,6 +5,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/gestures.dart' show DragStartBehavior;
 
 import '../rendering/mock_canvas.dart';
 
@@ -13,85 +14,89 @@ class _CustomPhysics extends ClampingScrollPhysics {
 
   @override
   _CustomPhysics applyTo(ScrollPhysics ancestor) {
-    return new _CustomPhysics(parent: buildParent(ancestor));
+    return _CustomPhysics(parent: buildParent(ancestor));
   }
 
   @override
   Simulation createBallisticSimulation(ScrollMetrics position, double dragVelocity) {
-    return new ScrollSpringSimulation(spring, 1000.0, 1000.0, 1000.0);
+    return ScrollSpringSimulation(spring, 1000.0, 1000.0, 1000.0);
   }
 }
 
-Widget buildTest({ ScrollController controller, String title ='TTTTTTTT' }) {
-  return new Localizations(
+Widget buildTest({ ScrollController controller, String title = 'TTTTTTTT' }) {
+  return Localizations(
     locale: const Locale('en', 'US'),
     delegates: const <LocalizationsDelegate<dynamic>>[
       DefaultMaterialLocalizations.delegate,
       DefaultWidgetsLocalizations.delegate,
     ],
-    child: new Directionality(
+    child: Directionality(
       textDirection: TextDirection.ltr,
-      child: new MediaQuery(
+      child: MediaQuery(
         data: const MediaQueryData(),
-        child: new Scaffold(
-          body: new DefaultTabController(
+        child: Scaffold(
+          drawerDragStartBehavior: DragStartBehavior.down,
+          body: DefaultTabController(
             length: 4,
-            child: new NestedScrollView(
+            child: NestedScrollView(
+              dragStartBehavior: DragStartBehavior.down,
               controller: controller,
               headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
                 return <Widget>[
-                  new SliverAppBar(
-                    title: new Text(title),
+                  SliverAppBar(
+                    title: Text(title),
                     pinned: true,
                     expandedHeight: 200.0,
                     forceElevated: innerBoxIsScrolled,
                     bottom: const TabBar(
-                      tabs: const <Tab>[
-                        const Tab(text: 'AA'),
-                        const Tab(text: 'BB'),
-                        const Tab(text: 'CC'),
-                        const Tab(text: 'DD'),
+                      tabs: <Tab>[
+                        Tab(text: 'AA'),
+                        Tab(text: 'BB'),
+                        Tab(text: 'CC'),
+                        Tab(text: 'DD'),
                       ],
                     ),
                   ),
                 ];
               },
-              body: new TabBarView(
+              body: TabBarView(
                 children: <Widget>[
-                  new ListView(
+                  ListView(
                     children: <Widget>[
-                      new Container(
+                      Container(
                         height: 300.0,
                         child: const Text('aaa1'),
                       ),
-                      new Container(
+                      Container(
                         height: 200.0,
                         child: const Text('aaa2'),
                       ),
-                      new Container(
+                      Container(
                         height: 100.0,
                         child: const Text('aaa3'),
                       ),
-                      new Container(
+                      Container(
                         height: 50.0,
                         child: const Text('aaa4'),
                       ),
                     ],
                   ),
-                  new ListView(
+                  ListView(
+                    dragStartBehavior: DragStartBehavior.down,
                     children: <Widget>[
-                      new Container(
+                      Container(
                         height: 100.0,
                         child: const Text('bbb1'),
                       ),
                     ],
                   ),
-                  new Container(
-                    child: const Center(child: const Text('ccc1')),
+                  Container(
+                    child: const Center(child: Text('ccc1')),
                   ),
-                  new ListView(
+                  ListView(
+                    dragStartBehavior: DragStartBehavior.down,
                     children: <Widget>[
-                      new Container(
+                      Container(
                         height: 10000.0,
                         child: const Text('ddd1'),
                       ),
@@ -212,7 +217,7 @@ void main() {
   });
 
   testWidgets('NestedScrollView with a ScrollController', (WidgetTester tester) async {
-    final ScrollController controller = new ScrollController(initialScrollOffset: 50.0);
+    final ScrollController controller = ScrollController(initialScrollOffset: 50.0);
 
     double scrollOffset;
     controller.addListener(() {
@@ -268,13 +273,13 @@ void main() {
   });
 
   testWidgets('Three NestedScrollViews with one ScrollController', (WidgetTester tester) async {
-    final TrackingScrollController controller = new TrackingScrollController();
+    final TrackingScrollController controller = TrackingScrollController();
     expect(controller.mostRecentlyUpdatedPosition, isNull);
     expect(controller.initialScrollOffset, 0.0);
 
-    await tester.pumpWidget(new Directionality(
+    await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
-      child: new PageView(
+      child: PageView(
         children: <Widget>[
           buildTest(controller: controller, title: 'Page0'),
           buildTest(controller: controller, title: 'Page1'),
@@ -316,21 +321,28 @@ void main() {
   });
 
   testWidgets('NestedScrollViews with custom physics', (WidgetTester tester) async {
-    await tester.pumpWidget(new Directionality(
+    await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
-      child: new MediaQuery(
-        data: const MediaQueryData(),
-        child: new NestedScrollView(
-          physics: const _CustomPhysics(),
-          headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-            return <Widget>[
-              const SliverAppBar(
-                floating: true,
-                title: const Text('AA'),
-              ),
-            ];
-          },
-          body: new Container(),
+      child: Localizations(
+        locale: const Locale('en', 'US'),
+        delegates: const <LocalizationsDelegate<dynamic>>[
+          DefaultMaterialLocalizations.delegate,
+          DefaultWidgetsLocalizations.delegate,
+        ],
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: NestedScrollView(
+            physics: const _CustomPhysics(),
+            headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+              return <Widget>[
+                const SliverAppBar(
+                  floating: true,
+                  title: Text('AA'),
+                ),
+              ];
+            },
+            body: Container(),
+          ),
         ),
       ),
     ));
@@ -345,20 +357,21 @@ void main() {
 
   testWidgets('NestedScrollView and internal scrolling', (WidgetTester tester) async {
     debugDisableShadows = false;
-    const List<String> _tabs = const <String>['Hello', 'World'];
+    const List<String> _tabs = <String>['Hello', 'World'];
     int buildCount = 0;
     await tester.pumpWidget(
-      new MaterialApp(home: new Material(child:
+      MaterialApp(home: Material(child:
         // THE FOLLOWING SECTION IS FROM THE NestedScrollView DOCUMENTATION
         // (EXCEPT FOR THE CHANGES TO THE buildCount COUNTER)
-        new DefaultTabController(
+        DefaultTabController(
           length: _tabs.length, // This is the number of tabs.
-          child: new NestedScrollView(
+          child: NestedScrollView(
+            dragStartBehavior: DragStartBehavior.down,
             headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
               buildCount += 1; // THIS LINE IS NOT IN THE ORIGINAL -- ADDED FOR TEST
               // These are the slivers that show up in the "outer" scroll view.
               return <Widget>[
-                new SliverOverlapAbsorber(
+                SliverOverlapAbsorber(
                   // This widget takes the overlapping behavior of the SliverAppBar,
                   // and redirects it to the SliverOverlapInjector below. If it is
                   // missing, then it is possible for the nested "inner" scroll view
@@ -367,7 +380,7 @@ void main() {
                   // This is not necessary if the "headerSliverBuilder" only builds
                   // widgets that do not overlap the next sliver.
                   handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
-                  child: new SliverAppBar(
+                  child: SliverAppBar(
                     title: const Text('Books'), // This is the title in the app bar.
                     pinned: true,
                     expandedHeight: 150.0,
@@ -380,26 +393,28 @@ void main() {
                     // not actually aware of the precise position of the inner
                     // scroll views.
                     forceElevated: innerBoxIsScrolled,
-                    bottom: new TabBar(
+                    bottom: TabBar(
                       // These are the widgets to put in each tab in the tab bar.
-                      tabs: _tabs.map((String name) => new Tab(text: name)).toList(),
+                      tabs: _tabs.map<Widget>((String name) => Tab(text: name)).toList(),
+                      dragStartBehavior: DragStartBehavior.down,
                     ),
                   ),
                 ),
               ];
             },
-            body: new TabBarView(
+            body: TabBarView(
+              dragStartBehavior: DragStartBehavior.down,
               // These are the contents of the tab views, below the tabs.
-              children: _tabs.map((String name) {
-                return new SafeArea(
+              children: _tabs.map<Widget>((String name) {
+                return SafeArea(
                   top: false,
                   bottom: false,
-                  child: new Builder(
+                  child: Builder(
                     // This Builder is needed to provide a BuildContext that is "inside"
                     // the NestedScrollView, so that sliverOverlapAbsorberHandleFor() can
                     // find the NestedScrollView.
                     builder: (BuildContext context) {
-                      return new CustomScrollView(
+                      return CustomScrollView(
                         // The "controller" and "primary" members should be left
                         // unset, so that the NestedScrollView can control this
                         // inner scroll view.
@@ -408,29 +423,30 @@ void main() {
                         // The PageStorageKey should be unique to this ScrollView;
                         // it allows the list to remember its scroll position when
                         // the tab view is not on the screen.
-                        key: new PageStorageKey<String>(name),
+                        key: PageStorageKey<String>(name),
+                        dragStartBehavior: DragStartBehavior.down,
                         slivers: <Widget>[
-                          new SliverOverlapInjector(
+                          SliverOverlapInjector(
                             // This is the flip side of the SliverOverlapAbsorber above.
                             handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
                           ),
-                          new SliverPadding(
+                          SliverPadding(
                             padding: const EdgeInsets.all(8.0),
                             // In this example, the inner scroll view has
                             // fixed-height list items, hence the use of
                             // SliverFixedExtentList. However, one could use any
                             // sliver widget here, e.g. SliverList or SliverGrid.
-                            sliver: new SliverFixedExtentList(
+                            sliver: SliverFixedExtentList(
                               // The items in this example are fixed to 48 pixels
                               // high. This matches the Material Design spec for
                               // ListTile widgets.
                               itemExtent: 48.0,
-                              delegate: new SliverChildBuilderDelegate(
+                              delegate: SliverChildBuilderDelegate(
                                 (BuildContext context, int index) {
                                   // This builder is called for each child.
                                   // In this example, we just number each list item.
-                                  return new ListTile(
-                                    title: new Text('Item $index'),
+                                  return ListTile(
+                                    title: Text('Item $index'),
                                   );
                                 },
                                 // The childCount of the SliverChildBuilderDelegate
@@ -449,7 +465,7 @@ void main() {
               }).toList(),
             ),
           ),
-        )
+        ),
         // END
       )),
     );
@@ -575,23 +591,25 @@ void main() {
     // it also makes sure that if you scroll back the other way, the scroll
     // positions of the inner and outer list don't have a discontinuity.
     debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
-    const Key key1 = const ValueKey<int>(1);
-    const Key key2 = const ValueKey<int>(2);
+    const Key key1 = ValueKey<int>(1);
+    const Key key2 = ValueKey<int>(2);
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new Material(
-          child: new DefaultTabController(
+      MaterialApp(
+        home: Material(
+          child: DefaultTabController(
             length: 1,
-            child: new NestedScrollView(
+            child: NestedScrollView(
+              dragStartBehavior: DragStartBehavior.down,
               headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
                 return <Widget>[
                   const SliverPersistentHeader(
-                    delegate: const TestHeader(key: key1),
+                    delegate: TestHeader(key: key1),
                   ),
                 ];
               },
-              body: new SingleChildScrollView(
-                child: new Container(
+              body: SingleChildScrollView(
+                dragStartBehavior: DragStartBehavior.down,
+                child: Container(
                   height: 1000.0,
                   child: const Placeholder(key: key2),
                 ),
@@ -601,35 +619,35 @@ void main() {
         ),
       ),
     );
-    expect(tester.getRect(find.byKey(key1)), new Rect.fromLTWH(0.0, 0.0, 800.0, 100.0));
-    expect(tester.getRect(find.byKey(key2)), new Rect.fromLTWH(0.0, 100.0, 800.0, 1000.0));
+    expect(tester.getRect(find.byKey(key1)), Rect.fromLTWH(0.0, 0.0, 800.0, 100.0));
+    expect(tester.getRect(find.byKey(key2)), Rect.fromLTWH(0.0, 100.0, 800.0, 1000.0));
     final TestGesture gesture = await tester.startGesture(const Offset(10.0, 10.0));
     await gesture.moveBy(const Offset(0.0, -10.0)); // scroll up
     await tester.pump();
-    expect(tester.getRect(find.byKey(key1)), new Rect.fromLTWH(0.0, -10.0, 800.0, 100.0));
-    expect(tester.getRect(find.byKey(key2)), new Rect.fromLTWH(0.0, 90.0, 800.0, 1000.0));
+    expect(tester.getRect(find.byKey(key1)), Rect.fromLTWH(0.0, -10.0, 800.0, 100.0));
+    expect(tester.getRect(find.byKey(key2)), Rect.fromLTWH(0.0, 90.0, 800.0, 1000.0));
     await gesture.moveBy(const Offset(0.0, 10.0)); // scroll back to origin
     await tester.pump();
-    expect(tester.getRect(find.byKey(key1)), new Rect.fromLTWH(0.0, 0.0, 800.0, 100.0));
-    expect(tester.getRect(find.byKey(key2)), new Rect.fromLTWH(0.0, 100.0, 800.0, 1000.0));
+    expect(tester.getRect(find.byKey(key1)), Rect.fromLTWH(0.0, 0.0, 800.0, 100.0));
+    expect(tester.getRect(find.byKey(key2)), Rect.fromLTWH(0.0, 100.0, 800.0, 1000.0));
     await gesture.moveBy(const Offset(0.0, 10.0)); // overscroll
     await gesture.moveBy(const Offset(0.0, 10.0)); // overscroll
     await gesture.moveBy(const Offset(0.0, 10.0)); // overscroll
     await tester.pump();
-    expect(tester.getRect(find.byKey(key1)), new Rect.fromLTWH(0.0, 0.0, 800.0, 100.0));
+    expect(tester.getRect(find.byKey(key1)), Rect.fromLTWH(0.0, 0.0, 800.0, 100.0));
     expect(tester.getRect(find.byKey(key2)).top, greaterThan(100.0));
     expect(tester.getRect(find.byKey(key2)).top, lessThan(130.0));
     await gesture.moveBy(const Offset(0.0, -1.0)); // scroll back a little
     await tester.pump();
-    expect(tester.getRect(find.byKey(key1)), new Rect.fromLTWH(0.0, -1.0, 800.0, 100.0));
+    expect(tester.getRect(find.byKey(key1)), Rect.fromLTWH(0.0, -1.0, 800.0, 100.0));
     expect(tester.getRect(find.byKey(key2)).top, greaterThan(100.0));
     expect(tester.getRect(find.byKey(key2)).top, lessThan(129.0));
     await gesture.moveBy(const Offset(0.0, -10.0)); // scroll back a lot
     await tester.pump();
-    expect(tester.getRect(find.byKey(key1)), new Rect.fromLTWH(0.0, -11.0, 800.0, 100.0));
+    expect(tester.getRect(find.byKey(key1)), Rect.fromLTWH(0.0, -11.0, 800.0, 100.0));
     await gesture.moveBy(const Offset(0.0, 20.0)); // overscroll again
     await tester.pump();
-    expect(tester.getRect(find.byKey(key1)), new Rect.fromLTWH(0.0, 0.0, 800.0, 100.0));
+    expect(tester.getRect(find.byKey(key1)), Rect.fromLTWH(0.0, 0.0, 800.0, 100.0));
     await gesture.up();
     debugDefaultTargetPlatformOverride = null;
   });
@@ -644,7 +662,7 @@ class TestHeader extends SliverPersistentHeaderDelegate {
   double get maxExtent => 100.0;
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return new Placeholder(key: key);
+    return Placeholder(key: key);
   }
   @override
   bool shouldRebuild(TestHeader oldDelegate) => false;

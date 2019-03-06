@@ -9,18 +9,18 @@ import 'package:flutter/foundation.dart';
 class Priority {
   const Priority._(this._value);
 
-  /// The integer that describes this Priority value.
+  /// Integer that describes this Priority value.
   int get value => _value;
   final int _value;
 
   /// A task to run after all other tasks, when no animations are running.
-  static const Priority idle = const Priority._(0);
+  static const Priority idle = Priority._(0);
 
   /// A task to run even when animations are running.
-  static const Priority animation = const Priority._(100000);
+  static const Priority animation = Priority._(100000);
 
   /// A task to run even when the user is interacting with the device.
-  static const Priority touch = const Priority._(200000);
+  static const Priority touch = Priority._(200000);
 
   /// Maximum offset by which to clamp relative priorities.
   ///
@@ -39,7 +39,7 @@ class Priority {
       // Clamp the input offset.
       offset = kMaxOffset * offset.sign;
     }
-    return new Priority._(_value + offset);
+    return Priority._(_value + offset);
   }
 
   /// Returns a priority relative to this priority.

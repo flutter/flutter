@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/scheduler.dart';
-import 'package:test/test.dart';
+
+import '../flutter_test_alternative.dart';
 
 void main() {
   test('Priority operators control test', () async {

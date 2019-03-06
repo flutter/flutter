@@ -4,7 +4,7 @@
 
 import 'dart:async';
 
-import 'package:test/test.dart';
+import 'package:test_api/test_api.dart' hide TypeMatcher, isInstanceOf;
 
 void main() {
   test('Message loop flushes microtasks between iterations', () async {
@@ -13,7 +13,7 @@ void main() {
     tasks.add(1);
 
     // Flush 0 microtasks.
-    await new Future<Null>.delayed(Duration.zero);
+    await Future<void>.delayed(Duration.zero);
 
     scheduleMicrotask(() {
       tasks.add(3);
@@ -25,7 +25,7 @@ void main() {
     tasks.add(2);
 
     // Flush 2 microtasks.
-    await new Future<Null>.delayed(Duration.zero);
+    await Future<void>.delayed(Duration.zero);
 
     scheduleMicrotask(() {
       tasks.add(6);
@@ -40,7 +40,7 @@ void main() {
     tasks.add(5);
 
     // Flush 3 microtasks.
-    await new Future<Null>.delayed(Duration.zero);
+    await Future<void>.delayed(Duration.zero);
 
     tasks.add(9);
 

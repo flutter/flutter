@@ -14,7 +14,7 @@ void testConfig(
   final String actualStringValue = Zone.current[String];
   final Map<Type, dynamic> otherActualValues = otherExpectedValues.map<Type, dynamic>(
     (Type key, dynamic value) {
-      return new MapEntry<Type, dynamic>(key, Zone.current[key]);
+      return MapEntry<Type, dynamic>(key, Zone.current[key]);
     },
   );
 

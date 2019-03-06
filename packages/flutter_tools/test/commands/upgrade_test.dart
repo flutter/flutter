@@ -6,7 +6,6 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/upgrade.dart';
-import 'package:test/test.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -36,18 +35,18 @@ void main() {
     });
 
     group('findProjectRoot', () {
-      Directory temp;
+      Directory tempDir;
 
       setUp(() async {
-        temp = fs.systemTempDirectory.createTempSync('flutter_tools');
+        tempDir = fs.systemTempDirectory.createTempSync('flutter_tools_upgrade_test.');
       });
 
       tearDown(() {
-        temp.deleteSync(recursive: true);
+        tryToDelete(tempDir);
       });
 
       testUsingContext('in project', () async {
-        final String projectPath = await createProject(temp);
+        final String projectPath = await createProject(tempDir);
         expect(findProjectRoot(projectPath), projectPath);
         expect(findProjectRoot(fs.path.join(projectPath, 'lib')), projectPath);
 
@@ -57,7 +56,7 @@ void main() {
       });
 
       testUsingContext('outside project', () async {
-        final String projectPath = await createProject(temp);
+        final String projectPath = await createProject(tempDir);
         expect(findProjectRoot(fs.directory(projectPath).parent.path), null);
         expect(findProjectRoot(Cache.flutterRoot), null);
       });

@@ -15,8 +15,8 @@ import 'package:typed_data/typed_buffers.dart' show Uint8Buffer;
 class WriteBuffer {
   /// Creates an interface for incrementally building a [ByteData] instance.
   WriteBuffer() {
-    _buffer = new Uint8Buffer();
-    _eightBytes = new ByteData(8);
+    _buffer = Uint8Buffer();
+    _eightBytes = ByteData(8);
     _eightBytesAsList = _eightBytes.buffer.asUint8List();
   }
 
@@ -65,7 +65,7 @@ class WriteBuffer {
     _buffer.addAll(list);
   }
 
-  /// Write all the values from a [Int32List] into the buffer.
+  /// Write all the values from an [Int32List] into the buffer.
   void putInt32List(Int32List list) {
     _alignTo(4);
     _buffer.addAll(list.buffer.asUint8List(list.offsetInBytes, 4 * list.length));

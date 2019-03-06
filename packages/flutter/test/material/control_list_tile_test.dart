@@ -9,11 +9,11 @@ import 'package:flutter/rendering.dart';
 import '../widgets/semantics_tester.dart';
 
 Widget wrap({ Widget child }) {
-  return new MediaQuery(
+  return MediaQuery(
     data: const MediaQueryData(),
-    child: new Directionality(
+    child: Directionality(
       textDirection: TextDirection.ltr,
-      child: new Material(child: child),
+      child: Material(child: child),
     ),
   );
 }
@@ -22,7 +22,7 @@ void main() {
   testWidgets('CheckboxListTile control test', (WidgetTester tester) async {
     final List<dynamic> log = <dynamic>[];
     await tester.pumpWidget(wrap(
-      child: new CheckboxListTile(
+      child: CheckboxListTile(
         value: true,
         onChanged: (bool value) { log.add(value); },
         title: const Text('Hello'),
@@ -37,7 +37,7 @@ void main() {
   testWidgets('RadioListTile control test', (WidgetTester tester) async {
     final List<dynamic> log = <dynamic>[];
     await tester.pumpWidget(wrap(
-      child: new RadioListTile<bool>(
+      child: RadioListTile<bool>(
         value: true,
         groupValue: false,
         onChanged: (bool value) { log.add(value); },
@@ -53,7 +53,7 @@ void main() {
   testWidgets('SwitchListTile control test', (WidgetTester tester) async {
     final List<dynamic> log = <dynamic>[];
     await tester.pumpWidget(wrap(
-      child: new SwitchListTile(
+      child: SwitchListTile(
         value: true,
         onChanged: (bool value) { log.add(value); },
         title: const Text('Hello'),
@@ -66,23 +66,23 @@ void main() {
   });
 
   testWidgets('SwitchListTile control test', (WidgetTester tester) async {
-    final SemanticsTester semantics = new SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(wrap(
-      child: new Column(
+      child: Column(
         children: <Widget>[
-          new SwitchListTile(
+          SwitchListTile(
             value: true,
             onChanged: (bool value) { },
             title: const Text('AAA'),
             secondary: const Text('aaa'),
           ),
-          new CheckboxListTile(
+          CheckboxListTile(
             value: true,
             onChanged: (bool value) { },
             title: const Text('BBB'),
             secondary: const Text('bbb'),
           ),
-          new RadioListTile<bool>(
+          RadioListTile<bool>(
             value: true,
             groupValue: false,
             onChanged: (bool value) { },
@@ -94,38 +94,38 @@ void main() {
     ));
 
     // This test verifies that the label and the control get merged.
-    expect(semantics, hasSemantics(new TestSemantics.root(
+    expect(semantics, hasSemantics(TestSemantics.root(
       children: <TestSemantics>[
-        new TestSemantics.rootChild(
+        TestSemantics.rootChild(
           id: 1,
-          rect: new Rect.fromLTWH(0.0, 0.0, 800.0, 56.0),
+          rect: Rect.fromLTWH(0.0, 0.0, 800.0, 56.0),
           transform: null,
           flags: <SemanticsFlag>[
-            SemanticsFlag.hasCheckedState,
-            SemanticsFlag.isChecked,
+            SemanticsFlag.hasToggledState,
+            SemanticsFlag.isToggled,
             SemanticsFlag.hasEnabledState,
-            SemanticsFlag.isEnabled
+            SemanticsFlag.isEnabled,
           ],
           actions: SemanticsAction.tap.index,
           label: 'aaa\nAAA',
         ),
-        new TestSemantics.rootChild(
+        TestSemantics.rootChild(
           id: 3,
-          rect: new Rect.fromLTWH(0.0, 0.0, 800.0, 56.0),
-          transform: new Matrix4.translationValues(0.0, 56.0, 0.0),
+          rect: Rect.fromLTWH(0.0, 0.0, 800.0, 56.0),
+          transform: Matrix4.translationValues(0.0, 56.0, 0.0),
           flags: <SemanticsFlag>[
             SemanticsFlag.hasCheckedState,
             SemanticsFlag.isChecked,
             SemanticsFlag.hasEnabledState,
-            SemanticsFlag.isEnabled
+            SemanticsFlag.isEnabled,
           ],
           actions: SemanticsAction.tap.index,
           label: 'bbb\nBBB',
         ),
-        new TestSemantics.rootChild(
+        TestSemantics.rootChild(
           id: 5,
-          rect: new Rect.fromLTWH(0.0, 0.0, 800.0, 56.0),
-          transform: new Matrix4.translationValues(0.0, 112.0, 0.0),
+          rect: Rect.fromLTWH(0.0, 0.0, 800.0, 56.0),
+          transform: Matrix4.translationValues(0.0, 112.0, 0.0),
           flags: <SemanticsFlag>[
             SemanticsFlag.hasCheckedState,
             SemanticsFlag.hasEnabledState,

@@ -68,7 +68,8 @@ contain translations for the same set of resource IDs as
 For each resource ID defined for English in material_en.arb, there is
 an additional resource with an '@' prefix. These '@' resources are not
 used by the material library at run time, they just exist to inform
-translators about how the value will be used.
+translators about how the value will be used, and to inform the code
+generator about what code to write.
 
 ```dart
 "cancelButtonLabel": "CANCEL",
@@ -130,16 +131,18 @@ help define an app's text theme and time picker layout respectively.
 
 The value of `timeOfDayFormat` defines how a time picker displayed by
 [showTimePicker()](https://docs.flutter.io/flutter/material/showTimePicker.html)
-formats and lays out its time controls. The value of `timeOfDayFormat` must be
-a string that matches one of the formats defined by
-https://docs.flutter.io/flutter/material/TimeOfDayFormat-class.html.
+formats and lays out its time controls. The value of `timeOfDayFormat`
+must be a string that matches one of the formats defined by
+<https://docs.flutter.io/flutter/material/TimeOfDayFormat-class.html>.
+It is converted to an enum value because the `material_en.arb` file
+has this value labeled as `"x-flutter-type": "icuShortTimePattern"`.
 
 The value of `scriptCategory` is based on the
-[Language categories reference](https://material.io/go/design-typography#typography-language-categories-reference)
-section in the Material spec. The `scriptCategory` value is used when looking up
-the `TextTheme`, see the
-[MaterialTextGeometry](https://docs.flutter.io/flutter/material/MaterialTextGeometry/forScriptCategory.html)
-class.
+[Language categories reference](https://material.io/design/typography/language-support.html#language-categories-reference)
+section in the Material spec. The Material theme uses the
+`scriptCategory` value to lookup a localized version of the default
+`TextTheme`, see
+[Typography.geometryThemeFor](https://docs.flutter.io/flutter/material/Typography/geometryThemeFor.html).
 
 
 ### Generated file localizations.dart: all of the localizations as a Map
@@ -181,7 +184,7 @@ translations for all the languages supported by this package.
 (Googlers, for more details see <go/flutter-l10n>.)
 
 If you have feedback about the translations please
-[file an issue on the Flutter github repo](https://github.com/flutter/flutter/issues/new).
+[file an issue on the Flutter github repo](https://github.com/flutter/flutter/issues/new?template=BUG.md).
 
 
 ### See Also

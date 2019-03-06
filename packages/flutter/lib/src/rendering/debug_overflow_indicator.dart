@@ -48,7 +48,7 @@ class _OverflowRegionData {
 /// overflows. It will print on the first occurrence, and once after each time that
 /// [reassemble] is called.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// ```dart
 /// class MyRenderObject extends RenderAligningShiftedBox with DebugOverflowIndicatorMixin {
@@ -81,40 +81,36 @@ class _OverflowRegionData {
 ///   }
 /// }
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
-///   * The code for [RenderUnconstrainedBox] and [RenderFlex] for examples of
-///     classes that use this indicator mixin.
-abstract class DebugOverflowIndicatorMixin extends RenderObject {
-  // This class is intended to be used as a mixin, and should not be
-  // extended directly.
-  factory DebugOverflowIndicatorMixin._() => null;
-
-  static const Color _black = const Color(0xBF000000);
-  static const Color _yellow = const Color(0xBFFFFF00);
+///  * [RenderUnconstrainedBox] and [RenderFlex] for examples of classes that use this indicator mixin.
+mixin DebugOverflowIndicatorMixin on RenderObject {
+  static const Color _black = Color(0xBF000000);
+  static const Color _yellow = Color(0xBFFFFF00);
   // The fraction of the container that the indicator covers.
   static const double _indicatorFraction = 0.1;
   static const double _indicatorFontSizePixels = 7.5;
   static const double _indicatorLabelPaddingPixels = 1.0;
-  static const TextStyle _indicatorTextStyle = const TextStyle(
-    color: const Color(0xFF900000),
+  static const TextStyle _indicatorTextStyle = TextStyle(
+    color: Color(0xFF900000),
     fontSize: _indicatorFontSizePixels,
     fontWeight: FontWeight.w800,
   );
-  static final Paint _indicatorPaint = new Paint()
-    ..shader = new ui.Gradient.linear(
+  static final Paint _indicatorPaint = Paint()
+    ..shader = ui.Gradient.linear(
       const Offset(0.0, 0.0),
       const Offset(10.0, 10.0),
       <Color>[_black, _yellow, _yellow, _black],
       <double>[0.25, 0.25, 0.75, 0.75],
       TileMode.repeated,
     );
-  static final Paint _labelBackgroundPaint = new Paint()..color = const Color(0xFFFFFFFF);
+  static final Paint _labelBackgroundPaint = Paint()..color = const Color(0xFFFFFFFF);
 
-  final List<TextPainter> _indicatorLabel = new List<TextPainter>.filled(
+  final List<TextPainter> _indicatorLabel = List<TextPainter>.filled(
     _OverflowSide.values.length,
-    new TextPainter(textDirection: TextDirection.ltr), // This label is in English.
+    TextPainter(textDirection: TextDirection.ltr), // This label is in English.
   );
 
   // Set to true to trigger a debug message in the console upon
@@ -137,13 +133,13 @@ abstract class DebugOverflowIndicatorMixin extends RenderObject {
   List<_OverflowRegionData> _calculateOverflowRegions(RelativeRect overflow, Rect containerRect) {
     final List<_OverflowRegionData> regions = <_OverflowRegionData>[];
     if (overflow.left > 0.0) {
-      final Rect markerRect = new Rect.fromLTWH(
+      final Rect markerRect = Rect.fromLTWH(
         0.0,
         0.0,
         containerRect.width * _indicatorFraction,
         containerRect.height,
       );
-      regions.add(new _OverflowRegionData(
+      regions.add(_OverflowRegionData(
         rect: markerRect,
         label: 'LEFT OVERFLOWED BY ${_formatPixels(overflow.left)} PIXELS',
         labelOffset: markerRect.centerLeft +
@@ -153,13 +149,13 @@ abstract class DebugOverflowIndicatorMixin extends RenderObject {
       ));
     }
     if (overflow.right > 0.0) {
-      final Rect markerRect = new Rect.fromLTWH(
+      final Rect markerRect = Rect.fromLTWH(
         containerRect.width * (1.0 - _indicatorFraction),
         0.0,
         containerRect.width * _indicatorFraction,
         containerRect.height,
       );
-      regions.add(new _OverflowRegionData(
+      regions.add(_OverflowRegionData(
         rect: markerRect,
         label: 'RIGHT OVERFLOWED BY ${_formatPixels(overflow.right)} PIXELS',
         labelOffset: markerRect.centerRight -
@@ -169,13 +165,13 @@ abstract class DebugOverflowIndicatorMixin extends RenderObject {
       ));
     }
     if (overflow.top > 0.0) {
-      final Rect markerRect = new Rect.fromLTWH(
+      final Rect markerRect = Rect.fromLTWH(
         0.0,
         0.0,
         containerRect.width,
         containerRect.height * _indicatorFraction,
       );
-      regions.add(new _OverflowRegionData(
+      regions.add(_OverflowRegionData(
         rect: markerRect,
         label: 'TOP OVERFLOWED BY ${_formatPixels(overflow.top)} PIXELS',
         labelOffset: markerRect.topCenter + const Offset(0.0, _indicatorLabelPaddingPixels),
@@ -184,13 +180,13 @@ abstract class DebugOverflowIndicatorMixin extends RenderObject {
       ));
     }
     if (overflow.bottom > 0.0) {
-      final Rect markerRect = new Rect.fromLTWH(
+      final Rect markerRect = Rect.fromLTWH(
         0.0,
         containerRect.height * (1.0 - _indicatorFraction),
         containerRect.width,
         containerRect.height * _indicatorFraction,
       );
-      regions.add(new _OverflowRegionData(
+      regions.add(_OverflowRegionData(
         rect: markerRect,
         label: 'BOTTOM OVERFLOWED BY ${_formatPixels(overflow.bottom)} PIXELS',
         labelOffset: markerRect.bottomCenter -
@@ -237,7 +233,7 @@ abstract class DebugOverflowIndicatorMixin extends RenderObject {
         overflowText = overflows.join(', ');
     }
     FlutterError.reportError(
-      new FlutterErrorDetailsForRendering(
+      FlutterErrorDetailsForRendering(
         exception: 'A $runtimeType overflowed by $overflowText.',
         library: 'rendering library',
         context: 'during layout',
@@ -265,7 +261,7 @@ abstract class DebugOverflowIndicatorMixin extends RenderObject {
     Rect childRect, {
     String overflowHints,
   }) {
-    final RelativeRect overflow = new RelativeRect.fromRect(containerRect, childRect);
+    final RelativeRect overflow = RelativeRect.fromRect(containerRect, childRect);
 
     if (overflow.left <= 0.0 &&
         overflow.right <= 0.0 &&
@@ -279,7 +275,7 @@ abstract class DebugOverflowIndicatorMixin extends RenderObject {
       context.canvas.drawRect(region.rect.shift(offset), _indicatorPaint);
 
       if (_indicatorLabel[region.side.index].text?.text != region.label) {
-        _indicatorLabel[region.side.index].text = new TextSpan(
+        _indicatorLabel[region.side.index].text = TextSpan(
           text: region.label,
           style: _indicatorTextStyle,
         );
@@ -287,7 +283,7 @@ abstract class DebugOverflowIndicatorMixin extends RenderObject {
       }
 
       final Offset labelOffset = region.labelOffset + offset;
-      final Offset centerOffset = new Offset(-_indicatorLabel[region.side.index].width / 2.0, 0.0);
+      final Offset centerOffset = Offset(-_indicatorLabel[region.side.index].width / 2.0, 0.0);
       final Rect textBackgroundRect = centerOffset & _indicatorLabel[region.side.index].size;
       context.canvas.save();
       context.canvas.translate(labelOffset.dx, labelOffset.dy);

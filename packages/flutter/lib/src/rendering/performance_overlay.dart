@@ -162,14 +162,14 @@ class RenderPerformanceOverlay extends RenderBox {
 
   @override
   void performResize() {
-    size = constraints.constrain(new Size(double.infinity, _intrinsicHeight));
+    size = constraints.constrain(Size(double.infinity, _intrinsicHeight));
   }
 
   @override
   void paint(PaintingContext context, Offset offset) {
     assert(needsCompositing);
-    context.addLayer(new PerformanceOverlayLayer(
-      overlayRect: new Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height),
+    context.addLayer(PerformanceOverlayLayer(
+      overlayRect: Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height),
       optionsMask: optionsMask,
       rasterizerThreshold: rasterizerThreshold,
       checkerboardRasterCacheImages: checkerboardRasterCacheImages,

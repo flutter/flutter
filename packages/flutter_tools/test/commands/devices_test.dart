@@ -12,7 +12,6 @@ import 'package:flutter_tools/src/commands/devices.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
-import 'package:test/test.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -24,18 +23,18 @@ void main() {
     });
 
     testUsingContext('returns 0 when called', () async {
-      final DevicesCommand command = new DevicesCommand();
+      final DevicesCommand command = DevicesCommand();
       await createTestCommandRunner(command).run(<String>['devices']);
     });
 
     testUsingContext('no error when no connected devices', () async {
-      final DevicesCommand command = new DevicesCommand();
+      final DevicesCommand command = DevicesCommand();
       await createTestCommandRunner(command).run(<String>['devices']);
       expect(testLogger.statusText, contains('No devices detected'));
     }, overrides: <Type, Generator>{
       AndroidSdk: () => null,
-      DeviceManager: () => new DeviceManager(),
-      ProcessManager: () => new MockProcessManager(),
+      DeviceManager: () => DeviceManager(),
+      ProcessManager: () => MockProcessManager(),
     });
   });
 }
@@ -43,27 +42,27 @@ void main() {
 class MockProcessManager extends Mock implements ProcessManager {
   @override
   Future<ProcessResult> run(
-      List<dynamic> command, {
-        String workingDirectory,
-        Map<String, String> environment,
-        bool includeParentEnvironment = true,
-        bool runInShell = false,
-        Encoding stdoutEncoding = SYSTEM_ENCODING, // ignore: deprecated_member_use
-        Encoding stderrEncoding = SYSTEM_ENCODING, // ignore: deprecated_member_use
-      }) async {
-    return new ProcessResult(0, 0, '', '');
+    List<dynamic> command, {
+    String workingDirectory,
+    Map<String, String> environment,
+    bool includeParentEnvironment = true,
+    bool runInShell = false,
+    Encoding stdoutEncoding = systemEncoding,
+    Encoding stderrEncoding = systemEncoding,
+  }) async {
+    return ProcessResult(0, 0, '', '');
   }
 
   @override
   ProcessResult runSync(
-      List<dynamic> command, {
-        String workingDirectory,
-        Map<String, String> environment,
-        bool includeParentEnvironment = true,
-        bool runInShell = false,
-        Encoding stdoutEncoding = SYSTEM_ENCODING, // ignore: deprecated_member_use
-        Encoding stderrEncoding = SYSTEM_ENCODING, // ignore: deprecated_member_use
-      }) {
-    return new ProcessResult(0, 0, '', '');
+    List<dynamic> command, {
+    String workingDirectory,
+    Map<String, String> environment,
+    bool includeParentEnvironment = true,
+    bool runInShell = false,
+    Encoding stdoutEncoding = systemEncoding,
+    Encoding stderrEncoding = systemEncoding,
+  }) {
+    return ProcessResult(0, 0, '', '');
   }
 }

@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:test/test.dart';
+import '../flutter_test_alternative.dart';
 
 import 'capture_output.dart';
 
@@ -18,7 +18,7 @@ void main() {
 
   test('debugPrintStack', () {
     final List<String> log = captureOutput(() {
-      final FlutterErrorDetails details = new FlutterErrorDetails(
+      final FlutterErrorDetails details = FlutterErrorDetails(
         exception: 'Example exception',
         stack: StackTrace.current,
         library: 'Example library',
@@ -43,7 +43,7 @@ void main() {
 
   test('FlutterErrorDetails.toString', () {
     expect(
-      new FlutterErrorDetails(
+      FlutterErrorDetails(
         exception: 'MESSAGE',
         library: 'LIBRARY',
         context: 'CONTEXTING',
@@ -56,7 +56,7 @@ void main() {
       'INFO',
     );
     expect(
-      new FlutterErrorDetails(
+      FlutterErrorDetails(
         library: 'LIBRARY',
         context: 'CONTEXTING',
         informationCollector: (StringBuffer information) {
@@ -68,7 +68,7 @@ void main() {
       'INFO',
     );
     expect(
-      new FlutterErrorDetails(
+      FlutterErrorDetails(
         exception: 'MESSAGE',
         context: 'CONTEXTING',
         informationCollector: (StringBuffer information) {
@@ -84,12 +84,12 @@ void main() {
         exception: 'MESSAGE',
       ).toString(),
       'Error caught by Flutter framework.\n'
-      'MESSAGE'
+      'MESSAGE',
     );
     expect(
       const FlutterErrorDetails().toString(),
       'Error caught by Flutter framework.\n'
-      '  null'
+      '  null',
     );
   });
 }

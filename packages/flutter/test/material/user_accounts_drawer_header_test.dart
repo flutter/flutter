@@ -8,51 +8,52 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/semantics_tester.dart';
 
-const Key avatarA = const Key('A');
-const Key avatarC = const Key('C');
-const Key avatarD = const Key('D');
+const Key avatarA = Key('A');
+const Key avatarC = Key('C');
+const Key avatarD = Key('D');
 
-Future<Null> pumpTestWidget(WidgetTester tester, {
+Future<void> pumpTestWidget(
+  WidgetTester tester, {
   bool withName = true,
   bool withEmail = true,
   bool withOnDetailsPressedHandler = true,
 }) async {
   await tester.pumpWidget(
-    new MaterialApp(
-      home: new MediaQuery(
+    MaterialApp(
+      home: MediaQuery(
         data: const MediaQueryData(
-          padding: const EdgeInsets.only(
+          padding: EdgeInsets.only(
             left: 10.0,
             top: 20.0,
             right: 30.0,
             bottom: 40.0,
           ),
         ),
-        child: new Material(
-          child: new Center(
-            child: new UserAccountsDrawerHeader(
+        child: Material(
+          child: Center(
+            child: UserAccountsDrawerHeader(
               onDetailsPressed: withOnDetailsPressedHandler ? () {} : null,
               currentAccountPicture: const ExcludeSemantics(
-                child: const CircleAvatar(
+                child: CircleAvatar(
                   key: avatarA,
-                  child: const Text('A'),
+                  child: Text('A'),
                 ),
               ),
               otherAccountsPictures: const <Widget>[
-                const CircleAvatar(
-                  child: const Text('B'),
+                CircleAvatar(
+                  child: Text('B'),
                 ),
-                const CircleAvatar(
+                CircleAvatar(
                   key: avatarC,
-                  child: const Text('C'),
+                  child: Text('C'),
                 ),
-                const CircleAvatar(
+                CircleAvatar(
                   key: avatarD,
-                  child: const Text('D'),
+                  child: Text('D'),
                 ),
-                const CircleAvatar(
-                  child: const Text('E'),
-                )
+                CircleAvatar(
+                  child: Text('E'),
+                ),
               ],
               accountName: withName ? const Text('name') : null,
               accountEmail: withEmail ? const Text('email') : null,
@@ -103,6 +104,81 @@ void main() {
     expect(avatarDTopRight.dx - avatarCTopRight.dx, equals(40.0 + 16.0)); // size + space between
   });
 
+  testWidgets('UserAccountsDrawerHeader icon rotation test', (WidgetTester tester) async {
+    await pumpTestWidget(tester);
+    Transform transformWidget = tester.firstWidget(find.byType(Transform));
+
+    // Icon is right side up.
+    expect(transformWidget.transform.getRotation()[0], 1.0);
+    expect(transformWidget.transform.getRotation()[4], 1.0);
+
+    await tester.tap(find.byType(Icon));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 10));
+    expect(tester.hasRunningAnimations, isTrue);
+
+    await tester.pumpAndSettle();
+    await tester.pump();
+    transformWidget = tester.firstWidget(find.byType(Transform));
+
+    // Icon has rotated 180 degrees.
+    expect(transformWidget.transform.getRotation()[0], -1.0);
+    expect(transformWidget.transform.getRotation()[4], -1.0);
+
+    await tester.tap(find.byType(Icon));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 10));
+    expect(tester.hasRunningAnimations, isTrue);
+
+    await tester.pumpAndSettle();
+    await tester.pump();
+    transformWidget = tester.firstWidget(find.byType(Transform));
+
+    // Icon has rotated 180 degrees back to the original position.
+    expect(transformWidget.transform.getRotation()[0], 1.0);
+    expect(transformWidget.transform.getRotation()[4], 1.0);
+  });
+
+  testWidgets('UserAccountsDrawerHeader icon rotation test speeeeeedy', (WidgetTester tester) async {
+    await pumpTestWidget(tester);
+    Transform transformWidget = tester.firstWidget(find.byType(Transform));
+
+    // Icon is right side up.
+    expect(transformWidget.transform.getRotation()[0], 1.0);
+    expect(transformWidget.transform.getRotation()[4], 1.0);
+
+    // Icon starts to rotate down.
+    await tester.tap(find.byType(Icon));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(tester.hasRunningAnimations, isTrue);
+
+    // Icon starts to rotate up mid animation.
+    await tester.tap(find.byType(Icon));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(tester.hasRunningAnimations, isTrue);
+
+    // Icon starts to rotate down again still mid animation.
+    await tester.tap(find.byType(Icon));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(tester.hasRunningAnimations, isTrue);
+
+    // Icon starts to rotate up to its original position mid animation.
+    await tester.tap(find.byType(Icon));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(tester.hasRunningAnimations, isTrue);
+
+    await tester.pumpAndSettle();
+    await tester.pump();
+    transformWidget = tester.firstWidget(find.byType(Transform));
+
+    // Icon has rotated 180 degrees back to the original position.
+    expect(transformWidget.transform.getRotation()[0], 1.0);
+    expect(transformWidget.transform.getRotation()[4], 1.0);
+  });
 
   testWidgets('UserAccountsDrawerHeader null parameters LTR', (WidgetTester tester) async {
     Widget buildFrame({
@@ -113,10 +189,10 @@ void main() {
       VoidCallback onDetailsPressed,
       EdgeInsets margin,
     }) {
-      return new MaterialApp(
-        home: new Material(
-          child: new Center(
-            child: new UserAccountsDrawerHeader(
+      return MaterialApp(
+        home: Material(
+          child: Center(
+            child: UserAccountsDrawerHeader(
               currentAccountPicture: currentAccountPicture,
               otherAccountsPictures: otherAccountsPictures,
               accountName: accountName,
@@ -145,11 +221,11 @@ void main() {
     ));
     expect(
       tester.getCenter(find.text('accountName')).dy,
-      tester.getCenter(find.byType(Icon)).dy
+      tester.getCenter(find.byType(Icon)).dy,
     );
     expect(
       tester.getCenter(find.text('accountName')).dx,
-      lessThan(tester.getCenter(find.byType(Icon)).dx)
+      lessThan(tester.getCenter(find.byType(Icon)).dx),
     );
 
     await tester.pumpWidget(buildFrame(
@@ -158,11 +234,11 @@ void main() {
     ));
     expect(
       tester.getCenter(find.text('accountEmail')).dy,
-      tester.getCenter(find.byType(Icon)).dy
+      tester.getCenter(find.byType(Icon)).dy,
     );
     expect(
       tester.getCenter(find.text('accountEmail')).dx,
-      lessThan(tester.getCenter(find.byType(Icon)).dx)
+      lessThan(tester.getCenter(find.byType(Icon)).dx),
     );
 
     await tester.pumpWidget(buildFrame(
@@ -172,43 +248,43 @@ void main() {
     ));
     expect(
       tester.getCenter(find.text('accountEmail')).dy,
-      tester.getCenter(find.byType(Icon)).dy
+      tester.getCenter(find.byType(Icon)).dy,
     );
     expect(
       tester.getCenter(find.text('accountEmail')).dx,
-      lessThan(tester.getCenter(find.byType(Icon)).dx)
+      lessThan(tester.getCenter(find.byType(Icon)).dx),
     );
     expect(
       tester.getBottomLeft(find.text('accountEmail')).dy,
-      greaterThan(tester.getBottomLeft(find.text('accountName')).dy)
+      greaterThan(tester.getBottomLeft(find.text('accountName')).dy),
     );
     expect(
       tester.getBottomLeft(find.text('accountEmail')).dx,
-      tester.getBottomLeft(find.text('accountName')).dx
+      tester.getBottomLeft(find.text('accountName')).dx,
     );
 
     await tester.pumpWidget(buildFrame(
-      currentAccountPicture: const CircleAvatar(child: const Text('A')),
+      currentAccountPicture: const CircleAvatar(child: Text('A')),
     ));
     expect(find.text('A'), findsOneWidget);
 
     await tester.pumpWidget(buildFrame(
-      otherAccountsPictures: <Widget>[const CircleAvatar(child: const Text('A'))],
+      otherAccountsPictures: <Widget>[const CircleAvatar(child: Text('A'))],
     ));
     expect(find.text('A'), findsOneWidget);
 
-    const Key avatarA = const Key('A');
+    const Key avatarA = Key('A');
     await tester.pumpWidget(buildFrame(
-      currentAccountPicture: const CircleAvatar(key: avatarA, child: const Text('A')),
+      currentAccountPicture: const CircleAvatar(key: avatarA, child: Text('A')),
       accountName: const Text('accountName'),
     ));
     expect(
       tester.getBottomLeft(find.byKey(avatarA)).dx,
-      tester.getBottomLeft(find.text('accountName')).dx
+      tester.getBottomLeft(find.text('accountName')).dx,
     );
     expect(
       tester.getBottomLeft(find.text('accountName')).dy,
-      greaterThan(tester.getBottomLeft(find.byKey(avatarA)).dy)
+      greaterThan(tester.getBottomLeft(find.byKey(avatarA)).dy),
     );
   });
 
@@ -221,12 +297,12 @@ void main() {
       VoidCallback onDetailsPressed,
       EdgeInsets margin,
     }) {
-      return new MaterialApp(
-        home: new Directionality(
+      return MaterialApp(
+        home: Directionality(
           textDirection: TextDirection.rtl,
-          child: new Material(
-            child: new Center(
-              child: new UserAccountsDrawerHeader(
+          child: Material(
+            child: Center(
+              child: UserAccountsDrawerHeader(
                 currentAccountPicture: currentAccountPicture,
                 otherAccountsPictures: otherAccountsPictures,
                 accountName: accountName,
@@ -256,11 +332,11 @@ void main() {
     ));
     expect(
       tester.getCenter(find.text('accountName')).dy,
-      tester.getCenter(find.byType(Icon)).dy
+      tester.getCenter(find.byType(Icon)).dy,
     );
     expect(
       tester.getCenter(find.text('accountName')).dx,
-      greaterThan(tester.getCenter(find.byType(Icon)).dx)
+      greaterThan(tester.getCenter(find.byType(Icon)).dx),
     );
 
     await tester.pumpWidget(buildFrame(
@@ -269,11 +345,11 @@ void main() {
     ));
     expect(
       tester.getCenter(find.text('accountEmail')).dy,
-      tester.getCenter(find.byType(Icon)).dy
+      tester.getCenter(find.byType(Icon)).dy,
     );
     expect(
       tester.getCenter(find.text('accountEmail')).dx,
-      greaterThan(tester.getCenter(find.byType(Icon)).dx)
+      greaterThan(tester.getCenter(find.byType(Icon)).dx),
     );
 
     await tester.pumpWidget(buildFrame(
@@ -283,77 +359,77 @@ void main() {
     ));
     expect(
       tester.getCenter(find.text('accountEmail')).dy,
-      tester.getCenter(find.byType(Icon)).dy
+      tester.getCenter(find.byType(Icon)).dy,
     );
     expect(
       tester.getCenter(find.text('accountEmail')).dx,
-      greaterThan(tester.getCenter(find.byType(Icon)).dx)
+      greaterThan(tester.getCenter(find.byType(Icon)).dx),
     );
     expect(
       tester.getBottomLeft(find.text('accountEmail')).dy,
-      greaterThan(tester.getBottomLeft(find.text('accountName')).dy)
+      greaterThan(tester.getBottomLeft(find.text('accountName')).dy),
     );
     expect(
       tester.getBottomRight(find.text('accountEmail')).dx,
-      tester.getBottomRight(find.text('accountName')).dx
+      tester.getBottomRight(find.text('accountName')).dx,
     );
 
     await tester.pumpWidget(buildFrame(
-      currentAccountPicture: const CircleAvatar(child: const Text('A')),
+      currentAccountPicture: const CircleAvatar(child: Text('A')),
     ));
     expect(find.text('A'), findsOneWidget);
 
     await tester.pumpWidget(buildFrame(
-      otherAccountsPictures: <Widget>[const CircleAvatar(child: const Text('A'))],
+      otherAccountsPictures: <Widget>[const CircleAvatar(child: Text('A'))],
     ));
     expect(find.text('A'), findsOneWidget);
 
-    const Key avatarA = const Key('A');
+    const Key avatarA = Key('A');
     await tester.pumpWidget(buildFrame(
-      currentAccountPicture: const CircleAvatar(key: avatarA, child: const Text('A')),
+      currentAccountPicture: const CircleAvatar(key: avatarA, child: Text('A')),
       accountName: const Text('accountName'),
     ));
     expect(
       tester.getBottomRight(find.byKey(avatarA)).dx,
-      tester.getBottomRight(find.text('accountName')).dx
+      tester.getBottomRight(find.text('accountName')).dx,
     );
     expect(
       tester.getBottomLeft(find.text('accountName')).dy,
-      greaterThan(tester.getBottomLeft(find.byKey(avatarA)).dy)
+      greaterThan(tester.getBottomLeft(find.byKey(avatarA)).dy),
     );
   });
 
   testWidgets('UserAccountsDrawerHeader provides semantics', (WidgetTester tester) async {
-    final SemanticsTester semantics = new SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
     await pumpTestWidget(tester);
 
     expect(
       semantics,
       hasSemantics(
-        new TestSemantics(
+        TestSemantics(
           children: <TestSemantics>[
-            new TestSemantics(
+            TestSemantics(
               children: <TestSemantics>[
-                new TestSemantics(
+                TestSemantics(
                   flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                   children: <TestSemantics>[
-                    new TestSemantics(
+                    TestSemantics(
                       label: 'Signed in\nname\nemail',
                       textDirection: TextDirection.ltr,
                       children: <TestSemantics>[
-                        new TestSemantics(
+                        TestSemantics(
                           label: r'B',
                           textDirection: TextDirection.ltr,
                         ),
-                        new TestSemantics(
+                        TestSemantics(
                           label: r'C',
                           textDirection: TextDirection.ltr,
                         ),
-                        new TestSemantics(
+                        TestSemantics(
                           label: r'D',
                           textDirection: TextDirection.ltr,
                         ),
-                        new TestSemantics(
+                        TestSemantics(
                           flags: <SemanticsFlag>[SemanticsFlag.isButton],
                           actions: <SemanticsAction>[SemanticsAction.tap],
                           label: r'Show accounts',
@@ -374,8 +450,29 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('alternative account selectors have sufficient tap targets', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    await pumpTestWidget(tester);
+
+    expect(tester.getSemantics(find.text('B')), matchesSemantics(
+      label: 'B',
+      size: const Size(48.0, 48.0),
+    ));
+
+    expect(tester.getSemantics(find.text('C')), matchesSemantics(
+      label: 'C',
+      size: const Size(48.0, 48.0),
+    ));
+
+    expect(tester.getSemantics(find.text('D')), matchesSemantics(
+      label: 'D',
+      size: const Size(48.0, 48.0),
+    ));
+    handle.dispose();
+  });
+
   testWidgets('UserAccountsDrawerHeader provides semantics with missing properties', (WidgetTester tester) async {
-    final SemanticsTester semantics = new SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
     await pumpTestWidget(
       tester,
       withEmail: false,
@@ -386,26 +483,26 @@ void main() {
     expect(
       semantics,
       hasSemantics(
-        new TestSemantics(
+        TestSemantics(
           children: <TestSemantics>[
-            new TestSemantics(
+            TestSemantics(
               children: <TestSemantics>[
-                new TestSemantics(
+                TestSemantics(
                   flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                   children: <TestSemantics>[
-                    new TestSemantics(
+                    TestSemantics(
                       label: 'Signed in',
                       textDirection: TextDirection.ltr,
                       children: <TestSemantics>[
-                        new TestSemantics(
+                        TestSemantics(
                           label: r'B',
                           textDirection: TextDirection.ltr,
                         ),
-                        new TestSemantics(
+                        TestSemantics(
                           label: r'C',
                           textDirection: TextDirection.ltr,
                         ),
-                        new TestSemantics(
+                        TestSemantics(
                           label: r'D',
                           textDirection: TextDirection.ltr,
                         ),

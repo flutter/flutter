@@ -12,7 +12,7 @@ const String kPackagesFileName = '.packages';
 Map<String, Uri> _parse(String packagesPath) {
   final List<int> source = fs.file(packagesPath).readAsBytesSync();
   return packages_file.parse(source,
-      new Uri.file(packagesPath, windows: platform.isWindows));
+      Uri.file(packagesPath, windows: platform.isWindows));
 }
 
 class PackageMap {

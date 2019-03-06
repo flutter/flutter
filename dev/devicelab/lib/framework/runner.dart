@@ -6,13 +6,14 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:path/path.dart' as path;
 import 'package:vm_service_client/vm_service_client.dart';
 
 import 'package:flutter_devicelab/framework/utils.dart';
 
 /// Slightly longer than task timeout that gives the task runner a chance to
 /// clean-up before forcefully quitting it.
-const Duration taskTimeoutWithGracePeriod = const Duration(minutes: 26);
+const Duration taskTimeoutWithGracePeriod = Duration(minutes: 26);
 
 /// Runs a task in a separate Dart VM and collects the result using the VM
 /// service protocol.
@@ -40,11 +41,11 @@ Future<Map<String, dynamic>> runTask(String taskName, { bool silent = false }) a
     runnerFinished = true;
   });
 
-  final Completer<int> port = new Completer<int>();
+  final Completer<int> port = Completer<int>();
 
   final StreamSubscription<String> stdoutSub = runner.stdout
-      .transform(const Utf8Decoder())
-      .transform(const LineSplitter())
+      .transform<String>(const Utf8Decoder())
+      .transform<String>(const LineSplitter())
       .listen((String line) {
     if (!port.isCompleted) {
       final int portValue = parseServicePort(line, prefix: 'Observatory listening on ');
@@ -57,8 +58,8 @@ Future<Map<String, dynamic>> runTask(String taskName, { bool silent = false }) a
   });
 
   final StreamSubscription<String> stderrSub = runner.stderr
-      .transform(const Utf8Decoder())
-      .transform(const LineSplitter())
+      .transform<String>(const Utf8Decoder())
+      .transform<String>(const LineSplitter())
       .listen((String line) {
     stderr.writeln('[$taskName] [STDERR] $line');
   });
@@ -70,17 +71,18 @@ Future<Map<String, dynamic>> runTask(String taskName, { bool silent = false }) a
     final Map<String, dynamic> taskResult =
         await isolate.invokeExtension('ext.cocoonRunTask').timeout(taskTimeoutWithGracePeriod);
     waitingFor = 'task process to exit';
-    await runner.exitCode.timeout(const Duration(seconds: 1));
+    await runner.exitCode.timeout(const Duration(seconds: 60));
     return taskResult;
   } on TimeoutException catch (timeout) {
-    runner.kill(ProcessSignal.SIGINT); // ignore: deprecated_member_use
+    runner.kill(ProcessSignal.sigint);
     return <String, dynamic>{
       'success': false,
-      'reason': 'Timeout waiting for $waitingFor: ${timeout.message}',
+      'reason': 'Timeout in runner.dart waiting for $waitingFor: ${timeout.message}',
     };
   } finally {
     if (!runnerFinished)
-      runner.kill(ProcessSignal.SIGKILL); // ignore: deprecated_member_use
+      runner.kill(ProcessSignal.sigkill);
+    await cleanupSystem();
     await stdoutSub.cancel();
     await stderrSub.cancel();
   }
@@ -88,14 +90,14 @@ Future<Map<String, dynamic>> runTask(String taskName, { bool silent = false }) a
 
 Future<VMIsolateRef> _connectToRunnerIsolate(int vmServicePort) async {
   final String url = 'ws://localhost:$vmServicePort/ws';
-  final DateTime started = new DateTime.now();
+  final DateTime started = DateTime.now();
 
   // TODO(yjbanov): due to lack of imagination at the moment the handshake with
   //                the task process is very rudimentary and requires this small
   //                delay to let the task process open up the VM service port.
   //                Otherwise we almost always hit the non-ready case first and
   //                wait a whole 1 second, which is annoying.
-  await new Future<Null>.delayed(const Duration(milliseconds: 100));
+  await Future<void>.delayed(const Duration(milliseconds: 100));
 
   while (true) {
     try {
@@ -103,7 +105,7 @@ Future<VMIsolateRef> _connectToRunnerIsolate(int vmServicePort) async {
       await (await WebSocket.connect(url)).close();
 
       // Look up the isolate.
-      final VMServiceClient client = new VMServiceClient.connect(url);
+      final VMServiceClient client = VMServiceClient.connect(url);
       final VM vm = await client.getVM();
       final VMIsolateRef isolate = vm.isolates.single;
       final String response = await isolate.invokeExtension('ext.cocoonRunnerReady');
@@ -111,17 +113,54 @@ Future<VMIsolateRef> _connectToRunnerIsolate(int vmServicePort) async {
         throw 'not ready yet';
       return isolate;
     } catch (error) {
-      const Duration connectionTimeout = const Duration(seconds: 10);
-      if (new DateTime.now().difference(started) > connectionTimeout) {
-        throw new TimeoutException(
+      const Duration connectionTimeout = Duration(seconds: 10);
+      if (DateTime.now().difference(started) > connectionTimeout) {
+        throw TimeoutException(
           'Failed to connect to the task runner process',
           connectionTimeout,
         );
       }
       print('VM service not ready yet: $error');
-      const Duration pauseBetweenRetries = const Duration(milliseconds: 200);
+      const Duration pauseBetweenRetries = Duration(milliseconds: 200);
       print('Will retry in $pauseBetweenRetries.');
-      await new Future<Null>.delayed(pauseBetweenRetries);
+      await Future<void>.delayed(pauseBetweenRetries);
     }
+  }
+}
+
+Future<void> cleanupSystem() async {
+  print('\n\nCleaning up system after task...');
+  final String javaHome = await findJavaHome();
+  if (javaHome != null) {
+    // To shut gradle down, we have to call "gradlew --stop".
+    // To call gradlew, we need to have a gradle-wrapper.properties file along
+    // with a shell script, a .jar file, etc. We get these from various places
+    // as you see in the code below, and we save them all into a temporary dir
+    // which we can then delete after.
+    // All the steps below are somewhat tolerant of errors, because it doesn't
+    // really matter if this succeeds every time or not.
+    print('\nTelling Gradle to shut down (JAVA_HOME=$javaHome)');
+    final String gradlewBinaryName = Platform.isWindows ? 'gradlew.bat' : 'gradlew';
+    final Directory tempDir = Directory.systemTemp.createTempSync('flutter_devicelab_shutdown_gradle.');
+    recursiveCopy(Directory(path.join(flutterDirectory.path, 'bin', 'cache', 'artifacts', 'gradle_wrapper')), tempDir);
+    copy(File(path.join(path.join(flutterDirectory.path, 'packages', 'flutter_tools'), 'templates', 'app', 'android.tmpl', 'gradle', 'wrapper', 'gradle-wrapper.properties')), Directory(path.join(tempDir.path, 'gradle', 'wrapper')));
+    if (!Platform.isWindows) {
+      await exec(
+        'chmod',
+        <String>['a+x', path.join(tempDir.path, gradlewBinaryName)],
+        canFail: true,
+      );
+    }
+    await exec(
+      path.join(tempDir.path, gradlewBinaryName),
+      <String>['--stop'],
+      environment: <String, String>{ 'JAVA_HOME': javaHome },
+      workingDirectory: tempDir.path,
+      canFail: true,
+    );
+    rmTree(tempDir);
+    print('\n');
+  } else {
+    print('Could not determine JAVA_HOME; not shutting down Gradle.');
   }
 }

@@ -25,7 +25,7 @@ bool debugDisableShadows = false;
 bool debugAssertAllPaintingVarsUnset(String reason, { bool debugDisableShadowsOverride = false }) {
   assert(() {
     if (debugDisableShadows != debugDisableShadowsOverride) {
-      throw new FlutterError(reason);
+      throw FlutterError(reason);
     }
     return true;
   }());

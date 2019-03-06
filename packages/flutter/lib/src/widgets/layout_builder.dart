@@ -9,7 +9,7 @@ import 'debug.dart';
 import 'framework.dart';
 
 /// The signature of the [LayoutBuilder] builder function.
-typedef Widget LayoutWidgetBuilder(BuildContext context, BoxConstraints constraints);
+typedef LayoutWidgetBuilder = Widget Function(BuildContext context, BoxConstraints constraints);
 
 /// Builds a widget tree that can depend on the parent widget's size.
 ///
@@ -25,16 +25,16 @@ typedef Widget LayoutWidgetBuilder(BuildContext context, BoxConstraints constrai
 ///
 /// See also:
 ///
-/// * [Builder], which calls a `builder` function at build time.
-/// * [StatefulBuilder], which passes its `builder` function a `setState` callback.
-/// * [CustomSingleChildLayout], which positions its child during layout.
+///  * [Builder], which calls a `builder` function at build time.
+///  * [StatefulBuilder], which passes its `builder` function a `setState` callback.
+///  * [CustomSingleChildLayout], which positions its child during layout.
 class LayoutBuilder extends RenderObjectWidget {
   /// Creates a widget that defers its building until layout.
   ///
   /// The [builder] argument must not be null.
   const LayoutBuilder({
     Key key,
-    @required this.builder
+    @required this.builder,
   }) : assert(builder != null),
        super(key: key);
 
@@ -43,10 +43,10 @@ class LayoutBuilder extends RenderObjectWidget {
   final LayoutWidgetBuilder builder;
 
   @override
-  _LayoutBuilderElement createElement() => new _LayoutBuilderElement(this);
+  _LayoutBuilderElement createElement() => _LayoutBuilderElement(this);
 
   @override
-  _RenderLayoutBuilder createRenderObject(BuildContext context) => new _RenderLayoutBuilder();
+  _RenderLayoutBuilder createRenderObject(BuildContext context) => _RenderLayoutBuilder();
 
   // updateRenderObject is redundant with the logic in the LayoutBuilderElement below.
 }
@@ -164,7 +164,7 @@ class _RenderLayoutBuilder extends RenderBox with RenderObjectWithChildMixin<Ren
   bool _debugThrowIfNotCheckingIntrinsics() {
     assert(() {
       if (!RenderObject.debugCheckingIntrinsics) {
-        throw new FlutterError(
+        throw FlutterError(
           'LayoutBuilder does not support returning intrinsic dimensions.\n'
           'Calculating the intrinsic dimensions would require running the layout '
           'callback speculatively, which might mutate the live render object tree.'
@@ -228,11 +228,11 @@ FlutterErrorDetails _debugReportException(
   dynamic exception,
   StackTrace stack,
 ) {
-  final FlutterErrorDetails details = new FlutterErrorDetails(
+  final FlutterErrorDetails details = FlutterErrorDetails(
     exception: exception,
     stack: stack,
     library: 'widgets library',
-    context: context
+    context: context,
   );
   FlutterError.reportError(details);
   return details;

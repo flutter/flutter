@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/rendering.dart';
-import 'package:test/test.dart';
+import '../flutter_test_alternative.dart';
 
 import 'rendering_tester.dart';
 
@@ -22,7 +22,7 @@ class RenderFixedSize extends RenderBox {
 
   @override
   void performLayout() {
-    size = new Size.square(dimension);
+    size = Size.square(dimension);
   }
 }
 
@@ -49,9 +49,9 @@ class RenderIntrinsicSize extends RenderProxyBox {
   @override
   void performLayout() {
     child.layout(constraints);
-    size = new Size(
+    size = Size(
       child.getMinIntrinsicWidth(double.infinity),
-      child.getMinIntrinsicHeight(double.infinity)
+      child.getMinIntrinsicHeight(double.infinity),
     );
   }
 }
@@ -61,17 +61,17 @@ void main() {
     RenderBox root;
     RenderFixedSize inner;
     layout(
-      root = new RenderIntrinsicSize(
-        child: new RenderParentSize(
-          child: inner = new RenderFixedSize()
+      root = RenderIntrinsicSize(
+        child: RenderParentSize(
+          child: inner = RenderFixedSize()
         )
       ),
       constraints: const BoxConstraints(
         minWidth: 0.0,
         minHeight: 0.0,
         maxWidth: 1000.0,
-        maxHeight: 1000.0
-      )
+        maxHeight: 1000.0,
+      ),
     );
     expect(root.size, equals(inner.size));
 

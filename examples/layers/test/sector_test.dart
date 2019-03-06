@@ -12,7 +12,7 @@ void main() {
     expect(const SectorConstraints().isTight, isFalse);
   });
 
-  testWidgets('Sector Sixes', (WidgetTester tester) {
-    tester.pumpWidget(new SectorApp());
+  testWidgets('Sector Sixes', (WidgetTester tester) async {
+    await tester.pumpWidget(SectorApp());
   });
 }

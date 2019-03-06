@@ -7,15 +7,15 @@ import 'package:flutter/material.dart';
 import 'stock_arrow.dart';
 import 'stock_data.dart';
 
-typedef void StockRowActionCallback(Stock stock);
+typedef StockRowActionCallback = void Function(Stock stock);
 
 class StockRow extends StatelessWidget {
   StockRow({
     this.stock,
     this.onPressed,
     this.onDoubleTap,
-    this.onLongPressed
-  }) : super(key: new ObjectKey(stock));
+    this.onLongPressed,
+  }) : super(key: ObjectKey(stock));
 
   final Stock stock;
   final StockRowActionCallback onPressed;
@@ -34,55 +34,55 @@ class StockRow extends StatelessWidget {
     String changeInPrice = '${stock.percentChange.toStringAsFixed(2)}%';
     if (stock.percentChange > 0)
       changeInPrice = '+' + changeInPrice;
-    return new InkWell(
+    return InkWell(
       onTap: _getHandler(onPressed),
       onDoubleTap: _getHandler(onDoubleTap),
       onLongPress: _getHandler(onLongPressed),
-      child: new Container(
+      child: Container(
         padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 20.0),
-        decoration: new BoxDecoration(
-          border: new Border(
-            bottom: new BorderSide(color: Theme.of(context).dividerColor)
+        decoration: BoxDecoration(
+          border: Border(
+            bottom: BorderSide(color: Theme.of(context).dividerColor)
           )
         ),
-        child: new Row(
+        child: Row(
           children: <Widget>[
-            new Container(
+            Container(
               margin: const EdgeInsets.only(right: 5.0),
-              child: new Hero(
+              child: Hero(
                 tag: stock,
-                child: new StockArrow(percentChange: stock.percentChange)
-              )
+                child: StockArrow(percentChange: stock.percentChange),
+              ),
             ),
-            new Expanded(
-              child: new Row(
+            Expanded(
+              child: Row(
                 children: <Widget>[
-                  new Expanded(
+                  Expanded(
                     flex: 2,
-                    child: new Text(
+                    child: Text(
                       stock.symbol
-                    )
+                    ),
                   ),
-                  new Expanded(
-                    child: new Text(
+                  Expanded(
+                    child: Text(
                       lastSale,
-                      textAlign: TextAlign.right
-                    )
+                      textAlign: TextAlign.right,
+                    ),
                   ),
-                  new Expanded(
-                    child: new Text(
+                  Expanded(
+                    child: Text(
                       changeInPrice,
-                      textAlign: TextAlign.right
-                    )
+                      textAlign: TextAlign.right,
+                    ),
                   ),
                 ],
                 crossAxisAlignment: CrossAxisAlignment.baseline,
-                textBaseline: DefaultTextStyle.of(context).style.textBaseline
-              )
+                textBaseline: DefaultTextStyle.of(context).style.textBaseline,
+              ),
             ),
-          ]
-        )
-      )
+          ],
+        ),
+      ),
     );
   }
 }

@@ -5,6 +5,12 @@
 import 'dart:async';
 
 import 'runner.dart' as runner;
+import 'src/base/context.dart';
+// The build_runner code generation is provided here to make it easier to
+// avoid introducing the dependency into google3. Not all build* packages
+// are synced internally.
+import 'src/build_runner/build_runner.dart';
+import 'src/codegen.dart';
 import 'src/commands/analyze.dart';
 import 'src/commands/attach.dart';
 import 'src/commands/build.dart';
@@ -18,11 +24,12 @@ import 'src/commands/doctor.dart';
 import 'src/commands/drive.dart';
 import 'src/commands/emulators.dart';
 import 'src/commands/format.dart';
-import 'src/commands/fuchsia_reload.dart';
+import 'src/commands/generate.dart';
 import 'src/commands/ide_config.dart';
 import 'src/commands/inject_plugins.dart';
 import 'src/commands/install.dart';
 import 'src/commands/logs.dart';
+import 'src/commands/make_host_app_editable.dart';
 import 'src/commands/packages.dart';
 import 'src/commands/precache.dart';
 import 'src/commands/run.dart';
@@ -33,12 +40,13 @@ import 'src/commands/test.dart';
 import 'src/commands/trace.dart';
 import 'src/commands/update_packages.dart';
 import 'src/commands/upgrade.dart';
+import 'src/commands/version.dart';
 import 'src/runner/flutter_command.dart';
 
 /// Main entry point for commands.
 ///
 /// This function is intended to be used from the `flutter` command line tool.
-Future<Null> main(List<String> args) async {
+Future<void> main(List<String> args) async {
   final bool verbose = args.contains('-v') || args.contains('--verbose');
 
   final bool doctor = (args.isNotEmpty && args.first == 'doctor') ||
@@ -49,35 +57,42 @@ Future<Null> main(List<String> args) async {
   final bool verboseHelp = help && verbose;
 
   await runner.run(args, <FlutterCommand>[
-    new AnalyzeCommand(verboseHelp: verboseHelp),
-    new AttachCommand(verboseHelp: verboseHelp),
-    new BuildCommand(verboseHelp: verboseHelp),
-    new ChannelCommand(verboseHelp: verboseHelp),
-    new CleanCommand(),
-    new ConfigCommand(verboseHelp: verboseHelp),
-    new CreateCommand(),
-    new DaemonCommand(hidden: !verboseHelp),
-    new DevicesCommand(),
-    new DoctorCommand(verbose: verbose),
-    new DriveCommand(),
-    new EmulatorsCommand(),
-    new FormatCommand(),
-    new FuchsiaReloadCommand(),
-    new IdeConfigCommand(hidden: !verboseHelp),
-    new InjectPluginsCommand(hidden: !verboseHelp),
-    new InstallCommand(),
-    new LogsCommand(),
-    new PackagesCommand(),
-    new PrecacheCommand(),
-    new RunCommand(verboseHelp: verboseHelp),
-    new ScreenshotCommand(),
-    new ShellCompletionCommand(verboseHelp: verboseHelp),
-    new StopCommand(),
-    new TestCommand(verboseHelp: verboseHelp),
-    new TraceCommand(),
-    new UpdatePackagesCommand(hidden: !verboseHelp),
-    new UpgradeCommand(),
+    AnalyzeCommand(verboseHelp: verboseHelp),
+    AttachCommand(verboseHelp: verboseHelp),
+    BuildCommand(verboseHelp: verboseHelp),
+    ChannelCommand(verboseHelp: verboseHelp),
+    CleanCommand(),
+    ConfigCommand(verboseHelp: verboseHelp),
+    CreateCommand(),
+    DaemonCommand(hidden: !verboseHelp),
+    DevicesCommand(),
+    DoctorCommand(verbose: verbose),
+    DriveCommand(),
+    EmulatorsCommand(),
+    FormatCommand(),
+    GenerateCommand(),
+    IdeConfigCommand(hidden: !verboseHelp),
+    InjectPluginsCommand(hidden: !verboseHelp),
+    InstallCommand(),
+    LogsCommand(),
+    MakeHostAppEditableCommand(),
+    PackagesCommand(),
+    PrecacheCommand(),
+    RunCommand(verboseHelp: verboseHelp),
+    ScreenshotCommand(),
+    ShellCompletionCommand(),
+    StopCommand(),
+    TestCommand(verboseHelp: verboseHelp),
+    TraceCommand(),
+    UpdatePackagesCommand(hidden: !verboseHelp),
+    UpgradeCommand(),
+    VersionCommand(),
   ], verbose: verbose,
      muteCommandLogging: muteCommandLogging,
-     verboseHelp: verboseHelp);
+     verboseHelp: verboseHelp,
+     overrides: <Type, Generator>{
+       // The build runner instance is not supported in google3 because
+       // the build runner packages are not synced internally.
+       CodeGenerator: () => experimentalBuildEnabled ? const BuildRunner() : const UnsupportedCodeGenerator(),
+     });
 }

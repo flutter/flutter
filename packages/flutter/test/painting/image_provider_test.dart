@@ -5,14 +5,16 @@
 import 'dart:async';
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/rendering_tester.dart';
 import 'image_data.dart';
+import 'mocks_for_image_cache.dart';
 
 void main() {
-  new TestRenderingFlutterBinding(); // initializes the imageCache
+  TestRenderingFlutterBinding(); // initializes the imageCache
   group(ImageProvider, () {
     tearDown(() {
       imageCache.clear();
@@ -20,30 +22,30 @@ void main() {
 
     test('NetworkImage non-null url test', () {
       expect(() {
-        new NetworkImage(nonconst(null));
+        NetworkImage(nonconst(null));
       }, throwsAssertionError);
     });
 
     test('ImageProvider can evict images', () async {
-      final Uint8List bytes = new Uint8List.fromList(kTransparentImage);
-      final MemoryImage imageProvider = new MemoryImage(bytes);
+      final Uint8List bytes = Uint8List.fromList(kTransparentImage);
+      final MemoryImage imageProvider = MemoryImage(bytes);
       final ImageStream stream = imageProvider.resolve(ImageConfiguration.empty);
-      final Completer<void> completer = new Completer<void>();
+      final Completer<void> completer = Completer<void>();
       stream.addListener((ImageInfo info, bool syncCall) => completer.complete());
       await completer.future;
 
       expect(imageCache.currentSize, 1);
-      expect(await new MemoryImage(bytes).evict(), true);
+      expect(await MemoryImage(bytes).evict(), true);
       expect(imageCache.currentSize, 0);
     });
 
     test('ImageProvider.evict respects the provided ImageCache', () async {
-      final ImageCache otherCache = new ImageCache();
-      final Uint8List bytes = new Uint8List.fromList(kTransparentImage);
-      final MemoryImage imageProvider = new MemoryImage(bytes);
+      final ImageCache otherCache = ImageCache();
+      final Uint8List bytes = Uint8List.fromList(kTransparentImage);
+      final MemoryImage imageProvider = MemoryImage(bytes);
       otherCache.putIfAbsent(imageProvider, () => imageProvider.load(imageProvider));
       final ImageStream stream = imageProvider.resolve(ImageConfiguration.empty);
-      final Completer<void> completer = new Completer<void>();
+      final Completer<void> completer = Completer<void>();
       stream.addListener((ImageInfo info, bool syncCall) => completer.complete());
       await completer.future;
 
@@ -53,5 +55,35 @@ void main() {
       expect(otherCache.currentSize, 0);
       expect(imageCache.currentSize, 1);
     });
+
+    test('ImageProvider errors can always be caught', () async {
+      final ErrorImageProvider imageProvider = ErrorImageProvider();
+      final Completer<bool> caughtError = Completer<bool>();
+      FlutterError.onError = (FlutterErrorDetails details) {
+        caughtError.complete(false);
+      };
+      final ImageStream stream = imageProvider.resolve(ImageConfiguration.empty);
+      stream.addListener((ImageInfo info, bool syncCall) {
+        caughtError.complete(false);
+      }, onError: (dynamic error, StackTrace stackTrace) {
+        caughtError.complete(true);
+      });
+      expect(await caughtError.future, true);
+    });
+  });
+
+  test('ImageProvide.obtainKey errors will be caught', () async {
+    final ImageProvider imageProvider = ObtainKeyErrorImageProvider();
+    final Completer<bool> caughtError = Completer<bool>();
+    FlutterError.onError = (FlutterErrorDetails details) {
+      caughtError.complete(false);
+    };
+    final ImageStream stream = imageProvider.resolve(ImageConfiguration.empty);
+    stream.addListener((ImageInfo info, bool syncCall) {
+      caughtError.complete(false);
+    }, onError: (dynamic error, StackTrace stackTrace) {
+      caughtError.complete(true);
+    });
+    expect(await caughtError.future, true);
   });
 }

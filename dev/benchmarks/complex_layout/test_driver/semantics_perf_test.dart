@@ -8,7 +8,7 @@ import 'dart:io';
 
 import 'package:flutter_driver/flutter_driver.dart';
 import 'package:path/path.dart' as p;
-import 'package:test/test.dart';
+import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 
 void main() {
   group('semantics performance test', () {
@@ -25,7 +25,9 @@ void main() {
 
     test('inital tree creation', () async {
       // Let app become fully idle.
-      await new Future<Null>.delayed(const Duration(seconds: 1));
+      await Future<void>.delayed(const Duration(seconds: 2));
+
+      await driver.forceGC();
 
       final Timeline timeline = await driver.traceAction(() async {
         expect(await driver.setSemantics(true), isTrue);
@@ -37,7 +39,7 @@ void main() {
       final Duration semanticsTreeCreation = semanticsEvents.first.duration;
 
       final String jsonEncoded = json.encode(<String, dynamic>{'initialSemanticsTreeCreation': semanticsTreeCreation.inMilliseconds});
-      new File(p.join(testOutputsDirectory, 'complex_layout_semantics_perf.json')).writeAsStringSync(jsonEncoded);
+      File(p.join(testOutputsDirectory, 'complex_layout_semantics_perf.json')).writeAsStringSync(jsonEncoded);
     });
   });
 }

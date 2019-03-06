@@ -34,12 +34,12 @@ $originalStackTrace
 bool _noLogSubscribers = true;
 
 final StreamController<LogRecord> _logger =
-    new StreamController<LogRecord>.broadcast(sync: true, onListen: () {
+    StreamController<LogRecord>.broadcast(sync: true, onListen: () {
       _noLogSubscribers = false;
     });
 
 void _log(LogLevel level, String loggerName, Object message) {
-  final LogRecord record = new LogRecord._(level, loggerName, '$message');
+  final LogRecord record = LogRecord._(level, loggerName, '$message');
   // If nobody expressed interest in rerouting log messages somewhere specific,
   // print them to stderr.
   if (_noLogSubscribers)

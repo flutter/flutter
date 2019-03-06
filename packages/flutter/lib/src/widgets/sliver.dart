@@ -16,6 +16,25 @@ export 'package:flutter/rendering.dart' show
   SliverGridDelegateWithFixedCrossAxisCount,
   SliverGridDelegateWithMaxCrossAxisExtent;
 
+// Examples can assume:
+// SliverGridDelegateWithMaxCrossAxisExtent _gridDelegate;
+
+/// A callback which produces a semantic index given a widget and the local index.
+///
+/// Return a null value to prevent a widget from receiving an index.
+///
+/// A semantic index is used to tag child semantic nodes for accessibility
+/// announcements in scroll view.
+///
+/// See also:
+///
+///  * [CustomScrollView], for an explanation of scroll semantics.
+///  * [SliverChildBuilderDelegate], for an explanation of how this is used to
+///    generate indexes.
+typedef SemanticIndexCallback = int Function(Widget widget, int localIndex);
+
+int _kDefaultSemanticIndexCallback(Widget _, int localIndex) => localIndex;
+
 /// A delegate that supplies children for slivers.
 ///
 /// Many slivers lazily construct their box children to avoid creating more
@@ -26,6 +45,67 @@ export 'package:flutter/rendering.dart' show
 /// It's uncommon to subclass [SliverChildDelegate]. Instead, consider using one
 /// of the existing subclasses that provide adaptors to builder callbacks or
 /// explicit child lists.
+///
+/// {@template flutter.widgets.sliverChildDelegate.lifecycle}
+/// ## Child elements' lifecycle
+///
+/// ### Creation
+///
+/// While laying out the list, visible children's elements, states and render
+/// objects will be created lazily based on existing widgets (such as in the
+/// case of [SliverChildListDelegate]) or lazily provided ones (such as in the
+/// case of [SliverChildBuilderDelegate]).
+///
+/// ### Destruction
+///
+/// When a child is scrolled out of view, the associated element subtree, states
+/// and render objects are destroyed. A new child at the same position in the
+/// sliver will be lazily recreated along with new elements, states and render
+/// objects when it is scrolled back.
+///
+/// ### Destruction mitigation
+///
+/// In order to preserve state as child elements are scrolled in and out of
+/// view, the following options are possible:
+///
+///  * Moving the ownership of non-trivial UI-state-driving business logic
+///    out of the sliver child subtree. For instance, if a list contains posts
+///    with their number of upvotes coming from a cached network response, store
+///    the list of posts and upvote number in a data model outside the list. Let
+///    the sliver child UI subtree be easily recreate-able from the
+///    source-of-truth model object. Use [StatefulWidget]s in the child widget
+///    subtree to store instantaneous UI state only.
+///
+///  * Letting [KeepAlive] be the root widget of the sliver child widget subtree
+///    that needs to be preserved. The [KeepAlive] widget marks the child
+///    subtree's top render object child for keep-alive. When the associated top
+///    render object is scrolled out of view, the sliver keeps the child's
+///    render object (and by extension, its associated elements and states) in a
+///    cache list instead of destroying them. When scrolled back into view, the
+///    render object is repainted as-is (if it wasn't marked dirty in the
+///    interim).
+///
+///    This only works if the [SliverChildDelegate] subclasses don't wrap the
+///    child widget subtree with other widgets such as [AutomaticKeepAlive] and
+///    [RepaintBoundary] via `addAutomaticKeepAlives` and
+///    `addRepaintBoundaries`.
+///
+///  * Using [AutomaticKeepAlive] widgets (inserted by default in
+///    [SliverChildListDelegate] or [SliverChildListDelegate]). Instead of
+///    unconditionally caching the child element subtree when scrolling
+///    off-screen like [KeepAlive], [AutomaticKeepAlive] can let whether to
+///    cache the subtree be determined by descendant logic in the subtree.
+///
+///    As an example, the [EditableText] widget signals its sliver child element
+///    subtree to stay alive while its text field has input focus. If it doesn't
+///    have focus and no other descendants signaled for keep-alive via a
+///    [KeepAliveNotification], the sliver child element subtree will be
+///    destroyed when scrolled away.
+///
+///    [AutomaticKeepAlive] descendants typically signal it to be kept alive by
+///    using the [AutomaticKeepAliveClientMixin], then implementing the
+///    [wantKeepAlive] getter and calling [updateKeepAlive].
+/// {@endtemplate}
 ///
 /// See also:
 ///
@@ -127,24 +207,118 @@ abstract class SliverChildDelegate {
 /// default) and in [RepaintBoundary] widgets if [addRepaintBoundaries] is true
 /// (also the default).
 ///
+/// ## Accessibility
+///
+/// The [CustomScrollView] requires that its semantic children are annotated
+/// using [IndexedSemantics]. This is done by default in the delegate with
+/// the `addSemanticIndexes` parameter set to true.
+///
+/// If multiple delegates are used in a single scroll view, then the indexes
+/// will not be correct by default. The `semanticIndexOffset` can be used to
+/// offset the semantic indexes of each delegate so that the indexes are
+/// monotonically increasing. For example, if a scroll view contains two
+/// delegates where the first has 10 children contributing semantics, then the
+/// second delegate should offset its children by 10.
+///
+/// {@tool sample}
+///
+/// This sample code shows how to use `semanticIndexOffset` to handle multiple
+/// delegates in a single scroll view.
+///
+/// ```dart
+/// CustomScrollView(
+///   semanticChildCount: 4,
+///   slivers: <Widget>[
+///     SliverGrid(
+///       gridDelegate: _gridDelegate,
+///       delegate: SliverChildBuilderDelegate(
+///         (BuildContext context, int index) {
+///            return Text('...');
+///          },
+///          childCount: 2,
+///        ),
+///      ),
+///     SliverGrid(
+///       gridDelegate: _gridDelegate,
+///       delegate: SliverChildBuilderDelegate(
+///         (BuildContext context, int index) {
+///            return Text('...');
+///          },
+///          childCount: 2,
+///          semanticIndexOffset: 2,
+///        ),
+///      ),
+///   ],
+/// )
+/// ```
+/// {@end-tool}
+///
+/// In certain cases, only a subset of child widgets should be annotated
+/// with a semantic index. For example, in [new ListView.separated()] the
+/// separators do not have an index associated with them. This is done by
+/// providing a `semanticIndexCallback` which returns null for separators
+/// indexes and rounds the non-separator indexes down by half.
+///
+/// {@tool sample}
+///
+/// This sample code shows how to use `semanticIndexCallback` to handle
+/// annotating a subset of child nodes with a semantic index. There is
+/// a [Spacer] widget at odd indexes which should not have a semantic
+/// index.
+///
+/// ```dart
+/// CustomScrollView(
+///   semanticChildCount: 5,
+///   slivers: <Widget>[
+///     SliverGrid(
+///       gridDelegate: _gridDelegate,
+///       delegate: SliverChildBuilderDelegate(
+///         (BuildContext context, int index) {
+///            if (index.isEven) {
+///              return Text('...');
+///            }
+///            return Spacer();
+///          },
+///          semanticIndexCallback: (Widget widget, int localIndex) {
+///            if (localIndex.isEven) {
+///              return localIndex ~/ 2;
+///            }
+///            return null;
+///          },
+///          childCount: 10,
+///        ),
+///      ),
+///   ],
+/// )
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [SliverChildListDelegate], which is a delegate that has an explicit list
 ///    of children.
+///  * [IndexedSemantics], for an example of manually annotating child nodes
+///    with semantic indexes.
 class SliverChildBuilderDelegate extends SliverChildDelegate {
   /// Creates a delegate that supplies children for slivers using the given
   /// builder callback.
   ///
-  /// The [builder], [addAutomaticKeepAlives], and [addRepaintBoundaries]
-  /// arguments must not be null.
+  /// The [builder], [addAutomaticKeepAlives], [addRepaintBoundaries],
+  /// [addSemanticIndexes], and [semanticIndexCallback] arguments must not be
+  /// null.
   const SliverChildBuilderDelegate(
     this.builder, {
     this.childCount,
     this.addAutomaticKeepAlives = true,
     this.addRepaintBoundaries = true,
+    this.addSemanticIndexes = true,
+    this.semanticIndexCallback = _kDefaultSemanticIndexCallback,
+    this.semanticIndexOffset = 0,
   }) : assert(builder != null),
        assert(addAutomaticKeepAlives != null),
-       assert(addRepaintBoundaries != null);
+       assert(addRepaintBoundaries != null),
+       assert(addSemanticIndexes != null),
+       assert(semanticIndexCallback != null);
 
   /// Called to build children for the sliver.
   ///
@@ -189,18 +363,53 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
   /// Defaults to true.
   final bool addRepaintBoundaries;
 
+  /// Whether to wrap each child in an [IndexedSemantics].
+  ///
+  /// Typically, children in a scrolling container must be annotated with a
+  /// semantic index in order to generate the correct accessibility
+  /// announcements. This should only be set to false if the indexes have
+  /// already been provided by an [IndexedChildSemantics] widget.
+  ///
+  /// Defaults to true.
+  ///
+  /// See also:
+  ///
+  ///  * [IndexedChildSemantics], for an explanation of how to manually
+  ///    provide semantic indexes.
+  final bool addSemanticIndexes;
+
+  /// An initial offset to add to the semantic indexes generated by this widget.
+  ///
+  /// Defaults to zero.
+  final int semanticIndexOffset;
+
+  /// A [SemanticIndexCallback] which is used when [addSemanticIndexes] is true.
+  ///
+  /// Defaults to providing an index for each widget.
+  final SemanticIndexCallback semanticIndexCallback;
+
   @override
   Widget build(BuildContext context, int index) {
     assert(builder != null);
     if (index < 0 || (childCount != null && index >= childCount))
       return null;
-    Widget child = builder(context, index);
+    Widget child;
+    try {
+      child = builder(context, index);
+    } catch (exception, stackTrace) {
+      child = _createErrorWidget(exception, stackTrace);
+    }
     if (child == null)
       return null;
     if (addRepaintBoundaries)
-      child = new RepaintBoundary.wrap(child, index);
+      child = RepaintBoundary.wrap(child, index);
+    if (addSemanticIndexes) {
+      final int semanticIndex = semanticIndexCallback(child, index);
+      if (semanticIndex != null)
+        child = IndexedSemantics(index: semanticIndex + semanticIndexOffset, child: child);
+    }
     if (addAutomaticKeepAlives)
-      child = new AutomaticKeepAlive(child: child);
+      child = AutomaticKeepAlive(child: child);
     return child;
   }
 
@@ -236,6 +445,28 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
 /// default) and in [RepaintBoundary] widgets if [addRepaintBoundaries] is true
 /// (also the default).
 ///
+/// ## Accessibility
+///
+/// The [CustomScrollView] requires that its semantic children are annotated
+/// using [IndexedSemantics]. This is done by default in the delegate with
+/// the `addSemanticIndexes` parameter set to true.
+///
+/// If multiple delegates are used in a single scroll view, then the indexes
+/// will not be correct by default. The `semanticIndexOffset` can be used to
+/// offset the semantic indexes of each delegate so that the indexes are
+/// monotonically increasing. For example, if a scroll view contains two
+/// delegates where the first has 10 children contributing semantics, then the
+/// second delegate should offset its children by 10.
+///
+/// In certain cases, only a subset of child widgets should be annotated
+/// with a semantic index. For example, in [new ListView.separated()] the
+/// separators do not have an index associated with them. This is done by
+/// providing a `semanticIndexCallback` which returns null for separators
+/// indexes and rounds the non-separator indexes down by half.
+///
+/// See [SliverChildBuilderDelegate] for sample code using
+/// `semanticIndexOffset` and `semanticIndexCallback`.
+///
 /// See also:
 ///
 ///  * [SliverChildBuilderDelegate], which is a delegate that uses a builder
@@ -244,15 +475,21 @@ class SliverChildListDelegate extends SliverChildDelegate {
   /// Creates a delegate that supplies children for slivers using the given
   /// list.
   ///
-  /// The [children], [addAutomaticKeepAlives], and [addRepaintBoundaries]
-  /// arguments must not be null.
+  /// The [children], [addAutomaticKeepAlives], [addRepaintBoundaries],
+  /// [addSemanticIndexes], and [semanticIndexCallback] arguments must not be
+  /// null.
   const SliverChildListDelegate(
     this.children, {
     this.addAutomaticKeepAlives = true,
     this.addRepaintBoundaries = true,
+    this.addSemanticIndexes = true,
+    this.semanticIndexCallback = _kDefaultSemanticIndexCallback,
+    this.semanticIndexOffset = 0,
   }) : assert(children != null),
        assert(addAutomaticKeepAlives != null),
-       assert(addRepaintBoundaries != null);
+       assert(addRepaintBoundaries != null),
+       assert(addSemanticIndexes != null),
+       assert(semanticIndexCallback != null);
 
   /// Whether to wrap each child in an [AutomaticKeepAlive].
   ///
@@ -279,6 +516,31 @@ class SliverChildListDelegate extends SliverChildDelegate {
   /// Defaults to true.
   final bool addRepaintBoundaries;
 
+  /// Whether to wrap each child in an [IndexedSemantics].
+  ///
+  /// Typically, children in a scrolling container must be annotated with a
+  /// semantic index in order to generate the correct accessibility
+  /// announcements. This should only be set to false if the indexes have
+  /// already been provided by an [IndexedChildSemantics] widget.
+  ///
+  /// Defaults to true.
+  ///
+  /// See also:
+  ///
+  ///  * [IndexedChildSemantics], for an explanation of how to manually
+  ///    provide semantic indexes.
+  final bool addSemanticIndexes;
+
+  /// An initial offset to add to the semantic indexes generated by this widget.
+  ///
+  /// Defaults to zero.
+  final int semanticIndexOffset;
+
+  /// A [SemanticIndexCallback] which is used when [addSemanticIndexes] is true.
+  ///
+  /// Defaults to providing an index for each widget.
+  final SemanticIndexCallback semanticIndexCallback;
+
   /// The widgets to display.
   final List<Widget> children;
 
@@ -290,9 +552,14 @@ class SliverChildListDelegate extends SliverChildDelegate {
     Widget child = children[index];
     assert(child != null);
     if (addRepaintBoundaries)
-      child = new RepaintBoundary.wrap(child, index);
+      child = RepaintBoundary.wrap(child, index);
+    if (addSemanticIndexes) {
+      final int semanticIndex = semanticIndexCallback(child, index);
+      if (semanticIndex != null)
+        child = IndexedSemantics(index: semanticIndex + semanticIndexOffset, child: child);
+    }
     if (addAutomaticKeepAlives)
-      child = new AutomaticKeepAlive(child: child);
+      child = AutomaticKeepAlive(child: child);
     return child;
   }
 
@@ -305,10 +572,21 @@ class SliverChildListDelegate extends SliverChildDelegate {
   }
 }
 
+/// A base class for sliver that have [KeepAlive] children.
+abstract class SliverWithKeepAliveWidget extends RenderObjectWidget {
+  /// Initializes fields for subclasses.
+  const SliverWithKeepAliveWidget({
+    Key key,
+  }) : super(key : key);
+
+  @override
+  RenderSliverWithKeepAliveMixin createRenderObject(BuildContext context);
+}
+
 /// A base class for sliver that have multiple box children.
 ///
 /// Helps subclasses build their children lazily using a [SliverChildDelegate].
-abstract class SliverMultiBoxAdaptorWidget extends RenderObjectWidget {
+abstract class SliverMultiBoxAdaptorWidget extends SliverWithKeepAliveWidget {
   /// Initializes fields for subclasses.
   const SliverMultiBoxAdaptorWidget({
     Key key,
@@ -329,7 +607,7 @@ abstract class SliverMultiBoxAdaptorWidget extends RenderObjectWidget {
   final SliverChildDelegate delegate;
 
   @override
-  SliverMultiBoxAdaptorElement createElement() => new SliverMultiBoxAdaptorElement(this);
+  SliverMultiBoxAdaptorElement createElement() => SliverMultiBoxAdaptorElement(this);
 
   @override
   RenderSliverMultiBoxAdaptor createRenderObject(BuildContext context);
@@ -363,7 +641,7 @@ abstract class SliverMultiBoxAdaptorWidget extends RenderObjectWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new DiagnosticsProperty<SliverChildDelegate>('delegate', delegate));
+    properties.add(DiagnosticsProperty<SliverChildDelegate>('delegate', delegate));
   }
 }
 
@@ -383,6 +661,8 @@ abstract class SliverMultiBoxAdaptorWidget extends RenderObjectWidget {
 /// [SliverFixedExtentList] does not need to perform layout on its children to
 /// obtain their extent in the main axis and is therefore more efficient.
 ///
+/// {@macro flutter.widgets.sliverChildDelegate.lifecycle}
+///
 /// See also:
 ///
 ///  * [SliverFixedExtentList], which is more efficient for children with
@@ -401,7 +681,7 @@ class SliverList extends SliverMultiBoxAdaptorWidget {
   @override
   RenderSliverList createRenderObject(BuildContext context) {
     final SliverMultiBoxAdaptorElement element = context;
-    return new RenderSliverList(childManager: element);
+    return RenderSliverList(childManager: element);
   }
 }
 
@@ -417,25 +697,28 @@ class SliverList extends SliverMultiBoxAdaptorWidget {
 /// [SliverFixedExtentList] does not need to perform layout on its children to
 /// obtain their extent in the main axis.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// This example, which would be inserted into a [CustomScrollView.slivers]
 /// list, shows an infinite number of items in varying shades of blue:
 ///
 /// ```dart
-/// new SliverFixedExtentList(
+/// SliverFixedExtentList(
 ///   itemExtent: 50.0,
-///   delegate: new SliverChildBuilderDelegate(
+///   delegate: SliverChildBuilderDelegate(
 ///     (BuildContext context, int index) {
-///       return new Container(
+///       return Container(
 ///         alignment: Alignment.center,
 ///         color: Colors.lightBlue[100 * (index % 9)],
-///         child: new Text('list item $index'),
+///         child: Text('list item $index'),
 ///       );
 ///     },
 ///   ),
 /// )
 /// ```
+/// {@end-tool}
+///
+/// {@macro flutter.widgets.sliverChildDelegate.lifecycle}
 ///
 /// See also:
 ///
@@ -461,7 +744,7 @@ class SliverFixedExtentList extends SliverMultiBoxAdaptorWidget {
   @override
   RenderSliverFixedExtentList createRenderObject(BuildContext context) {
     final SliverMultiBoxAdaptorElement element = context;
-    return new RenderSliverFixedExtentList(childManager: element, itemExtent: itemExtent);
+    return RenderSliverFixedExtentList(childManager: element, itemExtent: itemExtent);
   }
 
   @override
@@ -479,31 +762,34 @@ class SliverFixedExtentList extends SliverMultiBoxAdaptorWidget {
 /// The main axis direction of a grid is the direction in which it scrolls; the
 /// cross axis direction is the orthogonal direction.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// This example, which would be inserted into a [CustomScrollView.slivers]
 /// list, shows twenty boxes in a pretty teal grid:
 ///
 /// ```dart
-/// new SliverGrid(
-///   gridDelegate: new SliverGridDelegateWithMaxCrossAxisExtent(
+/// SliverGrid(
+///   gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
 ///     maxCrossAxisExtent: 200.0,
 ///     mainAxisSpacing: 10.0,
 ///     crossAxisSpacing: 10.0,
 ///     childAspectRatio: 4.0,
 ///   ),
-///   delegate: new SliverChildBuilderDelegate(
+///   delegate: SliverChildBuilderDelegate(
 ///     (BuildContext context, int index) {
-///       return new Container(
+///       return Container(
 ///         alignment: Alignment.center,
 ///         color: Colors.teal[100 * (index % 9)],
-///         child: new Text('grid item $index'),
+///         child: Text('grid item $index'),
 ///       );
 ///     },
 ///     childCount: 20,
 ///   ),
 /// )
 /// ```
+/// {@end-tool}
+///
+/// {@macro flutter.widgets.sliverChildDelegate.lifecycle}
 ///
 /// See also:
 ///
@@ -538,13 +824,13 @@ class SliverGrid extends SliverMultiBoxAdaptorWidget {
     double crossAxisSpacing = 0.0,
     double childAspectRatio = 1.0,
     List<Widget> children = const <Widget>[],
-  }) : gridDelegate = new SliverGridDelegateWithFixedCrossAxisCount(
+  }) : gridDelegate = SliverGridDelegateWithFixedCrossAxisCount(
          crossAxisCount: crossAxisCount,
          mainAxisSpacing: mainAxisSpacing,
          crossAxisSpacing: crossAxisSpacing,
          childAspectRatio: childAspectRatio,
        ),
-       super(key: key, delegate: new SliverChildListDelegate(children));
+       super(key: key, delegate: SliverChildListDelegate(children));
 
   /// Creates a sliver that places multiple box children in a two dimensional
   /// arrangement with tiles that each have a maximum cross-axis extent.
@@ -562,13 +848,13 @@ class SliverGrid extends SliverMultiBoxAdaptorWidget {
     double crossAxisSpacing = 0.0,
     double childAspectRatio = 1.0,
     List<Widget> children = const <Widget>[],
-  }) : gridDelegate = new SliverGridDelegateWithMaxCrossAxisExtent(
+  }) : gridDelegate = SliverGridDelegateWithMaxCrossAxisExtent(
          maxCrossAxisExtent: maxCrossAxisExtent,
          mainAxisSpacing: mainAxisSpacing,
          crossAxisSpacing: crossAxisSpacing,
          childAspectRatio: childAspectRatio,
        ),
-       super(key: key, delegate: new SliverChildListDelegate(children));
+       super(key: key, delegate: SliverChildListDelegate(children));
 
   /// The delegate that controls the size and position of the children.
   final SliverGridDelegate gridDelegate;
@@ -576,7 +862,7 @@ class SliverGrid extends SliverMultiBoxAdaptorWidget {
   @override
   RenderSliverGrid createRenderObject(BuildContext context) {
     final SliverMultiBoxAdaptorElement element = context;
-    return new RenderSliverGrid(childManager: element, gridDelegate: gridDelegate);
+    return RenderSliverGrid(childManager: element, gridDelegate: gridDelegate);
   }
 
   @override
@@ -637,7 +923,7 @@ class SliverFillViewport extends SliverMultiBoxAdaptorWidget {
   @override
   RenderSliverFillViewport createRenderObject(BuildContext context) {
     final SliverMultiBoxAdaptorElement element = context;
-    return new RenderSliverFillViewport(childManager: element, viewportFraction: viewportFraction);
+    return RenderSliverFillViewport(childManager: element, viewportFraction: viewportFraction);
   }
 
   @override
@@ -678,8 +964,8 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
   // so that if we do case 2 later, we don't call the builder again.
   // Any time we do case 1, though, we reset the cache.
 
-  final Map<int, Widget> _childWidgets = new HashMap<int, Widget>();
-  final SplayTreeMap<int, Element> _childElements = new SplayTreeMap<int, Element>();
+  final Map<int, Widget> _childWidgets = HashMap<int, Widget>();
+  final SplayTreeMap<int, Element> _childElements = SplayTreeMap<int, Element>();
   RenderBox _currentBeforeChild;
 
   @override
@@ -689,23 +975,23 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
     _currentBeforeChild = null;
     assert(_currentlyUpdatingChildIndex == null);
     try {
-      int firstIndex = _childElements.firstKey();
-      int lastIndex = _childElements.lastKey();
-      if (_childElements.isEmpty) {
-        firstIndex = 0;
-        lastIndex = 0;
-      } else if (_didUnderflow) {
-        lastIndex += 1;
-      }
-      for (int index = firstIndex; index <= lastIndex; ++index) {
+      void processElement(int index) {
         _currentlyUpdatingChildIndex = index;
         final Element newChild = updateChild(_childElements[index], _build(index), index);
         if (newChild != null) {
           _childElements[index] = newChild;
-          _currentBeforeChild = newChild.renderObject;
+          final SliverMultiBoxAdaptorParentData parentData = newChild.renderObject.parentData;
+          if (!parentData.keptAlive)
+            _currentBeforeChild = newChild.renderObject;
         } else {
           _childElements.remove(index);
         }
+      }
+      // processElement may modify the Map - need to do a .toList() here.
+      _childElements.keys.toList().forEach(processElement);
+      if (_didUnderflow) {
+        final int lastKey = _childElements.lastKey() ?? -1;
+        processElement(lastKey + 1);
       }
     } finally {
       _currentlyUpdatingChildIndex = null;
@@ -795,7 +1081,8 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
   }
 
   @override
-  double estimateMaxScrollOffset(SliverConstraints constraints, {
+  double estimateMaxScrollOffset(
+    SliverConstraints constraints, {
     int firstIndex,
     int lastIndex,
     double leadingScrollOffset,
@@ -934,15 +1221,30 @@ class SliverFillRemaining extends SingleChildRenderObjectWidget {
   }) : super(key: key, child: child);
 
   @override
-  RenderSliverFillRemaining createRenderObject(BuildContext context) => new RenderSliverFillRemaining();
+  RenderSliverFillRemaining createRenderObject(BuildContext context) => RenderSliverFillRemaining();
 }
 
 /// Mark a child as needing to stay alive even when it's in a lazy list that
 /// would otherwise remove it.
 ///
-/// This widget is for use in [SliverMultiBoxAdaptorWidget]s, such as
+/// This widget is for use in [SliverWithKeepAliveWidget]s, such as
 /// [SliverGrid] or [SliverList].
-class KeepAlive extends ParentDataWidget<SliverMultiBoxAdaptorWidget> {
+///
+/// This widget is rarely used directly. The [SliverChildBuilderDelegate] and
+/// [SliverChildListDelegate] delegates, used with [SliverList] and
+/// [SliverGrid], as well as the scroll view counterparts [ListView] and
+/// [GridView], have an `addAutomaticKeepAlives` feature, which is enabled by
+/// default, and which causes [AutomaticKeepAlive] widgets to be inserted around
+/// each child, causing [KeepAlive] widgets to be automatically added and
+/// configured in response to [KeepAliveNotification]s.
+///
+/// Therefore, to keep a widget alive, it is more common to use those
+/// notifications than to directly deal with [KeepAlive] widgets.
+///
+/// In practice, the simplest way to deal with these notifications is to mix
+/// [AutomaticKeepAliveClientMixin] into one's [State]. See the documentation
+/// for that mixin class for details.
+class KeepAlive extends ParentDataWidget<SliverWithKeepAliveWidget> {
   /// Marks a child as needing to remain alive.
   ///
   /// The [child] and [keepAlive] arguments must not be null.
@@ -961,8 +1263,8 @@ class KeepAlive extends ParentDataWidget<SliverMultiBoxAdaptorWidget> {
 
   @override
   void applyParentData(RenderObject renderObject) {
-    assert(renderObject.parentData is SliverMultiBoxAdaptorParentData);
-    final SliverMultiBoxAdaptorParentData parentData = renderObject.parentData;
+    assert(renderObject.parentData is KeepAliveParentDataMixin);
+    final KeepAliveParentDataMixin parentData = renderObject.parentData;
     if (parentData.keepAlive != keepAlive) {
       parentData.keepAlive = keepAlive;
       final AbstractNode targetParent = renderObject.parent;
@@ -981,6 +1283,19 @@ class KeepAlive extends ParentDataWidget<SliverMultiBoxAdaptorWidget> {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new DiagnosticsProperty<bool>('keepAlive', keepAlive));
+    properties.add(DiagnosticsProperty<bool>('keepAlive', keepAlive));
   }
+}
+
+// Return an ErrorWidget for the given Exception
+ErrorWidget _createErrorWidget(dynamic exception, StackTrace stackTrace) {
+  final FlutterErrorDetails details = FlutterErrorDetails(
+    exception: exception,
+    stack: stackTrace,
+    library: 'widgets library',
+    context: 'building',
+    informationCollector: null,
+  );
+  FlutterError.reportError(details);
+  return ErrorWidget.builder(details);
 }

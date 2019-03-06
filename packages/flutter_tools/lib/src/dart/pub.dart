@@ -23,32 +23,32 @@ import 'sdk.dart';
 // DO NOT update without contacting kevmoo.
 // We have server-side tooling that assumes the values are consistent.
 class PubContext {
-  static final RegExp _validContext = new RegExp('[a-z][a-z_]*[a-z]');
-
-  static final PubContext create = new PubContext._(<String>['create']);
-  static final PubContext createPackage = new PubContext._(<String>['create_pkg']);
-  static final PubContext createPlugin = new PubContext._(<String>['create_plugin']);
-  static final PubContext interactive = new PubContext._(<String>['interactive']);
-  static final PubContext pubGet = new PubContext._(<String>['get']);
-  static final PubContext pubUpgrade = new PubContext._(<String>['upgrade']);
-  static final PubContext runTest = new PubContext._(<String>['run_test']);
-
-  static final PubContext flutterTests = new PubContext._(<String>['flutter_tests']);
-  static final PubContext updatePackages = new PubContext._(<String>['update_packages']);
-
-  final List<String> _values;
-
   PubContext._(this._values) {
     for (String item in _values) {
       if (!_validContext.hasMatch(item)) {
-        throw new ArgumentError.value(
+        throw ArgumentError.value(
             _values, 'value', 'Must match RegExp ${_validContext.pattern}');
       }
     }
   }
 
   static PubContext getVerifyContext(String commandName) =>
-      new PubContext._(<String>['verify', commandName.replaceAll('-', '_')]);
+      PubContext._(<String>['verify', commandName.replaceAll('-', '_')]);
+
+  static final PubContext create = PubContext._(<String>['create']);
+  static final PubContext createPackage = PubContext._(<String>['create_pkg']);
+  static final PubContext createPlugin = PubContext._(<String>['create_plugin']);
+  static final PubContext interactive = PubContext._(<String>['interactive']);
+  static final PubContext pubGet = PubContext._(<String>['get']);
+  static final PubContext pubUpgrade = PubContext._(<String>['upgrade']);
+  static final PubContext runTest = PubContext._(<String>['run_test']);
+
+  static final PubContext flutterTests = PubContext._(<String>['flutter_tests']);
+  static final PubContext updatePackages = PubContext._(<String>['update_packages']);
+
+  final List<String> _values;
+
+  static final RegExp _validContext = RegExp('[a-z][a-z_]*[a-z]');
 
   @override
   String toString() => 'PubContext: ${_values.join(':')}';
@@ -69,13 +69,13 @@ bool _shouldRunPubGet({ File pubSpecYaml, File dotPackages }) {
 
 /// [context] provides extra information to package server requests to
 /// understand usage.
-Future<Null> pubGet({
+Future<void> pubGet({
   @required PubContext context,
   String directory,
   bool skipIfAbsent = false,
   bool upgrade = false,
   bool offline = false,
-  bool checkLastModified = true
+  bool checkLastModified = true,
 }) async {
   directory ??= fs.currentDirectory.path;
 
@@ -92,7 +92,7 @@ Future<Null> pubGet({
     final String command = upgrade ? 'upgrade' : 'get';
     final Status status = logger.startProgress(
       'Running "flutter packages $command" in ${fs.path.basename(directory)}...',
-      expectSlowOperation: true,
+      timeout: kSlowOperation,
     );
     final List<String> args = <String>['--verbosity=warning'];
     if (FlutterCommand.current != null && FlutterCommand.current.globalResults['verbose'])
@@ -109,8 +109,10 @@ Future<Null> pubGet({
         failureMessage: 'pub $command failed',
         retry: true,
       );
-    } finally {
       status.stop();
+    } catch (exception) {
+      status.cancel();
+      rethrow;
     }
   }
 
@@ -121,7 +123,7 @@ Future<Null> pubGet({
     throwToolExit('$directory: pub did not update .packages file (pubspec.yaml file has a newer timestamp)');
 }
 
-typedef String MessageFilter(String message);
+typedef MessageFilter = String Function(String message);
 
 /// Runs pub in 'batch' mode, forwarding complete lines written by pub to its
 /// stdout/stderr streams to the corresponding stream of this process, optionally
@@ -133,7 +135,8 @@ typedef String MessageFilter(String message);
 ///
 /// [context] provides extra information to package server requests to
 /// understand usage.
-Future<Null> pub(List<String> arguments, {
+Future<void> pub(
+  List<String> arguments, {
   @required PubContext context,
   String directory,
   MessageFilter filter,
@@ -159,7 +162,7 @@ Future<Null> pub(List<String> arguments, {
     if (code != 69) // UNAVAILABLE in https://github.com/dart-lang/pub/blob/master/lib/src/exit_codes.dart
       break;
     printStatus('$failureMessage ($code) -- attempting retry $attempts in $duration second${ duration == 1 ? "" : "s"}...');
-    await new Future<Null>.delayed(new Duration(seconds: duration));
+    await Future<void>.delayed(Duration(seconds: duration));
     if (duration < 64)
       duration *= 2;
   }
@@ -171,9 +174,11 @@ Future<Null> pub(List<String> arguments, {
 /// Runs pub in 'interactive' mode, directly piping the stdin stream of this
 /// process to that of pub, and the stdout/stderr stream of pub to the corresponding
 /// streams of this process.
-Future<Null> pubInteractively(List<String> arguments, {
+Future<void> pubInteractively(
+  List<String> arguments, {
   String directory,
 }) async {
+  Cache.releaseLockEarly();
   final int code = await runInteractively(
     _pubCommand(arguments),
     workingDirectory: directory,
@@ -204,7 +209,7 @@ Map<String, String> _createPubEnvironment(PubContext context) {
   return environment;
 }
 
-final RegExp _analyzerWarning = new RegExp(r'^! \w+ [^ ]+ from path \.\./\.\./bin/cache/dart-sdk/lib/\w+$');
+final RegExp _analyzerWarning = RegExp(r'^! \w+ [^ ]+ from path \.\./\.\./bin/cache/dart-sdk/lib/\w+$');
 
 /// The console environment key used by the pub tool.
 const String _pubEnvironmentKey = 'PUB_ENVIRONMENT';

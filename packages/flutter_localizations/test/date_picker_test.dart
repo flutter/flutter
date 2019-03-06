@@ -14,39 +14,39 @@ void main() {
   DateTime initialDate;
 
   setUp(() {
-    firstDate = new DateTime(2001, DateTime.january, 1);
-    lastDate = new DateTime(2031, DateTime.december, 31);
-    initialDate = new DateTime(2016, DateTime.january, 15);
+    firstDate = DateTime(2001, DateTime.january, 1);
+    lastDate = DateTime(2031, DateTime.december, 31);
+    initialDate = DateTime(2016, DateTime.january, 15);
   });
 
   group(DayPicker, () {
-    final intl.NumberFormat arabicNumbers = new intl.NumberFormat('0', 'ar');
+    final intl.NumberFormat arabicNumbers = intl.NumberFormat('0', 'ar');
     final Map<Locale, Map<String, dynamic>> testLocales = <Locale, Map<String, dynamic>>{
       // Tests the default.
       const Locale('en', 'US'): <String, dynamic>{
         'textDirection': TextDirection.ltr,
         'expectedDaysOfWeek': <String>['S', 'M', 'T', 'W', 'T', 'F', 'S'],
-        'expectedDaysOfMonth': new List<String>.generate(30, (int i) => '${i + 1}'),
+        'expectedDaysOfMonth': List<String>.generate(30, (int i) => '${i + 1}'),
         'expectedMonthYearHeader': 'September 2017',
       },
       // Tests a different first day of week.
       const Locale('ru', 'RU'): <String, dynamic>{
         'textDirection': TextDirection.ltr,
         'expectedDaysOfWeek': <String>['пн', 'вт', 'ср', 'чт', 'пт', 'сб', 'вс'],
-        'expectedDaysOfMonth': new List<String>.generate(30, (int i) => '${i + 1}'),
+        'expectedDaysOfMonth': List<String>.generate(30, (int i) => '${i + 1}'),
         'expectedMonthYearHeader': 'сентябрь 2017 г.',
       },
       const Locale('ro', 'RO'): <String, dynamic>{
         'textDirection': TextDirection.ltr,
         'expectedDaysOfWeek': <String>['D', 'L', 'M', 'M', 'J', 'V', 'S'],
-        'expectedDaysOfMonth': new List<String>.generate(30, (int i) => '${i + 1}'),
+        'expectedDaysOfMonth': List<String>.generate(30, (int i) => '${i + 1}'),
         'expectedMonthYearHeader': 'septembrie 2017',
       },
       // Tests RTL.
       const Locale('ar', 'AR'): <String, dynamic>{
         'textDirection': TextDirection.rtl,
         'expectedDaysOfWeek': <String>['ح', 'ن', 'ث', 'ر', 'خ', 'ج', 'س'],
-        'expectedDaysOfMonth': new List<String>.generate(30, (int i) => '${arabicNumbers.format(i + 1)}'),
+        'expectedDaysOfMonth': List<String>.generate(30, (int i) => '${arabicNumbers.format(i + 1)}'),
         'expectedMonthYearHeader': 'سبتمبر ٢٠١٧',
       },
     };
@@ -57,9 +57,9 @@ void main() {
         final List<String> expectedDaysOfMonth = testLocales[locale]['expectedDaysOfMonth'];
         final String expectedMonthYearHeader = testLocales[locale]['expectedMonthYearHeader'];
         final TextDirection textDirection = testLocales[locale]['textDirection'];
-        final DateTime baseDate = new DateTime(2017, 9, 27);
+        final DateTime baseDate = DateTime(2017, 9, 27);
 
-        await _pumpBoilerplate(tester, new DayPicker(
+        await _pumpBoilerplate(tester, DayPicker(
           selectedDate: baseDate,
           currentDate: baseDate,
           onChanged: (DateTime newValue) {},
@@ -96,17 +96,17 @@ void main() {
   });
 
   testWidgets('locale parameter overrides ambient locale', (WidgetTester tester) async {
-    await tester.pumpWidget(new MaterialApp(
+    await tester.pumpWidget(MaterialApp(
       locale: const Locale('en', 'US'),
       supportedLocales: const <Locale>[
-        const Locale('en', 'US'),
-        const Locale('fr', 'CA'),
+        Locale('en', 'US'),
+        Locale('fr', 'CA'),
       ],
       localizationsDelegates: GlobalMaterialLocalizations.delegates,
-      home: new Material(
-        child: new Builder(
+      home: Material(
+        child: Builder(
           builder: (BuildContext context) {
-            return new FlatButton(
+            return FlatButton(
               onPressed: () async {
                 await showDatePicker(
                   context: context,
@@ -141,15 +141,15 @@ void main() {
   });
 
   testWidgets('textDirection parameter overrides ambient textDirection', (WidgetTester tester) async {
-    await tester.pumpWidget(new MaterialApp(
+    await tester.pumpWidget(MaterialApp(
       locale: const Locale('en', 'US'),
       supportedLocales: const <Locale>[
-        const Locale('en', 'US'),
+        Locale('en', 'US'),
       ],
-      home: new Material(
-        child: new Builder(
+      home: Material(
+        child: Builder(
           builder: (BuildContext context) {
-            return new FlatButton(
+            return FlatButton(
               onPressed: () async {
                 await showDatePicker(
                   context: context,
@@ -179,17 +179,17 @@ void main() {
   });
 
   testWidgets('textDirection parameter takes precedence over locale parameter', (WidgetTester tester) async {
-    await tester.pumpWidget(new MaterialApp(
+    await tester.pumpWidget(MaterialApp(
       locale: const Locale('en', 'US'),
       supportedLocales: const <Locale>[
-        const Locale('en', 'US'),
-        const Locale('fr', 'CA'),
+        Locale('en', 'US'),
+        Locale('fr', 'CA'),
       ],
       localizationsDelegates: GlobalMaterialLocalizations.delegates,
-      home: new Material(
-        child: new Builder(
+      home: Material(
+        child: Builder(
           builder: (BuildContext context) {
-            return new FlatButton(
+            return FlatButton(
               onPressed: () async {
                 await showDatePicker(
                   context: context,
@@ -225,15 +225,15 @@ void main() {
   });
 }
 
-Future<Null> _pumpBoilerplate(
+Future<void> _pumpBoilerplate(
   WidgetTester tester,
   Widget child, {
   Locale locale = const Locale('en', 'US'),
-  TextDirection textDirection = TextDirection.ltr
+  TextDirection textDirection = TextDirection.ltr,
 }) async {
-  await tester.pumpWidget(new Directionality(
+  await tester.pumpWidget(Directionality(
     textDirection: TextDirection.ltr,
-    child: new Localizations(
+    child: Localizations(
       locale: locale,
       delegates: GlobalMaterialLocalizations.delegates,
       child: child,

@@ -4,7 +4,6 @@
 
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/commands/run.dart';
-import 'package:test/test.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -13,7 +12,7 @@ import '../src/mocks.dart';
 void main() {
   group('run', () {
     testUsingContext('fails when target not found', () async {
-      final RunCommand command = new RunCommand();
+      final RunCommand command = RunCommand();
       applyMocksToCommand(command);
       try {
         await createTestCommandRunner(command).run(<String>['run', '-t', 'abc123']);

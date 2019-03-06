@@ -26,7 +26,7 @@ class StatefulWrapper extends StatefulWidget {
   final Widget child;
 
   @override
-  StatefulWrapperState createState() => new StatefulWrapperState();
+  StatefulWrapperState createState() => StatefulWrapperState();
 }
 
 class StatefulWrapperState extends State<StatefulWrapper> {
@@ -41,18 +41,18 @@ class StatefulWrapperState extends State<StatefulWrapper> {
 
 void main() {
   testWidgets('Moving global key inside a LayoutBuilder', (WidgetTester tester) async {
-    final GlobalKey<StatefulWrapperState> key = new GlobalKey<StatefulWrapperState>();
+    final GlobalKey<StatefulWrapperState> key = GlobalKey<StatefulWrapperState>();
     await tester.pumpWidget(
-      new LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
-        return new Wrapper(
-          child: new StatefulWrapper(key: key, child: new Container(height: 100.0)),
+      LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+        return Wrapper(
+          child: StatefulWrapper(key: key, child: Container(height: 100.0)),
         );
       }),
     );
     await tester.pumpWidget(
-      new LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+      LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
         key.currentState.trigger();
-        return new StatefulWrapper(key: key, child: new Container(height: 100.0));
+        return StatefulWrapper(key: key, child: Container(height: 100.0));
       }),
     );
   });

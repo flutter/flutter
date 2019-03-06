@@ -18,7 +18,7 @@ void main() {
     await device.unlock();
     final Directory appDir = dir(path.join(flutterDirectory.path, 'dev/integration_tests/ui'));
     await inDirectory(appDir, () async {
-      final Completer<Null> ready = new Completer<Null>();
+      final Completer<void> ready = Completer<void>();
       print('run: starting...');
       final Process run = await startProcess(
         path.join(flutterDirectory.path, 'bin', 'flutter'),
@@ -29,8 +29,8 @@ void main() {
       final List<String> stderr = <String>[];
       int runExitCode;
       run.stdout
-        .transform(utf8.decoder)
-        .transform(const LineSplitter())
+        .transform<String>(utf8.decoder)
+        .transform<String>(const LineSplitter())
         .listen((String line) {
           print('run:stdout: $line');
           stdout.add(line);
@@ -38,13 +38,13 @@ void main() {
             ready.complete();
         });
       run.stderr
-        .transform(utf8.decoder)
-        .transform(const LineSplitter())
+        .transform<String>(utf8.decoder)
+        .transform<String>(const LineSplitter())
         .listen((String line) {
           print('run:stderr: $line');
-          stdout.add(line);
+          stderr.add(line);
         });
-      run.exitCode.then((int exitCode) { runExitCode = exitCode; });
+      run.exitCode.then<void>((int exitCode) { runExitCode = exitCode; });
       await Future.any<dynamic>(<Future<dynamic>>[ ready.future, run.exitCode ]);
       if (runExitCode != null)
         throw 'Failed to run test app; runner unexpected exited, with exit code $runExitCode.';
@@ -52,28 +52,30 @@ void main() {
       await run.exitCode;
       if (stderr.isNotEmpty)
         throw 'flutter run --release had output on standard error.';
-      if (stdout.first == 'Building flutter tool...')
+      if (stdout.first.startsWith('Building flutter tool...'))
         stdout.removeAt(0);
-      if (stdout.first == 'Running "flutter packages get" in ui...')
+      if (stdout.first.startsWith('Running "flutter packages get" in ui...'))
         stdout.removeAt(0);
-      if (stdout.first == 'Initializing gradle...')
+      if (stdout.first.startsWith('Initializing gradle...'))
+        stdout.removeAt(0);
+      if (stdout.first.startsWith('Resolving dependencies...'))
         stdout.removeAt(0);
       if (!(stdout.first.startsWith('Launching lib/main.dart on ') && stdout.first.endsWith(' in release mode...')))
         throw 'flutter run --release had unexpected first line: ${stdout.first}';
       stdout.removeAt(0);
-      if (stdout.first != 'Running \'gradlew assembleRelease\'...')
+      if (!stdout.first.startsWith('Running Gradle task \'assembleRelease\'...'))
         throw 'flutter run --release had unexpected second line: ${stdout.first}';
       stdout.removeAt(0);
       if (!(stdout.first.startsWith('Built build/app/outputs/apk/release/app-release.apk (') && stdout.first.endsWith('MB).')))
         throw 'flutter run --release had unexpected third line: ${stdout.first}';
       stdout.removeAt(0);
-      if (stdout.first == 'Installing build/app/outputs/apk/app.apk...')
+      if (stdout.first.startsWith('Installing build/app/outputs/apk/app.apk...'))
         stdout.removeAt(0);
       if (stdout.join('\n') != '\nTo quit, press "q".\n\nApplication finished.') {
         throw 'flutter run --release had unexpected output after third line:\n'
             '${stdout.join('\n')}';
       }
     });
-    return new TaskResult.success(null);
+    return TaskResult.success(null);
   });
 }

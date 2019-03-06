@@ -12,16 +12,16 @@ import 'package:flutter/scheduler.dart';
 int seed = 0;
 
 void main() {
-  runApp(new MaterialApp(
+  runApp(MaterialApp(
     title: 'Text tester',
     home: const Home(),
     routes: <String, WidgetBuilder>{
       'underlines': (BuildContext context) => const Underlines(),
       'fallback': (BuildContext context) => const Fallback(),
       'bidi': (BuildContext context) => const Bidi(),
-      'fuzzer': (BuildContext context) => new Fuzzer(seed: seed),
-      'zalgo': (BuildContext context) => new Zalgo(seed: seed),
-      'painting': (BuildContext context) => new Painting(seed: seed),
+      'fuzzer': (BuildContext context) => Fuzzer(seed: seed),
+      'zalgo': (BuildContext context) => Zalgo(seed: seed),
+      'painting': (BuildContext context) => Painting(seed: seed),
     },
   ));
 }
@@ -30,50 +30,50 @@ class Home extends StatefulWidget {
   const Home({ Key key }) : super(key: key);
 
   @override
-  _HomeState createState() => new _HomeState();
+  _HomeState createState() => _HomeState();
 }
 
 class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
-    return new Material(
-      child: new Column(
+    return Material(
+      child: Column(
         children: <Widget>[
-          new Expanded(
-            child: new Column(
+          Expanded(
+            child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
-                new FlatButton(
+                FlatButton(
                   child: const Text('Test Underlines'),
                   color: Colors.red.shade800,
                   textColor: Colors.white,
                   onPressed: () { Navigator.pushNamed(context, 'underlines'); },
                 ),
-                new FlatButton(
+                FlatButton(
                   child: const Text('Test Font Fallback'),
                   color: Colors.orange.shade700,
                   textColor: Colors.white,
                   onPressed: () { Navigator.pushNamed(context, 'fallback'); },
                 ),
-                new FlatButton(
+                FlatButton(
                   child: const Text('Test Bidi Formatting'),
                   color: Colors.yellow.shade700,
                   textColor: Colors.black,
                   onPressed: () { Navigator.pushNamed(context, 'bidi'); },
                 ),
-                new FlatButton(
+                FlatButton(
                   child: const Text('TextSpan Fuzzer'),
                   color: Colors.green.shade400,
                   textColor: Colors.black,
                   onPressed: () { Navigator.pushNamed(context, 'fuzzer'); },
                 ),
-                new FlatButton(
+                FlatButton(
                   child: const Text('Diacritics Fuzzer'),
                   color: Colors.blue.shade400,
                   textColor: Colors.white,
                   onPressed: () { Navigator.pushNamed(context, 'zalgo'); },
                 ),
-                new FlatButton(
+                FlatButton(
                   child: const Text('Painting Fuzzer'),
                   color: Colors.purple.shade200,
                   textColor: Colors.black,
@@ -82,9 +82,9 @@ class _HomeState extends State<Home> {
               ],
             ),
           ),
-          new Padding(
+          Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20.0),
-            child: new Slider(
+            child: Slider(
               min: 0.0,
               max: 1024.0,
               value: seed.toDouble(),
@@ -97,9 +97,9 @@ class _HomeState extends State<Home> {
               },
             ),
           ),
-          new Padding(
+          Padding(
             padding: const EdgeInsets.only(bottom: 10.0),
-            child: new Text('Random seed for fuzzers: $seed'),
+            child: Text('Random seed for fuzzers: $seed'),
           ),
         ],
       ),
@@ -113,7 +113,7 @@ class Fuzzer extends StatefulWidget {
   final int seed;
 
   @override
-  _FuzzerState createState() => new _FuzzerState();
+  _FuzzerState createState() => _FuzzerState();
 }
 
 class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
@@ -124,7 +124,7 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    _random = new math.Random(widget.seed); // providing a seed is important for reproducibility
+    _random = math.Random(widget.seed); // providing a seed is important for reproducibility
     _ticker = createTicker(_updateTextSpan)..start();
     _updateTextSpan(null);
   }
@@ -142,7 +142,7 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
   }
 
   TextSpan _fiddleWith(TextSpan node) {
-    return new TextSpan(
+    return TextSpan(
       text: _fiddleWithText(node.text),
       style: _fiddleWithStyle(node.style),
       children: _fiddleWithChildren(node.children?.map((TextSpan child) => _fiddleWith(child))?.toList() ?? <TextSpan>[]),
@@ -169,7 +169,7 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
     }
     if (_random.nextInt(200) == 0)
       return null;
-    return new TextStyle(
+    return TextStyle(
       color: _fiddleWithColor(style.color),
       decoration: _fiddleWithDecoration(style.decoration),
       decorationColor: _fiddleWithColor(style.decorationColor),
@@ -189,7 +189,7 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
     switch (_random.nextInt(10)) {
       case 0:
         if (value == null)
-          return pickFromList(_random, Colors.primaries)[(_random.nextInt(9) + 1) * 100];
+          return pickFromList<MaterialColor>(_random, Colors.primaries)[(_random.nextInt(9) + 1) * 100];
         switch (_random.nextInt(4)) {
           case 0:
             return value.withAlpha(value.alpha + _random.nextInt(10) - 5);
@@ -224,13 +224,13 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
       case 30:
         return TextDecoration.overline;
       case 90:
-        return new TextDecoration.combine(<TextDecoration>[TextDecoration.underline, TextDecoration.lineThrough]);
+        return TextDecoration.combine(<TextDecoration>[TextDecoration.underline, TextDecoration.lineThrough]);
       case 91:
-        return new TextDecoration.combine(<TextDecoration>[TextDecoration.underline, TextDecoration.overline]);
+        return TextDecoration.combine(<TextDecoration>[TextDecoration.underline, TextDecoration.overline]);
       case 92:
-        return new TextDecoration.combine(<TextDecoration>[TextDecoration.lineThrough, TextDecoration.overline]);
+        return TextDecoration.combine(<TextDecoration>[TextDecoration.lineThrough, TextDecoration.overline]);
       case 93:
-        return new TextDecoration.combine(<TextDecoration>[TextDecoration.underline, TextDecoration.lineThrough, TextDecoration.overline]);
+        return TextDecoration.combine(<TextDecoration>[TextDecoration.underline, TextDecoration.lineThrough, TextDecoration.overline]);
     }
     return null;
   }
@@ -240,7 +240,7 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
       case 0:
         return null;
       case 1:
-        return pickFromList(_random, TextDecorationStyle.values);
+        return pickFromList<TextDecorationStyle>(_random, TextDecorationStyle.values);
     }
     return value;
   }
@@ -250,7 +250,7 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
       case 0:
         return null;
       case 1:
-        return pickFromList(_random, FontWeight.values);
+        return pickFromList<FontWeight>(_random, FontWeight.values);
     }
     return value;
   }
@@ -260,7 +260,7 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
       case 0:
         return null;
       case 1:
-        return pickFromList(_random, FontStyle.values);
+        return pickFromList<FontStyle>(_random, FontStyle.values);
     }
     return value;
   }
@@ -338,7 +338,7 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
   }
 
   TextSpan _createRandomTextSpan() {
-    return new TextSpan(
+    return TextSpan(
       text: _createRandomText(),
     );
   }
@@ -421,7 +421,7 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
       case 49:
         return '𠜎𠜱𠝹𠱓𠱸𠲖𠳏𠳕𠴕𠵼𠵿𠸎𠸏𠹷𠺝𠺢𠻗𠻹𠻺𠼭𠼮𠽌𠾴𠾼𠿪𡁜𡁯𡁵𡁶𡁻𡃁𡃉𡇙𢃇𢞵𢫕𢭃𢯊𢱑𢱕𢳂𢴈𢵌𢵧𢺳𣲷𤓓𤶸𤷪𥄫𦉘𦟌𦧲𦧺𧨾𨅝𨈇𨋢𨳊𨳍𨳒𩶘'; // http://www.i18nguy.com/unicode/supplementary-test.html
       case 50: // any random character
-        return new String.fromCharCode(_random.nextInt(0x10FFFF + 1));
+        return String.fromCharCode(_random.nextInt(0x10FFFF + 1));
       case 51:
         return '\u00DF'; // SS
       case 52:
@@ -443,10 +443,10 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
       case 61: // random BMP character
       case 62: // random BMP character
       case 63: // random BMP character
-        return new String.fromCharCode(_random.nextInt(0xFFFF));
+        return String.fromCharCode(_random.nextInt(0xFFFF));
       case 64: // random emoji
       case 65: // random emoji
-        return new String.fromCharCode(0x1F000 + _random.nextInt(0x9FF));
+        return String.fromCharCode(0x1F000 + _random.nextInt(0x9FF));
       case 66:
         return 'Z{' + zalgo(_random, _random.nextInt(4) + 2) + '}Z';
       case 67:
@@ -472,7 +472,7 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
       case 80:
       case 81:
       case 82:
-        final StringBuffer buffer = new StringBuffer();
+        final StringBuffer buffer = StringBuffer();
         final int targetLength = _random.nextInt(8) + 1;
         for (int index = 0; index < targetLength; index += 1) {
           if (_random.nextInt(20) > 0) {
@@ -488,22 +488,22 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return new Container(
+    return Container(
       color: Colors.black,
-      child: new Column(
+      child: Column(
         children: <Widget>[
-          new Expanded(
-            child: new SingleChildScrollView(
-              child: new SafeArea(
-                child: new Padding(
+          Expanded(
+            child: SingleChildScrollView(
+              child: SafeArea(
+                child: Padding(
                   padding: const EdgeInsets.all(10.0),
-                  child: new RichText(text: _textSpan),
+                  child: RichText(text: _textSpan),
                 ),
               ),
             ),
           ),
-          new Material(
-            child: new SwitchListTile(
+          Material(
+            child: SwitchListTile(
               title: const Text('Enable Fuzzer'),
               value: _ticker.isActive,
               onChanged: (bool value) {
@@ -515,7 +515,7 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
                     debugPrint(_textSpan.toStringDeep());
                   }
                 });
-              }
+              },
             ),
           ),
         ],
@@ -528,14 +528,14 @@ class Underlines extends StatefulWidget {
   const Underlines({ Key key }) : super(key: key);
 
   @override
-  _UnderlinesState createState() => new _UnderlinesState();
+  _UnderlinesState createState() => _UnderlinesState();
 }
 
 class _UnderlinesState extends State<Underlines> {
 
   String _text = 'i';
 
-  final TextStyle _style = new TextStyle(
+  final TextStyle _style = TextStyle(
     inherit: false,
     color: Colors.yellow.shade200,
     fontSize: 48.0,
@@ -544,12 +544,12 @@ class _UnderlinesState extends State<Underlines> {
   );
 
   Widget _wrap(TextDecorationStyle style) {
-    return new Align(
+    return Align(
       alignment: Alignment.centerLeft,
       heightFactor: 1.0,
-      child: new Container(
-        decoration: const BoxDecoration(color: const Color(0xFF333333), border: const Border(right: const BorderSide(color: Colors.white, width: 0.0))),
-        child: new Text(_text, style: style != null ? _style.copyWith(decoration: TextDecoration.underline, decorationStyle: style) : _style),
+      child: Container(
+        decoration: const BoxDecoration(color: Color(0xFF333333), border: Border(right: BorderSide(color: Colors.white, width: 0.0))),
+        child: Text(_text, style: style != null ? _style.copyWith(decoration: TextDecoration.underline, decorationStyle: style) : _style),
       ),
     );
   }
@@ -560,27 +560,27 @@ class _UnderlinesState extends State<Underlines> {
     for (TextDecorationStyle style in TextDecorationStyle.values)
       lines.add(_wrap(style));
     final Size size = MediaQuery.of(context).size;
-    return new Container(
+    return Container(
       color: Colors.black,
-      child: new Column(
+      child: Column(
         children: <Widget>[
-          new Expanded(
-            child: new SingleChildScrollView(
-              child: new Padding(
-                padding: new EdgeInsets.symmetric(
+          Expanded(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: EdgeInsets.symmetric(
                   horizontal: size.width * 0.1,
                   vertical: size.height * 0.1,
                 ),
-                child: new ListBody(
+                child: ListBody(
                   children: lines,
-                )
+                ),
               ),
             ),
           ),
-          new Material(
-            child: new ButtonBar(
+          Material(
+            child: ButtonBar(
               children: <Widget>[
-                new FlatButton(
+                FlatButton(
                   onPressed: () {
                     setState(() {
                       _text += 'i';
@@ -589,7 +589,7 @@ class _UnderlinesState extends State<Underlines> {
                   color: Colors.yellow,
                   child: const Text('ADD i'),
                 ),
-                new FlatButton(
+                FlatButton(
                   onPressed: () {
                     setState(() {
                       _text += 'w';
@@ -598,7 +598,7 @@ class _UnderlinesState extends State<Underlines> {
                   color: Colors.yellow,
                   child: const Text('ADD w'),
                 ),
-                new FlatButton(
+                FlatButton(
                   onPressed: _text == '' ? null : () {
                     setState(() {
                       _text = _text.substring(0, _text.length - 1);
@@ -621,13 +621,13 @@ class Fallback extends StatefulWidget {
   const Fallback({ Key key }) : super(key: key);
 
   @override
-  _FallbackState createState() => new _FallbackState();
+  _FallbackState createState() => _FallbackState();
 }
 
 class _FallbackState extends State<Fallback> {
   static const String multiScript = 'A1!aÀàĀāƁƀḂⱠꜲꬰəͲἀἏЀЖԠꙐꙮՁخ‎ࡔࠇܦআਉઐଘஇఘಧൺඣᭆᯔᮯ᳇ꠈᜅᩌꪈ༇ꥄꡙꫤ᧰៘꧁꧂ᜰᨏᯤᢆᣭᗗꗃⵞ𐒎߷ጩꬤ𖠺‡₩℻Ⅷ↹⋇⏳ⓖ╋▒◛⚧⑆שׁ🅕㊼龜ポ䷤🂡';
 
-  static const List<String> androidFonts = const <String>[
+  static const List<String> androidFonts = <String>[
     'sans-serif',
     'sans-serif-condensed',
     'serif',
@@ -638,7 +638,7 @@ class _FallbackState extends State<Fallback> {
     'sans-serif-smallcaps',
   ];
 
-  static const TextStyle style = const TextStyle(
+  static const TextStyle style = TextStyle(
     inherit: false,
     color: Colors.white,
   );
@@ -649,42 +649,42 @@ class _FallbackState extends State<Fallback> {
   Widget build(BuildContext context) {
     final List<Widget> lines = <Widget>[];
     for (String font in androidFonts)
-      lines.add(new Text(multiScript, style: style.copyWith(fontFamily: font, fontSize: math.exp(_fontSize))));
+      lines.add(Text(multiScript, style: style.copyWith(fontFamily: font, fontSize: math.exp(_fontSize))));
     final Size size = MediaQuery.of(context).size;
-    return new Container(
+    return Container(
       color: Colors.black,
-      child: new Column(
+      child: Column(
         children: <Widget>[
-          new Expanded(
-            child: new SingleChildScrollView(
+          Expanded(
+            child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
-              child: new SingleChildScrollView(
-                child: new Padding(
-                  padding: new EdgeInsets.symmetric(
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
                     horizontal: size.width * 0.1,
                     vertical: size.height * 0.1,
                   ),
-                  child: new IntrinsicWidth(
-                    child: new ListBody(
+                  child: IntrinsicWidth(
+                    child: ListBody(
                       children: lines,
                     ),
-                  )
+                  ),
                 ),
               ),
             ),
           ),
-          new Material(
-            child: new Padding(
+          Material(
+            child: Padding(
               padding: const EdgeInsets.only(left: 20.0, right: 20.0, bottom: 20.0),
-              child: new Row(
+              child: Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: <Widget>[
                   const Padding(
-                    padding: const EdgeInsets.only(bottom: 10.0),
-                    child: const Text('Font size'),
+                    padding: EdgeInsets.only(bottom: 10.0),
+                    child: Text('Font size'),
                   ),
-                  new Expanded(
-                    child: new Slider(
+                  Expanded(
+                    child: Slider(
                       min: 2.0,
                       max: 5.0,
                       value: _fontSize,
@@ -710,71 +710,71 @@ class Bidi extends StatefulWidget {
   const Bidi({ Key key }) : super(key: key);
 
   @override
-  _BidiState createState() => new _BidiState();
+  _BidiState createState() => _BidiState();
 }
 
 class _BidiState extends State<Bidi> {
   @override
   Widget build(BuildContext context) {
-    return new Container(
+    return Container(
       color: Colors.black,
-      child: new ListView(
+      child: ListView(
         padding: const EdgeInsets.symmetric(vertical: 40.0, horizontal: 20.0),
         children: <Widget>[
-          new RichText(
-            text: new TextSpan(
+          RichText(
+            text: TextSpan(
               children: <TextSpan>[
-                new TextSpan(text: 'abc', style: new TextStyle(fontWeight: FontWeight.w100, fontSize: 40.0, color: Colors.blue.shade100)),
-                new TextSpan(text: 'ghi', style: new TextStyle(fontWeight: FontWeight.w400, fontSize: 40.0, color: Colors.blue.shade500)),
-                new TextSpan(text: 'mno', style: new TextStyle(fontWeight: FontWeight.w900, fontSize: 40.0, color: Colors.blue.shade900)),
-                new TextSpan(text: 'LKJ', style: new TextStyle(fontWeight: FontWeight.w500, fontSize: 40.0, color: Colors.blue.shade700)),
-                new TextSpan(text: 'FED', style: new TextStyle(fontWeight: FontWeight.w300, fontSize: 40.0, color: Colors.blue.shade300)),
+                TextSpan(text: 'abc', style: TextStyle(fontWeight: FontWeight.w100, fontSize: 40.0, color: Colors.blue.shade100)),
+                TextSpan(text: 'ghi', style: TextStyle(fontWeight: FontWeight.w400, fontSize: 40.0, color: Colors.blue.shade500)),
+                TextSpan(text: 'mno', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 40.0, color: Colors.blue.shade900)),
+                TextSpan(text: 'LKJ', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 40.0, color: Colors.blue.shade700)),
+                TextSpan(text: 'FED', style: TextStyle(fontWeight: FontWeight.w300, fontSize: 40.0, color: Colors.blue.shade300)),
               ],
             ),
             textAlign: TextAlign.center,
             textDirection: TextDirection.ltr,
           ),
-          new RichText(
-            text: new TextSpan(
+          RichText(
+            text: TextSpan(
               children: <TextSpan>[
-                new TextSpan(text: '${Unicode.LRO}abc', style: new TextStyle(fontWeight: FontWeight.w100, fontSize: 40.0, color: Colors.blue.shade100)),
-                new TextSpan(text: '${Unicode.RLO}DEF', style: new TextStyle(fontWeight: FontWeight.w300, fontSize: 40.0, color: Colors.blue.shade300)),
-                new TextSpan(text: '${Unicode.LRO}ghi', style: new TextStyle(fontWeight: FontWeight.w400, fontSize: 40.0, color: Colors.blue.shade500)),
-                new TextSpan(text: '${Unicode.RLO}JKL', style: new TextStyle(fontWeight: FontWeight.w500, fontSize: 40.0, color: Colors.blue.shade700)),
-                new TextSpan(text: '${Unicode.LRO}mno', style: new TextStyle(fontWeight: FontWeight.w900, fontSize: 40.0, color: Colors.blue.shade900)),
-              ],
-            ),
-            textAlign: TextAlign.center,
-            textDirection: TextDirection.ltr,
-          ),
-          const SizedBox(height: 40.0),
-          new RichText(
-            text: new TextSpan(
-              children: <TextSpan>[
-                new TextSpan(text: '${Unicode.LRO}abc${Unicode.RLO}D', style: new TextStyle(fontWeight: FontWeight.w100, fontSize: 40.0, color: Colors.orange.shade100)),
-                new TextSpan(text: 'EF${Unicode.LRO}gh', style: new TextStyle(fontWeight: FontWeight.w500, fontSize: 50.0, color: Colors.orange.shade500)),
-                new TextSpan(text: 'i${Unicode.RLO}JKL${Unicode.LRO}mno', style: new TextStyle(fontWeight: FontWeight.w900, fontSize: 60.0, color: Colors.orange.shade900)),
-              ],
-            ),
-            textAlign: TextAlign.center,
-            textDirection: TextDirection.ltr,
-          ),
-          new RichText(
-            text: new TextSpan(
-              children: <TextSpan>[
-                new TextSpan(text: 'abc', style: new TextStyle(fontWeight: FontWeight.w100, fontSize: 40.0, color: Colors.orange.shade100)),
-                new TextSpan(text: 'gh', style: new TextStyle(fontWeight: FontWeight.w500, fontSize: 50.0, color: Colors.orange.shade500)),
-                new TextSpan(text: 'imno', style: new TextStyle(fontWeight: FontWeight.w900, fontSize: 60.0, color: Colors.orange.shade900)),
-                new TextSpan(text: 'LKJ', style: new TextStyle(fontWeight: FontWeight.w900, fontSize: 60.0, color: Colors.orange.shade900)),
-                new TextSpan(text: 'FE', style: new TextStyle(fontWeight: FontWeight.w500, fontSize: 50.0, color: Colors.orange.shade500)),
-                new TextSpan(text: 'D', style: new TextStyle(fontWeight: FontWeight.w100, fontSize: 40.0, color: Colors.orange.shade100)),
+                TextSpan(text: '${Unicode.LRO}abc', style: TextStyle(fontWeight: FontWeight.w100, fontSize: 40.0, color: Colors.blue.shade100)),
+                TextSpan(text: '${Unicode.RLO}DEF', style: TextStyle(fontWeight: FontWeight.w300, fontSize: 40.0, color: Colors.blue.shade300)),
+                TextSpan(text: '${Unicode.LRO}ghi', style: TextStyle(fontWeight: FontWeight.w400, fontSize: 40.0, color: Colors.blue.shade500)),
+                TextSpan(text: '${Unicode.RLO}JKL', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 40.0, color: Colors.blue.shade700)),
+                TextSpan(text: '${Unicode.LRO}mno', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 40.0, color: Colors.blue.shade900)),
               ],
             ),
             textAlign: TextAlign.center,
             textDirection: TextDirection.ltr,
           ),
           const SizedBox(height: 40.0),
-          const Text('The pairs of lines above should match exactly.', textAlign: TextAlign.center, style: const TextStyle(inherit: false, fontSize: 14.0, color: Colors.white)),
+          RichText(
+            text: TextSpan(
+              children: <TextSpan>[
+                TextSpan(text: '${Unicode.LRO}abc${Unicode.RLO}D', style: TextStyle(fontWeight: FontWeight.w100, fontSize: 40.0, color: Colors.orange.shade100)),
+                TextSpan(text: 'EF${Unicode.LRO}gh', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 50.0, color: Colors.orange.shade500)),
+                TextSpan(text: 'i${Unicode.RLO}JKL${Unicode.LRO}mno', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 60.0, color: Colors.orange.shade900)),
+              ],
+            ),
+            textAlign: TextAlign.center,
+            textDirection: TextDirection.ltr,
+          ),
+          RichText(
+            text: TextSpan(
+              children: <TextSpan>[
+                TextSpan(text: 'abc', style: TextStyle(fontWeight: FontWeight.w100, fontSize: 40.0, color: Colors.orange.shade100)),
+                TextSpan(text: 'gh', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 50.0, color: Colors.orange.shade500)),
+                TextSpan(text: 'imno', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 60.0, color: Colors.orange.shade900)),
+                TextSpan(text: 'LKJ', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 60.0, color: Colors.orange.shade900)),
+                TextSpan(text: 'FE', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 50.0, color: Colors.orange.shade500)),
+                TextSpan(text: 'D', style: TextStyle(fontWeight: FontWeight.w100, fontSize: 40.0, color: Colors.orange.shade100)),
+              ],
+            ),
+            textAlign: TextAlign.center,
+            textDirection: TextDirection.ltr,
+          ),
+          const SizedBox(height: 40.0),
+          const Text('The pairs of lines above should match exactly.', textAlign: TextAlign.center, style: TextStyle(inherit: false, fontSize: 14.0, color: Colors.white)),
         ],
       ),
     );
@@ -787,7 +787,7 @@ class Zalgo extends StatefulWidget {
   final int seed;
 
   @override
-  _ZalgoState createState() => new _ZalgoState();
+  _ZalgoState createState() => _ZalgoState();
 }
 
 class _ZalgoState extends State<Zalgo> with SingleTickerProviderStateMixin {
@@ -798,7 +798,7 @@ class _ZalgoState extends State<Zalgo> with SingleTickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    _random = new math.Random(widget.seed); // providing a seed is important for reproducibility
+    _random = math.Random(widget.seed); // providing a seed is important for reproducibility
     _ticker = createTicker(_update)..start();
     _update(null);
   }
@@ -825,16 +825,16 @@ class _ZalgoState extends State<Zalgo> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return new Container(
+    return Container(
       color: Colors.black,
-      child: new Column(
+      child: Column(
         children: <Widget>[
-          new Expanded(
-            child: new Center(
-              child: new RichText(
-                text: new TextSpan(
+          Expanded(
+            child: Center(
+              child: RichText(
+                text: TextSpan(
                   text: _text,
-                  style: new TextStyle(
+                  style: TextStyle(
                     inherit: false,
                     fontSize: 96.0,
                     color: Colors.red.shade200,
@@ -843,10 +843,10 @@ class _ZalgoState extends State<Zalgo> with SingleTickerProviderStateMixin {
               ),
             ),
           ),
-          new Material(
-            child: new Column(
+          Material(
+            child: Column(
               children: <Widget>[
-                new SwitchListTile(
+                SwitchListTile(
                   title: const Text('Enable Fuzzer'),
                   value: _ticker.isActive,
                   onChanged: (bool value) {
@@ -859,23 +859,23 @@ class _ZalgoState extends State<Zalgo> with SingleTickerProviderStateMixin {
                     });
                   },
                 ),
-                new SwitchListTile(
+                SwitchListTile(
                   title: const Text('Allow spacing combining marks'),
                   value: _allowSpacing,
                   onChanged: (bool value) {
                     setState(() {
                       _allowSpacing = value;
-                      _random = new math.Random(widget.seed); // reset for reproducibility
+                      _random = math.Random(widget.seed); // reset for reproducibility
                     });
                   },
                 ),
-                new SwitchListTile(
+                SwitchListTile(
                   title: const Text('Vary base character'),
                   value: _varyBase,
                   onChanged: (bool value) {
                     setState(() {
                       _varyBase = value;
-                      _random = new math.Random(widget.seed); // reset for reproducibility
+                      _random = math.Random(widget.seed); // reset for reproducibility
                     });
                   },
                 ),
@@ -894,7 +894,7 @@ class Painting extends StatefulWidget {
   final int seed;
 
   @override
-  _PaintingState createState() => new _PaintingState();
+  _PaintingState createState() => _PaintingState();
 }
 
 class _PaintingState extends State<Painting> with SingleTickerProviderStateMixin {
@@ -905,7 +905,7 @@ class _PaintingState extends State<Painting> with SingleTickerProviderStateMixin
   @override
   void initState() {
     super.initState();
-    _random = new math.Random(widget.seed); // providing a seed is important for reproducibility
+    _random = math.Random(widget.seed); // providing a seed is important for reproducibility
     _ticker = createTicker(_update)..start();
     _update(null);
   }
@@ -916,14 +916,14 @@ class _PaintingState extends State<Painting> with SingleTickerProviderStateMixin
     super.dispose();
   }
 
-  final GlobalKey intrinsicKey = new GlobalKey();
-  final GlobalKey controlKey = new GlobalKey();
+  final GlobalKey intrinsicKey = GlobalKey();
+  final GlobalKey controlKey = GlobalKey();
 
   bool _ellipsize = false;
 
   void _update(Duration duration) {
     setState(() {
-      final StringBuffer buffer = new StringBuffer();
+      final StringBuffer buffer = StringBuffer();
       final int targetLength = _random.nextInt(20) + (_ellipsize ? MediaQuery.of(context).size.width.round() : 1);
       for (int index = 0; index < targetLength; index += 1) {
         if (_random.nextInt(5) > 0) {
@@ -938,7 +938,7 @@ class _PaintingState extends State<Painting> with SingleTickerProviderStateMixin
       if (mounted && intrinsicKey.currentContext.size.height != controlKey.currentContext.size.height) {
         debugPrint('Found some text that unexpectedly renders at different heights.');
         debugPrint('Text: $_text');
-        debugPrint(_text.runes.map((int index) => 'U+' + index.toRadixString(16).padLeft(4, '0')).join(' '));
+        debugPrint(_text.runes.map<String>((int index) => 'U+' + index.toRadixString(16).padLeft(4, '0')).join(' '));
         setState(() {
           _ticker.stop();
         });
@@ -949,29 +949,29 @@ class _PaintingState extends State<Painting> with SingleTickerProviderStateMixin
   @override
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
-    return new Container(
+    return Container(
       color: Colors.black,
-      child: new Column(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          new Expanded(
-            child: new Padding(
-              padding: new EdgeInsets.only(top: size.height * 0.1),
-              child: new Stack(
+          Expanded(
+            child: Padding(
+              padding: EdgeInsets.only(top: size.height * 0.1),
+              child: Stack(
                 alignment: Alignment.center,
                 children: <Widget>[
-                  new Positioned(
+                  Positioned(
                     top: 0.0,
                     left: 0.0,
                     right: 0.0,
-                    child: new Align(
+                    child: Align(
                       alignment: Alignment.topCenter,
-                      child: new IntrinsicWidth( // to test shrink-wrap vs rendering
-                        child: new RichText(
+                      child: IntrinsicWidth( // to test shrink-wrap vs rendering
+                        child: RichText(
                           key: intrinsicKey,
                           textAlign: TextAlign.center,
                           overflow: _ellipsize ? TextOverflow.ellipsis : TextOverflow.clip,
-                          text: new TextSpan(
+                          text: TextSpan(
                             text: _text,
                             style: const TextStyle(
                               inherit: false,
@@ -983,15 +983,15 @@ class _PaintingState extends State<Painting> with SingleTickerProviderStateMixin
                       ),
                     ),
                   ),
-                  new Positioned(
+                  Positioned(
                     top: 0.0,
                     left: 0.0,
                     right: 0.0,
-                    child: new RichText(
+                    child: RichText(
                       key: controlKey,
                       textAlign: TextAlign.center,
                       overflow: _ellipsize ? TextOverflow.ellipsis : TextOverflow.clip,
-                      text: new TextSpan(
+                      text: TextSpan(
                         text: _text,
                         style: const TextStyle(
                           inherit: false,
@@ -1005,10 +1005,10 @@ class _PaintingState extends State<Painting> with SingleTickerProviderStateMixin
               ),
             ),
           ),
-          new Material(
-            child: new Column(
+          Material(
+            child: Column(
               children: <Widget>[
-                new SwitchListTile(
+                SwitchListTile(
                   title: const Text('Enable Fuzzer'),
                   value: _ticker.isActive,
                   onChanged: (bool value) {
@@ -1021,31 +1021,31 @@ class _PaintingState extends State<Painting> with SingleTickerProviderStateMixin
                     });
                   },
                 ),
-                new SwitchListTile(
+                SwitchListTile(
                   title: const Text('Enable Ellipses'),
                   value: _ellipsize,
                   onChanged: (bool value) {
                     setState(() {
                       _ellipsize = value;
-                      _random = new math.Random(widget.seed); // reset for reproducibility
+                      _random = math.Random(widget.seed); // reset for reproducibility
                       if (!_ticker.isActive)
                         _update(null);
                     });
                   },
                 ),
                 const ListTile(
-                  title: const Text('There should be no red visible.'),
+                  title: Text('There should be no red visible.'),
                 ),
-                new ButtonBar(
+                ButtonBar(
                   children: <Widget>[
-                    new FlatButton(
+                    FlatButton(
                       onPressed: _ticker.isActive ? null : () => _update(null),
                       child: const Text('ITERATE'),
                     ),
-                    new FlatButton(
+                    FlatButton(
                       onPressed: _ticker.isActive ? null : () {
                         print('The currently visible text is: $_text');
-                        print(_text.runes.map((int value) => 'U+${value.toRadixString(16).padLeft(4, '0').toUpperCase()}').join(' '));
+                        print(_text.runes.map<String>((int value) => 'U+${value.toRadixString(16).padLeft(4, '0').toUpperCase()}').join(' '));
                       },
                       child: const Text('DUMP TEXT TO LOGS'),
                     ),
@@ -1064,11 +1064,11 @@ String zalgo(math.Random random, int targetLength, { bool includeSpacingCombinin
   // The following three tables are derived from UnicodeData.txt:
   //   http://unicode.org/Public/UNIDATA/UnicodeData.txt
   // There are three groups, character classes Mc, Me, and Mn.
-  const List<int> enclosingCombiningMarks = const <int>[ // Me
+  const List<int> enclosingCombiningMarks = <int>[ // Me
     0x00488, 0x00489, 0x01ABE, 0x020DD, 0x020DE, 0x020DF, 0x020E0,
     0x020E2, 0x020E3, 0x020E4, 0x0A670, 0x0A671, 0x0A672,
   ];
-  const List<int> nonspacingCombiningMarks = const <int>[ // Mn
+  const List<int> nonspacingCombiningMarks = <int>[ // Mn
     0x00300, 0x00301, 0x00302, 0x00303, 0x00304, 0x00305, 0x00306,
     0x00307, 0x00308, 0x00309, 0x0030A, 0x0030B, 0x0030C, 0x0030D,
     0x0030E, 0x0030F, 0x00310, 0x00311, 0x00312, 0x00313, 0x00314,
@@ -1322,7 +1322,7 @@ String zalgo(math.Random random, int targetLength, { bool includeSpacingCombinin
     0xE01E3, 0xE01E4, 0xE01E5, 0xE01E6, 0xE01E7, 0xE01E8, 0xE01E9,
     0xE01EA, 0xE01EB, 0xE01EC, 0xE01ED, 0xE01EE, 0xE01EF,
   ];
-  const List<int> spacingCombiningMarks = const <int>[ // Mc
+  const List<int> spacingCombiningMarks = <int>[ // Mc
     0x00903, 0x0093B, 0x0093E, 0x0093F, 0x00940, 0x00949, 0x0094A,
     0x0094B, 0x0094C, 0x0094E, 0x0094F, 0x00982, 0x00983, 0x009BE,
     0x009BF, 0x009C0, 0x009C7, 0x009C8, 0x009CB, 0x009CC, 0x009D7,
@@ -1382,7 +1382,7 @@ String zalgo(math.Random random, int targetLength, { bool includeSpacingCombinin
     0x16F7E, 0x1D165, 0x1D166, 0x1D16D, 0x1D16E, 0x1D16F, 0x1D170,
     0x1D171, 0x1D172,
   ];
-  final Set<int> these = new Set<int>();
+  final Set<int> these = Set<int>();
   int combiningCount = enclosingCombiningMarks.length + nonspacingCombiningMarks.length;
   if (includeSpacingCombiningMarks)
     combiningCount += spacingCombiningMarks.length;
@@ -1400,10 +1400,10 @@ String zalgo(math.Random random, int targetLength, { bool includeSpacingCombinin
       }
     }
   }
-  base ??= new String.fromCharCode(randomCharacter(random));
+  base ??= String.fromCharCode(randomCharacter(random));
   final List<int> characters = <int>[];
   characters.addAll(these);
-  return base + new String.fromCharCodes(characters);
+  return base + String.fromCharCodes(characters);
 }
 
 T pickFromList<T>(math.Random random, List<T> list) {
@@ -1418,698 +1418,698 @@ class Range {
 
 int randomCharacter(math.Random random) {
   // all ranges of non-control, non-combining characters
-  const List<Range> characterRanges = const <Range>[
-    const Range(0x00020, 0x0007e),
-    const Range(0x000a0, 0x000ac),
-    const Range(0x000ae, 0x002ff),
-    const Range(0x00370, 0x00377),
-    const Range(0x0037a, 0x0037f),
-    const Range(0x00384, 0x0038a),
-    const Range(0x0038c, 0x0038c),
-    const Range(0x0038e, 0x003a1),
-    const Range(0x003a3, 0x00482),
-    const Range(0x0048a, 0x0052f),
-    const Range(0x00531, 0x00556),
-    const Range(0x00559, 0x0055f),
-    const Range(0x00561, 0x00587),
-    const Range(0x00589, 0x0058a),
-    const Range(0x0058d, 0x0058f),
-    const Range(0x005be, 0x005be),
-    const Range(0x005c0, 0x005c0),
-    const Range(0x005c3, 0x005c3),
-    const Range(0x005c6, 0x005c6),
-    const Range(0x005d0, 0x005ea),
-    const Range(0x005f0, 0x005f4),
-    const Range(0x00606, 0x0060f),
-    const Range(0x0061b, 0x0061b),
-    const Range(0x0061e, 0x0064a),
-    const Range(0x00660, 0x0066f),
-    const Range(0x00671, 0x006d5),
-    const Range(0x006de, 0x006de),
-    const Range(0x006e5, 0x006e6),
-    const Range(0x006e9, 0x006e9),
-    const Range(0x006ee, 0x0070d),
-    const Range(0x00710, 0x00710),
-    const Range(0x00712, 0x0072f),
-    const Range(0x0074d, 0x007a5),
-    const Range(0x007b1, 0x007b1),
-    const Range(0x007c0, 0x007ea),
-    const Range(0x007f4, 0x007fa),
-    const Range(0x00800, 0x00815),
-    const Range(0x0081a, 0x0081a),
-    const Range(0x00824, 0x00824),
-    const Range(0x00828, 0x00828),
-    const Range(0x00830, 0x0083e),
-    const Range(0x00840, 0x00858),
-    const Range(0x0085e, 0x0085e),
-    const Range(0x00860, 0x0086a),
-    const Range(0x008a0, 0x008b4),
-    const Range(0x008b6, 0x008bd),
-    const Range(0x00904, 0x00939),
-    const Range(0x0093d, 0x0093d),
-    const Range(0x00950, 0x00950),
-    const Range(0x00958, 0x00961),
-    const Range(0x00964, 0x00980),
-    const Range(0x00985, 0x0098c),
-    const Range(0x0098f, 0x00990),
-    const Range(0x00993, 0x009a8),
-    const Range(0x009aa, 0x009b0),
-    const Range(0x009b2, 0x009b2),
-    const Range(0x009b6, 0x009b9),
-    const Range(0x009bd, 0x009bd),
-    const Range(0x009ce, 0x009ce),
-    const Range(0x009dc, 0x009dd),
-    const Range(0x009df, 0x009e1),
-    const Range(0x009e6, 0x009fd),
-    const Range(0x00a05, 0x00a0a),
-    const Range(0x00a0f, 0x00a10),
-    const Range(0x00a13, 0x00a28),
-    const Range(0x00a2a, 0x00a30),
-    const Range(0x00a32, 0x00a33),
-    const Range(0x00a35, 0x00a36),
-    const Range(0x00a38, 0x00a39),
-    const Range(0x00a59, 0x00a5c),
-    const Range(0x00a5e, 0x00a5e),
-    const Range(0x00a66, 0x00a6f),
-    const Range(0x00a72, 0x00a74),
-    const Range(0x00a85, 0x00a8d),
-    const Range(0x00a8f, 0x00a91),
-    const Range(0x00a93, 0x00aa8),
-    const Range(0x00aaa, 0x00ab0),
-    const Range(0x00ab2, 0x00ab3),
-    const Range(0x00ab5, 0x00ab9),
-    const Range(0x00abd, 0x00abd),
-    const Range(0x00ad0, 0x00ad0),
-    const Range(0x00ae0, 0x00ae1),
-    const Range(0x00ae6, 0x00af1),
-    const Range(0x00af9, 0x00af9),
-    const Range(0x00b05, 0x00b0c),
-    const Range(0x00b0f, 0x00b10),
-    const Range(0x00b13, 0x00b28),
-    const Range(0x00b2a, 0x00b30),
-    const Range(0x00b32, 0x00b33),
-    const Range(0x00b35, 0x00b39),
-    const Range(0x00b3d, 0x00b3d),
-    const Range(0x00b5c, 0x00b5d),
-    const Range(0x00b5f, 0x00b61),
-    const Range(0x00b66, 0x00b77),
-    const Range(0x00b83, 0x00b83),
-    const Range(0x00b85, 0x00b8a),
-    const Range(0x00b8e, 0x00b90),
-    const Range(0x00b92, 0x00b95),
-    const Range(0x00b99, 0x00b9a),
-    const Range(0x00b9c, 0x00b9c),
-    const Range(0x00b9e, 0x00b9f),
-    const Range(0x00ba3, 0x00ba4),
-    const Range(0x00ba8, 0x00baa),
-    const Range(0x00bae, 0x00bb9),
-    const Range(0x00bd0, 0x00bd0),
-    const Range(0x00be6, 0x00bfa),
-    const Range(0x00c05, 0x00c0c),
-    const Range(0x00c0e, 0x00c10),
-    const Range(0x00c12, 0x00c28),
-    const Range(0x00c2a, 0x00c39),
-    const Range(0x00c3d, 0x00c3d),
-    const Range(0x00c58, 0x00c5a),
-    const Range(0x00c60, 0x00c61),
-    const Range(0x00c66, 0x00c6f),
-    const Range(0x00c78, 0x00c80),
-    const Range(0x00c85, 0x00c8c),
-    const Range(0x00c8e, 0x00c90),
-    const Range(0x00c92, 0x00ca8),
-    const Range(0x00caa, 0x00cb3),
-    const Range(0x00cb5, 0x00cb9),
-    const Range(0x00cbd, 0x00cbd),
-    const Range(0x00cde, 0x00cde),
-    const Range(0x00ce0, 0x00ce1),
-    const Range(0x00ce6, 0x00cef),
-    const Range(0x00cf1, 0x00cf2),
-    const Range(0x00d05, 0x00d0c),
-    const Range(0x00d0e, 0x00d10),
-    const Range(0x00d12, 0x00d3a),
-    const Range(0x00d3d, 0x00d3d),
-    const Range(0x00d4e, 0x00d4f),
-    const Range(0x00d54, 0x00d56),
-    const Range(0x00d58, 0x00d61),
-    const Range(0x00d66, 0x00d7f),
-    const Range(0x00d85, 0x00d96),
-    const Range(0x00d9a, 0x00db1),
-    const Range(0x00db3, 0x00dbb),
-    const Range(0x00dbd, 0x00dbd),
-    const Range(0x00dc0, 0x00dc6),
-    const Range(0x00de6, 0x00def),
-    const Range(0x00df4, 0x00df4),
-    const Range(0x00e01, 0x00e30),
-    const Range(0x00e32, 0x00e33),
-    const Range(0x00e3f, 0x00e46),
-    const Range(0x00e4f, 0x00e5b),
-    const Range(0x00e81, 0x00e82),
-    const Range(0x00e84, 0x00e84),
-    const Range(0x00e87, 0x00e88),
-    const Range(0x00e8a, 0x00e8a),
-    const Range(0x00e8d, 0x00e8d),
-    const Range(0x00e94, 0x00e97),
-    const Range(0x00e99, 0x00e9f),
-    const Range(0x00ea1, 0x00ea3),
-    const Range(0x00ea5, 0x00ea5),
-    const Range(0x00ea7, 0x00ea7),
-    const Range(0x00eaa, 0x00eab),
-    const Range(0x00ead, 0x00eb0),
-    const Range(0x00eb2, 0x00eb3),
-    const Range(0x00ebd, 0x00ebd),
-    const Range(0x00ec0, 0x00ec4),
-    const Range(0x00ec6, 0x00ec6),
-    const Range(0x00ed0, 0x00ed9),
-    const Range(0x00edc, 0x00edf),
-    const Range(0x00f00, 0x00f17),
-    const Range(0x00f1a, 0x00f34),
-    const Range(0x00f36, 0x00f36),
-    const Range(0x00f38, 0x00f38),
-    const Range(0x00f3a, 0x00f3d),
-    const Range(0x00f40, 0x00f47),
-    const Range(0x00f49, 0x00f6c),
-    const Range(0x00f85, 0x00f85),
-    const Range(0x00f88, 0x00f8c),
-    const Range(0x00fbe, 0x00fc5),
-    const Range(0x00fc7, 0x00fcc),
-    const Range(0x00fce, 0x00fda),
-    const Range(0x01000, 0x0102a),
-    const Range(0x0103f, 0x01055),
-    const Range(0x0105a, 0x0105d),
-    const Range(0x01061, 0x01061),
-    const Range(0x01065, 0x01066),
-    const Range(0x0106e, 0x01070),
-    const Range(0x01075, 0x01081),
-    const Range(0x0108e, 0x0108e),
-    const Range(0x01090, 0x01099),
-    const Range(0x0109e, 0x010c5),
-    const Range(0x010c7, 0x010c7),
-    const Range(0x010cd, 0x010cd),
-    const Range(0x010d0, 0x01248),
-    const Range(0x0124a, 0x0124d),
-    const Range(0x01250, 0x01256),
-    const Range(0x01258, 0x01258),
-    const Range(0x0125a, 0x0125d),
-    const Range(0x01260, 0x01288),
-    const Range(0x0128a, 0x0128d),
-    const Range(0x01290, 0x012b0),
-    const Range(0x012b2, 0x012b5),
-    const Range(0x012b8, 0x012be),
-    const Range(0x012c0, 0x012c0),
-    const Range(0x012c2, 0x012c5),
-    const Range(0x012c8, 0x012d6),
-    const Range(0x012d8, 0x01310),
-    const Range(0x01312, 0x01315),
-    const Range(0x01318, 0x0135a),
-    const Range(0x01360, 0x0137c),
-    const Range(0x01380, 0x01399),
-    const Range(0x013a0, 0x013f5),
-    const Range(0x013f8, 0x013fd),
-    const Range(0x01400, 0x0169c),
-    const Range(0x016a0, 0x016f8),
-    const Range(0x01700, 0x0170c),
-    const Range(0x0170e, 0x01711),
-    const Range(0x01720, 0x01731),
-    const Range(0x01735, 0x01736),
-    const Range(0x01740, 0x01751),
-    const Range(0x01760, 0x0176c),
-    const Range(0x0176e, 0x01770),
-    const Range(0x01780, 0x017b3),
-    const Range(0x017d4, 0x017dc),
-    const Range(0x017e0, 0x017e9),
-    const Range(0x017f0, 0x017f9),
-    const Range(0x01800, 0x0180a),
-    const Range(0x01810, 0x01819),
-    const Range(0x01820, 0x01877),
-    const Range(0x01880, 0x01884),
-    const Range(0x01887, 0x018a8),
-    const Range(0x018aa, 0x018aa),
-    const Range(0x018b0, 0x018f5),
-    const Range(0x01900, 0x0191e),
-    const Range(0x01940, 0x01940),
-    const Range(0x01944, 0x0196d),
-    const Range(0x01970, 0x01974),
-    const Range(0x01980, 0x019ab),
-    const Range(0x019b0, 0x019c9),
-    const Range(0x019d0, 0x019da),
-    const Range(0x019de, 0x01a16),
-    const Range(0x01a1e, 0x01a54),
-    const Range(0x01a80, 0x01a89),
-    const Range(0x01a90, 0x01a99),
-    const Range(0x01aa0, 0x01aad),
-    const Range(0x01b05, 0x01b33),
-    const Range(0x01b45, 0x01b4b),
-    const Range(0x01b50, 0x01b6a),
-    const Range(0x01b74, 0x01b7c),
-    const Range(0x01b83, 0x01ba0),
-    const Range(0x01bae, 0x01be5),
-    const Range(0x01bfc, 0x01c23),
-    const Range(0x01c3b, 0x01c49),
-    const Range(0x01c4d, 0x01c88),
-    const Range(0x01cc0, 0x01cc7),
-    const Range(0x01cd3, 0x01cd3),
-    const Range(0x01ce9, 0x01cec),
-    const Range(0x01cee, 0x01cf1),
-    const Range(0x01cf5, 0x01cf6),
-    const Range(0x01d00, 0x01dbf),
-    const Range(0x01e00, 0x01f15),
-    const Range(0x01f18, 0x01f1d),
-    const Range(0x01f20, 0x01f45),
-    const Range(0x01f48, 0x01f4d),
-    const Range(0x01f50, 0x01f57),
-    const Range(0x01f59, 0x01f59),
-    const Range(0x01f5b, 0x01f5b),
-    const Range(0x01f5d, 0x01f5d),
-    const Range(0x01f5f, 0x01f7d),
-    const Range(0x01f80, 0x01fb4),
-    const Range(0x01fb6, 0x01fc4),
-    const Range(0x01fc6, 0x01fd3),
-    const Range(0x01fd6, 0x01fdb),
-    const Range(0x01fdd, 0x01fef),
-    const Range(0x01ff2, 0x01ff4),
-    const Range(0x01ff6, 0x01ffe),
-    const Range(0x02000, 0x0200a),
-    const Range(0x02010, 0x02029),
-    const Range(0x0202f, 0x0205f),
-    const Range(0x02070, 0x02071),
-    const Range(0x02074, 0x0208e),
-    const Range(0x02090, 0x0209c),
-    const Range(0x020a0, 0x020bf),
-    const Range(0x02100, 0x0218b),
-    const Range(0x02190, 0x02426),
-    const Range(0x02440, 0x0244a),
-    const Range(0x02460, 0x02b73),
-    const Range(0x02b76, 0x02b95),
-    const Range(0x02b98, 0x02bb9),
-    const Range(0x02bbd, 0x02bc8),
-    const Range(0x02bca, 0x02bd2),
-    const Range(0x02bec, 0x02bef),
-    const Range(0x02c00, 0x02c2e),
-    const Range(0x02c30, 0x02c5e),
-    const Range(0x02c60, 0x02cee),
-    const Range(0x02cf2, 0x02cf3),
-    const Range(0x02cf9, 0x02d25),
-    const Range(0x02d27, 0x02d27),
-    const Range(0x02d2d, 0x02d2d),
-    const Range(0x02d30, 0x02d67),
-    const Range(0x02d6f, 0x02d70),
-    const Range(0x02d80, 0x02d96),
-    const Range(0x02da0, 0x02da6),
-    const Range(0x02da8, 0x02dae),
-    const Range(0x02db0, 0x02db6),
-    const Range(0x02db8, 0x02dbe),
-    const Range(0x02dc0, 0x02dc6),
-    const Range(0x02dc8, 0x02dce),
-    const Range(0x02dd0, 0x02dd6),
-    const Range(0x02dd8, 0x02dde),
-    const Range(0x02e00, 0x02e49),
-    const Range(0x02e80, 0x02e99),
-    const Range(0x02e9b, 0x02ef3),
-    const Range(0x02f00, 0x02fd5),
-    const Range(0x02ff0, 0x02ffb),
-    const Range(0x03000, 0x03029),
-    const Range(0x03030, 0x0303f),
-    const Range(0x03041, 0x03096),
-    const Range(0x0309b, 0x030ff),
-    const Range(0x03105, 0x0312e),
-    const Range(0x03131, 0x0318e),
-    const Range(0x03190, 0x031ba),
-    const Range(0x031c0, 0x031e3),
-    const Range(0x031f0, 0x0321e),
-    const Range(0x03220, 0x032fe),
-    const Range(0x03300, 0x04db5),
-    const Range(0x04dc0, 0x09fea),
-    const Range(0x0a000, 0x0a48c),
-    const Range(0x0a490, 0x0a4c6),
-    const Range(0x0a4d0, 0x0a62b),
-    const Range(0x0a640, 0x0a66e),
-    const Range(0x0a673, 0x0a673),
-    const Range(0x0a67e, 0x0a69d),
-    const Range(0x0a6a0, 0x0a6ef),
-    const Range(0x0a6f2, 0x0a6f7),
-    const Range(0x0a700, 0x0a7ae),
-    const Range(0x0a7b0, 0x0a7b7),
-    const Range(0x0a7f7, 0x0a801),
-    const Range(0x0a803, 0x0a805),
-    const Range(0x0a807, 0x0a80a),
-    const Range(0x0a80c, 0x0a822),
-    const Range(0x0a828, 0x0a82b),
-    const Range(0x0a830, 0x0a839),
-    const Range(0x0a840, 0x0a877),
-    const Range(0x0a882, 0x0a8b3),
-    const Range(0x0a8ce, 0x0a8d9),
-    const Range(0x0a8f2, 0x0a8fd),
-    const Range(0x0a900, 0x0a925),
-    const Range(0x0a92e, 0x0a946),
-    const Range(0x0a95f, 0x0a97c),
-    const Range(0x0a984, 0x0a9b2),
-    const Range(0x0a9c1, 0x0a9cd),
-    const Range(0x0a9cf, 0x0a9d9),
-    const Range(0x0a9de, 0x0a9e4),
-    const Range(0x0a9e6, 0x0a9fe),
-    const Range(0x0aa00, 0x0aa28),
-    const Range(0x0aa40, 0x0aa42),
-    const Range(0x0aa44, 0x0aa4b),
-    const Range(0x0aa50, 0x0aa59),
-    const Range(0x0aa5c, 0x0aa7a),
-    const Range(0x0aa7e, 0x0aaaf),
-    const Range(0x0aab1, 0x0aab1),
-    const Range(0x0aab5, 0x0aab6),
-    const Range(0x0aab9, 0x0aabd),
-    const Range(0x0aac0, 0x0aac0),
-    const Range(0x0aac2, 0x0aac2),
-    const Range(0x0aadb, 0x0aaea),
-    const Range(0x0aaf0, 0x0aaf4),
-    const Range(0x0ab01, 0x0ab06),
-    const Range(0x0ab09, 0x0ab0e),
-    const Range(0x0ab11, 0x0ab16),
-    const Range(0x0ab20, 0x0ab26),
-    const Range(0x0ab28, 0x0ab2e),
-    const Range(0x0ab30, 0x0ab65),
-    const Range(0x0ab70, 0x0abe2),
-    const Range(0x0abeb, 0x0abeb),
-    const Range(0x0abf0, 0x0abf9),
-    const Range(0x0ac00, 0x0d7a3),
-    const Range(0x0d7b0, 0x0d7c6),
-    const Range(0x0d7cb, 0x0d7fb),
-    const Range(0x0f900, 0x0fa6d),
-    const Range(0x0fa70, 0x0fad9),
-    const Range(0x0fb00, 0x0fb06),
-    const Range(0x0fb13, 0x0fb17),
-    const Range(0x0fb1d, 0x0fb1d),
-    const Range(0x0fb1f, 0x0fb36),
-    const Range(0x0fb38, 0x0fb3c),
-    const Range(0x0fb3e, 0x0fb3e),
-    const Range(0x0fb40, 0x0fb41),
-    const Range(0x0fb43, 0x0fb44),
-    const Range(0x0fb46, 0x0fbc1),
-    const Range(0x0fbd3, 0x0fd3f),
-    const Range(0x0fd50, 0x0fd8f),
-    const Range(0x0fd92, 0x0fdc7),
-    const Range(0x0fdf0, 0x0fdfd),
-    const Range(0x0fe10, 0x0fe19),
-    const Range(0x0fe30, 0x0fe52),
-    const Range(0x0fe54, 0x0fe66),
-    const Range(0x0fe68, 0x0fe6b),
-    const Range(0x0fe70, 0x0fe74),
-    const Range(0x0fe76, 0x0fefc),
-    const Range(0x0ff01, 0x0ffbe),
-    const Range(0x0ffc2, 0x0ffc7),
-    const Range(0x0ffca, 0x0ffcf),
-    const Range(0x0ffd2, 0x0ffd7),
-    const Range(0x0ffda, 0x0ffdc),
-    const Range(0x0ffe0, 0x0ffe6),
-    const Range(0x0ffe8, 0x0ffee),
-    const Range(0x0fffc, 0x0fffd),
-    const Range(0x10000, 0x1000b),
-    const Range(0x1000d, 0x10026),
-    const Range(0x10028, 0x1003a),
-    const Range(0x1003c, 0x1003d),
-    const Range(0x1003f, 0x1004d),
-    const Range(0x10050, 0x1005d),
-    const Range(0x10080, 0x100fa),
-    const Range(0x10100, 0x10102),
-    const Range(0x10107, 0x10133),
-    const Range(0x10137, 0x1018e),
-    const Range(0x10190, 0x1019b),
-    const Range(0x101a0, 0x101a0),
-    const Range(0x101d0, 0x101fc),
-    const Range(0x10280, 0x1029c),
-    const Range(0x102a0, 0x102d0),
-    const Range(0x102e1, 0x102fb),
-    const Range(0x10300, 0x10323),
-    const Range(0x1032d, 0x1034a),
-    const Range(0x10350, 0x10375),
-    const Range(0x10380, 0x1039d),
-    const Range(0x1039f, 0x103c3),
-    const Range(0x103c8, 0x103d5),
-    const Range(0x10400, 0x1049d),
-    const Range(0x104a0, 0x104a9),
-    const Range(0x104b0, 0x104d3),
-    const Range(0x104d8, 0x104fb),
-    const Range(0x10500, 0x10527),
-    const Range(0x10530, 0x10563),
-    const Range(0x1056f, 0x1056f),
-    const Range(0x10600, 0x10736),
-    const Range(0x10740, 0x10755),
-    const Range(0x10760, 0x10767),
-    const Range(0x10800, 0x10805),
-    const Range(0x10808, 0x10808),
-    const Range(0x1080a, 0x10835),
-    const Range(0x10837, 0x10838),
-    const Range(0x1083c, 0x1083c),
-    const Range(0x1083f, 0x10855),
-    const Range(0x10857, 0x1089e),
-    const Range(0x108a7, 0x108af),
-    const Range(0x108e0, 0x108f2),
-    const Range(0x108f4, 0x108f5),
-    const Range(0x108fb, 0x1091b),
-    const Range(0x1091f, 0x10939),
-    const Range(0x1093f, 0x1093f),
-    const Range(0x10980, 0x109b7),
-    const Range(0x109bc, 0x109cf),
-    const Range(0x109d2, 0x10a00),
-    const Range(0x10a10, 0x10a13),
-    const Range(0x10a15, 0x10a17),
-    const Range(0x10a19, 0x10a33),
-    const Range(0x10a40, 0x10a47),
-    const Range(0x10a50, 0x10a58),
-    const Range(0x10a60, 0x10a9f),
-    const Range(0x10ac0, 0x10ae4),
-    const Range(0x10aeb, 0x10af6),
-    const Range(0x10b00, 0x10b35),
-    const Range(0x10b39, 0x10b55),
-    const Range(0x10b58, 0x10b72),
-    const Range(0x10b78, 0x10b91),
-    const Range(0x10b99, 0x10b9c),
-    const Range(0x10ba9, 0x10baf),
-    const Range(0x10c00, 0x10c48),
-    const Range(0x10c80, 0x10cb2),
-    const Range(0x10cc0, 0x10cf2),
-    const Range(0x10cfa, 0x10cff),
-    const Range(0x10e60, 0x10e7e),
-    const Range(0x11003, 0x11037),
-    const Range(0x11047, 0x1104d),
-    const Range(0x11052, 0x1106f),
-    const Range(0x11083, 0x110af),
-    const Range(0x110bb, 0x110bc),
-    const Range(0x110be, 0x110c1),
-    const Range(0x110d0, 0x110e8),
-    const Range(0x110f0, 0x110f9),
-    const Range(0x11103, 0x11126),
-    const Range(0x11136, 0x11143),
-    const Range(0x11150, 0x11172),
-    const Range(0x11174, 0x11176),
-    const Range(0x11183, 0x111b2),
-    const Range(0x111c1, 0x111c9),
-    const Range(0x111cd, 0x111cd),
-    const Range(0x111d0, 0x111df),
-    const Range(0x111e1, 0x111f4),
-    const Range(0x11200, 0x11211),
-    const Range(0x11213, 0x1122b),
-    const Range(0x11238, 0x1123d),
-    const Range(0x11280, 0x11286),
-    const Range(0x11288, 0x11288),
-    const Range(0x1128a, 0x1128d),
-    const Range(0x1128f, 0x1129d),
-    const Range(0x1129f, 0x112a9),
-    const Range(0x112b0, 0x112de),
-    const Range(0x112f0, 0x112f9),
-    const Range(0x11305, 0x1130c),
-    const Range(0x1130f, 0x11310),
-    const Range(0x11313, 0x11328),
-    const Range(0x1132a, 0x11330),
-    const Range(0x11332, 0x11333),
-    const Range(0x11335, 0x11339),
-    const Range(0x1133d, 0x1133d),
-    const Range(0x11350, 0x11350),
-    const Range(0x1135d, 0x11361),
-    const Range(0x11400, 0x11434),
-    const Range(0x11447, 0x11459),
-    const Range(0x1145b, 0x1145b),
-    const Range(0x1145d, 0x1145d),
-    const Range(0x11480, 0x114af),
-    const Range(0x114c4, 0x114c7),
-    const Range(0x114d0, 0x114d9),
-    const Range(0x11580, 0x115ae),
-    const Range(0x115c1, 0x115db),
-    const Range(0x11600, 0x1162f),
-    const Range(0x11641, 0x11644),
-    const Range(0x11650, 0x11659),
-    const Range(0x11660, 0x1166c),
-    const Range(0x11680, 0x116aa),
-    const Range(0x116c0, 0x116c9),
-    const Range(0x11700, 0x11719),
-    const Range(0x11730, 0x1173f),
-    const Range(0x118a0, 0x118f2),
-    const Range(0x118ff, 0x118ff),
-    const Range(0x11a00, 0x11a00),
-    const Range(0x11a0b, 0x11a32),
-    const Range(0x11a3a, 0x11a3a),
-    const Range(0x11a3f, 0x11a46),
-    const Range(0x11a50, 0x11a50),
-    const Range(0x11a5c, 0x11a83),
-    const Range(0x11a86, 0x11a89),
-    const Range(0x11a9a, 0x11a9c),
-    const Range(0x11a9e, 0x11aa2),
-    const Range(0x11ac0, 0x11af8),
-    const Range(0x11c00, 0x11c08),
-    const Range(0x11c0a, 0x11c2e),
-    const Range(0x11c40, 0x11c45),
-    const Range(0x11c50, 0x11c6c),
-    const Range(0x11c70, 0x11c8f),
-    const Range(0x11d00, 0x11d06),
-    const Range(0x11d08, 0x11d09),
-    const Range(0x11d0b, 0x11d30),
-    const Range(0x11d46, 0x11d46),
-    const Range(0x11d50, 0x11d59),
-    const Range(0x12000, 0x12399),
-    const Range(0x12400, 0x1246e),
-    const Range(0x12470, 0x12474),
-    const Range(0x12480, 0x12543),
-    const Range(0x13000, 0x1342e),
-    const Range(0x14400, 0x14646),
-    const Range(0x16800, 0x16a38),
-    const Range(0x16a40, 0x16a5e),
-    const Range(0x16a60, 0x16a69),
-    const Range(0x16a6e, 0x16a6f),
-    const Range(0x16ad0, 0x16aed),
-    const Range(0x16af5, 0x16af5),
-    const Range(0x16b00, 0x16b2f),
-    const Range(0x16b37, 0x16b45),
-    const Range(0x16b50, 0x16b59),
-    const Range(0x16b5b, 0x16b61),
-    const Range(0x16b63, 0x16b77),
-    const Range(0x16b7d, 0x16b8f),
-    const Range(0x16f00, 0x16f44),
-    const Range(0x16f50, 0x16f50),
-    const Range(0x16f93, 0x16f9f),
-    const Range(0x16fe0, 0x16fe1),
-    const Range(0x17000, 0x187ec),
-    const Range(0x18800, 0x18af2),
-    const Range(0x1b000, 0x1b11e),
-    const Range(0x1b170, 0x1b2fb),
-    const Range(0x1bc00, 0x1bc6a),
-    const Range(0x1bc70, 0x1bc7c),
-    const Range(0x1bc80, 0x1bc88),
-    const Range(0x1bc90, 0x1bc99),
-    const Range(0x1bc9c, 0x1bc9c),
-    const Range(0x1bc9f, 0x1bc9f),
-    const Range(0x1d000, 0x1d0f5),
-    const Range(0x1d100, 0x1d126),
-    const Range(0x1d129, 0x1d164),
-    const Range(0x1d16a, 0x1d16c),
-    const Range(0x1d183, 0x1d184),
-    const Range(0x1d18c, 0x1d1a9),
-    const Range(0x1d1ae, 0x1d1e8),
-    const Range(0x1d200, 0x1d241),
-    const Range(0x1d245, 0x1d245),
-    const Range(0x1d300, 0x1d356),
-    const Range(0x1d360, 0x1d371),
-    const Range(0x1d400, 0x1d454),
-    const Range(0x1d456, 0x1d49c),
-    const Range(0x1d49e, 0x1d49f),
-    const Range(0x1d4a2, 0x1d4a2),
-    const Range(0x1d4a5, 0x1d4a6),
-    const Range(0x1d4a9, 0x1d4ac),
-    const Range(0x1d4ae, 0x1d4b9),
-    const Range(0x1d4bb, 0x1d4bb),
-    const Range(0x1d4bd, 0x1d4c3),
-    const Range(0x1d4c5, 0x1d505),
-    const Range(0x1d507, 0x1d50a),
-    const Range(0x1d50d, 0x1d514),
-    const Range(0x1d516, 0x1d51c),
-    const Range(0x1d51e, 0x1d539),
-    const Range(0x1d53b, 0x1d53e),
-    const Range(0x1d540, 0x1d544),
-    const Range(0x1d546, 0x1d546),
-    const Range(0x1d54a, 0x1d550),
-    const Range(0x1d552, 0x1d6a5),
-    const Range(0x1d6a8, 0x1d7cb),
-    const Range(0x1d7ce, 0x1d9ff),
-    const Range(0x1da37, 0x1da3a),
-    const Range(0x1da6d, 0x1da74),
-    const Range(0x1da76, 0x1da83),
-    const Range(0x1da85, 0x1da8b),
-    const Range(0x1e800, 0x1e8c4),
-    const Range(0x1e8c7, 0x1e8cf),
-    const Range(0x1e900, 0x1e943),
-    const Range(0x1e950, 0x1e959),
-    const Range(0x1e95e, 0x1e95f),
-    const Range(0x1ee00, 0x1ee03),
-    const Range(0x1ee05, 0x1ee1f),
-    const Range(0x1ee21, 0x1ee22),
-    const Range(0x1ee24, 0x1ee24),
-    const Range(0x1ee27, 0x1ee27),
-    const Range(0x1ee29, 0x1ee32),
-    const Range(0x1ee34, 0x1ee37),
-    const Range(0x1ee39, 0x1ee39),
-    const Range(0x1ee3b, 0x1ee3b),
-    const Range(0x1ee42, 0x1ee42),
-    const Range(0x1ee47, 0x1ee47),
-    const Range(0x1ee49, 0x1ee49),
-    const Range(0x1ee4b, 0x1ee4b),
-    const Range(0x1ee4d, 0x1ee4f),
-    const Range(0x1ee51, 0x1ee52),
-    const Range(0x1ee54, 0x1ee54),
-    const Range(0x1ee57, 0x1ee57),
-    const Range(0x1ee59, 0x1ee59),
-    const Range(0x1ee5b, 0x1ee5b),
-    const Range(0x1ee5d, 0x1ee5d),
-    const Range(0x1ee5f, 0x1ee5f),
-    const Range(0x1ee61, 0x1ee62),
-    const Range(0x1ee64, 0x1ee64),
-    const Range(0x1ee67, 0x1ee6a),
-    const Range(0x1ee6c, 0x1ee72),
-    const Range(0x1ee74, 0x1ee77),
-    const Range(0x1ee79, 0x1ee7c),
-    const Range(0x1ee7e, 0x1ee7e),
-    const Range(0x1ee80, 0x1ee89),
-    const Range(0x1ee8b, 0x1ee9b),
-    const Range(0x1eea1, 0x1eea3),
-    const Range(0x1eea5, 0x1eea9),
-    const Range(0x1eeab, 0x1eebb),
-    const Range(0x1eef0, 0x1eef1),
-    const Range(0x1f000, 0x1f02b),
-    const Range(0x1f030, 0x1f093),
-    const Range(0x1f0a0, 0x1f0ae),
-    const Range(0x1f0b1, 0x1f0bf),
-    const Range(0x1f0c1, 0x1f0cf),
-    const Range(0x1f0d1, 0x1f0f5),
-    const Range(0x1f100, 0x1f10c),
-    const Range(0x1f110, 0x1f12e),
-    const Range(0x1f130, 0x1f16b),
-    const Range(0x1f170, 0x1f1ac),
-    const Range(0x1f1e6, 0x1f202),
-    const Range(0x1f210, 0x1f23b),
-    const Range(0x1f240, 0x1f248),
-    const Range(0x1f250, 0x1f251),
-    const Range(0x1f260, 0x1f265),
-    const Range(0x1f300, 0x1f6d4),
-    const Range(0x1f6e0, 0x1f6ec),
-    const Range(0x1f6f0, 0x1f6f8),
-    const Range(0x1f700, 0x1f773),
-    const Range(0x1f780, 0x1f7d4),
-    const Range(0x1f800, 0x1f80b),
-    const Range(0x1f810, 0x1f847),
-    const Range(0x1f850, 0x1f859),
-    const Range(0x1f860, 0x1f887),
-    const Range(0x1f890, 0x1f8ad),
-    const Range(0x1f900, 0x1f90b),
-    const Range(0x1f910, 0x1f93e),
-    const Range(0x1f940, 0x1f94c),
-    const Range(0x1f950, 0x1f96b),
-    const Range(0x1f980, 0x1f997),
-    const Range(0x1f9c0, 0x1f9c0),
-    const Range(0x1f9d0, 0x1f9e6),
-    const Range(0x20000, 0x2a6d6),
-    const Range(0x2a700, 0x2b734),
-    const Range(0x2b740, 0x2b81d),
-    const Range(0x2b820, 0x2cea1),
-    const Range(0x2ceb0, 0x2ebe0),
-    const Range(0x2f800, 0x2fa1d),
+  const List<Range> characterRanges = <Range>[
+    Range(0x00020, 0x0007e),
+    Range(0x000a0, 0x000ac),
+    Range(0x000ae, 0x002ff),
+    Range(0x00370, 0x00377),
+    Range(0x0037a, 0x0037f),
+    Range(0x00384, 0x0038a),
+    Range(0x0038c, 0x0038c),
+    Range(0x0038e, 0x003a1),
+    Range(0x003a3, 0x00482),
+    Range(0x0048a, 0x0052f),
+    Range(0x00531, 0x00556),
+    Range(0x00559, 0x0055f),
+    Range(0x00561, 0x00587),
+    Range(0x00589, 0x0058a),
+    Range(0x0058d, 0x0058f),
+    Range(0x005be, 0x005be),
+    Range(0x005c0, 0x005c0),
+    Range(0x005c3, 0x005c3),
+    Range(0x005c6, 0x005c6),
+    Range(0x005d0, 0x005ea),
+    Range(0x005f0, 0x005f4),
+    Range(0x00606, 0x0060f),
+    Range(0x0061b, 0x0061b),
+    Range(0x0061e, 0x0064a),
+    Range(0x00660, 0x0066f),
+    Range(0x00671, 0x006d5),
+    Range(0x006de, 0x006de),
+    Range(0x006e5, 0x006e6),
+    Range(0x006e9, 0x006e9),
+    Range(0x006ee, 0x0070d),
+    Range(0x00710, 0x00710),
+    Range(0x00712, 0x0072f),
+    Range(0x0074d, 0x007a5),
+    Range(0x007b1, 0x007b1),
+    Range(0x007c0, 0x007ea),
+    Range(0x007f4, 0x007fa),
+    Range(0x00800, 0x00815),
+    Range(0x0081a, 0x0081a),
+    Range(0x00824, 0x00824),
+    Range(0x00828, 0x00828),
+    Range(0x00830, 0x0083e),
+    Range(0x00840, 0x00858),
+    Range(0x0085e, 0x0085e),
+    Range(0x00860, 0x0086a),
+    Range(0x008a0, 0x008b4),
+    Range(0x008b6, 0x008bd),
+    Range(0x00904, 0x00939),
+    Range(0x0093d, 0x0093d),
+    Range(0x00950, 0x00950),
+    Range(0x00958, 0x00961),
+    Range(0x00964, 0x00980),
+    Range(0x00985, 0x0098c),
+    Range(0x0098f, 0x00990),
+    Range(0x00993, 0x009a8),
+    Range(0x009aa, 0x009b0),
+    Range(0x009b2, 0x009b2),
+    Range(0x009b6, 0x009b9),
+    Range(0x009bd, 0x009bd),
+    Range(0x009ce, 0x009ce),
+    Range(0x009dc, 0x009dd),
+    Range(0x009df, 0x009e1),
+    Range(0x009e6, 0x009fd),
+    Range(0x00a05, 0x00a0a),
+    Range(0x00a0f, 0x00a10),
+    Range(0x00a13, 0x00a28),
+    Range(0x00a2a, 0x00a30),
+    Range(0x00a32, 0x00a33),
+    Range(0x00a35, 0x00a36),
+    Range(0x00a38, 0x00a39),
+    Range(0x00a59, 0x00a5c),
+    Range(0x00a5e, 0x00a5e),
+    Range(0x00a66, 0x00a6f),
+    Range(0x00a72, 0x00a74),
+    Range(0x00a85, 0x00a8d),
+    Range(0x00a8f, 0x00a91),
+    Range(0x00a93, 0x00aa8),
+    Range(0x00aaa, 0x00ab0),
+    Range(0x00ab2, 0x00ab3),
+    Range(0x00ab5, 0x00ab9),
+    Range(0x00abd, 0x00abd),
+    Range(0x00ad0, 0x00ad0),
+    Range(0x00ae0, 0x00ae1),
+    Range(0x00ae6, 0x00af1),
+    Range(0x00af9, 0x00af9),
+    Range(0x00b05, 0x00b0c),
+    Range(0x00b0f, 0x00b10),
+    Range(0x00b13, 0x00b28),
+    Range(0x00b2a, 0x00b30),
+    Range(0x00b32, 0x00b33),
+    Range(0x00b35, 0x00b39),
+    Range(0x00b3d, 0x00b3d),
+    Range(0x00b5c, 0x00b5d),
+    Range(0x00b5f, 0x00b61),
+    Range(0x00b66, 0x00b77),
+    Range(0x00b83, 0x00b83),
+    Range(0x00b85, 0x00b8a),
+    Range(0x00b8e, 0x00b90),
+    Range(0x00b92, 0x00b95),
+    Range(0x00b99, 0x00b9a),
+    Range(0x00b9c, 0x00b9c),
+    Range(0x00b9e, 0x00b9f),
+    Range(0x00ba3, 0x00ba4),
+    Range(0x00ba8, 0x00baa),
+    Range(0x00bae, 0x00bb9),
+    Range(0x00bd0, 0x00bd0),
+    Range(0x00be6, 0x00bfa),
+    Range(0x00c05, 0x00c0c),
+    Range(0x00c0e, 0x00c10),
+    Range(0x00c12, 0x00c28),
+    Range(0x00c2a, 0x00c39),
+    Range(0x00c3d, 0x00c3d),
+    Range(0x00c58, 0x00c5a),
+    Range(0x00c60, 0x00c61),
+    Range(0x00c66, 0x00c6f),
+    Range(0x00c78, 0x00c80),
+    Range(0x00c85, 0x00c8c),
+    Range(0x00c8e, 0x00c90),
+    Range(0x00c92, 0x00ca8),
+    Range(0x00caa, 0x00cb3),
+    Range(0x00cb5, 0x00cb9),
+    Range(0x00cbd, 0x00cbd),
+    Range(0x00cde, 0x00cde),
+    Range(0x00ce0, 0x00ce1),
+    Range(0x00ce6, 0x00cef),
+    Range(0x00cf1, 0x00cf2),
+    Range(0x00d05, 0x00d0c),
+    Range(0x00d0e, 0x00d10),
+    Range(0x00d12, 0x00d3a),
+    Range(0x00d3d, 0x00d3d),
+    Range(0x00d4e, 0x00d4f),
+    Range(0x00d54, 0x00d56),
+    Range(0x00d58, 0x00d61),
+    Range(0x00d66, 0x00d7f),
+    Range(0x00d85, 0x00d96),
+    Range(0x00d9a, 0x00db1),
+    Range(0x00db3, 0x00dbb),
+    Range(0x00dbd, 0x00dbd),
+    Range(0x00dc0, 0x00dc6),
+    Range(0x00de6, 0x00def),
+    Range(0x00df4, 0x00df4),
+    Range(0x00e01, 0x00e30),
+    Range(0x00e32, 0x00e33),
+    Range(0x00e3f, 0x00e46),
+    Range(0x00e4f, 0x00e5b),
+    Range(0x00e81, 0x00e82),
+    Range(0x00e84, 0x00e84),
+    Range(0x00e87, 0x00e88),
+    Range(0x00e8a, 0x00e8a),
+    Range(0x00e8d, 0x00e8d),
+    Range(0x00e94, 0x00e97),
+    Range(0x00e99, 0x00e9f),
+    Range(0x00ea1, 0x00ea3),
+    Range(0x00ea5, 0x00ea5),
+    Range(0x00ea7, 0x00ea7),
+    Range(0x00eaa, 0x00eab),
+    Range(0x00ead, 0x00eb0),
+    Range(0x00eb2, 0x00eb3),
+    Range(0x00ebd, 0x00ebd),
+    Range(0x00ec0, 0x00ec4),
+    Range(0x00ec6, 0x00ec6),
+    Range(0x00ed0, 0x00ed9),
+    Range(0x00edc, 0x00edf),
+    Range(0x00f00, 0x00f17),
+    Range(0x00f1a, 0x00f34),
+    Range(0x00f36, 0x00f36),
+    Range(0x00f38, 0x00f38),
+    Range(0x00f3a, 0x00f3d),
+    Range(0x00f40, 0x00f47),
+    Range(0x00f49, 0x00f6c),
+    Range(0x00f85, 0x00f85),
+    Range(0x00f88, 0x00f8c),
+    Range(0x00fbe, 0x00fc5),
+    Range(0x00fc7, 0x00fcc),
+    Range(0x00fce, 0x00fda),
+    Range(0x01000, 0x0102a),
+    Range(0x0103f, 0x01055),
+    Range(0x0105a, 0x0105d),
+    Range(0x01061, 0x01061),
+    Range(0x01065, 0x01066),
+    Range(0x0106e, 0x01070),
+    Range(0x01075, 0x01081),
+    Range(0x0108e, 0x0108e),
+    Range(0x01090, 0x01099),
+    Range(0x0109e, 0x010c5),
+    Range(0x010c7, 0x010c7),
+    Range(0x010cd, 0x010cd),
+    Range(0x010d0, 0x01248),
+    Range(0x0124a, 0x0124d),
+    Range(0x01250, 0x01256),
+    Range(0x01258, 0x01258),
+    Range(0x0125a, 0x0125d),
+    Range(0x01260, 0x01288),
+    Range(0x0128a, 0x0128d),
+    Range(0x01290, 0x012b0),
+    Range(0x012b2, 0x012b5),
+    Range(0x012b8, 0x012be),
+    Range(0x012c0, 0x012c0),
+    Range(0x012c2, 0x012c5),
+    Range(0x012c8, 0x012d6),
+    Range(0x012d8, 0x01310),
+    Range(0x01312, 0x01315),
+    Range(0x01318, 0x0135a),
+    Range(0x01360, 0x0137c),
+    Range(0x01380, 0x01399),
+    Range(0x013a0, 0x013f5),
+    Range(0x013f8, 0x013fd),
+    Range(0x01400, 0x0169c),
+    Range(0x016a0, 0x016f8),
+    Range(0x01700, 0x0170c),
+    Range(0x0170e, 0x01711),
+    Range(0x01720, 0x01731),
+    Range(0x01735, 0x01736),
+    Range(0x01740, 0x01751),
+    Range(0x01760, 0x0176c),
+    Range(0x0176e, 0x01770),
+    Range(0x01780, 0x017b3),
+    Range(0x017d4, 0x017dc),
+    Range(0x017e0, 0x017e9),
+    Range(0x017f0, 0x017f9),
+    Range(0x01800, 0x0180a),
+    Range(0x01810, 0x01819),
+    Range(0x01820, 0x01877),
+    Range(0x01880, 0x01884),
+    Range(0x01887, 0x018a8),
+    Range(0x018aa, 0x018aa),
+    Range(0x018b0, 0x018f5),
+    Range(0x01900, 0x0191e),
+    Range(0x01940, 0x01940),
+    Range(0x01944, 0x0196d),
+    Range(0x01970, 0x01974),
+    Range(0x01980, 0x019ab),
+    Range(0x019b0, 0x019c9),
+    Range(0x019d0, 0x019da),
+    Range(0x019de, 0x01a16),
+    Range(0x01a1e, 0x01a54),
+    Range(0x01a80, 0x01a89),
+    Range(0x01a90, 0x01a99),
+    Range(0x01aa0, 0x01aad),
+    Range(0x01b05, 0x01b33),
+    Range(0x01b45, 0x01b4b),
+    Range(0x01b50, 0x01b6a),
+    Range(0x01b74, 0x01b7c),
+    Range(0x01b83, 0x01ba0),
+    Range(0x01bae, 0x01be5),
+    Range(0x01bfc, 0x01c23),
+    Range(0x01c3b, 0x01c49),
+    Range(0x01c4d, 0x01c88),
+    Range(0x01cc0, 0x01cc7),
+    Range(0x01cd3, 0x01cd3),
+    Range(0x01ce9, 0x01cec),
+    Range(0x01cee, 0x01cf1),
+    Range(0x01cf5, 0x01cf6),
+    Range(0x01d00, 0x01dbf),
+    Range(0x01e00, 0x01f15),
+    Range(0x01f18, 0x01f1d),
+    Range(0x01f20, 0x01f45),
+    Range(0x01f48, 0x01f4d),
+    Range(0x01f50, 0x01f57),
+    Range(0x01f59, 0x01f59),
+    Range(0x01f5b, 0x01f5b),
+    Range(0x01f5d, 0x01f5d),
+    Range(0x01f5f, 0x01f7d),
+    Range(0x01f80, 0x01fb4),
+    Range(0x01fb6, 0x01fc4),
+    Range(0x01fc6, 0x01fd3),
+    Range(0x01fd6, 0x01fdb),
+    Range(0x01fdd, 0x01fef),
+    Range(0x01ff2, 0x01ff4),
+    Range(0x01ff6, 0x01ffe),
+    Range(0x02000, 0x0200a),
+    Range(0x02010, 0x02029),
+    Range(0x0202f, 0x0205f),
+    Range(0x02070, 0x02071),
+    Range(0x02074, 0x0208e),
+    Range(0x02090, 0x0209c),
+    Range(0x020a0, 0x020bf),
+    Range(0x02100, 0x0218b),
+    Range(0x02190, 0x02426),
+    Range(0x02440, 0x0244a),
+    Range(0x02460, 0x02b73),
+    Range(0x02b76, 0x02b95),
+    Range(0x02b98, 0x02bb9),
+    Range(0x02bbd, 0x02bc8),
+    Range(0x02bca, 0x02bd2),
+    Range(0x02bec, 0x02bef),
+    Range(0x02c00, 0x02c2e),
+    Range(0x02c30, 0x02c5e),
+    Range(0x02c60, 0x02cee),
+    Range(0x02cf2, 0x02cf3),
+    Range(0x02cf9, 0x02d25),
+    Range(0x02d27, 0x02d27),
+    Range(0x02d2d, 0x02d2d),
+    Range(0x02d30, 0x02d67),
+    Range(0x02d6f, 0x02d70),
+    Range(0x02d80, 0x02d96),
+    Range(0x02da0, 0x02da6),
+    Range(0x02da8, 0x02dae),
+    Range(0x02db0, 0x02db6),
+    Range(0x02db8, 0x02dbe),
+    Range(0x02dc0, 0x02dc6),
+    Range(0x02dc8, 0x02dce),
+    Range(0x02dd0, 0x02dd6),
+    Range(0x02dd8, 0x02dde),
+    Range(0x02e00, 0x02e49),
+    Range(0x02e80, 0x02e99),
+    Range(0x02e9b, 0x02ef3),
+    Range(0x02f00, 0x02fd5),
+    Range(0x02ff0, 0x02ffb),
+    Range(0x03000, 0x03029),
+    Range(0x03030, 0x0303f),
+    Range(0x03041, 0x03096),
+    Range(0x0309b, 0x030ff),
+    Range(0x03105, 0x0312e),
+    Range(0x03131, 0x0318e),
+    Range(0x03190, 0x031ba),
+    Range(0x031c0, 0x031e3),
+    Range(0x031f0, 0x0321e),
+    Range(0x03220, 0x032fe),
+    Range(0x03300, 0x04db5),
+    Range(0x04dc0, 0x09fea),
+    Range(0x0a000, 0x0a48c),
+    Range(0x0a490, 0x0a4c6),
+    Range(0x0a4d0, 0x0a62b),
+    Range(0x0a640, 0x0a66e),
+    Range(0x0a673, 0x0a673),
+    Range(0x0a67e, 0x0a69d),
+    Range(0x0a6a0, 0x0a6ef),
+    Range(0x0a6f2, 0x0a6f7),
+    Range(0x0a700, 0x0a7ae),
+    Range(0x0a7b0, 0x0a7b7),
+    Range(0x0a7f7, 0x0a801),
+    Range(0x0a803, 0x0a805),
+    Range(0x0a807, 0x0a80a),
+    Range(0x0a80c, 0x0a822),
+    Range(0x0a828, 0x0a82b),
+    Range(0x0a830, 0x0a839),
+    Range(0x0a840, 0x0a877),
+    Range(0x0a882, 0x0a8b3),
+    Range(0x0a8ce, 0x0a8d9),
+    Range(0x0a8f2, 0x0a8fd),
+    Range(0x0a900, 0x0a925),
+    Range(0x0a92e, 0x0a946),
+    Range(0x0a95f, 0x0a97c),
+    Range(0x0a984, 0x0a9b2),
+    Range(0x0a9c1, 0x0a9cd),
+    Range(0x0a9cf, 0x0a9d9),
+    Range(0x0a9de, 0x0a9e4),
+    Range(0x0a9e6, 0x0a9fe),
+    Range(0x0aa00, 0x0aa28),
+    Range(0x0aa40, 0x0aa42),
+    Range(0x0aa44, 0x0aa4b),
+    Range(0x0aa50, 0x0aa59),
+    Range(0x0aa5c, 0x0aa7a),
+    Range(0x0aa7e, 0x0aaaf),
+    Range(0x0aab1, 0x0aab1),
+    Range(0x0aab5, 0x0aab6),
+    Range(0x0aab9, 0x0aabd),
+    Range(0x0aac0, 0x0aac0),
+    Range(0x0aac2, 0x0aac2),
+    Range(0x0aadb, 0x0aaea),
+    Range(0x0aaf0, 0x0aaf4),
+    Range(0x0ab01, 0x0ab06),
+    Range(0x0ab09, 0x0ab0e),
+    Range(0x0ab11, 0x0ab16),
+    Range(0x0ab20, 0x0ab26),
+    Range(0x0ab28, 0x0ab2e),
+    Range(0x0ab30, 0x0ab65),
+    Range(0x0ab70, 0x0abe2),
+    Range(0x0abeb, 0x0abeb),
+    Range(0x0abf0, 0x0abf9),
+    Range(0x0ac00, 0x0d7a3),
+    Range(0x0d7b0, 0x0d7c6),
+    Range(0x0d7cb, 0x0d7fb),
+    Range(0x0f900, 0x0fa6d),
+    Range(0x0fa70, 0x0fad9),
+    Range(0x0fb00, 0x0fb06),
+    Range(0x0fb13, 0x0fb17),
+    Range(0x0fb1d, 0x0fb1d),
+    Range(0x0fb1f, 0x0fb36),
+    Range(0x0fb38, 0x0fb3c),
+    Range(0x0fb3e, 0x0fb3e),
+    Range(0x0fb40, 0x0fb41),
+    Range(0x0fb43, 0x0fb44),
+    Range(0x0fb46, 0x0fbc1),
+    Range(0x0fbd3, 0x0fd3f),
+    Range(0x0fd50, 0x0fd8f),
+    Range(0x0fd92, 0x0fdc7),
+    Range(0x0fdf0, 0x0fdfd),
+    Range(0x0fe10, 0x0fe19),
+    Range(0x0fe30, 0x0fe52),
+    Range(0x0fe54, 0x0fe66),
+    Range(0x0fe68, 0x0fe6b),
+    Range(0x0fe70, 0x0fe74),
+    Range(0x0fe76, 0x0fefc),
+    Range(0x0ff01, 0x0ffbe),
+    Range(0x0ffc2, 0x0ffc7),
+    Range(0x0ffca, 0x0ffcf),
+    Range(0x0ffd2, 0x0ffd7),
+    Range(0x0ffda, 0x0ffdc),
+    Range(0x0ffe0, 0x0ffe6),
+    Range(0x0ffe8, 0x0ffee),
+    Range(0x0fffc, 0x0fffd),
+    Range(0x10000, 0x1000b),
+    Range(0x1000d, 0x10026),
+    Range(0x10028, 0x1003a),
+    Range(0x1003c, 0x1003d),
+    Range(0x1003f, 0x1004d),
+    Range(0x10050, 0x1005d),
+    Range(0x10080, 0x100fa),
+    Range(0x10100, 0x10102),
+    Range(0x10107, 0x10133),
+    Range(0x10137, 0x1018e),
+    Range(0x10190, 0x1019b),
+    Range(0x101a0, 0x101a0),
+    Range(0x101d0, 0x101fc),
+    Range(0x10280, 0x1029c),
+    Range(0x102a0, 0x102d0),
+    Range(0x102e1, 0x102fb),
+    Range(0x10300, 0x10323),
+    Range(0x1032d, 0x1034a),
+    Range(0x10350, 0x10375),
+    Range(0x10380, 0x1039d),
+    Range(0x1039f, 0x103c3),
+    Range(0x103c8, 0x103d5),
+    Range(0x10400, 0x1049d),
+    Range(0x104a0, 0x104a9),
+    Range(0x104b0, 0x104d3),
+    Range(0x104d8, 0x104fb),
+    Range(0x10500, 0x10527),
+    Range(0x10530, 0x10563),
+    Range(0x1056f, 0x1056f),
+    Range(0x10600, 0x10736),
+    Range(0x10740, 0x10755),
+    Range(0x10760, 0x10767),
+    Range(0x10800, 0x10805),
+    Range(0x10808, 0x10808),
+    Range(0x1080a, 0x10835),
+    Range(0x10837, 0x10838),
+    Range(0x1083c, 0x1083c),
+    Range(0x1083f, 0x10855),
+    Range(0x10857, 0x1089e),
+    Range(0x108a7, 0x108af),
+    Range(0x108e0, 0x108f2),
+    Range(0x108f4, 0x108f5),
+    Range(0x108fb, 0x1091b),
+    Range(0x1091f, 0x10939),
+    Range(0x1093f, 0x1093f),
+    Range(0x10980, 0x109b7),
+    Range(0x109bc, 0x109cf),
+    Range(0x109d2, 0x10a00),
+    Range(0x10a10, 0x10a13),
+    Range(0x10a15, 0x10a17),
+    Range(0x10a19, 0x10a33),
+    Range(0x10a40, 0x10a47),
+    Range(0x10a50, 0x10a58),
+    Range(0x10a60, 0x10a9f),
+    Range(0x10ac0, 0x10ae4),
+    Range(0x10aeb, 0x10af6),
+    Range(0x10b00, 0x10b35),
+    Range(0x10b39, 0x10b55),
+    Range(0x10b58, 0x10b72),
+    Range(0x10b78, 0x10b91),
+    Range(0x10b99, 0x10b9c),
+    Range(0x10ba9, 0x10baf),
+    Range(0x10c00, 0x10c48),
+    Range(0x10c80, 0x10cb2),
+    Range(0x10cc0, 0x10cf2),
+    Range(0x10cfa, 0x10cff),
+    Range(0x10e60, 0x10e7e),
+    Range(0x11003, 0x11037),
+    Range(0x11047, 0x1104d),
+    Range(0x11052, 0x1106f),
+    Range(0x11083, 0x110af),
+    Range(0x110bb, 0x110bc),
+    Range(0x110be, 0x110c1),
+    Range(0x110d0, 0x110e8),
+    Range(0x110f0, 0x110f9),
+    Range(0x11103, 0x11126),
+    Range(0x11136, 0x11143),
+    Range(0x11150, 0x11172),
+    Range(0x11174, 0x11176),
+    Range(0x11183, 0x111b2),
+    Range(0x111c1, 0x111c9),
+    Range(0x111cd, 0x111cd),
+    Range(0x111d0, 0x111df),
+    Range(0x111e1, 0x111f4),
+    Range(0x11200, 0x11211),
+    Range(0x11213, 0x1122b),
+    Range(0x11238, 0x1123d),
+    Range(0x11280, 0x11286),
+    Range(0x11288, 0x11288),
+    Range(0x1128a, 0x1128d),
+    Range(0x1128f, 0x1129d),
+    Range(0x1129f, 0x112a9),
+    Range(0x112b0, 0x112de),
+    Range(0x112f0, 0x112f9),
+    Range(0x11305, 0x1130c),
+    Range(0x1130f, 0x11310),
+    Range(0x11313, 0x11328),
+    Range(0x1132a, 0x11330),
+    Range(0x11332, 0x11333),
+    Range(0x11335, 0x11339),
+    Range(0x1133d, 0x1133d),
+    Range(0x11350, 0x11350),
+    Range(0x1135d, 0x11361),
+    Range(0x11400, 0x11434),
+    Range(0x11447, 0x11459),
+    Range(0x1145b, 0x1145b),
+    Range(0x1145d, 0x1145d),
+    Range(0x11480, 0x114af),
+    Range(0x114c4, 0x114c7),
+    Range(0x114d0, 0x114d9),
+    Range(0x11580, 0x115ae),
+    Range(0x115c1, 0x115db),
+    Range(0x11600, 0x1162f),
+    Range(0x11641, 0x11644),
+    Range(0x11650, 0x11659),
+    Range(0x11660, 0x1166c),
+    Range(0x11680, 0x116aa),
+    Range(0x116c0, 0x116c9),
+    Range(0x11700, 0x11719),
+    Range(0x11730, 0x1173f),
+    Range(0x118a0, 0x118f2),
+    Range(0x118ff, 0x118ff),
+    Range(0x11a00, 0x11a00),
+    Range(0x11a0b, 0x11a32),
+    Range(0x11a3a, 0x11a3a),
+    Range(0x11a3f, 0x11a46),
+    Range(0x11a50, 0x11a50),
+    Range(0x11a5c, 0x11a83),
+    Range(0x11a86, 0x11a89),
+    Range(0x11a9a, 0x11a9c),
+    Range(0x11a9e, 0x11aa2),
+    Range(0x11ac0, 0x11af8),
+    Range(0x11c00, 0x11c08),
+    Range(0x11c0a, 0x11c2e),
+    Range(0x11c40, 0x11c45),
+    Range(0x11c50, 0x11c6c),
+    Range(0x11c70, 0x11c8f),
+    Range(0x11d00, 0x11d06),
+    Range(0x11d08, 0x11d09),
+    Range(0x11d0b, 0x11d30),
+    Range(0x11d46, 0x11d46),
+    Range(0x11d50, 0x11d59),
+    Range(0x12000, 0x12399),
+    Range(0x12400, 0x1246e),
+    Range(0x12470, 0x12474),
+    Range(0x12480, 0x12543),
+    Range(0x13000, 0x1342e),
+    Range(0x14400, 0x14646),
+    Range(0x16800, 0x16a38),
+    Range(0x16a40, 0x16a5e),
+    Range(0x16a60, 0x16a69),
+    Range(0x16a6e, 0x16a6f),
+    Range(0x16ad0, 0x16aed),
+    Range(0x16af5, 0x16af5),
+    Range(0x16b00, 0x16b2f),
+    Range(0x16b37, 0x16b45),
+    Range(0x16b50, 0x16b59),
+    Range(0x16b5b, 0x16b61),
+    Range(0x16b63, 0x16b77),
+    Range(0x16b7d, 0x16b8f),
+    Range(0x16f00, 0x16f44),
+    Range(0x16f50, 0x16f50),
+    Range(0x16f93, 0x16f9f),
+    Range(0x16fe0, 0x16fe1),
+    Range(0x17000, 0x187ec),
+    Range(0x18800, 0x18af2),
+    Range(0x1b000, 0x1b11e),
+    Range(0x1b170, 0x1b2fb),
+    Range(0x1bc00, 0x1bc6a),
+    Range(0x1bc70, 0x1bc7c),
+    Range(0x1bc80, 0x1bc88),
+    Range(0x1bc90, 0x1bc99),
+    Range(0x1bc9c, 0x1bc9c),
+    Range(0x1bc9f, 0x1bc9f),
+    Range(0x1d000, 0x1d0f5),
+    Range(0x1d100, 0x1d126),
+    Range(0x1d129, 0x1d164),
+    Range(0x1d16a, 0x1d16c),
+    Range(0x1d183, 0x1d184),
+    Range(0x1d18c, 0x1d1a9),
+    Range(0x1d1ae, 0x1d1e8),
+    Range(0x1d200, 0x1d241),
+    Range(0x1d245, 0x1d245),
+    Range(0x1d300, 0x1d356),
+    Range(0x1d360, 0x1d371),
+    Range(0x1d400, 0x1d454),
+    Range(0x1d456, 0x1d49c),
+    Range(0x1d49e, 0x1d49f),
+    Range(0x1d4a2, 0x1d4a2),
+    Range(0x1d4a5, 0x1d4a6),
+    Range(0x1d4a9, 0x1d4ac),
+    Range(0x1d4ae, 0x1d4b9),
+    Range(0x1d4bb, 0x1d4bb),
+    Range(0x1d4bd, 0x1d4c3),
+    Range(0x1d4c5, 0x1d505),
+    Range(0x1d507, 0x1d50a),
+    Range(0x1d50d, 0x1d514),
+    Range(0x1d516, 0x1d51c),
+    Range(0x1d51e, 0x1d539),
+    Range(0x1d53b, 0x1d53e),
+    Range(0x1d540, 0x1d544),
+    Range(0x1d546, 0x1d546),
+    Range(0x1d54a, 0x1d550),
+    Range(0x1d552, 0x1d6a5),
+    Range(0x1d6a8, 0x1d7cb),
+    Range(0x1d7ce, 0x1d9ff),
+    Range(0x1da37, 0x1da3a),
+    Range(0x1da6d, 0x1da74),
+    Range(0x1da76, 0x1da83),
+    Range(0x1da85, 0x1da8b),
+    Range(0x1e800, 0x1e8c4),
+    Range(0x1e8c7, 0x1e8cf),
+    Range(0x1e900, 0x1e943),
+    Range(0x1e950, 0x1e959),
+    Range(0x1e95e, 0x1e95f),
+    Range(0x1ee00, 0x1ee03),
+    Range(0x1ee05, 0x1ee1f),
+    Range(0x1ee21, 0x1ee22),
+    Range(0x1ee24, 0x1ee24),
+    Range(0x1ee27, 0x1ee27),
+    Range(0x1ee29, 0x1ee32),
+    Range(0x1ee34, 0x1ee37),
+    Range(0x1ee39, 0x1ee39),
+    Range(0x1ee3b, 0x1ee3b),
+    Range(0x1ee42, 0x1ee42),
+    Range(0x1ee47, 0x1ee47),
+    Range(0x1ee49, 0x1ee49),
+    Range(0x1ee4b, 0x1ee4b),
+    Range(0x1ee4d, 0x1ee4f),
+    Range(0x1ee51, 0x1ee52),
+    Range(0x1ee54, 0x1ee54),
+    Range(0x1ee57, 0x1ee57),
+    Range(0x1ee59, 0x1ee59),
+    Range(0x1ee5b, 0x1ee5b),
+    Range(0x1ee5d, 0x1ee5d),
+    Range(0x1ee5f, 0x1ee5f),
+    Range(0x1ee61, 0x1ee62),
+    Range(0x1ee64, 0x1ee64),
+    Range(0x1ee67, 0x1ee6a),
+    Range(0x1ee6c, 0x1ee72),
+    Range(0x1ee74, 0x1ee77),
+    Range(0x1ee79, 0x1ee7c),
+    Range(0x1ee7e, 0x1ee7e),
+    Range(0x1ee80, 0x1ee89),
+    Range(0x1ee8b, 0x1ee9b),
+    Range(0x1eea1, 0x1eea3),
+    Range(0x1eea5, 0x1eea9),
+    Range(0x1eeab, 0x1eebb),
+    Range(0x1eef0, 0x1eef1),
+    Range(0x1f000, 0x1f02b),
+    Range(0x1f030, 0x1f093),
+    Range(0x1f0a0, 0x1f0ae),
+    Range(0x1f0b1, 0x1f0bf),
+    Range(0x1f0c1, 0x1f0cf),
+    Range(0x1f0d1, 0x1f0f5),
+    Range(0x1f100, 0x1f10c),
+    Range(0x1f110, 0x1f12e),
+    Range(0x1f130, 0x1f16b),
+    Range(0x1f170, 0x1f1ac),
+    Range(0x1f1e6, 0x1f202),
+    Range(0x1f210, 0x1f23b),
+    Range(0x1f240, 0x1f248),
+    Range(0x1f250, 0x1f251),
+    Range(0x1f260, 0x1f265),
+    Range(0x1f300, 0x1f6d4),
+    Range(0x1f6e0, 0x1f6ec),
+    Range(0x1f6f0, 0x1f6f8),
+    Range(0x1f700, 0x1f773),
+    Range(0x1f780, 0x1f7d4),
+    Range(0x1f800, 0x1f80b),
+    Range(0x1f810, 0x1f847),
+    Range(0x1f850, 0x1f859),
+    Range(0x1f860, 0x1f887),
+    Range(0x1f890, 0x1f8ad),
+    Range(0x1f900, 0x1f90b),
+    Range(0x1f910, 0x1f93e),
+    Range(0x1f940, 0x1f94c),
+    Range(0x1f950, 0x1f96b),
+    Range(0x1f980, 0x1f997),
+    Range(0x1f9c0, 0x1f9c0),
+    Range(0x1f9d0, 0x1f9e6),
+    Range(0x20000, 0x2a6d6),
+    Range(0x2a700, 0x2b734),
+    Range(0x2b740, 0x2b81d),
+    Range(0x2b820, 0x2cea1),
+    Range(0x2ceb0, 0x2ebe0),
+    Range(0x2f800, 0x2fa1d),
   ];
-  final Range range = pickFromList(random, characterRanges);
+  final Range range = pickFromList<Range>(random, characterRanges);
   if (range.start == range.end)
     return range.start;
   return range.start + random.nextInt(range.end - range.start);

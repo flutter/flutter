@@ -12,25 +12,25 @@ class TestItem extends StatelessWidget {
   final double height;
   @override
   Widget build(BuildContext context) {
-    return new Container(
+    return Container(
       width: width,
       height: height,
       alignment: Alignment.center,
-      child: new Text('Item $item', textDirection: TextDirection.ltr),
+      child: Text('Item $item', textDirection: TextDirection.ltr),
     );
   }
 }
 
 Widget buildFrame({ int count, double width, double height, Axis scrollDirection }) {
-  return new Directionality(
+  return Directionality(
     textDirection: TextDirection.ltr,
-    child: new CustomScrollView(
+    child: CustomScrollView(
       scrollDirection: scrollDirection ?? Axis.vertical,
       slivers: <Widget>[
-        new SliverPrototypeExtentList(
-          prototypeItem: new TestItem(item: -1, width: width, height: height),
-          delegate: new SliverChildBuilderDelegate(
-            (BuildContext context, int index) => new TestItem(item: index),
+        SliverPrototypeExtentList(
+          prototypeItem: TestItem(item: -1, width: width, height: height),
+          delegate: SliverChildBuilderDelegate(
+            (BuildContext context, int index) => TestItem(item: index),
             childCount: count,
           ),
         ),
@@ -109,18 +109,18 @@ void main() {
   });
 
   testWidgets('SliverPrototypeExtentList first item is also the prototype', (WidgetTester tester) async {
-    final List<Widget> items = new List<Widget>.generate(10, (int index) {
-      return new TestItem(key: new ValueKey<int>(index), item: index, height: index == 0 ? 60.0 : null);
+    final List<Widget> items = List<Widget>.generate(10, (int index) {
+      return TestItem(key: ValueKey<int>(index), item: index, height: index == 0 ? 60.0 : null);
     }).toList();
 
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new CustomScrollView(
+        child: CustomScrollView(
           slivers: <Widget>[
-            new SliverPrototypeExtentList(
+            SliverPrototypeExtentList(
               prototypeItem: items[0],
-              delegate: new SliverChildBuilderDelegate(
+              delegate: SliverChildBuilderDelegate(
                 (BuildContext context, int index) => items[index],
                 childCount: 10,
               ),

@@ -20,7 +20,7 @@ class TestFlowDelegate extends FlowDelegate {
   void paintChildren(FlowPaintingContext context) {
     double dy = startOffset.value;
     for (int i = 0; i < context.childCount; ++i) {
-      context.paintChild(i, transform: new Matrix4.translationValues(0.0, dy, 0.0));
+      context.paintChild(i, transform: Matrix4.translationValues(0.0, dy, 0.0));
       dy += 0.75 * context.getChildSize(i).height;
     }
   }
@@ -47,28 +47,28 @@ class OpacityFlowDelegate extends FlowDelegate {
 
 void main() {
   testWidgets('Flow control test', (WidgetTester tester) async {
-    final AnimationController startOffset = new AnimationController.unbounded(
+    final AnimationController startOffset = AnimationController.unbounded(
       vsync: tester,
     );
     final List<int> log = <int>[];
 
     Widget buildBox(int i) {
-      return new GestureDetector(
+      return GestureDetector(
         onTap: () {
           log.add(i);
         },
-        child: new Container(
+        child: Container(
           width: 100.0,
           height: 100.0,
           color: const Color(0xFF0000FF),
-          child: new Text('$i', textDirection: TextDirection.ltr)
-        )
+          child: Text('$i', textDirection: TextDirection.ltr),
+        ),
       );
     }
 
     await tester.pumpWidget(
-      new Flow(
-        delegate: new TestFlowDelegate(startOffset: startOffset),
+      Flow(
+        delegate: TestFlowDelegate(startOffset: startOffset),
         children: <Widget>[
           buildBox(0),
           buildBox(1),
@@ -77,7 +77,7 @@ void main() {
           buildBox(4),
           buildBox(5),
           buildBox(6),
-        ]
+        ],
       )
     );
 
@@ -103,11 +103,11 @@ void main() {
   testWidgets('Flow opacity layer', (WidgetTester tester) async {
     const double opacity = 0.2;
     await tester.pumpWidget(
-      new Flow(
-        delegate: new OpacityFlowDelegate(opacity),
+      Flow(
+        delegate: OpacityFlowDelegate(opacity),
         children: <Widget>[
-          new Container(width: 100.0, height: 100.0),
-        ]
+          Container(width: 100.0, height: 100.0),
+        ],
       )
     );
     ContainerLayer layer = RendererBinding.instance.renderView.debugLayer;

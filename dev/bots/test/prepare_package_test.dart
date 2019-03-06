@@ -8,11 +8,11 @@ import 'dart:io' hide Platform;
 import 'dart:typed_data';
 
 import 'package:mockito/mockito.dart';
-import 'package:test/test.dart';
 import 'package:path/path.dart' as path;
 import 'package:platform/platform.dart' show FakePlatform;
 
 import '../prepare_package.dart';
+import 'common.dart';
 import 'fake_process_manager.dart';
 
 void main() {
@@ -20,15 +20,15 @@ void main() {
   test('Throws on missing executable', () async {
     // Uses a *real* process manager, since we want to know what happens if
     // it can't find an executable.
-    final ProcessRunner processRunner = new ProcessRunner(subprocessOutput: false);
+    final ProcessRunner processRunner = ProcessRunner(subprocessOutput: false);
     expect(
         expectAsync1((List<String> commandLine) async {
           return processRunner.runProcess(commandLine);
         })(<String>['this_executable_better_not_exist_2857632534321']),
-        throwsA(const isInstanceOf<ProcessRunnerException>()));
+        throwsA(isInstanceOf<PreparePackageException>()));
     try {
       await processRunner.runProcess(<String>['this_executable_better_not_exist_2857632534321']);
-    } on ProcessRunnerException catch (e) {
+    } on PreparePackageException catch (e) {
       expect(
         e.message,
         contains('Invalid argument(s): Cannot find executable for this_executable_better_not_exist_2857632534321.'),
@@ -36,38 +36,40 @@ void main() {
     }
   });
   for (String platformName in <String>['macos', 'linux', 'windows']) {
-    final FakePlatform platform = new FakePlatform(
+    final FakePlatform platform = FakePlatform(
       operatingSystem: platformName,
-      environment: <String, String>{},
+      environment: <String, String>{
+        'DEPOT_TOOLS': path.join('D:', 'depot_tools'),
+      },
     );
     group('ProcessRunner for $platform', () {
       test('Returns stdout', () async {
-        final FakeProcessManager fakeProcessManager = new FakeProcessManager();
+        final FakeProcessManager fakeProcessManager = FakeProcessManager();
         fakeProcessManager.fakeResults = <String, List<ProcessResult>>{
-          'echo test': <ProcessResult>[new ProcessResult(0, 0, 'output', 'error')],
+          'echo test': <ProcessResult>[ProcessResult(0, 0, 'output', 'error')],
         };
-        final ProcessRunner processRunner = new ProcessRunner(
+        final ProcessRunner processRunner = ProcessRunner(
             subprocessOutput: false, platform: platform, processManager: fakeProcessManager);
         final String output = await processRunner.runProcess(<String>['echo', 'test']);
         expect(output, equals('output'));
       });
       test('Throws on process failure', () async {
-        final FakeProcessManager fakeProcessManager = new FakeProcessManager();
+        final FakeProcessManager fakeProcessManager = FakeProcessManager();
         fakeProcessManager.fakeResults = <String, List<ProcessResult>>{
-          'echo test': <ProcessResult>[new ProcessResult(0, -1, 'output', 'error')],
+          'echo test': <ProcessResult>[ProcessResult(0, -1, 'output', 'error')],
         };
-        final ProcessRunner processRunner = new ProcessRunner(
+        final ProcessRunner processRunner = ProcessRunner(
             subprocessOutput: false, platform: platform, processManager: fakeProcessManager);
         expect(
             expectAsync1((List<String> commandLine) async {
               return processRunner.runProcess(commandLine);
             })(<String>['echo', 'test']),
-            throwsA(const isInstanceOf<ProcessRunnerException>()));
+            throwsA(isInstanceOf<PreparePackageException>()));
       });
     });
     group('ArchiveCreator for $platformName', () {
       ArchiveCreator creator;
-      Directory tmpDir;
+      Directory tempDir;
       Directory flutterDir;
       FakeProcessManager processManager;
       final List<List<String>> args = <List<String>>[];
@@ -75,19 +77,19 @@ void main() {
       String flutter;
 
       Future<Uint8List> fakeHttpReader(Uri url, {Map<String, String> headers}) {
-        return new Future<Uint8List>.value(new Uint8List(0));
+        return Future<Uint8List>.value(Uint8List(0));
       }
 
       setUp(() async {
-        processManager = new FakeProcessManager();
+        processManager = FakeProcessManager();
         args.clear();
         namedArgs.clear();
-        tmpDir = await Directory.systemTemp.createTemp('flutter_');
-        flutterDir = new Directory(path.join(tmpDir.path, 'flutter'));
+        tempDir = Directory.systemTemp.createTempSync('flutter_prepage_package_test.');
+        flutterDir = Directory(path.join(tempDir.path, 'flutter'));
         flutterDir.createSync(recursive: true);
-        creator = new ArchiveCreator(
-          tmpDir,
-          tmpDir,
+        creator = ArchiveCreator(
+          tempDir,
+          tempDir,
           testRef,
           Branch.dev,
           processManager: processManager,
@@ -99,24 +101,19 @@ void main() {
       });
 
       tearDown(() async {
-        // On Windows, the directory is locked and not able to be deleted yet. So
-        // we just leave some (very small, because we're not actually building
-        // archives here) trash around to be deleted at the next reboot.
-        if (!platform.isWindows) {
-          await tmpDir.delete(recursive: true);
-        }
+        tryToDelete(tempDir);
       });
 
       test('sets PUB_CACHE properly', () async {
-        final String createBase = path.join(tmpDir.absolute.path, 'create_');
+        final String createBase = path.join(tempDir.absolute.path, 'create_');
         final Map<String, List<ProcessResult>> calls = <String, List<ProcessResult>>{
           'git clone -b dev https://chromium.googlesource.com/external/github.com/flutter/flutter': null,
           'git reset --hard $testRef': null,
           'git remote set-url origin https://github.com/flutter/flutter.git': null,
-          'git describe --tags --abbrev=0': <ProcessResult>[new ProcessResult(0, 0, 'v1.2.3', '')],
+          'git describe --tags --exact-match $testRef': <ProcessResult>[ProcessResult(0, 0, 'v1.2.3', '')],
         };
         if (platform.isWindows) {
-          calls['7za x ${path.join(tmpDir.path, 'mingit.zip')}'] = null;
+          calls['7za x ${path.join(tempDir.path, 'mingit.zip')}'] = null;
         }
         calls.addAll(<String, List<ProcessResult>>{
           '$flutter doctor': null,
@@ -128,7 +125,7 @@ void main() {
           '$flutter create --template=plugin ${createBase}plugin': null,
           'git clean -f -X **/.packages': null,
         });
-        final String archiveName = path.join(tmpDir.absolute.path,
+        final String archiveName = path.join(tempDir.absolute.path,
             'flutter_${platformName}_v1.2.3-dev${platform.isLinux ? '.tar.xz' : '.zip'}');
         if (platform.isWindows) {
           calls['7za a -tzip -mx=9 $archiveName flutter'] = null;
@@ -151,15 +148,15 @@ void main() {
       });
 
       test('calls the right commands for archive output', () async {
-        final String createBase = path.join(tmpDir.absolute.path, 'create_');
+        final String createBase = path.join(tempDir.absolute.path, 'create_');
         final Map<String, List<ProcessResult>> calls = <String, List<ProcessResult>>{
           'git clone -b dev https://chromium.googlesource.com/external/github.com/flutter/flutter': null,
           'git reset --hard $testRef': null,
           'git remote set-url origin https://github.com/flutter/flutter.git': null,
-          'git describe --tags --abbrev=0': <ProcessResult>[new ProcessResult(0, 0, 'v1.2.3', '')],
+          'git describe --tags --exact-match $testRef': <ProcessResult>[ProcessResult(0, 0, 'v1.2.3', '')],
         };
         if (platform.isWindows) {
-          calls['7za x ${path.join(tmpDir.path, 'mingit.zip')}'] = null;
+          calls['7za x ${path.join(tempDir.path, 'mingit.zip')}'] = null;
         }
         calls.addAll(<String, List<ProcessResult>>{
           '$flutter doctor': null,
@@ -171,7 +168,7 @@ void main() {
           '$flutter create --template=plugin ${createBase}plugin': null,
           'git clean -f -X **/.packages': null,
         });
-        final String archiveName = path.join(tmpDir.absolute.path,
+        final String archiveName = path.join(tempDir.absolute.path,
             'flutter_${platformName}_v1.2.3-dev${platform.isLinux ? '.tar.xz' : '.zip'}');
         if (platform.isWindows) {
           calls['7za a -tzip -mx=9 $archiveName flutter'] = null;
@@ -181,9 +178,9 @@ void main() {
           calls['tar cJf $archiveName flutter'] = null;
         }
         processManager.fakeResults = calls;
-        creator = new ArchiveCreator(
-          tmpDir,
-          tmpDir,
+        creator = ArchiveCreator(
+          tempDir,
+          tempDir,
           testRef,
           Branch.dev,
           processManager: processManager,
@@ -199,12 +196,59 @@ void main() {
       test('throws when a command errors out', () async {
         final Map<String, List<ProcessResult>> calls = <String, List<ProcessResult>>{
           'git clone -b dev https://chromium.googlesource.com/external/github.com/flutter/flutter':
-              <ProcessResult>[new ProcessResult(0, 0, 'output1', '')],
-          'git reset --hard $testRef': <ProcessResult>[new ProcessResult(0, -1, 'output2', '')],
+              <ProcessResult>[ProcessResult(0, 0, 'output1', '')],
+          'git reset --hard $testRef': <ProcessResult>[ProcessResult(0, -1, 'output2', '')],
         };
         processManager.fakeResults = calls;
         expect(expectAsync0(creator.initializeRepo),
-            throwsA(const isInstanceOf<ProcessRunnerException>()));
+            throwsA(isInstanceOf<PreparePackageException>()));
+      });
+
+      test('non-strict mode calls the right commands', () async {
+        final String createBase = path.join(tempDir.absolute.path, 'create_');
+        final Map<String, List<ProcessResult>> calls = <String, List<ProcessResult>>{
+          'git clone -b dev https://chromium.googlesource.com/external/github.com/flutter/flutter': null,
+          'git reset --hard $testRef': null,
+          'git remote set-url origin https://github.com/flutter/flutter.git': null,
+          'git describe --tags --abbrev=0 $testRef': <ProcessResult>[ProcessResult(0, 0, 'v1.2.3', '')],
+        };
+        if (platform.isWindows) {
+          calls['7za x ${path.join(tempDir.path, 'mingit.zip')}'] = null;
+        }
+        calls.addAll(<String, List<ProcessResult>>{
+          '$flutter doctor': null,
+          '$flutter update-packages': null,
+          '$flutter precache': null,
+          '$flutter ide-config': null,
+          '$flutter create --template=app ${createBase}app': null,
+          '$flutter create --template=package ${createBase}package': null,
+          '$flutter create --template=plugin ${createBase}plugin': null,
+          'git clean -f -X **/.packages': null,
+        });
+        final String archiveName = path.join(tempDir.absolute.path,
+            'flutter_${platformName}_v1.2.3-dev${platform.isLinux ? '.tar.xz' : '.zip'}');
+        if (platform.isWindows) {
+          calls['7za a -tzip -mx=9 $archiveName flutter'] = null;
+        } else if (platform.isMacOS) {
+          calls['zip -r -9 $archiveName flutter'] = null;
+        } else if (platform.isLinux) {
+          calls['tar cJf $archiveName flutter'] = null;
+        }
+        processManager.fakeResults = calls;
+        creator = ArchiveCreator(
+          tempDir,
+          tempDir,
+          testRef,
+          Branch.dev,
+          strict: false,
+          processManager: processManager,
+          subprocessOutput: false,
+          platform: platform,
+          httpReader: fakeHttpReader,
+        );
+        await creator.initializeRepo();
+        await creator.createArchive();
+        processManager.verifyCalls(calls.keys.toList());
       });
     });
 
@@ -213,18 +257,12 @@ void main() {
       Directory tempDir;
 
       setUp(() async {
-        processManager = new FakeProcessManager();
-        tempDir = await Directory.systemTemp.createTemp('flutter_');
-        tempDir.createSync();
+        processManager = FakeProcessManager();
+        tempDir = Directory.systemTemp.createTempSync('flutter_prepage_package_test.');
       });
 
       tearDown(() async {
-        // On Windows, the directory is locked and not able to be deleted yet. So
-        // we just leave some (very small, because we're not actually building
-        // archives here) trash around to be deleted at the next reboot.
-        if (!platform.isWindows) {
-          await tempDir.delete(recursive: true);
-        }
+        tryToDelete(tempDir);
       });
 
       test('calls the right processes', () async {
@@ -232,7 +270,7 @@ void main() {
         final String archiveName = platform.isLinux ? 'archive.tar.xz' : 'archive.zip';
         final String archiveMime = platform.isLinux ? 'application/x-gtar' : 'application/zip';
         final String archivePath = path.join(tempDir.absolute.path, archiveName);
-        final String gsArchivePath = 'gs://flutter_infra/releases/release/$platformName/$archiveName';
+        final String gsArchivePath = 'gs://flutter_infra/releases/stable/$platformName/$archiveName';
         final String jsonPath = path.join(tempDir.absolute.path, releasesName);
         final String gsJsonPath = 'gs://flutter_infra/releases/$releasesName';
         final String releasesJson = '''{
@@ -247,40 +285,47 @@ void main() {
       "channel": "dev",
       "version": "v0.2.3",
       "release_date": "2018-03-20T01:47:02.851729Z",
-      "archive": "dev/$platformName/flutter_${platformName}_v0.2.3-dev.zip"
+      "archive": "dev/$platformName/flutter_${platformName}_v0.2.3-dev.zip",
+      "sha256": "4fe85a822093e81cb5a66c7fc263f68de39b5797b294191b6d75e7afcc86aff8"
     },
     {
       "hash": "b9bd51cc36b706215915711e580851901faebb40",
       "channel": "beta",
       "version": "v0.2.2",
       "release_date": "2018-03-16T18:48:13.375013Z",
-      "archive": "dev/$platformName/flutter_${platformName}_v0.2.2-dev.zip"
+      "archive": "dev/$platformName/flutter_${platformName}_v0.2.2-dev.zip",
+      "sha256": "6073331168cdb37a4637a5dc073d6a7ef4e466321effa2c529fa27d2253a4d4b"
     },
     {
       "hash": "$testRef",
-      "channel": "release",
+      "channel": "stable",
       "version": "v0.0.0",
       "release_date": "2018-03-20T01:47:02.851729Z",
-      "archive": "release/$platformName/flutter_${platformName}_v0.0.0-dev.zip"
+      "archive": "stable/$platformName/flutter_${platformName}_v0.0.0-dev.zip",
+      "sha256": "5dd34873b3a3e214a32fd30c2c319a0f46e608afb72f0d450b2d621a6d02aebd"
     }
   ]
 }
 ''';
-        new File(jsonPath).writeAsStringSync(releasesJson);
+        File(jsonPath).writeAsStringSync(releasesJson);
+        File(archivePath).writeAsStringSync('archive contents');
+        final String gsutilCall = platform.isWindows
+            ? 'python ${path.join("D:", "depot_tools", "gsutil.py")}'
+            : 'gsutil.py';
         final Map<String, List<ProcessResult>> calls = <String, List<ProcessResult>>{
-          'gsutil rm $gsArchivePath': null,
-          'gsutil -h Content-Type:$archiveMime cp $archivePath $gsArchivePath': null,
-          'gsutil cp $gsJsonPath $jsonPath': null,
-          'gsutil rm $gsJsonPath': null,
-          'gsutil -h Content-Type:application/json cp $jsonPath $gsJsonPath': null,
+          '$gsutilCall -- rm $gsArchivePath': null,
+          '$gsutilCall -- -h Content-Type:$archiveMime cp $archivePath $gsArchivePath': null,
+          '$gsutilCall -- cp $gsJsonPath $jsonPath': null,
+          '$gsutilCall -- rm $gsJsonPath': null,
+          '$gsutilCall -- -h Content-Type:application/json cp $jsonPath $gsJsonPath': null,
         };
         processManager.fakeResults = calls;
-        final File outputFile = new File(path.join(tempDir.absolute.path, archiveName));
+        final File outputFile = File(path.join(tempDir.absolute.path, archiveName));
         assert(tempDir.existsSync());
-        final ArchivePublisher publisher = new ArchivePublisher(
+        final ArchivePublisher publisher = ArchivePublisher(
           tempDir,
           testRef,
-          Branch.release,
+          Branch.stable,
           'v1.2.3',
           outputFile,
           processManager: processManager,
@@ -290,13 +335,14 @@ void main() {
         assert(tempDir.existsSync());
         await publisher.publishArchive();
         processManager.verifyCalls(calls.keys.toList());
-        final File releaseFile = new File(jsonPath);
+        final File releaseFile = File(jsonPath);
         expect(releaseFile.existsSync(), isTrue);
         final String contents = releaseFile.readAsStringSync();
         // Make sure new data is added.
         expect(contents, contains('"hash": "$testRef"'));
-        expect(contents, contains('"channel": "release"'));
-        expect(contents, contains('"archive": "release/$platformName/$archiveName"'));
+        expect(contents, contains('"channel": "stable"'));
+        expect(contents, contains('"archive": "stable/$platformName/$archiveName"'));
+        expect(contents, contains('"sha256": "f69f4865f861193a91d1c5544a894167a7137b788d10bac8edbf5d095f45cb4d"'));
         // Make sure existing entries are preserved.
         expect(contents, contains('"hash": "5a58b36e36b8d7aace89d3950e6deb307956a6a0"'));
         expect(contents, contains('"hash": "b9bd51cc36b706215915711e580851901faebb40"'));
@@ -310,10 +356,10 @@ void main() {
         // Make sure the new entry is first (and hopefully it takes less than a
         // minute to go from publishArchive above to this line!).
         expect(
-          new DateTime.now().difference(DateTime.parse(releases[0]['release_date'])),
+          DateTime.now().difference(DateTime.parse(releases[0]['release_date'])),
           lessThan(const Duration(minutes: 1)),
         );
-        const JsonEncoder encoder = const JsonEncoder.withIndent('  ');
+        const JsonEncoder encoder = JsonEncoder.withIndent('  ');
         expect(contents, equals(encoder.convert(jsonData)));
       });
     });
