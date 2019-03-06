@@ -391,9 +391,9 @@ void _validateFonts(YamlList fonts, List<String> errors) {
   if (fonts == null) {
     return;
   }
-  final Set<int> fontWeights = Set<int>.from(const <int>[
+  const Set<int> fontWeights = <int>{
     100, 200, 300, 400, 500, 600, 700, 800, 900,
-  ]);
+  };
   for (final YamlMap fontMap in fonts) {
     for (dynamic key in fontMap.keys.where((dynamic key) => key != 'family' && key != 'fonts')) {
       errors.add('Unexpected child "$key" found under "fonts".');

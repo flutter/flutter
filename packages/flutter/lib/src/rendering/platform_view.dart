@@ -481,7 +481,7 @@ class _AndroidViewGestureRecognizer extends OneSequenceGestureRecognizer {
 
   // Pointer for which we have already won the arena, events for pointers in this set are
   // immediately dispatched to the Android view.
-  final Set<int> forwardedPointers = Set<int>();
+  final Set<int> forwardedPointers = <int>{};
 
   // We use OneSequenceGestureRecognizers as they support gesture arena teams.
   // TODO(amirh): get a list of GestureRecognizers here.

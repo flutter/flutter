@@ -200,7 +200,7 @@ class UpdatePackagesCommand extends FlutterCommand {
       // First, collect up the explicit dependencies:
       final List<PubspecYaml> pubspecs = <PubspecYaml>[];
       final Map<String, PubspecDependency> dependencies = <String, PubspecDependency>{};
-      final Set<String> specialDependencies = Set<String>();
+      final Set<String> specialDependencies = <String>{};
       for (Directory directory in packages) { // these are all the directories with pubspec.yamls we care about
         printTrace('Reading pubspec.yaml from: ${directory.path}');
         PubspecYaml pubspec;
@@ -279,7 +279,7 @@ class UpdatePackagesCommand extends FlutterCommand {
         for (PubspecDependency dependency in pubspec.dependencies) {
           if (dependency.kind == DependencyKind.normal) {
             tree._versions[package] = version;
-            tree._dependencyTree[package] ??= Set<String>();
+            tree._dependencyTree[package] ??= <String>{};
             tree._dependencyTree[package].add(dependency.name);
           }
         }
@@ -341,7 +341,7 @@ class UpdatePackagesCommand extends FlutterCommand {
       throwToolExit('Package $to not found in the dependency tree.');
 
     final Queue<_DependencyLink> traversalQueue = Queue<_DependencyLink>();
-    final Set<String> visited = Set<String>();
+    final Set<String> visited = <String>{};
     final List<_DependencyLink> paths = <_DependencyLink>[];
 
     traversalQueue.addFirst(_DependencyLink(from: null, to: from));
@@ -625,8 +625,8 @@ class PubspecYaml {
   void apply(PubDependencyTree versions, Set<String> specialDependencies) {
     assert(versions != null);
     final List<String> output = <String>[]; // the string data to output to the file, line by line
-    final Set<String> directDependencies = Set<String>(); // packages this pubspec directly depends on (i.e. not transitive)
-    final Set<String> devDependencies = Set<String>();
+    final Set<String> directDependencies = <String>{}; // packages this pubspec directly depends on (i.e. not transitive)
+    final Set<String> devDependencies = <String>{};
     Section section = Section.other; // the section we're currently handling
 
     // the line number where we're going to insert the transitive dependencies.
@@ -723,8 +723,8 @@ class PubspecYaml {
     final List<String> transitiveDevDependencyOutput = <String>[];
 
     // Which dependencies we need to handle for the transitive and dev dependency sections.
-    final Set<String> transitiveDependencies = Set<String>();
-    final Set<String> transitiveDevDependencies = Set<String>();
+    final Set<String> transitiveDependencies = <String>{};
+    final Set<String> transitiveDevDependencies = <String>{};
 
     // Merge the lists of dependencies we've seen in this file from dependencies, dev dependencies,
     // and the dependencies we know this file mentions that are already pinned
@@ -735,7 +735,7 @@ class PubspecYaml {
 
     // Create a new set to hold the list of packages we've already processed, so
     // that we don't redundantly process them multiple times.
-    final Set<String> done = Set<String>();
+    final Set<String> done = <String>{};
     for (String package in directDependencies)
       transitiveDependencies.addAll(versions.getTransitiveDependenciesFor(package, seen: done, exclude: implied));
     for (String package in devDependencies)
@@ -752,7 +752,7 @@ class PubspecYaml {
       transitiveDevDependencyOutput.add('  $package: ${versions.versionFor(package)} $kTransitiveMagicString');
 
     // Build a sorted list of all dependencies for the checksum.
-    final Set<String> checksumDependencies = Set<String>()
+    final Set<String> checksumDependencies = <String>{}
       ..addAll(directDependencies)
       ..addAll(devDependencies)
       ..addAll(transitiveDependenciesAsList)
