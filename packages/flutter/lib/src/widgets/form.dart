@@ -162,7 +162,7 @@ class _FormScope extends InheritedWidget {
     Key key,
     Widget child,
     FormState formState,
-    int generation
+    int generation,
   }) : _formState = formState,
        _generation = generation,
        super(key: key, child: child);
@@ -254,7 +254,7 @@ class FormField<T> extends StatefulWidget {
   /// If true, this form field will validate and update its error text
   /// immediately after every change. Otherwise, you must call
   /// [FormFieldState.validate] to validate. If part of a [Form] that
-  /// autovalidates, this value will be ignored.
+  /// auto-validates, this value will be ignored.
   final bool autovalidate;
 
   /// Whether the form is able to receive user input.

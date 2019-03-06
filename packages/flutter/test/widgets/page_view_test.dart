@@ -172,7 +172,7 @@ void main() {
           child: PageView(
             children: kStates.map<Widget>((String state) => Text(state)).toList(),
           ),
-        )
+        ),
       ),
     ));
 
@@ -332,7 +332,7 @@ void main() {
     final List<int> log = <int>[];
     final PageController controller = PageController(viewportFraction: 0.9);
 
-    Widget build(PageController controller, {Size size}) {
+    Widget build(PageController controller, { Size size }) {
       final Widget pageView = Directionality(
         textDirection: TextDirection.ltr,
         child: PageView(
@@ -690,7 +690,7 @@ void main() {
               child: Text('Page #$i'),
               container: true,
             );
-          })
+          }),
         ),
     ));
     expect(controller.page, 0);

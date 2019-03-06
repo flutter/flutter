@@ -502,9 +502,12 @@ example:org-dartlang-app:/
   });
 }
 
-Future<void> _recompile(StreamController<List<int>> streamController,
-  ResidentCompiler generator, MockStdIn mockFrontendServerStdIn,
-  String mockCompilerOutput) async {
+Future<void> _recompile(
+  StreamController<List<int>> streamController,
+  ResidentCompiler generator,
+  MockStdIn mockFrontendServerStdIn,
+  String mockCompilerOutput,
+) async {
   // Put content into the output stream after generator.recompile gets
   // going few lines below, resets completer.
   scheduleMicrotask(() {
@@ -565,12 +568,12 @@ class MockStdIn extends Mock implements IOSink {
   }
 
   @override
-  void write([Object o = '']) {
+  void write([ Object o = '' ]) {
     _stdInWrites.write(o);
   }
 
   @override
-  void writeln([Object o = '']) {
+  void writeln([ Object o = '' ]) {
     _stdInWrites.writeln(o);
   }
 }

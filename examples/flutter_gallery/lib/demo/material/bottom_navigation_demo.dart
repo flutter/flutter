@@ -96,7 +96,7 @@ class CustomInactiveIcon extends StatelessWidget {
       height: iconTheme.size - 8.0,
       decoration: BoxDecoration(
         border: Border.all(color: iconTheme.color, width: 2.0),
-      )
+      ),
     );
   }
 }
@@ -150,7 +150,7 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo>
         title: 'Event',
         color: Colors.pink,
         vsync: this,
-      )
+      ),
     ];
 
     _navigationViews[_currentIndex].controller.value = 1.0;
@@ -189,6 +189,7 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo>
           .toList(),
       currentIndex: _currentIndex,
       type: _type,
+      //iconSize: 4.0,
       onTap: (int index) {
         setState(() {
           _navigationViews[_currentIndex].controller.reverse();
@@ -217,13 +218,13 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo>
               const PopupMenuItem<BottomNavigationBarType>(
                 value: BottomNavigationBarType.shifting,
                 child: Text('Shifting'),
-              )
+              ),
             ],
-          )
+          ),
         ],
       ),
       body: Center(
-        child: _buildTransitionsStack()
+        child: _buildTransitionsStack(),
       ),
       bottomNavigationBar: botNavBar,
     );

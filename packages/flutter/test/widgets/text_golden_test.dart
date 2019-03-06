@@ -160,7 +160,7 @@ void main() {
                 style: TextStyle(
                   color: translucentGreen,
                   background: Paint()
-                    ..color = red.withOpacity(0.5)
+                    ..color = red.withOpacity(0.5),
                 ),
                 children: <TextSpan>[
                   TextSpan(
@@ -168,8 +168,8 @@ void main() {
                     style: TextStyle(
                       color: translucentDarkRed,
                       background: Paint()
-                        ..color = blue.withOpacity(0.5)
-                    )
+                        ..color = blue.withOpacity(0.5),
+                    ),
                   ),
                 ],
               ),
@@ -211,7 +211,7 @@ void main() {
                 ),
               ),
             ),
-          )
+          ),
         )
     );
 
@@ -270,7 +270,7 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile('text_golden.Strut.1.png'),
+      matchesGoldenFile('text_golden.Strut.1.1.png'),
     );
   }, skip: true); // Should only be on linux (skip: !Platform.isLinux).
                   // Disabled for now until font inconsistency is resolved.
@@ -299,7 +299,7 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile('text_golden.Strut.2.png'),
+      matchesGoldenFile('text_golden.Strut.2.1.png'),
     );
   }, skip: true); // Should only be on linux (skip: !Platform.isLinux).
                   // Disabled for now until font inconsistency is resolved.
@@ -319,7 +319,7 @@ void main() {
                 text: 'Hello\n',
                 style: TextStyle(
                   color: Colors.red,
-                  fontSize: 30
+                  fontSize: 30,
                 ),
                 children: <TextSpan>[
                   TextSpan(
@@ -351,7 +351,7 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile('text_golden.Strut.3.png'),
+      matchesGoldenFile('text_golden.Strut.3.1.png'),
     );
   }, skip: true); // Should only be on linux (skip: !Platform.isLinux).
                   // Disabled for now until font inconsistency is resolved.
@@ -376,7 +376,7 @@ void main() {
                   'FakeFont 2',
                   'EvilFont 3',
                   'Nice Font 4',
-                  'ahem'
+                  'ahem',
                 ],
                 fontSize: 14,
               ),
@@ -387,7 +387,7 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile('text_golden.Strut.4.png'),
+      matchesGoldenFile('text_golden.Strut.4.1.png'),
     );
   }, skip: true); // Should only be on linux (skip: !Platform.isLinux).
                   // Disabled for now until font inconsistency is resolved.
@@ -407,7 +407,7 @@ void main() {
                 text: 'Hello\n',
                 style: TextStyle(
                   color: Colors.red,
-                  fontSize: 30
+                  fontSize: 30,
                 ),
                 children: <TextSpan>[
                   TextSpan(
@@ -439,7 +439,7 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile('text_golden.StrutForce.1.png'),
+      matchesGoldenFile('text_golden.StrutForce.1.1.png'),
     );
   }, skip: true); // Should only be on linux (skip: !Platform.isLinux).
                   // Disabled for now until font inconsistency is resolved.

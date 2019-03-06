@@ -19,6 +19,7 @@ import 'ios/plist_utils.dart' as plist;
 import 'ios/xcodeproj.dart' as xcode;
 import 'plugins.dart';
 import 'template.dart';
+import 'web/web_device.dart';
 
 /// Represents the contents of a Flutter project at the specified [directory].
 ///
@@ -95,6 +96,9 @@ class FlutterProject {
   /// The Android sub project of this project.
   AndroidProject get android => AndroidProject._(this);
 
+  /// The web sub project of this project.
+  WebProject get web => WebProject._(this);
+
   /// The `pubspec.yaml` file of this project.
   File get pubspecFile => directory.childFile('pubspec.yaml');
 
@@ -150,6 +154,9 @@ class FlutterProject {
     refreshPluginsList(this);
     await android.ensureReadyForPlatformSpecificTooling();
     await ios.ensureReadyForPlatformSpecificTooling();
+    if (flutterWebEnabled) {
+      await web.ensureReadyForPlatformSpecificTooling();
+    }
     await injectPlugins(this);
   }
 
@@ -325,7 +332,7 @@ class IosProject {
       target,
       <String, dynamic>{
         'projectName': parent.manifest.appName,
-        'iosIdentifier': parent.manifest.iosBundleIdentifier
+        'iosIdentifier': parent.manifest.iosBundleIdentifier,
       },
       printStatusWhenWriting: false,
       overwriteExisting: true,
@@ -452,6 +459,31 @@ class AndroidProject {
       overwriteExisting: true,
     );
   }
+}
+
+/// Represents the web sub-project of a Flutter project.
+class WebProject {
+  WebProject._(this.parent);
+
+  final FlutterProject parent;
+
+   Future<void> ensureReadyForPlatformSpecificTooling() async {
+    /// Generate index.html in build/web. Eventually we could support
+    /// a custom html under the web sub directory.
+    final Directory outputDir = fs.directory(getWebBuildDirectory());
+    if (!outputDir.existsSync()) {
+      outputDir.createSync(recursive: true);
+    }
+    final Template template = Template.fromName('web/index.html.tmpl');
+    template.render(
+      outputDir,
+      <String, dynamic>{
+        'appName': parent.manifest.appName,
+      },
+      printStatusWhenWriting: false,
+      overwriteExisting: true,
+    );
+   }
 }
 
 /// Deletes [directory] with all content.

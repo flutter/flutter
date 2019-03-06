@@ -8,7 +8,7 @@ import 'package:flutter/foundation.dart';
 
 import 'keyboard_key.dart';
 import 'raw_keyboard_android.dart';
-import 'raw_keyboard_fuschia.dart';
+import 'raw_keyboard_fuchsia.dart';
 import 'system_channels.dart';
 
 /// An enum describing the side of the keyboard that a key is on, to allow
@@ -121,7 +121,7 @@ abstract class RawKeyEventData {
   /// side of the keyboard. Defaults to checking for the key being down on
   /// either side of the keyboard. If there is only one instance of the key on
   /// the keyboard, then [side] is ignored.
-  bool isModifierPressed(ModifierKey key, {KeyboardSide side = KeyboardSide.any});
+  bool isModifierPressed(ModifierKey key, { KeyboardSide side = KeyboardSide.any });
 
   /// Returns a [KeyboardSide] enum value that describes which side or sides of
   /// the given keyboard modifier key were pressed at the time of this event.

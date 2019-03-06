@@ -99,7 +99,7 @@ void main() {
 
         expect(actualDecoration.color, const Color(0xFF000000));
         expect(actualDecoration.boxShadow, null);
-      }
+      },
     );
 
     testWidgets('animations work with curves test', (WidgetTester tester) async {

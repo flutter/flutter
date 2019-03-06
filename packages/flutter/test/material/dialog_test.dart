@@ -11,7 +11,7 @@ import 'package:matcher/matcher.dart';
 
 import '../widgets/semantics_tester.dart';
 
-MaterialApp _appWithAlertDialog(WidgetTester tester, AlertDialog dialog, {ThemeData theme}) {
+MaterialApp _appWithAlertDialog(WidgetTester tester, AlertDialog dialog, { ThemeData theme }) {
   return MaterialApp(
       theme: theme,
       home: Material(
@@ -27,11 +27,11 @@ MaterialApp _appWithAlertDialog(WidgetTester tester, AlertDialog dialog, {ThemeD
                         return dialog;
                     },
                   );
-                }
-              )
+                },
+              ),
             );
           }
-        )
+        ),
       ),
   );
 }
@@ -60,8 +60,8 @@ void main() {
             onPressed: () {
               didPressOk = true;
             },
-            child: const Text('OK')
-        )
+            child: const Text('OK'),
+        ),
       ],
     );
     await tester.pumpWidget(_appWithAlertDialog(tester, dialog));
@@ -463,7 +463,7 @@ void main() {
 
     expect(semantics, isNot(includesNodeWith(
         label: 'Title',
-        flags: <SemanticsFlag>[SemanticsFlag.namesRoute]
+        flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
     )));
 
     await tester.tap(find.text('X'));

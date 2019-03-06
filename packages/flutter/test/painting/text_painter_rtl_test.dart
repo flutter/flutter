@@ -406,7 +406,7 @@ void main() {
       <TextBox>[TextBox.fromLTRBD(50.0, 28.0, 60.0, 38.0, TextDirection.ltr)],
       <TextBox>[TextBox.fromLTRBD(60.0, 28.0, 70.0, 38.0, TextDirection.ltr)],
       <TextBox>[TextBox.fromLTRBD(70.0, 28.0, 80.0, 38.0, TextDirection.ltr)],
-      <TextBox>[TextBox.fromLTRBD(80.0, 28.0, 90.0, 38.0, TextDirection.ltr)]
+      <TextBox>[TextBox.fromLTRBD(80.0, 28.0, 90.0, 38.0, TextDirection.ltr)],
     ]);
   }, skip: skipTestsWithKnownBugs);
 

@@ -164,7 +164,7 @@ abstract class PaintPattern {
   ///
   /// Any calls made between the last matched call (if any) and the
   /// [Canvas.clipPath] call are ignored.
-  void clipPath({Matcher pathMatcher});
+  void clipPath({ Matcher pathMatcher });
 
   /// Indicates that a rectangle is expected next.
   ///
@@ -571,8 +571,7 @@ class _TestRecordingCanvasPaintsCountMatcher extends _TestRecordingCanvasMatcher
   }
 
   @override
-  bool _evaluatePredicates(Iterable<RecordedInvocation> calls,
-      StringBuffer description) {
+  bool _evaluatePredicates(Iterable<RecordedInvocation> calls, StringBuffer description) {
     int count = 0;
     for(RecordedInvocation call in calls) {
       if (call.invocation.isMethod && call.invocation.memberName == _methodName) {
@@ -710,7 +709,7 @@ class _TestRecordingCanvasPatternMatcher extends _TestRecordingCanvasMatcher imp
   }
 
   @override
-  void clipPath({Matcher pathMatcher}) {
+  void clipPath({ Matcher pathMatcher }) {
     _predicates.add(_FunctionPaintPredicate(#clipPath, <dynamic>[pathMatcher]));
   }
 
@@ -868,7 +867,7 @@ abstract class _PaintPredicate {
 abstract class _DrawCommandPaintPredicate extends _PaintPredicate {
   _DrawCommandPaintPredicate(
     this.symbol, this.name, this.argumentCount, this.paintArgumentIndex,
-    { this.color, this.strokeWidth, this.hasMaskFilter, this.style }
+    { this.color, this.strokeWidth, this.hasMaskFilter, this.style, }
   );
 
   final Symbol symbol;
@@ -940,7 +939,7 @@ class _OneParameterPaintPredicate<T> extends _DrawCommandPaintPredicate {
     @required Color color,
     @required double strokeWidth,
     @required bool hasMaskFilter,
-    @required PaintingStyle style
+    @required PaintingStyle style,
   }) : super(
     symbol, name, 2, 1, color: color, strokeWidth: strokeWidth, hasMaskFilter: hasMaskFilter, style: style);
 
@@ -974,7 +973,7 @@ class _TwoParameterPaintPredicate<T1, T2> extends _DrawCommandPaintPredicate {
     @required Color color,
     @required double strokeWidth,
     @required bool hasMaskFilter,
-    @required PaintingStyle style
+    @required PaintingStyle style,
   }) : super(
     symbol, name, 3, 2, color: color, strokeWidth: strokeWidth, hasMaskFilter: hasMaskFilter, style: style);
 

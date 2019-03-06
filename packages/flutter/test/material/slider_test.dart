@@ -558,8 +558,8 @@ void main() {
       final ValueChanged<double> onChanged = !enabled
           ? null
           : (double d) {
-              value = d;
-            };
+        value = d;
+      };
       return Directionality(
         textDirection: TextDirection.ltr,
         child: MediaQuery(
@@ -978,6 +978,55 @@ void main() {
     await tester.pumpAndSettle();
   });
 
+  testWidgets('Tick marks are skipped when they are too dense', (WidgetTester tester) async {
+    Widget buildSlider({
+      int divisions,
+    }) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: MediaQueryData.fromWindow(window),
+          child: Material(
+            child: Center(
+              child: Slider(
+                min: 0.0,
+                max: 100.0,
+                divisions: divisions,
+                value: 0.25,
+                onChanged: (double newValue) { },
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Pump a slider with a reasonable amount of divisions to verify that the
+    // tick marks are drawn when the number of tick marks is not too dense.
+    await tester.pumpWidget(
+      buildSlider(
+        divisions: 4,
+      ),
+    );
+
+    final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
+
+    // 5 tick marks and a thumb.
+    expect(sliderBox, paintsExactlyCountTimes(#drawCircle, 6));
+
+    // 200 divisions will produce a tick interval off less than 6,
+    // which would be too dense to draw.
+    await tester.pumpWidget(
+      buildSlider(
+        divisions: 200,
+      ),
+    );
+
+    // No tick marks are drawn because they are too dense, but the thumb is
+    // still drawn.
+    expect(sliderBox, paintsExactlyCountTimes(#drawCircle, 1));
+  });
+
   testWidgets('Slider has correct animations when reparented', (WidgetTester tester) async {
     final Key sliderKey = GlobalKey(debugLabel: 'A');
     double value = 0.0;
@@ -1256,7 +1305,7 @@ void main() {
     );
     SliderThemeData theme = baseTheme.sliderTheme;
     double value = 0.45;
-    Widget buildApp({SliderThemeData sliderTheme, int divisions, bool enabled = true}) {
+    Widget buildApp({ SliderThemeData sliderTheme, int divisions, bool enabled = true }) {
       final ValueChanged<double> onChanged = enabled ? (double d) => value = d : null;
       return Directionality(
         textDirection: TextDirection.ltr,

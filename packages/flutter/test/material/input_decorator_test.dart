@@ -268,6 +268,39 @@ void main() {
     expect(tester.getBottomLeft(find.text('label')).dy, tester.getBottomLeft(find.text('hint')).dy);
   });
 
+  testWidgets('InputDecorator alignLabelWithHint for multiline TextField no-strut', (WidgetTester tester) async {
+    Widget buildFrame(bool alignLabelWithHint) {
+      return MaterialApp(
+        home: Material(
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: TextField(
+              maxLines: 8,
+              decoration: InputDecoration(
+                labelText: 'label',
+                alignLabelWithHint: alignLabelWithHint,
+                hintText: 'hint',
+              ),
+              strutStyle: StrutStyle.disabled,
+            ),
+          ),
+        ),
+      );
+    }
+
+    // alignLabelWithHint: false centers the label in the TextField
+    await tester.pumpWidget(buildFrame(false));
+    await tester.pumpAndSettle();
+    expect(tester.getTopLeft(find.text('label')).dy, 76.0);
+    expect(tester.getBottomLeft(find.text('label')).dy, 92.0);
+
+    // alignLabelWithHint: true aligns the label with the hint.
+    await tester.pumpWidget(buildFrame(true));
+    await tester.pumpAndSettle();
+    expect(tester.getTopLeft(find.text('label')).dy, tester.getTopLeft(find.text('hint')).dy);
+    expect(tester.getBottomLeft(find.text('label')).dy, tester.getBottomLeft(find.text('hint')).dy);
+  });
+
   testWidgets('InputDecorator alignLabelWithHint for multiline TextField', (WidgetTester tester) async {
     Widget buildFrame(bool alignLabelWithHint) {
       return MaterialApp(
@@ -1597,7 +1630,7 @@ void main() {
       return tester.firstWidget<AnimatedDefaultTextStyle>(
         find.ancestor(
           of: find.text('label'),
-          matching: find.byType(AnimatedDefaultTextStyle)
+          matching: find.byType(AnimatedDefaultTextStyle),
         )
       ).style;
     }

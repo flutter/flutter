@@ -31,13 +31,13 @@ void main() {
                 key: popupMenuButtonKey,
                 itemBuilder: (BuildContext context) {
                   return <PopupMenuItem<String>>[
-                    const PopupMenuItem<String>(child: Text('menuItem'))
+                    const PopupMenuItem<String>(child: Text('menuItem')),
                   ];
-                }
+                },
               ),
-            ]
-          )
-        )
+            ],
+          ),
+        ),
       )
     );
 
@@ -100,14 +100,14 @@ void main() {
                   key: popupMenuButtonKey,
                   itemBuilder: (BuildContext context) {
                     return <PopupMenuItem<String>>[
-                      const PopupMenuItem<String>(child: Text('menuItem'))
+                      const PopupMenuItem<String>(child: Text('menuItem')),
                     ];
-                  }
+                  },
                 ),
-              ]
-            )
-          )
-        )
+              ],
+            ),
+          ),
+        ),
       )
     );
 
@@ -137,11 +137,11 @@ void main() {
                       child: Text('menuItem'),
                     ),
                   ],
-                )
-              ]
-            )
-          )
-        )
+                ),
+              ],
+            ),
+          ),
+        ),
       )
     );
 
@@ -172,10 +172,10 @@ void main() {
                     child: const Text('SHOW'),
                   );
                 }
-              )
-            )
-          )
-        )
+              ),
+            ),
+          ),
+        ),
       )
     );
 
@@ -209,10 +209,10 @@ void main() {
                     child: const Text('SHOW'),
                   );
                 }
-              )
-            )
-          )
-        )
+              ),
+            ),
+          ),
+        ),
       )
     );
 
@@ -666,6 +666,7 @@ class _TextStyleProxy implements TextStyle {
 
   // Do make sure that all the properties correctly forward to the _delegate.
   @override Color get color => _delegate.color;
+  @override Color get backgroundColor => _delegate.backgroundColor;
   @override String get debugLabel => _delegate.debugLabel;
   @override TextDecoration get decoration => _delegate.decoration;
   @override Color get decorationColor => _delegate.decorationColor;
@@ -686,11 +687,11 @@ class _TextStyleProxy implements TextStyle {
   @override List<Shadow> get shadows => _delegate.shadows;
 
   @override
-  String toString({DiagnosticLevel minLevel = DiagnosticLevel.debug}) =>
+  String toString({ DiagnosticLevel minLevel = DiagnosticLevel.debug }) =>
       super.toString();
 
   @override
-  DiagnosticsNode toDiagnosticsNode({String name, DiagnosticsTreeStyle style}) {
+  DiagnosticsNode toDiagnosticsNode({ String name, DiagnosticsTreeStyle style }) {
     throw UnimplementedError();
   }
 
@@ -700,7 +701,7 @@ class _TextStyleProxy implements TextStyle {
   }
 
   @override
-  TextStyle apply({Color color, TextDecoration decoration, Color decorationColor, TextDecorationStyle decorationStyle, String fontFamily, List<String> fontFamilyFallback, double fontSizeFactor = 1.0, double fontSizeDelta = 0.0, int fontWeightDelta = 0, double letterSpacingFactor = 1.0, double letterSpacingDelta = 0.0, double wordSpacingFactor = 1.0, double wordSpacingDelta = 0.0, double heightFactor = 1.0, double heightDelta = 0.0}) {
+  TextStyle apply({ Color color, Color backgroundColor, TextDecoration decoration, Color decorationColor, TextDecorationStyle decorationStyle, String fontFamily, List<String> fontFamilyFallback, double fontSizeFactor = 1.0, double fontSizeDelta = 0.0, int fontWeightDelta = 0, double letterSpacingFactor = 1.0, double letterSpacingDelta = 0.0, double wordSpacingFactor = 1.0, double wordSpacingDelta = 0.0, double heightFactor = 1.0, double heightDelta = 0.0 }) {
     throw UnimplementedError();
   }
 
@@ -710,22 +711,22 @@ class _TextStyleProxy implements TextStyle {
   }
 
   @override
-  TextStyle copyWith({Color color, String fontFamily, List<String> fontFamilyFallback, double fontSize, FontWeight fontWeight, FontStyle fontStyle, double letterSpacing, double wordSpacing, TextBaseline textBaseline, double height, Locale locale, ui.Paint foreground, ui.Paint background, List<Shadow> shadows, TextDecoration decoration, Color decorationColor, TextDecorationStyle decorationStyle, String debugLabel}) {
+  TextStyle copyWith({ Color color, Color backgroundColor, String fontFamily, List<String> fontFamilyFallback, double fontSize, FontWeight fontWeight, FontStyle fontStyle, double letterSpacing, double wordSpacing, TextBaseline textBaseline, double height, Locale locale, ui.Paint foreground, ui.Paint background, List<Shadow> shadows, TextDecoration decoration, Color decorationColor, TextDecorationStyle decorationStyle, String debugLabel }) {
     throw UnimplementedError();
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties, {String prefix = ''}) {
+  void debugFillProperties(DiagnosticPropertiesBuilder properties, { String prefix = '' }) {
     throw UnimplementedError();
   }
 
   @override
-  ui.ParagraphStyle getParagraphStyle({TextAlign textAlign, TextDirection textDirection, double textScaleFactor = 1.0, String ellipsis, int maxLines, Locale locale, String fontFamily, double fontSize, FontWeight fontWeight, FontStyle fontStyle, double height, StrutStyle strutStyle}) {
+  ui.ParagraphStyle getParagraphStyle({ TextAlign textAlign, TextDirection textDirection, double textScaleFactor = 1.0, String ellipsis, int maxLines, Locale locale, String fontFamily, double fontSize, FontWeight fontWeight, FontStyle fontStyle, double height, StrutStyle strutStyle }) {
     throw UnimplementedError();
   }
 
   @override
-  ui.TextStyle getTextStyle({double textScaleFactor = 1.0}) {
+  ui.TextStyle getTextStyle({ double textScaleFactor = 1.0 }) {
     throw UnimplementedError();
   }
 

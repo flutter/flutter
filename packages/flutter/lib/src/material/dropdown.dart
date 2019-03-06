@@ -40,7 +40,7 @@ class _DropdownMenuPainter extends CustomPainter {
          // of onChanged callback here.
          color: color,
          borderRadius: BorderRadius.circular(2.0),
-         boxShadow: kElevationToShadow[elevation]
+         boxShadow: kElevationToShadow[elevation],
        ).createBoxPainter(),
        super(repaint: resize);
 
@@ -327,19 +327,67 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
 
   @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        return _DropdownRoutePage<T>(
+          route: this,
+          constraints: constraints,
+          items: items,
+          padding: padding,
+          buttonRect: buttonRect,
+          selectedIndex: selectedIndex,
+          elevation: elevation,
+          theme: theme,
+          style: style,
+        );
+      }
+    );
+  }
+
+  void _dismiss() {
+    navigator?.removeRoute(this);
+  }
+}
+
+class _DropdownRoutePage<T> extends StatelessWidget {
+ const  _DropdownRoutePage({
+    Key key,
+    this.route,
+    this.constraints,
+    this.items,
+    this.padding,
+    this.buttonRect,
+    this.selectedIndex,
+    this.elevation = 8,
+    this.theme,
+    this.style,
+  }) : super(key: key);
+
+  final _DropdownRoute<T> route;
+  final BoxConstraints constraints;
+  final List<DropdownMenuItem<T>> items;
+  final EdgeInsetsGeometry padding;
+  final Rect buttonRect;
+  final int selectedIndex;
+  final int elevation;
+  final ThemeData theme;
+  final TextStyle style;
+
+  @override
+  Widget build(BuildContext context) {
     assert(debugCheckHasDirectionality(context));
-    final double screenHeight = MediaQuery.of(context).size.height;
-    final double maxMenuHeight = screenHeight - 2.0 * _kMenuItemHeight;
+    final double availableHeight = constraints.maxHeight;
+    final double maxMenuHeight = availableHeight - 2.0 * _kMenuItemHeight;
 
     final double buttonTop = buttonRect.top;
-    final double buttonBottom = buttonRect.bottom;
+    final double buttonBottom = math.min(buttonRect.bottom, availableHeight);
 
     // If the button is placed on the bottom or top of the screen, its top or
     // bottom may be less than [_kMenuItemHeight] from the edge of the screen.
     // In this case, we want to change the menu limits to align with the top
     // or bottom edge of the button.
     final double topLimit = math.min(_kMenuItemHeight, buttonTop);
-    final double bottomLimit = math.max(screenHeight - _kMenuItemHeight, buttonBottom);
+    final double bottomLimit = math.max(availableHeight - _kMenuItemHeight, buttonBottom);
 
     final double selectedItemOffset = selectedIndex * _kMenuItemHeight + kMaterialListPadding.top;
 
@@ -359,24 +407,25 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
     // respectively.
     if (menuTop < topLimit)
       menuTop = math.min(buttonTop, topLimit);
+
     if (menuBottom > bottomLimit) {
       menuBottom = math.max(buttonBottom, bottomLimit);
       menuTop = menuBottom - menuHeight;
     }
 
-    if (scrollController == null) {
+    if (route.scrollController == null) {
       // The limit is asymmetrical because we do not care how far positive the
       // limit goes. We are only concerned about the case where the value of
       // [buttonTop - menuTop] is larger than selectedItemOffset, ie. when
       // the button is close to the bottom of the screen and the selected item
       // is close to 0.
       final double scrollOffset = preferredMenuHeight > maxMenuHeight ? math.max(0.0, selectedItemOffset - (buttonTop - menuTop)) : 0.0;
-      scrollController = ScrollController(initialScrollOffset: scrollOffset);
+      route.scrollController = ScrollController(initialScrollOffset: scrollOffset);
     }
 
     final TextDirection textDirection = Directionality.of(context);
     Widget menu = _DropdownMenu<T>(
-      route: this,
+      route: route,
       padding: padding.resolve(textDirection),
     );
 
@@ -403,10 +452,6 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
         },
       ),
     );
-  }
-
-  void _dismiss() {
-    navigator?.removeRoute(this);
   }
 }
 
@@ -826,7 +871,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       child: GestureDetector(
         onTap: _enabled ? _handleTap : null,
         behavior: HitTestBehavior.opaque,
-        child: result
+        child: result,
       ),
     );
   }

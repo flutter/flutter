@@ -494,8 +494,11 @@ flutter:
       expect(flutterManifest.isEmpty, false);
     }
 
-    void testUsingContextAndFs(String description, FileSystem filesystem,
-        dynamic testMethod()) {
+    void testUsingContextAndFs(
+      String description,
+      FileSystem filesystem,
+      dynamic testMethod(),
+    ) {
       testUsingContext(description,
               () async {
             writeEmptySchemaFile(filesystem);
@@ -503,7 +506,7 @@ flutter:
       },
           overrides: <Type, Generator>{
             FileSystem: () => filesystem,
-          }
+          },
       );
     }
 
@@ -514,13 +517,13 @@ flutter:
     testUsingContextAndFs('Validate manifest on Posix FS',
         MemoryFileSystem(style: FileSystemStyle.posix), () {
           assertSchemaIsReadable();
-        }
+        },
     );
 
     testUsingContextAndFs('Validate manifest on Windows FS',
         MemoryFileSystem(style: FileSystemStyle.windows), () {
           assertSchemaIsReadable();
-        }
+        },
     );
 
   });

@@ -61,8 +61,8 @@ void main() {
           width: 100.0,
           height: 100.0,
           color: const Color(0xFF0000FF),
-          child: Text('$i', textDirection: TextDirection.ltr)
-        )
+          child: Text('$i', textDirection: TextDirection.ltr),
+        ),
       );
     }
 
@@ -77,7 +77,7 @@ void main() {
           buildBox(4),
           buildBox(5),
           buildBox(6),
-        ]
+        ],
       )
     );
 
@@ -107,7 +107,7 @@ void main() {
         delegate: OpacityFlowDelegate(opacity),
         children: <Widget>[
           Container(width: 100.0, height: 100.0),
-        ]
+        ],
       )
     );
     ContainerLayer layer = RendererBinding.instance.renderView.debugLayer;

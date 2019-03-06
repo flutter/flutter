@@ -432,7 +432,7 @@ void main() {
         'writeFile test lib/foo.txt.dill build/app.dill',
       ]);
       expect(devFS.assetPathsToEvict, unorderedMatches(<String>[
-        'a.txt', 'b.txt'
+        'a.txt', 'b.txt',
       ]));
       devFS.assetPathsToEvict.clear();
       expect(report.syncedBytes, 22);
@@ -604,7 +604,8 @@ class MockVM implements VM {
   }
 
   @override
-  Future<Map<String, dynamic>> invokeRpcRaw(String method, {
+  Future<Map<String, dynamic>> invokeRpcRaw(
+    String method, {
     Map<String, dynamic> params = const <String, dynamic>{},
     Duration timeout,
     bool timeoutFatal = true,

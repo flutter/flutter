@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:collection';
 import 'dart:math' as math;
 import 'dart:ui' as ui show Gradient, lerpDouble;
 
@@ -16,22 +17,43 @@ class _ColorsAndStops {
   final List<double> stops;
 }
 
-_ColorsAndStops _interpolateColorsAndStops(List<Color> aColors, List<double> aStops, List<Color> bColors, List<double> bStops, double t) {
-  assert(aColors.length == bColors.length, 'Cannot interpolate between two gradients with a different number of colors.'); // TODO(ianh): remove limitation
-  assert((aStops == null && aColors.length == 2) || (aStops != null && aStops.length == aColors.length));
-  assert((bStops == null && bColors.length == 2) || (bStops != null && bStops.length == bColors.length));
-  final List<Color> interpolatedColors = <Color>[];
-  for (int i = 0; i < aColors.length; i += 1)
-    interpolatedColors.add(Color.lerp(aColors[i], bColors[i], t));
-  List<double> interpolatedStops;
-  if (aStops != null || bStops != null) {
-    aStops ??= const <double>[0.0, 1.0];
-    bStops ??= const <double>[0.0, 1.0];
-    assert(aStops.length == bStops.length);
-    interpolatedStops = <double>[];
-    for (int i = 0; i < aStops.length; i += 1)
-      interpolatedStops.add(ui.lerpDouble(aStops[i], bStops[i], t).clamp(0.0, 1.0));
-  }
+/// Calculate the color at position [t] of the gradient defined by [colors] and [stops].
+Color _sample(List<Color> colors, List<double> stops, double t) {
+  assert(colors != null);
+  assert(colors.isNotEmpty);
+  assert(stops != null);
+  assert(stops.isNotEmpty);
+  assert(t != null);
+  if (t <= stops.first)
+    return colors.first;
+  if (t >= stops.last)
+    return colors.last;
+  final int index = stops.lastIndexWhere((double s) => s <= t);
+  assert(index != -1);
+  return Color.lerp(
+      colors[index], colors[index + 1],
+      (t - stops[index]) / (stops[index + 1] - stops[index]),
+  );
+}
+
+_ColorsAndStops _interpolateColorsAndStops(
+    List<Color> aColors,
+    List<double> aStops,
+    List<Color> bColors,
+    List<double> bStops,
+    double t,
+) {
+  assert(aColors.length >= 2);
+  assert(bColors.length >= 2);
+  assert(aStops.length == aColors.length);
+  assert(bStops.length == bColors.length);
+  final SplayTreeSet<double> stops = SplayTreeSet<double>()
+    ..addAll(aStops)
+    ..addAll(bStops);
+  final List<double> interpolatedStops = stops.toList(growable: false);
+  final List<Color> interpolatedColors = interpolatedStops.map<Color>(
+          (double stop) => Color.lerp(_sample(aColors, aStops, stop), _sample(bColors, bStops, stop), t)
+  ).toList(growable: false);
   return _ColorsAndStops(interpolatedColors, interpolatedStops);
 }
 
@@ -88,8 +110,6 @@ abstract class Gradient {
   List<double> _impliedStops() {
     if (stops != null)
       return stops;
-    if (colors.length == 2)
-      return null;
     assert(colors.length >= 2, 'colors list must have at least two colors');
     final double separation = 1.0 / (colors.length - 1);
     return List<double>.generate(
@@ -335,14 +355,14 @@ class LinearGradient extends Gradient {
 
   @override
   Gradient lerpFrom(Gradient a, double t) {
-    if (a == null || (a is LinearGradient && a.colors.length == colors.length)) // TODO(ianh): remove limitation
+    if (a == null || (a is LinearGradient))
       return LinearGradient.lerp(a, this, t);
     return super.lerpFrom(a, t);
   }
 
   @override
   Gradient lerpTo(Gradient b, double t) {
-    if (b == null || (b is LinearGradient && b.colors.length == colors.length)) // TODO(ianh): remove limitation
+    if (b == null || (b is LinearGradient))
       return LinearGradient.lerp(this, b, t);
     return super.lerpTo(b, t);
   }
@@ -374,7 +394,13 @@ class LinearGradient extends Gradient {
       return b.scale(t);
     if (b == null)
       return a.scale(1.0 - t);
-    final _ColorsAndStops interpolated = _interpolateColorsAndStops(a.colors, a.stops, b.colors, b.stops, t);
+    final _ColorsAndStops interpolated = _interpolateColorsAndStops(
+        a.colors,
+        a._impliedStops(),
+        b.colors,
+        b._impliedStops(),
+        t,
+    );
     return LinearGradient(
       begin: AlignmentGeometry.lerp(a.begin, b.begin, t),
       end: AlignmentGeometry.lerp(a.end, b.end, t),
@@ -506,7 +532,7 @@ class RadialGradient extends Gradient {
     List<double> stops,
     this.tileMode = TileMode.clamp,
     this.focal,
-    this.focalRadius = 0.0
+    this.focalRadius = 0.0,
   }) : assert(center != null),
        assert(radius != null),
        assert(tileMode != null),
@@ -598,20 +624,20 @@ class RadialGradient extends Gradient {
       stops: stops,
       tileMode: tileMode,
       focal: focal,
-      focalRadius: focalRadius
+      focalRadius: focalRadius,
     );
   }
 
   @override
   Gradient lerpFrom(Gradient a, double t) {
-    if (a == null || (a is RadialGradient && a.colors.length == colors.length)) // TODO(ianh): remove limitation
+    if (a == null || (a is RadialGradient))
       return RadialGradient.lerp(a, this, t);
     return super.lerpFrom(a, t);
   }
 
   @override
   Gradient lerpTo(Gradient b, double t) {
-    if (b == null || (b is RadialGradient && b.colors.length == colors.length)) // TODO(ianh): remove limitation
+    if (b == null || (b is RadialGradient))
       return RadialGradient.lerp(this, b, t);
     return super.lerpTo(b, t);
   }
@@ -643,7 +669,13 @@ class RadialGradient extends Gradient {
       return b.scale(t);
     if (b == null)
       return a.scale(1.0 - t);
-    final _ColorsAndStops interpolated = _interpolateColorsAndStops(a.colors, a.stops, b.colors, b.stops, t);
+    final _ColorsAndStops interpolated = _interpolateColorsAndStops(
+        a.colors,
+        a._impliedStops(),
+        b.colors,
+        b._impliedStops(),
+        t,
+    );
     return RadialGradient(
       center: AlignmentGeometry.lerp(a.center, b.center, t),
       radius: math.max(0.0, ui.lerpDouble(a.radius, b.radius, t)),
@@ -835,14 +867,14 @@ class SweepGradient extends Gradient {
 
   @override
   Gradient lerpFrom(Gradient a, double t) {
-    if (a == null || (a is SweepGradient && a.colors.length == colors.length)) // TODO(ianh): remove limitation
+    if (a == null || (a is SweepGradient))
       return SweepGradient.lerp(a, this, t);
     return super.lerpFrom(a, t);
   }
 
   @override
   Gradient lerpTo(Gradient b, double t) {
-    if (b == null || (b is SweepGradient && b.colors.length == colors.length)) // TODO(ianh): remove limitation
+    if (b == null || (b is SweepGradient))
       return SweepGradient.lerp(this, b, t);
     return super.lerpTo(b, t);
   }
@@ -873,7 +905,13 @@ class SweepGradient extends Gradient {
       return b.scale(t);
     if (b == null)
       return a.scale(1.0 - t);
-    final _ColorsAndStops interpolated = _interpolateColorsAndStops(a.colors, a.stops, b.colors, b.stops, t);
+    final _ColorsAndStops interpolated = _interpolateColorsAndStops(
+        a.colors,
+        a._impliedStops(),
+        b.colors,
+        b._impliedStops(),
+        t,
+    );
     return SweepGradient(
       center: AlignmentGeometry.lerp(a.center, b.center, t),
       startAngle: math.max(0.0, ui.lerpDouble(a.startAngle, b.startAngle, t)),

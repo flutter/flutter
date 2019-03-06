@@ -212,7 +212,7 @@ class TestSemantics {
   /// parent).
   final Matrix4 transform;
 
-  /// The elevation of this node reative to the parent node.
+  /// The elevation of this node relative to the parent node.
   ///
   /// See also:
   ///
@@ -250,14 +250,12 @@ class TestSemantics {
 
   bool _matches(
     SemanticsNode node,
-    Map<dynamic, dynamic> matchState,
-    {
-      bool ignoreRect = false,
-      bool ignoreTransform = false,
-      bool ignoreId = false,
-      DebugSemanticsDumpOrder childOrder = DebugSemanticsDumpOrder.inverseHitTest,
-    }
-  ) {
+    Map<dynamic, dynamic> matchState, {
+    bool ignoreRect = false,
+    bool ignoreTransform = false,
+    bool ignoreId = false,
+    DebugSemanticsDumpOrder childOrder = DebugSemanticsDumpOrder.inverseHitTest,
+  }) {
     bool fail(String message) {
       matchState[TestSemantics] = '$message';
       return false;
@@ -343,7 +341,7 @@ class TestSemantics {
   }
 
   @override
-  String toString([int indentAmount = 0]) {
+  String toString([ int indentAmount = 0 ]) {
     final String indent = '  ' * indentAmount;
     final StringBuffer buf = StringBuffer();
     buf.writeln('$indent$runtimeType(');
@@ -495,8 +493,8 @@ class SemanticsTester {
   ///
   /// Use this method to generate code for unit tests. It works similar to
   /// screenshot testing. The very first time you add semantics to a widget you
-  /// verify manually that the widget behaves correctly. You then use ths method
-  /// to generate test code for this widget.
+  /// verify manually that the widget behaves correctly. You then use this
+  /// method to generate test code for this widget.
   ///
   /// Example:
   ///
@@ -688,7 +686,8 @@ class _HasSemantics extends Matcher {
 }
 
 /// Asserts that a [SemanticsTester] has a semantics tree that exactly matches the given semantics.
-Matcher hasSemantics(TestSemantics semantics, {
+Matcher hasSemantics(
+  TestSemantics semantics, {
   bool ignoreRect = false,
   bool ignoreTransform = false,
   bool ignoreId = false,

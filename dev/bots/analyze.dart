@@ -30,6 +30,7 @@ Future<void> main(List<String> args) async {
     print('The analyze.dart script must be run with --enable-asserts.');
     exit(1);
   }
+  await _verifyNoMissingLicense(flutterRoot);
   await _verifyNoTestImports(flutterRoot);
   await _verifyNoTestPackageImports(flutterRoot);
   await _verifyGeneratedPluginRegistrants(flutterRoot);
@@ -235,7 +236,7 @@ Future<EvalResult> _evalCommand(String executable, List<String> arguments, {
 }
 
 Future<void> _runFlutterAnalyze(String workingDirectory, {
-  List<String> options = const <String>[]
+  List<String> options = const <String>[],
 }) {
   return runCommand(flutter, <String>['analyze', '--dartdocs']..addAll(options),
     workingDirectory: workingDirectory,
@@ -467,6 +468,30 @@ Future<void> _verifyNoBadImportsInFlutterTools(String workingDirectory) async {
       print('${bold}Multiple errors were detected when looking at import dependencies within the flutter_tools package:$reset\n');
     }
     print(errors.join('\n\n'));
+    print('$redLine\n');
+    exit(1);
+  }
+}
+
+Future<void> _verifyNoMissingLicense(String workingDirectory) async {
+  final List<String> errors = <String>[];
+  for (FileSystemEntity entity in Directory(path.join(workingDirectory, 'packages'))
+      .listSync(recursive: true)
+      .where((FileSystemEntity entity) => entity is File && path.extension(entity.path) == '.dart')) {
+    final File file = entity;
+    bool hasLicense = false;
+    final List<String> lines = file.readAsLinesSync();
+    if (lines.isNotEmpty)
+      hasLicense = lines.first.startsWith(RegExp(r'// Copyright \d{4}'));
+    if (!hasLicense)
+      errors.add(file.path);
+  }
+  // Fail if any errors
+  if (errors.isNotEmpty) {
+    print('$redLine');
+    final String s = errors.length == 1 ? '' : 's';
+    print('${bold}License headers cannot be found at the beginning of the following file$s.$reset\n');
+    print(errors.join('\n'));
     print('$redLine\n');
     exit(1);
   }

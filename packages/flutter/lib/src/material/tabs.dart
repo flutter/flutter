@@ -108,8 +108,8 @@ class Tab extends StatelessWidget {
             child: icon,
             margin: const EdgeInsets.only(bottom: 10.0),
           ),
-          _buildLabelText()
-        ]
+          _buildLabelText(),
+        ],
       );
     }
 
@@ -562,7 +562,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
     this.labelPadding,
     this.unselectedLabelColor,
     this.unselectedLabelStyle,
-    this.dragStartBehavior = DragStartBehavior.down,
+    this.dragStartBehavior = DragStartBehavior.start,
     this.onTap,
   }) : assert(tabs != null),
        assert(isScrollable != null),
@@ -1005,7 +1005,7 @@ class _TabBarState extends State<TabBar> {
                 selected: index == _currentIndex,
                 label: localizations.tabLabel(tabIndex: index + 1, tabCount: tabCount),
               ),
-            ]
+            ],
           ),
         ),
       );
@@ -1057,7 +1057,7 @@ class TabBarView extends StatefulWidget {
     @required this.children,
     this.controller,
     this.physics,
-    this.dragStartBehavior = DragStartBehavior.down,
+    this.dragStartBehavior = DragStartBehavior.start,
   }) : assert(children != null),
        assert(dragStartBehavior != null),
        super(key: key);
@@ -1388,7 +1388,7 @@ class TabPageSelector extends StatelessWidget {
             }).toList(),
           ),
         );
-      }
+      },
     );
   }
 }

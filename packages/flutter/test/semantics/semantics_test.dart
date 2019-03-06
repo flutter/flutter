@@ -82,10 +82,10 @@ void main() {
               child: TestRender(
                 hasScrollUpAction: true,
                 isSemanticBoundary: true,
-              )
-            )
-          )
-        )
+              ),
+            ),
+          ),
+        ),
       );
 
       layout(root);
@@ -137,7 +137,7 @@ void main() {
       ' └─SemanticsNode#2\n'
       '     STALE\n'
       '     owner: null\n'
-      '     Rect.fromLTRB(5.0, 0.0, 10.0, 5.0)\n'
+      '     Rect.fromLTRB(5.0, 0.0, 10.0, 5.0)\n',
     );
   });
 
@@ -211,7 +211,7 @@ void main() {
       ' └─SemanticsNode#2\n'
       '     STALE\n'
       '     owner: null\n'
-      '     Rect.fromLTRB(10.0, 0.0, 15.0, 5.0)\n'
+      '     Rect.fromLTRB(10.0, 0.0, 15.0, 5.0)\n',
     );
 
     expect(
@@ -229,7 +229,7 @@ void main() {
       ' └─SemanticsNode#2\n'
       '     STALE\n'
       '     owner: null\n'
-      '     Rect.fromLTRB(10.0, 0.0, 15.0, 5.0)\n'
+      '     Rect.fromLTRB(10.0, 0.0, 15.0, 5.0)\n',
     );
 
     final SemanticsNode child3 = SemanticsNode()
@@ -248,7 +248,7 @@ void main() {
       ..rect = Rect.fromLTRB(0.0, 0.0, 25.0, 5.0);
     rootComplex.updateWith(
         config: null,
-        childrenInInversePaintOrder: <SemanticsNode>[child1, child2, child3]
+        childrenInInversePaintOrder: <SemanticsNode>[child1, child2, child3],
     );
 
     expect(
@@ -281,7 +281,7 @@ void main() {
       '   └─SemanticsNode#6\n'
       '       STALE\n'
       '       owner: null\n'
-      '       Rect.fromLTRB(0.0, 0.0, 5.0, 5.0)\n'
+      '       Rect.fromLTRB(0.0, 0.0, 5.0, 5.0)\n',
     );
 
     expect(
@@ -314,7 +314,7 @@ void main() {
       '   └─SemanticsNode#6\n'
       '       STALE\n'
       '       owner: null\n'
-      '       Rect.fromLTRB(0.0, 0.0, 5.0, 5.0)\n'
+      '       Rect.fromLTRB(0.0, 0.0, 5.0, 5.0)\n',
     );
   });
 
@@ -324,7 +324,7 @@ void main() {
       minimalProperties.toStringDeep(),
       'SemanticsNode#1\n'
       '   Rect.fromLTRB(0.0, 0.0, 0.0, 0.0)\n'
-      '   invisible\n'
+      '   invisible\n',
     );
 
     expect(
@@ -352,7 +352,7 @@ void main() {
       '   scrollPosition: null\n'
       '   scrollExtentMax: null\n'
       '   elevation: 0.0\n'
-      '   thicknes: 0.0\n'
+      '   thicknes: 0.0\n',
     );
 
     final SemanticsConfiguration config = SemanticsConfiguration()
@@ -446,7 +446,7 @@ void main() {
       '   scrollPosition: null\n'
       '   scrollExtentMax: null\n'
       '   elevation: 0.0\n'
-      '   thicknes: 0.0\n'
+      '   thicknes: 0.0\n',
     );
 
   });
@@ -549,7 +549,7 @@ class TestRender extends RenderProxyBox {
     this.hasScrollUpAction = false,
     this.hasScrollDownAction = false,
     this.isSemanticBoundary,
-    RenderObject child
+    RenderObject child,
   }) : super(child);
 
   bool hasTapAction;

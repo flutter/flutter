@@ -120,7 +120,7 @@ class FlutterVersion {
   /// A date String describing the last framework commit.
   String get frameworkCommitDate => _latestGitCommitDate();
 
-  static String _latestGitCommitDate([String branch]) {
+  static String _latestGitCommitDate([ String branch ]) {
     final List<String> args = <String>['git', 'log'];
 
     if (branch != null)
@@ -171,7 +171,7 @@ class FlutterVersion {
   static FlutterVersion get instance => context[FlutterVersion];
 
   /// Return a short string for the version (e.g. `master/0.0.59-pre.92`, `scroll_refactor/a76bc8e22b`).
-  String getVersionString({bool redactUnknownBranches = false}) {
+  String getVersionString({ bool redactUnknownBranches = false }) {
     if (frameworkVersion != 'unknown')
       return '${getBranchName(redactUnknownBranches: redactUnknownBranches)}/$frameworkVersion';
     return '${getBranchName(redactUnknownBranches: redactUnknownBranches)}/$frameworkRevisionShort';
@@ -496,7 +496,7 @@ class VersionCheckError implements Exception {
 ///
 /// If [lenient] is true and the command fails, returns an empty string.
 /// Otherwise, throws a [ToolExit] exception.
-String _runSync(List<String> command, {bool lenient = true}) {
+String _runSync(List<String> command, { bool lenient = true }) {
   final ProcessResult results = processManager.runSync(command, workingDirectory: Cache.flutterRoot);
 
   if (results.exitCode == 0)

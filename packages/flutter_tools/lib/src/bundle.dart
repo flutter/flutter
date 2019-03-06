@@ -22,7 +22,7 @@ const String defaultAssetBasePath = '.';
 const String defaultManifestPath = 'pubspec.yaml';
 String get defaultDepfilePath => fs.path.join(getBuildDirectory(), 'snapshot_blob.bin.d');
 
-String getDefaultApplicationKernelPath({@required bool trackWidgetCreation}) {
+String getDefaultApplicationKernelPath({ @required bool trackWidgetCreation }) {
   return getKernelPathForTransformerOptions(
     fs.path.join(getBuildDirectory(), 'app.dill'),
     trackWidgetCreation: trackWidgetCreation,
@@ -165,7 +165,7 @@ Future<AssetBundle> buildAssets({
   String assetDirPath,
   String packagesPath,
   bool includeDefaultFonts = true,
-  bool reportLicensedPackages = false
+  bool reportLicensedPackages = false,
 }) async {
   assetDirPath ??= getAssetBuildDirectory();
   packagesPath ??= fs.path.absolute(PackageMap.globalPackagesPath);
@@ -177,7 +177,7 @@ Future<AssetBundle> buildAssets({
     assetDirPath: assetDirPath,
     packagesPath: packagesPath,
     includeDefaultFonts: includeDefaultFonts,
-    reportLicensedPackages: reportLicensedPackages
+    reportLicensedPackages: reportLicensedPackages,
   );
   if (result != 0)
     return null;
@@ -222,7 +222,9 @@ Future<void> assemble({
 }
 
 Future<void> writeBundle(
-    Directory bundleDir, Map<String, DevFSContent> assetEntries) async {
+  Directory bundleDir,
+  Map<String, DevFSContent> assetEntries,
+) async {
   if (bundleDir.existsSync())
     bundleDir.deleteSync(recursive: true);
   bundleDir.createSync(recursive: true);

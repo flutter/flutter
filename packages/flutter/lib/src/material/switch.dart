@@ -73,7 +73,7 @@ class Switch extends StatefulWidget {
     this.activeThumbImage,
     this.inactiveThumbImage,
     this.materialTapTargetSize,
-    this.dragStartBehavior = DragStartBehavior.down,
+    this.dragStartBehavior = DragStartBehavior.start,
   }) : _switchType = _SwitchType.material,
        assert(dragStartBehavior != null),
        super(key: key);
@@ -97,7 +97,7 @@ class Switch extends StatefulWidget {
     this.activeThumbImage,
     this.inactiveThumbImage,
     this.materialTapTargetSize,
-    this.dragStartBehavior = DragStartBehavior.down,
+    this.dragStartBehavior = DragStartBehavior.start,
   }) : _switchType = _SwitchType.adaptive,
        super(key: key);
 
@@ -508,7 +508,7 @@ class _RenderSwitch extends RenderToggleable {
       color: color,
       image: image == null ? null : DecorationImage(image: image),
       shape: BoxShape.circle,
-      boxShadow: kElevationToShadow[1]
+      boxShadow: kElevationToShadow[1],
     );
   }
 
@@ -565,14 +565,14 @@ class _RenderSwitch extends RenderToggleable {
       offset.dx + trackHorizontalPadding,
       offset.dy + (size.height - _kTrackHeight) / 2.0,
       size.width - 2.0 * trackHorizontalPadding,
-      _kTrackHeight
+      _kTrackHeight,
     );
     final RRect trackRRect = RRect.fromRectAndRadius(trackRect, const Radius.circular(_kTrackRadius));
     canvas.drawRRect(trackRRect, paint);
 
     final Offset thumbPosition = Offset(
       kRadialReactionRadius + visualPosition * _trackInnerLength,
-      size.height / 2.0
+      size.height / 2.0,
     );
 
     paintRadialReaction(canvas, offset, thumbPosition);
@@ -593,7 +593,7 @@ class _RenderSwitch extends RenderToggleable {
       thumbPainter.paint(
         canvas,
         thumbPosition + offset - Offset(radius, radius),
-        configuration.copyWith(size: Size.fromRadius(radius))
+        configuration.copyWith(size: Size.fromRadius(radius)),
       );
     } finally {
       _isPainting = false;

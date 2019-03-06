@@ -2500,7 +2500,7 @@ class SemanticsOwner extends ChangeNotifier {
   ///
   /// If the given `action` requires arguments they need to be passed in via
   /// the `args` parameter.
-  void performAction(int id, SemanticsAction action, [dynamic args]) {
+  void performAction(int id, SemanticsAction action, [ dynamic args ]) {
     assert(action != null);
     final _SemanticsActionHandler handler = _getSemanticsActionHandlerForId(id, action);
     if (handler != null) {
@@ -2550,7 +2550,7 @@ class SemanticsOwner extends ChangeNotifier {
   ///
   /// If the given `action` requires arguments they need to be passed in via
   /// the `args` parameter.
-  void performActionAt(Offset position, SemanticsAction action, [dynamic args]) {
+  void performActionAt(Offset position, SemanticsAction action, [ dynamic args ]) {
     assert(action != null);
     final SemanticsNode node = rootSemanticsNode;
     if (node == null)
@@ -3698,7 +3698,7 @@ String _concatStrings({
   @required String thisString,
   @required String otherString,
   @required TextDirection thisTextDirection,
-  @required TextDirection otherTextDirection
+  @required TextDirection otherTextDirection,
 }) {
   if (otherString.isEmpty)
     return thisString;

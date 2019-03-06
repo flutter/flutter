@@ -60,7 +60,7 @@ class CupertinoSwitch extends StatefulWidget {
     @required this.value,
     @required this.onChanged,
     this.activeColor,
-    this.dragStartBehavior = DragStartBehavior.down,
+    this.dragStartBehavior = DragStartBehavior.start,
   }) : assert(dragStartBehavior != null),
        super(key: key);
 
@@ -97,7 +97,6 @@ class CupertinoSwitch extends StatefulWidget {
   /// [CupertinoTheme] in accordance to native iOS behavior.
   final Color activeColor;
 
-  // TODO(jslavitz): Set the DragStartBehavior default to be start across all widgets.
   /// {@template flutter.cupertino.switch.dragStartBehavior}
   /// Determines the way that drag start behavior is handled.
   ///
@@ -110,7 +109,7 @@ class CupertinoSwitch extends StatefulWidget {
   /// animation smoother and setting it to [DragStartBehavior.down] will make
   /// drag behavior feel slightly more reactive.
   ///
-  /// By default, the drag start behavior is [DragStartBehavior.down].
+  /// By default, the drag start behavior is [DragStartBehavior.start].
   ///
   /// See also:
   ///
@@ -149,7 +148,7 @@ class _CupertinoSwitchRenderObjectWidget extends LeafRenderObjectWidget {
     this.activeColor,
     this.onChanged,
     this.vsync,
-    this.dragStartBehavior = DragStartBehavior.down,
+    this.dragStartBehavior = DragStartBehavior.start,
   }) : super(key: key);
 
   final bool value;
@@ -166,7 +165,7 @@ class _CupertinoSwitchRenderObjectWidget extends LeafRenderObjectWidget {
       onChanged: onChanged,
       textDirection: Directionality.of(context),
       vsync: vsync,
-      dragStartBehavior: dragStartBehavior
+      dragStartBehavior: dragStartBehavior,
     );
   }
 
@@ -202,7 +201,7 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
     ValueChanged<bool> onChanged,
     @required TextDirection textDirection,
     @required TickerProvider vsync,
-    DragStartBehavior dragStartBehavior = DragStartBehavior.down,
+    DragStartBehavior dragStartBehavior = DragStartBehavior.start,
   }) : assert(value != null),
        assert(activeColor != null),
        assert(vsync != null),
@@ -478,7 +477,7 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
         offset.dx + (size.width - _kTrackWidth) / 2.0,
         offset.dy + (size.height - _kTrackHeight) / 2.0,
         _kTrackWidth,
-        _kTrackHeight
+        _kTrackHeight,
     );
     final RRect outerRRect = RRect.fromRectAndRadius(trackRect, const Radius.circular(_kTrackRadius));
     final RRect innerRRect = RRect.fromRectAndRadius(trackRect.deflate(borderThickness), const Radius.circular(_kTrackRadius));

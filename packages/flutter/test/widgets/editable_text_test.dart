@@ -905,7 +905,7 @@ void main() {
       semantics,
       includesNodeWith(flags: <SemanticsFlag>[
         SemanticsFlag.isTextField,
-        SemanticsFlag.isFocused
+        SemanticsFlag.isFocused,
       ]),
     );
 
@@ -1517,7 +1517,7 @@ void main() {
                     TestSemantics(
                       flags: <SemanticsFlag>[
                         SemanticsFlag.isTextField,
-                        SemanticsFlag.isObscured
+                        SemanticsFlag.isObscured,
                       ],
                       value: expectedValue,
                       textDirection: TextDirection.ltr,
@@ -1634,8 +1634,7 @@ void main() {
   });
 
   group('a11y copy/cut/paste', () {
-    Future<void> _buildApp(
-        MockTextSelectionControls controls, WidgetTester tester) {
+    Future<void> _buildApp(MockTextSelectionControls controls, WidgetTester tester) {
       return tester.pumpWidget(MaterialApp(
         home: EditableText(
           backgroundCursorColor: Colors.grey,
@@ -1782,7 +1781,7 @@ void main() {
                         id: expectedNodeId,
                         flags: <SemanticsFlag>[
                           SemanticsFlag.isTextField,
-                          SemanticsFlag.isFocused
+                          SemanticsFlag.isFocused,
                         ],
                         actions: <SemanticsAction>[
                           SemanticsAction.moveCursorBackwardByCharacter,
@@ -1790,7 +1789,7 @@ void main() {
                           SemanticsAction.setSelection,
                           SemanticsAction.copy,
                           SemanticsAction.cut,
-                          SemanticsAction.paste
+                          SemanticsAction.paste,
                         ],
                         value: 'test',
                         textSelection: TextSelection.collapsed(

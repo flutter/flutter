@@ -223,6 +223,16 @@ class TestGesture {
     });
   }
 
+  /// Dispatch a pointer down event at the given `downLocation`, caching the
+  /// hit test result with a custom down event.
+  Future<void> downWithCustomEvent(Offset downLocation, PointerDownEvent event) async {
+    _pointer.setDownInfo(event, downLocation);
+    return TestAsyncUtils.guard<void>(() async {
+      _result = _hitTester(downLocation);
+      return _dispatcher(event, _result);
+    });
+  }
+
   final EventDispatcher _dispatcher;
   final HitTester _hitTester;
   final TestPointer _pointer;

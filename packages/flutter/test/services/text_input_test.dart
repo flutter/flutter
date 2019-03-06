@@ -26,7 +26,7 @@ void main() {
       );
       final Map<String, dynamic> json = configuration.toJson();
       expect(json['inputType'], <String, dynamic>{
-        'name': 'TextInputType.text', 'signed': null, 'decimal': null
+        'name': 'TextInputType.text', 'signed': null, 'decimal': null,
       });
       expect(json['obscureText'], true);
       expect(json['autocorrect'], false);
@@ -42,7 +42,7 @@ void main() {
       );
       final Map<String, dynamic> json = configuration.toJson();
       expect(json['inputType'], <String, dynamic>{
-        'name': 'TextInputType.number', 'signed': false, 'decimal': true
+        'name': 'TextInputType.number', 'signed': false, 'decimal': true,
       });
       expect(json['obscureText'], true);
       expect(json['autocorrect'], false);

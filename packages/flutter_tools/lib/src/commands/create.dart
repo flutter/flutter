@@ -56,19 +56,19 @@ class CreateCommand extends FlutterCommand {
   CreateCommand() {
     argParser.addFlag('pub',
       defaultsTo: true,
-      help: 'Whether to run "flutter packages get" after the project has been created.'
+      help: 'Whether to run "flutter packages get" after the project has been created.',
     );
     argParser.addFlag('offline',
       defaultsTo: false,
       help: 'When "flutter packages get" is run by the create command, this indicates '
         'whether to run it in offline mode or not. In offline mode, it will need to '
-        'have all dependencies already available in the pub cache to succeed.'
+        'have all dependencies already available in the pub cache to succeed.',
     );
     argParser.addFlag(
       'with-driver-test',
       negatable: true,
       defaultsTo: false,
-      help: "Also add a flutter_driver dependency and generate a sample 'flutter drive' test."
+      help: "Also add a flutter_driver dependency and generate a sample 'flutter drive' test.",
     );
     argParser.addOption(
       'template',
@@ -90,9 +90,10 @@ class CreateCommand extends FlutterCommand {
       'sample',
       abbr: 's',
       help: 'Specifies the Flutter code sample to use as the main.dart for an application. Implies '
-        '--template=app.',
+        '--template=app. The value should be the sample ID of the desired sample from the API '
+        'documentation website (http://docs.flutter.io).',
       defaultsTo: null,
-      valueHelp: 'the sample ID of the desired sample from the API documentation website (http://docs.flutter.io)'
+      valueHelp: 'id',
     );
     argParser.addFlag(
       'overwrite',
@@ -103,18 +104,18 @@ class CreateCommand extends FlutterCommand {
     argParser.addOption(
       'description',
       defaultsTo: 'A new Flutter project.',
-      help: 'The description to use for your new Flutter project. This string ends up in the pubspec.yaml file.'
+      help: 'The description to use for your new Flutter project. This string ends up in the pubspec.yaml file.',
     );
     argParser.addOption(
       'org',
       defaultsTo: 'com.example',
       help: 'The organization responsible for your new Flutter project, in reverse domain name notation. '
-            'This string is used in Java package names and as prefix in the iOS bundle identifier.'
+            'This string is used in Java package names and as prefix in the iOS bundle identifier.',
     );
     argParser.addOption(
       'project-name',
       defaultsTo: null,
-      help: 'The project name for this new Flutter project. This must be a valid dart package name.'
+      help: 'The project name for this new Flutter project. This must be a valid dart package name.',
     );
     argParser.addOption(
       'ios-language',
@@ -395,7 +396,7 @@ To edit platform code in an IDE see https://flutter.io/developing-packages/#edit
     return null;
   }
 
-  Future<int> _generateModule(Directory directory, Map<String, dynamic> templateContext, {bool overwrite = false}) async {
+  Future<int> _generateModule(Directory directory, Map<String, dynamic> templateContext, { bool overwrite = false }) async {
     int generatedCount = 0;
     final String description = argResults.wasParsed('description')
         ? argResults['description']
@@ -414,7 +415,7 @@ To edit platform code in an IDE see https://flutter.io/developing-packages/#edit
     return generatedCount;
   }
 
-  Future<int> _generatePackage(Directory directory, Map<String, dynamic> templateContext, {bool overwrite = false}) async {
+  Future<int> _generatePackage(Directory directory, Map<String, dynamic> templateContext, { bool overwrite = false }) async {
     int generatedCount = 0;
     final String description = argResults.wasParsed('description')
         ? argResults['description']
@@ -431,7 +432,7 @@ To edit platform code in an IDE see https://flutter.io/developing-packages/#edit
     return generatedCount;
   }
 
-  Future<int> _generatePlugin(Directory directory, Map<String, dynamic> templateContext, {bool overwrite = false}) async {
+  Future<int> _generatePlugin(Directory directory, Map<String, dynamic> templateContext, { bool overwrite = false }) async {
     int generatedCount = 0;
     final String description = argResults.wasParsed('description')
         ? argResults['description']
@@ -463,7 +464,7 @@ To edit platform code in an IDE see https://flutter.io/developing-packages/#edit
     return generatedCount;
   }
 
-  Future<int> _generateApp(Directory directory, Map<String, dynamic> templateContext, {bool overwrite = false}) async {
+  Future<int> _generateApp(Directory directory, Map<String, dynamic> templateContext, { bool overwrite = false }) async {
     int generatedCount = 0;
     generatedCount += _renderTemplate('app', directory, templateContext, overwrite: overwrite);
     final FlutterProject project = await FlutterProject.fromDirectory(directory);
@@ -536,7 +537,7 @@ To edit platform code in an IDE see https://flutter.io/developing-packages/#edit
     };
   }
 
-  int _renderTemplate(String templateName, Directory directory, Map<String, dynamic> context, {bool overwrite = false}) {
+  int _renderTemplate(String templateName, Directory directory, Map<String, dynamic> context, { bool overwrite = false }) {
     final Template template = Template.fromName(templateName);
     return template.render(directory, context, overwriteExisting: overwrite);
   }
@@ -611,7 +612,7 @@ String _createUTIIdentifier(String organization, String name) {
   return segments.join('.');
 }
 
-final Set<String> _packageDependencies = <String>{
+final Set<String> _packageDependencies = Set<String>.from(<String>[
   'analyzer',
   'args',
   'async',
@@ -637,8 +638,8 @@ final Set<String> _packageDependencies = <String>{
   'test',
   'utf',
   'watcher',
-  'yaml'
-};
+  'yaml',
+]);
 
 /// Return null if the project name is legal. Return a validation message if
 /// we should disallow the project name.

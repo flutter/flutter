@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/gestures.dart' show PointerDeviceKind;
 import 'package:flutter/widgets.dart';
 
 void main() {
@@ -13,14 +14,21 @@ void main() {
   int doubleTapDownCount;
   int forcePressStartCount;
   int forcePressEndCount;
+  int dragStartCount;
+  int dragUpdateCount;
+  int dragEndCount;
+  const Offset forcePressOffset = Offset(400.0, 50.0);
 
   void _handleTapDown(TapDownDetails details) { tapCount++; }
   void _handleSingleTapUp(TapUpDetails details) { singleTapUpCount++; }
   void _handleSingleTapCancel() { singleTapCancelCount++; }
-  void _handleSingleLongTapStart(GestureLongPressDragStartDetails details) { singleLongTapStartCount++; }
+  void _handleSingleLongTapStart(LongPressStartDetails details) { singleLongTapStartCount++; }
   void _handleDoubleTapDown(TapDownDetails details) { doubleTapDownCount++; }
   void _handleForcePressStart(ForcePressDetails details) { forcePressStartCount++; }
   void _handleForcePressEnd(ForcePressDetails details) { forcePressEndCount++; }
+  void _handleDragSelectionStart(DragStartDetails details) { dragStartCount++; }
+  void _handleDragSelectionUpdate(DragStartDetails _, DragUpdateDetails details) { dragUpdateCount++; }
+  void _handleDragSelectionEnd(DragEndDetails details) { dragEndCount++; }
 
   setUp(() {
     tapCount = 0;
@@ -30,6 +38,9 @@ void main() {
     doubleTapDownCount = 0;
     forcePressStartCount = 0;
     forcePressEndCount = 0;
+    dragStartCount = 0;
+    dragUpdateCount = 0;
+    dragEndCount = 0;
   });
 
   Future<void> pumpGestureDetector(WidgetTester tester) async {
@@ -43,6 +54,9 @@ void main() {
         onDoubleTapDown: _handleDoubleTapDown,
         onForcePressStart: _handleForcePressStart,
         onForcePressEnd: _handleForcePressEnd,
+        onDragSelectionStart: _handleDragSelectionStart,
+        onDragSelectionUpdate: _handleDragSelectionUpdate,
+        onDragSelectionEnd: _handleDragSelectionEnd,
         child: Container(),
       ),
     );
@@ -117,7 +131,7 @@ void main() {
     expect(singleLongTapStartCount, 0);
   });
 
-  testWidgets('a very quick swipe is just a canceled tap', (WidgetTester tester) async {
+  testWidgets('a very quick swipe is ignored', (WidgetTester tester) async {
     await pumpGestureDetector(tester);
     final TestGesture gesture = await tester.startGesture(const Offset(200, 200));
     await tester.pump(const Duration(milliseconds: 20));
@@ -125,7 +139,7 @@ void main() {
     await tester.pump();
     expect(singleTapUpCount, 0);
     expect(tapCount, 0);
-    expect(singleTapCancelCount, 1);
+    expect(singleTapCancelCount, 0);
     expect(doubleTapDownCount, 0);
     expect(singleLongTapStartCount, 0);
 
@@ -133,7 +147,7 @@ void main() {
     // Nothing else happens on up.
     expect(singleTapUpCount, 0);
     expect(tapCount, 0);
-    expect(singleTapCancelCount, 1);
+    expect(singleTapCancelCount, 0);
     expect(doubleTapDownCount, 0);
     expect(singleLongTapStartCount, 0);
   });
@@ -155,22 +169,62 @@ void main() {
     await pumpGestureDetector(tester);
 
     const int pointerValue = 1;
-    TestGesture gesture = await tester.startGesture(const Offset(400.0, 50.0), pointer: pointerValue);
+
+    final TestGesture gesture = await tester.createGesture();
+
+    await gesture.downWithCustomEvent(
+      forcePressOffset,
+      const PointerDownEvent(
+        pointer: pointerValue,
+        position: forcePressOffset,
+        pressure: 0.0,
+        pressureMax: 6.0,
+        pressureMin: 0.0,
+      ),
+    );
+
     await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(0.0, 0.0), pressure: 0.5, pressureMin: 0, pressureMax: 1));
     await gesture.up();
     await tester.pumpAndSettle();
 
-    gesture = await tester.startGesture(const Offset(400.0, 50.0), pointer: pointerValue);
+    await gesture.downWithCustomEvent(
+      forcePressOffset,
+      const PointerDownEvent(
+        pointer: pointerValue,
+        position: forcePressOffset,
+        pressure: 0.0,
+        pressureMax: 6.0,
+        pressureMin: 0.0,
+      ),
+    );
     await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(0.0, 0.0), pressure: 0.5, pressureMin: 0, pressureMax: 1));
     await gesture.up();
     await tester.pump(const Duration(milliseconds: 20));
 
-    gesture = await tester.startGesture(const Offset(400.0, 50.0), pointer: pointerValue);
+     await gesture.downWithCustomEvent(
+      forcePressOffset,
+      const PointerDownEvent(
+        pointer: pointerValue,
+        position: forcePressOffset,
+        pressure: 0.0,
+        pressureMax: 6.0,
+        pressureMin: 0.0,
+      ),
+    );
     await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(0.0, 0.0), pressure: 0.5, pressureMin: 0, pressureMax: 1));
     await gesture.up();
     await tester.pump(const Duration(milliseconds: 20));
 
-    gesture = await tester.startGesture(const Offset(400.0, 50.0), pointer: pointerValue);
+    await gesture.downWithCustomEvent(
+      forcePressOffset,
+      const PointerDownEvent(
+        pointer: pointerValue,
+        position: forcePressOffset,
+        pressure: 0.0,
+        pressureMax: 6.0,
+        pressureMin: 0.0,
+      ),
+    );
     await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(0.0, 0.0), pressure: 0.5, pressureMin: 0, pressureMax: 1));
     await gesture.up();
 
@@ -181,16 +235,49 @@ void main() {
     await pumpGestureDetector(tester);
 
     const int pointerValue = 1;
-    TestGesture gesture = await tester.startGesture(const Offset(400.0, 50.0), pointer: pointerValue);
+    final TestGesture gesture = await tester.createGesture();
+    await gesture.downWithCustomEvent(
+      forcePressOffset,
+      const PointerDownEvent(
+          pointer: pointerValue,
+          position: forcePressOffset,
+          pressure: 0.0,
+          pressureMax: 6.0,
+          pressureMin: 0.0,
+      ),
 
+    );
     // Initiate a quick tap.
-    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(0.0, 0.0), pressure: 0.0, pressureMin: 0, pressureMax: 1));
+    await gesture.updateWithCustomEvent(
+      const PointerMoveEvent(
+        pointer: pointerValue,
+        position: Offset(0.0, 0.0),
+        pressure: 0.0,
+        pressureMin: 0,
+        pressureMax: 1,
+      )
+    );
     await tester.pump(const Duration(milliseconds: 50));
     await gesture.up();
 
     // Initiate a force tap.
-    gesture = await tester.startGesture(const Offset(400.0, 50.0), pointer: pointerValue);
-    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(0.0, 0.0), pressure: 0.5, pressureMin: 0, pressureMax: 1));
+    await gesture.downWithCustomEvent(
+      forcePressOffset,
+      const PointerDownEvent(
+        pointer: pointerValue,
+        position: forcePressOffset,
+        pressure: 0.0,
+        pressureMax: 6.0,
+        pressureMin: 0.0,
+      ),
+    );
+    await gesture.updateWithCustomEvent(const PointerMoveEvent(
+      pointer: pointerValue,
+      position: Offset(0.0, 0.0),
+      pressure: 0.5,
+      pressureMin: 0,
+      pressureMax: 1,
+    ));
     expect(forcePressStartCount, 1);
 
     await tester.pump(const Duration(milliseconds: 50));
@@ -199,5 +286,90 @@ void main() {
 
     expect(forcePressEndCount, 1);
     expect(doubleTapDownCount, 0);
+  });
+
+  testWidgets('a long press from a touch device is recognized as a long single tap', (WidgetTester tester) async {
+    await pumpGestureDetector(tester);
+
+    const int pointerValue = 1;
+    final TestGesture gesture =
+        await tester.startGesture(const Offset(200.0, 200.0), pointer: pointerValue, kind: PointerDeviceKind.touch);
+    await tester.pump(const Duration(seconds: 2));
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(tapCount, 1);
+    expect(singleTapUpCount, 0);
+    expect(singleLongTapStartCount, 1);
+  });
+
+  testWidgets('a long press from a mouse is just a tap', (WidgetTester tester) async {
+    await pumpGestureDetector(tester);
+
+    const int pointerValue = 1;
+    final TestGesture gesture =
+        await tester.startGesture(const Offset(200.0, 200.0), pointer: pointerValue, kind: PointerDeviceKind.mouse);
+    await tester.pump(const Duration(seconds: 2));
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(tapCount, 1);
+    expect(singleTapUpCount, 1);
+    expect(singleLongTapStartCount, 0);
+  });
+
+  testWidgets('a touch drag is not recognized for text selection', (WidgetTester tester) async {
+    await pumpGestureDetector(tester);
+
+    const int pointerValue = 1;
+    final TestGesture gesture =
+        await tester.startGesture(const Offset(200.0, 200.0), pointer: pointerValue, kind: PointerDeviceKind.touch);
+    await tester.pump();
+    await gesture.moveBy(const Offset(210.0, 200.0));
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(tapCount, 0);
+    expect(singleTapUpCount, 0);
+    expect(dragStartCount, 0);
+    expect(dragUpdateCount, 0);
+    expect(dragEndCount, 0);
+  });
+
+  testWidgets('a mouse drag is recognized for text selection', (WidgetTester tester) async {
+    await pumpGestureDetector(tester);
+
+    const int pointerValue = 1;
+    final TestGesture gesture =
+        await tester.startGesture(const Offset(200.0, 200.0), pointer: pointerValue, kind: PointerDeviceKind.mouse);
+    await tester.pump();
+    await gesture.moveBy(const Offset(210.0, 200.0));
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(tapCount, 0);
+    expect(singleTapUpCount, 0);
+    expect(dragStartCount, 1);
+    expect(dragUpdateCount, 1);
+    expect(dragEndCount, 1);
+  });
+
+  testWidgets('a slow mouse drag is still recognized for text selection', (WidgetTester tester) async {
+    await pumpGestureDetector(tester);
+
+    const int pointerValue = 1;
+    final TestGesture gesture =
+        await tester.startGesture(const Offset(200.0, 200.0), pointer: pointerValue, kind: PointerDeviceKind.mouse);
+    await tester.pump(const Duration(seconds: 2));
+    await gesture.moveBy(const Offset(210.0, 200.0));
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(dragStartCount, 1);
+    expect(dragUpdateCount, 1);
+    expect(dragEndCount, 1);
   });
 }

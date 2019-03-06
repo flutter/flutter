@@ -31,6 +31,27 @@ void main() {
   SystemChannels.platform.setMockMethodCallHandler(mockClipboard.handleMethodCall);
 
   testWidgets(
+    'takes available space horizontally and takes intrinsic space vertically no-strut',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(
+            child: ConstrainedBox(
+              constraints: BoxConstraints.loose(const Size(200, 200)),
+              child: const CupertinoTextField(strutStyle: StrutStyle.disabled),
+            ),
+          ),
+        ),
+      );
+
+      expect(
+        tester.getSize(find.byType(CupertinoTextField)),
+        const Size(200, 29), // 29 is the height of the default font + padding etc.
+      );
+    },
+  );
+
+  testWidgets(
     'takes available space horizontally and takes intrinsic space vertically',
     (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -46,7 +67,31 @@ void main() {
 
       expect(
         tester.getSize(find.byType(CupertinoTextField)),
-        const Size(200, 29), // 29 is the height of the default font + padding etc.
+        const Size(200, 29), // 29 is the height of the default font (17) + decoration (12).
+      );
+    },
+  );
+
+  testWidgets(
+    'multi-lined text fields are intrinsically taller no-strut',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(
+            child: ConstrainedBox(
+              constraints: BoxConstraints.loose(const Size(200, 200)),
+              child: const CupertinoTextField(
+                maxLines: 3,
+                strutStyle: StrutStyle.disabled,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(
+        tester.getSize(find.byType(CupertinoTextField)),
+        const Size(200, 63), // 63 is the height of the default font (17) * maxlines (3) + decoration height (12).
       );
     },
   );
@@ -73,6 +118,61 @@ void main() {
   );
 
   testWidgets(
+    'strut height override',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(
+            child: ConstrainedBox(
+              constraints: BoxConstraints.loose(const Size(200, 200)),
+              child: const CupertinoTextField(
+                maxLines: 3,
+                strutStyle: StrutStyle(
+                  fontSize: 8,
+                  forceStrutHeight: true,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(
+        tester.getSize(find.byType(CupertinoTextField)),
+        const Size(200, 36),
+      );
+    },
+  );
+
+  testWidgets(
+    'strut forces field taller',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(
+            child: ConstrainedBox(
+              constraints: BoxConstraints.loose(const Size(200, 200)),
+              child: const CupertinoTextField(
+                maxLines: 3,
+                style: TextStyle(fontSize: 10),
+                strutStyle: StrutStyle(
+                  fontSize: 18,
+                  forceStrutHeight: true,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(
+        tester.getSize(find.byType(CupertinoTextField)),
+        const Size(200, 66),
+      );
+    },
+  );
+
+  testWidgets(
     'default text field has a border',
     (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -86,7 +186,7 @@ void main() {
       final BoxDecoration decoration = tester.widget<DecoratedBox>(
         find.descendant(
           of: find.byType(CupertinoTextField),
-          matching: find.byType(DecoratedBox)
+          matching: find.byType(DecoratedBox),
         ),
       ).decoration;
 
@@ -117,7 +217,7 @@ void main() {
       expect(
         find.descendant(
           of: find.byType(CupertinoTextField),
-          matching: find.byType(DecoratedBox)
+          matching: find.byType(DecoratedBox),
         ),
         findsNothing,
       );
@@ -396,6 +496,64 @@ void main() {
   );
 
   testWidgets(
+    'padding is in between prefix and suffix no-strut',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const CupertinoApp(
+          home: Center(
+            child: CupertinoTextField(
+              padding: EdgeInsets.all(20.0),
+              prefix: SizedBox(height: 100.0, width: 100.0),
+              suffix: SizedBox(height: 50.0, width: 50.0),
+              strutStyle: StrutStyle.disabled,
+            ),
+          ),
+        ),
+      );
+
+      expect(
+        tester.getTopLeft(find.byType(EditableText)).dx,
+        // Size of prefix + padding.
+        100.0 + 20.0,
+      );
+
+      expect(tester.getTopLeft(find.byType(EditableText)).dy, 291.5);
+
+      expect(
+        tester.getTopRight(find.byType(EditableText)).dx,
+        800.0 - 50.0 - 20.0,
+      );
+
+      await tester.pumpWidget(
+        const CupertinoApp(
+          home: Center(
+            child: CupertinoTextField(
+              padding: EdgeInsets.all(30.0),
+              prefix: SizedBox(height: 100.0, width: 100.0),
+              suffix: SizedBox(height: 50.0, width: 50.0),
+              strutStyle: StrutStyle.disabled,
+            ),
+          ),
+        ),
+      );
+
+      expect(
+        tester.getTopLeft(find.byType(EditableText)).dx,
+        100.0 + 30.0,
+      );
+
+      // Since the highest component, the prefix box, is higher than
+      // the text + paddings, the text's vertical position isn't affected.
+      expect(tester.getTopLeft(find.byType(EditableText)).dy, 291.5);
+
+      expect(
+        tester.getTopRight(find.byType(EditableText)).dx,
+        800.0 - 50.0 - 30.0,
+      );
+    },
+  );
+
+  testWidgets(
     'padding is in between prefix and suffix',
     (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -591,6 +749,45 @@ void main() {
   );
 
   testWidgets(
+    'font style controls intrinsic height no-strut',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const CupertinoApp(
+          home: Center(
+            child: CupertinoTextField(
+              strutStyle: StrutStyle.disabled,
+            ),
+          ),
+        ),
+      );
+
+      expect(
+        tester.getSize(find.byType(CupertinoTextField)).height,
+        29.0,
+      );
+
+      await tester.pumpWidget(
+        const CupertinoApp(
+          home: Center(
+            child: CupertinoTextField(
+              style: TextStyle(
+                // A larger font.
+                fontSize: 50.0,
+              ),
+              strutStyle: StrutStyle.disabled,
+            ),
+          ),
+        ),
+      );
+
+      expect(
+        tester.getSize(find.byType(CupertinoTextField)).height,
+        62.0,
+      );
+    },
+  );
+
+  testWidgets(
     'font style controls intrinsic height',
     (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -652,6 +849,35 @@ void main() {
       expect(
         tester.getTopRight(find.byIcon(CupertinoIcons.clear_thick_circled)).dx,
         24.0,
+      );
+    },
+  );
+
+  testWidgets(
+    'text fields with no max lines can grow no-strut',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const CupertinoApp(
+          home: Center(
+            child: CupertinoTextField(
+              maxLines: null,
+              strutStyle: StrutStyle.disabled,
+            ),
+          ),
+        ),
+      );
+
+      expect(
+        tester.getSize(find.byType(CupertinoTextField)).height,
+        29.0, // Initially one line high.
+      );
+
+      await tester.enterText(find.byType(CupertinoTextField), '\n');
+      await tester.pump();
+
+      expect(
+        tester.getSize(find.byType(CupertinoTextField)).height,
+        46.0, // Initially one line high.
       );
     },
   );
@@ -782,7 +1008,7 @@ void main() {
 
     await tester.enterText(
       find.widgetWithText(CupertinoTextField, 'field 1'),
-      "j'aime la poutine"
+      "j'aime la poutine",
     );
     await tester.pump();
 
@@ -1108,6 +1334,7 @@ void main() {
         controller.selection,
         const TextSelection.collapsed(offset: 3, affinity: TextAffinity.upstream),
       );
+      // Toolbar only shows up on long press up.
       expect(find.byType(CupertinoButton), findsNothing);
 
       await gesture.moveBy(const Offset(50, 0));
@@ -1310,6 +1537,7 @@ void main() {
         controller.selection,
         const TextSelection(baseOffset: 8, extentOffset: 12),
       );
+      // Shows toolbar.
       expect(find.byType(CupertinoButton), findsNWidgets(3));
     },
   );
@@ -1380,36 +1608,85 @@ void main() {
   );
 
   testWidgets('force press selects word', (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController(
-        text: 'Atwater Peel Sherbrooke Bonaventure',
-      );
-      await tester.pumpWidget(
-        CupertinoApp(
-          home: Center(
-            child: CupertinoTextField(
-              controller: controller,
-            ),
+    final TextEditingController controller = TextEditingController(
+      text: 'Atwater Peel Sherbrooke Bonaventure',
+    );
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoTextField(
+            controller: controller,
           ),
         ),
-      );
+      ),
+    );
 
-      final Offset textfieldStart = tester.getTopLeft(find.byType(CupertinoTextField));
+    final Offset textfieldStart = tester.getTopLeft(find.byType(CupertinoTextField));
 
-      const int pointerValue = 1;
-      final TestGesture gesture =
-      await tester.startGesture(textfieldStart + const Offset(150.0, 5.0));
-      await gesture.updateWithCustomEvent(PointerMoveEvent(pointer: pointerValue, position: textfieldStart + const Offset(150.0, 5.0), pressure: 0.5, pressureMin: 0, pressureMax: 1));
-      // We expect the force press to select a word at the given location.
-      expect(
-        controller.selection,
-        const TextSelection(baseOffset: 8, extentOffset: 12),
-      );
+    const int pointerValue = 1;
+    final TestGesture gesture = await tester.createGesture();
+    await gesture.downWithCustomEvent(
+      textfieldStart + const Offset(150.0, 5.0),
+      PointerDownEvent(
+        pointer: pointerValue,
+        position: textfieldStart + const Offset(150.0, 5.0),
+        pressure: 3.0,
+        pressureMax: 6.0,
+        pressureMin: 0.0,
+      ),
+    );
+    // We expect the force press to select a word at the given location.
+    expect(
+      controller.selection,
+      const TextSelection(baseOffset: 8, extentOffset: 12),
+    );
 
-      await gesture.up();
-      await tester.pumpAndSettle();
-      expect(find.byType(CupertinoButton), findsNWidgets(3));
-    },
-  );
+    await gesture.up();
+    await tester.pump();
+    // Shows toolbar.
+    expect(find.byType(CupertinoButton), findsNWidgets(3));
+  });
+
+  testWidgets('force press on unsupported devices falls back to tap', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(
+      text: 'Atwater Peel Sherbrooke Bonaventure',
+    );
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoTextField(
+            controller: controller,
+          ),
+        ),
+      ),
+    );
+
+    final Offset textfieldStart = tester.getTopLeft(find.byType(CupertinoTextField));
+
+    const int pointerValue = 1;
+    final TestGesture gesture = await tester.createGesture();
+    await gesture.downWithCustomEvent(
+      textfieldStart + const Offset(150.0, 5.0),
+      PointerDownEvent(
+        pointer: pointerValue,
+        position: textfieldStart + const Offset(150.0, 5.0),
+        // iPhone 6 and below report 0 across the board.
+        pressure: 0,
+        pressureMax: 0,
+        pressureMin: 0,
+      ),
+    );
+    await gesture.up();
+    // Fall back to a single tap which selects the edge of the word.
+    expect(
+      controller.selection,
+      const TextSelection.collapsed(offset: 8),
+    );
+
+    await tester.pump();
+    // Falling back to a single tap doesn't trigger a toolbar.
+    expect(find.byType(CupertinoButton), findsNothing);
+  });
 
   testWidgets(
     'text field respects theme',
@@ -1428,7 +1705,7 @@ void main() {
       final BoxDecoration decoration = tester.widget<DecoratedBox>(
         find.descendant(
           of: find.byType(CupertinoTextField),
-          matching: find.byType(DecoratedBox)
+          matching: find.byType(DecoratedBox),
         ),
       ).decoration;
 
