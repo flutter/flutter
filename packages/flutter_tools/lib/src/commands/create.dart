@@ -612,7 +612,7 @@ String _createUTIIdentifier(String organization, String name) {
   return segments.join('.');
 }
 
-final Set<String> _packageDependencies = <String>{
+const Set<String> _packageDependencies = <String>{
   'analyzer',
   'args',
   'async',

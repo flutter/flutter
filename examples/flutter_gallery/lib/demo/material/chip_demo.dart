@@ -54,7 +54,7 @@ const Map<String, String> _avatars = <String, String>{
   'customer': 'people/square/peter.png',
 };
 
-final Map<String, Set<String>> _toolActions = <String, Set<String>>{
+const Map<String, Set<String>> _toolActions = <String, Set<String>>{
   'hammer': <String>{'flake', 'fragment', 'splinter'},
   'chisel': <String>{'flake', 'nick', 'splinter'},
   'fryer': <String>{'fry'},
@@ -62,7 +62,7 @@ final Map<String, Set<String>> _toolActions = <String, Set<String>>{
   'customer': <String>{'cash in', 'eat'},
 };
 
-final Map<String, Set<String>> _materialActions = <String, Set<String>>{
+const Map<String, Set<String>> _materialActions = <String, Set<String>>{
   'poker': <String>{'cash in'},
   'tortilla': <String>{'fry', 'eat'},
   'fish and': <String>{'fry', 'eat'},

@@ -71,7 +71,7 @@ const Map<String, String> kIdentifierRewrites = <String, String>{
 
 };
 
-final Set<String> kMirroredIcons = <String>{
+const Set<String> kMirroredIcons = <String>{
   // This list is obtained from:
   // http://google.github.io/material-design-icons/#icons-in-rtl
   'arrow_back',

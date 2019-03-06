@@ -43,7 +43,7 @@ class FlutterVersion {
   String _repositoryUrl;
   String get repositoryUrl => _repositoryUrl;
 
-  static Set<String> officialChannels = <String>{
+  static const Set<String> officialChannels = <String>{
     'master',
     'dev',
     'beta',
