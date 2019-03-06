@@ -18,8 +18,7 @@ import 'will_pop_scope.dart';
 ///
 /// {@tool snippet --template=stateful_widget_material}
 /// This example shows a [Form] with one [TextFormField] and a [RaisedButton]. A
-/// [GlobalKey] is required to identify the [Form], and it is used here to
-/// validate input.
+/// [GlobalKey] is used here to identify the [Form] and validate input.
 ///
 /// ```dart
 /// final _formKey = GlobalKey<FormState>();
