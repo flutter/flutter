@@ -950,6 +950,9 @@ class ProjectFileInvalidator {
 
   void _scanDirectory(String path, List<String> invalidatedFiles) {
     final Directory directory = fs.directory(path);
+    if (!directory.existsSync()) {
+      return;
+    }
     for (FileSystemEntity entity in directory.listSync(recursive: true)) {
       if (entity.path.endsWith('.dart')) {
         final int oldUpdatedAt = _updateTime[entity.path];
