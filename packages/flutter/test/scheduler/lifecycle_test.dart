@@ -9,9 +9,9 @@ void main() {
   testWidgets('initialLifecycleState is used to init state paused', (WidgetTester tester) async {
     // Mock the Window to provide paused as the AppLifecycleState
     final TestWidgetsFlutterBinding binding = tester.binding;
-    // Use paused instead of the default of resumed.
+    // Use paused as the initial state.
     binding.window.initialLifecycleStateTestValue = 'AppLifecycleState.paused';
-    binding.forceInitLifecycleState();
+    binding.initLifecycleState();
 
     expect(binding.window.initialLifecycleState, equals('AppLifecycleState.paused'));
     expect(SchedulerBinding.instance.lifecycleState.toString(), equals('AppLifecycleState.paused'));

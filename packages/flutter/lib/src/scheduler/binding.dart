@@ -5,7 +5,7 @@
 import 'dart:async';
 import 'dart:collection';
 import 'dart:developer';
-import 'dart:ui' show AppLifecycleState, window, Window;
+import 'dart:ui' show AppLifecycleState;
 
 import 'package:collection/collection.dart' show PriorityQueue, HeapPriorityQueue;
 import 'package:flutter/foundation.dart';
@@ -232,9 +232,9 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
   ///
   /// Once the lifecycleState is initialized, it cannot be initialized again.
   @protected
-  void initLifecycleState([Window testWindow]) {
-    if (_lifecycleState == null && _parseAppLifecycleMessage((testWindow ?? window).initialLifecycleState) != null) {
-      _handleLifecycleMessage((testWindow ?? window).initialLifecycleState);
+  void initLifecycleState() {
+    if (_lifecycleState == null && _parseAppLifecycleMessage(window.initialLifecycleState) != null) {
+      _handleLifecycleMessage(window.initialLifecycleState);
     }
   }
 

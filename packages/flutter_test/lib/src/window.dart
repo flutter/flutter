@@ -152,7 +152,7 @@ class TestWindow implements Window {
   }
 
   @override
-  String get initialLifecycleState => _initialLifecycleStateTestValue ?? 'AppLifecycleState.resumed';
+  String get initialLifecycleState => _initialLifecycleStateTestValue;
   String _initialLifecycleStateTestValue;
   set initialLifecycleStateTestValue(String state) {
     _initialLifecycleStateTestValue = state;
