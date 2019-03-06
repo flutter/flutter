@@ -7,6 +7,7 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 
 import 'box.dart';
@@ -99,10 +100,14 @@ class RenderAndroidView extends RenderBox {
   /// `viewController` must not be null.
   set viewController(AndroidViewController viewController) {
     assert(_viewController != null);
+    assert(viewController != null);
     if (_viewController == viewController)
       return;
+    final bool needsSemantics = _viewController.id != viewController.id;
     _viewController = viewController;
     _sizePlatformView();
+    if (needsSemantics)
+      markNeedsSemanticsUpdate();
   }
 
   /// How to behave during hit testing.
@@ -236,6 +241,14 @@ class RenderAndroidView extends RenderBox {
   }
 
   @override
+  void describeSemanticsConfiguration (SemanticsConfiguration config) {
+    super.describeSemanticsConfiguration(config);
+
+    config.isSemanticBoundary = true;
+    config.platformViewId = _viewController.id;
+  }
+
+  @override
   void detach() {
     _gestureRecognizer.reset();
     super.detach();
@@ -286,10 +299,13 @@ class RenderUiKitView extends RenderBox {
   /// must have been created by calling [PlatformViewsService.initUiKitView].
   UiKitViewController get viewController => _viewController;
   UiKitViewController _viewController;
-  set viewController(UiKitViewController viewId) {
-    assert(viewId != null);
-    _viewController = viewId;
+  set viewController(UiKitViewController viewController) {
+    assert(viewController != null);
+    final bool needsSemantics = _viewController.id != viewController.id;
+    _viewController = viewController;
     markNeedsPaint();
+    if (needsSemantics)
+      markNeedsSemanticsUpdate();
   }
 
   /// How to behave during hit testing.
@@ -374,6 +390,15 @@ class RenderUiKitView extends RenderBox {
       _viewController.rejectGesture();
     }
     _lastPointerDownEvent = null;
+  }
+
+  @override
+  void describeSemanticsConfiguration (SemanticsConfiguration config) {
+    print('fff');
+    super.describeSemanticsConfiguration(config);
+
+    config.isSemanticBoundary = true;
+    config.platformViewId = _viewController.id;
   }
 
   @override

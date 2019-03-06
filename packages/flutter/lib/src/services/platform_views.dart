@@ -25,6 +25,8 @@ final PlatformViewsRegistry platformViewsRegistry = PlatformViewsRegistry._insta
 class PlatformViewsRegistry {
   PlatformViewsRegistry._instance();
 
+  // Always non-negative. The id value -1 is used in the accessibility bridge
+  // to indicate the absence of a platform view.
   int _nextPlatformViewId = 0;
 
   /// Allocates a unique identifier for a platform view.
