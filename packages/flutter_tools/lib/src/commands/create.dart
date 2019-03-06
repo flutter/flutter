@@ -185,6 +185,7 @@ class CreateCommand extends FlutterCommand {
     return null;
   }
 
+  /// The hostname for the Flutter docs for the current channel.
   String get _snippetsHost => FlutterVersion.instance.channel == 'stable'
         ? 'docs.flutter.io'
         : 'master-docs.flutter.io';
@@ -199,10 +200,13 @@ class CreateCommand extends FlutterCommand {
     return utf8.decode(await fetchUrl(Uri.https(_snippetsHost, 'snippets/$sampleId.dart')));
   }
 
+  /// Fetches the samples index file from the Flutter docs website.
   Future<String> _fetchSamplesIndexFromServer() async {
     return utf8.decode(await fetchUrl(Uri.https(_snippetsHost, 'snippets/index.json')));
   }
 
+  /// Fetches the samples index file from the server and writes it to
+  /// [outputFilePath].
   Future<void> _writeSamplesJson(String outputFilePath) async {
     try {
       final File outputFile = fs.file(outputFilePath);
