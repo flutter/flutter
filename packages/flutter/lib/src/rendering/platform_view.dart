@@ -303,7 +303,6 @@ class RenderUiKitView extends RenderBox {
     assert(viewController != null);
     _viewController = viewController;
     markNeedsPaint();
-    }
   }
 
   /// How to behave during hit testing.
