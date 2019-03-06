@@ -214,7 +214,4 @@ class ColdRunner extends ResidentRunner {
         await device.device.stopApp(device.package);
     }
   }
-
-  @override
-  void dispose() {}
 }

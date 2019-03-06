@@ -15,7 +15,6 @@ class TestRunner extends ResidentRunner {
     : super(devices);
 
   bool hasHelpBeenPrinted = false;
-  bool disposeCalled = false;
   String receivedCommand;
 
   @override
@@ -47,11 +46,6 @@ class TestRunner extends ResidentRunner {
     Completer<DebugConnectionInfo> connectionInfoCompleter,
     Completer<void> appStartedCompleter,
   }) async => null;
-
-  @override
-  void dispose() {
-    disposeCalled = true;
-  }
 }
 
 void main() {
