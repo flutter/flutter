@@ -12,7 +12,7 @@ import 'package:build_daemon/data/build_status.dart' as build;
 import 'package:build_daemon/client.dart';
 import 'package:meta/meta.dart';
 import 'package:yaml/yaml.dart';
-import 'package:quiver/core.dart';
+import 'package:crypto/crypto.dart' show md5;
 
 import '../artifacts.dart';
 import '../base/common.dart';
@@ -139,10 +139,20 @@ class BuildRunner extends CodeGenerator {
     // Check if contents of builders changed. If so, invalidate build script
     // and regnerate.
     final YamlMap builders = await flutterProject.builders;
-    final String newContents = _produceScriptId(builders);
+    final List<int> appliedBuilderDigest = _produceScriptId(builders);
     if (scriptIdFile.existsSync() && buildSnapshot.existsSync()) {
-      final String contents = scriptIdFile.readAsStringSync().trim();
-      if (newContents == contents) {
+      final List<int> previousAppliedBuilderDigest = scriptIdFile.readAsBytesSync();
+      bool digestsAreEqual = false;
+      if (appliedBuilderDigest.length == previousAppliedBuilderDigest.length) {
+        digestsAreEqual = true;
+        for (int i = 0; i < appliedBuilderDigest.length; i++) {
+          if (appliedBuilderDigest[i] != previousAppliedBuilderDigest[i]) {
+            digestsAreEqual = false;
+            break;
+          }
+        }
+      }
+      if (digestsAreEqual) {
         return;
       }
     }
@@ -180,7 +190,7 @@ class BuildRunner extends CodeGenerator {
       if (!scriptIdFile.existsSync()) {
         scriptIdFile.createSync(recursive: true);
       }
-      scriptIdFile.writeAsStringSync(newContents);
+      scriptIdFile.writeAsBytesSync(appliedBuilderDigest);
       final PackageGraph packageGraph = PackageGraph.forPath(syntheticPubspec.parent.path);
       final BuildScriptGenerator buildScriptGenerator = const BuildScriptGeneratorFactory().create(flutterProject, packageGraph);
       await buildScriptGenerator.generateBuildScript();
@@ -295,12 +305,12 @@ class _BuildRunnerCodegenDaemon implements CodegenDaemon {
 }
 
 // Sorts the builders by name and produces a hashcode of the resulting iterable.
-String _produceScriptId(YamlMap builders) {
+List<int> _produceScriptId(YamlMap builders) {
   if (builders == null || builders.isEmpty) {
-    return '0';
+    return md5.convert(<int>[]).bytes;
   }
   final List<String> orderedBuilders = builders.keys
     .cast<String>()
     .toList()..sort();
-  return hashObjects(orderedBuilders).toString();
+  return md5.convert(orderedBuilders.join('').codeUnits).bytes;
 }
