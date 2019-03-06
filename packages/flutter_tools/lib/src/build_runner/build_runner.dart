@@ -116,15 +116,12 @@ class BuildRunner extends CodeGenerator {
       throw Exception('build_runner cannot find generated directory');
     }
     final String relativeMain = fs.path.relative(mainPath, from: flutterProject.directory.path);
-    printTrace('relativeMain: $relativeMain');
     final File packagesFile = fs.file(
       fs.path.join(generatedDirectory.path, fs.path.setExtension(relativeMain, '.packages'))
     );
-    printTrace('pacakgesFile: ${packagesFile.path}');
     final File dillFile = fs.file(
       fs.path.join(generatedDirectory.path, fs.path.setExtension(relativeMain, '.app.dill'))
     );
-    printTrace('pacakgesFile: ${dillFile.path}');
     if (!packagesFile.existsSync() || !dillFile.existsSync()) {
       throw Exception('build_runner did not produce output at expected location: ${dillFile.path} missing');
     }
@@ -133,7 +130,6 @@ class BuildRunner extends CodeGenerator {
 
   @override
   Future<void> generateBuildScript(FlutterProject flutterProject) async {
-    final FlutterProject flutterProject = await FlutterProject.current();
     final Directory entrypointDirectory = fs.directory(fs.path.join(flutterProject.dartTool.path, 'build', 'entrypoint'));
     final Directory generatedDirectory = fs.directory(fs.path.join(flutterProject.dartTool.path, 'flutter_tool'));
     final File buildScript = entrypointDirectory.childFile('build.dart');
