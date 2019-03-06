@@ -95,6 +95,12 @@ class CreateCommand extends FlutterCommand {
       defaultsTo: null,
       valueHelp: 'id',
     );
+    argParser.addOption(
+      'list-samples',
+      help: 'Specifies a file to output a list of Flutter code samples that can '
+        'be created with --sample to a JSON file.',
+      valueHelp: 'path',
+    );
     argParser.addFlag(
       'overwrite',
       negatable: true,
@@ -179,6 +185,10 @@ class CreateCommand extends FlutterCommand {
     return null;
   }
 
+  String get _snippetsHost => FlutterVersion.instance.channel == 'stable'
+        ? 'docs.flutter.io'
+        : 'master-docs.flutter.io';
+
   Future<String> _fetchSampleFromServer(String sampleId) async {
     // Sanity check the sampleId
     if (sampleId.contains(RegExp(r'[^-\w\.]'))) {
@@ -186,14 +196,33 @@ class CreateCommand extends FlutterCommand {
         'documentation and try again.');
     }
 
-    final String host = FlutterVersion.instance.channel == 'stable'
-        ? 'docs.flutter.io'
-        : 'master-docs.flutter.io';
-    return utf8.decode(await fetchUrl(Uri.https(host, 'snippets/$sampleId.dart')));
+    return utf8.decode(await fetchUrl(Uri.https(_snippetsHost, 'snippets/$sampleId.dart')));
+  }
+
+  Future<String> _fetchSamplesIndexFromServer() async {
+    return utf8.decode(await fetchUrl(Uri.https(_snippetsHost, 'snippets/index.json')));
+  }
+
+  Future<void> _writeSamplesJson(String outputFilePath) async {
+    try {
+      final File outputFile = fs.file(outputFilePath);
+      if (outputFile.existsSync()) {
+        throwToolExit('File "$outputFilePath" already exists', exitCode: 1);
+      }
+      outputFile.writeAsStringSync(await _fetchSamplesIndexFromServer());
+      printStatus('Wrote samples JSON to "$outputFilePath"');
+    } catch (e) {
+      throwToolExit('Failed to write samples JSON to "$outputFilePath": $e', exitCode: 2);
+    }
   }
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+    if (argResults['list-samples'] != null) {
+      await _writeSamplesJson(argResults['list-samples']);
+      return null;
+    }
+
     if (argResults.rest.isEmpty)
       throwToolExit('No option specified for the output directory.\n$usage', exitCode: 2);
 
