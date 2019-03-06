@@ -733,7 +733,7 @@ Future<bool> upgradePbxProjWithFlutterAssets(IosProject project) async {
 
   final RegExp oldAssets = RegExp(r'\/\* (flutter_assets|app\.flx)');
   final StringBuffer buffer = StringBuffer();
-  final Set<String> printedStatuses = Set<String>();
+  final Set<String> printedStatuses = <String>{};
 
   for (final String line in lines) {
     final Match match = oldAssets.firstMatch(line);
