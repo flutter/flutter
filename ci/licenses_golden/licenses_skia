@@ -1,4 +1,4 @@
-Signature: cf0991f5443f916cde12c3bc27ba049f
+Signature: 171d209ab2e2243f9d0472e568158ad1
 
 UNUSED LICENSES:
 
@@ -2110,6 +2110,14 @@ FILE: ../../../third_party/skia/experimental/docs/jsonbaseddoc.htm
 FILE: ../../../third_party/skia/experimental/docs/svgBackend.js
 FILE: ../../../third_party/skia/experimental/docs/svgbaseddoc.htm
 FILE: ../../../third_party/skia/experimental/docs/utilities.js
+FILE: ../../../third_party/skia/experimental/wasm-skp-debugger/cpu.js
+FILE: ../../../third_party/skia/experimental/wasm-skp-debugger/debugger/index.html
+FILE: ../../../third_party/skia/experimental/wasm-skp-debugger/externs.js
+FILE: ../../../third_party/skia/experimental/wasm-skp-debugger/fonts/NotoMono-Regular.ttf
+FILE: ../../../third_party/skia/experimental/wasm-skp-debugger/karma.conf.js
+FILE: ../../../third_party/skia/experimental/wasm-skp-debugger/package.json
+FILE: ../../../third_party/skia/experimental/wasm-skp-debugger/ready.js
+FILE: ../../../third_party/skia/experimental/wasm-skp-debugger/sample.skp
 FILE: ../../../third_party/skia/infra/bots/assets.isolate
 FILE: ../../../third_party/skia/infra/bots/assets/android_ndk_darwin/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/android_ndk_linux/VERSION
@@ -2255,13 +2263,6 @@ FILE: ../../../third_party/skia/infra/bots/recipes/android_compile.expected/andr
 FILE: ../../../third_party/skia/infra/bots/recipes/android_compile.expected/android_compile_trybot.json
 FILE: ../../../third_party/skia/infra/bots/recipes/android_compile.expected/android_compile_trybot_failure.json
 FILE: ../../../third_party/skia/infra/bots/recipes/android_compile.expected/android_compile_unrecognized_target.json
-FILE: ../../../third_party/skia/infra/bots/recipes/bookmaker.expected/nightly_bookmaker.json
-FILE: ../../../third_party/skia/infra/bots/recipes/bookmaker.expected/nightly_failed_extract_fiddles.json
-FILE: ../../../third_party/skia/infra/bots/recipes/bookmaker.expected/nightly_failed_fiddlecli.json
-FILE: ../../../third_party/skia/infra/bots/recipes/bookmaker.expected/nightly_failed_fiddles.json
-FILE: ../../../third_party/skia/infra/bots/recipes/bookmaker.expected/nightly_failed_upload.json
-FILE: ../../../third_party/skia/infra/bots/recipes/bookmaker.expected/percommit_bookmaker.json
-FILE: ../../../third_party/skia/infra/bots/recipes/bookmaker.expected/percommit_failed_validation.json
 FILE: ../../../third_party/skia/infra/bots/recipes/calmbench.expected/Calmbench-Debian9-Clang-GCE-CPU-AVX2-x86_64-Release-All.json
 FILE: ../../../third_party/skia/infra/bots/recipes/calmbench.expected/Calmbench-Ubuntu17-Clang-Golo-GPU-QuadroP400-x86_64-Release-All.json
 FILE: ../../../third_party/skia/infra/bots/recipes/check_generated_files.expected/Housekeeper-PerCommit-CheckGeneratedFiles.json
@@ -4652,7 +4653,10 @@ LIBRARY: skia
 ORIGIN: ../../../third_party/skia/experimental/canvaskit/WasmAliases.h + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/experimental/canvaskit/WasmAliases.h
+FILE: ../../../third_party/skia/experimental/canvaskit/particles_bindings.cpp
 FILE: ../../../third_party/skia/experimental/canvaskit/skottie_bindings.cpp
+FILE: ../../../third_party/skia/experimental/wasm-skp-debugger/debugger_bindings.cpp
+FILE: ../../../third_party/skia/gm/runtimecolorfilter.cpp
 FILE: ../../../third_party/skia/modules/particles/include/SkCurve.h
 FILE: ../../../third_party/skia/modules/particles/include/SkParticleAffector.h
 FILE: ../../../third_party/skia/modules/particles/include/SkParticleData.h
@@ -4665,6 +4669,7 @@ FILE: ../../../third_party/skia/modules/particles/src/SkParticleAffector.cpp
 FILE: ../../../third_party/skia/modules/particles/src/SkParticleDrawable.cpp
 FILE: ../../../third_party/skia/modules/particles/src/SkParticleEffect.cpp
 FILE: ../../../third_party/skia/modules/particles/src/SkReflected.cpp
+FILE: ../../../third_party/skia/src/core/SkColorFilterPriv.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2019 Google LLC
 
