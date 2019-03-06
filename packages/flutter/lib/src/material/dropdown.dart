@@ -350,7 +350,7 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
 }
 
 class _DropdownRoutePage<T> extends StatelessWidget {
- const  _DropdownRoutePage({
+  const _DropdownRoutePage({
     Key key,
     this.route,
     this.constraints,

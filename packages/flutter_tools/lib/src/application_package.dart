@@ -98,7 +98,7 @@ class AndroidApk extends ApplicationPackage {
       return null;
     }
 
-     final List<String> aaptArgs = <String>[
+    final List<String> aaptArgs = <String>[
        aaptPath,
       'dump',
       'xmltree',

@@ -669,7 +669,7 @@ class Tab2ConversationRow extends StatelessWidget {
 }
 
 List<Widget> buildTab2Conversation() {
- return <Widget>[
+  return <Widget>[
     const Tab2ConversationRow(
       text: "My Xanadu doesn't look right",
     ),

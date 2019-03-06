@@ -8,9 +8,13 @@ import '../demo/all.dart';
 import 'icons.dart';
 
 class GalleryDemoCategory {
-  const GalleryDemoCategory._({ this.name, this.icon });
-  @required final String name;
-  @required final IconData icon;
+  const GalleryDemoCategory._({
+    @required this.name,
+    @required this.icon,
+  });
+
+  final String name;
+  final IconData icon;
 
   @override
   bool operator ==(dynamic other) {
