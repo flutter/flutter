@@ -65,6 +65,7 @@ class Window final {
   void UpdateWindowMetrics(const ViewportMetrics& metrics);
   void UpdateLocales(const std::vector<std::string>& locales);
   void UpdateUserSettingsData(const std::string& data);
+  void UpdateLifecycleState(const std::string& data);
   void UpdateSemanticsEnabled(bool enabled);
   void UpdateAccessibilityFeatures(int32_t flags);
   void DispatchPlatformMessage(fml::RefPtr<PlatformMessage> message);

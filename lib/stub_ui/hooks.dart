@@ -84,6 +84,10 @@ void _updateUserSettingsData(String jsonData) {
   _updateAlwaysUse24HourFormat(data['alwaysUse24HourFormat']);
 }
 
+void _updateLifecycleState(String state) {
+  window._initialLifecycleState ??= state;
+}
+
 void _updateTextScaleFactor(double textScaleFactor) {
   window._textScaleFactor = textScaleFactor;
   _invoke(window.onTextScaleFactorChanged, window._onTextScaleFactorChangedZone);

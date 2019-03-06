@@ -217,6 +217,18 @@ void Window::UpdateUserSettingsData(const std::string& data) {
                                            }));
 }
 
+void Window::UpdateLifecycleState(const std::string& data) {
+  std::shared_ptr<tonic::DartState> dart_state = library_.dart_state().lock();
+  if (!dart_state)
+    return;
+  tonic::DartState::Scope scope(dart_state);
+  tonic::LogIfError(tonic::DartInvokeField(library_.value(),
+                                           "_updateLifecycleState",
+                                           {
+                                               tonic::StdStringToDart(data),
+                                           }));
+}
+
 void Window::UpdateSemanticsEnabled(bool enabled) {
   std::shared_ptr<tonic::DartState> dart_state = library_.dart_state().lock();
   if (!dart_state)

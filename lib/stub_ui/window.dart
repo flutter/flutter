@@ -551,6 +551,15 @@ class Window {
     _onLocaleChangedZone = Zone.current;
   }
 
+  /// The lifecycle state immediately after dart isolate initialization.
+  ///
+  /// This property will not be updated as the lifecycle changes.
+  ///
+  /// It is used to initialize [SchedulerBinding.lifecycleState] at startup
+  /// with any buffered lifecycle state events.
+  String get initialLifecycleState => _initialLifecycleState;
+  String _initialLifecycleState;
+
   /// The setting indicating the current brightness mode of the host platform.
   /// If the platform has no preference, [platformBrightness] defaults to [Brightness.light].
   Brightness get platformBrightness => _platformBrightness;
