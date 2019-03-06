@@ -132,8 +132,12 @@ class UpdatePackagesCommand extends FlutterCommand {
     // package that is in the goldens repository. We need to make sure that the goldens
     // repository is cloned locally before we verify or update pubspecs.
     printStatus('Cloning goldens repository...');
-    final GoldensClient goldensClient = GoldensClient();
-    await goldensClient.prepare();
+    try {
+      final GoldensClient goldensClient = GoldensClient();
+      await goldensClient.prepare();
+    } on NonZeroExitCode catch (e) {
+      throwToolExit(e.stderr, exitCode: e.exitCode);
+    }
 
     if (isVerifyOnly) {
       bool needsUpdate = false;
