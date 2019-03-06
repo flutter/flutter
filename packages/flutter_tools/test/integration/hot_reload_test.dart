@@ -39,12 +39,6 @@ void main() {
     test('newly added code executes during hot reload', () async {
       await _flutter.run();
       _project.uncommentHotReloadPrint();
-      // Allow filesystem watchers to catch the updated file. Under normal
-      // circumstances this await would be unecessary, but in the artificial
-      // test environment the immediate filesystem operation followed by the
-      // hot reload occurs before enough event-turns have elapsed for the file
-      // watcher callbacks to trigger.
-      await Future<void>.delayed(const Duration(milliseconds: 100));
       final StringBuffer stdout = StringBuffer();
       final StreamSubscription<String> subscription = _flutter.stdout.listen(stdout.writeln);
       try {

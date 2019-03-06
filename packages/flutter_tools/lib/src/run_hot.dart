@@ -78,8 +78,7 @@ class HotRunner extends ResidentRunner {
              saveCompilationTrace: saveCompilationTrace,
              stayResident: stayResident,
              ipv6: ipv6)  {
-    watcher = ProjectWatcher(
-      projectRootPath,
+    fileInvalidator = ProjectFileInvalidator(
       packagesFilePath ?? fs.path.absolute(PackageMap.globalPackagesPath),
     );
   }
@@ -89,7 +88,7 @@ class HotRunner extends ResidentRunner {
   final bool hostIsIde;
   bool _didAttach = false;
   final String dillOutputPath;
-  ProjectWatcher watcher;
+  ProjectFileInvalidator fileInvalidator;
 
   final Map<String, List<int>> benchmarkData = <String, List<int>>{};
   // The initial launch is from a snapshot.
@@ -182,8 +181,8 @@ class HotRunner extends ResidentRunner {
       printError('Error initializing DevFS: $error');
       return 3;
     }
-    // Wait for filesystem watchers to be ready.
-    await watcher.onReady;
+    // Initialize file invalidator.
+    fileInvalidator.findInvalidated();
     final Stopwatch initialUpdateDevFSsTimer = Stopwatch()..start();
     final UpdateFSReport devfsResult = await _updateDevFS(fullRestart: true);
     _addBenchmarkData(
@@ -322,9 +321,7 @@ class HotRunner extends ResidentRunner {
       if (result != 0)
         return UpdateFSReport(success: false);
     }
-
-    final List<String> invalidatedFiles = watcher.invalidatedFiles.toList();
-    watcher.invalidatedFiles.clear();
+    final List<String> invalidatedFiles = fileInvalidator.findInvalidated();
     final UpdateFSReport results = UpdateFSReport(success: true);
     for (FlutterDevice device in flutterDevices) {
       results.incorporateResults(await device.updateDevFS(
@@ -923,49 +920,41 @@ class HotRunner extends ResidentRunner {
   }
 }
 
-// Watches non pubspec dependencies from the .packages file for changes.
-class ProjectWatcher {
-  ProjectWatcher(String projectDirectory, String packagesPath) {
-    final String projectPath = projectDirectory ?? fs.currentDirectory.path;
-    if (!fs.directory(projectPath).existsSync() || !fs.file(packagesPath).existsSync()) {
-      return;
-    }
-    final List<Future<void>> _watchersReady = <Future<void>>[];
-    final Watcher watcher = DirectoryWatcher(projectPath);
-    watcher.events.listen(_onWatchEvent);
-    _watchersReady.add(watcher.ready);
-    final Map<String, Uri> packageMap = PackageMap(packagesPath).map;
-    for (String dependency in packageMap.keys) {
-      final String scriptPath = packageMap[dependency].path;
-      final String scriptUri = platform.isWindows && scriptPath.startsWith('/') ? scriptPath.substring(1) : scriptPath;
-      if (scriptUri.contains(pubCachePath)) {
-        continue;
-      }
-      if (!fs.directory(scriptUri).existsSync()) {
-        continue;
-      }
-      final Watcher watcher = DirectoryWatcher(scriptUri);
-      watcher.events.listen(_onWatchEvent);
-      _watchersReady.add(watcher.ready);
-    }
-    _onReady = Future.wait(_watchersReady);
-  }
-
-  /// Called when all listeners have finished initializing.
-  Future<void> get onReady => _onReady;
-  Future<void> _onReady;
+class ProjectFileInvalidator {
+  ProjectFileInvalidator(String packagesPath) : _packageMap = PackageMap(packagesPath).map;
 
   // Used to avoid watching pubspec directories. This will not change even with pub upgrade,
   // because that actually switches the directory and requires a corresponding
   // update to .packages
-  static const String pubCachePath = '.pub-cache';
+  static const String _pubCachePath = '.pub-cache';
 
-  final List<String> invalidatedFiles = <String>[];
+  final Map<String, Uri> _packageMap;
+  final Map<String, int> _updateTime = <String, int>{};
 
-  void _onWatchEvent(WatchEvent watchEvent) {
-    if (watchEvent.type == ChangeType.REMOVE || !watchEvent.path.trimRight().endsWith('dart')) {
-      return;
+  List<String> findInvalidated() {
+    final List<String> invalidatedFiles = <String>[];
+    for (String packageName in _packageMap.keys) {
+      final Uri packageUri =_packageMap[packageName];
+      final String packagePath = packageUri.path;
+      if (packagePath.contains(_pubCachePath)) {
+        continue;
+      }
+      _scanDirectory(packagePath, invalidatedFiles);
     }
-    invalidatedFiles.add(watchEvent.path);
+    return invalidatedFiles;
+  }
+
+  void _scanDirectory(String path, List<String> invalidatedFiles) {
+    final Directory directory = fs.directory(path);
+    for (FileSystemEntity entity in directory.listSync(recursive: true)) {
+      if (entity.path.endsWith('.dart')) {
+        final int oldUpdatedAt = _updateTime[entity.path];
+        final int updatedAt = fs.statSync(entity.path).modified.millisecondsSinceEpoch;
+        if (oldUpdatedAt == null || updatedAt > oldUpdatedAt) {
+          invalidatedFiles.add(entity.path);
+        }
+        _updateTime[entity.path] =updatedAt;
+      }
+    }
   }
 }
