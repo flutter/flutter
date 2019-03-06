@@ -104,6 +104,12 @@ vars = {
   'ios_tools_revision': '69b7c1b160e7107a6a98d948363772dc9caea46f',
 
   'buildtools_revision': 'bac220c15490dcf7b7d8136f75100bbc77e8d217',
+
+  # Checkout Android dependencies only on platforms where we build for Android targets.
+  'download_android_deps': 'host_os == "mac" or host_os == "linux"',
+
+  # Checkout Windows dependencies only if we are building on Windows.
+  'download_windows_deps' : 'host_os == "win"',
 }
 
 # Only these hosts are allowed for dependencies in this DEPS file.
@@ -383,10 +389,6 @@ deps = {
    Var('dart_git') + '/when.git' + '@' + '0.2.0',
 }
 
-recursedeps = [
-  'src/buildtools',
-]
-
 hooks = [
   {
     # This clobbers when necessary (based on get_landmines.py). It must be the
@@ -402,12 +404,12 @@ hooks = [
   {
     # Update the Windows toolchain if necessary.
     'name': 'win_toolchain',
+    'condition': 'download_windows_deps',
     'pattern': '.',
     'action': ['python', 'src/build/vs_toolchain.py', 'update'],
   },
   {
-    # Pull dart sdk if needed
-    # this will be used by android_tools
+    # Pull prebuilt dart sdk.
     'name': 'dart',
     'pattern': '.',
     'action': ['python', 'src/tools/dart/update.py'],
@@ -415,31 +417,17 @@ hooks = [
   {
     'name': 'prepare_android_downloader',
     'pattern': '.',
+    'condition': 'download_android_deps',
     'cwd': 'src/tools/android/android_sdk_downloader',
-    'condition': 'host_os == "linux" or host_os == "mac"',
     'action': [
         '../../../third_party/dart/tools/sdks/dart-sdk/bin/pub', # this hook _must_ be run _after_ the dart hook.
         'get'
     ],
   },
-  # TODO(dnfield): This can be enabled when we actually support building
-  # the android engine on windows.  For now there's no sense in having
-  # windows clients download bits they don't need.
-  # see: https://github.com/flutter/flutter/issues/13841
-  # {
-  #   'name': 'prepare_android_downloader_win',
-  #   'pattern': '.',
-  #   'cwd': 'src\\tools\\android\\android_sdk_downloader',
-  #   'condition': 'host_os == "win"',
-  #   'action': [
-  #       '..\\..\\..\\third_party\\dart\\tools\\sdks\\dart-sdk\\bin\\pub.bat', # this hook _must_ be run _after_ the dart hook.
-  #       'get'
-  #   ],
-  # },
   {
     'name': 'download_android_tools',
     'pattern': '.',
-    'condition': 'host_os == "mac" or host_os == "linux"',
+    'condition': 'download_android_deps',
     'action': [
         'src/third_party/dart/tools/sdks/dart-sdk/bin/dart', # this hook _must_ be run _after_ the dart hook.
         '--enable-asserts',
@@ -454,31 +442,10 @@ hooks = [
         '--ndk-version=19.1.5304403'
     ],
   },
-  # TODO(dnfield): This can be enabled when we actually support building
-  # the android engine on windows.  For now there's no sense in having
-  # windows clients download bits they don't need.
-  # see: https://github.com/flutter/flutter/issues/13841
-  # {
-  #   'name': 'download_android_tools_win',
-  #   'pattern': '.',
-  #   'condition': 'host_os == "win"',
-  #   'action': [
-  #       'src\\third_party\\dart\\tools\\sdks\\dart-sdk\\bin\\dart.exe', # this hook _must_ be run _after_ the dart hook.
-  #       '--enable-asserts',
-  #       'src\\tools\\android\\android_sdk_downloader\\lib\\main.dart',
-  #       '-y', # Accept licenses
-  #       '--out=src\\third_party\\android_tools',
-  #       '--platform=28',
-  #       '--platform-revision=6',
-  #       '--build-tools-version=28.0.3',
-  #       '--platform-tools-version=28.0.1',
-  #       '--tools-version=26.1.1',
-  #       '--ndk-version=19.0.5232133'
-  #   ],
-  # },
   {
     'name': 'download_android_support',
     'pattern': '.',
+    'condition': 'download_android_deps',
     'action': [
         'python',
         'src/flutter/tools/android_support/download_android_support.py',
@@ -510,18 +477,19 @@ hooks = [
     ],
   },
   {
-    "name": "7zip",
-    "pattern": ".",
-    "action": [
-      "download_from_google_storage",
-      "--no_auth",
-      "--no_resume",
-      "--bucket",
-      "dart-dependencies",
-      "--platform=win32",
-      "--extract",
-      "-s",
-      "src/third_party/dart/third_party/7zip.tar.gz.sha1",
+    'name': '7zip',
+    'pattern': '.',
+    'condition': 'download_windows_deps',
+    'action': [
+      'download_from_google_storage',
+      '--no_auth',
+      '--no_resume',
+      '--bucket',
+      'dart-dependencies',
+      '--platform=win32',
+      '--extract',
+      '-s',
+      'src/third_party/dart/third_party/7zip.tar.gz.sha1',
     ],
   },
 ]
