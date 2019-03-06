@@ -29,6 +29,9 @@ import '../project.dart';
 import '../resident_runner.dart';
 import 'build_script_generator.dart';
 
+// Arbitrarily choosen multi-root file scheme. This is used to configure the
+// frontend_server to resolve a package uri to multiple filesystem directories.
+// In this case, the source directory and a generated directory.
 const String _kMultirootScheme = 'org-dartlang-app';
 
 /// A wrapper for a build_runner process which delegates to a generated
@@ -271,7 +274,7 @@ class BuildRunner extends CodeGenerator {
   }
 
   // Create generated packages file which adds a multi-root scheme to the user's
-  // project directory. currently we only replace the root package with a multiroot
+  // project directory. Currently we only replace the root package with a multiroot
   // scheme. To support codegen on arbitrary packages we would need to do
   // this for each dependency.
   void _generatePackages(FlutterProject flutterProject) {
