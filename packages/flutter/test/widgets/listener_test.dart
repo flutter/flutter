@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/gestures.dart';
@@ -98,8 +99,10 @@ void main() {
       PointerEnterEvent enter;
       PointerHoverEvent move;
       PointerExitEvent exit;
+      final GlobalKey listenerKey = GlobalKey();
       await tester.pumpWidget(Center(
         child: Listener(
+          key: listenerKey,
           child: Container(
             width: 100.0,
             height: 100.0,
@@ -109,6 +112,7 @@ void main() {
           onPointerExit: (PointerExitEvent details) => exit = details,
         ),
       ));
+      final RenderPointerListener renderListener = listenerKey.currentContext.findRenderObject();
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
       await gesture.moveTo(const Offset(400.0, 300.0));
       await tester.pump();
@@ -125,6 +129,7 @@ void main() {
       ));
       expect(exit, isNotNull);
       expect(exit.position, equals(const Offset(400.0, 300.0)));
+      expect(WidgetsBinding.instance.mouseTracker.isAnnotationAttached(renderListener.hoverAnnotation), isFalse);
     });
   });
 }
