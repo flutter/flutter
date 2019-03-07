@@ -79,7 +79,6 @@ class PlatformViewsService {
     @required TextDirection layoutDirection,
     dynamic creationParams,
     MessageCodec<dynamic> creationParamsCodec,
-    PlatformViewCreatedCallback onPlatformViewCreated,
   }) {
     assert(id != null);
     assert(viewType != null);
@@ -91,7 +90,6 @@ class PlatformViewsService {
       creationParams,
       creationParamsCodec,
       layoutDirection,
-      onPlatformViewCreated,
     );
   }
 
@@ -408,7 +406,6 @@ class AndroidViewController {
     dynamic creationParams,
     MessageCodec<dynamic> creationParamsCodec,
     TextDirection layoutDirection,
-    PlatformViewCreatedCallback onPlatformViewCreated,
   ) : assert(id != null),
       assert(viewType != null),
       assert(layoutDirection != null),
@@ -417,11 +414,7 @@ class AndroidViewController {
       _creationParams = creationParams,
       _creationParamsCodec = creationParamsCodec,
       _layoutDirection = layoutDirection,
-      _state = _AndroidViewState.waitingForSize {
-    if (onPlatformViewCreated != null) {
-      _platformViewCreatedCallbacks.add(onPlatformViewCreated);
-    }
-  }
+      _state = _AndroidViewState.waitingForSize;
 
   /// Action code for when a primary pointer touched the screen.
   ///
