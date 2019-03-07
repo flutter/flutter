@@ -4,8 +4,6 @@
 
 import 'dart:async';
 
-import 'package:flutter_tools/src/project.dart';
-
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/time.dart';
@@ -17,6 +15,7 @@ import '../compile.dart';
 import '../device.dart';
 import '../globals.dart';
 import '../ios/mac.dart';
+import '../project.dart';
 import '../resident_runner.dart';
 import '../run_cold.dart';
 import '../run_hot.dart';
