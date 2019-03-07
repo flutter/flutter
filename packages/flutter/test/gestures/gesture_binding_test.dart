@@ -86,42 +86,14 @@ void main() {
     _binding.callback = events.add;
 
     ui.window.onPointerDataPacket(packet);
+
     expect(events.length, 0);
-    expect(pointerRouterEvents.length, 6,
+    expect(pointerRouterEvents.length, 4,
         reason: 'pointerRouterEvents contains: $pointerRouterEvents');
-    expect(pointerRouterEvents[0].runtimeType, equals(PointerAddedEvent));
+    expect(pointerRouterEvents[0].runtimeType, equals(PointerHoverEvent));
     expect(pointerRouterEvents[1].runtimeType, equals(PointerHoverEvent));
-    expect(pointerRouterEvents[2].runtimeType, equals(PointerHoverEvent));
-    expect(pointerRouterEvents[3].runtimeType, equals(PointerRemovedEvent));
-    expect(pointerRouterEvents[4].runtimeType, equals(PointerAddedEvent));
-    expect(pointerRouterEvents[5].runtimeType, equals(PointerHoverEvent));
-  });
-
-  test('Synthetic move events', () {
-    final ui.PointerDataPacket packet = ui.PointerDataPacket(
-      data: <ui.PointerData>[
-        ui.PointerData(
-          change: ui.PointerChange.down,
-          physicalX: 1.0 * ui.window.devicePixelRatio,
-          physicalY: 3.0 * ui.window.devicePixelRatio,
-        ),
-        ui.PointerData(
-          change: ui.PointerChange.up,
-          physicalX: 10.0 * ui.window.devicePixelRatio,
-          physicalY: 15.0 * ui.window.devicePixelRatio,
-        ),
-      ]
-    );
-
-    final List<PointerEvent> events = <PointerEvent>[];
-    _binding.callback = events.add;
-
-    ui.window.onPointerDataPacket(packet);
-    expect(events.length, 3);
-    expect(events[0].runtimeType, equals(PointerDownEvent));
-    expect(events[1].runtimeType, equals(PointerMoveEvent));
-    expect(events[1].delta, equals(const Offset(9.0, 12.0)));
-    expect(events[2].runtimeType, equals(PointerUpEvent));
+    expect(pointerRouterEvents[2].runtimeType, equals(PointerRemovedEvent));
+    expect(pointerRouterEvents[3].runtimeType, equals(PointerHoverEvent));
   });
 
   test('Pointer cancel events', () {
@@ -136,7 +108,8 @@ void main() {
     _binding.callback = events.add;
 
     ui.window.onPointerDataPacket(packet);
-    expect(events.length, 2);
+    expect(events.length, 2,
+        reason: 'events contains: $events');
     expect(events[0].runtimeType, equals(PointerDownEvent));
     expect(events[1].runtimeType, equals(PointerCancelEvent));
   });
@@ -162,49 +135,7 @@ void main() {
     expect(events[1].runtimeType, equals(PointerCancelEvent));
   });
 
-  test('Can expand add and hover pointers', () {
-    const ui.PointerDataPacket packet = ui.PointerDataPacket(
-      data: <ui.PointerData>[
-        ui.PointerData(change: ui.PointerChange.add, device: 24),
-        ui.PointerData(change: ui.PointerChange.hover, device: 24),
-        ui.PointerData(change: ui.PointerChange.remove, device: 24),
-        ui.PointerData(change: ui.PointerChange.hover, device: 24),
-      ]
-    );
-
-    final List<PointerEvent> events = PointerEventConverter.expand(
-      packet.data, ui.window.devicePixelRatio).toList();
-
-    expect(events.length, 5);
-    expect(events[0].runtimeType, equals(PointerAddedEvent));
-    expect(events[1].runtimeType, equals(PointerHoverEvent));
-    expect(events[2].runtimeType, equals(PointerRemovedEvent));
-    expect(events[3].runtimeType, equals(PointerAddedEvent));
-    expect(events[4].runtimeType, equals(PointerHoverEvent));
-  });
-
-  test('Synthetic hover and cancel for misplaced down and remove', () {
-    final ui.PointerDataPacket packet = ui.PointerDataPacket(
-      data: <ui.PointerData>[
-        ui.PointerData(change: ui.PointerChange.add, device: 25, physicalX: 10.0 * ui.window.devicePixelRatio, physicalY: 10.0 * ui.window.devicePixelRatio),
-        ui.PointerData(change: ui.PointerChange.down, device: 25, physicalX: 15.0 * ui.window.devicePixelRatio, physicalY: 17.0 * ui.window.devicePixelRatio),
-        const ui.PointerData(change: ui.PointerChange.remove, device: 25),
-      ]
-    );
-
-    final List<PointerEvent> events = PointerEventConverter.expand(
-      packet.data, ui.window.devicePixelRatio).toList();
-
-    expect(events.length, 5);
-    expect(events[0].runtimeType, equals(PointerAddedEvent));
-    expect(events[1].runtimeType, equals(PointerHoverEvent));
-    expect(events[1].delta, equals(const Offset(5.0, 7.0)));
-    expect(events[2].runtimeType, equals(PointerDownEvent));
-    expect(events[3].runtimeType, equals(PointerCancelEvent));
-    expect(events[4].runtimeType, equals(PointerRemovedEvent));
-  });
-
-  test('Can expand pointer scroll events', () {
+  test('Can pointer scroll events', () {
     const ui.PointerDataPacket packet = ui.PointerDataPacket(
         data: <ui.PointerData>[
           ui.PointerData(change: ui.PointerChange.add),
@@ -212,41 +143,11 @@ void main() {
         ]
     );
 
-    final List<PointerEvent> events = PointerEventConverter.expand(
-      packet.data, ui.window.devicePixelRatio).toList();
+    final List<PointerEvent> events = PointerEventConverter.format(
+        packet.data, ui.window.devicePixelRatio).toList();
 
     expect(events.length, 2);
     expect(events[0].runtimeType, equals(PointerAddedEvent));
     expect(events[1].runtimeType, equals(PointerScrollEvent));
-  });
-
-  test('Synthetic hover/move for misplaced scrolls', () {
-    final Offset lastLocation = const Offset(10.0, 10.0) * ui.window.devicePixelRatio;
-    const Offset unexpectedOffset = Offset(5.0, 7.0);
-    final Offset scrollLocation = lastLocation + unexpectedOffset * ui.window.devicePixelRatio;
-    final ui.PointerDataPacket packet = ui.PointerDataPacket(
-      data: <ui.PointerData>[
-        ui.PointerData(change: ui.PointerChange.add, physicalX: lastLocation.dx, physicalY: lastLocation.dy),
-        ui.PointerData(change: ui.PointerChange.hover, physicalX: scrollLocation.dx, physicalY: scrollLocation.dy, signalKind: ui.PointerSignalKind.scroll),
-        // Move back to starting location, click, and repeat to test mouse-down version.
-        ui.PointerData(change: ui.PointerChange.hover, physicalX: lastLocation.dx, physicalY: lastLocation.dy),
-        ui.PointerData(change: ui.PointerChange.down, physicalX: lastLocation.dx, physicalY: lastLocation.dy),
-        ui.PointerData(change: ui.PointerChange.hover, physicalX: scrollLocation.dx, physicalY: scrollLocation.dy, signalKind: ui.PointerSignalKind.scroll),
-      ]
-    );
-
-    final List<PointerEvent> events = PointerEventConverter.expand(
-      packet.data, ui.window.devicePixelRatio).toList();
-
-    expect(events.length, 7);
-    expect(events[0].runtimeType, equals(PointerAddedEvent));
-    expect(events[1].runtimeType, equals(PointerHoverEvent));
-    expect(events[1].delta, equals(unexpectedOffset));
-    expect(events[2].runtimeType, equals(PointerScrollEvent));
-    expect(events[3].runtimeType, equals(PointerHoverEvent));
-    expect(events[4].runtimeType, equals(PointerDownEvent));
-    expect(events[5].runtimeType, equals(PointerMoveEvent));
-    expect(events[5].delta, equals(unexpectedOffset));
-    expect(events[6].runtimeType, equals(PointerScrollEvent));
   });
 }
