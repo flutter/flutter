@@ -645,9 +645,7 @@ void main() {
     expect(decoration.border, isNull);
   });
 
-  testWidgets(
-      'Border is displayed by default in sliver nav bar',
-      (WidgetTester tester) async {
+  testWidgets('Border is displayed by default in sliver nav bar', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: CupertinoPageScaffold(
@@ -675,9 +673,7 @@ void main() {
     expect(bottom, isNotNull);
   });
 
-  testWidgets(
-      'Border is not displayed when null in sliver nav bar',
-      (WidgetTester tester) async {
+  testWidgets('Border is not displayed when null in sliver nav bar', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: CupertinoPageScaffold(
@@ -749,9 +745,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets(
-      'Border can be overridden in sliver nav bar',
-      (WidgetTester tester) async {
+  testWidgets('Border can be overridden in sliver nav bar', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: CupertinoPageScaffold(

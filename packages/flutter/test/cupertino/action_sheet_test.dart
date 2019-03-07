@@ -10,8 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
-  testWidgets('Verify that a tap on modal barrier dismisses an action sheet',
-          (WidgetTester tester) async {
+  testWidgets('Verify that a tap on modal barrier dismisses an action sheet', (WidgetTester tester) async {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
         const CupertinoActionSheet(
@@ -30,8 +29,7 @@ void main() {
     expect(find.text('Action Sheet'), findsNothing);
   });
 
-  testWidgets('Verify that a tap on title section (not buttons) does not dismiss an action sheet',
-          (WidgetTester tester) async {
+  testWidgets('Verify that a tap on title section (not buttons) does not dismiss an action sheet', (WidgetTester tester) async {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
         const CupertinoActionSheet(
@@ -82,8 +80,7 @@ void main() {
     expect(widget.style.fontWeight, equals(FontWeight.w600));
   });
 
-  testWidgets('Action sheet text styles are correct when both title and message are included',
-          (WidgetTester tester) async {
+  testWidgets('Action sheet text styles are correct when both title and message are included', (WidgetTester tester) async {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
         const CupertinoActionSheet(
@@ -105,8 +102,7 @@ void main() {
     expect(messageStyle.style.fontWeight, FontWeight.w400);
   });
 
-  testWidgets('Action sheet text styles are correct when title but no message is included',
-          (WidgetTester tester) async {
+  testWidgets('Action sheet text styles are correct when title but no message is included', (WidgetTester tester) async {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
         const CupertinoActionSheet(
@@ -124,8 +120,7 @@ void main() {
     expect(titleStyle.style.fontWeight, FontWeight.w400);
   });
 
-  testWidgets('Action sheet text styles are correct when message but no title is included',
-          (WidgetTester tester) async {
+  testWidgets('Action sheet text styles are correct when message but no title is included', (WidgetTester tester) async {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
         const CupertinoActionSheet(
@@ -364,8 +359,7 @@ void main() {
     expect(find.text('One'), findsNothing);
   });
 
-  testWidgets('Action sheet width is correct when given infinite horizontal space',
-          (WidgetTester tester) async {
+  testWidgets('Action sheet width is correct when given infinite horizontal space', (WidgetTester tester) async {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
         Row(
@@ -393,8 +387,7 @@ void main() {
     expect(tester.getSize(find.byType(CupertinoActionSheet)).width, 600.0);
   });
 
-  testWidgets('Action sheet height is correct when given infinite vertical space',
-          (WidgetTester tester) async {
+  testWidgets('Action sheet height is correct when given infinite vertical space', (WidgetTester tester) async {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
         Column(
