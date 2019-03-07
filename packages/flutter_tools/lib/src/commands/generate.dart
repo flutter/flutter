@@ -4,6 +4,7 @@
 
 import '../base/common.dart';
 import '../codegen.dart';
+import '../project.dart';
 import '../runner/flutter_command.dart';
 
 class GenerateCommand extends FlutterCommand {
@@ -24,7 +25,8 @@ class GenerateCommand extends FlutterCommand {
     if (!experimentalBuildEnabled) {
       throwToolExit('FLUTTER_EXPERIMENTAL_BUILD is not enabled, codegen is unsupported.');
     }
-    await codeGenerator.generate(mainPath: argResults['target']);
+    final FlutterProject flutterProject = await FlutterProject.current();
+    await codeGenerator.generate(flutterProject, mainPath: argResults['target']);
     return null;
   }
 }

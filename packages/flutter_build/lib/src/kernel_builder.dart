@@ -89,25 +89,18 @@ class FlutterKernelBuilder implements Builder {
       return;
     }
     final AssetId outputId = buildStep.inputId.changeExtension(_kFlutterDillOutputExtension);
-    final AssetId packagesOutputId = buildStep.inputId.changeExtension(_kPackagesExtension);
 
     // Create a scratch space file that can be read/written by the frontend server.
     // It is okay to hard-code these file names because we will copy them back
     // from the temp directory at the end of the build step.
     final Directory tempDirecory = await Directory.systemTemp.createTemp('_flutter_build');
-    final File packagesFile = File(path.join(tempDirecory.path, _kPackagesExtension));
+    final Directory projectDir = File(packagesPath).parent;
+    final String packagesFilePath = path.join(projectDir.path, '.packages.generated');
     final File outputFile =  File(path.join(tempDirecory.path, 'main.app.dill'));
     await outputFile.create();
-    await packagesFile.create();
 
-    final Directory projectDir = File(packagesPath).parent;
     final String packageName = buildStep.inputId.package;
-    final String oldPackagesContents = await File(packagesPath).readAsString();
-    // Note: currently we only replace the root package with a multiroot
-    // scheme. To support codegen on arbitrary packages we will need to do
-    // this for each dependency.
-    final String newPackagesContents = oldPackagesContents.replaceFirst('$packageName:lib/', '$packageName:$_kMultirootScheme:/');
-    await packagesFile.writeAsString(newPackagesContents);
+
     String absoluteMainPath;
     if (path.isAbsolute(mainPath)) {
       absoluteMainPath = mainPath;
@@ -143,7 +136,7 @@ class FlutterKernelBuilder implements Builder {
     final String normalRoot =  path.join(projectDir.absolute.path, 'lib${Platform.pathSeparator}');
     arguments.addAll(<String>[
       '--packages',
-      Uri.file(packagesFile.path).toString(),
+      packagesFilePath,
       '--output-dill',
       outputFile.path,
       '--filesystem-root',
@@ -158,7 +151,7 @@ class FlutterKernelBuilder implements Builder {
     }
     final Uri mainUri = _PackageUriMapper.findUri(
       absoluteMainPath,
-      packagesFile.path,
+      packagesFilePath,
       _kMultirootScheme,
       <String>[normalRoot, generatedRoot],
     );
@@ -178,7 +171,6 @@ class FlutterKernelBuilder implements Builder {
       await server.exitCode;
       await _stdoutHandler.compilerOutput.future;
       await buildStep.writeAsBytes(outputId, await outputFile.readAsBytes());
-      await buildStep.writeAsBytes(packagesOutputId, await packagesFile.readAsBytes());
     } catch (err, stackTrace) {
       log.shout('frontend server failed to start: $err, $stackTrace');
     }
