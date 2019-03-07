@@ -125,6 +125,11 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   @protected
   bool get disableShadows => false;
 
+  /// Increase the timeout for the current test by the given duration.
+  void addTime(Duration duration) {
+    // Noop, see [AutomatedTestWidgetsFlutterBinding. addTime] for an actual implementation.
+  }
+
   /// The value to set [debugCheckIntrinsicSizes] to while tests are running.
   ///
   /// This can be used to enable additional checks. For example,
@@ -843,7 +848,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
       _timeoutCompleter.completeError(
         TimeoutException(
           'The test exceeded the timeout. It may have hung.\n'
-          'Consider using "addTime" to increase the timeout before expensive operations.',
+          'Consider using "tester.binding.addTime" to increase the timeout before expensive operations.',
           _timeout,
         ),
       );
@@ -873,6 +878,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   ///
   ///  * [defaultTestTimeout], the maximum that the timeout can reach.
   ///    (That timeout is implemented by the test package.)
+  @override
   void addTime(Duration duration) {
     assert(_timeout != null, 'addTime can only be called during a test.');
     _timeout += duration;

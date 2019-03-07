@@ -281,15 +281,15 @@ class IsolateExampleState extends State<StatefulWidget> with SingleTickerProvide
   }
 
   String _getStatus(CalculationState state) {
-      switch (state) {
-        case CalculationState.loading:
-          return 'Loading...';
-        case CalculationState.calculating:
-          return 'In Progress';
-        case CalculationState.idle:
-        default:
-          return 'Idle';
-      }
+    switch (state) {
+      case CalculationState.loading:
+        return 'Loading...';
+      case CalculationState.calculating:
+        return 'In Progress';
+      case CalculationState.idle:
+      default:
+        return 'Idle';
+    }
   }
 
   void _updateState(String result, double progress) {

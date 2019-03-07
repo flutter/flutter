@@ -118,7 +118,7 @@ class AOTSnapshotter {
     final String vmServicePath = fs.path.join(skyEnginePkg, 'sdk_ext', 'vmservice_io.dart');
 
     final List<String> inputPaths = <String>[uiPath, vmServicePath, mainPath];
-    final Set<String> outputPaths = Set<String>();
+    final Set<String> outputPaths = <String>{};
 
     final String depfilePath = fs.path.join(outputDir.path, 'snapshot.d');
     final List<String> genSnapshotArgs = <String>[
@@ -458,7 +458,7 @@ class JITSnapshotter {
       genSnapshotArgs.addAll(extraGenSnapshotOptions);
     }
 
-    final Set<String> outputPaths = Set<String>();
+    final Set<String> outputPaths = <String>{};
     outputPaths.addAll(<String>[isolateSnapshotData]);
     if (!createPatch) {
       outputPaths.add(isolateSnapshotInstructions);
