@@ -1,0 +1,66 @@
+# Copyright 2019 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+group("web_sdk") {
+  sdk_copy_deps = []
+
+  deps = [
+    ":web_ui_sources",
+    ":web_libraries_json",
+    ":dart_sdk_internal",
+  ] + sdk_copy_deps
+}
+
+copy("web_ui_sources") {
+  sources = [
+    "$flutter_root/lib/stub_ui/compositing.dart",
+    "$flutter_root/lib/stub_ui/geometry.dart",
+    "$flutter_root/lib/stub_ui/hash_codes.dart",
+    "$flutter_root/lib/stub_ui/hooks.dart",
+    "$flutter_root/lib/stub_ui/isolate_name_server.dart",
+    "$flutter_root/lib/stub_ui/lerp.dart",
+    "$flutter_root/lib/stub_ui/natives.dart",
+    "$flutter_root/lib/stub_ui/painting.dart",
+    "$flutter_root/lib/stub_ui/plugins.dart",
+    "$flutter_root/lib/stub_ui/pointer.dart",
+    "$flutter_root/lib/stub_ui/semantics.dart",
+    "$flutter_root/lib/stub_ui/text.dart",
+    "$flutter_root/lib/stub_ui/ui.dart",
+    "$flutter_root/lib/stub_ui/versions.dart",
+    "$flutter_root/lib/stub_ui/window.dart",
+  ]
+
+  outputs = [
+    "$root_out_dir/flutter_web_sdk/lib/ui/{{source_file_part}}"
+  ]
+}
+
+copy("web_libraries_json") {
+  sources = [
+    "libraries.json"
+  ]
+
+  outputs = [
+    "$root_out_dir/flutter_web_sdk/lib/libraries.json"
+  ]
+}
+
+copy("dart_sdk_internal") {
+    deps = [
+        "//third_party/dart:create_sdk"
+    ]
+
+    sources = [
+        "$root_out_dir/dart-sdk/lib/_internal/ddc_sdk.dill",
+        "$root_out_dir/dart-sdk/lib/_internal/dart2js_platform.dill",
+        "$root_out_dir/dart-sdk/lib/_internal/dart2js_server_platform.dill",
+        "$root_out_dir/dart-sdk/lib/_internal/ddc_sdk.sum",
+        "$root_out_dir/dart-sdk/lib/_internal/strong.sum",
+        "$root_out_dir/dart-sdk/lib/_internal/vm_platform_strong.dill",
+    ]
+
+    outputs = [
+        "$root_out_dir/flutter_web_sdk/lib/_internal/{{source_file_part}}"
+    ]
+}

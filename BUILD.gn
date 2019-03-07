@@ -3,7 +3,6 @@
 # found in the LICENSE file.
 
 import("$flutter_root/common/config.gni")
-import("//third_party/dart/build/dart/dart_action.gni")
 
 group("flutter") {
   testonly = true
@@ -24,7 +23,7 @@ group("flutter") {
       public_deps += [
         "$flutter_root/frontend_server",
         "//third_party/dart:create_sdk",
-        "$flutter_root/lib/stub_ui:stub_ui",
+        "$flutter_root/web_sdk",
       ]
     }
   }

@@ -251,7 +251,6 @@ FILE: ../../../flutter/lib/stub_ui/hash_codes.dart
 FILE: ../../../flutter/lib/stub_ui/hooks.dart
 FILE: ../../../flutter/lib/stub_ui/isolate_name_server.dart
 FILE: ../../../flutter/lib/stub_ui/lerp.dart
-FILE: ../../../flutter/lib/stub_ui/libraries.json
 FILE: ../../../flutter/lib/stub_ui/natives.dart
 FILE: ../../../flutter/lib/stub_ui/painting.dart
 FILE: ../../../flutter/lib/stub_ui/plugins.dart
@@ -704,6 +703,7 @@ FILE: ../../../flutter/vulkan/vulkan_utilities.cc
 FILE: ../../../flutter/vulkan/vulkan_utilities.h
 FILE: ../../../flutter/vulkan/vulkan_window.cc
 FILE: ../../../flutter/vulkan/vulkan_window.h
+FILE: ../../../flutter/web_sdk/libraries.json
 ----------------------------------------------------------------------------------------------------
 Copyright 2013 The Flutter Authors. All rights reserved.
 
