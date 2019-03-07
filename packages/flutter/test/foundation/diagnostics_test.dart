@@ -629,7 +629,7 @@ void main() {
                 StringProperty('node_type', '<leaf node>', showName: false, quoted: false),
                 IntProperty('foo', 42),
               ],
-              style: DiagnosticsTreeStyle.dense
+              style: DiagnosticsTreeStyle.dense,
             ),
           ],
         ),
@@ -1244,7 +1244,7 @@ void main() {
       'name',
       rect,
       showName: false,
-      level: DiagnosticLevel.warning
+      level: DiagnosticLevel.warning,
     );
     expect(hideName.value, equals(rect));
     expect(hideName.level, equals(DiagnosticLevel.warning));

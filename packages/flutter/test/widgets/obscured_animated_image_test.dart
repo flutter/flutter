@@ -23,8 +23,8 @@ Future<void> main() async {
       MaterialApp(
         home: Image(image: fakeImageProvider, excludeFromSemantics: true, key: imageKey),
         routes: <String, WidgetBuilder> {
-          '/page': (BuildContext context) => Container()
-        }
+          '/page': (BuildContext context) => Container(),
+        },
       )
     );
     final RenderImage renderImage = tester.renderObject(find.byType(Image));

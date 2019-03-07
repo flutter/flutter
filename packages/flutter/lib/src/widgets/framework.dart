@@ -1942,11 +1942,15 @@ abstract class BuildContext {
   /// Returns the nearest ancestor widget of the given type, which must be the
   /// type of a concrete [Widget] subclass.
   ///
-  /// This should not be used from build methods, because the build context will
-  /// not be rebuilt if the value that would be returned by this method changes.
-  /// In general, [inheritFromWidgetOfExactType] is more useful. This method is
+  /// In general, [inheritFromWidgetOfExactType] is more useful, since inherited
+  /// widgets will trigger consumers to rebuild when they change. This method is
   /// appropriate when used in interaction event handlers (e.g. gesture
-  /// callbacks), or for performing one-off tasks.
+  /// callbacks) or for performing one-off tasks such as asserting that you have
+  /// or don't have a widget of a specific type as an ancestor. The return value
+  /// of a Widget's build method should not depend on the value returned by this
+  /// method, because the build context will not rebuild if the return value of
+  /// this method changes. This could lead to a situation where data used in the
+  /// build method changes, but the widget is not rebuilt.
   ///
   /// Calling this method is relatively expensive (O(N) in the depth of the
   /// tree). Only call this method if the distance from this widget to the
@@ -2277,7 +2281,7 @@ class BuildOwner {
             informationCollector: (StringBuffer information) {
               information.writeln('The element being rebuilt at the time was index $index of $dirtyCount:');
               information.write('  ${_dirtyElements[index]}');
-            }
+            },
           );
         }
         index += 1;
@@ -3416,7 +3420,8 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   }
 
   /// A short, textual description of this element.
-  @override String toStringShort() {
+  @override
+  String toStringShort() {
     return widget != null ? '${widget.toStringShort()}' : '[$runtimeType]';
   }
 
@@ -4056,7 +4061,7 @@ class ParentDataElement<T extends RenderObjectWidget> extends ProxyElement {
           description: '$this',
           ownershipChain: parent.debugGetCreatorChain(10),
           foundValidAncestor: ancestor != null,
-          badAncestors: badAncestors
+          badAncestors: badAncestors,
         )
       );
     }());
@@ -5005,7 +5010,7 @@ FlutterErrorDetails _debugReportException(
   String context,
   dynamic exception,
   StackTrace stack, {
-  InformationCollector informationCollector
+  InformationCollector informationCollector,
 }) {
   final FlutterErrorDetails details = FlutterErrorDetails(
     exception: exception,

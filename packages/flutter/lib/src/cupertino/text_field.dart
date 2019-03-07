@@ -126,7 +126,7 @@ enum OverlayVisibilityMode {
 class CupertinoTextField extends StatefulWidget {
   /// Creates an iOS-style text field.
   ///
-  /// To provide a prefilled text entry, pass in a [TextEditingController] with
+  /// To provide a pre-filled text entry, pass in a [TextEditingController] with
   /// an initial value to the [controller] parameter.
   ///
   /// To provide a hint placeholder text that appears when the text entry is

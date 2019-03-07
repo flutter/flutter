@@ -389,7 +389,7 @@ class TextInputConfiguration {
   /// Defaults to false.
   final bool obscureText;
 
-  /// Whether to enable autocorrection.
+  /// Whether to enable auto-correction.
   ///
   /// Defaults to true.
   final bool autocorrect;
@@ -400,7 +400,7 @@ class TextInputConfiguration {
   /// What kind of action to request for the action button on the IME.
   final TextInputAction inputAction;
 
-  /// Specifies how platforms may automatically capitialize text entered by the
+  /// Specifies how platforms may automatically capitalize text entered by the
   /// user.
   ///
   /// Defaults to [TextCapitalization.none].
@@ -487,7 +487,7 @@ class TextEditingValue {
   const TextEditingValue({
     this.text = '',
     this.selection = const TextSelection.collapsed(offset: -1),
-    this.composing = TextRange.empty
+    this.composing = TextRange.empty,
   }) : assert(text != null),
        assert(selection != null),
        assert(composing != null);
@@ -538,12 +538,12 @@ class TextEditingValue {
   TextEditingValue copyWith({
     String text,
     TextSelection selection,
-    TextRange composing
+    TextRange composing,
   }) {
     return TextEditingValue(
       text: text ?? this.text,
       selection: selection ?? this.selection,
-      composing: composing ?? this.composing
+      composing: composing ?? this.composing,
     );
   }
 
@@ -566,7 +566,7 @@ class TextEditingValue {
   int get hashCode => hashValues(
     text.hashCode,
     selection.hashCode,
-    composing.hashCode
+    composing.hashCode,
   );
 }
 

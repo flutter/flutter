@@ -108,7 +108,7 @@ void main() {
         '''
 1) 86f7e437faa5a7fce15d1ddcb9eaeaea377667b8 "iPhone Developer: Profile 1 (1111AAAA11)"
     1 valid identities found''',
-        ''
+        '',
       ));
       when(mockProcessManager.runSync(
         <String>['security', 'find-certificate', '-c', '1111AAAA11', '-p'],
@@ -170,7 +170,7 @@ void main() {
 2) da4b9237bacccdf19c0760cab7aec4a8359010b0 "iPhone Developer: Profile 2 (2222BBBB22)"
 3) 5bf1fd927dfb8679496a2e6cf00cbe50c1c87145 "iPhone Developer: Profile 3 (3333CCCC33)"
     3 valid identities found''',
-        ''
+        '',
       ));
       mockTerminalStdInStream =
           Stream<String>.fromFuture(Future<String>.value('3'));
@@ -209,11 +209,11 @@ void main() {
 
       expect(
         testLogger.statusText,
-        contains('Please select a certificate for code signing [<bold>1</bold>|2|3|a]: 3')
+        contains('Please select a certificate for code signing [<bold>1</bold>|2|3|a]: 3'),
       );
       expect(
         testLogger.statusText,
-        contains('Signing iOS app for device deployment using developer identity: "iPhone Developer: Profile 3 (3333CCCC33)"')
+        contains('Signing iOS app for device deployment using developer identity: "iPhone Developer: Profile 3 (3333CCCC33)"'),
       );
       expect(testLogger.errorText, isEmpty);
       verify(mockOpenSslStdIn.write('This is a mock certificate'));
@@ -245,7 +245,7 @@ void main() {
 2) da4b9237bacccdf19c0760cab7aec4a8359010b0 "iPhone Developer: Profile 2 (2222BBBB22)"
 3) 5bf1fd927dfb8679496a2e6cf00cbe50c1c87145 "iPhone Developer: Profile 3 (3333CCCC33)"
     3 valid identities found''',
-          ''
+          '',
       ));
       mockTerminalStdInStream =
         Stream<String>.fromFuture(Future<String>.error(Exception('Cannot read from StdIn')));
@@ -314,7 +314,7 @@ void main() {
 2) da4b9237bacccdf19c0760cab7aec4a8359010b0 "iPhone Developer: Profile 2 (2222BBBB22)"
 3) 5bf1fd927dfb8679496a2e6cf00cbe50c1c87145 "iPhone Developer: Profile 3 (3333CCCC33)"
     3 valid identities found''',
-        ''
+        '',
       ));
       when(mockProcessManager.runSync(
         <String>['security', 'find-certificate', '-c', '3333CCCC33', '-p'],
@@ -352,11 +352,11 @@ void main() {
 
       expect(
         testLogger.statusText,
-        contains('Found saved certificate choice "iPhone Developer: Profile 3 (3333CCCC33)". To clear, use "flutter config"')
+        contains('Found saved certificate choice "iPhone Developer: Profile 3 (3333CCCC33)". To clear, use "flutter config"'),
       );
       expect(
         testLogger.statusText,
-        contains('Signing iOS app for device deployment using developer identity: "iPhone Developer: Profile 3 (3333CCCC33)"')
+        contains('Signing iOS app for device deployment using developer identity: "iPhone Developer: Profile 3 (3333CCCC33)"'),
       );
       expect(testLogger.errorText, isEmpty);
       verify(mockOpenSslStdIn.write('This is a mock certificate'));
@@ -385,7 +385,7 @@ void main() {
 2) da4b9237bacccdf19c0760cab7aec4a8359010b0 "iPhone Developer: Profile 2 (2222BBBB22)"
 3) 5bf1fd927dfb8679496a2e6cf00cbe50c1c87145 "iPhone Developer: Profile 3 (3333CCCC33)"
     3 valid identities found''',
-        ''
+        '',
       ));
       mockTerminalStdInStream =
           Stream<String>.fromFuture(Future<String>.value('3'));
@@ -426,11 +426,11 @@ void main() {
 
       expect(
         testLogger.errorText,
-        contains('Saved signing certificate "iPhone Developer: Invalid Profile" is not a valid development certificate')
+        contains('Saved signing certificate "iPhone Developer: Invalid Profile" is not a valid development certificate'),
       );
       expect(
         testLogger.statusText,
-        contains('Certificate choice "iPhone Developer: Profile 3 (3333CCCC33)"')
+        contains('Certificate choice "iPhone Developer: Profile 3 (3333CCCC33)"'),
       );
       expect(signingConfigs, <String, String> {'DEVELOPMENT_TEAM':'4444DDDD44'});
       verify(config.setValue('ios-signing-cert', 'iPhone Developer: Profile 3 (3333CCCC33)'));

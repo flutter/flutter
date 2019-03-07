@@ -62,7 +62,7 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
     Key key,
     @required this.decoration,
     this.position = DecorationPosition.background,
-    Widget child
+    Widget child,
   }) : assert(decoration != null),
        assert(position != null),
        super(key: key, child: child);
@@ -145,9 +145,9 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
 /// Since [Container] combines a number of other widgets each with their own
 /// layout behavior, [Container]'s layout behavior is somewhat complicated.
 ///
-/// tl;dr: [Container] tries, in order: to honor [alignment], to size itself to
-/// the [child], to honor the `width`, `height`, and [constraints], to expand to
-/// fit the parent, to be as small as possible.
+/// Summary: [Container] tries, in order: to honor [alignment], to size itself
+/// to the [child], to honor the `width`, `height`, and [constraints], to expand
+/// to fit the parent, to be as small as possible.
 ///
 /// More specifically:
 ///
@@ -355,7 +355,7 @@ class Container extends StatelessWidget {
       current = LimitedBox(
         maxWidth: 0.0,
         maxHeight: 0.0,
-        child: ConstrainedBox(constraints: const BoxConstraints.expand())
+        child: ConstrainedBox(constraints: const BoxConstraints.expand()),
       );
     }
 
@@ -373,7 +373,7 @@ class Container extends StatelessWidget {
       current = DecoratedBox(
         decoration: foregroundDecoration,
         position: DecorationPosition.foreground,
-        child: current
+        child: current,
       );
     }
 

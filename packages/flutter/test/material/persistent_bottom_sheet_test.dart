@@ -14,8 +14,8 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         key: scaffoldKey,
-        body: const Center(child: Text('body'))
-      )
+        body: const Center(child: Text('body')),
+      ),
     ));
 
     bottomSheet = scaffoldKey.currentState.showBottomSheet<void>((_) {
@@ -67,8 +67,8 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         key: scaffoldKey,
-        body: const Center(child: Text('body'))
-      )
+        body: const Center(child: Text('body')),
+      ),
     ));
 
     scaffoldKey.currentState.showBottomSheet<void>((BuildContext context) {
@@ -221,7 +221,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: Placeholder(key: key),
-      )
+      ),
     ));
 
     int buildCount = 0;
@@ -258,7 +258,7 @@ void main() {
             }
           ),
         ),
-      )
+      ),
     ));
 
     await tester.pump();

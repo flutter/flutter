@@ -1040,7 +1040,7 @@ class RectangularSliderTrackShape extends SliderTrackShape {
         offset: offset,
         sliderTheme: sliderTheme,
         isEnabled: isEnabled,
-        isDiscrete: isDiscrete
+        isDiscrete: isDiscrete,
     );
     final Rect leftTrackSegment = Rect.fromLTRB(trackRect.left, trackRect.top, thumbCenter.dx - horizontalAdjustment, trackRect.bottom);
     context.canvas.drawRect(leftTrackSegment, leftTrackPaint);
@@ -1136,7 +1136,7 @@ class RoundSliderThumbShape extends SliderComponentShape {
   // TODO(clocksmith): This needs to be changed to 10 according to spec.
   const RoundSliderThumbShape({
     this.enabledThumbRadius = 6.0,
-    this.disabledThumbRadius
+    this.disabledThumbRadius,
   });
 
   /// The preferred radius of the round thumb shape when the slider is enabled.

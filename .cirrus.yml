@@ -10,6 +10,7 @@ task:
     PATH: "$CIRRUS_WORKING_DIR/bin:$CIRRUS_WORKING_DIR/bin/cache/dart-sdk/bin:$PATH"
     ANDROID_SDK_ROOT: "/opt/android_sdk"
   git_fetch_script:
+    - git clean -xfd
     - git fetch origin
     - git fetch origin master # To set FETCH_HEAD for "git merge-base" to work
   pub_cache:
@@ -49,6 +50,7 @@ task:
         - dart --enable-asserts ./dev/bots/analyze.dart
     - name: tests-linux
       env:
+        GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
         SHARD: tests
       test_script:
         - dart --enable-asserts ./dev/bots/test.dart
@@ -57,6 +59,7 @@ task:
         memory: 12G
     - name: tool_tests-linux
       env:
+        GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
         SHARD: tool_tests
       test_script:
         - dart --enable-asserts ./dev/bots/test.dart
@@ -98,6 +101,7 @@ task:
   env:
     CIRRUS_WORKING_DIR: "C:\\Windows\\Temp\\flutter sdk"
   git_fetch_script:
+    - git clean -xfd
     - git fetch origin
     - git fetch origin master # To set FETCH_HEAD for "git merge-base" to work
   pub_cache:
@@ -119,9 +123,11 @@ task:
   matrix:
     - name: tests-windows
       env:
+        GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
         SHARD: tests
     - name: tool_tests-windows
       env:
+        GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
         SHARD: tool_tests
     - name: build_tests-windows
       env:
@@ -156,8 +162,9 @@ task:
     # Private repo for publishing certificates.
     PUBLISHING_MATCH_CERTIFICATE_REPO: git@github.com:flutter/private_publishing_certificates.git
   osx_instance:
-    image: high-sierra-xcode-9.4.1
+    image: mojave-xcode-10.1
   git_fetch_script:
+    - git clean -xfd
     - git fetch origin
     - git fetch origin master # To set FETCH_HEAD
   setup_script:
@@ -178,6 +185,7 @@ task:
   install_cocoapods_script:
     - sudo gem install cocoapods
   git_fetch_script:
+    - git clean -xfd
     - git fetch origin
     - git fetch origin master # To set FETCH_HEAD for "git merge-base" to work
   pub_cache:
@@ -198,9 +206,11 @@ task:
   matrix:
     - name: tests-macos
       env:
+        GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
         SHARD: tests
     - name: tool_tests-macos
       env:
+        GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
         SHARD: tool_tests
     - name: build_tests-macos
       env:

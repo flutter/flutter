@@ -140,11 +140,11 @@ Widget buildLeftRightApp({ List<String> tabs, String value }) {
         body: const TabBarView(
           children: <Widget>[
             Center(child: Text('LEFT CHILD')),
-            Center(child: Text('RIGHT CHILD'))
-          ]
-        )
-      )
-    )
+            Center(child: Text('RIGHT CHILD')),
+          ],
+        ),
+      ),
+    ),
   );
 }
 
@@ -359,9 +359,9 @@ void main() {
           child: TabBarView(
             children: tabs.map<Widget>((String name) {
               return StateMarker(
-                child: Text(name)
+                child: Text(name),
               );
-            }).toList()
+            }).toList(),
           ),
         ),
       );
@@ -619,8 +619,8 @@ void main() {
             controller: controller,
             children: const <Widget>[
               Center(child: Text('LEFT CHILD')),
-              Center(child: Text('RIGHT CHILD'))
-            ]
+              Center(child: Text('RIGHT CHILD')),
+            ],
           ),
         ),
       );
@@ -680,7 +680,7 @@ void main() {
               Center(child: Text('CHILD A')),
               Center(child: Text('CHILD B')),
               Center(child: Text('CHILD C')),
-            ]
+            ],
           ),
         ),
       );
@@ -1544,8 +1544,8 @@ void main() {
                         rect: Rect.fromLTRB(0.0, 0.0, 116.0, kTextTabBarHeight),
                         transform: Matrix4.translationValues(116.0, 276.0, 0.0),
                       ),
-                    ]
-                )
+                    ],
+                ),
               ],
             ),
           ],
@@ -1808,8 +1808,8 @@ void main() {
                         rect: Rect.fromLTRB(0.0, 0.0, 116.0, kTextTabBarHeight),
                         transform: Matrix4.translationValues(116.0, 276.0, 0.0),
                       ),
-                    ]
-                )
+                    ],
+                ),
               ],
             ),
           ],

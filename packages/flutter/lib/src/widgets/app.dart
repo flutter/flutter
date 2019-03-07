@@ -33,7 +33,7 @@ export 'dart:ui' show Locale;
 /// The [locales] list is the device's preferred locales when the app started, or the
 /// device's preferred locales the user selected after the app was started. This list
 /// is in order of preference. If this list is null or empty, then Flutter has not yet
-/// recieved the locale information from the platform. The [supportedLocales] parameter
+/// received the locale information from the platform. The [supportedLocales] parameter
 /// is just the value of [WidgetsApp.supportedLocales].
 ///
 /// See also:
@@ -47,7 +47,7 @@ typedef LocaleListResolutionCallback = Locale Function(List<Locale> locales, Ite
 ///
 /// It is recommended to provide a [LocaleListResolutionCallback] instead of a
 /// [LocaleResolutionCallback] when possible, as [LocaleResolutionCallback] only
-/// recieves a subset of the information provided in [LocaleListResolutionCallback].
+/// receives a subset of the information provided in [LocaleListResolutionCallback].
 ///
 /// A [LocaleResolutionCallback] is responsible for computing the locale of the app's
 /// [Localizations] object when the app starts and when user changes the default
@@ -59,7 +59,7 @@ typedef LocaleListResolutionCallback = Locale Function(List<Locale> locales, Ite
 /// The [locale] is either the value of [WidgetsApp.locale], or the device's default
 /// locale when the app started, or the device locale the user selected after the app
 /// was started. The default locale is the first locale in the list of preferred
-/// locales. If [locale] is null, then Flutter has not yet recieved the locale
+/// locales. If [locale] is null, then Flutter has not yet received the locale
 /// information from the platform. The [supportedLocales] parameter is just the value of
 /// [WidgetsApp.supportedLocales].
 ///
@@ -524,7 +524,7 @@ class WidgetsApp extends StatefulWidget {
   /// This callback considers the entire list of preferred locales.
   ///
   /// This algorithm should be able to handle a null or empty list of preferred locales,
-  /// which indicates Flutter has not yet recieved locale information from the platform.
+  /// which indicates Flutter has not yet received locale information from the platform.
   ///
   /// See also:
   ///
@@ -541,7 +541,7 @@ class WidgetsApp extends StatefulWidget {
   /// over [localeResolutionCallback] as it provides the full preferred locales list.
   ///
   /// This algorithm should be able to handle a null locale, which indicates
-  /// Flutter has not yet recieved locale information from the platform.
+  /// Flutter has not yet received locale information from the platform.
   ///
   /// See also:
   ///
@@ -585,8 +585,8 @@ class WidgetsApp extends StatefulWidget {
   /// [Locale.countryCode] to specify a generic fallback for a particular script.
   ///
   /// A fully supported language with multiple scripts should define a generic language-only
-  /// locale (eg. 'zh'), language+script only locales (eg. 'zh_Hans' and 'zh_Hant'),
-  /// and any language+script+country locales (eg. 'zh_Hans_CN'). Fully defining all of
+  /// locale (e.g. 'zh'), language+script only locales (e.g. 'zh_Hans' and 'zh_Hant'),
+  /// and any language+script+country locales (e.g. 'zh_Hans_CN'). Fully defining all of
   /// these locales as supported is not strictly required but allows for proper locale resolution in
   /// the most number of cases. These locales can be specified with the [Locale.fromSubtags]
   /// constructor:
@@ -847,7 +847,7 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
   /// Custom resolution algorithms can be provided through [WidgetsApp.localeListResolutionCallback]
   /// or [WidgetsApp.localeResolutionCallback].
   ///
-  /// When no custom locale resolition algorithms are provided or if both fail to resolve,
+  /// When no custom locale resolution algorithms are provided or if both fail to resolve,
   /// Flutter will default to calling this algorithm.
   ///
   /// This algorithm prioritizes speed at the cost of slightly less appropriate
@@ -859,7 +859,7 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
   ///
   /// In the case where a locale is matched by languageCode-only and is not the
   /// default (first) locale, the next locale in preferredLocales with a
-  /// perfect match can supercede the languageCode-only match if it exists.
+  /// perfect match can supersede the languageCode-only match if it exists.
   ///
   /// When a preferredLocale matches more than one supported locale, it will resolve
   /// to the first matching locale listed in the supportedLocales.
@@ -1135,7 +1135,7 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
         children: <Widget>[
           result,
           Positioned(top: 0.0, left: 0.0, right: 0.0, child: performanceOverlay),
-        ]
+        ],
       );
     }
 

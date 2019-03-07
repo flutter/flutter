@@ -59,7 +59,7 @@ class BottomSheet extends StatefulWidget {
     this.scrollController,
     this.elevation = 0.0,
     @required this.onClosing,
-    @required this.builder
+    @required this.builder,
   }) : assert(enableDrag != null),
        assert(onClosing != null),
        assert(
@@ -282,7 +282,7 @@ class _ModalBottomSheetAnimationControllerLayout extends SingleChildLayoutDelega
       minWidth: constraints.maxWidth,
       maxWidth: constraints.maxWidth,
       minHeight: 0.0,
-      maxHeight: constraints.maxHeight * 9.0 / 16.0
+      maxHeight: constraints.maxHeight * 9.0 / 16.0,
     );
   }
 
@@ -383,8 +383,8 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
               ),
             ),
           );
-        }
-      )
+        },
+      ),
     );
   }
   @override

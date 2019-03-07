@@ -111,7 +111,7 @@ Future<Process> runCommand(
   List<String> cmd, {
   String workingDirectory,
   bool allowReentrantFlutter = false,
-  Map<String, String> environment
+  Map<String, String> environment,
 }) {
   _traceCommand(cmd, workingDirectory: workingDirectory);
   return processManager.start(
@@ -137,13 +137,13 @@ Future<int> runCommandAndStreamOutput(
   bool trace = false,
   RegExp filter,
   StringConverter mapFunction,
-  Map<String, String> environment
+  Map<String, String> environment,
 }) async {
   final Process process = await runCommand(
     cmd,
     workingDirectory: workingDirectory,
     allowReentrantFlutter: allowReentrantFlutter,
-    environment: environment
+    environment: environment,
   );
   final StreamSubscription<String> stdoutSubscription = process.stdout
     .transform<String>(utf8.decoder)
@@ -193,7 +193,7 @@ Future<int> runInteractively(
   List<String> command, {
   String workingDirectory,
   bool allowReentrantFlutter = false,
-  Map<String, String> environment
+  Map<String, String> environment,
 }) async {
   final Process process = await runCommand(
     command,
@@ -226,7 +226,7 @@ Future<RunResult> runAsync(
   List<String> cmd, {
   String workingDirectory,
   bool allowReentrantFlutter = false,
-  Map<String, String> environment
+  Map<String, String> environment,
 }) async {
   _traceCommand(cmd, workingDirectory: workingDirectory);
   final ProcessResult results = await processManager.run(
@@ -243,7 +243,7 @@ Future<RunResult> runCheckedAsync(
   List<String> cmd, {
   String workingDirectory,
   bool allowReentrantFlutter = false,
-  Map<String, String> environment
+  Map<String, String> environment,
 }) async {
   final RunResult result = await runAsync(
     cmd,
@@ -301,12 +301,12 @@ String runCheckedSync(
 String runSync(
   List<String> cmd, {
   String workingDirectory,
-  bool allowReentrantFlutter = false
+  bool allowReentrantFlutter = false,
 }) {
   return _runWithLoggingSync(
     cmd,
     workingDirectory: workingDirectory,
-    allowReentrantFlutter: allowReentrantFlutter
+    allowReentrantFlutter: allowReentrantFlutter,
   );
 }
 

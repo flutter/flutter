@@ -524,7 +524,7 @@ void main() {
               ],
             ),
           ],
-        )
+        ),
       ),
     );
     final RenderBox boxA = tester.renderObject(find.text('AAA'));

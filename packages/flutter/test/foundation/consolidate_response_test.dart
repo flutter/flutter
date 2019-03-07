@@ -22,7 +22,7 @@ void main() {
          any,
          onDone: anyNamed('onDone'),
          onError: anyNamed('onError'),
-         cancelOnError: anyNamed('cancelOnError')
+         cancelOnError: anyNamed('cancelOnError'),
       )).thenAnswer((Invocation invocation) {
         final void Function(List<int>) onData = invocation.positionalArguments[0];
         final void Function(Object) onError = invocation.namedArguments[#onError];
@@ -72,7 +72,7 @@ void main() {
         any,
         onDone: anyNamed('onDone'),
         onError: anyNamed('onError'),
-        cancelOnError: anyNamed('cancelOnError')
+        cancelOnError: anyNamed('cancelOnError'),
       )).thenAnswer((Invocation invocation) {
         final void Function(List<int>) onData = invocation.positionalArguments[0];
         final void Function(Object) onError = invocation.namedArguments[#onError];

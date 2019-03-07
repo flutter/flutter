@@ -85,7 +85,7 @@ class AndroidApk extends ApplicationPackage {
     String id,
     @required this.file,
     @required this.versionCode,
-    @required this.launchActivity
+    @required this.launchActivity,
   }) : assert(file != null),
        assert(launchActivity != null),
        super(id: id);
@@ -98,7 +98,7 @@ class AndroidApk extends ApplicationPackage {
       return null;
     }
 
-     final List<String> aaptArgs = <String>[
+    final List<String> aaptArgs = <String>[
        aaptPath,
       'dump',
       'xmltree',
@@ -123,7 +123,7 @@ class AndroidApk extends ApplicationPackage {
       id: data.packageName,
       file: apk,
       versionCode: int.tryParse(data.versionCode),
-      launchActivity: '${data.packageName}/${data.launchableActivityName}'
+      launchActivity: '${data.packageName}/${data.launchableActivityName}',
     );
   }
 
@@ -204,7 +204,7 @@ class AndroidApk extends ApplicationPackage {
       id: packageId,
       file: apkFile,
       versionCode: null,
-      launchActivity: launchActivity
+      launchActivity: launchActivity,
     );
   }
 

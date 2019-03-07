@@ -62,12 +62,12 @@ void main() {
     cocoaPodsUnderTest = CocoaPods();
     pretendPodVersionIs('1.5.0');
     fs.file(fs.path.join(
-      Cache.flutterRoot, 'packages', 'flutter_tools', 'templates', 'cocoapods', 'Podfile-objc'
+      Cache.flutterRoot, 'packages', 'flutter_tools', 'templates', 'cocoapods', 'Podfile-objc',
     ))
         ..createSync(recursive: true)
         ..writeAsStringSync('Objective-C podfile template');
     fs.file(fs.path.join(
-      Cache.flutterRoot, 'packages', 'flutter_tools', 'templates', 'cocoapods', 'Podfile-swift'
+      Cache.flutterRoot, 'packages', 'flutter_tools', 'templates', 'cocoapods', 'Podfile-swift',
     ))
         ..createSync(recursive: true)
         ..writeAsStringSync('Swift podfile template');

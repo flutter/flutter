@@ -181,7 +181,7 @@ void main() {
           const Offset(110.0, 190.0),
           const Offset(1000.0, 1000.0),
         ],
-      )
+      ),
     );
     expect(
       borderDirectional.getOuterPath(Rect.fromLTRB(50.0, 60.0, 110.0, 190.0), textDirection: TextDirection.rtl),
@@ -597,7 +597,7 @@ void main() {
           includes: <Offset>[const Offset(15.0, 30.0)],
           excludes: <Offset>[const Offset(25.0, 30.0)],
           color: const Color(0xFF00FF00),
-        )
+        ),
     );
     expect(
       (Canvas canvas) {
@@ -609,14 +609,14 @@ void main() {
           includes: <Offset>[const Offset(25.0, 30.0)],
           excludes: <Offset>[const Offset(15.0, 30.0)],
           color: const Color(0xFF00FF00),
-        )
+        ),
     );
     expect(
       (Canvas canvas) {
         const BorderDirectional(end: BorderSide(width: 10.0, color: Color(0xFF00FF00)))
           .paint(canvas, Rect.fromLTRB(10.0, 20.0, 30.0, 40.0));
       },
-      paintsAssertion // no TextDirection
+      paintsAssertion, // no TextDirection
     );
   });
 
@@ -649,7 +649,7 @@ void main() {
         ..path(
           includes: <Offset>[const Offset(49.0, 10.0)],
           excludes: <Offset>[const Offset(31.0, 10.0)],
-        )
+        ),
     );
     expect(
       (Canvas canvas) {
@@ -663,7 +663,7 @@ void main() {
         ..path(
           includes: <Offset>[const Offset(31.0, 10.0)],
           excludes: <Offset>[const Offset(49.0, 10.0)],
-        )
+        ),
     );
     expect(decoration2.padding, const EdgeInsetsDirectional.fromSTEB(2.0, 0.0, 0.0, 0.0));
     expect(decoration2.scale(2.0), decoration4);
