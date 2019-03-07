@@ -9,6 +9,7 @@ import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/platform.dart';
 import 'compile.dart';
+import 'dart/package_map.dart';
 import 'globals.dart';
 import 'project.dart';
 
@@ -44,8 +45,9 @@ abstract class CodeGenerator {
   const CodeGenerator();
 
   /// Run a partial build include code generators but not kernel.
-  Future<void> generate({@required String mainPath}) async {
+  Future<void> generate(FlutterProject flutterProject, {@required String mainPath}) async {
     await build(
+      flutterProject,
       mainPath: mainPath,
       aot: false,
       linkPlatformKernelIn: false,
@@ -59,7 +61,7 @@ abstract class CodeGenerator {
   ///
   /// The defines of the build command are the arguments required in the
   /// flutter_build kernel builder.
-  Future<CodeGenerationResult> build({
+  Future<CodeGenerationResult> build(FlutterProject flutterProject, {
     @required String mainPath,
     @required bool aot,
     @required bool linkPlatformKernelIn,
@@ -73,7 +75,7 @@ abstract class CodeGenerator {
   ///
   /// The defines of the daemon command are the arguments required in the
   /// flutter_build kernel builder.
-  Future<CodegenDaemon> daemon({
+  Future<CodegenDaemon> daemon(FlutterProject flutterProject, {
     @required String mainPath,
     bool linkPlatformKernelIn = false,
     bool targetProductVm = false,
@@ -81,22 +83,16 @@ abstract class CodeGenerator {
     List<String> extraFrontEndOptions = const <String>[],
   });
 
-  /// Invalidates a generated build script by deleting it.
-  ///
-  /// Must be called any time a pubspec file update triggers a corresponding change
-  /// in .packages.
-  Future<void> invalidateBuildScript();
-
   // Generates a synthetic package under .dart_tool/flutter_tool which is in turn
   // used to generate a build script.
-  Future<void> generateBuildScript();
+  Future<void> generateBuildScript(FlutterProject flutterProject);
 }
 
 class UnsupportedCodeGenerator extends CodeGenerator {
   const UnsupportedCodeGenerator();
 
   @override
-  Future<CodeGenerationResult> build({
+  Future<CodeGenerationResult> build(FlutterProject flutterProject, {
     String mainPath,
     bool aot,
     bool linkPlatformKernelIn,
@@ -109,17 +105,12 @@ class UnsupportedCodeGenerator extends CodeGenerator {
   }
 
   @override
-  Future<void> generateBuildScript() {
+  Future<void> generateBuildScript(FlutterProject flutterProject) {
     throw UnsupportedError('build_runner is not currently supported.');
   }
 
   @override
-  Future<void> invalidateBuildScript() {
-    throw UnsupportedError('build_runner is not currently supported.');
-  }
-
-  @override
-  Future<CodegenDaemon> daemon({
+  Future<CodegenDaemon> daemon(FlutterProject flutterProject, {
     String mainPath,
     bool linkPlatformKernelIn = false,
     bool targetProductVm = false,
@@ -139,8 +130,6 @@ abstract class CodegenDaemon {
   /// Starts a new build.
   void startBuild();
 
-  File get packagesFile;
-
   File get dillFile;
 }
 
@@ -148,9 +137,8 @@ abstract class CodegenDaemon {
 ///
 /// If no dill or packages file is generated, they will be null.
 class CodeGenerationResult {
-  const CodeGenerationResult(this.packagesFile, this.dillFile);
+  const CodeGenerationResult(this.dillFile);
 
-  final File packagesFile;
   final File dillFile;
 }
 
@@ -187,8 +175,10 @@ class CodeGeneratingKernelCompiler implements KernelCompiler {
         'sdkRoot, packagesPath are not supported when using the experimental '
         'build* pipeline');
     }
+    final FlutterProject flutterProject = await FlutterProject.current();
     try {
       final CodeGenerationResult buildResult = await codeGenerator.build(
+        flutterProject,
         aot: aot,
         linkPlatformKernelIn: linkPlatformKernelIn,
         trackWidgetCreation: trackWidgetCreation,
@@ -217,13 +207,16 @@ class CodeGeneratingResidentCompiler implements ResidentCompiler {
   /// Creates a new [ResidentCompiler] and configures a [BuildDaemonClient] to
   /// run builds.
   static Future<CodeGeneratingResidentCompiler> create({
-    @required String mainPath,
+    @required FlutterProject flutterProject,
+    String mainPath,
     bool trackWidgetCreation = false,
     CompilerMessageConsumer compilerMessageConsumer = printError,
     bool unsafePackageSerialization = false,
+    String outputPath,
+    String initializeFromDill,
   }) async {
-    final FlutterProject flutterProject = await FlutterProject.current();
     final CodegenDaemon codegenDaemon = await codeGenerator.daemon(
+      flutterProject,
       extraFrontEndOptions: <String>[],
       linkPlatformKernelIn: false,
       mainPath: mainPath,
@@ -232,22 +225,23 @@ class CodeGeneratingResidentCompiler implements ResidentCompiler {
     );
     codegenDaemon.startBuild();
     final CodegenStatus status = await codegenDaemon.buildResults.firstWhere((CodegenStatus status) {
-      return status ==CodegenStatus.Succeeded || status == CodegenStatus.Failed;
+      return status == CodegenStatus.Succeeded || status == CodegenStatus.Failed;
     });
     if (status == CodegenStatus.Failed) {
-      printError('Codegeneration failed, halting build.');
+      printError('Code generation failed, build may have compile errors');
     }
     final ResidentCompiler residentCompiler = ResidentCompiler(
       artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
       trackWidgetCreation: trackWidgetCreation,
-      packagesPath: codegenDaemon.packagesFile.path,
+      packagesPath: PackageMap.globalGeneratedPackagesPath,
       fileSystemRoots: <String>[
-        fs.path.join(flutterProject.generated.absolute.path, 'lib${platform.pathSeparator}'),
+        fs.path.join(flutterProject.generated.path, 'lib${platform.pathSeparator}'),
         fs.path.join(flutterProject.directory.path, 'lib${platform.pathSeparator}'),
       ],
       fileSystemScheme: _kMultiRootScheme,
       targetModel: TargetModel.flutter,
       unsafePackageSerialization: unsafePackageSerialization,
+      initializeFromDill: initializeFromDill,
     );
     return CodeGeneratingResidentCompiler._(residentCompiler, codegenDaemon);
   }
@@ -285,7 +279,7 @@ class CodeGeneratingResidentCompiler implements ResidentCompiler {
       mainPath,
       invalidatedFiles,
       outputPath: outputPath,
-      packagesFilePath: _codegenDaemon.packagesFile.path,
+      packagesFilePath: PackageMap.globalGeneratedPackagesPath,
     );
   }
 

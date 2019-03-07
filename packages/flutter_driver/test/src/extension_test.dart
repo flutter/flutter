@@ -24,9 +24,9 @@ void main() {
 
     testWidgets('returns immediately when transient callback queue is empty', (WidgetTester tester) async {
       extension.call(WaitUntilNoTransientCallbacks().serialize())
-          .then<void>(expectAsync1((Map<String, dynamic> r) {
-        result = r;
-      }));
+        .then<void>(expectAsync1((Map<String, dynamic> r) {
+          result = r;
+        }));
 
       await tester.idle();
       expect(
@@ -44,9 +44,9 @@ void main() {
       });
 
       extension.call(WaitUntilNoTransientCallbacks().serialize())
-          .then<void>(expectAsync1((Map<String, dynamic> r) {
-        result = r;
-      }));
+        .then<void>(expectAsync1((Map<String, dynamic> r) {
+          result = r;
+        }));
 
       // Nothing should happen until the next frame.
       await tester.idle();

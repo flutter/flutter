@@ -156,7 +156,7 @@ void main() {
 
     test('create iOS view of unregistered type', () async {
       expect(
-            () {
+        () {
           return PlatformViewsService.initUiKitView(
             id: 0,
             viewType: 'web',

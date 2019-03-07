@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -256,20 +255,20 @@ void main() {
   });
 
   testWidgets('Back swipe dismiss interrupted by route push', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/28728
     final GlobalKey scaffoldKey = GlobalKey();
 
     await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData(platform: TargetPlatform.iOS),
-        home: Scaffold(
+      CupertinoApp(
+        home: CupertinoPageScaffold(
           key: scaffoldKey,
-          body: Center(
-            child: RaisedButton(
+          child: Center(
+            child: CupertinoButton(
               onPressed: () {
-                Navigator.push<void>(scaffoldKey.currentContext, MaterialPageRoute<void>(
+                Navigator.push<void>(scaffoldKey.currentContext, CupertinoPageRoute<void>(
                   builder: (BuildContext context) {
-                    return const Scaffold(
-                      body: Center(child: Text('route')),
+                    return const CupertinoPageScaffold(
+                      child: Center(child: Text('route')),
                     );
                   },
                 ));
@@ -294,17 +293,17 @@ void main() {
     await gesture.up();
     await tester.pump();
     expect( // The 'route' route has been dragged to the right, halfway across the screen
-      tester.getTopLeft(find.ancestor(of: find.text('route'), matching: find.byType(Scaffold))),
+      tester.getTopLeft(find.ancestor(of: find.text('route'), matching: find.byType(CupertinoPageScaffold))),
       const Offset(400, 0),
     );
     expect( // The 'push' route is sliding in from the left.
-      tester.getTopLeft(find.ancestor(of: find.text('push'), matching: find.byType(Scaffold))).dx,
+      tester.getTopLeft(find.ancestor(of: find.text('push'), matching: find.byType(CupertinoPageScaffold))).dx,
       lessThan(0),
     );
     await tester.pumpAndSettle();
     expect(find.text('push'), findsOneWidget);
     expect(
-      tester.getTopLeft(find.ancestor(of: find.text('push'), matching: find.byType(Scaffold))),
+      tester.getTopLeft(find.ancestor(of: find.text('push'), matching: find.byType(CupertinoPageScaffold))),
       Offset.zero,
     );
     expect(find.text('route'), findsNothing);

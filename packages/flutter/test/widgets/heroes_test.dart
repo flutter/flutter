@@ -95,24 +95,26 @@ final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
 };
 
 class ThreeRoute extends MaterialPageRoute<void> {
-  ThreeRoute() : super(builder: (BuildContext context) {
-    return Material(
-      key: routeThreeKey,
-      child: ListView(
-        children: <Widget>[
-          Container(height: 200.0, width: 200.0),
-          Card(child: Hero(tag: 'a', child: Container(height: 200.0, width: 200.0, key: thirdKey))),
-          Container(height: 200.0, width: 200.0),
-        ],
-      ),
-    );
-  });
+  ThreeRoute()
+    : super(builder: (BuildContext context) {
+        return Material(
+          key: routeThreeKey,
+          child: ListView(
+            children: <Widget>[
+              Container(height: 200.0, width: 200.0),
+              Card(child: Hero(tag: 'a', child: Container(height: 200.0, width: 200.0, key: thirdKey))),
+              Container(height: 200.0, width: 200.0),
+            ],
+          ),
+        );
+      });
 }
 
 class MutatingRoute extends MaterialPageRoute<void> {
-  MutatingRoute() : super(builder: (BuildContext context) {
-    return Hero(tag: 'a', child: const Text('MutatingRoute'), key: UniqueKey());
-  });
+  MutatingRoute()
+    : super(builder: (BuildContext context) {
+        return Hero(tag: 'a', child: const Text('MutatingRoute'), key: UniqueKey());
+      });
 
   void markNeedsBuild() {
     setState(() {
