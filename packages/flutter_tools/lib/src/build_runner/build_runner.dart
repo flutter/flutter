@@ -10,7 +10,6 @@ import 'package:build_runner_core/build_runner_core.dart' hide BuildStatus;
 import 'package:build_daemon/data/server_log.dart';
 import 'package:build_daemon/data/build_status.dart' as build;
 import 'package:build_daemon/client.dart';
-import 'package:meta/meta.dart';
 import 'package:yaml/yaml.dart';
 import 'package:crypto/crypto.dart' show md5;
 
@@ -21,13 +20,14 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process_manager.dart';
 import '../codegen.dart';
-import '../convert.dart';
 import '../dart/package_map.dart';
 import '../dart/pub.dart';
 import '../globals.dart';
 import '../project.dart';
-import '../resident_runner.dart';
 import 'build_script_generator.dart';
+
+/// The minimum version of build_runner we can support in the flutter tool.
+const String kMinimumBuildRunnerVersion = '1.2.8';
 
 // Arbitrarily choosen multi-root file scheme. This is used to configure the
 // frontend_server to resolve a package uri to multiple filesystem directories.
@@ -41,92 +41,6 @@ const String _kMultirootScheme = 'org-dartlang-app';
 /// external flutter users.
 class BuildRunner extends CodeGenerator {
   const BuildRunner();
-
-  @override
-  Future<CodeGenerationResult> build(FlutterProject flutterProject, {
-    @required String mainPath,
-    @required bool aot,
-    @required bool linkPlatformKernelIn,
-    @required bool trackWidgetCreation,
-    @required bool targetProductVm,
-    List<String> extraFrontEndOptions = const <String>[],
-    bool disableKernelGeneration = false,
-  }) async {
-    await generateBuildScript(flutterProject);
-    final String frontendServerPath = artifacts.getArtifactPath(
-      Artifact.frontendServerSnapshotForEngineDartSdk
-    );
-    final String sdkRoot = artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath);
-    final String engineDartBinaryPath = artifacts.getArtifactPath(Artifact.engineDartBinary);
-    final String packagesPath = flutterProject.packagesFile.absolute.path;
-    final String buildSnapshot = flutterProject
-        .dartTool
-        .childDirectory('build')
-        .childDirectory('entrypoint')
-        .childFile('build.dart.snapshot')
-        .path;
-    final String scriptPackagesPath = flutterProject
-        .dartTool
-        .childDirectory('flutter_tool')
-        .childFile('.packages')
-        .path;
-    final Status status = logger.startProgress('running builders...', timeout: null);
-    try {
-      final Process buildProcess = await processManager.start(<String>[
-        engineDartBinaryPath,
-        '--packages=$scriptPackagesPath',
-        buildSnapshot,
-        'build',
-        '--skip-build-script-check',
-        '--define', 'flutter_build|kernel=disabled=$disableKernelGeneration',
-        '--define', 'flutter_build|kernel=aot=$aot',
-        '--define', 'flutter_build|kernel=linkPlatformKernelIn=$linkPlatformKernelIn',
-        '--define', 'flutter_build|kernel=trackWidgetCreation=$trackWidgetCreation',
-        '--define', 'flutter_build|kernel=targetProductVm=$targetProductVm',
-        '--define', 'flutter_build|kernel=mainPath=$mainPath',
-        '--define', 'flutter_build|kernel=packagesPath=$packagesPath',
-        '--define', 'flutter_build|kernel=sdkRoot=$sdkRoot',
-        '--define', 'flutter_build|kernel=frontendServerPath=$frontendServerPath',
-        '--define', 'flutter_build|kernel=engineDartBinaryPath=$engineDartBinaryPath',
-        '--define', 'flutter_build|kernel=extraFrontEndOptions=${extraFrontEndOptions ?? const <String>[]}',
-      ]);
-      buildProcess
-          .stdout
-          .transform(utf8.decoder)
-          .transform(const LineSplitter())
-          .listen(printTrace);
-      buildProcess
-          .stderr
-          .transform(utf8.decoder)
-          .transform(const LineSplitter())
-          .listen(printError);
-    } finally {
-      status.stop();
-    }
-    if (disableKernelGeneration) {
-      return const CodeGenerationResult(null);
-    }
-    /// We don't check for this above because it might be generated for the
-    /// first time by invoking the build.
-    final Directory dartTool = flutterProject.dartTool;
-    final String projectName = flutterProject.manifest.appName;
-    final Directory generatedDirectory = dartTool
-        .absolute
-        .childDirectory('build')
-        .childDirectory('generated')
-        .childDirectory(projectName);
-    if (!generatedDirectory.existsSync()) {
-      throw Exception('build_runner cannot find generated directory');
-    }
-    final String relativeMain = fs.path.relative(mainPath, from: flutterProject.directory.path);
-    final File dillFile = fs.file(
-      fs.path.join(generatedDirectory.path, fs.path.setExtension(relativeMain, '.app.dill'))
-    );
-    if (!dillFile.existsSync()) {
-      throw Exception('build_runner did not produce output at expected location: ${dillFile.path} missing');
-    }
-    return CodeGenerationResult(dillFile);
-  }
 
   @override
   Future<void> generateBuildScript(FlutterProject flutterProject) async {
@@ -177,10 +91,9 @@ class BuildRunner extends CodeGenerator {
           stringBuffer.writeln('  $name: $node');
         }
       }
-      stringBuffer.writeln('  build_runner: any');
-      stringBuffer.writeln('  flutter_build:');
-      stringBuffer.writeln('    sdk: flutter');
-      syntheticPubspec.writeAsStringSync(stringBuffer.toString());
+      stringBuffer.writeln('  build_runner: ^$kMinimumBuildRunnerVersion');
+      await syntheticPubspec.writeAsString(stringBuffer.toString());
+
       await pubGet(
         context: PubContext.pubGet,
         directory: generatedDirectory.path,
@@ -217,15 +130,9 @@ class BuildRunner extends CodeGenerator {
     bool trackWidgetCreation = false,
     List<String> extraFrontEndOptions = const <String> [],
   }) async {
-    mainPath ??= findMainDartFile();
     await generateBuildScript(flutterProject);
     _generatePackages(flutterProject);
-    final String frontendServerPath = artifacts.getArtifactPath(
-      Artifact.frontendServerSnapshotForEngineDartSdk
-    );
-    final String sdkRoot = artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath);
     final String engineDartBinaryPath = artifacts.getArtifactPath(Artifact.engineDartBinary);
-    final String packagesPath = flutterProject.packagesFile.absolute.path;
     final File buildSnapshot = flutterProject
         .dartTool
         .childDirectory('build')
@@ -245,17 +152,6 @@ class BuildRunner extends CodeGenerator {
         buildSnapshot.path,
         'daemon',
          '--skip-build-script-check',
-        '--define', 'flutter_build|kernel=disabled=false',
-        '--define', 'flutter_build|kernel=aot=false',
-        '--define', 'flutter_build|kernel=linkPlatformKernelIn=$linkPlatformKernelIn',
-        '--define', 'flutter_build|kernel=trackWidgetCreation=$trackWidgetCreation',
-        '--define', 'flutter_build|kernel=targetProductVm=$targetProductVm',
-        '--define', 'flutter_build|kernel=mainPath=$mainPath',
-        '--define', 'flutter_build|kernel=packagesPath=$packagesPath',
-        '--define', 'flutter_build|kernel=sdkRoot=$sdkRoot',
-        '--define', 'flutter_build|kernel=frontendServerPath=$frontendServerPath',
-        '--define', 'flutter_build|kernel=engineDartBinaryPath=$engineDartBinaryPath',
-        '--define', 'flutter_build|kernel=extraFrontEndOptions=${extraFrontEndOptions ?? const <String>[]}',
       ];
       buildDaemonClient = await BuildDaemonClient.connect(flutterProject.directory.path, command, logHandler: (ServerLog log) => printTrace(log.toString()));
     } finally {
@@ -264,9 +160,7 @@ class BuildRunner extends CodeGenerator {
     buildDaemonClient.registerBuildTarget(DefaultBuildTarget((DefaultBuildTargetBuilder builder) {
       builder.target = flutterProject.manifest.appName;
     }));
-    final String relativeMain = fs.path.relative(mainPath, from: flutterProject.directory.path);
-    final File generatedDillFile = fs.file(fs.path.join(flutterProject.generated.path, fs.path.setExtension(relativeMain, '.app.dill')));
-    return _BuildRunnerCodegenDaemon(buildDaemonClient, generatedDillFile);
+    return _BuildRunnerCodegenDaemon(buildDaemonClient);
   }
 
   // Create generated packages file which adds a multi-root scheme to the user's
@@ -283,11 +177,10 @@ class BuildRunner extends CodeGenerator {
 }
 
 class _BuildRunnerCodegenDaemon implements CodegenDaemon {
-  _BuildRunnerCodegenDaemon(this.buildDaemonClient, this.dillFile);
+  _BuildRunnerCodegenDaemon(this.buildDaemonClient);
 
   final BuildDaemonClient buildDaemonClient;
-  @override
-  final File dillFile;
+
   @override
   CodegenStatus get lastStatus => _lastStatus;
   CodegenStatus _lastStatus;

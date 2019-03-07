@@ -64,7 +64,9 @@ class FlutterDevice {
     ResidentCompiler generator;
     final FlutterProject flutterProject = await FlutterProject.current();
     if (experimentalBuildEnabled && await flutterProject.hasBuilders) {
-      generator = await CodeGeneratingResidentCompiler.create(flutterProject: flutterProject, mainPath: target);
+      generator = await CodeGeneratingResidentCompiler.create(
+        flutterProject: flutterProject,
+      );
     } else {
       generator = ResidentCompiler(
         artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
