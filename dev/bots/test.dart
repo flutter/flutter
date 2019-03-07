@@ -358,11 +358,15 @@ Future<void> _buildRunnerTest(
     pubEnvironment['FLUTTER_TOOL_ARGS'] = toolsArgs.trim();
   }
 
-  final Stream<String> testOutput = runAndGetStdout(pub, args,
+  final FlutterCompactFormatter formatter = FlutterCompactFormatter();
+  final Stream<String> testOutput = runAndGetStdout(
+    pub,
+    args,
     workingDirectory: workingDirectory,
     environment: pubEnvironment,
+    beforeExit: formatter.finish
   );
-  await _processTestOutput(testOutput, tableData);
+  await _processTestOutput(formatter, testOutput, tableData);
 }
 
 Future<void> _pubRunTest(
@@ -388,10 +392,14 @@ Future<void> _pubRunTest(
         toolsArgs += ' --enable-asserts';
     pubEnvironment['FLUTTER_TOOL_ARGS'] = toolsArgs.trim();
   }
-  final Stream<String> testOutput = runAndGetStdout(pub, args,
+  final FlutterCompactFormatter formatter = FlutterCompactFormatter();
+  final Stream<String> testOutput = runAndGetStdout(
+    pub,
+    args,
     workingDirectory: workingDirectory,
+    beforeExit: formatter.finish,
   );
-  await _processTestOutput(testOutput, tableData);
+  await _processTestOutput(formatter, testOutput, tableData);
 }
 
 enum CiProviders {
@@ -460,9 +468,13 @@ String _getGitHash() {
   return '';
 }
 
-Future<void> _processTestOutput(Stream<String> testOutput, bq.TabledataResourceApi tableData) async {
-  final FlutterCompactFormatter formatter = FlutterCompactFormatter();
+Future<void> _processTestOutput(
+  FlutterCompactFormatter formatter,
+  Stream<String> testOutput,
+  bq.TabledataResourceApi tableData,
+) async {
   await testOutput.forEach(formatter.processRawOutput);
+  formatter.finish();
   if (tableData == null || formatter.tests.isEmpty) {
     return;
   }
@@ -538,7 +550,8 @@ Future<void> _runFlutterTest(String workingDirectory, {
   if (flutterTestArgs != null && flutterTestArgs.isNotEmpty)
     args.addAll(flutterTestArgs);
 
-  if (!expectFailure) {
+  final bool shouldProcessOutput = !expectFailure && !options.contains('--coverage');
+  if (shouldProcessOutput) {
     args.add('--machine');
   }
 
@@ -556,7 +569,7 @@ Future<void> _runFlutterTest(String workingDirectory, {
     }
     args.add(script);
   }
-  if (expectFailure) {
+  if (!shouldProcessOutput) {
     return runCommand(flutter, args,
       workingDirectory: workingDirectory,
       expectNonZeroExit: true,
@@ -565,12 +578,14 @@ Future<void> _runFlutterTest(String workingDirectory, {
       timeout: timeout,
     );
   }
+  final FlutterCompactFormatter formatter = FlutterCompactFormatter();
   final Stream<String> testOutput = runAndGetStdout(flutter, args,
     workingDirectory: workingDirectory,
     expectNonZeroExit: expectFailure,
     timeout: timeout,
+    beforeExit: formatter.finish,
   );
-  await _processTestOutput(testOutput, tableData);
+  await _processTestOutput(formatter, testOutput, tableData);
 }
 
 Future<void> _verifyVersion(String filename) async {

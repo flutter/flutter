@@ -37,6 +37,7 @@ Stream<String> runAndGetStdout(String executable, List<String> arguments, {
   int expectedExitCode,
   String failureMessage,
   Duration timeout = _kLongTimeout,
+  Function beforeExit,
 }) async* {
   final String commandDescription = '${path.relative(executable, from: workingDirectory)} ${arguments.join(' ')}';
   final String relativeWorkingDir = path.relative(workingDirectory);
@@ -70,6 +71,7 @@ Stream<String> runAndGetStdout(String executable, List<String> arguments, {
             '${bold}Relative working directory:$red $relativeWorkingDir$reset\n'
             '$redLine'
     );
+    beforeExit?.call();
     exit(1);
   }
 }
