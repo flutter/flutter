@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:flutter_tools/src/project.dart';
 import 'package:multicast_dns/multicast_dns.dart';
 
 import '../base/common.dart';
@@ -19,6 +18,7 @@ import '../fuchsia/fuchsia_device.dart';
 import '../globals.dart';
 import '../ios/devices.dart';
 import '../ios/simulators.dart';
+import '../project.dart';
 import '../protocol_discovery.dart';
 import '../resident_runner.dart';
 import '../run_cold.dart';
