@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/project.dart';
 import 'package:meta/meta.dart';
 
 import '../base/common.dart';
@@ -341,6 +342,7 @@ class AppDomain extends Domain {
     if (await device.isLocalEmulator && !options.buildInfo.supportsEmulator) {
       throw '${toTitleCase(options.buildInfo.friendlyModeName)} mode is not supported for emulators.';
     }
+    final FlutterProject flutterProject = await FlutterProject.current();
 
     // We change the current working directory for the duration of the `start` command.
     final Directory cwd = fs.currentDirectory;
@@ -367,6 +369,7 @@ class AppDomain extends Domain {
         dillOutputPath: dillOutputPath,
         ipv6: ipv6,
         hostIsIde: true,
+        flutterProject: flutterProject,
       );
     } else {
       runner = ColdRunner(

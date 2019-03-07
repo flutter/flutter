@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/commands/update_packages.dart';
 import 'package:json_rpc_2/error_code.dart' as rpc_error_code;
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:meta/meta.dart';
@@ -22,6 +23,7 @@ import 'dart/package_map.dart';
 import 'devfs.dart';
 import 'device.dart';
 import 'globals.dart';
+import 'project.dart';
 import 'resident_runner.dart';
 import 'usage.dart';
 import 'vmservice.dart';
@@ -68,6 +70,7 @@ class HotRunner extends ResidentRunner {
     bool saveCompilationTrace = false,
     bool stayResident = true,
     bool ipv6 = false,
+    FlutterProject flutterProject,
   }) : super(devices,
              target: target,
              debuggingOptions: debuggingOptions,
@@ -79,6 +82,7 @@ class HotRunner extends ResidentRunner {
              ipv6: ipv6)  {
     fileInvalidator = ProjectFileInvalidator(
       packagesFilePath ?? fs.path.absolute(PackageMap.globalPackagesPath),
+      flutterProject,
     );
   }
 
@@ -920,18 +924,45 @@ class HotRunner extends ResidentRunner {
 }
 
 class ProjectFileInvalidator {
-  ProjectFileInvalidator(String packagesPath) {
+  ProjectFileInvalidator(String packagesPath, FlutterProject flutterProject) {
     if (fs.file(packagesPath).existsSync()) {
       _packageMap = PackageMap(packagesPath).map;
     } else {
       _packageMap = const <String, Uri>{};
+    }
+    if (flutterProject != null && flutterProject.pubspecFile.existsSync()) {
+      final PubspecYaml pubspec = PubspecYaml(flutterProject.directory);
+      final Set<String> relevantDependencies = <String>{};
+      for (PubspecDependency dependency in pubspec.allDependencies) {
+        if (dependency.isDevDependency) {
+          continue;
+        }
+        relevantDependencies.add(dependency.name);
+      }
+      // Remove any packages which were tagged as dev dependenices,
+      // But don't remove the app itself!
+      for (String packageName in _packageMap.keys.toList()) {
+        if (!relevantDependencies.contains(packageName) && packageName != flutterProject.manifest.appName) {
+          _packageMap.remove(packageName);
+          continue;
+        }
+      }
+    }
+    // Remove any packages which are derived from the pub cache.
+    for (String packageName in _packageMap.keys.toList()) {
+      final String path = _packageMap[packageName].path;
+      if ((platform.isWindows && path.contains(_pubCachePathWindows))
+          || path.contains(_pubCachePathLinuxAndWindows)) {
+        _packageMap.remove(packageName);
+      }
     }
   }
 
   // Used to avoid watching pubspec directories. This will not change even with pub upgrade,
   // because that actually switches the directory and requires a corresponding
   // update to .packages
-  static const String _pubCachePath = '.pub-cache';
+  static const String _pubCachePathLinuxAndWindows = '.pub-cache';
+  static const String _pubCachePathWindows = 'Pub/Cache';
 
   Map<String, Uri> _packageMap;
   final Map<String, int> _updateTime = <String, int>{};
@@ -941,10 +972,12 @@ class ProjectFileInvalidator {
     for (String packageName in _packageMap.keys) {
       final Uri packageUri =_packageMap[packageName];
       final String packagePath = packageUri.path;
-      if (packagePath.contains(_pubCachePath)) {
-        continue;
+      // On windows check for leading `/`
+      if (platform.isWindows && packagePath.startsWith(r'/')) {
+        _scanDirectory(packagePath.substring(1), invalidatedFiles);
+      } else {
+        _scanDirectory(packagePath, invalidatedFiles);
       }
-      _scanDirectory(packagePath, invalidatedFiles);
     }
     return invalidatedFiles;
   }

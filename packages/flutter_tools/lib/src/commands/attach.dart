@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/project.dart';
 import 'package:multicast_dns/multicast_dns.dart';
 
 import '../base/common.dart';
@@ -129,6 +130,7 @@ class AttachCommand extends FlutterCommand {
   Future<FlutterCommandResult> runCommand() async {
     final String ipv4Loopback = InternetAddress.loopbackIPv4.address;
     final String ipv6Loopback = InternetAddress.loopbackIPv6.address;
+    final FlutterProject flutterProject = await FlutterProject.current();
 
     Cache.releaseLockEarly();
 
@@ -227,6 +229,7 @@ class AttachCommand extends FlutterCommand {
             projectRootPath: argResults['project-root'],
             dillOutputPath: argResults['output-dill'],
             ipv6: usesIpv6,
+            flutterProject: flutterProject,
           )
         : ColdRunner(
             flutterDevices,
@@ -288,6 +291,7 @@ class HotRunnerFactory {
     String dillOutputPath,
     bool stayResident = true,
     bool ipv6 = false,
+    FlutterProject flutterProject,
   }) => HotRunner(
     devices,
     target: target,
@@ -301,6 +305,7 @@ class HotRunnerFactory {
     dillOutputPath: dillOutputPath,
     stayResident: stayResident,
     ipv6: ipv6,
+    flutterProject: flutterProject,
   );
 }
 
