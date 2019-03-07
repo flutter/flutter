@@ -463,6 +463,7 @@ String _getGitHash() {
 Future<void> _processTestOutput(Stream<String> testOutput, bq.TabledataResourceApi tableData) async {
   final FlutterCompactFormatter formatter = FlutterCompactFormatter();
   await testOutput.forEach(formatter.processRawOutput);
+  formatter.finish();
   if (tableData == null || formatter.tests.isEmpty) {
     return;
   }
