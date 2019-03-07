@@ -369,7 +369,10 @@ class _AndroidViewState extends State<AndroidView> {
       layoutDirection: _layoutDirection,
       creationParams: widget.creationParams,
       creationParamsCodec: widget.creationParamsCodec,
-    )..addOnPlatformViewCreatedListener(widget.onPlatformViewCreated);
+    );
+    if (widget.onPlatformViewCreated != null) {
+      _controller.addOnPlatformViewCreatedListener(widget.onPlatformViewCreated);
+    }
   }
 }
 
