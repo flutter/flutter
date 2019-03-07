@@ -378,8 +378,7 @@ public class FlutterView extends SurfaceView
     private static final int kPointerDeviceKindMouse = 1;
     private static final int kPointerDeviceKindStylus = 2;
     private static final int kPointerDeviceKindInvertedStylus = 3;
-    private static final int kPointerDeviceKindSignal = 4;
-    private static final int kPointerDeviceKindUnknown = 5;
+    private static final int kPointerDeviceKindUnknown = 4;
 
     // Must match the PointerSignalKind enum in pointer.dart.
     private static final int kPointerSignalKindNone = 0;
