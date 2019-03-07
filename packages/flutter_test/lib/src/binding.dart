@@ -257,6 +257,12 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     });
   }
 
+  /// Re-attempts the initialization of the lifecycle state after providing
+  /// test values in [TestWindow].
+  void readTestInitialLifecycleStateFromNativeWindow() {
+    readInitialLifecycleStateFromNativeWindow();
+  }
+
   Size _surfaceSize;
 
   /// Artificially changes the surface size to `size` on the Widget binding,

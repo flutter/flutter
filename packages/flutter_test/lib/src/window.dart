@@ -154,6 +154,7 @@ class TestWindow implements Window {
   @override
   String get initialLifecycleState => _initialLifecycleStateTestValue;
   String _initialLifecycleStateTestValue;
+  /// Sets a faked initialLifecycleState for testing.
   set initialLifecycleStateTestValue(String state) {
     _initialLifecycleStateTestValue = state;
   }
