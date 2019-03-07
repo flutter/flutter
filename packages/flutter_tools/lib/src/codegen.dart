@@ -190,10 +190,10 @@ class CodeGeneratingKernelCompiler implements KernelCompiler {
         await outputFile.create();
       }
       await outputFile.writeAsBytes(await buildResult.dillFile.readAsBytes());
-      return CompilerOutput(outputFilePath, 0);
+      return CompilerOutput(outputFilePath, 0, /* sources= */ null);
     } on Exception catch (err) {
       printError('Compilation Failed: $err');
-      return const CompilerOutput(null, 1);
+      return const CompilerOutput(null, 1, /* sources= */ null);
     }
   }
 }

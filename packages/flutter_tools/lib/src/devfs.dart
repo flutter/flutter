@@ -557,6 +557,8 @@ class DevFS {
       outputPath:  dillOutputPath ?? getDefaultApplicationKernelPath(trackWidgetCreation: trackWidgetCreation),
       packagesFilePath : _packagesFilePath,
     );
+    // list of sources that needs to be monitored are in [compilerOutput.sources]
+    //
     // Don't send full kernel file that would overwrite what VM already
     // started loading from.
     if (!bundleFirstUpload) {
