@@ -12,7 +12,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart' show DragStartBehavior;
+import 'package:flutter/gestures.dart' show DragStartBehavior, PointerDeviceKind;
 
 import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
@@ -533,6 +533,37 @@ void main() {
     expect(controller.selection.extentOffset, testValue.indexOf('f')+1);
   });
 
+  testWidgets('Mouse long press is just like a tap', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController();
+
+    await tester.pumpWidget(
+      overlay(
+        child: TextField(
+          controller: controller,
+        ),
+      )
+    );
+
+    const String testValue = 'abc def ghi';
+    await tester.enterText(find.byType(TextField), testValue);
+    expect(controller.value.text, testValue);
+    await skipPastScrollingAnimation(tester);
+
+    expect(controller.selection.isCollapsed, true);
+
+    // Long press the 'e' using a mouse device.
+    final int eIndex = testValue.indexOf('e');
+    final Offset ePos = textOffsetToPosition(tester, eIndex);
+    final TestGesture gesture = await tester.startGesture(ePos, kind: PointerDeviceKind.mouse);
+    await tester.pump(const Duration(seconds: 2));
+    await gesture.up();
+    await tester.pump();
+
+    // The cursor is placed just like a regular tap.
+    expect(controller.selection.baseOffset, eIndex);
+    expect(controller.selection.extentOffset, eIndex);
+  });
+
   testWidgets('enableInteractiveSelection = false, long-press', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController();
 
@@ -562,6 +593,69 @@ void main() {
     expect(controller.selection.isCollapsed, true);
     expect(controller.selection.baseOffset, -1);
     expect(controller.selection.extentOffset, -1);
+  });
+
+  testWidgets('Can select text by dragging with a mouse', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: TextField(
+            dragStartBehavior: DragStartBehavior.down,
+            controller: controller,
+          ),
+        ),
+      ),
+    );
+
+    const String testValue = 'abc def ghi';
+    await tester.enterText(find.byType(TextField), testValue);
+    await skipPastScrollingAnimation(tester);
+
+    final Offset ePos = textOffsetToPosition(tester, testValue.indexOf('e'));
+    final Offset gPos = textOffsetToPosition(tester, testValue.indexOf('g'));
+
+    final TestGesture gesture = await tester.startGesture(ePos, kind: PointerDeviceKind.mouse);
+    await tester.pump();
+    await gesture.moveTo(gPos);
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(controller.selection.baseOffset, testValue.indexOf('e'));
+    expect(controller.selection.extentOffset, testValue.indexOf('g'));
+  });
+
+  testWidgets('Slow mouse dragging also selects text', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: TextField(
+            dragStartBehavior: DragStartBehavior.down,
+            controller: controller,
+          ),
+        ),
+      ),
+    );
+
+    const String testValue = 'abc def ghi';
+    await tester.enterText(find.byType(TextField), testValue);
+    await skipPastScrollingAnimation(tester);
+
+    final Offset ePos = textOffsetToPosition(tester, testValue.indexOf('e'));
+    final Offset gPos = textOffsetToPosition(tester, testValue.indexOf('g'));
+
+    final TestGesture gesture = await tester.startGesture(ePos, kind: PointerDeviceKind.mouse);
+    await tester.pump(const Duration(seconds: 2));
+    await gesture.moveTo(gPos);
+    await tester.pump();
+    await gesture.up();
+
+    expect(controller.selection.baseOffset, testValue.indexOf('e'));
+    expect(controller.selection.extentOffset, testValue.indexOf('g'));
   });
 
   testWidgets('Can drag handles to change selection', (WidgetTester tester) async {

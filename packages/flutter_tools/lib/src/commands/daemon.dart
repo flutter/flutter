@@ -346,11 +346,12 @@ class AppDomain extends Domain {
     final Directory cwd = fs.currentDirectory;
     fs.currentDirectory = fs.directory(projectDirectory);
 
-    final FlutterDevice flutterDevice = FlutterDevice(
+    final FlutterDevice flutterDevice = await FlutterDevice.create(
       device,
       trackWidgetCreation: trackWidgetCreation,
       dillOutputPath: dillOutputPath,
       viewFilter: isolateFilter,
+      target: target,
     );
 
     ResidentRunner runner;

@@ -661,7 +661,11 @@ class ResidentCompiler {
     return null;
   }
 
-  Future<dynamic> shutdown() {
+  Future<dynamic> shutdown() async {
+    // Server was never sucessfully created.
+    if (_server == null) {
+      return 0;
+    }
     _server.kill();
     return _server.exitCode;
   }

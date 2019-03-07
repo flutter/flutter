@@ -10,6 +10,7 @@ import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/platform.dart';
 import 'compile.dart';
+import 'dart/package_map.dart';
 import 'globals.dart';
 import 'project.dart';
 
@@ -48,34 +49,23 @@ abstract class CodeGenerator {
   ///
   /// The defines of the daemon command are the arguments required in the
   /// flutter_build kernel builder.
-  Future<CodegenDaemon> daemon();
-
-  /// Invalidates a generated build script by deleting it.
-  ///
-  /// Must be called any time a pubspec file update triggers a corresponding change
-  /// in .packages.
-  Future<void> invalidateBuildScript();
+  Future<CodegenDaemon> daemon(FlutterProject flutterProject);
 
   // Generates a synthetic package under .dart_tool/flutter_tool which is in turn
   // used to generate a build script.
-  Future<void> generateBuildScript();
+  Future<void> generateBuildScript(FlutterProject flutterProject);
 }
 
 class UnsupportedCodeGenerator extends CodeGenerator {
   const UnsupportedCodeGenerator();
 
   @override
-  Future<void> generateBuildScript() {
+  Future<void> generateBuildScript(FlutterProject flutterProject) {
     throw UnsupportedError('build_runner is not currently supported.');
   }
 
   @override
-  Future<void> invalidateBuildScript() {
-    throw UnsupportedError('build_runner is not currently supported.');
-  }
-
-  @override
-  Future<CodegenDaemon> daemon() {
+  Future<CodegenDaemon> daemon(FlutterProject flutterProject) {
     throw UnsupportedError('build_runner is not currently supported.');
   }
 }
@@ -125,7 +115,8 @@ class CodeGeneratingKernelCompiler implements KernelCompiler {
         'sdkRoot, packagesPath are not supported when using the experimental '
         'build* pipeline');
     }
-    final CodegenDaemon codegenDaemon = await codeGenerator.daemon();
+    final FlutterProject flutterProject = await FlutterProject.current();
+    final CodegenDaemon codegenDaemon = await codeGenerator.daemon(flutterProject);
     codegenDaemon.startBuild();
     await for (CodegenStatus codegenStatus in codegenDaemon.buildResults) {
       if (codegenStatus == CodegenStatus.Failed) {
@@ -145,8 +136,11 @@ class CodeGeneratingKernelCompiler implements KernelCompiler {
       incrementalCompilerByteStorePath: incrementalCompilerByteStorePath,
       targetProductVm: targetProductVm,
       sdkRoot: sdkRoot,
-      packagesPath: packagesPath,
-      fileSystemRoots: fileSystemRoots,
+      packagesPath: PackageMap.globalGeneratedPackagesPath,
+      fileSystemRoots: <String>[
+        fs.path.join(flutterProject.generated.path, 'lib${platform.pathSeparator}'),
+        fs.path.join(flutterProject.directory.path, 'lib${platform.pathSeparator}'),
+      ],
       fileSystemScheme: fileSystemScheme,
       depFilePath: depFilePath,
       targetModel: targetModel,
@@ -162,19 +156,21 @@ class CodeGeneratingResidentCompiler implements ResidentCompiler {
   /// Creates a new [ResidentCompiler] and configures a [BuildDaemonClient] to
   /// run builds.
   static Future<CodeGeneratingResidentCompiler> create({
-    @required String mainPath,
+    @required FlutterProject flutterProject,
+    String mainPath,
     bool trackWidgetCreation = false,
     CompilerMessageConsumer compilerMessageConsumer = printError,
     bool unsafePackageSerialization = false,
+    String outputPath,
+    String initializeFromDill,
   }) async {
-    final FlutterProject flutterProject = await FlutterProject.current();
-    final CodegenDaemon codegenDaemon = await codeGenerator.daemon();
+    final CodegenDaemon codegenDaemon = await codeGenerator.daemon(flutterProject);
     codegenDaemon.startBuild();
     final CodegenStatus status = await codegenDaemon.buildResults.firstWhere((CodegenStatus status) {
-      return status ==CodegenStatus.Succeeded || status == CodegenStatus.Failed;
+      return status == CodegenStatus.Succeeded || status == CodegenStatus.Failed;
     });
     if (status == CodegenStatus.Failed) {
-      printError('Codegeneration failed, halting build.');
+      printError('Code generation failed, build may have compile errors');
     }
     final ResidentCompiler residentCompiler = ResidentCompiler(
       artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
@@ -182,12 +178,13 @@ class CodeGeneratingResidentCompiler implements ResidentCompiler {
       // TODO(jonahwilliams): replace with generated path.
       // packagesPath: codegenDaemon.packagesFile.path,
       fileSystemRoots: <String>[
-        fs.path.join(flutterProject.generated.absolute.path, 'lib${platform.pathSeparator}'),
+        fs.path.join(flutterProject.generated.path, 'lib${platform.pathSeparator}'),
         fs.path.join(flutterProject.directory.path, 'lib${platform.pathSeparator}'),
       ],
       fileSystemScheme: _kMultiRootScheme,
       targetModel: TargetModel.flutter,
       unsafePackageSerialization: unsafePackageSerialization,
+      initializeFromDill: initializeFromDill,
     );
     return CodeGeneratingResidentCompiler._(residentCompiler, codegenDaemon);
   }
@@ -209,7 +206,7 @@ class CodeGeneratingResidentCompiler implements ResidentCompiler {
   Future<CompilerOutput> recompile(String mainPath, List<String> invalidatedFiles, {String outputPath, String packagesFilePath}) async {
     if (_codegenDaemon.lastStatus != CodegenStatus.Succeeded && _codegenDaemon.lastStatus != CodegenStatus.Failed) {
       await _codegenDaemon.buildResults.firstWhere((CodegenStatus status) {
-        return status ==CodegenStatus.Succeeded || status == CodegenStatus.Failed;
+        return status == CodegenStatus.Succeeded || status == CodegenStatus.Failed;
       });
     }
     if (_codegenDaemon.lastStatus == CodegenStatus.Failed) {

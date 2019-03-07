@@ -809,7 +809,7 @@ class _LargeTitleNavigationBarSliverDelegate
 
   @override
   bool shouldRebuild(_LargeTitleNavigationBarSliverDelegate oldDelegate) {
-       return components != oldDelegate.components
+    return components != oldDelegate.components
         || userMiddle != oldDelegate.userMiddle
         || backgroundColor != oldDelegate.backgroundColor
         || border != oldDelegate.border

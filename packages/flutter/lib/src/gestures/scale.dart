@@ -183,7 +183,12 @@ class _LineBetweenPointers{
 /// are no longer in contact with the screen, the recognizer calls [onEnd].
 class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   /// Create a gesture recognizer for interactions intended for scaling content.
-  ScaleGestureRecognizer({ Object debugOwner }) : super(debugOwner: debugOwner);
+  ///
+  /// {@macro flutter.gestures.gestureRecognizer.kind}
+  ScaleGestureRecognizer({
+    Object debugOwner,
+    PointerDeviceKind kind,
+  }) : super(debugOwner: debugOwner, kind: kind);
 
   /// The pointers in contact with the screen have established a focal point and
   /// initial scale of 1.0.
@@ -239,7 +244,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   }
 
   @override
-  void addPointer(PointerEvent event) {
+  void addAllowedPointer(PointerEvent event) {
     startTrackingPointer(event.pointer);
     _velocityTrackers[event.pointer] = VelocityTracker();
     if (_state == _ScaleState.ready) {
