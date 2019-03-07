@@ -26,7 +26,7 @@ import '../globals.dart';
 import '../project.dart';
 import 'build_script_generator.dart';
 
-/// The minimum version of build_runner we can support in the flutter tool
+/// The minimum version of build_runner we can support in the flutter tool.
 const String kMinimumBuildRunnerVersion = '1.2.8';
 
 // Arbitrarily choosen multi-root file scheme. This is used to configure the
