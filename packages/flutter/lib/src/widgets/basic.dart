@@ -664,7 +664,7 @@ class ClipRRect extends SingleChildRenderObjectWidget {
   /// exceed width/height.
   ///
   /// This value is ignored if [clipper] is non-null.
-  final BorderRadius borderRadius;
+  final BorderRadiusGeometry borderRadius;
 
   /// If non-null, determines which clip to use.
   final CustomClipper<RRect> clipper;
@@ -685,7 +685,7 @@ class ClipRRect extends SingleChildRenderObjectWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<BorderRadius>('borderRadius', borderRadius, showName: false, defaultValue: null));
+    properties.add(DiagnosticsProperty<BorderRadiusGeometry>('borderRadius', borderRadius, showName: false, defaultValue: null));
     properties.add(DiagnosticsProperty<CustomClipper<RRect>>('clipper', clipper, defaultValue: null));
   }
 }
@@ -875,7 +875,7 @@ class PhysicalModel extends SingleChildRenderObjectWidget {
   /// exceed width/height.
   ///
   /// This is ignored if the [shape] is not [BoxShape.rectangle].
-  final BorderRadius borderRadius;
+  final BorderRadiusGeometry borderRadius;
 
   /// The z-coordinate relative to the parent at which to place this physical
   /// object.
@@ -914,7 +914,7 @@ class PhysicalModel extends SingleChildRenderObjectWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(EnumProperty<BoxShape>('shape', shape));
-    properties.add(DiagnosticsProperty<BorderRadius>('borderRadius', borderRadius));
+    properties.add(DiagnosticsProperty<BorderRadiusGeometry>('borderRadius', borderRadius));
     properties.add(DoubleProperty('elevation', elevation));
     properties.add(DiagnosticsProperty<Color>('color', color));
     properties.add(DiagnosticsProperty<Color>('shadowColor', shadowColor));
