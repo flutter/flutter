@@ -13,6 +13,7 @@ import '../cache.dart';
 import '../device.dart';
 import '../globals.dart';
 import '../ios/mac.dart';
+import '../project.dart';
 import '../resident_runner.dart';
 import '../run_cold.dart';
 import '../run_hot.dart';
@@ -267,6 +268,7 @@ class RunCommand extends RunCommandBase {
     // Enable hot mode by default if `--no-hot` was not passed and we are in
     // debug mode.
     final bool hotMode = shouldUseHotMode();
+    final FlutterProject flutterProject = await FlutterProject.current();
 
     writePidFile(argResults['pid-file']);
 
@@ -376,6 +378,7 @@ class RunCommand extends RunCommandBase {
         saveCompilationTrace: argResults['train'],
         stayResident: stayResident,
         ipv6: ipv6,
+        flutterProject: flutterProject,
       );
     } else {
       runner = ColdRunner(
