@@ -30,6 +30,7 @@ void main() {
     testUsingContext('delegates to build_runner', () async {
       const CodeGeneratingKernelCompiler kernelCompiler = CodeGeneratingKernelCompiler();
       when(mockBuildRunner.build(
+        any,
         aot: anyNamed('aot'),
         extraFrontEndOptions: anyNamed('extraFrontEndOptions'),
         linkPlatformKernelIn: anyNamed('linkPlatformKernelIn'),
@@ -37,7 +38,7 @@ void main() {
         targetProductVm: anyNamed('targetProductVm'),
         trackWidgetCreation: anyNamed('trackWidgetCreation'),
       )).thenAnswer((Invocation invocation) async {
-        return CodeGenerationResult(fs.file('.packages'), fs.file('main.app.dill'));
+        return CodeGenerationResult(fs.file('main.app.dill'));
       });
       final CompilerOutput buildResult = await kernelCompiler.compile(
         outputFilePath: 'output.app.dill',
