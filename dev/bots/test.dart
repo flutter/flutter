@@ -538,7 +538,8 @@ Future<void> _runFlutterTest(String workingDirectory, {
   if (flutterTestArgs != null && flutterTestArgs.isNotEmpty)
     args.addAll(flutterTestArgs);
 
-  if (!expectFailure && !options.contains('--coverage')) {
+  final bool shouldProcessOutput = !expectFailure && !options.contains('--coverage');
+  if (shouldProcessOutput) {
     args.add('--machine');
   }
 
@@ -556,7 +557,7 @@ Future<void> _runFlutterTest(String workingDirectory, {
     }
     args.add(script);
   }
-  if (expectFailure) {
+  if (!shouldProcessOutput) {
     return runCommand(flutter, args,
       workingDirectory: workingDirectory,
       expectNonZeroExit: true,
