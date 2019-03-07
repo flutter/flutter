@@ -141,7 +141,7 @@ class CodeGeneratingKernelCompiler implements KernelCompiler {
         fs.path.join(flutterProject.generated.path, 'lib${platform.pathSeparator}'),
         fs.path.join(flutterProject.directory.path, 'lib${platform.pathSeparator}'),
       ],
-      fileSystemScheme: fileSystemScheme,
+      fileSystemScheme: _kMultiRootScheme,
       depFilePath: depFilePath,
       targetModel: targetModel,
     );
@@ -157,7 +157,6 @@ class CodeGeneratingResidentCompiler implements ResidentCompiler {
   /// run builds.
   static Future<CodeGeneratingResidentCompiler> create({
     @required FlutterProject flutterProject,
-    String mainPath,
     bool trackWidgetCreation = false,
     CompilerMessageConsumer compilerMessageConsumer = printError,
     bool unsafePackageSerialization = false,
@@ -170,13 +169,12 @@ class CodeGeneratingResidentCompiler implements ResidentCompiler {
       return status == CodegenStatus.Succeeded || status == CodegenStatus.Failed;
     });
     if (status == CodegenStatus.Failed) {
-      printError('Code generation failed, build may have compile errors');
+      printError('Code generation failed, build may have compile errors.');
     }
     final ResidentCompiler residentCompiler = ResidentCompiler(
       artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
       trackWidgetCreation: trackWidgetCreation,
-      // TODO(jonahwilliams): replace with generated path.
-      // packagesPath: codegenDaemon.packagesFile.path,
+      packagesPath: PackageMap.globalGeneratedPackagesPath,
       fileSystemRoots: <String>[
         fs.path.join(flutterProject.generated.path, 'lib${platform.pathSeparator}'),
         fs.path.join(flutterProject.directory.path, 'lib${platform.pathSeparator}'),
@@ -215,15 +213,14 @@ class CodeGeneratingResidentCompiler implements ResidentCompiler {
     // Delete this file so that the frontend_server can handle multi-root.
     // TODO(jonahwilliams): investigate frontend_server behavior in the presence
     // of multi-root and initialize from dill.
-    if (await fs.file(outputPath).exists()) {
-      await fs.file(outputPath).delete();
+    if (outputPath != null && fs.file(outputPath).existsSync()) {
+      fs.file(outputPath).deleteSync();
     }
     return _residentCompiler.recompile(
       mainPath,
       invalidatedFiles,
       outputPath: outputPath,
-      // TODO(jonahwilliams): replace with generated path.
-      //packagesFilePath: _codegenDaemon.packagesFile.path,
+      packagesFilePath: PackageMap.globalGeneratedPackagesPath,
     );
   }
 
