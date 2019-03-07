@@ -137,9 +137,8 @@ abstract class CodegenDaemon {
 ///
 /// If no dill or packages file is generated, they will be null.
 class CodeGenerationResult {
-  const CodeGenerationResult(this.packagesFile, this.dillFile);
+  const CodeGenerationResult(this.dillFile);
 
-  final File packagesFile;
   final File dillFile;
 }
 

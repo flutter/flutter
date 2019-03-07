@@ -104,7 +104,7 @@ class BuildRunner extends CodeGenerator {
       status.stop();
     }
     if (disableKernelGeneration) {
-      return const CodeGenerationResult(null, null);
+      return const CodeGenerationResult(null);
     }
     /// We don't check for this above because it might be generated for the
     /// first time by invoking the build.
@@ -119,16 +119,13 @@ class BuildRunner extends CodeGenerator {
       throw Exception('build_runner cannot find generated directory');
     }
     final String relativeMain = fs.path.relative(mainPath, from: flutterProject.directory.path);
-    final File packagesFile = fs.file(
-      fs.path.join(generatedDirectory.path, fs.path.setExtension(relativeMain, '.packages'))
-    );
     final File dillFile = fs.file(
       fs.path.join(generatedDirectory.path, fs.path.setExtension(relativeMain, '.app.dill'))
     );
-    if (!packagesFile.existsSync() || !dillFile.existsSync()) {
+    if (!dillFile.existsSync()) {
       throw Exception('build_runner did not produce output at expected location: ${dillFile.path} missing');
     }
-    return CodeGenerationResult(packagesFile, dillFile);
+    return CodeGenerationResult(dillFile);
   }
 
   @override
@@ -184,7 +181,6 @@ class BuildRunner extends CodeGenerator {
       stringBuffer.writeln('  flutter_build:');
       stringBuffer.writeln('    sdk: flutter');
       syntheticPubspec.writeAsStringSync(stringBuffer.toString());
-
       await pubGet(
         context: PubContext.pubGet,
         directory: generatedDirectory.path,
