@@ -25,10 +25,10 @@ void main() {
         expectAsync1((List<String> commandLine) async {
           return processRunner.runProcess(commandLine);
         })(<String>['this_executable_better_not_exist_2857632534321']),
-        throwsA(isInstanceOf<ProcessRunnerException>()));
+        throwsA(isInstanceOf<PreparePackageException>()));
     try {
       await processRunner.runProcess(<String>['this_executable_better_not_exist_2857632534321']);
-    } on ProcessRunnerException catch (e) {
+    } on PreparePackageException catch (e) {
       expect(
         e.message,
         contains('Invalid argument(s): Cannot find executable for this_executable_better_not_exist_2857632534321.'),
@@ -64,7 +64,7 @@ void main() {
             expectAsync1((List<String> commandLine) async {
               return processRunner.runProcess(commandLine);
             })(<String>['echo', 'test']),
-            throwsA(isInstanceOf<ProcessRunnerException>()));
+            throwsA(isInstanceOf<PreparePackageException>()));
       });
     });
     group('ArchiveCreator for $platformName', () {
@@ -110,7 +110,7 @@ void main() {
           'git clone -b dev https://chromium.googlesource.com/external/github.com/flutter/flutter': null,
           'git reset --hard $testRef': null,
           'git remote set-url origin https://github.com/flutter/flutter.git': null,
-          'git describe --tags --abbrev=0': <ProcessResult>[ProcessResult(0, 0, 'v1.2.3', '')],
+          'git describe --tags --exact-match $testRef': <ProcessResult>[ProcessResult(0, 0, 'v1.2.3', '')],
         };
         if (platform.isWindows) {
           calls['7za x ${path.join(tempDir.path, 'mingit.zip')}'] = null;
@@ -153,7 +153,7 @@ void main() {
           'git clone -b dev https://chromium.googlesource.com/external/github.com/flutter/flutter': null,
           'git reset --hard $testRef': null,
           'git remote set-url origin https://github.com/flutter/flutter.git': null,
-          'git describe --tags --abbrev=0': <ProcessResult>[ProcessResult(0, 0, 'v1.2.3', '')],
+          'git describe --tags --exact-match $testRef': <ProcessResult>[ProcessResult(0, 0, 'v1.2.3', '')],
         };
         if (platform.isWindows) {
           calls['7za x ${path.join(tempDir.path, 'mingit.zip')}'] = null;
@@ -201,7 +201,54 @@ void main() {
         };
         processManager.fakeResults = calls;
         expect(expectAsync0(creator.initializeRepo),
-            throwsA(isInstanceOf<ProcessRunnerException>()));
+            throwsA(isInstanceOf<PreparePackageException>()));
+      });
+
+      test('non-strict mode calls the right commands', () async {
+        final String createBase = path.join(tempDir.absolute.path, 'create_');
+        final Map<String, List<ProcessResult>> calls = <String, List<ProcessResult>>{
+          'git clone -b dev https://chromium.googlesource.com/external/github.com/flutter/flutter': null,
+          'git reset --hard $testRef': null,
+          'git remote set-url origin https://github.com/flutter/flutter.git': null,
+          'git describe --tags --abbrev=0 $testRef': <ProcessResult>[ProcessResult(0, 0, 'v1.2.3', '')],
+        };
+        if (platform.isWindows) {
+          calls['7za x ${path.join(tempDir.path, 'mingit.zip')}'] = null;
+        }
+        calls.addAll(<String, List<ProcessResult>>{
+          '$flutter doctor': null,
+          '$flutter update-packages': null,
+          '$flutter precache': null,
+          '$flutter ide-config': null,
+          '$flutter create --template=app ${createBase}app': null,
+          '$flutter create --template=package ${createBase}package': null,
+          '$flutter create --template=plugin ${createBase}plugin': null,
+          'git clean -f -X **/.packages': null,
+        });
+        final String archiveName = path.join(tempDir.absolute.path,
+            'flutter_${platformName}_v1.2.3-dev${platform.isLinux ? '.tar.xz' : '.zip'}');
+        if (platform.isWindows) {
+          calls['7za a -tzip -mx=9 $archiveName flutter'] = null;
+        } else if (platform.isMacOS) {
+          calls['zip -r -9 $archiveName flutter'] = null;
+        } else if (platform.isLinux) {
+          calls['tar cJf $archiveName flutter'] = null;
+        }
+        processManager.fakeResults = calls;
+        creator = ArchiveCreator(
+          tempDir,
+          tempDir,
+          testRef,
+          Branch.dev,
+          strict: false,
+          processManager: processManager,
+          subprocessOutput: false,
+          platform: platform,
+          httpReader: fakeHttpReader,
+        );
+        await creator.initializeRepo();
+        await creator.createArchive();
+        processManager.verifyCalls(calls.keys.toList());
       });
     });
 

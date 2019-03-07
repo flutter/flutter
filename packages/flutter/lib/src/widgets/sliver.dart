@@ -1172,9 +1172,9 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
 
   @override
   void visitChildren(ElementVisitor visitor) {
-   // The toList() is to make a copy so that the underlying list can be modified by
-   // the visitor:
-   assert(!_childElements.values.any((Element child) => child == null));
+    // The toList() is to make a copy so that the underlying list can be modified by
+    // the visitor:
+    assert(!_childElements.values.any((Element child) => child == null));
     _childElements.values.toList().forEach(visitor);
   }
 

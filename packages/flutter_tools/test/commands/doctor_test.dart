@@ -212,7 +212,7 @@ void main() {
   });
 
 
- group('doctor with fake validators', () {
+  group('doctor with fake validators', () {
     testUsingContext('validate non-verbose output format for run without issues', () async {
       expect(await FakeQuietDoctor().diagnose(verbose: false), isTrue);
       expect(testLogger.statusText, equals(
