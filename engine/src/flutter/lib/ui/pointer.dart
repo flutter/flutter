@@ -50,6 +50,9 @@ enum PointerDeviceKind {
   /// A pointer device with a stylus that has been inverted.
   invertedStylus,
 
+  /// A pointer device that uses a pointer signal.
+  signal,
+
   /// An unknown pointer device.
   unknown
 }
