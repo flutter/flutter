@@ -2028,6 +2028,8 @@ void main() {
 
     final EditableTextState state =
         tester.state<EditableTextState>(find.byType(EditableText));
+    final RenderEditable renderEditable = state.renderEditable;
+    final Scrollable scrollable = tester.widget<Scrollable>(find.byType(Scrollable));
 
     bool leftVisibleBefore = false;
     bool rightVisibleBefore = false;
@@ -2043,9 +2045,8 @@ void main() {
       // Check the signal from RenderEditable about whether they're within the
       // viewport.
 
-      final RenderEditable renderObject = state.selectionOverlay.renderObject;
-      expect(renderObject.selectionStartInViewport.value, equals(leftVisible));
-      expect(renderObject.selectionEndInViewport.value, equals(rightVisible));
+      expect(renderEditable.selectionStartInViewport.value, equals(leftVisible));
+      expect(renderEditable.selectionEndInViewport.value, equals(rightVisible));
 
       // Check that the animations are functional and going in the right
       // direction.
@@ -2083,7 +2084,7 @@ void main() {
       final List<Positioned> positioned =
         find.byType(Positioned).evaluate().map((Element e) => e.widget).cast<Positioned>().toList();
 
-      final Size viewport = renderObject.size;
+      final Size viewport = renderEditable.size;
 
       void testPosition(double pos, Symbol expected) {
         if (expected == #left)
@@ -2099,18 +2100,20 @@ void main() {
     }
 
     // Select the first word. Both handles should be visible.
-    await tester.longPressAt(const Offset(20, 10));
+    await tester.tapAt(const Offset(20, 10));
+    renderEditable.selectWord(cause: SelectionChangedCause.longPress);
+    await tester.pump();
     await verifyVisibility(true, #left, true, #middle);
 
     // Drag the text slightly so the first word is partially visible. Only the
     // right handle should be visible.
-    await tester.drag(find.byKey(editableTextKey), const Offset(-20, 0));
+    scrollable.controller.jumpTo(20.0);
     await verifyVisibility(false, #left, true, #middle);
 
     // Drag the text all the way to the left so the first word is not visible at
     // all (and the second word is fully visible). Both handles should be
     // invisible now.
-    await tester.drag(find.byKey(editableTextKey), const Offset(-400, 0));
+    scrollable.controller.jumpTo(200.0);
     await verifyVisibility(false, #left, false, #left);
 
     // Tap to unselect.
@@ -2118,17 +2121,19 @@ void main() {
     await tester.pump();
 
     // Now that the second word has been dragged fully into view, select it.
-    await tester.longPressAt(const Offset(80, 10));
+    await tester.tapAt(const Offset(80, 10));
+    renderEditable.selectWord(cause: SelectionChangedCause.longPress);
+    await tester.pump();
     await verifyVisibility(true, #middle, true, #middle);
 
     // Drag the text slightly to the right. Only the left handle should be
     // visible.
-    await tester.drag(find.byKey(editableTextKey), const Offset(20, 0));
+    scrollable.controller.jumpTo(150);
     await verifyVisibility(true, #middle, false, #right);
 
     // Drag the text all the way to the right, so the second word is not visible
     // at all. Again, both handles should be invisible.
-    await tester.drag(find.byKey(editableTextKey), const Offset(400, 0));
+    scrollable.controller.jumpTo(0);
     await verifyVisibility(false, #right, false, #right);
   });
 }
