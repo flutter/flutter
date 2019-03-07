@@ -258,7 +258,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   }
 
   /// Re-attempts the initialization of the lifecycle state after providing
-  /// test values in [TestWindow].
+  /// test values in [TestWindow.initialLifecycleStateTestValue].
   void readTestInitialLifecycleStateFromNativeWindow() {
     readInitialLifecycleStateFromNativeWindow();
   }
