@@ -538,7 +538,7 @@ Future<void> _runFlutterTest(String workingDirectory, {
   if (flutterTestArgs != null && flutterTestArgs.isNotEmpty)
     args.addAll(flutterTestArgs);
 
-  if (!expectFailure) {
+  if (!expectFailure && !options.contains('--coverage')) {
     args.add('--machine');
   }
 
