@@ -604,12 +604,11 @@ class _TextSelectionHandleOverlayState
     }
 
     final Size viewport = widget.renderObject.size;
-    if (!viewport.contains(point)) {
-      point = Offset(
+    point = Offset(
         point.dx.clamp(0.0, viewport.width),
-        point.dy.clamp(0.0, viewport.height),
-      );
-    }
+        point.dy.clamp(0.0, viewport.height)
+    );
+
 
     return CompositedTransformFollower(
       link: widget.layerLink,
