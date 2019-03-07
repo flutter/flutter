@@ -88,6 +88,7 @@ class RenderAndroidView extends RenderBox {
        _viewController = viewController {
     _motionEventsDispatcher = _MotionEventsDispatcher(globalToLocal, viewController);
     updateGestureRecognizers(gestureRecognizers);
+    _viewController.addOnPlatformViewCreatedListener(_onPlatformViewCreated);
   }
 
   _PlatformViewState _state = _PlatformViewState.uninitialized;
@@ -103,11 +104,17 @@ class RenderAndroidView extends RenderBox {
     assert(viewController != null);
     if (_viewController == viewController)
       return;
-    final bool needsSemantics = _viewController.id != viewController.id;
+    _viewController.removeOnPlatformViewCreatedListener(_onPlatformViewCreated);
     _viewController = viewController;
     _sizePlatformView();
-    if (needsSemantics)
+    if (_viewController.isCreated) {
       markNeedsSemanticsUpdate();
+    }
+    _viewController.addOnPlatformViewCreatedListener(_onPlatformViewCreated);
+  }
+
+  void _onPlatformViewCreated(int id) {
+    markNeedsSemanticsUpdate();
   }
 
   /// How to behave during hit testing.
@@ -245,7 +252,10 @@ class RenderAndroidView extends RenderBox {
     super.describeSemanticsConfiguration(config);
 
     config.isSemanticBoundary = true;
-    config.platformViewId = _viewController.id;
+
+    if (_viewController.isCreated) {
+      config.platformViewId = _viewController.id;
+    }
   }
 
   @override
