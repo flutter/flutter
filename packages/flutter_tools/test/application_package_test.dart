@@ -73,8 +73,6 @@ void main() {
       when(sdk.latestVersion).thenReturn(sdkVersion);
       when(sdk.platformToolsAvailable).thenReturn(true);
       when(sdk.licensesAvailable).thenReturn(false);
-      final FlutterProject project = await FlutterProject.current();
-
       when(mockProcessManager.runSync(
           argThat(equals(<String>[
             aaptPath,
