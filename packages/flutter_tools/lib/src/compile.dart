@@ -259,10 +259,10 @@ class KernelCompiler {
 
     printTrace(command.join(' '));
     final Process server = await processManager
-        .start(command)
-        .catchError((dynamic error, StackTrace stack) {
-      printError('Failed to start frontend server $error, $stack');
-    });
+      .start(command)
+      .catchError((dynamic error, StackTrace stack) {
+        printError('Failed to start frontend server $error, $stack');
+      });
 
     final StdoutHandler _stdoutHandler = StdoutHandler();
 

@@ -137,7 +137,7 @@ void main() {
 
     expect(leftBehind['Target 1'], equals(1));
     expect(leftBehind['Target 2'], equals(1));
-    });
+  });
 
   testWidgets('Drag and drop - dragging over button', (WidgetTester tester) async {
     final List<String> events = <String>[];
@@ -685,7 +685,7 @@ void main() {
       expect(tester.getTopLeft(find.text('H')), thirdWidgetLocation);
     });
 
-     testWidgets('Vertical axis draggable moves vertically', (WidgetTester tester) async {
+    testWidgets('Vertical axis draggable moves vertically', (WidgetTester tester) async {
       await tester.pumpWidget(build());
       final Offset firstLocation = tester.getTopLeft(find.text('V'));
       final Offset secondLocation = firstLocation + const Offset(0.0, 300.0);

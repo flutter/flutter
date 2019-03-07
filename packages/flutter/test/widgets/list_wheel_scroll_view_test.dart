@@ -55,7 +55,7 @@ void main() {
 
     testWidgets('ListWheelScrollView needs positive magnification', (WidgetTester tester) async {
       expect(
-            () {
+        () {
           ListWheelScrollView(
             useMagnifier: true,
             magnification: -1.0,

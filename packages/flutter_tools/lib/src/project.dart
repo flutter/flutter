@@ -490,7 +490,7 @@ class WebProject {
       printStatusWhenWriting: false,
       overwriteExisting: true,
     );
-   }
+  }
 }
 
 /// Deletes [directory] with all content.

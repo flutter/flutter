@@ -527,44 +527,44 @@ void main() {
   });
 
   testWidgets('accessible navigation behavior with action', (WidgetTester tester) async {
-      final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
-      await tester.pumpWidget(MaterialApp(
-        home: MediaQuery(
-          data: const MediaQueryData(accessibleNavigation: true),
-          child: Scaffold(
-            key: scaffoldKey,
-            body: Builder(
-              builder: (BuildContext context) {
-                return GestureDetector(
-                  onTap: () {
-                    Scaffold.of(context).showSnackBar(SnackBar(
-                      content: const Text('snack'),
-                      duration: const Duration(seconds: 1),
-                      action: SnackBarAction(
-                        label: 'ACTION',
-                        onPressed: () {},
-                      ),
-                    ));
-                  },
-                  child: const Text('X'),
-                );
-              },
-            ),
+    await tester.pumpWidget(MaterialApp(
+      home: MediaQuery(
+        data: const MediaQueryData(accessibleNavigation: true),
+        child: Scaffold(
+          key: scaffoldKey,
+          body: Builder(
+            builder: (BuildContext context) {
+              return GestureDetector(
+                onTap: () {
+                  Scaffold.of(context).showSnackBar(SnackBar(
+                    content: const Text('snack'),
+                    duration: const Duration(seconds: 1),
+                    action: SnackBarAction(
+                      label: 'ACTION',
+                      onPressed: () {},
+                    ),
+                  ));
+                },
+                child: const Text('X'),
+              );
+            },
           ),
         ),
-      ));
-      await tester.tap(find.text('X'));
-      await tester.pump();
-      // Find action immediately
-      expect(find.text('ACTION'), findsOneWidget);
-      // Snackbar doesn't close
-      await tester.pump(const Duration(seconds: 10));
-      expect(find.text('ACTION'), findsOneWidget);
-      await tester.tap(find.text('ACTION'));
-      await tester.pump();
-      // Snackbar closes immediately
-      expect(find.text('ACTION'), findsNothing);
+      ),
+    ));
+    await tester.tap(find.text('X'));
+    await tester.pump();
+    // Find action immediately
+    expect(find.text('ACTION'), findsOneWidget);
+    // Snackbar doesn't close
+    await tester.pump(const Duration(seconds: 10));
+    expect(find.text('ACTION'), findsOneWidget);
+    await tester.tap(find.text('ACTION'));
+    await tester.pump();
+    // Snackbar closes immediately
+    expect(find.text('ACTION'), findsNothing);
   });
 
   testWidgets('contributes dismiss semantics', (WidgetTester tester) async {
