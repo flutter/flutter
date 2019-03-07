@@ -146,6 +146,10 @@
   return _shell->GetTaskRunners().GetPlatformTaskRunner();
 }
 
+- (void)ensureSemanticsEnabled {
+  self.iosPlatformView->SetSemanticsEnabled(true);
+}
+
 - (void)setViewController:(FlutterViewController*)viewController {
   FML_DCHECK(self.iosPlatformView);
   _viewController = [viewController getWeakPtr];

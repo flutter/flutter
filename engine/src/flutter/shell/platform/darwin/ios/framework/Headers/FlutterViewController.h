@@ -18,6 +18,14 @@
 @class FlutterEngine;
 
 /**
+ * The name used for semantic update nofications via `NSNotificationCenter`.
+ *
+ * The object passed as the sender is the `FlutterViewController` associated
+ * with the update.
+ */
+const NSNotificationName FlutterSemanticsUpdateNotification = @"FlutterSemanticsUpdate";
+
+/**
  * A `UIViewController` implementation for Flutter views.
  *
  * Dart execution, channel communication, texture registration, and plugin registration

@@ -90,8 +90,8 @@ sk_sp<GrContext> PlatformViewIOS::CreateResourceContext() const {
 // |shell::PlatformView|
 void PlatformViewIOS::SetSemanticsEnabled(bool enabled) {
   if (!owner_controller_) {
-    FML_DLOG(WARNING) << "Could not set semantics to enabled, this "
-                         "PlatformViewIOS has no ViewController.";
+    FML_LOG(WARNING) << "Could not set semantics to enabled, this "
+                        "PlatformViewIOS has no ViewController.";
     return;
   }
   if (enabled && !accessibility_bridge_) {
@@ -111,8 +111,11 @@ void PlatformViewIOS::SetAccessibilityFeatures(int32_t flags) {
 // |shell::PlatformView|
 void PlatformViewIOS::UpdateSemantics(blink::SemanticsNodeUpdates update,
                                       blink::CustomAccessibilityActionUpdates actions) {
+  FML_DCHECK(owner_controller_);
   if (accessibility_bridge_) {
     accessibility_bridge_->UpdateSemantics(std::move(update), std::move(actions));
+    [[NSNotificationCenter defaultCenter] postNotificationName:FlutterSemanticsUpdateNotification
+                                                        object:owner_controller_.get()];
   }
 }
 

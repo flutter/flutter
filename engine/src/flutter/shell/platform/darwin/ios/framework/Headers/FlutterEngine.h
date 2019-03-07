@@ -134,6 +134,26 @@ FLUTTER_EXPORT
 - (void)destroyContext;
 
 /**
+ * Ensures that Flutter will generate a semantics tree.
+ *
+ * This is enabled by default if certain accessibility services are turned on by
+ * the user, or when using a Simulator. This method allows a user to turn
+ * semantics on when they would not ordinarily be generated and the performance
+ * overhead is not a concern, e.g. for UI testing. Note that semantics should
+ * never be programatically turned off, as it would potentially disable
+ * accessibility services an end user has requested.
+ *
+ * This method must only be called after launching the engine via
+ * `-runWithEntrypoint:` or `-runWithEntryPoint:libraryURI`.
+ *
+ * You can subscribe to semantics updates via `NSNotificationCenter` by adding
+ * an observer for the name `FlutterSemanticsUpdateNotification`.  The `object`
+ * parameter will be the `FlutterViewController` associated with the semantics
+ * update.
+ */
+- (void)ensureSemanticsEnabled;
+
+/**
  * Sets the `FlutterViewController` for this instance.  The FlutterEngine must be
  * running (e.g. a successful call to `-runWithEntrypoint:` or `-runWithEntrypoint:libraryURI`)
  * before calling this method. Callers may pass nil to remove the viewController

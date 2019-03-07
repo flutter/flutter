@@ -40,6 +40,9 @@ class PlatformViewIOS final : public PlatformView {
 
   void SetTextInputPlugin(fml::scoped_nsprotocol<FlutterTextInputPlugin*> plugin);
 
+  // |shell::PlatformView|
+  void SetSemanticsEnabled(bool enabled) override;
+
  private:
   fml::WeakPtr<FlutterViewController> owner_controller_;
   std::unique_ptr<IOSSurface> ios_surface_;
@@ -56,9 +59,6 @@ class PlatformViewIOS final : public PlatformView {
 
   // |shell::PlatformView|
   sk_sp<GrContext> CreateResourceContext() const override;
-
-  // |shell::PlatformView|
-  void SetSemanticsEnabled(bool enabled) override;
 
   // |shell::PlatformView|
   void SetAccessibilityFeatures(int32_t flags) override;
