@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:flutter_tools/src/project.dart';
 import 'package:meta/meta.dart';
 
 import '../base/common.dart';
@@ -20,6 +19,7 @@ import '../convert.dart';
 import '../device.dart';
 import '../emulator.dart';
 import '../globals.dart';
+import '../project.dart';
 import '../resident_runner.dart';
 import '../run_cold.dart';
 import '../run_hot.dart';
