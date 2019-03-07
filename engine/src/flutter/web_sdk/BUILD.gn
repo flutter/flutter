@@ -3,13 +3,11 @@
 # found in the LICENSE file.
 
 group("web_sdk") {
-  sdk_copy_deps = []
-
   deps = [
     ":web_ui_sources",
     ":web_libraries_json",
-    ":dart_sdk_internal",
-  ] + sdk_copy_deps
+    #":dart_sdk_internal",
+  ]
 }
 
 copy("web_ui_sources") {
@@ -46,21 +44,21 @@ copy("web_libraries_json") {
   ]
 }
 
-copy("dart_sdk_internal") {
-    deps = [
-        "//third_party/dart:create_sdk"
-    ]
+# copy("dart_sdk_internal") {
+#     deps = [
+#         "//third_party/dart:create_sdk"
+#     ]
 
-    sources = [
-        "$root_out_dir/dart-sdk/lib/_internal/ddc_sdk.dill",
-        "$root_out_dir/dart-sdk/lib/_internal/dart2js_platform.dill",
-        "$root_out_dir/dart-sdk/lib/_internal/dart2js_server_platform.dill",
-        "$root_out_dir/dart-sdk/lib/_internal/ddc_sdk.sum",
-        "$root_out_dir/dart-sdk/lib/_internal/strong.sum",
-        "$root_out_dir/dart-sdk/lib/_internal/vm_platform_strong.dill",
-    ]
+#     sources = [
+#         "$root_out_dir/dart-sdk/lib/_internal/ddc_sdk.dill",
+#         "$root_out_dir/dart-sdk/lib/_internal/dart2js_platform.dill",
+#         "$root_out_dir/dart-sdk/lib/_internal/dart2js_server_platform.dill",
+#         "$root_out_dir/dart-sdk/lib/_internal/ddc_sdk.sum",
+#         "$root_out_dir/dart-sdk/lib/_internal/strong.sum",
+#         "$root_out_dir/dart-sdk/lib/_internal/vm_platform_strong.dill",
+#     ]
 
-    outputs = [
-        "$root_out_dir/flutter_web_sdk/lib/_internal/{{source_file_part}}"
-    ]
-}
+#     outputs = [
+#         "$root_out_dir/flutter_web_sdk/lib/_internal/{{source_file_part}}"
+#     ]
+# }
