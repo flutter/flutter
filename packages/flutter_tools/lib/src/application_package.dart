@@ -93,7 +93,7 @@ class AndroidApk extends ApplicationPackage {
 
   /// Creates a new AndroidApk from an existing APK.
   factory AndroidApk.fromApk(File apk) {
-    final String aaptPath = androidSdk.latestVersion.aaptPath;
+    final String aaptPath = androidSdk?.latestVersion?.aaptPath;
     if (aaptPath == null) {
       printError(userMessages.aaptNotFound);
       return null;
