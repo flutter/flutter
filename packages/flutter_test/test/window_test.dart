@@ -164,20 +164,6 @@ void main() {
     );
   });
 
-  testWidgets('TestWindow can fake initialLifecycleState', (WidgetTester tester) async {
-    verifyThatTestWindowCanFakeProperty<String>(
-      tester: tester,
-      realValue: 'AppLifecycleState.resumed',
-      fakeValue: 'AppLifecycleState.blahfake',
-      propertyRetriever: () {
-        return WidgetsBinding.instance.window.initialLifecycleState;
-      },
-      propertyFaker: (TestWidgetsFlutterBinding binding, String fakeValue) {
-        binding.window.initialLifecycleStateTestValue = fakeValue;
-      },
-    );
-  });
-
   testWidgets('TestWindow can clear out fake properties all at once', (WidgetTester tester) {
     final double originalDevicePixelRatio = ui.window.devicePixelRatio;
     final double originalTextScaleFactor = ui.window.textScaleFactor;
