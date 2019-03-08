@@ -11,7 +11,7 @@ gke_container:
 task:
   env:
     CIRRUS_WORKING_DIR: "/tmp/github_repo"
-
+    DEPOT_TOOLS_UPDATE: 0
   replace_engine_script: |
     cd $ENGINE_PATH/src
     rm -r flutter
@@ -88,7 +88,7 @@ format_and_dart_test_task:
 
   env:
     CIRRUS_WORKING_DIR: "/tmp/github_repo"
-
+    DEPOT_TOOLS_UPDATE: 0
   replace_engine_script: |
     cd $ENGINE_PATH/src
     rm -r flutter
