@@ -992,9 +992,10 @@ class ProjectFileInvalidator {
         final int oldUpdatedAt = _updateTime[entity.path];
         final int updatedAt = fs.statSync(entity.path).modified.millisecondsSinceEpoch;
         if (oldUpdatedAt == null || updatedAt > oldUpdatedAt) {
-          // On windows check for leading `/`
-          if (platform.isWindows && entity.path.startsWith(r'/')) {
-            invalidatedFiles.add(entity.path.substring(1));
+          // On windows convert to file uri in expected format.
+          if (platform.isWindows) {
+            final String fileUri = 'file:///${entity.path.replaceAll(r'\', r'/')}';
+            invalidatedFiles.add(fileUri);
           } else {
             invalidatedFiles.add(entity.path);
           }
