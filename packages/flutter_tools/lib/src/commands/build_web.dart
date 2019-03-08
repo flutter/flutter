@@ -4,11 +4,10 @@
 
 import 'dart:async';
 
-import '../base/common.dart';
 import '../base/logger.dart';
 import '../build_info.dart';
 import '../globals.dart';
-import '../runner/flutter_command.dart' show FlutterCommandResult;
+import '../runner/flutter_command.dart' show ExitStatus, FlutterCommandResult;
 import '../web/compile.dart';
 import 'build.dart';
 
@@ -34,9 +33,6 @@ class BuildWebCommand extends BuildSubCommand {
     final Status status = logger.startProgress('Compiling $target to JavaScript...', timeout: null);
     final int result = await webCompiler.compile(target: target);
     status.stop();
-    if (result != 0) {
-      throwToolExit('JavaScript compilation failed.');
-    }
-    return null;
+    return FlutterCommandResult(result == 0 ? ExitStatus.success : ExitStatus.fail);
   }
 }
