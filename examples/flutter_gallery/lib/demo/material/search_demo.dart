@@ -60,7 +60,7 @@ class _SearchDemoState extends State<SearchDemo> {
                   ? Icons.more_horiz
                   : Icons.more_vert,
             ),
-            onPressed: () {},
+            onPressed: () { },
           ),
         ],
       ),

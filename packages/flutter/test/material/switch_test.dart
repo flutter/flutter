@@ -57,7 +57,7 @@ void main() {
               child: Switch(
                 dragStartBehavior: DragStartBehavior.down,
                 value: true,
-                onChanged: (bool newValue) {},
+                onChanged: (bool newValue) { },
               ),
             ),
           ),
@@ -77,7 +77,7 @@ void main() {
               child: Switch(
                 dragStartBehavior: DragStartBehavior.down,
                 value: true,
-                onChanged: (bool newValue) {},
+                onChanged: (bool newValue) { },
               ),
             ),
           ),

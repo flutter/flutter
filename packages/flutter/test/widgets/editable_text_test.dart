@@ -784,7 +784,7 @@ void main() {
                     cursorColor: Colors.blue,
                     selectionControls: materialTextSelectionControls,
                     keyboardType: TextInputType.text,
-                    onChanged: (String value) {},
+                    onChanged: (String value) { },
                   ),
                 ),
               ),

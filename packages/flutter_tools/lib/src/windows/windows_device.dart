@@ -14,7 +14,7 @@ class WindowsDevice extends Device {
   WindowsDevice() : super('Windows');
 
   @override
-  void clearLogs() {}
+  void clearLogs() { }
 
   @override
   DeviceLogReader getLogReader({ ApplicationPackage app }) => NoOpDeviceLogReader('windows');

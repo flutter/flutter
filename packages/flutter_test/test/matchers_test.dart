@@ -393,8 +393,8 @@ void main() {
         namesRoute: true,
         header: true,
         button: true,
-        onTap: () {},
-        onLongPress: () {},
+        onTap: () { },
+        onLongPress: () { },
         label: 'foo',
         hint: 'bar',
         value: 'baz',
@@ -404,8 +404,8 @@ void main() {
         onTapHint: 'scan',
         onLongPressHint: 'fill',
         customSemanticsActions: <CustomSemanticsAction, VoidCallback>{
-          const CustomSemanticsAction(label: 'foo'): () {},
-          const CustomSemanticsAction(label: 'bar'): () {},
+          const CustomSemanticsAction(label: 'foo'): () { },
+          const CustomSemanticsAction(label: 'bar'): () { },
         },
       ));
 

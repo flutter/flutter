@@ -161,7 +161,7 @@ abstract class SliverChildDelegate {
   ///
   /// Useful for subclasses that which to track which children are included in
   /// the underlying render tree.
-  void didFinishLayout(int firstIndex, int lastIndex) {}
+  void didFinishLayout(int firstIndex, int lastIndex) { }
 
   /// Called whenever a new instance of the child delegate class is
   /// provided to the sliver.

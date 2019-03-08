@@ -79,7 +79,7 @@ class StdoutHandler {
   void handler(String message) {
     const String kResultPrefix = 'result ';
     if (boundaryKey == null && message.startsWith(kResultPrefix)) {
-        boundaryKey = message.substring(kResultPrefix.length);
+      boundaryKey = message.substring(kResultPrefix.length);
     } else if (message.startsWith(boundaryKey)) {
       if (message.length <= boundaryKey.length) {
         compilerOutput.complete(null);

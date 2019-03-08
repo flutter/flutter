@@ -50,7 +50,7 @@ void main() {
   });
 
   testWidgets('Passes onEditingComplete to underlying TextField', (WidgetTester tester) async {
-    final VoidCallback onEditingComplete = () {};
+    final VoidCallback onEditingComplete = () { };
 
     await tester.pumpWidget(
       MaterialApp(

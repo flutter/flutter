@@ -23,7 +23,7 @@ void main() {
               child: CupertinoPicker(
                 scrollController: controller,
                 itemExtent: 50.0,
-                onSelectedItemChanged: (_) {},
+                onSelectedItemChanged: (_) { },
                 children: List<Widget>.generate(3, (int index) {
                   return Container(
                     height: 50.0,
@@ -79,7 +79,7 @@ void main() {
                   Text('1'),
                   Text('1'),
                 ],
-                onSelectedItemChanged: (int i) {},
+                onSelectedItemChanged: (int i) { },
               ),
             ),
           ),
@@ -121,7 +121,7 @@ void main() {
                   Text('1'),
                   Text('1'),
                 ],
-                onSelectedItemChanged: (int i) {},
+                onSelectedItemChanged: (int i) { },
               ),
             ),
           ),
@@ -154,7 +154,7 @@ void main() {
                   Text('1'),
                   Text('1'),
                 ],
-                onSelectedItemChanged: (int i) {},
+                onSelectedItemChanged: (int i) { },
               ),
             ),
           ),
