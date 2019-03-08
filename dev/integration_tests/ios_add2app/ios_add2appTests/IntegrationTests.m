@@ -9,7 +9,7 @@
 #import "../ios_add2app/DualFlutterViewController.h"
 #import "../ios_add2app/FullScreenViewController.h"
 #import "../ios_add2app/MainViewController.h"
-#import "../ios_add2app/HybridViewController.h"p
+#import "../ios_add2app/HybridViewController.h"
 
 static void waitForFlutterSemanticsTree(FlutterViewController *viewController) {
   int tries = 10;
@@ -129,7 +129,7 @@ static void waitForFlutterSemanticsTree(FlutterViewController *viewController) {
                                            delegate])
             .window.rootViewController;
     HybridViewController *viewController =
-        (FlutterViewController *)navController.visibleViewController;
+        (HybridViewController *)navController.visibleViewController;
     GREYAssertNotNil(viewController.flutterViewController,
                      @"Expected non-nil FlutterViewController.");
     waitForFlutterSemanticsTree(viewController.flutterViewController);
