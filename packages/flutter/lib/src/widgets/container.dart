@@ -184,7 +184,7 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
 ///
 /// {@tool sample}
 ///
-/// This example shows a 48x48 yellow square (placed inside a [Center] widget in
+/// This example shows a 48x48 amber square (placed inside a [Center] widget in
 /// case the parent widget has its own opinions regarding the size that the
 /// [Container] should take), with a margin so that it stays away from
 /// neighboring widgets:
@@ -193,7 +193,7 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
 /// Center(
 ///   child: Container(
 ///     margin: const EdgeInsets.all(10.0),
-///     color: Colors.yellow[600],
+///     color: Colors.amber[600],
 ///     width: 48.0,
 ///     height: 48.0,
 ///   ),
