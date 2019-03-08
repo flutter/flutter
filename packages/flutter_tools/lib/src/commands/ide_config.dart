@@ -223,6 +223,8 @@ class IdeConfigCommand extends FlutterCommand {
       throwToolExit('Currently, the only supported IDE is IntelliJ\n$usage', exitCode: 2);
     }
 
+    await Cache.instance.updateAll();
+
     if (argResults['update-templates']) {
       _handleTemplateUpdate();
       return null;

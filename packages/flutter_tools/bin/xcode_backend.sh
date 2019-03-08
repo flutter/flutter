@@ -84,6 +84,7 @@ BuildApp() {
 
   local framework_path="${FLUTTER_ROOT}/bin/cache/artifacts/engine/${artifact_variant}"
 
+  AssertExists "${framework_path}"
   AssertExists "${project_path}"
 
   local derived_dir="${SOURCE_ROOT}/Flutter"
@@ -120,12 +121,6 @@ BuildApp() {
     local_engine_flag="--local-engine=${LOCAL_ENGINE}"
     flutter_framework="${FLUTTER_ENGINE}/out/${LOCAL_ENGINE}/Flutter.framework"
     flutter_podspec="${FLUTTER_ENGINE}/out/${LOCAL_ENGINE}/Flutter.podspec"
-  fi
-
-  # If the framework path does not exist, ensure that it is downloaded.
-  if [[ ! -e "$1" ]]; then
-    FLUTTER_ALREADY_LOCKED = "true"
-    RunCommand "${FLUTTER_ROOT}/bin/flutter" precache --suppress-analytics
   fi
 
   if [[ -e "${project_path}/.ios" ]]; then
