@@ -549,13 +549,15 @@ typedef struct {
   // Flutter application (such as compiled shader programs used by Skia).
   // This is optional.  The string must be NULL terminated.
   const char* persistent_cache_path;
-  // A callback that gets invoked by the engine when it attempts to wait for
-  // a platform vsync event. The engine will give the platform a baton that
-  // needs to be returned back to the engine via |FlutterEngineOnVsync|. All
-  // vsync operations must occur on the thread that made the call to
-  // |FlutterEngineRun|. All batons must be retured to the engine before
-  // initializing a |FlutterEngineShutdown|. Not doing the same will result in a
-  // memory leak.
+  // A callback that gets invoked by the engine when it attempts to wait for a
+  // platform vsync event. The engine will give the platform a baton that needs
+  // to be returned back to the engine via |FlutterEngineOnVsync|. All batons
+  // must be retured to the engine before initializing a
+  // |FlutterEngineShutdown|. Not doing the same will result in a memory leak.
+  // While the call to |FlutterEngineOnVsync| must occur on the thread that made
+  // the call to |FlutterEngineRun|, the engine will make this callback on an
+  // internal engine-managed thread. If the components accessed on the embedder
+  // are not thread safe, the appropriate re-threading must be done.
   VsyncCallback vsync_callback;
 } FlutterProjectArgs;
 
@@ -645,7 +647,15 @@ FlutterEngineResult FlutterEngineDispatchSemanticsAction(
     size_t data_length);
 
 // Notify the engine that a vsync event occurred. A baton passed to the
-// platform via the vsync callback must be returned.
+// platform via the vsync callback must be returned. This call must be made on
+// the thread on which the call to |FlutterEngineRun| was made.
+//
+// |frame_start_time_nanos| is the point at which the vsync event occurred.
+// |frame_target_time_nanos| is the point at which the embedder anticipates the
+// next vsync to occur. This is a hint the engine uses to schedule Dart VM
+// garbage collection in periods in which the various threads are most likely to
+// be idle. For example, for a 60Hz display, embedders should add 16.6 * 1e6 to
+// the frame time field.
 FLUTTER_EXPORT
 FlutterEngineResult FlutterEngineOnVsync(FlutterEngine engine,
                                          intptr_t baton,

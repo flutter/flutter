@@ -35,7 +35,7 @@ void VsyncWaiter::FireCallback(fml::TimePoint frame_start_time,
     return;
   }
 
-  task_runners_.GetUITaskRunner()->PostTask(
+  task_runners_.GetUITaskRunner()->PostTaskForTime(
       [callback, frame_start_time, frame_target_time]() {
 #if defined(OS_FUCHSIA)
         // In general, traces on Fuchsia are recorded across the whole system.
@@ -49,7 +49,8 @@ void VsyncWaiter::FireCallback(fml::TimePoint frame_start_time,
         TRACE_EVENT0("flutter", "VSYNC");
 #endif
         callback(frame_start_time, frame_target_time);
-      });
+      },
+      frame_start_time);
 }
 
 float VsyncWaiter::GetDisplayRefreshRate() const {
