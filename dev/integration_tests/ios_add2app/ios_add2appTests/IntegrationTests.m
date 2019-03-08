@@ -65,13 +65,20 @@ static void waitForFlutterSemanticsTree(FlutterViewController *viewController) {
             .window.rootViewController;
     weakViewController =
         (FullScreenViewController *)navController.visibleViewController;
+    waitForFlutterSemanticsTree(weakViewController);
     GREYAssertNotNil(weakViewController,
                      @"Expected non-nil FullScreenViewController.");
-    waitForFlutterSemanticsTree(weakViewController);
   }
   
   [[EarlGrey selectElementWithMatcher:grey_accessibilityLabel(@"POP")]
       performAction:grey_tap()];
+  // EarlGrey v1 isn't good at detecting this yet - 2.0 will be able to do it
+  int tries = 10;
+  double delay = 1.0;
+  while (weakViewController != nil && tries != 0) {
+    CFRunLoopRunInMode(kCFRunLoopDefaultMode, delay, false);
+    tries--;
+  }
   [[EarlGrey selectElementWithMatcher:grey_buttonTitle(@"Native iOS View")]
       assertWithMatcher:grey_sufficientlyVisible()];
   GREYAssertNil(weakViewController,
