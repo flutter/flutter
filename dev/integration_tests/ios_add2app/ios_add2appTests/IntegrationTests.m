@@ -13,7 +13,7 @@
 
 static void waitForFlutterSemanticsTree(FlutterViewController *viewController) {
   int tries = 10;
-  double delay = .5;
+  double delay = 1.0;
   __block BOOL semanticsAvailable = NO;
   __block id<NSObject> observer = [[NSNotificationCenter defaultCenter]
       addObserverForName:@"FlutterSemanticsUpdate"
@@ -67,9 +67,9 @@ static void waitForFlutterSemanticsTree(FlutterViewController *viewController) {
         (FullScreenViewController *)navController.visibleViewController;
     GREYAssertNotNil(weakViewController,
                      @"Expected non-nil FullScreenViewController.");
+    waitForFlutterSemanticsTree(weakViewController);
   }
-  waitForFlutterSemanticsTree(weakViewController);
-
+  
   [[EarlGrey selectElementWithMatcher:grey_accessibilityLabel(@"POP")]
       performAction:grey_tap()];
   [[EarlGrey selectElementWithMatcher:grey_buttonTitle(@"Native iOS View")]
