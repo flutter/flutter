@@ -270,7 +270,7 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
   void initServiceExtensions() {
     super.initServiceExtensions();
 
-    profile(() {
+    if (!kReleaseMode) {
       registerSignalServiceExtension(
         name: 'debugDumpApp',
         callback: () {
@@ -302,7 +302,7 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
           };
         },
       );
-    });
+    }
 
     assert(() {
       registerBoolServiceExtension(
@@ -566,10 +566,10 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
   /// This is used by [WidgetsApp] to avoid reporting frames that aren't useful
   /// during startup as the "first frame".
   void deferFirstFrameReport() {
-    profile(() {
+    if (!kReleaseMode) {
       assert(_deferFirstFrameReportCount >= 0);
       _deferFirstFrameReportCount += 1;
-    });
+    }
   }
 
   /// When called after [deferFirstFrameReport]: tell the framework to report
@@ -581,10 +581,10 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
   /// This is used by [WidgetsApp] to report when the first useful frame is
   /// painted.
   void allowFirstFrameReport() {
-    profile(() {
+    if (!kReleaseMode) {
       assert(_deferFirstFrameReportCount >= 1);
       _deferFirstFrameReportCount -= 1;
-    });
+    }
   }
 
   void _handleBuildScheduled() {
@@ -706,13 +706,13 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
         return true;
       }());
     }
-    profile(() {
+    if (!kReleaseMode) {
       if (_needToReportFirstFrame && _reportFirstFrame) {
         developer.Timeline.instantSync('Widgets completed first useful frame');
         developer.postEvent('Flutter.FirstFrame', <String, dynamic>{});
         _needToReportFirstFrame = false;
       }
-    });
+    }
   }
 
   /// The [Element] that is at the root of the hierarchy (and which wraps the
