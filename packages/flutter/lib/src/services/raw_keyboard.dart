@@ -8,7 +8,7 @@ import 'package:flutter/foundation.dart';
 
 import 'keyboard_key.dart';
 import 'raw_keyboard_android.dart';
-import 'raw_keyboard_fuschia.dart';
+import 'raw_keyboard_fuchsia.dart';
 import 'system_channels.dart';
 
 /// An enum describing the side of the keyboard that a key is on, to allow
@@ -478,7 +478,7 @@ class RawKeyboard {
     }
   }
 
-  final Set<LogicalKeyboardKey> _keysPressed = Set<LogicalKeyboardKey>();
+  final Set<LogicalKeyboardKey> _keysPressed = <LogicalKeyboardKey>{};
 
   /// Returns the set of keys currently pressed.
   Set<LogicalKeyboardKey> get keysPressed {

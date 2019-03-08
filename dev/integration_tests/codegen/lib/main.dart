@@ -4,17 +4,12 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_driver/driver_extension.dart';
-
-import 'coffee_app.dart';
-import 'src/coffee.dart';
+import 'message.dart' as generated; // ignore: uri_does_not_exist
 
 Future<void> main() async {
   enableFlutterDriverExtension();
-  coffeeApp = await CoffeeApp.create(PourOverCoffeeModule());
   runApp(ExampleWidget());
 }
-
-CoffeeApp coffeeApp;
 
 class ExampleWidget extends StatefulWidget {
   @override
@@ -22,7 +17,7 @@ class ExampleWidget extends StatefulWidget {
 }
 
 class _ExampleWidgetState extends State<ExampleWidget> {
-  String _message = '';
+  bool _pressed = false;
 
   @override
   Widget build(BuildContext context) {
@@ -34,16 +29,22 @@ class _ExampleWidgetState extends State<ExampleWidget> {
             RaisedButton(
               child: const Text('Press Button, Get Coffee'),
               onPressed: () async {
-                final CoffeeMaker coffeeMaker = coffeeApp.getCoffeeMaker();
                 setState(() {
-                  _message = coffeeMaker.brew();
+                 _pressed = true;
                 });
               },
             ),
-            Text(_message),
+            _pressed ? GeneratedWidget() : const SizedBox(),
           ],
         ),
       ),
     );
+  }
+}
+
+class GeneratedWidget extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Text(generated.message);
   }
 }

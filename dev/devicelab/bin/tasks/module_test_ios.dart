@@ -26,7 +26,7 @@ Future<void> main() async {
             '--org',
             'io.flutter.devicelab',
             '--template=module',
-            'hello'
+            'hello',
           ],
         );
       });

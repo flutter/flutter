@@ -62,6 +62,50 @@ const int _kObscureShowLatestCharCursorTicks = 3;
 /// text field. If you build a text field with a controller that already has
 /// [text], the text field will use that text as its initial value.
 ///
+/// The [text] or [selection] properties can be set from within a listener
+/// added to this controller. If both properties need to be changed then the
+/// controller's [value] should be set instead.
+///
+/// {@tool snippet --template=stateful_widget_material}
+/// This example creates a [TextField] with a [TextEditingController] whose
+/// change listener forces the entered text to be lower case and keeps the
+/// cursor at the end of the input.
+///
+/// ```dart
+/// final _controller = TextEditingController();
+///
+/// void initState() {
+///   _controller.addListener(() {
+///     final text = _controller.text.toLowerCase();
+///     _controller.value = _controller.value.copyWith(
+///       text: text,
+///       selection: TextSelection(baseOffset: text.length, extentOffset: text.length),
+///       composing: TextRange.empty,
+///     );
+///   });
+///   super.initState();
+/// }
+///
+/// void dispose() {
+///   _controller.dispose();
+///   super.dispose();
+/// }
+///
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     body: Container(
+///      alignment: Alignment.center,
+///       padding: const EdgeInsets.all(6),
+///       child: TextFormField(
+///         controller: _controller,
+///        decoration: InputDecoration(border: OutlineInputBorder()),
+///       ),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [TextField], which is a Material Design text field that can be controlled
@@ -89,10 +133,17 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// that they need to update (it calls [notifyListeners]). For this reason,
   /// this value should only be set between frames, e.g. in response to user
   /// actions, not during the build, layout, or paint phases.
+  ///
+  /// This property can be set from a listener added to this
+  /// [TextEditingController]; however, one should not also set [selection]
+  /// in a separate statement. To change both the [text] and the [selection]
+  /// change the controller's [value].
   set text(String newText) {
-    value = value.copyWith(text: newText,
-                           selection: const TextSelection.collapsed(offset: -1),
-                           composing: TextRange.empty);
+    value = value.copyWith(
+      text: newText,
+      selection: const TextSelection.collapsed(offset: -1),
+      composing: TextRange.empty,
+    );
   }
 
   /// The currently selected [text].
@@ -104,6 +155,11 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// that they need to update (it calls [notifyListeners]). For this reason,
   /// this value should only be set between frames, e.g. in response to user
   /// actions, not during the build, layout, or paint phases.
+  ///
+  /// This property can be set from a listener added to this
+  /// [TextEditingController]; however, one should not also set [text]
+  /// in a separate statement. To change both the [text] and the [selection]
+  /// change the controller's [value].
   set selection(TextSelection newSelection) {
     if (newSelection.start > text.length || newSelection.end > text.length)
       throw FlutterError('invalid text selection: $newSelection');
@@ -178,6 +234,16 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
 /// Rather than using this widget directly, consider using [TextField], which
 /// is a full-featured, material-design text input field with placeholder text,
 /// labels, and [Form] integration.
+///
+/// ## Gesture Events Handling
+///
+/// This widget provides rudimentary, platform-agnostic gesture handling for
+/// user actions such as tapping, long-pressing and scrolling when
+/// [rendererIgnoresPointer] is false (false by default). To tightly conform
+/// to the platform behavior with respect to input gestures in text fields, use
+/// [TextField] or [CupertinoTextField]. For custom selection behavior, call
+/// methods such as [RenderEditable.selectPosition],
+/// [RenderEditable.selectWord], etc. programmatically.
 ///
 /// See also:
 ///
@@ -291,7 +357,7 @@ class EditableText extends StatefulWidget {
   /// Since fonts may vary depending on user input and due to font
   /// fallback, [StrutStyle.forceStrutHeight] is enabled by default
   /// to lock all lines to the height of the base [TextStyle], provided by
-  /// [style]. This ensures the typed text fits within the alotted space.
+  /// [style]. This ensures the typed text fits within the allotted space.
   ///
   /// If null, the strut used will is inherit values from the [style] and will
   /// have [StrutStyle.forceStrutHeight] set to true. When no [style] is
@@ -397,10 +463,10 @@ class EditableText extends StatefulWidget {
   ///
   /// If this is null, there is no limit to the number of lines, and the text
   /// container will start with enough vertical space for one line and
-  /// automatically grow to accomodate additional lines as they are entered.
+  /// automatically grow to accommodate additional lines as they are entered.
   ///
   /// If it is not null, the value must be greater than zero. If it is greater
-  /// than 1, it will take up enough horizontal space to accomodate that number
+  /// than 1, it will take up enough horizontal space to accommodate that number
   /// of lines.
   /// {@endtemplate}
   final int maxLines;
@@ -422,6 +488,19 @@ class EditableText extends StatefulWidget {
   final Color selectionColor;
 
   /// Optional delegate for building the text selection handles and toolbar.
+  ///
+  /// The [EditableText] widget used on its own will not trigger the display
+  /// of the selection toolbar by itself. The toolbar is shown by calling
+  /// [EditableTextState.showToolbar] in response to an appropriate user event.
+  ///
+  /// See also:
+  ///
+  ///  * [CupertinoTextField], which wraps an [EditableText] and which shows the
+  ///    selection toolbar upon user events that are appropriate on the iOS
+  ///    platform.
+  ///  * [TextField], a Material Design themed wrapper of [EditableText], which
+  ///    shows the selection toolbar upon appropriate user events based on the
+  ///    user's platform set in [ThemeData.platform].
   final TextSelectionControls selectionControls;
 
   /// {@template flutter.widgets.editableText.keyboardType}
@@ -883,7 +962,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
               ),
               textCapitalization: widget.textCapitalization,
               keyboardAppearance: widget.keyboardAppearance,
-          )
+          ),
       )..setEditingState(localValue);
     }
     _textInputConnection.show();
@@ -1009,7 +1088,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           newCaretRect.left - widget.scrollPadding.left,
           newCaretRect.top - widget.scrollPadding.top,
           newCaretRect.right + widget.scrollPadding.right,
-          newCaretRect.bottom + widget.scrollPadding.bottom
+          newCaretRect.bottom + widget.scrollPadding.bottom,
       );
       _editableKey.currentContext.findRenderObject().showOnScreen(
         rect: inflatedRect,
@@ -1342,7 +1421,7 @@ class _Editable extends LeafRenderObjectWidget {
     this.enableInteractiveSelection = true,
     this.textSelectionDelegate,
     this.paintCursorAboveText,
-    this.devicePixelRatio
+    this.devicePixelRatio,
   }) : assert(textDirection != null),
        assert(rendererIgnoresPointer != null),
        super(key: key);

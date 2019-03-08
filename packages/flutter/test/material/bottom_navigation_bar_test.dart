@@ -24,18 +24,18 @@ void main() {
             items: const <BottomNavigationBarItem>[
               BottomNavigationBarItem(
                 icon: Icon(Icons.ac_unit),
-                title: Text('AC')
+                title: Text('AC'),
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.access_alarm),
-                title: Text('Alarm')
-              )
+                title: Text('Alarm'),
+              ),
             ],
             onTap: (int index) {
               mutatedIndex = index;
-            }
-          )
-        )
+            },
+          ),
+        ),
       )
     );
 
@@ -52,15 +52,15 @@ void main() {
             items: const <BottomNavigationBarItem>[
               BottomNavigationBarItem(
                 icon: Icon(Icons.ac_unit),
-                title: Text('AC')
+                title: Text('AC'),
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.access_alarm),
-                title: Text('Alarm')
-              )
+                title: Text('Alarm'),
+              ),
             ]
-          )
-        )
+          ),
+        ),
       )
     );
 
@@ -92,9 +92,9 @@ void main() {
                 icon: Icon(Icons.access_alarm),
                 title: Text('Alarm'),
               ),
-            ]
-          )
-        )
+            ],
+          ),
+        ),
       )
     );
 
@@ -128,9 +128,9 @@ void main() {
                 icon: Icon(Icons.access_alarm),
                 title: Text('Alarm'),
               ),
-            ]
-          )
-        )
+            ],
+          ),
+        ),
       )
     );
 
@@ -171,9 +171,9 @@ void main() {
                 icon: Icon(Icons.access_alarm),
                 title: Text('Alarm'),
               ),
-            ]
-          )
-        )
+            ],
+          ),
+        ),
       )
     );
 
@@ -220,9 +220,9 @@ void main() {
                 icon: Icon(Icons.access_alarm),
                 title: Text('Alarm'),
               ),
-            ]
-          )
-        )
+            ],
+          ),
+        ),
       )
     );
 
@@ -247,9 +247,9 @@ void main() {
                 icon: Icon(Icons.access_alarm),
                 title: Text('Alarm'),
               ),
-            ]
-          )
-        )
+            ],
+          ),
+        ),
       )
     );
 
@@ -275,9 +275,9 @@ void main() {
                 icon: Icon(Icons.access_alarm),
                 title: Text('Alarm'),
               ),
-            ]
-          )
-        )
+            ],
+          ),
+        ),
       )
     );
 
@@ -304,9 +304,9 @@ void main() {
                 icon: Icon(Icons.access_alarm),
                 title: Text('Alarm'),
               ),
-            ]
-          )
-        )
+            ],
+          ),
+        ),
       )
     );
 
@@ -353,9 +353,9 @@ void main() {
                 icon: Icon(Icons.access_alarm),
                 title: Text('Alarm'),
               ),
-            ]
-          )
-        )
+            ],
+          ),
+        ),
       )
     );
 
@@ -380,9 +380,9 @@ void main() {
                 icon: Icon(Icons.access_alarm),
                 title: Text('Alarm'),
               ),
-            ]
-          )
-        )
+            ],
+          ),
+        ),
       )
     );
 
@@ -399,16 +399,16 @@ void main() {
               items: const <BottomNavigationBarItem>[
                 BottomNavigationBarItem(
                   icon: Icon(Icons.ac_unit),
-                  title: Text('AC')
+                  title: Text('AC'),
                 ),
                 BottomNavigationBarItem(
                   icon: Icon(Icons.access_alarm),
-                  title: Text('Alarm')
-                )
+                  title: Text('Alarm'),
+                ),
               ]
-            )
-          )
-        )
+            ),
+          ),
+        ),
       )
     );
 
@@ -427,15 +427,15 @@ void main() {
             items: const <BottomNavigationBarItem>[
               BottomNavigationBarItem(
                 icon: Icon(Icons.ac_unit),
-                title: Text('AC')
+                title: Text('AC'),
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.access_alarm),
-                title: Text('Alarm')
-              )
-            ]
-          )
-        )
+                title: Text('Alarm'),
+              ),
+            ],
+          ),
+        ),
       )
     );
 
@@ -453,15 +453,15 @@ void main() {
             items: const <BottomNavigationBarItem>[
               BottomNavigationBarItem(
                 icon: Icon(Icons.ac_unit),
-                title: Text('AC')
+                title: Text('AC'),
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.access_alarm),
-                title: Text('Alarm')
-              )
-            ]
-          )
-        )
+                title: Text('Alarm'),
+              ),
+            ],
+          ),
+        ),
       )
     );
 
@@ -482,23 +482,23 @@ void main() {
             items: const <BottomNavigationBarItem>[
               BottomNavigationBarItem(
                 icon: Icon(Icons.ac_unit),
-                title: Text('AC')
+                title: Text('AC'),
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.access_alarm),
-                title: Text('Alarm')
+                title: Text('Alarm'),
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.access_time),
-                title: Text('Time')
+                title: Text('Time'),
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.add),
-                title: Text('Add')
-              )
-            ]
-          )
-        )
+                title: Text('Add'),
+              ),
+            ],
+          ),
+        ),
       )
     );
 
@@ -543,24 +543,24 @@ void main() {
               items: const <BottomNavigationBarItem>[
                 BottomNavigationBarItem(
                   icon: Icon(Icons.ac_unit),
-                  title: Text('AC')
+                  title: Text('AC'),
                 ),
                 BottomNavigationBarItem(
                   icon: Icon(Icons.access_alarm),
-                  title: Text('Alarm')
+                  title: Text('Alarm'),
                 ),
                 BottomNavigationBarItem(
                   icon: Icon(Icons.access_time),
-                  title: Text('Time')
+                  title: Text('Time'),
                 ),
                 BottomNavigationBarItem(
                   icon: Icon(Icons.add),
-                  title: Text('Add')
-                )
-              ]
-            )
-          )
-        )
+                  title: Text('Add'),
+                ),
+              ],
+            ),
+          ),
+        ),
       )
     );
 
@@ -581,24 +581,24 @@ void main() {
               items: const <BottomNavigationBarItem>[
                 BottomNavigationBarItem(
                   icon: Icon(Icons.ac_unit),
-                  title: Text('AC')
+                  title: Text('AC'),
                 ),
                 BottomNavigationBarItem(
                   icon: Icon(Icons.access_alarm),
-                  title: Text('Alarm')
+                  title: Text('Alarm'),
                 ),
                 BottomNavigationBarItem(
                   icon: Icon(Icons.access_time),
-                  title: Text('Time')
+                  title: Text('Time'),
                 ),
                 BottomNavigationBarItem(
                   icon: Icon(Icons.add),
-                  title: Text('Add')
-                )
-              ]
-            )
-          )
-        )
+                  title: Text('Add'),
+                ),
+              ],
+            ),
+          ),
+        ),
       )
     );
 
@@ -815,7 +815,7 @@ void main() {
           ..restore()
           ..circle(x: 200.0)
           ..translate(x: 400.0)
-          ..circle(x: 200.0)
+          ..circle(x: 200.0),
     );
   });
 
@@ -1154,8 +1154,7 @@ void main() {
     }
   });
 
-  testWidgets('BottomNavigationBar item title should not be nullable',
-      (WidgetTester tester) async {
+  testWidgets('BottomNavigationBar item title should not be nullable', (WidgetTester tester) async {
     expect(() {
       MaterialApp(
           home: Scaffold(
@@ -1168,21 +1167,60 @@ void main() {
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.access_alarm),
-            )
+            ),
           ])));
     }, throwsA(isInstanceOf<AssertionError>()));
   });
 
-  testWidgets('BottomNavigationBar [showSelectedLabels]=false and [showUnselectedLabels]=false '
-      'for shifting navbar, expect that there is no rendered text', (WidgetTester tester) async {
-        final Widget widget = MaterialApp(
+  testWidgets(
+    'BottomNavigationBar [showSelectedLabels]=false and [showUnselectedLabels]=false '
+    'for shifting navbar, expect that there is no rendered text',
+    (WidgetTester tester) async {
+      final Widget widget = MaterialApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Scaffold(
+              bottomNavigationBar: BottomNavigationBar(
+                showSelectedLabels: false,
+                showUnselectedLabels: false,
+                type: BottomNavigationBarType.shifting,
+                items: const <BottomNavigationBarItem>[
+                  BottomNavigationBarItem(
+                    title: Text('Red'),
+                    backgroundColor: Colors.red,
+                    icon: Icon(Icons.dashboard),
+                  ),
+                  BottomNavigationBarItem(
+                    title: Text('Green'),
+                    backgroundColor: Colors.green,
+                    icon: Icon(Icons.menu),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      );
+      await tester.pumpWidget(widget);
+      expect(find.text('Red'), findsOneWidget);
+      expect(find.text('Green'), findsOneWidget);
+      expect(tester.widget<Opacity>(find.byType(Opacity).first).opacity, 0.0);
+      expect(tester.widget<Opacity>(find.byType(Opacity).last).opacity, 0.0);
+    });
+
+  testWidgets(
+    'BottomNavigationBar [showSelectedLabels]=false and [showUnselectedLabels]=false '
+    'for fixed navbar, expect that there is no rendered text',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
           home: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
               return Scaffold(
                 bottomNavigationBar: BottomNavigationBar(
                   showSelectedLabels: false,
                   showUnselectedLabels: false,
-                  type: BottomNavigationBarType.shifting,
+                  type: BottomNavigationBarType.fixed,
                   items: const <BottomNavigationBarItem>[
                     BottomNavigationBarItem(
                       title: Text('Red'),
@@ -1199,48 +1237,13 @@ void main() {
               );
             },
           ),
-        );
-        await tester.pumpWidget(widget);
-        expect(find.text('Red'), findsOneWidget);
-        expect(find.text('Green'), findsOneWidget);
-        expect(tester.widget<Opacity>(find.byType(Opacity).first).opacity, 0.0);
-        expect(tester.widget<Opacity>(find.byType(Opacity).last).opacity, 0.0);
-      });
-
-  testWidgets('BottomNavigationBar [showSelectedLabels]=false and [showUnselectedLabels]=false '
-      'for fixed navbar, expect that there is no rendered text', (WidgetTester tester) async {
-        await tester.pumpWidget(
-          MaterialApp(
-            home: StatefulBuilder(
-              builder: (BuildContext context, StateSetter setState) {
-                return Scaffold(
-                  bottomNavigationBar: BottomNavigationBar(
-                    showSelectedLabels: false,
-                    showUnselectedLabels: false,
-                    type: BottomNavigationBarType.fixed,
-                    items: const <BottomNavigationBarItem>[
-                      BottomNavigationBarItem(
-                        title: Text('Red'),
-                        backgroundColor: Colors.red,
-                        icon: Icon(Icons.dashboard),
-                      ),
-                      BottomNavigationBarItem(
-                        title: Text('Green'),
-                        backgroundColor: Colors.green,
-                        icon: Icon(Icons.menu),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
-          ),
-        );
-        expect(find.text('Red'), findsOneWidget);
-        expect(find.text('Green'), findsOneWidget);
-        expect(tester.widget<Opacity>(find.byType(Opacity).first).opacity, 0.0);
-        expect(tester.widget<Opacity>(find.byType(Opacity).last).opacity, 0.0);
-      });
+        ),
+      );
+      expect(find.text('Red'), findsOneWidget);
+      expect(find.text('Green'), findsOneWidget);
+      expect(tester.widget<Opacity>(find.byType(Opacity).first).opacity, 0.0);
+      expect(tester.widget<Opacity>(find.byType(Opacity).last).opacity, 0.0);
+    });
 
   testWidgets('BottomNavigationBar.fixed [showSelectedLabels]=false and [showUnselectedLabels]=false semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);

@@ -125,6 +125,11 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   @protected
   bool get disableShadows => false;
 
+  /// Increase the timeout for the current test by the given duration.
+  void addTime(Duration duration) {
+    // Noop, see [AutomatedTestWidgetsFlutterBinding. addTime] for an actual implementation.
+  }
+
   /// The value to set [debugCheckIntrinsicSizes] to while tests are running.
   ///
   /// This can be used to enable additional checks. For example,
@@ -311,7 +316,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   void dispatchEvent(
     PointerEvent event,
     HitTestResult hitTestResult, {
-    TestBindingEventSource source = TestBindingEventSource.device
+    TestBindingEventSource source = TestBindingEventSource.device,
   }) {
     assert(source == TestBindingEventSource.test);
     super.dispatchEvent(event, hitTestResult);
@@ -374,7 +379,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       'Test starting...',
       style: _messageStyle,
       textDirection: TextDirection.ltr,
-    )
+    ),
   );
 
   static const Widget _postTestMessage = Center(
@@ -382,7 +387,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       'Test finished.',
       style: _messageStyle,
       textDirection: TextDirection.ltr,
-    )
+    ),
   );
 
   /// Whether to include the output of debugDumpApp() when reporting
@@ -465,7 +470,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
         FlutterError.dumpErrorToConsole(details, forceReport: true);
         _pendingExceptionDetails = FlutterErrorDetails(
           exception: 'Multiple exceptions ($_exceptionCount) were detected during the running of the current test, and at least one was unexpected.',
-          library: 'Flutter test framework'
+          library: 'Flutter test framework',
         );
       } else {
         reportExceptionNoticed(details); // mostly this is just a hook for the LiveTestWidgetsFlutterBinding
@@ -487,7 +492,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
           exception: exception,
           stack: _unmangle(stack),
           context: 'running a test (but after the test had completed)',
-          library: 'Flutter test framework'
+          library: 'Flutter test framework',
         ), forceReport: true);
         return;
       }
@@ -544,7 +549,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
           }
           if (description.isNotEmpty)
             information.writeln('The test description was:\n$description');
-        }
+        },
       ));
       assert(_parentZone != null);
       assert(_pendingExceptionDetails != null, 'A test overrode FlutterError.onError but either failed to return it to its original state, or had unexpected additional errors that it could not handle. Typically, this is caused by using expect() before restoring FlutterError.onError.');
@@ -843,7 +848,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
       _timeoutCompleter.completeError(
         TimeoutException(
           'The test exceeded the timeout. It may have hung.\n'
-          'Consider using "addTime" to increase the timeout before expensive operations.',
+          'Consider using "tester.binding.addTime" to increase the timeout before expensive operations.',
           _timeout,
         ),
       );
@@ -873,6 +878,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   ///
   ///  * [defaultTestTimeout], the maximum that the timeout can reach.
   ///    (That timeout is implemented by the test package.)
+  @override
   void addTime(Duration duration) {
     assert(_timeout != null, 'addTime can only be called during a test.');
     _timeout += duration;
@@ -1193,7 +1199,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   void dispatchEvent(
     PointerEvent event,
     HitTestResult hitTestResult, {
-    TestBindingEventSource source = TestBindingEventSource.device
+    TestBindingEventSource source = TestBindingEventSource.device,
   }) {
     switch (source) {
       case TestBindingEventSource.test:
@@ -1361,7 +1367,7 @@ class TestViewConfiguration extends ViewConfiguration {
     final Matrix4 matrix = Matrix4.compose(
       Vector3(shiftX, shiftY, 0.0), // translation
       Quaternion.identity(), // rotation
-      Vector3(scale, scale, 1.0) // scale
+      Vector3(scale, scale, 1.0), // scale
     );
     return matrix;
   }
@@ -1391,7 +1397,7 @@ const int _kPointerDecay = -2;
 class _LiveTestPointerRecord {
   _LiveTestPointerRecord(
     this.pointer,
-    this.position
+    this.position,
   ) : color = HSVColor.fromAHSV(0.8, (35.0 * pointer) % 360.0, 1.0, 1.0).toColor(),
       decay = 1;
   final int pointer;

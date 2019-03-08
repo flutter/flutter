@@ -213,7 +213,7 @@ class MaterialApp extends StatefulWidget {
   /// {@macro flutter.widgets.widgetsApp.localizationsDelegates}
   ///
   /// Internationalized apps that require translations for one of the locales
-  /// listed in [GlobalMaterialLocalizations] should specify this paramter
+  /// listed in [GlobalMaterialLocalizations] should specify this parameter
   /// and list the [supportedLocales] that the application can handle.
   ///
   /// ```dart

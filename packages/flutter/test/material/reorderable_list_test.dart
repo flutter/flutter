@@ -129,7 +129,7 @@ void main() {
               key: Key('Last item'),
               height: itemHeight,
               child: Text('Last item'),
-            )
+            ),
           ],
           scrollDirection: Axis.vertical,
           onReorder: (int oldIndex, int newIndex) {},
@@ -557,7 +557,7 @@ void main() {
               key: Key('Last item'),
               width: itemHeight,
               child: Text('Last item'),
-            )
+            ),
           ],
           scrollDirection: Axis.horizontal,
           onReorder: (int oldIndex, int newIndex) {},
@@ -914,7 +914,7 @@ void main() {
           SizedBox(
             key: Key('C'),
             child: Text('C'),
-          )
+          ),
         ],
         reverse: true,
         onReorder: (int oldIndex, int newIndex) {},

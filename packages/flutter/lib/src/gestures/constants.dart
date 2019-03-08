@@ -31,9 +31,7 @@ const Duration kLongPressTimeout = Duration(milliseconds: 500);
 const Duration kDoubleTapTimeout = Duration(milliseconds: 300);
 
 /// The minimum time from the end of the first tap to the start of the second
-/// tap in a double-tap gesture. (Currently not honored by the
-/// DoubleTapGestureRecognizer.)
-// TODO(ianh): Either implement this or remove the constant.
+/// tap in a double-tap gesture.
 const Duration kDoubleTapMinTime = Duration(milliseconds: 40);
 
 /// The maximum distance that the first touch in a double-tap gesture can travel

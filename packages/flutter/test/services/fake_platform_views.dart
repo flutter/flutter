@@ -20,7 +20,7 @@ class FakeAndroidPlatformViewsController {
 
   final Map<int, List<FakeAndroidMotionEvent>> motionEvents = <int, List<FakeAndroidMotionEvent>>{};
 
-  final Set<String> _registeredViewTypes = Set<String>();
+  final Set<String> _registeredViewTypes = <String>{};
 
   int _textureCounter = 0;
 
@@ -153,7 +153,7 @@ class FakeIosPlatformViewsController {
   Iterable<FakeUiKitView> get views => _views.values;
   final Map<int, FakeUiKitView> _views = <int, FakeUiKitView>{};
 
-  final Set<String> _registeredViewTypes = Set<String>();
+  final Set<String> _registeredViewTypes = <String>{};
 
   // When this completer is non null, the 'create' method channel call will be
   // delayed until it completes.
@@ -223,7 +223,7 @@ class FakeIosPlatformViewsController {
     final int id = args['id'];
     gesturesRejected[id] += 1;
     return Future<int>.sync(() => null);
-    }
+  }
 
   Future<dynamic> _dispose(MethodCall call) {
     final int id = call.arguments;

@@ -45,7 +45,7 @@ void main() {
 
       expect(errorCount, 0);
     }, overrides: <Type, Generator>{
-      OperatingSystemUtils: () => os
+      OperatingSystemUtils: () => os,
     });
   });
 
@@ -67,7 +67,7 @@ void main() {
 
     expect(errorCount, greaterThan(0));
   }, overrides: <Type, Generator>{
-    OperatingSystemUtils: () => os
+    OperatingSystemUtils: () => os,
   });
 
   testUsingContext('Returns no errors when source is error-free', () async {
@@ -84,7 +84,7 @@ void main() {
     await onDone;
     expect(errorCount, 0);
   }, overrides: <Type, Generator>{
-    OperatingSystemUtils: () => os
+    OperatingSystemUtils: () => os,
   });
 }
 

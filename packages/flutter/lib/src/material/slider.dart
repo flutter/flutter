@@ -967,7 +967,7 @@ class _RenderSlider extends RenderBox {
       parentBox: this,
       offset: offset,
       sliderTheme: _sliderTheme,
-      isDiscrete: isDiscrete
+      isDiscrete: isDiscrete,
     );
     final Offset thumbCenter = Offset(trackRect.left + visualPosition * trackRect.width, trackRect.center.dy);
 
@@ -980,7 +980,7 @@ class _RenderSlider extends RenderBox {
       textDirection: _textDirection,
       thumbCenter: thumbCenter,
       isDiscrete: isDiscrete,
-      isEnabled: isInteractive
+      isEnabled: isInteractive,
     );
 
     // TODO(closkmith): Move this to paint after the thumb.
@@ -1005,16 +1005,16 @@ class _RenderSlider extends RenderBox {
         isEnabled: isInteractive,
         sliderTheme: _sliderTheme,
       ).width;
-      // If the ticks would be too dense, don't bother painting them.
-      if ((trackRect.width - tickMarkWidth) / divisions >= 3.0 * tickMarkWidth) {
+      final double adjustedTrackWidth = trackRect.width - tickMarkWidth;
+      // If the tick marks would be too dense, don't bother painting them.
+      if (adjustedTrackWidth / divisions >= 3.0 * tickMarkWidth) {
+        final double dy = trackRect.center.dy;
         for (int i = 0; i <= divisions; i++) {
-          final double tickValue = i / divisions;
+          final double value = i / divisions;
           // The ticks are mapped to be within the track, so the tick mark width
           // must be subtracted from the track width.
-          final double tickX = trackRect.left +
-              tickValue * (trackRect.width - tickMarkWidth) + tickMarkWidth / 2;
-          final double tickY = trackRect.center.dy;
-          final Offset tickMarkOffset = Offset(tickX, tickY);
+          final double dx = trackRect.left + value * adjustedTrackWidth + tickMarkWidth / 2;
+          final Offset tickMarkOffset = Offset(dx, dy);
           _sliderTheme.tickMarkShape.paint(
             context,
             tickMarkOffset,

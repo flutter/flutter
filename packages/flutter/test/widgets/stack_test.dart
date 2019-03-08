@@ -535,7 +535,7 @@ void main() {
       '=1=',
       'BoxConstraints(w=3.0, h=7.0)',
       '=2=',
-      'BoxConstraints(2.0<=w<=3.0, 5.0<=h<=7.0)'
+      'BoxConstraints(2.0<=w<=3.0, 5.0<=h<=7.0)',
     ]);
   });
 

@@ -53,7 +53,7 @@ Future<int> run(
     final String systemLocale = await intl_standalone.findSystemLocale();
     intl.Intl.defaultLocale = intl.Intl.verifiedLocale(
       systemLocale, intl.NumberFormat.localeExists,
-      onFailure: (String _) => 'en_US'
+      onFailure: (String _) => 'en_US',
     );
 
     try {

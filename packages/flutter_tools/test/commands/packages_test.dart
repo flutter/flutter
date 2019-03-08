@@ -82,7 +82,7 @@ void main() {
       expect(
         fs.file(fs.path.join(projectPath, relPath)).readAsStringSync(),
         contains(substring),
-        reason: '$projectPath/$relPath has unexpected content'
+        reason: '$projectPath/$relPath has unexpected content',
       );
     }
 

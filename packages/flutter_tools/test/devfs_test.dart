@@ -300,7 +300,7 @@ void main() {
       const String packageName = 'doubleslashpkg';
       await _createPackage(fs, packageName, 'somefile.txt', doubleSlash: true);
 
-      final Set<String> fileFilter = Set<String>();
+      final Set<String> fileFilter = <String>{};
       final List<Uri> pkgUris = <Uri>[fs.path.toUri(basePath)]..addAll(_packages.values);
       for (Uri pkgUri in pkgUris) {
         if (!pkgUri.isAbsolute) {
@@ -432,7 +432,7 @@ void main() {
         'writeFile test lib/foo.txt.dill build/app.dill',
       ]);
       expect(devFS.assetPathsToEvict, unorderedMatches(<String>[
-        'a.txt', 'b.txt'
+        'a.txt', 'b.txt',
       ]));
       devFS.assetPathsToEvict.clear();
       expect(report.syncedBytes, 22);

@@ -165,7 +165,7 @@ Future<AssetBundle> buildAssets({
   String assetDirPath,
   String packagesPath,
   bool includeDefaultFonts = true,
-  bool reportLicensedPackages = false
+  bool reportLicensedPackages = false,
 }) async {
   assetDirPath ??= getAssetBuildDirectory();
   packagesPath ??= fs.path.absolute(PackageMap.globalPackagesPath);
@@ -177,7 +177,7 @@ Future<AssetBundle> buildAssets({
     assetDirPath: assetDirPath,
     packagesPath: packagesPath,
     includeDefaultFonts: includeDefaultFonts,
-    reportLicensedPackages: reportLicensedPackages
+    reportLicensedPackages: reportLicensedPackages,
   );
   if (result != 0)
     return null;
@@ -230,9 +230,9 @@ Future<void> writeBundle(
   bundleDir.createSync(recursive: true);
 
   await Future.wait<void>(
-      assetEntries.entries.map<Future<void>>((MapEntry<String, DevFSContent> entry) async {
-    final File file = fs.file(fs.path.join(bundleDir.path, entry.key));
-    file.parent.createSync(recursive: true);
-    await file.writeAsBytes(await entry.value.contentsAsBytes());
-  }));
+    assetEntries.entries.map<Future<void>>((MapEntry<String, DevFSContent> entry) async {
+      final File file = fs.file(fs.path.join(bundleDir.path, entry.key));
+      file.parent.createSync(recursive: true);
+      await file.writeAsBytes(await entry.value.contentsAsBytes());
+    }));
 }

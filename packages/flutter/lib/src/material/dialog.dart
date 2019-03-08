@@ -285,7 +285,7 @@ class AlertDialog extends StatelessWidget {
   /// The semantic label of the dialog used by accessibility frameworks to
   /// announce screen transitions when the dialog is opened and closed.
   ///
-  /// If this label is not provided, a semantic label will be infered from the
+  /// If this label is not provided, a semantic label will be inferred from the
   /// [title] if it is not null.  If there is no title, the label will be taken
   /// from [MaterialLocalizations.alertDialogLabel].
   ///
@@ -361,7 +361,7 @@ class AlertDialog extends StatelessWidget {
       dialogChild = Semantics(
         namesRoute: true,
         label: label,
-        child: dialogChild
+        child: dialogChild,
       );
 
     return Dialog(
@@ -430,7 +430,7 @@ class SimpleDialogOption extends StatelessWidget {
       onTap: onPressed,
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 24.0),
-        child: child
+        child: child,
       ),
     );
   }
@@ -570,7 +570,7 @@ class SimpleDialog extends StatelessWidget {
   /// The semantic label of the dialog used by accessibility frameworks to
   /// announce screen transitions when the dialog is opened and closed.
   ///
-  /// If this label is not provided, a semantic label will be infered from the
+  /// If this label is not provided, a semantic label will be inferred from the
   /// [title] if it is not null.  If there is no title, the label will be taken
   /// from [MaterialLocalizations.dialogLabel].
   ///
@@ -595,7 +595,7 @@ class SimpleDialog extends StatelessWidget {
         child: DefaultTextStyle(
           style: Theme.of(context).textTheme.title,
           child: Semantics(namesRoute: true, child: title),
-        )
+        ),
       ));
     } else {
       switch (defaultTargetPlatform) {
@@ -613,7 +613,7 @@ class SimpleDialog extends StatelessWidget {
         child: SingleChildScrollView(
           padding: contentPadding,
           child: ListBody(children: children),
-        )
+        ),
       ));
     }
 

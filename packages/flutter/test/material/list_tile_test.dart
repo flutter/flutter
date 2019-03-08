@@ -364,7 +364,7 @@ void main() {
               ],
             ),
           ),
-        )
+        ),
       ),
     );
 
@@ -405,7 +405,7 @@ void main() {
       return MediaQuery(
         data: const MediaQueryData(
           padding: EdgeInsets.zero,
-          textScaleFactor: 1.0
+          textScaleFactor: 1.0,
         ),
         child: Directionality(
           textDirection: textDirection,
@@ -450,7 +450,7 @@ void main() {
       return MediaQuery(
         data: const MediaQueryData(
           padding: EdgeInsets.zero,
-          textScaleFactor: 1.0
+          textScaleFactor: 1.0,
         ),
         child: Directionality(
           textDirection: textDirection,
@@ -497,7 +497,7 @@ void main() {
       return MediaQuery(
         data: const MediaQueryData(
           padding: EdgeInsets.zero,
-          textScaleFactor: 1.0
+          textScaleFactor: 1.0,
         ),
         child: Directionality(
           textDirection: textDirection,

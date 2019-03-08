@@ -97,7 +97,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: ListView(
-          children: const <Widget>[]
+          children: const <Widget>[],
         ),
       ),
     );
@@ -138,7 +138,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: ListView(
-          children: const <Widget>[]
+          children: const <Widget>[],
         ),
       ),
     );

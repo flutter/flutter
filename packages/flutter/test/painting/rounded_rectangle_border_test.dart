@@ -32,7 +32,7 @@ void main() {
           outer: RRect.fromRectAndRadius(rect, const Radius.circular(100.0)),
           inner: RRect.fromRectAndRadius(rect.deflate(10.0), const Radius.circular(90.0)),
           strokeWidth: 0.0,
-        )
+        ),
     );
 
     const RoundedRectangleBorder directional = RoundedRectangleBorder(

@@ -23,7 +23,7 @@ export 'src/services/platform_messages.dart';
 export 'src/services/platform_views.dart';
 export 'src/services/raw_keyboard.dart';
 export 'src/services/raw_keyboard_android.dart';
-export 'src/services/raw_keyboard_fuschia.dart';
+export 'src/services/raw_keyboard_fuchsia.dart';
 export 'src/services/system_channels.dart';
 export 'src/services/system_chrome.dart';
 export 'src/services/system_navigator.dart';

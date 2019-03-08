@@ -256,7 +256,7 @@ class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
         baseline: widget.height - _kBaselineOffsetFromBottom,
         baselineType: style.textBaseline,
         child: buildChild(),
-      )
+      ),
     );
     if (!widget.enabled) {
       final bool isDark = theme.brightness == Brightness.dark;
@@ -412,7 +412,7 @@ class _CheckedPopupMenuItemState<T> extends PopupMenuItemState<T, CheckedPopupMe
       enabled: widget.enabled,
       leading: FadeTransition(
         opacity: _opacity,
-        child: Icon(_controller.isDismissed ? null : Icons.done)
+        child: Icon(_controller.isDismissed ? null : Icons.done),
       ),
       title: widget.child,
     );
@@ -439,7 +439,7 @@ class _PopupMenu<T> extends StatelessWidget {
       final double end = (start + 1.5 * unit).clamp(0.0, 1.0);
       final CurvedAnimation opacity = CurvedAnimation(
         parent: route.animation,
-        curve: Interval(start, end)
+        curve: Interval(start, end),
       );
       Widget item = route.items[i];
       if (route.initialValue != null && route.items[i].represents(route.initialValue)) {
@@ -605,7 +605,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
     return CurvedAnimation(
       parent: super.createAnimation(),
       curve: Curves.linear,
-      reverseCurve: const Interval(0.0, _kMenuCloseIntervalEnd)
+      reverseCurve: const Interval(0.0, _kMenuCloseIntervalEnd),
     );
   }
 

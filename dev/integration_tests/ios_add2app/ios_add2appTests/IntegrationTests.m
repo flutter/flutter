@@ -11,7 +11,7 @@
 
 static void waitForInitialFlutterRender() {
   // TODO(dnfield,jamesderlin): actually sync with Flutter rendering.
-  CFRunLoopRunInMode(kCFRunLoopDefaultMode, 3, false);
+  CFRunLoopRunInMode(kCFRunLoopDefaultMode, 10, false);
 }
 
 @interface FlutterTests : XCTestCase

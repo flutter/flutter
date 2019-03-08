@@ -178,7 +178,7 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo> {
                             onPressed: () {
                               Navigator.pop(context, 'Cancel');
                             },
-                          )
+                          ),
                         ),
                       );
                     },

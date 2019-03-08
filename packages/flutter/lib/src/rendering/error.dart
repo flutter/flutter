@@ -90,7 +90,7 @@ class RenderErrorBox extends RenderBox {
     color: const Color(0xFFFFFF66),
     fontFamily: 'monospace',
     fontSize: 14.0,
-    fontWeight: FontWeight.bold
+    fontWeight: FontWeight.bold,
   );
 
   /// The paragraph style to use when painting [RenderErrorBox] objects.

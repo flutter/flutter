@@ -6,8 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
 void main() {
-  testWidgets('OverflowEntries context contains Overlay',
-      (WidgetTester tester) async {
+  testWidgets('OverflowEntries context contains Overlay', (WidgetTester tester) async {
     final GlobalKey overlayKey = GlobalKey();
     bool didBuild = false;
     await tester.pumpWidget(

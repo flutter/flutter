@@ -49,7 +49,7 @@ void main() {
             isExpanded: false,
             onPressed: (bool isExpanded) {
               expanded = !expanded;
-            }
+            },
           )
       )
     );
@@ -60,7 +60,7 @@ void main() {
             isExpanded: true,
             onPressed: (bool isExpanded) {
               expanded = !expanded;
-            }
+            },
         )
       )
     );

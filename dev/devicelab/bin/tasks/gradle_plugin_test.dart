@@ -279,7 +279,7 @@ Future<ProcessResult> _resultOfGradleTask({String workingDirectory, String task,
     gradle,
     args,
     workingDirectory: workingDirectory,
-    environment: <String, String>{ 'JAVA_HOME': javaHome }
+    environment: <String, String>{ 'JAVA_HOME': javaHome },
   );
 }
 

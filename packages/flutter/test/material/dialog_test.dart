@@ -24,14 +24,14 @@ MaterialApp _appWithAlertDialog(WidgetTester tester, AlertDialog dialog, { Theme
                   showDialog<void>(
                     context: context,
                     builder: (BuildContext context) {
-                        return dialog;
+                      return dialog;
                     },
                   );
-                }
-              )
+                },
+              ),
             );
           }
-        )
+        ),
       ),
   );
 }
@@ -60,8 +60,8 @@ void main() {
             onPressed: () {
               didPressOk = true;
             },
-            child: const Text('OK')
-        )
+            child: const Text('OK'),
+        ),
       ],
     );
     await tester.pumpWidget(_appWithAlertDialog(tester, dialog));
@@ -463,7 +463,7 @@ void main() {
 
     expect(semantics, isNot(includesNodeWith(
         label: 'Title',
-        flags: <SemanticsFlag>[SemanticsFlag.namesRoute]
+        flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
     )));
 
     await tester.tap(find.text('X'));

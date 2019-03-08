@@ -176,7 +176,7 @@ void main() {
           child: Center(
             child: CupertinoButton(
               onPressed: () { },
-              child: const Text('ABC')
+              child: const Text('ABC'),
             ),
           ),
       ),
@@ -189,7 +189,7 @@ void main() {
             actions: SemanticsAction.tap.index,
             label: 'ABC',
             flags: SemanticsFlag.isButton.index,
-          )
+          ),
         ],
       ),
       ignoreId: true,
@@ -261,7 +261,7 @@ void main() {
     BoxDecoration decoration = tester.widget<DecoratedBox>(
       find.descendant(
         of: find.byType(CupertinoButton),
-        matching: find.byType(DecoratedBox)
+        matching: find.byType(DecoratedBox),
       )
     ).decoration;
     expect(decoration.color, CupertinoColors.activeBlue);
@@ -296,7 +296,7 @@ void main() {
     decoration = tester.widget<DecoratedBox>(
       find.descendant(
         of: find.byType(CupertinoButton),
-        matching: find.byType(DecoratedBox)
+        matching: find.byType(DecoratedBox),
       )
     ).decoration;
     expect(decoration.color, CupertinoColors.activeOrange);

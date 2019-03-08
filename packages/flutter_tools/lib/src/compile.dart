@@ -259,10 +259,10 @@ class KernelCompiler {
 
     printTrace(command.join(' '));
     final Process server = await processManager
-        .start(command)
-        .catchError((dynamic error, StackTrace stack) {
-      printError('Failed to start frontend server $error, $stack');
-    });
+      .start(command)
+      .catchError((dynamic error, StackTrace stack) {
+        printError('Failed to start frontend server $error, $stack');
+      });
 
     final StdoutHandler _stdoutHandler = StdoutHandler();
 
@@ -324,7 +324,7 @@ class _CompileExpressionRequest extends _CompilationRequest {
     this.typeDefinitions,
     this.libraryUri,
     this.klass,
-    this.isStatic
+    this.isStatic,
   ) : super(completer);
 
   String expression;
@@ -440,7 +440,7 @@ class ResidentCompiler {
       return _compile(
           _mapFilename(request.mainPath, packageUriMapper),
           request.outputPath,
-          _mapFilename(request.packagesFilePath ?? _packagesPath, /* packageUriMapper= */ null)
+          _mapFilename(request.packagesFilePath ?? _packagesPath, /* packageUriMapper= */ null),
       );
     }
 
@@ -661,7 +661,11 @@ class ResidentCompiler {
     return null;
   }
 
-  Future<dynamic> shutdown() {
+  Future<dynamic> shutdown() async {
+    // Server was never sucessfully created.
+    if (_server == null) {
+      return 0;
+    }
     _server.kill();
     return _server.exitCode;
   }

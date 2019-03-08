@@ -61,7 +61,7 @@ class TestAsyncUtils {
     guardSync();
     final Zone zone = Zone.current.fork(
       zoneValues: <dynamic, dynamic>{
-        _scopeStack: true // so we can recognize this as our own zone
+        _scopeStack: true, // so we can recognize this as our own zone
       }
     );
     final _AsyncScope scope = _AsyncScope(StackTrace.current, zone);
@@ -111,7 +111,7 @@ class TestAsyncUtils {
         resultValue = value;
         return completionHandler(null, null);
       },
-      onError: completionHandler
+      onError: completionHandler,
     );
   }
 

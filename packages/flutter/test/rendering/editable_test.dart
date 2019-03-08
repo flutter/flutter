@@ -1,4 +1,4 @@
- // Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2017 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -92,7 +92,7 @@ void main() {
     editable.layout(BoxConstraints.loose(const Size(1000.0, 1000.0)));
     expect(
       (Canvas canvas) => editable.paint(TestRecordingPaintingContext(canvas), Offset.zero),
-      paints..clipRect(rect: Rect.fromLTRB(0.0, 0.0, 1000.0, 10.0))
+      paints..clipRect(rect: Rect.fromLTRB(0.0, 0.0, 1000.0, 10.0)),
     );
   });
 

@@ -28,14 +28,14 @@ class _TimePickerLauncher extends StatelessWidget {
                 onPressed: () async {
                   onChanged(await showTimePicker(
                     context: context,
-                    initialTime: const TimeOfDay(hour: 7, minute: 0)
+                    initialTime: const TimeOfDay(hour: 7, minute: 0),
                   ));
-                }
+                },
               );
             }
-          )
-        )
-      )
+          ),
+        ),
+      ),
     );
   }
 }
