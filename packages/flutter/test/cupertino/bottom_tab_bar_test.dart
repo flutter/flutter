@@ -246,22 +246,22 @@ void main() {
   testWidgets('Tap callback', (WidgetTester tester) async {
     int callbackTab;
 
-      await pumpWidgetWithBoilerplate(tester, MediaQuery(
-        data: const MediaQueryData(),
-        child: CupertinoTabBar(
-          items: const <BottomNavigationBarItem>[
-            BottomNavigationBarItem(
-              icon: ImageIcon(TestImageProvider(24, 24)),
-              title: Text('Tab 1'),
-            ),
-            BottomNavigationBarItem(
-              icon: ImageIcon(TestImageProvider(24, 24)),
-              title: Text('Tab 2'),
-            ),
-          ],
-          currentIndex: 1,
-          onTap: (int tab) { callbackTab = tab; },
-        ),
+    await pumpWidgetWithBoilerplate(tester, MediaQuery(
+      data: const MediaQueryData(),
+      child: CupertinoTabBar(
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: ImageIcon(TestImageProvider(24, 24)),
+            title: Text('Tab 1'),
+          ),
+          BottomNavigationBarItem(
+            icon: ImageIcon(TestImageProvider(24, 24)),
+            title: Text('Tab 2'),
+          ),
+        ],
+        currentIndex: 1,
+        onTap: (int tab) { callbackTab = tab; },
+      ),
     ));
 
     await tester.tap(find.text('Tab 1'));
@@ -338,8 +338,7 @@ void main() {
     expect(itemsTapped, <int>[1]);
   });
 
-  testWidgets('Hide border hides the top border of the tabBar',
-      (WidgetTester tester) async {
+  testWidgets('Hide border hides the top border of the tabBar', (WidgetTester tester) async {
     await pumpWidgetWithBoilerplate(
         tester,
         MediaQuery(

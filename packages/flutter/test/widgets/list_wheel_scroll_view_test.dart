@@ -55,7 +55,7 @@ void main() {
 
     testWidgets('ListWheelScrollView needs positive magnification', (WidgetTester tester) async {
       expect(
-            () {
+        () {
           ListWheelScrollView(
             useMagnifier: true,
             magnification: -1.0,
@@ -277,7 +277,7 @@ void main() {
     });
 
     testWidgets('builder is never called twice for same index', (WidgetTester tester) async {
-      final Set<int> builtChildren = Set<int>();
+      final Set<int> builtChildren = <int>{};
       final FixedExtentScrollController controller =
         FixedExtentScrollController();
 

@@ -55,6 +55,10 @@ enum SelectionChangedCause {
   /// Keyboard-triggered selection changes may be caused by the IME as well as
   /// by accessibility tools (e.g. TalkBack on Android).
   keyboard,
+
+  /// The user used the mouse to change the selection by dragging over a piece
+  /// of text.
+  drag,
 }
 
 /// Signature for the callback that reports when the caret location changes.
@@ -1235,7 +1239,7 @@ class RenderEditable extends RenderBox {
   }
 
   /// If [ignorePointer] is false (the default) then this method is called by
-  /// the internal gesture recognizer's [LongPressRecognizer.onLongPress]
+  /// the internal gesture recognizer's [LongPressGestureRecognizer.onLongPress]
   /// callback.
   ///
   /// When [ignorePointer] is true, an ancestor widget must respond to long

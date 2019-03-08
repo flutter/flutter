@@ -415,7 +415,7 @@ class _RenderCupertinoPickerSemantics extends RenderProxyBox {
     if (_currentIndex == 0)
       return;
     controller.jumpToItem(_currentIndex - 1);
-   }
+  }
 
   void _handleScrollUpdate() {
     if (controller.selectedItem == _currentIndex)

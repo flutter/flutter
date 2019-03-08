@@ -12,7 +12,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart' show DragStartBehavior;
+import 'package:flutter/gestures.dart' show DragStartBehavior, PointerDeviceKind;
 
 import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
@@ -533,6 +533,37 @@ void main() {
     expect(controller.selection.extentOffset, testValue.indexOf('f')+1);
   });
 
+  testWidgets('Mouse long press is just like a tap', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController();
+
+    await tester.pumpWidget(
+      overlay(
+        child: TextField(
+          controller: controller,
+        ),
+      )
+    );
+
+    const String testValue = 'abc def ghi';
+    await tester.enterText(find.byType(TextField), testValue);
+    expect(controller.value.text, testValue);
+    await skipPastScrollingAnimation(tester);
+
+    expect(controller.selection.isCollapsed, true);
+
+    // Long press the 'e' using a mouse device.
+    final int eIndex = testValue.indexOf('e');
+    final Offset ePos = textOffsetToPosition(tester, eIndex);
+    final TestGesture gesture = await tester.startGesture(ePos, kind: PointerDeviceKind.mouse);
+    await tester.pump(const Duration(seconds: 2));
+    await gesture.up();
+    await tester.pump();
+
+    // The cursor is placed just like a regular tap.
+    expect(controller.selection.baseOffset, eIndex);
+    expect(controller.selection.extentOffset, eIndex);
+  });
+
   testWidgets('enableInteractiveSelection = false, long-press', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController();
 
@@ -562,6 +593,69 @@ void main() {
     expect(controller.selection.isCollapsed, true);
     expect(controller.selection.baseOffset, -1);
     expect(controller.selection.extentOffset, -1);
+  });
+
+  testWidgets('Can select text by dragging with a mouse', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: TextField(
+            dragStartBehavior: DragStartBehavior.down,
+            controller: controller,
+          ),
+        ),
+      ),
+    );
+
+    const String testValue = 'abc def ghi';
+    await tester.enterText(find.byType(TextField), testValue);
+    await skipPastScrollingAnimation(tester);
+
+    final Offset ePos = textOffsetToPosition(tester, testValue.indexOf('e'));
+    final Offset gPos = textOffsetToPosition(tester, testValue.indexOf('g'));
+
+    final TestGesture gesture = await tester.startGesture(ePos, kind: PointerDeviceKind.mouse);
+    await tester.pump();
+    await gesture.moveTo(gPos);
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(controller.selection.baseOffset, testValue.indexOf('e'));
+    expect(controller.selection.extentOffset, testValue.indexOf('g'));
+  });
+
+  testWidgets('Slow mouse dragging also selects text', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: TextField(
+            dragStartBehavior: DragStartBehavior.down,
+            controller: controller,
+          ),
+        ),
+      ),
+    );
+
+    const String testValue = 'abc def ghi';
+    await tester.enterText(find.byType(TextField), testValue);
+    await skipPastScrollingAnimation(tester);
+
+    final Offset ePos = textOffsetToPosition(tester, testValue.indexOf('e'));
+    final Offset gPos = textOffsetToPosition(tester, testValue.indexOf('g'));
+
+    final TestGesture gesture = await tester.startGesture(ePos, kind: PointerDeviceKind.mouse);
+    await tester.pump(const Duration(seconds: 2));
+    await gesture.moveTo(gPos);
+    await tester.pump();
+    await gesture.up();
+
+    expect(controller.selection.baseOffset, testValue.indexOf('e'));
+    expect(controller.selection.extentOffset, testValue.indexOf('g'));
   });
 
   testWidgets('Can drag handles to change selection', (WidgetTester tester) async {
@@ -1278,8 +1372,7 @@ void main() {
     expect(suffixText.style, suffixStyle);
   });
 
-  testWidgets('TextField prefix and suffix appear correctly with no hint or label',
-          (WidgetTester tester) async {
+  testWidgets('TextField prefix and suffix appear correctly with no hint or label', (WidgetTester tester) async {
     final Key secondKey = UniqueKey();
 
     await tester.pumpWidget(
@@ -1322,8 +1415,7 @@ void main() {
     expect(find.text('Suffix'), findsOneWidget);
   });
 
-  testWidgets('TextField prefix and suffix appear correctly with hint text',
-          (WidgetTester tester) async {
+  testWidgets('TextField prefix and suffix appear correctly with hint text', (WidgetTester tester) async {
     final TextStyle hintStyle = TextStyle(
       inherit: false,
       color: Colors.pink[500],
@@ -1383,8 +1475,7 @@ void main() {
     expect(suffixText.style, hintStyle);
   });
 
-  testWidgets('TextField prefix and suffix appear correctly with label text',
-          (WidgetTester tester) async {
+  testWidgets('TextField prefix and suffix appear correctly with label text', (WidgetTester tester) async {
     final TextStyle prefixStyle = TextStyle(
       color: Colors.pink[500],
       fontSize: 10.0,
@@ -2030,9 +2121,7 @@ void main() {
     expect(find.text('5/10'), findsOneWidget);
   });
 
-  testWidgets(
-      'setting maxLength to TextField.noMaxLength shows only entered length',
-      (WidgetTester tester) async {
+  testWidgets('setting maxLength to TextField.noMaxLength shows only entered length', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(
       home: Material(
         child: Center(
@@ -2267,13 +2356,13 @@ void main() {
 
     String clipboardContent = '';
     SystemChannels.platform
-        .setMockMethodCallHandler((MethodCall methodCall) async {
-      if (methodCall.method == 'Clipboard.setData')
-        clipboardContent = methodCall.arguments['text'];
-      else if (methodCall.method == 'Clipboard.getData')
-        return <String, dynamic>{'text': clipboardContent};
-      return null;
-    });
+      .setMockMethodCallHandler((MethodCall methodCall) async {
+        if (methodCall.method == 'Clipboard.setData')
+          clipboardContent = methodCall.arguments['text'];
+        else if (methodCall.method == 'Clipboard.getData')
+          return <String, dynamic>{'text': clipboardContent};
+        return null;
+      });
 
     await tester.pumpWidget(
       MaterialApp(
@@ -2337,13 +2426,13 @@ void main() {
       );
     String clipboardContent = '';
     SystemChannels.platform
-        .setMockMethodCallHandler((MethodCall methodCall) async {
-      if (methodCall.method == 'Clipboard.setData')
-        clipboardContent = methodCall.arguments['text'];
-      else if (methodCall.method == 'Clipboard.getData')
-        return <String, dynamic>{'text': clipboardContent};
-      return null;
-    });
+      .setMockMethodCallHandler((MethodCall methodCall) async {
+        if (methodCall.method == 'Clipboard.setData')
+          clipboardContent = methodCall.arguments['text'];
+        else if (methodCall.method == 'Clipboard.getData')
+          return <String, dynamic>{'text': clipboardContent};
+        return null;
+      });
 
     await tester.pumpWidget(
       MaterialApp(
@@ -2509,7 +2598,7 @@ void main() {
     final Key key1 = UniqueKey();
     final Key key2 = UniqueKey();
 
-   await tester.pumpWidget(
+    await tester.pumpWidget(
       MaterialApp(
         home:
         Material(
@@ -4313,92 +4402,92 @@ void main() {
 
   testWidgets('long press drag can edge scroll (iOS)', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
-        text: 'Atwater Peel Sherbrooke Bonaventure Angrignon Peel Côte-des-Neiges',
-      );
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(platform: TargetPlatform.iOS),
-          home: Material(
-            child: Center(
-              child: TextField(
-                controller: controller,
-                maxLines: 1,
-              ),
+      text: 'Atwater Peel Sherbrooke Bonaventure Angrignon Peel Côte-des-Neiges',
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(platform: TargetPlatform.iOS),
+        home: Material(
+          child: Center(
+            child: TextField(
+              controller: controller,
+              maxLines: 1,
             ),
           ),
         ),
-      );
+      ),
+    );
 
-      final RenderEditable renderEditable = findRenderEditable(tester);
+    final RenderEditable renderEditable = findRenderEditable(tester);
 
-      List<TextSelectionPoint> lastCharEndpoint = renderEditable.getEndpointsForSelection(
-        const TextSelection.collapsed(offset: 66), // Last character's position.
-      );
+    List<TextSelectionPoint> lastCharEndpoint = renderEditable.getEndpointsForSelection(
+      const TextSelection.collapsed(offset: 66), // Last character's position.
+    );
 
-      expect(lastCharEndpoint.length, 1);
-      // Just testing the test and making sure that the last character is off
-      // the right side of the screen.
-      expect(lastCharEndpoint[0].point.dx, 1056);
+    expect(lastCharEndpoint.length, 1);
+    // Just testing the test and making sure that the last character is off
+    // the right side of the screen.
+    expect(lastCharEndpoint[0].point.dx, 1056);
 
-      final Offset textfieldStart = tester.getTopLeft(find.byType(TextField));
+    final Offset textfieldStart = tester.getTopLeft(find.byType(TextField));
 
-      final TestGesture gesture =
-          await tester.startGesture(textfieldStart + const Offset(300, 5));
-      await tester.pump(const Duration(milliseconds: 500));
+    final TestGesture gesture =
+        await tester.startGesture(textfieldStart + const Offset(300, 5));
+    await tester.pump(const Duration(milliseconds: 500));
 
-      expect(
-        controller.selection,
-        const TextSelection.collapsed(offset: 19, affinity: TextAffinity.upstream),
-      );
-      expect(find.byType(CupertinoButton), findsNothing);
+    expect(
+      controller.selection,
+      const TextSelection.collapsed(offset: 19, affinity: TextAffinity.upstream),
+    );
+    expect(find.byType(CupertinoButton), findsNothing);
 
-      await gesture.moveBy(const Offset(600, 0));
-      // To the edge of the screen basically.
-      await tester.pump();
-      expect(
-        controller.selection,
-        const TextSelection.collapsed(offset: 56, affinity: TextAffinity.downstream),
-      );
-      // Keep moving out.
-      await gesture.moveBy(const Offset(1, 0));
-      await tester.pump();
-      expect(
-        controller.selection,
-        const TextSelection.collapsed(offset: 62, affinity: TextAffinity.downstream),
-      );
-      await gesture.moveBy(const Offset(1, 0));
-      await tester.pump();
-      expect(
-        controller.selection,
-        const TextSelection.collapsed(offset: 66, affinity: TextAffinity.upstream),
-      ); // We're at the edge now.
-      expect(find.byType(CupertinoButton), findsNothing);
+    await gesture.moveBy(const Offset(600, 0));
+    // To the edge of the screen basically.
+    await tester.pump();
+    expect(
+      controller.selection,
+      const TextSelection.collapsed(offset: 56, affinity: TextAffinity.downstream),
+    );
+    // Keep moving out.
+    await gesture.moveBy(const Offset(1, 0));
+    await tester.pump();
+    expect(
+      controller.selection,
+      const TextSelection.collapsed(offset: 62, affinity: TextAffinity.downstream),
+    );
+    await gesture.moveBy(const Offset(1, 0));
+    await tester.pump();
+    expect(
+      controller.selection,
+      const TextSelection.collapsed(offset: 66, affinity: TextAffinity.upstream),
+    ); // We're at the edge now.
+    expect(find.byType(CupertinoButton), findsNothing);
 
-      await gesture.up();
-      await tester.pump();
+    await gesture.up();
+    await tester.pump();
 
-      // The selection isn't affected by the gesture lift.
-      expect(
-        controller.selection,
-        const TextSelection.collapsed(offset: 66, affinity: TextAffinity.upstream),
-      );
-      // The toolbar now shows up.
-      expect(find.byType(CupertinoButton), findsNWidgets(2));
+    // The selection isn't affected by the gesture lift.
+    expect(
+      controller.selection,
+      const TextSelection.collapsed(offset: 66, affinity: TextAffinity.upstream),
+    );
+    // The toolbar now shows up.
+    expect(find.byType(CupertinoButton), findsNWidgets(2));
 
-      lastCharEndpoint = renderEditable.getEndpointsForSelection(
-        const TextSelection.collapsed(offset: 66), // Last character's position.
-      );
+    lastCharEndpoint = renderEditable.getEndpointsForSelection(
+      const TextSelection.collapsed(offset: 66), // Last character's position.
+    );
 
-      expect(lastCharEndpoint.length, 1);
-      // The last character is now on screen near the right edge.
-      expect(lastCharEndpoint[0].point.dx, moreOrLessEquals(798, epsilon: 1));
+    expect(lastCharEndpoint.length, 1);
+    // The last character is now on screen near the right edge.
+    expect(lastCharEndpoint[0].point.dx, moreOrLessEquals(798, epsilon: 1));
 
-      final List<TextSelectionPoint> firstCharEndpoint = renderEditable.getEndpointsForSelection(
-        const TextSelection.collapsed(offset: 0), // First character's position.
-      );
-      expect(firstCharEndpoint.length, 1);
-      // The first character is now offscreen to the left.
-      expect(firstCharEndpoint[0].point.dx, moreOrLessEquals(-257, epsilon: 1));
+    final List<TextSelectionPoint> firstCharEndpoint = renderEditable.getEndpointsForSelection(
+      const TextSelection.collapsed(offset: 0), // First character's position.
+    );
+    expect(firstCharEndpoint.length, 1);
+    // The first character is now offscreen to the left.
+    expect(firstCharEndpoint[0].point.dx, moreOrLessEquals(-257, epsilon: 1));
   });
 
   testWidgets(

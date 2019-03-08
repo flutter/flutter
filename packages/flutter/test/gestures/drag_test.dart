@@ -517,4 +517,83 @@ void main() {
     tester.route(pointer.up());
     drag.dispose();
   });
+
+  testGesture('Can filter drags based on device kind', (GestureTester tester) {
+    final HorizontalDragGestureRecognizer drag =
+        HorizontalDragGestureRecognizer(
+            kind: PointerDeviceKind.mouse,
+        )
+        ..dragStartBehavior = DragStartBehavior.down;
+
+    bool didStartDrag = false;
+    drag.onStart = (_) {
+      didStartDrag = true;
+    };
+
+    double updatedDelta;
+    drag.onUpdate = (DragUpdateDetails details) {
+      updatedDelta = details.primaryDelta;
+    };
+
+    bool didEndDrag = false;
+    drag.onEnd = (DragEndDetails details) {
+      didEndDrag = true;
+    };
+
+    // Using a touch pointer to drag shouldn't be recognized.
+    final TestPointer touchPointer = TestPointer(5, PointerDeviceKind.touch);
+    final PointerDownEvent touchDown = touchPointer.down(const Offset(10.0, 10.0));
+    drag.addPointer(touchDown);
+    tester.closeArena(5);
+    expect(didStartDrag, isFalse);
+    expect(updatedDelta, isNull);
+    expect(didEndDrag, isFalse);
+
+    tester.route(touchDown);
+    // Still doesn't recognize the drag because it's coming from a touch pointer.
+    expect(didStartDrag, isFalse);
+    expect(updatedDelta, isNull);
+    expect(didEndDrag, isFalse);
+
+    tester.route(touchPointer.move(const Offset(20.0, 25.0)));
+    // Still doesn't recognize the drag because it's coming from a touch pointer.
+    expect(didStartDrag, isFalse);
+    expect(updatedDelta, isNull);
+    expect(didEndDrag, isFalse);
+
+    tester.route(touchPointer.up());
+    // Still doesn't recognize the drag because it's coming from a touch pointer.
+    expect(didStartDrag, isFalse);
+    expect(updatedDelta, isNull);
+    expect(didEndDrag, isFalse);
+
+    // Using a mouse pointer to drag should be recognized.
+    final TestPointer mousePointer = TestPointer(5, PointerDeviceKind.mouse);
+    final PointerDownEvent mouseDown = mousePointer.down(const Offset(10.0, 10.0));
+    drag.addPointer(mouseDown);
+    tester.closeArena(5);
+    expect(didStartDrag, isFalse);
+    expect(updatedDelta, isNull);
+    expect(didEndDrag, isFalse);
+
+    tester.route(mouseDown);
+    expect(didStartDrag, isTrue);
+    didStartDrag = false;
+    expect(updatedDelta, isNull);
+    expect(didEndDrag, isFalse);
+
+    tester.route(mousePointer.move(const Offset(20.0, 25.0)));
+    expect(didStartDrag, isFalse);
+    expect(updatedDelta, 10.0);
+    updatedDelta = null;
+    expect(didEndDrag, isFalse);
+
+    tester.route(mousePointer.up());
+    expect(didStartDrag, isFalse);
+    expect(updatedDelta, isNull);
+    expect(didEndDrag, isTrue);
+    didEndDrag = false;
+
+    drag.dispose();
+  });
 }

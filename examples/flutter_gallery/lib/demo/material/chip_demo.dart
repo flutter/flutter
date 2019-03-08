@@ -54,20 +54,20 @@ const Map<String, String> _avatars = <String, String>{
   'customer': 'people/square/peter.png',
 };
 
-final Map<String, Set<String>> _toolActions = <String, Set<String>>{
-  'hammer': Set<String>()..addAll(<String>['flake', 'fragment', 'splinter']),
-  'chisel': Set<String>()..addAll(<String>['flake', 'nick', 'splinter']),
-  'fryer': Set<String>()..addAll(<String>['fry']),
-  'fabricator': Set<String>()..addAll(<String>['solder']),
-  'customer': Set<String>()..addAll(<String>['cash in', 'eat']),
+const Map<String, Set<String>> _toolActions = <String, Set<String>>{
+  'hammer': <String>{'flake', 'fragment', 'splinter'},
+  'chisel': <String>{'flake', 'nick', 'splinter'},
+  'fryer': <String>{'fry'},
+  'fabricator': <String>{'solder'},
+  'customer': <String>{'cash in', 'eat'},
 };
 
-final Map<String, Set<String>> _materialActions = <String, Set<String>>{
-  'poker': Set<String>()..addAll(<String>['cash in']),
-  'tortilla': Set<String>()..addAll(<String>['fry', 'eat']),
-  'fish and': Set<String>()..addAll(<String>['fry', 'eat']),
-  'micro': Set<String>()..addAll(<String>['solder', 'fragment']),
-  'wood': Set<String>()..addAll(<String>['flake', 'cut', 'splinter', 'nick']),
+const Map<String, Set<String>> _materialActions = <String, Set<String>>{
+  'poker': <String>{'cash in'},
+  'tortilla': <String>{'fry', 'eat'},
+  'fish and': <String>{'fry', 'eat'},
+  'micro': <String>{'solder', 'fragment'},
+  'wood': <String>{'flake', 'cut', 'splinter', 'nick'},
 };
 
 class _ChipsTile extends StatelessWidget {
@@ -93,11 +93,11 @@ class _ChipsTile extends StatelessWidget {
     if (children.isNotEmpty) {
       cardChildren.add(Wrap(
         children: children.map<Widget>((Widget chip) {
-        return Padding(
-          padding: const EdgeInsets.all(2.0),
-          child: chip,
-        );
-      }).toList()));
+          return Padding(
+            padding: const EdgeInsets.all(2.0),
+            child: chip,
+          );
+        }).toList()));
     } else {
       final TextStyle textStyle = Theme.of(context).textTheme.caption.copyWith(fontStyle: FontStyle.italic);
       cardChildren.add(
@@ -134,12 +134,12 @@ class _ChipDemoState extends State<ChipDemo> {
     _reset();
   }
 
-  final Set<String> _materials = Set<String>();
+  final Set<String> _materials = <String>{};
   String _selectedMaterial = '';
   String _selectedAction = '';
-  final Set<String> _tools = Set<String>();
-  final Set<String> _selectedTools = Set<String>();
-  final Set<String> _actions = Set<String>();
+  final Set<String> _tools = <String>{};
+  final Set<String> _selectedTools = <String>{};
+  final Set<String> _actions = <String>{};
   bool _showShapeBorder = false;
 
   // Initialize members with the default data.
@@ -262,7 +262,7 @@ class _ChipDemoState extends State<ChipDemo> {
       );
     }).toList();
 
-    Set<String> allowedActions = Set<String>();
+    Set<String> allowedActions = <String>{};
     if (_selectedMaterial != null && _selectedMaterial.isNotEmpty) {
       for (String tool in _selectedTools) {
         allowedActions.addAll(_toolActions[tool]);
