@@ -37,7 +37,8 @@ Future<List<int>> _attempt(Uri url, { bool onlyHeaders = false }) async {
   printTrace('Downloading: $url');
   HttpClient httpClient;
   if (context[HttpClientFactory] != null) {
-    httpClient = (context[HttpClientFactory] as HttpClientFactory)(); // ignore: avoid_as
+    final HttpClientFactory httpClientFactory = context[HttpClientFactory];
+    httpClient = httpClientFactory();
   } else {
     httpClient = HttpClient();
   }
@@ -64,9 +65,9 @@ Future<List<int>> _attempt(Uri url, { bool onlyHeaders = false }) async {
   // If we're making a HEAD request, we're only checking to see if the URL is
   // valid.
   if (onlyHeaders) {
-    return (response.statusCode == 200) ? <int>[] : null;
+    return (response.statusCode == HttpStatus.ok) ? <int>[] : null;
   }
-  if (response.statusCode != 200) {
+  if (response.statusCode != HttpStatus.ok) {
     if (response.statusCode > 0 && response.statusCode < 500) {
       throwToolExit(
         'Download failed.\n'
