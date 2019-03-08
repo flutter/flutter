@@ -132,12 +132,15 @@ public class PlatformPlugin implements ActivityLifecycleListener {
             return;
         }
 
-        @SuppressWarnings("deprecation")
-        TaskDescription taskDescription = (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
-            ? new TaskDescription(description.label, 0, description.color)
-            : new TaskDescription(description.label, null, description.color);
-
-        activity.setTaskDescription(taskDescription);
+        // Linter refuses to believe we're only executing this code in API 28 unless we use distinct if blocks and
+        // hardcode the API 28 constant.
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P && Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP) {
+            activity.setTaskDescription(new TaskDescription(description.label));
+        }
+        if (Build.VERSION.SDK_INT >= 28) {
+            TaskDescription taskDescription = new TaskDescription(description.label, 0, description.color);
+            activity.setTaskDescription(taskDescription);
+        }
     }
 
     private void setSystemChromeEnabledSystemUIOverlays(List<PlatformChannel.SystemUiOverlay> overlaysToShow) {
