@@ -348,6 +348,10 @@ FlutterEngineResult FlutterEngineRun(size_t version,
     shell::PersistentCache::SetCacheDirectoryPath(persistent_cache_path);
   }
 
+  if (SAFE_ACCESS(args, is_persistent_cache_read_only, false)) {
+    shell::PersistentCache::gIsReadOnly = true;
+  }
+
   fml::CommandLine command_line;
   if (SAFE_ACCESS(args, command_line_argc, 0) != 0 &&
       SAFE_ACCESS(args, command_line_argv, nullptr) != nullptr) {
