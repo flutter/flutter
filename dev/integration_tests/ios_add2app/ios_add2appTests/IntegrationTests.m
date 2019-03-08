@@ -69,7 +69,7 @@ static void waitForFlutterSemanticsTree(FlutterViewController *viewController) {
     GREYAssertNotNil(weakViewController,
                      @"Expected non-nil FullScreenViewController.");
   }
-  
+
   [[EarlGrey selectElementWithMatcher:grey_accessibilityLabel(@"POP")]
       performAction:grey_tap()];
   // EarlGrey v1 isn't good at detecting this yet - 2.0 will be able to do it
