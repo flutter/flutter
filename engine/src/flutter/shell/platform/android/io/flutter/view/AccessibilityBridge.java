@@ -4,12 +4,15 @@
 
 package io.flutter.view;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.graphics.Rect;
 import android.opengl.Matrix;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.NonNull;
+import android.support.annotation.RequiresApi;
 import android.util.Log;
 import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
@@ -84,10 +87,12 @@ class AccessibilityBridge
         SHOW_ON_SCREEN(1 << 8),
         MOVE_CURSOR_FORWARD_BY_CHARACTER(1 << 9),
         MOVE_CURSOR_BACKWARD_BY_CHARACTER(1 << 10),
+        /** These actions are only supported on Android 4.3 and above. */
         SET_SELECTION(1 << 11),
         COPY(1 << 12),
         CUT(1 << 13),
         PASTE(1 << 14),
+        /** End 4.3 only supported actions. */
         DID_GAIN_ACCESSIBILITY_FOCUS(1 << 15),
         DID_LOSE_ACCESSIBILITY_FOCUS(1 << 16),
         CUSTOM_ACTION(1 << 17),
@@ -233,17 +238,22 @@ class AccessibilityBridge
             }
             result.setMovementGranularities(granularities);
         }
-        if (object.hasAction(Action.SET_SELECTION)) {
-            result.addAction(AccessibilityNodeInfo.ACTION_SET_SELECTION);
-        }
-        if (object.hasAction(Action.COPY)) {
-            result.addAction(AccessibilityNodeInfo.ACTION_COPY);
-        }
-        if (object.hasAction(Action.CUT)) {
-            result.addAction(AccessibilityNodeInfo.ACTION_CUT);
-        }
-        if (object.hasAction(Action.PASTE)) {
-            result.addAction(AccessibilityNodeInfo.ACTION_PASTE);
+
+        // These are non-ops on older devices. Attempting to interact with the text will cause Talkback to read the
+        // contents of the text box instead.
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN_MR2) {
+            if (object.hasAction(Action.SET_SELECTION)) {
+                result.addAction(AccessibilityNodeInfo.ACTION_SET_SELECTION);
+            }
+            if (object.hasAction(Action.COPY)) {
+                result.addAction(AccessibilityNodeInfo.ACTION_COPY);
+            }
+            if (object.hasAction(Action.CUT)) {
+                result.addAction(AccessibilityNodeInfo.ACTION_CUT);
+            }
+            if (object.hasAction(Action.PASTE)) {
+                result.addAction(AccessibilityNodeInfo.ACTION_PASTE);
+            }
         }
 
         if (object.hasFlag(Flag.IS_BUTTON)) {
@@ -312,11 +322,14 @@ class AccessibilityBridge
             // We should prefer setCollectionInfo to the class names, as this way we get "In List"
             // and "Out of list" announcements.  But we don't always know the counts, so we
             // can fallback to the generic scroll view class names.
+            //
+            // On older APIs, we always fall back to the generic scroll view class names here.
+            //
             // TODO(dnfield): We should add semantics properties for rows and columns in 2 dimensional lists, e.g.
             // GridView.  Right now, we're only supporting ListViews and only if they have scroll children.
             if (object.hasFlag(Flag.HAS_IMPLICIT_SCROLLING)) {
                 if (object.hasAction(Action.SCROLL_LEFT) || object.hasAction(Action.SCROLL_RIGHT)) {
-                    if (shouldSetCollectionInfo(object)) {
+                    if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT && shouldSetCollectionInfo(object)) {
                         result.setCollectionInfo(AccessibilityNodeInfo.CollectionInfo.obtain(
                             0, // rows
                             object.scrollChildren, // columns
@@ -325,7 +338,7 @@ class AccessibilityBridge
                         result.setClassName("android.widget.HorizontalScrollView");
                     }
                 } else {
-                    if (shouldSetCollectionInfo(object)) {
+                    if (Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN_MR2 && shouldSetCollectionInfo(object)) {
                         result.setCollectionInfo(AccessibilityNodeInfo.CollectionInfo.obtain(
                             object.scrollChildren, // rows
                             0, // columns
@@ -465,9 +478,21 @@ class AccessibilityBridge
                 return true;
             }
             case AccessibilityNodeInfo.ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY: {
+                // Text selection APIs aren't available until API 18. We can't handle the case here so return false
+                // instead. It's extremely unlikely that this case would ever be triggered in the first place in API <
+                // 18.
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR2) {
+                    return false;
+                }
                 return performCursorMoveAction(object, virtualViewId, arguments, false);
             }
             case AccessibilityNodeInfo.ACTION_NEXT_AT_MOVEMENT_GRANULARITY: {
+                // Text selection APIs aren't available until API 18. We can't handle the case here so return false
+                // instead. It's extremely unlikely that this case would ever be triggered in the first place in API <
+                // 18.
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR2) {
+                    return false;
+                }
                 return performCursorMoveAction(object, virtualViewId, arguments, true);
             }
             case AccessibilityNodeInfo.ACTION_CLEAR_ACCESSIBILITY_FOCUS: {
@@ -502,6 +527,12 @@ class AccessibilityBridge
                 return true;
             }
             case AccessibilityNodeInfo.ACTION_SET_SELECTION: {
+                // Text selection APIs aren't available until API 18. We can't handle the case here so return false
+                // instead. It's extremely unlikely that this case would ever be triggered in the first place in API <
+                // 18.
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR2) {
+                    return false;
+                }
                 final Map<String, Integer> selection = new HashMap<>();
                 final boolean hasSelection = arguments != null
                         && arguments.containsKey(
@@ -553,6 +584,8 @@ class AccessibilityBridge
         return false;
     }
 
+    @RequiresApi(18)
+    @TargetApi(18)
     boolean performCursorMoveAction(
             SemanticsObject object, int virtualViewId, Bundle arguments, boolean forward) {
         final int granularity =

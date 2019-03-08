@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lint>
+    <issue id="NewApi">
+        <!-- The NewApi lint also catches the usage of Java 8 APIs. The engine
+        relies on being built with backwards support for Java 8 APIs enabled. BE
+        CAREFUL ADDING TO THIS LIST. Not all Java 8 APIs are backwards
+        compatible all the way back to API 16. See
+        https://developer.android.com/studio/write/java8-support.html#supported_features -->
+        <ignore regexp="^Try-with-resources requires API level 19"/>
+  </issue>
+</lint>

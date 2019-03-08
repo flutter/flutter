@@ -4,6 +4,8 @@
 
 package io.flutter.view;
 
+import static java.util.Arrays.asList;
+
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -16,6 +18,7 @@ import io.flutter.util.PathUtils;
 import org.json.JSONObject;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.concurrent.CancellationException;
@@ -30,10 +33,12 @@ import java.util.zip.ZipFile;
 class ResourceExtractor {
     private static final String TAG = "ResourceExtractor";
     private static final String TIMESTAMP_PREFIX = "res_timestamp-";
+    private static final String[] SUPPORTED_ABIS = getSupportedAbis();
 
     @SuppressWarnings("deprecation")
     static long getVersionCode(PackageInfo packageInfo) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+        // Linter needs P (28) hardcoded or else it will fail these lines.
+        if (Build.VERSION.SDK_INT >= 28) {
             return packageInfo.getLongVersionCode();
         } else {
             return packageInfo.versionCode;
@@ -244,7 +249,7 @@ class ResourceExtractor {
             ZipEntry entry = null;
             if (asset.endsWith(".so")) {
                 // Replicate library lookup logic.
-                for (String abi : Build.SUPPORTED_ABIS) {
+                for (String abi : SUPPORTED_ABIS) {
                     resource = "lib/" + abi + "/" + asset;
                     entry = zipFile.getEntry(resource);
                     if (entry == null) {
@@ -401,6 +406,16 @@ class ResourceExtractor {
                 mContext.getPackageName(), 0).publicSourceDir;
         } catch (Exception e) {
             return null;
+        }
+    }
+
+    private static String[] getSupportedAbis() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && Build.SUPPORTED_ABIS.length > 0) {
+            return Build.SUPPORTED_ABIS;
+        } else {
+            ArrayList<String> cpuAbis = new ArrayList<String>(asList(Build.CPU_ABI, Build.CPU_ABI2));
+            cpuAbis.removeAll(asList(null, ""));
+            return cpuAbis.toArray(new String[0]);
         }
     }
 }
