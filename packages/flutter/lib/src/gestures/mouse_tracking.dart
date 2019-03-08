@@ -173,6 +173,10 @@ class MouseTracker {
 
   /// Checks if the given [MouseTrackerAnnotation] is attached to this
   /// [MouseTracker].
+  ///
+  /// This function is only public to allow for proper testing of the
+  /// MouseTracker. Do not call in other contexts.
+  @visibleForTesting
   bool isAnnotationAttached(MouseTrackerAnnotation annotation) {
     return _trackedAnnotations[annotation] != null;
   }
