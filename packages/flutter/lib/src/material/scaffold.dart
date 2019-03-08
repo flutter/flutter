@@ -1499,7 +1499,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       _currentBottomSheet = _buildBottomSheet<void>(
         (BuildContext context) => widget.bottomSheet,
         true,
-        clampTop: true,
         animationController: animationController,
         isScrollControlled: widget.bottomSheetIsScrollControlled,
       );
@@ -1522,7 +1521,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       WidgetBuilder builder,
       bool isPersistent, {
       double initialHeight = 0.5,
-      bool clampTop = false,
       AnimationController animationController,
       bool isScrollControlled = false,
     }) {
@@ -1543,7 +1541,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     } else {
       _bottomSheetScrollController = BottomSheet.createScrollController(
         initialHeightPercentage: initialHeight,
-        minTop: clampTop ? initialHeight : 0.0,
+        minTop: isPersistent ? initialHeight : 0.0,
         isPersistent: isPersistent,
         context: context,
       )..addTopListener(() => setState(() {
@@ -1678,9 +1676,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   /// to have a bottom sheet that has a scrollable child such as a [ListView] or
   /// a [GridView], you should set this parameter to true. In such a case, the
   /// `initialHeightPercentage` specifies how much of the available screen space
-  /// the sheet should take at the start.  The `clampTop` parameter specifies
-  /// whether to force the bottom sheet to always be at least that height, and
-  /// setting it to true will disable swipe down dismissal of the bottom sheet.
+  /// the sheet should take at the start.
   ///
   /// To rebuild the bottom sheet (e.g. if it is stateful), call
   /// [PersistentBottomSheetController.setState] on the controller returned by
@@ -1715,7 +1711,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       WidgetBuilder builder, {
       bool isScrollControlled = false,
       double initialHeightPercentage = 0.5,
-      bool clampTop = false,
   }) {
     assert(() {
       if (widget.bottomSheet != null) {
@@ -1739,7 +1734,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         builder,
         false,
         initialHeight: initialHeightPercentage,
-        clampTop: clampTop,
         animationController: controller,
         isScrollControlled: isScrollControlled,
       );

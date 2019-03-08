@@ -412,7 +412,6 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
     this.barrierLabel,
     this.isScrollControlled = false,
     this.initialHeightPercentage,
-    this.clampTop = false,
     RouteSettings settings,
   }) : assert(isScrollControlled != null),
        super(settings: settings);
@@ -421,7 +420,6 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
   final ThemeData theme;
   final bool isScrollControlled;
   final double initialHeightPercentage;
-  final bool clampTop;
 
   BottomSheetScrollController _scrollController;
   AnimationController _animationController;
@@ -461,7 +459,7 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
     if (isScrollControlled) {
       _scrollController = BottomSheet.createScrollController(
         initialHeightPercentage: initialHeightPercentage,
-        minTop: clampTop ? initialHeightPercentage : 0.0,
+        minTop: 0.0,
         context: context,
         forFullScreen: true,
       );
@@ -503,9 +501,7 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
 /// to have a bottom sheet that has a scrollable child such as a [ListView] or
 /// a [GridView], you should set this parameter to true. In such a case, the
 /// `initialHeightPercentage` specifies how much of the available screen space
-/// the sheet should take at the start.  The `clampTop` parameter specifies
-/// whether to force the bottom sheet to always be at least that height, and
-/// setting it to true will disable swipe down dismissal of the bottom sheet.
+/// the sheet should take at the start.
 ///
 /// Returns a `Future` that resolves to the value (if any) that was passed to
 /// [Navigator.pop] when the modal bottom sheet was closed.
@@ -522,14 +518,10 @@ Future<T> showModalBottomSheet<T>({
   @required WidgetBuilder builder,
   bool isScrollControlled = false,
   double initialHeightPercentage = 0.5,
-  bool clampTop = false,
 }) {
-  assert(clampTop != null);
   assert(context != null);
   assert(builder != null);
   assert(isScrollControlled != null);
-  assert(!clampTop || initialHeightPercentage != null,
-    'If you wish to clamp the top, you must specify an initial value.');
   assert(initialHeightPercentage != null);
   assert(initialHeightPercentage >= 0.0 && initialHeightPercentage <= 1.0);
   assert(debugCheckHasMediaQuery(context));
@@ -541,7 +533,6 @@ Future<T> showModalBottomSheet<T>({
     barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
     isScrollControlled: isScrollControlled,
     initialHeightPercentage: initialHeightPercentage,
-    clampTop: clampTop,
   ));
 }
 
@@ -556,9 +547,7 @@ Future<T> showModalBottomSheet<T>({
 /// to have a bottom sheet that has a scrollable child such as a [ListView] or
 /// a [GridView], you should set this parameter to true. In such a case, the
 /// `initialHeightPercentage` specifies how much of the available screen space
-/// the sheet should take at the start.  The `clampTop` parameter specifies
-/// whether to force the bottom sheet to always be at least that height, and
-/// setting it to true will disable swipe down dismissal of the bottom sheet.
+/// the sheet should take at the start.
 ///
 /// To rebuild the bottom sheet (e.g. if it is stateful), call
 /// [PersistentBottomSheetController.setState] on the controller returned by
@@ -593,17 +582,14 @@ PersistentBottomSheetController<T> showBottomSheet<T>({
   @required WidgetBuilder builder,
   bool isScrollControlled = false,
   double initialHeightPercentage = 0.5,
-  bool clampTop = false,
 }) {
   assert(context != null);
   assert(builder != null);
-  assert(clampTop != null);
   assert(debugCheckHasScaffold(context));
 
   return Scaffold.of(context).showBottomSheet<T>(
     builder,
     isScrollControlled: isScrollControlled,
     initialHeightPercentage: initialHeightPercentage,
-    clampTop: clampTop,
   );
 }
