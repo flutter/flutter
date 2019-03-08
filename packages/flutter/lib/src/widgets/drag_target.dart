@@ -650,7 +650,8 @@ class _DragAvatar<T> extends Drag {
     _leaveAllEntered();
 
     // Enter new targets.
-    final _DragTargetState<T> newTarget = targets.firstWhere((_DragTargetState<T> target) {
+    final _DragTargetState<T> newTarget = targets.firstWhere(
+      (_DragTargetState<T> target) {
         _enteredTargets.add(target);
         return target.didEnter(this);
       },

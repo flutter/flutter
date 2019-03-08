@@ -204,10 +204,10 @@ class _SegmentedControlState<T> extends State<CupertinoSegmentedControl<T>>
       duration: _kFadeDuration,
       vsync: this,
     )..addListener(() {
-        setState(() {
-          // State of background/text colors has changed
-        });
+      setState(() {
+        // State of background/text colors has changed
       });
+    });
   }
 
   bool _updateColors() {

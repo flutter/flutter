@@ -879,7 +879,7 @@ class RenderAnimatedOpacity extends RenderProxyBox {
     super.attach(owner);
     _opacity.addListener(_updateOpacity);
     _updateOpacity(); // in case it changed while we weren't listening
- }
+  }
 
   @override
   void detach() {
@@ -1181,7 +1181,7 @@ abstract class _RenderCustomClip<T> extends RenderProxyBox {
   void attach(PipelineOwner owner) {
     super.attach(owner);
     _clipper?._reclip?.addListener(_markNeedsClip);
- }
+  }
 
   @override
   void detach() {

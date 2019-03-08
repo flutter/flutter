@@ -90,9 +90,7 @@ void main() {
     expect(box.size, const Size(80.0, 80.0));
   });
 
-  testWidgets(
-    'test default icon buttons can be stretched if specified',
-    (WidgetTester tester) async {
+  testWidgets('test default icon buttons can be stretched if specified', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,

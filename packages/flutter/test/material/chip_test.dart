@@ -1583,12 +1583,12 @@ void main() {
   }
 
   testWidgets('Chip clipBehavior properly passes through to the Material', (WidgetTester tester) async {
-     const Text label = Text('label');
-     await tester.pumpWidget(_wrapForChip(child: const Chip(label: label)));
-     checkChipMaterialClipBehavior(tester, Clip.none);
+    const Text label = Text('label');
+    await tester.pumpWidget(_wrapForChip(child: const Chip(label: label)));
+    checkChipMaterialClipBehavior(tester, Clip.none);
 
-     await tester.pumpWidget(_wrapForChip(child: const Chip(label: label, clipBehavior: Clip.antiAlias)));
-     checkChipMaterialClipBehavior(tester, Clip.antiAlias);
+    await tester.pumpWidget(_wrapForChip(child: const Chip(label: label, clipBehavior: Clip.antiAlias)));
+    checkChipMaterialClipBehavior(tester, Clip.antiAlias);
   });
 
   testWidgets('ChoiceChip clipBehavior properly passes through to the Material', (WidgetTester tester) async {

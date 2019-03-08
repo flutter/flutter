@@ -282,8 +282,7 @@ void main() {
     expect(actualTurns, Matrix4.rotationZ(math.pi * 1.5));
   });
 
-  testWidgets('RotationTransition maintains chosen alignment during animation',
-      (WidgetTester tester) async {
+  testWidgets('RotationTransition maintains chosen alignment during animation', (WidgetTester tester) async {
     final AnimationController controller = AnimationController(vsync: const TestVSync());
     final Widget widget = RotationTransition(
       alignment: Alignment.topRight,
