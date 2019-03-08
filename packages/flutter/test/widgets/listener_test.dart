@@ -112,7 +112,7 @@ void main() {
           onPointerExit: (PointerExitEvent details) => exit = details,
         ),
       ));
-      final RenderPointerListener renderListener = listenerKey.currentContext.findRenderObject();
+      final RenderPointerListener renderListener = tester.renderObject(find.byType(Listener));
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
       await gesture.moveTo(const Offset(400.0, 300.0));
       await tester.pump();
@@ -129,7 +129,7 @@ void main() {
       ));
       expect(exit, isNotNull);
       expect(exit.position, equals(const Offset(400.0, 300.0)));
-      expect(WidgetsBinding.instance.mouseTracker.isAnnotationAttached(renderListener.hoverAnnotation), isFalse);
+      expect(tester.binding.mouseTracker.isAnnotationAttached(renderListener.hoverAnnotation), isFalse);
     });
   });
 }
