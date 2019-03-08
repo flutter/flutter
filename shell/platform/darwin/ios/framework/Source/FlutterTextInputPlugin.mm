@@ -621,6 +621,27 @@ static UIReturnKeyType ToUIReturnKeyType(NSString* inputType) {
 
 - (void)deleteBackward {
   _selectionAffinity = _kTextAffinityDownstream;
+
+  // When deleting Thai vowel, _selectedTextRange has location
+  // but does not have length, so we have to manually set it.
+  // In addition, we needed to delete only a part of grapheme cluster
+  // because it is the expected behavior of Thai input.
+  // https://github.com/flutter/flutter/issues/24203
+  // https://github.com/flutter/flutter/issues/21745
+  //
+  // This is needed for correct handling of the deletion of Thai vowel input.
+  // TODO(cbracken): Get a good understanding of expected behaviour of Thai
+  // input and ensure that this is the correct solution.
+  // https://github.com/flutter/flutter/issues/28962
+  if (_selectedTextRange.isEmpty && [self hasText]) {
+    NSRange oldRange = ((FlutterTextRange*)_selectedTextRange).range;
+    if (oldRange.location > 0) {
+      NSRange newRange = NSMakeRange(oldRange.location - 1, 1);
+      [self setSelectedTextRange:[FlutterTextRange rangeWithNSRange:newRange]
+              updateEditingState:false];
+    }
+  }
+
   if (!_selectedTextRange.isEmpty)
     [self replaceRange:_selectedTextRange withText:@""];
 }
