@@ -1,4 +1,4 @@
-Signature: 5499bdd90e967369cfc64f95ffd6b6d7
+Signature: 8bdb80f9946ca01423af71f6555e5c39
 
 UNUSED LICENSES:
 
@@ -4838,6 +4838,7 @@ FILE: ../../../third_party/skia/gm/backdrop.cpp
 FILE: ../../../third_party/skia/gm/compositor_quads.cpp
 FILE: ../../../third_party/skia/gm/mac_aa_explorer.cpp
 FILE: ../../../third_party/skia/gm/mixercolorfilter.cpp
+FILE: ../../../third_party/skia/gm/samplelocations.cpp
 FILE: ../../../third_party/skia/gm/skbug_8664.cpp
 FILE: ../../../third_party/skia/include/gpu/GrContextThreadSafeProxy.h
 FILE: ../../../third_party/skia/include/private/GrContext_Base.h
@@ -4865,6 +4866,8 @@ FILE: ../../../third_party/skia/src/gpu/GrImageContext.cpp
 FILE: ../../../third_party/skia/src/gpu/GrImageContextPriv.h
 FILE: ../../../third_party/skia/src/gpu/GrRecordingContext.cpp
 FILE: ../../../third_party/skia/src/gpu/GrRecordingContextPriv.h
+FILE: ../../../third_party/skia/src/gpu/GrSamplePatternDictionary.cpp
+FILE: ../../../third_party/skia/src/gpu/GrSamplePatternDictionary.h
 FILE: ../../../third_party/skia/src/gpu/effects/GrMixerEffect.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/GrMixerEffect.fp
 FILE: ../../../third_party/skia/src/gpu/effects/GrMixerEffect.h
