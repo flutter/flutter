@@ -98,9 +98,9 @@ typedef enum {
   // A request that the node should be dismissed.
   kFlutterSemanticsActionDismiss = 1 << 18,
   // Move the cursor forward by one word.
-  kFlutterSemanticsActionMoveCursorForwardByWordIndex = 1 << 19,
+  kFlutterSemanticsActionMoveCursorForwardByWord = 1 << 19,
   // Move the cursor backward by one word.
-  kFlutterSemanticsActionMoveCursorBackwardByWordIndex = 1 << 20,
+  kFlutterSemanticsActionMoveCursorBackwardByWord = 1 << 20,
 } FlutterSemanticsAction;
 
 // The set of properties that may be associated with a semantics node.
