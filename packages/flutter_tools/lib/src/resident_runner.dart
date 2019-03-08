@@ -323,14 +323,14 @@ class FlutterDevice {
     String route,
     bool shouldBuild,
   }) async {
-    final bool prebuiltMode = hotRunner.applicationBinary != null;
+    final bool prebuiltMode = hotRunner.applicationBinaries[device.id] != null;
     final String modeName = hotRunner.debuggingOptions.buildInfo.friendlyModeName;
     printStatus('Launching ${getDisplayPath(hotRunner.mainPath)} on ${device.name} in $modeName mode...');
 
     final TargetPlatform targetPlatform = await device.targetPlatform;
     package = await ApplicationPackageFactory.instance.getPackageForPlatform(
       targetPlatform,
-      applicationBinary: hotRunner.applicationBinary,
+      applicationBinary: hotRunner.applicationBinaries[device.id],
     );
 
     if (package == null) {
@@ -384,11 +384,11 @@ class FlutterDevice {
     final TargetPlatform targetPlatform = await device.targetPlatform;
     package = await ApplicationPackageFactory.instance.getPackageForPlatform(
       targetPlatform,
-      applicationBinary: coldRunner.applicationBinary,
+      applicationBinary: coldRunner.applicationBinaries[device.id],
     );
 
     final String modeName = coldRunner.debuggingOptions.buildInfo.friendlyModeName;
-    final bool prebuiltMode = coldRunner.applicationBinary != null;
+    final bool prebuiltMode = coldRunner.applicationBinaries[device.id] != null;
     if (coldRunner.mainPath == null) {
       assert(prebuiltMode);
       printStatus('Launching ${package.displayName} on ${device.name} in $modeName mode...');

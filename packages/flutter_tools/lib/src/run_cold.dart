@@ -22,7 +22,7 @@ class ColdRunner extends ResidentRunner {
     bool usesTerminalUI = true,
     this.traceStartup = false,
     this.awaitFirstFrameWhenTracing = true,
-    this.applicationBinary,
+    this.applicationBinaries,
     bool saveCompilationTrace = false,
     bool stayResident = true,
     bool ipv6 = false,
@@ -36,7 +36,7 @@ class ColdRunner extends ResidentRunner {
 
   final bool traceStartup;
   final bool awaitFirstFrameWhenTracing;
-  final File applicationBinary;
+  final Map<String, File> applicationBinaries;
   bool _didAttach = false;
 
   @override
@@ -46,7 +46,7 @@ class ColdRunner extends ResidentRunner {
     String route,
     bool shouldBuild = true,
   }) async {
-    final bool prebuiltMode = applicationBinary != null;
+    final bool prebuiltMode = applicationBinaries != null;
     if (!prebuiltMode) {
       if (!fs.isFileSync(mainPath)) {
         String message = 'Tried to run $mainPath, but that file does not exist.';

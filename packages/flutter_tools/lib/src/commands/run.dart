@@ -361,15 +361,20 @@ class RunCommand extends RunCommandBase {
 
     ResidentRunner runner;
     final String applicationBinaryPath = argResults['use-application-binary'];
+    Map<String, File> applicationBinaries;
+    if (applicationBinaryPath != null) {
+      applicationBinaries = <String, File>{};
+      for (Device device in devices) {
+        applicationBinaries[device.id] = fs.file(applicationBinaryPath);
+      }
+    }
     if (hotMode) {
       runner = HotRunner(
         flutterDevices,
         target: targetFile,
         debuggingOptions: _createDebuggingOptions(),
         benchmarkMode: argResults['benchmark'],
-        applicationBinary: applicationBinaryPath == null
-            ? null
-            : fs.file(applicationBinaryPath),
+        applicationBinaries: applicationBinaries,
         projectRootPath: argResults['project-root'],
         packagesFilePath: globalResults['packages'],
         dillOutputPath: argResults['output-dill'],
@@ -384,9 +389,7 @@ class RunCommand extends RunCommandBase {
         debuggingOptions: _createDebuggingOptions(),
         traceStartup: traceStartup,
         awaitFirstFrameWhenTracing: awaitFirstFrameWhenTracing,
-        applicationBinary: applicationBinaryPath == null
-            ? null
-            : fs.file(applicationBinaryPath),
+        applicationBinaries: applicationBinaries,
         saveCompilationTrace: argResults['train'],
         stayResident: stayResident,
         ipv6: ipv6,

@@ -63,7 +63,7 @@ class HotRunner extends ResidentRunner {
     DebuggingOptions debuggingOptions,
     bool usesTerminalUI = true,
     this.benchmarkMode = false,
-    this.applicationBinary,
+    this.applicationBinaries,
     this.hostIsIde = false,
     String projectRootPath,
     String packagesFilePath,
@@ -82,7 +82,8 @@ class HotRunner extends ResidentRunner {
              ipv6: ipv6);
 
   final bool benchmarkMode;
-  final File applicationBinary;
+  // final File applicationBinary;
+  final Map<String, File> applicationBinaries;
   final bool hostIsIde;
   bool _didAttach = false;
   Set<String> _dartDependencies;

@@ -355,6 +355,10 @@ class AppDomain extends Domain {
     );
 
     ResidentRunner runner;
+    Map<String, File> applicationBinaries;
+    if (applicationBinary != null) {
+      applicationBinaries = <String, File>{device.id: applicationBinary};
+    }
 
     if (enableHotReload) {
       runner = HotRunner(
@@ -362,7 +366,7 @@ class AppDomain extends Domain {
         target: target,
         debuggingOptions: options,
         usesTerminalUI: false,
-        applicationBinary: applicationBinary,
+        applicationBinaries: applicationBinaries,
         projectRootPath: projectRootPath,
         packagesFilePath: packagesFilePath,
         dillOutputPath: dillOutputPath,
@@ -375,7 +379,7 @@ class AppDomain extends Domain {
         target: target,
         debuggingOptions: options,
         usesTerminalUI: false,
-        applicationBinary: applicationBinary,
+        applicationBinaries: applicationBinaries,
         ipv6: ipv6,
       );
     }
