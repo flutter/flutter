@@ -29,11 +29,6 @@ import 'build_script_generator.dart';
 /// The minimum version of build_runner we can support in the flutter tool.
 const String kMinimumBuildRunnerVersion = '1.2.8';
 
-// Arbitrarily choosen multi-root file scheme. This is used to configure the
-// frontend_server to resolve a package uri to multiple filesystem directories.
-// In this case, the source directory and a generated directory.
-const String _kMultirootScheme = 'org-dartlang-app';
-
 /// A wrapper for a build_runner process which delegates to a generated
 /// build script.
 ///
@@ -92,6 +87,8 @@ class BuildRunner extends CodeGenerator {
         }
       }
       stringBuffer.writeln('  build_runner: ^$kMinimumBuildRunnerVersion');
+      stringBuffer.writeln('dependency_overrides:');
+      stringBuffer.writeln('    analyzer: 0.35.3');
       await syntheticPubspec.writeAsString(stringBuffer.toString());
 
       await pubGet(
@@ -170,7 +167,7 @@ class BuildRunner extends CodeGenerator {
   void _generatePackages(FlutterProject flutterProject) {
     final String oldPackagesContents = fs.file(PackageMap.globalPackagesPath).readAsStringSync();
     final String appName = flutterProject.manifest.appName;
-    final String newPackagesContents = oldPackagesContents.replaceFirst('$appName:lib/', '$appName:$_kMultirootScheme:/');
+    final String newPackagesContents = oldPackagesContents.replaceFirst('$appName:lib/', '$appName:$kMultiRootScheme:/');
     final String generatedPackagesPath = fs.path.setExtension(PackageMap.globalPackagesPath, '.generated');
     fs.file(generatedPackagesPath).writeAsStringSync(newPackagesContents);
   }
