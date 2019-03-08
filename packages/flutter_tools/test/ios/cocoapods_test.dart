@@ -152,7 +152,7 @@ void main() {
 
     testUsingContext('creates swift Podfile if swift', () async {
       when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
-      when(mockXcodeProjectInterpreter.getBuildSettings(any, any)).thenAnswer((_) => Future<Map<String, String>>.value(<String, String>{
+      when(mockXcodeProjectInterpreter.getBuildSettings(any, any)).thenAnswer((Invocation invocation) => Future<Map<String, String>>.value(<String, String>{
         'SWIFT_VERSION': '4.0',
       }));
 
