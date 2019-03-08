@@ -288,7 +288,7 @@ void main() {
         success: false,
         stdout: '''
 Launching lib/main.dart on iPhone in debug mode...
-Signing iOS app for device deployment using developer identity: "iPhone Developer: test@flutter.io (1122334455)"
+Signing iOS app for device deployment using developer identity: "iPhone Developer: test@flutter.dev (1122334455)"
 Running Xcode build...                                1.3s
 Failed to build iOS app
 Error output from Xcode build:

@@ -221,7 +221,7 @@ Pod::Spec.new do |s|
   s.description      = <<-DESC
 Depends on all your plugins, and provides a function to register them.
                        DESC
-  s.homepage         = 'https://flutter.io'
+  s.homepage         = 'https://flutter.dev'
   s.license          = { :type => 'BSD' }
   s.author           = { 'Flutter Dev Team' => 'flutter-dev@googlegroups.com' }
   s.ios.deployment_target = '8.0'

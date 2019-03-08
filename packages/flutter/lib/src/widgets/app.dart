@@ -625,7 +625,7 @@ class WidgetsApp extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///  * <https://flutter.io/debugging/#performanceoverlay>
+  ///  * <https://flutter.dev/debugging/#performanceoverlay>
   final bool showPerformanceOverlay;
 
   /// Checkerboards raster cache images.
@@ -1068,7 +1068,7 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
         );
       }
       message.writeln(
-        'See https://flutter.io/tutorials/internationalization/ for more\n'
+        'See https://flutter.dev/tutorials/internationalization/ for more\n'
         'information about configuring an app\'s locale, supportedLocales,\n'
         'and localizationsDelegates parameters.'
       );

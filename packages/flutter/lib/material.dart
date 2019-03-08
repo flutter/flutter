@@ -8,7 +8,7 @@
 ///
 /// See also:
 ///
-///  * [flutter.io/widgets](https://flutter.io/widgets/)
+///  * [flutter.dev/widgets](https://flutter.dev/widgets/)
 ///    for a catalog of commonly-used Flutter widgets.
 ///  * [material.io/design](https://material.io/design/)
 ///    for an introduction to Material Design.

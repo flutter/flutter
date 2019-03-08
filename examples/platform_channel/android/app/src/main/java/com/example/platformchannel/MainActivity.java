@@ -25,8 +25,8 @@ import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugins.GeneratedPluginRegistrant;
 
 public class MainActivity extends FlutterActivity {
-  private static final String BATTERY_CHANNEL = "samples.flutter.io/battery";
-  private static final String CHARGING_CHANNEL = "samples.flutter.io/charging";
+  private static final String BATTERY_CHANNEL = "samples.flutter.dev/battery";
+  private static final String CHARGING_CHANNEL = "samples.flutter.dev/charging";
 
   @Override
   public void onCreate(Bundle savedInstanceState) {

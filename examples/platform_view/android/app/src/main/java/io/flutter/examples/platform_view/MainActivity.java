@@ -14,7 +14,7 @@ import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 
 public class MainActivity extends FlutterActivity {
-  private static final String CHANNEL = "samples.flutter.io/platform_view";
+  private static final String CHANNEL = "samples.flutter.dev/platform_view";
   private static final String METHOD_SWITCH_VIEW = "switchView";
   private static final int COUNT_REQUEST = 1;
 

@@ -205,7 +205,7 @@ void debugPaintPadding(Canvas canvas, Rect outerRect, Rect innerRect, { double o
 /// This function is used by the test framework to ensure that debug variables
 /// haven't been inadvertently changed.
 ///
-/// See <https://docs.flutter.io/flutter/rendering/rendering-library.html> for
+/// See <https://docs.flutter.dev/flutter/rendering/rendering-library.html> for
 /// a complete list.
 ///
 /// The `debugCheckIntrinsicSizesOverride` argument can be provided to override

@@ -173,7 +173,7 @@ class AnimatedList extends StatefulWidget {
       'This can happen when the context provided is from the same StatefulWidget that '
       'built the AnimatedList. Please see the AnimatedList documentation for examples '
       'of how to refer to an AnimatedListState object: '
-      '  https://docs.flutter.io/flutter/widgets/AnimatedListState-class.html \n'
+      '  https://docs.flutter.dev/flutter/widgets/AnimatedListState-class.html \n'
       'The context used was:\n'
       '  $context'
     );

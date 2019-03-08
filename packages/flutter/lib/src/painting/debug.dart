@@ -16,7 +16,7 @@ bool debugDisableShadows = false;
 /// This function is used by the test framework to ensure that debug variables
 /// haven't been inadvertently changed.
 ///
-/// See <https://docs.flutter.io/flutter/rendering/painting-library.html> for
+/// See <https://docs.flutter.dev/flutter/rendering/painting-library.html> for
 /// a complete list.
 ///
 /// The `debugDisableShadowsOverride` argument can be provided to override

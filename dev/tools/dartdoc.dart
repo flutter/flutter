@@ -20,8 +20,8 @@ const String kSnippetsRoot = 'dev/snippets';
 /// documentation to `//dev/docs/doc/api/`.
 ///
 /// This script also updates the index.html file so that it can be placed
-/// at the root of docs.flutter.io. We are keeping the files inside of
-/// docs.flutter.io/flutter for now, so we need to manipulate paths
+/// at the root of docs.flutter.dev. We are keeping the files inside of
+/// docs.flutter.dev/flutter for now, so we need to manipulate paths
 /// a bit. See https://github.com/flutter/flutter/issues/3900 for more info.
 ///
 /// This will only work on UNIX systems, not Windows. It requires that 'git' be
@@ -49,7 +49,7 @@ Future<void> main(List<String> arguments) async {
   // Create the pubspec.yaml file.
   final StringBuffer buf = StringBuffer();
   buf.writeln('name: Flutter');
-  buf.writeln('homepage: https://flutter.io');
+  buf.writeln('homepage: https://flutter.dev');
   buf.writeln('version: $version');
   buf.writeln('dependencies:');
   for (String package in findPackageNames()) {
@@ -284,7 +284,7 @@ void createSearchMetadata(String templatePath, String metadataPath) {
   final String branch = getBranchName();
   final String metadata = template.replaceAll(
     '{SITE_URL}',
-    branch == 'stable' ? 'https://docs.flutter.io/' : 'https://master-docs.flutter.io/',
+    branch == 'stable' ? 'https://docs.flutter.dev/' : 'https://master-docs.flutter.dev/',
   );
   Directory(path.dirname(metadataPath)).create(recursive: true);
   File(metadataPath).writeAsStringSync(metadata);
@@ -389,8 +389,8 @@ void changePackageToSdkInTitlebar() {
   final File indexFile = File('$kPublishRoot/index.html');
   String indexContents = indexFile.readAsStringSync();
   indexContents = indexContents.replaceFirst(
-    '<li><a href="https://flutter.io">Flutter package</a></li>',
-    '<li><a href="https://flutter.io">Flutter SDK</a></li>',
+    '<li><a href="https://flutter.dev">Flutter package</a></li>',
+    '<li><a href="https://flutter.dev">Flutter SDK</a></li>',
   );
 
   indexFile.writeAsStringSync(indexContents);

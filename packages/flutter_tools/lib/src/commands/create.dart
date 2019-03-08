@@ -91,7 +91,7 @@ class CreateCommand extends FlutterCommand {
       abbr: 's',
       help: 'Specifies the Flutter code sample to use as the main.dart for an application. Implies '
         '--template=app. The value should be the sample ID of the desired sample from the API '
-        'documentation website (http://docs.flutter.io).',
+        'documentation website (http://docs.flutter.dev).',
       defaultsTo: null,
       valueHelp: 'id',
     );
@@ -187,8 +187,8 @@ class CreateCommand extends FlutterCommand {
     }
 
     final String host = FlutterVersion.instance.channel == 'stable'
-        ? 'docs.flutter.io'
-        : 'master-docs.flutter.io';
+        ? 'docs.flutter.dev'
+        : 'master-docs.flutter.dev';
     return utf8.decode(await fetchUrl(Uri.https(host, 'snippets/$sampleId.dart')));
   }
 
@@ -374,7 +374,7 @@ Your $application code is in $relativeAppMain.
 Your plugin code is in $relativePluginMain.
 
 Host platform code is in the "android" and "ios" directories under $relativePluginPath.
-To edit platform code in an IDE see https://flutter.io/developing-packages/#edit-plugin-package.
+To edit platform code in an IDE see https://flutter.dev/developing-packages/#edit-plugin-package.
 ''');
         }
       } else {

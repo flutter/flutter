@@ -35,7 +35,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   static const MethodChannel _methodChannel =
-      MethodChannel('samples.flutter.io/platform_view');
+      MethodChannel('samples.flutter.dev/platform_view');
 
   int _counter = 0;
 

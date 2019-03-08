@@ -3157,7 +3157,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
           'If you need some sizing information during build to decide which '
           'widgets to build, consider using a LayoutBuilder widget, which can '
           'tell you the layout constraints at a given location in the tree. See '
-          '<https://docs.flutter.io/flutter/widgets/LayoutBuilder-class.html> '
+          '<https://docs.flutter.dev/flutter/widgets/LayoutBuilder-class.html> '
           'for more details.\n'
           '\n'
           'The size getter was called for the following element:\n'

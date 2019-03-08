@@ -70,7 +70,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
           child: buildRaisedButton(),
         ),
         exampleCodeTag: _raisedCode,
-        documentationUrl: 'https://docs.flutter.io/flutter/material/RaisedButton-class.html',
+        documentationUrl: 'https://docs.flutter.dev/flutter/material/RaisedButton-class.html',
       ),
       ComponentDemoTabData(
         tabName: 'FLAT',
@@ -80,7 +80,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
           child: buildFlatButton(),
         ),
         exampleCodeTag: _flatCode,
-        documentationUrl: 'https://docs.flutter.io/flutter/material/FlatButton-class.html',
+        documentationUrl: 'https://docs.flutter.dev/flutter/material/FlatButton-class.html',
       ),
       ComponentDemoTabData(
         tabName: 'OUTLINE',
@@ -90,28 +90,28 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
           child: buildOutlineButton(),
         ),
         exampleCodeTag: _outlineCode,
-        documentationUrl: 'https://docs.flutter.io/flutter/material/OutlineButton-class.html',
+        documentationUrl: 'https://docs.flutter.dev/flutter/material/OutlineButton-class.html',
       ),
       ComponentDemoTabData(
         tabName: 'DROPDOWN',
         description: _dropdownText,
         demoWidget: buildDropdownButton(),
         exampleCodeTag: _dropdownCode,
-        documentationUrl: 'https://docs.flutter.io/flutter/material/DropdownButton-class.html',
+        documentationUrl: 'https://docs.flutter.dev/flutter/material/DropdownButton-class.html',
       ),
       ComponentDemoTabData(
         tabName: 'ICON',
         description: _iconText,
         demoWidget: buildIconButton(),
         exampleCodeTag: _iconCode,
-        documentationUrl: 'https://docs.flutter.io/flutter/material/IconButton-class.html',
+        documentationUrl: 'https://docs.flutter.dev/flutter/material/IconButton-class.html',
       ),
       ComponentDemoTabData(
         tabName: 'ACTION',
         description: _actionText,
         demoWidget: buildActionButton(),
         exampleCodeTag: _actionCode,
-        documentationUrl: 'https://docs.flutter.io/flutter/material/FloatingActionButton-class.html',
+        documentationUrl: 'https://docs.flutter.dev/flutter/material/FloatingActionButton-class.html',
       ),
     ];
 

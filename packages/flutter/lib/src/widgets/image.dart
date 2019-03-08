@@ -382,7 +382,7 @@ class Image extends StatefulWidget {
   ///    omitted.
   ///  * [ExactAssetImage], which is used to implement the behavior when the
   ///    scale is present.
-  ///  * <https://flutter.io/assets-and-images/>, an introduction to assets in
+  ///  * <https://flutter.dev/assets-and-images/>, an introduction to assets in
   ///    Flutter.
   Image.asset(String name, {
     Key key,
