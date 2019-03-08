@@ -215,12 +215,6 @@ class CodeGeneratingResidentCompiler implements ResidentCompiler {
     if (_codegenDaemon.lastStatus == CodegenStatus.Failed) {
       printError('Codegeneration failed, halting build.');
     }
-    // Delete this file so that the frontend_server can handle multi-root.
-    // TODO(jonahwilliams): investigate frontend_server behavior in the presence
-    // of multi-root and initialize from dill.
-    if (outputPath != null && fs.file(outputPath).existsSync()) {
-      fs.file(outputPath).deleteSync();
-    }
     return _residentCompiler.recompile(
       mainPath,
       invalidatedFiles,
