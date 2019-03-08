@@ -180,10 +180,9 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
     return nextRoute is CupertinoPageRoute && !nextRoute.fullscreenDialog;
   }
 
-  /// True if a Cupertino pop gesture is currently underway for [route].
+  /// True if an iOS-style back swipe pop gesture is currently underway for [route].
   ///
-  /// This returns true for both the top route and the bottom route of a
-  /// pop gesture.
+  /// This just check for the route's [NavigatorState.userGestureInProgress].
   ///
   /// See also:
   ///
@@ -193,7 +192,7 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
     return route.navigator.userGestureInProgress;
   }
 
-  /// True if a Cupertino pop gesture is currently underway for this route.
+  /// True if an iOS-style back swipe pop gesture is currently underway for this route.
   ///
   /// See also:
   ///

@@ -310,8 +310,7 @@ void main() {
 
 
     // Run the dismiss animation 60%, which exposes the route "push" button,
-    // and then press the button. A drag dropped animation is 400ms when dropped
-    // exactly halfway. It follows a curve that is very steep initially.
+    // and then press the button.
 
     await tester.tap(find.text('push'));
     await tester.pumpAndSettle();
@@ -321,7 +320,15 @@ void main() {
     gesture = await tester.startGesture(const Offset(5, 300));
     await gesture.moveBy(const Offset(400, 0)); // Drag halfway.
     await gesture.up();
-    await tester.pump(); // Trigger the dropped snapping animation.
+    // Trigger the snapping animation.
+    // Since the back swipe drag was brought to >=50% of the screen, it will
+    // self snap to finish the pop transition as the gesture is lifted.
+    //
+    // This drag drop animation is 400ms when dropped exactly halfway
+    // (800 / [pixel distance remaining], see
+    // _CupertinoBackGestureController.dragEnd). It follows a curve that is very
+    // steep initially.
+    await tester.pump();
     expect(
       tester.getTopLeft(find.ancestor(of: find.text('route'), matching: find.byType(CupertinoPageScaffold))),
       const Offset(400, 0),
@@ -457,6 +464,8 @@ void main() {
     );
 
     tester.state<NavigatorState>(find.byType(Navigator)).push(route2);
+    // The whole transition is 400ms based on CupertinoPageRoute.transitionDuration.
+    // Break it up into small chunks.
 
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
@@ -511,26 +520,26 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('1'), findsNothing);
-    expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(0, epsilon: 1));
+    expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(0));
 
     final TestGesture swipeGesture = await tester.startGesture(const Offset(5, 100));
 
     await swipeGesture.moveBy(const Offset(100, 0));
     await tester.pump();
     expect(tester.getTopLeft(find.text('1')).dx, moreOrLessEquals(-233, epsilon: 1));
-    expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(100, epsilon: 1));
+    expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(100));
 
     await swipeGesture.moveBy(const Offset(100, 0));
     await tester.pump();
-    expect(tester.getTopLeft(find.text('1')).dx, moreOrLessEquals(-200, epsilon: 1));
-    expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(200, epsilon: 1));
+    expect(tester.getTopLeft(find.text('1')).dx, moreOrLessEquals(-200));
+    expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(200));
 
     // Moving by the same distance each time produces linear movements on both
     // routes.
     await swipeGesture.moveBy(const Offset(100, 0));
     await tester.pump();
     expect(tester.getTopLeft(find.text('1')).dx, moreOrLessEquals(-166, epsilon: 1));
-    expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(300, epsilon: 1));
+    expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(300));
   });
 
   testWidgets('Pop gesture snapping is not linear', (WidgetTester tester) async {
@@ -557,8 +566,8 @@ void main() {
     await swipeGesture.moveBy(const Offset(500, 0));
     await swipeGesture.up();
     await tester.pump();
-    expect(tester.getTopLeft(find.text('1')).dx, moreOrLessEquals(-100, epsilon: 1));
-    expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(500, epsilon: 1));
+    expect(tester.getTopLeft(find.text('1')).dx, moreOrLessEquals(-100));
+    expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(500));
 
     await tester.pump(const Duration(milliseconds: 50));
     expect(tester.getTopLeft(find.text('1')).dx, moreOrLessEquals(-19, epsilon: 1));
@@ -592,19 +601,19 @@ void main() {
 
     await tester.dragFrom(const Offset(5, 100), const Offset(100, 0));
     await tester.pump();
-    expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(100, epsilon: 1));
+    expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(100));
     expect(navigatorKey.currentState.userGestureInProgress, true);
 
     // Didn't drag far enough to snap into dismissing this route.
     // Each 100px distance takes 100ms to snap back.
     await tester.pump(const Duration(milliseconds: 101));
     // Back to the page covering the whole screen.
-    expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(0, epsilon: 1));
+    expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(0));
     expect(navigatorKey.currentState.userGestureInProgress, false);
 
     await tester.dragFrom(const Offset(5, 100), const Offset(500, 0));
     await tester.pump();
-    expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(500, epsilon: 1));
+    expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(500));
     expect(navigatorKey.currentState.userGestureInProgress, true);
 
     // Did go far enough to snap out of this route.
@@ -612,7 +621,7 @@ void main() {
     // Back to the page covering the whole screen.
     expect(find.text('2'), findsNothing);
     // First route covers the whole screen.
-    expect(tester.getTopLeft(find.text('1')).dx, moreOrLessEquals(0, epsilon: 1));
+    expect(tester.getTopLeft(find.text('1')).dx, moreOrLessEquals(0));
     expect(navigatorKey.currentState.userGestureInProgress, false);
   });
 }
