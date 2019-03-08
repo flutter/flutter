@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../painting/mocks_for_image_cache.dart';
@@ -111,16 +110,14 @@ void main() {
 
     await tester.pumpWidget(
       CupertinoApp(
-        home: Material(
-          child: CupertinoTabScaffold(
-            tabBar: _buildTabBar(),
-            tabBuilder: (BuildContext context, int index) {
-              return TextField(
-                focusNode: focusNodes[index],
-                autofocus: true,
-              );
-            },
-          ),
+        home: CupertinoTabScaffold(
+          tabBar: _buildTabBar(),
+          tabBuilder: (BuildContext context, int index) {
+            return CupertinoTextField(
+              focusNode: focusNodes[index],
+              autofocus: true,
+            );
+          },
         ),
       ),
     );
@@ -147,28 +144,22 @@ void main() {
 
     await tester.pumpWidget(
       CupertinoApp(
-        home: Material(
-          child: CupertinoTabScaffold(
-            tabBar: _buildTabBar(),
-            tabBuilder: (BuildContext context, int index) {
-              return Column(
-                children: <Widget>[
-                  TextField(
-                    focusNode: focusNodes[index * 2],
-                    decoration: const InputDecoration(
-                      hintText: 'TextField 1',
-                    ),
-                  ),
-                  TextField(
-                    focusNode: focusNodes[index * 2 + 1],
-                    decoration: const InputDecoration(
-                      hintText: 'TextField 2',
-                    ),
-                  ),
-                ],
-              );
-            },
-          ),
+        home: CupertinoTabScaffold(
+          tabBar: _buildTabBar(),
+          tabBuilder: (BuildContext context, int index) {
+            return Column(
+              children: <Widget>[
+                CupertinoTextField(
+                  focusNode: focusNodes[index * 2],
+                  placeholder: 'TextField 1',
+                ),
+                CupertinoTextField(
+                  focusNode: focusNodes[index * 2 + 1],
+                  placeholder: 'TextField 2',
+                ),
+              ],
+            );
+          },
         ),
       ),
     );
@@ -178,7 +169,7 @@ void main() {
       isFalse,
     );
 
-    await tester.tap(find.widgetWithText(TextField, 'TextField 2'));
+    await tester.tap(find.widgetWithText(CupertinoTextField, 'TextField 2'));
 
     expect(
       focusNodes.indexOf(focusNodes.singleWhere((FocusNode node) => node.hasFocus)),
@@ -188,7 +179,7 @@ void main() {
     await tester.tap(find.text('Tab 2'));
     await tester.pump();
 
-    await tester.tap(find.widgetWithText(TextField, 'TextField 1'));
+    await tester.tap(find.widgetWithText(CupertinoTextField, 'TextField 1'));
 
     expect(
       focusNodes.indexOf(focusNodes.singleWhere((FocusNode node) => node.hasFocus)),
@@ -470,6 +461,50 @@ void main() {
     expect(find.text('Page 1', skipOffstage: false), findsNothing);
     expect(find.text('Page 2', skipOffstage: false), findsNothing);
     expect(find.text('Page 4', skipOffstage: false), findsNothing);
+  });
+
+  testWidgets('Does not lose state when focusing on text input', (WidgetTester tester) async {
+    // Regression testing for https://github.com/flutter/flutter/issues/28457.
+
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(
+          viewInsets:  EdgeInsets.only(bottom: 0),
+        ),
+        child: CupertinoApp(
+          home: CupertinoTabScaffold(
+            tabBar: _buildTabBar(),
+            tabBuilder: (BuildContext context, int index) {
+              return CupertinoTextField();
+            },
+          ),
+        ),
+      ),
+    );
+
+    final EditableTextState editableState = tester.state<EditableTextState>(find.byType(EditableText));
+
+    await tester.enterText(find.byType(CupertinoTextField), "don't lose me");
+
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(
+          viewInsets:  EdgeInsets.only(bottom: 100),
+        ),
+        child: CupertinoApp(
+          home: CupertinoTabScaffold(
+            tabBar: _buildTabBar(),
+            tabBuilder: (BuildContext context, int index) {
+              return CupertinoTextField();
+            },
+          ),
+        ),
+      ),
+    );
+
+    // The exact same state instance is still there.
+    expect(tester.state<EditableTextState>(find.byType(EditableText)), editableState);
+    expect(find.text("don't lose me"), findsOneWidget);
   });
 }
 
