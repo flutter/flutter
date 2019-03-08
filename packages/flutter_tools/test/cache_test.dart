@@ -65,7 +65,7 @@ void main() {
       expect(gradleWrapper.isUpToDate().isUpToDate, const UpdateResult(isUpToDate: false).isUpToDate);
     }, overrides: <Type, Generator>{
       Cache: ()=> mockCache,
-      FileSystem: () => fs
+      FileSystem: () => fs,
     });
 
     testUsingContext('Gradle wrapper should be up to date, only if all cached artifact are available', () {
@@ -81,7 +81,7 @@ void main() {
       expect(gradleWrapper.isUpToDate().isUpToDate, const UpdateResult(isUpToDate: true).isUpToDate);
     }, overrides: <Type, Generator>{
       Cache: ()=> mockCache,
-      FileSystem: () => fs
+      FileSystem: () => fs,
     });
 
     test('should not be up to date, if some cached artifact is not', () {
@@ -345,7 +345,7 @@ class MockFileSystem extends ForwardingFileSystem {
 
 class MockFile extends Mock implements File {
   @override
-  Future<RandomAccessFile> open({FileMode mode = FileMode.read}) async {
+  Future<RandomAccessFile> open({ FileMode mode = FileMode.read }) async {
     return MockRandomAccessFile();
   }
 }

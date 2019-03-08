@@ -242,9 +242,7 @@ void main() {
     expect(renderEditable, paintsExactlyCountTimes(#drawRect, 0));
   });
 
-  testWidgets(
-      'Cursor does not animates on iOS when debugDeterministicCursor is set',
-      (WidgetTester tester) async {
+  testWidgets('Cursor does not animates on iOS when debugDeterministicCursor is set', (WidgetTester tester) async {
     EditableText.debugDeterministicCursor = true;
     final Widget widget = MaterialApp(
       theme: ThemeData(platform: TargetPlatform.iOS),
@@ -282,9 +280,7 @@ void main() {
     EditableText.debugDeterministicCursor = false;
   });
 
-  testWidgets(
-      'Cursor does not animate on Android when debugDeterministicCursor is set',
-      (WidgetTester tester) async {
+  testWidgets('Cursor does not animate on Android when debugDeterministicCursor is set', (WidgetTester tester) async {
     EditableText.debugDeterministicCursor = true;
 
     const Widget widget = MaterialApp(
@@ -512,7 +508,9 @@ void main() {
     expect(controller.selection.baseOffset, text.length);
   });
 
-  testWidgets('Floating cursor is painted', (WidgetTester tester) async {
+  testWidgets('Floating cursor is painted on iOS', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController();
+    const TextStyle textStyle = TextStyle();
     const String text = 'hello world this is fun and cool and awesome!';
     controller.text = text;
     final FocusNode focusNode = FocusNode();
@@ -527,6 +525,7 @@ void main() {
               controller: controller,
               focusNode: focusNode,
               style: textStyle,
+              strutStyle: StrutStyle.disabled,
             ),
           ),
         ),
@@ -552,41 +551,45 @@ void main() {
     expect(editable, paints
       ..rrect(
         rrect: RRect.fromRectAndRadius(
-          Rect.fromLTRB(464.6666564941406, 2.0833332538604736, 466.6666564941406, 14.083333015441895),
+          Rect.fromLTRB(463.3333435058594, 2.0833332538604736, 465.3333435058594, 14.083333015441895),
           const Radius.circular(2.0),
         ),
-        color: const Color(0xff8e8e93))
+        color: const Color(0xff8e8e93),
+      )
       ..rrect(
         rrect: RRect.fromRectAndRadius(
-          Rect.fromLTRB(465.1666564941406, 1.0833336114883423, 468.1666564941406, 15.083333969116211),
+          Rect.fromLTRB(463.8333435058594, 1.0833336114883423, 466.8333435058594, 15.083333969116211),
           const Radius.circular(1.0),
         ),
-        color: const Color(0xbf2196f3))
+        color: const Color(0xbf2196f3),
+      ),
     );
 
     // Moves the cursor right a few characters.
     editableTextState.updateFloatingCursor(
-        RawFloatingCursorPoint(
-          state: FloatingCursorDragState.Update,
-          offset: const Offset(-250, 20)));
+      RawFloatingCursorPoint(
+        state: FloatingCursorDragState.Update,
+        offset: const Offset(-250, 20),
+      ),
+    );
 
     expect(find.byType(EditableText), paints
       ..rrect(
         rrect: RRect.fromRectAndRadius(
-          Rect.fromLTRB(192.6666717529297, 2.0833332538604736, 194.6666717529297, 14.083333015441895),
+          Rect.fromLTRB(191.3333282470703, 2.0833332538604736, 193.3333282470703, 14.083333015441895),
           const Radius.circular(2.0),
         ),
-        color: const Color(0xff8e8e93))
+        color: const Color(0xff8e8e93),
+      )
       ..rrect(
         rrect: RRect.fromRectAndRadius(
-          Rect.fromLTRB(195.16665649414062, 1.0833336114883423, 198.16665649414062, 15.083333969116211),
-          const Radius.circular(1.0),
-        ),
-        color: const Color(0xbf2196f3))
+          Rect.fromLTRB(193.83334350585938, 1.0833336114883423, 196.83334350585938, 15.083333969116211),
+          const Radius.circular(1.0)),
+        color: const Color(0xbf2196f3),
+      ),
     );
 
     editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.End));
-
     await tester.pumpAndSettle();
   });
 }

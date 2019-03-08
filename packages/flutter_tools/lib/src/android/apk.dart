@@ -8,7 +8,6 @@ import 'package:meta/meta.dart';
 
 import '../base/common.dart';
 import '../build_info.dart';
-import '../globals.dart';
 import '../project.dart';
 
 import 'android_sdk.dart';
@@ -17,7 +16,7 @@ import 'gradle.dart';
 Future<void> buildApk({
   @required FlutterProject project,
   @required String target,
-  BuildInfo buildInfo = BuildInfo.debug
+  BuildInfo buildInfo = BuildInfo.debug,
 }) async {
   if (!project.android.isUsingGradle) {
     throwToolExit(
@@ -32,18 +31,11 @@ Future<void> buildApk({
   if (androidSdk == null)
     throwToolExit('No Android SDK found. Try setting the ANDROID_SDK_ROOT environment variable.');
 
-  final List<String> validationResult = androidSdk.validateSdkWellFormed();
-  if (validationResult.isNotEmpty) {
-    for (String message in validationResult) {
-      printError(message, wrap: false);
-    }
-    throwToolExit('Try re-installing or updating your Android SDK.');
-  }
-
-  return buildGradleProject(
+  await buildGradleProject(
     project: project,
     buildInfo: buildInfo,
     target: target,
-    isBuildingBundle: false
+    isBuildingBundle: false,
   );
+  androidSdk.reinitialize();
 }

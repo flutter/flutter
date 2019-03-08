@@ -71,7 +71,7 @@ class FlutterTesterDevice extends Device {
       _FlutterTesterDeviceLogReader();
 
   @override
-  DeviceLogReader getLogReader({ApplicationPackage app}) => _logReader;
+  DeviceLogReader getLogReader({ ApplicationPackage app }) => _logReader;
 
   @override
   Future<bool> installApp(ApplicationPackage app) async => true;
@@ -154,17 +154,17 @@ class FlutterTesterDevice extends Device {
       // Setting a bool can't fail in the callback.
       unawaited(_process.exitCode.then<void>((_) => _isRunning = false));
       _process.stdout
-          .transform<String>(utf8.decoder)
-          .transform<String>(const LineSplitter())
-          .listen((String line) {
-        _logReader.addLine(line);
-      });
+        .transform<String>(utf8.decoder)
+        .transform<String>(const LineSplitter())
+        .listen((String line) {
+          _logReader.addLine(line);
+        });
       _process.stderr
-          .transform<String>(utf8.decoder)
-          .transform<String>(const LineSplitter())
-          .listen((String line) {
-        _logReader.addLine(line);
-      });
+        .transform<String>(utf8.decoder)
+        .transform<String>(const LineSplitter())
+        .listen((String line) {
+          _logReader.addLine(line);
+        });
 
       if (!debuggingOptions.debuggingEnabled)
         return LaunchResult.succeeded();
@@ -235,7 +235,7 @@ class _FlutterTesterDeviceLogReader extends DeviceLogReader {
 /// where the VM is running on the same machine and does not need ports forwarding.
 class _NoopPortForwarder extends DevicePortForwarder {
   @override
-  Future<int> forward(int devicePort, {int hostPort}) {
+  Future<int> forward(int devicePort, { int hostPort }) {
     if (hostPort != null && hostPort != devicePort)
       throw 'Forwarding to a different port is not supported by flutter tester';
     return Future<int>.value(devicePort);

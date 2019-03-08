@@ -34,7 +34,6 @@ const String _kOptionCoverageDirectory = 'coverage-directory';
 const List<String> _kRequiredOptions = <String>[
   _kOptionPackages,
   _kOptionShell,
-  _kOptionTestDirectory,
   _kOptionSdkRoot,
   _kOptionIcudtl,
   _kOptionTests,
@@ -75,10 +74,8 @@ Future<void> run(List<String> args) async {
       fs.systemTempDirectory.createTempSync('flutter_fuchsia_tester.');
   try {
     Cache.flutterRoot = tempDir.path;
-    final Directory testDirectory =
-        fs.directory(argResults[_kOptionTestDirectory]);
 
-    final String shellPath = argResults[_kOptionShell];
+    final String shellPath = fs.file(argResults[_kOptionShell]).resolveSymbolicLinksSync();
     if (!fs.isFileSync(shellPath)) {
       throwToolExit('Cannot find Flutter shell at $shellPath');
     }
@@ -101,9 +98,9 @@ Future<void> run(List<String> args) async {
     final Link testerDestLink =
         fs.link(artifacts.getArtifactPath(Artifact.flutterTester));
     testerDestLink.parent.createSync(recursive: true);
-    testerDestLink.createSync(shellPath);
+    testerDestLink.createSync(fs.path.absolute(shellPath));
     final Link icudtlLink = testerDestLink.parent.childLink('icudtl.dat');
-    icudtlLink.createSync(argResults[_kOptionIcudtl]);
+    icudtlLink.createSync(fs.path.absolute(argResults[_kOptionIcudtl]));
     final Directory sdkRootDest =
         fs.directory(artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath));
     sdkRootDest.createSync(recursive: true);
@@ -116,9 +113,14 @@ Future<void> run(List<String> args) async {
     PackageMap.globalPackagesPath =
         fs.path.normalize(fs.path.absolute(argResults[_kOptionPackages]));
 
+    Directory testDirectory;
     CoverageCollector collector;
     if (argResults['coverage']) {
       collector = CoverageCollector();
+      if (!argResults.options.contains(_kOptionTestDirectory)) {
+        throwToolExit('Use of --coverage requires setting --test-directory');
+      }
+      testDirectory = fs.directory(argResults[_kOptionTestDirectory]);
     }
 
 
@@ -126,7 +128,9 @@ Future<void> run(List<String> args) async {
     final List<Map<String, dynamic>> jsonList = List<Map<String, dynamic>>.from(
       json.decode(fs.file(argResults[_kOptionTests]).readAsStringSync()));
     for (Map<String, dynamic> map in jsonList) {
-      tests[map['source']] = map['dill'];
+      final String source = fs.file(map['source']).resolveSymbolicLinksSync();
+      final String dill = fs.file(map['dill']).resolveSymbolicLinksSync();
+      tests[source] = dill;
     }
 
     exitCode = await runTests(

@@ -65,7 +65,7 @@ void main() {
         verify(usage.sendTiming(
                 captureAny, captureAny, captureAny,
                 label: captureAnyNamed('label'))).captured,
-        <dynamic>['flutter', 'dummy', const Duration(milliseconds: 1000), null]
+        <dynamic>['flutter', 'dummy', const Duration(milliseconds: 1000), null],
       );
     },
     overrides: <Type, Generator>{
@@ -98,7 +98,7 @@ void main() {
         ExitStatus.success,
         // nulls should be cleaned up.
         timingLabelParts: <String> ['blah1', 'blah2', null, 'blah3'],
-        endTimeOverride: DateTime.fromMillisecondsSinceEpoch(1500)
+        endTimeOverride: DateTime.fromMillisecondsSinceEpoch(1500),
       );
 
       final DummyFlutterCommand flutterCommand = DummyFlutterCommand(
@@ -149,8 +149,8 @@ void main() {
             'flutter',
             'dummy',
             const Duration(milliseconds: 1000),
-            'fail'
-          ]
+            'fail',
+          ],
         );
       }
     },

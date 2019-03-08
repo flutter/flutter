@@ -42,27 +42,27 @@ void main() {
 class MockProcessManager extends Mock implements ProcessManager {
   @override
   Future<ProcessResult> run(
-      List<dynamic> command, {
-        String workingDirectory,
-        Map<String, String> environment,
-        bool includeParentEnvironment = true,
-        bool runInShell = false,
-        Encoding stdoutEncoding = systemEncoding,
-        Encoding stderrEncoding = systemEncoding,
-      }) async {
+    List<dynamic> command, {
+    String workingDirectory,
+    Map<String, String> environment,
+    bool includeParentEnvironment = true,
+    bool runInShell = false,
+    Encoding stdoutEncoding = systemEncoding,
+    Encoding stderrEncoding = systemEncoding,
+  }) async {
     return ProcessResult(0, 0, '', '');
   }
 
   @override
   ProcessResult runSync(
-      List<dynamic> command, {
-        String workingDirectory,
-        Map<String, String> environment,
-        bool includeParentEnvironment = true,
-        bool runInShell = false,
-        Encoding stdoutEncoding = systemEncoding,
-        Encoding stderrEncoding = systemEncoding,
-      }) {
+    List<dynamic> command, {
+    String workingDirectory,
+    Map<String, String> environment,
+    bool includeParentEnvironment = true,
+    bool runInShell = false,
+    Encoding stdoutEncoding = systemEncoding,
+    Encoding stderrEncoding = systemEncoding,
+  }) {
     return ProcessResult(0, 0, '', '');
   }
 }

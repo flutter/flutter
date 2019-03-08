@@ -89,7 +89,7 @@ void main() {
     expect(config.getActionHandler(SemanticsAction.scrollRight), isNotNull);
 
     config = SemanticsConfiguration();
-    renderObj.validActions = <SemanticsAction>[SemanticsAction.tap, SemanticsAction.scrollLeft].toSet();
+    renderObj.validActions = <SemanticsAction>{SemanticsAction.tap, SemanticsAction.scrollLeft};
 
     renderObj.describeSemanticsConfiguration(config);
     expect(config.getActionHandler(SemanticsAction.tap), isNotNull);
@@ -277,7 +277,7 @@ void main() {
 
 class _FakeTickerProvider implements TickerProvider {
   @override
-  Ticker createTicker(TickerCallback onTick, [bool disableAnimations = false]) {
+  Ticker createTicker(TickerCallback onTick, [ bool disableAnimations = false ]) {
     return _FakeTicker();
   }
 }
@@ -308,7 +308,7 @@ class _FakeTicker implements Ticker {
   void dispose() {}
 
   @override
-  void scheduleTick({bool rescheduling = false}) {}
+  void scheduleTick({ bool rescheduling = false }) {}
 
   @override
   TickerFuture start() {
@@ -316,11 +316,11 @@ class _FakeTicker implements Ticker {
   }
 
   @override
-  void stop({bool canceled = false}) {}
+  void stop({ bool canceled = false }) {}
 
   @override
   void unscheduleTick() {}
 
   @override
-  String toString({bool debugIncludeStack = false}) => super.toString();
+  String toString({ bool debugIncludeStack = false }) => super.toString();
 }

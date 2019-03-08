@@ -4,7 +4,7 @@
 
 
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/build_runner/build_runner.dart';
+import 'package:flutter_tools/src/codegen.dart';
 import 'package:mockito/mockito.dart';
 
 import '../src/common.dart';

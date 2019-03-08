@@ -67,7 +67,7 @@ class ExpansionPanel {
   ExpansionPanel({
     @required this.headerBuilder,
     @required this.body,
-    this.isExpanded = false
+    this.isExpanded = false,
   }) : assert(headerBuilder != null),
        assert(body != null),
        assert(isExpanded != null);

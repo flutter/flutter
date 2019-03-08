@@ -146,14 +146,13 @@ void main() {
             return Material(
               child: Center(
                 child: Switch(
-                    dragStartBehavior: DragStartBehavior.down,
-                    value: value,
-                    onChanged: (bool newValue) {
-                      setState(() {
-                        value = newValue;
-                      }
-                    );
-                  }
+                  dragStartBehavior: DragStartBehavior.down,
+                  value: value,
+                  onChanged: (bool newValue) {
+                    setState(() {
+                      value = newValue;
+                    });
+                  },
                 ),
               ),
             );
@@ -189,7 +188,7 @@ void main() {
                       setState(() {
                         value = newValue;
                       });
-                    }
+                    },
                 ),
               ),
             );
@@ -428,7 +427,7 @@ void main() {
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
         ..circle(color: const Color(0x1f000000))
-        ..circle(color: Colors.yellow[500])
+        ..circle(color: Colors.yellow[500]),
     );
     await tester.drag(find.byType(Switch), const Offset(-30.0, 0.0));
     await tester.pump();
@@ -443,7 +442,7 @@ void main() {
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
         ..circle(color: const Color(0x1f000000))
-        ..circle(color: Colors.red[500])
+        ..circle(color: Colors.red[500]),
     );
   });
 

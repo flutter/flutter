@@ -89,7 +89,7 @@ void main() {
               key: middleBox,
               alignment: Alignment.center,
               widthFactor: 1.0,
-              child: const Text('Title')
+              child: const Text('Title'),
             ),
             trailing: const CupertinoButton(child: Text('Puma'), onPressed: null),
             padding: const EdgeInsetsDirectional.only(
@@ -447,7 +447,7 @@ void main() {
     // Large title initially visible.
     expect(
       largeTitleOpacity.opacity.value,
-      1.0
+      1.0,
     );
     // Middle widget not even wrapped with RenderOpacity, i.e. is always visible.
     expect(
@@ -466,7 +466,7 @@ void main() {
     // Large title no longer visible.
     expect(
       largeTitleOpacity.opacity.value,
-      0.0
+      0.0,
     );
 
     // The persistent toolbar doesn't move or change size.
@@ -645,9 +645,7 @@ void main() {
     expect(decoration.border, isNull);
   });
 
-  testWidgets(
-      'Border is displayed by default in sliver nav bar',
-      (WidgetTester tester) async {
+  testWidgets('Border is displayed by default in sliver nav bar', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: CupertinoPageScaffold(
@@ -675,9 +673,7 @@ void main() {
     expect(bottom, isNotNull);
   });
 
-  testWidgets(
-      'Border is not displayed when null in sliver nav bar',
-      (WidgetTester tester) async {
+  testWidgets('Border is not displayed when null in sliver nav bar', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: CupertinoPageScaffold(
@@ -749,9 +745,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets(
-      'Border can be overridden in sliver nav bar',
-      (WidgetTester tester) async {
+  testWidgets('Border can be overridden in sliver nav bar', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: CupertinoPageScaffold(

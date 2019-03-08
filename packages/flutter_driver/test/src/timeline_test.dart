@@ -23,11 +23,11 @@ void main() {
             'tts': 567,
             'args': <String, dynamic>{
               'arg1': true,
-            }
+            },
           },
           // Tests that we don't choke on missing data
-          <String, dynamic>{}
-        ]
+          <String, dynamic>{},
+        ],
       });
 
       expect(timeline.events, hasLength(2));

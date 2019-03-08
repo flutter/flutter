@@ -1,3 +1,7 @@
+// Copyright 2018 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'context.dart';
 
 UserMessages get userMessages => context[UserMessages];
@@ -45,6 +49,15 @@ class UserMessages {
   String androidCantRunJavaBinary(String javaBinary) => 'Cannot execute $javaBinary to determine the version';
   String get androidUnknownJavaVersion => 'Could not determine java version';
   String androidJavaVersion(String javaVersion) => 'Java version $javaVersion';
+  String androidSdkLicenseOnly(String envKey) =>
+      'Android SDK contains licenses only.\n'
+      'Your first build of an Android application will take longer than usual, '
+      'while gradle downloads the missing components. This functionality will '
+      'only work if the licenses in the licenses folder in $envKey are valid.\n'
+      'If the Android SDK has been installed to another location, set $envKey to that location.\n'
+      'You may also want to add it to your PATH environment variable.\n\n'
+      'Certain features, such as `flutter emulators` and `flutter devices`, will '
+      'not work without the currently missing SDK components.';
   String androidBadSdkDir(String envKey, String homeDir) =>
       '$envKey = $homeDir\n'
       'but Android SDK not found at this location.';
@@ -53,7 +66,7 @@ class UserMessages {
       'Install Android Studio from: https://developer.android.com/studio/index.html\n'
       'On first launch it will assist you in installing the Android SDK components.\n'
       '(or visit https://flutter.io/setup/#android-setup for detailed instructions).\n'
-      'If Android SDK has been installed to a custom location, set $envKey to that location.\n'
+      'If the Android SDK has been installed to a custom location, set $envKey to that location.\n'
       'You may also want to add it to your PATH environment variable.\n';
   String androidSdkLocation(String directory) => 'Android SDK at $directory';
   String androidSdkPlatformToolsVersion(String platform, String tools) =>
@@ -75,7 +88,11 @@ class UserMessages {
   String get androidLicensesAll => 'All Android licenses accepted.';
   String get androidLicensesSome => 'Some Android licenses not accepted.  To resolve this, run: flutter doctor --android-licenses';
   String get androidLicensesNone => 'Android licenses not accepted.  To resolve this, run: flutter doctor --android-licenses';
-  String get androidLicensesUnknown => 'Android license status unknown.';
+  String get androidLicensesUnknown =>
+      'Android license status unknown.\n'
+      'Try re-installing or updating your Android SDK Manager.\n'
+      'See https://developer.android.com/studio/#downloads or visit '
+      'https://flutter.io/setup/#android-setup for detailed instructions.';
   String androidSdkManagerOutdated(String managerPath) =>
       'A newer version of the Android SDK is required. To update, run:\n'
       '$managerPath --update\n';
@@ -98,6 +115,8 @@ class UserMessages {
   String get androidStudioResetDir =>
       'Consider removing your android-studio-dir setting by running:\n'
       'flutter config --android-studio-dir=';
+  String get aaptNotFound =>
+      'Could not locate aapt. Please ensure you have the Android buildtools installed.';
 
   // Messages used in NoAndroidStudioValidator
   String androidStudioMissing(String location) =>
@@ -243,8 +262,8 @@ class UserMessages {
       'Warning: this bug report contains local paths, device identifiers, and log snippets.';
   String get runnerNoRecordTo => 'record-to location not specified';
   String get runnerNoReplayFrom => 'replay-from location not specified';
-  String runnerNoEngineBuildDir(String enginePackageName, String engineEnvVar) =>
-      'Unable to detect local Flutter engine build directory.\n'
+  String runnerNoEngineSrcDir(String enginePackageName, String engineEnvVar) =>
+      'Unable to detect local Flutter engine src directory.\n'
       'Either specify a dependency_override for the $enginePackageName package in your pubspec.yaml and '
       'ensure --package-root is set if necessary, or set the \$$engineEnvVar environment variable, or '
       'use --local-engine-src-path to specify the path to the root of your flutter/engine repository.';

@@ -254,7 +254,8 @@ class FixedExtentScrollController extends ScrollController {
   /// The returned [Future] resolves when the animation completes.
   ///
   /// The `duration` and `curve` arguments must not be null.
-  Future<void> animateToItem(int itemIndex, {
+  Future<void> animateToItem(
+    int itemIndex, {
     @required Duration duration,
     @required Curve curve,
   }) async {
@@ -356,7 +357,7 @@ int _getItemFromOffset({
 double _clipOffsetToScrollableRange(
   double offset,
   double minScrollExtent,
-  double maxScrollExtent
+  double maxScrollExtent,
 ) {
   return math.min(math.max(offset, minScrollExtent), maxScrollExtent);
 }

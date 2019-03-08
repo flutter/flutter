@@ -7,116 +7,96 @@ import 'constants.dart';
 import 'events.dart';
 import 'recognizer.dart';
 
-/// Signature for when a pointer has remained in contact with the screen at the
+/// Callback signature for [LongPressGestureRecognizer.onLongPress].
+///
+/// Called when a pointer has remained in contact with the screen at the
 /// same location for a long period of time.
 typedef GestureLongPressCallback = void Function();
 
-/// Signature for when a pointer stops contacting the screen after a long press
+/// Callback signature for [LongPressGestureRecognizer.onLongPressUp].
+///
+/// Called when a pointer stops contacting the screen after a long press
 /// gesture was detected.
 typedef GestureLongPressUpCallback = void Function();
 
-/// Signature from a [LongPressDragGestureRecognizer] when a pointer has remained
-/// in contact with the screen at the same location for a long period of time.
-typedef GestureLongPressDragStartCallback = void Function(GestureLongPressDragStartDetails details);
-
-/// Signature from a [LongPressDragGestureRecognizer] when a pointer is moving
-/// after being held in contact at the same location for a long period of time.
-typedef GestureLongPressDragUpdateCallback = void Function(GestureLongPressDragUpdateDetails details);
-
-/// Signature from a [LongPressDragGestureRecognizer] after a pointer stops
-/// contacting the screen.
+/// Callback signature for [LongPressGestureRecognizer.onLongPressStart].
 ///
-/// The contact stop position may be different from the contact start position.
-typedef GestureLongPressDragUpCallback = void Function(GestureLongPressDragUpDetails details);
+/// Called when a pointer has remained in contact with the screen at the
+/// same location for a long period of time. Also reports the long press down
+/// position.
+typedef GestureLongPressStartCallback = void Function(LongPressStartDetails details);
 
-/// Details for callbacks that use [GestureLongPressDragStartCallback].
+/// Callback signature for [LongPressGestureRecognizer.onLongPressMoveUpdate].
+///
+/// Called when a pointer is moving after being held in contact at the same
+/// location for a long period of time. Reports the new position and its offset
+/// from the original down position.
+typedef GestureLongPressMoveUpdateCallback = void Function(LongPressMoveUpdateDetails details);
+
+/// Callback signature for [LongPressGestureRecognizer.onLongPressEnd].
+///
+/// Called when a pointer stops contacting the screen after a long press
+/// gesture was detected. Also reports the position where the pointer stopped
+/// contacting the screen.
+typedef GestureLongPressEndCallback = void Function(LongPressEndDetails details);
+
+/// Details for callbacks that use [GestureLongPressStartCallback].
 ///
 /// See also:
 ///
-///  * [LongPressDragGestureRecognizer.onLongPressStart], which uses [GestureLongPressDragStartCallback].
-///  * [GestureLongPressDragUpdateDetails], the details for [GestureLongPressDragUpdateCallback]
-///  * [GestureLongPressDragUpDetails], the details for [GestureLongPressDragUpCallback].
-class GestureLongPressDragStartDetails {
-  /// Creates the details for a [GestureLongPressDragStartCallback].
+///  * [LongPressGestureRecognizer.onLongPressStart], which uses [GestureLongPressStartCallback].
+///  * [LongPressMoveUpdateDetails], the details for [GestureLongPressMoveUpdateCallback]
+///  * [LongPressEndDetails], the details for [GestureLongPressEndCallback].
+class LongPressStartDetails {
+  /// Creates the details for a [GestureLongPressStartCallback].
   ///
   /// The [globalPosition] argument must not be null.
-  const GestureLongPressDragStartDetails({ this.sourceTimeStamp, this.globalPosition = Offset.zero })
+  const LongPressStartDetails({ this.globalPosition = Offset.zero })
     : assert(globalPosition != null);
-
-  /// Recorded timestamp of the source pointer event that triggered the press
-  /// event.
-  ///
-  /// Could be null if triggered by proxied events such as accessibility.
-  ///
-  /// See also:
-  ///
-  ///  * [PointerEvent.synthesized] for details on synthesized pointer events.
-  final Duration sourceTimeStamp;
 
   /// The global position at which the pointer contacted the screen.
   final Offset globalPosition;
 }
 
-/// Details for callbacks that use [GestureLongPressDragUpdateCallback].
+/// Details for callbacks that use [GestureLongPressMoveUpdateCallback].
 ///
 /// See also:
 ///
-///  * [LongPressDragGestureRecognizer.onLongPressDragUpdate], which uses [GestureLongPressDragUpdateCallback].
-///  * [GestureLongPressDragUpDetails], the details for [GestureLongPressDragUpCallback]
-///  * [GestureLongPressDragStartDetails], the details for [GestureLongPressDragStartCallback].
-class GestureLongPressDragUpdateDetails {
-  /// Creates the details for a [GestureLongPressDragUpdateCallback].
+///  * [LongPressGestureRecognizer.onLongPressMoveUpdate], which uses [GestureLongPressMoveUpdateCallback].
+///  * [LongPressEndDetails], the details for [GestureLongPressEndCallback]
+///  * [LongPressStartDetails], the details for [GestureLongPressStartCallback].
+class LongPressMoveUpdateDetails {
+  /// Creates the details for a [GestureLongPressMoveUpdateCallback].
   ///
   /// The [globalPosition] and [offsetFromOrigin] arguments must not be null.
-  const GestureLongPressDragUpdateDetails({
-    this.sourceTimeStamp,
+  const LongPressMoveUpdateDetails({
     this.globalPosition = Offset.zero,
     this.offsetFromOrigin = Offset.zero,
   }) : assert(globalPosition != null),
        assert(offsetFromOrigin != null);
 
-  /// Recorded timestamp of the source pointer event that triggered the press
-  /// event.
-  ///
-  /// Could be null if triggered by proxied events such as accessibility.
-  ///
-  /// See also:
-  ///
-  ///  * [PointerEvent.synthesized] for details on synthesized pointer events.
-  final Duration sourceTimeStamp;
-
   /// The global position of the pointer when it triggered this update.
   final Offset globalPosition;
 
   /// A delta offset from the point where the long press drag initially contacted
-  /// the screen to the point where the pointer is currently located when
-  /// this callback is triggered.
+  /// the screen to the point where the pointer is currently located (the
+  /// present [globalPosition]) when this callback is triggered.
   final Offset offsetFromOrigin;
 }
 
-/// Details for callbacks that use [GestureLongPressDragUpCallback].
+/// Details for callbacks that use [GestureLongPressEndCallback].
 ///
 /// See also:
 ///
-///  * [LongPressDragGestureRecognizer.onLongPressUp], which uses [GestureLongPressDragUpCallback].
-///  * [GestureLongPressDragUpdateDetails], the details for [GestureLongPressDragUpdateCallback]
-///  * [GestureLongPressDragStartDetails], the details for [GestureLongPressDragStartCallback].
-class GestureLongPressDragUpDetails {
-  /// Creates the details for a [GestureLongPressDragUpCallback].
+///  * [LongPressGestureRecognizer.onLongPressEnd], which uses [GestureLongPressEndCallback].
+///  * [LongPressMoveUpdateDetails], the details for [GestureLongPressMoveUpdateCallback]
+///  * [LongPressStartDetails], the details for [GestureLongPressStartCallback].
+class LongPressEndDetails {
+  /// Creates the details for a [GestureLongPressEndCallback].
   ///
   /// The [globalPosition] argument must not be null.
-  const GestureLongPressDragUpDetails({ this.sourceTimeStamp, this.globalPosition = Offset.zero })
+  const LongPressEndDetails({ this.globalPosition = Offset.zero })
     : assert(globalPosition != null);
-
-  /// Recorded timestamp of the source pointer event that triggered the press
-  /// event.
-  ///
-  /// Could be null if triggered by proxied events such as accessibility.
-  ///
-  /// See also:
-  ///
-  ///  * [PointerEvent.synthesized] for details on synthesized pointer events.
-  final Duration sourceTimeStamp;
 
   /// The global position at which the pointer lifted from the screen.
   final Offset globalPosition;
@@ -124,72 +104,31 @@ class GestureLongPressDragUpDetails {
 
 /// Recognizes when the user has pressed down at the same location for a long
 /// period of time.
+///
+/// The gesture must not deviate in position from its touch down point for 500ms
+/// until it's recognized. Once the gesture is accepted, the finger can be
+/// moved, triggering [onLongPressMoveUpdate] callbacks, unless the
+/// [postAcceptSlopTolerance] constructor argument is specified.
 class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
   /// Creates a long-press gesture recognizer.
   ///
-  /// Consider assigning the [onLongPress] callback after creating this object.
-  LongPressGestureRecognizer({ Object debugOwner })
-    : super(deadline: kLongPressTimeout, debugOwner: debugOwner);
-
-  bool _longPressAccepted = false;
-
-  /// Called when a long press gesture has been recognized.
-  GestureLongPressCallback onLongPress;
-
-  /// Called when the pointer stops contacting the screen after the long-press
-  /// gesture has been recognized.
-  GestureLongPressUpCallback onLongPressUp;
-
-  @override
-  void didExceedDeadline() {
-    resolve(GestureDisposition.accepted);
-    _longPressAccepted = true;
-    if (onLongPress != null) {
-      invokeCallback<void>('onLongPress', onLongPress);
-    }
-  }
-
-  @override
-  void handlePrimaryPointer(PointerEvent event) {
-    if (event is PointerUpEvent) {
-      if (_longPressAccepted == true && onLongPressUp != null) {
-        _longPressAccepted = false;
-        invokeCallback<void>('onLongPressUp', onLongPressUp);
-      } else {
-        resolve(GestureDisposition.rejected);
-      }
-    } else if (event is PointerDownEvent || event is PointerCancelEvent) {
-      // the first touch, initialize the  flag with false
-      _longPressAccepted = false;
-    }
-  }
-
-  @override
-  String get debugDescription => 'long press';
-}
-
-/// Recognizes long presses that can be subsequently dragged around.
-///
-/// Similar to a [LongPressGestureRecognizer] where a press has to be held down
-/// at the same location for a long period of time. However drag events that
-/// occur after the long-press hold threshold has past will not cancel the
-/// gesture. The [onLongPressDragUpdate] callback will be called until an up
-/// event occurs.
-///
-/// See also:
-///
-///  * [LongPressGestureRecognizer], which cancels its gesture if a drag event
-///    occurs at any point during the long-press.
-class LongPressDragGestureRecognizer extends PrimaryPointerGestureRecognizer {
-  /// Creates a long-press-drag gesture recognizer.
+  /// Consider assigning the [onLongPressStart] callback after creating this
+  /// object.
   ///
-  /// Consider assigning the [onLongPressStart], [onLongPressDragUpdate] and
-  /// the [onLongPressUp] callbacks after creating this object.
-  LongPressDragGestureRecognizer({ Object debugOwner }) : super(
+  /// The [postAcceptSlopTolerance] argument can be used to specify a maximum
+  /// allowed distance for the gesture to deviate from the starting point once
+  /// the long press has triggered. If the gesture deviates past that point,
+  /// subsequent callbacks ([onLongPressMoveUpdate], [onLongPressUp],
+  /// [onLongPressEnd]) will stop. Defaults to null, which means the gesture
+  /// can be moved without limit once the long press is accepted.
+  LongPressGestureRecognizer({
+    double postAcceptSlopTolerance,
+    PointerDeviceKind kind,
+    Object debugOwner,
+  }) : super(
     deadline: kLongPressTimeout,
-    // Since it's a drag gesture, no travel distance will cause it to get
-    // rejected after the long-press is accepted.
-    postAcceptSlopTolerance: null,
+    postAcceptSlopTolerance: postAcceptSlopTolerance,
+    kind: kind,
     debugOwner: debugOwner,
   );
 
@@ -197,27 +136,50 @@ class LongPressDragGestureRecognizer extends PrimaryPointerGestureRecognizer {
 
   Offset _longPressOrigin;
 
-  Duration _longPressStartTimestamp;
-
   /// Called when a long press gesture has been recognized.
-  GestureLongPressDragStartCallback onLongPressStart;
+  ///
+  /// See also:
+  ///
+  ///  * [onLongPressStart], which has the same timing but has data for the
+  ///    press location.
+  GestureLongPressCallback onLongPress;
 
-  /// Called as the primary pointer is dragged after the long press.
-  GestureLongPressDragUpdateCallback onLongPressDragUpdate;
+  /// Callback for long press start with gesture location.
+  ///
+  /// See also:
+  ///
+  ///  * [onLongPress], which has the same timing but without the location data.
+  GestureLongPressStartCallback onLongPressStart;
 
-  /// Called when the pointer stops contacting the screen after the
-  /// long-press gesture has been recognized.
-  GestureLongPressDragUpCallback onLongPressUp;
+  /// Callback for moving the gesture after the lang press is recognized.
+  GestureLongPressMoveUpdateCallback onLongPressMoveUpdate;
+
+  /// Called when the pointer stops contacting the screen after the long-press.
+  ///
+  /// See also:
+  ///
+  ///  * [onLongPressEnd], which has the same timing but has data for the up
+  ///    gesture location.
+  GestureLongPressUpCallback onLongPressUp;
+
+  /// Callback for long press end with gesture location.
+  ///
+  /// See also:
+  ///
+  ///  * [onLongPressUp], which has the same timing but without the location data.
+  GestureLongPressEndCallback onLongPressEnd;
 
   @override
   void didExceedDeadline() {
     resolve(GestureDisposition.accepted);
     _longPressAccepted = true;
     super.acceptGesture(primaryPointer);
+    if (onLongPress != null) {
+      invokeCallback<void>('onLongPress', onLongPress);
+    }
     if (onLongPressStart != null) {
       invokeCallback<void>('onLongPressStart', () {
-        onLongPressStart(GestureLongPressDragStartDetails(
-          sourceTimeStamp: _longPressStartTimestamp,
+        onLongPressStart(LongPressStartDetails(
           globalPosition: _longPressOrigin,
         ));
       });
@@ -227,26 +189,28 @@ class LongPressDragGestureRecognizer extends PrimaryPointerGestureRecognizer {
   @override
   void handlePrimaryPointer(PointerEvent event) {
     if (event is PointerUpEvent) {
-      if (_longPressAccepted == true && onLongPressUp != null) {
+      if (_longPressAccepted == true) {
+        if (onLongPressUp != null) {
+          invokeCallback<void>('onLongPressUp', onLongPressUp);
+        }
+        if (onLongPressEnd != null) {
+          invokeCallback<void>('onLongPressEnd', () {
+            onLongPressEnd(LongPressEndDetails(
+              globalPosition: event.position,
+            ));
+          });
+        }
         _longPressAccepted = false;
-        invokeCallback<void>('onLongPressUp', () {
-          onLongPressUp(GestureLongPressDragUpDetails(
-            sourceTimeStamp: event.timeStamp,
-            globalPosition: event.position,
-          ));
-        });
       } else {
         resolve(GestureDisposition.rejected);
       }
-    } else if (event is PointerDownEvent) {
+    } else if (event is PointerDownEvent || event is PointerCancelEvent) {
       // The first touch.
       _longPressAccepted = false;
-      _longPressStartTimestamp = event.timeStamp;
       _longPressOrigin = event.position;
-    } else if (event is PointerMoveEvent && _longPressAccepted && onLongPressDragUpdate != null) {
-      invokeCallback<void>('onLongPressDrag', () {
-        onLongPressDragUpdate(GestureLongPressDragUpdateDetails(
-          sourceTimeStamp: event.timeStamp,
+    } else if (event is PointerMoveEvent && _longPressAccepted && onLongPressMoveUpdate != null) {
+      invokeCallback<void>('onLongPressMoveUpdate', () {
+        onLongPressMoveUpdate(LongPressMoveUpdateDetails(
           globalPosition: event.position,
           offsetFromOrigin: event.position - _longPressOrigin,
         ));
@@ -261,13 +225,5 @@ class LongPressDragGestureRecognizer extends PrimaryPointerGestureRecognizer {
   }
 
   @override
-  void didStopTrackingLastPointer(int pointer) {
-    _longPressAccepted = false;
-    _longPressOrigin = null;
-    _longPressStartTimestamp = null;
-    super.didStopTrackingLastPointer(pointer);
-  }
-
-  @override
-  String get debugDescription => 'long press drag';
+  String get debugDescription => 'long press';
 }

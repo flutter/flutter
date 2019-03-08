@@ -255,7 +255,7 @@ abstract class SliverChildDelegate {
 ///
 /// In certain cases, only a subset of child widgets should be annotated
 /// with a semantic index. For example, in [new ListView.separated()] the
-/// separators do not have an index assocaited with them. This is done by
+/// separators do not have an index associated with them. This is done by
 /// providing a `semanticIndexCallback` which returns null for separators
 /// indexes and rounds the non-separator indexes down by half.
 ///
@@ -460,7 +460,7 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
 ///
 /// In certain cases, only a subset of child widgets should be annotated
 /// with a semantic index. For example, in [new ListView.separated()] the
-/// separators do not have an index assocaited with them. This is done by
+/// separators do not have an index associated with them. This is done by
 /// providing a `semanticIndexCallback` which returns null for separators
 /// indexes and rounds the non-separator indexes down by half.
 ///
@@ -1081,7 +1081,8 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
   }
 
   @override
-  double estimateMaxScrollOffset(SliverConstraints constraints, {
+  double estimateMaxScrollOffset(
+    SliverConstraints constraints, {
     int firstIndex,
     int lastIndex,
     double leadingScrollOffset,
@@ -1171,9 +1172,9 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
 
   @override
   void visitChildren(ElementVisitor visitor) {
-   // The toList() is to make a copy so that the underlying list can be modified by
-   // the visitor:
-   assert(!_childElements.values.any((Element child) => child == null));
+    // The toList() is to make a copy so that the underlying list can be modified by
+    // the visitor:
+    assert(!_childElements.values.any((Element child) => child == null));
     _childElements.values.toList().forEach(visitor);
   }
 
