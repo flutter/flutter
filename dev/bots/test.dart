@@ -572,7 +572,7 @@ Future<void> _runFlutterTest(String workingDirectory, {
   if (!shouldProcessOutput) {
     return runCommand(flutter, args,
       workingDirectory: workingDirectory,
-      expectNonZeroExit: true,
+      expectNonZeroExit: expectFailure,
       printOutput: printOutput,
       skip: skip,
       timeout: timeout,
