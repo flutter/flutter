@@ -549,6 +549,10 @@ typedef struct {
   // Flutter application (such as compiled shader programs used by Skia).
   // This is optional.  The string must be NULL terminated.
   const char* persistent_cache_path;
+
+  // If true, we'll only read the existing cache, but not write new ones.
+  bool is_persistent_cache_read_only;
+
   // A callback that gets invoked by the engine when it attempts to wait for a
   // platform vsync event. The engine will give the platform a baton that needs
   // to be returned back to the engine via |FlutterEngineOnVsync|. All batons

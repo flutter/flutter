@@ -19,6 +19,13 @@ namespace shell {
 
 class PersistentCache : public GrContextOptions::PersistentCache {
  public:
+  // Mutable static switch that can be set before GetCacheForProcess. If true,
+  // we'll only read existing caches but not generate new ones. Some clients
+  // (e.g., embedded devices) prefer generating persistent cache files for the
+  // specific device beforehand, and ship them as readonly files in OTA
+  // packages.
+  static bool gIsReadOnly;
+
   static PersistentCache* GetCacheForProcess();
 
   static void SetCacheDirectoryPath(std::string path);
@@ -31,6 +38,8 @@ class PersistentCache : public GrContextOptions::PersistentCache {
 
  private:
   static std::string cache_base_path_;
+
+  const bool is_read_only_;
   std::shared_ptr<fml::UniqueFD> cache_directory_;
   mutable std::mutex worker_task_runners_mutex_;
   std::multiset<fml::RefPtr<fml::TaskRunner>> worker_task_runners_
@@ -38,7 +47,7 @@ class PersistentCache : public GrContextOptions::PersistentCache {
 
   bool IsValid() const;
 
-  PersistentCache();
+  PersistentCache(bool read_only = false);
 
   // |GrContextOptions::PersistentCache|
   sk_sp<SkData> load(const SkData& key) override;
