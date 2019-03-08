@@ -287,12 +287,12 @@ class MockXcodeProjectInterpreter implements XcodeProjectInterpreter {
   int get minorVersion => 2;
 
   @override
-  Map<String, String> getBuildSettings(String projectPath, String target) {
+  Future<Map<String, String>> getBuildSettings(String projectPath, String target) async {
     return <String, String>{};
   }
 
   @override
-  XcodeProjectInfo getInfo(String projectPath) {
+  Future<XcodeProjectInfo> getInfo(String projectPath) async {
     return XcodeProjectInfo(
       <String>['Runner'],
       <String>['Debug', 'Release'],

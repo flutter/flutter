@@ -147,8 +147,8 @@ class XcodeProjectInterpreter {
     return _minorVersion;
   }
 
-  Map<String, String> getBuildSettings(String projectPath, String target) {
-    final String out = runCheckedSync(<String>[
+  Future<Map<String, String>> getBuildSettings(String projectPath, String target) async {
+    final RunResult result = await runCheckedAsync(<String>[
       _executable,
       '-project',
       fs.path.absolute(projectPath),
@@ -156,14 +156,14 @@ class XcodeProjectInterpreter {
       target,
       '-showBuildSettings'
     ], workingDirectory: projectPath);
-    return parseXcodeBuildSettings(out);
+    return parseXcodeBuildSettings(result.toString());
   }
 
-  XcodeProjectInfo getInfo(String projectPath) {
-    final String out = runCheckedSync(<String>[
+  Future<XcodeProjectInfo> getInfo(String projectPath) async {
+    final RunResult result = await runCheckedAsync(<String>[
       _executable, '-list',
     ], workingDirectory: projectPath);
-    return XcodeProjectInfo.fromXcodeBuildOutput(out);
+    return XcodeProjectInfo.fromXcodeBuildOutput(result.toString());
   }
 }
 

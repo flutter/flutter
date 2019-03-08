@@ -259,7 +259,10 @@ class IosProject {
   Map<String, String> get buildSettings {
     if (!xcode.xcodeProjectInterpreter.isInstalled)
       return null;
-    return xcode.xcodeProjectInterpreter.getBuildSettings(xcodeProject.path, _hostAppBundleName);
+    Map<String, String> settings;
+    xcode.xcodeProjectInterpreter.getBuildSettings(xcodeProject.path, _hostAppBundleName)
+        .then((Map<String, String> value) { settings = value; });
+    return settings;
   }
 
   Future<void> ensureReadyForPlatformSpecificTooling() async {
