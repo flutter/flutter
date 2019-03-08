@@ -169,12 +169,21 @@ class Range {
   int max;
 }
 
+final Set<Color> boardPointColors =
+  <Color>{
+    Colors.grey[600],
+    Colors.black,
+    Colors.red,
+    Colors.blue,
+  };
+
 // A location on the board in axial coordinates
 class BoardPoint {
   BoardPoint(this.q, this.r);
 
   int q;
   int r;
+  Color color = Colors.grey[600];
 
   @override
   String toString() {

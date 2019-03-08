@@ -1,6 +1,7 @@
 import 'dart:ui' show Vertices;
 import 'package:flutter/material.dart';
 import 'pan_and_zoom_demo_board.dart';
+import 'pan_and_zoom_demo_edit_board_point.dart';
 import 'pan_and_zoom_demo_transform_interaction.dart';
 
 class PanAndZoomDemo extends StatefulWidget {
@@ -67,10 +68,12 @@ class _PanAndZoomDemoState extends State<PanAndZoomDemo> {
             return;
           }
           showModalBottomSheet<Widget>(context: context, builder: (BuildContext context) {
-            return Container(
-              width: double.infinity,
-              height: 200,
-              child: Text('${_board.selected.q}, ${_board.selected.r}'),
+            return EditBoardPoint(
+              boardPoint: _board.selected,
+              onSetColor: (Color color) {
+                // TODO update board to contain new colored board point
+                print('justin set ${_board.selected} to $color');
+              },
             );
           });
         }),
@@ -100,12 +103,11 @@ class BoardPainter extends CustomPainter {
   // Draw each hexagon
   @override
   void paint(Canvas canvas, Size size) {
-    final Color hexagonColor = Colors.grey[600];
     final Color hexagonColorSelected = Colors.blue[300];
 
     void drawBoardPoint(BoardPoint boardPoint) {
       final Color color = board.selected == boardPoint
-        ? hexagonColorSelected : hexagonColor;
+        ? hexagonColorSelected : boardPoint.color;
       final Vertices vertices = board.getVerticesForBoardPoint(boardPoint, color);
       canvas.drawVertices(vertices, BlendMode.color, Paint());
     }
