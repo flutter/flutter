@@ -91,7 +91,7 @@ class _SearchDemoState extends State<SearchDemo> {
               ),
             ),
             const SizedBox(height: 64.0),
-            Text('Last selected integer: ${_lastIntegerSelected ?? 'NONE' }.')
+            Text('Last selected integer: ${_lastIntegerSelected ?? 'NONE' }.'),
           ],
         ),
       ),
@@ -219,7 +219,7 @@ class _SearchDemoSearchDelegate extends SearchDelegate<int> {
                 query = '';
                 showSuggestions(context);
               },
-            )
+            ),
     ];
   }
 }

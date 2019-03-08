@@ -67,7 +67,8 @@ ImageConfiguration createLocalImageConfiguration(BuildContext context, { Size si
 /// The [BuildContext] and [Size] are used to select an image configuration
 /// (see [createLocalImageConfiguration]).
 ///
-/// The `onError` argument can be used to manually handle errors while precaching.
+/// The `onError` argument can be used to manually handle errors while
+/// pre-caching.
 ///
 /// See also:
 ///
@@ -561,7 +562,7 @@ class Image extends StatefulWidget {
 
   /// A Semantic description of the image.
   ///
-  /// Used to provide a description of the image to TalkBack on Andoid, and
+  /// Used to provide a description of the image to TalkBack on Android, and
   /// VoiceOver on iOS.
   final String semanticLabel;
 
@@ -630,7 +631,7 @@ class _ImageState extends State<Image> {
     final ImageStream newStream =
       widget.image.resolve(createLocalImageConfiguration(
           context,
-          size: widget.width != null && widget.height != null ? Size(widget.width, widget.height) : null
+          size: widget.width != null && widget.height != null ? Size(widget.width, widget.height) : null,
       ));
     assert(newStream != null);
     _updateSourceStream(newStream);

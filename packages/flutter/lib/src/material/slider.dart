@@ -967,7 +967,7 @@ class _RenderSlider extends RenderBox {
       parentBox: this,
       offset: offset,
       sliderTheme: _sliderTheme,
-      isDiscrete: isDiscrete
+      isDiscrete: isDiscrete,
     );
     final Offset thumbCenter = Offset(trackRect.left + visualPosition * trackRect.width, trackRect.center.dy);
 
@@ -980,7 +980,7 @@ class _RenderSlider extends RenderBox {
       textDirection: _textDirection,
       thumbCenter: thumbCenter,
       isDiscrete: isDiscrete,
-      isEnabled: isInteractive
+      isEnabled: isInteractive,
     );
 
     // TODO(closkmith): Move this to paint after the thumb.

@@ -81,7 +81,7 @@ void main() {
         );
       },
       paints
-        ..drawImageRect(source: Rect.fromLTRB(0.0, 0.0, 100.0, 200.0), destination: Rect.fromLTRB(20.0, 1000.0 - 40.0 - 200.0, 20.0 + 100.0, 1000.0 - 40.0))
+        ..drawImageRect(source: Rect.fromLTRB(0.0, 0.0, 100.0, 200.0), destination: Rect.fromLTRB(20.0, 1000.0 - 40.0 - 200.0, 20.0 + 100.0, 1000.0 - 40.0)),
     );
     expect(
       (Canvas canvas) {
@@ -94,7 +94,7 @@ void main() {
           ),
         );
       },
-      isNot(paints..image()) // we always use drawImageRect
+      isNot(paints..image()), // we always use drawImageRect
     );
     expect(log, isEmpty);
   });

@@ -160,7 +160,7 @@ class ThemeData extends Diagnosticable {
     ColorScheme colorScheme,
     DialogTheme dialogTheme,
     Typography typography,
-    CupertinoThemeData cupertinoOverrideTheme
+    CupertinoThemeData cupertinoOverrideTheme,
   }) {
     brightness ??= Brightness.light;
     final bool isDark = brightness == Brightness.dark;

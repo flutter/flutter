@@ -39,7 +39,7 @@ void main(List<String> argList) {
           'application template.',
       getEnumName(SnippetType.sample):
           'Produce a nicely formatted piece of sample code. Does not embed the '
-          'sample into an application template.'
+          'sample into an application template.',
     },
     help: 'The type of snippet to produce.',
   );

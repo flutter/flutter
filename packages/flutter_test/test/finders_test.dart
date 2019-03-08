@@ -21,7 +21,7 @@ void main() {
           TextSpan(text: 't', children: <TextSpan>[
             TextSpan(text: 'e'),
             TextSpan(text: 'st'),
-          ]
+          ],
         ),
       )));
 
@@ -68,7 +68,7 @@ void main() {
           ),
           Container(
             child: const Text('2'),
-          )
+          ),
         ],
       )),
     );

@@ -117,7 +117,7 @@ class FuchsiaRemoteConnection {
   final Map<int, PortForwarder> _dartVmPortMap = <int, PortForwarder>{};
 
   /// Tracks stale ports so as not to reconnect while polling.
-  final Set<int> _stalePorts = Set<int>();
+  final Set<int> _stalePorts = <int>{};
 
   /// A broadcast stream that emits events relating to Dart VM's as they update.
   Stream<DartVmEvent> get onDartVmEvent => _onDartVmEvent;

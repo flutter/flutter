@@ -61,7 +61,7 @@ class TestSemantics {
        assert(decreasedValue != null),
        assert(hint != null),
        assert(children != null),
-       tags = tags?.toSet() ?? Set<SemanticsTag>();
+       tags = tags?.toSet() ?? <SemanticsTag>{};
 
   /// Creates an object with some test semantics data, with the [id] and [rect]
   /// set to the appropriate values for the root node.
@@ -92,7 +92,7 @@ class TestSemantics {
        elevation = 0.0,
        thickness = 0.0,
        assert(children != null),
-       tags = tags?.toSet() ?? Set<SemanticsTag>();
+       tags = tags?.toSet() ?? <SemanticsTag>{};
 
   /// Creates an object with some test semantics data, with the [id] and [rect]
   /// set to the appropriate values for direct children of the root node.
@@ -131,7 +131,7 @@ class TestSemantics {
        assert(hint != null),
        transform = _applyRootChildScale(transform),
        assert(children != null),
-       tags = tags?.toSet() ?? Set<SemanticsTag>();
+       tags = tags?.toSet() ?? <SemanticsTag>{};
 
   /// The unique identifier for this node.
   ///
@@ -212,7 +212,7 @@ class TestSemantics {
   /// parent).
   final Matrix4 transform;
 
-  /// The elevation of this node reative to the parent node.
+  /// The elevation of this node relative to the parent node.
   ///
   /// See also:
   ///
@@ -493,8 +493,8 @@ class SemanticsTester {
   ///
   /// Use this method to generate code for unit tests. It works similar to
   /// screenshot testing. The very first time you add semantics to a widget you
-  /// verify manually that the widget behaves correctly. You then use ths method
-  /// to generate test code for this widget.
+  /// verify manually that the widget behaves correctly. You then use this
+  /// method to generate test code for this widget.
   ///
   /// Example:
   ///

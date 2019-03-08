@@ -254,10 +254,16 @@ class _NoDefaultCupertinoThemeData extends CupertinoThemeData {
         scaffoldBackgroundColor,
       );
 
-  @override final Brightness brightness;
-  @override final Color primaryColor;
-  @override final Color primaryContrastingColor;
-  @override final CupertinoTextThemeData textTheme;
-  @override final Color barBackgroundColor;
-  @override final Color scaffoldBackgroundColor;
+  @override
+  final Brightness brightness;
+  @override
+  final Color primaryColor;
+  @override
+  final Color primaryContrastingColor;
+  @override
+  final CupertinoTextThemeData textTheme;
+  @override
+  final Color barBackgroundColor;
+  @override
+  final Color scaffoldBackgroundColor;
 }

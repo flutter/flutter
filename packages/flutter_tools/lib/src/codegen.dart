@@ -81,12 +81,6 @@ abstract class CodeGenerator {
     List<String> extraFrontEndOptions = const <String>[],
   });
 
-  /// Invalidates a generated build script by deleting it.
-  ///
-  /// Must be called any time a pubspec file update triggers a corresponding change
-  /// in .packages.
-  Future<void> invalidateBuildScript();
-
   // Generates a synthetic package under .dart_tool/flutter_tool which is in turn
   // used to generate a build script.
   Future<void> generateBuildScript();
@@ -110,11 +104,6 @@ class UnsupportedCodeGenerator extends CodeGenerator {
 
   @override
   Future<void> generateBuildScript() {
-    throw UnsupportedError('build_runner is not currently supported.');
-  }
-
-  @override
-  Future<void> invalidateBuildScript() {
     throw UnsupportedError('build_runner is not currently supported.');
   }
 
@@ -194,7 +183,7 @@ class CodeGeneratingKernelCompiler implements KernelCompiler {
         trackWidgetCreation: trackWidgetCreation,
         mainPath: mainPath,
         targetProductVm: targetProductVm,
-        extraFrontEndOptions: extraFrontEndOptions
+        extraFrontEndOptions: extraFrontEndOptions,
       );
       final File outputFile = fs.file(outputFilePath);
       if (!await outputFile.exists()) {

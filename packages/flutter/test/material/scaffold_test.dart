@@ -237,9 +237,9 @@ void main() {
               dragStartBehavior: DragStartBehavior.down,
               controller: scrollOffset,
               children: List<Widget>.generate(10,
-                (int index) => SizedBox(height: 100.0, child: Text('D$index'))
-              )
-            )
+                (int index) => SizedBox(height: 100.0, child: Text('D$index')),
+              ),
+            ),
           ),
           body: CustomScrollView(
             slivers: <Widget>[
@@ -259,7 +259,7 @@ void main() {
               ),
             ],
           ),
-        )
+        ),
       )
     );
 
@@ -291,7 +291,7 @@ void main() {
             primary: true,
             slivers: <Widget>[
               const SliverAppBar(
-                title: Text('Title')
+                title: Text('Title'),
               ),
               SliverList(
                 delegate: SliverChildListDelegate(List<Widget>.generate(
@@ -385,7 +385,7 @@ void main() {
                 didPressButton = true;
               },
               child: const Text('X'),
-            )
+            ),
           ],
         ),
       ),
@@ -430,7 +430,7 @@ void main() {
         '/scaffold': (_) => Scaffold(
             appBar: AppBar(),
             body: const Text('Scaffold'),
-        )
+        ),
       };
       await tester.pumpWidget(
         MaterialApp(theme: ThemeData(platform: platform), routes: routes)
@@ -905,7 +905,7 @@ void main() {
 
       expect(
         geometry.bottomNavigationBarTop,
-        appBox.size.height - navigationBox.size.height
+        appBox.size.height - navigationBox.size.height,
       );
     });
 
@@ -922,7 +922,7 @@ void main() {
 
       expect(
         geometry.bottomNavigationBarTop,
-        null
+        null,
       );
     });
 
@@ -945,7 +945,7 @@ void main() {
 
       expect(
         geometry.floatingActionButtonArea,
-        fabRect
+        fabRect,
       );
     });
 
@@ -962,7 +962,7 @@ void main() {
 
       expect(
           geometry.floatingActionButtonArea,
-          null
+          null,
       );
     });
 
@@ -1009,22 +1009,22 @@ void main() {
 
       expect(
         geometry.floatingActionButtonArea,
-        fabRect
+        fabRect,
       );
 
       expect(
         geometry.floatingActionButtonArea.center,
-        transitioningFabRect.center
+        transitioningFabRect.center,
       );
 
       expect(
         geometry.floatingActionButtonArea.width,
-        greaterThan(transitioningFabRect.width)
+        greaterThan(transitioningFabRect.width),
       );
 
       expect(
         geometry.floatingActionButtonArea.height,
-        greaterThan(transitioningFabRect.height)
+        greaterThan(transitioningFabRect.height),
       );
     });
 
@@ -1118,7 +1118,7 @@ void main() {
               body: const Text('scaffold body'),
               appBar: AppBar(
                 centerTitle: true,
-                title: const Text('Title')
+                title: const Text('Title'),
               ),
             ),
           ),
@@ -1171,8 +1171,8 @@ void main() {
               body: const Text('scaffold body'),
               appBar: AppBar(
                 centerTitle: true,
-                title: const Text('Title')
-              )
+                title: const Text('Title'),
+              ),
             ),
           ),
         ),
@@ -1218,7 +1218,7 @@ void main() {
             body: const Text('scaffold body'),
             appBar: AppBar(
               centerTitle: true,
-              title: const Text('Title')
+              title: const Text('Title'),
             ),
           ),
         ),
@@ -1246,7 +1246,7 @@ void main() {
               body: const Text('scaffold body'),
               appBar: AppBar(
                 centerTitle: true,
-                title: const Text('Title')
+                title: const Text('Title'),
               ),
             ),
           ),
@@ -1281,7 +1281,7 @@ void main() {
                 body: const Text('scaffold body'),
                 appBar: AppBar(
                   centerTitle: true,
-                  title: const Text('Title')
+                  title: const Text('Title'),
                 ),
               ),
             ),

@@ -532,7 +532,7 @@ class _CupertinoSliverRefreshControlState extends State<CupertinoSliverRefreshCo
           }
           return Container();
         },
-      )
+      ),
     );
   }
 }

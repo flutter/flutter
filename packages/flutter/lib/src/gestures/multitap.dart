@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:ui' show Offset;
+import 'package:flutter/foundation.dart' show required;
 
 import 'arena.dart';
 import 'binding.dart';
@@ -32,16 +33,41 @@ typedef GestureMultiTapCallback = void Function(int pointer);
 /// [GestureMultiTapDownCallback] will not end up causing a tap.
 typedef GestureMultiTapCancelCallback = void Function(int pointer);
 
+/// CountdownZoned tracks whether the specified duration has elapsed since
+/// creation, honoring [Zone].
+class _CountdownZoned {
+   _CountdownZoned({ @required Duration duration })
+       : assert(duration != null) {
+    _timer = Timer(duration, _onTimeout);
+  }
+
+  bool _timeout = false;
+  Timer _timer;
+
+  bool get timeout => _timeout;
+
+  void _onTimeout() {
+    _timeout = true;
+  }
+}
+
 /// TapTracker helps track individual tap sequences as part of a
 /// larger gesture.
 class _TapTracker {
-  _TapTracker({ PointerDownEvent event, this.entry })
-    : pointer = event.pointer,
-      _initialPosition = event.position;
+  _TapTracker({
+    @required PointerDownEvent event,
+    this.entry,
+    @required Duration doubleTapMinTime,
+  }) : assert(doubleTapMinTime != null),
+       assert(event != null),
+       pointer = event.pointer,
+       _initialPosition = event.position,
+       _doubleTapMinTimeCountdown = _CountdownZoned(duration: doubleTapMinTime);
 
   final int pointer;
   final GestureArenaEntry entry;
   final Offset _initialPosition;
+  final _CountdownZoned _doubleTapMinTimeCountdown;
 
   bool _isTrackingPointer = false;
 
@@ -63,13 +89,22 @@ class _TapTracker {
     final Offset offset = event.position - _initialPosition;
     return offset.distance <= tolerance;
   }
+
+  bool hasElapsedMinTime() {
+    return _doubleTapMinTimeCountdown.timeout;
+  }
 }
 
 /// Recognizes when the user has tapped the screen at the same location twice in
 /// quick succession.
 class DoubleTapGestureRecognizer extends GestureRecognizer {
   /// Create a gesture recognizer for double taps.
-  DoubleTapGestureRecognizer({ Object debugOwner }) : super(debugOwner: debugOwner);
+  ///
+  /// {@macro flutter.gestures.gestureRecognizer.kind}
+  DoubleTapGestureRecognizer({
+    Object debugOwner,
+    PointerDeviceKind kind,
+  }) : super(debugOwner: debugOwner, kind: kind);
 
   // Implementation notes:
   // The double tap recognizer can be in one of four states. There's no
@@ -100,15 +135,22 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
   final Map<int, _TapTracker> _trackers = <int, _TapTracker>{};
 
   @override
-  void addPointer(PointerEvent event) {
-    // Ignore out-of-bounds second taps.
-    if (_firstTap != null &&
-        !_firstTap.isWithinTolerance(event, kDoubleTapSlop))
-      return;
+  void addAllowedPointer(PointerEvent event) {
+    if (_firstTap != null) {
+      if (!_firstTap.isWithinTolerance(event, kDoubleTapSlop)) {
+        // Ignore out-of-bounds second taps.
+        return;
+      } else if (!_firstTap.hasElapsedMinTime()) {
+        // Restart when the second tap is too close to the first.
+        _reset();
+        return addAllowedPointer(event);
+      }
+    }
     _stopDoubleTapTimer();
     final _TapTracker tracker = _TapTracker(
       event: event,
-      entry: GestureBinding.instance.gestureArena.add(event.pointer, this)
+      entry: GestureBinding.instance.gestureArena.add(event.pointer, this),
+      doubleTapMinTime: kDoubleTapMinTime,
     );
     _trackers[event.pointer] = tracker;
     tracker.startTrackingPointer(_handleEvent);
@@ -230,11 +272,12 @@ class _TapGesture extends _TapTracker {
   _TapGesture({
     this.gestureRecognizer,
     PointerEvent event,
-    Duration longTapDelay
+    Duration longTapDelay,
   }) : _lastPosition = event.position,
        super(
     event: event,
-    entry: GestureBinding.instance.gestureArena.add(event.pointer, gestureRecognizer)
+    entry: GestureBinding.instance.gestureArena.add(event.pointer, gestureRecognizer),
+    doubleTapMinTime: kDoubleTapMinTime,
   ) {
     startTrackingPointer(handleEvent);
     if (longTapDelay > Duration.zero) {
@@ -318,7 +361,8 @@ class MultiTapGestureRecognizer extends GestureRecognizer {
   MultiTapGestureRecognizer({
     this.longTapDelay = Duration.zero,
     Object debugOwner,
-  }) : super(debugOwner: debugOwner);
+    PointerDeviceKind kind,
+  }) : super(debugOwner: debugOwner, kind: kind);
 
   /// A pointer that might cause a tap has contacted the screen at a particular
   /// location.
@@ -345,12 +389,12 @@ class MultiTapGestureRecognizer extends GestureRecognizer {
   final Map<int, _TapGesture> _gestureMap = <int, _TapGesture>{};
 
   @override
-  void addPointer(PointerEvent event) {
+  void addAllowedPointer(PointerEvent event) {
     assert(!_gestureMap.containsKey(event.pointer));
     _gestureMap[event.pointer] = _TapGesture(
       gestureRecognizer: this,
       event: event,
-      longTapDelay: longTapDelay
+      longTapDelay: longTapDelay,
     );
     if (onTapDown != null)
       invokeCallback<void>('onTapDown', () => onTapDown(event.pointer, TapDownDetails(globalPosition: event.position)));

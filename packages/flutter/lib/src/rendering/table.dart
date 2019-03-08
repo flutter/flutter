@@ -237,7 +237,7 @@ class MaxColumnWidth extends TableColumnWidth {
   double minIntrinsicWidth(Iterable<RenderBox> cells, double containerWidth) {
     return math.max(
       a.minIntrinsicWidth(cells, containerWidth),
-      b.minIntrinsicWidth(cells, containerWidth)
+      b.minIntrinsicWidth(cells, containerWidth),
     );
   }
 
@@ -245,7 +245,7 @@ class MaxColumnWidth extends TableColumnWidth {
   double maxIntrinsicWidth(Iterable<RenderBox> cells, double containerWidth) {
     return math.max(
       a.maxIntrinsicWidth(cells, containerWidth),
-      b.maxIntrinsicWidth(cells, containerWidth)
+      b.maxIntrinsicWidth(cells, containerWidth),
     );
   }
 
@@ -288,7 +288,7 @@ class MinColumnWidth extends TableColumnWidth {
   double minIntrinsicWidth(Iterable<RenderBox> cells, double containerWidth) {
     return math.min(
       a.minIntrinsicWidth(cells, containerWidth),
-      b.minIntrinsicWidth(cells, containerWidth)
+      b.minIntrinsicWidth(cells, containerWidth),
     );
   }
 
@@ -296,7 +296,7 @@ class MinColumnWidth extends TableColumnWidth {
   double maxIntrinsicWidth(Iterable<RenderBox> cells, double containerWidth) {
     return math.min(
       a.maxIntrinsicWidth(cells, containerWidth),
-      b.maxIntrinsicWidth(cells, containerWidth)
+      b.maxIntrinsicWidth(cells, containerWidth),
     );
   }
 
@@ -368,7 +368,7 @@ class RenderTable extends RenderBox {
     ImageConfiguration configuration = ImageConfiguration.empty,
     TableCellVerticalAlignment defaultVerticalAlignment = TableCellVerticalAlignment.top,
     TextBaseline textBaseline,
-    List<List<RenderBox>> children
+    List<List<RenderBox>> children,
   }) : assert(columns == null || columns >= 0),
        assert(rows == null || rows >= 0),
        assert(rows == null || children == null),
@@ -1138,7 +1138,7 @@ class RenderTable extends RenderBox {
           _rowDecorationPainters[y].paint(
             canvas,
             Offset(offset.dx, offset.dy + _rowTops[y]),
-            configuration.copyWith(size: Size(size.width, _rowTops[y+1] - _rowTops[y]))
+            configuration.copyWith(size: Size(size.width, _rowTops[y+1] - _rowTops[y])),
           );
         }
       }

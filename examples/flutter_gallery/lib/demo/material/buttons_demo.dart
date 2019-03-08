@@ -323,7 +323,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
               },
               items: <String>[
                   'One', 'Two', 'Free', 'Four', 'Can', 'I', 'Have', 'A', 'Little',
-                  'Bit', 'More', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten'
+                  'Bit', 'More', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten',
                  ]
                 .map<DropdownMenuItem<String>>((String value) {
                   return DropdownMenuItem<String>(
@@ -363,7 +363,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
               semanticLabel: 'Thumbs not up',
             ),
             onPressed: null,
-          )
+          ),
         ]
         .map<Widget>((Widget button) => SizedBox(width: 64.0, height: 64.0, child: button))
         .toList(),

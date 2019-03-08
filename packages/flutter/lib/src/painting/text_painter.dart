@@ -431,7 +431,7 @@ class TextPainter {
     return _isUtf16Surrogate(nextCodeUnit) ? offset + 2 : offset + 1;
   }
 
-  /// Returns the closest offset before `offset` at which the inout cursor can
+  /// Returns the closest offset before `offset` at which the input cursor can
   /// be positioned.
   int getOffsetBefore(int offset) {
     final int prevCodeUnit = _text.codeUnitAt(offset - 1);

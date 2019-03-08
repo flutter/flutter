@@ -156,7 +156,7 @@ class XcodeProjectInterpreter {
       fs.path.absolute(projectPath),
       '-target',
       target,
-      '-showBuildSettings'
+      '-showBuildSettings',
     ], workingDirectory: projectPath);
     return parseXcodeBuildSettings(out);
   }
