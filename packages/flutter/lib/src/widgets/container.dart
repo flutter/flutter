@@ -226,7 +226,7 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
 ///         .display1
 ///         .copyWith(color: Colors.white)),
 ///   transform: Matrix4.rotationZ(0.1),
-/// ),
+/// )
 /// ```
 /// {@end-tool}
 ///
