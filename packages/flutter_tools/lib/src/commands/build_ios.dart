@@ -49,15 +49,9 @@ class BuildIOSCommand extends BuildSubCommand {
   final String description = 'Build an iOS application bundle (Mac OS X host only).';
 
   @override
-  Future<void> validateCommand() async {
-    defaultBuildMode = forSimulator ? BuildMode.debug : BuildMode.release;
-    return super.validateCommand();
-  }
-
-  bool get forSimulator => argResults['simulator'];
-
-  @override
   Future<FlutterCommandResult> runCommand() async {
+    final bool forSimulator = argResults['simulator'];
+    defaultBuildMode = forSimulator ? BuildMode.debug : BuildMode.release;
 
     if (getCurrentHostPlatform() != HostPlatform.darwin_x64)
       throwToolExit('Building for iOS is only supported on the Mac.');
