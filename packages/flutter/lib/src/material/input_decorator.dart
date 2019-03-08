@@ -552,13 +552,16 @@ class _RenderDecoration extends RenderBox {
     @required TextDirection textDirection,
     @required TextBaseline textBaseline,
     @required bool isFocused,
+    @required bool expands,
   }) : assert(decoration != null),
        assert(textDirection != null),
        assert(textBaseline != null),
+       assert(expands != null),
        _decoration = decoration,
        _textDirection = textDirection,
        _textBaseline = textBaseline,
-       _isFocused = isFocused;
+       _isFocused = isFocused,
+       _expands = expands;
 
   final Map<_DecorationSlot, RenderBox> slotToChild = <_DecorationSlot, RenderBox>{};
   final Map<RenderBox, _DecorationSlot> childToSlot = <RenderBox, _DecorationSlot>{};
@@ -709,6 +712,16 @@ class _RenderDecoration extends RenderBox {
     markNeedsSemanticsUpdate();
   }
 
+  bool get expands => _expands;
+  bool _expands = false;
+  set expands(bool value) {
+    assert(value != null);
+    if (_expands == value)
+      return;
+    _expands = value;
+    markNeedsLayout();
+  }
+
   @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
@@ -804,34 +817,31 @@ class _RenderDecoration extends RenderBox {
 
   EdgeInsets get contentPadding => decoration.contentPadding;
 
-  // Returns a value used by performLayout to position all
-  // of the renderers. This method applies layout to all of the renderers
-  // except the container. For convenience, the container is laid out
-  // in performLayout().
-  _RenderDecorationLayout _layout(BoxConstraints layoutConstraints) {
-    final Map<RenderBox, double> boxToBaseline = <RenderBox, double>{};
-    BoxConstraints boxConstraints = layoutConstraints.loosen();
-    double aboveBaseline = 0.0;
-    double belowBaseline = 0.0;
-    void layoutLineBox(RenderBox box) {
-      if (box == null)
-        return;
-      box.layout(boxConstraints, parentUsesSize: true);
-      final double baseline = box.getDistanceToBaseline(textBaseline);
-      assert(baseline != null && baseline >= 0.0);
-      boxToBaseline[box] = baseline;
-      aboveBaseline = math.max(baseline, aboveBaseline);
-      belowBaseline = math.max(box.size.height - baseline, belowBaseline);
+  // Lay out the given box if needed, and return its baseline
+  double _layoutLineBox(RenderBox box, BoxConstraints constraints) {
+    if (box == null) {
+      return 0.0;
     }
-    layoutLineBox(prefix);
-    layoutLineBox(suffix);
+    box.layout(constraints, parentUsesSize: true);
+    final double baseline = box.getDistanceToBaseline(textBaseline);
+    assert(baseline != null && baseline >= 0.0);
+    return baseline;
+  }
 
-    if (icon != null)
-      icon.layout(boxConstraints, parentUsesSize: true);
-    if (prefixIcon != null)
-      prefixIcon.layout(boxConstraints, parentUsesSize: true);
-    if (suffixIcon != null)
-      suffixIcon.layout(boxConstraints, parentUsesSize: true);
+  // Returns a value used by performLayout to position all of the renderers.
+  // This method applies layout to all of the renderers except the container.
+  // For convenience, the container is laid out in performLayout().
+  _RenderDecorationLayout _layout(BoxConstraints layoutConstraints) {
+    // Margin on each side of subtext (counter and helperError)
+    final Map<RenderBox, double> boxToBaseline = <RenderBox, double>{};
+    final BoxConstraints boxConstraints = layoutConstraints.loosen();
+
+    // Layout all the widgets used by InputDecorator
+    boxToBaseline[prefix] = _layoutLineBox(prefix, boxConstraints);
+    boxToBaseline[suffix] = _layoutLineBox(suffix, boxConstraints);
+    boxToBaseline[icon] = _layoutLineBox(icon, boxConstraints);
+    boxToBaseline[prefixIcon] = _layoutLineBox(prefixIcon, boxConstraints);
+    boxToBaseline[suffixIcon] = _layoutLineBox(suffixIcon, boxConstraints);
 
     final double inputWidth = math.max(0.0, constraints.maxWidth - (
       _boxSize(icon).width
@@ -841,72 +851,144 @@ class _RenderDecoration extends RenderBox {
       + _boxSize(suffix).width
       + _boxSize(suffixIcon).width
       + contentPadding.right));
+    boxToBaseline[label] = _layoutLineBox(
+      label,
+      boxConstraints.copyWith(maxWidth: inputWidth),
+    );
+    boxToBaseline[hint] = _layoutLineBox(
+      hint,
+      boxConstraints.copyWith(minWidth: inputWidth, maxWidth: inputWidth),
+    );
+    boxToBaseline[counter] = _layoutLineBox(counter, boxConstraints);
 
-    boxConstraints = boxConstraints.copyWith(maxWidth: inputWidth);
-    if (label != null) {
-      if (decoration.alignLabelWithHint) {
-        // The label is aligned with the hint, at the baseline
-        layoutLineBox(label);
-      } else {
-        // The label is centered, not baseline aligned
-        label.layout(boxConstraints, parentUsesSize: true);
-      }
-    }
-
-    boxConstraints = boxConstraints.copyWith(minWidth: inputWidth);
-    layoutLineBox(hint);
-    layoutLineBox(input);
-
-    double inputBaseline = contentPadding.top + aboveBaseline;
-    double containerHeight = contentPadding.top
-      + aboveBaseline
-      + belowBaseline
-      + contentPadding.bottom;
-
-    if (label != null) {
-      // floatingLabelHeight includes the vertical gap between the inline
-      // elements and the floating label.
-      containerHeight += decoration.floatingLabelHeight;
-      inputBaseline += decoration.floatingLabelHeight;
-    }
-
-    containerHeight = math.max(
-      containerHeight,
-      math.max(
-        _boxSize(suffixIcon).height,
-        _boxSize(prefixIcon).height));
-
-    // Inline text within an outline border is centered within the container
-    // less 2.0 dps at the top to account for the vertical space occupied
-    // by the floating label.
-    final double outlineBaseline = aboveBaseline +
-      (containerHeight - (2.0 + aboveBaseline + belowBaseline)) / 2.0;
-
-    double subtextBaseline = 0.0;
-    double subtextHeight = 0.0;
-    if (helperError != null || counter != null) {
-      boxConstraints = layoutConstraints.loosen();
-      aboveBaseline = 0.0;
-      belowBaseline = 0.0;
-      layoutLineBox(counter);
-
-      // The helper or error text can occupy the full width less the space
-      // occupied by the icon and counter.
-      boxConstraints = boxConstraints.copyWith(
+    // The helper or error text can occupy the full width less the space
+    // occupied by the icon and counter.
+    boxToBaseline[helperError] = _layoutLineBox(
+      helperError,
+      boxConstraints.copyWith(
         maxWidth: math.max(0.0, boxConstraints.maxWidth
           - _boxSize(icon).width
           - _boxSize(counter).width
           - contentPadding.horizontal,
         ),
-      );
-      layoutLineBox(helperError);
+      ),
+    );
 
-      if (aboveBaseline + belowBaseline > 0.0) {
-        const double subtextGap = 8.0;
-        subtextBaseline = containerHeight + subtextGap + aboveBaseline;
-        subtextHeight = subtextGap + aboveBaseline + belowBaseline;
-      }
+    // The height of the input needs to accommodate label above and counter and
+    // helperError below, when they exist.
+    const double subtextGap = 8.0;
+    final double labelHeight = label == null
+      ? 0
+      : decoration.floatingLabelHeight;
+    final double topHeight = decoration.border.isOutline
+      ? math.max(labelHeight - boxToBaseline[label], 0)
+      : labelHeight;
+    final double counterHeight = counter == null
+      ? 0
+      : boxToBaseline[counter] + subtextGap * 2;
+    final _HelperError helperErrorWidget = decoration.helperError;
+    final double helperErrorHeight = helperErrorWidget.helperText == null
+      ? 0
+      : helperError.size.height + subtextGap * 2;
+    final double bottomHeight = math.max(
+      counterHeight,
+      helperErrorHeight,
+    );
+    boxToBaseline[input] = _layoutLineBox(
+      input,
+      boxConstraints.deflate(EdgeInsets.only(
+        top: contentPadding.top + topHeight,
+        bottom: contentPadding.bottom + bottomHeight,
+      )).copyWith(
+        minWidth: inputWidth,
+        maxWidth: inputWidth,
+      ),
+    );
+
+    // The field can be occupied by a hint or by the input itself
+    final double hintHeight = hint == null ? 0 : hint.size.height;
+    final double inputDirectHeight = input == null ? 0 : input.size.height;
+    final double inputHeight = math.max(hintHeight, inputDirectHeight);
+    final double inputInternalBaseline = math.max(
+      boxToBaseline[input],
+      boxToBaseline[hint],
+    );
+
+    // Calculate the amount that prefix/suffix affects height above and below
+    // the input.
+    final double prefixHeight = prefix == null ? 0 : prefix.size.height;
+    final double suffixHeight = suffix == null ? 0 : suffix.size.height;
+    final double fixHeight = math.max(
+      boxToBaseline[prefix],
+      boxToBaseline[suffix],
+    );
+    final double fixAboveInput = math.max(0, fixHeight - inputInternalBaseline);
+    final double fixBelowBaseline = math.max(
+      prefixHeight - boxToBaseline[prefix],
+      suffixHeight - boxToBaseline[suffix],
+    );
+    final double fixBelowInput = math.max(
+      0,
+      fixBelowBaseline - (inputHeight - inputInternalBaseline),
+    );
+
+    // Calculate the height of the input text container.
+    final double prefixIconHeight = prefixIcon == null ? 0 : prefixIcon.size.height;
+    final double suffixIconHeight = suffixIcon == null ? 0 : suffixIcon.size.height;
+    final double fixIconHeight = math.max(prefixIconHeight, suffixIconHeight);
+    final double contentHeight = math.max(
+      fixIconHeight,
+      topHeight
+      + contentPadding.top
+      + fixAboveInput
+      + inputHeight
+      + fixBelowInput
+      + contentPadding.bottom,
+    );
+    final double maxContainerHeight = boxConstraints.maxHeight - bottomHeight;
+    final double containerHeight = expands
+      ? maxContainerHeight
+      : math.min(contentHeight, maxContainerHeight);
+
+    // Always position the prefix/suffix in the same place (baseline).
+    final double overflow = math.max(0, contentHeight - maxContainerHeight);
+    final double baselineAdjustment = fixAboveInput - overflow;
+
+    // The baselines that will be used to draw the actual input text content.
+    final double inputBaseline = contentPadding.top
+      + topHeight
+      + inputInternalBaseline
+      + baselineAdjustment;
+    // The text in the input when an outline border is present is centered
+    // within the container less 2.0 dps at the top to account for the vertical
+    // space occupied by the floating label.
+    final double outlineBaseline = inputInternalBaseline
+      + baselineAdjustment / 2
+      + (containerHeight - (2.0 + inputHeight)) / 2.0;
+
+    // Find the positions of the text below the input when it exists.
+    double subtextCounterBaseline = 0;
+    double subtextHelperBaseline = 0;
+    double subtextCounterHeight = 0;
+    double subtextHelperHeight = 0;
+    if (counter != null) {
+      subtextCounterBaseline =
+        containerHeight + subtextGap + boxToBaseline[counter];
+      subtextCounterHeight = counter.size.height + subtextGap;
     }
+    if (helperErrorWidget.helperText != null) {
+      subtextHelperBaseline =
+        containerHeight + subtextGap + boxToBaseline[helperError];
+      subtextHelperHeight = helperError.size.height + subtextGap;
+    }
+    final double subtextBaseline = math.max(
+      subtextCounterBaseline,
+      subtextHelperBaseline,
+    );
+    final double subtextHeight = math.max(
+      subtextCounterHeight,
+      subtextHelperHeight,
+    );
 
     return _RenderDecorationLayout(
       boxToBaseline: boxToBaseline,
@@ -1370,15 +1452,18 @@ class _Decorator extends RenderObjectWidget {
     @required this.textDirection,
     @required this.textBaseline,
     @required this.isFocused,
+    @required this.expands,
   }) : assert(decoration != null),
        assert(textDirection != null),
        assert(textBaseline != null),
+       assert(expands != null),
        super(key: key);
 
   final _Decoration decoration;
   final TextDirection textDirection;
   final TextBaseline textBaseline;
   final bool isFocused;
+  final bool expands;
 
   @override
   _RenderDecorationElement createElement() => _RenderDecorationElement(this);
@@ -1390,6 +1475,7 @@ class _Decorator extends RenderObjectWidget {
       textDirection: textDirection,
       textBaseline: textBaseline,
       isFocused: isFocused,
+      expands: expands,
     );
   }
 
@@ -1399,6 +1485,7 @@ class _Decorator extends RenderObjectWidget {
      ..decoration = decoration
      ..textDirection = textDirection
      ..textBaseline = textBaseline
+     ..expands = expands
      ..isFocused = isFocused;
   }
 }
@@ -1461,6 +1548,7 @@ class InputDecorator extends StatefulWidget {
     this.baseStyle,
     this.textAlign,
     this.isFocused = false,
+    this.expands = false,
     this.isEmpty = false,
     this.child,
   }) : assert(isFocused != null),
@@ -1494,6 +1582,19 @@ class InputDecorator extends StatefulWidget {
   ///
   /// Defaults to false.
   final bool isFocused;
+
+  /// If true, the height of the input field will be as large as possible.
+  ///
+  /// If wrapped in a widget that constrains its child's height, like Expanded
+  /// or SizedBox, the input field will only be affected if [expands] is set to
+  /// true.
+  ///
+  /// See [TextField.minLines] and [TextField.maxLines] for related ways to
+  /// affect the height of an input. When [expands] is true, both must be null
+  /// in order to avoid ambiguity in determining the height.
+  ///
+  /// Defaults to false.
+  final bool expands;
 
   /// Whether the input field is empty.
   ///
@@ -1533,6 +1634,7 @@ class InputDecorator extends StatefulWidget {
     properties.add(DiagnosticsProperty<InputDecoration>('decoration', decoration));
     properties.add(DiagnosticsProperty<TextStyle>('baseStyle', baseStyle, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('isFocused', isFocused));
+    properties.add(DiagnosticsProperty<bool>('expands', expands, defaultValue: false));
     properties.add(DiagnosticsProperty<bool>('isEmpty', isEmpty));
   }
 }
@@ -1928,6 +2030,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       textDirection: textDirection,
       textBaseline: textBaseline,
       isFocused: isFocused,
+      expands: widget.expands,
     );
   }
 }
