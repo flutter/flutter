@@ -103,28 +103,28 @@ void main() {
     expect(mockCodec.numFramesAsked, 1);
   });
 
-   testWidgets('getNextFrame future fails', (WidgetTester tester) async {
-     final MockCodec mockCodec = MockCodec();
-     mockCodec.frameCount = 1;
-     final Completer<Codec> codecCompleter = Completer<Codec>();
+  testWidgets('getNextFrame future fails', (WidgetTester tester) async {
+    final MockCodec mockCodec = MockCodec();
+    mockCodec.frameCount = 1;
+    final Completer<Codec> codecCompleter = Completer<Codec>();
 
-     MultiFrameImageStreamCompleter(
-       codec: codecCompleter.future,
-       scale: 1.0,
-     );
+    MultiFrameImageStreamCompleter(
+      codec: codecCompleter.future,
+      scale: 1.0,
+    );
 
-     codecCompleter.complete(mockCodec);
-     // MultiFrameImageStreamCompleter only sets an error handler for the next
-     // frame future after the codec future has completed.
-     // Idling here lets the MultiFrameImageStreamCompleter advance and set the
-     // error handler for the nextFrame future.
-     await tester.idle();
+    codecCompleter.complete(mockCodec);
+    // MultiFrameImageStreamCompleter only sets an error handler for the next
+    // frame future after the codec future has completed.
+    // Idling here lets the MultiFrameImageStreamCompleter advance and set the
+    // error handler for the nextFrame future.
+    await tester.idle();
 
-     mockCodec.failNextFrame('frame completion error');
-     await tester.idle();
+    mockCodec.failNextFrame('frame completion error');
+    await tester.idle();
 
-     expect(tester.takeException(), 'frame completion error');
-   });
+    expect(tester.takeException(), 'frame completion error');
+  });
 
   testWidgets('ImageStream emits frame (static image)', (WidgetTester tester) async {
     final MockCodec mockCodec = MockCodec();

@@ -39,7 +39,8 @@ class _FuchsiaLogReader extends DeviceLogReader {
   FuchsiaDevice _device;
   ApplicationPackage _app;
 
-  @override String get name => _device.name;
+  @override
+  String get name => _device.name;
 
   Stream<String> _logLines;
   @override

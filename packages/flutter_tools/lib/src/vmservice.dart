@@ -272,7 +272,7 @@ class VMService {
   final Map<String, StreamController<ServiceEvent>> _eventControllers =
       <String, StreamController<ServiceEvent>>{};
 
-  final Set<String> _listeningFor = Set<String>();
+  final Set<String> _listeningFor = <String>{};
 
   /// Whether our connection to the VM service has been closed;
   bool get isClosed => _peer.isClosed;
@@ -749,7 +749,7 @@ class VM extends ServiceObjectOwner {
 
   void _removeDeadIsolates(List<Isolate> newIsolates) {
     // Build a set of new isolates.
-    final Set<String> newIsolateSet = Set<String>();
+    final Set<String> newIsolateSet = <String>{};
     for (Isolate iso in newIsolates)
       newIsolateSet.add(iso.id);
 
@@ -1428,14 +1428,14 @@ class FlutterView extends ServiceObject {
     final Completer<void> completer = Completer<void>();
     final StreamSubscription<ServiceEvent> subscription =
       (await owner.vm.vmService.onIsolateEvent).listen((ServiceEvent event) {
-      // TODO(johnmccutchan): Listen to the debug stream and catch initial
-      // launch errors.
-      if (event.kind == ServiceEvent.kIsolateRunnable) {
-        printTrace('Isolate is runnable.');
-        if (!completer.isCompleted)
-          completer.complete();
-      }
-    });
+        // TODO(johnmccutchan): Listen to the debug stream and catch initial
+        // launch errors.
+        if (event.kind == ServiceEvent.kIsolateRunnable) {
+          printTrace('Isolate is runnable.');
+          if (!completer.isCompleted)
+            completer.complete();
+        }
+      });
     await owner.vm.runInView(viewId,
                              entryUri,
                              packagesUri,

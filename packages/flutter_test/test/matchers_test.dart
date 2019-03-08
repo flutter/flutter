@@ -273,7 +273,7 @@ void main() {
       );
     });
 
-     test('partially overlapping paths', () {
+    test('partially overlapping paths', () {
       final Path rectPath = Path()
         ..addRect(Rect.fromLTRB(5.0, 5.0, 6.0, 6.0));
       final Path linePath = Path()

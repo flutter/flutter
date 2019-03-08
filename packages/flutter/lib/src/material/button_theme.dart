@@ -291,12 +291,12 @@ class ButtonThemeData extends Diagnosticable {
   EdgeInsetsGeometry get padding {
     if (_padding != null)
       return _padding;
-   switch (textTheme) {
+    switch (textTheme) {
       case ButtonTextTheme.normal:
       case ButtonTextTheme.accent:
         return const EdgeInsets.symmetric(horizontal: 16.0);
       case ButtonTextTheme.primary:
-       return const EdgeInsets.symmetric(horizontal: 24.0);
+        return const EdgeInsets.symmetric(horizontal: 24.0);
     }
     assert(false);
     return EdgeInsets.zero;

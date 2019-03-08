@@ -244,30 +244,9 @@ void main() {
   testWidgets(
     'AppBar centerTitle:false leading button title left edge is 72.0 (LTR)',
     (WidgetTester tester) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          appBar: AppBar(
-            centerTitle: false,
-            title: const Text('X'),
-          ),
-          // A drawer causes a leading hamburger.
-          drawer: const Drawer(),
-        ),
-      ),
-    );
-
-    expect(tester.getTopLeft(find.text('X')).dx, 72.0);
-  });
-
-  testWidgets(
-    'AppBar centerTitle:false leading button title left edge is 72.0 (RTL)',
-    (WidgetTester tester) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Directionality(
-          textDirection: TextDirection.rtl,
-          child: Scaffold(
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
             appBar: AppBar(
               centerTitle: false,
               title: const Text('X'),
@@ -276,11 +255,32 @@ void main() {
             drawer: const Drawer(),
           ),
         ),
-      ),
-    );
+      );
 
-    expect(tester.getTopRight(find.text('X')).dx, 800.0 - 72.0);
-  });
+      expect(tester.getTopLeft(find.text('X')).dx, 72.0);
+    });
+
+  testWidgets(
+    'AppBar centerTitle:false leading button title left edge is 72.0 (RTL)',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Directionality(
+            textDirection: TextDirection.rtl,
+            child: Scaffold(
+              appBar: AppBar(
+                centerTitle: false,
+                title: const Text('X'),
+              ),
+              // A drawer causes a leading hamburger.
+              drawer: const Drawer(),
+            ),
+          ),
+        ),
+      );
+
+      expect(tester.getTopRight(find.text('X')).dx, 800.0 - 72.0);
+    });
 
   testWidgets('AppBar centerTitle:false title overflow OK', (WidgetTester tester) async {
     // The app bar's title should be constrained to fit within the available space
