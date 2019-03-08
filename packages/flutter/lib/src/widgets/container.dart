@@ -5,6 +5,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/material.dart';
 
 import 'basic.dart';
 import 'framework.dart';
@@ -193,7 +194,7 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
 /// Center(
 ///   child: Container(
 ///     margin: const EdgeInsets.all(10.0),
-///     color: const Colors.yellow[600],
+///     color: Colors.yellow[600],
 ///     width: 48.0,
 ///     height: 48.0,
 ///   ),
