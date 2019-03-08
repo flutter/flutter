@@ -193,6 +193,7 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
     window.onBeginFrame = _handleBeginFrame;
     window.onDrawFrame = _handleDrawFrame;
     SystemChannels.lifecycle.setMessageHandler(_handleLifecycleMessage);
+    readInitialLifecycleStateFromNativeWindow();
   }
 
   /// The current [SchedulerBinding], if one has been created.
@@ -224,6 +225,23 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
   /// [WidgetsBindingObserver.didChangeAppLifecycleState].
   AppLifecycleState get lifecycleState => _lifecycleState;
   AppLifecycleState _lifecycleState;
+
+  /// Initializes the [lifecycleState] with the [initialLifecycleState] from the
+  /// window.
+  ///
+  /// Once the [lifecycleState] is populated through any means (including this
+  /// method), this method will do nothing. This is because the
+  /// [initialLifecycleState] may already be stale and it no longer makes sense
+  /// to use the initial state at dart vm startup as the current state anymore.
+  ///
+  /// The latest state should be obtained by subscribing to
+  /// [WidgetsBindingObserver.didChangeAppLifecycleState].
+  @protected
+  void readInitialLifecycleStateFromNativeWindow() {
+    if (_lifecycleState == null && _parseAppLifecycleMessage(window.initialLifecycleState) != null) {
+      _handleLifecycleMessage(window.initialLifecycleState);
+    }
+  }
 
   /// Called when the application lifecycle state changes.
   ///
