@@ -616,7 +616,6 @@ Future<void> _runIntegrationTests() async {
   print('Platform env vars:');
 
   await _runDevicelabTest('dartdocs');
-  await _runDevicelabTest('technical_debt__cost');
 
   if (Platform.isLinux) {
     await _runDevicelabTest('flutter_create_offline_test_linux');
