@@ -99,10 +99,8 @@ void main() {
       PointerEnterEvent enter;
       PointerHoverEvent move;
       PointerExitEvent exit;
-      final GlobalKey listenerKey = GlobalKey();
       await tester.pumpWidget(Center(
         child: Listener(
-          key: listenerKey,
           child: Container(
             width: 100.0,
             height: 100.0,
