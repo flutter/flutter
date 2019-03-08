@@ -248,7 +248,7 @@ BuildApp() {
     --target="${target_path}"                                               \
     --${build_mode}                                                         \
     --depfile="${build_dir}/snapshot_blob.bin.d"                            \
-    --asset-dir="${derived_dir}/App.framework/flutter_assets"               \
+    --asset-dir="${derived_dir}/App.framework/$FLTAssetsPath"               \
     ${precompilation_flag}                                                  \
     ${flutter_engine_flag}                                                  \
     ${local_engine_flag}                                                    \
