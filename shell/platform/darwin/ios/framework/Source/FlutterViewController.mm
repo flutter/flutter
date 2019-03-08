@@ -22,6 +22,8 @@
 #include "flutter/shell/platform/darwin/ios/framework/Source/platform_message_response_darwin.h"
 #include "flutter/shell/platform/darwin/ios/platform_view_ios.h"
 
+NSNotificationName const FlutterSemanticsUpdateNotification = @"FlutterSemanticsUpdate";
+
 @implementation FlutterViewController {
   std::unique_ptr<fml::WeakPtrFactory<FlutterViewController>> _weakFactory;
   fml::scoped_nsobject<FlutterEngine> _engine;
