@@ -475,7 +475,7 @@ void main() {
           home: CupertinoTabScaffold(
             tabBar: _buildTabBar(),
             tabBuilder: (BuildContext context, int index) {
-              return CupertinoTextField();
+              return const CupertinoTextField();
             },
           ),
         ),
@@ -495,7 +495,7 @@ void main() {
           home: CupertinoTabScaffold(
             tabBar: _buildTabBar(),
             tabBuilder: (BuildContext context, int index) {
-              return CupertinoTextField();
+              return const CupertinoTextField();
             },
           ),
         ),
