@@ -73,9 +73,9 @@ String _artifactToFileName(Artifact artifact, [ TargetPlatform platform, BuildMo
     case Artifact.engineDartBinary:
       return 'dart';
     case Artifact.dart2jsSnapshot:
-      return 'flutter_dart2js.dart.snapshot';
+      return 'dart2js.dart.snapshot';
     case Artifact.kernelWorkerSnapshot:
-      return 'flutter_kernel_worker.dart.snapshot';
+      return 'kernel_worker.dart.snapshot';
   }
   assert(false, 'Invalid artifact $artifact.');
   return null;
