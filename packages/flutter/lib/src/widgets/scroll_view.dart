@@ -604,15 +604,73 @@ abstract class BoxScrollView extends ScrollView {
 /// padding. To avoid this behavior, override with a zero [padding] property.
 ///
 /// {@tool sample}
-///
-/// An infinite list of children:
+/// This example uses the default constructor for [ListView] which takes an
+/// explicit [List<Widget] of children. This [ListView]'s children are made up
+/// of [Container]s with [Text].
 ///
 /// ```dart
-/// ListView.builder(
+/// ListView(
 ///   padding: EdgeInsets.all(8.0),
-///   itemExtent: 20.0,
-///   itemBuilder: (BuildContext context, int index) {
-///     return Text('entry $index');
+///   children: <Widget>[
+///     Container(
+///       height: 50,
+///       color: Colors.amber[600],
+///       child: Center( child: Text('Entry A')),
+///     ),
+///     Container(
+///       height: 50,
+///       color: Colors.amber[500],
+///       child: Center(child: Text('Entry B')),
+///     ),
+///     Container(
+///       height: 50,
+///       color: Colors.amber[100],
+///       child: Center(child: Text('Entry C')),
+///     ),
+///   ],
+/// )
+/// ```
+/// {@end-tool}
+/// {@tool sample}
+/// This example mirrors the previous one, creating the same list using
+/// [ListView.builder].
+///
+/// ```dart
+/// final List entries = ['A', 'B', 'C'];
+/// final colorCodes = [600, 500, 100];
+///
+/// ListView.builder(
+///   itemCount: entries.length,
+///   itemBuilder: (context, index) {
+///     return Container(
+///       height: 50,
+///       color: Colors.amber[colorCodes[index]],
+///       child: Center(child: Text('Entry ${entries[index]}')),
+///     );
+///   }
+/// )
+/// ```
+/// {@end-tool}
+/// {@tool sample}
+/// This example continues to build from our the previous ones, creating a
+/// similar list using [ListView.separated]. Here, a [Divider] is used as a
+/// separator.
+///
+/// ```dart
+/// final List entries = ['A', 'B', 'C'];
+/// final colorCodes = [600, 500, 100];
+///
+/// ListView.separated(
+///   itemCount: entries.length,
+///   itemBuilder: (context, index) {
+///     return Container(
+///       height: 50,
+///       color: Colors.amber[colorCodes[index]],
+///       child: Center(child: Text('Entry ${entries[index]}')),
+///     );
+///   },
+///   separatorBuilder: (context, position) {
+///     return Divider();
 ///   },
 /// )
 /// ```
