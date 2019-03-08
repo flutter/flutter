@@ -705,7 +705,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
             '$addendum'
             'If this message did not help you determine the problem, consider using debugDumpRenderTree():\n'
             '  https://flutter.dev/debugging/#rendering-layer\n'
-            '  http://docs.flutter.dev/flutter/rendering/debugDumpRenderTree.html\n'
+            '  http://api.flutter.dev/flutter/rendering/debugDumpRenderTree.html\n'
             'If none of the above helps enough to fix this problem, please don\'t hesitate to file a bug:\n'
             '  https://github.com/flutter/flutter/issues/new?template=BUG.md'
           );

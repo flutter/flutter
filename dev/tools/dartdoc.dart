@@ -20,8 +20,8 @@ const String kSnippetsRoot = 'dev/snippets';
 /// documentation to `//dev/docs/doc/api/`.
 ///
 /// This script also updates the index.html file so that it can be placed
-/// at the root of docs.flutter.dev. We are keeping the files inside of
-/// docs.flutter.dev/flutter for now, so we need to manipulate paths
+/// at the root of api.flutter.dev. We are keeping the files inside of
+/// api.flutter.dev/flutter for now, so we need to manipulate paths
 /// a bit. See https://github.com/flutter/flutter/issues/3900 for more info.
 ///
 /// This will only work on UNIX systems, not Windows. It requires that 'git' be
@@ -284,7 +284,7 @@ void createSearchMetadata(String templatePath, String metadataPath) {
   final String branch = getBranchName();
   final String metadata = template.replaceAll(
     '{SITE_URL}',
-    branch == 'stable' ? 'https://docs.flutter.dev/' : 'https://master-docs.flutter.dev/',
+    branch == 'stable' ? 'https://api.flutter.dev/' : 'https://master-api.flutter.dev/',
   );
   Directory(path.dirname(metadataPath)).create(recursive: true);
   File(metadataPath).writeAsStringSync(metadata);

@@ -1,2 +1,2 @@
-/// [Flutter platform integration APIs for Android.](https://docs.flutter.dev/javadoc/)
+/// [Flutter platform integration APIs for Android.](https://api.flutter.dev/javadoc/)
 library Android;

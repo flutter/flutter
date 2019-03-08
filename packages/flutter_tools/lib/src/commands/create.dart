@@ -91,7 +91,7 @@ class CreateCommand extends FlutterCommand {
       abbr: 's',
       help: 'Specifies the Flutter code sample to use as the main.dart for an application. Implies '
         '--template=app. The value should be the sample ID of the desired sample from the API '
-        'documentation website (http://docs.flutter.dev).',
+        'documentation website (http://api.flutter.dev).',
       defaultsTo: null,
       valueHelp: 'id',
     );
@@ -187,8 +187,8 @@ class CreateCommand extends FlutterCommand {
     }
 
     final String host = FlutterVersion.instance.channel == 'stable'
-        ? 'docs.flutter.dev'
-        : 'master-docs.flutter.dev';
+        ? 'api.flutter.dev'
+        : 'master-api.flutter.dev';
     return utf8.decode(await fetchUrl(Uri.https(host, 'snippets/$sampleId.dart')));
   }
 

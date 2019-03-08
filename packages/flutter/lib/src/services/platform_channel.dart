@@ -287,7 +287,7 @@ class MethodChannel {
   ///    [StandardMethodCodec].
   ///  * [JSONMessageCodec] which defines the payload values supported by
   ///    [JSONMethodCodec].
-  ///  * <https://docs.flutter.dev/javadoc/io/flutter/plugin/common/MethodCall.html>
+  ///  * <https://api.flutter.dev/javadoc/io/flutter/plugin/common/MethodCall.html>
   ///    for how to access method call arguments on Android.
   @optionalTypeArgs
   Future<T> invokeMethod<T>(String method, [ dynamic arguments ]) async {

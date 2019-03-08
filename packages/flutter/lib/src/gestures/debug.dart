@@ -54,7 +54,7 @@ bool debugPrintRecognizerCallbacksTrace = false;
 /// This function is used by the test framework to ensure that debug variables
 /// haven't been inadvertently changed.
 ///
-/// See [https://docs.flutter.dev/flutter/gestures/gestures-library.html] for
+/// See [https://api.flutter.dev/flutter/gestures/gestures-library.html] for
 /// a complete list.
 bool debugAssertAllGesturesVarsUnset(String reason) {
   assert(() {

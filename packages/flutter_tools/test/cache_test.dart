@@ -136,7 +136,7 @@ void main() {
 
   testUsingContext('flattenNameSubdirs', () {
     expect(flattenNameSubdirs(Uri.parse('http://flutter.dev/foo/bar')), 'flutter.dev/foo/bar');
-    expect(flattenNameSubdirs(Uri.parse('http://docs.flutter.dev/foo/bar')), 'docs.flutter.dev/foo/bar');
+    expect(flattenNameSubdirs(Uri.parse('http://api.flutter.dev/foo/bar')), 'api.flutter.dev/foo/bar');
     expect(flattenNameSubdirs(Uri.parse('https://www.flutter.dev')), 'www.flutter.dev');
   }, overrides: <Type, Generator>{
     FileSystem: () => MockFileSystem(),

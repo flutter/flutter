@@ -292,7 +292,7 @@ void debugWidgetBuilderValue(Widget widget, Widget built) {
 /// This function is used by the test framework to ensure that debug variables
 /// haven't been inadvertently changed.
 ///
-/// See [https://docs.flutter.dev/flutter/widgets/widgets-library.html] for
+/// See [https://api.flutter.dev/flutter/widgets/widgets-library.html] for
 /// a complete list.
 bool debugAssertAllWidgetVarsUnset(String reason) {
   assert(() {
