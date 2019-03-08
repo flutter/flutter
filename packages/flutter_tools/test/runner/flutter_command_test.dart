@@ -42,7 +42,12 @@ void main() {
     testUsingContext('honors shouldUpdateCache true', () async {
       final DummyFlutterCommand flutterCommand = DummyFlutterCommand(shouldUpdateCache: true);
       await flutterCommand.run();
-      verify(cache.updateAll()).called(1);
+      verify(cache.updateAll(
+        buildModes: anyNamed('buildModes'),
+        clobber: anyNamed('clobber'),
+        skipUnknown: anyNamed('skipUnknown'),
+        targetPlatforms: anyNamed('targetPlatforms')
+      )).called(1);
     },
     overrides: <Type, Generator>{
       Cache: () => cache,

@@ -134,4 +134,7 @@ class _FuchsiaAttachCommand extends AttachCommand {
     Cache.flutterRoot = '$originalWorkingDirectory/third_party/dart-pkg/git/flutter';
     return super.runCommand();
   }
+
+  @override
+  Future<void> updateCache() async {}
 }
