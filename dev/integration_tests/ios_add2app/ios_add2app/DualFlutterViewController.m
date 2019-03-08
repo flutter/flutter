@@ -23,10 +23,9 @@
   stackView.layoutMarginsRelativeArrangement = YES;
   [self.view addSubview:stackView];
 
-
   _topFlutterViewController = [[FlutterViewController alloc] init];
   _bottomFlutterViewController= [[FlutterViewController alloc] init];
-  
+
   [_topFlutterViewController setInitialRoute:@"marquee_green"];
   [self addChildViewController:_topFlutterViewController];
   [stackView addArrangedSubview:_topFlutterViewController.view];
