@@ -1029,7 +1029,7 @@ void main() {
     expect(tester.getSize(find.byType(InputDecorator)).height, closeTo(128.0, .0001));
     expect(tester.getSize(find.text('text')).height, 20.0);
     expect(tester.getSize(find.byKey(pKey)).height, 100.0);
-    expect(tester.getTopLeft(find.text('text')).dy, 96); // 12 + 100 - 16
+    expect(tester.getTopLeft(find.text('text')).dy, closeTo(96, .0001)); // 12 + 100 - 16
     expect(tester.getTopLeft(find.byKey(pKey)).dy, 12.0);
 
     // layout is a row: [prefix text suffix]
@@ -1079,7 +1079,7 @@ void main() {
     expect(tester.getSize(find.byType(InputDecorator)).height, closeTo(144, .0001));
     expect(tester.getSize(find.text('text')).height, 20.0);
     expect(tester.getSize(find.byKey(pKey)).height, 100.0);
-    expect(tester.getTopLeft(find.text('text')).dy, 103);
+    expect(tester.getTopLeft(find.text('text')).dy, closeTo(103, .0001));
     expect(tester.getTopLeft(find.byKey(pKey)).dy, 19.0);
 
     // layout is a row: [prefix text suffix]
