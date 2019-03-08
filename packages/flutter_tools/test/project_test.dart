@@ -264,7 +264,7 @@ void main() {
       });
       testWithMocks('from pbxproj and plist, by substitution', () async {
         final FlutterProject project = await someProject();
-        when(mockXcodeProjectInterpreter.getBuildSettings(any, any)).thenAnswer((_) => Future<Map<String, String>>.value(<String, String>{
+        when(mockXcodeProjectInterpreter.getBuildSettings(any, any)).thenAnswer((Invocation invocation) => Future<Map<String, String>>.value(<String, String>{
           'PRODUCT_BUNDLE_IDENTIFIER': 'io.flutter.someProject',
           'SUFFIX': 'suffix',
         }));
