@@ -3548,8 +3548,8 @@ class PositionedDirectional extends StatelessWidget {
 /// horizontal) or [Column] (if it's vertical) instead, because that will be less
 /// verbose.
 ///
-/// To cause a child to expand to fill the available space on its main axis,
-/// wrap the child in an [Expanded] widget.
+/// To cause a child to expand to fill the available space in the [direction]
+/// of this widget's main axis, wrap the child in an [Expanded] widget.
 ///
 /// The [Flex] widget does not scroll (and in general it is considered an error
 /// to have more children in a [Flex] than will fit in the available room). If
