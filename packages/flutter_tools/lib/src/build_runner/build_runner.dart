@@ -87,8 +87,6 @@ class BuildRunner extends CodeGenerator {
         }
       }
       stringBuffer.writeln('  build_runner: ^$kMinimumBuildRunnerVersion');
-      stringBuffer.writeln('dependency_overrides:');
-      stringBuffer.writeln('    analyzer: 0.35.3');
       await syntheticPubspec.writeAsString(stringBuffer.toString());
 
       await pubGet(
