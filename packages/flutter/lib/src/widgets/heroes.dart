@@ -111,7 +111,7 @@ Rect _globalBoundingBoxFor(BuildContext context) {
 /// B to A, route A's hero's widget is, by default, placed over where route B's
 /// hero's widget was, and then the animation goes the other way.
 ///
-/// ## Nested Navigators
+/// ### Nested Navigators
 ///
 /// If either or both routes contain nested [Navigator]s, only [Hero]s
 /// contained in the top-most routes (as defined by [Route.isCurrent] of those
@@ -202,11 +202,13 @@ class Hero extends StatefulWidget {
   /// Defaults to false and cannot be null.
   final bool transitionOnUserGestures;
 
-  // Returns a map of all of the heroes in context, indexed by hero tag.
+  // Returns a map of all of the heroes in `context` indexed by hero tag that
+  // should be considered for animation when `navigator` transitions from one
+  // PageRoute to another, .
   static Map<Object, _HeroState> _allHeroesFor(
       BuildContext context,
       bool isUserGestureTransition,
-      NavigatorState triggeringNavigator,
+      NavigatorState navigator,
   ) {
     assert(context != null);
     assert(isUserGestureTransition != null);
@@ -237,11 +239,14 @@ class Hero extends StatefulWidget {
         if (!isUserGestureTransition || heroWidget.transitionOnUserGestures) {
           final Object tag = heroWidget.tag;
           assert(tag != null);
-          if (Navigator.of(hero) == triggeringNavigator) {
+          if (Navigator.of(hero) == navigator) {
             addHero(hero, tag);
           } else {
-            // Nested navigators: only consider heros in the topmost route of
-            // the nested navigator, if it is a PageRoute.
+            // The nearest navigator to the Hero is not the Navigator that is
+            // currently transitioning from one route to another. This means,
+            // the Hero is inside a nested Navigator and should only be
+            // considered for animation, if it is part of the top-most route in
+            // that nested Navigator and if that route is also a PageRoute.
             final ModalRoute<dynamic> heroRoute = ModalRoute.of(hero);
             if (heroRoute != null && heroRoute is PageRoute && heroRoute.isCurrent) {
               addHero(hero, tag);
