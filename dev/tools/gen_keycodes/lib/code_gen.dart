@@ -135,6 +135,46 @@ $otherComments  static const LogicalKeyboardKey ${entry.constantName} = LogicalK
     return androidScanCodeMap.toString().trimRight();
   }
 
+    /// This generates the map of macOS key codes to logical keys.
+  String get macOsKeyCodeMap {
+    final StringBuffer macOsKeyCodeMap = StringBuffer();
+    for (Key entry in keyData.data) {
+      if (entry.macOsKeyCodes != null) {
+        for (int code in entry.macOsKeyCodes.cast<int>()) {
+          macOsKeyCodeMap.writeln('  $code: LogicalKeyboardKey.${entry.constantName},');
+        }
+      }
+    }
+    return macOsKeyCodeMap.toString().trimRight();
+  }
+
+      /// This generates the map of macOS key codes to logical keys.
+  String get macOsScanCodeMap {
+    final StringBuffer macOsScanCodeMap = StringBuffer();
+    for (Key entry in keyData.data) {
+      if (entry.macOsScanCode != null) {
+        macOsScanCodeMap.writeln('  ${toHex(entry.macOsScanCode)}: PhysicalKeyboardKey.${entry.constantName},');
+      }
+    }
+    return macOsScanCodeMap.toString().trimRight();
+  }
+
+      /// This generates the map of macOSAndroid number pad key codes to logical keys.
+  String get macOsNumpadMap {
+    final StringBuffer macOsKeyCodeMap = StringBuffer();
+    final List<Key> onlyNumpads = keyData.data.where((Key entry) {
+      return entry.constantName.startsWith('numpad') && entry.keyLabel != null;
+    }).toList();
+    for (Key entry in onlyNumpads) {
+      if (entry.macOsKeyCodes != null) {
+        for (int code in entry.macOsKeyCodes.cast<int>()) {
+          macOsKeyCodeMap.writeln('  $code: LogicalKeyboardKey.${entry.constantName},');
+        }
+      }
+    }
+    return macOsKeyCodeMap.toString().trimRight();
+  }
+
   /// This generates the map of Fuchsia key codes to logical keys.
   String get fuchsiaKeyCodeMap {
     final StringBuffer fuchsiaKeyCodeMap = StringBuffer();
@@ -180,6 +220,9 @@ $otherComments  static const LogicalKeyboardKey ${entry.constantName} = LogicalK
       'ANDROID_NUMPAD_MAP': androidNumpadMap,
       'FUCHSIA_SCAN_CODE_MAP': fuchsiaHidCodeMap,
       'FUCHSIA_KEY_CODE_MAP': fuchsiaKeyCodeMap,
+      'MACOS_SCAN_CODE_MAP': macOsScanCodeMap,
+      'MACOS_KEY_CODE_MAP': macOsKeyCodeMap,
+      'MACOS_NUMPAD_MAP': macOsNumpadMap,
     };
 
     final String template = File(path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'keyboard_maps.tmpl')).readAsStringSync();

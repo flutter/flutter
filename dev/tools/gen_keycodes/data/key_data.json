@@ -19,7 +19,8 @@
     "keyCodes": {
       "android": [
         0
-      ]
+      ],
+      "macos": null
     }
   },
   "hyper": {
@@ -38,7 +39,8 @@
       "macos": null
     },
     "keyCodes": {
-      "android": null
+      "android": null,
+      "macos": null
     }
   },
   "superKey": {
@@ -57,7 +59,8 @@
       "macos": null
     },
     "keyCodes": {
-      "android": null
+      "android": null,
+      "macos": null
     }
   },
   "fn": {
@@ -82,7 +85,8 @@
     "keyCodes": {
       "android": [
         119
-      ]
+      ],
+      "macos": null
     }
   },
   "fnLock": {
@@ -101,7 +105,8 @@
       "macos": null
     },
     "keyCodes": {
-      "android": null
+      "android": null,
+      "macos": null
     }
   },
   "suspend": {
@@ -124,7 +129,8 @@
       "macos": null
     },
     "keyCodes": {
-      "android": null
+      "android": null,
+      "macos": null
     }
   },
   "resume": {
@@ -143,7 +149,8 @@
       "macos": null
     },
     "keyCodes": {
-      "android": null
+      "android": null,
+      "macos": null
     }
   },
   "turbo": {
@@ -162,7 +169,8 @@
       "macos": null
     },
     "keyCodes": {
-      "android": null
+      "android": null,
+      "macos": null
     }
   },
   "launchAssistant": {
@@ -185,7 +193,8 @@
     "keyCodes": {
       "android": [
         219
-      ]
+      ],
+      "macos": null
     }
   },
   "sleep": {
@@ -210,7 +219,8 @@
     "keyCodes": {
       "android": [
         223
-      ]
+      ],
+      "macos": null
     }
   },
   "wakeUp": {
@@ -235,7 +245,8 @@
     "keyCodes": {
       "android": [
         224
-      ]
+      ],
+      "macos": null
     }
   },
   "usbReserved": {
@@ -254,7 +265,8 @@
       "macos": null
     },
     "keyCodes": {
-      "android": null
+      "android": null,
+      "macos": null
     }
   },
   "usbErrorRollOver": {
@@ -273,7 +285,8 @@
       "macos": null
     },
     "keyCodes": {
-      "android": null
+      "android": null,
+      "macos": null
     }
   },
   "usbPostFail": {
@@ -292,7 +305,8 @@
       "macos": null
     },
     "keyCodes": {
-      "android": null
+      "android": null,
+      "macos": null
     }
   },
   "usbErrorUndefined": {
@@ -311,7 +325,8 @@
       "macos": null
     },
     "keyCodes": {
-      "android": null
+      "android": null,
+      "macos": null
     }
   },
   "keyA": {
@@ -336,6 +351,9 @@
     "keyCodes": {
       "android": [
         29
+      ],
+      "macos": [
+        0
       ]
     }
   },
@@ -361,6 +379,9 @@
     "keyCodes": {
       "android": [
         30
+      ],
+      "macos": [
+        11
       ]
     }
   },
@@ -386,6 +407,9 @@
     "keyCodes": {
       "android": [
         31
+      ],
+      "macos": [
+        8
       ]
     }
   },
@@ -411,6 +435,9 @@
     "keyCodes": {
       "android": [
         32
+      ],
+      "macos": [
+        2
       ]
     }
   },
@@ -436,6 +463,9 @@
     "keyCodes": {
       "android": [
         33
+      ],
+      "macos": [
+        14
       ]
     }
   },
@@ -461,6 +491,9 @@
     "keyCodes": {
       "android": [
         34
+      ],
+      "macos": [
+        3
       ]
     }
   },
@@ -486,6 +519,9 @@
     "keyCodes": {
       "android": [
         35
+      ],
+      "macos": [
+        5
       ]
     }
   },
@@ -511,6 +547,9 @@
     "keyCodes": {
       "android": [
         36
+      ],
+      "macos": [
+        4
       ]
     }
   },
@@ -536,6 +575,9 @@
     "keyCodes": {
       "android": [
         37
+      ],
+      "macos": [
+        34
       ]
     }
   },
@@ -560,6 +602,9 @@
     },
     "keyCodes": {
       "android": [
+        38
+      ],
+      "macos": [
         38
       ]
     }
@@ -586,6 +631,9 @@
     "keyCodes": {
       "android": [
         39
+      ],
+      "macos": [
+        40
       ]
     }
   },
@@ -611,6 +659,9 @@
     "keyCodes": {
       "android": [
         40
+      ],
+      "macos": [
+        37
       ]
     }
   },
@@ -636,6 +687,9 @@
     "keyCodes": {
       "android": [
         41
+      ],
+      "macos": [
+        46
       ]
     }
   },
@@ -661,6 +715,9 @@
     "keyCodes": {
       "android": [
         42
+      ],
+      "macos": [
+        45
       ]
     }
   },
@@ -686,6 +743,9 @@
     "keyCodes": {
       "android": [
         43
+      ],
+      "macos": [
+        31
       ]
     }
   },
@@ -711,6 +771,9 @@
     "keyCodes": {
       "android": [
         44
+      ],
+      "macos": [
+        35
       ]
     }
   },
@@ -736,6 +799,9 @@
     "keyCodes": {
       "android": [
         45
+      ],
+      "macos": [
+        12
       ]
     }
   },
@@ -761,6 +827,9 @@
     "keyCodes": {
       "android": [
         46
+      ],
+      "macos": [
+        15
       ]
     }
   },
@@ -786,6 +855,9 @@
     "keyCodes": {
       "android": [
         47
+      ],
+      "macos": [
+        1
       ]
     }
   },
@@ -811,6 +883,9 @@
     "keyCodes": {
       "android": [
         48
+      ],
+      "macos": [
+        17
       ]
     }
   },
@@ -836,6 +911,9 @@
     "keyCodes": {
       "android": [
         49
+      ],
+      "macos": [
+        32
       ]
     }
   },
@@ -861,6 +939,9 @@
     "keyCodes": {
       "android": [
         50
+      ],
+      "macos": [
+        9
       ]
     }
   },
@@ -886,6 +967,9 @@
     "keyCodes": {
       "android": [
         51
+      ],
+      "macos": [
+        13
       ]
     }
   },
@@ -911,6 +995,9 @@
     "keyCodes": {
       "android": [
         52
+      ],
+      "macos": [
+        7
       ]
     }
   },
@@ -936,6 +1023,9 @@
     "keyCodes": {
       "android": [
         53
+      ],
+      "macos": [
+        16
       ]
     }
   },
@@ -961,6 +1051,9 @@
     "keyCodes": {
       "android": [
         54
+      ],
+      "macos": [
+        6
       ]
     }
   },
@@ -986,6 +1079,9 @@
     "keyCodes": {
       "android": [
         8
+      ],
+      "macos": [
+        18
       ]
     }
   },
@@ -1011,6 +1107,9 @@
     "keyCodes": {
       "android": [
         9
+      ],
+      "macos": [
+        19
       ]
     }
   },
@@ -1036,6 +1135,9 @@
     "keyCodes": {
       "android": [
         10
+      ],
+      "macos": [
+        20
       ]
     }
   },
@@ -1061,6 +1163,9 @@
     "keyCodes": {
       "android": [
         11
+      ],
+      "macos": [
+        21
       ]
     }
   },
@@ -1086,6 +1191,9 @@
     "keyCodes": {
       "android": [
         12
+      ],
+      "macos": [
+        23
       ]
     }
   },
@@ -1111,6 +1219,9 @@
     "keyCodes": {
       "android": [
         13
+      ],
+      "macos": [
+        22
       ]
     }
   },
@@ -1136,6 +1247,9 @@
     "keyCodes": {
       "android": [
         14
+      ],
+      "macos": [
+        26
       ]
     }
   },
@@ -1161,6 +1275,9 @@
     "keyCodes": {
       "android": [
         15
+      ],
+      "macos": [
+        28
       ]
     }
   },
@@ -1186,6 +1303,9 @@
     "keyCodes": {
       "android": [
         16
+      ],
+      "macos": [
+        25
       ]
     }
   },
@@ -1211,6 +1331,9 @@
     "keyCodes": {
       "android": [
         7
+      ],
+      "macos": [
+        29
       ]
     }
   },
@@ -1236,6 +1359,9 @@
     "keyCodes": {
       "android": [
         66
+      ],
+      "macos": [
+        36
       ]
     }
   },
@@ -1261,6 +1387,9 @@
     "keyCodes": {
       "android": [
         111
+      ],
+      "macos": [
+        53
       ]
     }
   },
@@ -1286,6 +1415,9 @@
     "keyCodes": {
       "android": [
         67
+      ],
+      "macos": [
+        51
       ]
     }
   },
@@ -1311,6 +1443,9 @@
     "keyCodes": {
       "android": [
         61
+      ],
+      "macos": [
+        48
       ]
     }
   },
@@ -1336,6 +1471,9 @@
     "keyCodes": {
       "android": [
         62
+      ],
+      "macos": [
+        49
       ]
     }
   },
@@ -1361,6 +1499,9 @@
     "keyCodes": {
       "android": [
         69
+      ],
+      "macos": [
+        27
       ]
     }
   },
@@ -1386,6 +1527,9 @@
     "keyCodes": {
       "android": [
         70
+      ],
+      "macos": [
+        24
       ]
     }
   },
@@ -1411,6 +1555,9 @@
     "keyCodes": {
       "android": [
         71
+      ],
+      "macos": [
+        33
       ]
     }
   },
@@ -1436,6 +1583,9 @@
     "keyCodes": {
       "android": [
         72
+      ],
+      "macos": [
+        30
       ]
     }
   },
@@ -1462,6 +1612,9 @@
     "keyCodes": {
       "android": [
         73
+      ],
+      "macos": [
+        42
       ]
     }
   },
@@ -1487,6 +1640,9 @@
     "keyCodes": {
       "android": [
         74
+      ],
+      "macos": [
+        41
       ]
     }
   },
@@ -1512,6 +1668,9 @@
     "keyCodes": {
       "android": [
         75
+      ],
+      "macos": [
+        39
       ]
     }
   },
@@ -1537,6 +1696,9 @@
     "keyCodes": {
       "android": [
         68
+      ],
+      "macos": [
+        50
       ]
     }
   },
@@ -1562,6 +1724,9 @@
     "keyCodes": {
       "android": [
         55
+      ],
+      "macos": [
+        43
       ]
     }
   },
@@ -1587,6 +1752,9 @@
     "keyCodes": {
       "android": [
         56
+      ],
+      "macos": [
+        47
       ]
     }
   },
@@ -1612,6 +1780,9 @@
     "keyCodes": {
       "android": [
         76
+      ],
+      "macos": [
+        44
       ]
     }
   },
@@ -1637,6 +1808,9 @@
     "keyCodes": {
       "android": [
         115
+      ],
+      "macos": [
+        57
       ]
     }
   },
@@ -1662,6 +1836,9 @@
     "keyCodes": {
       "android": [
         131
+      ],
+      "macos": [
+        122
       ]
     }
   },
@@ -1687,6 +1864,9 @@
     "keyCodes": {
       "android": [
         132
+      ],
+      "macos": [
+        120
       ]
     }
   },
@@ -1712,6 +1892,9 @@
     "keyCodes": {
       "android": [
         133
+      ],
+      "macos": [
+        99
       ]
     }
   },
@@ -1737,6 +1920,9 @@
     "keyCodes": {
       "android": [
         134
+      ],
+      "macos": [
+        118
       ]
     }
   },
@@ -1762,6 +1948,9 @@
     "keyCodes": {
       "android": [
         135
+      ],
+      "macos": [
+        96
       ]
     }
   },
@@ -1787,6 +1976,9 @@
     "keyCodes": {
       "android": [
         136
+      ],
+      "macos": [
+        97
       ]
     }
   },
@@ -1812,6 +2004,9 @@
     "keyCodes": {
       "android": [
         137
+      ],
+      "macos": [
+        98
       ]
     }
   },
@@ -1837,6 +2032,9 @@
     "keyCodes": {
       "android": [
         138
+      ],
+      "macos": [
+        100
       ]
     }
   },
@@ -1862,6 +2060,9 @@
     "keyCodes": {
       "android": [
         139
+      ],
+      "macos": [
+        101
       ]
     }
   },
@@ -1887,6 +2088,9 @@
     "keyCodes": {
       "android": [
         140
+      ],
+      "macos": [
+        109
       ]
     }
   },
@@ -1912,6 +2116,9 @@
     "keyCodes": {
       "android": [
         141
+      ],
+      "macos": [
+        103
       ]
     }
   },
@@ -1937,6 +2144,9 @@
     "keyCodes": {
       "android": [
         142
+      ],
+      "macos": [
+        111
       ]
     }
   },
@@ -1962,7 +2172,8 @@
     "keyCodes": {
       "android": [
         120
-      ]
+      ],
+      "macos": null
     }
   },
   "scrollLock": {
@@ -1987,7 +2198,8 @@
     "keyCodes": {
       "android": [
         116
-      ]
+      ],
+      "macos": null
     }
   },
   "pause": {
@@ -2013,7 +2225,8 @@
     "keyCodes": {
       "android": [
         121
-      ]
+      ],
+      "macos": null
     }
   },
   "insert": {
@@ -2038,6 +2251,9 @@
     "keyCodes": {
       "android": [
         124
+      ],
+      "macos": [
+        114
       ]
     }
   },
@@ -2063,6 +2279,9 @@
     "keyCodes": {
       "android": [
         122
+      ],
+      "macos": [
+        115
       ]
     }
   },
@@ -2089,6 +2308,9 @@
     "keyCodes": {
       "android": [
         92
+      ],
+      "macos": [
+        116
       ]
     }
   },
@@ -2114,6 +2336,9 @@
     "keyCodes": {
       "android": [
         112
+      ],
+      "macos": [
+        117
       ]
     }
   },
@@ -2139,6 +2364,9 @@
     "keyCodes": {
       "android": [
         123
+      ],
+      "macos": [
+        119
       ]
     }
   },
@@ -2165,6 +2393,9 @@
     "keyCodes": {
       "android": [
         93
+      ],
+      "macos": [
+        121
       ]
     }
   },
@@ -2190,6 +2421,9 @@
     "keyCodes": {
       "android": [
         22
+      ],
+      "macos": [
+        124
       ]
     }
   },
@@ -2215,6 +2449,9 @@
     "keyCodes": {
       "android": [
         21
+      ],
+      "macos": [
+        123
       ]
     }
   },
@@ -2240,6 +2477,9 @@
     "keyCodes": {
       "android": [
         20
+      ],
+      "macos": [
+        125
       ]
     }
   },
@@ -2265,6 +2505,9 @@
     "keyCodes": {
       "android": [
         19
+      ],
+      "macos": [
+        126
       ]
     }
   },
@@ -2290,6 +2533,9 @@
     "keyCodes": {
       "android": [
         143
+      ],
+      "macos": [
+        71
       ]
     }
   },
@@ -2315,6 +2561,9 @@
     "keyCodes": {
       "android": [
         154
+      ],
+      "macos": [
+        75
       ]
     }
   },
@@ -2340,6 +2589,9 @@
     "keyCodes": {
       "android": [
         155
+      ],
+      "macos": [
+        67
       ]
     }
   },
@@ -2365,6 +2617,9 @@
     "keyCodes": {
       "android": [
         156
+      ],
+      "macos": [
+        78
       ]
     }
   },
@@ -2390,6 +2645,9 @@
     "keyCodes": {
       "android": [
         157
+      ],
+      "macos": [
+        69
       ]
     }
   },
@@ -2415,6 +2673,9 @@
     "keyCodes": {
       "android": [
         160
+      ],
+      "macos": [
+        76
       ]
     }
   },
@@ -2440,6 +2701,9 @@
     "keyCodes": {
       "android": [
         145
+      ],
+      "macos": [
+        83
       ]
     }
   },
@@ -2465,6 +2729,9 @@
     "keyCodes": {
       "android": [
         146
+      ],
+      "macos": [
+        84
       ]
     }
   },
@@ -2490,6 +2757,9 @@
     "keyCodes": {
       "android": [
         147
+      ],
+      "macos": [
+        85
       ]
     }
   },
@@ -2515,6 +2785,9 @@
     "keyCodes": {
       "android": [
         148
+      ],
+      "macos": [
+        86
       ]
     }
   },
@@ -2540,6 +2813,9 @@
     "keyCodes": {
       "android": [
         149
+      ],
+      "macos": [
+        87
       ]
     }
   },
@@ -2565,6 +2841,9 @@
     "keyCodes": {
       "android": [
         150
+      ],
+      "macos": [
+        88
       ]
     }
   },
@@ -2590,6 +2869,9 @@
     "keyCodes": {
       "android": [
         151
+      ],
+      "macos": [
+        89
       ]
     }
   },
@@ -2615,6 +2897,9 @@
     "keyCodes": {
       "android": [
         152
+      ],
+      "macos": [
+        91
       ]
     }
   },
@@ -2640,6 +2925,9 @@
     "keyCodes": {
       "android": [
         153
+      ],
+      "macos": [
+        92
       ]
     }
   },
@@ -2665,6 +2953,9 @@
     "keyCodes": {
       "android": [
         144
+      ],
+      "macos": [
+        82
       ]
     }
   },
@@ -2690,6 +2981,9 @@
     "keyCodes": {
       "android": [
         158
+      ],
+      "macos": [
+        65
       ]
     }
   },
@@ -2709,7 +3003,10 @@
       "macos": 10
     },
     "keyCodes": {
-      "android": null
+      "android": null,
+      "macos": [
+        10
+      ]
     }
   },
   "contextMenu": {
@@ -2735,6 +3032,9 @@
     "keyCodes": {
       "android": [
         82
+      ],
+      "macos": [
+        110
       ]
     }
   },
@@ -2761,7 +3061,8 @@
     "keyCodes": {
       "android": [
         26
-      ]
+      ],
+      "macos": null
     }
   },
   "numpadEqual": {
@@ -2786,6 +3087,9 @@
     "keyCodes": {
       "android": [
         161
+      ],
+      "macos": [
+        81
       ]
     }
   },
@@ -2809,7 +3113,10 @@
       "macos": 105
     },
     "keyCodes": {
-      "android": null
+      "android": null,
+      "macos": [
+        105
+      ]
     }
   },
   "f14": {
@@ -2832,7 +3139,10 @@
       "macos": 107
     },
     "keyCodes": {
-      "android": null
+      "android": null,
+      "macos": [
+        107
+      ]
     }
   },
   "f15": {
@@ -2855,7 +3165,10 @@
       "macos": 113
     },
     "keyCodes": {
-      "android": null
+      "android": null,
+      "macos": [
+        113
+      ]
     }
   },
   "f16": {
@@ -2878,7 +3191,10 @@
       "macos": 106
     },
     "keyCodes": {
-      "android": null
+      "android": null,
+      "macos": [
+        106
+      ]
     }
   },
   "f17": {
@@ -2901,7 +3217,10 @@
       "macos": 64
     },
     "keyCodes": {
-      "android": null
+      "android": null,
+      "macos": [
+        64
+      ]
     }
   },
   "f18": {
@@ -2924,7 +3243,10 @@
       "macos": 79
     },
     "keyCodes": {
-      "android": null
+      "android": null,
+      "macos": [
+        79
+      ]
     }
   },
   "f19": {
@@ -2947,7 +3269,10 @@
       "macos": 80
     },
     "keyCodes": {
-      "android": null
+      "android": null,
+      "macos": [
+        80
+      ]
     }
   },
   "f20": {
@@ -2970,7 +3295,10 @@
       "macos": 90
     },
     "keyCodes": {
-      "android": null
+      "android": null,
+      "macos": [
+        90
+      ]
     }
   },
   "f21": {
@@ -2993,7 +3321,8 @@
       "macos": null
     },
     "keyCodes": {
-      "android": null
+      "android": null,
+      "macos": null
     }
   },
   "f22": {
@@ -3016,7 +3345,8 @@
       "macos": null
     },
     "keyCodes": {
-      "android": null
+      "android": null,
+      "macos": null
     }
   },
   "f23": {
@@ -3039,7 +3369,8 @@
       "macos": null
     },
     "keyCodes": {
-      "android": null
+      "android": null,
+      "macos": null
     }
   },
   "f24": {
@@ -3062,7 +3393,8 @@
       "macos": null
     },
     "keyCodes": {
-      "android": null
+      "android": null,
+      "macos": null
     }
   },
   "open": {
@@ -3085,7 +3417,8 @@
       "macos": null
     },
     "keyCodes": {
-      "android": null
+      "android": null,
+      "macos": null
     }
   },
   "help": {
@@ -3110,7 +3443,8 @@
     "keyCodes": {
       "android": [
         259
-      ]
+      ],
+      "macos": null
     }
   },
   "select": {
@@ -3129,7 +3463,8 @@
       "macos": null
     },
     "keyCodes": {
-      "android": null
+      "android": null,
+      "macos": null
     }
   },
   "again": {
@@ -3152,7 +3487,8 @@
       "macos": null
     },
     "keyCodes": {
-      "android": null
+      "android": null,
+      "macos": null
     }
   },
   "undo": {
@@ -3175,7 +3511,8 @@
       "macos": null
     },
     "keyCodes": {
-      "android": null
+      "android": null,
+      "macos": null
     }
   },
   "cut": {
@@ -3200,7 +3537,8 @@
     "keyCodes": {
       "android": [
         277
-      ]
+      ],
+      "macos": null
     }
   },
   "copy": {
@@ -3225,7 +3563,8 @@
     "keyCodes": {
       "android": [
         278
-      ]
+      ],
+      "macos": null
     }
   },
   "paste": {
@@ -3250,7 +3589,8 @@
     "keyCodes": {
       "android": [
         279
-      ]
+      ],
+      "macos": null
     }
   },
   "find": {
@@ -3273,7 +3613,8 @@
       "macos": null
     },
     "keyCodes": {
-      "android": null
+      "android": null,
+      "macos": null
     }
   },
   "audioVolumeMute": {
@@ -3298,6 +3639,9 @@
     "keyCodes": {
       "android": [
         164
+      ],
+      "macos": [
+        74
       ]
     }
   },
@@ -3323,6 +3667,9 @@
     "keyCodes": {
       "android": [
         24
+      ],
+      "macos": [
+        72
       ]
     }
   },
@@ -3348,6 +3695,9 @@
     "keyCodes": {
       "android": [
         25
+      ],
+      "macos": [
+        73
       ]
     }
   },
@@ -3374,6 +3724,9 @@
     "keyCodes": {
       "android": [
         159
+      ],
+      "macos": [
+        95
       ]
     }
   },
@@ -3393,7 +3746,10 @@
       "macos": 94
     },
     "keyCodes": {
-      "android": null
+      "android": null,
+      "macos": [
+        94
+      ]
     }
   },
   "kanaMode": {
@@ -3412,7 +3768,10 @@
       "macos": 104
     },
     "keyCodes": {
-      "android": null
+      "android": null,
+      "macos": [
+        104
+      ]
     }
   },
   "intlYen": {
@@ -3431,7 +3790,10 @@
       "macos": 93
     },
     "keyCodes": {
-      "android": null
+      "android": null,
+      "macos": [
+        93
+      ]
     }
   },
   "convert": {
@@ -3456,7 +3818,8 @@
     "keyCodes": {
       "android": [
         214
-      ]
+      ],
+      "macos": null
     }
   },
   "nonConvert": {
@@ -3481,7 +3844,8 @@
     "keyCodes": {
       "android": [
         213
-      ]
+      ],
+      "macos": null
     }
   },
   "lang1": {
@@ -3500,7 +3864,8 @@
       "macos": null
     },
     "keyCodes": {
-      "android": null
+      "android": null,
+      "macos": null
     }
   },
   "lang2": {
@@ -3519,7 +3884,8 @@
       "macos": null
     },
     "keyCodes": {
-      "android": null
+      "android": null,
+      "macos": null
     }
   },
   "lang3": {
@@ -3542,7 +3908,8 @@
       "macos": null
     },
     "keyCodes": {
-      "android": null
+      "android": null,
+      "macos": null
     }
   },
   "lang4": {
@@ -3565,7 +3932,8 @@
       "macos": null
     },
     "keyCodes": {
-      "android": null
+      "android": null,
+      "macos": null
     }
   },
   "lang5": {
@@ -3584,7 +3952,8 @@
       "macos": null
     },
     "keyCodes": {
-      "android": null
+      "android": null,
+      "macos": null
     }
   },
   "abort": {
@@ -3603,7 +3972,8 @@
       "macos": null
     },
     "keyCodes": {
-      "android": null
+      "android": null,
+      "macos": null
     }
   },
   "props": {
@@ -3626,7 +3996,8 @@
       "macos": null
     },
     "keyCodes": {
-      "android": null
+      "android": null,
+      "macos": null
     }
   },
   "numpadParenLeft": {
@@ -3651,7 +4022,8 @@
     "keyCodes": {
       "android": [
         162
-      ]
+      ],
+      "macos": null
     }
   },
   "numpadParenRight": {
@@ -3676,7 +4048,8 @@
     "keyCodes": {
       "android": [
         163
-      ]
+      ],
+      "macos": null
     }
   },
   "numpadBackspace": {
@@ -3695,7 +4068,8 @@
       "macos": null
     },
     "keyCodes": {
-      "android": null
+      "android": null,
+      "macos": null
     }
   },
   "numpadMemoryStore": {
@@ -3714,7 +4088,8 @@
       "macos": null
     },
     "keyCodes": {
-      "android": null
+      "android": null,
+      "macos": null
     }
   },
   "numpadMemoryRecall": {
@@ -3733,7 +4108,8 @@
       "macos": null
     },
     "keyCodes": {
-      "android": null
+      "android": null,
+      "macos": null
     }
   },
   "numpadMemoryClear": {
@@ -3752,7 +4128,8 @@
       "macos": null
     },
     "keyCodes": {
-      "android": null
+      "android": null,
+      "macos": null
     }
   },
   "numpadMemoryAdd": {
@@ -3771,7 +4148,8 @@
       "macos": null
     },
     "keyCodes": {
-      "android": null
+      "android": null,
+      "macos": null
     }
   },
   "numpadMemorySubtract": {
@@ -3790,7 +4168,8 @@
       "macos": null
     },
     "keyCodes": {
-      "android": null
+      "android": null,
+      "macos": null
     }
   },
   "numpadSignChange": {
@@ -3809,7 +4188,8 @@
       "macos": null
     },
     "keyCodes": {
-      "android": null
+      "android": null,
+      "macos": null
     }
   },
   "numpadClear": {
@@ -3828,7 +4208,8 @@
       "macos": null
     },
     "keyCodes": {
-      "android": null
+      "android": null,
+      "macos": null
     }
   },
   "numpadClearEntry": {
@@ -3847,7 +4228,8 @@
       "macos": null
     },
     "keyCodes": {
-      "android": null
+      "android": null,
+      "macos": null
     }
   },
   "controlLeft": {
@@ -3872,6 +4254,9 @@
     "keyCodes": {
       "android": [
         113
+      ],
+      "macos": [
+        59
       ]
     }
   },
@@ -3897,6 +4282,9 @@
     "keyCodes": {
       "android": [
         59
+      ],
+      "macos": [
+        56
       ]
     }
   },
@@ -3922,6 +4310,9 @@
     "keyCodes": {
       "android": [
         57
+      ],
+      "macos": [
+        58
       ]
     }
   },
@@ -3947,6 +4338,9 @@
     "keyCodes": {
       "android": [
         117
+      ],
+      "macos": [
+        55
       ]
     }
   },
@@ -3972,6 +4366,9 @@
     "keyCodes": {
       "android": [
         114
+      ],
+      "macos": [
+        62
       ]
     }
   },
@@ -3996,6 +4393,9 @@
     },
     "keyCodes": {
       "android": [
+        60
+      ],
+      "macos": [
         60
       ]
     }
@@ -4022,6 +4422,9 @@
     "keyCodes": {
       "android": [
         58
+      ],
+      "macos": [
+        61
       ]
     }
   },
@@ -4047,6 +4450,9 @@
     "keyCodes": {
       "android": [
         118
+      ],
+      "macos": [
+        54
       ]
     }
   },
@@ -4072,7 +4478,8 @@
     "keyCodes": {
       "android": [
         165
-      ]
+      ],
+      "macos": null
     }
   },
   "closedCaptionToggle": {
@@ -4095,7 +4502,8 @@
     "keyCodes": {
       "android": [
         175
-      ]
+      ],
+      "macos": null
     }
   },
   "brightnessUp": {
@@ -4120,7 +4528,8 @@
     "keyCodes": {
       "android": [
         221
-      ]
+      ],
+      "macos": null
     }
   },
   "brightnessDown": {
@@ -4145,7 +4554,8 @@
     "keyCodes": {
       "android": [
         220
-      ]
+      ],
+      "macos": null
     }
   },
   "brightnessToggle": {
@@ -4164,7 +4574,8 @@
       "macos": null
     },
     "keyCodes": {
-      "android": null
+      "android": null,
+      "macos": null
     }
   },
   "brightnessMinimum": {
@@ -4183,7 +4594,8 @@
       "macos": null
     },
     "keyCodes": {
-      "android": null
+      "android": null,
+      "macos": null
     }
   },
   "brightnessMaximum": {
@@ -4202,7 +4614,8 @@
       "macos": null
     },
     "keyCodes": {
-      "android": null
+      "android": null,
+      "macos": null
     }
   },
   "brightnessAuto": {
@@ -4221,7 +4634,8 @@
       "macos": null
     },
     "keyCodes": {
-      "android": null
+      "android": null,
+      "macos": null
     }
   },
   "mediaLast": {
@@ -4244,7 +4658,8 @@
     "keyCodes": {
       "android": [
         229
-      ]
+      ],
+      "macos": null
     }
   },
   "launchPhone": {
@@ -4263,7 +4678,8 @@
       "macos": null
     },
     "keyCodes": {
-      "android": null
+      "android": null,
+      "macos": null
     }
   },
   "programGuide": {
@@ -4282,7 +4698,8 @@
       "macos": null
     },
     "keyCodes": {
-      "android": null
+      "android": null,
+      "macos": null
     }
   },
   "exit": {
@@ -4305,7 +4722,8 @@
       "macos": null
     },
     "keyCodes": {
-      "android": null
+      "android": null,
+      "macos": null
     }
   },
   "channelUp": {
@@ -4330,7 +4748,8 @@
     "keyCodes": {
       "android": [
         166
-      ]
+      ],
+      "macos": null
     }
   },
   "channelDown": {
@@ -4355,7 +4774,8 @@
     "keyCodes": {
       "android": [
         167
-      ]
+      ],
+      "macos": null
     }
   },
   "mediaPlay": {
@@ -4381,7 +4801,8 @@
     "keyCodes": {
       "android": [
         126
-      ]
+      ],
+      "macos": null
     }
   },
   "mediaRecord": {
@@ -4406,7 +4827,8 @@
     "keyCodes": {
       "android": [
         130
-      ]
+      ],
+      "macos": null
     }
   },
   "mediaFastForward": {
@@ -4431,7 +4853,8 @@
     "keyCodes": {
       "android": [
         90
-      ]
+      ],
+      "macos": null
     }
   },
   "mediaRewind": {
@@ -4456,7 +4879,8 @@
     "keyCodes": {
       "android": [
         89
-      ]
+      ],
+      "macos": null
     }
   },
   "mediaTrackNext": {
@@ -4481,7 +4905,8 @@
     "keyCodes": {
       "android": [
         87
-      ]
+      ],
+      "macos": null
     }
   },
   "mediaTrackPrevious": {
@@ -4506,7 +4931,8 @@
     "keyCodes": {
       "android": [
         88
-      ]
+      ],
+      "macos": null
     }
   },
   "mediaStop": {
@@ -4532,7 +4958,8 @@
     "keyCodes": {
       "android": [
         86
-      ]
+      ],
+      "macos": null
     }
   },
   "eject": {
@@ -4558,7 +4985,8 @@
     "keyCodes": {
       "android": [
         129
-      ]
+      ],
+      "macos": null
     }
   },
   "mediaPlayPause": {
@@ -4583,7 +5011,8 @@
     "keyCodes": {
       "android": [
         85
-      ]
+      ],
+      "macos": null
     }
   },
   "speechInputToggle": {
@@ -4602,7 +5031,8 @@
       "macos": null
     },
     "keyCodes": {
-      "android": null
+      "android": null,
+      "macos": null
     }
   },
   "bassBoost": {
@@ -4625,7 +5055,8 @@
       "macos": null
     },
     "keyCodes": {
-      "android": null
+      "android": null,
+      "macos": null
     }
   },
   "mediaSelect": {
@@ -4644,7 +5075,8 @@
       "macos": null
     },
     "keyCodes": {
-      "android": null
+      "android": null,
+      "macos": null
     }
   },
   "launchWordProcessor": {
@@ -4663,7 +5095,8 @@
       "macos": null
     },
     "keyCodes": {
-      "android": null
+      "android": null,
+      "macos": null
     }
   },
   "launchSpreadsheet": {
@@ -4682,7 +5115,8 @@
       "macos": null
     },
     "keyCodes": {
-      "android": null
+      "android": null,
+      "macos": null
     }
   },
   "launchMail": {
@@ -4708,7 +5142,8 @@
     "keyCodes": {
       "android": [
         65
-      ]
+      ],
+      "macos": null
     }
   },
   "launchContacts": {
@@ -4733,7 +5168,8 @@
     "keyCodes": {
       "android": [
         207
-      ]
+      ],
+      "macos": null
     }
   },
   "launchCalendar": {
@@ -4758,7 +5194,8 @@
     "keyCodes": {
       "android": [
         208
-      ]
+      ],
+      "macos": null
     }
   },
   "launchApp2": {
@@ -4777,7 +5214,8 @@
       "macos": null
     },
     "keyCodes": {
-      "android": null
+      "android": null,
+      "macos": null
     }
   },
   "launchApp1": {
@@ -4796,7 +5234,8 @@
       "macos": null
     },
     "keyCodes": {
-      "android": null
+      "android": null,
+      "macos": null
     }
   },
   "launchInternetBrowser": {
@@ -4815,7 +5254,8 @@
       "macos": null
     },
     "keyCodes": {
-      "android": null
+      "android": null,
+      "macos": null
     }
   },
   "logOff": {
@@ -4834,7 +5274,8 @@
       "macos": null
     },
     "keyCodes": {
-      "android": null
+      "android": null,
+      "macos": null
     }
   },
   "lockScreen": {
@@ -4853,7 +5294,8 @@
       "macos": null
     },
     "keyCodes": {
-      "android": null
+      "android": null,
+      "macos": null
     }
   },
   "launchControlPanel": {
@@ -4872,7 +5314,8 @@
       "macos": null
     },
     "keyCodes": {
-      "android": null
+      "android": null,
+      "macos": null
     }
   },
   "selectTask": {
@@ -4891,7 +5334,8 @@
       "macos": null
     },
     "keyCodes": {
-      "android": null
+      "android": null,
+      "macos": null
     }
   },
   "launchDocuments": {
@@ -4910,7 +5354,8 @@
       "macos": null
     },
     "keyCodes": {
-      "android": null
+      "android": null,
+      "macos": null
     }
   },
   "spellCheck": {
@@ -4929,7 +5374,8 @@
       "macos": null
     },
     "keyCodes": {
-      "android": null
+      "android": null,
+      "macos": null
     }
   },
   "launchKeyboardLayout": {
@@ -4948,7 +5394,8 @@
       "macos": null
     },
     "keyCodes": {
-      "android": null
+      "android": null,
+      "macos": null
     }
   },
   "launchScreenSaver": {
@@ -4967,7 +5414,8 @@
       "macos": null
     },
     "keyCodes": {
-      "android": null
+      "android": null,
+      "macos": null
     }
   },
   "launchAudioBrowser": {
@@ -4986,7 +5434,8 @@
       "macos": null
     },
     "keyCodes": {
-      "android": null
+      "android": null,
+      "macos": null
     }
   },
   "newKey": {
@@ -5009,7 +5458,8 @@
       "macos": null
     },
     "keyCodes": {
-      "android": null
+      "android": null,
+      "macos": null
     }
   },
   "close": {
@@ -5036,7 +5486,8 @@
     "keyCodes": {
       "android": [
         128
-      ]
+      ],
+      "macos": null
     }
   },
   "save": {
@@ -5055,7 +5506,8 @@
       "macos": null
     },
     "keyCodes": {
-      "android": null
+      "android": null,
+      "macos": null
     }
   },
   "print": {
@@ -5078,7 +5530,8 @@
       "macos": null
     },
     "keyCodes": {
-      "android": null
+      "android": null,
+      "macos": null
     }
   },
   "browserSearch": {
@@ -5103,7 +5556,8 @@
     "keyCodes": {
       "android": [
         84
-      ]
+      ],
+      "macos": null
     }
   },
   "browserHome": {
@@ -5122,7 +5576,8 @@
       "macos": null
     },
     "keyCodes": {
-      "android": null
+      "android": null,
+      "macos": null
     }
   },
   "browserBack": {
@@ -5141,7 +5596,8 @@
       "macos": null
     },
     "keyCodes": {
-      "android": null
+      "android": null,
+      "macos": null
     }
   },
   "browserForward": {
@@ -5166,7 +5622,8 @@
     "keyCodes": {
       "android": [
         125
-      ]
+      ],
+      "macos": null
     }
   },
   "browserStop": {
@@ -5185,7 +5642,8 @@
       "macos": null
     },
     "keyCodes": {
-      "android": null
+      "android": null,
+      "macos": null
     }
   },
   "browserRefresh": {
@@ -5204,7 +5662,8 @@
       "macos": null
     },
     "keyCodes": {
-      "android": null
+      "android": null,
+      "macos": null
     }
   },
   "browserFavorites": {
@@ -5229,7 +5688,8 @@
     "keyCodes": {
       "android": [
         174
-      ]
+      ],
+      "macos": null
     }
   },
   "zoomIn": {
@@ -5252,7 +5712,8 @@
     "keyCodes": {
       "android": [
         168
-      ]
+      ],
+      "macos": null
     }
   },
   "zoomOut": {
@@ -5275,7 +5736,8 @@
     "keyCodes": {
       "android": [
         169
-      ]
+      ],
+      "macos": null
     }
   },
   "zoomToggle": {
@@ -5298,7 +5760,8 @@
     "keyCodes": {
       "android": [
         255
-      ]
+      ],
+      "macos": null
     }
   },
   "redo": {
@@ -5321,7 +5784,8 @@
       "macos": null
     },
     "keyCodes": {
-      "android": null
+      "android": null,
+      "macos": null
     }
   },
   "mailReply": {
@@ -5340,7 +5804,8 @@
       "macos": null
     },
     "keyCodes": {
-      "android": null
+      "android": null,
+      "macos": null
     }
   },
   "mailForward": {
@@ -5359,7 +5824,8 @@
       "macos": null
     },
     "keyCodes": {
-      "android": null
+      "android": null,
+      "macos": null
     }
   },
   "mailSend": {
@@ -5378,7 +5844,8 @@
       "macos": null
     },
     "keyCodes": {
-      "android": null
+      "android": null,
+      "macos": null
     }
   }
 }
