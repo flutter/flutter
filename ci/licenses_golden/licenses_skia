@@ -1,4 +1,4 @@
-Signature: 8bdb80f9946ca01423af71f6555e5c39
+Signature: 9107ca6e7b9595ef1a2eff8ea828c5c4
 
 UNUSED LICENSES:
 
@@ -2005,7 +2005,6 @@ TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/.clang-tidy
 FILE: ../../../third_party/skia/CQ_COMMITTERS
 FILE: ../../../third_party/skia/DEPS
-FILE: ../../../third_party/skia/Doxyfile
 FILE: ../../../third_party/skia/animations/checkbox.xml
 FILE: ../../../third_party/skia/animations/chest#1.jpg
 FILE: ../../../third_party/skia/animations/fire#1.jpg
@@ -2131,6 +2130,7 @@ FILE: ../../../third_party/skia/infra/bots/assets/chromebook_x86_64_gles/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/clang_linux/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/clang_win/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/cmake_linux/VERSION
+FILE: ../../../third_party/skia/infra/bots/assets/cmake_mac/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/gcloud_linux/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/go/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/go_deps/VERSION
