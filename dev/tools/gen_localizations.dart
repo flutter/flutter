@@ -80,7 +80,7 @@ final Map<LocaleInfo, Map<String, dynamic>> localeToResourceAttributes = <Locale
 /// the first Hant Chinese locale as a default by repeating the data. If an
 /// explicit match is later found, we can reference this set to see if we should
 /// overwrite the existing assumed data.
-final Set<LocaleInfo> assumedLocales = Set<LocaleInfo>();
+final Set<LocaleInfo> assumedLocales = <LocaleInfo>{};
 
 /// Return `s` as a Dart-parseable raw string in single or double quotes.
 ///
@@ -124,15 +124,15 @@ String generateTranslationBundles() {
   final Map<String, Set<String>> languageToScriptCodes = <String, Set<String>>{};
   // Used to calculate if there are any corresponding countries for a given language and script.
   final Map<LocaleInfo, Set<String>> languageAndScriptToCountryCodes = <LocaleInfo, Set<String>>{};
-  final Set<String> allResourceIdentifiers = Set<String>();
+  final Set<String> allResourceIdentifiers = <String>{};
   for (LocaleInfo locale in localeToResources.keys.toList()..sort()) {
     if (locale.scriptCode != null) {
-      languageToScriptCodes[locale.languageCode] ??= Set<String>();
+      languageToScriptCodes[locale.languageCode] ??= <String>{};
       languageToScriptCodes[locale.languageCode].add(locale.scriptCode);
     }
     if (locale.countryCode != null && locale.scriptCode != null) {
       final LocaleInfo key = LocaleInfo.fromString(locale.languageCode + '_' + locale.scriptCode);
-      languageAndScriptToCountryCodes[key] ??= Set<String>();
+      languageAndScriptToCountryCodes[key] ??= <String>{};
       languageAndScriptToCountryCodes[key].add(locale.countryCode);
     }
     languageToLocales[locale.languageCode] ??= <LocaleInfo>[];

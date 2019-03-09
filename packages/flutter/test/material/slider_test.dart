@@ -556,10 +556,10 @@ void main() {
       bool enabled = true,
     }) {
       final ValueChanged<double> onChanged = !enabled
-          ? null
-          : (double d) {
-        value = d;
-      };
+        ? null
+        : (double d) {
+            value = d;
+          };
       return Directionality(
         textDirection: TextDirection.ltr,
         child: MediaQuery(

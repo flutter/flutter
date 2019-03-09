@@ -9,6 +9,7 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/platform.dart';
 import '../cache.dart';
+import '../project.dart';
 import '../runner/flutter_command.dart';
 import '../test/coverage_collector.dart';
 import '../test/event_printer.dart';
@@ -104,6 +105,7 @@ class TestCommand extends FlutterCommand {
   Future<FlutterCommandResult> runCommand() async {
     final List<String> names = argResults['name'];
     final List<String> plainNames = argResults['plain-name'];
+    final FlutterProject flutterProject = await FlutterProject.current();
 
     Iterable<String> files = argResults.rest.map<String>((String testPath) => fs.path.absolute(testPath)).toList();
 
@@ -170,6 +172,7 @@ class TestCommand extends FlutterCommand {
       trackWidgetCreation: argResults['track-widget-creation'],
       updateGoldens: argResults['update-goldens'],
       concurrency: jobs,
+      flutterProject: flutterProject,
     );
 
     if (collector != null) {

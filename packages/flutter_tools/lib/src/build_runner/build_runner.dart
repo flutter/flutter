@@ -10,22 +10,24 @@ import 'package:build_runner_core/build_runner_core.dart' hide BuildStatus;
 import 'package:build_daemon/data/server_log.dart';
 import 'package:build_daemon/data/build_status.dart' as build;
 import 'package:build_daemon/client.dart';
-import 'package:meta/meta.dart';
 import 'package:yaml/yaml.dart';
+import 'package:crypto/crypto.dart' show md5;
 
 import '../artifacts.dart';
+import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process_manager.dart';
-import '../cache.dart';
 import '../codegen.dart';
-import '../convert.dart';
+import '../dart/package_map.dart';
 import '../dart/pub.dart';
 import '../globals.dart';
 import '../project.dart';
-import '../resident_runner.dart';
 import 'build_script_generator.dart';
+
+/// The minimum version of build_runner we can support in the flutter tool.
+const String kMinimumBuildRunnerVersion = '1.2.8';
 
 /// A wrapper for a build_runner process which delegates to a generated
 /// build script.
@@ -36,123 +38,43 @@ class BuildRunner extends CodeGenerator {
   const BuildRunner();
 
   @override
-  Future<CodeGenerationResult> build({
-    @required String mainPath,
-    @required bool aot,
-    @required bool linkPlatformKernelIn,
-    @required bool trackWidgetCreation,
-    @required bool targetProductVm,
-    List<String> extraFrontEndOptions = const <String>[],
-    bool disableKernelGeneration = false,
-  }) async {
-    await generateBuildScript();
-    final FlutterProject flutterProject = await FlutterProject.current();
-    final String frontendServerPath = artifacts.getArtifactPath(
-      Artifact.frontendServerSnapshotForEngineDartSdk
-    );
-    final String sdkRoot = artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath);
-    final String engineDartBinaryPath = artifacts.getArtifactPath(Artifact.engineDartBinary);
-    final String packagesPath = flutterProject.packagesFile.absolute.path;
-    final String buildScript = flutterProject
-        .dartTool
-        .childDirectory('build')
-        .childDirectory('entrypoint')
-        .childFile('build.dart')
-        .path;
-    final String scriptPackagesPath = flutterProject
-        .dartTool
-        .childDirectory('flutter_tool')
-        .childFile('.packages')
-        .path;
-    final String dartPath = fs.path.join(Cache.flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', 'dart');
-    final Status status = logger.startProgress('running builders...', timeout: null);
-    try {
-      final Process buildProcess = await processManager.start(<String>[
-        dartPath,
-        '--packages=$scriptPackagesPath',
-        buildScript,
-        'build',
-        '--skip-build-script-check',
-        '--define', 'flutter_build|kernel=disabled=$disableKernelGeneration',
-        '--define', 'flutter_build|kernel=aot=$aot',
-        '--define', 'flutter_build|kernel=linkPlatformKernelIn=$linkPlatformKernelIn',
-        '--define', 'flutter_build|kernel=trackWidgetCreation=$trackWidgetCreation',
-        '--define', 'flutter_build|kernel=targetProductVm=$targetProductVm',
-        '--define', 'flutter_build|kernel=mainPath=$mainPath',
-        '--define', 'flutter_build|kernel=packagesPath=$packagesPath',
-        '--define', 'flutter_build|kernel=sdkRoot=$sdkRoot',
-        '--define', 'flutter_build|kernel=frontendServerPath=$frontendServerPath',
-        '--define', 'flutter_build|kernel=engineDartBinaryPath=$engineDartBinaryPath',
-        '--define', 'flutter_build|kernel=extraFrontEndOptions=${extraFrontEndOptions ?? const <String>[]}',
-      ]);
-      buildProcess
-          .stdout
-          .transform(utf8.decoder)
-          .transform(const LineSplitter())
-          .listen(printTrace);
-      buildProcess
-          .stderr
-          .transform(utf8.decoder)
-          .transform(const LineSplitter())
-          .listen(printError);
-      await buildProcess.exitCode;
-    } finally {
-      status.stop();
-    }
-    if (disableKernelGeneration) {
-      return const CodeGenerationResult(null, null);
-    }
-    /// We don't check for this above because it might be generated for the
-    /// first time by invoking the build.
-    final Directory dartTool = flutterProject.dartTool;
-    final String projectName = flutterProject.manifest.appName;
-    final Directory generatedDirectory = dartTool
-        .absolute
-        .childDirectory('build')
-        .childDirectory('generated')
-        .childDirectory(projectName);
-    if (!generatedDirectory.existsSync()) {
-      throw Exception('build_runner cannot find generated directory');
-    }
-    final String relativeMain = fs.path.relative(mainPath, from: flutterProject.directory.path);
-    final File packagesFile = fs.file(
-      fs.path.join(generatedDirectory.path,  fs.path.setExtension(relativeMain, '.packages'))
-    );
-    final File dillFile = fs.file(
-      fs.path.join(generatedDirectory.path, fs.path.setExtension(relativeMain, '.app.dill'))
-    );
-    if (!packagesFile.existsSync() || !dillFile.existsSync()) {
-      throw Exception('build_runner did not produce output at expected location: ${dillFile.path} missing');
-    }
-    return CodeGenerationResult(packagesFile, dillFile);
-  }
+  Future<void> generateBuildScript(FlutterProject flutterProject) async {
+    final Directory entrypointDirectory = fs.directory(fs.path.join(flutterProject.dartTool.path, 'build', 'entrypoint'));
+    final Directory generatedDirectory = fs.directory(fs.path.join(flutterProject.dartTool.path, 'flutter_tool'));
+    final File buildScript = entrypointDirectory.childFile('build.dart');
+    final File buildSnapshot = entrypointDirectory.childFile('build.dart.snapshot');
+    final File scriptIdFile = entrypointDirectory.childFile('id');
+    final File syntheticPubspec = generatedDirectory.childFile('pubspec.yaml');
 
-  @override
-  Future<void> invalidateBuildScript() async {
-    final FlutterProject flutterProject = await FlutterProject.current();
-    final File buildScript = flutterProject.dartTool
-        .absolute
-        .childDirectory('flutter_tool')
-        .childFile('build.dart');
-    if (!buildScript.existsSync()) {
-      return;
+    // Check if contents of builders changed. If so, invalidate build script
+    // and regnerate.
+    final YamlMap builders = await flutterProject.builders;
+    final List<int> appliedBuilderDigest = _produceScriptId(builders);
+    if (scriptIdFile.existsSync() && buildSnapshot.existsSync()) {
+      final List<int> previousAppliedBuilderDigest = scriptIdFile.readAsBytesSync();
+      bool digestsAreEqual = false;
+      if (appliedBuilderDigest.length == previousAppliedBuilderDigest.length) {
+        digestsAreEqual = true;
+        for (int i = 0; i < appliedBuilderDigest.length; i++) {
+          if (appliedBuilderDigest[i] != previousAppliedBuilderDigest[i]) {
+            digestsAreEqual = false;
+            break;
+          }
+        }
+      }
+      if (digestsAreEqual) {
+        return;
+      }
     }
-    await buildScript.delete();
-  }
-
-  @override
-  Future<void> generateBuildScript() async {
-    final FlutterProject flutterProject = await FlutterProject.current();
-    final String generatedDirectory = fs.path.join(flutterProject.dartTool.path, 'flutter_tool');
-    final String resultScriptPath = fs.path.join(flutterProject.dartTool.path, 'build', 'entrypoint', 'build.dart');
-    if (fs.file(resultScriptPath).existsSync()) {
-      return;
+    // Clean-up all existing artifacts.
+    if (flutterProject.dartTool.existsSync()) {
+      flutterProject.dartTool.deleteSync(recursive: true);
     }
     final Status status = logger.startProgress('generating build script...', timeout: null);
     try {
-      fs.directory(generatedDirectory).createSync(recursive: true);
-
-      final File syntheticPubspec = fs.file(fs.path.join(generatedDirectory, 'pubspec.yaml'));
+      generatedDirectory.createSync(recursive: true);
+      entrypointDirectory.createSync(recursive: true);
+      flutterProject.dartTool.childDirectory('build').childDirectory('generated').createSync(recursive: true);
       final StringBuffer stringBuffer = StringBuffer();
 
       stringBuffer.writeln('name: flutter_tool');
@@ -160,78 +82,71 @@ class BuildRunner extends CodeGenerator {
       final YamlMap builders = await flutterProject.builders;
       if (builders != null) {
         for (String name in builders.keys) {
-          final YamlNode node = builders[name];
+          final Object node = builders[name];
           stringBuffer.writeln('  $name: $node');
         }
       }
-      stringBuffer.writeln('  build_runner: any');
-      stringBuffer.writeln('  flutter_build:');
-      stringBuffer.writeln('    sdk: flutter');
+      stringBuffer.writeln('  build_runner: ^$kMinimumBuildRunnerVersion');
       await syntheticPubspec.writeAsString(stringBuffer.toString());
 
       await pubGet(
         context: PubContext.pubGet,
-        directory: generatedDirectory,
+        directory: generatedDirectory.path,
         upgrade: false,
         checkLastModified: false,
       );
+      if (!scriptIdFile.existsSync()) {
+        scriptIdFile.createSync(recursive: true);
+      }
+      scriptIdFile.writeAsBytesSync(appliedBuilderDigest);
       final PackageGraph packageGraph = PackageGraph.forPath(syntheticPubspec.parent.path);
       final BuildScriptGenerator buildScriptGenerator = const BuildScriptGeneratorFactory().create(flutterProject, packageGraph);
       await buildScriptGenerator.generateBuildScript();
+      final ProcessResult result = await processManager.run(<String>[
+        artifacts.getArtifactPath(Artifact.engineDartBinary),
+        '--snapshot=${buildSnapshot.path}',
+        '--snapshot-kind=app-jit',
+        '--packages=${fs.path.join(generatedDirectory.path, '.packages')}',
+        buildScript.path,
+      ]);
+      if (result.exitCode != 0) {
+        throwToolExit('Error generating build_script snapshot: ${result.stderr}');
+      }
     } finally {
       status.stop();
     }
   }
 
   @override
-  Future<CodegenDaemon> daemon({
+  Future<CodegenDaemon> daemon(FlutterProject flutterProject, {
     String mainPath,
     bool linkPlatformKernelIn = false,
     bool targetProductVm = false,
     bool trackWidgetCreation = false,
     List<String> extraFrontEndOptions = const <String> [],
   }) async {
-    mainPath ??= findMainDartFile();
-    await generateBuildScript();
-    final FlutterProject flutterProject = await FlutterProject.current();
-    final String frontendServerPath = artifacts.getArtifactPath(
-      Artifact.frontendServerSnapshotForEngineDartSdk
-    );
-    final String sdkRoot = artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath);
+    await generateBuildScript(flutterProject);
+    _generatePackages(flutterProject);
     final String engineDartBinaryPath = artifacts.getArtifactPath(Artifact.engineDartBinary);
-    final String packagesPath = flutterProject.packagesFile.absolute.path;
-    final String buildScript = flutterProject
+    final File buildSnapshot = flutterProject
         .dartTool
         .childDirectory('build')
         .childDirectory('entrypoint')
-        .childFile('build.dart')
-        .path;
+        .childFile('build.dart.snapshot');
     final String scriptPackagesPath = flutterProject
         .dartTool
         .childDirectory('flutter_tool')
         .childFile('.packages')
         .path;
-    final String dartPath = fs.path.join(Cache.flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', 'dart');
     final Status status = logger.startProgress('starting build daemon...', timeout: null);
     BuildDaemonClient buildDaemonClient;
     try {
       final List<String> command = <String>[
-        dartPath,
+        engineDartBinaryPath,
         '--packages=$scriptPackagesPath',
-        buildScript,
+        buildSnapshot.path,
         'daemon',
          '--skip-build-script-check',
-        '--define', 'flutter_build|kernel=disabled=false',
-        '--define', 'flutter_build|kernel=aot=false',
-        '--define', 'flutter_build|kernel=linkPlatformKernelIn=$linkPlatformKernelIn',
-        '--define', 'flutter_build|kernel=trackWidgetCreation=$trackWidgetCreation',
-        '--define', 'flutter_build|kernel=targetProductVm=$targetProductVm',
-        '--define', 'flutter_build|kernel=mainPath=$mainPath',
-        '--define', 'flutter_build|kernel=packagesPath=$packagesPath',
-        '--define', 'flutter_build|kernel=sdkRoot=$sdkRoot',
-        '--define', 'flutter_build|kernel=frontendServerPath=$frontendServerPath',
-        '--define', 'flutter_build|kernel=engineDartBinaryPath=$engineDartBinaryPath',
-        '--define', 'flutter_build|kernel=extraFrontEndOptions=${extraFrontEndOptions ?? const <String>[]}',
       ];
       buildDaemonClient = await BuildDaemonClient.connect(flutterProject.directory.path, command, logHandler: (ServerLog log) => printTrace(log.toString()));
     } finally {
@@ -240,21 +155,27 @@ class BuildRunner extends CodeGenerator {
     buildDaemonClient.registerBuildTarget(DefaultBuildTarget((DefaultBuildTargetBuilder builder) {
       builder.target = flutterProject.manifest.appName;
     }));
-    final String relativeMain = fs.path.relative(mainPath, from: flutterProject.directory.path);
-    final File generatedPackagesFile = fs.file(fs.path.join(flutterProject.generated.path, fs.path.setExtension(relativeMain, '.packages')));
-    final File generatedDillFile = fs.file(fs.path.join(flutterProject.generated.path, fs.path.setExtension(relativeMain, '.app.dill')));
-    return _BuildRunnerCodegenDaemon(buildDaemonClient, generatedPackagesFile, generatedDillFile);
+    return _BuildRunnerCodegenDaemon(buildDaemonClient);
+  }
+
+  // Create generated packages file which adds a multi-root scheme to the user's
+  // project directory. Currently we only replace the root package with a multiroot
+  // scheme. To support codegen on arbitrary packages we would need to do
+  // this for each dependency.
+  void _generatePackages(FlutterProject flutterProject) {
+    final String oldPackagesContents = fs.file(PackageMap.globalPackagesPath).readAsStringSync();
+    final String appName = flutterProject.manifest.appName;
+    final String newPackagesContents = oldPackagesContents.replaceFirst('$appName:lib/', '$appName:$kMultiRootScheme:/');
+    final String generatedPackagesPath = fs.path.setExtension(PackageMap.globalPackagesPath, '.generated');
+    fs.file(generatedPackagesPath).writeAsStringSync(newPackagesContents);
   }
 }
 
 class _BuildRunnerCodegenDaemon implements CodegenDaemon {
-  _BuildRunnerCodegenDaemon(this.buildDaemonClient, this.packagesFile, this.dillFile);
+  _BuildRunnerCodegenDaemon(this.buildDaemonClient);
 
   final BuildDaemonClient buildDaemonClient;
-  @override
-  final File packagesFile;
-  @override
-  final File dillFile;
+
   @override
   CodegenStatus get lastStatus => _lastStatus;
   CodegenStatus _lastStatus;
@@ -278,4 +199,15 @@ class _BuildRunnerCodegenDaemon implements CodegenDaemon {
   void startBuild() {
     buildDaemonClient.startBuild();
   }
+}
+
+// Sorts the builders by name and produces a hashcode of the resulting iterable.
+List<int> _produceScriptId(YamlMap builders) {
+  if (builders == null || builders.isEmpty) {
+    return md5.convert(<int>[]).bytes;
+  }
+  final List<String> orderedBuilders = builders.keys
+    .cast<String>()
+    .toList()..sort();
+  return md5.convert(orderedBuilders.join('').codeUnits).bytes;
 }

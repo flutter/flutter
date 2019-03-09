@@ -43,12 +43,12 @@ class FlutterVersion {
   String _repositoryUrl;
   String get repositoryUrl => _repositoryUrl;
 
-  static Set<String> officialChannels = Set<String>.from(<String>[
+  static const Set<String> officialChannels = <String>{
     'master',
     'dev',
     'beta',
     'stable',
-  ]);
+  };
 
   /// This maps old branch names to the names of branches that replaced them.
   ///

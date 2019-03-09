@@ -175,6 +175,7 @@ class KernelCompiler {
     List<String> fileSystemRoots,
     String fileSystemScheme,
     bool targetProductVm = false,
+    String initializeFromDill,
   }) async {
     final String frontendServer = artifacts.getArtifactPath(
       Artifact.frontendServerSnapshotForEngineDartSdk
@@ -251,6 +252,9 @@ class KernelCompiler {
     if (fileSystemScheme != null) {
       command.addAll(<String>['--filesystem-scheme', fileSystemScheme]);
     }
+    if (initializeFromDill != null) {
+      command.addAll(<String>['--initialize-from-dill', initializeFromDill]);
+    }
 
     if (extraFrontEndOptions != null)
       command.addAll(extraFrontEndOptions);
@@ -259,10 +263,10 @@ class KernelCompiler {
 
     printTrace(command.join(' '));
     final Process server = await processManager
-        .start(command)
-        .catchError((dynamic error, StackTrace stack) {
-      printError('Failed to start frontend server $error, $stack');
-    });
+      .start(command)
+      .catchError((dynamic error, StackTrace stack) {
+        printError('Failed to start frontend server $error, $stack');
+      });
 
     final StdoutHandler _stdoutHandler = StdoutHandler();
 
@@ -661,7 +665,11 @@ class ResidentCompiler {
     return null;
   }
 
-  Future<dynamic> shutdown() {
+  Future<dynamic> shutdown() async {
+    // Server was never sucessfully created.
+    if (_server == null) {
+      return 0;
+    }
     _server.kill();
     return _server.exitCode;
   }

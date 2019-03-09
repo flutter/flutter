@@ -174,6 +174,24 @@ void main() {
     debugResetSemanticsIdCounter();
   });
 
+  final Key textFieldKey = UniqueKey();
+  Widget textFieldBuilder({
+    int maxLines = 1,
+    int minLines,
+  }) {
+    return boilerplate(
+      child: TextField(
+        key: textFieldKey,
+        style: const TextStyle(color: Colors.black, fontSize: 34.0),
+        maxLines: maxLines,
+        minLines: minLines,
+        decoration: const InputDecoration(
+          hintText: 'Placeholder',
+        ),
+      ),
+    );
+  }
+
   testWidgets('TextField passes onEditingComplete to EditableText', (WidgetTester tester) async {
     final VoidCallback onEditingComplete = () {};
 
@@ -883,23 +901,8 @@ void main() {
     expect(controller.selection.isCollapsed, false);
   });
 
-  testWidgets('Multiline text will wrap up to maxLines', (WidgetTester tester) async {
-    final Key textFieldKey = UniqueKey();
-
-    Widget builder(int maxLines) {
-      return boilerplate(
-        child: TextField(
-          key: textFieldKey,
-          style: const TextStyle(color: Colors.black, fontSize: 34.0),
-          maxLines: maxLines,
-          decoration: const InputDecoration(
-            hintText: 'Placeholder',
-          ),
-        ),
-      );
-    }
-
-    await tester.pumpWidget(builder(null));
+  testWidgets('TextField height with minLines unset', (WidgetTester tester) async {
+    await tester.pumpWidget(textFieldBuilder());
 
     RenderBox findInputBox() => tester.renderObject(find.byKey(textFieldKey));
 
@@ -907,46 +910,278 @@ void main() {
     final Size emptyInputSize = inputBox.size;
 
     await tester.enterText(find.byType(TextField), 'No wrapping here.');
-    await tester.pumpWidget(builder(null));
+    await tester.pumpWidget(textFieldBuilder());
     expect(findInputBox(), equals(inputBox));
     expect(inputBox.size, equals(emptyInputSize));
 
-    await tester.pumpWidget(builder(3));
+    // Even when entering multiline text, TextField doesn't grow. It's a single
+    // line input.
+    await tester.enterText(find.byType(TextField), kThreeLines);
+    await tester.pumpWidget(textFieldBuilder());
     expect(findInputBox(), equals(inputBox));
-    expect(inputBox.size, greaterThan(emptyInputSize));
+    expect(inputBox.size, equals(emptyInputSize));
+
+    // maxLines: 3 makes the TextField 3 lines tall
+    await tester.enterText(find.byType(TextField), '');
+    await tester.pumpWidget(textFieldBuilder(maxLines: 3));
+    expect(findInputBox(), equals(inputBox));
+    expect(inputBox.size.height, greaterThan(emptyInputSize.height));
+    expect(inputBox.size.width, emptyInputSize.width);
 
     final Size threeLineInputSize = inputBox.size;
 
+    // Filling with 3 lines of text stays the same size
     await tester.enterText(find.byType(TextField), kThreeLines);
-    await tester.pumpWidget(builder(null));
-    expect(findInputBox(), equals(inputBox));
-    expect(inputBox.size, greaterThan(emptyInputSize));
-
-    await tester.enterText(find.byType(TextField), kThreeLines);
-    await tester.pumpWidget(builder(null));
+    await tester.pumpWidget(textFieldBuilder(maxLines: 3));
     expect(findInputBox(), equals(inputBox));
     expect(inputBox.size, threeLineInputSize);
 
     // An extra line won't increase the size because we max at 3.
     await tester.enterText(find.byType(TextField), kMoreThanFourLines);
-    await tester.pumpWidget(builder(3));
+    await tester.pumpWidget(textFieldBuilder(maxLines: 3));
     expect(findInputBox(), equals(inputBox));
     expect(inputBox.size, threeLineInputSize);
 
     // But now it will... but it will max at four
     await tester.enterText(find.byType(TextField), kMoreThanFourLines);
-    await tester.pumpWidget(builder(4));
+    await tester.pumpWidget(textFieldBuilder(maxLines: 4));
     expect(findInputBox(), equals(inputBox));
-    expect(inputBox.size, greaterThan(threeLineInputSize));
+    expect(inputBox.size.height, greaterThan(threeLineInputSize.height));
+    expect(inputBox.size.width, threeLineInputSize.width);
 
     final Size fourLineInputSize = inputBox.size;
 
     // Now it won't max out until the end
-    await tester.pumpWidget(builder(null));
+    await tester.enterText(find.byType(TextField), '');
+    await tester.pumpWidget(textFieldBuilder(maxLines: null));
     expect(findInputBox(), equals(inputBox));
-    expect(inputBox.size, greaterThan(fourLineInputSize));
+    expect(inputBox.size, equals(emptyInputSize));
+    await tester.enterText(find.byType(TextField), kThreeLines);
+    await tester.pump();
+    expect(inputBox.size, equals(threeLineInputSize));
+    await tester.enterText(find.byType(TextField), kMoreThanFourLines);
+    await tester.pump();
+    expect(inputBox.size.height, greaterThan(fourLineInputSize.height));
+    expect(inputBox.size.width, fourLineInputSize.width);
   });
 
+  testWidgets('TextField height with minLines and maxLines', (WidgetTester tester) async {
+    await tester.pumpWidget(textFieldBuilder());
+
+    RenderBox findInputBox() => tester.renderObject(find.byKey(textFieldKey));
+
+    final RenderBox inputBox = findInputBox();
+    final Size emptyInputSize = inputBox.size;
+
+    await tester.enterText(find.byType(TextField), 'No wrapping here.');
+    await tester.pumpWidget(textFieldBuilder());
+    expect(findInputBox(), equals(inputBox));
+    expect(inputBox.size, equals(emptyInputSize));
+
+    // min and max set to same value locks height to value.
+    await tester.pumpWidget(textFieldBuilder(minLines: 3, maxLines: 3));
+    expect(findInputBox(), equals(inputBox));
+    expect(inputBox.size.height, greaterThan(emptyInputSize.height));
+    expect(inputBox.size.width, emptyInputSize.width);
+
+    final Size threeLineInputSize = inputBox.size;
+
+    // maxLines: null with minLines set grows beyond minLines
+    await tester.pumpWidget(textFieldBuilder(minLines: 3, maxLines: null));
+    expect(findInputBox(), equals(inputBox));
+    expect(inputBox.size, threeLineInputSize);
+    await tester.enterText(find.byType(TextField), kMoreThanFourLines);
+    await tester.pump();
+    expect(inputBox.size.height, greaterThan(threeLineInputSize.height));
+    expect(inputBox.size.width, threeLineInputSize.width);
+
+    // With minLines and maxLines set, input will expand through the range
+    await tester.enterText(find.byType(TextField), '');
+    await tester.pumpWidget(textFieldBuilder(minLines: 3, maxLines: 4));
+    expect(findInputBox(), equals(inputBox));
+    expect(inputBox.size, equals(threeLineInputSize));
+    await tester.enterText(find.byType(TextField), kMoreThanFourLines);
+    await tester.pump();
+    expect(inputBox.size.height, greaterThan(threeLineInputSize.height));
+    expect(inputBox.size.width, threeLineInputSize.width);
+
+    // minLines can't be greater than maxLines.
+    expect(() async {
+      await tester.pumpWidget(textFieldBuilder(minLines: 3, maxLines: 2));
+    }, throwsAssertionError);
+    expect(() async {
+      await tester.pumpWidget(textFieldBuilder(minLines: 3));
+    }, throwsAssertionError);
+
+    // maxLines defaults to 1 and can't be less than minLines
+    expect(() async {
+      await tester.pumpWidget(textFieldBuilder(minLines: 3));
+    }, throwsAssertionError);
+  });
+
+  testWidgets('Multiline text when wrapped in Expanded', (WidgetTester tester) async {
+    Widget expandedTextFieldBuilder({
+      int maxLines = 1,
+      int minLines,
+      bool expands = false,
+    }) {
+      return boilerplate(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Expanded(
+              child: TextField(
+                key: textFieldKey,
+                style: const TextStyle(color: Colors.black, fontSize: 34.0),
+                maxLines: maxLines,
+                minLines: minLines,
+                expands: expands,
+                decoration: const InputDecoration(
+                  hintText: 'Placeholder',
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    await tester.pumpWidget(expandedTextFieldBuilder());
+
+    RenderBox findBorder() {
+      return tester.renderObject(find.descendant(
+        of: find.byType(InputDecorator),
+        matching: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_BorderContainer'),
+      ));
+    }
+    final RenderBox border = findBorder();
+
+    // Without expanded: true and maxLines: null, the TextField does not expand
+    // to fill its parent when wrapped in an Expanded widget.
+    final Size unexpandedInputSize = border.size;
+
+    // It does expand to fill its parent when expands: true, maxLines: null, and
+    // it's wrapped in an Expanded widget.
+    await tester.pumpWidget(expandedTextFieldBuilder(expands: true, maxLines: null));
+    expect(border.size.height, greaterThan(unexpandedInputSize.height));
+    expect(border.size.width, unexpandedInputSize.width);
+
+    // min/maxLines that is not null and expands: true contradict each other.
+    expect(() async {
+      await tester.pumpWidget(expandedTextFieldBuilder(expands: true, maxLines: 4));
+    }, throwsAssertionError);
+    expect(() async {
+      await tester.pumpWidget(expandedTextFieldBuilder(expands: true, minLines: 1, maxLines: null));
+    }, throwsAssertionError);
+  });
+
+  testWidgets('Growable TextField when content height exceeds parent', (WidgetTester tester) async {
+    const double height = 200.0;
+    const double padding = 24.0;
+
+    Widget containedTextFieldBuilder({
+      Widget counter,
+      String helperText,
+      String labelText,
+      Widget prefix,
+    }) {
+      return boilerplate(
+        child: Container(
+          height: height,
+          child: TextField(
+            key: textFieldKey,
+            maxLines: null,
+            decoration: InputDecoration(
+              counter: counter,
+              helperText: helperText,
+              labelText: labelText,
+              prefix: prefix,
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(containedTextFieldBuilder());
+    RenderBox findEditableText() => tester.renderObject(find.byType(EditableText));
+
+    final RenderBox inputBox = findEditableText();
+
+    // With no decoration and when overflowing with content, the EditableText
+    // takes up the full height minus the padding, so the input fits perfectly
+    // inside the parent.
+    await tester.enterText(find.byType(TextField), 'a\n' * 11);
+    await tester.pump();
+    expect(findEditableText(), equals(inputBox));
+    expect(inputBox.size.height, height - padding);
+
+    // Adding a counter causes the EditableText to shrink to fit the counter
+    // inside the parent as well.
+    const double counterHeight = 40.0;
+    const double subtextGap = 8.0 * 2;
+    const double counterSpace = counterHeight + subtextGap;
+    await tester.pumpWidget(containedTextFieldBuilder(
+      counter: Container(height: counterHeight),
+    ));
+    expect(findEditableText(), equals(inputBox));
+    expect(inputBox.size.height, height - padding - counterSpace);
+
+    // Including helperText causes the EditableText to shrink to fit the text
+    // inside the parent as well.
+    await tester.pumpWidget(containedTextFieldBuilder(
+      helperText: 'I am helperText',
+    ));
+    expect(findEditableText(), equals(inputBox));
+    const double helperTextSpace = 28.0;
+    expect(inputBox.size.height, height - padding - helperTextSpace);
+
+    // When both helperText and counter are present, EditableText shrinks by the
+    // height of the taller of the two in order to fit both within the parent.
+    await tester.pumpWidget(containedTextFieldBuilder(
+      counter: Container(height: counterHeight),
+      helperText: 'I am helperText',
+    ));
+    expect(findEditableText(), equals(inputBox));
+    expect(inputBox.size.height, height - padding - counterSpace);
+
+    // When a label is present, EditableText shrinks to fit it at the top so
+    // that the bottom of the input still lines up perfectly with the parent.
+    await tester.pumpWidget(containedTextFieldBuilder(
+      labelText: 'I am labelText',
+    ));
+    const double labelSpace = 16.0;
+    expect(findEditableText(), equals(inputBox));
+    expect(inputBox.size.height, height - padding - labelSpace);
+
+    // When decoration is present on the top and bottom, EditableText shrinks to
+    // fit both inside the parent independently.
+    await tester.pumpWidget(containedTextFieldBuilder(
+      counter: Container(height: counterHeight),
+      labelText: 'I am labelText',
+    ));
+    expect(findEditableText(), equals(inputBox));
+    expect(inputBox.size.height, height - padding - counterSpace - labelSpace);
+
+    // When a prefix or suffix is present in an input that's full of content,
+    // it is ignored and allowed to expand beyond the top of the input. Other
+    // top and bottom decoration is still respected.
+    await tester.pumpWidget(containedTextFieldBuilder(
+      counter: Container(height: counterHeight),
+      labelText: 'I am labelText',
+      prefix: Container(
+        width: 10,
+        height: 60,
+      ),
+    ));
+    expect(findEditableText(), equals(inputBox));
+    expect(
+      inputBox.size.height,
+      height
+      - padding
+      - labelSpace
+      - counterSpace,
+    );
+  });
 
   testWidgets('Multiline hint text will wrap up to maxLines', (WidgetTester tester) async {
     final Key textFieldKey = UniqueKey();
@@ -1372,8 +1607,7 @@ void main() {
     expect(suffixText.style, suffixStyle);
   });
 
-  testWidgets('TextField prefix and suffix appear correctly with no hint or label',
-          (WidgetTester tester) async {
+  testWidgets('TextField prefix and suffix appear correctly with no hint or label', (WidgetTester tester) async {
     final Key secondKey = UniqueKey();
 
     await tester.pumpWidget(
@@ -1416,8 +1650,7 @@ void main() {
     expect(find.text('Suffix'), findsOneWidget);
   });
 
-  testWidgets('TextField prefix and suffix appear correctly with hint text',
-          (WidgetTester tester) async {
+  testWidgets('TextField prefix and suffix appear correctly with hint text', (WidgetTester tester) async {
     final TextStyle hintStyle = TextStyle(
       inherit: false,
       color: Colors.pink[500],
@@ -1477,8 +1710,7 @@ void main() {
     expect(suffixText.style, hintStyle);
   });
 
-  testWidgets('TextField prefix and suffix appear correctly with label text',
-          (WidgetTester tester) async {
+  testWidgets('TextField prefix and suffix appear correctly with label text', (WidgetTester tester) async {
     final TextStyle prefixStyle = TextStyle(
       color: Colors.pink[500],
       fontSize: 10.0,
@@ -2124,9 +2356,7 @@ void main() {
     expect(find.text('5/10'), findsOneWidget);
   });
 
-  testWidgets(
-      'setting maxLength to TextField.noMaxLength shows only entered length',
-      (WidgetTester tester) async {
+  testWidgets('setting maxLength to TextField.noMaxLength shows only entered length', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(
       home: Material(
         child: Center(
@@ -2361,13 +2591,13 @@ void main() {
 
     String clipboardContent = '';
     SystemChannels.platform
-        .setMockMethodCallHandler((MethodCall methodCall) async {
-      if (methodCall.method == 'Clipboard.setData')
-        clipboardContent = methodCall.arguments['text'];
-      else if (methodCall.method == 'Clipboard.getData')
-        return <String, dynamic>{'text': clipboardContent};
-      return null;
-    });
+      .setMockMethodCallHandler((MethodCall methodCall) async {
+        if (methodCall.method == 'Clipboard.setData')
+          clipboardContent = methodCall.arguments['text'];
+        else if (methodCall.method == 'Clipboard.getData')
+          return <String, dynamic>{'text': clipboardContent};
+        return null;
+      });
 
     await tester.pumpWidget(
       MaterialApp(
@@ -2431,13 +2661,13 @@ void main() {
       );
     String clipboardContent = '';
     SystemChannels.platform
-        .setMockMethodCallHandler((MethodCall methodCall) async {
-      if (methodCall.method == 'Clipboard.setData')
-        clipboardContent = methodCall.arguments['text'];
-      else if (methodCall.method == 'Clipboard.getData')
-        return <String, dynamic>{'text': clipboardContent};
-      return null;
-    });
+      .setMockMethodCallHandler((MethodCall methodCall) async {
+        if (methodCall.method == 'Clipboard.setData')
+          clipboardContent = methodCall.arguments['text'];
+        else if (methodCall.method == 'Clipboard.getData')
+          return <String, dynamic>{'text': clipboardContent};
+        return null;
+      });
 
     await tester.pumpWidget(
       MaterialApp(
@@ -2603,7 +2833,7 @@ void main() {
     final Key key1 = UniqueKey();
     final Key key2 = UniqueKey();
 
-   await tester.pumpWidget(
+    await tester.pumpWidget(
       MaterialApp(
         home:
         Material(
@@ -4407,92 +4637,92 @@ void main() {
 
   testWidgets('long press drag can edge scroll (iOS)', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
-        text: 'Atwater Peel Sherbrooke Bonaventure Angrignon Peel Côte-des-Neiges',
-      );
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(platform: TargetPlatform.iOS),
-          home: Material(
-            child: Center(
-              child: TextField(
-                controller: controller,
-                maxLines: 1,
-              ),
+      text: 'Atwater Peel Sherbrooke Bonaventure Angrignon Peel Côte-des-Neiges',
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(platform: TargetPlatform.iOS),
+        home: Material(
+          child: Center(
+            child: TextField(
+              controller: controller,
+              maxLines: 1,
             ),
           ),
         ),
-      );
+      ),
+    );
 
-      final RenderEditable renderEditable = findRenderEditable(tester);
+    final RenderEditable renderEditable = findRenderEditable(tester);
 
-      List<TextSelectionPoint> lastCharEndpoint = renderEditable.getEndpointsForSelection(
-        const TextSelection.collapsed(offset: 66), // Last character's position.
-      );
+    List<TextSelectionPoint> lastCharEndpoint = renderEditable.getEndpointsForSelection(
+      const TextSelection.collapsed(offset: 66), // Last character's position.
+    );
 
-      expect(lastCharEndpoint.length, 1);
-      // Just testing the test and making sure that the last character is off
-      // the right side of the screen.
-      expect(lastCharEndpoint[0].point.dx, 1056);
+    expect(lastCharEndpoint.length, 1);
+    // Just testing the test and making sure that the last character is off
+    // the right side of the screen.
+    expect(lastCharEndpoint[0].point.dx, 1056);
 
-      final Offset textfieldStart = tester.getTopLeft(find.byType(TextField));
+    final Offset textfieldStart = tester.getTopLeft(find.byType(TextField));
 
-      final TestGesture gesture =
-          await tester.startGesture(textfieldStart + const Offset(300, 5));
-      await tester.pump(const Duration(milliseconds: 500));
+    final TestGesture gesture =
+        await tester.startGesture(textfieldStart + const Offset(300, 5));
+    await tester.pump(const Duration(milliseconds: 500));
 
-      expect(
-        controller.selection,
-        const TextSelection.collapsed(offset: 19, affinity: TextAffinity.upstream),
-      );
-      expect(find.byType(CupertinoButton), findsNothing);
+    expect(
+      controller.selection,
+      const TextSelection.collapsed(offset: 19, affinity: TextAffinity.upstream),
+    );
+    expect(find.byType(CupertinoButton), findsNothing);
 
-      await gesture.moveBy(const Offset(600, 0));
-      // To the edge of the screen basically.
-      await tester.pump();
-      expect(
-        controller.selection,
-        const TextSelection.collapsed(offset: 56, affinity: TextAffinity.downstream),
-      );
-      // Keep moving out.
-      await gesture.moveBy(const Offset(1, 0));
-      await tester.pump();
-      expect(
-        controller.selection,
-        const TextSelection.collapsed(offset: 62, affinity: TextAffinity.downstream),
-      );
-      await gesture.moveBy(const Offset(1, 0));
-      await tester.pump();
-      expect(
-        controller.selection,
-        const TextSelection.collapsed(offset: 66, affinity: TextAffinity.upstream),
-      ); // We're at the edge now.
-      expect(find.byType(CupertinoButton), findsNothing);
+    await gesture.moveBy(const Offset(600, 0));
+    // To the edge of the screen basically.
+    await tester.pump();
+    expect(
+      controller.selection,
+      const TextSelection.collapsed(offset: 56, affinity: TextAffinity.downstream),
+    );
+    // Keep moving out.
+    await gesture.moveBy(const Offset(1, 0));
+    await tester.pump();
+    expect(
+      controller.selection,
+      const TextSelection.collapsed(offset: 62, affinity: TextAffinity.downstream),
+    );
+    await gesture.moveBy(const Offset(1, 0));
+    await tester.pump();
+    expect(
+      controller.selection,
+      const TextSelection.collapsed(offset: 66, affinity: TextAffinity.upstream),
+    ); // We're at the edge now.
+    expect(find.byType(CupertinoButton), findsNothing);
 
-      await gesture.up();
-      await tester.pump();
+    await gesture.up();
+    await tester.pump();
 
-      // The selection isn't affected by the gesture lift.
-      expect(
-        controller.selection,
-        const TextSelection.collapsed(offset: 66, affinity: TextAffinity.upstream),
-      );
-      // The toolbar now shows up.
-      expect(find.byType(CupertinoButton), findsNWidgets(2));
+    // The selection isn't affected by the gesture lift.
+    expect(
+      controller.selection,
+      const TextSelection.collapsed(offset: 66, affinity: TextAffinity.upstream),
+    );
+    // The toolbar now shows up.
+    expect(find.byType(CupertinoButton), findsNWidgets(2));
 
-      lastCharEndpoint = renderEditable.getEndpointsForSelection(
-        const TextSelection.collapsed(offset: 66), // Last character's position.
-      );
+    lastCharEndpoint = renderEditable.getEndpointsForSelection(
+      const TextSelection.collapsed(offset: 66), // Last character's position.
+    );
 
-      expect(lastCharEndpoint.length, 1);
-      // The last character is now on screen near the right edge.
-      expect(lastCharEndpoint[0].point.dx, moreOrLessEquals(798, epsilon: 1));
+    expect(lastCharEndpoint.length, 1);
+    // The last character is now on screen near the right edge.
+    expect(lastCharEndpoint[0].point.dx, moreOrLessEquals(798, epsilon: 1));
 
-      final List<TextSelectionPoint> firstCharEndpoint = renderEditable.getEndpointsForSelection(
-        const TextSelection.collapsed(offset: 0), // First character's position.
-      );
-      expect(firstCharEndpoint.length, 1);
-      // The first character is now offscreen to the left.
-      expect(firstCharEndpoint[0].point.dx, moreOrLessEquals(-257, epsilon: 1));
+    final List<TextSelectionPoint> firstCharEndpoint = renderEditable.getEndpointsForSelection(
+      const TextSelection.collapsed(offset: 0), // First character's position.
+    );
+    expect(firstCharEndpoint.length, 1);
+    // The first character is now offscreen to the left.
+    expect(firstCharEndpoint[0].point.dx, moreOrLessEquals(-257, epsilon: 1));
   });
 
   testWidgets(

@@ -105,9 +105,12 @@ void main() {
     nextTrain.value = 0.75;
     bool didSwitchTrains = false;
     final TrainHoppingAnimation animation = TrainHoppingAnimation(
-      currentTrain, nextTrain, onSwitchedTrain: () {
+      currentTrain,
+      nextTrain,
+      onSwitchedTrain: () {
         didSwitchTrains = true;
-      });
+      },
+    );
     expect(didSwitchTrains, isFalse);
     expect(animation.value, 0.5);
     expect(animation, hasOneLineDescription);

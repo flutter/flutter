@@ -921,7 +921,7 @@ class PipelineOwner {
   }
 
   bool _debugDoingSemantics = false;
-  final Set<RenderObject> _nodesNeedingSemantics = Set<RenderObject>();
+  final Set<RenderObject> _nodesNeedingSemantics = <RenderObject>{};
 
   /// Update the semantics for render objects marked as needing a semantics
   /// update.
@@ -2422,7 +2422,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
 
     final bool producesForkingFragment = !config.hasBeenAnnotated && !config.isSemanticBoundary;
     final List<_InterestingSemanticsFragment> fragments = <_InterestingSemanticsFragment>[];
-    final Set<_InterestingSemanticsFragment> toBeMarkedExplicit = Set<_InterestingSemanticsFragment>();
+    final Set<_InterestingSemanticsFragment> toBeMarkedExplicit = <_InterestingSemanticsFragment>{};
     final bool childrenMergeIntoParent = mergeIntoParent || config.isMergingSemanticsOfDescendants;
 
     // When set to true there's currently not enough information in this subtree
@@ -3244,7 +3244,7 @@ abstract class _InterestingSemanticsFragment extends _SemanticsFragment {
   void addTags(Iterable<SemanticsTag> tags) {
     if (tags == null || tags.isEmpty)
       return;
-    _tagsForChildren ??= Set<SemanticsTag>();
+    _tagsForChildren ??= <SemanticsTag>{};
     _tagsForChildren.addAll(tags);
   }
 

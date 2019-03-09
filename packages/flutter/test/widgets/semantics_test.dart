@@ -967,9 +967,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets(
-      'Semantics widgets without sort orders are sorted properly when no Directionality is present',
-      (WidgetTester tester) async {
+  testWidgets('Semantics widgets without sort orders are sorted properly when no Directionality is present', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     int semanticsUpdateCount = 0;
     final SemanticsHandle handle = tester.binding.pipelineOwner.ensureSemantics(listener: () {
