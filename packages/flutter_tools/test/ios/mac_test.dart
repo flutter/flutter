@@ -130,7 +130,7 @@ void main() {
     });
 
     testUsingContext('getInfoForDevice throws IOSDeviceNotFoundError when ideviceinfo returns specific error code and message', () async {
-      when(mockProcessManager.run(<String>['ideviceinfo', '-u', 'foo', '-k', 'bar', '--simple']))
+      when(mockProcessManager.run(<String>['ideviceinfo', '-u', 'foo', '-k', 'bar']))
           .thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(1, 255, 'No device found with udid foo, is it plugged in?', '')));
       expect(() async => await iMobileDevice.getInfoForDevice('foo', 'bar'), throwsA(isInstanceOf<IOSDeviceNotFoundError>()));
     }, overrides: <Type, Generator>{
@@ -153,7 +153,7 @@ void main() {
         // Let `idevicescreenshot` fail with exit code 1.
         when(mockProcessManager.run(<String>['idevicescreenshot', outputPath],
             environment: null,
-            workingDirectory: null
+            workingDirectory: null,
         )).thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(4, 1, '', '')));
 
         expect(() async => await iMobileDevice.takeScreenshot(mockOutputFile), throwsA(anything));
@@ -170,7 +170,7 @@ void main() {
         await iMobileDevice.takeScreenshot(mockOutputFile);
         verify(mockProcessManager.run(<String>['idevicescreenshot', outputPath],
             environment: null,
-            workingDirectory: null
+            workingDirectory: null,
         ));
       }, overrides: <Type, Generator>{
         ProcessManager: () => mockProcessManager,
@@ -442,7 +442,7 @@ Could not build the precompiled application for the device.''',
     const List<String> flutterAssetPbxProjLines = <String>[
       '/* flutter_assets */',
       '/* App.framework',
-      'another line'
+      'another line',
     ];
 
     const List<String> appFlxPbxProjLines = <String>[

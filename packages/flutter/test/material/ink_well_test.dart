@@ -38,7 +38,7 @@ void main() {
               },
             ),
           ),
-        )
+        ),
       )
     );
 
@@ -52,9 +52,10 @@ void main() {
     log.clear();
 
     await tester.tap(find.byType(InkWell), pointer: 2);
+    await tester.pump(const Duration(milliseconds: 100));
     await tester.tap(find.byType(InkWell), pointer: 3);
 
-    expect(log, equals(<String>['tap-cancel', 'double-tap']));
+    expect(log, equals(<String>['double-tap']));
     log.clear();
 
     await tester.longPress(find.byType(InkWell), pointer: 4);
@@ -83,7 +84,7 @@ void main() {
         child: Center(
           child: InkWell(),
         ),
-      )
+      ),
     ));
     await tester.tap(find.byType(InkWell), pointer: 1);
     await tester.pump(const Duration(seconds: 1));
@@ -108,8 +109,8 @@ void main() {
           textDirection: TextDirection.ltr,
           child: Center(
             child: InkWell(
-              onTap: () {},
-              onLongPress: () {},
+              onTap: () { },
+              onLongPress: () { },
             ),
           ),
         ),
@@ -136,12 +137,12 @@ void main() {
           textDirection: TextDirection.ltr,
           child: Center(
             child: InkWell(
-              onTap: () {},
-              onLongPress: () {},
+              onTap: () { },
+              onLongPress: () { },
               enableFeedback: false,
             ),
           ),
-        )
+        ),
       ));
       await tester.tap(find.byType(InkWell), pointer: 1);
       await tester.pump(const Duration(seconds: 1));

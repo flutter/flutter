@@ -13,6 +13,7 @@ import 'package:flutter/painting.dart' show MatrixUtils, TransformProperty;
 import 'package:flutter/services.dart';
 import 'package:vector_math/vector_math_64.dart';
 
+import 'binding.dart' show SemanticsBinding;
 import 'semantics_event.dart';
 
 export 'dart:ui' show SemanticsAction;
@@ -1283,7 +1284,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       return true;
     }());
     assert(() {
-      final Set<SemanticsNode> seenChildren = Set<SemanticsNode>();
+      final Set<SemanticsNode> seenChildren = <SemanticsNode>{};
       for (SemanticsNode child in newChildren)
         assert(seenChildren.add(child)); // check for duplicate adds
       return true;
@@ -1549,11 +1550,21 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   /// describes how high the box is that this [SemanticsNode] occupies in three
   /// dimensional space. The two other dimensions are defined by [rect].
   ///
-  /// ## Sample Code
-  ///
+  /// {@tool sample}
   /// The following code stacks three [PhysicalModel]s on top of each other
-  /// separated by none-zero elevations:
+  /// separated by non-zero elevations.
   ///
+  /// [PhysicalModel] C is elevated 10.0 above [PhysicalModel] B, which in turn
+  /// is elevated 5.0 above [PhysicalModel] A. The side view of this
+  /// constellation looks as follows:
+  ///
+  /// ![A diagram illustrating the elevations of three PhysicalModels and their
+  /// corresponding SemanticsNodes.](https://flutter.github.io/assets-for-api-docs/assets/semantics/SemanticsNode.thickness.png)
+  ///
+  /// In this example the [RenderObject]s for [PhysicalModel] C and B share one
+  /// [SemanticsNode] Y. Given the elevations of those [RenderObject]s, this
+  /// [SemanticsNode] has a [thickness] of 10.0 and an elevation of 5.0 over
+  /// its parent [SemanticsNode] X.
   /// ```dart
   /// PhysicalModel( // A
   ///   color: Colors.amber,
@@ -1570,20 +1581,9 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   ///       ),
   ///     ),
   ///   ),
-  /// );
+  /// )
   /// ```
-  ///
-  /// [PhysicalModel] C is elevated 10.0 above [PhysicalModel] B, which in turn
-  /// is elevated 5.0 above [PhysicalModel] A. The side view of this
-  /// constellation looks as follows:
-  ///
-  /// ![A diagram illustrating the elevations of three PhysicalModels and their
-  /// corresponding SemanticsNodes.](https://flutter.github.io/assets-for-api-docs/assets/semantics/SemanticsNode.thickness.png)
-  ///
-  /// In this example the [RenderObject]s for [PhysicalModel] C and B share one
-  /// [SemanticsNode] Y. Given the elevations of those [RenderObject]s, this
-  /// [SemanticsNode] has a [thickness] of 10.0 and an elevation of 5.0 over
-  /// its parent [SemanticsNode] X.
+  /// {@end-tool}
   ///
   /// See also:
   ///
@@ -1742,7 +1742,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     double scrollExtentMin = _scrollExtentMin;
     final double elevation = _elevation;
     double thickness = _thickness;
-    final Set<int> customSemanticsActionIds = Set<int>();
+    final Set<int> customSemanticsActionIds = <int>{};
     for (CustomSemanticsAction action in _customSemanticsActions.keys)
       customSemanticsActionIds.add(CustomSemanticsAction.getIdentifier(action));
     if (hintOverrides != null) {
@@ -1781,7 +1781,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
         if (decreasedValue == '' || decreasedValue == null)
           decreasedValue = node._decreasedValue;
         if (node.tags != null) {
-          mergedTags ??= Set<SemanticsTag>();
+          mergedTags ??= <SemanticsTag>{};
           mergedTags.addAll(node.tags);
         }
         if (node._customSemanticsActions != null) {
@@ -2270,7 +2270,7 @@ class _SemanticsSortGroup extends Comparable<_SemanticsSortGroup> {
     }
 
     final List<int> sortedIds = <int>[];
-    final Set<int> visitedIds = Set<int>();
+    final Set<int> visitedIds = <int>{};
     final List<SemanticsNode> startNodes = nodes.toList()..sort((SemanticsNode a, SemanticsNode b) {
       final Offset aTopLeft = _pointInParentCoordinates(a, a.rect.topLeft);
       final Offset bTopLeft = _pointInParentCoordinates(b, b.rect.topLeft);
@@ -2410,9 +2410,9 @@ class _TraversalSortNode implements Comparable<_TraversalSortNode> {
 /// obtain a [SemanticsHandle]. This will create a [SemanticsOwner] if
 /// necessary.
 class SemanticsOwner extends ChangeNotifier {
-  final Set<SemanticsNode> _dirtyNodes = Set<SemanticsNode>();
+  final Set<SemanticsNode> _dirtyNodes = <SemanticsNode>{};
   final Map<int, SemanticsNode> _nodes = <int, SemanticsNode>{};
-  final Set<SemanticsNode> _detachedNodes = Set<SemanticsNode>();
+  final Set<SemanticsNode> _detachedNodes = <SemanticsNode>{};
   final Map<int, CustomSemanticsAction> _actions = <int, CustomSemanticsAction>{};
 
   /// The root node of the semantics tree, if any.
@@ -2432,7 +2432,7 @@ class SemanticsOwner extends ChangeNotifier {
   void sendSemanticsUpdate() {
     if (_dirtyNodes.isEmpty)
       return;
-    final Set<int> customSemanticsActionIds = Set<int>();
+    final Set<int> customSemanticsActionIds = <int>{};
     final List<SemanticsNode> visitedNodes = <SemanticsNode>[];
     while (_dirtyNodes.isNotEmpty) {
       final List<SemanticsNode> localDirtyNodes = _dirtyNodes.where((SemanticsNode node) => !_detachedNodes.contains(node)).toList();
@@ -2473,7 +2473,7 @@ class SemanticsOwner extends ChangeNotifier {
       final CustomSemanticsAction action = CustomSemanticsAction.getAction(actionId);
       builder.updateCustomAction(id: actionId, label: action.label, hint: action.hint, overrideId: action.action?.index ?? -1);
     }
-    ui.window.updateSemantics(builder.build());
+    SemanticsBinding.instance.window.updateSemantics(builder.build());
     notifyListeners();
   }
 
@@ -2500,7 +2500,7 @@ class SemanticsOwner extends ChangeNotifier {
   ///
   /// If the given `action` requires arguments they need to be passed in via
   /// the `args` parameter.
-  void performAction(int id, SemanticsAction action, [dynamic args]) {
+  void performAction(int id, SemanticsAction action, [ dynamic args ]) {
     assert(action != null);
     final _SemanticsActionHandler handler = _getSemanticsActionHandlerForId(id, action);
     if (handler != null) {
@@ -2550,7 +2550,7 @@ class SemanticsOwner extends ChangeNotifier {
   ///
   /// If the given `action` requires arguments they need to be passed in via
   /// the `args` parameter.
-  void performActionAt(Offset position, SemanticsAction action, [dynamic args]) {
+  void performActionAt(Offset position, SemanticsAction action, [ dynamic args ]) {
     assert(action != null);
     final SemanticsNode node = rootSemanticsNode;
     if (node == null)
@@ -3551,7 +3551,7 @@ class SemanticsConfiguration {
   ///  * [RenderSemanticsGestureHandler.excludeFromScrolling] for an example of
   ///    how tags are used.
   void addTagForChildren(SemanticsTag tag) {
-    _tagsForChildren ??= Set<SemanticsTag>();
+    _tagsForChildren ??= <SemanticsTag>{};
     _tagsForChildren.add(tag);
   }
 
@@ -3698,7 +3698,7 @@ String _concatStrings({
   @required String thisString,
   @required String otherString,
   @required TextDirection thisTextDirection,
-  @required TextDirection otherTextDirection
+  @required TextDirection otherTextDirection,
 }) {
   if (otherString.isEmpty)
     return thisString;
@@ -3745,7 +3745,6 @@ String _concatStrings({
 ///
 /// See Also:
 ///
-///  * [SemanticsSortOrder] which manages a list of sort keys.
 ///  * [OrdinalSortKey] for a sort key that sorts using an ordinal.
 abstract class SemanticsSortKey extends Diagnosticable implements Comparable<SemanticsSortKey> {
   /// Abstract const constructor. This constructor enables subclasses to provide
@@ -3794,10 +3793,6 @@ abstract class SemanticsSortKey extends Diagnosticable implements Comparable<Sem
 /// fractional, e.g. in order to fit between two other consecutive whole
 /// numbers. The value must be finite (it cannot be [double.nan],
 /// [double.infinity], or [double.negativeInfinity]).
-///
-/// See also:
-///
-///  * [SemanticsSortOrder] which manages a list of sort keys.
 class OrdinalSortKey extends SemanticsSortKey {
   /// Creates a semantics sort key that uses a [double] as its key value.
   ///

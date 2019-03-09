@@ -2,16 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show ParagraphStyle, TextStyle, lerpDouble, Shadow;
+import 'dart:ui' as ui show ParagraphStyle, TextStyle, StrutStyle, lerpDouble, Shadow;
 
 import 'package:flutter/foundation.dart';
 
 import 'basic_types.dart';
+import 'strut_style.dart';
 
 const String _kDefaultDebugLabel = 'unknown';
 
 const String _kColorForegroundWarning = 'Cannot provide both a color and a foreground\n'
-         'The color argument is just a shorthand for "foreground: new Paint()..color = color".';
+    'The color argument is just a shorthand for "foreground: new Paint()..color = color".';
+
+const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor and a background\n'
+    'The backgroundColor argument is just a shorthand for "background: new Paint()..color = color".';
 
 // Examples can assume:
 // BuildContext context;
@@ -58,6 +62,10 @@ const String _kColorForegroundWarning = 'Cannot provide both a color and a foreg
 ///
 /// If [color] is specified, [foreground] must be null and vice versa. [color] is
 /// treated as a shorthand for `Paint()..color = color`.
+///
+/// If [backgroundColor] is specified, [background] must be null and vice versa.
+/// The [backgroundColor] is treated as a shorthand for
+/// `background: Paint()..color = backgroundColor`.
 ///
 /// ```dart
 /// RichText(
@@ -294,6 +302,7 @@ class TextStyle extends Diagnosticable {
   const TextStyle({
     this.inherit = true,
     this.color,
+    this.backgroundColor,
     this.fontSize,
     this.fontWeight,
     this.fontStyle,
@@ -316,7 +325,8 @@ class TextStyle extends Diagnosticable {
        _fontFamilyFallback = fontFamilyFallback,
        _package = package,
        assert(inherit != null),
-       assert(color == null || foreground == null, _kColorForegroundWarning);
+       assert(color == null || foreground == null, _kColorForegroundWarning),
+       assert(backgroundColor == null || background == null, _kColorBackgroundWarning);
 
 
   /// Whether null values are replaced with their value in an ancestor text
@@ -336,6 +346,17 @@ class TextStyle extends Diagnosticable {
   /// specification are resolved in [foreground]'s favor - i.e. if [foreground] is
   /// specified in one place, it will dominate [color] in another.
   final Color color;
+
+  /// The color to use as the background for the text.
+  ///
+  /// If [background] is specified, this value must be null. The
+  /// [backgroundColor] property is shorthand for
+  /// `background: Paint()..color = backgroundColor`.
+  ///
+  /// In [merge], [apply], and [lerp], conflicts between [backgroundColor] and [background]
+  /// specification are resolved in [background]'s favor - i.e. if [background] is
+  /// specified in one place, it will dominate [color] in another.
+  final Color backgroundColor;
 
   /// The name of the font to use when painting the text (e.g., Roboto). If the
   /// font is defined in a package, this will be prefixed with
@@ -423,9 +444,9 @@ class TextStyle extends Diagnosticable {
   /// This property is rarely set. Typically the locale used to select
   /// region-specific glyphs is defined by the text widget's [BuildContext]
   /// using `Localizations.localeOf(context)`. For example [RichText] defines
-  /// its locale this way. However, a rich text widget's [TextSpan]s could specify
-  /// text styles with different explicit locales in order to select different
-  /// region-specifc glyphs for each text span.
+  /// its locale this way. However, a rich text widget's [TextSpan]s could
+  /// specify text styles with different explicit locales in order to select
+  /// different region-specific glyphs for each text span.
   final Locale locale;
 
   /// The paint drawn as a foreground for the text.
@@ -449,6 +470,15 @@ class TextStyle extends Diagnosticable {
   /// styles are created with the same paint settings. Otherwise, each time it
   /// will appear like the style changed, which will result in unnecessary
   /// updates all the way through the framework.
+  ///
+  /// If [backgroundColor] is specified, this value must be null. The
+  /// [backgroundColor] property is shorthand for
+  /// `background: Paint()..color = backgroundColor`.
+  ///
+  /// In [merge], [apply], and [lerp], conflicts between [backgroundColor] and
+  /// [background] specification are resolved in [background]'s favor - i.e. if
+  /// [background] is specified in one place, it will dominate [backgroundColor]
+  /// in another.
   final Paint background;
 
   /// The decorations to paint near the text (e.g., an underline).
@@ -487,8 +517,13 @@ class TextStyle extends Diagnosticable {
   ///
   /// One of [color] or [foreground] must be null, and if this has [foreground]
   /// specified it will be given preference over any color parameter.
+  ///
+  /// One of [backgroundColor] or [background] must be null, and if this has
+  /// [background] specified it will be given preference over any
+  /// backgroundColor parameter.
   TextStyle copyWith({
     Color color,
+    Color backgroundColor,
     String fontFamily,
     List<String> fontFamilyFallback,
     double fontSize,
@@ -508,6 +543,7 @@ class TextStyle extends Diagnosticable {
     String debugLabel,
   }) {
     assert(color == null || foreground == null, _kColorForegroundWarning);
+    assert(backgroundColor == null || background == null, _kColorBackgroundWarning);
     String newDebugLabel;
     assert(() {
       if (this.debugLabel != null)
@@ -517,6 +553,7 @@ class TextStyle extends Diagnosticable {
     return TextStyle(
       inherit: inherit,
       color: this.foreground == null && foreground == null ? color ?? this.color : null,
+      backgroundColor: this.background == null && background == null ? backgroundColor ?? this.backgroundColor : null,
       fontFamily: fontFamily ?? this.fontFamily,
       fontFamilyFallback: fontFamilyFallback ?? this.fontFamilyFallback,
       fontSize: fontSize ?? this.fontSize,
@@ -543,7 +580,9 @@ class TextStyle extends Diagnosticable {
   /// The non-numeric properties [color], [fontFamily], [decoration],
   /// [decorationColor] and [decorationStyle] are replaced with the new values.
   ///
-  /// [foreground] will be given preference over [color] if it is not null.
+  /// [foreground] will be given preference over [color] if it is not null and
+  /// [background] will be given preference over [backgroundColor] if it is not
+  /// null.
   ///
   /// The numeric properties are multiplied by the given factors and then
   /// incremented by the given deltas.
@@ -562,9 +601,11 @@ class TextStyle extends Diagnosticable {
   /// deltas must not be specified.
   ///
   /// If [foreground] is specified on this object, then applying [color] here
-  /// will have no effect.
+  /// will have no effect and if [background] is specified on this object, then
+  /// applying [backgroundColor] here will have no effect either.
   TextStyle apply({
     Color color,
+    Color backgroundColor,
     TextDecoration decoration,
     Color decorationColor,
     TextDecorationStyle decorationStyle,
@@ -605,6 +646,7 @@ class TextStyle extends Diagnosticable {
     return TextStyle(
       inherit: inherit,
       color: foreground == null ? color ?? this.color : null,
+      backgroundColor: background == null ? backgroundColor ?? this.backgroundColor : null,
       fontFamily: fontFamily ?? this.fontFamily,
       fontFamilyFallback: fontFamilyFallback ?? this.fontFamilyFallback,
       fontSize: fontSize == null ? null : fontSize * fontSizeFactor + fontSizeDelta,
@@ -615,7 +657,7 @@ class TextStyle extends Diagnosticable {
       textBaseline: textBaseline,
       height: height == null ? null : height * heightFactor + heightDelta,
       locale: locale,
-      foreground: foreground != null ? foreground : null,
+      foreground: foreground,
       background: background,
       shadows: shadows,
       decoration: decoration ?? this.decoration,
@@ -642,6 +684,10 @@ class TextStyle extends Diagnosticable {
   ///
   /// One of [color] or [foreground] must be null, and if this or `other` has
   /// [foreground] specified it will be given preference over any color parameter.
+  ///
+  /// Similarly, One of [backgroundColor] or [background] must be null, and if
+  /// this or `other` has [background] specified it will be given preference
+  /// over any backgroundColor parameter.
   TextStyle merge(TextStyle other) {
     if (other == null)
       return this;
@@ -657,6 +703,7 @@ class TextStyle extends Diagnosticable {
 
     return copyWith(
       color: other.color,
+      backgroundColor: other.backgroundColor,
       fontFamily: other.fontFamily,
       fontFamilyFallback: other.fontFamilyFallback,
       fontSize: other.fontSize,
@@ -686,6 +733,10 @@ class TextStyle extends Diagnosticable {
   /// If [foreground] is specified on either of `a` or `b`, both will be treated
   /// as if they have a [foreground] paint (creating a new [Paint] if necessary
   /// based on the [color] property).
+  ///
+  /// If [background] is specified on either of `a` or `b`, both will be treated
+  /// as if they have a [background] paint (creating a new [Paint] if necessary
+  /// based on the [backgroundColor] property).
   static TextStyle lerp(TextStyle a, TextStyle b, double t) {
     assert(t != null);
     assert(a == null || b == null || a.inherit == b.inherit);
@@ -703,6 +754,7 @@ class TextStyle extends Diagnosticable {
       return TextStyle(
         inherit: b.inherit,
         color: Color.lerp(null, b.color, t),
+        backgroundColor: Color.lerp(null, b.backgroundColor, t),
         fontFamily: t < 0.5 ? null : b.fontFamily,
         fontFamilyFallback: t < 0.5 ? null : b.fontFamilyFallback,
         fontSize: t < 0.5 ? null : b.fontSize,
@@ -727,6 +779,7 @@ class TextStyle extends Diagnosticable {
       return TextStyle(
         inherit: a.inherit,
         color: Color.lerp(a.color, null, t),
+        backgroundColor: Color.lerp(null, a.backgroundColor, t),
         fontFamily: t < 0.5 ? a.fontFamily : null,
         fontFamilyFallback: t < 0.5 ? a.fontFamilyFallback : null,
         fontSize: t < 0.5 ? a.fontSize : null,
@@ -750,6 +803,7 @@ class TextStyle extends Diagnosticable {
     return TextStyle(
       inherit: b.inherit,
       color: a.foreground == null && b.foreground == null ? Color.lerp(a.color, b.color, t) : null,
+      backgroundColor: a.background == null && b.background == null ? Color.lerp(a.backgroundColor, b.backgroundColor, t) : null,
       fontFamily: t < 0.5 ? a.fontFamily : b.fontFamily,
       fontFamilyFallback: t < 0.5 ? a.fontFamilyFallback : b.fontFamilyFallback,
       fontSize: ui.lerpDouble(a.fontSize ?? b.fontSize, b.fontSize ?? a.fontSize, t),
@@ -765,7 +819,11 @@ class TextStyle extends Diagnosticable {
           ? a.foreground ?? (Paint()..color = a.color)
           : b.foreground ?? (Paint()..color = b.color)
         : null,
-      background: t < 0.5 ? a.background : b.background,
+      background: (a.background != null || b.background != null)
+        ? t < 0.5
+          ? a.background ?? (Paint()..color = a.backgroundColor)
+          : b.background ?? (Paint()..color = b.backgroundColor)
+        : null,
       shadows: t < 0.5 ? a.shadows : b.shadows,
       decoration: t < 0.5 ? a.decoration : b.decoration,
       decorationColor: Color.lerp(a.decorationColor, b.decorationColor, t),
@@ -792,7 +850,10 @@ class TextStyle extends Diagnosticable {
       height: height,
       locale: locale,
       foreground: foreground,
-      background: background,
+      background: background ?? (backgroundColor != null
+        ? (Paint()..color = backgroundColor)
+        : null
+      ),
       shadows: shadows,
     );
   }
@@ -806,23 +867,41 @@ class TextStyle extends Diagnosticable {
   /// If the font size on this style isn't set, it will default to 14 logical
   /// pixels.
   ui.ParagraphStyle getParagraphStyle({
-      TextAlign textAlign,
-      TextDirection textDirection,
-      double textScaleFactor = 1.0,
-      String ellipsis,
-      int maxLines,
-      Locale locale,
+    TextAlign textAlign,
+    TextDirection textDirection,
+    double textScaleFactor = 1.0,
+    String ellipsis,
+    int maxLines,
+    Locale locale,
+    String fontFamily,
+    double fontSize,
+    FontWeight fontWeight,
+    FontStyle fontStyle,
+    double height,
+    StrutStyle strutStyle,
   }) {
     assert(textScaleFactor != null);
     assert(maxLines == null || maxLines > 0);
     return ui.ParagraphStyle(
       textAlign: textAlign,
       textDirection: textDirection,
-      fontWeight: fontWeight,
-      fontStyle: fontStyle,
-      fontFamily: fontFamily,
-      fontSize: (fontSize ?? _defaultFontSize) * textScaleFactor,
-      lineHeight: height,
+      // Here, we stablish the contents of this TextStyle as the paragraph's default font
+      // unless an override is passed in.
+      fontWeight: fontWeight ?? this.fontWeight,
+      fontStyle: fontStyle ?? this.fontStyle,
+      fontFamily: fontFamily ?? this.fontFamily,
+      fontSize: (fontSize ?? this.fontSize ?? _defaultFontSize) * textScaleFactor,
+      height: height ?? this.height,
+      strutStyle: strutStyle == null ? null : ui.StrutStyle(
+        fontFamily: strutStyle.fontFamily,
+        fontFamilyFallback: strutStyle.fontFamilyFallback,
+        fontSize: strutStyle.fontSize,
+        height: strutStyle.height,
+        leading: strutStyle.leading,
+        fontWeight: strutStyle.fontWeight,
+        fontStyle: strutStyle.fontStyle,
+        forceStrutHeight: strutStyle.forceStrutHeight,
+      ),
       maxLines: maxLines,
       ellipsis: ellipsis,
       locale: locale,
@@ -854,6 +933,7 @@ class TextStyle extends Diagnosticable {
         !listEquals(fontFamilyFallback, other.fontFamilyFallback))
       return RenderComparison.layout;
     if (color != other.color ||
+        backgroundColor != other.backgroundColor ||
         decoration != other.decoration ||
         decorationColor != other.decorationColor ||
         decorationStyle != other.decorationStyle)
@@ -870,6 +950,7 @@ class TextStyle extends Diagnosticable {
     final TextStyle typedOther = other;
     return inherit == typedOther.inherit &&
            color == typedOther.color &&
+           backgroundColor == typedOther.backgroundColor &&
            fontFamily == typedOther.fontFamily &&
            fontSize == typedOther.fontSize &&
            fontWeight == typedOther.fontWeight &&
@@ -893,6 +974,7 @@ class TextStyle extends Diagnosticable {
     return hashValues(
       inherit,
       color,
+      backgroundColor,
       fontFamily,
       fontFamilyFallback,
       fontSize,
@@ -908,7 +990,7 @@ class TextStyle extends Diagnosticable {
       decoration,
       decorationColor,
       decorationStyle,
-      shadows
+      shadows,
     );
   }
 
@@ -923,40 +1005,13 @@ class TextStyle extends Diagnosticable {
       properties.add(MessageProperty('${prefix}debugLabel', debugLabel));
     final List<DiagnosticsNode> styles = <DiagnosticsNode>[];
     styles.add(DiagnosticsProperty<Color>('${prefix}color', color, defaultValue: null));
+    styles.add(DiagnosticsProperty<Color>('${prefix}backgroundColor', backgroundColor, defaultValue: null));
     styles.add(StringProperty('${prefix}family', fontFamily, defaultValue: null, quoted: false));
     styles.add(IterableProperty<String>('${prefix}familyFallback', fontFamilyFallback, defaultValue: null));
     styles.add(DoubleProperty('${prefix}size', fontSize, defaultValue: null));
     String weightDescription;
     if (fontWeight != null) {
-      switch (fontWeight) {
-        case FontWeight.w100:
-          weightDescription = '100';
-          break;
-        case FontWeight.w200:
-          weightDescription = '200';
-          break;
-        case FontWeight.w300:
-          weightDescription = '300';
-          break;
-        case FontWeight.w400:
-          weightDescription = '400';
-          break;
-        case FontWeight.w500:
-          weightDescription = '500';
-          break;
-        case FontWeight.w600:
-          weightDescription = '600';
-          break;
-        case FontWeight.w700:
-          weightDescription = '700';
-          break;
-        case FontWeight.w800:
-          weightDescription = '800';
-          break;
-        case FontWeight.w900:
-          weightDescription = '900';
-          break;
-      }
+      weightDescription = '${fontWeight.index + 1}00';
     }
     // TODO(jacobr): switch this to use enumProperty which will either cause the
     // weight description to change to w600 from 600 or require existing

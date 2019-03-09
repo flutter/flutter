@@ -9,12 +9,14 @@ import 'package:meta/meta.dart';
 import 'application_package.dart';
 import 'artifacts.dart';
 import 'asset.dart';
+import 'base/common.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
 import 'base/logger.dart';
 import 'base/terminal.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
+import 'codegen.dart';
 import 'compile.dart';
 import 'dart/dependencies.dart';
 import 'dart/package_map.dart';
@@ -44,8 +46,49 @@ class FlutterDevice {
          fileSystemRoots: fileSystemRoots,
          fileSystemScheme: fileSystemScheme,
          targetModel: targetModel,
-	 experimentalFlags: experimentalFlags,
+         experimentalFlags: experimentalFlags,
        );
+
+  /// Create a [FlutterDevice] with optional code generation enabled.
+  static Future<FlutterDevice> create(Device device, {
+    @required bool trackWidgetCreation,
+    String dillOutputPath,
+    List<String> fileSystemRoots,
+    String fileSystemScheme,
+    String viewFilter,
+    @required String target,
+    TargetModel targetModel = TargetModel.flutter,
+    List<String> experimentalFlags,
+    ResidentCompiler generator,
+  }) async {
+    ResidentCompiler generator;
+    final FlutterProject flutterProject = await FlutterProject.current();
+    if (experimentalBuildEnabled && await flutterProject.hasBuilders) {
+      generator = await CodeGeneratingResidentCompiler.create(
+        flutterProject: flutterProject,
+      );
+    } else {
+      generator = ResidentCompiler(
+        artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
+        trackWidgetCreation: trackWidgetCreation,
+        fileSystemRoots: fileSystemRoots,
+        fileSystemScheme: fileSystemScheme,
+        targetModel: targetModel,
+        experimentalFlags: experimentalFlags,
+      );
+    }
+    return FlutterDevice(
+      device,
+      trackWidgetCreation: trackWidgetCreation,
+      dillOutputPath: dillOutputPath,
+      fileSystemRoots: fileSystemRoots,
+      fileSystemScheme:fileSystemScheme,
+      viewFilter: viewFilter,
+      experimentalFlags: experimentalFlags,
+      targetModel: targetModel,
+      generator: generator,
+    );
+  }
 
   final Device device;
   final ResidentCompiler generator;
@@ -139,23 +182,24 @@ class FlutterDevice {
     await Future.wait(futures).timeout(const Duration(seconds: 2), onTimeout: () { });
   }
 
-  Future<Uri> setupDevFS(String fsName,
+  Future<Uri> setupDevFS(
+    String fsName,
     Directory rootDirectory, {
-    String packagesFilePath
+    String packagesFilePath,
   }) {
     // One devFS per device. Shared by all running instances.
     devFS = DevFS(
       vmServices[0],
       fsName,
       rootDirectory,
-      packagesFilePath: packagesFilePath
+      packagesFilePath: packagesFilePath,
     );
     return devFS.create();
   }
 
   List<Future<Map<String, dynamic>>> reloadSources(
     String entryPath, {
-    bool pause = false
+    bool pause = false,
   }) {
     final Uri deviceEntryUri = devFS.baseUri.resolveUri(fs.path.toUri(entryPath));
     final Uri devicePackagesUri = devFS.baseUri.resolve('.packages');
@@ -164,7 +208,7 @@ class FlutterDevice {
       final Future<Map<String, dynamic>> report = view.uiIsolate.reloadSources(
         pause: pause,
         rootLibUri: deviceEntryUri,
-        packagesUri: devicePackagesUri
+        packagesUri: devicePackagesUri,
       );
       reports.add(report);
     }
@@ -286,7 +330,7 @@ class FlutterDevice {
     final TargetPlatform targetPlatform = await device.targetPlatform;
     package = await ApplicationPackageFactory.instance.getPackageForPlatform(
       targetPlatform,
-      applicationBinary: hotRunner.applicationBinary
+      applicationBinary: hotRunner.applicationBinary,
     );
 
     if (package == null) {
@@ -323,7 +367,11 @@ class FlutterDevice {
       await stopEchoingDeviceLog();
       return 2;
     }
-    observatoryUris = <Uri>[result.observatoryUri];
+    if (result.hasObservatory) {
+      observatoryUris = <Uri>[result.observatoryUri];
+    } else {
+      observatoryUris = <Uri>[];
+    }
     return 0;
   }
 
@@ -336,7 +384,7 @@ class FlutterDevice {
     final TargetPlatform targetPlatform = await device.targetPlatform;
     package = await ApplicationPackageFactory.instance.getPackageForPlatform(
       targetPlatform,
-      applicationBinary: coldRunner.applicationBinary
+      applicationBinary: coldRunner.applicationBinary,
     );
 
     final String modeName = coldRunner.debuggingOptions.buildInfo.friendlyModeName;
@@ -381,8 +429,11 @@ class FlutterDevice {
       await stopEchoingDeviceLog();
       return 2;
     }
-    if (result.hasObservatory)
+    if (result.hasObservatory) {
       observatoryUris = <Uri>[result.observatoryUri];
+    } else {
+      observatoryUris = <Uri>[];
+    }
     return 0;
   }
 
@@ -417,7 +468,7 @@ class FlutterDevice {
         dillOutputPath: dillOutputPath,
         trackWidgetCreation: trackWidgetCreation,
         projectRootPath: projectRootPath,
-        pathToReload: pathToReload
+        pathToReload: pathToReload,
       );
     } on DevFSException {
       devFSStatus.cancel();
@@ -470,7 +521,7 @@ abstract class ResidentRunner {
   String get projectRootPath => _projectRootPath;
   String _mainPath;
   String get mainPath => _mainPath;
-  String getReloadPath({bool fullRestart}) => mainPath + (fullRestart ? '' : '.incremental') + '.dill';
+  String getReloadPath({ bool fullRestart }) => mainPath + (fullRestart ? '' : '.incremental') + '.dill';
 
   AssetBundle _assetBundle;
   AssetBundle get assetBundle => _assetBundle;
@@ -739,10 +790,10 @@ abstract class ResidentRunner {
         // This hooks up callbacks for when the connection stops in the future.
         // We don't want to wait for them. We don't handle errors in those callbacks'
         // futures either because they just print to logger and is not critical.
-        service.done.then<void>( // ignore: unawaited_futures
+        unawaited(service.done.then<void>(
           _serviceProtocolDone,
-          onError: _serviceProtocolError
-        ).whenComplete(_serviceDisconnected);
+          onError: _serviceProtocolError,
+        ).whenComplete(_serviceDisconnected));
       }
     }
   }
@@ -894,6 +945,11 @@ abstract class ResidentRunner {
   }
 
   bool hasDirtyDependencies(FlutterDevice device) {
+    /// When using the build system, dependency analysis is handled by build
+    /// runner instead.
+    if (experimentalBuildEnabled) {
+      return false;
+    }
     final DartDependencySetBuilder dartDependencySetBuilder =
         DartDependencySetBuilder(mainPath, packagesFilePath);
     final DependencyChecker dependencyChecker =
@@ -973,7 +1029,7 @@ class OperationResult {
 
 /// Given the value of the --target option, return the path of the Dart file
 /// where the app's main function should be.
-String findMainDartFile([String target]) {
+String findMainDartFile([ String target ]) {
   target ??= '';
   final String targetPath = fs.path.absolute(target);
   if (fs.isDirectorySync(targetPath))

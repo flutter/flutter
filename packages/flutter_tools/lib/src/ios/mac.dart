@@ -114,7 +114,7 @@ class IMobileDevice {
 
     // If no device is attached, we're unable to detect any problems. Assume all is well.
     final ProcessResult result = (await runAsync(<String>['idevice_id', '-l'])).processResult;
-    if (result.exitCode != 0 || result.stdout.isEmpty)
+    if (result.exitCode == 0 && result.stdout.isEmpty)
       return true;
 
     // Check that we can look up the names of any attached devices.
@@ -134,7 +134,7 @@ class IMobileDevice {
 
   Future<String> getInfoForDevice(String deviceID, String key) async {
     try {
-      final ProcessResult result = await processManager.run(<String>['ideviceinfo', '-u', deviceID, '-k', key, '--simple']);
+      final ProcessResult result = await processManager.run(<String>['ideviceinfo', '-u', deviceID, '-k', key]);
       if (result.exitCode == 255 && result.stdout != null && result.stdout.contains('No device found'))
         throw IOSDeviceNotFoundError('ideviceinfo could not find device:\n${result.stdout}');
       if (result.exitCode != 0)
@@ -294,6 +294,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   BuildInfo buildInfo,
   String targetOverride,
   bool buildForDevice,
+  IOSArch activeArch,
   bool codesign = true,
   bool usesTerminalUi = true,
 }) async {
@@ -387,7 +388,7 @@ Future<XcodeBuildResult> buildXcodeProject({
       iosProject: project.ios,
       iosEngineDir: flutterFrameworkDir(buildInfo.mode),
       isSwift: project.ios.isSwift,
-      dependenciesChanged: !await fingerprinter.doesFingerprintMatch()
+      dependenciesChanged: !await fingerprinter.doesFingerprintMatch(),
     );
     if (didPodInstall)
       await fingerprinter.writeFingerprint();
@@ -435,12 +436,20 @@ Future<XcodeBuildResult> buildXcodeProject({
     buildCommands.addAll(<String>['-sdk', 'iphonesimulator', '-arch', 'x86_64']);
   }
 
+  if (activeArch != null) {
+    final String activeArchName = getNameForIOSArch(activeArch);
+    if (activeArchName != null) {
+      buildCommands.add('ONLY_ACTIVE_ARCH=YES');
+      buildCommands.add('ARCHS=$activeArchName');
+    }
+  }
+
   if (!codesign) {
     buildCommands.addAll(
       <String>[
         'CODE_SIGNING_ALLOWED=NO',
         'CODE_SIGNING_REQUIRED=NO',
-        'CODE_SIGNING_IDENTITY=""'
+        'CODE_SIGNING_IDENTITY=""',
       ]
     );
   }
@@ -480,7 +489,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     }
 
     // Trigger the start of the pipe -> stdout loop. Ignore exceptions.
-    listenToScriptOutputLine(); // ignore: unawaited_futures
+    unawaited(listenToScriptOutputLine());
 
     buildCommands.add('SCRIPT_OUTPUT_STREAM_FILE=${scriptOutputPipeFile.absolute.path}');
   }
@@ -490,7 +499,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   final RunResult buildResult = await runAsync(
     buildCommands,
     workingDirectory: app.project.hostAppRoot.path,
-    allowReentrantFlutter: true
+    allowReentrantFlutter: true,
   );
   // Notifies listener that no more output is coming.
   scriptOutputPipeFile?.writeAsStringSync('all done');
@@ -711,7 +720,7 @@ void _copyServiceDefinitionsManifest(List<Map<String, String>> services, File ma
     'name': service['name'],
     // Since we have already moved it to the Frameworks directory. Strip away
     // the directory and basenames.
-    'framework': fs.path.basenameWithoutExtension(service['ios-framework'])
+    'framework': fs.path.basenameWithoutExtension(service['ios-framework']),
   }).toList();
   final Map<String, dynamic> jsonObject = <String, dynamic>{ 'services' : jsonServices };
   manifest.writeAsStringSync(json.encode(jsonObject), mode: FileMode.write, flush: true);
@@ -724,7 +733,7 @@ Future<bool> upgradePbxProjWithFlutterAssets(IosProject project) async {
 
   final RegExp oldAssets = RegExp(r'\/\* (flutter_assets|app\.flx)');
   final StringBuffer buffer = StringBuffer();
-  final Set<String> printedStatuses = Set<String>();
+  final Set<String> printedStatuses = <String>{};
 
   for (final String line in lines) {
     final Match match = oldAssets.firstMatch(line);

@@ -24,7 +24,7 @@ void main() {
         );
       },
       paints
-        ..rrect(rrect: RRect.fromRectAndCorners(Offset.zero & size, topRight: const Radius.circular(100.0)))
+        ..rrect(rrect: RRect.fromRectAndCorners(Offset.zero & size, topRight: const Radius.circular(100.0))),
     );
     expect(decoration.hitTest(size, const Offset(10.0, 10.0), textDirection: TextDirection.rtl), isTrue);
     expect(decoration.hitTest(size, const Offset(990.0, 10.0), textDirection: TextDirection.rtl), isFalse);
@@ -37,7 +37,7 @@ void main() {
         );
       },
       paints
-        ..rrect(rrect: RRect.fromRectAndCorners(Offset.zero & size, topLeft: const Radius.circular(100.0)))
+        ..rrect(rrect: RRect.fromRectAndCorners(Offset.zero & size, topLeft: const Radius.circular(100.0))),
     );
     expect(decoration.hitTest(size, const Offset(10.0, 10.0), textDirection: TextDirection.ltr), isFalse);
     expect(decoration.hitTest(size, const Offset(990.0, 10.0), textDirection: TextDirection.ltr), isTrue);
@@ -58,7 +58,7 @@ void main() {
     final BoxPainter painter = decoration.createBoxPainter();
     const Size size = Size(1000.0, 1000.0);
     expect(
-        (Canvas canvas) {
+      (Canvas canvas) {
         painter.paint(
           canvas,
           const Offset(0.0, 0.0),

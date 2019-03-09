@@ -362,7 +362,7 @@ class DataTable extends StatelessWidget {
     Color color,
     bool checked,
     VoidCallback onRowTap,
-    ValueChanged<bool> onCheckboxChanged
+    ValueChanged<bool> onCheckboxChanged,
   }) {
     Widget contents = Semantics(
       container: true,
@@ -481,8 +481,8 @@ class DataTable extends StatelessWidget {
             color: isLightTheme ? Colors.black54 : Colors.white70,
           ),
           child: DropdownButtonHideUnderline(child: label),
-        )
-      )
+        ),
+      ),
     );
     if (onTap != null) {
       label = InkWell(
@@ -523,7 +523,7 @@ class DataTable extends StatelessWidget {
           key: index == 0 ? _headingRowKey : rows[index - 1].key,
           decoration: index > 0 && rows[index - 1].selected ? _kSelectedDecoration
                                                             : _kUnselectedDecoration,
-          children: List<Widget>(tableColumns.length)
+          children: List<Widget>(tableColumns.length),
         );
       },
     );
@@ -543,7 +543,7 @@ class DataTable extends StatelessWidget {
         tableRows[rowIndex].children[0] = _buildCheckbox(
           color: theme.accentColor,
           checked: row.selected,
-          onRowTap: () => row.onSelectChanged(!row.selected),
+          onRowTap: () => row.onSelectChanged != null ? row.onSelectChanged(!row.selected) : null ,
           onCheckboxChanged: row.onSelectChanged,
         );
         rowIndex += 1;
@@ -568,7 +568,7 @@ class DataTable extends StatelessWidget {
         label: column.label,
         tooltip: column.tooltip,
         numeric: column.numeric,
-        onSort: () => column.onSort(dataColumnIndex, sortColumnIndex == dataColumnIndex ? !sortAscending : true),
+        onSort: () => column.onSort != null ? column.onSort(dataColumnIndex, sortColumnIndex == dataColumnIndex ? !sortAscending : true) : null,
         sorted: dataColumnIndex == sortColumnIndex,
         ascending: sortAscending,
       );
@@ -583,7 +583,7 @@ class DataTable extends StatelessWidget {
           placeholder: cell.placeholder,
           showEditIcon: cell.showEditIcon,
           onTap: cell.onTap,
-          onSelectChanged: () => row.onSelectChanged(!row.selected),
+          onSelectChanged: () => row.onSelectChanged != null ? row.onSelectChanged(!row.selected) : null,
         );
         rowIndex += 1;
       }
@@ -705,7 +705,7 @@ class _SortArrowState extends State<_SortArrow> with TickerProviderStateMixin {
         duration: widget.duration,
         vsync: this,
       ),
-      curve: Curves.fastOutSlowIn
+      curve: Curves.fastOutSlowIn,
     )
     ..addListener(_rebuild);
     _opacityController.value = widget.visible ? 1.0 : 0.0;

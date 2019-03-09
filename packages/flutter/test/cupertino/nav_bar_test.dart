@@ -89,7 +89,7 @@ void main() {
               key: middleBox,
               alignment: Alignment.center,
               widthFactor: 1.0,
-              child: const Text('Title')
+              child: const Text('Title'),
             ),
             trailing: const CupertinoButton(child: Text('Puma'), onPressed: null),
             padding: const EdgeInsetsDirectional.only(
@@ -154,12 +154,12 @@ void main() {
       CupertinoApp(
         home: CupertinoNavigationBar(
           leading: CupertinoButton(
-            onPressed: () {},
+            onPressed: () { },
             child: const _ExpectStyles(color: CupertinoColors.activeBlue, index: 0x000001),
           ),
           middle: const _ExpectStyles(color: CupertinoColors.black, index: 0x000100),
           trailing: CupertinoButton(
-            onPressed: () {},
+            onPressed: () { },
             child: const _ExpectStyles(color: CupertinoColors.activeBlue, index: 0x010000),
           ),
         ),
@@ -175,12 +175,12 @@ void main() {
         theme: const CupertinoThemeData(brightness: Brightness.dark),
         home: CupertinoNavigationBar(
           leading: CupertinoButton(
-            onPressed: () {},
+            onPressed: () { },
             child: const _ExpectStyles(color: CupertinoColors.activeOrange, index: 0x000001),
           ),
           middle: const _ExpectStyles(color: CupertinoColors.white, index: 0x000100),
           trailing: CupertinoButton(
-            onPressed: () {},
+            onPressed: () { },
             child: const _ExpectStyles(color: CupertinoColors.activeOrange, index: 0x010000),
           ),
         ),
@@ -195,12 +195,12 @@ void main() {
       CupertinoApp(
         home: CupertinoNavigationBar(
           leading: CupertinoButton(
-            onPressed: () {},
+            onPressed: () { },
             child: const _ExpectStyles(color: Color(0xFF001122), index: 0x000001),
           ),
           middle: const _ExpectStyles(color: Color(0xFF000000), index: 0x000100),
           trailing: CupertinoButton(
-            onPressed: () {},
+            onPressed: () { },
             child: const _ExpectStyles(color: Color(0xFF001122), index: 0x010000),
           ),
           actionsForegroundColor: const Color(0xFF001122),
@@ -447,7 +447,7 @@ void main() {
     // Large title initially visible.
     expect(
       largeTitleOpacity.opacity.value,
-      1.0
+      1.0,
     );
     // Middle widget not even wrapped with RenderOpacity, i.e. is always visible.
     expect(
@@ -466,7 +466,7 @@ void main() {
     // Large title no longer visible.
     expect(
       largeTitleOpacity.opacity.value,
-      0.0
+      0.0,
     );
 
     // The persistent toolbar doesn't move or change size.
@@ -645,9 +645,7 @@ void main() {
     expect(decoration.border, isNull);
   });
 
-  testWidgets(
-      'Border is displayed by default in sliver nav bar',
-      (WidgetTester tester) async {
+  testWidgets('Border is displayed by default in sliver nav bar', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: CupertinoPageScaffold(
@@ -675,9 +673,7 @@ void main() {
     expect(bottom, isNotNull);
   });
 
-  testWidgets(
-      'Border is not displayed when null in sliver nav bar',
-      (WidgetTester tester) async {
+  testWidgets('Border is not displayed when null in sliver nav bar', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: CupertinoPageScaffold(
@@ -749,9 +745,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets(
-      'Border can be overridden in sliver nav bar',
-      (WidgetTester tester) async {
+  testWidgets('Border can be overridden in sliver nav bar', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: CupertinoPageScaffold(

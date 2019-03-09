@@ -26,7 +26,7 @@ class StockList extends StatelessWidget {
           stock: stocks[index],
           onPressed: onOpen,
           onDoubleTap: onShow,
-          onLongPressed: onAction
+          onLongPressed: onAction,
         );
       },
     );

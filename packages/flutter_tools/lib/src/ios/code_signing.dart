@@ -94,8 +94,8 @@ final RegExp _certificateOrganizationalUnitExtractionPattern = RegExp(r'OU=([a-z
 /// project has a development team set in the project's build settings.
 Future<Map<String, String>> getCodeSigningIdentityDevelopmentTeam({
   BuildableIOSApp iosApp,
-  bool usesTerminalUi = true
-}) async{
+  bool usesTerminalUi = true,
+}) async {
   final Map<String, String> buildSettings = iosApp.project.buildSettings;
   if (buildSettings == null)
     return null;
@@ -158,7 +158,7 @@ Future<Map<String, String>> getCodeSigningIdentityDevelopmentTeam({
   final String opensslOutput = await utf8.decodeStream(opensslProcess.stdout);
   // Fire and forget discard of the stderr stream so we don't hold onto resources.
   // Don't care about the result.
-  opensslProcess.stderr.drain<String>(); // ignore: unawaited_futures
+  unawaited(opensslProcess.stderr.drain<String>());
 
   if (await opensslProcess.exitCode != 0)
     return null;

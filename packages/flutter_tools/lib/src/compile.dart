@@ -20,20 +20,9 @@ import 'convert.dart';
 import 'dart/package_map.dart';
 import 'globals.dart';
 
-KernelCompilerFactory get kernelCompilerFactory => context[KernelCompilerFactory];
+KernelCompiler get kernelCompiler => context[KernelCompiler];
 
-typedef CompilerMessageConsumer = void Function(String message, {bool emphasis, TerminalColor color});
-
-/// Injectable factory to allow async construction of a [KernelCompiler].
-class KernelCompilerFactory {
-  const KernelCompilerFactory();
-
-  /// Return the correct [KernelCompiler] instance for the given project
-  /// configuration.
-  FutureOr<KernelCompiler> create() async {
-    return const KernelCompiler();
-  }
-}
+typedef CompilerMessageConsumer = void Function(String message, { bool emphasis, TerminalColor color });
 
 /// The target model describes the set of core libraries that are availible within
 /// the SDK.
@@ -90,7 +79,7 @@ class StdoutHandler {
   void handler(String message) {
     const String kResultPrefix = 'result ';
     if (boundaryKey == null && message.startsWith(kResultPrefix)) {
-        boundaryKey = message.substring(kResultPrefix.length);
+      boundaryKey = message.substring(kResultPrefix.length);
     } else if (message.startsWith(boundaryKey)) {
       if (message.length <= boundaryKey.length) {
         compilerOutput.complete(null);
@@ -112,7 +101,7 @@ class StdoutHandler {
 
   // This is needed to get ready to process next compilation result output,
   // with its own boundary key and new completer.
-  void reset({bool suppressCompilerMessages = false}) {
+  void reset({ bool suppressCompilerMessages = false }) {
     boundaryKey = null;
     compilerMessageReceived = false;
     compilerOutput = Completer<CompilerOutput>();
@@ -128,10 +117,14 @@ class PackageUriMapper {
 
     for (String packageName in packageMap.keys) {
       final String prefix = packageMap[packageName].toString();
-      if (fileSystemScheme != null && fileSystemRoots != null && prefix.contains(fileSystemScheme)) {
+      // Only perform a multi-root mapping if there are multiple roots.
+      if (fileSystemScheme != null
+        && fileSystemRoots != null
+        && fileSystemRoots.length > 1
+        && prefix.contains(fileSystemScheme)) {
         _packageName = packageName;
         _uriPrefixes = fileSystemRoots
-          .map((String name) => Uri.file('$name/lib/', windows: platform.isWindows).toString())
+          .map((String name) => Uri.file(name, windows: platform.isWindows).toString())
           .toList();
         return;
       }
@@ -182,6 +175,7 @@ class KernelCompiler {
     List<String> fileSystemRoots,
     String fileSystemScheme,
     bool targetProductVm = false,
+    String initializeFromDill,
   }) async {
     final String frontendServer = artifacts.getArtifactPath(
       Artifact.frontendServerSnapshotForEngineDartSdk
@@ -258,6 +252,9 @@ class KernelCompiler {
     if (fileSystemScheme != null) {
       command.addAll(<String>['--filesystem-scheme', fileSystemScheme]);
     }
+    if (initializeFromDill != null) {
+      command.addAll(<String>['--initialize-from-dill', initializeFromDill]);
+    }
 
     if (extraFrontEndOptions != null)
       command.addAll(extraFrontEndOptions);
@@ -266,10 +263,10 @@ class KernelCompiler {
 
     printTrace(command.join(' '));
     final Process server = await processManager
-        .start(command)
-        .catchError((dynamic error, StackTrace stack) {
-      printError('Failed to start frontend server $error, $stack');
-    });
+      .start(command)
+      .catchError((dynamic error, StackTrace stack) {
+        printError('Failed to start frontend server $error, $stack');
+      });
 
     final StdoutHandler _stdoutHandler = StdoutHandler();
 
@@ -331,7 +328,7 @@ class _CompileExpressionRequest extends _CompilationRequest {
     this.typeDefinitions,
     this.libraryUri,
     this.klass,
-    this.isStatic
+    this.isStatic,
   ) : super(completer);
 
   String expression;
@@ -408,8 +405,12 @@ class ResidentCompiler {
   /// point that is used for recompilation.
   /// Binary file name is returned if compilation was successful, otherwise
   /// null is returned.
-  Future<CompilerOutput> recompile(String mainPath, List<String> invalidatedFiles,
-      {@required String outputPath, String packagesFilePath}) async {
+  Future<CompilerOutput> recompile(
+    String mainPath,
+    List<String> invalidatedFiles, {
+    @required String outputPath,
+    String packagesFilePath,
+  }) async {
     assert (outputPath != null);
     if (!_controller.hasListener) {
       _controller.stream.listen(_handleCompilationRequest);
@@ -443,7 +444,7 @@ class ResidentCompiler {
       return _compile(
           _mapFilename(request.mainPath, packageUriMapper),
           request.outputPath,
-          _mapFilename(request.packagesFilePath ?? _packagesPath, /* packageUriMapper= */ null)
+          _mapFilename(request.packagesFilePath ?? _packagesPath, /* packageUriMapper= */ null),
       );
     }
 
@@ -477,8 +478,11 @@ class ResidentCompiler {
     }
   }
 
-  Future<CompilerOutput> _compile(String scriptUri, String outputPath,
-      String packagesFilePath) async {
+  Future<CompilerOutput> _compile(
+    String scriptUri,
+    String outputPath,
+    String packagesFilePath,
+  ) async {
     final String frontendServer = artifacts.getArtifactPath(
       Artifact.frontendServerSnapshotForEngineDartSdk
     );
@@ -546,8 +550,14 @@ class ResidentCompiler {
     return _stdoutHandler.compilerOutput.future;
   }
 
-  Future<CompilerOutput> compileExpression(String expression, List<String> definitions,
-      List<String> typeDefinitions, String libraryUri, String klass, bool isStatic) {
+  Future<CompilerOutput> compileExpression(
+    String expression,
+    List<String> definitions,
+    List<String> typeDefinitions,
+    String libraryUri,
+    String klass,
+    bool isStatic,
+  ) {
     if (!_controller.hasListener) {
       _controller.stream.listen(_handleCompilationRequest);
     }
@@ -560,8 +570,7 @@ class ResidentCompiler {
     return completer.future;
   }
 
-  Future<CompilerOutput> _compileExpression(
-      _CompileExpressionRequest request) async {
+  Future<CompilerOutput> _compileExpression(_CompileExpressionRequest request) async {
     _stdoutHandler.reset(suppressCompilerMessages: true);
 
     // 'compile-expression' should be invoked after compiler has been started,
@@ -656,7 +665,11 @@ class ResidentCompiler {
     return null;
   }
 
-  Future<dynamic> shutdown() {
+  Future<dynamic> shutdown() async {
+    // Server was never sucessfully created.
+    if (_server == null) {
+      return 0;
+    }
     _server.kill();
     return _server.exitCode;
   }

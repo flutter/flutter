@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/painting.dart';
 
 import 'basic.dart';
 import 'framework.dart';
@@ -221,9 +222,12 @@ class Text extends StatelessWidget {
   ///
   /// If the [style] argument is null, the text will use the style from the
   /// closest enclosing [DefaultTextStyle].
+  ///
+  /// The [data] parameter must not be null.
   const Text(this.data, {
     Key key,
     this.style,
+    this.strutStyle,
     this.textAlign,
     this.textDirection,
     this.locale,
@@ -232,14 +236,20 @@ class Text extends StatelessWidget {
     this.textScaleFactor,
     this.maxLines,
     this.semanticsLabel,
-  }) : assert(data != null),
+  }) : assert(
+         data != null,
+         'A non-null String must be provided to a Text widget.',
+       ),
        textSpan = null,
        super(key: key);
 
   /// Creates a text widget with a [TextSpan].
+  ///
+  /// The [textSpan] parameter must not be null.
   const Text.rich(this.textSpan, {
     Key key,
     this.style,
+    this.strutStyle,
     this.textAlign,
     this.textDirection,
     this.locale,
@@ -248,7 +258,10 @@ class Text extends StatelessWidget {
     this.textScaleFactor,
     this.maxLines,
     this.semanticsLabel,
-  }) : assert(textSpan != null),
+  }) : assert(
+         textSpan != null,
+         'A non-null TextSpan must be provided to a Text.rich widget.',
+       ),
        data = null,
        super(key: key);
 
@@ -268,6 +281,9 @@ class Text extends StatelessWidget {
   /// the closest enclosing [DefaultTextStyle]. Otherwise, the style will
   /// replace the closest enclosing [DefaultTextStyle].
   final TextStyle style;
+
+  /// {@macro flutter.painting.textPainter.strutStyle}
+  final StrutStyle strutStyle;
 
   /// How the text should be aligned horizontally.
   final TextAlign textAlign;
@@ -356,6 +372,7 @@ class Text extends StatelessWidget {
       overflow: overflow ?? defaultTextStyle.overflow,
       textScaleFactor: textScaleFactor ?? MediaQuery.textScaleFactorOf(context),
       maxLines: maxLines ?? defaultTextStyle.maxLines,
+      strutStyle: strutStyle,
       text: TextSpan(
         style: effectiveTextStyle,
         text: data,
@@ -368,7 +385,7 @@ class Text extends StatelessWidget {
         label: semanticsLabel,
         child: ExcludeSemantics(
           child: result,
-        )
+        ),
       );
     }
     return result;

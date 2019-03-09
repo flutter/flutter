@@ -48,7 +48,7 @@ void main() {
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTap: () { log.add('tap'); },
-        )
+        ),
       )
     );
     expect(log, equals(<String>['getClip']));
@@ -68,7 +68,7 @@ void main() {
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTap: () { log.add('tap'); },
-        )
+        ),
       )
     );
     expect(log, equals(<String>[]));
@@ -90,8 +90,8 @@ void main() {
           child: GestureDetector(
             behavior: HitTestBehavior.opaque,
             onTap: () { log.add('tap'); },
-          )
-        )
+          ),
+        ),
       )
     );
     expect(log, equals(<String>[]));
@@ -117,9 +117,9 @@ void main() {
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
               onTap: () { log.add('tap'); },
-            )
-          )
-        )
+            ),
+          ),
+        ),
       )
     );
     expect(log, equals(<String>['a']));
@@ -141,9 +141,9 @@ void main() {
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
               onTap: () { log.add('tap'); },
-            )
-          )
-        )
+            ),
+          ),
+        ),
       )
     );
     expect(log, equals(<String>['a', 'tap']));
@@ -159,9 +159,9 @@ void main() {
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
               onTap: () { log.add('tap'); },
-            )
-          )
-        )
+            ),
+          ),
+        ),
       )
     );
     expect(log, equals(<String>['a', 'tap', 'a']));
@@ -177,9 +177,9 @@ void main() {
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
               onTap: () { log.add('tap'); },
-            )
-          )
-        )
+            ),
+          ),
+        ),
       )
     );
     expect(log, equals(<String>['a', 'tap', 'a']));
@@ -195,9 +195,9 @@ void main() {
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
               onTap: () { log.add('tap'); },
-            )
-          )
-        )
+            ),
+          ),
+        ),
       )
     );
     expect(log, equals(<String>['a', 'tap', 'a', 'b']));
@@ -213,9 +213,9 @@ void main() {
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
               onTap: () { log.add('tap'); },
-            )
-          )
-        )
+            ),
+          ),
+        ),
       )
     );
     expect(log, equals(<String>['a', 'tap', 'a', 'b', 'c']));
@@ -239,12 +239,12 @@ void main() {
       ..save()
       ..path() // Placeholder
       ..restore()
-      ..restore()
+      ..restore(),
     );
     debugPaintSizeEnabled = true;
     expect(tester.renderObject(find.byType(ClipRect)).debugPaint, paints
       ..rect(rect: Rect.fromLTRB(0.0, 0.0, 800.0, 600.0))
-      ..paragraph()
+      ..paragraph(),
     );
     debugPaintSizeEnabled = false;
   });

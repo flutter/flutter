@@ -36,7 +36,7 @@ abstract class AssetBundle {
 
   bool wasBuiltOnce();
 
-  bool needsBuild({String manifestPath = _ManifestAssetBundle.defaultManifestPath});
+  bool needsBuild({ String manifestPath = _ManifestAssetBundle.defaultManifestPath });
 
   /// Returns 0 for success; non-zero for failure.
   Future<int> build({
@@ -44,7 +44,7 @@ abstract class AssetBundle {
     String assetDirPath,
     String packagesPath,
     bool includeDefaultFonts = true,
-    bool reportLicensedPackages = false
+    bool reportLicensedPackages = false,
   });
 }
 
@@ -75,7 +75,7 @@ class _ManifestAssetBundle implements AssetBundle {
   bool wasBuiltOnce() => _lastBuildTimestamp != null;
 
   @override
-  bool needsBuild({String manifestPath = defaultManifestPath}) {
+  bool needsBuild({ String manifestPath = defaultManifestPath }) {
     if (_lastBuildTimestamp == null)
       return true;
 
@@ -92,7 +92,7 @@ class _ManifestAssetBundle implements AssetBundle {
     String assetDirPath,
     String packagesPath,
     bool includeDefaultFonts = true,
-    bool reportLicensedPackages = false
+    bool reportLicensedPackages = false,
   }) async {
     assetDirPath ??= getAssetBuildDirectory();
     packagesPath ??= fs.path.absolute(PackageMap.globalPackagesPath);
@@ -128,7 +128,7 @@ class _ManifestAssetBundle implements AssetBundle {
       packageMap,
       flutterManifest,
       assetBasePath,
-      excludeDirs: <String>[assetDirPath, getBuildDirectory()]
+      excludeDirs: <String>[assetDirPath, getBuildDirectory()],
     );
 
     if (assetVariants == null)
@@ -290,7 +290,7 @@ List<_Asset> _getMaterialAssets(String fontSet) {
       result.add(_Asset(
         baseDir: fs.path.join(Cache.flutterRoot, 'bin', 'cache', 'artifacts', 'material_fonts'),
         relativeUri: Uri(path: entryUri.pathSegments.last),
-        entryUri: entryUri
+        entryUri: entryUri,
       ));
     }
   }
@@ -303,9 +303,9 @@ final String _licenseSeparator = '\n' + ('-' * 80) + '\n';
 /// Returns a DevFSContent representing the license file.
 Future<DevFSContent> _obtainLicenses(
   PackageMap packageMap,
-  String assetBase,
-  { bool reportPackages }
-) async {
+  String assetBase, {
+  bool reportPackages,
+}) async {
   // Read the LICENSE file from each package in the .packages file, splitting
   // each one into each component license (so that we can de-dupe if possible).
   //
@@ -320,7 +320,7 @@ Future<DevFSContent> _obtainLicenses(
   // example, a package might itself contain code from multiple third-party
   // sources, and might need to include a license for each one.)
   final Map<String, Set<String>> packageLicenses = <String, Set<String>>{};
-  final Set<String> allPackages = Set<String>();
+  final Set<String> allPackages = <String>{};
   for (String packageName in packageMap.map.keys) {
     final Uri package = packageMap.map[packageName];
     if (package != null && package.scheme == 'file') {
@@ -342,7 +342,7 @@ Future<DevFSContent> _obtainLicenses(
             packageNames = <String>[packageName];
             licenseText = rawLicense;
           }
-          packageLicenses.putIfAbsent(licenseText, () => Set<String>())
+          packageLicenses.putIfAbsent(licenseText, () => <String>{})
             ..addAll(packageNames);
           allPackages.addAll(packageNames);
         }
@@ -395,7 +395,7 @@ List<Map<String, dynamic>> _parseFonts(
   FlutterManifest manifest,
   bool includeDefaultFonts,
   PackageMap packageMap, {
-  String packageName
+  String packageName,
 }) {
   final List<Map<String, dynamic>> fonts = <Map<String, dynamic>>[];
   if (manifest.usesMaterialDesign && includeDefaultFonts) {
@@ -526,7 +526,7 @@ Map<_Asset, List<_Asset>> _parseAssets(
   FlutterManifest flutterManifest,
   String assetBase, {
   List<String> excludeDirs = const <String>[],
-  String packageName
+  String packageName,
 }) {
   final Map<_Asset, List<_Asset>> result = <_Asset, List<_Asset>>{};
 
@@ -564,14 +564,15 @@ Map<_Asset, List<_Asset>> _parseAssets(
   return result;
 }
 
-void _parseAssetsFromFolder(PackageMap packageMap,
+void _parseAssetsFromFolder(
+  PackageMap packageMap,
   FlutterManifest flutterManifest,
   String assetBase,
   _AssetDirectoryCache cache,
   Map<_Asset, List<_Asset>> result,
   Uri assetUri, {
   List<String> excludeDirs = const <String>[],
-  String packageName
+  String packageName,
 }) {
   final String directoryPath = fs.path.join(
       assetBase, assetUri.toFilePath(windows: platform.isWindows));
@@ -595,14 +596,15 @@ void _parseAssetsFromFolder(PackageMap packageMap,
   }
 }
 
-void _parseAssetFromFile(PackageMap packageMap,
+void _parseAssetFromFile(
+  PackageMap packageMap,
   FlutterManifest flutterManifest,
   String assetBase,
   _AssetDirectoryCache cache,
   Map<_Asset, List<_Asset>> result,
   Uri assetUri, {
   List<String> excludeDirs = const <String>[],
-  String packageName
+  String packageName,
 }) {
   final _Asset asset = _resolveAsset(
     packageMap,

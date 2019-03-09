@@ -110,7 +110,7 @@ void main() {
       fs.file(xcodebuild).deleteSync();
       expect(xcodeProjectInterpreter.isInstalled, isFalse);
     }, overrides: <Type, Generator>{
-      Platform: () => fakePlatform('notMacOS')
+      Platform: () => fakePlatform('notMacOS'),
     });
 
     testUsingOsxContext('isInstalled is false when xcodebuild does not exist', () {
@@ -450,7 +450,7 @@ dependencies:
     sdk: flutter
 flutter:
 ''';
-      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, buildNumber: 3);
+      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, buildNumber: '3');
       await checkBuildVersion(
         manifestString: manifest,
         buildInfo: buildInfo,
@@ -468,7 +468,7 @@ dependencies:
     sdk: flutter
 flutter:
 ''';
-      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, buildName: '1.0.2', buildNumber: 3);
+      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, buildName: '1.0.2', buildNumber: '3');
       await checkBuildVersion(
         manifestString: manifest,
         buildInfo: buildInfo,
@@ -486,7 +486,7 @@ dependencies:
     sdk: flutter
 flutter:
 ''';
-      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, buildName: '1.0.2', buildNumber: 3);
+      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, buildName: '1.0.2', buildNumber: '3');
       await checkBuildVersion(
         manifestString: manifest,
         buildInfo: buildInfo,
@@ -503,7 +503,7 @@ dependencies:
     sdk: flutter
 flutter:
 ''';
-      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, buildName: '1.0.2', buildNumber: 3);
+      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, buildName: '1.0.2', buildNumber: '3');
       await checkBuildVersion(
         manifestString: manifest,
         buildInfo: buildInfo,

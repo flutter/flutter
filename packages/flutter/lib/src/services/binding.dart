@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 
@@ -20,10 +19,15 @@ mixin ServicesBinding on BindingBase {
   @override
   void initInstances() {
     super.initInstances();
-    ui.window
+    _instance = this;
+    window
       ..onPlatformMessage = BinaryMessages.handlePlatformMessage;
     initLicenses();
   }
+
+  /// The current [ServicesBinding], if one has been created.
+  static ServicesBinding get instance => _instance;
+  static ServicesBinding _instance;
 
   /// Adds relevant licenses to the [LicenseRegistry].
   ///
@@ -74,7 +78,7 @@ mixin ServicesBinding on BindingBase {
       if (split >= 0) {
         result.add(LicenseEntryWithLineBreaks(
           license.substring(0, split).split('\n'),
-          license.substring(split + 2)
+          license.substring(split + 2),
         ));
       } else {
         result.add(LicenseEntryWithLineBreaks(const <String>[], license));

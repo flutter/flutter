@@ -78,8 +78,8 @@ void main() {
 
   test('RenderSemanticsGestureHandler adds/removes correct semantic actions', () {
     final RenderSemanticsGestureHandler renderObj = RenderSemanticsGestureHandler(
-      onTap: () {},
-      onHorizontalDragUpdate: (DragUpdateDetails details) {},
+      onTap: () { },
+      onHorizontalDragUpdate: (DragUpdateDetails details) { },
     );
 
     SemanticsConfiguration config = SemanticsConfiguration();
@@ -89,7 +89,7 @@ void main() {
     expect(config.getActionHandler(SemanticsAction.scrollRight), isNotNull);
 
     config = SemanticsConfiguration();
-    renderObj.validActions = <SemanticsAction>[SemanticsAction.tap, SemanticsAction.scrollLeft].toSet();
+    renderObj.validActions = <SemanticsAction>{SemanticsAction.tap, SemanticsAction.scrollLeft};
 
     renderObj.describeSemanticsConfiguration(config);
     expect(config.getActionHandler(SemanticsAction.tap), isNotNull);
@@ -277,7 +277,7 @@ void main() {
 
 class _FakeTickerProvider implements TickerProvider {
   @override
-  Ticker createTicker(TickerCallback onTick, [bool disableAnimations = false]) {
+  Ticker createTicker(TickerCallback onTick, [ bool disableAnimations = false ]) {
     return _FakeTicker();
   }
 }
@@ -287,7 +287,7 @@ class _FakeTicker implements Ticker {
   bool muted;
 
   @override
-  void absorbTicker(Ticker originalTicker) {}
+  void absorbTicker(Ticker originalTicker) { }
 
   @override
   String get debugLabel => null;
@@ -305,10 +305,10 @@ class _FakeTicker implements Ticker {
   bool get shouldScheduleTick => null;
 
   @override
-  void dispose() {}
+  void dispose() { }
 
   @override
-  void scheduleTick({bool rescheduling = false}) {}
+  void scheduleTick({ bool rescheduling = false }) { }
 
   @override
   TickerFuture start() {
@@ -316,11 +316,11 @@ class _FakeTicker implements Ticker {
   }
 
   @override
-  void stop({bool canceled = false}) {}
+  void stop({ bool canceled = false }) { }
 
   @override
-  void unscheduleTick() {}
+  void unscheduleTick() { }
 
   @override
-  String toString({bool debugIncludeStack = false}) => super.toString();
+  String toString({ bool debugIncludeStack = false }) => super.toString();
 }
