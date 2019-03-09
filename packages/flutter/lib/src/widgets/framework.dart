@@ -1186,7 +1186,19 @@ abstract class State<T extends StatefulWidget> extends Diagnosticable {
   void dispose() {
     assert(_debugLifecycleState == _StateLifecycle.ready);
     assert(() { _debugLifecycleState = _StateLifecycle.defunct; return true; }());
+    assert(
+      debugStatesDisposedDuringTest != null,
+      'debugStatesDisposedDuringTest should only be used in widget tests',
+    );
+    if (debugIsUserState)
+      debugStatesDisposedDuringTest.add(toString());
   }
+
+  @visibleForTesting
+  static List<String> debugStatesDisposedDuringTest;
+
+  @protected
+  bool get debugIsUserState => true;
 
   /// Describes the part of the user interface represented by this widget.
   ///

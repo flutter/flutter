@@ -578,6 +578,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     assert(inTest);
 
     runApp(Container(key: UniqueKey(), child: _preTestMessage)); // Reset the tree to a known state.
+    State.debugStatesDisposedDuringTest = <String>[];
     await pump();
 
     final bool autoUpdateGoldensBeforeTest = autoUpdateGoldenFiles;
@@ -588,6 +589,10 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     asyncBarrier(); // drains the microtasks in `flutter test` mode (when using AutomatedTestWidgetsFlutterBinding)
 
     if (_pendingExceptionDetails == null) {
+      assert(
+        State.debugStatesDisposedDuringTest.isEmpty,
+        'A State was disposed but was not expected by the test\nUnexpected States:\n${State.debugStatesDisposedDuringTest}',
+      );
       // We only try to clean up and verify invariants if we didn't already
       // fail. If we got an exception already, then we instead leave everything
       // alone so that we don't cause more spurious errors.
@@ -670,6 +675,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     assert(inTest);
     FlutterError.onError = _oldExceptionHandler;
     _pendingExceptionDetails = null;
+    State.debugStatesDisposedDuringTest.clear();
     _parentZone = null;
   }
 }

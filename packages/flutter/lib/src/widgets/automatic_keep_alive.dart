@@ -72,6 +72,9 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
     super.dispose();
   }
 
+  @override
+  bool get debugIsUserState => false;
+
   bool _addClient(KeepAliveNotification notification) {
     final Listenable handle = notification.handle;
     _handles ??= <Listenable, VoidCallback>{};

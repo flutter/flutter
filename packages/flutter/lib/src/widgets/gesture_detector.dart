@@ -755,6 +755,9 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
     super.dispose();
   }
 
+  @override
+  bool get debugIsUserState => false;
+
   void _syncAll(Map<Type, GestureRecognizerFactory> gestures) {
     assert(_recognizers != null);
     final Map<Type, GestureRecognizer> oldRecognizers = _recognizers;
