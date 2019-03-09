@@ -271,7 +271,7 @@ class MaterialButton extends StatelessWidget {
         minWidth: minWidth,
         minHeight: height,
       ),
-      shape: buttonTheme.shape,
+      shape: buttonTheme.getShape(this),
       clipBehavior: clipBehavior ?? Clip.none,
       animationDuration: buttonTheme.getAnimationDuration(this),
       child: child,
