@@ -10,6 +10,8 @@ class Board extends Object with IterableMixin<BoardPoint> {
     @required this.boardRadius,
     @required this.hexagonRadius,
     @required this.hexagonMargin,
+    this.selected,
+    this.boardPoints,
   })
     : assert(boardRadius > 0),
       assert(hexagonRadius > 0),
@@ -33,30 +35,82 @@ class Board extends Object with IterableMixin<BoardPoint> {
       Offset(hexStart.x - centerToFlat, hexStart.y + 1.5 * hexagonRadiusPadded),
       Offset(hexStart.x - centerToFlat, hexStart.y + 0.5 * hexagonRadiusPadded),
     ];
+
+    if (boardPoints == null) {
+      // Generate boardPoints for a fresh board.
+      boardPoints = <BoardPoint>[];
+      BoardPoint boardPoint = _getNextBoardPoint(null);
+      while (boardPoint != null) {
+        boardPoints.add(boardPoint);
+        boardPoint = _getNextBoardPoint(boardPoint);
+      }
+    }
   }
 
-  @override
-  Iterator<BoardPoint> get iterator => BoardIterator(boardRadius, selected);
-
-  BoardPoint selected;
   int boardRadius; // Number of hexagons from center to edge
   double hexagonRadius; // Pixel radius of a hexagon (center to vertex)
   double hexagonMargin; // Margin between hexagons
   List<Offset> positionsForHexagonAtOrigin;
+  BoardPoint selected;
+  List<BoardPoint> boardPoints;
 
-  // Get the distance between two locations
-  int getDistance(BoardPoint a, BoardPoint b) {
-    final Vector3 a3 = a.getCubeCoords();
-    final Vector3 b3 = b.getCubeCoords();
-    return
-      ((a3.x - b3.x).abs() + (a3.y - b3.y).abs() + (a3.z - b3.z).abs()) ~/ 2;
+  @override
+  Iterator<BoardPoint> get iterator =>
+    BoardIterator(boardRadius, selected, boardPoints);
+
+  // For a given q axial coordinate, get the range of possible r values
+  Range _getRRangeForQ(int q) {
+    int rStart;
+    int rEnd;
+    if (q <= 0) {
+      rStart = -boardRadius - q;
+      rEnd = boardRadius;
+    } else if (q > 0) {
+      rEnd = boardRadius - q;
+      rStart = -boardRadius;
+    }
+
+    return Range(rStart, rEnd);
+  }
+
+  // Get the BoardPoint that comes after the given BoardPoint. If given null,
+  // returns the origin BoardPoint. If given BoardPoint is the last, returns
+  // null.
+  BoardPoint _getNextBoardPoint (BoardPoint boardPoint) {
+    // If before the first element
+    if (boardPoint == null) {
+      return BoardPoint(-boardRadius, 0);
+    }
+
+    final Range rRange = _getRRangeForQ(boardPoint.q);
+
+    // If at or after the last element
+    if (boardPoint.q >= boardRadius && boardPoint.r >= rRange.max) {
+      return null;
+    }
+
+    // If wrapping from one q to the next
+    if (boardPoint.r >= rRange.max) {
+      return BoardPoint(boardPoint.q + 1, _getRRangeForQ(boardPoint.q + 1).min);
+    }
+
+    // Otherwise we're just incrementing r
+    return BoardPoint(boardPoint.q, boardPoint.r + 1);
   }
 
   // Check if the board point is actually on the board
   bool _validateBoardPoint(BoardPoint boardPoint) {
-    BoardPoint center = BoardPoint(0, 0);
+    final BoardPoint center = BoardPoint(0, 0);
     final int distanceFromCenter = getDistance(center, boardPoint);
     return distanceFromCenter <= boardRadius;
+  }
+
+  // Get the distance between two locations
+  static int getDistance(BoardPoint a, BoardPoint b) {
+    final Vector3 a3 = a.getCubeCoords();
+    final Vector3 b3 = b.getCubeCoords();
+    return
+      ((a3.x - b3.x).abs() + (a3.y - b3.y).abs() + (a3.z - b3.z).abs()) ~/ 2;
   }
 
   // Return a q,r BoardPoint for a point in the scene, where the origin is in
@@ -91,7 +145,9 @@ class Board extends Object with IterableMixin<BoardPoint> {
       return offset.translate(centerOfHexZeroCenter.x, centerOfHexZeroCenter.y);
     }).toList();
 
-    return Vertices(VertexMode.triangleFan, positions,
+    return Vertices(
+      VertexMode.triangleFan,
+      positions,
       colors: List<Color>.filled(positions.length, color),
     );
   }
@@ -101,62 +157,56 @@ class Board extends Object with IterableMixin<BoardPoint> {
       boardRadius: boardRadius,
       hexagonRadius: hexagonRadius,
       hexagonMargin: hexagonMargin,
+      selected: boardPoint,
+      boardPoints: boardPoints,
     );
-    nextBoard.selected = boardPoint;
     return nextBoard;
+  }
+
+  Board setBoardPointColor(BoardPoint boardPoint, Color color) {
+    final BoardPoint nextBoardPoint = boardPoint.setColor(color);
+    final int boardPointIndex = boardPoints.indexWhere((BoardPoint boardPointI) =>
+      boardPointI.q == boardPoint.q && boardPointI.r == boardPoint.r
+    );
+    final List<BoardPoint> nextBoardPoints = List<BoardPoint>.from(boardPoints);
+    nextBoardPoints[boardPointIndex] = nextBoardPoint;
+    return Board(
+      boardRadius: boardRadius,
+      hexagonRadius: hexagonRadius,
+      hexagonMargin: hexagonMargin,
+      selected: boardPoint,
+      boardPoints: nextBoardPoints,
+    );
   }
 }
 
 class BoardIterator extends Iterator<BoardPoint> {
-  BoardIterator(this.boardRadius, this.selected)
+  BoardIterator(this.boardRadius, this.selected, this.boardPoints)
     : assert(boardRadius > 0);
 
   int boardRadius;
   BoardPoint selected;
+  List<BoardPoint> boardPoints;
+  int currentIndex;
 
   @override
   BoardPoint current;
 
   @override
   bool moveNext() {
-    // If before the first element
-    if (current == null) {
-      current = BoardPoint(-boardRadius, 0);
-      return true;
+    if (currentIndex == null) {
+      currentIndex = 0;
+    } else {
+      currentIndex++;
     }
 
-    final Range rRange = getRRangeForQ(current.q);
-
-    // If at or after the last element
-    if (current.q >= boardRadius && current.r >= rRange.max) {
+    if (currentIndex >= boardPoints.length) {
       current = null;
       return false;
     }
 
-    // If wrapping from one q to the next
-    if (current.r >= rRange.max) {
-      current = BoardPoint(current.q + 1, getRRangeForQ(current.q + 1).min);
-      return true;
-    }
-
-    // Otherwise we're just incrementing r
-    current = BoardPoint(current.q, current.r + 1);
+    current = boardPoints[currentIndex];
     return true;
-  }
-
-  // For a given q axial coordinate, get the range of possible r values
-  Range getRRangeForQ(int q) {
-    int rStart;
-    int rEnd;
-    if (q <= 0) {
-      rStart = -boardRadius - q;
-      rEnd = boardRadius;
-    } else if (q > 0) {
-      rEnd = boardRadius - q;
-      rStart = -boardRadius;
-    }
-
-    return Range(rStart, rEnd);
   }
 }
 
@@ -171,7 +221,7 @@ class Range {
 
 final Set<Color> boardPointColors =
   <Color>{
-    Colors.grey[600],
+    Colors.grey,
     Colors.black,
     Colors.red,
     Colors.blue,
@@ -179,17 +229,20 @@ final Set<Color> boardPointColors =
 
 // A location on the board in axial coordinates
 class BoardPoint {
-  BoardPoint(this.q, this.r);
+  BoardPoint(this.q, this.r, {
+    this.color = Colors.grey,
+  });
 
   int q;
   int r;
-  Color color = Colors.grey[600];
+  Color color;
 
   @override
   String toString() {
-    return 'BoardPoint(${q.toString()}, ${r.toString()})';
+    return 'BoardPoint($q, $r, $color)';
   }
 
+  // Only compares by location
   @override
   bool operator ==(dynamic other) {
     if (other is! BoardPoint) {
@@ -203,6 +256,14 @@ class BoardPoint {
   int get hashCode {
     final String string = q.toString() + r.toString();
     return int.parse(string);
+  }
+
+  BoardPoint setColor(Color nextColor) {
+    return BoardPoint(
+      q,
+      r,
+      color: nextColor,
+    );
   }
 
   // Convert from q,r axial coords to x,y,z cube coords

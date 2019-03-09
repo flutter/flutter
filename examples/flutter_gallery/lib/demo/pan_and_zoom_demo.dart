@@ -68,11 +68,15 @@ class _PanAndZoomDemoState extends State<PanAndZoomDemo> {
             return;
           }
           showModalBottomSheet<Widget>(context: context, builder: (BuildContext context) {
+            // TODO(justinmc): I think storing the selected board point gives
+            // you an outdated color. Duplicate info.
             return EditBoardPoint(
               boardPoint: _board.selected,
               onSetColor: (Color color) {
-                // TODO update board to contain new colored board point
-                print('justin set ${_board.selected} to $color');
+                setState(() {
+                  _board = _board.setBoardPointColor(_board.selected, color);
+                  Navigator.pop(context);
+                });
               },
             );
           });
@@ -100,14 +104,11 @@ class BoardPainter extends CustomPainter {
 
   Board board;
 
-  // Draw each hexagon
   @override
   void paint(Canvas canvas, Size size) {
-    final Color hexagonColorSelected = Colors.blue[300];
-
     void drawBoardPoint(BoardPoint boardPoint) {
       final Color color = board.selected == boardPoint
-        ? hexagonColorSelected : boardPoint.color;
+        ? boardPoint.color.withOpacity(0.2) : boardPoint.color;
       final Vertices vertices = board.getVerticesForBoardPoint(boardPoint, color);
       canvas.drawVertices(vertices, BlendMode.color, Paint());
     }

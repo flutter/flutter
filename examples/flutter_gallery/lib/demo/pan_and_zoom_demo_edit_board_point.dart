@@ -27,7 +27,7 @@ class EditBoardPoint extends StatelessWidget {
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
           ColorPicker(
-            colors: boardPointColors.values.toSet(),
+            colors: boardPointColors,
             selectedColor: boardPoint.color,
             onTapColor: onSetColor,
           ),
