@@ -1450,4 +1450,78 @@ void main() {
     ));
     expect(find.text('two'), findsOneWidget);
   });
+
+  testWidgets('Can push/pop on outer Navigator if nested Navigator contains Heroes', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/28042.
+
+    const String heroTag = 'You are my hero!';
+    final GlobalKey<NavigatorState> rootNavigator = GlobalKey();
+    final GlobalKey<NavigatorState> nestedNavigator = GlobalKey();
+    final GlobalKey nestedRouteHeroBottom = GlobalKey();
+    final GlobalKey nestedRouteHeroTop = GlobalKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorKey: rootNavigator,
+        home: Navigator(
+          key: nestedNavigator,
+          onGenerateRoute: (RouteSettings settings) {
+            return MaterialPageRoute<void>(
+              builder: (BuildContext context) {
+                return Hero(
+                  tag: heroTag,
+                  child: Placeholder(
+                    key: nestedRouteHeroBottom,
+                  ),
+                );
+              }
+            );
+          },
+        ),
+      )
+    );
+
+    nestedNavigator.currentState.push(MaterialPageRoute<void>(
+      builder: (BuildContext context) {
+        return Hero(
+          tag: heroTag,
+          child: Placeholder(
+            key: nestedRouteHeroTop,
+          ),
+        );
+      },
+    ));
+    await tester.pumpAndSettle();
+
+    // Both heros are in the tree, one is offstage
+    expect(find.byKey(nestedRouteHeroTop), findsOneWidget);
+    expect(find.byKey(nestedRouteHeroBottom), findsNothing);
+    expect(find.byKey(nestedRouteHeroBottom, skipOffstage: false), findsOneWidget);
+
+    rootNavigator.currentState.push(MaterialPageRoute<void>(
+      builder: (BuildContext context) {
+        return const Text('Foo');
+      },
+    ));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Foo'), findsOneWidget);
+    // Both heroes are still in the tree, both are offstage.
+    expect(find.byKey(nestedRouteHeroBottom), findsNothing);
+    expect(find.byKey(nestedRouteHeroTop), findsNothing);
+    expect(find.byKey(nestedRouteHeroBottom, skipOffstage: false), findsOneWidget);
+    expect(find.byKey(nestedRouteHeroTop, skipOffstage: false), findsOneWidget);
+
+    // Doesn't crash.
+    expect(tester.takeException(), isNull);
+
+    rootNavigator.currentState.pop();
+    await tester.pumpAndSettle();
+
+    expect(find.text('Foo'), findsNothing);
+    // Both heros are in the tree, one is offstage
+    expect(find.byKey(nestedRouteHeroTop), findsOneWidget);
+    expect(find.byKey(nestedRouteHeroBottom), findsNothing);
+    expect(find.byKey(nestedRouteHeroBottom, skipOffstage: false), findsOneWidget);
+  });
 }
