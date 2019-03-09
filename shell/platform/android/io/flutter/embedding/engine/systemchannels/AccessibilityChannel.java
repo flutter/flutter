@@ -103,17 +103,17 @@ public class AccessibilityChannel {
     void announce(@NonNull String message);
 
     /**
-     * The user has tapped on the artifact with the given {@code nodeId}.
+     * The user has tapped on the widget with the given {@code nodeId}.
      */
     void onTap(int nodeId);
 
     /**
-     * The user has long pressed on the artifact with the given {@code nodeId}.
+     * The user has long pressed on the widget with the given {@code nodeId}.
      */
     void onLongPress(int nodeId);
 
     /**
-     * The user has opened a popup window, menu, dialog, etc.
+     * The user has opened a tooltip.
      */
     void onTooltip(@NonNull String message);
   }

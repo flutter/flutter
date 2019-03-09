@@ -4,22 +4,22 @@
     <issue
         id="Assert"
         message="Assertions are unreliable in Dalvik and unimplemented in ART. Use `BuildConfig.DEBUG` conditional checks instead."
-        errorLine1="            assert object.id > ROOT_NODE_ID;"
+        errorLine1="            assert semanticsNode.id > ROOT_NODE_ID;"
         errorLine2="            ~~~~~~">
         <location
             file="../../../flutter/shell/platform/android/io/flutter/view/AccessibilityBridge.java"
-            line="273"
+            line="537"
             column="13"/>
     </issue>
 
     <issue
         id="Assert"
         message="Assertions are unreliable in Dalvik and unimplemented in ART. Use `BuildConfig.DEBUG` conditional checks instead."
-        errorLine1="            assert object.id == ROOT_NODE_ID;"
+        errorLine1="            assert semanticsNode.id == ROOT_NODE_ID;"
         errorLine2="            ~~~~~~">
         <location
             file="../../../flutter/shell/platform/android/io/flutter/view/AccessibilityBridge.java"
-            line="276"
+            line="540"
             column="13"/>
     </issue>
 
@@ -30,18 +30,18 @@
         errorLine2="        ~~~~~~">
         <location
             file="../../../flutter/shell/platform/android/io/flutter/view/AccessibilityBridge.java"
-            line="378"
+            line="649"
             column="9"/>
     </issue>
 
     <issue
         id="Assert"
         message="Assertions are unreliable in Dalvik and unimplemented in ART. Use `BuildConfig.DEBUG` conditional checks instead."
-        errorLine1="        assert objects.containsKey(0);"
+        errorLine1="        assert flutterSemanticsTree.containsKey(0);"
         errorLine2="        ~~~~~~">
         <location
             file="../../../flutter/shell/platform/android/io/flutter/view/AccessibilityBridge.java"
-            line="644"
+            line="984"
             column="9"/>
     </issue>
 
@@ -52,7 +52,7 @@
         errorLine2="                    ~~~~~~">
         <location
             file="../../../flutter/shell/platform/android/io/flutter/view/AccessibilityBridge.java"
-            line="824"
+            line="1240"
             column="21"/>
     </issue>
 
@@ -63,7 +63,7 @@
         errorLine2="                    ~~~~~~">
         <location
             file="../../../flutter/shell/platform/android/io/flutter/view/AccessibilityBridge.java"
-            line="825"
+            line="1241"
             column="21"/>
     </issue>
 
@@ -74,29 +74,29 @@
         errorLine2="        ~~~~~~">
         <location
             file="../../../flutter/shell/platform/android/io/flutter/view/AccessibilityBridge.java"
-            line="919"
+            line="1393"
             column="9"/>
     </issue>
 
     <issue
         id="Assert"
         message="Assertions are unreliable in Dalvik and unimplemented in ART. Use `BuildConfig.DEBUG` conditional checks instead."
-        errorLine1="        assert objects.containsKey(object.id);"
+        errorLine1="        assert flutterSemanticsTree.containsKey(semanticsNodeToBeRemoved.id);"
         errorLine2="        ~~~~~~">
         <location
             file="../../../flutter/shell/platform/android/io/flutter/view/AccessibilityBridge.java"
-            line="953"
+            line="1405"
             column="9"/>
     </issue>
 
     <issue
         id="Assert"
         message="Assertions are unreliable in Dalvik and unimplemented in ART. Use `BuildConfig.DEBUG` conditional checks instead."
-        errorLine1="        assert objects.get(object.id) == object;"
+        errorLine1="        assert flutterSemanticsTree.get(semanticsNodeToBeRemoved.id) == semanticsNodeToBeRemoved;"
         errorLine2="        ~~~~~~">
         <location
             file="../../../flutter/shell/platform/android/io/flutter/view/AccessibilityBridge.java"
-            line="954"
+            line="1406"
             column="9"/>
     </issue>
 
@@ -107,7 +107,7 @@
         errorLine2="            ~~~~~~">
         <location
             file="../../../flutter/shell/platform/android/io/flutter/view/AccessibilityBridge.java"
-            line="1098"
+            line="1701"
             column="13"/>
     </issue>
 
@@ -118,7 +118,7 @@
         errorLine2="                        ~~~~~~">
         <location
             file="../../../flutter/shell/platform/android/io/flutter/view/AccessibilityBridge.java"
-            line="1227"
+            line="1830"
             column="25"/>
     </issue>
 
@@ -129,7 +129,7 @@
         errorLine2="            ~~~~~~">
         <location
             file="../../../flutter/shell/platform/android/io/flutter/view/AccessibilityBridge.java"
-            line="1249"
+            line="1852"
             column="13"/>
     </issue>
 
@@ -305,7 +305,7 @@
         errorLine2="                  ~~~~~~~~~~~">
         <location
             file="../../../flutter/shell/platform/android/io/flutter/view/ResourceExtractor.java"
-            line="47"
+            line="48"
             column="19"/>
     </issue>
 
@@ -327,7 +327,7 @@
         errorLine2="            ^">
         <location
             file="../../../flutter/shell/platform/android/io/flutter/view/AccessibilityBridge.java"
-            line="1115"
+            line="1718"
             column="13"/>
     </issue>
 
@@ -360,7 +360,7 @@
         errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="../../../flutter/shell/platform/android/io/flutter/view/ResourceExtractor.java"
-            line="200"
+            line="201"
             column="17"/>
     </issue>
 
@@ -371,7 +371,7 @@
         errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="../../../flutter/shell/platform/android/io/flutter/view/ResourceExtractor.java"
-            line="327"
+            line="328"
             column="17"/>
     </issue>
 
@@ -432,24 +432,24 @@
 
     <issue
         id="UseSparseArrays"
-        message="Use `new SparseArray&lt;SemanticsObject>(...)` instead for better performance"
-        errorLine1="        objects = new HashMap&lt;>();"
-        errorLine2="                  ~~~~~~~~~~~~~~~">
+        message="Use `new SparseArray&lt;SemanticsNode>(...)` instead for better performance"
+        errorLine1="    private final Map&lt;Integer, SemanticsNode> flutterSemanticsTree = new HashMap&lt;>();"
+        errorLine2="                                                                     ~~~~~~~~~~~~~~~">
         <location
             file="../../../flutter/shell/platform/android/io/flutter/view/AccessibilityBridge.java"
-            line="142"
-            column="19"/>
+            line="135"
+            column="70"/>
     </issue>
 
     <issue
         id="UseSparseArrays"
         message="Use `new SparseArray&lt;CustomAccessibilityAction>(...)` instead for better performance"
-        errorLine1="        customAccessibilityActions = new HashMap&lt;>();"
-        errorLine2="                                     ~~~~~~~~~~~~~~~">
+        errorLine1="    private final Map&lt;Integer, CustomAccessibilityAction> customAccessibilityActions = new HashMap&lt;>();"
+        errorLine2="                                                                                       ~~~~~~~~~~~~~~~">
         <location
             file="../../../flutter/shell/platform/android/io/flutter/view/AccessibilityBridge.java"
-            line="143"
-            column="38"/>
+            line="160"
+            column="88"/>
     </issue>
 
     <issue
@@ -492,7 +492,7 @@
         errorLine2="                   ~~~~~~~~~~~~">
         <location
             file="../../../flutter/shell/platform/android/io/flutter/view/FlutterView.java"
-            line="511"
+            line="508"
             column="20"/>
     </issue>
 
