@@ -140,7 +140,7 @@ FLUTTER_EXPORT
  * the user, or when using a Simulator. This method allows a user to turn
  * semantics on when they would not ordinarily be generated and the performance
  * overhead is not a concern, e.g. for UI testing. Note that semantics should
- * never be programatically turned off, as it would potentially disable
+ * never be programmatically turned off, as it would potentially disable
  * accessibility services an end user has requested.
  *
  * This method must only be called after launching the engine via
