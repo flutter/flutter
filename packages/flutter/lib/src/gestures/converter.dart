@@ -448,6 +448,12 @@ class PointerEventConverter {
               scrollDelta: scrollDelta,
             );
             break;
+          case ui.PointerSignalKind.none:
+            assert(false); // This branch should already have 'none' filtered out.
+            break;
+          case ui.PointerSignalKind.unknown:
+            // Ignore unknown signals.
+            break;
         }
       }
     }
