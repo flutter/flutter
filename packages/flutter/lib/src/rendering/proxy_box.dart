@@ -1033,18 +1033,19 @@ class RenderBackdropFilter extends RenderProxyBox {
   @override
   bool get alwaysNeedsCompositing => child != null;
 
+  void _addTrasnparentPaint(PaintingContext context, Offset offset) {
+    // Draw a fully transparent paint to make sure that the cull rect won't be
+    // shrunk by Skia.
+    final Paint transparentPaint = Paint()..color = const Color(0x00000000);
+    context.canvas.drawPaint(transparentPaint);
+    super.paint(context, offset);
+  }
+
   @override
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       assert(needsCompositing);
-      final PaintingContextCallback paintingCallback = (PaintingContext context, Offset offset) {
-        // Draw a fully transparent paint to make sure that the cull rect won't be
-        // shrunk by Skia.
-        final Paint transparentPaint = Paint()..color = const Color(0x00000000);
-        context.canvas.drawPaint(transparentPaint);
-        super.paint(context, offset);
-      };
-      context.pushLayer(BackdropFilterLayer(filter: _filter), paintingCallback, offset);
+      context.pushLayer(BackdropFilterLayer(filter: _filter), _addTrasnparentPaint, offset);
 
     }
   }
