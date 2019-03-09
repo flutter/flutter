@@ -79,6 +79,8 @@ public class FlutterView extends FrameLayout {
   private TextInputPlugin textInputPlugin;
   @Nullable
   private AndroidKeyProcessor androidKeyProcessor;
+  @Nullable
+  private AndroidTouchProcessor androidTouchProcessor;
 
   // Directly implemented View behavior that communicates with Flutter.
   private final FlutterRenderer.ViewportMetrics viewportMetrics = new FlutterRenderer.ViewportMetrics();
@@ -313,8 +315,7 @@ public class FlutterView extends FrameLayout {
       return false;
     }
 
-    // TODO(mattcarroll): forward event to touch processore when it's merged in.
-    return false;
+    return androidTouchProcessor.onTouchEvent(event);
   }
 
   /**
@@ -388,6 +389,7 @@ public class FlutterView extends FrameLayout {
         this.flutterEngine.getKeyEventChannel(),
         textInputPlugin
     );
+    androidTouchProcessor = new AndroidTouchProcessor(this.flutterEngine.getRenderer());
 
     // Inform the Android framework that it should retrieve a new InputConnection
     // now that an engine is attached.
