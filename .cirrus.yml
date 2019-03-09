@@ -11,10 +11,17 @@ gke_container:
 task:
   env:
     CIRRUS_WORKING_DIR: "/tmp/github_repo"
-    DEPOT_TOOLS_UPDATE: 0
-  replace_engine_script: |
+    ENGINE_PATH: "/tmp/clean_engine"
+    DEPOT_TOOLS: "/tmp/depot_tools"
+    PATH: "$DEPOT_TOOLS:$PATH"
+  depot_tools_script:
+    git clone --depth 1 https://chromium.googlesource.com/chromium/tools/depot_tools.git $DEPOT_TOOLS
+  gclient_sync_script: |
+    mkdir -p $ENGINE_PATH/src
+    echo 'solutions = [{"managed": False,"name": "src/flutter","url": "git@github.com:flutter/engine.git","deps_file": "DEPS", "custom_vars": {"download_android_deps" : False, "download_windows_deps" : False,},},]' > $ENGINE_PATH/.gclient
     cd $ENGINE_PATH/src
-    rm -r flutter
+    rm -rf flutter
+    rm -rf out
     mv $CIRRUS_WORKING_DIR flutter
     gclient sync
 
@@ -38,6 +45,10 @@ task:
         ninja -C out/host_release
       test_host_script: cd $ENGINE_PATH/src && ./flutter/testing/run_tests.sh host_release
     - name: build_android
+      get_android_sdk_script: |
+        echo 'solutions = [{"managed": False,"name": "src/flutter","url": "git@github.com:flutter/engine.git","deps_file": "DEPS", "custom_vars": {"download_windows_deps" : False,},},]' > $ENGINE_PATH/.gclient
+        cd $ENGINE_PATH/src
+        gclient sync
       lint_host_script: |
         cd $ENGINE_PATH/src/flutter/tools/android_lint
         $ENGINE_PATH/src/third_party/dart/tools/sdks/dart-sdk/bin/pub get
@@ -60,7 +71,7 @@ task:
     DEPOT_TOOLS: "/tmp/depot_tools"
     PATH: "$DEPOT_TOOLS:$PATH"
   depot_tools_script:
-    git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git $DEPOT_TOOLS
+    git clone --depth 1 https://chromium.googlesource.com/chromium/tools/depot_tools.git $DEPOT_TOOLS
   # jazzy_script:
   #   sudo gem install jazzy@0.9.4
   gclient_sync_script: |
@@ -88,12 +99,18 @@ format_and_dart_test_task:
 
   env:
     CIRRUS_WORKING_DIR: "/tmp/github_repo"
-    DEPOT_TOOLS_UPDATE: 0
-  replace_engine_script: |
+    DEPOT_TOOLS: "/tmp/depot_tools"
+    ENGINE_PATH: "/tmp/clean_engine"
+    PATH: "$DEPOT_TOOLS:$PATH"
+  depot_tools_script:
+    git clone --depth 1 https://chromium.googlesource.com/chromium/tools/depot_tools.git $DEPOT_TOOLS
+  gclient_sync_script: |
+    mkdir -p $ENGINE_PATH/src
+    echo 'solutions = [{"managed": False,"name": "src/flutter","url": "git@github.com:flutter/engine.git","deps_file": "DEPS", "custom_vars": {"download_android_deps" : False, "download_windows_deps" : False,},},]' > $ENGINE_PATH/.gclient
     cd $ENGINE_PATH/src
-    rm -r flutter
-    cp $CIRRUS_WORKING_DIR -r ./flutter
+    rm -rf flutter
+    rm -rf out
+    mv $CIRRUS_WORKING_DIR flutter
     gclient sync
-
   format_script: cd $ENGINE_PATH/src/flutter && ./ci/format.sh
   build_script: cd $ENGINE_PATH/src/flutter && ./ci/build.sh
