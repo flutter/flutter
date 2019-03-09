@@ -569,9 +569,9 @@ Future<void> _runFlutterTest(String workingDirectory, {
     args.addAll(flutterTestArgs);
 
   final bool shouldProcessOutput = !expectFailure && !options.contains('--coverage');
-  if (shouldProcessOutput) {
-    args.add('--machine');
-  }
+  // if (shouldProcessOutput) {
+  //   args.add('--machine');
+  // }
 
   if (script != null) {
     final String fullScriptPath = path.join(workingDirectory, script);
