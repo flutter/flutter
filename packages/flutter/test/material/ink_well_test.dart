@@ -109,8 +109,8 @@ void main() {
           textDirection: TextDirection.ltr,
           child: Center(
             child: InkWell(
-              onTap: () {},
-              onLongPress: () {},
+              onTap: () { },
+              onLongPress: () { },
             ),
           ),
         ),
@@ -137,8 +137,8 @@ void main() {
           textDirection: TextDirection.ltr,
           child: Center(
             child: InkWell(
-              onTap: () {},
-              onLongPress: () {},
+              onTap: () { },
+              onLongPress: () { },
               enableFeedback: false,
             ),
           ),

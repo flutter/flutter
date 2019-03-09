@@ -147,8 +147,7 @@ void main() {
     });
   });
 
-  group('iOS', ()
-  {
+  group('iOS', () {
     FakeIosPlatformViewsController viewsController;
     setUp(() {
       viewsController = FakeIosPlatformViewsController();

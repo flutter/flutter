@@ -647,7 +647,7 @@ class _RenderDecoration extends RenderBox {
   }
 
   // The returned list is ordered for hit testing.
-  Iterable<RenderBox> get _children sync *{
+  Iterable<RenderBox> get _children sync* {
     if (icon != null)
       yield icon;
     if (input != null)

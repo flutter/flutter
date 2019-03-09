@@ -199,7 +199,7 @@ void main() {
     test('failed image can successfully be removed from the cache\'s pending images', () async {
       const TestImage testImage = TestImage(width: 8, height: 8);
 
-      const FailingTestImageProvider(1, 1, image: testImage).resolve(ImageConfiguration.empty).addListener((ImageInfo image, bool synchronousCall){}, onError: (dynamic exception, StackTrace stackTrace) {
+      const FailingTestImageProvider(1, 1, image: testImage).resolve(ImageConfiguration.empty).addListener((ImageInfo image, bool synchronousCall) { }, onError: (dynamic exception, StackTrace stackTrace) {
         final bool evicationResult = imageCache.evict(1);
         expect(evicationResult, isTrue);
       });

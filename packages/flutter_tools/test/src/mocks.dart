@@ -470,16 +470,16 @@ class MockDevFSOperations extends BasicMock implements DevFSOperations {
 
 class MockResidentCompiler extends BasicMock implements ResidentCompiler {
   @override
-  void accept() {}
+  void accept() { }
 
   @override
   Future<CompilerOutput> reject() async { return null; }
 
   @override
-  void reset() {}
+  void reset() { }
 
   @override
-  Future<dynamic> shutdown() async {}
+  Future<dynamic> shutdown() async { }
 
   @override
   Future<CompilerOutput> compileExpression(

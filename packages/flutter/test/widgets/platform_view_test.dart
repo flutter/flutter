@@ -635,7 +635,7 @@ void main() {
             onVerticalDragStart: (DragStartDetails d) {
               verticalDragAcceptedByParent = true;
             },
-            onLongPress: () {},
+            onLongPress: () { },
             child: const SizedBox(
               width: 200.0,
               height: 100.0,
@@ -721,7 +721,7 @@ void main() {
         Align(
           alignment: Alignment.topLeft,
           child: GestureDetector(
-            onVerticalDragStart: (DragStartDetails d) {},
+            onVerticalDragStart: (DragStartDetails d) { },
             child: SizedBox(
               width: 200.0,
               height: 100.0,
@@ -1253,7 +1253,7 @@ void main() {
             onVerticalDragStart: (DragStartDetails d) {
               verticalDragAcceptedByParent = true;
             },
-            onLongPress: () {},
+            onLongPress: () { },
             child: const SizedBox(
               width: 200.0,
               height: 100.0,
@@ -1332,7 +1332,7 @@ void main() {
         Align(
           alignment: Alignment.topLeft,
           child: GestureDetector(
-            onVerticalDragStart: (DragStartDetails d) {},
+            onVerticalDragStart: (DragStartDetails d) { },
             child: SizedBox(
               width: 200.0,
               height: 100.0,
