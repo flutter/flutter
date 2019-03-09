@@ -473,7 +473,12 @@ Future<void> _processTestOutput(
   Stream<String> testOutput,
   bq.TabledataResourceApi tableData,
 ) async {
+  final Timer heartbeat = Timer.periodic(const Duration(seconds: 30), (Timer timer) {
+    print('Processing...');
+  });
+
   await testOutput.forEach(formatter.processRawOutput);
+  heartbeat.cancel();
   formatter.finish();
   if (tableData == null || formatter.tests.isEmpty) {
     return;
