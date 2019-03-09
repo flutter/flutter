@@ -14,8 +14,9 @@ const LocalProcessManager processManager = LocalProcessManager();
 ///
 /// This script scans the flutter/shell/platform/android directory for Java
 /// files to build a `project.xml` file.  This file is then passed to the lint
-/// tool and HTML output is reqeusted in the directory for the `--out`
-/// parameter, which defaults to `lint_report`.
+/// tool. If an `--html` flag is also passed in, HTML output is reqeusted in the
+/// directory for the optional `--out` parameter, which defaults to
+/// `lint_report`. Otherwise the output is printed to STDOUT.
 ///
 /// The `--in` parameter may be specified to force this script to scan a
 /// specific location for the engine repository, and expects to be given the
@@ -87,21 +88,21 @@ Future<int> runLint(ArgParser argParser, ArgResults argResults) async {
   await projectXml.close();
 
   print('Wrote project.xml, starting lint...');
-  final Process lintProcess = await processManager.start(
-    <String>[
-      path.join(androidSdkDir.path, 'tools', 'bin', 'lint'),
-      '--project',
-      projectXmlPath,
-      '--html',
-      argResults['out'],
-      '--showall',
-      '--exitcode', // Set non-zero exit code on errors
-      '-Wall',
-      '-Werror',
-      '--baseline',
-      baselineXmlPath,
-    ],
-  );
+  final List<String> lintArgs = <String>[
+    path.join(androidSdkDir.path, 'tools', 'bin', 'lint'),
+    '--project',
+    projectXmlPath,
+    '--showall',
+    '--exitcode', // Set non-zero exit code on errors
+    '-Wall',
+    '-Werror',
+    '--baseline',
+    baselineXmlPath,
+  ];
+  if (argResults['html']) {
+    lintArgs.addAll(<String>['--html', argResults['out']]);
+  }
+  final Process lintProcess = await processManager.start(lintArgs);
   lintProcess.stdout.pipe(stdout);
   lintProcess.stderr.pipe(stderr);
   return await lintProcess.exitCode;
@@ -123,11 +124,6 @@ ArgParser setupOptions() {
         ),
       ),
     )
-    ..addOption(
-      'out',
-      help: 'The path to write the generated the HTML report to.',
-      defaultsTo: path.join(projectDir, 'lint_report'),
-    )
     ..addFlag(
       'help',
       help: 'Print usage of the command.',
@@ -140,6 +136,19 @@ ArgParser setupOptions() {
           'in this project.',
       negatable: false,
       defaultsTo: false,
+    )
+    ..addFlag(
+      'html',
+      help: 'Creates an HTML output for this report instead of printing '
+          'command line output.',
+      negatable: false,
+      defaultsTo: false,
+    )
+    ..addOption(
+      'out',
+      help: 'The path to write the generated the HTML report to. Ignored if '
+          '--html is not also true.',
+      defaultsTo: path.join(projectDir, 'lint_report'),
     );
 
   return argParser;
