@@ -122,7 +122,7 @@ allowed_hosts = [
 ]
 
 deps = {
-  'src': 'https://github.com/flutter/buildroot.git' + '@' + '4a12b0dfad16723b2190b697a669e3ae17b50b35',
+  'src': 'https://github.com/flutter/buildroot.git' + '@' + '3f54d4f03112098e164ee62f015fcc54b19d1eda',
 
    # Fuchsia compatibility
    #
@@ -387,6 +387,61 @@ deps = {
 
   'src/third_party/pkg/when':
    Var('dart_git') + '/when.git' + '@' + '0.2.0',
+
+   'src/third_party/android_tools/ndk': {
+     'packages': [
+       {
+        'package': 'flutter/android/ndk/${{platform}}',
+        'version': 'version:r19b'
+       }
+     ],
+     'condition': 'download_android_deps',
+     'dep_type': 'cipd',
+   },
+
+  'src/third_party/android_tools/sdk/build-tools': {
+     'packages': [
+       {
+        'package': 'flutter/android/sdk/build-tools/${{platform}}',
+        'version': 'version:28.0.3'
+       }
+     ],
+     'condition': 'download_android_deps',
+     'dep_type': 'cipd',
+   },
+
+  'src/third_party/android_tools/sdk/platform-tools': {
+     'packages': [
+       {
+        'package': 'flutter/android/sdk/platform-tools/${{platform}}',
+        'version': 'version:28.0.1'
+       }
+     ],
+     'condition': 'download_android_deps',
+     'dep_type': 'cipd',
+   },
+
+  'src/third_party/android_tools/sdk/platforms': {
+     'packages': [
+       {
+        'package': 'flutter/android/sdk/platforms',
+        'version': 'version:28r6'
+       }
+     ],
+     'condition': 'download_android_deps',
+     'dep_type': 'cipd',
+   },
+
+  'src/third_party/android_tools/sdk/tools': {
+     'packages': [
+       {
+        'package': 'flutter/android/sdk/tools/${{platform}}',
+        'version': 'version:26.1.1'
+       }
+     ],
+     'condition': 'download_android_deps',
+     'dep_type': 'cipd',
+   },
 }
 
 hooks = [
@@ -413,34 +468,6 @@ hooks = [
     'name': 'dart',
     'pattern': '.',
     'action': ['python', 'src/tools/dart/update.py'],
-  },
-  {
-    'name': 'prepare_android_downloader',
-    'pattern': '.',
-    'condition': 'download_android_deps',
-    'cwd': 'src/flutter/tools/android_sdk_downloader',
-    'action': [
-        '../../../third_party/dart/tools/sdks/dart-sdk/bin/pub', # this hook _must_ be run _after_ the dart hook.
-        'get'
-    ],
-  },
-  {
-    'name': 'download_android_tools',
-    'pattern': '.',
-    'condition': 'download_android_deps',
-    'action': [
-        'src/third_party/dart/tools/sdks/dart-sdk/bin/dart', # this hook _must_ be run _after_ the dart hook.
-        '--enable-asserts',
-        'src/flutter/tools/android_sdk_downloader/lib/main.dart',
-        '-y', # Accept licenses
-        '--out=src/third_party/android_tools',
-        '--platform=28',
-        '--platform-revision=6',
-        '--build-tools-version=28.0.3',
-        '--platform-tools-version=28.0.1',
-        '--tools-version=26.1.1',
-        '--ndk-version=19.1.5304403'
-    ],
   },
   {
     'name': 'download_android_support',
