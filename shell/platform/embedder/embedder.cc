@@ -902,3 +902,18 @@ void FlutterEngineTraceEventDurationEnd(const char* name) {
 void FlutterEngineTraceEventInstant(const char* name) {
   fml::tracing::TraceEventInstant0("flutter", name);
 }
+
+FlutterEngineResult FlutterEnginePostRenderThreadTask(FlutterEngine engine,
+                                                      VoidCallback callback,
+                                                      void* baton) {
+  if (engine == nullptr || callback == nullptr) {
+    return kInvalidArguments;
+  }
+
+  auto task = [callback, baton]() { callback(baton); };
+
+  return reinterpret_cast<shell::EmbedderEngine*>(engine)->PostRenderThreadTask(
+             task)
+             ? kSuccess
+             : kInternalInconsistency;
+}

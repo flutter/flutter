@@ -203,4 +203,13 @@ bool EmbedderEngine::OnVsyncEvent(intptr_t baton,
                                               frame_target_time);
 }
 
+bool EmbedderEngine::PostRenderThreadTask(fml::closure task) {
+  if (!IsValid()) {
+    return false;
+  }
+
+  shell_->GetTaskRunners().GetGPUTaskRunner()->PostTask(task);
+  return true;
+}
+
 }  // namespace shell
