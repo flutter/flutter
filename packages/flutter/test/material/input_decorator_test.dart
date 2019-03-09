@@ -993,100 +993,6 @@ void main() {
     expect(tester.getTopRight(find.text('text')).dx, lessThanOrEqualTo(tester.getTopRight(find.byKey(sKey)).dx));
   });
 
-  testWidgets('InputDecorator tall prefix', (WidgetTester tester) async {
-    const Key pKey = Key('p');
-    await tester.pumpWidget(
-      buildInputDecorator(
-        // isEmpty: false (default)
-        // isFocused: false (default)
-        decoration: InputDecoration(
-          prefix: Container(
-            key: pKey,
-            height: 100,
-            width: 10,
-          ),
-          filled: true,
-        ),
-        // Set the fontSize so that everything works out to whole numbers.
-        child: const Text(
-          'text',
-          style: TextStyle(fontFamily: 'Ahem', fontSize: 20.0),
-        ),
-      ),
-    );
-
-    // Overall height for this InputDecorator is ~127.2dps because
-    // the prefix is 100dps tall, but it aligns with the input's baseline,
-    // overlapping the input a bit.
-    //   12 - top padding
-    //  100 - total height of prefix
-    //  -16 - input prefix overlap (distance input top to baseline, not exact)
-    //   20 - input text (ahem font size 16dps)
-    //    0 - bottom prefix/suffix padding
-    //   12 - bottom padding
-
-    expect(tester.getSize(find.byType(InputDecorator)).width, 800.0);
-    expect(tester.getSize(find.byType(InputDecorator)).height, closeTo(128.0, .0001));
-    expect(tester.getSize(find.text('text')).height, 20.0);
-    expect(tester.getSize(find.byKey(pKey)).height, 100.0);
-    expect(tester.getTopLeft(find.text('text')).dy, closeTo(96, .0001)); // 12 + 100 - 16
-    expect(tester.getTopLeft(find.byKey(pKey)).dy, 12.0);
-
-    // layout is a row: [prefix text suffix]
-    expect(tester.getTopLeft(find.byKey(pKey)).dx, 12.0);
-    expect(tester.getTopRight(find.byKey(pKey)).dx, tester.getTopLeft(find.text('text')).dx);
-  });
-
-  testWidgets('InputDecorator tall prefix with border', (WidgetTester tester) async {
-    const Key pKey = Key('p');
-    await tester.pumpWidget(
-      buildInputDecorator(
-        // isEmpty: false (default)
-        // isFocused: false (default)
-        decoration: InputDecoration(
-          border: const OutlineInputBorder(),
-          prefix: Container(
-            key: pKey,
-            height: 100,
-            width: 10,
-          ),
-          filled: true,
-        ),
-        // Set the fontSize so that everything works out to whole numbers.
-        child: const Text(
-          'text',
-          style: TextStyle(fontFamily: 'Ahem', fontSize: 20.0),
-        ),
-      ),
-    );
-
-    // Overall height for this InputDecorator is ~127.2dps because
-    // the prefix is 100dps tall, but it aligns with the input's baseline,
-    // overlapping the input a bit.
-    //   24 - top padding
-    //  100 - total height of prefix
-    //  -16 - input prefix overlap (distance input top to baseline, not exact)
-    //   20 - input text (ahem font size 16dps)
-    //    0 - bottom prefix/suffix padding
-    //   16 - bottom padding
-    // When a border is present, the input text and prefix/suffix are centered
-    // within the input. Here, that will be content of height 106, including 2
-    // extra pixels of space, centered within an input of height 144. That gives
-    // 19 pixels of space on each side of the content, so the prefix is
-    // positioned at 19, and the text is at 19+100-16=103.
-
-    expect(tester.getSize(find.byType(InputDecorator)).width, 800.0);
-    expect(tester.getSize(find.byType(InputDecorator)).height, closeTo(144, .0001));
-    expect(tester.getSize(find.text('text')).height, 20.0);
-    expect(tester.getSize(find.byKey(pKey)).height, 100.0);
-    expect(tester.getTopLeft(find.text('text')).dy, closeTo(103, .0001));
-    expect(tester.getTopLeft(find.byKey(pKey)).dy, 19.0);
-
-    // layout is a row: [prefix text suffix]
-    expect(tester.getTopLeft(find.byKey(pKey)).dx, 12.0);
-    expect(tester.getTopRight(find.byKey(pKey)).dx, tester.getTopLeft(find.text('text')).dx);
-  });
-
   testWidgets('InputDecorator prefixIcon/suffixIcon', (WidgetTester tester) async {
     await tester.pumpWidget(
       buildInputDecorator(
@@ -1168,6 +1074,7 @@ void main() {
     expect(tester.getSize(find.byKey(prefixKey)).height, 100.0);
     expect(tester.getTopLeft(find.byKey(prefixKey)).dy, 0.0);
   });
+
 
   testWidgets('counter text has correct right margin - LTR, not dense', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -1556,12 +1463,12 @@ void main() {
   testWidgets('InputDecoration outline shape with no border and no floating placeholder', (WidgetTester tester) async {
     await tester.pumpWidget(
       buildInputDecorator(
-        // isFocused: false (default)
-        isEmpty: true,
-        decoration: const InputDecoration(
-          border: OutlineInputBorder(borderSide: BorderSide.none),
-          hasFloatingPlaceholder: false,
-          labelText: 'label',
+      // isFocused: false (default)
+      isEmpty: true,
+      decoration: const InputDecoration(
+        border: OutlineInputBorder(borderSide: BorderSide.none),
+        hasFloatingPlaceholder: false,
+        labelText: 'label',
         ),
       ),
     );
