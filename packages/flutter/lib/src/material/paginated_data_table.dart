@@ -236,7 +236,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
   DataRow _getBlankRowFor(int index) {
     return DataRow.byIndex(
       index: index,
-      cells: widget.columns.map<DataCell>((DataColumn column) => DataCell.empty).toList()
+      cells: widget.columns.map<DataCell>((DataColumn column) => DataCell.empty).toList(),
     );
   }
 
@@ -255,7 +255,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
     }
     return DataRow.byIndex(
       index: index,
-      cells: cells
+      cells: cells,
     );
   }
 
@@ -298,17 +298,17 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
     final List<Widget> headerWidgets = <Widget>[];
     double startPadding = 24.0;
     if (_selectedRowCount == 0) {
-      if (widget.header != null) {
-        headerWidgets.add(Expanded(child: widget.header));
-        if (widget.header is ButtonBar) {
-          // We adjust the padding when a button bar is present, because the
-          // ButtonBar introduces 2 pixels of outside padding, plus 2 pixels
-          // around each button on each side, and the button itself will have 8
-          // pixels internally on each side, yet we want the left edge of the
-          // inside of the button to line up with the 24.0 left inset.
-          // TODO(ianh): Better magic. See https://github.com/flutter/flutter/issues/4460
-          startPadding = 12.0;
-        }
+
+      headerWidgets.add(Expanded(child: widget.header));
+      if (widget.header is ButtonBar) {
+        // We adjust the padding when a button bar is present, because the
+        // ButtonBar introduces 2 pixels of outside padding, plus 2 pixels
+        // around each button on each side, and the button itself will have 8
+        // pixels internally on each side, yet we want the left edge of the
+        // inside of the button to line up with the 24.0 left inset.
+        // TODO(ianh): Better magic. See https://github.com/flutter/flutter/issues/4460
+        startPadding = 12.0;
+
       }
     } else {
       headerWidgets.add(Expanded(
@@ -336,7 +336,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
         .map<DropdownMenuItem<int>>((int value) {
           return DropdownMenuItem<int>(
             value: value,
-            child: Text('$value')
+            child: Text('$value'),
           );
         })
         .toList();
@@ -367,7 +367,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
           _firstRowIndex + 1,
           _firstRowIndex + widget.rowsPerPage,
           _rowCount,
-          _rowCountApproximate
+          _rowCountApproximate,
         )
       ),
       Container(width: 32.0),
@@ -375,19 +375,19 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
         icon: const Icon(Icons.chevron_left),
         padding: EdgeInsets.zero,
         tooltip: localizations.previousPageTooltip,
-        onPressed: _firstRowIndex <= 0 ? null : _handlePrevious
+        onPressed: _firstRowIndex <= 0 ? null : _handlePrevious,
       ),
       Container(width: 24.0),
       IconButton(
         icon: const Icon(Icons.chevron_right),
         padding: EdgeInsets.zero,
         tooltip: localizations.nextPageTooltip,
-        onPressed: (!_rowCountApproximate && (_firstRowIndex + widget.rowsPerPage >= _rowCount)) ? null : _handleNext
+        onPressed: (!_rowCountApproximate && (_firstRowIndex + widget.rowsPerPage >= _rowCount)) ? null : _handleNext,
       ),
       Container(width: 14.0),
     ]);
 
-    final List<Widget> cardWidgets = <Widget>[];
+    List<Widget> cardWidgets = new List<Widget>();
 
     if (headerWidgets.isNotEmpty) {
       // The header will be visible only if the headerWidgets collection is not empty
