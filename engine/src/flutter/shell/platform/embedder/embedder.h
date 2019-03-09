@@ -688,6 +688,14 @@ void FlutterEngineTraceEventDurationEnd(const char* name);
 FLUTTER_EXPORT
 void FlutterEngineTraceEventInstant(const char* name);
 
+// Posts a task onto the Flutter render thread. Typically, this may be called
+// from any thread as long as a |FlutterEngineShutdown| on the specific engine
+// has not already been initiated.
+FLUTTER_EXPORT
+FlutterEngineResult FlutterEnginePostRenderThreadTask(FlutterEngine engine,
+                                                      VoidCallback callback,
+                                                      void* callback_data);
+
 #if defined(__cplusplus)
 }  // extern "C"
 #endif

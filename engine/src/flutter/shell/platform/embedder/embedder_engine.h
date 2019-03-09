@@ -63,6 +63,8 @@ class EmbedderEngine {
                     fml::TimePoint frame_start_time,
                     fml::TimePoint frame_target_time);
 
+  bool PostRenderThreadTask(fml::closure task);
+
  private:
   const ThreadHost thread_host_;
   std::unique_ptr<Shell> shell_;
