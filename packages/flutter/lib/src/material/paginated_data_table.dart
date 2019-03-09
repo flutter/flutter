@@ -389,7 +389,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
       Container(width: 14.0),
     ]);
 
-    final List<Widget> cardWidgets = [];
+    final List<Widget> cardWidgets = <Widget>[];
 
     if (headerWidgets.isNotEmpty) {
       // The header will be visible only if the headerWidgets collection is not empty
