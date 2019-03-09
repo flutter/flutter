@@ -2,9 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
+import 'package:flutter_basic_test/paginated_data_table.dart';
+import 'package:flutter/material.dart' show DataTableSource, DataCell, Text, DataRow, MaterialApp, DataColumn, Icons, Widget, IconButton, Icon, MediaQuery, MediaQueryData, Align, Alignment, SizedBox, Card, Column;
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/gestures.dart' show DragStartBehavior;
+
 
 import 'data_table_test_utils.dart';
 
@@ -259,7 +260,7 @@ void main() {
               header: const Text('HEADER'),
               source: source,
               rowsPerPage: 5,
-              dragStartBehavior: DragStartBehavior.down,
+              // dragStartBehavior: DragStartBehavior.down,
               availableRowsPerPage: const <int>[ 5 ],
               onRowsPerPageChanged: (int rowsPerPage) { },
               columns: const <DataColumn>[
