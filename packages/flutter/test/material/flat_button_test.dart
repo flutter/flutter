@@ -12,7 +12,7 @@ void main() {
   testWidgets('FlatButton implements debugFillDescription', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     FlatButton(
-        onPressed: () {},
+        onPressed: () { },
         textColor: const Color(0xFF00FF00),
         disabledTextColor: const Color(0xFFFF0000),
         color: const Color(0xFF000000),
@@ -32,7 +32,7 @@ void main() {
     ]);
   });
 
-  testWidgets('FlatButton has no clip by default', (WidgetTester tester) async{
+  testWidgets('FlatButton has no clip by default', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,

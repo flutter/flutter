@@ -234,7 +234,7 @@ void main() {
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoButton(
-          onPressed: () {},
+          onPressed: () { },
           child: Builder(builder: (BuildContext context) {
             textStyle = DefaultTextStyle.of(context).style;
             return const Placeholder();
@@ -248,7 +248,7 @@ void main() {
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoButton.filled(
-          onPressed: () {},
+          onPressed: () { },
           child: Builder(builder: (BuildContext context) {
             textStyle = DefaultTextStyle.of(context).style;
             return const Placeholder();
@@ -270,7 +270,7 @@ void main() {
       CupertinoApp(
         theme: const CupertinoThemeData(brightness: Brightness.dark),
         home: CupertinoButton(
-          onPressed: () {},
+          onPressed: () { },
           child: Builder(builder: (BuildContext context) {
             textStyle = DefaultTextStyle.of(context).style;
             return const Placeholder();
@@ -284,7 +284,7 @@ void main() {
       CupertinoApp(
         theme: const CupertinoThemeData(brightness: Brightness.dark),
         home: CupertinoButton.filled(
-          onPressed: () {},
+          onPressed: () { },
           child: Builder(builder: (BuildContext context) {
             textStyle = DefaultTextStyle.of(context).style;
             return const Placeholder();

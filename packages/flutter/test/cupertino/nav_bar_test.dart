@@ -154,12 +154,12 @@ void main() {
       CupertinoApp(
         home: CupertinoNavigationBar(
           leading: CupertinoButton(
-            onPressed: () {},
+            onPressed: () { },
             child: const _ExpectStyles(color: CupertinoColors.activeBlue, index: 0x000001),
           ),
           middle: const _ExpectStyles(color: CupertinoColors.black, index: 0x000100),
           trailing: CupertinoButton(
-            onPressed: () {},
+            onPressed: () { },
             child: const _ExpectStyles(color: CupertinoColors.activeBlue, index: 0x010000),
           ),
         ),
@@ -175,12 +175,12 @@ void main() {
         theme: const CupertinoThemeData(brightness: Brightness.dark),
         home: CupertinoNavigationBar(
           leading: CupertinoButton(
-            onPressed: () {},
+            onPressed: () { },
             child: const _ExpectStyles(color: CupertinoColors.activeOrange, index: 0x000001),
           ),
           middle: const _ExpectStyles(color: CupertinoColors.white, index: 0x000100),
           trailing: CupertinoButton(
-            onPressed: () {},
+            onPressed: () { },
             child: const _ExpectStyles(color: CupertinoColors.activeOrange, index: 0x010000),
           ),
         ),
@@ -195,12 +195,12 @@ void main() {
       CupertinoApp(
         home: CupertinoNavigationBar(
           leading: CupertinoButton(
-            onPressed: () {},
+            onPressed: () { },
             child: const _ExpectStyles(color: Color(0xFF001122), index: 0x000001),
           ),
           middle: const _ExpectStyles(color: Color(0xFF000000), index: 0x000100),
           trailing: CupertinoButton(
-            onPressed: () {},
+            onPressed: () { },
             child: const _ExpectStyles(color: Color(0xFF001122), index: 0x010000),
           ),
           actionsForegroundColor: const Color(0xFF001122),
