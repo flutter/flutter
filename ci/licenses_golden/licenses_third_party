@@ -1,4 +1,4 @@
-Signature: 4a8dfa2afe659f0a6057032c092f7496
+Signature: aeb3ef2d086ef58fb819d6902a51acb5
 
 UNUSED LICENSES:
 
@@ -5230,7 +5230,6 @@ FILE: ../../../third_party/dart/runtime/vm/malloc_hooks.h
 FILE: ../../../third_party/dart/runtime/vm/malloc_hooks_arm.cc
 FILE: ../../../third_party/dart/runtime/vm/malloc_hooks_arm64.cc
 FILE: ../../../third_party/dart/runtime/vm/malloc_hooks_ia32.cc
-FILE: ../../../third_party/dart/runtime/vm/malloc_hooks_jemalloc.cc
 FILE: ../../../third_party/dart/runtime/vm/malloc_hooks_tcmalloc.cc
 FILE: ../../../third_party/dart/runtime/vm/malloc_hooks_test.cc
 FILE: ../../../third_party/dart/runtime/vm/malloc_hooks_unsupported.cc
