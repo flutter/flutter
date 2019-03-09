@@ -648,7 +648,7 @@ abstract class BoxScrollView extends ScrollView {
 ///       child: Center(child: Text('Entry ${entries[index]}')),
 ///     );
 ///   }
-/// )
+/// );
 /// ```
 /// {@end-tool}
 /// {@tool sample}
@@ -672,7 +672,7 @@ abstract class BoxScrollView extends ScrollView {
 ///   separatorBuilder: (context, position) {
 ///     return Divider();
 ///   },
-/// )
+/// );
 /// ```
 /// {@end-tool}
 ///
