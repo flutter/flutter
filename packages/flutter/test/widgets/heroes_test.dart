@@ -1383,7 +1383,7 @@ void main() {
 
     await tester.pump();
 
-    // Both Heros exist and seated in their normal parents.
+    // Both Heroes exist and seated in their normal parents.
     expect(find.byKey(firstKey), isOnstage);
     expect(find.byKey(firstKey), isInCard);
     expect(find.byKey(secondKey), isOnstage);
@@ -1493,7 +1493,7 @@ void main() {
     ));
     await tester.pumpAndSettle();
 
-    // Both heros are in the tree, one is offstage
+    // Both heroes are in the tree, one is offstage
     expect(find.byKey(nestedRouteHeroTop), findsOneWidget);
     expect(find.byKey(nestedRouteHeroBottom), findsNothing);
     expect(find.byKey(nestedRouteHeroBottom, skipOffstage: false), findsOneWidget);
@@ -1519,7 +1519,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Foo'), findsNothing);
-    // Both heros are in the tree, one is offstage
+    // Both heroes are in the tree, one is offstage
     expect(find.byKey(nestedRouteHeroTop), findsOneWidget);
     expect(find.byKey(nestedRouteHeroBottom), findsNothing);
     expect(find.byKey(nestedRouteHeroBottom, skipOffstage: false), findsOneWidget);
@@ -1591,7 +1591,7 @@ void main() {
     expect(find.byKey(smallContainer), isNotInCard);
 
     await tester.pump(const Duration(milliseconds: 100));
-    
+
     // The hero is in-flight.
     expect(find.byKey(largeContainer), findsNothing);
     expect(find.byKey(smallContainer), isOnstage);

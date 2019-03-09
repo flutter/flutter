@@ -204,7 +204,7 @@ class Hero extends StatefulWidget {
 
   // Returns a map of all of the heroes in `context` indexed by hero tag that
   // should be considered for animation when `navigator` transitions from one
-  // PageRoute to another, .
+  // PageRoute to another.
   static Map<Object, _HeroState> _allHeroesFor(
       BuildContext context,
       bool isUserGestureTransition,
