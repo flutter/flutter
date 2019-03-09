@@ -6,8 +6,8 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:googleapis/bigquery/v2.dart' as bq;
-import 'package:googleapis_auth/auth_io.dart' as auth;
-import 'package:http/http.dart' as http;
+// import 'package:googleapis_auth/auth_io.dart' as auth;
+// import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as path;
 
 import 'flutter_compact_formatter.dart';
@@ -145,9 +145,10 @@ Future<void> _runSmokeTests() async {
 }
 
 Future<bq.BigqueryApi> _getBigqueryApi() async {
-  // // TODO(dnfield): How will we do this on LUCI?
+  // TODO(dnfield): How will we do this on LUCI?
   // final String privateKey = Platform.environment['GCLOUD_SERVICE_ACCOUNT_KEY'];
-  // if (privateKey == null || privateKey.isEmpty) {
+  // // If we're on Cirrus and a non-collaborator is doing this, we can't get the key.
+  // if (privateKey == null || privateKey.isEmpty || privateKey.startsWith('ENCRYPTED['])) {
   //   return null;
   // }
   // final auth.ServiceAccountCredentials accountCredentials = auth.ServiceAccountCredentials( //.fromJson(credentials);
@@ -481,6 +482,8 @@ String _getGitHash() {
   return '';
 }
 
+// TODO(dnfield): Remove this when we're re-enabling it.
+// ignore: unused_element
 Future<void> _processTestOutput(
   FlutterCompactFormatter formatter,
   Stream<String> testOutput,
@@ -568,7 +571,7 @@ Future<void> _runFlutterTest(String workingDirectory, {
   if (flutterTestArgs != null && flutterTestArgs.isNotEmpty)
     args.addAll(flutterTestArgs);
 
-  final bool shouldProcessOutput = !expectFailure && !options.contains('--coverage');
+  // final bool shouldProcessOutput = !expectFailure && !options.contains('--coverage');
   // if (shouldProcessOutput) {
   //   args.add('--machine');
   // }
