@@ -261,7 +261,8 @@ class MaterialButton extends StatelessWidget {
       onPressed: onPressed,
       onHighlightChanged: onHighlightChanged,
       fillColor: color,
-      textStyle: theme.textTheme.button.copyWith(color: buttonTheme.getTextColor(this)),
+      textStyle: theme.textTheme.button.copyWith(
+          color: buttonTheme.getTextColor(this)),
       highlightColor: highlightColor ?? theme.highlightColor,
       splashColor: splashColor ?? theme.splashColor,
       elevation: buttonTheme.getElevation(this),
@@ -271,18 +272,20 @@ class MaterialButton extends StatelessWidget {
         minWidth: minWidth,
         minHeight: height,
       ),
-      shape: buttonTheme.shape,
+      shape: buttonTheme.getShape(this),
       clipBehavior: clipBehavior ?? Clip.none,
       animationDuration: buttonTheme.getAnimationDuration(this),
       child: child,
-      materialTapTargetSize: materialTapTargetSize ?? theme.materialTapTargetSize,
+      materialTapTargetSize: materialTapTargetSize ??
+          theme.materialTapTargetSize,
     );
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(FlagProperty('enabled', value: enabled, ifFalse: 'disabled'));
+    properties.add(
+        FlagProperty('enabled', value: enabled, ifFalse: 'disabled'));
   }
 }
 
@@ -291,4 +294,4 @@ class MaterialButton extends StatelessWidget {
 ///
 /// This mixin only exists to give the "label and icon" button widgets a distinct
 /// type for the sake of [ButtonTheme].
-mixin MaterialButtonWithIconMixin { }
+mixin MaterialButtonWithIconMixin {}
