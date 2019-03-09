@@ -1033,6 +1033,7 @@ class RenderBackdropFilter extends RenderProxyBox {
   @override
   bool get alwaysNeedsCompositing => child != null;
 
+  // TODO(liyuqian): remove this after updating the engine BackdropFilterLayer.
   void _addTrasnparentPaint(PaintingContext context, Offset offset) {
     // Draw a fully transparent paint to make sure that the cull rect won't be
     // shrunk by Skia.
