@@ -654,12 +654,16 @@ FlutterEngineResult FlutterEngineDispatchSemanticsAction(
 // platform via the vsync callback must be returned. This call must be made on
 // the thread on which the call to |FlutterEngineRun| was made.
 //
-// |frame_start_time_nanos| is the point at which the vsync event occurred.
+// |frame_start_time_nanos| is the point at which the vsync event occurred or
+// will occur. If the time point is in the future, the engine will wait till
+// that point to begin its frame workload. The system monotonic clock is used as
+// the timebase.
+//
 // |frame_target_time_nanos| is the point at which the embedder anticipates the
 // next vsync to occur. This is a hint the engine uses to schedule Dart VM
 // garbage collection in periods in which the various threads are most likely to
 // be idle. For example, for a 60Hz display, embedders should add 16.6 * 1e6 to
-// the frame time field.
+// the frame time field. The system monotonic clock is used as the timebase.
 FLUTTER_EXPORT
 FlutterEngineResult FlutterEngineOnVsync(FlutterEngine engine,
                                          intptr_t baton,
