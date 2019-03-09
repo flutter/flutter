@@ -299,16 +299,18 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
     double startPadding = 24.0;
     if (_selectedRowCount == 0) {
 
-      headerWidgets.add(Expanded(child: widget.header));
-      if (widget.header is ButtonBar) {
-        // We adjust the padding when a button bar is present, because the
-        // ButtonBar introduces 2 pixels of outside padding, plus 2 pixels
-        // around each button on each side, and the button itself will have 8
-        // pixels internally on each side, yet we want the left edge of the
-        // inside of the button to line up with the 24.0 left inset.
-        // TODO(ianh): Better magic. See https://github.com/flutter/flutter/issues/4460
-        startPadding = 12.0;
+      if (widget.header != null){
+        headerWidgets.add(Expanded(child: widget.header));
+        if (widget.header is ButtonBar) {
+          // We adjust the padding when a button bar is present, because the
+          // ButtonBar introduces 2 pixels of outside padding, plus 2 pixels
+          // around each button on each side, and the button itself will have 8
+          // pixels internally on each side, yet we want the left edge of the
+          // inside of the button to line up with the 24.0 left inset.
+          // TODO(ianh): Better magic. See https://github.com/flutter/flutter/issues/4460
+          startPadding = 12.0;
 
+        }
       }
     } else {
       headerWidgets.add(Expanded(
