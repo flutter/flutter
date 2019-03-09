@@ -149,7 +149,7 @@ class CodeGeneratingKernelCompiler implements KernelCompiler {
       depFilePath: depFilePath,
       targetModel: targetModel,
       // Pass an invalid file name to prevent frontend_server from initializing from dill.
-      initializeFromDill: ' ',
+      initializeFromDill: 'none_file',
     );
   }
 }
@@ -189,7 +189,7 @@ class CodeGeneratingResidentCompiler implements ResidentCompiler {
       targetModel: TargetModel.flutter,
       unsafePackageSerialization: unsafePackageSerialization,
       // Pass an invalid file name to prevent frontend_server from initializing from dill.
-      initializeFromDill: ' ',
+      initializeFromDill: 'none_file',
     );
     return CodeGeneratingResidentCompiler._(residentCompiler, codegenDaemon);
   }
