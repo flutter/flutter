@@ -20,6 +20,8 @@ import io.flutter.embedding.engine.dart.PlatformMessageHandler;
 import io.flutter.embedding.engine.FlutterEngine.EngineLifecycleListener;
 import io.flutter.embedding.engine.renderer.FlutterRenderer;
 import io.flutter.embedding.engine.renderer.OnFirstFrameRenderedListener;
+import io.flutter.plugin.common.StandardMessageCodec;
+import io.flutter.view.AccessibilityBridge;
 
 /**
  * Interface between Flutter embedding's Java code and Flutter engine's C/C++ code.
@@ -322,6 +324,22 @@ public class FlutterJNI {
   private native void nativeDispatchPointerDataPacket(long nativePlatformViewId,
                                                       ByteBuffer buffer,
                                                       int position);
+
+  public void dispatchSemanticsAction(int id, @NonNull AccessibilityBridge.Action action) {
+    dispatchSemanticsAction(id, action, null);
+  }
+
+  public void dispatchSemanticsAction(int id, @NonNull AccessibilityBridge.Action action, @Nullable Object args) {
+    ensureAttachedToNative();
+
+    ByteBuffer encodedArgs = null;
+    int position = 0;
+    if (args != null) {
+      encodedArgs = StandardMessageCodec.INSTANCE.encodeMessage(args);
+      position = encodedArgs.position();
+    }
+    dispatchSemanticsAction(id, action.value, encodedArgs, position);
+  }
 
   @UiThread
   public void dispatchSemanticsAction(int id, int action, ByteBuffer args, int argsPosition) {
