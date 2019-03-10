@@ -277,8 +277,9 @@ tasks:
     description: >
       Verifies that `flutter drive --route` still works. No performance numbers.
     stage: devicelab
-    required_agent_capabilities: ["linux/android"]
+    required_agent_capabilities: ["l
 
+  # TODO(dnfield): Remove these once we're confident it's all working on cirrus
   # gradle_plugin_test:
   #   description: >
   #     Verifies that the Flutter Gradle plugin supports standard and custom Android build types.
@@ -317,6 +318,7 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
 
+  # TODO(dnfield): Remove these once we're confident it's all working on cirrus
   # flutter_create_offline_test_linux:
   #   description: >
   #     Tests the `flutter create --offline` command.
@@ -343,6 +345,7 @@ tasks:
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
 
+  # TODO(dnfield): Remove these once we're confident it's all working on cirrus
   # plugin_test_ios:
   #   description: >
   #     Checks that the project template works and supports plugins on iOS.
@@ -478,6 +481,7 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
 
+  # TODO(dnfield): Remove these once we're confident it's all working on cirrus
   # dartdocs:
   #   description: >
   #     Tracks how many members are still lacking documentation.
