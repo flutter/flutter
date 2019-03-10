@@ -277,7 +277,7 @@ tasks:
     description: >
       Verifies that `flutter drive --route` still works. No performance numbers.
     stage: devicelab
-    required_agent_capabilities: ["l
+    required_agent_capabilities: ["linux/android"]
 
   # TODO(dnfield): Remove these once we're confident it's all working on cirrus
   # gradle_plugin_test:
