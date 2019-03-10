@@ -50,6 +50,7 @@ Stream<String> runAndGetStdout(String executable, List<String> arguments, {
     environment: environment,
   );
 
+  process.stderr.pipe(stderr);
   final Stream<String> lines = process.stdout.transform(utf8.decoder).transform(const LineSplitter());
   await for (String line in lines) {
     yield line;

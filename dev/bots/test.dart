@@ -6,8 +6,8 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:googleapis/bigquery/v2.dart' as bq;
-// import 'package:googleapis_auth/auth_io.dart' as auth;
-// import 'package:http/http.dart' as http;
+import 'package:googleapis_auth/auth_io.dart' as auth;
+import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as path;
 
 import 'flutter_compact_formatter.dart';
@@ -146,21 +146,19 @@ Future<void> _runSmokeTests() async {
 
 Future<bq.BigqueryApi> _getBigqueryApi() async {
   // TODO(dnfield): How will we do this on LUCI?
-  // final String privateKey = Platform.environment['GCLOUD_SERVICE_ACCOUNT_KEY'];
-  // // If we're on Cirrus and a non-collaborator is doing this, we can't get the key.
-  // if (privateKey == null || privateKey.isEmpty || privateKey.startsWith('ENCRYPTED['])) {
-  //   return null;
-  // }
-  // final auth.ServiceAccountCredentials accountCredentials = auth.ServiceAccountCredentials( //.fromJson(credentials);
-  //   'flutter-ci-test-reporter@flutter-infra.iam.gserviceaccount.com',
-  //   auth.ClientId.serviceAccount('114390419920880060881.apps.googleusercontent.com'),
-  //   '-----BEGIN PRIVATE KEY-----\n$privateKey\n-----END PRIVATE KEY-----\n',
-  // );
-  // final List<String> scopes = <String>[bq.BigqueryApi.BigqueryInsertdataScope];
-  // final http.Client client = await auth.clientViaServiceAccount(accountCredentials, scopes);
-  // return bq.BigqueryApi(client);
-  // TODO(dnfield): re-enable this when I can figure out why it's flaky.
-  return null;
+  final String privateKey = Platform.environment['GCLOUD_SERVICE_ACCOUNT_KEY'];
+  // If we're on Cirrus and a non-collaborator is doing this, we can't get the key.
+  if (privateKey == null || privateKey.isEmpty || privateKey.startsWith('ENCRYPTED[')) {
+    return null;
+  }
+  final auth.ServiceAccountCredentials accountCredentials = auth.ServiceAccountCredentials( //.fromJson(credentials);
+    'flutter-ci-test-reporter@flutter-infra.iam.gserviceaccount.com',
+    auth.ClientId.serviceAccount('114390419920880060881.apps.googleusercontent.com'),
+    '-----BEGIN PRIVATE KEY-----\n$privateKey\n-----END PRIVATE KEY-----\n',
+  );
+  final List<String> scopes = <String>[bq.BigqueryApi.BigqueryInsertdataScope];
+  final http.Client client = await auth.clientViaServiceAccount(accountCredentials, scopes);
+  return bq.BigqueryApi(client);
 }
 
 Future<void> _runToolTests() async {
@@ -361,21 +359,15 @@ Future<void> _buildRunnerTest(
     pubEnvironment['FLUTTER_TOOL_ARGS'] = toolsArgs.trim();
   }
 
-  await runCommand(
+  final FlutterCompactFormatter formatter = FlutterCompactFormatter();
+  final Stream<String> testOutput = runAndGetStdout(
     pub,
     args,
     workingDirectory: workingDirectory,
     environment: pubEnvironment,
+    beforeExit: formatter.finish
   );
-  // final FlutterCompactFormatter formatter = FlutterCompactFormatter();
-  // final Stream<String> testOutput = runCommand(
-  //   pub,
-  //   args,
-  //   workingDirectory: workingDirectory,
-  //   environment: pubEnvironment,
-  //   beforeExit: formatter.finish
-  // );
-  // await _processTestOutput(formatter, testOutput, tableData);
+  await _processTestOutput(formatter, testOutput, tableData);
 }
 
 Future<void> _pubRunTest(
@@ -401,19 +393,14 @@ Future<void> _pubRunTest(
         toolsArgs += ' --enable-asserts';
     pubEnvironment['FLUTTER_TOOL_ARGS'] = toolsArgs.trim();
   }
-  await runCommand(
+  final FlutterCompactFormatter formatter = FlutterCompactFormatter();
+  final Stream<String> testOutput = runAndGetStdout(
     pub,
     args,
     workingDirectory: workingDirectory,
+    beforeExit: formatter.finish,
   );
-  // final FlutterCompactFormatter formatter = FlutterCompactFormatter();
-  // final Stream<String> testOutput = runAndGetStdout(
-  //   pub,
-  //   args,
-  //   workingDirectory: workingDirectory,
-  //   beforeExit: formatter.finish,
-  // );
-  // await _processTestOutput(formatter, testOutput, tableData);
+  await _processTestOutput(formatter, testOutput, tableData);
 }
 
 enum CiProviders {
@@ -482,8 +469,6 @@ String _getGitHash() {
   return '';
 }
 
-// TODO(dnfield): Remove this when we're re-enabling it.
-// ignore: unused_element
 Future<void> _processTestOutput(
   FlutterCompactFormatter formatter,
   Stream<String> testOutput,
@@ -571,10 +556,10 @@ Future<void> _runFlutterTest(String workingDirectory, {
   if (flutterTestArgs != null && flutterTestArgs.isNotEmpty)
     args.addAll(flutterTestArgs);
 
-  // final bool shouldProcessOutput = !expectFailure && !options.contains('--coverage');
-  // if (shouldProcessOutput) {
-  //   args.add('--machine');
-  // }
+  final bool shouldProcessOutput = !expectFailure && !options.contains('--coverage');
+  if (shouldProcessOutput) {
+    args.add('--machine');
+  }
 
   if (script != null) {
     final String fullScriptPath = path.join(workingDirectory, script);
@@ -590,7 +575,7 @@ Future<void> _runFlutterTest(String workingDirectory, {
     }
     args.add(script);
   }
-  // if (!shouldProcessOutput) {
+  if (!shouldProcessOutput) {
     return runCommand(flutter, args,
       workingDirectory: workingDirectory,
       expectNonZeroExit: expectFailure,
@@ -598,15 +583,15 @@ Future<void> _runFlutterTest(String workingDirectory, {
       skip: skip,
       timeout: timeout,
     );
-  // }
-  // final FlutterCompactFormatter formatter = FlutterCompactFormatter();
-  // final Stream<String> testOutput = runAndGetStdout(flutter, args,
-  //   workingDirectory: workingDirectory,
-  //   expectNonZeroExit: expectFailure,
-  //   timeout: timeout,
-  //   beforeExit: formatter.finish,
-  // );
-  // await _processTestOutput(formatter, testOutput, tableData);
+  }
+  final FlutterCompactFormatter formatter = FlutterCompactFormatter();
+  final Stream<String> testOutput = runAndGetStdout(flutter, args,
+    workingDirectory: workingDirectory,
+    expectNonZeroExit: expectFailure,
+    timeout: timeout,
+    beforeExit: formatter.finish,
+  );
+  await _processTestOutput(formatter, testOutput, tableData);
 }
 
 Future<void> _verifyVersion(String filename) async {
