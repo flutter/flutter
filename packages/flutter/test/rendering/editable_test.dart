@@ -17,13 +17,13 @@ class FakeEditableTextState extends TextSelectionDelegate {
   TextEditingValue get textEditingValue { return const TextEditingValue(); }
 
   @override
-  set textEditingValue(TextEditingValue value) {}
+  set textEditingValue(TextEditingValue value) { }
 
   @override
-  void hideToolbar() {}
+  void hideToolbar() { }
 
   @override
-  void bringIntoView(TextPosition position) {}
+  void bringIntoView(TextPosition position) { }
 }
 
 void main() {
@@ -56,7 +56,6 @@ void main() {
         ' │ cursorColor: null\n'
         ' │ showCursor: ValueNotifier<bool>#00000(false)\n'
         ' │ maxLines: 1\n'
-        ' │ minLines: null\n'
         ' │ selectionColor: null\n'
         ' │ textScaleFactor: 1.0\n'
         ' │ locale: ja_JP\n'

@@ -361,7 +361,7 @@ class _RecipePageState extends State<RecipePage> {
                 backgroundColor: Colors.transparent,
                 actions: <Widget>[
                   PopupMenuButton<String>(
-                    onSelected: (String item) {},
+                    onSelected: (String item) { },
                     itemBuilder: (BuildContext context) => <PopupMenuItem<String>>[
                       _buildMenuItem(Icons.share, 'Tweet recipe'),
                       _buildMenuItem(Icons.email, 'Email recipe'),

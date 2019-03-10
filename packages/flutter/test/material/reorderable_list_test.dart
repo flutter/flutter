@@ -132,7 +132,7 @@ void main() {
             ),
           ],
           scrollDirection: Axis.vertical,
-          onReorder: (int oldIndex, int newIndex) {},
+          onReorder: (int oldIndex, int newIndex) { },
         );
         await tester.pumpWidget(MaterialApp(
           home: SizedBox(
@@ -198,7 +198,7 @@ void main() {
               _Stateful(key: const Key('B')),
               _Stateful(key: const Key('C')),
             ],
-            onReorder: (int oldIndex, int newIndex) {},
+            onReorder: (int oldIndex, int newIndex) { },
           ),
         ));
         await tester.tap(find.byKey(const Key('A')));
@@ -215,7 +215,7 @@ void main() {
               _Stateful(key: const Key('C')),
               _Stateful(key: const Key('A')),
             ],
-            onReorder: (int oldIndex, int newIndex) {},
+            onReorder: (int oldIndex, int newIndex) { },
           ),
         ));
         // Only the 'A' widget should be checked.
@@ -232,7 +232,7 @@ void main() {
             SizedBox(width: 100.0, height: 100.0, child: Text('B'), key: Key('B')),
             SizedBox(width: 100.0, height: 100.0, child: Text('A'), key: Key('A')),
           ],
-          onReorder: (int oldIndex, int newIndex) {},
+          onReorder: (int oldIndex, int newIndex) { },
         );
 
         Widget buildWithScrollController(ScrollController controller) {
@@ -270,7 +270,7 @@ void main() {
             SizedBox(width: 100.0, height: 100.0, child: Text('B'), key: Key('B')),
             SizedBox(width: 100.0, height: 100.0, child: Text('A'), key: Key('A')),
           ],
-          onReorder: (int oldIndex, int newIndex) {},
+          onReorder: (int oldIndex, int newIndex) { },
         );
         final Widget boilerplate = Localizations(
           locale: const Locale('en'),
@@ -441,7 +441,7 @@ void main() {
                   child: SwitchListTile(
                     title: const Text('Switch tile'),
                     value: true,
-                    onChanged: (bool newValue) {},
+                    onChanged: (bool newValue) { },
                   ),
                 ),
               ),
@@ -452,7 +452,7 @@ void main() {
               ),
             ],
             scrollDirection: Axis.vertical,
-            onReorder: (int oldIndex, int newIndex) {},
+            onReorder: (int oldIndex, int newIndex) { },
           );
           await tester.pumpWidget(MaterialApp(
             home: SizedBox(
@@ -560,7 +560,7 @@ void main() {
             ),
           ],
           scrollDirection: Axis.horizontal,
-          onReorder: (int oldIndex, int newIndex) {},
+          onReorder: (int oldIndex, int newIndex) { },
         );
         await tester.pumpWidget(MaterialApp(
           home: SizedBox(
@@ -627,7 +627,7 @@ void main() {
               _Stateful(key: const Key('B')),
               _Stateful(key: const Key('C')),
             ],
-            onReorder: (int oldIndex, int newIndex) {},
+            onReorder: (int oldIndex, int newIndex) { },
             scrollDirection: Axis.horizontal,
           ),
         ));
@@ -645,7 +645,7 @@ void main() {
               _Stateful(key: const Key('C')),
               _Stateful(key: const Key('A')),
             ],
-            onReorder: (int oldIndex, int newIndex) {},
+            onReorder: (int oldIndex, int newIndex) { },
             scrollDirection: Axis.horizontal,
           ),
         ));
@@ -917,7 +917,7 @@ void main() {
           ),
         ],
         reverse: true,
-        onReorder: (int oldIndex, int newIndex) {},
+        onReorder: (int oldIndex, int newIndex) { },
       );
       await tester.pumpWidget(MaterialApp(
         home: reorderableListView,

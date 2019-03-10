@@ -137,7 +137,7 @@ Future<void> main() async {
             fadeOutDuration: animationDuration,
             fadeInDuration: animationDuration,
             imageSemanticLabel: imageSemanticText,
-            placeholderSemanticLabel: placeholderSemanticText
+            placeholderSemanticLabel: placeholderSemanticText,
         ));
 
         placeholderProvider.complete(); // load the placeholder
@@ -164,7 +164,7 @@ Future<void> main() async {
             image: imageProvider,
             fadeOutDuration: animationDuration,
             fadeInDuration: animationDuration,
-            placeholderSemanticLabel: placeholderSemanticText
+            placeholderSemanticLabel: placeholderSemanticText,
         ));
 
         placeholderProvider.complete(); // load the placeholder

@@ -62,7 +62,7 @@ void main() {
         await _pumpBoilerplate(tester, DayPicker(
           selectedDate: baseDate,
           currentDate: baseDate,
-          onChanged: (DateTime newValue) {},
+          onChanged: (DateTime newValue) { },
           firstDate: baseDate.subtract(const Duration(days: 90)),
           lastDate: baseDate.add(const Duration(days: 90)),
           displayedMonth: baseDate,

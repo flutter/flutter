@@ -37,7 +37,7 @@ class FakeImage implements Image {
   int get height => _height;
 
   @override
-  void dispose() {}
+  void dispose() { }
 
   @override
   Future<ByteData> toByteData({ ImageByteFormat format = ImageByteFormat.rawRgba }) async {
@@ -73,7 +73,7 @@ class MockCodec implements Codec {
   }
 
   @override
-  void dispose() {}
+  void dispose() { }
 
 }
 
@@ -293,7 +293,7 @@ void main() {
       scale: 1.0,
     );
 
-    final ImageListener listener = (ImageInfo image, bool synchronousCall) {};
+    final ImageListener listener = (ImageInfo image, bool synchronousCall) { };
     imageStream.addListener(listener);
 
     codecCompleter.complete(mockCodec);
@@ -377,7 +377,7 @@ void main() {
       scale: 1.0,
     );
 
-    final ImageListener listener = (ImageInfo image, bool synchronousCall) {};
+    final ImageListener listener = (ImageInfo image, bool synchronousCall) { };
     imageStream.addListener(listener);
 
     codecCompleter.complete(mockCodec);
@@ -410,7 +410,7 @@ void main() {
       scale: 1.0,
     );
 
-    final ImageListener listener = (ImageInfo image, bool synchronousCall) {};
+    final ImageListener listener = (ImageInfo image, bool synchronousCall) { };
     imageStream.addListener(listener);
 
     codecCompleter.complete(mockCodec);
@@ -451,7 +451,7 @@ void main() {
     };
 
     streamUnderTest.addListener(
-      (ImageInfo image, bool synchronousCall) {},
+      (ImageInfo image, bool synchronousCall) { },
       onError: errorListener,
     );
 

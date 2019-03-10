@@ -92,7 +92,7 @@ Future<void> _runLiveTest(Suite suiteConfig, LiveTest liveTest, _Reporter report
 }
 
 Future<void> _runSkippedTest(Suite suiteConfig, Test test, List<Group> parents, _Reporter reporter) async {
-  final LocalTest skipped = LocalTest(test.name, test.metadata, () {}, trace: test.trace);
+  final LocalTest skipped = LocalTest(test.name, test.metadata, () { }, trace: test.trace);
   if (skipped.metadata.skipReason != null) {
     print('Skip: ${skipped.metadata.skipReason}');
   }

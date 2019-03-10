@@ -94,7 +94,7 @@ void main() {
         boilerplate(
           child: CupertinoSegmentedControl<int>(
             children: children,
-            onValueChanged: (int newValue) {},
+            onValueChanged: (int newValue) { },
           ),
         ),
       );
@@ -109,7 +109,7 @@ void main() {
         boilerplate(
           child: CupertinoSegmentedControl<int>(
             children: children,
-            onValueChanged: (int newValue) {},
+            onValueChanged: (int newValue) { },
           ),
         ),
       );
@@ -129,7 +129,7 @@ void main() {
         boilerplate(
           child: CupertinoSegmentedControl<int>(
             children: children,
-            onValueChanged: (int newValue) {},
+            onValueChanged: (int newValue) { },
             groupValue: 2,
           ),
         ),
@@ -147,7 +147,7 @@ void main() {
         boilerplate(
           child: CupertinoSegmentedControl<int>(
             children: null,
-            onValueChanged: (int newValue) {},
+            onValueChanged: (int newValue) { },
           ),
         ),
       );
@@ -336,7 +336,7 @@ void main() {
             height: 200.0,
             child: CupertinoSegmentedControl<int>(
               children: children,
-              onValueChanged: (int newValue) {},
+              onValueChanged: (int newValue) { },
             ),
           ),
         ),
@@ -390,7 +390,7 @@ void main() {
           return boilerplate(
             child: CupertinoSegmentedControl<int>(
               children: children,
-              onValueChanged: (int newValue) {},
+              onValueChanged: (int newValue) { },
               groupValue: sharedValue,
             ),
           );
@@ -546,7 +546,7 @@ void main() {
             child: CupertinoSegmentedControl<int>(
               key: const ValueKey<String>('Segmented Control'),
               children: children,
-              onValueChanged: (int newValue) {},
+              onValueChanged: (int newValue) { },
             ),
           );
         },
@@ -578,7 +578,7 @@ void main() {
             child: CupertinoSegmentedControl<int>(
               key: const ValueKey<String>('Segmented Control'),
               children: children,
-              onValueChanged: (int newValue) {},
+              onValueChanged: (int newValue) { },
             ),
           );
         },
@@ -616,7 +616,7 @@ void main() {
                 CupertinoSegmentedControl<int>(
                   key: const ValueKey<String>('Segmented Control'),
                   children: children,
-                  onValueChanged: (int newValue) {},
+                  onValueChanged: (int newValue) { },
                 ),
               ],
             ),
@@ -642,7 +642,7 @@ void main() {
         child: Center(
           child: CupertinoSegmentedControl<int>(
             children: children,
-            onValueChanged: (int newValue) {},
+            onValueChanged: (int newValue) { },
           ),
         ),
       ),
@@ -1315,7 +1315,7 @@ void main() {
                 child: CupertinoSegmentedControl<int>(
                   key: const ValueKey<String>('Segmented Control'),
                   children: children,
-                  onValueChanged: (int newValue) {},
+                  onValueChanged: (int newValue) { },
                   groupValue: currentValue,
                 ),
               ),
@@ -1349,7 +1349,7 @@ void main() {
                 child: CupertinoSegmentedControl<int>(
                   key: const ValueKey<String>('Segmented Control'),
                   children: children,
-                  onValueChanged: (int newValue) {},
+                  onValueChanged: (int newValue) { },
                   groupValue: currentValue,
                 ),
               ),
