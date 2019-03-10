@@ -257,6 +257,7 @@ task:
         cpu: 4
         memory: 12G
     - name: add2app-macos
+      only_if: $CIRRUS_USER_COLLABORATOR == 'true'
       env:
         SHARD: add2app_test
 
