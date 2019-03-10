@@ -28,6 +28,7 @@ Widget buildFrame({
   bool isExpanded = false,
   Widget hint,
   Widget disabledHint,
+  BorderSide underline,
   List<String> items = menuItems,
   Alignment alignment = Alignment.center,
   TextDirection textDirection = TextDirection.ltr,
@@ -43,6 +44,7 @@ Widget buildFrame({
             value: value,
             hint: hint,
             disabledHint: disabledHint,
+            underline: underline,
             onChanged: onChanged,
             isDense: isDense,
             isExpanded: isExpanded,
@@ -1079,5 +1081,19 @@ void main() {
     await tester.tap(find.text('13').last);
     await tester.pumpAndSettle();
     expect(selectedIndex, 13);
+  });
+
+  testWidgets('Underlined dropdown golden', (WidgetTester tester) async {
+    final Key buttonKey = UniqueKey();
+    Widget build() => buildFrame(buttonKey: buttonKey,
+        underline: const BorderSide(color: Color(0xFFFFAAEE), width: 4.0));
+    await tester.pumpWidget(build());
+    final Finder buttonFinder = find.byKey(buttonKey);
+    assert(tester.renderObject(buttonFinder).attached);
+    await expectLater(
+      find.ancestor(of: buttonFinder, matching: find.byType(RepaintBoundary)).first,
+      matchesGoldenFile('dropdown_test.underlined.0.png'),
+      skip: !Platform.isLinux,
+    );
   });
 }
