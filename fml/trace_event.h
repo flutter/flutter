@@ -13,6 +13,8 @@
 
 #include <trace/event.h>
 
+#define FML_TRACE_COUNTER(category_group, name, count) \
+  TRACE_COUNTER(category_group, name, 0u, name, count)
 #define TRACE_EVENT0(a, b) TRACE_DURATION(a, b)
 #define TRACE_EVENT1(a, b, c, d) TRACE_DURATION(a, b, c, d)
 #define TRACE_EVENT2(a, b, c, d, e, f) TRACE_DURATION(a, b, c, d, e, f)
@@ -26,11 +28,8 @@
 #include <cstddef>
 #include <cstdint>
 #include <string>
-#include <type_traits>
-#include <vector>
 
 #include "flutter/fml/macros.h"
-#include "third_party/dart/runtime/include/dart_tools_api.h"
 
 #if !defined(OS_FUCHSIA)
 
@@ -46,8 +45,8 @@
 // from trace/event.h on Fuchsia.
 //
 // TODO(chinmaygarde): All macros here should have the FML prefix.
-#define FML_TRACE_COUNTER(category_group, name, counter_id, arg1, args...) \
-  ::fml::tracing::TraceCounter(category_group, name, counter_id, arg1, ##args);
+#define FML_TRACE_COUNTER(category_group, name, count) \
+  ::fml::tracing::TraceCounter(category_group, name, count);
 
 #define TRACE_EVENT0(category_group, name)           \
   ::fml::tracing::TraceEvent0(category_group, name); \
@@ -100,63 +99,7 @@ namespace tracing {
 using TraceArg = const char*;
 using TraceIDArg = int64_t;
 
-void TraceTimelineEvent(TraceArg category_group,
-                        TraceArg name,
-                        TraceIDArg id,
-                        Dart_Timeline_Event_Type type,
-                        const std::vector<const char*>& names,
-                        const std::vector<std::string>& values);
-
-inline std::string TraceToString(const char* string) {
-  return std::string{string};
-}
-
-inline std::string TraceToString(std::string string) {
-  return string;
-}
-
-template <typename T, typename = std::enable_if_t<std::is_arithmetic<T>::value>>
-std::string TraceToString(T string) {
-  return std::to_string(string);
-}
-
-inline void SplitArgumentsCollect(std::vector<const char*>& keys,
-                                  std::vector<std::string>& values) {}
-
-template <typename Key, typename Value, typename... Args>
-void SplitArgumentsCollect(std::vector<const char*>& keys,
-                           std::vector<std::string>& values,
-                           Key key,
-                           Value value,
-                           Args... args) {
-  keys.emplace_back(key);
-  values.emplace_back(TraceToString(value));
-  SplitArgumentsCollect(keys, values, args...);
-}
-
-inline std::pair<std::vector<const char*>, std::vector<std::string>>
-SplitArguments() {
-  return {};
-}
-
-template <typename Key, typename Value, typename... Args>
-std::pair<std::vector<const char*>, std::vector<std::string>>
-SplitArguments(Key key, Value value, Args... args) {
-  std::vector<const char*> keys;
-  std::vector<std::string> values;
-  SplitArgumentsCollect(keys, values, key, value, args...);
-  return std::make_pair(std::move(keys), std::move(values));
-}
-
-template <typename... Args>
-void TraceCounter(TraceArg category,
-                  TraceArg name,
-                  TraceIDArg identifier,
-                  Args... args) {
-  auto split = SplitArguments(args...);
-  TraceTimelineEvent(category, name, identifier, Dart_Timeline_Event_Counter,
-                     split.first, split.second);
-}
+void TraceCounter(TraceArg category_group, TraceArg name, TraceIDArg count);
 
 void TraceEvent0(TraceArg category_group, TraceArg name);
 
