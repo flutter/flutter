@@ -605,27 +605,27 @@ abstract class BoxScrollView extends ScrollView {
 ///
 /// {@tool sample}
 /// This example uses the default constructor for [ListView] which takes an
-/// explicit [List<Widget] of children. This [ListView]'s children are made up
+/// explicit [List<Widget>] of children. This [ListView]'s children are made up
 /// of [Container]s with [Text].
 ///
 /// ```dart
 /// ListView(
-///   padding: EdgeInsets.all(8.0),
+///   padding: const EdgeInsets.all(8.0),
 ///   children: <Widget>[
 ///     Container(
 ///       height: 50,
 ///       color: Colors.amber[600],
-///       child: Center( child: Text('Entry A')),
+///       child: const Center(child: const Text('Entry A')),
 ///     ),
 ///     Container(
 ///       height: 50,
 ///       color: Colors.amber[500],
-///       child: Center(child: Text('Entry B')),
+///       child: const Center(child: const Text('Entry B')),
 ///     ),
 ///     Container(
 ///       height: 50,
 ///       color: Colors.amber[100],
-///       child: Center(child: Text('Entry C')),
+///       child: const Center(child: const Text('Entry C')),
 ///     ),
 ///   ],
 /// )
@@ -636,12 +636,13 @@ abstract class BoxScrollView extends ScrollView {
 /// [ListView.builder].
 ///
 /// ```dart
-/// final List entries = ['A', 'B', 'C'];
-/// final colorCodes = [600, 500, 100];
+/// static const List entries = ['A', 'B', 'C'];
+/// static const colorCodes = [600, 500, 100];
 ///
 /// ListView.builder(
+///   padding: const EdgeInsets.all(8.0),
 ///   itemCount: entries.length,
-///   itemBuilder: (context, index) {
+///   itemBuilder: (BuildContext context, int index) {
 ///     return Container(
 ///       height: 50,
 ///       color: Colors.amber[colorCodes[index]],
@@ -657,21 +658,20 @@ abstract class BoxScrollView extends ScrollView {
 /// separator.
 ///
 /// ```dart
-/// final List entries = ['A', 'B', 'C'];
-/// final colorCodes = [600, 500, 100];
+/// static const List entries = ['A', 'B', 'C'];
+/// static const colorCodes = [600, 500, 100];
 ///
 /// ListView.separated(
+///   padding: const EdgeInsets.all(8.0),
 ///   itemCount: entries.length,
-///   itemBuilder: (context, index) {
+///   itemBuilder: (BuildContext context, int index) {
 ///     return Container(
 ///       height: 50,
 ///       color: Colors.amber[colorCodes[index]],
 ///       child: Center(child: Text('Entry ${entries[index]}')),
 ///     );
 ///   },
-///   separatorBuilder: (context, position) {
-///     return Divider();
-///   },
+///   separatorBuilder: (BuildContext context, int index) => const Divider(),
 /// );
 /// ```
 /// {@end-tool}
