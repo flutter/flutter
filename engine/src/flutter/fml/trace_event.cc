@@ -4,34 +4,22 @@
 
 #include "flutter/fml/trace_event.h"
 
-#include "flutter/fml/logging.h"
+#include "third_party/dart/runtime/include/dart_tools_api.h"
 
 namespace fml {
 namespace tracing {
 
-void TraceTimelineEvent(TraceArg category_group,
-                        TraceArg name,
-                        TraceIDArg identifier,
-                        Dart_Timeline_Event_Type type,
-                        const std::vector<const char*>& names,
-                        const std::vector<std::string>& values) {
-  const auto argument_count = std::min(names.size(), values.size());
-
-  std::vector<const char*> c_values;
-  c_values.resize(argument_count, nullptr);
-
-  for (size_t i = 0; i < argument_count; i++) {
-    c_values[i] = values[i].c_str();
-  }
-
-  Dart_TimelineEvent(
-      name,                                      // label
-      Dart_TimelineGetMicros(),                  // timestamp0
-      identifier,                                // timestamp1_or_async_id
-      type,                                      // event type
-      argument_count,                            // argument_count
-      const_cast<const char**>(names.data()),    // argument_names
-      const_cast<const char**>(c_values.data())  // argument_values
+void TraceCounter(TraceArg category_group, TraceArg name, TraceIDArg count) {
+  auto count_string = std::to_string(count);
+  const char* arg_names[] = {name};
+  const char* arg_values[] = {count_string.c_str()};
+  Dart_TimelineEvent(name,                         // label
+                     Dart_TimelineGetMicros(),     // timestamp0
+                     0,                            // timestamp1_or_async_id
+                     Dart_Timeline_Event_Counter,  // event type
+                     1,                            // argument_count
+                     arg_names,                    // argument_names
+                     arg_values                    // argument_values
   );
 }
 
