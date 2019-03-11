@@ -312,10 +312,32 @@ public class FlutterView extends FrameLayout {
   @Override
   public boolean onTouchEvent(MotionEvent event) {
     if (!isAttachedToFlutterEngine()) {
-      return false;
+      return super.onTouchEvent(event);
+    }
+
+    // TODO(abarth): This version check might not be effective in some
+    // versions of Android that statically compile code and will be upset
+    // at the lack of |requestUnbufferedDispatch|. Instead, we should factor
+    // version-dependent code into separate classes for each supported
+    // version and dispatch dynamically.
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+      requestUnbufferedDispatch(event);
     }
 
     return androidTouchProcessor.onTouchEvent(event);
+  }
+
+  /**
+   * Invoked by Android when a generic motion event occurs, e.g., joystick movement, mouse hover,
+   * track pad touches, scroll wheel movements, etc.
+   *
+   * Flutter handles all of its own gesture detection and processing, therefore this
+   * method forwards all {@link MotionEvent} data from Android to Flutter.
+   */
+  @Override
+  public boolean onGenericMotionEvent(MotionEvent event) {
+    boolean handled = isAttachedToFlutterEngine() && androidTouchProcessor.onGenericMotionEvent(event);
+    return handled ? true : super.onGenericMotionEvent(event);
   }
 
   /**
@@ -332,7 +354,7 @@ public class FlutterView extends FrameLayout {
   @Override
   public boolean onHoverEvent(MotionEvent event) {
     if (!isAttachedToFlutterEngine()) {
-      return false;
+      return super.onHoverEvent(event);
     }
 
     // TODO(mattcarroll): hook up to accessibility.
