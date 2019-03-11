@@ -58,32 +58,42 @@ void PhysicalShapeLayer::Preroll(PrerollContext* context,
     // join the child paint bounds.
     // The offset is calculated as follows:
 
-    //                   .--                            (kLightRadius = 800)
-    //                 -----                            (light)
-    //                   |                              (kLightHeight = 600)
+    //                   .---                           (kLightRadius)
+    //                -------/                          (light)
+    //                   |  /
+    //                   | /
+    //                   |/
+    //                   |O
+    //                  /|                              (kLightHeight)
+    //                 / |
+    //                /  |
+    //               /   |
+    //              /    |
     //             -------------                        (layer)
-    //                   |
-    //                   |                              (elevation)
-    //                   |
+    //            /|     |
+    //           / |     |                              (elevation)
+    //        A /  |     |B
     // ------------------------------------------------ (canvas)
-    //  -----------                                     (extent of shadow)
+    //          ---                                     (extent of shadow)
     //
-    // E = lx        }           x = (r + w/2)/h
+    // E = lt        }           t = (r + w/2)/h
     //                } =>
-    // r + w/2 = hx  }           E = (l/h)(r + w/2)
+    // r + w/2 = ht  }           E = (l/h)(r + w/2)
     //
     // Where: E = extent of shadow
     //        l = elevation of layer
     //        r = radius of the light source
     //        w = width of the layer
     //        h = light height
-    //        x = multiplier for elevation to extent
+    //        t = tangent of AOB, i.e., multiplier for elevation to extent
     SkRect bounds(path_.getBounds());
-    double ex = (kLightRadius * device_pixel_ratio_ + bounds.width() * 0.5) /
+    // tangent for x
+    double tx = (kLightRadius * device_pixel_ratio_ + bounds.width() * 0.5) /
                 kLightHeight;
-    double ey = (kLightRadius * device_pixel_ratio_ + bounds.height() * 0.5) /
+    // tangent for y
+    double ty = (kLightRadius * device_pixel_ratio_ + bounds.height() * 0.5) /
                 kLightHeight;
-    bounds.outset(elevation_ * ex, elevation_ * ey);
+    bounds.outset(elevation_ * tx, elevation_ * ty);
     set_paint_bounds(bounds);
 #endif  // defined(OS_FUCHSIA)
   }
