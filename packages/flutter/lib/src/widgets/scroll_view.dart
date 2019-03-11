@@ -615,17 +615,17 @@ abstract class BoxScrollView extends ScrollView {
 ///     Container(
 ///       height: 50,
 ///       color: Colors.amber[600],
-///       child: const Center(child: const Text('Entry A')),
+///       child: const Center(child: Text('Entry A')),
 ///     ),
 ///     Container(
 ///       height: 50,
 ///       color: Colors.amber[500],
-///       child: const Center(child: const Text('Entry B')),
+///       child: const Center(child: Text('Entry B')),
 ///     ),
 ///     Container(
 ///       height: 50,
 ///       color: Colors.amber[100],
-///       child: const Center(child: const Text('Entry C')),
+///       child: const Center(child: Text('Entry C')),
 ///     ),
 ///   ],
 /// )
@@ -637,8 +637,8 @@ abstract class BoxScrollView extends ScrollView {
 /// are built lazily and can be infinite in number.
 ///
 /// ```dart
-/// static const List entries = ['A', 'B', 'C'];
-/// static const colorCodes = [600, 500, 100];
+/// const List entries = ['A', 'B', 'C'];
+/// const colorCodes = [600, 500, 100];
 ///
 /// ListView.builder(
 ///   padding: const EdgeInsets.all(8.0),
@@ -659,8 +659,8 @@ abstract class BoxScrollView extends ScrollView {
 /// separator.
 ///
 /// ```dart
-/// static const List entries = ['A', 'B', 'C'];
-/// static const colorCodes = [600, 500, 100];
+/// const List entries = ['A', 'B', 'C'];
+/// const colorCodes = [600, 500, 100];
 ///
 /// ListView.separated(
 ///   padding: const EdgeInsets.all(8.0),
