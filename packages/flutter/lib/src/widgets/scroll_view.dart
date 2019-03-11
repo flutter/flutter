@@ -632,8 +632,9 @@ abstract class BoxScrollView extends ScrollView {
 /// ```
 /// {@end-tool}
 /// {@tool sample}
-/// This example mirrors the previous one, creating the same list using
-/// [ListView.builder].
+/// This example mirrors the previous one, creating the same list using the
+/// [ListView.builder] constructor. Using the [IndexedWidgetBuilder], children
+/// are built lazily and can be infinite in number.
 ///
 /// ```dart
 /// static const List entries = ['A', 'B', 'C'];
