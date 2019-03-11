@@ -563,6 +563,7 @@ class _RenderDecoration extends RenderBox {
        _isFocused = isFocused,
        _expands = expands;
 
+  static const double subtextGap = 8.0;
   final Map<_DecorationSlot, RenderBox> slotToChild = <_DecorationSlot, RenderBox>{};
   final Map<RenderBox, _DecorationSlot> childToSlot = <RenderBox, _DecorationSlot>{};
 
@@ -876,7 +877,6 @@ class _RenderDecoration extends RenderBox {
 
     // The height of the input needs to accommodate label above and counter and
     // helperError below, when they exist.
-    const double subtextGap = 8.0;
     final double labelHeight = label == null
       ? 0
       : decoration.floatingLabelHeight;
@@ -885,11 +885,11 @@ class _RenderDecoration extends RenderBox {
       : labelHeight;
     final double counterHeight = counter == null
       ? 0
-      : boxToBaseline[counter] + subtextGap * 2;
+      : boxToBaseline[counter] + subtextGap;
     final _HelperError helperErrorWidget = decoration.helperError;
     final double helperErrorHeight = helperErrorWidget.helperText == null
       ? 0
-      : helperError.size.height + subtextGap * 2;
+      : helperError.size.height + subtextGap;
     final double bottomHeight = math.max(
       counterHeight,
       helperErrorHeight,
@@ -1041,7 +1041,7 @@ class _RenderDecoration extends RenderBox {
   double computeMinIntrinsicHeight(double width) {
     double subtextHeight = _lineHeight(width, <RenderBox>[helperError, counter]);
     if (subtextHeight > 0.0)
-      subtextHeight += 8.0;
+      subtextHeight += subtextGap;
     return contentPadding.top
       + (label == null ? 0.0 : decoration.floatingLabelHeight)
       + _lineHeight(width, <RenderBox>[prefix, input, suffix])

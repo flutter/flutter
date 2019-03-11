@@ -1075,6 +1075,43 @@ void main() {
     }, throwsAssertionError);
   });
 
+  // Regression test for https://github.com/flutter/flutter/pull/29093
+  testWidgets('Multiline text when wrapped in IntrinsicHeight', (WidgetTester tester) async {
+    final Key intrinsicHeightKey = UniqueKey();
+    Widget intrinsicTextFieldBuilder(bool wrapInIntrinsic) {
+      final TextFormField textField = TextFormField(
+        key: textFieldKey,
+        style: const TextStyle(color: Colors.black, fontSize: 34.0),
+        maxLines: null,
+        decoration: const InputDecoration(
+          counterText: 'I am counter',
+        ),
+      );
+      final Widget widget = wrapInIntrinsic
+        ? IntrinsicHeight(key: intrinsicHeightKey, child: textField)
+        : textField;
+      return boilerplate(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[widget],
+        ),
+      );
+    }
+
+    await tester.pumpWidget(intrinsicTextFieldBuilder(false));
+    expect(find.byKey(intrinsicHeightKey), findsNothing);
+
+    RenderBox findEditableText() => tester.renderObject(find.byType(EditableText));
+    RenderBox editableText = findEditableText();
+    final Size unwrappedEditableTextSize = editableText.size;
+
+    // Wrapping in IntrinsicHeight should not affect the height of the input
+    await tester.pumpWidget(intrinsicTextFieldBuilder(true));
+    editableText = findEditableText();
+    expect(editableText.size.height, unwrappedEditableTextSize.height);
+    expect(editableText.size.width, unwrappedEditableTextSize.width);
+  });
+
   testWidgets('Growable TextField when content height exceeds parent', (WidgetTester tester) async {
     const double height = 200.0;
     const double padding = 24.0;
@@ -1118,7 +1155,7 @@ void main() {
     // Adding a counter causes the EditableText to shrink to fit the counter
     // inside the parent as well.
     const double counterHeight = 40.0;
-    const double subtextGap = 8.0 * 2;
+    const double subtextGap = 8.0;
     const double counterSpace = counterHeight + subtextGap;
     await tester.pumpWidget(containedTextFieldBuilder(
       counter: Container(height: counterHeight),
@@ -1132,8 +1169,8 @@ void main() {
       helperText: 'I am helperText',
     ));
     expect(findEditableText(), equals(inputBox));
-    const double helperTextSpace = 28.0;
-    expect(inputBox.size.height, height - padding - helperTextSpace);
+    const double helperTextSpace = 12.0;
+    expect(inputBox.size.height, height - padding - helperTextSpace - subtextGap);
 
     // When both helperText and counter are present, EditableText shrinks by the
     // height of the taller of the two in order to fit both within the parent.
