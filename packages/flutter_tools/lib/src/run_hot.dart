@@ -185,7 +185,7 @@ class HotRunner extends ResidentRunner {
       return 3;
     }
     // Initialize file invalidator.
-    fileInvalidator.findInvalidated();
+    fileInvalidator.initialize();
     final Stopwatch initialUpdateDevFSsTimer = Stopwatch()..start();
     final UpdateFSReport devfsResult = await _updateDevFS(fullRestart: true);
     _addBenchmarkData(
@@ -967,6 +967,13 @@ class ProjectFileInvalidator {
   Map<String, Uri> _packageMap;
   final Map<String, int> _updateTime = <String, int>{};
 
+  // To initialize the file invalidator we traverse all of the source files
+  // to grab an initial timestamp. We assume that the initial dill file
+  // contains all up to date files.
+  void initialize() {
+    findInvalidated();
+  }
+
   List<String> findInvalidated() {
     final List<String> invalidatedFiles = <String>[];
     for (String packageName in _packageMap.keys) {
@@ -994,13 +1001,13 @@ class ProjectFileInvalidator {
         if (oldUpdatedAt == null || updatedAt > oldUpdatedAt) {
           // On windows convert to file uri in expected format.
           if (platform.isWindows) {
-            final String fileUri = 'file:///${entity.path.replaceAll(r'\', r'/')}';
-            invalidatedFiles.add(fileUri);
+            final Uri uri = Uri.file(entity.path, windows: platform.isWindows);
+            invalidatedFiles.add(uri.toString());
           } else {
             invalidatedFiles.add(entity.path);
           }
         }
-        _updateTime[entity.path] =updatedAt;
+        _updateTime[entity.path] = updatedAt;
       }
     }
   }

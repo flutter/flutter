@@ -943,12 +943,9 @@ abstract class ResidentRunner {
   }
 
   bool hasDirtyDependencies(FlutterDevice device) {
-    /// When using the build system, dependency analysis is handled by build
-    /// runner instead.
-    if (experimentalBuildEnabled) {
-      return false;
-    }
-    return true;
+    // When using the build system, dependency analysis is handled by build
+    // runner instead.
+    return !experimentalBuildEnabled;
   }
 
   Future<void> preStop() async { }
