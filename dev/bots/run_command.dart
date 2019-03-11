@@ -30,6 +30,53 @@ void printProgress(String action, String workingDir, String command) {
   print('$arrow $action: cd $cyan$workingDir$reset; $yellow$command$reset');
 }
 
+Stream<String> runAndGetStdout(String executable, List<String> arguments, {
+  String workingDirectory,
+  Map<String, String> environment,
+  bool expectNonZeroExit = false,
+  int expectedExitCode,
+  String failureMessage,
+  Duration timeout = _kLongTimeout,
+  Function beforeExit,
+}) async* {
+  final String commandDescription = '${path.relative(executable, from: workingDirectory)} ${arguments.join(' ')}';
+  final String relativeWorkingDir = path.relative(workingDirectory);
+
+  printProgress('RUNNING', relativeWorkingDir, commandDescription);
+
+  final DateTime start = DateTime.now();
+  final Process process = await Process.start(executable, arguments,
+    workingDirectory: workingDirectory,
+    environment: environment,
+  );
+
+  stderr.addStream(process.stderr);
+  final Stream<String> lines = process.stdout.transform(utf8.decoder).transform(const LineSplitter());
+  await for (String line in lines) {
+    yield line;
+  }
+
+  final int exitCode = await process.exitCode.timeout(timeout, onTimeout: () {
+    stderr.writeln('Process timed out after $timeout');
+    return expectNonZeroExit ? 0 : 1;
+  });
+  print('$clock ELAPSED TIME: $bold${elapsedTime(start)}$reset for $commandDescription in $relativeWorkingDir: ');
+  if ((exitCode == 0) == expectNonZeroExit || (expectedExitCode != null && exitCode != expectedExitCode)) {
+    if (failureMessage != null) {
+      print(failureMessage);
+    }
+    print(
+        '$redLine\n'
+            '${bold}ERROR:$red Last command exited with $exitCode (expected: ${expectNonZeroExit ? (expectedExitCode ?? 'non-zero') : 'zero'}).$reset\n'
+            '${bold}Command:$cyan $commandDescription$reset\n'
+            '${bold}Relative working directory:$red $relativeWorkingDir$reset\n'
+            '$redLine'
+    );
+    beforeExit?.call();
+    exit(1);
+  }
+}
+
 Future<void> runCommand(String executable, List<String> arguments, {
   String workingDirectory,
   Map<String, String> environment,

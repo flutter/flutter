@@ -513,7 +513,7 @@ class _DiamondBorder extends ShapeBorder {
   }
 
   @override
-  void paint(Canvas canvas, Rect rect, { TextDirection textDirection }) {}
+  void paint(Canvas canvas, Rect rect, { TextDirection textDirection }) { }
 
   // This border doesn't support scaling.
   @override

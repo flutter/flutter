@@ -388,6 +388,28 @@ void main() {
       });
     });
   }
+
+  testUsingContext('GitTagVersion', () {
+    const String hash = 'abcdef';
+    expect(GitTagVersion.parse('v1.2.3-4-g$hash').frameworkVersionFor(hash), '1.2.4-pre.4');
+    expect(GitTagVersion.parse('v98.76.54-32-g$hash').frameworkVersionFor(hash), '98.76.55-pre.32');
+    expect(GitTagVersion.parse('v10.20.30-0-g$hash').frameworkVersionFor(hash), '10.20.30');
+    expect(GitTagVersion.parse('v1.2.3-hotfix.1-4-g$hash').frameworkVersionFor(hash), '1.2.3-hotfix.2-pre.4');
+    expect(GitTagVersion.parse('v7.2.4-hotfix.8-0-g$hash').frameworkVersionFor(hash), '7.2.4-hotfix.8');
+    expect(testLogger.traceText, '');
+    expect(GitTagVersion.parse('x1.2.3-4-g$hash').frameworkVersionFor(hash), '0.0.0-unknown');
+    expect(GitTagVersion.parse('v1.0.0-unknown-0-g$hash').frameworkVersionFor(hash), '0.0.0-unknown');
+    expect(GitTagVersion.parse('beta-1-g$hash').frameworkVersionFor(hash), '0.0.0-unknown');
+    expect(GitTagVersion.parse('v1.2.3-4-gx$hash').frameworkVersionFor(hash), '0.0.0-unknown');
+    expect(testLogger.statusText, '');
+    expect(testLogger.errorText, '');
+    expect(testLogger.traceText,
+      'Could not interpret results of "git describe": x1.2.3-4-gabcdef\n'
+      'Could not interpret results of "git describe": v1.0.0-unknown-0-gabcdef\n'
+      'Could not interpret results of "git describe": beta-1-gabcdef\n'
+      'Could not interpret results of "git describe": v1.2.3-4-gxabcdef\n'
+    );
+  });
 }
 
 void _expectVersionMessage(String message) {

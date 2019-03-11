@@ -137,7 +137,7 @@ class LabeledTapTargetGuideline extends AccessibilityGuideline {
 
   @override
   FutureOr<Evaluation> evaluate(WidgetTester tester) {
-   final SemanticsNode root = tester.binding.pipelineOwner.semanticsOwner.rootSemanticsNode;
+    final SemanticsNode root = tester.binding.pipelineOwner.semanticsOwner.rootSemanticsNode;
     Evaluation traverse(SemanticsNode node) {
       Evaluation result = const Evaluation.pass();
       node.visitChildren((SemanticsNode child) {
@@ -197,7 +197,7 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
     final RenderView renderView = tester.binding.renderView;
     final OffsetLayer layer = renderView.layer;
     ui.Image image;
-    final ByteData byteData = await tester.binding.runAsync<ByteData>(() async  {
+    final ByteData byteData = await tester.binding.runAsync<ByteData>(() async {
       // Needs to be the same pixel ratio otherwise our dimensions won't match the
       // last transform layer.
       image = await layer.toImage(renderView.paintBounds, pixelRatio: 1.0);
@@ -262,8 +262,8 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
         return result;
       final List<int> subset = _subsetToRect(byteData, paintBounds, image.width, image.height);
       // Node was too far off screen.
-     if (subset.isEmpty)
-       return result;
+      if (subset.isEmpty)
+        return result;
       final _ContrastReport report = _ContrastReport(subset);
       final double contrastRatio = report.contrastRatio();
       const double delta = -0.01;

@@ -330,7 +330,7 @@ void main() {
     });
   });
 
-  group('pageBack', (){
+  group('pageBack', () {
     testWidgets('fails when there are no back buttons', (WidgetTester tester) async {
       await tester.pumpWidget(Container());
 
@@ -492,7 +492,7 @@ void main() {
     testWidgets('disallows re-entry', (WidgetTester tester) async {
       final Completer<void> completer = Completer<void>();
       tester.runAsync<void>(() => completer.future);
-      expect(() => tester.runAsync(() async {}), throwsA(isInstanceOf<TestFailure>()));
+      expect(() => tester.runAsync(() async { }), throwsA(isInstanceOf<TestFailure>()));
       completer.complete();
     });
 
@@ -573,7 +573,7 @@ void main() {
           home: Scaffold(
             body: Container(
               child: OutlineButton(
-                  onPressed: () {},
+                  onPressed: () { },
                   child: const Text('hello'),
               ),
             ),

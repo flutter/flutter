@@ -81,8 +81,7 @@ void main() {
     expect(find.text('Arizona'), findsNothing);
   });
 
-  testWidgets('PageView does not squish when overscrolled',
-      (WidgetTester tester) async {
+  testWidgets('PageView does not squish when overscrolled', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(platform: TargetPlatform.iOS),
       home: PageView(
@@ -566,8 +565,7 @@ void main() {
     expect(tester.getTopLeft(find.text('Hawaii')), const Offset(-100.0, 0.0));
   });
 
-  testWidgets('PageView does not report page changed on overscroll',
-      (WidgetTester tester) async {
+  testWidgets('PageView does not report page changed on overscroll', (WidgetTester tester) async {
     final PageController controller = PageController(
       initialPage: kStates.length - 1,
     );
@@ -594,8 +592,7 @@ void main() {
     expect(changeIndex, 0);
   });
 
-  testWidgets('PageView can restore page',
-      (WidgetTester tester) async {
+  testWidgets('PageView can restore page', (WidgetTester tester) async {
     final PageController controller = PageController();
     try {
       controller.page;

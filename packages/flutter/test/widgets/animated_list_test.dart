@@ -363,12 +363,11 @@ void main() {
       expect(itemTop(2), 150.0);
       expect(itemBottom(2), 250.0);
 
-      // Items 1, 2 at 0, 100.
-      await tester.pumpAndSettle();
-      expect(itemTop(1), 0.0);
-      expect(itemBottom(1), 100.0);
-      expect(itemTop(2), 100.0);
-      expect(itemBottom(2), 200.0);
-    });
+    // Items 1, 2 at 0, 100.
+    await tester.pumpAndSettle();
+    expect(itemTop(1), 0.0);
+    expect(itemBottom(1), 100.0);
+    expect(itemTop(2), 100.0);
+    expect(itemBottom(2), 200.0);
   });
 }

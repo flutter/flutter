@@ -147,8 +147,7 @@ void main() {
     });
   });
 
-  group('iOS', ()
-  {
+  group('iOS', () {
     FakeIosPlatformViewsController viewsController;
     setUp(() {
       viewsController = FakeIosPlatformViewsController();
@@ -156,7 +155,7 @@ void main() {
 
     test('create iOS view of unregistered type', () async {
       expect(
-            () {
+        () {
           return PlatformViewsService.initUiKitView(
             id: 0,
             viewType: 'web',

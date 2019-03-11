@@ -299,7 +299,7 @@ void main() {
                       value: sliderValue,
                       label: '$value',
                       divisions: 3,
-                      onChanged: (double d) {},
+                      onChanged: (double d) { },
                     ),
                   ),
                 ),

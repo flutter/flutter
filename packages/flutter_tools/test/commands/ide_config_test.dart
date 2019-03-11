@@ -23,10 +23,10 @@ void main() {
     Map<String, String> _getFilesystemContents([ Directory root ]) {
       final String tempPath = tempDir.absolute.path;
       final List<String> paths =
-          (root ?? tempDir).listSync(recursive: true).map((FileSystemEntity entity) {
-        final String relativePath = fs.path.relative(entity.path, from: tempPath);
-        return relativePath;
-      }).toList();
+        (root ?? tempDir).listSync(recursive: true).map((FileSystemEntity entity) {
+          final String relativePath = fs.path.relative(entity.path, from: tempPath);
+          return relativePath;
+        }).toList();
       final Map<String, String> contents = <String, String>{};
       for (String path in paths) {
         final String absPath = fs.path.join(tempPath, path);

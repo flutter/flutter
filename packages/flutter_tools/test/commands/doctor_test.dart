@@ -133,8 +133,7 @@ void main() {
         ..environment = <String, String>{'http_proxy': 'fakeproxy.local'},
     });
 
-    testUsingContext('reports success when NO_PROXY is configured correctly',
-        () async {
+    testUsingContext('reports success when NO_PROXY is configured correctly', () async {
       final ValidationResult results = await ProxyValidator().validate();
       final List<ValidationMessage> issues = results.messages
           .where((ValidationMessage msg) => msg.isError || msg.isHint)
@@ -148,8 +147,7 @@ void main() {
         },
     });
 
-    testUsingContext('reports success when no_proxy is configured correctly',
-        () async {
+    testUsingContext('reports success when no_proxy is configured correctly', () async {
       final ValidationResult results = await ProxyValidator().validate();
       final List<ValidationMessage> issues = results.messages
           .where((ValidationMessage msg) => msg.isError || msg.isHint)
@@ -163,8 +161,7 @@ void main() {
         },
     });
 
-    testUsingContext('reports issues when NO_PROXY is missing localhost',
-        () async {
+    testUsingContext('reports issues when NO_PROXY is missing localhost', () async {
       final ValidationResult results = await ProxyValidator().validate();
       final List<ValidationMessage> issues = results.messages
           .where((ValidationMessage msg) => msg.isError || msg.isHint)
@@ -178,8 +175,7 @@ void main() {
         },
     });
 
-    testUsingContext('reports issues when NO_PROXY is missing 127.0.0.1',
-        () async {
+    testUsingContext('reports issues when NO_PROXY is missing 127.0.0.1', () async {
       final ValidationResult results = await ProxyValidator().validate();
       final List<ValidationMessage> issues = results.messages
           .where((ValidationMessage msg) => msg.isError || msg.isHint)
@@ -212,7 +208,7 @@ void main() {
   });
 
 
- group('doctor with fake validators', () {
+  group('doctor with fake validators', () {
     testUsingContext('validate non-verbose output format for run without issues', () async {
       expect(await FakeQuietDoctor().diagnose(verbose: false), isTrue);
       expect(testLogger.statusText, equals(

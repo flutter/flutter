@@ -201,7 +201,7 @@ void main() {
     await gesture.up();
     await tester.pump(const Duration(milliseconds: 20));
 
-     await gesture.downWithCustomEvent(
+    await gesture.downWithCustomEvent(
       forcePressOffset,
       const PointerDownEvent(
         pointer: pointerValue,

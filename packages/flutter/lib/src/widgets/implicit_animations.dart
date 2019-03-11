@@ -367,7 +367,7 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
   /// Any properties that depend upon tweens created by [forEachTween] should be
   /// updated within [didUpdateTweens], not within [forEachTween].
   @protected
-  void didUpdateTweens() {}
+  void didUpdateTweens() { }
 }
 
 /// A base class for widgets with implicit animations that need to rebuild their
