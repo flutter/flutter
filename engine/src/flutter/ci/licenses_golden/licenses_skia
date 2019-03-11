@@ -1,4 +1,4 @@
-Signature: 2f8546533f16e65b5b013621e84e1987
+Signature: 1f8afd011d49d76a6bb68cf8f1c1236e
 
 UNUSED LICENSES:
 
@@ -1717,6 +1717,8 @@ FILE: ../../../third_party/skia/src/effects/SkTrimPE.h
 FILE: ../../../third_party/skia/src/effects/SkTrimPathEffect.cpp
 FILE: ../../../third_party/skia/src/gpu/GrContextThreadSafeProxyPriv.h
 FILE: ../../../third_party/skia/src/gpu/GrDDLContext.cpp
+FILE: ../../../third_party/skia/src/gpu/GrDeinstantiateProxyTracker.cpp
+FILE: ../../../third_party/skia/src/gpu/GrDeinstantiateProxyTracker.h
 FILE: ../../../third_party/skia/src/gpu/GrDriverBugWorkarounds.cpp
 FILE: ../../../third_party/skia/src/gpu/GrFPArgs.h
 FILE: ../../../third_party/skia/src/gpu/GrLegacyDirectContext.cpp
@@ -2060,46 +2062,6 @@ FILE: ../../../third_party/skia/docs/overview.bmh
 FILE: ../../../third_party/skia/docs/status.json
 FILE: ../../../third_party/skia/docs/undocumented.bmh
 FILE: ../../../third_party/skia/docs/usingBookmaker.bmh
-FILE: ../../../third_party/skia/experimental/canvaskit/canvaskit/NotoSerif-Regular.ttf
-FILE: ../../../third_party/skia/experimental/canvaskit/canvaskit/Roboto-Regular.ttf
-FILE: ../../../third_party/skia/experimental/canvaskit/canvaskit/Roboto-Regular.woff
-FILE: ../../../third_party/skia/experimental/canvaskit/canvaskit/example.html
-FILE: ../../../third_party/skia/experimental/canvaskit/canvaskit/node.example.js
-FILE: ../../../third_party/skia/experimental/canvaskit/canvaskit/package.json
-FILE: ../../../third_party/skia/experimental/canvaskit/canvaskit/test.png
-FILE: ../../../third_party/skia/experimental/canvaskit/cpu.js
-FILE: ../../../third_party/skia/experimental/canvaskit/debug.js
-FILE: ../../../third_party/skia/experimental/canvaskit/externs.js
-FILE: ../../../third_party/skia/experimental/canvaskit/fonts/NotoMono-Regular.ttf
-FILE: ../../../third_party/skia/experimental/canvaskit/gpu.js
-FILE: ../../../third_party/skia/experimental/canvaskit/helper.js
-FILE: ../../../third_party/skia/experimental/canvaskit/htmlcanvas/_namedcolors.js
-FILE: ../../../third_party/skia/experimental/canvaskit/htmlcanvas/canvas2dcontext.js
-FILE: ../../../third_party/skia/experimental/canvaskit/htmlcanvas/color.js
-FILE: ../../../third_party/skia/experimental/canvaskit/htmlcanvas/font.js
-FILE: ../../../third_party/skia/experimental/canvaskit/htmlcanvas/htmlcanvas.js
-FILE: ../../../third_party/skia/experimental/canvaskit/htmlcanvas/imagedata.js
-FILE: ../../../third_party/skia/experimental/canvaskit/htmlcanvas/lineargradient.js
-FILE: ../../../third_party/skia/experimental/canvaskit/htmlcanvas/path2d.js
-FILE: ../../../third_party/skia/experimental/canvaskit/htmlcanvas/pattern.js
-FILE: ../../../third_party/skia/experimental/canvaskit/htmlcanvas/postamble.js
-FILE: ../../../third_party/skia/experimental/canvaskit/htmlcanvas/preamble.js
-FILE: ../../../third_party/skia/experimental/canvaskit/htmlcanvas/radialgradient.js
-FILE: ../../../third_party/skia/experimental/canvaskit/htmlcanvas/util.js
-FILE: ../../../third_party/skia/experimental/canvaskit/interface.js
-FILE: ../../../third_party/skia/experimental/canvaskit/karma.bench.conf.js
-FILE: ../../../third_party/skia/experimental/canvaskit/karma.conf.js
-FILE: ../../../third_party/skia/experimental/canvaskit/package.json
-FILE: ../../../third_party/skia/experimental/canvaskit/perf/animation.bench.js
-FILE: ../../../third_party/skia/experimental/canvaskit/perf/assets/confetti.json
-FILE: ../../../third_party/skia/experimental/canvaskit/perf/assets/drinks.json
-FILE: ../../../third_party/skia/experimental/canvaskit/perf/assets/lego_loader.json
-FILE: ../../../third_party/skia/experimental/canvaskit/perf/assets/onboarding.json
-FILE: ../../../third_party/skia/experimental/canvaskit/postamble.js
-FILE: ../../../third_party/skia/experimental/canvaskit/preamble.js
-FILE: ../../../third_party/skia/experimental/canvaskit/ready.js
-FILE: ../../../third_party/skia/experimental/canvaskit/release.js
-FILE: ../../../third_party/skia/experimental/canvaskit/skottie.js
 FILE: ../../../third_party/skia/experimental/docs/animationCommon.js
 FILE: ../../../third_party/skia/experimental/docs/backend.js
 FILE: ../../../third_party/skia/experimental/docs/canvasBackend.js
@@ -2414,6 +2376,46 @@ FILE: ../../../third_party/skia/infra/project-config/cr-buildbucket.cfg
 FILE: ../../../third_party/skia/infra/project-config/project.cfg
 FILE: ../../../third_party/skia/infra/project-config/refs.cfg
 FILE: ../../../third_party/skia/infra/skqp/docker/android-skqp/Dockerfile
+FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/NotoSerif-Regular.ttf
+FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/Roboto-Regular.ttf
+FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/Roboto-Regular.woff
+FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/example.html
+FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/node.example.js
+FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/package.json
+FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/test.png
+FILE: ../../../third_party/skia/modules/canvaskit/cpu.js
+FILE: ../../../third_party/skia/modules/canvaskit/debug.js
+FILE: ../../../third_party/skia/modules/canvaskit/externs.js
+FILE: ../../../third_party/skia/modules/canvaskit/fonts/NotoMono-Regular.ttf
+FILE: ../../../third_party/skia/modules/canvaskit/gpu.js
+FILE: ../../../third_party/skia/modules/canvaskit/helper.js
+FILE: ../../../third_party/skia/modules/canvaskit/htmlcanvas/_namedcolors.js
+FILE: ../../../third_party/skia/modules/canvaskit/htmlcanvas/canvas2dcontext.js
+FILE: ../../../third_party/skia/modules/canvaskit/htmlcanvas/color.js
+FILE: ../../../third_party/skia/modules/canvaskit/htmlcanvas/font.js
+FILE: ../../../third_party/skia/modules/canvaskit/htmlcanvas/htmlcanvas.js
+FILE: ../../../third_party/skia/modules/canvaskit/htmlcanvas/imagedata.js
+FILE: ../../../third_party/skia/modules/canvaskit/htmlcanvas/lineargradient.js
+FILE: ../../../third_party/skia/modules/canvaskit/htmlcanvas/path2d.js
+FILE: ../../../third_party/skia/modules/canvaskit/htmlcanvas/pattern.js
+FILE: ../../../third_party/skia/modules/canvaskit/htmlcanvas/postamble.js
+FILE: ../../../third_party/skia/modules/canvaskit/htmlcanvas/preamble.js
+FILE: ../../../third_party/skia/modules/canvaskit/htmlcanvas/radialgradient.js
+FILE: ../../../third_party/skia/modules/canvaskit/htmlcanvas/util.js
+FILE: ../../../third_party/skia/modules/canvaskit/interface.js
+FILE: ../../../third_party/skia/modules/canvaskit/karma.bench.conf.js
+FILE: ../../../third_party/skia/modules/canvaskit/karma.conf.js
+FILE: ../../../third_party/skia/modules/canvaskit/package.json
+FILE: ../../../third_party/skia/modules/canvaskit/perf/animation.bench.js
+FILE: ../../../third_party/skia/modules/canvaskit/perf/assets/confetti.json
+FILE: ../../../third_party/skia/modules/canvaskit/perf/assets/drinks.json
+FILE: ../../../third_party/skia/modules/canvaskit/perf/assets/lego_loader.json
+FILE: ../../../third_party/skia/modules/canvaskit/perf/assets/onboarding.json
+FILE: ../../../third_party/skia/modules/canvaskit/postamble.js
+FILE: ../../../third_party/skia/modules/canvaskit/preamble.js
+FILE: ../../../third_party/skia/modules/canvaskit/ready.js
+FILE: ../../../third_party/skia/modules/canvaskit/release.js
+FILE: ../../../third_party/skia/modules/canvaskit/skottie.js
 FILE: ../../../third_party/skia/modules/pathkit/chaining.js
 FILE: ../../../third_party/skia/modules/pathkit/externs.js
 FILE: ../../../third_party/skia/modules/pathkit/helper.js
@@ -4650,13 +4652,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: skia
-ORIGIN: ../../../third_party/skia/experimental/canvaskit/WasmAliases.h + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/experimental/wasm-skp-debugger/debugger_bindings.cpp + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
-FILE: ../../../third_party/skia/experimental/canvaskit/WasmAliases.h
-FILE: ../../../third_party/skia/experimental/canvaskit/particles_bindings.cpp
-FILE: ../../../third_party/skia/experimental/canvaskit/skottie_bindings.cpp
 FILE: ../../../third_party/skia/experimental/wasm-skp-debugger/debugger_bindings.cpp
 FILE: ../../../third_party/skia/gm/runtimecolorfilter.cpp
+FILE: ../../../third_party/skia/modules/canvaskit/WasmAliases.h
+FILE: ../../../third_party/skia/modules/canvaskit/particles_bindings.cpp
+FILE: ../../../third_party/skia/modules/canvaskit/skottie_bindings.cpp
 FILE: ../../../third_party/skia/modules/particles/include/SkCurve.h
 FILE: ../../../third_party/skia/modules/particles/include/SkParticleAffector.h
 FILE: ../../../third_party/skia/modules/particles/include/SkParticleData.h
@@ -4702,17 +4704,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: skia
-ORIGIN: ../../../third_party/skia/experimental/canvaskit/canvaskit_bindings.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/fuzz/FuzzDrawFunctions.cpp + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
-FILE: ../../../third_party/skia/experimental/canvaskit/canvaskit_bindings.cpp
-FILE: ../../../third_party/skia/fuzz/FuzzEncoders.cpp
-FILE: ../../../third_party/skia/fuzz/FuzzPolyUtils.cpp
-FILE: ../../../third_party/skia/include/private/GrSkSLFPFactoryCache.h
-FILE: ../../../third_party/skia/modules/pathkit/pathkit_wasm_bindings.cpp
-FILE: ../../../third_party/skia/src/core/SkPicture_none.cpp
-FILE: ../../../third_party/skia/src/gpu/ccpr/GrCoverageCountingPathRenderer_none.cpp
+FILE: ../../../third_party/skia/fuzz/FuzzDrawFunctions.cpp
 ----------------------------------------------------------------------------------------------------
-Copyright 2018 Google LLC
+Copyright 2016 Mozilla Foundation
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
@@ -4743,11 +4739,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: skia
-ORIGIN: ../../../third_party/skia/fuzz/FuzzDrawFunctions.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/fuzz/FuzzEncoders.cpp + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
-FILE: ../../../third_party/skia/fuzz/FuzzDrawFunctions.cpp
+FILE: ../../../third_party/skia/fuzz/FuzzEncoders.cpp
+FILE: ../../../third_party/skia/fuzz/FuzzPolyUtils.cpp
+FILE: ../../../third_party/skia/include/private/GrSkSLFPFactoryCache.h
+FILE: ../../../third_party/skia/modules/canvaskit/canvaskit_bindings.cpp
+FILE: ../../../third_party/skia/modules/pathkit/pathkit_wasm_bindings.cpp
+FILE: ../../../third_party/skia/src/core/SkPicture_none.cpp
+FILE: ../../../third_party/skia/src/gpu/ccpr/GrCoverageCountingPathRenderer_none.cpp
 ----------------------------------------------------------------------------------------------------
-Copyright 2016 Mozilla Foundation
+Copyright 2018 Google LLC
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
@@ -4873,6 +4875,7 @@ ORIGIN: ../../../third_party/skia/gm/backdrop.cpp + ../../../third_party/skia/LI
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/gm/backdrop.cpp
 FILE: ../../../third_party/skia/gm/compositor_quads.cpp
+FILE: ../../../third_party/skia/gm/crbug_938592.cpp
 FILE: ../../../third_party/skia/gm/mac_aa_explorer.cpp
 FILE: ../../../third_party/skia/gm/mixercolorfilter.cpp
 FILE: ../../../third_party/skia/gm/samplelocations.cpp
@@ -4885,6 +4888,7 @@ FILE: ../../../third_party/skia/include/private/SkVx.h
 FILE: ../../../third_party/skia/modules/sksg/include/SkSGRenderEffect.h
 FILE: ../../../third_party/skia/modules/sksg/src/SkSGRenderEffect.cpp
 FILE: ../../../third_party/skia/modules/sksg/src/SkSGTransformPriv.h
+FILE: ../../../third_party/skia/samplecode/SampleDegenerateQuads.cpp
 FILE: ../../../third_party/skia/samplecode/SampleSG.cpp
 FILE: ../../../third_party/skia/samplecode/SampleThinAA.cpp
 FILE: ../../../third_party/skia/src/core/SkDescriptor.cpp
