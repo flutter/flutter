@@ -91,7 +91,7 @@ class RefreshIndicator extends StatefulWidget {
   /// The [semanticsLabel] is used to specify an accessibility label for this widget.
   /// If it is null, it will be defaulted to [MaterialLocalizations.refreshIndicatorSemanticLabel].
   /// An empty string may be passed to avoid having anything read by screen reading software.
-  /// The [semanticsValue] may be used to specify progress on the widget. The
+  /// The [semanticsValue] may be used to specify progress on the widget.
   const RefreshIndicator({
     Key key,
     @required this.child,
