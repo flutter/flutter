@@ -155,6 +155,10 @@ class AnalyzeOnce extends AnalyzeBase {
       }
     }
 
+    if (server.didServerErrorOccur) {
+      throwToolExit('Server error(s) occurred. (ran in ${seconds}s)');
+    }
+
     if (argResults['congratulate']) {
       if (undocumentedMembers > 0) {
         printStatus('No issues found! (ran in ${seconds}s; $dartdocMessage)');
