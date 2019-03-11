@@ -52,6 +52,12 @@ void main() {
     expect(unselectedRenderObject.text.style.fontFamily, equals('Roboto'));
     expect(unselectedRenderObject.text.style.fontSize, equals(14.0));
     expect(unselectedRenderObject.text.style.color, equals(Colors.white.withAlpha(0xB2)));
+
+    await expectLater(
+      find.byKey(_painterKey),
+      matchesGoldenFile('tab_bar_theme.tab_label_padding.default.png'),
+      skip: !Platform.isLinux,
+    );
   });
 
   testWidgets('Tab bar theme overrides label color (selected)', (WidgetTester tester) async {
@@ -64,6 +70,19 @@ void main() {
     expect(textRenderObject.text.style.color, equals(labelColor));
     final RenderParagraph iconRenderObject = _iconRenderObject(tester, Icons.looks_one);
     expect(iconRenderObject.text.style.color, equals(labelColor));
+  });
+
+  testWidgets('Tab bar theme overrides label padding', (WidgetTester tester) async {
+    const EdgeInsetsGeometry labelPadding = EdgeInsets.symmetric(vertical: 8.0);
+    const TabBarTheme tabBarTheme = TabBarTheme(labelPadding: labelPadding);
+
+    await tester.pumpWidget(_withTheme(tabBarTheme));
+
+    await expectLater(
+      find.byKey(_painterKey),
+      matchesGoldenFile('tab_bar_theme.tab_label_padding.vertical.png'),
+      skip: !Platform.isLinux,
+    );
   });
 
   testWidgets('Tab bar theme overrides label styles', (WidgetTester tester) async {
@@ -109,6 +128,32 @@ void main() {
     expect(selectedRenderObject.text.style.fontFamily, equals(labelStyle.fontFamily));
     final RenderParagraph unselectedRenderObject = tester.renderObject<RenderParagraph>(find.text(_tab2Text));
     expect(unselectedRenderObject.text.style.fontFamily, equals(unselectedLabelStyle.fontFamily));
+  });
+  testWidgets('Tab bar label padding overrides theme label padding', (WidgetTester tester) async {
+    const EdgeInsetsGeometry themeLabelPadding = EdgeInsets.symmetric(vertical: 8.0);
+    const TabBarTheme tabBarTheme = TabBarTheme(labelPadding: themeLabelPadding);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(tabBarTheme: tabBarTheme),
+        home: Scaffold(body:
+          RepaintBoundary(
+            key: _painterKey,
+            child: TabBar(
+              tabs: _tabs,
+              controller:TabController(length: _tabs.length, vsync: const TestVSync()),
+              labelPadding: kTabLabelPadding,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expectLater(
+      find.byKey(_painterKey),
+      matchesGoldenFile('tab_bar_theme.tab_label_padding.default.png'),
+      skip: !Platform.isLinux,
+    );
   });
 
   testWidgets('Tab bar theme overrides label color (unselected)', (WidgetTester tester) async {
