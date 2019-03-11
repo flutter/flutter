@@ -289,9 +289,18 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
   ///
   /// It is an error to specify both `above` and `below`.
   void insert(OverlayEntry entry, { OverlayEntry below, OverlayEntry above }) {
-    assert(above == null || below == null);
-    assert(above == null || (above._overlay == this && _entries.contains(above)));
-    assert(below == null || (below._overlay == this && _entries.contains(below)));
+    assert(
+      above == null || below == null,
+      'Only one of `above` and `below` may be specified.',
+    );
+    assert(
+      above == null || (above._overlay == this && _entries.contains(above)),
+      'The provided entry for `above` is not present in the Overlay.',
+    );
+    assert(
+      below == null || (below._overlay == this && _entries.contains(below)),
+      'The provided entry for `below` is not present in the Overlay.',
+    );
     assert(!_entries.contains(entry), 'The specified entry is already present in the Overlay.');
     assert(entry._overlay == null, 'The specified entry is already present in another Overlay.');
     entry._overlay = this;
@@ -308,9 +317,18 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
   ///
   /// It is an error to specify both `above` and `below`.
   void insertAll(Iterable<OverlayEntry> entries, { OverlayEntry below, OverlayEntry above }) {
-    assert(above == null || below == null);
-    assert(above == null || (above._overlay == this && _entries.contains(above)));
-    assert(below == null || (below._overlay == this && _entries.contains(below)));
+    assert(
+      above == null || below == null,
+      'Only one of `above` and `below` may be specified.',
+    );
+    assert(
+      above == null || (above._overlay == this && _entries.contains(above)),
+      'The provided entry for `above` is not present in the Overlay.',
+    );
+    assert(
+      below == null || (below._overlay == this && _entries.contains(below)),
+      'The provided entry for `below` is not present in the Overlay.',
+    );
     assert(
       entries.every((OverlayEntry entry) => !_entries.contains(entry)),
       'One or more of the specified entries are already present in the Overlay.'
@@ -349,10 +367,22 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
   /// It is an error to specify both `above` and `below`.
   void rearrange(Iterable<OverlayEntry> newEntries, { OverlayEntry below, OverlayEntry above }) {
     final List<OverlayEntry> newEntriesList = newEntries is List<OverlayEntry> ? newEntries : newEntries.toList(growable: false);
-    assert(above == null || below == null);
-    assert(above == null || (above._overlay == this && _entries.contains(above) && newEntriesList.contains(above)));
-    assert(below == null || (below._overlay == this && _entries.contains(below) && newEntriesList.contains(below)));
-    assert(newEntriesList.every((OverlayEntry entry) => entry._overlay == null || entry._overlay == this));
+    assert(
+      above == null || below == null,
+      'Only one of `above` and `below` may be specified.',
+    );
+    assert(
+      above == null || (above._overlay == this && _entries.contains(above) && newEntriesList.contains(above)),
+      'The entry used for `above` must be in the Overlay and in the `newEntriesList`.'
+    );
+    assert(
+      below == null || (below._overlay == this && _entries.contains(below) && newEntriesList.contains(below)),
+      'The entry used for `below` must be in the Overlay and in the `newEntriesList`.'
+    );
+    assert(
+      newEntriesList.every((OverlayEntry entry) => entry._overlay == null || entry._overlay == this),
+      'One or more of the specified entries are already present in another Overlay.'
+    );
     assert(
       newEntriesList.every((OverlayEntry entry) => _entries.indexOf(entry) == _entries.lastIndexOf(entry)),
       'One or more of the specified entries are specified multiple times.'
