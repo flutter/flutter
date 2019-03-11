@@ -243,9 +243,9 @@ class Hero extends StatefulWidget {
             addHero(hero, tag);
           } else {
             // The nearest navigator to the Hero is not the Navigator that is
-            // currently transitioning from one route to another. This means,
+            // currently transitioning from one route to another. This means
             // the Hero is inside a nested Navigator and should only be
-            // considered for animation, if it is part of the top-most route in
+            // considered for animation if it is part of the top-most route in
             // that nested Navigator and if that route is also a PageRoute.
             final ModalRoute<dynamic> heroRoute = ModalRoute.of(hero);
             if (heroRoute != null && heroRoute is PageRoute && heroRoute.isCurrent) {
