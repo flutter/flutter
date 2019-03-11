@@ -364,6 +364,7 @@ Matcher matchesSemantics({
   Size size,
   double elevation,
   double thickness,
+  int platformViewId,
   // Flags //
   bool hasCheckedState = false,
   bool isChecked = false,
@@ -514,6 +515,7 @@ Matcher matchesSemantics({
     size: size,
     elevation: elevation,
     thickness: thickness,
+    platformViewId: platformViewId,
     customActions: customActions,
     hintOverrides: hintOverrides,
     children: children,
@@ -1698,6 +1700,7 @@ class _MatchesSemanticsData extends Matcher {
     this.size,
     this.elevation,
     this.thickness,
+    this.platformViewId,
     this.customActions,
     this.hintOverrides,
     this.children,
@@ -1717,6 +1720,7 @@ class _MatchesSemanticsData extends Matcher {
   final Size size;
   final double elevation;
   final double thickness;
+  final int platformViewId;
   final List<Matcher> children;
 
   @override
@@ -1746,6 +1750,8 @@ class _MatchesSemanticsData extends Matcher {
       description.add(' with elevation: $elevation');
     if (thickness != null)
       description.add(' with thickness: $thickness');
+    if (platformViewId != null)
+      description.add(' with platformViewId: $platformViewId');
     if (customActions != null)
       description.add(' with custom actions: $customActions');
     if (hintOverrides != null)
@@ -1786,6 +1792,8 @@ class _MatchesSemanticsData extends Matcher {
       return failWithDescription(matchState, 'elevation was: ${data.elevation}');
     if (thickness != null && thickness != data.thickness)
       return failWithDescription(matchState, 'thickness was: ${data.thickness}');
+    if (platformViewId != null && platformViewId != data.platformViewId)
+      return failWithDescription(matchState, 'platformViewId was: ${data.platformViewId}');
     if (actions != null) {
       int actionBits = 0;
       for (SemanticsAction action in actions)
