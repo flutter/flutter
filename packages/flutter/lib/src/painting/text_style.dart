@@ -483,6 +483,8 @@ class TextStyle extends Diagnosticable {
   final Paint background;
 
   /// The decorations to paint near the text (e.g., an underline).
+  ///
+  /// Multiple decorations can be applied using [TextDecoration.combine].
   final TextDecoration decoration;
 
   /// The color in which to paint the text decorations.
@@ -494,12 +496,44 @@ class TextStyle extends Diagnosticable {
   /// The thickness of the decoration stroke as a muliplier of the thickness
   /// defined by the font.
   ///
-  /// The font provides a base stroke width for decorations which scales off
+  /// The font provides a base stroke width for [decoration]s which scales off
   /// of the [fontSize]. This property may be used to achieve a thinner or
   /// thicker decoration stroke, without changing the [fontSize]. For example,
   /// a [decorationThickness] of 2.0 will draw a decoration twice as thick as
   /// the font defined decoration thickness.
+  ///
+  /// {@tool sample}
+  /// To achieve a bolded strike-through, we can apply a thicker stroke for the
+  /// decoration.
+  ///
+  /// ```dart
+  /// Text(
+  ///   'This has a very BOLD strike through!',
+  ///   style: TextStyle(
+  ///     decoration: TextDecoration.lineThrough,
+  ///     decorationThickness: 2.85,
+  ///   ),
+  /// )
+  /// ```
+  /// {@end-tool}
   /// 
+  /// {@tool sample}
+  /// We can apply a very thin and subtle wavy underline (perhaps, when words
+  /// are misspelled) by using a [decorationThickness] < 1.0.
+  ///
+  /// ```dart
+  /// Text(
+  ///   'oopsIforgottousespaces!',
+  ///   style: TextStyle(
+  ///     decoration: TextDecoration.underline,
+  ///     decorationStyle: TextDecorationStyle.wavy,
+  ///     decorationColor: Colors.red,
+  ///     decorationThickness: 0.5,
+  ///   ),
+  /// )
+  /// ```
+  /// {@end-tool}
+  ///
   /// The default [decorationThickness] is 1.0, which will use the font's base
   /// stroke thickness/width.
   final double decorationThickness;
