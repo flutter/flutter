@@ -750,6 +750,12 @@ class HotRunner extends ResidentRunner {
           printError('Reassembling ${view.uiIsolate.name} failed: $error');
           return;
         }
+        try {
+          await view.uiIsolate.uiWindowScheduleFrame();
+        } catch (error) {
+          failedReassemble = true;
+          printError('Scheduling a frame for ${view.uiIsolate.name} failed: $error');
+        }
       }());
     }
     final Future<void> reassembleFuture = Future.wait<void>(futures).then<void>((List<void> values) { });
@@ -984,18 +990,12 @@ class ProjectFileInvalidator {
     final List<String> invalidatedFiles = <String>[];
     for (String packageName in _packageMap.keys) {
       final Uri packageUri =_packageMap[packageName];
-      final String packagePath = packageUri.path;
-      // On windows check for leading `/`
-      if (platform.isWindows && packagePath.startsWith(r'/')) {
-        _scanDirectory(packagePath.substring(1), invalidatedFiles);
-      } else {
-        _scanDirectory(packagePath, invalidatedFiles);
-      }
+      _scanDirectory(packageUri, invalidatedFiles);
     }
     return invalidatedFiles;
   }
 
-  void _scanDirectory(String path, List<String> invalidatedFiles) {
+  void _scanDirectory(Uri path, List<String> invalidatedFiles) {
     final Directory directory = fs.directory(path);
     if (!directory.existsSync()) {
       return;
