@@ -599,6 +599,7 @@ class DropdownButton<T> extends StatefulWidget {
     @required this.onChanged,
     this.elevation = 8,
     this.style,
+    this.underline,
     this.iconSize = 24.0,
     this.isDense = false,
     this.isExpanded = false,
@@ -652,6 +653,11 @@ class DropdownButton<T> extends StatefulWidget {
   /// Defaults to the [TextTheme.subhead] value of the current
   /// [ThemeData.textTheme] of the current [Theme].
   final TextStyle style;
+
+  /// The border to use for the drop-down button's [BoxDecoration].
+  ///
+  /// Defaults to a 0.0 width bottom border with color 0xFFBDBDBD.
+  final BorderSide underline;
 
   /// The size to use for the drop-down button's down arrow icon button.
   ///
@@ -857,8 +863,9 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
             bottom: bottom,
             child: Container(
               height: 1.0,
-              decoration: const BoxDecoration(
-                border: Border(bottom: BorderSide(color: Color(0xFFBDBDBD), width: 0.0))
+              decoration: BoxDecoration(
+                border: Border(bottom: widget.underline
+                    ?? const BorderSide(color: Color(0xFFBDBDBD), width: 0.0))
               ),
             ),
           ),
