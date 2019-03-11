@@ -124,7 +124,7 @@ bar:file:///C:/Pub/Cache/bar/lib/
 baz:file:///C:/baz/lib/
 test_package:file:///C:/lib/
 ''');
-    final File pubspecFile = memoryFileSystem.file(r'C:\pubspec.yaml')
+    memoryFileSystem.file(r'C:\pubspec.yaml')
       ..createSync()
       ..writeAsStringSync(r'''
 name: test_package
