@@ -5240,6 +5240,7 @@ class Listener extends SingleChildRenderObjectWidget {
     this.onPointerHover,
     this.onPointerUp,
     this.onPointerCancel,
+    this.onPointerSignal,
     this.behavior = HitTestBehavior.deferToChild,
     Widget child,
   }) : assert(behavior != null),
@@ -5288,6 +5289,9 @@ class Listener extends SingleChildRenderObjectWidget {
   /// no longer directed towards this receiver.
   final PointerCancelEventListener onPointerCancel;
 
+  /// Called when a pointer signal occurs over this object.
+  final PointerSignalEventListener onPointerSignal;
+
   /// How to behave during hit testing.
   final HitTestBehavior behavior;
 
@@ -5301,6 +5305,7 @@ class Listener extends SingleChildRenderObjectWidget {
       onPointerExit: onPointerExit,
       onPointerUp: onPointerUp,
       onPointerCancel: onPointerCancel,
+      onPointerSignal: onPointerSignal,
       behavior: behavior,
     );
   }
@@ -5315,6 +5320,7 @@ class Listener extends SingleChildRenderObjectWidget {
       ..onPointerExit = onPointerExit
       ..onPointerUp = onPointerUp
       ..onPointerCancel = onPointerCancel
+      ..onPointerSignal = onPointerSignal
       ..behavior = behavior;
   }
 
@@ -5336,6 +5342,8 @@ class Listener extends SingleChildRenderObjectWidget {
       listeners.add('up');
     if (onPointerCancel != null)
       listeners.add('cancel');
+    if (onPointerSignal != null)
+      listeners.add('signal');
     properties.add(IterableProperty<String>('listeners', listeners, ifEmpty: '<none>'));
     properties.add(EnumProperty<HitTestBehavior>('behavior', behavior));
   }

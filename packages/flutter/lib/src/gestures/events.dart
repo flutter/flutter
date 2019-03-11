@@ -790,6 +790,65 @@ class PointerUpEvent extends PointerEvent {
   );
 }
 
+/// An event that corresponds to a discrete pointer signal.
+///
+/// Pointer signals are events that originate from the pointer but don't change
+/// the state of the pointer itself, and are discrete rather than needing to be
+/// interpreted in the context of a series of events.
+abstract class PointerSignalEvent extends PointerEvent {
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
+  const PointerSignalEvent({
+    Duration timeStamp = Duration.zero,
+    int pointer = 0,
+    PointerDeviceKind kind = PointerDeviceKind.mouse,
+    int device = 0,
+    Offset position = Offset.zero,
+  }) : super(
+    timeStamp: timeStamp,
+    pointer: pointer,
+    kind: kind,
+    device: device,
+    position: position,
+  );
+}
+
+/// The pointer issued a scroll event.
+///
+/// Scrolling the scroll wheel on a mouse is an example of an event that
+/// would create a [PointerScrollEvent].
+class PointerScrollEvent extends PointerSignalEvent {
+  /// Creates a pointer scroll event.
+  ///
+  /// All of the arguments must be non-null.
+  const PointerScrollEvent({
+    Duration timeStamp = Duration.zero,
+    PointerDeviceKind kind = PointerDeviceKind.mouse,
+    int device = 0,
+    Offset position = Offset.zero,
+    this.scrollDelta = Offset.zero,
+  }) : assert(timeStamp != null),
+       assert(kind != null),
+       assert(device != null),
+       assert(position != null),
+       assert(scrollDelta != null),
+       super(
+    timeStamp: timeStamp,
+    kind: kind,
+    device: device,
+    position: position,
+  );
+
+  /// The amount to scroll, in logical pixels.
+  final Offset scrollDelta;
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Offset>('scrollDelta', scrollDelta));
+  }
+}
+
 /// The input from the pointer is no longer directed towards this receiver.
 class PointerCancelEvent extends PointerEvent {
   /// Creates a pointer cancel event.
