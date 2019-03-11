@@ -625,4 +625,25 @@ void main() {
         paintsExactlyCountTimes(#clipPath, 0),
     );
   });
+
+  testWidgets('MaterialButton shape overrides ButtonTheme shape', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/29146
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MaterialButton(
+          onPressed: () { },
+          shape: const StadiumBorder(),
+          child: const Text('button'),
+        ),
+      ),
+    );
+
+    final Finder rawButtonMaterial = find.descendant(
+      of: find.byType(MaterialButton),
+      matching: find.byType(Material),
+    );
+    expect(tester.widget<Material>(rawButtonMaterial).shape, const StadiumBorder());
+  });
+
 }
