@@ -114,10 +114,10 @@ Rect _globalBoundingBoxFor(BuildContext context) {
 /// ### Nested Navigators
 ///
 /// If either or both routes contain nested [Navigator]s, only [Hero]s
-/// contained in the top-most routes (as defined by [Route.isCurrent] of those
-/// nested [Navigator]s are considered for animation. Furthermore, the top-most
-/// routes containing these [Hero]s in the nested [Navigator]s also have to be
-/// [PageRoute]s.
+/// contained in the top-most routes (as defined by [Route.isCurrent]) *of those
+/// nested [Navigator]s* are considered for animation. Just like in the
+/// non-nested case the top-most routes containing these [Hero]s in the nested
+/// [Navigator]s have to be [PageRoute]s.
 ///
 /// ## Parts of a Hero Transition
 ///
@@ -212,6 +212,7 @@ class Hero extends StatefulWidget {
   ) {
     assert(context != null);
     assert(isUserGestureTransition != null);
+    assert(navigator != null);
     final Map<Object, _HeroState> result = <Object, _HeroState>{};
 
     void addHero(StatefulElement hero, Object tag) {
@@ -219,7 +220,7 @@ class Hero extends StatefulWidget {
         if (result.containsKey(tag)) {
           throw FlutterError(
             'There are multiple heroes that share the same tag within a subtree.\n'
-            'Within each subtree for which heroes are to be animated (typically a PageRoute subtree), '
+            'Within each subtree for which heroes are to be animated (i.e. a PageRoute subtree), '
             'each Hero must have a unique non-null tag.\n'
             'In this case, multiple heroes had the following tag: $tag\n'
             'Here is the subtree for one of the offending heroes:\n'

@@ -1383,7 +1383,7 @@ void main() {
 
     await tester.pump();
 
-    // Both Heroes exist and seated in their normal parents.
+    // Both Heroes exist and are seated in their normal parents.
     expect(find.byKey(firstKey), isOnstage);
     expect(find.byKey(firstKey), isInCard);
     expect(find.byKey(secondKey), isOnstage);
@@ -1457,8 +1457,8 @@ void main() {
     const String heroTag = 'You are my hero!';
     final GlobalKey<NavigatorState> rootNavigator = GlobalKey();
     final GlobalKey<NavigatorState> nestedNavigator = GlobalKey();
-    final GlobalKey nestedRouteHeroBottom = GlobalKey();
-    final GlobalKey nestedRouteHeroTop = GlobalKey();
+    final Key nestedRouteHeroBottom = UniqueKey();
+    final Key nestedRouteHeroTop = UniqueKey();
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1528,8 +1528,8 @@ void main() {
   testWidgets('Can hero from route in root Navigator to route in nested Navigator', (WidgetTester tester) async {
     const String heroTag = 'foo';
     final GlobalKey<NavigatorState> rootNavigator = GlobalKey();
-    final GlobalKey smallContainer = GlobalKey();
-    final GlobalKey largeContainer = GlobalKey();
+    final Key smallContainer = UniqueKey();
+    final Key largeContainer = UniqueKey();
 
     await tester.pumpWidget(
       MaterialApp(
