@@ -184,18 +184,36 @@ class AnimatedList extends StatefulWidget {
   AnimatedListState createState() => AnimatedListState();
 }
 
-abstract class _AnimatedListBaseState<T extends StatefulWidget> extends State<T> with TickerProviderStateMixin<T> {
-  @protected
-  AnimatedListItemBuilder get itemBuilder;
-  @protected
-  int get initialItemCount;
-
+/// The state for a scrolling container that animates items when they are
+/// inserted or removed.
+///
+/// When an item is inserted with [insertItem] an animation begins running. The
+/// animation is passed to [AnimatedList.itemBuilder] whenever the item's widget
+/// is needed.
+///
+/// When an item is removed with [removeItem] its animation is reversed.
+/// The removed item's animation is passed to the [removeItem] builder
+/// parameter.
+///
+/// An app that needs to insert or remove items in response to an event
+/// can refer to the [AnimatedList]'s state with a global key:
+///
+/// ```dart
+/// GlobalKey<AnimatedListState> listKey = GlobalKey<AnimatedListState>();
+/// ...
+/// AnimatedList(key: listKey, ...);
+/// ...
+/// listKey.currentState.insert(123);
+/// ```
+///
+/// [AnimatedList] item input handlers can also refer to their [AnimatedListState]
+/// with the static [AnimatedList.of] method.
+class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixin<AnimatedList> {
   final List<_ActiveItem> _incomingItems = <_ActiveItem>[];
   final List<_ActiveItem> _outgoingItems = <_ActiveItem>[];
   int _itemsCount = 0;
 
-  @protected
-  SliverChildBuilderDelegate get delegate {
+  SliverChildBuilderDelegate get _delegate {
     return SliverChildBuilderDelegate(
       _itemBuilder,
       childCount: _itemsCount,
@@ -205,7 +223,7 @@ abstract class _AnimatedListBaseState<T extends StatefulWidget> extends State<T>
   @override
   void initState() {
     super.initState();
-    _itemsCount = initialItemCount;
+    _itemsCount = widget.initialItemCount;
   }
 
   @override
@@ -353,45 +371,13 @@ abstract class _AnimatedListBaseState<T extends StatefulWidget> extends State<T>
 
     final _ActiveItem incomingItem = _activeItemAt(_incomingItems, itemIndex);
     final Animation<double> animation = incomingItem?.controller?.view ?? kAlwaysCompleteAnimation;
-    return itemBuilder(context, _itemIndexToIndex(itemIndex), animation);
+    return widget.itemBuilder(context, _itemIndexToIndex(itemIndex), animation);
   }
-}
-
-/// The state for a scrolling container that animates items when they are
-/// inserted or removed.
-///
-/// When an item is inserted with [insertItem] an animation begins running. The
-/// animation is passed to [AnimatedList.itemBuilder] whenever the item's widget
-/// is needed.
-///
-/// When an item is removed with [removeItem] its animation is reversed.
-/// The removed item's animation is passed to the [removeItem] builder
-/// parameter.
-///
-/// An app that needs to insert or remove items in response to an event
-/// can refer to the [AnimatedList]'s state with a global key:
-///
-/// ```dart
-/// GlobalKey<AnimatedListState> listKey = GlobalKey<AnimatedListState>();
-/// ...
-/// AnimatedList(key: listKey, ...);
-/// ...
-/// listKey.currentState.insert(123);
-/// ```
-///
-/// [AnimatedList] item input handlers can also refer to their [AnimatedListState]
-/// with the static [AnimatedList.of] method.
-class AnimatedListState extends _AnimatedListBaseState<AnimatedList> {
-  @override
-  AnimatedListItemBuilder get itemBuilder => widget.itemBuilder;
-
-  @override
-  int get initialItemCount => widget.initialItemCount;
 
   @override
   Widget build(BuildContext context) {
     return ListView.custom(
-      childrenDelegate: delegate,
+      childrenDelegate: _delegate,
       scrollDirection: widget.scrollDirection,
       reverse: widget.reverse,
       controller: widget.controller,
@@ -411,36 +397,14 @@ class AnimatedListState extends _AnimatedListBaseState<AnimatedList> {
 ///
 /// This sliver is similar to one created by [SliverList] with
 /// [SliverChildBuilderDelegate].
-class SliverAnimatedList extends StatefulWidget {
+class SliverAnimatedList extends AnimatedList {
   /// Creates a sliver that animates items when they are inserted or removed.
   const SliverAnimatedList({
     Key key,
-    @required this.itemBuilder,
-    this.initialItemCount = 0,
-  })  : assert(itemBuilder != null),
-        assert(initialItemCount != null),
-        super(key: key);
+    @required AnimatedListItemBuilder itemBuilder,
+    int initialItemCount = 0,
+  })  : super(key: key, itemBuilder: itemBuilder, initialItemCount: initialItemCount);
 
-  /// Called, as needed, to build list item widgets.
-  ///
-  /// List items are only built when they're scrolled into view.
-  ///
-  /// The [AnimatedListItemBuilder] index parameter indicates the item's
-  /// position in the list. The value of the index parameter will be between 0
-  /// and [initialItemCount] plus the total number of items that have been
-  /// inserted with [AnimatedListState.insertItem] and less the total number of
-  /// items that have been removed with [AnimatedListState.removeItem].
-  ///
-  /// Implementations of this callback should assume that
-  /// [AnimatedListState.removeItem] removes an item immediately.
-  final AnimatedListItemBuilder itemBuilder;
-
-  /// The number of items the list will start with.
-  ///
-  /// The appearance of the initial items is not animated. They
-  /// are created, as needed, by [itemBuilder] with an animation parameter
-  /// of [kAlwaysCompleteAnimation].
-  final int initialItemCount;
 
   @override
   SliverAnimatedListState createState() => SliverAnimatedListState();
@@ -496,17 +460,12 @@ class SliverAnimatedList extends StatefulWidget {
 ///
 /// [SliverAnimatedList] item input handlers can also refer to their
 /// [SliverAnimatedListState] with the static [SliverAnimatedList.of] method.
-class SliverAnimatedListState extends _AnimatedListBaseState<SliverAnimatedList> {
-  @override
-  AnimatedListItemBuilder get itemBuilder => widget.itemBuilder;
-
-  @override
-  int get initialItemCount => widget.initialItemCount;
+class SliverAnimatedListState extends AnimatedListState {
 
   @override
   Widget build(BuildContext context) {
     return SliverList(
-      delegate: delegate,
+      delegate: _delegate,
     );
   }
 }
