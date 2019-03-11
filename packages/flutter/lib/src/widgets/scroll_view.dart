@@ -637,8 +637,8 @@ abstract class BoxScrollView extends ScrollView {
 /// are built lazily and can be infinite in number.
 ///
 /// ```dart
-/// const List entries = ['A', 'B', 'C'];
-/// const colorCodes = [600, 500, 100];
+/// final List entries = ['A', 'B', 'C'];
+/// final colorCodes = [600, 500, 100];
 ///
 /// ListView.builder(
 ///   padding: const EdgeInsets.all(8.0),
@@ -659,8 +659,8 @@ abstract class BoxScrollView extends ScrollView {
 /// separator.
 ///
 /// ```dart
-/// const List entries = ['A', 'B', 'C'];
-/// const colorCodes = [600, 500, 100];
+/// final List entries = ['A', 'B', 'C'];
+/// final colorCodes = [600, 500, 100];
 ///
 /// ListView.separated(
 ///   padding: const EdgeInsets.all(8.0),
