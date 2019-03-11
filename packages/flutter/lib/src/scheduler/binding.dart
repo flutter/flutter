@@ -890,11 +890,11 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
     if (rawTimeStamp != null)
       _lastRawTimeStamp = rawTimeStamp;
 
-    profile(() {
+    if (!kReleaseMode) {
       _profileFrameNumber += 1;
       _profileFrameStopwatch.reset();
       _profileFrameStopwatch.start();
-    });
+    }
 
     assert(() {
       if (debugPrintBeginFrameBanner || debugPrintEndFrameBanner) {
@@ -957,10 +957,10 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
     } finally {
       _schedulerPhase = SchedulerPhase.idle;
       Timeline.finishSync(); // end the Frame
-      profile(() {
+      if (!kReleaseMode) {
         _profileFrameStopwatch.stop();
         _profileFramePostEvent();
-      });
+      }
       assert(() {
         if (debugPrintEndFrameBanner)
           debugPrint('▀' * _debugBanner.length);
