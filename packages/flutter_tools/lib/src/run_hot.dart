@@ -967,6 +967,12 @@ class ProjectFileInvalidator {
   Map<String, Uri> _packageMap;
   final Map<String, int> _updateTime = <String, int>{};
 
+  @visibleForTesting
+  Map<String, int> get updateTime => _updateTime;
+
+  @visibleForTesting
+  Map<String, Uri> get packageMap => _packageMap;
+
   // To initialize the file invalidator we traverse all of the source files
   // to grab an initial timestamp. We assume that the initial dill file
   // contains all up to date files.
