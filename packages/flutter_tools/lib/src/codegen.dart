@@ -5,6 +5,7 @@
 import 'package:meta/meta.dart';
 
 import 'artifacts.dart';
+import 'base/common.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/platform.dart';
@@ -13,7 +14,10 @@ import 'dart/package_map.dart';
 import 'globals.dart';
 import 'project.dart';
 
-const String _kMultiRootScheme = 'org-dartlang-app';
+// Arbitrarily choosen multi-root file scheme. This is used to configure the
+// frontend_server to resolve a package uri to multiple filesystem directories.
+// In this case, the source directory and a generated directory.
+const String kMultiRootScheme = 'org-dartlang-app';
 
 /// The [CodeGenerator] instance.
 ///
@@ -44,44 +48,11 @@ set experimentalBuildEnabled(bool value) {
 abstract class CodeGenerator {
   const CodeGenerator();
 
-  /// Run a partial build include code generators but not kernel.
-  Future<void> generate(FlutterProject flutterProject, {@required String mainPath}) async {
-    await build(
-      flutterProject,
-      mainPath: mainPath,
-      aot: false,
-      linkPlatformKernelIn: false,
-      trackWidgetCreation: false,
-      targetProductVm: false,
-      disableKernelGeneration: true,
-    );
-  }
-
-  /// Run a full build and return the resulting .packages and dill file.
-  ///
-  /// The defines of the build command are the arguments required in the
-  /// flutter_build kernel builder.
-  Future<CodeGenerationResult> build(FlutterProject flutterProject, {
-    @required String mainPath,
-    @required bool aot,
-    @required bool linkPlatformKernelIn,
-    @required bool trackWidgetCreation,
-    @required bool targetProductVm,
-    List<String> extraFrontEndOptions = const <String>[],
-    bool disableKernelGeneration = false,
-  });
-
   /// Starts a persistent code generting daemon.
   ///
   /// The defines of the daemon command are the arguments required in the
   /// flutter_build kernel builder.
-  Future<CodegenDaemon> daemon(FlutterProject flutterProject, {
-    @required String mainPath,
-    bool linkPlatformKernelIn = false,
-    bool targetProductVm = false,
-    bool trackWidgetCreation = false,
-    List<String> extraFrontEndOptions = const <String>[],
-  });
+  Future<CodegenDaemon> daemon(FlutterProject flutterProject);
 
   // Generates a synthetic package under .dart_tool/flutter_tool which is in turn
   // used to generate a build script.
@@ -92,31 +63,12 @@ class UnsupportedCodeGenerator extends CodeGenerator {
   const UnsupportedCodeGenerator();
 
   @override
-  Future<CodeGenerationResult> build(FlutterProject flutterProject, {
-    String mainPath,
-    bool aot,
-    bool linkPlatformKernelIn,
-    bool trackWidgetCreation,
-    bool targetProductVm,
-    List<String> extraFrontEndOptions = const <String> [],
-    bool disableKernelGeneration = false,
-  }) {
-    throw UnsupportedError('build_runner is not currently supported.');
-  }
-
-  @override
   Future<void> generateBuildScript(FlutterProject flutterProject) {
     throw UnsupportedError('build_runner is not currently supported.');
   }
 
   @override
-  Future<CodegenDaemon> daemon(FlutterProject flutterProject, {
-    String mainPath,
-    bool linkPlatformKernelIn = false,
-    bool targetProductVm = false,
-    bool trackWidgetCreation = false,
-    List<String> extraFrontEndOptions = const <String> [],
-  }) {
+  Future<CodegenDaemon> daemon(FlutterProject flutterProject) {
     throw UnsupportedError('build_runner is not currently supported.');
   }
 }
@@ -129,17 +81,6 @@ abstract class CodegenDaemon {
 
   /// Starts a new build.
   void startBuild();
-
-  File get dillFile;
-}
-
-/// The result of running a build through a [CodeGenerator].
-///
-/// If no dill or packages file is generated, they will be null.
-class CodeGenerationResult {
-  const CodeGenerationResult(this.dillFile);
-
-  final File dillFile;
 }
 
 /// An implementation of the [KernelCompiler] which delegates to build_runner.
@@ -151,6 +92,8 @@ class CodeGenerationResult {
 /// This is only safe to use if [experimentalBuildEnabled] is true.
 class CodeGeneratingKernelCompiler implements KernelCompiler {
   const CodeGeneratingKernelCompiler();
+
+  static const KernelCompiler _delegate = KernelCompiler();
 
   @override
   Future<CompilerOutput> compile({
@@ -169,6 +112,7 @@ class CodeGeneratingKernelCompiler implements KernelCompiler {
     String fileSystemScheme,
     String depFilePath,
     TargetModel targetModel = TargetModel.flutter,
+    String initializeFromDill,
   }) async {
     if (fileSystemRoots != null || fileSystemScheme != null || depFilePath != null || targetModel != null || sdkRoot != null || packagesPath != null) {
       printTrace('fileSystemRoots, fileSystemScheme, depFilePath, targetModel,'
@@ -176,26 +120,37 @@ class CodeGeneratingKernelCompiler implements KernelCompiler {
         'build* pipeline');
     }
     final FlutterProject flutterProject = await FlutterProject.current();
-    try {
-      final CodeGenerationResult buildResult = await codeGenerator.build(
-        flutterProject,
-        aot: aot,
-        linkPlatformKernelIn: linkPlatformKernelIn,
-        trackWidgetCreation: trackWidgetCreation,
-        mainPath: mainPath,
-        targetProductVm: targetProductVm,
-        extraFrontEndOptions: extraFrontEndOptions,
-      );
-      final File outputFile = fs.file(outputFilePath);
-      if (!await outputFile.exists()) {
-        await outputFile.create();
+    final CodegenDaemon codegenDaemon = await codeGenerator.daemon(flutterProject);
+    codegenDaemon.startBuild();
+    await for (CodegenStatus codegenStatus in codegenDaemon.buildResults) {
+      if (codegenStatus == CodegenStatus.Failed) {
+        throwToolExit('Code generation failed');
       }
-      await outputFile.writeAsBytes(await buildResult.dillFile.readAsBytes());
-      return CompilerOutput(outputFilePath, 0);
-    } on Exception catch (err) {
-      printError('Compilation Failed: $err');
-      return const CompilerOutput(null, 1);
+      if (codegenStatus == CodegenStatus.Succeeded) {
+        break;
+      }
     }
+    return _delegate.compile(
+      mainPath: mainPath,
+      outputFilePath: outputFilePath,
+      linkPlatformKernelIn: linkPlatformKernelIn,
+      aot: aot,
+      trackWidgetCreation: trackWidgetCreation,
+      extraFrontEndOptions: extraFrontEndOptions,
+      incrementalCompilerByteStorePath: incrementalCompilerByteStorePath,
+      targetProductVm: targetProductVm,
+      sdkRoot: sdkRoot,
+      packagesPath: PackageMap.globalGeneratedPackagesPath,
+      fileSystemRoots: <String>[
+        fs.path.join(flutterProject.generated.path, 'lib${platform.pathSeparator}'),
+        fs.path.join(flutterProject.directory.path, 'lib${platform.pathSeparator}'),
+      ],
+      fileSystemScheme: kMultiRootScheme,
+      depFilePath: depFilePath,
+      targetModel: targetModel,
+      // Pass an invalid file name to prevent frontend_server from initializing from dill.
+      initializeFromDill: 'none_file',
+    );
   }
 }
 
@@ -208,27 +163,19 @@ class CodeGeneratingResidentCompiler implements ResidentCompiler {
   /// run builds.
   static Future<CodeGeneratingResidentCompiler> create({
     @required FlutterProject flutterProject,
-    String mainPath,
     bool trackWidgetCreation = false,
     CompilerMessageConsumer compilerMessageConsumer = printError,
     bool unsafePackageSerialization = false,
     String outputPath,
     String initializeFromDill,
   }) async {
-    final CodegenDaemon codegenDaemon = await codeGenerator.daemon(
-      flutterProject,
-      extraFrontEndOptions: <String>[],
-      linkPlatformKernelIn: false,
-      mainPath: mainPath,
-      targetProductVm: false,
-      trackWidgetCreation: trackWidgetCreation,
-    );
+    final CodegenDaemon codegenDaemon = await codeGenerator.daemon(flutterProject);
     codegenDaemon.startBuild();
     final CodegenStatus status = await codegenDaemon.buildResults.firstWhere((CodegenStatus status) {
       return status == CodegenStatus.Succeeded || status == CodegenStatus.Failed;
     });
     if (status == CodegenStatus.Failed) {
-      printError('Code generation failed, build may have compile errors');
+      printError('Code generation failed, build may have compile errors.');
     }
     final ResidentCompiler residentCompiler = ResidentCompiler(
       artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
@@ -238,10 +185,11 @@ class CodeGeneratingResidentCompiler implements ResidentCompiler {
         fs.path.join(flutterProject.generated.path, 'lib${platform.pathSeparator}'),
         fs.path.join(flutterProject.directory.path, 'lib${platform.pathSeparator}'),
       ],
-      fileSystemScheme: _kMultiRootScheme,
+      fileSystemScheme: kMultiRootScheme,
       targetModel: TargetModel.flutter,
       unsafePackageSerialization: unsafePackageSerialization,
-      initializeFromDill: initializeFromDill,
+      // Pass an invalid file name to prevent frontend_server from initializing from dill.
+      initializeFromDill: 'none_file',
     );
     return CodeGeneratingResidentCompiler._(residentCompiler, codegenDaemon);
   }
@@ -263,17 +211,11 @@ class CodeGeneratingResidentCompiler implements ResidentCompiler {
   Future<CompilerOutput> recompile(String mainPath, List<String> invalidatedFiles, {String outputPath, String packagesFilePath}) async {
     if (_codegenDaemon.lastStatus != CodegenStatus.Succeeded && _codegenDaemon.lastStatus != CodegenStatus.Failed) {
       await _codegenDaemon.buildResults.firstWhere((CodegenStatus status) {
-        return status ==CodegenStatus.Succeeded || status == CodegenStatus.Failed;
+        return status == CodegenStatus.Succeeded || status == CodegenStatus.Failed;
       });
     }
     if (_codegenDaemon.lastStatus == CodegenStatus.Failed) {
       printError('Codegeneration failed, halting build.');
-    }
-    // Delete this file so that the frontend_server can handle multi-root.
-    // TODO(jonahwilliams): investigate frontend_server behavior in the presence
-    // of multi-root and initialize from dill.
-    if (await fs.file(outputPath).exists()) {
-      await fs.file(outputPath).delete();
     }
     return _residentCompiler.recompile(
       mainPath,

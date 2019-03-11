@@ -492,5 +492,5 @@ class NoOpDevicePortForwarder implements DevicePortForwarder {
   List<ForwardedPort> get forwardedPorts => <ForwardedPort>[];
 
   @override
-  Future<void> unforward(ForwardedPort forwardedPort) async {}
+  Future<void> unforward(ForwardedPort forwardedPort) async { }
 }

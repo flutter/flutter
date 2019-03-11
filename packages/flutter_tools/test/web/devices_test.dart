@@ -26,7 +26,7 @@ void main() {
         minify: anyNamed('minify'),
         enabledAssertions: anyNamed('enabledAssertions'),
       )).thenAnswer((Invocation invocation) async => 0);
-      when(mockChromeLauncher.launch(any)).thenAnswer((Invocation invocation) async {});
+      when(mockChromeLauncher.launch(any)).thenAnswer((Invocation invocation) async { });
     });
 
     testUsingContext('can build and connect to chrome', () async {

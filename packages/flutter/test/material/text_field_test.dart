@@ -175,7 +175,7 @@ void main() {
   });
 
   testWidgets('TextField passes onEditingComplete to EditableText', (WidgetTester tester) async {
-    final VoidCallback onEditingComplete = () {};
+    final VoidCallback onEditingComplete = () { };
 
     await tester.pumpWidget(
       MaterialApp(
@@ -2208,7 +2208,7 @@ void main() {
     });
   }
 
-  group('Keyboard Tests', (){
+  group('Keyboard Tests', () {
     TextEditingController controller;
 
     setUp( () {
@@ -2235,7 +2235,7 @@ void main() {
       );
     }
 
-    testWidgets('Shift test 1', (WidgetTester tester) async{
+    testWidgets('Shift test 1', (WidgetTester tester) async {
 
       await tester.pumpWidget(setupWidget());
       const String testValue = 'a big house';
@@ -2249,7 +2249,7 @@ void main() {
       expect(controller.selection.extentOffset - controller.selection.baseOffset, 1);
     });
 
-    testWidgets('Control Shift test', (WidgetTester tester) async{
+    testWidgets('Control Shift test', (WidgetTester tester) async {
       await tester.pumpWidget(setupWidget());
       const String testValue = 'their big house';
       await tester.enterText(find.byType(TextField), testValue);
@@ -2265,7 +2265,7 @@ void main() {
       expect(controller.selection.extentOffset - controller.selection.baseOffset, 5);
     });
 
-    testWidgets('Down and up test', (WidgetTester tester) async{
+    testWidgets('Down and up test', (WidgetTester tester) async {
       await tester.pumpWidget(setupWidget());
       const String testValue = 'a big house';
       await tester.enterText(find.byType(TextField), testValue);
@@ -2287,7 +2287,7 @@ void main() {
       expect(controller.selection.extentOffset - controller.selection.baseOffset, 0);
     });
 
-    testWidgets('Down and up test 2', (WidgetTester tester) async{
+    testWidgets('Down and up test 2', (WidgetTester tester) async {
       await tester.pumpWidget(setupWidget());
       const String testValue = 'a big house\njumped over a mouse\nOne more line yay'; // 11 \n 19
       await tester.enterText(find.byType(TextField), testValue);
@@ -2345,7 +2345,7 @@ void main() {
   const int _kAKeyCode = 29;
   const int _kDelKeyCode = 112;
 
-  testWidgets('Copy paste test', (WidgetTester tester) async{
+  testWidgets('Copy paste test', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
     final TextEditingController controller = TextEditingController();
     final TextField textField =
@@ -2416,7 +2416,7 @@ void main() {
     expect(find.text(expected), findsOneWidget);
   });
 
-  testWidgets('Cut test', (WidgetTester tester) async{
+  testWidgets('Cut test', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
     final TextEditingController controller = TextEditingController();
     final TextField textField =
@@ -2488,7 +2488,7 @@ void main() {
     expect(find.text(expected), findsOneWidget);
   });
 
-  testWidgets('Select all test', (WidgetTester tester) async{
+  testWidgets('Select all test', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
     final TextEditingController controller = TextEditingController();
     final TextField textField =
@@ -2534,7 +2534,7 @@ void main() {
     expect(find.text(expected), findsOneWidget);
   });
 
-  testWidgets('Delete test', (WidgetTester tester) async{
+  testWidgets('Delete test', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
     final TextEditingController controller = TextEditingController();
     final TextField textField =
@@ -2588,7 +2588,7 @@ void main() {
     expect(find.text(expected2), findsOneWidget);
   });
 
-  testWidgets('Changing positions of text fields', (WidgetTester tester) async{
+  testWidgets('Changing positions of text fields', (WidgetTester tester) async {
 
     final FocusNode focusNode = FocusNode();
     final List<RawKeyEvent> events = <RawKeyEvent>[];

@@ -416,7 +416,7 @@ class FlutterDriver {
     return response['response'];
   }
 
-  void _logCommunication(String message)  {
+  void _logCommunication(String message) {
     if (_printCommunication)
       _log.info(message);
     if (_logCommunicationToFile) {

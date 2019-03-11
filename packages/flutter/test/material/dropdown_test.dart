@@ -13,7 +13,7 @@ import 'package:flutter/rendering.dart';
 import '../widgets/semantics_tester.dart';
 
 const List<String> menuItems = <String>['one', 'two', 'three', 'four'];
-final ValueChanged<String> onChanged = (_) {};
+final ValueChanged<String> onChanged = (_) { };
 
 final Type dropdownButtonType = DropdownButton<String>(
   onChanged: (_) { },
@@ -299,7 +299,7 @@ void main() {
                     child: const Text(value),
                   ),
                 ],
-                onChanged: (_) {},
+                onChanged: (_) { },
               ),
             ],
           ),
@@ -757,7 +757,7 @@ void main() {
       buttonKey: key,
       value: null,
       items: menuItems,
-      onChanged: (String _) {},
+      onChanged: (String _) { },
       hint: const Text('test'),
     ));
 
@@ -895,7 +895,7 @@ void main() {
 
     final DropdownButton<int> button = DropdownButton<int>(
       value: 50,
-      onChanged: (int newValue){},
+      onChanged: (int newValue) { },
       items: items,
     );
 
@@ -932,7 +932,7 @@ void main() {
 
     final DropdownButton<int> button = DropdownButton<int>(
       value: 99,
-      onChanged: (int newValue){},
+      onChanged: (int newValue) { },
       items: items,
     );
 
@@ -969,7 +969,7 @@ void main() {
 
     final DropdownButton<int> button = DropdownButton<int>(
       value: 0,
-      onChanged: (int newValue){},
+      onChanged: (int newValue) { },
       items: items,
     );
 
@@ -1006,7 +1006,7 @@ void main() {
 
     final DropdownButton<int> button = DropdownButton<int>(
       value: 99,
-      onChanged: (int newValue){},
+      onChanged: (int newValue) { },
       items: items,
     );
 

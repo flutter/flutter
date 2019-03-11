@@ -197,7 +197,7 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
     final RenderView renderView = tester.binding.renderView;
     final OffsetLayer layer = renderView.layer;
     ui.Image image;
-    final ByteData byteData = await tester.binding.runAsync<ByteData>(() async  {
+    final ByteData byteData = await tester.binding.runAsync<ByteData>(() async {
       // Needs to be the same pixel ratio otherwise our dimensions won't match the
       // last transform layer.
       image = await layer.toImage(renderView.paintBounds, pixelRatio: 1.0);

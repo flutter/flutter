@@ -275,7 +275,7 @@ class AttachCommand extends FlutterCommand {
     return null;
   }
 
-  Future<void> _validateArguments() async {}
+  Future<void> _validateArguments() async { }
 }
 
 class HotRunnerFactory {

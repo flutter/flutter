@@ -175,7 +175,7 @@ class _RenderCupertinoSliverRefresh extends RenderSliver
   // Nothing special done here because this sliver always paints its child
   // exactly between paintOrigin and paintExtent.
   @override
-  void applyPaintTransform(RenderObject child, Matrix4 transform) {}
+  void applyPaintTransform(RenderObject child, Matrix4 transform) { }
 }
 
 /// The current state of the refresh control.
@@ -427,7 +427,7 @@ class _CupertinoSliverRefreshControlState extends State<CupertinoSliverRefreshCo
       if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.idle) {
         setState(() => hasSliverLayoutExtent = false);
       } else {
-        SchedulerBinding.instance.addPostFrameCallback((Duration timestamp){
+        SchedulerBinding.instance.addPostFrameCallback((Duration timestamp) {
           setState(() => hasSliverLayoutExtent = false);
         });
       }

@@ -26,7 +26,7 @@ class _DummyPortForwarder implements PortForwarder {
   int get remotePort => _remotePort;
 
   @override
-  Future<void> stop() async {}
+  Future<void> stop() async { }
 }
 
 class _DummySshCommandRunner implements SshCommandRunner {
