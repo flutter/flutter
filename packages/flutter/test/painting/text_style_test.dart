@@ -33,6 +33,12 @@ void main() {
       equals('TextStyle(inherit: true, size: 10.0, weight: 800, height: 123.0x)'),
     );
 
+    // Check that the inherit flag can be set with copyWith().
+    expect(
+      s1.copyWith(inherit: false).toString(),
+      equals('TextStyle(inherit: false, size: 10.0, weight: 800, height: 123.0x)'),
+    );
+
     final TextStyle s2 = s1.copyWith(color: const Color(0xFF00FF00), height: 100.0);
     expect(s1.fontFamily, isNull);
     expect(s1.fontSize, 10.0);
