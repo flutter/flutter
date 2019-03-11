@@ -161,22 +161,19 @@ class CodeGeneratingResidentCompiler implements ResidentCompiler {
 
   /// Creates a new [ResidentCompiler] and configures a [BuildDaemonClient] to
   /// run builds.
-  static Future<CodeGeneratingResidentCompiler> create({
+  ///
+  /// If `runCold` is true, then no codegen daemon will be created. Instead the
+  /// compiler will only be initialized with the correct configuration for
+  /// codegen mode.
+  static Future<ResidentCompiler> create({
     @required FlutterProject flutterProject,
     bool trackWidgetCreation = false,
     CompilerMessageConsumer compilerMessageConsumer = printError,
     bool unsafePackageSerialization = false,
     String outputPath,
     String initializeFromDill,
+    bool runCold = false,
   }) async {
-    final CodegenDaemon codegenDaemon = await codeGenerator.daemon(flutterProject);
-    codegenDaemon.startBuild();
-    final CodegenStatus status = await codegenDaemon.buildResults.firstWhere((CodegenStatus status) {
-      return status == CodegenStatus.Succeeded || status == CodegenStatus.Failed;
-    });
-    if (status == CodegenStatus.Failed) {
-      printError('Code generation failed, build may have compile errors.');
-    }
     final ResidentCompiler residentCompiler = ResidentCompiler(
       artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
       trackWidgetCreation: trackWidgetCreation,
@@ -191,6 +188,17 @@ class CodeGeneratingResidentCompiler implements ResidentCompiler {
       // Pass an invalid file name to prevent frontend_server from initializing from dill.
       initializeFromDill: 'none_file',
     );
+    if (runCold) {
+      return residentCompiler;
+    }
+    final CodegenDaemon codegenDaemon = await codeGenerator.daemon(flutterProject);
+    codegenDaemon.startBuild();
+    final CodegenStatus status = await codegenDaemon.buildResults.firstWhere((CodegenStatus status) {
+      return status == CodegenStatus.Succeeded || status == CodegenStatus.Failed;
+    });
+    if (status == CodegenStatus.Failed) {
+      printError('Code generation failed, build may have compile errors.');
+    }
     return CodeGeneratingResidentCompiler._(residentCompiler, codegenDaemon);
   }
 
