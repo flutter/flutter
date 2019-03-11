@@ -74,7 +74,7 @@ class TestImage implements ui.Image {
   final int width;
 
   @override
-  void dispose() {}
+  void dispose() { }
 
   @override
   Future<ByteData> toByteData({ ImageByteFormat format = ImageByteFormat.rawRgba }) {

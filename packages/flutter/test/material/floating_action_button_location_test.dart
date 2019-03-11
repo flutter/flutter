@@ -77,7 +77,7 @@ void main() {
     });
 
     group('interrupts in-progress animations without jumps', () {
-       _GeometryListener geometryListener;
+      _GeometryListener geometryListener;
       ScaffoldGeometry geometry;
       _GeometryListenerState listenerState;
       Size previousRect;

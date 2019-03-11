@@ -14,6 +14,7 @@ import 'debug.dart';
 import 'events.dart';
 import 'hit_test.dart';
 import 'pointer_router.dart';
+import 'pointer_signal_resolver.dart';
 
 /// A binding for the gesture subsystem.
 ///
@@ -108,6 +109,10 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
   /// pointer events.
   final GestureArenaManager gestureArena = GestureArenaManager();
 
+  /// The resolver used for determining which widget handles a pointer
+  /// signal event.
+  final PointerSignalResolver pointerSignalResolver = PointerSignalResolver();
+
   /// State for all pointers which are currently down.
   ///
   /// The state of hovering pointers is not tracked because that would require
@@ -117,11 +122,13 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
   void _handlePointerEvent(PointerEvent event) {
     assert(!locked);
     HitTestResult hitTestResult;
-    if (event is PointerDownEvent) {
+    if (event is PointerDownEvent || event is PointerSignalEvent) {
       assert(!_hitTests.containsKey(event.pointer));
       hitTestResult = HitTestResult();
       hitTest(hitTestResult, event.position);
-      _hitTests[event.pointer] = hitTestResult;
+      if (event is PointerDownEvent) {
+        _hitTests[event.pointer] = hitTestResult;
+      }
       assert(() {
         if (debugPrintHitTestResults)
           debugPrint('$event: $hitTestResult');
@@ -216,6 +223,8 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
       gestureArena.close(event.pointer);
     } else if (event is PointerUpEvent) {
       gestureArena.sweep(event.pointer);
+    } else if (event is PointerSignalEvent) {
+      pointerSignalResolver.resolve(event);
     }
   }
 }

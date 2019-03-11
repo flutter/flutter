@@ -31,7 +31,7 @@ class ProductPage extends StatelessWidget {
     return ScopedModelDescendant<AppStateModel>(
       builder: (BuildContext context, Widget child, AppStateModel model) {
         return AsymmetricView(products: model.getProducts());
-    });
+      });
   }
 }
 

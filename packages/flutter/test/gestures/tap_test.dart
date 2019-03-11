@@ -10,10 +10,10 @@ import 'gesture_tester.dart';
 
 class TestGestureArenaMember extends GestureArenaMember {
   @override
-  void acceptGesture(int key) {}
+  void acceptGesture(int key) { }
 
   @override
-  void rejectGesture(int key) {}
+  void rejectGesture(int key) { }
 }
 
 void main() {

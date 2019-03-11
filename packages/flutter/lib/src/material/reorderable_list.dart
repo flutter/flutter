@@ -525,8 +525,8 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
           // If the target is not the original starting point, then we will accept the drop.
           return _dragging == toAccept && toAccept != toWrap.key;
         },
-        onAccept: (Key accepted) {},
-        onLeave: (Key leaving) {},
+        onAccept: (Key accepted) { },
+        onLeave: (Key leaving) { },
       );
     });
   }
@@ -536,52 +536,52 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
     assert(debugCheckHasMaterialLocalizations(context));
     // We use the layout builder to constrain the cross-axis size of dragging child widgets.
     return LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
-        final List<Widget> wrappedChildren = <Widget>[];
-        if (widget.header != null) {
-          wrappedChildren.add(widget.header);
-        }
-        for (int i = 0; i < widget.children.length; i += 1) {
-          wrappedChildren.add(_wrap(widget.children[i], i, constraints));
-        }
-        const Key endWidgetKey = Key('DraggableList - End Widget');
-        Widget finalDropArea;
-        switch (widget.scrollDirection) {
-          case Axis.horizontal:
-            finalDropArea = SizedBox(
-              key: endWidgetKey,
-              width: _defaultDropAreaExtent,
-              height: constraints.maxHeight,
-            );
-            break;
-          case Axis.vertical:
-          default:
-            finalDropArea = SizedBox(
-              key: endWidgetKey,
-              height: _defaultDropAreaExtent,
-              width: constraints.maxWidth,
-            );
-            break;
-        }
-        if (widget.reverse) {
-          wrappedChildren.insert(0, _wrap(
-            finalDropArea,
-            widget.children.length,
-            constraints),
+      final List<Widget> wrappedChildren = <Widget>[];
+      if (widget.header != null) {
+        wrappedChildren.add(widget.header);
+      }
+      for (int i = 0; i < widget.children.length; i += 1) {
+        wrappedChildren.add(_wrap(widget.children[i], i, constraints));
+      }
+      const Key endWidgetKey = Key('DraggableList - End Widget');
+      Widget finalDropArea;
+      switch (widget.scrollDirection) {
+        case Axis.horizontal:
+          finalDropArea = SizedBox(
+            key: endWidgetKey,
+            width: _defaultDropAreaExtent,
+            height: constraints.maxHeight,
           );
-        } else {
-          wrappedChildren.add(_wrap(
-            finalDropArea,
-            widget.children.length,
-            constraints),
+          break;
+        case Axis.vertical:
+        default:
+          finalDropArea = SizedBox(
+            key: endWidgetKey,
+            height: _defaultDropAreaExtent,
+            width: constraints.maxWidth,
           );
-        }
-        return SingleChildScrollView(
-          scrollDirection: widget.scrollDirection,
-          child: _buildContainerForScrollDirection(children: wrappedChildren),
-          padding: widget.padding,
-          controller: _scrollController,
-          reverse: widget.reverse,
+          break;
+      }
+      if (widget.reverse) {
+        wrappedChildren.insert(0, _wrap(
+          finalDropArea,
+          widget.children.length,
+          constraints),
         );
+      } else {
+        wrappedChildren.add(_wrap(
+          finalDropArea,
+          widget.children.length,
+          constraints),
+        );
+      }
+      return SingleChildScrollView(
+        scrollDirection: widget.scrollDirection,
+        child: _buildContainerForScrollDirection(children: wrappedChildren),
+        padding: widget.padding,
+        controller: _scrollController,
+        reverse: widget.reverse,
+      );
     });
   }
 }

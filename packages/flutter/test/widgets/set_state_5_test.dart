@@ -14,7 +14,7 @@ class BadWidget extends StatefulWidget {
 class BadWidgetState extends State<BadWidget> {
   BadWidgetState() {
     setState(() {
-     _count = 1;
+      _count = 1;
     });
   }
 

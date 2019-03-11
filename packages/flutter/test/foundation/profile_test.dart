@@ -10,7 +10,7 @@ void main() {
   // that the code in the `profile` closure is omitted in release mode.
   test('profile invokes its closure in debug or profile mode', () {
     int count = 0;
-    profile(() {
+    profile(() { // ignore: deprecated_member_use_from_same_package
       count++;
     });
     // We run our tests in debug mode, so kReleaseMode will always evaluate to

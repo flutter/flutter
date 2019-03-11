@@ -20,7 +20,7 @@ class MacOSDevice extends Device {
   MacOSDevice() : super('macOS');
 
   @override
-  void clearLogs() {}
+  void clearLogs() { }
 
   @override
   DeviceLogReader getLogReader({ ApplicationPackage app }) => NoOpDeviceLogReader('macos');

@@ -225,7 +225,7 @@ void main() {
   });
 
   testWidgets('cache unchanged callbacks', (WidgetTester tester) async {
-    final GestureTapCallback inputCallback = () {};
+    final GestureTapCallback inputCallback = () { };
 
     await tester.pumpWidget(
       Center(

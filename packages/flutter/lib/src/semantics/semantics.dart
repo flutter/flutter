@@ -1284,7 +1284,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       return true;
     }());
     assert(() {
-      final Set<SemanticsNode> seenChildren = Set<SemanticsNode>();
+      final Set<SemanticsNode> seenChildren = <SemanticsNode>{};
       for (SemanticsNode child in newChildren)
         assert(seenChildren.add(child)); // check for duplicate adds
       return true;
@@ -1742,7 +1742,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     double scrollExtentMin = _scrollExtentMin;
     final double elevation = _elevation;
     double thickness = _thickness;
-    final Set<int> customSemanticsActionIds = Set<int>();
+    final Set<int> customSemanticsActionIds = <int>{};
     for (CustomSemanticsAction action in _customSemanticsActions.keys)
       customSemanticsActionIds.add(CustomSemanticsAction.getIdentifier(action));
     if (hintOverrides != null) {
@@ -1781,7 +1781,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
         if (decreasedValue == '' || decreasedValue == null)
           decreasedValue = node._decreasedValue;
         if (node.tags != null) {
-          mergedTags ??= Set<SemanticsTag>();
+          mergedTags ??= <SemanticsTag>{};
           mergedTags.addAll(node.tags);
         }
         if (node._customSemanticsActions != null) {
@@ -2270,7 +2270,7 @@ class _SemanticsSortGroup extends Comparable<_SemanticsSortGroup> {
     }
 
     final List<int> sortedIds = <int>[];
-    final Set<int> visitedIds = Set<int>();
+    final Set<int> visitedIds = <int>{};
     final List<SemanticsNode> startNodes = nodes.toList()..sort((SemanticsNode a, SemanticsNode b) {
       final Offset aTopLeft = _pointInParentCoordinates(a, a.rect.topLeft);
       final Offset bTopLeft = _pointInParentCoordinates(b, b.rect.topLeft);
@@ -2410,9 +2410,9 @@ class _TraversalSortNode implements Comparable<_TraversalSortNode> {
 /// obtain a [SemanticsHandle]. This will create a [SemanticsOwner] if
 /// necessary.
 class SemanticsOwner extends ChangeNotifier {
-  final Set<SemanticsNode> _dirtyNodes = Set<SemanticsNode>();
+  final Set<SemanticsNode> _dirtyNodes = <SemanticsNode>{};
   final Map<int, SemanticsNode> _nodes = <int, SemanticsNode>{};
-  final Set<SemanticsNode> _detachedNodes = Set<SemanticsNode>();
+  final Set<SemanticsNode> _detachedNodes = <SemanticsNode>{};
   final Map<int, CustomSemanticsAction> _actions = <int, CustomSemanticsAction>{};
 
   /// The root node of the semantics tree, if any.
@@ -2432,7 +2432,7 @@ class SemanticsOwner extends ChangeNotifier {
   void sendSemanticsUpdate() {
     if (_dirtyNodes.isEmpty)
       return;
-    final Set<int> customSemanticsActionIds = Set<int>();
+    final Set<int> customSemanticsActionIds = <int>{};
     final List<SemanticsNode> visitedNodes = <SemanticsNode>[];
     while (_dirtyNodes.isNotEmpty) {
       final List<SemanticsNode> localDirtyNodes = _dirtyNodes.where((SemanticsNode node) => !_detachedNodes.contains(node)).toList();
@@ -3551,7 +3551,7 @@ class SemanticsConfiguration {
   ///  * [RenderSemanticsGestureHandler.excludeFromScrolling] for an example of
   ///    how tags are used.
   void addTagForChildren(SemanticsTag tag) {
-    _tagsForChildren ??= Set<SemanticsTag>();
+    _tagsForChildren ??= <SemanticsTag>{};
     _tagsForChildren.add(tag);
   }
 
@@ -3745,7 +3745,6 @@ String _concatStrings({
 ///
 /// See Also:
 ///
-///  * [SemanticsSortOrder] which manages a list of sort keys.
 ///  * [OrdinalSortKey] for a sort key that sorts using an ordinal.
 abstract class SemanticsSortKey extends Diagnosticable implements Comparable<SemanticsSortKey> {
   /// Abstract const constructor. This constructor enables subclasses to provide
@@ -3794,10 +3793,6 @@ abstract class SemanticsSortKey extends Diagnosticable implements Comparable<Sem
 /// fractional, e.g. in order to fit between two other consecutive whole
 /// numbers. The value must be finite (it cannot be [double.nan],
 /// [double.infinity], or [double.negativeInfinity]).
-///
-/// See also:
-///
-///  * [SemanticsSortOrder] which manages a list of sort keys.
 class OrdinalSortKey extends SemanticsSortKey {
   /// Creates a semantics sort key that uses a [double] as its key value.
   ///

@@ -9,6 +9,9 @@ import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:path/path.dart' as path;
 
+final String gradlew = Platform.isWindows ? 'gradlew.bat' : 'gradlew';
+final String gradlewExecutable = Platform.isWindows ? gradlew : './$gradlew';
+
 /// Tests that the Flutter module project template works and supports
 /// adding Flutter to an existing Android app.
 Future<void> main() async {
@@ -53,7 +56,7 @@ Future<void> main() async {
 
       await inDirectory(Directory(path.join(projectDir.path, '.android')), () async {
         await exec(
-          './gradlew',
+          gradlewExecutable,
           <String>['flutter:assembleDebug'],
           environment: <String, String>{ 'JAVA_HOME': javaHome },
         );
@@ -143,7 +146,7 @@ Future<void> main() async {
         hostApp,
       );
       copy(
-        File(path.join(projectDir.path, '.android', 'gradlew')),
+        File(path.join(projectDir.path, '.android', gradlew)),
         hostApp,
       );
       copy(
@@ -152,8 +155,10 @@ Future<void> main() async {
       );
 
       await inDirectory(hostApp, () async {
-        await exec('chmod', <String>['+x', 'gradlew']);
-        await exec('./gradlew',
+        if (!Platform.isWindows) {
+          await exec('chmod', <String>['+x', 'gradlew']);
+        }
+        await exec(gradlewExecutable,
           <String>['app:assembleDebug'],
           environment: <String, String>{ 'JAVA_HOME': javaHome },
         );
