@@ -648,7 +648,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// Unselected tab labels are rendered with the same color rendered at 70%
   /// opacity unless [unselectedLabelColor] is non-null.
   ///
-  /// If this parameter is null then the color of the theme's body2 text color
+  /// If this parameter is null then the color of the primaryTextTheme's body2 text color
   /// is used.
   final Color labelColor;
 
