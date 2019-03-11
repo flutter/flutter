@@ -265,6 +265,7 @@ Int32List _encodeTextStyle(
   TextDecoration decoration,
   Color decorationColor,
   TextDecorationStyle decorationStyle,
+  double decorationThickness,
   FontWeight fontWeight,
   FontStyle fontStyle,
   TextBaseline textBaseline,
@@ -296,20 +297,23 @@ Int32List _encodeTextStyle(
     result[0] |= 1 << 4;
     result[4] = decorationStyle.index;
   }
-  if (fontWeight != null) {
+  if (decorationThickness != null) {
     result[0] |= 1 << 5;
+  }
+  if (fontWeight != null) {
+    result[0] |= 1 << 6;
     result[5] = fontWeight.index;
   }
   if (fontStyle != null) {
-    result[0] |= 1 << 6;
+    result[0] |= 1 << 7;
     result[6] = fontStyle.index;
   }
   if (textBaseline != null) {
-    result[0] |= 1 << 7;
+    result[0] |= 1 << 8;
     result[7] = textBaseline.index;
   }
   if (fontFamily != null || (fontFamilyFallback != null && fontFamilyFallback.isNotEmpty)) {
-    result[0] |= 1 << 8;
+    result[0] |= 1 << 9;
     // Passed separately to native.
   }
   if (fontSize != null) {
@@ -355,6 +359,7 @@ class TextStyle {
   /// * `decoration`: The decorations to paint near the text (e.g., an underline).
   /// * `decorationColor`: The color in which to paint the text decorations.
   /// * `decorationStyle`: The style in which to paint the text decorations (e.g., dashed).
+  /// * `decorationThickness`: The thickness of the decoration as a muliplier on the thickness specified by the font.
   /// * `fontWeight`: The typeface thickness to use when painting the text (e.g., bold).
   /// * `fontStyle`: The typeface variant to use when drawing the letters (e.g., italics).
   /// * `fontFamily`: The name of the font to use when painting the text (e.g., Roboto). If a `fontFamilyFallback` is
@@ -379,6 +384,7 @@ class TextStyle {
     TextDecoration decoration,
     Color decorationColor,
     TextDecorationStyle decorationStyle,
+    double decorationThickness,
     FontWeight fontWeight,
     FontStyle fontStyle,
     TextBaseline textBaseline,
@@ -401,6 +407,7 @@ class TextStyle {
          decoration,
          decorationColor,
          decorationStyle,
+         decorationThickness,
          fontWeight,
          fontStyle,
          textBaseline,
@@ -421,6 +428,7 @@ class TextStyle {
        _letterSpacing = letterSpacing,
        _wordSpacing = wordSpacing,
        _height = height,
+       _decorationThickness = decorationThickness,
        _locale = locale,
        _background = background,
        _foreground = foreground,
@@ -433,6 +441,7 @@ class TextStyle {
   final double _letterSpacing;
   final double _wordSpacing;
   final double _height;
+  final double _decorationThickness;
   final Locale _locale;
   final Paint _background;
   final Paint _foreground;
@@ -450,6 +459,7 @@ class TextStyle {
         _letterSpacing != typedOther._letterSpacing ||
         _wordSpacing != typedOther._wordSpacing ||
         _height != typedOther._height ||
+        _decorationThickness != typedOther._decorationThickness ||
         _locale != typedOther._locale ||
         _background != typedOther._background ||
         _foreground != typedOther._foreground)
@@ -466,31 +476,32 @@ class TextStyle {
   }
 
   @override
-  int get hashCode => hashValues(hashList(_encoded), _fontFamily, _fontFamilyFallback, _fontSize, _letterSpacing, _wordSpacing, _height, _locale, _background, _foreground, _shadows);
+  int get hashCode => hashValues(hashList(_encoded), _fontFamily, _fontFamilyFallback, _fontSize, _letterSpacing, _wordSpacing, _height, _locale, _background, _foreground, _shadows, _decorationThickness);
 
   @override
   String toString() {
     return 'TextStyle('
-             'color: ${             _encoded[0] & 0x00002 == 0x00002  ? new Color(_encoded[1])                  : "unspecified"}, '
-             'decoration: ${        _encoded[0] & 0x00004 == 0x00004  ? new TextDecoration._(_encoded[2])       : "unspecified"}, '
-             'decorationColor: ${   _encoded[0] & 0x00008 == 0x00008  ? new Color(_encoded[3])                  : "unspecified"}, '
-             'decorationStyle: ${   _encoded[0] & 0x00010 == 0x00010  ? TextDecorationStyle.values[_encoded[4]] : "unspecified"}, '
-             'fontWeight: ${        _encoded[0] & 0x00020 == 0x00020  ? FontWeight.values[_encoded[5]]          : "unspecified"}, '
-             'fontStyle: ${         _encoded[0] & 0x00040 == 0x00040  ? FontStyle.values[_encoded[6]]           : "unspecified"}, '
-             'textBaseline: ${      _encoded[0] & 0x00080 == 0x00080  ? TextBaseline.values[_encoded[7]]        : "unspecified"}, '
-             'fontFamily: ${        _encoded[0] & 0x00100 == 0x00100
-                                    && _fontFamily != null            ? _fontFamily                             : "unspecified"}, '
-             'fontFamilyFallback: ${_encoded[0] & 0x00100 == 0x00100
-                                    && _fontFamilyFallback != null
-                                    && _fontFamilyFallback.isNotEmpty ? _fontFamilyFallback                     : "unspecified"}, '
-             'fontSize: ${          _encoded[0] & 0x00200 == 0x00200  ? _fontSize                               : "unspecified"}, '
-             'letterSpacing: ${     _encoded[0] & 0x00400 == 0x00400  ? "${_letterSpacing}x"                    : "unspecified"}, '
-             'wordSpacing: ${       _encoded[0] & 0x00800 == 0x00800  ? "${_wordSpacing}x"                      : "unspecified"}, '
-             'height: ${            _encoded[0] & 0x01000 == 0x01000  ? "${_height}x"                           : "unspecified"}, '
-             'locale: ${            _encoded[0] & 0x02000 == 0x02000  ? _locale                                 : "unspecified"}, '
-             'background: ${        _encoded[0] & 0x04000 == 0x04000  ? _background                             : "unspecified"}, '
-             'foreground: ${        _encoded[0] & 0x08000 == 0x08000  ? _foreground                             : "unspecified"}, '
-             'shadows: ${           _encoded[0] & 0x10000 == 0x10000  ? _shadows                                : "unspecified"}'
+             'color: ${              _encoded[0] & 0x00002 == 0x00002  ? new Color(_encoded[1])                  : "unspecified"}, '
+             'decoration: ${         _encoded[0] & 0x00004 == 0x00004  ? new TextDecoration._(_encoded[2])       : "unspecified"}, '
+             'decorationColor: ${    _encoded[0] & 0x00008 == 0x00008  ? new Color(_encoded[3])                  : "unspecified"}, '
+             'decorationStyle: ${    _encoded[0] & 0x00010 == 0x00010  ? TextDecorationStyle.values[_encoded[4]] : "unspecified"}, '
+             'decorationThickness: ${_encoded[0] & 0x00020 == 0x00020  ? _decorationThickness                    : "unspecified"}, '
+             'fontWeight: ${         _encoded[0] & 0x00040 == 0x00040  ? FontWeight.values[_encoded[5]]          : "unspecified"}, '
+             'fontStyle: ${          _encoded[0] & 0x00080 == 0x00080  ? FontStyle.values[_encoded[6]]           : "unspecified"}, '
+             'textBaseline: ${       _encoded[0] & 0x00100 == 0x00100  ? TextBaseline.values[_encoded[7]]        : "unspecified"}, '
+             'fontFamily: ${         _encoded[0] & 0x00200 == 0x00200
+                                     && _fontFamily != null            ? _fontFamily                             : "unspecified"}, '
+             'fontFamilyFallback: ${ _encoded[0] & 0x00200 == 0x00200
+                                     && _fontFamilyFallback != null
+                                     && _fontFamilyFallback.isNotEmpty ? _fontFamilyFallback                     : "unspecified"}, '
+             'fontSize: ${           _encoded[0] & 0x00400 == 0x00400  ? _fontSize                               : "unspecified"}, '
+             'letterSpacing: ${      _encoded[0] & 0x00800 == 0x00800  ? "${_letterSpacing}x"                    : "unspecified"}, '
+             'wordSpacing: ${        _encoded[0] & 0x01000 == 0x01000  ? "${_wordSpacing}x"                      : "unspecified"}, '
+             'height: ${             _encoded[0] & 0x02000 == 0x02000  ? "${_height}x"                           : "unspecified"}, '
+             'locale: ${             _encoded[0] & 0x04000 == 0x04000  ? _locale                                 : "unspecified"}, '
+             'background: ${         _encoded[0] & 0x08000 == 0x08000  ? _background                             : "unspecified"}, '
+             'foreground: ${         _encoded[0] & 0x10000 == 0x10000  ? _foreground                             : "unspecified"}, '
+             'shadows: ${            _encoded[0] & 0x20000 == 0x20000  ? _shadows                                : "unspecified"}'
            ')';
   }
 }

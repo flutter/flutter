@@ -33,23 +33,25 @@ const int tsColorIndex = 1;
 const int tsTextDecorationIndex = 2;
 const int tsTextDecorationColorIndex = 3;
 const int tsTextDecorationStyleIndex = 4;
-const int tsFontWeightIndex = 5;
-const int tsFontStyleIndex = 6;
-const int tsTextBaselineIndex = 7;
-const int tsFontFamilyIndex = 8;
-const int tsFontSizeIndex = 9;
-const int tsLetterSpacingIndex = 10;
-const int tsWordSpacingIndex = 11;
-const int tsHeightIndex = 12;
-const int tsLocaleIndex = 13;
-const int tsBackgroundIndex = 14;
-const int tsForegroundIndex = 15;
-const int tsTextShadowsIndex = 16;
+const int tsTextDecorationThicknessIndex = 5;
+const int tsFontWeightIndex = 6;
+const int tsFontStyleIndex = 7;
+const int tsTextBaselineIndex = 8;
+const int tsFontFamilyIndex = 9;
+const int tsFontSizeIndex = 10;
+const int tsLetterSpacingIndex = 11;
+const int tsWordSpacingIndex = 12;
+const int tsHeightIndex = 13;
+const int tsLocaleIndex = 14;
+const int tsBackgroundIndex = 15;
+const int tsForegroundIndex = 16;
+const int tsTextShadowsIndex = 17;
 
 const int tsColorMask = 1 << tsColorIndex;
 const int tsTextDecorationMask = 1 << tsTextDecorationIndex;
 const int tsTextDecorationColorMask = 1 << tsTextDecorationColorIndex;
 const int tsTextDecorationStyleMask = 1 << tsTextDecorationStyleIndex;
+const int tsTextDecorationThicknessMask = 1 << tsTextDecorationThicknessIndex;
 const int tsFontWeightMask = 1 << tsFontWeightIndex;
 const int tsFontStyleMask = 1 << tsFontStyleIndex;
 const int tsTextBaselineMask = 1 << tsTextBaselineIndex;
@@ -224,11 +226,13 @@ ParagraphBuilder::ParagraphBuilder(
   int32_t mask = encoded[0];
   txt::ParagraphStyle style;
 
-  if (mask & psTextAlignMask)
+  if (mask & psTextAlignMask) {
     style.text_align = txt::TextAlign(encoded[psTextAlignIndex]);
+  }
 
-  if (mask & psTextDirectionMask)
+  if (mask & psTextDirectionMask) {
     style.text_direction = txt::TextDirection(encoded[psTextDirectionIndex]);
+  }
 
   if (mask & psFontWeightMask) {
     style.font_weight =
@@ -255,14 +259,17 @@ ParagraphBuilder::ParagraphBuilder(
     decodeStrut(strutData, strutFontFamilies, style);
   }
 
-  if (mask & psMaxLinesMask)
+  if (mask & psMaxLinesMask) {
     style.max_lines = encoded[psMaxLinesIndex];
+  }
 
-  if (mask & psEllipsisMask)
+  if (mask & psEllipsisMask) {
     style.ellipsis = ellipsis;
+  }
 
-  if (mask & psLocaleMask)
+  if (mask & psLocaleMask) {
     style.locale = locale;
+  }
 
   FontCollection& font_collection =
       UIDartState::Current()->window()->client()->GetFontCollection();
@@ -302,6 +309,7 @@ void ParagraphBuilder::pushStyle(tonic::Int32List& encoded,
                                  double letterSpacing,
                                  double wordSpacing,
                                  double height,
+                                 double decorationThickness,
                                  const std::string& locale,
                                  Dart_Handle background_objects,
                                  Dart_Handle background_data,
@@ -318,20 +326,27 @@ void ParagraphBuilder::pushStyle(tonic::Int32List& encoded,
 
   // Only change the style property from the previous value if a new explicitly
   // set value is available
-  if (mask & tsColorMask)
+  if (mask & tsColorMask) {
     style.color = encoded[tsColorIndex];
+  }
 
   if (mask & tsTextDecorationMask) {
     style.decoration =
         static_cast<txt::TextDecoration>(encoded[tsTextDecorationIndex]);
   }
 
-  if (mask & tsTextDecorationColorMask)
+  if (mask & tsTextDecorationColorMask) {
     style.decoration_color = encoded[tsTextDecorationColorIndex];
+  }
 
-  if (mask & tsTextDecorationStyleMask)
+  if (mask & tsTextDecorationStyleMask) {
     style.decoration_style = static_cast<txt::TextDecorationStyle>(
         encoded[tsTextDecorationStyleIndex]);
+  }
+
+  if (mask & tsTextDecorationThicknessMask) {
+    style.decoration_thickness_multiplier = decorationThickness;
+  }
 
   if (mask & tsTextBaselineMask) {
     // TODO(abarth): Implement TextBaseline. The CSS version of this
