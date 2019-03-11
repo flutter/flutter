@@ -1047,7 +1047,6 @@ class RenderBackdropFilter extends RenderProxyBox {
     if (child != null) {
       assert(needsCompositing);
       context.pushLayer(BackdropFilterLayer(filter: _filter), _addTrasnparentPaint, offset);
-
     }
   }
 }
