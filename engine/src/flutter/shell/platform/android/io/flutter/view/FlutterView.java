@@ -694,7 +694,7 @@ public class FlutterView extends SurfaceView implements BinaryMessenger, Texture
 
     @Override
     public AccessibilityNodeProvider getAccessibilityNodeProvider() {
-        if (mAccessibilityNodeProvider.isAccessibilityEnabled()) {
+        if (mAccessibilityNodeProvider != null && mAccessibilityNodeProvider.isAccessibilityEnabled()) {
             return mAccessibilityNodeProvider;
         } else {
             // TODO(goderbauer): when a11y is off this should return a one-off snapshot of
