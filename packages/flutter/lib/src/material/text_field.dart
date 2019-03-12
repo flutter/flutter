@@ -164,6 +164,7 @@ class TextField extends StatefulWidget {
     this.onTap,
     this.buildCounter,
   }) : assert(textAlign != null),
+       assert(decoration != null),
        assert(autofocus != null),
        assert(obscureText != null),
        assert(autocorrect != null),

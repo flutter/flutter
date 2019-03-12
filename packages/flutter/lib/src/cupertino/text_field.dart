@@ -177,6 +177,7 @@ class CupertinoTextField extends StatefulWidget {
     this.keyboardAppearance,
     this.scrollPadding = const EdgeInsets.all(20.0),
   }) : assert(textAlign != null),
+       assert(decoration != null),
        assert(autofocus != null),
        assert(obscureText != null),
        assert(autocorrect != null),
