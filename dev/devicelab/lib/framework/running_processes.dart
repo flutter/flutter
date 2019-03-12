@@ -143,7 +143,7 @@ Iterable<RunningProcessInfo> processPowershellOutput(String output) sync* {
     String rawTime = line.substring(
       creationDateHeaderStart,
       creationDateHeaderEnd,
-    );
+    ).trim();
 
     if (rawTime[1] == '/') {
       rawTime = '0$rawTime';
