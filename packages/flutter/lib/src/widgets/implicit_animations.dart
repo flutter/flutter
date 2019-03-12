@@ -371,7 +371,7 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
   /// ```dart
   /// class MyWidgetState extends AnimatedWidgetBaseState<MyWidget> {
   ///   ColorTween _colorTween;
-  /// 
+  ///
   ///   @override
   ///   Widget build(BuildContext context) {
   ///     return Text(
