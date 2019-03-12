@@ -4,6 +4,7 @@
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/run_hot.dart';
@@ -15,6 +16,7 @@ import 'src/context.dart';
 void main() {
   final Platform windowsPlatform = MockPlatform();
   final Platform notWindowsPlatform = MockPlatform();
+  final BufferLogger bufferLogger = BufferLogger();
   when(windowsPlatform.isWindows).thenReturn(true);
   when(notWindowsPlatform.isWindows).thenReturn(false);
 
@@ -110,6 +112,25 @@ void main() {}
     }, overrides: <Type, Generator>{
       FileSystem: () => memoryFileSystem,
       Platform: () => notWindowsPlatform,
+    });
+
+    testUsingContext('update to .packages triggers warning', () async {
+      final FlutterProject flutterProject = await FlutterProject.fromDirectory(pubspecFile.parent);
+      final ProjectFileInvalidator invalidator = ProjectFileInvalidator(packagesFile.path, flutterProject);
+      invalidator.initialize();
+      packagesFile.writeAsStringSync(r'''
+foo:file:///foo/lib/
+bar:file:///.pub-cache/bar/lib/
+baz:file:///baz/lib/
+new_dep:file:///new_dep/lib/
+test_package:file:///lib/
+''');
+      invalidator.findInvalidated();
+      expect(bufferLogger.errorText, 'Warning: updated dependencies detected. The Flutter application will require a restart to safely use new packages.\n');
+    }, overrides: <Type, Generator>{
+      FileSystem: () => memoryFileSystem,
+      Platform: () => notWindowsPlatform,
+      Logger: () => bufferLogger,
     });
   });
 

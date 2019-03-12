@@ -930,7 +930,7 @@ class HotRunner extends ResidentRunner {
 }
 
 class ProjectFileInvalidator {
-  ProjectFileInvalidator(this._packagesPath, FlutterProject flutterProject) {
+  ProjectFileInvalidator(this._packagesPath, this._flutterProject) {
     final File packagesFile = fs.file(_packagesPath);
     if (packagesFile.existsSync()) {
       _packagesUpdateTime = packagesFile.statSync().modified.millisecondsSinceEpoch;
@@ -939,32 +939,7 @@ class ProjectFileInvalidator {
       _packagesUpdateTime = -1;
       _packageMap = const <String, Uri>{};
     }
-    if (flutterProject != null && flutterProject.pubspecFile.existsSync()) {
-      final PubspecYaml pubspec = PubspecYaml(flutterProject.directory);
-      final Set<String> relevantDependencies = <String>{};
-      for (PubspecDependency dependency in pubspec.allDependencies) {
-        if (dependency.isDevDependency) {
-          continue;
-        }
-        relevantDependencies.add(dependency.name);
-      }
-      // Remove any packages which were tagged as dev dependenices,
-      // But don't remove the app itself!
-      for (String packageName in _packageMap.keys.toList()) {
-        if (!relevantDependencies.contains(packageName) && packageName != flutterProject.manifest.appName) {
-          _packageMap.remove(packageName);
-          continue;
-        }
-      }
-    }
-    // Remove any packages which are derived from the pub cache.
-    for (String packageName in _packageMap.keys.toList()) {
-      final String path = _packageMap[packageName].path;
-      if ((platform.isWindows && path.contains(_pubCachePathWindows))
-          || path.contains(_pubCachePathLinuxAndWindows)) {
-        _packageMap.remove(packageName);
-      }
-    }
+    _computePackageMap(_packageMap, _flutterProject);
   }
 
   // Used to avoid watching pubspec directories. This will not change even with pub upgrade,
@@ -975,6 +950,7 @@ class ProjectFileInvalidator {
 
   Map<String, Uri> _packageMap;
   final String _packagesPath;
+  final FlutterProject _flutterProject;
   final Map<String, int> _updateTime = <String, int>{};
   int _packagesUpdateTime;
 
@@ -983,6 +959,39 @@ class ProjectFileInvalidator {
 
   @visibleForTesting
   Map<String, Uri> get packageMap => _packageMap;
+
+  static void _computePackageMap(Map<String, Uri> packageMap, FlutterProject flutterProject) {
+    if (flutterProject != null && flutterProject.pubspecFile.existsSync()) {
+      try {
+        final PubspecYaml pubspec = PubspecYaml(flutterProject.directory);
+        final Set<String> relevantDependencies = <String>{};
+        for (PubspecDependency dependency in pubspec.allDependencies) {
+          if (dependency.isDevDependency) {
+            continue;
+          }
+          relevantDependencies.add(dependency.name);
+        }
+        // Remove any packages which were tagged as dev dependenices,
+        // But don't remove the app itself!
+        for (String packageName in packageMap.keys.toList()) {
+          if (!relevantDependencies.contains(packageName) && packageName != flutterProject.manifest.appName) {
+            packageMap.remove(packageName);
+            continue;
+          }
+        }
+      } catch (err) {
+        // If we detect a pubspec formatting problem, fallback to the packages file.
+      }
+    }
+    // Remove any packages which are derived from the pub cache.
+    for (String packageName in packageMap.keys.toList()) {
+      final String path = packageMap[packageName].path;
+      if ((platform.isWindows && path.contains(_pubCachePathWindows))
+          || path.contains(_pubCachePathLinuxAndWindows)) {
+        packageMap.remove(packageName);
+      }
+    }
+  }
 
   // To initialize the file invalidator we traverse all of the source files
   // to grab an initial timestamp. We assume that the initial dill file
@@ -995,8 +1004,12 @@ class ProjectFileInvalidator {
     final File packagesFile = fs.file(_packagesPath);
     if (packagesFile.existsSync()) {
       final int newPackagesUpdateTime = packagesFile.statSync().modified.millisecondsSinceEpoch;
+      // Hot reloading with an updated package will often times kill a non-trivial
+      // appliction. This _might_ work, given certain application size and package
+      // constraints, so instead of exiting we print a warning so that the user has
+      // some hint on what went wrong.
       if (newPackagesUpdateTime > _packagesUpdateTime) {
-        printError('Warning: updated dependencies detected. The Flutter application will require a restart to use them.');
+        printError('Warning: updated dependencies detected. The Flutter application will require a restart to safely use new packages.');
       }
       _packagesUpdateTime = newPackagesUpdateTime;
     }
