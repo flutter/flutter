@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' as intl;
 import 'package:intl/date_symbols.dart' as intl;
 import 'package:intl/date_symbol_data_custom.dart' as date_symbol_data_custom;
-import 'l10n/date_localizations.dart' as date_localizations;
+import 'l10n/generated_date_localizations.dart' as date_localizations;
 
 import 'l10n/generated_material_localizations.dart';
 import 'widgets_localizations.dart';
