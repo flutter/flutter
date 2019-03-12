@@ -444,10 +444,14 @@ class DevFS {
     assert(trackWidgetCreation != null);
     assert(generator != null);
 
-    if (bundle != null && fullRestart) {
+    if (bundle != null) {
       printTrace('Scanning asset files');
+      // We write the assets into the AssetBundle working dir so that they
+      // are in the same location in DevFS and the iOS simulator.
+      final String assetDirectory = fs.path.join(getAssetBuildDirectory();
       bundle.entries.forEach((String archivePath, DevFSContent content) {
-        _scanBundleEntry(archivePath, content);
+        final Uri deviceUri = fs.path.toUri(assetDirectory, archivePath));
+        _entries[deviceUri] = content;
       });
     }
 
@@ -509,13 +513,6 @@ class DevFS {
     printTrace('DevFS: Sync finished');
     return UpdateFSReport(success: true, syncedBytes: syncedBytes,
          invalidatedSourcesCount: invalidatedFiles.length);
-  }
-
-  void _scanBundleEntry(String archivePath, DevFSContent content) {
-    // We write the assets into the AssetBundle working dir so that they
-    // are in the same location in DevFS and the iOS simulator.
-    final Uri deviceUri = fs.path.toUri(fs.path.join(getAssetBuildDirectory(), archivePath));
-    _entries[deviceUri] = content;
   }
 }
 
