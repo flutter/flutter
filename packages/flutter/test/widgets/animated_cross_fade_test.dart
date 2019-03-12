@@ -376,7 +376,7 @@ class _TickerWatchingWidgetState extends State<_TickerWatchingWidget> with Singl
   @override
   void initState() {
     super.initState();
-    ticker = createTicker((_) {})..start();
+    ticker = createTicker((_) { })..start();
   }
 
   @override

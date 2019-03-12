@@ -14,7 +14,10 @@ import 'dart/package_map.dart';
 import 'globals.dart';
 import 'project.dart';
 
-const String _kMultiRootScheme = 'org-dartlang-app';
+// Arbitrarily choosen multi-root file scheme. This is used to configure the
+// frontend_server to resolve a package uri to multiple filesystem directories.
+// In this case, the source directory and a generated directory.
+const String kMultiRootScheme = 'org-dartlang-app';
 
 /// The [CodeGenerator] instance.
 ///
@@ -109,6 +112,7 @@ class CodeGeneratingKernelCompiler implements KernelCompiler {
     String fileSystemScheme,
     String depFilePath,
     TargetModel targetModel = TargetModel.flutter,
+    String initializeFromDill,
   }) async {
     if (fileSystemRoots != null || fileSystemScheme != null || depFilePath != null || targetModel != null || sdkRoot != null || packagesPath != null) {
       printTrace('fileSystemRoots, fileSystemScheme, depFilePath, targetModel,'
@@ -141,9 +145,11 @@ class CodeGeneratingKernelCompiler implements KernelCompiler {
         fs.path.join(flutterProject.generated.path, 'lib${platform.pathSeparator}'),
         fs.path.join(flutterProject.directory.path, 'lib${platform.pathSeparator}'),
       ],
-      fileSystemScheme: _kMultiRootScheme,
+      fileSystemScheme: kMultiRootScheme,
       depFilePath: depFilePath,
       targetModel: targetModel,
+      // Pass an invalid file name to prevent frontend_server from initializing from dill.
+      initializeFromDill: 'none_file',
     );
   }
 }
@@ -179,10 +185,11 @@ class CodeGeneratingResidentCompiler implements ResidentCompiler {
         fs.path.join(flutterProject.generated.path, 'lib${platform.pathSeparator}'),
         fs.path.join(flutterProject.directory.path, 'lib${platform.pathSeparator}'),
       ],
-      fileSystemScheme: _kMultiRootScheme,
+      fileSystemScheme: kMultiRootScheme,
       targetModel: TargetModel.flutter,
       unsafePackageSerialization: unsafePackageSerialization,
-      initializeFromDill: initializeFromDill,
+      // Pass an invalid file name to prevent frontend_server from initializing from dill.
+      initializeFromDill: 'none_file',
     );
     return CodeGeneratingResidentCompiler._(residentCompiler, codegenDaemon);
   }
@@ -209,12 +216,6 @@ class CodeGeneratingResidentCompiler implements ResidentCompiler {
     }
     if (_codegenDaemon.lastStatus == CodegenStatus.Failed) {
       printError('Codegeneration failed, halting build.');
-    }
-    // Delete this file so that the frontend_server can handle multi-root.
-    // TODO(jonahwilliams): investigate frontend_server behavior in the presence
-    // of multi-root and initialize from dill.
-    if (outputPath != null && fs.file(outputPath).existsSync()) {
-      fs.file(outputPath).deleteSync();
     }
     return _residentCompiler.recompile(
       mainPath,

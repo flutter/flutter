@@ -18,18 +18,18 @@ class ProbeWidgetState extends State<ProbeWidget> {
   @override
   void initState() {
     super.initState();
-    setState(() {});
+    setState(() { });
   }
 
   @override
   void didUpdateWidget(ProbeWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    setState(() {});
+    setState(() { });
   }
 
   @override
   Widget build(BuildContext context) {
-    setState(() {});
+    setState(() { });
     buildCount++;
     return Container();
   }

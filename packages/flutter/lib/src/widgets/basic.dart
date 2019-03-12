@@ -336,15 +336,14 @@ class ShaderMask extends SingleChildRenderObjectWidget {
 /// A widget that applies a filter to the existing painted content and then
 /// paints [child].
 ///
-/// The filter will only be applied to the area of the background in which the
-/// [child] (or one of its descendants) is actually going to paint in regardless
-/// of the actual size of [child].
+/// The filter will be applied to all the area within its parent or ancestor
+/// widget's clip. If there's no clip, the filter will be applied to the full
+/// screen.
 ///
 /// {@tool sample}
-/// Even though the [BackdropFilter] is wrapping the [Container] below, the
-/// background will only be blurred in the area defined by the bounding box
-/// of the [Text] because that's the only area any descendant of the
-/// [BackdropFilter] is painting in.
+/// If the [BackdropFilter] needs to be applied to an area that exactly matches
+/// its child, wraps the [BackdropFilter] with a clip widget that clips exactly
+/// to that child.
 ///
 /// ```dart
 /// Stack(
@@ -352,45 +351,18 @@ class ShaderMask extends SingleChildRenderObjectWidget {
 ///   children: <Widget>[
 ///     Text('0' * 10000),
 ///     Center(
-///       child: BackdropFilter(
-///         filter: ui.ImageFilter.blur(
-///           sigmaX: 5.0,
-///           sigmaY: 5.0,
-///         ),
-///         child: Container(
-///           alignment: Alignment.center,
-///           width: 200.0,
-///           height: 200.0,
-///           child: Text('Hello World'),
-///         ),
-///       ),
-///     ),
-///   ],
-/// )
-/// ```
-///
-/// To blur the entire area of the [Container], increase the paint area of
-/// the Container. Giving it a transparent background color will increase
-/// the paint area of the container (and hence blur the background behind the
-/// entire container) without changing other visual properties.
-///
-/// ```dart
-/// Stack(
-///   fit: StackFit.expand,
-///   children: <Widget>[
-///     Text('0' * 10000),
-///     Center(
-///       child: BackdropFilter(
-///         filter: ui.ImageFilter.blur(
-///           sigmaX: 5.0,
-///           sigmaY: 5.0,
-///         ),
-///         child: Container(
-///           color: Colors.transparent, // <-- NEW
-///           alignment: Alignment.center,
-///           width: 200.0,
-///           height: 200.0,
-///           child: Text('Hello World'),
+///       child: ClipRect(  // <-- clips to the 200x200 [Container] below
+///         child: BackdropFilter(
+///           filter: ui.ImageFilter.blur(
+///             sigmaX: 5.0,
+///             sigmaY: 5.0,
+///           ),
+///           child: Container(
+///             alignment: Alignment.center,
+///             width: 200.0,
+///             height: 200.0,
+///             child: Text('Hello World'),
+///           ),
 ///         ),
 ///       ),
 ///     ),
@@ -5268,6 +5240,7 @@ class Listener extends SingleChildRenderObjectWidget {
     this.onPointerHover,
     this.onPointerUp,
     this.onPointerCancel,
+    this.onPointerSignal,
     this.behavior = HitTestBehavior.deferToChild,
     Widget child,
   }) : assert(behavior != null),
@@ -5316,6 +5289,9 @@ class Listener extends SingleChildRenderObjectWidget {
   /// no longer directed towards this receiver.
   final PointerCancelEventListener onPointerCancel;
 
+  /// Called when a pointer signal occurs over this object.
+  final PointerSignalEventListener onPointerSignal;
+
   /// How to behave during hit testing.
   final HitTestBehavior behavior;
 
@@ -5329,6 +5305,7 @@ class Listener extends SingleChildRenderObjectWidget {
       onPointerExit: onPointerExit,
       onPointerUp: onPointerUp,
       onPointerCancel: onPointerCancel,
+      onPointerSignal: onPointerSignal,
       behavior: behavior,
     );
   }
@@ -5343,6 +5320,7 @@ class Listener extends SingleChildRenderObjectWidget {
       ..onPointerExit = onPointerExit
       ..onPointerUp = onPointerUp
       ..onPointerCancel = onPointerCancel
+      ..onPointerSignal = onPointerSignal
       ..behavior = behavior;
   }
 
@@ -5364,6 +5342,8 @@ class Listener extends SingleChildRenderObjectWidget {
       listeners.add('up');
     if (onPointerCancel != null)
       listeners.add('cancel');
+    if (onPointerSignal != null)
+      listeners.add('signal');
     properties.add(IterableProperty<String>('listeners', listeners, ifEmpty: '<none>'));
     properties.add(EnumProperty<HitTestBehavior>('behavior', behavior));
   }

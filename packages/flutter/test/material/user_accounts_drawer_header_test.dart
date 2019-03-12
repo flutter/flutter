@@ -32,7 +32,7 @@ Future<void> pumpTestWidget(
         child: Material(
           child: Center(
             child: UserAccountsDrawerHeader(
-              onDetailsPressed: withOnDetailsPressedHandler ? () {} : null,
+              onDetailsPressed: withOnDetailsPressedHandler ? () { } : null,
               currentAccountPicture: const ExcludeSemantics(
                 child: CircleAvatar(
                   key: avatarA,
