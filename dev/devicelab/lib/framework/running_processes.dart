@@ -70,7 +70,7 @@ Stream<RunningProcessInfo> windowsRunningProcesses(
   // a process.
   // See: https://docs.microsoft.com/en-us/windows/desktop/cimwin32prov/win32-process
   final String script = processName != null
-      ? '''"Get-CimInstance Win32_Process -Filter \\"name='$processName'\\" | Select-Object ProcessId,CreationDate,CommandLine | Format-Table -AutoSize | Out-String -Width 4096"'''
+      ? '''"Get-CimInstance Win32_Process -Filter "name='$processName'" | Select-Object ProcessId,CreationDate,CommandLine | Format-Table -AutoSize | Out-String -Width 4096"'''
       : '"Get-CimInstance Win32_Process | Select-Object ProcessId,CreationDate,CommandLine | Format-Table -AutoSize | Out-String -Width 4096"';
   final ProcessResult result = await processManager.run(<String>[
     'powershell',
