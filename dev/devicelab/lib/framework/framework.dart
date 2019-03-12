@@ -90,7 +90,7 @@ class _TaskRunner {
       ).toSet();
       beforeRunningDartInstances.forEach(print);
 
-      TaskResult result = await _performTask().timeout(taskTimeout);
+      final TaskResult result = await _performTask().timeout(taskTimeout);
 
       section('Checking running Dart$exe processes after task...');
       final List<RunningProcessInfo> afterRunningDartInstances = await getRunningProcesses(
@@ -100,7 +100,6 @@ class _TaskRunner {
       for (final RunningProcessInfo info in afterRunningDartInstances) {
         if (!beforeRunningDartInstances.contains(info)) {
           print('$info was leaked by this test.');
-          // result = TaskResult.markUnderperformed(result);
           final bool killed = await killProcess(info.pid);
           if (!killed) {
             print('Failed to kill process ${info.pid}.');
