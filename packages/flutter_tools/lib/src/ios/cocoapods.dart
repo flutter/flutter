@@ -179,7 +179,7 @@ class CocoaPods {
   /// Ensures the given iOS sub-project of a parent Flutter project
   /// contains a suitable `Podfile` and that its `Flutter/Xxx.xcconfig` files
   /// include pods configuration.
-  Future<void> setupPodfile(IosProject iosProject) async {
+  void setupPodfile(IosProject iosProject) {
     if (!xcodeProjectInterpreter.isInstalled) {
       // Don't do anything for iOS when host platform doesn't support it.
       return;
@@ -190,11 +190,10 @@ class CocoaPods {
     }
     final File podfile = iosProject.podfile;
     if (!podfile.existsSync()) {
-      final Map<String, String> buildSettings = await xcodeProjectInterpreter.getBuildSettings(
+      final bool isSwift = xcodeProjectInterpreter.getBuildSettings(
         runnerProject.path,
         'Runner',
-      );
-      final bool isSwift = buildSettings.containsKey('SWIFT_VERSION');
+      ).containsKey('SWIFT_VERSION');
       final File podfileTemplate = fs.file(fs.path.join(
         Cache.flutterRoot,
         'packages',

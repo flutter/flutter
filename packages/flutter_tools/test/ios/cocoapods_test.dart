@@ -143,7 +143,7 @@ void main() {
 
   group('Setup Podfile', () {
     testUsingContext('creates objective-c Podfile when not present', () async {
-      await cocoaPodsUnderTest.setupPodfile(projectUnderTest.ios);
+      cocoaPodsUnderTest.setupPodfile(projectUnderTest.ios);
 
       expect(projectUnderTest.ios.podfile.readAsStringSync(), 'Objective-C podfile template');
     }, overrides: <Type, Generator>{
@@ -152,12 +152,12 @@ void main() {
 
     testUsingContext('creates swift Podfile if swift', () async {
       when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
-      when(mockXcodeProjectInterpreter.getBuildSettings(any, any)).thenAnswer((Invocation invocation) => Future<Map<String, String>>.value(<String, String>{
+      when(mockXcodeProjectInterpreter.getBuildSettings(any, any)).thenReturn(<String, String>{
         'SWIFT_VERSION': '4.0',
-      }));
+      });
 
       final FlutterProject project = await FlutterProject.fromPath('project');
-      await cocoaPodsUnderTest.setupPodfile(project.ios);
+      cocoaPodsUnderTest.setupPodfile(project.ios);
 
       expect(projectUnderTest.ios.podfile.readAsStringSync(), 'Swift podfile template');
     }, overrides: <Type, Generator>{
@@ -169,7 +169,7 @@ void main() {
       projectUnderTest.ios.podfile..createSync()..writeAsStringSync('Existing Podfile');
 
       final FlutterProject project = await FlutterProject.fromPath('project');
-      await cocoaPodsUnderTest.setupPodfile(project.ios);
+      cocoaPodsUnderTest.setupPodfile(project.ios);
 
       expect(projectUnderTest.ios.podfile.readAsStringSync(), 'Existing Podfile');
     }, overrides: <Type, Generator>{
@@ -180,7 +180,7 @@ void main() {
       when(mockXcodeProjectInterpreter.isInstalled).thenReturn(false);
 
       final FlutterProject project = await FlutterProject.fromPath('project');
-      await cocoaPodsUnderTest.setupPodfile(project.ios);
+      cocoaPodsUnderTest.setupPodfile(project.ios);
 
       expect(projectUnderTest.ios.podfile.existsSync(), false);
     }, overrides: <Type, Generator>{
@@ -198,7 +198,7 @@ void main() {
         ..writeAsStringSync('Existing release config');
 
       final FlutterProject project = await FlutterProject.fromPath('project');
-      await cocoaPodsUnderTest.setupPodfile(project.ios);
+      cocoaPodsUnderTest.setupPodfile(project.ios);
 
       final String debugContents = projectUnderTest.ios.xcodeConfigFor('Debug').readAsStringSync();
       expect(debugContents, contains(
