@@ -133,12 +133,6 @@ class _SearchDemoState extends State<SearchDemo> {
   }
 }
 
-/// [SearchDelegate.buildResults] might be called multiple times. Please cache
-/// the search result if you don't want to call search backend multiple times
-/// on the same query.
-/// See:
-/// https://github.com/flutter/flutter/issues/11655#issuecomment-412413030
-/// https://github.com/flutter/flutter/issues/26759
 class _SearchDemoSearchDelegate extends SearchDelegate<int> {
   final List<int> _data = List<int>.generate(100001, (int i) => i).reversed.toList();
   final List<int> _history = <int>[42607, 85604, 66374, 44, 174];
