@@ -2591,6 +2591,13 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
   // Object used for annotation of the layer used for hover hit detection.
   MouseTrackerAnnotation _hoverAnnotation;
 
+  /// Object used for annotation of the layer used for hover hit detection.
+  ///
+  /// This is only public to allow for testing of Listener widgets. Do not call
+  /// in other contexts.
+  @visibleForTesting
+  MouseTrackerAnnotation get hoverAnnotation => _hoverAnnotation;
+
   void _updateAnnotations() {
     if (_hoverAnnotation != null && attached) {
       RendererBinding.instance.mouseTracker.detachAnnotation(_hoverAnnotation);
