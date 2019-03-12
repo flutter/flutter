@@ -605,8 +605,8 @@ class _TextSelectionHandleOverlayState
 
     final Size viewport = widget.renderObject.size;
     point = Offset(
-        point.dx.clamp(0.0, viewport.width),
-        point.dy.clamp(0.0, viewport.height)
+      point.dx.clamp(0.0, viewport.width),
+      point.dy.clamp(0.0, viewport.height),
     );
 
 
