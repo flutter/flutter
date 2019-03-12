@@ -297,20 +297,20 @@ Int32List _encodeTextStyle(
     result[0] |= 1 << 4;
     result[4] = decorationStyle.index;
   }
-  if (decorationThickness != null) {
-    result[0] |= 1 << 5;
-  }
   if (fontWeight != null) {
-    result[0] |= 1 << 6;
+    result[0] |= 1 << 5;
     result[5] = fontWeight.index;
   }
   if (fontStyle != null) {
-    result[0] |= 1 << 7;
+    result[0] |= 1 << 6;
     result[6] = fontStyle.index;
   }
   if (textBaseline != null) {
-    result[0] |= 1 << 8;
+    result[0] |= 1 << 7;
     result[7] = textBaseline.index;
+  }
+  if (decorationThickness != null) {
+    result[0] |= 1 << 8;
   }
   if (fontFamily != null || (fontFamilyFallback != null && fontFamilyFallback.isNotEmpty)) {
     result[0] |= 1 << 9;
