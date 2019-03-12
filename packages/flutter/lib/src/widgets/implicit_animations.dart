@@ -15,6 +15,9 @@ import 'text.dart';
 import 'ticker_provider.dart';
 import 'transitions.dart';
 
+// Examples can assume:
+// Color myCurrentTargetColor;
+
 /// An interpolation between two [BoxConstraints].
 ///
 /// This class specializes the interpolation of [Tween<BoxConstraints>] to use
@@ -358,6 +361,31 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
   /// [forEachTween] should override [didUpdateTweens] to update those
   /// properties. Dependent properties should not be updated within
   /// [forEachTween].
+  ///
+  /// {@tool sample}
+  /// ```dart
+  /// class MyWidgetState extends AnimatedWidgetBaseState<MyWidget> {
+  ///   ColorTween _colorTween;
+  /// 
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return Text(
+  ///       'Hello World',
+  ///       style: TextStyle(color: _colorTween.evaluate(animation)),
+  ///     );
+  ///   }
+  ///
+  ///   @override
+  ///   void forEachTween(TweenVisitor<dynamic> visitor) {
+  ///     _colorTween = visitor(
+  ///       _colorTween,
+  ///       myCurrentTargetColor,
+  ///       (value) => ColorTween(begin: value),
+  ///     );
+  ///   }
+  /// }
+  /// ```
+  /// {@end-tool}
   @protected
   void forEachTween(TweenVisitor<dynamic> visitor);
 
