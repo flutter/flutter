@@ -51,12 +51,6 @@ class KeyData {
   /// [KeyData.fromJson].
   Map<String, dynamic> toJson() {
     for (Key entry in data) {
-      // macOS doesn't provide a scan code, but instead, provides virtual keyCode to
-      // represent physical keys.
-      if (entry.macOsScanCode != null) {
-        entry.macOsKeyCodes ??= <int>[];
-        entry.macOsKeyCodes.add(entry.macOsScanCode);
-      }
       entry.androidKeyNames = _nameToAndroidName[entry.constantName]?.cast<String>();
       if (entry.androidKeyNames != null && entry.androidKeyNames.isNotEmpty) {
         for (String androidKeyName in entry.androidKeyNames) {
@@ -217,7 +211,6 @@ class Key {
     this.androidKeyNames,
     this.androidScanCodes,
     this.androidKeyCodes,
-    this.macOsKeyCodes,
   })  : assert(usbHidCode != null),
         assert(chromiumName != null),
         _constantName = enumName;
@@ -232,7 +225,6 @@ class Key {
       androidKeyNames: map['names']['android']?.cast<String>(),
       androidScanCodes: map['scanCodes']['android']?.cast<int>(),
       androidKeyCodes: map['keyCodes']['android']?.cast<int>(),
-      macOsKeyCodes: map['keyCodes']['macos']?.cast<int>(),
       linuxScanCode: map['scanCodes']['linux'],
       xKbScanCode: map['scanCodes']['xkb'],
       windowsScanCode: map['scanCodes']['windows'],
@@ -268,11 +260,6 @@ class Key {
   /// the Android name in the Chromium data, and substituting the Android scan
   /// code value.
   List<int> androidScanCodes;
-  /// The list of macOS key codes matching this key. MacOS doesn't provide a scan code,
-  /// but a virtual key code to represent physical keys. Alphanumeric and some symbol 
-  /// characters are mapped to specific logical keys (view raw_keyboard_macos.dart). If
-  /// they are not found in the map, defaults to the keycode.
-  List<int> macOsKeyCodes;
 
   /// Creates a JSON map from the key data.
   Map<String, dynamic> toJson() {
@@ -293,7 +280,6 @@ class Key {
       },
       'keyCodes': <String, List<int>>{
         'android': androidKeyCodes,
-        'macos': macOsKeyCodes,
       },
     };
   }
