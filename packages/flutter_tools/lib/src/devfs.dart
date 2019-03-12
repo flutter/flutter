@@ -448,9 +448,9 @@ class DevFS {
       printTrace('Scanning asset files');
       // We write the assets into the AssetBundle working dir so that they
       // are in the same location in DevFS and the iOS simulator.
-      final String assetDirectory = fs.path.join(getAssetBuildDirectory();
+      final String assetDirectory = getAssetBuildDirectory();
       bundle.entries.forEach((String archivePath, DevFSContent content) {
-        final Uri deviceUri = fs.path.toUri(assetDirectory, archivePath));
+        final Uri deviceUri = fs.path.toUri(fs.path.join(assetDirectory, archivePath));
         _entries[deviceUri] = content;
       });
     }
