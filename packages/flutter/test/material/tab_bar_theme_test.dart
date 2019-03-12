@@ -20,14 +20,22 @@ const List<Tab> _tabs = <Tab>[
   Tab(text: _tab3Text, icon: Icon(Icons.looks_3)),
 ];
 
-Widget _withTheme(TabBarTheme theme) {
+final List<SizedBox> _sizedTabs = <SizedBox>[
+  SizedBox(key: UniqueKey(), width: 100.0, height: 50.0),
+  SizedBox(key: UniqueKey(), width: 100.0, height: 50.0),
+];
+
+Widget _withTheme(TabBarTheme theme, List<Widget> tabs, {bool isScrollable}) {
+  isScrollable = isScrollable ?? false; // false is the default value
+
   return MaterialApp(
     theme: ThemeData(tabBarTheme: theme),
     home: Scaffold(
       body: RepaintBoundary(
         key: _painterKey,
         child: TabBar(
-          tabs: _tabs,
+          tabs: tabs,
+          isScrollable: isScrollable,
           controller: TabController(length: _tabs.length, vsync: const TestVSync()),
         ),
       ),
@@ -42,7 +50,7 @@ RenderParagraph _iconRenderObject(WidgetTester tester, IconData icon) {
 
 void main() {
   testWidgets('Tab bar defaults', (WidgetTester tester) async {
-    await tester.pumpWidget(_withTheme(null));
+    await tester.pumpWidget(_withTheme(null, _tabs));
 
     final RenderParagraph selectedRenderObject = tester.renderObject<RenderParagraph>(find.text(_tab1Text));
     expect(selectedRenderObject.text.style.fontFamily, equals('Roboto'));
@@ -53,18 +61,18 @@ void main() {
     expect(unselectedRenderObject.text.style.fontSize, equals(14.0));
     expect(unselectedRenderObject.text.style.color, equals(Colors.white.withAlpha(0xB2)));
 
+    //TODO: update to use coordinates over goldens
     await expectLater(
       find.byKey(_painterKey),
       matchesGoldenFile('tab_bar_theme.tab_label_padding.default.png'),
       skip: !Platform.isLinux,
     );
   });
-
   testWidgets('Tab bar theme overrides label color (selected)', (WidgetTester tester) async {
     const Color labelColor = Colors.black;
     const TabBarTheme tabBarTheme = TabBarTheme(labelColor: labelColor);
 
-    await tester.pumpWidget(_withTheme(tabBarTheme));
+    await tester.pumpWidget(_withTheme(tabBarTheme, _tabs));
 
     final RenderParagraph textRenderObject = tester.renderObject<RenderParagraph>(find.text(_tab1Text));
     expect(textRenderObject.text.style.color, equals(labelColor));
@@ -73,16 +81,39 @@ void main() {
   });
 
   testWidgets('Tab bar theme overrides label padding', (WidgetTester tester) async {
-    const EdgeInsetsGeometry labelPadding = EdgeInsets.symmetric(vertical: 8.0);
+    const double verticalPadding = 10.0;
+    const double horizontalPadding = 10.0;
+    const double indicatorWeight = 2.0; // default value
+
+    const EdgeInsetsGeometry labelPadding = EdgeInsets.symmetric(
+      vertical: verticalPadding,
+      horizontal: horizontalPadding,
+    );
+
     const TabBarTheme tabBarTheme = TabBarTheme(labelPadding: labelPadding);
 
-    await tester.pumpWidget(_withTheme(tabBarTheme));
+    await tester.pumpWidget(_withTheme(
+      tabBarTheme,
+      _sizedTabs,
+      isScrollable: true,
+    ));
 
-    await expectLater(
-      find.byKey(_painterKey),
-      matchesGoldenFile('tab_bar_theme.tab_label_padding.vertical.png'),
-      skip: !Platform.isLinux,
-    );
+    final Rect tabBar = tester.getRect(find.byType(TabBar));
+    final Rect tabOneRect = tester.getRect(find.byKey(_sizedTabs[0].key));
+    final Rect tabTwoRect = tester.getRect(find.byKey(_sizedTabs[1].key));
+
+    // verify coordinates of tabOne
+    expect(tabOneRect.left, equals(horizontalPadding));
+    expect(tabOneRect.top, equals(verticalPadding));
+    expect(tabOneRect.bottom, equals(tabBar.bottom - verticalPadding - indicatorWeight));
+
+    // verify coordinates of tabTwo
+    expect(tabTwoRect.right, equals(tabBar.width - horizontalPadding));
+    expect(tabTwoRect.top, equals(verticalPadding));
+    expect(tabTwoRect.bottom, equals(tabBar.bottom - verticalPadding - indicatorWeight));
+
+    // verify tabOne and tabTwo is separated by 2x horizontalPadding
+    expect(tabOneRect.right, equals(tabTwoRect.left - (2 * horizontalPadding)));
   });
 
   testWidgets('Tab bar theme overrides label styles', (WidgetTester tester) async {
@@ -93,7 +124,7 @@ void main() {
       unselectedLabelStyle: unselectedLabelStyle,
     );
 
-    await tester.pumpWidget(_withTheme(tabBarTheme));
+    await tester.pumpWidget(_withTheme(tabBarTheme, _tabs));
 
     final RenderParagraph selectedRenderObject = tester.renderObject<RenderParagraph>(find.text(_tab1Text));
     expect(selectedRenderObject.text.style.fontFamily, equals(labelStyle.fontFamily));
@@ -130,7 +161,22 @@ void main() {
     expect(unselectedRenderObject.text.style.fontFamily, equals(unselectedLabelStyle.fontFamily));
   });
   testWidgets('Tab bar label padding overrides theme label padding', (WidgetTester tester) async {
-    const EdgeInsetsGeometry themeLabelPadding = EdgeInsets.symmetric(vertical: 8.0);
+    const double verticalPadding = 10.0;
+    const double horizontalPadding = 10.0;
+    const EdgeInsetsGeometry labelPadding = EdgeInsets.symmetric(
+      vertical: verticalPadding,
+      horizontal: horizontalPadding,
+    );
+
+    const double verticalThemePadding = 20.0;
+    const double horizontalThemePadding = 20.0;
+    const EdgeInsetsGeometry themeLabelPadding = EdgeInsets.symmetric(
+      vertical: verticalThemePadding,
+      horizontal: horizontalThemePadding,
+    );
+
+    const double indicatorWeight = 2.0; // default value
+
     const TabBarTheme tabBarTheme = TabBarTheme(labelPadding: themeLabelPadding);
 
     await tester.pumpWidget(
@@ -140,27 +186,39 @@ void main() {
           RepaintBoundary(
             key: _painterKey,
             child: TabBar(
-              tabs: _tabs,
-              controller:TabController(length: _tabs.length, vsync: const TestVSync()),
-              labelPadding: kTabLabelPadding,
+              tabs: _sizedTabs,
+              isScrollable: true,
+              controller: TabController(length: _tabs.length, vsync: const TestVSync()),
+              labelPadding: labelPadding,
             ),
           ),
         ),
       ),
     );
 
-    expectLater(
-      find.byKey(_painterKey),
-      matchesGoldenFile('tab_bar_theme.tab_label_padding.default.png'),
-      skip: !Platform.isLinux,
-    );
+    final Rect tabBar = tester.getRect(find.byType(TabBar));
+    final Rect tabOneRect = tester.getRect(find.byKey(_sizedTabs[0].key));
+    final Rect tabTwoRect = tester.getRect(find.byKey(_sizedTabs[1].key));
+
+    // verify coordinates of tabOne
+    expect(tabOneRect.left, equals(horizontalPadding));
+    expect(tabOneRect.top, equals(verticalPadding));
+    expect(tabOneRect.bottom, equals(tabBar.bottom - verticalPadding - indicatorWeight));
+
+    // verify coordinates of tabTwo
+    expect(tabTwoRect.right, equals(tabBar.width - horizontalPadding));
+    expect(tabTwoRect.top, equals(verticalPadding));
+    expect(tabTwoRect.bottom, equals(tabBar.bottom - verticalPadding - indicatorWeight));
+
+    // verify tabOne and tabTwo is separated by 2x horizontalPadding
+    expect(tabOneRect.right, equals(tabTwoRect.left - (2 * horizontalPadding)));
   });
 
   testWidgets('Tab bar theme overrides label color (unselected)', (WidgetTester tester) async {
     const Color unselectedLabelColor = Colors.black;
     const TabBarTheme tabBarTheme = TabBarTheme(unselectedLabelColor: unselectedLabelColor);
 
-    await tester.pumpWidget(_withTheme(tabBarTheme));
+    await tester.pumpWidget(_withTheme(tabBarTheme, _tabs));
 
     final RenderParagraph textRenderObject = tester.renderObject<RenderParagraph>(find.text(_tab2Text));
     expect(textRenderObject.text.style.color, equals(unselectedLabelColor));
@@ -171,7 +229,7 @@ void main() {
   testWidgets('Tab bar theme overrides tab indicator size (tab)', (WidgetTester tester) async {
     const TabBarTheme tabBarTheme = TabBarTheme(indicatorSize: TabBarIndicatorSize.tab);
 
-    await tester.pumpWidget(_withTheme(tabBarTheme));
+    await tester.pumpWidget(_withTheme(tabBarTheme, _tabs));
 
     await expectLater(
       find.byKey(_painterKey),
@@ -183,7 +241,7 @@ void main() {
   testWidgets('Tab bar theme overrides tab indicator size (label)', (WidgetTester tester) async {
     const TabBarTheme tabBarTheme = TabBarTheme(indicatorSize: TabBarIndicatorSize.label);
 
-    await tester.pumpWidget(_withTheme(tabBarTheme));
+    await tester.pumpWidget(_withTheme(tabBarTheme, _tabs));
 
     await expectLater(
       find.byKey(_painterKey),
@@ -200,7 +258,7 @@ void main() {
       ),
     );
 
-    await tester.pumpWidget(_withTheme(tabBarTheme));
+    await tester.pumpWidget(_withTheme(tabBarTheme, _tabs));
 
     await expectLater(
       find.byKey(_painterKey),
@@ -217,7 +275,7 @@ void main() {
       ),
     );
 
-    await tester.pumpWidget(_withTheme(tabBarTheme));
+    await tester.pumpWidget(_withTheme(tabBarTheme, _tabs));
 
     await expectLater(
       find.byKey(_painterKey),
