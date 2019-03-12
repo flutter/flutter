@@ -951,7 +951,7 @@ void main() {
   });
 
   test('callback property test', () {
-    final Function onClick = () {};
+    final Function onClick = () { };
     final ObjectFlagProperty<Function> present = ObjectFlagProperty<Function>(
       'onClick',
       onClick,
@@ -1385,7 +1385,7 @@ void main() {
   });
 
   test('has property test', () {
-    final Function onClick = () {};
+    final Function onClick = () { };
     final ObjectFlagProperty<Function> has = ObjectFlagProperty<Function>.has(
       'onClick',
       onClick,

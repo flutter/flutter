@@ -61,7 +61,7 @@ class WebDevice extends Device {
   bool get supportsScreenshot => false;
 
   @override
-  void clearLogs() {}
+  void clearLogs() { }
 
   @override
   DeviceLogReader getLogReader({ApplicationPackage app}) {

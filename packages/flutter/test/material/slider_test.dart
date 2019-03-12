@@ -1167,7 +1167,7 @@ void main() {
         child: Material(
           child: Slider(
             value: 0.5,
-            onChanged: (double v) {},
+            onChanged: (double v) { },
           ),
         ),
       ),
@@ -1232,7 +1232,7 @@ void main() {
                 value: 100.0,
                 min: 0.0,
                 max: 200.0,
-                onChanged: (double v) {},
+                onChanged: (double v) { },
               ),
             ),
           ),
@@ -1273,7 +1273,7 @@ void main() {
             max: 200.0,
             divisions: 10,
             semanticFormatterCallback: (double value) => value.round().toString(),
-            onChanged: (double v) {},
+            onChanged: (double v) { },
           ),
         ),
       ),

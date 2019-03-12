@@ -636,7 +636,7 @@ void main() {
             child: RepaintBoundary(
               key: key,
               child: FloatingActionButton(
-                onPressed: () {},
+                onPressed: () { },
                 child: const Icon(Icons.add),
               ),
             ),
@@ -655,7 +655,7 @@ void main() {
     );
   });
 
-  testWidgets('Floating Action Button has no clip by default', (WidgetTester tester) async{
+  testWidgets('Floating Action Button has no clip by default', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
           textDirection: TextDirection.ltr,

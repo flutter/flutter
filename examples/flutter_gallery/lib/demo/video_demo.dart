@@ -144,7 +144,7 @@ class _VideoPlayPauseState extends State<VideoPlayPause> {
   _VideoPlayPauseState() {
     listener = () {
       if (mounted)
-        setState(() {});
+        setState(() { });
     };
   }
 
@@ -221,7 +221,7 @@ class _FadeAnimationState extends State<FadeAnimation> with SingleTickerProvider
     );
     animationController.addListener(() {
       if (mounted) {
-        setState(() {});
+        setState(() { });
       }
     });
     animationController.forward(from: 0.0);
@@ -372,7 +372,7 @@ class _VideoDemoState extends State<VideoDemo> with SingleTickerProviderStateMix
       await controller.initialize();
       if (mounted) {
         print('< VideoDemo initController "$name" done ${isDisposed ? "DISPOSED" : ""}');
-        setState(() {});
+        setState(() { });
       }
     }
 

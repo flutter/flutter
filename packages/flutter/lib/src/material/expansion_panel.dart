@@ -240,7 +240,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
       }
       _currentOpenPanel = isExpanded ? null : pressedChild;
     }
-    setState((){});
+    setState(() { });
   }
 
   @override

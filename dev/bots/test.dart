@@ -27,6 +27,7 @@ const Map<String, ShardRunner> _kShards = <String, ShardRunner>{
   'tool_tests': _runToolTests,
   'build_tests': _runBuildTests,
   'coverage': _runCoverage,
+  'integration_tests': _runIntegrationTests,
   'add2app_test': _runAdd2AppTest,
 };
 
@@ -147,17 +148,24 @@ Future<void> _runSmokeTests() async {
 Future<bq.BigqueryApi> _getBigqueryApi() async {
   // TODO(dnfield): How will we do this on LUCI?
   final String privateKey = Platform.environment['GCLOUD_SERVICE_ACCOUNT_KEY'];
-  if (privateKey == null || privateKey.isEmpty) {
+  // If we're on Cirrus and a non-collaborator is doing this, we can't get the key.
+  if (privateKey == null || privateKey.isEmpty || privateKey.startsWith('ENCRYPTED[')) {
     return null;
   }
-  final auth.ServiceAccountCredentials accountCredentials = auth.ServiceAccountCredentials( //.fromJson(credentials);
-    'flutter-ci-test-reporter@flutter-infra.iam.gserviceaccount.com',
-    auth.ClientId.serviceAccount('114390419920880060881.apps.googleusercontent.com'),
-    '-----BEGIN PRIVATE KEY-----\n$privateKey\n-----END PRIVATE KEY-----\n',
-  );
-  final List<String> scopes = <String>[bq.BigqueryApi.BigqueryInsertdataScope];
-  final http.Client client = await auth.clientViaServiceAccount(accountCredentials, scopes);
-  return bq.BigqueryApi(client);
+  try {
+    final auth.ServiceAccountCredentials accountCredentials = auth.ServiceAccountCredentials( //.fromJson(credentials);
+      'flutter-ci-test-reporter@flutter-infra.iam.gserviceaccount.com',
+      auth.ClientId.serviceAccount('114390419920880060881.apps.googleusercontent.com'),
+      '-----BEGIN PRIVATE KEY-----\n$privateKey\n-----END PRIVATE KEY-----\n',
+    );
+    final List<String> scopes = <String>[bq.BigqueryApi.BigqueryInsertdataScope];
+    final http.Client client = await auth.clientViaServiceAccount(accountCredentials, scopes);
+    return bq.BigqueryApi(client);
+  } catch (e) {
+    print('Failed to get BigQuery API client.');
+    print(e);
+    return null;
+  }
 }
 
 Future<void> _runToolTests() async {
@@ -473,7 +481,12 @@ Future<void> _processTestOutput(
   Stream<String> testOutput,
   bq.TabledataResourceApi tableData,
 ) async {
+  final Timer heartbeat = Timer.periodic(const Duration(seconds: 30), (Timer timer) {
+    print('Processing...');
+  });
+
   await testOutput.forEach(formatter.processRawOutput);
+  heartbeat.cancel();
   formatter.finish();
   if (tableData == null || formatter.tests.isEmpty) {
     return;
@@ -609,4 +622,52 @@ Future<void> _verifyVersion(String filename) async {
     print('$redLine');
     exit(1);
   }
+}
+
+Future<void> _runIntegrationTests() async {
+  print('Platform env vars:');
+
+  await _runDevicelabTest('dartdocs');
+
+  if (Platform.isLinux) {
+    await _runDevicelabTest('flutter_create_offline_test_linux');
+  } else if (Platform.isWindows) {
+    await _runDevicelabTest('flutter_create_offline_test_windows');
+  } else if (Platform.isMacOS) {
+    await _runDevicelabTest('flutter_create_offline_test_mac');
+    await _runDevicelabTest('module_test_ios');
+  }
+  await _integrationTestsAndroidSdk();
+}
+
+Future<void> _runDevicelabTest(String testName, {Map<String, String> env}) async {
+  await runCommand(
+    dart,
+    <String>['bin/run.dart', '-t', testName],
+    workingDirectory: path.join(flutterRoot, 'dev', 'devicelab'),
+    environment: env,
+  );
+}
+
+Future<void> _integrationTestsAndroidSdk() async {
+  final String androidSdkRoot = (Platform.environment['ANDROID_HOME']?.isEmpty ?? true)
+      ? Platform.environment['ANDROID_SDK_ROOT']
+      : Platform.environment['ANDROID_HOME'];
+  if (androidSdkRoot == null || androidSdkRoot.isEmpty) {
+    print('No Android SDK detected, skipping Android Integration Tests');
+    return;
+  }
+
+  final Map<String, String> env = <String, String> {
+    'ANDROID_HOME': androidSdkRoot,
+    'ANDROID_SDK_ROOT': androidSdkRoot,
+  };
+
+  // TODO(dnfield): gradlew is crashing on the cirrus image and it's not clear why.
+  if (!Platform.isWindows) {
+    await _runDevicelabTest('gradle_plugin_test', env: env);
+    await _runDevicelabTest('module_test', env: env);
+  }
+  // note: this also covers plugin_test_win as long as Windows has an Android SDK available.
+  await _runDevicelabTest('plugin_test', env: env);
 }

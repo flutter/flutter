@@ -334,7 +334,7 @@ void main() {
   testWidgets('OutlineButton implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     OutlineButton(
-      onPressed: () {},
+      onPressed: () { },
       textColor: const Color(0xFF00FF00),
       disabledTextColor: const Color(0xFFFF0000),
       color: const Color(0xFF000000),
@@ -363,7 +363,7 @@ void main() {
         home: Scaffold(
           body: Center(
             child: OutlineButton(
-              onPressed: () {},
+              onPressed: () { },
               // Causes the button to be filled with the theme's canvasColor
               // instead of Colors.transparent before the button material's
               // elevation is animated to 2.0.
