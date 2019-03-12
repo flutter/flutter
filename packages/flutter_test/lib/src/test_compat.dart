@@ -232,8 +232,8 @@ void test(
 /// avoid this flag if possible, and instead use the test runner flag `-n` to
 /// filter tests by name.
 @isTestGroup
-void group(Object description, Function body) {
-  _declarer.group(description.toString(), body);
+void group(Object description, Function body, dynamic skip) {
+  _declarer.group(description.toString(), body, skip: skip);
 }
 
 /// Registers a function to be run before tests.
