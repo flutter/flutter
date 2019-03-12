@@ -61,12 +61,26 @@ void main() {
     expect(unselectedRenderObject.text.style.fontSize, equals(14.0));
     expect(unselectedRenderObject.text.style.color, equals(Colors.white.withAlpha(0xB2)));
 
-    //TODO: update to use coordinates over goldens
-    await expectLater(
-      find.byKey(_painterKey),
-      matchesGoldenFile('tab_bar_theme.tab_label_padding.default.png'),
-      skip: !Platform.isLinux,
-    );
+    // checks if the labelPadding is equal to the default value
+    await tester.pumpWidget(_withTheme(null, _sizedTabs, isScrollable: true));
+
+    const double indicatorWeight = 2.0;
+    final Rect tabBar = tester.getRect(find.byType(TabBar));
+    final Rect tabOneRect = tester.getRect(find.byKey(_sizedTabs[0].key));
+    final Rect tabTwoRect = tester.getRect(find.byKey(_sizedTabs[1].key));
+
+    // verify coordinates of tabOne
+    expect(tabOneRect.left, equals(kTabLabelPadding.left));
+    expect(tabOneRect.top, equals(kTabLabelPadding.top));
+    expect(tabOneRect.bottom, equals(tabBar.bottom - kTabLabelPadding.bottom - indicatorWeight));
+
+    // verify coordinates of tabTwo
+    expect(tabTwoRect.right, equals(tabBar.width - kTabLabelPadding.right));
+    expect(tabTwoRect.top, equals(kTabLabelPadding.top));
+    expect(tabTwoRect.bottom, equals(tabBar.bottom - kTabLabelPadding.bottom - indicatorWeight));
+
+    // verify tabOne and tabTwo is separated by right padding of tabOne and left padding of tabTwo
+    expect(tabOneRect.right, equals(tabTwoRect.left - kTabLabelPadding.left - kTabLabelPadding.right));
   });
   testWidgets('Tab bar theme overrides label color (selected)', (WidgetTester tester) async {
     const Color labelColor = Colors.black;
@@ -81,13 +95,14 @@ void main() {
   });
 
   testWidgets('Tab bar theme overrides label padding', (WidgetTester tester) async {
-    const double verticalPadding = 10.0;
-    const double horizontalPadding = 10.0;
+    const double topPadding = 10.0;
+    const double bottomPadding = 7.0;
+    const double rightPadding = 13.0;
+    const double leftPadding = 16.0;
     const double indicatorWeight = 2.0; // default value
 
-    const EdgeInsetsGeometry labelPadding = EdgeInsets.symmetric(
-      vertical: verticalPadding,
-      horizontal: horizontalPadding,
+    const EdgeInsetsGeometry labelPadding = EdgeInsets.fromLTRB(
+      leftPadding, topPadding, rightPadding, bottomPadding
     );
 
     const TabBarTheme tabBarTheme = TabBarTheme(labelPadding: labelPadding);
@@ -103,17 +118,17 @@ void main() {
     final Rect tabTwoRect = tester.getRect(find.byKey(_sizedTabs[1].key));
 
     // verify coordinates of tabOne
-    expect(tabOneRect.left, equals(horizontalPadding));
-    expect(tabOneRect.top, equals(verticalPadding));
-    expect(tabOneRect.bottom, equals(tabBar.bottom - verticalPadding - indicatorWeight));
+    expect(tabOneRect.left, equals(leftPadding));
+    expect(tabOneRect.top, equals(topPadding));
+    expect(tabOneRect.bottom, equals(tabBar.bottom - bottomPadding - indicatorWeight));
 
     // verify coordinates of tabTwo
-    expect(tabTwoRect.right, equals(tabBar.width - horizontalPadding));
-    expect(tabTwoRect.top, equals(verticalPadding));
-    expect(tabTwoRect.bottom, equals(tabBar.bottom - verticalPadding - indicatorWeight));
+    expect(tabTwoRect.right, equals(tabBar.width - rightPadding));
+    expect(tabTwoRect.top, equals(topPadding));
+    expect(tabTwoRect.bottom, equals(tabBar.bottom - bottomPadding - indicatorWeight));
 
-    // verify tabOne and tabTwo is separated by 2x horizontalPadding
-    expect(tabOneRect.right, equals(tabTwoRect.left - (2 * horizontalPadding)));
+    // verify tabOne and tabTwo is separated by right padding of tabOne and left padding of tabTwo
+    expect(tabOneRect.right, equals(tabTwoRect.left - leftPadding - rightPadding));
   });
 
   testWidgets('Tab bar theme overrides label styles', (WidgetTester tester) async {
