@@ -108,12 +108,9 @@ abstract class SearchDelegate<T> {
   /// The current value of [query] can be used to determine what the user
   /// searched for.
   ///
-  /// Note that this method might be called multiple times just like any other
-  /// build function in Flutter. Please cache the search results if you don't
-  /// want to call search backend multiple times on the same query.
-  /// See:
-  /// https://github.com/flutter/flutter/issues/11655#issuecomment-412413030
-  /// https://github.com/flutter/flutter/issues/26759
+  /// This method might be applied more than once to the same query.
+  /// If your [buildResults] method is computationally expensive, you may want
+  /// to cache the search results for one or more queries.
   ///
   /// Typically, this method returns a [ListView] with the search results.
   /// When the user taps on a particular search result, [close] should be called
