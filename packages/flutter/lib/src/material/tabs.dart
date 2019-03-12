@@ -655,8 +655,8 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// Unselected tab labels are rendered with the same color rendered at 70%
   /// opacity unless [unselectedLabelColor] is non-null.
   ///
-  /// If this parameter is null then the color of the theme's body2 text color
-  /// is used.
+  /// If this parameter is null then the color of the [ThemeData.primaryTextTheme]'s
+  /// body2 text color is used.
   final Color labelColor;
 
   /// The color of unselected tab labels.
@@ -669,8 +669,8 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// null then this text style will be used for both selected and unselected
   /// label styles.
   ///
-  /// If this property is null then the text style of the theme's body2
-  /// definition is used.
+  /// If this property is null then the text style of the [ThemeData.primaryTextTheme]'s
+  /// body2 definition is used.
   final TextStyle labelStyle;
 
   /// The padding added to each of the tab labels.
@@ -681,7 +681,8 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// The text style of the unselected tab labels
   ///
   /// If this property is null then the [labelStyle] value is used. If [labelStyle]
-  /// is null then the text style of the theme's body2 definition is used.
+  /// is null then the text style of the [ThemeData.primaryTextTheme]'s
+  /// body2 definition is used.
   final TextStyle unselectedLabelStyle;
 
   /// {@macro flutter.widgets.scrollable.dragStartBehavior}
