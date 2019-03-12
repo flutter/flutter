@@ -930,10 +930,13 @@ class HotRunner extends ResidentRunner {
 }
 
 class ProjectFileInvalidator {
-  ProjectFileInvalidator(String packagesPath, FlutterProject flutterProject) {
-    if (fs.file(packagesPath).existsSync()) {
-      _packageMap = PackageMap(packagesPath).map;
+  ProjectFileInvalidator(this._packagesPath, FlutterProject flutterProject) {
+    final File packagesFile = fs.file(_packagesPath);
+    if (packagesFile.existsSync()) {
+      _packagesUpdateTime = packagesFile.statSync().modified.millisecondsSinceEpoch;
+      _packageMap = PackageMap(_packagesPath).map;
     } else {
+      _packagesUpdateTime = -1;
       _packageMap = const <String, Uri>{};
     }
     if (flutterProject != null && flutterProject.pubspecFile.existsSync()) {
@@ -971,7 +974,9 @@ class ProjectFileInvalidator {
   static const String _pubCachePathWindows = 'Pub/Cache';
 
   Map<String, Uri> _packageMap;
+  final String _packagesPath;
   final Map<String, int> _updateTime = <String, int>{};
+  int _packagesUpdateTime;
 
   @visibleForTesting
   Map<String, int> get updateTime => _updateTime;
@@ -987,6 +992,14 @@ class ProjectFileInvalidator {
   }
 
   List<String> findInvalidated() {
+    final File packagesFile = fs.file(_packagesPath);
+    if (packagesFile.existsSync()) {
+      final int newPackagesUpdateTime = packagesFile.statSync().modified.millisecondsSinceEpoch;
+      if (newPackagesUpdateTime > _packagesUpdateTime) {
+        printError('Warning: updated dependencies detected. The Flutter application will require a restart to use them.');
+      }
+      _packagesUpdateTime = newPackagesUpdateTime;
+    }
     final List<String> invalidatedFiles = <String>[];
     for (String packageName in _packageMap.keys) {
       final Uri packageUri =_packageMap[packageName];

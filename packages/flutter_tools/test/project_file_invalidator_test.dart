@@ -35,7 +35,7 @@ name: test_package
 
 dependencies:
   foo: any
-  bar: any
+  bar:
 
 dev_dependencies:
   baz: any
@@ -131,7 +131,7 @@ name: test_package
 
 dependencies:
   foo: any
-  bar: any
+  bar:
 
 dev_dependencies:
   baz: any
