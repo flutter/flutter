@@ -11,6 +11,7 @@ import 'dart:isolate';
 import 'package:logging/logging.dart';
 import 'package:stack_trace/stack_trace.dart';
 
+import 'running_processes.dart';
 import 'utils.dart';
 
 /// Maximum amount of time a single task is allowed to take to run.
@@ -82,7 +83,33 @@ class _TaskRunner {
     try {
       _taskStarted = true;
       print('Running task.');
-      final TaskResult result = await _performTask().timeout(taskTimeout);
+      final String exe = Platform.isWindows ? '.exe' : '';
+      section('Checking running Dart$exe processes');
+      final Set<RunningProcessInfo> beforeRunningDartInstances = await getRunningProcesses(
+        processName: 'dart$exe',
+      ).toSet();
+      beforeRunningDartInstances.forEach(print);
+
+      TaskResult result = await _performTask().timeout(taskTimeout);
+
+      section('Checking running Dart$exe processes after task...');
+      final List<RunningProcessInfo> afterRunningDartInstances = await getRunningProcesses(
+        processName: 'dart$exe',
+      ).toList();
+      afterRunningDartInstances.forEach(print);
+      for(final RunningProcessInfo info in afterRunningDartInstances) {
+        if (!beforeRunningDartInstances.contains(info)) {
+          print('$info was leaked by this test.');
+          result = TaskResult.markFailure(result);
+          final bool killed = await killProcess(info.pid);
+          if (!killed) {
+            print('Failed to kill process ${info.pid}.');
+          } else {
+            print('Killed process id ${info.pid}.');
+          }
+        }
+      }
+
       _completer.complete(result);
       return result;
     } on TimeoutException catch (_) {
@@ -146,6 +173,13 @@ class _TaskRunner {
 
 /// A result of running a single task.
 class TaskResult {
+  /// Creates a result marked as a failure from an existing result.
+  TaskResult.markFailure(TaskResult original)
+      : succeeded = false,
+        benchmarkScoreKeys = original.benchmarkScoreKeys,
+        data = original.data,
+        message = original.message;
+
   /// Constructs a successful result.
   TaskResult.success(this.data, {this.benchmarkScoreKeys = const <String>[]})
       : succeeded = true,
