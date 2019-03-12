@@ -16,9 +16,14 @@ import 'ticker_provider.dart';
 import 'transitions.dart';
 
 // Examples can assume:
-// Color myCurrentTargetColor;
-// class _Noop {}
-// class MyWidget = ImplicitlyAnimatedWidget with _Noop;
+// class MyWidget extends ImplicitlyAnimatedWidget {
+//   MyWidget() : super(duration: const Duration(seconds: 1));
+//
+//   final Color targetColor = Color.black;
+//
+//   @override
+//   HeadlineState createState() => MyWidgetState();
+// }
 
 /// An interpolation between two [BoxConstraints].
 ///
@@ -381,7 +386,7 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
   ///   void forEachTween(TweenVisitor<dynamic> visitor) {
   ///     _colorTween = visitor(
   ///       _colorTween,
-  ///       myCurrentTargetColor,
+  ///       widget.targetColor,
   ///       (value) => ColorTween(begin: value),
   ///     );
   ///   }
