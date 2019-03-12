@@ -14,10 +14,10 @@
 namespace fml {
 
 // struct UniqueFooTraits {
-//   // This function should be fast an inline.
+//   // This function should be fast and inline.
 //   static int InvalidValue() { return 0; }
 //
-//   // This function should be fast an inline.
+//   // This function should be fast and inline.
 //   static bool IsValid(const T& value) { return value != InvalidValue(); }
 //
 //   // This free function will not be called if f == InvalidValue()!
