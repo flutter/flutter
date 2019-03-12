@@ -100,6 +100,7 @@ class _TaskRunner {
       for (final RunningProcessInfo info in afterRunningDartInstances) {
         if (!beforeRunningDartInstances.contains(info)) {
           print('$info was leaked by this test.');
+          result.data['LeakedDartProcesses'] = true;
           final bool killed = await killProcess(info.pid);
           if (!killed) {
             print('Failed to kill process ${info.pid}.');
@@ -227,9 +228,6 @@ class TaskResult {
 
   /// Explains the result in a human-readable format.
   final String message;
-
-  /// Whether the test underperformed, e.g. leaked a process it shouldn't have.
-  bool underperformed = false;
 
   /// Serializes this task result to JSON format.
   ///
