@@ -25,6 +25,8 @@ final PlatformViewsRegistry platformViewsRegistry = PlatformViewsRegistry._insta
 class PlatformViewsRegistry {
   PlatformViewsRegistry._instance();
 
+  // Always non-negative. The id value -1 is used in the accessibility bridge
+  // to indicate the absence of a platform view.
   int _nextPlatformViewId = 0;
 
   /// Allocates a unique identifier for a platform view.
@@ -77,7 +79,6 @@ class PlatformViewsService {
     @required TextDirection layoutDirection,
     dynamic creationParams,
     MessageCodec<dynamic> creationParamsCodec,
-    PlatformViewCreatedCallback onPlatformViewCreated,
   }) {
     assert(id != null);
     assert(viewType != null);
@@ -89,7 +90,6 @@ class PlatformViewsService {
       creationParams,
       creationParamsCodec,
       layoutDirection,
-      onPlatformViewCreated,
     );
   }
 
@@ -143,7 +143,7 @@ class AndroidPointerProperties {
   /// All parameters must not be null.
   const AndroidPointerProperties({
     @required this.id,
-    @required this.toolType
+    @required this.toolType,
   }) : assert(id != null),
        assert(toolType != null);
 
@@ -193,7 +193,7 @@ class AndroidPointerCoords {
     @required this.touchMajor,
     @required this.touchMinor,
     @required this.x,
-    @required this.y
+    @required this.y,
   }) : assert(orientation != null),
        assert(pressure != null),
        assert(size != null),
@@ -280,7 +280,7 @@ class AndroidMotionEvent {
     @required this.deviceId,
     @required this.edgeFlags,
     @required this.source,
-    @required this.flags
+    @required this.flags,
   }) : assert(downTime != null),
        assert(eventTime != null),
        assert(action != null),
@@ -349,7 +349,7 @@ class AndroidMotionEvent {
   /// See Android's [MotionEvent#getDeviceId](https://developer.android.com/reference/android/view/MotionEvent.html#getDeviceId()).
   final int deviceId;
 
-  /// A bitfield indicating which edges, if any, were touched by this MotionEvent.
+  /// A bit field indicating which edges, if any, were touched by this MotionEvent.
   ///
   /// See Android's [MotionEvent#getEdgeFlags](https://developer.android.com/reference/android/view/MotionEvent.html#getEdgeFlags()).
   final int edgeFlags;
@@ -406,7 +406,6 @@ class AndroidViewController {
     dynamic creationParams,
     MessageCodec<dynamic> creationParamsCodec,
     TextDirection layoutDirection,
-    PlatformViewCreatedCallback onPlatformViewCreated,
   ) : assert(id != null),
       assert(viewType != null),
       assert(layoutDirection != null),
@@ -415,7 +414,6 @@ class AndroidViewController {
       _creationParams = creationParams,
       _creationParamsCodec = creationParamsCodec,
       _layoutDirection = layoutDirection,
-      _onPlatformViewCreated = onPlatformViewCreated,
       _state = _AndroidViewState.waitingForSize;
 
   /// Action code for when a primary pointer touched the screen.
@@ -459,8 +457,6 @@ class AndroidViewController {
 
   final String _viewType;
 
-  final PlatformViewCreatedCallback _onPlatformViewCreated;
-
   /// The texture entry id into which the Android view is rendered.
   int _textureId;
 
@@ -478,6 +474,25 @@ class AndroidViewController {
 
   MessageCodec<dynamic> _creationParamsCodec;
 
+  final List<PlatformViewCreatedCallback> _platformViewCreatedCallbacks = <PlatformViewCreatedCallback>[];
+
+  /// Whether the platform view has already been created.
+  bool get isCreated => _state == _AndroidViewState.created;
+
+  /// Adds a callback that will get invoke after the platform view has been
+  /// created.
+  void addOnPlatformViewCreatedListener(PlatformViewCreatedCallback listener) {
+    assert(listener != null);
+    assert(_state != _AndroidViewState.disposed);
+    _platformViewCreatedCallbacks.add(listener);
+  }
+
+  /// Removes a callback added with [addOnPlatformViewCreatedListener].
+  void removeOnPlatformViewCreatedListener(PlatformViewCreatedCallback listener) {
+    assert(_state != _AndroidViewState.disposed);
+    _platformViewCreatedCallbacks.remove(listener);
+  }
+
   /// Disposes the Android view.
   ///
   /// The [AndroidViewController] object is unusable after calling this.
@@ -486,6 +501,7 @@ class AndroidViewController {
   Future<void> dispose() async {
     if (_state == _AndroidViewState.creating || _state == _AndroidViewState.created)
       await SystemChannels.platform_views.invokeMethod<void>('dispose', id);
+    _platformViewCreatedCallbacks.clear();
     _state = _AndroidViewState.disposed;
   }
 
@@ -578,9 +594,10 @@ class AndroidViewController {
       );
     }
     _textureId = await SystemChannels.platform_views.invokeMethod('create', args);
-    if (_onPlatformViewCreated != null)
-      _onPlatformViewCreated(id);
     _state = _AndroidViewState.created;
+    for (PlatformViewCreatedCallback callback in _platformViewCreatedCallbacks) {
+      callback(id);
+    }
   }
 }
 
@@ -598,7 +615,8 @@ class UiKitViewController {
 
   /// The unique identifier of the iOS view controlled by this controller.
   ///
-  /// This identifer is typically generated by [PlatformViewsRegistry.getNextPlatformViewId].
+  /// This identifier is typically generated by
+  /// [PlatformViewsRegistry.getNextPlatformViewId].
   final int id;
 
   bool _debugDisposed = false;

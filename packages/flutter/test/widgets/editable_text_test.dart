@@ -12,24 +12,8 @@ import 'package:flutter/services.dart';
 import 'package:mockito/mockito.dart';
 import 'package:flutter/foundation.dart';
 
+import 'editable_text_utils.dart';
 import 'semantics_tester.dart';
-
-RenderEditable findRenderEditable(WidgetTester tester) {
-  final RenderObject root = tester.renderObject(find.byType(EditableText));
-  expect(root, isNotNull);
-
-  RenderEditable renderEditable;
-  void recursiveFinder(RenderObject child) {
-    if (child is RenderEditable) {
-      renderEditable = child;
-      return;
-    }
-    child.visitChildren(recursiveFinder);
-  }
-  root.visitChildren(recursiveFinder);
-  expect(renderEditable, isNotNull);
-  return renderEditable;
-}
 
 final TextEditingController controller = TextEditingController();
 final FocusNode focusNode = FocusNode();
@@ -108,8 +92,7 @@ void main() {
     expect(editableText.cursorWidth, 2.0);
   });
 
-  testWidgets('text keyboard is requested when maxLines is default',
-      (WidgetTester tester) async {
+  testWidgets('text keyboard is requested when maxLines is default', (WidgetTester tester) async {
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(devicePixelRatio: 1.0),
@@ -143,9 +126,7 @@ void main() {
         equals('TextInputAction.done'));
   });
 
-  testWidgets(
-      'Keyboard is configured for "unspecified" action when explicitly requested',
-      (WidgetTester tester) async {
+  testWidgets('Keyboard is configured for "unspecified" action when explicitly requested', (WidgetTester tester) async {
     await _desiredKeyboardActionIsRequested(
       tester: tester,
       action: TextInputAction.unspecified,
@@ -153,9 +134,7 @@ void main() {
     );
   });
 
-  testWidgets(
-      'Keyboard is configured for "none" action when explicitly requested',
-      (WidgetTester tester) async {
+  testWidgets('Keyboard is configured for "none" action when explicitly requested', (WidgetTester tester) async {
     await _desiredKeyboardActionIsRequested(
       tester: tester,
       action: TextInputAction.none,
@@ -163,9 +142,7 @@ void main() {
     );
   });
 
-  testWidgets(
-      'Keyboard is configured for "done" action when explicitly requested',
-      (WidgetTester tester) async {
+  testWidgets('Keyboard is configured for "done" action when explicitly requested', (WidgetTester tester) async {
     await _desiredKeyboardActionIsRequested(
       tester: tester,
       action: TextInputAction.done,
@@ -173,9 +150,7 @@ void main() {
     );
   });
 
-  testWidgets(
-      'Keyboard is configured for "send" action when explicitly requested',
-      (WidgetTester tester) async {
+  testWidgets('Keyboard is configured for "send" action when explicitly requested', (WidgetTester tester) async {
     await _desiredKeyboardActionIsRequested(
       tester: tester,
       action: TextInputAction.send,
@@ -183,9 +158,7 @@ void main() {
     );
   });
 
-  testWidgets(
-      'Keyboard is configured for "go" action when explicitly requested',
-      (WidgetTester tester) async {
+  testWidgets('Keyboard is configured for "go" action when explicitly requested', (WidgetTester tester) async {
     await _desiredKeyboardActionIsRequested(
       tester: tester,
       action: TextInputAction.go,
@@ -193,9 +166,7 @@ void main() {
     );
   });
 
-  testWidgets(
-      'Keyboard is configured for "search" action when explicitly requested',
-      (WidgetTester tester) async {
+  testWidgets('Keyboard is configured for "search" action when explicitly requested', (WidgetTester tester) async {
     await _desiredKeyboardActionIsRequested(
       tester: tester,
       action: TextInputAction.search,
@@ -203,9 +174,7 @@ void main() {
     );
   });
 
-  testWidgets(
-      'Keyboard is configured for "send" action when explicitly requested',
-      (WidgetTester tester) async {
+  testWidgets('Keyboard is configured for "send" action when explicitly requested', (WidgetTester tester) async {
     await _desiredKeyboardActionIsRequested(
       tester: tester,
       action: TextInputAction.send,
@@ -213,9 +182,7 @@ void main() {
     );
   });
 
-  testWidgets(
-      'Keyboard is configured for "next" action when explicitly requested',
-      (WidgetTester tester) async {
+  testWidgets('Keyboard is configured for "next" action when explicitly requested', (WidgetTester tester) async {
     await _desiredKeyboardActionIsRequested(
       tester: tester,
       action: TextInputAction.next,
@@ -223,9 +190,7 @@ void main() {
     );
   });
 
-  testWidgets(
-      'Keyboard is configured for "previous" action when explicitly requested',
-      (WidgetTester tester) async {
+  testWidgets('Keyboard is configured for "previous" action when explicitly requested', (WidgetTester tester) async {
     await _desiredKeyboardActionIsRequested(
       tester: tester,
       action: TextInputAction.previous,
@@ -233,9 +198,7 @@ void main() {
     );
   });
 
-  testWidgets(
-      'Keyboard is configured for "continue" action when explicitly requested',
-      (WidgetTester tester) async {
+  testWidgets('Keyboard is configured for "continue" action when explicitly requested', (WidgetTester tester) async {
     await _desiredKeyboardActionIsRequested(
       tester: tester,
       action: TextInputAction.continueAction,
@@ -243,9 +206,7 @@ void main() {
     );
   });
 
-  testWidgets(
-      'Keyboard is configured for "join" action when explicitly requested',
-      (WidgetTester tester) async {
+  testWidgets('Keyboard is configured for "join" action when explicitly requested', (WidgetTester tester) async {
     await _desiredKeyboardActionIsRequested(
       tester: tester,
       action: TextInputAction.join,
@@ -253,9 +214,7 @@ void main() {
     );
   });
 
-  testWidgets(
-      'Keyboard is configured for "route" action when explicitly requested',
-      (WidgetTester tester) async {
+  testWidgets('Keyboard is configured for "route" action when explicitly requested', (WidgetTester tester) async {
     await _desiredKeyboardActionIsRequested(
       tester: tester,
       action: TextInputAction.route,
@@ -263,9 +222,7 @@ void main() {
     );
   });
 
-  testWidgets(
-      'Keyboard is configured for "emergencyCall" action when explicitly requested',
-      (WidgetTester tester) async {
+  testWidgets('Keyboard is configured for "emergencyCall" action when explicitly requested', (WidgetTester tester) async {
     await _desiredKeyboardActionIsRequested(
       tester: tester,
       action: TextInputAction.emergencyCall,
@@ -273,8 +230,7 @@ void main() {
     );
   });
 
-  testWidgets('multiline keyboard is requested when set explicitly',
-      (WidgetTester tester) async {
+  testWidgets('multiline keyboard is requested when set explicitly', (WidgetTester tester) async {
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(devicePixelRatio: 1.0),
@@ -374,9 +330,7 @@ void main() {
         equals('TextInputAction.done'));
   });
 
-  testWidgets(
-      'Correct keyboard is requested when set explicitly and maxLines > 1',
-      (WidgetTester tester) async {
+  testWidgets('Correct keyboard is requested when set explicitly and maxLines > 1', (WidgetTester tester) async {
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(devicePixelRatio: 1.0),
@@ -410,8 +364,7 @@ void main() {
         equals('TextInputAction.done'));
   });
 
-  testWidgets('multiline keyboard is requested when set implicitly',
-      (WidgetTester tester) async {
+  testWidgets('multiline keyboard is requested when set implicitly', (WidgetTester tester) async {
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(devicePixelRatio: 1.0),
@@ -444,8 +397,7 @@ void main() {
         equals('TextInputAction.newline'));
   });
 
-  testWidgets('single line inputs have correct default keyboard',
-      (WidgetTester tester) async {
+  testWidgets('single line inputs have correct default keyboard', (WidgetTester tester) async {
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(devicePixelRatio: 1.0),
@@ -478,8 +430,7 @@ void main() {
         equals('TextInputAction.done'));
   });
 
-  testWidgets('can only show toolbar when there is text and a selection',
-      (WidgetTester tester) async {
+  testWidgets('can only show toolbar when there is text and a selection', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: EditableText(
@@ -517,8 +468,7 @@ void main() {
     expect(find.text('PASTE'), findsOneWidget);
   });
 
-  testWidgets('Fires onChanged when text changes via TextSelectionOverlay',
-      (WidgetTester tester) async {
+  testWidgets('Fires onChanged when text changes via TextSelectionOverlay', (WidgetTester tester) async {
     final GlobalKey<EditableTextState> editableTextKey =
         GlobalKey<EditableTextState>();
 
@@ -543,11 +493,11 @@ void main() {
     // Populate a fake clipboard.
     const String clipboardContent = 'Dobunezumi mitai ni utsukushiku naritai';
     SystemChannels.platform
-        .setMockMethodCallHandler((MethodCall methodCall) async {
-      if (methodCall.method == 'Clipboard.getData')
-        return const <String, dynamic>{'text': clipboardContent};
-      return null;
-    });
+      .setMockMethodCallHandler((MethodCall methodCall) async {
+        if (methodCall.method == 'Clipboard.getData')
+          return const <String, dynamic>{'text': clipboardContent};
+        return null;
+      });
 
     // Long-press to bring up the text editing controls.
     final Finder textFinder = find.byKey(editableTextKey);
@@ -561,8 +511,7 @@ void main() {
     expect(changedValue, clipboardContent);
   });
 
-  testWidgets('Does not lose focus by default when "next" action is pressed',
-      (WidgetTester tester) async {
+  testWidgets('Does not lose focus by default when "next" action is pressed', (WidgetTester tester) async {
     final GlobalKey<EditableTextState> editableTextKey =
         GlobalKey<EditableTextState>();
     final FocusNode focusNode = FocusNode();
@@ -595,9 +544,7 @@ void main() {
     expect(focusNode.hasFocus, true);
   });
 
-  testWidgets(
-      'Does not lose focus by default when "done" action is pressed and onEditingComplete is provided',
-      (WidgetTester tester) async {
+  testWidgets('Does not lose focus by default when "done" action is pressed and onEditingComplete is provided', (WidgetTester tester) async {
     final GlobalKey<EditableTextState> editableTextKey =
         GlobalKey<EditableTextState>();
     final FocusNode focusNode = FocusNode();
@@ -634,9 +581,7 @@ void main() {
     expect(focusNode.hasFocus, true);
   });
 
-  testWidgets(
-      'When "done" is pressed callbacks are invoked: onEditingComplete > onSubmitted',
-      (WidgetTester tester) async {
+  testWidgets('When "done" is pressed callbacks are invoked: onEditingComplete > onSubmitted', (WidgetTester tester) async {
     final GlobalKey<EditableTextState> editableTextKey =
         GlobalKey<EditableTextState>();
     final FocusNode focusNode = FocusNode();
@@ -679,9 +624,7 @@ void main() {
     // and onSubmission callbacks.
   });
 
-  testWidgets(
-      'When "next" is pressed callbacks are invoked: onEditingComplete > onSubmitted',
-      (WidgetTester tester) async {
+  testWidgets('When "next" is pressed callbacks are invoked: onEditingComplete > onSubmitted', (WidgetTester tester) async {
     final GlobalKey<EditableTextState> editableTextKey =
         GlobalKey<EditableTextState>();
     final FocusNode focusNode = FocusNode();
@@ -724,9 +667,7 @@ void main() {
     // and onSubmission callbacks.
   });
 
-  testWidgets(
-      'When "newline" action is called on a Editable text with maxLines == 1 callbacks are invoked: onEditingComplete > onSubmitted',
-      (WidgetTester tester) async {
+  testWidgets('When "newline" action is called on a Editable text with maxLines == 1 callbacks are invoked: onEditingComplete > onSubmitted', (WidgetTester tester) async {
     final GlobalKey<EditableTextState> editableTextKey =
         GlobalKey<EditableTextState>();
     final FocusNode focusNode = FocusNode();
@@ -769,9 +710,7 @@ void main() {
     // and onSubmission callbacks.
   });
 
-  testWidgets(
-      'When "newline" action is called on a Editable text with maxLines != 1, onEditingComplete and onSubmitted callbacks are not invoked.',
-      (WidgetTester tester) async {
+  testWidgets('When "newline" action is called on a Editable text with maxLines != 1, onEditingComplete and onSubmitted callbacks are not invoked.', (WidgetTester tester) async {
     final GlobalKey<EditableTextState> editableTextKey =
         GlobalKey<EditableTextState>();
     final FocusNode focusNode = FocusNode();
@@ -814,8 +753,7 @@ void main() {
     assert(!onEditingCompleteCalled);
   });
 
-  testWidgets('Changing controller updates EditableText',
-      (WidgetTester tester) async {
+  testWidgets('Changing controller updates EditableText', (WidgetTester tester) async {
     final GlobalKey<EditableTextState> editableTextKey =
         GlobalKey<EditableTextState>();
     final TextEditingController controller1 =
@@ -846,7 +784,7 @@ void main() {
                     cursorColor: Colors.blue,
                     selectionControls: materialTextSelectionControls,
                     keyboardType: TextInputType.text,
-                    onChanged: (String value) {},
+                    onChanged: (String value) { },
                   ),
                 ),
               ),
@@ -887,8 +825,7 @@ void main() {
     );
   });
 
-  testWidgets('EditableText identifies as text field (w/ focus) in semantics',
-      (WidgetTester tester) async {
+  testWidgets('EditableText identifies as text field (w/ focus) in semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -921,15 +858,14 @@ void main() {
       semantics,
       includesNodeWith(flags: <SemanticsFlag>[
         SemanticsFlag.isTextField,
-        SemanticsFlag.isFocused
+        SemanticsFlag.isFocused,
       ]),
     );
 
     semantics.dispose();
   });
 
-  testWidgets('EditableText includes text as value in semantics',
-      (WidgetTester tester) async {
+  testWidgets('EditableText includes text as value in semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     const String value1 = 'EditableText content';
@@ -1024,8 +960,7 @@ void main() {
     );
   });
 
-  testWidgets('exposes correct cursor movement semantics',
-      (WidgetTester tester) async {
+  testWidgets('exposes correct cursor movement semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     controller.text = 'test';
@@ -1296,8 +1231,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('can extend selection with a11y means - character',
-      (WidgetTester tester) async {
+  testWidgets('can extend selection with a11y means - character', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     const bool extendSelection = true;
     const bool doNotExtendSelection = false;
@@ -1398,111 +1332,109 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('can extend selection with a11y means - word',
-          (WidgetTester tester) async {
-      final SemanticsTester semantics = SemanticsTester(tester);
-      const bool extendSelection = true;
-      const bool doNotExtendSelection = false;
+  testWidgets('can extend selection with a11y means - word', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    const bool extendSelection = true;
+    const bool doNotExtendSelection = false;
 
-      controller.text = 'test for words';
-      controller.selection =
-      TextSelection.collapsed(offset: controller.text.length);
+    controller.text = 'test for words';
+    controller.selection =
+    TextSelection.collapsed(offset: controller.text.length);
 
-      await tester.pumpWidget(MaterialApp(
-        home: EditableText(
-          backgroundCursorColor: Colors.grey,
-          controller: controller,
-          focusNode: focusNode,
-          style: textStyle,
-          cursorColor: cursorColor,
-        ),
-      ));
+    await tester.pumpWidget(MaterialApp(
+      home: EditableText(
+        backgroundCursorColor: Colors.grey,
+        controller: controller,
+        focusNode: focusNode,
+        style: textStyle,
+        cursorColor: cursorColor,
+      ),
+    ));
 
-      expect(
-        semantics,
-        includesNodeWith(
-          value: 'test for words',
-          actions: <SemanticsAction>[
-            SemanticsAction.moveCursorBackwardByCharacter,
-            SemanticsAction.moveCursorBackwardByWord,
-          ],
-        ),
-      );
+    expect(
+      semantics,
+      includesNodeWith(
+        value: 'test for words',
+        actions: <SemanticsAction>[
+          SemanticsAction.moveCursorBackwardByCharacter,
+          SemanticsAction.moveCursorBackwardByWord,
+        ],
+      ),
+    );
 
-      final RenderEditable render = tester.allRenderObjects
-          .firstWhere((RenderObject o) => o.runtimeType == RenderEditable);
-      final int semanticsId = render.debugSemantics.id;
+    final RenderEditable render = tester.allRenderObjects
+        .firstWhere((RenderObject o) => o.runtimeType == RenderEditable);
+    final int semanticsId = render.debugSemantics.id;
 
-      expect(controller.selection.baseOffset, 14);
-      expect(controller.selection.extentOffset, 14);
+    expect(controller.selection.baseOffset, 14);
+    expect(controller.selection.extentOffset, 14);
 
-      tester.binding.pipelineOwner.semanticsOwner.performAction(semanticsId,
-          SemanticsAction.moveCursorBackwardByWord, extendSelection);
-      await tester.pumpAndSettle();
+    tester.binding.pipelineOwner.semanticsOwner.performAction(semanticsId,
+        SemanticsAction.moveCursorBackwardByWord, extendSelection);
+    await tester.pumpAndSettle();
 
-      expect(controller.selection.baseOffset, 14);
-      expect(controller.selection.extentOffset, 9);
+    expect(controller.selection.baseOffset, 14);
+    expect(controller.selection.extentOffset, 9);
 
-      expect(
-        semantics,
-        includesNodeWith(
-          value: 'test for words',
-          actions: <SemanticsAction>[
-            SemanticsAction.moveCursorBackwardByCharacter,
-            SemanticsAction.moveCursorForwardByCharacter,
-            SemanticsAction.moveCursorBackwardByWord,
-            SemanticsAction.moveCursorForwardByWord,
-            SemanticsAction.setSelection,
-          ],
-        ),
-      );
+    expect(
+      semantics,
+      includesNodeWith(
+        value: 'test for words',
+        actions: <SemanticsAction>[
+          SemanticsAction.moveCursorBackwardByCharacter,
+          SemanticsAction.moveCursorForwardByCharacter,
+          SemanticsAction.moveCursorBackwardByWord,
+          SemanticsAction.moveCursorForwardByWord,
+          SemanticsAction.setSelection,
+        ],
+      ),
+    );
 
-      tester.binding.pipelineOwner.semanticsOwner.performAction(semanticsId,
-          SemanticsAction.moveCursorBackwardByWord, extendSelection);
-      await tester.pumpAndSettle();
+    tester.binding.pipelineOwner.semanticsOwner.performAction(semanticsId,
+        SemanticsAction.moveCursorBackwardByWord, extendSelection);
+    await tester.pumpAndSettle();
 
-      expect(controller.selection.baseOffset, 14);
-      expect(controller.selection.extentOffset, 5);
+    expect(controller.selection.baseOffset, 14);
+    expect(controller.selection.extentOffset, 5);
 
-      tester.binding.pipelineOwner.semanticsOwner.performAction(semanticsId,
-          SemanticsAction.moveCursorBackwardByWord, extendSelection);
-      await tester.pumpAndSettle();
+    tester.binding.pipelineOwner.semanticsOwner.performAction(semanticsId,
+        SemanticsAction.moveCursorBackwardByWord, extendSelection);
+    await tester.pumpAndSettle();
 
-      expect(controller.selection.baseOffset, 14);
-      expect(controller.selection.extentOffset, 0);
+    expect(controller.selection.baseOffset, 14);
+    expect(controller.selection.extentOffset, 0);
 
-      await tester.pumpAndSettle();
-      expect(
-        semantics,
-        includesNodeWith(
-          value: 'test for words',
-          actions: <SemanticsAction>[
-            SemanticsAction.moveCursorForwardByCharacter,
-            SemanticsAction.moveCursorForwardByWord,
-            SemanticsAction.setSelection,
-          ],
-        ),
-      );
+    await tester.pumpAndSettle();
+    expect(
+      semantics,
+      includesNodeWith(
+        value: 'test for words',
+        actions: <SemanticsAction>[
+          SemanticsAction.moveCursorForwardByCharacter,
+          SemanticsAction.moveCursorForwardByWord,
+          SemanticsAction.setSelection,
+        ],
+      ),
+    );
 
-      tester.binding.pipelineOwner.semanticsOwner.performAction(semanticsId,
-          SemanticsAction.moveCursorForwardByWord, doNotExtendSelection);
-      await tester.pumpAndSettle();
+    tester.binding.pipelineOwner.semanticsOwner.performAction(semanticsId,
+        SemanticsAction.moveCursorForwardByWord, doNotExtendSelection);
+    await tester.pumpAndSettle();
 
-      expect(controller.selection.baseOffset, 5);
-      expect(controller.selection.extentOffset, 5);
+    expect(controller.selection.baseOffset, 5);
+    expect(controller.selection.extentOffset, 5);
 
-      tester.binding.pipelineOwner.semanticsOwner.performAction(semanticsId,
-          SemanticsAction.moveCursorForwardByWord, extendSelection);
-      await tester.pumpAndSettle();
+    tester.binding.pipelineOwner.semanticsOwner.performAction(semanticsId,
+        SemanticsAction.moveCursorForwardByWord, extendSelection);
+    await tester.pumpAndSettle();
 
-      expect(controller.selection.baseOffset, 5);
-      expect(controller.selection.extentOffset, 9);
+    expect(controller.selection.baseOffset, 5);
+    expect(controller.selection.extentOffset, 9);
 
-      semantics.dispose();
+    semantics.dispose();
   });
 
-  testWidgets('password fields have correct semantics',
-      (WidgetTester tester) async {
+  testWidgets('password fields have correct semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     controller.text = 'super-secret-password!!1';
@@ -1533,7 +1465,7 @@ void main() {
                     TestSemantics(
                       flags: <SemanticsFlag>[
                         SemanticsFlag.isTextField,
-                        SemanticsFlag.isObscured
+                        SemanticsFlag.isObscured,
                       ],
                       value: expectedValue,
                       textDirection: TextDirection.ltr,
@@ -1553,8 +1485,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('password fields become obscured with the right semantics when set',
-      (WidgetTester tester) async {
+  testWidgets('password fields become obscured with the right semantics when set', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     const String originalText = 'super-secret-password!!1';
@@ -1650,8 +1581,7 @@ void main() {
   });
 
   group('a11y copy/cut/paste', () {
-    Future<void> _buildApp(
-        MockTextSelectionControls controls, WidgetTester tester) {
+    Future<void> _buildApp(MockTextSelectionControls controls, WidgetTester tester) {
       return tester.pumpWidget(MaterialApp(
         home: EditableText(
           backgroundCursorColor: Colors.grey,
@@ -1798,7 +1728,7 @@ void main() {
                         id: expectedNodeId,
                         flags: <SemanticsFlag>[
                           SemanticsFlag.isTextField,
-                          SemanticsFlag.isFocused
+                          SemanticsFlag.isFocused,
                         ],
                         actions: <SemanticsAction>[
                           SemanticsAction.moveCursorBackwardByCharacter,
@@ -1806,7 +1736,7 @@ void main() {
                           SemanticsAction.setSelection,
                           SemanticsAction.copy,
                           SemanticsAction.cut,
-                          SemanticsAction.paste
+                          SemanticsAction.paste,
                         ],
                         value: 'test',
                         textSelection: TextSelection.collapsed(
@@ -1837,8 +1767,7 @@ void main() {
     });
   });
 
-  testWidgets('allows customizing text style in subclasses',
-      (WidgetTester tester) async {
+  testWidgets('allows customizing text style in subclasses', (WidgetTester tester) async {
     controller.text = 'Hello World';
 
     await tester.pumpWidget(MaterialApp(
@@ -1967,9 +1896,7 @@ void main() {
     expect(setClient.arguments.last['keyboardAppearance'], 'Brightness.dark');
   });
 
-  testWidgets(
-      'Composing text is underlined and underline is cleared when losing focus',
-      (WidgetTester tester) async {
+  testWidgets('Composing text is underlined and underline is cleared when losing focus', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController.fromValue(
       const TextEditingValue(
         text: 'text composing text',

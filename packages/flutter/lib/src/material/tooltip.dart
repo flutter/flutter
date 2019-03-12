@@ -137,11 +137,11 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       padding: widget.padding,
       animation: CurvedAnimation(
         parent: _controller,
-        curve: Curves.fastOutSlowIn
+        curve: Curves.fastOutSlowIn,
       ),
       target: target,
       verticalOffset: widget.verticalOffset,
-      preferBelow: widget.preferBelow
+      preferBelow: widget.preferBelow,
     );
     _entry = OverlayEntry(builder: (BuildContext context) => overlay);
     Overlay.of(context, debugRequiredFor: widget).insert(_entry);

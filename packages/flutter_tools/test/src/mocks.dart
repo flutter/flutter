@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/android/android_sdk.dart' show AndroidSdk;
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/file_system.dart' hide IOSink;
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/devfs.dart';
@@ -30,7 +31,7 @@ class MockApplicationPackageStore extends ApplicationPackageStore {
       id: 'io.flutter.android.mock',
       file: fs.file('/mock/path/to/android/SkyShell.apk'),
       versionCode: 1,
-      launchActivity: 'io.flutter.android.mock.MockActivity'
+      launchActivity: 'io.flutter.android.mock.MockActivity',
     ),
     iOS: BuildableIOSApp(MockIosProject())
   );
@@ -44,16 +45,26 @@ class MockAndroidSdk extends Mock implements AndroidSdk {
     int ndkVersion = 16,
     bool withNdkSysroot = false,
     bool withSdkManager = true,
+    bool withPlatformTools = true,
+    bool withBuildTools = true,
   }) {
     final Directory dir = fs.systemTempDirectory.createTempSync('flutter_mock_android_sdk.');
+    final String exe = platform.isWindows ? '.exe' : '';
+    final String bat = platform.isWindows ? '.bat' : '';
 
-    _createSdkFile(dir, 'platform-tools/adb');
+    _createDir(dir, 'licenses');
 
-    _createSdkFile(dir, 'build-tools/19.1.0/aapt');
-    _createSdkFile(dir, 'build-tools/22.0.1/aapt');
-    _createSdkFile(dir, 'build-tools/23.0.2/aapt');
-    if (withAndroidN)
-      _createSdkFile(dir, 'build-tools/24.0.0-preview/aapt');
+    if (withPlatformTools) {
+      _createSdkFile(dir, 'platform-tools/adb$exe');
+    }
+
+    if (withBuildTools) {
+      _createSdkFile(dir, 'build-tools/19.1.0/aapt$exe');
+      _createSdkFile(dir, 'build-tools/22.0.1/aapt$exe');
+      _createSdkFile(dir, 'build-tools/23.0.2/aapt$exe');
+      if (withAndroidN)
+        _createSdkFile(dir, 'build-tools/24.0.0-preview/aapt$exe');
+    }
 
     _createSdkFile(dir, 'platforms/android-22/android.jar');
     _createSdkFile(dir, 'platforms/android-23/android.jar');
@@ -63,7 +74,7 @@ class MockAndroidSdk extends Mock implements AndroidSdk {
     }
 
     if (withSdkManager)
-      _createSdkFile(dir, 'tools/bin/sdkmanager');
+      _createSdkFile(dir, 'tools/bin/sdkmanager$bat');
 
     if (withNdkDir != null) {
       final String ndkToolchainBin = fs.path.join(
@@ -268,12 +279,12 @@ class MemoryIOSink implements IOSink {
   }
 
   @override
-  void writeln([Object obj = '']) {
+  void writeln([ Object obj = '' ]) {
     add(encoding.encode('$obj\n'));
   }
 
   @override
-  void writeAll(Iterable<dynamic> objects, [String separator = '']) {
+  void writeAll(Iterable<dynamic> objects, [ String separator = '' ]) {
     bool addSeparator = false;
     for (dynamic object in objects) {
       if (addSeparator) {
@@ -285,7 +296,7 @@ class MemoryIOSink implements IOSink {
   }
 
   @override
-  void addError(dynamic error, [StackTrace stackTrace]) {
+  void addError(dynamic error, [ StackTrace stackTrace ]) {
     throw UnimplementedError();
   }
 
@@ -459,16 +470,16 @@ class MockDevFSOperations extends BasicMock implements DevFSOperations {
 
 class MockResidentCompiler extends BasicMock implements ResidentCompiler {
   @override
-  void accept() {}
+  void accept() { }
 
   @override
   Future<CompilerOutput> reject() async { return null; }
 
   @override
-  void reset() {}
+  void reset() { }
 
   @override
-  Future<dynamic> shutdown() async {}
+  Future<dynamic> shutdown() async { }
 
   @override
   Future<CompilerOutput> compileExpression(
@@ -477,12 +488,12 @@ class MockResidentCompiler extends BasicMock implements ResidentCompiler {
     List<String> typeDefinitions,
     String libraryUri,
     String klass,
-    bool isStatic
+    bool isStatic,
   ) async {
     return null;
   }
   @override
-  Future<CompilerOutput> recompile(String mainPath, List<String> invalidatedFiles, {String outputPath, String packagesFilePath}) async {
+  Future<CompilerOutput> recompile(String mainPath, List<String> invalidatedFiles, { String outputPath, String packagesFilePath }) async {
     fs.file(outputPath).createSync(recursive: true);
     fs.file(outputPath).writeAsStringSync('compiled_kernel_output');
     return CompilerOutput(outputPath, 0);

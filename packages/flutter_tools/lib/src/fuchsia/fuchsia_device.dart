@@ -39,7 +39,8 @@ class _FuchsiaLogReader extends DeviceLogReader {
   FuchsiaDevice _device;
   ApplicationPackage _app;
 
-  @override String get name => _device.name;
+  @override
+  String get name => _device.name;
 
   Stream<String> _logLines;
   @override
@@ -92,7 +93,7 @@ class _FuchsiaLogSink implements EventSink<String> {
   }
 
   @override
-  void addError(Object error, [StackTrace stackTrace]) {
+  void addError(Object error, [ StackTrace stackTrace ]) {
     _outputSink.addError(error, stackTrace);
   }
 
@@ -205,7 +206,7 @@ class FuchsiaDevice extends Device {
   Future<String> get sdkNameAndVersion async => 'Fuchsia';
 
   @override
-  DeviceLogReader getLogReader({ApplicationPackage app}) => _logReader ??= _FuchsiaLogReader(this, app);
+  DeviceLogReader getLogReader({ ApplicationPackage app }) => _logReader ??= _FuchsiaLogReader(this, app);
   _FuchsiaLogReader _logReader;
 
   @override
@@ -397,13 +398,13 @@ class _FuchsiaPortForwarder extends DevicePortForwarder {
   final Map<int, Process> _processes = <int, Process>{};
 
   @override
-  Future<int> forward(int devicePort, {int hostPort}) async {
+  Future<int> forward(int devicePort, { int hostPort }) async {
     hostPort ??= await _findPort();
     // Note: the provided command works around a bug in -N, see US-515
     // for more explanation.
     final List<String> command = <String>[
       'ssh', '-6', '-F', fuchsiaArtifacts.sshConfig.absolute.path, '-nNT', '-vvv', '-f',
-      '-L', '$hostPort:$_ipv4Loopback:$devicePort', device.id, 'true'
+      '-L', '$hostPort:$_ipv4Loopback:$devicePort', device.id, 'true',
     ];
     final Process process = await processManager.start(command);
     unawaited(process.exitCode.then((int exitCode) {

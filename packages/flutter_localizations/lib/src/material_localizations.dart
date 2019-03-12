@@ -248,7 +248,7 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   String get tabLabelRaw;
 
   @override
-  String tabLabel({int tabIndex, int tabCount}) {
+  String tabLabel({ int tabIndex, int tabCount }) {
     assert(tabIndex >= 1);
     assert(tabCount >= 1);
     final String template = tabLabelRaw;
@@ -573,7 +573,7 @@ class _MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocal
       // Keep track of initialzed locales, or will fail on attempted double init.
       // This can only happen if a locale with a stripped scriptCode has already
       // been initialzed. This should be removed when scriptCode stripping is removed.
-      final Set<String> initializedLocales = Set<String>();
+      final Set<String> initializedLocales = <String>{};
       date_localizations.dateSymbols.forEach((String locale, dynamic data) {
         // Strip scriptCode from the locale, as we do not distinguish between scripts
         // for dates.

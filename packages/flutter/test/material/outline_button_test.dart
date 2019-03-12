@@ -70,7 +70,7 @@ void main() {
     const Color disabledBorderColor = Color(0xFFFF00FF);
     const double borderWidth = 4.0;
 
-    Widget buildFrame({VoidCallback onPressed}) {
+    Widget buildFrame({ VoidCallback onPressed }) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: Theme(
@@ -178,7 +178,7 @@ void main() {
 
     expect(
         tester.renderObject(find.byKey(buttonKey)),
-        paintsExactlyCountTimes(#clipPath, 0)
+        paintsExactlyCountTimes(#clipPath, 0),
     );
   });
 
@@ -213,7 +213,7 @@ void main() {
               SemanticsFlag.hasEnabledState,
               SemanticsFlag.isEnabled,
             ],
-          )
+          ),
         ],
       ),
       ignoreId: true,
@@ -297,7 +297,7 @@ void main() {
   testWidgets('OutlineButton implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     OutlineButton(
-      onPressed: () {},
+      onPressed: () { },
       textColor: const Color(0xFF00FF00),
       disabledTextColor: const Color(0xFFFF0000),
       color: const Color(0xFF000000),
@@ -326,7 +326,7 @@ void main() {
         home: Scaffold(
           body: Center(
             child: OutlineButton(
-              onPressed: () {},
+              onPressed: () { },
               // Causes the button to be filled with the theme's canvasColor
               // instead of Colors.transparent before the button material's
               // elevation is animated to 2.0.

@@ -17,8 +17,11 @@ class IntelliJPlugins {
   static final Version kMinFlutterPluginVersion = Version(16, 0, 0);
 
   void validatePackage(
-      List<ValidationMessage> messages, List<String> packageNames, String title,
-      {Version minVersion}) {
+    List<ValidationMessage> messages,
+    List<String> packageNames,
+    String title, {
+    Version minVersion,
+  }) {
     for (String packageName in packageNames) {
       if (!_hasPackage(packageName)) {
         continue;

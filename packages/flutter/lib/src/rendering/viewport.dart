@@ -68,7 +68,7 @@ abstract class RenderAbstractViewport extends RenderObject {
   /// See also:
   ///
   ///  * [RevealedOffset], which describes the return value of this method.
-  RevealedOffset getOffsetToReveal(RenderObject target, double alignment, {Rect rect});
+  RevealedOffset getOffsetToReveal(RenderObject target, double alignment, { Rect rect });
 
   /// The default value for the cache extent of the viewport.
   ///
@@ -576,7 +576,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
       if (child.geometry.visible && child.hitTest(
         result,
         mainAxisPosition: computeChildMainAxisPosition(child, mainAxisPosition),
-        crossAxisPosition: crossAxisPosition
+        crossAxisPosition: crossAxisPosition,
       )) {
         return true;
       }
@@ -585,7 +585,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   }
 
   @override
-  RevealedOffset getOffsetToReveal(RenderObject target, double alignment, {Rect rect}) {
+  RevealedOffset getOffsetToReveal(RenderObject target, double alignment, { Rect rect }) {
     double leadingScrollOffset = 0.0;
     double targetMainAxisExtent;
     rect ??= target.paintBounds;

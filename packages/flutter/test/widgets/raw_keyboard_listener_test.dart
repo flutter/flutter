@@ -60,8 +60,7 @@ void main() {
     focusNode.dispose();
   });
 
-  testWidgets('Defunct listeners do not receive events',
-      (WidgetTester tester) async {
+  testWidgets('Defunct listeners do not receive events', (WidgetTester tester) async {
     final List<RawKeyEvent> events = <RawKeyEvent>[];
 
     final FocusNode focusNode = FocusNode();

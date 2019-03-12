@@ -25,6 +25,9 @@ enum TextOverflow {
 
   /// Use an ellipsis to indicate that the text has overflowed.
   ellipsis,
+
+  /// Render overflowing text outside of its container.
+  visible,
 }
 
 const String _kEllipsis = '\u2026';
@@ -268,7 +271,7 @@ class RenderParagraph extends RenderBox {
     span?.recognizer?.addPointer(event);
   }
 
-  bool _hasVisualOverflow = false;
+  bool _needsClipping = false;
   ui.Shader _overflowShader;
 
   /// Whether this paragraph currently has a [dart:ui.Shader] for its overflow
@@ -281,30 +284,37 @@ class RenderParagraph extends RenderBox {
   @override
   void performLayout() {
     _layoutTextWithConstraints(constraints);
-    // We grab _textPainter.size here because assigning to `size` will trigger
-    // us to validate our intrinsic sizes, which will change _textPainter's
-    // layout because the intrinsic size calculations are destructive.
-    // Other _textPainter state like didExceedMaxLines will also be affected.
-    // See also RenderEditable which has a similar issue.
+    // We grab _textPainter.size and _textPainter.didExceedMaxLines here because
+    // assigning to `size` will trigger us to validate our intrinsic sizes,
+    // which will change _textPainter's layout because the intrinsic size
+    // calculations are destructive. Other _textPainter state will also be
+    // affected. See also RenderEditable which has a similar issue.
     final Size textSize = _textPainter.size;
-    final bool didOverflowHeight = _textPainter.didExceedMaxLines;
+    final bool textDidExceedMaxLines = _textPainter.didExceedMaxLines;
     size = constraints.constrain(textSize);
 
+    final bool didOverflowHeight = size.height < textSize.height || textDidExceedMaxLines;
     final bool didOverflowWidth = size.width < textSize.width;
     // TODO(abarth): We're only measuring the sizes of the line boxes here. If
     // the glyphs draw outside the line boxes, we might think that there isn't
     // visual overflow when there actually is visual overflow. This can become
     // a problem if we start having horizontal overflow and introduce a clip
     // that affects the actual (but undetected) vertical overflow.
-    _hasVisualOverflow = didOverflowWidth || didOverflowHeight;
-    if (_hasVisualOverflow) {
+    final bool hasVisualOverflow = didOverflowWidth || didOverflowHeight;
+    if (hasVisualOverflow) {
       switch (_overflow) {
+        case TextOverflow.visible:
+          _needsClipping = false;
+          _overflowShader = null;
+          break;
         case TextOverflow.clip:
         case TextOverflow.ellipsis:
+          _needsClipping = true;
           _overflowShader = null;
           break;
         case TextOverflow.fade:
           assert(textDirection != null);
+          _needsClipping = true;
           final TextPainter fadeSizePainter = TextPainter(
             text: TextSpan(style: _textPainter.text.style, text: '\u2026'),
             textDirection: textDirection,
@@ -340,6 +350,7 @@ class RenderParagraph extends RenderBox {
           break;
       }
     } else {
+      _needsClipping = false;
       _overflowShader = null;
     }
   }
@@ -368,7 +379,7 @@ class RenderParagraph extends RenderBox {
       return true;
     }());
 
-    if (_hasVisualOverflow) {
+    if (_needsClipping) {
       final Rect bounds = offset & size;
       if (_overflowShader != null) {
         // This layer limits what the shader below blends with to be just the text
@@ -380,7 +391,7 @@ class RenderParagraph extends RenderBox {
       canvas.clipRect(bounds);
     }
     _textPainter.paint(canvas, offset);
-    if (_hasVisualOverflow) {
+    if (_needsClipping) {
       if (_overflowShader != null) {
         canvas.translate(offset.dx, offset.dy);
         final Paint paint = Paint()

@@ -61,7 +61,7 @@ class EmulatorManager {
   }
 
   /// Return the list of all available emulators.
-  Future<CreateEmulatorResult> createEmulator({String name}) async {
+  Future<CreateEmulatorResult> createEmulator({ String name }) async {
     if (name == null || name == '') {
       const String autoName = 'flutter_emulator';
       // Don't use getEmulatorsMatching here, as it will only return one
@@ -115,7 +115,7 @@ class EmulatorManager {
       'avd',
       '-n', name,
       '-k', sdkId,
-      '-d', device
+      '-d', device,
     ];
     final ProcessResult runResult = processManager.runSync(args,
         environment: androidSdk?.sdkManagerEnv);
@@ -136,7 +136,7 @@ class EmulatorManager {
       getAvdManagerPath(androidSdk),
       'list',
       'device',
-      '-c'
+      '-c',
     ];
     final ProcessResult runResult = processManager.runSync(args,
         environment: androidSdk?.sdkManagerEnv);

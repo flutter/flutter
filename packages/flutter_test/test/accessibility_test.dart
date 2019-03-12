@@ -163,7 +163,7 @@ void main() {
                   style: TextStyle(fontSize: 14.0, color: Colors.yellowAccent),
                 ),
               ),
-            )
+            ),
           ],
         )
       ));
@@ -182,7 +182,7 @@ void main() {
           width: 48.0,
           height: 48.0,
           child: GestureDetector(
-            onTap: () {},
+            onTap: () { },
           ),
         ),
       ));
@@ -197,7 +197,7 @@ void main() {
           width: 47.0,
           height: 48.0,
           child: GestureDetector(
-            onTap: () {},
+            onTap: () { },
           ),
         ),
       ));
@@ -212,7 +212,7 @@ void main() {
           width: 48.0,
           height: 47.0,
           child: GestureDetector(
-            onTap: () {},
+            onTap: () { },
           ),
         ),
       ));
@@ -229,7 +229,7 @@ void main() {
             width: 48.0,
             height: 48.0,
             child: GestureDetector(
-              onTap: () {},
+              onTap: () { },
             ),
           ),
         ),
@@ -245,7 +245,7 @@ void main() {
           width: 48.0,
           height: 47.0,
           child: GestureDetector(
-            onTap: () {},
+            onTap: () { },
           ),
         ),
       ));
@@ -264,7 +264,7 @@ void main() {
         width: 48.0,
         height: 47.0,
         child: GestureDetector(
-          onTap: () {},
+          onTap: () { },
         ),
       );
       await tester.pumpWidget(
@@ -347,12 +347,12 @@ void main() {
               child: Semantics(
                 container: true,
                 child: GestureDetector(
-                  onTap: () {},
+                  onTap: () { },
                   child: const SizedBox(width: 4.0, height: 4.0),
-                )
-              )
+                ),
+              ),
             ),
-          )
+          ),
         )
       ));
 
@@ -362,13 +362,13 @@ void main() {
     });
   });
 
-   group('Labeled tappable node guideline', () {
+  group('Labeled tappable node guideline', () {
     testWidgets('Passes when node is labeled', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(_boilerplate(Semantics(
         container: true,
         child: const SizedBox(width: 10.0, height: 10.0),
-        onTap: () {},
+        onTap: () { },
         label: 'test',
       )));
       final Evaluation result = await labeledTapTargetGuideline.evaluate(tester);
@@ -380,7 +380,7 @@ void main() {
       await tester.pumpWidget(_boilerplate(Semantics(
         container: true,
         child: const SizedBox(width: 10.0, height: 10.0),
-        onLongPress: () {},
+        onLongPress: () { },
         label: '',
       )));
       final Evaluation result = await labeledTapTargetGuideline.evaluate(tester);
@@ -393,7 +393,7 @@ void main() {
       await tester.pumpWidget(_boilerplate(Semantics(
         container: true,
         child: const SizedBox(width: 10.0, height: 10.0),
-        onTap: () {},
+        onTap: () { },
         label: '',
       )));
       final Evaluation result = await labeledTapTargetGuideline.evaluate(tester);
@@ -405,7 +405,7 @@ void main() {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(_boilerplate(Semantics(
         container: true,
-        onLongPress: () {},
+        onLongPress: () { },
         label: '',
         child: Semantics(
           label: 'test',

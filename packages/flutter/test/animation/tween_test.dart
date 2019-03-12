@@ -73,7 +73,7 @@ void main() {
     expect(tween.lerp(1.0), equals(b));
     expect(
       tween.lerp(0.5),
-      equals(a.clone()..translate(3.0, -4.0, 0.0)..scale(0.75, 1.0, 3.0))
+      equals(a.clone()..translate(3.0, -4.0, 0.0)..scale(0.75, 1.0, 3.0)),
     );
     final Matrix4 c = a.clone()..rotateZ(1.0);
     final Matrix4Tween rotationTween = Matrix4Tween(begin: a, end: c);
@@ -83,7 +83,7 @@ void main() {
       rotationTween.lerp(0.5).absoluteError(
         a.clone()..rotateZ(0.5)
       ),
-      moreOrLessEquals(0.0)
+      moreOrLessEquals(0.0),
     );
   }, skip: Platform.isWindows); // floating point math not quite deterministic on Windows?
 

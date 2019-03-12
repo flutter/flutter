@@ -59,15 +59,15 @@ void main() {
         textDirection: TextDirection.ltr,
         children: <Widget>[
           Container(
-            child: StateMarker(key: left)
+            child: StateMarker(key: left),
           ),
           Container(
             child: StateMarker(
               key: right,
-              child: grandchild
-            )
+              child: grandchild,
+            ),
           ),
-        ]
+        ],
       )
     );
 
@@ -88,13 +88,13 @@ void main() {
           Container(
             child: StateMarker(
               key: right,
-              child: newGrandchild
-            )
+              child: newGrandchild,
+            ),
           ),
           Container(
-            child: StateMarker(key: left)
+            child: StateMarker(key: left),
           ),
-        ]
+        ],
       )
     );
 
@@ -113,9 +113,9 @@ void main() {
         child: Container(
           child: StateMarker(
             key: left,
-            child: Container()
-          )
-        )
+            child: Container(),
+          ),
+        ),
       )
     );
 
@@ -136,9 +136,9 @@ void main() {
           StateMarker(key: left),
           StateMarker(
             key: right,
-            child: grandchild
-          )
-        ]
+            child: grandchild,
+          ),
+        ],
       )
     );
 
@@ -158,10 +158,10 @@ void main() {
         children: <Widget>[
           StateMarker(
             key: right,
-            child: newGrandchild
+            child: newGrandchild,
           ),
-          StateMarker(key: left)
-        ]
+          StateMarker(key: left),
+        ],
       )
     );
 
@@ -180,9 +180,9 @@ void main() {
         child: Container(
           child: StateMarker(
             key: left,
-            child: Container()
-          )
-        )
+            child: Container(),
+          ),
+        ),
       )
     );
 
@@ -232,7 +232,7 @@ void main() {
       children: <Widget>[
         StateMarker(key: key),
         Container(width: 100.0, height: 100.0),
-      ]
+      ],
     ));
 
     final StateMarkerState keyState = key.currentState;
@@ -243,7 +243,7 @@ void main() {
       children: <Widget>[
         Container(width: 100.0, height: 100.0),
         StateMarker(key: key),
-      ]
+      ],
     ));
 
     expect(key.currentState, equals(keyState));
@@ -254,7 +254,7 @@ void main() {
       children: <Widget>[
         StateMarker(key: key),
         Container(width: 100.0, height: 100.0),
-      ]
+      ],
     ));
 
     expect(key.currentState, equals(keyState));
@@ -270,7 +270,7 @@ void main() {
         Container(width: 100.0, height: 100.0),
         StateMarker(key: key),
         Container(width: 100.0, height: 100.0),
-      ]
+      ],
     ));
 
     final StateMarkerState keyState = key.currentState;
@@ -281,7 +281,7 @@ void main() {
       children: <Widget>[
         Container(width: 100.0, height: 100.0, child: StateMarker(key: key)),
         Container(width: 100.0, height: 100.0),
-      ]
+      ],
     ));
 
     expect(key.currentState, equals(keyState));
@@ -293,7 +293,7 @@ void main() {
         Container(width: 100.0, height: 100.0),
         StateMarker(key: key),
         Container(width: 100.0, height: 100.0),
-      ]
+      ],
     ));
 
     expect(key.currentState, equals(keyState));
@@ -304,7 +304,7 @@ void main() {
       children: <Widget>[
         Container(width: 100.0, height: 100.0),
         Container(width: 100.0, height: 100.0, child: StateMarker(key: key)),
-      ]
+      ],
     ));
 
     expect(key.currentState, equals(keyState));
@@ -316,7 +316,7 @@ void main() {
         Container(width: 100.0, height: 100.0),
         StateMarker(key: key),
         Container(width: 100.0, height: 100.0),
-      ]
+      ],
     ));
 
     expect(key.currentState, equals(keyState));
@@ -360,11 +360,11 @@ void main() {
               key: key2,
               child: StateMarker(
                 key: key3,
-                child: StateMarker(child: Container(width: 100.0))
-              )
-            )
-          )
-        ]
+                child: StateMarker(child: Container(width: 100.0)),
+              ),
+            ),
+          ),
+        ],
       )
     );
 
@@ -374,16 +374,16 @@ void main() {
         children: <Widget>[
           StateMarker(
             key: key2,
-            child: StateMarker(child: Container(width: 100.0))
+            child: StateMarker(child: Container(width: 100.0)),
           ),
           StateMarker(
             key: key1,
             child: StateMarker(
               key: key3,
-              child: StateMarker(child: Container(width: 100.0))
-            )
+              child: StateMarker(child: Container(width: 100.0)),
+            ),
           ),
-        ]
+        ],
       )
     );
   });

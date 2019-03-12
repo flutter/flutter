@@ -256,7 +256,7 @@ class _RadioItem<T> extends StatelessWidget {
                 ),
               ),
             ),
-          ]
+          ],
         ),
       ),
     );
@@ -333,7 +333,7 @@ class _DemoBottomAppBar extends StatelessWidget {
   const _DemoBottomAppBar({
     this.color,
     this.fabLocation,
-    this.shape
+    this.shape,
   });
 
   final Color color;
@@ -513,7 +513,7 @@ class _DiamondBorder extends ShapeBorder {
   }
 
   @override
-  void paint(Canvas canvas, Rect rect, { TextDirection textDirection }) {}
+  void paint(Canvas canvas, Rect rect, { TextDirection textDirection }) { }
 
   // This border doesn't support scaling.
   @override

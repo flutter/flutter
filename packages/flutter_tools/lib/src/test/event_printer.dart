@@ -18,7 +18,7 @@ class EventPrinter extends TestWatcher {
         <String, dynamic>{'observatoryUri': event.observatoryUri.toString()});
   }
 
-  void _sendEvent(String name, [dynamic params]) {
+  void _sendEvent(String name, [ dynamic params ]) {
     final Map<String, dynamic> map = <String, dynamic>{ 'event': name};
     if (params != null) {
       map['params'] = params;

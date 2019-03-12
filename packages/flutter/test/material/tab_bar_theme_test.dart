@@ -82,6 +82,23 @@ void main() {
     expect(unselectedRenderObject.text.style.fontFamily, equals(unselectedLabelStyle.fontFamily));
   });
 
+  testWidgets('Tab bar theme with just label style specified', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/28784
+    const TextStyle labelStyle = TextStyle(fontFamily: 'foobar');
+    const TabBarTheme tabBarTheme = TabBarTheme(
+      labelStyle: labelStyle,
+    );
+
+    await tester.pumpWidget(_withTheme(tabBarTheme));
+
+    final RenderParagraph selectedRenderObject = tester.renderObject<RenderParagraph>(find.text(_tab1Text));
+    expect(selectedRenderObject.text.style.fontFamily, equals(labelStyle.fontFamily));
+    final RenderParagraph unselectedRenderObject = tester.renderObject<RenderParagraph>(find.text(_tab2Text));
+    expect(unselectedRenderObject.text.style.fontFamily, equals('Roboto'));
+    expect(unselectedRenderObject.text.style.fontSize, equals(14.0));
+    expect(unselectedRenderObject.text.style.color, equals(Colors.white.withAlpha(0xB2)));
+  });
+
   testWidgets('Tab bar label styles override theme label styles', (WidgetTester tester) async {
     const TextStyle labelStyle = TextStyle(fontFamily: '1');
     const TextStyle unselectedLabelStyle = TextStyle(fontFamily: '2');
@@ -101,7 +118,7 @@ void main() {
             labelStyle: labelStyle,
             unselectedLabelStyle: unselectedLabelStyle,
           ),
-        )
+        ),
       ),
     );
 
@@ -152,7 +169,7 @@ void main() {
       indicator: BoxDecoration(
         border: Border.all(color: Colors.black),
         shape: BoxShape.rectangle,
-      )
+      ),
     );
 
     await tester.pumpWidget(_withTheme(tabBarTheme));
@@ -168,7 +185,7 @@ void main() {
     final TabBarTheme tabBarTheme = TabBarTheme(
       indicator: ShapeDecoration(
         shape: BeveledRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
-        color: Colors.black
+        color: Colors.black,
       ),
     );
 

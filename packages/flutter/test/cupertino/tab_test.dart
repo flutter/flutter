@@ -68,7 +68,7 @@ void main() {
                 settings: settings,
                 builder: (BuildContext context) {
                   return const Text('generated home');
-                }
+                },
               );
             }
             return null;
