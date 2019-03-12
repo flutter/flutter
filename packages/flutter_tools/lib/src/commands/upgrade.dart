@@ -85,6 +85,14 @@ class UpgradeCommand extends FlutterCommand {
       mapFunction: (String line) => matchesGitLine(line) ? null : line,
     );
 
+    try {
+      await runCheckedAsync(<String>[
+        'git', 'stash', 'pop',
+      ]);
+    } catch (e) {
+      printError('Failed to re-apply local changes. State may have been lost.');
+    }
+
     if (code != 0)
       throwToolExit(null, exitCode: code);
 
