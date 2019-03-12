@@ -485,10 +485,11 @@ class TextStyle {
              'decoration: ${         _encoded[0] & 0x00004 == 0x00004  ? new TextDecoration._(_encoded[2])       : "unspecified"}, '
              'decorationColor: ${    _encoded[0] & 0x00008 == 0x00008  ? new Color(_encoded[3])                  : "unspecified"}, '
              'decorationStyle: ${    _encoded[0] & 0x00010 == 0x00010  ? TextDecorationStyle.values[_encoded[4]] : "unspecified"}, '
-             'decorationThickness: ${_encoded[0] & 0x00020 == 0x00020  ? _decorationThickness                    : "unspecified"}, '
-             'fontWeight: ${         _encoded[0] & 0x00040 == 0x00040  ? FontWeight.values[_encoded[5]]          : "unspecified"}, '
-             'fontStyle: ${          _encoded[0] & 0x00080 == 0x00080  ? FontStyle.values[_encoded[6]]           : "unspecified"}, '
-             'textBaseline: ${       _encoded[0] & 0x00100 == 0x00100  ? TextBaseline.values[_encoded[7]]        : "unspecified"}, '
+             // The decorationThickness is not in encoded order in order to keep it near the other decoration properties.
+             'decorationThickness: ${_encoded[0] & 0x00100 == 0x00100  ? _decorationThickness                    : "unspecified"}, '
+             'fontWeight: ${         _encoded[0] & 0x00020 == 0x00020  ? FontWeight.values[_encoded[5]]          : "unspecified"}, '
+             'fontStyle: ${          _encoded[0] & 0x00040 == 0x00040  ? FontStyle.values[_encoded[6]]           : "unspecified"}, '
+             'textBaseline: ${       _encoded[0] & 0x00080 == 0x00080  ? TextBaseline.values[_encoded[7]]        : "unspecified"}, '
              'fontFamily: ${         _encoded[0] & 0x00200 == 0x00200
                                      && _fontFamily != null            ? _fontFamily                             : "unspecified"}, '
              'fontFamilyFallback: ${ _encoded[0] & 0x00200 == 0x00200
