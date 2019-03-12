@@ -223,6 +223,9 @@ class MaterialButton extends StatelessWidget {
   /// The button's highlight and splash are clipped to this shape. If the
   /// button has an elevation, then its drop shadow is defined by this
   /// shape as well.
+  ///
+  /// Defaults to the value from the current [ButtonTheme],
+  /// [ButtonThemeData.shape].
   final ShapeBorder shape;
 
   /// {@macro flutter.widgets.Clip}
@@ -271,7 +274,7 @@ class MaterialButton extends StatelessWidget {
         minWidth: minWidth,
         minHeight: height,
       ),
-      shape: buttonTheme.shape,
+      shape: buttonTheme.getShape(this),
       clipBehavior: clipBehavior ?? Clip.none,
       animationDuration: buttonTheme.getAnimationDuration(this),
       child: child,
