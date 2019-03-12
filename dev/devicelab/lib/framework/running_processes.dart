@@ -19,11 +19,27 @@ class RunningProcessInfo {
 
   @override
   bool operator ==(Object other) {
-    return other is RunningProcessInfo && other.pid == pid;
+    return other is RunningProcessInfo &&
+        other.pid == pid &&
+        other.commandLine == commandLine &&
+        other.creationDate == creationDate;
   }
 
   @override
-  int get hashCode => pid.hashCode;
+  int get hashCode {
+    // TODO(dnfield): Replace this when Object.hashValues lands.
+    int hash = 17;
+    if (pid != null) {
+      hash = hash * 23 + pid.hashCode;
+    }
+    if (commandLine != null) {
+      hash = hash * 23 + commandLine.hashCode;
+    }
+    if (creationDate != null) {
+      hash = hash * 23 + creationDate.hashCode;
+    }
+    return hash;
+  }
 
   @override
   String toString() {
@@ -82,7 +98,7 @@ Stream<RunningProcessInfo> windowsRunningProcesses(String processName) async* {
     print('Could not list processes!');
     print(result.stderr);
     print(result.stdout);
-    exit(result.exitCode);
+    return;
   }
   for (RunningProcessInfo info in processPowershellOutput(result.stdout)) {
     yield info;
@@ -156,7 +172,14 @@ Iterable<RunningProcessInfo> processPowershellOutput(String output) sync* {
 
 @visibleForTesting
 Stream<RunningProcessInfo> posixRunningProcesses(
-    String processName, ProcessManager processManager) async* {
+  String processName,
+  ProcessManager processManager,
+) async* {
+  // Cirrus is missing this in Linux for some reason.
+  if (!processManager.canRun('ps')) {
+    print('Cannot list processes on this system: `ps` not available.');
+    return;
+  }
   final ProcessResult result = await processManager.run(<String>[
     'ps',
     '-eo',
@@ -166,11 +189,8 @@ Stream<RunningProcessInfo> posixRunningProcesses(
     print('Could not list processes!');
     print(result.stderr);
     print(result.stdout);
-    exit(result.exitCode);
+    return;
   }
-  print(result.stdout);
-  print(result.stderr);
-  exit(-1);
   for (RunningProcessInfo info in processPsOutput(result.stdout, processName)) {
     yield info;
   }

@@ -100,7 +100,7 @@ class _TaskRunner {
       for (final RunningProcessInfo info in afterRunningDartInstances) {
         if (!beforeRunningDartInstances.contains(info)) {
           print('$info was leaked by this test.');
-          result = TaskResult.markFailure(result);
+          result = TaskResult.markUnderperformed(result);
           final bool killed = await killProcess(info.pid);
           if (!killed) {
             print('Failed to kill process ${info.pid}.');
@@ -173,13 +173,6 @@ class _TaskRunner {
 
 /// A result of running a single task.
 class TaskResult {
-  /// Creates a result marked as a failure from an existing result.
-  TaskResult.markFailure(TaskResult original)
-      : succeeded = false,
-        benchmarkScoreKeys = original.benchmarkScoreKeys,
-        data = original.data,
-        message = original.message;
-
   /// Constructs a successful result.
   TaskResult.success(this.data, {this.benchmarkScoreKeys = const <String>[]})
       : succeeded = true,
@@ -235,6 +228,9 @@ class TaskResult {
 
   /// Explains the result in a human-readable format.
   final String message;
+
+  /// Whether the test underperformed, e.g. leaked a process it shouldn't have.
+  bool underperformed = false;
 
   /// Serializes this task result to JSON format.
   ///

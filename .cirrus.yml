@@ -79,14 +79,13 @@ task:
         # This is a temporary workaround until we figure how to properly configure
         # a UTF8 locale on Cirrus (or until the Gradle bug is fixed).
         # TODO(amirh): Set the locale to UTF8.
-        - /bin/ps -eo lstart,pid,command
-        # - echo "$CIRRUS_CHANGE_MESSAGE" > /tmp/cirrus_change_message.txt
-        # - echo "$CIRRUS_COMMIT_MESSAGE" > /tmp/cirrus_commit_message.txt
-        # - export CIRRUS_CHANGE_MESSAGE=""
-        # - export CIRRUS_COMMIT_MESSAGE=""
-        # - dart --enable-asserts ./dev/bots/test.dart
-        # - export CIRRUS_CHANGE_MESSAGE=`cat /tmp/cirrus_change_message.txt`
-        # - export CIRRUS_COMMIT_MESSAGE=`cat /tmp/cirrus_commit_message.txt`
+        - echo "$CIRRUS_CHANGE_MESSAGE" > /tmp/cirrus_change_message.txt
+        - echo "$CIRRUS_COMMIT_MESSAGE" > /tmp/cirrus_commit_message.txt
+        - export CIRRUS_CHANGE_MESSAGE=""
+        - export CIRRUS_COMMIT_MESSAGE=""
+        - dart --enable-asserts ./dev/bots/test.dart
+        - export CIRRUS_CHANGE_MESSAGE=`cat /tmp/cirrus_change_message.txt`
+        - export CIRRUS_COMMIT_MESSAGE=`cat /tmp/cirrus_commit_message.txt`
       container:
         cpu: 4
         memory: 12G
