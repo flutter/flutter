@@ -806,6 +806,53 @@ void main() {
 
       expect(factoryInvocationCount, 1);
     });
+
+    testWidgets('AndroidView has correct semantics', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
+      expect(currentViewId, greaterThanOrEqualTo(0));
+      final FakeAndroidPlatformViewsController viewsController = FakeAndroidPlatformViewsController();
+      viewsController.registerViewType('webview');
+
+      viewsController.createCompleter = Completer<void>();
+
+      await tester.pumpWidget(
+        Semantics(
+          container: true,
+          child: const Align(
+            alignment: Alignment.bottomRight,
+            child: SizedBox(
+              width: 200.0,
+              height: 100.0,
+              child: AndroidView(
+                viewType: 'webview',
+                layoutDirection: TextDirection.ltr,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final SemanticsNode semantics =  tester.getSemantics(find.byType(AndroidView));
+
+      // Platform view has not been created yet, no platformViewId.
+      expect(semantics.platformViewId, null);
+      expect(semantics.rect, Rect.fromLTWH(0, 0, 200, 100));
+      // A 200x100 rect positioned at bottom right of a 800x600 box.
+      expect(semantics.transform, Matrix4.translationValues(600, 500, 0));
+      expect(semantics.childrenCount, 0);
+
+      viewsController.createCompleter.complete();
+      await tester.pumpAndSettle();
+
+      expect(semantics.platformViewId, currentViewId + 1);
+      expect(semantics.rect, Rect.fromLTWH(0, 0, 200, 100));
+      // A 200x100 rect positioned at bottom right of a 800x600 box.
+      expect(semantics.transform, Matrix4.translationValues(600, 500, 0));
+      expect(semantics.childrenCount, 0);
+
+      handle.dispose();
+    });
   });
 
   group('UiKitView', () {
