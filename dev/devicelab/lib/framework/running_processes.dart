@@ -168,6 +168,9 @@ Stream<RunningProcessInfo> posixRunningProcesses(
     print(result.stdout);
     exit(result.exitCode);
   }
+  print(result.stdout);
+  print(result.stderr);
+  exit(-1);
   for (RunningProcessInfo info in processPsOutput(result.stdout, processName)) {
     yield info;
   }
