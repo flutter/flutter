@@ -4,7 +4,6 @@
 
 import 'dart:async';
 import 'dart:developer';
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -106,7 +105,7 @@ class DefaultShaderWarmUp extends ShaderWarmUp {
   /// Trigger common draw operations on a canvas to warm up GPU shader
   /// compilation cache.
   @override
-  Future<void> warmUpOnCanvas(ui.Canvas canvas) {
+  Future<void> warmUpOnCanvas(ui.Canvas canvas) async {
     final ui.RRect rrect = ui.RRect.fromLTRBXY(20.0, 20.0, 60.0, 60.0, 10.0, 10.0);
     final ui.Path rrectPath = ui.Path()..addRRect(rrect);
 
@@ -181,8 +180,5 @@ class DefaultShaderWarmUp extends ShaderWarmUp {
     final ui.Paragraph paragraph = paragraphBuilder.build()
       ..layout(const ui.ParagraphConstraints(width: 60.0));
     canvas.drawParagraph(paragraph, const ui.Offset(20.0, 20.0));
-
-    // No asynchronous work in the default shader warm-up yet.
-    return Future<void>.value(null);
   }
 }
