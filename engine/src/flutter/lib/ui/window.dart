@@ -562,8 +562,15 @@ class Window {
   ///
   /// It is used to initialize [SchedulerBinding.lifecycleState] at startup
   /// with any buffered lifecycle state events.
-  String get initialLifecycleState => _initialLifecycleState;
+  String get initialLifecycleState {
+    _initialLifecycleStateAccessed = true;
+    return _initialLifecycleState;
+  }
   String _initialLifecycleState;
+  /// Tracks if the initial state has been accessed. Once accessed, we
+  /// will stop updating the [initialLifecycleState], as it is not the
+  /// preferred way to access the state.
+  bool _initialLifecycleStateAccessed = false;
 
   /// The system-reported text scale.
   ///
