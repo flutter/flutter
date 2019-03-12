@@ -18,9 +18,9 @@ import 'transitions.dart';
 // Examples can assume:
 // class MyWidget extends ImplicitlyAnimatedWidget {
 //   MyWidget() : super(duration: const Duration(seconds: 1));
-//   final Color targetColor = Color.black;
+//   final Color targetColor = Colors.black;
 //   @override
-//   HeadlineState createState() => MyWidgetState();
+//   MyWidgetState createState() => MyWidgetState();
 // }
 
 /// An interpolation between two [BoxConstraints].
