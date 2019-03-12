@@ -570,6 +570,7 @@ class TextStyle extends Diagnosticable {
   /// [background] specified it will be given preference over any
   /// backgroundColor parameter.
   TextStyle copyWith({
+    bool inherit,
     Color color,
     Color backgroundColor,
     String fontFamily,
@@ -600,7 +601,7 @@ class TextStyle extends Diagnosticable {
       return true;
     }());
     return TextStyle(
-      inherit: inherit,
+      inherit: inherit ?? this.inherit,
       color: this.foreground == null && foreground == null ? color ?? this.color : null,
       backgroundColor: this.background == null && background == null ? backgroundColor ?? this.backgroundColor : null,
       fontFamily: fontFamily ?? this.fontFamily,
