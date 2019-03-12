@@ -1,4 +1,4 @@
-Signature: f273dca586b4d4128723611e149ca435
+Signature: a4c67abd90b802f779c15f927456b53d
 
 UNUSED LICENSES:
 
@@ -1717,8 +1717,6 @@ FILE: ../../../third_party/skia/src/effects/SkTrimPE.h
 FILE: ../../../third_party/skia/src/effects/SkTrimPathEffect.cpp
 FILE: ../../../third_party/skia/src/gpu/GrContextThreadSafeProxyPriv.h
 FILE: ../../../third_party/skia/src/gpu/GrDDLContext.cpp
-FILE: ../../../third_party/skia/src/gpu/GrDeinstantiateProxyTracker.cpp
-FILE: ../../../third_party/skia/src/gpu/GrDeinstantiateProxyTracker.h
 FILE: ../../../third_party/skia/src/gpu/GrDriverBugWorkarounds.cpp
 FILE: ../../../third_party/skia/src/gpu/GrFPArgs.h
 FILE: ../../../third_party/skia/src/gpu/GrLegacyDirectContext.cpp
@@ -4232,7 +4230,6 @@ FILE: ../../../third_party/skia/gm/srgb.cpp
 FILE: ../../../third_party/skia/gm/testgradient.cpp
 FILE: ../../../third_party/skia/gm/text_scale_skew.cpp
 FILE: ../../../third_party/skia/gm/thinconcavepaths.cpp
-FILE: ../../../third_party/skia/gm/tosrgb_colorfilter.cpp
 FILE: ../../../third_party/skia/include/android/SkAndroidFrameworkUtils.h
 FILE: ../../../third_party/skia/include/atlastext/SkAtlasTextContext.h
 FILE: ../../../third_party/skia/include/atlastext/SkAtlasTextFont.h
@@ -4249,7 +4246,6 @@ FILE: ../../../third_party/skia/include/core/SkSurfaceCharacterization.h
 FILE: ../../../third_party/skia/include/core/SkVertices.h
 FILE: ../../../third_party/skia/include/docs/SkXPSDocument.h
 FILE: ../../../third_party/skia/include/effects/SkHighContrastFilter.h
-FILE: ../../../third_party/skia/include/effects/SkToSRGBColorFilter.h
 FILE: ../../../third_party/skia/include/encode/SkEncoder.h
 FILE: ../../../third_party/skia/include/encode/SkJpegEncoder.h
 FILE: ../../../third_party/skia/include/encode/SkPngEncoder.h
@@ -4421,7 +4417,6 @@ FILE: ../../../third_party/skia/src/core/SkVptr.h
 FILE: ../../../third_party/skia/src/core/SkWritePixelsRec.h
 FILE: ../../../third_party/skia/src/effects/SkDashImpl.h
 FILE: ../../../third_party/skia/src/effects/SkHighContrastFilter.cpp
-FILE: ../../../third_party/skia/src/effects/SkToSRGBColorFilter.cpp
 FILE: ../../../third_party/skia/src/gpu/GrAHardwareBufferImageGenerator.cpp
 FILE: ../../../third_party/skia/src/gpu/GrAHardwareBufferImageGenerator.h
 FILE: ../../../third_party/skia/src/gpu/GrBackendSurface.cpp
