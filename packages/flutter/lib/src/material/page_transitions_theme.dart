@@ -348,7 +348,7 @@ class PageTransitionsTheme extends Diagnosticable {
       DiagnosticsProperty<Map<TargetPlatform, PageTransitionsBuilder>>(
         'builders',
         builders,
-        defaultValue: PageTransitionsTheme._defaultBuilders
+        defaultValue: PageTransitionsTheme._defaultBuilders,
       ),
     );
   }

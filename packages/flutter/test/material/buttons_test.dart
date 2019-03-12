@@ -24,7 +24,7 @@ void main() {
           child: Center(
             child: FlatButton(
               onPressed: () { },
-              child: const Text('ABC')
+              child: const Text('ABC'),
             ),
           ),
         ),
@@ -46,7 +46,7 @@ void main() {
               SemanticsFlag.hasEnabledState,
               SemanticsFlag.isEnabled,
             ],
-          )
+          ),
         ],
       ),
       ignoreId: true,
@@ -64,7 +64,7 @@ void main() {
           child: Center(
             child: RaisedButton(
               onPressed: () { },
-              child: const Text('ABC')
+              child: const Text('ABC'),
             ),
           ),
         ),
@@ -86,7 +86,7 @@ void main() {
               SemanticsFlag.hasEnabledState,
               SemanticsFlag.isEnabled,
             ],
-          )
+          ),
         ]
       ),
       ignoreId: true,
@@ -214,7 +214,7 @@ void main() {
             areaToCompare: expectedClipRect.inflate(10.0),
         ))
         ..circle(color: directSplashColor)
-        ..rect(color: directHighlightColor)
+        ..rect(color: directHighlightColor),
     );
 
     const Color themeSplashColor1 = Color(0xFF001100);
@@ -251,7 +251,7 @@ void main() {
             areaToCompare: expectedClipRect.inflate(10.0),
         ))
         ..circle(color: themeSplashColor1)
-        ..rect(color: themeHighlightColor1)
+        ..rect(color: themeHighlightColor1),
     );
 
     const Color themeSplashColor2 = Color(0xFF002200);
@@ -275,7 +275,7 @@ void main() {
       Material.of(tester.element(find.byType(MaterialButton))),
       paints
         ..circle(color: themeSplashColor2)
-        ..rect(color: themeHighlightColor2)
+        ..rect(color: themeHighlightColor2),
     );
 
     await gesture.up();
@@ -306,7 +306,7 @@ void main() {
 
     expect(
         tester.renderObject(find.byKey(buttonKey)),
-        paintsExactlyCountTimes(#clipPath, 0)
+        paintsExactlyCountTimes(#clipPath, 0),
     );
   });
 
@@ -488,7 +488,7 @@ void main() {
               child: MaterialButton(
                 key: key1,
                 child: const SizedBox(width: 50.0, height: 8.0),
-                onPressed: () {},
+                onPressed: () { },
               ),
             ),
           ),
@@ -509,7 +509,7 @@ void main() {
               child: MaterialButton(
                 key: key2,
                 child: const SizedBox(width: 50.0, height: 8.0),
-                onPressed: () {},
+                onPressed: () { },
               ),
             ),
           ),
@@ -532,7 +532,7 @@ void main() {
               child: FlatButton(
                 key: key1,
                 child: const SizedBox(width: 50.0, height: 8.0),
-                onPressed: () {},
+                onPressed: () { },
               ),
             ),
           ),
@@ -553,7 +553,7 @@ void main() {
               child: FlatButton(
                 key: key2,
                 child: const SizedBox(width: 50.0, height: 8.0),
-                onPressed: () {},
+                onPressed: () { },
               ),
             ),
           ),
@@ -576,7 +576,7 @@ void main() {
               child: RaisedButton(
                 key: key1,
                 child: const SizedBox(width: 50.0, height: 8.0),
-                onPressed: () {},
+                onPressed: () { },
               ),
             ),
           ),
@@ -597,7 +597,7 @@ void main() {
               child: RaisedButton(
                 key: key2,
                 child: const SizedBox(width: 50.0, height: 8.0),
-                onPressed: () {},
+                onPressed: () { },
               ),
             ),
           ),
@@ -608,7 +608,7 @@ void main() {
     expect(tester.getSize(find.byKey(key2)), const Size(88.0, 36.0));
   });
 
-  testWidgets('RaisedButton has no clip by default', (WidgetTester tester) async{
+  testWidgets('RaisedButton has no clip by default', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
           textDirection: TextDirection.ltr,
@@ -616,13 +616,13 @@ void main() {
             child: RaisedButton(
               onPressed: () { /* to make sure the button is enabled */ },
             ),
-          )
+          ),
       ),
     );
 
     expect(
         tester.renderObject(find.byType(RaisedButton)),
-        paintsExactlyCountTimes(#clipPath, 0)
+        paintsExactlyCountTimes(#clipPath, 0),
     );
   });
 }

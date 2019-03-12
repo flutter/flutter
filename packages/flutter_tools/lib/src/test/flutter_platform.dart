@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:meta/meta.dart';
 import 'package:stream_channel/stream_channel.dart';
@@ -25,19 +24,28 @@ import '../base/process_manager.dart';
 import '../base/terminal.dart';
 import '../build_info.dart';
 import '../bundle.dart';
+import '../codegen.dart';
 import '../compile.dart';
+import '../convert.dart';
 import '../dart/package_map.dart';
 import '../globals.dart';
+import '../project.dart';
 import '../vmservice.dart';
 import 'watcher.dart';
 
 /// The timeout we give the test process to connect to the test harness
 /// once the process has entered its main method.
-const Duration _kTestStartupTimeout = Duration(minutes: 1);
+///
+/// We time out test execution because we expect some tests to hang and we want
+/// to know which test hung, rather than have the entire test harness just do
+/// nothing for a few hours until the user (or CI environment) gets bored.
+const Duration _kTestStartupTimeout = Duration(minutes: 5);
 
 /// The timeout we give the test process to start executing Dart code. When the
 /// CPU is under severe load, this can take a while, but it's not indicative of
 /// any problem with Flutter, so we give it a large timeout.
+///
+/// See comment under [_kTestStartupTimeout] regarding timeouts.
 const Duration _kTestProcessTimeout = Duration(minutes: 5);
 
 /// Message logged by the test process to signal that its main method has begun
@@ -83,6 +91,7 @@ void installHook({
   int observatoryPort,
   InternetAddressType serverType = InternetAddressType.IPv4,
   Uri projectRootDirectory,
+  FlutterProject flutterProject,
 }) {
   assert(enableObservatory || (!startPaused && observatoryPort == null));
   hack.registerPlatformPlugin(
@@ -101,6 +110,7 @@ void installHook({
       trackWidgetCreation: trackWidgetCreation,
       updateGoldens: updateGoldens,
       projectRootDirectory: projectRootDirectory,
+      flutterProject: flutterProject,
     ),
   );
 }
@@ -138,7 +148,7 @@ String generateTestBootstrap({
   final StringBuffer buffer = StringBuffer();
   buffer.write('''
 import 'dart:async';
-import 'dart:convert';
+import 'dart:convert';  // ignore: dart_convert_import
 import 'dart:io';  // ignore: dart_io_import
 import 'dart:isolate';
 
@@ -226,7 +236,7 @@ class _CompilationRequest {
 // This class is a wrapper around compiler that allows multiple isolates to
 // enqueue compilation requests, but ensures only one compilation at a time.
 class _Compiler {
-  _Compiler(bool trackWidgetCreation, Uri projectRootDirectory) {
+  _Compiler(bool trackWidgetCreation, Uri projectRootDirectory, FlutterProject flutterProject) {
     // Compiler maintains and updates single incremental dill file.
     // Incremental compilation requests done for each test copy that file away
     // for independent execution.
@@ -259,7 +269,16 @@ class _Compiler {
       trackWidgetCreation: trackWidgetCreation,
     );
 
-    ResidentCompiler createCompiler() {
+    Future<ResidentCompiler> createCompiler() async {
+      if (experimentalBuildEnabled && await flutterProject.hasBuilders) {
+        return CodeGeneratingResidentCompiler.create(
+          flutterProject: flutterProject,
+          trackWidgetCreation: trackWidgetCreation,
+          initializeFromDill: null, // TODO(jonahwilliams): investigate multi-root support in init from dill.
+          unsafePackageSerialization: false,
+          compilerMessageConsumer: reportCompilerMessage,
+        );
+      }
       return ResidentCompiler(
         artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
         packagesPath: PackageMap.globalPackagesPath,
@@ -284,17 +303,15 @@ class _Compiler {
           final Stopwatch compilerTime = Stopwatch()..start();
           bool firstCompile = false;
           if (compiler == null) {
-            compiler = createCompiler();
+            compiler = await createCompiler();
             firstCompile = true;
           }
           suppressOutput = false;
-          final CompilerOutput compilerOutput = await handleTimeout<CompilerOutput>(
-            compiler.recompile(
-              request.path,
-              <String>[request.path],
-              outputPath: outputDill.path),
-              request.path,
-            );
+          final CompilerOutput compilerOutput = await compiler.recompile(
+            request.path,
+            <String>[request.path],
+            outputPath: outputDill.path,
+          );
           final String outputPath = compilerOutput?.outputFilename;
 
           // In case compiler didn't produce output or reported compilation
@@ -337,7 +354,7 @@ class _Compiler {
   Future<String> compile(String mainDart) {
     final Completer<String> completer = Completer<String>();
     compilerController.add(_CompilationRequest(mainDart, completer));
-    return handleTimeout<String>(completer.future, mainDart);
+    return completer.future;
   }
 
   Future<void> _shutdown() async {
@@ -352,13 +369,6 @@ class _Compiler {
   Future<void> dispose() async {
     await _shutdown();
     await compilerController.close();
-  }
-
-  static Future<T> handleTimeout<T>(Future<T> value, String path) {
-    return value.timeout(const Duration(minutes: 5), onTimeout: () {
-      printError('Compilation of $path timed out after 5 minutes.');
-      return null;
-    });
   }
 }
 
@@ -377,6 +387,7 @@ class _FlutterPlatform extends PlatformPlugin {
     this.trackWidgetCreation,
     this.updateGoldens,
     this.projectRootDirectory,
+    this.flutterProject,
   }) : assert(shellPath != null);
 
   final String shellPath;
@@ -392,6 +403,7 @@ class _FlutterPlatform extends PlatformPlugin {
   final bool trackWidgetCreation;
   final bool updateGoldens;
   final Uri projectRootDirectory;
+  final FlutterProject flutterProject;
 
   Directory fontsDirectory;
   _Compiler compiler;
@@ -466,10 +478,15 @@ class _FlutterPlatform extends PlatformPlugin {
     return remoteChannel;
   }
 
-  Future<String> _compileExpressionService(String isolateId, String expression,
-      List<String> definitions, List<String> typeDefinitions,
-      String libraryUri, String klass, bool isStatic,
-      ) async {
+  Future<String> _compileExpressionService(
+    String isolateId,
+    String expression,
+    List<String> definitions,
+    List<String> typeDefinitions,
+    String libraryUri,
+    String klass,
+    bool isStatic,
+  ) async {
     if (compiler == null || compiler.compiler == null) {
       throw 'Compiler is not set up properly to compile $expression';
     }
@@ -498,9 +515,9 @@ class _FlutterPlatform extends PlatformPlugin {
     bool controllerSinkClosed = false;
     try {
       // Callback can't throw since it's just setting a variable.
-      controller.sink.done.whenComplete(() { // ignore: unawaited_futures
+      unawaited(controller.sink.done.whenComplete(() {
         controllerSinkClosed = true;
-      }); // ignore: unawaited_futures
+      }));
 
       // Prepare our WebSocket server to talk to the engine subproces.
       final HttpServer server = await HttpServer.bind(host, port);
@@ -543,7 +560,7 @@ class _FlutterPlatform extends PlatformPlugin {
 
       if (precompiledDillPath == null && precompiledDillFiles == null) {
         // Lazily instantiate compiler so it is built only if it is actually used.
-        compiler ??= _Compiler(trackWidgetCreation, projectRootDirectory);
+        compiler ??= _Compiler(trackWidgetCreation, projectRootDirectory, flutterProject);
         mainDart = await compiler.compile(mainDart);
 
         if (mainDart == null) {
@@ -656,7 +673,7 @@ class _FlutterPlatform extends PlatformPlugin {
               shellPath);
           controller.sink.addError(message);
           // Awaited for with 'sink.done' below.
-          controller.sink.close(); // ignore: unawaited_futures
+          unawaited(controller.sink.close());
           printTrace('test $ourTestCount: waiting for controller sink to close');
           await controller.sink.done;
           await watcher?.handleTestCrashed(ProcessEvent(ourTestCount, process));
@@ -669,7 +686,7 @@ class _FlutterPlatform extends PlatformPlugin {
           final String message = _getErrorMessage('Test never connected to test harness.', testPath, shellPath);
           controller.sink.addError(message);
           // Awaited for with 'sink.done' below.
-          controller.sink.close(); // ignore: unawaited_futures
+          unawaited(controller.sink.close());
           printTrace('test $ourTestCount: waiting for controller sink to close');
           await controller.sink.done;
           await watcher
@@ -751,7 +768,7 @@ class _FlutterPlatform extends PlatformPlugin {
                   shellPath);
               controller.sink.addError(message);
               // Awaited for with 'sink.done' below.
-              controller.sink.close(); // ignore: unawaited_futures
+              unawaited(controller.sink.close());
               printTrace('test $ourTestCount: waiting for controller sink to close');
               await controller.sink.done;
               break;
@@ -795,7 +812,7 @@ class _FlutterPlatform extends PlatformPlugin {
       }
       if (!controllerSinkClosed) {
         // Waiting below with await.
-        controller.sink.close(); // ignore: unawaited_futures
+        unawaited(controller.sink.close());
         printTrace('test $ourTestCount: waiting for controller sink to close');
         await controller.sink.done;
       }
@@ -810,8 +827,12 @@ class _FlutterPlatform extends PlatformPlugin {
     return outOfBandError;
   }
 
-  String _createListenerDart(List<_Finalizer> finalizers, int ourTestCount,
-      String testPath, HttpServer server) {
+  String _createListenerDart(
+    List<_Finalizer> finalizers,
+    int ourTestCount,
+    String testPath,
+    HttpServer server,
+  ) {
     // Prepare a temporary directory to store the Dart file that will talk to us.
     final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_test_listener.');
     finalizers.add(() async {
@@ -929,8 +950,9 @@ class _FlutterPlatform extends PlatformPlugin {
       command.add('--ipv6');
     }
 
-    command.add('--enable-checked-mode');
     command.addAll(<String>[
+      '--enable-checked-mode',
+      '--verify-entry-points',
       '--enable-software-rendering',
       '--skia-deterministic-rendering',
       '--enable-dart-profiling',
@@ -956,7 +978,7 @@ class _FlutterPlatform extends PlatformPlugin {
     const String observatoryString = 'Observatory listening on ';
     for (Stream<List<int>> stream in <Stream<List<int>>>[
       process.stderr,
-      process.stdout
+      process.stdout,
     ]) {
       stream
           .transform<String>(utf8.decoder)
@@ -1063,7 +1085,7 @@ class _FlutterPlatformStreamSinkWrapper<S> implements StreamSink<S> {
   @override
   void add(S event) => _parent.add(event);
   @override
-  void addError(dynamic errorEvent, [StackTrace stackTrace]) => _parent.addError(errorEvent, stackTrace);
+  void addError(dynamic errorEvent, [ StackTrace stackTrace ]) => _parent.addError(errorEvent, stackTrace);
   @override
   Future<dynamic> addStream(Stream<S> stream) => _parent.addStream(stream);
 }

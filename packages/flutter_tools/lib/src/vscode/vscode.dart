@@ -2,12 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
-
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/platform.dart';
 import '../base/version.dart';
+import '../convert.dart';
 import '../doctor.dart';
 
 // Include VS Code insiders (useful for debugging).
@@ -122,7 +121,7 @@ class VsCode {
         fs.path.join(homeDirPath, 'Applications', 'Visual Studio Code - Insiders.app', 'Contents'),
         '.vscode-insiders',
         isInsiders: true,
-      )
+      ),
     ]);
   }
 
@@ -190,8 +189,7 @@ class VsCode {
     ]);
   }
 
-  static List<VsCode> _findInstalled(
-      List<_VsCodeInstallLocation> allLocations) {
+  static List<VsCode> _findInstalled(List<_VsCodeInstallLocation> allLocations) {
     final Iterable<_VsCodeInstallLocation> searchLocations =
       _includeInsiders
         ? allLocations

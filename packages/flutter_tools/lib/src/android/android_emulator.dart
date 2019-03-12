@@ -27,7 +27,7 @@ class AndroidEmulators extends EmulatorDiscovery {
 
 class AndroidEmulator extends Emulator {
   AndroidEmulator(String id, [this._properties])
-      : super(id, _properties != null && _properties.isNotEmpty);
+    : super(id, _properties != null && _properties.isNotEmpty);
 
   Map<String, String> _properties;
 
@@ -51,12 +51,13 @@ class AndroidEmulator extends Emulator {
                 throw '${runResult.stdout}\n${runResult.stderr}'.trimRight();
               }
             });
-    // emulator continues running on a successful launch so if we
-    // haven't quit within 3 seconds we assume that's a success and just
-    // return.
+    // The emulator continues running on a successful launch, so if it hasn't
+    // quit within 3 seconds we assume that's a success and just return. This
+    // means that on a slow machine, a failure that takes more than three
+    // seconds won't be recognized as such... :-/
     return Future.any<void>(<Future<void>>[
       launchResult,
-      Future<void>.delayed(const Duration(seconds: 3))
+      Future<void>.delayed(const Duration(seconds: 3)),
     ]);
   }
 }

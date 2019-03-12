@@ -25,13 +25,13 @@ class BuildAotCommand extends BuildSubCommand {
       ..addOption('output-dir', defaultsTo: getAotBuildDirectory())
       ..addOption('target-platform',
         defaultsTo: 'android-arm',
-        allowed: <String>['android-arm', 'android-arm64', 'ios']
+        allowed: <String>['android-arm', 'android-arm64', 'ios'],
       )
       ..addFlag('quiet', defaultsTo: false)
       ..addFlag('build-shared-library',
         negatable: false,
         defaultsTo: false,
-        help: 'Compile to a *.so file (requires NDK when building for Android).'
+        help: 'Compile to a *.so file (requires NDK when building for Android).',
       )
       ..addMultiOption('ios-arch',
         splitCommas: true,
@@ -57,8 +57,6 @@ class BuildAotCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    await super.runCommand();
-
     final String targetPlatform = argResults['target-platform'];
     final TargetPlatform platform = getTargetPlatformForName(targetPlatform);
     if (platform == null)
@@ -71,7 +69,7 @@ class BuildAotCommand extends BuildSubCommand {
       final String typeName = artifacts.getEngineType(platform, buildMode);
       status = logger.startProgress(
         'Building AOT snapshot in ${getFriendlyModeName(getBuildMode())} mode ($typeName)...',
-        expectSlowOperation: true,
+        timeout: kSlowOperation,
       );
     }
     final String outputPath = argResults['output-dir'] ?? getAotBuildDirectory();

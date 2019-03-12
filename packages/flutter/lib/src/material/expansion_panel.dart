@@ -59,7 +59,7 @@ typedef ExpansionPanelHeaderBuilder = Widget Function(BuildContext context, bool
 /// See also:
 ///
 ///  * [ExpansionPanelList]
-///  * <https://material.google.com/components/expansion-panels.html>
+///  * <https://material.io/design/components/lists.html#types>
 class ExpansionPanel {
   /// Creates an expansion panel to be used as a child for [ExpansionPanelList].
   ///
@@ -67,7 +67,7 @@ class ExpansionPanel {
   ExpansionPanel({
     @required this.headerBuilder,
     @required this.body,
-    this.isExpanded = false
+    this.isExpanded = false,
   }) : assert(headerBuilder != null),
        assert(body != null),
        assert(isExpanded != null);
@@ -114,7 +114,7 @@ class ExpansionPanelRadio extends ExpansionPanel {
 /// See also:
 ///
 ///  * [ExpansionPanel]
-///  * <https://material.google.com/components/expansion-panels.html>
+///  * <https://material.io/design/components/lists.html#types>
 class ExpansionPanelList extends StatefulWidget {
   /// Creates an expansion panel list widget. The [expansionCallback] is
   /// triggered when an expansion panel expand/collapse button is pushed.
@@ -140,12 +140,11 @@ class ExpansionPanelList extends StatefulWidget {
   /// of [ExpansionPanelRadio].
   const ExpansionPanelList.radio({
     Key key,
-    List<ExpansionPanelRadio> children = const <ExpansionPanelRadio>[],
+    this.children = const <ExpansionPanelRadio>[],
     this.expansionCallback,
     this.animationDuration = kThemeAnimationDuration,
     this.initialOpenPanelValue,
-  }) : children = children, // ignore: prefer_initializing_formals
-       assert(children != null),
+  }) : assert(children != null),
        assert(animationDuration != null),
        _allowOnlyOnePanelOpen = true,
        super(key: key);
@@ -241,7 +240,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
       }
       _currentOpenPanel = isExpanded ? null : pressedChild;
     }
-    setState((){});
+    setState(() { });
   }
 
   @override

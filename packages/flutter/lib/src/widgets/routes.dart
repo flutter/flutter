@@ -81,10 +81,6 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
     RouteSettings settings,
   }) : super(settings: settings);
 
-  // TODO(ianh): once https://github.com/dart-lang/sdk/issues/31543 is fixed,
-  // this should be removed.
-  TransitionRoute._settings(RouteSettings settings) : super(settings: settings);
-
   /// This future completes only once the transition itself has finished, after
   /// the overlay entries have been removed from the navigator's overlay.
   ///
@@ -155,12 +151,11 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
           overlayEntries.first.opaque = false;
         break;
       case AnimationStatus.dismissed:
-        assert(!overlayEntries.first.opaque);
-        // We might still be the current route if a subclass is controlling the
+        // We might still be an active route if a subclass is controlling the
         // the transition and hits the dismissed status. For example, the iOS
         // back gesture drives this animation to the dismissed status before
-        // popping the navigator.
-        if (!isCurrent) {
+        // removing the route and disposing it.
+        if (!isActive) {
           navigator.finalizeRoute(this);
           assert(overlayEntries.isEmpty);
         }
@@ -242,7 +237,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
               assert(newAnimation.currentTrain == nextRoute._animation);
               _secondaryAnimation.parent = newAnimation.currentTrain;
               newAnimation.dispose();
-            }
+            },
           );
           _secondaryAnimation.parent = newAnimation;
           current.dispose();
@@ -540,7 +535,7 @@ class _ModalScopeStatus extends InheritedWidget {
     @required this.isCurrent,
     @required this.canPop,
     @required this.route,
-    @required Widget child
+    @required Widget child,
   }) : assert(isCurrent != null),
        assert(canPop != null),
        assert(route != null),
@@ -682,7 +677,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// Creates a route that blocks interaction with previous routes.
   ModalRoute({
     RouteSettings settings,
-  }) : super._settings(settings);
+  }) : super(settings: settings);
 
   // The API for general users of this class
 
@@ -884,10 +879,10 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///  * [buildPage], which is used to describe the actual contents of the page,
   ///    and whose result is passed to the `child` argument of this method.
   Widget buildTransitions(
-      BuildContext context,
-      Animation<double> animation,
-      Animation<double> secondaryAnimation,
-      Widget child,
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
   ) {
     return child;
   }
@@ -1368,7 +1363,7 @@ class RouteObserver<R extends Route<dynamic>> extends NavigatorObserver {
   void subscribe(RouteAware routeAware, R route) {
     assert(routeAware != null);
     assert(route != null);
-    final Set<RouteAware> subscribers = _listeners.putIfAbsent(route, () => Set<RouteAware>());
+    final Set<RouteAware> subscribers = _listeners.putIfAbsent(route, () => <RouteAware>{});
     if (subscribers.add(routeAware)) {
       routeAware.didPush();
     }
@@ -1450,14 +1445,14 @@ class _DialogRoute<T> extends PopupRoute<T> {
     Duration transitionDuration = const Duration(milliseconds: 200),
     RouteTransitionsBuilder transitionBuilder,
     RouteSettings settings,
-  })  : assert(barrierDismissible != null),
-        _pageBuilder = pageBuilder,
-        _barrierDismissible = barrierDismissible,
-        _barrierLabel = barrierLabel,
-        _barrierColor = barrierColor,
-        _transitionDuration = transitionDuration,
-        _transitionBuilder = transitionBuilder,
-        super(settings: settings);
+  }) : assert(barrierDismissible != null),
+       _pageBuilder = pageBuilder,
+       _barrierDismissible = barrierDismissible,
+       _barrierLabel = barrierLabel,
+       _barrierColor = barrierColor,
+       _transitionDuration = transitionDuration,
+       _transitionBuilder = transitionBuilder,
+       super(settings: settings);
 
   final RoutePageBuilder _pageBuilder;
 

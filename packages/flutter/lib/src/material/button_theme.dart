@@ -291,12 +291,12 @@ class ButtonThemeData extends Diagnosticable {
   EdgeInsetsGeometry get padding {
     if (_padding != null)
       return _padding;
-   switch (textTheme) {
+    switch (textTheme) {
       case ButtonTextTheme.normal:
       case ButtonTextTheme.accent:
         return const EdgeInsets.symmetric(horizontal: 16.0);
       case ButtonTextTheme.primary:
-       return const EdgeInsets.symmetric(horizontal: 24.0);
+        return const EdgeInsets.symmetric(horizontal: 24.0);
     }
     assert(false);
     return EdgeInsets.zero;
@@ -632,16 +632,15 @@ class ButtonThemeData extends Diagnosticable {
   ///
   /// Returns the button's [MaterialButton.highlightElevation] if it is non-null.
   ///
-  /// If button is a [FlatButton] then the highlight elevation is 0.0, if it's
-  /// a [OutlineButton] then the highlight elevation is 2.0, otherise the
-  /// highlight elevation is 8.0.
+  /// If button is a [FlatButton] or an [OutlineButton] then the highlight
+  /// elevation is 0.0, otherwise the highlight elevation is 8.0.
   double getHighlightElevation(MaterialButton button) {
     if (button.highlightElevation != null)
       return button.highlightElevation;
     if (button is FlatButton)
       return 0.0;
     if (button is OutlineButton)
-      return 2.0;
+      return 0.0;
     return 8.0;
   }
 
@@ -650,7 +649,7 @@ class ButtonThemeData extends Diagnosticable {
   ///
   /// Returns the button's [MaterialButton.elevation] if it is non-null.
   ///
-  /// Otheriwse the disabled elevation is 0.0.
+  /// Otherwise the disabled elevation is 0.0.
   double getDisabledElevation(MaterialButton button) {
     if (button.disabledElevation != null)
       return button.disabledElevation;

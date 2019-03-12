@@ -83,4 +83,6 @@ class ValueKey<T> extends LocalKey {
   }
 }
 
-class _TypeLiteral<T> { Type get type => T; }
+class _TypeLiteral<T> {
+  Type get type => T;
+}

@@ -62,19 +62,21 @@ Future<void> updateGeneratedXcodeProperties({
     localsBuffer.writeln('FLUTTER_FRAMEWORK_DIR=${flutterFrameworkDir(buildInfo.mode)}');
   }
 
-  final String buildName = buildInfo?.buildName ?? project.manifest.buildName;
+  final String buildName = validatedBuildNameForPlatform(TargetPlatform.ios, buildInfo?.buildName ?? project.manifest.buildName);
   if (buildName != null) {
     localsBuffer.writeln('FLUTTER_BUILD_NAME=$buildName');
   }
 
-  final int buildNumber = buildInfo?.buildNumber ?? project.manifest.buildNumber;
+  final String buildNumber = validatedBuildNumberForPlatform(TargetPlatform.ios, buildInfo?.buildNumber ?? project.manifest.buildNumber);
   if (buildNumber != null) {
     localsBuffer.writeln('FLUTTER_BUILD_NUMBER=$buildNumber');
   }
 
   if (artifacts is LocalEngineArtifacts) {
     final LocalEngineArtifacts localEngineArtifacts = artifacts;
-    localsBuffer.writeln('LOCAL_ENGINE=${localEngineArtifacts.engineOutPath}');
+    final String engineOutPath = localEngineArtifacts.engineOutPath;
+    localsBuffer.writeln('FLUTTER_ENGINE=${fs.path.dirname(fs.path.dirname(engineOutPath))}');
+    localsBuffer.writeln('LOCAL_ENGINE=${fs.path.basename(engineOutPath)}');
 
     // Tell Xcode not to build universal binaries for local engines, which are
     // single-architecture.
@@ -82,7 +84,7 @@ Future<void> updateGeneratedXcodeProperties({
     // NOTE: this assumes that local engine binary paths are consistent with
     // the conventions uses in the engine: 32-bit iOS engines are built to
     // paths ending in _arm, 64-bit builds are not.
-    final String arch = localEngineArtifacts.engineOutPath.endsWith('_arm') ? 'armv7' : 'arm64';
+    final String arch = engineOutPath.endsWith('_arm') ? 'armv7' : 'arm64';
     localsBuffer.writeln('ARCHS=$arch');
   }
 
@@ -120,7 +122,7 @@ class XcodeProjectInterpreter {
       _majorVersion = int.parse(components[0]);
       _minorVersion = components.length == 1 ? 0 : int.parse(components[1]);
     } on ProcessException {
-      // Ignore: leave values null.
+      // Ignored, leave values null.
     }
   }
 
@@ -154,7 +156,7 @@ class XcodeProjectInterpreter {
       fs.path.absolute(projectPath),
       '-target',
       target,
-      '-showBuildSettings'
+      '-showBuildSettings',
     ], workingDirectory: projectPath);
     return parseXcodeBuildSettings(out);
   }

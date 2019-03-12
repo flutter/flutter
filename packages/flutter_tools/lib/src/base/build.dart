@@ -46,13 +46,11 @@ class GenSnapshot {
 
   Future<int> run({
     @required SnapshotType snapshotType,
-    @required String packagesPath,
     IOSArch iosArch,
     Iterable<String> additionalArgs = const <String>[],
   }) {
     final List<String> args = <String>[
       '--causal_async_stacks',
-      '--packages=$packagesPath',
     ]..addAll(additionalArgs);
 
     final String snapshotterPath = getSnapshotterPath(snapshotType);
@@ -120,7 +118,7 @@ class AOTSnapshotter {
     final String vmServicePath = fs.path.join(skyEnginePkg, 'sdk_ext', 'vmservice_io.dart');
 
     final List<String> inputPaths = <String>[uiPath, vmServicePath, mainPath];
-    final Set<String> outputPaths = Set<String>();
+    final Set<String> outputPaths = <String>{};
 
     final String depfilePath = fs.path.join(outputDir.path, 'snapshot.d');
     final List<String> genSnapshotArgs = <String>[
@@ -193,7 +191,6 @@ class AOTSnapshotter {
     final SnapshotType snapshotType = SnapshotType(platform, buildMode);
     final int genSnapshotExitCode = await genSnapshot.run(
       snapshotType: snapshotType,
-      packagesPath: packageMap.packagesPath,
       additionalArgs: genSnapshotArgs,
       iosArch: iosArch,
     );
@@ -351,7 +348,7 @@ class JITSnapshotter {
     @required String outputPath,
     @required String compilationTraceFilePath,
     @required bool createPatch,
-    int buildNumber,
+    String buildNumber,
     String baselineDir,
     List<String> extraGenSnapshotOptions = const <String>[],
   }) async {
@@ -438,6 +435,15 @@ class JITSnapshotter {
           }
         }
       }
+
+      {
+        final ArchiveFile af = baselinePkg.findFile(
+            fs.path.join('assets/flutter_assets/vm_snapshot_instr'));
+        if (af != null) {
+          printError('Error: Invalid baseline package ${baselineApk.path}.');
+          return 1;
+        }
+      }
     }
 
     final String depfilePath = fs.path.join(outputDir.path, 'snapshot.d');
@@ -452,14 +458,31 @@ class JITSnapshotter {
       genSnapshotArgs.addAll(extraGenSnapshotOptions);
     }
 
-    final Set<String> outputPaths = Set<String>();
+    final Set<String> outputPaths = <String>{};
     outputPaths.addAll(<String>[isolateSnapshotData]);
     if (!createPatch) {
       outputPaths.add(isolateSnapshotInstructions);
     }
 
+    // There are a couple special cases below where we create a snapshot
+    // with only the data section, which only contains interpreted code.
+    bool supportsAppJit = true;
+
+    if (platform == TargetPlatform.android_x64 &&
+        getCurrentHostPlatform() == HostPlatform.windows_x64) {
+      supportsAppJit = false;
+      printStatus('Android x64 dynamic build on Windows x64 will use purely interpreted '
+                  'code for now (see  https://github.com/flutter/flutter/issues/17489).');
+    }
+
+    if (platform == TargetPlatform.android_x86) {
+      supportsAppJit = false;
+      printStatus('Android x86 dynamic build will use purely interpreted code for now. '
+                  'To optimize performance, consider using --target-platform=android-x64.');
+    }
+
     genSnapshotArgs.addAll(<String>[
-      '--snapshot_kind=app-jit',
+      '--snapshot_kind=${supportsAppJit ? 'app-jit' : 'app'}',
       '--load_compilation_trace=$compilationTraceFilePath',
       '--load_vm_snapshot_data=$engineVmSnapshotData',
       '--load_isolate_snapshot_data=$engineIsolateSnapshotData',
@@ -511,7 +534,6 @@ class JITSnapshotter {
     final SnapshotType snapshotType = SnapshotType(platform, buildMode);
     final int genSnapshotExitCode = await genSnapshot.run(
       snapshotType: snapshotType,
-      packagesPath: packagesPath,
       additionalArgs: genSnapshotArgs,
     );
     if (genSnapshotExitCode != 0) {
@@ -533,6 +555,8 @@ class JITSnapshotter {
     return const <TargetPlatform>[
       TargetPlatform.android_arm,
       TargetPlatform.android_arm64,
+      TargetPlatform.android_x86,
+      TargetPlatform.android_x64,
     ].contains(platform);
   }
 }

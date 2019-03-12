@@ -8,6 +8,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
 
 import 'button.dart';
+import 'colors.dart';
 import 'localizations.dart';
 
 // Padding around the line at the edge of the text selection that has 0 width and
@@ -33,9 +34,11 @@ const EdgeInsets _kToolbarButtonPadding = EdgeInsets.symmetric(vertical: 10.0, h
 const BorderRadius _kToolbarBorderRadius = BorderRadius.all(Radius.circular(7.5));
 
 const TextStyle _kToolbarButtonFontStyle = TextStyle(
+  inherit: false,
   fontSize: 14.0,
   letterSpacing: -0.11,
   fontWeight: FontWeight.w300,
+  color: CupertinoColors.white,
 );
 
 /// Paints a triangle below the toolbar.
@@ -104,7 +107,7 @@ class _TextSelectionToolbar extends StatelessWidget {
       size: _kToolbarTriangleSize,
       child: CustomPaint(
         painter: _TextSelectionToolbarNotchPainter(),
-      )
+      ),
     );
 
     return Column(
@@ -113,8 +116,12 @@ class _TextSelectionToolbar extends StatelessWidget {
         ClipRRect(
           borderRadius: _kToolbarBorderRadius,
           child: DecoratedBox(
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               color: _kToolbarDividerColor,
+              borderRadius: _kToolbarBorderRadius,
+              // Add a hairline border with the button color to avoid
+              // antialiasing artifacts.
+              border: Border.all(color: _kToolbarBackgroundColor, width: 0),
             ),
             child: Row(mainAxisSize: MainAxisSize.min, children: items),
           ),
@@ -245,7 +252,7 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
           handlePaste: canPaste(delegate) ? () => handlePaste(delegate) : null,
           handleSelectAll: canSelectAll(delegate) ? () => handleSelectAll(delegate) : null,
         ),
-      )
+      ),
     );
   }
 
@@ -256,7 +263,7 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
     // padding in every direction that will constitute the selection drag area.
     final Size desiredSize = Size(
       2.0 * _kHandlesPadding,
-      textLineHeight + 2.0 * _kHandlesPadding
+      textLineHeight + 2.0 * _kHandlesPadding,
     );
 
     final Widget handle = SizedBox.fromSize(
@@ -281,16 +288,16 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
         return Transform(
           transform: Matrix4.rotationZ(math.pi)
               ..translate(-_kHandlesPadding, -_kHandlesPadding),
-          child: handle
+          child: handle,
         );
       case TextSelectionHandleType.right:
         return Transform(
           transform: Matrix4.translationValues(
             -_kHandlesPadding,
             -(textLineHeight + _kHandlesPadding),
-            0.0
+            0.0,
           ),
-          child: handle
+          child: handle,
         );
       case TextSelectionHandleType.collapsed: // iOS doesn't draw anything for collapsed selections.
         return Container();

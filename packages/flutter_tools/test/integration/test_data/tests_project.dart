@@ -47,9 +47,7 @@ class TestsProject extends Project {
 
   String get testFilePath => fs.path.join(dir.path, 'test', 'test.dart');
 
-  @override
   Uri get breakpointUri => Uri.file(testFilePath);
 
-  @override
   int get breakpointLine => lineContaining(testContent, '// BREAKPOINT');
 }

@@ -13,6 +13,7 @@ import '../application_package.dart';
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
+import '../base/terminal.dart';
 import '../base/time.dart';
 import '../base/user_messages.dart';
 import '../base/utils.dart';
@@ -63,6 +64,7 @@ class FlutterCommandResult {
 class FlutterOptions {
   static const String kExtraFrontEndOptions = 'extra-front-end-options';
   static const String kExtraGenSnapshotOptions = 'extra-gen-snapshot-options';
+  static const String kEnableExperiment = 'enable-experiment';
   static const String kFileSystemRoot = 'filesystem-root';
   static const String kFileSystemScheme = 'filesystem-scheme';
 }
@@ -81,7 +83,10 @@ abstract class FlutterCommand extends Command<void> {
 
   @override
   ArgParser get argParser => _argParser;
-  final ArgParser _argParser = ArgParser(allowTrailingOptions: false);
+  final ArgParser _argParser = ArgParser(
+    allowTrailingOptions: false,
+    usageLineLength: outputPreferences.wrapText ? outputPreferences.wrapColumn : null,
+  );
 
   @override
   FlutterCommandRunner get runner => super.runner;
@@ -138,7 +143,7 @@ abstract class FlutterCommand extends Command<void> {
   ///
   /// [hide] indicates whether or not to hide these options when the user asks
   /// for help.
-  void usesFilesystemOptions({@required bool hide}) {
+  void usesFilesystemOptions({ @required bool hide }) {
     argParser
       ..addOption('output-dill',
         hide: hide,
@@ -163,7 +168,7 @@ abstract class FlutterCommand extends Command<void> {
   void usesPortOptions() {
     argParser.addOption(observatoryPortOption,
         help: 'Listen to the given port for an observatory debugger connection.\n'
-              'Specifying port 0 (the default) will find a random free port.'
+              'Specifying port 0 (the default) will find a random free port.',
     );
     _usesPortOption = true;
   }
@@ -198,12 +203,12 @@ abstract class FlutterCommand extends Command<void> {
 
   void usesBuildNumberOption() {
     argParser.addOption('build-number',
-        help: 'An integer used as an internal version number.\n'
-              'Each build must have a unique number to differentiate it from previous builds.\n'
+        help: 'An identifier used as an internal version number.\n'
+              'Each build must have a unique identifier to differentiate it from previous builds.\n'
               'It is used to determine whether one build is more recent than another, with higher numbers indicating more recent build.\n'
               'On Android it is used as \'versionCode\'.\n'
               'On Xcode builds it is used as \'CFBundleVersion\'',
-        valueHelp: 'int');
+    );
   }
 
   void usesBuildNameOption() {
@@ -215,7 +220,7 @@ abstract class FlutterCommand extends Command<void> {
         valueHelp: 'x.y.z');
   }
 
-  void usesIsolateFilterOption({@required bool hide}) {
+  void usesIsolateFilterOption({ @required bool hide }) {
     argParser.addOption('isolate-filter',
       defaultsTo: null,
       hide: hide,
@@ -223,7 +228,7 @@ abstract class FlutterCommand extends Command<void> {
             'Normally there\'s only one, but when adding Flutter to a pre-existing app it\'s possible to create multiple.');
   }
 
-  void addBuildModeFlags({bool defaultToRelease = true, bool verboseHelp = false}) {
+  void addBuildModeFlags({ bool defaultToRelease = true, bool verboseHelp = false }) {
     defaultBuildMode = defaultToRelease ? BuildMode.release : BuildMode.debug;
 
     argParser.addFlag('debug',
@@ -241,25 +246,25 @@ abstract class FlutterCommand extends Command<void> {
       help: 'Enable dynamic code. Only allowed with --release or --profile.');
   }
 
-  void addDynamicModeFlags({bool verboseHelp = false}) {
+  void addDynamicModeFlags({ bool verboseHelp = false }) {
     argParser.addOption('compilation-trace-file',
         defaultsTo: 'compilation.txt',
         hide: !verboseHelp,
         help: 'Filename of Dart compilation trace file. This file will be produced\n'
               'by \'flutter run --dynamic --profile --train\' and consumed by subsequent\n'
               '--dynamic builds such as \'flutter build apk --dynamic\' to precompile\n'
-              'some code by the offline compiler.'
+              'some code by the offline compiler.',
     );
     argParser.addFlag('patch',
         hide: !verboseHelp,
         negatable: false,
         help: 'Generate dynamic patch for current changes from baseline.\n'
               'Dynamic patch is generated relative to baseline package.\n'
-              'This flag is only allowed when using --dynamic.\n'
+              'This flag is only allowed when using --dynamic.\n',
     );
   }
 
-  void addDynamicPatchingFlags({bool verboseHelp = false}) {
+  void addDynamicPatchingFlags({ bool verboseHelp = false }) {
     argParser.addOption('patch-number',
         hide: !verboseHelp,
         help: 'An integer used as an internal version number for dynamic patch.\n'
@@ -268,7 +273,7 @@ abstract class FlutterCommand extends Command<void> {
               'This optional setting allows several dynamic patches to coexist\n'
               'for same baseline build, and is useful for canary and A-B testing\n'
               'of dynamic patches.\n'
-              'This flag is only used when --dynamic --patch is specified.\n'
+              'This flag is only used when --dynamic --patch is specified.\n',
     );
     argParser.addOption('patch-dir',
         defaultsTo: 'public',
@@ -276,7 +281,7 @@ abstract class FlutterCommand extends Command<void> {
         help: 'The directory where to store generated dynamic patches.\n'
               'This directory can be deployed to a CDN such as Firebase Hosting.\n'
               'It is recommended to store this directory in version control.\n'
-              'This flag is only used when --dynamic --patch is specified.\n'
+              'This flag is only used when --dynamic --patch is specified.\n',
     );
     argParser.addFlag('baseline',
         hide: !verboseHelp,
@@ -284,23 +289,23 @@ abstract class FlutterCommand extends Command<void> {
         help: 'Save built package as baseline for future dynamic patching.\n'
             'Built package, such as APK file on Android, is saved and '
             'can be used to generate dynamic patches in later builds.\n'
-            'This flag is only allowed when using --dynamic.\n'
+            'This flag is only allowed when using --dynamic.\n',
     );
 
     addDynamicBaselineFlags(verboseHelp: verboseHelp);
   }
 
-  void addDynamicBaselineFlags({bool verboseHelp = false}) {
+  void addDynamicBaselineFlags({ bool verboseHelp = false }) {
     argParser.addOption('baseline-dir',
         defaultsTo: '.baseline',
         hide: !verboseHelp,
         help: 'The directory where to store and find generated baseline packages.\n'
               'It is recommended to store this directory in version control.\n'
-              'This flag is only used when --dynamic --baseline is specified.\n'
+              'This flag is only used when --dynamic --baseline is specified.\n',
     );
   }
 
-  void usesFuchsiaOptions({bool hide = false}) {
+  void usesFuchsiaOptions({ bool hide = false }) {
     argParser.addOption(
       'target-model',
       help: 'Target model that determines what core libraries are available',
@@ -354,7 +359,7 @@ abstract class FlutterCommand extends Command<void> {
       'flavor',
       help: 'Build a custom app flavor as defined by platform-specific build setup.\n'
         'Supports the use of product flavors in Android Gradle scripts.\n'
-        'Supports the use of custom Xcode schemes.'
+        'Supports the use of custom Xcode schemes.',
     );
   }
 
@@ -369,15 +374,9 @@ abstract class FlutterCommand extends Command<void> {
         ? argResults['track-widget-creation']
         : false;
 
-    int buildNumber;
-    try {
-      buildNumber = argParser.options.containsKey('build-number') && argResults['build-number'] != null
-          ? int.parse(argResults['build-number'])
-          : null;
-    } catch (e) {
-      throw UsageException(
-          '--build-number (${argResults['build-number']}) must be an int.', null);
-    }
+    final String buildNumber = argParser.options.containsKey('build-number') && argResults['build-number'] != null
+        ? argResults['build-number']
+        : null;
 
     int patchNumber;
     try {
@@ -387,6 +386,22 @@ abstract class FlutterCommand extends Command<void> {
     } catch (e) {
       throw UsageException(
           '--patch-number (${argResults['patch-number']}) must be an int.', null);
+    }
+
+    String extraFrontEndOptions =
+        argParser.options.containsKey(FlutterOptions.kExtraFrontEndOptions)
+            ? argResults[FlutterOptions.kExtraFrontEndOptions]
+            : null;
+    if (argParser.options.containsKey(FlutterOptions.kEnableExperiment) &&
+        argResults[FlutterOptions.kEnableExperiment] != null) {
+      for (String expFlag in argResults[FlutterOptions.kEnableExperiment]) {
+        final String flag = '--enable-experiment=' + expFlag;
+        if (extraFrontEndOptions != null) {
+          extraFrontEndOptions += ',' + flag;
+        } else {
+          extraFrontEndOptions = flag;
+        }
+      }
     }
 
     return BuildInfo(getBuildMode(),
@@ -410,9 +425,7 @@ abstract class FlutterCommand extends Command<void> {
       baselineDir: argParser.options.containsKey('baseline-dir')
           ? argResults['baseline-dir']
           : null,
-      extraFrontEndOptions: argParser.options.containsKey(FlutterOptions.kExtraFrontEndOptions)
-          ? argResults[FlutterOptions.kExtraFrontEndOptions]
-          : null,
+      extraFrontEndOptions: extraFrontEndOptions,
       extraGenSnapshotOptions: argParser.options.containsKey(FlutterOptions.kExtraGenSnapshotOptions)
           ? argResults[FlutterOptions.kExtraGenSnapshotOptions]
           : null,
@@ -467,19 +480,18 @@ abstract class FlutterCommand extends Command<void> {
       body: () async {
         if (flutterUsage.isFirstRun)
           flutterUsage.printWelcome();
-
+        final String commandPath = await usagePath;
         FlutterCommandResult commandResult;
         try {
-          commandResult = await verifyThenRunCommand();
+          commandResult = await verifyThenRunCommand(commandPath);
         } on ToolExit {
           commandResult = const FlutterCommandResult(ExitStatus.fail);
           rethrow;
         } finally {
           final DateTime endTime = systemClock.now();
           printTrace(userMessages.flutterElapsedTime(name, getElapsedAsMilliseconds(endTime.difference(startTime))));
-          // This is checking the result of the call to 'usagePath'
-          // (a Future<String>), and not the result of evaluating the Future.
-          if (usagePath != null) {
+          printTrace('"flutter $name" took ${getElapsedAsMilliseconds(endTime.difference(startTime))}.');
+          if (commandPath != null) {
             final List<String> labels = <String>[];
             if (commandResult?.exitStatus != null)
               labels.add(getEnumName(commandResult.exitStatus));
@@ -513,7 +525,7 @@ abstract class FlutterCommand extends Command<void> {
   /// then call this method to execute the command
   /// rather than calling [runCommand] directly.
   @mustCallSuper
-  Future<FlutterCommandResult> verifyThenRunCommand() async {
+  Future<FlutterCommandResult> verifyThenRunCommand(String commandPath) async {
     await validateCommand();
 
     // Populate the cache. We call this before pub get below so that the sky_engine
@@ -528,8 +540,6 @@ abstract class FlutterCommand extends Command<void> {
     }
 
     setupApplicationPackages();
-
-    final String commandPath = await usagePath;
 
     if (commandPath != null) {
       final Map<String, String> additionalUsageValues = await usageValues;
@@ -635,8 +645,6 @@ abstract class FlutterCommand extends Command<void> {
         throw ToolExit(userMessages.flutterTargetFileMissing(targetPath));
     }
 
-    final bool dynamicFlag = argParser.options.containsKey('dynamic')
-        ? argResults['dynamic'] : false;
     final String compilationTraceFilePath = argParser.options.containsKey('compilation-trace-file')
         ? argResults['compilation-trace-file'] : null;
     final bool createBaseline = argParser.options.containsKey('baseline')
@@ -646,12 +654,8 @@ abstract class FlutterCommand extends Command<void> {
 
     if (createBaseline && createPatch)
       throw ToolExit(userMessages.flutterBasePatchFlagsExclusive);
-    if (createBaseline && !dynamicFlag)
-      throw ToolExit(userMessages.flutterBaselineRequiresDynamic);
     if (createBaseline && compilationTraceFilePath == null)
       throw ToolExit(userMessages.flutterBaselineRequiresTraceFile);
-    if (createPatch && !dynamicFlag)
-      throw ToolExit(userMessages.flutterPatchRequiresDynamic);
     if (createPatch && compilationTraceFilePath == null)
       throw ToolExit(userMessages.flutterPatchRequiresTraceFile);
   }

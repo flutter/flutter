@@ -277,16 +277,31 @@ abstract class ImageProvider<T> {
           if (obtainedKey != null) {
             information.writeln('Image key: $obtainedKey');
           }
-        }
+        },
       );
     }
-    obtainKey(configuration).then<void>((T key) {
+
+    // `obtainKey` can throw both sync and async errors.
+    // `catchError` handles cases where async errors are thrown and the try block is for sync errors.
+    //
+    // `onError` callback on [ImageCache] handles the cases where `obtainKey` is a sync future and `load` throws.
+    Future<T> key;
+    try {
+      key = obtainKey(configuration);
+    } catch (error, stackTrace) {
+      handleError(error, stackTrace);
+      return stream;
+    }
+
+    key.then<void>((T key) {
       obtainedKey = key;
-      final ImageStreamCompleter completer = PaintingBinding.instance.imageCache.putIfAbsent(key, () => load(key), onError: handleError);
+      final ImageStreamCompleter completer = PaintingBinding.instance
+          .imageCache.putIfAbsent(key, () => load(key), onError: handleError);
       if (completer != null) {
         stream.setCompleter(completer);
       }
     }).catchError(handleError);
+
     return stream;
   }
 
@@ -307,7 +322,7 @@ abstract class ImageProvider<T> {
   /// {@tool sample}
   ///
   /// The following sample code shows how an image loaded using the [Image]
-  /// widget can be evicted using a [NetworkImage] with a matching url.
+  /// widget can be evicted using a [NetworkImage] with a matching URL.
   ///
   /// ```dart
   /// class MyWidget extends StatelessWidget {
@@ -328,7 +343,7 @@ abstract class ImageProvider<T> {
   /// }
   /// ```
   /// {@end-tool}
-  Future<bool> evict({ImageCache cache, ImageConfiguration configuration = ImageConfiguration.empty}) async {
+  Future<bool> evict({ ImageCache cache, ImageConfiguration configuration = ImageConfiguration.empty }) async {
     cache ??= imageCache;
     final T key = await obtainKey(configuration);
     return cache.evict(key);
@@ -366,7 +381,7 @@ class AssetBundleImageKey {
   const AssetBundleImageKey({
     @required this.bundle,
     @required this.name,
-    @required this.scale
+    @required this.scale,
   }) : assert(bundle != null),
        assert(name != null),
        assert(scale != null);
@@ -420,7 +435,7 @@ abstract class AssetBundleImageProvider extends ImageProvider<AssetBundleImageKe
       informationCollector: (StringBuffer information) {
         information.writeln('Image provider: $this');
         information.write('Image key: $key');
-      }
+      },
     );
   }
 
@@ -452,8 +467,8 @@ class NetworkImage extends ImageProvider<NetworkImage> {
   ///
   /// The arguments must not be null.
   const NetworkImage(this.url, { this.scale = 1.0 , this.headers })
-      : assert(url != null),
-        assert(scale != null);
+    : assert(url != null),
+      assert(scale != null);
 
   /// The URL from which the image will be fetched.
   final String url;
@@ -477,7 +492,7 @@ class NetworkImage extends ImageProvider<NetworkImage> {
       informationCollector: (StringBuffer information) {
         information.writeln('Image provider: $this');
         information.write('Image key: $key');
-      }
+      },
     );
   }
 
@@ -529,8 +544,8 @@ class FileImage extends ImageProvider<FileImage> {
   ///
   /// The arguments must not be null.
   const FileImage(this.file, { this.scale = 1.0 })
-      : assert(file != null),
-        assert(scale != null);
+    : assert(file != null),
+      assert(scale != null);
 
   /// The file to decode into an image.
   final File file;
@@ -550,7 +565,7 @@ class FileImage extends ImageProvider<FileImage> {
       scale: key.scale,
       informationCollector: (StringBuffer information) {
         information.writeln('Path: ${file?.path}');
-      }
+      },
     );
   }
 
@@ -597,8 +612,8 @@ class MemoryImage extends ImageProvider<MemoryImage> {
   ///
   /// The arguments must not be null.
   const MemoryImage(this.bytes, { this.scale = 1.0 })
-      : assert(bytes != null),
-        assert(scale != null);
+    : assert(bytes != null),
+      assert(scale != null);
 
   /// The bytes to decode into an image.
   final Uint8List bytes;
@@ -615,7 +630,7 @@ class MemoryImage extends ImageProvider<MemoryImage> {
   ImageStreamCompleter load(MemoryImage key) {
     return MultiFrameImageStreamCompleter(
       codec: _loadAsync(key),
-      scale: key.scale
+      scale: key.scale,
     );
   }
 
@@ -757,7 +772,7 @@ class ExactAssetImage extends AssetBundleImageProvider {
     return SynchronousFuture<AssetBundleImageKey>(AssetBundleImageKey(
       bundle: bundle ?? configuration.bundle ?? rootBundle,
       name: keyName,
-      scale: scale
+      scale: scale,
     ));
   }
 

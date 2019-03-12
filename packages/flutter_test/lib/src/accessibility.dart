@@ -17,7 +17,9 @@ import 'widget_tester.dart';
 /// The result of evaluating a semantics node by a [AccessibilityGuideline].
 class Evaluation {
   /// Create a passing evaluation.
-  const Evaluation.pass() : passed = true, reason = null;
+  const Evaluation.pass()
+    : passed = true,
+      reason = null;
 
   /// Create a failing evaluation, with an optional [reason] explaining the
   /// result.
@@ -106,11 +108,11 @@ class MinimumTapTargetGuideline extends AccessibilityGuideline {
       const double delta = 0.001;
       if (paintBounds.left <= delta
         || paintBounds.top <= delta
-        || (paintBounds.bottom - ui.window.physicalSize.height).abs() <= delta
-        || (paintBounds.right - ui.window.physicalSize.width).abs() <= delta)
+        || (paintBounds.bottom - tester.binding.window.physicalSize.height).abs() <= delta
+        || (paintBounds.right - tester.binding.window.physicalSize.width).abs() <= delta)
         return result;
       // shrink by device pixel ratio.
-      final Size candidateSize = paintBounds.size / ui.window.devicePixelRatio;
+      final Size candidateSize = paintBounds.size / tester.binding.window.devicePixelRatio;
       if (candidateSize.width < size.width || candidateSize.height < size.height)
         result += Evaluation.fail(
           '$node: expected tap target size of at least $size, but found $candidateSize\n'
@@ -135,7 +137,7 @@ class LabeledTapTargetGuideline extends AccessibilityGuideline {
 
   @override
   FutureOr<Evaluation> evaluate(WidgetTester tester) {
-   final SemanticsNode root = tester.binding.pipelineOwner.semanticsOwner.rootSemanticsNode;
+    final SemanticsNode root = tester.binding.pipelineOwner.semanticsOwner.rootSemanticsNode;
     Evaluation traverse(SemanticsNode node) {
       Evaluation result = const Evaluation.pass();
       node.visitChildren((SemanticsNode child) {
@@ -195,7 +197,7 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
     final RenderView renderView = tester.binding.renderView;
     final OffsetLayer layer = renderView.layer;
     ui.Image image;
-    final ByteData byteData = await tester.binding.runAsync<ByteData>(() async  {
+    final ByteData byteData = await tester.binding.runAsync<ByteData>(() async {
       // Needs to be the same pixel ratio otherwise our dimensions won't match the
       // last transform layer.
       image = await layer.toImage(renderView.paintBounds, pixelRatio: 1.0);
@@ -260,8 +262,8 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
         return result;
       final List<int> subset = _subsetToRect(byteData, paintBounds, image.width, image.height);
       // Node was too far off screen.
-     if (subset.isEmpty)
-       return result;
+      if (subset.isEmpty)
+        return result;
       final _ContrastReport report = _ContrastReport(subset);
       final double contrastRatio = report.contrastRatio();
       const double delta = -0.01;

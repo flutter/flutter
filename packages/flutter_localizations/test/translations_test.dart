@@ -247,7 +247,7 @@ void main() {
     expect(localizations is MaterialLocalizationZh, true);
   });
 
-testWidgets('Serbian resolution', (WidgetTester tester) async {
+  testWidgets('Serbian resolution', (WidgetTester tester) async {
     Locale locale = const Locale.fromSubtags(languageCode: 'sr', scriptCode: null, countryCode: null);
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(locale);

@@ -299,7 +299,7 @@ abstract class CachedArtifact {
   Future<void> _downloadArchive(String message, Uri url, Directory location, bool verifier(File f), void extractor(File f, Directory d)) {
     return _withDownloadFile('${flattenNameSubdirs(url)}', (File tempFile) async {
       if (!verifier(tempFile)) {
-        final Status status = logger.startProgress(message, expectSlowOperation: true);
+        final Status status = logger.startProgress(message, timeout: kSlowOperation);
         try {
           await _downloadFile(url, tempFile);
           status.stop();
@@ -348,7 +348,7 @@ void _maybeWarnAboutStorageOverride(String overrideUrl) {
 
 /// A cached artifact containing fonts used for Material Design.
 class MaterialFonts extends CachedArtifact {
-  MaterialFonts(Cache cache): super('material_fonts', cache);
+  MaterialFonts(Cache cache) : super('material_fonts', cache);
 
   @override
   Future<void> updateInner() {
@@ -359,7 +359,7 @@ class MaterialFonts extends CachedArtifact {
 
 /// A cached artifact containing the Flutter engine binaries.
 class FlutterEngine extends CachedArtifact {
-  FlutterEngine(Cache cache): super('engine', cache);
+  FlutterEngine(Cache cache) : super('engine', cache);
 
   List<String> _getPackageDirs() => const <String>['sky_engine'];
 
@@ -524,8 +524,10 @@ class FlutterEngine extends CachedArtifact {
     }
   }
 
-  Future<bool> areRemoteArtifactsAvailable({String engineVersion,
-                                            bool includeAllPlatforms = true}) async {
+  Future<bool> areRemoteArtifactsAvailable({
+    String engineVersion,
+    bool includeAllPlatforms = true,
+  }) async {
     final bool includeAllPlatformsState = cache.includeAllPlatforms;
     cache.includeAllPlatforms = includeAllPlatforms;
 
@@ -574,7 +576,7 @@ class FlutterEngine extends CachedArtifact {
 
 /// A cached artifact containing Gradle Wrapper scripts and binaries.
 class GradleWrapper extends CachedArtifact {
-  GradleWrapper(Cache cache): super('gradle_wrapper', cache);
+  GradleWrapper(Cache cache) : super('gradle_wrapper', cache);
 
   List<String> get _gradleScripts => <String>['gradlew', 'gradlew.bat'];
 
@@ -620,7 +622,7 @@ final Map<int, List<int>> _flattenNameSubstitutions = <int, List<int>>{
   r'>'.codeUnitAt(0): '@gt@'.codeUnits,
   r'"'.codeUnitAt(0): '@q@'.codeUnits,
   r'|'.codeUnitAt(0): '@pip@'.codeUnits,
-  r'?'.codeUnitAt(0): '@ques@'.codeUnits
+  r'?'.codeUnitAt(0): '@ques@'.codeUnits,
 };
 
 /// Given a name containing slashes, colons, and backslashes, expand it into
@@ -648,7 +650,7 @@ Future<void> _downloadFile(Uri url, File location) async {
 }
 
 Future<bool> _doesRemoteExist(String message, Uri url) async {
-  final Status status = logger.startProgress(message, expectSlowOperation: true);
+  final Status status = logger.startProgress(message, timeout: kSlowOperation);
   final bool exists = await doesRemoteFileExist(url);
   status.stop();
   return exists;

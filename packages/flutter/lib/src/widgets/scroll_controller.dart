@@ -142,7 +142,8 @@ class ScrollController extends ChangeNotifier {
   ///
   /// The duration must not be zero. To jump to a particular value without an
   /// animation, use [jumpTo].
-  Future<void> animateTo(double offset, {
+  Future<void> animateTo(
+    double offset, {
     @required Duration duration,
     @required Curve curve,
   }) {
@@ -224,7 +225,7 @@ class ScrollController extends ChangeNotifier {
   ///    This is used when the environment has changed and the [Scrollable]
   ///    needs to recreate the [ScrollPosition] object. It is null the first
   ///    time the [ScrollPosition] is created.
- ScrollPosition createScrollPosition(
+  ScrollPosition createScrollPosition(
     ScrollPhysics physics,
     ScrollContext context,
     ScrollPosition oldPosition,

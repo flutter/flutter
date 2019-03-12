@@ -60,7 +60,7 @@ class ModalBarrier extends StatelessWidget {
   ///    the [ModalBarrier] built by [ModalRoute] pages.
   final bool barrierSemanticsDismissible;
 
-  /// Semantics label used for the barrier if it is [dismissable].
+  /// Semantics label used for the barrier if it is [dismissible].
   ///
   /// The semantics label is read out by accessibility tools (e.g. TalkBack
   /// on Android and VoiceOver on iOS) when the barrier is focused.
@@ -95,12 +95,12 @@ class ModalBarrier extends StatelessWidget {
               child: color == null ? null : DecoratedBox(
                 decoration: BoxDecoration(
                   color: color,
-                )
-              )
-            )
-          )
-        )
-      )
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
@@ -147,7 +147,7 @@ class AnimatedModalBarrier extends AnimatedWidget {
   ///    [AnimatedModalBarrier] built by [ModalRoute] pages.
   final bool dismissible;
 
-  /// Semantics label used for the barrier if it is [dismissable].
+  /// Semantics label used for the barrier if it is [dismissible].
   ///
   /// The semantics label is read out by accessibility tools (e.g. TalkBack
   /// on Android and VoiceOver on iOS) when the barrier is focused.

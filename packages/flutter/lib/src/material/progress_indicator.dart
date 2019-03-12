@@ -24,7 +24,7 @@ const int _kIndeterminateLinearDuration = 1800;
 ///
 /// See also:
 ///
-///  * <https://material.google.com/components/progress-activity.html>
+///  * <https://material.io/design/components/progress-indicators.html>
 abstract class ProgressIndicator extends StatefulWidget {
   /// Creates a progress indicator.
   ///
@@ -219,7 +219,7 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
 /// See also:
 ///
 ///  * [CircularProgressIndicator]
-///  * <https://material.google.com/components/progress-activity.html#progress-activity-types-of-indicators>
+///  * <https://material.io/design/components/progress-indicators.html#linear-progress-indicators>
 class LinearProgressIndicator extends ProgressIndicator {
   /// Creates a linear progress indicator.
   ///
@@ -389,7 +389,7 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
 /// See also:
 ///
 ///  * [LinearProgressIndicator]
-///  * <https://material.google.com/components/progress-activity.html#progress-activity-types-of-indicators>
+///  * <https://material.io/design/components/progress-indicators.html#circular-progress-indicators>
 class CircularProgressIndicator extends ProgressIndicator {
   /// Creates a circular progress indicator.
   ///

@@ -32,7 +32,7 @@ class FooState extends State<Foo> {
                   child: SizedBox(
                     height: 200.0,
                   ),
-                )
+                ),
               ),
               const DecoratedBox(
                 decoration: BoxDecoration(color: Color(0)),
@@ -65,7 +65,7 @@ class FooState extends State<Foo> {
                 ),
               ),
             ],
-          )
+          ),
         );
       }
     );

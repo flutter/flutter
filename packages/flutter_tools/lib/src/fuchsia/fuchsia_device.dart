@@ -39,7 +39,8 @@ class _FuchsiaLogReader extends DeviceLogReader {
   FuchsiaDevice _device;
   ApplicationPackage _app;
 
-  @override String get name => _device.name;
+  @override
+  String get name => _device.name;
 
   Stream<String> _logLines;
   @override
@@ -92,7 +93,7 @@ class _FuchsiaLogSink implements EventSink<String> {
   }
 
   @override
-  void addError(Object error, [StackTrace stackTrace]) {
+  void addError(Object error, [ StackTrace stackTrace ]) {
     _outputSink.addError(error, stackTrace);
   }
 
@@ -115,7 +116,7 @@ class FuchsiaDevices extends PollingDeviceDiscovery {
       return <Device>[];
     }
     final String text = await fuchsiaSdk.listDevices();
-    if (text == null) {
+    if (text == null || text.isEmpty) {
       return <Device>[];
     }
     final List<FuchsiaDevice> devices = parseListDevices(text);
@@ -133,6 +134,9 @@ List<FuchsiaDevice> parseListDevices(String text) {
     final String line = rawLine.trim();
     // ['ip', 'device name']
     final List<String> words = line.split(' ');
+    if (words.length < 2) {
+      continue;
+    }
     final String name = words[1];
     final String id = words[0];
     devices.add(FuchsiaDevice(id, name: name));
@@ -185,7 +189,7 @@ class FuchsiaDevice extends Device {
     Map<String, dynamic> platformArgs,
     bool prebuiltApplication = false,
     bool applicationNeedsRebuild = false,
-    bool usesTerminalUi = false,
+    bool usesTerminalUi = true,
     bool ipv6 = false,
   }) => Future<void>.error('unimplemented');
 
@@ -202,7 +206,7 @@ class FuchsiaDevice extends Device {
   Future<String> get sdkNameAndVersion async => 'Fuchsia';
 
   @override
-  DeviceLogReader getLogReader({ApplicationPackage app}) => _logReader ??= _FuchsiaLogReader(this, app);
+  DeviceLogReader getLogReader({ ApplicationPackage app }) => _logReader ??= _FuchsiaLogReader(this, app);
   _FuchsiaLogReader _logReader;
 
   @override
@@ -325,7 +329,7 @@ class FuchsiaIsolateDiscoveryProtocol {
     }
     _status ??= logger.startProgress(
       'Waiting for a connection from $_isolateName on ${_device.name}...',
-      expectSlowOperation: true,
+      timeout: null, // could take an arbitrary amount of time
     );
     _pollingTimer ??= Timer(_pollDuration, _findIsolate);
     return _foundUri.future.then((Uri uri) {
@@ -394,20 +398,20 @@ class _FuchsiaPortForwarder extends DevicePortForwarder {
   final Map<int, Process> _processes = <int, Process>{};
 
   @override
-  Future<int> forward(int devicePort, {int hostPort}) async {
+  Future<int> forward(int devicePort, { int hostPort }) async {
     hostPort ??= await _findPort();
     // Note: the provided command works around a bug in -N, see US-515
     // for more explanation.
     final List<String> command = <String>[
       'ssh', '-6', '-F', fuchsiaArtifacts.sshConfig.absolute.path, '-nNT', '-vvv', '-f',
-      '-L', '$hostPort:$_ipv4Loopback:$devicePort', device.id, 'true'
+      '-L', '$hostPort:$_ipv4Loopback:$devicePort', device.id, 'true',
     ];
     final Process process = await processManager.start(command);
-    process.exitCode.then((int exitCode) { // ignore: unawaited_futures
+    unawaited(process.exitCode.then((int exitCode) {
       if (exitCode != 0) {
         throwToolExit('Failed to forward port:$devicePort');
       }
-    });
+    }));
     _processes[hostPort] = process;
     _forwardedPorts.add(ForwardedPort(hostPort, devicePort));
     return hostPort;

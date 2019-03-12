@@ -92,7 +92,7 @@ void main() {
       expect(escapePath('foo\\bar\\cool.dart'), 'foo\\\\bar\\\\cool.dart');
       expect(escapePath('C:/foo/bar/cool.dart'), 'C:/foo/bar/cool.dart');
     }, overrides: <Type, Generator>{
-      Platform: () => FakePlatform(operatingSystem: 'windows')
+      Platform: () => FakePlatform(operatingSystem: 'windows'),
     });
 
     testUsingContext('on Linux', () {
@@ -100,7 +100,7 @@ void main() {
       expect(escapePath('foo/bar/cool.dart'), 'foo/bar/cool.dart');
       expect(escapePath('foo\\cool.dart'), 'foo\\cool.dart');
     }, overrides: <Type, Generator>{
-      Platform: () => FakePlatform(operatingSystem: 'linux')
+      Platform: () => FakePlatform(operatingSystem: 'linux'),
     });
   });
 }

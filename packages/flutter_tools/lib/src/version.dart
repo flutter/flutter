@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:meta/meta.dart';
 
@@ -15,6 +14,7 @@ import 'base/process.dart';
 import 'base/process_manager.dart';
 import 'base/time.dart';
 import 'cache.dart';
+import 'convert.dart';
 import 'globals.dart';
 
 class FlutterVersion {
@@ -43,12 +43,12 @@ class FlutterVersion {
   String _repositoryUrl;
   String get repositoryUrl => _repositoryUrl;
 
-  static Set<String> officialChannels = Set<String>.from(<String>[
+  static const Set<String> officialChannels = <String>{
     'master',
     'dev',
     'beta',
     'stable',
-  ]);
+  };
 
   /// This maps old branch names to the names of branches that replaced them.
   ///
@@ -120,7 +120,7 @@ class FlutterVersion {
   /// A date String describing the last framework commit.
   String get frameworkCommitDate => _latestGitCommitDate();
 
-  static String _latestGitCommitDate([String branch]) {
+  static String _latestGitCommitDate([ String branch ]) {
     final List<String> args = <String>['git', 'log'];
 
     if (branch != null)
@@ -171,7 +171,7 @@ class FlutterVersion {
   static FlutterVersion get instance => context[FlutterVersion];
 
   /// Return a short string for the version (e.g. `master/0.0.59-pre.92`, `scroll_refactor/a76bc8e22b`).
-  String getVersionString({bool redactUnknownBranches = false}) {
+  String getVersionString({ bool redactUnknownBranches = false }) {
     if (frameworkVersion != 'unknown')
       return '${getBranchName(redactUnknownBranches: redactUnknownBranches)}/$frameworkVersion';
     return '${getBranchName(redactUnknownBranches: redactUnknownBranches)}/$frameworkRevisionShort';
@@ -496,7 +496,7 @@ class VersionCheckError implements Exception {
 ///
 /// If [lenient] is true and the command fails, returns an empty string.
 /// Otherwise, throws a [ToolExit] exception.
-String _runSync(List<String> command, {bool lenient = true}) {
+String _runSync(List<String> command, { bool lenient = true }) {
   final ProcessResult results = processManager.runSync(command, workingDirectory: Cache.flutterRoot);
 
   if (results.exitCode == 0)
@@ -539,8 +539,14 @@ String _shortGitRevision(String revision) {
 }
 
 class GitTagVersion {
-  const GitTagVersion(this.x, this.y, this.z, this.commits, this.hash);
-  const GitTagVersion.unknown() : x = null, y = null, z = null, commits = 0, hash = '';
+  const GitTagVersion(this.x, this.y, this.z, this.hotfix, this.commits, this.hash);
+  const GitTagVersion.unknown()
+    : x = null,
+      y = null,
+      z = null,
+      hotfix = null,
+      commits = 0,
+      hash = '';
 
   /// The X in vX.Y.Z.
   final int x;
@@ -551,6 +557,9 @@ class GitTagVersion {
   /// The Z in vX.Y.Z.
   final int z;
 
+  /// the F in vX.Y.Z-hotfix.F
+  final int hotfix;
+
   /// Number of commits since the vX.Y.Z tag.
   final int commits;
 
@@ -558,22 +567,30 @@ class GitTagVersion {
   final String hash;
 
   static GitTagVersion determine() {
-    final String version = _runGit('git describe --match v*.*.* --first-parent --long --tags');
-    final RegExp versionPattern = RegExp('^v([0-9]+)\.([0-9]+)\.([0-9]+)-([0-9]+)-g([a-f0-9]+)\$');
-    final List<String> parts = versionPattern.matchAsPrefix(version)?.groups(<int>[1, 2, 3, 4, 5]);
+    return parse(_runGit('git describe --match v*.*.* --first-parent --long --tags'));
+  }
+
+  static GitTagVersion parse(String version) {
+    final RegExp versionPattern = RegExp(r'^v([0-9]+)\.([0-9]+)\.([0-9]+)(?:-hotfix\.([0-9]+))?-([0-9]+)-g([a-f0-9]+)$');
+    final List<String> parts = versionPattern.matchAsPrefix(version)?.groups(<int>[1, 2, 3, 4, 5, 6]);
     if (parts == null) {
       printTrace('Could not interpret results of "git describe": $version');
       return const GitTagVersion.unknown();
     }
-    final List<int> parsedParts = parts.take(4).map<int>(int.tryParse).toList();
-    return GitTagVersion(parsedParts[0], parsedParts[1], parsedParts[2], parsedParts[3], parts[4]);
+    final List<int> parsedParts = parts.take(5).map<int>((String source) => source == null ? null : int.tryParse(source)).toList();
+    return GitTagVersion(parsedParts[0], parsedParts[1], parsedParts[2], parsedParts[3], parsedParts[4], parts[5]);
   }
 
   String frameworkVersionFor(String revision) {
     if (x == null || y == null || z == null || !revision.startsWith(hash))
       return '0.0.0-unknown';
-    if (commits == 0)
+    if (commits == 0) {
+      if (hotfix != null)
+        return '$x.$y.$z-hotfix.$hotfix';
       return '$x.$y.$z';
+    }
+    if (hotfix != null)
+      return '$x.$y.$z-hotfix.${hotfix + 1}-pre.$commits';
     return '$x.$y.${z + 1}-pre.$commits';
   }
 }

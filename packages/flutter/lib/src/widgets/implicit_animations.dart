@@ -218,7 +218,7 @@ abstract class ImplicitlyAnimatedWidget extends StatefulWidget {
   const ImplicitlyAnimatedWidget({
     Key key,
     this.curve = Curves.linear,
-    @required this.duration
+    @required this.duration,
   }) : assert(curve != null),
        assert(duration != null),
        super(key: key);
@@ -367,7 +367,7 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
   /// Any properties that depend upon tweens created by [forEachTween] should be
   /// updated within [didUpdateTweens], not within [forEachTween].
   @protected
-  void didUpdateTweens() {}
+  void didUpdateTweens() { }
 }
 
 /// A base class for widgets with implicit animations that need to rebuild their
@@ -769,7 +769,7 @@ class AnimatedPositioned extends ImplicitlyAnimatedWidget {
     @required Duration duration,
   }) : assert(left == null || right == null || width == null),
        assert(top == null || bottom == null || height == null),
-      super(key: key, curve: curve, duration: duration);
+       super(key: key, curve: curve, duration: duration);
 
   /// Creates a widget that animates the rectangle it occupies implicitly.
   ///
@@ -779,7 +779,7 @@ class AnimatedPositioned extends ImplicitlyAnimatedWidget {
     this.child,
     Rect rect,
     Curve curve = Curves.linear,
-    @required Duration duration
+    @required Duration duration,
   }) : left = rect.left,
        top = rect.top,
        width = rect.width,
@@ -920,7 +920,7 @@ class AnimatedPositionedDirectional extends ImplicitlyAnimatedWidget {
     @required Duration duration,
   }) : assert(start == null || end == null || width == null),
        assert(top == null || bottom == null || height == null),
-      super(key: key, curve: curve, duration: duration);
+       super(key: key, curve: curve, duration: duration);
 
   /// The widget below this widget in the tree.
   ///
@@ -1116,7 +1116,7 @@ class _AnimatedOpacityState extends ImplicitlyAnimatedWidgetState<AnimatedOpacit
   Widget build(BuildContext context) {
     return FadeTransition(
       opacity: _opacityAnimation,
-      child: widget.child
+      child: widget.child,
     );
   }
 }

@@ -28,7 +28,7 @@ class BuildApkCommand extends BuildSubCommand {
       )
       ..addOption('target-platform',
         defaultsTo: 'android-arm',
-        allowed: <String>['android-arm', 'android-arm64']);
+        allowed: <String>['android-arm', 'android-arm64', 'android-x86', 'android-x64']);
   }
 
   @override
@@ -42,7 +42,6 @@ class BuildApkCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    await super.runCommand();
     await buildApk(
       project: await FlutterProject.current(),
       target: targetFile,

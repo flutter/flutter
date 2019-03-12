@@ -364,7 +364,7 @@ void main() {
               ],
             ),
           ),
-        )
+        ),
       ),
     );
 
@@ -405,7 +405,7 @@ void main() {
       return MediaQuery(
         data: const MediaQueryData(
           padding: EdgeInsets.zero,
-          textScaleFactor: 1.0
+          textScaleFactor: 1.0,
         ),
         child: Directionality(
           textDirection: textDirection,
@@ -450,7 +450,7 @@ void main() {
       return MediaQuery(
         data: const MediaQueryData(
           padding: EdgeInsets.zero,
-          textScaleFactor: 1.0
+          textScaleFactor: 1.0,
         ),
         child: Directionality(
           textDirection: textDirection,
@@ -497,7 +497,7 @@ void main() {
       return MediaQuery(
         data: const MediaQueryData(
           padding: EdgeInsets.zero,
-          textScaleFactor: 1.0
+          textScaleFactor: 1.0,
         ),
         child: Directionality(
           textDirection: textDirection,
@@ -585,11 +585,11 @@ void main() {
         ),
       ),
     );
-    //                                                                    LEFT                 TOP          WIDTH  HEIGHT
+    //                                                                    LEFT                  TOP          WIDTH  HEIGHT
     expect(tester.getRect(find.byType(ListTile).at(0)),     Rect.fromLTWH(                0.0,          0.0, 800.0, 177.0));
-    expect(tester.getRect(find.byType(CircleAvatar).at(0)), Rect.fromLTWH(               16.0,          4.0,  40.0,  40.0));
-    expect(tester.getRect(find.byType(Placeholder).at(0)),  Rect.fromLTWH(800.0 - 24.0 - 16.0,         12.0,  24.0,  24.0));
-    expect(tester.getRect(find.byType(ListTile).at(1)),     Rect.fromLTWH(                0.0, 177.0,        800.0,  48.0));
+    expect(tester.getRect(find.byType(CircleAvatar).at(0)), Rect.fromLTWH(               16.0,         16.0,  40.0,  40.0));
+    expect(tester.getRect(find.byType(Placeholder).at(0)),  Rect.fromLTWH(800.0 - 24.0 - 16.0,         16.0,  24.0,  24.0));
+    expect(tester.getRect(find.byType(ListTile).at(1)),     Rect.fromLTWH(                0.0,        177.0, 800.0,  48.0));
     expect(tester.getRect(find.byType(CircleAvatar).at(1)), Rect.fromLTWH(               16.0, 177.0 +  4.0,  40.0,  40.0));
     expect(tester.getRect(find.byType(Placeholder).at(1)),  Rect.fromLTWH(800.0 - 24.0 - 16.0, 177.0 + 12.0,  24.0,  24.0));
 
@@ -615,11 +615,11 @@ void main() {
       ),
     );
     await tester.pump(const Duration(seconds: 2)); // the text styles are animated when we change dense
-    //                                                                    LEFT                 TOP          WIDTH  HEIGHT
+    //                                                                    LEFT                 TOP                   WIDTH  HEIGHT
     expect(tester.getRect(find.byType(ListTile).at(0)),     Rect.fromLTWH(                0.0,          0.0, 800.0, 216.0));
-    expect(tester.getRect(find.byType(CircleAvatar).at(0)), Rect.fromLTWH(               16.0,          8.0,  40.0,  40.0));
+    expect(tester.getRect(find.byType(CircleAvatar).at(0)), Rect.fromLTWH(               16.0,         16.0,  40.0,  40.0));
     expect(tester.getRect(find.byType(Placeholder).at(0)),  Rect.fromLTWH(800.0 - 24.0 - 16.0,         16.0,  24.0,  24.0));
-    expect(tester.getRect(find.byType(ListTile).at(1)),     Rect.fromLTWH(                0.0, 216.0,        800.0,  56.0));
+    expect(tester.getRect(find.byType(ListTile).at(1)),     Rect.fromLTWH(                0.0, 216.0       , 800.0,  56.0));
     expect(tester.getRect(find.byType(CircleAvatar).at(1)), Rect.fromLTWH(               16.0, 216.0 +  8.0,  40.0,  40.0));
     expect(tester.getRect(find.byType(Placeholder).at(1)),  Rect.fromLTWH(800.0 - 24.0 - 16.0, 216.0 + 16.0,  24.0,  24.0));
 
@@ -650,8 +650,8 @@ void main() {
     );
     //                                                                    LEFT                 TOP          WIDTH  HEIGHT
     expect(tester.getRect(find.byType(ListTile).at(0)),     Rect.fromLTWH(                0.0,          0.0, 800.0, 180.0));
-    expect(tester.getRect(find.byType(CircleAvatar).at(0)), Rect.fromLTWH(               16.0,         12.0,  40.0,  40.0));
-    expect(tester.getRect(find.byType(Placeholder).at(0)),  Rect.fromLTWH(800.0 - 24.0 - 16.0,         20.0,  24.0,  24.0));
+    expect(tester.getRect(find.byType(CircleAvatar).at(0)), Rect.fromLTWH(               16.0,         16.0,  40.0,  40.0));
+    expect(tester.getRect(find.byType(Placeholder).at(0)),  Rect.fromLTWH(800.0 - 24.0 - 16.0,         16.0,  24.0,  24.0));
     expect(tester.getRect(find.byType(ListTile).at(1)),     Rect.fromLTWH(                0.0, 180.0,        800.0,  64.0));
     expect(tester.getRect(find.byType(CircleAvatar).at(1)), Rect.fromLTWH(               16.0, 180.0 + 12.0,  40.0,  40.0));
     expect(tester.getRect(find.byType(Placeholder).at(1)),  Rect.fromLTWH(800.0 - 24.0 - 16.0, 180.0 + 20.0,  24.0,  24.0));
@@ -682,7 +682,7 @@ void main() {
     //                                                                    LEFT                 TOP          WIDTH  HEIGHT
     expect(tester.getRect(find.byType(ListTile).at(0)),     Rect.fromLTWH(                0.0,          0.0, 800.0, 180.0));
     expect(tester.getRect(find.byType(CircleAvatar).at(0)), Rect.fromLTWH(               16.0,         16.0,  40.0,  40.0));
-    expect(tester.getRect(find.byType(Placeholder).at(0)),  Rect.fromLTWH(800.0 - 24.0 - 16.0,         24.0,  24.0,  24.0));
+    expect(tester.getRect(find.byType(Placeholder).at(0)),  Rect.fromLTWH(800.0 - 24.0 - 16.0,         16.0,  24.0,  24.0));
     expect(tester.getRect(find.byType(ListTile).at(1)),     Rect.fromLTWH(                0.0, 180.0,        800.0,  72.0));
     expect(tester.getRect(find.byType(CircleAvatar).at(1)), Rect.fromLTWH(               16.0, 180.0 + 16.0,  40.0,  40.0));
     expect(tester.getRect(find.byType(Placeholder).at(1)),  Rect.fromLTWH(800.0 - 24.0 - 16.0, 180.0 + 24.0,  24.0,  24.0));
@@ -754,5 +754,35 @@ void main() {
     expect(tester.getRect(find.byType(ListTile).at(1)),     Rect.fromLTWH(                0.0, 180.0,        800.0,  88.0));
     expect(tester.getRect(find.byType(CircleAvatar).at(1)), Rect.fromLTWH(               16.0, 180.0 + 16.0,  40.0,  40.0));
     expect(tester.getRect(find.byType(Placeholder).at(1)),  Rect.fromLTWH(800.0 - 24.0 - 16.0, 180.0 + 16.0,  24.0,  24.0));
+
+    // "ONE-LINE" with Small Leading Widget
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: ListView(
+            children: const <Widget>[
+              ListTile(
+                leading: SizedBox(height:12.0, width:24.0, child: Placeholder()),
+                trailing: SizedBox(height: 24.0, width: 24.0, child: Placeholder()),
+                title: Text('A\nB\nC\nD\nE\nF\nG\nH\nI\nJ\nK\nL\nM'),
+              ),
+              ListTile(
+                leading: SizedBox(height:12.0, width:24.0, child: Placeholder()),
+                trailing: SizedBox(height: 24.0, width: 24.0, child: Placeholder()),
+                title: Text('A'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    await tester.pump(const Duration(seconds: 2)); // the text styles are animated when we change dense
+    //                                                                    LEFT                 TOP           WIDTH  HEIGHT
+    expect(tester.getRect(find.byType(ListTile).at(0)),     Rect.fromLTWH(                0.0,          0.0, 800.0, 216.0));
+    expect(tester.getRect(find.byType(Placeholder).at(0)),  Rect.fromLTWH(               16.0,         16.0,  24.0,  12.0));
+    expect(tester.getRect(find.byType(Placeholder).at(1)),  Rect.fromLTWH(800.0 - 24.0 - 16.0,         16.0,  24.0,  24.0));
+    expect(tester.getRect(find.byType(ListTile).at(1)),     Rect.fromLTWH(                0.0, 216.0       , 800.0,  56.0));
+    expect(tester.getRect(find.byType(Placeholder).at(2)),  Rect.fromLTWH(               16.0, 216.0 + 16.0,  24.0,  12.0));
+    expect(tester.getRect(find.byType(Placeholder).at(3)),  Rect.fromLTWH(800.0 - 24.0 - 16.0, 216.0 + 16.0,  24.0,  24.0));
   });
 }

@@ -26,7 +26,7 @@ class TestImage implements ui.Image {
   void dispose() { }
 
   @override
-  Future<ByteData> toByteData({ui.ImageByteFormat format}) async {
+  Future<ByteData> toByteData({ ui.ImageByteFormat format = ui.ImageByteFormat.rawRgba }) async {
     throw UnsupportedError('Cannot encode test image');
   }
 }
@@ -117,7 +117,7 @@ class TestAssetImage extends AssetImage {
   }
 }
 
-Widget buildImageAtRatio(String image, Key key, double ratio, bool inferSize, [AssetBundle bundle]) {
+Widget buildImageAtRatio(String image, Key key, double ratio, bool inferSize, [ AssetBundle bundle ]) {
   const double windowSize = 500.0; // 500 logical pixels
   const double imageSize = 200.0; // 200 logical pixels
 
@@ -125,7 +125,7 @@ Widget buildImageAtRatio(String image, Key key, double ratio, bool inferSize, [A
     data: MediaQueryData(
       size: const Size(windowSize, windowSize),
       devicePixelRatio: ratio,
-      padding: const EdgeInsets.all(0.0)
+      padding: const EdgeInsets.all(0.0),
     ),
     child: DefaultAssetBundle(
       bundle: bundle ?? TestAssetBundle(),
@@ -134,7 +134,7 @@ Widget buildImageAtRatio(String image, Key key, double ratio, bool inferSize, [A
           Image(
             key: key,
             excludeFromSemantics: true,
-            image: TestAssetImage(image)
+            image: TestAssetImage(image),
           ) :
           Image(
             key: key,
@@ -142,10 +142,10 @@ Widget buildImageAtRatio(String image, Key key, double ratio, bool inferSize, [A
             image: TestAssetImage(image),
             height: imageSize,
             width: imageSize,
-            fit: BoxFit.fill
-          )
-      )
-    )
+            fit: BoxFit.fill,
+          ),
+      ),
+    ),
   );
 }
 

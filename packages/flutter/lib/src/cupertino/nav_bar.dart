@@ -809,7 +809,7 @@ class _LargeTitleNavigationBarSliverDelegate
 
   @override
   bool shouldRebuild(_LargeTitleNavigationBarSliverDelegate oldDelegate) {
-       return components != oldDelegate.components
+    return components != oldDelegate.components
         || userMiddle != oldDelegate.userMiddle
         || backgroundColor != oldDelegate.backgroundColor
         || border != oldDelegate.border
@@ -910,13 +910,13 @@ class _PersistentNavigationBar extends StatelessWidget {
 @immutable
 class _NavigationBarStaticComponentsKeys {
   _NavigationBarStaticComponentsKeys()
-      : navBarBoxKey = GlobalKey(debugLabel: 'Navigation bar render box'),
-        leadingKey = GlobalKey(debugLabel: 'Leading'),
-        backChevronKey = GlobalKey(debugLabel: 'Back chevron'),
-        backLabelKey = GlobalKey(debugLabel: 'Back label'),
-        middleKey = GlobalKey(debugLabel: 'Middle'),
-        trailingKey = GlobalKey(debugLabel: 'Trailing'),
-        largeTitleKey = GlobalKey(debugLabel: 'Large title');
+    : navBarBoxKey = GlobalKey(debugLabel: 'Navigation bar render box'),
+      leadingKey = GlobalKey(debugLabel: 'Leading'),
+      backChevronKey = GlobalKey(debugLabel: 'Back chevron'),
+      backLabelKey = GlobalKey(debugLabel: 'Back label'),
+      middleKey = GlobalKey(debugLabel: 'Middle'),
+      trailingKey = GlobalKey(debugLabel: 'Trailing'),
+      largeTitleKey = GlobalKey(debugLabel: 'Large title');
 
   final GlobalKey navBarBoxKey;
   final GlobalKey leadingKey;
@@ -1676,7 +1676,7 @@ class _NavigationBarComponentsTransition {
           ancestor: toNavBarBox,
         ).translate(
           0.0,
-          - fromBox.size.height / 2 + toBox.size.height / 2
+          - fromBox.size.height / 2 + toBox.size.height / 2,
         ) & fromBox.size; // Keep the from render object's size.
 
     if (forwardDirection < 0) {

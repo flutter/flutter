@@ -22,7 +22,7 @@ void main() {
     FlutterRunTestDriver _flutter;
 
     setUp(() async {
-      tempDir = createResolvedTempDirectorySync('expression_test.');
+      tempDir = createResolvedTempDirectorySync('run_expression_eval_test.');
       await _project.setUpIn(tempDir);
       _flutter = FlutterRunTestDriver(tempDir);
     });
@@ -32,16 +32,18 @@ void main() {
       tryToDelete(tempDir);
     });
 
-    Future<Isolate> breakInBuildMethod(FlutterTestDriver flutter) async {
-      return _flutter.breakAt(
-          _project.buildMethodBreakpointUri,
-          _project.buildMethodBreakpointLine);
+    Future<void> breakInBuildMethod(FlutterTestDriver flutter) async {
+      await _flutter.breakAt(
+        _project.buildMethodBreakpointUri,
+        _project.buildMethodBreakpointLine,
+      );
     }
 
-    Future<Isolate> breakInTopLevelFunction(FlutterTestDriver flutter) async {
-      return _flutter.breakAt(
-          _project.topLevelFunctionBreakpointUri,
-          _project.topLevelFunctionBreakpointLine);
+    Future<void> breakInTopLevelFunction(FlutterTestDriver flutter) async {
+      await _flutter.breakAt(
+        _project.topLevelFunctionBreakpointUri,
+        _project.topLevelFunctionBreakpointLine,
+      );
     }
 
     test('can evaluate trivial expressions in top level function', () async {
@@ -79,7 +81,7 @@ void main() {
       await breakInBuildMethod(_flutter);
       await evaluateComplexReturningExpressions(_flutter);
     });
-  }, timeout: const Timeout.factor(6));
+  }, timeout: const Timeout.factor(10)); // The DevFS sync takes a really long time, so these tests can be slow.
 
   group('flutter test expression evaluation', () {
     Directory tempDir;
@@ -124,7 +126,7 @@ void main() {
       await evaluateComplexReturningExpressions(_flutter);
     });
     // Skipped due to https://github.com/flutter/flutter/issues/26518
-  }, timeout: const Timeout.factor(6));
+  }, timeout: const Timeout.factor(10), skip: true); // The DevFS sync takes a really long time, so these tests can be slow.
 }
 
 Future<void> evaluateTrivialExpressions(FlutterTestDriver flutter) async {
@@ -142,17 +144,16 @@ Future<void> evaluateTrivialExpressions(FlutterTestDriver flutter) async {
 
 Future<void> evaluateComplexExpressions(FlutterTestDriver flutter) async {
   final InstanceRef res = await flutter.evaluateInFrame('new DateTime.now().year');
-    expect(res.kind == InstanceKind.kInt && res.valueAsString == DateTime.now().year.toString(), isTrue);
+  expect(res.kind == InstanceKind.kInt && res.valueAsString == DateTime.now().year.toString(), isTrue);
 }
 
 Future<void> evaluateComplexReturningExpressions(FlutterTestDriver flutter) async {
   final DateTime now = DateTime.now();
-    final InstanceRef resp = await flutter.evaluateInFrame('new DateTime.now()');
-    expect(resp.classRef.name, equals('DateTime'));
-    // Ensure we got a reasonable approximation. The more accurate we try to
-    // make this, the more likely it'll fail due to differences in the time
-    // in the remote VM and the local VM at the time the code runs.
-    final InstanceRef res = await flutter.evaluate(resp.id, r'"$year-$month-$day"');
-    expect(res.valueAsString,
-        equals('${now.year}-${now.month}-${now.day}'));
+  final InstanceRef resp = await flutter.evaluateInFrame('new DateTime.now()');
+  expect(resp.classRef.name, equals('DateTime'));
+  // Ensure we got a reasonable approximation. The more accurate we try to
+  // make this, the more likely it'll fail due to differences in the time
+  // in the remote VM and the local VM at the time the code runs.
+  final InstanceRef res = await flutter.evaluate(resp.id, r'"$year-$month-$day"');
+  expect(res.valueAsString, equals('${now.year}-${now.month}-${now.day}'));
 }

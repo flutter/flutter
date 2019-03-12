@@ -94,7 +94,7 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
     });
     _animation = CurvedAnimation(
       parent: _controller,
-      curve: curve
+      curve: curve,
     );
   }
 

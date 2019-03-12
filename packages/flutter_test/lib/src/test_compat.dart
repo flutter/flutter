@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:meta/meta.dart';
 import 'package:test_api/src/backend/declarer.dart'; // ignore: implementation_imports
 import 'package:test_api/src/frontend/timeout.dart'; // ignore: implementation_imports
 import 'package:test_api/src/backend/group.dart'; // ignore: implementation_imports
@@ -74,7 +75,7 @@ Future<void> _runGroup(Suite suiteConfig, Group group, List<Group> parents, _Rep
   }
 }
 
-Future<void> _runLiveTest(Suite suiteConfig, LiveTest liveTest, _Reporter reporter, {bool countSuccess = true}) async {
+Future<void> _runLiveTest(Suite suiteConfig, LiveTest liveTest, _Reporter reporter, { bool countSuccess = true }) async {
   reporter._onTestStarted(liveTest);
   // Schedule a microtask to ensure that [onTestStarted] fires before the
   // first [LiveTest.onStateChange] event.
@@ -91,7 +92,7 @@ Future<void> _runLiveTest(Suite suiteConfig, LiveTest liveTest, _Reporter report
 }
 
 Future<void> _runSkippedTest(Suite suiteConfig, Test test, List<Group> parents, _Reporter reporter) async {
-  final LocalTest skipped = LocalTest(test.name, test.metadata, () {}, trace: test.trace);
+  final LocalTest skipped = LocalTest(test.name, test.metadata, () { }, trace: test.trace);
   if (skipped.metadata.skipReason != null) {
     print('Skip: ${skipped.metadata.skipReason}');
   }
@@ -155,14 +156,17 @@ Future<void> _runSkippedTest(Suite suiteConfig, Test test, List<Group> parents, 
 /// suite*—tests in other suites will run as normal. We recommend that users
 /// avoid this flag if possible and instead use the test runner flag `-n` to
 /// filter tests by name.
-void test(Object description, Function body, {
+@isTest
+void test(
+  Object description,
+  Function body, {
   String testOn,
   Timeout timeout,
   dynamic skip,
   dynamic tags,
   Map<String, dynamic> onPlatform,
   int retry,
-  }) {
+}) {
   _declarer.test(
     description.toString(), body,
     testOn: testOn,
@@ -227,6 +231,7 @@ void test(Object description, Function body, {
 /// suite*—tests in other suites will run as normal. We recommend that users
 /// avoid this flag if possible, and instead use the test runner flag `-n` to
 /// filter tests by name.
+@isTestGroup
 void group(Object description, Function body) {
   _declarer.group(description.toString(), body);
 }
@@ -304,12 +309,13 @@ void tearDownAll(Function body) {
 /// fixed, this must not import `dart:io`.
 class _Reporter {
   _Reporter({bool color = true, bool printPath = true})
-  : _printPath = printPath,
-    _green = color ? '\u001b[32m' : '',
-    _red = color ? '\u001b[31m' : '',
-    _yellow = color ? '\u001b[33m' : '',
-    _bold = color ? '\u001b[1m' : '',
-    _noColor = color ? '\u001b[0m' : '';
+    : _printPath = printPath,
+      _green = color ? '\u001b[32m' : '',
+      _red = color ? '\u001b[31m' : '',
+      _yellow = color ? '\u001b[33m' : '',
+      _bold = color ? '\u001b[1m' : '',
+      _noColor = color ? '\u001b[0m' : '';
+
   final List<LiveTest> passed = <LiveTest>[];
   final List<LiveTest> failed = <LiveTest>[];
   final List<Test> skipped = <Test>[];
@@ -359,7 +365,7 @@ class _Reporter {
   String _lastProgressSuffix;
 
   /// The set of all subscriptions to various streams.
-  final Set<StreamSubscription<void>> _subscriptions = Set<StreamSubscription<void>>();
+  final Set<StreamSubscription<void>> _subscriptions = <StreamSubscription<void>>{};
 
   /// A callback called when the engine begins running [liveTest].
   void _onTestStarted(LiveTest liveTest) {
@@ -419,7 +425,7 @@ class _Reporter {
   /// [message] goes after the progress report. If [color] is passed, it's used
   /// as the color for [message]. If [suffix] is passed, it's added to the end
   /// of [message].
-  void _progressLine(String message, {String color, String suffix}) {
+  void _progressLine(String message, { String color, String suffix }) {
     // Print nothing if nothing has changed since the last progress line.
     if (passed.length == _lastProgressPassed &&
         skipped.length == _lastProgressSkipped &&
@@ -491,12 +497,12 @@ class _Reporter {
   }
 }
 
-String _indent(String string, {int size, String first}) {
+String _indent(String string, { int size, String first }) {
   size ??= first == null ? 2 : first.length;
   return _prefixLines(string, ' ' * size, first: first);
 }
 
-String _prefixLines(String text, String prefix, {String first, String last, String single}) {
+String _prefixLines(String text, String prefix, { String first, String last, String single }) {
   first ??= prefix;
   last ??= prefix;
   single ??= first ?? last ?? prefix;

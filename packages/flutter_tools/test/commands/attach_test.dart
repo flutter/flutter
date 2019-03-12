@@ -7,19 +7,24 @@ import 'dart:async';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/attach.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_hot.dart';
+import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
+import 'package:multicast_dns/multicast_dns.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
 import '../src/mocks.dart';
 
 void main() {
+  final StreamLogger logger = StreamLogger();
   group('attach', () {
     final FileSystem testFileSystem = MemoryFileSystem(
       style: platform.isWindows ? FileSystemStyle.windows : FileSystemStyle
@@ -48,18 +53,19 @@ void main() {
           // Now that the reader is used, start writing messages to it.
           Timer.run(() {
             mockLogReader.addLine('Foo');
-            mockLogReader.addLine(
-                'Observatory listening on http://127.0.0.1:$devicePort');
+            mockLogReader.addLine('Observatory listening on http://127.0.0.1:$devicePort');
           });
 
           return mockLogReader;
         });
-        when(device.portForwarder).thenReturn(portForwarder);
+        when(device.portForwarder)
+          .thenReturn(portForwarder);
         when(portForwarder.forward(devicePort, hostPort: anyNamed('hostPort')))
-            .thenAnswer((_) async => hostPort);
-        when(portForwarder.forwardedPorts).thenReturn(
-            <ForwardedPort>[ForwardedPort(hostPort, devicePort)]);
-        when(portForwarder.unforward(any)).thenAnswer((_) async => null);
+          .thenAnswer((_) async => hostPort);
+        when(portForwarder.forwardedPorts)
+          .thenReturn(<ForwardedPort>[ForwardedPort(hostPort, devicePort)]);
+        when(portForwarder.unforward(any))
+          .thenAnswer((_) async => null);
 
         // We cannot add the device to a device manager because that is
         // only enabled by the context of each testUsingContext call.
@@ -74,16 +80,23 @@ void main() {
 
       testUsingContext('finds observatory port and forwards', () async {
         testDeviceManager.addDevice(device);
-
-        final AttachCommand command = AttachCommand();
-
-        await createTestCommandRunner(command).run(<String>['attach']);
-
+        final Completer<void> completer = Completer<void>();
+        final StreamSubscription<String> loggerSubscription = logger.stream.listen((String message) {
+          if (message == '[stdout] Done.') {
+            // The "Done." message is output by the AttachCommand when it's done.
+            completer.complete();
+          }
+        });
+        final Future<void> task = createTestCommandRunner(AttachCommand()).run(<String>['attach']);
+        await completer.future;
         verify(
           portForwarder.forward(devicePort, hostPort: anyNamed('hostPort')),
         ).called(1);
+        await expectLoggerInterruptEndsTask(task, logger);
+        await loggerSubscription.cancel();
       }, overrides: <Type, Generator>{
         FileSystem: () => testFileSystem,
+        Logger: () => logger,
       });
 
       testUsingContext('accepts filesystem parameters', () async {
@@ -93,6 +106,9 @@ void main() {
         const String filesystemRoot = '/build-output/';
         const String projectRoot = '/build-output/project-root';
         const String outputDill = '/tmp/output.dill';
+
+        final MockHotRunner mockHotRunner = MockHotRunner();
+        when(mockHotRunner.attach()).thenAnswer((_) async => 0);
 
         final MockHotRunnerFactory mockHotRunnerFactory = MockHotRunnerFactory();
         when(
@@ -106,7 +122,7 @@ void main() {
             usesTerminalUI: anyNamed('usesTerminalUI'),
             ipv6: false,
           ),
-        )..thenReturn(MockHotRunner());
+        ).thenReturn(mockHotRunner);
 
         final AttachCommand command = AttachCommand(
           hotRunnerFactory: mockHotRunnerFactory,
@@ -121,7 +137,7 @@ void main() {
           projectRoot,
           '--output-dill',
           outputDill,
-          '-v',
+          '-v', // enables verbose logging
         ]);
 
         // Validate the attach call built a mock runner with the right
@@ -191,52 +207,58 @@ void main() {
       final MockDeviceLogReader mockLogReader = MockDeviceLogReader();
       final MockPortForwarder portForwarder = MockPortForwarder();
       final MockAndroidDevice device = MockAndroidDevice();
+      final MockHotRunner mockHotRunner = MockHotRunner();
       final MockHotRunnerFactory mockHotRunnerFactory = MockHotRunnerFactory();
-      when(device.portForwarder).thenReturn(portForwarder);
+      when(device.portForwarder)
+        .thenReturn(portForwarder);
       when(portForwarder.forward(devicePort, hostPort: anyNamed('hostPort')))
-          .thenAnswer((_) async => hostPort);
-      when(portForwarder.forwardedPorts).thenReturn(
-          <ForwardedPort>[ForwardedPort(hostPort, devicePort)]);
-      when(portForwarder.unforward(any)).thenAnswer((_) async => null);
-      when(mockHotRunnerFactory.build(any,
-          target: anyNamed('target'),
-          debuggingOptions: anyNamed('debuggingOptions'),
-          packagesFilePath: anyNamed('packagesFilePath'),
-          usesTerminalUI: anyNamed('usesTerminalUI'),
-          ipv6: false)).thenReturn(
-          MockHotRunner());
+        .thenAnswer((_) async => hostPort);
+      when(portForwarder.forwardedPorts)
+        .thenReturn(<ForwardedPort>[ForwardedPort(hostPort, devicePort)]);
+      when(portForwarder.unforward(any))
+        .thenAnswer((_) async => null);
+      when(mockHotRunner.attach())
+        .thenAnswer((_) async => 0);
+      when(mockHotRunnerFactory.build(
+        any,
+        target: anyNamed('target'),
+        debuggingOptions: anyNamed('debuggingOptions'),
+        packagesFilePath: anyNamed('packagesFilePath'),
+        usesTerminalUI: anyNamed('usesTerminalUI'),
+        ipv6: false,
+      )).thenReturn(mockHotRunner);
 
       testDeviceManager.addDevice(device);
-      when(device.getLogReader()).thenAnswer((_) {
-        // Now that the reader is used, start writing messages to it.
-        Timer.run(() {
-          mockLogReader.addLine('Foo');
-          mockLogReader.addLine(
-              'Observatory listening on http://127.0.0.1:$devicePort');
+      when(device.getLogReader())
+        .thenAnswer((_) {
+          // Now that the reader is used, start writing messages to it.
+          Timer.run(() {
+            mockLogReader.addLine('Foo');
+            mockLogReader.addLine(
+                'Observatory listening on http://127.0.0.1:$devicePort');
+          });
+          return mockLogReader;
         });
-
-        return mockLogReader;
-      });
       final File foo = fs.file('lib/foo.dart')
         ..createSync();
 
       // Delete the main.dart file to be sure that attach works without it.
       fs.file('lib/main.dart').deleteSync();
 
-      final AttachCommand command = AttachCommand(
-          hotRunnerFactory: mockHotRunnerFactory);
-      await createTestCommandRunner(command).run(
-          <String>['attach', '-t', foo.path, '-v']);
+      final AttachCommand command = AttachCommand(hotRunnerFactory: mockHotRunnerFactory);
+      await createTestCommandRunner(command).run(<String>['attach', '-t', foo.path, '-v']);
 
-      verify(mockHotRunnerFactory.build(any,
-          target: foo.path,
-          debuggingOptions: anyNamed('debuggingOptions'),
-          packagesFilePath: anyNamed('packagesFilePath'),
-          usesTerminalUI: anyNamed('usesTerminalUI'),
-          ipv6: false)).called(1);
+      verify(mockHotRunnerFactory.build(
+        any,
+        target: foo.path,
+        debuggingOptions: anyNamed('debuggingOptions'),
+        packagesFilePath: anyNamed('packagesFilePath'),
+        usesTerminalUI: anyNamed('usesTerminalUI'),
+        ipv6: false,
+      )).called(1);
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
-    },);
+    });
 
     group('forwarding to given port', () {
       const int devicePort = 499;
@@ -248,74 +270,121 @@ void main() {
         portForwarder = MockPortForwarder();
         device = MockAndroidDevice();
 
-        when(device.portForwarder).thenReturn(portForwarder);
-        when(portForwarder.forward(devicePort)).thenAnswer((_) async => hostPort);
-        when(portForwarder.forwardedPorts).thenReturn(
-            <ForwardedPort>[ForwardedPort(hostPort, devicePort)]);
-        when(portForwarder.unforward(any)).thenAnswer((_) async => null);
+        when(device.portForwarder)
+          .thenReturn(portForwarder);
+        when(portForwarder.forward(devicePort))
+          .thenAnswer((_) async => hostPort);
+        when(portForwarder.forwardedPorts)
+          .thenReturn(<ForwardedPort>[ForwardedPort(hostPort, devicePort)]);
+        when(portForwarder.unforward(any))
+          .thenAnswer((_) async => null);
       });
 
       testUsingContext('succeeds in ipv4 mode', () async {
         testDeviceManager.addDevice(device);
-        final AttachCommand command = AttachCommand();
 
-        await createTestCommandRunner(command).run(
-            <String>['attach', '--debug-port', '$devicePort']);
-
+        final Completer<void> completer = Completer<void>();
+        final StreamSubscription<String> loggerSubscription = logger.stream.listen((String message) {
+          if (message == '[verbose] Connecting to service protocol: http://127.0.0.1:42/') {
+            // Wait until resident_runner.dart tries to connect.
+            // There's nothing to connect _to_, so that's as far as we care to go.
+            completer.complete();
+          }
+        });
+        final Future<void> task = createTestCommandRunner(AttachCommand())
+          .run(<String>['attach', '--debug-port', '$devicePort']);
+        await completer.future;
         verify(portForwarder.forward(devicePort)).called(1);
+
+        await expectLoggerInterruptEndsTask(task, logger);
+        await loggerSubscription.cancel();
       }, overrides: <Type, Generator>{
         FileSystem: () => testFileSystem,
+        Logger: () => logger,
       });
 
       testUsingContext('succeeds in ipv6 mode', () async {
         testDeviceManager.addDevice(device);
-        final AttachCommand command = AttachCommand();
 
-        await createTestCommandRunner(command).run(
-            <String>['attach', '--debug-port', '$devicePort', '--ipv6']);
-
+        final Completer<void> completer = Completer<void>();
+        final StreamSubscription<String> loggerSubscription = logger.stream.listen((String message) {
+          if (message == '[verbose] Connecting to service protocol: http://[::1]:42/') {
+            // Wait until resident_runner.dart tries to connect.
+            // There's nothing to connect _to_, so that's as far as we care to go.
+            completer.complete();
+          }
+        });
+        final Future<void> task = createTestCommandRunner(AttachCommand())
+          .run(<String>['attach', '--debug-port', '$devicePort', '--ipv6']);
+        await completer.future;
         verify(portForwarder.forward(devicePort)).called(1);
+
+        await expectLoggerInterruptEndsTask(task, logger);
+        await loggerSubscription.cancel();
       }, overrides: <Type, Generator>{
         FileSystem: () => testFileSystem,
+        Logger: () => logger,
       });
 
       testUsingContext('skips in ipv4 mode with a provided observatory port', () async {
         testDeviceManager.addDevice(device);
-        final AttachCommand command = AttachCommand();
 
-        await createTestCommandRunner(command).run(
-            <String>[
-              'attach',
-              '--debug-port',
-              '$devicePort',
-              '--observatory-port',
-              '$hostPort',
-            ],
+        final Completer<void> completer = Completer<void>();
+        final StreamSubscription<String> loggerSubscription = logger.stream.listen((String message) {
+          if (message == '[verbose] Connecting to service protocol: http://127.0.0.1:42/') {
+            // Wait until resident_runner.dart tries to connect.
+            // There's nothing to connect _to_, so that's as far as we care to go.
+            completer.complete();
+          }
+        });
+        final Future<void> task = createTestCommandRunner(AttachCommand()).run(
+          <String>[
+            'attach',
+            '--debug-port',
+            '$devicePort',
+            '--observatory-port',
+            '$hostPort',
+          ],
         );
-
+        await completer.future;
         verifyNever(portForwarder.forward(devicePort));
+
+        await expectLoggerInterruptEndsTask(task, logger);
+        await loggerSubscription.cancel();
       }, overrides: <Type, Generator>{
         FileSystem: () => testFileSystem,
+        Logger: () => logger,
       });
 
       testUsingContext('skips in ipv6 mode with a provided observatory port', () async {
         testDeviceManager.addDevice(device);
-        final AttachCommand command = AttachCommand();
 
-        await createTestCommandRunner(command).run(
-            <String>[
-              'attach',
-              '--debug-port',
-              '$devicePort',
-              '--observatory-port',
-              '$hostPort',
-              '--ipv6',
-            ],
+        final Completer<void> completer = Completer<void>();
+        final StreamSubscription<String> loggerSubscription = logger.stream.listen((String message) {
+          if (message == '[verbose] Connecting to service protocol: http://[::1]:42/') {
+            // Wait until resident_runner.dart tries to connect.
+            // There's nothing to connect _to_, so that's as far as we care to go.
+            completer.complete();
+          }
+        });
+        final Future<void> task = createTestCommandRunner(AttachCommand()).run(
+          <String>[
+            'attach',
+            '--debug-port',
+            '$devicePort',
+            '--observatory-port',
+            '$hostPort',
+            '--ipv6',
+          ],
         );
-
+        await completer.future;
         verifyNever(portForwarder.forward(devicePort));
+
+        await expectLoggerInterruptEndsTask(task, logger);
+        await loggerSubscription.cancel();
       }, overrides: <Type, Generator>{
         FileSystem: () => testFileSystem,
+        Logger: () => logger,
       });
     });
 
@@ -328,7 +397,7 @@ void main() {
       expect(testLogger.statusText, contains('No connected devices'));
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
-    },);
+    });
 
     testUsingContext('exits when multiple devices connected', () async {
       Device aDeviceWithId(String id) {
@@ -352,12 +421,205 @@ void main() {
       expect(testLogger.statusText, contains('yy2'));
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
-    },);
+    });
+  });
+
+  group('mDNS Discovery', () {
+    final int year3000 = DateTime(3000).millisecondsSinceEpoch;
+
+    MDnsClient getMockClient(
+      List<PtrResourceRecord> ptrRecords,
+      Map<String, List<SrvResourceRecord>> srvResponse,
+    ) {
+      final MDnsClient client = MockMDnsClient();
+
+      when(client.lookup<PtrResourceRecord>(
+        ResourceRecordQuery.serverPointer(MDnsObservatoryPortDiscovery.dartObservatoryName),
+      )).thenAnswer((_) => Stream<PtrResourceRecord>.fromIterable(ptrRecords));
+
+      for (final MapEntry<String, List<SrvResourceRecord>> entry in srvResponse.entries) {
+        when(client.lookup<SrvResourceRecord>(
+          ResourceRecordQuery.service(entry.key),
+        )).thenAnswer((_) => Stream<SrvResourceRecord>.fromIterable(entry.value));
+      }
+      return client;
+    }
+
+    testUsingContext('No ports available', () async {
+      final MDnsClient client = getMockClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{});
+
+      final MDnsObservatoryPortDiscovery portDiscovery = MDnsObservatoryPortDiscovery(mdnsClient: client);
+      final int port = await portDiscovery.queryForPort();
+      expect(port, isNull);
+    });
+
+    testUsingContext('One port available, no appId', () async {
+      final MDnsClient client = getMockClient(
+        <PtrResourceRecord>[
+          PtrResourceRecord('foo', year3000, domainName: 'bar'),
+        ],
+        <String, List<SrvResourceRecord>>{
+          'bar': <SrvResourceRecord>[
+            SrvResourceRecord('bar', year3000, port: 123, weight: 1, priority: 1, target: 'appId'),
+          ],
+        },
+      );
+
+      final MDnsObservatoryPortDiscovery portDiscovery = MDnsObservatoryPortDiscovery(mdnsClient: client);
+      final int port = await portDiscovery.queryForPort();
+      expect(port, 123);
+    });
+
+    testUsingContext('Multiple ports available, without appId', () async {
+      final MDnsClient client = getMockClient(
+        <PtrResourceRecord>[
+          PtrResourceRecord('foo', year3000, domainName: 'bar'),
+          PtrResourceRecord('baz', year3000, domainName: 'fiz'),
+        ],
+        <String, List<SrvResourceRecord>>{
+          'bar': <SrvResourceRecord>[
+            SrvResourceRecord('bar', year3000, port: 123, weight: 1, priority: 1, target: 'appId'),
+          ],
+          'fiz': <SrvResourceRecord>[
+            SrvResourceRecord('fiz', year3000, port: 321, weight: 1, priority: 1, target: 'local'),
+          ],
+        },
+      );
+
+      final MDnsObservatoryPortDiscovery portDiscovery = MDnsObservatoryPortDiscovery(mdnsClient: client);
+      expect(() => portDiscovery.queryForPort(), throwsToolExit());
+    });
+
+    testUsingContext('Multiple ports available, with appId', () async {
+      final MDnsClient client = getMockClient(
+        <PtrResourceRecord>[
+          PtrResourceRecord('foo', year3000, domainName: 'bar'),
+          PtrResourceRecord('baz', year3000, domainName: 'fiz'),
+        ],
+        <String, List<SrvResourceRecord>>{
+          'bar': <SrvResourceRecord>[
+            SrvResourceRecord('bar', year3000, port: 123, weight: 1, priority: 1, target: 'appId'),
+          ],
+          'fiz': <SrvResourceRecord>[
+            SrvResourceRecord('fiz', year3000, port: 321, weight: 1, priority: 1, target: 'local'),
+          ],
+        },
+      );
+
+      final MDnsObservatoryPortDiscovery portDiscovery = MDnsObservatoryPortDiscovery(mdnsClient: client);
+      final int port = await portDiscovery.queryForPort(applicationId: 'fiz');
+      expect(port, 321);
+    });
+
+    testUsingContext('Multiple ports available per process, with appId', () async {
+      final MDnsClient client = getMockClient(
+        <PtrResourceRecord>[
+          PtrResourceRecord('foo', year3000, domainName: 'bar'),
+          PtrResourceRecord('baz', year3000, domainName: 'fiz'),
+        ],
+        <String, List<SrvResourceRecord>>{
+          'bar': <SrvResourceRecord>[
+            SrvResourceRecord('bar', year3000, port: 1234, weight: 1, priority: 1, target: 'appId'),
+            SrvResourceRecord('bar', year3000, port: 123, weight: 1, priority: 1, target: 'appId'),
+          ],
+          'fiz': <SrvResourceRecord>[
+            SrvResourceRecord('fiz', year3000, port: 4321, weight: 1, priority: 1, target: 'local'),
+            SrvResourceRecord('fiz', year3000, port: 321, weight: 1, priority: 1, target: 'local'),
+          ],
+        },
+      );
+
+      final MDnsObservatoryPortDiscovery portDiscovery = MDnsObservatoryPortDiscovery(mdnsClient: client);
+      final int port = await portDiscovery.queryForPort(applicationId: 'bar');
+      expect(port, 1234);
+    });
   });
 }
+
+class MockMDnsClient extends Mock implements MDnsClient {}
 
 class MockPortForwarder extends Mock implements DevicePortForwarder {}
 
 class MockHotRunner extends Mock implements HotRunner {}
 
 class MockHotRunnerFactory extends Mock implements HotRunnerFactory {}
+
+class StreamLogger extends Logger {
+  @override
+  bool get isVerbose => true;
+
+  @override
+  void printError(
+    String message, {
+    StackTrace stackTrace,
+    bool emphasis,
+    TerminalColor color,
+    int indent,
+    int hangingIndent,
+    bool wrap,
+  }) {
+    _log('[stderr] $message');
+  }
+
+  @override
+  void printStatus(
+    String message, {
+    bool emphasis,
+    TerminalColor color,
+    bool newline,
+    int indent,
+    int hangingIndent,
+    bool wrap,
+  }) {
+    _log('[stdout] $message');
+  }
+
+  @override
+  void printTrace(String message) {
+    _log('[verbose] $message');
+  }
+
+  @override
+  Status startProgress(
+    String message, {
+    @required Duration timeout,
+    String progressId,
+    bool multilineOutput = false,
+    int progressIndicatorPadding = kDefaultStatusPadding,
+  }) {
+    _log('[progress] $message');
+    return SilentStatus(timeout: timeout)..start();
+  }
+
+  bool _interrupt = false;
+
+  void interrupt() {
+    _interrupt = true;
+  }
+
+  final StreamController<String> _controller = StreamController<String>.broadcast();
+
+  void _log(String message) {
+    _controller.add(message);
+    if (_interrupt) {
+      _interrupt = false;
+      throw const LoggerInterrupted();
+    }
+  }
+
+  Stream<String> get stream => _controller.stream;
+}
+
+class LoggerInterrupted implements Exception {
+  const LoggerInterrupted();
+}
+
+Future<void> expectLoggerInterruptEndsTask(Future<void> task, StreamLogger logger) async {
+  logger.interrupt(); // an exception during the task should cause it to fail...
+  try {
+    await task;
+    expect(false, isTrue); // (shouldn't reach here)
+  } on ToolExit catch (error) {
+    expect(error.exitCode, 2); // ...with exit code 2.
+  }
+}

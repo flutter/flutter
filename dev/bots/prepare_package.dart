@@ -8,10 +8,12 @@ import 'dart:io' hide Platform;
 import 'dart:typed_data';
 
 import 'package:args/args.dart';
+import 'package:crypto/crypto.dart';
+import 'package:crypto/src/digest_sink.dart';
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as path;
-import 'package:process/process.dart';
 import 'package:platform/platform.dart' show Platform, LocalPlatform;
+import 'package:process/process.dart';
 
 const String chromiumRepo = 'https://chromium.googlesource.com/external/github.com/flutter/flutter';
 const String githubRepo = 'https://github.com/flutter/flutter.git';
@@ -24,8 +26,8 @@ const String baseUrl = 'https://storage.googleapis.com/flutter_infra';
 
 /// Exception class for when a process fails to run, so we can catch
 /// it and provide something more readable than a stack trace.
-class ProcessRunnerException implements Exception {
-  ProcessRunnerException(this.message, [this.result]);
+class PreparePackageException implements Exception {
+  PreparePackageException(this.message, [this.result]);
 
   final String message;
   final ProcessResult result;
@@ -156,17 +158,17 @@ class ProcessRunner {
     } on ProcessException catch (e) {
       final String message = 'Running "${commandLine.join(' ')}" in ${workingDirectory.path} '
           'failed with:\n${e.toString()}';
-      throw ProcessRunnerException(message);
+      throw PreparePackageException(message);
     } on ArgumentError catch (e) {
       final String message = 'Running "${commandLine.join(' ')}" in ${workingDirectory.path} '
           'failed with:\n${e.toString()}';
-      throw ProcessRunnerException(message);
+      throw PreparePackageException(message);
     }
 
     final int exitCode = await allComplete();
     if (exitCode != 0 && !failOk) {
       final String message = 'Running "${commandLine.join(' ')}" in ${workingDirectory.path} failed';
-      throw ProcessRunnerException(
+      throw PreparePackageException(
         message,
         ProcessResult(0, exitCode, null, 'returned $exitCode'),
       );
@@ -192,18 +194,19 @@ class ArchiveCreator {
     this.outputDir,
     this.revision,
     this.branch, {
+    this.strict = true,
     ProcessManager processManager,
     bool subprocessOutput = true,
     this.platform = const LocalPlatform(),
     HttpReader httpReader,
-  }) : assert(revision.length == 40),
-       flutterRoot = Directory(path.join(tempDir.path, 'flutter')),
-       httpReader = httpReader ?? http.readBytes,
-       _processRunner = ProcessRunner(
-         processManager: processManager,
-         subprocessOutput: subprocessOutput,
-         platform: platform,
-       ) {
+  })  : assert(revision.length == 40),
+        flutterRoot = Directory(path.join(tempDir.path, 'flutter')),
+        httpReader = httpReader ?? http.readBytes,
+        _processRunner = ProcessRunner(
+          processManager: processManager,
+          subprocessOutput: subprocessOutput,
+          platform: platform,
+        ) {
     _flutter = path.join(
       flutterRoot.absolute.path,
       'bin',
@@ -233,6 +236,11 @@ class ArchiveCreator {
 
   /// The directory to write the output file to.
   final Directory outputDir;
+
+  /// True if the creator should be strict about checking requirements or not.
+  ///
+  /// In strict mode, will insist that the [revision] be a tagged revision.
+  final bool strict;
 
   final Uri _minGitUri = Uri.parse(mingitForWindowsUrl);
   final ProcessRunner _processRunner;
@@ -283,10 +291,29 @@ class ArchiveCreator {
     return _outputFile;
   }
 
-  /// Returns the version number of this release, according the to tags in
-  /// the repo.
+  /// Returns the version number of this release, according the to tags in the
+  /// repo.
+  ///
+  /// This looks for the tag attached to [revision] and, if it doesn't find one,
+  /// git will give an error.
+  ///
+  /// If [strict] is true, the exact [revision] must be tagged to return the
+  /// version.  If [strict] is not true, will look backwards in time starting at
+  /// [revision] to find the most recent version tag.
   Future<String> _getVersion() async {
-    return _runGit(<String>['describe', '--tags', '--abbrev=0']);
+    if (strict) {
+      try {
+        return _runGit(<String>['describe', '--tags', '--exact-match', revision]);
+      } on PreparePackageException catch (exception) {
+        throw PreparePackageException(
+          'Git error when checking for a version tag attached to revision $revision.\n'
+          'Perhaps there is no tag at that revision?:\n'
+          '$exception'
+        );
+      }
+    } else {
+      return _runGit(<String>['describe', '--tags', '--abbrev=0', revision]);
+    }
   }
 
   /// Clone the Flutter repo and make sure that the git environment is sane
@@ -311,8 +338,7 @@ class ArchiveCreator {
     final File gitFile = File(path.join(tempDir.absolute.path, 'mingit.zip'));
     await gitFile.writeAsBytes(data, flush: true);
 
-    final Directory minGitPath =
-        Directory(path.join(flutterRoot.absolute.path, 'bin', 'mingit'));
+    final Directory minGitPath = Directory(path.join(flutterRoot.absolute.path, 'bin', 'mingit'));
     await minGitPath.create(recursive: true);
     await _unzipArchive(gitFile, workingDirectory: minGitPath);
   }
@@ -435,13 +461,13 @@ class ArchivePublisher {
     ProcessManager processManager,
     bool subprocessOutput = true,
     this.platform = const LocalPlatform(),
-  }) : assert(revision.length == 40),
-       platformName = platform.operatingSystem.toLowerCase(),
-       metadataGsPath = '$gsReleaseFolder/${getMetadataFilename(platform)}',
-       _processRunner = ProcessRunner(
-         processManager: processManager,
-         subprocessOutput: subprocessOutput,
-       );
+  })  : assert(revision.length == 40),
+        platformName = platform.operatingSystem.toLowerCase(),
+        metadataGsPath = '$gsReleaseFolder/${getMetadataFilename(platform)}',
+        _processRunner = ProcessRunner(
+          processManager: processManager,
+          subprocessOutput: subprocessOutput,
+        );
 
   final Platform platform;
   final String platformName;
@@ -456,6 +482,18 @@ class ArchivePublisher {
   String get destinationArchivePath => '$branchName/$platformName/${path.basename(outputFile.path)}';
   static String getMetadataFilename(Platform platform) => 'releases_${platform.operatingSystem.toLowerCase()}.json';
 
+  Future<String> _getChecksum(File archiveFile) async {
+    final DigestSink digestSink = DigestSink();
+    final ByteConversionSink sink = sha256.startChunkedConversion(digestSink);
+
+    final Stream<List<int>> stream = archiveFile.openRead();
+    await stream.forEach((List<int> chunk) {
+      sink.add(chunk);
+    });
+    sink.close();
+    return digestSink.value.toString();
+  }
+
   /// Publish the archive to Google Storage.
   Future<void> publishArchive() async {
     final String destGsPath = '$gsReleaseFolder/$destinationArchivePath';
@@ -464,7 +502,7 @@ class ArchivePublisher {
     await _updateMetadata();
   }
 
-  Map<String, dynamic> _addRelease(Map<String, dynamic> jsonData) {
+  Future<Map<String, dynamic>> _addRelease(Map<String, dynamic> jsonData) async {
     jsonData['base_url'] = '$baseUrl$releaseFolder';
     if (!jsonData.containsKey('current_release')) {
       jsonData['current_release'] = <String, String>{};
@@ -480,6 +518,7 @@ class ArchivePublisher {
     newEntry['version'] = version;
     newEntry['release_date'] = DateTime.now().toUtc().toIso8601String();
     newEntry['archive'] = destinationArchivePath;
+    newEntry['sha256'] = await _getChecksum(outputFile);
 
     // Search for any entries with the same hash and channel and remove them.
     final List<dynamic> releases = jsonData['releases'];
@@ -511,17 +550,17 @@ class ArchivePublisher {
     await _runGsUtil(<String>['cp', metadataGsPath, metadataFile.absolute.path]);
     final String currentMetadata = metadataFile.readAsStringSync();
     if (currentMetadata.isEmpty) {
-      throw ProcessRunnerException('Empty metadata received from server');
+      throw PreparePackageException('Empty metadata received from server');
     }
 
     Map<String, dynamic> jsonData;
     try {
       jsonData = json.decode(currentMetadata);
     } on FormatException catch (e) {
-      throw ProcessRunnerException('Unable to parse JSON metadata received from cloud: $e');
+      throw PreparePackageException('Unable to parse JSON metadata received from cloud: $e');
     }
 
-    jsonData = _addRelease(jsonData);
+    jsonData = await _addRelease(jsonData);
 
     const JsonEncoder encoder = JsonEncoder.withIndent('  ');
     metadataFile.writeAsStringSync(encoder.convert(jsonData));
@@ -533,6 +572,14 @@ class ArchivePublisher {
     Directory workingDirectory,
     bool failOk = false,
   }) async {
+    if (platform.isWindows) {
+      return _processRunner.runProcess(
+        <String>['python', path.join(platform.environment['DEPOT_TOOLS'], 'gsutil.py'), '--']..addAll(args),
+        workingDirectory: workingDirectory,
+        failOk: failOk,
+      );
+    }
+
     return _processRunner.runProcess(
       <String>['gsutil.py', '--']..addAll(args),
       workingDirectory: workingDirectory,
@@ -663,7 +710,7 @@ Future<void> main(List<String> rawArguments) async {
   }
 
   final Branch branch = fromBranchName(parsedArguments['branch']);
-  final ArchiveCreator creator = ArchiveCreator(tempDir, outputDir, revision, branch);
+  final ArchiveCreator creator = ArchiveCreator(tempDir, outputDir, revision, branch, strict: parsedArguments['publish']);
   int exitCode = 0;
   String message;
   try {
@@ -679,7 +726,7 @@ Future<void> main(List<String> rawArguments) async {
       );
       await publisher.publishArchive();
     }
-  } on ProcessRunnerException catch (e) {
+  } on PreparePackageException catch (e) {
     exitCode = e.exitCode;
     message = e.message;
   } catch (e) {

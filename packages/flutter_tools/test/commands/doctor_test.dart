@@ -4,10 +4,17 @@
 
 import 'dart:async';
 
+import 'package:mockito/mockito.dart';
+import 'package:process/process.dart';
+
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
+import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/doctor.dart';
+import 'package:flutter_tools/src/globals.dart';
 import 'package:flutter_tools/src/proxy_validator.dart';
 import 'package:flutter_tools/src/vscode/vscode.dart';
 import 'package:flutter_tools/src/vscode/vscode_validator.dart';
@@ -17,10 +24,16 @@ import '../src/context.dart';
 
 final Generator _kNoColorOutputPlatform = () => FakePlatform.fromPlatform(const LocalPlatform())..stdoutSupportsAnsi = false;
 final Map<Type, Generator> noColorTerminalOverride = <Type, Generator>{
-  Platform: _kNoColorOutputPlatform
+  Platform: _kNoColorOutputPlatform,
 };
 
 void main() {
+  MockProcessManager mockProcessManager;
+
+  setUp(() {
+    mockProcessManager = MockProcessManager();
+  });
+
   group('doctor', () {
     testUsingContext('intellij validator', () async {
       const String installPath = '/path/to/intelliJ';
@@ -120,8 +133,7 @@ void main() {
         ..environment = <String, String>{'http_proxy': 'fakeproxy.local'},
     });
 
-    testUsingContext('reports success when NO_PROXY is configured correctly',
-        () async {
+    testUsingContext('reports success when NO_PROXY is configured correctly', () async {
       final ValidationResult results = await ProxyValidator().validate();
       final List<ValidationMessage> issues = results.messages
           .where((ValidationMessage msg) => msg.isError || msg.isHint)
@@ -131,12 +143,11 @@ void main() {
       Platform: () => FakePlatform()
         ..environment = <String, String>{
           'HTTP_PROXY': 'fakeproxy.local',
-          'NO_PROXY': 'localhost,127.0.0.1'
+          'NO_PROXY': 'localhost,127.0.0.1',
         },
     });
 
-    testUsingContext('reports success when no_proxy is configured correctly',
-        () async {
+    testUsingContext('reports success when no_proxy is configured correctly', () async {
       final ValidationResult results = await ProxyValidator().validate();
       final List<ValidationMessage> issues = results.messages
           .where((ValidationMessage msg) => msg.isError || msg.isHint)
@@ -146,12 +157,11 @@ void main() {
       Platform: () => FakePlatform()
         ..environment = <String, String>{
           'http_proxy': 'fakeproxy.local',
-          'no_proxy': 'localhost,127.0.0.1'
+          'no_proxy': 'localhost,127.0.0.1',
         },
     });
 
-    testUsingContext('reports issues when NO_PROXY is missing localhost',
-        () async {
+    testUsingContext('reports issues when NO_PROXY is missing localhost', () async {
       final ValidationResult results = await ProxyValidator().validate();
       final List<ValidationMessage> issues = results.messages
           .where((ValidationMessage msg) => msg.isError || msg.isHint)
@@ -161,12 +171,11 @@ void main() {
       Platform: () => FakePlatform()
         ..environment = <String, String>{
           'HTTP_PROXY': 'fakeproxy.local',
-          'NO_PROXY': '127.0.0.1'
+          'NO_PROXY': '127.0.0.1',
         },
     });
 
-    testUsingContext('reports issues when NO_PROXY is missing 127.0.0.1',
-        () async {
+    testUsingContext('reports issues when NO_PROXY is missing 127.0.0.1', () async {
       final ValidationResult results = await ProxyValidator().validate();
       final List<ValidationMessage> issues = results.messages
           .where((ValidationMessage msg) => msg.isError || msg.isHint)
@@ -176,7 +185,7 @@ void main() {
       Platform: () => FakePlatform()
         ..environment = <String, String>{
           'HTTP_PROXY': 'fakeproxy.local',
-          'NO_PROXY': 'localhost'
+          'NO_PROXY': 'localhost',
         },
     });
   });
@@ -199,7 +208,7 @@ void main() {
   });
 
 
- group('doctor with fake validators', () {
+  group('doctor with fake validators', () {
     testUsingContext('validate non-verbose output format for run without issues', () async {
       expect(await FakeQuietDoctor().diagnose(verbose: false), isTrue);
       expect(testLogger.statusText, equals(
@@ -290,6 +299,29 @@ void main() {
               '! Doctor found issues in 4 categories.\n'
       ));
     }, overrides: noColorTerminalOverride);
+
+    testUsingContext('gen_snapshot does not work', () async {
+      when(mockProcessManager.runSync(
+        <String>[artifacts.getArtifactPath(Artifact.genSnapshot)],
+        workingDirectory: anyNamed('workingDirectory'),
+        environment: anyNamed('environment'),
+      )).thenReturn(ProcessResult(101, 1, '', ''));
+
+      expect(await FlutterValidatorDoctor().diagnose(verbose: false), isTrue);
+      final List<String> statusLines = testLogger.statusText.split('\n');
+      for (String msg in userMessages.flutterBinariesDoNotRun.split('\n')) {
+        expect(statusLines, contains(contains(msg)));
+      }
+      if (platform.isLinux) {
+        for (String msg in userMessages.flutterBinariesLinuxRepairCommands.split('\n')) {
+          expect(statusLines, contains(contains(msg)));
+        }
+      }
+    }, overrides: <Type, Generator>{
+      OutputPreferences: () => OutputPreferences(wrapText: false),
+      ProcessManager: () => mockProcessManager,
+      Platform: _kNoColorOutputPlatform,
+    });
   });
 
   testUsingContext('validate non-verbose output wrapping', () async {
@@ -477,7 +509,7 @@ class PassingValidator extends DoctorValidator {
 }
 
 class MissingValidator extends DoctorValidator {
-  MissingValidator(): super('Missing Validator');
+  MissingValidator() : super('Missing Validator');
 
   @override
   Future<ValidationResult> validate() async {
@@ -490,7 +522,7 @@ class MissingValidator extends DoctorValidator {
 }
 
 class NotAvailableValidator extends DoctorValidator {
-  NotAvailableValidator(): super('Not Available Validator');
+  NotAvailableValidator() : super('Not Available Validator');
 
   @override
   Future<ValidationResult> validate() async {
@@ -599,7 +631,7 @@ class FakeDoctorValidatorsProvider implements DoctorValidatorsProvider {
     return <DoctorValidator>[
       PassingValidator('Passing Validator'),
       PassingValidator('Another Passing Validator'),
-      PassingValidator('Providing validators is fun')
+      PassingValidator('Providing validators is fun'),
     ];
   }
 
@@ -622,7 +654,7 @@ class PassingGroupedValidator extends DoctorValidator {
 }
 
 class MissingGroupedValidator extends DoctorValidator {
-  MissingGroupedValidator(String name): super(name);
+  MissingGroupedValidator(String name) : super(name);
 
   @override
   Future<ValidationResult> validate() async {
@@ -633,7 +665,7 @@ class MissingGroupedValidator extends DoctorValidator {
 }
 
 class PartialGroupedValidator extends DoctorValidator {
-  PartialGroupedValidator(String name): super(name);
+  PartialGroupedValidator(String name) : super(name);
 
   @override
   Future<ValidationResult> validate() async {
@@ -663,11 +695,11 @@ class FakeGroupedDoctor extends Doctor {
       _validators = <DoctorValidator>[];
       _validators.add(GroupedValidator(<DoctorValidator>[
         PassingGroupedValidator('Category 1'),
-        PassingGroupedValidator('Category 1')
+        PassingGroupedValidator('Category 1'),
       ]));
       _validators.add(GroupedValidator(<DoctorValidator>[
         PassingGroupedValidator('Category 2'),
-        MissingGroupedValidator('Category 2')
+        MissingGroupedValidator('Category 2'),
       ]));
     }
     return _validators;
@@ -687,6 +719,15 @@ class FakeGroupedDoctorWithStatus extends Doctor {
   }
 }
 
+class FlutterValidatorDoctor extends Doctor {
+  List<DoctorValidator> _validators;
+  @override
+  List<DoctorValidator> get validators {
+    _validators ??= <DoctorValidator>[FlutterValidator()];
+    return _validators;
+  }
+}
+
 /// A doctor that takes any two validators. Used to check behavior when
 /// merging ValidationTypes (installed, missing, partial).
 class FakeSmallGroupDoctor extends Doctor {
@@ -702,7 +743,7 @@ class FakeSmallGroupDoctor extends Doctor {
 
 class VsCodeValidatorTestTargets extends VsCodeValidator {
   VsCodeValidatorTestTargets._(String installDirectory, String extensionDirectory, {String edition})
-      : super(VsCode.fromDirectory(installDirectory, extensionDirectory, edition: edition));
+    : super(VsCode.fromDirectory(installDirectory, extensionDirectory, edition: edition));
 
   static VsCodeValidatorTestTargets get installedWithExtension =>
       VsCodeValidatorTestTargets._(validInstall, validExtensions);
@@ -717,3 +758,5 @@ class VsCodeValidatorTestTargets extends VsCodeValidator {
   static final String validExtensions = fs.path.join('test', 'data', 'vscode', 'extensions');
   static final String missingExtensions = fs.path.join('test', 'data', 'vscode', 'notExtensions');
 }
+
+class MockProcessManager extends Mock implements ProcessManager {}

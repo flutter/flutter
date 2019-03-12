@@ -25,6 +25,9 @@ import 'material_localizations.dart';
 import 'text_theme.dart';
 import 'theme.dart';
 
+// Examples can assume:
+// BuildContext context;
+
 /// Initial display mode of the date picker dialog.
 ///
 /// Date picker UI mode for either showing a list of available years or a
@@ -428,7 +431,7 @@ class DayPicker extends StatelessWidget {
           itemStyle = themeData.accentTextTheme.body2;
           decoration = BoxDecoration(
             color: themeData.accentColor,
-            shape: BoxShape.circle
+            shape: BoxShape.circle,
           );
         } else if (disabled) {
           itemStyle = themeData.textTheme.body1.copyWith(color: themeData.disabledColor);
@@ -570,7 +573,7 @@ class _MonthPickerState extends State<MonthPicker> with SingleTickerProviderStat
 
     // Setup the fade animation for chevrons
     _chevronOpacityController = AnimationController(
-      duration: const Duration(milliseconds: 250), vsync: this
+      duration: const Duration(milliseconds: 250), vsync: this,
     );
     _chevronOpacityAnimation = _chevronOpacityController.drive(_chevronOpacityTween);
   }
@@ -1069,7 +1072,7 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
           }
           return null;
         }
-      )
+      ),
     );
 
     return Theme(
@@ -1110,6 +1113,28 @@ typedef SelectableDayPredicate = bool Function(DateTime day);
 /// The [context] argument is passed to [showDialog], the documentation for
 /// which discusses how it is used.
 ///
+/// The [builder] parameter can be used to wrap the dialog widget
+/// to add inherited widgets like [Theme].
+///
+/// {@tool sample}
+/// Show a date picker with the dark theme.
+///
+/// ```dart
+/// Future<DateTime> selectedDate = showDatePicker(
+///   context: context,
+///   initialDate: DateTime.now(),
+///   firstDate: DateTime(2018),
+///   lastDate: DateTime(2030),
+///   builder: (BuildContext context, Widget child) {
+///     return Theme(
+///       data: ThemeData.dark(),
+///       child: child,
+///     );
+///   },
+/// );
+/// ```
+/// {@end-tool}
+///
 /// The [context], [initialDate], [firstDate], and [lastDate] parameters must
 /// not be null.
 ///
@@ -1132,6 +1157,7 @@ Future<DateTime> showDatePicker({
   DatePickerMode initialDatePickerMode = DatePickerMode.day,
   Locale locale,
   TextDirection textDirection,
+  TransitionBuilder builder,
 }) async {
   assert(initialDate != null);
   assert(firstDate != null);
@@ -1172,6 +1198,8 @@ Future<DateTime> showDatePicker({
 
   return await showDialog<DateTime>(
     context: context,
-    builder: (BuildContext context) => child,
+    builder: (BuildContext context) {
+      return builder == null ? child : builder(context, child);
+    },
   );
 }

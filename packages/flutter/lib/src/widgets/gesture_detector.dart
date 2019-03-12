@@ -19,6 +19,10 @@ export 'package:flutter/gestures.dart' show
   GestureTapCallback,
   GestureTapCancelCallback,
   GestureLongPressCallback,
+  GestureLongPressStartCallback,
+  GestureLongPressMoveUpdateCallback,
+  GestureLongPressUpCallback,
+  GestureLongPressEndCallback,
   GestureDragDownCallback,
   GestureDragStartCallback,
   GestureDragUpdateCallback,
@@ -31,6 +35,9 @@ export 'package:flutter/gestures.dart' show
   GestureForcePressPeakCallback,
   GestureForcePressEndCallback,
   GestureForcePressUpdateCallback,
+  LongPressStartDetails,
+  LongPressMoveUpdateDetails,
+  LongPressEndDetails,
   ScaleStartDetails,
   ScaleUpdateDetails,
   ScaleEndDetails,
@@ -83,9 +90,9 @@ class GestureRecognizerFactoryWithHandlers<T extends GestureRecognizer> extends 
   /// Creates a gesture recognizer factory with the given callbacks.
   ///
   /// The arguments must not be null.
-  const GestureRecognizerFactoryWithHandlers(this._constructor, this._initializer) :
-    assert(_constructor != null),
-    assert(_initializer != null);
+  const GestureRecognizerFactoryWithHandlers(this._constructor, this._initializer)
+    : assert(_constructor != null),
+      assert(_initializer != null);
 
   final GestureRecognizerFactoryConstructor<T> _constructor;
 
@@ -161,7 +168,10 @@ class GestureDetector extends StatelessWidget {
     this.onTapCancel,
     this.onDoubleTap,
     this.onLongPress,
+    this.onLongPressStart,
+    this.onLongPressMoveUpdate,
     this.onLongPressUp,
+    this.onLongPressEnd,
     this.onVerticalDragDown,
     this.onVerticalDragStart,
     this.onVerticalDragUpdate,
@@ -256,12 +266,44 @@ class GestureDetector extends StatelessWidget {
   /// succession.
   final GestureTapCallback onDoubleTap;
 
-  /// A pointer has remained in contact with the screen at the same location for
-  /// a long period of time.
+  /// Called when a long press gesture has been recognized.
+  ///
+  /// Triggered when a pointer has remained in contact with the screen at the
+  /// same location for a long period of time.
+  ///
+  /// See also:
+  ///
+  ///  * [onLongPressStart], which has the same timing but has data for the
+  ///    press location.
   final GestureLongPressCallback onLongPress;
 
+  /// Callback for long press start with gesture location.
+  ///
+  /// Triggered when a pointer has remained in contact with the screen at the
+  /// same location for a long period of time.
+  ///
+  /// See also:
+  ///
+  ///  * [onLongPress], which has the same timing but without the location data.
+  final GestureLongPressStartCallback onLongPressStart;
+
+  /// A pointer has been drag-moved after a long press.
+  final GestureLongPressMoveUpdateCallback onLongPressMoveUpdate;
+
   /// A pointer that has triggered a long-press has stopped contacting the screen.
+  ///
+  /// See also:
+  ///
+  ///  * [onLongPressEnd], which has the same timing but has data for the up
+  ///    gesture location.
   final GestureLongPressUpCallback onLongPressUp;
+
+  /// A pointer that has triggered a long-press has stopped contacting the screen.
+  ///
+  /// See also:
+  ///
+  ///  * [onLongPressUp], which has the same timing but without the location data.
+  final GestureLongPressEndCallback onLongPressEnd;
 
   /// A pointer has contacted the screen and might begin to move vertically.
   final GestureDragDownCallback onVerticalDragDown;
@@ -421,12 +463,19 @@ class GestureDetector extends StatelessWidget {
       );
     }
 
-    if (onLongPress != null || onLongPressUp !=null) {
+    if (onLongPress != null ||
+        onLongPressUp != null ||
+        onLongPressStart != null ||
+        onLongPressMoveUpdate != null ||
+        onLongPressEnd != null) {
       gestures[LongPressGestureRecognizer] = GestureRecognizerFactoryWithHandlers<LongPressGestureRecognizer>(
         () => LongPressGestureRecognizer(debugOwner: this),
         (LongPressGestureRecognizer instance) {
           instance
             ..onLongPress = onLongPress
+            ..onLongPressStart = onLongPressStart
+            ..onLongPressMoveUpdate = onLongPressMoveUpdate
+            ..onLongPressEnd =onLongPressEnd
             ..onLongPressUp = onLongPressUp;
         },
       );
@@ -506,13 +555,13 @@ class GestureDetector extends StatelessWidget {
         onForcePressUpdate != null ||
         onForcePressEnd != null) {
       gestures[ForcePressGestureRecognizer] = GestureRecognizerFactoryWithHandlers<ForcePressGestureRecognizer>(
-          () => ForcePressGestureRecognizer(debugOwner: this),
-          (ForcePressGestureRecognizer instance) {
-            instance
-              ..onStart = onForcePressStart
-              ..onPeak = onForcePressPeak
-              ..onUpdate = onForcePressUpdate
-              ..onEnd = onForcePressEnd;
+        () => ForcePressGestureRecognizer(debugOwner: this),
+        (ForcePressGestureRecognizer instance) {
+          instance
+            ..onStart = onForcePressStart
+            ..onPeak = onForcePressPeak
+            ..onUpdate = onForcePressUpdate
+            ..onEnd = onForcePressEnd;
         },
       );
     }
@@ -819,7 +868,7 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
     Widget result = Listener(
       onPointerDown: _handlePointerDown,
       behavior: widget.behavior ?? _defaultBehavior,
-      child: widget.child
+      child: widget.child,
     );
     if (!widget.excludeFromSemantics)
       result = _GestureSemantics(owner: this, child: result);
@@ -844,7 +893,7 @@ class _GestureSemantics extends SingleChildRenderObjectWidget {
   const _GestureSemantics({
     Key key,
     Widget child,
-    this.owner
+    this.owner,
   }) : super(key: key, child: child);
 
   final RawGestureDetectorState owner;

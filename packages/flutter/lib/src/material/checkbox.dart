@@ -34,8 +34,8 @@ import 'toggleable.dart';
 ///  * [Switch], a widget with semantics similar to [Checkbox].
 ///  * [Radio], for selecting among a set of explicit values.
 ///  * [Slider], for selecting a value in a range.
-///  * <https://material.google.com/components/selection-controls.html#selection-controls-checkbox>
-///  * <https://material.google.com/components/lists-controls.html#lists-controls-types-of-list-controls>
+///  * <https://material.io/design/components/selection-controls.html#checkboxes>
+///  * <https://material.io/design/components/lists.html#types>
 class Checkbox extends StatefulWidget {
   /// Creates a material design checkbox.
   ///
@@ -59,6 +59,7 @@ class Checkbox extends StatefulWidget {
     this.tristate = false,
     @required this.onChanged,
     this.activeColor,
+    this.checkColor,
     this.materialTapTargetSize,
   }) : assert(tristate != null),
        assert(tristate || value != null),
@@ -102,6 +103,11 @@ class Checkbox extends StatefulWidget {
   ///
   /// Defaults to [ThemeData.toggleableActiveColor].
   final Color activeColor;
+
+  /// The color to use for the check icon when this checkbox is checked
+  ///
+  /// Defaults to Color(0xFFFFFFFF)
+  final Color checkColor;
 
   /// If true the checkbox's [value] can be true, false, or null.
   ///
@@ -150,6 +156,7 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin {
       value: widget.value,
       tristate: widget.tristate,
       activeColor: widget.activeColor ?? themeData.toggleableActiveColor,
+      checkColor: widget.checkColor ?? const Color(0xFFFFFFFF),
       inactiveColor: widget.onChanged != null ? themeData.unselectedWidgetColor : themeData.disabledColor,
       onChanged: widget.onChanged,
       additionalConstraints: additionalConstraints,
@@ -164,6 +171,7 @@ class _CheckboxRenderObjectWidget extends LeafRenderObjectWidget {
     @required this.value,
     @required this.tristate,
     @required this.activeColor,
+    @required this.checkColor,
     @required this.inactiveColor,
     @required this.onChanged,
     @required this.vsync,
@@ -178,6 +186,7 @@ class _CheckboxRenderObjectWidget extends LeafRenderObjectWidget {
   final bool value;
   final bool tristate;
   final Color activeColor;
+  final Color checkColor;
   final Color inactiveColor;
   final ValueChanged<bool> onChanged;
   final TickerProvider vsync;
@@ -188,6 +197,7 @@ class _CheckboxRenderObjectWidget extends LeafRenderObjectWidget {
     value: value,
     tristate: tristate,
     activeColor: activeColor,
+    checkColor: checkColor,
     inactiveColor: inactiveColor,
     onChanged: onChanged,
     vsync: vsync,
@@ -200,6 +210,7 @@ class _CheckboxRenderObjectWidget extends LeafRenderObjectWidget {
       ..value = value
       ..tristate = tristate
       ..activeColor = activeColor
+      ..checkColor = checkColor
       ..inactiveColor = inactiveColor
       ..onChanged = onChanged
       ..additionalConstraints = additionalConstraints
@@ -216,22 +227,24 @@ class _RenderCheckbox extends RenderToggleable {
     bool value,
     bool tristate,
     Color activeColor,
+    this.checkColor,
     Color inactiveColor,
     BoxConstraints additionalConstraints,
     ValueChanged<bool> onChanged,
     @required TickerProvider vsync,
-  }): _oldValue = value,
-      super(
-        value: value,
-        tristate: tristate,
-        activeColor: activeColor,
-        inactiveColor: inactiveColor,
-        onChanged: onChanged,
-        additionalConstraints: additionalConstraints,
-        vsync: vsync,
-      );
+  }) : _oldValue = value,
+       super(
+         value: value,
+         tristate: tristate,
+         activeColor: activeColor,
+         inactiveColor: inactiveColor,
+         onChanged: onChanged,
+         additionalConstraints: additionalConstraints,
+         vsync: vsync,
+       );
 
   bool _oldValue;
+  Color checkColor;
 
   @override
   set value(bool newValue) {
@@ -270,7 +283,7 @@ class _RenderCheckbox extends RenderToggleable {
   // White stroke used to paint the check and dash.
   void _initStrokePaint(Paint paint) {
     paint
-      ..color = const Color(0xFFFFFFFF)
+      ..color = checkColor
       ..style = PaintingStyle.stroke
       ..strokeWidth = _kStrokeWidth;
   }

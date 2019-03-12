@@ -29,7 +29,7 @@ void main() {
             numeric: true,
             onSort: (int columnIndex, bool ascending) {
               log.add('column-sort: $columnIndex $ascending');
-            }
+            },
           ),
         ],
         rows: kDesserts.map<DataRow>((Dessert dessert) {
@@ -56,7 +56,7 @@ void main() {
     }
 
     await tester.pumpWidget(MaterialApp(
-      home: Material(child: buildTable())
+      home: Material(child: buildTable()),
     ));
 
     await tester.tap(find.byType(Checkbox).first);
@@ -75,7 +75,7 @@ void main() {
     log.clear();
 
     await tester.pumpWidget(MaterialApp(
-      home: Material(child: buildTable(sortColumnIndex: 1))
+      home: Material(child: buildTable(sortColumnIndex: 1)),
     ));
     await tester.pumpAndSettle(const Duration(milliseconds: 200));
     await tester.tap(find.text('Calories'));
@@ -84,7 +84,7 @@ void main() {
     log.clear();
 
     await tester.pumpWidget(MaterialApp(
-      home: Material(child: buildTable(sortColumnIndex: 1, sortAscending: false))
+      home: Material(child: buildTable(sortColumnIndex: 1, sortAscending: false)),
     ));
     await tester.pumpAndSettle(const Duration(milliseconds: 200));
 
@@ -210,4 +210,61 @@ void main() {
     expect(tester.renderObject<RenderBox>(find.byType(Row).first).size.width, lessThan(800.0));
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('DataTable column onSort test', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: DataTable(
+            columns: const <DataColumn>[
+              DataColumn(
+                label: Text('Dessert'),
+              ),
+            ],
+            rows: const <DataRow>[
+              DataRow(
+                cells: <DataCell>[
+                  DataCell(
+                    Text('Lollipop'), // wraps
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('Dessert'));
+    await tester.pump();
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('DataTable row onSelectChanged test', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: DataTable(
+            columns: const <DataColumn>[
+              DataColumn(
+                label: Text('Dessert'),
+              ),
+            ],
+            rows: const <DataRow>[
+              DataRow(
+                cells: <DataCell>[
+                  DataCell(
+                    Text('Lollipop'), // wraps
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('Lollipop'));
+    await tester.pump();
+    expect(tester.takeException(), isNull);
+  });
+
 }

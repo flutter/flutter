@@ -39,15 +39,15 @@ void main() {
       const ProcessManager _processManager = LocalProcessManager();
       final ProcessResult _proc = await _processManager.run(
         <String>[flutterBin, 'run', '-d', 'invalid-device-id'],
-        workingDirectory: tempDir.path
+        workingDirectory: tempDir.path,
       );
 
       expect(_proc.stdout, isNot(contains('flutter has exited unexpectedly')));
       expect(_proc.stderr, isNot(contains('flutter has exited unexpectedly')));
       if (!_proc.stderr.toString().contains('Unable to locate a development')
-        && !_proc.stdout.toString().contains('No devices found with name or id matching')) {
-          fail("'flutter run -d invalid-device-id' did not produce the expected error");
-        }
+          && !_proc.stdout.toString().contains('No devices found with name or id matching')) {
+        fail("'flutter run -d invalid-device-id' did not produce the expected error");
+      }
     });
 
     test('writes pid-file', () async {
@@ -55,5 +55,5 @@ void main() {
       await _flutter.run(pidFile: pidFile);
       expect(pidFile.existsSync(), isTrue);
     });
-  }, timeout: const Timeout.factor(6));
+  }, timeout: const Timeout.factor(10)); // The DevFS sync takes a really long time, so these tests can be slow.
 }

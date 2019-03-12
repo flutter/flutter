@@ -52,7 +52,7 @@ typedef NestedScrollViewHeaderSliversBuilder = List<Widget> Function(BuildContex
 /// in the opposite direction (e.g. allowing the user to swipe horizontally
 /// between the pages represented by the tabs, while the list scrolls
 /// vertically), then any list inside that [TabBarView] would not interact with
-/// the outer [ScrollView]. For example, flinginsg the inner list to scroll to
+/// the outer [ScrollView]. For example, flinging the inner list to scroll to
 /// the top would not cause a collapsed [SliverAppBar] in the outer [ScrollView]
 /// to expand.
 ///
@@ -713,7 +713,8 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
     _outerPosition.updateCanDrag(maxInnerExtent);
   }
 
-  Future<void> animateTo(double to, {
+  Future<void> animateTo(
+    double to, {
     @required Duration duration,
     @required Curve curve,
   }) async {
@@ -1057,7 +1058,8 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
     ));
   }
 
-  ScrollActivity createBallisticScrollActivity(Simulation simulation, {
+  ScrollActivity createBallisticScrollActivity(
+    Simulation simulation, {
     @required _NestedBallisticScrollActivityMode mode,
     _NestedScrollMetrics metrics,
   }) {
@@ -1079,7 +1081,8 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
   }
 
   @override
-  Future<void> animateTo(double to, {
+  Future<void> animateTo(
+    double to, {
     @required Duration duration,
     @required Curve curve,
   }) {
@@ -1377,7 +1380,8 @@ class RenderSliverOverlapAbsorber extends RenderSliver with RenderObjectWithChil
   RenderSliverOverlapAbsorber({
     @required SliverOverlapAbsorberHandle handle,
     RenderSliver child,
-  }) : assert(handle != null), _handle = handle {
+  }) : assert(handle != null),
+       _handle = handle {
     this.child = child;
   }
 
@@ -1522,7 +1526,8 @@ class RenderSliverOverlapInjector extends RenderSliver {
   /// The [handle] must not be null.
   RenderSliverOverlapInjector({
     @required SliverOverlapAbsorberHandle handle,
-  }) : assert(handle != null), _handle = handle;
+  }) : assert(handle != null),
+       _handle = handle;
 
   double _currentLayoutExtent;
   double _currentMaxExtent;

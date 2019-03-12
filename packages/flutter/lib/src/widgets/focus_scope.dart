@@ -37,8 +37,12 @@ class _FocusScopeMarker extends InheritedWidget {
 /// FocusScope.of(context).setFirstFocus(node);
 /// ```
 ///
-/// When a [FocusScope] is removed from the tree, the previously active
-/// [FocusScope] becomes active again.
+/// If a [FocusScope] is removed from the widget tree, then the previously
+/// focused node will be focused, but only if the [node] is the same [node]
+/// object as in the previous frame. To assure this, you can use a GlobalKey to
+/// keep the [FocusScope] widget from being rebuilt from one frame to the next,
+/// or pass in the [node] from a parent that is not rebuilt. If there is no next
+/// sibling, then the parent scope node will be focused.
 ///
 /// See also:
 ///
@@ -72,9 +76,37 @@ class FocusScope extends StatefulWidget {
 
   /// Returns the [node] of the [FocusScope] that most tightly encloses the
   /// given [BuildContext].
+  ///
+  /// The [context] argument must not be null.
   static FocusScopeNode of(BuildContext context) {
+    assert(context != null);
     final _FocusScopeMarker scope = context.inheritFromWidgetOfExactType(_FocusScopeMarker);
     return scope?.node ?? context.owner.focusManager.rootScope;
+  }
+
+  /// A list of the [FocusScopeNode]s for each [FocusScope] ancestor of
+  /// the given [BuildContext]. The first element of the list is the
+  /// nearest ancestor's [FocusScopeNode].
+  ///
+  /// The returned list does not include the [FocusManager]'s `rootScope`.
+  /// Only the [FocusScopeNode]s that belong to [FocusScope] widgets are
+  /// returned.
+  ///
+  /// The [context] argument must not be null.
+  static List<FocusScopeNode> ancestorsOf(BuildContext context) {
+    assert(context != null);
+    final List<FocusScopeNode> ancestors = <FocusScopeNode>[];
+    while (true) {
+      context = context.ancestorInheritedElementForWidgetOfExactType(_FocusScopeMarker);
+      if (context == null)
+        return ancestors;
+      final _FocusScopeMarker scope = context.widget;
+      ancestors.add(scope.node);
+      context.visitAncestorElements((Element parent) {
+        context = parent;
+        return false;
+      });
+    }
   }
 
   @override

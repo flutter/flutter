@@ -4,6 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 
+import 'card_theme.dart';
 import 'material.dart';
 import 'theme.dart';
 
@@ -18,41 +19,74 @@ import 'theme.dart';
 /// some text describing a musical, and the other with buttons for buying
 /// tickets or listening to the show.](https://flutter.github.io/assets-for-api-docs/assets/material/card.png)
 ///
-/// {@tool snippet --template=stateless_widget}
+/// {@tool snippet --template=stateless_widget_scaffold}
 ///
 /// This sample shows creation of a [Card] widget that shows album information
 /// and two actions.
 ///
 /// ```dart
-/// Center(
-///   child: Card(
-///     child: Column(
-///       mainAxisSize: MainAxisSize.min,
-///       children: <Widget>[
-///         const ListTile(
-///           leading: Icon(Icons.album),
-///           title: Text('The Enchanted Nightingale'),
-///           subtitle: Text('Music by Julie Gable. Lyrics by Sidney Stein.'),
-///         ),
-///         ButtonTheme.bar( // make buttons use the appropriate styles for cards
-///           child: ButtonBar(
-///             children: <Widget>[
-///               FlatButton(
-///                 child: const Text('BUY TICKETS'),
-///                 onPressed: () { /* ... */ },
-///               ),
-///               FlatButton(
-///                 child: const Text('LISTEN'),
-///                 onPressed: () { /* ... */ },
-///               ),
-///             ],
+/// Widget build(BuildContext context) {
+///   return Center(
+///     child: Card(
+///       child: Column(
+///         mainAxisSize: MainAxisSize.min,
+///         children: <Widget>[
+///           const ListTile(
+///             leading: Icon(Icons.album),
+///             title: Text('The Enchanted Nightingale'),
+///             subtitle: Text('Music by Julie Gable. Lyrics by Sidney Stein.'),
 ///           ),
-///         ),
-///       ],
+///           ButtonTheme.bar( // make buttons use the appropriate styles for cards
+///             child: ButtonBar(
+///               children: <Widget>[
+///                 FlatButton(
+///                   child: const Text('BUY TICKETS'),
+///                   onPressed: () { /* ... */ },
+///                 ),
+///                 FlatButton(
+///                   child: const Text('LISTEN'),
+///                   onPressed: () { /* ... */ },
+///                 ),
+///               ],
+///             ),
+///           ),
+///         ],
+///       ),
 ///     ),
-///   ),
-/// )
+///   );
+/// }
 /// ```
+/// {@end-tool}
+///
+/// Sometimes the primary action area of a card is the card itself. Cards can be
+/// one large touch target that shows a detail screen when tapped.
+///
+/// {@tool snippet --template=stateless_widget_scaffold}
+///
+/// This sample shows creation of a [Card] widget that can be tapped. When
+/// tapped this [Card]'s [InkWell] displays an "ink splash" that fills the
+/// entire card.
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return Center(
+///     child: Card(
+///       child: InkWell(
+///         splashColor: Colors.blue.withAlpha(30),
+///         onTap: () {
+///           print('Card tapped.');
+///         },
+///         child: Container(
+///           width: 300,
+///           height: 100,
+///           child: Text('A card that can be tapped'),
+///         ),
+///       ),
+///     ),
+///   );
+/// }
+/// ```
+///
 /// {@end-tool}
 ///
 /// See also:
@@ -61,29 +95,32 @@ import 'theme.dart';
 ///  * [ButtonBar], to display buttons at the bottom of a card. Typically these
 ///    would be styled using a [ButtonTheme] created with [new ButtonTheme.bar].
 ///  * [showDialog], to display a modal card.
-///  * <https://material.google.com/components/cards.html>
+///  * <https://material.io/design/components/cards.html>
 class Card extends StatelessWidget {
   /// Creates a material design card.
   ///
-  /// The [clipBehavior] and [elevation] arguments must not be null.
-  /// Additionally, the [elevation] must be non-negative.
+  /// The [elevation] must be null or non-negative. The [borderOnForeground]
+  /// must not be null.
   const Card({
     Key key,
     this.color,
-    this.elevation = 1.0,
+    this.elevation,
     this.shape,
-    this.margin = const EdgeInsets.all(4.0),
-    this.clipBehavior = Clip.none,
+    this.borderOnForeground = true,
+    this.margin,
+    this.clipBehavior,
     this.child,
     this.semanticContainer = true,
-  }) : assert(elevation != null && elevation >= 0.0),
+  }) : assert(elevation == null || elevation >= 0.0),
+       assert(borderOnForeground != null),
        super(key: key);
 
   /// The card's background color.
   ///
   /// Defines the card's [Material.color].
   ///
-  /// The default color is defined by the ambient [Theme]: [ThemeData.cardColor].
+  /// If this property is null then [ThemeData.cardTheme.color] is used,
+  /// if that's null then [ThemeData.cardColor] is used.
   final Color color;
 
   /// The z-coordinate at which to place this card. This controls the size of
@@ -91,25 +128,36 @@ class Card extends StatelessWidget {
   ///
   /// Defines the card's [Material.elevation].
   ///
-  /// The default elevation is 1.0. The value is always non-negative.
+  /// If this property is null then [ThemeData.cardTheme.elevation] is used,
+  /// if that's null, the default value is 1.0.
   final double elevation;
 
   /// The shape of the card's [Material].
   ///
   /// Defines the card's [Material.shape].
   ///
-  /// The default shape is a [RoundedRectangleBorder] with a circular corner
-  /// radius of 4.0.
+  /// If this property is null then [ThemeData.cardTheme.shape] is used.
+  /// If that's null then the shape will be a [RoundedRectangleBorder] with a
+  /// circular corner radius of 4.0.
   final ShapeBorder shape;
 
+  /// Whether to paint the [shape] border in front of the [child].
+  ///
+  /// The default value is true.
+  /// If false, the border will be painted behind the [child].
+  final bool borderOnForeground;
+
   /// {@macro flutter.widgets.Clip}
+  /// If this property is null then [ThemeData.cardTheme.clipBehavior] is used.
+  /// If that's null then the behavior will be [Clip.none].
   final Clip clipBehavior;
 
   /// The empty space that surrounds the card.
   ///
   /// Defines the card's outer [Container.margin].
   ///
-  /// The default margin is 4.0 logical pixels on all sides:
+  /// If this property is null then [ThemeData.cardTheme.margin] is used,
+  /// if that's null, the default margin is 4.0 logical pixels on all sides:
   /// `EdgeInsets.all(4.0)`.
   final EdgeInsetsGeometry margin;
 
@@ -131,20 +179,26 @@ class Card extends StatelessWidget {
   /// {@macro flutter.widgets.child}
   final Widget child;
 
+  static const double _defaultElevation = 1.0;
+  static const Clip _defaultClipBehavior = Clip.none;
+
   @override
   Widget build(BuildContext context) {
+    final CardTheme cardTheme = CardTheme.of(context);
+
     return Semantics(
       container: semanticContainer,
       child: Container(
-        margin: margin ?? const EdgeInsets.all(4.0),
+        margin: margin ?? cardTheme.margin ?? const EdgeInsets.all(4.0),
         child: Material(
           type: MaterialType.card,
-          color: color ?? Theme.of(context).cardColor,
-          elevation: elevation,
-          shape: shape ?? const RoundedRectangleBorder(
+          color: color ?? cardTheme.color ?? Theme.of(context).cardColor,
+          elevation: elevation ?? cardTheme.elevation ?? _defaultElevation,
+          shape: shape ?? cardTheme.shape ?? const RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(4.0)),
           ),
-          clipBehavior: clipBehavior,
+          borderOnForeground: borderOnForeground,
+          clipBehavior: clipBehavior ?? cardTheme.clipBehavior ?? _defaultClipBehavior,
           child: Semantics(
             explicitChildNodes: !semanticContainer,
             child: child,

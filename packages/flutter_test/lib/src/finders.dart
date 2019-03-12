@@ -269,7 +269,7 @@ class CommonFinders {
   ///
   /// If the [matchRoot] argument is true then the widget(s) specified by [of]
   /// will be matched along with the ancestors.
-  Finder ancestor({ Finder of, Finder matching, bool matchRoot = false}) {
+  Finder ancestor({ Finder of, Finder matching, bool matchRoot = false }) {
     return _AncestorFinder(of, matching, matchRoot: matchRoot);
   }
 }
@@ -308,7 +308,7 @@ abstract class Finder {
   Iterable<Element> get allCandidates {
     return collectAllElementsFrom(
       WidgetsBinding.instance.renderViewElement,
-      skipOffstage: skipOffstage
+      skipOffstage: skipOffstage,
     );
   }
 
@@ -576,8 +576,8 @@ class _WidgetFinder extends MatchFinder {
 
 class _WidgetPredicateFinder extends MatchFinder {
   _WidgetPredicateFinder(this.predicate, { String description, bool skipOffstage = true })
-      : _description = description,
-        super(skipOffstage: skipOffstage);
+    : _description = description,
+      super(skipOffstage: skipOffstage);
 
   final WidgetPredicate predicate;
   final String _description;
@@ -593,8 +593,8 @@ class _WidgetPredicateFinder extends MatchFinder {
 
 class _ElementPredicateFinder extends MatchFinder {
   _ElementPredicateFinder(this.predicate, { String description, bool skipOffstage = true })
-      : _description = description,
-        super(skipOffstage: skipOffstage);
+    : _description = description,
+      super(skipOffstage: skipOffstage);
 
   final ElementPredicate predicate;
   final String _description;

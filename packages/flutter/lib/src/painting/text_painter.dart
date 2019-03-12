@@ -10,6 +10,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 
 import 'basic_types.dart';
+import 'strut_style.dart';
 import 'text_span.dart';
 
 export 'package:flutter/services.dart' show TextRange, TextSelection;
@@ -48,6 +49,7 @@ class TextPainter {
     int maxLines,
     String ellipsis,
     Locale locale,
+    StrutStyle strutStyle,
   }) : assert(text == null || text.debugAssertIsValid()),
        assert(textAlign != null),
        assert(textScaleFactor != null),
@@ -58,7 +60,8 @@ class TextPainter {
        _textScaleFactor = textScaleFactor,
        _maxLines = maxLines,
        _ellipsis = ellipsis,
-       _locale = locale;
+       _locale = locale,
+       _strutStyle = strutStyle;
 
   ui.Paragraph _paragraph;
   bool _needsLayout = true;
@@ -198,9 +201,32 @@ class TextPainter {
     _needsLayout = true;
   }
 
+  /// {@template flutter.painting.textPainter.strutStyle}
+  /// The strut style to use. Strut style defines the strut, which sets minimum
+  /// vertical layout metrics.
+  ///
+  /// Omitting or providing null will disable strut.
+  ///
+  /// Omitting or providing null for any properties of [StrutStyle] will result in
+  /// default values being used. It is highly recommended to at least specify a
+  /// [fontSize].
+  ///
+  /// See [StrutStyle] for details.
+  /// {@endtemplate}
+  StrutStyle get strutStyle => _strutStyle;
+  StrutStyle _strutStyle;
+  set strutStyle(StrutStyle value) {
+    if (_strutStyle == value)
+      return;
+    _strutStyle = value;
+    _paragraph = null;
+    _needsLayout = true;
+  }
+
+
   ui.Paragraph _layoutTemplate;
 
-  ui.ParagraphStyle _createParagraphStyle([TextDirection defaultTextDirection]) {
+  ui.ParagraphStyle _createParagraphStyle([ TextDirection defaultTextDirection ]) {
     // The defaultTextDirection argument is used for preferredLineHeight in case
     // textDirection hasn't yet been set.
     assert(textAlign != null);
@@ -212,6 +238,7 @@ class TextPainter {
       maxLines: _maxLines,
       ellipsis: _ellipsis,
       locale: _locale,
+      strutStyle: _strutStyle,
     ) ?? ui.ParagraphStyle(
       textAlign: textAlign,
       textDirection: textDirection ?? defaultTextDirection,
@@ -242,9 +269,7 @@ class TextPainter {
         builder.pushStyle(text.style.getTextStyle(textScaleFactor: textScaleFactor));
       builder.addText(' ');
       _layoutTemplate = builder.build()
-        // TODO(cbracken): use const constructor. https://github.com/flutter/flutter/issues/26390
-        // ignore:prefer_const_constructors
-        ..layout(ui.ParagraphConstraints(width: double.infinity));
+        ..layout(const ui.ParagraphConstraints(width: double.infinity));
     }
     return _layoutTemplate.height;
   }
@@ -406,7 +431,7 @@ class TextPainter {
     return _isUtf16Surrogate(nextCodeUnit) ? offset + 2 : offset + 1;
   }
 
-  /// Returns the closest offset before `offset` at which the inout cursor can
+  /// Returns the closest offset before `offset` at which the input cursor can
   /// be positioned.
   int getOffsetBefore(int offset) {
     final int prevCodeUnit = _text.codeUnitAt(offset - 1);

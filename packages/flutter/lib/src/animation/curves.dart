@@ -30,11 +30,29 @@ abstract class Curve {
 
   /// Returns the value of the curve at point `t`.
   ///
-  /// The value of `t` must be between 0.0 and 1.0, inclusive. Subclasses should
-  /// assert that this is true.
+  /// This function must ensure the following:
+  /// - The value of `t` must be between 0.0 and 1.0
+  /// - Values of `t`=0.0 and `t`=1.0 must be mapped to 0.0 and 1.0,
+  /// respectively.
   ///
-  /// A curve must map t=0.0 to 0.0 and t=1.0 to 1.0.
-  double transform(double t);
+  /// It is recommended that subclasses override [transformInternal] instead of
+  /// this function, as the above cases are already handled in the default
+  /// implementation of [transform], which delegates the remaining logic to
+  /// [transformInternal].
+  double transform(double t) {
+    assert(t >= 0.0 && t <= 1.0);
+    if (t == 0.0 || t == 1.0) {
+      return t;
+    }
+    return transformInternal(t);
+  }
+
+  /// Returns the value of the curve at point `t`, in cases where
+  /// 1.0 > `t` > 0.0.
+  @protected
+  double transformInternal(double t) {
+    throw UnimplementedError();
+  }
 
   /// Returns a new curve that is the reversed inversion of this one.
   ///
@@ -63,7 +81,7 @@ class _Linear extends Curve {
   const _Linear._();
 
   @override
-  double transform(double t) => t;
+  double transformInternal(double t) => t;
 }
 
 /// A sawtooth curve that repeats a given number of times over the unit interval.
@@ -82,10 +100,7 @@ class SawTooth extends Curve {
   final int count;
 
   @override
-  double transform(double t) {
-    assert(t >= 0.0 && t <= 1.0);
-    if (t == 1.0)
-      return 1.0;
+  double transformInternal(double t) {
     t *= count;
     return t - t.truncateToDouble();
   }
@@ -110,9 +125,9 @@ class Interval extends Curve {
   ///
   /// The arguments must not be null.
   const Interval(this.begin, this.end, { this.curve = Curves.linear })
-      : assert(begin != null),
-        assert(end != null),
-        assert(curve != null);
+    : assert(begin != null),
+      assert(end != null),
+      assert(curve != null);
 
   /// The largest value for which this interval is 0.0.
   ///
@@ -128,15 +143,12 @@ class Interval extends Curve {
   final Curve curve;
 
   @override
-  double transform(double t) {
-    assert(t >= 0.0 && t <= 1.0);
+  double transformInternal(double t) {
     assert(begin >= 0.0);
     assert(begin <= 1.0);
     assert(end >= 0.0);
     assert(end <= 1.0);
     assert(end >= begin);
-    if (t == 0.0 || t == 1.0)
-      return t;
     t = ((t - begin) / (end - begin)).clamp(0.0, 1.0);
     if (t == 0.0 || t == 1.0)
       return t;
@@ -166,12 +178,9 @@ class Threshold extends Curve {
   final double threshold;
 
   @override
-  double transform(double t) {
-    assert(t >= 0.0 && t <= 1.0);
+  double transformInternal(double t) {
     assert(threshold >= 0.0);
     assert(threshold <= 1.0);
-    if (t == 0.0 || t == 1.0)
-      return t;
     return t < threshold ? 0.0 : 1.0;
   }
 }
@@ -199,10 +208,10 @@ class Cubic extends Curve {
   ///
   /// The [a], [b], [c], and [d] arguments must not be null.
   const Cubic(this.a, this.b, this.c, this.d)
-      : assert(a != null),
-        assert(b != null),
-        assert(c != null),
-        assert(d != null);
+    : assert(a != null),
+      assert(b != null),
+      assert(c != null),
+      assert(d != null);
 
   /// The x coordinate of the first control point.
   ///
@@ -237,8 +246,7 @@ class Cubic extends Curve {
   }
 
   @override
-  double transform(double t) {
-    assert(t >= 0.0 && t <= 1.0);
+  double transformInternal(double t) {
     double start = 0.0;
     double end = 1.0;
     while (true) {
@@ -287,7 +295,7 @@ class FlippedCurve extends Curve {
   final Curve curve;
 
   @override
-  double transform(double t) => 1.0 - curve.transform(1.0 - t);
+  double transformInternal(double t) => 1.0 - curve.transform(1.0 - t);
 
   @override
   String toString() {
@@ -306,8 +314,7 @@ class _DecelerateCurve extends Curve {
   const _DecelerateCurve._();
 
   @override
-  double transform(double t) {
-    assert(t >= 0.0 && t <= 1.0);
+  double transformInternal(double t) {
     // Intended to match the behavior of:
     // https://android.googlesource.com/platform/frameworks/base/+/master/core/java/android/view/animation/DecelerateInterpolator.java
     // ...as of December 2016.
@@ -315,7 +322,6 @@ class _DecelerateCurve extends Curve {
     return 1.0 - t * t;
   }
 }
-
 
 // BOUNCE CURVES
 
@@ -340,8 +346,7 @@ class _BounceInCurve extends Curve {
   const _BounceInCurve._();
 
   @override
-  double transform(double t) {
-    assert(t >= 0.0 && t <= 1.0);
+  double transformInternal(double t) {
     return 1.0 - _bounce(1.0 - t);
   }
 }
@@ -353,8 +358,7 @@ class _BounceOutCurve extends Curve {
   const _BounceOutCurve._();
 
   @override
-  double transform(double t) {
-    assert(t >= 0.0 && t <= 1.0);
+  double transformInternal(double t) {
     return _bounce(t);
   }
 }
@@ -366,8 +370,7 @@ class _BounceInOutCurve extends Curve {
   const _BounceInOutCurve._();
 
   @override
-  double transform(double t) {
-    assert(t >= 0.0 && t <= 1.0);
+  double transformInternal(double t) {
     if (t < 0.5)
       return (1.0 - _bounce(1.0 - t * 2.0)) * 0.5;
     else
@@ -394,8 +397,7 @@ class ElasticInCurve extends Curve {
   final double period;
 
   @override
-  double transform(double t) {
-    assert(t >= 0.0 && t <= 1.0);
+  double transformInternal(double t) {
     final double s = period / 4.0;
     t = t - 1.0;
     return -math.pow(2.0, 10.0 * t) * math.sin((t - s) * (math.pi * 2.0) / period);
@@ -423,8 +425,7 @@ class ElasticOutCurve extends Curve {
   final double period;
 
   @override
-  double transform(double t) {
-    assert(t >= 0.0 && t <= 1.0);
+  double transformInternal(double t) {
     final double s = period / 4.0;
     return math.pow(2.0, -10 * t) * math.sin((t - s) * (math.pi * 2.0) / period) + 1.0;
   }
@@ -452,8 +453,7 @@ class ElasticInOutCurve extends Curve {
   final double period;
 
   @override
-  double transform(double t) {
-    assert(t >= 0.0 && t <= 1.0);
+  double transformInternal(double t) {
     final double s = period / 4.0;
     t = 2.0 * t - 1.0;
     if (t < 0.0)
@@ -509,6 +509,7 @@ class ElasticInOutCurve extends Curve {
 /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_elastic_in_out.mp4}
 /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_elastic_out.mp4}
 /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_fast_out_slow_in.mp4}
+/// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_slow_middle.mp4}
 /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_linear.mp4}
 ///
 /// See also:
@@ -536,6 +537,15 @@ class Curves {
   /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_decelerate.mp4}
   static const Curve decelerate = _DecelerateCurve._();
 
+  /// A curve that is very steep and linear at the beginning, but quickly flattens out
+  /// and very slowly eases in.
+  ///
+  /// By default is the curve used to animate pages on iOS back to their original
+  /// position if a swipe gesture is ended midway through a swipe.
+  ///
+  /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/fast_linear_to_slow_ease_in.mp4}
+  static const Cubic fastLinearToSlowEaseIn = Cubic(0.18, 1.0, 0.04, 1.0);
+
   /// A cubic animation curve that speeds up quickly and ends slowly.
   ///
   /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease.mp4}
@@ -546,6 +556,13 @@ class Curves {
   /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_in.mp4}
   static const Cubic easeIn = Cubic(0.42, 0.0, 1.0, 1.0);
 
+  /// A cubic animation curve that starts starts slowly and ends linearly.
+  ///
+  /// The symmetric animation to [linearToEaseOut].
+  ///
+  /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_in_to_linear.mp4}
+  static const Cubic easeInToLinear = Cubic(0.67, 0.03, 0.65, 0.09);
+
   /// A cubic animation curve that starts slowly and ends quickly. This is
   /// similar to [Curves.easeIn], but with sinusoidal easing for a slightly less
   /// abrupt beginning and end. Nonetheless, the result is quite gentle and is
@@ -554,7 +571,7 @@ class Curves {
   /// Derived from Robert Penner’s easing functions.
   ///
   /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_in_sine.mp4}
-  static const Cubic easeInSine = Cubic(0.47, 0, 0.745, 0.715);
+  static const Cubic easeInSine = Cubic(0.47, 0.0, 0.745, 0.715);
 
   /// A cubic animation curve that starts slowly and ends quickly. Based on a
   /// quadratic equation where `f(t) = t²`, this is effectively the inverse of
@@ -639,6 +656,13 @@ class Curves {
   ///
   /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_out.mp4}
   static const Cubic easeOut = Cubic(0.0, 0.0, 0.58, 1.0);
+
+  /// A cubic animation curve that starts linearly and ends slowly.
+  ///
+  /// A symmetric animation to [easeInToLinear].
+  ///
+  /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/linear_to_ease_out.mp4}
+  static const Cubic linearToEaseOut = Cubic(0.35, 0.91, 0.33, 0.97);
 
   /// A cubic animation curve that starts quickly and ends slowly. This is
   /// similar to [Curves.easeOut], but with sinusoidal easing for a slightly
@@ -728,13 +752,13 @@ class Curves {
   /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_out_back.mp4}
   static const Cubic easeOutBack = Cubic(0.175, 0.885, 0.32, 1.275);
 
-  /// A cubic animation curve that starts slowly, speeds up, and then and ends
+  /// A cubic animation curve that starts slowly, speeds up, and then ends
   /// slowly.
   ///
   /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_in_out.mp4}
   static const Cubic easeInOut = Cubic(0.42, 0.0, 0.58, 1.0);
 
-  /// A cubic animation curve that starts slowly, speeds up, and then and ends
+  /// A cubic animation curve that starts slowly, speeds up, and then ends
   /// slowly. This is similar to [Curves.easeInOut], but with sinusoidal easing
   /// for a slightly less abrupt beginning and end.
   ///
@@ -743,7 +767,7 @@ class Curves {
   /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_in_out_sine.mp4}
   static const Cubic easeInOutSine = Cubic(0.445, 0.05, 0.55, 0.95);
 
-  /// A cubic animation curve that starts slowly, speeds up, and then and ends
+  /// A cubic animation curve that starts slowly, speeds up, and then ends
   /// slowly. This curve can be imagined as [Curves.easeInQuad] as the first
   /// half, and [Curves.easeOutQuad] as the second.
   ///
@@ -754,7 +778,7 @@ class Curves {
   /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_in_out_quad.mp4}
   static const Cubic easeInOutQuad = Cubic(0.455, 0.03, 0.515, 0.955);
 
-  /// A cubic animation curve that starts slowly, speeds up, and then and ends
+  /// A cubic animation curve that starts slowly, speeds up, and then ends
   /// slowly. This curve can be imagined as [Curves.easeInCubic] as the first
   /// half, and [Curves.easeOutCubic] as the second.
   ///
@@ -768,7 +792,7 @@ class Curves {
   /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_in_out_cubic.mp4}
   static const Cubic easeInOutCubic = Cubic(0.645, 0.045, 0.355, 1.0);
 
-  /// A cubic animation curve that starts slowly, speeds up, and then and ends
+  /// A cubic animation curve that starts slowly, speeds up, and then ends
   /// slowly. This curve can be imagined as [Curves.easeInQuart] as the first
   /// half, and [Curves.easeOutQuart] as the second.
   ///
@@ -780,9 +804,9 @@ class Curves {
   /// Derived from Robert Penner’s easing functions.
   ///
   /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_in_out_quart.mp4}
-  static const Cubic easeInOutQuart = Cubic(0.77, 0, 0.175, 1.0);
+  static const Cubic easeInOutQuart = Cubic(0.77, 0.0, 0.175, 1.0);
 
-  /// A cubic animation curve that starts slowly, speeds up, and then and ends
+  /// A cubic animation curve that starts slowly, speeds up, and then ends
   /// slowly. This curve can be imagined as [Curves.easeInQuint] as the first
   /// half, and [Curves.easeOutQuint] as the second.
   ///
@@ -791,9 +815,9 @@ class Curves {
   /// Derived from Robert Penner’s easing functions.
   ///
   /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_in_out_quint.mp4}
-  static const Cubic easeInOutQuint = Cubic(0.86, 0, 0.07, 1.0);
+  static const Cubic easeInOutQuint = Cubic(0.86, 0.0, 0.07, 1.0);
 
-  /// A cubic animation curve that starts slowly, speeds up, and then and ends
+  /// A cubic animation curve that starts slowly, speeds up, and then ends
   /// slowly.
   ///
   /// Since this curve is arrived at with an exponential function, the midpoint
@@ -805,9 +829,9 @@ class Curves {
   /// Derived from Robert Penner’s easing functions.
   ///
   /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_in_out_expo.mp4}
-  static const Cubic easeInOutExpo = Cubic(1.0, 0, 0, 1.0);
+  static const Cubic easeInOutExpo = Cubic(1.0, 0.0, 0.0, 1.0);
 
-  /// A cubic animation curve that starts slowly, speeds up, and then and ends
+  /// A cubic animation curve that starts slowly, speeds up, and then ends
   /// slowly. This curve can be imagined as [Curves.easeInCirc] as the first
   /// half, and [Curves.easeOutCirc] as the second.
   ///
@@ -821,7 +845,7 @@ class Curves {
   /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_in_out_circ.mp4}
   static const Cubic easeInOutCirc = Cubic(0.785, 0.135, 0.15, 0.86);
 
-  /// A cubic animation curve that starts slowly, speeds up, and then and ends
+  /// A cubic animation curve that starts slowly, speeds up, and then ends
   /// slowly. This curve can be imagined as [Curves.easeInBack] as the first
   /// half, and [Curves.easeOutBack] as the second.
   ///
@@ -843,6 +867,12 @@ class Curves {
   ///
   /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_fast_out_slow_in.mp4}
   static const Cubic fastOutSlowIn = Cubic(0.4, 0.0, 0.2, 1.0);
+
+  /// A cubic animation curve that starts quickly, slows down, and then ends
+  /// quickly.
+  ///
+  /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_slow_middle.mp4}
+  static const Cubic slowMiddle = Cubic(0.15, 0.85, 0.85, 0.15);
 
   /// An oscillating curve that grows in magnitude.
   ///

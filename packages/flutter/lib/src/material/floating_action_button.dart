@@ -53,6 +53,58 @@ class _DefaultHeroTag {
 /// disabled. Consider changing the [backgroundColor] if disabling the floating
 /// action button.
 ///
+/// {@tool snippet --template=stateless_widget_material}
+/// This example shows how to make a simple [FloatingActionButton] in a
+/// [Scaffold], with a pink [backgroundColor] and a thumbs up [Icon].
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     appBar: AppBar(
+///       title: Text('Floating Action Button Sample'),
+///     ),
+///     body: Center(
+///       child: Text('Press the button below!')
+///     ),
+///     floatingActionButton: FloatingActionButton(
+///       onPressed: () {
+///         // Add your onPressed code here!
+///       },
+///       child: Icon(Icons.thumb_up),
+///       backgroundColor: Colors.pink,
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
+/// {@tool snippet --template=stateless_widget_material}
+/// This example shows how to make an extended [FloatingActionButton] in a
+/// [Scaffold], with a  pink [backgroundColor] and a thumbs up [Icon] and a
+/// [Text] label.
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     appBar: AppBar(
+///       title: Text('Floating Action Button Sample'),
+///     ),
+///     body: Center(
+///       child: Text('Press the extended button below!'),
+///     ),
+///     floatingActionButton: FloatingActionButton.extended(
+///       onPressed: () {
+///         // Add your onPressed code here!
+///       },
+///       label: Text('Approve'),
+///       icon: Icon(Icons.thumb_up),
+///       backgroundColor: Colors.pink,
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [Scaffold], in which floating action buttons typically live.
@@ -82,20 +134,20 @@ class FloatingActionButton extends StatelessWidget {
     this.clipBehavior = Clip.none,
     this.materialTapTargetSize,
     this.isExtended = false,
-  }) :  assert(elevation != null && elevation >= 0.0),
-        assert(highlightElevation != null && highlightElevation >= 0.0),
-        assert(disabledElevation == null || disabledElevation >= 0.0),
-        assert(mini != null),
-        assert(shape != null),
-        assert(isExtended != null),
-        _sizeConstraints = mini ? _kMiniSizeConstraints : _kSizeConstraints,
-        disabledElevation = disabledElevation ?? elevation,
-        super(key: key);
+  }) : assert(elevation != null && elevation >= 0.0),
+       assert(highlightElevation != null && highlightElevation >= 0.0),
+       assert(disabledElevation == null || disabledElevation >= 0.0),
+       assert(mini != null),
+       assert(shape != null),
+       assert(isExtended != null),
+       _sizeConstraints = mini ? _kMiniSizeConstraints : _kSizeConstraints,
+       disabledElevation = disabledElevation ?? elevation,
+       super(key: key);
 
-  /// Creates a wider [StadiumBorder]-shaped floating action button with both
-  /// an [icon] and a [label].
+  /// Creates a wider [StadiumBorder]-shaped floating action button with
+  /// an optional [icon] and a [label].
   ///
-  /// The [label], [icon], [elevation], [highlightElevation], [clipBehavior] and
+  /// The [label], [elevation], [highlightElevation], [clipBehavior] and
   /// [shape] arguments must not be null. Additionally, [elevation]
   /// [highlightElevation], and [disabledElevation] (if specified) must be
   /// non-negative.
@@ -113,30 +165,36 @@ class FloatingActionButton extends StatelessWidget {
     this.isExtended = true,
     this.materialTapTargetSize,
     this.clipBehavior = Clip.none,
-    @required Widget icon,
+    Widget icon,
     @required Widget label,
-  }) :  assert(elevation != null && elevation >= 0.0),
-        assert(highlightElevation != null && highlightElevation >= 0.0),
-        assert(disabledElevation == null || disabledElevation >= 0.0),
-        assert(shape != null),
-        assert(isExtended != null),
-        assert(clipBehavior != null),
-        _sizeConstraints = _kExtendedSizeConstraints,
-        disabledElevation = disabledElevation ?? elevation,
-        mini = false,
-        child = _ChildOverflowBox(
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              const SizedBox(width: 16.0),
-              icon,
-              const SizedBox(width: 8.0),
-              label,
-              const SizedBox(width: 20.0),
-            ],
-          ),
-        ),
-        super(key: key);
+  }) : assert(elevation != null && elevation >= 0.0),
+       assert(highlightElevation != null && highlightElevation >= 0.0),
+       assert(disabledElevation == null || disabledElevation >= 0.0),
+       assert(shape != null),
+       assert(isExtended != null),
+       assert(clipBehavior != null),
+       _sizeConstraints = _kExtendedSizeConstraints,
+       disabledElevation = disabledElevation ?? elevation,
+       mini = false,
+       child = _ChildOverflowBox(
+         child: Row(
+           mainAxisSize: MainAxisSize.min,
+           children: icon == null
+             ? <Widget>[
+                 const SizedBox(width: 20.0),
+                 label,
+                 const SizedBox(width: 20.0),
+               ]
+             : <Widget>[
+                 const SizedBox(width: 16.0),
+                 icon,
+                 const SizedBox(width: 8.0),
+                 label,
+                 const SizedBox(width: 20.0),
+               ],
+         ),
+       ),
+       super(key: key);
 
   /// The widget below this widget in the tree.
   ///
@@ -178,7 +236,7 @@ class FloatingActionButton extends StatelessWidget {
   /// If this is set to null, the button will be disabled.
   final VoidCallback onPressed;
 
-  /// The z-coordinate at which to place this button releative to its parent.
+  /// The z-coordinate at which to place this button relative to its parent.
   ///
   /// This controls the size of the shadow below the floating action button.
   ///

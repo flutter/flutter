@@ -25,7 +25,7 @@ class ClampedSimulation extends Simulation {
     this.xMin = double.negativeInfinity,
     this.xMax = double.infinity,
     this.dxMin = double.negativeInfinity,
-    this.dxMax = double.infinity
+    this.dxMax = double.infinity,
   }) : assert(simulation != null),
        assert(xMax >= xMin),
        assert(dxMax >= dxMin);

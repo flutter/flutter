@@ -49,7 +49,7 @@ void main() {
             isExpanded: false,
             onPressed: (bool isExpanded) {
               expanded = !expanded;
-            }
+            },
           )
       )
     );
@@ -60,7 +60,7 @@ void main() {
             isExpanded: true,
             onPressed: (bool isExpanded) {
               expanded = !expanded;
-            }
+            },
         )
       )
     );
@@ -91,7 +91,7 @@ void main() {
     await tester.pumpWidget(wrap(
         child: ExpandIcon(
           isExpanded: true,
-          onPressed: (bool _) {},
+          onPressed: (bool _) { },
         )
     ));
 
@@ -106,7 +106,7 @@ void main() {
     await tester.pumpWidget(wrap(
       child: ExpandIcon(
         isExpanded: false,
-        onPressed: (bool _) {},
+        onPressed: (bool _) { },
       )
     ));
 

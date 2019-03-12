@@ -177,7 +177,10 @@ class FlutterDriverExtension {
       if (commandHandler == null || commandDeserializer == null)
         throw 'Extension $_extensionMethod does not support command $commandKind';
       final Command command = commandDeserializer(params);
-      final Result response = await commandHandler(command).timeout(command.timeout);
+      Future<Result> responseFuture = commandHandler(command);
+      if (command.timeout != null)
+        responseFuture = responseFuture.timeout(command.timeout);
+      final Result response = await responseFuture;
       return _makeResponse(response?.toJson());
     } on TimeoutException catch (error, stackTrace) {
       final String msg = 'Timeout while executing $commandKind: $error\n$stackTrace';
@@ -191,7 +194,7 @@ class FlutterDriverExtension {
     }
   }
 
-  Map<String, dynamic> _makeResponse(dynamic response, {bool isError = false}) {
+  Map<String, dynamic> _makeResponse(dynamic response, { bool isError = false }) {
     return <String, dynamic>{
       'isError': isError,
       'response': response,
@@ -205,7 +208,7 @@ class FlutterDriverExtension {
   }
 
   // Waits until at the end of a frame the provided [condition] is [true].
-  Future<void> _waitUntilFrame(bool condition(), [Completer<void> completer]) {
+  Future<void> _waitUntilFrame(bool condition(), [ Completer<void> completer ]) {
     completer ??= Completer<void>();
     if (!condition()) {
       SchedulerBinding.instance.addPostFrameCallback((Duration timestamp) {
