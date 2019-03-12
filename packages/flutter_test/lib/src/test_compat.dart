@@ -232,7 +232,7 @@ void test(
 /// avoid this flag if possible, and instead use the test runner flag `-n` to
 /// filter tests by name.
 @isTestGroup
-void group(Object description, Function body, dynamic skip) {
+void group(Object description, Function body, { dynamic skip }) {
   _declarer.group(description.toString(), body, skip: skip);
 }
 
