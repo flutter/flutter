@@ -678,6 +678,8 @@ class _TextStyleProxy implements TextStyle {
   @override
   TextDecorationStyle get decorationStyle => _delegate.decorationStyle;
   @override
+  double get decorationThickness => _delegate.decorationThickness;
+  @override
   String get fontFamily => _delegate.fontFamily;
   @override
   List<String> get fontFamilyFallback => _delegate.fontFamilyFallback;
