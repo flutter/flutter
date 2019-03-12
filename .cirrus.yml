@@ -222,14 +222,13 @@ task:
       env:
         GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
         SHARD: tool_tests
-    - name: build_tests-macos
+    - name: $SHARD-macos
       env:
-        SHARD: build_tests
-        COCOAPODS_DISABLE_STATS: true
-        FLUTTER_FRAMEWORK_DIR: "/tmp/flutter sdk/bin/cache/artifacts/engine/ios/"
-    - name: integration_tests-macos
-      env:
-        SHARD: integration_tests
+        matrix:
+          - SHARD: integration_tests
+          - SHARD: build_tests
+            COCOAPODS_DISABLE_STATS: true
+            FLUTTER_FRAMEWORK_DIR: "/tmp/flutter sdk/bin/cache/artifacts/engine/ios/"
         ANDROID_SDK_TOOLS_URL: https://dl.google.com/android/repository/sdk-tools-darwin-4333796.zip
         ANDROID_SDK_ROOT: $HOME/Android
         ANDROID_HOME: $HOME/Android
