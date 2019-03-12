@@ -165,8 +165,11 @@ class TestCommand extends FlutterCommand {
       final CodegenDaemon codegenDaemon = await codeGenerator.daemon(flutterProject);
       codegenDaemon.startBuild();
       await for (CodegenStatus status in codegenDaemon.buildResults) {
-        if (status == CodegenStatus.Succeeded || status == CodegenStatus.Failed) {
+        if (status == CodegenStatus.Succeeded) {
           break;
+        }
+        if (status == CodegenStatus.Failed) {
+          throwToolExit('Code generation failed.');
         }
       }
     }
