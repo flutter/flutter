@@ -753,6 +753,7 @@ class _TextStyleProxy implements TextStyle {
 
   @override
   TextStyle copyWith({
+    bool inherit,
     Color color,
     Color backgroundColor,
     String fontFamily,
