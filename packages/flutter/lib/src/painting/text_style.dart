@@ -516,7 +516,7 @@ class TextStyle extends Diagnosticable {
   /// )
   /// ```
   /// {@end-tool}
-  /// 
+  ///
   /// {@tool sample}
   /// We can apply a very thin and subtle wavy underline (perhaps, when words
   /// are misspelled) by using a [decorationThickness] < 1.0.
