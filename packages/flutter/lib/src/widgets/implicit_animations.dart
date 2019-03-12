@@ -17,6 +17,7 @@ import 'transitions.dart';
 
 // Examples can assume:
 // Color myCurrentTargetColor;
+// class MyWidget = ImplicitlyAnimatedWidget;
 
 /// An interpolation between two [BoxConstraints].
 ///
