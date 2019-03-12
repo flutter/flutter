@@ -570,7 +570,7 @@ void processBundle(File file, { @required String localeString }) {
   // Only pre-assume scriptCode if there is a country or script code to assume off of.
   // When we assume scriptCode based on languageCode-only, we want this initial pass
   // to use the un-assumed version as a base class.
-  LocaleInfo locale = LocaleInfo.fromString(localeString, assume: localeString.split('_').length > 1);
+  LocaleInfo locale = LocaleInfo.fromString(localeString, deriveScriptCode: localeString.split('_').length > 1);
   // Allow overwrite if the existing data is assumed.
   if (assumedLocales.contains(locale)) {
     localeToResources[locale] = <String, String>{};
@@ -582,7 +582,7 @@ void processBundle(File file, { @required String localeString }) {
   }
   populateResources(locale);
   // Add an assumed locale to default to when there is no info on scriptOnly locales.
-  locale = LocaleInfo.fromString(localeString, assume: true);
+  locale = LocaleInfo.fromString(localeString, deriveScriptCode: true);
   if (locale.scriptCode != null) {
     final LocaleInfo scriptLocale = LocaleInfo.fromString(locale.languageCode + '_' + locale.scriptCode);
     if (!localeToResources.containsKey(scriptLocale)) {

@@ -24,7 +24,10 @@ class LocaleInfo implements Comparable<LocaleInfo> {
   /// and country is 2-3 characters and all uppercase.
   ///
   /// 'language_COUNTRY' or 'language_script' are also valid. Missing fields will be null.
-  factory LocaleInfo.fromString(String locale, {bool assume = false}) {
+  ///
+  /// When `deriveScriptCode` is true, the [scriptCode] will be tentatively derived from
+  /// the [languageCode] and [countryCode].
+  factory LocaleInfo.fromString(String locale, { bool deriveScriptCode = false }) {
     final List<String> codes = locale.split('_'); // [language, script, country]
     assert(codes.isNotEmpty && codes.length < 4);
     final String languageCode = codes[0];
@@ -49,7 +52,7 @@ class LocaleInfo implements Comparable<LocaleInfo> {
     /// The basis of the assumptions here are based off of known usage of scripts
     /// across various countries. For example, we know Taiwan uses traditional (Hant)
     /// script, so it is safe to apply (Hant) to Taiwanese languages.
-    if (assume && scriptCode == null) {
+    if (deriveScriptCode && scriptCode == null) {
       switch (languageCode) {
         case 'zh': {
           if (countryCode == null) {
