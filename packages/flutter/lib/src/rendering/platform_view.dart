@@ -310,9 +310,13 @@ class RenderUiKitView extends RenderBox {
   UiKitViewController get viewController => _viewController;
   UiKitViewController _viewController;
   set viewController(UiKitViewController viewController) {
+    final bool needsSemantics = _viewController.id != viewController.id;
     assert(viewController != null);
     _viewController = viewController;
     markNeedsPaint();
+    if (needsSemantics) {	
+      markNeedsSemanticsUpdate();	
+    }
   }
 
   /// How to behave during hit testing.
@@ -398,6 +402,14 @@ class RenderUiKitView extends RenderBox {
     }
     _lastPointerDownEvent = null;
   }
+
+  @override	
+  void describeSemanticsConfiguration (SemanticsConfiguration config) {	
+    super.describeSemanticsConfiguration(config);	
+    config.isSemanticBoundary = true;	
+    config.platformViewId = _viewController.id;	
+  }	
+
 
   @override
   void attach(PipelineOwner owner) {
