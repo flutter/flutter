@@ -26,7 +26,7 @@ class AnalyzeContinuously extends AnalyzeBase {
 
   String analysisTarget;
   bool firstAnalysis = true;
-  Set<String> analyzedPaths = Set<String>();
+  Set<String> analyzedPaths = <String>{};
   Map<String, List<AnalysisError>> analysisErrors = <String, List<AnalysisError>>{};
   Stopwatch analysisTimer;
   int lastErrorCount = 0;
@@ -67,6 +67,9 @@ class AnalyzeContinuously extends AnalyzeBase {
     if (exitCode != 0)
       throwToolExit(message, exitCode: exitCode);
     printStatus(message);
+
+    if (server.didServerErrorOccur)
+      throwToolExit('Server error(s) occurred.');
   }
 
   void _handleAnalysisStatus(AnalysisServer server, bool isAnalyzing) {

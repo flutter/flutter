@@ -91,7 +91,7 @@ void main() {
     await tester.pumpWidget(wrap(
         child: ExpandIcon(
           isExpanded: true,
-          onPressed: (bool _) {},
+          onPressed: (bool _) { },
         )
     ));
 
@@ -106,7 +106,7 @@ void main() {
     await tester.pumpWidget(wrap(
       child: ExpandIcon(
         isExpanded: false,
-        onPressed: (bool _) {},
+        onPressed: (bool _) { },
       )
     ));
 

@@ -75,7 +75,7 @@ Future<void> run(List<String> args) async {
   try {
     Cache.flutterRoot = tempDir.path;
 
-    final String shellPath = argResults[_kOptionShell];
+    final String shellPath = fs.file(argResults[_kOptionShell]).resolveSymbolicLinksSync();
     if (!fs.isFileSync(shellPath)) {
       throwToolExit('Cannot find Flutter shell at $shellPath');
     }
@@ -128,7 +128,9 @@ Future<void> run(List<String> args) async {
     final List<Map<String, dynamic>> jsonList = List<Map<String, dynamic>>.from(
       json.decode(fs.file(argResults[_kOptionTests]).readAsStringSync()));
     for (Map<String, dynamic> map in jsonList) {
-      tests[map['source']] = map['dill'];
+      final String source = fs.file(map['source']).resolveSymbolicLinksSync();
+      final String dill = fs.file(map['dill']).resolveSymbolicLinksSync();
+      tests[source] = dill;
     }
 
     exitCode = await runTests(

@@ -24,7 +24,7 @@ MaterialApp _appWithAlertDialog(WidgetTester tester, AlertDialog dialog, { Theme
                   showDialog<void>(
                     context: context,
                     builder: (BuildContext context) {
-                        return dialog;
+                      return dialog;
                     },
                   );
                 },

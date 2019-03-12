@@ -58,7 +58,7 @@ void main() {
     final BoxPainter painter = decoration.createBoxPainter();
     const Size size = Size(1000.0, 1000.0);
     expect(
-        (Canvas canvas) {
+      (Canvas canvas) {
         painter.paint(
           canvas,
           const Offset(0.0, 0.0),

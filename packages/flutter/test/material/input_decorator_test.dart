@@ -1207,7 +1207,7 @@ void main() {
     expect(tester.getRect(find.text('test')).left, 12.0);
   });
 
-    testWidgets('counter text has correct right margin - LTR, dense', (WidgetTester tester) async {
+  testWidgets('counter text has correct right margin - LTR, dense', (WidgetTester tester) async {
     await tester.pumpWidget(
       buildInputDecorator(
         // isEmpty: false (default)

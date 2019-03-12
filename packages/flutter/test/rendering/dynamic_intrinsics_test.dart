@@ -15,10 +15,14 @@ class RenderFixedSize extends RenderBox {
     markNeedsLayout();
   }
 
-  @override double computeMinIntrinsicWidth(double height) => dimension;
-  @override double computeMaxIntrinsicWidth(double height) => dimension;
-  @override double computeMinIntrinsicHeight(double width) => dimension;
-  @override double computeMaxIntrinsicHeight(double width) => dimension;
+  @override
+  double computeMinIntrinsicWidth(double height) => dimension;
+  @override
+  double computeMaxIntrinsicWidth(double height) => dimension;
+  @override
+  double computeMinIntrinsicHeight(double width) => dimension;
+  @override
+  double computeMaxIntrinsicHeight(double width) => dimension;
 
   @override
   void performLayout() {
