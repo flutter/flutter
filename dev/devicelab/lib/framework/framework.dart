@@ -97,7 +97,7 @@ class _TaskRunner {
         processName: 'dart$exe',
       ).toList();
       afterRunningDartInstances.forEach(print);
-      for(final RunningProcessInfo info in afterRunningDartInstances) {
+      for (final RunningProcessInfo info in afterRunningDartInstances) {
         if (!beforeRunningDartInstances.contains(info)) {
           print('$info was leaked by this test.');
           result = TaskResult.markFailure(result);

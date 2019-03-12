@@ -38,7 +38,8 @@ Future<bool> killProcess(int pid, {ProcessManager processManager}) async {
   if (Platform.isWindows) {
     result = await processManager.run(<String>[
       'taskkill',
-      '/pid', pid.toString(),
+      '/pid',
+      pid.toString(),
       '/f',
     ]);
   } else {
@@ -65,6 +66,9 @@ Stream<RunningProcessInfo> getRunningProcesses({
 @visibleForTesting
 Stream<RunningProcessInfo> windowsRunningProcesses(
     String processName, ProcessManager processManager) async* {
+  // PowerShell script to get the command line arguments and create time of
+  // a process.
+  // See: https://docs.microsoft.com/en-us/windows/desktop/cimwin32prov/win32-process
   final String script = processName != null
       ? '''"Get-CimInstance Win32_Process -Filter \\"name='$processName'\\" | Select-Object ProcessId,CreationDate,CommandLine | Format-Table -AutoSize | Out-String -Width 4096"'''
       : '"Get-CimInstance Win32_Process | Select-Object ProcessId,CreationDate,CommandLine | Format-Table -AutoSize | Out-String -Width 4096"';
@@ -84,13 +88,14 @@ Stream<RunningProcessInfo> windowsRunningProcesses(
   }
 }
 
+/// Parses the output of the PowerShell script from [windowsRunningProcesses].
+///
+/// E.g.:
+/// ProcessId CreationDate          CommandLine
+/// --------- ------------          -----------
+///      2904 3/11/2019 11:01:54 AM "C:\Program Files\Android\Android Studio\jre\bin\java.exe" -Xmx1536M -Dfile.encoding=windows-1252 -Duser.country=US -Duser.language=en -Duser.variant -cp C:\Users\win1\.gradle\wrapper\dists\gradle-4.10.2-all\9fahxiiecdb76a5g3aw9oi8rv\gradle-4.10.2\lib\gradle-launcher-4.10.2.jar org.gradle.launcher.daemon.bootstrap.GradleDaemon 4.10.2
 @visibleForTesting
 Iterable<RunningProcessInfo> processPowershellOutput(String output) sync* {
-  // e.g.:
-  //
-  // ProcessId CreationDate          CommandLine
-  // --------- ------------          -----------
-  //      2904 3/11/2019 11:01:54 AM "C:\Program Files\Android\Android Studio\jre\bin\java.exe" -Xmx1536M -Dfile.encoding=windows-1252 -Duser.country=US -Duser.language=en -Duser.variant -cp C:\Users\win1\.gradle\wrapper\dists\gradle-4.10.2-all\9fahxiiecdb76a5g3aw9oi8rv\gradle-4.10.2\lib\gradle-launcher-4.10.2.jar org.gradle.launcher.daemon.bootstrap.GradleDaemon 4.10.2
   if (output == null) {
     return;
   }
@@ -112,37 +117,37 @@ Iterable<RunningProcessInfo> processPowershellOutput(String output) sync* {
     if (!inTableBody || line.isEmpty) {
       continue;
     }
+    if (line.length < commandLineHeaderStart) {
+      continue;
+    }
 
-    DateTime getDateTime() {
-      // 3/11/2019 11:01:54 AM
-      // 12/11/2019 11:01:54 AM
-      String raw = line.substring(
-        creationDateHeaderStart,
-        creationDateHeaderEnd,
-      );
+    // 3/11/2019 11:01:54 AM
+    // 12/11/2019 11:01:54 AM
+    String rawTime = line.substring(
+      creationDateHeaderStart,
+      creationDateHeaderEnd,
+    );
 
-      if (raw[1] == '/') {
-        raw = '0$raw';
-      }
-      if (raw[4] == '/') {
-        raw = raw.substring(0, 3) + '0' + raw.substring(3);
-      }
-      final String year = raw.substring(6, 10);
-      final String month = raw.substring(3, 5);
-      final String day = raw.substring(0, 2);
-      String time = raw.substring(11, 19);
-      if (time[7] == ' ') {
-        time = '0$time'.trim();
-      }
-      if (raw.endsWith('PM')) {
-        final int hours = int.parse(time.substring(0, 2));
-        time = '${hours + 12}${time.substring(2)}';
-      }
-      return DateTime.parse('$year-$month-${day}T$time');
+    if (rawTime[1] == '/') {
+      rawTime = '0$rawTime';
+    }
+    if (rawTime[4] == '/') {
+      rawTime = rawTime.substring(0, 3) + '0' + rawTime.substring(3);
+    }
+    final String year = rawTime.substring(6, 10);
+    final String month = rawTime.substring(3, 5);
+    final String day = rawTime.substring(0, 2);
+    String time = rawTime.substring(11, 19);
+    if (time[7] == ' ') {
+      time = '0$time'.trim();
+    }
+    if (rawTime.endsWith('PM')) {
+      final int hours = int.parse(time.substring(0, 2));
+      time = '${hours + 12}${time.substring(2)}';
     }
 
     final int pid = int.parse(line.substring(0, processIdHeaderSize).trim());
-    final DateTime creationDate = getDateTime();
+    final DateTime creationDate = DateTime.parse('$year-$month-${day}T$time');
     final String commandLine = line.substring(commandLineHeaderStart).trim();
     yield RunningProcessInfo(pid, creationDate, commandLine);
   }
@@ -167,14 +172,18 @@ Stream<RunningProcessInfo> posixRunningProcesses(
   }
 }
 
+/// Parses the output of the command in [posixRunningProcesses].
+///
+/// E.g.:
+///
+/// STARTED                        PID COMMAND
+/// Sat Mar  9 20:12:47 2019         1 /sbin/launchd
+/// Sat Mar  9 20:13:00 2019        49 /usr/sbin/syslogd
 @visibleForTesting
-Iterable<RunningProcessInfo> processPsOutput(String output, String processName) sync* {
-  // e.g.:
-  //
-  // STARTED                        PID COMMAND
-  // Sat Mar  9 20:12:47 2019         1 /sbin/launchd
-  // Sat Mar  9 20:13:00 2019        49 /usr/sbin/syslogd
-
+Iterable<RunningProcessInfo> processPsOutput(
+  String output,
+  String processName,
+) sync* {
   if (output == null) {
     return;
   }
@@ -191,34 +200,34 @@ Iterable<RunningProcessInfo> processPsOutput(String output, String processName) 
     if (processName != null && !line.contains(processName)) {
       continue;
     }
-
-    DateTime getDateTime() {
-      // 'Sat Feb 16 02:29:55 2019'
-      // 'Sat Mar  9 20:12:47 2019'
-      const Map<String, String> months = <String, String>{
-        'Jan': '01',
-        'Feb': '02',
-        'Mar': '03',
-        'Apr': '04',
-        'May': '05',
-        'Jun': '06',
-        'Jul': '07',
-        'Aug': '08',
-        'Sep': '09',
-        'Oct': '10',
-        'Nov': '11',
-        'Dec': '12',
-      };
-      final String raw = line.substring(0, 24);
-
-      final String year = raw.substring(20, 24);
-      final String month = months[raw.substring(4, 7)];
-      final String day = raw.substring(8, 10).replaceFirst(' ', '0');
-      final String time = raw.substring(11, 19);
-      return DateTime.parse('$year-$month-${day}T$time');
+    if (line.length < 25) {
+      continue;
     }
 
-    final DateTime creationDate = getDateTime();
+    // 'Sat Feb 16 02:29:55 2019'
+    // 'Sat Mar  9 20:12:47 2019'
+    const Map<String, String> months = <String, String>{
+      'Jan': '01',
+      'Feb': '02',
+      'Mar': '03',
+      'Apr': '04',
+      'May': '05',
+      'Jun': '06',
+      'Jul': '07',
+      'Aug': '08',
+      'Sep': '09',
+      'Oct': '10',
+      'Nov': '11',
+      'Dec': '12',
+    };
+    final String rawTime = line.substring(0, 24);
+
+    final String year = rawTime.substring(20, 24);
+    final String month = months[rawTime.substring(4, 7)];
+    final String day = rawTime.substring(8, 10).replaceFirst(' ', '0');
+    final String time = rawTime.substring(11, 19);
+
+    final DateTime creationDate = DateTime.parse('$year-$month-${day}T$time');
     line = line.substring(24).trim();
     final int nextSpace = line.indexOf(' ');
     final int pid = int.parse(line.substring(0, nextSpace));
