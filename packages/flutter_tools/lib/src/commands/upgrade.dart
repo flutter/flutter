@@ -80,18 +80,10 @@ class UpgradeCommand extends FlutterCommand {
     await ChannelCommand.upgradeChannel();
 
     int code = await runCommandAndStreamOutput(
-      <String>['git', 'pull'],
+      <String>['git', 'pull', '--rebase'],
       workingDirectory: Cache.flutterRoot,
       mapFunction: (String line) => matchesGitLine(line) ? null : line,
     );
-
-    try {
-      await runCheckedAsync(<String>[
-        'git', 'stash', 'pop',
-      ]);
-    } catch (e) {
-      printError('Failed to re-apply local changes. State may have been lost.');
-    }
 
     if (code != 0)
       throwToolExit(null, exitCode: code);
@@ -129,6 +121,14 @@ class UpgradeCommand extends FlutterCommand {
       workingDirectory: Cache.flutterRoot,
       allowReentrantFlutter: true,
     );
+
+    try {
+      await runCheckedAsync(<String>[
+        'git', 'stash', 'pop',
+      ]);
+    } catch (e) {
+      printError('Failed to re-apply local changes. State may have been lost.');
+    }
 
     return null;
   }
