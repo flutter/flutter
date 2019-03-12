@@ -37,7 +37,7 @@ Future<bool> killProcess(int pid, {ProcessManager processManager}) async {
   ProcessResult result;
   if (Platform.isWindows) {
     result = await processManager.run(<String>[
-      'taskkill',
+      'taskkill.exe',
       '/pid',
       pid.toString(),
       '/f',
@@ -159,7 +159,7 @@ Stream<RunningProcessInfo> posixRunningProcesses(
     String processName, ProcessManager processManager) async* {
   final ProcessResult result = await processManager.run(<String>[
     'ps',
-    '-Ao',
+    '-eo',
     'lstart,pid,command',
   ]);
   if (result.exitCode != 0) {
