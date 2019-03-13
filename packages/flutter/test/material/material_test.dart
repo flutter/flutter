@@ -20,8 +20,10 @@ class NotifyMaterial extends StatelessWidget {
   }
 }
 
-Widget buildMaterial(
-    {double elevation = 0.0, Color shadowColor = const Color(0xFF00FF00)}) {
+Widget buildMaterial({
+  double elevation = 0.0,
+  Color shadowColor = const Color(0xFF00FF00),
+}) {
   return Center(
     child: SizedBox(
       height: 100.0,
@@ -87,7 +89,7 @@ void main() {
       'color: Color(0xffffffff)',
       'textStyle.inherit: true',
       'textStyle.color: Color(0xff00ff00)',
-      'borderRadius: BorderRadiusDirectional.circular(10.0)'
+      'borderRadius: BorderRadiusDirectional.circular(10.0)',
     ]);
   });
 
@@ -347,7 +349,7 @@ void main() {
         Material(
           key: materialKey,
           type: MaterialType.canvas,
-          child: const SizedBox(width: 100.0, height: 100.0)
+          child: const SizedBox(width: 100.0, height: 100.0),
         )
       );
 
@@ -537,7 +539,7 @@ void main() {
             side: BorderSide(
               width: 2.0,
               color: Color(0xFF0000FF),
-            )
+            ),
           ),
         )
       );
@@ -557,7 +559,7 @@ void main() {
             side: BorderSide(
               width: 2.0,
               color: Color(0xFF0000FF),
-            )
+            ),
           ),
         )
       );
@@ -604,19 +606,19 @@ void main() {
                       Container(
                         color: Colors.green,
                         height: 150,
-                      )
+                      ),
                     ],
                   ),
                 ),
               ),
-            )
-          )
+            ),
+          ),
         ),
       ));
 
       await expectLater(
         find.byKey(painterKey),
-        matchesGoldenFile('material.border_paint_above.png'),
+        matchesGoldenFile('material.border_paint_above.1.png'),
         skip: !Platform.isLinux,
       );
     });
@@ -645,19 +647,19 @@ void main() {
                       Container(
                         color: Colors.green,
                         height: 150,
-                      )
+                      ),
                     ],
                   ),
                 ),
               ),
-            )
-          )
+            ),
+          ),
         ),
       ));
 
       await expectLater(
         find.byKey(painterKey),
-        matchesGoldenFile('material.border_paint_below.png'),
+        matchesGoldenFile('material.border_paint_below.1.png'),
         skip: !Platform.isLinux,
       );
     });

@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:collection';
 import 'dart:convert';
 import 'dart:developer' as developer;
 import 'dart:math' as math;
@@ -42,7 +41,7 @@ typedef InspectorSelectButtonBuilder = Widget Function(BuildContext context, Voi
 
 typedef _RegisterServiceExtensionCallback = void Function({
   @required String name,
-  @required ServiceExtensionCallback callback
+  @required ServiceExtensionCallback callback,
 });
 
 /// A layer that mimics the behavior of another layer.
@@ -55,7 +54,7 @@ class _ProxyLayer extends Layer {
   final Layer _layer;
 
   @override
-  ui.EngineLayer addToScene(ui.SceneBuilder builder, [Offset layerOffset = Offset.zero]) {
+  ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
     return _layer.addToScene(builder, layerOffset);
   }
 
@@ -79,19 +78,19 @@ class _MulticastCanvas implements Canvas {
   final Canvas _screenshot;
 
   @override
-  void clipPath(Path path, {bool doAntiAlias = true}) {
+  void clipPath(Path path, { bool doAntiAlias = true }) {
     _main.clipPath(path, doAntiAlias: doAntiAlias);
     _screenshot.clipPath(path, doAntiAlias: doAntiAlias);
   }
 
   @override
-  void clipRRect(RRect rrect, {bool doAntiAlias = true}) {
+  void clipRRect(RRect rrect, { bool doAntiAlias = true }) {
     _main.clipRRect(rrect, doAntiAlias: doAntiAlias);
     _screenshot.clipRRect(rrect, doAntiAlias: doAntiAlias);
   }
 
   @override
-  void clipRect(Rect rect, {ui.ClipOp clipOp = ui.ClipOp.intersect, bool doAntiAlias = true}) {
+  void clipRect(Rect rect, { ui.ClipOp clipOp = ui.ClipOp.intersect, bool doAntiAlias = true }) {
     _main.clipRect(rect, clipOp: clipOp, doAntiAlias: doAntiAlias);
     _screenshot.clipRect(rect, clipOp: clipOp, doAntiAlias: doAntiAlias);
   }
@@ -256,7 +255,7 @@ class _MulticastCanvas implements Canvas {
   }
 
   @override
-  void scale(double sx, [double sy]) {
+  void scale(double sx, [ double sy ]) {
     _main.scale(sx, sy);
     _screenshot.scale(sx, sy);
   }
@@ -313,7 +312,7 @@ Rect _calculateSubtreeBounds(RenderObject object) {
 /// screenshots render to the scene in the local coordinate system of the layer.
 class _ScreenshotContainerLayer extends OffsetLayer {
   @override
-  ui.EngineLayer addToScene(ui.SceneBuilder builder, [Offset layerOffset = Offset.zero]) {
+  ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
     addChildrenToScene(builder, layerOffset);
     return null; // this does not have an engine layer.
   }
@@ -369,7 +368,7 @@ class _ScreenshotData {
 /// of the regular rendering pipeline.
 /// This painting context behaves the same as standard [PaintingContext] with
 /// instrumentation added to compute a screenshot of a specified [RenderObject]
-/// added. To correctly mimic the behavor of the regular rendering pipeline, the
+/// added. To correctly mimic the behavior of the regular rendering pipeline, the
 /// full subtree of the first [RepaintBoundary] ancestor of the specified
 /// [RenderObject] will also be rendered rather than just the subtree of the
 /// render object.
@@ -630,7 +629,8 @@ class _DiagnosticsPathNode {
   final int childIndex;
 }
 
-List<_DiagnosticsPathNode> _followDiagnosticableChain(List<Diagnosticable> chain, {
+List<_DiagnosticsPathNode> _followDiagnosticableChain(
+  List<Diagnosticable> chain, {
   String name,
   DiagnosticsTreeStyle style,
 }) {
@@ -863,7 +863,7 @@ mixin WidgetInspectorService {
   void _registerBoolServiceExtension({
     @required String name,
     @required AsyncValueGetter<bool> getter,
-    @required AsyncValueSetter<bool> setter
+    @required AsyncValueSetter<bool> setter,
   }) {
     assert(name != null);
     assert(getter != null);
@@ -968,8 +968,7 @@ mixin WidgetInspectorService {
   ///  * <https://github.com/dart-lang/sdk/blob/master/runtime/vm/service/service.md#rpcs-requests-and-responses>
   ///  * [BindingBase.initServiceExtensions], which explains when service
   ///    extensions can be used.
-  void initServiceExtensions(
-      _RegisterServiceExtensionCallback registerServiceExtensionCallback) {
+  void initServiceExtensions(_RegisterServiceExtensionCallback registerServiceExtensionCallback) {
     _registerServiceExtensionCallback = registerServiceExtensionCallback;
     assert(!_debugServiceExtensionsRegistered);
     assert(() { _debugServiceExtensionsRegistered = true; return true; }());
@@ -1220,7 +1219,7 @@ mixin WidgetInspectorService {
   /// Returns whether the application has rendered its first frame and it is
   /// appropriate to display the Widget tree in the inspector.
   @protected
-  bool isWidgetTreeReady([String groupName]) {
+  bool isWidgetTreeReady([ String groupName ]) {
     return WidgetsBinding.instance != null &&
            WidgetsBinding.instance.debugDidSendFirstFrameEvent;
   }
@@ -1231,7 +1230,7 @@ mixin WidgetInspectorService {
   /// API surface of the methods in this class called from the Flutter IntelliJ
   /// Plugin.
   @protected
-  Object toObject(String id, [String groupName]) {
+  Object toObject(String id, [ String groupName ]) {
     if (id == null)
       return null;
 
@@ -1252,7 +1251,7 @@ mixin WidgetInspectorService {
   /// The `groupName` parameter is not required by is added to regularize the
   /// API surface of methods called from the Flutter IntelliJ Plugin.
   @protected
-  Object toObjectForSourceLocation(String id, [String groupName]) {
+  Object toObjectForSourceLocation(String id, [ String groupName ]) {
     final Object object = toObject(id);
     if (object is Element) {
       return object.widget;
@@ -1298,7 +1297,7 @@ mixin WidgetInspectorService {
   /// The `groupName` parameter is not required by is added to regularize the
   /// API surface of methods called from the Flutter IntelliJ Plugin.
   @protected
-  bool setSelectionById(String id, [String groupName]) {
+  bool setSelectionById(String id, [ String groupName ]) {
     return setSelection(toObject(id), groupName);
   }
 
@@ -1310,7 +1309,7 @@ mixin WidgetInspectorService {
   /// The `groupName` parameter is not needed but is specified to regularize the
   /// API surface of methods called from the Flutter IntelliJ Plugin.
   @protected
-  bool setSelection(Object object, [String groupName]) {
+  bool setSelection(Object object, [ String groupName ]) {
     if (object is Element || object is RenderObject) {
       if (object is Element) {
         if (object == selection.currentElement) {
@@ -1376,7 +1375,7 @@ mixin WidgetInspectorService {
     };
   }
 
-  List<Element> _getRawElementParentChain(Element element, {int numLocalParents}) {
+  List<Element> _getRawElementParentChain(Element element, { int numLocalParents }) {
     List<Element> elements = element?.debugGetDiagnosticChain();
     if (numLocalParents != null) {
       for (int i = 0; i < elements.length; i += 1) {
@@ -1392,13 +1391,13 @@ mixin WidgetInspectorService {
     return elements?.reversed?.toList();
   }
 
-  List<_DiagnosticsPathNode> _getElementParentChain(Element element, String groupName, {int numLocalParents}) {
+  List<_DiagnosticsPathNode> _getElementParentChain(Element element, String groupName, { int numLocalParents }) {
     return _followDiagnosticableChain(
       _getRawElementParentChain(element, numLocalParents: numLocalParents),
     ) ?? const <_DiagnosticsPathNode>[];
   }
 
-  List<_DiagnosticsPathNode> _getRenderObjectParentChain(RenderObject renderObject, String groupName, {int maxparents}) {
+  List<_DiagnosticsPathNode> _getRenderObjectParentChain(RenderObject renderObject, String groupName, { int maxparents }) {
     final List<RenderObject> chain = <RenderObject>[];
     while (renderObject != null) {
       chain.add(renderObject);
@@ -2259,7 +2258,7 @@ class _WidgetInspectorState extends State<WidgetInspector>
       return size == null ? double.maxFinite : size.width * size.height;
     }
     regularHits.sort((RenderObject a, RenderObject b) => _area(a).compareTo(_area(b)));
-    final Set<RenderObject> hits = LinkedHashSet<RenderObject>();
+    final Set<RenderObject> hits = <RenderObject>{};
     hits..addAll(edgeHits)..addAll(regularHits);
     return hits.toList();
   }
@@ -2346,7 +2345,7 @@ class _WidgetInspectorState extends State<WidgetInspector>
       children.add(Positioned(
         left: _kInspectButtonMargin,
         bottom: _kInspectButtonMargin,
-        child: widget.selectButtonBuilder(context, _handleEnableSelect)
+        child: widget.selectButtonBuilder(context, _handleEnableSelect),
       ));
     }
     children.add(_InspectorOverlay(selection: selection));
@@ -2583,7 +2582,7 @@ class _InspectorOverlayLayer extends Layer {
   double _textPainterMaxWidth;
 
   @override
-  ui.EngineLayer addToScene(ui.SceneBuilder builder, [Offset layerOffset = Offset.zero]) {
+  ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
     if (!selection.active)
       return null;
 
@@ -2756,7 +2755,7 @@ class _Location {
     this.line,
     this.column,
     this.name,
-    this.parameterLocations
+    this.parameterLocations,
   });
 
   /// File path of the location.

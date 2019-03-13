@@ -76,6 +76,30 @@ tasks:
     stage: devicelab_win
     required_agent_capabilities: ["windows/android"]
 
+  codegen_integration_win:
+    description: >
+      Runs codegeneration and verifies that it can execute
+      correctly.
+    stage: devicelab_win
+    required_agent_capabilities: ["windows/android"]
+    flaky: true
+
+  codegen_integration_mac:
+    description: >
+      Runs codegeneration and verifies that it can execute
+      correctly.
+    stage: devicelab_ios
+    required_agent_capabilities: ["mac/ios"]
+    flaky: true
+
+  codegen_integration_linux:
+    description: >
+      Runs codegeneration and verifies that it can execute
+      correctly.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+    flaky: true
+
   flutter_gallery_android__compile:
     description: >
       Collects various performance metrics of compiling the Flutter
@@ -118,13 +142,19 @@ tasks:
       flutter_gallery app on Android.
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
-    flaky: true
 
   cull_opacity_perf__timeline_summary:
     description: >
       Measures the runtime performance of culling opacity widgets on Android.
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
+
+  cubic_bezier_perf__timeline_summary:
+    description: >
+      Measures the runtime performance of cubic bezier animations on Android.
+    stage: devicelab
+    required_agent_capabilities: ["mac/android"]
+    flaky: true
 
   flavors_test:
     description: >
@@ -265,23 +295,24 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
 
-  gradle_plugin_test:
-    description: >
-      Verifies that the Flutter Gradle plugin supports standard and custom Android build types.
-    stage: devicelab
-    required_agent_capabilities: ["linux/android"]
+  # TODO(dnfield): Remove these once we're confident it's all working on cirrus
+  # gradle_plugin_test:
+  #   description: >
+  #     Verifies that the Flutter Gradle plugin supports standard and custom Android build types.
+  #   stage: devicelab
+  #   required_agent_capabilities: ["linux/android"]
 
-  plugin_test:
-    description: >
-      Checks that the project template works and supports plugins.
-    stage: devicelab
-    required_agent_capabilities: ["linux/android"]
+  # plugin_test:
+  #   description: >
+  #     Checks that the project template works and supports plugins.
+  #   stage: devicelab
+  #   required_agent_capabilities: ["linux/android"]
 
-  module_test:
-    description: >
-      Checks that the module project template works and supports add2app on Android.
-    stage: devicelab
-    required_agent_capabilities: ["linux/android"]
+  # module_test:
+  #   description: >
+  #     Checks that the module project template works and supports add2app on Android.
+  #   stage: devicelab
+  #   required_agent_capabilities: ["linux/android"]
 
   flutter_gallery_instrumentation_test:
     description: >
@@ -303,23 +334,24 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
 
-  flutter_create_offline_test_linux:
-    description: >
-      Tests the `flutter create --offline` command.
-    stage: devicelab
-    required_agent_capabilities: ["linux/android"]
+  # TODO(dnfield): Remove these once we're confident it's all working on cirrus
+  # flutter_create_offline_test_linux:
+  #   description: >
+  #     Tests the `flutter create --offline` command.
+  #   stage: devicelab
+  #   required_agent_capabilities: ["linux/android"]
 
-  flutter_create_offline_test_windows:
-    description: >
-      Tests the `flutter create --offline` command.
-    stage: devicelab
-    required_agent_capabilities: ["windows/android"]
+  # flutter_create_offline_test_windows:
+  #   description: >
+  #     Tests the `flutter create --offline` command.
+  #   stage: devicelab
+  #   required_agent_capabilities: ["windows/android"]
 
-  flutter_create_offline_test_mac:
-    description: >
-      Tests the `flutter create --offline` command.
-    stage: devicelab
-    required_agent_capabilities: ["mac/android"]
+  # flutter_create_offline_test_mac:
+  #   description: >
+  #     Tests the `flutter create --offline` command.
+  #   stage: devicelab
+  #   required_agent_capabilities: ["mac/android"]
 
   # iOS on-device tests
 
@@ -329,17 +361,18 @@ tasks:
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
 
-  plugin_test_ios:
-    description: >
-      Checks that the project template works and supports plugins on iOS.
-    stage: devicelab_ios
-    required_agent_capabilities: ["mac/ios"]
+  # TODO(dnfield): Remove these once we're confident it's all working on cirrus
+  # plugin_test_ios:
+  #   description: >
+  #     Checks that the project template works and supports plugins on iOS.
+  #   stage: devicelab_ios
+  #   required_agent_capabilities: ["mac/ios"]
 
-  module_test_ios:
-    description: >
-      Checks that the module project template works and supports add2app on iOS.
-    stage: devicelab
-    required_agent_capabilities: ["mac/ios"]
+  # module_test_ios:
+  #   description: >
+  #     Checks that the module project template works and supports add2app on iOS.
+  #   stage: devicelab
+  #   required_agent_capabilities: ["mac/ios"]
 
   external_ui_integration_test_ios:
     description: >
@@ -464,11 +497,12 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
 
-  dartdocs:
-    description: >
-      Tracks how many members are still lacking documentation.
-    stage: devicelab
-    required_agent_capabilities: ["linux/android"]
+  # TODO(dnfield): Remove these once we're confident it's all working on cirrus
+  # dartdocs:
+  #   description: >
+  #     Tracks how many members are still lacking documentation.
+  #   stage: devicelab
+  #   required_agent_capabilities: ["linux/android"]
 
   flutter_test_performance:
     description: >

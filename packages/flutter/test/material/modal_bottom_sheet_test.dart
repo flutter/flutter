@@ -19,7 +19,7 @@ void main() {
           savedContext = context;
           return Container();
         }
-      )
+      ),
     ));
 
     await tester.pump();
@@ -28,7 +28,7 @@ void main() {
     bool showBottomSheetThenCalled = false;
     showModalBottomSheet<void>(
       context: savedContext,
-      builder: (BuildContext context) => const Text('BottomSheet')
+      builder: (BuildContext context) => const Text('BottomSheet'),
     ).then<void>((void value) {
       showBottomSheetThenCalled = true;
     });
@@ -74,8 +74,8 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         key: scaffoldKey,
-        body: const Center(child: Text('body'))
-      )
+        body: const Center(child: Text('body')),
+      ),
     ));
 
     expect(showBottomSheetThenCalled, isFalse);
@@ -84,7 +84,7 @@ void main() {
     scaffoldKey.currentState.showBottomSheet<void>((BuildContext context) {
       return Container(
         margin: const EdgeInsets.all(40.0),
-        child: const Text('BottomSheet')
+        child: const Text('BottomSheet'),
       );
     }).closed.whenComplete(() {
       showBottomSheetThenCalled = true;
@@ -131,14 +131,14 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         key: scaffoldKey,
-        body: const Center(child: Text('body'))
-      )
+        body: const Center(child: Text('body')),
+      ),
     ));
 
     scaffoldKey.currentState.showBottomSheet<void>((BuildContext context) {
       return Container(
         margin: const EdgeInsets.all(40.0),
-        child: const Text('BottomSheet')
+        child: const Text('BottomSheet'),
       );
     });
 
@@ -211,14 +211,14 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         key: scaffoldKey,
-        body: const Center(child: Text('body'))
-      )
+        body: const Center(child: Text('body')),
+      ),
     ));
 
 
     showModalBottomSheet<void>(context: scaffoldKey.currentContext, builder: (BuildContext context) {
       return Container(
-        child: const Text('BottomSheet')
+        child: const Text('BottomSheet'),
       );
     });
 

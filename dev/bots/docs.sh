@@ -62,9 +62,9 @@ function move_offline_into_place() {
   mv flutter.docs.zip doc/offline/flutter.docs.zip
   du -sh doc/offline/flutter.docs.zip
   if [[ "$CIRRUS_BRANCH" == "stable" ]]; then
-    echo -e "<entry>\n  <version>${FLUTTER_VERSION}</version>\n  <url>https://docs.flutter.io/offline/flutter.docset.tar.gz</url>\n</entry>" > doc/offline/flutter.xml
+    echo -e "<entry>\n  <version>${FLUTTER_VERSION}</version>\n  <url>https://api.flutter.dev/offline/flutter.docset.tar.gz</url>\n</entry>" > doc/offline/flutter.xml
   else
-    echo -e "<entry>\n  <version>${FLUTTER_VERSION}</version>\n  <url>https://master-docs.flutter.io/offline/flutter.docset.tar.gz</url>\n</entry>" > doc/offline/flutter.xml
+    echo -e "<entry>\n  <version>${FLUTTER_VERSION}</version>\n  <url>https://master-api.flutter.dev/offline/flutter.docset.tar.gz</url>\n</entry>" > doc/offline/flutter.xml
   fi
   mv flutter.docset.tar.gz doc/offline/flutter.docset.tar.gz
   du -sh doc/offline/flutter.docset.tar.gz
@@ -104,7 +104,7 @@ if [[ -d "$FLUTTER_PUB_CACHE" ]]; then
 fi
 
 # Install and activate dartdoc.
-"$PUB" global activate dartdoc 0.28.1+2
+"$PUB" global activate dartdoc 0.28.2
 
 # This script generates a unified doc set, and creates
 # a custom index.html, placing everything into dev/docs/doc.
@@ -125,21 +125,21 @@ cp "$FLUTTER_ROOT/dev/docs/google2ed1af765c529f57.html" "$FLUTTER_ROOT/dev/docs/
 if [[ -n "$CIRRUS_CI" && -z "$CIRRUS_PR" ]]; then
   echo "This is not a pull request; considering whether to upload docs... (branch=$CIRRUS_BRANCH)"
   if [[ "$CIRRUS_BRANCH" == "master" ]]; then
-    echo "Updating $CIRRUS_BRANCH docs: https://master-docs.flutter.io/"
+    echo "Updating $CIRRUS_BRANCH docs: https://master-api.flutter.dev/"
     # Disable search indexing on the master staging site so searches get only
     # the stable site.
     echo -e "User-agent: *\nDisallow: /" > "$FLUTTER_ROOT/dev/docs/doc/robots.txt"
     export FIREBASE_TOKEN="$FIREBASE_MASTER_TOKEN"
-    deploy 5 master-docs-flutter-io
+    deploy 5 master-docs-flutter-dev
   fi
 
   if [[ "$CIRRUS_BRANCH" == "stable" ]]; then
     # Enable search indexing on the master staging site so searches get only
     # the stable site.
-    echo "Updating $CIRRUS_BRANCH docs: https://docs.flutter.io/"
+    echo "Updating $CIRRUS_BRANCH docs: https://api.flutter.dev/"
     echo -e "# All robots welcome!" > "$FLUTTER_ROOT/dev/docs/doc/robots.txt"
     export FIREBASE_TOKEN="$FIREBASE_PUBLIC_TOKEN"
-    deploy 5 docs-flutter-io
+    deploy 5 docs-flutter-dev
   fi
 fi
 

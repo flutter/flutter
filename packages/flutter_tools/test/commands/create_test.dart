@@ -27,6 +27,10 @@ final Generator _kNoColorTerminalPlatform = () => FakePlatform.fromPlatform(cons
 final Map<Type, Generator> noColorTerminalOverride = <Type, Generator> {
   Platform: _kNoColorTerminalPlatform,
 };
+const String samplesIndexJson = '''[
+  { "id": "sample1" },
+  { "id": "sample2" }
+]''';
 
 void main() {
   Directory tempDir;
@@ -86,7 +90,7 @@ void main() {
 
   testUsingContext('creates a module project correctly', () async {
     await _createAndAnalyzeProject(projectDir, <String>[
-      '--template=module'
+      '--template=module',
     ], <String>[
       '.android/app/',
       '.gitignore',
@@ -341,7 +345,7 @@ void main() {
 
   testUsingContext('module project with pub', () async {
     return _createProject(projectDir, <String>[
-      '--template=module'
+      '--template=module',
     ], <String>[
       '.android/build.gradle',
       '.android/Flutter/build.gradle',
@@ -531,11 +535,11 @@ void main() {
     FlutterProject project = await FlutterProject.fromDirectory(fs.directory(tmpProjectDir));
     expect(
         project.ios.productBundleIdentifier,
-        'com.example.helloFlutter'
+        'com.example.helloFlutter',
     );
     expect(
         project.android.applicationId,
-        'com.example.hello_flutter'
+        'com.example.hello_flutter',
     );
 
     tmpProjectDir = fs.path.join(tempDir.path, 'test_abc');
@@ -543,11 +547,11 @@ void main() {
     project = await FlutterProject.fromDirectory(fs.directory(tmpProjectDir));
     expect(
         project.ios.productBundleIdentifier,
-        'abc.1.testAbc'
+        'abc.1.testAbc',
     );
     expect(
         project.android.applicationId,
-        'abc.u1.test_abc'
+        'abc.u1.test_abc',
     );
 
     tmpProjectDir = fs.path.join(tempDir.path, 'flutter_project');
@@ -555,11 +559,11 @@ void main() {
     project = await FlutterProject.fromDirectory(fs.directory(tmpProjectDir));
     expect(
         project.ios.productBundleIdentifier,
-        'flutterProject.untitled'
+        'flutterProject.untitled',
     );
     expect(
         project.android.applicationId,
-        'flutter_project.untitled'
+        'flutter_project.untitled',
     );
   }, overrides: <Type, Generator>{
     FlutterVersion: () => mockFlutterVersion,
@@ -888,6 +892,41 @@ void main() {
   }, timeout: allowForRemotePubInvocation, overrides: <Type, Generator>{
     HttpClientFactory: () => () => MockHttpClient(200, result: 'void main() {}'),
   });
+
+  testUsingContext('can write samples index to disk', () async {
+    final String outputFile = fs.path.join(tempDir.path, 'flutter_samples.json');
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+    final List<String> args = <String>[
+      'create',
+      '--list-samples',
+      outputFile
+    ];
+
+    await runner.run(args);
+    final File expectedFile = fs.file(outputFile);
+    expect(expectedFile.existsSync(), isTrue);
+    expect(expectedFile.readAsStringSync(), equals(samplesIndexJson));
+  }, overrides: <Type, Generator>{
+    HttpClientFactory: () =>
+        () => MockHttpClient(200, result: samplesIndexJson),
+  });
+  testUsingContext('provides an error to the user if samples json download fails', () async {
+    final String outputFile = fs.path.join(tempDir.path, 'flutter_samples.json');
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+    final List<String> args = <String>[
+      'create',
+      '--list-samples',
+      outputFile
+    ];
+
+    await expectLater(runner.run(args), throwsToolExit(exitCode: 2, message: 'Failed to write samples'));
+    expect(fs.file(outputFile).existsSync(), isFalse);
+  }, overrides: <Type, Generator>{
+    HttpClientFactory: () =>
+        () => MockHttpClient(404, result: 'not found'),
+  });
 }
 
 Future<void> _createProject(
@@ -956,7 +995,7 @@ Future<void> _analyzeProject(String workingDir) async {
   expect(exec.exitCode, 0);
 }
 
-Future<void> _runFlutterTest(Directory workingDir, {String target}) async {
+Future<void> _runFlutterTest(Directory workingDir, { String target }) async {
   final String flutterToolsPath = fs.path.absolute(fs.path.join(
     'bin',
     'flutter_tools.dart',
@@ -1057,8 +1096,11 @@ class MockHttpClientResponse extends Stream<List<int>> implements HttpClientResp
   String get reasonPhrase => '<reason phrase>';
 
   @override
-  StreamSubscription<List<int>> listen(void onData(List<int> event), {
-    Function onError, void onDone(), bool cancelOnError
+  StreamSubscription<List<int>> listen(
+    void onData(List<int> event), {
+    Function onError,
+    void onDone(),
+    bool cancelOnError,
   }) {
     return Stream<List<int>>.fromIterable(<List<int>>[result.codeUnits])
       .listen(onData, onError: onError, onDone: onDone, cancelOnError: cancelOnError);

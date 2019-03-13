@@ -150,7 +150,7 @@ void main() {
             'timeout': _kSerializedTestTimeout,
             'finderType': 'ByValueKey',
             'keyValueString': 'foo',
-            'keyValueType': 'String'
+            'keyValueType': 'String',
           });
           return makeMockResponse(<String, dynamic>{});
         });
@@ -189,10 +189,10 @@ void main() {
             'timeout': _kSerializedTestTimeout,
             'finderType': 'ByValueKey',
             'keyValueString': '123',
-            'keyValueType': 'int'
+            'keyValueType': 'int',
           });
           return makeMockResponse(<String, String>{
-            'text': 'hello'
+            'text': 'hello',
           });
         });
         final String result = await driver.getText(find.byValueKey(123), timeout: _kTestTimeout);
@@ -236,10 +236,10 @@ void main() {
       test('clears timeline', () async {
         bool clearWasCalled = false;
         when(mockPeer.sendRequest('_clearVMTimeline', argThat(equals(<String, dynamic>{}))))
-            .thenAnswer((Invocation invocation) async {
-          clearWasCalled = true;
-          return null;
-        });
+          .thenAnswer((Invocation invocation) async {
+            clearWasCalled = true;
+            return null;
+          });
         await driver.clearTimeline();
         expect(clearWasCalled, isTrue);
       });
@@ -252,30 +252,30 @@ void main() {
         log = <String>[];
 
         when(mockPeer.sendRequest('_clearVMTimeline', argThat(equals(<String, dynamic>{}))))
-            .thenAnswer((Invocation invocation) async {
-          log.add('clear');
-          return null;
-        });
+          .thenAnswer((Invocation invocation) async {
+            log.add('clear');
+            return null;
+          });
 
         when(mockPeer.sendRequest('_setVMTimelineFlags', argThat(equals(<String, dynamic>{'recordedStreams': '[all]'}))))
-            .thenAnswer((Invocation invocation) async {
-          log.add('startTracing');
-          return null;
-        });
+          .thenAnswer((Invocation invocation) async {
+            log.add('startTracing');
+            return null;
+          });
 
         when(mockPeer.sendRequest('_setVMTimelineFlags', argThat(equals(<String, dynamic>{'recordedStreams': '[]'}))))
-            .thenAnswer((Invocation invocation) async {
-          log.add('stopTracing');
-          return null;
-        });
+          .thenAnswer((Invocation invocation) async {
+            log.add('stopTracing');
+            return null;
+          });
 
         when(mockPeer.sendRequest('_getVMTimeline')).thenAnswer((Invocation invocation) async {
           log.add('download');
           return <String, dynamic> {
             'traceEvents': <dynamic>[
               <String, String>{
-                'name': 'test event'
-              }
+                'name': 'test event',
+              },
             ],
           };
         });
@@ -333,8 +333,8 @@ void main() {
           return <String, dynamic> {
             'traceEvents': <dynamic>[
               <String, String>{
-                'name': 'test event'
-              }
+                'name': 'test event',
+              },
             ],
           };
         });
@@ -345,7 +345,7 @@ void main() {
         streams: const <TimelineStream>[
           TimelineStream.dart,
           TimelineStream.gc,
-          TimelineStream.compiler
+          TimelineStream.compiler,
         ],
         retainPriorEvents: true);
 
@@ -376,7 +376,7 @@ void main() {
       test('remote error', () async {
         when(mockIsolate.invokeExtension(any, any)).thenAnswer((Invocation i) {
           return makeMockResponse(<String, dynamic>{
-            'message': 'This is a failure'
+            'message': 'This is a failure',
           }, isError: true);
         });
         try {
@@ -427,10 +427,12 @@ void main() {
 }
 
 Future<Map<String, dynamic>> makeMockResponse(
-    Map<String, dynamic> response, {bool isError = false}) {
+  Map<String, dynamic> response, {
+  bool isError = false,
+}) {
   return Future<Map<String, dynamic>>.value(<String, dynamic>{
     'isError': isError,
-    'response': response
+    'response': response,
   });
 }
 

@@ -118,7 +118,6 @@ example:org-dartlang-app:/
               'result abc\nline1\nline2\nabc /path/to/main.dart.dill 0'
             ))
           ));
-      final KernelCompiler kernelCompiler = await kernelCompilerFactory.create();
       final CompilerOutput output = await kernelCompiler.compile(sdkRoot: '/path/to/sdkroot',
         mainPath: '/path/to/main.dart',
         trackWidgetCreation: false,
@@ -142,7 +141,6 @@ example:org-dartlang-app:/
               'result abc\nline1\nline2\nabc'
             ))
           ));
-      final KernelCompiler kernelCompiler = await kernelCompilerFactory.create();
       final CompilerOutput output = await kernelCompiler.compile(sdkRoot: '/path/to/sdkroot',
         mainPath: '/path/to/main.dart',
         trackWidgetCreation: false,
@@ -168,7 +166,6 @@ example:org-dartlang-app:/
               'result abc\nline1\nline2\nabc'
           ))
       ));
-      final KernelCompiler kernelCompiler = await kernelCompilerFactory.create();
       final CompilerOutput output = await kernelCompiler.compile(
         sdkRoot: '/path/to/sdkroot',
         mainPath: '/path/to/main.dart',
@@ -337,8 +334,7 @@ example:org-dartlang-app:/
     });
   });
 
-  group('compile expression', ()
-  {
+  group('compile expression', () {
     ProcessManager mockProcessManager;
     ResidentCompiler generator;
     MockProcess mockFrontendServer;
@@ -505,9 +501,12 @@ example:org-dartlang-app:/
   });
 }
 
-Future<void> _recompile(StreamController<List<int>> streamController,
-  ResidentCompiler generator, MockStdIn mockFrontendServerStdIn,
-  String mockCompilerOutput) async {
+Future<void> _recompile(
+  StreamController<List<int>> streamController,
+  ResidentCompiler generator,
+  MockStdIn mockFrontendServerStdIn,
+  String mockCompilerOutput,
+) async {
   // Put content into the output stream after generator.recompile gets
   // going few lines below, resets completer.
   scheduleMicrotask(() {
@@ -568,12 +567,12 @@ class MockStdIn extends Mock implements IOSink {
   }
 
   @override
-  void write([Object o = '']) {
+  void write([ Object o = '' ]) {
     _stdInWrites.write(o);
   }
 
   @override
-  void writeln([Object o = '']) {
+  void writeln([ Object o = '' ]) {
     _stdInWrites.writeln(o);
   }
 }

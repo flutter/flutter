@@ -31,7 +31,8 @@ class SnippetGenerator {
   SnippetGenerator({Configuration configuration})
       : configuration = configuration ??
             // Flutter's root is four directories up from this script.
-            Configuration(flutterRoot: Directory(Platform.environment['FLUTTER_ROOT'] ?? path.canonicalize(path.join(path.dirname(path.fromUri(Platform.script)), '..', '..', '..')))) {
+            Configuration(flutterRoot: Directory(Platform.environment['FLUTTER_ROOT']
+                ?? path.canonicalize(path.join(path.dirname(path.fromUri(Platform.script)), '..', '..', '..')))) {
     this.configuration.createOutputDirectory();
   }
 
@@ -72,10 +73,10 @@ class SnippetGenerator {
         // Remove any leading/trailing empty comment lines.
         // We don't want to remove ALL empty comment lines, only the ones at the
         // beginning and the end.
-        while (description.last == '// ') {
+        while (description.isNotEmpty && description.last == '// ') {
           description.removeLast();
         }
-        while (description.first == '// ') {
+        while (description.isNotEmpty && description.first == '// ') {
           description.removeAt(0);
         }
         return description.join('\n').trim();
@@ -98,7 +99,7 @@ class SnippetGenerator {
   ///
   /// Takes into account the [type] and doesn't substitute in the id and the app
   /// if not a [SnippetType.application] snippet.
-  String interpolateSkeleton(SnippetType type, List<_ComponentTuple> injections, String skeleton) {
+  String interpolateSkeleton(SnippetType type, List<_ComponentTuple> injections, String skeleton, Map<String, Object> metadata) {
     final List<String> result = <String>[];
     const HtmlEscape htmlEscape = HtmlEscape();
     String language;
@@ -128,12 +129,13 @@ class SnippetGenerator {
       'language': language ?? 'dart',
     }..addAll(type == SnippetType.application
         ? <String, String>{
+            'serial': metadata['serial'].toString() ?? '0',
             'id':
                 injections.firstWhere((_ComponentTuple tuple) => tuple.name == 'id').mergedContent,
             'app':
                 htmlEscape.convert(injections.firstWhere((_ComponentTuple tuple) => tuple.name == 'app').mergedContent),
           }
-        : <String, String>{'id': '', 'app': ''});
+        : <String, String>{'serial': '', 'id': '', 'app': ''});
     return skeleton.replaceAllMapped(RegExp('{{(${substitutions.keys.join('|')})}}'), (Match match) {
       return substitutions[match[1]];
     });
@@ -180,6 +182,16 @@ class SnippetGenerator {
     return file.readAsStringSync(encoding: Encoding.getByName('utf-8'));
   }
 
+  String _addLineNumbers(String app) {
+    final StringBuffer buffer = StringBuffer();
+    int count = 0;
+    for (String line in app.split('\n')) {
+      count++;
+      buffer.writeln('${count.toString().padLeft(5, ' ')}: $line');
+    }
+    return buffer.toString();
+  }
+
   /// The main routine for generating snippets.
   ///
   /// The [input] is the file containing the dartdoc comments (minus the leading
@@ -220,7 +232,7 @@ class SnippetGenerator {
         try {
           app = formatter.format(app);
         } on FormatterException catch (exception) {
-          stderr.write('Code to format:\n$app\n');
+          stderr.write('Code to format:\n${_addLineNumbers(app)}\n');
           errorExit('Unable to format snippet app template: $exception');
         }
 
@@ -250,6 +262,6 @@ class SnippetGenerator {
         break;
     }
     final String skeleton = _loadFileAsUtf8(configuration.getHtmlSkeletonFile(type));
-    return interpolateSkeleton(type, snippetData, skeleton);
+    return interpolateSkeleton(type, snippetData, skeleton, metadata);
   }
 }

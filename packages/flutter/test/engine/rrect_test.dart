@@ -13,7 +13,7 @@ void main() {
       topLeft: const Radius.circular(0.5),
       topRight: const Radius.circular(0.25),
       bottomRight: const Radius.elliptical(0.25, 0.75),
-      bottomLeft: Radius.zero
+      bottomLeft: Radius.zero,
     );
 
     expect(rrect.contains(const Offset(1.0, 1.0)), isFalse);
@@ -32,7 +32,7 @@ void main() {
       topLeft: const Radius.circular(5000.0),
       topRight: const Radius.circular(2500.0),
       bottomRight: const Radius.elliptical(2500.0, 7500.0),
-      bottomLeft: Radius.zero
+      bottomLeft: Radius.zero,
     );
 
     expect(rrect.contains(const Offset(1.0, 1.0)), isFalse);
