@@ -33,6 +33,10 @@ class RasterCacheResult {
 
   void draw(SkCanvas& canvas, const SkPaint* paint = nullptr) const;
 
+  SkISize image_dimensions() const {
+    return image_ ? image_->dimensions() : SkISize::Make(0, 0);
+  };
+
  private:
   sk_sp<SkImage> image_;
   SkRect logical_rect_;
@@ -87,6 +91,7 @@ class RasterCache {
   void Prepare(PrerollContext* context, Layer* layer, const SkMatrix& ctm);
 
   RasterCacheResult Get(const SkPicture& picture, const SkMatrix& ctm) const;
+
   RasterCacheResult Get(Layer* layer, const SkMatrix& ctm) const;
 
   void SweepAfterFrame();
@@ -126,6 +131,8 @@ class RasterCache {
   LayerRasterCacheKey::Map<Entry> layer_cache_;
   bool checkerboard_images_;
   fml::WeakPtrFactory<RasterCache> weak_factory_;
+
+  void TraceStatsToTimeline() const;
 
   FML_DISALLOW_COPY_AND_ASSIGN(RasterCache);
 };
