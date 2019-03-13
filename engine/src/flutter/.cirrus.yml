@@ -60,39 +60,6 @@ task:
         mkdir javadoc_tmp
         ./flutter/tools/gen_javadoc.py --out-dir javadoc_tmp
 
-task:
-  name: build_ios
-  use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true'
-  osx_instance:
-    image: high-sierra-xcode-9.4.1
-  env:
-    CIRRUS_WORKING_DIR: "/tmp/github_repo"
-    ENGINE_PATH: "/tmp/engine"
-    DEPOT_TOOLS: "/tmp/depot_tools"
-    PATH: "$DEPOT_TOOLS:$PATH"
-  depot_tools_script:
-    git clone --depth 1 https://chromium.googlesource.com/chromium/tools/depot_tools.git $DEPOT_TOOLS
-  # jazzy_script:
-  #   sudo gem install jazzy@0.9.4
-  gclient_sync_script: |
-    mkdir -p $ENGINE_PATH/src
-    echo 'solutions = [{"managed": False,"name": "src/flutter","url": "git@github.com:flutter/engine.git","deps_file": "DEPS", "custom_vars": {"download_android_deps" : False, "download_windows_deps" : False,},},]' > $ENGINE_PATH/.gclient
-    cd $ENGINE_PATH/src
-    rm -rf flutter
-    rm -rf out
-    mv $CIRRUS_WORKING_DIR flutter
-    gclient sync
-  compile_host_script: |
-    cd $ENGINE_PATH/src
-    ./flutter/tools/gn --ios --unoptimized
-    ninja -C out/ios_debug_unopt
-    # TODO(dnfield): when we can install jazzy properly, we should do this.
-    # AFAICT we can't because of Xcode version.
-    # mkdir objcdoc_tmp
-    # pushd flutter
-    # ./tools/gen_objcdoc.sh ../objcdoc_tmp
-    # popd
-
 format_and_dart_test_task:
   container:
     image: gcr.io/flutter-cirrus/build-engine-image:latest
