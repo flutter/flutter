@@ -297,6 +297,9 @@ class IOSDevice extends Device {
     if (debuggingOptions.traceSkia)
       launchArguments.add('--trace-skia');
 
+    if (debuggingOptions.dumpShaderSkp)
+      launchArguments.add('--dump-shader-skp');
+
     if (platformArgs['trace-startup'] ?? false)
       launchArguments.add('--trace-startup');
 
