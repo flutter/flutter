@@ -403,13 +403,12 @@ class RenderUiKitView extends RenderBox {
     _lastPointerDownEvent = null;
   }
 
-  @override	
-  void describeSemanticsConfiguration (SemanticsConfiguration config) {	
-    super.describeSemanticsConfiguration(config);	
-    config.isSemanticBoundary = true;	
-    config.platformViewId = _viewController.id;	
-  }	
-
+  @override
+  void describeSemanticsConfiguration (SemanticsConfiguration config) {
+    super.describeSemanticsConfiguration(config);
+    config.isSemanticBoundary = true;
+    config.platformViewId = _viewController.id;
+  }
 
   @override
   void attach(PipelineOwner owner) {

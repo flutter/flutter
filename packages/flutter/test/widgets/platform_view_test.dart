@@ -1479,8 +1479,7 @@ void main() {
       final SemanticsHandle handle = tester.ensureSemantics();
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       expect(currentViewId, greaterThanOrEqualTo(0));
-      final FakeIosPlatformViewsController viewsController =
-          FakeIosPlatformViewsController();
+      final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
       viewsController.registerViewType('webview');
 
       await tester.pumpWidget(
@@ -1503,8 +1502,7 @@ void main() {
       // is not yet in the tree.
       await tester.pump();
 
-      final SemanticsNode semantics =
-          tester.getSemantics(find.byType(UiKitView));
+      final SemanticsNode semantics = tester.getSemantics(find.byType(UiKitView));
 
       expect(semantics.platformViewId, currentViewId + 1);
       expect(semantics.rect, Rect.fromLTWH(0, 0, 200, 100));
