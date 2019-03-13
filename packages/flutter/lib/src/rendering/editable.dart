@@ -255,6 +255,50 @@ class RenderEditable extends RenderBox {
 
   Rect _lastCaretRect;
 
+  /// Track whether position of the start of the selected text is within the viewport.
+  ///
+  /// For example, if the text contains "Hello World", and the user selects
+  /// "Hello", then scrolls so only "World" is visible, this will become false.
+  /// If the user scrolls back so that the "H" is visible again, this will
+  /// become true.
+  ///
+  /// This bool indicates whether the text is scrolled so that the handle is
+  /// inside the text field viewport, as opposed to whether it is actually
+  /// visible on the screen.
+  ValueListenable<bool> get selectionStartInViewport => _selectionStartInViewport;
+  final ValueNotifier<bool> _selectionStartInViewport = ValueNotifier<bool>(true);
+
+  /// Track whether position of the end of the selected text is within the viewport.
+  ///
+  /// For example, if the text contains "Hello World", and the user selects
+  /// "World", then scrolls so only "Hello" is visible, this will become
+  /// 'false'. If the user scrolls back so that the "d" is visible again, this
+  /// will become 'true'.
+  ///
+  /// This bool indicates whether the text is scrolled so that the handle is
+  /// inside the text field viewport, as opposed to whether it is actually
+  /// visible on the screen.
+  ValueListenable<bool> get selectionEndInViewport => _selectionEndInViewport;
+  final ValueNotifier<bool> _selectionEndInViewport = ValueNotifier<bool>(true);
+
+  void _updateSelectionExtentsVisibility(Offset effectiveOffset) {
+    final Rect visibleRegion = Offset.zero & size;
+
+    final Offset startOffset = _textPainter.getOffsetForCaret(
+      TextPosition(offset: _selection.start, affinity: _selection.affinity),
+      Rect.zero
+    );
+
+    _selectionStartInViewport.value = visibleRegion.contains(startOffset + effectiveOffset);
+
+    final Offset endOffset =  _textPainter.getOffsetForCaret(
+      TextPosition(offset: _selection.end, affinity: _selection.affinity),
+      Rect.zero
+    );
+
+    _selectionEndInViewport.value = visibleRegion.contains(endOffset + effectiveOffset);
+  }
+
   static const int _kLeftArrowCode = 21;
   static const int _kRightArrowCode = 22;
   static const int _kUpArrowCode = 19;
@@ -1570,6 +1614,7 @@ class RenderEditable extends RenderBox {
         showCaret = true;
       else if (!_selection.isCollapsed && _selectionColor != null)
         showSelection = true;
+      _updateSelectionExtentsVisibility(effectiveOffset);
     }
 
     if (showSelection) {

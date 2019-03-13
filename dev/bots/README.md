@@ -19,7 +19,7 @@ For tagged dev and beta builds, it also builds and deploys the gallery app to
 the app stores. It is configured by the [.cirrus.yml](/.cirrus.yml).
 
 We also have post-commit testing with actual devices, in what we call our
-[devicelab](../dev/devicelab/README.md).
+[devicelab](../devicelab/README.md).
 
 ## LUCI (Layered Universal Continuous Intergration)
 

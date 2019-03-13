@@ -26,6 +26,8 @@ class FakeAndroidPlatformViewsController {
 
   Completer<void> resizeCompleter;
 
+  Completer<void> createCompleter;
+
   void registerViewType(String viewType) {
     _registeredViewTypes.add(viewType);
   }
@@ -46,7 +48,7 @@ class FakeAndroidPlatformViewsController {
     return Future<dynamic>.sync(() => null);
   }
 
-  Future<dynamic> _create(MethodCall call) {
+  Future<dynamic> _create(MethodCall call) async {
     final Map<dynamic, dynamic> args = call.arguments;
     final int id = args['id'];
     final String viewType = args['viewType'];
@@ -66,6 +68,10 @@ class FakeAndroidPlatformViewsController {
         code: 'error',
         message: 'Trying to create a platform view of unregistered type: $viewType',
       );
+
+    if (createCompleter != null) {
+      await createCompleter.future;
+    }
 
     _views[id] = FakeAndroidPlatformView(id, viewType, Size(width, height), layoutDirection, creationParams);
     final int textureId = _textureCounter++;

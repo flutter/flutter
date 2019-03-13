@@ -82,7 +82,7 @@ void main() {
 
     await expectLater(
       find.byKey(_painterKey),
-      matchesGoldenFile('bottom_app_bar_theme.custom_shape.png'),
+      matchesGoldenFile('bottom_app_bar_theme.custom_shape.1.png'),
       skip: !Platform.isLinux,
     );
   });
