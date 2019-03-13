@@ -52,6 +52,9 @@ DEF_SWITCH(ICUSymbolPrefix,
            "icu-symbol-prefix",
            "Prefix for the symbols representing ICU data linked into the "
            "Flutter library.")
+DEF_SWITCH(ICUNativeLibPath,
+           "icu-native-lib-path",
+           "Path to the library file that exports the ICU data.")
 DEF_SWITCH(DartFlags,
            "dart-flags",
            "Flags passed directly to the Dart VM without being interpreted "

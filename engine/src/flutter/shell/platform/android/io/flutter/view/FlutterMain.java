@@ -6,6 +6,7 @@ package io.flutter.view;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.app.AlarmManager;
@@ -195,7 +196,12 @@ public class FlutterMain {
             sResourceExtractor.waitForCompletion();
 
             List<String> shellArgs = new ArrayList<>();
+
             shellArgs.add("--icu-symbol-prefix=_binary_icudtl_dat");
+            ApplicationInfo applicationInfo = applicationContext.getPackageManager().getApplicationInfo(
+                applicationContext.getPackageName(), PackageManager.GET_META_DATA);
+            shellArgs.add("--icu-native-lib-path=" + applicationInfo.nativeLibraryDir + File.separator + DEFAULT_LIBRARY);
+
             if (args != null) {
                 Collections.addAll(shellArgs, args);
             }
