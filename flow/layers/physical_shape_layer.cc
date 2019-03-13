@@ -142,6 +142,7 @@ void PhysicalShapeLayer::Paint(PaintContext& context) const {
   // Call drawPath without clip if possible for better performance.
   SkPaint paint;
   paint.setColor(color_);
+  paint.setAntiAlias(true);
   if (clip_behavior_ != Clip::antiAliasWithSaveLayer) {
     context.leaf_nodes_canvas->drawPath(path_, paint);
   }
