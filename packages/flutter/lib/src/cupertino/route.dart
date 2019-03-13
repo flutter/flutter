@@ -420,8 +420,8 @@ class CupertinoFullscreenDialogTransition extends StatelessWidget {
   }) : _positionAnimation = CurvedAnimation(
          parent: animation,
          curve: Curves.linearToEaseOut,
-         // curve must be flipped so that the reverse animation doesn't play an
-         // ease-in curve, which iOS does not use.
+         // The curve must be flipped so that the reverse animation doesn't play
+         // an ease-in curve, which iOS does not use.
          reverseCurve: Curves.linearToEaseOut.flipped,
        ).drive(_kBottomUpTween),
        super(key: key);
