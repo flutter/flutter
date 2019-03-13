@@ -662,7 +662,7 @@ class ResidentCompiler {
         }
       }
     }
-    return null;
+    return Uri.file(filename, windows: platform.isWindows).toString();
   }
 
   Future<dynamic> shutdown() async {
