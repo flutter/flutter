@@ -944,6 +944,11 @@ class _TabBarState extends State<TabBar> {
 
   @override
   Widget build(BuildContext context) {
+    final int tabControllerLength = widget.controller.length;
+    final int numTabs = widget.tabs.length;
+
+    assert(tabControllerLength == numTabs,
+      'TabController length ($tabControllerLength) and number of tabs ($numTabs) should be equal');
     assert(debugCheckHasMaterialLocalizations(context));
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     if (_controller.length == 0) {
