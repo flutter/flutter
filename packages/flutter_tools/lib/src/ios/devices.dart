@@ -297,6 +297,10 @@ class IOSDevice extends Device {
     if (debuggingOptions.traceSkia)
       launchArguments.add('--trace-skia');
 
+    if (debuggingOptions.verboseSystemLogs) {
+      launchArguments.add('--verbose-logging');
+    }
+
     if (platformArgs['trace-startup'] ?? false)
       launchArguments.add('--trace-startup');
 
