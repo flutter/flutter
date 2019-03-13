@@ -847,15 +847,11 @@ void main() {
     // Enter animation.
     await tester.pump();
     Transform transform = tester.widget(find.byType(Transform));
-    expect(transform.transform[0], closeTo(1.2, 0.01));
+    expect(transform.transform[0], closeTo(1.3, 0.01));
 
     await tester.pump(const Duration(milliseconds: 50));
     transform = tester.widget(find.byType(Transform));
-    expect(transform.transform[0], closeTo(1.182, 0.001));
-
-    await tester.pump(const Duration(milliseconds: 50));
-    transform = tester.widget(find.byType(Transform));
-    expect(transform.transform[0], closeTo(1.108, 0.001));
+    expect(transform.transform[0], closeTo(1.145, 0.001));
 
     await tester.pump(const Duration(milliseconds: 50));
     transform = tester.widget(find.byType(Transform));
@@ -863,11 +859,15 @@ void main() {
 
     await tester.pump(const Duration(milliseconds: 50));
     transform = tester.widget(find.byType(Transform));
-    expect(transform.transform[0], closeTo(1.015, 0.001));
+    expect(transform.transform[0], closeTo(1.013, 0.001));
 
     await tester.pump(const Duration(milliseconds: 50));
     transform = tester.widget(find.byType(Transform));
     expect(transform.transform[0], closeTo(1.003, 0.001));
+
+    await tester.pump(const Duration(milliseconds: 50));
+    transform = tester.widget(find.byType(Transform));
+    expect(transform.transform[0], closeTo(1.000, 0.001));
 
     await tester.pump(const Duration(milliseconds: 50));
     transform = tester.widget(find.byType(Transform));
