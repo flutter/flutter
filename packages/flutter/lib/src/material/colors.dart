@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:ui' show Color;
-
+import 'dart:math';
 import 'package:flutter/painting.dart';
 
 /// Defines a single color as well a color swatch with ten shades of the color.
@@ -1894,4 +1894,10 @@ class Colors {
     orangeAccent,
     deepOrangeAccent,
   ];
+  
+  ///Random color
+  MaterialColor get random {
+    final int randomIndex = Random().nextInt(primaries.length - 1);
+    return primaries[randomIndex];
+  }
 }
