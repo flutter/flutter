@@ -177,7 +177,7 @@ class CodeGeneratingResidentCompiler implements ResidentCompiler {
     final ResidentCompiler residentCompiler = ResidentCompiler(
       artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
       trackWidgetCreation: trackWidgetCreation,
-      packagesPath: Uri.file(fs.path.relative(PackageMap.globalGeneratedPackagesPath)).toString(),
+      packagesPath: PackageMap.globalGeneratedPackagesPath,
       fileSystemRoots: <String>[
         fs.path.join(flutterProject.generated.path, 'lib${platform.pathSeparator}'),
         fs.path.join(flutterProject.directory.path, 'lib${platform.pathSeparator}'),
