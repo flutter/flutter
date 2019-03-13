@@ -111,18 +111,35 @@ class RawKetEventDataMacOs extends RawKeyEventData {
     );
   }
 
+  bool _isLeftRightModifierPressed(KeyboardSide side, int anyMask, int leftMask, int rightMask) {
+    if (modifiers & anyMask == 0) {
+      return false;
+    }
+    switch (side) {
+      case KeyboardSide.any:
+        return true;
+      case KeyboardSide.all:
+        return modifiers & leftMask != 0 && modifiers & rightMask != 0;
+      case KeyboardSide.left:
+        return modifiers & leftMask != 0;
+      case KeyboardSide.right:
+        return modifiers & rightMask != 0;
+    }
+    return false;
+  }
+
   @override
   bool isModifierPressed(ModifierKey key, {KeyboardSide side = KeyboardSide.any}) {
     final int independentModifier = modifiers & deviceIndependentMask;
     switch (key) {
       case ModifierKey.controlModifier:
-        return independentModifier & modifierControl != 0;
+        return _isLeftRightModifierPressed(side, independentModifier & modifierControl, modifierLeftControl, modifierRightControl);
       case ModifierKey.shiftModifier:
-        return independentModifier & modifierShift != 0;
+        return _isLeftRightModifierPressed(side, independentModifier & modifierShift, modifierLeftShift, modifierRightShift);
       case ModifierKey.altModifier:
-        return independentModifier & modifierOption != 0;
+        return _isLeftRightModifierPressed(side, independentModifier & modifierOption, modifierLeftOption, modifierRightOption);
       case ModifierKey.metaModifier:
-        return independentModifier & modifierCommand != 0;
+        return _isLeftRightModifierPressed(side, independentModifier & modifierCommand, modifierLeftCommand, modifierRightCommand);
       case ModifierKey.capsLockModifier:
         return independentModifier & modifierCapsLock != 0;
       case ModifierKey.numLockModifier:
@@ -130,17 +147,51 @@ class RawKetEventDataMacOs extends RawKeyEventData {
       case ModifierKey.functionModifier:
       case ModifierKey.symbolModifier:
       case ModifierKey.scrollLockModifier:
-        // These are not included in macOS.
+        // These are not used in macOS keyboards.
         return false;
     }
     return false;
   }
 
   @override
-  KeyboardSide getModifierSide(ModifierKey key) => KeyboardSide.any;
+  KeyboardSide getModifierSide(ModifierKey key) {
+    KeyboardSide findSide(int leftMask, int rightMask) {
+      final int combinedMask = leftMask | rightMask;
+      final int combined = modifiers & combinedMask;
+      if (combined == leftMask) {
+        return KeyboardSide.left;
+      } else if (combined == rightMask) {
+        return KeyboardSide.right;
+      } else if (combined == combinedMask) {
+        return KeyboardSide.all;
+      }
+      return null;
+    }
+    
+    switch (key) {
+      case ModifierKey.controlModifier:
+        return findSide(modifierLeftControl, modifierRightControl);
+      case ModifierKey.shiftModifier:
+        return findSide(modifierLeftShift, modifierRightShift);
+      case ModifierKey.altModifier:
+        return findSide(modifierLeftOption, modifierRightOption);
+      case ModifierKey.metaModifier:
+        return findSide(modifierLeftCommand, modifierRightCommand);
+      case ModifierKey.capsLockModifier:
+      case ModifierKey.numLockModifier:
+      case ModifierKey.scrollLockModifier:
+      case ModifierKey.functionModifier:
+      case ModifierKey.symbolModifier:
+        return KeyboardSide.all;
+    }
+
+    assert(false, 'Not handling $key type properly.');
+    return null;
+  }
 
   // Modifier key masks. Apple's NSEvent documentation
   // https://developer.apple.com/documentation/appkit/nseventmodifierflags?language=objc
+  // https://opensource.apple.com/source/IOHIDFamily/IOHIDFamily-86/IOHIDSystem/IOKit/hidsystem/IOLLEvent.h.auto.html
 
   /// This mask is used to check the [modifiers] field to test whether the CAPS
   /// LOCK modifier key is on.
@@ -148,7 +199,7 @@ class RawKetEventDataMacOs extends RawKeyEventData {
   /// Use this value if you need to decode the [modifiers] field yourself, but
   /// it's much easier to use [isModifierPressed] if you just want to know if
   /// a modifier is pressed.
-  static const int modifierCapsLock = 1 << 16;
+  static const int modifierCapsLock = 0x10000;
 
   /// This mask is used to check the [modifiers] field to test whether one of the
   /// SHIFT modifier keys is pressed.
@@ -156,7 +207,23 @@ class RawKetEventDataMacOs extends RawKeyEventData {
   /// Use this value if you need to decode the [modifiers] field yourself, but
   /// it's much easier to use [isModifierPressed] if you just want to know if
   /// a modifier is pressed.
-  static const int modifierShift = 1 << 17;
+  static const int modifierShift = 0x20000;
+
+  /// This mask is used to check the [modifiers] field to test whether the left
+  /// SHIFT modifier key is pressed.
+  ///
+  /// Use this value if you need to decode the [modifiers] field yourself, but
+  /// it's much easier to use [isModifierPressed] if you just want to know if
+  /// a modifier is pressed.
+  static const int modifierLeftShift = 0x02;
+
+  /// This mask is used to check the [modifiers] field to test whether the right
+  /// SHIFT modifier key is pressed.
+  ///
+  /// Use this value if you need to decode the [modifiers] field yourself, but
+  /// it's much easier to use [isModifierPressed] if you just want to know if
+  /// a modifier is pressed.
+  static const int modifierRightShift = 0x04;
 
   /// This mask is used to check the [modifiers] field to test whether one of the
   /// CTRL modifier keys is pressed.
@@ -164,7 +231,23 @@ class RawKetEventDataMacOs extends RawKeyEventData {
   /// Use this value if you need to decode the [modifiers] field yourself, but
   /// it's much easier to use [isModifierPressed] if you just want to know if
   /// a modifier is pressed.
-  static const int modifierControl = 1 << 18;
+  static const int modifierControl = 0x40000;
+
+  /// This mask is used to check the [modifiers] field to test whether the left
+  /// CTRL modifier key is pressed.
+  ///
+  /// Use this value if you need to decode the [modifiers] field yourself, but
+  /// it's much easier to use [isModifierPressed] if you just want to know if
+  /// a modifier is pressed.
+  static const int modifierLeftControl = 0x01;
+
+  /// This mask is used to check the [modifiers] field to test whether the right
+  /// CTRL modifier key is pressed.
+  ///
+  /// Use this value if you need to decode the [modifiers] field yourself, but
+  /// it's much easier to use [isModifierPressed] if you just want to know if
+  /// a modifier is pressed.
+  static const int modifierRightControl = 0x2000;
 
   /// This mask is used to check the [modifiers] field to test whether one of the
   /// ALT modifier keys is pressed.
@@ -172,7 +255,23 @@ class RawKetEventDataMacOs extends RawKeyEventData {
   /// Use this value if you need to decode the [modifiers] field yourself, but
   /// it's much easier to use [isModifierPressed] if you just want to know if
   /// a modifier is pressed.
-  static const int modifierOption = 1 << 19;
+  static const int modifierOption = 0x80000;
+
+  /// This mask is used to check the [modifiers] field to test whether the left
+  /// ALT modifier key is pressed.
+  ///
+  /// Use this value if you need to decode the [modifiers] field yourself, but
+  /// it's much easier to use [isModifierPressed] if you just want to know if
+  /// a modifier is pressed.
+  static const int modifierLeftOption = 0x20;
+
+  /// This mask is used to check the [modifiers] field to test whether the right
+  /// ALT modifier key is pressed.
+  ///
+  /// Use this value if you need to decode the [modifiers] field yourself, but
+  /// it's much easier to use [isModifierPressed] if you just want to know if
+  /// a modifier is pressed.
+  static const int modifierRightOption = 0x40;
 
   /// This mask is used to check the [modifiers] field to test whether one of the
   /// CMD modifier keys is pressed.
@@ -180,7 +279,23 @@ class RawKetEventDataMacOs extends RawKeyEventData {
   /// Use this value if you need to decode the [modifiers] field yourself, but
   /// it's much easier to use [isModifierPressed] if you just want to know if
   /// a modifier is pressed.
-  static const int modifierCommand = 1 << 20;
+  static const int modifierCommand = 0x100000;
+
+  /// This mask is used to check the [modifiers] field to test whether the left
+  /// CMD modifier keys is pressed.
+  ///
+  /// Use this value if you need to decode the [modifiers] field yourself, but
+  /// it's much easier to use [isModifierPressed] if you just want to know if
+  /// a modifier is pressed.
+  static const int modifierLeftCommand = 0x08;
+
+  /// This mask is used to check the [modifiers] field to test whether the right
+  /// CMD modifier keys is pressed.
+  ///
+  /// Use this value if you need to decode the [modifiers] field yourself, but
+  /// it's much easier to use [isModifierPressed] if you just want to know if
+  /// a modifier is pressed.
+  static const int modifierRightCommand = 0x10;
 
   /// This mask is used to check the [modifiers] field to test whether any key in
   /// the numeric keypad is pressed.
@@ -188,7 +303,7 @@ class RawKetEventDataMacOs extends RawKeyEventData {
   /// Use this value if you need to decode the [modifiers] field yourself, but
   /// it's much easier to use [isModifierPressed] if you just want to know if
   /// a modifier is pressed.
-  static const int modifierNumericPad = 1 << 21;
+  static const int modifierNumericPad = 0x200000;
 
   /// This mask is used to check the [modifiers] field to test whether the
   /// HELP modifier key is pressed.
@@ -196,7 +311,7 @@ class RawKetEventDataMacOs extends RawKeyEventData {
   /// Use this value if you need to decode the [modifiers] field yourself, but
   /// it's much easier to use [isModifierPressed] if you just want to know if
   /// a modifier is pressed.
-  static const int modifierHelp = 1 << 22;
+  static const int modifierHelp = 0x400000;
 
   /// This mask is used to check the [modifiers] field to test whether one of the
   /// FUNCTION modifier keys is pressed.
@@ -204,7 +319,7 @@ class RawKetEventDataMacOs extends RawKeyEventData {
   /// Use this value if you need to decode the [modifiers] field yourself, but
   /// it's much easier to use [isModifierPressed] if you just want to know if
   /// a modifier is pressed.
-  static const int modifierFunction = 1 << 23;
+  static const int modifierFunction = 0x800000;
 
   /// Used to retrieve only the device-independent modifier flags, allowing
   /// applications to mask off the device-dependent modifier flags, including
