@@ -222,7 +222,7 @@ class RawKetEventDataMacOs extends RawKeyEventData {
   static const int modifierFunction = 1 << 23;
 
   /// Used to retrieve only the device-independent modifier flags, allowing
-  /// applications to mask off the device-dependent modifier flags, including 
+  /// applications to mask off the device-dependent modifier flags, including
   /// event coalescing information.
   static const int deviceIndependentMask = 0xffff0000;
 
