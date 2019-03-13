@@ -488,7 +488,7 @@ void main() {
               child: MaterialButton(
                 key: key1,
                 child: const SizedBox(width: 50.0, height: 8.0),
-                onPressed: () {},
+                onPressed: () { },
               ),
             ),
           ),
@@ -509,7 +509,7 @@ void main() {
               child: MaterialButton(
                 key: key2,
                 child: const SizedBox(width: 50.0, height: 8.0),
-                onPressed: () {},
+                onPressed: () { },
               ),
             ),
           ),
@@ -532,7 +532,7 @@ void main() {
               child: FlatButton(
                 key: key1,
                 child: const SizedBox(width: 50.0, height: 8.0),
-                onPressed: () {},
+                onPressed: () { },
               ),
             ),
           ),
@@ -553,7 +553,7 @@ void main() {
               child: FlatButton(
                 key: key2,
                 child: const SizedBox(width: 50.0, height: 8.0),
-                onPressed: () {},
+                onPressed: () { },
               ),
             ),
           ),
@@ -576,7 +576,7 @@ void main() {
               child: RaisedButton(
                 key: key1,
                 child: const SizedBox(width: 50.0, height: 8.0),
-                onPressed: () {},
+                onPressed: () { },
               ),
             ),
           ),
@@ -597,7 +597,7 @@ void main() {
               child: RaisedButton(
                 key: key2,
                 child: const SizedBox(width: 50.0, height: 8.0),
-                onPressed: () {},
+                onPressed: () { },
               ),
             ),
           ),
@@ -608,7 +608,7 @@ void main() {
     expect(tester.getSize(find.byKey(key2)), const Size(88.0, 36.0));
   });
 
-  testWidgets('RaisedButton has no clip by default', (WidgetTester tester) async{
+  testWidgets('RaisedButton has no clip by default', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
           textDirection: TextDirection.ltr,
@@ -624,5 +624,25 @@ void main() {
         tester.renderObject(find.byType(RaisedButton)),
         paintsExactlyCountTimes(#clipPath, 0),
     );
+  });
+
+  testWidgets('MaterialButton shape overrides ButtonTheme shape', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/29146
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MaterialButton(
+          onPressed: () { },
+          shape: const StadiumBorder(),
+          child: const Text('button'),
+        ),
+      ),
+    );
+
+    final Finder rawButtonMaterial = find.descendant(
+      of: find.byType(MaterialButton),
+      matching: find.byType(Material),
+    );
+    expect(tester.widget<Material>(rawButtonMaterial).shape, const StadiumBorder());
   });
 }

@@ -285,7 +285,7 @@ void main() {
     expect(await result, equals('all done'));
   });
 
-    testWidgets('Two-step initial route', (WidgetTester tester) async {
+  testWidgets('Two-step initial route', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (BuildContext context) => const Text('route "/"'),
       '/a': (BuildContext context) => const Text('route "/a"'),

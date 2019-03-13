@@ -50,53 +50,35 @@ void main() {
       const ImageConfiguration configuration = ImageConfiguration();
 
       assetImage.obtainKey(configuration)
-          .then(expectAsync1((AssetBundleImageKey bundleKey) {
-        expect(bundleKey.name, mainAssetPath);
-        expect(bundleKey.scale, 1.0);
-      }));
+        .then(expectAsync1((AssetBundleImageKey bundleKey) {
+          expect(bundleKey.name, mainAssetPath);
+          expect(bundleKey.scale, 1.0);
+        }));
     }
 
     test('When asset is main variant check scale is 1.0', () {
       _buildAndTestWithOneAsset('assets/normalFolder/normalFile.png');
     });
 
+    test('When asset path and key are the same string even though it could be took as a 3.0x variant', () async {
+      _buildAndTestWithOneAsset('assets/parentFolder/3.0x/normalFile.png');
+    });
 
-    test(
-        'When asset path and key are the same string even though it could be took as a 3.0x variant',
-            () async {
-          _buildAndTestWithOneAsset('assets/parentFolder/3.0x/normalFile.png');
-        });
+    test('When asset path contains variant identifier as part of parent folder name scale is 1.0', () {
+      _buildAndTestWithOneAsset('assets/parentFolder/__3.0x__/leafFolder/normalFile.png');
+    });
 
+    test('When asset path contains variant identifier as part of leaf folder name scale is 1.0', () {
+      _buildAndTestWithOneAsset('assets/parentFolder/__3.0x_leaf_folder_/normalFile.png');
+    });
 
-    test(
-        'When asset path contains variant identifier as part of parent folder name scale is 1.0',
-            () {
-          _buildAndTestWithOneAsset(
-              'assets/parentFolder/__3.0x__/leafFolder/normalFile.png');
-        });
+    test('When asset path contains variant identifier as part of parent folder name scale is 1.0', () {
+      _buildAndTestWithOneAsset('assets/parentFolder/__3.0x__/leafFolder/normalFile.png');
+    });
 
-
-    test(
-        'When asset path contains variant identifier as part of leaf folder name scale is 1.0',
-            () {
-          _buildAndTestWithOneAsset(
-              'assets/parentFolder/__3.0x_leaf_folder_/normalFile.png');
-        });
-
-
-    test(
-        'When asset path contains variant identifier as part of parent folder name scale is 1.0',
-            () {
-          _buildAndTestWithOneAsset(
-              'assets/parentFolder/__3.0x__/leafFolder/normalFile.png');
-        });
-
-    test(
-        'When asset path contains variant identifier in parent folder scale is 1.0',
-            () {
-          _buildAndTestWithOneAsset(
-              'assets/parentFolder/3.0x/leafFolder/normalFile.png');
-        });
+    test('When asset path contains variant identifier in parent folder scale is 1.0', () {
+      _buildAndTestWithOneAsset('assets/parentFolder/3.0x/leafFolder/normalFile.png');
+    });
   });
 
 
@@ -119,16 +101,16 @@ void main() {
 
       // we have the exact match for this scale, let's use it
       assetImage.obtainKey(const ImageConfiguration())
-          .then(expectAsync1((AssetBundleImageKey bundleKey) {
-        expect(bundleKey.name, mainAssetPath);
-        expect(bundleKey.scale, 1.0);
-      }));
+        .then(expectAsync1((AssetBundleImageKey bundleKey) {
+          expect(bundleKey.name, mainAssetPath);
+          expect(bundleKey.scale, 1.0);
+        }));
 
       // we also have the exact match for this scale, let's use it
       assetImage.obtainKey(ImageConfiguration(
-          bundle: testAssetBundle,
-          devicePixelRatio: 3.0))
-          .then(expectAsync1((AssetBundleImageKey bundleKey) {
+        bundle: testAssetBundle,
+        devicePixelRatio: 3.0,
+      )).then(expectAsync1((AssetBundleImageKey bundleKey) {
         expect(bundleKey.name, variantPath);
         expect(bundleKey.scale, 3.0);
       }));
@@ -152,15 +134,15 @@ void main() {
 
 
       assetImage.obtainKey(const ImageConfiguration())
-          .then(expectAsync1((AssetBundleImageKey bundleKey) {
-        expect(bundleKey.name, mainAssetPath);
-        expect(bundleKey.scale, 1.0);
-      }));
+        .then(expectAsync1((AssetBundleImageKey bundleKey) {
+          expect(bundleKey.name, mainAssetPath);
+          expect(bundleKey.scale, 1.0);
+        }));
 
       assetImage.obtainKey(ImageConfiguration(
-          bundle: testAssetBundle,
-          devicePixelRatio: 3.0))
-          .then(expectAsync1((AssetBundleImageKey bundleKey) {
+        bundle: testAssetBundle,
+        devicePixelRatio: 3.0)
+      ).then(expectAsync1((AssetBundleImageKey bundleKey) {
         expect(bundleKey.name, mainAssetPath);
         expect(bundleKey.scale, 1.0);
       }));
@@ -191,9 +173,9 @@ void main() {
 
       // we have 1.0 and 3.0, asking for 1.5 should give
       assetImage.obtainKey(ImageConfiguration(
-          bundle: testAssetBundle,
-          devicePixelRatio: deviceRatio))
-          .then(expectAsync1((AssetBundleImageKey bundleKey) {
+        bundle: testAssetBundle,
+        devicePixelRatio: deviceRatio)
+      ).then(expectAsync1((AssetBundleImageKey bundleKey) {
         expect(bundleKey.name, expectedAssetPath);
         expect(bundleKey.scale, chosenAssetRatio);
       }));

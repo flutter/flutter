@@ -80,6 +80,6 @@ void main() {
       expect(signed.hashCode == decimal.hashCode, false);
       expect(signed.hashCode == signedDecimal.hashCode, false);
       expect(decimal.hashCode == signedDecimal.hashCode, false);
-      });
+    });
   });
 }

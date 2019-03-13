@@ -592,7 +592,7 @@ class _RenderTheatre extends RenderBox
       );
     }
     return children;
-   }
+  }
 
   @override
   void visitChildrenForSemantics(RenderObjectVisitor visitor) {

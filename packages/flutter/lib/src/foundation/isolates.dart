@@ -8,7 +8,7 @@ import 'dart:isolate';
 
 import 'package:meta/meta.dart';
 
-import 'profile.dart';
+import 'constants.dart';
 
 /// Signature for the callback passed to [compute].
 ///
@@ -45,7 +45,9 @@ typedef ComputeCallback<Q, R> = R Function(Q message);
 /// The `debugLabel` argument can be specified to provide a name to add to the
 /// [Timeline]. This is useful when profiling an application.
 Future<R> compute<Q, R>(ComputeCallback<Q, R> callback, Q message, { String debugLabel }) async {
-  profile(() { debugLabel ??= callback.toString(); });
+  if (!kReleaseMode) {
+    debugLabel ??= callback.toString();
+  }
   final Flow flow = Flow.begin();
   Timeline.startSync('$debugLabel: start', flow: flow);
   final ReceivePort resultPort = ReceivePort();

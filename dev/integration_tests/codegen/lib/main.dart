@@ -17,7 +17,7 @@ class ExampleWidget extends StatefulWidget {
 }
 
 class _ExampleWidgetState extends State<ExampleWidget> {
-  String _message = '';
+  bool _pressed = false;
 
   @override
   Widget build(BuildContext context) {
@@ -30,14 +30,21 @@ class _ExampleWidgetState extends State<ExampleWidget> {
               child: const Text('Press Button, Get Coffee'),
               onPressed: () async {
                 setState(() {
-                 _message = generated.message;
+                 _pressed = true;
                 });
               },
             ),
-            Text(_message),
+            _pressed ? GeneratedWidget() : const SizedBox(),
           ],
         ),
       ),
     );
+  }
+}
+
+class GeneratedWidget extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Text(generated.message);
   }
 }

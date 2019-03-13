@@ -346,11 +346,12 @@ class AppDomain extends Domain {
     final Directory cwd = fs.currentDirectory;
     fs.currentDirectory = fs.directory(projectDirectory);
 
-    final FlutterDevice flutterDevice = FlutterDevice(
+    final FlutterDevice flutterDevice = await FlutterDevice.create(
       device,
       trackWidgetCreation: trackWidgetCreation,
       dillOutputPath: dillOutputPath,
       viewFilter: isolateFilter,
+      target: target,
     );
 
     ResidentRunner runner;
@@ -982,9 +983,8 @@ class _AppRunLogger extends Logger {
           'id': id.toString(),
           'progressId': progressId,
           'finished': true,
-        },
-      );
-    })..start();
+        });
+      })..start();
     return _status;
   }
 

@@ -184,7 +184,7 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
 ///
 /// {@tool sample}
 ///
-/// This example shows a 48x48 green square (placed inside a [Center] widget in
+/// This example shows a 48x48 amber square (placed inside a [Center] widget in
 /// case the parent widget has its own opinions regarding the size that the
 /// [Container] should take), with a margin so that it stays away from
 /// neighboring widgets:
@@ -193,7 +193,7 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
 /// Center(
 ///   child: Container(
 ///     margin: const EdgeInsets.all(10.0),
-///     color: const Color(0xFF00FF00),
+///     color: Colors.amber[600],
 ///     width: 48.0,
 ///     height: 48.0,
 ///   ),
@@ -206,9 +206,8 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
 /// The [constraints] are set to fit the font size plus ample headroom
 /// vertically, while expanding horizontally to fit the parent. The [padding] is
 /// used to make sure there is space between the contents and the text. The
-/// `color` makes the box teal. The [alignment] causes the [child] to be
-/// centered in the box. The [foregroundDecoration] overlays a nine-patch image
-/// onto the text. Finally, the [transform] applies a slight rotation to the
+/// [color] makes the box blue. The [alignment] causes the [child] to be
+/// centered in the box. Finally, the [transform] applies a slight rotation to the
 /// entire contraption to complete the effect.
 ///
 /// ```dart
@@ -217,15 +216,13 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
 ///     height: Theme.of(context).textTheme.display1.fontSize * 1.1 + 200.0,
 ///   ),
 ///   padding: const EdgeInsets.all(8.0),
-///   color: Colors.teal.shade700,
+///   color: Colors.blue[600],
 ///   alignment: Alignment.center,
-///   child: Text('Hello World', style: Theme.of(context).textTheme.display1.copyWith(color: Colors.white)),
-///   foregroundDecoration: BoxDecoration(
-///     image: DecorationImage(
-///       image: NetworkImage('https://www.example.com/images/frame.png'),
-///       centerSlice: Rect.fromLTRB(270.0, 180.0, 1360.0, 730.0),
-///     ),
-///   ),
+///   child: Text('Hello World',
+///     style: Theme.of(context)
+///         .textTheme
+///         .display1
+///         .copyWith(color: Colors.white)),
 ///   transform: Matrix4.rotationZ(0.1),
 /// )
 /// ```

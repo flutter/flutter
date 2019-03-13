@@ -1984,7 +1984,8 @@ class DiagnosticableNode<T extends Diagnosticable> extends DiagnosticsNode {
     return _cachedBuilder;
   }
 
-  @override DiagnosticsTreeStyle get style {
+  @override
+  DiagnosticsTreeStyle get style {
     return super.style ?? _builder.defaultDiagnosticsTreeStyle;
   }
 
@@ -2127,7 +2128,12 @@ abstract class Diagnosticable {
 
   @override
   String toString({ DiagnosticLevel minLevel = DiagnosticLevel.debug }) {
-    return toDiagnosticsNode(style: DiagnosticsTreeStyle.singleLine).toString(minLevel: minLevel);
+    String fullString;
+    assert(() {
+      fullString = toDiagnosticsNode(style: DiagnosticsTreeStyle.singleLine).toString(minLevel: minLevel);
+      return true;
+    }());
+    return fullString ?? toStringShort();
   }
 
   /// Returns a debug representation of the object that is used by debugging

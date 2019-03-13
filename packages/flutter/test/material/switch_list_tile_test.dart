@@ -63,7 +63,7 @@ void main() {
   testWidgets('SwitchListTile.adaptive delegates to', (WidgetTester tester) async {
     bool value = false;
 
-     Widget buildFrame(TargetPlatform platform) {
+    Widget buildFrame(TargetPlatform platform) {
       return MaterialApp(
         theme: ThemeData(platform: platform),
         home: StatefulBuilder(

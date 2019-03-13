@@ -305,21 +305,23 @@ void main() {
 
     testUsingContext('simulator can output `)`', () async {
       when(mockProcessManager.start(any, environment: null, workingDirectory: null))
-          .thenAnswer((Invocation invocation) {
-        final Process mockProcess = MockProcess();
-        when(mockProcess.stdout).thenAnswer((Invocation invocation) =>
-            Stream<List<int>>.fromIterable(<List<int>>['''
+        .thenAnswer((Invocation invocation) {
+          final Process mockProcess = MockProcess();
+          when(mockProcess.stdout)
+            .thenAnswer((Invocation invocation) {
+              return Stream<List<int>>.fromIterable(<List<int>>['''
 2017-09-13 15:26:57.228948-0700  localhost Runner[37195]: (Flutter) Observatory listening on http://127.0.0.1:57701/
 2017-09-13 15:26:57.228948-0700  localhost Runner[37195]: (Flutter) ))))))))))
 2017-09-13 15:26:57.228948-0700  localhost Runner[37195]: (Flutter) #0      Object.noSuchMethod (dart:core-patch/dart:core/object_patch.dart:46)'''
-                .codeUnits]));
-        when(mockProcess.stderr)
-            .thenAnswer((Invocation invocation) => const Stream<List<int>>.empty());
-        // Delay return of exitCode until after stdout stream data, since it terminates the logger.
-        when(mockProcess.exitCode)
-            .thenAnswer((Invocation invocation) => Future<int>.delayed(Duration.zero, () => 0));
-        return Future<Process>.value(mockProcess);
-      });
+                .codeUnits]);
+            });
+          when(mockProcess.stderr)
+              .thenAnswer((Invocation invocation) => const Stream<List<int>>.empty());
+          // Delay return of exitCode until after stdout stream data, since it terminates the logger.
+          when(mockProcess.exitCode)
+              .thenAnswer((Invocation invocation) => Future<int>.delayed(Duration.zero, () => 0));
+          return Future<Process>.value(mockProcess);
+        });
 
       final IOSSimulator device = IOSSimulator('123456', category: 'iOS 11.0');
       final DeviceLogReader logReader = device.getLogReader(
