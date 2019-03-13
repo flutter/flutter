@@ -1896,7 +1896,7 @@ class Colors {
   ];
   
   ///Random color
-  MaterialColor get random {
+  static MaterialColor get random {
     final int randomIndex = Random().nextInt(primaries.length - 1);
     return primaries[randomIndex];
   }
