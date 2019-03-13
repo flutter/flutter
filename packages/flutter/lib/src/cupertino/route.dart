@@ -820,6 +820,9 @@ class _CupertinoModalPopupRoute<T> extends PopupRoute<T> {
     assert(_animation == null);
     _animation = CurvedAnimation(
       parent: super.createAnimation(),
+
+      // These curves were initially measured from native iOS horizontal page
+      // route animations and seemd to be a good match here as well.
       curve: Curves.linearToEaseOut,
       reverseCurve: Curves.linearToEaseOut.flipped,
     );
@@ -883,6 +886,8 @@ Future<T> showCupertinoModalPopup<T>({
   );
 }
 
+// These values were mostly eyeballed from iOS, however they reuse the same
+// animation curve that was modelled after native page transitions.
 final Animatable<double> _dialogTween = Tween<double>(begin: 1.3, end: 1.0)
   .chain(CurveTween(curve: Curves.linearToEaseOut));
 
@@ -945,6 +950,7 @@ Future<T> showCupertinoDialog<T>({
     context: context,
     barrierDismissible: false,
     barrierColor: _kModalBarrierColor,
+    // This transition duration was eyeballed comparing with iOS
     transitionDuration: const Duration(milliseconds: 250),
     pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
       return builder(context);
