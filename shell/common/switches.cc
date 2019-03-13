@@ -123,13 +123,29 @@ static bool GetSwitchValue(const fml::CommandLine& command_line,
   return false;
 }
 
-std::unique_ptr<fml::Mapping> GetSymbolMapping(std::string symbol_prefix) {
-  fml::RefPtr<fml::NativeLibrary> proc_library =
+std::unique_ptr<fml::Mapping> GetSymbolMapping(std::string symbol_prefix,
+                                               std::string native_lib_path) {
+  const uint8_t* mapping;
+  intptr_t size;
+
+  auto lookup_symbol = [&mapping, &size, symbol_prefix](
+                           const fml::RefPtr<fml::NativeLibrary>& library) {
+    mapping = library->ResolveSymbol((symbol_prefix + "_start").c_str());
+    size = reinterpret_cast<intptr_t>(
+        library->ResolveSymbol((symbol_prefix + "_size").c_str()));
+  };
+
+  fml::RefPtr<fml::NativeLibrary> library =
       fml::NativeLibrary::CreateForCurrentProcess();
-  const uint8_t* mapping =
-      proc_library->ResolveSymbol((symbol_prefix + "_start").c_str());
-  const intptr_t size = reinterpret_cast<intptr_t>(
-      proc_library->ResolveSymbol((symbol_prefix + "_size").c_str()));
+  lookup_symbol(library);
+
+  if (!(mapping && size)) {
+    // Symbol lookup for the current process fails on some devices.  As a
+    // fallback, try doing the lookup based on the path to the Flutter library.
+    library = fml::NativeLibrary::Create(native_lib_path.c_str());
+    lookup_symbol(library);
+  }
+
   FML_CHECK(mapping && size) << "Unable to resolve symbols: " << symbol_prefix;
   return std::make_unique<fml::NonOwnedMapping>(mapping, size);
 }
@@ -228,11 +244,13 @@ blink::Settings SettingsFromCommandLine(const fml::CommandLine& command_line) {
     command_line.GetOptionValue(FlagForSwitch(Switch::ICUDataFilePath),
                                 &settings.icu_data_path);
     if (command_line.HasOption(FlagForSwitch(Switch::ICUSymbolPrefix))) {
-      std::string icu_symbol_prefix;
+      std::string icu_symbol_prefix, native_lib_path;
       command_line.GetOptionValue(FlagForSwitch(Switch::ICUSymbolPrefix),
                                   &icu_symbol_prefix);
-      settings.icu_mapper = [icu_symbol_prefix] {
-        return GetSymbolMapping(icu_symbol_prefix);
+      command_line.GetOptionValue(FlagForSwitch(Switch::ICUNativeLibPath),
+                                  &native_lib_path);
+      settings.icu_mapper = [icu_symbol_prefix, native_lib_path] {
+        return GetSymbolMapping(icu_symbol_prefix, native_lib_path);
       };
     }
   }
