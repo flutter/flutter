@@ -310,11 +310,11 @@ class RenderUiKitView extends RenderBox {
   UiKitViewController get viewController => _viewController;
   UiKitViewController _viewController;
   set viewController(UiKitViewController viewController) {
-    final bool needsSmeanticsUpdate = _viewController.id != viewController.id;
+    final bool needsSemanticsUpdate = _viewController.id != viewController.id;
     assert(viewController != null);
     _viewController = viewController;
     markNeedsPaint();
-    if (needsSmeanticsUpdate) {	
+    if (needsSemanticsUpdate) {	
       markNeedsSemanticsUpdate();	
     }
   }
