@@ -443,4 +443,81 @@ void main() {
     );
   }, skip: true); // Should only be on linux (skip: !Platform.isLinux).
                   // Disabled for now until font inconsistency is resolved.
+
+  testWidgets('Decoration thickness', (WidgetTester tester) async {
+    final TextDecoration allDecorations = TextDecoration.combine(
+      <TextDecoration>[
+        TextDecoration.underline,
+        TextDecoration.overline,
+        TextDecoration.lineThrough,
+      ]
+    );
+
+    await tester.pumpWidget(
+      Center(
+        child: RepaintBoundary(
+          child: Container(
+            width: 300.0,
+            height: 100.0,
+            decoration: const BoxDecoration(
+              color: Color(0xff00ff00),
+            ),
+            child: Text(
+              'Hello, wor!\nabcd.',
+              style: TextStyle(
+                fontSize: 25,
+                decoration: allDecorations,
+                decorationColor: Colors.blue,
+                decorationStyle: TextDecorationStyle.dashed,
+              ),
+              textDirection: TextDirection.rtl,
+            ),
+          ),
+        ),
+      ),
+    );
+    await expectLater(
+      find.byType(Container),
+      matchesGoldenFile('text_golden.Decoration.1.0.png'),
+    );
+  }, skip: !Platform.isLinux); // Coretext uses different thicknesses for decoration
+
+  testWidgets('Decoration thickness', (WidgetTester tester) async {
+    final TextDecoration allDecorations = TextDecoration.combine(
+      <TextDecoration>[
+        TextDecoration.underline,
+        TextDecoration.overline,
+        TextDecoration.lineThrough,
+      ]
+    );
+
+    await tester.pumpWidget(
+      Center(
+        child: RepaintBoundary(
+          child: Container(
+            width: 300.0,
+            height: 100.0,
+            decoration: const BoxDecoration(
+              color: Color(0xff00ff00),
+            ),
+            child: Text(
+              'Hello, wor!\nabcd.',
+              style: TextStyle(
+                fontSize: 25,
+                decoration: allDecorations,
+                decorationColor: Colors.blue,
+                decorationStyle: TextDecorationStyle.wavy,
+                decorationThickness: 4,
+              ),
+              textDirection: TextDirection.rtl,
+            ),
+          ),
+        ),
+      ),
+    );
+    await expectLater(
+      find.byType(Container),
+      matchesGoldenFile('text_golden.DecorationThickness.1.0.png'),
+    );
+  }, skip: !Platform.isLinux); // Coretext uses different thicknesses for decoration
 }
