@@ -650,7 +650,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 1000));
     await expectLater(
       find.byKey(key),
-      matchesGoldenFile('floating_action_button_test.clip.3.png'), // .clip.1.png is obsolete and can be removed
+      matchesGoldenFile('floating_action_button_test.clip.2.png'), // .clip.1.png is obsolete and can be removed
       skip: !Platform.isLinux,
     );
   });
