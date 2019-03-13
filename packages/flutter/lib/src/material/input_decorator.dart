@@ -886,8 +886,9 @@ class _RenderDecoration extends RenderBox {
     final double counterHeight = counter == null
       ? 0
       : boxToBaseline[counter] + subtextGap;
-    final _HelperError helperErrorWidget = decoration.helperError;
-    final double helperErrorHeight = helperErrorWidget.helperText == null
+    final bool helperErrorExists = helperError?.size != null
+        && helperError.size.height > 0;
+    final double helperErrorHeight = !helperErrorExists
       ? 0
       : helperError.size.height + subtextGap;
     final double bottomHeight = math.max(
@@ -976,10 +977,10 @@ class _RenderDecoration extends RenderBox {
         containerHeight + subtextGap + boxToBaseline[counter];
       subtextCounterHeight = counter.size.height + subtextGap;
     }
-    if (helperErrorWidget.helperText != null) {
+    if (helperErrorExists) {
       subtextHelperBaseline =
         containerHeight + subtextGap + boxToBaseline[helperError];
-      subtextHelperHeight = helperError.size.height + subtextGap;
+      subtextHelperHeight = helperErrorHeight;
     }
     final double subtextBaseline = math.max(
       subtextCounterBaseline,

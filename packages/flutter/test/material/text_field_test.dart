@@ -1112,6 +1112,52 @@ void main() {
     expect(editableText.size.width, unwrappedEditableTextSize.width);
   });
 
+  // Regression test for https://github.com/flutter/flutter/pull/29093
+  testWidgets('errorText empty string', (WidgetTester tester) async {
+    Widget textFormFieldBuilder(String errorText) {
+      return boilerplate(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            TextFormField(
+              key: textFieldKey,
+              maxLength: 3,
+              maxLengthEnforced: false,
+              decoration: InputDecoration(
+                counterText: '',
+                errorText: errorText,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    await tester.pumpWidget(textFormFieldBuilder(null));
+
+    RenderBox findInputBox() => tester.renderObject(find.byKey(textFieldKey));
+    final RenderBox inputBox = findInputBox();
+    final Size errorNullInputSize = inputBox.size;
+
+    // Setting errorText causes the input's height to increase to accommodate it
+    await tester.pumpWidget(textFormFieldBuilder('im errorText'));
+    expect(inputBox, findInputBox());
+    expect(inputBox.size.height, greaterThan(errorNullInputSize.height));
+    expect(inputBox.size.width, errorNullInputSize.width);
+    final Size errorInputSize = inputBox.size;
+
+    // Setting errorText to an empty string causes the input's height to
+    // increase to accommodate it, even though it's not displayed.
+    // This may or may not be ideal behavior, but it is legacy behavior and
+    // there are visual tests that rely on it (see Github issue referenced at
+    // the top of this test). A counterText of empty string does not affect
+    // input height, however.
+    await tester.pumpWidget(textFormFieldBuilder(''));
+    expect(inputBox, findInputBox());
+    expect(inputBox.size.height, errorInputSize.height);
+    expect(inputBox.size.width, errorNullInputSize.width);
+  });
+
   testWidgets('Growable TextField when content height exceeds parent', (WidgetTester tester) async {
     const double height = 200.0;
     const double padding = 24.0;
