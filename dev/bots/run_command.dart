@@ -55,7 +55,7 @@ Stream<String> runAndGetStdout(String executable, List<String> arguments, {
   await for (String line in lines) {
     yield line;
   }
-  await stderr.addStream(process.stderr);
+
   final int exitCode = await process.exitCode.timeout(timeout, onTimeout: () {
     stderr.writeln('Process timed out after $timeout');
     return expectNonZeroExit ? 0 : 1;
