@@ -409,8 +409,9 @@ class ResourceExtractor {
         }
     }
 
+    @SuppressWarnings("deprecation")
     private static String[] getSupportedAbis() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && Build.SUPPORTED_ABIS.length > 0) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             return Build.SUPPORTED_ABIS;
         } else {
             ArrayList<String> cpuAbis = new ArrayList<String>(asList(Build.CPU_ABI, Build.CPU_ABI2));
