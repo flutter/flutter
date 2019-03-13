@@ -80,8 +80,14 @@ class RawKetEventDataMacOs extends RawKeyEventData {
     if (keyLabel != null &&
         !LogicalKeyboardKey.isControlCharacter(keyLabel) &&
         charactersIgnoringModifiers.isNotEmpty) {
-      final int keyId = LogicalKeyboardKey.unicodePlane |
-        (charactersIgnoringModifiers.codeUnitAt(0) & LogicalKeyboardKey.valueMask);
+      int codeUnit = charactersIgnoringModifiers.codeUnitAt(0);
+      if (charactersIgnoringModifiers.length > 1) {
+        // Not covering length > 2 case since > 1 is already unlikely.
+        final int secondCode = charactersIgnoringModifiers.codeUnitAt(1);
+        codeUnit |= secondCode;
+      }
+
+      final int keyId = LogicalKeyboardKey.unicodePlane | (codeUnit & LogicalKeyboardKey.valueMask);
       return LogicalKeyboardKey.findKeyByKeyId(keyId) ?? LogicalKeyboardKey(
         keyId,
         keyLabel: keyLabel,
@@ -167,7 +173,7 @@ class RawKetEventDataMacOs extends RawKeyEventData {
       }
       return null;
     }
-    
+
     switch (key) {
       case ModifierKey.controlModifier:
         return findSide(modifierLeftControl, modifierRightControl);
