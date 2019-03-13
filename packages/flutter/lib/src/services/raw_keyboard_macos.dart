@@ -8,6 +8,14 @@ import 'keyboard_key.dart';
 import 'keyboard_maps.dart';
 import 'raw_keyboard.dart';
 
+/// Platform-specific key event data for macOS.
+///
+/// This object contains information about key events obtained from macOS's
+/// `NSEvent` interface.
+///
+/// See also:
+///
+///  * [RawKeyboard], which uses this interface to expose key data.
 class RawKetEventDataMacOs extends RawKeyEventData {
   /// Creates a key event data structure specific for macOS.
   ///
