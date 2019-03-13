@@ -662,6 +662,9 @@ class ResidentCompiler {
         }
       }
     }
+    if (platform.isWindows && _fileSystemRoots.length > 1) {
+      return Uri.file(filename, windows: platform.isWindows).toString();
+    }
     return null;
   }
 
