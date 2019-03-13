@@ -480,7 +480,7 @@ void main() {
       find.byType(Container),
       matchesGoldenFile('text_golden.Decoration.1.0.png'),
     );
-  });
+  }, skip: !Platform.isLinux); // Coretext uses different thicknesses for decoration
 
   testWidgets('Decoration thickness', (WidgetTester tester) async {
     final TextDecoration allDecorations = TextDecoration.combine(
@@ -519,5 +519,5 @@ void main() {
       find.byType(Container),
       matchesGoldenFile('text_golden.DecorationThickness.1.0.png'),
     );
-  });
+  }, skip: !Platform.isLinux); // Coretext uses different thicknesses for decoration
 }
