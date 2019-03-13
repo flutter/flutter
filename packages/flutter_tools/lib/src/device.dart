@@ -371,7 +371,7 @@ class DebuggingOptions {
     this.skiaDeterministicRendering = false,
     this.traceSkia = false,
     this.traceSystrace = false,
-    this.dumpShaderSkp = false,
+    this.dumpSkpOnShaderCompilation = false,
     this.useTestFonts = false,
     this.observatoryPort,
    }) : debuggingEnabled = true;
@@ -384,7 +384,7 @@ class DebuggingOptions {
       skiaDeterministicRendering = false,
       traceSkia = false,
       traceSystrace = false,
-      dumpShaderSkp = false,
+      dumpSkpOnShaderCompilation = false,
       observatoryPort = null;
 
   final bool debuggingEnabled;
@@ -395,7 +395,7 @@ class DebuggingOptions {
   final bool skiaDeterministicRendering;
   final bool traceSkia;
   final bool traceSystrace;
-  final bool dumpShaderSkp;
+  final bool dumpSkpOnShaderCompilation;
   final bool useTestFonts;
   final int observatoryPort;
 
