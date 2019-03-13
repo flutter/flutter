@@ -96,14 +96,15 @@ class UpgradeCommandRunner {
   ///
   /// Exits tool if `git stash` returns a non-zero exit code.
   Future<bool> maybeStashChanges(GitTagVersion gitTagVersion) async {
-    bool stashedChanges = true;
+    bool stashedChanges = false;
     final String stashName = 'flutter-upgrade-from-v${gitTagVersion.x}.${gitTagVersion.y}.${gitTagVersion.z}';
     try {
       final RunResult runResult = await runCheckedAsync(<String>[
         'git', 'stash', 'push', '-m', stashName
       ]);
-      if (runResult.stdout.contains('No local changes to save')) {
-        stashedChanges = false;
+      // output message will contain stashname if successful.
+      if (runResult.stdout.contains(stashName)) {
+        stashedChanges = true;
       }
     } catch (e) {
       throwToolExit('Failed to stash local changes: $e');
