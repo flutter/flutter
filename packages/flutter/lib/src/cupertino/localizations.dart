@@ -95,7 +95,7 @@ abstract class CupertinoLocalizations {
   ///
   /// - US English: Wed Sep 27
   /// - Russian: ср сент. 27
-  // Based on intl package's DateFormat.MMMEd.
+  // The global version is based on intl package's DateFormat.MMMEd.
   String datePickerMediumDate(DateTime date);
 
   /// Hour that is shown in [CupertinoDatePicker] spinner corresponding

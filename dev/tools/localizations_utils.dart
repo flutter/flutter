@@ -25,8 +25,8 @@ class LocaleInfo implements Comparable<LocaleInfo> {
   ///
   /// 'language_COUNTRY' or 'language_script' are also valid. Missing fields will be null.
   ///
-  /// When `deriveScriptCode` is true, the [scriptCode] will be tentatively derived from
-  /// the [languageCode] and [countryCode].
+  /// When `deriveScriptCode` is true, if [scriptCode] was unspecified, it will
+  /// be derived from the [languageCode] and [countryCode] if possible.
   factory LocaleInfo.fromString(String locale, { bool deriveScriptCode = false }) {
     final List<String> codes = locale.split('_'); // [language, script, country]
     assert(codes.isNotEmpty && codes.length < 4);
