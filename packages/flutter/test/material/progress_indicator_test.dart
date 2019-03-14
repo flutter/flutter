@@ -236,8 +236,7 @@ void main() {
       valueColor: AlwaysStoppedAnimation<Color>(blue),
     ));
 
-    expect(find.byType(CircularProgressIndicator),
-        paintsExactlyCountTimes(#drawArc, 1));
+    expect(find.byType(CircularProgressIndicator), paintsExactlyCountTimes(#drawArc, 1));
     expect(find.byType(CircularProgressIndicator), paints..arc(color: blue));
 
     await tester.pumpWidget(const CircularProgressIndicator(
@@ -245,10 +244,8 @@ void main() {
       valueColor: AlwaysStoppedAnimation<Color>(blue),
     ));
 
-    expect(find.byType(CircularProgressIndicator),
-        paintsExactlyCountTimes(#drawArc, 2));
-    expect(find.byType(CircularProgressIndicator),
-        paints..arc(color: green)..arc(color: blue));
+    expect(find.byType(CircularProgressIndicator), paintsExactlyCountTimes(#drawArc, 2));
+    expect(find.byType(CircularProgressIndicator), paints..arc(color: green)..arc(color: blue));
   });
 
   testWidgets('Indeterminate RefreshProgressIndicator keeps spinning until end of time (approximate)', (WidgetTester tester) async {

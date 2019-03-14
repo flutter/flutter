@@ -359,7 +359,7 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
         ..color = backgroundColor
         ..strokeWidth = strokeWidth
         ..style = PaintingStyle.stroke;
-      canvas.drawArc(Offset.zero & size, 0, _twoPi, false, backgroundPaint);
+      canvas.drawArc(Offset.zero & size, 0, _sweep, false, backgroundPaint);
     }
 
     if (value == null) // Indeterminate
