@@ -34,18 +34,20 @@ void main() {
   });
 
   testWidgets('FloatingActionButtonThemeData values are used when no FloatingActionButton properties are specified', (WidgetTester tester) async {
-    final Color backgroundColor = Color(0xBEEFBEEF);
-    final Color foregroundColor = Color(0xFACEFACE);
-    final double elevation = 7;
-    final double highlightElevation = 13;
-    final ShapeBorder shape = StadiumBorder();
+    const Color backgroundColor = Color(0xBEEFBEEF);
+    const Color foregroundColor = Color(0xFACEFACE);
+    const double elevation = 7;
+    const double disabledElevation = 1;
+    const double highlightElevation = 13;
+    const ShapeBorder shape = StadiumBorder();
 
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData.fallback().copyWith(
-        floatingActionButtonTheme: FloatingActionButtonThemeData(
+        floatingActionButtonTheme: const FloatingActionButtonThemeData(
           backgroundColor: backgroundColor,
           foregroundColor: foregroundColor,
           elevation: elevation,
+          disabledElevation: disabledElevation,
           highlightElevation: highlightElevation,
           shape: shape,
         )
@@ -61,26 +63,27 @@ void main() {
     expect(_getRawMaterialButton(tester).fillColor, backgroundColor);
     expect(_getIconTheme(tester).data.color, foregroundColor);
     expect(_getRawMaterialButton(tester).elevation, elevation);
+    expect(_getRawMaterialButton(tester).disabledElevation, disabledElevation);
     expect(_getRawMaterialButton(tester).highlightElevation, highlightElevation);
     expect(_getRawMaterialButton(tester).shape, shape);
   });
 
   testWidgets('FloatingActionButton values take priority over FloatingActionButtonThemeData values when both properties are specified', (WidgetTester tester) async {
-    final Color backgroundColor = Color(0xBEEFBEEF);
-    final Color foregroundColor = Color(0xFACEFACE);
-    final double elevation = 7;
-    final double highlightElevation = 13;
-    final ShapeBorder shape = StadiumBorder();
+    const Color backgroundColor = Color(0xBEEFBEEF);
+    const Color foregroundColor = Color(0xFACEFACE);
+    const double elevation = 7;
+    const double highlightElevation = 13;
+    const ShapeBorder shape = StadiumBorder();
 
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData.fallback().copyWith(
-          floatingActionButtonTheme: FloatingActionButtonThemeData(
-            backgroundColor: Color(0xCAFECAFE),
-            foregroundColor: Color(0xFEEDFEED),
-            elevation: 23,
-            highlightElevation: 43,
-            shape: BeveledRectangleBorder(),
-          )
+        floatingActionButtonTheme: const FloatingActionButtonThemeData(
+          backgroundColor: Color(0xCAFECAFE),
+          foregroundColor: Color(0xFEEDFEED),
+          elevation: 23,
+          highlightElevation: 43,
+          shape: BeveledRectangleBorder(),
+        ),
       ),
       home: Scaffold(
         floatingActionButton: FloatingActionButton(
@@ -118,6 +121,21 @@ void main() {
     ));
 
     expect(_getIconTheme(tester).data.color, const Color(0xFACEFACE));
+  });
+
+  testWidgets('FloatingActionButton uses a custom shape when specified in the theme', (WidgetTester tester) async {
+    const ShapeBorder customShape = BeveledRectangleBorder();
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        floatingActionButton: FloatingActionButton(
+          onPressed: () { },
+          shape: customShape,
+        ),
+      ),
+    ));
+
+    expect(_getRawMaterialButton(tester).shape, customShape);
   });
 }
 

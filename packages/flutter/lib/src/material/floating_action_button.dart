@@ -322,7 +322,7 @@ class FloatingActionButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final FloatingActionButtonThemeData floatingActionButtonTheme = theme.floatingActionButtonTheme;
+    final FloatingActionButtonThemeData floatingActionButtonTheme = FloatingActionButtonThemeData.of(context);
 
     final Color backgroundColor = this.backgroundColor
       ?? floatingActionButtonTheme.backgroundColor
@@ -334,10 +334,12 @@ class FloatingActionButton extends StatelessWidget {
     final double elevation = this.elevation
       ?? floatingActionButtonTheme.elevation
       ?? _defaultElevation;
+    final double disabledElevation = this.elevation
+        ?? floatingActionButtonTheme.elevation
+        ?? elevation;
     final double highlighElevation = this.highlightElevation
       ?? floatingActionButtonTheme.highlightElevation
       ?? _defaultHighlightElevation;
-    final double disabledElevation = this.disabledElevation ?? elevation;
     final MaterialTapTargetSize materialTapTargetSize = this.materialTapTargetSize
       ?? theme.materialTapTargetSize;
     final TextStyle textStyle = theme.accentTextTheme.button.copyWith(

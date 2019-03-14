@@ -158,9 +158,9 @@ class ThemeData extends Diagnosticable {
     PageTransitionsTheme pageTransitionsTheme,
     AppBarTheme appBarTheme,
     BottomAppBarTheme bottomAppBarTheme,
-    FloatingActionButtonThemeData floatingActionButtonTheme,
     ColorScheme colorScheme,
     DialogTheme dialogTheme,
+    FloatingActionButtonThemeData floatingActionButtonTheme,
     Typography typography,
     CupertinoThemeData cupertinoOverrideTheme,
   }) {
@@ -309,9 +309,9 @@ class ThemeData extends Diagnosticable {
       pageTransitionsTheme: pageTransitionsTheme,
       appBarTheme: appBarTheme,
       bottomAppBarTheme: bottomAppBarTheme,
-      floatingActionButtonTheme: floatingActionButtonTheme,
       colorScheme: colorScheme,
       dialogTheme: dialogTheme,
+      floatingActionButtonTheme: floatingActionButtonTheme,
       typography: typography,
       cupertinoOverrideTheme: cupertinoOverrideTheme,
     );
@@ -374,9 +374,9 @@ class ThemeData extends Diagnosticable {
     @required this.pageTransitionsTheme,
     @required this.appBarTheme,
     @required this.bottomAppBarTheme,
-    @required this.floatingActionButtonTheme,
     @required this.colorScheme,
     @required this.dialogTheme,
+    @required this.floatingActionButtonTheme,
     @required this.typography,
     @required this.cupertinoOverrideTheme,
   }) : assert(brightness != null),
@@ -424,9 +424,9 @@ class ThemeData extends Diagnosticable {
        assert(pageTransitionsTheme != null),
        assert(appBarTheme != null),
        assert(bottomAppBarTheme != null),
-       assert(floatingActionButtonTheme != null),
        assert(colorScheme != null),
        assert(dialogTheme != null),
+       assert(floatingActionButtonTheme != null),
        assert(typography != null);
 
   // Warning: make sure these properties are in the exact same order as in
@@ -655,10 +655,6 @@ class ThemeData extends Diagnosticable {
   /// A theme for customizing the shape, elevation, and color of a [BottomAppBar].
   final BottomAppBarTheme bottomAppBarTheme;
 
-  /// A theme for customizing the shape, elevation, and color of a
-  /// [FloatingActionButton].
-  final FloatingActionButtonThemeData floatingActionButtonTheme;
-
   /// A set of thirteen colors that can be used to configure the
   /// color properties of most components.
   ///
@@ -671,6 +667,10 @@ class ThemeData extends Diagnosticable {
 
   /// A theme for customizing the shape of a dialog.
   final DialogTheme dialogTheme;
+
+  /// A theme for customizing the shape, elevation, and color of a
+  /// [FloatingActionButton].
+  final FloatingActionButtonThemeData floatingActionButtonTheme;
 
   /// The color and geometry [TextTheme] values used to configure [textTheme],
   /// [primaryTextTheme], and [accentTextTheme].
@@ -736,9 +736,9 @@ class ThemeData extends Diagnosticable {
     PageTransitionsTheme pageTransitionsTheme,
     AppBarTheme appBarTheme,
     BottomAppBarTheme bottomAppBarTheme,
-    FloatingActionButtonThemeData floatingActionButtonTheme,
     ColorScheme colorScheme,
     DialogTheme dialogTheme,
+    FloatingActionButtonThemeData floatingActionButtonTheme,
     Typography typography,
     CupertinoThemeData cupertinoOverrideTheme,
   }) {
@@ -790,9 +790,9 @@ class ThemeData extends Diagnosticable {
       pageTransitionsTheme: pageTransitionsTheme ?? this.pageTransitionsTheme,
       appBarTheme: appBarTheme ?? this.appBarTheme,
       bottomAppBarTheme: bottomAppBarTheme ?? this.bottomAppBarTheme,
-      floatingActionButtonTheme: floatingActionButtonTheme ?? this.floatingActionButtonTheme,
       colorScheme: colorScheme ?? this.colorScheme,
       dialogTheme: dialogTheme ?? this.dialogTheme,
+      floatingActionButtonTheme: floatingActionButtonTheme ?? this.floatingActionButtonTheme,
       typography: typography ?? this.typography,
       cupertinoOverrideTheme: cupertinoOverrideTheme ?? this.cupertinoOverrideTheme,
     );
@@ -922,9 +922,9 @@ class ThemeData extends Diagnosticable {
       pageTransitionsTheme: t < 0.5 ? a.pageTransitionsTheme : b.pageTransitionsTheme,
       appBarTheme: AppBarTheme.lerp(a.appBarTheme, b.appBarTheme, t),
       bottomAppBarTheme: BottomAppBarTheme.lerp(a.bottomAppBarTheme, b.bottomAppBarTheme, t),
-      floatingActionButtonTheme: FloatingActionButtonThemeData.lerp(a.floatingActionButtonTheme, b.floatingActionButtonTheme, t),
       colorScheme: ColorScheme.lerp(a.colorScheme, b.colorScheme, t),
       dialogTheme: DialogTheme.lerp(a.dialogTheme, b.dialogTheme, t),
+      floatingActionButtonTheme: FloatingActionButtonThemeData.lerp(a.floatingActionButtonTheme, b.floatingActionButtonTheme, t),
       typography: Typography.lerp(a.typography, b.typography, t),
       cupertinoOverrideTheme: t < 0.5 ? a.cupertinoOverrideTheme : b.cupertinoOverrideTheme,
     );
@@ -984,9 +984,9 @@ class ThemeData extends Diagnosticable {
            (otherData.pageTransitionsTheme == pageTransitionsTheme) &&
            (otherData.appBarTheme == appBarTheme) &&
            (otherData.bottomAppBarTheme == bottomAppBarTheme) &&
-           (otherData.floatingActionButtonTheme == floatingActionButtonTheme) &&
            (otherData.colorScheme == colorScheme) &&
            (otherData.dialogTheme == dialogTheme) &&
+           (otherData.floatingActionButtonTheme == floatingActionButtonTheme) &&
            (otherData.typography == typography) &&
            (otherData.cupertinoOverrideTheme == cupertinoOverrideTheme);
   }
@@ -1046,9 +1046,9 @@ class ThemeData extends Diagnosticable {
           pageTransitionsTheme,
           appBarTheme,
           bottomAppBarTheme,
-          floatingActionButtonTheme,
           colorScheme,
           dialogTheme,
+          floatingActionButtonTheme,
           typography,
           cupertinoOverrideTheme,
         ),
@@ -1103,9 +1103,9 @@ class ThemeData extends Diagnosticable {
     properties.add(DiagnosticsProperty<PageTransitionsTheme>('pageTransitionsTheme', pageTransitionsTheme));
     properties.add(DiagnosticsProperty<AppBarTheme>('appBarTheme', appBarTheme, defaultValue: defaultData.appBarTheme));
     properties.add(DiagnosticsProperty<BottomAppBarTheme>('bottomAppBarTheme', bottomAppBarTheme, defaultValue: defaultData.bottomAppBarTheme));
-    properties.add(DiagnosticsProperty<FloatingActionButtonThemeData>('floatingActionButtonThemeData', floatingActionButtonTheme, defaultValue: defaultData.floatingActionButtonTheme));
     properties.add(DiagnosticsProperty<ColorScheme>('colorScheme', colorScheme, defaultValue: defaultData.colorScheme));
     properties.add(DiagnosticsProperty<DialogTheme>('dialogTheme', dialogTheme, defaultValue: defaultData.dialogTheme));
+    properties.add(DiagnosticsProperty<FloatingActionButtonThemeData>('floatingActionButtonThemeData', floatingActionButtonTheme, defaultValue: defaultData.floatingActionButtonTheme));
     properties.add(DiagnosticsProperty<Typography>('typography', typography, defaultValue: defaultData.typography));
     properties.add(DiagnosticsProperty<CupertinoThemeData>('cupertinoOverrideTheme', cupertinoOverrideTheme, defaultValue: defaultData.cupertinoOverrideTheme));
   }

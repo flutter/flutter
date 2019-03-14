@@ -36,6 +36,7 @@ class FloatingActionButtonThemeData extends Diagnosticable {
     this.backgroundColor,
     this.foregroundColor,
     this.elevation,
+    this.disabledElevation,
     this.highlightElevation,
     this.shape,
   });
@@ -51,6 +52,10 @@ class FloatingActionButtonThemeData extends Diagnosticable {
   /// The z-coordinate to be used for the unselected, enabled floating action
   /// buttons's elevation foreground.
   final double elevation;
+
+  /// The z-coordinate to be used for the disabled floating action buttons's
+  /// elevation foreground.
+  final double disabledElevation;
 
   /// The z-coordinate to be used for the selected, enabled floating action
   /// buttons's elevation foreground.
@@ -70,6 +75,7 @@ class FloatingActionButtonThemeData extends Diagnosticable {
     Color backgroundColor,
     Color foregroundColor,
     double elevation,
+    double disabledElevation,
     double highlightElevation,
     ShapeBorder shape,
   }) {
@@ -77,6 +83,7 @@ class FloatingActionButtonThemeData extends Diagnosticable {
       backgroundColor: backgroundColor ?? this.backgroundColor,
       foregroundColor: foregroundColor ?? this.foregroundColor,
       elevation: elevation ?? this.elevation,
+      disabledElevation: disabledElevation ?? this.disabledElevation,
       highlightElevation: highlightElevation ?? this.highlightElevation,
       shape: shape ?? this.shape,
     );
@@ -90,6 +97,7 @@ class FloatingActionButtonThemeData extends Diagnosticable {
       backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
       foregroundColor: Color.lerp(a?.foregroundColor, b?.foregroundColor, t),
       elevation: lerpDouble(a?.elevation, b?.elevation, t),
+      disabledElevation: lerpDouble(a?.disabledElevation, b?.disabledElevation, t),
       highlightElevation: lerpDouble(a?.highlightElevation, b?.highlightElevation, t),
       shape: ShapeBorder.lerp(a?.shape, b?.shape, t),
     );
@@ -101,6 +109,7 @@ class FloatingActionButtonThemeData extends Diagnosticable {
       backgroundColor,
       foregroundColor,
       elevation,
+      disabledElevation,
       highlightElevation,
       shape,
     );
@@ -108,16 +117,15 @@ class FloatingActionButtonThemeData extends Diagnosticable {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other)) {
+    if (identical(this, other))
       return true;
-    }
-    if (other.runtimeType != runtimeType) {
+    if (other.runtimeType != runtimeType)
       return false;
-    }
     final FloatingActionButtonThemeData otherData = other;
     return otherData.backgroundColor == backgroundColor
         && otherData.foregroundColor == foregroundColor
         && otherData.elevation == elevation
+        && otherData.disabledElevation == disabledElevation
         && otherData.highlightElevation == highlightElevation
         && otherData.shape == shape;
   }
@@ -130,6 +138,7 @@ class FloatingActionButtonThemeData extends Diagnosticable {
     properties.add(DiagnosticsProperty<Color>('backgroundColor', backgroundColor, defaultValue: defaultData.backgroundColor));
     properties.add(DiagnosticsProperty<Color>('foregroundColor', foregroundColor, defaultValue: defaultData.foregroundColor));
     properties.add(DiagnosticsProperty<double>('elevation', elevation, defaultValue: defaultData.elevation));
+    properties.add(DiagnosticsProperty<double>('disabledElevation', disabledElevation, defaultValue: defaultData.disabledElevation));
     properties.add(DiagnosticsProperty<double>('highlightElevation', highlightElevation, defaultValue: defaultData.highlightElevation));
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: defaultData.shape));
   }
