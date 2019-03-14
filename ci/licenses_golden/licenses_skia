@@ -1,4 +1,4 @@
-Signature: 8c7f6a7aafe929103e78df23ccf4b18d
+Signature: d9f6707a9eabeae331acff2af41e7b80
 
 UNUSED LICENSES:
 
@@ -1717,6 +1717,8 @@ FILE: ../../../third_party/skia/src/effects/SkTrimPE.h
 FILE: ../../../third_party/skia/src/effects/SkTrimPathEffect.cpp
 FILE: ../../../third_party/skia/src/gpu/GrContextThreadSafeProxyPriv.h
 FILE: ../../../third_party/skia/src/gpu/GrDDLContext.cpp
+FILE: ../../../third_party/skia/src/gpu/GrDeinstantiateProxyTracker.cpp
+FILE: ../../../third_party/skia/src/gpu/GrDeinstantiateProxyTracker.h
 FILE: ../../../third_party/skia/src/gpu/GrDriverBugWorkarounds.cpp
 FILE: ../../../third_party/skia/src/gpu/GrFPArgs.h
 FILE: ../../../third_party/skia/src/gpu/GrLegacyDirectContext.cpp
