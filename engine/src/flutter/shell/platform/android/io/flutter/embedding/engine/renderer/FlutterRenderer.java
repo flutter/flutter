@@ -233,7 +233,7 @@ public class FlutterRenderer implements TextureRegistry {
    * UI.
    *
    * A {@code RenderSurface} is responsible for carrying out behaviors that are needed by a
-   * corresponding {@link FlutterRenderer}, e.g., {@link #updateSemantics(ByteBuffer, String[])}.
+   * corresponding {@link FlutterRenderer}.
    *
    * A {@code RenderSurface} also receives callbacks for important events, e.g.,
    * {@link #onFirstFrameRendered()}.
@@ -254,12 +254,6 @@ public class FlutterRenderer implements TextureRegistry {
      * This method will cease any on-going rendering from Flutter to this {@code RenderSurface}.
      */
     void detachFromRenderer();
-
-    // TODO(mattcarroll): describe what this callback is intended to do
-    void updateCustomAccessibilityActions(ByteBuffer buffer, String[] strings);
-
-    // TODO(mattcarroll): describe what this callback is intended to do
-    void updateSemantics(ByteBuffer buffer, String[] strings);
 
     /**
      * The {@link FlutterRenderer} corresponding to this {@code RenderSurface} has painted its

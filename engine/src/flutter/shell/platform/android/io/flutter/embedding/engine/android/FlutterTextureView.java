@@ -184,16 +184,6 @@ public class FlutterTextureView extends TextureView implements FlutterRenderer.R
   }
 
   @Override
-  public void updateCustomAccessibilityActions(ByteBuffer buffer, String[] strings) {
-    // TODO(mattcarroll): refactor RenderSurface to move this method somewhere else.
-  }
-
-  @Override
-  public void updateSemantics(ByteBuffer buffer, String[] strings) {
-    // TODO(mattcarroll): refactor RenderSurface to move this method somewhere else.
-  }
-
-  @Override
   public void onFirstFrameRendered() {
     // TODO(mattcarroll): decide where this method should live and what it needs to do.
     Log.d(TAG, "onFirstFrameRendered()");

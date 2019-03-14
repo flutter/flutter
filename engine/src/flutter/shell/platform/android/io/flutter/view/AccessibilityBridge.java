@@ -32,6 +32,7 @@ import io.flutter.embedding.engine.systemchannels.AccessibilityChannel;
 import io.flutter.util.Predicate;
 
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.*;
 
 /**
@@ -48,7 +49,6 @@ import java.util.*;
  *   {@link #rootAccessibilityView} is expected to notify the {@code AccessibilityBridge} of
  *   relevant interactions: {@link #onAccessibilityHoverEvent(MotionEvent)}, {@link #reset()},
  *   {@link #updateSemantics(ByteBuffer, String[])}, and {@link #updateCustomAccessibilityActions(ByteBuffer, String[])}</li>
- *   <li>A {@link FlutterJNI} instance, corresponding to the running Flutter app.</li>
  *   <li>An {@link AccessibilityChannel} that is connected to the running Flutter app.</li>
  *   <li>Android's {@link AccessibilityManager} to query and listen for accessibility settings.</li>
  *   <li>Android's {@link ContentResolver} to listen for changes to system animation settings.</li>
@@ -60,12 +60,6 @@ import java.util.*;
  * accessibility events may be consumed by a Flutter widget, as if it were an Android
  * {@link View}. {@code AccessibilityBridge} refers to Flutter's accessible widgets as
  * "virtual views" and identifies them with "virtual view IDs".
- *
- * Most communication between the Android OS accessibility system and Flutter's accessibility
- * system is achieved via the {@link AccessibilityChannel} system channel. However, some
- * information is exchanged directly between the Android embedding and Flutter framework
- * via {@link FlutterJNI}.
- * TODO(mattcarroll): consider moving FlutterJNI calls over to AccessibilityChannel
  */
 public class AccessibilityBridge extends AccessibilityNodeProvider {
     private static final String TAG = "AccessibilityBridge";
@@ -85,10 +79,6 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     // Real Android View, which internally holds a Flutter UI.
     @NonNull
     private final View rootAccessibilityView;
-
-    // Direct interface between Flutter's Android embedding and the Flutter framework.
-    @NonNull
-    private final FlutterJNI flutterJNI;
 
     // The accessibility communication API between Flutter's Android embedding and
     // the Flutter framework.
@@ -239,6 +229,24 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
             e.getText().add(message);
             sendAccessibilityEvent(e);
         }
+
+        /**
+         * New custom accessibility actions exist in Flutter. Update our Android-side cache.
+         */
+        @Override
+        public void updateCustomAccessibilityActions(ByteBuffer buffer, String[] strings) {
+            buffer.order(ByteOrder.LITTLE_ENDIAN);
+            AccessibilityBridge.this.updateCustomAccessibilityActions(buffer, strings);
+        }
+
+        /**
+         * Flutter's semantics tree has changed. Update our Android-side cache.
+         */
+        @Override
+        public void updateSemantics(ByteBuffer buffer, String[] strings) {
+            buffer.order(ByteOrder.LITTLE_ENDIAN);
+            AccessibilityBridge.this.updateSemantics(buffer, strings);
+        }
     };
 
     // Listener that is notified when accessibility is turned on/off.
@@ -247,10 +255,10 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
         public void onAccessibilityStateChanged(boolean accessibilityEnabled) {
             if (accessibilityEnabled) {
                 accessibilityChannel.setAccessibilityMessageHandler(accessibilityMessageHandler);
-                flutterJNI.setSemanticsEnabled(true);
+                accessibilityChannel.onAndroidAccessibilityEnabled();
             } else {
                 accessibilityChannel.setAccessibilityMessageHandler(null);
-                flutterJNI.setSemanticsEnabled(false);
+                accessibilityChannel.onAndroidAccessibilityDisabled();
             }
 
             if (onAccessibilityChangeListener != null) {
@@ -295,15 +303,13 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
         }
     };
 
-    AccessibilityBridge(
+    public AccessibilityBridge(
         @NonNull View rootAccessibilityView,
-        @NonNull FlutterJNI flutterJNI,
         @NonNull AccessibilityChannel accessibilityChannel,
         @NonNull AccessibilityManager accessibilityManager,
         @NonNull ContentResolver contentResolver
     ) {
         this.rootAccessibilityView = rootAccessibilityView;
-        this.flutterJNI = flutterJNI;
         this.accessibilityChannel = accessibilityChannel;
         this.accessibilityManager = accessibilityManager;
         this.contentResolver = contentResolver;
@@ -391,10 +397,10 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     }
 
     /**
-     * Sends the current value of {@link #accessibilityFeatureFlags} to Flutter via {@link FlutterJNI}.
+     * Sends the current value of {@link #accessibilityFeatureFlags} to Flutter.
      */
     private void sendLatestAccessibilityFlagsToFlutter() {
-        flutterJNI.setAccessibilityFeatures(accessibilityFeatureFlags);
+        accessibilityChannel.setAccessibilityFeatures(accessibilityFeatureFlags);
     }
 
     private boolean shouldSetCollectionInfo(final SemanticsNode semanticsNode) {
@@ -712,8 +718,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
      * In a traditional Android app, the given view ID refers to a {@link View} within an Android
      * {@link View} hierarchy. Flutter does not have an Android {@link View} hierarchy, therefore
      * the given view ID is a {@code virtualViewId} that refers to a {@code SemanticsNode} within
-     * a Flutter app. The given arguments of this method are forwarded from Android to Flutter
-     * via {@link FlutterJNI}.
+     * a Flutter app. The given arguments of this method are forwarded from Android to Flutter.
      */
     @Override
     public boolean performAction(int virtualViewId, int accessibilityAction, @Nullable Bundle arguments) {
@@ -726,27 +731,27 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
                 // Note: TalkBack prior to Oreo doesn't use this handler and instead simulates a
                 //     click event at the center of the SemanticsNode. Other a11y services might go
                 //     through this handler though.
-                flutterJNI.dispatchSemanticsAction(virtualViewId, Action.TAP);
+                accessibilityChannel.dispatchSemanticsAction(virtualViewId, Action.TAP);
                 return true;
             }
             case AccessibilityNodeInfo.ACTION_LONG_CLICK: {
                 // Note: TalkBack doesn't use this handler and instead simulates a long click event
                 //     at the center of the SemanticsNode. Other a11y services might go through this
                 //     handler though.
-                flutterJNI.dispatchSemanticsAction(virtualViewId, Action.LONG_PRESS);
+                accessibilityChannel.dispatchSemanticsAction(virtualViewId, Action.LONG_PRESS);
                 return true;
             }
             case AccessibilityNodeInfo.ACTION_SCROLL_FORWARD: {
                 if (semanticsNode.hasAction(Action.SCROLL_UP)) {
-                    flutterJNI.dispatchSemanticsAction(virtualViewId, Action.SCROLL_UP);
+                    accessibilityChannel.dispatchSemanticsAction(virtualViewId, Action.SCROLL_UP);
                 } else if (semanticsNode.hasAction(Action.SCROLL_LEFT)) {
                     // TODO(ianh): bidi support using textDirection
-                    flutterJNI.dispatchSemanticsAction(virtualViewId, Action.SCROLL_LEFT);
+                    accessibilityChannel.dispatchSemanticsAction(virtualViewId, Action.SCROLL_LEFT);
                 } else if (semanticsNode.hasAction(Action.INCREASE)) {
                     semanticsNode.value = semanticsNode.increasedValue;
                     // Event causes Android to read out the updated value.
                     sendAccessibilityEvent(virtualViewId, AccessibilityEvent.TYPE_VIEW_SELECTED);
-                    flutterJNI.dispatchSemanticsAction(virtualViewId, Action.INCREASE);
+                    accessibilityChannel.dispatchSemanticsAction(virtualViewId, Action.INCREASE);
                 } else {
                     return false;
                 }
@@ -754,15 +759,15 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
             }
             case AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD: {
                 if (semanticsNode.hasAction(Action.SCROLL_DOWN)) {
-                    flutterJNI.dispatchSemanticsAction(virtualViewId, Action.SCROLL_DOWN);
+                    accessibilityChannel.dispatchSemanticsAction(virtualViewId, Action.SCROLL_DOWN);
                 } else if (semanticsNode.hasAction(Action.SCROLL_RIGHT)) {
                     // TODO(ianh): bidi support using textDirection
-                    flutterJNI.dispatchSemanticsAction(virtualViewId, Action.SCROLL_RIGHT);
+                    accessibilityChannel.dispatchSemanticsAction(virtualViewId, Action.SCROLL_RIGHT);
                 } else if (semanticsNode.hasAction(Action.DECREASE)) {
                     semanticsNode.value = semanticsNode.decreasedValue;
                     // Event causes Android to read out the updated value.
                     sendAccessibilityEvent(virtualViewId, AccessibilityEvent.TYPE_VIEW_SELECTED);
-                    flutterJNI.dispatchSemanticsAction(virtualViewId, Action.DECREASE);
+                    accessibilityChannel.dispatchSemanticsAction(virtualViewId, Action.DECREASE);
                 } else {
                     return false;
                 }
@@ -787,7 +792,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
                 return performCursorMoveAction(semanticsNode, virtualViewId, arguments, true);
             }
             case AccessibilityNodeInfo.ACTION_CLEAR_ACCESSIBILITY_FOCUS: {
-                flutterJNI.dispatchSemanticsAction(
+                accessibilityChannel.dispatchSemanticsAction(
                     virtualViewId,
                     Action.DID_LOSE_ACCESSIBILITY_FOCUS
                 );
@@ -799,7 +804,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
                 return true;
             }
             case AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS: {
-                flutterJNI.dispatchSemanticsAction(
+                accessibilityChannel.dispatchSemanticsAction(
                     virtualViewId,
                     Action.DID_GAIN_ACCESSIBILITY_FOCUS
                 );
@@ -824,7 +829,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
                 return true;
             }
             case ACTION_SHOW_ON_SCREEN: {
-                flutterJNI.dispatchSemanticsAction(virtualViewId, Action.SHOW_ON_SCREEN);
+                accessibilityChannel.dispatchSemanticsAction(virtualViewId, Action.SHOW_ON_SCREEN);
                 return true;
             }
             case AccessibilityNodeInfo.ACTION_SET_SELECTION: {
@@ -852,23 +857,23 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
                     selection.put("base", semanticsNode.textSelectionExtent);
                     selection.put("extent", semanticsNode.textSelectionExtent);
                 }
-                flutterJNI.dispatchSemanticsAction(virtualViewId, Action.SET_SELECTION, selection);
+                accessibilityChannel.dispatchSemanticsAction(virtualViewId, Action.SET_SELECTION, selection);
                 return true;
             }
             case AccessibilityNodeInfo.ACTION_COPY: {
-                flutterJNI.dispatchSemanticsAction(virtualViewId, Action.COPY);
+                accessibilityChannel.dispatchSemanticsAction(virtualViewId, Action.COPY);
                 return true;
             }
             case AccessibilityNodeInfo.ACTION_CUT: {
-                flutterJNI.dispatchSemanticsAction(virtualViewId, Action.CUT);
+                accessibilityChannel.dispatchSemanticsAction(virtualViewId, Action.CUT);
                 return true;
             }
             case AccessibilityNodeInfo.ACTION_PASTE: {
-                flutterJNI.dispatchSemanticsAction(virtualViewId, Action.PASTE);
+                accessibilityChannel.dispatchSemanticsAction(virtualViewId, Action.PASTE);
                 return true;
             }
             case AccessibilityNodeInfo.ACTION_DISMISS: {
-                flutterJNI.dispatchSemanticsAction(virtualViewId, Action.DISMISS);
+                accessibilityChannel.dispatchSemanticsAction(virtualViewId, Action.DISMISS);
                 return true;
             }
             default:
@@ -876,7 +881,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
                 final int flutterId = accessibilityAction - FIRST_RESOURCE_ID;
                 CustomAccessibilityAction contextAction = customAccessibilityActions.get(flutterId);
                 if (contextAction != null) {
-                    flutterJNI.dispatchSemanticsAction(
+                    accessibilityChannel.dispatchSemanticsAction(
                         virtualViewId,
                         Action.CUSTOM_ACTION,
                         contextAction.id
@@ -908,7 +913,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
         switch (granularity) {
             case AccessibilityNodeInfo.MOVEMENT_GRANULARITY_CHARACTER: {
                 if (forward && semanticsNode.hasAction(Action.MOVE_CURSOR_FORWARD_BY_CHARACTER)) {
-                    flutterJNI.dispatchSemanticsAction(
+                    accessibilityChannel.dispatchSemanticsAction(
                         virtualViewId,
                         Action.MOVE_CURSOR_FORWARD_BY_CHARACTER,
                         extendSelection
@@ -916,7 +921,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
                     return true;
                 }
                 if (!forward && semanticsNode.hasAction(Action.MOVE_CURSOR_BACKWARD_BY_CHARACTER)) {
-                    flutterJNI.dispatchSemanticsAction(
+                    accessibilityChannel.dispatchSemanticsAction(
                         virtualViewId,
                         Action.MOVE_CURSOR_BACKWARD_BY_CHARACTER,
                         extendSelection
@@ -927,7 +932,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
             }
             case AccessibilityNodeInfo.MOVEMENT_GRANULARITY_WORD:
                 if (forward && semanticsNode.hasAction(Action.MOVE_CURSOR_FORWARD_BY_WORD)) {
-                    flutterJNI.dispatchSemanticsAction(
+                    accessibilityChannel.dispatchSemanticsAction(
                         virtualViewId,
                         Action.MOVE_CURSOR_FORWARD_BY_WORD,
                         extendSelection
@@ -935,7 +940,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
                     return true;
                 }
                 if (!forward && semanticsNode.hasAction(Action.MOVE_CURSOR_BACKWARD_BY_WORD)) {
-                    flutterJNI.dispatchSemanticsAction(
+                    accessibilityChannel.dispatchSemanticsAction(
                         virtualViewId,
                         Action.MOVE_CURSOR_BACKWARD_BY_WORD,
                         extendSelection

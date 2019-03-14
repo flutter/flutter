@@ -97,6 +97,7 @@ public class FlutterJNI {
   
   private Long nativePlatformViewId;
   private FlutterRenderer.RenderSurface renderSurface;
+  private AccessibilityDelegate accessibilityDelegate;
   private PlatformMessageHandler platformMessageHandler;
   private final Set<EngineLifecycleListener> engineLifecycleListeners = new HashSet<>();
   private final Set<OnFirstFrameRenderedListener> firstFrameListeners = new HashSet<>();
@@ -106,9 +107,7 @@ public class FlutterJNI {
    *
    * Flutter expects a user interface to exist on the platform side (Android), and that interface
    * is expected to offer some capabilities that Flutter depends upon. The {@link FlutterRenderer.RenderSurface}
-   * interface represents those expectations. For example, Flutter expects to be able to request
-   * that its user interface "update custom accessibility actions" and therefore the delegate interface
-   * declares a corresponding method, {@link FlutterRenderer.RenderSurface#updateCustomAccessibilityActions(ByteBuffer, String[])}.
+   * interface represents those expectations.
    *
    * If an app includes a user interface that renders a Flutter UI then a {@link FlutterRenderer.RenderSurface}
    * should be set (this is the typical Flutter scenario). If no UI is being rendered, such as a
@@ -123,7 +122,22 @@ public class FlutterJNI {
   }
 
   /**
-   * Call invoked by native to be forwarded to an {@link io.flutter.view.AccessibilityBridge}.
+   * Sets the {@link AccessibilityDelegate} for the attached Flutter context.
+   *
+   * The {@link AccessibilityDelegate} is responsible for maintaining an Android-side cache of
+   * Flutter's semantics tree and custom accessibility actions. This cache should be hooked up
+   * to Android's accessibility system.
+   *
+   * See {@link AccessibilityBridge} for an example of an {@link AccessibilityDelegate} and the
+   * surrounding responsibilities.
+   */
+  @UiThread
+  public void setAccessibilityDelegate(@Nullable AccessibilityDelegate accessibilityDelegate) {
+    this.accessibilityDelegate = accessibilityDelegate;
+  }
+
+  /**
+   * Invoked by native to send semantics tree updates from Flutter to Android.
    *
    * The {@code buffer} and {@code strings} form a communication protocol that is implemented here:
    * https://github.com/flutter/engine/blob/master/shell/platform/android/platform_view_android.cc#L207
@@ -131,14 +145,14 @@ public class FlutterJNI {
   @SuppressWarnings("unused")
   @UiThread
   private void updateSemantics(ByteBuffer buffer, String[] strings) {
-    if (renderSurface != null) {
-      renderSurface.updateSemantics(buffer, strings);
+    if (accessibilityDelegate != null) {
+      accessibilityDelegate.updateSemantics(buffer, strings);
     }
     // TODO(mattcarroll): log dropped messages when in debug mode (https://github.com/flutter/flutter/issues/25391)
   }
 
   /**
-   * Call invoked by native to be forwarded to an {@link io.flutter.view.AccessibilityBridge}.
+   * Invoked by native to send new custom accessibility events from Flutter to Android.
    *
    * The {@code buffer} and {@code strings} form a communication protocol that is implemented here:
    * https://github.com/flutter/engine/blob/master/shell/platform/android/platform_view_android.cc#L207
@@ -148,8 +162,8 @@ public class FlutterJNI {
   @SuppressWarnings("unused")
   @UiThread
   private void updateCustomAccessibilityActions(ByteBuffer buffer, String[] strings) {
-    if (renderSurface != null) {
-      renderSurface.updateCustomAccessibilityActions(buffer, strings);
+    if (accessibilityDelegate != null) {
+      accessibilityDelegate.updateCustomAccessibilityActions(buffer, strings);
     }
     // TODO(mattcarroll): log dropped messages when in debug mode (https://github.com/flutter/flutter/issues/25391)
   }
@@ -531,5 +545,29 @@ public class FlutterJNI {
     if (nativePlatformViewId == null) {
       throw new RuntimeException("Cannot execute operation because FlutterJNI is not attached to native.");
     }
+  }
+
+  /**
+   * Delegate responsible for creating and updating Android-side caches of Flutter's semantics
+   * tree and custom accessibility actions.
+   *
+   * {@link AccessibilityBridge} is an example of an {@code AccessibilityDelegate}.
+   */
+  public interface AccessibilityDelegate {
+    /**
+     * Sends new custom accessibility actions from Flutter to Android.
+     *
+     * Implementers are expected to maintain an Android-side cache of custom accessibility actions.
+     * This method provides new actions to add to that cache.
+     */
+    void updateCustomAccessibilityActions(ByteBuffer buffer, String[] strings);
+
+    /**
+     * Sends new {@code SemanticsNode} information from Flutter to Android.
+     *
+     * Implementers are expected to maintain an Android-side cache of Flutter's semantics tree.
+     * This method provides updates from Flutter for the Android-side semantics tree cache.
+     */
+    void updateSemantics(ByteBuffer buffer, String[] strings);
   }
 }
