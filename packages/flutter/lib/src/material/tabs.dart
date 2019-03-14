@@ -778,6 +778,17 @@ class _TabBarState extends State<TabBar> {
       }
       return true;
     }());
+
+    assert(() {
+      if (newController.length != widget.tabs.length) {
+        throw FlutterError(
+          'Controller\'s length property (${newController.length}) does not match the \n'
+          'number of tab elements (${widget.tabs.length}) present in TabBar\'s tabs property.'
+        );
+      }
+      return true;
+    }());
+
     if (newController == _controller)
       return;
 
@@ -944,11 +955,6 @@ class _TabBarState extends State<TabBar> {
 
   @override
   Widget build(BuildContext context) {
-    final int tabControllerLength = widget.controller.length;
-    final int numTabs = widget.tabs.length;
-
-    assert(tabControllerLength == numTabs,
-      'TabController length ($tabControllerLength) and number of tabs ($numTabs) should be equal');
     assert(debugCheckHasMaterialLocalizations(context));
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     if (_controller.length == 0) {
@@ -1125,6 +1131,17 @@ class _TabBarViewState extends State<TabBarView> {
       }
       return true;
     }());
+
+    assert(() {
+      if (newController.length != widget.children.length) {
+        throw FlutterError(
+          'Controller\'s length property (${newController.length}) does not match the \n'
+          'number of elements (${widget.children.length}) present in TabBarView\'s children property.'
+        );
+      }
+      return true;
+    }());
+
     if (newController == _controller)
       return;
 
