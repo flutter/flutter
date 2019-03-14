@@ -207,8 +207,13 @@ abstract class CupertinoLocalizations {
 class _CupertinoLocalizationsDelegate extends LocalizationsDelegate<CupertinoLocalizations> {
   const _CupertinoLocalizationsDelegate();
 
+  const Set<String> kSupportedLanguages = <String>{
+    'en', // English
+    'fr', // French
+  };
+
   @override
-  bool isSupported(Locale locale) => <String>['en', 'fr'].contains(locale.languageCode);
+  bool isSupported(Locale locale) => kSupportedLanguages.contains(locale.languageCode);
 
   @override
   Future<CupertinoLocalizations> load(Locale locale) {
