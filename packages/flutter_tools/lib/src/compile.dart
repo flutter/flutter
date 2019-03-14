@@ -112,7 +112,16 @@ class StdoutHandler {
         }
       } else {
         assert(state == StdoutState.CollectDependencies);
-        sources.add(Uri.parse(message));
+        switch (message[0]) {
+          case '+':
+            sources.add(Uri.parse(message.substring(1)));
+            break;
+          case '-':
+            sources.remove(Uri.parse(message.substring(1)));
+            break;
+          default:
+            printTrace('Unexpected prefix for $message uri - ignoring');
+        }
       }
     }
   }
