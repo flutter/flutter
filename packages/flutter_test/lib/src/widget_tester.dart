@@ -84,17 +84,26 @@ void testWidgets(
   WidgetTesterCallback callback, {
   bool skip = false,
   test_package.Timeout timeout,
+  bool semanticsEnabled = false,
 }) {
+  print('$description $semanticsEnabled');
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
   final WidgetTester tester = WidgetTester._(binding);
   timeout ??= binding.defaultTestTimeout;
   test(
     description,
     () {
+      SemanticsHandle semanticsHandle;
+      if (semanticsEnabled == true) {
+        semanticsHandle = tester.ensureSemantics();
+      }
       tester._recordNumberOfSemanticsHandles();
       test_package.addTearDown(binding.postTest);
       return binding.runTest(
-        () => callback(tester),
+        () async {
+          await callback(tester);
+          semanticsHandle?.dispose();
+        },
         tester._endOfTestVerifications,
         description: description ?? '',
       );
