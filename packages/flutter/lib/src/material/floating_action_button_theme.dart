@@ -41,24 +41,24 @@ class FloatingActionButtonThemeData extends Diagnosticable {
     this.shape,
   });
 
-  /// Color to be used for the unselected, enabled floating action buttons's
+  /// Color to be used for the unselected, enabled [FloatingActionButton]'s
   /// background.
   final Color backgroundColor;
 
-  /// Color to be used for the unselected, enabled floating action buttons's
+  /// Color to be used for the unselected, enabled [FloatingActionButton]'s
   /// foreground.
   final Color foregroundColor;
 
-  /// The z-coordinate to be used for the unselected, enabled floating action
-  /// buttons's elevation foreground.
+  /// The z-coordinate to be used for the unselected, enabled
+  /// [FloatingActionButton]'s elevation foreground.
   final double elevation;
 
-  /// The z-coordinate to be used for the disabled floating action buttons's
+  /// The z-coordinate to be used for the disabled [FloatingActionButton]'s
   /// elevation foreground.
   final double disabledElevation;
 
-  /// The z-coordinate to be used for the selected, enabled floating action
-  /// buttons's elevation foreground.
+  /// The z-coordinate to be used for the selected, enabled
+  /// [FloatingActionButton]'s elevation foreground.
   final double highlightElevation;
 
   /// The shape to be used for the floating action button's [Material].
