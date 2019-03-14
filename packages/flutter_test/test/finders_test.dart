@@ -29,6 +29,21 @@ void main() {
     });
   });
 
+  group('semantics', () {
+    testWidgets('finds Semantically labeled widgets', (WidgetTester tester) async {
+      await tester.pumpWidget(_boilerplate(
+        Semantics(
+          label: 'Add',
+          button: true,
+          child: const FlatButton(
+            child: Text('+'),
+            onPressed: null,),
+          ),
+      ));
+      expect(find.bySemanticLabel('Add'), findsOneWidget);
+    });
+  });
+
   group('hitTestable', () {
     testWidgets('excludes non-hit-testable widgets', (WidgetTester tester) async {
       await tester.pumpWidget(

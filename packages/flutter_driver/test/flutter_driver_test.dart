@@ -158,6 +158,21 @@ void main() {
       });
     });
 
+    group('BySemanticLabel', () {
+      test('finds by Semantic label', () async {
+        when(mockIsolate.invokeExtension(any, any)).thenAnswer((Invocation i) {
+          expect(i.positionalArguments[1], <String, String>{
+            'command': 'tap',
+            'timeout': _kSerializedTestTimeout,
+            'finderType': 'BySemanticLabel',
+            'label': 'foo',
+          });
+          return makeMockResponse(<String, dynamic>{});
+        });
+        await driver.tap(find.bySemanticLabel('foo'), timeout: _kTestTimeout);
+      });
+    });
+
     group('tap', () {
       test('requires a target reference', () async {
         expect(driver.tap(null), throwsA(isInstanceOf<DriverError>()));

@@ -135,6 +135,7 @@ class FlutterDriverExtension {
     _finders.addAll(<String, FinderConstructor>{
       'ByText': (SerializableFinder finder) => _createByTextFinder(finder),
       'ByTooltipMessage': (SerializableFinder finder) => _createByTooltipMessageFinder(finder),
+      'BySemanticLabel': (SerializableFinder finder) => _createBySemanticLabelFinder(finder),
       'ByValueKey': (SerializableFinder finder) => _createByValueKeyFinder(finder),
       'ByType': (SerializableFinder finder) => _createByTypeFinder(finder),
       'PageBack': (SerializableFinder finder) => _createPageBackFinder(),
@@ -260,6 +261,15 @@ class FlutterDriverExtension {
         return widget.message == arguments.text;
       return false;
     }, description: 'widget with text tooltip "${arguments.text}"');
+  }
+
+  Finder _createBySemanticLabelFinder(BySemanticLabel arguments) {
+    return find.byElementPredicate((Element element) {
+      final Widget widget = element.widget;
+      if (widget is Semantics)
+        return widget.properties.label == arguments.label;
+      return false;
+    }, description: 'widget with semantic label "${arguments.label}"');
   }
 
   Finder _createByValueKeyFinder(ByValueKey arguments) {

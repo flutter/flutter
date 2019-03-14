@@ -272,6 +272,23 @@ class CommonFinders {
   Finder ancestor({ Finder of, Finder matching, bool matchRoot = false }) {
     return _AncestorFinder(of, matching, matchRoot: matchRoot);
   }
+
+  /// Finds [Semantics] widgets with the given label.
+  ///
+  /// ## Sample code
+  ///
+  /// ```dart
+  /// expect(find.bySemanticLabel('Back'), findsOneWidget);
+  /// ```
+  ///
+  /// If the `skipOffstage` argument is true (the default), then this skips
+  /// nodes that are [Offstage] or that are from inactive [Route]s.
+  Finder bySemanticLabel(String label, { bool skipOffstage = true }) {
+    return byWidgetPredicate(
+      (Widget widget) => widget is Semantics && widget.properties.label == label,
+      skipOffstage: skipOffstage,
+    );
+  }
 }
 
 /// Searches a widget tree and returns nodes that match a particular
