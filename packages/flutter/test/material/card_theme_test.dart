@@ -139,7 +139,7 @@ void main() {
 
     await expectLater(
       find.byKey(painterKey),
-      matchesGoldenFile('card_theme.custom_shape.1.png'),
+      matchesGoldenFile('card_theme.custom_shape.png'),
       skip: !Platform.isLinux,
     );
   });
