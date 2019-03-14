@@ -207,7 +207,7 @@ abstract class CupertinoLocalizations {
 class _CupertinoLocalizationsDelegate extends LocalizationsDelegate<CupertinoLocalizations> {
   const _CupertinoLocalizationsDelegate();
 
-  const Set<String> kSupportedLanguages = <String>{
+  static const Set<String> kSupportedLanguages = <String>{
     'en', // English
     'fr', // French
   };
