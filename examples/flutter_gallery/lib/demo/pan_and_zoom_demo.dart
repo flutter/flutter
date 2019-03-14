@@ -68,8 +68,6 @@ class _PanAndZoomDemoState extends State<PanAndZoomDemo> {
             return;
           }
           showModalBottomSheet<Widget>(context: context, builder: (BuildContext context) {
-            // TODO(justinmc): I think storing the selected board point gives
-            // you an outdated color. Duplicate info.
             return EditBoardPoint(
               boardPoint: _board.selected,
               onSetColor: (Color color) {

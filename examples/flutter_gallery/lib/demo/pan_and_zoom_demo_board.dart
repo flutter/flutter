@@ -113,20 +113,17 @@ class Board extends Object with IterableMixin<BoardPoint> {
       ((a3.x - b3.x).abs() + (a3.y - b3.y).abs() + (a3.z - b3.z).abs()) ~/ 2;
   }
 
-  // Return a q,r BoardPoint for a point in the scene, where the origin is in
+  // Return the q,r BoardPoint for a point in the scene, where the origin is in
   // the center of the board in both coordinate systems. If no BoardPoint at the
   // location, return null.
   BoardPoint pointToBoardPoint(Offset point) {
-    final BoardPoint boardPoint = BoardPoint(
-      ((sqrt(3) / 3 * point.dx - 1 / 3 * point.dy) / hexagonRadius).round(),
-      ((2 / 3 * point.dy) / hexagonRadius).round(),
+    final int q =
+      ((sqrt(3) / 3 * point.dx - 1 / 3 * point.dy) / hexagonRadius).round();
+    final int r = ((2 / 3 * point.dy) / hexagonRadius).round();
+
+    return boardPoints.firstWhere(
+      (BoardPoint boardPoint) => boardPoint.q == q && boardPoint.r == r,
     );
-
-    if (!_validateBoardPoint(boardPoint)) {
-      return null;
-    }
-
-    return boardPoint;
   }
 
   // Return a scene point for a q,r point
@@ -152,6 +149,7 @@ class Board extends Object with IterableMixin<BoardPoint> {
     );
   }
 
+  // Return a new board with the given BoardPoint selected.
   Board selectBoardPoint(BoardPoint boardPoint) {
     final Board nextBoard = Board(
       boardRadius: boardRadius,
@@ -163,6 +161,7 @@ class Board extends Object with IterableMixin<BoardPoint> {
     return nextBoard;
   }
 
+  // Return a new board where boardPoint has the given color.
   Board setBoardPointColor(BoardPoint boardPoint, Color color) {
     final BoardPoint nextBoardPoint = boardPoint.setColor(color);
     final int boardPointIndex = boardPoints.indexWhere((BoardPoint boardPointI) =>
@@ -170,11 +169,14 @@ class Board extends Object with IterableMixin<BoardPoint> {
     );
     final List<BoardPoint> nextBoardPoints = List<BoardPoint>.from(boardPoints);
     nextBoardPoints[boardPointIndex] = nextBoardPoint;
+    final BoardPoint selectedBoardPoint = boardPoint == selected
+      ? nextBoardPoint
+      : selected;
     return Board(
       boardRadius: boardRadius,
       hexagonRadius: hexagonRadius,
       hexagonMargin: hexagonMargin,
-      selected: boardPoint,
+      selected: selectedBoardPoint,
       boardPoints: nextBoardPoints,
     );
   }
