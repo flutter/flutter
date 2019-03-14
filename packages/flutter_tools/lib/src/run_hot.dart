@@ -184,8 +184,6 @@ class HotRunner extends ResidentRunner {
       printError('Error initializing DevFS: $error');
       return 3;
     }
-    // Initialize file invalidator.
-    fileInvalidator.initialize();
     final Stopwatch initialUpdateDevFSsTimer = Stopwatch()..start();
     final UpdateFSReport devfsResult = await _updateDevFS(fullRestart: true);
     _addBenchmarkData(
@@ -954,7 +952,6 @@ class ProjectFileInvalidator {
   final Map<String, int> _updateTime = <String, int>{};
   int _packagesUpdateTime;
 
-  @visibleForTesting
   Map<String, int> get updateTime => _updateTime;
 
   @visibleForTesting
@@ -991,13 +988,6 @@ class ProjectFileInvalidator {
         packageMap.remove(packageName);
       }
     }
-  }
-
-  // To initialize the file invalidator we traverse all of the source files
-  // to grab an initial timestamp. We assume that the initial dill file
-  // contains all up to date files.
-  void initialize() {
-    findInvalidated();
   }
 
   List<String> findInvalidated() {

@@ -943,9 +943,19 @@ abstract class ResidentRunner {
   }
 
   bool hasDirtyDependencies(FlutterDevice device) {
-    // When using the build system, dependency analysis is handled by build
-    // runner instead.
-    return !experimentalBuildEnabled;
+    if (device.package.packagesFile == null || !device.package.packagesFile.existsSync()) {
+      return true;
+    }
+    // Leave pubspec null to check all dependencies.
+    final ProjectFileInvalidator projectFileInvalidator = ProjectFileInvalidator(device.package.packagesFile.path, null);
+    projectFileInvalidator.findInvalidated();
+    final int lastBuildTime = device.package.packagesFile.statSync().modified.millisecondsSinceEpoch;
+    for (int updateTime in projectFileInvalidator.updateTime.values) {
+      if (updateTime > lastBuildTime) {
+        return true;
+      }
+    }
+    return false;
   }
 
   Future<void> preStop() async { }

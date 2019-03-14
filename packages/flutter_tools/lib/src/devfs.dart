@@ -477,7 +477,6 @@ class DevFS {
     if (fullRestart) {
       generator.reset();
     }
-
     printTrace('Compiling dart to kernel with ${invalidatedFiles.length} updated files');
     final CompilerOutput compilerOutput = await generator.recompile(
       mainPath,

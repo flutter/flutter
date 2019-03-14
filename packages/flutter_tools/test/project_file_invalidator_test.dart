@@ -60,7 +60,7 @@ void main() {}
     testUsingContext('No .packages, no pubspec', () async {
       // Instead of setting up multiple filesystems, passing a .packages file which does not exist.
       final ProjectFileInvalidator invalidator = ProjectFileInvalidator('.packages-wrong', null);
-      invalidator.initialize();
+      invalidator.findInvalidated();
       expect(invalidator.packageMap, isEmpty);
       expect(invalidator.updateTime, isEmpty);
     }, overrides: <Type, Generator>{
@@ -70,7 +70,7 @@ void main() {}
 
     testUsingContext('.packages only', () async {
       final ProjectFileInvalidator invalidator = ProjectFileInvalidator(packagesFile.path, null);
-      invalidator.initialize();
+      invalidator.findInvalidated();
       expect(invalidator.packageMap, <String, Uri>{
         'foo': Uri.parse('file:///foo/lib/'),
         // Excluded because it is in pub cache.
@@ -91,7 +91,7 @@ void main() {}
     testUsingContext('.packages and pubspec', () async {
       final FlutterProject flutterProject = await FlutterProject.fromDirectory(pubspecFile.parent);
       final ProjectFileInvalidator invalidator = ProjectFileInvalidator(packagesFile.path, flutterProject);
-      invalidator.initialize();
+      invalidator.findInvalidated();
       expect(invalidator.packageMap, <String, Uri>{
         'foo': Uri.parse('file:///foo/lib/'),
         // Excluded because it is in pub cache.
@@ -117,7 +117,7 @@ void main() {}
     testUsingContext('update to .packages triggers warning', () async {
       final FlutterProject flutterProject = await FlutterProject.fromDirectory(pubspecFile.parent);
       final ProjectFileInvalidator invalidator = ProjectFileInvalidator(packagesFile.path, flutterProject);
-      invalidator.initialize();
+      invalidator.findInvalidated();
       packagesFile.writeAsStringSync(r'''
 foo:file:///foo/lib/
 bar:file:///.pub-cache/bar/lib/
@@ -175,7 +175,7 @@ void main() {}
     testUsingContext('No .packages, no pubspec', () async {
       // Instead of setting up multiple filesystems, passing a .packages file which does not exist.
       final ProjectFileInvalidator invalidator = ProjectFileInvalidator('.packages-wrong', null);
-      invalidator.initialize();
+      invalidator.findInvalidated();
       expect(invalidator.packageMap, isEmpty);
       expect(invalidator.updateTime, isEmpty);
     }, overrides: <Type, Generator>{
@@ -185,7 +185,7 @@ void main() {}
 
     testUsingContext('.packages only', () async {
       final ProjectFileInvalidator invalidator = ProjectFileInvalidator(packagesFile.path, null);
-      invalidator.initialize();
+      invalidator.findInvalidated();
       expect(invalidator.packageMap, <String, Uri>{
         'foo': Uri.file(r'C:\foo\lib\', windows: true),
         // Excluded because it is in pub cache.
@@ -206,7 +206,7 @@ void main() {}
     testUsingContext('.packages and pubspec', () async {
       final FlutterProject flutterProject = await FlutterProject.fromDirectory(fs.directory(r'C:\'));
       final ProjectFileInvalidator invalidator = ProjectFileInvalidator(packagesFile.path, flutterProject);
-      invalidator.initialize();
+      invalidator.findInvalidated();
       expect(invalidator.packageMap, <String, Uri>{
         'foo': Uri.file(r'C:\foo\lib\', windows: true),
         // Excluded because it is in pub cache.
