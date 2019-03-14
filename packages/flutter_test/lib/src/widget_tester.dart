@@ -91,7 +91,6 @@ void testWidgets(
   test_package.Timeout timeout,
   bool semanticsEnabled = false,
 }) {
-  print('$description $semanticsEnabled');
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
   final WidgetTester tester = WidgetTester._(binding);
   timeout ??= binding.defaultTestTimeout;
