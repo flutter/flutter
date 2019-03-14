@@ -336,11 +336,6 @@ public class FlutterFragment extends Fragment {
       //                    to platformPlugin. We're implicitly entangling the Window, Activity, Fragment,
       //                    and engine all with this one call.
       platformPlugin.onPostResume();
-
-      // TODO(mattcarroll): consider a more abstract way to invoke this behavior. It is very strange for
-      //                    a Fragment to have a seemingly random View responsibility, but this is what
-      //                    existed in the original embedding and I don't have a good alternative yet.
-      flutterView.updateAccessibilityFeatures();
     } else {
       Log.w(TAG, "onPostResume() invoked before FlutterFragment was attached to an Activity.");
     }
