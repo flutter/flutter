@@ -254,7 +254,10 @@ class TextSelectionOverlay {
        assert(context != null),
        _value = value {
     final OverlayState overlay = Overlay.of(context);
-    assert(overlay != null);
+    assert(overlay != null,
+      'No Overlay widget exists above $context.\n'
+      'Usually the Navigator created by WidgetsApp provides the overlay. Perhaps your '
+      'app content was created above the Navigator with the WidgetsApp builder parameter.');
     _toolbarController = AnimationController(duration: fadeDuration, vsync: overlay);
   }
 
