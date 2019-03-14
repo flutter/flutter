@@ -350,7 +350,7 @@ Future<void> _buildRunnerTest(
   bool enableFlutterToolAsserts = false,
   bq.TabledataResourceApi tableData,
 }) async {
-  final List<String> args = <String>['run', 'build_runner', 'test', '--', '-rcompact', '-j1'];
+  final List<String> args = <String>['run', 'build_runner', 'test', '--', useFlutterTestFormatter ? '-rjson' : '-rcompact', '-j1'];
   if (!hasColor) {
     args.add('--no-color');
   }
