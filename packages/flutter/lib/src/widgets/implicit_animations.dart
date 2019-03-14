@@ -367,11 +367,6 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
   /// properties. Dependent properties should not be updated within
   /// [forEachTween].
   ///
-  /// ### Sample code
-  ///
-  /// A sample code implementing an `ImplicitlyAnimatedWidgetState` that
-  /// animates between colors whenever `widget.targetColor` changes.
-  ///
   /// {@tool sample}
   /// ```dart
   /// class MyWidgetState extends AnimatedWidgetBaseState<MyWidget> {
