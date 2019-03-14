@@ -113,6 +113,7 @@ class FlutterProject {
 
   /// The directory containing the generated code for this project.
   Directory get generated => directory
+    .absolute
     .childDirectory('.dart_tool')
     .childDirectory('build')
     .childDirectory('generated')
@@ -164,6 +165,12 @@ class FlutterProject {
   Future<YamlMap> get builders async {
     final YamlMap pubspec = loadYaml(await pubspecFile.readAsString());
     return pubspec['builders'];
+  }
+
+  /// Whether there are any builders used by this package.
+  Future<bool> get hasBuilders async {
+    final YamlMap result = await builders;
+    return result != null && result.isNotEmpty;
   }
 }
 
@@ -483,7 +490,7 @@ class WebProject {
       printStatusWhenWriting: false,
       overwriteExisting: true,
     );
-   }
+  }
 }
 
 /// Deletes [directory] with all content.

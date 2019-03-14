@@ -499,14 +499,15 @@ flutter:
       FileSystem filesystem,
       dynamic testMethod(),
     ) {
-      testUsingContext(description,
-              () async {
-            writeEmptySchemaFile(filesystem);
-            testMethod();
-      },
-          overrides: <Type, Generator>{
-            FileSystem: () => filesystem,
-          },
+      testUsingContext(
+        description,
+        () async {
+          writeEmptySchemaFile(filesystem);
+          testMethod();
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => filesystem,
+        },
       );
     }
 
@@ -514,16 +515,20 @@ flutter:
       assertSchemaIsReadable();
     });
 
-    testUsingContextAndFs('Validate manifest on Posix FS',
-        MemoryFileSystem(style: FileSystemStyle.posix), () {
-          assertSchemaIsReadable();
-        },
+    testUsingContextAndFs(
+      'Validate manifest on Posix FS',
+      MemoryFileSystem(style: FileSystemStyle.posix),
+      () {
+        assertSchemaIsReadable();
+      },
     );
 
-    testUsingContextAndFs('Validate manifest on Windows FS',
-        MemoryFileSystem(style: FileSystemStyle.windows), () {
-          assertSchemaIsReadable();
-        },
+    testUsingContextAndFs(
+      'Validate manifest on Windows FS',
+      MemoryFileSystem(style: FileSystemStyle.windows),
+      () {
+        assertSchemaIsReadable();
+      },
     );
 
   });

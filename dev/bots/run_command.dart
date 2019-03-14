@@ -37,6 +37,7 @@ Stream<String> runAndGetStdout(String executable, List<String> arguments, {
   int expectedExitCode,
   String failureMessage,
   Duration timeout = _kLongTimeout,
+  Function beforeExit,
 }) async* {
   final String commandDescription = '${path.relative(executable, from: workingDirectory)} ${arguments.join(' ')}';
   final String relativeWorkingDir = path.relative(workingDirectory);
@@ -49,6 +50,7 @@ Stream<String> runAndGetStdout(String executable, List<String> arguments, {
     environment: environment,
   );
 
+  stderr.addStream(process.stderr);
   final Stream<String> lines = process.stdout.transform(utf8.decoder).transform(const LineSplitter());
   await for (String line in lines) {
     yield line;
@@ -70,6 +72,7 @@ Stream<String> runAndGetStdout(String executable, List<String> arguments, {
             '${bold}Relative working directory:$red $relativeWorkingDir$reset\n'
             '$redLine'
     );
+    beforeExit?.call();
     exit(1);
   }
 }

@@ -302,9 +302,9 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// advances the clock.
   Future<void> pumpBenchmark(Duration duration) async {
     assert(() {
-        final TestWidgetsFlutterBinding widgetsBinding = binding;
-        return widgetsBinding is LiveTestWidgetsFlutterBinding &&
-               widgetsBinding.framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.benchmark;
+      final TestWidgetsFlutterBinding widgetsBinding = binding;
+      return widgetsBinding is LiveTestWidgetsFlutterBinding &&
+              widgetsBinding.framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.benchmark;
     }());
 
     dynamic caughtException;

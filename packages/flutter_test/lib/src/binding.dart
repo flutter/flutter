@@ -257,6 +257,12 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     });
   }
 
+  /// Re-attempts the initialization of the lifecycle state after providing
+  /// test values in [TestWindow.initialLifecycleStateTestValue].
+  void readTestInitialLifecycleStateFromNativeWindow() {
+    readInitialLifecycleStateFromNativeWindow();
+  }
+
   Size _surfaceSize;
 
   /// Artificially changes the surface size to `size` on the Widget binding,
@@ -1524,22 +1530,22 @@ class _MockHttpClient implements HttpClient {
   String userAgent;
 
   @override
-  void addCredentials(Uri url, String realm, HttpClientCredentials credentials) {}
+  void addCredentials(Uri url, String realm, HttpClientCredentials credentials) { }
 
   @override
-  void addProxyCredentials(String host, int port, String realm, HttpClientCredentials credentials) {}
+  void addProxyCredentials(String host, int port, String realm, HttpClientCredentials credentials) { }
 
   @override
-  set authenticate(Future<bool> Function(Uri url, String scheme, String realm) f) {}
+  set authenticate(Future<bool> Function(Uri url, String scheme, String realm) f) { }
 
   @override
-  set authenticateProxy(Future<bool> Function(String host, int port, String scheme, String realm) f) {}
+  set authenticateProxy(Future<bool> Function(String host, int port, String scheme, String realm) f) { }
 
   @override
-  set badCertificateCallback(bool Function(X509Certificate cert, String host, int port) callback) {}
+  set badCertificateCallback(bool Function(X509Certificate cert, String host, int port) callback) { }
 
   @override
-  void close({ bool force = false }) {}
+  void close({ bool force = false }) { }
 
   @override
   Future<HttpClientRequest> delete(String host, int port, String path) {
@@ -1552,7 +1558,7 @@ class _MockHttpClient implements HttpClient {
   }
 
   @override
-  set findProxy(String Function(Uri url) f) {}
+  set findProxy(String Function(Uri url) f) { }
 
   @override
   Future<HttpClientRequest> get(String host, int port, String path) {
@@ -1624,10 +1630,10 @@ class _MockHttpRequest extends HttpClientRequest {
   final HttpHeaders headers = _MockHttpHeaders();
 
   @override
-  void add(List<int> data) {}
+  void add(List<int> data) { }
 
   @override
-  void addError(Object error, [ StackTrace stackTrace ]) {}
+  void addError(Object error, [ StackTrace stackTrace ]) { }
 
   @override
   Future<void> addStream(Stream<List<int>> stream) {
@@ -1660,16 +1666,16 @@ class _MockHttpRequest extends HttpClientRequest {
   Uri get uri => null;
 
   @override
-  void write(Object obj) {}
+  void write(Object obj) { }
 
   @override
-  void writeAll(Iterable<Object> objects, [ String separator = '' ]) {}
+  void writeAll(Iterable<Object> objects, [ String separator = '' ]) { }
 
   @override
-  void writeCharCode(int charCode) {}
+  void writeCharCode(int charCode) { }
 
   @override
-  void writeln([ Object obj = '' ]) {}
+  void writeln([ Object obj = '' ]) { }
 }
 
 /// A mocked [HttpClientResponse] which is empty and has a [statusCode] of 400.
@@ -1726,25 +1732,25 @@ class _MockHttpHeaders extends HttpHeaders {
   List<String> operator [](String name) => <String>[];
 
   @override
-  void add(String name, Object value) {}
+  void add(String name, Object value) { }
 
   @override
-  void clear() {}
+  void clear() { }
 
   @override
-  void forEach(void Function(String name, List<String> values) f) {}
+  void forEach(void Function(String name, List<String> values) f) { }
 
   @override
-  void noFolding(String name) {}
+  void noFolding(String name) { }
 
   @override
-  void remove(String name, Object value) {}
+  void remove(String name, Object value) { }
 
   @override
-  void removeAll(String name) {}
+  void removeAll(String name) { }
 
   @override
-  void set(String name, Object value) {}
+  void set(String name, Object value) { }
 
   @override
   String value(String name) => null;

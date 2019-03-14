@@ -15,6 +15,7 @@ import '../base/process_manager.dart';
 import '../base/terminal.dart';
 import '../dart/package_map.dart';
 import '../globals.dart';
+import '../project.dart';
 import 'flutter_platform.dart' as loader;
 import 'watcher.dart';
 
@@ -34,6 +35,7 @@ Future<int> runTests(
   bool updateGoldens = false,
   TestWatcher watcher,
   @required int concurrency,
+  FlutterProject flutterProject,
 }) async {
   // Compute the command-line arguments for package:test.
   final List<String> testArgs = <String>[];
@@ -80,6 +82,7 @@ Future<int> runTests(
     trackWidgetCreation: trackWidgetCreation,
     updateGoldens: updateGoldens,
     projectRootDirectory: fs.currentDirectory.uri,
+    flutterProject: flutterProject,
   );
 
   // Make the global packages path absolute.

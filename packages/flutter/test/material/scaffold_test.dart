@@ -630,7 +630,7 @@ void main() {
       await tester.pumpWidget(buildFrame(extendBody: false, resizeToAvoidBottomInset: true, viewInsetBottom: 100.0));
       expect(tester.getSize(find.byKey(bodyKey)), const Size(800.0, 500.0));
       expect(mediaQueryBottom, 0.0);
-   });
+    });
   });
 
   testWidgets('Open drawer hides underlying semantics tree', (WidgetTester tester) async {
@@ -915,7 +915,7 @@ void main() {
             floatingActionButton: FloatingActionButton(
               key: key,
               child: _GeometryListener(),
-              onPressed: () {},
+              onPressed: () { },
             ),
       )));
 
@@ -962,7 +962,7 @@ void main() {
             floatingActionButton: FloatingActionButton(
               key: key,
               child: _GeometryListener(),
-              onPressed: () {},
+              onPressed: () { },
             ),
       )));
 
@@ -1030,7 +1030,7 @@ void main() {
             floatingActionButton: FloatingActionButton(
               key: key,
               child: _GeometryListener(),
-              onPressed: () {},
+              onPressed: () { },
             ),
       )));
 

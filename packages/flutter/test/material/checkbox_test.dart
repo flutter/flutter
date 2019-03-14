@@ -27,7 +27,7 @@ void main() {
             child: Center(
               child: Checkbox(
                 value: true,
-                onChanged: (bool newValue) {},
+                onChanged: (bool newValue) { },
               ),
             ),
           ),
@@ -46,7 +46,7 @@ void main() {
             child: Center(
               child: Checkbox(
                 value: true,
-                onChanged: (bool newValue) {},
+                onChanged: (bool newValue) { },
               ),
             ),
           ),
@@ -192,7 +192,7 @@ void main() {
         child: Checkbox(
           tristate: true,
           value: null,
-          onChanged: (bool newValue) {},
+          onChanged: (bool newValue) { },
         ),
       ),
     );
@@ -211,7 +211,7 @@ void main() {
         child: Checkbox(
           tristate: true,
           value: true,
-          onChanged: (bool newValue) {},
+          onChanged: (bool newValue) { },
         ),
       ),
     );
@@ -231,7 +231,7 @@ void main() {
         child: Checkbox(
           tristate: true,
           value: false,
-          onChanged: (bool newValue) {},
+          onChanged: (bool newValue) { },
         ),
       ),
     );
