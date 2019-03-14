@@ -301,7 +301,7 @@ class SemanticsData extends Diagnosticable {
   ///
   /// If this value is non-null, the SemanticsNode must not have any children
   /// as those would be replaced by the semantics nodes of the referenced
-  /// platform view.
+  /// platform view, and other semantic configurations are ignored.
   ///
   /// See also:
   ///
@@ -1688,7 +1688,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   ///
   /// If this value is non-null, the SemanticsNode must not have any children
   /// as those would be replaced by the semantics nodes of the referenced
-  /// platform view.
+  /// platform view, and other semantic configurations are ignored.
   ///
   /// See also:
   ///
@@ -3148,7 +3148,7 @@ class SemanticsConfiguration {
   /// The id of the platform view, whose semantics nodes will be added as
   /// children to this node.
   ///
-  /// When it is set, all the other semantic configurations for this node will be ignored.
+  /// When it is set, all other semantic configurations for this node will be ignored.
   int get platformViewId => _platformViewId;
   int _platformViewId;
   set platformViewId(int value) {
