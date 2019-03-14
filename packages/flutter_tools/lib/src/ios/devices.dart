@@ -300,6 +300,10 @@ class IOSDevice extends Device {
     if (debuggingOptions.dumpSkpOnShaderCompilation)
       launchArguments.add('--dump-skp-on-shader-compilation');
 
+    if (debuggingOptions.verboseSystemLogs) {
+      launchArguments.add('--verbose-logging');
+    }
+
     if (platformArgs['trace-startup'] ?? false)
       launchArguments.add('--trace-startup');
 

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -73,15 +71,15 @@ void main() {
     await pump(FloatingActionButtonLocation.endDocked);
     await expectLater(
       find.byKey(key),
-      matchesGoldenFile('bottom_app_bar.custom_shape.1.1.png'),
+      matchesGoldenFile('bottom_app_bar.custom_shape.1.png'),
     );
     await pump(FloatingActionButtonLocation.centerDocked);
     await tester.pumpAndSettle();
     await expectLater(
       find.byKey(key),
-      matchesGoldenFile('bottom_app_bar.custom_shape.2.1.png'),
+      matchesGoldenFile('bottom_app_bar.custom_shape.2.png'),
     );
-  }, skip: !Platform.isLinux);
+  });
 
   testWidgets('color defaults to Theme.bottomAppBarColor', (WidgetTester tester) async {
     await tester.pumpWidget(
