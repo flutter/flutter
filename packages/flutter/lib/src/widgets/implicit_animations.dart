@@ -367,6 +367,11 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
   /// properties. Dependent properties should not be updated within
   /// [forEachTween].
   ///
+  /// ### Sample code
+  ///
+  /// A sample code implementing an `ImplicitlyAnimatedWidgetState` that
+  /// animates between colors whenever `widget.targetColor` changes.
+  ///
   /// {@tool sample}
   /// ```dart
   /// class MyWidgetState extends AnimatedWidgetBaseState<MyWidget> {
@@ -376,17 +381,26 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
   ///   Widget build(BuildContext context) {
   ///     return Text(
   ///       'Hello World',
+  ///       // Computes the value of the text color at any given time.
   ///       style: TextStyle(color: _colorTween.evaluate(animation)),
   ///     );
   ///   }
   ///
   ///   @override
   ///   void forEachTween(TweenVisitor<dynamic> visitor) {
+  ///     // Update the tween using the provided visitor function.
   ///     _colorTween = visitor(
+  ///       // The latest tween value. Can be `null`.
   ///       _colorTween,
+  ///       // The color value toward which we are animating.
   ///       widget.targetColor,
+  ///       // A function that takes a color value and returns a tween
+  ///       // beginning at that value.
   ///       (value) => ColorTween(begin: value),
   ///     );
+  ///
+  ///     // We could have more tweens than one by using the visitor
+  ///     // multiple times.
   ///   }
   /// }
   /// ```
