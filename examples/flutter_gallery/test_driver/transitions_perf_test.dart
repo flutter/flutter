@@ -201,6 +201,10 @@ void main([List<String> args = const <String>[]]) {
 
     test('all demos', () async {
 
+      // Let it fully start to ensure that we only measure the kProfiledDemos
+      // See https://github.com/flutter/flutter/pull/20400 for a similar change.
+      await Future<void>.delayed(const Duration(seconds: 2));
+
       // Collect timeline data for just a limited set of demos to avoid OOMs.
       final Timeline timeline = await driver.traceAction(
         () async {
