@@ -134,6 +134,8 @@ static void PersistentCacheStore(fml::RefPtr<fml::TaskRunner> worker,
 
 // |GrContextOptions::PersistentCache|
 void PersistentCache::store(const SkData& key, const SkData& data) {
+  stored_new_shaders_ = true;
+
   if (is_read_only_) {
     return;
   }
@@ -155,6 +157,24 @@ void PersistentCache::store(const SkData& key, const SkData& data) {
     return;
   }
 
+  PersistentCacheStore(GetWorkerTaskRunner(), cache_directory_,
+                       std::move(file_name), std::move(mapping));
+}
+
+void PersistentCache::DumpSkp(const SkData& data) {
+  if (is_read_only_ || !IsValid()) {
+    FML_LOG(ERROR) << "Could not dump SKP from read-only or invalid persistent "
+                      "cache.";
+    return;
+  }
+
+  std::stringstream name_stream;
+  auto ticks = fml::TimePoint::Now().ToEpochDelta().ToNanoseconds();
+  name_stream << "shader_dump_" << std::to_string(ticks) << ".skp";
+  std::string file_name = name_stream.str();
+  FML_LOG(ERROR) << "Dumping " << file_name;
+  auto mapping = std::make_unique<fml::DataMapping>(
+      std::vector<uint8_t>{data.bytes(), data.bytes() + data.size()});
   PersistentCacheStore(GetWorkerTaskRunner(), cache_directory_,
                        std::move(file_name), std::move(mapping));
 }
