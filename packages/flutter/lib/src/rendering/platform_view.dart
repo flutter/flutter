@@ -314,8 +314,8 @@ class RenderUiKitView extends RenderBox {
     assert(viewController != null);
     _viewController = viewController;
     markNeedsPaint();
-    if (needsSemanticsUpdate) {	
-      markNeedsSemanticsUpdate();	
+    if (needsSemanticsUpdate) {
+      markNeedsSemanticsUpdate();
     }
   }
 
