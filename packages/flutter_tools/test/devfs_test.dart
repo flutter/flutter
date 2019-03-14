@@ -129,7 +129,7 @@ void main() {
         'writeFile test lib/foo.txt.dill',
       ]);
       expect(devFS.assetPathsToEvict, isEmpty);
-      expect(report.syncedBytes, 0);
+      expect(report.syncedBytes, 22);
       expect(report.success, true);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
