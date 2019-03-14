@@ -14,10 +14,8 @@ class ColorPicker extends StatelessWidget {
   @override
   Widget build (BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
-        border: Border.all(width: 1.0, color: Colors.black),
-      ),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: colors.map((Color color) => ColorPickerSwatch(
           color: color,
           selected: color == selectedColor,
@@ -46,24 +44,36 @@ class ColorPickerSwatch extends StatelessWidget {
 
   @override
   Widget build (BuildContext context) {
-    return InkWell(
-      onTap: () {
-        if (onTap == null) {
-          return;
-        }
-        onTap();
-      },
+    const BorderSide borderSide = BorderSide(width: 2.0, color: Color(0xFF000000));
+    return Container(
       child: Container(
         width: 60,
         height: 60,
+        padding: const EdgeInsets.fromLTRB(2, 0, 2, 0),
         child: Stack(
           children: <Widget>[
             Container(
-              color: color,
+              decoration: BoxDecoration(
+                border: Border.all(width: 2.0, color: const Color(0xff000000)),
+              ),
+              child: Material(
+                color: color,
+                child: InkWell(
+                  onTap: () {
+                    if (onTap == null) {
+                      return;
+                    }
+                    onTap();
+                  },
+                ),
+              ),
             ),
             Align(
               alignment: Alignment.bottomRight,
-              child: !selected ? null : const Icon(Icons.check),
+              child: !selected ? null : const Icon(
+                Icons.check,
+                color: Colors.white,
+              ),
             ),
           ],
         ),

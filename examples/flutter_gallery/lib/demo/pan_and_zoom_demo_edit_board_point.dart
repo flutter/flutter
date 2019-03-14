@@ -16,7 +16,7 @@ class EditBoardPoint extends StatelessWidget {
   Widget build (BuildContext context) {
     return Container(
       width: double.infinity,
-      height: 200,
+      height: 150,
       padding: const EdgeInsets.all(12.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
