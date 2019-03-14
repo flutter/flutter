@@ -109,8 +109,13 @@ DEF_SWITCH(TraceStartup,
 DEF_SWITCH(TraceSkia,
            "trace-skia",
            "Trace Skia calls. This is useful when debugging the GPU threed."
-           "By default, Skia tracing is not enable to reduce the number of "
+           "By default, Skia tracing is not enabled to reduce the number of "
            "traced events")
+DEF_SWITCH(DumpSkpOnShaderCompilation,
+           "dump-skp-on-shader-compilation",
+           "Automatically dump the skp that triggers new shader compilations. "
+           "This is useful for writing custom ShaderWarmUp to reduce jank. "
+           "By default, this is not enabled to reduce the overhead. ")
 DEF_SWITCH(
     TraceSystrace,
     "trace-systrace",
