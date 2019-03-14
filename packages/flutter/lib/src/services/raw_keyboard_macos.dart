@@ -21,15 +21,15 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
   ///
   /// The [characters], [charactersIgnoringModifiers], and [modifiers], arguments
   /// must not be null.
-  const RawKeyEventDataMacOs(
-      {this.characters = '',
-      this.charactersIgnoringModifiers = '',
-      this.keyCode = 0,
-      this.modifiers = 0})
-      : assert(characters != null),
-        assert(charactersIgnoringModifiers != null),
-        assert(keyCode != null),
-        assert(modifiers != null);
+  const RawKeyEventDataMacOs({
+    this.characters = '',
+    this.charactersIgnoringModifiers = '',
+    this.keyCode = 0,
+    this.modifiers = 0,
+  }) : assert(characters != null),
+       assert(charactersIgnoringModifiers != null),
+       assert(keyCode != null),
+       assert(modifiers != null);
 
   /// The Unicode characters associated with a key-up or key-down event.
   ///
@@ -84,7 +84,7 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
       if (charactersIgnoringModifiers.length == 2) {
         // Not covering length > 2 case since > 1 is already unlikely.
         final int secondCode = charactersIgnoringModifiers.codeUnitAt(1);
-        codeUnit |= secondCode;
+        codeUnit = (codeUnit << 16) | secondCode;
       }
 
       final int keyId = LogicalKeyboardKey.unicodePlane | (codeUnit & LogicalKeyboardKey.valueMask);
