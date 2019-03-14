@@ -674,7 +674,8 @@ FlutterEngineResult FlutterEngineOnVsync(FlutterEngine engine,
 // the timeline is unavailable or disabled, this has no effect. Must be
 // balanced with an duration end event (via
 // |FlutterEngineTraceEventDurationEnd|) with the same name on the same thread.
-// Can be called on any thread.
+// Can be called on any thread. Strings passed into the function will NOT be
+// copied when added to the timeline. Only string literals may be passed in.
 FLUTTER_EXPORT
 void FlutterEngineTraceEventDurationBegin(const char* name);
 
@@ -682,13 +683,16 @@ void FlutterEngineTraceEventDurationBegin(const char* name);
 // timeline is unavailable or disabled, this has no effect. This call must be
 // preceded by a trace duration begin call (via
 // |FlutterEngineTraceEventDurationBegin|) with the same name on the same
-// thread. Can be called on any thread.
+// thread. Can be called on any thread. Strings passed into the function will
+// NOT be copied when added to the timeline. Only string literals may be passed
+// in.
 FLUTTER_EXPORT
 void FlutterEngineTraceEventDurationEnd(const char* name);
 
 // A profiling utility. Logs a trace duration instant event to the timeline. If
 // the timeline is unavailable or disabled, this has no effect. Can be called
-// on any thread.
+// on any thread. Strings passed into the function will NOT be copied when added
+// to the timeline. Only string literals may be passed in.
 FLUTTER_EXPORT
 void FlutterEngineTraceEventInstant(const char* name);
 

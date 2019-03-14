@@ -6,7 +6,27 @@
 
 #include <algorithm>
 
+#include "flutter/fml/build_config.h"
 #include "flutter/fml/logging.h"
+
+#if OS_MACOSX && !defined(NDEBUG)
+
+#include <malloc/malloc.h>
+
+#define DCHECK_LITERAL(x)                                \
+  ({                                                     \
+    do {                                                 \
+      FML_DCHECK(malloc_size((x)) == 0)                  \
+          << "Timeline string must not be on the heap."; \
+    } while (0);                                         \
+    ((x));                                               \
+  })
+
+#else  // OS_MACOSX
+
+#define DCHECK_LITERAL(x) ((x))
+
+#endif  // OS_MACOSX
 
 namespace fml {
 namespace tracing {
@@ -23,11 +43,15 @@ void TraceTimelineEvent(TraceArg category_group,
   c_values.resize(argument_count, nullptr);
 
   for (size_t i = 0; i < argument_count; i++) {
+#if !defined(NDEBUG)
+    DCHECK_LITERAL(c_names[i]);
+#endif  // !defined(NDEBUG)
+
     c_values[i] = values[i].c_str();
   }
 
   Dart_TimelineEvent(
-      name,                                      // label
+      DCHECK_LITERAL(name),                      // label
       Dart_TimelineGetMicros(),                  // timestamp0
       identifier,                                // timestamp1_or_async_id
       type,                                      // event type
@@ -38,7 +62,7 @@ void TraceTimelineEvent(TraceArg category_group,
 }
 
 void TraceEvent0(TraceArg category_group, TraceArg name) {
-  Dart_TimelineEvent(name,                       // label
+  Dart_TimelineEvent(DCHECK_LITERAL(name),       // label
                      Dart_TimelineGetMicros(),   // timestamp0
                      0,                          // timestamp1_or_async_id
                      Dart_Timeline_Event_Begin,  // event type
@@ -52,9 +76,9 @@ void TraceEvent1(TraceArg category_group,
                  TraceArg name,
                  TraceArg arg1_name,
                  TraceArg arg1_val) {
-  const char* arg_names[] = {arg1_name};
+  const char* arg_names[] = {DCHECK_LITERAL(arg1_name)};
   const char* arg_values[] = {arg1_val};
-  Dart_TimelineEvent(name,                       // label
+  Dart_TimelineEvent(DCHECK_LITERAL(name),       // label
                      Dart_TimelineGetMicros(),   // timestamp0
                      0,                          // timestamp1_or_async_id
                      Dart_Timeline_Event_Begin,  // event type
@@ -70,9 +94,10 @@ void TraceEvent2(TraceArg category_group,
                  TraceArg arg1_val,
                  TraceArg arg2_name,
                  TraceArg arg2_val) {
-  const char* arg_names[] = {arg1_name, arg2_name};
+  const char* arg_names[] = {DCHECK_LITERAL(arg1_name),
+                             DCHECK_LITERAL(arg2_name)};
   const char* arg_values[] = {arg1_val, arg2_val};
-  Dart_TimelineEvent(name,                       // label
+  Dart_TimelineEvent(DCHECK_LITERAL(name),       // label
                      Dart_TimelineGetMicros(),   // timestamp0
                      0,                          // timestamp1_or_async_id
                      Dart_Timeline_Event_Begin,  // event type
@@ -83,7 +108,7 @@ void TraceEvent2(TraceArg category_group,
 }
 
 void TraceEventEnd(TraceArg name) {
-  Dart_TimelineEvent(name,                      // label
+  Dart_TimelineEvent(DCHECK_LITERAL(name),      // label
                      Dart_TimelineGetMicros(),  // timestamp0
                      0,                         // timestamp1_or_async_id
                      Dart_Timeline_Event_End,   // event type
@@ -96,7 +121,7 @@ void TraceEventEnd(TraceArg name) {
 void TraceEventAsyncBegin0(TraceArg category_group,
                            TraceArg name,
                            TraceIDArg id) {
-  Dart_TimelineEvent(name,                             // label
+  Dart_TimelineEvent(DCHECK_LITERAL(name),             // label
                      Dart_TimelineGetMicros(),         // timestamp0
                      id,                               // timestamp1_or_async_id
                      Dart_Timeline_Event_Async_Begin,  // event type
@@ -109,7 +134,7 @@ void TraceEventAsyncBegin0(TraceArg category_group,
 void TraceEventAsyncEnd0(TraceArg category_group,
                          TraceArg name,
                          TraceIDArg id) {
-  Dart_TimelineEvent(name,                           // label
+  Dart_TimelineEvent(DCHECK_LITERAL(name),           // label
                      Dart_TimelineGetMicros(),       // timestamp0
                      id,                             // timestamp1_or_async_id
                      Dart_Timeline_Event_Async_End,  // event type
@@ -124,9 +149,9 @@ void TraceEventAsyncBegin1(TraceArg category_group,
                            TraceIDArg id,
                            TraceArg arg1_name,
                            TraceArg arg1_val) {
-  const char* arg_names[] = {arg1_name};
+  const char* arg_names[] = {DCHECK_LITERAL(arg1_name)};
   const char* arg_values[] = {arg1_val};
-  Dart_TimelineEvent(name,                             // label
+  Dart_TimelineEvent(DCHECK_LITERAL(name),             // label
                      Dart_TimelineGetMicros(),         // timestamp0
                      id,                               // timestamp1_or_async_id
                      Dart_Timeline_Event_Async_Begin,  // event type
@@ -141,9 +166,9 @@ void TraceEventAsyncEnd1(TraceArg category_group,
                          TraceIDArg id,
                          TraceArg arg1_name,
                          TraceArg arg1_val) {
-  const char* arg_names[] = {arg1_name};
+  const char* arg_names[] = {DCHECK_LITERAL(arg1_name)};
   const char* arg_values[] = {arg1_val};
-  Dart_TimelineEvent(name,                           // label
+  Dart_TimelineEvent(DCHECK_LITERAL(name),           // label
                      Dart_TimelineGetMicros(),       // timestamp0
                      id,                             // timestamp1_or_async_id
                      Dart_Timeline_Event_Async_End,  // event type
@@ -154,7 +179,7 @@ void TraceEventAsyncEnd1(TraceArg category_group,
 }
 
 void TraceEventInstant0(TraceArg category_group, TraceArg name) {
-  Dart_TimelineEvent(name,                         // label
+  Dart_TimelineEvent(DCHECK_LITERAL(name),         // label
                      Dart_TimelineGetMicros(),     // timestamp0
                      0,                            // timestamp1_or_async_id
                      Dart_Timeline_Event_Instant,  // event type
@@ -167,7 +192,7 @@ void TraceEventInstant0(TraceArg category_group, TraceArg name) {
 void TraceEventFlowBegin0(TraceArg category_group,
                           TraceArg name,
                           TraceIDArg id) {
-  Dart_TimelineEvent(name,                            // label
+  Dart_TimelineEvent(DCHECK_LITERAL(name),            // label
                      Dart_TimelineGetMicros(),        // timestamp0
                      id,                              // timestamp1_or_async_id
                      Dart_Timeline_Event_Flow_Begin,  // event type
@@ -180,7 +205,7 @@ void TraceEventFlowBegin0(TraceArg category_group,
 void TraceEventFlowStep0(TraceArg category_group,
                          TraceArg name,
                          TraceIDArg id) {
-  Dart_TimelineEvent(name,                           // label
+  Dart_TimelineEvent(DCHECK_LITERAL(name),           // label
                      Dart_TimelineGetMicros(),       // timestamp0
                      id,                             // timestamp1_or_async_id
                      Dart_Timeline_Event_Flow_Step,  // event type
@@ -191,7 +216,7 @@ void TraceEventFlowStep0(TraceArg category_group,
 }
 
 void TraceEventFlowEnd0(TraceArg category_group, TraceArg name, TraceIDArg id) {
-  Dart_TimelineEvent(name,                          // label
+  Dart_TimelineEvent(DCHECK_LITERAL(name),          // label
                      Dart_TimelineGetMicros(),      // timestamp0
                      id,                            // timestamp1_or_async_id
                      Dart_Timeline_Event_Flow_End,  // event type
