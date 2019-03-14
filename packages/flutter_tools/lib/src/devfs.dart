@@ -494,6 +494,7 @@ class DevFS {
           : pathToReload,
         );
         final DevFSFileContent content = DevFSFileContent(fs.file(compiledBinary));
+        syncedBytes += content.size;
         dirtyEntries[entryUri] = content;
       }
     }

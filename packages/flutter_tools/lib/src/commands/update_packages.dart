@@ -1036,8 +1036,7 @@ class PubspecDependency extends PubspecLine {
       // We're a git: dependency. Return false so we'll be forgotten.
       return false;
     } else {
-      // We're an empty target.
-      return false;
+      throw 'Could not parse additional details for dependency $name; line was: "$line"';
     }
     _lockIsOverride = lockIsOverride;
     _lockLine = line;

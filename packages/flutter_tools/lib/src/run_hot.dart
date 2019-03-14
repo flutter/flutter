@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:json_rpc_2/error_code.dart' as rpc_error_code;
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:meta/meta.dart';
+import 'package:yaml/yaml.dart';
 
 import 'base/common.dart';
 import 'base/context.dart';
@@ -16,7 +17,6 @@ import 'base/platform.dart';
 import 'base/terminal.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
-import 'commands/update_packages.dart';
 import 'compile.dart';
 import 'convert.dart';
 import 'dart/package_map.dart';
@@ -960,14 +960,9 @@ class ProjectFileInvalidator {
   static void _computePackageMap(Map<String, Uri> packageMap, FlutterProject flutterProject) {
     if (flutterProject != null && flutterProject.pubspecFile.existsSync()) {
       try {
-        final PubspecYaml pubspec = PubspecYaml(flutterProject.directory);
-        final Set<String> relevantDependencies = <String>{};
-        for (PubspecDependency dependency in pubspec.allDependencies) {
-          if (dependency.isDevDependency) {
-            continue;
-          }
-          relevantDependencies.add(dependency.name);
-        }
+        final YamlMap pubspec = loadYamlDocument(flutterProject.pubspecFile.readAsStringSync()).contents;
+        final YamlMap dependencies = pubspec['dependencies'];
+        final Set<String> relevantDependencies = Set<String>.from(dependencies.keys);
         // Remove any packages which were tagged as dev dependenices,
         // But don't remove the app itself!
         for (String packageName in packageMap.keys.toList()) {
