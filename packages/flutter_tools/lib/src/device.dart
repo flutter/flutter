@@ -372,6 +372,7 @@ class DebuggingOptions {
     this.traceSkia = false,
     this.traceSystrace = false,
     this.useTestFonts = false,
+    this.verboseSystemLogs = false,
     this.observatoryPort,
    }) : debuggingEnabled = true;
 
@@ -383,6 +384,7 @@ class DebuggingOptions {
       skiaDeterministicRendering = false,
       traceSkia = false,
       traceSystrace = false,
+      verboseSystemLogs = false,
       observatoryPort = null;
 
   final bool debuggingEnabled;
@@ -394,6 +396,7 @@ class DebuggingOptions {
   final bool traceSkia;
   final bool traceSystrace;
   final bool useTestFonts;
+  final bool verboseSystemLogs;
   final int observatoryPort;
 
   bool get hasObservatoryPort => observatoryPort != null;
