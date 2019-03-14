@@ -3147,6 +3147,8 @@ class SemanticsConfiguration {
 
   /// The id of the platform view, whose semantics nodes will be added as
   /// children to this node.
+  ///
+  /// When it is set, all the other semantic configurations for this node will be ignored.
   int get platformViewId => _platformViewId;
   int _platformViewId;
   set platformViewId(int value) {
