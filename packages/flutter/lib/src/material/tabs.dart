@@ -1185,17 +1185,15 @@ class _TabBarViewState extends State<TabBarView> {
       return _pageController.animateToPage(_currentIndex, duration: kTabScrollDuration, curve: Curves.ease);
 
     assert((_currentIndex - previousIndex).abs() > 1);
-    int initialPage;
+    final int initialPage = _currentIndex > previousIndex
+        ? _currentIndex - 1
+        : _currentIndex + 1;
     setState(() {
       _warpUnderwayCount += 1;
       _children = List<Widget>.from(widget.children, growable: false);
-      if (_currentIndex > previousIndex) {
-        _children[_currentIndex - 1] = _children[previousIndex];
-        initialPage = _currentIndex - 1;
-      } else {
-        _children[_currentIndex + 1] = _children[previousIndex];
-        initialPage = _currentIndex + 1;
-      }
+      final Widget temp = _children[initialPage];
+      _children[initialPage] = _children[previousIndex];
+      _children[previousIndex] = temp;
     });
 
     _pageController.jumpToPage(initialPage);
