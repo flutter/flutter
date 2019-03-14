@@ -265,7 +265,7 @@ abstract class RawKeyEvent {
         );
         break;
       case 'macos':
-        data = RawKetEventDataMacOs(
+        data = RawKeyEventDataMacOs(
             characters: message['characters'] ?? '',
             charactersIgnoringModifiers:
                 message['charactersIgnoringModifiers'] ?? '',

@@ -264,4 +264,133 @@ void main() {
       expect(data.keyLabel, isNull);
     });
   });
+    group('RawKeyEventDataMacOs', () {
+    const Map<int, _ModifierCheck> modifierTests = <int, _ModifierCheck>{
+      RawKeyEventDataMacOs.modifierOption | RawKeyEventDataMacOs.modifierLeftOption: _ModifierCheck(ModifierKey.altModifier, KeyboardSide.left),
+      RawKeyEventDataMacOs.modifierOption | RawKeyEventDataMacOs.modifierRightOption: _ModifierCheck(ModifierKey.altModifier, KeyboardSide.right),
+      RawKeyEventDataMacOs.modifierShift | RawKeyEventDataMacOs.modifierLeftShift: _ModifierCheck(ModifierKey.shiftModifier, KeyboardSide.left),
+      RawKeyEventDataMacOs.modifierShift | RawKeyEventDataMacOs.modifierRightShift: _ModifierCheck(ModifierKey.shiftModifier, KeyboardSide.right),
+      RawKeyEventDataMacOs.modifierFunction: _ModifierCheck(ModifierKey.functionModifier, KeyboardSide.all),
+      RawKeyEventDataMacOs.modifierControl | RawKeyEventDataMacOs.modifierLeftControl: _ModifierCheck(ModifierKey.controlModifier, KeyboardSide.left),
+      RawKeyEventDataMacOs.modifierControl | RawKeyEventDataMacOs.modifierRightControl: _ModifierCheck(ModifierKey.controlModifier, KeyboardSide.right),
+      RawKeyEventDataMacOs.modifierCommand | RawKeyEventDataMacOs.modifierLeftCommand: _ModifierCheck(ModifierKey.metaModifier, KeyboardSide.left),
+      RawKeyEventDataMacOs.modifierCommand | RawKeyEventDataMacOs.modifierRightCommand: _ModifierCheck(ModifierKey.metaModifier, KeyboardSide.right),
+      RawKeyEventDataMacOs.modifierCapsLock: _ModifierCheck(ModifierKey.capsLockModifier, KeyboardSide.all),
+    };
+
+    test('modifier keys are recognized individually', () {
+      for (int modifier in modifierTests.keys) {
+        final RawKeyEvent event = RawKeyEvent.fromMessage(<String, dynamic>{
+          'type': 'keydown',
+          'keymap': 'macos',
+          'keyCode': 0x04,
+          'characters': 'a',
+          'charactersIgnoringModifiers': 'a',
+          'modifiers': modifier,
+        });
+        final RawKeyEventDataMacOs data = event.data;
+        for (ModifierKey key in ModifierKey.values) {
+          if (modifierTests[modifier].key == key) {
+            expect(
+              data.isModifierPressed(key, side: modifierTests[modifier].side),
+              isTrue,
+              reason: "$key should be pressed with metaState $modifier, but isn't.",
+            );
+            expect(data.getModifierSide(key), equals(modifierTests[modifier].side));
+          } else {
+            expect(
+              data.isModifierPressed(key, side: modifierTests[modifier].side),
+              isFalse,
+              reason: '$key should not be pressed with metaState $modifier.',
+            );
+          }
+        }
+      }
+    });
+    test('modifier keys are recognized when combined', () {
+      for (int modifier in modifierTests.keys) {
+        if (modifier == RawKeyEventDataMacOs.modifierFunction) {
+          // No need to combine function key with itself.
+          continue;
+        }
+        final RawKeyEvent event = RawKeyEvent.fromMessage(<String, dynamic>{
+          'type': 'keydown',
+          'keymap': 'macos',
+          'keyCode': 0x04,
+          'plainCodePoint': 0x64,
+          'characters': 'a',
+          'charactersIgnoringModifiers': 'a',
+          'modifiers': modifier | RawKeyEventDataMacOs.modifierFunction,
+        });
+        final RawKeyEventDataMacOs data = event.data;
+        for (ModifierKey key in ModifierKey.values) {
+          if (modifierTests[modifier].key == key || key == ModifierKey.functionModifier) {
+            expect(
+              data.isModifierPressed(key, side: modifierTests[modifier].side),
+              isTrue,
+              reason: '$key should be pressed with metaState $modifier '
+                  "and additional key ${RawKeyEventDataMacOs.modifierFunction}, but isn't.",
+            );
+            if (key != ModifierKey.functionModifier) {
+              expect(data.getModifierSide(key), equals(modifierTests[modifier].side));
+            } else {
+              expect(data.getModifierSide(key), equals(KeyboardSide.all));
+            }
+          } else {
+            expect(
+              data.isModifierPressed(key, side: modifierTests[modifier].side),
+              isFalse,
+              reason: '$key should not be pressed with metaState $modifier with metaState $modifier '
+                  'and additional key ${RawKeyEventDataMacOs.modifierFunction}.',
+            );
+          }
+        }
+      }
+    });
+    test('Printable keyboard keys are correctly translated', () {
+      const String unmodifiedCharacter = 'a';
+      final RawKeyEvent keyAEvent = RawKeyEvent.fromMessage(<String, dynamic>{
+        'type': 'keydown',
+        'keymap': 'macos',
+        'keyCode': 0x00000000,
+        'characters': 'a',
+        'charactersIgnoringModifiers': unmodifiedCharacter,
+        'modifiers': 0x0,
+      });
+      final RawKeyEventDataMacOs data = keyAEvent.data;
+      expect(data.physicalKey, equals(PhysicalKeyboardKey.keyA));
+      expect(data.logicalKey, equals(LogicalKeyboardKey.keyA));
+      expect(data.keyLabel, equals('a'));
+    });
+    test('Control keyboard keys are correctly translated', () {
+      final RawKeyEvent escapeKeyEvent = RawKeyEvent.fromMessage(const <String, dynamic>{
+        'type': 'keydown',
+        'keymap': 'macos',
+        'keyCode': 0x00000035,
+        'characters': '',
+        'charactersIgnoringModifiers': '',
+        'character': null,
+        'modifiers': 0x0,
+      });
+      final RawKeyEventDataMacOs data = escapeKeyEvent.data;
+      expect(data.physicalKey, equals(PhysicalKeyboardKey.escape));
+      expect(data.logicalKey, equals(LogicalKeyboardKey.escape));
+      expect(data.keyLabel, isNull);
+    });
+    test('Modifier keyboard keys are correctly translated', () {
+      final RawKeyEvent shiftLeftKeyEvent = RawKeyEvent.fromMessage(const <String, dynamic>{
+        'type': 'keydown',
+        'keymap': 'macos',
+        'keyCode': 0x00000038,
+        'characters': '',
+        'charactersIgnoringModifiers': '',
+        'character': null,
+        'modifiers': RawKeyEventDataMacOs.modifierLeftShift,
+      });
+      final RawKeyEventDataMacOs data = shiftLeftKeyEvent.data;
+      expect(data.physicalKey, equals(PhysicalKeyboardKey.shiftLeft));
+      expect(data.logicalKey, equals(LogicalKeyboardKey.shiftLeft));
+      expect(data.keyLabel, isNull);
+    });
+  });
 }

@@ -844,7 +844,7 @@ const Map<int, PhysicalKeyboardKey> kFuchsiaToPhysicalKey = <int, PhysicalKeyboa
 };
 
 
-/// Maps macOS-specific USB HID Usage IDs to the matching [PhysicalKeyboardKey].
+/// Maps macOS-specific key code values representing [PhysicalKeyboardKey].
 /// MacOS doesn't provide a scan code, but a virtual keycode to represent a physical key.
 const Map<int, PhysicalKeyboardKey> kMacOsToPhysicalKey = <int, PhysicalKeyboardKey>{
   0x00000000: PhysicalKeyboardKey.keyA,
