@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 
@@ -132,7 +130,7 @@ void main() {
     await tester.pumpWidget(Container());
 
     expect(tester.testTextInput.isVisible, isFalse);
-  }, skip: Platform.isMacOS);
+  }, skip: true); // https://github.com/flutter/flutter/issues/29384.
 
   testWidgets('Focus triggers keep-alive', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
