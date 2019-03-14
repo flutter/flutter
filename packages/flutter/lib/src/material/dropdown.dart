@@ -599,6 +599,9 @@ class DropdownButton<T> extends StatefulWidget {
     @required this.onChanged,
     this.elevation = 8,
     this.style,
+    this.icon,
+    this.iconDisabledColor,
+    this.iconEnabledColor,
     this.iconSize = 24.0,
     this.isDense = false,
     this.isExpanded = false,
@@ -652,6 +655,15 @@ class DropdownButton<T> extends StatefulWidget {
   /// Defaults to the [TextTheme.subhead] value of the current
   /// [ThemeData.textTheme] of the current [Theme].
   final TextStyle style;
+
+  /// TODO: add documentation here
+  final Widget icon;
+
+  /// TODO: add documentation here
+  final Color iconDisabledColor;
+
+  /// TODO: add documentation here
+  final Color iconEnabledColor;
 
   /// The size to use for the drop-down button's down arrow icon button.
   ///
@@ -768,16 +780,20 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     return math.max(_textStyle.fontSize, math.max(widget.iconSize, _kDenseButtonHeight));
   }
 
-  Color get _downArrowColor {
+  Color get _iconColor {
     // These colors are not defined in the Material Design spec.
     if (_enabled) {
-      if (Theme.of(context).brightness == Brightness.light) {
+      if (widget.iconEnabledColor != null) {
+        return widget.iconEnabledColor;
+      } else if (Theme.of(context).brightness == Brightness.light) {
         return Colors.grey.shade700;
       } else {
         return Colors.white70;
       }
     } else {
-      if (Theme.of(context).brightness == Brightness.light) {
+      if (widget.iconDisabledColor != null) {
+        return widget.iconDisabledColor;
+      } else if (Theme.of(context).brightness == Brightness.light) {
         return Colors.grey.shade400;
       } else {
         return Colors.white10;
@@ -827,6 +843,9 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       );
     }
 
+    const Icon defaultIcon = Icon(Icons.arrow_drop_down);
+    final Widget dropdownIcon = widget.icon ?? defaultIcon;
+
     Widget result = DefaultTextStyle(
       style: _textStyle,
       child: Container(
@@ -837,9 +856,12 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             widget.isExpanded ? Expanded(child: innerItemsWidget) : innerItemsWidget,
-            Icon(Icons.arrow_drop_down,
-              size: widget.iconSize,
-              color: _downArrowColor,
+            IconTheme(
+              data: IconThemeData(
+                color: _iconColor,
+                size: widget.iconSize,
+              ),
+              child: dropdownIcon,
             ),
           ],
         ),

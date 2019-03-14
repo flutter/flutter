@@ -10,6 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
+import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 
 const List<String> menuItems = <String>['one', 'two', 'three', 'four'];
@@ -24,6 +25,10 @@ Widget buildFrame({
   Key buttonKey,
   String value = 'two',
   ValueChanged<String> onChanged,
+  Widget icon,
+  Color iconDisabledColor,
+  Color iconEnabledColor,
+  double iconSize = 24.0,
   bool isDense = false,
   bool isExpanded = false,
   Widget hint,
@@ -44,6 +49,10 @@ Widget buildFrame({
             hint: hint,
             disabledHint: disabledHint,
             onChanged: onChanged,
+            icon: icon,
+            iconSize: iconSize,
+            iconDisabledColor: iconDisabledColor,
+            iconEnabledColor: iconEnabledColor,
             isDense: isDense,
             isExpanded: isExpanded,
             items: items == null ? null : items.map<DropdownMenuItem<String>>((String item) {
@@ -429,6 +438,65 @@ void main() {
     expect(arrowIcon.localToGlobal(Offset.zero).dx,
         buttonBox.size.centerRight(Offset(-arrowIcon.size.width, 0.0)).dx);
   });
+
+  // test for passed in widget being in the dropdown
+  testWidgets('DropdownButton icon will accept widgets as icons', (WidgetTester tester) async {
+    final Key buttonKey = UniqueKey();
+
+    final Widget customWidget = Container(
+      decoration: ShapeDecoration(
+        shape: CircleBorder(
+          side: BorderSide(
+            width: 5.0,
+            color: Colors.grey.shade700,
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpWidget(buildFrame(
+      buttonKey: buttonKey, 
+      icon: customWidget,
+      onChanged: onChanged,
+    ));
+
+    expect(find.byWidget(customWidget), findsOneWidget);
+    expect(find.byIcon(Icons.arrow_drop_down), findsNothing);
+
+    await tester.pumpWidget(buildFrame(
+      buttonKey: buttonKey, 
+      icon: const Icon(Icons.assessment),
+      onChanged: onChanged,
+    ));
+
+    expect(find.byIcon(Icons.assessment), findsOneWidget);
+    expect(find.byIcon(Icons.arrow_drop_down), findsNothing);    
+  });
+
+  // test for icon defaults when no size and color are passed in
+  testWidgets('DropdownButton icon should have default size and colors when not defined', (WidgetTester tester) async {
+    final Key buttonKey = UniqueKey();
+    final Key iconKey = UniqueKey();
+
+    final Icon customIcon = Icon(Icons.assessment, key: iconKey);
+
+    await tester.pumpWidget(buildFrame(
+      buttonKey: buttonKey, 
+      icon: customIcon,
+      onChanged: onChanged,
+    ));
+
+    final RenderBox icon = tester.renderObject(find.byKey(iconKey));
+    expect(icon.size, const Size(24.0, 24.0));
+    // somehow test for color
+
+  });
+
+  // test for icon when size and color are passed in
+
+
+  // test for icon's own size and color when those are defined
+
 
   testWidgets('Dropdown button with isDense:true aligns selected menu item', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
