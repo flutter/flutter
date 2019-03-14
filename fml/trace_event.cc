@@ -5,6 +5,7 @@
 #include "flutter/fml/trace_event.h"
 
 #include <algorithm>
+#include <atomic>
 
 #include "flutter/fml/build_config.h"
 #include "flutter/fml/logging.h"
@@ -30,6 +31,11 @@
 
 namespace fml {
 namespace tracing {
+
+size_t TraceNonce() {
+  static std::atomic_size_t gLastItem;
+  return ++gLastItem;
+}
 
 void TraceTimelineEvent(TraceArg category_group,
                         TraceArg name,

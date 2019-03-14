@@ -30,6 +30,7 @@
 #include <vector>
 
 #include "flutter/fml/macros.h"
+#include "flutter/fml/time/time_point.h"
 #include "third_party/dart/runtime/include/dart_tools_api.h"
 
 #if !defined(OS_FUCHSIA)
@@ -49,6 +50,10 @@
 #define FML_TRACE_COUNTER(category_group, name, counter_id, arg1, ...)         \
   ::fml::tracing::TraceCounter((category_group), (name), (counter_id), (arg1), \
                                __VA_ARGS__);
+
+#define FML_TRACE_EVENT(category_group, name, ...)                   \
+  ::fml::tracing::TraceEvent((category_group), (name), __VA_ARGS__); \
+  __FML__AUTO_TRACE_END(name)
 
 #define TRACE_EVENT0(category_group, name)           \
   ::fml::tracing::TraceEvent0(category_group, name); \
@@ -116,6 +121,10 @@ inline std::string TraceToString(std::string string) {
   return string;
 }
 
+inline std::string TraceToString(TimePoint point) {
+  return std::to_string(point.ToEpochDelta().ToNanoseconds());
+}
+
 template <typename T, typename = std::enable_if_t<std::is_arithmetic<T>::value>>
 std::string TraceToString(T string) {
   return std::to_string(string);
@@ -149,6 +158,8 @@ SplitArguments(Key key, Value value, Args... args) {
   return std::make_pair(std::move(keys), std::move(values));
 }
 
+size_t TraceNonce();
+
 template <typename... Args>
 void TraceCounter(TraceArg category,
                   TraceArg name,
@@ -157,6 +168,13 @@ void TraceCounter(TraceArg category,
   auto split = SplitArguments(args...);
   TraceTimelineEvent(category, name, identifier, Dart_Timeline_Event_Counter,
                      split.first, split.second);
+}
+
+template <typename... Args>
+void TraceEvent(TraceArg category, TraceArg name, Args... args) {
+  auto split = SplitArguments(args...);
+  TraceTimelineEvent(category, name, 0, Dart_Timeline_Event_Begin, split.first,
+                     split.second);
 }
 
 void TraceEvent0(TraceArg category_group, TraceArg name);
