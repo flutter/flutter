@@ -6,6 +6,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'expand_icon.dart';
+import 'ink_well.dart';
 import 'mergeable_material.dart';
 import 'theme.dart';
 
@@ -71,9 +72,11 @@ class ExpansionPanel {
     @required this.headerBuilder,
     @required this.body,
     this.isExpanded = false,
+    this.canTapOnHeader = false,
   }) : assert(headerBuilder != null),
        assert(body != null),
-       assert(isExpanded != null);
+       assert(isExpanded != null),
+       assert(canTapOnHeader != null);
 
   /// The widget builder that builds the expansion panels' header.
   final ExpansionPanelHeaderBuilder headerBuilder;
@@ -87,6 +90,11 @@ class ExpansionPanel {
   ///
   /// Defaults to false.
   final bool isExpanded;
+
+  /// Whether tapping on the panel's header will expand/collapse it.
+  ///
+  /// Defaults to false.
+  final bool canTapOnHeader;
 
 }
 
@@ -109,8 +117,13 @@ class ExpansionPanelRadio extends ExpansionPanel {
     @required this.value,
     @required ExpansionPanelHeaderBuilder headerBuilder,
     @required Widget body,
+    bool canTapOnHeader = false,
   }) : assert(value != null),
-       super(body: body, headerBuilder: headerBuilder);
+      super(
+        body: body,
+        headerBuilder: headerBuilder,
+        canTapOnHeader: canTapOnHeader,
+      );
 
   /// The value that uniquely identifies a radio panel so that the currently
   /// selected radio panel can be identified.
@@ -406,6 +419,10 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
         items.add(MaterialGap(key: _SaltedKey<BuildContext, int>(context, index * 2 - 1)));
 
       final ExpansionPanel child = widget.children[index];
+      final Widget headerWidget = child.headerBuilder(
+        context,
+        _isChildExpanded(index),
+      );
       final Row header = Row(
         children: <Widget>[
           Expanded(
@@ -415,10 +432,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
               margin: _isChildExpanded(index) ? kExpandedEdgeInsets : EdgeInsets.zero,
               child: ConstrainedBox(
                 constraints: const BoxConstraints(minHeight: _kPanelHeaderCollapsedHeight),
-                child: child.headerBuilder(
-                  context,
-                  _isChildExpanded(index),
-                ),
+                child: headerWidget,
               ),
             ),
           ),
@@ -427,7 +441,9 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
             child: ExpandIcon(
               isExpanded: _isChildExpanded(index),
               padding: const EdgeInsets.all(16.0),
-              onPressed: (bool isExpanded) => _handlePressed(isExpanded, index),
+              onPressed: !child.canTapOnHeader
+                ? (bool isExpanded) => _handlePressed(isExpanded, index)
+                : null,
             ),
           ),
         ],
@@ -438,7 +454,14 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
           key: _SaltedKey<BuildContext, int>(context, index * 2),
           child: Column(
             children: <Widget>[
-              MergeSemantics(child: header),
+              MergeSemantics(
+                child: child.canTapOnHeader
+                  ? InkWell(
+                  onTap: () => _handlePressed(_isChildExpanded(index), index),
+                  child: header,
+                )
+                  : header,
+              ),
               AnimatedCrossFade(
                 firstChild: Container(height: 0.0),
                 secondChild: child.body,
