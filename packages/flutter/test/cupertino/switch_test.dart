@@ -211,7 +211,7 @@ void main() {
                 children: <Widget>[
                   CupertinoButton(
                     child: const Text('Button'),
-                    onPressed: (){
+                    onPressed: () {
                       setState(() {
                         value = !value;
                       });

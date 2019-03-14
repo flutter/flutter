@@ -738,7 +738,7 @@ class _RenderListTile extends RenderBox {
   }
 
   // The returned list is ordered for hit testing.
-  Iterable<RenderBox> get _children sync *{
+  Iterable<RenderBox> get _children sync* {
     if (leading != null)
       yield leading;
     if (title != null)

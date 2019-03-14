@@ -312,7 +312,7 @@ void main() {
                         textColor: Colors.lightBlue,
                         disabledTextColor: Colors.red,
                         label: 'ACTION',
-                        onPressed: () {},
+                        onPressed: () { },
                       ),
                     ),
                   );
@@ -359,7 +359,7 @@ void main() {
                   Scaffold.of(context).showSnackBar(SnackBar(
                     content: const Text('I am a snack bar.'),
                     duration: const Duration(seconds: 2),
-                    action: SnackBarAction(label: 'ACTION', onPressed: () {}),
+                    action: SnackBarAction(label: 'ACTION', onPressed: () { }),
                   ));
                 },
                 child: const Text('X'),
@@ -416,7 +416,7 @@ void main() {
                   Scaffold.of(context).showSnackBar(SnackBar(
                     content: const Text('I am a snack bar.'),
                     duration: const Duration(seconds: 2),
-                    action: SnackBarAction(label: 'ACTION', onPressed: () {}),
+                    action: SnackBarAction(label: 'ACTION', onPressed: () { }),
                   ));
                 },
                 child: const Text('X'),
@@ -543,7 +543,7 @@ void main() {
                     duration: const Duration(seconds: 1),
                     action: SnackBarAction(
                       label: 'ACTION',
-                      onPressed: () {},
+                      onPressed: () { },
                     ),
                   ));
                 },
@@ -585,7 +585,7 @@ void main() {
                             duration: const Duration(seconds: 1),
                             action: SnackBarAction(
                                 label: 'ACTION',
-                                onPressed: () {},
+                                onPressed: () { },
                             ),
                           ));
                         },
@@ -670,7 +670,7 @@ void main() {
                             onTap: () {
                               Scaffold.of(context).showSnackBar(SnackBar(
                                   content: const Text('test'),
-                                  action: SnackBarAction(label: 'foo', onPressed: () {}),
+                                  action: SnackBarAction(label: 'foo', onPressed: () { }),
                               ));
                             },
                             behavior: HitTestBehavior.opaque,

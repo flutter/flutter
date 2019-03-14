@@ -784,7 +784,7 @@ void main() {
                     cursorColor: Colors.blue,
                     selectionControls: materialTextSelectionControls,
                     keyboardType: TextInputType.text,
-                    onChanged: (String value) {},
+                    onChanged: (String value) { },
                   ),
                 ),
               ),
@@ -1940,6 +1940,145 @@ void main() {
     // Everything's just formated the same way now.
     expect(renderEditable.text.text, 'text composing text');
     expect(renderEditable.text.style.decoration, isNull);
+  });
+
+  testWidgets('text selection handle visibility', (WidgetTester tester) async {
+    final GlobalKey<EditableTextState> editableTextKey =
+        GlobalKey<EditableTextState>();
+
+    const String testText = 'XXXXX          XXXXX';
+    final TextEditingController controller = TextEditingController(text: testText);
+
+    final Widget widget = MaterialApp(
+      home: Align(
+        alignment: Alignment.topLeft,
+        child: SizedBox(
+          width: 100,
+          child: EditableText(
+            key: editableTextKey,
+            controller: controller,
+            focusNode: FocusNode(),
+            style: Typography(platform: TargetPlatform.android).black.subhead,
+            cursorColor: Colors.blue,
+            backgroundCursorColor: Colors.grey,
+            selectionControls: materialTextSelectionControls,
+            keyboardType: TextInputType.text,
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpWidget(widget);
+
+    final EditableTextState state =
+        tester.state<EditableTextState>(find.byType(EditableText));
+    final RenderEditable renderEditable = state.renderEditable;
+    final Scrollable scrollable = tester.widget<Scrollable>(find.byType(Scrollable));
+
+    bool leftVisibleBefore = false;
+    bool rightVisibleBefore = false;
+
+    Future<void> verifyVisibility(
+      bool leftVisible,
+      Symbol leftPosition,
+      bool rightVisible,
+      Symbol rightPosition,
+    ) async {
+      await tester.pump();
+
+      // Check the signal from RenderEditable about whether they're within the
+      // viewport.
+
+      expect(renderEditable.selectionStartInViewport.value, equals(leftVisible));
+      expect(renderEditable.selectionEndInViewport.value, equals(rightVisible));
+
+      // Check that the animations are functional and going in the right
+      // direction.
+
+      final List<Widget> transitions =
+        find.byType(FadeTransition).evaluate().map((Element e) => e.widget).toList();
+      final FadeTransition left = transitions[1];
+      final FadeTransition right = transitions[2];
+
+      if (leftVisibleBefore)
+        expect(left.opacity.value, equals(1.0));
+      if (rightVisibleBefore)
+        expect(right.opacity.value, equals(1.0));
+
+      await tester.pump(TextSelectionOverlay.fadeDuration ~/ 2);
+
+      if (leftVisible != leftVisibleBefore)
+        expect(left.opacity.value, equals(0.5));
+      if (rightVisible != rightVisibleBefore)
+        expect(right.opacity.value, equals(0.5));
+
+      await tester.pump(TextSelectionOverlay.fadeDuration ~/ 2);
+
+      if (leftVisible)
+        expect(left.opacity.value, equals(1.0));
+      if (rightVisible)
+        expect(right.opacity.value, equals(1.0));
+
+      leftVisibleBefore = leftVisible;
+      rightVisibleBefore = rightVisible;
+
+      // Check that the handles' positions are correct (clamped within the
+      // viewport but not stuck).
+
+      final List<Positioned> positioned =
+        find.byType(Positioned).evaluate().map((Element e) => e.widget).cast<Positioned>().toList();
+
+      final Size viewport = renderEditable.size;
+
+      void testPosition(double pos, Symbol expected) {
+        if (expected == #left)
+          expect(pos, equals(0.0));
+        if (expected == #right)
+          expect(pos, equals(viewport.width));
+        if (expected == #middle)
+          expect(pos, inExclusiveRange(0.0, viewport.width));
+      }
+
+      testPosition(positioned[0].left, leftPosition);
+      testPosition(positioned[1].left, rightPosition);
+    }
+
+    // Select the first word. Both handles should be visible.
+    await tester.tapAt(const Offset(20, 10));
+    renderEditable.selectWord(cause: SelectionChangedCause.longPress);
+    await tester.pump();
+    await verifyVisibility(true, #left, true, #middle);
+
+    // Drag the text slightly so the first word is partially visible. Only the
+    // right handle should be visible.
+    scrollable.controller.jumpTo(20.0);
+    await verifyVisibility(false, #left, true, #middle);
+
+    // Drag the text all the way to the left so the first word is not visible at
+    // all (and the second word is fully visible). Both handles should be
+    // invisible now.
+    scrollable.controller.jumpTo(200.0);
+    await verifyVisibility(false, #left, false, #left);
+
+    // Tap to unselect.
+    await tester.tap(find.byKey(editableTextKey));
+    await tester.pump();
+
+    // Now that the second word has been dragged fully into view, select it.
+    await tester.tapAt(const Offset(80, 10));
+    renderEditable.selectWord(cause: SelectionChangedCause.longPress);
+    await tester.pump();
+    await verifyVisibility(true, #middle, true, #middle);
+
+    // Drag the text slightly to the right. Only the left handle should be
+    // visible.
+    scrollable.controller.jumpTo(150);
+    await verifyVisibility(true, #middle, false, #right);
+
+    // Drag the text all the way to the right, so the second word is not visible
+    // at all. Again, both handles should be invisible.
+    scrollable.controller.jumpTo(0);
+    await verifyVisibility(false, #right, false, #right);
   });
 }
 

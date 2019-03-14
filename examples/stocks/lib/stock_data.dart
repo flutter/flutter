@@ -24,7 +24,7 @@ class Stock {
     lastSale = 0.0;
     try {
       lastSale = double.parse(fields[2]);
-    } catch (_) {}
+    } catch (_) { }
     symbol = fields[0];
     name = fields[1];
     marketCap = fields[4];

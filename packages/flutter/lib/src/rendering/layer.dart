@@ -58,7 +58,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   /// This is only for debug and test purpose only.
   @visibleForTesting
   void debugMarkClean() {
-    assert((){
+    assert(() {
       _needsAddToScene = false;
       return true;
     }());
@@ -77,7 +77,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   @visibleForTesting
   bool get debugSubtreeNeedsAddToScene {
     bool result;
-    assert((){
+    assert(() {
       result = _subtreeNeedsAddToScene;
       return true;
     }());

@@ -7,6 +7,7 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 
 import 'box.dart';
@@ -84,10 +85,10 @@ class RenderAndroidView extends RenderBox {
   }) : assert(viewController != null),
        assert(hitTestBehavior != null),
        assert(gestureRecognizers != null),
-       _viewController = viewController
-  {
+       _viewController = viewController {
     _motionEventsDispatcher = _MotionEventsDispatcher(globalToLocal, viewController);
     updateGestureRecognizers(gestureRecognizers);
+    _viewController.addOnPlatformViewCreatedListener(_onPlatformViewCreated);
   }
 
   _PlatformViewState _state = _PlatformViewState.uninitialized;
@@ -100,10 +101,20 @@ class RenderAndroidView extends RenderBox {
   /// `viewController` must not be null.
   set viewController(AndroidViewController viewController) {
     assert(_viewController != null);
+    assert(viewController != null);
     if (_viewController == viewController)
       return;
+    _viewController.removeOnPlatformViewCreatedListener(_onPlatformViewCreated);
     _viewController = viewController;
     _sizePlatformView();
+    if (_viewController.isCreated) {
+      markNeedsSemanticsUpdate();
+    }
+    _viewController.addOnPlatformViewCreatedListener(_onPlatformViewCreated);
+  }
+
+  void _onPlatformViewCreated(int id) {
+    markNeedsSemanticsUpdate();
   }
 
   /// How to behave during hit testing.
@@ -237,6 +248,17 @@ class RenderAndroidView extends RenderBox {
   }
 
   @override
+  void describeSemanticsConfiguration (SemanticsConfiguration config) {
+    super.describeSemanticsConfiguration(config);
+
+    config.isSemanticBoundary = true;
+
+    if (_viewController.isCreated) {
+      config.platformViewId = _viewController.id;
+    }
+  }
+
+  @override
   void detach() {
     _gestureRecognizer.reset();
     super.detach();
@@ -287,9 +309,9 @@ class RenderUiKitView extends RenderBox {
   /// must have been created by calling [PlatformViewsService.initUiKitView].
   UiKitViewController get viewController => _viewController;
   UiKitViewController _viewController;
-  set viewController(UiKitViewController viewId) {
-    assert(viewId != null);
-    _viewController = viewId;
+  set viewController(UiKitViewController viewController) {
+    assert(viewController != null);
+    _viewController = viewController;
     markNeedsPaint();
   }
 
@@ -430,7 +452,7 @@ class _UiKitViewGestureRecognizer extends OneSequenceGestureRecognizer {
   String get debugDescription => 'UIKit view';
 
   @override
-  void didStopTrackingLastPointer(int pointer) {}
+  void didStopTrackingLastPointer(int pointer) { }
 
   @override
   void handleEvent(PointerEvent event) {
@@ -501,7 +523,7 @@ class _AndroidViewGestureRecognizer extends OneSequenceGestureRecognizer {
   String get debugDescription => 'Android view';
 
   @override
-  void didStopTrackingLastPointer(int pointer) {}
+  void didStopTrackingLastPointer(int pointer) { }
 
   @override
   void handleEvent(PointerEvent event) {

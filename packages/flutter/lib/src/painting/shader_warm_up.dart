@@ -4,7 +4,6 @@
 
 import 'dart:async';
 import 'dart:developer';
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -106,7 +105,7 @@ class DefaultShaderWarmUp extends ShaderWarmUp {
   /// Trigger common draw operations on a canvas to warm up GPU shader
   /// compilation cache.
   @override
-  Future<void> warmUpOnCanvas(ui.Canvas canvas) {
+  Future<void> warmUpOnCanvas(ui.Canvas canvas) async {
     final ui.RRect rrect = ui.RRect.fromLTRBXY(20.0, 20.0, 60.0, 60.0, 10.0, 10.0);
     final ui.Path rrectPath = ui.Path()..addRRect(rrect);
 
@@ -181,30 +180,5 @@ class DefaultShaderWarmUp extends ShaderWarmUp {
     final ui.Paragraph paragraph = paragraphBuilder.build()
       ..layout(const ui.ParagraphConstraints(width: 60.0));
     canvas.drawParagraph(paragraph, const ui.Offset(20.0, 20.0));
-
-    // Construct an image for drawImage related operations
-    const int imageWidth = 10;
-    const int imageHeight = 10;
-    final Uint8List pixels = Uint8List.fromList(List<int>.generate(
-      imageWidth * imageHeight * 4,
-          (int i) => i % 4 < 2 ? 0x00 : 0xFF,  // opaque blue
-    ));
-
-    final Completer<void> completer = Completer<void>();
-    ui.decodeImageFromPixels(pixels, imageWidth, imageHeight, ui.PixelFormat.rgba8888, (ui.Image image) {
-      // Warm up image shaders
-      canvas.translate(0.0, 80.0);
-      canvas.save();
-      final ui.Rect srcRect = ui.Rect.fromLTWH(0.0, 0.0, image.width.toDouble(), image.height.toDouble());
-      canvas.drawImage(image, const ui.Offset(20.0, 20.0), ui.Paint());
-      canvas.translate(80.0, 0.0);
-      canvas.drawImageRect(image, srcRect, ui.Rect.fromLTWH(20.0, 20.0, imageWidth * 0.6, imageWidth * 0.6), paints[0]);
-      canvas.translate(80.0, 0.0);
-      canvas.drawImageRect(image, srcRect, ui.Rect.fromLTWH(10.0, 10.0, imageWidth * 1.5, imageWidth * 1.5), paints[0]);
-      canvas.restore();
-      completer.complete();
-    });
-
-    return completer.future;
   }
 }

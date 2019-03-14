@@ -79,7 +79,7 @@ class StdoutHandler {
   void handler(String message) {
     const String kResultPrefix = 'result ';
     if (boundaryKey == null && message.startsWith(kResultPrefix)) {
-        boundaryKey = message.substring(kResultPrefix.length);
+      boundaryKey = message.substring(kResultPrefix.length);
     } else if (message.startsWith(boundaryKey)) {
       if (message.length <= boundaryKey.length) {
         compilerOutput.complete(null);
@@ -175,6 +175,7 @@ class KernelCompiler {
     List<String> fileSystemRoots,
     String fileSystemScheme,
     bool targetProductVm = false,
+    String initializeFromDill,
   }) async {
     final String frontendServer = artifacts.getArtifactPath(
       Artifact.frontendServerSnapshotForEngineDartSdk
@@ -250,6 +251,9 @@ class KernelCompiler {
     }
     if (fileSystemScheme != null) {
       command.addAll(<String>['--filesystem-scheme', fileSystemScheme]);
+    }
+    if (initializeFromDill != null) {
+      command.addAll(<String>['--initialize-from-dill', initializeFromDill]);
     }
 
     if (extraFrontEndOptions != null)

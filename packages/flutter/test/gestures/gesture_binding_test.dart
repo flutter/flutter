@@ -203,4 +203,50 @@ void main() {
     expect(events[3].runtimeType, equals(PointerCancelEvent));
     expect(events[4].runtimeType, equals(PointerRemovedEvent));
   });
+
+  test('Can expand pointer scroll events', () {
+    const ui.PointerDataPacket packet = ui.PointerDataPacket(
+        data: <ui.PointerData>[
+          ui.PointerData(change: ui.PointerChange.add),
+          ui.PointerData(change: ui.PointerChange.hover, signalKind: ui.PointerSignalKind.scroll),
+        ]
+    );
+
+    final List<PointerEvent> events = PointerEventConverter.expand(
+      packet.data, ui.window.devicePixelRatio).toList();
+
+    expect(events.length, 2);
+    expect(events[0].runtimeType, equals(PointerAddedEvent));
+    expect(events[1].runtimeType, equals(PointerScrollEvent));
+  });
+
+  test('Synthetic hover/move for misplaced scrolls', () {
+    final Offset lastLocation = const Offset(10.0, 10.0) * ui.window.devicePixelRatio;
+    const Offset unexpectedOffset = Offset(5.0, 7.0);
+    final Offset scrollLocation = lastLocation + unexpectedOffset * ui.window.devicePixelRatio;
+    final ui.PointerDataPacket packet = ui.PointerDataPacket(
+      data: <ui.PointerData>[
+        ui.PointerData(change: ui.PointerChange.add, physicalX: lastLocation.dx, physicalY: lastLocation.dy),
+        ui.PointerData(change: ui.PointerChange.hover, physicalX: scrollLocation.dx, physicalY: scrollLocation.dy, signalKind: ui.PointerSignalKind.scroll),
+        // Move back to starting location, click, and repeat to test mouse-down version.
+        ui.PointerData(change: ui.PointerChange.hover, physicalX: lastLocation.dx, physicalY: lastLocation.dy),
+        ui.PointerData(change: ui.PointerChange.down, physicalX: lastLocation.dx, physicalY: lastLocation.dy),
+        ui.PointerData(change: ui.PointerChange.hover, physicalX: scrollLocation.dx, physicalY: scrollLocation.dy, signalKind: ui.PointerSignalKind.scroll),
+      ]
+    );
+
+    final List<PointerEvent> events = PointerEventConverter.expand(
+      packet.data, ui.window.devicePixelRatio).toList();
+
+    expect(events.length, 7);
+    expect(events[0].runtimeType, equals(PointerAddedEvent));
+    expect(events[1].runtimeType, equals(PointerHoverEvent));
+    expect(events[1].delta, equals(unexpectedOffset));
+    expect(events[2].runtimeType, equals(PointerScrollEvent));
+    expect(events[3].runtimeType, equals(PointerHoverEvent));
+    expect(events[4].runtimeType, equals(PointerDownEvent));
+    expect(events[5].runtimeType, equals(PointerMoveEvent));
+    expect(events[5].delta, equals(unexpectedOffset));
+    expect(events[6].runtimeType, equals(PointerScrollEvent));
+  });
 }

@@ -32,6 +32,10 @@ abstract class RunCommandBase extends FlutterCommand {
         negatable: false,
         help: 'Trace application startup, then exit, saving the trace to a file.',
       )
+      ..addFlag('verbose-system-logs',
+        negatable: false,
+        help: 'Include verbose logging from the flutter engine.'
+      )
       ..addOption('route',
         help: 'Which route to load when running the app.',
       )
@@ -256,6 +260,7 @@ class RunCommand extends RunCommandBase {
         traceSkia: argResults['trace-skia'],
         traceSystrace: argResults['trace-systrace'],
         observatoryPort: observatoryPort,
+        verboseSystemLogs: argResults['verbose-system-logs'],
       );
     }
   }

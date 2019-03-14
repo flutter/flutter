@@ -27,6 +27,7 @@ class AnalysisServer {
       StreamController<bool>.broadcast();
   final StreamController<FileAnalysisErrors> _errorsController =
       StreamController<FileAnalysisErrors>.broadcast();
+  bool _didServerErrorOccur = false;
 
   int _id = 0;
 
@@ -61,6 +62,7 @@ class AnalysisServer {
         <String, dynamic>{'included': directories, 'excluded': <String>[]});
   }
 
+  bool get didServerErrorOccur => _didServerErrorOccur;
   Stream<bool> get onAnalyzing => _analyzingController.stream;
   Stream<FileAnalysisErrors> get onErrors => _errorsController.stream;
 
@@ -120,6 +122,7 @@ class AnalysisServer {
     if (error['stackTrace'] != null) {
       printError(error['stackTrace']);
     }
+    _didServerErrorOccur = true;
   }
 
   void _handleAnalysisIssues(Map<String, dynamic> issueInfo) {

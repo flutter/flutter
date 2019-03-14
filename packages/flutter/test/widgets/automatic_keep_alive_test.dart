@@ -480,7 +480,7 @@ void main() {
         dragStartBehavior: DragStartBehavior.down,
         addSemanticIndexes: false,
         itemCount: 50,
-        itemBuilder: (BuildContext context, int index){
+        itemBuilder: (BuildContext context, int index) {
           if (index == 0){
             return const _AlwaysKeepAlive(
               key: GlobalObjectKey<_AlwaysKeepAliveState>(0),
@@ -514,7 +514,7 @@ void main() {
       child: ListView.builder(
         addSemanticIndexes: false,
         itemCount: 250,
-        itemBuilder: (BuildContext context, int index){
+        itemBuilder: (BuildContext context, int index) {
           if (index % 2 == 0){
             return _AlwaysKeepAlive(
               key: GlobalObjectKey<_AlwaysKeepAliveState>(index),
@@ -631,5 +631,5 @@ class RenderSliverMultiBoxAdaptorAlt extends RenderSliver with
   }
 
   @override
-  void performLayout() {}
+  void performLayout() { }
 }
