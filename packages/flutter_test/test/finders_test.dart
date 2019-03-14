@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/rendering.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -31,6 +32,7 @@ void main() {
 
   group('semantics', () {
     testWidgets('finds Semantically labeled widgets', (WidgetTester tester) async {
+      final SemanticsHandle semanticsHandle = tester.ensureSemantics();
       await tester.pumpWidget(_boilerplate(
         Semantics(
           label: 'Add',
@@ -42,6 +44,16 @@ void main() {
         ),
       ));
       expect(find.bySemanticLabel('Add'), findsOneWidget);
+      semanticsHandle.dispose();
+    });
+
+    testWidgets('finds Semantically labeled widgets without explicit Semantics', (WidgetTester tester) async {
+      final SemanticsHandle semanticsHandle = tester.ensureSemantics();
+      await tester.pumpWidget(_boilerplate(
+        const SimpleCustomSemanticsWidget('Foo')
+      ));
+      expect(find.bySemanticLabel('Foo'), findsOneWidget);
+      semanticsHandle.dispose();
     });
   });
 
@@ -107,4 +119,29 @@ Widget _boilerplate(Widget child) {
     textDirection: TextDirection.ltr,
     child: child,
   );
+}
+
+class SimpleCustomSemanticsWidget extends LeafRenderObjectWidget {
+  const SimpleCustomSemanticsWidget(this.label);
+
+  final String label;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) => SimpleCustomSemanticsRenderObject(label);
+}
+
+class SimpleCustomSemanticsRenderObject extends RenderBox {
+  SimpleCustomSemanticsRenderObject(this.label);
+
+  final String label;
+
+  @override
+  bool get sizedByParent => true;
+
+  @override
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    super.describeSemanticsConfiguration(config);
+    config..label = label..textDirection = TextDirection.ltr;
+
+  }
 }

@@ -265,10 +265,7 @@ class FlutterDriverExtension {
 
   Finder _createBySemanticLabelFinder(BySemanticLabel arguments) {
     return find.byElementPredicate((Element element) {
-      final Widget widget = element.widget;
-      if (widget is Semantics)
-        return widget.properties.label == arguments.label;
-      return false;
+      return element is RenderObjectElement && element.renderObject?.debugSemantics?.label == arguments.label;
     }, description: 'widget with semantic label "${arguments.label}"');
   }
 
