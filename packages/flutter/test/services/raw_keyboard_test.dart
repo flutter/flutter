@@ -349,7 +349,7 @@ void main() {
     });
     test('Printable keyboard keys are correctly translated', () {
       const String unmodifiedCharacter = 'a';
-      final RawKeyEvent keyAEvent = RawKeyEvent.fromMessage(<String, dynamic>{
+      final RawKeyEvent keyAEvent = RawKeyEvent.fromMessage(const <String, dynamic>{
         'type': 'keydown',
         'keymap': 'macos',
         'keyCode': 0x00000000,
