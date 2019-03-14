@@ -664,6 +664,8 @@ FlutterEngineResult FlutterEngineDispatchSemanticsAction(
 // garbage collection in periods in which the various threads are most likely to
 // be idle. For example, for a 60Hz display, embedders should add 16.6 * 1e6 to
 // the frame time field. The system monotonic clock is used as the timebase.
+//
+// That frame timepoints are in nanoseconds.
 FLUTTER_EXPORT
 FlutterEngineResult FlutterEngineOnVsync(FlutterEngine engine,
                                          intptr_t baton,
