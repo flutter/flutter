@@ -72,6 +72,7 @@ void main() {
     const Color backgroundColor = Color(0xBEEFBEEF);
     const Color foregroundColor = Color(0xFACEFACE);
     const double elevation = 7;
+    const double disabledElevation = 1;
     const double highlightElevation = 13;
     const ShapeBorder shape = StadiumBorder();
 
@@ -81,6 +82,7 @@ void main() {
           backgroundColor: Color(0xCAFECAFE),
           foregroundColor: Color(0xFEEDFEED),
           elevation: 23,
+          disabledElevation: 11,
           highlightElevation: 43,
           shape: BeveledRectangleBorder(),
         ),
@@ -92,6 +94,7 @@ void main() {
           backgroundColor: backgroundColor,
           foregroundColor: foregroundColor,
           elevation: elevation,
+          disabledElevation: disabledElevation,
           highlightElevation: highlightElevation,
           shape: shape,
         ),
@@ -101,6 +104,7 @@ void main() {
     expect(_getRawMaterialButton(tester).fillColor, backgroundColor);
     expect(_getIconTheme(tester).data.color, foregroundColor);
     expect(_getRawMaterialButton(tester).elevation, elevation);
+    expect(_getRawMaterialButton(tester).disabledElevation, disabledElevation);
     expect(_getRawMaterialButton(tester).highlightElevation, highlightElevation);
     expect(_getRawMaterialButton(tester).shape, shape);
   });
