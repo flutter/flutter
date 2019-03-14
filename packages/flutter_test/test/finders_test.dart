@@ -37,8 +37,9 @@ void main() {
           button: true,
           child: const FlatButton(
             child: Text('+'),
-            onPressed: null,),
+            onPressed: null,
           ),
+        ),
       ));
       expect(find.bySemanticLabel('Add'), findsOneWidget);
     });
