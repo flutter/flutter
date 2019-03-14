@@ -28,26 +28,12 @@ class _PanAndZoomDemoState extends State<PanAndZoomDemo> {
       board: _board,
     );
     final Size screenSize = MediaQuery.of(context).size;
-    final Size visibleSize = Size(screenSize.width * 3, screenSize.height * 3);
+    final Size visibleSize = Size(screenSize.width * 3, screenSize.height * 2);
 
     // The scene is drawn by a CustomPaint, but user interaction is handled by
     // the TransformInteraction parent widget.
     return Scaffold(
       body: TransformInteraction(
-        //child: Text('hello world'),
-        /*
-        child: Image.asset(
-          'places/india_pondicherry_salt_farm.png',
-          package: 'flutter_gallery_assets',
-          fit: BoxFit.cover,
-        ),
-        visibleRect: Rect.fromLTWH(
-          -screenSize.width,
-          -screenSize.height,
-          visibleSize.width,
-          visibleSize.height,
-        ),
-        */
         child: CustomPaint(
           size: Size.infinite,
           painter: painter,

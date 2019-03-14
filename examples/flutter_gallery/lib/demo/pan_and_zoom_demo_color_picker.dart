@@ -44,7 +44,6 @@ class ColorPickerSwatch extends StatelessWidget {
 
   @override
   Widget build (BuildContext context) {
-    const BorderSide borderSide = BorderSide(width: 2.0, color: Color(0xFF000000));
     return Container(
       child: Container(
         width: 60,

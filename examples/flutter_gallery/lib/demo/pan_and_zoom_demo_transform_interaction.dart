@@ -107,7 +107,6 @@ class TransformInteractionState extends State<TransformInteraction> with SingleT
   // The translation that will be applied to the scene (not viewport).
   // A positive x offset moves the scene right, viewport left.
   // A positive y offset moves the scene down, viewport up.
-  // Start out looking at the center.
   Offset _translateFromScene; // Point where a single translation began
   double _scaleStart; // Scale value at start of scaling gesture
   double _rotationStart = 0.0;
@@ -122,14 +121,21 @@ class TransformInteractionState extends State<TransformInteraction> with SingleT
     }
     final double scale = _transform.getMaxScaleOnAxis();
     final Size scaledSize = widget.size / scale;
+    final Vector3 currentTranslation = matrix.getTranslation() / scale;
+    final Rect boundaries = Rect.fromLTRB(
+      _visibleRect.left * -1,
+      _visibleRect.top * -1,
+      (_visibleRect.right - scaledSize.width) * -1,
+      (_visibleRect.bottom - scaledSize.height) * -1,
+    );
     final Offset clampedTranslation = Offset(
       translation.dx.clamp(
-        scaledSize.width - _visibleRect.right,
-        -_visibleRect.left,
+        boundaries.right - currentTranslation.x,
+        boundaries.left - currentTranslation.x,
       ),
       translation.dy.clamp(
-         scaledSize.height - _visibleRect.bottom,
-        -_visibleRect.top,
+        boundaries.bottom - currentTranslation.y,
+        boundaries.top - currentTranslation.y,
       ),
     );
     return matrix..translate(
@@ -296,8 +302,8 @@ class TransformInteractionState extends State<TransformInteraction> with SingleT
         _transform = matrixScale(_transform, scaleChange);
         scale = _transform.getMaxScaleOnAxis();
 
-        // While scaling, translate such that the user's fingers stay on the
-        // same place in the scene. That means that the focal point of the
+        // While scaling, translate such that the user's two fingers stay on the
+        // same places in the scene. That means that the focal point of the
         // scale should be on the same place in the scene before and after the
         // scale.
         final Offset focalPointSceneNext = fromViewport(
@@ -330,6 +336,7 @@ class TransformInteractionState extends State<TransformInteraction> with SingleT
     _controller.reset();
 
     // If the scale ended with velocity, animate inertial movement
+    // TODO(justinmc): kill this when hitting the boundary to avoid bounce?
     final double velocityTotal = details.velocity.pixelsPerSecond.dx.abs()
       + details.velocity.pixelsPerSecond.dy.abs();
     if (velocityTotal == 0) {
