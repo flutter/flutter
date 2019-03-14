@@ -334,4 +334,36 @@ void main() {
     expect(currentSelection.baseOffset, 5);
     expect(currentSelection.extentOffset, 9);
   });
+
+  test('selects correct place when offsets are flipped', () {
+    final TextSelectionDelegate delegate = FakeEditableTextState();
+    final ViewportOffset viewportOffset = ViewportOffset.zero();
+    TextSelection currentSelection;
+    final RenderEditable editable = RenderEditable(
+      backgroundCursorColor: Colors.grey,
+      selectionColor: Colors.black,
+      textDirection: TextDirection.ltr,
+      cursorColor: Colors.red,
+      offset: viewportOffset,
+      textSelectionDelegate: delegate,
+      onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {
+        currentSelection = selection;
+      },
+      text: const TextSpan(
+        text: 'abc def ghi',
+        style: TextStyle(
+          height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+        ),
+      ),
+    );
+
+    layout(editable);
+
+    editable.selectPositionAt(from: const Offset(30, 2), to: const Offset(10, 2), cause: SelectionChangedCause.drag);
+    pumpFrame();
+
+    expect(currentSelection.isCollapsed, isFalse);
+    expect(currentSelection.baseOffset, 1);
+    expect(currentSelection.extentOffset, 3);
+  });
 }
