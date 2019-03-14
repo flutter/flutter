@@ -117,12 +117,17 @@ class Board extends Object with IterableMixin<BoardPoint> {
   // the center of the board in both coordinate systems. If no BoardPoint at the
   // location, return null.
   BoardPoint pointToBoardPoint(Offset point) {
-    final int q =
-      ((sqrt(3) / 3 * point.dx - 1 / 3 * point.dy) / hexagonRadius).round();
-    final int r = ((2 / 3 * point.dy) / hexagonRadius).round();
+    final BoardPoint boardPoint = BoardPoint(
+      ((sqrt(3) / 3 * point.dx - 1 / 3 * point.dy) / hexagonRadius).round(),
+      ((2 / 3 * point.dy) / hexagonRadius).round(),
+    );
 
-    return boardPoints.firstWhere(
-      (BoardPoint boardPoint) => boardPoint.q == q && boardPoint.r == r,
+    if (!_validateBoardPoint(boardPoint)) {
+      return null;
+    }
+
+    return boardPoints.firstWhere((BoardPoint boardPointI) =>
+      boardPointI.q == boardPoint.q && boardPointI.r == boardPoint.r,
     );
   }
 
