@@ -234,9 +234,9 @@ def to_gn_args(args):
     if args.arm_float_abi:
       gn_args['arm_float_abi'] = args.arm_float_abi
 
-    # Switch flutter to full Dart SDK when building for the host system.
-    if args.target_os is None:
-      gn_args['dart_platform_sdk'] = False
+    # Whether to build all dart snapshots.
+    if args.full_dart_sdk:
+        gn_args['dart_platform_sdk'] = False
 
     return gn_args
 
@@ -288,6 +288,9 @@ def parse_args(args):
   parser.add_argument('--coverage', default=False, action='store_true')
 
   parser.add_argument('--out-dir', default='', type=str)
+
+  parser.add_argument('--full-dart-sdk', default=True, action='store_true', 
+                      help='include trained dart2js and dartdevc snapshots. Enable only on steps that create an sdk')
 
   return parser.parse_args(args)
 
