@@ -81,7 +81,10 @@ class AOTSnapshotter {
     IOSArch iosArch,
     List<String> extraGenSnapshotOptions = const <String>[],
   }) async {
-    final FlutterProject flutterProject = await FlutterProject.current();
+    FlutterProject flutterProject;
+    if (fs.file('pubspec.yaml').existsSync()) {
+      flutterProject = await FlutterProject.current();
+    }
     final FlutterEngine engine = FlutterEngine(cache);
     if (!_isValidAotPlatform(platform, buildMode)) {
       printError('${getNameForTargetPlatform(platform)} does not support AOT compilation.');
@@ -185,7 +188,7 @@ class AOTSnapshotter {
         'sharedLib': buildSharedLibrary.toString(),
         'extraGenSnapshotOptions': extraGenSnapshotOptions.join(' '),
         'engineHash': engine.version,
-        'buildersUsed': '${await flutterProject.hasBuilders}',
+        'buildersUsed': '${flutterProject != null ? await flutterProject.hasBuilders : false}',
       },
       depfilePaths: <String>[],
     );

@@ -182,7 +182,10 @@ class KernelCompiler {
     final String frontendServer = artifacts.getArtifactPath(
       Artifact.frontendServerSnapshotForEngineDartSdk
     );
-    final FlutterProject flutterProject = await FlutterProject.current();
+    FlutterProject flutterProject;
+    if (fs.file('pubspec.yaml').existsSync()) {
+      flutterProject = await FlutterProject.current();
+    }
     final FlutterEngine engine = FlutterEngine(cache);
 
     // TODO(cbracken): eliminate pathFilter.
@@ -198,7 +201,7 @@ class KernelCompiler {
           'trackWidgetCreation': trackWidgetCreation.toString(),
           'linkPlatformKernelIn': linkPlatformKernelIn.toString(),
           'engineHash': engine.version,
-          'buildersUsed': '${await flutterProject.hasBuilders}',
+          'buildersUsed': '${flutterProject != null ? await flutterProject.hasBuilders : false}',
         },
         depfilePaths: <String>[depFilePath],
         pathFilter: (String path) => !path.startsWith('/b/build/slave/'),
