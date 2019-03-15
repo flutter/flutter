@@ -9,6 +9,7 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/platform.dart';
 import '../cache.dart';
+import '../codegen.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
 import '../test/coverage_collector.dart';
@@ -158,6 +159,20 @@ class TestCommand extends FlutterCommand {
     }
 
     Cache.releaseLockEarly();
+
+    // Run builders once before all tests.
+    if (experimentalBuildEnabled && await flutterProject.hasBuilders) {
+      final CodegenDaemon codegenDaemon = await codeGenerator.daemon(flutterProject);
+      codegenDaemon.startBuild();
+      await for (CodegenStatus status in codegenDaemon.buildResults) {
+        if (status == CodegenStatus.Succeeded) {
+          break;
+        }
+        if (status == CodegenStatus.Failed) {
+          throwToolExit('Code generation failed.');
+        }
+      }
+    }
 
     final int result = await runTests(
       files,
