@@ -117,9 +117,10 @@ class AOTSnapshotter {
 
     final String skyEnginePkg = _getPackagePath(packageMap, 'sky_engine');
     final String uiPath = fs.path.join(skyEnginePkg, 'lib', 'ui', 'ui.dart');
+    final String jscPath = fs.path.join(skyEnginePkg, 'lib', 'jsc', 'jsc.dart');
     final String vmServicePath = fs.path.join(skyEnginePkg, 'sdk_ext', 'vmservice_io.dart');
 
-    final List<String> inputPaths = <String>[uiPath, vmServicePath, mainPath];
+    final List<String> inputPaths = <String>[uiPath,jscPath, vmServicePath, mainPath];
     final Set<String> outputPaths = Set<String>();
 
     final String depfilePath = fs.path.join(outputDir.path, 'snapshot.d');

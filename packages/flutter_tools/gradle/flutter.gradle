@@ -18,7 +18,7 @@ import org.gradle.api.tasks.bundling.Jar
 
 buildscript {
     repositories {
-        google()
+        maven { url "https://maven.google.com" }
         jcenter()
     }
     dependencies {
