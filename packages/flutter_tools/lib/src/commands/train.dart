@@ -4,8 +4,8 @@
 
 import '../runner/flutter_command.dart';
 
-// This command is run when generating the app-jit snapshot for the tool, so it cannot access the Cache
-// or any artifacts that haven't been downloaded yet.
+/// This command is run when generating the app-jit snapshot for the tool, so it cannot access the Cache
+/// or any artifacts that haven't been downloaded yet.
 class TrainingCommand extends FlutterCommand {
   @override
   String get description => 'training run for app-jit snapshot';
@@ -15,9 +15,13 @@ class TrainingCommand extends FlutterCommand {
 
   @override
   bool get hidden => true;
+  
+  @override
+  bool get shouldUpdateCache => false;
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+    // This command does not do anything yet :).
     return null;
   }
 }
