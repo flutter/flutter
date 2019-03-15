@@ -419,7 +419,7 @@ class _MaterialAppState extends State<MaterialApp> {
       _navigatorObservers = List<NavigatorObserver>.from(widget.navigatorObservers)
         ..add(_heroController);
     } else {
-      _navigatorObservers = null;
+      _navigatorObservers = const <NavigatorObserver>[];
     }
   }
 

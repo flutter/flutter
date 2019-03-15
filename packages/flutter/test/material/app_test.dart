@@ -596,4 +596,14 @@ void main() {
     expect(themeBeforeBrightnessChange.brightness, Brightness.light);
     expect(themeAfterBrightnessChange.brightness, Brightness.dark);
   });
+
+  testWidgets('MaterialApp with builder and no route information works.', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        builder: (BuildContext context, Widget child) {
+          return const SizedBox();
+        },
+      ),
+    );
+  });
 }
