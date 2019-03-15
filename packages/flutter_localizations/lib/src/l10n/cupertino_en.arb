@@ -1,0 +1,77 @@
+{
+  "datePickerHourSemanticsLabelOther": "$hour o'clock",
+  "@datePickerHourSemanticsLabel": {
+    "description": "Accessibility announcement for the selected hour on a time picker such as '5 o'clock' or '5点'",
+    "plural": "hour"
+  },
+
+  "datePickerMinuteSemanticsOne": "1 minute",
+  "datePickerMinuteSemanticsOther": "$minute minutes",
+  "@datePickerMinuteSemanticsLabel": {
+    "description": "Accessibility announcement for the selected minute on a time picker such as '15 minutes' or '15分'",
+    "plural": "minute"
+  },
+
+  "datePickerDateOrder": "mdy",
+  "@datePickerDateOrder": {
+    "description": "The standard order for the locale to arrange day, month and year in a date. Options are dmy, mdy, ymd and ydm.",
+  },
+
+  "datePickerDateTimeOrder": "date_time_dayPeriod",
+  "@datePickerDateTimeOrder": {
+    "description": "The standard order for the locale to date, time and am/pm in a datetime. Options are date_time_dayPeriod, date_dayPeriod_time, time_dayPeriod_date and dayPeriod_time_date where 'dayPeriod' is am/pm.",
+  },
+
+  "anteMeridiemAbbreviation": "AM",
+  "@anteMeridiemAbbreviation": {
+    "description": "The abbreviation for ante meridiem (before noon) shown in the time picker.",
+  },
+
+  "postMeridiemAbbreviation": "PM",
+  "@postMeridiemAbbreviation": {
+    "description": "The abbreviation for post meridiem (after noon) shown in the time picker.",
+  },
+
+  "alertDialogLabel": "Alert",
+  "@alertDialogLabel": {
+    "description": "The accessibility audio announcement made when an iOS style alert dialog is opened."
+  },
+
+  "timerPickerHourLabelOne": "hour",
+  "timerPickerHourLabelOther": "hours",
+  "@timerPickerHourLabel": {
+    "description": "The label adjacent to an hour integer number in a countdown timer.",
+    "plural": "hour"
+  },
+
+  "timerPickerMinuteLabelOther": "min",
+  "@timerPickerMinuteLabel": {
+    "description": "The label adjacent to a minute integer number in a countdown timer.",
+    "plural": "minute"
+  },
+
+  "timerPickerSecondLabelOther": "sec",
+  "@timerPickerSecondLabel": {
+    "description": "The label adjacent to a second integer number in a countdown timer.",
+    "plural": "second"
+  },
+
+  "cutButtonLabel": "Cut",
+  "@cutButtonLabel": {
+    "description": "The label for cut buttons and menu items."
+  },
+
+  "copyButtonLabel": "Copy",
+  "@copyButtonLabel": {
+    "description": "The label for copy buttons and menu items."
+  },
+
+  "pasteButtonLabel": "Paste",
+  "@pasteButtonLabel": {
+    "description": "The label for paste buttons and menu items."
+  },
+
+  "selectAllButtonLabel": "Select All",
+  "@selectAllButtonLabel": {
+    "description": "The label for select-all buttons and menu items."
+  },

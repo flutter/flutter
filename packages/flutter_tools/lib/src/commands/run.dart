@@ -99,6 +99,13 @@ class RunCommand extends RunCommandBase {
         help: 'Enable tracing to the system tracer. This is only useful on '
               'platforms where such a tracer is available (Android and Fuchsia).',
       )
+      ..addFlag('dump-skp-on-shader-compilation',
+        negatable: false,
+        help: 'Automatically dump the skp that triggers new shader compilations. '
+              'This is useful for wrting custom ShaderWarmUp to reduce jank. '
+              'By default, this is not enabled to reduce the overhead. '
+              'This is only available in profile or debug build. ',
+      )
       ..addFlag('await-first-frame-when-tracing',
         defaultsTo: true,
         help: 'Whether to wait for the first frame when tracing startup ("--trace-startup"), '
@@ -259,6 +266,7 @@ class RunCommand extends RunCommandBase {
         skiaDeterministicRendering: argResults['skia-deterministic-rendering'],
         traceSkia: argResults['trace-skia'],
         traceSystrace: argResults['trace-systrace'],
+        dumpSkpOnShaderCompilation: argResults['dump-skp-on-shader-compilation'],
         observatoryPort: observatoryPort,
         verboseSystemLogs: argResults['verbose-system-logs'],
       );
