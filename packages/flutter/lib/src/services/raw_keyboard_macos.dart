@@ -102,7 +102,7 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
     // Keys like "backspace" won't have a character, but it's known by the physical keyboard.
     // Since there is no logical keycode map for macOS (macOS uses the keycode to reference
     // physical keys), a LogicalKeyboardKey is created with the physical key's HID usage and
-    // debugName. This avoids the need of duplicating the physical keys map.
+    // debugName. This avoids the need for duplicating the physical key map.
     if (physicalKey != PhysicalKeyboardKey.none) {
       final int keyId = physicalKey.usbHidUsage | LogicalKeyboardKey.hidPlane;
       return LogicalKeyboardKey.findKeyByKeyId(keyId) ?? LogicalKeyboardKey(
