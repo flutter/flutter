@@ -157,7 +157,7 @@ class IOSValidator extends DoctorValidator {
     return ValidationResult(
         <ValidationType>[xcodeStatus, packageManagerStatus].reduce(_mergeValidationTypes),
         messages,
-        statusInfo: xcodeVersionInfo
+        statusInfo: xcodeVersionInfo,
     );
   }
 

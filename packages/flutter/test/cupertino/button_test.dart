@@ -176,7 +176,7 @@ void main() {
           child: Center(
             child: CupertinoButton(
               onPressed: () { },
-              child: const Text('ABC')
+              child: const Text('ABC'),
             ),
           ),
       ),
@@ -189,7 +189,7 @@ void main() {
             actions: SemanticsAction.tap.index,
             label: 'ABC',
             flags: SemanticsFlag.isButton.index,
-          )
+          ),
         ],
       ),
       ignoreId: true,
@@ -234,7 +234,7 @@ void main() {
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoButton(
-          onPressed: () {},
+          onPressed: () { },
           child: Builder(builder: (BuildContext context) {
             textStyle = DefaultTextStyle.of(context).style;
             return const Placeholder();
@@ -248,7 +248,7 @@ void main() {
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoButton.filled(
-          onPressed: () {},
+          onPressed: () { },
           child: Builder(builder: (BuildContext context) {
             textStyle = DefaultTextStyle.of(context).style;
             return const Placeholder();
@@ -261,7 +261,7 @@ void main() {
     BoxDecoration decoration = tester.widget<DecoratedBox>(
       find.descendant(
         of: find.byType(CupertinoButton),
-        matching: find.byType(DecoratedBox)
+        matching: find.byType(DecoratedBox),
       )
     ).decoration;
     expect(decoration.color, CupertinoColors.activeBlue);
@@ -270,7 +270,7 @@ void main() {
       CupertinoApp(
         theme: const CupertinoThemeData(brightness: Brightness.dark),
         home: CupertinoButton(
-          onPressed: () {},
+          onPressed: () { },
           child: Builder(builder: (BuildContext context) {
             textStyle = DefaultTextStyle.of(context).style;
             return const Placeholder();
@@ -284,7 +284,7 @@ void main() {
       CupertinoApp(
         theme: const CupertinoThemeData(brightness: Brightness.dark),
         home: CupertinoButton.filled(
-          onPressed: () {},
+          onPressed: () { },
           child: Builder(builder: (BuildContext context) {
             textStyle = DefaultTextStyle.of(context).style;
             return const Placeholder();
@@ -296,7 +296,7 @@ void main() {
     decoration = tester.widget<DecoratedBox>(
       find.descendant(
         of: find.byType(CupertinoButton),
-        matching: find.byType(DecoratedBox)
+        matching: find.byType(DecoratedBox),
       )
     ).decoration;
     expect(decoration.color, CupertinoColors.activeOrange);

@@ -10,8 +10,6 @@ import '../base/time.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
-import '../codegen.dart';
-import '../compile.dart';
 import '../device.dart';
 import '../globals.dart';
 import '../ios/mac.dart';
@@ -34,6 +32,10 @@ abstract class RunCommandBase extends FlutterCommand {
         negatable: false,
         help: 'Trace application startup, then exit, saving the trace to a file.',
       )
+      ..addFlag('verbose-system-logs',
+        negatable: false,
+        help: 'Include verbose logging from the flutter engine.'
+      )
       ..addOption('route',
         help: 'Which route to load when running the app.',
       )
@@ -47,7 +49,7 @@ abstract class RunCommandBase extends FlutterCommand {
               'compiler up to that point. This file can be used in subsequent --dynamic builds '
               'to precompile some code by the offline compiler. '
               'This flag is only allowed when running as --dynamic --profile (recommended) or '
-              '--debug (may include unwanted debug symbols).'
+              '--debug (may include unwanted debug symbols).',
       )
       ..addOption('target-platform',
         defaultsTo: 'default',
@@ -258,6 +260,7 @@ class RunCommand extends RunCommandBase {
         traceSkia: argResults['trace-skia'],
         traceSystrace: argResults['trace-systrace'],
         observatoryPort: observatoryPort,
+        verboseSystemLogs: argResults['verbose-system-logs'],
       );
     }
   }
@@ -346,13 +349,9 @@ class RunCommand extends RunCommandBase {
         argResults[FlutterOptions.kEnableExperiment].isNotEmpty) {
       expFlags = argResults[FlutterOptions.kEnableExperiment];
     }
-
-    ResidentCompiler residentCompiler;
-    if (experimentalBuildEnabled) {
-      residentCompiler = await CodeGeneratingResidentCompiler.create(mainPath: argResults['target']);
-    }
-    final List<FlutterDevice> flutterDevices = devices.map<FlutterDevice>((Device device) {
-      return FlutterDevice(
+    final List<FlutterDevice> flutterDevices = <FlutterDevice>[];
+    for (Device device in devices) {
+      final FlutterDevice flutterDevice = await FlutterDevice.create(
         device,
         trackWidgetCreation: argResults['track-widget-creation'],
         dillOutputPath: argResults['output-dill'],
@@ -360,9 +359,10 @@ class RunCommand extends RunCommandBase {
         fileSystemScheme: argResults['filesystem-scheme'],
         viewFilter: argResults['isolate-filter'],
         experimentalFlags: expFlags,
-        generator: residentCompiler,
+        target: argResults['target'],
       );
-    }).toList();
+      flutterDevices.add(flutterDevice);
+    }
 
     ResidentRunner runner;
     final String applicationBinaryPath = argResults['use-application-binary'];
@@ -424,7 +424,7 @@ class RunCommand extends RunCommandBase {
         devices.length == 1
             ? getNameForTargetPlatform(await devices[0].targetPlatform)
             : 'multiple',
-        devices.length == 1 && await devices[0].isLocalEmulator ? 'emulator' : null
+        devices.length == 1 && await devices[0].isLocalEmulator ? 'emulator' : null,
       ],
       endTimeOverride: appStartedTime,
     );

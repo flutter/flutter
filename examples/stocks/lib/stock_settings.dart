@@ -67,7 +67,7 @@ class StockSettingsState extends State<StockSettings> {
       case StockMode.pessimistic:
         showDialog<bool>(
           context: context,
-           builder: (BuildContext context) {
+          builder: (BuildContext context) {
             return AlertDialog(
               title: const Text('Change mode?'),
               content: const Text('Optimistic mode means everything is awesome. Are you sure you can handle that?'),
@@ -76,13 +76,13 @@ class StockSettingsState extends State<StockSettings> {
                   child: const Text('NO THANKS'),
                   onPressed: () {
                     Navigator.pop(context, false);
-                  }
+                  },
                 ),
                 FlatButton(
                   child: const Text('AGREE'),
                   onPressed: () {
                     Navigator.pop(context, true);
-                  }
+                  },
                 ),
               ],
             );
@@ -99,7 +99,7 @@ class StockSettingsState extends State<StockSettings> {
 
   Widget buildAppBar(BuildContext context) {
     return AppBar(
-      title: const Text('Settings')
+      title: const Text('Settings'),
     );
   }
 
@@ -212,7 +212,7 @@ class StockSettingsState extends State<StockSettings> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: buildAppBar(context),
-      body: buildSettingsPane(context)
+      body: buildSettingsPane(context),
     );
   }
 }

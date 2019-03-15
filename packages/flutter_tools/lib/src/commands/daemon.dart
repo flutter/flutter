@@ -95,7 +95,7 @@ class Daemon {
       onDone: () {
         if (!_onExitCompleter.isCompleted)
           _onExitCompleter.complete(0);
-      }
+      },
     );
   }
 
@@ -272,12 +272,12 @@ class DaemonDomain extends Domain {
           sendEvent('daemon.logMessage', <String, dynamic>{
             'level': message.level,
             'message': message.message,
-            'stackTrace': message.stackTrace.toString()
+            'stackTrace': message.stackTrace.toString(),
           });
         } else {
           sendEvent('daemon.logMessage', <String, dynamic>{
             'level': message.level,
-            'message': message.message
+            'message': message.message,
           });
         }
       }
@@ -303,7 +303,7 @@ class DaemonDomain extends Domain {
 
 typedef _RunOrAttach = Future<void> Function({
   Completer<DebugConnectionInfo> connectionInfoCompleter,
-  Completer<void> appStartedCompleter
+  Completer<void> appStartedCompleter,
 });
 
 /// This domain responds to methods like [start] and [stop].
@@ -346,11 +346,12 @@ class AppDomain extends Domain {
     final Directory cwd = fs.currentDirectory;
     fs.currentDirectory = fs.directory(projectDirectory);
 
-    final FlutterDevice flutterDevice = FlutterDevice(
+    final FlutterDevice flutterDevice = await FlutterDevice.create(
       device,
       trackWidgetCreation: trackWidgetCreation,
       dillOutputPath: dillOutputPath,
       viewFilter: isolateFilter,
+      target: target,
     );
 
     ResidentRunner runner;
@@ -910,12 +911,12 @@ class _AppRunLogger extends Logger {
         _sendLogEvent(<String, dynamic>{
           'log': message,
           'stackTrace': stackTrace.toString(),
-          'error': true
+          'error': true,
         });
       } else {
         _sendLogEvent(<String, dynamic>{
           'log': message,
-          'error': true
+          'error': true,
         });
       }
     }
@@ -982,9 +983,8 @@ class _AppRunLogger extends Logger {
           'id': id.toString(),
           'progressId': progressId,
           'finished': true,
-        },
-      );
-    })..start();
+        });
+      })..start();
     return _status;
   }
 

@@ -72,7 +72,7 @@ String getEmulatorPath([ AndroidSdk existingSdk ]) {
 String getAvdPath() {
 
   final List<String> searchPaths = <String>[
-    platform.environment['ANDROID_AVD_HOME']
+    platform.environment['ANDROID_AVD_HOME'],
   ];
 
   if (platform.environment['HOME'] != null)
@@ -365,6 +365,14 @@ class AndroidSdk {
   }
 
   static bool validSdkDirectory(String dir) {
+    return sdkDirectoryHasLicneses(dir) || sdkDirectoryHasPlatformTools(dir);
+  }
+
+  static bool sdkDirectoryHasPlatformTools(String dir) {
+    return fs.isDirectorySync(fs.path.join(dir, 'platform-tools'));
+  }
+
+  static bool sdkDirectoryHasLicneses(String dir) {
     return fs.isDirectorySync(fs.path.join(dir, 'licenses'));
   }
 

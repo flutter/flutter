@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:developer';
 import 'dart:ui' as ui;
 
@@ -9,26 +10,46 @@ import 'package:flutter/foundation.dart';
 
 /// Interface for drawing an image to warm up Skia shader compilations.
 ///
-/// When Skia first sees a certain type of draw operations on GPU, it needs to
-/// compile the corresponding shader. The compilation can be slow (20ms-200ms).
-/// Having that time as a startup latency is often better than having a jank in
-/// the middle of an animation.
+/// When Skia first sees a certain type of draw operation on the GPU, it needs
+/// to compile the corresponding shader. The compilation can be slow (20ms-
+/// 200ms). Having that time as startup latency is often better than having
+/// jank in the middle of an animation.
 ///
 /// Therefore, we use this during the [PaintingBinding.initInstances] call to
 /// move common shader compilations from animation time to startup time. By
-/// default, a [DefaultShaderWarmUp] is used. Create a custom [ShaderWarmUp]
-/// subclass to replace [PaintingBinding.shaderWarmUp] before
-/// [PaintingBinding.initInstances] is called. Usually, that can be done before
-/// calling [runApp].
+/// default, a [DefaultShaderWarmUp] is used. If needed, app developers can
+/// create a custom [ShaderWarmUp] subclass and hand it to
+/// [PaintingBinding.shaderWarmUp] (so it replaces [DefaultShaderWarmUp])
+/// before [PaintingBinding.initInstances] is called. Usually, that can be
+/// done before calling [runApp].
 ///
-/// This warm up needs to be run on each individual device because the shader
+/// To determine whether a draw operation is useful for warming up shaders,
+/// check whether it improves the slowest GPU frame. Also, tracing with
+/// `flutter run --profile --trace-skia` may reveal whether there is shader-
+/// compilation-related jank. If there is such jank, some long
+/// `GrGLProgramBuilder::finalize` calls would appear in the middle of an
+/// animation. Their parent calls, which look like `XyzOp` (e.g., `FillRecOp`,
+/// `CircularRRectOp`) would suggest Xyz draw operations are causing the
+/// shaders to be compiled. A useful shader warm-up draw operation would
+/// eliminate such long compilation calls in the animation. To double-check
+/// the warm-up, trace with `flutter run --profile --trace-skia --start-
+/// paused`. The `GrGLProgramBuilder` with the associated `XyzOp` should
+/// appear during startup rather than in the middle of a later animation.
+
+///
+/// This warm-up needs to be run on each individual device because the shader
 /// compilation depends on the specific GPU hardware and driver a device has. It
 /// can't be pre-computed during the Flutter engine compilation as the engine is
-/// device agnostic.
+/// device-agnostic.
 ///
-/// If no warm up is desired (e.g., when the startup latency is crucial), set
+/// If no warm-up is desired (e.g., when the startup latency is crucial), set
 /// [PaintingBinding.shaderWarmUp] either to a custom ShaderWarmUp with an empty
 /// [warmUpOnCanvas] or null.
+///
+/// See also:
+///
+///  * [PaintingBinding.shaderWarmUp], the actual instance of [ShaderWarmUp]
+///    that's used to warm up the shaders.
 abstract class ShaderWarmUp {
   /// Allow const constructors for subclasses.
   const ShaderWarmUp();
@@ -53,15 +74,15 @@ abstract class ShaderWarmUp {
   /// Skia draw operations are commonly used, and which shader compilations
   /// are causing janks.
   @protected
-  void warmUpOnCanvas(ui.Canvas canvas);
+  Future<void> warmUpOnCanvas(ui.Canvas canvas);
 
   /// Construct an offscreen image of [size], and execute [warmUpOnCanvas] on a
   /// canvas associated with that image.
-  void execute() {
+  Future<void> execute() async {
     final ui.PictureRecorder recorder = ui.PictureRecorder();
     final ui.Canvas canvas = ui.Canvas(recorder);
 
-    warmUpOnCanvas(canvas);
+    await warmUpOnCanvas(canvas);
 
     final ui.Picture picture = recorder.endRecording();
     final TimelineTask shaderWarmUpTask = TimelineTask();
@@ -84,7 +105,7 @@ class DefaultShaderWarmUp extends ShaderWarmUp {
   /// Trigger common draw operations on a canvas to warm up GPU shader
   /// compilation cache.
   @override
-  void warmUpOnCanvas(ui.Canvas canvas) {
+  Future<void> warmUpOnCanvas(ui.Canvas canvas) async {
     final ui.RRect rrect = ui.RRect.fromLTRBXY(20.0, 20.0, 60.0, 60.0, 10.0, 10.0);
     final ui.Path rrectPath = ui.Path()..addRRect(rrect);
 
@@ -101,11 +122,26 @@ class DefaultShaderWarmUp extends ShaderWarmUp {
     path.moveTo(60.0, 20.0);
     path.quadraticBezierTo(60.0, 60.0, 20.0, 60.0);
 
-    final List<ui.Path> paths = <ui.Path>[rrectPath, circlePath, path];
+    final ui.Path convexPath = ui.Path();
+    convexPath.moveTo(20.0, 30.0);
+    convexPath.lineTo(40.0, 20.0);
+    convexPath.lineTo(60.0, 30.0);
+    convexPath.lineTo(60.0, 60.0);
+    convexPath.lineTo(20.0, 60.0);
+    convexPath.close();
+
+    // Skia uses different shaders based on the kinds of paths being drawn and
+    // the associated paint configurations. According to our experience and
+    // tracing, drawing the following paths/paints generates various of
+    // shaders that are commonly used.
+    final List<ui.Path> paths = <ui.Path>[rrectPath, circlePath, path, convexPath];
 
     final List<ui.Paint> paints = <ui.Paint>[
       ui.Paint()
         ..isAntiAlias = true
+        ..style = ui.PaintingStyle.fill,
+      ui.Paint()
+        ..isAntiAlias = false
         ..style = ui.PaintingStyle.fill,
       ui.Paint()
         ..isAntiAlias = true
@@ -114,7 +150,7 @@ class DefaultShaderWarmUp extends ShaderWarmUp {
       ui.Paint()
         ..isAntiAlias = true
         ..style = ui.PaintingStyle.stroke
-        ..strokeWidth = 0.1  // hairline
+        ..strokeWidth = 0.1,  // hairline
     ];
 
     // Warm up path stroke and fill shaders.

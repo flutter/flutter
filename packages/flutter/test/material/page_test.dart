@@ -481,7 +481,7 @@ void main() {
             builder: (BuildContext context) {
               final String pageNumber = settings.name == '/' ? '1' : '2';
               return Center(child: Text('Page $pageNumber'));
-            }
+            },
           );
         },
       ),
@@ -517,7 +517,7 @@ void main() {
             builder: (BuildContext context) {
               final String pageNumber = settings.name == '/' ? '1' : '2';
               return Center(child: Text('Page $pageNumber'));
-            }
+            },
           );
         },
       ),
@@ -539,5 +539,81 @@ void main() {
 
     expect(find.text('Page 1'), isOnstage);
     expect(find.text('Page 2'), findsNothing);
+  });
+
+  testWidgets('Back swipe dismiss interrupted by route push', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/28728
+    final GlobalKey scaffoldKey = GlobalKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(platform: TargetPlatform.iOS),
+        home: Scaffold(
+          key: scaffoldKey,
+          body: Center(
+            child: RaisedButton(
+              onPressed: () {
+                Navigator.push<void>(scaffoldKey.currentContext, MaterialPageRoute<void>(
+                  builder: (BuildContext context) {
+                    return const Scaffold(
+                      body: Center(child: Text('route')),
+                    );
+                  },
+                ));
+              },
+              child: const Text('push'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Check the basic iOS back-swipe dismiss transition. Dragging the pushed
+    // route halfway across the screen will trigger the iOS dismiss animation
+
+    await tester.tap(find.text('push'));
+    await tester.pumpAndSettle();
+    expect(find.text('route'), findsOneWidget);
+    expect(find.text('push'), findsNothing);
+
+    TestGesture gesture = await tester.startGesture(const Offset(5, 300));
+    await gesture.moveBy(const Offset(400, 0));
+    await gesture.up();
+    await tester.pump();
+    expect( // The 'route' route has been dragged to the right, halfway across the screen
+      tester.getTopLeft(find.ancestor(of: find.text('route'), matching: find.byType(Scaffold))),
+      const Offset(400, 0),
+    );
+    expect( // The 'push' route is sliding in from the left.
+      tester.getTopLeft(find.ancestor(of: find.text('push'), matching: find.byType(Scaffold))).dx,
+      lessThan(0),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('push'), findsOneWidget);
+    expect(
+      tester.getTopLeft(find.ancestor(of: find.text('push'), matching: find.byType(Scaffold))),
+      Offset.zero,
+    );
+    expect(find.text('route'), findsNothing);
+
+
+    // Run the dismiss animation 75%, which exposes the route "push" button,
+    // and then press the button. MaterialPageTransition duration is 300ms,
+    // 275 = 300 * 0.75.
+
+    await tester.tap(find.text('push'));
+    await tester.pumpAndSettle();
+    expect(find.text('route'), findsOneWidget);
+    expect(find.text('push'), findsNothing);
+
+    gesture = await tester.startGesture(const Offset(5, 300));
+    await gesture.moveBy(const Offset(400, 0)); // drag halfway
+    await gesture.up();
+    await tester.pump(const Duration(milliseconds: 275)); // partially dismiss "route"
+    expect(find.text('route'), findsOneWidget);
+    await tester.tap(find.text('push'));
+    await tester.pumpAndSettle();
+    expect(find.text('route'), findsOneWidget);
+    expect(find.text('push'), findsNothing);
   });
 }

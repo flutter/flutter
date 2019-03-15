@@ -136,7 +136,7 @@ void main() {
         home: Scaffold(
           floatingActionButton: FloatingActionButton(
             onPressed: () { },
-            highlightElevation: 20.0
+            highlightElevation: 20.0,
           ),
         ),
       ),
@@ -477,7 +477,7 @@ void main() {
             SemanticsFlag.isEnabled,
           ],
           actions: <SemanticsAction>[
-            SemanticsAction.tap
+            SemanticsAction.tap,
           ],
         ),
       ],
@@ -543,7 +543,7 @@ void main() {
                 TestSemantics(
                   label: 'Add Photo',
                   actions: <SemanticsAction>[
-                    SemanticsAction.tap
+                    SemanticsAction.tap,
                   ],
                   flags: <SemanticsFlag>[
                     SemanticsFlag.isButton,
@@ -636,7 +636,7 @@ void main() {
             child: RepaintBoundary(
               key: key,
               child: FloatingActionButton(
-                onPressed: () {},
+                onPressed: () { },
                 child: const Icon(Icons.add),
               ),
             ),
@@ -655,7 +655,7 @@ void main() {
     );
   });
 
-  testWidgets('Floating Action Button has no clip by default', (WidgetTester tester) async{
+  testWidgets('Floating Action Button has no clip by default', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
           textDirection: TextDirection.ltr,
@@ -663,13 +663,13 @@ void main() {
             child: FloatingActionButton(
               onPressed: () { /* to make sure the button is enabled */ },
             ),
-          )
+          ),
       ),
     );
 
     expect(
         tester.renderObject(find.byType(FloatingActionButton)),
-        paintsExactlyCountTimes(#clipPath, 0)
+        paintsExactlyCountTimes(#clipPath, 0),
     );
   });
 }

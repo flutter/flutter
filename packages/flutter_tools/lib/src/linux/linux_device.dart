@@ -14,7 +14,7 @@ class LinuxDevice extends Device {
   LinuxDevice() : super('Linux');
 
   @override
-  void clearLogs() {}
+  void clearLogs() { }
 
   @override
   DeviceLogReader getLogReader({ ApplicationPackage app }) => NoOpDeviceLogReader('linux');
@@ -93,7 +93,7 @@ class LinuxDevices extends PollingDeviceDiscovery {
       return const <Device>[];
     }
     return <Device>[
-      LinuxDevice()
+      LinuxDevice(),
     ];
   }
 

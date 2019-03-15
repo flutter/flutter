@@ -236,7 +236,7 @@ Future<EvalResult> _evalCommand(String executable, List<String> arguments, {
 }
 
 Future<void> _runFlutterAnalyze(String workingDirectory, {
-  List<String> options = const <String>[]
+  List<String> options = const <String>[],
 }) {
   return runCommand(flutter, <String>['analyze', '--dartdocs']..addAll(options),
     workingDirectory: workingDirectory,
@@ -401,7 +401,7 @@ Set<String> _findFlutterDependencies(String srcPath, List<String> errors, { bool
   return Directory(srcPath).listSync(recursive: true).where((FileSystemEntity entity) {
     return entity is File && path.extension(entity.path) == '.dart';
   }).map<Set<String>>((FileSystemEntity entity) {
-    final Set<String> result = Set<String>();
+    final Set<String> result = <String>{};
     final File file = entity;
     for (String line in file.readAsLinesSync()) {
       Match match = _importPattern.firstMatch(line);
@@ -419,7 +419,7 @@ Set<String> _findFlutterDependencies(String srcPath, List<String> errors, { bool
     }
     return result;
   }).reduce((Set<String> value, Set<String> element) {
-    value ??= Set<String>();
+    value ??= <String>{};
     value.addAll(element);
     return value;
   });
@@ -434,7 +434,7 @@ List<T> _deepSearch<T>(Map<T, Set<T>> map, T start, [ Set<T> seen ]) {
     final List<T> result = _deepSearch<T>(
       map,
       key,
-      (seen == null ? Set<T>.from(<T>[start]) : Set<T>.from(seen))..add(key),
+      (seen == null ? <T>{start} : Set<T>.from(seen))..add(key),
     );
     if (result != null) {
       result.insert(0, start);
@@ -543,7 +543,7 @@ Future<void> _verifyGeneratedPluginRegistrants(String flutterRoot) async {
     }
   }
 
-  final Set<String> outOfDate = Set<String>();
+  final Set<String> outOfDate = <String>{};
 
   for (String package in packageToRegistrants.keys) {
     final Map<File, String> fileToContent = <File, String>{};

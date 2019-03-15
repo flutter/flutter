@@ -254,7 +254,7 @@ class ServiceProtocolDevFSOperations implements DevFSOperations {
         params: <String, dynamic> {
           'fsName': fsName,
           'uri': deviceUri.toString(),
-          'fileContents': fileContents
+          'fileContents': fileContents,
         },
       );
     } catch (error) {
@@ -384,22 +384,18 @@ class DevFS {
     VMService serviceProtocol,
     this.fsName,
     this.rootDirectory, {
-    String packagesFilePath
+    String packagesFilePath,
   }) : _operations = ServiceProtocolDevFSOperations(serviceProtocol),
-       _httpWriter = _DevFSHttpWriter(fsName, serviceProtocol) {
-    _packagesFilePath =
-        packagesFilePath ?? fs.path.join(rootDirectory.path, kPackagesFileName);
-  }
+       _httpWriter = _DevFSHttpWriter(fsName, serviceProtocol),
+       _packagesFilePath = packagesFilePath ?? fs.path.join(rootDirectory.path, kPackagesFileName);
 
   DevFS.operations(
     this._operations,
     this.fsName,
     this.rootDirectory, {
     String packagesFilePath,
-  }) : _httpWriter = null {
-       _packagesFilePath =
-           packagesFilePath ?? fs.path.join(rootDirectory.path, kPackagesFileName);
-  }
+  }) : _httpWriter = null,
+       _packagesFilePath = packagesFilePath ?? fs.path.join(rootDirectory.path, kPackagesFileName);
 
   final DevFSOperations _operations;
   final _DevFSHttpWriter _httpWriter;
@@ -407,7 +403,7 @@ class DevFS {
   final Directory rootDirectory;
   String _packagesFilePath;
   final Map<Uri, DevFSContent> _entries = <Uri, DevFSContent>{};
-  final Set<String> assetPathsToEvict = Set<String>();
+  final Set<String> assetPathsToEvict = <String>{};
 
   final List<Future<Map<String, dynamic>>> _pendingOperations =
       <Future<Map<String, dynamic>>>[];
@@ -537,7 +533,7 @@ class DevFS {
     // run with no changes is supposed to be fast (considering that it is
     // initiated by user key press).
     final List<String> invalidatedFiles = <String>[];
-    final Set<Uri> filesUris = Set<Uri>();
+    final Set<Uri> filesUris = <Uri>{};
     for (Uri uri in dirtyEntries.keys.toList()) {
       if (!uri.path.startsWith(assetBuildDirPrefix)) {
         final DevFSContent content = dirtyEntries[uri];

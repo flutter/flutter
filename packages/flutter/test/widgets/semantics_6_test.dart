@@ -21,7 +21,7 @@ void main() {
           label: 'hello',
           textDirection: TextDirection.ltr,
           rect: TestSemantics.fullScreen,
-        )
+        ),
       ],
     );
 
@@ -71,7 +71,7 @@ Widget buildWidget({ @required String blockedText, bool blocking = true }) {
               container: true,
             ),
           ),
-        ]
+        ],
     ),
   );
 }

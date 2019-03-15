@@ -334,8 +334,7 @@ example:org-dartlang-app:/
     });
   });
 
-  group('compile expression', ()
-  {
+  group('compile expression', () {
     ProcessManager mockProcessManager;
     ResidentCompiler generator;
     MockProcess mockFrontendServer;

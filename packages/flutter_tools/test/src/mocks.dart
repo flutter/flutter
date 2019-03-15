@@ -31,7 +31,7 @@ class MockApplicationPackageStore extends ApplicationPackageStore {
       id: 'io.flutter.android.mock',
       file: fs.file('/mock/path/to/android/SkyShell.apk'),
       versionCode: 1,
-      launchActivity: 'io.flutter.android.mock.MockActivity'
+      launchActivity: 'io.flutter.android.mock.MockActivity',
     ),
     iOS: BuildableIOSApp(MockIosProject())
   );
@@ -470,16 +470,16 @@ class MockDevFSOperations extends BasicMock implements DevFSOperations {
 
 class MockResidentCompiler extends BasicMock implements ResidentCompiler {
   @override
-  void accept() {}
+  void accept() { }
 
   @override
   Future<CompilerOutput> reject() async { return null; }
 
   @override
-  void reset() {}
+  void reset() { }
 
   @override
-  Future<dynamic> shutdown() async {}
+  Future<dynamic> shutdown() async { }
 
   @override
   Future<CompilerOutput> compileExpression(
@@ -488,7 +488,7 @@ class MockResidentCompiler extends BasicMock implements ResidentCompiler {
     List<String> typeDefinitions,
     String libraryUri,
     String klass,
-    bool isStatic
+    bool isStatic,
   ) async {
     return null;
   }

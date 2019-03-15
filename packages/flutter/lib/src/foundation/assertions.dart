@@ -32,7 +32,7 @@ class FlutterErrorDetails {
     this.context,
     this.stackFilter,
     this.informationCollector,
-    this.silent = false
+    this.silent = false,
   });
 
   /// The exception. Often this will be an [AssertionError], maybe specifically

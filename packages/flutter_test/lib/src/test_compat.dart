@@ -92,7 +92,7 @@ Future<void> _runLiveTest(Suite suiteConfig, LiveTest liveTest, _Reporter report
 }
 
 Future<void> _runSkippedTest(Suite suiteConfig, Test test, List<Group> parents, _Reporter reporter) async {
-  final LocalTest skipped = LocalTest(test.name, test.metadata, () {}, trace: test.trace);
+  final LocalTest skipped = LocalTest(test.name, test.metadata, () { }, trace: test.trace);
   if (skipped.metadata.skipReason != null) {
     print('Skip: ${skipped.metadata.skipReason}');
   }
@@ -231,9 +231,9 @@ void test(
 /// suite*—tests in other suites will run as normal. We recommend that users
 /// avoid this flag if possible, and instead use the test runner flag `-n` to
 /// filter tests by name.
-@isTest
-void group(Object description, Function body) {
-  _declarer.group(description.toString(), body);
+@isTestGroup
+void group(Object description, Function body, { dynamic skip }) {
+  _declarer.group(description.toString(), body, skip: skip);
 }
 
 /// Registers a function to be run before tests.
@@ -365,7 +365,7 @@ class _Reporter {
   String _lastProgressSuffix;
 
   /// The set of all subscriptions to various streams.
-  final Set<StreamSubscription<void>> _subscriptions = Set<StreamSubscription<void>>();
+  final Set<StreamSubscription<void>> _subscriptions = <StreamSubscription<void>>{};
 
   /// A callback called when the engine begins running [liveTest].
   void _onTestStarted(LiveTest liveTest) {

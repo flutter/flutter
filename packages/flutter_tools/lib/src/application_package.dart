@@ -14,6 +14,7 @@ import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/os.dart' show os;
 import 'base/process.dart';
+import 'base/user_messages.dart';
 import 'build_info.dart';
 import 'globals.dart';
 import 'ios/ios_workflow.dart';
@@ -85,7 +86,7 @@ class AndroidApk extends ApplicationPackage {
     String id,
     @required this.file,
     @required this.versionCode,
-    @required this.launchActivity
+    @required this.launchActivity,
   }) : assert(file != null),
        assert(launchActivity != null),
        super(id: id);
@@ -94,11 +95,11 @@ class AndroidApk extends ApplicationPackage {
   factory AndroidApk.fromApk(File apk) {
     final String aaptPath = androidSdk?.latestVersion?.aaptPath;
     if (aaptPath == null) {
-      printError('Unable to locate the Android SDK; please run \'flutter doctor\'.');
+      printError(userMessages.aaptNotFound);
       return null;
     }
 
-     final List<String> aaptArgs = <String>[
+    final List<String> aaptArgs = <String>[
        aaptPath,
       'dump',
       'xmltree',
@@ -123,7 +124,7 @@ class AndroidApk extends ApplicationPackage {
       id: data.packageName,
       file: apk,
       versionCode: int.tryParse(data.versionCode),
-      launchActivity: '${data.packageName}/${data.launchableActivityName}'
+      launchActivity: '${data.packageName}/${data.launchableActivityName}',
     );
   }
 
@@ -204,7 +205,7 @@ class AndroidApk extends ApplicationPackage {
       id: packageId,
       file: apkFile,
       versionCode: null,
-      launchActivity: launchActivity
+      launchActivity: launchActivity,
     );
   }
 

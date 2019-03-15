@@ -121,7 +121,7 @@ class VsCode {
         fs.path.join(homeDirPath, 'Applications', 'Visual Studio Code - Insiders.app', 'Contents'),
         '.vscode-insiders',
         isInsiders: true,
-      )
+      ),
     ]);
   }
 

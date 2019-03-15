@@ -13,11 +13,11 @@ import 'package:flutter/rendering.dart';
 import '../widgets/semantics_tester.dart';
 
 const List<String> menuItems = <String>['one', 'two', 'three', 'four'];
-final ValueChanged<String> onChanged = (_) {};
+final ValueChanged<String> onChanged = (_) { };
 
 final Type dropdownButtonType = DropdownButton<String>(
   onChanged: (_) { },
-  items: const <DropdownMenuItem<String>>[]
+  items: const <DropdownMenuItem<String>>[],
 ).runtimeType;
 
 Widget buildFrame({
@@ -53,7 +53,7 @@ Widget buildFrame({
                 child: Text(item, key: ValueKey<String>(item + 'Text')),
               );
             }).toList(),
-          )
+          ),
         ),
       ),
     ),
@@ -254,7 +254,7 @@ void main() {
                 items: menuItems.map((String val) {
                   return DropdownMenuItem<String>(
                     value: val,
-                    child: Text(val)
+                    child: Text(val),
                   );
                 }).toList(),
                 onChanged: (String v) {
@@ -299,7 +299,7 @@ void main() {
                     child: const Text(value),
                   ),
                 ],
-                onChanged: (_) {},
+                onChanged: (_) { },
               ),
             ],
           ),
@@ -491,7 +491,7 @@ void main() {
     const Offset selectedItemOffset = Offset(0.0, -8.0);
     expect(
       firstItem.size.topCenter(firstItem.localToGlobal(selectedItemOffset)).dy,
-      equals(menuItemContainer.size.topCenter(menuItemContainer.localToGlobal(Offset.zero)).dy)
+      equals(menuItemContainer.size.topCenter(menuItemContainer.localToGlobal(Offset.zero)).dy),
     );
   });
 
@@ -515,7 +515,7 @@ void main() {
     // List should be scrolled so that the selected item is in line with the button
     expect(
       selectedItem.size.center(selectedItem.localToGlobal(Offset.zero)).dy,
-      equals(buttonBox.size.center(buttonBox.localToGlobal(Offset.zero)).dy)
+      equals(buttonBox.size.center(buttonBox.localToGlobal(Offset.zero)).dy),
     );
   });
 
@@ -757,7 +757,7 @@ void main() {
       buttonKey: key,
       value: null,
       items: menuItems,
-      onChanged: (String _) {},
+      onChanged: (String _) { },
       hint: const Text('test'),
     ));
 
@@ -895,7 +895,7 @@ void main() {
 
     final DropdownButton<int> button = DropdownButton<int>(
       value: 50,
-      onChanged: (int newValue){},
+      onChanged: (int newValue) { },
       items: items,
     );
 
@@ -932,7 +932,7 @@ void main() {
 
     final DropdownButton<int> button = DropdownButton<int>(
       value: 99,
-      onChanged: (int newValue){},
+      onChanged: (int newValue) { },
       items: items,
     );
 
@@ -969,7 +969,7 @@ void main() {
 
     final DropdownButton<int> button = DropdownButton<int>(
       value: 0,
-      onChanged: (int newValue){},
+      onChanged: (int newValue) { },
       items: items,
     );
 
@@ -1006,7 +1006,7 @@ void main() {
 
     final DropdownButton<int> button = DropdownButton<int>(
       value: 99,
-      onChanged: (int newValue){},
+      onChanged: (int newValue) { },
       items: items,
     );
 

@@ -161,7 +161,7 @@ Future<GradleProject> _readGradleProject() async {
     project = GradleProject(
       <String>['debug', 'profile', 'release'],
       <String>[], flutterProject.android.gradleAppOutV1Directory,
-        flutterProject.android.gradleAppBundleOutV1Directory
+        flutterProject.android.gradleAppBundleOutV1Directory,
     );
   }
   status.stop();
@@ -464,7 +464,7 @@ Future<void> _buildGradleProjectV2(
       }
 
       return line;
-    }
+    },
   );
   status.stop();
 
@@ -682,7 +682,7 @@ class GradleProject {
         .trim();
 
     // Extract build types and product flavors.
-    final Set<String> variants = Set<String>();
+    final Set<String> variants = <String>{};
     for (String s in tasks.split('\n')) {
       final Match match = _assembleTaskPattern.matchAsPrefix(s);
       if (match != null) {
@@ -691,8 +691,8 @@ class GradleProject {
           variants.add(variant);
       }
     }
-    final Set<String> buildTypes = Set<String>();
-    final Set<String> productFlavors = Set<String>();
+    final Set<String> buildTypes = <String>{};
+    final Set<String> productFlavors = <String>{};
     for (final String variant1 in variants) {
       for (final String variant2 in variants) {
         if (variant2.startsWith(variant1) && variant2 != variant1) {

@@ -577,7 +577,7 @@ abstract class Constraints {
   /// Returns the same as [isNormalized] if asserts are disabled.
   bool debugAssertIsValid({
     bool isAppliedConstraint = false,
-    InformationCollector informationCollector
+    InformationCollector informationCollector,
   }) {
     assert(isNormalized);
     return isNormalized;
@@ -749,9 +749,9 @@ class PipelineOwner {
   ///
   /// See [RendererBinding] for an example of how this function is used.
   void flushLayout() {
-    profile(() {
+    if (!kReleaseMode) {
       Timeline.startSync('Layout', arguments: timelineWhitelistArguments);
-    });
+    }
     assert(() {
       _debugDoingLayout = true;
       return true;
@@ -771,9 +771,9 @@ class PipelineOwner {
         _debugDoingLayout = false;
         return true;
       }());
-      profile(() {
+      if (!kReleaseMode) {
         Timeline.finishSync();
-      });
+      }
     }
   }
 
@@ -809,14 +809,18 @@ class PipelineOwner {
   /// Called as part of the rendering pipeline after [flushLayout] and before
   /// [flushPaint].
   void flushCompositingBits() {
-    profile(() { Timeline.startSync('Compositing bits'); });
+    if (!kReleaseMode) {
+      Timeline.startSync('Compositing bits');
+    }
     _nodesNeedingCompositingBitsUpdate.sort((RenderObject a, RenderObject b) => a.depth - b.depth);
     for (RenderObject node in _nodesNeedingCompositingBitsUpdate) {
       if (node._needsCompositingBitsUpdate && node.owner == this)
         node._updateCompositingBits();
     }
     _nodesNeedingCompositingBitsUpdate.clear();
-    profile(() { Timeline.finishSync(); });
+    if (!kReleaseMode) {
+      Timeline.finishSync();
+    }
   }
 
   List<RenderObject> _nodesNeedingPaint = <RenderObject>[];
@@ -837,7 +841,9 @@ class PipelineOwner {
   ///
   /// See [RendererBinding] for an example of how this function is used.
   void flushPaint() {
-    profile(() { Timeline.startSync('Paint', arguments: timelineWhitelistArguments); });
+    if (!kReleaseMode) {
+      Timeline.startSync('Paint', arguments: timelineWhitelistArguments);
+    }
     assert(() {
       _debugDoingPaint = true;
       return true;
@@ -862,7 +868,9 @@ class PipelineOwner {
         _debugDoingPaint = false;
         return true;
       }());
-      profile(() { Timeline.finishSync(); });
+      if (!kReleaseMode) {
+        Timeline.finishSync();
+      }
     }
   }
 
@@ -921,7 +929,7 @@ class PipelineOwner {
   }
 
   bool _debugDoingSemantics = false;
-  final Set<RenderObject> _nodesNeedingSemantics = Set<RenderObject>();
+  final Set<RenderObject> _nodesNeedingSemantics = <RenderObject>{};
 
   /// Update the semantics for render objects marked as needing a semantics
   /// update.
@@ -937,7 +945,9 @@ class PipelineOwner {
   void flushSemantics() {
     if (_semanticsOwner == null)
       return;
-    profile(() { Timeline.startSync('Semantics'); });
+    if (!kReleaseMode) {
+      Timeline.startSync('Semantics');
+    }
     assert(_semanticsOwner != null);
     assert(() { _debugDoingSemantics = true; return true; }());
     try {
@@ -952,7 +962,9 @@ class PipelineOwner {
     } finally {
       assert(_nodesNeedingSemantics.isEmpty);
       assert(() { _debugDoingSemantics = false; return true; }());
-      profile(() { Timeline.finishSync(); });
+      if (!kReleaseMode) {
+        Timeline.finishSync();
+      }
     }
   }
 }
@@ -1206,7 +1218,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
           information.writeln('This RenderObject has no descendants.');
         }
         information.writeAll(descendants, '\n');
-      }
+      },
     ));
   }
 
@@ -1570,7 +1582,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
             information.writeln(stack[targetFrame]);
           }
         }
-      }
+      },
     ));
     assert(!_debugDoingThisResize);
     assert(!_debugDoingThisLayout);
@@ -1735,7 +1747,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   void rotate({
     int oldAngle, // 0..3
     int newAngle, // 0..3
-    Duration time
+    Duration time,
   }) { }
 
   // when the parent has rotated (e.g. when the screen has been turned
@@ -2422,7 +2434,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
 
     final bool producesForkingFragment = !config.hasBeenAnnotated && !config.isSemanticBoundary;
     final List<_InterestingSemanticsFragment> fragments = <_InterestingSemanticsFragment>[];
-    final Set<_InterestingSemanticsFragment> toBeMarkedExplicit = Set<_InterestingSemanticsFragment>();
+    final Set<_InterestingSemanticsFragment> toBeMarkedExplicit = <_InterestingSemanticsFragment>{};
     final bool childrenMergeIntoParent = mergeIntoParent || config.isMergingSemanticsOfDescendants;
 
     // When set to true there's currently not enough information in this subtree
@@ -3098,7 +3110,7 @@ class FlutterErrorDetailsForRendering extends FlutterErrorDetails {
     String context,
     this.renderObject,
     InformationCollector informationCollector,
-    bool silent = false
+    bool silent = false,
   }) : super(
     exception: exception,
     stack: stack,
@@ -3180,7 +3192,7 @@ class _ContainerSemanticsFragment extends _SemanticsFragment {
 abstract class _InterestingSemanticsFragment extends _SemanticsFragment {
   _InterestingSemanticsFragment({
     @required RenderObject owner,
-    @required bool dropsSemanticsOfPreviousSiblings
+    @required bool dropsSemanticsOfPreviousSiblings,
   }) : assert(owner != null),
        _ancestorChain = <RenderObject>[owner],
        super(dropsSemanticsOfPreviousSiblings: dropsSemanticsOfPreviousSiblings);
@@ -3244,7 +3256,7 @@ abstract class _InterestingSemanticsFragment extends _SemanticsFragment {
   void addTags(Iterable<SemanticsTag> tags) {
     if (tags == null || tags.isEmpty)
       return;
-    _tagsForChildren ??= Set<SemanticsTag>();
+    _tagsForChildren ??= <SemanticsTag>{};
     _tagsForChildren.addAll(tags);
   }
 

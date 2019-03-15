@@ -24,10 +24,12 @@ import '../base/process_manager.dart';
 import '../base/terminal.dart';
 import '../build_info.dart';
 import '../bundle.dart';
+import '../codegen.dart';
 import '../compile.dart';
 import '../convert.dart';
 import '../dart/package_map.dart';
 import '../globals.dart';
+import '../project.dart';
 import '../vmservice.dart';
 import 'watcher.dart';
 
@@ -89,6 +91,7 @@ void installHook({
   int observatoryPort,
   InternetAddressType serverType = InternetAddressType.IPv4,
   Uri projectRootDirectory,
+  FlutterProject flutterProject,
 }) {
   assert(enableObservatory || (!startPaused && observatoryPort == null));
   hack.registerPlatformPlugin(
@@ -107,6 +110,7 @@ void installHook({
       trackWidgetCreation: trackWidgetCreation,
       updateGoldens: updateGoldens,
       projectRootDirectory: projectRootDirectory,
+      flutterProject: flutterProject,
     ),
   );
 }
@@ -232,7 +236,7 @@ class _CompilationRequest {
 // This class is a wrapper around compiler that allows multiple isolates to
 // enqueue compilation requests, but ensures only one compilation at a time.
 class _Compiler {
-  _Compiler(bool trackWidgetCreation, Uri projectRootDirectory) {
+  _Compiler(bool trackWidgetCreation, Uri projectRootDirectory, FlutterProject flutterProject) {
     // Compiler maintains and updates single incremental dill file.
     // Incremental compilation requests done for each test copy that file away
     // for independent execution.
@@ -265,7 +269,17 @@ class _Compiler {
       trackWidgetCreation: trackWidgetCreation,
     );
 
-    ResidentCompiler createCompiler() {
+    Future<ResidentCompiler> createCompiler() async {
+      if (experimentalBuildEnabled && await flutterProject.hasBuilders) {
+        return CodeGeneratingResidentCompiler.create(
+          flutterProject: flutterProject,
+          trackWidgetCreation: trackWidgetCreation,
+          compilerMessageConsumer: reportCompilerMessage,
+          // We already ran codegen once at the start, we only need to
+          // configure builders.
+          runCold: true,
+        );
+      }
       return ResidentCompiler(
         artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
         packagesPath: PackageMap.globalPackagesPath,
@@ -290,7 +304,7 @@ class _Compiler {
           final Stopwatch compilerTime = Stopwatch()..start();
           bool firstCompile = false;
           if (compiler == null) {
-            compiler = createCompiler();
+            compiler = await createCompiler();
             firstCompile = true;
           }
           suppressOutput = false;
@@ -374,6 +388,7 @@ class _FlutterPlatform extends PlatformPlugin {
     this.trackWidgetCreation,
     this.updateGoldens,
     this.projectRootDirectory,
+    this.flutterProject,
   }) : assert(shellPath != null);
 
   final String shellPath;
@@ -389,6 +404,7 @@ class _FlutterPlatform extends PlatformPlugin {
   final bool trackWidgetCreation;
   final bool updateGoldens;
   final Uri projectRootDirectory;
+  final FlutterProject flutterProject;
 
   Directory fontsDirectory;
   _Compiler compiler;
@@ -545,7 +561,7 @@ class _FlutterPlatform extends PlatformPlugin {
 
       if (precompiledDillPath == null && precompiledDillFiles == null) {
         // Lazily instantiate compiler so it is built only if it is actually used.
-        compiler ??= _Compiler(trackWidgetCreation, projectRootDirectory);
+        compiler ??= _Compiler(trackWidgetCreation, projectRootDirectory, flutterProject);
         mainDart = await compiler.compile(mainDart);
 
         if (mainDart == null) {
@@ -963,7 +979,7 @@ class _FlutterPlatform extends PlatformPlugin {
     const String observatoryString = 'Observatory listening on ';
     for (Stream<List<int>> stream in <Stream<List<int>>>[
       process.stderr,
-      process.stdout
+      process.stdout,
     ]) {
       stream
           .transform<String>(utf8.decoder)

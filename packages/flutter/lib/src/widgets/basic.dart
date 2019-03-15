@@ -86,7 +86,7 @@ class Directionality extends InheritedWidget {
   const Directionality({
     Key key,
     @required this.textDirection,
-    @required Widget child
+    @required Widget child,
   }) : assert(textDirection != null),
        assert(child != null),
        super(key: key, child: child);
@@ -296,7 +296,7 @@ class ShaderMask extends SingleChildRenderObjectWidget {
     Key key,
     @required this.shaderCallback,
     this.blendMode = BlendMode.modulate,
-    Widget child
+    Widget child,
   }) : assert(shaderCallback != null),
        assert(blendMode != null),
        super(key: key, child: child);
@@ -336,15 +336,14 @@ class ShaderMask extends SingleChildRenderObjectWidget {
 /// A widget that applies a filter to the existing painted content and then
 /// paints [child].
 ///
-/// The filter will only be applied to the area of the background in which the
-/// [child] (or one of its descendants) is actually going to paint in regardless
-/// of the actual size of [child].
+/// The filter will be applied to all the area within its parent or ancestor
+/// widget's clip. If there's no clip, the filter will be applied to the full
+/// screen.
 ///
 /// {@tool sample}
-/// Even though the [BackdropFilter] is wrapping the [Container] below, the
-/// background will only be blurred in the area defined by the bounding box
-/// of the [Text] because that's the only area any descendant of the
-/// [BackdropFilter] is painting in.
+/// If the [BackdropFilter] needs to be applied to an area that exactly matches
+/// its child, wraps the [BackdropFilter] with a clip widget that clips exactly
+/// to that child.
 ///
 /// ```dart
 /// Stack(
@@ -352,45 +351,18 @@ class ShaderMask extends SingleChildRenderObjectWidget {
 ///   children: <Widget>[
 ///     Text('0' * 10000),
 ///     Center(
-///       child: BackdropFilter(
-///         filter: ui.ImageFilter.blur(
-///           sigmaX: 5.0,
-///           sigmaY: 5.0,
-///         ),
-///         child: Container(
-///           alignment: Alignment.center,
-///           width: 200.0,
-///           height: 200.0,
-///           child: Text('Hello World'),
-///         ),
-///       ),
-///     ),
-///   ],
-/// )
-/// ```
-///
-/// To blur the entire area of the [Container], increase the paint area of
-/// the Container. Giving it a transparent background color will increase
-/// the paint area of the container (and hence blur the background behind the
-/// entire container) without changing other visual properties.
-///
-/// ```dart
-/// Stack(
-///   fit: StackFit.expand,
-///   children: <Widget>[
-///     Text('0' * 10000),
-///     Center(
-///       child: BackdropFilter(
-///         filter: ui.ImageFilter.blur(
-///           sigmaX: 5.0,
-///           sigmaY: 5.0,
-///         ),
-///         child: Container(
-///           color: Colors.transparent, // <-- NEW
-///           alignment: Alignment.center,
-///           width: 200.0,
-///           height: 200.0,
-///           child: Text('Hello World'),
+///       child: ClipRect(  // <-- clips to the 200x200 [Container] below
+///         child: BackdropFilter(
+///           filter: ui.ImageFilter.blur(
+///             sigmaX: 5.0,
+///             sigmaY: 5.0,
+///           ),
+///           child: Container(
+///             alignment: Alignment.center,
+///             width: 200.0,
+///             height: 200.0,
+///             child: Text('Hello World'),
+///           ),
 ///         ),
 ///       ),
 ///     ),
@@ -413,7 +385,7 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
   const BackdropFilter({
     Key key,
     @required this.filter,
-    Widget child
+    Widget child,
   }) : assert(filter != null),
        super(key: key, child: child);
 
@@ -984,7 +956,7 @@ class PhysicalShape extends SingleChildRenderObjectWidget {
       clipBehavior: clipBehavior,
       elevation: elevation,
       color: color,
-      shadowColor: shadowColor
+      shadowColor: shadowColor,
     );
   }
 
@@ -1182,7 +1154,7 @@ class Transform extends SingleChildRenderObjectWidget {
       origin: origin,
       alignment: alignment,
       textDirection: Directionality.of(context),
-      transformHitTests: transformHitTests
+      transformHitTests: transformHitTests,
     );
   }
 
@@ -1264,7 +1236,7 @@ class CompositedTransformTarget extends SingleChildRenderObjectWidget {
 ///
 /// Hit testing on descendants of this widget will only work if the target
 /// position is within the box that this widget's parent considers to be
-/// hitable. If the parent covers the screen, this is trivially achievable, so
+/// hittable. If the parent covers the screen, this is trivially achievable, so
 /// this widget is usually used as the root of an [OverlayEntry] in an app-wide
 /// [Overlay] (e.g. as created by the [MaterialApp] widget's [Navigator]).
 ///
@@ -1652,7 +1624,7 @@ class Align extends SingleChildRenderObjectWidget {
     this.alignment = Alignment.center,
     this.widthFactor,
     this.heightFactor,
-    Widget child
+    Widget child,
   }) : assert(alignment != null),
        assert(widthFactor == null || widthFactor >= 0.0),
        assert(heightFactor == null || heightFactor >= 0.0),
@@ -1762,7 +1734,7 @@ class CustomSingleChildLayout extends SingleChildRenderObjectWidget {
   const CustomSingleChildLayout({
     Key key,
     @required this.delegate,
-    Widget child
+    Widget child,
   }) : assert(delegate != null),
        super(key: key, child: child);
 
@@ -1792,7 +1764,7 @@ class LayoutId extends ParentDataWidget<CustomMultiChildLayout> {
   LayoutId({
     Key key,
     @required this.id,
-    @required Widget child
+    @required Widget child,
   }) : assert(child != null),
        assert(id != null),
        super(key: key ?? ValueKey<Object>(id), child: child);
@@ -2028,7 +2000,7 @@ class ConstrainedBox extends SingleChildRenderObjectWidget {
   ConstrainedBox({
     Key key,
     @required this.constraints,
-    Widget child
+    Widget child,
   }) : assert(constraints != null),
        assert(constraints.debugAssertIsValid()),
        super(key: key, child: child);
@@ -2280,7 +2252,7 @@ class LimitedBox extends SingleChildRenderObjectWidget {
   RenderLimitedBox createRenderObject(BuildContext context) {
     return RenderLimitedBox(
       maxWidth: maxWidth,
-      maxHeight: maxHeight
+      maxHeight: maxHeight,
     );
   }
 
@@ -2577,7 +2549,7 @@ class AspectRatio extends SingleChildRenderObjectWidget {
   const AspectRatio({
     Key key,
     @required this.aspectRatio,
-    Widget child
+    Widget child,
   }) : assert(aspectRatio != null),
        super(key: key, child: child);
 
@@ -2713,7 +2685,7 @@ class Baseline extends SingleChildRenderObjectWidget {
     Key key,
     @required this.baseline,
     @required this.baselineType,
-    Widget child
+    Widget child,
   }) : assert(baseline != null),
        assert(baselineType != null),
        super(key: key, child: child);
@@ -4263,6 +4235,83 @@ class Flexible extends ParentDataWidget<Flex> {
 /// [Flex] must contain only [StatelessWidget]s or [StatefulWidget]s (not other
 /// kinds of widgets, like [RenderObjectWidget]s).
 ///
+/// {@tool snippet --template=stateless_widget_material}
+/// This example shows how to use an [Expanded] widget in a [Column] so that
+/// it's middle child, a [Container] here, expands to fill the space.
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     appBar: AppBar(
+///       title: Text('Expanded Column Sample'),
+///     ),
+///     body: Center(
+///        child: Column(
+///         children: <Widget>[
+///           Container(
+///             color: Colors.red,
+///             height: 100,
+///             width: 100,
+///           ),
+///           Expanded(
+///             child: Container(
+///               color: Colors.blue,
+///               width: 100,
+///             ),
+///           ),
+///           Container(
+///             color: Colors.red,
+///             height: 100,
+///             width: 100,
+///           ),
+///         ],
+///       ),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
+/// {@tool snippet --template=stateless_widget_material}
+/// This example shows how to use an [Expanded] widget in a [Row] with multiple
+/// children expanded, utilizing the [flex] factor to prioritize available space.
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     appBar: AppBar(
+///       title: Text('Expanded Row Sample'),
+///     ),
+///     body: Center(
+///       child: Row(
+///         children: <Widget>[
+///           Expanded(
+///             flex: 2,
+///             child: Container(
+///               color: Colors.red,
+///               height: 100,
+///             ),
+///           ),
+///           Container(
+///             color: Colors.blue,
+///             height: 100,
+///             width: 50,
+///           ),
+///           Expanded(
+///             flex: 1,
+///             child: Container(
+///               color: Colors.red,
+///               height: 100,
+///             ),
+///           ),
+///         ],
+///       ),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [Flexible], which does not force the child to fill the available space.
@@ -5029,7 +5078,7 @@ class DefaultAssetBundle extends InheritedWidget {
   const DefaultAssetBundle({
     Key key,
     @required this.bundle,
-    @required Widget child
+    @required Widget child,
   }) : assert(bundle != null),
        assert(child != null),
        super(key: key, child: child);
@@ -5191,8 +5240,9 @@ class Listener extends SingleChildRenderObjectWidget {
     this.onPointerHover,
     this.onPointerUp,
     this.onPointerCancel,
+    this.onPointerSignal,
     this.behavior = HitTestBehavior.deferToChild,
-    Widget child
+    Widget child,
   }) : assert(behavior != null),
        super(key: key, child: child);
 
@@ -5239,6 +5289,9 @@ class Listener extends SingleChildRenderObjectWidget {
   /// no longer directed towards this receiver.
   final PointerCancelEventListener onPointerCancel;
 
+  /// Called when a pointer signal occurs over this object.
+  final PointerSignalEventListener onPointerSignal;
+
   /// How to behave during hit testing.
   final HitTestBehavior behavior;
 
@@ -5252,7 +5305,8 @@ class Listener extends SingleChildRenderObjectWidget {
       onPointerExit: onPointerExit,
       onPointerUp: onPointerUp,
       onPointerCancel: onPointerCancel,
-      behavior: behavior
+      onPointerSignal: onPointerSignal,
+      behavior: behavior,
     );
   }
 
@@ -5266,6 +5320,7 @@ class Listener extends SingleChildRenderObjectWidget {
       ..onPointerExit = onPointerExit
       ..onPointerUp = onPointerUp
       ..onPointerCancel = onPointerCancel
+      ..onPointerSignal = onPointerSignal
       ..behavior = behavior;
   }
 
@@ -5287,6 +5342,8 @@ class Listener extends SingleChildRenderObjectWidget {
       listeners.add('up');
     if (onPointerCancel != null)
       listeners.add('cancel');
+    if (onPointerSignal != null)
+      listeners.add('signal');
     properties.add(IterableProperty<String>('listeners', listeners, ifEmpty: '<none>'));
     properties.add(EnumProperty<HitTestBehavior>('behavior', behavior));
   }
@@ -5397,7 +5454,7 @@ class IgnorePointer extends SingleChildRenderObjectWidget {
     Key key,
     this.ignoring = true,
     this.ignoringSemantics,
-    Widget child
+    Widget child,
   }) : assert(ignoring != null),
        super(key: key, child: child);
 
@@ -5418,7 +5475,7 @@ class IgnorePointer extends SingleChildRenderObjectWidget {
   RenderIgnorePointer createRenderObject(BuildContext context) {
     return RenderIgnorePointer(
       ignoring: ignoring,
-      ignoringSemantics: ignoringSemantics
+      ignoringSemantics: ignoringSemantics,
     );
   }
 
@@ -5513,7 +5570,7 @@ class MetaData extends SingleChildRenderObjectWidget {
     Key key,
     this.metaData,
     this.behavior = HitTestBehavior.deferToChild,
-    Widget child
+    Widget child,
   }) : super(key: key, child: child);
 
   /// Opaque meta data ignored by the render tree
@@ -5526,7 +5583,7 @@ class MetaData extends SingleChildRenderObjectWidget {
   RenderMetaData createRenderObject(BuildContext context) {
     return RenderMetaData(
       metaData: metaData,
-      behavior: behavior
+      behavior: behavior,
     );
   }
 
@@ -5968,7 +6025,7 @@ class ExcludeSemantics extends SingleChildRenderObjectWidget {
 /// Semantic indexes are used by TalkBack/Voiceover to make announcements about
 /// the current scroll state. Certain widgets like the [ListView] will
 /// automatically provide a child index for building semantics. A user may wish
-/// to manually provide semanitc indexes if not all child of the scrollable
+/// to manually provide semantic indexes if not all child of the scrollable
 /// contribute semantics.
 ///
 /// {@tool sample}
@@ -5994,7 +6051,7 @@ class ExcludeSemantics extends SingleChildRenderObjectWidget {
 ///
 /// See also:
 ///
-///  * [CustomScrollView], for an explaination of index semantics.
+///  * [CustomScrollView], for an explanation of index semantics.
 class IndexedSemantics extends SingleChildRenderObjectWidget {
   /// Creates a widget that annotated the first child semantics node with an index.
   ///
@@ -6030,7 +6087,7 @@ class KeyedSubtree extends StatelessWidget {
   /// Creates a widget that builds its child.
   const KeyedSubtree({
     Key key,
-    @required this.child
+    @required this.child,
   }) : assert(child != null),
        super(key: key);
 
@@ -6077,7 +6134,7 @@ class Builder extends StatelessWidget {
   /// The [builder] argument must not be null.
   const Builder({
     Key key,
-    @required this.builder
+    @required this.builder,
   }) : assert(builder != null),
        super(key: key);
 
@@ -6110,7 +6167,7 @@ class StatefulBuilder extends StatefulWidget {
   /// The [builder] argument must not be null.
   const StatefulBuilder({
     Key key,
-    @required this.builder
+    @required this.builder,
   }) : assert(builder != null),
        super(key: key);
 

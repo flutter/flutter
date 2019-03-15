@@ -31,7 +31,7 @@ void main() {
           ..rrect(
             rrect: RRect.fromRectAndRadius(rect.deflate(5.0), Radius.circular(rect.shortestSide / 2.0 - 5.0)),
             strokeWidth: 10.0,
-          )
+          ),
     );
   });
 

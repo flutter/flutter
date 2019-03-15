@@ -63,7 +63,7 @@ void main() {
       expect(gradleWrapper.isUpToDateInner(), false);
     }, overrides: <Type, Generator>{
       Cache: ()=> mockCache,
-      FileSystem: () => fs
+      FileSystem: () => fs,
     });
 
     testUsingContext('Gradle wrapper should be up to date, only if all cached artifact are available', () {
@@ -78,7 +78,7 @@ void main() {
       expect(gradleWrapper.isUpToDateInner(), true);
     }, overrides: <Type, Generator>{
       Cache: ()=> mockCache,
-      FileSystem: () => fs
+      FileSystem: () => fs,
     });
 
     test('should not be up to date, if some cached artifact is not', () {

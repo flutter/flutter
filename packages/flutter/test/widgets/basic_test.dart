@@ -76,8 +76,8 @@ void main() {
                   color: const Color(0xFF0000FF)
                 ),
               ),
-            )
-          )
+            ),
+          ),
         )
       );
       expect(_pointerDown, isFalse);
@@ -106,8 +106,8 @@ void main() {
                   color: const Color(0xFF0000FF)
                 ),
               ),
-            )
-          )
+            ),
+          ),
         )
       );
       expect(_pointerDown, isFalse);
@@ -136,8 +136,8 @@ void main() {
                   color: const Color(0xFF0000FF)
                 ),
               ),
-            )
-          )
+            ),
+          ),
         )
       );
       expect(_pointerDown, isFalse);

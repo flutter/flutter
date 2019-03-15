@@ -165,7 +165,7 @@ class _CupertinoSwitchRenderObjectWidget extends LeafRenderObjectWidget {
       onChanged: onChanged,
       textDirection: Directionality.of(context),
       vsync: vsync,
-      dragStartBehavior: dragStartBehavior
+      dragStartBehavior: dragStartBehavior,
     );
   }
 
@@ -414,7 +414,7 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
     _reactionController.reverse();
   }
 
-  void _emitVibration(){
+  void _emitVibration() {
     switch(defaultTargetPlatform) {
       case TargetPlatform.iOS:
         HapticFeedback.lightImpact();
@@ -477,7 +477,7 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
         offset.dx + (size.width - _kTrackWidth) / 2.0,
         offset.dy + (size.height - _kTrackHeight) / 2.0,
         _kTrackWidth,
-        _kTrackHeight
+        _kTrackHeight,
     );
     final RRect outerRRect = RRect.fromRectAndRadius(trackRect, const Radius.circular(_kTrackRadius));
     final RRect innerRRect = RRect.fromRectAndRadius(trackRect.deflate(borderThickness), const Radius.circular(_kTrackRadius));

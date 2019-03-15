@@ -49,6 +49,47 @@ class FlutterDevice {
          experimentalFlags: experimentalFlags,
        );
 
+  /// Create a [FlutterDevice] with optional code generation enabled.
+  static Future<FlutterDevice> create(Device device, {
+    @required bool trackWidgetCreation,
+    String dillOutputPath,
+    List<String> fileSystemRoots,
+    String fileSystemScheme,
+    String viewFilter,
+    @required String target,
+    TargetModel targetModel = TargetModel.flutter,
+    List<String> experimentalFlags,
+    ResidentCompiler generator,
+  }) async {
+    ResidentCompiler generator;
+    final FlutterProject flutterProject = await FlutterProject.current();
+    if (experimentalBuildEnabled && await flutterProject.hasBuilders) {
+      generator = await CodeGeneratingResidentCompiler.create(
+        flutterProject: flutterProject,
+      );
+    } else {
+      generator = ResidentCompiler(
+        artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
+        trackWidgetCreation: trackWidgetCreation,
+        fileSystemRoots: fileSystemRoots,
+        fileSystemScheme: fileSystemScheme,
+        targetModel: targetModel,
+        experimentalFlags: experimentalFlags,
+      );
+    }
+    return FlutterDevice(
+      device,
+      trackWidgetCreation: trackWidgetCreation,
+      dillOutputPath: dillOutputPath,
+      fileSystemRoots: fileSystemRoots,
+      fileSystemScheme:fileSystemScheme,
+      viewFilter: viewFilter,
+      experimentalFlags: experimentalFlags,
+      targetModel: targetModel,
+      generator: generator,
+    );
+  }
+
   final Device device;
   final ResidentCompiler generator;
   List<Uri> observatoryUris;
@@ -144,21 +185,21 @@ class FlutterDevice {
   Future<Uri> setupDevFS(
     String fsName,
     Directory rootDirectory, {
-    String packagesFilePath
+    String packagesFilePath,
   }) {
     // One devFS per device. Shared by all running instances.
     devFS = DevFS(
       vmServices[0],
       fsName,
       rootDirectory,
-      packagesFilePath: packagesFilePath
+      packagesFilePath: packagesFilePath,
     );
     return devFS.create();
   }
 
   List<Future<Map<String, dynamic>>> reloadSources(
     String entryPath, {
-    bool pause = false
+    bool pause = false,
   }) {
     final Uri deviceEntryUri = devFS.baseUri.resolveUri(fs.path.toUri(entryPath));
     final Uri devicePackagesUri = devFS.baseUri.resolve('.packages');
@@ -167,7 +208,7 @@ class FlutterDevice {
       final Future<Map<String, dynamic>> report = view.uiIsolate.reloadSources(
         pause: pause,
         rootLibUri: deviceEntryUri,
-        packagesUri: devicePackagesUri
+        packagesUri: devicePackagesUri,
       );
       reports.add(report);
     }
@@ -289,7 +330,7 @@ class FlutterDevice {
     final TargetPlatform targetPlatform = await device.targetPlatform;
     package = await ApplicationPackageFactory.instance.getPackageForPlatform(
       targetPlatform,
-      applicationBinary: hotRunner.applicationBinary
+      applicationBinary: hotRunner.applicationBinary,
     );
 
     if (package == null) {
@@ -343,7 +384,7 @@ class FlutterDevice {
     final TargetPlatform targetPlatform = await device.targetPlatform;
     package = await ApplicationPackageFactory.instance.getPackageForPlatform(
       targetPlatform,
-      applicationBinary: coldRunner.applicationBinary
+      applicationBinary: coldRunner.applicationBinary,
     );
 
     final String modeName = coldRunner.debuggingOptions.buildInfo.friendlyModeName;
@@ -427,7 +468,7 @@ class FlutterDevice {
         dillOutputPath: dillOutputPath,
         trackWidgetCreation: trackWidgetCreation,
         projectRootPath: projectRootPath,
-        pathToReload: pathToReload
+        pathToReload: pathToReload,
       );
     } on DevFSException {
       devFSStatus.cancel();
@@ -751,7 +792,7 @@ abstract class ResidentRunner {
         // futures either because they just print to logger and is not critical.
         unawaited(service.done.then<void>(
           _serviceProtocolDone,
-          onError: _serviceProtocolError
+          onError: _serviceProtocolError,
         ).whenComplete(_serviceDisconnected));
       }
     }
