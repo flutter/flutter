@@ -146,7 +146,7 @@ class FloatingActionButton extends StatelessWidget {
   /// an optional [icon] and a [label].
   ///
   /// The [label] and [clipBehavior] arguments must non-null. Additionally,
-  /// [elevation] [highlightElevation], and [disabledElevation] (if specified)
+  /// [elevation], [highlightElevation], and [disabledElevation] (if specified)
   /// must be non-negative.
   FloatingActionButton.extended({
     Key key,
@@ -337,7 +337,7 @@ class FloatingActionButton extends StatelessWidget {
     final double disabledElevation = this.disabledElevation
         ?? floatingActionButtonTheme.disabledElevation
         ?? elevation;
-    final double highlighElevation = this.highlightElevation
+    final double highlightElevation = this.highlightElevation
       ?? floatingActionButtonTheme.highlightElevation
       ?? _defaultHighlightElevation;
     final MaterialTapTargetSize materialTapTargetSize = this.materialTapTargetSize
@@ -364,7 +364,7 @@ class FloatingActionButton extends StatelessWidget {
     result = RawMaterialButton(
       onPressed: onPressed,
       elevation: elevation,
-      highlightElevation: highlighElevation,
+      highlightElevation: highlightElevation,
       disabledElevation: disabledElevation,
       constraints: _sizeConstraints,
       materialTapTargetSize: materialTapTargetSize,
