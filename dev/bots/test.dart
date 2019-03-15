@@ -317,6 +317,10 @@ Future<void> _runTests() async {
   // with --track-widget-creation.
   await _runFlutterTest(path.join(flutterRoot, 'examples', 'flutter_gallery'), options: <String>['--track-widget-creation'], tableData: bigqueryApi?.tabledata);
   await _runFlutterTest(path.join(flutterRoot, 'examples', 'catalog'), tableData: bigqueryApi?.tabledata);
+  // Smoke test for code generation.
+  await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'codegen'), tableData: bigqueryApi?.tabledata, environment: <String, String>{
+    'FLUTTER_EXPERIMENTAL_BUILD': 'true',
+  });
 
   print('${bold}DONE: All tests successful.$reset');
 }
@@ -581,6 +585,7 @@ Future<void> _runFlutterTest(String workingDirectory, {
   bool skip = false,
   Duration timeout = _kLongTimeout,
   bq.TabledataResourceApi tableData,
+  Map<String, String> environment,
 }) async {
   final List<String> args = <String>['test']..addAll(options);
   if (flutterTestArgs != null && flutterTestArgs.isNotEmpty)
@@ -612,6 +617,7 @@ Future<void> _runFlutterTest(String workingDirectory, {
       printOutput: printOutput,
       skip: skip,
       timeout: timeout,
+      environment: environment,
     );
   }
 
@@ -624,6 +630,7 @@ Future<void> _runFlutterTest(String workingDirectory, {
     expectNonZeroExit: expectFailure,
     timeout: timeout,
     beforeExit: formatter.finish,
+    environment: environment,
   );
   await _processTestOutput(formatter, testOutput, tableData);
   } else {

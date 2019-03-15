@@ -500,12 +500,11 @@ class ResidentCompiler {
     }
     if (packagesFilePath != null) {
       command.addAll(<String>['--packages', packagesFilePath]);
+    } else if (_packagesPath != null) {
+      command.addAll(<String>['--packages', _packagesPath]);
     }
     if (_trackWidgetCreation) {
       command.add('--track-widget-creation');
-    }
-    if (_packagesPath != null) {
-      command.addAll(<String>['--packages', _packagesPath]);
     }
     if (_fileSystemRoots != null) {
       for (String root in _fileSystemRoots) {
@@ -661,6 +660,9 @@ class ResidentCompiler {
               .toString();
         }
       }
+    }
+    if (platform.isWindows && _fileSystemRoots != null && _fileSystemRoots.length > 1) {
+      return Uri.file(filename, windows: platform.isWindows).toString();
     }
     return null;
   }
