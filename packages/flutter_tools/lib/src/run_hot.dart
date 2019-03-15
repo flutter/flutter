@@ -748,12 +748,6 @@ class HotRunner extends ResidentRunner {
           printError('Reassembling ${view.uiIsolate.name} failed: $error');
           return;
         }
-        try {
-          await view.uiIsolate.uiWindowScheduleFrame();
-        } catch (error) {
-          failedReassemble = true;
-          printError('Scheduling a frame for ${view.uiIsolate.name} failed: $error');
-        }
       }());
     }
     final Future<void> reassembleFuture = Future.wait<void>(futures).then<void>((List<void> values) { });
