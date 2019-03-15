@@ -301,8 +301,11 @@ class SemanticsData extends Diagnosticable {
   ///
   /// If this value is non-null, the SemanticsNode must not have any children
   /// as those would be replaced by the semantics nodes of the referenced
-  /// platform view, and other semantic configurations are ignored.
-  ///
+  /// platform view, and other semantic configurations are ignored. The ignored
+  /// configurations include: [flags], [actions], [label], [value], [increasedValue],
+  /// [decreasedValue], [hint], [textDirection], [textSelection], [scrollChildCount],
+  /// [scrollIndex], [scrollPosition], [scrollExtentMax], [scrollExtentMin], [transform], 
+  /// [elevation], [thickness], [customSemanticsActionIds].
   /// See also:
   ///
   ///  * [AndroidView], which is the platform view for Android.
@@ -1688,7 +1691,11 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   ///
   /// If this value is non-null, the SemanticsNode must not have any children
   /// as those would be replaced by the semantics nodes of the referenced
-  /// platform view, and other semantic configurations are ignored.
+  /// platform view, and other semantic configurations are ignored. The ignored
+  /// configurations include: [label], [value], [increasedValue],
+  /// [decreasedValue], [hint], [textDirection], [textSelection], [scrollChildCount],
+  /// [scrollIndex], [scrollPosition], [scrollExtentMax], [scrollExtentMin], [transform], 
+  /// [elevation], [thickness], [customSemanticsActionIds]
   ///
   /// See also:
   ///
@@ -3148,7 +3155,7 @@ class SemanticsConfiguration {
   /// The id of the platform view, whose semantics nodes will be added as
   /// children to this node.
   ///
-  /// When it is set, all other semantic configurations for this node will be ignored.
+  /// When it is set, all other semantic configurations for this node are ignored.
   int get platformViewId => _platformViewId;
   int _platformViewId;
   set platformViewId(int value) {
