@@ -172,7 +172,7 @@ void PersistentCache::DumpSkp(const SkData& data) {
   auto ticks = fml::TimePoint::Now().ToEpochDelta().ToNanoseconds();
   name_stream << "shader_dump_" << std::to_string(ticks) << ".skp";
   std::string file_name = name_stream.str();
-  FML_LOG(ERROR) << "Dumping " << file_name;
+  FML_LOG(INFO) << "Dumping " << file_name;
   auto mapping = std::make_unique<fml::DataMapping>(
       std::vector<uint8_t>{data.bytes(), data.bytes() + data.size()});
   PersistentCacheStore(GetWorkerTaskRunner(), cache_directory_,
