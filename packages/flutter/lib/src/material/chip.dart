@@ -449,8 +449,9 @@ abstract class TappableChipAttributes {
 /// button for deleting the chip.
 ///
 /// Its ancestors must include [Material], [MediaQuery], [Directionality], and
-/// [MaterialLocalizations]. The [label] and [clipBehavior] arguments must not
-/// be null.
+/// [MaterialLocalizations]. Typically all of these widgets are provided by
+/// [MaterialApp] and [Scaffold]. The [label] and [clipBehavior] arguments must
+/// not be null.
 ///
 /// {@tool sample}
 ///
