@@ -7,7 +7,7 @@
 
 #include <memory>
 
-#include <zx/eventpair.h>
+#include <lib/zx/eventpair.h>
 
 #include "dart-pkg/zircon/sdk_ext/handle.h"
 #include "flutter/flow/scene_update_context.h"
