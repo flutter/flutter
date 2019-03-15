@@ -198,16 +198,16 @@ Future<String> _doctorText() async {
 }
 
 Future<int> _exit(int code) async {
-  // if (flutterUsage.isFirstRun)
-  //   flutterUsage.printWelcome();
+  if (flutterUsage.isFirstRun)
+    flutterUsage.printWelcome();
 
   // Send any last analytics calls that are in progress without overly delaying
   // the tool's exit (we wait a maximum of 250ms).
-  // if (flutterUsage.enabled) {
-  //   final Stopwatch stopwatch = Stopwatch()..start();
-  //   await flutterUsage.ensureAnalyticsSent();
-  //   printTrace('ensureAnalyticsSent: ${stopwatch.elapsedMilliseconds}ms');
-  // }
+  if (flutterUsage.enabled) {
+    final Stopwatch stopwatch = Stopwatch()..start();
+    await flutterUsage.ensureAnalyticsSent();
+    printTrace('ensureAnalyticsSent: ${stopwatch.elapsedMilliseconds}ms');
+  }
 
   // Run shutdown hooks before flushing logs
   await runShutdownHooks();
