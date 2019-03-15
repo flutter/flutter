@@ -278,6 +278,8 @@ class EditableText extends StatefulWidget {
     this.locale,
     this.textScaleFactor,
     this.maxLines = 1,
+    this.minLines,
+    this.expands = false,
     this.autofocus = false,
     this.selectionColor,
     this.selectionControls,
@@ -310,6 +312,16 @@ class EditableText extends StatefulWidget {
        assert(backgroundCursorColor != null),
        assert(textAlign != null),
        assert(maxLines == null || maxLines > 0),
+       assert(minLines == null || minLines > 0),
+       assert(
+         (maxLines == null) || (minLines == null) || (maxLines >= minLines),
+         'minLines can\'t be greater than maxLines',
+       ),
+       assert(expands != null),
+       assert(
+         !expands || (maxLines == null && minLines == null),
+         'minLines and maxLines must be null when expands is true.',
+       ),
        assert(autofocus != null),
        assert(rendererIgnoresPointer != null),
        assert(scrollPadding != null),
@@ -465,11 +477,77 @@ class EditableText extends StatefulWidget {
   /// container will start with enough vertical space for one line and
   /// automatically grow to accommodate additional lines as they are entered.
   ///
-  /// If it is not null, the value must be greater than zero. If it is greater
-  /// than 1, it will take up enough horizontal space to accommodate that number
-  /// of lines.
+  /// If this is not null, the value must be greater than zero, and it will lock
+  /// the input to the given number of lines and take up enough horizontal space
+  /// to accommodate that number of lines. Setting [minLines] as well allows the
+  /// input to grow between the indicated range.
+  ///
+  /// The full set of behaviors possible with [minLines] and [maxLines] are as
+  /// follows. These examples apply equally to `TextField`, `TextFormField`, and
+  /// `EditableText`.
+  ///
+  /// Input that occupies a single line and scrolls horizontally as needed.
+  /// ```dart
+  /// TextField()
+  /// ```
+  ///
+  /// Input whose height grows from one line up to as many lines as needed for
+  /// the text that was entered. If a height limit is imposed by its parent, it
+  /// will scroll vertically when its height reaches that limit.
+  /// ```dart
+  /// TextField(maxLines: null)
+  /// ```
+  ///
+  /// The input's height is large enough for the given number of lines. If
+  /// additional lines are entered the input scrolls vertically.
+  /// ```dart
+  /// TextField(maxLines: 2)
+  /// ```
+  ///
+  /// Input whose height grows with content between a min and max. An infinite
+  /// max is possible with `maxLines: null`.
+  /// ```dart
+  /// TextField(minLines: 2, maxLines: 4)
+  /// ```
   /// {@endtemplate}
   final int maxLines;
+
+  /// {@template flutter.widgets.editableText.minLines}
+  /// The minimum number of lines to occupy when the content spans fewer lines.
+
+  /// When [maxLines] is set as well, the height will grow between the indicated
+  /// range of lines. When [maxLines] is null, it will grow as high as needed,
+  /// starting from [minLines].
+  ///
+  /// See the examples in [maxLines] for the complete picture of how [maxLines]
+  /// and [minLines] interact to produce various behaviors.
+  ///
+  /// Defaults to null.
+  /// {@endtemplate}
+  final int minLines;
+
+  /// {@template flutter.widgets.editableText.expands}
+  /// Whether this widget's height will be sized to fill its parent.
+  ///
+  /// If set to true and wrapped in a parent widget like [Expanded] or
+  /// [SizedBox], the input will expand to fill the parent.
+  ///
+  /// [maxLines] and [minLines] must both be null when this is set to true,
+  /// otherwise an error is thrown.
+  ///
+  /// Defaults to false.
+  ///
+  /// See the examples in [maxLines] for the complete picture of how [maxLines],
+  /// [minLines], and [expands] interact to produce various behaviors.
+  ///
+  /// Input that matches the height of its parent
+  /// ```dart
+  /// Expanded(
+  ///   child: TextField(maxLines: null, expands: true),
+  /// )
+  /// ```
+  /// {@endtemplate}
+  final bool expands;
 
   /// {@template flutter.widgets.editableText.autofocus}
   /// Whether this text field should focus itself if nothing else is already
@@ -676,6 +754,8 @@ class EditableText extends StatefulWidget {
     properties.add(DiagnosticsProperty<Locale>('locale', locale, defaultValue: null));
     properties.add(DoubleProperty('textScaleFactor', textScaleFactor, defaultValue: null));
     properties.add(IntProperty('maxLines', maxLines, defaultValue: 1));
+    properties.add(IntProperty('minLines', minLines, defaultValue: null));
+    properties.add(DiagnosticsProperty<bool>('expands', expands, defaultValue: false));
     properties.add(DiagnosticsProperty<bool>('autofocus', autofocus, defaultValue: false));
     properties.add(DiagnosticsProperty<TextInputType>('keyboardType', keyboardType, defaultValue: null));
   }
@@ -795,7 +875,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         // If this is a multiline EditableText, do nothing for a "newline"
         // action; The newline is already inserted. Otherwise, finalize
         // editing.
-        if (widget.maxLines == 1)
+        if (!_isMultiline)
           _finalizeEditing(true);
         break;
       case TextInputAction.done:
@@ -1333,6 +1413,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                   : _cursorVisibilityNotifier,
               hasFocus: _hasFocus,
               maxLines: widget.maxLines,
+              minLines: widget.minLines,
+              expands: widget.expands,
               strutStyle: widget.strutStyle,
               selectionColor: widget.selectionColor,
               textScaleFactor: widget.textScaleFactor ?? MediaQuery.textScaleFactorOf(context),
@@ -1403,6 +1485,8 @@ class _Editable extends LeafRenderObjectWidget {
     this.showCursor,
     this.hasFocus,
     this.maxLines,
+    this.minLines,
+    this.expands,
     this.strutStyle,
     this.selectionColor,
     this.textScaleFactor,
@@ -1433,6 +1517,8 @@ class _Editable extends LeafRenderObjectWidget {
   final ValueNotifier<bool> showCursor;
   final bool hasFocus;
   final int maxLines;
+  final int minLines;
+  final bool expands;
   final StrutStyle strutStyle;
   final Color selectionColor;
   final double textScaleFactor;
@@ -1462,6 +1548,8 @@ class _Editable extends LeafRenderObjectWidget {
       showCursor: showCursor,
       hasFocus: hasFocus,
       maxLines: maxLines,
+      minLines: minLines,
+      expands: expands,
       strutStyle: strutStyle,
       selectionColor: selectionColor,
       textScaleFactor: textScaleFactor,
@@ -1492,6 +1580,8 @@ class _Editable extends LeafRenderObjectWidget {
       ..showCursor = showCursor
       ..hasFocus = hasFocus
       ..maxLines = maxLines
+      ..minLines = minLines
+      ..expands = expands
       ..strutStyle = strutStyle
       ..selectionColor = selectionColor
       ..textScaleFactor = textScaleFactor
