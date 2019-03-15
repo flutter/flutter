@@ -440,7 +440,7 @@ class AndroidDevice extends Device {
       if (debuggingOptions.useTestFonts)
         cmd.addAll(<String>['--ez', 'use-test-fonts', 'true']);
       if (debuggingOptions.verboseSystemLogs) {
-        cmd.addAll(<String>['--ez', '--verbose-logging', 'true']);
+        cmd.addAll(<String>['--ez', 'verbose-logging', 'true']);
       }
     }
     cmd.add(apk.launchActivity);
