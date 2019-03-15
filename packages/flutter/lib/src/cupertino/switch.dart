@@ -131,12 +131,15 @@ class CupertinoSwitch extends StatefulWidget {
 class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
-    return _CupertinoSwitchRenderObjectWidget(
-      value: widget.value,
-      activeColor: widget.activeColor ?? CupertinoColors.activeGreen,
-      onChanged: widget.onChanged,
-      vsync: this,
-      dragStartBehavior: widget.dragStartBehavior,
+    return Opacity(
+      opacity: widget.onChanged == null ? 0.4 : 1.0,
+      child: _CupertinoSwitchRenderObjectWidget(
+        value: widget.value,
+        activeColor: widget.activeColor ?? CupertinoColors.activeGreen,
+        onChanged: widget.onChanged,
+        vsync: this,
+        dragStartBehavior: widget.dragStartBehavior,
+      ),
     );
   }
 }

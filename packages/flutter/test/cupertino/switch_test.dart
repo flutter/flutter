@@ -414,5 +414,27 @@ void main() {
 
     expect(value, isFalse);
   });
+  testWidgets('Switch is opaque when disabled', (WidgetTester tester) async {
+    final Key switchKey = UniqueKey();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Center(
+              child: CupertinoSwitch(
+                key: switchKey,
+                value: false,
+                dragStartBehavior: DragStartBehavior.down,
+                onChanged: null,
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(tester.widget<Opacity>(find.byType(Opacity).first).opacity, 0.4);
+  });
 
 }
