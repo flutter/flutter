@@ -161,7 +161,7 @@ class TestCommand extends FlutterCommand {
     Cache.releaseLockEarly();
 
     // Run builders once before all tests.
-    if (experimentalBuildEnabled && await flutterProject.hasBuilders) {
+    if (await flutterProject.hasBuilders) {
       final CodegenDaemon codegenDaemon = await codeGenerator.daemon(flutterProject);
       codegenDaemon.startBuild();
       await for (CodegenStatus status in codegenDaemon.buildResults) {

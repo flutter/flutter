@@ -15,7 +15,6 @@ import 'base/logger.dart';
 import 'base/terminal.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
-import 'codegen.dart';
 import 'compile.dart';
 import 'convert.dart';
 import 'dart/dependencies.dart';
@@ -99,6 +98,8 @@ class HotRunner extends ResidentRunner {
   }
 
   Future<bool> _refreshDartDependencies() async {
+    // TODO(jonahwilliams): remove when https://github.com/flutter/flutter/pull/28152 lands.
+    return true;
     if (!hotRunnerConfig.computeDartDependencies) {
       // Disabled.
       return true;
@@ -123,11 +124,6 @@ class HotRunner extends ResidentRunner {
       return false;
     }
 
-    /// When using the build system, dependency analysis is handled by build
-    /// runner instead.
-    if (experimentalBuildEnabled) {
-      return true;
-    }
     final DartDependencySetBuilder dartDependencySetBuilder = DartDependencySetBuilder(mainPath, packagesFilePath);
     try {
       _dartDependencies = Set<String>.from(dartDependencySetBuilder.build());

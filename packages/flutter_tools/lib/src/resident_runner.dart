@@ -63,7 +63,7 @@ class FlutterDevice {
   }) async {
     ResidentCompiler generator;
     final FlutterProject flutterProject = await FlutterProject.current();
-    if (experimentalBuildEnabled && await flutterProject.hasBuilders) {
+    if (await flutterProject.hasBuilders) {
       generator = await CodeGeneratingResidentCompiler.create(
         flutterProject: flutterProject,
       );
@@ -945,11 +945,13 @@ abstract class ResidentRunner {
   }
 
   bool hasDirtyDependencies(FlutterDevice device) {
+    // TODO(jonahwilliams): remove when https://github.com/flutter/flutter/pull/28152 lands.
+    return true;
     /// When using the build system, dependency analysis is handled by build
     /// runner instead.
-    if (experimentalBuildEnabled) {
-      return false;
-    }
+    // if (experimentalBuildEnabled) {
+    //   return false;
+    // }
     final DartDependencySetBuilder dartDependencySetBuilder =
         DartDependencySetBuilder(mainPath, packagesFilePath);
     final DependencyChecker dependencyChecker =

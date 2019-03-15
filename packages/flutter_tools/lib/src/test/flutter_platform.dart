@@ -270,7 +270,7 @@ class _Compiler {
     );
 
     Future<ResidentCompiler> createCompiler() async {
-      if (experimentalBuildEnabled && await flutterProject.hasBuilders) {
+      if (await flutterProject.hasBuilders) {
         return CodeGeneratingResidentCompiler.create(
           flutterProject: flutterProject,
           trackWidgetCreation: trackWidgetCreation,

@@ -16,11 +16,24 @@ import 'base/io.dart';
 import 'base/platform.dart';
 import 'base/process_manager.dart';
 import 'base/terminal.dart';
+import 'codegen.dart';
 import 'convert.dart';
 import 'dart/package_map.dart';
 import 'globals.dart';
+import 'project.dart';
 
-KernelCompiler get kernelCompiler => context[KernelCompiler];
+KernelCompilerFactory get kernelCompilerFactory => context[KernelCompilerFactory];
+
+class KernelCompilerFactory {
+  const KernelCompilerFactory();
+
+  Future<KernelCompiler> create(FlutterProject flutterProject) async {
+    if (flutterProject == null || !await flutterProject.hasBuilders) {
+      return const KernelCompiler();
+    }
+    return const CodeGeneratingKernelCompiler();
+  }
+}
 
 typedef CompilerMessageConsumer = void Function(String message, { bool emphasis, TerminalColor color });
 

@@ -93,6 +93,6 @@ Future<void> main(List<String> args) async {
      overrides: <Type, Generator>{
        // The build runner instance is not supported in google3 because
        // the build runner packages are not synced internally.
-       CodeGenerator: () => experimentalBuildEnabled ? const BuildRunner() : const UnsupportedCodeGenerator(),
+       CodeGenerator: () => const BuildRunner(),
      });
 }
