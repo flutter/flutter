@@ -493,6 +493,7 @@ class _CupertinoBackGestureDetectorState<T> extends State<_CupertinoBackGestureD
     assert(mounted);
     assert(_backGestureController == null);
     _backGestureController = widget.onStartPopGesture();
+    _backGestureController.dragStart();
   }
 
   void _handleDragUpdate(DragUpdateDetails details) {
