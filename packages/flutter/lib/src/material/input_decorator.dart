@@ -1701,8 +1701,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     if (widget._labelShouldWithdraw != old._labelShouldWithdraw && widget.decoration.hasFloatingPlaceholder) {
       if (widget._labelShouldWithdraw) {
         _floatingLabelController.forward();
-      }
-      else
+      } else
         _floatingLabelController.reverse();
     }
 

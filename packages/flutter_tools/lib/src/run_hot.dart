@@ -484,7 +484,7 @@ class HotRunner extends ResidentRunner {
     final Map<String, String> analyticsParameters =
       reason == null
         ? null
-        : <String, String>{ kEventReloadReasonParameterName: reason };
+        : <String, String>{kEventReloadReasonParameterName: reason};
 
     if (!_isPaused()) {
       printTrace('Refreshing active FlutterViews before restarting.');

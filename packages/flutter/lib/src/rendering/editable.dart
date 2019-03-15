@@ -718,8 +718,7 @@ class RenderEditable extends RenderBox {
       assert(!_listenerAttached);
       RawKeyboard.instance.addListener(_handleKeyEvent);
       _listenerAttached = true;
-    }
-    else {
+    } else {
       assert(_listenerAttached);
       RawKeyboard.instance.removeListener(_handleKeyEvent);
       _listenerAttached = false;
@@ -1557,7 +1556,7 @@ class RenderEditable extends RenderBox {
     }
     _floatingCursorOn = state != FloatingCursorDragState.End;
     _resetFloatingCursorAnimationValue = resetLerpValue;
-    if(_floatingCursorOn) {
+    if (_floatingCursorOn) {
       _floatingCursorOffset = boundedOffset;
       _floatingCursorTextPosition = lastTextPosition;
     }
@@ -1574,7 +1573,7 @@ class RenderEditable extends RenderBox {
     double sizeAdjustmentX = _kFloatingCaretSizeIncrease.dx;
     double sizeAdjustmentY = _kFloatingCaretSizeIncrease.dy;
 
-    if(_resetFloatingCursorAnimationValue != null) {
+    if (_resetFloatingCursorAnimationValue != null) {
       sizeAdjustmentX = ui.lerpDouble(sizeAdjustmentX, 0, _resetFloatingCursorAnimationValue);
       sizeAdjustmentY = ui.lerpDouble(sizeAdjustmentY, 0, _resetFloatingCursorAnimationValue);
     }
@@ -1639,7 +1638,7 @@ class RenderEditable extends RenderBox {
 
     if (currentX < leftBound && deltaPosition.dx < 0) {
       _resetOriginOnLeft = true;
-    } else if(currentX > rightBound && deltaPosition.dx > 0)
+    } else if (currentX > rightBound && deltaPosition.dx > 0)
       _resetOriginOnRight = true;
     if (currentY < topBound && deltaPosition.dy < 0)
       _resetOriginOnTop = true;

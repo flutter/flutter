@@ -2517,10 +2517,10 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
     this.onPointerSignal,
     HitTestBehavior behavior = HitTestBehavior.deferToChild,
     RenderBox child,
-  })  : _onPointerEnter = onPointerEnter,
-        _onPointerHover = onPointerHover,
-        _onPointerExit = onPointerExit,
-        super(behavior: behavior, child: child) {
+  }) : _onPointerEnter = onPointerEnter,
+       _onPointerHover = onPointerHover,
+       _onPointerExit = onPointerExit,
+       super(behavior: behavior, child: child) {
     if (_onPointerEnter != null || _onPointerHover != null || _onPointerExit != null) {
       _hoverAnnotation = MouseTrackerAnnotation(
         onEnter: _onPointerEnter,

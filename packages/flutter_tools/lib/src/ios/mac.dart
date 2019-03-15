@@ -599,8 +599,7 @@ Future<void> diagnoseXcodeBuildFailure(XcodeBuildResult result) async {
   if (result.xcodeBuildExecution != null &&
       result.xcodeBuildExecution.buildForPhysicalDevice &&
       !<String>['DEVELOPMENT_TEAM', 'PROVISIONING_PROFILE'].any(
-        result.xcodeBuildExecution.buildSettings.containsKey)
-      ) {
+        result.xcodeBuildExecution.buildSettings.containsKey)) {
     printError(noDevelopmentTeamInstruction, emphasis: true);
     return;
   }
@@ -722,7 +721,7 @@ void _copyServiceDefinitionsManifest(List<Map<String, String>> services, File ma
     // the directory and basenames.
     'framework': fs.path.basenameWithoutExtension(service['ios-framework']),
   }).toList();
-  final Map<String, dynamic> jsonObject = <String, dynamic>{ 'services' : jsonServices };
+  final Map<String, dynamic> jsonObject = <String, dynamic>{'services': jsonServices};
   manifest.writeAsStringSync(json.encode(jsonObject), mode: FileMode.write, flush: true);
 }
 

@@ -400,7 +400,7 @@ class RawKeyDownEvent extends RawKeyEvent {
   const RawKeyDownEvent({
     @required RawKeyEventData data,
     String character,
-  })  : super(data: data, character: character);
+  }) : super(data: data, character: character);
 }
 
 /// The user has released a key on the keyboard.

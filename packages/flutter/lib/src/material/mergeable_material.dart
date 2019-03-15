@@ -263,10 +263,8 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
     int j = 0;
 
     while (j < _children.length) {
-      if (
-        _children[j] is MaterialGap &&
-        _animationTuples[_children[j].key].controller.status == AnimationStatus.dismissed
-      ) {
+      if (_children[j] is MaterialGap &&
+          _animationTuples[_children[j].key].controller.status == AnimationStatus.dismissed) {
         _removeChild(j);
       } else {
         j += 1;

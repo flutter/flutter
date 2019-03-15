@@ -54,7 +54,7 @@ void main() {
         'success': false,
         'details': <String, dynamic>{
           'notices': <Map<String, dynamic>>[
-            <String, dynamic>{ 'message': false, },
+            <String, dynamic>{'message': false},
           ],
         },
       }), false);
@@ -63,7 +63,7 @@ void main() {
         'success': false,
         'details': <String, dynamic>{
           'notices': <Map<String, dynamic>>[
-            <String, dynamic>{ 'message': <String>['error'], },
+            <String, dynamic>{'message': <String>['error']},
           ],
         },
       }), false);
@@ -72,8 +72,8 @@ void main() {
         'success': false,
         'details': <String, dynamic>{
           'notices': <Map<String, dynamic>>[
-            <String, dynamic>{ 'message': 'error', },
-            <String, dynamic>{ 'message': <String>['error'], },
+            <String, dynamic>{'message': 'error'},
+            <String, dynamic>{'message': <String>['error']},
           ],
         },
       }), false);
@@ -82,7 +82,7 @@ void main() {
         'success': false,
         'details': <String, dynamic>{
           'notices': <Map<String, dynamic>>[
-            <String, dynamic>{ 'message': 'error', },
+            <String, dynamic>{'message': 'error'},
           ],
         },
       }), false);
