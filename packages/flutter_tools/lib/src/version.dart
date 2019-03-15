@@ -20,28 +20,17 @@ import 'globals.dart';
 class FlutterVersion {
   @visibleForTesting
   FlutterVersion([this._clock = const SystemClock()]) {
-    _channel = _runGit('git rev-parse --abbrev-ref --symbolic @{u}');
-    final String branch = _runGit('git rev-parse --abbrev-ref HEAD');
-    _branch = branch == 'HEAD' ? _channel : branch;
-
-    final int slash = _channel.indexOf('/');
-    if (slash != -1) {
-      final String remote = _channel.substring(0, slash);
-      _repositoryUrl = _runGit('git ls-remote --get-url $remote');
-      _channel = _channel.substring(slash + 1);
-    } else if (_channel.isEmpty) {
-      _channel = 'unknown';
-    }
-
     _frameworkRevision = _runGit('git log -n 1 --pretty=format:%H');
-    _frameworkAge = _runGit('git log -n 1 --pretty=format:%ar');
     _frameworkVersion = GitTagVersion.determine().frameworkVersionFor(_frameworkRevision);
   }
 
   final SystemClock _clock;
 
   String _repositoryUrl;
-  String get repositoryUrl => _repositoryUrl;
+  String get repositoryUrl {
+    final String _ = channel;
+    return _repositoryUrl;
+  }
 
   static const Set<String> officialChannels = <String>{
     'master',
@@ -64,7 +53,20 @@ class FlutterVersion {
   String _channel;
   /// The channel is the upstream branch.
   /// `master`, `dev`, `beta`, `stable`; or old ones, like `alpha`, `hackathon`, ...
-  String get channel => _channel;
+  String get channel {
+    if (_channel == null) {
+      final String channel = _runGit('git rev-parse --abbrev-ref --symbolic @{u}');
+      final int slash = channel.indexOf('/');
+      if (slash != -1) {
+        final String remote = channel.substring(0, slash);
+        _repositoryUrl = _runGit('git ls-remote --get-url $remote');
+        _channel = channel.substring(slash + 1);
+       } else if (_channel.isEmpty) {
+        _channel = 'unknown';
+      }
+    }
+    return _channel;
+  }
 
   /// The name of the local branch.
   /// Use getBranchName() to read this.
@@ -75,7 +77,9 @@ class FlutterVersion {
   String get frameworkRevisionShort => _shortGitRevision(frameworkRevision);
 
   String _frameworkAge;
-  String get frameworkAge => _frameworkAge;
+  String get frameworkAge {
+    return _frameworkAge ??= _runGit('git log -n 1 --pretty=format:%ar');
+  }
 
   String _frameworkVersion;
   String get frameworkVersion => _frameworkVersion;
@@ -182,6 +186,10 @@ class FlutterVersion {
   /// If [redactUnknownBranches] is true and the branch is unknown,
   /// the branch name will be returned as `'[user-branch]'`.
   String getBranchName({ bool redactUnknownBranches = false }) {
+    _branch ??= () {
+      final String branch = _runGit('git rev-parse --abbrev-ref HEAD');
+      return branch == 'HEAD' ? _channel : branch;
+    }();
     if (redactUnknownBranches || _branch.isEmpty) {
       // Only return the branch names we know about; arbitrary branch names might contain PII.
       if (!officialChannels.contains(_branch) && !obsoleteBranches.containsKey(_branch))
