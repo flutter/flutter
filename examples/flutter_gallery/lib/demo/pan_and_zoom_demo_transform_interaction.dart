@@ -115,6 +115,7 @@ class TransformInteractionState extends State<TransformInteraction> with SingleT
   GestureType gestureType;
 
   // Perform a translation on the given matrix within constraints of the scene.
+  // The _visibleRect is not rotated with the scene.
   Matrix4 matrixTranslate(Matrix4 matrix, Offset translation) {
     if (widget.disableTranslation) {
       return matrix;
@@ -336,7 +337,6 @@ class TransformInteractionState extends State<TransformInteraction> with SingleT
     _controller.reset();
 
     // If the scale ended with velocity, animate inertial movement
-    // TODO(justinmc): kill this when hitting the boundary to avoid bounce?
     final double velocityTotal = details.velocity.pixelsPerSecond.dx.abs()
       + details.velocity.pixelsPerSecond.dy.abs();
     if (velocityTotal == 0) {
@@ -358,10 +358,13 @@ class TransformInteractionState extends State<TransformInteraction> with SingleT
   // Handle inertia drag animation
   void _onAnimate() {
     setState(() {
+      // Translate _transform such that the resulting translation is
+      // _animation.value.
       final Vector3 translationVector = _transform.getTranslation();
       final Offset translation = Offset(translationVector.x, translationVector.y);
-      final Offset translationChange = _animation.value - translation;
-      final Offset translationChangeScene = translationChange / _transform.getMaxScaleOnAxis();
+      final Offset translationScene = fromViewport(translation, _transform);
+      final Offset animationScene = fromViewport(_animation.value, _transform);
+      final Offset translationChangeScene = animationScene - translationScene;
       _transform = matrixTranslate(_transform, translationChangeScene);
     });
   }
