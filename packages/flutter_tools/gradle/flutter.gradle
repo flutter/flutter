@@ -186,26 +186,28 @@ class FlutterPlugin implements Plugin<Project> {
         File pluginsFile = new File(project.projectDir.parentFile.parentFile, '.flutter-plugins')
         Properties plugins = readPropertiesIfExist(pluginsFile)
 
-        plugins.each { name, _ ->
-            def pluginProject = project.rootProject.findProject(":$name")
-            if (pluginProject != null) {
-                project.dependencies {
-                    if (project.getConfigurations().findByName("implementation")) {
-                        implementation pluginProject
-                    } else {
-                        compile pluginProject
-                    }
-                }
-		pluginProject.afterEvaluate {
-                    pluginProject.android.buildTypes {
-                        profile {
-                            initWith debug
-                        }
-                    }
-		}
-                pluginProject.afterEvaluate this.&addFlutterJarCompileOnlyDependency
-            } else {
-                project.logger.error("Plugin project :$name not found. Please update settings.gradle.")
+        // TODO(mklim): This replacement currently requires apps to remove their
+        // `subproject {}` declarations or else break. If we're going to
+        // actually commit this we need to fix that or make this code path
+        // execute only when we detect that users have migrated their app
+        // instead.
+        plugins.each { name, path ->
+            def String artifactDir = Paths.get(path, 'android', 'build', 'outputs', 'aar').toString();
+            def Set<File> aars = project.fileTree(dir: artifactDir, include: '*.aar').getFiles();
+
+            if (aars.size() < 1) {
+                throw new GradleException("Couldn't find plugin $name .aar artifiact in $artifactDir");
+            }
+
+            def String aarPath = aars[0].getAbsolutePath();
+            if (aars.size() > 1) {
+                // TODO(mklim): Pick the AAR we actually just built, not the
+                // first one.
+                project.logger.warn("Found multiple artifacts for plugin $name. Using $aarPath.");
+            }
+
+            project.dependencies {
+                compile project.files(aarPath)
             }
         }
     }

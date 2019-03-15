@@ -1,0 +1,74 @@
+import java.nio.file.Path
+import java.nio.file.Paths
+
+allprojects {
+    apply plugin: FlutterAarPlugin
+}
+
+/** Adds in a cmpileOnly dependency on flutterJar. */
+class FlutterAarPlugin implements Plugin<Project> {
+    private File flutterJar
+    private File debugFlutterJar
+    private File releaseFlutterJar
+
+    @Override
+    void apply(Project project) {
+        findFlutterJar(project)
+        project.afterEvaluate this.&addFlutterJarCompileOnlyDependency
+    }
+
+    // TODO(mklim): This logic is copied from flutter.gradle. Should probably
+    // come from the same source instead.
+    private void findFlutterJar(Project project) {
+        if (project.hasProperty('localEngineOut')) {
+            String engineOutPath = project.property('localEngineOut')
+            File engineOut = project.file(engineOutPath)
+            if (!engineOut.isDirectory()) {
+                throw new GradleException('localEngineOut must point to a local engine build')
+            }
+            flutterJar = Paths.get(engineOut.absolutePath, "flutter.jar").toFile()
+            if (!flutterJar.isFile()) {
+                throw new GradleException('Local engine build does not contain flutter.jar')
+            }
+
+            localEngine = engineOut.name
+            localEngineSrcPath = engineOut.parentFile.parent
+
+            project.dependencies {
+                compileOnly project.files(flutterJar)
+            }
+        } else {
+            Path baseEnginePath = Paths.get(project.property('flutter-root'), 'bin', 'cache', 'artifacts', 'engine')
+            String targetArch = 'arm'
+            if (project.hasProperty('target-platform') &&
+                project.property('target-platform') == 'android-arm64') {
+              targetArch = 'arm64'
+            }
+            debugFlutterJar = baseEnginePath.resolve("android-${targetArch}").resolve("flutter.jar").toFile()
+            releaseFlutterJar = baseEnginePath.resolve("android-${targetArch}-release").resolve("flutter.jar").toFile()
+            if (!debugFlutterJar.isFile()) {
+                project.exec {
+                    executable flutterExecutable.absolutePath
+                    args "--suppress-analytics"
+                    args "precache"
+                }
+                if (!debugFlutterJar.isFile()) {
+                    throw new GradleException("Unable to find flutter.jar in SDK: ${debugFlutterJar}")
+                }
+            }
+        }
+    }
+
+    private void addFlutterJarCompileOnlyDependency(Project project) {
+        if (project.state.failure) {
+            return
+        }
+        project.dependencies {
+            if (flutterJar != null) {
+                compileOnly project.files(flutterJar)
+            } else {
+                compileOnly project.files(releaseFlutterJar)
+            }
+        }
+    }
+}
