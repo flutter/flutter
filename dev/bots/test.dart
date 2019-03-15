@@ -181,7 +181,7 @@ Future<void> _runToolTests() async {
   await _buildRunnerTest(
     path.join(flutterRoot, 'packages', 'flutter_tools'),
     flutterRoot,
-    enableFlutterToolAsserts: true,
+    enableFlutterToolAsserts: false, // required to use app-jit tool snapshots.
     tableData: bigqueryApi?.tabledata,
   );
 
