@@ -28,6 +28,8 @@ enum Artifact {
   engineDartBinary,
   dart2jsSnapshot,
   kernelWorkerSnapshot,
+  webPlatformKernelDill,
+  flutterWebSdkPath,
 }
 
 String _artifactToFileName(Artifact artifact, [ TargetPlatform platform, BuildMode mode ]) {
@@ -76,6 +78,11 @@ String _artifactToFileName(Artifact artifact, [ TargetPlatform platform, BuildMo
       return 'flutter_dart2js.dart.snapshot';
     case Artifact.kernelWorkerSnapshot:
       return 'flutter_kernel_worker.dart.snapshot';
+    case Artifact.flutterWebSdkPath:
+      assert(false, 'No filename for web sdk path, should not be invoked');
+      return null;
+    case Artifact.webPlatformKernelDill:
+      return 'flutter_ddc_sdk.dill';
   }
   assert(false, 'Invalid artifact $artifact.');
   return null;
@@ -201,6 +208,10 @@ class CachedArtifacts extends Artifacts {
         return fs.path.join(dartSdkPath, 'bin', 'snapshots', _artifactToFileName(artifact));
       case Artifact.kernelWorkerSnapshot:
         return fs.path.join(dartSdkPath, 'bin', 'snapshots', _artifactToFileName(artifact));
+      case Artifact.webPlatformKernelDill:
+        return fs.path.join(dartWebSdkPath, 'kernel', _artifactToFileName(artifact));
+      case Artifact.flutterWebSdkPath:
+        return dartSdkPath;
       default:
         assert(false, 'Artifact $artifact not available for platform $platform.');
         return null;
@@ -281,6 +292,10 @@ class LocalEngineArtifacts extends Artifacts {
         return fs.path.join(_hostEngineOutPath, 'dart-sdk', 'bin', 'snapshots', _artifactToFileName(artifact));
       case Artifact.kernelWorkerSnapshot:
         return fs.path.join(_hostEngineOutPath, 'dart-sdk', 'bin', 'snapshots', _artifactToFileName(artifact));
+      case Artifact.webPlatformKernelDill:
+        return fs.path.join(_hostEngineOutPath, 'flutter_web_sdk', 'kernel', _artifactToFileName(artifact));
+      case Artifact.flutterWebSdkPath:
+        return fs.path.join(_hostEngineOutPath, 'flutter_web_sdk');
     }
     assert(false, 'Invalid artifact $artifact.');
     return null;

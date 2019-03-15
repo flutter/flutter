@@ -474,6 +474,11 @@ class WebProject {
 
   final FlutterProject parent;
 
+  /// Whether this project has a web entrypoint.
+  bool get isSupported {
+    return parent.directory.childDirectory('web').existsSync();
+  }
+
   Future<void> ensureReadyForPlatformSpecificTooling() async {
     /// Generate index.html in build/web. Eventually we could support
     /// a custom html under the web sub directory.

@@ -83,7 +83,7 @@ class BuildScriptGenerator {
     final List<BuilderDefinition> builderDefinitions = orderedConfigs
       .expand((BuildConfig buildConfig) => buildConfig.builderDefinitions.values)
       .where((BuilderDefinition builderDefinition) {
-        if (builderDefinition.import.startsWith('package:')) {
+        if (builderDefinition.import.startsWith('package:') && !builderDefinition.import.contains('build_web_compilers')) {
           return true;
         }
         return builderDefinition.package == packageGraph.root.name;
@@ -96,7 +96,7 @@ class BuildScriptGenerator {
     final List<PostProcessBuilderDefinition> postProcessBuilderDefinitions = orderedConfigs
       .expand((BuildConfig buildConfig) => buildConfig.postProcessBuilderDefinitions.values)
       .where((PostProcessBuilderDefinition builderDefinition) {
-        if (builderDefinition.import.startsWith('package:')) {
+        if (builderDefinition.import.startsWith('package:') && !builderDefinition.import.contains('build_web_compilers')) {
           return true;
         }
         return builderDefinition.package == packageGraph.root.name;

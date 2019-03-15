@@ -11,6 +11,10 @@ String get dartSdkPath {
   return fs.path.join(Cache.flutterRoot, 'bin', 'cache', 'dart-sdk');
 }
 
+String get dartWebSdkPath {
+  return fs.path.join(Cache.flutterRoot, 'bin', 'cache', 'flutter_web_sdk');
+}
+
 /// The required Dart language flags
 const List<String> dartVmFlags = <String>[];
 

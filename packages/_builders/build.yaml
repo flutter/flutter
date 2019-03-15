@@ -1,0 +1,69 @@
+builders:
+  ddc:
+    import: "package:_builders/builders.dart"
+    builder_factories:
+      - devCompilerBuilder
+    build_extensions:
+      .dart:
+        - .ddc.js.errors
+        - .ddc.js
+        - .ddc.js.map
+    is_optional: True
+    auto_apply: all_packages
+    required_inputs:
+      - .dart
+      - .dartdevc.module
+    applies_builders:
+      # We want this to apply for dart2js as well - luckily this builder doesn't
+      # need to be disabled since it's lazy so we can use is as a handle to get
+      # the cleanup builder applied.
+      - _builders|dart_source_cleanup
+      - build_modules|dartdevc
+      - build_modules|dart2js
+  entrypoint:
+    import: "package:_builders/builders.dart"
+    builder_factories:
+      - webEntrypointBuilder
+    build_extensions:
+      .dart:
+        - .dart.bootstrap.js
+        - .dart.js
+        - .dart.js.map
+        - .dart.js.tar.gz
+    required_inputs:
+      - .dart
+      - .ddc.js
+      - .dartdevc.module
+      - .dart2js.module
+    build_to: cache
+    auto_apply: root_package
+    defaults:
+      generate_for:
+        include:
+          - web/**
+          - test/**_test.dart
+          - example/**
+          - benchmark/**
+        exclude:
+          - test/**.node_test.dart
+          - test/**.vm_test.dart
+      options:
+        dart2js_args:
+          - --minify
+      release_options:
+        compiler: dart2js
+    applies_builders:
+      - _builders|dart2js_archive_extractor
+post_process_builders:
+  dart2js_archive_extractor:
+    import: "package:_builders/builders.dart"
+    builder_factory: dart2JsArchiveExtractor
+    defaults:
+      release_options:
+        filter_outputs: true
+  dart_source_cleanup:
+    import: "package:_builders/builders.dart"
+    builder_factory: dartSourceCleanup
+    defaults:
+      release_options:
+        enabled: true

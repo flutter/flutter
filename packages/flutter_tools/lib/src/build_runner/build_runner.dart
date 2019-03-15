@@ -10,6 +10,7 @@ import 'package:build_runner_core/build_runner_core.dart' hide BuildStatus;
 import 'package:build_daemon/data/server_log.dart';
 import 'package:build_daemon/data/build_status.dart' as build;
 import 'package:build_daemon/client.dart';
+import 'package:flutter_tools/src/convert.dart';
 import 'package:yaml/yaml.dart';
 import 'package:crypto/crypto.dart' show md5;
 
@@ -87,6 +88,10 @@ class BuildRunner extends CodeGenerator {
         }
       }
       stringBuffer.writeln('  build_runner: ^$kMinimumBuildRunnerVersion');
+      if (flutterProject.web.isSupported) {
+        stringBuffer.writeln('  _builders:');
+        stringBuffer.writeln('    sdk: flutter');
+      }
       await syntheticPubspec.writeAsString(stringBuffer.toString());
 
       await pubGet(
@@ -168,6 +173,45 @@ class BuildRunner extends CodeGenerator {
     final String newPackagesContents = oldPackagesContents.replaceFirst('$appName:lib/', '$appName:$kMultiRootScheme:/');
     final String generatedPackagesPath = fs.path.setExtension(PackageMap.globalPackagesPath, '.generated');
     fs.file(generatedPackagesPath).writeAsStringSync(newPackagesContents);
+  }
+
+  @override
+  Future<void> serve(FlutterProject flutterProject) async {
+    await generateBuildScript(flutterProject);
+    final String engineDartBinaryPath = artifacts.getArtifactPath(Artifact.engineDartBinary);
+    final File buildSnapshot = flutterProject
+      .dartTool
+      .childDirectory('build')
+      .childDirectory('entrypoint')
+      .childFile('build.dart.snapshot');
+    final String scriptPackagesPath = flutterProject
+      .dartTool
+      .childDirectory('flutter_tool')
+      .childFile('.packages')
+      .path;
+    final String platformSdk = artifacts.getArtifactPath(Artifact.flutterWebSdkPath);
+    final String webKernelDill = fs.path.relative(artifacts.getArtifactPath(Artifact.webPlatformKernelDill), from: platformSdk);
+    final List<String> command = <String>[
+      engineDartBinaryPath,
+      '--packages=$scriptPackagesPath',
+      buildSnapshot.path,
+      'serve',
+      '--skip-build-script-check',
+      '--define', '_builders|ddc=platformSdk=$platformSdk',
+      '--define', '_builders|ddc=sdkKernelPath=$webKernelDill',
+    ];
+    final Process process = await processManager.start(command);
+    process
+      .stdout
+      .transform(utf8.decoder)
+      .transform(const LineSplitter())
+      .listen(printStatus);
+    process
+      .stderr
+      .transform(utf8.decoder)
+      .transform(const LineSplitter())
+      .listen(printError);
+    return process.exitCode;
   }
 }
 

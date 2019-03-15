@@ -54,6 +54,9 @@ abstract class CodeGenerator {
   /// flutter_build kernel builder.
   Future<CodegenDaemon> daemon(FlutterProject flutterProject);
 
+  /// Build and serve a web project.
+  Future<void> serve(FlutterProject flutterProject);
+
   // Generates a synthetic package under .dart_tool/flutter_tool which is in turn
   // used to generate a build script.
   Future<void> generateBuildScript(FlutterProject flutterProject);
@@ -65,6 +68,11 @@ class UnsupportedCodeGenerator extends CodeGenerator {
   @override
   Future<void> generateBuildScript(FlutterProject flutterProject) {
     throw UnsupportedError('build_runner is not currently supported.');
+  }
+
+  @override
+  Future<void> serve(FlutterProject flutterProject) {
+    throw UnsupportedError('build_runner is not currentl supported');
   }
 
   @override
