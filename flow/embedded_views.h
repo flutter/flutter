@@ -21,7 +21,7 @@ class EmbeddedViewParams {
 };
 
 // This is only used on iOS when running in a non headless mode,
-// in this case ViewEmbedded is a reference to the
+// in this case ExternalViewEmbedder is a reference to the
 // FlutterPlatformViewsController which is owned by FlutterViewController.
 class ExternalViewEmbedder {
  public:

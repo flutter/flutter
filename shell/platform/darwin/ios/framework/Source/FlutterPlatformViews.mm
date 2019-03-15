@@ -210,8 +210,7 @@ bool FlutterPlatformViewsController::SubmitFrame(bool gl_rendering,
   for (size_t i = 0; i < composition_order_.size(); i++) {
     int64_t view_id = composition_order_[i];
     if (gl_rendering) {
-      EnsureGLOverlayInitialized(view_id, gl_context, gr_context,
-                                 gr_context != overlays_gr_context_);
+      EnsureGLOverlayInitialized(view_id, gl_context, gr_context);
     } else {
       EnsureOverlayInitialized(view_id);
     }
@@ -221,7 +220,6 @@ bool FlutterPlatformViewsController::SubmitFrame(bool gl_rendering,
     canvas->flush();
     did_submit &= frame->Submit();
   }
-  overlays_gr_context_ = gr_context;
   picture_recorders_.clear();
   if (composition_order_ == active_composition_order_) {
     composition_order_.clear();
@@ -267,10 +265,10 @@ void FlutterPlatformViewsController::EnsureOverlayInitialized(int64_t overlay_id
 void FlutterPlatformViewsController::EnsureGLOverlayInitialized(
     int64_t overlay_id,
     std::shared_ptr<IOSGLContext> gl_context,
-    GrContext* gr_context,
-    bool update_gr_context) {
+    GrContext* gr_context) {
   if (overlays_.count(overlay_id) != 0) {
-    if (update_gr_context) {
+    if (gr_context != overlays_gr_context_) {
+      overlays_gr_context_ = gr_context;
       // The overlay already exists, but the GrContext was changed so we need to recreate
       // the rendering surface with the new GrContext.
       IOSSurfaceGL* ios_surface_gl = (IOSSurfaceGL*)overlays_[overlay_id]->ios_surface.get();
