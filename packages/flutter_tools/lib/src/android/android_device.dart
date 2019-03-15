@@ -430,6 +430,8 @@ class AndroidDevice extends Device {
       cmd.addAll(<String>['--ez', 'trace-skia', 'true']);
     if (debuggingOptions.traceSystrace)
       cmd.addAll(<String>['--ez', 'trace-systrace', 'true']);
+    if (debuggingOptions.dumpSkpOnShaderCompilation)
+      cmd.addAll(<String>['--ez', 'dump-skp-on-shader-compilation', 'true']);
     if (debuggingOptions.debuggingEnabled) {
       if (debuggingOptions.buildInfo.isDebug) {
         cmd.addAll(<String>['--ez', 'enable-checked-mode', 'true']);
