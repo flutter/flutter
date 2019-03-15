@@ -946,6 +946,10 @@ abstract class ResidentRunner {
     if (device.package.packagesFile == null || !device.package.packagesFile.existsSync()) {
       return true;
     }
+    // why is this sometimes an APK.
+    if (!device.package.packagesFile.path.contains('.packages')) {
+      return true;
+    }
     // Leave pubspec null to check all dependencies.
     final ProjectFileInvalidator projectFileInvalidator = ProjectFileInvalidator(device.package.packagesFile.path, null);
     projectFileInvalidator.findInvalidated();
