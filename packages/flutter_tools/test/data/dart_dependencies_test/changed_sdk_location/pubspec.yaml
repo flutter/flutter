@@ -1,9 +1,0 @@
-name: sdk-move-test
-
-environment:
-  # The pub client defaults to an <2.0.0 sdk constraint which we need to explicitly overwrite.
-  sdk: ">=2.0.0-dev.68.0 <3.0.0"
-
-dependencies:
-  flutter:
-    sdk: flutter

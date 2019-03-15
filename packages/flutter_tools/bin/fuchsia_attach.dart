@@ -15,7 +15,6 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/attach.dart';
 import 'package:flutter_tools/src/commands/doctor.dart';
 import 'package:flutter_tools/src/fuchsia/fuchsia_sdk.dart';
-import 'package:flutter_tools/src/run_hot.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 
 final ArgParser parser = ArgParser()
@@ -100,8 +99,7 @@ Future<void> main(List<String> args) async {
         platformKernelDill: platformKernelDill,
         flutterPatchedSdk: flutterPatchedSdk,
       ),
-      HotRunnerConfig: () => HotRunnerConfig()..computeDartDependencies = false,
-    },
+    }
   );
 }
 
