@@ -15,7 +15,7 @@ class TrainingCommand extends FlutterCommand {
 
   @override
   bool get hidden => true;
-  
+
   @override
   bool get shouldUpdateCache => false;
 
