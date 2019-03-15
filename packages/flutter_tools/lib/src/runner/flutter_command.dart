@@ -662,3 +662,15 @@ abstract class FlutterCommand extends Command<void> {
 
   ApplicationPackageStore applicationPackages;
 }
+
+
+abstract class FastFlutterCommand extends FlutterCommand {
+  @override
+  Future<void> run() {
+    return context.run<void>(
+      name: 'command',
+      overrides: <Type, Generator>{FlutterCommand: () => this},
+      body: runCommand,
+    );
+  }
+}

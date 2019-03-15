@@ -17,7 +17,7 @@ import '../test/event_printer.dart';
 import '../test/runner.dart';
 import '../test/watcher.dart';
 
-class TestCommand extends FlutterCommand {
+class TestCommand extends FastFlutterCommand {
   TestCommand({ bool verboseHelp = false }) {
     requiresPubspecYaml();
     usesPubOption();
