@@ -579,9 +579,7 @@ class _CupertinoBackGestureController<T> {
     @required this.route,
     @required this.controller,
     @required this.onEnded,
-  }) : assert(route != null), assert(controller != null), assert(onEnded != null) {
-    route.navigator.didStartUserGesture();
-  }
+  }) : assert(route != null), assert(controller != null), assert(onEnded != null);
 
   final PageRoute<T> route;
   final AnimationController controller;
@@ -593,6 +591,10 @@ class _CupertinoBackGestureController<T> {
   /// drag should be 0.0 to 1.0.
   void dragUpdate(double delta) {
     controller.value -= delta;
+  }
+
+  void dragStart() {
+    route.navigator.didStartUserGesture();
   }
 
   /// The drag gesture has ended with a horizontal motion of
@@ -636,9 +638,9 @@ class _CupertinoBackGestureController<T> {
     } else {
       // Animate calls could return inline if already at the target destination
       // value.
-      return _handleStatusChanged(controller.status);
+      _handleStatusChanged(controller.status);
     }
-
+    route.navigator?.didStopUserGesture();
   }
 
   void _handleStatusChanged(AnimationStatus status) {
@@ -654,7 +656,6 @@ class _CupertinoBackGestureController<T> {
   void dispose() {
     if (_animating)
       controller.removeStatusListener(_handleStatusChanged);
-    route.navigator?.didStopUserGesture();
   }
 }
 
