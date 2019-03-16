@@ -639,7 +639,13 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
           rowChildren.add(
             GestureDetector(
               onTap: widget.enabled ?? true
-                  ? () => _effectiveController.clear()
+                  ? () {
+                // special handle onChanged for ClearButton.
+                final bool textChanged = _effectiveController.text != '';
+                _effectiveController.clear();
+                if (widget.onChanged != null && textChanged)
+                  widget.onChanged(_effectiveController.text);
+              }
                   : null,
               child: const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 6.0),
