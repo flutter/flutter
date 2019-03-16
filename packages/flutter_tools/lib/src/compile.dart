@@ -28,7 +28,7 @@ class KernelCompilerFactory {
   const KernelCompilerFactory();
 
   Future<KernelCompiler> create(FlutterProject flutterProject) async {
-    if (flutterProject == null || !await flutterProject.hasBuilders) {
+    if (flutterProject == null || !flutterProject.hasBuilders) {
       return const KernelCompiler();
     }
     return const CodeGeneratingKernelCompiler();

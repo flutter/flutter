@@ -228,6 +228,26 @@ void main() {
     expect(find.byType(CircularProgressIndicator), paints..arc(strokeWidth: 16.0));
   });
 
+  testWidgets('CircularProgressIndicator paint background color', (WidgetTester tester) async {
+    const Color green = Color(0xFF00FF00);
+    const Color blue = Color(0xFF0000FF);
+
+    await tester.pumpWidget(const CircularProgressIndicator(
+      valueColor: AlwaysStoppedAnimation<Color>(blue),
+    ));
+
+    expect(find.byType(CircularProgressIndicator), paintsExactlyCountTimes(#drawArc, 1));
+    expect(find.byType(CircularProgressIndicator), paints..arc(color: blue));
+
+    await tester.pumpWidget(const CircularProgressIndicator(
+      backgroundColor: green,
+      valueColor: AlwaysStoppedAnimation<Color>(blue),
+    ));
+
+    expect(find.byType(CircularProgressIndicator), paintsExactlyCountTimes(#drawArc, 2));
+    expect(find.byType(CircularProgressIndicator), paints..arc(color: green)..arc(color: blue));
+  });
+
   testWidgets('Indeterminate RefreshProgressIndicator keeps spinning until end of time (approximate)', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/13782
 

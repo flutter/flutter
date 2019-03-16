@@ -48,7 +48,7 @@ class BuildRunner extends CodeGenerator {
 
     // Check if contents of builders changed. If so, invalidate build script
     // and regnerate.
-    final YamlMap builders = await flutterProject.builders;
+    final YamlMap builders = flutterProject.builders;
     final List<int> appliedBuilderDigest = _produceScriptId(builders);
     if (scriptIdFile.existsSync() && buildSnapshot.existsSync()) {
       final List<int> previousAppliedBuilderDigest = scriptIdFile.readAsBytesSync();
@@ -79,7 +79,7 @@ class BuildRunner extends CodeGenerator {
 
       stringBuffer.writeln('name: flutter_tool');
       stringBuffer.writeln('dependencies:');
-      final YamlMap builders = await flutterProject.builders;
+      final YamlMap builders = flutterProject.builders;
       if (builders != null) {
         for (String name in builders.keys) {
           final Object node = builders[name];

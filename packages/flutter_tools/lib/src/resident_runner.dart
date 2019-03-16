@@ -18,9 +18,7 @@ import 'base/utils.dart';
 import 'build_info.dart';
 import 'codegen.dart';
 import 'compile.dart';
-import 'dart/dependencies.dart';
 import 'dart/package_map.dart';
-import 'dependency_checker.dart';
 import 'devfs.dart';
 import 'device.dart';
 import 'globals.dart';
@@ -63,7 +61,7 @@ class FlutterDevice {
   }) async {
     ResidentCompiler generator;
     final FlutterProject flutterProject = await FlutterProject.current();
-    if (await flutterProject.hasBuilders) {
+    if (flutterProject.hasBuilders) {
       generator = await CodeGeneratingResidentCompiler.create(
         flutterProject: flutterProject,
       );
@@ -444,10 +442,10 @@ class FlutterDevice {
     DateTime firstBuildTime,
     bool bundleFirstUpload = false,
     bool bundleDirty = false,
-    Set<String> fileFilter,
     bool fullRestart = false,
     String projectRootPath,
     String pathToReload,
+    @required List<String> invalidatedFiles,
   }) async {
     final Status devFSStatus = logger.startProgress(
       'Syncing files to device ${device.name}...',
@@ -462,13 +460,13 @@ class FlutterDevice {
         firstBuildTime: firstBuildTime,
         bundleFirstUpload: bundleFirstUpload,
         bundleDirty: bundleDirty,
-        fileFilter: fileFilter,
         generator: generator,
         fullRestart: fullRestart,
         dillOutputPath: dillOutputPath,
         trackWidgetCreation: trackWidgetCreation,
         projectRootPath: projectRootPath,
         pathToReload: pathToReload,
+        invalidatedFiles: invalidatedFiles,
       );
     } on DevFSException {
       devFSStatus.cancel();
@@ -945,23 +943,26 @@ abstract class ResidentRunner {
   }
 
   bool hasDirtyDependencies(FlutterDevice device) {
-    // TODO(jonahwilliams): remove when https://github.com/flutter/flutter/pull/28152 lands.
-    return true;
-    /// When using the build system, dependency analysis is handled by build
-    /// runner instead.
-    // if (experimentalBuildEnabled) {
-    //   return false;
-    // }
-    final DartDependencySetBuilder dartDependencySetBuilder =
-        DartDependencySetBuilder(mainPath, packagesFilePath);
-    final DependencyChecker dependencyChecker =
-        DependencyChecker(dartDependencySetBuilder, assetBundle);
     if (device.package.packagesFile == null || !device.package.packagesFile.existsSync()) {
       return true;
     }
-    final DateTime lastBuildTime = device.package.packagesFile.statSync().modified;
-
-    return dependencyChecker.check(lastBuildTime);
+    // why is this sometimes an APK.
+    if (!device.package.packagesFile.path.contains('.packages')) {
+      return true;
+    }
+    // Leave pubspec null to check all dependencies.
+    final ProjectFileInvalidator projectFileInvalidator = ProjectFileInvalidator(
+      device.package.packagesFile.path,
+      null,
+    );
+    projectFileInvalidator.findInvalidated();
+    final int lastBuildTime = device.package.packagesFile.statSync().modified.millisecondsSinceEpoch;
+    for (int updateTime in projectFileInvalidator.updateTime.values) {
+      if (updateTime > lastBuildTime) {
+        return true;
+      }
+    }
+    return false;
   }
 
   Future<void> preStop() async { }
