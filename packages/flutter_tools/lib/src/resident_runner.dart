@@ -946,12 +946,12 @@ abstract class ResidentRunner {
     if (device.package.packagesFile == null || !device.package.packagesFile.existsSync()) {
       return true;
     }
-    // why is this sometimes an APK.
-    if (!device.package.packagesFile.path.contains('.packages')) {
+    // Leave pubspec null to check all dependencies.
+    final File actualPackagesFile = fs.file(PackageMap.globalPackagesPath);
+    if (!actualPackagesFile.existsSync()) {
       return true;
     }
-    // Leave pubspec null to check all dependencies.
-    final ProjectFileInvalidator projectFileInvalidator = ProjectFileInvalidator(device.package.packagesFile.path, null);
+    final ProjectFileInvalidator projectFileInvalidator = ProjectFileInvalidator(actualPackagesFile.path, null);
     projectFileInvalidator.findInvalidated();
     final int lastBuildTime = device.package.packagesFile.statSync().modified.millisecondsSinceEpoch;
     for (int updateTime in projectFileInvalidator.updateTime.values) {
