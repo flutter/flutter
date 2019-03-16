@@ -104,9 +104,8 @@ class _ManifestAssetBundle implements AssetBundle {
       printError('$e');
       return 1;
     }
-    if (flutterManifest == null) {
+    if (flutterManifest == null)
       return 1;
-    }
 
     // If the last build time isn't set before this early return, empty pubspecs will
     // hang on hot reload, as the incremental dill files will never be copied to the
