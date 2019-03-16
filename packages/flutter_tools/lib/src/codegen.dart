@@ -186,7 +186,7 @@ class CodeGeneratingResidentCompiler implements ResidentCompiler {
       targetModel: TargetModel.flutter,
       unsafePackageSerialization: unsafePackageSerialization,
       // Pass an invalid file name to prevent frontend_server from initializing from dill.
-      initializeFromDill: initializeFromDill,
+      initializeFromDill: 'none_file',
     );
     if (runCold) {
       return residentCompiler;

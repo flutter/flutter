@@ -61,8 +61,10 @@ class FlutterVersion {
         final String remote = channel.substring(0, slash);
         _repositoryUrl = _runGit('git ls-remote --get-url $remote');
         _channel = channel.substring(slash + 1);
-       } else if (_channel.isEmpty) {
+       } else if (channel.isEmpty) {
         _channel = 'unknown';
+      } else {
+        _channel = channel;
       }
     }
     return _channel;
@@ -188,7 +190,7 @@ class FlutterVersion {
   String getBranchName({ bool redactUnknownBranches = false }) {
     _branch ??= () {
       final String branch = _runGit('git rev-parse --abbrev-ref HEAD');
-      return branch == 'HEAD' ? _channel : branch;
+      return branch == 'HEAD' ? channel : branch;
     }();
     if (redactUnknownBranches || _branch.isEmpty) {
       // Only return the branch names we know about; arbitrary branch names might contain PII.
@@ -274,7 +276,7 @@ class FlutterVersion {
   /// writes shared cache files.
   Future<void> checkFlutterVersionFreshness() async {
     // Don't perform update checks if we're not on an official channel.
-    if (!officialChannels.contains(_channel)) {
+    if (!officialChannels.contains(channel)) {
       return;
     }
 
@@ -367,7 +369,7 @@ class FlutterVersion {
 
     // Cache is empty or it's been a while since the last server ping. Ping the server.
     try {
-      final DateTime remoteFrameworkCommitDate = DateTime.parse(await FlutterVersion.fetchRemoteFrameworkCommitDate(_channel));
+      final DateTime remoteFrameworkCommitDate = DateTime.parse(await FlutterVersion.fetchRemoteFrameworkCommitDate(channel));
       await versionCheckStamp.store(
         newTimeVersionWasChecked: _clock.now(),
         newKnownRemoteVersion: remoteFrameworkCommitDate,
