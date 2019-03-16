@@ -345,7 +345,7 @@ class FlutterDevice {
     startEchoingDeviceLog();
 
     // Start the application.
-    final bool hasDirtyDependencies = hotRunner.hasDirtyDependencies(this);
+    final bool hasDirtyDependencies = await hotRunner.hasDirtyDependencies(this);
     final Future<LaunchResult> futureResult = device.startApp(
       package,
       mainPath: hotRunner.mainPath,
@@ -409,7 +409,7 @@ class FlutterDevice {
 
     startEchoingDeviceLog();
 
-    final bool hasDirtyDependencies = coldRunner.hasDirtyDependencies(this);
+    final bool hasDirtyDependencies = await coldRunner.hasDirtyDependencies(this);
     final LaunchResult result = await device.startApp(
       package,
       mainPath: coldRunner.mainPath,
@@ -942,16 +942,16 @@ abstract class ResidentRunner {
     return exitCode;
   }
 
-  bool hasDirtyDependencies(FlutterDevice device) {
+  Future<bool> hasDirtyDependencies(FlutterDevice device) async {
     if (device.package.packagesFile == null || !device.package.packagesFile.existsSync()) {
       return true;
     }
-    // Leave pubspec null to check all dependencies.
     final File actualPackagesFile = fs.file(PackageMap.globalPackagesPath);
     if (!actualPackagesFile.existsSync()) {
       return true;
     }
-    final ProjectFileInvalidator projectFileInvalidator = ProjectFileInvalidator(actualPackagesFile.path, null);
+    final FlutterProject flutterProject = await FlutterProject.current();
+    final ProjectFileInvalidator projectFileInvalidator = ProjectFileInvalidator(actualPackagesFile.path, flutterProject);
     projectFileInvalidator.findInvalidated();
     final int lastBuildTime = device.package.packagesFile.statSync().modified.millisecondsSinceEpoch;
     for (int updateTime in projectFileInvalidator.updateTime.values) {
