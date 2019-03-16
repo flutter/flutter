@@ -194,10 +194,7 @@ class _ManifestAssetBundle implements AssetBundle {
       }
       for (_Asset variant in assetVariants[asset]) {
         assert(variant.assetFileExists);
-              // Only create a new entry if it asset is dirty or missing.
-        if (!entries.containsKey(variant.entryUri.path) || variant.assetFile.statSync().modified.isAfter(_lastBuildTimestamp)) {
-          entries[variant.entryUri.path] = DevFSFileContent(variant.assetFile);
-        }
+        entries[variant.entryUri.path] = DevFSFileContent(variant.assetFile);
       }
     }
 
@@ -207,10 +204,7 @@ class _ManifestAssetBundle implements AssetBundle {
     }
     for (_Asset asset in materialAssets) {
       assert(asset.assetFileExists);
-      // Only create a new entry if it asset is dirty or missing.
-      if (!entries.containsKey(asset.entryUri.path) || asset.assetFile.statSync().modified.isAfter(_lastBuildTimestamp)) {
-        entries[asset.entryUri.path] = DevFSFileContent(asset.assetFile);
-      }
+      entries[asset.entryUri.path] = DevFSFileContent(asset.assetFile);
     }
 
     entries[_assetManifestJson] = _createAssetManifest(assetVariants);
