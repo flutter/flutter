@@ -48,9 +48,12 @@ TaskFunction createHotModeTest() {
           process.stdout
               .transform<String>(utf8.decoder)
               .transform<String>(const LineSplitter())
-              .listen((String line) {
+              .listen((String line) async {
             if (line.contains('\] Reloaded ')) {
               if (hotReloadCount == 0) {
+                // Ensure that notifications triggered after the previous hot
+                // reload have finished.
+                await Future<void>.delayed(const Duration(seconds: 2));
                 // Update the file and reload again.
                 final File appDartSource = file(path.join(
                     _editedFlutterGalleryDir.path, 'lib/gallery/app.dart',
