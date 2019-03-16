@@ -104,8 +104,9 @@ class _ManifestAssetBundle implements AssetBundle {
       printError('$e');
       return 1;
     }
-    if (flutterManifest == null)
+    if (flutterManifest == null) {
       return 1;
+    }
 
     // If the last build time isn't set before this early return, empty pubspecs will
     // hang on hot reload, as the incremental dill files will never be copied to the
@@ -193,7 +194,10 @@ class _ManifestAssetBundle implements AssetBundle {
       }
       for (_Asset variant in assetVariants[asset]) {
         assert(variant.assetFileExists);
-        entries[variant.entryUri.path] = DevFSFileContent(variant.assetFile);
+              // Only create a new entry if it asset is dirty or missing.
+        if (!entries.containsKey(variant.entryUri.path) || variant.assetFile.statSync().modified.isAfter(_lastBuildTimestamp)) {
+          entries[variant.entryUri.path] = DevFSFileContent(variant.assetFile);
+        }
       }
     }
 
@@ -203,7 +207,10 @@ class _ManifestAssetBundle implements AssetBundle {
     }
     for (_Asset asset in materialAssets) {
       assert(asset.assetFileExists);
-      entries[asset.entryUri.path] = DevFSFileContent(asset.assetFile);
+      // Only create a new entry if it asset is dirty or missing.
+      if (!entries.containsKey(asset.entryUri.path) || asset.assetFile.statSync().modified.isAfter(_lastBuildTimestamp)) {
+        entries[asset.entryUri.path] = DevFSFileContent(asset.assetFile);
+      }
     }
 
     entries[_assetManifestJson] = _createAssetManifest(assetVariants);

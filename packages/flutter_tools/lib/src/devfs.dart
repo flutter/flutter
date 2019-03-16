@@ -122,7 +122,6 @@ class DevFSFileContent extends DevFSContent {
     if (_oldFileStat == null && _fileStat == null)
       return false;
     return time == null
-        || _oldFileStat == null
         || _fileStat == null
         || _fileStat.modified.isAfter(time);
   }
@@ -385,8 +384,8 @@ class DevFS {
   final String fsName;
   final Directory rootDirectory;
   String _packagesFilePath;
-  final Map<Uri, DevFSContent> _entries = <Uri, DevFSContent>{};
   final Set<String> assetPathsToEvict = <String>{};
+  DateTime _lastUpdate;
 
   Uri _baseUri;
   Uri get baseUri => _baseUri;
@@ -441,39 +440,37 @@ class DevFS {
     @required String pathToReload,
     @required List<String> invalidatedFiles,
   }) async {
+    print('bundleDirty: $bundleDirty');
     assert(trackWidgetCreation != null);
     assert(generator != null);
-
-    if (bundle != null) {
-      printTrace('Scanning asset files');
-      // We write the assets into the AssetBundle working dir so that they
-      // are in the same location in DevFS and the iOS simulator.
-      final String assetDirectory = getAssetBuildDirectory();
-      bundle.entries.forEach((String archivePath, DevFSContent content) {
-        final Uri deviceUri = fs.path.toUri(fs.path.join(assetDirectory, archivePath));
-        _entries[deviceUri] = content;
-      });
-    }
 
     // Update modified files
     final String assetBuildDirPrefix = _asUriPath(getAssetBuildDirectory());
     final Map<Uri, DevFSContent> dirtyEntries = <Uri, DevFSContent>{};
 
     int syncedBytes = 0;
-    _entries.forEach((Uri deviceUri, DevFSContent content) {
-      String archivePath;
-      if (deviceUri.path.startsWith(assetBuildDirPrefix))
-        archivePath = deviceUri.path.substring(assetBuildDirPrefix.length);
-      // When doing full restart, copy content so that isModified does not
-      // reset last check timestamp because we want to report all modified
-      // files to incremental compiler next time user does hot reload.
-      if (content.isModified || ((bundleDirty || bundleFirstUpload) && archivePath != null)) {
-        dirtyEntries[deviceUri] = content;
-        syncedBytes += content.size;
-        if (archivePath != null && (!bundleFirstUpload || content.isModifiedAfter(firstBuildTime)))
-          assetPathsToEvict.add(archivePath);
-      }
-    });
+    if (bundle != null && (bundleDirty || fullRestart)) {
+      printTrace('Scanning asset files');
+      // We write the assets into the AssetBundle working dir so that they
+      // are in the same location in DevFS and the iOS simulator.
+      final String assetDirectory = getAssetBuildDirectory();
+      bundle.entries.forEach((String archivePath, DevFSContent content) {
+        final Uri deviceUri = fs.path.toUri(fs.path.join(assetDirectory, archivePath));
+        if (deviceUri.path.startsWith(assetBuildDirPrefix)) {
+          archivePath = deviceUri.path.substring(assetBuildDirPrefix.length);
+        }
+        // When doing full restart, copy content so that isModified does not
+        // reset last check timestamp because we want to report all modified
+        // files to incremental compiler next time user does hot reload.
+        if ((_lastUpdate != null && content.isModifiedAfter(_lastUpdate)) || ((fullRestart || bundleFirstUpload) && archivePath != null)) {
+          dirtyEntries[deviceUri] = content;
+          syncedBytes += content.size;
+          if (archivePath != null && (bundleFirstUpload || content.isModifiedAfter(_lastUpdate))) {
+            assetPathsToEvict.add(archivePath);
+          }
+        }
+      });
+    }
     if (fullRestart) {
       generator.reset();
     }
@@ -511,6 +508,7 @@ class DevFS {
       }
     }
     printTrace('DevFS: Sync finished');
+    _lastUpdate = DateTime.now();
     return UpdateFSReport(success: true, syncedBytes: syncedBytes,
          invalidatedSourcesCount: invalidatedFiles.length);
   }
