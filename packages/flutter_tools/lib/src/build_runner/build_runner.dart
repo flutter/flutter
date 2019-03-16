@@ -147,6 +147,7 @@ class BuildRunner extends CodeGenerator {
         buildSnapshot.path,
         'daemon',
          '--skip-build-script-check',
+         '--delete-conflicting-outputs'
       ];
       buildDaemonClient = await BuildDaemonClient.connect(flutterProject.directory.path, command, logHandler: (ServerLog log) => printTrace(log.toString()));
     } finally {
