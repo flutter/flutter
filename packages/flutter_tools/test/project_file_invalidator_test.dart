@@ -16,7 +16,6 @@ import 'src/context.dart';
 void main() {
   final Platform windowsPlatform = MockPlatform();
   final Platform notWindowsPlatform = MockPlatform();
-  final BufferLogger bufferLogger = BufferLogger();
   when(windowsPlatform.isWindows).thenReturn(true);
   when(notWindowsPlatform.isWindows).thenReturn(false);
 
@@ -54,6 +53,9 @@ void main() {}
       ..createSync(recursive: true)
       ..writeAsStringSync('');
     final File bazFile = memoryFileSystem.file('baz/lib/baz.dart')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('');
+    memoryFileSystem.file('new_dep/lib/new_dep.dart')
       ..createSync(recursive: true)
       ..writeAsStringSync('');
 
@@ -114,7 +116,7 @@ void main() {}
       Platform: () => notWindowsPlatform,
     });
 
-    testUsingContext('update to .packages triggers warning', () async {
+    testUsingContext('update to .packages adds files to invalidated', () async {
       final FlutterProject flutterProject = await FlutterProject.fromDirectory(pubspecFile.parent);
       final ProjectFileInvalidator invalidator = ProjectFileInvalidator(packagesFile.path, flutterProject);
       invalidator.findInvalidated();
@@ -125,12 +127,11 @@ baz:file:///baz/lib/
 new_dep:file:///new_dep/lib/
 test_package:file:///lib/
 ''');
-      invalidator.findInvalidated();
-      expect(bufferLogger.errorText, 'Warning: updated dependencies detected. The Flutter application will require a restart to safely use new packages.\n');
+      expect(invalidator.findInvalidated(), <String>['/new_dep/lib/new_dep.dart']);
+      expect(invalidator.updateTime.containsKey('new_dep'), false);
     }, overrides: <Type, Generator>{
       FileSystem: () => memoryFileSystem,
       Platform: () => notWindowsPlatform,
-      Logger: () => bufferLogger,
     });
   });
 

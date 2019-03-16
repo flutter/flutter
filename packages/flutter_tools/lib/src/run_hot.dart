@@ -933,9 +933,11 @@ class ProjectFileInvalidator {
     if (packagesFile.existsSync()) {
       _packagesUpdateTime = packagesFile.statSync().modified.millisecondsSinceEpoch;
       _packageMap = PackageMap(_packagesPath).map;
+      _loadedPackages = Set<String>.from(_packageMap.keys);
     } else {
       _packagesUpdateTime = -1;
       _packageMap = const <String, Uri>{};
+      _loadedPackages = <String>{};
     }
     _computePackageMap(_packageMap, _flutterProject);
   }
@@ -946,6 +948,7 @@ class ProjectFileInvalidator {
   static const String _pubCachePathLinuxAndWindows = '.pub-cache';
   static const String _pubCachePathWindows = 'Pub/Cache';
 
+  Set<String> _loadedPackages = <String>{};
   Map<String, Uri> _packageMap;
   final String _packagesPath;
   final FlutterProject _flutterProject;
@@ -986,27 +989,37 @@ class ProjectFileInvalidator {
   }
 
   List<String> findInvalidated() {
+    final List<String> invalidatedFiles = <String>[];
     final File packagesFile = fs.file(_packagesPath);
     if (packagesFile.existsSync()) {
       final int newPackagesUpdateTime = packagesFile.statSync().modified.millisecondsSinceEpoch;
       // Hot reloading with an updated package will often times kill a non-trivial
       // appliction. This _might_ work, given certain application size and package
-      // constraints, so instead of exiting we print a warning so that the user has
-      // some hint on what went wrong.
+      // constraints.
       if (newPackagesUpdateTime > _packagesUpdateTime) {
-        printError('Warning: updated dependencies detected. The Flutter application will require a restart to safely use new packages.');
+        final Map<String, Uri> newPackageMap = PackageMap(_packagesPath).map;
+        final Set<String> newPackages = Set<String>.from(newPackageMap.keys);
+        final Set<String> difference = newPackages.difference(_loadedPackages);
+        if (difference.isNotEmpty) {
+          for (String newPackage in difference) {
+             _scanDirectory(newPackageMap[newPackage], invalidatedFiles, skipCache: true);
+          }
+          _computePackageMap(newPackageMap, _flutterProject);
+          _packageMap
+            ..clear()
+            ..addAll(newPackageMap);
+        }
       }
       _packagesUpdateTime = newPackagesUpdateTime;
     }
-    final List<String> invalidatedFiles = <String>[];
     for (String packageName in _packageMap.keys) {
       final Uri packageUri =_packageMap[packageName];
-      _scanDirectory(packageUri, invalidatedFiles);
+      _scanDirectory(packageUri, invalidatedFiles, skipCache: false);
     }
     return invalidatedFiles;
   }
 
-  void _scanDirectory(Uri path, List<String> invalidatedFiles) {
+  void _scanDirectory(Uri path, List<String> invalidatedFiles, {bool skipCache}) {
     final Directory directory = fs.directory(path);
     if (!directory.existsSync()) {
       return;
@@ -1024,7 +1037,9 @@ class ProjectFileInvalidator {
             invalidatedFiles.add(entity.path);
           }
         }
-        _updateTime[entity.path] = updatedAt;
+        if (!skipCache) {
+          _updateTime[entity.path] = updatedAt;
+        }
       }
     }
   }
