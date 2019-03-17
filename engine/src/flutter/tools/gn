@@ -234,9 +234,8 @@ def to_gn_args(args):
     if args.arm_float_abi:
       gn_args['arm_float_abi'] = args.arm_float_abi
 
-    # Whether to build all dart snapshots.
-    if args.full_dart_sdk:
-        gn_args['dart_platform_sdk'] = False
+    # Whether to build trained Dart SDK snapshots of dart2js and dartdevc.
+    gn_args['dart_platform_sdk'] = not args.full_dart_sdk
 
     return gn_args
 
@@ -289,8 +288,9 @@ def parse_args(args):
 
   parser.add_argument('--out-dir', default='', type=str)
 
-  parser.add_argument('--full-dart-sdk', default=True, action='store_true', 
-                      help='include trained dart2js and dartdevc snapshots. Enable only on steps that create an sdk')
+  parser.add_argument('--full-dart-sdk', default=False, action='store_true',
+                      help='include trained dart2js and dartdevc snapshots. Enable only on steps that create an SDK')
+  parser.add_argument('--no-full-dart-sdk', dest='full_dart_sdk', action='store_false')
 
   return parser.parse_args(args)
 
