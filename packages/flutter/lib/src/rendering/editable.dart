@@ -1636,9 +1636,9 @@ class RenderEditable extends RenderBox {
     final double adjustedY = math.min(math.max(currentY, topBound), bottomBound);
     final Offset adjustedOffset = Offset(adjustedX, adjustedY);
 
-    if (currentX < leftBound && deltaPosition.dx < 0) {
+    if (currentX < leftBound && deltaPosition.dx < 0)
       _resetOriginOnLeft = true;
-    } else if (currentX > rightBound && deltaPosition.dx > 0)
+    else if (currentX > rightBound && deltaPosition.dx > 0)
       _resetOriginOnRight = true;
     if (currentY < topBound && deltaPosition.dy < 0)
       _resetOriginOnTop = true;

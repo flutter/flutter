@@ -1178,7 +1178,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
               ),
             ),
           );
-        } else
+        } else {
           return Semantics(
             label: semanticsLabel,
             excludeSemantics: true,
@@ -1195,6 +1195,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
               ),
             ),
           );
+        }
       }),
     );
   }
