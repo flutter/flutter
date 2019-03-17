@@ -122,6 +122,7 @@ class DevFSFileContent extends DevFSContent {
     if (_oldFileStat == null && _fileStat == null)
       return false;
     return time == null
+        || _oldFileStat == null
         || _fileStat == null
         || _fileStat.modified.isAfter(time);
   }

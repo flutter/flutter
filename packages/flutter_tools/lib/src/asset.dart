@@ -194,7 +194,7 @@ class _ManifestAssetBundle implements AssetBundle {
       }
       for (_Asset variant in assetVariants[asset]) {
         assert(variant.assetFileExists);
-        entries[variant.entryUri.path] = DevFSFileContent(variant.assetFile);
+        entries[variant.entryUri.path] ??= DevFSFileContent(variant.assetFile);
       }
     }
 
@@ -204,7 +204,7 @@ class _ManifestAssetBundle implements AssetBundle {
     }
     for (_Asset asset in materialAssets) {
       assert(asset.assetFileExists);
-      entries[asset.entryUri.path] = DevFSFileContent(asset.assetFile);
+      entries[asset.entryUri.path] ??= DevFSFileContent(asset.assetFile);
     }
 
     entries[_assetManifestJson] = _createAssetManifest(assetVariants);
