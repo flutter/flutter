@@ -163,6 +163,9 @@ class FlutterProject {
 
   /// Return the set of builders used by this package.
   YamlMap get builders {
+    if (!pubspecFile.existsSync()) {
+      return null;
+    }
     final YamlMap pubspec = loadYaml(pubspecFile.readAsStringSync());
     return pubspec['builders'];
   }
