@@ -981,8 +981,7 @@ class ProjectFileInvalidator {
     // Remove any packages which are derived from the pub cache.
     for (String packageName in packageMap.keys.toList()) {
       final String path = packageMap[packageName].path;
-      if ((platform.isWindows && path.contains(_pubCachePathWindows))
-          || path.contains(_pubCachePathLinuxAndWindows)) {
+      if (_shouldSkip(path)) {
         packageMap.remove(packageName);
       }
     }
@@ -1002,7 +1001,8 @@ class ProjectFileInvalidator {
         final Set<String> difference = newPackages.difference(_loadedPackages);
         if (difference.isNotEmpty) {
           for (String newPackage in difference) {
-             _scanDirectory(newPackageMap[newPackage], invalidatedFiles, skipCache: true);
+            final Uri uri = newPackageMap[newPackage];
+            _scanDirectory(uri, invalidatedFiles, skipCache: _shouldSkip(uri.path));
           }
           _computePackageMap(newPackageMap, _flutterProject);
           _packageMap
@@ -1042,5 +1042,10 @@ class ProjectFileInvalidator {
         }
       }
     }
+  }
+
+ static bool _shouldSkip(String path) {
+    return (platform.isWindows && path.contains(_pubCachePathWindows))
+      || path.contains(_pubCachePathLinuxAndWindows);
   }
 }
