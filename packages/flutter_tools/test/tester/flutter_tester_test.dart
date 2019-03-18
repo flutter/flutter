@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/tester/flutter_tester.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
@@ -109,7 +110,7 @@ void main() {
         FileSystem: () => fs,
         Cache: () => Cache(rootOverride: fs.directory(flutterRoot)),
         ProcessManager: () => mockProcessManager,
-        KernelCompiler: () => mockKernelCompiler,
+        KernelCompilerFactory: () => FakeKernelCompilerFactory(mockKernelCompiler),
         Artifacts: () => mockArtifacts,
       };
 
@@ -194,3 +195,14 @@ Hello!
 
 class MockArtifacts extends Mock implements Artifacts {}
 class MockKernelCompiler extends Mock implements KernelCompiler {}
+class FakeKernelCompilerFactory implements KernelCompilerFactory {
+  FakeKernelCompilerFactory(this.kernelCompiler);
+
+  final KernelCompiler kernelCompiler;
+
+  @override
+  Future<KernelCompiler> create(FlutterProject flutterProject) async {
+    return kernelCompiler;
+  }
+
+}
