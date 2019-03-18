@@ -439,7 +439,6 @@ void main() {
   });
 
   testWidgets('Dropdown button icon will accept widgets as icons', (WidgetTester tester) async {
-
     final Widget customWidget = Container(
       decoration: ShapeDecoration(
         shape: CircleBorder(
@@ -470,7 +469,6 @@ void main() {
 
   testWidgets('Dropdown button icon should have default size and colors when not defined', (WidgetTester tester) async {
     final Key iconKey = UniqueKey();
-
     final Icon customIcon = Icon(Icons.assessment, key: iconKey);
 
     await tester.pumpWidget(buildFrame(
@@ -510,7 +508,6 @@ void main() {
 
   testWidgets('Dropdown button icon should have the passed in size and color instead of defaults', (WidgetTester tester) async {
     final Key iconKey = UniqueKey();
-
     final Icon customIcon = Icon(Icons.assessment, key: iconKey);
 
     await tester.pumpWidget(buildFrame(
