@@ -368,6 +368,11 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
   /// [forEachTween].
   ///
   /// {@tool sample}
+  ///
+  /// Sample code implementing an implicitly animated widget's `State`.
+  /// The widget animates between colors whenever `widget.targetColor`
+  /// changes.
+  ///
   /// ```dart
   /// class MyWidgetState extends AnimatedWidgetBaseState<MyWidget> {
   ///   ColorTween _colorTween;
