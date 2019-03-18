@@ -1,4 +1,4 @@
-Signature: aa6c73966a5ec1867116b4523182926d
+Signature: 7bd6f84ef1b06ea794bfafa29dbf8044
 
 UNUSED LICENSES:
 
@@ -2241,7 +2241,6 @@ FILE: ../../../third_party/skia/infra/bots/recipes/compute_test.expected/Test-De
 FILE: ../../../third_party/skia/infra/bots/recipes/housekeeper.expected/Housekeeper-PerCommit-Trybot.json
 FILE: ../../../third_party/skia/infra/bots/recipes/housekeeper.expected/Housekeeper-PerCommit.json
 FILE: ../../../third_party/skia/infra/bots/recipes/infra.expected/infra_tests.json
-FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/Perf-Android-Clang-GalaxyS9-GPU-MaliG72-arm64-Debug-All-Android_Vulkan.json
 FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/Perf-Android-Clang-Nexus5-GPU-Adreno330-arm-Debug-All-Android.json
 FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/Perf-Android-Clang-Nexus5x-GPU-Adreno418-arm64-Release-All-Android_NoGPUThreads.json
 FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/Perf-ChromeOS-Clang-ASUSChromebookFlipC100-GPU-MaliT764-arm-Release-All.json
@@ -2382,6 +2381,7 @@ FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/NotoSerif-Regular.tt
 FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/Roboto-Regular.ttf
 FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/Roboto-Regular.woff
 FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/example.html
+FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/extra.html
 FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/node.example.js
 FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/package.json
 FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/test.png
@@ -4942,7 +4942,6 @@ FILE: ../../../third_party/skia/docs/examples/Canvas_092.cpp
 FILE: ../../../third_party/skia/docs/examples/Canvas_093.cpp
 FILE: ../../../third_party/skia/docs/examples/Canvas_094.cpp
 FILE: ../../../third_party/skia/docs/examples/Canvas_095.cpp
-FILE: ../../../third_party/skia/docs/examples/Canvas_096.cpp
 FILE: ../../../third_party/skia/docs/examples/Canvas_097.cpp
 FILE: ../../../third_party/skia/docs/examples/Canvas_098.cpp
 FILE: ../../../third_party/skia/docs/examples/Canvas_099.cpp
@@ -4959,7 +4958,6 @@ FILE: ../../../third_party/skia/docs/examples/Canvas_109.cpp
 FILE: ../../../third_party/skia/docs/examples/Canvas_110.cpp
 FILE: ../../../third_party/skia/docs/examples/Canvas_111.cpp
 FILE: ../../../third_party/skia/docs/examples/Canvas_112.cpp
-FILE: ../../../third_party/skia/docs/examples/Canvas_113.cpp
 FILE: ../../../third_party/skia/docs/examples/Canvas_114.cpp
 FILE: ../../../third_party/skia/docs/examples/Canvas_115.cpp
 FILE: ../../../third_party/skia/docs/examples/Canvas_116.cpp
@@ -5003,45 +5001,7 @@ FILE: ../../../third_party/skia/docs/examples/Color_015.cpp
 FILE: ../../../third_party/skia/docs/examples/Color_016.cpp
 FILE: ../../../third_party/skia/docs/examples/Color_017.cpp
 FILE: ../../../third_party/skia/docs/examples/Color_018.cpp
-FILE: ../../../third_party/skia/docs/examples/Font_000.cpp
-FILE: ../../../third_party/skia/docs/examples/Font_001.cpp
-FILE: ../../../third_party/skia/docs/examples/Font_002.cpp
-FILE: ../../../third_party/skia/docs/examples/Font_003.cpp
-FILE: ../../../third_party/skia/docs/examples/Font_004.cpp
-FILE: ../../../third_party/skia/docs/examples/Font_005.cpp
-FILE: ../../../third_party/skia/docs/examples/Font_006.cpp
-FILE: ../../../third_party/skia/docs/examples/Font_007.cpp
-FILE: ../../../third_party/skia/docs/examples/Font_008.cpp
-FILE: ../../../third_party/skia/docs/examples/Font_009.cpp
-FILE: ../../../third_party/skia/docs/examples/Font_010.cpp
-FILE: ../../../third_party/skia/docs/examples/Font_011.cpp
-FILE: ../../../third_party/skia/docs/examples/Font_012.cpp
-FILE: ../../../third_party/skia/docs/examples/Font_013.cpp
-FILE: ../../../third_party/skia/docs/examples/Font_014.cpp
-FILE: ../../../third_party/skia/docs/examples/Font_015.cpp
-FILE: ../../../third_party/skia/docs/examples/Font_016.cpp
-FILE: ../../../third_party/skia/docs/examples/Font_017.cpp
-FILE: ../../../third_party/skia/docs/examples/Font_018.cpp
-FILE: ../../../third_party/skia/docs/examples/Font_019.cpp
-FILE: ../../../third_party/skia/docs/examples/Font_020.cpp
-FILE: ../../../third_party/skia/docs/examples/Font_021.cpp
-FILE: ../../../third_party/skia/docs/examples/Font_022.cpp
-FILE: ../../../third_party/skia/docs/examples/Font_023.cpp
-FILE: ../../../third_party/skia/docs/examples/Font_024.cpp
-FILE: ../../../third_party/skia/docs/examples/Font_025.cpp
-FILE: ../../../third_party/skia/docs/examples/Font_026.cpp
-FILE: ../../../third_party/skia/docs/examples/Font_027.cpp
-FILE: ../../../third_party/skia/docs/examples/Font_028.cpp
-FILE: ../../../third_party/skia/docs/examples/Font_029.cpp
-FILE: ../../../third_party/skia/docs/examples/Font_030.cpp
-FILE: ../../../third_party/skia/docs/examples/Font_031.cpp
-FILE: ../../../third_party/skia/docs/examples/Font_032.cpp
 FILE: ../../../third_party/skia/docs/examples/Font_033.cpp
-FILE: ../../../third_party/skia/docs/examples/Font_034.cpp
-FILE: ../../../third_party/skia/docs/examples/Font_035.cpp
-FILE: ../../../third_party/skia/docs/examples/Font_036.cpp
-FILE: ../../../third_party/skia/docs/examples/Font_037.cpp
-FILE: ../../../third_party/skia/docs/examples/Font_038.cpp
 FILE: ../../../third_party/skia/docs/examples/IPoint_000.cpp
 FILE: ../../../third_party/skia/docs/examples/IPoint_001.cpp
 FILE: ../../../third_party/skia/docs/examples/IPoint_002.cpp
@@ -5226,7 +5186,6 @@ FILE: ../../../third_party/skia/docs/examples/Matrix_021.cpp
 FILE: ../../../third_party/skia/docs/examples/Matrix_022.cpp
 FILE: ../../../third_party/skia/docs/examples/Matrix_023.cpp
 FILE: ../../../third_party/skia/docs/examples/Matrix_024.cpp
-FILE: ../../../third_party/skia/docs/examples/Matrix_025.cpp
 FILE: ../../../third_party/skia/docs/examples/Matrix_026.cpp
 FILE: ../../../third_party/skia/docs/examples/Matrix_027.cpp
 FILE: ../../../third_party/skia/docs/examples/Matrix_028.cpp
@@ -5382,7 +5341,6 @@ FILE: ../../../third_party/skia/docs/examples/Paint_069.cpp
 FILE: ../../../third_party/skia/docs/examples/Paint_070.cpp
 FILE: ../../../third_party/skia/docs/examples/Paint_071.cpp
 FILE: ../../../third_party/skia/docs/examples/Paint_072.cpp
-FILE: ../../../third_party/skia/docs/examples/Paint_073.cpp
 FILE: ../../../third_party/skia/docs/examples/Paint_074.cpp
 FILE: ../../../third_party/skia/docs/examples/Paint_075.cpp
 FILE: ../../../third_party/skia/docs/examples/Paint_076.cpp
@@ -5502,7 +5460,6 @@ FILE: ../../../third_party/skia/docs/examples/Path_071.cpp
 FILE: ../../../third_party/skia/docs/examples/Path_072.cpp
 FILE: ../../../third_party/skia/docs/examples/Path_073.cpp
 FILE: ../../../third_party/skia/docs/examples/Path_074.cpp
-FILE: ../../../third_party/skia/docs/examples/Path_075.cpp
 FILE: ../../../third_party/skia/docs/examples/Path_076.cpp
 FILE: ../../../third_party/skia/docs/examples/Path_077.cpp
 FILE: ../../../third_party/skia/docs/examples/Path_078.cpp
@@ -5836,7 +5793,6 @@ FILE: ../../../third_party/skia/docs/examples/Surface_010.cpp
 FILE: ../../../third_party/skia/docs/examples/Surface_011.cpp
 FILE: ../../../third_party/skia/docs/examples/Surface_012.cpp
 FILE: ../../../third_party/skia/docs/examples/Surface_013.cpp
-FILE: ../../../third_party/skia/docs/examples/Surface_014.cpp
 FILE: ../../../third_party/skia/docs/examples/Surface_015.cpp
 FILE: ../../../third_party/skia/docs/examples/Surface_016.cpp
 FILE: ../../../third_party/skia/docs/examples/Surface_017.cpp
@@ -5901,6 +5857,7 @@ ORIGIN: ../../../third_party/skia/experimental/wasm-skp-debugger/debugger_bindin
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/experimental/wasm-skp-debugger/debugger_bindings.cpp
 FILE: ../../../third_party/skia/gm/runtimecolorfilter.cpp
+FILE: ../../../third_party/skia/include/gpu/gl/GrGLAssembleHelpers.h
 FILE: ../../../third_party/skia/modules/canvaskit/WasmAliases.h
 FILE: ../../../third_party/skia/modules/canvaskit/particles_bindings.cpp
 FILE: ../../../third_party/skia/modules/canvaskit/skottie_bindings.cpp
@@ -5917,6 +5874,9 @@ FILE: ../../../third_party/skia/modules/particles/src/SkParticleDrawable.cpp
 FILE: ../../../third_party/skia/modules/particles/src/SkParticleEffect.cpp
 FILE: ../../../third_party/skia/modules/particles/src/SkReflected.cpp
 FILE: ../../../third_party/skia/src/core/SkColorFilterPriv.h
+FILE: ../../../third_party/skia/src/gpu/gl/GrGLAssembleHelpers.cpp
+FILE: ../../../third_party/skia/src/gpu/gl/GrGLAssembleInterface_gl.cpp
+FILE: ../../../third_party/skia/src/gpu/gl/GrGLAssembleInterface_gles.cpp
 ----------------------------------------------------------------------------------------------------
 Copyright 2019 Google LLC
 
@@ -6083,6 +6043,7 @@ ORIGIN: ../../../third_party/skia/fuzz/oss_fuzz/FuzzSKSL2GLSL.cpp + ../../../thi
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzSKSL2GLSL.cpp
 FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzSKSL2Metal.cpp
+FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzSKSL2Pipeline.cpp
 FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzSKSL2SPIRV.cpp
 ----------------------------------------------------------------------------------------------------
 Copyright 2019 Google, LLC
