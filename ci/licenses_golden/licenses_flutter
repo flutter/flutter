@@ -704,6 +704,7 @@ FILE: ../../../flutter/vulkan/vulkan_utilities.cc
 FILE: ../../../flutter/vulkan/vulkan_utilities.h
 FILE: ../../../flutter/vulkan/vulkan_window.cc
 FILE: ../../../flutter/vulkan/vulkan_window.h
+FILE: ../../../flutter/web_sdk/flutter_kernel_sdk.dart
 FILE: ../../../flutter/web_sdk/libraries.json
 ----------------------------------------------------------------------------------------------------
 Copyright 2013 The Flutter Authors. All rights reserved.

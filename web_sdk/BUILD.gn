@@ -2,63 +2,82 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//third_party/dart/build/dart/dart_action.gni")
+import("//third_party/dart/utils/compile_platform.gni")
+
+sdk_dill = "$root_out_dir/flutter_web_sdk/kernel/flutter_ddc_sdk.dill"
+sdk_libraries_json = "$flutter_root/web_sdk/libraries.json"
+
+web_ui_sources = [
+  "$flutter_root/lib/stub_ui/compositing.dart",
+  "$flutter_root/lib/stub_ui/geometry.dart",
+  "$flutter_root/lib/stub_ui/hash_codes.dart",
+  "$flutter_root/lib/stub_ui/hooks.dart",
+  "$flutter_root/lib/stub_ui/isolate_name_server.dart",
+  "$flutter_root/lib/stub_ui/lerp.dart",
+  "$flutter_root/lib/stub_ui/natives.dart",
+  "$flutter_root/lib/stub_ui/painting.dart",
+  "$flutter_root/lib/stub_ui/plugins.dart",
+  "$flutter_root/lib/stub_ui/pointer.dart",
+  "$flutter_root/lib/stub_ui/semantics.dart",
+  "$flutter_root/lib/stub_ui/text.dart",
+  "$flutter_root/lib/stub_ui/ui.dart",
+  "$flutter_root/lib/stub_ui/versions.dart",
+  "$flutter_root/lib/stub_ui/window.dart",
+]
+
 group("web_sdk") {
   deps = [
     ":web_ui_sources",
-    ":web_libraries_json",
-    #":dart_sdk_internal",
+    ":web_ui_library",
+    ":flutter_dartdevc_kernel_sdk",
   ]
 }
 
 copy("web_ui_sources") {
-  sources = [
-    "$flutter_root/lib/stub_ui/compositing.dart",
-    "$flutter_root/lib/stub_ui/geometry.dart",
-    "$flutter_root/lib/stub_ui/hash_codes.dart",
-    "$flutter_root/lib/stub_ui/hooks.dart",
-    "$flutter_root/lib/stub_ui/isolate_name_server.dart",
-    "$flutter_root/lib/stub_ui/lerp.dart",
-    "$flutter_root/lib/stub_ui/natives.dart",
-    "$flutter_root/lib/stub_ui/painting.dart",
-    "$flutter_root/lib/stub_ui/plugins.dart",
-    "$flutter_root/lib/stub_ui/pointer.dart",
-    "$flutter_root/lib/stub_ui/semantics.dart",
-    "$flutter_root/lib/stub_ui/text.dart",
-    "$flutter_root/lib/stub_ui/ui.dart",
-    "$flutter_root/lib/stub_ui/versions.dart",
-    "$flutter_root/lib/stub_ui/window.dart",
-  ]
+  sources = web_ui_sources
 
   outputs = [
     "$root_out_dir/flutter_web_sdk/lib/ui/{{source_file_part}}"
   ]
 }
 
-copy("web_libraries_json") {
+copy("web_ui_library") {
   sources = [
-    "libraries.json"
+    "$flutter_root/web_sdk/libraries.json",
   ]
 
   outputs = [
-    "$root_out_dir/flutter_web_sdk/lib/libraries.json"
+    "$root_out_dir/flutter_web_sdk/{{source_file_part}}"
   ]
 }
 
-# copy("dart_sdk_internal") {
-#     deps = [
-#         "//third_party/dart:create_sdk"
-#     ]
+prebuilt_dart_action("flutter_dartdevc_kernel_sdk") {
+  deps = [
+    "//third_party/dart/pkg:pkg_files_stamp",
+    "//third_party/dart/utils/dartdevc:dartdevc_files_stamp",
+    "//third_party/dart/utils/dartdevc:dartdevc_sdk_patch_stamp",
+  ]
 
-#     sources = [
-#         "$root_out_dir/dart-sdk/lib/_internal/ddc_sdk.dill",
-#         "$root_out_dir/dart-sdk/lib/_internal/dart2js_platform.dill",
-#         "$root_out_dir/dart-sdk/lib/_internal/dart2js_server_platform.dill",
-#         "$root_out_dir/dart-sdk/lib/_internal/ddc_sdk.sum",
-#         "$root_out_dir/dart-sdk/lib/_internal/strong.sum",
-#         "$root_out_dir/dart-sdk/lib/_internal/vm_platform_strong.dill",
-#     ]
+  inputs = [
+    "//third_party/dart/pkg/dev_compiler/tool/kernel_sdk.dart",
+  ]
 
-#     outputs = [
-#         "$root_out_dir/flutter_web_sdk/lib/_internal/{{source_file_part}}"
-#     ]
-# }
+  outputs = [
+    sdk_dill,
+    "$root_out_dir/flutter_web_sdk/lib/_internal/libraries.json",
+    "$root_out_dir/flutter_web_sdk/kernel/amd/dart_sdk.js",
+    "$root_out_dir/flutter_web_sdk/kernel/amd/dart_sdk.js.map",
+  ]
+
+  script = "flutter_kernel_sdk.dart"
+  packages = "//third_party/dart/.packages"
+
+  output_path = rebase_path(sdk_dill)
+  libraries_path = rebase_path(sdk_libraries_json)
+
+  args = [
+    "--output=$output_path",
+    "--libraries=$libraries_path",
+  ]
+}

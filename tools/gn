@@ -234,8 +234,10 @@ def to_gn_args(args):
     if args.arm_float_abi:
       gn_args['arm_float_abi'] = args.arm_float_abi
 
-    # Whether to build trained Dart SDK snapshots of dart2js and dartdevc.
+    # Whether to build trained Dart SDK snapshots of dart2js and dartdevc,
+    # including the web sdk kernel and source files.
     gn_args['dart_platform_sdk'] = not args.full_dart_sdk
+    gn_args['full_dart_sdk'] = args.full_dart_sdk
 
     return gn_args
 
