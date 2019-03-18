@@ -951,23 +951,23 @@ void main() {
     // Exit animation, look at reverse FadeTransition.
     await tester.pump(const Duration(milliseconds: 25));
     transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1);
-    expect(transition.opacity.value, closeTo(0.358, 0.001));
+    expect(transition.opacity.value, closeTo(0.500, 0.001));
 
     await tester.pump(const Duration(milliseconds: 25));
     transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1);
-    expect(transition.opacity.value, closeTo(0.231, 0.001));
+    expect(transition.opacity.value, closeTo(0.332, 0.001));
 
     await tester.pump(const Duration(milliseconds: 25));
     transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1);
-    expect(transition.opacity.value, closeTo(0.128, 0.001));
+    expect(transition.opacity.value, closeTo(0.188, 0.001));
 
     await tester.pump(const Duration(milliseconds: 25));
     transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1);
-    expect(transition.opacity.value, closeTo(0.056, 0.001));
+    expect(transition.opacity.value, closeTo(0.081, 0.001));
 
     await tester.pump(const Duration(milliseconds: 25));
     transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1);
-    expect(transition.opacity.value, closeTo(0.013, 0.001));
+    expect(transition.opacity.value, closeTo(0.019, 0.001));
 
     await tester.pump(const Duration(milliseconds: 25));
     transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1);
