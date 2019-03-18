@@ -355,16 +355,16 @@
     // Embedded views requires the gpu and the platform views to be the same.
     // The plan is to eventually dynamically merge the threads when there's a
     // platform view in the layer tree.
-    // For now we run in a single threaded configuration.
-    // TODO(amirh/chinmaygarde): merge only the gpu and platform threads.
-    // https://github.com/flutter/flutter/issues/23974
+    // For now we use a fixed thread configuration with the same thread used as the
+    // gpu and platform task runner.
     // TODO(amirh/chinmaygarde): remove this, and dynamically change the thread configuration.
     // https://github.com/flutter/flutter/issues/23975
+
     blink::TaskRunners task_runners(threadLabel.UTF8String,                          // label
                                     fml::MessageLoop::GetCurrent().GetTaskRunner(),  // platform
                                     fml::MessageLoop::GetCurrent().GetTaskRunner(),  // gpu
-                                    fml::MessageLoop::GetCurrent().GetTaskRunner(),  // ui
-                                    fml::MessageLoop::GetCurrent().GetTaskRunner()   // io
+                                    _threadHost.ui_thread->GetTaskRunner(),          // ui
+                                    _threadHost.io_thread->GetTaskRunner()           // io
     );
     // Create the shell. This is a blocking operation.
     _shell = shell::Shell::Create(std::move(task_runners),  // task runners
