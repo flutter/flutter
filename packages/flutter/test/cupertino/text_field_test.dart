@@ -360,6 +360,40 @@ void main() {
   );
 
   testWidgets(
+    "placeholderStyle modifies placeholder's style and doesn't affect text's style",
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const CupertinoApp(
+          home: Center(
+            child: CupertinoTextField(
+              placeholder: 'placeholder',
+              style: TextStyle(
+                color: Color(0X00FFFFFF),
+                fontWeight: FontWeight.w300,
+              ),
+              placeholderStyle: TextStyle(
+                color: Color(0XAAFFFFFF),
+                fontWeight: FontWeight.w600
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final Text placeholder = tester.widget(find.text('placeholder'));
+      expect(placeholder.style.color, const Color(0XAAFFFFFF));
+      expect(placeholder.style.fontWeight, FontWeight.w600);
+
+      await tester.enterText(find.byType(CupertinoTextField), 'input');
+      await tester.pump();
+
+      final EditableText inputText = tester.widget(find.text('input'));
+      expect(inputText.style.color, const Color(0X00FFFFFF));
+      expect(inputText.style.fontWeight, FontWeight.w300);
+    },
+  );
+
+  testWidgets(
     'prefix widget is in front of the text',
     (WidgetTester tester) async {
       await tester.pumpWidget(

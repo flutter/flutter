@@ -151,6 +151,10 @@ class CupertinoTextField extends StatefulWidget {
     this.decoration = _kDefaultRoundedBorderDecoration,
     this.padding = const EdgeInsets.all(6.0),
     this.placeholder,
+    this.placeholderStyle = const TextStyle(
+      fontWeight: FontWeight.w300,
+      color: _kInactiveTextColor
+    ),
     this.prefix,
     this.prefixMode = OverlayVisibilityMode.always,
     this.suffix,
@@ -234,6 +238,13 @@ class CupertinoTextField extends StatefulWidget {
   /// The text style of the placeholder text matches that of the text field's
   /// main text entry except a lighter font weight and a grey font color.
   final String placeholder;
+
+  /// The style to use for the placeholder text which overrides [style] property.
+  ///
+  /// If null, placeholder's style will be the same as [style].
+  ///
+  /// Defaults to the [style] property with w300 font weight and grey color.
+  final TextStyle placeholderStyle;
 
   /// An optional [Widget] to display before the text.
   final Widget prefix;
@@ -416,6 +427,7 @@ class CupertinoTextField extends StatefulWidget {
     properties.add(DiagnosticsProperty<BoxDecoration>('decoration', decoration));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding));
     properties.add(StringProperty('placeholder', placeholder));
+    properties.add(DiagnosticsProperty<TextStyle>('placeholderStyle', placeholderStyle));
     properties.add(DiagnosticsProperty<OverlayVisibilityMode>('prefix', prefix == null ? null : prefixMode));
     properties.add(DiagnosticsProperty<OverlayVisibilityMode>('suffix', suffix == null ? null : suffixMode));
     properties.add(DiagnosticsProperty<OverlayVisibilityMode>('clearButtonMode', clearButtonMode));
@@ -575,9 +587,10 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
     );
   }
 
-  Widget _addTextDependentAttachments(Widget editableText, TextStyle textStyle) {
+  Widget _addTextDependentAttachments(Widget editableText, TextStyle textStyle, TextStyle placeholderStyle) {
     assert(editableText != null);
     assert(textStyle != null);
+    assert(placeholderStyle != null);
     // If there are no surrounding widgets, just return the core editable text
     // part.
     if (widget.placeholder == null &&
@@ -612,12 +625,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
                 widget.placeholder,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: textStyle.merge(
-                  const TextStyle(
-                    color: _kInactiveTextColor,
-                    fontWeight: FontWeight.w300,
-                  ),
-                ),
+                style: placeholderStyle
               ),
             ),
           );
@@ -665,6 +673,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
     }
     final CupertinoThemeData themeData = CupertinoTheme.of(context);
     final TextStyle textStyle = themeData.textTheme.textStyle.merge(widget.style);
+    final TextStyle placeholderStyle = textStyle.merge(widget.placeholderStyle);
     final Brightness keyboardAppearance = widget.keyboardAppearance ?? themeData.brightness;
 
     final Widget paddedEditable = Padding(
@@ -735,7 +744,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
               onSingleLongTapEnd: _handleSingleLongTapEnd,
               onDoubleTapDown: _handleDoubleTapDown,
               behavior: HitTestBehavior.translucent,
-              child: _addTextDependentAttachments(paddedEditable, textStyle),
+              child: _addTextDependentAttachments(paddedEditable, textStyle, placeholderStyle),
             ),
           ),
         ),
