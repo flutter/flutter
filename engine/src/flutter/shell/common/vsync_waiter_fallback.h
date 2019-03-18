@@ -20,7 +20,6 @@ class VsyncWaiterFallback final : public VsyncWaiter {
 
  private:
   fml::TimePoint phase_;
-  fml::WeakPtrFactory<VsyncWaiterFallback> weak_factory_;
 
   // |shell::VsyncWaiter|
   void AwaitVSync() override;
