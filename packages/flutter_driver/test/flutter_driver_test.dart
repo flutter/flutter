@@ -158,18 +158,18 @@ void main() {
       });
     });
 
-    group('BySemanticLabel', () {
+    group('BySemanticsLabel', () {
       test('finds by Semantic label', () async {
         when(mockIsolate.invokeExtension(any, any)).thenAnswer((Invocation i) {
           expect(i.positionalArguments[1], <String, String>{
             'command': 'tap',
             'timeout': _kSerializedTestTimeout,
-            'finderType': 'BySemanticLabel',
+            'finderType': 'BySemanticsLabel',
             'label': 'foo',
           });
           return makeMockResponse(<String, dynamic>{});
         });
-        await driver.tap(find.bySemanticLabel('foo'), timeout: _kTestTimeout);
+        await driver.tap(find.bySemanticsLabel('foo'), timeout: _kTestTimeout);
       });
     });
 

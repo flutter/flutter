@@ -278,12 +278,12 @@ class CommonFinders {
   /// ## Sample code
   ///
   /// ```dart
-  /// expect(find.bySemanticLabel('Back'), findsOneWidget);
+  /// expect(find.BySemanticsLabel('Back'), findsOneWidget);
   /// ```
   ///
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
-  Finder bySemanticLabel(String label, { bool skipOffstage = true }) {
+  Finder bySemanticsLabel(String label, { bool skipOffstage = true }) {
     if (WidgetsBinding.instance.pipelineOwner.semanticsOwner == null)
       throw StateError('Semantics are not enabled. '
                        'Make sure to call tester.enableSemantics() before using '

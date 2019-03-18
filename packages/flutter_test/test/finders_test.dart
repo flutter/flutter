@@ -32,7 +32,7 @@ void main() {
 
   group('semantics', () {
     testWidgets('Throws StateError if semantics are not enabled', (WidgetTester tester) async {
-      expect(() => find.bySemanticLabel('Add'), throwsStateError);
+      expect(() => find.bySemanticsLabel('Add'), throwsStateError);
     });
 
     testWidgets('finds Semantically labeled widgets', (WidgetTester tester) async {
@@ -47,7 +47,7 @@ void main() {
           ),
         ),
       ));
-      expect(find.bySemanticLabel('Add'), findsOneWidget);
+      expect(find.bySemanticsLabel('Add'), findsOneWidget);
       semanticsHandle.dispose();
     });
 
@@ -56,7 +56,7 @@ void main() {
       await tester.pumpWidget(_boilerplate(
         const SimpleCustomSemanticsWidget('Foo')
       ));
-      expect(find.bySemanticLabel('Foo'), findsOneWidget);
+      expect(find.bySemanticsLabel('Foo'), findsOneWidget);
       semanticsHandle.dispose();
     });
   });
