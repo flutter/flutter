@@ -10,7 +10,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
-import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 
 const List<String> menuItems = <String>['one', 'two', 'three', 'four'];
@@ -441,7 +440,6 @@ void main() {
 
   // test for passed in widget being in the dropdown
   testWidgets('Dropdown button icon will accept widgets as icons', (WidgetTester tester) async {
-    final Key buttonKey = UniqueKey();
 
     final Widget customWidget = Container(
       decoration: ShapeDecoration(
@@ -455,7 +453,6 @@ void main() {
     );
 
     await tester.pumpWidget(buildFrame(
-      buttonKey: buttonKey, 
       icon: customWidget,
       onChanged: onChanged,
     ));
@@ -464,7 +461,6 @@ void main() {
     expect(find.byIcon(Icons.arrow_drop_down), findsNothing);
 
     await tester.pumpWidget(buildFrame(
-      buttonKey: buttonKey, 
       icon: const Icon(Icons.assessment),
       onChanged: onChanged,
     ));
@@ -473,34 +469,53 @@ void main() {
     expect(find.byIcon(Icons.arrow_drop_down), findsNothing);    
   });
 
-  // test for icon defaults when no size and color are passed in
   testWidgets('Dropdown button icon should have default size and colors when not defined', (WidgetTester tester) async {
-    final Key buttonKey = UniqueKey();
     final Key iconKey = UniqueKey();
 
     final Icon customIcon = Icon(Icons.assessment, key: iconKey);
 
     await tester.pumpWidget(buildFrame(
-      buttonKey: buttonKey, 
       icon: customIcon,
       onChanged: onChanged,
     ));
 
+    // test for size
     final RenderBox icon = tester.renderObject(find.byKey(iconKey));
     expect(icon.size, const Size(24.0, 24.0));
 
-    // test for color
+    // test for enabled color
+    final RichText enabledRichText = tester.widget<RichText>(
+      find.descendant(
+        of: find.byKey(iconKey),
+        matching: find.byType(RichText),
+      ),
+    );
+
+    expect(enabledRichText.text.style.color, Colors.grey.shade700);
+
+    // test for disabled color
+    await tester.pumpWidget(buildFrame(
+      icon: customIcon,
+      onChanged: null,
+    ));
+
+    final RichText disabledRichText = tester.widget<RichText>(
+      find.descendant(
+        of: find.byKey(iconKey),
+        matching: find.byType(RichText),
+      ),
+    );
+
+    expect(disabledRichText.text.style.color, Colors.grey.shade400);
   });
 
   // test for icon when size and color are passed in
   testWidgets('Dropdown button icon should have the passed in size and color instead of defaults', (WidgetTester tester) async {
-    final Key buttonKey = UniqueKey();
     final Key iconKey = UniqueKey();
 
     final Icon customIcon = Icon(Icons.assessment, key: iconKey);
 
     await tester.pumpWidget(buildFrame(
-      buttonKey: buttonKey,
       icon: customIcon,
       iconSize: 30.0,
       iconEnabledColor: Colors.pink,
@@ -508,25 +523,51 @@ void main() {
       onChanged: onChanged,
     ));
 
+    // test for size
     final RenderBox icon = tester.renderObject(find.byKey(iconKey));
     expect(icon.size, const Size(30.0, 30.0));
 
-    // test for color
+    // test for enabled color
+    final RichText enabledRichText = tester.widget<RichText>(
+      find.descendant(
+        of: find.byKey(iconKey),
+        matching: find.byType(RichText),
+      ),
+    );
+
+    expect(enabledRichText.text.style.color, Colors.pink);
+
+    // test for disabled color
+    await tester.pumpWidget(buildFrame(
+      icon: customIcon,
+      iconSize: 30.0,
+      iconEnabledColor: Colors.pink,
+      iconDisabledColor: Colors.orange,
+      onChanged: null,
+    ));
+
+    final RichText disabledRichText = tester.widget<RichText>(
+      find.descendant(
+        of: find.byKey(iconKey),
+        matching: find.byType(RichText),
+      ),
+    );
+
+    expect(disabledRichText.text.style.color, Colors.orange);
   });
 
   // test for icon's own size and color when those are defined
   testWidgets('Dropdown button should use its own size and color properties over those defined by the theme', (WidgetTester tester) async {
-    final Key buttonKey = UniqueKey();
     final Key iconKey = UniqueKey();
 
     final Icon customIcon = Icon(
       Icons.assessment,
       key: iconKey,
       size: 40.0,
+      color: Colors.yellow,
     );
 
     await tester.pumpWidget(buildFrame(
-      buttonKey: buttonKey,
       icon: customIcon,
       iconSize: 30.0,
       iconEnabledColor: Colors.pink,
@@ -534,10 +575,37 @@ void main() {
       onChanged: onChanged,
     ));
 
+    // test for size
     final RenderBox icon = tester.renderObject(find.byKey(iconKey));
     expect(icon.size, const Size(40.0, 40.0));
 
-    // test for color
+    // test for enabled color
+    final RichText enabledRichText = tester.widget<RichText>(
+      find.descendant(
+        of: find.byKey(iconKey),
+        matching: find.byType(RichText),
+      ),
+    );
+
+    expect(enabledRichText.text.style.color, Colors.yellow);
+
+    // test for disabled color
+    await tester.pumpWidget(buildFrame(
+      icon: customIcon,
+      iconSize: 30.0,
+      iconEnabledColor: Colors.pink,
+      iconDisabledColor: Colors.orange,
+      onChanged: null,
+    ));
+
+    final RichText disabledRichText = tester.widget<RichText>(
+      find.descendant(
+        of: find.byKey(iconKey),
+        matching: find.byType(RichText),
+      ),
+    );
+
+    expect(disabledRichText.text.style.color, Colors.yellow);
   });
 
   testWidgets('Dropdown button with isDense:true aligns selected menu item', (WidgetTester tester) async {
