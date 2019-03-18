@@ -164,8 +164,8 @@ Future<ProcessResult> _runFlutterTest(
   final File testPackages = fs.file(testPackagesPath);
   if (!testPackages.existsSync()) {
     await Process.run(
-      'flutter',
-      <String>['package', 'get'],
+      fs.path.join(dartSdkPath, 'bin', 'pub'),
+      <String>['get'],
       workingDirectory: workingDirectory,
     );
   }
