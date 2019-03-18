@@ -159,7 +159,7 @@ void main() {
     });
 
     group('BySemanticsLabel', () {
-      test('finds by Semantic label', () async {
+      test('finds by Semantic label using String', () async {
         when(mockIsolate.invokeExtension(any, any)).thenAnswer((Invocation i) {
           expect(i.positionalArguments[1], <String, String>{
             'command': 'tap',
@@ -170,6 +170,20 @@ void main() {
           return makeMockResponse(<String, dynamic>{});
         });
         await driver.tap(find.bySemanticsLabel('foo'), timeout: _kTestTimeout);
+      });
+
+      test('finds by Semantic label using RegExp', () async {
+        when(mockIsolate.invokeExtension(any, any)).thenAnswer((Invocation i) {
+          expect(i.positionalArguments[1], <String, String>{
+            'command': 'tap',
+            'timeout': _kSerializedTestTimeout,
+            'finderType': 'BySemanticsLabel',
+            'label': 'foo',
+            'isRegExp': 'true',
+          });
+          return makeMockResponse(<String, dynamic>{});
+        });
+        await driver.tap(find.bySemanticsLabel(RegExp('^foo')), timeout: _kTestTimeout);
       });
     });
 

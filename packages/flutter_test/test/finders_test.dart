@@ -51,6 +51,22 @@ void main() {
       semanticsHandle.dispose();
     });
 
+    testWidgets('finds Semantically labeled widgets by RegExp', (WidgetTester tester) async {
+      final SemanticsHandle semanticsHandle = tester.ensureSemantics();
+      await tester.pumpWidget(_boilerplate(
+        Semantics(
+          container: true,
+          child: Row(children: const <Widget>[
+            Text('Hello'),
+            Text('World'),
+          ]),
+        ),
+      ));
+      expect(find.bySemanticsLabel('Hello'), findsNothing);
+      expect(find.bySemanticsLabel(RegExp(r'^Hello')), findsOneWidget);
+      semanticsHandle.dispose();
+    });
+
     testWidgets('finds Semantically labeled widgets without explicit Semantics', (WidgetTester tester) async {
       final SemanticsHandle semanticsHandle = tester.ensureSemantics();
       await tester.pumpWidget(_boilerplate(
