@@ -6,6 +6,7 @@
 
 #include <algorithm>
 #include <atomic>
+#include <utility>
 
 #include "flutter/fml/build_config.h"
 #include "flutter/fml/logging.h"
@@ -121,6 +122,34 @@ void TraceEventEnd(TraceArg name) {
                      0,                         // argument_count
                      nullptr,                   // argument_names
                      nullptr                    // argument_values
+  );
+}
+
+void TraceEventAsyncComplete(TraceArg category_group,
+                             TraceArg name,
+                             TimePoint begin,
+                             TimePoint end) {
+  auto identifier = TraceNonce();
+
+  if (begin > end) {
+    std::swap(begin, end);
+  }
+
+  Dart_TimelineEvent(DCHECK_LITERAL(name),                   // label
+                     begin.ToEpochDelta().ToMicroseconds(),  // timestamp0
+                     identifier,                       // timestamp1_or_async_id
+                     Dart_Timeline_Event_Async_Begin,  // event type
+                     0,                                // argument_count
+                     nullptr,                          // argument_names
+                     nullptr                           // argument_values
+  );
+  Dart_TimelineEvent(DCHECK_LITERAL(name),                 // label
+                     end.ToEpochDelta().ToMicroseconds(),  // timestamp0
+                     identifier,                     // timestamp1_or_async_id
+                     Dart_Timeline_Event_Async_End,  // event type
+                     0,                              // argument_count
+                     nullptr,                        // argument_names
+                     nullptr                         // argument_values
   );
 }
 

@@ -9,9 +9,9 @@
 namespace shell {
 namespace {
 
-fml::TimePoint SnapToNextTick(fml::TimePoint value,
-                              fml::TimePoint tick_phase,
-                              fml::TimeDelta tick_interval) {
+static fml::TimePoint SnapToNextTick(fml::TimePoint value,
+                                     fml::TimePoint tick_phase,
+                                     fml::TimeDelta tick_interval) {
   fml::TimeDelta offset = (tick_phase - value) % tick_interval;
   if (offset != fml::TimeDelta::Zero())
     offset = offset + tick_interval;
@@ -21,27 +21,19 @@ fml::TimePoint SnapToNextTick(fml::TimePoint value,
 }  // namespace
 
 VsyncWaiterFallback::VsyncWaiterFallback(blink::TaskRunners task_runners)
-    : VsyncWaiter(std::move(task_runners)),
-      phase_(fml::TimePoint::Now()),
-      weak_factory_(this) {}
+    : VsyncWaiter(std::move(task_runners)), phase_(fml::TimePoint::Now()) {}
 
 VsyncWaiterFallback::~VsyncWaiterFallback() = default;
 
-constexpr fml::TimeDelta interval = fml::TimeDelta::FromSecondsF(1.0 / 60.0);
-
 // |shell::VsyncWaiter|
 void VsyncWaiterFallback::AwaitVSync() {
-  fml::TimePoint now = fml::TimePoint::Now();
-  fml::TimePoint next = SnapToNextTick(now, phase_, interval);
+  constexpr fml::TimeDelta kSingleFrameInterval =
+      fml::TimeDelta::FromSecondsF(1.0 / 60.0);
 
-  task_runners_.GetUITaskRunner()->PostDelayedTask(
-      [self = weak_factory_.GetWeakPtr()] {
-        if (self) {
-          const auto frame_time = fml::TimePoint::Now();
-          self->FireCallback(frame_time, frame_time + interval);
-        }
-      },
-      next - now);
+  auto next =
+      SnapToNextTick(fml::TimePoint::Now(), phase_, kSingleFrameInterval);
+
+  FireCallback(next, next + kSingleFrameInterval);
 }
 
 }  // namespace shell

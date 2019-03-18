@@ -193,6 +193,11 @@ void TraceEvent2(TraceArg category_group,
 
 void TraceEventEnd(TraceArg name);
 
+void TraceEventAsyncComplete(TraceArg category_group,
+                             TraceArg name,
+                             TimePoint begin,
+                             TimePoint end);
+
 void TraceEventAsyncBegin0(TraceArg category_group,
                            TraceArg name,
                            TraceIDArg id);
