@@ -58,6 +58,11 @@ typedef WidgetTesterCallback = Future<void> Function(WidgetTester widgetTester);
 /// is defined by the timeout property,
 /// which defaults to [TestWidgetsFlutterBinding.defaultTestTimeout].
 ///
+/// If the `enableSemantics` parameter is set to `true`,
+/// [WidgetTester.ensureSemantics] will have been called before the tester is
+/// passed to the `callback`, and that handle will automatically be disposed
+/// after the callback is finished.
+///
 /// This function uses the [test] function in the test package to
 /// register the given callback as a test. The callback, when run,
 /// will be given a new instance of [WidgetTester]. The [find] object
@@ -84,6 +89,7 @@ void testWidgets(
   WidgetTesterCallback callback, {
   bool skip = false,
   test_package.Timeout timeout,
+  bool semanticsEnabled = false,
 }) {
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
   final WidgetTester tester = WidgetTester._(binding);
@@ -91,10 +97,17 @@ void testWidgets(
   test(
     description,
     () {
+      SemanticsHandle semanticsHandle;
+      if (semanticsEnabled == true) {
+        semanticsHandle = tester.ensureSemantics();
+      }
       tester._recordNumberOfSemanticsHandles();
       test_package.addTearDown(binding.postTest);
       return binding.runTest(
-        () => callback(tester),
+        () async {
+          await callback(tester);
+          semanticsHandle?.dispose();
+        },
         tester._endOfTestVerifications,
         description: description ?? '',
       );
