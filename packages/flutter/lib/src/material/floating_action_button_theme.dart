@@ -61,11 +61,6 @@ class FloatingActionButtonThemeData extends Diagnosticable {
   /// The shape to be used for the floating action button's [Material].
   final ShapeBorder shape;
 
-  /// The [ThemeData.floatingActionButtonTheme] property of the ambient [Theme].
-  static FloatingActionButtonThemeData of(BuildContext context) {
-    return Theme.of(context).floatingActionButtonTheme;
-  }
-
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   FloatingActionButtonThemeData copyWith({

@@ -322,7 +322,7 @@ class FloatingActionButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final FloatingActionButtonThemeData floatingActionButtonTheme = FloatingActionButtonThemeData.of(context);
+    final FloatingActionButtonThemeData floatingActionButtonTheme = theme.floatingActionButtonTheme;
 
     final Color backgroundColor = this.backgroundColor
       ?? floatingActionButtonTheme.backgroundColor
