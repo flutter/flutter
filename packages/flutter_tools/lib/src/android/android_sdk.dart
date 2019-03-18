@@ -216,10 +216,13 @@ class AndroidNdk {
           .split('\n')
           .map<String>((String line) => line.trim())
           .where((String line) => line.isNotEmpty);
-      final Map<String, String> properties = Map<String, String>.fromIterable(
-          propertiesFileLines.map<List<String>>((String line) => line.split(' = ')),
-          key: (dynamic split) => split[0],
-          value: (dynamic split) => split[1]);
+      final Map<String, String> properties = <String, String>{};
+      for (String line in propertiesFileLines) {
+        final List<String> parts = line.split(' = ');
+        if (parts.length == 2) {
+          properties[parts[0]] = parts[1];
+        }
+      }
 
       if (!properties.containsKey('Pkg.Revision')) {
         throw AndroidNdkSearchError('Can not establish ndk-bundle version: $propertiesFile does not contain Pkg.Revision');
