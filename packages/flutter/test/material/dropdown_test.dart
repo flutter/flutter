@@ -438,7 +438,6 @@ void main() {
         buttonBox.size.centerRight(Offset(-arrowIcon.size.width, 0.0)).dx);
   });
 
-  // test for passed in widget being in the dropdown
   testWidgets('Dropdown button icon will accept widgets as icons', (WidgetTester tester) async {
 
     final Widget customWidget = Container(
@@ -509,7 +508,6 @@ void main() {
     expect(disabledRichText.text.style.color, Colors.grey.shade400);
   });
 
-  // test for icon when size and color are passed in
   testWidgets('Dropdown button icon should have the passed in size and color instead of defaults', (WidgetTester tester) async {
     final Key iconKey = UniqueKey();
 
@@ -556,7 +554,6 @@ void main() {
     expect(disabledRichText.text.style.color, Colors.orange);
   });
 
-  // test for icon's own size and color when those are defined
   testWidgets('Dropdown button should use its own size and color properties over those defined by the theme', (WidgetTester tester) async {
     final Key iconKey = UniqueKey();
 
