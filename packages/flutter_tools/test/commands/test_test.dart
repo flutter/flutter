@@ -165,8 +165,8 @@ Future<ProcessResult> _runFlutterTest(
   if (!testPackages.existsSync()) {
     await Process.run(
       'flutter',
-      <String>['packages get'],
-      workingDirectory: workingDirectoy,
+      <String>['package', 'get'],
+      workingDirectory: workingDirectory,
     );
   }
 
