@@ -798,7 +798,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       switch(Theme.of(context).brightness) {
         case Brightness.light:
           return Colors.grey.shade700;
-        case Brightness.dark:
+        default:
           return Colors.white70;
       }
     } else {
@@ -809,7 +809,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       switch(Theme.of(context).brightness) {
         case Brightness.light:
           return Colors.grey.shade400;
-        case Brightness.dark:
+        default:
           return Colors.white10;
       }
     }
