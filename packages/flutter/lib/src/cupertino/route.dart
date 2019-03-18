@@ -822,7 +822,7 @@ class _CupertinoModalPopupRoute<T> extends PopupRoute<T> {
       parent: super.createAnimation(),
 
       // These curves were initially measured from native iOS horizontal page
-      // route animations and seemd to be a good match here as well.
+      // route animations and seemed to be a good match here as well.
       curve: Curves.linearToEaseOut,
       reverseCurve: Curves.linearToEaseOut.flipped,
     );
