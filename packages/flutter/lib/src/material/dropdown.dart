@@ -793,18 +793,24 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     if (_enabled) {
       if (widget.iconEnabledColor != null) {
         return widget.iconEnabledColor;
-      } else if (Theme.of(context).brightness == Brightness.light) {
-        return Colors.grey.shade700;
-      } else {
-        return Colors.white70;
+      }
+
+      switch(Theme.of(context).brightness) {
+        case Brightness.light:
+          return Colors.grey.shade700;
+        case Brightness.dark:
+          return Colors.white70;
       }
     } else {
       if (widget.iconDisabledColor != null) {
         return widget.iconDisabledColor;
-      } else if (Theme.of(context).brightness == Brightness.light) {
-        return Colors.grey.shade400;
-      } else {
-        return Colors.white10;
+      } 
+      
+      switch(Theme.of(context).brightness) {
+        case Brightness.light:
+          return Colors.grey.shade400;
+        case Brightness.dark:
+          return Colors.white10;
       }
     }
   }
