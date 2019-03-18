@@ -335,8 +335,8 @@ class FloatingActionButton extends StatelessWidget {
       ?? floatingActionButtonTheme.elevation
       ?? _defaultElevation;
     final double disabledElevation = this.disabledElevation
-        ?? floatingActionButtonTheme.disabledElevation
-        ?? elevation;
+      ?? floatingActionButtonTheme.disabledElevation
+      ?? elevation;
     final double highlightElevation = this.highlightElevation
       ?? floatingActionButtonTheme.highlightElevation
       ?? _defaultHighlightElevation;

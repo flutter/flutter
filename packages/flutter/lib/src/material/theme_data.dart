@@ -7,7 +7,6 @@ import 'dart:ui' show Color, hashValues;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/src/material/floating_action_button_theme.dart';
 import 'package:flutter/widgets.dart';
 
 import 'app_bar_theme.dart';
@@ -18,6 +17,7 @@ import 'chip_theme.dart';
 import 'color_scheme.dart';
 import 'colors.dart';
 import 'dialog_theme.dart';
+import 'floating_action_button_theme.dart';
 import 'ink_splash.dart';
 import 'ink_well.dart' show InteractiveInkFeatureFactory;
 import 'input_decorator.dart';

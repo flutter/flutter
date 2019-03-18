@@ -25,7 +25,7 @@ void main() {
     // The color scheme values are guaranteed to be non null since the default
     // [ThemeData] creates it with [ColorScheme.fromSwatch].
     expect(_getRawMaterialButton(tester).fillColor, ThemeData().colorScheme.secondary);
-    expect(_getIconTheme(tester).data.color, ThemeData().colorScheme.onSecondary);
+    expect(_getRichText(tester).text.style.color, ThemeData().colorScheme.onSecondary);
 
     // These defaults come directly from the [FloatingActionButton].
     expect(_getRawMaterialButton(tester).elevation, 6);
@@ -42,7 +42,7 @@ void main() {
     const ShapeBorder shape = StadiumBorder();
 
     await tester.pumpWidget(MaterialApp(
-      theme: ThemeData.fallback().copyWith(
+      theme: ThemeData().copyWith(
         floatingActionButtonTheme: const FloatingActionButtonThemeData(
           backgroundColor: backgroundColor,
           foregroundColor: foregroundColor,
@@ -61,7 +61,7 @@ void main() {
     ));
 
     expect(_getRawMaterialButton(tester).fillColor, backgroundColor);
-    expect(_getIconTheme(tester).data.color, foregroundColor);
+    expect(_getRichText(tester).text.style.color, foregroundColor);
     expect(_getRawMaterialButton(tester).elevation, elevation);
     expect(_getRawMaterialButton(tester).disabledElevation, disabledElevation);
     expect(_getRawMaterialButton(tester).highlightElevation, highlightElevation);
@@ -77,7 +77,7 @@ void main() {
     const ShapeBorder shape = StadiumBorder();
 
     await tester.pumpWidget(MaterialApp(
-      theme: ThemeData.fallback().copyWith(
+      theme: ThemeData().copyWith(
         floatingActionButtonTheme: const FloatingActionButtonThemeData(
           backgroundColor: Color(0xCAFECAFE),
           foregroundColor: Color(0xFEEDFEED),
@@ -102,7 +102,7 @@ void main() {
     ));
 
     expect(_getRawMaterialButton(tester).fillColor, backgroundColor);
-    expect(_getIconTheme(tester).data.color, foregroundColor);
+    expect(_getRichText(tester).text.style.color, foregroundColor);
     expect(_getRawMaterialButton(tester).elevation, elevation);
     expect(_getRawMaterialButton(tester).disabledElevation, disabledElevation);
     expect(_getRawMaterialButton(tester).highlightElevation, highlightElevation);
@@ -124,7 +124,7 @@ void main() {
       ),
     ));
 
-    expect(_getIconTheme(tester).data.color, const Color(0xFACEFACE));
+    expect(_getRichText(tester).text.style.color, const Color(0xFACEFACE));
   });
 
   testWidgets('FloatingActionButton uses a custom shape when specified in the theme', (WidgetTester tester) async {
@@ -152,11 +152,11 @@ RawMaterialButton _getRawMaterialButton(WidgetTester tester) {
   );
 }
 
-IconTheme _getIconTheme(WidgetTester tester) {
-  return tester.widget<IconTheme>(
+RichText _getRichText(WidgetTester tester) {
+  return tester.widget<RichText>(
     find.descendant(
       of: find.byType(FloatingActionButton),
-      matching: find.byType(IconTheme),
-    ).first,
+      matching: find.byType(RichText),
+    ),
   );
 }

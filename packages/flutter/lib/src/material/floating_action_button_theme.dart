@@ -6,9 +6,6 @@ import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-
-import 'theme.dart';
 
 /// Defines default property values for descendant [FloatingActionButton]
 /// widgets.
@@ -69,7 +66,7 @@ class FloatingActionButtonThemeData extends Diagnosticable {
     return Theme.of(context).floatingActionButtonTheme;
   }
 
-  /// Creates a copy of this object but with the given fields replaced with the
+  /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   FloatingActionButtonThemeData copyWith({
     Color backgroundColor,
@@ -89,6 +86,11 @@ class FloatingActionButtonThemeData extends Diagnosticable {
     );
   }
 
+  /// Linearly interpolate between two floating action button themes.
+  ///
+  /// If both arguments are null then null is returned.
+  ///
+  /// {@macro dart.ui.shadow.lerp}
   static FloatingActionButtonThemeData lerp(FloatingActionButtonThemeData a, FloatingActionButtonThemeData b, double t) {
     assert(t != null);
     if (a == null && b == null)
@@ -133,7 +135,8 @@ class FloatingActionButtonThemeData extends Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    final FloatingActionButtonThemeData defaultData = FloatingActionButtonThemeData();
+    const FloatingActionButtonThemeData defaultData = FloatingActionButtonThemeData();
+
 
     properties.add(DiagnosticsProperty<Color>('backgroundColor', backgroundColor, defaultValue: defaultData.backgroundColor));
     properties.add(DiagnosticsProperty<Color>('foregroundColor', foregroundColor, defaultValue: defaultData.foregroundColor));

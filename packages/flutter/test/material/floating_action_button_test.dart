@@ -174,7 +174,7 @@ void main() {
       ),
     );
 
-    expect(tester.widget<RawMaterialButton>(find.byType(RawMaterialButton)).disabledElevation, 0.0);
+    expect(tester.widget<PhysicalShape>(find.byType(PhysicalShape)).elevation, 0.0);
   });
 
   testWidgets('Floating Action Button elevation when disabled - effect', (WidgetTester tester) async {
