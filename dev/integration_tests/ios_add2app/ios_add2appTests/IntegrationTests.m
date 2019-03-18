@@ -14,6 +14,15 @@
 static void waitForFlutterSemanticsTree(FlutterViewController *viewController) {
   int tries = 10;
   double delay = 1.0;
+
+  // ensureSemanticsEnabled is a synchronous call, but only ensures that the
+  // semantics tree will be built on a subsequent frame (as opposed to being
+  // available at time it returns).
+  // To actually get the tree, we have to wait for the FlutterSemanticsUpdate
+  // notification, which lets us know that a semantics tree has been built;
+  // but we cannot block the main thread while waiting (so we use
+  // CFRunLoopRunInMode).
+
   __block BOOL semanticsAvailable = NO;
   __block id<NSObject> observer = [[NSNotificationCenter defaultCenter]
       addObserverForName:@"FlutterSemanticsUpdate"
