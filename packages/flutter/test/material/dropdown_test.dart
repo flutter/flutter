@@ -464,7 +464,7 @@ void main() {
     ));
 
     expect(find.byIcon(Icons.assessment), findsOneWidget);
-    expect(find.byIcon(Icons.arrow_drop_down), findsNothing);    
+    expect(find.byIcon(Icons.arrow_drop_down), findsNothing);
   });
 
   testWidgets('Dropdown button icon should have default size and colors when not defined', (WidgetTester tester) async {
