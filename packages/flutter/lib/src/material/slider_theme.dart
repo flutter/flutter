@@ -903,33 +903,16 @@ class _EmptySliderComponentShape extends SliderComponentShape {
   }
 }
 
-// The following shapes are the material defaults.
-
-/// This is the default shape of a [Slider]'s track.
+/// Base track shape with default sizing.
 ///
-/// It paints a solid colored rectangle with rounded edges, vertically centered
-/// in the  [parentBox]. The track rectangle extends to the bounds of the
-/// [parentBox], but is padded by the [RoundSliderOverlayShape] radius. The
-/// height is defined by the [SliderThemeData.trackHeight]. The color is
-/// determined by the [Slider]'s enabled state and the track piece's active
-/// state which are defined by:
-///   [SliderThemeData.activeTrackColor],
-///   [SliderThemeData.inactiveTrackColor],
-///   [SliderThemeData.disabledActiveTrackColor],
-///   [SliderThemeData.disabledInactiveTrackColor].
+/// The [SliderTrackShape]s that use this base class are:
+///   [RectangularSliderTrackShape],
+///   [StadiumSliderTrackShape]
 ///
-/// See also:
-///
-///  * [Slider] for the component that this is meant to display this shape.
-///  * [SliderThemeData] where an instance of this class is set to inform the
-///    slider of the visual details of the its track.
-///  * [SliderTrackShape] Base component for creating other custom track
-///    shapes.
-class StadiumSliderTrackShape extends SliderTrackShape {
-  /// Create a slider track that draws 2 rectangles with stadium outer edges.
-  const StadiumSliderTrackShape();
-
-  @override
+/// The height is set from [SliderThemeData.trackHeight] and the width is the
+/// width of the parent box, but with the largest shape subtracted out from
+/// [SliderThemeData.thumbShape] and [SliderThemeData.overlayShape].
+abstract class BaseSliderTrackShape {
   Rect getPreferredRect({
     RenderBox parentBox,
     Offset offset = Offset.zero,
@@ -952,7 +935,32 @@ class StadiumSliderTrackShape extends SliderTrackShape {
     final double trackWidth = parentBox.size.width - math.max(thumbWidth, overlayWidth);
     return Rect.fromLTWH(trackLeft, trackTop, trackWidth, trackHeight);
   }
+}
 
+/// This is the default shape of a [Slider]'s track.
+///
+/// It paints a solid colored rectangle with rounded edges, vertically centered
+/// in the [parentBox]. The track rectangle extends to the bounds of the
+/// [parentBox], but is padded by the larger of [RoundSliderOverlayShape]
+/// radius and [RoundSliderThumbShape]. The height is defined by the
+/// [SliderThemeData.trackHeight]. The color is determined by the [Slider]'s
+/// enabled state and the track piece's active state which are defined by:
+///   [SliderThemeData.activeTrackColor],
+///   [SliderThemeData.inactiveTrackColor],
+///   [SliderThemeData.disabledActiveTrackColor],
+///   [SliderThemeData.disabledInactiveTrackColor].
+///
+/// See also:
+///
+///  * [Slider] for the component that this is meant to display this shape.
+///  * [SliderThemeData] where an instance of this class is set to inform the
+///    slider of the visual details of the its track.
+///  * [SliderTrackShape] Base component for creating other custom track
+///    shapes.
+///  * [RectangularSliderTrackShape] for a similar track with blunt edges.
+class StadiumSliderTrackShape extends SliderTrackShape with BaseSliderTrackShape {
+  /// Create a slider track that draws 2 rectangles with stadium outer edges.
+  const StadiumSliderTrackShape();
 
   @override
   void paint(
@@ -998,19 +1006,21 @@ class StadiumSliderTrackShape extends SliderTrackShape {
       isEnabled: isEnabled,
       isDiscrete: isDiscrete,
     );
+
     final Rect leftTrackArcRect = Rect.fromLTWH(trackRect.left, trackRect.top, trackRect.height, trackRect.height);
     context.canvas.drawArc(leftTrackArcRect, math.pi / 2, math.pi, false, leftTrackPaint);
-    final Rect leftTrackSegment = Rect.fromLTRB(trackRect.left + trackRect.height / 2, trackRect.top, thumbCenter.dx, trackRect.bottom);
-    context.canvas.drawRect(leftTrackSegment, leftTrackPaint);
-
     final Rect rightTrackArcRect = Rect.fromLTWH(trackRect.right - trackRect.height / 2, trackRect.top, trackRect.height, trackRect.height);
     context.canvas.drawArc(rightTrackArcRect, -math.pi / 2, math.pi, false, rightTrackPaint);
-    final Rect rightTrackSegment = Rect.fromLTRB(thumbCenter.dx, trackRect.top, trackRect.right, trackRect.bottom);
+
+    final Size thumbSize = sliderTheme.thumbShape.getPreferredSize(isEnabled, isDiscrete);
+    final Rect leftTrackSegment = Rect.fromLTRB(trackRect.left + trackRect.height / 2, trackRect.top, thumbCenter.dx - thumbSize.width / 2, trackRect.bottom);
+    context.canvas.drawRect(leftTrackSegment, leftTrackPaint);
+    final Rect rightTrackSegment = Rect.fromLTRB(thumbCenter.dx + thumbSize.width / 2, trackRect.top, trackRect.right, trackRect.bottom);
     context.canvas.drawRect(rightTrackSegment, rightTrackPaint);
   }
 }
 
-/// This is the default shape of a [Slider]'s track.
+/// A rectangular shape of a [Slider]'s track.
 ///
 /// It paints a solid colored rectangle, vertically centered in the
 /// [parentBox]. The track rectangle extends to the bounds of the [parentBox],
@@ -1030,6 +1040,7 @@ class StadiumSliderTrackShape extends SliderTrackShape {
 ///    slider of the visual details of the its track.
 ///  * [SliderTrackShape] Base component for creating other custom track
 ///    shapes.
+///  * [StadiumSliderTrackShape] for a similar track with rounded edges.
 class RectangularSliderTrackShape extends SliderTrackShape {
   /// Create a slider track that draws 2 rectangles.
   const RectangularSliderTrackShape({ this.disabledThumbGapWidth = 2.0 });
@@ -1042,7 +1053,6 @@ class RectangularSliderTrackShape extends SliderTrackShape {
   /// thumb radius.
   final double disabledThumbGapWidth;
 
-  // TODO(clocksmith): de-dupe this code.
   @override
   Rect getPreferredRect({
     RenderBox parentBox,
@@ -1066,7 +1076,6 @@ class RectangularSliderTrackShape extends SliderTrackShape {
     final double trackWidth = parentBox.size.width - math.max(thumbWidth, overlayWidth);
     return Rect.fromLTWH(trackLeft, trackTop, trackWidth, trackHeight);
   }
-
 
   @override
   void paint(
@@ -1105,16 +1114,29 @@ class RectangularSliderTrackShape extends SliderTrackShape {
         break;
     }
 
+    // Used to create a gap around the thumb iff the slider is disabled.
+    // If the slider is enabled, the track can be drawn beneath the thumb
+    // without a gap. But when the slider is disabled, the track is shortened
+    // and this gap helps determine how much shorter it should be.
+    // TODO(clocksmith): The new Material spec has a gray circle in place of this gap.
+    double horizontalAdjustment = 0.0;
+    if (!isEnabled) {
+      final double disabledThumbRadius = sliderTheme.thumbShape.getPreferredSize(false, isDiscrete).width / 2.0;
+      final double gap = disabledThumbGapWidth * (1.0 - enableAnimation.value);
+      horizontalAdjustment = disabledThumbRadius + gap;
+    }
+
     final Rect trackRect = getPreferredRect(
-        parentBox: parentBox,
-        offset: offset,
-        sliderTheme: sliderTheme,
-        isEnabled: isEnabled,
-        isDiscrete: isDiscrete,
+      parentBox: parentBox,
+      offset: offset,
+      sliderTheme: sliderTheme,
+      isEnabled: isEnabled,
+      isDiscrete: isDiscrete,
     );
-    final Rect leftTrackSegment = Rect.fromLTRB(trackRect.left, trackRect.top, thumbCenter.dx, trackRect.bottom);
+
+    final Rect leftTrackSegment = Rect.fromLTRB(trackRect.left, trackRect.top, thumbCenter.dx - horizontalAdjustment, trackRect.bottom);
     context.canvas.drawRect(leftTrackSegment, leftTrackPaint);
-    final Rect rightTrackSegment = Rect.fromLTRB(thumbCenter.dx, trackRect.top, trackRect.right, trackRect.bottom);
+    final Rect rightTrackSegment = Rect.fromLTRB(thumbCenter.dx + horizontalAdjustment, trackRect.top, trackRect.right, trackRect.bottom);
     context.canvas.drawRect(rightTrackSegment, rightTrackPaint);
   }
 }
