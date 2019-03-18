@@ -29,7 +29,7 @@ abstract class ProgressIndicator extends StatefulWidget {
   /// Creates a progress indicator.
   ///
   /// {@template flutter.material.progressIndicator.parameters}
-  /// The [value] argument can be either null for an indeterminate
+  /// The [value] argument can either be null for an indeterminate
   /// progress indicator, or non-null for a determinate progress
   /// indicator.
   ///
@@ -48,8 +48,9 @@ abstract class ProgressIndicator extends StatefulWidget {
     this.semanticsValue,
   }) : super(key: key);
 
-  /// If non-null, the value of this progress indicator. A value of 0.0
-  /// corresponds to no progress and 1.0 corresponds to progress completion.
+  /// If non-null, the value of this progress indicator.
+  ///
+  /// A value of 0.0 means no progress and 1.0 means that progress is complete.
   ///
   /// If null, this progress indicator is indeterminate, which means the
   /// indicator displays a predetermined animation that does not indicate how
