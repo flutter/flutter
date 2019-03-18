@@ -272,9 +272,10 @@ class FlutterDriverExtension {
       if (semanticsLabel == null) {
         return false;
       }
-      return arguments.label is String
-          ? arguments.label == semanticsLabel
-          : arguments.label.allMatches(semanticsLabel).isNotEmpty;
+      final Pattern label = arguments.label;
+      return label is RegExp
+          ? label.hasMatch(semanticsLabel)
+          : label == semanticsLabel;
     }, description: 'widget with semantic label "${arguments.label}"');
   }
 

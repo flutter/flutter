@@ -273,17 +273,18 @@ class CommonFinders {
     return _AncestorFinder(of, matching, matchRoot: matchRoot);
   }
 
-  /// Finds [Semantics] widgets matching the given `label`.
+  /// Finds [Semantics] widgets matching the given `label`, either by
+  /// [RegExp.hasMatch] or string equality.
   ///
   /// The framework may combine semantics labels in certain scenarios, such as
-  /// when multiple [Text] widgets are in a [Row] widget. In such a case, it
-  /// may be preferable to match by regular expression. Consumers of this API
-  /// __must not__ introduce unsuitable content into the semantics tree for the
-  /// purposes of testing; in particular, you should prefer matching by regular
-  /// expression rather than by string if the framework has combined your
-  /// semantics, and not try to force the framework to break up the semantics
-  /// nodes. Breaking up the nodes would have an undesirable effect on screen
-  /// readers and other accessibility services.
+  /// when multiple [Text] widgets are in a [MaterialButton] widget. In such a
+  /// case, it may be preferable to match by regular expression. Consumers of
+  /// this API __must not__ introduce unsuitable content into the semantics tree
+  /// for the purposes of testing; in particular, you should prefer matching by
+  /// regular expression rather than by string if the framework has combined
+  /// your semantics, and not try to force the framework to break up the
+  /// semantics nodes. Breaking up the nodes would have an undesirable effect on
+  /// screen readers and other accessibility services.
   ///
   /// ## Sample code
   ///
@@ -309,9 +310,9 @@ class CommonFinders {
         if (semanticsLabel == null) {
           return false;
         }
-        return label is String
-            ? label == semanticsLabel
-            : label.allMatches(semanticsLabel).isNotEmpty;
+        return label is RegExp
+            ? label.hasMatch(semanticsLabel)
+            : label == semanticsLabel;
       },
       skipOffstage: skipOffstage,
     );

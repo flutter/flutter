@@ -168,7 +168,7 @@ class ByTooltipMessage extends SerializableFinder {
 /// A Flutter Driver finder that finds widgets by semantic label.
 ///
 /// If the [label] property is a [String], the finder will try to find an exact
-/// match. If it is a [RegExp], it will try to find
+/// match. If it is a [RegExp], it will return true for [RegExp.hasMatch].
 class BySemanticsLabel extends SerializableFinder {
   /// Creates a semantic label finder given the [label].
   BySemanticsLabel(this.label);
