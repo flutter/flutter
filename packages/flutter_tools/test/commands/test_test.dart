@@ -166,7 +166,7 @@ Future<ProcessResult> _runFlutterTest(
     await Process.run(
       'flutter',
       <String>['packages get'],
-      workingDirectory: workingDirectoy,
+      workingDirectory: workingDirectory,
     );
   }
 
