@@ -225,27 +225,44 @@ bool FlutterPlatformViewsController::SubmitFrame(bool gl_rendering,
     composition_order_.clear();
     return did_submit;
   }
+  DetachUnusedLayers();
+  active_composition_order_.clear();
   UIView* flutter_view = flutter_view_.get();
 
-  // This can be more efficient, instead of removing all views and then re-attaching them,
-  // we should only remove the views that has been completly removed from the layer tree, and
-  // reorder the views using UIView's bringSubviewToFront.
-  // TODO(amirh): make this more efficient.
-  // https://github.com/flutter/flutter/issues/23793
-  for (UIView* sub_view in [flutter_view subviews]) {
-    [sub_view removeFromSuperview];
-  }
-
-  active_composition_order_.clear();
   for (size_t i = 0; i < composition_order_.size(); i++) {
     int view_id = composition_order_[i];
-    [flutter_view addSubview:touch_interceptors_[view_id].get()];
-    [flutter_view addSubview:overlays_[view_id]->overlay_view.get()];
+    UIView* intercepter = touch_interceptors_[view_id].get();
+    UIView* overlay = overlays_[view_id]->overlay_view;
+    FML_CHECK(intercepter.superview == overlay.superview);
+
+    if (intercepter.superview == flutter_view) {
+      [flutter_view bringSubviewToFront:intercepter];
+      [flutter_view bringSubviewToFront:overlay];
+    } else {
+      [flutter_view addSubview:intercepter];
+      [flutter_view addSubview:overlay];
+    }
+
     active_composition_order_.push_back(view_id);
   }
 
   composition_order_.clear();
   return did_submit;
+}
+
+void FlutterPlatformViewsController::DetachUnusedLayers() {
+  std::unordered_set<int64_t> composition_order_set;
+
+  for (int64_t view_id : composition_order_) {
+    composition_order_set.insert(view_id);
+  }
+
+  for (int64_t view_id : active_composition_order_) {
+    if (composition_order_set.find(view_id) == composition_order_set.end()) {
+      [touch_interceptors_[view_id].get() removeFromSuperview];
+      [overlays_[view_id]->overlay_view.get() removeFromSuperview];
+    }
+  }
 }
 
 void FlutterPlatformViewsController::EnsureOverlayInitialized(int64_t overlay_id) {
