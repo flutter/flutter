@@ -428,27 +428,46 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     return widget.max > widget.min ? (value - widget.min) / (widget.max - widget.min) : 0.0;
   }
 
+  static const double _defaultTrackHeight = 2;
+  static const SliderTrackShape _defaultTrackShape = StadiumSliderTrackShape();
+  static const SliderTickMarkShape _defaultTickMarkShape = RoundSliderTickMarkShape();
+  static const SliderComponentShape _defaultThumbShape = RoundSliderThumbShape();
+  static const SliderComponentShape _defaultOverlayShape = RoundSliderOverlayShape();
+  static const SliderComponentShape _defaultValueIndicatorShape = PaddleSliderValueIndicatorShape();
+  static const ShowValueIndicator _defaultShowValueIndicator = ShowValueIndicator.onlyForDiscrete;
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     assert(debugCheckHasMediaQuery(context));
 
+    ThemeData theme = Theme.of(context);
     SliderThemeData sliderTheme = SliderTheme.of(context);
 
     // If the widget has active or inactive colors specified, then we plug them
     // in to the slider theme as best we can. If the developer wants more
     // control than that, then they need to use a SliderTheme.
-    if (widget.activeColor != null || widget.inactiveColor != null) {
-      sliderTheme = sliderTheme.copyWith(
-        activeTrackColor: widget.activeColor,
-        inactiveTrackColor: widget.inactiveColor,
-        activeTickMarkColor: widget.inactiveColor,
-        inactiveTickMarkColor: widget.activeColor,
-        thumbColor: widget.activeColor,
-        valueIndicatorColor: widget.activeColor,
-        overlayColor: widget.activeColor?.withAlpha(0x29),
-      );
-    }
+    sliderTheme = sliderTheme.copyWith(
+      trackHeight: sliderTheme.trackHeight ?? _defaultTrackHeight,
+      activeTrackColor: widget.activeColor ?? sliderTheme.activeTrackColor ?? theme.colorScheme.primary,
+      inactiveTrackColor: widget.inactiveColor ?? sliderTheme.inactiveTrackColor ?? theme.colorScheme.primary.withOpacity(0.24),
+      disabledActiveTrackColor: sliderTheme.disabledActiveTrackColor ?? theme.colorScheme.onSurface.withOpacity(0.32),
+      disabledInactiveTrackColor: sliderTheme.disabledInactiveTrackColor ?? theme.colorScheme.onSurface.withOpacity(0.12),
+      activeTickMarkColor: widget.inactiveColor ?? sliderTheme.activeTickMarkColor ?? theme.colorScheme.onPrimary.withOpacity(0.54),
+      inactiveTickMarkColor: widget.activeColor ?? sliderTheme.inactiveTickMarkColor ?? theme.colorScheme.primary.withOpacity(0.54),
+      disabledActiveTickMarkColor: sliderTheme.disabledActiveTickMarkColor ?? theme.colorScheme.onPrimary.withOpacity(0.12),
+      disabledInactiveTickMarkColor: sliderTheme.disabledInactiveTrackColor ?? theme.colorScheme.onSurface.withOpacity(0.12),
+      thumbColor: widget.activeColor ?? sliderTheme.thumbColor ?? theme.colorScheme.primary,
+      disabledThumbColor: sliderTheme.disabledThumbColor ?? theme.colorScheme.onSurface.withOpacity(0.38),
+      overlayColor: widget.activeColor?.withOpacity(0.12) ?? sliderTheme.overlayColor ?? theme.colorScheme.primary.withOpacity(0.12),
+      valueIndicatorColor: widget.activeColor ?? sliderTheme.valueIndicatorColor ?? theme.colorScheme.primary,
+      trackShape: sliderTheme.trackShape ?? _defaultTrackShape,
+      tickMarkShape: sliderTheme.tickMarkShape ?? _defaultTickMarkShape,
+      thumbShape: sliderTheme.thumbShape ?? _defaultThumbShape,
+      overlayShape: sliderTheme.overlayShape ?? _defaultOverlayShape,
+      valueIndicatorShape: sliderTheme.valueIndicatorShape ?? _defaultValueIndicatorShape,
+      showValueIndicator: sliderTheme.showValueIndicator ?? _defaultShowValueIndicator
+    );
 
     return _SliderRenderObjectWidget(
       value: _unlerp(widget.value),
@@ -554,7 +573,6 @@ class _RenderSlider extends RenderBox {
        _value = value,
        _divisions = divisions,
        _sliderTheme = sliderTheme,
-       _theme = theme,
        _mediaQueryData = mediaQueryData,
        _onChanged = onChanged,
        _state = state,
