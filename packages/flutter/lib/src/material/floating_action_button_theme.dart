@@ -137,7 +137,6 @@ class FloatingActionButtonThemeData extends Diagnosticable {
     super.debugFillProperties(properties);
     const FloatingActionButtonThemeData defaultData = FloatingActionButtonThemeData();
 
-
     properties.add(DiagnosticsProperty<Color>('backgroundColor', backgroundColor, defaultValue: defaultData.backgroundColor));
     properties.add(DiagnosticsProperty<Color>('foregroundColor', foregroundColor, defaultValue: defaultData.foregroundColor));
     properties.add(DiagnosticsProperty<double>('elevation', elevation, defaultValue: defaultData.elevation));

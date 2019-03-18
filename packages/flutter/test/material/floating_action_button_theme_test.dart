@@ -141,6 +141,44 @@ void main() {
 
     expect(_getRawMaterialButton(tester).shape, customShape);
   });
+
+  testWidgets('default FloatingActionButton debugFillProperties', (WidgetTester tester) async {
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    const FloatingActionButtonThemeData ().debugFillProperties(builder);
+
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
+
+    expect(description, <String>[]);
+  });
+
+  testWidgets('Material implements debugFillProperties', (WidgetTester tester) async {
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    const FloatingActionButtonThemeData(
+      backgroundColor: Color(0xCAFECAFE),
+      foregroundColor: Color(0xFEEDFEED),
+      elevation: 23,
+      disabledElevation: 11,
+      highlightElevation: 43,
+      shape: BeveledRectangleBorder(),
+    ).debugFillProperties(builder);
+
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
+
+    expect(description, <String>[
+      'backgroundColor: Color(0xcafecafe)',
+      'foregroundColor: Color(0xfeedfeed)',
+      'elevation: 23.0',
+      'disabledElevation: 11.0',
+      'highlightElevation: 43.0',
+      'shape: BeveledRectangleBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none), BorderRadius.zero)',
+    ]);
+  });
 }
 
 RawMaterialButton _getRawMaterialButton(WidgetTester tester) {
