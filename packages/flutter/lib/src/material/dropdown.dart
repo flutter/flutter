@@ -656,13 +656,21 @@ class DropdownButton<T> extends StatefulWidget {
   /// [ThemeData.textTheme] of the current [Theme].
   final TextStyle style;
 
-  /// TODO: add documentation here
+  /// The widget to use for the drop-down button's icon.
+  ///
+  /// Defaults to an [Icon] with the [Icons.arrow_drop_down] glyph.
   final Widget icon;
 
-  /// TODO: add documentation here
+  /// Sets the disabled icon color if an [Icon] widget is passed into the icon parameter.
+  ///
+  /// Defaults to [Colors.grey.shade400] when the theme is [Brightness.light] and to
+  /// [Colors.white10] when the theme is [Brightness.dark]
   final Color iconDisabledColor;
 
-  /// TODO: add documentation here
+  /// Sets the enabled icon color if an [Icon] widget is passed into the icon parameter.
+  ///
+  /// Defaults to [Colors.grey.shade700] when the theme is [Brightness.light] and to
+  /// [Colors.white70] when the theme is [Brightness.dark]
   final Color iconEnabledColor;
 
   /// The size to use for the drop-down button's down arrow icon button.

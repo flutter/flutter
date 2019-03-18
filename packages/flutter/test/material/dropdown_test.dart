@@ -440,7 +440,7 @@ void main() {
   });
 
   // test for passed in widget being in the dropdown
-  testWidgets('DropdownButton icon will accept widgets as icons', (WidgetTester tester) async {
+  testWidgets('Dropdown button icon will accept widgets as icons', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
 
     final Widget customWidget = Container(
@@ -474,7 +474,7 @@ void main() {
   });
 
   // test for icon defaults when no size and color are passed in
-  testWidgets('DropdownButton icon should have default size and colors when not defined', (WidgetTester tester) async {
+  testWidgets('Dropdown button icon should have default size and colors when not defined', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
     final Key iconKey = UniqueKey();
 
@@ -488,15 +488,57 @@ void main() {
 
     final RenderBox icon = tester.renderObject(find.byKey(iconKey));
     expect(icon.size, const Size(24.0, 24.0));
-    // somehow test for color
 
+    // test for color
   });
 
   // test for icon when size and color are passed in
+  testWidgets('Dropdown button icon should have the passed in size and color instead of defaults', (WidgetTester tester) async {
+    final Key buttonKey = UniqueKey();
+    final Key iconKey = UniqueKey();
 
+    final Icon customIcon = Icon(Icons.assessment, key: iconKey);
+
+    await tester.pumpWidget(buildFrame(
+      buttonKey: buttonKey,
+      icon: customIcon,
+      iconSize: 30.0,
+      iconEnabledColor: Colors.pink,
+      iconDisabledColor: Colors.orange,
+      onChanged: onChanged,
+    ));
+
+    final RenderBox icon = tester.renderObject(find.byKey(iconKey));
+    expect(icon.size, const Size(30.0, 30.0));
+
+    // test for color
+  });
 
   // test for icon's own size and color when those are defined
+  testWidgets('Dropdown button should use its own size and color properties over those defined by the theme', (WidgetTester tester) async {
+    final Key buttonKey = UniqueKey();
+    final Key iconKey = UniqueKey();
 
+    final Icon customIcon = Icon(
+      Icons.assessment,
+      key: iconKey,
+      size: 40.0,
+    );
+
+    await tester.pumpWidget(buildFrame(
+      buttonKey: buttonKey,
+      icon: customIcon,
+      iconSize: 30.0,
+      iconEnabledColor: Colors.pink,
+      iconDisabledColor: Colors.orange,
+      onChanged: onChanged,
+    ));
+
+    final RenderBox icon = tester.renderObject(find.byKey(iconKey));
+    expect(icon.size, const Size(40.0, 40.0));
+
+    // test for color
+  });
 
   testWidgets('Dropdown button with isDense:true aligns selected menu item', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
