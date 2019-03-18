@@ -46,6 +46,19 @@ BuildApp() {
     target_path="${FLUTTER_TARGET}"
   fi
 
+  local derived_dir="${SOURCE_ROOT}/Flutter"
+  if [[ -e "${project_path}/.ios" ]]; then
+    derived_dir="${project_path}/.ios/Flutter"
+  fi
+
+  # Write User-Defined FLTAssetsPath to AppFrameworkInfo.plist
+  local assets_path="flutter_assets"
+  if [[ -n "$FLTAssetsPath" ]]; then
+    assets_path="${FLTAssetsPath}"
+    /usr/libexec/PlistBuddy -c "Delete :FLTAssetsPath" "${derived_dir}/AppFrameworkInfo.plist"
+    /usr/libexec/PlistBuddy -c "Add :FLTAssetsPath string ${FLTAssetsPath}" "${derived_dir}/AppFrameworkInfo.plist"
+  fi
+
   # Use FLUTTER_BUILD_MODE if it's set, otherwise use the Xcode build configuration name
   # This means that if someone wants to use an Xcode build config other than Debug/Profile/Release,
   # they _must_ set FLUTTER_BUILD_MODE so we know what type of artifact to build.
@@ -87,10 +100,6 @@ BuildApp() {
   AssertExists "${framework_path}"
   AssertExists "${project_path}"
 
-  local derived_dir="${SOURCE_ROOT}/Flutter"
-  if [[ -e "${project_path}/.ios" ]]; then
-    derived_dir="${project_path}/.ios/Flutter"
-  fi
   RunCommand mkdir -p -- "$derived_dir"
   AssertExists "$derived_dir"
 
@@ -248,7 +257,7 @@ BuildApp() {
     --target="${target_path}"                                               \
     --${build_mode}                                                         \
     --depfile="${build_dir}/snapshot_blob.bin.d"                            \
-    --asset-dir="${derived_dir}/App.framework/flutter_assets"               \
+    --asset-dir="${derived_dir}/App.framework/${assets_path}"               \
     ${precompilation_flag}                                                  \
     ${flutter_engine_flag}                                                  \
     ${local_engine_flag}                                                    \
