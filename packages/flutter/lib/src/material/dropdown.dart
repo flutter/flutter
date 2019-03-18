@@ -804,8 +804,8 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     } else {
       if (widget.iconDisabledColor != null) {
         return widget.iconDisabledColor;
-      } 
-      
+      }
+
       switch(Theme.of(context).brightness) {
         case Brightness.light:
           return Colors.grey.shade400;
