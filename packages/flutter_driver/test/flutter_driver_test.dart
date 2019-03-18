@@ -178,7 +178,7 @@ void main() {
             'command': 'tap',
             'timeout': _kSerializedTestTimeout,
             'finderType': 'BySemanticsLabel',
-            'label': 'foo',
+            'label': '^foo',
             'isRegExp': 'true',
           });
           return makeMockResponse(<String, dynamic>{});
