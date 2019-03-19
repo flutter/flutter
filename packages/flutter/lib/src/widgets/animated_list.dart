@@ -213,17 +213,13 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
   final List<_ActiveItem> _outgoingItems = <_ActiveItem>[];
   int _itemsCount = 0;
 
-  SliverChildBuilderDelegate get _delegate {
-    return SliverChildBuilderDelegate(
-      _itemBuilder,
-      childCount: _itemsCount,
-    );
-  }
+  SliverChildBuilderDelegate _delegate;
 
   @override
   void initState() {
     super.initState();
     _itemsCount = widget.initialItemCount;
+    _delegate = SliverChildBuilderDelegate(_itemBuilder, childCount: _itemsCount);
   }
 
   @override
@@ -273,6 +269,13 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
     return index;
   }
 
+  void _updateDelegate(VoidCallback fn) {
+    setState(() {
+      fn();
+      _delegate = SliverChildBuilderDelegate(_itemBuilder, childCount: _itemsCount);
+    });
+  }
+
   /// Insert an item at [index] and start an animation that will be passed
   /// to [AnimatedList.itemBuilder] when the item is visible.
   ///
@@ -299,7 +302,7 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
 
     final AnimationController controller = AnimationController(duration: duration, vsync: this);
     final _ActiveItem incomingItem = _ActiveItem.incoming(controller, itemIndex);
-    setState(() {
+    _updateDelegate(() {
       _incomingItems
         ..add(incomingItem)
         ..sort();
@@ -335,7 +338,7 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
     final AnimationController controller = incomingItem?.controller
       ?? AnimationController(duration: duration, value: 1.0, vsync: this);
     final _ActiveItem outgoingItem = _ActiveItem.outgoing(controller, itemIndex, builder);
-    setState(() {
+    _updateDelegate(() {
       _outgoingItems
         ..add(outgoingItem)
         ..sort();
@@ -355,16 +358,13 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
           item.itemIndex -= 1;
       }
 
-      setState(() {
+      _updateDelegate(() {
         _itemsCount -= 1;
       });
     });
   }
 
   Widget _itemBuilder(BuildContext context, int itemIndex) {
-    if (itemIndex >= _itemsCount)
-      return null;
-
     final _ActiveItem outgoingItem = _activeItemAt(_outgoingItems, itemIndex);
     if (outgoingItem != null)
       return outgoingItem.removedItemBuilder(context, outgoingItem.controller.view);
@@ -393,10 +393,11 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
 ///
 /// This widget's [SliverAnimatedListState] can be used to dynamically insert or
 /// remove items. To refer to the [SliverAnimatedListState] either provide a
-/// [GlobalKey] or use the static [of] method from an item's input callback.
+/// [GlobalKey] or use the static [SliverAnimatedList.of] method from an item's
+/// input callback.
 ///
-/// This sliver is similar to one created by [SliverList] with
-/// [SliverChildBuilderDelegate].
+/// See also:
+/// * [SliverList], which does not animate items when they are inserted or removed.
 class SliverAnimatedList extends AnimatedList {
   /// Creates a sliver that animates items when they are inserted or removed.
   const SliverAnimatedList({
