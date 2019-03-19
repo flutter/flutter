@@ -38,6 +38,7 @@ import 'src/commands/shell_completion.dart';
 import 'src/commands/stop.dart';
 import 'src/commands/test.dart';
 import 'src/commands/trace.dart';
+import 'src/commands/train.dart';
 import 'src/commands/update_packages.dart';
 import 'src/commands/upgrade.dart';
 import 'src/commands/version.dart';
@@ -84,6 +85,7 @@ Future<void> main(List<String> args) async {
     StopCommand(),
     TestCommand(verboseHelp: verboseHelp),
     TraceCommand(),
+    TrainingCommand(),
     UpdatePackagesCommand(hidden: !verboseHelp),
     UpgradeCommand(),
     VersionCommand(),

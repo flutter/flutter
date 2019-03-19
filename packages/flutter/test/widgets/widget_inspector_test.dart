@@ -2167,7 +2167,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
 
       await expectLater(
         WidgetInspectorService.instance.screenshot(find.byType(Stack).evaluate().first, width: 300.0, height: 300.0),
-        matchesGoldenFile('inspector.composited_transform.only_offsets_small.png'),
+        matchesGoldenFile('inspector.composited_transform.only_offsets_small.1.png'),
         skip: !Platform.isLinux,
       );
 
