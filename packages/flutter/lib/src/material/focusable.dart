@@ -38,6 +38,8 @@ class Focusable extends StatefulWidget {
     this.showDecorations = true,
     this.focusedDecoration,
     this.unfocusedDecoration,
+    this.duration,
+    this.curve,
     this.onFocusChange,
     this.onKey,
     this.debugLabel,
@@ -120,6 +122,14 @@ class Focusable extends StatefulWidget {
   /// the ambient [Theme] in the context.
   final Decoration unfocusedDecoration;
 
+  /// The duration over which to animate the parameters of the focus highlight
+  /// [decoration].
+  final Duration duration;
+
+  /// The curve to apply when animating the parameters of the focus highlight
+  /// [decoration].
+  final Curve curve;
+
   /// Returns the [node] of the [Focusable] that most tightly encloses the given
   /// [BuildContext].
   ///
@@ -201,13 +211,15 @@ class _FocusableState extends State<Focusable> {
           widget.onKey(node, event);
         }
       },
-      child: Container(
+      child: AnimatedContainer(
         decoration: _getDecoration(context),
         child: _FocusableMarker(
           key: node.key,
           node: node,
           child: widget.child,
         ),
+        duration: widget.duration,
+        curve: widget.curve,
       ),
     );
   }
