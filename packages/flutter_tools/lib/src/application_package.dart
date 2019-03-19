@@ -11,7 +11,6 @@ import 'package:xml/xml.dart' as xml;
 import 'android/android_sdk.dart';
 import 'android/gradle.dart';
 import 'base/context.dart';
-import 'base/common.dart';
 import 'base/file_system.dart';
 import 'base/os.dart' show os;
 import 'base/process.dart';
