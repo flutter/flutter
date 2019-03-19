@@ -14,6 +14,7 @@ import io.flutter.plugin.common.BinaryMessenger;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.StandardMethodCodec;
+import io.flutter.view.AccessibilityBridge;
 import io.flutter.view.TextureRegistry;
 
 import java.nio.ByteBuffer;
@@ -31,7 +32,7 @@ import static android.view.MotionEvent.PointerProperties;
  * Each {@link io.flutter.app.FlutterPluginRegistry} has a single platform views controller.
  * A platform views controller can be attached to at most one Flutter view.
  */
-public class PlatformViewsController implements MethodChannel.MethodCallHandler {
+public class PlatformViewsController implements MethodChannel.MethodCallHandler, PlatformViewsAccessibilityDelegate {
     private static final String TAG = "PlatformViewsController";
 
     private static final String CHANNEL_NAME = "flutter/platform_views";
@@ -49,6 +50,9 @@ public class PlatformViewsController implements MethodChannel.MethodCallHandler 
 
     // The messenger used to communicate with the framework over the platform views channel.
     private BinaryMessenger mMessenger;
+
+    // The accessibility bridge to which accessibility events form the platform views will be dispatched.
+    private AccessibilityBridge accessibilityBridge;
 
     private final HashMap<Integer, VirtualDisplayController> vdControllers;
 
@@ -94,6 +98,25 @@ public class PlatformViewsController implements MethodChannel.MethodCallHandler 
         mTextureRegistry = null;
     }
 
+    /**
+     * Attaches an accessibility bridge for this platform views controller.
+     *
+     * Accessibility events sent by platform views that belonging to this controller will be
+     * dispatched to this accessibility bridge.
+     */
+    public void attachAccessibilityBridge(AccessibilityBridge accessibilityBridge) {
+        this.accessibilityBridge = accessibilityBridge;
+    }
+
+    /**
+     * Detaches the current accessibility bridge.
+     *
+     * Any accessibility events sent by platform views belonging to this controller will be ignored.
+     */
+    public void detachAccessibiltyBridge() {
+        this.accessibilityBridge = null;
+    }
+
     public PlatformViewRegistry getRegistry() {
         return mRegistry;
     }
@@ -104,6 +127,17 @@ public class PlatformViewsController implements MethodChannel.MethodCallHandler 
 
     public void onPreEngineRestart() {
         flushAllViews();
+    }
+
+    /**
+     * Returns the embedded view with id, or null if no view with this id is registered.
+     */
+    public View getPlatformViewById(Integer id) {
+        VirtualDisplayController controller = vdControllers.get(id);
+        if (controller == null) {
+            return null;
+        }
+        return controller.getView();
     }
 
     @Override
