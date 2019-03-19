@@ -158,6 +158,7 @@ java_library("flutter_shell_java") {
     "io/flutter/plugin/platform/PlatformViewFactory.java",
     "io/flutter/plugin/platform/PlatformViewRegistry.java",
     "io/flutter/plugin/platform/PlatformViewRegistryImpl.java",
+    "io/flutter/plugin/platform/PlatformViewsAccessibilityDelegate.java",
     "io/flutter/plugin/platform/PlatformViewsController.java",
     "io/flutter/plugin/platform/SingleViewPresentation.java",
     "io/flutter/plugin/platform/VirtualDisplayController.java",

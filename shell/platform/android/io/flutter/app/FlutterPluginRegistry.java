@@ -94,6 +94,10 @@ public class FlutterPluginRegistry
         mPlatformViewsController.onPreEngineRestart();
     }
 
+    public PlatformViewsController getPlatformViewsController() {
+        return mPlatformViewsController;
+    }
+
     private class FlutterRegistrar implements Registrar {
         private final String pluginKey;
 
