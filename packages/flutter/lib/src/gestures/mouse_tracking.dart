@@ -124,7 +124,7 @@ class MouseTracker {
     for (int deviceId in trackedAnnotation.activeDevices) {
       annotation.onExit(PointerExitEvent.fromHoverEvent(_lastMouseEvent[deviceId]));
     }
-    _trackedAnnotations.remove(trackedAnnotation);
+    _trackedAnnotations.remove(annotation);
   }
 
   void _scheduleMousePositionCheck() {
@@ -169,6 +169,16 @@ class MouseTracker {
         'Unable to find annotation $annotation in tracked annotations. '
         'Check that attachAnnotation has been called for all annotated layers.');
     return trackedAnnotation;
+  }
+
+  /// Checks if the given [MouseTrackerAnnotation] is attached to this
+  /// [MouseTracker].
+  ///
+  /// This function is only public to allow for proper testing of the
+  /// MouseTracker. Do not call in other contexts.
+  @visibleForTesting
+  bool isAnnotationAttached(MouseTrackerAnnotation annotation) {
+    return _trackedAnnotations[annotation] != null;
   }
 
   /// Tells interested objects that a mouse has entered, exited, or moved, given

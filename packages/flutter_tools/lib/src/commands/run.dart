@@ -13,6 +13,7 @@ import '../cache.dart';
 import '../device.dart';
 import '../globals.dart';
 import '../ios/mac.dart';
+import '../project.dart';
 import '../resident_runner.dart';
 import '../run_cold.dart';
 import '../run_hot.dart';
@@ -31,6 +32,10 @@ abstract class RunCommandBase extends FlutterCommand {
       ..addFlag('trace-startup',
         negatable: false,
         help: 'Trace application startup, then exit, saving the trace to a file.',
+      )
+      ..addFlag('verbose-system-logs',
+        negatable: false,
+        help: 'Include verbose logging from the flutter engine.'
       )
       ..addOption('route',
         help: 'Which route to load when running the app.',
@@ -94,6 +99,13 @@ class RunCommand extends RunCommandBase {
         negatable: false,
         help: 'Enable tracing to the system tracer. This is only useful on '
               'platforms where such a tracer is available (Android and Fuchsia).',
+      )
+      ..addFlag('dump-skp-on-shader-compilation',
+        negatable: false,
+        help: 'Automatically dump the skp that triggers new shader compilations. '
+              'This is useful for wrting custom ShaderWarmUp to reduce jank. '
+              'By default, this is not enabled to reduce the overhead. '
+              'This is only available in profile or debug build. ',
       )
       ..addFlag('await-first-frame-when-tracing',
         defaultsTo: true,
@@ -255,7 +267,9 @@ class RunCommand extends RunCommandBase {
         skiaDeterministicRendering: argResults['skia-deterministic-rendering'],
         traceSkia: argResults['trace-skia'],
         traceSystrace: argResults['trace-systrace'],
+        dumpSkpOnShaderCompilation: argResults['dump-skp-on-shader-compilation'],
         observatoryPort: observatoryPort,
+        verboseSystemLogs: argResults['verbose-system-logs'],
       );
     }
   }
@@ -267,6 +281,7 @@ class RunCommand extends RunCommandBase {
     // Enable hot mode by default if `--no-hot` was not passed and we are in
     // debug mode.
     final bool hotMode = shouldUseHotMode();
+    final FlutterProject flutterProject = await FlutterProject.current();
 
     writePidFile(argResults['pid-file']);
 
@@ -376,6 +391,7 @@ class RunCommand extends RunCommandBase {
         saveCompilationTrace: argResults['train'],
         stayResident: stayResident,
         ipv6: ipv6,
+        flutterProject: flutterProject,
       );
     } else {
       runner = ColdRunner(

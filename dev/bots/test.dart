@@ -22,6 +22,11 @@ final String pub = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', Pla
 final String pubCache = path.join(flutterRoot, '.pub-cache');
 final List<String> flutterTestArgs = <String>[];
 
+
+final bool useFlutterTestFormatter = Platform.environment['FLUTTER_TEST_FORMATTER'] == 'true';
+
+final bool noUseBuildRunner = Platform.environment['FLUTTER_TEST_NO_BUILD_RUNNER'] == 'true';
+
 const Map<String, ShardRunner> _kShards = <String, ShardRunner>{
   'tests': _runTests,
   'tool_tests': _runToolTests,
@@ -146,6 +151,9 @@ Future<void> _runSmokeTests() async {
 }
 
 Future<bq.BigqueryApi> _getBigqueryApi() async {
+  if (!useFlutterTestFormatter) {
+    return null;
+  }
   // TODO(dnfield): How will we do this on LUCI?
   final String privateKey = Platform.environment['GCLOUD_SERVICE_ACCOUNT_KEY'];
   // If we're on Cirrus and a non-collaborator is doing this, we can't get the key.
@@ -153,7 +161,7 @@ Future<bq.BigqueryApi> _getBigqueryApi() async {
     return null;
   }
   try {
-    final auth.ServiceAccountCredentials accountCredentials = auth.ServiceAccountCredentials( //.fromJson(credentials);
+    final auth.ServiceAccountCredentials accountCredentials = auth.ServiceAccountCredentials(
       'flutter-ci-test-reporter@flutter-infra.iam.gserviceaccount.com',
       auth.ClientId.serviceAccount('114390419920880060881.apps.googleusercontent.com'),
       '-----BEGIN PRIVATE KEY-----\n$privateKey\n-----END PRIVATE KEY-----\n',
@@ -172,12 +180,18 @@ Future<void> _runToolTests() async {
   final bq.BigqueryApi bigqueryApi = await _getBigqueryApi();
   await _runSmokeTests();
 
-  await _buildRunnerTest(
-    path.join(flutterRoot, 'packages', 'flutter_tools'),
-    flutterRoot,
-    enableFlutterToolAsserts: true,
-    tableData: bigqueryApi?.tabledata,
-  );
+  if (noUseBuildRunner) {
+    await _pubRunTest(
+      path.join(flutterRoot, 'packages', 'flutter_tools'),
+      tableData: bigqueryApi?.tabledata,
+    );
+  } else {
+    await _buildRunnerTest(
+      path.join(flutterRoot, 'packages', 'flutter_tools'),
+      flutterRoot,
+      tableData: bigqueryApi?.tabledata,
+    );
+  }
 
   print('${bold}DONE: All tests successful.$reset');
 }
@@ -311,6 +325,10 @@ Future<void> _runTests() async {
   // with --track-widget-creation.
   await _runFlutterTest(path.join(flutterRoot, 'examples', 'flutter_gallery'), options: <String>['--track-widget-creation'], tableData: bigqueryApi?.tabledata);
   await _runFlutterTest(path.join(flutterRoot, 'examples', 'catalog'), tableData: bigqueryApi?.tabledata);
+  // Smoke test for code generation.
+  await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'codegen'), tableData: bigqueryApi?.tabledata, environment: <String, String>{
+    'FLUTTER_EXPERIMENTAL_BUILD': 'true',
+  });
 
   print('${bold}DONE: All tests successful.$reset');
 }
@@ -344,7 +362,7 @@ Future<void> _buildRunnerTest(
   bool enableFlutterToolAsserts = false,
   bq.TabledataResourceApi tableData,
 }) async {
-  final List<String> args = <String>['run', 'build_runner', 'test', '--', '-rcompact', '-j1'];
+  final List<String> args = <String>['run', 'build_runner', 'test', '--', useFlutterTestFormatter ? '-rjson' : '-rcompact', '-j1'];
   if (!hasColor) {
     args.add('--no-color');
   }
@@ -366,15 +384,24 @@ Future<void> _buildRunnerTest(
     pubEnvironment['FLUTTER_TOOL_ARGS'] = toolsArgs.trim();
   }
 
-  final FlutterCompactFormatter formatter = FlutterCompactFormatter();
-  final Stream<String> testOutput = runAndGetStdout(
-    pub,
-    args,
-    workingDirectory: workingDirectory,
-    environment: pubEnvironment,
-    beforeExit: formatter.finish
-  );
-  await _processTestOutput(formatter, testOutput, tableData);
+  if (useFlutterTestFormatter) {
+    final FlutterCompactFormatter formatter = FlutterCompactFormatter();
+    final Stream<String> testOutput = runAndGetStdout(
+      pub,
+      args,
+      workingDirectory: workingDirectory,
+      environment: pubEnvironment,
+      beforeExit: formatter.finish
+    );
+    await _processTestOutput(formatter, testOutput, tableData);
+  } else {
+    await runCommand(
+      pub,
+      args,
+      workingDirectory:workingDirectory,
+      environment:pubEnvironment,
+    );
+  }
 }
 
 Future<void> _pubRunTest(
@@ -383,7 +410,7 @@ Future<void> _pubRunTest(
   bool enableFlutterToolAsserts = false,
   bq.TabledataResourceApi tableData,
 }) async {
-  final List<String> args = <String>['run', 'test', '-rjson', '-j1'];
+  final List<String> args = <String>['run', 'test', useFlutterTestFormatter ? '-rjson' : '-rcompact', '-j1'];
   if (!hasColor)
     args.add('--no-color');
   if (testPath != null)
@@ -400,14 +427,22 @@ Future<void> _pubRunTest(
         toolsArgs += ' --enable-asserts';
     pubEnvironment['FLUTTER_TOOL_ARGS'] = toolsArgs.trim();
   }
-  final FlutterCompactFormatter formatter = FlutterCompactFormatter();
-  final Stream<String> testOutput = runAndGetStdout(
-    pub,
-    args,
-    workingDirectory: workingDirectory,
-    beforeExit: formatter.finish,
-  );
-  await _processTestOutput(formatter, testOutput, tableData);
+  if (useFlutterTestFormatter) {
+    final FlutterCompactFormatter formatter = FlutterCompactFormatter();
+    final Stream<String> testOutput = runAndGetStdout(
+      pub,
+      args,
+      workingDirectory: workingDirectory,
+      beforeExit: formatter.finish,
+    );
+    await _processTestOutput(formatter, testOutput, tableData);
+  } else {
+    await runCommand(
+      pub,
+      args,
+      workingDirectory:workingDirectory,
+    );
+  }
 }
 
 enum CiProviders {
@@ -558,12 +593,13 @@ Future<void> _runFlutterTest(String workingDirectory, {
   bool skip = false,
   Duration timeout = _kLongTimeout,
   bq.TabledataResourceApi tableData,
+  Map<String, String> environment,
 }) async {
   final List<String> args = <String>['test']..addAll(options);
   if (flutterTestArgs != null && flutterTestArgs.isNotEmpty)
     args.addAll(flutterTestArgs);
 
-  final bool shouldProcessOutput = !expectFailure && !options.contains('--coverage');
+  final bool shouldProcessOutput = useFlutterTestFormatter && !expectFailure && !options.contains('--coverage');
   if (shouldProcessOutput) {
     args.add('--machine');
   }
@@ -589,16 +625,31 @@ Future<void> _runFlutterTest(String workingDirectory, {
       printOutput: printOutput,
       skip: skip,
       timeout: timeout,
+      environment: environment,
     );
   }
+
+  if (useFlutterTestFormatter) {
   final FlutterCompactFormatter formatter = FlutterCompactFormatter();
-  final Stream<String> testOutput = runAndGetStdout(flutter, args,
+  final Stream<String> testOutput = runAndGetStdout(
+    flutter,
+    args,
     workingDirectory: workingDirectory,
     expectNonZeroExit: expectFailure,
     timeout: timeout,
     beforeExit: formatter.finish,
+    environment: environment,
   );
   await _processTestOutput(formatter, testOutput, tableData);
+  } else {
+    await runCommand(
+      flutter,
+      args,
+      workingDirectory: workingDirectory,
+      expectNonZeroExit: expectFailure,
+      timeout: timeout,
+    );
+  }
 }
 
 Future<void> _verifyVersion(String filename) async {
