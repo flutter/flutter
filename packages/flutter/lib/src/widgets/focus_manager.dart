@@ -449,38 +449,20 @@ class FocusableNode extends FocusNode {
   ///
   /// All parameters must not be null.
   FocusableNode({
-    this.isScope = false,
     this.autofocus = false,
     @required this.key,
   })  : assert(key != null),
-        assert(isScope != null),
         assert(autofocus != null);
 
   /// Indicates that this node is a scope node, which keeps track of which of its
   /// descendants last had the focus.
-  final bool isScope;
+  bool get isScope => false;
 
   /// True if this node will be selected as the initial focus when no other node
   /// in its scope is currently focused.
   ///
   /// There must only be one node in a scope that has [autofocus] set.
   final bool autofocus;
-
-  /// If [isScope] is true, returns the child of this node which should receive
-  /// focus if this node receives focus.
-  ///
-  /// If [hasFocus] and [isScope] is true, then this points to the child of this
-  /// node which is currently focused.
-  ///
-  /// Returns null if [isScope] is false, or there is no currently focused
-  /// child.
-  FocusableNode get focusedChild {
-    assert(!isScope || _focusedChild == null || _focusedChild.enclosingScope == this,
-      'Focused child does not have the same idea of its enclosing scope as the scope does.');
-    return isScope ? _focusedChild : null;
-  }
-
-  FocusableNode _focusedChild;
 
   /// The global key for the [InheritedWidget] associated with this node.
   ///
@@ -492,28 +474,6 @@ class FocusableNode extends FocusNode {
   FocusableNode get parent => _parent;
   FocusableNode _parent;
 
-  /// Holds the [PolicyData] used by the scope's [FocusTraversalPolicy].
-  ///
-  /// This is set on scope nodes by the traversal policy to keep data that it
-  /// may need later.  For instance, the last focused node in a direction is
-  /// kept here so that directional navigation can avoid hysteresis when
-  /// returning in the direction it just came from.
-  ///
-  /// This data will be cleared if the node moves to another scope.
-  PolicyData get policyData {
-    if (!isScope) {
-      return null;
-    }
-    return _policyData;
-  }
-  set policyData(PolicyData node) {
-    if (!isScope) {
-      return;
-    }
-    _policyData = node;
-  }
-  PolicyData _policyData;
-
   final List<FocusableNode> _children = <FocusableNode>[];
 
   /// Resets this node back to a base configuration.
@@ -521,10 +481,10 @@ class FocusableNode extends FocusNode {
   /// This is only used by tests to clear the root node. Do not call in other
   /// contexts, as it doesn't properly detach children.
   @visibleForTesting
+  @mustCallSuper
   void clear() {
     _manager = null;
     _parent = null;
-    _focusedChild = null;
     _children.clear();
   }
 
@@ -558,7 +518,6 @@ class FocusableNode extends FocusNode {
       assert(_children.contains(child), "Found a node that says it's a child, but doesn't appear in the child list.");
       return;
     }
-    final FocusableNode previousEnclosingScope = child.enclosingScope;
     child.detach();
     _children.add(child);
     child._parent = this;
@@ -569,10 +528,6 @@ class FocusableNode extends FocusNode {
     if (child.autofocus) {
       _debugCheckUniqueAutofocusNode(child);
       _manager._requestAutofocus(child);
-    }
-    // If the child moved scopes, then the policy data is invalid.
-    if (previousEnclosingScope != child.enclosingScope) {
-      policyData = null;
     }
   }
 
@@ -649,18 +604,10 @@ class FocusableNode extends FocusNode {
     assert(_manager != null, "Tried to request focus for a node that isn't part of the focus tree.");
     // Set the focus to the focused child of this scope, if it is one. Otherwise
     // start with setting the focus to this node itself.
-    FocusableNode primaryFocus = isScope ? focusedChild : this;
-    primaryFocus ??= this;
-    // Keep going down through scopes until the ultimately focusable item is
-    // found, a scope doesn't have a focusedChild, or a non-scope is
-    // encountered.
-    while (primaryFocus.isScope && primaryFocus.focusedChild != null) {
-      primaryFocus = primaryFocus.focusedChild;
-    }
     if (!isImplicit) {
-      primaryFocus.enclosingScope.policyData = null;
+      enclosingScope.policyData = null;
     }
-    _manager._markNeedsUpdate(newFocus: primaryFocus);
+    _manager._markNeedsUpdate(newFocus: this);
   }
 
   @override
@@ -697,18 +644,18 @@ class FocusableNode extends FocusNode {
 
   /// Returns the nearest enclosing scope node above this node, including
   /// this node, if it's a scope, or null if none is found.
-  FocusableNode get nearestScope => isScope ? this : enclosingScope;
+  FocusableScopeNode get nearestScope => isScope ? this : enclosingScope;
 
   /// Returns the nearest enclosing scope node above this node, or null if none
   /// is found. If this node is a scope, does not include it.
-  FocusableNode get enclosingScope => ancestors.firstWhere((FocusableNode node) => node.isScope, orElse: () => null);
+  FocusableScopeNode get enclosingScope => ancestors.firstWhere((FocusableNode node) => node.isScope, orElse: () => null);
 
   // Sets this node as the focused child for the enclosing scope, and that scope
   // as focused child for the scope above it, until it reaches the root node.
   void _setAsFocusedChild() {
     FocusableNode scopeFocus = this;
     for (FocusableNode ancestor in ancestors) {
-      if (ancestor.isScope) {
+      if (ancestor is FocusableScopeNode) {
         assert(scopeFocus != ancestor, "Somehow made a loop by setting focusedChild to it's scope.");
         ancestor._focusedChild = scopeFocus;
         scopeFocus = ancestor;
@@ -725,7 +672,7 @@ class FocusableNode extends FocusNode {
   }
 
   void _unfocus() {
-    final FocusableNode scope = enclosingScope;
+    final FocusableScopeNode scope = enclosingScope;
     if (scope == null) {
       return;
     }
@@ -761,16 +708,14 @@ class FocusableNode extends FocusNode {
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.debug}) {
-    return '${describeIdentity(this)} key:$key ${hasFocus ? '(FOCUSED)' : ''} ${isScope ? '(SCOPE)' : ''}';
+    return '${describeIdentity(this)} key:$key ${hasFocus ? '(FOCUSED)' : ''}';
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<GlobalKey>('key', key, defaultValue: null));
-    properties.add(FlagProperty('isScope', value: isScope, ifTrue: 'SCOPE', defaultValue: false));
     properties.add(FlagProperty('hasFocus', value: hasFocus, ifTrue: 'FOCUSED', defaultValue: false));
-    properties.add(DiagnosticsProperty<FocusableNode>('focusedChild', focusedChild, defaultValue: null));
   }
 
   @override
@@ -782,6 +727,99 @@ class FocusableNode extends FocusNode {
       ++count;
     }
     return children;
+  }
+}
+
+/// A [FocusableNode] subclass that acts as a scope for its descendants,
+/// maintaining state about which descendant was last or is currently focused.
+class FocusableScopeNode extends FocusableNode {
+  /// Creates a FocusableScope node
+  ///
+  /// All parameters must not be null.
+  FocusableScopeNode({
+    bool autofocus = false,
+    @required GlobalKey<State<StatefulWidget>> key,
+  })  : assert(key != null),
+        assert(autofocus != null),
+        super(key: key, autofocus: autofocus);
+
+  @override
+  bool get isScope => true;
+
+  @override
+  void reparent(FocusableNode child) {
+    final FocusableScopeNode previousEnclosingScope = child.enclosingScope;
+    super.reparent(child);
+    // If the child moved scopes, then the policy data is invalid.
+    if (previousEnclosingScope != child.enclosingScope) {
+      policyData = null;
+    }
+  }
+
+  /// Returns the child of this node which should receive focus if this scope
+  /// node receives focus.
+  ///
+  /// If [hasFocus] is true, then this points to the child of this node which is
+  /// currently focused.
+  ///
+  /// Returns null if there is no currently focused child.
+  FocusableNode get focusedChild {
+    assert(_focusedChild == null || _focusedChild.enclosingScope == this, 'Focused child does not have the same idea of its enclosing scope as the scope does.');
+    return _focusedChild;
+  }
+
+  FocusableNode _focusedChild;
+
+  /// Requests that this node and every parent of this node gets focus.
+  ///
+  /// If this node is a scope, and there is a current [focusedChild], then focus
+  /// that node instead.  If that node is also a scope, will look for its
+  /// [focusedChild], and so forth, until a non-scope, or a scope with a null
+  /// [focusedChild] is found.
+  ///
+  /// Set [isImplicit] to true if you are requesting focus from within a focus
+  /// policy in order to keep the policy data for future access.
+  @override
+  void requestFocus({bool isImplicit = false}) {
+    assert(isImplicit != null);
+    assert(_manager != null, "Tried to request focus for a node that isn't part of the focus tree.");
+    // Set the focus to the focused child of this scope, if it is one. Otherwise
+    // start with setting the focus to this node itself.
+    FocusableNode primaryFocus = focusedChild ?? this;
+    // Keep going down through scopes until the ultimately focusable item is
+    // found, a scope doesn't have a focusedChild, or a non-scope is
+    // encountered.
+    while (primaryFocus is FocusableScopeNode && primaryFocus.focusedChild != null) {
+      final FocusableScopeNode scope = primaryFocus;
+      primaryFocus = scope.focusedChild;
+    }
+    if (!isImplicit) {
+      primaryFocus.enclosingScope.policyData = null;
+    }
+    _manager._markNeedsUpdate(newFocus: primaryFocus);
+  }
+
+  /// Holds the [PolicyData] used by the scope's [FocusTraversalPolicy].
+  ///
+  /// This is set on scope nodes by the traversal policy to keep data that it
+  /// may need later.  For instance, the last focused node in a direction is
+  /// kept here so that directional navigation can avoid hysteresis when
+  /// returning in the direction it just came from.
+  ///
+  /// This data will be cleared if the node moves to another scope.
+  PolicyData policyData;
+
+  @visibleForTesting
+  @override
+  void clear() {
+    super.clear();
+    _focusedChild = null;
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<FocusableNode>('focusedChild', focusedChild, defaultValue: null));
   }
 }
 
@@ -864,8 +902,7 @@ class FocusManager with DiagnosticableTreeMixin {
   ///
   /// To find the nearest [FocusableNode] that corresponds to a
   /// [Focusable], use [Focusable.of].
-  final FocusableNode rootFocusable = FocusableNode(
-    isScope: true,
+  final FocusableNode rootFocusable = FocusableScopeNode(
     key: GlobalKey(debugLabel: 'Focus Tree Root'),
   );
 

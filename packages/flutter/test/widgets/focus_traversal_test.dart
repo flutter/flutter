@@ -28,9 +28,8 @@ void main() {
             onFocusChange: (bool focus) => focus1 = focus,
             child: Column(
               children: <Widget>[
-                Focusable(
+                FocusableScope(
                   debugLabel: 'key2',
-                  isScope: true,
                   key: key2,
                   onFocusChange: (bool focus) => focus2 = focus,
                   child: Column(
@@ -139,8 +138,7 @@ void main() {
             key: key1,
             child: Column(
               children: <Widget>[
-                Focusable(
-                  isScope: true,
+                FocusableScope(
                   key: key2,
                   child: Column(
                     children: <Widget>[
@@ -223,9 +221,8 @@ void main() {
               onFocusChange: (bool focus) => focus1 = focus,
               child: Column(
                 children: <Widget>[
-                  Focusable(
+                  FocusableScope(
                     debugLabel: 'key2',
-                    isScope: true,
                     key: key2,
                     onFocusChange: (bool focus) => focus2 = focus,
                     child: Row(
@@ -336,8 +333,7 @@ void main() {
             key: key1,
             child: Column(
               children: <Widget>[
-                Focusable(
-                  isScope: true,
+                FocusableScope(
                   key: key2,
                   child: Column(
                     children: <Widget>[
@@ -526,8 +522,7 @@ void main() {
             key: key1,
             child: Column(
               children: <Widget>[
-                Focusable(
-                  isScope: true,
+                FocusableScope(
                   key: key2,
                   child: Column(
                     children: <Widget>[

@@ -33,7 +33,6 @@ class Focusable extends StatefulWidget {
   const Focusable({
     Key key,
     @required this.child,
-    this.isScope = false,
     this.autofocus = false,
     this.showDecorations = true,
     this.focusedDecoration,
@@ -44,7 +43,6 @@ class Focusable extends StatefulWidget {
     this.onKey,
     this.debugLabel,
   })  : assert(child != null),
-        assert(isScope != null),
         assert(autofocus != null),
         assert(showDecorations != null),
         super(key: key);
@@ -75,20 +73,6 @@ class Focusable extends StatefulWidget {
   /// Called with true if this focusable gains focus, and false if it loses
   /// focus.
   final ValueChanged<bool> onFocusChange;
-
-  /// True if this [Focusable] serves as a scope for other [Focusable]s.
-  ///
-  /// This means that it remembers the last focusable that was focused within
-  /// its descendants, and can move that focus to the next/previous node, or a
-  /// node in a particular direction when the [FocusableNode.nextFocus],
-  /// [FocusableNode.previousFocus], or [FocusableNode.focusInDirection] are
-  /// called on a Focusable node that is a child of this scope, or the node
-  /// owned by this scope node.
-  ///
-  /// The selection process of the node to move to is determined by the node
-  /// traversal policy specified by the nearest enclosing
-  /// [DefaultFocusTraversal] widget.
-  final bool isScope;
 
   /// True if this widget will be selected as the initial focus when no other
   /// node in its scope is currently focused.
@@ -130,6 +114,20 @@ class Focusable extends StatefulWidget {
   /// [decoration].
   final Curve curve;
 
+  /// True if this [Focusable] serves as a scope for other [Focusable]s.
+  ///
+  /// This means that it remembers the last focusable that was focused within
+  /// its descendants, and can move that focus to the next/previous node, or a
+  /// node in a particular direction when the [FocusableNode.nextFocus],
+  /// [FocusableNode.previousFocus], or [FocusableNode.focusInDirection] are
+  /// called on a Focusable node that is a child of this scope, or the node
+  /// owned by this scope node.
+  ///
+  /// The selection process of the node to move to is determined by the node
+  /// traversal policy specified by the nearest enclosing
+  /// [DefaultFocusTraversal] widget.
+  bool get isScope => false;
+
   /// Returns the [node] of the [Focusable] that most tightly encloses the given
   /// [BuildContext].
   ///
@@ -158,11 +156,17 @@ class _FocusableState extends State<Focusable> {
   @override
   void initState() {
     super.initState();
-    node = FocusableNode(
-      isScope: widget.isScope,
-      autofocus: widget.autofocus,
-      key: GlobalKey(debugLabel: widget.debugLabel),
-    );
+    if (widget.isScope) {
+      node = FocusableScopeNode(
+        autofocus: widget.autofocus,
+        key: GlobalKey(debugLabel: widget.debugLabel),
+      );
+    } else {
+      node = FocusableNode(
+        autofocus: widget.autofocus,
+        key: GlobalKey(debugLabel: widget.debugLabel),
+      );
+    }
     _hasFocus = node.hasFocus;
     node.addListener(_handleFocusChanged);
   }
@@ -224,6 +228,62 @@ class _FocusableState extends State<Focusable> {
     );
   }
 }
+
+/// A [Focusable] widget that serves as a scope for other [Focusable]s.
+///
+/// This means that it remembers the last focusable that was focused within its
+/// descendants, and can move that focus to the next/previous node, or a node in
+/// a particular direction when the [FocusableNode.nextFocus],
+/// [FocusableNode.previousFocus], or [FocusableNode.focusInDirection] are
+/// called on a [Focusable] or [FocusableScope] node that is a child of this
+/// scope, or the node owned by this scope node.
+///
+/// The selection process of the node to move to is determined by the node
+/// traversal policy specified by the nearest enclosing
+/// [DefaultFocusTraversal] widget.
+class FocusableScope extends Focusable {
+  /// Creates a widget that manages a [FocusableScopeNode]
+  ///
+  /// The [child] arguments is required and must not be null.
+  ///
+  /// The [autofocus], and [showDecorations] arguments must not be null.
+  const FocusableScope({
+    Key key,
+    @required Widget child,
+    bool autofocus = false,
+    bool showDecorations = true,
+    Decoration focusedDecoration,
+    Decoration unfocusedDecoration,
+    Duration duration,
+    Curve curve,
+    ValueChanged<bool> onFocusChange,
+    FocusableOnKeyCallback onKey,
+    String debugLabel,
+  })  : assert(child != null),
+        assert(autofocus != null),
+        assert(showDecorations != null),
+        super(
+          key: key,
+          child: child,
+          autofocus: autofocus,
+          showDecorations: showDecorations,
+          focusedDecoration: focusedDecoration,
+          unfocusedDecoration: unfocusedDecoration,
+          duration: duration,
+          curve: curve,
+          onFocusChange: onFocusChange,
+          onKey: onKey,
+          debugLabel: debugLabel,
+        );
+
+  @override
+  bool get isScope => true;
+
+  @override
+  _FocusableScopeState createState() => _FocusableScopeState();
+}
+
+class _FocusableScopeState extends _FocusableState {}
 
 class _FocusableMarker extends InheritedWidget {
   const _FocusableMarker({

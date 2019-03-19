@@ -45,7 +45,7 @@ abstract class FocusTraversalPolicy {
     // Make sure there's only one autofocus child for the scope this node
     // belongs to.
     debugCheckUniqueAutofocusNode(currentNode);
-    final FocusableNode scope = currentNode.nearestScope;
+    final FocusableScopeNode scope = currentNode.nearestScope;
     assert(scope.focusedChild == null, 'There already is a focused node in $scope');
     final FocusableNode autofocus = scope.descendants.firstWhere(
       (FocusableNode node) => node.nearestScope == scope && node.autofocus,
@@ -191,7 +191,7 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
   /// avoid hysteresis when we change directions in navigation.
   ///
   /// Returns true if focus was requested on a previous node.
-  bool _popPolicyDataIfNeeded(AxisDirection direction, FocusableNode nearestScope, FocusableNode focusedChild) {
+  bool _popPolicyDataIfNeeded(AxisDirection direction, FocusableScopeNode nearestScope, FocusableNode focusedChild) {
     _DirectionalPolicyData policyData;
     print('Looking for policy data: ${nearestScope.policyData}');
     if (nearestScope.policyData != null && nearestScope.policyData is _DirectionalPolicyData) {
@@ -238,7 +238,7 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
     return false;
   }
 
-  void _pushPolicyData(AxisDirection direction, FocusableNode nearestScope, FocusableNode focusedChild) {
+  void _pushPolicyData(AxisDirection direction, FocusableScopeNode nearestScope, FocusableNode focusedChild) {
     final _DirectionalPolicyData policyData = nearestScope.policyData;
     if (policyData != null && policyData is! _DirectionalPolicyData) {
       return;
@@ -269,7 +269,7 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
   @mustCallSuper
   @override
   bool inDirection(FocusableNode currentNode, AxisDirection direction) {
-    final FocusableNode nearestScope = currentNode.nearestScope;
+    final FocusableScopeNode nearestScope = currentNode.nearestScope;
     final FocusableNode focusedChild = nearestScope.focusedChild;
     if (focusedChild == null) {
       currentNode.requestFocus(isImplicit: true);
@@ -363,7 +363,7 @@ class WidgetOrderFocusTraversalPolicy extends FocusTraversalPolicy with Directio
     if (node == null) {
       return false;
     }
-    final FocusableNode nearestScope = node.nearestScope;
+    final FocusableScopeNode nearestScope = node.nearestScope;
     nearestScope.policyData = null;
     final FocusableNode focusedChild = nearestScope.focusedChild;
     if (focusedChild == null) {
@@ -496,7 +496,7 @@ class ReadingOrderTraversalPolicy extends FocusTraversalPolicy with DirectionalF
   // Moves the focus forward or backward in reading order, depending on the
   // value of the forward argument.
   bool _move(FocusableNode currentNode, {@required bool forward}) {
-    final FocusableNode nearestScope = currentNode.nearestScope;
+    final FocusableScopeNode nearestScope = currentNode.nearestScope;
     nearestScope.policyData = null;
     final FocusableNode focusedChild = nearestScope.focusedChild;
     if (focusedChild == null) {

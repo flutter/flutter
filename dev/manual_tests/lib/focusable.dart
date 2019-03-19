@@ -95,9 +95,8 @@ class _FocusableDemoState extends State<FocusableDemo> {
       textDirection: TextDirection.rtl,
       child: DefaultFocusTraversal(
         policy: const ReadingOrderTraversalPolicy(),
-        child: Focusable(
+        child: FocusableScope(
           debugLabel: 'Scope',
-          isScope: true,
           onKey: (FocusableNode node, RawKeyEvent event) {
             if (event is RawKeyDownEvent) {
               print('Scope got key event: ${event.logicalKey}, $node');

@@ -48,7 +48,7 @@ void main() {
       expect(parent.children, isEmpty);
     });
     testWidgets('Removing a node removes it from scope.', (WidgetTester tester) async {
-      final FocusableNode scope = FocusableNode(isScope: true, key: GlobalKey(debugLabel: 'scope'));
+      final FocusableScopeNode scope = FocusableScopeNode(key: GlobalKey(debugLabel: 'scope'));
       final FocusableNode parent = FocusableNode(key: GlobalKey(debugLabel: 'parent'));
       final FocusableNode child1 = FocusableNode(key: GlobalKey(debugLabel: 'child1'));
       final FocusableNode child2 = FocusableNode(key: GlobalKey(debugLabel: 'child2'));
@@ -67,7 +67,7 @@ void main() {
       expect(scope.focusedChild, isNull);
     });
     testWidgets('Can add children to scope and focus', (WidgetTester tester) async {
-      final FocusableNode scope = FocusableNode(key: GlobalKey(debugLabel: 'scope'), isScope: true);
+      final FocusableScopeNode scope = FocusableScopeNode(key: GlobalKey(debugLabel: 'scope'));
       final FocusableNode parent = FocusableNode(key: GlobalKey(debugLabel: 'parent'));
       final FocusableNode child1 = FocusableNode(key: GlobalKey(debugLabel: 'child1'));
       final FocusableNode child2 = FocusableNode(key: GlobalKey(debugLabel: 'child2'));
@@ -85,7 +85,6 @@ void main() {
       child1.requestFocus();
       await tester.pump();
       expect(scope.focusedChild, equals(child1));
-      expect(parent.focusedChild, isNull);
       expect(parent.hasFocus, isTrue);
       expect(parent.hasPrimaryFocus, isFalse);
       expect(child1.hasFocus, isTrue);
@@ -95,7 +94,6 @@ void main() {
       child2.requestFocus();
       await tester.pump();
       expect(scope.focusedChild, equals(child2));
-      expect(parent.focusedChild, isNull);
       expect(parent.hasFocus, isTrue);
       expect(parent.hasPrimaryFocus, isFalse);
       expect(child1.hasFocus, isFalse);
@@ -104,7 +102,7 @@ void main() {
       expect(child2.hasPrimaryFocus, isTrue);
     });
     testWidgets('Autofocus works.', (WidgetTester tester) async {
-      final FocusableNode scope = FocusableNode(key: GlobalKey(debugLabel: 'scope'), isScope: true);
+      final FocusableScopeNode scope = FocusableScopeNode(key: GlobalKey(debugLabel: 'scope'));
       final FocusableNode parent = FocusableNode(key: GlobalKey(debugLabel: 'parent'));
       final FocusableNode child1 = FocusableNode(key: GlobalKey(debugLabel: 'child1'));
       final FocusableNode child2 = FocusableNode(key: GlobalKey(debugLabel: 'child2'), autofocus: true);
@@ -133,8 +131,8 @@ void main() {
       expect(child2.hasPrimaryFocus, isFalse);
     });
     testWidgets('Adding a focusedChild to a scope sets scope as focusedChild in parent scope', (WidgetTester tester) async {
-      final FocusableNode scope1 = FocusableNode(key: GlobalKey(debugLabel: 'scope1'), isScope: true);
-      final FocusableNode scope2 = FocusableNode(key: GlobalKey(debugLabel: 'scope2'), isScope: true);
+      final FocusableScopeNode scope1 = FocusableScopeNode(key: GlobalKey(debugLabel: 'scope1'));
+      final FocusableScopeNode scope2 = FocusableScopeNode(key: GlobalKey(debugLabel: 'scope2'));
       final FocusableNode child1 = FocusableNode(key: GlobalKey(debugLabel: 'child1'));
       final FocusableNode child2 = FocusableNode(key: GlobalKey(debugLabel: 'child2'));
       tester.binding.focusManager.rootFocusable.reparent(scope1);
@@ -159,7 +157,7 @@ void main() {
       expect(child2.hasPrimaryFocus, isFalse);
     });
     testWidgets('Can move node with focus without losing focus', (WidgetTester tester) async {
-      final FocusableNode scope = FocusableNode(key: GlobalKey(debugLabel: 'scope'), isScope: true);
+      final FocusableScopeNode scope = FocusableScopeNode(key: GlobalKey(debugLabel: 'scope'));
       final FocusableNode parent1 = FocusableNode(key: GlobalKey(debugLabel: 'parent1'));
       final FocusableNode parent2 = FocusableNode(key: GlobalKey(debugLabel: 'parent2'));
       final FocusableNode child1 = FocusableNode(key: GlobalKey(debugLabel: 'child1'));
@@ -188,8 +186,8 @@ void main() {
       expect(parent2.children.first, equals(child1));
     });
     testWidgets('Can move node between scopes and lose scope focus', (WidgetTester tester) async {
-      final FocusableNode scope1 = FocusableNode(key: GlobalKey(debugLabel: 'scope1'), isScope: true);
-      final FocusableNode scope2 = FocusableNode(key: GlobalKey(debugLabel: 'scope2'), isScope: true);
+      final FocusableScopeNode scope1 = FocusableScopeNode(key: GlobalKey(debugLabel: 'scope1'));
+      final FocusableScopeNode scope2 = FocusableScopeNode(key: GlobalKey(debugLabel: 'scope2'));
       final FocusableNode parent1 = FocusableNode(key: GlobalKey(debugLabel: 'parent1'));
       final FocusableNode parent2 = FocusableNode(key: GlobalKey(debugLabel: 'parent2'));
       final FocusableNode child1 = FocusableNode(key: GlobalKey(debugLabel: 'child1'));
@@ -216,8 +214,8 @@ void main() {
       expect(parent2.children.contains(child1), isTrue);
     });
     testWidgets('Can move focus between scopes and keep focus', (WidgetTester tester) async {
-      final FocusableNode scope1 = FocusableNode(key: GlobalKey(debugLabel: 'scope1'), isScope: true);
-      final FocusableNode scope2 = FocusableNode(key: GlobalKey(debugLabel: 'scope2'), isScope: true);
+      final FocusableScopeNode scope1 = FocusableScopeNode(key: GlobalKey(debugLabel: 'scope1'));
+      final FocusableScopeNode scope2 = FocusableScopeNode(key: GlobalKey(debugLabel: 'scope2'));
       final FocusableNode parent1 = FocusableNode(key: GlobalKey(debugLabel: 'parent1'));
       final FocusableNode parent2 = FocusableNode(key: GlobalKey(debugLabel: 'parent2'));
       final FocusableNode child1 = FocusableNode(key: GlobalKey(debugLabel: 'child1'));
