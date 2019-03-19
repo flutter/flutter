@@ -236,7 +236,9 @@ def to_gn_args(args):
 
     # Whether to build trained Dart SDK snapshots of dart2js and dartdevc,
     # including the web sdk kernel and source files.
-    gn_args['dart_platform_sdk'] = not args.full_dart_sdk
+    if args.target_os is None:
+      # dart_platform_sdk is not declared for Android targets.
+      gn_args['dart_platform_sdk'] = not args.full_dart_sdk
     gn_args['full_dart_sdk'] = args.full_dart_sdk
 
     return gn_args
