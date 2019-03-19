@@ -5,7 +5,7 @@
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 
 /// Defines default property values for descendant [FloatingActionButton]
 /// widgets.
