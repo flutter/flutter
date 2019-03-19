@@ -30,7 +30,7 @@ void main() {
     // These defaults come directly from the [FloatingActionButton].
     expect(_getRawMaterialButton(tester).elevation, 6);
     expect(_getRawMaterialButton(tester).highlightElevation, 12);
-    expect(_getRawMaterialButton(tester).shape, CircleBorder());
+    expect(_getRawMaterialButton(tester).shape, const CircleBorder());
   });
 
   testWidgets('FloatingActionButtonThemeData values are used when no FloatingActionButton properties are specified', (WidgetTester tester) async {
