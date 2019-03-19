@@ -11,6 +11,7 @@ import 'package:xml/xml.dart' as xml;
 import 'android/android_sdk.dart';
 import 'android/gradle.dart';
 import 'base/context.dart';
+import 'base/common.dart';
 import 'base/file_system.dart';
 import 'base/os.dart' show os;
 import 'base/process.dart';
@@ -164,9 +165,15 @@ class AndroidApk extends ApplicationPackage {
     xml.XmlDocument document;
     try {
       document = xml.parse(manifestString);
-    } on Exception {
+    } on xml.XmlParserException catch (exception) {
       printError('AndroidManifest.xml is not a valid XML document.');
-      return null;
+      if (androidProject.isUsingGradle) {
+        printError('Please check ${androidProject.hostAppGradleRoot}/app/src/main/AndroidManifest.xml for errors');
+      } else {
+        printError('Please check ${androidProject.hostAppGradleRoot}/AndroidManifest.xml for errors');
+      }
+
+      throwToolExit(exception.toString(), exitCode: 1);
     }
 
     final Iterable<xml.XmlElement> manifests = document.findElements('manifest');
