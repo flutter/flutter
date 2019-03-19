@@ -228,7 +228,7 @@ class _MergingListenable extends Listenable {
 
   @override
   void addListener(VoidCallback listener) {
-    for (final Listenable child  in _children) {
+    for (final Listenable child in _children) {
       child?.addListener(listener);
     }
   }

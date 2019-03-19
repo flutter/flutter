@@ -444,7 +444,7 @@ class ApkManifestData {
       final int level = line.length - trimLine.length;
 
       // Handle level out
-      while(level <= currentElement.level) {
+      while (level <= currentElement.level) {
         currentElement = currentElement.parent;
       }
 

@@ -279,14 +279,14 @@ class CupertinoDatePicker extends StatefulWidget {
         }
         break;
       case _PickerColumnType.hour:
-        for (int i = 0 ; i < 24; i++) {
+        for (int i = 0; i < 24; i++) {
           final String hour = localizations.datePickerHour(i);
           if (longestText.length < hour.length)
             longestText = hour;
         }
         break;
       case _PickerColumnType.minute:
-        for (int i = 0 ; i < 60; i++) {
+        for (int i = 0; i < 60; i++) {
           final String minute = localizations.datePickerMinute(i);
           if (longestText.length < minute.length)
             longestText = minute;
@@ -299,14 +299,14 @@ class CupertinoDatePicker extends StatefulWidget {
             : localizations.postMeridiemAbbreviation;
         break;
       case _PickerColumnType.dayOfMonth:
-        for (int i = 1 ; i <=31; i++) {
+        for (int i = 1; i <=31; i++) {
           final String dayOfMonth = localizations.datePickerDayOfMonth(i);
           if (longestText.length < dayOfMonth.length)
             longestText = dayOfMonth;
         }
         break;
       case _PickerColumnType.month:
-        for (int i = 1 ; i <=12; i++) {
+        for (int i = 1; i <=12; i++) {
           final String month = localizations.datePickerMonth(i);
           if (longestText.length < month.length)
             longestText = month;
