@@ -66,7 +66,7 @@ class BottomSheet extends StatefulWidget {
          scrollController == null || animationController == null,
          'A BottomSheet can either have a scrollController or an '
          'animationController, but not both. If the scrollController is '
-         'specified, the animation will be controlled by the.',
+         'specified, the animation will be controlled by the scroll controller.',
        ),
        assert(
          (scrollController != null && enableDrag) || scrollController == null,
@@ -76,18 +76,17 @@ class BottomSheet extends StatefulWidget {
        assert(elevation != null && elevation >= 0.0),
        super(key: key);
 
-  /// The animation that controls the bottom sheet's position, if
+  /// The animation controller that controls the bottom sheet's position, if
   /// [scrollController] is not specified.
   ///
   /// The BottomSheet widget will manipulate the position of this animation, it
   /// is not just a passive observer.
   final AnimationController animationController;
 
-  /// The [BottomSheetScrollController] that will act as the
-  /// [PrimaryScrollController] for this [BottomSheet], controlling its height
-  /// and its child's scroll offset.
+  /// The [BottomSheetScrollController] will both animate the top of the bottom
+  /// sheet and act as the [PrimaryScrollController] for the child scrollable.
   ///
-  /// If [animationController] is specified, this property must not be.
+  /// If [animationController] is specified, this property must be null.
   final BottomSheetScrollController scrollController;
 
   /// Called when the bottom sheet begins to close.
@@ -104,9 +103,11 @@ class BottomSheet extends StatefulWidget {
   final WidgetBuilder builder;
 
   /// If true, the bottom sheet can be dragged up and down and dismissed by
-  /// swiping downards.
+  /// swiping downards. If [scrollController] is not null, dragging will both
+  /// resize and eventually scroll the bottom sheet contents.
   ///
-  /// Default is true.  If [scrollController] is specified, this must be true.
+  /// Default is true. If [scrollController] is not null, this property must be
+  /// true.
   final bool enableDrag;
 
   /// The z-coordinate at which to place this material relative to its parent.
@@ -119,17 +120,26 @@ class BottomSheet extends StatefulWidget {
   @override
   _BottomSheetState createState() => _BottomSheetState();
 
-  /// Creates an [AnimationController] suitable for controlling a [BottomSheet].
+  /// Creates an [AnimationController] suitable for a
+  /// [BottomSheet.animationController].
+  ///
+  /// This API available as a convenience for a Material compliant bottom sheet
+  /// animation. If alternative animation durations are required, a different
+  /// animation controller could be provided.
   static AnimationController createAnimationController(TickerProvider vsync) {
     return AnimationController(
       duration: _kBottomSheetDuration,
       debugLabel: 'BottomSheet',
-      vsync: vsync
+      vsync: vsync,
     );
   }
 
-  /// Creates a [BottomSheetScrollController] suitable for animating the
-  /// [BottomSheet].
+  /// Creates a [BottomSheetScrollController] suitable for use as the
+  /// [BottomSheet.scrollController]. The parameters are the same as those
+  /// on the constructor for [BottomSheetScrollController].
+  ///
+  /// This API is available as a convenience with default values for a Material
+  /// compliant bottom sheet that contains scrollable content.
   static BottomSheetScrollController createScrollController({
     double initialHeightPercentage = 0.5,
     double minTop = 0.0,
@@ -137,6 +147,7 @@ class BottomSheet extends StatefulWidget {
     @required BuildContext context,
     bool forFullScreen = false,
   }) {
+    assert(initialHeightPercentage != null);
     assert(minTop != null);
     assert(context != null);
     assert(debugCheckHasMediaQuery(context));

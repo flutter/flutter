@@ -148,13 +148,13 @@ bool debugCheckHasScaffold(BuildContext context) {
       final Element element = context;
       throw FlutterError(
           'No Scaffold widget found.\n'
-              '${context.widget.runtimeType} widgets require a Scaffold widget ancestor.\n'
-              'The Specific widget that could not find a Scaffold ancestor was:\n'
-              '  ${context.widget}\n'
-              'The ownership chain for the affected widget is:\n'
-              '  ${element.debugGetCreatorChain(10)}\n'
-              'Typically, the Scaffold widget is introduced by the MaterialApp or '
-              'WidgetsApp widget at the top of your application widget tree.'
+          '${context.widget.runtimeType} widgets require a Scaffold widget ancestor.\n'
+          'The Specific widget that could not find a Scaffold ancestor was:\n'
+          '  ${context.widget}\n'
+          'The ownership chain for the affected widget is:\n'
+          '  ${element.debugGetCreatorChain(10)}\n'
+          'Typically, the Scaffold widget is introduced by the MaterialApp or '
+          'WidgetsApp widget at the top of your application widget tree.'
       );
     }
     return true;

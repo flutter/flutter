@@ -15,11 +15,19 @@ import 'scaffold.dart';
 
 const double _kBottomSheetMinHeight = 56.0;
 
-/// Controls a scrollable widget that is not fully visible on screen yet. While
-/// the [top] value is between [minTop] and [maxTop], scroll events will drive
-/// [top]. Once it has reached [minTop] or [maxTop], scroll events will drive
-/// [offset]. The [top] value is guaranteed not to be clamped between
-/// [minTop] and [maxTop].
+/// A [ScrollController] meant to be used as a [PrimaryScrollController] for a
+/// [BottomSheet] with scrollable content.
+///
+/// If a [BottomSheet] contains content that is exceeds the height of the
+/// screen, this controller will allow the bottom sheet to both be dragged to
+/// fill the screen and then scroll the child content.
+///
+/// While the [top] value is between [minTop] and [maxTop], scroll events will
+/// drive [top]. Once it has reached [minTop] or [maxTop], scroll events will
+/// drive [offset]. The [top] value is guaranteed not to be clamped between
+/// [minTop] and [maxTop]. The owner must manage the controllers lifetime and
+/// call [dispose] when the controller is no longer needed.
+///
 ///
 /// This controller would typically be created and listened to by a parent
 /// widget such as a [Positioned] or an [Align], and then either passed in
@@ -36,7 +44,8 @@ const double _kBottomSheetMinHeight = 56.0;
 class BottomSheetScrollController extends ScrollController {
   /// Creates a new [BottomSheetScrollController].
   ///
-  /// The [top] and [minTop] parameters must not be null. If [maxTop]
+  /// The [initialScrollOffset], [initialHeightPercentage], [context],
+  /// [isPersistent] and [minTop] parameters must not be null. If [maxTop]
   /// is provided as null, it will be defaulted to the
   /// [MediaQueryData.size.height].
   BottomSheetScrollController({
@@ -57,7 +66,7 @@ class BottomSheetScrollController extends ScrollController {
           debugLabel: debugLabel,
           initialScrollOffset: initialScrollOffset,
       ) {
-    // If the BottomSheet's child doesn't have a Scrollable widget in it that
+    // If the BottomSheet's child tree doesn't have a Scrollable widget that
     // inherits our PrimaryScrollController, it will never become visible.
     assert(() {
       SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
@@ -82,7 +91,6 @@ class BottomSheetScrollController extends ScrollController {
     assert(initialHeightPercentage != null);
     assert(initialHeightPercentage >= 0.0 && initialHeightPercentage <= 1.0);
     assert(forFullScreen != null);
-    assert(debugCheckHasMediaQuery(context));
     assert(forFullScreen || debugCheckHasScaffold(context));
 
     final double screenHeight = MediaQuery.of(context).size.height;
@@ -92,8 +100,8 @@ class BottomSheetScrollController extends ScrollController {
     if (!forFullScreen) {
       // Scaffold.of(context) won't work if the context is the Scaffold itself.
       final ScaffoldState scaffold = context is StatefulElement && context.state is ScaffoldState
-          ? context.state
-          : Scaffold.of(context);
+        ? context.state
+        : Scaffold.of(context);
       extraAppBarHeight = scaffold.appBarMaxHeight ?? 0.0;
     }
 
@@ -101,9 +109,9 @@ class BottomSheetScrollController extends ScrollController {
   }
 
   static double _calculateMaxTop(
-      double initialHeightPercentage,
-      BuildContext context,
-      bool isPersistent,
+    double initialHeightPercentage,
+    BuildContext context,
+    bool isPersistent,
   ) {
     if (isPersistent) {
       return _topFromInitialHeightPercentage(initialHeightPercentage, context, false);
@@ -117,7 +125,8 @@ class BottomSheetScrollController extends ScrollController {
 
   BottomSheetScrollPosition _position;
 
-  /// The position at which the top of the controlled widget should be displayed.
+  // TODO(dnfield): Change this in sync with figuring out the screenHeight logic.
+  /// The top of the bottom sheet relative to the screen.
   ///
   /// When this value reaches [minTop], the controller will allow the content of
   /// the child to scroll.
@@ -127,23 +136,34 @@ class BottomSheetScrollController extends ScrollController {
   double get initialTop => _initialTop;
   final double _initialTop;
 
-  /// The minimum allowable value for [top].
+  /// The point at which the a scrolling gesture will change the scroll offset
+  /// of the child content rather than the top of the bottom sheet.
+  ///
+  /// The default value is 0.
   final double minTop;
 
-  /// The maximum allowable value for [top].
+  /// The point at which further scrolling will dismiss the bottom sheet.
+  ///
+  /// The default value is half the screen height.
   final double maxTop;
 
-  /// Whether the bottom sheet is persistent or not.
+  /// Whether the bottom sheet can be dismissed from view or not.
+  ///
+  /// A persistent bottom sheet cannot be dismissed from view, and should have
+  /// a [minTop] value that is greater than 0. The typical way to create one is
+  /// to set [Scaffold.bottomSheet].
+  ///
+  /// A non-persistent or standard bottom sheet can be dismissed by swiping it
+  /// down towards the bottom of the screen.
+  ///
+  /// The default value is `false`.
   final bool isPersistent;
 
   /// The [AnimationStatus] of the [AnimationController] for the [top].
   AnimationStatus get animationStatus => _position?._topAnimationController?.status;
 
-  /// Animate the [top] value to [maxTop] for non-persistent bottom sheets, or
-  /// [reset] the top and scroll position for persistent bottom sheets.
-  ///
-  /// The [isPersistent] property determines whether this is for a persistent
-  /// bottom sheet or not.
+  /// Animate the [top] value to [maxTop] for bottom sheets, or
+  /// [reset] the top and scroll position when [isPersistent] is true.
   Future<void> dismiss() {
     if (!isPersistent) {
       return _position?.dismiss();
@@ -151,8 +171,7 @@ class BottomSheetScrollController extends ScrollController {
     return reset();
   }
 
-  /// Reset the [top] value to [initialTop], and any jump any child scroll
-  /// position to 0.0.
+  /// Reset the [top] value to [initialTop], and scroll the child to 0.0.
   ///
   /// See also:
   ///
@@ -163,8 +182,11 @@ class BottomSheetScrollController extends ScrollController {
   }
 
   @override
-  BottomSheetScrollPosition createScrollPosition(ScrollPhysics physics,
-      ScrollContext context, ScrollPosition oldPosition) {
+  BottomSheetScrollPosition createScrollPosition(
+    ScrollPhysics physics,
+    ScrollContext context,
+    ScrollPosition oldPosition,
+  ) {
     _position = BottomSheetScrollPosition(
       physics: physics,
       context: context,
@@ -180,7 +202,7 @@ class BottomSheetScrollController extends ScrollController {
 
   // NotificationCallback handling for top.
 
-  List<VoidCallback> _topListeners = <VoidCallback>[];
+  final List<VoidCallback> _topListeners = <VoidCallback>[];
 
   /// Register a closure to be called when [top] changes.
   ///
@@ -190,8 +212,8 @@ class BottomSheetScrollController extends ScrollController {
     _topListeners.add(callback);
   }
 
-  /// Remove a previously registered closure from the list of closures that are
-  /// notified when [top] changes.
+  /// Remove a previously registered [VoidCallback] from the list of closures
+  /// that are notified when [top] changes.
   ///
   /// If the given listener is not registered, the call is ignored.
   ///
@@ -214,12 +236,12 @@ class BottomSheetScrollController extends ScrollController {
     _topListeners?.remove(callback);
   }
 
-  /// Call all the registered listeners to [top] changes.
+  /// Call all the listeners added with [addTopListener].
   ///
   /// Call this method whenever [top] changes, to notify any clients the
   /// object may have. Listeners that are added during this iteration will not
   /// be visited. Listeners that are removed during this iteration will not be
-  /// visited after they are removed.
+  /// called after they are removed.
   ///
   /// Exceptions thrown by listeners will be caught and reported using
   /// [FlutterError.reportError].
@@ -230,7 +252,7 @@ class BottomSheetScrollController extends ScrollController {
   /// in response to a notification) that has been registered multiple times.
   /// See the discussion at [removeTopListener].
   void notifyTopListeners() {
-    if (_topListeners != null) {
+    if (_topListeners.isNotEmpty) {
       final List<VoidCallback> localListeners = List<VoidCallback>.from(_topListeners);
       for (VoidCallback listener in localListeners) {
         try {
@@ -258,7 +280,7 @@ class BottomSheetScrollController extends ScrollController {
   void dispose() {
     if (!_disposed) {
       _disposed = true;
-      _topListeners = null;
+      _topListeners.clear();
       super.dispose();
     }
   }
@@ -289,8 +311,10 @@ class BottomSheetScrollController extends ScrollController {
 class BottomSheetScrollPosition extends ScrollPositionWithSingleContext {
   /// Creates a new [BottomSheetScrollPosition].
   ///
-  /// The [top], [notifier], and [minTop] parameters must not be null.  If [maxTop]
-  /// is null, it will be defaulted to [double.maxFinite].
+  /// The [context], [animateIn], [top], [notifier], and [minTop] parameters
+  /// must not be null.  If [maxTop] is null, it will be defaulted to
+  /// [double.maxFinite].  The [minTop] and [maxTop] values must be positive
+  /// numbers.
   BottomSheetScrollPosition({
     @required double top,
     @required this.notifier,
@@ -316,7 +340,6 @@ class BottomSheetScrollPosition extends ScrollPositionWithSingleContext {
       ) {
     _topAnimationController = AnimationController(
       value: 1.0,
-      upperBound: 1.0,
       lowerBound: minTop / maxTop,
       vsync: context.vsync,
       duration: const Duration(milliseconds: 200),
@@ -327,7 +350,8 @@ class BottomSheetScrollPosition extends ScrollPositionWithSingleContext {
     }
   }
 
-  /// Whether the [top] will be animated initially.
+  /// If true, the bottom sheet will be animated to [top] initially. Otherwise,
+  /// the bottom sheet will simply appear at [top].
   final bool animateIn;
 
   /// The [VoidCallback] to use when [top] is modified.
