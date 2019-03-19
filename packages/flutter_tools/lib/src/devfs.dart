@@ -386,7 +386,6 @@ class DevFS {
   final Directory rootDirectory;
   String _packagesFilePath;
   final Set<String> assetPathsToEvict = <String>{};
-  DateTime _lastUpdate;
 
   Uri _baseUri;
   Uri get baseUri => _baseUri;
@@ -432,7 +431,6 @@ class DevFS {
     AssetBundle bundle,
     DateTime firstBuildTime,
     bool bundleFirstUpload = false,
-    bool bundleDirty = false,
     @required ResidentCompiler generator,
     String dillOutputPath,
     @required bool trackWidgetCreation,
@@ -462,10 +460,10 @@ class DevFS {
         // When doing full restart, copy content so that isModified does not
         // reset last check timestamp because we want to report all modified
         // files to incremental compiler next time user does hot reload.
-        if ((_lastUpdate != null && content.isModifiedAfter(_lastUpdate)) || (bundleFirstUpload && archivePath != null)) {
+        if (content.isModified || (bundleFirstUpload && archivePath != null)) {
           dirtyEntries[deviceUri] = content;
           syncedBytes += content.size;
-          if (archivePath != null && (!bundleFirstUpload && content.isModifiedAfter(_lastUpdate))) {
+          if (archivePath != null && !bundleFirstUpload) {
             assetPathsToEvict.add(archivePath);
           }
         }
@@ -508,7 +506,6 @@ class DevFS {
       }
     }
     printTrace('DevFS: Sync finished');
-    _lastUpdate = DateTime.now();
     return UpdateFSReport(success: true, syncedBytes: syncedBytes,
          invalidatedSourcesCount: invalidatedFiles.length);
   }

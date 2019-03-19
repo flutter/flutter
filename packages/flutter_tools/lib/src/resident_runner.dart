@@ -459,7 +459,6 @@ class FlutterDevice {
         bundle: bundle,
         firstBuildTime: firstBuildTime,
         bundleFirstUpload: bundleFirstUpload,
-        bundleDirty: bundleDirty,
         generator: generator,
         fullRestart: fullRestart,
         dillOutputPath: dillOutputPath,
