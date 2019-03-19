@@ -352,7 +352,7 @@ def main():
       most_recent_commit = args.dart_sdk_revision
     else:
       # Get the most recent commit that is a reasonable candidate.
-      most_recent_commit = get_most_recent_green_build(success_threshold=1.0)
+      most_recent_commit = get_most_recent_green_build()
     if args.skip_tests:
       dart_roll_helper_args.append('--no-test')
     if args.skip_build:

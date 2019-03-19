@@ -23,7 +23,10 @@ class BuildStatus:
 
   @property
   def builder_name(self):
-    return self._results['properties']['buildername']
+    if (('properties' in self._results) and
+        ('buildername' in self._results['properties'])):
+      return self._results['properties']['buildername']
+    return None
 
 
   @property
@@ -87,7 +90,7 @@ def update_dart_sdk_repo():
   subprocess.check_output(['git', 'pull', '--rebase'], cwd=DART_SDK_HOME)
 
 
-def get_builder_names(filter_by_list=['flutter-', 'vm-', 'app-kernel', 'analyzer']):
+def get_builder_names(filter_by_list=['vm-', 'app-kernel', 'analyzer']):
   payload = {
     'bucket': LUCI_DART_BUCKET
   }
@@ -127,6 +130,9 @@ def bucket_states_by_commit(builder_states):
   for builder_state in builder_states:
     previous_revision = None
     for state in reversed(builder_state):
+      # If the builder doesn't have a name, ignore it.
+      if state.builder_name == None:
+        continue
       revisions = []
       # The build bot API doesn't return a list of revisions for a build so
       # we'll have to associate commits to builds manually.
@@ -169,11 +175,6 @@ def get_most_recent_green_build(success_threshold=0.95):
     if in_progress > 0:
       continue
 
-    # Only consider builds where the Dart-Engine-Flutter bots are green.
-    flutter_builder_states = list(filter(lambda x: ('flutter' in x.builder_name), commit_states))
-    flutter_builder_success = bool(reduce(lambda x, prev: (x.is_success() and prev), flutter_builder_states))
-    if not flutter_builder_success:
-      continue
     successes = map((lambda state: int(state.is_success())), commit_states)
     percent_success = float(sum(successes)) / len(commit_states)
     if percent_success >= success_threshold:
