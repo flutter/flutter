@@ -52,7 +52,7 @@ void main() {
 
     root.elevation = 0.0;
     pumpFrame(phase: EnginePhase.composite);
-    expect(root.needsCompositing, isFalse);
+    expect(root.needsCompositing, isTrue);
 
     debugDefaultTargetPlatformOverride = null;
   });
@@ -71,7 +71,7 @@ void main() {
 
     root.elevation = 0.0;
     pumpFrame(phase: EnginePhase.composite);
-    expect(root.needsCompositing, isFalse);
+    expect(root.needsCompositing, isTrue);
 
     debugDefaultTargetPlatformOverride = null;
   });
@@ -134,7 +134,7 @@ void main() {
 
       root.elevation = 0.0;
       pumpFrame(phase: EnginePhase.composite);
-      expect(root.needsCompositing, isFalse);
+      expect(root.needsCompositing, isTrue);
 
       debugDefaultTargetPlatformOverride = null;
     });
