@@ -161,7 +161,13 @@ class AndroidApk extends ApplicationPackage {
       return null;
 
     final String manifestString = manifest.readAsStringSync();
-    final xml.XmlDocument document = xml.parse(manifestString);
+    xml.XmlDocument document;
+    try {
+      document = xml.parse(manifestString);
+    } on Exception {
+      printError('AndroidManifest.xml is not a valid XML document.');
+      return null;
+    }
 
     final Iterable<xml.XmlElement> manifests = document.findElements('manifest');
     if (manifests.isEmpty)
