@@ -163,10 +163,11 @@ Future<ProcessResult> _runFlutterTest(
   final String testPackagesPath = fs.path.join(testDirectory, '.packges');
   final File testPackages = fs.file(testPackagesPath);
   if (!testPackages.existsSync()) {
-    await Process.run(
-      fs.path.join(dartSdkPath, 'bin', 'pub'),
-      <String>['get'],
-      workingDirectory: workingDirectory,
+    await Process.run(fs.path.join(dartSdkPath, 'bin', 'dart'), <String>[]
+      ..addAll(dartVmFlags)
+      ..add(flutterToolsPath)
+      ..addAll(<String>['packages', 'get']),
+      workingDirectory: workingDir.path,
     );
   }
 
