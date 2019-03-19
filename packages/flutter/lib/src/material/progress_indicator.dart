@@ -62,7 +62,7 @@ abstract class ProgressIndicator extends StatefulWidget {
   /// The current theme's [ThemeData.backgroundColor] by default.
   final Color backgroundColor;
 
-  /// The indicator's color as an animated value.
+  /// The progress indicator's color as an animated value.
   ///
   /// To specify a constant color use: `AlwaysStoppedAnimation<Color>(color)`.
   ///
