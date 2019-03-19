@@ -346,6 +346,7 @@ void main() {
       '   hint: ""\n'
       '   textDirection: null\n'
       '   sortKey: null\n'
+      '   platformViewId: null\n'
       '   scrollChildren: null\n'
       '   scrollIndex: null\n'
       '   scrollExtentMin: null\n'
@@ -413,9 +414,9 @@ void main() {
     const CustomSemanticsAction action2 = CustomSemanticsAction(label: 'action2');
     const CustomSemanticsAction action3 = CustomSemanticsAction(label: 'action3');
     configuration.customSemanticsActions = <CustomSemanticsAction, VoidCallback>{
-      action1: () {},
-      action2: () {},
-      action3: () {},
+      action1: () { },
+      action2: () { },
+      action3: () { },
     };
     final SemanticsNode actionNode = SemanticsNode();
     actionNode.updateWith(config: configuration);
@@ -440,6 +441,7 @@ void main() {
       '   hint: ""\n'
       '   textDirection: null\n'
       '   sortKey: null\n'
+      '   platformViewId: null\n'
       '   scrollChildren: null\n'
       '   scrollIndex: null\n'
       '   scrollExtentMin: null\n'
@@ -499,7 +501,7 @@ void main() {
     final MoveCursorHandler onMoveCursorForwardByCharacter = (bool _) { };
     final MoveCursorHandler onMoveCursorBackwardByCharacter = (bool _) { };
     final VoidCallback onTap = () { };
-    final VoidCallback onCustomAction = () {};
+    final VoidCallback onCustomAction = () { };
 
     config.onShowOnScreen = onShowOnScreen;
     config.onScrollDown = onScrollDown;

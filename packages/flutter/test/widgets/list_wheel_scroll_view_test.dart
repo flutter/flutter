@@ -55,7 +55,7 @@ void main() {
 
     testWidgets('ListWheelScrollView needs positive magnification', (WidgetTester tester) async {
       expect(
-            () {
+        () {
           ListWheelScrollView(
             useMagnifier: true,
             magnification: -1.0,
@@ -79,7 +79,7 @@ void main() {
           child: ListWheelScrollView.useDelegate(
             controller: controller,
             itemExtent: 100.0,
-            onSelectedItemChanged: (_) {},
+            onSelectedItemChanged: (_) { },
             childDelegate: ListWheelChildLoopingListDelegate(
               children: List<Widget>.generate(10, (int index) {
                 return Container(
@@ -125,7 +125,7 @@ void main() {
           child: ListWheelScrollView.useDelegate(
             controller: controller,
             itemExtent: 100.0,
-            onSelectedItemChanged: (_) {},
+            onSelectedItemChanged: (_) { },
             childDelegate: ListWheelChildBuilderDelegate(
               builder: (BuildContext context, int index) {
                 return Container(
@@ -168,7 +168,7 @@ void main() {
           child: ListWheelScrollView.useDelegate(
             controller: controller,
             itemExtent: 100.0,
-            onSelectedItemChanged: (_) {},
+            onSelectedItemChanged: (_) { },
             childDelegate: ListWheelChildBuilderDelegate(
               builder: (BuildContext context, int index) {
                 if (index < -15 || index > -5)
@@ -287,7 +287,7 @@ void main() {
           child: ListWheelScrollView.useDelegate(
             controller: controller,
             itemExtent: 100.0,
-            onSelectedItemChanged: (_) {},
+            onSelectedItemChanged: (_) { },
             childDelegate: ListWheelChildBuilderDelegate(
               builder: (BuildContext context, int index) {
                 expect(builtChildren.contains(index), false);
@@ -323,7 +323,7 @@ void main() {
           child: ListWheelScrollView(
             controller: controller,
             itemExtent: 100.0,
-            onSelectedItemChanged: (_) {},
+            onSelectedItemChanged: (_) { },
             children: List<Widget>.generate(16, (int index) {
               return Text(index.toString());
             }),

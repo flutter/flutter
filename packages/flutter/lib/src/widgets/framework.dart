@@ -36,28 +36,6 @@ export 'package:flutter/rendering.dart' show RenderObject, RenderBox, debugDumpR
 // abstract class FrogJar extends RenderObjectWidget { }
 // abstract class FrogJarParentData extends ParentData { Size size; }
 
-// DOCUMENTATION TEMPLATES FOR THE WIDGET LIBRARY
-
-/// {@template flutter.widgets.child}
-/// This widget can only have one child. To lay out multiple children, let this
-/// widget's child be a widget such as [Row], [Column], or [Stack], which have a
-/// `children` property, and then provide the children to that widget.
-/// {@endtemplate}
-
-/// {@template flutter.widgets.subscriptions}
-/// If a [State]'s [build] method depends on an object that can itself
-/// change state, for example a [ChangeNotifier] or [Stream], or some
-/// other object to which one can subscribe to receive notifications, then
-/// be sure to subscribe and unsubscribe properly in [initState],
-/// [didUpdateWidget], and [dispose]:
-///
-///  * In [initState], subscribe to the object.
-///  * In [didUpdateWidget] unsubscribe from the old object and subscribe
-///    to the new one if the updated widget configuration requires
-///    replacing the object.
-///  * In [dispose], unsubscribe from the object.
-/// {@endtemplate}
-
 // KEYS
 
 /// A key that is only equal to itself.
@@ -993,7 +971,19 @@ abstract class State<T extends StatefulWidget> extends Diagnosticable {
   /// location at which this object was inserted into the tree (i.e., [context])
   /// or on the widget used to configure this object (i.e., [widget]).
   ///
-  /// {@macro flutter.widgets.subscriptions}
+  /// {@template flutter.widgets.subscriptions}
+  /// If a [State]'s [build] method depends on an object that can itself
+  /// change state, for example a [ChangeNotifier] or [Stream], or some
+  /// other object to which one can subscribe to receive notifications, then
+  /// be sure to subscribe and unsubscribe properly in [initState],
+  /// [didUpdateWidget], and [dispose]:
+  ///
+  ///  * In [initState], subscribe to the object.
+  ///  * In [didUpdateWidget] unsubscribe from the old object and subscribe
+  ///    to the new one if the updated widget configuration requires
+  ///    replacing the object.
+  ///  * In [dispose], unsubscribe from the object.
+  /// {@endtemplate}
   ///
   /// You cannot use [BuildContext.inheritFromWidgetOfExactType] from this
   /// method. However, [didChangeDependencies] will be called immediately
@@ -1344,7 +1334,11 @@ abstract class ProxyWidget extends Widget {
 
   /// The widget below this widget in the tree.
   ///
-  /// {@macro flutter.widgets.child}
+  /// {@template flutter.widgets.child}
+  /// This widget can only have one child. To lay out multiple children, let this
+  /// widget's child be a widget such as [Row], [Column], or [Stack], which have a
+  /// `children` property, and then provide the children to that widget.
+  /// {@endtemplate}
   final Widget child;
 }
 
@@ -2250,7 +2244,7 @@ class BuildOwner {
           context._debugSetAllowIgnoredCallsToMarkNeedsBuild(true);
           debugPreviousBuildTarget = _debugCurrentBuildTarget;
           _debugCurrentBuildTarget = context;
-         return true;
+          return true;
         }());
         _dirtyElementsNeedsResorting = false;
         try {

@@ -158,6 +158,35 @@ void main() {
       });
     });
 
+    group('BySemanticsLabel', () {
+      test('finds by Semantic label using String', () async {
+        when(mockIsolate.invokeExtension(any, any)).thenAnswer((Invocation i) {
+          expect(i.positionalArguments[1], <String, String>{
+            'command': 'tap',
+            'timeout': _kSerializedTestTimeout,
+            'finderType': 'BySemanticsLabel',
+            'label': 'foo',
+          });
+          return makeMockResponse(<String, dynamic>{});
+        });
+        await driver.tap(find.bySemanticsLabel('foo'), timeout: _kTestTimeout);
+      });
+
+      test('finds by Semantic label using RegExp', () async {
+        when(mockIsolate.invokeExtension(any, any)).thenAnswer((Invocation i) {
+          expect(i.positionalArguments[1], <String, String>{
+            'command': 'tap',
+            'timeout': _kSerializedTestTimeout,
+            'finderType': 'BySemanticsLabel',
+            'label': '^foo',
+            'isRegExp': 'true',
+          });
+          return makeMockResponse(<String, dynamic>{});
+        });
+        await driver.tap(find.bySemanticsLabel(RegExp('^foo')), timeout: _kTestTimeout);
+      });
+    });
+
     group('tap', () {
       test('requires a target reference', () async {
         expect(driver.tap(null), throwsA(isInstanceOf<DriverError>()));
@@ -236,10 +265,10 @@ void main() {
       test('clears timeline', () async {
         bool clearWasCalled = false;
         when(mockPeer.sendRequest('_clearVMTimeline', argThat(equals(<String, dynamic>{}))))
-            .thenAnswer((Invocation invocation) async {
-          clearWasCalled = true;
-          return null;
-        });
+          .thenAnswer((Invocation invocation) async {
+            clearWasCalled = true;
+            return null;
+          });
         await driver.clearTimeline();
         expect(clearWasCalled, isTrue);
       });
@@ -252,22 +281,22 @@ void main() {
         log = <String>[];
 
         when(mockPeer.sendRequest('_clearVMTimeline', argThat(equals(<String, dynamic>{}))))
-            .thenAnswer((Invocation invocation) async {
-          log.add('clear');
-          return null;
-        });
+          .thenAnswer((Invocation invocation) async {
+            log.add('clear');
+            return null;
+          });
 
         when(mockPeer.sendRequest('_setVMTimelineFlags', argThat(equals(<String, dynamic>{'recordedStreams': '[all]'}))))
-            .thenAnswer((Invocation invocation) async {
-          log.add('startTracing');
-          return null;
-        });
+          .thenAnswer((Invocation invocation) async {
+            log.add('startTracing');
+            return null;
+          });
 
         when(mockPeer.sendRequest('_setVMTimelineFlags', argThat(equals(<String, dynamic>{'recordedStreams': '[]'}))))
-            .thenAnswer((Invocation invocation) async {
-          log.add('stopTracing');
-          return null;
-        });
+          .thenAnswer((Invocation invocation) async {
+            log.add('stopTracing');
+            return null;
+          });
 
         when(mockPeer.sendRequest('_getVMTimeline')).thenAnswer((Invocation invocation) async {
           log.add('download');

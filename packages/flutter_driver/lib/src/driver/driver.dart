@@ -416,7 +416,7 @@ class FlutterDriver {
     return response['response'];
   }
 
-  void _logCommunication(String message)  {
+  void _logCommunication(String message) {
     if (_printCommunication)
       _log.info(message);
     if (_logCommunicationToFile) {
@@ -938,6 +938,9 @@ class CommonFinders {
 
   /// Finds widgets with a tooltip with the given [message].
   SerializableFinder byTooltip(String message) => ByTooltipMessage(message);
+
+  /// Finds widgets with the given semantics [label].
+  SerializableFinder bySemanticsLabel(Pattern label) => BySemanticsLabel(label);
 
   /// Finds widgets whose class name matches the given string.
   SerializableFinder byType(String type) => ByType(type);

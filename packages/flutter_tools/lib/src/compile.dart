@@ -79,7 +79,7 @@ class StdoutHandler {
   void handler(String message) {
     const String kResultPrefix = 'result ';
     if (boundaryKey == null && message.startsWith(kResultPrefix)) {
-        boundaryKey = message.substring(kResultPrefix.length);
+      boundaryKey = message.substring(kResultPrefix.length);
     } else if (message.startsWith(boundaryKey)) {
       if (message.length <= boundaryKey.length) {
         compilerOutput.complete(null);
@@ -175,6 +175,7 @@ class KernelCompiler {
     List<String> fileSystemRoots,
     String fileSystemScheme,
     bool targetProductVm = false,
+    String initializeFromDill,
   }) async {
     final String frontendServer = artifacts.getArtifactPath(
       Artifact.frontendServerSnapshotForEngineDartSdk
@@ -251,6 +252,9 @@ class KernelCompiler {
     if (fileSystemScheme != null) {
       command.addAll(<String>['--filesystem-scheme', fileSystemScheme]);
     }
+    if (initializeFromDill != null) {
+      command.addAll(<String>['--initialize-from-dill', initializeFromDill]);
+    }
 
     if (extraFrontEndOptions != null)
       command.addAll(extraFrontEndOptions);
@@ -259,10 +263,10 @@ class KernelCompiler {
 
     printTrace(command.join(' '));
     final Process server = await processManager
-        .start(command)
-        .catchError((dynamic error, StackTrace stack) {
-      printError('Failed to start frontend server $error, $stack');
-    });
+      .start(command)
+      .catchError((dynamic error, StackTrace stack) {
+        printError('Failed to start frontend server $error, $stack');
+      });
 
     final StdoutHandler _stdoutHandler = StdoutHandler();
 
@@ -496,12 +500,11 @@ class ResidentCompiler {
     }
     if (packagesFilePath != null) {
       command.addAll(<String>['--packages', packagesFilePath]);
+    } else if (_packagesPath != null) {
+      command.addAll(<String>['--packages', _packagesPath]);
     }
     if (_trackWidgetCreation) {
       command.add('--track-widget-creation');
-    }
-    if (_packagesPath != null) {
-      command.addAll(<String>['--packages', _packagesPath]);
     }
     if (_fileSystemRoots != null) {
       for (String root in _fileSystemRoots) {
@@ -658,10 +661,17 @@ class ResidentCompiler {
         }
       }
     }
+    if (platform.isWindows && _fileSystemRoots != null && _fileSystemRoots.length > 1) {
+      return Uri.file(filename, windows: platform.isWindows).toString();
+    }
     return null;
   }
 
-  Future<dynamic> shutdown() {
+  Future<dynamic> shutdown() async {
+    // Server was never sucessfully created.
+    if (_server == null) {
+      return 0;
+    }
     _server.kill();
     return _server.exitCode;
   }

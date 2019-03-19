@@ -199,7 +199,7 @@ void main() {
       BinaryMessages.handlePlatformMessage(
         'ch',
         event,
-            (ByteData reply) {},
+            (ByteData reply) { },
       );
     }
     test('can receive event stream', () async {

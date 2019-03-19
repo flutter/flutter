@@ -67,7 +67,7 @@ class StockSettingsState extends State<StockSettings> {
       case StockMode.pessimistic:
         showDialog<bool>(
           context: context,
-           builder: (BuildContext context) {
+          builder: (BuildContext context) {
             return AlertDialog(
               title: const Text('Change mode?'),
               content: const Text('Optimistic mode means everything is awesome. Are you sure you can handle that?'),

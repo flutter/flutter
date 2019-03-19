@@ -18,9 +18,7 @@ import 'base/utils.dart';
 import 'build_info.dart';
 import 'codegen.dart';
 import 'compile.dart';
-import 'dart/dependencies.dart';
 import 'dart/package_map.dart';
-import 'dependency_checker.dart';
 import 'devfs.dart';
 import 'device.dart';
 import 'globals.dart';
@@ -48,6 +46,47 @@ class FlutterDevice {
          targetModel: targetModel,
          experimentalFlags: experimentalFlags,
        );
+
+  /// Create a [FlutterDevice] with optional code generation enabled.
+  static Future<FlutterDevice> create(Device device, {
+    @required bool trackWidgetCreation,
+    String dillOutputPath,
+    List<String> fileSystemRoots,
+    String fileSystemScheme,
+    String viewFilter,
+    @required String target,
+    TargetModel targetModel = TargetModel.flutter,
+    List<String> experimentalFlags,
+    ResidentCompiler generator,
+  }) async {
+    ResidentCompiler generator;
+    final FlutterProject flutterProject = await FlutterProject.current();
+    if (experimentalBuildEnabled && await flutterProject.hasBuilders) {
+      generator = await CodeGeneratingResidentCompiler.create(
+        flutterProject: flutterProject,
+      );
+    } else {
+      generator = ResidentCompiler(
+        artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
+        trackWidgetCreation: trackWidgetCreation,
+        fileSystemRoots: fileSystemRoots,
+        fileSystemScheme: fileSystemScheme,
+        targetModel: targetModel,
+        experimentalFlags: experimentalFlags,
+      );
+    }
+    return FlutterDevice(
+      device,
+      trackWidgetCreation: trackWidgetCreation,
+      dillOutputPath: dillOutputPath,
+      fileSystemRoots: fileSystemRoots,
+      fileSystemScheme:fileSystemScheme,
+      viewFilter: viewFilter,
+      experimentalFlags: experimentalFlags,
+      targetModel: targetModel,
+      generator: generator,
+    );
+  }
 
   final Device device;
   final ResidentCompiler generator;
@@ -403,10 +442,10 @@ class FlutterDevice {
     DateTime firstBuildTime,
     bool bundleFirstUpload = false,
     bool bundleDirty = false,
-    Set<String> fileFilter,
     bool fullRestart = false,
     String projectRootPath,
     String pathToReload,
+    @required List<String> invalidatedFiles,
   }) async {
     final Status devFSStatus = logger.startProgress(
       'Syncing files to device ${device.name}...',
@@ -421,13 +460,13 @@ class FlutterDevice {
         firstBuildTime: firstBuildTime,
         bundleFirstUpload: bundleFirstUpload,
         bundleDirty: bundleDirty,
-        fileFilter: fileFilter,
         generator: generator,
         fullRestart: fullRestart,
         dillOutputPath: dillOutputPath,
         trackWidgetCreation: trackWidgetCreation,
         projectRootPath: projectRootPath,
         pathToReload: pathToReload,
+        invalidatedFiles: invalidatedFiles,
       );
     } on DevFSException {
       devFSStatus.cancel();
@@ -904,21 +943,23 @@ abstract class ResidentRunner {
   }
 
   bool hasDirtyDependencies(FlutterDevice device) {
-    /// When using the build system, dependency analysis is handled by build
-    /// runner instead.
-    if (experimentalBuildEnabled) {
-      return false;
-    }
-    final DartDependencySetBuilder dartDependencySetBuilder =
-        DartDependencySetBuilder(mainPath, packagesFilePath);
-    final DependencyChecker dependencyChecker =
-        DependencyChecker(dartDependencySetBuilder, assetBundle);
     if (device.package.packagesFile == null || !device.package.packagesFile.existsSync()) {
       return true;
     }
-    final DateTime lastBuildTime = device.package.packagesFile.statSync().modified;
-
-    return dependencyChecker.check(lastBuildTime);
+    // why is this sometimes an APK.
+    if (!device.package.packagesFile.path.contains('.packages')) {
+      return true;
+    }
+    // Leave pubspec null to check all dependencies.
+    final ProjectFileInvalidator projectFileInvalidator = ProjectFileInvalidator(device.package.packagesFile.path, null);
+    projectFileInvalidator.findInvalidated();
+    final int lastBuildTime = device.package.packagesFile.statSync().modified.millisecondsSinceEpoch;
+    for (int updateTime in projectFileInvalidator.updateTime.values) {
+      if (updateTime > lastBuildTime) {
+        return true;
+      }
+    }
+    return false;
   }
 
   Future<void> preStop() async { }

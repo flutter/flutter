@@ -95,24 +95,26 @@ final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
 };
 
 class ThreeRoute extends MaterialPageRoute<void> {
-  ThreeRoute() : super(builder: (BuildContext context) {
-    return Material(
-      key: routeThreeKey,
-      child: ListView(
-        children: <Widget>[
-          Container(height: 200.0, width: 200.0),
-          Card(child: Hero(tag: 'a', child: Container(height: 200.0, width: 200.0, key: thirdKey))),
-          Container(height: 200.0, width: 200.0),
-        ],
-      ),
-    );
-  });
+  ThreeRoute()
+    : super(builder: (BuildContext context) {
+        return Material(
+          key: routeThreeKey,
+          child: ListView(
+            children: <Widget>[
+              Container(height: 200.0, width: 200.0),
+              Card(child: Hero(tag: 'a', child: Container(height: 200.0, width: 200.0, key: thirdKey))),
+              Container(height: 200.0, width: 200.0),
+            ],
+          ),
+        );
+      });
 }
 
 class MutatingRoute extends MaterialPageRoute<void> {
-  MutatingRoute() : super(builder: (BuildContext context) {
-    return Hero(tag: 'a', child: const Text('MutatingRoute'), key: UniqueKey());
-  });
+  MutatingRoute()
+    : super(builder: (BuildContext context) {
+        return Hero(tag: 'a', child: const Text('MutatingRoute'), key: UniqueKey());
+      });
 
   void markNeedsBuild() {
     setState(() {
@@ -1381,7 +1383,7 @@ void main() {
 
     await tester.pump();
 
-    // Both Heros exist and seated in their normal parents.
+    // Both Heroes exist and are seated in their normal parents.
     expect(find.byKey(firstKey), isOnstage);
     expect(find.byKey(firstKey), isInCard);
     expect(find.byKey(secondKey), isOnstage);
@@ -1447,5 +1449,249 @@ void main() {
       initialRoute: '/two',
     ));
     expect(find.text('two'), findsOneWidget);
+  });
+
+  testWidgets('Can push/pop on outer Navigator if nested Navigator contains Heroes', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/28042.
+
+    const String heroTag = 'You are my hero!';
+    final GlobalKey<NavigatorState> rootNavigator = GlobalKey();
+    final GlobalKey<NavigatorState> nestedNavigator = GlobalKey();
+    final Key nestedRouteHeroBottom = UniqueKey();
+    final Key nestedRouteHeroTop = UniqueKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorKey: rootNavigator,
+        home: Navigator(
+          key: nestedNavigator,
+          onGenerateRoute: (RouteSettings settings) {
+            return MaterialPageRoute<void>(
+              builder: (BuildContext context) {
+                return Hero(
+                  tag: heroTag,
+                  child: Placeholder(
+                    key: nestedRouteHeroBottom,
+                  ),
+                );
+              }
+            );
+          },
+        ),
+      )
+    );
+
+    nestedNavigator.currentState.push(MaterialPageRoute<void>(
+      builder: (BuildContext context) {
+        return Hero(
+          tag: heroTag,
+          child: Placeholder(
+            key: nestedRouteHeroTop,
+          ),
+        );
+      },
+    ));
+    await tester.pumpAndSettle();
+
+    // Both heroes are in the tree, one is offstage
+    expect(find.byKey(nestedRouteHeroTop), findsOneWidget);
+    expect(find.byKey(nestedRouteHeroBottom), findsNothing);
+    expect(find.byKey(nestedRouteHeroBottom, skipOffstage: false), findsOneWidget);
+
+    rootNavigator.currentState.push(MaterialPageRoute<void>(
+      builder: (BuildContext context) {
+        return const Text('Foo');
+      },
+    ));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Foo'), findsOneWidget);
+    // Both heroes are still in the tree, both are offstage.
+    expect(find.byKey(nestedRouteHeroBottom), findsNothing);
+    expect(find.byKey(nestedRouteHeroTop), findsNothing);
+    expect(find.byKey(nestedRouteHeroBottom, skipOffstage: false), findsOneWidget);
+    expect(find.byKey(nestedRouteHeroTop, skipOffstage: false), findsOneWidget);
+
+    // Doesn't crash.
+    expect(tester.takeException(), isNull);
+
+    rootNavigator.currentState.pop();
+    await tester.pumpAndSettle();
+
+    expect(find.text('Foo'), findsNothing);
+    // Both heroes are in the tree, one is offstage
+    expect(find.byKey(nestedRouteHeroTop), findsOneWidget);
+    expect(find.byKey(nestedRouteHeroBottom), findsNothing);
+    expect(find.byKey(nestedRouteHeroBottom, skipOffstage: false), findsOneWidget);
+  });
+
+  testWidgets('Can hero from route in root Navigator to route in nested Navigator', (WidgetTester tester) async {
+    const String heroTag = 'foo';
+    final GlobalKey<NavigatorState> rootNavigator = GlobalKey();
+    final Key smallContainer = UniqueKey();
+    final Key largeContainer = UniqueKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorKey: rootNavigator,
+        home: Center(
+          child: Card(
+            child: Hero(
+              tag: heroTag,
+              child: Container(
+                key: largeContainer,
+                color: Colors.red,
+                height: 200.0,
+                width: 200.0,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+
+    // The initial setup.
+    expect(find.byKey(largeContainer), isOnstage);
+    expect(find.byKey(largeContainer), isInCard);
+    expect(find.byKey(smallContainer, skipOffstage: false), findsNothing);
+
+    rootNavigator.currentState.push(
+      MaterialPageRoute<void>(
+        builder: (BuildContext context) {
+          return Center(
+            child: Card(
+              child: Hero(
+                tag: heroTag,
+                child: Container(
+                  key: smallContainer,
+                  color: Colors.red,
+                  height: 100.0,
+                  width: 100.0,
+                ),
+              ),
+            ),
+          );
+        }
+      ),
+    );
+    await tester.pump();
+
+    // The second route exists offstage.
+    expect(find.byKey(largeContainer), isOnstage);
+    expect(find.byKey(largeContainer), isInCard);
+    expect(find.byKey(smallContainer, skipOffstage: false), isOffstage);
+    expect(find.byKey(smallContainer, skipOffstage: false), isInCard);
+
+    await tester.pump();
+
+    // The hero started flying.
+    expect(find.byKey(largeContainer), findsNothing);
+    expect(find.byKey(smallContainer), isOnstage);
+    expect(find.byKey(smallContainer), isNotInCard);
+
+    await tester.pump(const Duration(milliseconds: 100));
+
+    // The hero is in-flight.
+    expect(find.byKey(largeContainer), findsNothing);
+    expect(find.byKey(smallContainer), isOnstage);
+    expect(find.byKey(smallContainer), isNotInCard);
+    final Size size = tester.getSize(find.byKey(smallContainer));
+    expect(size.height, greaterThan(100));
+    expect(size.width, greaterThan(100));
+    expect(size.height, lessThan(200));
+    expect(size.width, lessThan(200));
+
+    await tester.pumpAndSettle();
+
+    // The transition has ended.
+    expect(find.byKey(largeContainer), findsNothing);
+    expect(find.byKey(smallContainer), isOnstage);
+    expect(find.byKey(smallContainer), isInCard);
+    expect(tester.getSize(find.byKey(smallContainer)), const Size(100,100));
+  });
+
+  testWidgets('Hero within a Hero, throws', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: Hero(
+            tag: 'a',
+            child: Hero(
+              tag: 'b',
+              child: Text('Child of a Hero'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isAssertionError);
+  });
+
+  testWidgets('Hero within a Hero subtree, throws', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Container(
+            child: const Hero(
+              tag: 'a',
+              child: Hero(
+                tag: 'b',
+                child: Text('Child of a Hero'),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isAssertionError);
+  });
+
+  testWidgets('Hero within a Hero subtree with Builder, throws', (
+      WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Hero(
+            tag: 'a',
+            child: Builder(
+              builder: (BuildContext context) {
+                return const Hero(
+                  tag: 'b',
+                  child: Text('Child of a Hero'),
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(),isAssertionError);
+  });
+
+  testWidgets('Hero within a Hero subtree with LayoutBuilder, throws', (
+      WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Hero(
+            tag: 'a',
+            child: LayoutBuilder(
+              builder: (BuildContext context, BoxConstraints constraints) {
+                return const Hero(
+                  tag: 'b',
+                  child: Text('Child of a Hero'),
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isAssertionError);
   });
 }

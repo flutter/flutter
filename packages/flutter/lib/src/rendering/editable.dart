@@ -144,6 +144,8 @@ class RenderEditable extends RenderBox {
     ValueNotifier<bool> showCursor,
     bool hasFocus,
     int maxLines = 1,
+    int minLines,
+    bool expands = false,
     StrutStyle strutStyle,
     Color selectionColor,
     double textScaleFactor = 1.0,
@@ -165,6 +167,16 @@ class RenderEditable extends RenderBox {
   }) : assert(textAlign != null),
        assert(textDirection != null, 'RenderEditable created without a textDirection.'),
        assert(maxLines == null || maxLines > 0),
+       assert(minLines == null || minLines > 0),
+       assert(
+         (maxLines == null) || (minLines == null) || (maxLines >= minLines),
+         'minLines can\'t be greater than maxLines',
+       ),
+       assert(expands != null),
+       assert(
+         !expands || (maxLines == null && minLines == null),
+         'minLines and maxLines must be null when expands is true.',
+       ),
        assert(textScaleFactor != null),
        assert(offset != null),
        assert(ignorePointer != null),
@@ -186,6 +198,8 @@ class RenderEditable extends RenderBox {
        _showCursor = showCursor ?? ValueNotifier<bool>(false),
        _hasFocus = hasFocus ?? false,
        _maxLines = maxLines,
+       _minLines = minLines,
+       _expands = expands,
        _selectionColor = selectionColor,
        _selection = selection,
        _offset = offset,
@@ -254,6 +268,50 @@ class RenderEditable extends RenderBox {
   TextSelectionDelegate textSelectionDelegate;
 
   Rect _lastCaretRect;
+
+  /// Track whether position of the start of the selected text is within the viewport.
+  ///
+  /// For example, if the text contains "Hello World", and the user selects
+  /// "Hello", then scrolls so only "World" is visible, this will become false.
+  /// If the user scrolls back so that the "H" is visible again, this will
+  /// become true.
+  ///
+  /// This bool indicates whether the text is scrolled so that the handle is
+  /// inside the text field viewport, as opposed to whether it is actually
+  /// visible on the screen.
+  ValueListenable<bool> get selectionStartInViewport => _selectionStartInViewport;
+  final ValueNotifier<bool> _selectionStartInViewport = ValueNotifier<bool>(true);
+
+  /// Track whether position of the end of the selected text is within the viewport.
+  ///
+  /// For example, if the text contains "Hello World", and the user selects
+  /// "World", then scrolls so only "Hello" is visible, this will become
+  /// 'false'. If the user scrolls back so that the "d" is visible again, this
+  /// will become 'true'.
+  ///
+  /// This bool indicates whether the text is scrolled so that the handle is
+  /// inside the text field viewport, as opposed to whether it is actually
+  /// visible on the screen.
+  ValueListenable<bool> get selectionEndInViewport => _selectionEndInViewport;
+  final ValueNotifier<bool> _selectionEndInViewport = ValueNotifier<bool>(true);
+
+  void _updateSelectionExtentsVisibility(Offset effectiveOffset) {
+    final Rect visibleRegion = Offset.zero & size;
+
+    final Offset startOffset = _textPainter.getOffsetForCaret(
+      TextPosition(offset: _selection.start, affinity: _selection.affinity),
+      Rect.zero
+    );
+
+    _selectionStartInViewport.value = visibleRegion.contains(startOffset + effectiveOffset);
+
+    final Offset endOffset =  _textPainter.getOffsetForCaret(
+      TextPosition(offset: _selection.end, affinity: _selection.affinity),
+      Rect.zero
+    );
+
+    _selectionEndInViewport.value = visibleRegion.contains(endOffset + effectiveOffset);
+  }
 
   static const int _kLeftArrowCode = 21;
   static const int _kRightArrowCode = 22;
@@ -688,6 +746,29 @@ class RenderEditable extends RenderBox {
     if (maxLines == value)
       return;
     _maxLines = value;
+    markNeedsTextLayout();
+  }
+
+  /// {@macro flutter.widgets.editableText.minLines}
+  int get minLines => _minLines;
+  int _minLines;
+  /// The value may be null. If it is not null, then it must be greater than zero.
+  set minLines(int value) {
+    assert(value == null || value > 0);
+    if (minLines == value)
+      return;
+    _minLines = value;
+    markNeedsTextLayout();
+  }
+
+  /// {@macro flutter.widgets.editableText.expands}
+  bool get expands => _expands;
+  bool _expands;
+  set expands(bool value) {
+    assert(value != null);
+    if (expands == value)
+      return;
+    _expands = value;
     markNeedsTextLayout();
   }
 
@@ -1150,8 +1231,28 @@ class RenderEditable extends RenderBox {
   double get preferredLineHeight => _textPainter.preferredLineHeight;
 
   double _preferredHeight(double width) {
-    if (maxLines != null)
+    // Lock height to maxLines if needed
+    final bool lockedMax = maxLines != null && minLines == null;
+    final bool lockedBoth = minLines != null && minLines == maxLines;
+    final bool singleLine = maxLines == 1;
+    if (singleLine || lockedMax || lockedBoth) {
       return preferredLineHeight * maxLines;
+    }
+
+    // Clamp height to minLines or maxLines if needed
+    final bool minLimited = minLines != null && minLines > 1;
+    final bool maxLimited = maxLines != null;
+    if (minLimited || maxLimited) {
+      _layoutText(width);
+      if (minLimited && _textPainter.height < preferredLineHeight * minLines) {
+        return preferredLineHeight * minLines;
+      }
+      if (maxLimited && _textPainter.height > preferredLineHeight * maxLines) {
+        return preferredLineHeight * maxLines;
+      }
+    }
+
+    // Set the height based on the content
     if (width == double.infinity) {
       final String text = _textPainter.text.toPlainText();
       int lines = 1;
@@ -1276,10 +1377,18 @@ class RenderEditable extends RenderBox {
       final TextPosition toPosition = to == null
         ? null
         : _textPainter.getPositionForOffset(globalToLocal(to - _paintOffset));
+
+      int baseOffset = fromPosition.offset;
+      int extentOffset = fromPosition.offset;
+      if (toPosition != null) {
+        baseOffset = math.min(fromPosition.offset, toPosition.offset);
+        extentOffset = math.max(fromPosition.offset, toPosition.offset);
+      }
+
       onSelectionChanged(
         TextSelection(
-          baseOffset: fromPosition.offset,
-          extentOffset: toPosition?.offset ?? fromPosition.offset,
+          baseOffset: baseOffset,
+          extentOffset: extentOffset,
           affinity: fromPosition.affinity,
         ),
         this,
@@ -1570,6 +1679,7 @@ class RenderEditable extends RenderBox {
         showCaret = true;
       else if (!_selection.isCollapsed && _selectionColor != null)
         showSelection = true;
+      _updateSelectionExtentsVisibility(effectiveOffset);
     }
 
     if (showSelection) {
@@ -1613,6 +1723,8 @@ class RenderEditable extends RenderBox {
     properties.add(DiagnosticsProperty<Color>('cursorColor', cursorColor));
     properties.add(DiagnosticsProperty<ValueNotifier<bool>>('showCursor', showCursor));
     properties.add(IntProperty('maxLines', maxLines));
+    properties.add(IntProperty('minLines', minLines));
+    properties.add(DiagnosticsProperty<bool>('expands', expands, defaultValue: false));
     properties.add(DiagnosticsProperty<Color>('selectionColor', selectionColor));
     properties.add(DoubleProperty('textScaleFactor', textScaleFactor));
     properties.add(DiagnosticsProperty<Locale>('locale', locale, defaultValue: null));

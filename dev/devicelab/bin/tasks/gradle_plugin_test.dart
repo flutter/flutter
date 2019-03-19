@@ -272,8 +272,11 @@ Future<ProcessResult> _resultOfGradleTask({String workingDirectory, String task,
   if (options != null) {
     args.addAll(options);
   }
+  final String gradle = Platform.isWindows ? 'gradlew.bat' : './gradlew';
+  print('Running Gradle: ${path.join(workingDirectory, gradle)} ${args.join(' ')}');
+  print(File(path.join(workingDirectory, gradle)).readAsStringSync());
   return Process.run(
-    './gradlew',
+    gradle,
     args,
     workingDirectory: workingDirectory,
     environment: <String, String>{ 'JAVA_HOME': javaHome },

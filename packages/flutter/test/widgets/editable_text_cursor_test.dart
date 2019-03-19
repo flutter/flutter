@@ -242,9 +242,7 @@ void main() {
     expect(renderEditable, paintsExactlyCountTimes(#drawRect, 0));
   });
 
-  testWidgets(
-      'Cursor does not animates on iOS when debugDeterministicCursor is set',
-      (WidgetTester tester) async {
+  testWidgets('Cursor does not animates on iOS when debugDeterministicCursor is set', (WidgetTester tester) async {
     EditableText.debugDeterministicCursor = true;
     final Widget widget = MaterialApp(
       theme: ThemeData(platform: TargetPlatform.iOS),
@@ -282,9 +280,7 @@ void main() {
     EditableText.debugDeterministicCursor = false;
   });
 
-  testWidgets(
-      'Cursor does not animate on Android when debugDeterministicCursor is set',
-      (WidgetTester tester) async {
+  testWidgets('Cursor does not animate on Android when debugDeterministicCursor is set', (WidgetTester tester) async {
     EditableText.debugDeterministicCursor = true;
 
     const Widget widget = MaterialApp(

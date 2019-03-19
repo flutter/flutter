@@ -513,7 +513,7 @@ void main() {
     await tester.pumpWidget(genPhysicalModel(Clip.antiAlias));
     await expectLater(
       find.byType(RepaintBoundary).first,
-      matchesGoldenFile('clip.PhysicalModel.antiAlias.png'),
+      matchesGoldenFile('clip.PhysicalModel.antiAlias.1.png'),
     );
   });
 
@@ -521,7 +521,7 @@ void main() {
     await tester.pumpWidget(genPhysicalModel(Clip.hardEdge));
     await expectLater(
       find.byType(RepaintBoundary).first,
-      matchesGoldenFile('clip.PhysicalModel.hardEdge.png'),
+      matchesGoldenFile('clip.PhysicalModel.hardEdge.1.png'),
     );
   });
 
@@ -573,7 +573,7 @@ void main() {
     );
     await expectLater(
       find.byType(RepaintBoundary).first,
-      matchesGoldenFile('clip.PhysicalModel.default.png'),
+      matchesGoldenFile('clip.PhysicalModel.default.1.png'),
     );
   });
 
@@ -622,7 +622,7 @@ void main() {
     await tester.pumpWidget(genPhysicalShape(Clip.antiAlias));
     await expectLater(
       find.byType(RepaintBoundary).first,
-      matchesGoldenFile('clip.PhysicalShape.antiAlias.png'),
+      matchesGoldenFile('clip.PhysicalShape.antiAlias.1.png'),
     );
   });
 
@@ -630,7 +630,7 @@ void main() {
     await tester.pumpWidget(genPhysicalShape(Clip.hardEdge));
     await expectLater(
       find.byType(RepaintBoundary).first,
-      matchesGoldenFile('clip.PhysicalShape.hardEdge.png'),
+      matchesGoldenFile('clip.PhysicalShape.hardEdge.1.png'),
     );
   });
 
@@ -684,7 +684,7 @@ void main() {
     );
     await expectLater(
       find.byType(RepaintBoundary).first,
-      matchesGoldenFile('clip.PhysicalShape.default.png'),
+      matchesGoldenFile('clip.PhysicalShape.default.1.png'),
     );
   });
 

@@ -430,6 +430,8 @@ class AndroidDevice extends Device {
       cmd.addAll(<String>['--ez', 'trace-skia', 'true']);
     if (debuggingOptions.traceSystrace)
       cmd.addAll(<String>['--ez', 'trace-systrace', 'true']);
+    if (debuggingOptions.dumpSkpOnShaderCompilation)
+      cmd.addAll(<String>['--ez', 'dump-skp-on-shader-compilation', 'true']);
     if (debuggingOptions.debuggingEnabled) {
       if (debuggingOptions.buildInfo.isDebug) {
         cmd.addAll(<String>['--ez', 'enable-checked-mode', 'true']);
@@ -439,6 +441,9 @@ class AndroidDevice extends Device {
         cmd.addAll(<String>['--ez', 'start-paused', 'true']);
       if (debuggingOptions.useTestFonts)
         cmd.addAll(<String>['--ez', 'use-test-fonts', 'true']);
+      if (debuggingOptions.verboseSystemLogs) {
+        cmd.addAll(<String>['--ez', 'verbose-logging', 'true']);
+      }
     }
     cmd.add(apk.launchActivity);
     final String result = (await runCheckedAsync(cmd)).stdout;

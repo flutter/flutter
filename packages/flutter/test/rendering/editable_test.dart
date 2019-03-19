@@ -17,13 +17,13 @@ class FakeEditableTextState extends TextSelectionDelegate {
   TextEditingValue get textEditingValue { return const TextEditingValue(); }
 
   @override
-  set textEditingValue(TextEditingValue value) {}
+  set textEditingValue(TextEditingValue value) { }
 
   @override
-  void hideToolbar() {}
+  void hideToolbar() { }
 
   @override
-  void bringIntoView(TextPosition position) {}
+  void bringIntoView(TextPosition position) { }
 }
 
 void main() {
@@ -56,6 +56,7 @@ void main() {
         ' │ cursorColor: null\n'
         ' │ showCursor: ValueNotifier<bool>#00000(false)\n'
         ' │ maxLines: 1\n'
+        ' │ minLines: null\n'
         ' │ selectionColor: null\n'
         ' │ textScaleFactor: 1.0\n'
         ' │ locale: ja_JP\n'
@@ -333,5 +334,37 @@ void main() {
     expect(currentSelection.isCollapsed, false);
     expect(currentSelection.baseOffset, 5);
     expect(currentSelection.extentOffset, 9);
+  });
+
+  test('selects correct place when offsets are flipped', () {
+    final TextSelectionDelegate delegate = FakeEditableTextState();
+    final ViewportOffset viewportOffset = ViewportOffset.zero();
+    TextSelection currentSelection;
+    final RenderEditable editable = RenderEditable(
+      backgroundCursorColor: Colors.grey,
+      selectionColor: Colors.black,
+      textDirection: TextDirection.ltr,
+      cursorColor: Colors.red,
+      offset: viewportOffset,
+      textSelectionDelegate: delegate,
+      onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {
+        currentSelection = selection;
+      },
+      text: const TextSpan(
+        text: 'abc def ghi',
+        style: TextStyle(
+          height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+        ),
+      ),
+    );
+
+    layout(editable);
+
+    editable.selectPositionAt(from: const Offset(30, 2), to: const Offset(10, 2), cause: SelectionChangedCause.drag);
+    pumpFrame();
+
+    expect(currentSelection.isCollapsed, isFalse);
+    expect(currentSelection.baseOffset, 1);
+    expect(currentSelection.extentOffset, 3);
   });
 }

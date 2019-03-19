@@ -18,6 +18,7 @@ import '../fuchsia/fuchsia_device.dart';
 import '../globals.dart';
 import '../ios/devices.dart';
 import '../ios/simulators.dart';
+import '../project.dart';
 import '../protocol_discovery.dart';
 import '../resident_runner.dart';
 import '../run_cold.dart';
@@ -129,6 +130,7 @@ class AttachCommand extends FlutterCommand {
   Future<FlutterCommandResult> runCommand() async {
     final String ipv4Loopback = InternetAddress.loopbackIPv4.address;
     final String ipv6Loopback = InternetAddress.loopbackIPv6.address;
+    final FlutterProject flutterProject = await FlutterProject.current();
 
     Cache.releaseLockEarly();
 
@@ -205,13 +207,14 @@ class AttachCommand extends FlutterCommand {
     }
     try {
       final bool useHot = getBuildInfo().isDebug;
-      final FlutterDevice flutterDevice = FlutterDevice(
+      final FlutterDevice flutterDevice = await FlutterDevice.create(
         device,
         trackWidgetCreation: false,
         dillOutputPath: argResults['output-dill'],
         fileSystemRoots: argResults['filesystem-root'],
         fileSystemScheme: argResults['filesystem-scheme'],
         viewFilter: argResults['isolate-filter'],
+        target: argResults['target'],
         targetModel: TargetModel(argResults['target-model']),
       );
       flutterDevice.observatoryUris = <Uri>[ observatoryUri ];
@@ -227,6 +230,7 @@ class AttachCommand extends FlutterCommand {
             projectRootPath: argResults['project-root'],
             dillOutputPath: argResults['output-dill'],
             ipv6: usesIpv6,
+            flutterProject: flutterProject,
           )
         : ColdRunner(
             flutterDevices,
@@ -271,7 +275,7 @@ class AttachCommand extends FlutterCommand {
     return null;
   }
 
-  Future<void> _validateArguments() async {}
+  Future<void> _validateArguments() async { }
 }
 
 class HotRunnerFactory {
@@ -288,6 +292,7 @@ class HotRunnerFactory {
     String dillOutputPath,
     bool stayResident = true,
     bool ipv6 = false,
+    FlutterProject flutterProject,
   }) => HotRunner(
     devices,
     target: target,
@@ -301,6 +306,7 @@ class HotRunnerFactory {
     dillOutputPath: dillOutputPath,
     stayResident: stayResident,
     ipv6: ipv6,
+    flutterProject: flutterProject,
   );
 }
 

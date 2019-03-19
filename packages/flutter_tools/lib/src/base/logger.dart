@@ -184,7 +184,7 @@ class StdoutLogger extends Logger {
   }
 
   @override
-  void printTrace(String message) {}
+  void printTrace(String message) { }
 
   @override
   Status startProgress(

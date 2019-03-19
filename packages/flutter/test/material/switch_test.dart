@@ -57,7 +57,7 @@ void main() {
               child: Switch(
                 dragStartBehavior: DragStartBehavior.down,
                 value: true,
-                onChanged: (bool newValue) {},
+                onChanged: (bool newValue) { },
               ),
             ),
           ),
@@ -77,7 +77,7 @@ void main() {
               child: Switch(
                 dragStartBehavior: DragStartBehavior.down,
                 value: true,
-                onChanged: (bool newValue) {},
+                onChanged: (bool newValue) { },
               ),
             ),
           ),
@@ -146,13 +146,12 @@ void main() {
             return Material(
               child: Center(
                 child: Switch(
-                    dragStartBehavior: DragStartBehavior.down,
-                    value: value,
-                    onChanged: (bool newValue) {
-                      setState(() {
-                        value = newValue;
-                      }
-                    );
+                  dragStartBehavior: DragStartBehavior.down,
+                  value: value,
+                  onChanged: (bool newValue) {
+                    setState(() {
+                      value = newValue;
+                    });
                   },
                 ),
               ),

@@ -18,7 +18,7 @@ void main() {
 
     setUp(() {
       response = MockHttpClientResponse();
-       when(response.listen(
+      when(response.listen(
          any,
          onDone: anyNamed('onDone'),
          onError: anyNamed('onError'),
@@ -39,8 +39,7 @@ void main() {
       });
     });
 
-    test('Converts an HttpClientResponse with contentLength to bytes',
-        () async {
+    test('Converts an HttpClientResponse with contentLength to bytes', () async {
       when(response.contentLength)
           .thenReturn(chunkOne.length + chunkTwo.length);
       final List<int> bytes =
@@ -49,8 +48,7 @@ void main() {
       expect(bytes, <int>[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
     });
 
-    test('Converts a compressed HttpClientResponse with contentLength to bytes',
-        () async {
+    test('Converts a compressed HttpClientResponse with contentLength to bytes', () async {
       when(response.contentLength).thenReturn(chunkOne.length);
       final List<int> bytes =
           await consolidateHttpClientResponseBytes(response);
@@ -58,8 +56,7 @@ void main() {
       expect(bytes, <int>[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
     });
 
-    test('Converts an HttpClientResponse without contentLength to bytes',
-        () async {
+    test('Converts an HttpClientResponse without contentLength to bytes', () async {
       when(response.contentLength).thenReturn(-1);
       final List<int> bytes =
           await consolidateHttpClientResponseBytes(response);

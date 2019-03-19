@@ -129,9 +129,16 @@ class FlutterCompactFormatter {
         }
         break;
       case 'error':
+        final String error = decoded['error'];
+        final String stackTrace = decoded['stackTrace'];
         if (originalResult != null) {
-          originalResult.errorMessage = decoded['error'];
-          originalResult.stackTrace = decoded['stackTrace'];
+          originalResult.errorMessage = error;
+          originalResult.stackTrace = stackTrace;
+        } else {
+          if (error != null)
+            stderr.writeln(error);
+          if (stackTrace != null)
+            stderr.writeln(stackTrace);
         }
         break;
       case 'print':

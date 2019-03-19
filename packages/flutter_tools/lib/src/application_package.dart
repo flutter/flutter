@@ -10,10 +10,12 @@ import 'package:xml/xml.dart' as xml;
 
 import 'android/android_sdk.dart';
 import 'android/gradle.dart';
+import 'base/common.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/os.dart' show os;
 import 'base/process.dart';
+import 'base/user_messages.dart';
 import 'build_info.dart';
 import 'globals.dart';
 import 'ios/ios_workflow.dart';
@@ -94,7 +96,7 @@ class AndroidApk extends ApplicationPackage {
   factory AndroidApk.fromApk(File apk) {
     final String aaptPath = androidSdk?.latestVersion?.aaptPath;
     if (aaptPath == null) {
-      printError('Unable to locate the Android SDK; please run \'flutter doctor\'.');
+      printError(userMessages.aaptNotFound);
       return null;
     }
 
@@ -160,7 +162,20 @@ class AndroidApk extends ApplicationPackage {
       return null;
 
     final String manifestString = manifest.readAsStringSync();
-    final xml.XmlDocument document = xml.parse(manifestString);
+    xml.XmlDocument document;
+    try {
+      document = xml.parse(manifestString);
+    } on xml.XmlParserException catch (exception) {
+      String manifestLocation;
+      if (androidProject.isUsingGradle) {
+        manifestLocation = fs.path.join(androidProject.hostAppGradleRoot.path, 'app', 'src', 'main', 'AndroidManifest.xml');
+      } else {
+        manifestLocation = fs.path.join(androidProject.hostAppGradleRoot.path, 'AndroidManifest.xml');
+      }
+      printError('AndroidManifest.xml is not a valid XML document.');
+      printError('Please check $manifestLocation for errors.');
+      throwToolExit('XML Parser error message: ${exception.toString()}');
+    }
 
     final Iterable<xml.XmlElement> manifests = document.findElements('manifest');
     if (manifests.isEmpty)
