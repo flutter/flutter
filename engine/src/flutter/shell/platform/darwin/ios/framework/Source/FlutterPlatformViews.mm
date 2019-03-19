@@ -245,7 +245,6 @@ bool FlutterPlatformViewsController::SubmitFrame(bool gl_rendering,
 
     active_composition_order_.push_back(view_id);
   }
-
   composition_order_.clear();
   return did_submit;
 }
@@ -294,7 +293,9 @@ void FlutterPlatformViewsController::EnsureGLOverlayInitialized(
     }
     return;
   }
-  FlutterOverlayView* overlay_view = [[FlutterOverlayView alloc] init];
+  auto contentsScale = flutter_view_.get().layer.contentsScale;
+  FlutterOverlayView* overlay_view =
+      [[FlutterOverlayView alloc] initWithContentsScale:contentsScale];
   overlay_view.frame = flutter_view_.get().bounds;
   overlay_view.autoresizingMask =
       (UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight);
@@ -303,6 +304,7 @@ void FlutterPlatformViewsController::EnsureGLOverlayInitialized(
   std::unique_ptr<Surface> surface = ios_surface->CreateSecondaryGPUSurface(gr_context);
   overlays_[overlay_id] = std::make_unique<FlutterPlatformViewLayer>(
       fml::scoped_nsobject<UIView>(overlay_view), std::move(ios_surface), std::move(surface));
+  overlays_gr_context_ = gr_context;
 }
 
 }  // namespace shell
