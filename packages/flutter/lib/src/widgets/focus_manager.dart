@@ -302,8 +302,9 @@ class FocusScopeNode extends Object with DiagnosticableTreeMixin {
   /// Adopts the given node if it is focused in another scope.
   ///
   /// A widget that requests that a node is focused should call this method
-  /// during its `build` method in case the widget is moved from one location
-  /// in the tree to another location that has a different focus scope.
+  /// during its [StatelessWidget.build] or [State.build] method in case the
+  /// widget is moved from one location in the tree to another location that has
+  /// a different focus scope.
   void reparentIfNeeded(FocusNode node) {
     assert(node != null);
     if (node._scopeParent == null || node._scopeParent == this) {

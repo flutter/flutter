@@ -218,8 +218,8 @@ class _FocusableState extends State<Focusable> {
           node: node,
           child: widget.child,
         ),
-        duration: widget.duration,
-        curve: widget.curve,
+        duration: widget.duration ?? Theme.of(context).focusableTheme.focusAnimationDuration,
+        curve: widget.curve ?? Theme.of(context).focusableTheme.focusAnimationCurve,
       ),
     );
   }
@@ -251,9 +251,15 @@ class FocusableThemeData extends Diagnosticable {
   ///
   /// All of the arguments are optional, and will use fallback values if not
   /// specified.
-  const FocusableThemeData({Decoration focusedDecoration, Decoration unfocusedDecoration})
-      : focusedDecoration = focusedDecoration ?? _defaultFocusedDecoration,
-        unfocusedDecoration = unfocusedDecoration ?? _defaultUnfocusedDecoration;
+  const FocusableThemeData({
+    Decoration focusedDecoration,
+    Decoration unfocusedDecoration,
+    Curve focusAnimationCurve,
+    Duration focusAnimationDuration,
+  })  : focusedDecoration = focusedDecoration ?? _defaultFocusedDecoration,
+        unfocusedDecoration = unfocusedDecoration ?? _defaultUnfocusedDecoration,
+        focusAnimationCurve = focusAnimationCurve ?? Curves.easeInOut,
+        focusAnimationDuration = focusAnimationDuration ?? const Duration(milliseconds: 100);
 
   static const Color _defaultFocusedColor = Color(0xff000080);
   static const Color _defaultUnfocusedColor = Color(0x00000000);
@@ -289,6 +295,14 @@ class FocusableThemeData extends Diagnosticable {
   /// By default, this is a box with a fully transparent border that is one
   /// logical pixel wide.
   final Decoration unfocusedDecoration;
+
+  /// Specifies the default duration for the transition between focused and
+  /// unfocused (and vice versa) decorations in a Focusable.
+  final Duration focusAnimationDuration;
+
+  /// Specifies the default curve to use for the transition between focused and
+  /// unfocused (and vice versa) decorations in a focusable.
+  final Curve focusAnimationCurve;
 
   /// Linearly interpolate between two [FocusableThemeData]s.
   ///
