@@ -1581,7 +1581,7 @@ abstract class _RenderPhysicalModelBase<T> extends _RenderCustomClip<T> {
   }
 
   @override
-  bool get alwaysNeedsCompositing => _elevation != 0.0;
+  bool get alwaysNeedsCompositing => true;
 
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
