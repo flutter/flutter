@@ -474,7 +474,7 @@ class HotRunner extends ResidentRunner {
           isolateNotifications.add(
             view.owner.vm.vmService.onIsolateEvent.then((Stream<ServiceEvent> serviceEvents) async {
               await for (ServiceEvent serviceEvent in serviceEvents) {
-                if (serviceEvent.owner.name.contains('_spawn') == true && serviceEvent.kind == ServiceEvent.kIsolateExit) {
+                if (serviceEvent.owner.name.contains('_spawn') && serviceEvent.kind == ServiceEvent.kIsolateExit) {
                   return;
                 }
               }
