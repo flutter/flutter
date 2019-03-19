@@ -677,6 +677,8 @@ void Paragraph::Layout(double width, bool force) {
         const SkTextBlobBuilder::RunBuffer& blob_buffer =
             builder.allocRunPos(font, glyph_blob.end - glyph_blob.start);
 
+        double justify_x_offset_delta = 0;
+
         for (size_t glyph_index = glyph_blob.start;
              glyph_index < glyph_blob.end;) {
           size_t cluster_start_glyph_index = glyph_index;
@@ -690,7 +692,7 @@ void Paragraph::Layout(double width, bool force) {
 
             size_t pos_index = blob_index * 2;
             blob_buffer.pos[pos_index] =
-                layout.getX(glyph_index) + justify_x_offset;
+                layout.getX(glyph_index) + justify_x_offset_delta;
             blob_buffer.pos[pos_index + 1] = layout.getY(glyph_index);
 
             if (glyph_index == cluster_start_glyph_index)
@@ -770,7 +772,7 @@ void Paragraph::Layout(double width, bool force) {
 
           if (at_word_end) {
             if (justify_line) {
-              justify_x_offset += word_gap_width;
+              justify_x_offset_delta += word_gap_width;
             }
             word_index++;
 
@@ -787,9 +789,11 @@ void Paragraph::Layout(double width, bool force) {
           continue;
         SkFontMetrics metrics;
         font.getMetrics(&metrics);
-        paint_records.emplace_back(run.style(), SkPoint::Make(run_x_offset, 0),
-                                   builder.make(), metrics, line_number,
-                                   layout.getAdvance(), run.is_ghost());
+        paint_records.emplace_back(
+            run.style(), SkPoint::Make(run_x_offset + justify_x_offset, 0),
+            builder.make(), metrics, line_number,
+            layout.getAdvance() + justify_x_offset_delta, run.is_ghost());
+        justify_x_offset += justify_x_offset_delta;
 
         line_glyph_positions.insert(line_glyph_positions.end(),
                                     glyph_positions.begin(),
@@ -1050,13 +1054,7 @@ void Paragraph::PaintDecorations(SkCanvas* canvas,
   // Filled when drawing wavy decorations.
   SkPath path;
 
-  double width = 0;
-  if (paragraph_style_.text_align == TextAlign::justify &&
-      record.line() != GetLineCount() - 1) {
-    width = width_;
-  } else {
-    width = record.GetRunWidth();
-  }
+  double width = record.GetRunWidth();
 
   SkScalar underline_thickness;
   if ((metrics.fFlags &
