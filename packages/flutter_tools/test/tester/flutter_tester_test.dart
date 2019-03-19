@@ -177,7 +177,7 @@ Hello!
           packagesPath: anyNamed('packagesPath'),
         )).thenAnswer((_) async {
           fs.file('$mainPath.dill').createSync(recursive: true);
-          return CompilerOutput('$mainPath.dill', 0, <Uri>[]);
+          return CompilerOutput('$mainPath.dill', 0);
         });
 
         final LaunchResult result = await device.startApp(null,
