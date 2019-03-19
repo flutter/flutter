@@ -119,7 +119,7 @@ class _DirectionalPolicyDataEntry {
   final FocusableNode previousNode;
 }
 
-class _DirectionalPolicyData extends PolicyData {
+class _DirectionalPolicyData {
   const _DirectionalPolicyData({@required this.history}) : assert(history != null);
 
   /// A queue of entries that describe the path taken to the current node.
@@ -426,10 +426,16 @@ class _SortData {
 /// Traverses the focus order in "reading order".
 ///
 /// By default, reading order traversal goes in the reading direction, and then
-/// down, using the same algorithm that is used by the semantics nodes.
+/// down, using this algorithm:
 ///
-/// It uses the ambient directionality at the nodes being traversed to determine
-/// which direction is "reading order".
+/// 1. Find the node rectangle that has the highest `top` on the screen.
+/// 2. Find any other nodes which intersect the infinite horizontal band defined
+///    by the highest rectangle's top and bottom edges.
+/// 3. Pick the closest to the beginning of the reading order from among the
+///    nodes discovered above.
+///
+/// It uses the ambient directionality in the context for the enclosing scope to
+/// determine which direction is "reading order".
 class ReadingOrderTraversalPolicy extends FocusTraversalPolicy with DirectionalFocusTraversalPolicyMixin {
   /// Creates a const ReadingOrderTraversalPolicy.
   const ReadingOrderTraversalPolicy();
@@ -449,9 +455,10 @@ class ReadingOrderTraversalPolicy extends FocusTraversalPolicy with DirectionalF
       });
     }
 
+    final TextDirection textDirection = Directionality.of(scope.key.currentContext);
     _SortData pickFirst(List<_SortData> candidates) {
-      int compareLeftSide(_SortData a, _SortData b) {
-        return a.rect.left.compareTo(b.rect.left);
+      int compareBeginningSide(_SortData a, _SortData b) {
+        return textDirection == TextDirection.ltr ? a.rect.left.compareTo(b.rect.left) : -a.rect.right.compareTo(b.rect.right);
       }
 
       int compareTopSide(_SortData a, _SortData b) {
@@ -464,7 +471,7 @@ class ReadingOrderTraversalPolicy extends FocusTraversalPolicy with DirectionalF
       // If there are any others in the band of the topmost, then pick the
       // leftmost one.
       final List<_SortData> inBandOfTop = inBand(topmost, candidates).toList();
-      inBandOfTop.sort(compareLeftSide);
+      inBandOfTop.sort(compareBeginningSide);
       if (inBandOfTop.isNotEmpty) {
         return inBandOfTop.first;
       }
@@ -532,8 +539,7 @@ class ReadingOrderTraversalPolicy extends FocusTraversalPolicy with DirectionalF
   bool previous(FocusableNode currentNode) => _move(currentNode, forward: false);
 }
 
-/// Describes an inherited focus policy for focus traversal of [Focusable]
-/// widgets for its children.
+/// A widget that describes an inherited focus policy for focus traversal.
 ///
 /// By default, traverses in widget order using
 /// [WidgetOrderFocusTraversalPolicy].
@@ -564,11 +570,13 @@ class DefaultFocusTraversal extends InheritedWidget {
   ///
   /// See also:
   ///
-  ///  * [FocusTraversalPolicy] for the API used to impose traversal order policy.
+  ///  * [FocusTraversalPolicy] for the API used to impose traversal order
+  ///    policy.
   ///  * [WidgetOrderFocusTraversalPolicy] for a traversal policy that traverses
   ///    nodes in the order they are added to the widget tree.
-  ///  * [ReadingOrderTraversalPolicy] for a traversal policy that traverses nodes
-  ///    in the reading order defined in the widget tree, and then top to bottom.
+  ///  * [ReadingOrderTraversalPolicy] for a traversal policy that traverses
+  ///    nodes in the reading order defined in the widget tree, and then top to
+  ///    bottom.
   final FocusTraversalPolicy policy;
 
   /// Returns the [DefaultFocusTraversal] that most tightly encloses the given
