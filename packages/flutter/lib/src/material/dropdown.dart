@@ -661,15 +661,19 @@ class DropdownButton<T> extends StatefulWidget {
   /// Defaults to an [Icon] with the [Icons.arrow_drop_down] glyph.
   final Widget icon;
 
-  /// The color of any [Icon] descendant of [icon] if this button is disabled, i.e. if [onChanged] is null.
+  /// The color of any [Icon] descendant of [icon] if this button is disabled,
+  /// i.e. if [onChanged] is null.
   ///
-  /// Defaults to [Colors.grey.shade400] when the theme's [ThemeData.brightness] is [Brightness.light] and to
+  /// Defaults to [Colors.grey.shade400] when the theme's
+  /// [ThemeData.brightness] is [Brightness.light] and to
   /// [Colors.white10] when it is [Brightness.dark]
   final Color iconDisabledColor;
 
-  /// The color of any [Icon] descendant of [icon] if this button is enabled, i.e. if [onChanged] is defined.
+  /// The color of any [Icon] descendant of [icon] if this button is enabled,
+  /// i.e. if [onChanged] is defined.
   ///
-  /// Defaults to [Colors.grey.shade700] when the theme's [ThemeData.brightness] is [Brightness.light] and to
+  /// Defaults to [Colors.grey.shade700] when the theme's
+  /// [ThemeData.brightness] is [Brightness.light] and to
   /// [Colors.white70] when it is [Brightness.dark]
   final Color iconEnabledColor;
 
@@ -798,7 +802,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       switch(Theme.of(context).brightness) {
         case Brightness.light:
           return Colors.grey.shade700;
-        default:
+        case Brightness.dark:
           return Colors.white70;
       }
     } else {
@@ -809,10 +813,13 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       switch(Theme.of(context).brightness) {
         case Brightness.light:
           return Colors.grey.shade400;
-        default:
+        case Brightness.dark:
           return Colors.white10;
       }
     }
+
+    assert(false);
+    return null;
   }
 
   bool get _enabled => widget.items != null && widget.items.isNotEmpty && widget.onChanged != null;
