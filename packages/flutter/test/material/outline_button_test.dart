@@ -10,27 +10,6 @@ import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
-    PhysicalModelLayer findPhysicalLayer(Element element) {
-      expect(element, isNotNull);
-      RenderObject object = element.renderObject;
-      while (object != null && object is! RenderRepaintBoundary && object is! RenderView) {
-        object = object.parent;
-      }
-      expect(object.debugLayer, isNotNull);
-      expect(object.debugLayer.firstChild, isInstanceOf<PhysicalModelLayer>());
-      final PhysicalModelLayer layer = object.debugLayer.firstChild;
-      return layer.firstChild is PhysicalModelLayer ? layer.firstChild : layer;
-    }
-
-    void checkPhysicalLayer(Element element, Color expectedColor, {Path clipPath, Rect clipRect}) {
-      final PhysicalModelLayer expectedLayer = findPhysicalLayer(element);
-      expect(expectedLayer.elevation, 0.0);
-      expect(expectedLayer.color, expectedColor);
-      if (clipPath != null) {
-        expect(clipRect, isNotNull);
-        expect(expectedLayer.clipPath, coversSameAreaAs(clipPath, areaToCompare: clipRect.inflate(10.0)));
-      }
-    }
   testWidgets('Outline button responds to tap when enabled', (WidgetTester tester) async {
     int pressedCount = 0;
 
@@ -135,13 +114,8 @@ void main() {
     expect(
       outlineButton,
       paints
+        ..clipPath(pathMatcher: coversSameAreaAs(clipPath, areaToCompare: clipRect.inflate(10.0)))
         ..path(color: disabledBorderColor, strokeWidth: borderWidth));
-    checkPhysicalLayer(
-      tester.element(outlineButton),
-      const Color(0),
-      clipPath: clipPath,
-      clipRect: clipRect,
-    );
 
     // Pump a new button with a no-op onPressed callback to make it enabled.
     await tester.pumpWidget(
@@ -156,14 +130,10 @@ void main() {
     expect(
       outlineButton,
       paints
+        // initially the interior of the button is transparent
+        ..path(color: fillColor.withAlpha(0x00))
+        ..clipPath(pathMatcher: coversSameAreaAs(clipPath, areaToCompare: clipRect.inflate(10.0)))
         ..path(color: borderColor, strokeWidth: borderWidth));
-    // initially, the interior of the button is transparent
-    checkPhysicalLayer(
-      tester.element(outlineButton),
-      fillColor.withAlpha(0x00),
-      clipPath: clipPath,
-      clipRect: clipRect,
-    );
 
     final Offset center = tester.getCenter(outlineButton);
     final TestGesture gesture = await tester.startGesture(center);
@@ -174,13 +144,9 @@ void main() {
     expect(
       outlineButton,
       paints
+        ..path(color: fillColor.withAlpha(0xFF))
+        ..clipPath(pathMatcher: coversSameAreaAs(clipPath, areaToCompare: clipRect.inflate(10.0)))
         ..path(color: highlightedBorderColor, strokeWidth: borderWidth));
-    checkPhysicalLayer(
-      tester.element(outlineButton),
-      fillColor.withAlpha(0xFF),
-      clipPath: clipPath,
-      clipRect: clipRect,
-    );
 
     // Tap gesture completes, button returns to its initial configuration.
     await gesture.up();
@@ -188,13 +154,9 @@ void main() {
     expect(
       outlineButton,
       paints
+        ..path(color: fillColor.withAlpha(0x00))
+        ..clipPath(pathMatcher: coversSameAreaAs(clipPath, areaToCompare: clipRect.inflate(10.0)))
         ..path(color: borderColor, strokeWidth: borderWidth));
-    checkPhysicalLayer(
-      tester.element(outlineButton),
-      fillColor.withAlpha(0x00),
-      clipPath: clipPath,
-      clipRect: clipRect,
-    );
   });
 
   testWidgets('OutlineButton has no clip by default', (WidgetTester tester) async {
@@ -259,6 +221,7 @@ void main() {
 
     semantics.dispose();
   });
+
 
   testWidgets('OutlineButton scales textScaleFactor', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -377,7 +340,6 @@ void main() {
 
     await tester.pumpWidget(buildFrame(ThemeData.dark()));
     final Finder button = find.byType(OutlineButton);
-    final Element buttonElement = tester.element(button);
     final Offset center = tester.getCenter(button);
 
     // Default value for dark Theme.of(context).canvasColor as well as
@@ -385,18 +347,18 @@ void main() {
     Color fillColor = Colors.grey[850];
 
     // Initially the interior of the button is transparent.
-    checkPhysicalLayer(buttonElement, fillColor.withAlpha(0x00));
+    expect(button, paints..path(color: fillColor.withAlpha(0x00)));
 
     // Tap-press gesture on the button triggers the fill animation.
     TestGesture gesture = await tester.startGesture(center);
     await tester.pump(); // Start the button fill animation.
     await tester.pump(const Duration(milliseconds: 200)); // Animation is complete.
-    checkPhysicalLayer(buttonElement, fillColor.withAlpha(0xFF));
+    expect(button, paints..path(color: fillColor.withAlpha(0xFF)));
 
     // Tap gesture completes, button returns to its initial configuration.
     await gesture.up();
     await tester.pumpAndSettle();
-    checkPhysicalLayer(buttonElement, fillColor.withAlpha(0x00));
+    expect(button,  paints..path(color: fillColor.withAlpha(0x00)));
 
     await tester.pumpWidget(buildFrame(ThemeData.light()));
     await tester.pumpAndSettle(); // Finish the theme change animation.
@@ -406,17 +368,17 @@ void main() {
     fillColor = Colors.grey[50];
 
     // Initially the interior of the button is transparent.
-    // expect(button, paints..path(color: fillColor.withAlpha(0x00)));
+    expect(button, paints..path(color: fillColor.withAlpha(0x00)));
 
     // Tap-press gesture on the button triggers the fill animation.
     gesture = await tester.startGesture(center);
     await tester.pump(); // Start the button fill animation.
     await tester.pump(const Duration(milliseconds: 200)); // Animation is complete.
-    checkPhysicalLayer(buttonElement, fillColor.withAlpha(0xFF));
+    expect(button, paints..path(color: fillColor.withAlpha(0xFF)));
 
     // Tap gesture completes, button returns to its initial configuration.
     await gesture.up();
     await tester.pumpAndSettle();
-    checkPhysicalLayer(buttonElement, fillColor.withAlpha(0x00));
+    expect(button,  paints..path(color: fillColor.withAlpha(0x00)));
   });
 }
