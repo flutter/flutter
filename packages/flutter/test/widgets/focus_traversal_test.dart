@@ -402,13 +402,12 @@ void main() {
       final GlobalKey key1 = GlobalKey(debugLabel: '1');
       final GlobalKey key2 = GlobalKey(debugLabel: '2');
       final GlobalKey key3 = GlobalKey(debugLabel: '3');
-      final GlobalKey key4 = GlobalKey(debugLabel: '4');
-      final GlobalKey key5 = GlobalKey(debugLabel: '5');
-      final GlobalKey key6 = GlobalKey(debugLabel: '6');
+      final GlobalKey key4 = GlobalKey(debugLabel: '5');
+      final GlobalKey key5 = GlobalKey(debugLabel: '4');
       bool focus1;
       bool focus2;
       bool focus3;
-      bool focus5;
+      bool focus4;
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
@@ -426,13 +425,13 @@ void main() {
                         debugLabel: 'key3',
                         key: key3,
                         onFocusChange: (bool focus) => focus3 = focus,
-                        child: Container(key: key4),
+                        child: Container(key: key2),
                       ),
                       Focusable(
-                        debugLabel: 'key5',
-                        key: key5,
-                        onFocusChange: (bool focus) => focus5 = focus,
-                        child: Container(key: key6),
+                        debugLabel: 'key4',
+                        key: key4,
+                        onFocusChange: (bool focus) => focus4 = focus,
+                        child: Container(key: key5),
                       ),
                     ],
                   ),
@@ -451,15 +450,15 @@ void main() {
         focus1 = null;
         focus2 = null;
         focus3 = null;
-        focus5 = null;
+        focus4 = null;
       }
 
-      final Element firstChild = tester.element(find.byKey(key4));
-      final Element secondChild = tester.element(find.byKey(key6));
+      final Element firstChild = tester.element(find.byKey(key2));
+      final Element secondChild = tester.element(find.byKey(key5));
       final FocusableNode firstFocusableNode = Focusable.of(firstChild);
       expect(getFocusableKey(firstFocusableNode), equals(key3));
       final FocusableNode secondFocusableNode = Focusable.of(secondChild);
-      expect(getFocusableKey(secondFocusableNode), equals(key5));
+      expect(getFocusableKey(secondFocusableNode), equals(key4));
       final FocusableNode scope = Focusable.of(firstChild).enclosingScope;
       firstFocusableNode.requestFocus();
 
@@ -468,7 +467,7 @@ void main() {
       expect(focus1, isTrue);
       expect(focus2, isNull);
       expect(focus3, isTrue);
-      expect(focus5, isNull);
+      expect(focus4, isNull);
       expect(firstFocusableNode.hasFocus, isTrue);
       expect(secondFocusableNode.hasFocus, isFalse);
       expect(scope.hasFocus, isTrue);
@@ -481,7 +480,7 @@ void main() {
       expect(focus1, isNull);
       expect(focus2, isNull);
       expect(focus3, isFalse);
-      expect(focus5, isTrue);
+      expect(focus4, isTrue);
       expect(firstFocusableNode.hasFocus, isFalse);
       expect(secondFocusableNode.hasFocus, isTrue);
       expect(scope.hasFocus, isTrue);
@@ -494,7 +493,7 @@ void main() {
       expect(focus1, isNull);
       expect(focus2, isNull);
       expect(focus3, isNull);
-      expect(focus5, isFalse);
+      expect(focus4, isFalse);
       expect(firstFocusableNode.hasFocus, isFalse);
       expect(secondFocusableNode.hasFocus, isFalse);
       expect(scope.hasFocus, isTrue);
@@ -508,7 +507,7 @@ void main() {
       expect(focus1, isNull);
       expect(focus2, isNull);
       expect(focus3, isNull);
-      expect(focus5, isTrue);
+      expect(focus4, isTrue);
       expect(firstFocusableNode.hasFocus, isFalse);
       expect(secondFocusableNode.hasFocus, isTrue);
       expect(scope.hasFocus, isTrue);

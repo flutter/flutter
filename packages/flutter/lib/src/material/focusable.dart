@@ -1,8 +1,6 @@
 // Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-import 'dart:async';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
@@ -63,6 +61,11 @@ class Focusable extends StatefulWidget {
   /// Key events are first given to the leaf nodes, and if they don't handle
   /// them, then to each node up the widget hierarchy. If they reach the root of
   /// the hierarchy, they are discarded.
+  ///
+  /// This is not the way to get text input similar to a text field: it leaves
+  /// out support for input method editors, and doesn't support soft keyboards
+  /// in general. For text input, consider [TextField] or [CupertinoTextField],
+  /// which do support these things.
   final FocusableOnKeyCallback onKey;
 
   /// Handler called when the focus of this focusable changes.

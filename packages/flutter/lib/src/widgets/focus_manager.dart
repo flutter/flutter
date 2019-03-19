@@ -425,8 +425,6 @@ typedef FocusableNodeVisitor = bool Function(FocusableNode node);
 /// If a policy data object encounters a type of policy data that it doesn't
 /// recognize, then it should not use it, but may overwrite it (this may happen
 /// when the traversal policy is changed).
-///
-/// The type T is the type of the policy object that supplied this policy data.
 abstract class PolicyData {
   /// A const constructor so that subclasses can be const.
   const PolicyData();
@@ -477,7 +475,7 @@ class FocusableNode extends FocusNode {
   /// child.
   FocusableNode get focusedChild {
     assert(!isScope || _focusedChild == null || _focusedChild.enclosingScope == this,
-      "Focused child does not have the same idea of it's enclosing scope as the scope does");
+      'Focused child does not have the same idea of its enclosing scope as the scope does.');
     return isScope ? _focusedChild : null;
   }
 
@@ -642,6 +640,9 @@ class FocusableNode extends FocusNode {
   /// that node instead.  If that node is also a scope, will look for its
   /// [focusedChild], and so forth, until a non-scope, or a scope with a null
   /// [focusedChild] is found.
+  ///
+  /// Set [isImplicit] to true if you are requesting focus from within a focus
+  /// policy in order to keep the policy data for future access.
   void requestFocus({bool isImplicit = false}) {
     assert(isImplicit != null);
     assert(_manager != null, "Tried to request focus for a node that isn't part of the focus tree.");
