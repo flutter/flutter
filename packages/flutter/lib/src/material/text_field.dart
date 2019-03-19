@@ -513,6 +513,16 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     && widget.decoration != null
     && widget.decoration.counterText == null;
 
+  final DeviceKindTracker _deviceKindTracker = DeviceKindTracker();
+  PointerDeviceKind get _lastUsedDeviceKind => _deviceKindTracker.value;
+
+  // The selection overlay should only be enabled when the user is interacting
+  // through a touch screen. Mouse and other devices shouldn't trigger the
+  // selection overlay.
+  // For backwards-compatibility, we treat a null kind the same as touch.
+  bool get _isSelectionOverlayEnabled =>
+      _lastUsedDeviceKind == null || _lastUsedDeviceKind == PointerDeviceKind.touch;
+
   InputDecoration _getEffectiveDecoration() {
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final ThemeData themeData = Theme.of(context);
@@ -605,8 +615,28 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     super.dispose();
   }
 
+  EditableTextState get _editableText => _editableTextKey.currentState;
+
   void _requestKeyboard() {
-    _editableTextKey.currentState?.requestKeyboard();
+    _editableText?.requestKeyboard();
+  }
+
+  bool _shouldShowHandles(SelectionChangedCause cause) {
+    // When the text field was triggered by anything other than a touch screen,
+    // we shouldn't show the selection handles.
+    // If [_deviceKind] is null we still show the handles for backwards-compatibility
+    // reasons.
+    if (!_isSelectionOverlayEnabled)
+      return false;
+    if (cause == SelectionChangedCause.keyboard)
+      return false;
+
+    if (cause == SelectionChangedCause.longPress)
+      return true;
+    if (_effectiveController.text.isNotEmpty)
+      return true;
+
+    return false;
   }
 
   void _handleSelectionChanged(TextSelection selection, SelectionChangedCause cause) {
@@ -615,12 +645,28 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     switch (Theme.of(context).platform) {
       case TargetPlatform.iOS:
         if (cause == SelectionChangedCause.longPress) {
-          _editableTextKey.currentState?.bringIntoView(selection.base);
+          _editableText?.bringIntoView(selection.base);
         }
         return;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
         // Do nothing.
+    }
+
+    if (_shouldShowHandles(cause)) {
+      _editableText?.showHandles();
+    }
+  }
+
+  /// Toggle the toolbar when a selection handle is tapped.
+  void _handleSelectionHandleTapped() {
+    if (_effectiveController.selection.isCollapsed) {
+      final TextSelectionOverlay overlay = _editableText.selectionOverlay;
+      if (overlay.toolbarIsVisible) {
+        overlay.hideToolbar();
+      } else {
+        overlay.showToolbar();
+      }
     }
   }
 
@@ -671,7 +717,8 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         from: details.globalPosition,
         cause: SelectionChangedCause.forcePress,
       );
-      _editableTextKey.currentState.showToolbar();
+      if (_isSelectionOverlayEnabled)
+        _editableTextKey.currentState.showToolbar();
     }
   }
 
@@ -738,13 +785,15 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
   }
 
   void _handleSingleLongTapEnd(LongPressEndDetails details) {
-    _editableTextKey.currentState.showToolbar();
+    if (_isSelectionOverlayEnabled)
+      _editableTextKey.currentState.showToolbar();
   }
 
   void _handleDoubleTapDown(TapDownDetails details) {
     if (widget.selectionEnabled) {
       _renderEditable.selectWord(cause: SelectionChangedCause.doubleTap);
-      _editableTextKey.currentState.showToolbar();
+      if (_isSelectionOverlayEnabled)
+        _editableTextKey.currentState.showToolbar();
     }
   }
 
@@ -884,6 +933,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         onSelectionChanged: _handleSelectionChanged,
         onEditingComplete: widget.onEditingComplete,
         onSubmitted: widget.onSubmitted,
+        onSelectionHandleTapped: _handleSelectionHandleTapped,
         inputFormatters: formatters,
         rendererIgnoresPointer: true,
         cursorWidth: widget.cursorWidth,
@@ -939,6 +989,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
           onDragSelectionStart: _handleMouseDragSelectionStart,
           onDragSelectionUpdate: _handleMouseDragSelectionUpdate,
           behavior: HitTestBehavior.translucent,
+          deviceKindTracker: _deviceKindTracker,
           child: child,
         ),
       ),

@@ -263,6 +263,7 @@ class TextSelectionOverlay {
     this.selectionControls,
     this.selectionDelegate,
     this.dragStartBehavior = DragStartBehavior.start,
+    this.onSelectionHandleTapped,
   }) : assert(value != null),
        assert(context != null),
        _value = value {
@@ -315,6 +316,11 @@ class TextSelectionOverlay {
   ///
   ///  * [DragGestureRecognizer.dragStartBehavior], which gives an example for the different behaviors.
   final DragStartBehavior dragStartBehavior;
+
+  /// {@template flutter.widgets.textSelection.onSelectionHandleTapped}
+  /// A callback that's invoked when a selection handle is tapped.
+  /// {@endtemplate}
+  final VoidCallback onSelectionHandleTapped;
 
   /// Controls the fade-in and fade-out animations for the toolbar and handles.
   static const Duration fadeDuration = Duration(milliseconds: 150);
@@ -400,10 +406,17 @@ class TextSelectionOverlay {
       _handles[1].remove();
       _handles = null;
     }
-    _toolbar?.remove();
-    _toolbar = null;
+    if (_toolbar != null) {
+      hideToolbar();
+    }
+  }
 
+  /// Hides the toolbar.
+  void hideToolbar() {
+    assert(_toolbar != null);
     _toolbarController.stop();
+    _toolbar.remove();
+    _toolbar = null;
   }
 
   /// Final cleanup.
@@ -418,7 +431,7 @@ class TextSelectionOverlay {
       return Container(); // hide the second handle when collapsed
     return _TextSelectionHandleOverlay(
       onSelectionHandleChanged: (TextSelection newSelection) { _handleSelectionHandleChanged(newSelection, position); },
-      onSelectionHandleTapped: _handleSelectionHandleTapped,
+      onSelectionHandleTapped: onSelectionHandleTapped,
       layerLink: layerLink,
       renderObject: renderObject,
       selection: _selection,
@@ -475,17 +488,6 @@ class TextSelectionOverlay {
     }
     selectionDelegate.textEditingValue = _value.copyWith(selection: newSelection, composing: TextRange.empty);
     selectionDelegate.bringIntoView(textPosition);
-  }
-
-  void _handleSelectionHandleTapped() {
-    if (_value.selection.isCollapsed) {
-      if (_toolbar != null) {
-        _toolbar?.remove();
-        _toolbar = null;
-      } else {
-        showToolbar();
-      }
-    }
   }
 }
 
@@ -602,7 +604,8 @@ class _TextSelectionHandleOverlayState
   }
 
   void _handleTap() {
-    widget.onSelectionHandleTapped();
+    if (widget.onSelectionHandleTapped != null)
+      widget.onSelectionHandleTapped();
   }
 
   @override
@@ -713,6 +716,7 @@ class TextSelectionGestureDetector extends StatefulWidget {
     this.onDragSelectionUpdate,
     this.onDragSelectionEnd,
     this.behavior,
+    this.deviceKindTracker,
     @required this.child,
   }) : assert(child != null),
        super(key: key);
@@ -773,6 +777,9 @@ class TextSelectionGestureDetector extends StatefulWidget {
   ///
   /// This defaults to [HitTestBehavior.deferToChild].
   final HitTestBehavior behavior;
+
+  /// {@macro flutter.widgets.gestureDetector.deviceKindTracker}
+  final DeviceKindTracker deviceKindTracker;
 
   /// Child below this widget.
   final Widget child;
@@ -994,6 +1001,7 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
       gestures: gestures,
       excludeFromSemantics: true,
       behavior: widget.behavior,
+      deviceKindTracker: widget.deviceKindTracker,
       child: widget.child,
     );
   }

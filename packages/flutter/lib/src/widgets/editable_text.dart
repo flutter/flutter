@@ -290,6 +290,7 @@ class EditableText extends StatefulWidget {
     this.onEditingComplete,
     this.onSubmitted,
     this.onSelectionChanged,
+    this.onSelectionHandleTapped,
     List<TextInputFormatter> inputFormatters,
     this.rendererIgnoresPointer = false,
     this.cursorWidth = 2.0,
@@ -644,6 +645,9 @@ class EditableText extends StatefulWidget {
   /// Called when the user changes the selection of text (including the cursor
   /// location).
   final SelectionChangedCallback onSelectionChanged;
+
+  /// {@macro flutter.widgets.textSelection.onSelectionHandleTapped}
+  final VoidCallback onSelectionHandleTapped;
 
   /// {@template flutter.widgets.editableText.inputFormatters}
   /// Optional input validation and formatting overrides.
@@ -1135,10 +1139,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         selectionControls: widget.selectionControls,
         selectionDelegate: this,
         dragStartBehavior: widget.dragStartBehavior,
+        onSelectionHandleTapped: widget.onSelectionHandleTapped,
       );
-      final bool longPress = cause == SelectionChangedCause.longPress;
-      if (cause != SelectionChangedCause.keyboard && (_value.text.isNotEmpty || longPress))
-        _selectionOverlay.showHandles();
+
       if (widget.onSelectionChanged != null)
         widget.onSelectionChanged(selection, cause);
     }
@@ -1236,7 +1239,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   Duration get cursorBlinkInterval => _kCursorBlinkHalfPeriod;
 
   /// The current status of the text selection handles.
-  @visibleForTesting
   TextSelectionOverlay get selectionOverlay => _selectionOverlay;
 
   int _obscureShowCharTicksPending = 0;
@@ -1374,6 +1376,12 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
     _selectionOverlay.showToolbar();
     return true;
+  }
+
+  /// Shows the handles at the location of the current selection.
+  void showHandles() {
+    assert(_selectionOverlay != null);
+    _selectionOverlay.showHandles();
   }
 
   @override
