@@ -6,24 +6,30 @@
 
 *Replace this paragraph with a list of issues related to this PR from our [issue database]. Indicate, which of these issues are resolved or fixed by this PR.*
 
+## Tests
+
+I added the following tests:
+
+*Replace this with a list of the tests that you added as part of this PR. A change in behaviour with no test covering it
+will likely get reverted accidentally sooner or later. PRs must include tests for all changed/updated/fixed behaviors. See [Test Coverage].*
+
 ## Checklist
 
 Before you create this PR confirm that it meets all requirements listed below by checking the relevant checkboxes (`[x]`). This will ensure a smooth and quick review process.
 
 - [ ] I read the [Contributor Guide] and followed the process outlined there for submitting PRs.
-- [ ] My PR includes tests for *all* changed/updated/fixed behaviors (See [Test Coverage]).
-- [ ] All existing and new tests are passing.
-- [ ] I updated/added relevant documentation (doc comments with `///`).
-- [ ] The analyzer (`flutter analyze --flutter-repo`) does not report any problems on my PR.
-- [ ] I read and followed the [Flutter Style Guide], including [Features we expect every widget to implement].
 - [ ] I signed the [CLA].
+- [ ] I read and followed the [Flutter Style Guide], including [Features we expect every widget to implement].
+- [ ] I updated/added relevant documentation (doc comments with `///`).
+- [ ] All existing and new tests are passing.
+- [ ] The analyzer (`flutter analyze --flutter-repo`) does not report any problems on my PR.
 - [ ] I am willing to follow-up on review comments in a timely manner.
 
 ## Breaking Change
 
 Does your PR require Flutter developers to manually update their apps to accommodate your change?
 
-- [ ] Yes, this is a breaking change (Please read [Handling breaking changes]).
+- [ ] Yes, this is a breaking change (Please read [Handling breaking changes]). *Replace this with a link to the e-mail where you asked for input on this proposed change.*
 - [ ] No, this is *not* a breaking change.
 
 <!-- Links -->
