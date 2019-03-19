@@ -10,26 +10,21 @@ import 'theme.dart';
 
 typedef FocusableOnKeyCallback = bool Function(FocusableNode node, RawKeyEvent event);
 
-/// A widget that manages a [FocusableNode] and allows specification of the
-/// focus order.
-///
-/// The node can be either a scope node or a leaf node. Scope nodes provide a
-/// scope for their children, using the focus traversal policy defined by the
-/// [DefaultFocusTraversal] widget above them to traverse their children.
+/// A widget that manages a [FocusableNode] to allow keyboard focus to be given
+/// to this widget and its descendants.
 ///
 /// It provides [onFocusChange] as a way to be notified when the focus is given
-/// to or removed from this widget, and allows specification of a [focusedDecoration]
-/// to be shown when its [child] has focus.
+/// to or removed from this widget, and allows specification of a
+/// [focusedDecoration] to be shown when its [child] has focus.
 ///
 /// The [onKey] argument allows specification of a key even handler that should
 /// be invoked when this node or one of its children has focus.
 class Focusable extends StatefulWidget {
   /// Creates a widget that manages a [FocusableNode]
   ///
-  /// The [child] arguments is required and must not be null.
+  /// The [child] argument is required and must not be null.
   ///
-  /// The [isScope], [autofocus], and [showDecorations] arguments must not be
-  /// null.
+  /// The [autofocus], and [showDecorations] arguments must not be null.
   const Focusable({
     Key key,
     @required this.child,
@@ -114,20 +109,6 @@ class Focusable extends StatefulWidget {
   /// [decoration].
   final Curve curve;
 
-  /// True if this [Focusable] serves as a scope for other [Focusable]s.
-  ///
-  /// This means that it remembers the last focusable that was focused within
-  /// its descendants, and can move that focus to the next/previous node, or a
-  /// node in a particular direction when the [FocusableNode.nextFocus],
-  /// [FocusableNode.previousFocus], or [FocusableNode.focusInDirection] are
-  /// called on a Focusable node that is a child of this scope, or the node
-  /// owned by this scope node.
-  ///
-  /// The selection process of the node to move to is determined by the node
-  /// traversal policy specified by the nearest enclosing
-  /// [DefaultFocusTraversal] widget.
-  bool get isScope => false;
-
   /// Returns the [node] of the [Focusable] that most tightly encloses the given
   /// [BuildContext].
   ///
@@ -156,7 +137,7 @@ class _FocusableState extends State<Focusable> {
   @override
   void initState() {
     super.initState();
-    if (widget.isScope) {
+    if (widget is FocusableScope) {
       node = FocusableScopeNode(
         autofocus: widget.autofocus,
         key: GlobalKey(debugLabel: widget.debugLabel),
@@ -229,22 +210,35 @@ class _FocusableState extends State<Focusable> {
   }
 }
 
-/// A [Focusable] widget that serves as a scope for other [Focusable]s.
+/// A [FocusableScope] is a [Focusable] that serves as a scope for other
+/// [Focusable]s.
 ///
-/// This means that it remembers the last focusable that was focused within its
+/// It manages a [FocusableScopeNode], managing its lifecycle, and listening for
+/// changes in focus. Scope nodes provide a scope for their children, using the
+/// focus traversal policy defined by the [DefaultFocusTraversal] widget above
+/// them to traverse their children.
+///
+/// Scope nodes remember the last focusable node that was focused within their
 /// descendants, and can move that focus to the next/previous node, or a node in
 /// a particular direction when the [FocusableNode.nextFocus],
 /// [FocusableNode.previousFocus], or [FocusableNode.focusInDirection] are
-/// called on a [Focusable] or [FocusableScope] node that is a child of this
-/// scope, or the node owned by this scope node.
+/// called on a [FocusableNode] or [FocusableScopeNode] that is a child of this
+/// scope, or the node owned by the scope node managed by this widget.
 ///
 /// The selection process of the node to move to is determined by the node
 /// traversal policy specified by the nearest enclosing
 /// [DefaultFocusTraversal] widget.
+///
+/// It provides [onFocusChange] as a way to be notified when the focus is given
+/// to or removed from this widget, and allows specification of a
+/// [focusedDecoration] to be shown when its [child] has focus.
+///
+/// The [onKey] argument allows specification of a key even handler that should
+/// be invoked when this node or one of its children has focus.
 class FocusableScope extends Focusable {
   /// Creates a widget that manages a [FocusableScopeNode]
   ///
-  /// The [child] arguments is required and must not be null.
+  /// The [child] argument is required and must not be null.
   ///
   /// The [autofocus], and [showDecorations] arguments must not be null.
   const FocusableScope({
@@ -277,13 +271,8 @@ class FocusableScope extends Focusable {
         );
 
   @override
-  bool get isScope => true;
-
-  @override
-  _FocusableScopeState createState() => _FocusableScopeState();
+  _FocusableState createState() => _FocusableState();
 }
-
-class _FocusableScopeState extends _FocusableState {}
 
 class _FocusableMarker extends InheritedWidget {
   const _FocusableMarker({

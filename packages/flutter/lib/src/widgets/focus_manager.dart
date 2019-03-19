@@ -419,25 +419,13 @@ class FocusScopeNode extends Object with DiagnosticableTreeMixin {
 
 typedef FocusableNodeVisitor = bool Function(FocusableNode node);
 
-/// An interface for data from policy objects to be held by the scope nodes.
-///
-/// This data is set and requested via [FocusableNode.policyData].
-///
-/// If a policy data object encounters a type of policy data that it doesn't
-/// recognize, then it should not use it, but may overwrite it (this may happen
-/// when the traversal policy is changed).
-abstract class PolicyData {
-  /// A const constructor so that subclasses can be const.
-  const PolicyData();
-}
-
 /// A node used by [Focusable] to represent and change the input focus.
 ///
-/// A `FocusableNode` is created and managed by the [Focusable] widget, forming
+/// A [FocusableNode] is created and managed by the [Focusable] widget, forming
 /// a tree of nodes that represent things that can be given the input focus in
 /// the UI.
 ///
-/// `FocusableNode`s are persistent objects which are reparented and reorganized
+/// [FocusableNode]s are persistent objects which are reparented and reorganized
 /// when the widget tree is rebuilt.
 ///
 /// The can be organized into "scopes", which form groups of nodes which are to
@@ -807,7 +795,7 @@ class FocusableScopeNode extends FocusableNode {
   /// returning in the direction it just came from.
   ///
   /// This data will be cleared if the node moves to another scope.
-  PolicyData policyData;
+  Object policyData;
 
   @visibleForTesting
   @override
