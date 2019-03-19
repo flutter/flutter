@@ -245,6 +245,39 @@ void main() {
     expect(previousPageCompleted, true);
   });
 
+  testWidgets('PageController with viewportFraction and only one child', (WidgetTester tester) async {
+    final List<String> log = <String>[];
+    final PageController controller = PageController(viewportFraction: 0.5);
+
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: Center(
+        child: SizedBox(
+          width: 600.0,
+          height: 400.0,
+          child: PageView(
+            controller: controller,
+            children: <Widget>[
+              GestureDetector(
+                onTap: () {
+                  log.add('Tap');
+                },
+                child: Container(
+                  height: 400.0,
+                  color: const Color(0xFF0000FF),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    ));
+
+    const Offset rightSideOfChild = Offset(400.0, 200.0);
+    await tester.tapAt(rightSideOfChild);
+    expect(log, equals(<String>['Tap']));
+  });
+
   testWidgets('PageView in zero-size container', (WidgetTester tester) async {
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
