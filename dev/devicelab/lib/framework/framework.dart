@@ -90,17 +90,21 @@ class _TaskRunner {
       ).toSet();
       beforeRunningDartInstances.forEach(print);
 
-      final TaskResult result = await _performTask().timeout(taskTimeout);
+      TaskResult result = await _performTask().timeout(taskTimeout);
 
       section('Checking running Dart$exe processes after task...');
       final List<RunningProcessInfo> afterRunningDartInstances = await getRunningProcesses(
         processName: 'dart$exe',
       ).toList();
-      afterRunningDartInstances.forEach(print);
       for (final RunningProcessInfo info in afterRunningDartInstances) {
         if (!beforeRunningDartInstances.contains(info)) {
           print('$info was leaked by this test.');
-          result.data['LeakedDartProcesses'] = true;
+          // TODO(dnfield): remove this special casing after https://github.com/flutter/flutter/issues/29141 is resolved.
+          if (result is TaskResultCheckProcesses) {
+            result = TaskResult.failure('This test leaked dart processes');
+          } else {
+            result = TaskResult.success(null);
+          }
           final bool killed = await killProcess(info.pid);
           if (!killed) {
             print('Failed to kill process ${info.pid}.');
@@ -257,4 +261,8 @@ class TaskResult {
 
     return json;
   }
+}
+
+class TaskResultCheckProcesses extends TaskResult {
+  TaskResultCheckProcesses() : super.success(null);
 }
