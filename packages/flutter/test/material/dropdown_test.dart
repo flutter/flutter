@@ -20,6 +20,13 @@ final Type dropdownButtonType = DropdownButton<String>(
   items: const <DropdownMenuItem<String>>[],
 ).runtimeType;
 
+Finder _iconRichText(Key iconKey) {
+  return find.descendant(
+    of: find.byKey(iconKey),
+    matching: find.byType(RichText),
+  );
+}
+
 Widget buildFrame({
   Key buttonKey,
   String value = 'two',
@@ -481,13 +488,7 @@ void main() {
     expect(icon.size, const Size(24.0, 24.0));
 
     // test for enabled color
-    final RichText enabledRichText = tester.widget<RichText>(
-      find.descendant(
-        of: find.byKey(iconKey),
-        matching: find.byType(RichText),
-      ),
-    );
-
+    final RichText enabledRichText = tester.widget<RichText>(_iconRichText(iconKey));
     expect(enabledRichText.text.style.color, Colors.grey.shade700);
 
     // test for disabled color
@@ -496,13 +497,7 @@ void main() {
       onChanged: null,
     ));
 
-    final RichText disabledRichText = tester.widget<RichText>(
-      find.descendant(
-        of: find.byKey(iconKey),
-        matching: find.byType(RichText),
-      ),
-    );
-
+    final RichText disabledRichText = tester.widget<RichText>(_iconRichText(iconKey));
     expect(disabledRichText.text.style.color, Colors.grey.shade400);
   });
 
@@ -523,13 +518,7 @@ void main() {
     expect(icon.size, const Size(30.0, 30.0));
 
     // test for enabled color
-    final RichText enabledRichText = tester.widget<RichText>(
-      find.descendant(
-        of: find.byKey(iconKey),
-        matching: find.byType(RichText),
-      ),
-    );
-
+    final RichText enabledRichText = tester.widget<RichText>(_iconRichText(iconKey));
     expect(enabledRichText.text.style.color, Colors.pink);
 
     // test for disabled color
@@ -541,13 +530,7 @@ void main() {
       onChanged: null,
     ));
 
-    final RichText disabledRichText = tester.widget<RichText>(
-      find.descendant(
-        of: find.byKey(iconKey),
-        matching: find.byType(RichText),
-      ),
-    );
-
+    final RichText disabledRichText = tester.widget<RichText>(_iconRichText(iconKey));
     expect(disabledRichText.text.style.color, Colors.orange);
   });
 
@@ -574,13 +557,7 @@ void main() {
     expect(icon.size, const Size(40.0, 40.0));
 
     // test for enabled color
-    final RichText enabledRichText = tester.widget<RichText>(
-      find.descendant(
-        of: find.byKey(iconKey),
-        matching: find.byType(RichText),
-      ),
-    );
-
+    final RichText enabledRichText = tester.widget<RichText>(_iconRichText(iconKey));
     expect(enabledRichText.text.style.color, Colors.yellow);
 
     // test for disabled color
@@ -592,13 +569,7 @@ void main() {
       onChanged: null,
     ));
 
-    final RichText disabledRichText = tester.widget<RichText>(
-      find.descendant(
-        of: find.byKey(iconKey),
-        matching: find.byType(RichText),
-      ),
-    );
-
+    final RichText disabledRichText = tester.widget<RichText>(_iconRichText(iconKey));
     expect(disabledRichText.text.style.color, Colors.yellow);
   });
 

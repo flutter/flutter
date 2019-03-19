@@ -661,16 +661,16 @@ class DropdownButton<T> extends StatefulWidget {
   /// Defaults to an [Icon] with the [Icons.arrow_drop_down] glyph.
   final Widget icon;
 
-  /// Sets the disabled icon color if an [Icon] widget is passed into the icon parameter.
+  /// The color of any [Icon] descendant of [icon] if this button is disabled, i.e. if [onChanged] is null.
   ///
-  /// Defaults to [Colors.grey.shade400] when the theme is [Brightness.light] and to
-  /// [Colors.white10] when the theme is [Brightness.dark]
+  /// Defaults to [Colors.grey.shade400] when the theme's [ThemeData.brightness] is [Brightness.light] and to
+  /// [Colors.white10] when it is [Brightness.dark]
   final Color iconDisabledColor;
 
-  /// Sets the enabled icon color if an [Icon] widget is passed into the icon parameter.
+  /// The color of any [Icon] descendant of [icon] if this button is enabled, i.e. if [onChanged] is defined.
   ///
-  /// Defaults to [Colors.grey.shade700] when the theme is [Brightness.light] and to
-  /// [Colors.white70] when the theme is [Brightness.dark]
+  /// Defaults to [Colors.grey.shade700] when the theme's [ThemeData.brightness] is [Brightness.light] and to
+  /// [Colors.white70] when it is [Brightness.dark]
   final Color iconEnabledColor;
 
   /// The size to use for the drop-down button's down arrow icon button.
@@ -858,7 +858,6 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     }
 
     const Icon defaultIcon = Icon(Icons.arrow_drop_down);
-    final Widget dropdownIcon = widget.icon ?? defaultIcon;
 
     Widget result = DefaultTextStyle(
       style: _textStyle,
@@ -875,7 +874,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
                 color: _iconColor,
                 size: widget.iconSize,
               ),
-              child: dropdownIcon,
+              child: widget.icon ?? defaultIcon,
             ),
           ],
         ),
