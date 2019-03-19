@@ -17,7 +17,7 @@ import '../src/common.dart';
 import '../src/context.dart';
 
 void main() {
-  group(UpgradeCommandRunner, () {
+  group('UpgradeCommandRunner', () {
     FakeUpgradeCommandRunner fakeCommandRunner;
     UpgradeCommandRunner realCommandRunner;
     MockProcessManager processManager;
@@ -27,7 +27,7 @@ void main() {
 
     setUp(() {
       fakeCommandRunner = FakeUpgradeCommandRunner();
-      realCommandRunner =UpgradeCommandRunner();
+      realCommandRunner = UpgradeCommandRunner();
       processManager = MockProcessManager();
     });
 
@@ -49,7 +49,7 @@ void main() {
       expect(await result, null);
     });
 
-    test('Doesn\'t throw on known tag, master branch, no force', () async {
+    test('Doesn\'t throw on known tag, dev branch, no force', () async {
       final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
         false,
         gitTagVersion,
@@ -59,14 +59,14 @@ void main() {
     });
 
     test('Only pops stash if it was pushed', () async {
-      fakeCommandRunner.shouldStashChanges = true;
+      fakeCommandRunner.stashName = 'test';
       final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
         false,
         gitTagVersion,
         flutterVersion,
       );
       expect(await result, null);
-      expect(fakeCommandRunner.calledPopStash, true);
+      expect(fakeCommandRunner.appliedStashName, 'test');
     });
 
     testUsingContext('verifyUpstreamConfigured', () async {
@@ -83,7 +83,7 @@ void main() {
       ProcessManager: () => processManager,
     });
 
-    testUsingContext('maybeStashChanges', () async {
+    testUsingContext('maybeStash', () async {
       final String stashName = 'flutter-upgrade-from-v${gitTagVersion.x}.${gitTagVersion.y}.${gitTagVersion.z}';
       when(processManager.run(
         <String>['git', 'stash', 'push', '-m', stashName],
@@ -93,7 +93,7 @@ void main() {
         return FakeProcessResult()
           ..exitCode = 0;
       });
-      await realCommandRunner.maybeStashChanges(gitTagVersion);
+      await realCommandRunner.maybeStash(gitTagVersion);
     }, overrides: <Type, Generator>{
       ProcessManager: () => processManager,
     });
@@ -153,25 +153,25 @@ void main() {
 }
 
 class FakeUpgradeCommandRunner extends UpgradeCommandRunner {
-  bool shouldStashChanges = false;
-  bool calledPopStash = false;
+  String stashName;
+  String appliedStashName;
 
   @override
   Future<void> verifyUpstreamConfigured() async {}
 
   @override
-  Future<bool> maybeStashChanges(GitTagVersion gitTagVersion) async {
-    return shouldStashChanges;
+  Future<String> maybeStash(GitTagVersion gitTagVersion) async {
+    return stashName;
   }
 
   @override
-  Future<void> updateChannel(FlutterVersion flutterVersion) async {}
+  Future<void> upgradeChannel(FlutterVersion flutterVersion) async {}
 
   @override
   Future<void> attemptRebase() async {}
 
   @override
-  Future<void> updateEngine() async {}
+  Future<void> precacheArtifacts() async {}
 
   @override
   Future<void> updatePackages(FlutterVersion flutterVersion) async {}
@@ -180,8 +180,8 @@ class FakeUpgradeCommandRunner extends UpgradeCommandRunner {
   Future<void> runDoctor() async {}
 
   @override
-  Future<void> popChanges() async {
-    calledPopStash = true;
+  Future<void> applyStash(String stashName) async {
+    appliedStashName = stashName;
   }
 }
 

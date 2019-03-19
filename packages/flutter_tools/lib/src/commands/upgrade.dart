@@ -67,15 +67,13 @@ class UpgradeCommandRunner {
         );
       }
     }
-    final bool stashedChanges = await maybeStashChanges(gitTagVersion);
-    await updateChannel(flutterVersion);
+    final String stashName = await maybeStash(gitTagVersion);
+    await upgradeChannel(flutterVersion);
     await attemptRebase();
-    await updateEngine();
+    await precacheArtifacts();
     await updatePackages(flutterVersion);
     await runDoctor();
-    if (stashedChanges) {
-      await popChanges();
-    }
+    await applyStash(stashName);
     return null;
   }
 
@@ -92,28 +90,31 @@ class UpgradeCommandRunner {
     }
   }
 
-  /// Attempt to stash any local changes, returning true if successufl.
+  /// Attempt to stash any local changes.
   ///
-  /// Exits tool if `git stash` returns a non-zero exit code.
-  Future<bool> maybeStashChanges(GitTagVersion gitTagVersion) async {
-    bool stashedChanges = false;
+  /// Returns the stash name if any changes were stashed. Exits tool if
+  /// `git stash` returns a non-zero exit code.
+  Future<String> maybeStash(GitTagVersion gitTagVersion) async {
     final String stashName = 'flutter-upgrade-from-v${gitTagVersion.x}.${gitTagVersion.y}.${gitTagVersion.z}';
     try {
       final RunResult runResult = await runCheckedAsync(<String>[
         'git', 'stash', 'push', '-m', stashName
       ]);
-      // output message will contain stashname if successful.
+      // output message will contain stash name if any changes were stashed..
       if (runResult.stdout.contains(stashName)) {
-        stashedChanges = true;
+        return stashName;
       }
     } catch (e) {
       throwToolExit('Failed to stash local changes: $e');
     }
-    return stashedChanges;
+    return null;
   }
 
   /// Attempts to upgrade the channel.
-  Future<void> updateChannel(FlutterVersion flutterVersion) async {
+  ///
+  /// If the user is on a deprecated channel, attempts to migrate them off of
+  /// it.
+  Future<void> upgradeChannel(FlutterVersion flutterVersion) async {
     printStatus('Upgrading Flutter from ${Cache.flutterRoot}...');
     await ChannelCommand.upgradeChannel();
   }
@@ -133,13 +134,12 @@ class UpgradeCommandRunner {
     }
   }
 
-  /// Update the engine repository.
+  /// Update the engine repository and precache all artifacts.
   ///
-  /// Check for and download any engine and pkg/ updates.
-  /// We run the 'flutter' shell script re-entrantly here
-  /// so that it will download the updated Dart and so forth
-  /// if necessary.
-  Future<void> updateEngine() async {
+  /// Check for and download any engine and pkg/ updates. We run the 'flutter'
+  /// shell script re-entrantly here so that it will download the updated
+  /// Dart and so forth if necessary.
+  Future<void> precacheArtifacts() async {
     printStatus('');
     printStatus('Upgrading engine...');
     final int code = await runCommandAndStreamOutput(
@@ -178,11 +178,19 @@ class UpgradeCommandRunner {
     );
   }
 
-  /// Pop stash changes.
-  ///
-  /// This should only be called if [maybeStashChanges] returned true.
-  Future<void> popChanges() async {
+  /// Pop stash changes if [stashName] is non-null and contained in stash.
+  Future<void> applyStash(String stashName) async {
+    if (stashName == null) {
+      return;
+    }
     try {
+      final RunResult result = await runCheckedAsync(<String>[
+        'git', 'stash', 'list'
+      ]);
+      if (!result.stdout.contains(stashName)) {
+        // print the same warning as if this threw.
+        throw Exception();
+      }
       await runCheckedAsync(<String>[
         'git', 'stash', 'pop',
       ]);
