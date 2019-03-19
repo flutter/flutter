@@ -593,7 +593,10 @@ class FocusableNode extends FocusNode {
     // Set the focus to the focused child of this scope, if it is one. Otherwise
     // start with setting the focus to this node itself.
     if (!isImplicit) {
-      enclosingScope.policyData = null;
+      final FocusableScopeNode scope = enclosingScope;
+      if (scope != null) {
+        scope.policyData = null;
+      }
     }
     _manager._markNeedsUpdate(newFocus: this);
   }
@@ -782,7 +785,10 @@ class FocusableScopeNode extends FocusableNode {
       primaryFocus = scope.focusedChild;
     }
     if (!isImplicit) {
-      primaryFocus.enclosingScope.policyData = null;
+      final FocusableScopeNode scope = primaryFocus.enclosingScope;
+      if (scope != null) {
+        scope.policyData = null;
+      }
     }
     _manager._markNeedsUpdate(newFocus: primaryFocus);
   }
