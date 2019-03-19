@@ -165,7 +165,7 @@ Future<ProcessResult> _runFlutterTest(
   if (!testPackages.existsSync()) {
     await Process.run(fs.path.join(dartSdkPath, 'bin', 'dart'), <String>[]
       ..addAll(dartVmFlags)
-      ..add(fs.path.absolute(fs.path.join('bin', 'flutter_tools.dart'))
+      ..add(fs.path.absolute(fs.path.join('bin', 'flutter_tools.dart')))
       ..addAll(<String>['packages', 'get']),
       workingDirectory: workingDirectory,
     );
