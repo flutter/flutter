@@ -172,10 +172,8 @@ class AndroidApk extends ApplicationPackage {
       } else {
         manifestLocation = fs.path.join(androidProject.hostAppGradleRoot.path, 'AndroidManifest.xml');
       }
-      printError(
-        '''AndroidManifest.xml is not a valid XML document.
-        Please check $manifestLocation for errors.'''
-      );
+      printError('AndroidManifest.xml is not a valid XML document.');
+      printError('Please check $manifestLocation for errors.');
       throwToolExit('XML Parser error message: ${exception.toString()}', exitCode: 1);
     }
 
