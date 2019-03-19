@@ -69,7 +69,7 @@ int _checkIos(String outPath, String nmPath, Iterable<String> builds) {
       continue;
     }
     final Iterable<NmEntry> unexpectedEntries = NmEntry.parse(nmResult.stdout).where((NmEntry entry) {
-      return !((entry.type == '(__DATA,__common)' && entry.name.startsWith('_Flutter'))
+      return !(((entry.type == '(__DATA,__common)' || entry.type == '(__DATA,__const)') && entry.name.startsWith('_Flutter'))
           || (entry.type == '(__DATA,__objc_data)'
               && (entry.name.startsWith('_OBJC_METACLASS_\$_Flutter') || entry.name.startsWith('_OBJC_CLASS_\$_Flutter'))));
     });
