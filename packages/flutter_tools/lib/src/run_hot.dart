@@ -215,8 +215,7 @@ class HotRunner extends ResidentRunner {
       printStatus('Running in benchmark mode.');
       // Measure time to perform a hot restart.
       printStatus('Benchmarking hot restart');
-      await restart(fullRestart: true);
-      await Future<void>.delayed(const Duration(seconds: 2));
+      await restart(fullRestart: true, benchmarkMode: true);
       printStatus('Benchmarking hot reload');
       // Measure time to perform a hot reload.
       await restart(fullRestart: false);
@@ -403,7 +402,7 @@ class HotRunner extends ResidentRunner {
 
   }
 
-  Future<OperationResult> _restartFromSources({ String reason }) async {
+  Future<OperationResult> _restartFromSources({ String reason, bool benchmarkMode = false }) async {
     final Map<String, String> analyticsParameters =
       reason == null
         ? null
@@ -466,6 +465,25 @@ class HotRunner extends ResidentRunner {
         restartTimer.elapsed.inMilliseconds);
     flutterUsage.sendEvent('hot', 'restart', parameters: analyticsParameters);
     flutterUsage.sendTiming('hot', 'restart', restartTimer.elapsed);
+
+    // In benchmark mode, make sure all stream notifications have finished.
+    if (benchmarkMode) {
+      final List<Future<void>> isolateNotifications = <Future<void>>[];
+      for (FlutterDevice device in flutterDevices) {
+        for (FlutterView view in device.views) {
+          isolateNotifications.add(
+            view.owner.vm.vmService.onIsolateEvent.then((Stream<ServiceEvent> serviceEvents) async {
+              await for (ServiceEvent serviceEvent in serviceEvents) {
+                if (serviceEvent.owner.name.contains('_spawn') == true && serviceEvent.kind == ServiceEvent.kIsolateExit) {
+                  return;
+                }
+              }
+            }),
+          );
+        }
+      }
+      await Future.wait(isolateNotifications);
+    }
     return OperationResult.ok;
   }
 
@@ -512,7 +530,7 @@ class HotRunner extends ResidentRunner {
   bool get supportsRestart => true;
 
   @override
-  Future<OperationResult> restart({ bool fullRestart = false, bool pauseAfterRestart = false, String reason }) async {
+  Future<OperationResult> restart({ bool fullRestart = false, bool pauseAfterRestart = false, String reason, bool benchmarkMode = false }) async {
     final Stopwatch timer = Stopwatch()..start();
     if (fullRestart) {
       if (!canHotRestart) {
@@ -526,7 +544,7 @@ class HotRunner extends ResidentRunner {
       try {
         if (!(await hotRunnerConfig.setupHotRestart()))
           return OperationResult(1, 'setupHotRestart failed');
-        final OperationResult result = await _restartFromSources(reason: reason);
+        final OperationResult result = await _restartFromSources(reason: reason, benchmarkMode: benchmarkMode,);
         if (!result.isOk)
           return result;
       } finally {
@@ -574,7 +592,7 @@ class HotRunner extends ResidentRunner {
     }
   }
 
-  Future<OperationResult> _reloadSources({ bool pause = false, String reason, void Function(String message) onSlow }) async {
+  Future<OperationResult> _reloadSources({ bool pause = false, String reason, void Function(String message) onSlow, }) async {
     final Map<String, String> analyticsParameters = <String, String>{};
     if (reason != null) {
       analyticsParameters[kEventReloadReasonParameterName] = reason;
