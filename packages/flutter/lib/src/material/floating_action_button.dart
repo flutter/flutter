@@ -6,10 +6,10 @@ import 'dart:math' as math;
 
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/src/material/floating_action_button_theme.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button.dart';
+import 'floating_action_button_theme.dart';
 import 'scaffold.dart';
 import 'theme.dart';
 import 'theme_data.dart';
