@@ -23,6 +23,7 @@
 - (instancetype)initWithCoder:(NSCoder*)aDecoder NS_UNAVAILABLE;
 
 - (instancetype)init NS_DESIGNATED_INITIALIZER;
+- (instancetype)initWithContentsScale:(CGFloat)contentsScale;
 - (std::unique_ptr<shell::IOSSurface>)createSoftwareSurface;
 - (std::unique_ptr<shell::IOSSurfaceGL>)createGLSurfaceWithContext:
     (std::shared_ptr<shell::IOSGLContext>)gl_context;
