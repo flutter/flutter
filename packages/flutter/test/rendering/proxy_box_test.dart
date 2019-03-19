@@ -64,10 +64,10 @@ void main() {
     layout(root, phase: EnginePhase.composite);
     expect(root.needsCompositing, isFalse);
 
-    // Flutter now composites physical shapes on all platforms.
+    // On non-Fuchsia platforms, Flutter draws its own shadows.
     root.elevation = 1.0;
     pumpFrame(phase: EnginePhase.composite);
-    expect(root.needsCompositing, isTrue);
+    expect(root.needsCompositing, isFalse);
 
     root.elevation = 0.0;
     pumpFrame(phase: EnginePhase.composite);
@@ -127,10 +127,10 @@ void main() {
       layout(root, phase: EnginePhase.composite);
       expect(root.needsCompositing, isFalse);
 
-      // On non-Fuchsia platforms, we composite physical shape layers
+      // On non-Fuchsia platforms, Flutter draws its own shadows.
       root.elevation = 1.0;
       pumpFrame(phase: EnginePhase.composite);
-      expect(root.needsCompositing, isTrue);
+      expect(root.needsCompositing, isFalse);
 
       root.elevation = 0.0;
       pumpFrame(phase: EnginePhase.composite);
