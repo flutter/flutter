@@ -522,6 +522,7 @@ class SliverGeometry extends Diagnosticable {
     double layoutExtent,
     this.maxPaintExtent = 0.0,
     this.maxScrollObstructionExtent = 0.0,
+    this.hitTestOrigin = 0.0,
     double hitTestExtent,
     bool visible,
     this.hasVisualOverflow = false,
@@ -638,8 +639,12 @@ class SliverGeometry extends Diagnosticable {
   /// actually scroll is reduced by the height of the app bar.
   final double maxScrollObstructionExtent;
 
-  /// The distance from where this sliver started painting to the bottom of
+  /// The distance from where this sliver started painting to the top of
   /// where it should accept hits.
+  final double hitTestOrigin;
+
+  /// The distance from [hitTestOrigin] to the bottom of where it should
+  /// accept hits.
   ///
   /// This must be between zero and [paintExtent]. It defaults to [paintExtent].
   final double hitTestExtent;
@@ -1166,7 +1171,7 @@ abstract class RenderSliver extends RenderObject {
   /// render object is to override its [hitTestSelf] and [hitTestChildren]
   /// methods.
   bool hitTest(HitTestResult result, { @required double mainAxisPosition, @required double crossAxisPosition }) {
-    if (mainAxisPosition >= 0.0 && mainAxisPosition < geometry.hitTestExtent &&
+    if (mainAxisPosition >= geometry.hitTestOrigin && mainAxisPosition < geometry.hitTestOrigin + geometry.hitTestExtent &&
         crossAxisPosition >= 0.0 && crossAxisPosition < constraints.crossAxisExtent) {
       if (hitTestChildren(result, mainAxisPosition: mainAxisPosition, crossAxisPosition: crossAxisPosition) ||
           hitTestSelf(mainAxisPosition: mainAxisPosition, crossAxisPosition: crossAxisPosition)) {

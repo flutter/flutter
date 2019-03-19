@@ -243,6 +243,8 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
       to: trailingScrollOffset,
     );
 
+    final double hitTestOrigin = math.max(leadingScrollOffset - scrollOffset, 0.0);
+
     final double cacheExtent = calculateCacheOffset(
       constraints,
       from: leadingScrollOffset,
@@ -255,6 +257,7 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
     geometry = SliverGeometry(
       scrollExtent: estimatedMaxScrollOffset,
       paintExtent: paintExtent,
+      hitTestOrigin: hitTestOrigin,
       cacheExtent: cacheExtent,
       maxPaintExtent: estimatedMaxScrollOffset,
       // Conservative to avoid flickering away the clip during scroll.
