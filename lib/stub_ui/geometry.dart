@@ -73,7 +73,7 @@ abstract class OffsetBase {
   ///
   /// This is a partial ordering. It is possible for two values to be neither
   /// less, nor greater than, nor equal to, another.
-  bool operator >=(OffsetBase other) => _dx > other._dx && _dy >= other._dy;
+  bool operator >=(OffsetBase other) => _dx >= other._dx && _dy >= other._dy;
 
   /// Equality operator. Compares an [Offset] or [Size] to another [Offset] or
   /// [Size], and returns true if the horizontal and vertical values of the
