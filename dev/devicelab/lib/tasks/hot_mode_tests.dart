@@ -48,7 +48,7 @@ TaskFunction createHotModeTest() {
           process.stdout
               .transform<String>(utf8.decoder)
               .transform<String>(const LineSplitter())
-              .listen((String line) async {
+              .listen((String line) {
             if (line.contains('\] Reloaded ')) {
               if (hotReloadCount == 0) {
                 // Update the file and reload again.
