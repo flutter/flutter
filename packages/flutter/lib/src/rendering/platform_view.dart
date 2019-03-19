@@ -381,8 +381,8 @@ class RenderUiKitView extends RenderBox {
       return;
     }
     _viewController.rejectGesture();
-    //_gestureRecognizer.addPointer(event);
-    //_lastPointerDownEvent = event;
+    _gestureRecognizer.addPointer(event);
+    _lastPointerDownEvent = event;
   }
 
   // This is registered as a global PointerRoute while the render object is attached.
@@ -399,7 +399,7 @@ class RenderUiKitView extends RenderBox {
       // This means that the pointer event was absorbed by a different render object.
       // Since on the platform side the FlutterTouchIntercepting view is seeing all events that are
       // within its bounds we need to tell it to reject the current touch sequence.
-      //_viewController.rejectGesture();
+      _viewController.rejectGesture();
     }
     _lastPointerDownEvent = null;
   }
@@ -474,13 +474,11 @@ class _UiKitViewGestureRecognizer extends OneSequenceGestureRecognizer {
   @override
   void acceptGesture(int pointer) {
     controller.acceptGesture();
-    print('render object accept');
   }
 
   @override
   void rejectGesture(int pointer) {
     controller.rejectGesture();
-    print('reject object accept');
   }
 
   void reset() {
