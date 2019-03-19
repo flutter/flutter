@@ -10,6 +10,7 @@ import '../base/file_system.dart';
 import '../base/platform.dart';
 import '../cache.dart';
 import '../codegen.dart';
+import '../dart/pub.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
 import '../test/coverage_collector.dart';
@@ -99,9 +100,8 @@ class TestCommand extends FastFlutterCommand {
         'called *_test.dart and must reside in the package\'s \'test\' '
         'directory (or one of its subdirectories).');
     }
-    if (!fs.isFileSync('.packages')) {
-      throwToolExit(
-        'Error: No .packages file, run "flutter packages get".');
+    if (shouldRunPub) {
+      await pubGet(context: PubContext.getVerifyContext(name), skipPubspecYamlCheck: true);
     }
     final List<String> names = argResults['name'];
     final List<String> plainNames = argResults['plain-name'];

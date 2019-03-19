@@ -663,7 +663,7 @@ abstract class FlutterCommand extends Command<void> {
   ApplicationPackageStore applicationPackages;
 }
 
-
+/// A command which runs less analytics and checks to speed up startup time.
 abstract class FastFlutterCommand extends FlutterCommand {
   @override
   Future<void> run() {

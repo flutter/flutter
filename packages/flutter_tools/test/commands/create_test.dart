@@ -1010,13 +1010,6 @@ Future<void> _runFlutterTest(Directory workingDir, { String target }) async {
     args.add(target);
   }
 
-  // Run packages get first.
-  await Process.run(fs.path.join(dartSdkPath, 'bin', 'dart'), <String>[]
-    ..addAll(dartVmFlags)
-    ..add(flutterToolsPath)
-    ..addAll(<String>['packages', 'get']),
-    workingDirectory: workingDir.path,
-  );
   final ProcessResult exec = await Process.run(
     '$dartSdkPath/bin/dart',
     args,

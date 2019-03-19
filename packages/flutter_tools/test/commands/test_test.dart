@@ -157,19 +157,8 @@ Future<ProcessResult> _runFlutterTest(
 
   final String testFilePath = fs.path.join(testDirectory, '${testName}_test.dart');
   final File testFile = fs.file(testFilePath);
-  if (!testFile.existsSync()) {
+  if (!testFile.existsSync())
     fail('missing test file: $testFile');
-  }
-  final String testPackagesPath = fs.path.join(testDirectory, '.packges');
-  final File testPackages = fs.file(testPackagesPath);
-  if (!testPackages.existsSync()) {
-    await Process.run(fs.path.join(dartSdkPath, 'bin', 'dart'), <String>[]
-      ..addAll(dartVmFlags)
-      ..add(fs.path.absolute(fs.path.join('bin', 'flutter_tools.dart')))
-      ..addAll(<String>['packages', 'get']),
-      workingDirectory: workingDirectory,
-    );
-  }
 
   final List<String> args = <String>[]
     ..addAll(dartVmFlags)
