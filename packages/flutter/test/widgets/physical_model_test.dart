@@ -48,11 +48,11 @@ void main() {
           child: Padding(
             padding: const EdgeInsets.all(50),
             child: Row(
-              children: <Widget> [
-                Material(child: const Text('A long long long long long long long string')),
-                Material(child: const Text('A long long long long long long long string')),
-                Material(child: const Text('A long long long long long long long string')),
-                Material(child: const Text('A long long long long long long long string')),
+              children: const <Widget>[
+                Material(child: Text('A long long long long long long long string')),
+                Material(child: Text('A long long long long long long long string')),
+                Material(child: Text('A long long long long long long long string')),
+                Material(child: Text('A long long long long long long long string')),
               ],
             ),
           ),
