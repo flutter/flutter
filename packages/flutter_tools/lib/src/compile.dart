@@ -80,59 +80,65 @@ class StdoutHandler {
   final List<Uri> sources = <Uri>[];
 
   bool _suppressCompilerMessages;
+  bool _expectSources;
 
   void handler(String message) {
     printTrace('-> $message');
     const String kResultPrefix = 'result ';
     if (boundaryKey == null && message.startsWith(kResultPrefix)) {
       boundaryKey = message.substring(kResultPrefix.length);
-    } else if (message.startsWith(boundaryKey)) {
-      if (state == StdoutState.CollectDiagnostic) {
-        state = StdoutState.CollectDependencies;
-      } else {
-        if (message.length <= boundaryKey.length) {
-          compilerOutput.complete(null);
+      return;
+    }
+    if (message.startsWith(boundaryKey)) {
+      if (_expectSources) {
+        if (state == StdoutState.CollectDiagnostic) {
+          state = StdoutState.CollectDependencies;
           return;
         }
-        final int spaceDelimiter = message.lastIndexOf(' ');
-        compilerOutput.complete(
-            CompilerOutput(
-                message.substring(boundaryKey.length + 1, spaceDelimiter),
-                int.parse(message.substring(spaceDelimiter + 1).trim()),
-                sources));
+      }
+      if (message.length <= boundaryKey.length) {
+        compilerOutput.complete(null);
+        return;
+      }
+      final int spaceDelimiter = message.lastIndexOf(' ');
+      compilerOutput.complete(
+          CompilerOutput(
+              message.substring(boundaryKey.length + 1, spaceDelimiter),
+              int.parse(message.substring(spaceDelimiter + 1).trim()),
+              sources));
+      return;
+    }
+    if (state == StdoutState.CollectDiagnostic) {
+      if (!_suppressCompilerMessages) {
+        if (compilerMessageReceived == false) {
+          consumer('\nCompiler message:');
+          compilerMessageReceived = true;
+        }
+        consumer(message);
       }
     } else {
-      if (state == StdoutState.CollectDiagnostic) {
-        if (!_suppressCompilerMessages) {
-          if (compilerMessageReceived == false) {
-            consumer('\nCompiler message:');
-            compilerMessageReceived = true;
-          }
-          consumer(message);
-        }
-      } else {
-        assert(state == StdoutState.CollectDependencies);
-        switch (message[0]) {
-          case '+':
-            sources.add(Uri.parse(message.substring(1)));
-            break;
-          case '-':
-            sources.remove(Uri.parse(message.substring(1)));
-            break;
-          default:
-            printTrace('Unexpected prefix for $message uri - ignoring');
-        }
+      assert(state == StdoutState.CollectDependencies);
+      switch (message[0]) {
+        case '+':
+          sources.add(Uri.parse(message.substring(1)));
+          break;
+        case '-':
+          sources.remove(Uri.parse(message.substring(1)));
+          break;
+        default:
+          printTrace('Unexpected prefix for $message uri - ignoring');
       }
     }
   }
 
   // This is needed to get ready to process next compilation result output,
   // with its own boundary key and new completer.
-  void reset({ bool suppressCompilerMessages = false }) {
+  void reset({ bool suppressCompilerMessages = false, bool expectSources = true }) {
     boundaryKey = null;
     compilerMessageReceived = false;
     compilerOutput = Completer<CompilerOutput>();
     _suppressCompilerMessages = suppressCompilerMessages;
+    _expectSources = expectSources;
     state = StdoutState.CollectDiagnostic;
   }
 }
@@ -602,7 +608,7 @@ class ResidentCompiler {
   }
 
   Future<CompilerOutput> _compileExpression(_CompileExpressionRequest request) async {
-    _stdoutHandler.reset(suppressCompilerMessages: true);
+    _stdoutHandler.reset(suppressCompilerMessages: true, expectSources: false);
 
     // 'compile-expression' should be invoked after compiler has been started,
     // program was compiled.
