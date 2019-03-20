@@ -16,9 +16,11 @@ import 'base/io.dart';
 import 'base/platform.dart';
 import 'base/process_manager.dart';
 import 'base/terminal.dart';
+import 'cache.dart';
 import 'convert.dart';
 import 'dart/package_map.dart';
 import 'globals.dart';
+import 'project.dart';
 
 KernelCompiler get kernelCompiler => context[KernelCompiler];
 
@@ -214,6 +216,11 @@ class KernelCompiler {
     final String frontendServer = artifacts.getArtifactPath(
       Artifact.frontendServerSnapshotForEngineDartSdk
     );
+    FlutterProject flutterProject;
+    if (fs.file('pubspec.yaml').existsSync()) {
+      flutterProject = await FlutterProject.current();
+    }
+    final FlutterEngine engine = FlutterEngine(cache);
 
     // TODO(cbracken): eliminate pathFilter.
     // Currently the compiler emits buildbot paths for the core libs in the
@@ -227,6 +234,8 @@ class KernelCompiler {
           'entryPoint': mainPath,
           'trackWidgetCreation': trackWidgetCreation.toString(),
           'linkPlatformKernelIn': linkPlatformKernelIn.toString(),
+          'engineHash': engine.version,
+          'buildersUsed': '${flutterProject != null ? await flutterProject.hasBuilders : false}',
         },
         depfilePaths: <String>[depFilePath],
         pathFilter: (String path) => !path.startsWith('/b/build/slave/'),
