@@ -99,7 +99,7 @@ Future<void> _verifyInternationalizations() async {
     workingDirectory: flutterRoot,
   );
 
-  final String localizationsFile = path.join('packages', 'flutter_localizations', 'lib', 'src', 'l10n', 'localizations.dart');
+  final String localizationsFile = path.join('packages', 'flutter_localizations', 'lib', 'src', 'l10n', 'generated_material_localizations.dart');
   final String expectedResult = await File(localizationsFile).readAsString();
 
   if (genResult.stdout.trim() != expectedResult.trim()) {
