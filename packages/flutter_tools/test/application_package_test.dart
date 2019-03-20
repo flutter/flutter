@@ -131,7 +131,7 @@ void main() {
   });
 
   group('ApkManifestData', () {
-    test('Parses manifest with an Activity that has enabled set to true, action set to android.intent.action.MAIN and category set to android.intent.category.LAUNCHER', () {
+    testUsingContext('Parses manifest with an Activity that has enabled set to true, action set to android.intent.action.MAIN and category set to android.intent.category.LAUNCHER', () {
       final ApkManifestData data = ApkManifestData.parseFromXmlDump(_aaptDataWithExplicitEnabledAndMainLauncherActivity);
       expect(data, isNotNull);
       expect(data.packageName, 'io.flutter.examples.hello_world');
@@ -156,14 +156,14 @@ void main() {
       final BufferLogger logger = context[Logger];
       expect(
           logger.errorText, 'Error running io.flutter.examples.hello_world. Default activity not found\n');
-    });
+    }, overrides: noColorTerminalOverride);
     testUsingContext('Error when parsing manifest with no Activity that has category set to android.intent.category.LAUNCHER', () {
       final ApkManifestData data = ApkManifestData.parseFromXmlDump(_aaptDataWithNoLauncherActivity);
       expect(data, isNull);
       final BufferLogger logger = context[Logger];
       expect(
           logger.errorText, 'Error running io.flutter.examples.hello_world. Default activity not found\n');
-    });
+    }, overrides: noColorTerminalOverride);
   });
 
   group('PrebuiltIOSApp', () {
