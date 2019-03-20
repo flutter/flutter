@@ -1,0 +1,88 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("publish.gni")
+
+_wrapper_includes = [
+  "include/flutter/basic_message_channel.h",
+  "include/flutter/binary_messenger.h",
+  "include/flutter/engine_method_result.h",
+  "include/flutter/json_message_codec.h",
+  "include/flutter/json_method_codec.h",
+  "include/flutter/json_type.h",
+  "include/flutter/message_codec.h",
+  "include/flutter/method_call.h",
+  "include/flutter/method_channel.h",
+  "include/flutter/method_codec.h",
+  "include/flutter/method_result.h",
+  "include/flutter/plugin_registrar.h",
+]
+
+# TODO: Once the wrapper API is more stable, consolidate to as few files as is
+# reasonable (without forcing different kinds of clients to take unnecessary
+# code) to simplify use.
+_wrapper_sources = [
+  "engine_method_result.cc",
+  "json_message_codec.cc",
+  "json_method_codec.cc",
+  "plugin_registrar.cc",
+]
+
+# Client library build for internal use by the shell implementation.
+source_set("client_wrapper") {
+  sources = _wrapper_sources
+  public = _wrapper_includes
+
+  deps = [
+    "$flutter_root/shell/platform/common/cpp:common_cpp_library_headers",
+    "//third_party/rapidjson",
+  ]
+
+  defines = [ "USE_RAPID_JSON" ]
+
+  configs += [
+    "$flutter_root/shell/platform/common/cpp:desktop_library_implementation",
+  ]
+
+  public_configs = [
+    "$flutter_root/shell/platform/common/cpp:relative_flutter_library_headers",
+  ]
+}
+
+# Copies the client wrapper code to the output directory.
+publish_client_wrapper("publish_wrapper") {
+  public = _wrapper_includes
+  sources = _wrapper_sources + [ "README" ]
+}
+
+source_set("client_wrapper_library_stubs") {
+  sources = [
+    "testing/stub_flutter_api.cc",
+    "testing/stub_flutter_api.h",
+  ]
+
+  public_deps = [
+    "$flutter_root/shell/platform/common/cpp:common_cpp_library_headers",
+  ]
+}
+
+executable("client_wrapper_unittests") {
+  testonly = true
+
+  # TODO: Add more unit tests.
+  sources = [
+    "method_call_unittests.cc",
+    "plugin_registrar_unittests.cc",
+  ]
+
+  deps = [
+    ":client_wrapper",
+    ":client_wrapper_library_stubs",
+    "$flutter_root/testing",
+
+    # TODO: Consider refactoring flutter_root/testing so that there's a testing
+    # target that doesn't require a Dart runtime to be linked in.
+    "//third_party/dart/runtime:libdart_jit",
+  ]
+}

@@ -1,0 +1,42 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Publishes client wrapper files to the output directory for distribution.
+# This can be used multiple times to combine various portions of a wrapper
+# library into one cohesive library for clients to consume.
+#
+# Files that should be built by clients go into 'sources', while headers meant
+# to be included by the consuming code go into 'public'.
+#
+# All public code is assumed to be in the 'flutter' namespace.
+template("publish_client_wrapper") {
+  template_target_name = target_name
+  publish_dir_root = "$root_out_dir/cpp_client_wrapper"
+  namespace = "flutter"
+
+  group(template_target_name) {
+    deps = [
+      ":${template_target_name}_publish_includes",
+      ":${template_target_name}_publish_sources",
+    ]
+  }
+
+  copy("${template_target_name}_publish_includes") {
+    visibility = [ ":$template_target_name" ]
+
+    sources = invoker.public
+    outputs = [
+      "$publish_dir_root/include/$namespace/{{source_file_part}}",
+    ]
+  }
+
+  copy("${template_target_name}_publish_sources") {
+    visibility = [ ":$template_target_name" ]
+
+    sources = invoker.sources
+    outputs = [
+      "$publish_dir_root/{{source_file_part}}",
+    ]
+  }
+}

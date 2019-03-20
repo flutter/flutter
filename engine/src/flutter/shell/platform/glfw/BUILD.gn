@@ -1,0 +1,80 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+_public_headers = [ "public/flutter_glfw.h" ]
+
+# Any files that are built by clients (client_wrapper code, library headers for
+# implementations using this shared code, etc.) include the public headers
+# assuming they are in the include path. This configuration should be added to
+# any such code that is also built by GN to make the includes work.
+config("relative_flutter_glfw_headers") {
+  include_dirs = [ "public" ]
+}
+
+# The headers are a separate source set since the client wrapper is allowed
+# to depend on the public headers, but none of the rest of the code.
+source_set("flutter_glfw_headers") {
+  public = _public_headers
+
+  public_deps = [
+    "$flutter_root/shell/platform/common/cpp:common_cpp_library_headers",
+  ]
+
+  configs += [
+    "$flutter_root/shell/platform/common/cpp:desktop_library_implementation",
+  ]
+
+  public_configs = [
+    "$flutter_root/shell/platform/common/cpp:relative_flutter_library_headers",
+  ]
+}
+
+source_set("flutter_glfw") {
+  sources = [
+    "flutter_glfw.cc",
+    "key_event_handler.cc",
+    "key_event_handler.h",
+    "keyboard_hook_handler.h",
+    "text_input_plugin.cc",
+    "text_input_plugin.h",
+  ]
+
+  defines = [ "USE_RAPID_JSON" ]
+
+  configs += [
+    "$flutter_root/shell/platform/common/cpp:desktop_library_implementation",
+  ]
+
+  deps = [
+    ":flutter_glfw_headers",
+    "$flutter_root/shell/platform/common/cpp:common_cpp",
+    "$flutter_root/shell/platform/common/cpp/client_wrapper:client_wrapper",
+    "$flutter_root/shell/platform/embedder:embedder",
+    "$flutter_root/shell/platform/glfw/client_wrapper:client_wrapper_glfw",
+    "//third_party/rapidjson",
+  ]
+
+  if (is_linux) {
+    libs = [ "GL" ]
+
+    configs += [
+      "$flutter_root/shell/platform/linux/config:epoxy",
+      "$flutter_root/shell/platform/linux/config:glfw3",
+      "$flutter_root/shell/platform/linux/config:gtk3",
+      "$flutter_root/shell/platform/linux/config:x11",
+    ]
+  }
+}
+
+copy("publish_headers_glfw") {
+  sources = _public_headers
+  outputs = [
+    "$root_out_dir/{{source_file_part}}",
+  ]
+
+  # The GLFW header assumes the presence of the common headers.
+  deps = [
+    "$flutter_root/shell/platform/common/cpp:publish_headers",
+  ]
+}
