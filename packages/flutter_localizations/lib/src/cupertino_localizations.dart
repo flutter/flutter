@@ -39,7 +39,7 @@ abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
   const GlobalCupertinoLocalizations({
     @required String localeName,
     @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat mediumDateFormat,
+    @required intl.DateFormat dayFormat,
     @required intl.DateFormat longDateFormat,
     @required intl.DateFormat yearMonthFormat,
     @required intl.NumberFormat decimalFormat,
@@ -48,269 +48,152 @@ abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
        _localeName = localeName,
        assert(fullYearFormat != null),
        _fullYearFormat = fullYearFormat,
-       assert(mediumDateFormat != null),
-       _mediumDateFormat = mediumDateFormat,
-       assert(longDateFormat != null),
-       _longDateFormat = longDateFormat,
-       assert(yearMonthFormat != null),
-       _yearMonthFormat = yearMonthFormat,
-       assert(decimalFormat != null),
-       _decimalFormat = decimalFormat,
-       assert(twoDigitZeroPaddedFormat != null),
-       _twoDigitZeroPaddedFormat = twoDigitZeroPaddedFormat;
+       assert(dayFormat != null),
+       _dayFormat = dayFormat;
 
   final String _localeName;
   final intl.DateFormat _fullYearFormat;
-  final intl.DateFormat _mediumDateFormat;
-  final intl.DateFormat _longDateFormat;
-  final intl.DateFormat _yearMonthFormat;
-  final intl.NumberFormat _decimalFormat;
-  final intl.NumberFormat _twoDigitZeroPaddedFormat;
-
-
-  /// The "zero" form of [selectedRowCountTitle].
-  ///
-  /// This form is optional.
-  ///
-  /// See also:
-  ///
-  ///  * [Intl.plural], to which this form is passed.
-  ///  * [selectedRowCountTitleOne], the "one" form
-  ///  * [selectedRowCountTitleTwo], the "two" form
-  ///  * [selectedRowCountTitleFew], the "few" form
-  ///  * [selectedRowCountTitleMany], the "many" form
-  ///  * [selectedRowCountTitleOther], the "other" form
-  @protected
-  String get selectedRowCountTitleZero => null;
-
-  /// The "one" form of [selectedRowCountTitle].
-  ///
-  /// This form is optional.
-  ///
-  /// See also:
-  ///
-  ///  * [Intl.plural], to which this form is passed.
-  ///  * [selectedRowCountTitleZero], the "zero" form
-  ///  * [selectedRowCountTitleTwo], the "two" form
-  ///  * [selectedRowCountTitleFew], the "few" form
-  ///  * [selectedRowCountTitleMany], the "many" form
-  ///  * [selectedRowCountTitleOther], the "other" form
-  @protected
-  String get selectedRowCountTitleOne => null;
-
-  /// The "two" form of [selectedRowCountTitle].
-  ///
-  /// This form is optional.
-  ///
-  /// See also:
-  ///
-  ///  * [Intl.plural], to which this form is passed.
-  ///  * [selectedRowCountTitleZero], the "zero" form
-  ///  * [selectedRowCountTitleOne], the "one" form
-  ///  * [selectedRowCountTitleFew], the "few" form
-  ///  * [selectedRowCountTitleMany], the "many" form
-  ///  * [selectedRowCountTitleOther], the "other" form
-  @protected
-  String get selectedRowCountTitleTwo => null;
-
-  /// The "few" form of [selectedRowCountTitle].
-  ///
-  /// This form is optional.
-  ///
-  /// See also:
-  ///
-  ///  * [Intl.plural], to which this form is passed.
-  ///  * [selectedRowCountTitleZero], the "zero" form
-  ///  * [selectedRowCountTitleOne], the "one" form
-  ///  * [selectedRowCountTitleTwo], the "two" form
-  ///  * [selectedRowCountTitleMany], the "many" form
-  ///  * [selectedRowCountTitleOther], the "other" form
-  @protected
-  String get selectedRowCountTitleFew => null;
-
-  /// The "many" form of [selectedRowCountTitle].
-  ///
-  /// This form is optional.
-  ///
-  /// See also:
-  ///
-  ///  * [Intl.plural], to which this form is passed.
-  ///  * [selectedRowCountTitleZero], the "zero" form
-  ///  * [selectedRowCountTitleOne], the "one" form
-  ///  * [selectedRowCountTitleTwo], the "two" form
-  ///  * [selectedRowCountTitleFew], the "few" form
-  ///  * [selectedRowCountTitleOther], the "other" form
-  @protected
-  String get selectedRowCountTitleMany => null;
-
-  /// The "other" form of [selectedRowCountTitle].
-  ///
-  /// This form is required.
-  ///
-  /// See also:
-  ///
-  ///  * [Intl.plural], to which this form is passed.
-  ///  * [selectedRowCountTitleZero], the "zero" form
-  ///  * [selectedRowCountTitleOne], the "one" form
-  ///  * [selectedRowCountTitleTwo], the "two" form
-  ///  * [selectedRowCountTitleFew], the "few" form
-  ///  * [selectedRowCountTitleMany], the "many" form
-  @protected
-  String get selectedRowCountTitleOther;
+  final intl.DateFormat _dayFormat;
 
   @override
-  String selectedRowCountTitle(int selectedRowCount) {
-    return intl.Intl.pluralLogic(
-      selectedRowCount,
-      zero: selectedRowCountTitleZero,
-      one: selectedRowCountTitleOne,
-      two: selectedRowCountTitleTwo,
-      few: selectedRowCountTitleFew,
-      many: selectedRowCountTitleMany,
-      other: selectedRowCountTitleOther,
-      locale: _localeName,
-    ).replaceFirst(r'$selectedRowCount', formatDecimal(selectedRowCount));
-  }
-
-  /// The format to use for [timeOfDayFormat].
-  @protected
-  TimeOfDayFormat get timeOfDayFormatRaw;
-
-  /// The [TimeOfDayFormat] corresponding to one of the following supported
-  /// patterns:
-  ///
-  ///  * `HH:mm`
-  ///  * `HH.mm`
-  ///  * `HH 'h' mm`
-  ///  * `HH:mm น.`
-  ///  * `H:mm`
-  ///  * `h:mm a`
-  ///  * `a h:mm`
-  ///  * `ah:mm`
-  ///
-  /// See also:
-  ///
-  ///  * <http://demo.icu-project.org/icu-bin/locexp?d_=en&_=en_US>, which shows
-  ///    the short time pattern used in the `en_US` locale.
-  @override
-  TimeOfDayFormat timeOfDayFormat({ bool alwaysUse24HourFormat = false }) {
-    assert(alwaysUse24HourFormat != null);
-    if (alwaysUse24HourFormat)
-      return _get24HourVersionOf(timeOfDayFormatRaw);
-    return timeOfDayFormatRaw;
-  }
-
-  /// The "zero" form of [remainingTextFieldCharacterCount].
-  ///
-  /// This form is required.
-  ///
-  /// See also:
-  ///
-  ///  * [Intl.plural], to which this form is passed.
-  ///  * [remainingTextFieldCharacterCountZero], the "zero" form
-  ///  * [remainingTextFieldCharacterCountOne], the "one" form
-  ///  * [remainingTextFieldCharacterCountTwo], the "two" form
-  ///  * [remainingTextFieldCharacterCountFew], the "few" form
-  ///  * [remainingTextFieldCharacterCountMany], the "many" form
-  ///  * [remainingTextFieldCharacterCountOther], the "other" form
-  @protected
-  String get remainingTextFieldCharacterCountZero;
-
-  /// The "one" form of [remainingTextFieldCharacterCount].
-  ///
-  /// This form is optional.
-  ///
-  /// See also:
-  ///
-  ///  * [remainingTextFieldCharacterCountZero], the "zero" form
-  ///  * [remainingTextFieldCharacterCountOne], the "one" form
-  ///  * [remainingTextFieldCharacterCountTwo], the "two" form
-  ///  * [remainingTextFieldCharacterCountFew], the "few" form
-  ///  * [remainingTextFieldCharacterCountMany], the "many" form
-  ///  * [remainingTextFieldCharacterCountOther], the "other" form
-  @protected
-  String get remainingTextFieldCharacterCountOne => null;
-
-  /// The "two" form of [remainingTextFieldCharacterCount].
-  ///
-  /// This form is optional.
-  ///
-  /// See also:
-  ///
-  ///  * [Intl.plural], to which this form is passed.
-  ///  * [remainingTextFieldCharacterCountZero], the "zero" form
-  ///  * [remainingTextFieldCharacterCountOne], the "one" form
-  ///  * [remainingTextFieldCharacterCountTwo], the "two" form
-  ///  * [remainingTextFieldCharacterCountFew], the "few" form
-  ///  * [remainingTextFieldCharacterCountMany], the "many" form
-  ///  * [remainingTextFieldCharacterCountOther], the "other" form
-  @protected
-  String get remainingTextFieldCharacterCountTwo => null;
-
-  /// The "many" form of [remainingTextFieldCharacterCount].
-  ///
-  /// This form is optional.
-  ///
-  /// See also:
-  ///
-  ///  * [Intl.plural], to which this form is passed.
-  ///  * [remainingTextFieldCharacterCountZero], the "zero" form
-  ///  * [remainingTextFieldCharacterCountOne], the "one" form
-  ///  * [remainingTextFieldCharacterCountTwo], the "two" form
-  ///  * [remainingTextFieldCharacterCountFew], the "few" form
-  ///  * [remainingTextFieldCharacterCountMany], the "many" form
-  ///  * [remainingTextFieldCharacterCountOther], the "other" form
-  @protected
-  String get remainingTextFieldCharacterCountMany => null;
-
-  /// The "few" form of [remainingTextFieldCharacterCount].
-  ///
-  /// This form is optional.
-  ///
-  /// See also:
-  ///
-  ///  * [Intl.plural], to which this form is passed.
-  ///  * [remainingTextFieldCharacterCountZero], the "zero" form
-  ///  * [remainingTextFieldCharacterCountOne], the "one" form
-  ///  * [remainingTextFieldCharacterCountTwo], the "two" form
-  ///  * [remainingTextFieldCharacterCountFew], the "few" form
-  ///  * [remainingTextFieldCharacterCountMany], the "many" form
-  ///  * [remainingTextFieldCharacterCountOther], the "other" form
-  @protected
-  String get remainingTextFieldCharacterCountFew => null;
-
-  /// The "other" form of [remainingTextFieldCharacterCount].
-  ///
-  /// This form is required.
-  ///
-  /// See also:
-  ///
-  ///  * [Intl.plural], to which this form is passed.
-  ///  * [remainingTextFieldCharacterCountZero], the "zero" form
-  ///  * [remainingTextFieldCharacterCountOne], the "one" form
-  ///  * [remainingTextFieldCharacterCountTwo], the "two" form
-  ///  * [remainingTextFieldCharacterCountFew], the "few" form
-  ///  * [remainingTextFieldCharacterCountMany], the "many" form
-  ///  * [remainingTextFieldCharacterCountOther], the "other" form
-  @protected
-  String get remainingTextFieldCharacterCountOther;
-
-  @override
-  String remainingTextFieldCharacterCount(int remainingCount) {
-    return intl.Intl.pluralLogic(
-      remainingCount,
-      zero: remainingTextFieldCharacterCountZero,
-      one: remainingTextFieldCharacterCountOne,
-      two: remainingTextFieldCharacterCountTwo,
-      many: remainingTextFieldCharacterCountMany,
-      few: remainingTextFieldCharacterCountFew,
-      other: remainingTextFieldCharacterCountOther,
-      locale: _localeName,
-    ).replaceFirst(r'$remainingCount', formatDecimal(remainingCount));
+  String datePickerYear(int yearIndex) {
+    return _fullYearFormat.format(DateTime.utc(yearIndex));
   }
 
   @override
-  ScriptCategory get scriptCategory;
+  String datePickerMonth(int monthIndex) {
+    // It doesn't actually have anything to do with _fullYearFormat. It's just
+    // taking advantage of the fact that _fullYearFormat loaded the needed
+    // locale's symbols.
+    return _fullYearFormat.dateSymbols.MONTHS[monthIndex];
+  }
+
+  @override
+  String datePickerDayOfMonth(int dayIndex) {
+
+  }
+
+  /// The medium-width date format that is shown in [CupertinoDatePicker]
+  /// spinner. Abbreviates month and days of week.
+  ///
+  /// Examples:
+  ///
+  /// - US English: Wed Sep 27
+  /// - Russian: ср сент. 27
+  // The global version is based on intl package's DateFormat.MMMEd.
+  String datePickerMediumDate(DateTime date);
+
+  /// Hour that is shown in [CupertinoDatePicker] spinner corresponding
+  /// to the given hour value.
+  ///
+  /// Examples: datePickerHour(1) in:
+  ///
+  ///  - US English: 1
+  ///  - Arabic: ٠١
+  // The global version uses date symbols data from the intl package.
+  String datePickerHour(int hour);
+
+  /// Semantics label for the given hour value in [CupertinoDatePicker].
+  // The global version uses the translated string from the arb file.
+  String datePickerHourSemanticsLabel(int hour);
+
+  /// Minute that is shown in [CupertinoDatePicker] spinner corresponding
+  /// to the given minute value.
+  ///
+  /// Examples: datePickerMinute(1) in:
+  ///
+  ///  - US English: 01
+  ///  - Arabic: ٠١
+  // The global version uses date symbols data from the intl package.
+  String datePickerMinute(int minute);
+
+  /// Semantics label for the given minute value in [CupertinoDatePicker].
+  // The global version uses the translated string from the arb file.
+  String datePickerMinuteSemanticsLabel(int minute);
+
+  /// The order of the date elements that will be shown in [CupertinoDatePicker].
+  // The global version uses the translated string from the arb file.
+  DatePickerDateOrder get datePickerDateOrder;
+
+  /// The order of the time elements that will be shown in [CupertinoDatePicker].
+  // The global version uses the translated string from the arb file.
+  DatePickerDateTimeOrder get datePickerDateTimeOrder;
+
+  /// The abbreviation for ante meridiem (before noon) shown in the time picker.
+  // The global version uses the translated string from the arb file.
+  String get anteMeridiemAbbreviation;
+
+  /// The abbreviation for post meridiem (after noon) shown in the time picker.
+  // The global version uses the translated string from the arb file.
+  String get postMeridiemAbbreviation;
+
+  /// The term used by the system to announce dialog alerts.
+  // The global version uses the translated string from the arb file.
+  String get alertDialogLabel;
+
+  /// Hour that is shown in [CupertinoTimerPicker] corresponding to
+  /// the given hour value.
+  ///
+  /// Examples: timerPickerHour(1) in:
+  ///
+  ///  - US English: 1
+  ///  - Arabic: ١
+  // The global version uses date symbols data from the intl package.
+  String timerPickerHour(int hour);
+
+  /// Minute that is shown in [CupertinoTimerPicker] corresponding to
+  /// the given minute value.
+  ///
+  /// Examples: timerPickerMinute(1) in:
+  ///
+  ///  - US English: 1
+  ///  - Arabic: ١
+  // The global version uses date symbols data from the intl package.
+  String timerPickerMinute(int minute);
+
+  /// Second that is shown in [CupertinoTimerPicker] corresponding to
+  /// the given second value.
+  ///
+  /// Examples: timerPickerSecond(1) in:
+  ///
+  ///  - US English: 1
+  ///  - Arabic: ١
+  // The global version uses date symbols data from the intl package.
+  String timerPickerSecond(int second);
+
+  /// Label that appears next to the hour picker in
+  /// [CupertinoTimerPicker] when selected hour value is `hour`.
+  /// This function will deal with pluralization based on the `hour` parameter.
+  // The global version uses the translated string from the arb file.
+  String timerPickerHourLabel(int hour);
+
+  /// Label that appears next to the minute picker in
+  /// [CupertinoTimerPicker] when selected minute value is `minute`.
+  /// This function will deal with pluralization based on the `minute` parameter.
+  // The global version uses the translated string from the arb file.
+  String timerPickerMinuteLabel(int minute);
+
+  /// Label that appears next to the minute picker in
+  /// [CupertinoTimerPicker] when selected minute value is `second`.
+  /// This function will deal with pluralization based on the `second` parameter.
+  // The global version uses the translated string from the arb file.
+  String timerPickerSecondLabel(int second);
+
+  /// The term used for cutting
+  // The global version uses the translated string from the arb file.
+  String get cutButtonLabel;
+
+  /// The term used for copying
+  // The global version uses the translated string from the arb file.
+  String get copyButtonLabel;
+
+  /// The term used for pasting
+  // The global version uses the translated string from the arb file.
+  String get pasteButtonLabel;
+
+  /// The term used for selecting everything
+  // The global version uses the translated string from the arb file.
+  String get selectAllButtonLabel;
 
   /// A [LocalizationsDelegate] that uses [GlobalMaterialLocalizations.load]
   /// to create an instance of this class.
@@ -345,23 +228,6 @@ abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
     GlobalMaterialLocalizations.delegate,
     GlobalWidgetsLocalizations.delegate,
   ];
-}
-
-/// Finds the [TimeOfDayFormat] to use instead of the `original` when the
-/// `original` uses 12-hour format and [MediaQueryData.alwaysUse24HourFormat]
-/// is true.
-TimeOfDayFormat _get24HourVersionOf(TimeOfDayFormat original) {
-  switch (original) {
-    case TimeOfDayFormat.HH_colon_mm:
-    case TimeOfDayFormat.HH_dot_mm:
-    case TimeOfDayFormat.frenchCanadian:
-    case TimeOfDayFormat.H_colon_mm:
-      return original;
-    case TimeOfDayFormat.h_colon_mm_space_a:
-    case TimeOfDayFormat.a_space_h_colon_mm:
-      return TimeOfDayFormat.HH_colon_mm;
-  }
-  return TimeOfDayFormat.HH_colon_mm;
 }
 
 class _GlobalCupertinoLocalizationsDelegate extends LocalizationsDelegate<CupertinoLocalizations> {
