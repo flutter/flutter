@@ -214,6 +214,21 @@ class _LeaveBehindListItem extends StatelessWidget {
           else
             _handleDelete();
         },
+        confirmDismiss: (DismissDirection dismissDirection) {
+          if (dismissDirection == DismissDirection.endToStart) {
+            confirmDismiss(context, 'archive').then((bool value) {
+              if(value) {
+                _handleArchive();
+              }
+            });
+          } else {
+            confirmDismiss(context, 'delete').then((bool value) {
+              if(value) {
+                _handleDelete();
+              }
+            });
+          }
+        },
         background: Container(
           color: theme.primaryColor,
           child: const ListTile(
@@ -238,6 +253,32 @@ class _LeaveBehindListItem extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+
+  Future<bool> confirmDismiss(BuildContext context, String action) {
+    return showDialog<bool>(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Do you want to $action this item?'),
+          actions: <Widget>[
+            FlatButton(
+              child: const Text('Yes'),
+              onPressed: () {
+                Navigator.pop(context, true); // showDialog() returns true
+              },
+            ),
+            FlatButton(
+              child: const Text('No'),
+              onPressed: () {
+                Navigator.pop(context, false); // showDialog() returns false
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }
