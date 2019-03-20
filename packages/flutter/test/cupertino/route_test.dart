@@ -332,32 +332,30 @@ void main() {
   testWidgets('Fullscreen route animates correct transform values over time', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
-        home: Container(
-          child: Builder(
-            builder: (BuildContext context) {
-              return CupertinoButton(
-                child: const Text('Button'),
-                onPressed: () {
-                  Navigator.push<void>(context, CupertinoPageRoute<void>(
-                    fullscreenDialog: true,
-                    builder: (BuildContext context) {
-                      return Column(
-                        children: <Widget>[
-                          const Placeholder(),
-                          CupertinoButton(
-                            child: const Text('Close'),
-                            onPressed: () {
-                              Navigator.pop<void>(context);
-                            },
-                          )
-                        ],
-                      );
-                    },
-                  ));
-                },
-              );
-            }
-          )
+        home: Builder(
+          builder: (BuildContext context) {
+            return CupertinoButton(
+              child: const Text('Button'),
+              onPressed: () {
+                Navigator.push<void>(context, CupertinoPageRoute<void>(
+                  fullscreenDialog: true,
+                  builder: (BuildContext context) {
+                    return Column(
+                      children: <Widget>[
+                        const Placeholder(),
+                        CupertinoButton(
+                          child: const Text('Close'),
+                          onPressed: () {
+                            Navigator.pop<void>(context);
+                          },
+                        )
+                      ],
+                    );
+                  },
+                ));
+              },
+            );
+          }
         ),
       ),
     );
