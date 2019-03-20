@@ -539,7 +539,7 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
     if (selectedItemOffset == null) {
       y = position.top;
     } else {
-      y = position.top + (size.height - position.top - position.bottom) / 2.0 - selectedItemOffset;
+      y = position.top - selectedItemOffset;
     }
 
     // Find the ideal horizontal position.
@@ -663,13 +663,17 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
 
 /// Show a popup menu that contains the `items` at `position`.
 ///
-/// If `initialValue` is specified then the first item with a matching value
-/// will be highlighted and the value of `position` gives the rectangle whose
-/// vertical center will be aligned with the vertical center of the highlighted
-/// item (when possible).
+/// If `initialValue` is specified, the first item in `items` with a matching
+/// value will be highlighted. Also, the vertical center of the `position` rectangle
+/// will be aligned with the vertical center of the highlighted item (when possible).
 ///
-/// If `initialValue` is not specified then the top of the menu will be aligned
-/// with the top of the `position` rectangle.
+/// The vertical center of the highlighted item is determined by iterating over the
+/// `items` to find the first whose [PopupMenuEntry.represents] method returns true
+/// for `initialValue`, and then summing the values of [PopupMenuEntry.height] for
+/// all preceding items to half the current item's height.
+///
+/// If `initialValue` is not specified, then the top of the popup menu will be
+/// aligned with the top of the `position` rectangle.
 ///
 /// In both cases, the menu position will be adjusted if necessary to fit on the
 /// screen.
@@ -681,12 +685,6 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
 /// edges of the `position` are equidistant from the opposite edge of the
 /// screen, then the ambient [Directionality] is used as a tie-breaker,
 /// preferring to grow in the reading direction.
-///
-/// The positioning of the `initialValue` at the `position` is implemented by
-/// iterating over the `items` to find the first whose
-/// [PopupMenuEntry.represents] method returns true for `initialValue`, and then
-/// summing the values of [PopupMenuEntry.height] for all the preceding widgets
-/// in the list.
 ///
 /// The `elevation` argument specifies the z-coordinate at which to place the
 /// menu. The elevation defaults to 8, the appropriate elevation for popup
