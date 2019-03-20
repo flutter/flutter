@@ -1309,18 +1309,20 @@ class _RendersOnPhysicalModel extends _MatchRenderObject<RenderPhysicalShape, Re
       return false;
 
     if (
-      borderRadius == null
-      && shape == BoxShape.rectangle
-      && !assertRoundedRectangle(shapeClipper, BorderRadius.zero, matchState)
-    )
+      borderRadius == null &&
+      shape == BoxShape.rectangle &&
+      !assertRoundedRectangle(shapeClipper, BorderRadius.zero, matchState)
+    ) {
       return false;
+    }
 
     if (
-      borderRadius == null
-      && shape == BoxShape.circle
-      && !assertCircle(shapeClipper, matchState)
-    )
+      borderRadius == null &&
+      shape == BoxShape.circle &&
+      !assertCircle(shapeClipper, matchState)
+    ) {
       return false;
+    }
 
     if (elevation != null && renderObject.elevation != elevation)
       return failWithDescription(matchState, 'had elevation: ${renderObject.elevation}');

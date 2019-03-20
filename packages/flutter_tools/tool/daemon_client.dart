@@ -50,7 +50,7 @@ Future<void> main() async {
       if (words.length > 1) {
         _send(<String, dynamic>{
           'method': 'app.stop',
-          'params': <String, dynamic> { 'appId': words[1] },
+          'params': <String, dynamic> {'appId': words[1]},
         });
       } else {
         _send(<String, dynamic>{'method': 'app.stop'});
@@ -59,7 +59,7 @@ Future<void> main() async {
       if (words.length > 1) {
         _send(<String, dynamic>{
           'method': 'app.restart',
-          'params': <String, dynamic> { 'appId': words[1] },
+          'params': <String, dynamic> {'appId': words[1]},
         });
       } else {
         _send(<String, dynamic>{'method': 'app.restart'});

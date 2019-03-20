@@ -378,7 +378,7 @@ class _CompileExpressionRequest extends _CompilationRequest {
 }
 
 class _RejectRequest extends _CompilationRequest {
-  _RejectRequest(Completer<CompilerOutput> completer): super(completer);
+  _RejectRequest(Completer<CompilerOutput> completer) : super(completer);
 
   @override
   Future<CompilerOutput> _run(ResidentCompiler compiler) async =>

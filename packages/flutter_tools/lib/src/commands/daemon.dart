@@ -203,7 +203,7 @@ abstract class Domain {
   }
 
   void sendEvent(String name, [ dynamic args ]) {
-    final Map<String, dynamic> map = <String, dynamic>{ 'event': name };
+    final Map<String, dynamic> map = <String, dynamic>{'event': name};
     if (args != null)
       map['params'] = _toJsonable(args);
     _send(map);
@@ -563,7 +563,7 @@ class AppDomain extends Domain {
   }
 
   void _sendAppEvent(AppInstance app, String name, [ Map<String, dynamic> args ]) {
-    final Map<String, dynamic> eventArgs = <String, dynamic> { 'appId': app.id };
+    final Map<String, dynamic> eventArgs = <String, dynamic> {'appId': app.id};
     if (args != null)
       eventArgs.addAll(args);
     sendEvent('app.$name', eventArgs);
@@ -652,7 +652,7 @@ class DeviceDomain extends Domain {
 
     hostPort = await device.portForwarder.forward(devicePort, hostPort: hostPort);
 
-    return <String, dynamic>{ 'hostPort': hostPort };
+    return <String, dynamic>{'hostPort': hostPort};
   }
 
   /// Removes a forwarded port.

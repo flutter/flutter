@@ -16,7 +16,7 @@ import '../runner/flutter_command.dart';
 import '../version.dart';
 
 class VersionCommand extends FlutterCommand {
-  VersionCommand(): super() {
+  VersionCommand() : super() {
     argParser.addFlag('force',
       abbr: 'f',
       help: 'Force switch to older Flutter versions that do not include a version command',
