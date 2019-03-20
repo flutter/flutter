@@ -886,9 +886,10 @@ Future<T> showCupertinoModalPopup<T>({
   );
 }
 
-// These values were mostly eyeballed from iOS, however they reuse the same
-// animation curve that was modelled after native page transitions.
-final Animatable<double> _dialogTween = Tween<double>(begin: 1.3, end: 1.0)
+// The curve and initial scale values were mostly eyeballed from iOS, however
+// they reuse the same animation curve that was modelled after native page
+// transitions.
+final Animatable<double> _dialogScaleTween = Tween<double>(begin: 1.3, end: 1.0)
   .chain(CurveTween(curve: Curves.linearToEaseOut));
 
 Widget _buildCupertinoDialogTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
@@ -906,7 +907,7 @@ Widget _buildCupertinoDialogTransitions(BuildContext context, Animation<double> 
     opacity: fadeAnimation,
     child: ScaleTransition(
       child: child,
-      scale: animation.drive(_dialogTween),
+      scale: animation.drive(_dialogScaleTween),
     ),
   );
 }
