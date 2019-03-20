@@ -25,6 +25,8 @@ final List<String> flutterTestArgs = <String>[];
 
 final bool useFlutterTestFormatter = Platform.environment['FLUTTER_TEST_FORMATTER'] == 'true';
 
+final bool noUseBuildRunner = Platform.environment['FLUTTER_TEST_NO_BUILD_RUNNER'] == 'true';
+
 const Map<String, ShardRunner> _kShards = <String, ShardRunner>{
   'tests': _runTests,
   'tool_tests': _runToolTests,
@@ -178,12 +180,18 @@ Future<void> _runToolTests() async {
   final bq.BigqueryApi bigqueryApi = await _getBigqueryApi();
   await _runSmokeTests();
 
-  await _buildRunnerTest(
-    path.join(flutterRoot, 'packages', 'flutter_tools'),
-    flutterRoot,
-    enableFlutterToolAsserts: true,
-    tableData: bigqueryApi?.tabledata,
-  );
+  if (noUseBuildRunner) {
+    await _pubRunTest(
+      path.join(flutterRoot, 'packages', 'flutter_tools'),
+      tableData: bigqueryApi?.tabledata,
+    );
+  } else {
+    await _buildRunnerTest(
+      path.join(flutterRoot, 'packages', 'flutter_tools'),
+      flutterRoot,
+      tableData: bigqueryApi?.tabledata,
+    );
+  }
 
   print('${bold}DONE: All tests successful.$reset');
 }

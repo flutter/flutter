@@ -57,11 +57,14 @@ class TargetModel {
 }
 
 class CompilerOutput {
-  const CompilerOutput(this.outputFilename, this.errorCount);
+  const CompilerOutput(this.outputFilename, this.errorCount, this.sources);
 
   final String outputFilename;
   final int errorCount;
+  final List<Uri> sources;
 }
+
+enum StdoutState { CollectDiagnostic, CollectDependencies }
 
 /// Handles stdin/stdout communication with the frontend server.
 class StdoutHandler {
@@ -72,40 +75,71 @@ class StdoutHandler {
   bool compilerMessageReceived = false;
   final CompilerMessageConsumer consumer;
   String boundaryKey;
+  StdoutState state = StdoutState.CollectDiagnostic;
   Completer<CompilerOutput> compilerOutput;
+  final List<Uri> sources = <Uri>[];
 
   bool _suppressCompilerMessages;
+  bool _expectSources;
 
   void handler(String message) {
+    printTrace('-> $message');
     const String kResultPrefix = 'result ';
     if (boundaryKey == null && message.startsWith(kResultPrefix)) {
       boundaryKey = message.substring(kResultPrefix.length);
-    } else if (message.startsWith(boundaryKey)) {
+      return;
+    }
+    if (message.startsWith(boundaryKey)) {
+      if (_expectSources) {
+        if (state == StdoutState.CollectDiagnostic) {
+          state = StdoutState.CollectDependencies;
+          return;
+        }
+      }
       if (message.length <= boundaryKey.length) {
         compilerOutput.complete(null);
         return;
       }
       final int spaceDelimiter = message.lastIndexOf(' ');
       compilerOutput.complete(
-        CompilerOutput(
-          message.substring(boundaryKey.length + 1, spaceDelimiter),
-          int.parse(message.substring(spaceDelimiter + 1).trim())));
-    } else if (!_suppressCompilerMessages) {
-      if (compilerMessageReceived == false) {
-        consumer('\nCompiler message:');
-        compilerMessageReceived = true;
+          CompilerOutput(
+              message.substring(boundaryKey.length + 1, spaceDelimiter),
+              int.parse(message.substring(spaceDelimiter + 1).trim()),
+              sources));
+      return;
+    }
+    if (state == StdoutState.CollectDiagnostic) {
+      if (!_suppressCompilerMessages) {
+        if (compilerMessageReceived == false) {
+          consumer('\nCompiler message:');
+          compilerMessageReceived = true;
+        }
+        consumer(message);
       }
-      consumer(message);
+    } else {
+      assert(state == StdoutState.CollectDependencies);
+      switch (message[0]) {
+        case '+':
+          sources.add(Uri.parse(message.substring(1)));
+          break;
+        case '-':
+          sources.remove(Uri.parse(message.substring(1)));
+          break;
+        default:
+          printTrace('Unexpected prefix for $message uri - ignoring');
+      }
     }
   }
 
   // This is needed to get ready to process next compilation result output,
   // with its own boundary key and new completer.
-  void reset({ bool suppressCompilerMessages = false }) {
+  void reset({ bool suppressCompilerMessages = false, bool expectSources = true }) {
     boundaryKey = null;
     compilerMessageReceived = false;
     compilerOutput = Completer<CompilerOutput>();
     _suppressCompilerMessages = suppressCompilerMessages;
+    _expectSources = expectSources;
+    state = StdoutState.CollectDiagnostic;
   }
 }
 
@@ -200,7 +234,7 @@ class KernelCompiler {
 
       if (await fingerprinter.doesFingerprintMatch()) {
         printTrace('Skipping kernel compilation. Fingerprint match.');
-        return CompilerOutput(outputFilePath, 0);
+        return CompilerOutput(outputFilePath, 0, /* sources */ null);
       }
     }
 
@@ -453,10 +487,13 @@ class ResidentCompiler {
         ? _mapFilename(request.mainPath, packageUriMapper) + ' '
         : '';
     _server.stdin.writeln('recompile $mainUri$inputKey');
+    printTrace('<- recompile $mainUri$inputKey');
     for (String fileUri in request.invalidatedFiles) {
       _server.stdin.writeln(_mapFileUri(fileUri, packageUriMapper));
+      printTrace('<- ${_mapFileUri(fileUri, packageUriMapper)}');
     }
     _server.stdin.writeln(inputKey);
+    printTrace('<- $inputKey');
 
     return _stdoutHandler.compilerOutput.future;
   }
@@ -545,6 +582,7 @@ class ResidentCompiler {
       .listen((String message) { printError(message); });
 
     _server.stdin.writeln('compile $scriptUri');
+    printTrace('<- compile $scriptUri');
 
     return _stdoutHandler.compilerOutput.future;
   }
@@ -570,7 +608,7 @@ class ResidentCompiler {
   }
 
   Future<CompilerOutput> _compileExpression(_CompileExpressionRequest request) async {
-    _stdoutHandler.reset(suppressCompilerMessages: true);
+    _stdoutHandler.reset(suppressCompilerMessages: true, expectSources: false);
 
     // 'compile-expression' should be invoked after compiler has been started,
     // program was compiled.
@@ -597,6 +635,7 @@ class ResidentCompiler {
   void accept() {
     if (_compileRequestNeedsConfirmation) {
       _server.stdin.writeln('accept');
+      printTrace('<- accept');
     }
     _compileRequestNeedsConfirmation = false;
   }
@@ -620,6 +659,7 @@ class ResidentCompiler {
     }
     _stdoutHandler.reset();
     _server.stdin.writeln('reject');
+    printTrace('<- reject');
     _compileRequestNeedsConfirmation = false;
     return _stdoutHandler.compilerOutput.future;
   }
@@ -629,6 +669,7 @@ class ResidentCompiler {
   /// kernel file.
   void reset() {
     _server?.stdin?.writeln('reset');
+    printTrace('<- reset');
   }
 
   String _mapFilename(String filename, PackageUriMapper packageUriMapper) {

@@ -134,6 +134,20 @@ class CupertinoIcons {
   ///  * [check_mark_circled], which is similar, but not filled in.
   static const IconData check_mark_circled_solid = IconData(0xf3ff, fontFamily: iconFont, fontPackage: iconFontPackage);
 
+  /// An empty circle (a ring).  An un-selected radio button.
+  ///
+  /// See also:
+  ///
+  ///  * [circle_filled], which is similar but filled in.
+  static const IconData circle = IconData(0xf401, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A filled circle.  The circle is surrounded by a ring.  A selected radio button.
+  ///
+  /// See also:
+  ///
+  ///  * [circle], which is similar but not filled in.
+  static const IconData circle_filled = IconData(0xf400, fontFamily: iconFont, fontPackage: iconFontPackage);
+
   /// A thicker left chevron used in iOS for the navigation bar back button.
   static const IconData back = IconData(0xf3cf, fontFamily: iconFont, fontPackage: iconFontPackage, matchTextDirection: true);
 

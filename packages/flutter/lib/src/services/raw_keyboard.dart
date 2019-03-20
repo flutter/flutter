@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'keyboard_key.dart';
 import 'raw_keyboard_android.dart';
 import 'raw_keyboard_fuchsia.dart';
+import 'raw_keyboard_macos.dart';
 import 'system_channels.dart';
 
 /// An enum describing the side of the keyboard that a key is on, to allow
@@ -262,6 +263,14 @@ abstract class RawKeyEvent {
           codePoint: message['codePoint'] ?? 0,
           modifiers: message['modifiers'] ?? 0,
         );
+        break;
+      case 'macos':
+        data = RawKeyEventDataMacOs(
+            characters: message['characters'] ?? '',
+            charactersIgnoringModifiers:
+                message['charactersIgnoringModifiers'] ?? '',
+            keyCode: message['keyCode'] ?? 0,
+            modifiers: message['modifiers'] ?? 0);
         break;
       default:
         // We don't yet implement raw key events on iOS or other platforms, but
