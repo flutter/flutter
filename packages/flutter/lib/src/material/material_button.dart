@@ -23,7 +23,7 @@ import 'theme_data.dart';
 /// an enabled button, make sure to pass a non-null value for onPressed.
 ///
 /// Rather than using this class directly, consider using [FlatButton],
-/// OutlineButton, or [RaisedButton], which configure this class with
+/// [OutlineButton], or [RaisedButton], which configure this class with
 /// appropriate defaults that match the material design specification.
 ///
 /// To create a button directly, without inheriting theme defaults, use
@@ -264,28 +264,31 @@ class MaterialButton extends StatelessWidget {
       onPressed: onPressed,
       onHighlightChanged: onHighlightChanged,
       fillColor: color,
-      textStyle: theme.textTheme.button.copyWith(color: buttonTheme.getTextColor(this)),
+      textStyle: theme.textTheme.button
+          .copyWith(color: buttonTheme.getTextColor(this)),
       highlightColor: highlightColor ?? theme.highlightColor,
       splashColor: splashColor ?? theme.splashColor,
       elevation: buttonTheme.getElevation(this),
       highlightElevation: buttonTheme.getHighlightElevation(this),
       padding: buttonTheme.getPadding(this),
       constraints: buttonTheme.getConstraints(this).copyWith(
-        minWidth: minWidth,
-        minHeight: height,
-      ),
+            minWidth: minWidth,
+            minHeight: height,
+          ),
       shape: buttonTheme.getShape(this),
       clipBehavior: clipBehavior ?? Clip.none,
       animationDuration: buttonTheme.getAnimationDuration(this),
       child: child,
-      materialTapTargetSize: materialTapTargetSize ?? theme.materialTapTargetSize,
+      materialTapTargetSize:
+          materialTapTargetSize ?? theme.materialTapTargetSize,
     );
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(FlagProperty('enabled', value: enabled, ifFalse: 'disabled'));
+    properties
+        .add(FlagProperty('enabled', value: enabled, ifFalse: 'disabled'));
   }
 }
 
@@ -294,4 +297,4 @@ class MaterialButton extends StatelessWidget {
 ///
 /// This mixin only exists to give the "label and icon" button widgets a distinct
 /// type for the sake of [ButtonTheme].
-mixin MaterialButtonWithIconMixin { }
+mixin MaterialButtonWithIconMixin {}
