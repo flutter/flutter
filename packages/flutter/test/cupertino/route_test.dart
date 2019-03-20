@@ -339,6 +339,7 @@ void main() {
                 child: const Text('Button'),
                 onPressed: () {
                   Navigator.push<void>(context, CupertinoPageRoute<void>(
+                    fullscreenDialog: true,
                     builder: (BuildContext context) {
                       return Column(
                         children: <Widget>[
@@ -352,8 +353,6 @@ void main() {
                         ],
                       );
                     },
-
-                    fullscreenDialog: true,
                   ));
                 },
               );
