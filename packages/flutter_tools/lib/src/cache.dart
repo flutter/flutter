@@ -364,6 +364,10 @@ class MaterialFonts extends CachedArtifact {
   }
 }
 
+/// A cached artifact containing the web dart:ui sources, platform dill files,
+/// and libraries.json.
+///
+/// This SDK references code within the regular Dart sdk to reduce download size.
 class FlutterWebSdk extends CachedArtifact {
   FlutterWebSdk(Cache cache) : super('flutter_web_sdk', cache);
 
