@@ -6,6 +6,8 @@ import 'pan_and_zoom_demo_inertial_motion.dart';
 // to pan, pinch to zoom and rotate, and still get back untransformed
 // coordinates for targeted tap events.
 @immutable
+// TODO(justinmc): Need a better name. The plan is to make this a full blown
+// reusable Flutter widget.
 class TransformInteraction extends StatefulWidget {
   const TransformInteraction({
     // The child to perform the transformations on
@@ -237,7 +239,7 @@ class TransformInteractionState extends State<TransformInteraction> with TickerP
         begin: _transform,
         end: _initialTransform,
       ).animate(_controllerReset);
-      _controllerReset.duration = Duration(milliseconds: 400);
+      _controllerReset.duration = const Duration(milliseconds: 400);
       _animationReset.addListener(_onAnimateReset);
       _controllerReset.forward();
     }

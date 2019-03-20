@@ -24,7 +24,7 @@ class EditBoardPoint extends StatelessWidget {
           Text(
             '${boardPoint.q}, ${boardPoint.r}',
             textAlign: TextAlign.right,
-            style: TextStyle(fontWeight: FontWeight.bold),
+            style: const TextStyle(fontWeight: FontWeight.bold),
           ),
           ColorPicker(
             colors: boardPointColors,

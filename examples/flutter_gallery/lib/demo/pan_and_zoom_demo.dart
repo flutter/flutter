@@ -12,15 +12,15 @@ class PanAndZoomDemo extends StatefulWidget {
   @override _PanAndZoomDemoState createState() => _PanAndZoomDemoState();
 }
 class _PanAndZoomDemoState extends State<PanAndZoomDemo> {
-  static const double HEXAGON_RADIUS = 32.0;
-  static const double HEXAGON_MARGIN = 1.0;
-  static const int BOARD_RADIUS = 8;
+  static const double _kHexagonRadius = 32.0;
+  static const double _kHexagonMargin = 1.0;
+  static const int _kBorderRadius = 8;
 
   bool _reset = false;
   Board _board = Board(
-    boardRadius: BOARD_RADIUS,
-    hexagonRadius: HEXAGON_RADIUS,
-    hexagonMargin: HEXAGON_MARGIN,
+    boardRadius: _kBorderRadius,
+    hexagonRadius: _kHexagonRadius,
+    hexagonMargin: _kHexagonMargin,
   );
 
   @override
@@ -65,6 +65,9 @@ class _PanAndZoomDemoState extends State<PanAndZoomDemo> {
     // the TransformInteraction parent widget.
     return Scaffold(
       body: TransformInteraction(
+        // TODO(justinmc): I'm not sure that I like this pattern that I came up
+        // with for resetting TransformInteraction from the parent level. Would
+        // a controller pattern be better, or is there something else?
         reset: _reset,
         onResetEnd: () {
           setState(() {
@@ -81,6 +84,8 @@ class _PanAndZoomDemoState extends State<PanAndZoomDemo> {
           visibleSize.width,
           visibleSize.height,
         ),
+        // Center the board in the middle of the screen. It's drawn centered at
+        // the origin, which is the top left corner of the TransformInteraction.
         initialTranslation: Offset(screenSize.width / 2, screenSize.height / 2),
         onTapUp: _onTapUp,
         size: screenSize,
