@@ -1,72 +1,22 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'dart:async';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' as intl;
 import 'package:intl/date_symbols.dart' as intl;
 
-import 'l10n/generated_material_localizations.dart';
 import 'utils/date_localizations.dart' as util;
 import 'widgets_localizations.dart';
 
-/// Implementation of localized strings for the material widgets using the
-/// `intl` package for date and time formatting.
-///
-/// ## Supported languages
-///
-/// This class supports locales with the following [Locale.languageCode]s:
-///
-/// {@macro flutter.localizations.languages}
-///
-/// This list is available programatically via [kSupportedLanguages].
-///
-/// ## Sample code
-///
-/// To include the localizations provided by this class in a [MaterialApp],
-/// add [GlobalMaterialLocalizations.delegates] to
-/// [MaterialApp.localizationsDelegates], and specify the locales your
-/// app supports with [MaterialApp.supportedLocales]:
-///
-/// ```dart
-/// new MaterialApp(
-///   localizationsDelegates: GlobalMaterialLocalizations.delegates,
-///   supportedLocales: [
-///     const Locale('en', 'US'), // American English
-///     const Locale('he', 'IL'), // Israeli Hebrew
-///     // ...
-///   ],
-///   // ...
-/// )
-/// ```
-///
-/// ## Overriding translations
-///
-/// To create a translation that's similar to an existing language's translation
-/// but has slightly different strings, subclass the relevant translation
-/// directly and then create a [LocalizationsDelegate<MaterialLocalizations>]
-/// subclass to define how to load it.
-///
-/// Avoid subclassing an unrelated language (for example, subclassing
-/// [MaterialLocalizationEn] and then passing a non-English `localeName` to the
-/// constructor). Doing so will cause confusion for locale-specific behaviors;
-/// in particular, translations that use the `localeName` for determining how to
-/// pluralize will end up doing invalid things. Subclassing an existing
-/// language's translations is only suitable for making small changes to the
-/// existing strings. For providing a new language entirely, implement
-/// [MaterialLocalizations] directly.
-///
-/// See also:
-///
-///  * The Flutter Internationalization Tutorial,
-///    <https://flutter.dev/tutorials/internationalization/>.
-///  * [DefaultMaterialLocalizations], which only provides US English translations.
-abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
-  /// Initializes an object that defines the material widgets' localized strings
-  /// for the given `locale`.
+/// Implementation of localized strings for Cupertino widgets using the `intl`
+/// package for date and time formatting.
+abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
+  /// Initializes an object that defines the Cupertino widgets' localized
+  /// strings for the given `locale`.
   ///
   /// The arguments are used for further runtime localization of data,
   /// specifically for selecting plurals, date and time formatting, and number
@@ -86,7 +36,7 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   ///
   /// The [narrowWeekdays] and [firstDayOfWeekIndex] properties use the values
   /// from the [intl.DateFormat] used by [formatFullDate].
-  const GlobalMaterialLocalizations({
+  const GlobalCupertinoLocalizations({
     @required String localeName,
     @required intl.DateFormat fullYearFormat,
     @required intl.DateFormat mediumDateFormat,
@@ -117,144 +67,6 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   final intl.NumberFormat _decimalFormat;
   final intl.NumberFormat _twoDigitZeroPaddedFormat;
 
-  @override
-  String formatHour(TimeOfDay timeOfDay, { bool alwaysUse24HourFormat = false }) {
-    switch (hourFormat(of: timeOfDayFormat(alwaysUse24HourFormat: alwaysUse24HourFormat))) {
-      case HourFormat.HH:
-        return _twoDigitZeroPaddedFormat.format(timeOfDay.hour);
-      case HourFormat.H:
-        return formatDecimal(timeOfDay.hour);
-      case HourFormat.h:
-        final int hour = timeOfDay.hourOfPeriod;
-        return formatDecimal(hour == 0 ? 12 : hour);
-    }
-    return null;
-  }
-
-  @override
-  String formatMinute(TimeOfDay timeOfDay) {
-    return _twoDigitZeroPaddedFormat.format(timeOfDay.minute);
-  }
-
-  @override
-  String formatYear(DateTime date) {
-    return _fullYearFormat.format(date);
-  }
-
-  @override
-  String formatMediumDate(DateTime date) {
-    return _mediumDateFormat.format(date);
-  }
-
-  @override
-  String formatFullDate(DateTime date) {
-    return _longDateFormat.format(date);
-  }
-
-  @override
-  String formatMonthYear(DateTime date) {
-    return _yearMonthFormat.format(date);
-  }
-
-  @override
-  List<String> get narrowWeekdays {
-    return _longDateFormat.dateSymbols.NARROWWEEKDAYS;
-  }
-
-  @override
-  int get firstDayOfWeekIndex => (_longDateFormat.dateSymbols.FIRSTDAYOFWEEK + 1) % 7;
-
-  @override
-  String formatDecimal(int number) {
-    return _decimalFormat.format(number);
-  }
-
-  @override
-  String formatTimeOfDay(TimeOfDay timeOfDay, { bool alwaysUse24HourFormat = false }) {
-    // Not using intl.DateFormat for two reasons:
-    //
-    // - DateFormat supports more formats than our material time picker does,
-    //   and we want to be consistent across time picker format and the string
-    //   formatting of the time of day.
-    // - DateFormat operates on DateTime, which is sensitive to time eras and
-    //   time zones, while here we want to format hour and minute within one day
-    //   no matter what date the day falls on.
-    final String hour = formatHour(timeOfDay, alwaysUse24HourFormat: alwaysUse24HourFormat);
-    final String minute = formatMinute(timeOfDay);
-    switch (timeOfDayFormat(alwaysUse24HourFormat: alwaysUse24HourFormat)) {
-      case TimeOfDayFormat.h_colon_mm_space_a:
-        return '$hour:$minute ${_formatDayPeriod(timeOfDay)}';
-      case TimeOfDayFormat.H_colon_mm:
-      case TimeOfDayFormat.HH_colon_mm:
-        return '$hour:$minute';
-      case TimeOfDayFormat.HH_dot_mm:
-        return '$hour.$minute';
-      case TimeOfDayFormat.a_space_h_colon_mm:
-        return '${_formatDayPeriod(timeOfDay)} $hour:$minute';
-      case TimeOfDayFormat.frenchCanadian:
-        return '$hour h $minute';
-    }
-    return null;
-  }
-
-  String _formatDayPeriod(TimeOfDay timeOfDay) {
-    switch (timeOfDay.period) {
-      case DayPeriod.am:
-        return anteMeridiemAbbreviation;
-      case DayPeriod.pm:
-        return postMeridiemAbbreviation;
-    }
-    return null;
-  }
-
-  /// The raw version of [aboutListTileTitle], with `$applicationName` verbatim
-  /// in the string.
-  @protected
-  String get aboutListTileTitleRaw;
-
-  @override
-  String aboutListTileTitle(String applicationName) {
-    final String text = aboutListTileTitleRaw;
-    return text.replaceFirst(r'$applicationName', applicationName);
-  }
-
-  /// The raw version of [pageRowsInfoTitle], with `$firstRow`, `$lastRow`' and
-  /// `$rowCount` verbatim in the string, for the case where the value is
-  /// approximate.
-  @protected
-  String get pageRowsInfoTitleApproximateRaw;
-
-  /// The raw version of [pageRowsInfoTitle], with `$firstRow`, `$lastRow`' and
-  /// `$rowCount` verbatim in the string, for the case where the value is
-  /// precise.
-  @protected
-  String get pageRowsInfoTitleRaw;
-
-  @override
-  String pageRowsInfoTitle(int firstRow, int lastRow, int rowCount, bool rowCountIsApproximate) {
-    String text = rowCountIsApproximate ? pageRowsInfoTitleApproximateRaw : null;
-    text ??= pageRowsInfoTitleRaw;
-    assert(text != null, 'A $_localeName localization was not found for pageRowsInfoTitle or pageRowsInfoTitleApproximate');
-    return text
-      .replaceFirst(r'$firstRow', formatDecimal(firstRow))
-      .replaceFirst(r'$lastRow', formatDecimal(lastRow))
-      .replaceFirst(r'$rowCount', formatDecimal(rowCount));
-  }
-
-  /// The raw version of [tabLabel], with `$tabIndex` and `$tabCount` verbatim
-  /// in the string.
-  @protected
-  String get tabLabelRaw;
-
-  @override
-  String tabLabel({ int tabIndex, int tabCount }) {
-    assert(tabIndex >= 1);
-    assert(tabCount >= 1);
-    final String template = tabLabelRaw;
-    return template
-      .replaceFirst(r'$tabIndex', formatDecimal(tabIndex))
-      .replaceFirst(r'$tabCount', formatDecimal(tabCount));
-  }
 
   /// The "zero" form of [selectedRowCountTitle].
   ///
@@ -552,16 +364,16 @@ TimeOfDayFormat _get24HourVersionOf(TimeOfDayFormat original) {
   return TimeOfDayFormat.HH_colon_mm;
 }
 
-class _MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocalizations> {
-  const _MaterialLocalizationsDelegate();
+class _GlobalCupertinoLocalizationsDelegate extends LocalizationsDelegate<CupertinoLocalizations> {
+  const _GlobalCupertinoLocalizationsDelegate();
 
   @override
   bool isSupported(Locale locale) => kSupportedLanguages.contains(locale.languageCode);
 
-  static final Map<Locale, Future<MaterialLocalizations>> _loadedTranslations = <Locale, Future<MaterialLocalizations>>{};
+  static final Map<Locale, Future<CupertinoLocalizations>> _loadedTranslations = <Locale, Future<CupertinoLocalizations>>{};
 
   @override
-  Future<MaterialLocalizations> load(Locale locale) {
+  Future<CupertinoLocalizations> load(Locale locale) {
     assert(isSupported(locale));
     return _loadedTranslations.putIfAbsent(locale, () {
       util.loadDateIntlDataIfNotLoaded();
@@ -604,7 +416,7 @@ class _MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocal
 
       assert(locale.toString() == localeName, 'comparing "$locale" to "$localeName"');
 
-      return SynchronousFuture<MaterialLocalizations>(getMaterialTranslation(
+      return SynchronousFuture<CupertinoLocalizations>(getMaterialTranslation(
         locale,
         fullYearFormat,
         mediumDateFormat,
@@ -617,7 +429,7 @@ class _MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocal
   }
 
   @override
-  bool shouldReload(_MaterialLocalizationsDelegate old) => false;
+  bool shouldReload(_GlobalCupertinoLocalizationsDelegate old) => false;
 
   @override
   String toString() => 'GlobalMaterialLocalizations.delegate(${kSupportedLanguages.length} locales)';
