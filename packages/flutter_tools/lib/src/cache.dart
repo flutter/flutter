@@ -388,7 +388,7 @@ class FlutterWebSdk extends CachedArtifact {
       platformName = 'windows-x64';
     }
     final Uri url = Uri.parse('$_storageBaseUrl/flutter_infra/flutter/$version/$platformName.zip');
-    return _downloadZipArchive('Downloading Web sdk...', url, location);
+    return _downloadZipArchive('Downloading Web SDK...', url, location);
   }
 }
 
