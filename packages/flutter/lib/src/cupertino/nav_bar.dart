@@ -1012,10 +1012,12 @@ class _NavigationBarStaticComponents {
 
     if (userLeading != null) {
       leadingContent = userLeading;
-    } else if (automaticallyImplyLeading &&
-        route is PageRoute &&
-        route.canPop &&
-        route.fullscreenDialog) {
+    } else if (
+      automaticallyImplyLeading &&
+      route is PageRoute &&
+      route.canPop &&
+      route.fullscreenDialog
+    ) {
       leadingContent = CupertinoButton(
         child: const Text('Close'),
         padding: EdgeInsets.zero,
@@ -1050,11 +1052,13 @@ class _NavigationBarStaticComponents {
     @required ModalRoute<dynamic> route,
     @required bool automaticallyImplyLeading,
   }) {
-    if (userLeading != null ||
-        !automaticallyImplyLeading ||
-        route == null ||
-        !route.canPop ||
-        (route is PageRoute && route.fullscreenDialog)) {
+    if (
+      userLeading != null ||
+      !automaticallyImplyLeading ||
+      route == null ||
+      !route.canPop ||
+      (route is PageRoute && route.fullscreenDialog)
+    ) {
       return null;
     }
 
@@ -1071,11 +1075,13 @@ class _NavigationBarStaticComponents {
     @required bool automaticallyImplyLeading,
     @required String previousPageTitle,
   }) {
-    if (userLeading != null ||
-        !automaticallyImplyLeading ||
-        route == null ||
-        !route.canPop ||
-        (route is PageRoute && route.fullscreenDialog)) {
+    if (
+      userLeading != null ||
+      !automaticallyImplyLeading ||
+      route == null ||
+      !route.canPop ||
+      (route is PageRoute && route.fullscreenDialog)
+    ) {
       return null;
     }
 
