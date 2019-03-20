@@ -345,7 +345,7 @@ class _RecompileRequest extends _CompilationRequest {
   ) : super(completer);
 
   String mainPath;
-  List<String> invalidatedFiles;
+  List<Uri> invalidatedFiles;
   String outputPath;
   String packagesFilePath;
 
@@ -441,7 +441,7 @@ class ResidentCompiler {
   /// null is returned.
   Future<CompilerOutput> recompile(
     String mainPath,
-    List<String> invalidatedFiles, {
+    List<Uri> invalidatedFiles, {
     @required String outputPath,
     String packagesFilePath,
   }) async {
@@ -488,9 +488,9 @@ class ResidentCompiler {
         : '';
     _server.stdin.writeln('recompile $mainUri$inputKey');
     printTrace('<- recompile $mainUri$inputKey');
-    for (String fileUri in request.invalidatedFiles) {
-      _server.stdin.writeln(_mapFileUri(fileUri, packageUriMapper));
-      printTrace('<- ${_mapFileUri(fileUri, packageUriMapper)}');
+    for (Uri fileUri in request.invalidatedFiles) {
+      _server.stdin.writeln(_mapFileUri(fileUri.toString(), packageUriMapper));
+      printTrace('<- ${_mapFileUri(fileUri.toString(), packageUriMapper)}');
     }
     _server.stdin.writeln(inputKey);
     printTrace('<- $inputKey');

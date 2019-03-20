@@ -387,6 +387,7 @@ class DevFS {
   String _packagesFilePath;
   final Map<Uri, DevFSContent> _entries = <Uri, DevFSContent>{};
   final Set<String> assetPathsToEvict = <String>{};
+  List<Uri> sources = <Uri>[];
 
   Uri _baseUri;
   Uri get baseUri => _baseUri;
@@ -439,7 +440,7 @@ class DevFS {
     bool fullRestart = false,
     String projectRootPath,
     @required String pathToReload,
-    @required List<String> invalidatedFiles,
+    @required List<Uri> invalidatedFiles,
   }) async {
     assert(trackWidgetCreation != null);
     assert(generator != null);
@@ -485,6 +486,7 @@ class DevFS {
       packagesFilePath : _packagesFilePath,
     );
     // list of sources that needs to be monitored are in [compilerOutput.sources]
+    sources = compilerOutput.sources;
     //
     // Don't send full kernel file that would overwrite what VM already
     // started loading from.

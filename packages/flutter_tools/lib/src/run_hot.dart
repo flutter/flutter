@@ -7,7 +7,6 @@ import 'dart:async';
 import 'package:json_rpc_2/error_code.dart' as rpc_error_code;
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:meta/meta.dart';
-import 'package:yaml/yaml.dart';
 
 import 'base/common.dart';
 import 'base/context.dart';
@@ -19,11 +18,9 @@ import 'base/utils.dart';
 import 'build_info.dart';
 import 'compile.dart';
 import 'convert.dart';
-import 'dart/package_map.dart';
 import 'devfs.dart';
 import 'device.dart';
 import 'globals.dart';
-import 'project.dart';
 import 'resident_runner.dart';
 import 'usage.dart';
 import 'vmservice.dart';
@@ -70,7 +67,6 @@ class HotRunner extends ResidentRunner {
     bool saveCompilationTrace = false,
     bool stayResident = true,
     bool ipv6 = false,
-    FlutterProject flutterProject,
   }) : super(devices,
              target: target,
              debuggingOptions: debuggingOptions,
@@ -80,10 +76,7 @@ class HotRunner extends ResidentRunner {
              saveCompilationTrace: saveCompilationTrace,
              stayResident: stayResident,
              ipv6: ipv6)  {
-    fileInvalidator = ProjectFileInvalidator(
-      packagesFilePath ?? fs.path.absolute(PackageMap.globalPackagesPath),
-      flutterProject,
-    );
+    fileInvalidator = ProjectFileInvalidator();
   }
 
   final bool benchmarkMode;
@@ -322,7 +315,11 @@ class HotRunner extends ResidentRunner {
       if (result != 0)
         return UpdateFSReport(success: false);
     }
-    final List<String> invalidatedFiles = fileInvalidator.findInvalidated();
+
+    // Picking up first device's compiler as a source of truth - compilers
+    // for all devices should be in sync.
+    final List<Uri> invalidatedFiles = fileInvalidator.findInvalidated(
+        flutterDevices[0].devFS.sources);
     final UpdateFSReport results = UpdateFSReport(success: true);
     for (FlutterDevice device in flutterDevices) {
       results.incorporateResults(await device.updateDevFS(
@@ -941,104 +938,42 @@ class HotRunner extends ResidentRunner {
 }
 
 class ProjectFileInvalidator {
-  ProjectFileInvalidator(this._packagesPath, this._flutterProject) {
-    final File packagesFile = fs.file(_packagesPath);
-    if (packagesFile.existsSync()) {
-      _packagesUpdateTime = packagesFile.statSync().modified.millisecondsSinceEpoch;
-      _packageMap = PackageMap(_packagesPath).map;
-    } else {
-      _packagesUpdateTime = -1;
-      _packageMap = const <String, Uri>{};
-    }
-    _computePackageMap(_packageMap, _flutterProject);
-  }
-
-  // Used to avoid watching pubspec directories. This will not change even with pub upgrade,
-  // because that actually switches the directory and requires a corresponding
-  // update to .packages
   static const String _pubCachePathLinuxAndWindows = '.pub-cache';
   static const String _pubCachePathWindows = 'Pub/Cache';
 
-  Map<String, Uri> _packageMap;
-  final String _packagesPath;
-  final FlutterProject _flutterProject;
-  final Map<String, int> _updateTime = <String, int>{};
-  int _packagesUpdateTime;
+  final Map<Uri, int> _updateTime = <Uri, int>{};
 
-  Map<String, int> get updateTime => _updateTime;
+  Map<Uri, int> get updateTime => _updateTime;
 
-  @visibleForTesting
-  Map<String, Uri> get packageMap => _packageMap;
-
-  static void _computePackageMap(Map<String, Uri> packageMap, FlutterProject flutterProject) {
-    if (flutterProject != null && flutterProject.pubspecFile.existsSync()) {
-      try {
-        final YamlMap pubspec = loadYamlDocument(flutterProject.pubspecFile.readAsStringSync()).contents;
-        final YamlMap dependencies = pubspec['dependencies'];
-        final Set<String> relevantDependencies = Set<String>.from(dependencies.keys);
-        // Remove any packages which were tagged as dev dependenices,
-        // But don't remove the app itself!
-        for (String packageName in packageMap.keys.toList()) {
-          if (!relevantDependencies.contains(packageName) && packageName != flutterProject.manifest.appName) {
-            packageMap.remove(packageName);
-            continue;
-          }
+  List<Uri> findInvalidated(List<Uri> urisToMonitor) {
+    final List<Uri> invalidatedFiles = <Uri>[];
+    int scanned = 0;
+    final Stopwatch stopwatch = Stopwatch()..start();
+    for (Uri uri in urisToMonitor) {
+      if ((platform.isWindows && uri.path.contains(_pubCachePathWindows))
+          || uri.path.contains(_pubCachePathLinuxAndWindows)) {
+        // Don't watch pub cache directories to speed things up a little.
+        continue;
+      }
+      final int oldUpdatedAt = _updateTime[uri];
+      final int updatedAt = fs
+          .statSync(uri.toFilePath(windows: platform.isWindows))
+          .modified
+          .millisecondsSinceEpoch;
+      scanned++;
+      if (oldUpdatedAt == null || updatedAt > oldUpdatedAt) {
+        _updateTime[uri] = updatedAt;
+        if (oldUpdatedAt != null) {
+          // findInvalidated with populated `urisToMonitor` is invoked after
+          // compiler has been warmed up because compiler is who provided us
+          // with that `urisToMonitor` list.
+          // So if we don't have a timestamp for this file here, assume that
+          // it is up to date.
+          invalidatedFiles.add(uri);
         }
-      } catch (err) {
-        // If we detect a pubspec formatting problem, fallback to the packages file.
       }
     }
-    // Remove any packages which are derived from the pub cache.
-    for (String packageName in packageMap.keys.toList()) {
-      final String path = packageMap[packageName].path;
-      if ((platform.isWindows && path.contains(_pubCachePathWindows))
-          || path.contains(_pubCachePathLinuxAndWindows)) {
-        packageMap.remove(packageName);
-      }
-    }
-  }
-
-  List<String> findInvalidated() {
-    final File packagesFile = fs.file(_packagesPath);
-    if (packagesFile.existsSync()) {
-      final int newPackagesUpdateTime = packagesFile.statSync().modified.millisecondsSinceEpoch;
-      // Hot reloading with an updated package will often times kill a non-trivial
-      // appliction. This _might_ work, given certain application size and package
-      // constraints, so instead of exiting we print a warning so that the user has
-      // some hint on what went wrong.
-      if (newPackagesUpdateTime > _packagesUpdateTime) {
-        printError('Warning: updated dependencies detected. The Flutter application will require a restart to safely use new packages.');
-      }
-      _packagesUpdateTime = newPackagesUpdateTime;
-    }
-    final List<String> invalidatedFiles = <String>[];
-    for (String packageName in _packageMap.keys) {
-      final Uri packageUri =_packageMap[packageName];
-      _scanDirectory(packageUri, invalidatedFiles);
-    }
+    printTrace('Scanned through $scanned files in ${stopwatch.elapsedMilliseconds}ms');
     return invalidatedFiles;
-  }
-
-  void _scanDirectory(Uri path, List<String> invalidatedFiles) {
-    final Directory directory = fs.directory(path);
-    if (!directory.existsSync()) {
-      return;
-    }
-    for (FileSystemEntity entity in directory.listSync(recursive: true)) {
-      if (entity.path.endsWith('.dart')) {
-        final int oldUpdatedAt = _updateTime[entity.path];
-        final int updatedAt = fs.statSync(entity.path).modified.millisecondsSinceEpoch;
-        if (oldUpdatedAt == null || updatedAt > oldUpdatedAt) {
-          // On windows convert to file uri in expected format.
-          if (platform.isWindows) {
-            final Uri uri = Uri.file(entity.path, windows: platform.isWindows);
-            invalidatedFiles.add(uri.toString());
-          } else {
-            invalidatedFiles.add(entity.path);
-          }
-        }
-        _updateTime[entity.path] = updatedAt;
-      }
-    }
   }
 }

@@ -517,7 +517,7 @@ Future<void> _recompile(
   });
   final CompilerOutput output = await generator.recompile(
     null /* mainPath */,
-    <String>['/path/to/main.dart'],
+    <Uri>[Uri.parse('/path/to/main.dart')],
     outputPath: '/build/',
   );
   expect(output.outputFilename, equals('/path/to/main.dart.dill'));

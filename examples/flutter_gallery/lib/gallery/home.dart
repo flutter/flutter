@@ -14,7 +14,7 @@ import 'backdrop.dart';
 import 'demos.dart';
 
 const String _kGalleryAssetsPackage = 'flutter_gallery_assets';
-const Color _kFlutterBlue = Color(0xFF003D75);
+const Color _kFlutterBlue = Color(0xFFFF3D75);
 const double _kDemoItemHeight = 64.0;
 const Duration _kFrontLayerSwitchDuration = Duration(milliseconds: 300);
 
