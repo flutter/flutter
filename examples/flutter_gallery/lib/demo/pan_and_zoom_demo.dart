@@ -16,6 +16,7 @@ class _PanAndZoomDemoState extends State<PanAndZoomDemo> {
   static const double HEXAGON_MARGIN = 1.0;
   static const int BOARD_RADIUS = 8;
 
+  bool _reset = false;
   Board _board = Board(
     boardRadius: BOARD_RADIUS,
     hexagonRadius: HEXAGON_RADIUS,
@@ -30,26 +31,17 @@ class _PanAndZoomDemoState extends State<PanAndZoomDemo> {
     final Size screenSize = MediaQuery.of(context).size;
     final Size visibleSize = Size(screenSize.width * 3, screenSize.height * 2);
 
-    // The scene is drawn by a CustomPaint, but user interaction is handled by
-    // the TransformInteraction parent widget.
-    return Scaffold(
-      body: TransformInteraction(
-        child: CustomPaint(
-          size: Size.infinite,
-          painter: painter,
-        ),
-        visibleRect: Rect.fromLTWH(
-          -visibleSize.width / 2,
-          -visibleSize.height / 2,
-          visibleSize.width,
-          visibleSize.height,
-        ),
-        initialTranslation: Offset(screenSize.width / 2, screenSize.height / 2),
-        onTapUp: _onTapUp,
-        size: screenSize,
-      ),
-      floatingActionButton: _board.selected == null ? null : FloatingActionButton(
+    final FloatingActionButton floatingActionButton = _board.selected == null
+      ? FloatingActionButton(
         onPressed: () => setState(() {
+          _reset = true;
+        }),
+        tooltip: 'Reset Transform',
+        backgroundColor: Colors.lightGreen,
+        child: const Icon(Icons.home),
+      )
+      : FloatingActionButton(
+        onPressed: () {
           if (_board.selected == null) {
             return;
           }
@@ -64,10 +56,36 @@ class _PanAndZoomDemoState extends State<PanAndZoomDemo> {
               },
             );
           });
-        }),
+        },
         tooltip: 'Edit Tile',
         child: const Icon(Icons.edit),
+      );
+
+    // The scene is drawn by a CustomPaint, but user interaction is handled by
+    // the TransformInteraction parent widget.
+    return Scaffold(
+      body: TransformInteraction(
+        reset: _reset,
+        onResetEnd: () {
+          setState(() {
+            _reset = false;
+          });
+        },
+        child: CustomPaint(
+          size: Size.infinite,
+          painter: painter,
+        ),
+        visibleRect: Rect.fromLTWH(
+          -visibleSize.width / 2,
+          -visibleSize.height / 2,
+          visibleSize.width,
+          visibleSize.height,
+        ),
+        initialTranslation: Offset(screenSize.width / 2, screenSize.height / 2),
+        onTapUp: _onTapUp,
+        size: screenSize,
       ),
+      floatingActionButton: floatingActionButton,
     );
   }
 

@@ -26,6 +26,10 @@ class TransformInteraction extends StatefulWidget {
     this.disableTranslation = false,
     this.disableScale = false,
     this.disableRotation = false,
+    // If set to true, this widget will animate back to its initial transform
+    // and call onResetEnd when done. When utilizing reset, onResetEnd should
+    // also be implemented, and it should set reset to false when called.
+    this.reset = false,
     // Access to event callbacks from GestureDetector. Called with untransformed
     // coordinates in an Offset.
     this.onTapDown,
@@ -50,13 +54,16 @@ class TransformInteraction extends StatefulWidget {
     this.onPanUpdate,
     this.onPanEnd,
     this.onPanCancel,
+    this.onResetEnd,
     this.onScaleStart,
     this.onScaleUpdate,
     this.onScaleEnd,
-  });
+  }) :
+    assert(!reset || onResetEnd != null, 'Must implement onResetEnd to use reset.');
 
   final Widget child;
   final Size size;
+  final bool reset;
   final Function onTapDown;
   final Function onTapUp;
   final Function onTap;
@@ -79,6 +86,7 @@ class TransformInteraction extends StatefulWidget {
   final Function onPanUpdate;
   final Function onPanEnd;
   final Function onPanCancel;
+  final Function onResetEnd;
   final Function onScaleStart;
   final Function onScaleUpdate;
   final Function onScaleEnd;
@@ -101,9 +109,11 @@ enum GestureType {
   rotate,
 }
 
-class TransformInteractionState extends State<TransformInteraction> with SingleTickerProviderStateMixin {
+class TransformInteractionState extends State<TransformInteraction> with TickerProviderStateMixin {
   Animation<Offset> _animation;
   AnimationController _controller;
+  Animation<Matrix4> _animationReset;
+  AnimationController _controllerReset;
   // The translation that will be applied to the scene (not viewport).
   // A positive x offset moves the scene right, viewport left.
   // A positive y offset moves the scene down, viewport up.
@@ -112,7 +122,23 @@ class TransformInteractionState extends State<TransformInteraction> with SingleT
   double _rotationStart = 0.0;
   Rect _visibleRect;
   Matrix4 _transform = Matrix4.identity();
+  double _currentRotation = 0.0;
   GestureType gestureType;
+
+  // The transformation matrix that gives the initial home position.
+  Matrix4 get _initialTransform {
+    Matrix4 matrix = Matrix4.identity();
+    if (widget.initialTranslation != null) {
+      matrix = matrixTranslate(matrix, widget.initialTranslation);
+    }
+    if (widget.initialScale != null) {
+      matrix = matrixScale(matrix, widget.initialScale);
+    }
+    if (widget.initialRotation != null) {
+      matrix = matrixRotate(matrix, widget.initialRotation, Offset.zero);
+    }
+    return matrix;
+  }
 
   // Perform a translation on the given matrix within constraints of the scene.
   // The _visibleRect is not rotated with the scene.
@@ -193,22 +219,29 @@ class TransformInteractionState extends State<TransformInteraction> with SingleT
     _visibleRect = widget.visibleRect != null
       ? widget.visibleRect
       : Rect.fromLTWH(0, 0, widget.size.width, widget.size.height);
-    if (widget.initialTranslation != null) {
-      _transform = matrixTranslate(_transform, widget.initialTranslation);
-    }
-    if (widget.initialScale != null) {
-      _transform = matrixScale(_transform, widget.initialScale);
-    }
-    if (widget.initialRotation != null) {
-      _transform = matrixRotate(_transform, widget.initialRotation, Offset.zero);
-    }
+    _transform = _initialTransform;
     _controller = AnimationController(
+      vsync: this,
+    );
+    _controllerReset = AnimationController(
       vsync: this,
     );
   }
 
   @override
   Widget build (BuildContext context) {
+    if (widget.reset && _animationReset == null) {
+      _animationReset?.removeListener(_onAnimateReset);
+      _controllerReset.reset();
+      _animationReset = Matrix4Tween(
+        begin: _transform,
+        end: _initialTransform,
+      ).animate(_controllerReset);
+      _controllerReset.duration = Duration(milliseconds: 400);
+      _animationReset.addListener(_onAnimateReset);
+      _controllerReset.forward();
+    }
+
     // A GestureDetector allows the detection of panning and zooming gestures on
     // its child, which is the CustomPaint.
     return GestureDetector(
@@ -266,10 +299,25 @@ class TransformInteractionState extends State<TransformInteraction> with SingleT
   }
 
   // Handle panning and pinch zooming events
-  double _currentRotation = 0.0;
   void _onScaleStart(ScaleStartDetails details) {
     widget.onScaleStart?.call();
-    _controller.stop();
+
+    // TODO(justinmc): Do things like this need to happen inside of setState? I
+    // don't need build to be called because of any of this.
+    if (_controller.isAnimating) {
+      _controller.stop();
+      _controller.reset();
+      _animation?.removeListener(_onAnimate);
+      _animation = null;
+    }
+    if (_controllerReset.isAnimating) {
+      _controllerReset.stop();
+      _animationReset?.removeListener(_onAnimateReset);
+      _animationReset = null;
+      _controllerReset.reset();
+      widget.onResetEnd();
+    }
+
     gestureType = null;
     setState(() {
       _scaleStart = _transform.getMaxScaleOnAxis();
@@ -367,11 +415,29 @@ class TransformInteractionState extends State<TransformInteraction> with SingleT
       final Offset translationChangeScene = animationScene - translationScene;
       _transform = matrixTranslate(_transform, translationChangeScene);
     });
+    if (!_controller.isAnimating) {
+      _animation?.removeListener(_onAnimate);
+      _animation = null;
+      _controller.reset();
+    }
+  }
+
+  void _onAnimateReset() {
+    setState(() {
+      _transform = _animationReset.value;
+    });
+    if (!_controllerReset.isAnimating) {
+      _animationReset?.removeListener(_onAnimateReset);
+      _animationReset = null;
+      _controllerReset.reset();
+      widget.onResetEnd();
+    }
   }
 
   @override
   void dispose() {
     _controller.dispose();
+    _controllerReset.dispose();
     super.dispose();
   }
 }
