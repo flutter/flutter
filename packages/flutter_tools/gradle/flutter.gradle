@@ -413,8 +413,18 @@ class FlutterPlugin implements Plugin<Project> {
                     }
                 } catch (Exception e) {
                 }
+                String currentFlavor = ""
+                try {
+                    String tmpCurrentFlavor = project.rootProject.ext.currentFlavor
+                    if (tmpCurrentFlavor != null) {
+                        currentFlavor = tmpCurrentFlavor
+                    }
+                } catch (Exception e) {
+                }
+                String buildVariant = "${currentFlavor.capitalize()}${variant.name.capitalize()}"
+
                 // Only include configurations that exist in parent project.
-                Task mergeAssets = project.tasks.findByPath(":${mainModuleName}:merge${variant.name.capitalize()}Assets")
+                Task mergeAssets = project.tasks.findByPath(":${mainModuleName}:merge${buildVariant}Assets")
                 if (mergeAssets) {
                     mergeAssets.dependsOn(copyFlutterAssetsTask)
                 }

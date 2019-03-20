@@ -24,6 +24,10 @@ gradle.getGradle().projectsLoaded { g ->
         if (_mainModuleName != null && !_mainModuleName.empty) {
             p.ext.mainModuleName = _mainModuleName
         }
+        _currentFlavor = binding.variables['currentFlavor']
+        if (_currentFlavor != null && !_currentFlavor.empty) {
+            p.ext.currentFlavor = _currentFlavor
+        }
     }
     g.rootProject.afterEvaluate { p ->
         p.subprojects { sp ->
