@@ -11,7 +11,7 @@ import 'package:flutter/rendering.dart';
 /// widgets.
 ///
 /// Descendant widgets obtain the current [FloatingActionButtonThemeData] object
-/// using `FloatingActionButtonThemeData.of(context)`. Instances of
+/// using `Theme.of(context).floatingActionButtonTheme`. Instances of
 /// [FloatingActionButtonThemeData] can be customized with
 /// [FloatingActionButtonThemeData.copyWith].
 ///
