@@ -6,6 +6,5 @@
 library flutter_localizations;
 
 export 'src/l10n/generated_material_localizations.dart';
-export 'src/cupertino_localizations.dart';
 export 'src/material_localizations.dart';
 export 'src/widgets_localizations.dart';

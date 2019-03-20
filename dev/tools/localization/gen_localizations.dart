@@ -604,11 +604,9 @@ Future<void> main(List<String> rawArgs) async {
 
   final Directory directory = Directory(path.join('packages', 'flutter_localizations', 'lib', 'src', 'l10n'));
   final RegExp materialFilenameRE = RegExp(r'material_(\w+)\.arb$');
-  final RegExp cupertinoFilenameRE = RegExp(r'cupertino_(\w+)\.arb$');
 
   try {
     validateEnglishLocalizations(File(path.join(directory.path, 'material_en.arb')));
-    validateEnglishLocalizations(File(path.join(directory.path, 'cupertino_en.arb')));
   } on ValidationError catch (exception) {
     exitWithError('$exception');
   }
