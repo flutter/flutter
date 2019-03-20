@@ -385,7 +385,7 @@ class FlutterWebSdk extends CachedArtifact {
     } else if (platform.isLinux) {
       platformName += 'linux-x64';
     } else if (platform.isWindows) {
-      platformName = 'windows-x64';
+      platformName += 'windows-x64';
     }
     final Uri url = Uri.parse('$_storageBaseUrl/flutter_infra/flutter/$version/$platformName.zip');
     return _downloadZipArchive('Downloading Web SDK...', url, location);
