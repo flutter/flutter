@@ -187,8 +187,7 @@ Future<String> _chooseSigningIdentity(List<String> validCodeSigningIdentities, b
       if (validCodeSigningIdentities.contains(savedCertChoice)) {
         printStatus('Found saved certificate choice "$savedCertChoice". To clear, use "flutter config".');
         return savedCertChoice;
-      }
-      else {
+      } else {
         printError('Saved signing certificate "$savedCertChoice" is not a valid development certificate');
       }
     }

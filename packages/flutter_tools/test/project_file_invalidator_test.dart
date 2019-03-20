@@ -102,7 +102,7 @@ void main() {}
       });
       expect(invalidator.updateTime, <String, int>{
         '/foo/lib/foo.dart': fooFile.statSync().modified.millisecondsSinceEpoch,
-        '/lib/main.dart':mainFile.statSync().modified.millisecondsSinceEpoch,
+        '/lib/main.dart': mainFile.statSync().modified.millisecondsSinceEpoch,
       });
       expect(invalidator.findInvalidated(), isEmpty);
 
