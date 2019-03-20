@@ -950,7 +950,8 @@ class ProjectFileInvalidator {
         // Don't watch pub cache directories to speed things up a little.
         continue;
       }
-      DateTime updatedAt = fs.statSync(uri.toFilePath(windows: platform.isWindows)).modified;
+      final DateTime updatedAt = fs.statSync(
+          uri.toFilePath(windows: platform.isWindows)).modified;
       scanned++;
       if (updatedAt == null) {
         continue;
