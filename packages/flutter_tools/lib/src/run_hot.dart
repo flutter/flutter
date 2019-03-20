@@ -75,16 +75,13 @@ class HotRunner extends ResidentRunner {
              packagesFilePath: packagesFilePath,
              saveCompilationTrace: saveCompilationTrace,
              stayResident: stayResident,
-             ipv6: ipv6)  {
-    fileInvalidator = ProjectFileInvalidator();
-  }
+             ipv6: ipv6);
 
   final bool benchmarkMode;
   final File applicationBinary;
   final bool hostIsIde;
   bool _didAttach = false;
   final String dillOutputPath;
-  ProjectFileInvalidator fileInvalidator;
 
   final Map<String, List<int>> benchmarkData = <String, List<int>>{};
   // The initial launch is from a snapshot.
@@ -318,8 +315,8 @@ class HotRunner extends ResidentRunner {
 
     // Picking up first device's compiler as a source of truth - compilers
     // for all devices should be in sync.
-    final List<Uri> invalidatedFiles = fileInvalidator.findInvalidated(
-      firstBuildTime: firstBuildTime,
+    final List<Uri> invalidatedFiles = ProjectFileInvalidator.findInvalidated(
+      lastCompiled: flutterDevices[0].devFS.lastCompiled,
       urisToMonitor: flutterDevices[0].devFS.sources);
     final UpdateFSReport results = UpdateFSReport(success: true);
     for (FlutterDevice device in flutterDevices) {
@@ -942,13 +939,8 @@ class ProjectFileInvalidator {
   static const String _pubCachePathLinuxAndWindows = '.pub-cache';
   static const String _pubCachePathWindows = 'Pub/Cache';
 
-  final Map<Uri, int> _updateTime = <Uri, int>{};
-
-  Map<Uri, int> get updateTime => _updateTime;
-
-  List<Uri> findInvalidated({@required DateTime firstBuildTime,
+  static List<Uri> findInvalidated({@required DateTime lastCompiled,
     @required List<Uri> urisToMonitor}) {
-    final int firstBuildTimeMs = firstBuildTime.millisecondsSinceEpoch;
     final List<Uri> invalidatedFiles = <Uri>[];
     int scanned = 0;
     final Stopwatch stopwatch = Stopwatch()..start();
@@ -958,20 +950,12 @@ class ProjectFileInvalidator {
         // Don't watch pub cache directories to speed things up a little.
         continue;
       }
-      final int oldUpdatedAt = _updateTime[uri];
       final int updatedAt = fs
           .statSync(uri.toFilePath(windows: platform.isWindows))
           .modified
           .millisecondsSinceEpoch;
       scanned++;
-      if (oldUpdatedAt != null && updatedAt <= oldUpdatedAt) {
-        continue;
-      }
-      _updateTime[uri] = updatedAt;
-      if (oldUpdatedAt != null ||
-          (oldUpdatedAt == null && updatedAt > firstBuildTimeMs)) {
-        // If this is the first time we are looking at the file invalidate it
-        // only if it was updated after we build the app as part of this session.
+      if (updatedAt > lastCompiled.millisecondsSinceEpoch) {
         invalidatedFiles.add(uri);
       }
     }

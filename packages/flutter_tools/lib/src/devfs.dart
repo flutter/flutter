@@ -388,6 +388,7 @@ class DevFS {
   final Map<Uri, DevFSContent> _entries = <Uri, DevFSContent>{};
   final Set<String> assetPathsToEvict = <String>{};
   List<Uri> sources = <Uri>[];
+  DateTime lastCompiled;
 
   Uri _baseUri;
   Uri get baseUri => _baseUri;
@@ -479,6 +480,7 @@ class DevFS {
       generator.reset();
     }
     printTrace('Compiling dart to kernel with ${invalidatedFiles.length} updated files');
+    lastCompiled = DateTime.now();
     final CompilerOutput compilerOutput = await generator.recompile(
       mainPath,
       invalidatedFiles,

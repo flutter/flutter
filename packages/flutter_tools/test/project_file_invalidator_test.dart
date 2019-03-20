@@ -13,9 +13,9 @@ void main() {
   group('ProjectFileInvalidator', () {
     final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
     testUsingContext('Empty project', () async {
-      final ProjectFileInvalidator invalidator = ProjectFileInvalidator();
-      invalidator.findInvalidated(firstBuildTime: DateTime.now(), urisToMonitor: <Uri>[]);
-      expect(invalidator.updateTime, isEmpty);
+      expect(
+        ProjectFileInvalidator.findInvalidated(lastCompiled: DateTime.now(), urisToMonitor: <Uri>[]),
+        isEmpty);
     }, overrides: <Type, Generator>{
       FileSystem: () => memoryFileSystem,
     });
