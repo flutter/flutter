@@ -17,6 +17,7 @@ RUN gclient sync
 WORKDIR $ENGINE_PATH/src
 RUN ./build/install-build-deps.sh --no-prompt
 RUN ./build/install-build-deps-android.sh --no-prompt
+RUN ./flutter/build/install-build-deps-linux-desktop.sh
 
 WORKDIR $HOME/dart
 RUN wget https://storage.googleapis.com/dart-archive/channels/dev/release/2.1.0-dev.7.1/sdk/dartsdk-linux-x64-release.zip
