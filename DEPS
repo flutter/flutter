@@ -72,7 +72,6 @@ vars = {
   'dart_package_config_tag': '1.0.5',
   'dart_package_resolver_tag': '1.0.10',
   'dart_path_tag': '1.6.2',
-  'dart_plugin_tag': 'f5b4b0e32d1406d62daccea030ba6457d14b1c47',
   'dart_pool_tag': '1.3.6',
   'dart_protobuf_rev': '0c77167b16d00b561a6055bfe26690af7f26ae88',
   'dart_pub_rev': '3c060aae47985e9a248b850f1d0450304a5c97e3',
@@ -278,9 +277,6 @@ deps = {
 
   'src/third_party/dart/third_party/pkg/pool':
    Var('dart_git') + '/pool.git' + '@' + Var('dart_pool_tag'),
-
-  'src/third_party/dart/third_party/pkg/plugin':
-   Var('dart_git') + '/plugin.git' + '@' + Var('dart_plugin_tag'),
 
   'src/third_party/dart/third_party/pkg/protobuf':
    Var('dart_git') + '/protobuf.git' + '@' + Var('dart_protobuf_rev'),
