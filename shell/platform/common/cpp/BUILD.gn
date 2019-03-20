@@ -1,0 +1,63 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+config("desktop_library_implementation") {
+  defines = [ "FLUTTER_DESKTOP_LIBRARY" ]
+}
+
+_public_headers = [
+  "public/flutter_export.h",
+  "public/flutter_messenger.h",
+  "public/flutter_plugin_registrar.h",
+]
+
+# Any files that are built by clients (client_wrapper code, library headers for
+# implementations using this shared code, etc.) include the public headers
+# assuming they are in the include path. This configuration should be added to
+# any such code that is also built by GN to make the includes work.
+config("relative_flutter_library_headers") {
+  include_dirs = [ "public" ]
+}
+
+# The headers are a separate source set since the client wrapper is allowed
+# to depend on the public headers, but none of the rest of the code.
+source_set("common_cpp_library_headers") {
+  public = _public_headers
+
+  configs += [ ":desktop_library_implementation" ]
+}
+
+source_set("common_cpp") {
+  public = [
+    "incoming_message_dispatcher.h",
+    "text_input_model.h",
+  ]
+
+  # TODO: Refactor flutter_glfw.cc to move the implementations corresponding
+  # to the _public_headers above into this target.
+  sources = [
+    "incoming_message_dispatcher.cc",
+    "text_input_model.cc",
+  ]
+
+  configs += [ ":desktop_library_implementation" ]
+
+  deps = [
+    ":common_cpp_library_headers",
+    "$flutter_root/shell/platform/common/cpp/client_wrapper:client_wrapper",
+    "$flutter_root/shell/platform/embedder:embedder",
+  ]
+
+  # TODO: Remove once text input model refactor lands, at which point this code
+  # won't have a JSON dependency.
+  defines = [ "USE_RAPID_JSON" ]
+  deps += [ "//third_party/rapidjson" ]
+}
+
+copy("publish_headers") {
+  sources = _public_headers
+  outputs = [
+    "$root_out_dir/{{source_file_part}}",
+  ]
+}
