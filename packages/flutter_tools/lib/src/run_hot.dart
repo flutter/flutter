@@ -319,7 +319,8 @@ class HotRunner extends ResidentRunner {
     // Picking up first device's compiler as a source of truth - compilers
     // for all devices should be in sync.
     final List<Uri> invalidatedFiles = fileInvalidator.findInvalidated(
-        flutterDevices[0].devFS.sources);
+      firstBuildTime: firstBuildTime,
+      urisToMonitor: flutterDevices[0].devFS.sources);
     final UpdateFSReport results = UpdateFSReport(success: true);
     for (FlutterDevice device in flutterDevices) {
       results.incorporateResults(await device.updateDevFS(
@@ -945,7 +946,9 @@ class ProjectFileInvalidator {
 
   Map<Uri, int> get updateTime => _updateTime;
 
-  List<Uri> findInvalidated(List<Uri> urisToMonitor) {
+  List<Uri> findInvalidated({@required DateTime firstBuildTime,
+    @required List<Uri> urisToMonitor}) {
+    final int firstBuildTimeMs = firstBuildTime.millisecondsSinceEpoch;
     final List<Uri> invalidatedFiles = <Uri>[];
     int scanned = 0;
     final Stopwatch stopwatch = Stopwatch()..start();
@@ -961,16 +964,15 @@ class ProjectFileInvalidator {
           .modified
           .millisecondsSinceEpoch;
       scanned++;
-      if (oldUpdatedAt == null || updatedAt > oldUpdatedAt) {
-        _updateTime[uri] = updatedAt;
-        if (oldUpdatedAt != null) {
-          // findInvalidated with populated `urisToMonitor` is invoked after
-          // compiler has been warmed up because compiler is who provided us
-          // with that `urisToMonitor` list.
-          // So if we don't have a timestamp for this file here, assume that
-          // it is up to date.
-          invalidatedFiles.add(uri);
-        }
+      if (oldUpdatedAt != null && updatedAt <= oldUpdatedAt) {
+        continue;
+      }
+      _updateTime[uri] = updatedAt;
+      if (oldUpdatedAt != null ||
+          (oldUpdatedAt == null && updatedAt > firstBuildTimeMs)) {
+        // If this is the first time we are looking at the file invalidate it
+        // only if it was updated after we build the app as part of this session.
+        invalidatedFiles.add(uri);
       }
     }
     printTrace('Scanned through $scanned files in ${stopwatch.elapsedMilliseconds}ms');
