@@ -1082,18 +1082,4 @@ void main() {
     await tester.pumpAndSettle();
     expect(selectedIndex, 13);
   });
-
-  testWidgets('Dropdown custom underline golden', (WidgetTester tester) async {
-    final Key buttonKey = UniqueKey();
-    Widget build() => buildFrame(buttonKey: buttonKey,
-        underline: const BorderSide(color: Color(0xFFCCAABB), width: 4.0));
-    await tester.pumpWidget(build());
-    final Finder buttonFinder = find.byKey(buttonKey);
-    assert(tester.renderObject(buttonFinder).attached);
-    await expectLater(
-      find.ancestor(of: buttonFinder, matching: find.byType(RepaintBoundary)).first,
-      matchesGoldenFile('dropdown_test.custom_underline.0.png'),
-      skip: !Platform.isLinux,
-    );
-  });
 }
