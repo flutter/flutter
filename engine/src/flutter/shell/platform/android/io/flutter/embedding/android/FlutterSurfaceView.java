@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-package io.flutter.embedding.engine.android;
+package io.flutter.embedding.android;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
@@ -11,8 +11,6 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
-
-import java.nio.ByteBuffer;
 
 import io.flutter.embedding.engine.renderer.FlutterRenderer;
 

@@ -480,7 +480,7 @@
         errorLine1="  public boolean onTouchEvent(MotionEvent event) {"
         errorLine2="                 ~~~~~~~~~~~~">
         <location
-            file="../../../flutter/shell/platform/android/io/flutter/embedding/engine/android/FlutterView.java"
+            file="../../../flutter/shell/platform/android/io/flutter/embedding/android/FlutterView.java"
             line="311"
             column="18"/>
     </issue>
