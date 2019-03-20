@@ -431,7 +431,7 @@ typedef FocusableNodeVisitor = bool Function(FocusableNode node);
 /// be traversed together. Within a scope, the last item to have focus is
 /// remembered, and if another scope is focused and then the first is returned
 /// to, that node will gain focus again.
-class FocusableNode extends FocusNode with DiagnosticableTreeMixin {
+class FocusableNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// Creates a Focusable node
   ///
   /// All parameters must not be null.
@@ -439,6 +439,9 @@ class FocusableNode extends FocusNode with DiagnosticableTreeMixin {
     this.autofocus = false,
     @required this.context,
   })  : assert(autofocus != null);
+
+  FocusManager _manager;
+  bool _hasKeyboardToken = false;
 
   /// Indicates that this node is a scope node, which keeps track of which of its
   /// descendants last had the focus.
@@ -449,6 +452,35 @@ class FocusableNode extends FocusNode with DiagnosticableTreeMixin {
   ///
   /// There must only be one node in a scope that has [autofocus] set.
   final bool autofocus;
+
+  /// Cancels any outstanding requests for focus.
+  ///
+  /// This method is safe to call regardless of whether this node has ever
+  /// requested focus.
+  void unfocus() {
+  }
+
+  /// Removes the keyboard token from this focus node if it has one.
+  ///
+  /// This mechanism helps distinguish between an input control gaining focus by
+  /// default and gaining focus as a result of an explicit user action.
+  ///
+  /// When a focus node requests the focus (either via
+  /// [FocusScopeNode.requestFocus] or [FocusScopeNode.autofocus]), the focus
+  /// node receives a keyboard token if it does not already have one. Later,
+  /// when the focus node becomes focused, the widget that manages the
+  /// [TextInputConnection] should show the keyboard (i.e., call
+  /// [TextInputConnection.show]) only if it successfully consumes the keyboard
+  /// token from the focus node.
+  ///
+  /// Returns whether this function successfully consumes a keyboard token.
+  bool consumeKeyboardToken() {
+    if (!_hasKeyboardToken) {
+      return false;
+    }
+    _hasKeyboardToken = false;
+    return true;
+  }
 
   /// The global key for the [InheritedWidget] associated with this node.
   ///
@@ -570,6 +602,11 @@ class FocusableNode extends FocusNode with DiagnosticableTreeMixin {
   @mustCallSuper
   void detach() => parent?.removeChild(this);
 
+  @mustCallSuper
+  void _notify() {
+    notifyListeners();
+  }
+
   @override
   void dispose() {
     detach();
@@ -599,7 +636,20 @@ class FocusableNode extends FocusNode with DiagnosticableTreeMixin {
     _manager._markNeedsUpdate(newFocus: this);
   }
 
-  @override
+  /// Whether this node has the overall focus.
+  ///
+  /// A [FocusNode] has the overall focus when the node is focused in its
+  /// parent [FocusScopeNode] and [FocusScopeNode.isFirstFocus] is true for
+  /// that scope and all its ancestor scopes.
+  ///
+  /// To request focus, find the [FocusScopeNode] for the current [BuildContext]
+  /// and call the [FocusScopeNode.requestFocus] method:
+  ///
+  /// ```dart
+  /// FocusScope.of(context).requestFocus(focusNode);
+  /// ```
+  ///
+  /// This object notifies its listeners whenever this value changes.
   bool get hasFocus {
     if (_manager == null) {
       return false;
@@ -899,7 +949,7 @@ class FocusManager with DiagnosticableTreeMixin {
   // The entire focus path, except for the rootFocusable, which is implicitly
   // at the beginning of the list.  The last element should correspond with
   // _currentFocus;
-  FocusNode _currentFocus;
+  Object _currentFocus;
   FocusableNode _nextFocusable;
   FocusableNode _nextAutofocus;
 
