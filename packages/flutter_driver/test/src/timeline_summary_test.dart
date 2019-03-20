@@ -221,7 +221,7 @@ void main() {
       ];
 
       test('computes 90th frame rasterizer time in milliseconds', () {
-        for(int i = 0; i < sequences.length; ++i) {
+        for (int i = 0; i < sequences.length; ++i) {
           expect(
             summarize(rasterizeTimeSequenceInMillis(sequences[i])).computePercentileFrameRasterizerTimeMillis(90.0),
             p90s[i],
@@ -231,7 +231,7 @@ void main() {
 
       test('compute 99th frame rasterizer time in milliseconds', () {
         final List<int> sequence = <int>[];
-        for(int i = 1; i <= 100; ++i) {
+        for (int i = 1; i <= 100; ++i) {
           sequence.add(i);
         }
         expect(
