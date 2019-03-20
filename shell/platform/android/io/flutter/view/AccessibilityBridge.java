@@ -312,7 +312,10 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
         @NonNull AccessibilityChannel accessibilityChannel,
         @NonNull AccessibilityManager accessibilityManager,
         @NonNull ContentResolver contentResolver,
-        @NonNull PlatformViewsAccessibilityDelegate platformViewsAccessibilityDelegate
+        // This should be @NonNull once the plumbing for io.flutter.embedding.engine.android.FlutterView is done.
+        // TODO(mattcarrol): Add the annotation once the plumbing is done.
+        // https://github.com/flutter/flutter/issues/29618
+        PlatformViewsAccessibilityDelegate platformViewsAccessibilityDelegate
     ) {
         this.rootAccessibilityView = rootAccessibilityView;
         this.accessibilityChannel = accessibilityChannel;
@@ -362,6 +365,14 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
             Uri transitionUri = Settings.Global.getUriFor(Settings.Global.TRANSITION_ANIMATION_SCALE);
             this.contentResolver.registerContentObserver(transitionUri, false, animationScaleObserver);
         }
+
+        // platformViewsAccessibilityDelegate should be @NonNull once the plumbing
+        // for io.flutter.embedding.engine.android.FlutterView is done.
+        // TODO(mattcarrol): Remove the null check once the plumbing is done.
+        // https://github.com/flutter/flutter/issues/29618
+        if (platformViewsAccessibilityDelegate != null) {
+            platformViewsAccessibilityDelegate.attachAccessibilityBridge(this);
+        }
     }
 
     /**
@@ -372,6 +383,13 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
      * on this {@code AccessibilityBridge} after invoking {@code release()} is undefined.
      */
     public void release() {
+        // platformViewsAccessibilityDelegate should be @NonNull once the plumbing
+        // for io.flutter.embedding.engine.android.FlutterView is done.
+        // TODO(mattcarrol): Remove the null check once the plumbing is done.
+        // https://github.com/flutter/flutter/issues/29618
+        if (platformViewsAccessibilityDelegate != null) {
+            platformViewsAccessibilityDelegate.detachAccessibiltyBridge();
+        }
         setOnAccessibilityChangeListener(null);
         accessibilityManager.removeAccessibilityStateChangeListener(accessibilityStateChangeListener);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
