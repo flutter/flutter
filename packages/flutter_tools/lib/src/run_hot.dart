@@ -950,12 +950,12 @@ class ProjectFileInvalidator {
         // Don't watch pub cache directories to speed things up a little.
         continue;
       }
-      final int updatedAt = fs
-          .statSync(uri.toFilePath(windows: platform.isWindows))
-          .modified
-          .millisecondsSinceEpoch;
+      DateTime updatedAt = fs.statSync(uri.toFilePath(windows: platform.isWindows)).modified;
       scanned++;
-      if (updatedAt > lastCompiled.millisecondsSinceEpoch) {
+      if (updatedAt == null) {
+        continue;
+      }
+      if (updatedAt.millisecondsSinceEpoch > lastCompiled.millisecondsSinceEpoch) {
         invalidatedFiles.add(uri);
       }
     }

@@ -19,5 +19,15 @@ void main() {
     }, overrides: <Type, Generator>{
       FileSystem: () => memoryFileSystem,
     });
+
+    testUsingContext('Non-existent files are ignored', () async {
+      expect(
+        ProjectFileInvalidator.findInvalidated(
+            lastCompiled: DateTime.now(),
+            urisToMonitor: <Uri>[Uri.parse('/not-there-anymore')]),
+        isEmpty);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => memoryFileSystem,
+    });
   });
 }
