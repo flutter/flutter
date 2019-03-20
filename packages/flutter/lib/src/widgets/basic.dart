@@ -1571,6 +1571,10 @@ class Padding extends SingleChildRenderObjectWidget {
 /// widget positions the `child` such that both points are lined up on top of
 /// each other.
 ///
+/// The following images illustrate different uses of the Align class.
+///
+/// ![A blue square container with the Flutter logo in the top right corner.](https://flutter.github.io/assets-for-api-docs/assets/widgets/align_constant.png)
+///
 /// {@tool sample}
 /// The [Align] widget in this example uses one of the defined constants from
 /// [Alignment], [topRight]. This places the [FlutterLogo] in the top right corner
@@ -1593,6 +1597,10 @@ class Padding extends SingleChildRenderObjectWidget {
 /// ```
 /// {@end-tool}
 ///
+/// ![A blue square container with the Flutter logo positioned according to the
+/// following Alignment. A point is marked at the center of the container for the
+/// origin of the Alignment coordinate system.](https://flutter.github.io/assets-for-api-docs/assets/widgets/align_alignment.png)
+///
 /// {@tool sample}
 /// The [Alignment] used in the following example defines a single point:
 ///
@@ -1600,8 +1608,8 @@ class Padding extends SingleChildRenderObjectWidget {
 ///   of [FlutterLogo]/2 + height of [FlutterLogo]/2) = (36.0, 48.0).
 ///
 /// The [Alignment] class uses a coordinate system with an origin in the center
-/// of the [Container], and so [Align] will place the [FlutterLogo] at (36.0, 48.0)
-/// according to this system.
+/// of the [Container], as shown with the [Icon] above. [Align] will place the
+/// [FlutterLogo] at (36.0, 48.0) according to this coordinate system.
 ///
 /// ```dart
 /// Center(
@@ -1619,6 +1627,10 @@ class Padding extends SingleChildRenderObjectWidget {
 /// )
 /// ```
 /// {@end-tool}
+///
+/// ![A blue square container with the Flutter logo positioned according to the
+/// following FractionalOffset. A point is marked at the top left corner of the
+/// container for the origin of the FractionalOffset coordinate system.](https://flutter.github.io/assets-for-api-docs/assets/widgets/align_fractional_offset.png)
 ///
 /// {@tool sample}
 /// The [FractionalOffset] used in the following example defines two points:
