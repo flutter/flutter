@@ -44,7 +44,7 @@ import 'framework.dart';
 ///  * [FocusScopeNode], which is an interior node in the focus tree.
 ///  * [FocusScope.of], which provides the [FocusScopeNode] for a given
 ///    [BuildContext].
-class FocusNode extends ChangeNotifier with DiagnosticableTreeMixin {
+class FocusNode extends Diagnosticable with ChangeNotifier {
   FocusScopeNode _scopeParent;
   FocusManager _manager;
   bool _hasKeyboardToken = false;
@@ -110,8 +110,9 @@ class FocusNode extends ChangeNotifier with DiagnosticableTreeMixin {
   }
 
   @override
-  String toString({DiagnosticLevel minLevel = DiagnosticLevel.debug}) {
-    return '${describeIdentity(this)}${hasFocus ? '(FOCUSED)' : ''}';
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(FlagProperty('hasFocus', value: hasFocus, ifTrue: 'FOCUSED', defaultValue: false));
   }
 }
 
@@ -393,9 +394,7 @@ class FocusScopeNode extends Object with DiagnosticableTreeMixin {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    if (_focus != null) {
-      properties.add(DiagnosticsProperty<FocusNode>('focus', _focus));
-    }
+    properties.add(DiagnosticsProperty<FocusNode>('focus', _focus, defaultValue: null));
   }
 
   @override
@@ -432,15 +431,14 @@ typedef FocusableNodeVisitor = bool Function(FocusableNode node);
 /// be traversed together. Within a scope, the last item to have focus is
 /// remembered, and if another scope is focused and then the first is returned
 /// to, that node will gain focus again.
-class FocusableNode extends FocusNode {
+class FocusableNode extends FocusNode with DiagnosticableTreeMixin {
   /// Creates a Focusable node
   ///
   /// All parameters must not be null.
   FocusableNode({
     this.autofocus = false,
-    @required this.key,
-  })  : assert(key != null),
-        assert(autofocus != null);
+    @required this.context,
+  })  : assert(autofocus != null);
 
   /// Indicates that this node is a scope node, which keeps track of which of its
   /// descendants last had the focus.
@@ -456,7 +454,7 @@ class FocusableNode extends FocusNode {
   ///
   /// This is not the [Focusable] itself, but is a child of the [Focusable], and
   /// it has the same dimensions.
-  final GlobalKey<State<StatefulWidget>> key;
+  BuildContext context;
 
   /// Returns the parent node for this object.
   FocusableNode get parent => _parent;
@@ -674,23 +672,23 @@ class FocusableNode extends FocusNode {
 
   /// Request that the widget move the focus to the next focusable node, by
   /// calling the [FocusTraversalPolicy.next] function.
-  bool nextFocus() => DefaultFocusTraversal.of(key.currentContext).next(this);
+  bool nextFocus() => DefaultFocusTraversal.of(context).next(this);
 
   /// Request that the widget move the focus to the previous focusable node, by
   /// calling the [FocusTraversalPolicy.previous] function.
-  bool previousFocus() => DefaultFocusTraversal.of(key.currentContext).previous(this);
+  bool previousFocus() => DefaultFocusTraversal.of(context).previous(this);
 
   /// Request that the widget move the focus to the previous focusable node, by
   /// calling the [FocusTraversalPolicy.inDirection] function.
-  bool focusInDirection(AxisDirection direction) => DefaultFocusTraversal.of(key.currentContext).inDirection(this, direction);
+  bool focusInDirection(AxisDirection direction) => DefaultFocusTraversal.of(context).inDirection(this, direction);
 
   /// Returns the size of the associated [Focusable] in logical units.
-  Size get size => key.currentContext.size;
+  Size get size => context.size;
 
   /// Returns the global offset to the upper left corner of the [Focusable] in
   /// logical units.
   Offset get offset {
-    final RenderObject object = key.currentContext.findRenderObject();
+    final RenderObject object = context.findRenderObject();
     return MatrixUtils.transformPoint(object.getTransformTo(null), Offset.zero);
   }
 
@@ -699,13 +697,13 @@ class FocusableNode extends FocusNode {
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.debug}) {
-    return '${describeIdentity(this)} key:$key ${hasFocus ? '(FOCUSED)' : ''}';
+    return '${describeIdentity(this)} key:$context ${hasFocus ? '(FOCUSED)' : ''}';
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<GlobalKey>('key', key, defaultValue: null));
+    properties.add(DiagnosticsProperty<BuildContext>('key', context, defaultValue: null));
     properties.add(FlagProperty('hasFocus', value: hasFocus, ifTrue: 'FOCUSED', defaultValue: false));
   }
 
@@ -729,10 +727,9 @@ class FocusableScopeNode extends FocusableNode {
   /// All parameters must not be null.
   FocusableScopeNode({
     bool autofocus = false,
-    @required GlobalKey<State<StatefulWidget>> key,
-  })  : assert(key != null),
-        assert(autofocus != null),
-        super(key: key, autofocus: autofocus);
+    @required BuildContext context,
+  })  : assert(autofocus != null),
+        super(context: context, autofocus: autofocus);
 
   @override
   bool get isScope => true;
@@ -755,7 +752,8 @@ class FocusableScopeNode extends FocusableNode {
   ///
   /// Returns null if there is no currently focused child.
   FocusableNode get focusedChild {
-    assert(_focusedChild == null || _focusedChild.enclosingScope == this, 'Focused child does not have the same idea of its enclosing scope as the scope does.');
+    assert(_focusedChild == null || _focusedChild.enclosingScope == this,
+      'Focused child does not have the same idea of its enclosing scope as the scope does.');
     return _focusedChild;
   }
 
@@ -896,9 +894,7 @@ class FocusManager with DiagnosticableTreeMixin {
   ///
   /// To find the nearest [FocusableNode] that corresponds to a
   /// [Focusable], use [Focusable.of].
-  final FocusableNode rootFocusable = FocusableScopeNode(
-    key: GlobalKey(debugLabel: 'Focus Tree Root'),
-  );
+  final FocusableNode rootFocusable = FocusableScopeNode(context: null);
 
   // The entire focus path, except for the rootFocusable, which is implicitly
   // at the beginning of the list.  The last element should correspond with

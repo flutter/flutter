@@ -249,10 +249,6 @@ void main() {
         ),
       );
 
-      Key getFocusableKey(FocusableNode node) {
-        return node.key.currentContext.ancestorWidgetOfExactType(Focusable).key;
-      }
-
       void clear() {
         focus1 = null;
         focus2 = null;
@@ -263,9 +259,7 @@ void main() {
       final Element firstChild = tester.element(find.byKey(key4));
       final Element secondChild = tester.element(find.byKey(key6));
       final FocusableNode firstFocusableNode = Focusable.of(firstChild);
-      expect(getFocusableKey(firstFocusableNode), equals(key3));
       final FocusableNode secondFocusableNode = Focusable.of(secondChild);
-      expect(getFocusableKey(secondFocusableNode), equals(key5));
       final FocusableNode scope = Focusable.of(firstChild).enclosingScope;
       firstFocusableNode.requestFocus();
 
@@ -438,10 +432,6 @@ void main() {
         ),
       );
 
-      Key getFocusableKey(FocusableNode node) {
-        return node.key.currentContext.ancestorWidgetOfExactType(Focusable).key;
-      }
-
       void clear() {
         focus1 = null;
         focus2 = null;
@@ -452,9 +442,7 @@ void main() {
       final Element firstChild = tester.element(find.byKey(key2));
       final Element secondChild = tester.element(find.byKey(key5));
       final FocusableNode firstFocusableNode = Focusable.of(firstChild);
-      expect(getFocusableKey(firstFocusableNode), equals(key3));
       final FocusableNode secondFocusableNode = Focusable.of(secondChild);
-      expect(getFocusableKey(secondFocusableNode), equals(key4));
       final FocusableNode scope = Focusable.of(firstChild).enclosingScope;
       firstFocusableNode.requestFocus();
 
