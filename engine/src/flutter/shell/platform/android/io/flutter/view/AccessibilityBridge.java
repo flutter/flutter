@@ -7,6 +7,7 @@ package io.flutter.view;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.database.ContentObserver;
 import android.graphics.Rect;
 import android.net.Uri;
@@ -21,6 +22,8 @@ import android.support.annotation.RequiresApi;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.WindowInsets;
+import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -100,19 +103,6 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     @NonNull
     private final ContentResolver contentResolver;
 
-    // The top-level Android View within the containing Window.
-    // TODO(mattcarroll): Move communication with the decorView out to FlutterView, or even FlutterActivity.
-    //                    The reason this is here is because when the device is in reverse-landscape
-    //                    orientation, Android has a bug where it assumes the OS nav bar is on the
-    //                    right side of the screen, not the left. As a result, accessibility borders
-    //                    are drawn too far to the left. The AccessibilityBridge directly adjusts
-    //                    for this Android bug. We still need to adjust, but this is the wrong place
-    //                    to access a decorView. What if the FlutterView is only part of the UI
-    //                    hierarchy, like a list item? We shouldn't touch the decor view.
-    //                    https://github.com/flutter/flutter/issues/19967
-    @NonNull
-    private final View decorView;
-
     // The entire Flutter semantics tree of the running Flutter app, stored as a Map
     // from each SemanticsNode's ID to a Java representation of a Flutter SemanticsNode.
     //
@@ -191,7 +181,9 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     // TODO(mattcarroll): why do we need previouseRouteId if we have flutterNavigationStack
     private int previousRouteId = ROOT_NODE_ID;
 
-    // TODO(mattcarroll): is this for the decor view adjustment?
+    // Tracks the left system inset of the screen because Flutter needs to manually adjust
+    // accessibility positioning when in reverse-landscape. This is an Android bug that Flutter
+    // is solving for itself.
     @NonNull
     private Integer lastLeftFrameInset = 0;
 
@@ -322,8 +314,6 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
         this.accessibilityManager = accessibilityManager;
         this.contentResolver = contentResolver;
         this.platformViewsAccessibilityDelegate = platformViewsAccessibilityDelegate;
-
-        decorView = ((Activity) rootAccessibilityView.getContext()).getWindow().getDecorView();
 
         // Tell Flutter whether accessibility is initially active or not. Then register a listener
         // to be notified of changes in the future.
@@ -1177,14 +1167,15 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
             // of the screen in landscape mode. We must handle the translation ourselves for the
             // a11y nodes.
             if (Build.VERSION.SDK_INT >= 23) {
-                Rect visibleFrame = new Rect();
-                decorView.getWindowVisibleDisplayFrame(visibleFrame);
-                if (!lastLeftFrameInset.equals(visibleFrame.left)) {
+                WindowInsets insets = rootAccessibilityView.getRootWindowInsets();
+                if (insets != null) {
+                  if (!lastLeftFrameInset.equals(insets.getSystemWindowInsetLeft())) {
                     rootObject.globalGeometryDirty = true;
                     rootObject.inverseTransformDirty = true;
+                  }
+                  lastLeftFrameInset = insets.getSystemWindowInsetLeft();
+                  Matrix.translateM(identity, 0, lastLeftFrameInset, 0, 0);
                 }
-                lastLeftFrameInset = visibleFrame.left;
-                Matrix.translateM(identity, 0, visibleFrame.left, 0, 0);
             }
             rootObject.updateRecursively(identity, visitedObjects, false);
             rootObject.collectRoutes(newRoutes);
