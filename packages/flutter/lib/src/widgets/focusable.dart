@@ -9,12 +9,12 @@ import 'focus_manager.dart';
 import 'framework.dart';
 import 'raw_keyboard_listener.dart';
 
-typedef FocusableOnKeyCallback = bool Function(FocusableNode node, RawKeyEvent event);
+typedef FocusableOnKeyCallback = bool Function(FocusNode node, RawKeyEvent event);
 
-/// A widget that manages a [FocusableNode] to allow keyboard focus to be given
+/// A widget that manages a [FocusNode] to allow keyboard focus to be given
 /// to this widget and its descendants.
 ///
-/// It manages a [FocusableNode], managing its lifecycle, and listening for
+/// It manages a [FocusNode], managing its lifecycle, and listening for
 /// changes in focus.
 ///
 /// It provides [onFocusChange] as a way to be notified when the focus is given
@@ -27,13 +27,13 @@ typedef FocusableOnKeyCallback = bool Function(FocusableNode node, RawKeyEvent e
 /// changed. To provide that, add a [FocusHighlight] widget as a descendant of
 /// this widget.
 ///
-/// To collect nodes into a group, use a [FocusableScopeNode].
+/// To collect nodes into a group, use a [FocusScopeNode].
 ///
-/// To manipulate the focus, use methods on [FocusableScopeNode]. For instance,
+/// To manipulate the focus, use methods on [FocusScopeNode]. For instance,
 /// to move the focus to the next node, call
 /// `Focusable.of(context).nextFocus()`.
 class Focusable extends StatefulWidget {
-  /// Creates a widget that manages a [FocusableNode]
+  /// Creates a widget that manages a [FocusNode]
   ///
   /// The [child] argument is required and must not be null.
   ///
@@ -87,7 +87,7 @@ class Focusable extends StatefulWidget {
   /// [BuildContext].
   ///
   /// The [context] argument must not be null.
-  static FocusableNode of(BuildContext context) {
+  static FocusNode of(BuildContext context) {
     assert(context != null);
     final _FocusableMarker marker = context.inheritFromWidgetOfExactType(_FocusableMarker);
     return marker?.node ?? context.owner.focusManager.rootFocusable;
@@ -105,19 +105,19 @@ class Focusable extends StatefulWidget {
 }
 
 class _FocusableState extends State<Focusable> {
-  FocusableNode node;
+  FocusNode node;
   bool _hasFocus;
 
   @override
   void initState() {
     super.initState();
-    if (widget is FocusableScope) {
-      node = FocusableScopeNode(
+    if (widget is FocusScope) {
+      node = FocusScopeNode(
         autofocus: widget.autofocus,
         context: context,
       );
     } else {
-      node = FocusableNode(
+      node = FocusNode(
         autofocus: widget.autofocus,
         context: context,
       );
@@ -146,7 +146,7 @@ class _FocusableState extends State<Focusable> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final FocusableNode newParent = Focusable.of(context);
+    final FocusNode newParent = Focusable.of(context);
     node.context = context;
     newParent.reparent(node);
   }
@@ -168,19 +168,19 @@ class _FocusableState extends State<Focusable> {
   }
 }
 
-/// A [FocusableScope] is a [Focusable] that serves as a scope for other
+/// A [FocusScope] is a [Focusable] that serves as a scope for other
 /// [Focusable]s.
 ///
-/// It manages a [FocusableScopeNode], managing its lifecycle, and listening for
+/// It manages a [FocusScopeNode], managing its lifecycle, and listening for
 /// changes in focus. Scope nodes provide a scope for their children, using the
 /// focus traversal policy defined by the [DefaultFocusTraversal] widget above
 /// them to traverse their children.
 ///
 /// Scope nodes remember the last focusable node that was focused within their
 /// descendants, and can move that focus to the next/previous node, or a node in
-/// a particular direction when the [FocusableNode.nextFocus],
-/// [FocusableNode.previousFocus], or [FocusableNode.focusInDirection] are
-/// called on a [FocusableNode] or [FocusableScopeNode] that is a child of this
+/// a particular direction when the [FocusNode.nextFocus],
+/// [FocusNode.previousFocus], or [FocusNode.focusInDirection] are
+/// called on a [FocusNode] or [FocusScopeNode] that is a child of this
 /// scope, or the node owned by the scope node managed by this widget.
 ///
 /// The selection process of the node to move to is determined by the node
@@ -194,16 +194,16 @@ class _FocusableState extends State<Focusable> {
 /// The [onKey] argument allows specification of a key even handler that should
 /// be invoked when this node or one of its children has focus.
 ///
-/// To manipulate the focus, use methods on [FocusableScopeNode]. For instance,
+/// To manipulate the focus, use methods on [FocusScopeNode]. For instance,
 /// to move the focus to the next node, call
 /// `Focusable.of(context).nextFocus()`.
-class FocusableScope extends Focusable {
-  /// Creates a widget that manages a [FocusableScopeNode]
+class FocusScope extends Focusable {
+  /// Creates a widget that manages a [FocusScopeNode]
   ///
   /// The [child] argument is required and must not be null.
   ///
   /// The [autofocus], and [showDecorations] arguments must not be null.
-  const FocusableScope({
+  const FocusScope({
     Key key,
     @required Widget child,
     bool autofocus = false,
@@ -221,11 +221,11 @@ class FocusableScope extends Focusable {
           debugLabel: debugLabel,
         );
 
-  /// Returns the [node] of the [FocusableScope] that most tightly encloses the given
+  /// Returns the [node] of the [FocusScope] that most tightly encloses the given
   /// [BuildContext].
   ///
   /// The [context] argument must not be null.
-  static FocusableScopeNode of(BuildContext context) {
+  static FocusScopeNode of(BuildContext context) {
     assert(context != null);
     final _FocusableMarker marker = context.inheritFromWidgetOfExactType(_FocusableMarker);
     return marker?.node?.nearestScope ?? context.owner.focusManager.rootFocusable;
@@ -243,7 +243,7 @@ class _FocusableMarker extends InheritedWidget {
   })  : assert(node != null),
         super(key: key, child: child);
 
-  final FocusableNode node;
+  final FocusNode node;
 
   @override
   bool updateShouldNotify(_FocusableMarker oldWidget) {

@@ -35,7 +35,7 @@ class FocusableButton extends StatefulWidget {
 }
 
 class _FocusableButtonState extends State<FocusableButton> {
-  bool _handleKeyEvent(FocusableNode node, RawKeyEvent event) {
+  bool _handleKeyEvent(FocusNode node, RawKeyEvent event) {
     if (event is RawKeyDownEvent) {
       if (event.logicalKey == LogicalKeyboardKey.enter) {
         _handleButtonPress();
@@ -96,9 +96,9 @@ class _FocusableDemoState extends State<FocusableDemo> {
       textDirection: TextDirection.rtl,
       child: DefaultFocusTraversal(
         policy: const ReadingOrderTraversalPolicy(),
-        child: FocusableScope(
+        child: FocusScope(
           debugLabel: 'Scope',
-          onKey: (FocusableNode node, RawKeyEvent event) {
+          onKey: (FocusNode node, RawKeyEvent event) {
             if (event is RawKeyDownEvent) {
               print('Scope got key event: ${event.logicalKey}, $node');
               print('Keys down: ${RawKeyboard.instance.keysPressed}');

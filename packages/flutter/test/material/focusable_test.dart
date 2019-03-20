@@ -43,7 +43,7 @@ void main() {
       final Element element4 = tester.element(find.byKey(key4));
       final Element element5 = tester.element(find.byKey(key5));
       final Element element6 = tester.element(find.byKey(key6));
-      final FocusableNode root = element1.owner.focusManager.rootFocusable;
+      final FocusNode root = element1.owner.focusManager.rootFocusable;
 
       expect(Focusable.of(element1), equals(root));
       expect(Focusable.of(element2).parent, equals(root));
@@ -106,9 +106,9 @@ void main() {
       );
 
       final Element firstScope = tester.element(find.byKey(key1));
-      final List<FocusableNode> nodes = <FocusableNode>[];
+      final List<FocusNode> nodes = <FocusNode>[];
       final List<Key> keys = <Key>[];
-      bool visitor(FocusableNode node) {
+      bool visitor(FocusNode node) {
         nodes.add(node);
         keys.add(node.context.widget.key);
         return true;
@@ -141,7 +141,7 @@ void main() {
       );
 
       final Element firstNode = tester.element(find.byKey(key1));
-      final FocusableNode node = Focusable.of(firstNode);
+      final FocusNode node = Focusable.of(firstNode);
       node.requestFocus();
 
       await tester.pump();
@@ -159,7 +159,7 @@ void main() {
       );
 
       final Element firstElement = tester.element(find.byKey(key1));
-      final FocusableNode rootNode = Focusable.of(firstElement);
+      final FocusNode rootNode = Focusable.of(firstElement);
       rootNode.requestFocus();
 
       await tester.pump();

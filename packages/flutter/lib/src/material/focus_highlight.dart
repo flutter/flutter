@@ -14,7 +14,7 @@ import 'theme.dart';
 ///
 /// By default, it uses the values derived from [Theme.focusHighlightTheme].
 class FocusHighlight extends StatefulWidget {
-  /// Creates a widget that manages a [FocusableNode]
+  /// Creates a widget that manages a [FocusNode]
   ///
   /// The [child] argument is required and must not be null.
   ///
@@ -62,12 +62,12 @@ class FocusHighlight extends StatefulWidget {
 
 class _FocusHighlightState extends State<FocusHighlight> {
   bool _hasFocus;
-  FocusableNode _node;
+  FocusNode _node;
 
   @override
   void didUpdateWidget(FocusHighlight oldWidget) {
     super.didUpdateWidget(oldWidget);
-    final FocusableNode newNode = Focusable.of(context);
+    final FocusNode newNode = Focusable.of(context);
     if (newNode != _node) {
       _node.removeListener(_handleFocusChanged);
       _node = newNode;

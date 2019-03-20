@@ -28,7 +28,7 @@ void main() {
             onFocusChange: (bool focus) => focus1 = focus,
             child: Column(
               children: <Widget>[
-                FocusableScope(
+                FocusScope(
                   debugLabel: 'key2',
                   key: key2,
                   onFocusChange: (bool focus) => focus2 = focus,
@@ -57,9 +57,9 @@ void main() {
 
       final Element firstChild = tester.element(find.byKey(key4));
       final Element secondChild = tester.element(find.byKey(key6));
-      final FocusableNode firstFocusableNode = Focusable.of(firstChild);
-      final FocusableNode secondFocusableNode = Focusable.of(secondChild);
-      final FocusableNode scope = Focusable.of(firstChild).enclosingScope;
+      final FocusNode firstFocusableNode = Focusable.of(firstChild);
+      final FocusNode secondFocusableNode = Focusable.of(secondChild);
+      final FocusNode scope = Focusable.of(firstChild).enclosingScope;
       firstFocusableNode.requestFocus();
 
       await tester.pump();
@@ -138,7 +138,7 @@ void main() {
             key: key1,
             child: Column(
               children: <Widget>[
-                FocusableScope(
+                FocusScope(
                   key: key2,
                   child: Column(
                     children: <Widget>[
@@ -161,9 +161,9 @@ void main() {
 
       final Element firstChild = tester.element(find.byKey(key4));
       final Element secondChild = tester.element(find.byKey(key6));
-      final FocusableNode firstFocusableNode = Focusable.of(firstChild);
-      final FocusableNode secondFocusableNode = Focusable.of(secondChild);
-      final FocusableNode scope = Focusable.of(firstChild).enclosingScope;
+      final FocusNode firstFocusableNode = Focusable.of(firstChild);
+      final FocusNode secondFocusableNode = Focusable.of(secondChild);
+      final FocusNode scope = Focusable.of(firstChild).enclosingScope;
       secondFocusableNode.requestFocus();
 
       await tester.pump();
@@ -221,7 +221,7 @@ void main() {
               onFocusChange: (bool focus) => focus1 = focus,
               child: Column(
                 children: <Widget>[
-                  FocusableScope(
+                  FocusScope(
                     debugLabel: 'key2',
                     key: key2,
                     onFocusChange: (bool focus) => focus2 = focus,
@@ -258,9 +258,9 @@ void main() {
 
       final Element firstChild = tester.element(find.byKey(key4));
       final Element secondChild = tester.element(find.byKey(key6));
-      final FocusableNode firstFocusableNode = Focusable.of(firstChild);
-      final FocusableNode secondFocusableNode = Focusable.of(secondChild);
-      final FocusableNode scope = Focusable.of(firstChild).enclosingScope;
+      final FocusNode firstFocusableNode = Focusable.of(firstChild);
+      final FocusNode secondFocusableNode = Focusable.of(secondChild);
+      final FocusNode scope = Focusable.of(firstChild).enclosingScope;
       firstFocusableNode.requestFocus();
 
       await tester.pump();
@@ -327,7 +327,7 @@ void main() {
             key: key1,
             child: Column(
               children: <Widget>[
-                FocusableScope(
+                FocusScope(
                   key: key2,
                   child: Column(
                     children: <Widget>[
@@ -350,9 +350,9 @@ void main() {
 
       final Element firstChild = tester.element(find.byKey(key4));
       final Element secondChild = tester.element(find.byKey(key6));
-      final FocusableNode firstFocusableNode = Focusable.of(firstChild);
-      final FocusableNode secondFocusableNode = Focusable.of(secondChild);
-      final FocusableNode scope = Focusable.of(firstChild).enclosingScope;
+      final FocusNode firstFocusableNode = Focusable.of(firstChild);
+      final FocusNode secondFocusableNode = Focusable.of(secondChild);
+      final FocusNode scope = Focusable.of(firstChild).enclosingScope;
       secondFocusableNode.requestFocus();
 
       await tester.pump();
@@ -441,9 +441,9 @@ void main() {
 
       final Element firstChild = tester.element(find.byKey(key2));
       final Element secondChild = tester.element(find.byKey(key5));
-      final FocusableNode firstFocusableNode = Focusable.of(firstChild);
-      final FocusableNode secondFocusableNode = Focusable.of(secondChild);
-      final FocusableNode scope = Focusable.of(firstChild).enclosingScope;
+      final FocusNode firstFocusableNode = Focusable.of(firstChild);
+      final FocusNode secondFocusableNode = Focusable.of(secondChild);
+      final FocusNode scope = Focusable.of(firstChild).enclosingScope;
       firstFocusableNode.requestFocus();
 
       await tester.pump();
@@ -510,7 +510,7 @@ void main() {
             key: key1,
             child: Column(
               children: <Widget>[
-                FocusableScope(
+                FocusScope(
                   key: key2,
                   child: Column(
                     children: <Widget>[
@@ -533,9 +533,9 @@ void main() {
 
       final Element firstChild = tester.element(find.byKey(key4));
       final Element secondChild = tester.element(find.byKey(key6));
-      final FocusableNode firstFocusableNode = Focusable.of(firstChild);
-      final FocusableNode secondFocusableNode = Focusable.of(secondChild);
-      final FocusableNode scope = Focusable.of(firstChild).enclosingScope;
+      final FocusNode firstFocusableNode = Focusable.of(firstChild);
+      final FocusNode secondFocusableNode = Focusable.of(secondChild);
+      final FocusNode scope = Focusable.of(firstChild).enclosingScope;
       secondFocusableNode.requestFocus();
 
       await tester.pump();
