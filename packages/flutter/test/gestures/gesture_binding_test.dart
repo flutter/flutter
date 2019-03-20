@@ -36,6 +36,7 @@ void main() {
   test('Pointer tap events', () {
     const ui.PointerDataPacket packet = ui.PointerDataPacket(
       data: <ui.PointerData>[
+        ui.PointerData(change: ui.PointerChange.add),
         ui.PointerData(change: ui.PointerChange.down),
         ui.PointerData(change: ui.PointerChange.up),
       ]
@@ -43,7 +44,6 @@ void main() {
 
     final List<PointerEvent> events = <PointerEvent>[];
     _binding.callback = events.add;
-
     ui.window.onPointerDataPacket(packet);
     expect(events.length, 2);
     expect(events[0].runtimeType, equals(PointerDownEvent));
@@ -53,6 +53,7 @@ void main() {
   test('Pointer move events', () {
     const ui.PointerDataPacket packet = ui.PointerDataPacket(
       data: <ui.PointerData>[
+        ui.PointerData(change: ui.PointerChange.add),
         ui.PointerData(change: ui.PointerChange.down),
         ui.PointerData(change: ui.PointerChange.move),
         ui.PointerData(change: ui.PointerChange.up),
@@ -72,9 +73,11 @@ void main() {
   test('Pointer hover events', () {
     const ui.PointerDataPacket packet = ui.PointerDataPacket(
         data: <ui.PointerData>[
+          ui.PointerData(change: ui.PointerChange.add),
           ui.PointerData(change: ui.PointerChange.hover),
           ui.PointerData(change: ui.PointerChange.hover),
           ui.PointerData(change: ui.PointerChange.remove),
+          ui.PointerData(change: ui.PointerChange.add),
           ui.PointerData(change: ui.PointerChange.hover),
         ]
     );
@@ -88,17 +91,20 @@ void main() {
     ui.window.onPointerDataPacket(packet);
 
     expect(events.length, 0);
-    expect(pointerRouterEvents.length, 4,
+    expect(pointerRouterEvents.length, 6,
         reason: 'pointerRouterEvents contains: $pointerRouterEvents');
-    expect(pointerRouterEvents[0].runtimeType, equals(PointerHoverEvent));
+    expect(pointerRouterEvents[0].runtimeType, equals(PointerAddedEvent));
     expect(pointerRouterEvents[1].runtimeType, equals(PointerHoverEvent));
-    expect(pointerRouterEvents[2].runtimeType, equals(PointerRemovedEvent));
-    expect(pointerRouterEvents[3].runtimeType, equals(PointerHoverEvent));
+    expect(pointerRouterEvents[2].runtimeType, equals(PointerHoverEvent));
+    expect(pointerRouterEvents[3].runtimeType, equals(PointerRemovedEvent));
+    expect(pointerRouterEvents[4].runtimeType, equals(PointerAddedEvent));
+    expect(pointerRouterEvents[5].runtimeType, equals(PointerHoverEvent));
   });
 
   test('Pointer cancel events', () {
     const ui.PointerDataPacket packet = ui.PointerDataPacket(
       data: <ui.PointerData>[
+        ui.PointerData(change: ui.PointerChange.add),
         ui.PointerData(change: ui.PointerChange.down),
         ui.PointerData(change: ui.PointerChange.cancel),
       ]
@@ -117,6 +123,7 @@ void main() {
   test('Can cancel pointers', () {
     const ui.PointerDataPacket packet = ui.PointerDataPacket(
       data: <ui.PointerData>[
+        ui.PointerData(change: ui.PointerChange.add),
         ui.PointerData(change: ui.PointerChange.down),
         ui.PointerData(change: ui.PointerChange.up),
       ]
@@ -150,4 +157,69 @@ void main() {
     expect(events[0].runtimeType, equals(PointerAddedEvent));
     expect(events[1].runtimeType, equals(PointerScrollEvent));
   });
+
+  test('Incorrect event sequence should throw assertion exception hover before add', (){
+    const ui.PointerDataPacket packet = ui.PointerDataPacket(
+        data: <ui.PointerData>[
+          ui.PointerData(change: ui.PointerChange.hover),
+        ]
+    );
+    String msg;
+    try {
+      ui.window.onPointerDataPacket(packet);
+    } on AssertionError catch(e) {
+      msg = e.message;
+    }
+    expect(msg, 'Invalid event \'PointerChange.hover\': Pointer 0 does not exist.');
+  });
+
+  test('Incorrect event sequence should throw assertion exception move before add', (){
+    const ui.PointerDataPacket packet = ui.PointerDataPacket(
+        data: <ui.PointerData>[
+          ui.PointerData(change: ui.PointerChange.move),
+        ]
+    );
+    String msg;
+    try {
+      ui.window.onPointerDataPacket(packet);
+    } on AssertionError catch(e) {
+      msg = e.message;
+    }
+    expect(msg, 'Invalid event \'PointerChange.move\': Pointer 0 does not exist.');
+  });
+
+  test('Incorrect event sequence should throw assertion exception down when pointer already down', (){
+    const ui.PointerDataPacket packet = ui.PointerDataPacket(
+        data: <ui.PointerData>[
+          ui.PointerData(change: ui.PointerChange.add),
+          ui.PointerData(change: ui.PointerChange.down),
+          ui.PointerData(change: ui.PointerChange.down),
+        ]
+    );
+    String msg;
+    try {
+      ui.window.onPointerDataPacket(packet);
+    } on AssertionError catch(e) {
+      msg = e.message;
+    }
+    expect(msg, 'Invalid event \'PointerChange.down\': Pointer 0 is already down.');
+  });
+
+  test('Incorrect event sequence should throw assertion exception remove when pointer is down', (){
+    const ui.PointerDataPacket packet = ui.PointerDataPacket(
+        data: <ui.PointerData>[
+          ui.PointerData(change: ui.PointerChange.add),
+          ui.PointerData(change: ui.PointerChange.down),
+          ui.PointerData(change: ui.PointerChange.remove),
+        ]
+    );
+    String msg;
+    try {
+      ui.window.onPointerDataPacket(packet);
+    } on AssertionError catch(e) {
+      msg = e.message;
+    }
+    expect(msg, 'Invalid event \'PointerChange.remove\': Pointer 0 is down.');
+  });
+
 }

@@ -19,11 +19,22 @@ class _PointerState {
     _pointer = _pointerCount;
   }
 
+  bool get down => _down;
+  bool _down = false;
+  void setDown() {
+    assert(!_down);
+    _down = true;
+  }
+  void setUp() {
+    assert(_down);
+    _down = false;
+  }
+
   Offset lastPosition;
 
   @override
   String toString() {
-    return '_PointerState(pointer: $pointer, lastPosition: $lastPosition)';
+    return '_PointerState(pointer: $pointer, down: $down, lastPosition: $lastPosition)';
   }
 }
 
@@ -54,7 +65,10 @@ class PointerEventConverter {
     );
   }
 
-  /// format the given packet of pointer data into a framework
+  static String _formatErrorMessage(ui.PointerChange change, String msg) => 'Invalid event \'$change\': $msg';
+
+
+  /// Format the given packet of pointer data into a framework
   /// pointer events.
   ///
   /// The `devicePixelRatio` argument (usually given the value from
@@ -75,7 +89,8 @@ class PointerEventConverter {
       if (datum.signalKind == null || datum.signalKind == ui.PointerSignalKind.none) {
         switch (datum.change) {
           case ui.PointerChange.add:
-            assert(!_pointers.containsKey(datum.device));
+            assert(!_pointers.containsKey(datum.device),
+              _formatErrorMessage(datum.change, 'Pointer ${datum.device} already exist.'));
             final _PointerState state = _ensureStateForPointer(datum, position);
             assert(state.lastPosition == position);
             frameworkPointerData.add(
@@ -97,8 +112,11 @@ class PointerEventConverter {
             );
             break;
           case ui.PointerChange.hover:
-            assert(_pointers.containsKey(datum.device));
+            assert(_pointers.containsKey(datum.device),
+              _formatErrorMessage(datum.change, 'Pointer ${datum.device} does not exist.'));
             final _PointerState state = _pointers[datum.device];
+            assert(!state.down,
+              _formatErrorMessage(datum.change, 'Pointer ${datum.device} is down.'));
             final Offset offset = position - state.lastPosition;
             state.lastPosition = position;
             frameworkPointerData.add(
@@ -125,8 +143,11 @@ class PointerEventConverter {
             );
             break;
           case ui.PointerChange.move:
-            assert(_pointers.containsKey(datum.device));
+            assert(_pointers.containsKey(datum.device),
+              _formatErrorMessage(datum.change, 'Pointer ${datum.device} does not exist.'));
             final _PointerState state = _pointers[datum.device];
+            assert(state.down,
+              _formatErrorMessage(datum.change, 'Pointer ${datum.device} is up.'));
             final Offset offset = position - state.lastPosition;
             state.lastPosition = position;
             frameworkPointerData.add(
@@ -155,10 +176,15 @@ class PointerEventConverter {
             );
             break;
           case ui.PointerChange.down:
-            assert(_pointers.containsKey(datum.device));
+            assert(_pointers.containsKey(datum.device),
+              _formatErrorMessage(datum.change, 'Pointer ${datum.device} does not exist.'));
             final _PointerState state = _pointers[datum.device];
-            assert(position == state.lastPosition);
+            assert(!state.down,
+              _formatErrorMessage(datum.change, 'Pointer ${datum.device} is already down.'));
+            assert(position == state.lastPosition,
+              _formatErrorMessage(datum.change, 'Pointer ${datum.device} new position does not match previous position'));
             state.startNewPointer();
+            state.setDown();
             frameworkPointerData.add(
                 PointerDownEvent(
                   timeStamp: timeStamp,
@@ -183,9 +209,14 @@ class PointerEventConverter {
             );
             break;
           case ui.PointerChange.up:
-            assert(_pointers.containsKey(datum.device));
+            assert(_pointers.containsKey(datum.device),
+              _formatErrorMessage(datum.change, 'Pointer ${datum.device} does not exist.'));
             final _PointerState state = _pointers[datum.device];
-            assert(position == state.lastPosition);
+            assert(state.down,
+              _formatErrorMessage(datum.change, 'Pointer ${datum.device} is already up.'));
+            assert(position == state.lastPosition,
+              _formatErrorMessage(datum.change, 'Pointer ${datum.device} new position does not match previous position'));
+            state.setUp();
             frameworkPointerData.add(
                 PointerUpEvent(
                   timeStamp: timeStamp,
@@ -211,9 +242,13 @@ class PointerEventConverter {
             );
             break;
           case ui.PointerChange.cancel:
-            assert(_pointers.containsKey(datum.device));
+            assert(_pointers.containsKey(datum.device),
+              _formatErrorMessage(datum.change, 'Pointer ${datum.device} does not exist.'));
             final _PointerState state = _pointers[datum.device];
-            assert(position == state.lastPosition);
+            assert(state.down,
+              _formatErrorMessage(datum.change, 'Pointer ${datum.device} is already up.'));
+            assert(position == state.lastPosition,
+              _formatErrorMessage(datum.change, 'Pointer ${datum.device} new position does not match previous position'));
             frameworkPointerData.add(
                 PointerCancelEvent(
                   timeStamp: timeStamp,
@@ -238,7 +273,11 @@ class PointerEventConverter {
             );
             break;
           case ui.PointerChange.remove:
-            assert(_pointers.containsKey(datum.device));
+            assert(_pointers.containsKey(datum.device),
+              _formatErrorMessage(datum.change, 'Pointer ${datum.device} does not exist.'));
+            final _PointerState state = _pointers[datum.device];
+            assert(!state.down,
+              _formatErrorMessage(datum.change, 'Pointer ${datum.device} is down.'));
             _pointers.remove(datum.device);
             frameworkPointerData.add(
                 PointerRemovedEvent(
@@ -258,7 +297,7 @@ class PointerEventConverter {
       } else {
         switch (datum.signalKind) {
           case ui.PointerSignalKind.scroll:
-            //Devices must be added before they send scroll events.
+            // Devices must be added before they send scroll events.
             assert(_pointers.containsKey(datum.device));
             final _PointerState state = _ensureStateForPointer(datum, position);
             assert(state.lastPosition == position);
