@@ -15,6 +15,7 @@ import android.view.Surface;
 import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicLong;
 
+import io.flutter.embedding.android.FlutterView;
 import io.flutter.embedding.engine.FlutterJNI;
 import io.flutter.view.TextureRegistry;
 
@@ -29,7 +30,7 @@ import io.flutter.view.TextureRegistry;
  * code via JNI. The corresponding {@link RenderSurface} is used as a delegate to carry out
  * certain actions on behalf of this {@code FlutterRenderer} within an Android view hierarchy.
  *
- * {@link io.flutter.embedding.engine.android.FlutterView} is an implementation of a {@link RenderSurface}.
+ * {@link FlutterView} is an implementation of a {@link RenderSurface}.
  */
 @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
 public class FlutterRenderer implements TextureRegistry {
