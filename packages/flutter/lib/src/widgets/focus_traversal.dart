@@ -290,23 +290,23 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
         if (eligibleNodes.isEmpty) {
           break;
         }
-        List<FocusableNode> sortedVertically = eligibleNodes.toList();
+        List<FocusableNode> sorted = eligibleNodes.toList();
         if (direction == AxisDirection.up) {
-          sortedVertically = sortedVertically.reversed.toList();
+          sorted = sorted.reversed.toList();
         }
         // Find any nodes that intersect the band of the focused child.
         final Rect band = Rect.fromLTRB(focusedChild.rect.left, -double.infinity, focusedChild.rect.right, double.infinity);
-        final Iterable<FocusableNode> inBand = sortedVertically.where((FocusableNode node) => !node.rect.intersect(band).isEmpty);
+        final Iterable<FocusableNode> inBand = sorted.where((FocusableNode node) => !node.rect.intersect(band).isEmpty);
         if (inBand.isNotEmpty) {
           // The inBand list is already sorted by horizontal distance, so pick the closest one.
           found = inBand.first;
           break;
         }
         // Only out-of-band targets remain, so pick the one that is closest the to the center line horizontally.
-        sortedVertically.sort((FocusableNode a, FocusableNode b) {
+        sorted.sort((FocusableNode a, FocusableNode b) {
           return (a.rect.center.dx - focusedChild.rect.center.dx).abs().compareTo((b.rect.center.dx - focusedChild.rect.center.dx).abs());
         });
-        found = sortedVertically.first;
+        found = sorted.first;
         break;
       case AxisDirection.right:
       case AxisDirection.left:
@@ -314,23 +314,23 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
         if (eligibleNodes.isEmpty) {
           break;
         }
-        List<FocusableNode> sortedHorizontally = eligibleNodes.toList();
+        List<FocusableNode> sorted = eligibleNodes.toList();
         if (direction == AxisDirection.left) {
-          sortedHorizontally = sortedHorizontally.reversed.toList();
+          sorted = sorted.reversed.toList();
         }
         // Find any nodes that intersect the band of the focused child.
         final Rect band = Rect.fromLTRB(-double.infinity, focusedChild.rect.top, double.infinity, focusedChild.rect.bottom);
-        final Iterable<FocusableNode> inBand = sortedHorizontally.where((FocusableNode node) => !node.rect.intersect(band).isEmpty);
+        final Iterable<FocusableNode> inBand = sorted.where((FocusableNode node) => !node.rect.intersect(band).isEmpty);
         if (inBand.isNotEmpty) {
           // The inBand list is already sorted by horizontal distance, so pick the closest one.
           found = inBand.first;
           break;
         }
         // Only out-of-band targets remain, so pick the one that is closest the to the center line vertically.
-        sortedHorizontally.sort((FocusableNode a, FocusableNode b) {
+        sorted.sort((FocusableNode a, FocusableNode b) {
           return (a.rect.center.dy - focusedChild.rect.center.dy).abs().compareTo((b.rect.center.dy - focusedChild.rect.center.dy).abs());
         });
-        found = sortedHorizontally.first;
+        found = sorted.first;
         break;
     }
     if (found != null) {

@@ -58,22 +58,23 @@ class _FocusableButtonState extends State<FocusableButton> {
     return Focusable(
       autofocus: widget.autofocus,
       debugLabel: widget.title,
-      showDecorations: true,
       onKey: _handleKeyEvent,
       onFocusChange: (bool hasFocus) {
         setState(() {
           _hasFocus = hasFocus;
         });
       },
-      child: Builder(builder: (BuildContext context) {
-        return FlatButton(
-          onPressed: () {
-            Focusable.of(context).requestFocus();
-            _handleButtonPress();
-          },
-          child: Text(widget.title),
-        );
-      }),
+      child: FocusHighlight(
+        child: Builder(builder: (BuildContext context) {
+          return FlatButton(
+            onPressed: () {
+              Focusable.of(context).requestFocus();
+              _handleButtonPress();
+            },
+            child: Text(widget.title),
+          );
+        }),
+      ),
     );
   }
 }
@@ -187,11 +188,13 @@ class _FocusableDemoState extends State<FocusableDemo> {
                     children: <Widget>[
                       Focusable(
                         debugLabel: 'Next',
-                        child: MaterialButton(
-                          onPressed: () {
-                            return Focusable.of(context).nextFocus();
-                          },
-                          child: const Text('NEXT'),
+                        child: FocusHighlight(
+                          child: MaterialButton(
+                            onPressed: () {
+                              return Focusable.of(context).nextFocus();
+                            },
+                            child: const Text('NEXT'),
+                          ),
                         ),
                       ),
                     ],
