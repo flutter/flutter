@@ -275,14 +275,10 @@ class BottomSheetScrollController extends ScrollController {
     }
   }
 
-  bool _disposed = false;
   @override
   void dispose() {
-    if (!_disposed) {
-      _disposed = true;
-      _topListeners.clear();
-      super.dispose();
-    }
+    _topListeners.clear();
+    super.dispose();
   }
 
   @override
