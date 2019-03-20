@@ -136,13 +136,13 @@ void main() {
       expect(data, isNotNull);
       expect(data.packageName, 'io.flutter.examples.hello_world');
       expect(data.launchableActivityName, 'io.flutter.examples.hello_world.MainActivity2');
-    });
-    test('Parses manifest with an Activity that has no value for its enabled field, action set to android.intent.action.MAIN and category set to android.intent.category.LAUNCHER', () {
+    }, overrides: noColorTerminalOverride);
+    testUsingContext('Parses manifest with an Activity that has no value for its enabled field, action set to android.intent.action.MAIN and category set to android.intent.category.LAUNCHER', () {
       final ApkManifestData data = ApkManifestData.parseFromXmlDump(_aaptDataWithDefaultEnabledAndMainLauncherActivity);
       expect(data, isNotNull);
       expect(data.packageName, 'io.flutter.examples.hello_world');
       expect(data.launchableActivityName, 'io.flutter.examples.hello_world.MainActivity2');
-    });
+    }, overrides: noColorTerminalOverride);
     testUsingContext('Error when parsing manifest with no Activity that has enabled set to true nor has no value for its enabled field', () {
       final ApkManifestData data = ApkManifestData.parseFromXmlDump(_aaptDataWithNoEnabledActivity);
       expect(data, isNull);
