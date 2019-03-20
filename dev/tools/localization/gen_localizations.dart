@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 // This program generates a getMaterialTranslation() function that looks up the
-// translations contained by the arb files. The returned value is an
+// translations provided by the arb files. The returned value is a generated
 // instance of GlobalMaterialLocalizations that corresponds to a single
 // locale.
 //
@@ -28,14 +28,14 @@
 // The following outputs the generated Dart code to the console as a dry run:
 //
 // ```
-// dart dev/tools/gen_localizations.dart
+// dart dev/tools/localization/gen_localizations.dart
 // ```
 //
 // If the data looks good, use the `-w` or `--overwrite` option to overwrite the
 // packages/flutter_localizations/lib/src/l10n/generated_material_localizations.dart file:
 //
 // ```
-// dart dev/tools/gen_localizations.dart --overwrite
+// dart dev/tools/localization/gen_localizations.dart --overwrite
 // ```
 
 import 'dart:async';
@@ -604,11 +604,9 @@ Future<void> main(List<String> rawArgs) async {
 
   final Directory directory = Directory(path.join('packages', 'flutter_localizations', 'lib', 'src', 'l10n'));
   final RegExp materialFilenameRE = RegExp(r'material_(\w+)\.arb$');
-  final RegExp cupertinoFilenameRE = RegExp(r'cupertino_(\w+)\.arb$');
 
   try {
     validateEnglishLocalizations(File(path.join(directory.path, 'material_en.arb')));
-    validateEnglishLocalizations(File(path.join(directory.path, 'cupertino_en.arb')));
   } on ValidationError catch (exception) {
     exitWithError('$exception');
   }
@@ -629,7 +627,7 @@ Future<void> main(List<String> rawArgs) async {
   }
 
   final StringBuffer buffer = StringBuffer();
-  buffer.writeln(outputHeader.replaceFirst('@(regenerate)', 'dart dev/tools/gen_localizations.dart --overwrite'));
+  buffer.writeln(outputHeader.replaceFirst('@(regenerate)', 'dart dev/tools/localization/gen_localizations.dart --overwrite'));
   buffer.write(generateTranslationBundles());
 
   if (options.writeToFile) {

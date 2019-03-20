@@ -94,7 +94,7 @@ Future<void> _verifyInternationalizations() async {
   final EvalResult genResult = await _evalCommand(
     dart,
     <String>[
-      path.join('dev', 'tools', 'gen_localizations.dart'),
+      path.join('dev', 'tools', 'localization', 'gen_localizations.dart'),
     ],
     workingDirectory: flutterRoot,
   );

@@ -31,8 +31,8 @@ import 'typography.dart';
 //    you must add it to every other language (all the other *.arb files in that
 //    same directory), listing the translation as `TBD`. After that you have to
 //    re-generate lib/src/l10n/localizations.dart by running
-//    `dart dev/tools/gen_localizations.dart --overwrite`. There is a README
-//    file with further information in the lib/src/l10n/ directory.
+//    `dart dev/tools/localization/gen_localizations.dart --overwrite`. There is
+//    a README file with further information in the lib/src/l10n/ directory.
 //
 // 5. If you are a Google employee, you should then also follow the instructions
 //    at go/flutter-l10n. If you're not, don't worry about it.

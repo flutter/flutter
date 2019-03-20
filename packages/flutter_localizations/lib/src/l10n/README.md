@@ -148,13 +148,13 @@ section in the Material spec. The Material theme uses the
 ### Generated file localizations.dart: all of the localizations as a Map
 
 If you look at the comment at the top of `localizations.dart` you'll
-see that it was manually generated using a `dev/tools` app called
+see that it was manually generated using a `dev/tools/localization` app called
 `gen_localizations`.
 
 You can see what that script would generate by running this command:
 
 ```dart
-dart dev/tools/gen_localizations.dart packages/flutter_localizations/lib/src/l10n material
+dart dev/tools/localization/gen_localizations.dart packages/flutter_localizations/lib/src/l10n material
 ```
 
 The gen_localizations app just combines the contents of all of the
@@ -172,7 +172,7 @@ To in-place update the `localizations.dart` file using the default
 values, you can just run:
 
 ```dart
-dart dev/tools/gen_localizations.dart --overwrite
+dart dev/tools/localization/gen_localizations.dart --overwrite
 ```
 
 
