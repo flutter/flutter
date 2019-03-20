@@ -1,4 +1,4 @@
-Signature: 0a2fd38c998e20b99ec89e55e3387451
+Signature: affcc1ae5b1bd60f3e3e4839e61b054a
 
 UNUSED LICENSES:
 
@@ -4228,7 +4228,6 @@ FILE: ../../../third_party/skia/gm/pictureshadercache.cpp
 FILE: ../../../third_party/skia/gm/radial_gradient_precision.cpp
 FILE: ../../../third_party/skia/gm/savelayer.cpp
 FILE: ../../../third_party/skia/gm/shadowutils.cpp
-FILE: ../../../third_party/skia/gm/shapes_as_paths.cpp
 FILE: ../../../third_party/skia/gm/simple_magnification.cpp
 FILE: ../../../third_party/skia/gm/srgb.cpp
 FILE: ../../../third_party/skia/gm/testgradient.cpp
