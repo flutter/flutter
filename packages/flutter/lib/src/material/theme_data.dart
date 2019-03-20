@@ -756,7 +756,7 @@ class ThemeData extends Diagnosticable {
     FloatingActionButtonThemeData floatingActionButtonTheme,
     Typography typography,
     CupertinoThemeData cupertinoOverrideTheme,
-    FocusHighlightThemeData focusableTheme,
+    FocusHighlightThemeData focusHighlightTheme,
   }) {
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
     return ThemeData.raw(
@@ -811,7 +811,7 @@ class ThemeData extends Diagnosticable {
       floatingActionButtonTheme: floatingActionButtonTheme ?? this.floatingActionButtonTheme,
       typography: typography ?? this.typography,
       cupertinoOverrideTheme: cupertinoOverrideTheme ?? this.cupertinoOverrideTheme,
-      focusHighlightTheme: focusableTheme ?? this.focusHighlightTheme,
+      focusHighlightTheme: focusHighlightTheme ?? this.focusHighlightTheme,
     );
   }
 

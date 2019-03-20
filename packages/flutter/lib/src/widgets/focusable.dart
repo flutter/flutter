@@ -114,12 +114,12 @@ class _FocusableState extends State<Focusable> {
     if (widget is FocusableScope) {
       node = FocusableScopeNode(
         autofocus: widget.autofocus,
-        key: GlobalKey(debugLabel: widget.debugLabel),
+        context: context,
       );
     } else {
       node = FocusableNode(
         autofocus: widget.autofocus,
-        key: GlobalKey(debugLabel: widget.debugLabel),
+        context: context,
       );
     }
     _hasFocus = node.hasFocus;
@@ -147,6 +147,7 @@ class _FocusableState extends State<Focusable> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     final FocusableNode newParent = Focusable.of(context);
+    node.context = context;
     newParent.reparent(node);
   }
 
@@ -160,7 +161,6 @@ class _FocusableState extends State<Focusable> {
         }
       },
       child: _FocusableMarker(
-        key: node.key,
         node: node,
         child: widget.child,
       ),

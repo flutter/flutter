@@ -110,7 +110,7 @@ void main() {
       final List<Key> keys = <Key>[];
       bool visitor(FocusableNode node) {
         nodes.add(node);
-        keys.add(node.key.currentContext.ancestorWidgetOfExactType(Focusable).key);
+        keys.add(node.context.widget.key);
         return true;
       }
 

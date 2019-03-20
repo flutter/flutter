@@ -455,7 +455,7 @@ class ReadingOrderTraversalPolicy extends FocusTraversalPolicy with DirectionalF
       });
     }
 
-    final TextDirection textDirection = Directionality.of(scope.key.currentContext);
+    final TextDirection textDirection = scope.context == null ? TextDirection.ltr : Directionality.of(scope.context);
     _SortData pickFirst(List<_SortData> candidates) {
       int compareBeginningSide(_SortData a, _SortData b) {
         return textDirection == TextDirection.ltr ? a.rect.left.compareTo(b.rect.left) : -a.rect.right.compareTo(b.rect.right);
