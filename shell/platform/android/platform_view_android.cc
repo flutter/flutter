@@ -45,15 +45,33 @@ void PlatformViewAndroid::NotifyCreated(
     fml::RefPtr<AndroidNativeWindow> native_window) {
   if (android_surface_) {
     InstallFirstFrameCallback();
-    android_surface_->SetNativeWindow(native_window);
+
+    fml::AutoResetWaitableEvent latch;
+    fml::TaskRunner::RunNowOrPostTask(
+        task_runners_.GetGPUTaskRunner(),
+        [&latch, surface = android_surface_.get(),
+         native_window = std::move(native_window)]() {
+          surface->SetNativeWindow(native_window);
+          latch.Signal();
+        });
+    latch.Wait();
   }
+
   PlatformView::NotifyCreated();
 }
 
 void PlatformViewAndroid::NotifyDestroyed() {
   PlatformView::NotifyDestroyed();
+
   if (android_surface_) {
-    android_surface_->TeardownOnScreenContext();
+    fml::AutoResetWaitableEvent latch;
+    fml::TaskRunner::RunNowOrPostTask(
+        task_runners_.GetGPUTaskRunner(),
+        [&latch, surface = android_surface_.get()]() {
+          surface->TeardownOnScreenContext();
+          latch.Signal();
+        });
+    latch.Wait();
   }
 }
 
