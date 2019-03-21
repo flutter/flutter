@@ -7,6 +7,7 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 
 import 'box.dart';
@@ -87,6 +88,7 @@ class RenderAndroidView extends RenderBox {
        _viewController = viewController {
     _motionEventsDispatcher = _MotionEventsDispatcher(globalToLocal, viewController);
     updateGestureRecognizers(gestureRecognizers);
+    _viewController.addOnPlatformViewCreatedListener(_onPlatformViewCreated);
   }
 
   _PlatformViewState _state = _PlatformViewState.uninitialized;
@@ -99,10 +101,20 @@ class RenderAndroidView extends RenderBox {
   /// `viewController` must not be null.
   set viewController(AndroidViewController viewController) {
     assert(_viewController != null);
+    assert(viewController != null);
     if (_viewController == viewController)
       return;
+    _viewController.removeOnPlatformViewCreatedListener(_onPlatformViewCreated);
     _viewController = viewController;
     _sizePlatformView();
+    if (_viewController.isCreated) {
+      markNeedsSemanticsUpdate();
+    }
+    _viewController.addOnPlatformViewCreatedListener(_onPlatformViewCreated);
+  }
+
+  void _onPlatformViewCreated(int id) {
+    markNeedsSemanticsUpdate();
   }
 
   /// How to behave during hit testing.
@@ -236,6 +248,17 @@ class RenderAndroidView extends RenderBox {
   }
 
   @override
+  void describeSemanticsConfiguration (SemanticsConfiguration config) {
+    super.describeSemanticsConfiguration(config);
+
+    config.isSemanticBoundary = true;
+
+    if (_viewController.isCreated) {
+      config.platformViewId = _viewController.id;
+    }
+  }
+
+  @override
   void detach() {
     _gestureRecognizer.reset();
     super.detach();
@@ -286,9 +309,9 @@ class RenderUiKitView extends RenderBox {
   /// must have been created by calling [PlatformViewsService.initUiKitView].
   UiKitViewController get viewController => _viewController;
   UiKitViewController _viewController;
-  set viewController(UiKitViewController viewId) {
-    assert(viewId != null);
-    _viewController = viewId;
+  set viewController(UiKitViewController viewController) {
+    assert(viewController != null);
+    _viewController = viewController;
     markNeedsPaint();
   }
 
@@ -363,7 +386,7 @@ class RenderUiKitView extends RenderBox {
       return;
     }
     final Offset localOffset = globalToLocal(event.position);
-    if(!(Offset.zero & size).contains(localOffset)) {
+    if (!(Offset.zero & size).contains(localOffset)) {
       return;
     }
     if (event != _lastPointerDownEvent) {
@@ -396,9 +419,11 @@ class RenderUiKitView extends RenderBox {
 // When the team wins a gesture the recognizer notifies the engine that it should release
 // the touch sequence to the embedded UIView.
 class _UiKitViewGestureRecognizer extends OneSequenceGestureRecognizer {
-  _UiKitViewGestureRecognizer(this.controller, this.gestureRecognizerFactories, {
+  _UiKitViewGestureRecognizer(
+    this.controller,
+    this.gestureRecognizerFactories, {
     PointerDeviceKind kind,
-  }): super(kind: kind) {
+  }) : super(kind: kind) {
     team = GestureArenaTeam();
     team.captain = this;
     _gestureRecognizers = gestureRecognizerFactories.map(
@@ -458,9 +483,11 @@ class _UiKitViewGestureRecognizer extends OneSequenceGestureRecognizer {
 // When the team wins the recognizer sends all the cached point events to the embedded Android view, and
 // sets itself to a "forwarding mode" where it will forward any new pointer event to the Android view.
 class _AndroidViewGestureRecognizer extends OneSequenceGestureRecognizer {
-  _AndroidViewGestureRecognizer(this.dispatcher, this.gestureRecognizerFactories, {
+  _AndroidViewGestureRecognizer(
+    this.dispatcher,
+    this.gestureRecognizerFactories, {
     PointerDeviceKind kind,
-  }): super(kind: kind) {
+  }) : super(kind: kind) {
     team = GestureArenaTeam();
     team.captain = this;
     _gestureRecognizers = gestureRecognizerFactories.map(

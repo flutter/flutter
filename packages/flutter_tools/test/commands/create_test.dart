@@ -27,6 +27,10 @@ final Generator _kNoColorTerminalPlatform = () => FakePlatform.fromPlatform(cons
 final Map<Type, Generator> noColorTerminalOverride = <Type, Generator> {
   Platform: _kNoColorTerminalPlatform,
 };
+const String samplesIndexJson = '''[
+  { "id": "sample1" },
+  { "id": "sample2" }
+]''';
 
 void main() {
   Directory tempDir;
@@ -888,6 +892,41 @@ void main() {
   }, timeout: allowForRemotePubInvocation, overrides: <Type, Generator>{
     HttpClientFactory: () => () => MockHttpClient(200, result: 'void main() {}'),
   });
+
+  testUsingContext('can write samples index to disk', () async {
+    final String outputFile = fs.path.join(tempDir.path, 'flutter_samples.json');
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+    final List<String> args = <String>[
+      'create',
+      '--list-samples',
+      outputFile
+    ];
+
+    await runner.run(args);
+    final File expectedFile = fs.file(outputFile);
+    expect(expectedFile.existsSync(), isTrue);
+    expect(expectedFile.readAsStringSync(), equals(samplesIndexJson));
+  }, overrides: <Type, Generator>{
+    HttpClientFactory: () =>
+        () => MockHttpClient(200, result: samplesIndexJson),
+  });
+  testUsingContext('provides an error to the user if samples json download fails', () async {
+    final String outputFile = fs.path.join(tempDir.path, 'flutter_samples.json');
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+    final List<String> args = <String>[
+      'create',
+      '--list-samples',
+      outputFile
+    ];
+
+    await expectLater(runner.run(args), throwsToolExit(exitCode: 2, message: 'Failed to write samples'));
+    expect(fs.file(outputFile).existsSync(), isFalse);
+  }, overrides: <Type, Generator>{
+    HttpClientFactory: () =>
+        () => MockHttpClient(404, result: 'not found'),
+  });
 }
 
 Future<void> _createProject(
@@ -961,6 +1000,17 @@ Future<void> _runFlutterTest(Directory workingDir, { String target }) async {
     'bin',
     'flutter_tools.dart',
   ));
+
+  // While flutter test does get packages, it doesn't write version
+  // files anymore.
+  await Process.run(
+    '$dartSdkPath/bin/dart',
+    <String>[]
+    ..addAll(dartVmFlags)
+    ..add(flutterToolsPath)
+    ..addAll(<String>['packages', 'get']),
+    workingDirectory: workingDir.path,
+  );
 
   final List<String> args = <String>[]
     ..addAll(dartVmFlags)

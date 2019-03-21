@@ -169,6 +169,26 @@ class TestPointer {
       delta: delta,
     );
   }
+
+  /// Create a [PointerScrollEvent] (e.g., scroll wheel scroll; not finger-drag
+  /// scroll) with the given delta.
+  ///
+  /// By default, the time stamp on the event is [Duration.zero]. You can give a
+  /// specific time stamp by passing the `timeStamp` argument.
+  PointerScrollEvent scroll(
+    Offset scrollDelta, {
+    Duration timeStamp = Duration.zero,
+  }) {
+    assert(scrollDelta != null);
+    assert(timeStamp != null);
+    assert(kind != PointerDeviceKind.touch, "Touch pointers can't generate pointer signal events");
+    return PointerScrollEvent(
+      timeStamp: timeStamp,
+      kind: kind,
+      position: location,
+      scrollDelta: scrollDelta,
+    );
+  }
 }
 
 /// Signature for a callback that can dispatch events and returns a future that
@@ -205,14 +225,14 @@ class TestGesture {
     @required HitTester hitTester,
     int pointer = 1,
     PointerDeviceKind kind = PointerDeviceKind.touch,
-  })  : assert(dispatcher != null),
-        assert(hitTester != null),
-        assert(pointer != null),
-        assert(kind != null),
-        _dispatcher = dispatcher,
-        _hitTester = hitTester,
-        _pointer = TestPointer(pointer, kind),
-        _result = null;
+  }) : assert(dispatcher != null),
+       assert(hitTester != null),
+       assert(pointer != null),
+       assert(kind != null),
+       _dispatcher = dispatcher,
+       _hitTester = hitTester,
+       _pointer = TestPointer(pointer, kind),
+       _result = null;
 
   /// Dispatch a pointer down event at the given `downLocation`, caching the
   /// hit test result.

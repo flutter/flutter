@@ -460,12 +460,6 @@ class MockDevFSOperations extends BasicMock implements DevFSOperations {
     messages.add(message);
     devicePathToContent[deviceUri] = content;
   }
-
-  @override
-  Future<dynamic> deleteFile(String fsName, Uri deviceUri) async {
-    messages.add('deleteFile $fsName $deviceUri');
-    devicePathToContent.remove(deviceUri);
-  }
 }
 
 class MockResidentCompiler extends BasicMock implements ResidentCompiler {
@@ -496,6 +490,6 @@ class MockResidentCompiler extends BasicMock implements ResidentCompiler {
   Future<CompilerOutput> recompile(String mainPath, List<String> invalidatedFiles, { String outputPath, String packagesFilePath }) async {
     fs.file(outputPath).createSync(recursive: true);
     fs.file(outputPath).writeAsStringSync('compiled_kernel_output');
-    return CompilerOutput(outputPath, 0);
+    return CompilerOutput(outputPath, 0, <Uri>[]);
   }
 }

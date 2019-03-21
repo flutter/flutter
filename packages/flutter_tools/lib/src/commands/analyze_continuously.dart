@@ -67,6 +67,9 @@ class AnalyzeContinuously extends AnalyzeBase {
     if (exitCode != 0)
       throwToolExit(message, exitCode: exitCode);
     printStatus(message);
+
+    if (server.didServerErrorOccur)
+      throwToolExit('Server error(s) occurred.');
   }
 
   void _handleAnalysisStatus(AnalysisServer server, bool isAnalyzing) {

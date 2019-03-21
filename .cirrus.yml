@@ -191,13 +191,28 @@ task:
   env:
     CIRRUS_WORKING_DIR: "/tmp/flutter sdk"
     COCOAPODS_DISABLE_STATS: true
-    ANDROID_SDK_TOOLS_URL: https://dl.google.com/android/repository/sdk-tools-darwin-4333796.zip
-    ANDROID_SDK_ROOT: $HOME/Android
-    ANDROID_HOME: $HOME/Android
-    OPEN_JDK_URL: https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u202-b08/OpenJDK8U-jdk_x64_mac_hotspot_8u202b08.tar.gz
-    OPEN_JDK_REVISION: jdk8u202-b08
-    JAVA_HOME: $HOME/Java/$OPEN_JDK_REVISION/Contents/Home
-    PATH: "$PATH:$JAVA_HOME/bin:$ANDROID_SDK_ROOT/tools:$ANDROID_SDK_ROOT/tools/bin:$ANDROID_SDK_ROOT/platform-tools"
+  matrix:
+    - name: tests-macos
+      env:
+        GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
+        SHARD: tests
+    - name: tool_tests-macos
+      env:
+        GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
+        SHARD: tool_tests
+    - name: $SHARD-macos
+      env:
+        matrix:
+          - SHARD: integration_tests
+          - SHARD: build_tests
+            COCOAPODS_DISABLE_STATS: true
+            FLUTTER_FRAMEWORK_DIR: "/tmp/flutter sdk/bin/cache/artifacts/engine/ios/"
+      osx_instance:
+        image: mojave-flutter
+      remove_preinstalled_fluuter_script: rm -rf $FLUTTER_HOME
+    - name: add2app-macos
+      env:
+        SHARD: add2app_test
   # occasionally the clock on these machines is out of sync
   # with the actual time - this should help to verify
   print_date_script:
@@ -217,48 +232,12 @@ task:
   artifacts_cache:
     folder: bin/cache/artifacts
     fingerprint_script: echo $OS; cat bin/internal/engine.version
-  # TODO(dnfield): If the OSX image starts including this, we can remove it. https://github.com/cirruslabs/osx-images/issues/3
-  open_jdk_cache:
-    folder: $HOME/Java
-    fingerprint_script: echo $OPEN_JDK_URL; cat dev/bots/download_open_jdk.sh
-    populate_script: dev/bots/download_open_jdk.sh
-  # TODO(dnfield): If the OSX image starts including this, we can remove it. https://github.com/cirruslabs/osx-images/issues/3
-  android_sdk_cache:
-    folder: $ANDROID_SDK_ROOT
-    fingerprint_script: echo $ANDROID_SDK_TOOLS_URL; cat dev/bots/download_android_sdk.sh
-    populate_script: dev/bots/download_android_sdk.sh
   setup_script:
     - bin/flutter config --no-analytics
     - bin/flutter update-packages
   test_all_script: |
     ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
     bin/cache/dart-sdk/bin/dart --enable-asserts dev/bots/test.dart
-  matrix:
-    - name: tests-macos
-      env:
-        GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
-        SHARD: tests
-    - name: tool_tests-macos
-      env:
-        GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
-        SHARD: tool_tests
-    - name: build_tests-macos
-      env:
-        SHARD: build_tests
-        COCOAPODS_DISABLE_STATS: true
-        FLUTTER_FRAMEWORK_DIR: "/tmp/flutter sdk/bin/cache/artifacts/engine/ios/"
-      container:
-        cpu: 4
-        memory: 12G
-    - name: integration_tests-macos
-      env:
-        SHARD: integration_tests
-      container:
-        cpu: 4
-        memory: 12G
-    - name: add2app-macos
-      env:
-        SHARD: add2app_test
 
 docker_builder:
   # Only build a new docker image when we tag a release (for dev, beta, or release.)
