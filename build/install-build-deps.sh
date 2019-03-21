@@ -65,13 +65,13 @@ fi
 
 distro=$(lsb_release --id --short)
 codename=$(lsb_release --codename --short)
-ubuntu_codenames="(precise|trusty|utopic|vivid|xenial)"
+ubuntu_codenames="(precise|trusty|utopic|vivid|xenial|bionic)"
 debian_codenames="(stretch|rodete)"
 if [ 0 -eq "${do_unsupported-0}" ] && [ 0 -eq "${do_quick_check-0}" ] ; then
   if [[ ! $codename =~ $ubuntu_codenames && ! $codename =~ $debian_codenames ]]; then
     echo "ERROR: Only Ubuntu 12.04 (precise), 14.04 (trusty), " \
-      "14.10 (utopic), 15.04 (vivid), and 16.04 (xenial), Debian " \
-      "(rodete and stretch) are currently supported" >&2
+      "14.10 (utopic), 15.04 (vivid), 16.04 (xenial), 18.04 (bionic), " \
+      "and Debian (rodete and stretch) are currently supported" >&2
     exit 1
   fi
 
@@ -90,7 +90,7 @@ fi
 # Packages needed for development
 dev_list="bison cdbs curl dpkg-dev elfutils devscripts fakeroot
           flex g++ git-core git-svn gperf
-          libasound2-dev libbrlapi-dev libav-tools
+          libasound2-dev libbrlapi-dev
           libbz2-dev libcairo2-dev libcap-dev libcups2-dev libcurl4-gnutls-dev
           libdrm-dev libelf-dev libexif-dev libgconf2-dev libglib2.0-dev
           libglu1-mesa-dev libgnome-keyring-dev libgtk2.0-dev libkrb5-dev
@@ -134,7 +134,8 @@ arm_list="libc6-dev-armhf-cross
           linux-libc-dev-armhf-cross"
 
 # Work around for dependency issue Debian/Stretch
-if [[ "x$codename" = "xstretch" || "x$codename" = "xxenial" ]]; then
+if [[ "x$codename" = "xstretch" || "x$codename" = "xxenial" || \
+      "x$codename" = "xbionic"  ]]; then
   arm_list+=" g++-5-arm-linux-gnueabihf"
 else
   arm_list+=" g++-arm-linux-gnueabihf"
@@ -194,6 +195,9 @@ fi
 # installing them.
 if package_exists appmenu-gtk; then
   lib_list="$lib_list appmenu-gtk"
+fi
+if package_exists libav-tools; then
+  dev_list="${dev_list} libav-tools"
 fi
 
 # When cross building for arm/Android on 64-bit systems the host binaries

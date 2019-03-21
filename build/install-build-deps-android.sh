@@ -56,7 +56,8 @@ else
   sudo apt-get -y install libncurses5:i386 libstdc++6:i386 zlib1g:i386
 fi
 
-if [[ $lsb_release == "xenial" || $lsb_release == "rodete" ]]; then
+if [[ $lsb_release == "xenial" || $lsb_release == "bionic" || \
+      $lsb_release == "rodete" ]]; then
   sudo apt-get -y install openjdk-8-jre openjdk-8-jdk
   sudo update-java-alternatives -s java-1.8.0-openjdk-amd64
   sudo apt-get -y install ant
