@@ -438,11 +438,6 @@ class ListTile extends StatelessWidget {
         data: iconThemeData,
         child: leading,
       );
-
-      leadingIcon = Container(
-        constraints: BoxConstraints(maxHeight: 56),
-        child: leadingIcon,
-      );
     }
 
     final TextStyle titleStyle = _titleTextStyle(theme, tileTheme);
@@ -468,11 +463,6 @@ class ListTile extends StatelessWidget {
       trailingIcon = IconTheme.merge(
         data: iconThemeData,
         child: trailing,
-      );
-
-      trailingIcon = Container(
-        constraints: BoxConstraints(maxHeight: 56),
-        child: trailingIcon,
       );
     }
 
@@ -889,6 +879,15 @@ class _RenderListTile extends RenderBox {
     return isDense ? 76.0 : 88.0;
   }
 
+  double get _maxIconHeight {
+    final bool hasSubtitle = subtitle != null;
+    final bool isOneLine = !isThreeLine && !hasSubtitle;
+
+    if (isOneLine)
+      return isDense ? 32.0 : 40.0;
+    return isDense ? 48.0 : 56.0;
+  }
+
   @override
   double computeMinIntrinsicHeight(double width) {
     return math.max(
@@ -934,11 +933,16 @@ class _RenderListTile extends RenderBox {
     final bool hasTrailing = trailing != null;
     final bool isTwoLine = !isThreeLine && hasSubtitle;
     final bool isOneLine = !isThreeLine && !hasSubtitle;
+
+    final BoxConstraints maxIconHeightConstraint = BoxConstraints(
+      maxHeight: _maxIconHeight,
+    );
     final BoxConstraints looseConstraints = constraints.loosen();
+    final BoxConstraints iconConstraints = looseConstraints.enforce(maxIconHeightConstraint);
 
     final double tileWidth = looseConstraints.maxWidth;
-    final Size leadingSize = _layoutBox(leading, looseConstraints);
-    final Size trailingSize = _layoutBox(trailing, looseConstraints);
+    final Size leadingSize = _layoutBox(leading, iconConstraints);
+    final Size trailingSize = _layoutBox(trailing, iconConstraints);
 
     final double titleStart = hasLeading
       ? math.max(_minLeadingWidth, leadingSize.width) + _horizontalTitleGap
@@ -1018,8 +1022,8 @@ class _RenderListTile extends RenderBox {
       case TextDirection.rtl: {
         if (hasLeading)
           _positionBox(leading, Offset(tileWidth - leadingSize.width, leadingY));
-        final double titleX = hasTrailing ? trailingSize.width + _horizontalTitleGap : 0.0;
-        _positionBox(title, Offset(titleX, titleY));
+          final double titleX = hasTrailing ? trailingSize.width + _horizontalTitleGap : 0.0;
+          _positionBox(title, Offset(titleX, titleY));
         if (hasSubtitle)
           _positionBox(subtitle, Offset(titleX, subtitleY));
         if (hasTrailing)
@@ -1029,7 +1033,7 @@ class _RenderListTile extends RenderBox {
       case TextDirection.ltr: {
         if (hasLeading)
           _positionBox(leading, Offset(0.0, leadingY));
-        _positionBox(title, Offset(titleStart, titleY));
+          _positionBox(title, Offset(titleStart, titleY));
         if (hasSubtitle)
           _positionBox(subtitle, Offset(titleStart, subtitleY));
         if (hasTrailing)
