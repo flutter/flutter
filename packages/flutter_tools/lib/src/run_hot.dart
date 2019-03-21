@@ -965,8 +965,7 @@ class ProjectFileInvalidator {
         invalidatedFiles.add(uri);
       }
     }
-    // If a new package is added or the uri replaced, we need to invalidate
-    // the .packages file as well.
+    // we need to check the .packages file too since it is not used in compilation.
     final DateTime packagesUpdatedAt = fs.statSync(packagesPath).modified;
     if (lastCompiled != null && lastCompiled != null
         && packagesUpdatedAt.millisecondsSinceEpoch > lastCompiled.millisecondsSinceEpoch) {
