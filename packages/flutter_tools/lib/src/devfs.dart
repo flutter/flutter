@@ -386,6 +386,8 @@ class DevFS {
   final Directory rootDirectory;
   String _packagesFilePath;
   final Set<String> assetPathsToEvict = <String>{};
+  List<Uri> sources = <Uri>[];
+  DateTime lastCompiled;
 
   Uri _baseUri;
   Uri get baseUri => _baseUri;
@@ -437,7 +439,7 @@ class DevFS {
     bool fullRestart = false,
     String projectRootPath,
     @required String pathToReload,
-    @required List<String> invalidatedFiles,
+    @required List<Uri> invalidatedFiles,
   }) async {
     assert(trackWidgetCreation != null);
     assert(generator != null);
@@ -473,12 +475,16 @@ class DevFS {
       generator.reset();
     }
     printTrace('Compiling dart to kernel with ${invalidatedFiles.length} updated files');
+    lastCompiled = DateTime.now();
     final CompilerOutput compilerOutput = await generator.recompile(
       mainPath,
       invalidatedFiles,
       outputPath:  dillOutputPath ?? getDefaultApplicationKernelPath(trackWidgetCreation: trackWidgetCreation),
       packagesFilePath : _packagesFilePath,
     );
+    // list of sources that needs to be monitored are in [compilerOutput.sources]
+    sources = compilerOutput.sources;
+    //
     // Don't send full kernel file that would overwrite what VM already
     // started loading from.
     if (!bundleFirstUpload) {

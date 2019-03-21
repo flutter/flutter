@@ -148,8 +148,7 @@ class CodeGeneratingKernelCompiler implements KernelCompiler {
       fileSystemScheme: kMultiRootScheme,
       depFilePath: depFilePath,
       targetModel: targetModel,
-      // Pass an invalid file name to prevent frontend_server from initializing from dill.
-      initializeFromDill: 'none_file',
+      initializeFromDill: initializeFromDill,
     );
   }
 }
@@ -185,8 +184,7 @@ class CodeGeneratingResidentCompiler implements ResidentCompiler {
       fileSystemScheme: kMultiRootScheme,
       targetModel: TargetModel.flutter,
       unsafePackageSerialization: unsafePackageSerialization,
-      // Pass an invalid file name to prevent frontend_server from initializing from dill.
-      initializeFromDill: 'none_file',
+      initializeFromDill: initializeFromDill,
     );
     if (runCold) {
       return residentCompiler;
@@ -216,7 +214,7 @@ class CodeGeneratingResidentCompiler implements ResidentCompiler {
   }
 
   @override
-  Future<CompilerOutput> recompile(String mainPath, List<String> invalidatedFiles, {String outputPath, String packagesFilePath}) async {
+  Future<CompilerOutput> recompile(String mainPath, List<Uri> invalidatedFiles, {String outputPath, String packagesFilePath}) async {
     if (_codegenDaemon.lastStatus != CodegenStatus.Succeeded && _codegenDaemon.lastStatus != CodegenStatus.Failed) {
       await _codegenDaemon.buildResults.firstWhere((CodegenStatus status) {
         return status == CodegenStatus.Succeeded || status == CodegenStatus.Failed;

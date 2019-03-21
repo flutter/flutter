@@ -483,7 +483,7 @@ void main() {
       BoxFit.scaleDown,
     ];
 
-    for(BoxFit boxFit in boxFits) {
+    for (BoxFit boxFit in boxFits) {
       final TestCanvas canvas = TestCanvas(<Invocation>[]);
 
       final Rect outputRect = Rect.fromLTWH(30.0, 30.0, 250.0, 250.0);

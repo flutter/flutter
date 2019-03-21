@@ -345,7 +345,6 @@ class FlutterDevice {
     startEchoingDeviceLog();
 
     // Start the application.
-    final bool hasDirtyDependencies = hotRunner.hasDirtyDependencies(this);
     final Future<LaunchResult> futureResult = device.startApp(
       package,
       mainPath: hotRunner.mainPath,
@@ -353,7 +352,6 @@ class FlutterDevice {
       platformArgs: platformArgs,
       route: route,
       prebuiltApplication: prebuiltMode,
-      applicationNeedsRebuild: shouldBuild || hasDirtyDependencies,
       usesTerminalUi: hotRunner.usesTerminalUI,
       ipv6: hotRunner.ipv6,
     );
@@ -409,7 +407,6 @@ class FlutterDevice {
 
     startEchoingDeviceLog();
 
-    final bool hasDirtyDependencies = coldRunner.hasDirtyDependencies(this);
     final LaunchResult result = await device.startApp(
       package,
       mainPath: coldRunner.mainPath,
@@ -417,7 +414,6 @@ class FlutterDevice {
       platformArgs: platformArgs,
       route: route,
       prebuiltApplication: prebuiltMode,
-      applicationNeedsRebuild: shouldBuild || hasDirtyDependencies,
       usesTerminalUi: coldRunner.usesTerminalUI,
       ipv6: coldRunner.ipv6,
     );
@@ -445,7 +441,7 @@ class FlutterDevice {
     bool fullRestart = false,
     String projectRootPath,
     String pathToReload,
-    @required List<String> invalidatedFiles,
+    @required List<Uri> invalidatedFiles,
   }) async {
     final Status devFSStatus = logger.startProgress(
       'Syncing files to device ${device.name}...',
@@ -939,26 +935,6 @@ abstract class ResidentRunner {
     assert(exitCode != null);
     await cleanupAtFinish();
     return exitCode;
-  }
-
-  bool hasDirtyDependencies(FlutterDevice device) {
-    if (device.package.packagesFile == null || !device.package.packagesFile.existsSync()) {
-      return true;
-    }
-    // why is this sometimes an APK.
-    if (!device.package.packagesFile.path.contains('.packages')) {
-      return true;
-    }
-    // Leave pubspec null to check all dependencies.
-    final ProjectFileInvalidator projectFileInvalidator = ProjectFileInvalidator(device.package.packagesFile.path, null);
-    projectFileInvalidator.findInvalidated();
-    final int lastBuildTime = device.package.packagesFile.statSync().modified.millisecondsSinceEpoch;
-    for (int updateTime in projectFileInvalidator.updateTime.values) {
-      if (updateTime > lastBuildTime) {
-        return true;
-      }
-    }
-    return false;
   }
 
   Future<void> preStop() async { }

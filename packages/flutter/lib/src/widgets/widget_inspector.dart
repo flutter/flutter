@@ -876,7 +876,7 @@ mixin WidgetInspectorService {
           await setter(value);
           _postExtensionStateChangedEvent(name, value);
         }
-        return <String, dynamic>{ 'enabled': await getter() ? 'true' : 'false' };
+        return <String, dynamic>{'enabled': await getter() ? 'true' : 'false'};
       },
     );
   }
