@@ -18,6 +18,7 @@ import 'base/utils.dart';
 import 'build_info.dart';
 import 'compile.dart';
 import 'convert.dart';
+import 'dart/package_map.dart';
 import 'devfs.dart';
 import 'device.dart';
 import 'globals.dart';
@@ -317,7 +318,10 @@ class HotRunner extends ResidentRunner {
     // for all devices should be in sync.
     final List<Uri> invalidatedFiles = ProjectFileInvalidator.findInvalidated(
       lastCompiled: flutterDevices[0].devFS.lastCompiled,
-      urisToMonitor: flutterDevices[0].devFS.sources);
+      urisToMonitor: flutterDevices[0].devFS.sources,
+      packageMap: flutterDevices[0].devFS.packageMap,
+      packagesPath: packagesFilePath,
+    );
     final UpdateFSReport results = UpdateFSReport(success: true);
     for (FlutterDevice device in flutterDevices) {
       results.incorporateResults(await device.updateDevFS(
@@ -939,8 +943,12 @@ class ProjectFileInvalidator {
   static const String _pubCachePathLinuxAndWindows = '.pub-cache';
   static const String _pubCachePathWindows = 'Pub/Cache';
 
-  static List<Uri> findInvalidated({@required DateTime lastCompiled,
-    @required List<Uri> urisToMonitor}) {
+  static List<Uri> findInvalidated({
+    @required DateTime lastCompiled,
+    @required List<Uri> urisToMonitor,
+    @required Map<String, Uri> packageMap,
+    @required String packagesPath,
+  }) {
     final List<Uri> invalidatedFiles = <Uri>[];
     int scanned = 0;
     final Stopwatch stopwatch = Stopwatch()..start();
@@ -958,6 +966,37 @@ class ProjectFileInvalidator {
       }
       if (updatedAt.millisecondsSinceEpoch > lastCompiled.millisecondsSinceEpoch) {
         invalidatedFiles.add(uri);
+      }
+    }
+    // If a new package is added or the uri replaced, we need to invalidate
+    // source within the package once. If the sources are used by the compiler,
+    // they will be included in the next set of sources to monitor.
+    final DateTime packagesUpdatedAt = fs.statSync(packagesPath).modified;
+    if (lastCompiled != null
+        && packagesUpdatedAt.millisecondsSinceEpoch > lastCompiled.millisecondsSinceEpoch) {
+      final Map<String, Uri> newPackageMap = PackageMap(packagesPath).map;
+      final List<Uri> invalidatedPackageRoots = <Uri>[];
+      // We only need to worry about added packages.
+      for (String key in newPackageMap.keys) {
+        final Uri oldPackageRoot = packageMap[key];
+        final Uri newPackageRoot = newPackageMap[key];
+        if (oldPackageRoot == null || oldPackageRoot != newPackageRoot) {
+          invalidatedPackageRoots.add(newPackageRoot);
+        }
+      }
+      for (Uri invalidatedPackageRoot in invalidatedPackageRoots) {
+        for (FileSystemEntity entity in fs.directory(invalidatedPackageRoot).listSync(recursive: true)) {
+          if (entity.path.endsWith('.dart')) {
+            invalidatedFiles.add(entity.uri);
+          }
+        }
+      }
+      // If we updated any packages, replace the contents of the existing
+      // package map.
+      if (invalidatedPackageRoots.isNotEmpty) {
+        packageMap
+          ..clear()
+          ..addAll(newPackageMap);
       }
     }
     printTrace('Scanned through $scanned files in ${stopwatch.elapsedMilliseconds}ms');
