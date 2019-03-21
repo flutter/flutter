@@ -104,7 +104,6 @@ void main() {
       bundle: anyNamed('bundle'),
       firstBuildTime: anyNamed('firstBuildTime'),
       bundleFirstUpload: anyNamed('bundleFirstUpload'),
-      bundleDirty: anyNamed('bundleDirty'),
       generator: anyNamed('generator'),
       fullRestart: anyNamed('fullRestart'),
       dillOutputPath: anyNamed('dillOutputPath'),
