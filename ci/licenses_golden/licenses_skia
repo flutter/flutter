@@ -1,4 +1,4 @@
-Signature: 8b213e55333c31d2af13e99dbb28de7f
+Signature: 068fad76a0ce84ce9e64affe66fc39c5
 
 UNUSED LICENSES:
 
@@ -2266,6 +2266,9 @@ FILE: ../../../third_party/skia/infra/bots/recipes/perf_canvaskit.expected/pathk
 FILE: ../../../third_party/skia/infra/bots/recipes/perf_pathkit.expected/Perf-Debian9-EMCC-GCE-CPU-AVX2-asmjs-Release-All-PathKit.json
 FILE: ../../../third_party/skia/infra/bots/recipes/perf_pathkit.expected/Perf-Debian9-EMCC-GCE-CPU-AVX2-wasm-Release-All-PathKit.json
 FILE: ../../../third_party/skia/infra/bots/recipes/perf_pathkit.expected/pathkit_trybot.json
+FILE: ../../../third_party/skia/infra/bots/recipes/perf_skottietrace.expected/Perf-Android-Clang-AndroidOne-GPU-Mali400MP2-arm-Release-All-Android_SkottieTracing.json
+FILE: ../../../third_party/skia/infra/bots/recipes/perf_skottietrace.expected/skottietracing_parse_trace_error.json
+FILE: ../../../third_party/skia/infra/bots/recipes/perf_skottietrace.expected/skottietracing_trybot.json
 FILE: ../../../third_party/skia/infra/bots/recipes/recreate_skps.expected/Housekeeper-Nightly-RecreateSKPs_Canary.json
 FILE: ../../../third_party/skia/infra/bots/recipes/recreate_skps.expected/Housekeeper-Weekly-RecreateSKPs.json
 FILE: ../../../third_party/skia/infra/bots/recipes/recreate_skps.expected/failed_upload.json
@@ -4181,8 +4184,6 @@ ORIGIN: ../../../third_party/skia/bench/ClipMaskBench.cpp + ../../../third_party
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/bench/ClipMaskBench.cpp
 FILE: ../../../third_party/skia/bench/ClipStrategyBench.cpp
-FILE: ../../../third_party/skia/bench/ColorCanvasDrawBitmapBench.cpp
-FILE: ../../../third_party/skia/bench/ColorSpaceXformBench.cpp
 FILE: ../../../third_party/skia/bench/CubicKLMBench.cpp
 FILE: ../../../third_party/skia/bench/PathTextBench.cpp
 FILE: ../../../third_party/skia/bench/ShadowBench.cpp
@@ -4240,7 +4241,6 @@ FILE: ../../../third_party/skia/include/atlastext/SkAtlasTextFont.h
 FILE: ../../../third_party/skia/include/atlastext/SkAtlasTextRenderer.h
 FILE: ../../../third_party/skia/include/atlastext/SkAtlasTextTarget.h
 FILE: ../../../third_party/skia/include/codec/SkEncodedOrigin.h
-FILE: ../../../third_party/skia/include/core/SkColorSpaceXformCanvas.h
 FILE: ../../../third_party/skia/include/core/SkDeferredDisplayListRecorder.h
 FILE: ../../../third_party/skia/include/core/SkExecutor.h
 FILE: ../../../third_party/skia/include/core/SkFontArguments.h
@@ -4396,9 +4396,6 @@ FILE: ../../../third_party/skia/src/core/SkBlendMode.cpp
 FILE: ../../../third_party/skia/src/core/SkBlitter_RGB565.cpp
 FILE: ../../../third_party/skia/src/core/SkClipStackDevice.cpp
 FILE: ../../../third_party/skia/src/core/SkClipStackDevice.h
-FILE: ../../../third_party/skia/src/core/SkColorSpaceXformCanvas.cpp
-FILE: ../../../third_party/skia/src/core/SkColorSpaceXformer.cpp
-FILE: ../../../third_party/skia/src/core/SkColorSpaceXformer.h
 FILE: ../../../third_party/skia/src/core/SkCoverageDelta.cpp
 FILE: ../../../third_party/skia/src/core/SkCoverageDelta.h
 FILE: ../../../third_party/skia/src/core/SkDeferredDisplayListRecorder.cpp
