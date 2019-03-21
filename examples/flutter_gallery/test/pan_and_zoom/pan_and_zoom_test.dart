@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_gallery/demo/pan_and_zoom_demo_transform_interaction.dart';
 
+// TODO(justinmc): Do we care about comprehensive testing for example apps? I
+// wrote these tests just to help myself during development. I can clean them up
+// and add more if needed.
 void main() {
   test('fromViewport: Origin identity matrix', () {
     final Offset sceneOffset = TransformInteractionState.fromViewport(

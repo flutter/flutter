@@ -18,7 +18,8 @@ class TransformInteraction extends StatefulWidget {
     this.maxScale = 2.5,
     this.minScale = 0.8,
     // Transforms will be limited so that the viewport can not view beyond this
-    // Rect.
+    // Rect. The Rect does not rotate with the rest of the scene, so it is
+    // always aligned with the viewport.
     this.visibleRect,
     // Initial values for the transform can be provided
     this.initialTranslation,
@@ -121,7 +122,7 @@ class TransformInteractionState extends State<TransformInteraction> with TickerP
   // A positive y offset moves the scene down, viewport up.
   Offset _translateFromScene; // Point where a single translation began
   double _scaleStart; // Scale value at start of scaling gesture
-  double _rotationStart = 0.0;
+  double _rotationStart = 0.0; // Rotation at start of rotation gesture
   Rect _visibleRect;
   Matrix4 _transform = Matrix4.identity();
   double _currentRotation = 0.0;
@@ -142,77 +143,17 @@ class TransformInteractionState extends State<TransformInteraction> with TickerP
     return matrix;
   }
 
-  // Perform a translation on the given matrix within constraints of the scene.
-  // The _visibleRect is not rotated with the scene.
-  Matrix4 matrixTranslate(Matrix4 matrix, Offset translation) {
-    if (widget.disableTranslation) {
-      return matrix;
-    }
-    final double scale = _transform.getMaxScaleOnAxis();
-    final Size scaledSize = widget.size / scale;
-    final Vector3 currentTranslation = matrix.getTranslation() / scale;
-    final Rect boundaries = Rect.fromLTRB(
-      _visibleRect.left * -1,
-      _visibleRect.top * -1,
-      (_visibleRect.right - scaledSize.width) * -1,
-      (_visibleRect.bottom - scaledSize.height) * -1,
-    );
-    final Offset clampedTranslation = Offset(
-      translation.dx.clamp(
-        boundaries.right - currentTranslation.x,
-        boundaries.left - currentTranslation.x,
-      ),
-      translation.dy.clamp(
-        boundaries.bottom - currentTranslation.y,
-        boundaries.top - currentTranslation.y,
-      ),
-    );
-    return matrix..translate(
-      clampedTranslation.dx,
-      clampedTranslation.dy,
-    );
-  }
-
-  Matrix4 matrixScale(Matrix4 matrix, double scale) {
-    if (widget.disableScale) {
-      return matrix;
-    }
-
-    // Don't allow a scale that moves the viewport outside of _visibleRect
-    final Offset tl = fromViewport(const Offset(0, 0), _transform);
-    final Offset tr = fromViewport(Offset(widget.size.width, 0), _transform);
-    final Offset bl = fromViewport(Offset(0, widget.size.height), _transform);
-    final Offset br = fromViewport(
-      Offset(widget.size.width, widget.size.height),
-      _transform,
-    );
-    if (!_visibleRect.contains(tl)
-      || !_visibleRect.contains(tr)
-      || !_visibleRect.contains(bl)
-      || !_visibleRect.contains(br)) {
-      return matrix;
-    }
-
-    // Don't allow a scale that results in an overall scale beyond min/max scale
-    final double currentScale = _transform.getMaxScaleOnAxis();
-    final double totalScale = currentScale * scale;
-    final double clampedTotalScale = totalScale.clamp(
-      widget.minScale,
-      widget.maxScale,
-    );
-    final double clampedScale = clampedTotalScale / currentScale;
-    return matrix..scale(clampedScale);
-  }
-
-  Matrix4 matrixRotate(Matrix4 matrix, double rotation, Offset focalPoint) {
-    if (widget.disableRotation) {
-      return matrix;
-    }
-    final Offset focalPointScene = fromViewport(focalPoint, matrix);
-    return matrix
-      ..translate(focalPointScene.dx, focalPointScene.dy)
-      ..rotateZ(-rotation)
-      ..translate(-focalPointScene.dx, -focalPointScene.dy);
+  // Return the scene point underneath the viewport point given.
+  static Offset fromViewport(Offset viewportPoint, Matrix4 transform) {
+    // On viewportPoint, perform the inverse transformation of the scene to get
+    // where the point would be in the scene before the transformation.
+    final Matrix4 inverseMatrix = Matrix4.inverted(transform);
+    final Vector3 untransformed = inverseMatrix.transform3(Vector3(
+      viewportPoint.dx,
+      viewportPoint.dy,
+      0,
+    ));
+    return Offset(untransformed.x, untransformed.y);
   }
 
   @override
@@ -287,17 +228,84 @@ class TransformInteractionState extends State<TransformInteraction> with TickerP
     );
   }
 
-  // Return the scene point underneath the viewport point given.
-  static Offset fromViewport(Offset viewportPoint, Matrix4 transform) {
-    // On viewportPoint, perform the inverse transformation of the scene to get
-    // where the point would be in the scene before the transformation.
-    final Matrix4 inverseMatrix = Matrix4.inverted(transform);
-    final Vector3 untransformed = inverseMatrix.transform3(Vector3(
-      viewportPoint.dx,
-      viewportPoint.dy,
-      0,
-    ));
-    return Offset(untransformed.x, untransformed.y);
+  // Return a new matrix representing the given matrix after applying the given
+  // translation.
+  Matrix4 matrixTranslate(Matrix4 matrix, Offset translation) {
+    if (widget.disableTranslation) {
+      return matrix;
+    }
+
+    // Clamp translation so the viewport remains inside _visibleRect.
+    final double scale = _transform.getMaxScaleOnAxis();
+    final Size scaledSize = widget.size / scale;
+    final Vector3 currentTranslation = matrix.getTranslation() / scale;
+    final Rect boundaries = Rect.fromLTRB(
+      _visibleRect.left * -1,
+      _visibleRect.top * -1,
+      (_visibleRect.right - scaledSize.width) * -1,
+      (_visibleRect.bottom - scaledSize.height) * -1,
+    );
+    final Offset clampedTranslation = Offset(
+      translation.dx.clamp(
+        boundaries.right - currentTranslation.x,
+        boundaries.left - currentTranslation.x,
+      ),
+      translation.dy.clamp(
+        boundaries.bottom - currentTranslation.y,
+        boundaries.top - currentTranslation.y,
+      ),
+    );
+    return matrix..translate(
+      clampedTranslation.dx,
+      clampedTranslation.dy,
+    );
+  }
+
+  // Return a new matrix representing the given matrix after applying the given
+  // scale transform.
+  Matrix4 matrixScale(Matrix4 matrix, double scale) {
+    if (widget.disableScale) {
+      return matrix;
+    }
+
+    // Don't allow a scale that moves the viewport outside of _visibleRect.
+    final Offset tl = fromViewport(const Offset(0, 0), _transform);
+    final Offset tr = fromViewport(Offset(widget.size.width, 0), _transform);
+    final Offset bl = fromViewport(Offset(0, widget.size.height), _transform);
+    final Offset br = fromViewport(
+      Offset(widget.size.width, widget.size.height),
+      _transform,
+    );
+    if (!_visibleRect.contains(tl)
+      || !_visibleRect.contains(tr)
+      || !_visibleRect.contains(bl)
+      || !_visibleRect.contains(br)) {
+      return matrix;
+    }
+
+    // Don't allow a scale that results in an overall scale beyond min/max scale
+    final double currentScale = _transform.getMaxScaleOnAxis();
+    final double totalScale = currentScale * scale;
+    final double clampedTotalScale = totalScale.clamp(
+      widget.minScale,
+      widget.maxScale,
+    );
+    final double clampedScale = clampedTotalScale / currentScale;
+    return matrix..scale(clampedScale);
+  }
+
+  // Return a new matrix representing the given matrix after applying the given
+  // rotation transform.
+  // Rotating the scene cannot cause the viewport to view beyond _visibleRect.
+  Matrix4 matrixRotate(Matrix4 matrix, double rotation, Offset focalPoint) {
+    if (widget.disableRotation) {
+      return matrix;
+    }
+    final Offset focalPointScene = fromViewport(focalPoint, matrix);
+    return matrix
+      ..translate(focalPointScene.dx, focalPointScene.dy)
+      ..rotateZ(-rotation)
+      ..translate(-focalPointScene.dx, -focalPointScene.dy);
   }
 
   // Handle panning and pinch zooming events
@@ -424,6 +432,7 @@ class TransformInteractionState extends State<TransformInteraction> with TickerP
     }
   }
 
+  // Handle reset to home transform animation
   void _onAnimateReset() {
     setState(() {
       _transform = _animationReset.value;

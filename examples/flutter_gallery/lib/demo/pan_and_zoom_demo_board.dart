@@ -16,8 +16,9 @@ class Board extends Object with IterableMixin<BoardPoint> {
     : assert(boardRadius > 0),
       assert(hexagonRadius > 0),
       assert(hexagonMargin >= 0) {
-    // Set up the positions for the center hexagon.
-    // Start point of hexagon (top vertex).
+    // Set up the positions for the center hexagon where the entire board is
+    // centered on the origin.
+    // Start point of hexagon (top vertex)
     final Point<double> hexStart = Point<double>(
       0,
       -hexagonRadius,
@@ -56,7 +57,7 @@ class Board extends Object with IterableMixin<BoardPoint> {
 
   @override
   Iterator<BoardPoint> get iterator =>
-    BoardIterator(boardRadius, selected, boardPoints);
+    BoardIterator(boardPoints);
 
   // For a given q axial coordinate, get the range of possible r values
   Range _getRRangeForQ(int q) {
@@ -94,18 +95,18 @@ class Board extends Object with IterableMixin<BoardPoint> {
       return BoardPoint(boardPoint.q + 1, _getRRangeForQ(boardPoint.q + 1).min);
     }
 
-    // Otherwise we're just incrementing r
+    // Otherwise we're just incrementing r.
     return BoardPoint(boardPoint.q, boardPoint.r + 1);
   }
 
-  // Check if the board point is actually on the board
+  // Check if the board point is actually on the board.
   bool _validateBoardPoint(BoardPoint boardPoint) {
     final BoardPoint center = BoardPoint(0, 0);
     final int distanceFromCenter = getDistance(center, boardPoint);
     return distanceFromCenter <= boardRadius;
   }
 
-  // Get the distance between two locations
+  // Get the distance between two BoardPoins.
   static int getDistance(BoardPoint a, BoardPoint b) {
     final Vector3 a3 = a.getCubeCoords();
     final Vector3 b3 = b.getCubeCoords();
@@ -131,26 +132,11 @@ class Board extends Object with IterableMixin<BoardPoint> {
     );
   }
 
-  // Return a scene point for a q,r point
+  // Return a scene point for the center of a hexagon given its q,r point.
   Point<double> boardPointToPoint(BoardPoint boardPoint) {
     return Point<double>(
       sqrt(3) * hexagonRadius * boardPoint.q + sqrt(3) / 2 * hexagonRadius * boardPoint.r,
       1.5 * hexagonRadius * boardPoint.r,
-    );
-  }
-
-  // Get Vertices that can be drawn to a Canvas for the given BoardPoint
-  Vertices getVerticesForBoardPoint(BoardPoint boardPoint, Color color) {
-    final Point<double> centerOfHexZeroCenter = boardPointToPoint(boardPoint);
-
-    final List<Offset> positions = positionsForHexagonAtOrigin.map((Offset offset) {
-      return offset.translate(centerOfHexZeroCenter.x, centerOfHexZeroCenter.y);
-    }).toList();
-
-    return Vertices(
-      VertexMode.triangleFan,
-      positions,
-      colors: List<Color>.filled(positions.length, color),
     );
   }
 
@@ -185,14 +171,26 @@ class Board extends Object with IterableMixin<BoardPoint> {
       boardPoints: nextBoardPoints,
     );
   }
+
+  // Get Vertices that can be drawn to a Canvas for the given BoardPoint.
+  Vertices getVerticesForBoardPoint(BoardPoint boardPoint, Color color) {
+    final Point<double> centerOfHexZeroCenter = boardPointToPoint(boardPoint);
+
+    final List<Offset> positions = positionsForHexagonAtOrigin.map((Offset offset) {
+      return offset.translate(centerOfHexZeroCenter.x, centerOfHexZeroCenter.y);
+    }).toList();
+
+    return Vertices(
+      VertexMode.triangleFan,
+      positions,
+      colors: List<Color>.filled(positions.length, color),
+    );
+  }
 }
 
 class BoardIterator extends Iterator<BoardPoint> {
-  BoardIterator(this.boardRadius, this.selected, this.boardPoints)
-    : assert(boardRadius > 0);
+  BoardIterator(this.boardPoints);
 
-  int boardRadius;
-  BoardPoint selected;
   List<BoardPoint> boardPoints;
   int currentIndex;
 
@@ -226,13 +224,12 @@ class Range {
   int max;
 }
 
-final Set<Color> boardPointColors =
-  <Color>{
-    Colors.grey,
-    Colors.black,
-    Colors.red,
-    Colors.blue,
-  };
+Set<Color> boardPointColors = <Color>{
+  Colors.grey,
+  Colors.black,
+  Colors.red,
+  Colors.blue,
+};
 
 // A location on the board in axial coordinates
 class BoardPoint {

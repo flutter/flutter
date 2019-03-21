@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'pan_and_zoom_demo_board.dart';
 import 'pan_and_zoom_demo_color_picker.dart';
 
+// The panel for editing a board point
 class EditBoardPoint extends StatelessWidget {
   const EditBoardPoint({
     Key key,
