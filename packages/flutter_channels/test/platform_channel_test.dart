@@ -6,7 +6,8 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:flutter_channels/flutter_channels.dart';
-import 'package:test/test.dart';
+
+import 'common.dart';
 
 void main() {
   group('BaseMessageChannel', () {
@@ -74,7 +75,7 @@ void main() {
         },
       );
       expect(channel.invokeMethod<List<String>>('sayHello', 'hello'),
-          throwsA(const TypeMatcher<TypeError>()));
+          throwsA(isInstanceOf<TypeError>()));
       expect(await channel.invokeListMethod<String>('sayHello', 'hello'),
           <String>['hello', 'world']);
     });
@@ -95,7 +96,7 @@ void main() {
         },
       );
       expect(channel.invokeMethod<Map<String, String>>('sayHello', 'hello'),
-          throwsA(const TypeMatcher<TypeError>()));
+          throwsA(isInstanceOf<TypeError>()));
       expect(await channel.invokeMapMethod<String, String>('sayHello', 'hello'),
           <String, String>{'hello': 'world'});
     });
