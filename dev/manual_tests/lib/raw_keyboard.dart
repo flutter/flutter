@@ -62,7 +62,7 @@ class _HardwareKeyDemoState extends State<RawKeyboardDemo> {
           if (!_focusNode.hasFocus) {
             return GestureDetector(
               onTap: () {
-                FocusScope.of(context).requestFocus(_focusNode);
+                _focusNode.requestFocus();
               },
               child: Text('Tap to focus', style: textTheme.display1),
             );

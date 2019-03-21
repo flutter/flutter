@@ -149,7 +149,7 @@ void main() {
     expect(find.text('A FOCUSED'), findsOneWidget);
     expect(keyB.currentState.focusNode.hasFocus, isFalse);
     expect(find.text('b'), findsOneWidget);
- });
+  });
 
   // This moves a focus node first into a focus scope that is added to its
   // parent, and then out of that focus scope again.
@@ -183,22 +183,36 @@ void main() {
     expect(
       parentFocusScope.toStringDeep(minLevel: DiagnosticLevel.info),
       equalsIgnoringHashCodes('FocusScopeNode#00000\n'
-          '   focus: FocusNode#00000(FOCUSED)\n'),
+          ' │ key: FocusScope\n'
+          ' │ FOCUSED\n'
+          ' │ focusedChild: FocusNode#00000\n'
+          ' │\n'
+          ' └─child 1: FocusNode#00000\n'
+          '     FOCUSED\n'),
     );
 
     expect(WidgetsBinding.instance.focusManager.rootScope, hasAGoodToStringDeep);
     expect(
       WidgetsBinding.instance.focusManager.rootScope.toStringDeep(minLevel: DiagnosticLevel.info),
       equalsIgnoringHashCodes('FocusScopeNode#00000\n'
+          ' │ FOCUSED\n'
+          ' │ focusedChild: FocusScopeNode#00000\n'
+          ' │\n'
           ' └─child 1: FocusScopeNode#00000\n'
-          '     focus: FocusNode#00000(FOCUSED)\n'),
+          '   │ key: FocusScope\n'
+          '   │ FOCUSED\n'
+          '   │ focusedChild: FocusNode#00000\n'
+          '   │\n'
+          '   └─child 1: FocusNode#00000\n'
+          '       FOCUSED\n'),
     );
 
     // Add the child focus scope to the focus tree.
     parentFocusScope.setFirstFocus(childFocusScope);
+    await tester.pumpAndSettle();
     expect(childFocusScope.isFirstFocus, isTrue);
 
-    // Now add the child focus scope with no focus node in it to the tree.
+    // Now add the child focus scope with no child node in it to the tree.
     await tester.pumpWidget(
       FocusScope(
         node: parentFocusScope,
@@ -232,6 +246,7 @@ void main() {
       ),
     );
 
+    key.currentState.focusNode.requestFocus();
     await tester.pumpAndSettle();
 
     expect(key.currentState.focusNode.hasFocus, isTrue);
@@ -311,15 +326,15 @@ void main() {
         node: childFocusScope,
         child: TestFocusable(
           key: keyA,
-          name: 'a',
         ),
       ),
     );
 
-    FocusScope.of(keyA.currentContext).requestFocus(keyA.currentState.focusNode);
     WidgetsBinding.instance.focusManager.rootScope.setFirstFocus(FocusScope.of(keyA.currentContext));
+    FocusScope.of(keyA.currentContext).requestFocus(keyA.currentState.focusNode);
 
     await tester.pumpAndSettle();
+    print(WidgetsBinding.instance.focusManager.rootScope.toStringDeep());
 
     expect(keyA.currentState.focusNode.hasFocus, isTrue);
     expect(find.text('A FOCUSED'), findsOneWidget);
@@ -332,7 +347,6 @@ void main() {
           node: childFocusScope,
           child: TestFocusable(
             key: keyA,
-            name: 'a',
           ),
         ),
       ),
@@ -340,6 +354,7 @@ void main() {
 
     await tester.pump();
 
+    print(WidgetsBinding.instance.focusManager.rootScope.toStringDeep());
     expect(childFocusScope.isFirstFocus, isTrue);
     expect(keyA.currentState.focusNode.hasFocus, isFalse);
     expect(find.text('a'), findsOneWidget);

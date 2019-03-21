@@ -32,7 +32,7 @@ abstract class FocusTraversalPolicy {
   /// This is used by [next]/[previous] to determine which node to focus if they
   /// are called, but no node is currently focused.
   ///
-  /// Typically, it should take into account the [FocusNode.autofocus]
+  /// Typically, it should take into account the [FocusNode.isAutoFocus]
   /// setting, but can ignore it if that is the desired behavior. Nothing else
   /// looks at the [autofocus] setting.
   ///
@@ -48,7 +48,7 @@ abstract class FocusTraversalPolicy {
     final FocusScopeNode scope = currentNode.nearestScope;
     assert(scope.focusedChild == null, 'There already is a focused node in $scope');
     final FocusNode autofocus = scope.descendants.firstWhere(
-      (FocusNode node) => node.nearestScope == scope && node.autofocus,
+      (FocusNode node) => node.nearestScope == scope && node.isAutoFocus,
       orElse: () => null,
     );
     return autofocus ?? currentNode;
@@ -64,7 +64,7 @@ abstract class FocusTraversalPolicy {
     assert(() {
       final FocusNode nearestScope = node.nearestScope;
       final List<FocusNode> autofocusNodes = nearestScope.descendants.where((FocusNode descendant) {
-        return descendant.nearestScope == nearestScope && descendant.autofocus;
+        return descendant.nearestScope == nearestScope && descendant.isAutoFocus;
       });
       return autofocusNodes.length <= 1;
     }(), 'More than one autofocus node was found in the descendants of scope ${node.nearestScope}, which is not allowed.');
@@ -213,7 +213,7 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
               break;
             case AxisDirection.up:
             case AxisDirection.down:
-              policyData.history.removeLast().previousNode.requestFocus(isImplicit: true);
+              policyData.history.removeLast().previousNode.requestFocusFromPolicy();
               return true;
           }
           break;
@@ -222,7 +222,7 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
           switch (policyData.history.first.previousDirection) {
             case AxisDirection.left:
             case AxisDirection.right:
-              policyData.history.removeLast().previousNode.requestFocus(isImplicit: true);
+              policyData.history.removeLast().previousNode.requestFocusFromPolicy();
               return true;
             case AxisDirection.up:
             case AxisDirection.down:
@@ -272,7 +272,7 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
     final FocusScopeNode nearestScope = currentNode.nearestScope;
     final FocusNode focusedChild = nearestScope.focusedChild;
     if (focusedChild == null) {
-      currentNode.requestFocus(isImplicit: true);
+      currentNode.requestFocusFromPolicy();
       return true;
     }
     if (_popPolicyDataIfNeeded(direction, nearestScope, focusedChild)) {
@@ -335,7 +335,7 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
     }
     if (found != null) {
       _pushPolicyData(direction, nearestScope, focusedChild);
-      found.requestFocus(isImplicit: true);
+      found.requestFocusFromPolicy();
       return true;
     }
     return false;
@@ -367,7 +367,7 @@ class WidgetOrderFocusTraversalPolicy extends FocusTraversalPolicy with Directio
     nearestScope.policyData = null;
     final FocusNode focusedChild = nearestScope.focusedChild;
     if (focusedChild == null) {
-      findFirstFocus(node).requestFocus(isImplicit: true);
+      findFirstFocus(node).requestFocusFromPolicy();
       return true;
     }
     FocusNode previousNode;
@@ -378,12 +378,12 @@ class WidgetOrderFocusTraversalPolicy extends FocusTraversalPolicy with Directio
       visited.visitChildren(visit);
       if (forward) {
         if (previousNode == focusedChild) {
-          visited.requestFocus(isImplicit: true);
+          visited.requestFocusFromPolicy();
           return false; // short circuit the traversal.
         }
       } else {
         if (previousNode != null && visited == focusedChild) {
-          previousNode.requestFocus(isImplicit: true);
+          previousNode.requestFocusFromPolicy();
           return false; // short circuit the traversal.
         }
       }
@@ -395,12 +395,12 @@ class WidgetOrderFocusTraversalPolicy extends FocusTraversalPolicy with Directio
     if (nearestScope.visitChildren(visit)) {
       if (forward) {
         if (firstNode != null) {
-          firstNode.requestFocus(isImplicit: true);
+          firstNode.requestFocusFromPolicy();
           return true;
         }
       } else {
         if (lastNode != null) {
-          lastNode.requestFocus(isImplicit: true);
+          lastNode.requestFocusFromPolicy();
           return true;
         }
       }
@@ -507,16 +507,16 @@ class ReadingOrderTraversalPolicy extends FocusTraversalPolicy with DirectionalF
     nearestScope.policyData = null;
     final FocusNode focusedChild = nearestScope.focusedChild;
     if (focusedChild == null) {
-      currentNode.requestFocus(isImplicit: true);
+      currentNode.requestFocusFromPolicy();
       return true;
     }
     final List<FocusNode> sortedNodes = _sortByGeometry(nearestScope).toList();
     if (forward && focusedChild == sortedNodes.last) {
-      sortedNodes.first.requestFocus(isImplicit: true);
+      sortedNodes.first.requestFocusFromPolicy();
       return true;
     }
     if (!forward && focusedChild == sortedNodes.first) {
-      sortedNodes.last.requestFocus(isImplicit: true);
+      sortedNodes.last.requestFocusFromPolicy();
       return true;
     }
 
@@ -524,7 +524,7 @@ class ReadingOrderTraversalPolicy extends FocusTraversalPolicy with DirectionalF
     FocusNode previousNode;
     for (FocusNode node in maybeFlipped) {
       if (previousNode == focusedChild) {
-        node.requestFocus(isImplicit: true);
+        node.requestFocusFromPolicy();
         return true;
       }
       previousNode = node;
