@@ -936,7 +936,7 @@ class HotRunner extends ResidentRunner {
 }
 
 class ProjectFileInvalidator {
-  static const String _pubCachePathLinuxAndWindows = '.pub-cache';
+  static const String _pubCachePathLinuxAndMac = '.pub-cache';
   static const String _pubCachePathWindows = 'Pub/Cache';
 
   static List<Uri> findInvalidated({@required DateTime lastCompiled,
@@ -946,7 +946,7 @@ class ProjectFileInvalidator {
     final Stopwatch stopwatch = Stopwatch()..start();
     for (Uri uri in urisToMonitor) {
       if ((platform.isWindows && uri.path.contains(_pubCachePathWindows))
-          || uri.path.contains(_pubCachePathLinuxAndWindows)) {
+          || uri.path.contains(_pubCachePathLinuxAndMac)) {
         // Don't watch pub cache directories to speed things up a little.
         continue;
       }
