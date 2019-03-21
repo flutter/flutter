@@ -994,6 +994,7 @@ class ProjectFileInvalidator {
       // If we updated any packages, replace the contents of the existing
       // package map.
       if (invalidatedPackageRoots.isNotEmpty) {
+        invalidatedFiles.add(fs.file(packagesPath).uri);
         packageMap
           ..clear()
           ..addAll(newPackageMap);
