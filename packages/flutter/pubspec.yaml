@@ -14,6 +14,9 @@ dependencies:
   typed_data: 1.1.6
   vector_math: 2.0.8
 
+  flutter_channels:
+    sdk: flutter
+
   sky_engine:
     sdk: flutter
 

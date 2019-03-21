@@ -5,10 +5,10 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:flutter/foundation.dart' show ReadBuffer, WriteBuffer, required;
+import 'package:meta/meta.dart' show required;
 
 import 'message_codec.dart';
-
+import 'serialization.dart';
 /// [MessageCodec] with unencoded binary messages represented using [ByteData].
 ///
 /// On Android, messages will be represented using `java.nio.ByteBuffer`.

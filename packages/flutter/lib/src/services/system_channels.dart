@@ -4,7 +4,8 @@
 
 import 'dart:ui';
 
-import 'message_codecs.dart';
+import 'package:flutter_channels/flutter_channels.dart';
+
 import 'platform_channel.dart';
 
 /// Platform channels used by the Flutter system.

@@ -1,0 +1,18 @@
+name: flutter_channels
+author: Flutter Authors <flutter-dev@googlegroups.com>
+description: Codecs and Channels for sending platform messages in Flutter.
+homepage: http://flutter.io
+
+environment:
+  # The pub client defaults to an <2.0.0 sdk constraint which we need to explicitly overwrite.
+  sdk: ">=2.0.0-dev.68.0 <3.0.0"
+
+dependencies:
+  # To update these, use "flutter update-packages --force-upgrade".
+  meta: 1.1.6
+  typed_data: 1.1.6
+
+dev_dependencies:
+  test:
+
+# PUBSPEC CHECKSUM: 6541

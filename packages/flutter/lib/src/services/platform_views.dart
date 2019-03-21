@@ -7,8 +7,8 @@ import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter_channels/flutter_channels.dart';
 
-import 'message_codec.dart';
 import 'system_channels.dart';
 
 /// The [PlatformViewsRegistry] responsible for generating unique identifiers for platform views.

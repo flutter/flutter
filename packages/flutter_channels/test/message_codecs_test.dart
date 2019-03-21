@@ -4,8 +4,8 @@
 
 import 'dart:typed_data';
 
-import 'package:flutter/services.dart';
-import '../flutter_test_alternative.dart';
+import 'package:flutter_channels/flutter_channels.dart';
+import 'package:test/test.dart';
 
 void main() {
   group('Binary codec', () {

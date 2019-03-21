@@ -4,9 +4,7 @@
 
 import 'dart:typed_data';
 
-import 'package:flutter/foundation.dart';
-
-import 'platform_channel.dart';
+import 'package:meta/meta.dart';
 
 export 'dart:typed_data' show ByteData;
 
@@ -36,8 +34,7 @@ abstract class MessageCodec<T> {
 class MethodCall {
   /// Creates a [MethodCall] representing the invocation of [method] with the
   /// specified [arguments].
-  const MethodCall(this.method, [this.arguments])
-    : assert(method != null);
+  const MethodCall(this.method, [this.arguments]) : assert(method != null);
 
   /// The name of the method to be called.
   final String method;
@@ -81,9 +78,9 @@ abstract class MethodCodec {
   ///
   /// The specified error [code], human-readable error [message], and error
   /// [details] correspond to the fields of [PlatformException].
-  ByteData encodeErrorEnvelope({ @required String code, String message, dynamic details });
+  ByteData encodeErrorEnvelope(
+      {@required String code, String message, dynamic details});
 }
-
 
 /// Thrown to indicate that a platform interaction failed in the platform
 /// plugin.

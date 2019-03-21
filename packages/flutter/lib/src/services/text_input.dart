@@ -7,8 +7,8 @@ import 'dart:io' show Platform;
 import 'dart:ui' show TextAffinity, hashValues, Offset;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter_channels/flutter_channels.dart';
 
-import 'message_codec.dart';
 import 'system_channels.dart';
 import 'system_chrome.dart';
 import 'text_editing.dart';

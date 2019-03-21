@@ -17,6 +17,10 @@ export 'package:meta/meta.dart' show
   required,
   visibleForTesting;
 
+export 'package:flutter_channels/flutter_channels.dart' show
+  ReadBuffer,
+  WriteBuffer;
+
 // Examples can assume:
 // String _name;
 // bool _first;
@@ -49,6 +53,5 @@ export 'src/foundation/observer_list.dart';
 export 'src/foundation/platform.dart';
 export 'src/foundation/print.dart';
 export 'src/foundation/profile.dart';
-export 'src/foundation/serialization.dart';
 export 'src/foundation/synchronous_future.dart';
 export 'src/foundation/unicode.dart';
