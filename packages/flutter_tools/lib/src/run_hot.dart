@@ -967,7 +967,7 @@ class ProjectFileInvalidator {
     }
     // we need to check the .packages file too since it is not used in compilation.
     final DateTime packagesUpdatedAt = fs.statSync(packagesPath).modified;
-    if (lastCompiled != null && lastCompiled != null
+    if (lastCompiled != null && packagesUpdatedAt != null
         && packagesUpdatedAt.millisecondsSinceEpoch > lastCompiled.millisecondsSinceEpoch) {
       invalidatedFiles.add(fs.file(packagesPath).uri);
       scanned++;
