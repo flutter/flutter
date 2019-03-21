@@ -188,7 +188,7 @@ class AOTSnapshotter {
         'sharedLib': buildSharedLibrary.toString(),
         'extraGenSnapshotOptions': extraGenSnapshotOptions.join(' '),
         'engineHash': engine.version,
-        'buildersUsed': '${flutterProject != null ? await flutterProject.hasBuilders : false}',
+        'buildersUsed': '${flutterProject != null ? flutterProject.hasBuilders : false}',
       },
       depfilePaths: <String>[],
     );

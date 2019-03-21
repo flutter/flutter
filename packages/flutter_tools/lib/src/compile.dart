@@ -247,7 +247,7 @@ class KernelCompiler {
           'trackWidgetCreation': trackWidgetCreation.toString(),
           'linkPlatformKernelIn': linkPlatformKernelIn.toString(),
           'engineHash': engine.version,
-          'buildersUsed': '${flutterProject != null ? await flutterProject.hasBuilders : false}',
+          'buildersUsed': '${flutterProject != null ? flutterProject.hasBuilders : false}',
         },
         depfilePaths: <String>[depFilePath],
         pathFilter: (String path) => !path.startsWith('/b/build/slave/'),
