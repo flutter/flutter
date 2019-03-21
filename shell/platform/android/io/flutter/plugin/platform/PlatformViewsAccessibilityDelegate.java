@@ -4,14 +4,19 @@
 
 package io.flutter.plugin.platform;
 
+import android.view.View;
 import io.flutter.view.AccessibilityBridge;
 
 /**
  * Facilitates interaction between the accessibility bridge and embedded platform views.
  */
 public interface PlatformViewsAccessibilityDelegate {
-    // TODO(amirh): add a View getViewById(int id) here.
-    // not filing a tracking issue as this is going to be done in the next PR.
+
+    /**
+     * Returns the root of the view hierarchy for the platform view with the requested id, or null if there is no
+     * corresponding view.
+     */
+    View getPlatformViewById(Integer id);
 
     /**
      * Attaches an accessibility bridge for this platform views accessibility delegate.

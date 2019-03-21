@@ -524,6 +524,7 @@ FILE: ../../../flutter/shell/platform/android/io/flutter/util/PathUtils.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/util/Preconditions.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/util/Predicate.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/view/AccessibilityBridge.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/view/AccessibilityViewEmbedder.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/view/FlutterCallbackInformation.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/view/FlutterMain.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/view/FlutterNativeView.java
