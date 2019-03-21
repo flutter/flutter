@@ -438,6 +438,11 @@ class ListTile extends StatelessWidget {
         data: iconThemeData,
         child: leading,
       );
+
+      leadingIcon = Container(
+        constraints: BoxConstraints(maxHeight: 56),
+        child: leadingIcon,
+      );
     }
 
     final TextStyle titleStyle = _titleTextStyle(theme, tileTheme);
@@ -463,6 +468,11 @@ class ListTile extends StatelessWidget {
       trailingIcon = IconTheme.merge(
         data: iconThemeData,
         child: trailing,
+      );
+
+      trailingIcon = Container(
+        constraints: BoxConstraints(maxHeight: 56),
+        child: trailingIcon,
       );
     }
 
