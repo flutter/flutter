@@ -209,7 +209,7 @@ class UpgradeCommandRunner {
         throw Exception();
       }
       await runCheckedAsync(<String>[
-        'git', 'stash', 'apply', stashName,
+        'git', 'stash', 'pop',
       ]);
     } catch (e) {
       printError('Failed to re-apply local changes. State may have been lost.');
