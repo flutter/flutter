@@ -40,20 +40,28 @@ abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
     @required String localeName,
     @required intl.DateFormat fullYearFormat,
     @required intl.DateFormat dayFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+    @required intl.DateFormat mediumDateFormat,
+    @required intl.DateFormat datePickerHourFormat,
+    @required intl.DateFormat datePickerMinuteFormat,
   }) : assert(localeName != null),
        _localeName = localeName,
        assert(fullYearFormat != null),
        _fullYearFormat = fullYearFormat,
        assert(dayFormat != null),
-       _dayFormat = dayFormat;
+       _dayFormat = dayFormat,
+       assert(mediumDateFormat != null),
+       _mediumDateFormat = mediumDateFormat,
+       assert(datePickerHourFormat != null),
+       _datePickerHourFormat = datePickerHourFormat,
+       assert(datePickerMinuteFormat != null),
+       _datePickerMinuteFormat = datePickerMinuteFormat;
 
   final String _localeName;
   final intl.DateFormat _fullYearFormat;
   final intl.DateFormat _dayFormat;
+  final intl.DateFormat _mediumDateFormat;
+  final intl.DateFormat _datePickerHourFormat;
+  final intl.DateFormat _datePickerMinuteFormat;
 
   @override
   String datePickerYear(int yearIndex) {
@@ -65,59 +73,62 @@ abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
     // It doesn't actually have anything to do with _fullYearFormat. It's just
     // taking advantage of the fact that _fullYearFormat loaded the needed
     // locale's symbols.
-    return _fullYearFormat.dateSymbols.MONTHS[monthIndex];
+    return _fullYearFormat.dateSymbols.MONTHS[monthIndex - 1];
   }
 
   @override
   String datePickerDayOfMonth(int dayIndex) {
-
+    // Year and month doesn't matter since we just want to day formatted.
+    return _dayFormat.format(DateTime.utc(0, 0, dayIndex));
   }
 
-  /// The medium-width date format that is shown in [CupertinoDatePicker]
-  /// spinner. Abbreviates month and days of week.
-  ///
-  /// Examples:
-  ///
-  /// - US English: Wed Sep 27
-  /// - Russian: ср сент. 27
-  // The global version is based on intl package's DateFormat.MMMEd.
-  String datePickerMediumDate(DateTime date);
+  @override
+  String datePickerMediumDate(DateTime date) {
+    return _mediumDateFormat.format(date);
+  }
 
-  /// Hour that is shown in [CupertinoDatePicker] spinner corresponding
-  /// to the given hour value.
-  ///
-  /// Examples: datePickerHour(1) in:
-  ///
-  ///  - US English: 1
-  ///  - Arabic: ٠١
-  // The global version uses date symbols data from the intl package.
-  String datePickerHour(int hour);
+  @override
+  String datePickerHour(int hour) {
+    return _datePickerHourFormat.format(DateTime.utc(0, 0, 0, hour));
+  }
 
-  /// Semantics label for the given hour value in [CupertinoDatePicker].
-  // The global version uses the translated string from the arb file.
-  String datePickerHourSemanticsLabel(int hour);
+  @override
+  String datePickerMinute(int minute) {
+    return _datePickerHourFormat.format(DateTime.utc(0, 0, 0, 0, minute));
+  }
 
-  /// Minute that is shown in [CupertinoDatePicker] spinner corresponding
-  /// to the given minute value.
-  ///
-  /// Examples: datePickerMinute(1) in:
-  ///
-  ///  - US English: 01
-  ///  - Arabic: ٠١
-  // The global version uses date symbols data from the intl package.
-  String datePickerMinute(int minute);
+  /// Subclasses of this class should provide the string value for the order
+  /// from the ARB.
+  @protected
+  String get datePickerDateOrderString;
 
-  /// Semantics label for the given minute value in [CupertinoDatePicker].
-  // The global version uses the translated string from the arb file.
-  String datePickerMinuteSemanticsLabel(int minute);
+  @override
+  DatePickerDateOrder get datePickerDateOrder {
+    switch (datePickerDateOrderString) {
+      case 'dmy':
+        return DatePickerDateOrder.dmy;
+      case 'mdy':
+        return DatePickerDateOrder.dmy;
+      case 'ymd':
+        return DatePickerDateOrder.ymd;
+      case 'ydm':
+        return DatePickerDateOrder.ydm;
+      default:
+        assert(
+          false,
+          'Failed to load DatePickerDateOrder $datePickerDateOrderString for locale $_localeName',
+        );
+        return null;
+    }
+  }
 
-  /// The order of the date elements that will be shown in [CupertinoDatePicker].
-  // The global version uses the translated string from the arb file.
-  DatePickerDateOrder get datePickerDateOrder;
+  @protected
+  String get datePickerDateTimeOrderString;
 
-  /// The order of the time elements that will be shown in [CupertinoDatePicker].
-  // The global version uses the translated string from the arb file.
-  DatePickerDateTimeOrder get datePickerDateTimeOrder;
+  @override
+  DatePickerDateTimeOrder get datePickerDateTimeOrder {
+
+  }
 
   /// The abbreviation for ante meridiem (before noon) shown in the time picker.
   // The global version uses the translated string from the arb file.
@@ -247,24 +258,27 @@ class _GlobalCupertinoLocalizationsDelegate extends LocalizationsDelegate<Cupert
       final String localeName = intl.Intl.canonicalizedLocale(locale.toString());
 
       intl.DateFormat fullYearFormat;
+      intl.DateFormat dayFormat;
       intl.DateFormat mediumDateFormat;
-      intl.DateFormat longDateFormat;
-      intl.DateFormat yearMonthFormat;
+      // We don't want any additional decoration here. The am/pm is handled in
+      // the date picker. We just want an hour number localized.
+      intl.DateFormat datePickerHourFormat;
+      intl.DateFormat datePickerMinuteFormat;
+
+      void loadFormats(String locale) {
+        fullYearFormat = intl.DateFormat.y(locale);
+        dayFormat = intl.DateFormat.d(locale);
+        mediumDateFormat = intl.DateFormat.MMMEd(locale);
+        datePickerHourFormat = intl.DateFormat('HH', locale);
+        datePickerHourFormat = intl.DateFormat('mm', locale);
+      }
+
       if (intl.DateFormat.localeExists(localeName)) {
-        fullYearFormat = intl.DateFormat.y(localeName);
-        mediumDateFormat = intl.DateFormat.MMMEd(localeName);
-        longDateFormat = intl.DateFormat.yMMMMEEEEd(localeName);
-        yearMonthFormat = intl.DateFormat.yMMMM(localeName);
+        loadFormats(localeName);
       } else if (intl.DateFormat.localeExists(locale.languageCode)) {
-        fullYearFormat = intl.DateFormat.y(locale.languageCode);
-        mediumDateFormat = intl.DateFormat.MMMEd(locale.languageCode);
-        longDateFormat = intl.DateFormat.yMMMMEEEEd(locale.languageCode);
-        yearMonthFormat = intl.DateFormat.yMMMM(locale.languageCode);
+        loadFormats(locale.languageCode);
       } else {
-        fullYearFormat = intl.DateFormat.y();
-        mediumDateFormat = intl.DateFormat.MMMEd();
-        longDateFormat = intl.DateFormat.yMMMMEEEEd();
-        yearMonthFormat = intl.DateFormat.yMMMM();
+        loadFormats(null);
       }
 
       intl.NumberFormat decimalFormat;
