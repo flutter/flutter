@@ -183,7 +183,7 @@ void main() {
     expect(
       parentFocusScope.toStringDeep(minLevel: DiagnosticLevel.info),
       equalsIgnoringHashCodes('FocusScopeNode#00000\n'
-          ' │ key: FocusScope\n'
+          ' │ context: FocusScope\n'
           ' │ FOCUSED\n'
           ' │ focusedChild: FocusNode#00000\n'
           ' │\n'
@@ -199,7 +199,7 @@ void main() {
           ' │ focusedChild: FocusScopeNode#00000\n'
           ' │\n'
           ' └─child 1: FocusScopeNode#00000\n'
-          '   │ key: FocusScope\n'
+          '   │ context: FocusScope\n'
           '   │ FOCUSED\n'
           '   │ focusedChild: FocusNode#00000\n'
           '   │\n'

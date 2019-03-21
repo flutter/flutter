@@ -48,10 +48,7 @@ class FocusScope extends Focusable {
   /// The [autofocus], and [showDecorations] arguments must not be null.
   const FocusScope({
     Key key,
-    @Deprecated('FocusScope now normally manages its own node, so this argument '
-        'is used if provided, but not required. If provided, you must manage '
-        'the node lifetime yourself.')
-        this.node,
+    this.node,
     @required Widget child,
     bool autofocus = false,
     ValueChanged<bool> onFocusChange,
@@ -59,7 +56,7 @@ class FocusScope extends Focusable {
     String debugLabel,
   })  : assert(child != null),
         assert(autofocus != null),
-        assert(node != null || node == null),
+        _externalNode = node,
         super(
           key: key,
           child: child,
@@ -76,9 +73,12 @@ class FocusScope extends Focusable {
   ///
   /// Does not provide access to the internally managed node, only the node that
   /// is provided as a constructor argument.
+  @Deprecated('FocusScope now normally manages its own node, so this argument '
+      'is used if provided, but not required. If provided, you must manage '
+      'the node lifetime yourself.')
   final FocusNode node;
 
-  /// Returns the [node] of the [FocusScope] that most tightly encloses the given
+  /// Returns the node of the [FocusScope] that most tightly encloses the given
   /// [BuildContext].
   ///
   /// The [context] argument must not be null.
@@ -88,7 +88,7 @@ class FocusScope extends Focusable {
     return marker?.node?.nearestScope ?? context.owner.focusManager.rootScope;
   }
 
-  /// Returns the ancestor [node]s of the [FocusScope] in the given
+  /// Returns the ancestor nodes of the [FocusScope] in the given
   /// [BuildContext].
   ///
   /// The [context] argument must not be null.
@@ -99,7 +99,7 @@ class FocusScope extends Focusable {
   }
 
   @override
-  FocusScopeNode get _externalNode => node;
+  final FocusScopeNode _externalNode;
 
   @override
   _FocusableScopeState createState() => _FocusableScopeState();
@@ -108,13 +108,13 @@ class FocusScope extends Focusable {
 class _FocusableScopeState extends _FocusableState {
   @override
   void _initNode() {
-    node = widget._externalNode;
-    node ??= FocusScopeNode(
-      isAutoFocus: widget.autofocus,
-      context: context,
-    );
-    assert(node is FocusScopeNode,
-      'FocusNodes given to FocusScope widgets must be FocusScopeNodes');
+    if (widget._externalNode == null) {
+      _internalNode = FocusScopeNode(
+        isAutoFocus: widget.autofocus,
+        context: context,
+      );
+    }
+    assert(node is FocusScopeNode, 'FocusNodes given to FocusScope widgets must be FocusScopeNodes');
     _hasFocus = node.hasFocus;
     node.addListener(_handleFocusChanged);
   }
@@ -224,14 +224,18 @@ class Focusable extends StatefulWidget {
 }
 
 class _FocusableState extends State<Focusable> {
-  FocusNode node;
+  FocusNode _internalNode;
   bool _hasFocus;
 
+  FocusNode get node => widget._externalNode ?? _internalNode;
+
   void _initNode() {
-    node = FocusNode(
-      isAutoFocus: widget.autofocus,
-      context: context,
-    );
+    if (widget._externalNode == null) {
+      _internalNode = FocusNode(
+        isAutoFocus: widget.autofocus,
+        context: context,
+      );
+    }
     _hasFocus = node.hasFocus;
     node.addListener(_handleFocusChanged);
   }
@@ -244,10 +248,9 @@ class _FocusableState extends State<Focusable> {
 
   @override
   void dispose() {
-    // Don't manage the lifetime of external nodes given to the widget.
-    if (widget._externalNode == null) {
-      node.dispose();
-    }
+    // Don't manage the lifetime of external nodes given to the widget, just the
+    // internal node.
+    _internalNode?.dispose();
     super.dispose();
   }
 
@@ -267,7 +270,7 @@ class _FocusableState extends State<Focusable> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget._externalNode != widget._externalNode) {
       // The node changed, so either create a new node and manage it, stop
-      // managing a node, or just swap listeners.
+      // managing a node, or just update listeners.
       node.removeListener(_handleFocusChanged);
       if (oldWidget._externalNode == null) {
         node.dispose();

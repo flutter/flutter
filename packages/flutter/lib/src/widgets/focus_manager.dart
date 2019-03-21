@@ -39,10 +39,6 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   FocusManager _manager;
   bool _hasKeyboardToken = false;
 
-  /// Indicates that this node is a scope node, which keeps track of which of its
-  /// descendants last had the focus.
-  bool get isScope => false;
-
   /// True if this node will be selected as the initial focus when no other node
   /// in its scope is currently focused.
   ///
@@ -99,15 +95,22 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     return true;
   }
 
-  /// The global key for the [InheritedWidget] associated with this node.
+  /// The context from the [InheritedWidget] associated with this node.
   ///
-  /// This is not the [Focusable] itself, but is a child of the [Focusable], and
-  /// it has the same dimensions.
+  /// This is not the [Focusable] or [FocusScope] itself, but is a child of a
+  /// [Focusable] or [FocusScope], and it has the same dimensions.
   BuildContext context;
 
   /// Returns the parent node for this object.
   FocusNode get parent => _parent;
   FocusNode _parent;
+
+  // Set to true if this focusable node changed, and needs to have its listeners
+  // notified the next time the manager processes focus changes.
+  void _markAsDirty() {
+    _manager?._dirtySet?.add(this);
+    _manager?._markNeedsUpdate();
+  }
 
   final List<FocusNode> _children = <FocusNode>[];
 
@@ -118,6 +121,9 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   @visibleForTesting
   @mustCallSuper
   void clear() {
+    if (_manager != null) {
+      _manager._dirtySet.remove(this);
+    }
     _manager = null;
     _parent = null;
     _children.clear();
@@ -132,7 +138,6 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     node._unfocus();
 
     node._parent = null;
-
     _children.remove(node);
   }
 
@@ -156,7 +161,14 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     FocusNode oldPrimaryFocus;
     if (child._manager != null) {
       oldPrimaryFocus = child.hasFocus ? child._manager._currentFocus : null;
-      assert(oldPrimaryFocus == null || oldPrimaryFocus == child || child.descendants.contains(oldPrimaryFocus), "child has focus, but primary focus isn't a descendant for some reason");
+      assert(oldPrimaryFocus == null || oldPrimaryFocus == child || oldPrimaryFocus.ancestors.contains(child), "child has focus, but primary focus isn't a descendant of it for some reason");
+    }
+    Set<FocusNode> oldFocusPath = <FocusNode>{};
+    if (oldPrimaryFocus != null) {
+      // The child currently has focus, so we have to do some extra work to keep
+      // that focus, and to notify any scopes that used to be ancestors, and no
+      // longer have focus after we move it.
+      oldFocusPath = oldPrimaryFocus.ancestors.toSet();
     }
     child.detach();
     _children.add(child);
@@ -166,6 +178,11 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     // in its scope.
     child.enclosingScope._focusedChild ??= child.isAutoFocus ? child : null;
     if (oldPrimaryFocus != null) {
+      final Set<FocusNode> newFocusPath = _manager._currentFocus.ancestors.toSet();
+      // Nodes that will no longer be focused need to be marked dirty.
+      for (FocusNode node in oldFocusPath.difference(newFocusPath)) {
+        node._markAsDirty();
+      }
       // If the node used to have focus, make sure it keeps it's old primary
       // focus when it moves.
       oldPrimaryFocus.requestFocus();
@@ -322,12 +339,14 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
 
   /// Returns the nearest enclosing scope node above this node, including
   /// this node, if it's a scope. Returns null if no scope is found.
-  FocusScopeNode get nearestScope => isScope ? this : enclosingScope;
+  FocusScopeNode get nearestScope => enclosingScope;
 
   /// Returns the nearest enclosing scope node above this node, or null if none
   /// is found. If this node is itself a scope, this will only return ancestors
   /// of this scope.
-  FocusScopeNode get enclosingScope => ancestors.firstWhere((FocusNode node) => node.isScope, orElse: () => null);
+  FocusScopeNode get enclosingScope {
+    return ancestors.firstWhere((FocusNode node) => node is FocusScopeNode, orElse: () => null);
+  }
 
   // Sets this node as the focused child for the enclosing scope, and that scope
   // as focused child for the scope above it, until it reaches the root node.
@@ -410,7 +429,7 @@ class FocusScopeNode extends FocusNode {
         super(context: context, isAutoFocus: isAutoFocus);
 
   @override
-  bool get isScope => true;
+  FocusScopeNode get nearestScope => this;
 
   @override
   void reparentIfNeeded(FocusNode child) {
@@ -570,17 +589,25 @@ class FocusManager with DiagnosticableTreeMixin {
   FocusNode _currentFocus;
   FocusNode _nextFocus;
   FocusNode _nextAutofocus;
+  final Set<FocusNode> _dirtySet = <FocusNode>{};
 
   void _willDisposeFocusNode(FocusNode node) {
     assert(node != null);
     if (_currentFocus == node) {
       _currentFocus = null;
     }
+    if (_nextAutofocus == node) {
+      _nextAutofocus = null;
+    }
+    if (_nextFocus == node) {
+      _nextFocus = null;
+    }
+    _dirtySet.remove(node);
   }
 
   bool _haveScheduledUpdate = false;
   void _markNeedsUpdate({FocusNode newFocus}) {
-    // If newFocus isn't specified, then don't mess with _nextFocusable, just
+    // If newFocus isn't specified, then don't mess with _nextFocus, just
     // schedule the update.
     _nextFocus = newFocus ?? _nextFocus;
     if (_haveScheduledUpdate) {
@@ -606,24 +633,28 @@ class FocusManager with DiagnosticableTreeMixin {
       }
       _nextAutofocus = null;
     }
-    if (_nextFocus != null) {
+    if (_nextFocus != null && _nextFocus != _currentFocus) {
       // Even if the _currentFocus hasn't changed, it may have changed where it
       // was in the tree, so we have to make sure we update and notify.
       _currentFocus = _nextFocus;
       final Set<FocusNode> previousPath = previousFocus?.ancestors?.toSet() ?? <FocusNode>{};
       final Set<FocusNode> nextPath = _nextFocus.ancestors.toSet();
       // Notify nodes that are newly focused.
-      for (FocusNode node in nextPath.difference(previousPath)) {
-        node._notify();
-      }
+      _dirtySet.addAll(nextPath.difference(previousPath));
       // Notify nodes that are no longer focused
-      for (FocusNode node in previousPath.difference(nextPath)) {
-        node._notify();
-      }
+      _dirtySet.addAll(previousPath.difference(nextPath));
       _nextFocus = null;
     }
-    previousFocus?._notify();
-    _currentFocus?._notify();
+    if (previousFocus != null) {
+      _dirtySet.add(previousFocus);
+    }
+    if (_currentFocus != null) {
+      _dirtySet.add(_currentFocus);
+    }
+    for (FocusNode node in _dirtySet) {
+      node._notify();
+    }
+    _dirtySet.clear();
   }
 
   @override
