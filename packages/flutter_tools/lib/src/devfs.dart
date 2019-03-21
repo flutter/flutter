@@ -389,7 +389,6 @@ class DevFS {
   final String fsName;
   final Directory rootDirectory;
   String _packagesFilePath;
-  final Map<Uri, DevFSContent> _entries = <Uri, DevFSContent>{};
   final Set<String> assetPathsToEvict = <String>{};
   List<Uri> sources = <Uri>[];
   DateTime lastCompiled;
@@ -441,7 +440,6 @@ class DevFS {
     AssetBundle bundle,
     DateTime firstBuildTime,
     bool bundleFirstUpload = false,
-    bool bundleDirty = false,
     @required ResidentCompiler generator,
     String dillOutputPath,
     @required bool trackWidgetCreation,
@@ -453,6 +451,11 @@ class DevFS {
     assert(trackWidgetCreation != null);
     assert(generator != null);
 
+    // Update modified files
+    final String assetBuildDirPrefix = _asUriPath(getAssetBuildDirectory());
+    final Map<Uri, DevFSContent> dirtyEntries = <Uri, DevFSContent>{};
+
+    int syncedBytes = 0;
     if (bundle != null) {
       printTrace('Scanning asset files');
       // We write the assets into the AssetBundle working dir so that they
@@ -460,29 +463,20 @@ class DevFS {
       final String assetDirectory = getAssetBuildDirectory();
       bundle.entries.forEach((String archivePath, DevFSContent content) {
         final Uri deviceUri = fs.path.toUri(fs.path.join(assetDirectory, archivePath));
-        _entries[deviceUri] = content;
+        if (deviceUri.path.startsWith(assetBuildDirPrefix)) {
+          archivePath = deviceUri.path.substring(assetBuildDirPrefix.length);
+        }
+        // Only update assets if they have been modified, or if this is the
+        // first upload of the asset bundle.
+        if (content.isModified || (bundleFirstUpload && archivePath != null)) {
+          dirtyEntries[deviceUri] = content;
+          syncedBytes += content.size;
+          if (archivePath != null && !bundleFirstUpload) {
+            assetPathsToEvict.add(archivePath);
+          }
+        }
       });
     }
-
-    // Update modified files
-    final String assetBuildDirPrefix = _asUriPath(getAssetBuildDirectory());
-    final Map<Uri, DevFSContent> dirtyEntries = <Uri, DevFSContent>{};
-
-    int syncedBytes = 0;
-    _entries.forEach((Uri deviceUri, DevFSContent content) {
-      String archivePath;
-      if (deviceUri.path.startsWith(assetBuildDirPrefix))
-        archivePath = deviceUri.path.substring(assetBuildDirPrefix.length);
-      // When doing full restart, copy content so that isModified does not
-      // reset last check timestamp because we want to report all modified
-      // files to incremental compiler next time user does hot reload.
-      if (content.isModified || ((bundleDirty || bundleFirstUpload) && archivePath != null)) {
-        dirtyEntries[deviceUri] = content;
-        syncedBytes += content.size;
-        if (archivePath != null && (!bundleFirstUpload || content.isModifiedAfter(firstBuildTime)))
-          assetPathsToEvict.add(archivePath);
-      }
-    });
     if (fullRestart) {
       generator.reset();
     }
