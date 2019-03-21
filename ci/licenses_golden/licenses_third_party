@@ -1,4 +1,4 @@
-Signature: d8611addc54dd5fe85355e2e888206d4
+Signature: 0f3631374103b2f9512fd6180a904a7e
 
 UNUSED LICENSES:
 
@@ -5167,8 +5167,9 @@ FILE: ../../../third_party/dart/runtime/vm/compiler/stub_code_compiler_arm64.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/stub_code_compiler_dbc.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/stub_code_compiler_ia32.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/stub_code_compiler_x64.cc
+FILE: ../../../third_party/dart/runtime/vm/constants_arm64.cc
+FILE: ../../../third_party/dart/runtime/vm/constants_ia32.cc
 FILE: ../../../third_party/dart/runtime/vm/constants_x64.cc
-FILE: ../../../third_party/dart/runtime/vm/ffi_trampoline_stubs_x64.cc
 FILE: ../../../third_party/dart/runtime/vm/frame_layout.h
 FILE: ../../../third_party/dart/runtime/vm/intrusive_dlist.h
 FILE: ../../../third_party/dart/runtime/vm/intrusive_dlist_test.cc
