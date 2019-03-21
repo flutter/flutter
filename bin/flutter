@@ -3,7 +3,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-
 # ---------------------------------- NOTE ---------------------------------- #
 #
 # Please keep the logic in this file consistent with the logic in the
@@ -16,10 +15,50 @@ set -e
 
 unset CDPATH
 
+function updateMTFlutter() {
+  # cat $PROJECT_FLUTTER_PROPERTIES
+  if [[ ! -f "$PROJECT_FLUTTER_PROPERTIES" ]]; then
+    # echo "no project flutter property "
+    return 0
+  else
+    . $PROJECT_FLUTTER_PROPERTIES
+# MT_FLUTTER_VERSION=1.2.2-pre.1
+# MT_ENGINE_VERSION=89f9dfe2980d707b7fbce4fb7d9b81ba9e5555ad
+# MT_S3_BUCKET=http://XXXXXX.com/v1/XXXX/flutter/MTCustom/
+# MT_FULL_FLUTTER=flutter-MT.zip
+# MT_FLUTTER_CACHE=flutter-MT-cache.zip
+    if [[ -z "$MT_FLUTTER_VERSION" || -z "$MT_ENGINE_VERSION" || -z "$MT_S3_BUCKET" || -z "$MT_FULL_FLUTTER" || -z "$MT_FLUTTER_CACHE" ]];then
+      return 0
+    fi
+    FULL_FLUTTER=${MT_S3_BUCKET}/${MT_ENGINE_VERSION}/${MT_FULL_FLUTTER}
+    FLUTTER_CACHE=${MT_S3_BUCKET}/${MT_ENGINE_VERSION}/${MT_FLUTTER_CACHE}
+    MTCACHE_PATH=${FLUTTER_ROOT}/bin/cache/mtcache.stamp
+    # framework版本不一致
+    if [[ "$(cat "$FLUTTER_ROOT/version")" != "${MT_FLUTTER_VERSION}" ]]; then
+      pushd ${FLUTTER_ROOT}
+      echo "====download full flutter v$MT_FLUTTER_VERSION ====="
+      curl -o flutter.zip ${FULL_FLUTTER}
+      unzip -o flutter.zip 'flutter/*' -d .
+      rm flutter.zip
+      popd
+    # cache 版本不一致
+    elif [[ "$(cat "$MTCACHE_PATH")" != "${MT_ENGINE_VERSION}" ]]; then
+      echo "====download part flutter v${MT_FLUTTER_VERSION} cache ${MT_ENGINE_VERSION} ====="
+      pushd ${FLUTTER_ROOT}/bin
+      curl -o flutter_cache.zip ${FLUTTER_CACHE}
+      unzip -o flutter_cache.zip
+      rm flutter_cache.zip
+      popd
+    else
+      echo "everything is up to date"
+    fi
+  fi
+}
+
 function follow_links() {
   cd -P "${1%/*}"
   local file="$PWD/${1##*/}"
-  while [[ -h "$file" ]]; do
+  while [[ -L "$file" ]]; do
     # On Mac OS, readlink -f doesn't work.
     cd -P "${file%/*}"
     file="$(readlink "$file")"
@@ -35,11 +74,11 @@ function path_uri() {
   echo "$1" | sed -E -e "s,^/+,/,"
 }
 
-function _rmlock () {
+function _rmlock() {
   [ -n "$FLUTTER_UPGRADE_LOCK" ] && rm -f "$FLUTTER_UPGRADE_LOCK"
 }
 
-function retry_upgrade {
+function retry_upgrade() {
   local total_tries="10"
   local remaining_tries=$(($total_tries - 1))
   while [[ "$remaining_tries" > 0 ]]; do
@@ -56,7 +95,7 @@ function retry_upgrade {
   return 0
 }
 
-function upgrade_flutter () {
+function upgrade_flutter() {
   mkdir -p "$FLUTTER_ROOT/bin/cache"
 
   # This function is executed with a redirect that pipes the source of
@@ -97,11 +136,14 @@ function upgrade_flutter () {
     flock 3 2>/dev/null || true
   elif hash shlock 2>/dev/null; then
     FLUTTER_UPGRADE_LOCK="$FLUTTER_ROOT/bin/cache/.upgrade_lock"
-    while ! shlock -f "$FLUTTER_UPGRADE_LOCK" -p $$ ; do sleep .1 ; done
+    while ! shlock -f "$FLUTTER_UPGRADE_LOCK" -p $$; do sleep .1; done
     trap _rmlock EXIT
   fi
 
-  local revision="$(cd "$FLUTTER_ROOT"; git rev-parse HEAD)"
+  local revision="$(
+    cd "$FLUTTER_ROOT"
+    git rev-parse HEAD
+  )"
   if [[ ! -f "$SNAPSHOT_PATH" || ! -s "$STAMP_PATH" || "$(cat "$STAMP_PATH")" != "$revision" || "$FLUTTER_TOOLS_DIR/pubspec.yaml" -nt "$FLUTTER_TOOLS_DIR/pubspec.lock" ]]; then
     rm -f "$FLUTTER_ROOT/version"
     touch "$FLUTTER_ROOT/bin/cache/.dartignore"
@@ -122,7 +164,7 @@ function upgrade_flutter () {
     retry_upgrade
 
     "$DART" --snapshot="$SNAPSHOT_PATH" --packages="$FLUTTER_TOOLS_DIR/.packages" "$SCRIPT_PATH"
-    echo "$revision" > "$STAMP_PATH"
+    echo "$revision" >"$STAMP_PATH"
   fi
   # The exit here is duplicitous since the function is run in a subshell,
   # but this serves as documentation that running the function in a
@@ -130,10 +172,17 @@ function upgrade_flutter () {
   # is cleaned up.
   exit $?
 }
+PROJECT_FLUTTER_PROPERTIES=$(pwd)/flutter.properties
 
 PROG_NAME="$(path_uri "$(follow_links "$BASH_SOURCE")")"
-BIN_DIR="$(cd "${PROG_NAME%/*}" ; pwd -P)"
-export FLUTTER_ROOT="$(cd "${BIN_DIR}/.." ; pwd -P)"
+BIN_DIR="$(
+  cd "${PROG_NAME%/*}"
+  pwd -P
+)"
+export FLUTTER_ROOT="$(
+  cd "${BIN_DIR}/.."
+  pwd -P
+)"
 
 FLUTTER_TOOLS_DIR="$FLUTTER_ROOT/packages/flutter_tools"
 SNAPSHOT_PATH="$FLUTTER_ROOT/bin/cache/flutter_tools.snapshot"
@@ -169,8 +218,8 @@ fi
 # To debug the tool, you can uncomment the following lines to enable checked mode and set an observatory port:
 # FLUTTER_TOOL_ARGS="--checked $FLUTTER_TOOL_ARGS"
 # FLUTTER_TOOL_ARGS="$FLUTTER_TOOL_ARGS --observe=65432"
-
-(upgrade_flutter) 3< "$PROG_NAME"
+updateMTFlutter
+(upgrade_flutter) 3<"$PROG_NAME"
 
 # FLUTTER_TOOL_ARGS isn't quoted below, because it is meant to be considered as
 # separate space-separated args.

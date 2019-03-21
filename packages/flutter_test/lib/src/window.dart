@@ -52,6 +52,33 @@ class TestWindow implements Window {
 
   /// The [Window] that is wrapped by this [TestWindow].
   final Window _window;
+// addJavaScriptInterface
+// evalJavaScript
+// execJavaScript
+// invokeMethod
+// jsEnabled
+// jsEnabled=
+// setGlobalVariable
+  @override
+  bool get jsEnabled => false;
+  @override
+  set jsEnabled(bool enable) {
+  }
+  @override
+  void execJavaScript(String script, String sourceUrl) {
+  }
+  @override
+  dynamic evalJavaScript(String script, String sourceUrl) {
+  }
+  @override
+  void setGlobalVariable(String name, dynamic value) {
+  }
+  @override
+  dynamic invokeMethod(String objName, String function, dynamic arguments) {
+  }
+  @override
+  void addJavaScriptInterface(String name, JavaScriptInterface handler) {
+  }
 
   @override
   double get devicePixelRatio => _devicePixelRatio ?? _window.devicePixelRatio;
@@ -312,6 +339,7 @@ class TestWindow implements Window {
                            PlatformMessageResponseCallback callback) {
     _window.sendPlatformMessage(name, data, callback);
   }
+
 
   @override
   PlatformMessageCallback get onPlatformMessage => _window.onPlatformMessage;
