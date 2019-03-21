@@ -678,6 +678,8 @@ class _TextStyleProxy implements TextStyle {
   @override
   TextDecorationStyle get decorationStyle => _delegate.decorationStyle;
   @override
+  double get decorationThickness => _delegate.decorationThickness;
+  @override
   String get fontFamily => _delegate.fontFamily;
   @override
   List<String> get fontFamilyFallback => _delegate.fontFamilyFallback;
@@ -721,7 +723,26 @@ class _TextStyleProxy implements TextStyle {
   }
 
   @override
-  TextStyle apply({ Color color, Color backgroundColor, TextDecoration decoration, Color decorationColor, TextDecorationStyle decorationStyle, String fontFamily, List<String> fontFamilyFallback, double fontSizeFactor = 1.0, double fontSizeDelta = 0.0, int fontWeightDelta = 0, double letterSpacingFactor = 1.0, double letterSpacingDelta = 0.0, double wordSpacingFactor = 1.0, double wordSpacingDelta = 0.0, double heightFactor = 1.0, double heightDelta = 0.0 }) {
+  TextStyle apply({
+    Color color,
+    Color backgroundColor,
+    TextDecoration decoration,
+    Color decorationColor,
+    TextDecorationStyle decorationStyle,
+    double decorationThicknessFactor = 1.0,
+    double decorationThicknessDelta = 0.0,
+    String fontFamily,
+    List<String> fontFamilyFallback,
+    double fontSizeFactor = 1.0,
+    double fontSizeDelta = 0.0,
+    int fontWeightDelta = 0,
+    double letterSpacingFactor = 1.0,
+    double letterSpacingDelta = 0.0,
+    double wordSpacingFactor = 1.0,
+    double wordSpacingDelta = 0.0,
+    double heightFactor = 1.0,
+    double heightDelta = 0.0
+  }) {
     throw UnimplementedError();
   }
 
@@ -731,7 +752,29 @@ class _TextStyleProxy implements TextStyle {
   }
 
   @override
-  TextStyle copyWith({ Color color, Color backgroundColor, String fontFamily, List<String> fontFamilyFallback, double fontSize, FontWeight fontWeight, FontStyle fontStyle, double letterSpacing, double wordSpacing, TextBaseline textBaseline, double height, Locale locale, ui.Paint foreground, ui.Paint background, List<Shadow> shadows, TextDecoration decoration, Color decorationColor, TextDecorationStyle decorationStyle, String debugLabel }) {
+  TextStyle copyWith({
+    bool inherit,
+    Color color,
+    Color backgroundColor,
+    String fontFamily,
+    List<String> fontFamilyFallback,
+    double fontSize,
+    FontWeight fontWeight,
+    FontStyle fontStyle,
+    double letterSpacing,
+    double wordSpacing,
+    TextBaseline textBaseline,
+    double height,
+    Locale locale,
+    ui.Paint foreground,
+    ui.Paint background,
+    List<Shadow> shadows,
+    TextDecoration decoration,
+    Color decorationColor,
+    TextDecorationStyle decorationStyle,
+    double decorationThickness,
+    String debugLabel
+  }) {
     throw UnimplementedError();
   }
 
@@ -741,7 +784,20 @@ class _TextStyleProxy implements TextStyle {
   }
 
   @override
-  ui.ParagraphStyle getParagraphStyle({ TextAlign textAlign, TextDirection textDirection, double textScaleFactor = 1.0, String ellipsis, int maxLines, Locale locale, String fontFamily, double fontSize, FontWeight fontWeight, FontStyle fontStyle, double height, StrutStyle strutStyle }) {
+  ui.ParagraphStyle getParagraphStyle({
+    TextAlign textAlign,
+    TextDirection textDirection,
+    double textScaleFactor = 1.0,
+    String ellipsis,
+    int maxLines,
+    Locale locale,
+    String fontFamily,
+    double fontSize,
+    FontWeight fontWeight,
+    FontStyle fontStyle,
+    double height,
+    StrutStyle strutStyle
+  }) {
     throw UnimplementedError();
   }
 

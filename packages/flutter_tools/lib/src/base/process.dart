@@ -97,7 +97,7 @@ Future<void> runShutdownHooks() async {
 Map<String, String> _environment(bool allowReentrantFlutter, [ Map<String, String> environment ]) {
   if (allowReentrantFlutter) {
     if (environment == null)
-      environment = <String, String>{ 'FLUTTER_ALREADY_LOCKED': 'true' };
+      environment = <String, String>{'FLUTTER_ALREADY_LOCKED': 'true'};
     else
       environment['FLUTTER_ALREADY_LOCKED'] = 'true';
   }

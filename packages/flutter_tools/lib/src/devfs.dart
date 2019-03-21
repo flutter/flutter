@@ -30,8 +30,6 @@ DevFSConfig get devFSConfig => context[DevFSConfig];
 
 /// Common superclass for content copied to the device.
 abstract class DevFSContent {
-  bool _exists = true;
-
   /// Return true if this is the first time this method is called
   /// or if the entry has been modified since this method was last called.
   bool get isModified;
@@ -58,13 +56,6 @@ abstract class DevFSContent {
 // File content to be copied to the device.
 class DevFSFileContent extends DevFSContent {
   DevFSFileContent(this.file);
-
-  static DevFSFileContent clone(DevFSFileContent fsFileContent) {
-    final DevFSFileContent newFsFileContent = DevFSFileContent(fsFileContent.file);
-    newFsFileContent._linkTarget = fsFileContent._linkTarget;
-    newFsFileContent._fileStat = fsFileContent._fileStat;
-    return newFsFileContent;
-  }
 
   final FileSystemEntity file;
   FileSystemEntity _linkTarget;
@@ -218,7 +209,6 @@ abstract class DevFSOperations {
   Future<Uri> create(String fsName);
   Future<dynamic> destroy(String fsName);
   Future<dynamic> writeFile(String fsName, Uri deviceUri, DevFSContent content);
-  Future<dynamic> deleteFile(String fsName, Uri deviceUri);
 }
 
 /// An implementation of [DevFSOperations] that speaks to the
@@ -261,11 +251,6 @@ class ServiceProtocolDevFSOperations implements DevFSOperations {
       printTrace('DevFS: Failed to write $deviceUri: $error');
     }
   }
-
-  @override
-  Future<dynamic> deleteFile(String fsName, Uri deviceUri) async {
-    // TODO(johnmccutchan): Add file deletion to the devFS protocol.
-  }
 }
 
 class DevFSException implements Exception {
@@ -288,16 +273,14 @@ class _DevFSHttpWriter {
   int _inFlight = 0;
   Map<Uri, DevFSContent> _outstanding;
   Completer<void> _completer;
-  HttpClient _client;
+  final HttpClient _client = HttpClient();
 
   Future<void> write(Map<Uri, DevFSContent> entries) async {
-    _client = HttpClient();
     _client.maxConnectionsPerHost = kMaxInFlight;
     _completer = Completer<void>();
     _outstanding = Map<Uri, DevFSContent>.from(entries);
     _scheduleWrites();
     await _completer.future;
-    _client.close();
   }
 
   void _scheduleWrites() {
@@ -402,11 +385,9 @@ class DevFS {
   final String fsName;
   final Directory rootDirectory;
   String _packagesFilePath;
-  final Map<Uri, DevFSContent> _entries = <Uri, DevFSContent>{};
   final Set<String> assetPathsToEvict = <String>{};
-
-  final List<Future<Map<String, dynamic>>> _pendingOperations =
-      <Future<Map<String, dynamic>>>[];
+  List<Uri> sources = <Uri>[];
+  DateTime lastCompiled;
 
   Uri _baseUri;
   Uri get baseUri => _baseUri;
@@ -452,111 +433,57 @@ class DevFS {
     AssetBundle bundle,
     DateTime firstBuildTime,
     bool bundleFirstUpload = false,
-    bool bundleDirty = false,
-    Set<String> fileFilter,
     @required ResidentCompiler generator,
     String dillOutputPath,
     @required bool trackWidgetCreation,
     bool fullRestart = false,
     String projectRootPath,
     @required String pathToReload,
+    @required List<Uri> invalidatedFiles,
   }) async {
     assert(trackWidgetCreation != null);
     assert(generator != null);
-    // Mark all entries as possibly deleted.
-    for (DevFSContent content in _entries.values) {
-      content._exists = false;
-    }
-
-    // Scan workspace, packages, and assets
-    printTrace('DevFS: Starting sync from $rootDirectory');
-    logger.printTrace('Scanning project files');
-    await _scanDirectory(rootDirectory,
-                         recursive: true,
-                         fileFilter: fileFilter);
-    if (fs.isFileSync(_packagesFilePath)) {
-      printTrace('Scanning package files');
-      await _scanPackages(fileFilter);
-    }
-    if (bundle != null) {
-      printTrace('Scanning asset files');
-      bundle.entries.forEach((String archivePath, DevFSContent content) {
-        _scanBundleEntry(archivePath, content);
-      });
-    }
-
-    // Handle deletions.
-    printTrace('Scanning for deleted files');
-    final String assetBuildDirPrefix = _asUriPath(getAssetBuildDirectory());
-    final List<Uri> toRemove = <Uri>[];
-    _entries.forEach((Uri deviceUri, DevFSContent content) {
-      if (!content._exists) {
-        final Future<Map<String, dynamic>> operation =
-            _operations.deleteFile(fsName, deviceUri)
-            .then<Map<String, dynamic>>((dynamic v) => v?.cast<String,dynamic>());
-        if (operation != null)
-          _pendingOperations.add(operation);
-        toRemove.add(deviceUri);
-        if (deviceUri.path.startsWith(assetBuildDirPrefix)) {
-          final String archivePath = deviceUri.path.substring(assetBuildDirPrefix.length);
-          assetPathsToEvict.add(archivePath);
-        }
-      }
-    });
-    if (toRemove.isNotEmpty) {
-      printTrace('Removing deleted files');
-      toRemove.forEach(_entries.remove);
-      await Future.wait<Map<String, dynamic>>(_pendingOperations);
-      _pendingOperations.clear();
-    }
 
     // Update modified files
-    int syncedBytes = 0;
+    final String assetBuildDirPrefix = _asUriPath(getAssetBuildDirectory());
     final Map<Uri, DevFSContent> dirtyEntries = <Uri, DevFSContent>{};
-    _entries.forEach((Uri deviceUri, DevFSContent content) {
-      String archivePath;
-      if (deviceUri.path.startsWith(assetBuildDirPrefix))
-        archivePath = deviceUri.path.substring(assetBuildDirPrefix.length);
-      // When doing full restart, copy content so that isModified does not
-      // reset last check timestamp because we want to report all modified
-      // files to incremental compiler next time user does hot reload.
-      if (content.isModified || ((bundleDirty || bundleFirstUpload) && archivePath != null)) {
-        dirtyEntries[deviceUri] = content;
-        syncedBytes += content.size;
-        if (archivePath != null && (!bundleFirstUpload || content.isModifiedAfter(firstBuildTime)))
-          assetPathsToEvict.add(archivePath);
-      }
-    });
-    // We run generator even if [dirtyEntries] was empty because we want to
-    // keep logic of accepting/rejecting generator's output simple: we must
-    // accept/reject generator's output after every [update] call.  Incremental
-    // run with no changes is supposed to be fast (considering that it is
-    // initiated by user key press).
-    final List<String> invalidatedFiles = <String>[];
-    final Set<Uri> filesUris = <Uri>{};
-    for (Uri uri in dirtyEntries.keys.toList()) {
-      if (!uri.path.startsWith(assetBuildDirPrefix)) {
-        final DevFSContent content = dirtyEntries[uri];
-        if (content is DevFSFileContent) {
-          filesUris.add(uri);
-          invalidatedFiles.add(content.file.uri.toString());
-          syncedBytes -= content.size;
+
+    int syncedBytes = 0;
+    if (bundle != null) {
+      printTrace('Scanning asset files');
+      // We write the assets into the AssetBundle working dir so that they
+      // are in the same location in DevFS and the iOS simulator.
+      final String assetDirectory = getAssetBuildDirectory();
+      bundle.entries.forEach((String archivePath, DevFSContent content) {
+        final Uri deviceUri = fs.path.toUri(fs.path.join(assetDirectory, archivePath));
+        if (deviceUri.path.startsWith(assetBuildDirPrefix)) {
+          archivePath = deviceUri.path.substring(assetBuildDirPrefix.length);
         }
-      }
+        // Only update assets if they have been modified, or if this is the
+        // first upload of the asset bundle.
+        if (content.isModified || (bundleFirstUpload && archivePath != null)) {
+          dirtyEntries[deviceUri] = content;
+          syncedBytes += content.size;
+          if (archivePath != null && !bundleFirstUpload) {
+            assetPathsToEvict.add(archivePath);
+          }
+        }
+      });
     }
-    // No need to send source files because all compilation is done on the
-    // host and result of compilation is single kernel file.
-    filesUris.forEach(dirtyEntries.remove);
-    printTrace('Compiling dart to kernel with ${invalidatedFiles.length} updated files');
     if (fullRestart) {
       generator.reset();
     }
+    printTrace('Compiling dart to kernel with ${invalidatedFiles.length} updated files');
+    lastCompiled = DateTime.now();
     final CompilerOutput compilerOutput = await generator.recompile(
       mainPath,
       invalidatedFiles,
       outputPath:  dillOutputPath ?? getDefaultApplicationKernelPath(trackWidgetCreation: trackWidgetCreation),
       packagesFilePath : _packagesFilePath,
     );
+    // list of sources that needs to be monitored are in [compilerOutput.sources]
+    sources = compilerOutput.sources;
+    //
     // Don't send full kernel file that would overwrite what VM already
     // started loading from.
     if (!bundleFirstUpload) {
@@ -566,228 +493,28 @@ class DevFS {
           ? fs.path.relative(pathToReload, from: projectRootPath)
           : pathToReload,
         );
-        if (!dirtyEntries.containsKey(entryUri)) {
-          final DevFSFileContent content = DevFSFileContent(fs.file(compiledBinary));
-          dirtyEntries[entryUri] = content;
-          syncedBytes += content.size;
-        }
+        final DevFSFileContent content = DevFSFileContent(fs.file(compiledBinary));
+        syncedBytes += content.size;
+        dirtyEntries[entryUri] = content;
       }
     }
+    printTrace('Updating files');
     if (dirtyEntries.isNotEmpty) {
-      printTrace('Updating files');
-      if (_httpWriter != null) {
-        try {
-          await _httpWriter.write(dirtyEntries);
-        } on SocketException catch (socketException, stackTrace) {
-          printTrace('DevFS sync failed. Lost connection to device: $socketException');
-          throw DevFSException('Lost connection to device.', socketException, stackTrace);
-        } catch (exception, stackTrace) {
-          printError('Could not update files on device: $exception');
-          throw DevFSException('Sync failed', exception, stackTrace);
-        }
-      } else {
-        // Make service protocol requests for each.
-        dirtyEntries.forEach((Uri deviceUri, DevFSContent content) {
-          final Future<Map<String, dynamic>> operation =
-              _operations.writeFile(fsName, deviceUri, content)
-                  .then<Map<String, dynamic>>((dynamic v) => v?.cast<String, dynamic>());
-          if (operation != null)
-            _pendingOperations.add(operation);
-        });
-        await Future.wait<Map<String, dynamic>>(_pendingOperations, eagerError: true);
-        _pendingOperations.clear();
+      try {
+        await _httpWriter.write(dirtyEntries);
+      } on SocketException catch (socketException, stackTrace) {
+        printTrace('DevFS sync failed. Lost connection to device: $socketException');
+        throw DevFSException('Lost connection to device.', socketException, stackTrace);
+      } catch (exception, stackTrace) {
+        printError('Could not update files on device: $exception');
+        throw DevFSException('Sync failed', exception, stackTrace);
       }
     }
-
     printTrace('DevFS: Sync finished');
     return UpdateFSReport(success: true, syncedBytes: syncedBytes,
-        invalidatedSourcesCount: invalidatedFiles.length);
-  }
-
-  void _scanFile(Uri deviceUri, FileSystemEntity file) {
-    final DevFSContent content = _entries.putIfAbsent(deviceUri, () => DevFSFileContent(file));
-    content._exists = true;
-  }
-
-  void _scanBundleEntry(String archivePath, DevFSContent content) {
-    // We write the assets into the AssetBundle working dir so that they
-    // are in the same location in DevFS and the iOS simulator.
-    final Uri deviceUri = fs.path.toUri(fs.path.join(getAssetBuildDirectory(), archivePath));
-
-    _entries[deviceUri] = content;
-    content._exists = true;
-  }
-
-  bool _shouldIgnore(Uri deviceUri) {
-    final List<String> ignoredUriPrefixes = <String>['android/',
-                                               _asUriPath(getBuildDirectory()),
-                                               'ios/',
-                                               '.pub/'];
-    for (String ignoredUriPrefix in ignoredUriPrefixes) {
-      if (deviceUri.path.startsWith(ignoredUriPrefix))
-        return true;
-    }
-    return false;
-  }
-
-  bool _shouldSkip(
-    FileSystemEntity file,
-    String relativePath,
-    Uri directoryUriOnDevice, {
-    bool ignoreDotFiles = true,
-  }) {
-    if (file is Directory) {
-      // Skip non-files.
-      return true;
-    }
-    assert((file is Link) || (file is File));
-    final String basename = fs.path.basename(file.path);
-    if (ignoreDotFiles && basename.startsWith('.')) {
-      // Skip dot files, but not the '.packages' file (even though in dart1
-      // mode devfs['.packages'] will be overwritten with synthesized string content).
-      return basename != '.packages';
-    }
-    return false;
-  }
-
-  Uri _directoryUriOnDevice(Uri directoryUriOnDevice, Directory directory) {
-    if (directoryUriOnDevice == null) {
-      final String relativeRootPath = fs.path.relative(directory.path, from: rootDirectory.path);
-      if (relativeRootPath == '.') {
-        directoryUriOnDevice = Uri();
-      } else {
-        directoryUriOnDevice = fs.path.toUri(relativeRootPath);
-      }
-    }
-    return directoryUriOnDevice;
-  }
-
-  /// Scan all files from the [fileFilter] that are contained in [directory] and
-  /// pass various filters (e.g. ignoreDotFiles).
-  Future<bool> _scanFilteredDirectory(
-    Set<String> fileFilter,
-    Directory directory, {
-    Uri directoryUriOnDevice,
-    bool ignoreDotFiles = true,
-  }) async {
-    directoryUriOnDevice =
-        _directoryUriOnDevice(directoryUriOnDevice, directory);
-    try {
-      final String absoluteDirectoryPath = canonicalizePath(directory.path);
-      // For each file in the file filter.
-      for (String filePath in fileFilter) {
-        if (!filePath.startsWith(absoluteDirectoryPath)) {
-          // File is not in this directory. Skip.
-          continue;
-        }
-        final String relativePath =
-          fs.path.relative(filePath, from: directory.path);
-        final FileSystemEntity file = fs.file(filePath);
-        if (_shouldSkip(file, relativePath, directoryUriOnDevice, ignoreDotFiles: ignoreDotFiles)) {
-          continue;
-        }
-        final Uri deviceUri = directoryUriOnDevice.resolveUri(fs.path.toUri(relativePath));
-        if (!_shouldIgnore(deviceUri))
-          _scanFile(deviceUri, file);
-      }
-    } on FileSystemException catch (e) {
-      _printScanDirectoryError(directory.path, e);
-      return false;
-    }
-    return true;
-  }
-
-  /// Scan all files in [directory] that pass various filters (e.g. ignoreDotFiles).
-  Future<bool> _scanDirectory(
-    Directory directory, {
-    Uri directoryUriOnDevice,
-    bool recursive = false,
-    bool ignoreDotFiles = true,
-    Set<String> fileFilter,
-  }) async {
-    directoryUriOnDevice = _directoryUriOnDevice(directoryUriOnDevice, directory);
-    if ((fileFilter != null) && fileFilter.isNotEmpty) {
-      // When the fileFilter isn't empty, we can skip crawling the directory
-      // tree and instead use the fileFilter as the source of potential files.
-      return _scanFilteredDirectory(fileFilter,
-                                    directory,
-                                    directoryUriOnDevice: directoryUriOnDevice,
-                                    ignoreDotFiles: ignoreDotFiles);
-    }
-    try {
-      final Stream<FileSystemEntity> files =
-          directory.list(recursive: recursive, followLinks: false);
-      await for (FileSystemEntity file in files) {
-        if (!devFSConfig.noDirectorySymlinks && (file is Link)) {
-          // Check if this is a symlink to a directory and skip it.
-          try {
-            final FileSystemEntityType linkType =
-                fs.statSync(file.resolveSymbolicLinksSync()).type;
-            if (linkType == FileSystemEntityType.directory)
-              continue;
-          } on FileSystemException catch (e) {
-            _printScanDirectoryError(file.path, e);
-            continue;
-          }
-        }
-        final String relativePath =
-          fs.path.relative(file.path, from: directory.path);
-        if (_shouldSkip(file, relativePath, directoryUriOnDevice, ignoreDotFiles: ignoreDotFiles)) {
-          continue;
-        }
-        final Uri deviceUri = directoryUriOnDevice.resolveUri(fs.path.toUri(relativePath));
-        if (!_shouldIgnore(deviceUri))
-          _scanFile(deviceUri, file);
-      }
-    } on FileSystemException catch (e) {
-      _printScanDirectoryError(directory.path, e);
-      return false;
-    }
-    return true;
-  }
-
-  void _printScanDirectoryError(String path, Exception e) {
-    printError(
-        'Error while scanning $path.\n'
-        'Hot Reload might not work until the following error is resolved:\n'
-        '$e\n'
-    );
-  }
-
-  Future<void> _scanPackages(Set<String> fileFilter) async {
-    StringBuffer sb;
-    final PackageMap packageMap = PackageMap(_packagesFilePath);
-
-    for (String packageName in packageMap.map.keys) {
-      final Uri packageUri = packageMap.map[packageName];
-      final String packagePath = fs.path.fromUri(packageUri);
-      final Directory packageDirectory = fs.directory(packageUri);
-      Uri directoryUriOnDevice = fs.path.toUri(fs.path.join('packages', packageName) + fs.path.separator);
-      bool packageExists = packageDirectory.existsSync();
-
-      if (!packageExists) {
-        // If the package directory doesn't exist at all, we ignore it.
-        continue;
-      }
-
-      if (fs.path.isWithin(rootDirectory.path, packagePath)) {
-        // We already scanned everything under the root directory.
-        directoryUriOnDevice = fs.path.toUri(
-            fs.path.relative(packagePath, from: rootDirectory.path) + fs.path.separator
-        );
-      } else {
-        packageExists =
-            await _scanDirectory(packageDirectory,
-                                 directoryUriOnDevice: directoryUriOnDevice,
-                                 recursive: true,
-                                 fileFilter: fileFilter);
-      }
-      if (packageExists) {
-        sb ??= StringBuffer();
-        sb.writeln('$packageName:$directoryUriOnDevice');
-      }
-    }
+         invalidatedSourcesCount: invalidatedFiles.length);
   }
 }
+
 /// Converts a platform-specific file path to a platform-independent Uri path.
 String _asUriPath(String filePath) => fs.path.toUri(filePath).path + '/';
