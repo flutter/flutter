@@ -370,9 +370,7 @@ class DevFS {
     String packagesFilePath,
   }) : _operations = ServiceProtocolDevFSOperations(serviceProtocol),
        _httpWriter = _DevFSHttpWriter(fsName, serviceProtocol),
-       _packagesFilePath = packagesFilePath ?? fs.path.join(rootDirectory.path, kPackagesFileName) {
-    _packageMap = PackageMap(_packagesFilePath).map;
-  }
+       _packagesFilePath = packagesFilePath ?? fs.path.join(rootDirectory.path, kPackagesFileName);
 
   DevFS.operations(
     this._operations,
@@ -380,9 +378,7 @@ class DevFS {
     this.rootDirectory, {
     String packagesFilePath,
   }) : _httpWriter = null,
-       _packagesFilePath = packagesFilePath ?? fs.path.join(rootDirectory.path, kPackagesFileName) {
-    _packageMap = PackageMap(_packagesFilePath).map;
-  }
+       _packagesFilePath = packagesFilePath ?? fs.path.join(rootDirectory.path, kPackagesFileName);
 
   final DevFSOperations _operations;
   final _DevFSHttpWriter _httpWriter;
@@ -395,9 +391,6 @@ class DevFS {
 
   Uri _baseUri;
   Uri get baseUri => _baseUri;
-
-  Map<String, Uri> _packageMap;
-  Map<String, Uri> get packageMap => _packageMap;
 
   Uri deviceUriToHostUri(Uri deviceUri) {
     final String deviceUriString = deviceUri.toString();

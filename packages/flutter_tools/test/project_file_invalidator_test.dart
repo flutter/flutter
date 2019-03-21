@@ -14,7 +14,7 @@ void main() {
     final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
     testUsingContext('Empty project', () async {
       expect(
-        ProjectFileInvalidator.findInvalidated(lastCompiled: DateTime.now(), urisToMonitor: <Uri>[]),
+        ProjectFileInvalidator.findInvalidated(lastCompiled: DateTime.now(), urisToMonitor: <Uri>[], packagesPath: ''),
         isEmpty);
     }, overrides: <Type, Generator>{
       FileSystem: () => memoryFileSystem,
@@ -24,7 +24,9 @@ void main() {
       expect(
         ProjectFileInvalidator.findInvalidated(
             lastCompiled: DateTime.now(),
-            urisToMonitor: <Uri>[Uri.parse('/not-there-anymore')]),
+            urisToMonitor: <Uri>[Uri.parse('/not-there-anymore'),],
+            packagesPath: '',
+          ),
         isEmpty);
     }, overrides: <Type, Generator>{
       FileSystem: () => memoryFileSystem,
