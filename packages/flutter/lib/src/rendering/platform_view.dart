@@ -386,7 +386,7 @@ class RenderUiKitView extends RenderBox {
       return;
     }
     final Offset localOffset = globalToLocal(event.position);
-    if(!(Offset.zero & size).contains(localOffset)) {
+    if (!(Offset.zero & size).contains(localOffset)) {
       return;
     }
     if (event != _lastPointerDownEvent) {
@@ -419,9 +419,11 @@ class RenderUiKitView extends RenderBox {
 // When the team wins a gesture the recognizer notifies the engine that it should release
 // the touch sequence to the embedded UIView.
 class _UiKitViewGestureRecognizer extends OneSequenceGestureRecognizer {
-  _UiKitViewGestureRecognizer(this.controller, this.gestureRecognizerFactories, {
+  _UiKitViewGestureRecognizer(
+    this.controller,
+    this.gestureRecognizerFactories, {
     PointerDeviceKind kind,
-  }): super(kind: kind) {
+  }) : super(kind: kind) {
     team = GestureArenaTeam();
     team.captain = this;
     _gestureRecognizers = gestureRecognizerFactories.map(
@@ -481,9 +483,11 @@ class _UiKitViewGestureRecognizer extends OneSequenceGestureRecognizer {
 // When the team wins the recognizer sends all the cached point events to the embedded Android view, and
 // sets itself to a "forwarding mode" where it will forward any new pointer event to the Android view.
 class _AndroidViewGestureRecognizer extends OneSequenceGestureRecognizer {
-  _AndroidViewGestureRecognizer(this.dispatcher, this.gestureRecognizerFactories, {
+  _AndroidViewGestureRecognizer(
+    this.dispatcher,
+    this.gestureRecognizerFactories, {
     PointerDeviceKind kind,
-  }): super(kind: kind) {
+  }) : super(kind: kind) {
     team = GestureArenaTeam();
     team.captain = this;
     _gestureRecognizers = gestureRecognizerFactories.map(

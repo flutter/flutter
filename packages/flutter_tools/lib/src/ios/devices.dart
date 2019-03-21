@@ -235,7 +235,6 @@ class IOSDevice extends Device {
     DebuggingOptions debuggingOptions,
     Map<String, dynamic> platformArgs,
     bool prebuiltApplication = false,
-    bool applicationNeedsRebuild = false,
     bool usesTerminalUi = true,
     bool ipv6 = false,
   }) async {
@@ -433,7 +432,7 @@ String decodeSyslog(String line) {
   try {
     final List<int> bytes = utf8.encode(line);
     final List<int> out = <int>[];
-    for (int i = 0; i < bytes.length; ) {
+    for (int i = 0; i < bytes.length;) {
       if (bytes[i] != kBackslash || i > bytes.length - 4) {
         // Unmapped byte: copy as-is.
         out.add(bytes[i++]);

@@ -10,6 +10,7 @@ import '../base/file_system.dart';
 import '../base/platform.dart';
 import '../cache.dart';
 import '../codegen.dart';
+import '../dart/pub.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
 import '../test/coverage_collector.dart';
@@ -17,7 +18,7 @@ import '../test/event_printer.dart';
 import '../test/runner.dart';
 import '../test/watcher.dart';
 
-class TestCommand extends FlutterCommand {
+class TestCommand extends FastFlutterCommand {
   TestCommand({ bool verboseHelp = false }) {
     requiresPubspecYaml();
     usesPubOption();
@@ -91,8 +92,7 @@ class TestCommand extends FlutterCommand {
   String get description => 'Run Flutter unit tests for the current project.';
 
   @override
-  Future<void> validateCommand() async {
-    await super.validateCommand();
+  Future<FlutterCommandResult> runCommand() async {
     if (!fs.isFileSync('pubspec.yaml')) {
       throwToolExit(
         'Error: No pubspec.yaml file found in the current working directory.\n'
@@ -100,10 +100,9 @@ class TestCommand extends FlutterCommand {
         'called *_test.dart and must reside in the package\'s \'test\' '
         'directory (or one of its subdirectories).');
     }
-  }
-
-  @override
-  Future<FlutterCommandResult> runCommand() async {
+    if (shouldRunPub) {
+      await pubGet(context: PubContext.getVerifyContext(name), skipPubspecYamlCheck: true);
+    }
     final List<String> names = argResults['name'];
     final List<String> plainNames = argResults['plain-name'];
     final FlutterProject flutterProject = await FlutterProject.current();

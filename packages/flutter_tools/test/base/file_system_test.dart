@@ -20,12 +20,12 @@ void main() {
     testUsingContext('recursively creates a directory if it does not exist', () async {
       ensureDirectoryExists('foo/bar/baz.flx');
       expect(fs.isDirectorySync('foo/bar'), true);
-    }, overrides: <Type, Generator>{ FileSystem: () => fs });
+    }, overrides: <Type, Generator>{FileSystem: () => fs});
 
     testUsingContext('throws tool exit on failure to create', () async {
       fs.file('foo').createSync();
       expect(() => ensureDirectoryExists('foo/bar.flx'), throwsToolExit());
-    }, overrides: <Type, Generator>{ FileSystem: () => fs });
+    }, overrides: <Type, Generator>{FileSystem: () => fs});
   });
 
   group('copyDirectorySync', () {

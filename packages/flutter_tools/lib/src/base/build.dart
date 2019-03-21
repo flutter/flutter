@@ -12,6 +12,7 @@ import '../android/android_sdk.dart';
 import '../artifacts.dart';
 import '../build_info.dart';
 import '../bundle.dart';
+import '../cache.dart';
 import '../compile.dart';
 import '../dart/package_map.dart';
 import '../globals.dart';
@@ -80,6 +81,11 @@ class AOTSnapshotter {
     IOSArch iosArch,
     List<String> extraGenSnapshotOptions = const <String>[],
   }) async {
+    FlutterProject flutterProject;
+    if (fs.file('pubspec.yaml').existsSync()) {
+      flutterProject = await FlutterProject.current();
+    }
+    final FlutterEngine engine = FlutterEngine(cache);
     if (!_isValidAotPlatform(platform, buildMode)) {
       printError('${getNameForTargetPlatform(platform)} does not support AOT compilation.');
       return 1;
@@ -181,6 +187,8 @@ class AOTSnapshotter {
         'entryPoint': mainPath,
         'sharedLib': buildSharedLibrary.toString(),
         'extraGenSnapshotOptions': extraGenSnapshotOptions.join(' '),
+        'engineHash': engine.version,
+        'buildersUsed': '${flutterProject != null ? await flutterProject.hasBuilders : false}',
       },
       depfilePaths: <String>[],
     );
