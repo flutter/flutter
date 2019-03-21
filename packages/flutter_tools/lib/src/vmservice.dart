@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io' show CompressionOptions;
 import 'dart:math' as math;
 
 import 'package:file/file.dart';
@@ -24,7 +25,7 @@ import 'vmservice_record_replay.dart';
 
 /// Override `WebSocketConnector` in [context] to use a different constructor
 /// for [WebSocket]s (used by tests).
-typedef WebSocketConnector = Future<io.WebSocket> Function(String url);
+typedef WebSocketConnector = Future<io.WebSocket> Function(String url, {CompressionOptions compression});
 
 /// A function that opens a two-way communication channel to the specified [uri].
 typedef _OpenChannel = Future<StreamChannel<String>> Function(Uri uri);
@@ -86,7 +87,7 @@ Future<StreamChannel<String>> _defaultOpenChannel(Uri uri) async {
   while (socket == null) {
     attempts += 1;
     try {
-      socket = await constructor(uri.toString());
+      socket = await constructor(uri.toString(), compression: CompressionOptions.compressionOff);
     } on io.WebSocketException catch (e) {
       await handleError(e);
     } on io.SocketException catch (e) {
