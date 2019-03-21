@@ -311,7 +311,7 @@ class _Compiler {
           suppressOutput = false;
           final CompilerOutput compilerOutput = await compiler.recompile(
             request.path,
-            <String>[request.path],
+            <Uri>[Uri.parse(request.path)],
             outputPath: outputDill.path,
           );
           final String outputPath = compilerOutput?.outputFilename;

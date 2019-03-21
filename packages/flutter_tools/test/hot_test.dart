@@ -116,6 +116,8 @@ void main() {
         UpdateFSReport(success: true, syncedBytes: 1000, invalidatedSourcesCount: 1)));
     when(mockDevFs.assetPathsToEvict).thenReturn(<String>{});
     when(mockDevFs.baseUri).thenReturn(Uri.file('test'));
+    when(mockDevFs.sources).thenReturn(<Uri>[Uri.file('test')]);
+    when(mockDevFs.lastCompiled).thenReturn(DateTime.now());
 
     setUp(() {
       mockArtifacts = MockLocalEngineArtifacts();

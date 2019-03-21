@@ -306,7 +306,6 @@ class HotRunnerFactory {
     dillOutputPath: dillOutputPath,
     stayResident: stayResident,
     ipv6: ipv6,
-    flutterProject: flutterProject,
   );
 }
 
