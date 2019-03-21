@@ -10,7 +10,6 @@ import 'package:build_runner_core/build_runner_core.dart' hide BuildStatus;
 import 'package:build_daemon/data/server_log.dart';
 import 'package:build_daemon/data/build_status.dart' as build;
 import 'package:build_daemon/client.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:yaml/yaml.dart';
 import 'package:crypto/crypto.dart' show md5;
 
@@ -19,6 +18,7 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/platform.dart';
 import '../base/process_manager.dart';
 import '../codegen.dart';
 import '../dart/package_map.dart';
