@@ -115,7 +115,7 @@ abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
       case 'dmy':
         return DatePickerDateOrder.dmy;
       case 'mdy':
-        return DatePickerDateOrder.dmy;
+        return DatePickerDateOrder.mdy;
       case 'ymd':
         return DatePickerDateOrder.ymd;
       case 'ydm':
