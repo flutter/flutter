@@ -10,6 +10,7 @@ import 'package:build_runner_core/build_runner_core.dart' hide BuildStatus;
 import 'package:build_daemon/data/server_log.dart';
 import 'package:build_daemon/data/build_status.dart' as build;
 import 'package:build_daemon/client.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:yaml/yaml.dart';
 import 'package:crypto/crypto.dart' show md5;
 
@@ -204,10 +205,12 @@ class _BuildRunnerCodegenDaemon implements CodegenDaemon {
 // Sorts the builders by name and produces a hashcode of the resulting iterable.
 List<int> _produceScriptId(YamlMap builders) {
   if (builders == null || builders.isEmpty) {
-    return md5.convert(<int>[]).bytes;
+    return md5.convert(platform.version.codeUnits).bytes;
   }
   final List<String> orderedBuilders = builders.keys
     .cast<String>()
     .toList()..sort();
-  return md5.convert(orderedBuilders.join('').codeUnits).bytes;
+  return md5.convert(orderedBuilders
+    .followedBy(<String>[platform.version])
+    .join('').codeUnits).bytes;
 }
