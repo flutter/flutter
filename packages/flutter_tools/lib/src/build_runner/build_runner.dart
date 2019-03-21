@@ -18,6 +18,7 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/platform.dart';
 import '../base/process_manager.dart';
 import '../codegen.dart';
 import '../dart/package_map.dart';
@@ -205,10 +206,12 @@ class _BuildRunnerCodegenDaemon implements CodegenDaemon {
 // Sorts the builders by name and produces a hashcode of the resulting iterable.
 List<int> _produceScriptId(YamlMap builders) {
   if (builders == null || builders.isEmpty) {
-    return md5.convert(<int>[]).bytes;
+    return md5.convert(platform.version.codeUnits).bytes;
   }
   final List<String> orderedBuilders = builders.keys
     .cast<String>()
     .toList()..sort();
-  return md5.convert(orderedBuilders.join('').codeUnits).bytes;
+  return md5.convert(orderedBuilders
+    .followedBy(<String>[platform.version])
+    .join('').codeUnits).bytes;
 }
