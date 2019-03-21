@@ -773,4 +773,37 @@ void _tests() {
     // button and the right edge of the 800 wide window.
     expect(tester.getBottomLeft(find.text('OK')).dx, 800 - ltrOkRight);
   });
+
+  testWidgets('Header does not overflow when textscale > 1.0', (WidgetTester tester) async {
+    const Key buttonKey = Key('go button');
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: Builder(
+          builder: (BuildContext context) {
+            return RaisedButton(
+              key: buttonKey,
+              onPressed: () {
+                showDatePicker(
+                  context: context,
+                  initialDate: initialDate,
+                  firstDate: firstDate,
+                  lastDate: lastDate,
+                  builder: (BuildContext context, Widget widget) {
+                    return MediaQuery(
+                      data: MediaQuery.of(context).copyWith(textScaleFactor: 1.5),
+                      child: widget,
+                    );
+                  }
+                );
+              },
+              child: const Text('Go'),
+            );
+          },
+        ),
+      ),
+    ));
+    await tester.tap(find.byKey(buttonKey));
+    await tester.pumpAndSettle();
+    expect(find.byType(DayPicker), findsOneWidget);
+  });
 }

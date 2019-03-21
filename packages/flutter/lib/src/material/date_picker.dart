@@ -87,6 +87,7 @@ class _DatePickerHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final ThemeData themeData = Theme.of(context);
+    final MediaQueryData mediaQuery = MediaQuery.of(context);
     final TextTheme headerTextTheme = themeData.primaryTextTheme;
     Color dayColor;
     Color yearColor;
@@ -119,12 +120,12 @@ class _DatePickerHeader extends StatelessWidget {
     MainAxisAlignment mainAxisAlignment;
     switch (orientation) {
       case Orientation.portrait:
-        height = _kDatePickerHeaderPortraitHeight;
+        height = _kDatePickerHeaderPortraitHeight * mediaQuery.textScaleFactor;
         padding = const EdgeInsets.symmetric(horizontal: 16.0);
         mainAxisAlignment = MainAxisAlignment.center;
         break;
       case Orientation.landscape:
-        width = _kDatePickerHeaderLandscapeWidth;
+        width = _kDatePickerHeaderLandscapeWidth * mediaQuery.textScaleFactor;
         padding = const EdgeInsets.all(8.0);
         mainAxisAlignment = MainAxisAlignment.start;
         break;
