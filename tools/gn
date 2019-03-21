@@ -241,6 +241,9 @@ def to_gn_args(args):
       gn_args['dart_platform_sdk'] = not args.full_dart_sdk
     gn_args['full_dart_sdk'] = args.full_dart_sdk
 
+    if sys.platform == 'darwin':
+      gn_args['mac_sdk_path'] = args.mac_sdk_path
+
     return gn_args
 
 def parse_args(args):
@@ -295,6 +298,9 @@ def parse_args(args):
   parser.add_argument('--full-dart-sdk', default=False, action='store_true',
                       help='include trained dart2js and dartdevc snapshots. Enable only on steps that create an SDK')
   parser.add_argument('--no-full-dart-sdk', dest='full_dart_sdk', action='store_false')
+
+  parser.add_argument('--mac-sdk-path', default='', type=str,
+                      help='On the mac, the SDK is inferred from the Xcode location unless this flag is specified.')
 
   return parser.parse_args(args)
 
