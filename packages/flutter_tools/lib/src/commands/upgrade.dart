@@ -86,7 +86,11 @@ class UpgradeCommandRunner {
         'git', 'rev-parse', '@{u}',
       ], workingDirectory: Cache.flutterRoot);
     } catch (e) {
-      throwToolExit('Unable to upgrade Flutter: no upstream repository configured.');
+      throwToolExit(
+        'Unable to upgrade Flutter: no upstream repository configured. '
+        'Run \'git remote add upstream '
+        'https://github.com/flutter/flutter\' in ${Cache.flutterRoot}',
+      );
     }
   }
 
@@ -130,6 +134,19 @@ class UpgradeCommandRunner {
       mapFunction: (String line) => matchesGitLine(line) ? null : line,
     );
     if (code != 0) {
+      printError('git rebase failed');
+      final int undoCode = await runCommandAndStreamOutput(
+        <String>['git', 'rebase', '--abort'],
+        workingDirectory: Cache.flutterRoot,
+        mapFunction: (String line) => matchesGitLine(line) ? null : line,
+      );
+      if (undoCode != 0) {
+        printError(
+          'Failed to apply rebase: The flutter installation at'
+          ' ${Cache.flutterRoot} may be corrupted. A reinstallation of Flutter '
+          'is recommended'
+        );
+      }
       throwToolExit(null, exitCode: code);
     }
   }
@@ -192,7 +209,7 @@ class UpgradeCommandRunner {
         throw Exception();
       }
       await runCheckedAsync(<String>[
-        'git', 'stash', 'pop',
+        'git', 'stash', 'apply', stashName,
       ]);
     } catch (e) {
       printError('Failed to re-apply local changes. State may have been lost.');
