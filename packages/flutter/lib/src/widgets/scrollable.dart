@@ -733,9 +733,9 @@ class _RenderScrollSemantics extends RenderProxyBox {
     final List<SemanticsNode> included = <SemanticsNode>[];
     for (SemanticsNode child in children) {
       assert(child.isTagged(RenderViewport.useTwoPaneSemantics));
-      if (child.isTagged(RenderViewport.excludeFromScrolling))
+      if (child.isTagged(RenderViewport.excludeFromScrolling)) {
         excluded.add(child);
-      else {
+      } else {
         if (!child.hasFlag(SemanticsFlag.isHidden))
           firstVisibleIndex ??= child.indexInParent;
         included.add(child);

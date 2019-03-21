@@ -275,6 +275,7 @@ class _Compiler {
           flutterProject: flutterProject,
           trackWidgetCreation: trackWidgetCreation,
           compilerMessageConsumer: reportCompilerMessage,
+          initializeFromDill: testFilePath,
           // We already ran codegen once at the start, we only need to
           // configure builders.
           runCold: true,
