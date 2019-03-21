@@ -1,4 +1,4 @@
-Signature: 15e7148cf19140d66c66263e01e1c1d3
+Signature: 8b213e55333c31d2af13e99dbb28de7f
 
 UNUSED LICENSES:
 
@@ -5877,6 +5877,9 @@ FILE: ../../../third_party/skia/src/core/SkColorFilterPriv.h
 FILE: ../../../third_party/skia/src/gpu/gl/GrGLAssembleHelpers.cpp
 FILE: ../../../third_party/skia/src/gpu/gl/GrGLAssembleInterface_gl.cpp
 FILE: ../../../third_party/skia/src/gpu/gl/GrGLAssembleInterface_gles.cpp
+FILE: ../../../third_party/skia/src/sksl/SkSLByteCode.h
+FILE: ../../../third_party/skia/src/sksl/SkSLByteCodeGenerator.cpp
+FILE: ../../../third_party/skia/src/sksl/SkSLByteCodeGenerator.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2019 Google LLC
 
