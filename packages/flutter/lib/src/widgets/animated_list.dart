@@ -213,13 +213,10 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
   final List<_ActiveItem> _outgoingItems = <_ActiveItem>[];
   int _itemsCount = 0;
 
-  SliverChildBuilderDelegate _delegate;
-
   @override
   void initState() {
     super.initState();
     _itemsCount = widget.initialItemCount;
-    _delegate = SliverChildBuilderDelegate(_itemBuilder, childCount: _itemsCount);
   }
 
   @override
@@ -269,11 +266,8 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
     return index;
   }
 
-  void _updateDelegate(VoidCallback fn) {
-    setState(() {
-      fn();
-      _delegate = SliverChildBuilderDelegate(_itemBuilder, childCount: _itemsCount);
-    });
+  SliverChildDelegate _createDelegate() {
+    return SliverChildBuilderDelegate(_itemBuilder, childCount: _itemsCount);
   }
 
   /// Insert an item at [index] and start an animation that will be passed
@@ -302,7 +296,7 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
 
     final AnimationController controller = AnimationController(duration: duration, vsync: this);
     final _ActiveItem incomingItem = _ActiveItem.incoming(controller, itemIndex);
-    _updateDelegate(() {
+    setState(() {
       _incomingItems
         ..add(incomingItem)
         ..sort();
@@ -338,7 +332,7 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
     final AnimationController controller = incomingItem?.controller
       ?? AnimationController(duration: duration, value: 1.0, vsync: this);
     final _ActiveItem outgoingItem = _ActiveItem.outgoing(controller, itemIndex, builder);
-    _updateDelegate(() {
+    setState(() {
       _outgoingItems
         ..add(outgoingItem)
         ..sort();
@@ -358,7 +352,7 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
           item.itemIndex -= 1;
       }
 
-      _updateDelegate(() {
+      setState(() {
         _itemsCount -= 1;
       });
     });
@@ -377,7 +371,7 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
   @override
   Widget build(BuildContext context) {
     return ListView.custom(
-      childrenDelegate: _delegate,
+      childrenDelegate: _createDelegate(),
       scrollDirection: widget.scrollDirection,
       reverse: widget.reverse,
       controller: widget.controller,
@@ -462,11 +456,10 @@ class SliverAnimatedList extends AnimatedList {
 /// [SliverAnimatedList] item input handlers can also refer to their
 /// [SliverAnimatedListState] with the static [SliverAnimatedList.of] method.
 class SliverAnimatedListState extends AnimatedListState {
-
   @override
   Widget build(BuildContext context) {
     return SliverList(
-      delegate: _delegate,
+      delegate: _createDelegate(),
     );
   }
 }
