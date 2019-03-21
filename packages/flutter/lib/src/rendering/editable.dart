@@ -1384,15 +1384,15 @@ class RenderEditable extends RenderBox {
         extentOffset = math.max(fromPosition.offset, toPosition.offset);
       }
 
-      onSelectionChanged(
-        TextSelection(
-          baseOffset: baseOffset,
-          extentOffset: extentOffset,
-          affinity: fromPosition.affinity,
-        ),
-        this,
-        cause,
+      final TextSelection newSelection = TextSelection(
+        baseOffset: baseOffset,
+        extentOffset: extentOffset,
+        affinity: fromPosition.affinity,
       );
+      // Call [onSelectionChanged] only when the selection actually changed.
+      if (newSelection != _selection) {
+        onSelectionChanged(newSelection, this, cause);
+      }
     }
   }
 

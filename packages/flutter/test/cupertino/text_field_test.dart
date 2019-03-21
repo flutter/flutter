@@ -8,6 +8,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter_test/flutter_test.dart';
 
 class MockClipboard {
@@ -29,6 +30,45 @@ class MockClipboard {
 void main() {
   final MockClipboard mockClipboard = MockClipboard();
   SystemChannels.platform.setMockMethodCallHandler(mockClipboard.handleMethodCall);
+
+  // Returns the first RenderEditable.
+  RenderEditable findRenderEditable(WidgetTester tester) {
+    final RenderObject root = tester.renderObject(find.byType(EditableText));
+    expect(root, isNotNull);
+
+    RenderEditable renderEditable;
+    void recursiveFinder(RenderObject child) {
+      if (child is RenderEditable) {
+        renderEditable = child;
+        return;
+      }
+      child.visitChildren(recursiveFinder);
+    }
+    root.visitChildren(recursiveFinder);
+    expect(renderEditable, isNotNull);
+    return renderEditable;
+  }
+
+  List<TextSelectionPoint> globalize(Iterable<TextSelectionPoint> points, RenderBox box) {
+    return points.map<TextSelectionPoint>((TextSelectionPoint point) {
+      return TextSelectionPoint(
+        box.localToGlobal(point.point),
+        point.direction,
+      );
+    }).toList();
+  }
+
+  Offset textOffsetToPosition(WidgetTester tester, int offset) {
+    final RenderEditable renderEditable = findRenderEditable(tester);
+    final List<TextSelectionPoint> endpoints = globalize(
+      renderEditable.getEndpointsForSelection(
+        TextSelection.collapsed(offset: offset),
+      ),
+      renderEditable,
+    );
+    expect(endpoints.length, 1);
+    return endpoints[0].point + const Offset(0.0, -2.0);
+  }
 
   testWidgets(
     'takes available space horizontally and takes intrinsic space vertically no-strut',
@@ -1686,6 +1726,69 @@ void main() {
     await tester.pump();
     // Falling back to a single tap doesn't trigger a toolbar.
     expect(find.byType(CupertinoButton), findsNothing);
+  });
+
+  testWidgets('Cannot drag one handle past the other', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(
+      text: 'abc def ghi',
+    );
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoTextField(
+            dragStartBehavior: DragStartBehavior.down,
+            controller: controller,
+            style: const TextStyle(
+              fontFamily: 'Ahem',
+              fontSize: 10.0,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Double tap on 'e' to select 'def'.
+    final Offset ePos = textOffsetToPosition(tester, 5);
+    await tester.tapAt(ePos, pointer: 7);
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(controller.selection.isCollapsed, isTrue);
+    expect(controller.selection.baseOffset, 4);
+    await tester.tapAt(ePos, pointer: 7);
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(controller.selection.baseOffset, 4);
+    expect(controller.selection.extentOffset, 7);
+
+    final RenderEditable renderEditable = findRenderEditable(tester);
+    final List<TextSelectionPoint> endpoints = globalize(
+      renderEditable.getEndpointsForSelection(controller.selection),
+      renderEditable,
+    );
+    expect(endpoints.length, 2);
+
+    // Drag the right handle until there's only 1 char selected.
+    // We use a small offset because the endpoint is on the very corner
+    // of the handle.
+    final Offset handlePos = endpoints[1].point;
+    Offset newHandlePos = textOffsetToPosition(tester, 5); // Position of 'e'.
+    final TestGesture gesture = await tester.startGesture(handlePos, pointer: 7);
+    await tester.pump();
+    await gesture.moveTo(newHandlePos);
+    await tester.pump();
+
+    expect(controller.selection.baseOffset, 4);
+    expect(controller.selection.extentOffset, 5);
+
+    newHandlePos = textOffsetToPosition(tester, 2); // Position of 'c'.
+    await gesture.moveTo(newHandlePos);
+    await tester.pump();
+    await gesture.up();
+    await tester.pump();
+
+    expect(controller.selection.baseOffset, 4);
+    // The selection doesn't move beyond the left handle. There's always at
+    // least 1 char selected.
+    expect(controller.selection.extentOffset, 5);
   });
 
   testWidgets(
