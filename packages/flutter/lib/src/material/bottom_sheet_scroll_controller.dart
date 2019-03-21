@@ -47,7 +47,7 @@ class BottomSheetScrollController extends ScrollController {
   /// The [initialScrollOffset], [initialHeightPercentage], [context],
   /// [isPersistent] and [minTop] parameters must not be null. If [maxTop]
   /// is provided as null, it will be defaulted to the
-  /// [MediaQueryData.size.height].
+  /// `MediaQuery.of(context)`'s height.
   BottomSheetScrollController({
     double initialScrollOffset = 0.0,
     double initialHeightPercentage = 0.5,
@@ -92,8 +92,7 @@ class BottomSheetScrollController extends ScrollController {
     assert(initialHeightPercentage >= 0.0 && initialHeightPercentage <= 1.0);
     assert(forFullScreen != null);
     assert(forFullScreen || debugCheckHasScaffold(context));
-
-    final double screenHeight = MediaQuery.of(context).size.height;
+    final double screenHeight = _getMaxHeight(context);
     final double initialTop = screenHeight * (1.0 - initialHeightPercentage);
 
     double extraAppBarHeight = 0.0;
@@ -108,6 +107,10 @@ class BottomSheetScrollController extends ScrollController {
     return math.min(initialTop, screenHeight - _kBottomSheetMinHeight - extraAppBarHeight);
   }
 
+  static double _getMaxHeight(BuildContext context) {
+    return MediaQuery.of(context).size.height;
+  }
+
   static double _calculateMaxTop(
     double initialHeightPercentage,
     BuildContext context,
@@ -116,12 +119,8 @@ class BottomSheetScrollController extends ScrollController {
     if (isPersistent) {
       return _topFromInitialHeightPercentage(initialHeightPercentage, context, false);
     }
-
-    assert(debugCheckHasMediaQuery(context));
-
-    return MediaQuery.of(context).size.height;
+    return _getMaxHeight(context);
   }
-
 
   BottomSheetScrollPosition _position;
 
@@ -194,30 +193,33 @@ class BottomSheetScrollController extends ScrollController {
       minTop: minTop,
       maxTop: maxTop,
       oldPosition: oldPosition,
-      notifier: notifyTopListeners,
       animateIn: !isPersistent,
     );
+    final List<VoidCallback> callbacks = _pendingTopListenerCallbacks.toList();
+    callbacks.forEach(_position._topAnimationController.addListener);
+    _pendingTopListenerCallbacks.clear();
     return _position;
   }
 
   // NotificationCallback handling for top.
-
-  final List<VoidCallback> _topListeners = <VoidCallback>[];
+  final List<VoidCallback> _pendingTopListenerCallbacks = <VoidCallback>[];
 
   /// Register a closure to be called when [top] changes.
   ///
   /// Listeners looking for changes to the [offset] should use [addListener].
   /// This method must not be called after [dispose] has been called.
   void addTopListener(VoidCallback callback) {
-    _topListeners.add(callback);
+    if (_position == null) {
+      _pendingTopListenerCallbacks.add(callback);
+    } else {
+      _position._topAnimationController.addListener(callback);
+    }
   }
 
   /// Remove a previously registered [VoidCallback] from the list of closures
   /// that are notified when [top] changes.
   ///
   /// If the given listener is not registered, the call is ignored.
-  ///
-  /// This method must not be called after [dispose] has been called.
   ///
   /// If a listener had been added twice, and is removed once during an
   /// iteration (i.e. in response to a notification), it will still be called
@@ -232,53 +234,11 @@ class BottomSheetScrollController extends ScrollController {
   /// listener on two separate objects which are both forwarding all
   /// registrations to a common upstream object.
   void removeTopListener(VoidCallback callback) {
-    // if we're disposed, this might already be null.
-    _topListeners?.remove(callback);
-  }
-
-  /// Call all the listeners added with [addTopListener].
-  ///
-  /// Call this method whenever [top] changes, to notify any clients the
-  /// object may have. Listeners that are added during this iteration will not
-  /// be visited. Listeners that are removed during this iteration will not be
-  /// called after they are removed.
-  ///
-  /// Exceptions thrown by listeners will be caught and reported using
-  /// [FlutterError.reportError].
-  ///
-  /// This method must not be called after [dispose] has been called.
-  ///
-  /// Surprising behavior can result when reentrantly removing a listener (i.e.
-  /// in response to a notification) that has been registered multiple times.
-  /// See the discussion at [removeTopListener].
-  void notifyTopListeners() {
-    if (_topListeners.isNotEmpty) {
-      final List<VoidCallback> localListeners = List<VoidCallback>.from(_topListeners);
-      for (VoidCallback listener in localListeners) {
-        try {
-          if (_topListeners.contains(listener)) {
-            listener();
-          }
-        } catch (exception, stack) {
-          FlutterError.reportError(FlutterErrorDetails(
-            exception: exception,
-            stack: stack,
-            library: 'widgets library',
-            context: 'while dispatching notifications for $runtimeType',
-            informationCollector: (StringBuffer information) {
-              information
-                  .writeln('The $runtimeType sending notification was:');
-              information.write('  $this');
-            }));
-        }
-      }
+    if (_position == null) {
+      _pendingTopListenerCallbacks.remove(callback);
+    } else {
+      _position._topAnimationController.removeListener(callback);
     }
-  }
-
-  @override
-  void dispose() {
-    _topListeners.clear();
-    super.dispose();
   }
 
   @override
@@ -307,13 +267,12 @@ class BottomSheetScrollController extends ScrollController {
 class BottomSheetScrollPosition extends ScrollPositionWithSingleContext {
   /// Creates a new [BottomSheetScrollPosition].
   ///
-  /// The [context], [animateIn], [top], [notifier], and [minTop] parameters
+  /// The [context], [animateIn], [top], and [minTop] parameters
   /// must not be null.  If [maxTop] is null, it will be defaulted to
   /// [double.maxFinite].  The [minTop] and [maxTop] values must be positive
   /// numbers.
   BottomSheetScrollPosition({
     @required double top,
-    @required this.notifier,
     this.minTop = 0.0,
     @required this.maxTop,
     ScrollPosition oldPosition,
@@ -321,7 +280,6 @@ class BottomSheetScrollPosition extends ScrollPositionWithSingleContext {
     @required ScrollContext context,
     this.animateIn = true,
   })  : assert(top != null),
-        assert(notifier != null),
         assert(minTop != null),
         assert(maxTop != null),
         assert(minTop > 0 || maxTop > 0),
@@ -340,7 +298,7 @@ class BottomSheetScrollPosition extends ScrollPositionWithSingleContext {
       vsync: context.vsync,
       duration: const Duration(milliseconds: 200),
       debugLabel: 'BottomSheetScrollPositoinTopAnimationController',
-    )..addListener(notifier);
+    );
     if (animateIn) {
       _topAnimationController.animateTo(top / maxTop);
     }
@@ -349,9 +307,6 @@ class BottomSheetScrollPosition extends ScrollPositionWithSingleContext {
   /// If true, the bottom sheet will be animated to [top] initially. Otherwise,
   /// the bottom sheet will simply appear at [top].
   final bool animateIn;
-
-  /// The [VoidCallback] to use when [top] is modified.
-  final VoidCallback notifier;
 
   /// The current vertical offset.
   double get top => _topAnimationController.value * maxTop;
@@ -433,7 +388,7 @@ class BottomSheetScrollPosition extends ScrollPositionWithSingleContext {
     // scroll extent, but we still may want to move it up or down.
     return super.maxScrollExtent != null
       ? super.maxScrollExtent + .01
-      : MediaQuery.of(context.storageContext).size.height;
+      : BottomSheetScrollController._getMaxHeight(context.storageContext);
   }
 
   @override
@@ -445,7 +400,6 @@ class BottomSheetScrollPosition extends ScrollPositionWithSingleContext {
 
     // Scrollable expects that we will dispose of its current _drag
     _dragCancelCallback?.call();
-
 
     _ballisticController = AnimationController.unbounded(
       debugLabel: '$runtimeType',
@@ -485,14 +439,10 @@ class BottomSheetScrollPosition extends ScrollPositionWithSingleContext {
     return super.drag(details, dragCancelCallback);
   }
 
-  bool _disposed = false;
   @override
   void dispose() {
-    if (!_disposed) {
-      _disposed = true;
-      _ballisticController?.dispose();
-      _topAnimationController?.dispose();
-      super.dispose();
-    }
+    _ballisticController?.dispose();
+    _topAnimationController?.dispose();
+    super.dispose();
   }
 }
