@@ -188,7 +188,7 @@ class AOTSnapshotter {
         'sharedLib': buildSharedLibrary.toString(),
         'extraGenSnapshotOptions': extraGenSnapshotOptions.join(' '),
         'engineHash': engine.version,
-        'buildersUsed': '${flutterProject != null ? await flutterProject.hasBuilders : false}',
+        'buildersUsed': '${flutterProject != null ? flutterProject.hasBuilders : false}',
       },
       depfilePaths: <String>[],
     );
@@ -299,6 +299,7 @@ class AOTSnapshotter {
     @required bool trackWidgetCreation,
     List<String> extraFrontEndOptions = const <String>[],
   }) async {
+    final FlutterProject flutterProject = await FlutterProject.current();
     final Directory outputDir = fs.directory(outputPath);
     outputDir.createSync(recursive: true);
 
@@ -308,6 +309,7 @@ class AOTSnapshotter {
       printTrace('Extra front-end options: $extraFrontEndOptions');
 
     final String depfilePath = fs.path.join(outputPath, 'kernel_compile.d');
+    final KernelCompiler kernelCompiler = await kernelCompilerFactory.create(flutterProject);
     final CompilerOutput compilerOutput = await kernelCompiler.compile(
       sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
       mainPath: mainPath,
