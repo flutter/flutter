@@ -186,7 +186,6 @@ Hello!
             debuggingOptions: DebuggingOptions.enabled(const BuildInfo(BuildMode.debug, null)));
         expect(result.started, isTrue);
         expect(result.observatoryUri, observatoryUri);
-
         expect(logLines.last, 'Hello!');
       }, overrides: startOverrides);
     });
@@ -204,5 +203,4 @@ class FakeKernelCompilerFactory implements KernelCompilerFactory {
   Future<KernelCompiler> create(FlutterProject flutterProject) async {
     return kernelCompiler;
   }
-
 }
