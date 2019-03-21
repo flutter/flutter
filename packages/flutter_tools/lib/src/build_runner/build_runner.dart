@@ -118,7 +118,8 @@ class BuildRunner extends CodeGenerator {
   }
 
   @override
-  Future<CodegenDaemon> daemon(FlutterProject flutterProject, {
+  Future<CodegenDaemon> daemon(
+    FlutterProject flutterProject, {
     String mainPath,
     bool linkPlatformKernelIn = false,
     bool targetProductVm = false,

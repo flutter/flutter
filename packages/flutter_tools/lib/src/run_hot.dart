@@ -93,8 +93,11 @@ class HotRunner extends ResidentRunner {
     benchmarkData[name].add(value);
   }
 
-  Future<void> _reloadSourcesService(String isolateId,
-      { bool force = false, bool pause = false }) async {
+  Future<void> _reloadSourcesService(
+    String isolateId, {
+    bool force = false,
+    bool pause = false,
+  }) async {
     // TODO(cbernaschina): check that isolateId is the id of the UI isolate.
     final OperationResult result = await restart(pauseAfterRestart: pause);
     if (!result.isOk) {
@@ -589,7 +592,7 @@ class HotRunner extends ResidentRunner {
     }
   }
 
-  Future<OperationResult> _reloadSources({ bool pause = false, String reason, void Function(String message) onSlow, }) async {
+  Future<OperationResult> _reloadSources({ bool pause = false, String reason, void Function(String message) onSlow }) async {
     final Map<String, String> analyticsParameters = <String, String>{};
     if (reason != null) {
       analyticsParameters[kEventReloadReasonParameterName] = reason;

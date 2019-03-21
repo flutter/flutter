@@ -57,8 +57,11 @@ class VsCode {
     }
   }
 
-  factory VsCode.fromDirectory(String installPath, String extensionDirectory,
-      { String edition }) {
+  factory VsCode.fromDirectory(
+    String installPath,
+    String extensionDirectory, {
+    String edition,
+  }) {
     final String packageJsonPath =
         fs.path.join(installPath, 'resources', 'app', 'package.json');
     final String versionString = _getVersionFromPackageJson(packageJsonPath);
