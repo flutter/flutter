@@ -7,7 +7,6 @@ import 'dart:math' as math;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/physics.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 
 import 'debug.dart';
@@ -62,24 +61,7 @@ class BottomSheetScrollController extends ScrollController {
         assert(isPersistent != null),
         _initialTop = _topFromInitialHeightPercentage(initialHeightPercentage, context, forFullScreen),
         maxTop = _calculateMaxTop(initialHeightPercentage, context, isPersistent),
-        super(
-          debugLabel: debugLabel,
-          initialScrollOffset: initialScrollOffset,
-      ) {
-    // If the BottomSheet's child tree doesn't have a Scrollable widget that
-    // inherits our PrimaryScrollController, it will never become visible.
-    assert(() {
-      SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
-        assert(_position != null,
-          'BottomSheets must be created with a scrollable widget that has primary set to true.\n\n'
-          'If you have content that you do not wish to have scrolled beyond its viewable '
-          'area, you should consider using a SingleChildScrollView and setting freeze to true. '
-          'Otherwise, consider using a ListView or GridView.',
-        );
-      });
-      return true;
-    }());
-  }
+        super(debugLabel: debugLabel, initialScrollOffset: initialScrollOffset);
 
   /// Calculates a top value based on a percentage of screen height defined by the
   /// [MediaQuery] associated with the provided [context].
@@ -122,9 +104,21 @@ class BottomSheetScrollController extends ScrollController {
     return _getMaxHeight(context);
   }
 
+  /// Whether this BottomSheetScrollController has become the primary scroll
+  /// controller for a nested scroll controller.
+  ///
+  /// This will return null if asserts are not enabled.
+  bool get debugHasClient {
+    bool hasPosition;
+    assert(() {
+      hasPosition = _position != null;
+      return true;
+    }());
+    return hasPosition;
+  }
+
   BottomSheetScrollPosition _position;
 
-  // TODO(dnfield): Change this in sync with figuring out the screenHeight logic.
   /// The top of the bottom sheet relative to the screen.
   ///
   /// When this value reaches [minTop], the controller will allow the content of

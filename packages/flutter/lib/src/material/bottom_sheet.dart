@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 
 import 'bottom_sheet_scroll_controller.dart';
@@ -218,6 +219,29 @@ class _BottomSheetState extends State<BottomSheet> {
       // onClosing is asserted not null
       widget.onClosing();
    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // If the BottomSheet's child tree doesn't have a Scrollable widget that
+    // inherits our PrimaryScrollController, it will never become visible.
+    assert(() {
+      if (widget.scrollController == null) {
+        return true;
+      }
+      SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
+        assert(widget.scrollController.debugHasClient,
+          'Scroll controlled BottomSheets must be created with a scrollable '
+          'widget that has primary set to true.\n\n'
+          'If you have content that you do not wish to have scrolled beyond its '
+          'viewable area, you should either not use a scroll controlled '
+          'BottomSheet, or make the child of your scroll controlled BottomSheet '
+          'a SingleChildScrollView with freeze set to true.',
+        );
+      });
+      return true;
+    }());
   }
 
   @override
