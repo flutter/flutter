@@ -292,6 +292,8 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 ///  * [RichText], the widget for showing a paragraph of mix-style text.
 ///  * [TextSpan], the class that wraps a [TextStyle] for the purposes of
 ///    passing it to a [RichText].
+///  * [dart:ui.TextStyle], the class in the [dart:ui] library that is
+///    encapsulated by this class and its subclasses.
 @immutable
 class TextStyle extends Diagnosticable {
   /// Creates a text style.
