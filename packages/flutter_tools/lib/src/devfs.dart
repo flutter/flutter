@@ -459,9 +459,8 @@ class DevFS {
         if (deviceUri.path.startsWith(assetBuildDirPrefix)) {
           archivePath = deviceUri.path.substring(assetBuildDirPrefix.length);
         }
-        // When doing full restart, copy content so that isModified does not
-        // reset last check timestamp because we want to report all modified
-        // files to incremental compiler next time user does hot reload.
+        // Only update assets if they have been modified, or if this is the
+        // first upload of the asset bundle.
         if (content.isModified || (bundleFirstUpload && archivePath != null)) {
           dirtyEntries[deviceUri] = content;
           syncedBytes += content.size;
