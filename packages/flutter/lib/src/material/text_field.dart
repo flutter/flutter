@@ -743,7 +743,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     }
   }
 
-  void _handleDragSelectionStart(DragStartDetails details) {
+  void _handleMouseDragSelectionStart(DragStartDetails details) {
     _renderEditable.selectPositionAt(
       from: details.globalPosition,
       cause: SelectionChangedCause.drag,
@@ -751,7 +751,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     _startSplash(details.globalPosition);
   }
 
-  void _handleDragSelectionUpdate(
+  void _handleMouseDragSelectionUpdate(
       DragStartDetails startDetails,
       DragUpdateDetails updateDetails,
   ) {
@@ -930,8 +930,8 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
           onSingleLongTapMoveUpdate: _handleSingleLongTapMoveUpdate,
           onSingleLongTapEnd: _handleSingleLongTapEnd,
           onDoubleTapDown: _handleDoubleTapDown,
-          onDragSelectionStart: _handleDragSelectionStart,
-          onDragSelectionUpdate: _handleDragSelectionUpdate,
+          onDragSelectionStart: _handleMouseDragSelectionStart,
+          onDragSelectionUpdate: _handleMouseDragSelectionUpdate,
           behavior: HitTestBehavior.translucent,
           child: child,
         ),
