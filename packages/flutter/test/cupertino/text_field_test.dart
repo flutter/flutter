@@ -1918,4 +1918,20 @@ void main() {
     await tester.pump();
     expect(renderEditable.cursorColor, const Color(0xFFF44336));
   });
+
+  testWidgets('cursor can override color from theme', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        theme: CupertinoThemeData(),
+        home: Center(
+          child: CupertinoTextField(
+            cursorColor: Color(0xFFF44336),
+          ),
+        ),
+      ),
+    );
+
+    final EditableText editableText = tester.firstWidget(find.byType(EditableText));
+    expect(editableText.cursorColor, const Color(0xFFF44336));
+  });
 }

@@ -672,6 +672,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
     final CupertinoThemeData themeData = CupertinoTheme.of(context);
     final TextStyle textStyle = themeData.textTheme.textStyle.merge(widget.style);
     final Brightness keyboardAppearance = widget.keyboardAppearance ?? themeData.brightness;
+    final Color cursorColor = widget.cursorColor ?? themeData.primaryColor;
 
     final Widget paddedEditable = Padding(
       padding: widget.padding,
@@ -702,7 +703,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
           rendererIgnoresPointer: true,
           cursorWidth: widget.cursorWidth,
           cursorRadius: widget.cursorRadius,
-          cursorColor: themeData.primaryColor,
+          cursorColor: cursorColor,
           cursorOpacityAnimates: true,
           cursorOffset: cursorOffset,
           paintCursorAboveText: true,
