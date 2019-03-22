@@ -50,11 +50,6 @@ class BuildAotCommand extends BuildSubCommand {
   }
 
   @override
-  Set<DevelopmentArtifact> get requiredArtifacts => const <DevelopmentArtifact>{
-    DevelopmentArtifact.universal,
-  };
-
-  @override
   final String name = 'aot';
 
   @override

@@ -342,10 +342,9 @@ abstract class CachedArtifact {
   }
 
   Future<void> update() async {
-    if (location.existsSync()) {
-      location.deleteSync(recursive: true);
+    if (!location.existsSync()) {
+      location.createSync(recursive: true);
     }
-    location.createSync(recursive: true);
     await updateInner();
     cache.setStampFor(name, version);
     _removeDownloadedFiles();
@@ -493,10 +492,9 @@ class FlutterWebSdk extends CachedArtifact {
 
 abstract class EngineCachedArtifact extends CachedArtifact {
   EngineCachedArtifact(
-    String name,
     Cache cache,
     Set<DevelopmentArtifact> requiredArtifacts,
-  ) : super(name, cache, requiredArtifacts);
+  ) : super('engine', cache, requiredArtifacts);
 
   /// Return a list of (directory path, download URL path) tuples.
   List<List<String>> getBinaryDirs();
@@ -506,17 +504,6 @@ abstract class EngineCachedArtifact extends CachedArtifact {
 
   /// A list of the dart package directories to download.
   List<String> getPackageDirs();
-
-  @override
-  Future<void> update() async {
-    if (location.existsSync()) {
-      location.deleteSync(recursive: true);
-    }
-    location.createSync(recursive: true);
-    await updateInner();
-    cache.setStampFor('engine', cache.getVersionFor('engine'));
-    _removeDownloadedFiles();
-  }
 
   @override
   bool isUpToDateInner() {
@@ -543,14 +530,15 @@ abstract class EngineCachedArtifact extends CachedArtifact {
 
   @override
   Future<void> updateInner() async {
-    final String url = '$_storageBaseUrl/flutter_infra/flutter/${cache.getVersionFor('engine')}/';
+    final String url = '$_storageBaseUrl/flutter_infra/flutter/$version/';
 
     final Directory pkgDir = cache.getCacheDir('pkg');
     for (String pkgName in getPackageDirs()) {
       final String pkgPath = fs.path.join(pkgDir.path, pkgName);
       final Directory dir = fs.directory(pkgPath);
-      if (dir.existsSync())
+      if (dir.existsSync()) {
         dir.deleteSync(recursive: true);
+      }
       await _downloadZipArchive('Downloading package $pkgName...', Uri.parse(url + pkgName + '.zip'), pkgDir);
     }
 
@@ -592,7 +580,6 @@ abstract class EngineCachedArtifact extends CachedArtifact {
 /// A cached artifact containing the dart:ui source code.
 class FlutterSdk extends EngineCachedArtifact {
   FlutterSdk(Cache cache) : super(
-    'engine',
     cache,
     const <DevelopmentArtifact>{ DevelopmentArtifact.universal },
   );
@@ -633,7 +620,6 @@ class FlutterSdk extends EngineCachedArtifact {
 
 class AndroidEngineArtifacts extends EngineCachedArtifact {
   AndroidEngineArtifacts(Cache cache) : super(
-    'android-engine',
     cache,
     const <DevelopmentArtifact>{ DevelopmentArtifact.android },
   );
@@ -673,7 +659,6 @@ class AndroidEngineArtifacts extends EngineCachedArtifact {
 
 class IOSEngineArtifacts extends EngineCachedArtifact {
   IOSEngineArtifacts(Cache cache) : super(
-    'ios-engine',
     cache,
     <DevelopmentArtifact>{ DevelopmentArtifact.iOS },
   );
@@ -790,8 +775,9 @@ Future<void> _downloadFile(Uri url, File location) async {
 
 /// Create the given [directory] and parents, as necessary.
 void _ensureExists(Directory directory) {
-  if (!directory.existsSync())
+  if (!directory.existsSync()) {
     directory.createSync(recursive: true);
+  }
 }
 
 const List<List<String>> _osxBinaryDirs = <List<String>>[
