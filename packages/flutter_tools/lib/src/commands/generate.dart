@@ -24,9 +24,6 @@ class GenerateCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     Cache.releaseLockEarly();
-    if (!experimentalBuildEnabled) {
-      throwToolExit('FLUTTER_EXPERIMENTAL_BUILD is not enabled, codegen is unsupported.');
-    }
     final FlutterProject flutterProject = await FlutterProject.current();
     final CodegenDaemon codegenDaemon = await codeGenerator.daemon(flutterProject);
     codegenDaemon.startBuild();

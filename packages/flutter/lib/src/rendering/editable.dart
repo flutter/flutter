@@ -144,6 +144,8 @@ class RenderEditable extends RenderBox {
     ValueNotifier<bool> showCursor,
     bool hasFocus,
     int maxLines = 1,
+    int minLines,
+    bool expands = false,
     StrutStyle strutStyle,
     Color selectionColor,
     double textScaleFactor = 1.0,
@@ -165,6 +167,16 @@ class RenderEditable extends RenderBox {
   }) : assert(textAlign != null),
        assert(textDirection != null, 'RenderEditable created without a textDirection.'),
        assert(maxLines == null || maxLines > 0),
+       assert(minLines == null || minLines > 0),
+       assert(
+         (maxLines == null) || (minLines == null) || (maxLines >= minLines),
+         'minLines can\'t be greater than maxLines',
+       ),
+       assert(expands != null),
+       assert(
+         !expands || (maxLines == null && minLines == null),
+         'minLines and maxLines must be null when expands is true.',
+       ),
        assert(textScaleFactor != null),
        assert(offset != null),
        assert(ignorePointer != null),
@@ -186,6 +198,8 @@ class RenderEditable extends RenderBox {
        _showCursor = showCursor ?? ValueNotifier<bool>(false),
        _hasFocus = hasFocus ?? false,
        _maxLines = maxLines,
+       _minLines = minLines,
+       _expands = expands,
        _selectionColor = selectionColor,
        _selection = selection,
        _offset = offset,
@@ -704,8 +718,7 @@ class RenderEditable extends RenderBox {
       assert(!_listenerAttached);
       RawKeyboard.instance.addListener(_handleKeyEvent);
       _listenerAttached = true;
-    }
-    else {
+    } else {
       assert(_listenerAttached);
       RawKeyboard.instance.removeListener(_handleKeyEvent);
       _listenerAttached = false;
@@ -732,6 +745,29 @@ class RenderEditable extends RenderBox {
     if (maxLines == value)
       return;
     _maxLines = value;
+    markNeedsTextLayout();
+  }
+
+  /// {@macro flutter.widgets.editableText.minLines}
+  int get minLines => _minLines;
+  int _minLines;
+  /// The value may be null. If it is not null, then it must be greater than zero.
+  set minLines(int value) {
+    assert(value == null || value > 0);
+    if (minLines == value)
+      return;
+    _minLines = value;
+    markNeedsTextLayout();
+  }
+
+  /// {@macro flutter.widgets.editableText.expands}
+  bool get expands => _expands;
+  bool _expands;
+  set expands(bool value) {
+    assert(value != null);
+    if (expands == value)
+      return;
+    _expands = value;
     markNeedsTextLayout();
   }
 
@@ -1194,8 +1230,28 @@ class RenderEditable extends RenderBox {
   double get preferredLineHeight => _textPainter.preferredLineHeight;
 
   double _preferredHeight(double width) {
-    if (maxLines != null)
+    // Lock height to maxLines if needed
+    final bool lockedMax = maxLines != null && minLines == null;
+    final bool lockedBoth = minLines != null && minLines == maxLines;
+    final bool singleLine = maxLines == 1;
+    if (singleLine || lockedMax || lockedBoth) {
       return preferredLineHeight * maxLines;
+    }
+
+    // Clamp height to minLines or maxLines if needed
+    final bool minLimited = minLines != null && minLines > 1;
+    final bool maxLimited = maxLines != null;
+    if (minLimited || maxLimited) {
+      _layoutText(width);
+      if (minLimited && _textPainter.height < preferredLineHeight * minLines) {
+        return preferredLineHeight * minLines;
+      }
+      if (maxLimited && _textPainter.height > preferredLineHeight * maxLines) {
+        return preferredLineHeight * maxLines;
+      }
+    }
+
+    // Set the height based on the content
     if (width == double.infinity) {
       final String text = _textPainter.text.toPlainText();
       int lines = 1;
@@ -1320,15 +1376,23 @@ class RenderEditable extends RenderBox {
       final TextPosition toPosition = to == null
         ? null
         : _textPainter.getPositionForOffset(globalToLocal(to - _paintOffset));
-      onSelectionChanged(
-        TextSelection(
-          baseOffset: fromPosition.offset,
-          extentOffset: toPosition?.offset ?? fromPosition.offset,
-          affinity: fromPosition.affinity,
-        ),
-        this,
-        cause,
+
+      int baseOffset = fromPosition.offset;
+      int extentOffset = fromPosition.offset;
+      if (toPosition != null) {
+        baseOffset = math.min(fromPosition.offset, toPosition.offset);
+        extentOffset = math.max(fromPosition.offset, toPosition.offset);
+      }
+
+      final TextSelection newSelection = TextSelection(
+        baseOffset: baseOffset,
+        extentOffset: extentOffset,
+        affinity: fromPosition.affinity,
       );
+      // Call [onSelectionChanged] only when the selection actually changed.
+      if (newSelection != _selection) {
+        onSelectionChanged(newSelection, this, cause);
+      }
     }
   }
 
@@ -1500,7 +1564,7 @@ class RenderEditable extends RenderBox {
     }
     _floatingCursorOn = state != FloatingCursorDragState.End;
     _resetFloatingCursorAnimationValue = resetLerpValue;
-    if(_floatingCursorOn) {
+    if (_floatingCursorOn) {
       _floatingCursorOffset = boundedOffset;
       _floatingCursorTextPosition = lastTextPosition;
     }
@@ -1517,7 +1581,7 @@ class RenderEditable extends RenderBox {
     double sizeAdjustmentX = _kFloatingCaretSizeIncrease.dx;
     double sizeAdjustmentY = _kFloatingCaretSizeIncrease.dy;
 
-    if(_resetFloatingCursorAnimationValue != null) {
+    if (_resetFloatingCursorAnimationValue != null) {
       sizeAdjustmentX = ui.lerpDouble(sizeAdjustmentX, 0, _resetFloatingCursorAnimationValue);
       sizeAdjustmentY = ui.lerpDouble(sizeAdjustmentY, 0, _resetFloatingCursorAnimationValue);
     }
@@ -1580,9 +1644,9 @@ class RenderEditable extends RenderBox {
     final double adjustedY = math.min(math.max(currentY, topBound), bottomBound);
     final Offset adjustedOffset = Offset(adjustedX, adjustedY);
 
-    if (currentX < leftBound && deltaPosition.dx < 0) {
+    if (currentX < leftBound && deltaPosition.dx < 0)
       _resetOriginOnLeft = true;
-    } else if(currentX > rightBound && deltaPosition.dx > 0)
+    else if (currentX > rightBound && deltaPosition.dx > 0)
       _resetOriginOnRight = true;
     if (currentY < topBound && deltaPosition.dy < 0)
       _resetOriginOnTop = true;
@@ -1658,6 +1722,8 @@ class RenderEditable extends RenderBox {
     properties.add(DiagnosticsProperty<Color>('cursorColor', cursorColor));
     properties.add(DiagnosticsProperty<ValueNotifier<bool>>('showCursor', showCursor));
     properties.add(IntProperty('maxLines', maxLines));
+    properties.add(IntProperty('minLines', minLines));
+    properties.add(DiagnosticsProperty<bool>('expands', expands, defaultValue: false));
     properties.add(DiagnosticsProperty<Color>('selectionColor', selectionColor));
     properties.add(DoubleProperty('textScaleFactor', textScaleFactor));
     properties.add(DiagnosticsProperty<Locale>('locale', locale, defaultValue: null));

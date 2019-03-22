@@ -1001,6 +1001,17 @@ Future<void> _runFlutterTest(Directory workingDir, { String target }) async {
     'flutter_tools.dart',
   ));
 
+  // While flutter test does get packages, it doesn't write version
+  // files anymore.
+  await Process.run(
+    '$dartSdkPath/bin/dart',
+    <String>[]
+    ..addAll(dartVmFlags)
+    ..add(flutterToolsPath)
+    ..addAll(<String>['packages', 'get']),
+    workingDirectory: workingDir.path,
+  );
+
   final List<String> args = <String>[]
     ..addAll(dartVmFlags)
     ..add(flutterToolsPath)

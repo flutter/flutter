@@ -270,13 +270,15 @@ class _Compiler {
     );
 
     Future<ResidentCompiler> createCompiler() async {
-      if (experimentalBuildEnabled && await flutterProject.hasBuilders) {
+      if (flutterProject.hasBuilders) {
         return CodeGeneratingResidentCompiler.create(
           flutterProject: flutterProject,
           trackWidgetCreation: trackWidgetCreation,
-          initializeFromDill: null, // TODO(jonahwilliams): investigate multi-root support in init from dill.
-          unsafePackageSerialization: false,
           compilerMessageConsumer: reportCompilerMessage,
+          initializeFromDill: testFilePath,
+          // We already ran codegen once at the start, we only need to
+          // configure builders.
+          runCold: true,
         );
       }
       return ResidentCompiler(
@@ -309,7 +311,7 @@ class _Compiler {
           suppressOutput = false;
           final CompilerOutput compilerOutput = await compiler.recompile(
             request.path,
-            <String>[request.path],
+            <Uri>[Uri.parse(request.path)],
             outputPath: outputDill.path,
           );
           final String outputPath = compilerOutput?.outputFilename;

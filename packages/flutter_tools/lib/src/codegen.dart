@@ -25,21 +25,6 @@ const String kMultiRootScheme = 'org-dartlang-app';
 /// implementation.
 CodeGenerator get codeGenerator => context[CodeGenerator];
 
-/// Whether to attempt to build a flutter project using build* libraries.
-///
-/// This requires both an experimental opt in via the environment variable
-/// 'FLUTTER_EXPERIMENTAL_BUILD' and that the project itself has a
-/// dependency on the package 'flutter_build' and 'build_runner.'
-bool get experimentalBuildEnabled {
-  return _experimentalBuildEnabled ??= platform.environment['FLUTTER_EXPERIMENTAL_BUILD']?.toLowerCase() == 'true';
-}
-bool _experimentalBuildEnabled;
-
-@visibleForTesting
-set experimentalBuildEnabled(bool value) {
-  _experimentalBuildEnabled = value;
-}
-
 /// A wrapper for a build_runner process which delegates to a generated
 /// build script.
 ///
@@ -148,8 +133,7 @@ class CodeGeneratingKernelCompiler implements KernelCompiler {
       fileSystemScheme: kMultiRootScheme,
       depFilePath: depFilePath,
       targetModel: targetModel,
-      // Pass an invalid file name to prevent frontend_server from initializing from dill.
-      initializeFromDill: 'none_file',
+      initializeFromDill: initializeFromDill,
     );
   }
 }
@@ -161,22 +145,19 @@ class CodeGeneratingResidentCompiler implements ResidentCompiler {
 
   /// Creates a new [ResidentCompiler] and configures a [BuildDaemonClient] to
   /// run builds.
-  static Future<CodeGeneratingResidentCompiler> create({
+  ///
+  /// If `runCold` is true, then no codegen daemon will be created. Instead the
+  /// compiler will only be initialized with the correct configuration for
+  /// codegen mode.
+  static Future<ResidentCompiler> create({
     @required FlutterProject flutterProject,
     bool trackWidgetCreation = false,
     CompilerMessageConsumer compilerMessageConsumer = printError,
     bool unsafePackageSerialization = false,
     String outputPath,
     String initializeFromDill,
+    bool runCold = false,
   }) async {
-    final CodegenDaemon codegenDaemon = await codeGenerator.daemon(flutterProject);
-    codegenDaemon.startBuild();
-    final CodegenStatus status = await codegenDaemon.buildResults.firstWhere((CodegenStatus status) {
-      return status == CodegenStatus.Succeeded || status == CodegenStatus.Failed;
-    });
-    if (status == CodegenStatus.Failed) {
-      printError('Code generation failed, build may have compile errors.');
-    }
     final ResidentCompiler residentCompiler = ResidentCompiler(
       artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
       trackWidgetCreation: trackWidgetCreation,
@@ -188,9 +169,19 @@ class CodeGeneratingResidentCompiler implements ResidentCompiler {
       fileSystemScheme: kMultiRootScheme,
       targetModel: TargetModel.flutter,
       unsafePackageSerialization: unsafePackageSerialization,
-      // Pass an invalid file name to prevent frontend_server from initializing from dill.
-      initializeFromDill: 'none_file',
+      initializeFromDill: initializeFromDill,
     );
+    if (runCold) {
+      return residentCompiler;
+    }
+    final CodegenDaemon codegenDaemon = await codeGenerator.daemon(flutterProject);
+    codegenDaemon.startBuild();
+    final CodegenStatus status = await codegenDaemon.buildResults.firstWhere((CodegenStatus status) {
+      return status == CodegenStatus.Succeeded || status == CodegenStatus.Failed;
+    });
+    if (status == CodegenStatus.Failed) {
+      printError('Code generation failed, build may have compile errors.');
+    }
     return CodeGeneratingResidentCompiler._(residentCompiler, codegenDaemon);
   }
 
@@ -208,7 +199,7 @@ class CodeGeneratingResidentCompiler implements ResidentCompiler {
   }
 
   @override
-  Future<CompilerOutput> recompile(String mainPath, List<String> invalidatedFiles, {String outputPath, String packagesFilePath}) async {
+  Future<CompilerOutput> recompile(String mainPath, List<Uri> invalidatedFiles, {String outputPath, String packagesFilePath}) async {
     if (_codegenDaemon.lastStatus != CodegenStatus.Succeeded && _codegenDaemon.lastStatus != CodegenStatus.Failed) {
       await _codegenDaemon.buildResults.firstWhere((CodegenStatus status) {
         return status == CodegenStatus.Succeeded || status == CodegenStatus.Failed;

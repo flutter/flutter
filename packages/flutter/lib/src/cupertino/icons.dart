@@ -134,6 +134,20 @@ class CupertinoIcons {
   ///  * [check_mark_circled], which is similar, but not filled in.
   static const IconData check_mark_circled_solid = IconData(0xf3ff, fontFamily: iconFont, fontPackage: iconFontPackage);
 
+  /// An empty circle (a ring).  An un-selected radio button.
+  ///
+  /// See also:
+  ///
+  ///  * [circle_filled], which is similar but filled in.
+  static const IconData circle = IconData(0xf401, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A filled circle.  The circle is surrounded by a ring.  A selected radio button.
+  ///
+  /// See also:
+  ///
+  ///  * [circle], which is similar but not filled in.
+  static const IconData circle_filled = IconData(0xf400, fontFamily: iconFont, fontPackage: iconFontPackage);
+
   /// A thicker left chevron used in iOS for the navigation bar back button.
   static const IconData back = IconData(0xf3cf, fontFamily: iconFont, fontPackage: iconFontPackage, matchTextDirection: true);
 
@@ -834,4 +848,18 @@ class CupertinoIcons {
   ///
   ///  * [lab_flask], similar, but not filled in.
   static const IconData lab_flask_solid = IconData(0xf431, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// An outlined heart shape. Can be used to indicate like or favorite states.
+  ///
+  /// See also:
+  ///
+  ///  * [heart_solid], same shape, but filled in.
+  static const IconData heart = IconData(0xf442, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A filled heart shape. Can be used to indicate like or favorite states.
+  ///
+  /// See also:
+  ///
+  ///  * [heart], same shape, but not filled in.
+  static const IconData heart_solid = IconData(0xf443, fontFamily: iconFont, fontPackage: iconFontPackage);
 }

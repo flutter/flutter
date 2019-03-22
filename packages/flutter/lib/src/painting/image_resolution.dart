@@ -260,8 +260,7 @@ class AssetImage extends AssetBundleImageProvider {
   static final RegExp _extractRatioRegExp = RegExp(r'/?(\d+(\.\d*)?)x$');
 
   double _parseScale(String key) {
-
-    if ( key == assetName){
+    if (key == assetName) {
       return _naturalResolution;
     }
 

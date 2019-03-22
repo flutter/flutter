@@ -97,7 +97,7 @@ void main() {
         path: '/cr/report',
         queryParameters: <String, String>{
           'product': 'Flutter_Tools',
-          'version' : 'test-version',
+          'version': 'test-version',
         },
       ));
       expect(fields['uuid'], '00000000-0000-4000-0000-000000000000');
@@ -148,7 +148,7 @@ void main() {
         path: '/fake_server',
         queryParameters: <String, String>{
           'product': 'Flutter_Tools',
-          'version' : 'test-version',
+          'version': 'test-version',
         },
       ));
     }, overrides: <Type, Generator> {

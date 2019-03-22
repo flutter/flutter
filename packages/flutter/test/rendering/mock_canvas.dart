@@ -573,7 +573,7 @@ class _TestRecordingCanvasPaintsCountMatcher extends _TestRecordingCanvasMatcher
   @override
   bool _evaluatePredicates(Iterable<RecordedInvocation> calls, StringBuffer description) {
     int count = 0;
-    for(RecordedInvocation call in calls) {
+    for (RecordedInvocation call in calls) {
       if (call.invocation.isMethod && call.invocation.memberName == _methodName) {
         count++;
       }
