@@ -342,8 +342,10 @@ class _TabSwitchingViewState extends State<_TabSwitchingView> {
           child: TickerMode(
             enabled: active,
             child: FocusScope(
-              node: tabFocusNodes[index],
-              child: tabs[index] ?? Container(),
+              child: Builder(builder: (BuildContext context) {
+                tabFocusNodes[index] = FocusScope.of(context);
+                return tabs[index] ?? Container();
+              }),
             ),
           ),
         );

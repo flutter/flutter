@@ -172,14 +172,14 @@ class _FocusableState extends State<Focusable> {
   void didUpdateWidget(Focusable oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget._externalNode == widget._externalNode) {
-      // Nothing we cared about changed.
+      // Nothing we care about changed.
       return;
     }
     if (oldWidget._externalNode == null && widget._externalNode != null) {
       // We're no longer using the node we were managing. We don't stop managing
       // it until dispose, so do nothing yet: we might re-use it eventually, and
       // calling dispose on it here will confuse the raw keyboard handler that
-      // hasn't yet been notified of a widget change, but do unlisten.
+      // hasn't yet been notified of a widget change, but do stop listening.
       _internalNode?.removeListener(_handleFocusChanged);
       widget._externalNode?.addListener(_handleFocusChanged);
     } else if (oldWidget._externalNode != null && widget._externalNode == null) {
@@ -192,7 +192,6 @@ class _FocusableState extends State<Focusable> {
       oldWidget._externalNode?.removeListener(_handleFocusChanged);
       widget._externalNode?.addListener(_handleFocusChanged);
     }
-    Focusable.of(context).reparentIfNeeded(node);
     if (oldWidget.autofocus != widget.autofocus) {
       node.isAutoFocus = widget.autofocus;
     }
@@ -211,6 +210,7 @@ class _FocusableState extends State<Focusable> {
 
   @override
   Widget build(BuildContext context) {
+    Focusable.of(context).reparentIfNeeded(node);
     return RawKeyboardListener(
       focusNode: node,
       onKey: (RawKeyEvent event) {
@@ -271,7 +271,6 @@ class FocusScope extends Focusable {
     String debugLabel,
   })  : assert(child != null),
         assert(autofocus != null),
-        _externalNode = node,
         super(
           key: key,
           child: child,
@@ -280,18 +279,6 @@ class FocusScope extends Focusable {
           onKey: onKey,
           debugLabel: debugLabel,
         );
-
-  /// Deprecated node.
-  ///
-  /// Focusable manages its own node, so this argument is used if provided, but
-  /// not required. If provided, you must manage the node lifetime ' yourself.
-  ///
-  /// Does not provide access to the internally managed node, only the node that
-  /// is provided as a constructor argument.
-  @Deprecated('FocusScope now normally manages its own node, so this argument '
-      'is used if provided, but not required. If provided, you must manage '
-      'the node lifetime yourself.')
-  final FocusNode node;
 
   /// Returns the node of the [FocusScope] that most tightly encloses the given
   /// [BuildContext].
@@ -313,8 +300,11 @@ class FocusScope extends Focusable {
     return parent?.ancestors?.cast<FocusScopeNode>()?.toList() ?? <FocusScopeNode>[];
   }
 
-  @override
-  final FocusScopeNode _externalNode;
+  /// The focus scope node that this FocusScope will manage.
+  ///
+  /// You do not need to manage the lifetime of this, the FocusScope will adopt
+  /// it.
+  final FocusScopeNode node;
 
   @override
   _FocusableScopeState createState() => _FocusableScopeState();

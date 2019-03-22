@@ -150,6 +150,14 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     _children.remove(node);
   }
 
+  // Updates the manager for all descendants to the given manager.
+  void _updateManager(FocusManager manager) {
+    for (FocusNode node in descendants) {
+      node._manager = manager;
+    }
+    _manager = manager;
+  }
+
   /// Moves the given node to be a child of this node.
   ///
   /// Called whenever the associated widget is rebuilt in order to maintain the
@@ -182,7 +190,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     child.detach();
     _children.add(child);
     child._parent = this;
-    child._manager = _manager;
+    child._updateManager(_manager);
     // If this child is an autofocus node, then set that as the focused child
     // in its scope.
     child.enclosingScope._focusedChild ??= child.isAutoFocus ? child : null;
@@ -290,10 +298,10 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// Calling this will clear the [policyData] for the enclosing scope.
   void requestFocus([FocusNode node]) {
     if (node != null) {
-      // If an argument was given, then just tell the node given to focus
-      // itself. This is to emulate previous API functionality, and helps the
-      // syntax of widgets using inherited widgets to add dependencies
-      // implicitly.
+      // If an argument was given, then it expects to be a child of this node,
+      // and have the focus given to it.  Reparent the node and then request
+      // focus on it.
+      reparentIfNeeded(node);
       node.requestFocus();
       return;
     }
@@ -448,10 +456,11 @@ class FocusScopeNode extends FocusNode {
   /// Use [hasFocus] instead.
   bool get isFirstFocus => hasFocus;
 
-  /// Deprecated way to set the focus to this scope.
+  /// Add the given node as a child of this focus scope, and make it be the
+  /// [focusedChild].
   void setFirstFocus(FocusScopeNode node) {
     reparentIfNeeded(node);
-    requestFocus(node);
+    _focusedChild = node;
   }
 
   /// Returns the child of this node which should receive focus if this scope
