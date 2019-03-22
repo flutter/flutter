@@ -4,8 +4,7 @@
 
 import 'dart:async';
 
-import 'package:flutter_tools/src/cache.dart';
-
+import '../cache.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
 
