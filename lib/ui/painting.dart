@@ -1520,6 +1520,11 @@ class _ImageInfo {
 ///
 /// To draw an [Image], use one of the methods on the [Canvas] class, such as
 /// [Canvas.drawImage].
+///
+/// See also:
+///
+///  * [Image], the class in the [widgets] library that encapsulates this class.
+///
 @pragma('vm:entry-point')
 class Image extends NativeFieldWrapperClass2 {
   // This class is created by the engine, and should not be instantiated
@@ -2678,6 +2683,11 @@ Float32List _encodeTwoPoints(Offset pointA, Offset pointB) {
 ///
 /// There are several types of gradients, represented by the various constructors
 /// on this class.
+///
+/// See also:
+///
+///  * [Gradient], the class in the [painting] library that encapsulates this class.
+///
 class Gradient extends Shader {
 
   void _constructor() native 'Gradient_constructor';
