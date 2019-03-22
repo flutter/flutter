@@ -590,6 +590,11 @@ class SemanticsUpdateBuilder {
   /// The fields 'textSelectionBase' and 'textSelectionExtent' describe the
   /// currently selected text within `value`.
   ///
+  /// The field `platformViewId` references the platform view, whose semantics
+  /// nodes will be added as children to this node. If a platform view is
+  /// specified, `childrenInHitTestOrder` and `childrenInTraversalOrder` must be
+  /// empty.
+  ///
   /// For scrollable nodes `scrollPosition` describes the current scroll
   /// position in logical pixel. `scrollExtentMax` and `scrollExtentMin`
   /// describe the maximum and minimum in-rage values that `scrollPosition` can
@@ -618,6 +623,7 @@ class SemanticsUpdateBuilder {
     int actions,
     int textSelectionBase,
     int textSelectionExtent,
+    int platformViewId,
     int scrollChildren,
     int scrollIndex,
     double scrollPosition,
