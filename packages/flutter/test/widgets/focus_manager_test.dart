@@ -75,7 +75,6 @@ void main() {
       scope.reparentIfNeeded(parent);
       parent.reparentIfNeeded(child1);
       parent.reparentIfNeeded(child2);
-      expect(scope.isScope, isTrue);
       expect(scope.children.first, equals(parent));
       expect(parent.parent, equals(scope));
       expect(child1.parent, equals(parent));
@@ -167,7 +166,6 @@ void main() {
       scope.reparentIfNeeded(parent2);
       parent1.reparentIfNeeded(child1);
       parent1.reparentIfNeeded(child2);
-      expect(scope.isScope, isTrue);
       expect(scope.children.first, equals(parent1));
       expect(scope.children.last, equals(parent2));
       expect(parent1.parent, equals(scope));

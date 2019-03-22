@@ -6,6 +6,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 
 void main() {
+  setUp(() {
+    // Reset the focus manager between tests, to avoid leaking state.
+    WidgetsBinding.instance.focusManager.reset();
+  });
   group(Focusable, () {
     testWidgets('Focusable.of stops at the nearest FocusableScope.', (WidgetTester tester) async {
       final GlobalKey key1 = GlobalKey(debugLabel: '1');
@@ -167,5 +171,30 @@ void main() {
       expect(rootNode.hasFocus, isTrue);
       expect(rootNode, equals(firstElement.owner.focusManager.rootScope));
     });
+  });
+  testWidgets('Nodes are removed when all Focusables are removed.', (WidgetTester tester) async {
+    final GlobalKey key1 = GlobalKey(debugLabel: '1');
+    bool gotFocus;
+    await tester.pumpWidget(
+      FocusScope(
+        child: Focusable(
+          onFocusChange: (bool focused) => gotFocus = focused,
+          child: Container(key: key1),
+        ),
+      ),
+    );
+
+    final Element firstNode = tester.element(find.byKey(key1));
+    final FocusNode node = Focusable.of(firstNode);
+    node.requestFocus();
+
+    await tester.pump();
+
+    expect(gotFocus, isTrue);
+    expect(node.hasFocus, isTrue);
+
+    await tester.pumpWidget(Container());
+
+    expect(WidgetsBinding.instance.focusManager.rootScope.descendants, isEmpty);
   });
 }
