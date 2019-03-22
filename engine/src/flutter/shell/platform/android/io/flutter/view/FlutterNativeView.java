@@ -47,9 +47,8 @@ public class FlutterNativeView implements BinaryMessenger {
         assertAttached();
     }
 
-    public void detach() {
+    public void detachFromFlutterView() {
         mPluginRegistry.detach();
-        dartExecutor.onDetachedFromJNI();
         mFlutterView = null;
     }
 
