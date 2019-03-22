@@ -533,14 +533,14 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
     _editableTextKey.currentState.showToolbar();
   }
 
-  void _handleDragSelectionStart(DragStartDetails details) {
+  void _handleMouseDragSelectionStart(DragStartDetails details) {
     _renderEditable.selectPositionAt(
       from: details.globalPosition,
       cause: SelectionChangedCause.drag,
     );
   }
 
-  void _handleDragSelectionUpdate(
+  void _handleMouseDragSelectionUpdate(
       DragStartDetails startDetails,
       DragUpdateDetails updateDetails,
   ) {
@@ -551,7 +551,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
     );
   }
 
-  void _handleDragSelectionEnd(DragEndDetails details) {
+  void _handleMouseDragSelectionEnd(DragEndDetails details) {
     _requestKeyboard();
   }
 
@@ -763,9 +763,9 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
               onSingleLongTapMoveUpdate: _handleSingleLongTapMoveUpdate,
               onSingleLongTapEnd: _handleSingleLongTapEnd,
               onDoubleTapDown: _handleDoubleTapDown,
-              onDragSelectionStart: _handleDragSelectionStart,
-              onDragSelectionUpdate: _handleDragSelectionUpdate,
-              onDragSelectionEnd: _handleDragSelectionEnd,
+              onDragSelectionStart: _handleMouseDragSelectionStart,
+              onDragSelectionUpdate: _handleMouseDragSelectionUpdate,
+              onDragSelectionEnd: _handleMouseDragSelectionEnd,
               behavior: HitTestBehavior.translucent,
               child: _addTextDependentAttachments(paddedEditable, textStyle),
             ),
