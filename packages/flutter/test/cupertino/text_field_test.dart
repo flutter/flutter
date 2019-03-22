@@ -750,6 +750,45 @@ void main() {
   );
 
   testWidgets(
+    'clear button tapped alse call onChanged when text not empty',
+        (WidgetTester tester) async {
+      String value = '';
+      final TextEditingController controller = TextEditingController();
+      await tester.pumpWidget(
+        CupertinoApp(
+            home: StatefulBuilder(
+                builder: (BuildContext context, StateSetter setState) {
+                  return Center(
+                    child: CupertinoTextField(
+                      controller: controller,
+                      placeholder: 'placeholder',
+                      onChanged: (newValue) =>
+                          setState(() {
+                            value = newValue;
+                          }),
+                      clearButtonMode: OverlayVisibilityMode.always,
+                    ),
+                  );
+                })
+        ),
+      );
+
+      expect(value, isEmpty);
+
+      controller.text = 'text entry';
+      await tester.pump();
+
+      await tester.tap(find.byIcon(CupertinoIcons.clear_thick_circled));
+      await tester.pump();
+
+      expect(controller.text, '');
+      expect(find.text('text entry'), findsNothing);
+      expect(value, 'text entry');
+      expect(find.byIcon(CupertinoIcons.clear_thick_circled), findsOneWidget);
+    },
+  );
+
+  testWidgets(
     'clear button yields precedence to suffix',
     (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController();
