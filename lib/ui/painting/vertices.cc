@@ -73,7 +73,7 @@ void Vertices::init(SkVertices::VertexMode vertex_mode,
   }
   if (colors.data()) {
     // SkVertices::Builder assumes equal numbers of elements
-    FML_DCHECK(positions.num_elements() == colors.num_elements());
+    FML_DCHECK(positions.num_elements() / 2 == colors.num_elements());
     DecodeInts<SkColor>(colors, builder.colors());
   }
 
