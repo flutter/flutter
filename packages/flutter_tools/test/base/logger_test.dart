@@ -36,7 +36,7 @@ void main() {
                                              r'\[ (?: {0,2}\+[0-9]{1,3} ms|       )\] Oooh, I do I do I do\n$'));
       expect(mockLogger.traceText, '');
       expect(mockLogger.errorText, matches( r'^\[ (?: {0,2}\+[0-9]{1,3} ms|       )\] Helpless!\n$'));
-    }, overrides: <Type, Generator> {
+    }, overrides: <Type, Generator>{
       OutputPreferences: () => OutputPreferences(showColor: false),
       Platform: _kNoAnsiPlatform,
     });
@@ -57,7 +57,7 @@ void main() {
       expect(
           mockLogger.errorText,
           matches('^$red' r'\[ (?: {0,2}\+[0-9]{1,3} ms|       )\] ' '${bold}Helpless!$resetBold$resetColor' r'\n$'));
-    }, overrides: <Type, Generator> {
+    }, overrides: <Type, Generator>{
       OutputPreferences: () => OutputPreferences(showColor: true),
       Platform: () => FakePlatform()..stdoutSupportsAnsi = true,
     });

@@ -348,7 +348,7 @@ void main() {
                           onPressed: () {
                             Navigator.pop<void>(context);
                           },
-                        )
+                        ),
                       ],
                     );
                   },

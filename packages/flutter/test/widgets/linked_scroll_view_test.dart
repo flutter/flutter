@@ -105,7 +105,8 @@ class LinkedScrollController extends ScrollController {
 }
 
 class LinkedScrollPosition extends ScrollPositionWithSingleContext {
-  LinkedScrollPosition(this.owner, {
+  LinkedScrollPosition(
+    this.owner, {
     ScrollPhysics physics,
     ScrollContext context,
     double initialPixels,

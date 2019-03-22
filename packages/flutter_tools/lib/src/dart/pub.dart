@@ -76,7 +76,7 @@ Future<void> pubGet({
   bool upgrade = false,
   bool offline = false,
   bool checkLastModified = true,
-  bool skipPubspecYamlCheck = false
+  bool skipPubspecYamlCheck = false,
 }) async {
   directory ??= fs.currentDirectory.path;
 

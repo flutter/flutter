@@ -909,7 +909,10 @@ class PubspecHeader extends PubspecLine {
 
 /// A dependency, as represented by a line (or two) from a pubspec.yaml file.
 class PubspecDependency extends PubspecLine {
-  PubspecDependency(String line, this.name, this.suffix, {
+  PubspecDependency(
+    String line,
+    this.name,
+    this.suffix, {
     @required this.isTransitive,
     DependencyKind kind,
     this.version,

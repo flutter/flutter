@@ -163,7 +163,7 @@ Future<Map<String, String>> getCodeSigningIdentityDevelopmentTeam({
   if (await opensslProcess.exitCode != 0)
     return null;
 
-  return <String, String> {
+  return <String, String>{
     'DEVELOPMENT_TEAM': _certificateOrganizationalUnitExtractionPattern
       .firstMatch(opensslOutput)
       ?.group(1),
