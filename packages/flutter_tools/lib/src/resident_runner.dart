@@ -61,7 +61,7 @@ class FlutterDevice {
   }) async {
     ResidentCompiler generator;
     final FlutterProject flutterProject = await FlutterProject.current();
-    if (experimentalBuildEnabled && await flutterProject.hasBuilders) {
+    if (flutterProject.hasBuilders) {
       generator = await CodeGeneratingResidentCompiler.create(
         flutterProject: flutterProject,
       );

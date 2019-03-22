@@ -317,7 +317,9 @@ class HotRunner extends ResidentRunner {
     // for all devices should be in sync.
     final List<Uri> invalidatedFiles = ProjectFileInvalidator.findInvalidated(
       lastCompiled: flutterDevices[0].devFS.lastCompiled,
-      urisToMonitor: flutterDevices[0].devFS.sources);
+      urisToMonitor: flutterDevices[0].devFS.sources,
+      packagesPath: packagesFilePath,
+    );
     final UpdateFSReport results = UpdateFSReport(success: true);
     for (FlutterDevice device in flutterDevices) {
       results.incorporateResults(await device.updateDevFS(
@@ -939,8 +941,11 @@ class ProjectFileInvalidator {
   static const String _pubCachePathLinuxAndMac = '.pub-cache';
   static const String _pubCachePathWindows = 'Pub/Cache';
 
-  static List<Uri> findInvalidated({@required DateTime lastCompiled,
-    @required List<Uri> urisToMonitor}) {
+  static List<Uri> findInvalidated({
+    @required DateTime lastCompiled,
+    @required List<Uri> urisToMonitor,
+    @required String packagesPath,
+  }) {
     final List<Uri> invalidatedFiles = <Uri>[];
     int scanned = 0;
     final Stopwatch stopwatch = Stopwatch()..start();
@@ -959,6 +964,13 @@ class ProjectFileInvalidator {
       if (updatedAt.millisecondsSinceEpoch > lastCompiled.millisecondsSinceEpoch) {
         invalidatedFiles.add(uri);
       }
+    }
+    // we need to check the .packages file too since it is not used in compilation.
+    final DateTime packagesUpdatedAt = fs.statSync(packagesPath).modified;
+    if (lastCompiled != null && packagesUpdatedAt != null
+        && packagesUpdatedAt.millisecondsSinceEpoch > lastCompiled.millisecondsSinceEpoch) {
+      invalidatedFiles.add(fs.file(packagesPath).uri);
+      scanned++;
     }
     printTrace('Scanned through $scanned files in ${stopwatch.elapsedMilliseconds}ms');
     return invalidatedFiles;
