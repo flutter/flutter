@@ -62,7 +62,6 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   bool _isAutoFocus;
 
   /// Deprecated. Use isAutoFocus instead.
-  @Deprecated('Use isAutoFocus setter instead.')
   void autofocus(FocusNode node) {
     assert(node.enclosingScope == this, "Attempted to autofocus a focus node that wasn't a child of this scope.");
     node.isAutoFocus = true;
@@ -447,7 +446,6 @@ class FocusScopeNode extends FocusNode {
   /// Deprecated way to find out if this scope has focus.
   ///
   /// Use [hasFocus] instead.
-  @Deprecated('Use hasFocus instead.')
   bool get isFirstFocus => hasFocus;
 
   /// Deprecated way to set the focus to this scope.
@@ -570,6 +568,10 @@ class FocusManager with DiagnosticableTreeMixin {
     _currentFocus = null;
     _nextFocus = null;
     _haveScheduledUpdate = false;
+
+    for (FocusNode descendant in rootScope.descendants.toList()) {
+      descendant.detach();
+    }
 
     rootScope.clear();
     rootScope._manager = this;
