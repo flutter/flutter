@@ -9,8 +9,8 @@ import 'dart:io';
 import 'package:args/args.dart' as argslib;
 import 'package:meta/meta.dart';
 
-typedef String HeaderGenerator(String regenerateInstructions);
-typedef String ConstructorGenerator(LocaleInfo locale);
+typedef HeaderGenerator = String Function(String regenerateInstructions);
+typedef ConstructorGenerator = String Function(LocaleInfo locale);
 
 /// Simple data class to hold parsed locale. Does not promise validity of any data.
 class LocaleInfo implements Comparable<LocaleInfo> {

@@ -17,6 +17,13 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' as intl;
 
 import '../material_localizations.dart';
+
+// The classes defined here encode all of the translations found in the
+// `flutter_localizations/lib/src/l10n/*.arb` files.
+//
+// These classes are constructed by the [getMaterialTranslation] method at the
+// bottom of this file, and used by the [_MaterialLocalizationsDelegate.load]
+// method defined in `flutter_localizations/lib/src/material_localizations.dart`.
 ''';
 };
 
@@ -45,4 +52,18 @@ ConstructorGenerator generateMaterialConstructor = (LocaleInfo locale) {
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );''';
-})
+};
+
+const String materialFactoryDeclaration = '''
+GlobalMaterialLocalizations getMaterialTranslation(
+  Locale locale,
+  intl.DateFormat fullYearFormat,
+  intl.DateFormat mediumDateFormat,
+  intl.DateFormat longDateFormat,
+  intl.DateFormat yearMonthFormat,
+  intl.NumberFormat decimalFormat,
+  intl.NumberFormat twoDigitZeroPaddedFormat,
+) {''';
+
+const String materialFactoryArguments =
+    'fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat';
