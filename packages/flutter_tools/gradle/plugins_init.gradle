@@ -5,7 +5,7 @@ allprojects {
     apply plugin: FlutterAarPlugin
 }
 
-/** Adds in a cmpileOnly dependency on flutterJar. */
+/** Adds in a compileOnly dependency on flutterJar. */
 class FlutterAarPlugin implements Plugin<Project> {
     private File flutterJar
     private File debugFlutterJar
@@ -63,6 +63,7 @@ class FlutterAarPlugin implements Plugin<Project> {
         if (project.state.failure) {
             return
         }
+        println flutterJar
         project.dependencies {
             if (flutterJar != null) {
                 compileOnly project.files(flutterJar)

@@ -400,16 +400,16 @@ class AndroidProject {
   }
 
   bool get isUsingGradle {
-    return hostAppGradleRoot.childFile('build.gradle').existsSync();
+    return rootBuildGradle.existsSync();
   }
 
   String get applicationId {
-    final File gradleFile = hostAppGradleRoot.childDirectory('app').childFile('build.gradle');
+    final File gradleFile = appBuildGradle;
     return _firstMatchInFile(gradleFile, _applicationIdPattern)?.group(1);
   }
 
   String get group {
-    final File gradleFile = hostAppGradleRoot.childFile('build.gradle');
+    final File gradleFile = rootBuildGradle;
     return _firstMatchInFile(gradleFile, _groupPattern)?.group(1);
   }
 
@@ -447,6 +447,9 @@ class AndroidProject {
   }
 
   File get localPropertiesFile => _flutterLibGradleRoot.childFile('local.properties');
+
+  File get rootBuildGradle => _flutterLibGradleRoot.childFile('build.gradle');
+  File get appBuildGradle => _flutterLibGradleRoot.childDirectory('app').childFile('build.gradle');
 
   Directory get pluginRegistrantHost => _flutterLibGradleRoot.childDirectory(isModule ? 'Flutter' : 'app');
 

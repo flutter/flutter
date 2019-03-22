@@ -30,6 +30,13 @@ import 'android_studio.dart';
 
 const String gradleVersion = '4.10.2';
 final RegExp _assembleTaskPattern = RegExp(r'assemble(\S+)');
+const String _kSubprojectsNode = '''subprojects {
+    project.buildDir = "\${rootProject.buildDir}/\${project.name}"
+}
+subprojects {
+    project.evaluationDependsOn(':app')
+}
+''';
 
 GradleProject _cachedGradleProject;
 String _cachedGradleExecutable;
@@ -38,7 +45,7 @@ enum FlutterPluginVersion {
   none,
   v1,
   v2,
-  managed,
+  v3,
 }
 
 // Investigation documented in #13975 suggests the filter should be a subset
@@ -49,24 +56,6 @@ enum FlutterPluginVersion {
 final RegExp ndkMessageFilter = RegExp(r'^(?!NDK is missing a ".*" directory'
   r'|If you are not using NDK, unset the NDK variable from ANDROID_NDK_HOME or local.properties to remove this warning'
   r'|If you are using NDK, verify the ndk.dir is set to a valid NDK directory.  It is currently set to .*)');
-
-// This regex is intentionally broad. AndroidX errors can manifest in multiple
-// different ways and each one depends on the specific code config and
-// filesystem paths of the project. Throwing the broadest net possible here to
-// catch all known and likely cases.
-//
-// Example stack traces:
-//
-// https://github.com/flutter/flutter/issues/27226 "AAPT: error: resource android:attr/fontVariationSettings not found."
-// https://github.com/flutter/flutter/issues/27106 "Android resource linking failed|Daemon: AAPT2|error: failed linking references"
-// https://github.com/flutter/flutter/issues/27493 "error: cannot find symbol import androidx.annotation.NonNull;"
-// https://github.com/flutter/flutter/issues/23995 "error: package android.support.annotation does not exist import android.support.annotation.NonNull;"
-final RegExp androidXFailureRegex = RegExp(r'(AAPT|androidx|android\.support)');
-
-final RegExp androidXPluginWarningRegex = RegExp(r'\*{57}'
-  r"|WARNING: This version of (\w+) will break your Android build if it or its dependencies aren't compatible with AndroidX."
-  r'|See https://goo.gl/CP92wY for more information on the problem and how to fix it.'
-  r'|This warning prints for all Android build failures. The real root cause of the error may be unrelated.');
 
 FlutterPluginVersion getFlutterPluginVersion(AndroidProject project) {
   final File plugin = project.hostAppGradleRoot.childFile(
@@ -83,10 +72,10 @@ FlutterPluginVersion getFlutterPluginVersion(AndroidProject project) {
   if (appGradle.existsSync()) {
     for (String line in appGradle.readAsLinesSync()) {
       if (line.contains(RegExp(r'apply from: .*/flutter.gradle'))) {
-        return FlutterPluginVersion.managed;
+        return FlutterPluginVersion.v3;
       }
       if (line.contains("def flutterPluginVersion = 'managed'")) {
-        return FlutterPluginVersion.managed;
+        return FlutterPluginVersion.v3;
       }
     }
   }
@@ -100,7 +89,7 @@ Future<File> getGradleAppOut(AndroidProject androidProject) async {
       // Fall through. Pretend we're v1, and just go with it.
     case FlutterPluginVersion.v1:
       return androidProject.gradleAppOutV1File;
-    case FlutterPluginVersion.managed:
+    case FlutterPluginVersion.v3:
       // Fall through. The managed plugin matches plugin v2 for now.
     case FlutterPluginVersion.v2:
       return fs.file((await _gradleProject()).apkDirectory.childFile('app.apk'));
@@ -149,7 +138,7 @@ Future<GradleProject> _readGradleProject() async {
     );
     project = GradleProject.fromAppProperties(propertiesRunResult.stdout, tasksRunResult.stdout);
   } catch (exception) {
-    if (getFlutterPluginVersion(flutterProject.android) == FlutterPluginVersion.managed) {
+    if (getFlutterPluginVersion(flutterProject.android) == FlutterPluginVersion.v3) {
       status.cancel();
       // Handle known exceptions. This will exit if handled.
       handleKnownGradleExceptions(exception.toString());
@@ -341,8 +330,8 @@ Future<void> buildGradleProject({
       // Fall through. Pretend it's v1, and just go for it.
     case FlutterPluginVersion.v1:
       return _buildGradleProjectV1(project, gradle);
-    case FlutterPluginVersion.managed:
-      // Fall through. Managed plugin builds the same way as plugin v2.
+    case FlutterPluginVersion.v3:
+      return _buildGradleProjectV3(project, gradle, buildInfo, target, isBuildingBundle);
     case FlutterPluginVersion.v2:
       return _buildGradleProjectV2(project, gradle, buildInfo, target, isBuildingBundle);
   }
@@ -351,11 +340,11 @@ Future<void> buildGradleProject({
 // TODO(mklim): Fix the obvious bugs.
 // - Do we need logic for passing along build architecture, local engine, etc?
 // - Make this smart enough to not rebuild the plugin every time?
-Future<void> buildPluginAAR(Plugin plugin, String gradle) async {
+Future<void> buildPluginAAR(Plugin plugin, String gradle, String assembleTask) async {
   final String pluginDir = fs.path.join(plugin.path, 'android');
   writeLocalProperties(fs.file(fs.path.join(pluginDir, 'local.properties')));
   final Status status = logger.startProgress(
-    'Running \'gradlew build\' for $pluginDir...',
+    'Running \'gradlew $assembleTask\' for $pluginDir...',
     timeout: kSlowOperation,
     multilineOutput: true,
   );
@@ -364,11 +353,9 @@ Future<void> buildPluginAAR(Plugin plugin, String gradle) async {
     fs.file(gradle).absolute.path,
     '--init-script',
     initScriptPath,
-    'build',
-    '-x',
-    'lint',
+    assembleTask,
     '-q',
-    '-Pflutter-root=${Cache.flutterRoot}'
+    '-Pflutter-root=${Cache.flutterRoot}',
   ];
 
   final int exitCode = await runCommandAndStreamOutput(command, workingDirectory: pluginDir);
@@ -399,20 +386,37 @@ Future<void> _buildGradleProjectV1(FlutterProject project, String gradle) async 
   printStatus('Built ${fs.path.relative(project.android.gradleAppOutV1File.path)}.');
 }
 
-Future<void> _buildGradleProjectV2(
+Future<void> _buildGradleProjectV3(
   FlutterProject flutterProject,
   String gradle,
   BuildInfo buildInfo,
   String target,
   bool isBuildingBundle,
 ) async {
-  // TODO(mklim): This is breaking, should fix the incompatibility or only case
-  // into this for migrated apps (_buildGradleProjectV3)?
-  final List<Plugin> plugins = findPlugins(flutterProject);
-  for (Plugin plugin in plugins) {
-    await buildPluginAAR(plugin, gradle);
+  final String buildGradle = await flutterProject.android.rootBuildGradle.readAsString();
+  if (buildGradle.contains(_kSubprojectsNode)) {
+    printStatus('Updating build.gradle for new plugin format...');
+    final String updatedBuildGradle = buildGradle.replaceAll(_kSubprojectsNode, '');
+    await flutterProject.android.rootBuildGradle.writeAsString(updatedBuildGradle);
   }
+  return _buildGradleProjectV2(
+    flutterProject,
+    gradle,
+    buildInfo,
+    target,
+    isBuildingBundle,
+    buildPlugins: true
+  );
+}
 
+Future<void> _buildGradleProjectV2(
+  FlutterProject flutterProject,
+  String gradle,
+  BuildInfo buildInfo,
+  String target,
+  bool isBuildingBundle, {
+  bool buildPlugins = false
+}) async {
   final GradleProject project = await _gradleProject();
 
   String assembleTask;
@@ -437,6 +441,14 @@ Future<void> _buildGradleProjectV2(
         printError('You must specify a --flavor option to select one of them.');
       }
       throwToolExit('Gradle build aborted.');
+    }
+  }
+
+  if (buildPlugins) {
+    final List<Plugin> plugins = findPlugins(flutterProject);
+    for (Plugin plugin in plugins) {
+      // Always build assembleRelease. Plugins don't know about profile.
+      await buildPluginAAR(plugin, gradle, 'assembleRelease');
     }
   }
   final Status status = logger.startProgress(
@@ -480,39 +492,16 @@ Future<void> _buildGradleProjectV2(
     command.add('-Ptarget-platform=${getNameForTargetPlatform(buildInfo.targetPlatform)}');
 
   command.add(assembleTask);
-  bool potentialAndroidXFailure = false;
   final int exitCode = await runCommandAndStreamOutput(
     command,
     workingDirectory: flutterProject.android.hostAppGradleRoot.path,
     allowReentrantFlutter: true,
     environment: _gradleEnv,
-    // TODO(mklim): if AndroidX warnings are no longer required, this
-    // mapFunction and all its associated variabled can be replaced with just
-    // `filter: ndkMessagefilter`.
-    mapFunction: (String line) {
-      final bool isAndroidXPluginWarning = androidXPluginWarningRegex.hasMatch(line);
-      if (!isAndroidXPluginWarning && androidXFailureRegex.hasMatch(line)) {
-        potentialAndroidXFailure = true;
-      }
-      // Always print the full line in verbose mode.
-      if (logger.isVerbose) {
-        return line;
-      } else if (isAndroidXPluginWarning || !ndkMessageFilter.hasMatch(line)) {
-        return null;
-      }
-
-      return line;
-    },
+    filter: ndkMessageFilter,
   );
   status.stop();
 
   if (exitCode != 0) {
-    if (potentialAndroidXFailure) {
-      printError('*******************************************************************************************');
-      printError('The Gradle failure may have been because of AndroidX incompatibilities in this Flutter app.');
-      printError('See https://goo.gl/CP92wY for more information on the problem and how to fix it.');
-      printError('*******************************************************************************************');
-    }
     throwToolExit('Gradle task $assembleTask failed with exit code $exitCode', exitCode: exitCode);
   }
 
