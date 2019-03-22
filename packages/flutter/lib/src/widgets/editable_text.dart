@@ -18,6 +18,8 @@ import 'binding.dart';
 import 'debug.dart';
 import 'focus_manager.dart';
 import 'focus_scope.dart';
+import 'focusable.dart';
+import 'focusable_manager.dart';
 import 'framework.dart';
 import 'localizations.dart';
 import 'media_query.dart';
@@ -266,7 +268,8 @@ class EditableText extends StatefulWidget {
   EditableText({
     Key key,
     @required this.controller,
-    @required this.focusNode,
+    this.focusNode,
+    this.focusableNode,
     this.obscureText = false,
     this.autocorrect = true,
     @required this.style,
@@ -302,7 +305,7 @@ class EditableText extends StatefulWidget {
     this.dragStartBehavior = DragStartBehavior.start,
     this.enableInteractiveSelection,
   }) : assert(controller != null),
-       assert(focusNode != null),
+       assert(focusNode != null || focusableNode != null),
        assert(obscureText != null),
        assert(autocorrect != null),
        assert(style != null),
@@ -341,6 +344,9 @@ class EditableText extends StatefulWidget {
 
   /// Controls whether this widget has keyboard focus.
   final FocusNode focusNode;
+
+  /// Controls whether this widget has keyboard focus.
+  final FocusableNode focusableNode;
 
   /// {@template flutter.widgets.editableText.obscureText}
   /// Whether to hide the text being edited (e.g., for passwords).
@@ -745,7 +751,8 @@ class EditableText extends StatefulWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<TextEditingController>('controller', controller));
-    properties.add(DiagnosticsProperty<FocusNode>('focusNode', focusNode));
+    properties.add(DiagnosticsProperty<FocusNode>('focusNode', focusNode, defaultValue: null));
+    properties.add(DiagnosticsProperty<FocusableNode>('focusableNode', focusableNode, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('obscureText', obscureText, defaultValue: false));
     properties.add(DiagnosticsProperty<bool>('autocorrect', autocorrect, defaultValue: true));
     style?.debugFillProperties(properties);
@@ -788,7 +795,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   AnimationController _floatingCursorResetController;
 
   @override
-  bool get wantKeepAlive => widget.focusNode.hasFocus;
+  bool get wantKeepAlive => _hasFocus;
 
   Color get _cursorColor => widget.cursorColor.withOpacity(_cursorBlinkOpacityController.value);
 
@@ -798,7 +805,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   void initState() {
     super.initState();
     widget.controller.addListener(_didChangeTextEditingValue);
-    widget.focusNode.addListener(_handleFocusChanged);
+    widget.focusNode?.addListener(_handleFocusChanged);
+    widget.focusableNode?.addListener(_handleFocusChanged);
     _scrollController.addListener(() { _selectionOverlay?.updateForScroll(); });
     _cursorBlinkOpacityController = AnimationController(vsync: this, duration: _fadeDuration);
     _cursorBlinkOpacityController.addListener(_onCursorColorTick);
@@ -809,7 +817,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (!_didAutoFocus && widget.autofocus) {
+    if (widget.focusNode != null && !_didAutoFocus && widget.autofocus) {
       FocusScope.of(context).autofocus(widget.focusNode);
       _didAutoFocus = true;
     }
@@ -824,8 +832,13 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       _updateRemoteEditingValueIfNeeded();
     }
     if (widget.focusNode != oldWidget.focusNode) {
-      oldWidget.focusNode.removeListener(_handleFocusChanged);
-      widget.focusNode.addListener(_handleFocusChanged);
+      oldWidget.focusNode?.removeListener(_handleFocusChanged);
+      widget.focusNode?.addListener(_handleFocusChanged);
+      updateKeepAlive();
+    }
+    if (widget.focusableNode != oldWidget.focusableNode) {
+      oldWidget.focusableNode?.removeListener(_handleFocusChanged);
+      widget.focusableNode?.addListener(_handleFocusChanged);
       updateKeepAlive();
     }
   }
@@ -841,7 +854,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     assert(_cursorTimer == null);
     _selectionOverlay?.dispose();
     _selectionOverlay = null;
-    widget.focusNode.removeListener(_handleFocusChanged);
+    widget.focusNode?.removeListener(_handleFocusChanged);
+    widget.focusableNode?.removeListener(_handleFocusChanged);
     super.dispose();
   }
 
@@ -966,8 +980,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       // Default behavior if the developer did not provide an
       // onEditingComplete callback: Finalize editing and remove focus.
       widget.controller.clearComposing();
-      if (shouldUnfocus)
-        widget.focusNode.unfocus();
+      if (shouldUnfocus) {
+        widget.focusNode?.unfocus();
+        widget.focusableNode?.unfocus();
+      }
     }
 
     // Invoke optional callback with the user's submitted content.
@@ -990,7 +1006,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     widget.controller.value = value;
   }
 
-  bool get _hasFocus => widget.focusNode.hasFocus;
+  bool get _hasFocus => widget.focusNode != null && widget.focusNode.hasFocus || widget.focusableNode != null && widget.focusableNode.hasFocus;
   bool get _isMultiline => widget.maxLines != 1;
 
   // Calculate the new scroll offset so the cursor remains visible.
@@ -1057,7 +1073,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   void _openOrCloseInputConnectionIfNeeded() {
-    if (_hasFocus && widget.focusNode.consumeKeyboardToken()) {
+    if (_hasFocus && widget.focusNode != null && widget.focusNode.consumeKeyboardToken() ||
+        widget.focusableNode != null && widget.focusableNode.consumeKeyboardToken()) {
       _openInputConnection();
     } else if (!_hasFocus) {
       _closeInputConnectionIfNeeded();
@@ -1079,7 +1096,12 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       final List<FocusScopeNode> ancestorScopes = FocusScope.ancestorsOf(context);
       for (int i = ancestorScopes.length - 1; i >= 1; i -= 1)
         ancestorScopes[i].setFirstFocus(ancestorScopes[i - 1]);
-      FocusScope.of(context).requestFocus(widget.focusNode);
+      if (widget.focusNode != null) {
+        FocusScope.of(context).requestFocus(widget.focusNode);
+      }
+      if (widget.focusableNode != null) {
+        widget.focusableNode.requestFocus();
+      }
     }
   }
 
@@ -1385,7 +1407,12 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
-    FocusScope.of(context).reparentIfNeeded(widget.focusNode);
+    if (widget.focusNode != null) {
+      FocusScope.of(context).reparentIfNeeded(widget.focusNode);
+    }
+    if (widget.focusableNode != null) {
+      FocusableScope.of(context).reparent(widget.focusableNode);
+    }
     super.build(context); // See AutomaticKeepAliveClientMixin.
 
     final TextSelectionControls controls = widget.selectionControls;
