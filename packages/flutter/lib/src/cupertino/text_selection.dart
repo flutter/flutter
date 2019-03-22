@@ -19,6 +19,12 @@ const double _kHandlesPadding = 18.0;
 const double _kToolbarScreenPadding = 8.0;
 const double _kToolbarHeight = 36.0;
 
+// If the distance from the top is less than a certain value,
+// the toolbar should be displayed below the input box.
+// If don't do this, won't be able to properly display and interact toolbar at the top of some phones, such as iPhone X.
+// FIX https://github.com/flutter/flutter/issues/29808
+const double _kToolbarArrowInvertDistance = 100.0;
+
 const Color _kToolbarBackgroundColor = Color(0xFF2E2E2E);
 const Color _kToolbarDividerColor = Color(0xFFB9B9B9);
 // Read off from the output on iOS 12. This color does not vary with the
@@ -41,17 +47,23 @@ const TextStyle _kToolbarButtonFontStyle = TextStyle(
   color: CupertinoColors.white,
 );
 
+enum ArrowDirection { up, down }
+
 /// Paints a triangle below the toolbar.
 class _TextSelectionToolbarNotchPainter extends CustomPainter {
+  final ArrowDirection arrowDirection;
+
+  _TextSelectionToolbarNotchPainter(this.arrowDirection);
+
   @override
   void paint(Canvas canvas, Size size) {
     final Paint paint = Paint()
         ..color = _kToolbarBackgroundColor
         ..style = PaintingStyle.fill;
     final Path triangle = Path()
-        ..lineTo(_kToolbarTriangleSize.width / 2, 0.0)
+        ..lineTo(_kToolbarTriangleSize.width / 2, arrowDirection == ArrowDirection.down ? 0.0 : _kToolbarTriangleSize.height)
         ..lineTo(0.0, _kToolbarTriangleSize.height)
-        ..lineTo(-(_kToolbarTriangleSize.width / 2), 0.0)
+        ..lineTo(-(_kToolbarTriangleSize.width / 2), arrowDirection == ArrowDirection.down ? 0.0 : _kToolbarTriangleSize.height)
         ..close();
     canvas.drawPath(triangle, paint);
   }
@@ -68,12 +80,14 @@ class _TextSelectionToolbar extends StatelessWidget {
     this.handleCopy,
     this.handlePaste,
     this.handleSelectAll,
+    this.arrowDirection,
   }) : super(key: key);
 
   final VoidCallback handleCut;
   final VoidCallback handleCopy;
   final VoidCallback handlePaste;
   final VoidCallback handleSelectAll;
+  final ArrowDirection arrowDirection;
 
   @override
   Widget build(BuildContext context) {
@@ -103,35 +117,45 @@ class _TextSelectionToolbar extends StatelessWidget {
       items.add(_buildToolbarButton(localizations.selectAllButtonLabel, handleSelectAll));
     }
 
+    final Widget padding = Padding(padding: EdgeInsets.only(bottom: 10.0));
+
     final Widget triangle = SizedBox.fromSize(
       size: _kToolbarTriangleSize,
       child: CustomPaint(
-        painter: _TextSelectionToolbarNotchPainter(),
+        painter: _TextSelectionToolbarNotchPainter(arrowDirection),
       ),
     );
 
+    final Widget toolbar = ClipRRect(
+      borderRadius: _kToolbarBorderRadius,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: _kToolbarDividerColor,
+          borderRadius: _kToolbarBorderRadius,
+          // Add a hairline border with the button color to avoid
+          // antialiasing artifacts.
+          border: Border.all(color: _kToolbarBackgroundColor, width: 0),
+        ),
+        child: Row(mainAxisSize: MainAxisSize.min, children: items),
+      ),
+    );
+
+    final List<Widget> menus = arrowDirection == ArrowDirection.down ? <Widget>[
+      toolbar,
+      // TODO(xster): Position the triangle based on the layout delegate, and
+      // avoid letting the triangle line up with any dividers.
+      // https://github.com/flutter/flutter/issues/11274
+      triangle,
+      padding,
+    ] : <Widget>[
+      padding,
+      triangle,
+      toolbar,
+    ];
+
     return Column(
       mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        ClipRRect(
-          borderRadius: _kToolbarBorderRadius,
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              color: _kToolbarDividerColor,
-              borderRadius: _kToolbarBorderRadius,
-              // Add a hairline border with the button color to avoid
-              // antialiasing artifacts.
-              border: Border.all(color: _kToolbarBackgroundColor, width: 0),
-            ),
-            child: Row(mainAxisSize: MainAxisSize.min, children: items),
-          ),
-        ),
-        // TODO(xster): Position the triangle based on the layout delegate, and
-        // avoid letting the triangle line up with any dividers.
-        // https://github.com/flutter/flutter/issues/11274
-        triangle,
-        const Padding(padding: EdgeInsets.only(bottom: 10.0)),
-      ],
+      children: menus,
     );
   }
 
@@ -238,6 +262,12 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
   @override
   Widget buildToolbar(BuildContext context, Rect globalEditableRegion, Offset position, TextSelectionDelegate delegate) {
     assert(debugCheckHasMediaQuery(context));
+
+    final ArrowDirection direction = globalEditableRegion.top > _kToolbarArrowInvertDistance ? ArrowDirection.down : ArrowDirection.up;
+    if (direction == ArrowDirection.up) {
+      position += Offset(0, _kToolbarHeight);
+    }
+
     return ConstrainedBox(
       constraints: BoxConstraints.tight(globalEditableRegion.size),
       child: CustomSingleChildLayout(
@@ -251,6 +281,7 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
           handleCopy: canCopy(delegate) ? () => handleCopy(delegate) : null,
           handlePaste: canPaste(delegate) ? () => handlePaste(delegate) : null,
           handleSelectAll: canSelectAll(delegate) ? () => handleSelectAll(delegate) : null,
+          arrowDirection: direction,
         ),
       ),
     );

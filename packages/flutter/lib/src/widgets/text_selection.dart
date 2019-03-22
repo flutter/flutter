@@ -26,6 +26,13 @@ export 'package:flutter/services.dart' show TextSelectionDelegate;
 /// called.
 const Duration _kDragSelectionUpdateThrottle = Duration(milliseconds: 50);
 
+
+/// If the distance from the top is less than a certain value,
+/// the toolbar should be displayed below the input box.
+/// If don't do this, won't be able to properly display and interact toolbar at the top of some phones, such as iPhone X.
+/// FIX https://github.com/flutter/flutter/issues/29808
+const double _kToolbarArrowInvertDistance = 100.0;
+
 /// Which type of selection handle to be displayed.
 ///
 /// With mixed-direction text, both handles may be the same type. Examples:
@@ -421,17 +428,20 @@ class TextSelectionOverlay {
 
     // Find the horizontal midpoint, just above the selected text.
     final List<TextSelectionPoint> endpoints = renderObject.getEndpointsForSelection(_selection);
-    final Offset midpoint = Offset(
-      (endpoints.length == 1) ?
-        endpoints[0].point.dx :
-        (endpoints[0].point.dx + endpoints[1].point.dx) / 2.0,
-      endpoints[0].point.dy - renderObject.preferredLineHeight,
-    );
 
     final Rect editingRegion = Rect.fromPoints(
       renderObject.localToGlobal(Offset.zero),
       renderObject.localToGlobal(renderObject.size.bottomRight(Offset.zero)),
     );
+
+    double x = (endpoints.length == 1) ? endpoints[0].point.dx : (endpoints[0].point.dx + endpoints[1].point.dx) / 2.0;
+    double y;
+    if (editingRegion.top < _kToolbarArrowInvertDistance) {
+      y = endpoints[0].point.dy + editingRegion.height;
+    } else {
+      y = endpoints[0].point.dy - editingRegion.height;
+    }
+    final Offset midpoint = Offset(x, y);
 
     return FadeTransition(
       opacity: _toolbarOpacity,

@@ -14,9 +14,17 @@ import 'material_localizations.dart';
 import 'theme.dart';
 
 const double _kHandleSize = 22.0;
+const double _kHandlePadding = 26.0;
+
 // Minimal padding from all edges of the selection toolbar to all edges of the
 // viewport.
 const double _kToolbarScreenPadding = 8.0;
+
+// If the distance from the top is less than a certain value,
+// the toolbar should be displayed below the input box.
+// If don't do this, won't be able to properly display and interact toolbar at the top of some phones.
+// FIX https://github.com/flutter/flutter/issues/29808
+const double _kToolbarArrowInvertDistance = 100.0;
 
 /// Manages a copy/paste text selection toolbar.
 class _TextSelectionToolbar extends StatelessWidget {
@@ -133,6 +141,11 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
   Widget buildToolbar(BuildContext context, Rect globalEditableRegion, Offset position, TextSelectionDelegate delegate) {
     assert(debugCheckHasMediaQuery(context));
     assert(debugCheckHasMaterialLocalizations(context));
+
+    if (globalEditableRegion.top < _kToolbarArrowInvertDistance) {
+      position += Offset(0, _kHandlePadding);
+    }
+
     return ConstrainedBox(
       constraints: BoxConstraints.tight(globalEditableRegion.size),
       child: CustomSingleChildLayout(
@@ -155,7 +168,7 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
   @override
   Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textHeight) {
     final Widget handle = Padding(
-      padding: const EdgeInsets.only(right: 26.0, bottom: 26.0),
+      padding: const EdgeInsets.only(right: _kHandlePadding, bottom: _kHandlePadding),
       child: SizedBox(
         width: _kHandleSize,
         height: _kHandleSize,
