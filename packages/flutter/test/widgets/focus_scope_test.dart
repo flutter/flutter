@@ -651,8 +651,6 @@ void main() {
     WidgetsBinding.instance.focusManager.rootScope.setFirstFocus(FocusScope.of(keyA.currentContext));
 
     await tester.pumpAndSettle();
-    print(WidgetsBinding.instance.focusManager.rootScope.toStringDeep(prefixLineOne: 'Before: '));
-//    print(WidgetsBinding.instance.focusManager.rootScope.toStringDeep(prefixLineOne: 'After:  '));
 
     expect(keyA.currentState.focusNode.hasFocus, isTrue);
     expect(find.text('A FOCUSED'), findsOneWidget);
