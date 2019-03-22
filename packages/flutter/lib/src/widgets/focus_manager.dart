@@ -73,8 +73,14 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// This method is safe to call regardless of whether this node has ever
   /// requested focus.
   void unfocus() {
-    // TODO(gspencer): Implement this.
-    assert(false, 'not implemented');
+    final FocusScopeNode scope = enclosingScope;
+    if (scope == null) {
+      return;
+    }
+    if (scope._focusedChild == this) {
+      scope._focusedChild = null;
+    }
+    _manager?._willUnfocusNode(this);
   }
 
   /// Removes the keyboard token from this focus node if it has one.
@@ -139,7 +145,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     assert(_children.contains(node), "Tried to remove a node that wasn't a child.");
     // If this was the focused child for this scope, then unfocus it in that
     // scope.
-    node._unfocus();
+    node.unfocus();
 
     node._parent = null;
     _children.remove(node);
@@ -366,18 +372,6 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     }
   }
 
-  // TODO(gspencer): Validate that this is correct behavior for unfocusing.
-  void _unfocus() {
-    final FocusScopeNode scope = enclosingScope;
-    if (scope == null) {
-      return;
-    }
-    if (scope._focusedChild == this) {
-      scope._focusedChild = null;
-    }
-    _manager?._willUnfocusNode(this);
-  }
-
   /// Request that the widget move the focus to the next focusable node, by
   /// calling the [FocusTraversalPolicy.next] function.
   bool nextFocus() => DefaultFocusTraversal.of(context).next(this);
@@ -457,7 +451,6 @@ class FocusScopeNode extends FocusNode {
   bool get isFirstFocus => hasFocus;
 
   /// Deprecated way to set the focus to this scope.
-  @Deprecated('Use requestFocus on the node instead, after adding it to the tree with reparentIfNeeded.')
   void setFirstFocus(FocusScopeNode node) {
     reparentIfNeeded(node);
     requestFocus(node);

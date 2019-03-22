@@ -310,7 +310,7 @@ class FocusScope extends Focusable {
   static List<FocusScopeNode> ancestorsOf(BuildContext context) {
     assert(context != null);
     final FocusScopeNode parent = FocusScope.of(context);
-    return parent?.ancestors;
+    return parent?.ancestors?.cast<FocusScopeNode>()?.toList() ?? <FocusScopeNode>[];
   }
 
   @override

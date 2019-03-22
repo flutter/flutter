@@ -24,6 +24,8 @@ const Color cursorColor = Color.fromARGB(0xFF, 0xFF, 0x00, 0x00);
 void main() {
   setUp(() {
     debugResetSemanticsIdCounter();
+    // Reset the focus manager between tests, to avoid leaking state.
+    WidgetsBinding.instance.focusManager.reset();
   });
 
   // Tests that the desired keyboard action button is requested.
