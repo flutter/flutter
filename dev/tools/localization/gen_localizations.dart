@@ -428,6 +428,7 @@ const Map<String, String> _scriptCategoryToEnum = <String, String>{
 String generateValue(String value, Map<String, dynamic> attributes) {
   if (value == null)
     return null;
+  // cupertino_en.arb doesn't use x-flutter-type.
   if (attributes != null) {
     switch (attributes['x-flutter-type']) {
       case 'icuShortTimePattern':
@@ -503,9 +504,16 @@ Future<void> main(List<String> rawArgs) async {
     localeToResources: materialLocaleToResources,
     localeToResourceAttributes: materialLocaleToResourceAttributes,
   );
+  loadMatchingArbsIntoBundleMaps(
+    directory: directory,
+    filenamePattern: cupertinoFilenameRE,
+    localeToResources: cupertinoLocaleToResources,
+    localeToResourceAttributes: cupertinoLocaleToResourceAttributes,
+  );
 
   try {
     validateLocalizations(materialLocaleToResources, materialLocaleToResourceAttributes);
+    validateLocalizations(cupertinoLocaleToResources, cupertinoLocaleToResourceAttributes);
   } on ValidationError catch (exception) {
     exitWithError('$exception');
   }
