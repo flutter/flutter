@@ -762,10 +762,11 @@ void main() {
                     child: CupertinoTextField(
                       controller: controller,
                       placeholder: 'placeholder',
-                      onChanged: (String newValue) =>
-                          setState(() {
-                            value = newValue;
-                          }),
+                      onChanged: (String newValue) {
+                        setState(() {
+                          value = newValue;
+                        });
+                      },
                       clearButtonMode: OverlayVisibilityMode.always,
                     ),
                   );
