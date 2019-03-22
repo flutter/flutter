@@ -28,7 +28,6 @@ enum Artifact {
   engineDartBinary,
   dart2jsSnapshot,
   kernelWorkerSnapshot,
-  flutterWebSdk,
 }
 
 String _artifactToFileName(Artifact artifact, [ TargetPlatform platform, BuildMode mode ]) {
@@ -67,9 +66,6 @@ String _artifactToFileName(Artifact artifact, [ TargetPlatform platform, BuildMo
     case Artifact.flutterPatchedSdkPath:
       assert(false, 'No filename for sdk path, should not be invoked');
       return null;
-    case Artifact.flutterWebSdk:
-      assert(false, 'No filename for web sdk path, should not be invoked');
-      return null;
     case Artifact.engineDartSdkPath:
       return 'dart-sdk';
     case Artifact.frontendServerSnapshotForEngineDartSdk:
@@ -77,9 +73,9 @@ String _artifactToFileName(Artifact artifact, [ TargetPlatform platform, BuildMo
     case Artifact.engineDartBinary:
       return 'dart';
     case Artifact.dart2jsSnapshot:
-      return 'dart2js.dart.snapshot';
+      return 'flutter_dart2js.dart.snapshot';
     case Artifact.kernelWorkerSnapshot:
-      return 'kernel_worker.dart.snapshot';
+      return 'flutter_kernel_worker.dart.snapshot';
   }
   assert(false, 'Invalid artifact $artifact.');
   return null;
@@ -178,10 +174,6 @@ class CachedArtifacts extends Artifacts {
     return fs.path.join(engineArtifactsPath, 'common', 'flutter_patched_sdk');
   }
 
-  String _getFlutterWebSdkPath() {
-    return cache.getWebSdkDirectory().path;
-  }
-
   String _getHostArtifactPath(Artifact artifact, TargetPlatform platform, BuildMode mode) {
     switch (artifact) {
       case Artifact.genSnapshot:
@@ -205,8 +197,6 @@ class CachedArtifacts extends Artifacts {
         return fs.path.join(_getFlutterPatchedSdkPath(), 'lib', _artifactToFileName(artifact));
       case Artifact.flutterPatchedSdkPath:
         return _getFlutterPatchedSdkPath();
-      case Artifact.flutterWebSdk:
-        return _getFlutterWebSdkPath();
       case Artifact.dart2jsSnapshot:
         return fs.path.join(dartSdkPath, 'bin', 'snapshots', _artifactToFileName(artifact));
       case Artifact.kernelWorkerSnapshot:
@@ -281,8 +271,6 @@ class LocalEngineArtifacts extends Artifacts {
         return fs.path.join(engineOutPath, _artifactToFileName(artifact));
       case Artifact.flutterPatchedSdkPath:
         return _getFlutterPatchedSdkPath();
-      case Artifact.flutterWebSdk:
-        return _getFlutterWebSdkPath();
       case Artifact.frontendServerSnapshotForEngineDartSdk:
         return fs.path.join(_hostEngineOutPath, 'gen', _artifactToFileName(artifact));
       case Artifact.engineDartSdkPath:
@@ -305,10 +293,6 @@ class LocalEngineArtifacts extends Artifacts {
 
   String _getFlutterPatchedSdkPath() {
     return fs.path.join(engineOutPath, 'flutter_patched_sdk');
-  }
-
-  String _getFlutterWebSdkPath() {
-    return fs.path.join(engineOutPath, 'flutter_web_sdk');
   }
 
   String _genSnapshotPath() {
