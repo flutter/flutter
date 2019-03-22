@@ -15,6 +15,30 @@ import 'base/os.dart';
 import 'base/platform.dart';
 import 'globals.dart';
 
+/// A tag for a set of development artifacts that need to be cached.
+enum DevelopmentArtifact {
+  /// Artifacts required for Android development.
+  android,
+
+  /// Artifacts required for iOS development.
+  iOS,
+
+  /// Artifacts required for web development,
+  web,
+
+  /// Artifacts required for desktop macOS.
+  macOS,
+
+  /// Artifacts required for desktop Windows.
+  windows,
+
+  /// Artifacts required for desktop linux.
+  linux,
+
+  /// Artifacts required by all developments.
+  universal,
+}
+
 /// A wrapper around the `bin/cache/` directory.
 class Cache {
   /// [rootOverride] is configurable for testing.
@@ -25,6 +49,7 @@ class Cache {
       _artifacts.add(FlutterEngine(this));
       _artifacts.add(GradleWrapper(this));
       _artifacts.add(FlutterWebSdk(this));
+      _artifacts.add(FlutterSdk(this));
     } else {
       _artifacts.addAll(artifacts);
     }
@@ -194,7 +219,7 @@ class Cache {
     return isOlderThanReference(entity: entity, referenceFile: flutterToolsStamp);
   }
 
-  bool isUpToDate() => _artifacts.every((CachedArtifact artifact) => artifact.isUpToDate());
+  bool isUpToDate(Set<DevelopmentArtifact> requiredArtifacts) => _artifacts.every((CachedArtifact artifact) => artifact.isUpToDate(requiredArtifacts));
 
   Future<String> getThirdPartyFile(String urlStr, String serviceName) async {
     final Uri url = Uri.parse(urlStr);
@@ -217,13 +242,16 @@ class Cache {
     return cachedFile.path;
   }
 
-  Future<void> updateAll() async {
-    if (!_lockEnabled)
+  /// Update the cache to contain all `requiredArtifacts`.
+  Future<void> updateAll(Set<DevelopmentArtifact> requiredArtifacts) async {
+    if (!_lockEnabled) {
       return;
+    }
     try {
       for (CachedArtifact artifact in _artifacts) {
-        if (!artifact.isUpToDate())
+        if (!artifact.isUpToDate(requiredArtifacts)) {
           await artifact.update();
+        }
       }
     } on SocketException catch (e) {
       if (_hostsBlockedInChina.contains(e.address?.host)) {
@@ -241,10 +269,13 @@ class Cache {
 
 /// An artifact managed by the cache.
 abstract class CachedArtifact {
-  CachedArtifact(this.name, this.cache);
+  CachedArtifact(this.name, this.cache, this.developmentArtifacts);
 
   final String name;
   final Cache cache;
+
+  /// All development artifacts this cache provides.
+  final Set<DevelopmentArtifact> developmentArtifacts;
 
   Directory get location => cache.getArtifactDirectory(name);
   String get version => cache.getVersionFor(name);
@@ -255,17 +286,25 @@ abstract class CachedArtifact {
   /// starting from scratch.
   final List<File> _downloadedFiles = <File>[];
 
-  bool isUpToDate() {
-    if (!location.existsSync())
+  bool isUpToDate(Set<DevelopmentArtifact> requiredArtifacts) {
+    // If the set of required artifacts does not include any from this cache,
+    // then we can claim we are up to date to skip downloading.
+    if (!requiredArtifacts.any(developmentArtifacts.contains)) {
+      return true;
+    }
+    if (!location.existsSync()) {
       return false;
-    if (version != cache.getStampFor(name))
+    }
+    if (version != cache.getStampFor(name)) {
       return false;
+    }
     return isUpToDateInner();
   }
 
   Future<void> update() async {
-    if (location.existsSync())
+    if (location.existsSync()) {
       location.deleteSync(recursive: true);
+    }
     location.createSync(recursive: true);
     await updateInner();
     cache.setStampFor(name, version);
@@ -355,7 +394,11 @@ void _maybeWarnAboutStorageOverride(String overrideUrl) {
 
 /// A cached artifact containing fonts used for Material Design.
 class MaterialFonts extends CachedArtifact {
-  MaterialFonts(Cache cache) : super('material_fonts', cache);
+  MaterialFonts(Cache cache) : super(
+    'material_fonts',
+    cache,
+    const <DevelopmentArtifact>{ DevelopmentArtifact.universal },
+  );
 
   @override
   Future<void> updateInner() {
@@ -369,7 +412,11 @@ class MaterialFonts extends CachedArtifact {
 ///
 /// This SDK references code within the regular Dart sdk to reduce download size.
 class FlutterWebSdk extends CachedArtifact {
-  FlutterWebSdk(Cache cache) : super('flutter_web_sdk', cache);
+  FlutterWebSdk(Cache cache) : super(
+    'flutter_web_sdk',
+    cache,
+    const <DevelopmentArtifact>{ DevelopmentArtifact.web },
+  );
 
   @override
   Directory get location => cache.getWebSdkDirectory();
@@ -404,11 +451,49 @@ class FlutterWebSdk extends CachedArtifact {
   }
 }
 
-/// A cached artifact containing the Flutter engine binaries.
-class FlutterEngine extends CachedArtifact {
-  FlutterEngine(Cache cache) : super('engine', cache);
+/// A cached artifact containing the dart:ui source code.
+class FlutterSdk extends CachedArtifact {
+  FlutterSdk(Cache cache) : super(
+    'engine',
+    cache,
+    const <DevelopmentArtifact>{ DevelopmentArtifact.universal },
+  );
 
   List<String> _getPackageDirs() => const <String>['sky_engine'];
+
+  @override
+  bool isUpToDateInner() {
+    final Directory pkgDir = cache.getCacheDir('pkg');
+    for (String pkgName in _getPackageDirs()) {
+      final String pkgPath = fs.path.join(pkgDir.path, pkgName);
+      if (!fs.directory(pkgPath).existsSync())
+        return false;
+    }
+    return true;
+  }
+
+  @override
+  Future<void> updateInner() async {
+    final String url = '$_storageBaseUrl/flutter_infra/flutter/$version/';
+    final Directory pkgDir = cache.getCacheDir('pkg');
+    for (String pkgName in _getPackageDirs()) {
+      final String pkgPath = fs.path.join(pkgDir.path, pkgName);
+      final Directory dir = fs.directory(pkgPath);
+      if (dir.existsSync())
+        dir.deleteSync(recursive: true);
+      await _downloadZipArchive('Downloading package $pkgName...', Uri.parse(url + pkgName + '.zip'), pkgDir);
+    }
+  }
+}
+
+
+/// A cached artifact containing the Flutter engine binaries.
+class FlutterEngine extends CachedArtifact {
+  FlutterEngine(Cache cache) : super(
+    'engine',
+    cache,
+    const <DevelopmentArtifact>{ DevelopmentArtifact.android, DevelopmentArtifact.iOS },
+  );
 
   // Return a list of (cache directory path, download URL path) tuples.
   List<List<String>> _getBinaryDirs() {
@@ -512,15 +597,10 @@ class FlutterEngine extends CachedArtifact {
     return const <String>[];
   }
 
+  List<String> _getPackageDirs() => const <String>['sky_engine'];
+
   @override
   bool isUpToDateInner() {
-    final Directory pkgDir = cache.getCacheDir('pkg');
-    for (String pkgName in _getPackageDirs()) {
-      final String pkgPath = fs.path.join(pkgDir.path, pkgName);
-      if (!fs.directory(pkgPath).existsSync())
-        return false;
-    }
-
     for (List<String> toolsDir in _getBinaryDirs()) {
       final Directory dir = fs.directory(fs.path.join(location.path, toolsDir[0]));
       if (!dir.existsSync())
@@ -538,15 +618,6 @@ class FlutterEngine extends CachedArtifact {
   @override
   Future<void> updateInner() async {
     final String url = '$_storageBaseUrl/flutter_infra/flutter/$version/';
-
-    final Directory pkgDir = cache.getCacheDir('pkg');
-    for (String pkgName in _getPackageDirs()) {
-      final String pkgPath = fs.path.join(pkgDir.path, pkgName);
-      final Directory dir = fs.directory(pkgPath);
-      if (dir.existsSync())
-        dir.deleteSync(recursive: true);
-      await _downloadZipArchive('Downloading package $pkgName...', Uri.parse(url + pkgName + '.zip'), pkgDir);
-    }
 
     for (List<String> toolsDir in _getBinaryDirs()) {
       final String cacheDir = toolsDir[0];
@@ -623,7 +694,11 @@ class FlutterEngine extends CachedArtifact {
 
 /// A cached artifact containing Gradle Wrapper scripts and binaries.
 class GradleWrapper extends CachedArtifact {
-  GradleWrapper(Cache cache) : super('gradle_wrapper', cache);
+  GradleWrapper(Cache cache) : super(
+    'gradle_wrapper',
+    cache,
+    const <DevelopmentArtifact>{ DevelopmentArtifact.android },
+  );
 
   List<String> get _gradleScripts => <String>['gradlew', 'gradlew.bat'];
 
@@ -643,8 +718,9 @@ class GradleWrapper extends CachedArtifact {
   @override
   bool isUpToDateInner() {
     final Directory wrapperDir = cache.getCacheDir(fs.path.join('artifacts', 'gradle_wrapper'));
-    if (!fs.directory(wrapperDir).existsSync())
+    if (!fs.directory(wrapperDir).existsSync()) {
       return false;
+    }
     for (String scriptName in _gradleScripts) {
       final File scriptFile = fs.file(fs.path.join(wrapperDir.path, scriptName));
       if (!scriptFile.existsSync())
