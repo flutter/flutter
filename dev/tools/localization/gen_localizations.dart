@@ -45,79 +45,35 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 import 'package:meta/meta.dart';
 
+import 'gen_material_localizations.dart';
 import 'localizations_utils.dart';
 import 'localizations_validator.dart';
 
-const String outputHeader = '''
-// Copyright 2017 The Chromium Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+/// Maps of locales to resource key/value pairs for Material ARBs.
+final Map<LocaleInfo, Map<String, String>> materialLocaleToResources = <LocaleInfo, Map<String, String>>{};
 
-// This file has been automatically generated. Please do not edit it manually.
-// To regenerate the file, use:
-// @(regenerate)
-
-import 'dart:collection';
-
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-import 'package:intl/intl.dart' as intl;
-
-import '../material_localizations.dart';
-''';
-
-/// Maps locales to resource key/value pairs.
-final Map<LocaleInfo, Map<String, String>> localeToResources = <LocaleInfo, Map<String, String>>{};
-
-/// Maps locales to resource key/attributes pairs.
+/// Maps of locales to resource key/attributes pairs for Material ARBs..
 ///
 /// See also: <https://github.com/googlei18n/app-resource-bundle/wiki/ApplicationResourceBundleSpecification#resource-attributes>
-final Map<LocaleInfo, Map<String, dynamic>> localeToResourceAttributes = <LocaleInfo, Map<String, dynamic>>{};
+final Map<LocaleInfo, Map<String, dynamic>> materialLocaleToResourceAttributes = <LocaleInfo, Map<String, dynamic>>{};
 
-/// Set that holds the locales that were assumed from the existing locales.
-///
-/// For example, when the data lacks data for zh_Hant, we will use the data of
-/// the first Hant Chinese locale as a default by repeating the data. If an
-/// explicit match is later found, we can reference this set to see if we should
-/// overwrite the existing assumed data.
-final Set<LocaleInfo> assumedLocales = <LocaleInfo>{};
+/// Maps of locales to resource key/value pairs for Cupertino ARBs.
+final Map<LocaleInfo, Map<String, String>> cupertinoLocaleToResources = <LocaleInfo, Map<String, String>>{};
 
-/// Return `s` as a Dart-parseable raw string in single or double quotes.
+/// Maps of locales to resource key/attributes pairs for Cupertino ARBs..
 ///
-/// Double quotes are expanded:
-///
-/// ```
-/// foo => r'foo'
-/// foo "bar" => r'foo "bar"'
-/// foo 'bar' => r'foo ' "'" r'bar' "'"
-/// ```
-String generateString(String s) {
-  if (!s.contains("'"))
-    return "r'$s'";
+/// See also: <https://github.com/googlei18n/app-resource-bundle/wiki/ApplicationResourceBundleSpecification#resource-attributes>
+final Map<LocaleInfo, Map<String, dynamic>> cupertinoLocaleToResourceAttributes = <LocaleInfo, Map<String, dynamic>>{};
 
-  final StringBuffer output = StringBuffer();
-  bool started = false; // Have we started writing a raw string.
-  for (int i = 0; i < s.length; i++) {
-    if (s[i] == "'") {
-      if (started)
-        output.write("'");
-      output.write(' "\'" ');
-      started = false;
-    } else if (!started) {
-      output.write("r'${s[i]}");
-      started = true;
-    } else {
-      output.write(s[i]);
-    }
-  }
-  if (started)
-    output.write("'");
-  return output.toString();
-}
+
 
 /// This is the core of this script; it generates the code used for translations.
-String generateTranslationBundles() {
+String generateTranslationBundles({
+  @required HeaderGenerator headerGenerator,
+}) {
   final StringBuffer output = StringBuffer();
+  output.writeln(headerGenerator('dart dev/tools/localization/gen_localizations.dart --overwrite'));
+
   final StringBuffer supportedLocales = StringBuffer();
 
   final Map<String, List<LocaleInfo>> languageToLocales = <String, List<LocaleInfo>>{};
@@ -523,77 +479,6 @@ String generateGetter(String key, String value, Map<String, dynamic> attributes)
   $type get $key => $value;''';
 }
 
-/// Returns the source of the constructor for a GlobalMaterialLocalizations
-/// subclass.
-String generateConstructor(String className, LocaleInfo locale) {
-  final String localeName = locale.originalString;
-  return '''
-  /// Create an instance of the translation bundle for ${describeLocale(localeName)}.
-  ///
-  /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
-  const $className({
-    String localeName = '$localeName',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );''';
-}
-
-/// Parse the data for a locale from a file, and store it in the [attributes]
-/// and [resources] keys.
-void processBundle(File file, { @required String localeString }) {
-  assert(localeString != null);
-  // Helper method to fill the maps with the correct data from file.
-  void populateResources(LocaleInfo locale) {
-    final Map<String, String> resources = localeToResources[locale];
-    final Map<String, dynamic> attributes = localeToResourceAttributes[locale];
-    final Map<String, dynamic> bundle = json.decode(file.readAsStringSync());
-    for (String key in bundle.keys) {
-      // The ARB file resource "attributes" for foo are called @foo.
-      if (key.startsWith('@'))
-        attributes[key.substring(1)] = bundle[key];
-      else
-        resources[key] = bundle[key];
-    }
-  }
-  // Only pre-assume scriptCode if there is a country or script code to assume off of.
-  // When we assume scriptCode based on languageCode-only, we want this initial pass
-  // to use the un-assumed version as a base class.
-  LocaleInfo locale = LocaleInfo.fromString(localeString, deriveScriptCode: localeString.split('_').length > 1);
-  // Allow overwrite if the existing data is assumed.
-  if (assumedLocales.contains(locale)) {
-    localeToResources[locale] = <String, String>{};
-    localeToResourceAttributes[locale] = <String, dynamic>{};
-    assumedLocales.remove(locale);
-  } else {
-    localeToResources[locale] ??= <String, String>{};
-    localeToResourceAttributes[locale] ??= <String, dynamic>{};
-  }
-  populateResources(locale);
-  // Add an assumed locale to default to when there is no info on scriptOnly locales.
-  locale = LocaleInfo.fromString(localeString, deriveScriptCode: true);
-  if (locale.scriptCode != null) {
-    final LocaleInfo scriptLocale = LocaleInfo.fromString(locale.languageCode + '_' + locale.scriptCode);
-    if (!localeToResources.containsKey(scriptLocale)) {
-      assumedLocales.add(scriptLocale);
-      localeToResources[scriptLocale] ??= <String, String>{};
-      localeToResourceAttributes[scriptLocale] ??= <String, dynamic>{};
-      populateResources(scriptLocale);
-    }
-  }
-}
-
 Future<void> main(List<String> rawArgs) async {
   checkCwdIsRepoRoot('gen_localizations');
   final GeneratorOptions options = parseArgs(rawArgs);
@@ -604,36 +489,36 @@ Future<void> main(List<String> rawArgs) async {
 
   final Directory directory = Directory(path.join('packages', 'flutter_localizations', 'lib', 'src', 'l10n'));
   final RegExp materialFilenameRE = RegExp(r'material_(\w+)\.arb$');
+  final RegExp cupertinoFilenameRE = RegExp(r'cupertino_(\w+)\.arb$');
 
   try {
     validateEnglishLocalizations(File(path.join(directory.path, 'material_en.arb')));
+    validateEnglishLocalizations(File(path.join(directory.path, 'cupertino_en.arb')));
   } on ValidationError catch (exception) {
     exitWithError('$exception');
   }
 
   await precacheLanguageAndRegionTags();
 
-  for (FileSystemEntity entity in directory.listSync()) {
-    final String entityPath = entity.path;
-    if (FileSystemEntity.isFileSync(entityPath) && materialFilenameRE.hasMatch(entityPath)) {
-      processBundle(File(entityPath), localeString: materialFilenameRE.firstMatch(entityPath)[1]);
-    }
-  }
+  loadMatchingArbsIntoBundleMaps(
+    directory: directory,
+    filenamePattern: materialFilenameRE,
+    localeToResources: materialLocaleToResources,
+    localeToResourceAttributes: materialLocaleToResourceAttributes,
+  );
 
   try {
-    validateLocalizations(localeToResources, localeToResourceAttributes);
+    validateLocalizations(materialLocaleToResources, materialLocaleToResourceAttributes);
   } on ValidationError catch (exception) {
     exitWithError('$exception');
   }
 
-  final StringBuffer buffer = StringBuffer();
-  buffer.writeln(outputHeader.replaceFirst('@(regenerate)', 'dart dev/tools/localization/gen_localizations.dart --overwrite'));
-  buffer.write(generateTranslationBundles());
+  final String materialLocalizations = generateTranslationBundles(headerGenerator: generateMaterialHeader);
 
   if (options.writeToFile) {
     final File localizationsFile = File(path.join(directory.path, 'generated_material_localizations.dart'));
-    localizationsFile.writeAsStringSync(buffer.toString(), flush: true);
+    localizationsFile.writeAsStringSync(materialLocalizations, flush: true);
   } else {
-    stdout.write(buffer.toString());
+    stdout.write(materialLocalizations);
   }
 }
