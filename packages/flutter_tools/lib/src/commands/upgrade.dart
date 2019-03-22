@@ -55,7 +55,7 @@ class UpgradeCommandRunner {
       if (flutterVersion.channel != 'master' && FlutterVersion.officialChannels.contains(flutterVersion.channel)) {
         throwToolExit(
           'Unknown flutter tag. Abandoning upgrade to avoid destroying local '
-          'changes. It is recommended to use git directly if not working off of '
+          'changes. It is recommended to use git directly if not working on '
           'an official channel.'
         );
       // Otherwise explain that local changes can be lost.
@@ -70,10 +70,10 @@ class UpgradeCommandRunner {
     final String stashName = await maybeStash(gitTagVersion);
     await upgradeChannel(flutterVersion);
     await attemptRebase();
+    await applyStash(stashName);
     await precacheArtifacts();
     await updatePackages(flutterVersion);
     await runDoctor();
-    await applyStash(stashName);
     return null;
   }
 
@@ -87,8 +87,8 @@ class UpgradeCommandRunner {
       ], workingDirectory: Cache.flutterRoot);
     } catch (e) {
       throwToolExit(
-        'Unable to upgrade Flutter: no upstream repository configured. '
-        'Run \'git remote add upstream '
+        'Unable to upgrade Flutter: no origin repository configured. '
+        'Run \'git remote add origin '
         'https://github.com/flutter/flutter\' in ${Cache.flutterRoot}',
       );
     }
