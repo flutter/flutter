@@ -86,6 +86,15 @@ void main() {
     testUsingContext('maybeStash', () async {
       final String stashName = 'flutter-upgrade-from-v${gitTagVersion.x}.${gitTagVersion.y}.${gitTagVersion.z}';
       when(processManager.run(
+        <String>['git', 'status', '-s'],
+        environment:anyNamed('environment'),
+        workingDirectory: anyNamed('workingDirectory'))
+      ).thenAnswer((Invocation invocation) async {
+        return FakeProcessResult()
+          ..exitCode = 0
+          ..stdout = 'this is a changed file';
+      });
+      when(processManager.run(
         <String>['git', 'stash', 'push', '-m', stashName],
         environment:anyNamed('environment'),
         workingDirectory: anyNamed('workingDirectory'))
