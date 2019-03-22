@@ -350,8 +350,7 @@ String generateClassDeclaration(
   return '''
 
 /// The translations for ${describeLocale(locale.originalString)} (`${locale.originalString}`).
-class $classNamePrefix$camelCaseName extends $superClass {
-''';
+class $classNamePrefix$camelCaseName extends $superClass {''';
 }
 
 /// Return `s` as a Dart-parseable raw string in single or double quotes.

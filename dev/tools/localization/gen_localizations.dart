@@ -144,7 +144,7 @@ String generateArbBasedLocalizationSubclasses({
           generatedClassPrefix,
           '$generatedClassPrefix${camelCase(languageLocale)}',
         ));
-        output.writeln(generateConstructor(languageLocale));
+        output.writeln(generateConstructor(scriptBaseLocale));
         final Map<String, String> scriptResources = localeToResources[scriptBaseLocale];
         for (String key in scriptResources.keys) {
           if (languageResources[key] == scriptResources[key])
@@ -168,7 +168,7 @@ String generateArbBasedLocalizationSubclasses({
             generatedClassPrefix,
             '$generatedClassPrefix${camelCase(scriptBaseLocale)}',
           ));
-          output.writeln(generateConstructor(languageLocale));
+          output.writeln(generateConstructor(locale));
           final Map<String, String> localeResources = localeToResources[locale];
           for (String key in localeResources.keys) {
             // When script fallback contains the key, we compare to it instead of language fallback.
@@ -194,7 +194,7 @@ String generateArbBasedLocalizationSubclasses({
           generatedClassPrefix,
           '$generatedClassPrefix${camelCase(languageLocale)}',
         ));
-        output.writeln(generateConstructor(languageLocale));
+        output.writeln(generateConstructor(locale));
         for (String key in localeResources.keys) {
           if (languageResources[key] == localeResources[key])
             continue;
