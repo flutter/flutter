@@ -220,7 +220,6 @@ class KernelCompiler {
     if (fs.file('pubspec.yaml').existsSync()) {
       flutterProject = await FlutterProject.current();
     }
-    final FlutterEngine engine = FlutterEngine(cache);
 
     // TODO(cbracken): eliminate pathFilter.
     // Currently the compiler emits buildbot paths for the core libs in the
@@ -234,7 +233,7 @@ class KernelCompiler {
           'entryPoint': mainPath,
           'trackWidgetCreation': trackWidgetCreation.toString(),
           'linkPlatformKernelIn': linkPlatformKernelIn.toString(),
-          'engineHash': engine.version,
+          'engineHash': Cache.instance.engineRevision,
           'buildersUsed': '${flutterProject != null ? await flutterProject.hasBuilders : false}',
         },
         depfilePaths: <String>[depFilePath],
