@@ -68,8 +68,14 @@ class UpgradeCommandRunner {
       }
     }
     final String stashName = await maybeStash(gitTagVersion);
+    // If we're on a hotfix version, that means we likely have a different
+    // history than the tags pulled from master. We need to reset to the
+    // tag this hotfix was branched from.
+    if (gitTagVersion.hotfix != null) {
+      await unapplyHotfix(gitTagVersion);
+    }
     await upgradeChannel(flutterVersion);
-    await attemptRebase();
+    await attemptFastForward();
     await applyStash(stashName);
     await precacheArtifacts();
     await updatePackages(flutterVersion);
@@ -125,6 +131,18 @@ class UpgradeCommandRunner {
     return null;
   }
 
+  /// Attempts to reset to the un-hotfixed version. This should restore the
+  /// history to something that is compatible with the regular upgrade
+  /// process.
+  Future<void> unapplyHotfix(GitTagVersion gitTagVersion) async {
+    final RunResult runResult = await runCheckedAsync(<String>[
+      'git', 'reset', '--hard', 'v${gitTagVersion.x}.${gitTagVersion.y}.${gitTagVersion.z}',
+    ]);
+    if (runResult.exitCode != 0) {
+      throwToolExit('Failed to restore branch from hotfix.');
+    }
+  }
+
   /// Attempts to upgrade the channel.
   ///
   /// If the user is on a deprecated channel, attempts to migrate them off of
@@ -138,26 +156,13 @@ class UpgradeCommandRunner {
   ///
   /// If there haven't been any hot fixes or local changes, this is equivalent
   /// to a fast-forward.
-  Future<void> attemptRebase() async {
+  Future<void> attemptFastForward() async {
     final int code = await runCommandAndStreamOutput(
-      <String>['git', 'pull', '--rebase'],
+      <String>['git', 'pull', '--ff'],
       workingDirectory: Cache.flutterRoot,
       mapFunction: (String line) => matchesGitLine(line) ? null : line,
     );
     if (code != 0) {
-      printError('git rebase failed');
-      final int undoCode = await runCommandAndStreamOutput(
-        <String>['git', 'rebase', '--abort'],
-        workingDirectory: Cache.flutterRoot,
-        mapFunction: (String line) => matchesGitLine(line) ? null : line,
-      );
-      if (undoCode != 0) {
-        printError(
-          'Failed to apply rebase: The flutter installation at'
-          ' ${Cache.flutterRoot} may be corrupted. A reinstallation of Flutter '
-          'is recommended'
-        );
-      }
       throwToolExit(null, exitCode: code);
     }
   }
