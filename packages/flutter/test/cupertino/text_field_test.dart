@@ -774,7 +774,6 @@ void main() {
       );
 
       expect(value, isEmpty);
-
       controller.text = 'text entry';
       await tester.pump();
 
