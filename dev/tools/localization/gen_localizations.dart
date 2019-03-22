@@ -49,7 +49,7 @@ import 'localizations_utils.dart';
 import 'localizations_validator.dart';
 
 /// This is the core of this script; it generates the code used for translations.
-String generateTranslationBundles({
+String generateArbBasedLocalizationSubclasses({
   @required Map<LocaleInfo, Map<String, String>> localeToResources,
   @required Map<LocaleInfo, Map<String, dynamic>> localeToResourceAttributes,
   @required String generatedClassPrefix,
@@ -364,20 +364,6 @@ $factoryDeclaration
   return output.toString();
 }
 
-/// Writes the header of each class which corresponds to a locale.
-String generateClassDeclaration(
-  LocaleInfo locale,
-  String classNamePrefix,
-  String superClass,
-) {
-  final String camelCaseName = camelCase(locale);
-  return '''
-
-/// The translations for ${describeLocale(locale.originalString)} (`${locale.originalString}`).
-class $classNamePrefix$camelCaseName extends $superClass {
-''';
-}
-
 /// Returns the appropriate type for getters with the given attributes.
 ///
 /// Typically "String", but some (e.g. "timeOfDayFormat") return enums.
@@ -524,7 +510,7 @@ Future<void> main(List<String> rawArgs) async {
     exitWithError('$exception');
   }
 
-  final String materialLocalizations = generateTranslationBundles(
+  final String materialLocalizations = generateArbBasedLocalizationSubclasses(
     localeToResources: materialLocaleToResources,
     localeToResourceAttributes: materialLocaleToResourceAttributes,
     generatedClassPrefix: 'MaterialLocalization',

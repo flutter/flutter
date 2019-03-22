@@ -340,6 +340,20 @@ String describeLocale(String tag) {
   return output;
 }
 
+/// Writes the header of each class which corresponds to a locale.
+String generateClassDeclaration(
+  LocaleInfo locale,
+  String classNamePrefix,
+  String superClass,
+) {
+  final String camelCaseName = camelCase(locale);
+  return '''
+
+/// The translations for ${describeLocale(locale.originalString)} (`${locale.originalString}`).
+class $classNamePrefix$camelCaseName extends $superClass {
+''';
+}
+
 /// Return `s` as a Dart-parseable raw string in single or double quotes.
 ///
 /// Double quotes are expanded:
