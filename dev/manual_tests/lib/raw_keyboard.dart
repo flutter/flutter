@@ -97,6 +97,12 @@ class _HardwareKeyDemoState extends State<RawKeyboardDemo> {
             dataText.add(Text('characters: ${data.characters}'));
             dataText.add(Text('charactersIgnoringModifiers: ${data.charactersIgnoringModifiers}'));
             dataText.add(Text('modifiers: ${data.modifiers} (${_asHex(data.modifiers)})'));
+          } else if (data is RawKeyEventDataLinux) {
+            dataText.add(Text('keyCode: ${data.keyCode} (${_asHex(data.keyCode)})'));
+            dataText.add(Text('scanCode: ${data.scanCode}'));
+            dataText.add(Text('codePoint: ${data.codePoint}'));
+            dataText.add(Text('toolkit: ${data.toolkit}'));
+            dataText.add(Text('modifiers: ${data.modifiers} (${_asHex(data.modifiers)})'));
           }
           dataText.add(Text('logical: ${_event.logicalKey}'));
           dataText.add(Text('physical: ${_event.physicalKey}'));
