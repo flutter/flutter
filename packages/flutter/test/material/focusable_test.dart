@@ -43,7 +43,7 @@ void main() {
       final Element element4 = tester.element(find.byKey(key4));
       final Element element5 = tester.element(find.byKey(key5));
       final Element element6 = tester.element(find.byKey(key6));
-      final FocusableNode root = element1.owner.focusManager.rootFocusable;
+      final FocusableNode root = element1.owner.focusableManager.rootScope;
 
       expect(Focusable.of(element1), equals(root));
       expect(Focusable.of(element2).parent, equals(root));
@@ -165,7 +165,7 @@ void main() {
       await tester.pump();
 
       expect(rootNode.hasFocus, isTrue);
-      expect(rootNode, equals(firstElement.owner.focusManager.rootFocusable));
+      expect(rootNode, equals(firstElement.owner.focusableManager.rootScope));
     });
   });
 }

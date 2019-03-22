@@ -5,7 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
 import 'basic.dart';
-import 'focus_manager.dart';
+import 'focusable_manager.dart';
 import 'framework.dart';
 
 /// Object for specifying a focus traversal policy used for configuring a
@@ -32,7 +32,7 @@ abstract class FocusTraversalPolicy {
   /// This is used by [next]/[previous] to determine which node to focus if they
   /// are called, but no node is currently focused.
   ///
-  /// Typically, it should take into account the [FocusableNode.autofocus]
+  /// Typically, it should take into account the [FocusableNode.isAutoFocus]
   /// setting, but can ignore it if that is the desired behavior. Nothing else
   /// looks at the [autofocus] setting.
   ///
@@ -48,7 +48,7 @@ abstract class FocusTraversalPolicy {
     final FocusableScopeNode scope = currentNode.nearestScope;
     assert(scope.focusedChild == null, 'There already is a focused node in $scope');
     final FocusableNode autofocus = scope.descendants.firstWhere(
-      (FocusableNode node) => node.nearestScope == scope && node.autofocus,
+          (FocusableNode node) => node.nearestScope == scope && node.autofocus,
       orElse: () => null,
     );
     return autofocus ?? currentNode;
@@ -140,10 +140,10 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
   // This doesn't need to take into account directionality because it is
   // typically the result of an actual left or right arrow press.
   Iterable<FocusableNode> _sortAndFilterHorizontally(
-    AxisDirection direction,
-    Rect target,
-    FocusableNode nearestScope,
-  ) {
+      AxisDirection direction,
+      Rect target,
+      FocusableNode nearestScope,
+      ) {
     assert(direction == AxisDirection.left || direction == AxisDirection.right);
     final Iterable<FocusableNode> nodes = nearestScope.descendants;
     assert(!nodes.contains(nearestScope));
@@ -168,10 +168,10 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
   // either below the top of the target node if we're going up, or above the
   // bottom of the target node if we're going down.
   Iterable<FocusableNode> _sortAndFilterVertically(
-    AxisDirection direction,
-    Rect target,
-    Iterable<FocusableNode> nodes,
-  ) {
+      AxisDirection direction,
+      Rect target,
+      Iterable<FocusableNode> nodes,
+      ) {
     final List<FocusableNode> sorted = nodes.toList();
     sorted.sort((FocusableNode a, FocusableNode b) => a.rect.center.dy.compareTo(b.rect.center.dy));
     switch (direction) {
@@ -208,12 +208,12 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
           switch (policyData.history.first.previousDirection) {
             case AxisDirection.left:
             case AxisDirection.right:
-              // Reset the policy data if we change directions.
+            // Reset the policy data if we change directions.
               nearestScope.policyData = null;
               break;
             case AxisDirection.up:
             case AxisDirection.down:
-              policyData.history.removeLast().previousNode.requestFocus(isImplicit: true);
+              policyData.history.removeLast().previousNode.requestFocusFromPolicy();
               return true;
           }
           break;
@@ -222,11 +222,11 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
           switch (policyData.history.first.previousDirection) {
             case AxisDirection.left:
             case AxisDirection.right:
-              policyData.history.removeLast().previousNode.requestFocus(isImplicit: true);
+              policyData.history.removeLast().previousNode.requestFocusFromPolicy();
               return true;
             case AxisDirection.up:
             case AxisDirection.down:
-              // Reset the policy data if we change directions.
+            // Reset the policy data if we change directions.
               nearestScope.policyData = null;
               break;
           }
@@ -272,7 +272,7 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
     final FocusableScopeNode nearestScope = currentNode.nearestScope;
     final FocusableNode focusedChild = nearestScope.focusedChild;
     if (focusedChild == null) {
-      currentNode.requestFocus(isImplicit: true);
+      currentNode.requestFocusFromPolicy();
       return true;
     }
     if (_popPolicyDataIfNeeded(direction, nearestScope, focusedChild)) {
@@ -335,7 +335,7 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
     }
     if (found != null) {
       _pushPolicyData(direction, nearestScope, focusedChild);
-      found.requestFocus(isImplicit: true);
+      found.requestFocusFromPolicy();
       return true;
     }
     return false;
@@ -367,7 +367,7 @@ class WidgetOrderFocusTraversalPolicy extends FocusTraversalPolicy with Directio
     nearestScope.policyData = null;
     final FocusableNode focusedChild = nearestScope.focusedChild;
     if (focusedChild == null) {
-      findFirstFocus(node).requestFocus(isImplicit: true);
+      findFirstFocus(node).requestFocusFromPolicy();
       return true;
     }
     FocusableNode previousNode;
@@ -378,12 +378,12 @@ class WidgetOrderFocusTraversalPolicy extends FocusTraversalPolicy with Directio
       visited.visitChildren(visit);
       if (forward) {
         if (previousNode == focusedChild) {
-          visited.requestFocus(isImplicit: true);
+          visited.requestFocusFromPolicy();
           return false; // short circuit the traversal.
         }
       } else {
         if (previousNode != null && visited == focusedChild) {
-          previousNode.requestFocus(isImplicit: true);
+          previousNode.requestFocusFromPolicy();
           return false; // short circuit the traversal.
         }
       }
@@ -395,12 +395,12 @@ class WidgetOrderFocusTraversalPolicy extends FocusTraversalPolicy with Directio
     if (nearestScope.visitChildren(visit)) {
       if (forward) {
         if (firstNode != null) {
-          firstNode.requestFocus(isImplicit: true);
+          firstNode.requestFocusFromPolicy();
           return true;
         }
       } else {
         if (lastNode != null) {
-          lastNode.requestFocus(isImplicit: true);
+          lastNode.requestFocusFromPolicy();
           return true;
         }
       }
@@ -507,16 +507,16 @@ class ReadingOrderTraversalPolicy extends FocusTraversalPolicy with DirectionalF
     nearestScope.policyData = null;
     final FocusableNode focusedChild = nearestScope.focusedChild;
     if (focusedChild == null) {
-      currentNode.requestFocus(isImplicit: true);
+      currentNode.requestFocusFromPolicy();
       return true;
     }
     final List<FocusableNode> sortedNodes = _sortByGeometry(nearestScope).toList();
     if (forward && focusedChild == sortedNodes.last) {
-      sortedNodes.first.requestFocus(isImplicit: true);
+      sortedNodes.first.requestFocusFromPolicy();
       return true;
     }
     if (!forward && focusedChild == sortedNodes.first) {
-      sortedNodes.last.requestFocus(isImplicit: true);
+      sortedNodes.last.requestFocusFromPolicy();
       return true;
     }
 
@@ -524,7 +524,7 @@ class ReadingOrderTraversalPolicy extends FocusTraversalPolicy with DirectionalF
     FocusableNode previousNode;
     for (FocusableNode node in maybeFlipped) {
       if (previousNode == focusedChild) {
-        node.requestFocus(isImplicit: true);
+        node.requestFocusFromPolicy();
         return true;
       }
       previousNode = node;

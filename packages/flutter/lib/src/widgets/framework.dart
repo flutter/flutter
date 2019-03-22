@@ -11,6 +11,7 @@ import 'package:flutter/rendering.dart';
 
 import 'debug.dart';
 import 'focus_manager.dart';
+import 'focusable_manager.dart';
 
 export 'dart:ui' show hashValues, hashList;
 
@@ -2111,6 +2112,14 @@ class BuildOwner {
   ///
   /// See [FocusManager] for more details.
   final FocusManager focusManager = FocusManager();
+
+  /// The object in charge of the focus tree.
+  ///
+  /// Rarely used directly. Instead, consider using [FocusableScope.of] to
+  /// obtain the [FocusableScopeNode] for a given [BuildContext].
+  ///
+  /// See [FocusableManager] for more details.
+  final FocusableManager focusableManager = FocusableManager();
 
   /// Adds an element to the dirty elements list so that it will be rebuilt
   /// when [WidgetsBinding.drawFrame] calls [buildScope].

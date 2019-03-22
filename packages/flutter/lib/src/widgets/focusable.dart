@@ -5,7 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import 'basic.dart';
-import 'focus_manager.dart';
+import 'focusable_manager.dart';
 import 'framework.dart';
 import 'raw_keyboard_listener.dart';
 
@@ -90,8 +90,18 @@ class Focusable extends StatefulWidget {
   static FocusableNode of(BuildContext context) {
     assert(context != null);
     final _FocusableMarker marker = context.inheritFromWidgetOfExactType(_FocusableMarker);
-    return marker?.node ?? context.owner.focusManager.rootFocusable;
+    return marker?.node ?? context.owner.focusableManager.rootScope;
   }
+
+  /// A convenience function to allow build functions to write:
+  /// `Focusable.at(context)` to get whether or not the nearest Focusable above
+  /// them in the widget hierarchy currently has the keyboard focus.
+  static bool at(BuildContext context) {
+    return Focusable.of(context).hasFocus;
+  }
+
+  // Only FocusScopes can handle external nodes.
+  FocusableScopeNode get _externalNode => null;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -105,34 +115,49 @@ class Focusable extends StatefulWidget {
 }
 
 class _FocusableState extends State<Focusable> {
-  FocusableNode node;
+  FocusableNode _internalNode;
+  FocusableNode get node => widget._externalNode ?? _internalNode;
   bool _hasFocus;
 
-  @override
-  void initState() {
-    super.initState();
-    if (widget is FocusableScope) {
-      node = FocusableScopeNode(
-        autofocus: widget.autofocus,
-        context: context,
-      );
-    } else {
-      node = FocusableNode(
-        autofocus: widget.autofocus,
-        context: context,
-      );
+  FocusableNode _createNode(){
+    return FocusableNode(
+      debugLabel: widget.debugLabel,
+      autofocus: widget.autofocus,
+      context: context,
+    );
+  }
+
+  void _initNode() {
+    if (widget._externalNode == null) {
+      // Only create a new node if the widget doesn't have one.
+      _internalNode ??= _createNode();
     }
     _hasFocus = node.hasFocus;
+    // Add listener even if the _internalNode existed before, since it should
+    // not be listening already if we're re-using a previous one.
     node.addListener(_handleFocusChanged);
   }
 
   @override
+  void initState() {
+    super.initState();
+    _initNode();
+  }
+
+  @override
   void dispose() {
-    node.dispose();
+    widget._externalNode?.removeListener(_handleFocusChanged);
+    _internalNode?.removeListener(_handleFocusChanged);
+    // Don't manage the lifetime of external nodes given to the widget, just the
+    // internal node.
+    _internalNode?.dispose();
     super.dispose();
   }
 
   void _handleFocusChanged() {
+    if (!mounted) {
+      return;
+    }
     if (_hasFocus != node.hasFocus) {
       setState(() {
         _hasFocus = node.hasFocus;
@@ -140,6 +165,38 @@ class _FocusableState extends State<Focusable> {
       if (widget.onFocusChange != null) {
         widget.onFocusChange(node.hasFocus);
       }
+    }
+  }
+
+  @override
+  void didUpdateWidget(Focusable oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget._externalNode == widget._externalNode) {
+      // Nothing we care about changed.
+      return;
+    }
+    if (oldWidget._externalNode == null && widget._externalNode != null) {
+      // We're no longer using the node we were managing. We don't stop managing
+      // it until dispose, so do nothing yet: we might re-use it eventually, and
+      // calling dispose on it here will confuse the raw keyboard handler that
+      // hasn't yet been notified of a widget change, but do stop listening.
+      _internalNode?.removeListener(_handleFocusChanged);
+      widget._externalNode?.addListener(_handleFocusChanged);
+    } else if (oldWidget._externalNode != null && widget._externalNode == null) {
+      oldWidget._externalNode?.removeListener(_handleFocusChanged);
+      // We stopped using the external node, and now we need to manage one.
+      _initNode();
+    } else {
+      // We just switched which node the widget had, so just change what we
+      // listen to.
+      oldWidget._externalNode?.removeListener(_handleFocusChanged);
+      widget._externalNode?.addListener(_handleFocusChanged);
+    }
+    if (oldWidget.autofocus != widget.autofocus) {
+      node.autofocus = widget.autofocus;
+    }
+    if (oldWidget.debugLabel != widget.debugLabel) {
+      node.debugLabel = widget.debugLabel;
     }
   }
 
@@ -153,8 +210,9 @@ class _FocusableState extends State<Focusable> {
 
   @override
   Widget build(BuildContext context) {
+    Focusable.of(context).reparent(node);
     return RawKeyboardListener(
-      focusNode: node,
+      focusableNode: node,
       onKey: (RawKeyEvent event) {
         if (widget.onKey != null) {
           widget.onKey(node, event);
@@ -205,6 +263,7 @@ class FocusableScope extends Focusable {
   /// The [autofocus], and [showDecorations] arguments must not be null.
   const FocusableScope({
     Key key,
+    this.node,
     @required Widget child,
     bool autofocus = false,
     ValueChanged<bool> onFocusChange,
@@ -213,28 +272,56 @@ class FocusableScope extends Focusable {
   })  : assert(child != null),
         assert(autofocus != null),
         super(
-          key: key,
-          child: child,
-          autofocus: autofocus,
-          onFocusChange: onFocusChange,
-          onKey: onKey,
-          debugLabel: debugLabel,
-        );
+        key: key,
+        child: child,
+        autofocus: autofocus,
+        onFocusChange: onFocusChange,
+        onKey: onKey,
+        debugLabel: debugLabel,
+      );
 
-  /// Returns the [node] of the [FocusableScope] that most tightly encloses the given
+  /// Returns the node of the [FocusableScope] that most tightly encloses the given
   /// [BuildContext].
   ///
   /// The [context] argument must not be null.
   static FocusableScopeNode of(BuildContext context) {
     assert(context != null);
     final _FocusableMarker marker = context.inheritFromWidgetOfExactType(_FocusableMarker);
-    return marker?.node?.nearestScope ?? context.owner.focusManager.rootFocusable;
+    return marker?.node?.nearestScope ?? context.owner.focusableManager.rootScope;
   }
 
+  /// Returns the ancestor nodes of the [FocusableScope] in the given
+  /// [BuildContext].
+  ///
+  /// The [context] argument must not be null.
+  static List<FocusableScopeNode> ancestorsOf(BuildContext context) {
+    assert(context != null);
+    final FocusableScopeNode parent = FocusableScope.of(context);
+    return parent?.ancestors?.cast<FocusableScopeNode>()?.toList() ?? <FocusableScopeNode>[];
+  }
+
+  /// The focus scope node that this FocusScope will manage.
+  ///
+  /// You do not need to manage the lifetime of this, the FocusScope will adopt
+  /// it.
+  final FocusableScopeNode node;
+
   @override
-  _FocusableState createState() => _FocusableState();
+  _FocusableScopeState createState() => _FocusableScopeState();
 }
 
+class _FocusableScopeState extends _FocusableState {
+  @override
+  FocusableScopeNode _createNode(){
+    return FocusableScopeNode(
+      debugLabel: widget.debugLabel,
+      autofocus: widget.autofocus,
+      context: context,
+    );
+  }
+}
+
+// The InheritedWidget marker for Focusable and FocusScope.
 class _FocusableMarker extends InheritedWidget {
   const _FocusableMarker({
     Key key,

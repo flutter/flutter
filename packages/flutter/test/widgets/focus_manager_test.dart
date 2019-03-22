@@ -7,15 +7,15 @@ import 'package:flutter/widgets.dart';
 
 void main() {
   group(FocusableNode, () {
-    setUp((){
+    setUp(() {
       // Reset the focus manager between tests, to avoid leaking state.
-      WidgetsBinding.instance.focusManager.reset();
+      WidgetsBinding.instance.focusableManager.reset();
     });
     testWidgets('Can add children.', (WidgetTester tester) async {
-      final FocusableNode parent = FocusableNode(context: null);
-      final FocusableNode child1 = FocusableNode(context: null);
-      final FocusableNode child2 = FocusableNode(context: null);
-      tester.binding.focusManager.rootFocusable.reparent(parent);
+      final FocusableNode parent = FocusableNode();
+      final FocusableNode child1 = FocusableNode();
+      final FocusableNode child2 = FocusableNode();
+      tester.binding.focusableManager.rootScope.reparent(parent);
       parent.reparent(child1);
       expect(child1.parent, equals(parent));
       expect(parent.children.first, equals(child1));
@@ -27,10 +27,10 @@ void main() {
       expect(parent.children.last, equals(child2));
     });
     testWidgets('Can remove children.', (WidgetTester tester) async {
-      final FocusableNode parent = FocusableNode(context: null);
-      final FocusableNode child1 = FocusableNode(context: null);
-      final FocusableNode child2 = FocusableNode(context: null);
-      tester.binding.focusManager.rootFocusable.reparent(parent);
+      final FocusableNode parent = FocusableNode();
+      final FocusableNode child1 = FocusableNode();
+      final FocusableNode child2 = FocusableNode();
+      tester.binding.focusableManager.rootScope.reparent(parent);
       parent.reparent(child1);
       parent.reparent(child2);
       expect(child1.parent, equals(parent));
@@ -48,11 +48,11 @@ void main() {
       expect(parent.children, isEmpty);
     });
     testWidgets('Removing a node removes it from scope.', (WidgetTester tester) async {
-      final FocusableScopeNode scope = FocusableScopeNode(context: null);
-      final FocusableNode parent = FocusableNode(context: null);
-      final FocusableNode child1 = FocusableNode(context: null);
-      final FocusableNode child2 = FocusableNode(context: null);
-      tester.binding.focusManager.rootFocusable.reparent(scope);
+      final FocusableScopeNode scope = FocusableScopeNode();
+      final FocusableNode parent = FocusableNode();
+      final FocusableNode child1 = FocusableNode();
+      final FocusableNode child2 = FocusableNode();
+      tester.binding.focusableManager.rootScope.reparent(scope);
       scope.reparent(parent);
       parent.reparent(child1);
       parent.reparent(child2);
@@ -67,15 +67,14 @@ void main() {
       expect(scope.focusedChild, isNull);
     });
     testWidgets('Can add children to scope and focus', (WidgetTester tester) async {
-      final FocusableScopeNode scope = FocusableScopeNode(context: null);
-      final FocusableNode parent = FocusableNode(context: null);
-      final FocusableNode child1 = FocusableNode(context: null);
-      final FocusableNode child2 = FocusableNode(context: null);
-      tester.binding.focusManager.rootFocusable.reparent(scope);
+      final FocusableScopeNode scope = FocusableScopeNode();
+      final FocusableNode parent = FocusableNode();
+      final FocusableNode child1 = FocusableNode();
+      final FocusableNode child2 = FocusableNode();
+      tester.binding.focusableManager.rootScope.reparent(scope);
       scope.reparent(parent);
       parent.reparent(child1);
       parent.reparent(child2);
-      expect(scope.isScope, isTrue);
       expect(scope.children.first, equals(parent));
       expect(parent.parent, equals(scope));
       expect(child1.parent, equals(parent));
@@ -102,11 +101,11 @@ void main() {
       expect(child2.hasPrimaryFocus, isTrue);
     });
     testWidgets('Autofocus works.', (WidgetTester tester) async {
-      final FocusableScopeNode scope = FocusableScopeNode(context: null);
-      final FocusableNode parent = FocusableNode(context: null);
-      final FocusableNode child1 = FocusableNode(context: null);
-      final FocusableNode child2 = FocusableNode(context: null, autofocus: true);
-      tester.binding.focusManager.rootFocusable.reparent(scope);
+      final FocusableScopeNode scope = FocusableScopeNode();
+      final FocusableNode parent = FocusableNode();
+      final FocusableNode child1 = FocusableNode();
+      final FocusableNode child2 = FocusableNode(autofocus: true);
+      tester.binding.focusableManager.rootScope.reparent(scope);
       scope.reparent(parent);
       parent.reparent(child1);
       parent.reparent(child2);
@@ -131,11 +130,11 @@ void main() {
       expect(child2.hasPrimaryFocus, isFalse);
     });
     testWidgets('Adding a focusedChild to a scope sets scope as focusedChild in parent scope', (WidgetTester tester) async {
-      final FocusableScopeNode scope1 = FocusableScopeNode(context: null);
-      final FocusableScopeNode scope2 = FocusableScopeNode(context: null);
-      final FocusableNode child1 = FocusableNode(context: null);
-      final FocusableNode child2 = FocusableNode(context: null);
-      tester.binding.focusManager.rootFocusable.reparent(scope1);
+      final FocusableScopeNode scope1 = FocusableScopeNode();
+      final FocusableScopeNode scope2 = FocusableScopeNode();
+      final FocusableNode child1 = FocusableNode();
+      final FocusableNode child2 = FocusableNode();
+      tester.binding.focusableManager.rootScope.reparent(scope1);
       scope1.reparent(scope2);
       scope1.reparent(child1);
       scope2.reparent(child2);
@@ -157,17 +156,16 @@ void main() {
       expect(child2.hasPrimaryFocus, isFalse);
     });
     testWidgets('Can move node with focus without losing focus', (WidgetTester tester) async {
-      final FocusableScopeNode scope = FocusableScopeNode(context: null);
-      final FocusableNode parent1 = FocusableNode(context: null);
-      final FocusableNode parent2 = FocusableNode(context: null);
-      final FocusableNode child1 = FocusableNode(context: null);
-      final FocusableNode child2 = FocusableNode(context: null);
-      tester.binding.focusManager.rootFocusable.reparent(scope);
+      final FocusableScopeNode scope = FocusableScopeNode(debugLabel: 'Scope');
+      final FocusableNode parent1 = FocusableNode(debugLabel: 'Parent 1');
+      final FocusableNode parent2 = FocusableNode(debugLabel: 'Parent 2');
+      final FocusableNode child1 = FocusableNode(debugLabel: 'Child 1');
+      final FocusableNode child2 = FocusableNode(debugLabel: 'Child 2');
+      tester.binding.focusableManager.rootScope.reparent(scope);
       scope.reparent(parent1);
       scope.reparent(parent2);
       parent1.reparent(child1);
       parent1.reparent(child2);
-      expect(scope.isScope, isTrue);
       expect(scope.children.first, equals(parent1));
       expect(scope.children.last, equals(parent2));
       expect(parent1.parent, equals(scope));
@@ -177,6 +175,7 @@ void main() {
       expect(parent1.children.first, equals(child1));
       expect(parent1.children.last, equals(child2));
       child1.requestFocus();
+      await tester.pump();
       parent2.reparent(child1);
       await tester.pump();
       expect(scope.focusedChild, equals(child1));
@@ -186,16 +185,16 @@ void main() {
       expect(parent2.children.first, equals(child1));
     });
     testWidgets('Can move node between scopes and lose scope focus', (WidgetTester tester) async {
-      final FocusableScopeNode scope1 = FocusableScopeNode(context: null);
-      final FocusableScopeNode scope2 = FocusableScopeNode(context: null);
-      final FocusableNode parent1 = FocusableNode(context: null);
-      final FocusableNode parent2 = FocusableNode(context: null);
-      final FocusableNode child1 = FocusableNode(context: null);
-      final FocusableNode child2 = FocusableNode(context: null);
-      final FocusableNode child3 = FocusableNode(context: null);
-      final FocusableNode child4 = FocusableNode(context: null);
-      tester.binding.focusManager.rootFocusable.reparent(scope1);
-      tester.binding.focusManager.rootFocusable.reparent(scope2);
+      final FocusableScopeNode scope1 = FocusableScopeNode();
+      final FocusableScopeNode scope2 = FocusableScopeNode();
+      final FocusableNode parent1 = FocusableNode();
+      final FocusableNode parent2 = FocusableNode();
+      final FocusableNode child1 = FocusableNode();
+      final FocusableNode child2 = FocusableNode();
+      final FocusableNode child3 = FocusableNode();
+      final FocusableNode child4 = FocusableNode();
+      tester.binding.focusableManager.rootScope.reparent(scope1);
+      tester.binding.focusableManager.rootScope.reparent(scope2);
       scope1.reparent(parent1);
       scope2.reparent(parent2);
       parent1.reparent(child1);
@@ -214,16 +213,16 @@ void main() {
       expect(parent2.children.contains(child1), isTrue);
     });
     testWidgets('Can move focus between scopes and keep focus', (WidgetTester tester) async {
-      final FocusableScopeNode scope1 = FocusableScopeNode(context: null);
-      final FocusableScopeNode scope2 = FocusableScopeNode(context: null);
-      final FocusableNode parent1 = FocusableNode(context: null);
-      final FocusableNode parent2 = FocusableNode(context: null);
-      final FocusableNode child1 = FocusableNode(context: null);
-      final FocusableNode child2 = FocusableNode(context: null);
-      final FocusableNode child3 = FocusableNode(context: null);
-      final FocusableNode child4 = FocusableNode(context: null);
-      tester.binding.focusManager.rootFocusable.reparent(scope1);
-      tester.binding.focusManager.rootFocusable.reparent(scope2);
+      final FocusableScopeNode scope1 = FocusableScopeNode();
+      final FocusableScopeNode scope2 = FocusableScopeNode();
+      final FocusableNode parent1 = FocusableNode();
+      final FocusableNode parent2 = FocusableNode();
+      final FocusableNode child1 = FocusableNode();
+      final FocusableNode child2 = FocusableNode();
+      final FocusableNode child3 = FocusableNode();
+      final FocusableNode child4 = FocusableNode();
+      tester.binding.focusableManager.rootScope.reparent(scope1);
+      tester.binding.focusableManager.rootScope.reparent(scope2);
       scope1.reparent(parent1);
       scope2.reparent(parent2);
       parent1.reparent(child1);

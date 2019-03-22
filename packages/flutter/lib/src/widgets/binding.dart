@@ -15,6 +15,7 @@ import 'package:flutter/services.dart';
 import 'app.dart';
 import 'debug.dart';
 import 'focus_manager.dart';
+import 'focusable_manager.dart';
 import 'framework.dart';
 import 'widget_inspector.dart';
 
@@ -365,6 +366,14 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
   ///
   /// See [FocusManager] for more details.
   FocusManager get focusManager => _buildOwner.focusManager;
+
+  /// The object in charge of the focus tree.
+  ///
+  /// Rarely used directly. Instead, consider using [FocusableScope.of] to
+  /// obtain the [FocusableScopeNode] for a given [BuildContext].
+  ///
+  /// See [FocusableManager] for more details.
+  FocusableManager get focusableManager => _buildOwner.focusableManager;
 
   final List<WidgetsBindingObserver> _observers = <WidgetsBindingObserver>[];
 

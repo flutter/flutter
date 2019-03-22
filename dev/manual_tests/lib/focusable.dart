@@ -103,7 +103,7 @@ class _FocusableDemoState extends State<FocusableDemo> {
               print('Scope got key event: ${event.logicalKey}, $node');
               print('Keys down: ${RawKeyboard.instance.keysPressed}');
               if (event.logicalKey == LogicalKeyboardKey.tab) {
-                print(context.owner.focusManager.rootFocusable.toStringDeep());
+                print(context.owner.focusableManager.rootScope.toStringDeep());
                 if (event.isShiftPressed) {
                   print('Moving to previous.');
                   setState(() {

@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 
 import 'basic.dart';
 import 'focus_manager.dart';
+import 'focusable_manager.dart';
 import 'framework.dart';
 
 export 'package:flutter/services.dart' show RawKeyEvent;
@@ -32,15 +33,19 @@ class RawKeyboardListener extends StatefulWidget {
   /// on-screen keyboards and input method editors (IMEs).
   const RawKeyboardListener({
     Key key,
-    @required this.focusNode,
+    this.focusNode,
+    this.focusableNode,
     @required this.onKey,
     @required this.child,
-  }) : assert(focusNode != null),
+  }) : assert(focusNode != null || focusableNode != null),
        assert(child != null),
        super(key: key);
 
   /// Controls whether this widget has keyboard focus.
   final FocusNode focusNode;
+
+  /// Controls whether this widget has keyboard focus in the new style focus manager.
+  final FocusableNode focusableNode;
 
   /// Called whenever this widget receives a raw keyboard event.
   final ValueChanged<RawKeyEvent> onKey;
@@ -56,7 +61,8 @@ class RawKeyboardListener extends StatefulWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<FocusNode>('focusNode', focusNode));
+    properties.add(DiagnosticsProperty<FocusNode>('focusNode', focusNode, defaultValue: null));
+    properties.add(DiagnosticsProperty<FocusableNode>('focusableNode', focusableNode, defaultValue: null));
   }
 }
 
@@ -64,27 +70,34 @@ class _RawKeyboardListenerState extends State<RawKeyboardListener> {
   @override
   void initState() {
     super.initState();
-    widget.focusNode.addListener(_handleFocusChanged);
+    widget.focusNode?.addListener(_handleFocusChanged);
+    widget.focusableNode?.addListener(_handleFocusChanged);
   }
 
   @override
   void didUpdateWidget(RawKeyboardListener oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.focusNode != oldWidget.focusNode) {
-      oldWidget.focusNode.removeListener(_handleFocusChanged);
-      widget.focusNode.addListener(_handleFocusChanged);
+      oldWidget.focusNode?.removeListener(_handleFocusChanged);
+      widget.focusNode?.addListener(_handleFocusChanged);
+    }
+    if (widget.focusableNode != oldWidget.focusableNode) {
+      oldWidget.focusableNode?.removeListener(_handleFocusChanged);
+      widget.focusableNode?.addListener(_handleFocusChanged);
     }
   }
 
   @override
   void dispose() {
-    widget.focusNode.removeListener(_handleFocusChanged);
+    widget.focusNode?.removeListener(_handleFocusChanged);
+    widget.focusableNode?.removeListener(_handleFocusChanged);
     _detachKeyboardIfAttached();
     super.dispose();
   }
 
   void _handleFocusChanged() {
-    if (widget.focusNode.hasFocus)
+    if (widget.focusNode != null && widget.focusNode.hasFocus ||
+        widget.focusableNode != null && widget.focusableNode.hasFocus)
       _attachKeyboardIfDetached();
     else
       _detachKeyboardIfAttached();

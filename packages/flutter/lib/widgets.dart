@@ -36,6 +36,7 @@ export 'src/widgets/focus_manager.dart';
 export 'src/widgets/focus_scope.dart';
 export 'src/widgets/focus_traversal.dart';
 export 'src/widgets/focusable.dart';
+export 'src/widgets/focusable_manager.dart';
 export 'src/widgets/form.dart';
 export 'src/widgets/framework.dart';
 export 'src/widgets/gesture_detector.dart';
