@@ -63,7 +63,13 @@ void main() {
     });
 
     test('receives and processes mouse hover events', () {
-      final ui.PointerDataPacket packet1 = ui.PointerDataPacket(data: <ui.PointerData>[
+      const ui.PointerDataPacket packet1 = ui.PointerDataPacket(data: <ui.PointerData>[
+        ui.PointerData(
+            change: ui.PointerChange.add,
+            device: 0,
+        ),
+      ]);
+      final ui.PointerDataPacket packet2 = ui.PointerDataPacket(data: <ui.PointerData>[
         ui.PointerData(
           change: ui.PointerChange.hover,
           physicalX: 0.0 * ui.window.devicePixelRatio,
@@ -71,7 +77,7 @@ void main() {
           kind: PointerDeviceKind.mouse,
         ),
       ]);
-      final ui.PointerDataPacket packet2 = ui.PointerDataPacket(data: <ui.PointerData>[
+      final ui.PointerDataPacket packet3 = ui.PointerDataPacket(data: <ui.PointerData>[
         ui.PointerData(
           change: ui.PointerChange.hover,
           physicalX: 1.0 * ui.window.devicePixelRatio,
@@ -79,13 +85,19 @@ void main() {
           kind: PointerDeviceKind.mouse,
         ),
       ]);
-      const ui.PointerDataPacket packet3 = ui.PointerDataPacket(data: <ui.PointerData>[
+      const ui.PointerDataPacket packet4 = ui.PointerDataPacket(data: <ui.PointerData>[
         ui.PointerData(
           change: ui.PointerChange.remove,
           kind: PointerDeviceKind.mouse,
         ),
       ]);
-      final ui.PointerDataPacket packet4 = ui.PointerDataPacket(data: <ui.PointerData>[
+      const ui.PointerDataPacket packet5 = ui.PointerDataPacket(data: <ui.PointerData>[
+        ui.PointerData(
+          change: ui.PointerChange.add,
+          device: 0,
+        ),
+      ]);
+      final ui.PointerDataPacket packet6 = ui.PointerDataPacket(data: <ui.PointerData>[
         ui.PointerData(
           change: ui.PointerChange.hover,
           physicalX: 1.0 * ui.window.devicePixelRatio,
@@ -93,7 +105,13 @@ void main() {
           kind: PointerDeviceKind.mouse,
         ),
       ]);
-      final ui.PointerDataPacket packet5 = ui.PointerDataPacket(data: <ui.PointerData>[
+      const ui.PointerDataPacket packet7 = ui.PointerDataPacket(data: <ui.PointerData>[
+        ui.PointerData(
+          change: ui.PointerChange.add,
+          device: 1,
+        ),
+      ]);
+      final ui.PointerDataPacket packet8 = ui.PointerDataPacket(data: <ui.PointerData>[
         ui.PointerData(
           change: ui.PointerChange.hover,
           physicalX: 1.0 * ui.window.devicePixelRatio,
@@ -102,9 +120,23 @@ void main() {
           device: 1,
         ),
       ]);
+      const ui.PointerDataPacket packet9 = ui.PointerDataPacket(data: <ui.PointerData>[
+        ui.PointerData(
+          change: ui.PointerChange.remove,
+          kind: PointerDeviceKind.mouse,
+          device: 1
+        ),
+      ]);
+      const ui.PointerDataPacket packet10 = ui.PointerDataPacket(data: <ui.PointerData>[
+        ui.PointerData(
+          change: ui.PointerChange.remove,
+          kind: PointerDeviceKind.mouse,
+        ),
+      ]);
       tracker.attachAnnotation(annotation);
       isInHitRegion = true;
       ui.window.onPointerDataPacket(packet1);
+      ui.window.onPointerDataPacket(packet2);
       tracker.collectMousePositions();
       expect(enter.length, equals(1), reason: 'enter contains $enter');
       expect(enter.first.position, equals(const Offset(0.0, 0.0)));
@@ -117,7 +149,7 @@ void main() {
       expect(move.first.runtimeType, equals(PointerHoverEvent));
       clear();
 
-      ui.window.onPointerDataPacket(packet2);
+      ui.window.onPointerDataPacket(packet3);
       tracker.collectMousePositions();
       expect(enter.length, equals(0), reason: 'enter contains $enter');
       expect(exit.length, equals(0), reason: 'exit contains $exit');
@@ -127,7 +159,7 @@ void main() {
       expect(move.first.runtimeType, equals(PointerHoverEvent));
       clear();
 
-      ui.window.onPointerDataPacket(packet3);
+      ui.window.onPointerDataPacket(packet4);
       tracker.collectMousePositions();
       expect(enter.length, equals(0), reason: 'enter contains $enter');
       expect(move.length, equals(0), reason: 'move contains $move');
@@ -137,7 +169,8 @@ void main() {
       expect(exit.first.runtimeType, equals(PointerExitEvent));
 
       clear();
-      ui.window.onPointerDataPacket(packet4);
+      ui.window.onPointerDataPacket(packet5);
+      ui.window.onPointerDataPacket(packet6);
       tracker.collectMousePositions();
       expect(enter.length, equals(1), reason: 'enter contains $enter');
       expect(enter.first.position, equals(const Offset(1.0, 201.0)));
@@ -151,7 +184,8 @@ void main() {
 
       // add in a second mouse simultaneously.
       clear();
-      ui.window.onPointerDataPacket(packet5);
+      ui.window.onPointerDataPacket(packet7);
+      ui.window.onPointerDataPacket(packet8);
       tracker.collectMousePositions();
       expect(enter.length, equals(1), reason: 'enter contains $enter');
       expect(enter.first.position, equals(const Offset(1.0, 301.0)));
@@ -165,8 +199,22 @@ void main() {
       expect(move.last.position, equals(const Offset(1.0, 301.0)));
       expect(move.last.device, equals(1));
       expect(move.last.runtimeType, equals(PointerHoverEvent));
+
+      clear();
+      ui.window.onPointerDataPacket(packet9);
+      ui.window.onPointerDataPacket(packet10);
+      clear();
     });
     test('detects exit when annotated layer no longer hit', () {
+      const ui.PointerDataPacket addPointer0 = ui.PointerDataPacket(data: <ui.PointerData>[
+        ui.PointerData(change: ui.PointerChange.add),
+      ]);
+      const ui.PointerDataPacket removePointer0 = ui.PointerDataPacket(data: <ui.PointerData>[
+        ui.PointerData(
+          change: ui.PointerChange.remove,
+          kind: PointerDeviceKind.mouse,
+        ),
+      ]);
       final ui.PointerDataPacket packet1 = ui.PointerDataPacket(data: <ui.PointerData>[
         ui.PointerData(
           change: ui.PointerChange.hover,
@@ -191,7 +239,7 @@ void main() {
       ]);
       isInHitRegion = true;
       tracker.attachAnnotation(annotation);
-
+      ui.window.onPointerDataPacket(addPointer0);
       ui.window.onPointerDataPacket(packet1);
       tracker.collectMousePositions();
       expect(enter.length, equals(1), reason: 'enter contains $enter');
@@ -215,8 +263,14 @@ void main() {
       expect(exit.first.position, const Offset(1.0, 201.0));
       expect(exit.first.device, equals(0));
       expect(exit.first.runtimeType, equals(PointerExitEvent));
+      clear();
+      ui.window.onPointerDataPacket(removePointer0);
+      clear();
     });
     test('detects exit when mouse goes away', () {
+      const ui.PointerDataPacket addPointer0 = ui.PointerDataPacket(data: <ui.PointerData>[
+        ui.PointerData(change: ui.PointerChange.add),
+      ]);
       final ui.PointerDataPacket packet1 = ui.PointerDataPacket(data: <ui.PointerData>[
         ui.PointerData(
           change: ui.PointerChange.hover,
@@ -231,7 +285,7 @@ void main() {
           kind: PointerDeviceKind.mouse,
         ),
       ]);
-      const ui.PointerDataPacket packet2 = ui.PointerDataPacket(data: <ui.PointerData>[
+      const ui.PointerDataPacket removePointer0 = ui.PointerDataPacket(data: <ui.PointerData>[
         ui.PointerData(
           change: ui.PointerChange.remove,
           kind: PointerDeviceKind.mouse,
@@ -239,9 +293,10 @@ void main() {
       ]);
       isInHitRegion = true;
       tracker.attachAnnotation(annotation);
+      ui.window.onPointerDataPacket(addPointer0);
       ui.window.onPointerDataPacket(packet1);
       tracker.collectMousePositions();
-      ui.window.onPointerDataPacket(packet2);
+      ui.window.onPointerDataPacket(removePointer0);
       tracker.collectMousePositions();
       expect(enter.length, equals(1), reason: 'enter contains $enter');
       expect(enter.first.position, equals(const Offset(1.0, 101.0)));
