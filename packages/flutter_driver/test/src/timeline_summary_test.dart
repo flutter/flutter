@@ -21,15 +21,22 @@ void main() {
     }
 
     Map<String, dynamic> build(int timeStamp, int duration) => <String, dynamic>{
-      'name': 'Frame', 'ph': 'X', 'ts': timeStamp, 'dur': duration,
+      'name': 'Frame',
+      'ph': 'X',
+      'ts': timeStamp,
+      'dur': duration,
     };
 
     Map<String, dynamic> begin(int timeStamp) => <String, dynamic>{
-      'name': 'GPURasterizer::Draw', 'ph': 'B', 'ts': timeStamp,
+      'name': 'GPURasterizer::Draw',
+      'ph': 'B',
+      'ts': timeStamp,
     };
 
     Map<String, dynamic> end(int timeStamp) => <String, dynamic>{
-      'name': 'GPURasterizer::Draw', 'ph': 'E', 'ts': timeStamp,
+      'name': 'GPURasterizer::Draw',
+      'ph': 'E',
+      'ts': timeStamp,
     };
 
     List<Map<String, dynamic>> rasterizeTimeSequenceInMillis(List<int> sequence) {

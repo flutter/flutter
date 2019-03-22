@@ -265,7 +265,9 @@ class TransformProperty extends DiagnosticsProperty<Matrix4> {
   /// Create a diagnostics property for [Matrix4] objects.
   ///
   /// The [showName] and [level] arguments must not be null.
-  TransformProperty(String name, Matrix4 value, {
+  TransformProperty(
+    String name,
+    Matrix4 value, {
     bool showName = true,
     Object defaultValue = kNoDefaultValue,
     DiagnosticLevel level = DiagnosticLevel.info,

@@ -34,7 +34,7 @@ abstract class RunCommandBase extends FlutterCommand {
       )
       ..addFlag('verbose-system-logs',
         negatable: false,
-        help: 'Include verbose logging from the flutter engine.'
+        help: 'Include verbose logging from the flutter engine.',
       )
       ..addOption('route',
         help: 'Which route to load when running the app.',
@@ -203,7 +203,7 @@ class RunCommand extends RunCommandBase {
             ? getNameForTargetPlatform(await devices[0].targetPlatform)
             : 'multiple';
 
-    return <String, String>{ 'cd3': '$isEmulator', 'cd4': deviceType };
+    return <String, String>{'cd3': '$isEmulator', 'cd4': deviceType};
   }
 
   @override

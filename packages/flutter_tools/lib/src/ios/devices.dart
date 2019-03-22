@@ -389,8 +389,7 @@ class IOSDevice extends Device {
   DevicePortForwarder get portForwarder => _portForwarder ??= _IOSDevicePortForwarder(this);
 
   @override
-  void clearLogs() {
-  }
+  void clearLogs() { }
 
   @override
   bool get supportsScreenshot => iMobileDevice.isInstalled;
