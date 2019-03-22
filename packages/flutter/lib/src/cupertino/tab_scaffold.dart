@@ -290,15 +290,15 @@ class _TabSwitchingView extends StatefulWidget {
 
 class _TabSwitchingViewState extends State<_TabSwitchingView> {
   List<Widget> tabs;
-  List<FocusScopeNode> tabFocusNodes;
+  List<FocusableScopeNode> tabFocusNodes;
 
   @override
   void initState() {
     super.initState();
     tabs = List<Widget>(widget.tabNumber);
-    tabFocusNodes = List<FocusScopeNode>.generate(
+    tabFocusNodes = List<FocusableScopeNode>.generate(
       widget.tabNumber,
-      (int index) => FocusScopeNode(),
+      (int index) => null,
     );
   }
 
@@ -315,15 +315,7 @@ class _TabSwitchingViewState extends State<_TabSwitchingView> {
   }
 
   void _focusActiveTab() {
-    FocusScope.of(context).setFirstFocus(tabFocusNodes[widget.currentTabIndex]);
-  }
-
-  @override
-  void dispose() {
-    for (FocusScopeNode focusScopeNode in tabFocusNodes) {
-      focusScopeNode.detach();
-    }
-    super.dispose();
+    tabFocusNodes[widget.currentTabIndex]?.requestFocus();
   }
 
   @override
@@ -341,9 +333,11 @@ class _TabSwitchingViewState extends State<_TabSwitchingView> {
           offstage: !active,
           child: TickerMode(
             enabled: active,
-            child: FocusScope(
-              node: tabFocusNodes[index],
-              child: tabs[index] ?? Container(),
+            child: FocusableScope(
+              child: Builder(builder: (BuildContext context) {
+                tabFocusNodes[index] = FocusableScope.of(context);
+                return tabs[index] ?? Container();
+              }),
             ),
           ),
         );
