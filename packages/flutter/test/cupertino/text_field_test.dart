@@ -762,7 +762,7 @@ void main() {
                     child: CupertinoTextField(
                       controller: controller,
                       placeholder: 'placeholder',
-                      onChanged: (newValue) =>
+                      onChanged: (String newValue) =>
                           setState(() {
                             value = newValue;
                           }),
