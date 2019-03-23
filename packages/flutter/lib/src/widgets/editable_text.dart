@@ -269,7 +269,7 @@ class EditableText extends StatefulWidget {
     Key key,
     @required this.controller,
     this.focusNode,
-    this.focusableNode,
+    this.onFocusableNodeChanged,
     this.obscureText = false,
     this.autocorrect = true,
     @required this.style,
@@ -305,7 +305,6 @@ class EditableText extends StatefulWidget {
     this.dragStartBehavior = DragStartBehavior.start,
     this.enableInteractiveSelection,
   }) : assert(controller != null),
-       assert(focusNode != null || focusableNode != null),
        assert(obscureText != null),
        assert(autocorrect != null),
        assert(style != null),
@@ -346,7 +345,7 @@ class EditableText extends StatefulWidget {
   final FocusNode focusNode;
 
   /// Controls whether this widget has keyboard focus.
-  final FocusableNode focusableNode;
+  final ValueChanged<FocusableNode> onFocusableNodeChanged;
 
   /// {@template flutter.widgets.editableText.obscureText}
   /// Whether to hide the text being edited (e.g., for passwords).
@@ -752,7 +751,6 @@ class EditableText extends StatefulWidget {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<TextEditingController>('controller', controller));
     properties.add(DiagnosticsProperty<FocusNode>('focusNode', focusNode, defaultValue: null));
-    properties.add(DiagnosticsProperty<FocusableNode>('focusableNode', focusableNode, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('obscureText', obscureText, defaultValue: false));
     properties.add(DiagnosticsProperty<bool>('autocorrect', autocorrect, defaultValue: true));
     style?.debugFillProperties(properties);
@@ -784,6 +782,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   final LayerLink _layerLink = LayerLink();
   bool _didAutoFocus = false;
 
+  FocusableNode _focusableNode;
+
   // This value is an eyeball estimation of the time it takes for the iOS cursor
   // to ease in and out.
   static const Duration _fadeDuration = Duration(milliseconds: 250);
@@ -806,12 +806,24 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     super.initState();
     widget.controller.addListener(_didChangeTextEditingValue);
     widget.focusNode?.addListener(_handleFocusChanged);
-    widget.focusableNode?.addListener(_handleFocusChanged);
     _scrollController.addListener(() { _selectionOverlay?.updateForScroll(); });
     _cursorBlinkOpacityController = AnimationController(vsync: this, duration: _fadeDuration);
     _cursorBlinkOpacityController.addListener(_onCursorColorTick);
     _floatingCursorResetController = AnimationController(vsync: this);
     _floatingCursorResetController.addListener(_onFloatingCursorResetTick);
+  }
+
+  void _focusableNodeChanged(FocusableNode node) {
+    if (_focusableNode == node) {
+      return;
+    }
+    _focusableNode?.removeListener(_handleFocusChanged);
+    _focusableNode = node;
+    _focusableNode.autofocus = widget.autofocus;
+    _focusableNode?.addListener(_handleFocusChanged);
+    if (widget.onFocusableNodeChanged != null) {
+      widget.onFocusableNodeChanged(_focusableNode);
+    }
   }
 
   @override
@@ -836,11 +848,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       widget.focusNode?.addListener(_handleFocusChanged);
       updateKeepAlive();
     }
-    if (widget.focusableNode != oldWidget.focusableNode) {
-      oldWidget.focusableNode?.removeListener(_handleFocusChanged);
-      widget.focusableNode?.addListener(_handleFocusChanged);
-      updateKeepAlive();
-    }
   }
 
   @override
@@ -855,7 +862,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _selectionOverlay?.dispose();
     _selectionOverlay = null;
     widget.focusNode?.removeListener(_handleFocusChanged);
-    widget.focusableNode?.removeListener(_handleFocusChanged);
     super.dispose();
   }
 
@@ -982,7 +988,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       widget.controller.clearComposing();
       if (shouldUnfocus) {
         widget.focusNode?.unfocus();
-        widget.focusableNode?.unfocus();
+        _focusableNode?.unfocus();
       }
     }
 
@@ -1006,7 +1012,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     widget.controller.value = value;
   }
 
-  bool get _hasFocus => widget.focusNode != null && widget.focusNode.hasFocus || widget.focusableNode != null && widget.focusableNode.hasFocus;
+  bool get _hasFocus => widget.focusNode != null && widget.focusNode.hasFocus || _focusableNode != null && _focusableNode.hasFocus;
   bool get _isMultiline => widget.maxLines != 1;
 
   // Calculate the new scroll offset so the cursor remains visible.
@@ -1074,7 +1080,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   void _openOrCloseInputConnectionIfNeeded() {
     if (_hasFocus && widget.focusNode != null && widget.focusNode.consumeKeyboardToken() ||
-        widget.focusableNode != null && widget.focusableNode.consumeKeyboardToken()) {
+        _focusableNode != null && _focusableNode.consumeKeyboardToken()) {
       _openInputConnection();
     } else if (!_hasFocus) {
       _closeInputConnectionIfNeeded();
@@ -1099,8 +1105,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       if (widget.focusNode != null) {
         FocusScope.of(context).requestFocus(widget.focusNode);
       }
-      if (widget.focusableNode != null) {
-        widget.focusableNode.requestFocus();
+      if (_focusableNode != null) {
+        _focusableNode.requestFocus();
       }
     }
   }
@@ -1410,61 +1416,61 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (widget.focusNode != null) {
       FocusScope.of(context).reparentIfNeeded(widget.focusNode);
     }
-    if (widget.focusableNode != null) {
-      FocusableScope.of(context).reparent(widget.focusableNode);
-    }
     super.build(context); // See AutomaticKeepAliveClientMixin.
 
     final TextSelectionControls controls = widget.selectionControls;
-    return Scrollable(
-      excludeFromSemantics: true,
-      axisDirection: _isMultiline ? AxisDirection.down : AxisDirection.right,
-      controller: _scrollController,
-      physics: const ClampingScrollPhysics(),
-      dragStartBehavior: widget.dragStartBehavior,
-      viewportBuilder: (BuildContext context, ViewportOffset offset) {
-        return CompositedTransformTarget(
-          link: _layerLink,
-          child: Semantics(
-            onCopy: _semanticsOnCopy(controls),
-            onCut: _semanticsOnCut(controls),
-            onPaste: _semanticsOnPaste(controls),
-            child: _Editable(
-              key: _editableKey,
-              textSpan: buildTextSpan(),
-              value: _value,
-              cursorColor: _cursorColor,
-              backgroundCursorColor: widget.backgroundCursorColor,
-              showCursor: EditableText.debugDeterministicCursor
-                  ? ValueNotifier<bool>(true)
-                  : _cursorVisibilityNotifier,
-              hasFocus: _hasFocus,
-              maxLines: widget.maxLines,
-              minLines: widget.minLines,
-              expands: widget.expands,
-              strutStyle: widget.strutStyle,
-              selectionColor: widget.selectionColor,
-              textScaleFactor: widget.textScaleFactor ?? MediaQuery.textScaleFactorOf(context),
-              textAlign: widget.textAlign,
-              textDirection: _textDirection,
-              locale: widget.locale,
-              obscureText: widget.obscureText,
-              autocorrect: widget.autocorrect,
-              offset: offset,
-              onSelectionChanged: _handleSelectionChanged,
-              onCaretChanged: _handleCaretChanged,
-              rendererIgnoresPointer: widget.rendererIgnoresPointer,
-              cursorWidth: widget.cursorWidth,
-              cursorRadius: widget.cursorRadius,
-              cursorOffset: widget.cursorOffset,
-              paintCursorAboveText: widget.paintCursorAboveText,
-              enableInteractiveSelection: widget.enableInteractiveSelection,
-              textSelectionDelegate: this,
-              devicePixelRatio: _devicePixelRatio,
+    return Focusable(
+      onNodeChanged: _focusableNodeChanged,
+      child: Scrollable(
+        excludeFromSemantics: true,
+        axisDirection: _isMultiline ? AxisDirection.down : AxisDirection.right,
+        controller: _scrollController,
+        physics: const ClampingScrollPhysics(),
+        dragStartBehavior: widget.dragStartBehavior,
+        viewportBuilder: (BuildContext context, ViewportOffset offset) {
+          return CompositedTransformTarget(
+            link: _layerLink,
+            child: Semantics(
+              onCopy: _semanticsOnCopy(controls),
+              onCut: _semanticsOnCut(controls),
+              onPaste: _semanticsOnPaste(controls),
+              child: _Editable(
+                key: _editableKey,
+                textSpan: buildTextSpan(),
+                value: _value,
+                cursorColor: _cursorColor,
+                backgroundCursorColor: widget.backgroundCursorColor,
+                showCursor: EditableText.debugDeterministicCursor
+                    ? ValueNotifier<bool>(true)
+                    : _cursorVisibilityNotifier,
+                hasFocus: _hasFocus,
+                maxLines: widget.maxLines,
+                minLines: widget.minLines,
+                expands: widget.expands,
+                strutStyle: widget.strutStyle,
+                selectionColor: widget.selectionColor,
+                textScaleFactor: widget.textScaleFactor ?? MediaQuery.textScaleFactorOf(context),
+                textAlign: widget.textAlign,
+                textDirection: _textDirection,
+                locale: widget.locale,
+                obscureText: widget.obscureText,
+                autocorrect: widget.autocorrect,
+                offset: offset,
+                onSelectionChanged: _handleSelectionChanged,
+                onCaretChanged: _handleCaretChanged,
+                rendererIgnoresPointer: widget.rendererIgnoresPointer,
+                cursorWidth: widget.cursorWidth,
+                cursorRadius: widget.cursorRadius,
+                cursorOffset: widget.cursorOffset,
+                paintCursorAboveText: widget.paintCursorAboveText,
+                enableInteractiveSelection: widget.enableInteractiveSelection,
+                textSelectionDelegate: this,
+                devicePixelRatio: _devicePixelRatio,
+              ),
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 

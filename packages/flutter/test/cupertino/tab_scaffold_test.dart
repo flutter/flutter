@@ -106,7 +106,7 @@ void main() {
 
   testWidgets('Last tab gets focus', (WidgetTester tester) async {
     // 2 nodes for 2 tabs
-    final List<FocusNode> focusNodes = <FocusNode>[FocusNode(), FocusNode()];
+    final List<FocusableNode> focusNodes = <FocusableNode>[null, null];
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -114,7 +114,7 @@ void main() {
           tabBar: _buildTabBar(),
           tabBuilder: (BuildContext context, int index) {
             return CupertinoTextField(
-              focusNode: focusNodes[index],
+              onFocusableNodeChanged: (FocusableNode node) => focusNodes[index] = node,
               autofocus: true,
             );
           },
@@ -122,6 +122,12 @@ void main() {
       ),
     );
 
+    await tester.pump();
+
+    print(WidgetsBinding.instance.focusableManager.toStringDeep());
+    for (FocusableNode node in focusNodes) {
+      print ('Node $node');
+    }
     expect(focusNodes[0].hasFocus, isTrue);
 
     await tester.tap(find.text('Tab 2'));
@@ -138,8 +144,8 @@ void main() {
   });
 
   testWidgets('Do not affect focus order in the route', (WidgetTester tester) async {
-    final List<FocusNode> focusNodes = <FocusNode>[
-      FocusNode(), FocusNode(), FocusNode(), FocusNode(),
+    final List<FocusableNode> focusNodes = <FocusableNode>[
+      null, null, null, null,
     ];
 
     await tester.pumpWidget(
@@ -150,11 +156,11 @@ void main() {
             return Column(
               children: <Widget>[
                 CupertinoTextField(
-                  focusNode: focusNodes[index * 2],
+                  onFocusableNodeChanged: (FocusableNode node) =>  focusNodes[index * 2] = node,
                   placeholder: 'TextField 1',
                 ),
                 CupertinoTextField(
-                  focusNode: focusNodes[index * 2 + 1],
+                  onFocusableNodeChanged: (FocusableNode node) =>  focusNodes[index * 2 + 1] = node,
                   placeholder: 'TextField 2',
                 ),
               ],
@@ -165,14 +171,14 @@ void main() {
     );
 
     expect(
-      focusNodes.any((FocusNode node) => node.hasFocus),
+      focusNodes.any((FocusableNode node) => node?.hasFocus ?? false),
       isFalse,
     );
 
     await tester.tap(find.widgetWithText(CupertinoTextField, 'TextField 2'));
 
     expect(
-      focusNodes.indexOf(focusNodes.singleWhere((FocusNode node) => node.hasFocus)),
+      focusNodes.indexOf(focusNodes.singleWhere((FocusableNode node) => node?.hasFocus ?? false)),
       1,
     );
 
@@ -182,7 +188,7 @@ void main() {
     await tester.tap(find.widgetWithText(CupertinoTextField, 'TextField 1'));
 
     expect(
-      focusNodes.indexOf(focusNodes.singleWhere((FocusNode node) => node.hasFocus)),
+      focusNodes.indexOf(focusNodes.singleWhere((FocusableNode node) => node?.hasFocus ?? false)),
       2,
     );
 
@@ -192,7 +198,7 @@ void main() {
     // Upon going back to tab 1, the item it tab 1 that previously had the focus
     // (TextField 2) gets it back.
     expect(
-      focusNodes.indexOf(focusNodes.singleWhere((FocusNode node) => node.hasFocus)),
+      focusNodes.indexOf(focusNodes.singleWhere((FocusableNode node) => node?.hasFocus ?? false)),
       1,
     );
   });

@@ -43,6 +43,7 @@ class Focusable extends StatefulWidget {
     @required this.child,
     this.autofocus = false,
     this.onFocusChange,
+    this.onNodeChanged,
     this.onKey,
     this.debugLabel,
   })  : assert(child != null),
@@ -76,6 +77,9 @@ class Focusable extends StatefulWidget {
   /// focus.
   final ValueChanged<bool> onFocusChange;
 
+  /// Called when the managed FocusableNode is created or changed.
+  final ValueChanged<FocusableNode> onNodeChanged;
+
   /// True if this widget will be selected as the initial focus when no other
   /// node in its scope is currently focused.
   ///
@@ -100,9 +104,6 @@ class Focusable extends StatefulWidget {
     return Focusable.of(context).hasFocus;
   }
 
-  // Only FocusScopes can handle external nodes.
-  FocusableScopeNode get _externalNode => null;
-
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
@@ -115,8 +116,7 @@ class Focusable extends StatefulWidget {
 }
 
 class _FocusableState extends State<Focusable> {
-  FocusableNode _internalNode;
-  FocusableNode get node => widget._externalNode ?? _internalNode;
+  FocusableNode node;
   bool _hasFocus;
 
   FocusableNode _createNode(){
@@ -128,9 +128,10 @@ class _FocusableState extends State<Focusable> {
   }
 
   void _initNode() {
-    if (widget._externalNode == null) {
-      // Only create a new node if the widget doesn't have one.
-      _internalNode ??= _createNode();
+    final FocusableNode old = node;
+    node ??= _createNode();
+    if (old != node && widget.onNodeChanged != null) {
+      widget.onNodeChanged(node);
     }
     _hasFocus = node.hasFocus;
     // Add listener even if the _internalNode existed before, since it should
@@ -146,11 +147,8 @@ class _FocusableState extends State<Focusable> {
 
   @override
   void dispose() {
-    widget._externalNode?.removeListener(_handleFocusChanged);
-    _internalNode?.removeListener(_handleFocusChanged);
-    // Don't manage the lifetime of external nodes given to the widget, just the
-    // internal node.
-    _internalNode?.dispose();
+    node?.removeListener(_handleFocusChanged);
+    node?.dispose();
     super.dispose();
   }
 
@@ -171,26 +169,8 @@ class _FocusableState extends State<Focusable> {
   @override
   void didUpdateWidget(Focusable oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget._externalNode == widget._externalNode) {
-      // Nothing we care about changed.
+    if (node == null) {
       return;
-    }
-    if (oldWidget._externalNode == null && widget._externalNode != null) {
-      // We're no longer using the node we were managing. We don't stop managing
-      // it until dispose, so do nothing yet: we might re-use it eventually, and
-      // calling dispose on it here will confuse the raw keyboard handler that
-      // hasn't yet been notified of a widget change, but do stop listening.
-      _internalNode?.removeListener(_handleFocusChanged);
-      widget._externalNode?.addListener(_handleFocusChanged);
-    } else if (oldWidget._externalNode != null && widget._externalNode == null) {
-      oldWidget._externalNode?.removeListener(_handleFocusChanged);
-      // We stopped using the external node, and now we need to manage one.
-      _initNode();
-    } else {
-      // We just switched which node the widget had, so just change what we
-      // listen to.
-      oldWidget._externalNode?.removeListener(_handleFocusChanged);
-      widget._externalNode?.addListener(_handleFocusChanged);
     }
     if (oldWidget.autofocus != widget.autofocus) {
       node.autofocus = widget.autofocus;
@@ -205,12 +185,12 @@ class _FocusableState extends State<Focusable> {
     super.didChangeDependencies();
     final FocusableNode newParent = Focusable.of(context);
     node.context = context;
-    newParent.reparent(node);
+    newParent.reparentIfNecessary(node);
   }
 
   @override
   Widget build(BuildContext context) {
-    Focusable.of(context).reparent(node);
+    Focusable.of(context).reparentIfNecessary(node);
     return RawKeyboardListener(
       focusableNode: node,
       onKey: (RawKeyEvent event) {
@@ -263,7 +243,7 @@ class FocusableScope extends Focusable {
   /// The [autofocus], and [showDecorations] arguments must not be null.
   const FocusableScope({
     Key key,
-    this.node,
+    ValueChanged<FocusableNode> onNodeChanged,
     @required Widget child,
     bool autofocus = false,
     ValueChanged<bool> onFocusChange,
@@ -276,6 +256,7 @@ class FocusableScope extends Focusable {
         child: child,
         autofocus: autofocus,
         onFocusChange: onFocusChange,
+        onNodeChanged: onNodeChanged,
         onKey: onKey,
         debugLabel: debugLabel,
       );
@@ -299,12 +280,6 @@ class FocusableScope extends Focusable {
     final FocusableScopeNode parent = FocusableScope.of(context);
     return parent?.ancestors?.cast<FocusableScopeNode>()?.toList() ?? <FocusableScopeNode>[];
   }
-
-  /// The focus scope node that this FocusScope will manage.
-  ///
-  /// You do not need to manage the lifetime of this, the FocusScope will adopt
-  /// it.
-  final FocusableScopeNode node;
 
   @override
   _FocusableScopeState createState() => _FocusableScopeState();

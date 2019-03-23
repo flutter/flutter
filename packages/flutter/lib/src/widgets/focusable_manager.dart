@@ -54,11 +54,12 @@ class FocusableNode with DiagnosticableTreeMixin, ChangeNotifier {
       return;
     }
     _autofocus = value;
-    if (_autofocus) {
+    if (_autofocus && _manager != null) {
       _debugCheckUniqueAutofocusNode(this);
       _manager._requestAutofocus(this);
     }
   }
+
   bool _autofocus;
 
   /// Cancels any outstanding requests for focus.
@@ -161,7 +162,7 @@ class FocusableNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// during its `build` method in case the widget is moved from one location
   /// in the tree to another location that has a different focus scope.
   @mustCallSuper
-  void reparent(FocusableNode child) {
+  void reparentIfNecessary(FocusableNode child) {
     assert(child != null);
     assert(_manager == null || child != _manager.rootScope, "Can't reparent the root node");
     assert(!ancestors.contains(child), 'The supplied child is already an ancestor of this node. Inheritance loops are not allowed.');
@@ -186,7 +187,7 @@ class FocusableNode with DiagnosticableTreeMixin, ChangeNotifier {
     child._parent = this;
     child._updateManager(_manager);
     // If this child is an autofocus node, then set that as the focused child
-    // in its scope.
+    // in its scope, but only if there isn't already a focused child.
     child.enclosingScope._focusedChild ??= child.autofocus ? child : null;
     if (oldPrimaryFocus != null) {
       final Set<FocusableNode> newFocusPath = _manager?._currentFocus?.ancestors?.toSet() ?? <FocusableNode>{};
@@ -211,11 +212,14 @@ class FocusableNode with DiagnosticableTreeMixin, ChangeNotifier {
   void _debugCheckUniqueAutofocusNode(FocusableNode node) {
     assert(() {
       final FocusableNode enclosingScope = node.enclosingScope;
+      if (enclosingScope == null) {
+        return true;
+      }
       final List<FocusableNode> autofocusNodes = enclosingScope.descendants.where((FocusableNode descendant) {
         return descendant.enclosingScope == enclosingScope && descendant.autofocus;
       }).toList();
       return autofocusNodes.length <= 1;
-    }(), 'More than one autofocus node was found in the descendants of scope ${node.enclosingScope}, which is not allowed.');
+    }(), 'More than one autofocus node was found in the descendants of scope ${node.enclosingScope}, which is not allowed:\n${node.toStringDeep(prefixLineOne: '    ')}');
   }
 
   /// An iterator over the children of this node.
@@ -275,9 +279,7 @@ class FocusableNode with DiagnosticableTreeMixin, ChangeNotifier {
   ///
   /// The only difference between this and [requestFocus] is that the policy data
   /// is not cleared.
-  void requestFocusFromPolicy() {
-    _doRequestFocus(true);
-  }
+  void requestFocusFromPolicy() => _doRequestFocus(true);
 
   /// Requests that this node and every parent of this node gets focus.
   ///
@@ -290,17 +292,7 @@ class FocusableNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// within a focus policy in order to keep the policy data for future use.
   ///
   /// Calling this will clear the [policyData] for the enclosing scope.
-  void requestFocus([FocusableNode node]) {
-    if (node != null) {
-      // If an argument was given, then it expects to be a child of this node,
-      // and have the focus given to it.  Reparent the node and then request
-      // focus on it.
-      reparent(node);
-      node.requestFocus();
-      return;
-    }
-    _doRequestFocus(false);
-  }
+  void requestFocus() => _doRequestFocus(false);
 
   void _doRequestFocus(bool isFromPolicy) {
     assert(isFromPolicy != null);
@@ -401,6 +393,7 @@ class FocusableNode with DiagnosticableTreeMixin, ChangeNotifier {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
+    properties.add(FlagProperty('autofocus', value: autofocus, ifTrue: 'AUTOFOCUS', defaultValue: false));
     properties.add(DiagnosticsProperty<BuildContext>('context', context, defaultValue: null));
     properties.add(FlagProperty('hasFocus', value: hasFocus, ifTrue: 'FOCUSED', defaultValue: false));
     properties.add(StringProperty('debugLabel', debugLabel, defaultValue: null));
@@ -435,26 +428,14 @@ class FocusableScopeNode extends FocusableNode {
   FocusableScopeNode get nearestScope => this;
 
   @override
-  void reparent(FocusableNode child) {
+  void reparentIfNecessary(FocusableNode child) {
     final FocusableScopeNode previousEnclosingScope = child.enclosingScope;
-    super.reparent(child);
+    super.reparentIfNecessary(child);
     final FocusableScopeNode currentEnclosingScope = child.enclosingScope;
     // If the child moved scopes, then the policy data is invalid.
     if (previousEnclosingScope != currentEnclosingScope) {
       policyData = null;
     }
-  }
-
-  /// Deprecated way to find out if this scope has focus.
-  ///
-  /// Use [hasFocus] instead.
-  bool get isFirstFocus => hasFocus;
-
-  /// Add the given node as a child of this focus scope, and make it be the
-  /// [focusedChild].
-  void setFirstFocus(FocusableScopeNode node) {
-    reparent(node);
-    _focusedChild = node;
   }
 
   /// Returns the child of this node which should receive focus if this scope
@@ -644,9 +625,13 @@ class FocusableManager with DiagnosticableTreeMixin {
       }
       _nextAutofocus = null;
     }
+    if (_nextFocus is FocusableScopeNode) {
+      final FocusableScopeNode scope = _nextFocus;
+      if (scope._focusedChild != null) {
+        _nextFocus = scope._focusedChild;
+      }
+    }
     if (_nextFocus != null && _nextFocus != _currentFocus) {
-      // Even if the _currentFocus hasn't changed, it may have changed where it
-      // was in the tree, so we have to make sure we update and notify.
       _currentFocus = _nextFocus;
       final Set<FocusableNode> previousPath = previousFocus?.ancestors?.toSet() ?? <FocusableNode>{};
       final Set<FocusableNode> nextPath = _nextFocus.ancestors.toSet();
@@ -676,11 +661,8 @@ class FocusableManager with DiagnosticableTreeMixin {
   }
 
   @override
-  String toString({DiagnosticLevel minLevel = DiagnosticLevel.debug}) {
-    final String status = _haveScheduledUpdate ? ' UPDATE SCHEDULED' : '';
-    const String indent = '  ';
-    return '${describeIdentity(this)}$status\n'
-        '${indent}currentFocus: $_currentFocus\n'
-        '${rootScope.toStringDeep(prefixLineOne: indent, prefixOtherLines: indent)}';
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    properties.add(FlagProperty('haveScheduledUpdate', value: _haveScheduledUpdate, ifTrue: 'UPDATE SCHEDULED'));
+    properties.add(DiagnosticsProperty<FocusableNode>('currentFocus', _currentFocus, defaultValue: null));
   }
 }
