@@ -68,12 +68,7 @@ class UpgradeCommandRunner {
       }
     }
     final String stashName = await maybeStash(gitTagVersion);
-    // If we're on a hotfix version, that means we likely have a different
-    // history than the tags pulled from master. We need to reset to the
-    // tag this hotfix was branched from.
-    if (gitTagVersion.hotfix != null) {
-      await unapplyHotfix(gitTagVersion);
-    }
+    await resetChanges(gitTagVersion);
     await upgradeChannel(flutterVersion);
     await attemptFastForward();
     await applyStash(stashName);
@@ -131,12 +126,19 @@ class UpgradeCommandRunner {
     return null;
   }
 
-  /// Attempts to reset to the un-hotfixed version. This should restore the
+  /// Attempts to reset to the last known tag or branch. This should restore the
   /// history to something that is compatible with the regular upgrade
   /// process.
-  Future<void> unapplyHotfix(GitTagVersion gitTagVersion) async {
+  Future<void> resetChanges(GitTagVersion gitTagVersion) async {
+    // We only got here by using --force.
+    String tag;
+    if (gitTagVersion == const GitTagVersion.unknown()) {
+      tag = 'v0.0.0';
+    } else {
+      tag = 'v${gitTagVersion.x}.${gitTagVersion.y}.${gitTagVersion.z}';
+    }
     final RunResult runResult = await runCheckedAsync(<String>[
-      'git', 'reset', '--hard', 'v${gitTagVersion.x}.${gitTagVersion.y}.${gitTagVersion.z}',
+      'git', 'reset', '--hard', tag,
     ]);
     if (runResult.exitCode != 0) {
       throwToolExit('Failed to restore branch from hotfix.');
