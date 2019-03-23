@@ -1,4 +1,4 @@
-Signature: a11edade867d2a6d79060ca17bb31f94
+Signature: 767d8408bc1bafe38e80364099165750
 
 UNUSED LICENSES:
 
@@ -2325,7 +2325,6 @@ FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Win10-Clan
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Win10-Clang-ShuttleA-GPU-GTX660-x86_64-Release-All-Vulkan.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Win10-Clang-ShuttleC-GPU-GTX960-x86_64-Debug-All-ANGLE.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Win2016-Clang-GCE-CPU-AVX2-x86_64-Debug-All-FAAA.json
-FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Win2016-Clang-GCE-CPU-AVX2-x86_64-Debug-All-FDAA.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Win2016-Clang-GCE-CPU-AVX2-x86_64-Debug-All-FSAA.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Win2016-MSVC-GCE-CPU-AVX2-x86_64-Debug-All-MSRTC.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-iOS-Clang-iPadPro-GPU-PowerVRGT7800-arm64-Release-All.json
@@ -4396,8 +4395,6 @@ FILE: ../../../third_party/skia/src/core/SkBlendMode.cpp
 FILE: ../../../third_party/skia/src/core/SkBlitter_RGB565.cpp
 FILE: ../../../third_party/skia/src/core/SkClipStackDevice.cpp
 FILE: ../../../third_party/skia/src/core/SkClipStackDevice.h
-FILE: ../../../third_party/skia/src/core/SkCoverageDelta.cpp
-FILE: ../../../third_party/skia/src/core/SkCoverageDelta.h
 FILE: ../../../third_party/skia/src/core/SkDeferredDisplayListRecorder.cpp
 FILE: ../../../third_party/skia/src/core/SkDrawShadowInfo.cpp
 FILE: ../../../third_party/skia/src/core/SkDrawShadowInfo.h
@@ -6831,7 +6828,6 @@ ORIGIN: ../../../third_party/skia/src/compute/sk/SkDevice_Compute.h + ../../../t
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/src/compute/sk/SkDevice_Compute.h
 FILE: ../../../third_party/skia/src/core/SkScan_AAAPath.cpp
-FILE: ../../../third_party/skia/src/core/SkScan_DAAPath.cpp
 ----------------------------------------------------------------------------------------------------
 Copyright 2016 The Android Open Source Project
 
