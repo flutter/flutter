@@ -274,7 +274,7 @@ void main() {
     final Offset pageViewStart = tester.getTopLeft(find.byType(PageView));
     const Offset halfPixel = Offset(0.5, 0.0);
 
-    await tester.tapAt(pageViewStart);
+    await tester.tapAt(pageViewStart + halfPixel);
     expect(log, equals(<String>['Tap']));
     log.clear();
 
@@ -323,7 +323,7 @@ void main() {
     await tester.tapAt(leftBoundaryOfChild - halfPixel);
     expect(log, isEmpty);
 
-    await tester.tapAt(leftBoundaryOfChild);
+    await tester.tapAt(leftBoundaryOfChild + halfPixel);
     expect(log, equals(<String>['Tap']));
     log.clear();
 
@@ -331,7 +331,7 @@ void main() {
     expect(log, equals(<String>['Tap']));
     log.clear();
 
-    await tester.tapAt(rightBoundaryOfChild);
+    await tester.tapAt(rightBoundaryOfChild + halfPixel);
     expect(log, isEmpty);
   });
 
