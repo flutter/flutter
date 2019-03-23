@@ -37,6 +37,20 @@ subprojects {
     project.evaluationDependsOn(':app')
 }
 ''';
+const String _kLegacySettingsGradlePluginLogic = '''def plugins = new Properties()
+def pluginsFile = new File(flutterProjectRoot.toFile(), '.flutter-plugins')
+if (pluginsFile.exists()) {
+    pluginsFile.withReader('UTF-8') { reader -> plugins.load(reader) }
+}
+
+plugins.each { name, path ->
+    def pluginDirectory = flutterProjectRoot.resolve(path).resolve('android').toFile()
+    include ":\$name"
+    project(":\$name").projectDir = pluginDirectory
+    project(":\$name").parent = project(":app")
+    println project(":\$name").dump()
+}
+''';
 
 GradleProject _cachedGradleProject;
 String _cachedGradleExecutable;
@@ -344,16 +358,17 @@ Future<void> buildPluginAAR(Plugin plugin, String gradle, String assembleTask) a
   final String pluginDir = fs.path.join(plugin.path, 'android');
   writeLocalProperties(fs.file(fs.path.join(pluginDir, 'local.properties')));
   final Status status = logger.startProgress(
-    'Running \'gradlew $assembleTask\' for $pluginDir...',
+    'Running \'gradlew $assembleTask\' for ${plugin.androidPackage}...',
     timeout: kSlowOperation,
-    multilineOutput: true,
   );
   final String initScriptPath = fs.path.join(Cache.flutterRoot, 'packages', 'flutter_tools', 'gradle', 'plugins_init.gradle');
   final List<String> command =  <String>[
     fs.file(gradle).absolute.path,
     '--init-script',
     initScriptPath,
-    assembleTask,
+    'build',
+    '-x',
+    'lint',
     '-q',
     '-Pflutter-root=${Cache.flutterRoot}',
   ];
@@ -398,6 +413,12 @@ Future<void> _buildGradleProjectV3(
     printStatus('Updating build.gradle for new plugin format...');
     final String updatedBuildGradle = buildGradle.replaceAll(_kSubprojectsNode, '');
     await flutterProject.android.rootBuildGradle.writeAsString(updatedBuildGradle);
+  }
+  final String settingsGradle = await flutterProject.android.gradleSettingsFile.readAsString();
+  if (settingsGradle.contains(_kLegacySettingsGradlePluginLogic)) {
+    printStatus('Updating settings.gradle for new plugin format...');
+    final String updatedSettingsGradle = settingsGradle.replaceAll(_kLegacySettingsGradlePluginLogic, '');
+    await flutterProject.android.gradleSettingsFile.writeAsString(updatedSettingsGradle);
   }
   return _buildGradleProjectV2(
     flutterProject,

@@ -447,7 +447,7 @@ class AndroidProject {
   }
 
   File get localPropertiesFile => _flutterLibGradleRoot.childFile('local.properties');
-
+  File get gradleSettingsFile => _flutterLibGradleRoot.childFile('settings.gradle');
   File get rootBuildGradle => _flutterLibGradleRoot.childFile('build.gradle');
   File get appBuildGradle => _flutterLibGradleRoot.childDirectory('app').childFile('build.gradle');
 

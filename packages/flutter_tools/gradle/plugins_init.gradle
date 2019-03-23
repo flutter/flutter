@@ -12,9 +12,9 @@ class FlutterAarPlugin implements Plugin<Project> {
     private File releaseFlutterJar
 
     @Override
-    void apply(Project project) {
-        findFlutterJar(project)
-        project.afterEvaluate this.&addFlutterJarCompileOnlyDependency
+    void apply(Project gradleProject) {
+        findFlutterJar(gradleProject)
+        gradleProject.afterEvaluate this.&addFlutterJarCompileOnlyDependency
     }
 
     // TODO(mklim): This logic is copied from flutter.gradle. Should probably
@@ -63,7 +63,10 @@ class FlutterAarPlugin implements Plugin<Project> {
         if (project.state.failure) {
             return
         }
-        println flutterJar
+        File depsFile = project.file("${project.buildDir}/deps.txt")
+        project.getConfigurations().getByName("api").getDependencies().each {dep ->
+            depsFile << "${dep.group}:${dep.name}:${dep.version}\n"
+        }
         project.dependencies {
             if (flutterJar != null) {
                 compileOnly project.files(flutterJar)

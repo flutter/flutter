@@ -187,9 +187,15 @@ class FlutterPlugin implements Plugin<Project> {
         Properties plugins = readPropertiesIfExist(pluginsFile)
 
         plugins.each { name, path ->
-            def String artifactDir = Paths.get(path, 'android', 'build', 'outputs', 'aar').toString();
+            def File pluginDepsFile = new File(Paths.get(path, 'android', 'build', 'deps.txt').toString())
             project.dependencies {
-                compile project.fileTree(dir: artifactDir, include: '*release.aar')
+                if (pluginDepsFile.exists()) {
+                    def lines = pluginDepsFile.readLines()
+                    for (line in lines) {
+                        api line
+                    }
+                }
+                api project.files(Paths.get(path, 'android', 'build', 'outputs', 'aar', "$name-release.aar").toString());
             }
         }
     }
