@@ -58,17 +58,6 @@ void main() {
       expect(await result, null);
     });
 
-    test('Only pops stash if it was pushed', () async {
-      fakeCommandRunner.stashName = 'test';
-      final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
-        false,
-        gitTagVersion,
-        flutterVersion,
-      );
-      expect(await result, null);
-      expect(fakeCommandRunner.appliedStashName, 'test');
-    });
-
     testUsingContext('verifyUpstreamConfigured', () async {
       when(processManager.run(
         <String>['git', 'rev-parse', '@{u}'],
@@ -79,30 +68,6 @@ void main() {
           ..exitCode = 0;
       });
       await realCommandRunner.verifyUpstreamConfigured();
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => processManager,
-    });
-
-    testUsingContext('maybeStash', () async {
-      final String stashName = 'flutter-upgrade-from-v${gitTagVersion.x}.${gitTagVersion.y}.${gitTagVersion.z}';
-      when(processManager.run(
-        <String>['git', 'status', '-s'],
-        environment:anyNamed('environment'),
-        workingDirectory: anyNamed('workingDirectory'))
-      ).thenAnswer((Invocation invocation) async {
-        return FakeProcessResult()
-          ..exitCode = 0
-          ..stdout = 'this is a changed file';
-      });
-      when(processManager.run(
-        <String>['git', 'stash', 'push', '-m', stashName],
-        environment:anyNamed('environment'),
-        workingDirectory: anyNamed('workingDirectory'))
-      ).thenAnswer((Invocation invocation) async {
-        return FakeProcessResult()
-          ..exitCode = 0;
-      });
-      await realCommandRunner.maybeStash(gitTagVersion);
     }, overrides: <Type, Generator>{
       ProcessManager: () => processManager,
     });
@@ -162,16 +127,8 @@ void main() {
 }
 
 class FakeUpgradeCommandRunner extends UpgradeCommandRunner {
-  String stashName;
-  String appliedStashName;
-
   @override
   Future<void> verifyUpstreamConfigured() async {}
-
-  @override
-  Future<String> maybeStash(GitTagVersion gitTagVersion) async {
-    return stashName;
-  }
 
   @override
   Future<void> resetChanges(GitTagVersion gitTagVersion) async {}
@@ -190,11 +147,6 @@ class FakeUpgradeCommandRunner extends UpgradeCommandRunner {
 
   @override
   Future<void> runDoctor() async {}
-
-  @override
-  Future<void> applyStash(String stashName) async {
-    appliedStashName = stashName;
-  }
 }
 
 class MockFlutterVersion extends Mock implements FlutterVersion {}
