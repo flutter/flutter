@@ -97,6 +97,58 @@ abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
     return _doubleDigitMinuteFormat.format(DateTime.utc(0, 0, 0, 0, minute));
   }
 
+  /// Subclasses should provide the optional zero pluralization of [datePickerHourSemanticsLabel] based on the ARB file.
+  @protected String get datePickerHourSemanticsLabelZero => null;
+  /// Subclasses should provide the optional one pluralization of [datePickerHourSemanticsLabel] based on the ARB file.
+  @protected String get datePickerHourSemanticsLabelOne => null;
+  /// Subclasses should provide the optional two pluralization of [datePickerHourSemanticsLabel] based on the ARB file.
+  @protected String get datePickerHourSemanticsLabelTwo => null;
+  /// Subclasses should provide the optional few pluralization of [datePickerHourSemanticsLabel] based on the ARB file.
+  @protected String get datePickerHourSemanticsLabelFew => null;
+  /// Subclasses should provide the optional many pluralization of [datePickerHourSemanticsLabel] based on the ARB file.
+  @protected String get datePickerHourSemanticsLabelMany => null;
+  /// Subclasses should provide the required other pluralization of [datePickerHourSemanticsLabel] based on the ARB file.
+  @protected String get datePickerHourSemanticsLabelOther;
+
+  @override
+  String datePickerHourSemanticsLabel(int hour) {
+    return intl.Intl.pluralLogic(
+      hour,
+      zero: datePickerHourSemanticsLabelZero,
+      one: datePickerHourSemanticsLabelOne,
+      two: datePickerHourSemanticsLabelTwo,
+      few: datePickerHourSemanticsLabelFew,
+      many: datePickerHourSemanticsLabelMany,
+      other: datePickerHourSemanticsLabelOther,
+    );
+  }
+
+  /// Subclasses should provide the optional zero pluralization of [datePickerMinuteSemanticsLabel] based on the ARB file.
+  @protected String get datePickerMinuteSemanticsLabelZero => null;
+  /// Subclasses should provide the optional one pluralization of [datePickerMinuteSemanticsLabel] based on the ARB file.
+  @protected String get datePickerMinuteSemanticsLabelOne => null;
+  /// Subclasses should provide the optional two pluralization of [datePickerMinuteSemanticsLabel] based on the ARB file.
+  @protected String get datePickerMinuteSemanticsLabelTwo => null;
+  /// Subclasses should provide the optional few pluralization of [datePickerMinuteSemanticsLabel] based on the ARB file.
+  @protected String get datePickerMinuteSemanticsLabelFew => null;
+  /// Subclasses should provide the optional many pluralization of [datePickerMinuteSemanticsLabel] based on the ARB file.
+  @protected String get datePickerMinuteSemanticsLabelMany => null;
+  /// Subclasses should provide the required other pluralization of [datePickerMinuteSemanticsLabel] based on the ARB file.
+  @protected String get datePickerMinuteSemanticsLabelOther;
+
+  @override
+  String datePickerMinuteSemanticsLabel(int minute) {
+    return intl.Intl.pluralLogic(
+      minute,
+      zero: datePickerMinuteSemanticsLabelZero,
+      one: datePickerMinuteSemanticsLabelOne,
+      two: datePickerMinuteSemanticsLabelTwo,
+      few: datePickerMinuteSemanticsLabelFew,
+      many: datePickerMinuteSemanticsLabelMany,
+      other: datePickerMinuteSemanticsLabelOther,
+    );
+  }
+
   /// A string describing the [DatePickerDateOrder] enum value.
   ///
   /// Subclasses should provide this string value based on the ARB file for
@@ -177,80 +229,80 @@ abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
   }
 
   /// Subclasses should provide the optional zero pluralization of [timerPickerHourLabel] based on the ARB file.
-  @protected String get timePickerHourLabelZero => null;
+  @protected String get timerPickerHourLabelZero => null;
   /// Subclasses should provide the optional one pluralization of [timerPickerHourLabel] based on the ARB file.
-  @protected String get timePickerHourLabelOne => null;
+  @protected String get timerPickerHourLabelOne => null;
   /// Subclasses should provide the optional two pluralization of [timerPickerHourLabel] based on the ARB file.
-  @protected String get timePickerHourLabelTwo => null;
+  @protected String get timerPickerHourLabelTwo => null;
   /// Subclasses should provide the optional few pluralization of [timerPickerHourLabel] based on the ARB file.
-  @protected String get timePickerHourLabelFew => null;
+  @protected String get timerPickerHourLabelFew => null;
   /// Subclasses should provide the optional many pluralization of [timerPickerHourLabel] based on the ARB file.
-  @protected String get timePickerHourLabelMany => null;
+  @protected String get timerPickerHourLabelMany => null;
   /// Subclasses should provide the required other pluralization of [timerPickerHourLabel] based on the ARB file.
-  @protected String get timePickerHourLabelOther;
+  @protected String get timerPickerHourLabelOther;
 
   @override
   String timerPickerHourLabel(int hour) {
     return intl.Intl.pluralLogic(
       hour,
-      zero: timePickerHourLabelZero,
-      one: timePickerHourLabelOne,
-      two: timePickerHourLabelTwo,
-      few: timePickerHourLabelFew,
-      many: timePickerHourLabelMany,
-      other: timePickerHourLabelOther,
+      zero: timerPickerHourLabelZero,
+      one: timerPickerHourLabelOne,
+      two: timerPickerHourLabelTwo,
+      few: timerPickerHourLabelFew,
+      many: timerPickerHourLabelMany,
+      other: timerPickerHourLabelOther,
     );
   }
 
   /// Subclasses should provide the optional zero pluralization of [timerPickerMinuteLabel] based on the ARB file.
-  @protected String get timePickerMinuteLabelZero => null;
+  @protected String get timerPickerMinuteLabelZero => null;
   /// Subclasses should provide the optional one pluralization of [timerPickerMinuteLabel] based on the ARB file.
-  @protected String get timePickerMinuteLabelOne => null;
+  @protected String get timerPickerMinuteLabelOne => null;
   /// Subclasses should provide the optional two pluralization of [timerPickerMinuteLabel] based on the ARB file.
-  @protected String get timePickerMinuteLabelTwo => null;
+  @protected String get timerPickerMinuteLabelTwo => null;
   /// Subclasses should provide the optional few pluralization of [timerPickerMinuteLabel] based on the ARB file.
-  @protected String get timePickerMinuteLabelFew => null;
+  @protected String get timerPickerMinuteLabelFew => null;
   /// Subclasses should provide the optional many pluralization of [timerPickerMinuteLabel] based on the ARB file.
-  @protected String get timePickerMinuteLabelMany => null;
+  @protected String get timerPickerMinuteLabelMany => null;
   /// Subclasses should provide the required other pluralization of [timerPickerMinuteLabel] based on the ARB file.
-  @protected String get timePickerMinuteLabelOther;
+  @protected String get timerPickerMinuteLabelOther;
 
   @override
   String timerPickerMinuteLabel(int minute) {
     return intl.Intl.pluralLogic(
       minute,
-      zero: timePickerMinuteLabelZero,
-      one: timePickerMinuteLabelOne,
-      two: timePickerMinuteLabelTwo,
-      few: timePickerMinuteLabelFew,
-      many: timePickerMinuteLabelMany,
-      other: timePickerMinuteLabelOther,
+      zero: timerPickerMinuteLabelZero,
+      one: timerPickerMinuteLabelOne,
+      two: timerPickerMinuteLabelTwo,
+      few: timerPickerMinuteLabelFew,
+      many: timerPickerMinuteLabelMany,
+      other: timerPickerMinuteLabelOther,
     );
   }
 
   /// Subclasses should provide the optional zero pluralization of [timerPickerSecondLabel] based on the ARB file.
-  @protected String get timePickerSecondLabelZero => null;
+  @protected String get timerPickerSecondLabelZero => null;
   /// Subclasses should provide the optional one pluralization of [timerPickerSecondLabel] based on the ARB file.
-  @protected String get timePickerSecondLabelOne => null;
+  @protected String get timerPickerSecondLabelOne => null;
   /// Subclasses should provide the optional two pluralization of [timerPickerSecondLabel] based on the ARB file.
-  @protected String get timePickerSecondLabelTwo => null;
+  @protected String get timerPickerSecondLabelTwo => null;
   /// Subclasses should provide the optional few pluralization of [timerPickerSecondLabel] based on the ARB file.
-  @protected String get timePickerSecondLabelFew => null;
+  @protected String get timerPickerSecondLabelFew => null;
   /// Subclasses should provide the optional many pluralization of [timerPickerSecondLabel] based on the ARB file.
-  @protected String get timePickerSecondLabelMany => null;
+  @protected String get timerPickerSecondLabelMany => null;
   /// Subclasses should provide the required other pluralization of [timerPickerSecondLabel] based on the ARB file.
-  @protected String get timePickerSecondLabelOther;
+  @protected String get timerPickerSecondLabelOther;
 
   @override
   String timerPickerSecondLabel(int second) {
     return intl.Intl.pluralLogic(
       second,
-      zero: timePickerSecondLabelZero,
-      one: timePickerSecondLabelOne,
-      two: timePickerSecondLabelTwo,
-      few: timePickerSecondLabelFew,
-      many: timePickerSecondLabelMany,
-      other: timePickerSecondLabelOther,
+      zero: timerPickerSecondLabelZero,
+      one: timerPickerSecondLabelOne,
+      two: timerPickerSecondLabelTwo,
+      few: timerPickerSecondLabelFew,
+      many: timerPickerSecondLabelMany,
+      other: timerPickerSecondLabelOther,
     );
   }
 
