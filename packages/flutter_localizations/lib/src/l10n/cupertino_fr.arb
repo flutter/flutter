@@ -1,8 +1,8 @@
 {
   "datePickerHourSemanticsLabelOne": "une heure",
   "datePickerHourSemanticsLabelOther": "$hour heures",
-  "datePickerMinuteSemanticsOne": "une minute",
-  "datePickerMinuteSemanticsOther": "$minute minutes",
+  "datePickerMinuteSemanticsLabelOne": "une minute",
+  "datePickerMinuteSemanticsLabelOther": "$minute minutes",
   "datePickerDateOrder": "dmy",
   "datePickerDateTimeOrder": "date_time_dayPeriod",
   "anteMeridiemAbbreviation": "AM",
