@@ -503,7 +503,7 @@ class _AndroidViewGestureRecognizer extends OneSequenceGestureRecognizer {
   // Before the arena for a pointer is resolved all events are cached here, if we win the arena
   // the cached events are dispatched to the view, if we lose the arena we clear the cache for
   // the pointer.
-  final Map<int, List<PointerEvent>> cachedEvents = <int, List<PointerEvent>> {};
+  final Map<int, List<PointerEvent>> cachedEvents = <int, List<PointerEvent>>{};
 
   // Pointer for which we have already won the arena, events for pointers in this set are
   // immediately dispatched to the Android view.

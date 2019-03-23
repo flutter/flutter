@@ -47,15 +47,13 @@ abstract class InteractiveInkFeature extends InkFeature {
   ///
   /// Typically causes the ink to propagate faster across the material. By default this
   /// method does nothing.
-  void confirm() {
-  }
+  void confirm() { }
 
   /// Called when the user input that triggered this feature's appearance was canceled.
   ///
   /// Typically causes the ink to gradually disappear. By default this method does
   /// nothing.
-  void cancel() {
-  }
+  void cancel() { }
 
   /// The ink's color.
   Color get color => _color;

@@ -28,7 +28,8 @@ import 'run_hot.dart';
 import 'vmservice.dart';
 
 class FlutterDevice {
-  FlutterDevice(this.device, {
+  FlutterDevice(
+    this.device, {
     @required this.trackWidgetCreation,
     this.dillOutputPath,
     this.fileSystemRoots,
@@ -48,7 +49,8 @@ class FlutterDevice {
        );
 
   /// Create a [FlutterDevice] with optional code generation enabled.
-  static Future<FlutterDevice> create(Device device, {
+  static Future<FlutterDevice> create(
+    Device device, {
     @required bool trackWidgetCreation,
     String dillOutputPath,
     List<String> fileSystemRoots,
@@ -61,7 +63,7 @@ class FlutterDevice {
   }) async {
     ResidentCompiler generator;
     final FlutterProject flutterProject = await FlutterProject.current();
-    if (experimentalBuildEnabled && await flutterProject.hasBuilders) {
+    if (flutterProject.hasBuilders) {
       generator = await CodeGeneratingResidentCompiler.create(
         flutterProject: flutterProject,
       );
@@ -482,7 +484,8 @@ class FlutterDevice {
 
 // Shared code between different resident application runners.
 abstract class ResidentRunner {
-  ResidentRunner(this.flutterDevices, {
+  ResidentRunner(
+    this.flutterDevices, {
     this.target,
     this.debuggingOptions,
     this.usesTerminalUI = true,

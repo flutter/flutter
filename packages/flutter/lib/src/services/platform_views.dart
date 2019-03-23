@@ -117,7 +117,7 @@ class PlatformViewsService {
     assert(creationParams == null || creationParamsCodec != null);
 
     // TODO(amirh): pass layoutDirection once the system channel supports it.
-    final Map<String, dynamic> args = <String, dynamic> {
+    final Map<String, dynamic> args = <String, dynamic>{
       'id': id,
       'viewType': viewType,
     };
@@ -520,7 +520,7 @@ class AndroidViewController {
     if (_state == _AndroidViewState.waitingForSize)
       return _create(size);
 
-    await SystemChannels.platform_views.invokeMethod<void>('resize', <String, dynamic> {
+    await SystemChannels.platform_views.invokeMethod<void>('resize', <String, dynamic>{
       'id': id,
       'width': size.width,
       'height': size.height,
@@ -542,7 +542,7 @@ class AndroidViewController {
     if (_state == _AndroidViewState.waitingForSize)
       return;
 
-    await SystemChannels.platform_views.invokeMethod<void>('setDirection', <String, dynamic> {
+    await SystemChannels.platform_views.invokeMethod<void>('setDirection', <String, dynamic>{
       'id': id,
       'direction': _getAndroidDirection(layoutDirection),
     });
@@ -578,7 +578,7 @@ class AndroidViewController {
   }
 
   Future<void> _create(Size size) async {
-    final Map<String, dynamic> args = <String, dynamic> {
+    final Map<String, dynamic> args = <String, dynamic>{
       'id': id,
       'viewType': _viewType,
       'width': size.width,
@@ -642,7 +642,7 @@ class UiKitViewController {
   /// Calling this method releases the delayed events to the embedded UIView and makes it consume
   /// any following touch events for the pointers involved in the active gesture.
   Future<void> acceptGesture() {
-    final Map<String, dynamic> args = <String, dynamic> {
+    final Map<String, dynamic> args = <String, dynamic>{
       'id': id,
     };
     return SystemChannels.platform_views.invokeMethod('acceptGesture', args);
@@ -654,7 +654,7 @@ class UiKitViewController {
   /// Calling this method drops the buffered touch events and prevents any future touch events for
   /// the pointers that are part of the active touch sequence from arriving to the embedded view.
   Future<void> rejectGesture() {
-    final Map<String, dynamic> args = <String, dynamic> {
+    final Map<String, dynamic> args = <String, dynamic>{
       'id': id,
     };
     return SystemChannels.platform_views.invokeMethod('rejectGesture', args);
