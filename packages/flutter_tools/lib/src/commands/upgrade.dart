@@ -67,11 +67,9 @@ class UpgradeCommandRunner {
         );
       }
     }
-    final String stashName = await maybeStash(gitTagVersion);
     await resetChanges(gitTagVersion);
     await upgradeChannel(flutterVersion);
     await attemptFastForward();
-    await applyStash(stashName);
     await precacheArtifacts();
     await updatePackages(flutterVersion);
     await runDoctor();
@@ -95,37 +93,6 @@ class UpgradeCommandRunner {
     }
   }
 
-  /// Attempt to stash any local changes.
-  ///
-  /// Returns the stash name if any changes were stashed. Exits tool if
-  /// `git stash` returns a non-zero exit code.
-  Future<String> maybeStash(GitTagVersion gitTagVersion) async {
-    try {
-      final RunResult runResult = await runCheckedAsync(<String>[
-        'git', 'status', '-s',
-      ]);
-      // If there are no local changes, skip the stash.
-      if (runResult.stdout.trim().isEmpty) {
-        return null;
-      }
-    } catch (e) {
-      throwToolExit('Failed to check git status: $e');
-    }
-    final String stashName = 'flutter-upgrade-from-v${gitTagVersion.x}.${gitTagVersion.y}.${gitTagVersion.z}';
-    try {
-      final RunResult runResult = await runCheckedAsync(<String>[
-        'git', 'stash', 'push', '-m', stashName
-      ]);
-      // output message will contain stash name if any changes were stashed..
-      if (runResult.stdout.contains(stashName)) {
-        return stashName;
-      }
-    } catch (e) {
-      throwToolExit('Failed to stash local changes: $e');
-    }
-    return null;
-  }
-
   /// Attempts to reset to the last known tag or branch. This should restore the
   /// history to something that is compatible with the regular upgrade
   /// process.
@@ -139,7 +106,7 @@ class UpgradeCommandRunner {
     }
     final RunResult runResult = await runCheckedAsync(<String>[
       'git', 'reset', '--hard', tag,
-    ]);
+    ], workingDirectory: Cache.flutterRoot);
     if (runResult.exitCode != 0) {
       throwToolExit('Failed to restore branch from hotfix.');
     }
@@ -211,27 +178,6 @@ class UpgradeCommandRunner {
       workingDirectory: Cache.flutterRoot,
       allowReentrantFlutter: true,
     );
-  }
-
-  /// Pop stash changes if [stashName] is non-null and contained in stash.
-  Future<void> applyStash(String stashName) async {
-    if (stashName == null) {
-      return;
-    }
-    try {
-      final RunResult result = await runCheckedAsync(<String>[
-        'git', 'stash', 'list'
-      ]);
-      if (!result.stdout.contains(stashName)) {
-        // print the same warning as if this threw.
-        throw Exception();
-      }
-      await runCheckedAsync(<String>[
-        'git', 'stash', 'pop',
-      ]);
-    } catch (e) {
-      printError('Failed to re-apply local changes. State may have been lost.');
-    }
   }
 
   //  dev/benchmarks/complex_layout/lib/main.dart        |  24 +-
