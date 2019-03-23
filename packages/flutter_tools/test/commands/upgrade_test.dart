@@ -174,7 +174,7 @@ class FakeUpgradeCommandRunner extends UpgradeCommandRunner {
   }
 
   @override
-  Future<void> unapplyHotfix(GitTagVersion gitTagVersion) async {}
+  Future<void> resetChanges(GitTagVersion gitTagVersion) async {}
 
   @override
   Future<void> upgradeChannel(FlutterVersion flutterVersion) async {}
