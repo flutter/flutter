@@ -29,7 +29,7 @@ class ExpandIcon extends StatefulWidget {
     Key key,
     this.isExpanded = false,
     this.size = 24.0,
-    this.color;
+    this.color,
     @required this.onPressed,
     this.padding = const EdgeInsets.all(8.0),
   }) : assert(isExpanded != null),
