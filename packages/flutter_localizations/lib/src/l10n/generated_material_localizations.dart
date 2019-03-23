@@ -13145,7 +13145,7 @@ class MaterialLocalizationZhHantTw extends MaterialLocalizationZhHant {
 /// See also:
 ///
 ///  * [getMaterialTranslation], whose documentation describes these values.
-final Set<String> kSupportedLanguages = HashSet<String>.from(const <String>[
+final Set<String> kMaterialSupportedLanguages = HashSet<String>.from(const <String>[
   'ar', // Arabic
   'bg', // Bulgarian
   'bs', // Bosnian
@@ -13209,7 +13209,7 @@ final Set<String> kSupportedLanguages = HashSet<String>.from(const <String>[
 ///
 /// The following locales are supported by this package:
 ///
-/// {@template flutter.localizations.languages}
+/// {@template flutter.localizations.material.languages}
 ///  * `ar` - Arabic
 ///  * `bg` - Bulgarian
 ///  * `bs` - Bosnian
