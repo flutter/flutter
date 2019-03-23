@@ -15,6 +15,7 @@ source_set("libcxxabi") {
     "src/abort_message.cpp",
     "src/cxa_aux_runtime.cpp",
     "src/cxa_default_handlers.cpp",
+    "src/cxa_demangle.cpp",
     "src/cxa_exception_storage.cpp",
     "src/cxa_guard.cpp",
     "src/cxa_handlers.cpp",
@@ -28,14 +29,6 @@ source_set("libcxxabi") {
     "src/stdlib_stdexcept.cpp",
     "src/stdlib_typeinfo.cpp",
   ]
-
-  # TODO(goderbauer): Remove this and add cxa_demangle.cpp to the regular source
-  # list above when https://dart-review.googlesource.com/c/sdk/+/84831 has been
-  # rolled into the engine.
-  if (!is_android || (flutter_runtime_mode != "release" &&
-                      flutter_runtime_mode != "dynamic_release")) {
-    sources += [ "src/cxa_demangle.cpp" ]
-  }
 
   public_configs = [ ":libcxxabi_config" ]
 
