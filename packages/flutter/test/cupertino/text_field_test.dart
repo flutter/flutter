@@ -750,41 +750,32 @@ void main() {
   );
 
   testWidgets(
-    'clear button tapped alse call onChanged when text not empty',
+    'tapping clear button also calls onChanged when text not empty',
         (WidgetTester tester) async {
-      String value = '';
+      String value = 'text entry';
       final TextEditingController controller = TextEditingController();
       await tester.pumpWidget(
         CupertinoApp(
-            home: StatefulBuilder(
-                builder: (BuildContext context, StateSetter setState) {
-                  return Center(
-                    child: CupertinoTextField(
-                      controller: controller,
-                      placeholder: 'placeholder',
-                      onChanged: (String newValue) {
-                        setState(() {
-                          value = newValue;
-                        });
-                      },
-                      clearButtonMode: OverlayVisibilityMode.always,
-                    ),
-                  );
-                })
+          home: Center(
+            child: CupertinoTextField(
+              controller: controller,
+              placeholder: 'placeholder',
+              onChanged: (String newValue) => value = newValue,
+              clearButtonMode: OverlayVisibilityMode.always,
+            ),
+          ),
         ),
       );
 
-      expect(value, isEmpty);
-      controller.text = 'text entry';
+      controller.text = value;
       await tester.pump();
 
       await tester.tap(find.byIcon(CupertinoIcons.clear_thick_circled));
       await tester.pump();
 
-      expect(controller.text, '');
+      expect(controller.text, isEmpty);
       expect(find.text('text entry'), findsNothing);
-      expect(value, 'text entry');
-      expect(find.byIcon(CupertinoIcons.clear_thick_circled), findsOneWidget);
+      expect(value, isEmpty);
     },
   );
 

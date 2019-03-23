@@ -641,10 +641,10 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
               onTap: widget.enabled ?? true ? () {
                 // Special handle onChanged for ClearButton
                 // Also call onChanged when the clear button is tapped.
-                final String oldText = _effectiveController.text;
+                final bool textChanged = _effectiveController.text.isNotEmpty;
                 _effectiveController.clear();
-                if (widget.onChanged != null && oldText.isNotEmpty)
-                  widget.onChanged(oldText);
+                if (widget.onChanged != null && textChanged)
+                  widget.onChanged(_effectiveController.text);
               } : null,
               child: const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 6.0),
