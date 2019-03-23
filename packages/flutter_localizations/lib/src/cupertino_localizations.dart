@@ -375,7 +375,7 @@ class _GlobalCupertinoLocalizationsDelegate extends LocalizationsDelegate<Cupert
         singleDigitHourFormat = intl.DateFormat('HH', locale);
         singleDigitMinuteFormat = intl.DateFormat.m(locale);
         doubleDigitMinuteFormat = intl.DateFormat('mm', locale);
-        doubleDigitMinuteFormat = intl.DateFormat.s(locale);
+        singleDigitSecondFormat = intl.DateFormat.s(locale);
       }
 
       if (intl.DateFormat.localeExists(localeName)) {
