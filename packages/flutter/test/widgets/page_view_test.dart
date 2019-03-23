@@ -273,9 +273,24 @@ void main() {
       ),
     ));
 
-    const Offset rightSideOfChild = Offset(400.0, 200.0);
-    await tester.tapAt(rightSideOfChild);
+    final Offset pageViewStart = tester.getTopLeft(find.byType(PageView));
+    final Offset leftBoundaryOfChild = pageViewStart.translate(150.0, 200.0);
+    final Offset rightBoundaryOfChild = pageViewStart.translate(450.0, 200.0);
+    const Offset halfPixel = Offset(0.5, 0.0);
+
+    await tester.tapAt(leftBoundaryOfChild - halfPixel);
+    expect(log, isEmpty);
+
+    await tester.tapAt(leftBoundaryOfChild);
     expect(log, equals(<String>['Tap']));
+    log.clear();
+
+    await tester.tapAt(rightBoundaryOfChild - halfPixel);
+    expect(log, equals(<String>['Tap']));
+    log.clear();
+
+    await tester.tapAt(rightBoundaryOfChild);
+    expect(log, isEmpty);
   });
 
   testWidgets('PageView in zero-size container', (WidgetTester tester) async {
