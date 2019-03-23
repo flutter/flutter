@@ -245,7 +245,49 @@ void main() {
     expect(previousPageCompleted, true);
   });
 
-  testWidgets('PageController with viewportFraction and only one child', (WidgetTester tester) async {
+  testWidgets('PageView with only one child', (WidgetTester tester) async {
+    final List<String> log = <String>[];
+
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: Center(
+        child: SizedBox(
+          width: 600.0,
+          height: 400.0,
+          child: PageView(
+            children: <Widget>[
+              GestureDetector(
+                onTap: () {
+                  log.add('Tap');
+                },
+                child: Container(
+                  height: 400.0,
+                  color: const Color(0xFF0000FF),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    ));
+
+    final Offset pageViewStart = tester.getTopLeft(find.byType(PageView));
+    const Offset halfPixel = Offset(0.5, 0.0);
+
+    await tester.tapAt(pageViewStart);
+    expect(log, equals(<String>['Tap']));
+    log.clear();
+
+    await tester.tapAt(pageViewStart + const Offset(300.0, 0.0));
+    expect(log, equals(<String>['Tap']));
+    log.clear();
+
+    await tester.tapAt(pageViewStart + const Offset(600.0, 0.0) - halfPixel);
+    expect(log, equals(<String>['Tap']));
+    log.clear();
+  });
+
+  testWidgets('PageView with viewportFraction and only one child', (WidgetTester tester) async {
     final List<String> log = <String>[];
     final PageController controller = PageController(viewportFraction: 0.5);
 
