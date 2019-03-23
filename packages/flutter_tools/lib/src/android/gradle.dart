@@ -467,7 +467,7 @@ Future<void> _buildGradleProjectV2(
     final List<Plugin> plugins = findPlugins(flutterProject);
     for (Plugin plugin in plugins) {
       // Always build assembleRelease. Plugins don't know about profile.
-      await buildPluginAAR(plugin, gradle, 'assembleRelease');
+      await buildPluginAAR(plugin, gradle, buildInfo.mode == BuildMode.debug ? 'assembleDebug' : 'assembleRelease');
     }
   }
   final Status status = logger.startProgress(
