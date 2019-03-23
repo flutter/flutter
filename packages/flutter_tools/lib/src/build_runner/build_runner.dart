@@ -192,7 +192,7 @@ class BuildRunner extends CodeGenerator {
       .childDirectory('flutter_tool')
       .childFile('.packages')
       .path;
-    final String platformSdk = artifacts.getArtifactPath(Artifact.flutterWebSdkPath);
+    final String platformSdk = artifacts.getArtifactPath(Artifact.flutterWebSdk);
     final String webKernelDill = fs.path.relative(artifacts.getArtifactPath(Artifact.webPlatformKernelDill), from: platformSdk);
     final List<String> command = <String>[
       engineDartBinaryPath,
