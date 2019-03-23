@@ -15,7 +15,6 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/attach.dart';
 import 'package:flutter_tools/src/commands/doctor.dart';
 import 'package:flutter_tools/src/fuchsia/fuchsia_sdk.dart';
-import 'package:flutter_tools/src/run_hot.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 
 final ArgParser parser = ArgParser()
@@ -24,6 +23,7 @@ final ArgParser parser = ArgParser()
   ..addOption('target', help: 'The GN target to attach to')
   ..addOption('entrypoint', defaultsTo: 'main.dart', help: 'The filename of the main method. Defaults to main.dart')
   ..addOption('device', help: 'The device id to attach to')
+  ..addOption('dev-finder', help: 'The location of the dev_finder binary')
   ..addFlag('verbose', negatable: true);
 
 // Track the original working directory so that the tool can find the
@@ -41,7 +41,7 @@ Future<void> main(List<String> args) async {
   final String buildDirectory = argResults['build-dir'];
   final File frontendServer = fs.file('$buildDirectory/host_x64/gen/third_party/flutter/frontend_server/frontend_server_tool.snapshot');
   final File sshConfig = fs.file('$buildDirectory/ssh-keys/ssh_config');
-  final File devFinder = fs.file('$buildDirectory/host_x64/dev_finder');
+  final File devFinder = fs.file(argResults['dev-finder']);
   final File platformKernelDill = fs.file('$buildDirectory/flutter_runner_patched_sdk/platform_strong.dill');
   final File flutterPatchedSdk = fs.file('$buildDirectory/flutter_runner_patched_sdk');
   final String packages = '$buildDirectory/dartlang/gen/$path/${name}_dart_library.packages';
@@ -51,6 +51,19 @@ Future<void> main(List<String> args) async {
   // switch to the project root directory and run from there.
   originalWorkingDirectory = fs.currentDirectory.path;
   fs.currentDirectory = path;
+
+  if (!devFinder.existsSync()) {
+    print('Error: dev_finder not found at ${devFinder.path}.');
+    return 1;
+  }
+  if (!frontendServer.existsSync()) {
+    print(
+      'Error: frontend_server not found at ${frontendServer.path}. This '
+      'Usually means you ran fx set without specifying '
+      '--args=flutter_profile=true.'
+    );
+    return 1;
+  }
 
   // Check for a package with a lib directory.
   final String entrypoint = argResults['entrypoint'];
@@ -100,7 +113,6 @@ Future<void> main(List<String> args) async {
         platformKernelDill: platformKernelDill,
         flutterPatchedSdk: flutterPatchedSdk,
       ),
-      HotRunnerConfig: () => HotRunnerConfig()..computeDartDependencies = false,
     },
   );
 }

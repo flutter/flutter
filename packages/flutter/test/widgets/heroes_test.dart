@@ -1610,4 +1610,86 @@ void main() {
     expect(find.byKey(smallContainer), isInCard);
     expect(tester.getSize(find.byKey(smallContainer)), const Size(100,100));
   });
+
+  testWidgets('Hero within a Hero, throws', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: Hero(
+            tag: 'a',
+            child: Hero(
+              tag: 'b',
+              child: Text('Child of a Hero'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isAssertionError);
+  });
+
+  testWidgets('Hero within a Hero subtree, throws', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Container(
+            child: const Hero(
+              tag: 'a',
+              child: Hero(
+                tag: 'b',
+                child: Text('Child of a Hero'),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isAssertionError);
+  });
+
+  testWidgets('Hero within a Hero subtree with Builder, throws', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Hero(
+            tag: 'a',
+            child: Builder(
+              builder: (BuildContext context) {
+                return const Hero(
+                  tag: 'b',
+                  child: Text('Child of a Hero'),
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(),isAssertionError);
+  });
+
+  testWidgets('Hero within a Hero subtree with LayoutBuilder, throws', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Hero(
+            tag: 'a',
+            child: LayoutBuilder(
+              builder: (BuildContext context, BoxConstraints constraints) {
+                return const Hero(
+                  tag: 'b',
+                  child: Text('Child of a Hero'),
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isAssertionError);
+  });
 }

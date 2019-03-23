@@ -621,17 +621,16 @@ class SemanticsTester {
 
 class _HasSemantics extends Matcher {
   const _HasSemantics(
-    this._semantics,
-    {
-      @required this.ignoreRect,
-      @required this.ignoreTransform,
-      @required this.ignoreId,
-      @required this.childOrder,
-    }) : assert(_semantics != null),
-         assert(ignoreRect != null),
-         assert(ignoreId != null),
-         assert(ignoreTransform != null),
-         assert(childOrder != null);
+    this._semantics, {
+    @required this.ignoreRect,
+    @required this.ignoreTransform,
+    @required this.ignoreId,
+    @required this.childOrder,
+  }) : assert(_semantics != null),
+       assert(ignoreRect != null),
+       assert(ignoreId != null),
+       assert(ignoreTransform != null),
+       assert(childOrder != null);
 
   final TestSemantics _semantics;
   final bool ignoreRect;

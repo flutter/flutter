@@ -16,7 +16,8 @@ class _InputDropdown extends StatelessWidget {
     this.labelText,
     this.valueText,
     this.valueStyle,
-    this.onPressed }) : super(key: key);
+    this.onPressed,
+  }) : super(key: key);
 
   final String labelText;
   final String valueText;

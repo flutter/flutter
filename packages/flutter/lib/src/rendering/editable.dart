@@ -300,14 +300,14 @@ class RenderEditable extends RenderBox {
 
     final Offset startOffset = _textPainter.getOffsetForCaret(
       TextPosition(offset: _selection.start, affinity: _selection.affinity),
-      Rect.zero
+      Rect.zero,
     );
 
     _selectionStartInViewport.value = visibleRegion.contains(startOffset + effectiveOffset);
 
     final Offset endOffset =  _textPainter.getOffsetForCaret(
       TextPosition(offset: _selection.end, affinity: _selection.affinity),
-      Rect.zero
+      Rect.zero,
     );
 
     _selectionEndInViewport.value = visibleRegion.contains(endOffset + effectiveOffset);
@@ -718,8 +718,7 @@ class RenderEditable extends RenderBox {
       assert(!_listenerAttached);
       RawKeyboard.instance.addListener(_handleKeyEvent);
       _listenerAttached = true;
-    }
-    else {
+    } else {
       assert(_listenerAttached);
       RawKeyboard.instance.removeListener(_handleKeyEvent);
       _listenerAttached = false;
@@ -1377,15 +1376,23 @@ class RenderEditable extends RenderBox {
       final TextPosition toPosition = to == null
         ? null
         : _textPainter.getPositionForOffset(globalToLocal(to - _paintOffset));
-      onSelectionChanged(
-        TextSelection(
-          baseOffset: fromPosition.offset,
-          extentOffset: toPosition?.offset ?? fromPosition.offset,
-          affinity: fromPosition.affinity,
-        ),
-        this,
-        cause,
+
+      int baseOffset = fromPosition.offset;
+      int extentOffset = fromPosition.offset;
+      if (toPosition != null) {
+        baseOffset = math.min(fromPosition.offset, toPosition.offset);
+        extentOffset = math.max(fromPosition.offset, toPosition.offset);
+      }
+
+      final TextSelection newSelection = TextSelection(
+        baseOffset: baseOffset,
+        extentOffset: extentOffset,
+        affinity: fromPosition.affinity,
       );
+      // Call [onSelectionChanged] only when the selection actually changed.
+      if (newSelection != _selection) {
+        onSelectionChanged(newSelection, this, cause);
+      }
     }
   }
 
@@ -1557,7 +1564,7 @@ class RenderEditable extends RenderBox {
     }
     _floatingCursorOn = state != FloatingCursorDragState.End;
     _resetFloatingCursorAnimationValue = resetLerpValue;
-    if(_floatingCursorOn) {
+    if (_floatingCursorOn) {
       _floatingCursorOffset = boundedOffset;
       _floatingCursorTextPosition = lastTextPosition;
     }
@@ -1574,7 +1581,7 @@ class RenderEditable extends RenderBox {
     double sizeAdjustmentX = _kFloatingCaretSizeIncrease.dx;
     double sizeAdjustmentY = _kFloatingCaretSizeIncrease.dy;
 
-    if(_resetFloatingCursorAnimationValue != null) {
+    if (_resetFloatingCursorAnimationValue != null) {
       sizeAdjustmentX = ui.lerpDouble(sizeAdjustmentX, 0, _resetFloatingCursorAnimationValue);
       sizeAdjustmentY = ui.lerpDouble(sizeAdjustmentY, 0, _resetFloatingCursorAnimationValue);
     }
@@ -1637,9 +1644,9 @@ class RenderEditable extends RenderBox {
     final double adjustedY = math.min(math.max(currentY, topBound), bottomBound);
     final Offset adjustedOffset = Offset(adjustedX, adjustedY);
 
-    if (currentX < leftBound && deltaPosition.dx < 0) {
+    if (currentX < leftBound && deltaPosition.dx < 0)
       _resetOriginOnLeft = true;
-    } else if(currentX > rightBound && deltaPosition.dx > 0)
+    else if (currentX > rightBound && deltaPosition.dx > 0)
       _resetOriginOnRight = true;
     if (currentY < topBound && deltaPosition.dy < 0)
       _resetOriginOnTop = true;

@@ -335,4 +335,91 @@ void main() {
     expect(currentSelection.baseOffset, 5);
     expect(currentSelection.extentOffset, 9);
   });
+
+  test('selects correct place when offsets are flipped', () {
+    final TextSelectionDelegate delegate = FakeEditableTextState();
+    final ViewportOffset viewportOffset = ViewportOffset.zero();
+    TextSelection currentSelection;
+    final RenderEditable editable = RenderEditable(
+      backgroundCursorColor: Colors.grey,
+      selectionColor: Colors.black,
+      textDirection: TextDirection.ltr,
+      cursorColor: Colors.red,
+      offset: viewportOffset,
+      textSelectionDelegate: delegate,
+      onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {
+        currentSelection = selection;
+      },
+      text: const TextSpan(
+        text: 'abc def ghi',
+        style: TextStyle(
+          height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+        ),
+      ),
+    );
+
+    layout(editable);
+
+    editable.selectPositionAt(from: const Offset(30, 2), to: const Offset(10, 2), cause: SelectionChangedCause.drag);
+    pumpFrame();
+
+    expect(currentSelection.isCollapsed, isFalse);
+    expect(currentSelection.baseOffset, 1);
+    expect(currentSelection.extentOffset, 3);
+  });
+
+  test('selection does not flicker as user is dragging', () {
+    int selectionChangedCount = 0;
+    TextSelection updatedSelection;
+    final TextSelectionDelegate delegate = FakeEditableTextState();
+    const TextSpan text = TextSpan(
+      text: 'abc def ghi',
+      style: TextStyle(
+        height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+      ),
+    );
+
+    final RenderEditable editable1 = RenderEditable(
+      textSelectionDelegate: delegate,
+      textDirection: TextDirection.ltr,
+      offset: ViewportOffset.zero(),
+      selection: const TextSelection(baseOffset: 3, extentOffset: 4),
+      onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {
+        selectionChangedCount++;
+        updatedSelection = selection;
+      },
+      text: text,
+    );
+
+    layout(editable1);
+
+    // Shouldn't cause a selection change.
+    editable1.selectPositionAt(from: const Offset(30, 2), to: const Offset(42, 2), cause: SelectionChangedCause.drag);
+    pumpFrame();
+
+    expect(updatedSelection, isNull);
+    expect(selectionChangedCount, 0);
+
+    final RenderEditable editable2 = RenderEditable(
+      textSelectionDelegate: delegate,
+      textDirection: TextDirection.ltr,
+      offset: ViewportOffset.zero(),
+      selection: const TextSelection(baseOffset: 3, extentOffset: 4),
+      onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {
+        selectionChangedCount++;
+        updatedSelection = selection;
+      },
+      text: text,
+    );
+
+    layout(editable2);
+
+    // Now this should cause a selection change.
+    editable2.selectPositionAt(from: const Offset(30, 2), to: const Offset(48, 2), cause: SelectionChangedCause.drag);
+    pumpFrame();
+
+    expect(updatedSelection.baseOffset, 3);
+    expect(updatedSelection.extentOffset, 5);
+    expect(selectionChangedCount, 1);
+  });
 }

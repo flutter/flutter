@@ -12,14 +12,12 @@ import 'base/common.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
+import 'base/platform.dart';
 import 'base/terminal.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
-import 'codegen.dart';
 import 'compile.dart';
 import 'convert.dart';
-import 'dart/dependencies.dart';
-import 'dart/pub.dart';
 import 'devfs.dart';
 import 'device.dart';
 import 'globals.dart';
@@ -28,8 +26,6 @@ import 'usage.dart';
 import 'vmservice.dart';
 
 class HotRunnerConfig {
-  /// Should the hot runner compute the minimal Dart dependencies?
-  bool computeDartDependencies = true;
   /// Should the hot runner assume that the minimal Dart dependencies do not change?
   bool stableDartDependencies = false;
   /// A hook for implementations to perform any necessary initialization prior
@@ -85,7 +81,6 @@ class HotRunner extends ResidentRunner {
   final File applicationBinary;
   final bool hostIsIde;
   bool _didAttach = false;
-  Set<String> _dartDependencies;
   final String dillOutputPath;
 
   final Map<String, List<int>> benchmarkData = <String, List<int>>{};
@@ -96,49 +91,6 @@ class HotRunner extends ResidentRunner {
   void _addBenchmarkData(String name, int value) {
     benchmarkData[name] ??= <int>[];
     benchmarkData[name].add(value);
-  }
-
-  Future<bool> _refreshDartDependencies() async {
-    if (!hotRunnerConfig.computeDartDependencies) {
-      // Disabled.
-      return true;
-    }
-    if (_dartDependencies != null) {
-      // Already computed.
-      return true;
-    }
-
-    try {
-      // Will return immediately if pubspec.yaml is up-to-date.
-      await pubGet(
-        context: PubContext.pubGet,
-        directory: projectRootPath,
-      );
-    } on ToolExit catch (error) {
-      printError(
-        'Unable to reload your application because "flutter packages get" failed to update '
-        'package dependencies.\n'
-        '$error'
-      );
-      return false;
-    }
-
-    /// When using the build system, dependency analysis is handled by build
-    /// runner instead.
-    if (experimentalBuildEnabled) {
-      return true;
-    }
-    final DartDependencySetBuilder dartDependencySetBuilder = DartDependencySetBuilder(mainPath, packagesFilePath);
-    try {
-      _dartDependencies = Set<String>.from(dartDependencySetBuilder.build());
-    } on DartDependencyException catch (error) {
-      printError(
-        'Your application could not be compiled, because its dependencies could not be established.\n'
-        '$error'
-      );
-      return false;
-    }
-    return true;
   }
 
   Future<void> _reloadSourcesService(
@@ -256,8 +208,7 @@ class HotRunner extends ResidentRunner {
       printStatus('Running in benchmark mode.');
       // Measure time to perform a hot restart.
       printStatus('Benchmarking hot restart');
-      await restart(fullRestart: true);
-      // TODO(johnmccutchan): Modify script entry point.
+      await restart(fullRestart: true, benchmarkMode: true);
       printStatus('Benchmarking hot reload');
       // Measure time to perform a hot reload.
       await restart(fullRestart: false);
@@ -296,12 +247,6 @@ class HotRunner extends ResidentRunner {
       return 1;
     }
 
-    // Determine the Dart dependencies eagerly.
-    if (!await _refreshDartDependencies()) {
-      // Some kind of source level error or missing file in the Dart code.
-      return 1;
-    }
-
     firstBuildTime = DateTime.now();
 
     for (FlutterDevice device in flutterDevices) {
@@ -336,8 +281,6 @@ class HotRunner extends ResidentRunner {
         result = await restart(fullRestart: false);
       }
       if (!result.isOk) {
-        // TODO(johnmccutchan): Attempt to determine the number of errors that
-        // occurred and tighten this message.
         printStatus('Try again after fixing the above error(s).', emphasis: true);
       }
     } else if (lower == 'l') {
@@ -364,10 +307,6 @@ class HotRunner extends ResidentRunner {
   }
 
   Future<UpdateFSReport> _updateDevFS({ bool fullRestart = false }) async {
-    if (!await _refreshDartDependencies()) {
-      // Did not update DevFS because of a Dart source error.
-      return UpdateFSReport(success: false);
-    }
     final bool isFirstUpload = assetBundle.wasBuiltOnce() == false;
     final bool rebuildBundle = assetBundle.needsBuild();
     if (rebuildBundle) {
@@ -377,6 +316,13 @@ class HotRunner extends ResidentRunner {
         return UpdateFSReport(success: false);
     }
 
+    // Picking up first device's compiler as a source of truth - compilers
+    // for all devices should be in sync.
+    final List<Uri> invalidatedFiles = ProjectFileInvalidator.findInvalidated(
+      lastCompiled: flutterDevices[0].devFS.lastCompiled,
+      urisToMonitor: flutterDevices[0].devFS.sources,
+      packagesPath: packagesFilePath,
+    );
     final UpdateFSReport results = UpdateFSReport(success: true);
     for (FlutterDevice device in flutterDevices) {
       results.incorporateResults(await device.updateDevFS(
@@ -386,37 +332,13 @@ class HotRunner extends ResidentRunner {
         firstBuildTime: firstBuildTime,
         bundleFirstUpload: isFirstUpload,
         bundleDirty: isFirstUpload == false && rebuildBundle,
-        fileFilter: _dartDependencies,
         fullRestart: fullRestart,
         projectRootPath: projectRootPath,
         pathToReload: getReloadPath(fullRestart: fullRestart),
+        invalidatedFiles: invalidatedFiles,
       ));
     }
-    if (!results.success) {
-      return results;
-    }
-
-    if (!hotRunnerConfig.stableDartDependencies) {
-      // Clear the set after the sync so they are recomputed next time.
-      _dartDependencies = null;
-    }
     return results;
-  }
-
-  Future<void> _evictDirtyAssets() {
-    final List<Future<Map<String, dynamic>>> futures = <Future<Map<String, dynamic>>>[];
-    for (FlutterDevice device in flutterDevices) {
-      if (device.devFS.assetPathsToEvict.isEmpty)
-        continue;
-      if (device.views.first.uiIsolate == null) {
-        printError('Application isolate not found for $device');
-        continue;
-      }
-      for (String assetPath in device.devFS.assetPathsToEvict)
-        futures.add(device.views.first.uiIsolate.flutterEvictAsset(assetPath));
-      device.devFS.assetPathsToEvict.clear();
-    }
-    return Future.wait<Map<String, dynamic>>(futures);
   }
 
   void _resetDirtyAssets() {
@@ -480,11 +402,11 @@ class HotRunner extends ResidentRunner {
 
   }
 
-  Future<OperationResult> _restartFromSources({ String reason }) async {
+  Future<OperationResult> _restartFromSources({ String reason, bool benchmarkMode = false }) async {
     final Map<String, String> analyticsParameters =
       reason == null
         ? null
-        : <String, String>{ kEventReloadReasonParameterName: reason };
+        : <String, String>{kEventReloadReasonParameterName: reason};
 
     if (!_isPaused()) {
       printTrace('Refreshing active FlutterViews before restarting.');
@@ -543,6 +465,25 @@ class HotRunner extends ResidentRunner {
         restartTimer.elapsed.inMilliseconds);
     flutterUsage.sendEvent('hot', 'restart', parameters: analyticsParameters);
     flutterUsage.sendTiming('hot', 'restart', restartTimer.elapsed);
+
+    // In benchmark mode, make sure all stream notifications have finished.
+    if (benchmarkMode) {
+      final List<Future<void>> isolateNotifications = <Future<void>>[];
+      for (FlutterDevice device in flutterDevices) {
+        for (FlutterView view in device.views) {
+          isolateNotifications.add(
+            view.owner.vm.vmService.onIsolateEvent.then((Stream<ServiceEvent> serviceEvents) async {
+              await for (ServiceEvent serviceEvent in serviceEvents) {
+                if (serviceEvent.owner.name.contains('_spawn') && serviceEvent.kind == ServiceEvent.kIsolateExit) {
+                  return;
+                }
+              }
+            }),
+          );
+        }
+      }
+      await Future.wait(isolateNotifications);
+    }
     return OperationResult.ok;
   }
 
@@ -589,7 +530,7 @@ class HotRunner extends ResidentRunner {
   bool get supportsRestart => true;
 
   @override
-  Future<OperationResult> restart({ bool fullRestart = false, bool pauseAfterRestart = false, String reason }) async {
+  Future<OperationResult> restart({ bool fullRestart = false, bool pauseAfterRestart = false, String reason, bool benchmarkMode = false }) async {
     final Stopwatch timer = Stopwatch()..start();
     if (fullRestart) {
       if (!canHotRestart) {
@@ -603,7 +544,7 @@ class HotRunner extends ResidentRunner {
       try {
         if (!(await hotRunnerConfig.setupHotRestart()))
           return OperationResult(1, 'setupHotRestart failed');
-        final OperationResult result = await _restartFromSources(reason: reason);
+        final OperationResult result = await _restartFromSources(reason: reason, benchmarkMode: benchmarkMode,);
         if (!result.isOk)
           return result;
       } finally {
@@ -811,9 +752,9 @@ class HotRunner extends ResidentRunner {
         return OperationResult(OperationResult.ok.code, reloadMessage);
       }
     }
-    assert(reassembleViews.isNotEmpty);
     printTrace('Evicting dirty assets');
     await _evictDirtyAssets();
+    assert(reassembleViews.isNotEmpty);
     printTrace('Reassembling application');
     bool failedReassemble = false;
     final List<Future<void>> futures = <Future<void>>[];
@@ -825,12 +766,6 @@ class HotRunner extends ResidentRunner {
           failedReassemble = true;
           printError('Reassembling ${view.uiIsolate.name} failed: $error');
           return;
-        }
-        try {
-          await view.uiIsolate.uiWindowScheduleFrame();
-        } catch (error) {
-          failedReassemble = true;
-          printError('Scheduling a frame for ${view.uiIsolate.name} failed: $error');
         }
       }());
     }
@@ -886,7 +821,6 @@ class HotRunner extends ResidentRunner {
     // Only report timings if we reloaded a single view without any errors.
     if ((reassembleViews.length == 1) && !failedReassemble && shouldReportReloadTime)
       flutterUsage.sendTiming('hot', 'reload', reloadDuration);
-
     return OperationResult(
       failedReassemble ? 1 : OperationResult.ok.code,
       reloadMessage,
@@ -965,6 +899,23 @@ class HotRunner extends ResidentRunner {
     }
   }
 
+  Future<void> _evictDirtyAssets() {
+    final List<Future<Map<String, dynamic>>> futures = <Future<Map<String, dynamic>>>[];
+    for (FlutterDevice device in flutterDevices) {
+      if (device.devFS.assetPathsToEvict.isEmpty)
+        continue;
+      if (device.views.first.uiIsolate == null) {
+        printError('Application isolate not found for $device');
+        continue;
+      }
+      for (String assetPath in device.devFS.assetPathsToEvict) {
+        futures.add(device.views.first.uiIsolate.flutterEvictAsset(assetPath));
+      }
+      device.devFS.assetPathsToEvict.clear();
+    }
+    return Future.wait<Map<String, dynamic>>(futures);
+  }
+
   @override
   Future<void> cleanupAfterSignal() async {
     await stopEchoingDeviceLog();
@@ -986,5 +937,45 @@ class HotRunner extends ResidentRunner {
   Future<void> cleanupAtFinish() async {
     await _cleanupDevFS();
     await stopEchoingDeviceLog();
+  }
+}
+
+class ProjectFileInvalidator {
+  static const String _pubCachePathLinuxAndMac = '.pub-cache';
+  static const String _pubCachePathWindows = 'Pub/Cache';
+
+  static List<Uri> findInvalidated({
+    @required DateTime lastCompiled,
+    @required List<Uri> urisToMonitor,
+    @required String packagesPath,
+  }) {
+    final List<Uri> invalidatedFiles = <Uri>[];
+    int scanned = 0;
+    final Stopwatch stopwatch = Stopwatch()..start();
+    for (Uri uri in urisToMonitor) {
+      if ((platform.isWindows && uri.path.contains(_pubCachePathWindows))
+          || uri.path.contains(_pubCachePathLinuxAndMac)) {
+        // Don't watch pub cache directories to speed things up a little.
+        continue;
+      }
+      final DateTime updatedAt = fs.statSync(
+          uri.toFilePath(windows: platform.isWindows)).modified;
+      scanned++;
+      if (updatedAt == null) {
+        continue;
+      }
+      if (updatedAt.millisecondsSinceEpoch > lastCompiled.millisecondsSinceEpoch) {
+        invalidatedFiles.add(uri);
+      }
+    }
+    // we need to check the .packages file too since it is not used in compilation.
+    final DateTime packagesUpdatedAt = fs.statSync(packagesPath).modified;
+    if (lastCompiled != null && packagesUpdatedAt != null
+        && packagesUpdatedAt.millisecondsSinceEpoch > lastCompiled.millisecondsSinceEpoch) {
+      invalidatedFiles.add(fs.file(packagesPath).uri);
+      scanned++;
+    }
+    printTrace('Scanned through $scanned files in ${stopwatch.elapsedMilliseconds}ms');
+    return invalidatedFiles;
   }
 }

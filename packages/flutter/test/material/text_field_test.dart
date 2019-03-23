@@ -645,6 +645,90 @@ void main() {
     expect(controller.selection.extentOffset, testValue.indexOf('g'));
   });
 
+  testWidgets('Continuous dragging does not cause flickering', (WidgetTester tester) async {
+    int selectionChangedCount = 0;
+    const String testValue = 'abc def ghi';
+    final TextEditingController controller = TextEditingController(text: testValue);
+
+    controller.addListener(() {
+      selectionChangedCount++;
+    });
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: TextField(
+            dragStartBehavior: DragStartBehavior.down,
+            controller: controller,
+            style: const TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
+          ),
+        ),
+      ),
+    );
+
+    final Offset cPos = textOffsetToPosition(tester, 2); // Index of 'c'.
+    final Offset gPos = textOffsetToPosition(tester, 8); // Index of 'g'.
+    final Offset hPos = textOffsetToPosition(tester, 9); // Index of 'h'.
+
+    // Drag from 'c' to 'g'.
+    final TestGesture gesture = await tester.startGesture(cPos, kind: PointerDeviceKind.mouse);
+    await tester.pump();
+    await gesture.moveTo(gPos);
+    await tester.pumpAndSettle();
+
+    expect(selectionChangedCount, isNonZero);
+    selectionChangedCount = 0;
+    expect(controller.selection.baseOffset, 2);
+    expect(controller.selection.extentOffset, 8);
+
+    // Tiny movement shouldn't cause text selection to change.
+    await gesture.moveTo(gPos + const Offset(4.0, 0.0));
+    await tester.pumpAndSettle();
+    expect(selectionChangedCount, 0);
+
+    // Now a text selection change will occur after a significant movement.
+    await gesture.moveTo(hPos);
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(selectionChangedCount, 1);
+    expect(controller.selection.baseOffset, 2);
+    expect(controller.selection.extentOffset, 9);
+  });
+
+  testWidgets('Dragging in opposite direction also works', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: TextField(
+            dragStartBehavior: DragStartBehavior.down,
+            controller: controller,
+          ),
+        ),
+      ),
+    );
+
+    const String testValue = 'abc def ghi';
+    await tester.enterText(find.byType(TextField), testValue);
+    await skipPastScrollingAnimation(tester);
+
+    final Offset ePos = textOffsetToPosition(tester, testValue.indexOf('e'));
+    final Offset gPos = textOffsetToPosition(tester, testValue.indexOf('g'));
+
+    final TestGesture gesture = await tester.startGesture(gPos, kind: PointerDeviceKind.mouse);
+    await tester.pump();
+    await gesture.moveTo(ePos);
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(controller.selection.baseOffset, testValue.indexOf('e'));
+    expect(controller.selection.extentOffset, testValue.indexOf('g'));
+  });
+
   testWidgets('Slow mouse dragging also selects text', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController();
 
@@ -680,12 +764,10 @@ void main() {
     final TextEditingController controller = TextEditingController();
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: TextField(
-            dragStartBehavior: DragStartBehavior.down,
-            controller: controller,
-          ),
+      overlay(
+        child: TextField(
+          dragStartBehavior: DragStartBehavior.down,
+          controller: controller,
         ),
       ),
     );
@@ -703,6 +785,8 @@ void main() {
     await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
 
     final TextSelection selection = controller.selection;
+    expect(selection.baseOffset, 4);
+    expect(selection.extentOffset, 7);
 
     final RenderEditable renderEditable = findRenderEditable(tester);
     final List<TextSelectionPoint> endpoints = globalize(
@@ -715,7 +799,7 @@ void main() {
     // We use a small offset because the endpoint is on the very corner
     // of the handle.
     Offset handlePos = endpoints[1].point + const Offset(1.0, 1.0);
-    Offset newHandlePos = textOffsetToPosition(tester, selection.extentOffset+2);
+    Offset newHandlePos = textOffsetToPosition(tester, 9); // Position of 'h'.
     gesture = await tester.startGesture(handlePos, pointer: 7);
     await tester.pump();
     await gesture.moveTo(newHandlePos);
@@ -723,12 +807,12 @@ void main() {
     await gesture.up();
     await tester.pump();
 
-    expect(controller.selection.baseOffset, selection.baseOffset);
-    expect(controller.selection.extentOffset, selection.extentOffset);
+    expect(controller.selection.baseOffset, 4);
+    expect(controller.selection.extentOffset, 9);
 
     // Drag the left handle 2 letters to the left.
     handlePos = endpoints[0].point + const Offset(-1.0, 1.0);
-    newHandlePos = textOffsetToPosition(tester, selection.baseOffset-2);
+    newHandlePos = textOffsetToPosition(tester, 2); // Position of 'c'.
     gesture = await tester.startGesture(handlePos, pointer: 7);
     await tester.pump();
     await gesture.moveTo(newHandlePos);
@@ -736,8 +820,68 @@ void main() {
     await gesture.up();
     await tester.pump();
 
-    expect(controller.selection.baseOffset, selection.baseOffset);
-    expect(controller.selection.extentOffset, selection.extentOffset);
+    expect(controller.selection.baseOffset, 2);
+    expect(controller.selection.extentOffset, 9);
+  });
+
+  testWidgets('Cannot drag one handle past the other', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController();
+
+    await tester.pumpWidget(
+      overlay(
+        child: TextField(
+          dragStartBehavior: DragStartBehavior.down,
+          controller: controller,
+        ),
+      ),
+    );
+
+    const String testValue = 'abc def ghi';
+    await tester.enterText(find.byType(TextField), testValue);
+    await skipPastScrollingAnimation(tester);
+
+    // Long press the 'e' to select 'def'.
+    final Offset ePos = textOffsetToPosition(tester, 5); // Position of 'e'.
+    TestGesture gesture = await tester.startGesture(ePos, pointer: 7);
+    await tester.pump(const Duration(seconds: 2));
+    await gesture.up();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
+
+    final TextSelection selection = controller.selection;
+    expect(selection.baseOffset, 4);
+    expect(selection.extentOffset, 7);
+
+    final RenderEditable renderEditable = findRenderEditable(tester);
+    final List<TextSelectionPoint> endpoints = globalize(
+      renderEditable.getEndpointsForSelection(selection),
+      renderEditable,
+    );
+    expect(endpoints.length, 2);
+
+    // Drag the right handle until there's only 1 char selected.
+    // We use a small offset because the endpoint is on the very corner
+    // of the handle.
+    final Offset handlePos = endpoints[1].point + const Offset(1.0, 1.0);
+    Offset newHandlePos = textOffsetToPosition(tester, 5); // Position of 'e'.
+    gesture = await tester.startGesture(handlePos, pointer: 7);
+    await tester.pump();
+    await gesture.moveTo(newHandlePos);
+    await tester.pump();
+
+    expect(controller.selection.baseOffset, 4);
+    expect(controller.selection.extentOffset, 5);
+
+    newHandlePos = textOffsetToPosition(tester, 2); // Position of 'c'.
+    await gesture.moveTo(newHandlePos);
+    await tester.pump();
+    await gesture.up();
+    await tester.pump();
+
+    expect(controller.selection.baseOffset, 4);
+    // The selection doesn't move beyond the left handle. There's always at
+    // least 1 char selected.
+    expect(controller.selection.extentOffset, 5);
   });
 
   testWidgets('Can use selection toolbar', (WidgetTester tester) async {
@@ -2519,7 +2663,7 @@ void main() {
     sendFakeKeyEvent(<String, dynamic>{
       'type': down ? 'keydown' : 'keyup',
       'keymap': 'android',
-      'keyCode' : code,
+      'keyCode': code,
       'hidUsage': 0x04,
       'codePoint': 0x64,
       'metaState': metaState,
