@@ -366,9 +366,7 @@ Future<void> buildPluginAAR(Plugin plugin, String gradle, String assembleTask) a
     fs.file(gradle).absolute.path,
     '--init-script',
     initScriptPath,
-    'build',
-    '-x',
-    'lint',
+    assembleTask,
     '-q',
     '-Pflutter-root=${Cache.flutterRoot}',
   ];
