@@ -63,6 +63,7 @@ class FlutterAarPlugin implements Plugin<Project> {
         if (project.state.failure) {
             return
         }
+        project.mkdir(project.buildDir)
         File depsFile = project.file("${project.buildDir}/deps.txt")
         if (depsFile.exists()) {
             depsFile.text = ''
