@@ -25,25 +25,23 @@ class CleanCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     final FlutterProject flutterProject = await FlutterProject.current();
-    final Directory buildDir = fs.directory(getBuildDirectory());
+    final List<Directory> dirs = <Directory>[
+      fs.directory(getBuildDirectory()),         // build/
+      fs.directory(getAndroidBuildDirectory(flutterProject.isModule)),  // android/app/build/
+      flutterProject.dartTool,                   // .dartTool/
+    ];
 
-    printStatus("Deleting '${buildDir.path}${fs.path.separator}'.");
-    if (buildDir.existsSync()) {
-      try {
-        buildDir.deleteSync(recursive: true);
-      } catch (error) {
-        throwToolExit(error.toString());
+    for (final Directory dir in dirs) {
+      printStatus("Deleting '${dir.path}${fs.path.separator}'.");
+      if (dir.existsSync()) {
+        try {
+          dir.deleteSync(recursive: true);
+        } catch (error) {
+          throwToolExit(error.toString());
+        }
       }
     }
 
-    printStatus("Deleting '${flutterProject.dartTool.path}${fs.path.separator}'.");
-    if (flutterProject.dartTool.existsSync()) {
-      try {
-        flutterProject.dartTool.deleteSync(recursive: true);
-      } catch (error) {
-        throwToolExit(error.toString());
-      }
-    }
     return const FlutterCommandResult(ExitStatus.success);
   }
 }

@@ -385,9 +385,9 @@ String getBuildDirectory() {
 }
 
 /// Returns the Android build output directory.
-String getAndroidBuildDirectory() {
-  // TODO(cbracken): move to android subdir.
-  return getBuildDirectory();
+String getAndroidBuildDirectory(bool isModule) {
+  assert(isModule != null);
+  return fs.path.join(isModule ? '.android' : 'android', 'app', 'build');
 }
 
 /// Returns the AOT build output directory.

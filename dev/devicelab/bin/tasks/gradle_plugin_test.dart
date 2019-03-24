@@ -274,7 +274,6 @@ Future<ProcessResult> _resultOfGradleTask({String workingDirectory, String task,
   }
   final String gradle = Platform.isWindows ? 'gradlew.bat' : './gradlew';
   print('Running Gradle: ${path.join(workingDirectory, gradle)} ${args.join(' ')}');
-  print(File(path.join(workingDirectory, gradle)).readAsStringSync());
   return Process.run(
     gradle,
     args,
@@ -310,7 +309,7 @@ class _Dependencies {
 /// Returns [null] if target matches [expectedTarget], otherwise returns an error message.
 String _validateSnapshotDependency(FlutterProject project, String expectedTarget) {
   final _Dependencies deps = _Dependencies(
-      path.join(project.rootPath, 'build', 'app', 'intermediates',
+      path.join(project.androidPath, 'app', 'build', 'intermediates',
           'flutter', 'debug', 'snapshot_blob.bin.d'));
   return deps.target == expectedTarget ? null :
     'Dependency file should have $expectedTarget as target. Instead has ${deps.target}';

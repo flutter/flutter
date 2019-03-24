@@ -153,7 +153,7 @@ class AndroidApk extends ApplicationPackage {
       // command will grab a new AndroidApk after building, to get the updated
       // IDs.
     } else {
-      apkFile = fs.file(fs.path.join(getAndroidBuildDirectory(), 'app.apk'));
+      apkFile = fs.file(fs.path.join(getAndroidBuildDirectory(androidProject.isModule), 'app.apk'));
     }
 
     final File manifest = androidProject.appManifestFile;

@@ -47,8 +47,19 @@ plugins.each { name, path ->
     def pluginDirectory = flutterProjectRoot.resolve(path).resolve('android').toFile()
     include ":\$name"
     project(":\$name").projectDir = pluginDirectory
-    project(":\$name").parent = project(":app")
-    println project(":\$name").dump()
+}
+''';
+
+const String _kAlternateLegacySettingsGradlePluginLogic = '''def plugins = new Properties()
+def pluginsFile = new File(flutterProjectRoot.toFile(), '.flutter-plugins')
+if (pluginsFile.exists()) {
+    pluginsFile.withInputStream { stream -> plugins.load(stream) }
+}
+
+plugins.each { name, path ->
+    def pluginDirectory = flutterProjectRoot.resolve(path).resolve('android').toFile()
+    include ":\$name"
+    project(":\$name").projectDir = pluginDirectory
 }
 ''';
 
@@ -413,9 +424,10 @@ Future<void> _buildGradleProjectV3(
     await flutterProject.android.rootBuildGradle.writeAsString(updatedBuildGradle);
   }
   final String settingsGradle = await flutterProject.android.gradleSettingsFile.readAsString();
-  if (settingsGradle.contains(_kLegacySettingsGradlePluginLogic)) {
+  if (settingsGradle.contains(_kLegacySettingsGradlePluginLogic) || settingsGradle.contains(_kAlternateLegacySettingsGradlePluginLogic)) {
     printStatus('Updating settings.gradle for new plugin format...');
-    final String updatedSettingsGradle = settingsGradle.replaceAll(_kLegacySettingsGradlePluginLogic, '');
+    final String updatedSettingsGradle = settingsGradle.replaceAll(_kLegacySettingsGradlePluginLogic, '')
+                                                       .replaceAll(_kAlternateLegacySettingsGradlePluginLogic, '');
     await flutterProject.android.gradleSettingsFile.writeAsString(updatedSettingsGradle);
   }
   return _buildGradleProjectV2(

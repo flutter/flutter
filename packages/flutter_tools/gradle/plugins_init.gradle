@@ -64,7 +64,11 @@ class FlutterAarPlugin implements Plugin<Project> {
             return
         }
         File depsFile = project.file("${project.buildDir}/deps.txt")
-        depsFile.text = ''
+        if (depsFile.exists()) {
+            depsFile.text = ''
+        } else {
+            depsFile.createNewFile()
+        }
         project.getConfigurations().getByName("api").getDependencies().each {dep ->
             depsFile << "${dep.group}:${dep.name}:${dep.version}\n"
         }
