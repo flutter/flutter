@@ -1,4 +1,4 @@
-Signature: f2606196c58bd731894bfe690e9bd95f
+Signature: 096e6f6942d9d327f4648d588e7923ad
 
 UNUSED LICENSES:
 
@@ -3805,6 +3805,8 @@ FILE: ../../../third_party/skia/src/gpu/ops/GrCopySurfaceOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrCopySurfaceOp.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrDashLinePathRenderer.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrDashLinePathRenderer.h
+FILE: ../../../third_party/skia/src/gpu/ops/GrDrawAtlasOp.cpp
+FILE: ../../../third_party/skia/src/gpu/ops/GrDrawAtlasOp.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrDrawOp.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrDrawPathOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrDrawPathOp.h
