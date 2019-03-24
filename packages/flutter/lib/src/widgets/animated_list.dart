@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:collection/collection.dart' show binarySearch;
-
 import 'package:flutter/animation.dart';
 
 import 'basic.dart';
@@ -228,13 +226,32 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
   }
 
   _ActiveItem _removeActiveItemAt(List<_ActiveItem> items, int itemIndex) {
-    final int i = binarySearch(items, _ActiveItem.index(itemIndex));
+    final int i = _binarySearch(items, _ActiveItem.index(itemIndex));
     return i == -1 ? null : items.removeAt(i);
   }
 
   _ActiveItem _activeItemAt(List<_ActiveItem> items, int itemIndex) {
-    final int i = binarySearch(items, _ActiveItem.index(itemIndex));
+    final int i = _binarySearch(items, _ActiveItem.index(itemIndex));
     return i == -1 ? null : items[i];
+  }
+
+  static int _binarySearch<T extends Comparable<T>>(List<T> sortedList, T value) {
+    int min = 0;
+    int max = sortedList.length;
+    while (min < max) {
+      final int mid = min + ((max - min) >> 1);
+      final T element = sortedList[mid];
+      final int comp = element.compareTo(value);
+      if (comp == 0) {
+        return mid;
+      }
+      if (comp < 0) {
+        min = mid + 1;
+      } else {
+        max = mid;
+      }
+    }
+    return -1;
   }
 
   // The insertItem() and removeItem() index parameters are defined as if the
