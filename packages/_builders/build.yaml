@@ -29,7 +29,7 @@ builders:
         - .ddc.js
         - .ddc.js.map
     is_optional: True
-    auto_apply: none
+    auto_apply: all_packages
     required_inputs:
       - .dart
       - .flutter_dartdevc.module

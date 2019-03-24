@@ -10,6 +10,23 @@ dependencies:
     sdk: flutter
 
 dev_dependencies:
-  build_runner:
+  build:
+  build_modules:
+  build_web_compilers:
+  build_runner_core:
+  build_runner: 1.2.8
+  _builders:
+    sdk: flutter
 
+dependency_overrides:
+  build:
+    path: /Users/jonahwilliams/Documents/build/build/
+  build_modules:
+    path: /Users/jonahwilliams/Documents/build/build_modules/
+  build_web_compilers:
+    path: /Users/jonahwilliams/Documents/build/build_web_compilers/
+  build_runner_core:
+    path: /Users/jonahwilliams/Documents/build/build_runner_core/
+  build_runner:
+    path: /Users/jonahwilliams/Documents/build/build_runner
 # PUBSPEC CHECKSUM: d53c
