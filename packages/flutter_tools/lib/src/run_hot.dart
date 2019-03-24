@@ -428,14 +428,18 @@ class HotRunner extends ResidentRunner {
     for (FlutterDevice device in flutterDevices) {
       // VM must have accepted the kernel binary, there will be no reload
       // report, so we let incremental compiler know that source code was accepted.
-      if (device.generator != null)
+      if (device.generator != null) {
         device.generator.accept();
+      }
     }
     // Check if the isolate is paused and resume it.
     final List<Future<void>> futures = <Future<void>>[];
+    // Only attempt to restart or reload the main isolate.
+    // The name of the ui isolate will be something like [file].dart$[entrypoint]-number
+    final String isolateNamePart = fs.path.split(mainPath).last;
     for (FlutterDevice device in flutterDevices) {
       for (FlutterView view in device.views) {
-        if (view.uiIsolate != null) {
+        if (view.uiIsolate != null && view.uiIsolate.name.contains(isolateNamePart)) {
           // Reload the isolate.
           final Completer<void> completer = Completer<void>();
           futures.add(completer.future);
@@ -447,9 +451,7 @@ class HotRunner extends ResidentRunner {
                 return view.uiIsolate.resume();
               }
             },
-          ).whenComplete(
-            () { completer.complete(null); },
-          ));
+          ).whenComplete(completer.complete));
         }
       }
     }
@@ -631,6 +633,9 @@ class HotRunner extends ResidentRunner {
         getReloadPath(fullRestart: false),
         from: projectRootPath,
       );
+      // Only attempt to restart or reload the main isolate.
+      // The name of the ui isolate will be something like [file].dart$[entrypoint]-number
+      final String isolateNamePart = fs.path.split(mainPath).last;
       final List<Future<DeviceReloadReport>> allReportsFutures = <Future<DeviceReloadReport>>[];
       for (FlutterDevice device in flutterDevices) {
         if (_runningFromSnapshot) {
@@ -641,7 +646,7 @@ class HotRunner extends ResidentRunner {
         final Completer<DeviceReloadReport> completer = Completer<DeviceReloadReport>();
         allReportsFutures.add(completer.future);
         final List<Future<Map<String, dynamic>>> reportFutures = device.reloadSources(
-          entryPath, pause: pause,
+          entryPath, pause: pause, isolateNamePart: isolateNamePart,
         );
         unawaited(Future.wait(reportFutures).then(
           (List<Map<String, dynamic>> reports) async {

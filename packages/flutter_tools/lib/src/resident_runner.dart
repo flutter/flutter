@@ -200,11 +200,16 @@ class FlutterDevice {
   List<Future<Map<String, dynamic>>> reloadSources(
     String entryPath, {
     bool pause = false,
+    @required String isolateNamePart,
   }) {
     final Uri deviceEntryUri = devFS.baseUri.resolveUri(fs.path.toUri(entryPath));
     final Uri devicePackagesUri = devFS.baseUri.resolve('.packages');
     final List<Future<Map<String, dynamic>>> reports = <Future<Map<String, dynamic>>>[];
     for (FlutterView view in views) {
+      // Don't reload unrelated background isolates.
+      if (view.uiIsolate == null || !view.uiIsolate.name.contains(isolateNamePart)) {
+        continue;
+      }
       final Future<Map<String, dynamic>> report = view.uiIsolate.reloadSources(
         pause: pause,
         rootLibUri: deviceEntryUri,
