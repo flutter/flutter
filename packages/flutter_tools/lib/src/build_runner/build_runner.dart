@@ -21,7 +21,6 @@ import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/process_manager.dart';
 import '../codegen.dart';
-import '../dart/package_map.dart';
 import '../dart/pub.dart';
 import '../globals.dart';
 import '../project.dart';
@@ -128,7 +127,6 @@ class BuildRunner extends CodeGenerator {
     List<String> extraFrontEndOptions = const <String> [],
   }) async {
     await generateBuildScript(flutterProject);
-    _generatePackages(flutterProject);
     final String engineDartBinaryPath = artifacts.getArtifactPath(Artifact.engineDartBinary);
     final File buildSnapshot = flutterProject
         .dartTool
@@ -159,18 +157,6 @@ class BuildRunner extends CodeGenerator {
       builder.target = flutterProject.manifest.appName;
     }));
     return _BuildRunnerCodegenDaemon(buildDaemonClient);
-  }
-
-  // Create generated packages file which adds a multi-root scheme to the user's
-  // project directory. Currently we only replace the root package with a multiroot
-  // scheme. To support codegen on arbitrary packages we would need to do
-  // this for each dependency.
-  void _generatePackages(FlutterProject flutterProject) {
-    final String oldPackagesContents = fs.file(PackageMap.globalPackagesPath).readAsStringSync();
-    final String appName = flutterProject.manifest.appName;
-    final String newPackagesContents = oldPackagesContents.replaceFirst('$appName:lib/', '$appName:$kMultiRootScheme:/');
-    final String generatedPackagesPath = fs.path.setExtension(PackageMap.globalPackagesPath, '.generated');
-    fs.file(generatedPackagesPath).writeAsStringSync(newPackagesContents);
   }
 }
 
