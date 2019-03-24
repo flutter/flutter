@@ -8,7 +8,6 @@ import 'dart:io';
 
 import 'package:flutter_tools/src/context_runner.dart';
 import 'package:flutter_tools/src/test/coverage_collector.dart';
-import 'package:coverage/coverage.dart' as coverage;
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:path/path.dart' as path;
 import 'package:pedantic/pedantic.dart';
@@ -78,11 +77,12 @@ void main() {
       final Process testProcess = await Process.start(dartPath, <String>[
         '--packages=${File('.packages').absolute.path}',
         '--pause-isolates-on-exit',
+        '--enable-asserts',
         '--enable-vm-service=${coverageUri.port}',
         fakeTest.path,
       ], runInShell: true, environment: <String, String>{
         'FLUTTER_ROOT': Directory.current.parent.parent.path,
-      });
+      }).timeout(const Duration(minutes: 1));
       testProcess.stdout
         .transform(utf8.decoder)
         .transform(const LineSplitter())
@@ -95,15 +95,16 @@ void main() {
         print('test process exited with $code');
       }));
       try {
-        await coverageCollector.collectCoverage(testProcess, coverageUri).timeout(const Duration(minutes: 5));
+        await coverageCollector.collectCoverage(testProcess, coverageUri).timeout(const Duration(minutes: 1));
       } on TimeoutException catch (err) {
         print('Failed to collect coverage for ${fileSystemEntity.path} after 5 minutes');
       }
     }
 
     if (!coverageMap.existsSync()) {
-      coverageMap.createSync();
+      coverageMap.createSync(recursive: true);
     }
+    print('saving coverage');
     coverageMap.writeAsStringSync(json.encode(coverageCollector.globalHitmap, toEncodable: (dynamic value) {
       if (value is Map) {
         return Map<dynamic, dynamic>.fromIterables(
@@ -169,7 +170,6 @@ class ToolCoverageCollector extends CoverageCollector {
     print('pid $pid ($uri): done merging coverage data into global coverage map.');
   }
 
-  @override
   Future<Map<String, dynamic>> collect(Uri serviceUri, bool resume, bool waitPaused) async {
     final VMService vmService = await VMService.connect(serviceUri);
     await vmService.getVM();

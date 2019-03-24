@@ -19,7 +19,7 @@ import 'watcher.dart';
 
 /// A class that's used to collect coverage data during tests.
 class CoverageCollector extends TestWatcher {
-  Map<String, dynamic> _globalHitmap;
+  Map<String, dynamic> globalHitmap;
 
   @override
   Future<void> handleFinishedTest(ProcessEvent event) async {
@@ -27,11 +27,12 @@ class CoverageCollector extends TestWatcher {
     await collectCoverage(event.process, event.observatoryUri);
   }
 
-  void _addHitmap(Map<String, dynamic> hitmap) {
-    if (_globalHitmap == null)
-      _globalHitmap = hitmap;
-    else
-      coverage.mergeHitmaps(hitmap, _globalHitmap);
+  void addHitmap(Map<String, dynamic> hitmap) {
+    if (globalHitmap == null) {
+      globalHitmap = hitmap;
+    } else {
+      coverage.mergeHitmaps(hitmap, globalHitmap);
+    }
   }
 
   /// Collects coverage for the given [Process] using the given `port`.
@@ -62,7 +63,7 @@ class CoverageCollector extends TestWatcher {
     assert(data != null);
 
     printTrace('pid $pid ($observatoryUri): collected coverage data; merging...');
-    _addHitmap(coverage.createHitmap(data['coverage']));
+    addHitmap(coverage.createHitmap(data['coverage']));
     printTrace('pid $pid ($observatoryUri): done merging coverage data into global coverage map.');
   }
 
@@ -76,8 +77,9 @@ class CoverageCollector extends TestWatcher {
     Directory coverageDirectory,
   }) async {
     printTrace('formating coverage data');
-    if (_globalHitmap == null)
+    if (globalHitmap == null) {
       return null;
+    }
     if (formatter == null) {
       final coverage.Resolver resolver = coverage.Resolver(packagesPath: PackageMap.globalPackagesPath);
       final String packagePath = fs.currentDirectory.path;
@@ -86,8 +88,8 @@ class CoverageCollector extends TestWatcher {
         : <String>[coverageDirectory.path];
       formatter = coverage.LcovFormatter(resolver, reportOn: reportOn, basePath: packagePath);
     }
-    final String result = await formatter.format(_globalHitmap);
-    _globalHitmap = null;
+    final String result = await formatter.format(globalHitmap);
+    globalHitmap = null;
     return result;
   }
 
