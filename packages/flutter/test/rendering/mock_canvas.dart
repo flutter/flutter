@@ -573,7 +573,7 @@ class _TestRecordingCanvasPaintsCountMatcher extends _TestRecordingCanvasMatcher
   @override
   bool _evaluatePredicates(Iterable<RecordedInvocation> calls, StringBuffer description) {
     int count = 0;
-    for(RecordedInvocation call in calls) {
+    for (RecordedInvocation call in calls) {
       if (call.invocation.isMethod && call.invocation.memberName == _methodName) {
         count++;
       }
@@ -866,9 +866,15 @@ abstract class _PaintPredicate {
 
 abstract class _DrawCommandPaintPredicate extends _PaintPredicate {
   _DrawCommandPaintPredicate(
-    this.symbol, this.name, this.argumentCount, this.paintArgumentIndex,
-    { this.color, this.strokeWidth, this.hasMaskFilter, this.style, }
-  );
+    this.symbol,
+    this.name,
+    this.argumentCount,
+    this.paintArgumentIndex, {
+    this.color,
+    this.strokeWidth,
+    this.hasMaskFilter,
+    this.style,
+  });
 
   final Symbol symbol;
   final String name;
@@ -934,7 +940,9 @@ abstract class _DrawCommandPaintPredicate extends _PaintPredicate {
 }
 
 class _OneParameterPaintPredicate<T> extends _DrawCommandPaintPredicate {
-  _OneParameterPaintPredicate(Symbol symbol, String name, {
+  _OneParameterPaintPredicate(
+    Symbol symbol,
+    String name, {
     @required this.expected,
     @required Color color,
     @required double strokeWidth,
@@ -967,7 +975,9 @@ class _OneParameterPaintPredicate<T> extends _DrawCommandPaintPredicate {
 }
 
 class _TwoParameterPaintPredicate<T1, T2> extends _DrawCommandPaintPredicate {
-  _TwoParameterPaintPredicate(Symbol symbol, String name, {
+  _TwoParameterPaintPredicate(
+    Symbol symbol,
+    String name, {
     @required this.expected1,
     @required this.expected2,
     @required Color color,

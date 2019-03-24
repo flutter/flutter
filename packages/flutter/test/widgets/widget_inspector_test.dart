@@ -964,7 +964,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       expect(selectionChangedCount, equals(2));
       expect(service.selection.current, equals(elementB.renderObject));
 
-      await service.testExtension('setSelectionById', <String, String>{'arg' : service.toId(elementA, 'my-group'), 'objectGroup': 'my-group'});
+      await service.testExtension('setSelectionById', <String, String>{'arg': service.toId(elementA, 'my-group'), 'objectGroup': 'my-group'});
       expect(selectionChangedCount, equals(3));
       expect(service.selection.currentElement, equals(elementA));
       expect(service.selection.current, equals(elementA.renderObject));
@@ -2167,7 +2167,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
 
       await expectLater(
         WidgetInspectorService.instance.screenshot(find.byType(Stack).evaluate().first, width: 300.0, height: 300.0),
-        matchesGoldenFile('inspector.composited_transform.only_offsets_small.png'),
+        matchesGoldenFile('inspector.composited_transform.only_offsets_small.1.png'),
         skip: !Platform.isLinux,
       );
 

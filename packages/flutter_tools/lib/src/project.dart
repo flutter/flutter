@@ -162,14 +162,17 @@ class FlutterProject {
   }
 
   /// Return the set of builders used by this package.
-  Future<YamlMap> get builders async {
-    final YamlMap pubspec = loadYaml(await pubspecFile.readAsString());
+  YamlMap get builders {
+    if (!pubspecFile.existsSync()) {
+      return null;
+    }
+    final YamlMap pubspec = loadYaml(pubspecFile.readAsStringSync());
     return pubspec['builders'];
   }
 
   /// Whether there are any builders used by this package.
-  Future<bool> get hasBuilders async {
-    final YamlMap result = await builders;
+  bool get hasBuilders {
+    final YamlMap result = builders;
     return result != null && result.isNotEmpty;
   }
 }

@@ -965,9 +965,9 @@ class _DialPainter extends CustomPainter {
             textDirection: textDirection,
             onTap: label.onTap,
           ),
-          tags: <SemanticsTag>{
+          tags: const <SemanticsTag>{
             // Used by tests to find this node.
-            const SemanticsTag('dial-label'),
+            SemanticsTag('dial-label'),
           },
         );
         nodes.add(node);

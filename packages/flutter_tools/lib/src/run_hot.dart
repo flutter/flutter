@@ -7,7 +7,6 @@ import 'dart:async';
 import 'package:json_rpc_2/error_code.dart' as rpc_error_code;
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:meta/meta.dart';
-import 'package:yaml/yaml.dart';
 
 import 'base/common.dart';
 import 'base/context.dart';
@@ -19,11 +18,9 @@ import 'base/utils.dart';
 import 'build_info.dart';
 import 'compile.dart';
 import 'convert.dart';
-import 'dart/package_map.dart';
 import 'devfs.dart';
 import 'device.dart';
 import 'globals.dart';
-import 'project.dart';
 import 'resident_runner.dart';
 import 'usage.dart';
 import 'vmservice.dart';
@@ -70,7 +67,6 @@ class HotRunner extends ResidentRunner {
     bool saveCompilationTrace = false,
     bool stayResident = true,
     bool ipv6 = false,
-    FlutterProject flutterProject,
   }) : super(devices,
              target: target,
              debuggingOptions: debuggingOptions,
@@ -79,19 +75,13 @@ class HotRunner extends ResidentRunner {
              packagesFilePath: packagesFilePath,
              saveCompilationTrace: saveCompilationTrace,
              stayResident: stayResident,
-             ipv6: ipv6)  {
-    fileInvalidator = ProjectFileInvalidator(
-      packagesFilePath ?? fs.path.absolute(PackageMap.globalPackagesPath),
-      flutterProject,
-    );
-  }
+             ipv6: ipv6);
 
   final bool benchmarkMode;
   final File applicationBinary;
   final bool hostIsIde;
   bool _didAttach = false;
   final String dillOutputPath;
-  ProjectFileInvalidator fileInvalidator;
 
   final Map<String, List<int>> benchmarkData = <String, List<int>>{};
   // The initial launch is from a snapshot.
@@ -103,8 +93,11 @@ class HotRunner extends ResidentRunner {
     benchmarkData[name].add(value);
   }
 
-  Future<void> _reloadSourcesService(String isolateId,
-      { bool force = false, bool pause = false }) async {
+  Future<void> _reloadSourcesService(
+    String isolateId, {
+    bool force = false,
+    bool pause = false,
+  }) async {
     // TODO(cbernaschina): check that isolateId is the id of the UI isolate.
     final OperationResult result = await restart(pauseAfterRestart: pause);
     if (!result.isOk) {
@@ -215,7 +208,7 @@ class HotRunner extends ResidentRunner {
       printStatus('Running in benchmark mode.');
       // Measure time to perform a hot restart.
       printStatus('Benchmarking hot restart');
-      await restart(fullRestart: true);
+      await restart(fullRestart: true, benchmarkMode: true);
       printStatus('Benchmarking hot reload');
       // Measure time to perform a hot reload.
       await restart(fullRestart: false);
@@ -322,7 +315,14 @@ class HotRunner extends ResidentRunner {
       if (result != 0)
         return UpdateFSReport(success: false);
     }
-    final List<String> invalidatedFiles = fileInvalidator.findInvalidated();
+
+    // Picking up first device's compiler as a source of truth - compilers
+    // for all devices should be in sync.
+    final List<Uri> invalidatedFiles = ProjectFileInvalidator.findInvalidated(
+      lastCompiled: flutterDevices[0].devFS.lastCompiled,
+      urisToMonitor: flutterDevices[0].devFS.sources,
+      packagesPath: packagesFilePath,
+    );
     final UpdateFSReport results = UpdateFSReport(success: true);
     for (FlutterDevice device in flutterDevices) {
       results.incorporateResults(await device.updateDevFS(
@@ -402,11 +402,11 @@ class HotRunner extends ResidentRunner {
 
   }
 
-  Future<OperationResult> _restartFromSources({ String reason }) async {
+  Future<OperationResult> _restartFromSources({ String reason, bool benchmarkMode = false }) async {
     final Map<String, String> analyticsParameters =
       reason == null
         ? null
-        : <String, String>{ kEventReloadReasonParameterName: reason };
+        : <String, String>{kEventReloadReasonParameterName: reason};
 
     if (!_isPaused()) {
       printTrace('Refreshing active FlutterViews before restarting.');
@@ -465,6 +465,25 @@ class HotRunner extends ResidentRunner {
         restartTimer.elapsed.inMilliseconds);
     flutterUsage.sendEvent('hot', 'restart', parameters: analyticsParameters);
     flutterUsage.sendTiming('hot', 'restart', restartTimer.elapsed);
+
+    // In benchmark mode, make sure all stream notifications have finished.
+    if (benchmarkMode) {
+      final List<Future<void>> isolateNotifications = <Future<void>>[];
+      for (FlutterDevice device in flutterDevices) {
+        for (FlutterView view in device.views) {
+          isolateNotifications.add(
+            view.owner.vm.vmService.onIsolateEvent.then((Stream<ServiceEvent> serviceEvents) async {
+              await for (ServiceEvent serviceEvent in serviceEvents) {
+                if (serviceEvent.owner.name.contains('_spawn') && serviceEvent.kind == ServiceEvent.kIsolateExit) {
+                  return;
+                }
+              }
+            }),
+          );
+        }
+      }
+      await Future.wait(isolateNotifications);
+    }
     return OperationResult.ok;
   }
 
@@ -511,7 +530,7 @@ class HotRunner extends ResidentRunner {
   bool get supportsRestart => true;
 
   @override
-  Future<OperationResult> restart({ bool fullRestart = false, bool pauseAfterRestart = false, String reason }) async {
+  Future<OperationResult> restart({ bool fullRestart = false, bool pauseAfterRestart = false, String reason, bool benchmarkMode = false }) async {
     final Stopwatch timer = Stopwatch()..start();
     if (fullRestart) {
       if (!canHotRestart) {
@@ -525,7 +544,7 @@ class HotRunner extends ResidentRunner {
       try {
         if (!(await hotRunnerConfig.setupHotRestart()))
           return OperationResult(1, 'setupHotRestart failed');
-        final OperationResult result = await _restartFromSources(reason: reason);
+        final OperationResult result = await _restartFromSources(reason: reason, benchmarkMode: benchmarkMode,);
         if (!result.isOk)
           return result;
       } finally {
@@ -748,12 +767,6 @@ class HotRunner extends ResidentRunner {
           printError('Reassembling ${view.uiIsolate.name} failed: $error');
           return;
         }
-        try {
-          await view.uiIsolate.uiWindowScheduleFrame();
-        } catch (error) {
-          failedReassemble = true;
-          printError('Scheduling a frame for ${view.uiIsolate.name} failed: $error');
-        }
       }());
     }
     final Future<void> reassembleFuture = Future.wait<void>(futures).then<void>((List<void> values) { });
@@ -928,104 +941,41 @@ class HotRunner extends ResidentRunner {
 }
 
 class ProjectFileInvalidator {
-  ProjectFileInvalidator(this._packagesPath, this._flutterProject) {
-    final File packagesFile = fs.file(_packagesPath);
-    if (packagesFile.existsSync()) {
-      _packagesUpdateTime = packagesFile.statSync().modified.millisecondsSinceEpoch;
-      _packageMap = PackageMap(_packagesPath).map;
-    } else {
-      _packagesUpdateTime = -1;
-      _packageMap = const <String, Uri>{};
-    }
-    _computePackageMap(_packageMap, _flutterProject);
-  }
-
-  // Used to avoid watching pubspec directories. This will not change even with pub upgrade,
-  // because that actually switches the directory and requires a corresponding
-  // update to .packages
-  static const String _pubCachePathLinuxAndWindows = '.pub-cache';
+  static const String _pubCachePathLinuxAndMac = '.pub-cache';
   static const String _pubCachePathWindows = 'Pub/Cache';
 
-  Map<String, Uri> _packageMap;
-  final String _packagesPath;
-  final FlutterProject _flutterProject;
-  final Map<String, int> _updateTime = <String, int>{};
-  int _packagesUpdateTime;
-
-  Map<String, int> get updateTime => _updateTime;
-
-  @visibleForTesting
-  Map<String, Uri> get packageMap => _packageMap;
-
-  static void _computePackageMap(Map<String, Uri> packageMap, FlutterProject flutterProject) {
-    if (flutterProject != null && flutterProject.pubspecFile.existsSync()) {
-      try {
-        final YamlMap pubspec = loadYamlDocument(flutterProject.pubspecFile.readAsStringSync()).contents;
-        final YamlMap dependencies = pubspec['dependencies'];
-        final Set<String> relevantDependencies = Set<String>.from(dependencies.keys);
-        // Remove any packages which were tagged as dev dependenices,
-        // But don't remove the app itself!
-        for (String packageName in packageMap.keys.toList()) {
-          if (!relevantDependencies.contains(packageName) && packageName != flutterProject.manifest.appName) {
-            packageMap.remove(packageName);
-            continue;
-          }
-        }
-      } catch (err) {
-        // If we detect a pubspec formatting problem, fallback to the packages file.
+  static List<Uri> findInvalidated({
+    @required DateTime lastCompiled,
+    @required List<Uri> urisToMonitor,
+    @required String packagesPath,
+  }) {
+    final List<Uri> invalidatedFiles = <Uri>[];
+    int scanned = 0;
+    final Stopwatch stopwatch = Stopwatch()..start();
+    for (Uri uri in urisToMonitor) {
+      if ((platform.isWindows && uri.path.contains(_pubCachePathWindows))
+          || uri.path.contains(_pubCachePathLinuxAndMac)) {
+        // Don't watch pub cache directories to speed things up a little.
+        continue;
+      }
+      final DateTime updatedAt = fs.statSync(
+          uri.toFilePath(windows: platform.isWindows)).modified;
+      scanned++;
+      if (updatedAt == null) {
+        continue;
+      }
+      if (updatedAt.millisecondsSinceEpoch > lastCompiled.millisecondsSinceEpoch) {
+        invalidatedFiles.add(uri);
       }
     }
-    // Remove any packages which are derived from the pub cache.
-    for (String packageName in packageMap.keys.toList()) {
-      final String path = packageMap[packageName].path;
-      if ((platform.isWindows && path.contains(_pubCachePathWindows))
-          || path.contains(_pubCachePathLinuxAndWindows)) {
-        packageMap.remove(packageName);
-      }
+    // we need to check the .packages file too since it is not used in compilation.
+    final DateTime packagesUpdatedAt = fs.statSync(packagesPath).modified;
+    if (lastCompiled != null && packagesUpdatedAt != null
+        && packagesUpdatedAt.millisecondsSinceEpoch > lastCompiled.millisecondsSinceEpoch) {
+      invalidatedFiles.add(fs.file(packagesPath).uri);
+      scanned++;
     }
-  }
-
-  List<String> findInvalidated() {
-    final File packagesFile = fs.file(_packagesPath);
-    if (packagesFile.existsSync()) {
-      final int newPackagesUpdateTime = packagesFile.statSync().modified.millisecondsSinceEpoch;
-      // Hot reloading with an updated package will often times kill a non-trivial
-      // appliction. This _might_ work, given certain application size and package
-      // constraints, so instead of exiting we print a warning so that the user has
-      // some hint on what went wrong.
-      if (newPackagesUpdateTime > _packagesUpdateTime) {
-        printError('Warning: updated dependencies detected. The Flutter application will require a restart to safely use new packages.');
-      }
-      _packagesUpdateTime = newPackagesUpdateTime;
-    }
-    final List<String> invalidatedFiles = <String>[];
-    for (String packageName in _packageMap.keys) {
-      final Uri packageUri =_packageMap[packageName];
-      _scanDirectory(packageUri, invalidatedFiles);
-    }
+    printTrace('Scanned through $scanned files in ${stopwatch.elapsedMilliseconds}ms');
     return invalidatedFiles;
-  }
-
-  void _scanDirectory(Uri path, List<String> invalidatedFiles) {
-    final Directory directory = fs.directory(path);
-    if (!directory.existsSync()) {
-      return;
-    }
-    for (FileSystemEntity entity in directory.listSync(recursive: true)) {
-      if (entity.path.endsWith('.dart')) {
-        final int oldUpdatedAt = _updateTime[entity.path];
-        final int updatedAt = fs.statSync(entity.path).modified.millisecondsSinceEpoch;
-        if (oldUpdatedAt == null || updatedAt > oldUpdatedAt) {
-          // On windows convert to file uri in expected format.
-          if (platform.isWindows) {
-            final Uri uri = Uri.file(entity.path, windows: platform.isWindows);
-            invalidatedFiles.add(uri.toString());
-          } else {
-            invalidatedFiles.add(entity.path);
-          }
-        }
-        _updateTime[entity.path] = updatedAt;
-      }
-    }
   }
 }

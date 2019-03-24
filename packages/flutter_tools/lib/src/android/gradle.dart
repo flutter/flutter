@@ -478,7 +478,7 @@ Future<void> _buildGradleProjectV2(
     throwToolExit('Gradle task $assembleTask failed with exit code $exitCode', exitCode: exitCode);
   }
 
-  if(!isBuildingBundle) {
+  if (!isBuildingBundle) {
     final File apkFile = _findApkFile(project, buildInfo);
     if (apkFile == null)
       throwToolExit('Gradle build failed to produce an Android package.');

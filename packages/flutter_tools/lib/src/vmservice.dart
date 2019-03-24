@@ -353,7 +353,7 @@ class VMService {
   Future<void> _streamListen(String streamId) async {
     if (!_listeningFor.contains(streamId)) {
       _listeningFor.add(streamId);
-      await _sendRequest('streamListen', <String, dynamic>{ 'streamId': streamId });
+      await _sendRequest('streamListen', <String, dynamic>{'streamId': streamId});
     }
   }
 
@@ -425,8 +425,10 @@ abstract class ServiceObject {
   /// Factory constructor given a [ServiceObjectOwner] and a service map,
   /// upgrade the map into a proper [ServiceObject]. This function always
   /// returns a new instance and does not interact with caches.
-  factory ServiceObject._fromMap(ServiceObjectOwner owner,
-                                 Map<String, dynamic> map) {
+  factory ServiceObject._fromMap(
+    ServiceObjectOwner owner,
+    Map<String, dynamic> map,
+  ) {
     if (map == null)
       return null;
 
@@ -874,7 +876,7 @@ class VM extends ServiceObjectOwner {
 
   /// Create a new development file system on the device.
   Future<Map<String, dynamic>> createDevFS(String fsName) {
-    return invokeRpcRaw('_createDevFS', params: <String, dynamic> { 'fsName': fsName });
+    return invokeRpcRaw('_createDevFS', params: <String, dynamic>{'fsName': fsName});
   }
 
   /// List the development file system son the device.
@@ -914,12 +916,12 @@ class VM extends ServiceObjectOwner {
 
   /// The complete list of a file system.
   Future<List<String>> listDevFSFiles(String fsName) async {
-    return (await invokeRpcRaw('_listDevFSFiles', params: <String, dynamic>{ 'fsName': fsName }))['files'];
+    return (await invokeRpcRaw('_listDevFSFiles', params: <String, dynamic>{'fsName': fsName}))['files'];
   }
 
   /// Delete an existing file system.
   Future<Map<String, dynamic>> deleteDevFS(String fsName) {
-    return invokeRpcRaw('_deleteDevFS', params: <String, dynamic>{ 'fsName': fsName });
+    return invokeRpcRaw('_deleteDevFS', params: <String, dynamic>{'fsName': fsName});
   }
 
   Future<ServiceMap> runInView(
@@ -929,7 +931,7 @@ class VM extends ServiceObjectOwner {
     Uri assetsDirectory,
   ) {
     return invokeRpc<ServiceMap>('_flutter.runInView',
-      params: <String, dynamic> {
+      params: <String, dynamic>{
         'viewId': viewId,
         'mainScript': main.toString(),
         'packagesFile': packages.toString(),
@@ -1274,7 +1276,7 @@ class Isolate extends ServiceObjectOwner {
     if (state != null && state.containsKey('enabled') && state['enabled'] is String) {
       state = await invokeFlutterExtensionRpcRaw(
         'ext.flutter.$name',
-        params: <String, dynamic>{ 'enabled': state['enabled'] == 'true' ? 'false' : 'true' },
+        params: <String, dynamic>{'enabled': state['enabled'] == 'true' ? 'false' : 'true'},
       );
     }
     return state;
@@ -1289,7 +1291,7 @@ class Isolate extends ServiceObjectOwner {
   Future<Map<String, dynamic>> flutterDebugAllowBanner(bool show) {
     return invokeFlutterExtensionRpcRaw(
       'ext.flutter.debugAllowBanner',
-      params: <String, dynamic>{ 'enabled': show ? 'true' : 'false' },
+      params: <String, dynamic>{'enabled': show ? 'true' : 'false'},
     );
   }
 
@@ -1332,7 +1334,7 @@ class Isolate extends ServiceObjectOwner {
   Future<String> flutterPlatformOverride([ String platform ]) async {
     final Map<String, dynamic> result = await invokeFlutterExtensionRpcRaw(
       'ext.flutter.platformOverride',
-      params: platform != null ? <String, dynamic>{ 'value': platform } : <String, String>{},
+      params: platform != null ? <String, dynamic>{'value': platform} : <String, String>{},
     );
     if (result != null && result['value'] is String)
       return result['value'];

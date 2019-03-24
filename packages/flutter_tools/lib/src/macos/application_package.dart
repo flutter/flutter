@@ -9,7 +9,7 @@ import '../base/file_system.dart';
 import '../globals.dart';
 import '../ios/plist_utils.dart' as plist;
 
- /// Tests whether a [FileSystemEntity] is an macOS bundle directory
+/// Tests whether a [FileSystemEntity] is an macOS bundle directory
 bool _isBundleDirectory(FileSystemEntity entity) =>
     entity is Directory && entity.path.endsWith('.app');
 

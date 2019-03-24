@@ -265,9 +265,9 @@ void main() {
                 key: radioKey,
                 value: 1,
                 groupValue: 1,
-                onChanged: (int value) {},
+                onChanged: (int value) { },
               ),
-            )
+            ),
           ),
         ),
       ),

@@ -466,7 +466,7 @@ class NetworkImage extends ImageProvider<NetworkImage> {
   /// Creates an object that fetches the image at the given URL.
   ///
   /// The arguments must not be null.
-  const NetworkImage(this.url, { this.scale = 1.0 , this.headers })
+  const NetworkImage(this.url, { this.scale = 1.0, this.headers })
     : assert(url != null),
       assert(scale != null);
 
@@ -736,7 +736,8 @@ class ExactAssetImage extends AssetBundleImageProvider {
   /// The [package] argument must be non-null when fetching an asset that is
   /// included in a package. See the documentation for the [ExactAssetImage] class
   /// itself for details.
-  const ExactAssetImage(this.assetName, {
+  const ExactAssetImage(
+    this.assetName, {
     this.scale = 1.0,
     this.bundle,
     this.package,

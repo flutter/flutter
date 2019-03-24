@@ -501,8 +501,8 @@ abstract class IntelliJValidator extends DoctorValidator {
   String get pluginsPath;
 
   static final Map<String, String> _idToTitle = <String, String>{
-    'IntelliJIdea' : 'IntelliJ IDEA Ultimate Edition',
-    'IdeaIC' : 'IntelliJ IDEA Community Edition',
+    'IntelliJIdea': 'IntelliJ IDEA Ultimate Edition',
+    'IdeaIC': 'IntelliJ IDEA Community Edition',
   };
 
   static final Version kMinIdeaVersion = Version(2017, 1, 0);
@@ -615,9 +615,9 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
   final String id;
 
   static final Map<String, String> _dirNameToId = <String, String>{
-    'IntelliJ IDEA.app' : 'IntelliJIdea',
-    'IntelliJ IDEA Ultimate.app' : 'IntelliJIdea',
-    'IntelliJ IDEA CE.app' : 'IdeaIC',
+    'IntelliJ IDEA.app': 'IntelliJIdea',
+    'IntelliJ IDEA Ultimate.app': 'IntelliJIdea',
+    'IntelliJ IDEA CE.app': 'IdeaIC',
   };
 
   static Iterable<DoctorValidator> get installed {
