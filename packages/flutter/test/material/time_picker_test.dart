@@ -87,12 +87,17 @@ void _tests() {
     await tester.tapAt(Offset(center.dx, center.dy + 50.0));
     await finishPicker(tester);
     expect(result, equals(const TimeOfDay(hour: 6, minute: 0)));
+  });
 
-    center = await startPicker(tester, (TimeOfDay time) { result = time; });
+  testWidgets('tap switches from hour to minute', (WidgetTester tester) async {
+    TimeOfDay result;
+
+    final Offset center = await startPicker(tester, (TimeOfDay time) { result = time; });
     await tester.tapAt(Offset(center.dx, center.dy + 50.0));
+    await tester.pump(const Duration(milliseconds: 50));
     await tester.tapAt(Offset(center.dx - 50, center.dy));
     await finishPicker(tester);
-    expect(result, equals(const TimeOfDay(hour: 9, minute: 0)));
+    expect(result, equals(const TimeOfDay(hour: 6, minute: 45)));
   });
 
   testWidgets('drag-select an hour', (WidgetTester tester) async {
@@ -133,6 +138,25 @@ void _tests() {
     await finishPicker(tester);
     expect(result.hour, equals(9));
   });
+
+  testWidgets('drag-switches from hour to minute', (WidgetTester tester) async {
+    TimeOfDay result;
+
+    final Offset center = await startPicker(tester, (TimeOfDay time) { result = time; });
+    final Offset hour3 = Offset(center.dx + 50.0, center.dy);
+    final Offset hour6 = Offset(center.dx, center.dy + 50.0);
+    final Offset hour9 = Offset(center.dx - 50.0, center.dy);
+
+    TestGesture gesture = await tester.startGesture(hour6);
+    await gesture.moveBy(hour9 - hour6);
+    await gesture.up();
+    await tester.pump(const Duration(milliseconds: 50));
+    gesture = await tester.startGesture(hour6);
+    await gesture.moveBy(hour3 - hour6);
+    await gesture.up();
+    await finishPicker(tester);
+    expect(result, equals(const TimeOfDay(hour: 9, minute: 15)));
+    });
 
   group('haptic feedback', () {
     const Duration kFastFeedbackInterval = Duration(milliseconds: 10);

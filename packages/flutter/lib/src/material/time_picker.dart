@@ -1000,12 +1000,16 @@ class _Dial extends StatefulWidget {
     @required this.mode,
     @required this.use24HourDials,
     @required this.onChanged,
+    @required this.onHourDragEnd,
+    @required this.onHourTapUp,
   }) : assert(selectedTime != null);
 
   final TimeOfDay selectedTime;
   final _TimePickerMode mode;
   final bool use24HourDials;
   final ValueChanged<TimeOfDay> onChanged;
+  final VoidCallback onHourDragEnd;
+  final VoidCallback onHourTapUp;
 
   @override
   _DialState createState() => _DialState();
@@ -1169,6 +1173,9 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
     _position = null;
     _center = null;
     _animateTo(_getThetaForTime(widget.selectedTime));
+    if (widget.mode == _TimePickerMode.hour) {
+      widget.onHourDragEnd();
+    }
   }
 
   void _handleTapUp(TapUpDetails details) {
@@ -1183,6 +1190,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
       } else {
         _announceToAccessibility(context, localizations.formatDecimal(newTime.hourOfPeriod));
       }
+      widget.onHourTapUp();
     } else {
       _announceToAccessibility(context, localizations.formatDecimal(newTime.minute));
     }
@@ -1522,6 +1530,18 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
     });
   }
 
+  void _handleHourDragEnd() {
+    setState(() {
+      _mode = _TimePickerMode.minute;
+    });
+  }
+
+  void _handleHourTapUp() {
+    setState(() {
+      _mode = _TimePickerMode.minute;
+    });
+  }
+
   void _handleCancel() {
     Navigator.pop(context);
   }
@@ -1547,6 +1567,8 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
           use24HourDials: use24HourDials,
           selectedTime: _selectedTime,
           onChanged: _handleTimeChanged,
+          onHourDragEnd: _handleHourDragEnd,
+          onHourTapUp: _handleHourTapUp,
         ),
       ),
     );
