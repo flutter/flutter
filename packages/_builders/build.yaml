@@ -1,4 +1,24 @@
 builders:
+  dartdevc:
+    import: "package:build_modules/builders.dart"
+    builder_factories:
+      - metaModuleBuilderFactoryForPlatform('flutter_dartdevc')
+      - metaModuleCleanBuilderFactoryForPlatform('flutter_dartdevc')
+      - moduleBuilderFactoryForPlatform('flutter_dartdevc')
+      - unlinkedSummaryBuilderForPlatform('flutter_dartdevc')
+      - linkedSummaryBuilderForPlatform('flutter_dartdevc')
+    build_extensions:
+      $lib$:
+        - .flutter_dartdevc.meta_module.raw
+        - .flutter_dartdevc.meta_module.clean
+      .dart:
+        - .flutter_dartdevc.module
+        - .flutter_dartdevc.linked.sum
+        - .flutter_dartdevc.unlinked.sum
+    is_optional: True
+    auto_apply: none
+    required_inputs: [".dart", ".module.library"]
+    applies_builders: ["build_modules|module_cleanup"]
   ddc:
     import: "package:_builders/builders.dart"
     builder_factories:
@@ -9,17 +29,11 @@ builders:
         - .ddc.js
         - .ddc.js.map
     is_optional: True
-    auto_apply: all_packages
+    auto_apply: none
     required_inputs:
       - .dart
-      - .dartdevc.module
-    applies_builders:
-      # We want this to apply for dart2js as well - luckily this builder doesn't
-      # need to be disabled since it's lazy so we can use is as a handle to get
-      # the cleanup builder applied.
-      - _builders|dart_source_cleanup
-      - build_modules|dartdevc
-      - build_modules|dart2js
+      - .flutter_dartdevc.module
+    applies_builders: ["_builders|dartdevc"]
   entrypoint:
     import: "package:_builders/builders.dart"
     builder_factories:
@@ -33,10 +47,11 @@ builders:
     required_inputs:
       - .dart
       - .ddc.js
-      - .dartdevc.module
-      - .dart2js.module
+      - .flutter_dartdevc.module
     build_to: cache
     auto_apply: root_package
+    applies_builders:
+      - _builders|ddc
     defaults:
       generate_for:
         include:
@@ -47,23 +62,3 @@ builders:
         exclude:
           - test/**.node_test.dart
           - test/**.vm_test.dart
-      options:
-        dart2js_args:
-          - --minify
-      release_options:
-        compiler: dart2js
-    applies_builders:
-      - _builders|dart2js_archive_extractor
-post_process_builders:
-  dart2js_archive_extractor:
-    import: "package:_builders/builders.dart"
-    builder_factory: dart2JsArchiveExtractor
-    defaults:
-      release_options:
-        filter_outputs: true
-  dart_source_cleanup:
-    import: "package:_builders/builders.dart"
-    builder_factory: dartSourceCleanup
-    defaults:
-      release_options:
-        enabled: true

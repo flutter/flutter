@@ -92,6 +92,17 @@ class BuildRunner extends CodeGenerator {
       if (flutterProject.web.isSupported) {
         stringBuffer.writeln('  _builders:');
         stringBuffer.writeln('    sdk: flutter');
+        stringBuffer.write(r'''
+dependency_overrides:
+  build:
+    path: /Users/jonahwilliams/Documents/build/build/
+  build_modules:
+    path: /Users/jonahwilliams/Documents/build/build_modules/
+  build_web_compilers:
+    path: /Users/jonahwilliams/Documents/build/build_web_compilers/
+  build_runner_core:
+    path: /Users/jonahwilliams/Documents/build/build_runner_core/
+''');
       }
       await syntheticPubspec.writeAsString(stringBuffer.toString());
 
@@ -203,6 +214,7 @@ class BuildRunner extends CodeGenerator {
       '--define', '_builders|ddc=platformSdk=$platformSdk',
       '--define', '_builders|ddc=sdkKernelPath=$webKernelDill',
     ];
+    print(command);
     final Process process = await processManager.start(command);
     process
       .stdout

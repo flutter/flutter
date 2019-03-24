@@ -82,7 +82,7 @@ String _artifactToFileName(Artifact artifact, [ TargetPlatform platform, BuildMo
     case Artifact.kernelWorkerSnapshot:
       return 'kernel_worker.dart.snapshot';
     case Artifact.webPlatformKernelDill:
-      return 'flutter_ddc_sdk.dill';
+      return 'strong.sum';
   }
   assert(false, 'Invalid artifact $artifact.');
   return null;
@@ -215,7 +215,7 @@ class CachedArtifacts extends Artifacts {
       case Artifact.kernelWorkerSnapshot:
         return fs.path.join(dartSdkPath, 'bin', 'snapshots', _artifactToFileName(artifact));
       case Artifact.webPlatformKernelDill:
-        return fs.path.join(dartWebSdkPath, 'kernel', _artifactToFileName(artifact));
+        return fs.path.join(dartWebSdkPath, 'lib', '_internal', _artifactToFileName(artifact));
       default:
         assert(false, 'Artifact $artifact not available for platform $platform.');
         return null;
@@ -299,7 +299,7 @@ class LocalEngineArtifacts extends Artifacts {
       case Artifact.kernelWorkerSnapshot:
         return fs.path.join(_hostEngineOutPath, 'dart-sdk', 'bin', 'snapshots', _artifactToFileName(artifact));
       case Artifact.webPlatformKernelDill:
-        return fs.path.join(_hostEngineOutPath, 'flutter_web_sdk', 'kernel', _artifactToFileName(artifact));
+        return fs.path.join(_hostEngineOutPath, 'lib', '_internal', _artifactToFileName(artifact));
     }
     assert(false, 'Invalid artifact $artifact.');
     return null;

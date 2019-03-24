@@ -1,6 +1,6 @@
 import 'package:build/build.dart';
-
 import 'package:build_modules/build_modules.dart';
+
 import 'package:build_web_compilers/build_web_compilers.dart';
 
 /// Dev compiler builder.
@@ -10,12 +10,14 @@ Builder devCompilerBuilder(BuilderOptions builderOptions) {
   return DevCompilerBuilder(
     platformSdk: platformSdk,
     sdkKernelPath: sdkKernelPath,
+    useKernel: false,
   );
 }
 
 /// Web entrypoint builder.
-Builder webEntrypointBuilder(BuilderOptions options) =>
-    WebEntrypointBuilder.fromOptions(options);
+Builder webEntrypointBuilder(BuilderOptions options) {
+  return WebEntrypointBuilder(WebCompiler.DartDevc, flutterWeb: true);
+}
 
 /// Extractor for dart archive files.
 PostProcessBuilder dart2JsArchiveExtractor(BuilderOptions options) =>
@@ -40,6 +42,6 @@ Builder ddcKernelBuilder(BuilderOptions builderOptions) {
     platformSdk: platformSdk,
     sdkKernelPath: sdkKernelPath,
     outputExtension: ddcKernelExtension,
-    platform: DartPlatform.dartdevc,
+    platform: DartPlatform.flutter_dartdevc,
   );
 }

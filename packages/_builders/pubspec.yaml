@@ -5,6 +5,14 @@ environment:
   sdk: ">=2.0.0-dev.68.0 <3.0.0"
 
 dependencies:
-  build: 1.1.1
-  build_modules: 
+  build: any
+  build_modules: any
+  build_web_compilers: any
+
+dependency_overrides:
+  build:
+    path: /Users/jonahwilliams/Documents/build/build/
+  build_modules:
+    path: /Users/jonahwilliams/Documents/build/build_modules/
   build_web_compilers:
+    path: /Users/jonahwilliams/Documents/build/build_web_compilers/
