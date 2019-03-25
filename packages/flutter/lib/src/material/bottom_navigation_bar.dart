@@ -125,6 +125,13 @@ class BottomNavigationBar extends StatefulWidget {
   /// The [iconSize], [selectedFontSize], [unselectedFontSize], and [elevation]
   /// arguments must be non-null and non-negative.
   ///
+  /// The [selectedLabelStyle] and [unselectedLabelStyle] arguments should not
+  /// have a color set. Instead, [selectedItemColor] and [unselectedItemColor]
+  /// should and will be used.
+  ///
+  /// If both [selectedLabelStyle.fontSize] and [selectedFontSize] are set,
+  /// [selectedLabelStyle.fontSize] will be used.
+  ///
   /// Only one of [selectedItemColor] and [fixedColor] can be specified. The
   /// former is preferred, [fixedColor] only exists for the sake of
   /// backwards compatibility.
@@ -146,8 +153,10 @@ class BottomNavigationBar extends StatefulWidget {
     this.iconSize = 24.0,
     Color selectedItemColor,
     this.unselectedItemColor,
-    this.selectedFontSize = 14.0,
-    this.unselectedFontSize = 12.0,
+    double selectedFontSize = 14.0,
+    double unselectedFontSize = 12.0,
+    TextStyle selectedLabelStyle = const TextStyle(inherit: false),
+    TextStyle unselectedLabelStyle = const TextStyle(inherit: false),
     this.showSelectedLabels = true,
     bool showUnselectedLabels,
   }) : assert(items != null),
@@ -165,6 +174,12 @@ class BottomNavigationBar extends StatefulWidget {
        ),
        assert(selectedFontSize != null && selectedFontSize >= 0.0),
        assert(unselectedFontSize != null && unselectedFontSize >= 0.0),
+       assert(selectedLabelStyle != null),
+       assert(selectedLabelStyle.color == null, 'Color of the label is determined by $selectedItemColor'),
+       selectedLabelStyle = _defaultTextStyle(selectedLabelStyle, selectedFontSize),
+       assert(unselectedLabelStyle != null),
+       assert(unselectedLabelStyle.color == null, 'Color of the label is determined by $unselectedItemColor'),
+       unselectedLabelStyle = _defaultTextStyle(unselectedLabelStyle, unselectedFontSize),
        assert(showSelectedLabels != null),
        type = _type(type, items),
        selectedItemColor = selectedItemColor ?? fixedColor,
@@ -228,22 +243,24 @@ class BottomNavigationBar extends StatefulWidget {
   /// If null then the [TextTheme.caption]'s color is used.
   final Color unselectedItemColor;
 
-  /// The font size of the [BottomNavigationBarItem] labels when they are selected.
-  ///
-  /// Defaults to `14.0`.
-  final double selectedFontSize;
-
-  /// The font size of the [BottomNavigationBarItem] labels when they are not
+  /// The [TextStyle] of the [BottomNavigationBarItem] labels when they are
   /// selected.
-  ///
-  /// Defaults to `12.0`.
-  final double unselectedFontSize;
+  final TextStyle selectedLabelStyle;
+
+  /// The [TextStyle] of the [BottomNavigationBarItem] labels when they are not
+  /// selected.
+  final TextStyle unselectedLabelStyle;
 
   /// Whether the labels are shown for the selected [BottomNavigationBarItem].
   final bool showUnselectedLabels;
 
   /// Whether the labels are shown for the unselected [BottomNavigationBarItem]s.
   final bool showSelectedLabels;
+
+  double get selectedFontSize => selectedLabelStyle.fontSize;
+
+  double get unselectedFontSize => unselectedLabelStyle.fontSize;
+
 
   // Used by the [BottomNavigationBar] constructor to set the [type] parameter.
   //
@@ -276,6 +293,13 @@ class BottomNavigationBar extends StatefulWidget {
     return false;
   }
 
+  static TextStyle _defaultTextStyle(TextStyle textStyle, double fontSize) {
+    textStyle ??= const TextStyle(inherit: false);
+    if (textStyle.fontSize == null)
+      return textStyle.copyWith(fontSize: fontSize);
+    return textStyle;
+  }
+
   @override
   _BottomNavigationBarState createState() => _BottomNavigationBarState();
 }
@@ -292,8 +316,8 @@ class _BottomNavigationTile extends StatelessWidget {
     this.colorTween,
     this.flex,
     this.selected = false,
-    @required this.selectedFontSize,
-    @required this.unselectedFontSize,
+    @required this.selectedLabelStyle,
+    @required this.unselectedLabelStyle,
     this.showSelectedLabels,
     this.showUnselectedLabels,
     this.indexLabel,
@@ -301,8 +325,8 @@ class _BottomNavigationTile extends StatelessWidget {
          assert(item != null),
          assert(animation != null),
          assert(selected != null),
-         assert(selectedFontSize != null && selectedFontSize >= 0),
-         assert(unselectedFontSize != null && unselectedFontSize >= 0);
+         assert(selectedLabelStyle != null),
+         assert(unselectedLabelStyle != null);
 
   final BottomNavigationBarType type;
   final BottomNavigationBarItem item;
@@ -312,8 +336,8 @@ class _BottomNavigationTile extends StatelessWidget {
   final ColorTween colorTween;
   final double flex;
   final bool selected;
-  final double selectedFontSize;
-  final double unselectedFontSize;
+  final TextStyle selectedLabelStyle;
+  final TextStyle unselectedLabelStyle;
   final String indexLabel;
   final bool showSelectedLabels;
   final bool showUnselectedLabels;
@@ -325,6 +349,8 @@ class _BottomNavigationTile extends StatelessWidget {
     // produce smooth animation. We do this by multiplying the flex value
     // (which is an integer) by a large number.
     int size;
+
+    final double selectedFontSize = selectedLabelStyle.fontSize;
 
     double bottomPadding = selectedFontSize / 2.0;
     double topPadding = selectedFontSize / 2.0;
@@ -400,8 +426,8 @@ class _BottomNavigationTile extends StatelessWidget {
                       colorTween: colorTween,
                       animation: animation,
                       item: item,
-                      selectedFontSize: selectedFontSize,
-                      unselectedFontSize: unselectedFontSize,
+                      selectedLabelStyle: selectedLabelStyle,
+                      unselectedLabelStyle: unselectedLabelStyle,
                       showSelectedLabels: showSelectedLabels,
                       showUnselectedLabels: showUnselectedLabels,
                     ),
@@ -463,15 +489,15 @@ class _Label extends StatelessWidget {
     @required this.colorTween,
     @required this.animation,
     @required this.item,
-    @required this.selectedFontSize,
-    @required this.unselectedFontSize,
+    @required this.selectedLabelStyle,
+    @required this.unselectedLabelStyle,
     @required this.showSelectedLabels,
     @required this.showUnselectedLabels,
   }) : assert(colorTween != null),
        assert(animation != null),
        assert(item != null),
-       assert(selectedFontSize != null),
-       assert(unselectedFontSize != null),
+       assert(selectedLabelStyle != null),
+       assert(unselectedLabelStyle != null),
        assert(showSelectedLabels != null),
        assert(showUnselectedLabels != null),
        super(key: key);
@@ -479,15 +505,23 @@ class _Label extends StatelessWidget {
   final ColorTween colorTween;
   final Animation<double> animation;
   final BottomNavigationBarItem item;
-  final double selectedFontSize;
-  final double unselectedFontSize;
+  final TextStyle selectedLabelStyle;
+  final TextStyle unselectedLabelStyle;
   final bool showSelectedLabels;
   final bool showUnselectedLabels;
 
   @override
   Widget build(BuildContext context) {
+    final double selectedFontSize = selectedLabelStyle.fontSize;
+    final double unselectedFontSize = unselectedLabelStyle.fontSize;
+
+    final TextStyle customStyle = TextStyle.lerp(
+      unselectedLabelStyle,
+      selectedLabelStyle,
+      animation.value,
+    );
     Widget text = DefaultTextStyle.merge(
-      style: TextStyle(
+      style: customStyle.copyWith(
         fontSize: selectedFontSize,
         color: colorTween.evaluate(animation),
       ),
@@ -694,8 +728,8 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
         widget.items[i],
         _animations[i],
         widget.iconSize,
-        selectedFontSize: widget.selectedFontSize,
-        unselectedFontSize: widget.unselectedFontSize,
+        selectedLabelStyle: widget.selectedLabelStyle,
+        unselectedLabelStyle: widget.unselectedLabelStyle,
         onTap: () {
           if (widget.onTap != null)
             widget.onTap(i);

@@ -73,6 +73,7 @@ void main() {
   testWidgets('Fixed BottomNavigationBar defaults', (WidgetTester tester) async {
     const Color primaryColor = Colors.black;
     const Color captionColor = Colors.purple;
+    const TextStyle textStyle = TextStyle(fontWeight: FontWeight.w200, height: 2);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -81,18 +82,21 @@ void main() {
           textTheme: const TextTheme(caption: TextStyle(color: captionColor)),
         ),
         home: Scaffold(
-          bottomNavigationBar: BottomNavigationBar(
-            type: BottomNavigationBarType.fixed,
-            items: const <BottomNavigationBarItem>[
-              BottomNavigationBarItem(
-                icon: Icon(Icons.ac_unit),
-                title: Text('AC'),
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.access_alarm),
-                title: Text('Alarm'),
-              ),
-            ],
+          bottomNavigationBar: DefaultTextStyle(
+            style: textStyle,
+            child: BottomNavigationBar(
+              type: BottomNavigationBarType.fixed,
+              items: const <BottomNavigationBarItem>[
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.ac_unit),
+                  title: Text('AC'),
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.access_alarm),
+                  title: Text('Alarm'),
+                ),
+              ],
+            ),
           ),
         ),
       )
@@ -100,15 +104,20 @@ void main() {
 
     const double selectedFontSize = 14.0;
     const double unselectedFontSize = 12.0;
-    expect(tester.renderObject<RenderParagraph>(find.text('AC')).text.style.fontSize, selectedFontSize);
+    final TextStyle selectedFontStyle = tester.renderObject<RenderParagraph>(find.text('AC')).text.style;
+    final TextStyle unselectedFontStyle = tester.renderObject<RenderParagraph>(find.text('Alarm')).text.style;
+    expect(selectedFontStyle.color, equals(primaryColor));
+    expect(selectedFontStyle.fontSize, selectedFontSize);
+    expect(selectedFontStyle.fontWeight, textStyle.fontWeight);
+    expect(selectedFontStyle.height, textStyle.height);
+    expect(unselectedFontStyle.color, equals(captionColor));
+    expect(unselectedFontStyle.fontWeight, textStyle.fontWeight);
+    expect(unselectedFontStyle.height, textStyle.height);
     // Unselected label has a font size of 14 but is scaled down to be font size 12.
-    expect(tester.renderObject<RenderParagraph>(find.text('Alarm')).text.style.fontSize, selectedFontSize);
     expect(
       tester.firstWidget<Transform>(find.ancestor(of: find.text('Alarm'), matching: find.byType(Transform))).transform,
       equals(Matrix4.diagonal3(Vector3.all(unselectedFontSize / selectedFontSize))),
     );
-    expect(tester.renderObject<RenderParagraph>(find.text('AC')).text.style.color, equals(primaryColor));
-    expect(tester.renderObject<RenderParagraph>(find.text('Alarm')).text.style.color, equals(captionColor));
     expect(_getOpacity(tester, 'Alarm'), equals(1.0));
     expect(_getMaterial(tester).elevation, equals(8.0));
   });
