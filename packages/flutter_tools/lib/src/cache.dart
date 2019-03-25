@@ -389,6 +389,7 @@ class FlutterWebSdk extends CachedArtifact {
     }
     final Uri url = Uri.parse('$_storageBaseUrl/flutter_infra/flutter/$version/$platformName.zip');
     await _downloadZipArchive('Downloading Web SDK...', url, location);
+    // This is a temporary work-around for not being able to safely download into a shared directory.
     for (FileSystemEntity entity in location.listSync(recursive: true)) {
       if (entity is File) {
         final List<String> segments = fs.path.split(entity.path);
