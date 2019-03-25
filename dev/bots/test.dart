@@ -184,14 +184,14 @@ Future<void> _runToolTests() async {
     await _pubRunTest(
       path.join(flutterRoot, 'packages', 'flutter_tools'),
       tableData: bigqueryApi?.tabledata,
-      enableFlutterToolAsserts: true,
+      enableFlutterToolAsserts: false, // need to configure cirrus to always use debug flutter tool.
     );
   } else {
     await _buildRunnerTest(
       path.join(flutterRoot, 'packages', 'flutter_tools'),
       flutterRoot,
       tableData: bigqueryApi?.tabledata,
-      enableFlutterToolAsserts: true,
+      enableFlutterToolAsserts: false, // need to configure cirrus to always use debug flutter tool.
     );
   }
 
