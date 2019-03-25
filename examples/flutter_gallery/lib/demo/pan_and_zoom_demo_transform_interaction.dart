@@ -156,6 +156,12 @@ class TransformInteractionState extends State<TransformInteraction> with TickerP
     return Offset(untransformed.x, untransformed.y);
   }
 
+  // Get the offset of the current widget from the global screen coordinates.
+  static Offset getOffset(BuildContext context) {
+    final RenderBox renderObject = context.findRenderObject();
+    return renderObject.localToGlobal(Offset.zero);
+  }
+
   @override
   void initState() {
     super.initState();
@@ -189,26 +195,26 @@ class TransformInteractionState extends State<TransformInteraction> with TickerP
     // its child, which is the CustomPaint.
     return GestureDetector(
       behavior: HitTestBehavior.opaque, // Necessary when translating off screen
-      onTapDown: widget.onTapDown == null ? null : (TapDownDetails details) => widget.onTapDown(fromViewport(details.globalPosition, _transform)),
-      onTapUp: widget.onTapUp == null ? null : (TapUpDetails details) => widget.onTapUp(fromViewport(details.globalPosition, _transform)),
+      onTapDown: widget.onTapDown == null ? null : (TapDownDetails details) => widget.onTapDown(fromViewport(details.globalPosition - getOffset(context), _transform)),
+      onTapUp: widget.onTapUp == null ? null : (TapUpDetails details) => widget.onTapUp(fromViewport(details.globalPosition - getOffset(context), _transform)),
       onTap: widget.onTap,
       onTapCancel: widget.onTapCancel,
       onDoubleTap: widget.onDoubleTap,
       onLongPress: widget.onLongPress,
       onLongPressUp: widget.onLongPressUp,
-      onVerticalDragDown: widget.onVerticalDragDown == null ? null : (DragDownDetails details) => widget.onVerticalDragDown(fromViewport(details.globalPosition, _transform)),
-      onVerticalDragStart: widget.onVerticalDragStart == null ? null : (DragStartDetails details) => widget.onVerticalDragStart(fromViewport(details.globalPosition, _transform)),
-      onVerticalDragUpdate: widget.onVerticalDragUpdate == null ? null : (DragUpdateDetails details) => widget.onVerticalDragUpdate(fromViewport(details.globalPosition, _transform)),
+      onVerticalDragDown: widget.onVerticalDragDown == null ? null : (DragDownDetails details) => widget.onVerticalDragDown(fromViewport(details.globalPosition - getOffset(context), _transform)),
+      onVerticalDragStart: widget.onVerticalDragStart == null ? null : (DragStartDetails details) => widget.onVerticalDragStart(fromViewport(details.globalPosition - getOffset(context), _transform)),
+      onVerticalDragUpdate: widget.onVerticalDragUpdate == null ? null : (DragUpdateDetails details) => widget.onVerticalDragUpdate(fromViewport(details.globalPosition - getOffset(context), _transform)),
       onVerticalDragEnd: widget.onVerticalDragEnd == null ? null : (DragEndDetails details) => widget.onVerticalDragEnd(),
       onVerticalDragCancel: widget.onVerticalDragCancel,
-      onHorizontalDragDown: widget.onHorizontalDragDown == null ? null : (DragDownDetails details) => widget.onHorizontalDragDown(fromViewport(details.globalPosition, _transform)),
-      onHorizontalDragStart: widget.onHorizontalDragStart == null ? null : (DragStartDetails details) => widget.onHorizontalDragStart(fromViewport(details.globalPosition, _transform)),
-      onHorizontalDragUpdate: widget.onHorizontalDragUpdate == null ? null : (DragUpdateDetails details) => widget.onHorizontalDragUpdate(fromViewport(details.globalPosition, _transform)),
+      onHorizontalDragDown: widget.onHorizontalDragDown == null ? null : (DragDownDetails details) => widget.onHorizontalDragDown(fromViewport(details.globalPosition - getOffset(context), _transform)),
+      onHorizontalDragStart: widget.onHorizontalDragStart == null ? null : (DragStartDetails details) => widget.onHorizontalDragStart(fromViewport(details.globalPosition - getOffset(context), _transform)),
+      onHorizontalDragUpdate: widget.onHorizontalDragUpdate == null ? null : (DragUpdateDetails details) => widget.onHorizontalDragUpdate(fromViewport(details.globalPosition - getOffset(context), _transform)),
       onHorizontalDragEnd: widget.onHorizontalDragEnd,
       onHorizontalDragCancel: widget.onHorizontalDragCancel,
-      onPanDown: widget.onPanDown == null ? null : (DragDownDetails details) => widget.onPanDown(fromViewport(details.globalPosition, _transform)),
-      onPanStart: widget.onPanStart == null ? null : (DragStartDetails details) => widget.onPanStart(fromViewport(details.globalPosition, _transform)),
-      onPanUpdate: widget.onPanUpdate == null ? null : (DragUpdateDetails details) => widget.onPanUpdate(fromViewport(details.globalPosition, _transform)),
+      onPanDown: widget.onPanDown == null ? null : (DragDownDetails details) => widget.onPanDown(fromViewport(details.globalPosition - getOffset(context), _transform)),
+      onPanStart: widget.onPanStart == null ? null : (DragStartDetails details) => widget.onPanStart(fromViewport(details.globalPosition - getOffset(context), _transform)),
+      onPanUpdate: widget.onPanUpdate == null ? null : (DragUpdateDetails details) => widget.onPanUpdate(fromViewport(details.globalPosition - getOffset(context), _transform)),
       onPanEnd: widget.onPanEnd == null ? null : (DragEndDetails details) => widget.onPanEnd(),
       onPanCancel: widget.onPanCancel,
       onScaleEnd: _onScaleEnd,

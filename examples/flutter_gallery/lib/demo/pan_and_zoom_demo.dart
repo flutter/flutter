@@ -37,7 +37,7 @@ class _PanAndZoomDemoState extends State<PanAndZoomDemo> {
           _reset = true;
         }),
         tooltip: 'Reset Transform',
-        backgroundColor: Colors.lightGreen,
+        backgroundColor: Theme.of(context).primaryColor,
         child: const Icon(Icons.home),
       )
       : FloatingActionButton(
@@ -64,6 +64,7 @@ class _PanAndZoomDemoState extends State<PanAndZoomDemo> {
     // The scene is drawn by a CustomPaint, but user interaction is handled by
     // the TransformInteraction parent widget.
     return Scaffold(
+      appBar: AppBar(),
       body: TransformInteraction(
         // TODO(justinmc): I'm not sure that I like this pattern that I came up
         // with for resetting TransformInteraction from the parent level. Would
