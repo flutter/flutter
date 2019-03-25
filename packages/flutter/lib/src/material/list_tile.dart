@@ -225,7 +225,7 @@ enum ListTileControlAffinity {
 ///   leading: GestureDetector(
 ///     // allows background to be tappable
 ///     behavior: HitTestBehavior.translucent,
-///     onTap: () {...},
+///     onTap: () {},
 ///     child: Container(
 ///       // 48x48 box that is tappable
 ///       width: 48,
