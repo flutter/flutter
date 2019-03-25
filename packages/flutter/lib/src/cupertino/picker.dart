@@ -267,7 +267,7 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
               border: Border(
                 top: BorderSide(width: 0.0, color: _kHighlighterBorder),
                 bottom: BorderSide(width: 0.0, color: _kHighlighterBorder),
-              )
+              ),
             ),
             constraints: BoxConstraints.expand(
                 height: widget.itemExtent * widget.magnification,
@@ -343,7 +343,7 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
         children: <Widget> [
           _buildUnderMagnifierScreen(),
           _addBackgroundToChild(result),
-        ]
+        ],
       );
     } else {
       result = _addBackgroundToChild(result);
@@ -415,7 +415,7 @@ class _RenderCupertinoPickerSemantics extends RenderProxyBox {
     if (_currentIndex == 0)
       return;
     controller.jumpToItem(_currentIndex - 1);
-   }
+  }
 
   void _handleScrollUpdate() {
     if (controller.selectedItem == _currentIndex)

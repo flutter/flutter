@@ -70,8 +70,8 @@ void layout(
       alignment: alignment,
       child: RenderConstrainedBox(
         additionalConstraints: constraints,
-        child: box
-      )
+        child: box,
+      ),
     );
   }
   renderer.renderView.child = box;

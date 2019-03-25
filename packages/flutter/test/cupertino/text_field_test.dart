@@ -8,6 +8,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart' show DragStartBehavior, PointerDeviceKind;
 import 'package:flutter_test/flutter_test.dart';
 
 class MockClipboard {
@@ -29,6 +30,45 @@ class MockClipboard {
 void main() {
   final MockClipboard mockClipboard = MockClipboard();
   SystemChannels.platform.setMockMethodCallHandler(mockClipboard.handleMethodCall);
+
+  // Returns the first RenderEditable.
+  RenderEditable findRenderEditable(WidgetTester tester) {
+    final RenderObject root = tester.renderObject(find.byType(EditableText));
+    expect(root, isNotNull);
+
+    RenderEditable renderEditable;
+    void recursiveFinder(RenderObject child) {
+      if (child is RenderEditable) {
+        renderEditable = child;
+        return;
+      }
+      child.visitChildren(recursiveFinder);
+    }
+    root.visitChildren(recursiveFinder);
+    expect(renderEditable, isNotNull);
+    return renderEditable;
+  }
+
+  List<TextSelectionPoint> globalize(Iterable<TextSelectionPoint> points, RenderBox box) {
+    return points.map<TextSelectionPoint>((TextSelectionPoint point) {
+      return TextSelectionPoint(
+        box.localToGlobal(point.point),
+        point.direction,
+      );
+    }).toList();
+  }
+
+  Offset textOffsetToPosition(WidgetTester tester, int offset) {
+    final RenderEditable renderEditable = findRenderEditable(tester);
+    final List<TextSelectionPoint> endpoints = globalize(
+      renderEditable.getEndpointsForSelection(
+        TextSelection.collapsed(offset: offset),
+      ),
+      renderEditable,
+    );
+    expect(endpoints.length, 1);
+    return endpoints[0].point + const Offset(0.0, -2.0);
+  }
 
   testWidgets(
     'takes available space horizontally and takes intrinsic space vertically no-strut',
@@ -186,7 +226,7 @@ void main() {
       final BoxDecoration decoration = tester.widget<DecoratedBox>(
         find.descendant(
           of: find.byType(CupertinoTextField),
-          matching: find.byType(DecoratedBox)
+          matching: find.byType(DecoratedBox),
         ),
       ).decoration;
 
@@ -217,7 +257,7 @@ void main() {
       expect(
         find.descendant(
           of: find.byType(CupertinoTextField),
-          matching: find.byType(DecoratedBox)
+          matching: find.byType(DecoratedBox),
         ),
         findsNothing,
       );
@@ -1008,7 +1048,7 @@ void main() {
 
     await tester.enterText(
       find.widgetWithText(CupertinoTextField, 'field 1'),
-      "j'aime la poutine"
+      "j'aime la poutine",
     );
     await tester.pump();
 
@@ -1372,91 +1412,91 @@ void main() {
 
   testWidgets('long press drag can edge scroll', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
-        text: 'Atwater Peel Sherbrooke Bonaventure Angrignon Peel Côte-des-Neiges',
-      );
-      await tester.pumpWidget(
-        CupertinoApp(
-          home: Center(
-            child: CupertinoTextField(
-              controller: controller,
-              maxLines: 1,
-            ),
+      text: 'Atwater Peel Sherbrooke Bonaventure Angrignon Peel Côte-des-Neiges',
+    );
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoTextField(
+            controller: controller,
+            maxLines: 1,
           ),
         ),
-      );
+      ),
+    );
 
-      final RenderEditable renderEditable = tester.renderObject<RenderEditable>(
-        find.byElementPredicate((Element element) => element.renderObject is RenderEditable)
-      );
+    final RenderEditable renderEditable = tester.renderObject<RenderEditable>(
+      find.byElementPredicate((Element element) => element.renderObject is RenderEditable)
+    );
 
-      List<TextSelectionPoint> lastCharEndpoint = renderEditable.getEndpointsForSelection(
-        const TextSelection.collapsed(offset: 66), // Last character's position.
-      );
+    List<TextSelectionPoint> lastCharEndpoint = renderEditable.getEndpointsForSelection(
+      const TextSelection.collapsed(offset: 66), // Last character's position.
+    );
 
-      expect(lastCharEndpoint.length, 1);
-      // Just testing the test and making sure that the last character is off
-      // the right side of the screen.
-      expect(lastCharEndpoint[0].point.dx, moreOrLessEquals(1094.73486328125));
+    expect(lastCharEndpoint.length, 1);
+    // Just testing the test and making sure that the last character is off
+    // the right side of the screen.
+    expect(lastCharEndpoint[0].point.dx, moreOrLessEquals(1094.73486328125));
 
-      final Offset textfieldStart = tester.getTopLeft(find.byType(CupertinoTextField));
+    final Offset textfieldStart = tester.getTopLeft(find.byType(CupertinoTextField));
 
-      final TestGesture gesture =
-          await tester.startGesture(textfieldStart + const Offset(300, 5));
-      await tester.pump(const Duration(milliseconds: 500));
+    final TestGesture gesture =
+        await tester.startGesture(textfieldStart + const Offset(300, 5));
+    await tester.pump(const Duration(milliseconds: 500));
 
-      expect(
-        controller.selection,
-        const TextSelection.collapsed(offset: 18, affinity: TextAffinity.upstream),
-      );
-      expect(find.byType(CupertinoButton), findsNothing);
+    expect(
+      controller.selection,
+      const TextSelection.collapsed(offset: 18, affinity: TextAffinity.upstream),
+    );
+    expect(find.byType(CupertinoButton), findsNothing);
 
-      await gesture.moveBy(const Offset(600, 0));
-      // To the edge of the screen basically.
-      await tester.pump();
-      expect(
-        controller.selection,
-        const TextSelection.collapsed(offset: 54, affinity: TextAffinity.upstream),
-      );
-      // Keep moving out.
-      await gesture.moveBy(const Offset(1, 0));
-      await tester.pump();
-      expect(
-        controller.selection,
-        const TextSelection.collapsed(offset: 61, affinity: TextAffinity.upstream),
-      );
-      await gesture.moveBy(const Offset(1, 0));
-      await tester.pump();
-      expect(
-        controller.selection,
-        const TextSelection.collapsed(offset: 66, affinity: TextAffinity.upstream),
-      ); // We're at the edge now.
-      expect(find.byType(CupertinoButton), findsNothing);
+    await gesture.moveBy(const Offset(600, 0));
+    // To the edge of the screen basically.
+    await tester.pump();
+    expect(
+      controller.selection,
+      const TextSelection.collapsed(offset: 54, affinity: TextAffinity.upstream),
+    );
+    // Keep moving out.
+    await gesture.moveBy(const Offset(1, 0));
+    await tester.pump();
+    expect(
+      controller.selection,
+      const TextSelection.collapsed(offset: 61, affinity: TextAffinity.upstream),
+    );
+    await gesture.moveBy(const Offset(1, 0));
+    await tester.pump();
+    expect(
+      controller.selection,
+      const TextSelection.collapsed(offset: 66, affinity: TextAffinity.upstream),
+    ); // We're at the edge now.
+    expect(find.byType(CupertinoButton), findsNothing);
 
-      await gesture.up();
-      await tester.pump();
+    await gesture.up();
+    await tester.pump();
 
-      // The selection isn't affected by the gesture lift.
-      expect(
-        controller.selection,
-        const TextSelection.collapsed(offset: 66, affinity: TextAffinity.upstream),
-      );
-      // The toolbar now shows up.
-      expect(find.byType(CupertinoButton), findsNWidgets(2));
+    // The selection isn't affected by the gesture lift.
+    expect(
+      controller.selection,
+      const TextSelection.collapsed(offset: 66, affinity: TextAffinity.upstream),
+    );
+    // The toolbar now shows up.
+    expect(find.byType(CupertinoButton), findsNWidgets(2));
 
-      lastCharEndpoint = renderEditable.getEndpointsForSelection(
-        const TextSelection.collapsed(offset: 66), // Last character's position.
-      );
+    lastCharEndpoint = renderEditable.getEndpointsForSelection(
+      const TextSelection.collapsed(offset: 66), // Last character's position.
+    );
 
-      expect(lastCharEndpoint.length, 1);
-      // The last character is now on screen.
-      expect(lastCharEndpoint[0].point.dx, moreOrLessEquals(786.73486328125));
+    expect(lastCharEndpoint.length, 1);
+    // The last character is now on screen.
+    expect(lastCharEndpoint[0].point.dx, moreOrLessEquals(786.73486328125));
 
-      final List<TextSelectionPoint> firstCharEndpoint = renderEditable.getEndpointsForSelection(
-        const TextSelection.collapsed(offset: 0), // First character's position.
-      );
-      expect(firstCharEndpoint.length, 1);
-      // The first character is now offscreen to the left.
-      expect(firstCharEndpoint[0].point.dx, moreOrLessEquals(-308.20499999821186));
+    final List<TextSelectionPoint> firstCharEndpoint = renderEditable.getEndpointsForSelection(
+      const TextSelection.collapsed(offset: 0), // First character's position.
+    );
+    expect(firstCharEndpoint.length, 1);
+    // The first character is now offscreen to the left.
+    expect(firstCharEndpoint[0].point.dx, moreOrLessEquals(-308.20499999821186));
   });
 
   testWidgets(
@@ -1632,7 +1672,7 @@ void main() {
         position: textfieldStart + const Offset(150.0, 5.0),
         pressure: 3.0,
         pressureMax: 6.0,
-        pressureMin: 0.0
+        pressureMin: 0.0,
       ),
     );
     // We expect the force press to select a word at the given location.
@@ -1688,6 +1728,162 @@ void main() {
     expect(find.byType(CupertinoButton), findsNothing);
   });
 
+  testWidgets('Cannot drag one handle past the other', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(
+      text: 'abc def ghi',
+    );
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoTextField(
+            dragStartBehavior: DragStartBehavior.down,
+            controller: controller,
+            style: const TextStyle(
+              fontFamily: 'Ahem',
+              fontSize: 10.0,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Double tap on 'e' to select 'def'.
+    final Offset ePos = textOffsetToPosition(tester, 5);
+    await tester.tapAt(ePos, pointer: 7);
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(controller.selection.isCollapsed, isTrue);
+    expect(controller.selection.baseOffset, 4);
+    await tester.tapAt(ePos, pointer: 7);
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(controller.selection.baseOffset, 4);
+    expect(controller.selection.extentOffset, 7);
+
+    final RenderEditable renderEditable = findRenderEditable(tester);
+    final List<TextSelectionPoint> endpoints = globalize(
+      renderEditable.getEndpointsForSelection(controller.selection),
+      renderEditable,
+    );
+    expect(endpoints.length, 2);
+
+    // Drag the right handle until there's only 1 char selected.
+    // We use a small offset because the endpoint is on the very corner
+    // of the handle.
+    final Offset handlePos = endpoints[1].point;
+    Offset newHandlePos = textOffsetToPosition(tester, 5); // Position of 'e'.
+    final TestGesture gesture = await tester.startGesture(handlePos, pointer: 7);
+    await tester.pump();
+    await gesture.moveTo(newHandlePos);
+    await tester.pump();
+
+    expect(controller.selection.baseOffset, 4);
+    expect(controller.selection.extentOffset, 5);
+
+    newHandlePos = textOffsetToPosition(tester, 2); // Position of 'c'.
+    await gesture.moveTo(newHandlePos);
+    await tester.pump();
+    await gesture.up();
+    await tester.pump();
+
+    expect(controller.selection.baseOffset, 4);
+    // The selection doesn't move beyond the left handle. There's always at
+    // least 1 char selected.
+    expect(controller.selection.extentOffset, 5);
+  });
+
+  testWidgets('Can select text by dragging with a mouse', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController();
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoTextField(
+            dragStartBehavior: DragStartBehavior.down,
+            controller: controller,
+            style: const TextStyle(
+              fontFamily: 'Ahem',
+              fontSize: 10.0,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    const String testValue = 'abc def ghi';
+    await tester.enterText(find.byType(CupertinoTextField), testValue);
+    // Skip past scrolling animation.
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
+
+    final Offset ePos = textOffsetToPosition(tester, testValue.indexOf('e'));
+    final Offset gPos = textOffsetToPosition(tester, testValue.indexOf('g'));
+
+    final TestGesture gesture = await tester.startGesture(ePos, kind: PointerDeviceKind.mouse);
+    await tester.pump();
+    await gesture.moveTo(gPos);
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(controller.selection.baseOffset, testValue.indexOf('e'));
+    expect(controller.selection.extentOffset, testValue.indexOf('g'));
+  });
+
+  testWidgets('Continuous dragging does not cause flickering', (WidgetTester tester) async {
+    int selectionChangedCount = 0;
+    const String testValue = 'abc def ghi';
+    final TextEditingController controller = TextEditingController(text: testValue);
+
+    controller.addListener(() {
+      selectionChangedCount++;
+    });
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoTextField(
+            dragStartBehavior: DragStartBehavior.down,
+            controller: controller,
+            style: const TextStyle(
+              fontFamily: 'Ahem',
+              fontSize: 10.0,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Offset cPos = textOffsetToPosition(tester, 2); // Index of 'c'.
+    final Offset gPos = textOffsetToPosition(tester, 8); // Index of 'g'.
+    final Offset hPos = textOffsetToPosition(tester, 9); // Index of 'h'.
+
+    // Drag from 'c' to 'g'.
+    final TestGesture gesture = await tester.startGesture(cPos, kind: PointerDeviceKind.mouse);
+    await tester.pump();
+    await gesture.moveTo(gPos);
+    await tester.pumpAndSettle();
+
+    expect(selectionChangedCount, isNonZero);
+    selectionChangedCount = 0;
+    expect(controller.selection.baseOffset, 2);
+    expect(controller.selection.extentOffset, 8);
+
+    // Tiny movement shouldn't cause text selection to change.
+    await gesture.moveTo(gPos + const Offset(4.0, 0.0));
+    await tester.pumpAndSettle();
+    expect(selectionChangedCount, 0);
+
+    // Now a text selection change will occur after a significant movement.
+    await gesture.moveTo(hPos);
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(selectionChangedCount, 1);
+    expect(controller.selection.baseOffset, 2);
+    expect(controller.selection.extentOffset, 9);
+  });
+
   testWidgets(
     'text field respects theme',
     (WidgetTester tester) async {
@@ -1705,7 +1901,7 @@ void main() {
       final BoxDecoration decoration = tester.widget<DecoratedBox>(
         find.descendant(
           of: find.byType(CupertinoTextField),
-          matching: find.byType(DecoratedBox)
+          matching: find.byType(DecoratedBox),
         ),
       ).decoration;
 
@@ -1814,5 +2010,21 @@ void main() {
 
     await tester.pump();
     expect(renderEditable.cursorColor, const Color(0xFFF44336));
+  });
+
+  testWidgets('cursor can override color from theme', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        theme: CupertinoThemeData(),
+        home: Center(
+          child: CupertinoTextField(
+            cursorColor: Color(0xFFF44336),
+          ),
+        ),
+      ),
+    );
+
+    final EditableText editableText = tester.firstWidget(find.byType(EditableText));
+    expect(editableText.cursorColor, const Color(0xFFF44336));
   });
 }

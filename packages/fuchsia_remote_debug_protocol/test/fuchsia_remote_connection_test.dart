@@ -70,7 +70,7 @@ void main() {
                 'name': 'file://flutterBinary1',
                 'number': '1',
               },
-            }
+            },
           ],
         },
         <String, dynamic>{
@@ -85,7 +85,7 @@ void main() {
                 'name': 'file://flutterBinary2',
                 'number': '2',
               },
-            }
+            },
           ],
         },
       ];
@@ -120,8 +120,7 @@ void main() {
       restoreVmServiceConnectionFunction();
     });
 
-    test('end-to-end with three vm connections and flutter view query',
-        () async {
+    test('end-to-end with three vm connections and flutter view query', () async {
       final FuchsiaRemoteConnection connection =
           await FuchsiaRemoteConnection.connectWithSshCommandRunner(mockRunner);
 

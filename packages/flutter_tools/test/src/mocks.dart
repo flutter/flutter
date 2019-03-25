@@ -31,7 +31,7 @@ class MockApplicationPackageStore extends ApplicationPackageStore {
       id: 'io.flutter.android.mock',
       file: fs.file('/mock/path/to/android/SkyShell.apk'),
       versionCode: 1,
-      launchActivity: 'io.flutter.android.mock.MockActivity'
+      launchActivity: 'io.flutter.android.mock.MockActivity',
     ),
     iOS: BuildableIOSApp(MockIosProject())
   );
@@ -460,26 +460,20 @@ class MockDevFSOperations extends BasicMock implements DevFSOperations {
     messages.add(message);
     devicePathToContent[deviceUri] = content;
   }
-
-  @override
-  Future<dynamic> deleteFile(String fsName, Uri deviceUri) async {
-    messages.add('deleteFile $fsName $deviceUri');
-    devicePathToContent.remove(deviceUri);
-  }
 }
 
 class MockResidentCompiler extends BasicMock implements ResidentCompiler {
   @override
-  void accept() {}
+  void accept() { }
 
   @override
   Future<CompilerOutput> reject() async { return null; }
 
   @override
-  void reset() {}
+  void reset() { }
 
   @override
-  Future<dynamic> shutdown() async {}
+  Future<dynamic> shutdown() async { }
 
   @override
   Future<CompilerOutput> compileExpression(
@@ -488,14 +482,14 @@ class MockResidentCompiler extends BasicMock implements ResidentCompiler {
     List<String> typeDefinitions,
     String libraryUri,
     String klass,
-    bool isStatic
+    bool isStatic,
   ) async {
     return null;
   }
   @override
-  Future<CompilerOutput> recompile(String mainPath, List<String> invalidatedFiles, { String outputPath, String packagesFilePath }) async {
+  Future<CompilerOutput> recompile(String mainPath, List<Uri> invalidatedFiles, { String outputPath, String packagesFilePath }) async {
     fs.file(outputPath).createSync(recursive: true);
     fs.file(outputPath).writeAsStringSync('compiled_kernel_output');
-    return CompilerOutput(outputPath, 0);
+    return CompilerOutput(outputPath, 0, <Uri>[]);
   }
 }

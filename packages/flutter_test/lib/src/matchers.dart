@@ -364,6 +364,7 @@ Matcher matchesSemantics({
   Size size,
   double elevation,
   double thickness,
+  int platformViewId,
   // Flags //
   bool hasCheckedState = false,
   bool isChecked = false,
@@ -514,6 +515,7 @@ Matcher matchesSemantics({
     size: size,
     elevation: elevation,
     thickness: thickness,
+    platformViewId: platformViewId,
     customActions: customActions,
     hintOverrides: hintOverrides,
     children: children,
@@ -607,7 +609,7 @@ class _FindsWidgetMatcher extends Matcher {
     dynamic item,
     Description mismatchDescription,
     Map<dynamic, dynamic> matchState,
-    bool verbose
+    bool verbose,
   ) {
     final Finder finder = matchState[Finder];
     final int count = finder.evaluate().length;
@@ -755,7 +757,7 @@ class _EqualsIgnoringHashCodes extends Matcher {
     dynamic item,
     Description mismatchDescription,
     Map<dynamic, dynamic> matchState,
-    bool verbose
+    bool verbose,
   ) {
     if (matchState.containsKey(_mismatchedValueKey)) {
       final String actualValue = matchState[_mismatchedValueKey];
@@ -888,7 +890,7 @@ class _HasGoodToStringDeep extends Matcher {
     dynamic item,
     Description mismatchDescription,
     Map<dynamic, dynamic> matchState,
-    bool verbose
+    bool verbose,
   ) {
     if (matchState.containsKey(_toStringDeepErrorDescriptionKey)) {
       return mismatchDescription.add(
@@ -1216,7 +1218,7 @@ abstract class _FailWithDescriptionMatcher extends Matcher {
     dynamic item,
     Description mismatchDescription,
     Map<dynamic, dynamic> matchState,
-    bool verbose
+    bool verbose,
   ) {
     return mismatchDescription.add(matchState['failure']);
   }
@@ -1307,18 +1309,20 @@ class _RendersOnPhysicalModel extends _MatchRenderObject<RenderPhysicalShape, Re
       return false;
 
     if (
-      borderRadius == null
-      && shape == BoxShape.rectangle
-      && !assertRoundedRectangle(shapeClipper, BorderRadius.zero, matchState)
-    )
+      borderRadius == null &&
+      shape == BoxShape.rectangle &&
+      !assertRoundedRectangle(shapeClipper, BorderRadius.zero, matchState)
+    ) {
       return false;
+    }
 
     if (
-      borderRadius == null
-      && shape == BoxShape.circle
-      && !assertCircle(shapeClipper, matchState)
-    )
+      borderRadius == null &&
+      shape == BoxShape.circle &&
+      !assertCircle(shapeClipper, matchState)
+    ) {
       return false;
+    }
 
     if (elevation != null && renderObject.elevation != elevation)
       return failWithDescription(matchState, 'had elevation: ${renderObject.elevation}');
@@ -1327,18 +1331,18 @@ class _RendersOnPhysicalModel extends _MatchRenderObject<RenderPhysicalShape, Re
   }
 
   bool assertRoundedRectangle(ShapeBorderClipper shapeClipper, BorderRadius borderRadius, Map<dynamic, dynamic> matchState) {
-      if (shapeClipper.shape.runtimeType != RoundedRectangleBorder)
-        return failWithDescription(matchState, 'had shape border: ${shapeClipper.shape}');
-      final RoundedRectangleBorder border = shapeClipper.shape;
-      if (border.borderRadius != borderRadius)
-        return failWithDescription(matchState, 'had borderRadius: ${border.borderRadius}');
-      return true;
+    if (shapeClipper.shape.runtimeType != RoundedRectangleBorder)
+      return failWithDescription(matchState, 'had shape border: ${shapeClipper.shape}');
+    final RoundedRectangleBorder border = shapeClipper.shape;
+    if (border.borderRadius != borderRadius)
+      return failWithDescription(matchState, 'had borderRadius: ${border.borderRadius}');
+    return true;
   }
 
   bool assertCircle(ShapeBorderClipper shapeClipper, Map<dynamic, dynamic> matchState) {
-      if (shapeClipper.shape.runtimeType != CircleBorder)
-        return failWithDescription(matchState, 'had shape border: ${shapeClipper.shape}');
-      return true;
+    if (shapeClipper.shape.runtimeType != CircleBorder)
+      return failWithDescription(matchState, 'had shape border: ${shapeClipper.shape}');
+    return true;
   }
 
   @override
@@ -1505,7 +1509,7 @@ class _CoversSameAreaAs extends Matcher {
       for (int j = 0; j < sampleSize; j += 1) {
         final Offset offset = Offset(
           i * (areaToCompare.width / sampleSize),
-          j * (areaToCompare.height / sampleSize)
+          j * (areaToCompare.height / sampleSize),
         );
 
         if (!_samplePoint(matchState, actualPath, offset))
@@ -1543,7 +1547,7 @@ class _CoversSameAreaAs extends Matcher {
     dynamic item,
     Description mismatchDescription,
     Map<dynamic, dynamic> matchState,
-    bool verbose
+    bool verbose,
   ) {
     return mismatchDescription.add(matchState['failure']);
   }
@@ -1698,6 +1702,7 @@ class _MatchesSemanticsData extends Matcher {
     this.size,
     this.elevation,
     this.thickness,
+    this.platformViewId,
     this.customActions,
     this.hintOverrides,
     this.children,
@@ -1717,6 +1722,7 @@ class _MatchesSemanticsData extends Matcher {
   final Size size;
   final double elevation;
   final double thickness;
+  final int platformViewId;
   final List<Matcher> children;
 
   @override
@@ -1746,6 +1752,8 @@ class _MatchesSemanticsData extends Matcher {
       description.add(' with elevation: $elevation');
     if (thickness != null)
       description.add(' with thickness: $thickness');
+    if (platformViewId != null)
+      description.add(' with platformViewId: $platformViewId');
     if (customActions != null)
       description.add(' with custom actions: $customActions');
     if (hintOverrides != null)
@@ -1786,6 +1794,8 @@ class _MatchesSemanticsData extends Matcher {
       return failWithDescription(matchState, 'elevation was: ${data.elevation}');
     if (thickness != null && thickness != data.thickness)
       return failWithDescription(matchState, 'thickness was: ${data.thickness}');
+    if (platformViewId != null && platformViewId != data.platformViewId)
+      return failWithDescription(matchState, 'platformViewId was: ${data.platformViewId}');
     if (actions != null) {
       int actionBits = 0;
       for (SemanticsAction action in actions)
@@ -1855,7 +1865,7 @@ class _MatchesSemanticsData extends Matcher {
     dynamic item,
     Description mismatchDescription,
     Map<dynamic, dynamic> matchState,
-    bool verbose
+    bool verbose,
   ) {
     return mismatchDescription.add(matchState['failure']);
   }

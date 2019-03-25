@@ -39,7 +39,8 @@ class _FuchsiaLogReader extends DeviceLogReader {
   FuchsiaDevice _device;
   ApplicationPackage _app;
 
-  @override String get name => _device.name;
+  @override
+  String get name => _device.name;
 
   Stream<String> _logLines;
   @override
@@ -187,7 +188,6 @@ class FuchsiaDevice extends Device {
     DebuggingOptions debuggingOptions,
     Map<String, dynamic> platformArgs,
     bool prebuiltApplication = false,
-    bool applicationNeedsRebuild = false,
     bool usesTerminalUi = true,
     bool ipv6 = false,
   }) => Future<void>.error('unimplemented');
@@ -213,8 +213,7 @@ class FuchsiaDevice extends Device {
   _FuchsiaPortForwarder _portForwarder;
 
   @override
-  void clearLogs() {
-  }
+  void clearLogs() { }
 
   @override
   bool get supportsScreenshot => false;
@@ -306,7 +305,9 @@ class FuchsiaDevice extends Device {
 }
 
 class FuchsiaIsolateDiscoveryProtocol {
-  FuchsiaIsolateDiscoveryProtocol(this._device, this._isolateName, [
+  FuchsiaIsolateDiscoveryProtocol(
+    this._device,
+    this._isolateName, [
     this._vmServiceConnector = _kDefaultFuchsiaIsolateDiscoveryConnector,
     this._pollOnce = false,
   ]);
@@ -403,7 +404,7 @@ class _FuchsiaPortForwarder extends DevicePortForwarder {
     // for more explanation.
     final List<String> command = <String>[
       'ssh', '-6', '-F', fuchsiaArtifacts.sshConfig.absolute.path, '-nNT', '-vvv', '-f',
-      '-L', '$hostPort:$_ipv4Loopback:$devicePort', device.id, 'true'
+      '-L', '$hostPort:$_ipv4Loopback:$devicePort', device.id, 'true',
     ];
     final Process process = await processManager.start(command);
     unawaited(process.exitCode.then((int exitCode) {

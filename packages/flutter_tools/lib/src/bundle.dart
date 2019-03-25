@@ -16,6 +16,7 @@ import 'compile.dart';
 import 'dart/package_map.dart';
 import 'devfs.dart';
 import 'globals.dart';
+import 'project.dart';
 
 const String defaultMainPath = 'lib/main.dart';
 const String defaultAssetBasePath = '.';
@@ -72,6 +73,7 @@ Future<void> build({
   assetDirPath ??= getAssetBuildDirectory();
   packagesPath ??= fs.path.absolute(PackageMap.globalPackagesPath);
   applicationKernelFilePath ??= getDefaultApplicationKernelPath(trackWidgetCreation: trackWidgetCreation);
+  final FlutterProject flutterProject = await FlutterProject.current();
 
   if (compilationTraceFilePath != null) {
     if (buildMode != BuildMode.dynamicProfile && buildMode != BuildMode.dynamicRelease) {
@@ -99,6 +101,7 @@ Future<void> build({
     if ((extraFrontEndOptions != null) && extraFrontEndOptions.isNotEmpty)
       printTrace('Extra front-end options: $extraFrontEndOptions');
     ensureDirectoryExists(applicationKernelFilePath);
+    final KernelCompiler kernelCompiler = await kernelCompilerFactory.create(flutterProject);
     final CompilerOutput compilerOutput = await kernelCompiler.compile(
       sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
       incrementalCompilerByteStorePath: compilationTraceFilePath != null ? null :
@@ -165,7 +168,7 @@ Future<AssetBundle> buildAssets({
   String assetDirPath,
   String packagesPath,
   bool includeDefaultFonts = true,
-  bool reportLicensedPackages = false
+  bool reportLicensedPackages = false,
 }) async {
   assetDirPath ??= getAssetBuildDirectory();
   packagesPath ??= fs.path.absolute(PackageMap.globalPackagesPath);
@@ -177,7 +180,7 @@ Future<AssetBundle> buildAssets({
     assetDirPath: assetDirPath,
     packagesPath: packagesPath,
     includeDefaultFonts: includeDefaultFonts,
-    reportLicensedPackages: reportLicensedPackages
+    reportLicensedPackages: reportLicensedPackages,
   );
   if (result != 0)
     return null;
@@ -230,9 +233,9 @@ Future<void> writeBundle(
   bundleDir.createSync(recursive: true);
 
   await Future.wait<void>(
-      assetEntries.entries.map<Future<void>>((MapEntry<String, DevFSContent> entry) async {
-    final File file = fs.file(fs.path.join(bundleDir.path, entry.key));
-    file.parent.createSync(recursive: true);
-    await file.writeAsBytes(await entry.value.contentsAsBytes());
-  }));
+    assetEntries.entries.map<Future<void>>((MapEntry<String, DevFSContent> entry) async {
+      final File file = fs.file(fs.path.join(bundleDir.path, entry.key));
+      file.parent.createSync(recursive: true);
+      await file.writeAsBytes(await entry.value.contentsAsBytes());
+    }));
 }

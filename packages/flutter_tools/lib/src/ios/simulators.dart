@@ -297,7 +297,6 @@ class IOSSimulator extends Device {
     DebuggingOptions debuggingOptions,
     Map<String, dynamic> platformArgs,
     bool prebuiltApplication = false,
-    bool applicationNeedsRebuild = false,
     bool usesTerminalUi = true,
     bool ipv6 = false,
   }) async {
@@ -322,7 +321,7 @@ class IOSSimulator extends Device {
       if (debuggingOptions.buildInfo.isDebug)
         args.addAll(<String>[
           '--enable-checked-mode',
-          '--verify-entry-points'
+          '--verify-entry-points',
         ]);
       if (debuggingOptions.startPaused)
         args.add('--start-paused');
@@ -500,7 +499,7 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
   _IOSSimulatorLogReader(this.device, IOSApp app) {
     _linesController = StreamController<String>.broadcast(
       onListen: _start,
-      onCancel: _stop
+      onCancel: _stop,
     );
     _appName = app == null ? null : app.name.replaceAll('.app', '');
   }

@@ -22,7 +22,6 @@ import 'base/time.dart';
 import 'base/user_messages.dart';
 import 'base/utils.dart';
 import 'cache.dart';
-import 'codegen.dart';
 import 'compile.dart';
 import 'devfs.dart';
 import 'device.dart';
@@ -41,6 +40,7 @@ import 'run_hot.dart';
 import 'usage.dart';
 import 'version.dart';
 import 'web/compile.dart';
+import 'web/web_device.dart';
 import 'windows/windows_workflow.dart';
 
 Future<T> runInContext<T>(
@@ -65,6 +65,7 @@ Future<T> runInContext<T>(
       CocoaPods: () => CocoaPods(),
       CocoaPodsValidator: () => const CocoaPodsValidator(),
       Config: () => Config(),
+      ChromeLauncher: () => const ChromeLauncher(),
       DevFSConfig: () => DevFSConfig(),
       DeviceManager: () => DeviceManager(),
       Doctor: () => const Doctor(),
@@ -81,7 +82,7 @@ Future<T> runInContext<T>(
       IOSSimulatorUtils: () => IOSSimulatorUtils(),
       IOSWorkflow: () => const IOSWorkflow(),
       IOSValidator: () => const IOSValidator(),
-      KernelCompiler: () => experimentalBuildEnabled ? const CodeGeneratingKernelCompiler() : const KernelCompiler(),
+      KernelCompilerFactory: () => const KernelCompilerFactory(),
       LinuxWorkflow: () => const LinuxWorkflow(),
       Logger: () => platform.isWindows ? WindowsStdoutLogger() : StdoutLogger(),
       MacOSWorkflow: () => const MacOSWorkflow(),

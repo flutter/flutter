@@ -311,7 +311,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     modern: false,
   );
 
-  final XcodeProjectInfo projectInfo = xcodeProjectInterpreter.getInfo(app.project.hostAppRoot.path);
+  final XcodeProjectInfo projectInfo = await xcodeProjectInterpreter.getInfo(app.project.hostAppRoot.path);
   if (!projectInfo.targets.contains('Runner')) {
     printError('The Xcode project does not define target "Runner" which is needed by Flutter tooling.');
     printError('Open Xcode to fix the problem:');
@@ -388,7 +388,7 @@ Future<XcodeBuildResult> buildXcodeProject({
       iosProject: project.ios,
       iosEngineDir: flutterFrameworkDir(buildInfo.mode),
       isSwift: project.ios.isSwift,
-      dependenciesChanged: !await fingerprinter.doesFingerprintMatch()
+      dependenciesChanged: !await fingerprinter.doesFingerprintMatch(),
     );
     if (didPodInstall)
       await fingerprinter.writeFingerprint();
@@ -449,7 +449,7 @@ Future<XcodeBuildResult> buildXcodeProject({
       <String>[
         'CODE_SIGNING_ALLOWED=NO',
         'CODE_SIGNING_REQUIRED=NO',
-        'CODE_SIGNING_IDENTITY=""'
+        'CODE_SIGNING_IDENTITY=""',
       ]
     );
   }
@@ -499,7 +499,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   final RunResult buildResult = await runAsync(
     buildCommands,
     workingDirectory: app.project.hostAppRoot.path,
-    allowReentrantFlutter: true
+    allowReentrantFlutter: true,
   );
   // Notifies listener that no more output is coming.
   scriptOutputPipeFile?.writeAsStringSync('all done');
@@ -599,8 +599,7 @@ Future<void> diagnoseXcodeBuildFailure(XcodeBuildResult result) async {
   if (result.xcodeBuildExecution != null &&
       result.xcodeBuildExecution.buildForPhysicalDevice &&
       !<String>['DEVELOPMENT_TEAM', 'PROVISIONING_PROFILE'].any(
-        result.xcodeBuildExecution.buildSettings.containsKey)
-      ) {
+        result.xcodeBuildExecution.buildSettings.containsKey)) {
     printError(noDevelopmentTeamInstruction, emphasis: true);
     return;
   }
@@ -626,15 +625,13 @@ Future<void> diagnoseXcodeBuildFailure(XcodeBuildResult result) async {
 }
 
 class XcodeBuildResult {
-  XcodeBuildResult(
-    {
-      @required this.success,
-      this.output,
-      this.stdout,
-      this.stderr,
-      this.xcodeBuildExecution,
-    }
-  );
+  XcodeBuildResult({
+    @required this.success,
+    this.output,
+    this.stdout,
+    this.stderr,
+    this.xcodeBuildExecution,
+  });
 
   final bool success;
   final String output;
@@ -646,14 +643,12 @@ class XcodeBuildResult {
 
 /// Describes an invocation of a Xcode build command.
 class XcodeBuildExecution {
-  XcodeBuildExecution(
-    {
-      @required this.buildCommands,
-      @required this.appDirectory,
-      @required this.buildForPhysicalDevice,
-      @required this.buildSettings,
-    }
-  );
+  XcodeBuildExecution({
+    @required this.buildCommands,
+    @required this.appDirectory,
+    @required this.buildForPhysicalDevice,
+    @required this.buildSettings,
+  });
 
   /// The original list of Xcode build commands used to produce this build result.
   final List<String> buildCommands;
@@ -720,9 +715,9 @@ void _copyServiceDefinitionsManifest(List<Map<String, String>> services, File ma
     'name': service['name'],
     // Since we have already moved it to the Frameworks directory. Strip away
     // the directory and basenames.
-    'framework': fs.path.basenameWithoutExtension(service['ios-framework'])
+    'framework': fs.path.basenameWithoutExtension(service['ios-framework']),
   }).toList();
-  final Map<String, dynamic> jsonObject = <String, dynamic>{ 'services' : jsonServices };
+  final Map<String, dynamic> jsonObject = <String, dynamic>{'services': jsonServices};
   manifest.writeAsStringSync(json.encode(jsonObject), mode: FileMode.write, flush: true);
 }
 
@@ -733,7 +728,7 @@ Future<bool> upgradePbxProjWithFlutterAssets(IosProject project) async {
 
   final RegExp oldAssets = RegExp(r'\/\* (flutter_assets|app\.flx)');
   final StringBuffer buffer = StringBuffer();
-  final Set<String> printedStatuses = Set<String>();
+  final Set<String> printedStatuses = <String>{};
 
   for (final String line in lines) {
     final Match match = oldAssets.firstMatch(line);

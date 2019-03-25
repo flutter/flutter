@@ -20,35 +20,24 @@ import 'globals.dart';
 class FlutterVersion {
   @visibleForTesting
   FlutterVersion([this._clock = const SystemClock()]) {
-    _channel = _runGit('git rev-parse --abbrev-ref --symbolic @{u}');
-    final String branch = _runGit('git rev-parse --abbrev-ref HEAD');
-    _branch = branch == 'HEAD' ? _channel : branch;
-
-    final int slash = _channel.indexOf('/');
-    if (slash != -1) {
-      final String remote = _channel.substring(0, slash);
-      _repositoryUrl = _runGit('git ls-remote --get-url $remote');
-      _channel = _channel.substring(slash + 1);
-    } else if (_channel.isEmpty) {
-      _channel = 'unknown';
-    }
-
     _frameworkRevision = _runGit('git log -n 1 --pretty=format:%H');
-    _frameworkAge = _runGit('git log -n 1 --pretty=format:%ar');
     _frameworkVersion = GitTagVersion.determine().frameworkVersionFor(_frameworkRevision);
   }
 
   final SystemClock _clock;
 
   String _repositoryUrl;
-  String get repositoryUrl => _repositoryUrl;
+  String get repositoryUrl {
+    final String _ = channel;
+    return _repositoryUrl;
+  }
 
-  static Set<String> officialChannels = Set<String>.from(<String>[
+  static const Set<String> officialChannels = <String>{
     'master',
     'dev',
     'beta',
     'stable',
-  ]);
+  };
 
   /// This maps old branch names to the names of branches that replaced them.
   ///
@@ -64,7 +53,22 @@ class FlutterVersion {
   String _channel;
   /// The channel is the upstream branch.
   /// `master`, `dev`, `beta`, `stable`; or old ones, like `alpha`, `hackathon`, ...
-  String get channel => _channel;
+  String get channel {
+    if (_channel == null) {
+      final String channel = _runGit('git rev-parse --abbrev-ref --symbolic @{u}');
+      final int slash = channel.indexOf('/');
+      if (slash != -1) {
+        final String remote = channel.substring(0, slash);
+        _repositoryUrl = _runGit('git ls-remote --get-url $remote');
+        _channel = channel.substring(slash + 1);
+       } else if (channel.isEmpty) {
+        _channel = 'unknown';
+      } else {
+        _channel = channel;
+      }
+    }
+    return _channel;
+  }
 
   /// The name of the local branch.
   /// Use getBranchName() to read this.
@@ -75,7 +79,9 @@ class FlutterVersion {
   String get frameworkRevisionShort => _shortGitRevision(frameworkRevision);
 
   String _frameworkAge;
-  String get frameworkAge => _frameworkAge;
+  String get frameworkAge {
+    return _frameworkAge ??= _runGit('git log -n 1 --pretty=format:%ar');
+  }
 
   String _frameworkVersion;
   String get frameworkVersion => _frameworkVersion;
@@ -182,6 +188,10 @@ class FlutterVersion {
   /// If [redactUnknownBranches] is true and the branch is unknown,
   /// the branch name will be returned as `'[user-branch]'`.
   String getBranchName({ bool redactUnknownBranches = false }) {
+    _branch ??= () {
+      final String branch = _runGit('git rev-parse --abbrev-ref HEAD');
+      return branch == 'HEAD' ? channel : branch;
+    }();
     if (redactUnknownBranches || _branch.isEmpty) {
       // Only return the branch names we know about; arbitrary branch names might contain PII.
       if (!officialChannels.contains(_branch) && !obsoleteBranches.containsKey(_branch))
@@ -266,7 +276,7 @@ class FlutterVersion {
   /// writes shared cache files.
   Future<void> checkFlutterVersionFreshness() async {
     // Don't perform update checks if we're not on an official channel.
-    if (!officialChannels.contains(_channel)) {
+    if (!officialChannels.contains(channel)) {
       return;
     }
 
@@ -359,7 +369,7 @@ class FlutterVersion {
 
     // Cache is empty or it's been a while since the last server ping. Ping the server.
     try {
-      final DateTime remoteFrameworkCommitDate = DateTime.parse(await FlutterVersion.fetchRemoteFrameworkCommitDate(_channel));
+      final DateTime remoteFrameworkCommitDate = DateTime.parse(await FlutterVersion.fetchRemoteFrameworkCommitDate(channel));
       await versionCheckStamp.store(
         newTimeVersionWasChecked: _clock.now(),
         newKnownRemoteVersion: remoteFrameworkCommitDate,
@@ -539,11 +549,12 @@ String _shortGitRevision(String revision) {
 }
 
 class GitTagVersion {
-  const GitTagVersion(this.x, this.y, this.z, this.commits, this.hash);
+  const GitTagVersion(this.x, this.y, this.z, this.hotfix, this.commits, this.hash);
   const GitTagVersion.unknown()
     : x = null,
       y = null,
       z = null,
+      hotfix = null,
       commits = 0,
       hash = '';
 
@@ -556,6 +567,9 @@ class GitTagVersion {
   /// The Z in vX.Y.Z.
   final int z;
 
+  /// the F in vX.Y.Z-hotfix.F
+  final int hotfix;
+
   /// Number of commits since the vX.Y.Z tag.
   final int commits;
 
@@ -563,22 +577,30 @@ class GitTagVersion {
   final String hash;
 
   static GitTagVersion determine() {
-    final String version = _runGit('git describe --match v*.*.* --first-parent --long --tags');
-    final RegExp versionPattern = RegExp('^v([0-9]+)\.([0-9]+)\.([0-9]+)-([0-9]+)-g([a-f0-9]+)\$');
-    final List<String> parts = versionPattern.matchAsPrefix(version)?.groups(<int>[1, 2, 3, 4, 5]);
+    return parse(_runGit('git describe --match v*.*.* --first-parent --long --tags'));
+  }
+
+  static GitTagVersion parse(String version) {
+    final RegExp versionPattern = RegExp(r'^v([0-9]+)\.([0-9]+)\.([0-9]+)(?:-hotfix\.([0-9]+))?-([0-9]+)-g([a-f0-9]+)$');
+    final List<String> parts = versionPattern.matchAsPrefix(version)?.groups(<int>[1, 2, 3, 4, 5, 6]);
     if (parts == null) {
       printTrace('Could not interpret results of "git describe": $version');
       return const GitTagVersion.unknown();
     }
-    final List<int> parsedParts = parts.take(4).map<int>(int.tryParse).toList();
-    return GitTagVersion(parsedParts[0], parsedParts[1], parsedParts[2], parsedParts[3], parts[4]);
+    final List<int> parsedParts = parts.take(5).map<int>((String source) => source == null ? null : int.tryParse(source)).toList();
+    return GitTagVersion(parsedParts[0], parsedParts[1], parsedParts[2], parsedParts[3], parsedParts[4], parts[5]);
   }
 
   String frameworkVersionFor(String revision) {
     if (x == null || y == null || z == null || !revision.startsWith(hash))
       return '0.0.0-unknown';
-    if (commits == 0)
+    if (commits == 0) {
+      if (hotfix != null)
+        return '$x.$y.$z-hotfix.$hotfix';
       return '$x.$y.$z';
+    }
+    if (hotfix != null)
+      return '$x.$y.$z-hotfix.${hotfix + 1}-pre.$commits';
     return '$x.$y.${z + 1}-pre.$commits';
   }
 }

@@ -14,7 +14,7 @@ Iterable<int> range(int start, int end) sync* {
     yieldCount += 1;
     yield index;
   }
- }
+}
 
 void main() {
   setUp(() {

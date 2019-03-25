@@ -230,26 +230,26 @@ class SliderThemeData extends Diagnosticable {
     @required this.valueIndicatorShape,
     @required this.showValueIndicator,
     @required this.valueIndicatorTextStyle,
-  })  : assert(trackHeight != null),
-        assert(activeTrackColor != null),
-        assert(inactiveTrackColor != null),
-        assert(disabledActiveTrackColor != null),
-        assert(disabledInactiveTrackColor != null),
-        assert(activeTickMarkColor != null),
-        assert(inactiveTickMarkColor != null),
-        assert(disabledActiveTickMarkColor != null),
-        assert(disabledInactiveTickMarkColor != null),
-        assert(thumbColor != null),
-        assert(disabledThumbColor != null),
-        assert(overlayColor != null),
-        assert(valueIndicatorColor != null),
-        assert(trackShape != null),
-        assert(tickMarkShape != null),
-        assert(thumbShape != null),
-        assert(overlayShape != null),
-        assert(valueIndicatorShape != null),
-        assert(valueIndicatorTextStyle != null),
-        assert(showValueIndicator != null);
+  }) : assert(trackHeight != null),
+       assert(activeTrackColor != null),
+       assert(inactiveTrackColor != null),
+       assert(disabledActiveTrackColor != null),
+       assert(disabledInactiveTrackColor != null),
+       assert(activeTickMarkColor != null),
+       assert(inactiveTickMarkColor != null),
+       assert(disabledActiveTickMarkColor != null),
+       assert(disabledInactiveTickMarkColor != null),
+       assert(thumbColor != null),
+       assert(disabledThumbColor != null),
+       assert(overlayColor != null),
+       assert(valueIndicatorColor != null),
+       assert(trackShape != null),
+       assert(tickMarkShape != null),
+       assert(thumbShape != null),
+       assert(overlayShape != null),
+       assert(valueIndicatorShape != null),
+       assert(valueIndicatorTextStyle != null),
+       assert(showValueIndicator != null);
 
   /// Generates a SliderThemeData from three main colors.
   ///
@@ -1040,7 +1040,7 @@ class RectangularSliderTrackShape extends SliderTrackShape {
         offset: offset,
         sliderTheme: sliderTheme,
         isEnabled: isEnabled,
-        isDiscrete: isDiscrete
+        isDiscrete: isDiscrete,
     );
     final Rect leftTrackSegment = Rect.fromLTRB(trackRect.left, trackRect.top, thumbCenter.dx - horizontalAdjustment, trackRect.bottom);
     context.canvas.drawRect(leftTrackSegment, leftTrackPaint);
@@ -1136,7 +1136,7 @@ class RoundSliderThumbShape extends SliderComponentShape {
   // TODO(clocksmith): This needs to be changed to 10 according to spec.
   const RoundSliderThumbShape({
     this.enabledThumbRadius = 6.0,
-    this.disabledThumbRadius
+    this.disabledThumbRadius,
   });
 
   /// The preferred radius of the round thumb shape when the slider is enabled.

@@ -242,9 +242,7 @@ void main() {
     expect(renderEditable, paintsExactlyCountTimes(#drawRect, 0));
   });
 
-  testWidgets(
-      'Cursor does not animates on iOS when debugDeterministicCursor is set',
-      (WidgetTester tester) async {
+  testWidgets('Cursor does not animates on iOS when debugDeterministicCursor is set', (WidgetTester tester) async {
     EditableText.debugDeterministicCursor = true;
     final Widget widget = MaterialApp(
       theme: ThemeData(platform: TargetPlatform.iOS),
@@ -282,9 +280,7 @@ void main() {
     EditableText.debugDeterministicCursor = false;
   });
 
-  testWidgets(
-      'Cursor does not animate on Android when debugDeterministicCursor is set',
-      (WidgetTester tester) async {
+  testWidgets('Cursor does not animate on Android when debugDeterministicCursor is set', (WidgetTester tester) async {
     EditableText.debugDeterministicCursor = true;
 
     const Widget widget = MaterialApp(
@@ -547,7 +543,7 @@ void main() {
     editableTextState.updateFloatingCursor(
       RawFloatingCursorPoint(
         state: FloatingCursorDragState.Update,
-        offset: const Offset(20, 20)
+        offset: const Offset(20, 20),
       ),
     );
     await tester.pump();
@@ -556,7 +552,7 @@ void main() {
       ..rrect(
         rrect: RRect.fromRectAndRadius(
           Rect.fromLTRB(463.3333435058594, 2.0833332538604736, 465.3333435058594, 14.083333015441895),
-          const Radius.circular(2.0)
+          const Radius.circular(2.0),
         ),
         color: const Color(0xff8e8e93),
       )
@@ -566,14 +562,14 @@ void main() {
           const Radius.circular(1.0),
         ),
         color: const Color(0xbf2196f3),
-      )
+      ),
     );
 
     // Moves the cursor right a few characters.
     editableTextState.updateFloatingCursor(
       RawFloatingCursorPoint(
         state: FloatingCursorDragState.Update,
-        offset: const Offset(-250, 20)
+        offset: const Offset(-250, 20),
       ),
     );
 
@@ -581,16 +577,16 @@ void main() {
       ..rrect(
         rrect: RRect.fromRectAndRadius(
           Rect.fromLTRB(191.3333282470703, 2.0833332538604736, 193.3333282470703, 14.083333015441895),
-          const Radius.circular(2.0)
+          const Radius.circular(2.0),
         ),
-        color: const Color(0xff8e8e93)
+        color: const Color(0xff8e8e93),
       )
       ..rrect(
         rrect: RRect.fromRectAndRadius(
           Rect.fromLTRB(193.83334350585938, 1.0833336114883423, 196.83334350585938, 15.083333969116211),
           const Radius.circular(1.0)),
         color: const Color(0xbf2196f3),
-      )
+      ),
     );
 
     editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.End));

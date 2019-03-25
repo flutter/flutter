@@ -175,7 +175,7 @@ class ScrollPhysics {
     // TODO(ianh): Handle the case of the device pixel ratio changing.
     // TODO(ianh): Get this from the local MediaQuery not dart:ui's window object.
     velocity: 1.0 / (0.050 * WidgetsBinding.instance.window.devicePixelRatio), // logical pixels per second
-    distance: 1.0 / WidgetsBinding.instance.window.devicePixelRatio // logical pixels
+    distance: 1.0 / WidgetsBinding.instance.window.devicePixelRatio, // logical pixels
   );
 
   /// The tolerance to use for ballistic simulations.
@@ -430,7 +430,7 @@ class ClampingScrollPhysics extends ScrollPhysics {
         position.pixels,
         end,
         math.min(0.0, velocity),
-        tolerance: tolerance
+        tolerance: tolerance,
       );
     }
     if (velocity.abs() < tolerance.velocity)

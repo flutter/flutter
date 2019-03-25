@@ -40,17 +40,17 @@ Future<void> main() async {
     } else if (words.first == 'start') {
       _send(<String, dynamic>{
         'method': 'app.start',
-        'params': <String, dynamic> {
+        'params': <String, dynamic>{
           'deviceId': words[1],
           'projectDirectory': words[2],
           'launchMode': words[3],
-        }
+        },
       });
     } else if (words.first == 'stop') {
       if (words.length > 1) {
         _send(<String, dynamic>{
           'method': 'app.stop',
-          'params': <String, dynamic> { 'appId': words[1] }
+          'params': <String, dynamic>{'appId': words[1]},
         });
       } else {
         _send(<String, dynamic>{'method': 'app.stop'});
@@ -59,7 +59,7 @@ Future<void> main() async {
       if (words.length > 1) {
         _send(<String, dynamic>{
           'method': 'app.restart',
-          'params': <String, dynamic> { 'appId': words[1] }
+          'params': <String, dynamic>{'appId': words[1]},
         });
       } else {
         _send(<String, dynamic>{'method': 'app.restart'});
@@ -72,8 +72,8 @@ Future<void> main() async {
       _send(<String, dynamic>{
         'method': 'emulator.launch',
         'params': <String, dynamic>{
-          'emulatorId': words[1]
-        }
+          'emulatorId': words[1],
+        },
       });
     } else if (line == 'enable') {
       _send(<String, dynamic>{'method': 'device.enable'});

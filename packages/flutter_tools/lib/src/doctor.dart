@@ -312,7 +312,7 @@ class GroupedValidator extends DoctorValidator {
   String _currentSlowWarning = 'Initializing...';
 
   @override
-  Future<ValidationResult> validate() async  {
+  Future<ValidationResult> validate() async {
     final List<ValidatorTask> tasks = <ValidatorTask>[];
     for (DoctorValidator validator in subValidators) {
       tasks.add(ValidatorTask(validator, validator.validate()));
@@ -467,7 +467,7 @@ class FlutterValidator extends DoctorValidator {
     }
 
     return ValidationResult(valid, messages,
-      statusInfo: userMessages.flutterStatusInfo(version.channel, version.frameworkVersion, os.name, platform.localeName)
+      statusInfo: userMessages.flutterStatusInfo(version.channel, version.frameworkVersion, os.name, platform.localeName),
     );
   }
 }
@@ -501,8 +501,8 @@ abstract class IntelliJValidator extends DoctorValidator {
   String get pluginsPath;
 
   static final Map<String, String> _idToTitle = <String, String>{
-    'IntelliJIdea' : 'IntelliJ IDEA Ultimate Edition',
-    'IdeaIC' : 'IntelliJ IDEA Community Edition',
+    'IntelliJIdea': 'IntelliJ IDEA Ultimate Edition',
+    'IdeaIC': 'IntelliJ IDEA Community Edition',
   };
 
   static final Version kMinIdeaVersion = Version(2017, 1, 0);
@@ -615,9 +615,9 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
   final String id;
 
   static final Map<String, String> _dirNameToId = <String, String>{
-    'IntelliJ IDEA.app' : 'IntelliJIdea',
-    'IntelliJ IDEA Ultimate.app' : 'IntelliJIdea',
-    'IntelliJ IDEA CE.app' : 'IdeaIC',
+    'IntelliJ IDEA.app': 'IntelliJIdea',
+    'IntelliJ IDEA Ultimate.app': 'IntelliJIdea',
+    'IntelliJ IDEA CE.app': 'IdeaIC',
   };
 
   static Iterable<DoctorValidator> get installed {

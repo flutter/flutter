@@ -56,19 +56,19 @@ class CreateCommand extends FlutterCommand {
   CreateCommand() {
     argParser.addFlag('pub',
       defaultsTo: true,
-      help: 'Whether to run "flutter packages get" after the project has been created.'
+      help: 'Whether to run "flutter packages get" after the project has been created.',
     );
     argParser.addFlag('offline',
       defaultsTo: false,
       help: 'When "flutter packages get" is run by the create command, this indicates '
         'whether to run it in offline mode or not. In offline mode, it will need to '
-        'have all dependencies already available in the pub cache to succeed.'
+        'have all dependencies already available in the pub cache to succeed.',
     );
     argParser.addFlag(
       'with-driver-test',
       negatable: true,
       defaultsTo: false,
-      help: "Also add a flutter_driver dependency and generate a sample 'flutter drive' test."
+      help: "Also add a flutter_driver dependency and generate a sample 'flutter drive' test.",
     );
     argParser.addOption(
       'template',
@@ -95,6 +95,12 @@ class CreateCommand extends FlutterCommand {
       defaultsTo: null,
       valueHelp: 'id',
     );
+    argParser.addOption(
+      'list-samples',
+      help: 'Specifies a JSON output file for a listing of Flutter code samples '
+        'that can created with --sample.',
+      valueHelp: 'path',
+    );
     argParser.addFlag(
       'overwrite',
       negatable: true,
@@ -104,18 +110,18 @@ class CreateCommand extends FlutterCommand {
     argParser.addOption(
       'description',
       defaultsTo: 'A new Flutter project.',
-      help: 'The description to use for your new Flutter project. This string ends up in the pubspec.yaml file.'
+      help: 'The description to use for your new Flutter project. This string ends up in the pubspec.yaml file.',
     );
     argParser.addOption(
       'org',
       defaultsTo: 'com.example',
       help: 'The organization responsible for your new Flutter project, in reverse domain name notation. '
-            'This string is used in Java package names and as prefix in the iOS bundle identifier.'
+            'This string is used in Java package names and as prefix in the iOS bundle identifier.',
     );
     argParser.addOption(
       'project-name',
       defaultsTo: null,
-      help: 'The project name for this new Flutter project. This must be a valid dart package name.'
+      help: 'The project name for this new Flutter project. This must be a valid dart package name.',
     );
     argParser.addOption(
       'ios-language',
@@ -179,6 +185,11 @@ class CreateCommand extends FlutterCommand {
     return null;
   }
 
+  /// The hostname for the Flutter docs for the current channel.
+  String get _snippetsHost => FlutterVersion.instance.channel == 'stable'
+        ? 'docs.flutter.io'
+        : 'master-docs.flutter.io';
+
   Future<String> _fetchSampleFromServer(String sampleId) async {
     // Sanity check the sampleId
     if (sampleId.contains(RegExp(r'[^-\w\.]'))) {
@@ -186,14 +197,36 @@ class CreateCommand extends FlutterCommand {
         'documentation and try again.');
     }
 
-    final String host = FlutterVersion.instance.channel == 'stable'
-        ? 'docs.flutter.io'
-        : 'master-docs.flutter.io';
-    return utf8.decode(await fetchUrl(Uri.https(host, 'snippets/$sampleId.dart')));
+    return utf8.decode(await fetchUrl(Uri.https(_snippetsHost, 'snippets/$sampleId.dart')));
+  }
+
+  /// Fetches the samples index file from the Flutter docs website.
+  Future<String> _fetchSamplesIndexFromServer() async {
+    return utf8.decode(await fetchUrl(Uri.https(_snippetsHost, 'snippets/index.json')));
+  }
+
+  /// Fetches the samples index file from the server and writes it to
+  /// [outputFilePath].
+  Future<void> _writeSamplesJson(String outputFilePath) async {
+    try {
+      final File outputFile = fs.file(outputFilePath);
+      if (outputFile.existsSync()) {
+        throwToolExit('File "$outputFilePath" already exists', exitCode: 1);
+      }
+      outputFile.writeAsStringSync(await _fetchSamplesIndexFromServer());
+      printStatus('Wrote samples JSON to "$outputFilePath"');
+    } catch (e) {
+      throwToolExit('Failed to write samples JSON to "$outputFilePath": $e', exitCode: 2);
+    }
   }
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+    if (argResults['list-samples'] != null) {
+      await _writeSamplesJson(argResults['list-samples']);
+      return null;
+    }
+
     if (argResults.rest.isEmpty)
       throwToolExit('No option specified for the output directory.\n$usage', exitCode: 2);
 
@@ -612,7 +645,7 @@ String _createUTIIdentifier(String organization, String name) {
   return segments.join('.');
 }
 
-final Set<String> _packageDependencies = Set<String>.from(<String>[
+const Set<String> _packageDependencies = <String>{
   'analyzer',
   'args',
   'async',
@@ -638,8 +671,8 @@ final Set<String> _packageDependencies = Set<String>.from(<String>[
   'test',
   'utf',
   'watcher',
-  'yaml'
-]);
+  'yaml',
+};
 
 /// Return null if the project name is legal. Return a validation message if
 /// we should disallow the project name.

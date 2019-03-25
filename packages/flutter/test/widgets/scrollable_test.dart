@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' as ui;
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -219,5 +221,19 @@ void main() {
     expect(getScrollOffset(tester), 31.5);
     await gesture.moveBy(const Offset(0.0, -1.0), timeStamp: const Duration(milliseconds: 180));
     expect(getScrollOffset(tester), 32.5);
+  });
+
+  testWidgets('Scroll pointer signals are handled', (WidgetTester tester) async {
+    await pumpTest(tester, TargetPlatform.fuchsia);
+    final Offset scrollEventLocation = tester.getCenter(find.byType(Viewport));
+    final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+    // Create a hover event so that |testPointer| has a location when generating the scroll.
+    testPointer.hover(scrollEventLocation);
+    final HitTestResult result = tester.hitTestOnBinding(scrollEventLocation);
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)), result);
+    expect(getScrollOffset(tester), 20.0);
+    // Pointer signals should not cause overscroll.
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, -30.0)), result);
+    expect(getScrollOffset(tester), 0.0);
   });
 }

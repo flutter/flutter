@@ -12,7 +12,7 @@ class _GridPaperPainter extends CustomPainter {
     this.color,
     this.interval,
     this.divisions,
-    this.subdivisions
+    this.subdivisions,
   });
 
   final Color color;

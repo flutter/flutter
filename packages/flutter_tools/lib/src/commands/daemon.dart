@@ -95,7 +95,7 @@ class Daemon {
       onDone: () {
         if (!_onExitCompleter.isCompleted)
           _onExitCompleter.complete(0);
-      }
+      },
     );
   }
 
@@ -202,7 +202,7 @@ abstract class Domain {
   }
 
   void sendEvent(String name, [ dynamic args ]) {
-    final Map<String, dynamic> map = <String, dynamic>{ 'event': name };
+    final Map<String, dynamic> map = <String, dynamic>{'event': name};
     if (args != null)
       map['params'] = _toJsonable(args);
     _send(map);
@@ -272,12 +272,12 @@ class DaemonDomain extends Domain {
           sendEvent('daemon.logMessage', <String, dynamic>{
             'level': message.level,
             'message': message.message,
-            'stackTrace': message.stackTrace.toString()
+            'stackTrace': message.stackTrace.toString(),
           });
         } else {
           sendEvent('daemon.logMessage', <String, dynamic>{
             'level': message.level,
-            'message': message.message
+            'message': message.message,
           });
         }
       }
@@ -303,7 +303,7 @@ class DaemonDomain extends Domain {
 
 typedef _RunOrAttach = Future<void> Function({
   Completer<DebugConnectionInfo> connectionInfoCompleter,
-  Completer<void> appStartedCompleter
+  Completer<void> appStartedCompleter,
 });
 
 /// This domain responds to methods like [start] and [stop].
@@ -341,16 +341,16 @@ class AppDomain extends Domain {
     if (await device.isLocalEmulator && !options.buildInfo.supportsEmulator) {
       throw '${toTitleCase(options.buildInfo.friendlyModeName)} mode is not supported for emulators.';
     }
-
     // We change the current working directory for the duration of the `start` command.
     final Directory cwd = fs.currentDirectory;
     fs.currentDirectory = fs.directory(projectDirectory);
 
-    final FlutterDevice flutterDevice = FlutterDevice(
+    final FlutterDevice flutterDevice = await FlutterDevice.create(
       device,
       trackWidgetCreation: trackWidgetCreation,
       dillOutputPath: dillOutputPath,
       viewFilter: isolateFilter,
+      target: target,
     );
 
     ResidentRunner runner;
@@ -528,7 +528,7 @@ class AppDomain extends Domain {
     return app.stop().then<bool>(
       (void value) => true,
       onError: (dynamic error, StackTrace stack) {
-        _sendAppEvent(app, 'log', <String, dynamic>{ 'log': '$error', 'error': true });
+        _sendAppEvent(app, 'log', <String, dynamic>{'log': '$error', 'error': true});
         app.closeLogger();
         _apps.remove(app);
         return false;
@@ -546,7 +546,7 @@ class AppDomain extends Domain {
     return app.detach().then<bool>(
       (void value) => true,
       onError: (dynamic error, StackTrace stack) {
-        _sendAppEvent(app, 'log', <String, dynamic>{ 'log': '$error', 'error': true });
+        _sendAppEvent(app, 'log', <String, dynamic>{'log': '$error', 'error': true});
         app.closeLogger();
         _apps.remove(app);
         return false;
@@ -559,7 +559,7 @@ class AppDomain extends Domain {
   }
 
   void _sendAppEvent(AppInstance app, String name, [ Map<String, dynamic> args ]) {
-    final Map<String, dynamic> eventArgs = <String, dynamic> { 'appId': app.id };
+    final Map<String, dynamic> eventArgs = <String, dynamic>{'appId': app.id};
     if (args != null)
       eventArgs.addAll(args);
     sendEvent('app.$name', eventArgs);
@@ -648,7 +648,7 @@ class DeviceDomain extends Domain {
 
     hostPort = await device.portForwarder.forward(devicePort, hostPort: hostPort);
 
-    return <String, dynamic>{ 'hostPort': hostPort };
+    return <String, dynamic>{'hostPort': hostPort};
   }
 
   /// Removes a forwarded port.
@@ -910,12 +910,12 @@ class _AppRunLogger extends Logger {
         _sendLogEvent(<String, dynamic>{
           'log': message,
           'stackTrace': stackTrace.toString(),
-          'error': true
+          'error': true,
         });
       } else {
         _sendLogEvent(<String, dynamic>{
           'log': message,
-          'error': true
+          'error': true,
         });
       }
     }
@@ -951,7 +951,7 @@ class _AppRunLogger extends Logger {
     if (parent != null) {
       parent.printTrace(message);
     } else {
-      _sendLogEvent(<String, dynamic>{ 'log': message, 'trace': true });
+      _sendLogEvent(<String, dynamic>{'log': message, 'trace': true});
     }
   }
 
@@ -982,9 +982,8 @@ class _AppRunLogger extends Logger {
           'id': id.toString(),
           'progressId': progressId,
           'finished': true,
-        },
-      );
-    })..start();
+        });
+      })..start();
     return _status;
   }
 

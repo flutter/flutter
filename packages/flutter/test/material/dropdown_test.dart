@@ -13,21 +13,33 @@ import 'package:flutter/rendering.dart';
 import '../widgets/semantics_tester.dart';
 
 const List<String> menuItems = <String>['one', 'two', 'three', 'four'];
-final ValueChanged<String> onChanged = (_) {};
+final ValueChanged<String> onChanged = (_) { };
 
 final Type dropdownButtonType = DropdownButton<String>(
   onChanged: (_) { },
-  items: const <DropdownMenuItem<String>>[]
+  items: const <DropdownMenuItem<String>>[],
 ).runtimeType;
+
+Finder _iconRichText(Key iconKey) {
+  return find.descendant(
+    of: find.byKey(iconKey),
+    matching: find.byType(RichText),
+  );
+}
 
 Widget buildFrame({
   Key buttonKey,
   String value = 'two',
   ValueChanged<String> onChanged,
+  Widget icon,
+  Color iconDisabledColor,
+  Color iconEnabledColor,
+  double iconSize = 24.0,
   bool isDense = false,
   bool isExpanded = false,
   Widget hint,
   Widget disabledHint,
+  Widget underline,
   List<String> items = menuItems,
   Alignment alignment = Alignment.center,
   TextDirection textDirection = TextDirection.ltr,
@@ -44,8 +56,13 @@ Widget buildFrame({
             hint: hint,
             disabledHint: disabledHint,
             onChanged: onChanged,
+            icon: icon,
+            iconSize: iconSize,
+            iconDisabledColor: iconDisabledColor,
+            iconEnabledColor: iconEnabledColor,
             isDense: isDense,
             isExpanded: isExpanded,
+            underline: underline,
             items: items == null ? null : items.map<DropdownMenuItem<String>>((String item) {
               return DropdownMenuItem<String>(
                 key: ValueKey<String>(item),
@@ -53,7 +70,7 @@ Widget buildFrame({
                 child: Text(item, key: ValueKey<String>(item + 'Text')),
               );
             }).toList(),
-          )
+          ),
         ),
       ),
     ),
@@ -254,7 +271,7 @@ void main() {
                 items: menuItems.map((String val) {
                   return DropdownMenuItem<String>(
                     value: val,
-                    child: Text(val)
+                    child: Text(val),
                   );
                 }).toList(),
                 onChanged: (String v) {
@@ -299,7 +316,7 @@ void main() {
                     child: const Text(value),
                   ),
                 ],
-                onChanged: (_) {},
+                onChanged: (_) { },
               ),
             ],
           ),
@@ -430,6 +447,134 @@ void main() {
         buttonBox.size.centerRight(Offset(-arrowIcon.size.width, 0.0)).dx);
   });
 
+  testWidgets('Dropdown button icon will accept widgets as icons', (WidgetTester tester) async {
+    final Widget customWidget = Container(
+      decoration: ShapeDecoration(
+        shape: CircleBorder(
+          side: BorderSide(
+            width: 5.0,
+            color: Colors.grey.shade700,
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpWidget(buildFrame(
+      icon: customWidget,
+      onChanged: onChanged,
+    ));
+
+    expect(find.byWidget(customWidget), findsOneWidget);
+    expect(find.byIcon(Icons.arrow_drop_down), findsNothing);
+
+    await tester.pumpWidget(buildFrame(
+      icon: const Icon(Icons.assessment),
+      onChanged: onChanged,
+    ));
+
+    expect(find.byIcon(Icons.assessment), findsOneWidget);
+    expect(find.byIcon(Icons.arrow_drop_down), findsNothing);
+  });
+
+  testWidgets('Dropdown button icon should have default size and colors when not defined', (WidgetTester tester) async {
+    final Key iconKey = UniqueKey();
+    final Icon customIcon = Icon(Icons.assessment, key: iconKey);
+
+    await tester.pumpWidget(buildFrame(
+      icon: customIcon,
+      onChanged: onChanged,
+    ));
+
+    // test for size
+    final RenderBox icon = tester.renderObject(find.byKey(iconKey));
+    expect(icon.size, const Size(24.0, 24.0));
+
+    // test for enabled color
+    final RichText enabledRichText = tester.widget<RichText>(_iconRichText(iconKey));
+    expect(enabledRichText.text.style.color, Colors.grey.shade700);
+
+    // test for disabled color
+    await tester.pumpWidget(buildFrame(
+      icon: customIcon,
+      onChanged: null,
+    ));
+
+    final RichText disabledRichText = tester.widget<RichText>(_iconRichText(iconKey));
+    expect(disabledRichText.text.style.color, Colors.grey.shade400);
+  });
+
+  testWidgets('Dropdown button icon should have the passed in size and color instead of defaults', (WidgetTester tester) async {
+    final Key iconKey = UniqueKey();
+    final Icon customIcon = Icon(Icons.assessment, key: iconKey);
+
+    await tester.pumpWidget(buildFrame(
+      icon: customIcon,
+      iconSize: 30.0,
+      iconEnabledColor: Colors.pink,
+      iconDisabledColor: Colors.orange,
+      onChanged: onChanged,
+    ));
+
+    // test for size
+    final RenderBox icon = tester.renderObject(find.byKey(iconKey));
+    expect(icon.size, const Size(30.0, 30.0));
+
+    // test for enabled color
+    final RichText enabledRichText = tester.widget<RichText>(_iconRichText(iconKey));
+    expect(enabledRichText.text.style.color, Colors.pink);
+
+    // test for disabled color
+    await tester.pumpWidget(buildFrame(
+      icon: customIcon,
+      iconSize: 30.0,
+      iconEnabledColor: Colors.pink,
+      iconDisabledColor: Colors.orange,
+      onChanged: null,
+    ));
+
+    final RichText disabledRichText = tester.widget<RichText>(_iconRichText(iconKey));
+    expect(disabledRichText.text.style.color, Colors.orange);
+  });
+
+  testWidgets('Dropdown button should use its own size and color properties over those defined by the theme', (WidgetTester tester) async {
+    final Key iconKey = UniqueKey();
+
+    final Icon customIcon = Icon(
+      Icons.assessment,
+      key: iconKey,
+      size: 40.0,
+      color: Colors.yellow,
+    );
+
+    await tester.pumpWidget(buildFrame(
+      icon: customIcon,
+      iconSize: 30.0,
+      iconEnabledColor: Colors.pink,
+      iconDisabledColor: Colors.orange,
+      onChanged: onChanged,
+    ));
+
+    // test for size
+    final RenderBox icon = tester.renderObject(find.byKey(iconKey));
+    expect(icon.size, const Size(40.0, 40.0));
+
+    // test for enabled color
+    final RichText enabledRichText = tester.widget<RichText>(_iconRichText(iconKey));
+    expect(enabledRichText.text.style.color, Colors.yellow);
+
+    // test for disabled color
+    await tester.pumpWidget(buildFrame(
+      icon: customIcon,
+      iconSize: 30.0,
+      iconEnabledColor: Colors.pink,
+      iconDisabledColor: Colors.orange,
+      onChanged: null,
+    ));
+
+    final RichText disabledRichText = tester.widget<RichText>(_iconRichText(iconKey));
+    expect(disabledRichText.text.style.color, Colors.yellow);
+  });
+
   testWidgets('Dropdown button with isDense:true aligns selected menu item', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
     const String value = 'two';
@@ -491,7 +636,7 @@ void main() {
     const Offset selectedItemOffset = Offset(0.0, -8.0);
     expect(
       firstItem.size.topCenter(firstItem.localToGlobal(selectedItemOffset)).dy,
-      equals(menuItemContainer.size.topCenter(menuItemContainer.localToGlobal(Offset.zero)).dy)
+      equals(menuItemContainer.size.topCenter(menuItemContainer.localToGlobal(Offset.zero)).dy),
     );
   });
 
@@ -515,7 +660,7 @@ void main() {
     // List should be scrolled so that the selected item is in line with the button
     expect(
       selectedItem.size.center(selectedItem.localToGlobal(Offset.zero)).dy,
-      equals(buttonBox.size.center(buttonBox.localToGlobal(Offset.zero)).dy)
+      equals(buttonBox.size.center(buttonBox.localToGlobal(Offset.zero)).dy),
     );
   });
 
@@ -757,7 +902,7 @@ void main() {
       buttonKey: key,
       value: null,
       items: menuItems,
-      onChanged: (String _) {},
+      onChanged: (String _) { },
       hint: const Text('test'),
     ));
 
@@ -895,7 +1040,7 @@ void main() {
 
     final DropdownButton<int> button = DropdownButton<int>(
       value: 50,
-      onChanged: (int newValue){},
+      onChanged: (int newValue) { },
       items: items,
     );
 
@@ -932,7 +1077,7 @@ void main() {
 
     final DropdownButton<int> button = DropdownButton<int>(
       value: 99,
-      onChanged: (int newValue){},
+      onChanged: (int newValue) { },
       items: items,
     );
 
@@ -969,7 +1114,7 @@ void main() {
 
     final DropdownButton<int> button = DropdownButton<int>(
       value: 0,
-      onChanged: (int newValue){},
+      onChanged: (int newValue) { },
       items: items,
     );
 
@@ -1006,7 +1151,7 @@ void main() {
 
     final DropdownButton<int> button = DropdownButton<int>(
       value: 99,
-      onChanged: (int newValue){},
+      onChanged: (int newValue) { },
       items: items,
     );
 
@@ -1079,5 +1224,31 @@ void main() {
     await tester.tap(find.text('13').last);
     await tester.pumpAndSettle();
     expect(selectedIndex, 13);
+  });
+
+  testWidgets('Dropdown button will accept widgets as its underline', (
+      WidgetTester tester) async {
+
+    const BoxDecoration decoration = BoxDecoration(
+      border: Border(bottom: BorderSide(color: Color(0xFFCCBB00), width: 4.0)),
+    );
+    const BoxDecoration defaultDecoration = BoxDecoration(
+      border: Border(bottom: BorderSide(color: Color(0xFFBDBDBD), width: 0.0)),
+    );
+
+    final Widget customUnderline = Container(height: 4.0, decoration: decoration);
+    final Key buttonKey = UniqueKey();
+
+    final Finder decoratedBox = find.descendant(
+      of: find.byKey(buttonKey),
+      matching: find.byType(DecoratedBox),
+    );
+
+    await tester.pumpWidget(buildFrame(buttonKey: buttonKey, underline: customUnderline,
+        value: 'two', onChanged: onChanged));
+    expect(tester.widget<DecoratedBox>(decoratedBox).decoration, decoration);
+
+    await tester.pumpWidget(buildFrame(buttonKey: buttonKey, value: 'two', onChanged: onChanged));
+    expect(tester.widget<DecoratedBox>(decoratedBox).decoration, defaultDecoration);
   });
 }

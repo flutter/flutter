@@ -254,7 +254,8 @@ abstract class SelectableChipAttributes {
   /// Must not be null. Defaults to false.
   bool get selected;
 
-  /// Called when the chip should change between selected and deselected states.
+  /// Called when the chip should change between selected and de-selected
+  /// states.
   ///
   /// When the chip is tapped, then the [onSelected] callback, if set, will be
   /// applied to `!selected` (see [selected]).
@@ -447,8 +448,10 @@ abstract class TappableChipAttributes {
 /// Supplying a non-null [onDeleted] callback will cause the chip to include a
 /// button for deleting the chip.
 ///
-/// Requires one of its ancestors to be a [Material] widget. The [label]
-/// and [clipBehavior] arguments must not be null.
+/// Its ancestors must include [Material], [MediaQuery], [Directionality], and
+/// [MaterialLocalizations]. Typically all of these widgets are provided by
+/// [MaterialApp] and [Scaffold]. The [label] and [clipBehavior] arguments must
+/// not be null.
 ///
 /// {@tool sample}
 ///
@@ -1624,10 +1627,11 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
       animationDuration: pressedAnimationDuration,
       shape: shape,
       clipBehavior: widget.clipBehavior,
-      child: InkResponse(
+      child: InkWell(
         onTap: canTap ? _handleTap : null,
         onTapDown: canTap ? _handleTapDown : null,
         onTapCancel: canTap ? _handleTapCancel : null,
+        customBorder: shape,
         child: AnimatedBuilder(
           animation: Listenable.merge(<Listenable>[selectController, enableController]),
           builder: (BuildContext context, Widget child) {

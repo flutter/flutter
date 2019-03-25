@@ -20,6 +20,7 @@ import 'ios/simulators.dart';
 import 'linux/linux_device.dart';
 import 'macos/macos_device.dart';
 import 'tester/flutter_tester.dart';
+import 'web/web_device.dart';
 import 'windows/windows_device.dart';
 
 DeviceManager get deviceManager => context[DeviceManager];
@@ -36,7 +37,7 @@ class DeviceManager {
     IOSSimulators(),
     FuchsiaDevices(),
     FlutterTesterDevices(),
-  ] + _conditionalDesktopDevices);
+  ] + _conditionalDesktopDevices + _conditionalWebDevices);
 
   /// Only add desktop devices if the flag is enabled.
   static List<DeviceDiscovery> get _conditionalDesktopDevices {
@@ -44,6 +45,13 @@ class DeviceManager {
       MacOSDevices(),
       LinuxDevices(),
       WindowsDevices(),
+    ] : <DeviceDiscovery>[];
+  }
+
+  /// Only add web devices if the flag is enabled.
+  static List<DeviceDiscovery> get _conditionalWebDevices {
+    return flutterWebEnabled ? <DeviceDiscovery>[
+      WebDevices(),
     ] : <DeviceDiscovery>[];
   }
 
@@ -278,7 +286,6 @@ abstract class Device {
     DebuggingOptions debuggingOptions,
     Map<String, dynamic> platformArgs,
     bool prebuiltApplication = false,
-    bool applicationNeedsRebuild = false,
     bool usesTerminalUi = true,
     bool ipv6 = false,
   });
@@ -357,13 +364,16 @@ abstract class Device {
 }
 
 class DebuggingOptions {
-  DebuggingOptions.enabled(this.buildInfo, {
+  DebuggingOptions.enabled(
+    this.buildInfo, {
     this.startPaused = false,
     this.enableSoftwareRendering = false,
     this.skiaDeterministicRendering = false,
     this.traceSkia = false,
     this.traceSystrace = false,
+    this.dumpSkpOnShaderCompilation = false,
     this.useTestFonts = false,
+    this.verboseSystemLogs = false,
     this.observatoryPort,
    }) : debuggingEnabled = true;
 
@@ -375,6 +385,8 @@ class DebuggingOptions {
       skiaDeterministicRendering = false,
       traceSkia = false,
       traceSystrace = false,
+      dumpSkpOnShaderCompilation = false,
+      verboseSystemLogs = false,
       observatoryPort = null;
 
   final bool debuggingEnabled;
@@ -385,7 +397,9 @@ class DebuggingOptions {
   final bool skiaDeterministicRendering;
   final bool traceSkia;
   final bool traceSystrace;
+  final bool dumpSkpOnShaderCompilation;
   final bool useTestFonts;
+  final bool verboseSystemLogs;
   final int observatoryPort;
 
   bool get hasObservatoryPort => observatoryPort != null;
@@ -484,5 +498,5 @@ class NoOpDevicePortForwarder implements DevicePortForwarder {
   List<ForwardedPort> get forwardedPorts => <ForwardedPort>[];
 
   @override
-  Future<void> unforward(ForwardedPort forwardedPort) async {}
+  Future<void> unforward(ForwardedPort forwardedPort) async { }
 }

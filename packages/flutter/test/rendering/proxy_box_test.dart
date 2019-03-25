@@ -42,7 +42,7 @@ void main() {
 
     final RenderPhysicalModel root = RenderPhysicalModel(color: const Color(0xffff00ff));
     layout(root, phase: EnginePhase.composite);
-    expect(root.needsCompositing, isFalse);
+    expect(root.needsCompositing, isTrue);
 
     // On Fuchsia, the system compositor is responsible for drawing shadows
     // for physical model layers with non-zero elevation.
@@ -52,7 +52,7 @@ void main() {
 
     root.elevation = 0.0;
     pumpFrame(phase: EnginePhase.composite);
-    expect(root.needsCompositing, isFalse);
+    expect(root.needsCompositing, isTrue);
 
     debugDefaultTargetPlatformOverride = null;
   });
@@ -62,24 +62,24 @@ void main() {
 
     final RenderPhysicalModel root = RenderPhysicalModel(color: const Color(0xffff00ff));
     layout(root, phase: EnginePhase.composite);
-    expect(root.needsCompositing, isFalse);
+    expect(root.needsCompositing, isTrue);
 
-    // On non-Fuchsia platforms, Flutter draws its own shadows.
+    // Flutter now composites physical shapes on all platforms.
     root.elevation = 1.0;
     pumpFrame(phase: EnginePhase.composite);
-    expect(root.needsCompositing, isFalse);
+    expect(root.needsCompositing, isTrue);
 
     root.elevation = 0.0;
     pumpFrame(phase: EnginePhase.composite);
-    expect(root.needsCompositing, isFalse);
+    expect(root.needsCompositing, isTrue);
 
     debugDefaultTargetPlatformOverride = null;
   });
 
   test('RenderSemanticsGestureHandler adds/removes correct semantic actions', () {
     final RenderSemanticsGestureHandler renderObj = RenderSemanticsGestureHandler(
-      onTap: () {},
-      onHorizontalDragUpdate: (DragUpdateDetails details) {},
+      onTap: () { },
+      onHorizontalDragUpdate: (DragUpdateDetails details) { },
     );
 
     SemanticsConfiguration config = SemanticsConfiguration();
@@ -89,7 +89,7 @@ void main() {
     expect(config.getActionHandler(SemanticsAction.scrollRight), isNotNull);
 
     config = SemanticsConfiguration();
-    renderObj.validActions = <SemanticsAction>[SemanticsAction.tap, SemanticsAction.scrollLeft].toSet();
+    renderObj.validActions = <SemanticsAction>{SemanticsAction.tap, SemanticsAction.scrollLeft};
 
     renderObj.describeSemanticsConfiguration(config);
     expect(config.getActionHandler(SemanticsAction.tap), isNotNull);
@@ -125,16 +125,16 @@ void main() {
         clipper: const ShapeBorderClipper(shape: CircleBorder()),
       );
       layout(root, phase: EnginePhase.composite);
-      expect(root.needsCompositing, isFalse);
+      expect(root.needsCompositing, isTrue);
 
-      // On non-Fuchsia platforms, Flutter draws its own shadows.
+      // On non-Fuchsia platforms, we composite physical shape layers
       root.elevation = 1.0;
       pumpFrame(phase: EnginePhase.composite);
-      expect(root.needsCompositing, isFalse);
+      expect(root.needsCompositing, isTrue);
 
       root.elevation = 0.0;
       pumpFrame(phase: EnginePhase.composite);
-      expect(root.needsCompositing, isFalse);
+      expect(root.needsCompositing, isTrue);
 
       debugDefaultTargetPlatformOverride = null;
     });
@@ -287,7 +287,7 @@ class _FakeTicker implements Ticker {
   bool muted;
 
   @override
-  void absorbTicker(Ticker originalTicker) {}
+  void absorbTicker(Ticker originalTicker) { }
 
   @override
   String get debugLabel => null;
@@ -305,10 +305,10 @@ class _FakeTicker implements Ticker {
   bool get shouldScheduleTick => null;
 
   @override
-  void dispose() {}
+  void dispose() { }
 
   @override
-  void scheduleTick({ bool rescheduling = false }) {}
+  void scheduleTick({ bool rescheduling = false }) { }
 
   @override
   TickerFuture start() {
@@ -316,10 +316,10 @@ class _FakeTicker implements Ticker {
   }
 
   @override
-  void stop({ bool canceled = false }) {}
+  void stop({ bool canceled = false }) { }
 
   @override
-  void unscheduleTick() {}
+  void unscheduleTick() { }
 
   @override
   String toString({ bool debugIncludeStack = false }) => super.toString();

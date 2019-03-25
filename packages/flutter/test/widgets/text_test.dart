@@ -15,8 +15,8 @@ void main() {
     await tester.pumpWidget(const MediaQuery(
       data: MediaQueryData(textScaleFactor: 1.3),
       child: Center(
-        child: Text('Hello', textDirection: TextDirection.ltr)
-      )
+        child: Text('Hello', textDirection: TextDirection.ltr),
+      ),
     ));
 
     RichText text = tester.firstWidget(find.byType(RichText));
@@ -24,7 +24,7 @@ void main() {
     expect(text.textScaleFactor, 1.3);
 
     await tester.pumpWidget(const Center(
-      child: Text('Hello', textDirection: TextDirection.ltr)
+      child: Text('Hello', textDirection: TextDirection.ltr),
     ));
 
     text = tester.firstWidget(find.byType(RichText));
@@ -45,7 +45,7 @@ void main() {
     expect(baseSize.height, equals(14.0));
 
     await tester.pumpWidget(const Center(
-      child: Text('Hello', textScaleFactor: 1.5, textDirection: TextDirection.ltr)
+      child: Text('Hello', textScaleFactor: 1.5, textDirection: TextDirection.ltr),
     ));
 
     text = tester.firstWidget(find.byType(RichText));
@@ -59,7 +59,7 @@ void main() {
   testWidgets('Text respects textScaleFactor with explicit font size', (WidgetTester tester) async {
     await tester.pumpWidget(const Center(
       child: Text('Hello',
-        style: TextStyle(fontSize: 20.0), textDirection: TextDirection.ltr)
+        style: TextStyle(fontSize: 20.0), textDirection: TextDirection.ltr),
     ));
 
     RichText text = tester.firstWidget(find.byType(RichText));
@@ -73,7 +73,7 @@ void main() {
       child: Text('Hello',
         style: TextStyle(fontSize: 20.0),
         textScaleFactor: 1.3,
-        textDirection: TextDirection.ltr)
+        textDirection: TextDirection.ltr),
     ));
 
     text = tester.firstWidget(find.byType(RichText));
@@ -148,7 +148,7 @@ void main() {
         TextSpan(
           children: <TextSpan>[
             const TextSpan(text: 'hello '),
-            TextSpan(text: 'world', recognizer: TapGestureRecognizer()..onTap = () {}),
+            TextSpan(text: 'world', recognizer: TapGestureRecognizer()..onTap = () { }),
             const TextSpan(text: ' this is a '),
             const TextSpan(text: 'cat-astrophe'),
           ],
@@ -175,7 +175,7 @@ void main() {
             TestSemantics(
               label: ' this is a cat-astrophe',
               textDirection: TextDirection.ltr,
-            )
+            ),
           ],
         ),
       ],
@@ -193,9 +193,9 @@ void main() {
           style: textStyle,
           children: <TextSpan>[
             const TextSpan(text: 'hello world${Unicode.RLE}${Unicode.RLO} '),
-            TextSpan(text: 'BOY', recognizer: LongPressGestureRecognizer()..onLongPress = () {}),
+            TextSpan(text: 'BOY', recognizer: LongPressGestureRecognizer()..onLongPress = () { }),
             const TextSpan(text: ' HOW DO${Unicode.PDF} you ${Unicode.RLO} DO '),
-            TextSpan(text: 'SIR', recognizer: TapGestureRecognizer()..onTap = () {}),
+            TextSpan(text: 'SIR', recognizer: TapGestureRecognizer()..onTap = () { }),
             const TextSpan(text: '${Unicode.PDF}${Unicode.PDF} good bye'),
           ],
         ),

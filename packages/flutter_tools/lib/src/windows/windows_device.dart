@@ -14,7 +14,7 @@ class WindowsDevice extends Device {
   WindowsDevice() : super('Windows');
 
   @override
-  void clearLogs() {}
+  void clearLogs() { }
 
   @override
   DeviceLogReader getLogReader({ ApplicationPackage app }) => NoOpDeviceLogReader('windows');
@@ -57,7 +57,6 @@ class WindowsDevice extends Device {
     DebuggingOptions debuggingOptions,
     Map<String, dynamic> platformArgs,
     bool prebuiltApplication = false,
-    bool applicationNeedsRebuild = false,
     bool usesTerminalUi = true,
     bool ipv6 = false,
   }) {
@@ -93,7 +92,7 @@ class WindowsDevices extends PollingDeviceDiscovery {
       return const <Device>[];
     }
     return <Device>[
-      WindowsDevice()
+      WindowsDevice(),
     ];
   }
 

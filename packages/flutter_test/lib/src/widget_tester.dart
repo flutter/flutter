@@ -49,12 +49,30 @@ typedef WidgetTesterCallback = Future<void> Function(WidgetTester widgetTester);
 ///
 /// The callback can be asynchronous (using `async`/`await` or
 /// using explicit [Future]s).
+/// Tests using the [AutomatedTestWidgetsFlutterBinding]
+/// have a default time out of two seconds,
+/// which is automatically increased for some expensive operations,
+/// and can also be manually increased by calling
+/// [AutomatedTestWidgetsFlutterBinding.addTime].
+/// The maximum that this timeout can reach (automatically or manually increased)
+/// is defined by the timeout property,
+/// which defaults to [TestWidgetsFlutterBinding.defaultTestTimeout].
+///
+/// If the `enableSemantics` parameter is set to `true`,
+/// [WidgetTester.ensureSemantics] will have been called before the tester is
+/// passed to the `callback`, and that handle will automatically be disposed
+/// after the callback is finished.
 ///
 /// This function uses the [test] function in the test package to
 /// register the given callback as a test. The callback, when run,
 /// will be given a new instance of [WidgetTester]. The [find] object
 /// provides convenient widget [Finder]s for use with the
 /// [WidgetTester].
+///
+/// See also:
+///
+///  * [AutomatedTestWidgetsFlutterBinding.addTime] to learn more about
+/// timeout and how to manually increase timeouts.
 ///
 /// ## Sample code
 ///
@@ -70,7 +88,8 @@ void testWidgets(
   String description,
   WidgetTesterCallback callback, {
   bool skip = false,
-  test_package.Timeout timeout
+  test_package.Timeout timeout,
+  bool semanticsEnabled = false,
 }) {
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
   final WidgetTester tester = WidgetTester._(binding);
@@ -78,16 +97,23 @@ void testWidgets(
   test(
     description,
     () {
+      SemanticsHandle semanticsHandle;
+      if (semanticsEnabled == true) {
+        semanticsHandle = tester.ensureSemantics();
+      }
       tester._recordNumberOfSemanticsHandles();
       test_package.addTearDown(binding.postTest);
       return binding.runTest(
-        () => callback(tester),
+        () async {
+          await callback(tester);
+          semanticsHandle?.dispose();
+        },
         tester._endOfTestVerifications,
         description: description ?? '',
       );
     },
     skip: skip,
-    timeout: timeout
+    timeout: timeout,
   );
 }
 
@@ -289,17 +315,17 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// advances the clock.
   Future<void> pumpBenchmark(Duration duration) async {
     assert(() {
-        final TestWidgetsFlutterBinding widgetsBinding = binding;
-        return widgetsBinding is LiveTestWidgetsFlutterBinding &&
-               widgetsBinding.framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.benchmark;
+      final TestWidgetsFlutterBinding widgetsBinding = binding;
+      return widgetsBinding is LiveTestWidgetsFlutterBinding &&
+              widgetsBinding.framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.benchmark;
     }());
 
     dynamic caughtException;
     void handleError(dynamic error, StackTrace stackTrace) => caughtException ??= error;
 
-    Future<void>.microtask(() { binding.handleBeginFrame(duration); }).catchError(handleError);
+    await Future<void>.microtask(() { binding.handleBeginFrame(duration); }).catchError(handleError);
     await idle();
-    Future<void>.microtask(() { binding.handleDrawFrame(); }).catchError(handleError);
+    await Future<void>.microtask(() { binding.handleDrawFrame(); }).catchError(handleError);
     await idle();
 
     if (caughtException != null) {
@@ -383,7 +409,8 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// are required to wait for the returned future to complete before calling
   /// this method again. Attempts to do otherwise will result in a
   /// [TestFailure] error being thrown.
-  Future<T> runAsync<T>(Future<T> callback(), {
+  Future<T> runAsync<T>(
+    Future<T> callback(), {
     Duration additionalTime = const Duration(milliseconds: 1000),
   }) => binding.runAsync<T>(callback, additionalTime: additionalTime);
 
@@ -551,7 +578,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
 
   @override
   Ticker createTicker(TickerCallback onTick) {
-    _tickers ??= Set<_TestTicker>();
+    _tickers ??= <_TestTicker>{};
     final _TestTicker result = _TestTicker(onTick, _removeTicker);
     _tickers.add(result);
     return result;

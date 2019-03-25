@@ -156,16 +156,16 @@ class XcodeProjectInterpreter {
       fs.path.absolute(projectPath),
       '-target',
       target,
-      '-showBuildSettings'
+      '-showBuildSettings',
     ], workingDirectory: projectPath);
     return parseXcodeBuildSettings(out);
   }
 
-  XcodeProjectInfo getInfo(String projectPath) {
-    final String out = runCheckedSync(<String>[
+  Future<XcodeProjectInfo> getInfo(String projectPath) async {
+    final RunResult result = await runCheckedAsync(<String>[
       _executable, '-list',
     ], workingDirectory: projectPath);
-    return XcodeProjectInfo.fromXcodeBuildOutput(out);
+    return XcodeProjectInfo.fromXcodeBuildOutput(result.toString());
   }
 }
 

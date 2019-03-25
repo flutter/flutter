@@ -20,7 +20,7 @@ class MacOSDevice extends Device {
   MacOSDevice() : super('macOS');
 
   @override
-  void clearLogs() {}
+  void clearLogs() { }
 
   @override
   DeviceLogReader getLogReader({ ApplicationPackage app }) => NoOpDeviceLogReader('macos');
@@ -63,7 +63,6 @@ class MacOSDevice extends Device {
     DebuggingOptions debuggingOptions,
     Map<String, dynamic> platformArgs,
     bool prebuiltApplication = false,
-    bool applicationNeedsRebuild = false,
     bool usesTerminalUi = true,
     bool ipv6 = false,
   }) async {
@@ -110,7 +109,7 @@ class MacOSDevice extends Device {
         }
         final String pid = values[1];
         final ProcessResult killResult = await processManager.run(<String>[
-          'kill', pid
+          'kill', pid,
         ]);
         succeeded &= killResult.exitCode == 0;
       }
@@ -145,7 +144,7 @@ class MacOSDevices extends PollingDeviceDiscovery {
       return const <Device>[];
     }
     return <Device>[
-      MacOSDevice()
+      MacOSDevice(),
     ];
   }
 

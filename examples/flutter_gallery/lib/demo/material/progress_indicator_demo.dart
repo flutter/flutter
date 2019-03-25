@@ -29,7 +29,7 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> with Sing
     _animation = CurvedAnimation(
       parent: _controller,
       curve: const Interval(0.0, 0.9, curve: Curves.fastOutSlowIn),
-      reverseCurve: Curves.fastOutSlowIn
+      reverseCurve: Curves.fastOutSlowIn,
     )..addStatusListener((AnimationStatus status) {
       if (status == AnimationStatus.dismissed)
         _controller.forward();
@@ -68,7 +68,7 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> with Sing
     final List<Widget> indicators = <Widget>[
       const SizedBox(
         width: 200.0,
-        child: LinearProgressIndicator()
+        child: LinearProgressIndicator(),
       ),
       const LinearProgressIndicator(),
       const LinearProgressIndicator(),
@@ -80,13 +80,13 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> with Sing
           SizedBox(
               width: 20.0,
               height: 20.0,
-              child: CircularProgressIndicator(value: _animation.value)
+              child: CircularProgressIndicator(value: _animation.value),
           ),
           SizedBox(
             width: 100.0,
             height: 20.0,
             child: Text('${(_animation.value * 100.0).toStringAsFixed(1)}%',
-              textAlign: TextAlign.right
+              textAlign: TextAlign.right,
             ),
           ),
         ],
@@ -120,7 +120,7 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> with Sing
                   padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
                   child: AnimatedBuilder(
                     animation: _animation,
-                    builder: _buildIndicators
+                    builder: _buildIndicators,
                   ),
                 ),
               ),

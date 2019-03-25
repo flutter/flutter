@@ -10,6 +10,7 @@ task:
     PATH: "$CIRRUS_WORKING_DIR/bin:$CIRRUS_WORKING_DIR/bin/cache/dart-sdk/bin:$PATH"
     ANDROID_SDK_ROOT: "/opt/android_sdk"
   git_fetch_script:
+    - git clean -xfd
     - git fetch origin
     - git fetch origin master # To set FETCH_HEAD for "git merge-base" to work
   pub_cache:
@@ -49,6 +50,7 @@ task:
         - dart --enable-asserts ./dev/bots/analyze.dart
     - name: tests-linux
       env:
+        GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
         SHARD: tests
       test_script:
         - dart --enable-asserts ./dev/bots/test.dart
@@ -57,6 +59,7 @@ task:
         memory: 12G
     - name: tool_tests-linux
       env:
+        GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
         SHARD: tool_tests
       test_script:
         - dart --enable-asserts ./dev/bots/test.dart
@@ -66,6 +69,9 @@ task:
     - name: build_tests-linux
       env:
         SHARD: build_tests
+    - name: integration_tests-linux
+      env:
+        SHARD: integration_tests
       test_script:
         # Unsetting CIRRUS_CHANGE_MESSAGE and CIRRUS_COMMIT_MESSAGE as they
         # might include non-ASCII characters which makes Gradle crash.
@@ -83,21 +89,18 @@ task:
       container:
         cpu: 4
         memory: 12G
-    - name: codelabs-build-test
-      env:
-        SHARD: codelabs-build-test
-      build_test_script: ./dev/bots/codelabs_build_test.sh
 
 
 task:
   use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true' && $CIRRUS_PR == ''
   windows_container:
-    image: cirrusci/windowsservercore:2016
+    image: cirrusci/android-sdk:28-windowsservercore-ltsc2016
     os_version: 2016
     cpu: 4
   env:
     CIRRUS_WORKING_DIR: "C:\\Windows\\Temp\\flutter sdk"
   git_fetch_script:
+    - git clean -xfd
     - git fetch origin
     - git fetch origin master # To set FETCH_HEAD for "git merge-base" to work
   pub_cache:
@@ -119,13 +122,21 @@ task:
   matrix:
     - name: tests-windows
       env:
+        GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
         SHARD: tests
     - name: tool_tests-windows
       env:
+        GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
         SHARD: tool_tests
     - name: build_tests-windows
       env:
         SHARD: build_tests
+      container:
+        cpu: 4
+        memory: 12G
+    - name: integration_tests-windows
+      env:
+        SHARD: integration_tests
       container:
         cpu: 4
         memory: 12G
@@ -156,8 +167,13 @@ task:
     # Private repo for publishing certificates.
     PUBLISHING_MATCH_CERTIFICATE_REPO: git@github.com:flutter/private_publishing_certificates.git
   osx_instance:
-    image: high-sierra-xcode-9.4.1
+    image: mojave-xcode-10.1
+  # occasionally the clock on these machines is out of sync
+  # with the actual time - this should help to verify
+  print_date_script:
+    - date
   git_fetch_script:
+    - git clean -xfd
     - git fetch origin
     - git fetch origin master # To set FETCH_HEAD
   setup_script:
@@ -175,9 +191,36 @@ task:
   env:
     CIRRUS_WORKING_DIR: "/tmp/flutter sdk"
     COCOAPODS_DISABLE_STATS: true
+  matrix:
+    - name: tests-macos
+      env:
+        GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
+        SHARD: tests
+    - name: tool_tests-macos
+      env:
+        GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
+        SHARD: tool_tests
+    - name: $SHARD-macos
+      env:
+        matrix:
+          - SHARD: integration_tests
+          - SHARD: build_tests
+            COCOAPODS_DISABLE_STATS: true
+            FLUTTER_FRAMEWORK_DIR: "/tmp/flutter sdk/bin/cache/artifacts/engine/ios/"
+      osx_instance:
+        image: mojave-flutter
+      remove_preinstalled_fluuter_script: rm -rf $FLUTTER_HOME
+    - name: add2app-macos
+      env:
+        SHARD: add2app_test
+  # occasionally the clock on these machines is out of sync
+  # with the actual time - this should help to verify
+  print_date_script:
+    - date
   install_cocoapods_script:
     - sudo gem install cocoapods
   git_fetch_script:
+    - git clean -xfd
     - git fetch origin
     - git fetch origin master # To set FETCH_HEAD for "git merge-base" to work
   pub_cache:
@@ -195,24 +238,6 @@ task:
   test_all_script: |
     ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
     bin/cache/dart-sdk/bin/dart --enable-asserts dev/bots/test.dart
-  matrix:
-    - name: tests-macos
-      env:
-        SHARD: tests
-    - name: tool_tests-macos
-      env:
-        SHARD: tool_tests
-    - name: build_tests-macos
-      env:
-        SHARD: build_tests
-        COCOAPODS_DISABLE_STATS: true
-        FLUTTER_FRAMEWORK_DIR: "/tmp/flutter sdk/bin/cache/artifacts/engine/ios/"
-      container:
-        cpu: 4
-        memory: 12G
-    - name: add2app-macos
-      env:
-        SHARD: add2app_test
 
 docker_builder:
   # Only build a new docker image when we tag a release (for dev, beta, or release.)
@@ -225,6 +250,7 @@ docker_builder:
     - tests-linux
     - tool_tests-linux
     - build_tests-linux
+    - integration_tests-linux
   build_script: "$CIRRUS_WORKING_DIR/dev/ci/docker_linux/docker_build.sh"
   login_script: "$CIRRUS_WORKING_DIR/dev/ci/docker_linux/docker_login.sh"
   push_script: "$CIRRUS_WORKING_DIR/dev/ci/docker_linux/docker_push.sh"

@@ -28,7 +28,7 @@ import 'theme_data.dart';
 /// If you want an ink-splash effect for taps, but don't want to use a button,
 /// consider using [InkWell] directly.
 ///
-/// Raised buttons have a minimum size of 88.0 by 36.0 which can be overidden
+/// Raised buttons have a minimum size of 88.0 by 36.0 which can be overridden
 /// with [ButtonTheme].
 ///
 /// {@tool snippet --template=stateless_widget_scaffold}

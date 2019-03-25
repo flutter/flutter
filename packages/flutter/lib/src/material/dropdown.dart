@@ -40,7 +40,7 @@ class _DropdownMenuPainter extends CustomPainter {
          // of onChanged callback here.
          color: color,
          borderRadius: BorderRadius.circular(2.0),
-         boxShadow: kElevationToShadow[elevation]
+         boxShadow: kElevationToShadow[elevation],
        ).createBoxPainter(),
        super(repaint: resize);
 
@@ -350,7 +350,7 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
 }
 
 class _DropdownRoutePage<T> extends StatelessWidget {
- const  _DropdownRoutePage({
+  const _DropdownRoutePage({
     Key key,
     this.route,
     this.constraints,
@@ -599,6 +599,10 @@ class DropdownButton<T> extends StatefulWidget {
     @required this.onChanged,
     this.elevation = 8,
     this.style,
+    this.underline,
+    this.icon,
+    this.iconDisabledColor,
+    this.iconEnabledColor,
     this.iconSize = 24.0,
     this.isDense = false,
     this.isExpanded = false,
@@ -652,6 +656,32 @@ class DropdownButton<T> extends StatefulWidget {
   /// Defaults to the [TextTheme.subhead] value of the current
   /// [ThemeData.textTheme] of the current [Theme].
   final TextStyle style;
+
+  /// The widget to use for drawing the drop-down button's underline.
+  ///
+  /// Defaults to a 0.0 width bottom border with color 0xFFBDBDBD.
+  final Widget underline;
+
+  /// The widget to use for the drop-down button's icon.
+  ///
+  /// Defaults to an [Icon] with the [Icons.arrow_drop_down] glyph.
+  final Widget icon;
+
+  /// The color of any [Icon] descendant of [icon] if this button is disabled,
+  /// i.e. if [onChanged] is null.
+  ///
+  /// Defaults to [Colors.grey.shade400] when the theme's
+  /// [ThemeData.brightness] is [Brightness.light] and to
+  /// [Colors.white10] when it is [Brightness.dark]
+  final Color iconDisabledColor;
+
+  /// The color of any [Icon] descendant of [icon] if this button is enabled,
+  /// i.e. if [onChanged] is defined.
+  ///
+  /// Defaults to [Colors.grey.shade700] when the theme's
+  /// [ThemeData.brightness] is [Brightness.light] and to
+  /// [Colors.white70] when it is [Brightness.dark]
+  final Color iconEnabledColor;
 
   /// The size to use for the drop-down button's down arrow icon button.
   ///
@@ -768,21 +798,34 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     return math.max(_textStyle.fontSize, math.max(widget.iconSize, _kDenseButtonHeight));
   }
 
-  Color get _downArrowColor {
+  Color get _iconColor {
     // These colors are not defined in the Material Design spec.
     if (_enabled) {
-      if (Theme.of(context).brightness == Brightness.light) {
-        return Colors.grey.shade700;
-      } else {
-        return Colors.white70;
+      if (widget.iconEnabledColor != null) {
+        return widget.iconEnabledColor;
+      }
+
+      switch(Theme.of(context).brightness) {
+        case Brightness.light:
+          return Colors.grey.shade700;
+        case Brightness.dark:
+          return Colors.white70;
       }
     } else {
-      if (Theme.of(context).brightness == Brightness.light) {
-        return Colors.grey.shade400;
-      } else {
-        return Colors.white10;
+      if (widget.iconDisabledColor != null) {
+        return widget.iconDisabledColor;
+      }
+
+      switch(Theme.of(context).brightness) {
+        case Brightness.light:
+          return Colors.grey.shade400;
+        case Brightness.dark:
+          return Colors.white10;
       }
     }
+
+    assert(false);
+    return null;
   }
 
   bool get _enabled => widget.items != null && widget.items.isNotEmpty && widget.onChanged != null;
@@ -827,6 +870,8 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       );
     }
 
+    const Icon defaultIcon = Icon(Icons.arrow_drop_down);
+
     Widget result = DefaultTextStyle(
       style: _textStyle,
       child: Container(
@@ -837,9 +882,12 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             widget.isExpanded ? Expanded(child: innerItemsWidget) : innerItemsWidget,
-            Icon(Icons.arrow_drop_down,
-              size: widget.iconSize,
-              color: _downArrowColor,
+            IconTheme(
+              data: IconThemeData(
+                color: _iconColor,
+                size: widget.iconSize,
+              ),
+              child: widget.icon ?? defaultIcon,
             ),
           ],
         ),
@@ -855,7 +903,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
             left: 0.0,
             right: 0.0,
             bottom: bottom,
-            child: Container(
+            child: widget.underline ?? Container(
               height: 1.0,
               decoration: const BoxDecoration(
                 border: Border(bottom: BorderSide(color: Color(0xFFBDBDBD), width: 0.0))
@@ -871,7 +919,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       child: GestureDetector(
         onTap: _enabled ? _handleTap : null,
         behavior: HitTestBehavior.opaque,
-        child: result
+        child: result,
       ),
     );
   }

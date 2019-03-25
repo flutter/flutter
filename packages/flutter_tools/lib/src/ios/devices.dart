@@ -166,7 +166,7 @@ class IOSDevice extends Device {
 
   static String _checkForCommand(
     String command, [
-    String macInstructions = _kIdeviceinstallerInstructions
+    String macInstructions = _kIdeviceinstallerInstructions,
   ]) {
     try {
       command = runCheckedSync(<String>['which', command]).trim();
@@ -235,7 +235,6 @@ class IOSDevice extends Device {
     DebuggingOptions debuggingOptions,
     Map<String, dynamic> platformArgs,
     bool prebuiltApplication = false,
-    bool applicationNeedsRebuild = false,
     bool usesTerminalUi = true,
     bool ipv6 = false,
   }) async {
@@ -253,7 +252,7 @@ class IOSDevice extends Device {
           targetOverride: mainPath,
           buildForDevice: true,
           usesTerminalUi: usesTerminalUi,
-          activeArch: iosArch
+          activeArch: iosArch,
       );
       if (!buildResult.success) {
         printError('Could not build the precompiled application for the device.');
@@ -296,6 +295,13 @@ class IOSDevice extends Device {
 
     if (debuggingOptions.traceSkia)
       launchArguments.add('--trace-skia');
+
+    if (debuggingOptions.dumpSkpOnShaderCompilation)
+      launchArguments.add('--dump-skp-on-shader-compilation');
+
+    if (debuggingOptions.verboseSystemLogs) {
+      launchArguments.add('--verbose-logging');
+    }
 
     if (platformArgs['trace-startup'] ?? false)
       launchArguments.add('--trace-startup');
@@ -383,8 +389,7 @@ class IOSDevice extends Device {
   DevicePortForwarder get portForwarder => _portForwarder ??= _IOSDevicePortForwarder(this);
 
   @override
-  void clearLogs() {
-  }
+  void clearLogs() { }
 
   @override
   bool get supportsScreenshot => iMobileDevice.isInstalled;
@@ -426,7 +431,7 @@ String decodeSyslog(String line) {
   try {
     final List<int> bytes = utf8.encode(line);
     final List<int> out = <int>[];
-    for (int i = 0; i < bytes.length; ) {
+    for (int i = 0; i < bytes.length;) {
       if (bytes[i] != kBackslash || i > bytes.length - 4) {
         // Unmapped byte: copy as-is.
         out.add(bytes[i++]);
@@ -459,7 +464,7 @@ class _IOSDeviceLogReader extends DeviceLogReader {
   _IOSDeviceLogReader(this.device, ApplicationPackage app) {
     _linesController = StreamController<String>.broadcast(
       onListen: _start,
-      onCancel: _stop
+      onCancel: _stop,
     );
 
     // Match for lines for the runner in syslog.

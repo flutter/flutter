@@ -120,6 +120,7 @@ void main() {
             debuggingOptions: anyNamed('debuggingOptions'),
             packagesFilePath: anyNamed('packagesFilePath'),
             usesTerminalUI: anyNamed('usesTerminalUI'),
+            flutterProject: anyNamed('flutterProject'),
             ipv6: false,
           ),
         ).thenReturn(mockHotRunner);
@@ -151,6 +152,7 @@ void main() {
             debuggingOptions: anyNamed('debuggingOptions'),
             packagesFilePath: anyNamed('packagesFilePath'),
             usesTerminalUI: anyNamed('usesTerminalUI'),
+            flutterProject: anyNamed('flutterProject'),
             ipv6: false,
           ),
         )..called(1);
@@ -225,6 +227,7 @@ void main() {
         debuggingOptions: anyNamed('debuggingOptions'),
         packagesFilePath: anyNamed('packagesFilePath'),
         usesTerminalUI: anyNamed('usesTerminalUI'),
+        flutterProject: anyNamed('flutterProject'),
         ipv6: false,
       )).thenReturn(mockHotRunner);
 
@@ -237,8 +240,8 @@ void main() {
             mockLogReader.addLine(
                 'Observatory listening on http://127.0.0.1:$devicePort');
           });
-        return mockLogReader;
-      });
+          return mockLogReader;
+        });
       final File foo = fs.file('lib/foo.dart')
         ..createSync();
 
@@ -254,6 +257,7 @@ void main() {
         debuggingOptions: anyNamed('debuggingOptions'),
         packagesFilePath: anyNamed('packagesFilePath'),
         usesTerminalUI: anyNamed('usesTerminalUI'),
+        flutterProject: anyNamed('flutterProject'),
         ipv6: false,
       )).called(1);
     }, overrides: <Type, Generator>{

@@ -1,3 +1,7 @@
+// Copyright 2018 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'context.dart';
 
 UserMessages get userMessages => context[UserMessages];
@@ -101,7 +105,7 @@ class UserMessages {
   String androidSdkBuildToolsOutdated(String managerPath, int sdkMinVersion, String buildToolsMinVersion) =>
       'Flutter requires Android SDK $sdkMinVersion and the Android BuildTools $buildToolsMinVersion\n'
       'To update using sdkmanager, run:\n'
-      '  $managerPath "platforms;android-$sdkMinVersion" "build-tools;$buildToolsMinVersion"\n'
+      '  "$managerPath" "platforms;android-$sdkMinVersion" "build-tools;$buildToolsMinVersion"\n'
       'or visit https://flutter.io/setup/#android-setup for detailed instructions.';
 
   // Messages used in AndroidStudioValidator
@@ -111,6 +115,8 @@ class UserMessages {
   String get androidStudioResetDir =>
       'Consider removing your android-studio-dir setting by running:\n'
       'flutter config --android-studio-dir=';
+  String get aaptNotFound =>
+      'Could not locate aapt. Please ensure you have the Android buildtools installed.';
 
   // Messages used in NoAndroidStudioValidator
   String androidStudioMissing(String location) =>

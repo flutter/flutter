@@ -125,6 +125,11 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   @protected
   bool get disableShadows => false;
 
+  /// Increase the timeout for the current test by the given duration.
+  void addTime(Duration duration) {
+    // Noop, see [AutomatedTestWidgetsFlutterBinding. addTime] for an actual implementation.
+  }
+
   /// The value to set [debugCheckIntrinsicSizes] to while tests are running.
   ///
   /// This can be used to enable additional checks. For example,
@@ -226,7 +231,8 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// [AutomatedTestWidgetsFlutterBinding] implementation to increase the
   /// current timeout. See [AutomatedTestWidgetsFlutterBinding.addTime] for
   /// details. The value is ignored by the [LiveTestWidgetsFlutterBinding].
-  Future<T> runAsync<T>(Future<T> callback(), {
+  Future<T> runAsync<T>(
+    Future<T> callback(), {
     Duration additionalTime = const Duration(milliseconds: 1000),
   });
 
@@ -250,6 +256,12 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       assert(inTest);
       dispatchLocalesChanged(locales);
     });
+  }
+
+  /// Re-attempts the initialization of the lifecycle state after providing
+  /// test values in [TestWindow.initialLifecycleStateTestValue].
+  void readTestInitialLifecycleStateFromNativeWindow() {
+    readInitialLifecycleStateFromNativeWindow();
   }
 
   Size _surfaceSize;
@@ -311,7 +323,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   void dispatchEvent(
     PointerEvent event,
     HitTestResult hitTestResult, {
-    TestBindingEventSource source = TestBindingEventSource.device
+    TestBindingEventSource source = TestBindingEventSource.device,
   }) {
     assert(source == TestBindingEventSource.test);
     super.dispatchEvent(event, hitTestResult);
@@ -374,7 +386,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       'Test starting...',
       style: _messageStyle,
       textDirection: TextDirection.ltr,
-    )
+    ),
   );
 
   static const Widget _postTestMessage = Center(
@@ -382,7 +394,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       'Test finished.',
       style: _messageStyle,
       textDirection: TextDirection.ltr,
-    )
+    ),
   );
 
   /// Whether to include the output of debugDumpApp() when reporting
@@ -465,7 +477,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
         FlutterError.dumpErrorToConsole(details, forceReport: true);
         _pendingExceptionDetails = FlutterErrorDetails(
           exception: 'Multiple exceptions ($_exceptionCount) were detected during the running of the current test, and at least one was unexpected.',
-          library: 'Flutter test framework'
+          library: 'Flutter test framework',
         );
       } else {
         reportExceptionNoticed(details); // mostly this is just a hook for the LiveTestWidgetsFlutterBinding
@@ -487,7 +499,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
           exception: exception,
           stack: _unmangle(stack),
           context: 'running a test (but after the test had completed)',
-          library: 'Flutter test framework'
+          library: 'Flutter test framework',
         ), forceReport: true);
         return;
       }
@@ -544,7 +556,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
           }
           if (description.isNotEmpty)
             information.writeln('The test description was:\n$description');
-        }
+        },
       ));
       assert(_parentZone != null);
       assert(_pendingExceptionDetails != null, 'A test overrode FlutterError.onError but either failed to return it to its original state, or had unexpected additional errors that it could not handle. Typically, this is caused by using expect() before restoring FlutterError.onError.');
@@ -729,7 +741,8 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   }
 
   @override
-  Future<T> runAsync<T>(Future<T> callback(), {
+  Future<T> runAsync<T>(
+    Future<T> callback(), {
     Duration additionalTime = const Duration(milliseconds: 1000),
   }) {
     assert(additionalTime != null);
@@ -843,7 +856,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
       _timeoutCompleter.completeError(
         TimeoutException(
           'The test exceeded the timeout. It may have hung.\n'
-          'Consider using "addTime" to increase the timeout before expensive operations.',
+          'Consider using "tester.binding.addTime" to increase the timeout before expensive operations.',
           _timeout,
         ),
       );
@@ -873,6 +886,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   ///
   ///  * [defaultTestTimeout], the maximum that the timeout can reach.
   ///    (That timeout is implemented by the test package.)
+  @override
   void addTime(Duration duration) {
     assert(_timeout != null, 'addTime can only be called during a test.');
     _timeout += duration;
@@ -1193,7 +1207,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   void dispatchEvent(
     PointerEvent event,
     HitTestResult hitTestResult, {
-    TestBindingEventSource source = TestBindingEventSource.device
+    TestBindingEventSource source = TestBindingEventSource.device,
   }) {
     switch (source) {
       case TestBindingEventSource.test:
@@ -1237,7 +1251,8 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   }
 
   @override
-  Future<T> runAsync<T>(Future<T> callback(), {
+  Future<T> runAsync<T>(
+    Future<T> callback(), {
     Duration additionalTime = const Duration(milliseconds: 1000),
   }) async {
     assert(() {
@@ -1361,7 +1376,7 @@ class TestViewConfiguration extends ViewConfiguration {
     final Matrix4 matrix = Matrix4.compose(
       Vector3(shiftX, shiftY, 0.0), // translation
       Quaternion.identity(), // rotation
-      Vector3(scale, scale, 1.0) // scale
+      Vector3(scale, scale, 1.0), // scale
     );
     return matrix;
   }
@@ -1391,7 +1406,7 @@ const int _kPointerDecay = -2;
 class _LiveTestPointerRecord {
   _LiveTestPointerRecord(
     this.pointer,
-    this.position
+    this.position,
   ) : color = HSVColor.fromAHSV(0.8, (35.0 * pointer) % 360.0, 1.0, 1.0).toColor(),
       decay = 1;
   final int pointer;
@@ -1518,22 +1533,22 @@ class _MockHttpClient implements HttpClient {
   String userAgent;
 
   @override
-  void addCredentials(Uri url, String realm, HttpClientCredentials credentials) {}
+  void addCredentials(Uri url, String realm, HttpClientCredentials credentials) { }
 
   @override
-  void addProxyCredentials(String host, int port, String realm, HttpClientCredentials credentials) {}
+  void addProxyCredentials(String host, int port, String realm, HttpClientCredentials credentials) { }
 
   @override
-  set authenticate(Future<bool> Function(Uri url, String scheme, String realm) f) {}
+  set authenticate(Future<bool> Function(Uri url, String scheme, String realm) f) { }
 
   @override
-  set authenticateProxy(Future<bool> Function(String host, int port, String scheme, String realm) f) {}
+  set authenticateProxy(Future<bool> Function(String host, int port, String scheme, String realm) f) { }
 
   @override
-  set badCertificateCallback(bool Function(X509Certificate cert, String host, int port) callback) {}
+  set badCertificateCallback(bool Function(X509Certificate cert, String host, int port) callback) { }
 
   @override
-  void close({ bool force = false }) {}
+  void close({ bool force = false }) { }
 
   @override
   Future<HttpClientRequest> delete(String host, int port, String path) {
@@ -1546,7 +1561,7 @@ class _MockHttpClient implements HttpClient {
   }
 
   @override
-  set findProxy(String Function(Uri url) f) {}
+  set findProxy(String Function(Uri url) f) { }
 
   @override
   Future<HttpClientRequest> get(String host, int port, String path) {
@@ -1618,10 +1633,10 @@ class _MockHttpRequest extends HttpClientRequest {
   final HttpHeaders headers = _MockHttpHeaders();
 
   @override
-  void add(List<int> data) {}
+  void add(List<int> data) { }
 
   @override
-  void addError(Object error, [ StackTrace stackTrace ]) {}
+  void addError(Object error, [ StackTrace stackTrace ]) { }
 
   @override
   Future<void> addStream(Stream<List<int>> stream) {
@@ -1654,16 +1669,16 @@ class _MockHttpRequest extends HttpClientRequest {
   Uri get uri => null;
 
   @override
-  void write(Object obj) {}
+  void write(Object obj) { }
 
   @override
-  void writeAll(Iterable<Object> objects, [ String separator = '' ]) {}
+  void writeAll(Iterable<Object> objects, [ String separator = '' ]) { }
 
   @override
-  void writeCharCode(int charCode) {}
+  void writeCharCode(int charCode) { }
 
   @override
-  void writeln([ Object obj = '' ]) {}
+  void writeln([ Object obj = '' ]) { }
 }
 
 /// A mocked [HttpClientResponse] which is empty and has a [statusCode] of 400.
@@ -1720,25 +1735,25 @@ class _MockHttpHeaders extends HttpHeaders {
   List<String> operator [](String name) => <String>[];
 
   @override
-  void add(String name, Object value) {}
+  void add(String name, Object value) { }
 
   @override
-  void clear() {}
+  void clear() { }
 
   @override
-  void forEach(void Function(String name, List<String> values) f) {}
+  void forEach(void Function(String name, List<String> values) f) { }
 
   @override
-  void noFolding(String name) {}
+  void noFolding(String name) { }
 
   @override
-  void remove(String name, Object value) {}
+  void remove(String name, Object value) { }
 
   @override
-  void removeAll(String name) {}
+  void removeAll(String name) { }
 
   @override
-  void set(String name, Object value) {}
+  void set(String name, Object value) { }
 
   @override
   String value(String name) => null;

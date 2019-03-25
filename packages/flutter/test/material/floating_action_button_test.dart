@@ -110,11 +110,6 @@ void main() {
     expect(find.text('Add'), findsOneWidget);
   });
 
-  testWidgets('Floating Action Button elevation when highlighted - defaults', (WidgetTester tester) async {
-    expect(const FloatingActionButton(onPressed: null).highlightElevation, 12.0);
-    expect(const FloatingActionButton(onPressed: null, highlightElevation: 0.0).highlightElevation, 0.0);
-  });
-
   testWidgets('Floating Action Button elevation when highlighted - effect', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -136,7 +131,7 @@ void main() {
         home: Scaffold(
           floatingActionButton: FloatingActionButton(
             onPressed: () { },
-            highlightElevation: 20.0
+            highlightElevation: 20.0,
           ),
         ),
       ),
@@ -153,9 +148,33 @@ void main() {
   });
 
   testWidgets('Floating Action Button elevation when disabled - defaults', (WidgetTester tester) async {
-    expect(FloatingActionButton(onPressed: () { }).disabledElevation, 6.0);
-    expect(const FloatingActionButton(onPressed: null).disabledElevation, 6.0);
-    expect(FloatingActionButton(onPressed: () { }, disabledElevation: 0.0).disabledElevation, 0.0);
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          floatingActionButton: FloatingActionButton(
+            onPressed: null,
+          ),
+        ),
+      ),
+    );
+
+    // Disabled elevation defaults to regular default elevation.
+    expect(tester.widget<PhysicalShape>(find.byType(PhysicalShape)).elevation, 6.0);
+  });
+
+  testWidgets('Floating Action Button elevation when disabled - override', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          floatingActionButton: FloatingActionButton(
+            onPressed: null,
+            disabledElevation: 0,
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.widget<PhysicalShape>(find.byType(PhysicalShape)).elevation, 0.0);
   });
 
   testWidgets('Floating Action Button elevation when disabled - effect', (WidgetTester tester) async {
@@ -294,8 +313,14 @@ void main() {
       return tester.widget<FloatingActionButton>(fabFinder);
     }
 
+    final Finder materialButtonFinder = find.byType(RawMaterialButton);
+
+    RawMaterialButton getRawMaterialButtonWidget() {
+      return tester.widget<RawMaterialButton>(materialButtonFinder);
+    }
+
     expect(getFabWidget().isExtended, false);
-    expect(getFabWidget().shape, const CircleBorder());
+    expect(getRawMaterialButtonWidget().shape, const CircleBorder());
 
     await tester.pumpWidget(
       MaterialApp(
@@ -313,7 +338,7 @@ void main() {
     );
 
     expect(getFabWidget().isExtended, true);
-    expect(getFabWidget().shape, const StadiumBorder());
+    expect(getRawMaterialButtonWidget().shape, const StadiumBorder());
     expect(find.text('label'), findsOneWidget);
     expect(find.byType(Icon), findsOneWidget);
 
@@ -345,6 +370,12 @@ void main() {
       return tester.widget<FloatingActionButton>(fabFinder);
     }
 
+    final Finder materialButtonFinder = find.byType(RawMaterialButton);
+
+    RawMaterialButton getRawMaterialButtonWidget() {
+      return tester.widget<RawMaterialButton>(materialButtonFinder);
+    }
+
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -360,7 +391,7 @@ void main() {
     );
 
     expect(getFabWidget().isExtended, true);
-    expect(getFabWidget().shape, const StadiumBorder());
+    expect(getRawMaterialButtonWidget().shape, const StadiumBorder());
     expect(find.text('label'), findsOneWidget);
     expect(find.byType(Icon), findsNothing);
 
@@ -477,7 +508,7 @@ void main() {
             SemanticsFlag.isEnabled,
           ],
           actions: <SemanticsAction>[
-            SemanticsAction.tap
+            SemanticsAction.tap,
           ],
         ),
       ],
@@ -543,7 +574,7 @@ void main() {
                 TestSemantics(
                   label: 'Add Photo',
                   actions: <SemanticsAction>[
-                    SemanticsAction.tap
+                    SemanticsAction.tap,
                   ],
                   flags: <SemanticsFlag>[
                     SemanticsFlag.isButton,
@@ -636,7 +667,7 @@ void main() {
             child: RepaintBoundary(
               key: key,
               child: FloatingActionButton(
-                onPressed: () {},
+                onPressed: () { },
                 child: const Icon(Icons.add),
               ),
             ),
@@ -655,7 +686,7 @@ void main() {
     );
   });
 
-  testWidgets('Floating Action Button has no clip by default', (WidgetTester tester) async{
+  testWidgets('Floating Action Button has no clip by default', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
           textDirection: TextDirection.ltr,
@@ -663,13 +694,13 @@ void main() {
             child: FloatingActionButton(
               onPressed: () { /* to make sure the button is enabled */ },
             ),
-          )
+          ),
       ),
     );
 
     expect(
         tester.renderObject(find.byType(FloatingActionButton)),
-        paintsExactlyCountTimes(#clipPath, 0)
+        paintsExactlyCountTimes(#clipPath, 0),
     );
   });
 }

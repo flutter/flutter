@@ -65,7 +65,7 @@ class FlutterTesterDevice extends Device {
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.tester;
 
   @override
-  void clearLogs() {}
+  void clearLogs() { }
 
   final _FlutterTesterDeviceLogReader _logReader =
       _FlutterTesterDeviceLogReader();
@@ -96,7 +96,6 @@ class FlutterTesterDevice extends Device {
     @required DebuggingOptions debuggingOptions,
     Map<String, dynamic> platformArgs,
     bool prebuiltApplication = false,
-    bool applicationNeedsRebuild = false,
     bool usesTerminalUi = true,
     bool ipv6 = false,
   }) async {
@@ -154,17 +153,17 @@ class FlutterTesterDevice extends Device {
       // Setting a bool can't fail in the callback.
       unawaited(_process.exitCode.then<void>((_) => _isRunning = false));
       _process.stdout
-          .transform<String>(utf8.decoder)
-          .transform<String>(const LineSplitter())
-          .listen((String line) {
-        _logReader.addLine(line);
-      });
+        .transform<String>(utf8.decoder)
+        .transform<String>(const LineSplitter())
+        .listen((String line) {
+          _logReader.addLine(line);
+        });
       _process.stderr
-          .transform<String>(utf8.decoder)
-          .transform<String>(const LineSplitter())
-          .listen((String line) {
-        _logReader.addLine(line);
-      });
+        .transform<String>(utf8.decoder)
+        .transform<String>(const LineSplitter())
+        .listen((String line) {
+          _logReader.addLine(line);
+        });
 
       if (!debuggingOptions.debuggingEnabled)
         return LaunchResult.succeeded();

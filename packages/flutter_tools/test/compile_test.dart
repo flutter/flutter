@@ -78,14 +78,17 @@ example:org-dartlang-app:/
     });
   });
 
-  test(StdoutHandler, () async {
+  testUsingContext('StdOutHandler test', () async {
     final StdoutHandler stdoutHandler = StdoutHandler();
     stdoutHandler.handler('result 12345');
     expect(stdoutHandler.boundaryKey, '12345');
+    stdoutHandler.handler('12345');
     stdoutHandler.handler('12345 message 0');
     final CompilerOutput output = await stdoutHandler.compilerOutput.future;
     expect(output.errorCount, 0);
     expect(output.outputFilename, 'message');
+  }, overrides: <Type, Generator>{
+    Logger: () => BufferLogger(),
   });
 
   group('batch compile', () {
@@ -115,9 +118,10 @@ example:org-dartlang-app:/
       when(mockFrontendServer.stdout)
           .thenAnswer((Invocation invocation) => Stream<List<int>>.fromFuture(
             Future<List<int>>.value(utf8.encode(
-              'result abc\nline1\nline2\nabc /path/to/main.dart.dill 0'
+              'result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0'
             ))
           ));
+      final KernelCompiler kernelCompiler = await kernelCompilerFactory.create(null);
       final CompilerOutput output = await kernelCompiler.compile(sdkRoot: '/path/to/sdkroot',
         mainPath: '/path/to/main.dart',
         trackWidgetCreation: false,
@@ -138,9 +142,10 @@ example:org-dartlang-app:/
       when(mockFrontendServer.stdout)
           .thenAnswer((Invocation invocation) => Stream<List<int>>.fromFuture(
             Future<List<int>>.value(utf8.encode(
-              'result abc\nline1\nline2\nabc'
+              'result abc\nline1\nline2\nabc\nabc'
             ))
           ));
+      final KernelCompiler kernelCompiler = await kernelCompilerFactory.create(null);
       final CompilerOutput output = await kernelCompiler.compile(sdkRoot: '/path/to/sdkroot',
         mainPath: '/path/to/main.dart',
         trackWidgetCreation: false,
@@ -163,9 +168,10 @@ example:org-dartlang-app:/
       when(mockFrontendServer.stdout)
           .thenAnswer((Invocation invocation) => Stream<List<int>>.fromFuture(
           Future<List<int>>.value(utf8.encode(
-              'result abc\nline1\nline2\nabc'
+              'result abc\nline1\nline2\nabc\nabc'
           ))
       ));
+      final KernelCompiler kernelCompiler = await kernelCompilerFactory.create(null);
       final CompilerOutput output = await kernelCompiler.compile(
         sdkRoot: '/path/to/sdkroot',
         mainPath: '/path/to/main.dart',
@@ -220,7 +226,7 @@ example:org-dartlang-app:/
       when(mockFrontendServer.stdout)
           .thenAnswer((Invocation invocation) => Stream<List<int>>.fromFuture(
             Future<List<int>>.value(utf8.encode(
-              'result abc\nline1\nline2\nabc /path/to/main.dart.dill 0'
+              'result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0'
             ))
           ));
 
@@ -264,7 +270,7 @@ example:org-dartlang-app:/
       final StreamController<List<int>> streamController = StreamController<List<int>>();
       when(mockFrontendServer.stdout)
           .thenAnswer((Invocation invocation) => streamController.stream);
-      streamController.add(utf8.encode('result abc\nline0\nline1\nabc /path/to/main.dart.dill 0\n'));
+      streamController.add(utf8.encode('result abc\nline0\nline1\nabc\nabc /path/to/main.dart.dill 0\n'));
       await generator.recompile(
         '/path/to/main.dart',
         null, /* invalidatedFiles */
@@ -278,14 +284,14 @@ example:org-dartlang-app:/
       await _reject(streamController, generator, mockFrontendServerStdIn, '', '');
 
       await _recompile(streamController, generator, mockFrontendServerStdIn,
-        'result abc\nline1\nline2\nabc /path/to/main.dart.dill 0\n');
+        'result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0\n');
 
       await _accept(streamController, generator, mockFrontendServerStdIn, '^accept\\n\$');
 
       await _recompile(streamController, generator, mockFrontendServerStdIn,
-          'result abc\nline1\nline2\nabc /path/to/main.dart.dill 0\n');
+          'result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0\n');
 
-      await _reject(streamController, generator, mockFrontendServerStdIn, 'result abc\nabc\n',
+      await _reject(streamController, generator, mockFrontendServerStdIn, 'result abc\nabc\nabc\nabc',
           '^reject\\n\$');
 
       verifyNoMoreInteractions(mockFrontendServerStdIn);
@@ -309,15 +315,15 @@ example:org-dartlang-app:/
       when(mockFrontendServer.stdout)
           .thenAnswer((Invocation invocation) => streamController.stream);
       streamController.add(utf8.encode(
-        'result abc\nline0\nline1\nabc /path/to/main.dart.dill 0\n'
+        'result abc\nline0\nline1\nabc\nabc /path/to/main.dart.dill 0\n'
       ));
       await generator.recompile('/path/to/main.dart', null /* invalidatedFiles */, outputPath: '/build/');
       expect(mockFrontendServerStdIn.getAndClear(), 'compile /path/to/main.dart\n');
 
       await _recompile(streamController, generator, mockFrontendServerStdIn,
-        'result abc\nline1\nline2\nabc /path/to/main.dart.dill 0\n');
+        'result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0\n');
       await _recompile(streamController, generator, mockFrontendServerStdIn,
-        'result abc\nline2\nline3\nabc /path/to/main.dart.dill 0\n');
+        'result abc\nline2\nline3\nabc\nabc /path/to/main.dart.dill 0\n');
 
       verifyNoMoreInteractions(mockFrontendServerStdIn);
       expect(mockFrontendServerStdIn.getAndClear(), isEmpty);
@@ -334,8 +340,7 @@ example:org-dartlang-app:/
     });
   });
 
-  group('compile expression', ()
-  {
+  group('compile expression', () {
     ProcessManager mockProcessManager;
     ResidentCompiler generator;
     MockProcess mockFrontendServer;
@@ -390,7 +395,7 @@ example:org-dartlang-app:/
           compileExpressionResponseCompleter.future]));
 
       compileResponseCompleter.complete(Future<List<int>>.value(utf8.encode(
-        'result abc\nline1\nline2\nabc /path/to/main.dart.dill 0\n'
+        'result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0\n'
       )));
 
       await generator.recompile(
@@ -407,7 +412,7 @@ example:org-dartlang-app:/
 
         compileExpressionResponseCompleter.complete(
             Future<List<int>>.value(utf8.encode(
-                'result def\nline1\nline2\ndef /path/to/main.dart.dill.incremental 0\n'
+                'result def\nline1\nline2\ndef\ndef /path/to/main.dart.dill.incremental 0\n'
             )));
         generator.compileExpression(
             '2+2', null, null, null, null, false).then(
@@ -489,7 +494,7 @@ example:org-dartlang-app:/
       );
 
       compileResponseCompleter.complete(Future<List<int>>.value(utf8.encode(
-          'result abc\nline1\nline2\nabc /path/to/main.dart.dill 0\n'
+          'result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0\n'
       )));
 
       expect(await lastExpressionCompleted.future, isTrue);
@@ -515,7 +520,7 @@ Future<void> _recompile(
   });
   final CompilerOutput output = await generator.recompile(
     null /* mainPath */,
-    <String>['/path/to/main.dart'],
+    <Uri>[Uri.parse('/path/to/main.dart')],
     outputPath: '/build/',
   );
   expect(output.outputFilename, equals('/path/to/main.dart.dill'));
@@ -527,9 +532,12 @@ Future<void> _recompile(
   mockFrontendServerStdIn._stdInWrites.clear();
 }
 
-Future<void> _accept(StreamController<List<int>> streamController,
-    ResidentCompiler generator, MockStdIn mockFrontendServerStdIn,
-    String expected) async {
+Future<void> _accept(
+  StreamController<List<int>> streamController,
+  ResidentCompiler generator,
+  MockStdIn mockFrontendServerStdIn,
+  String expected,
+) async {
   // Put content into the output stream after generator.recompile gets
   // going few lines below, resets completer.
   generator.accept();
@@ -539,9 +547,13 @@ Future<void> _accept(StreamController<List<int>> streamController,
   mockFrontendServerStdIn._stdInWrites.clear();
 }
 
-Future<void> _reject(StreamController<List<int>> streamController,
-    ResidentCompiler generator, MockStdIn mockFrontendServerStdIn,
-    String mockCompilerOutput, String expected) async {
+Future<void> _reject(
+  StreamController<List<int>> streamController,
+  ResidentCompiler generator,
+  MockStdIn mockFrontendServerStdIn,
+  String mockCompilerOutput,
+  String expected,
+) async {
   // Put content into the output stream after generator.recompile gets
   // going few lines below, resets completer.
   scheduleMicrotask(() {

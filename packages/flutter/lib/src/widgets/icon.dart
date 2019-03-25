@@ -48,7 +48,8 @@ class Icon extends StatelessWidget {
   /// Creates an icon.
   ///
   /// The [size] and [color] default to the value given by the current [IconTheme].
-  const Icon(this.icon, {
+  const Icon(
+    this.icon, {
     Key key,
     this.size,
     this.color,
@@ -141,7 +142,7 @@ class Icon extends StatelessWidget {
     if (icon == null) {
       return Semantics(
         label: semanticLabel,
-        child: SizedBox(width: iconSize, height: iconSize)
+        child: SizedBox(width: iconSize, height: iconSize),
       );
     }
 
