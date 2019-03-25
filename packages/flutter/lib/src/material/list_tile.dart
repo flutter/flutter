@@ -164,6 +164,12 @@ enum ListTileControlAffinity {
 /// and to ensure that [subtitle] doesn't wrap (if [isThreeLine] is false) or
 /// wraps to two lines (if it is true).
 ///
+/// Leading and trailing widgets will be constrained in height according to
+/// the [Material spec](https://material.io/design/components/lists.html).
+/// An exception is made for one-line ListTiles for accessibility. Please
+/// see the example below to see how to adhere to both Material spec and
+/// accessibility requirements.
+///
 /// List tiles are typically used in [ListView]s, or arranged in [Column]s in
 /// [Drawer]s and [Card]s.
 ///
@@ -196,6 +202,43 @@ enum ListTileControlAffinity {
 ///   enabled: _act == 2,
 ///   onTap: () { /* react to the tile being tapped */ }
 /// )
+/// ```
+/// {@end-tool}
+///
+/// For accessibility purposes, tappable leading and trailing widgets have to
+/// be at least 48x48px in size. However, to adhere with Material spec,
+/// trailing/leading widgets in one-line ListTiles should visually be at
+/// most 32px (dense: true) or 40px (dense: false) in height, which may
+/// conflict with the accessibility requirement.
+///
+/// For this reason, ListTile is implemented such that the height of leading
+/// and trailing widgets will be constrained by the actual height of the
+/// ListTile. The following is an example of a one-line, non-dense ListTile
+/// with a tappable leading widget that adheres to accessibility requirements
+/// and the Material spec.
+///
+/// {@tool sample}
+///
+/// ```dart
+/// ListTile(
+///   dense: true,
+///   leading: GestureDetector(
+///     // allows background to be tappable
+///     behavior: HitTestBehavior.translucent,
+///     onTap: () {...},
+///     child: Container(
+///       // 48x48 box that is tappable
+///       width: 48,
+///       height: 48,
+///       child: Padding(
+///         // creates an avatar that visually adheres to Material
+///         padding: EdgeInsets.all(8.0),
+///         child: CircleAvatar(),
+///       ),
+///     ),
+///   ),
+///   title: Text('title'),
+/// ),
 /// ```
 /// {@end-tool}
 ///
@@ -879,13 +922,6 @@ class _RenderListTile extends RenderBox {
     return isDense ? 76.0 : 88.0;
   }
 
-  double get _maxIconHeight {
-    // One-line trailing and leading widget sizing does not follow
-    // Material specifications, but this sizing required to adhere
-    // to accessibility requirements for smallest tappable widget.
-    return isDense ? 48.0 : 56.0;
-  }
-
   @override
   double computeMinIntrinsicHeight(double width) {
     return math.max(
@@ -933,7 +969,10 @@ class _RenderListTile extends RenderBox {
     final bool isOneLine = !isThreeLine && !hasSubtitle;
 
     final BoxConstraints maxIconHeightConstraint = BoxConstraints(
-      maxHeight: _maxIconHeight,
+      // One-line trailing and leading widget sizing does not follow
+      // Material specifications, but this sizing required to adhere
+      // to accessibility requirements for smallest tappable widget.
+      maxHeight: isDense ? 48.0 : 56.0,
     );
     final BoxConstraints looseConstraints = constraints.loosen();
     final BoxConstraints iconConstraints = looseConstraints.enforce(maxIconHeightConstraint);
