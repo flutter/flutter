@@ -117,6 +117,8 @@ class VulkanProcTable : public fml::RefCountedThreadSafe<VulkanProcTable> {
 #if OS_FUCHSIA
   DEFINE_PROC(GetMemoryFuchsiaHandleKHR);
   DEFINE_PROC(ImportSemaphoreFuchsiaHandleKHR);
+  DEFINE_PROC(GetMemoryZirconHandleFUCHSIA);
+  DEFINE_PROC(ImportSemaphoreZirconHandleFUCHSIA);
 #endif  // OS_FUCHSIA
 
 #undef DEFINE_PROC
