@@ -56,6 +56,35 @@ void main() {
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
     });
+
+    testUsingContext('wildcard directories are updated when filesystem changes', () async {
+      fs.file('.packages').createSync();
+      fs.file('assets/foo/bar.txt').createSync(recursive: true);
+      fs.file('pubspec.yaml')
+        ..createSync()
+        ..writeAsStringSync(r'''
+name: example
+flutter:
+  assets:
+    - assets/foo/
+''');
+      final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
+      await bundle.build(manifestPath: 'pubspec.yaml');
+      expect(bundle.entries.length, 4);
+      expect(bundle.needsBuild(manifestPath: 'pubspec.yaml'), false);
+
+      // Adding a file should update the stat of the directory, but instead
+      // we need to fully recreate it.
+      fs.directory('assets/foo').deleteSync(recursive: true);
+      fs.file('assets/foo/fizz.txt').createSync(recursive: true);
+      fs.file('assets/foo/bar.txt').createSync();
+
+      expect(bundle.needsBuild(manifestPath: 'pubspec.yaml'), true);
+      await bundle.build(manifestPath: 'pubspec.yaml');
+      expect(bundle.entries.length, 5);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => testFileSystem,
+    });
   });
 
 }
