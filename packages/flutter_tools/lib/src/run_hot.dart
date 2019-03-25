@@ -538,7 +538,8 @@ class HotRunner extends ResidentRunner {
       }
       final Status status = logger.startProgress(
         'Performing hot restart...',
-        timeout: kFastOperation,
+        //timeout: kFastOperation,
+        timeout: const Duration(milliseconds: 375),
         progressId: 'hot.restart',
       );
       try {
