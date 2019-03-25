@@ -31,6 +31,13 @@ class B extends A with ChangeNotifier {
   }
 }
 
+// A simple int container with overridden == operator that compares contents.
+class IntContainer {
+  int x;
+  bool operator ==(o) => o is IntContainer && o.x == x;
+  IntContainer(this.x);
+};
+
 void main() {
   testWidgets('ChangeNotifier', (WidgetTester tester) async {
     final List<String> log = <String>[];
@@ -225,6 +232,23 @@ void main() {
 
     notifier.value = 3.0;
     expect(log, isEmpty);
+  });
+
+  test('ValueNotifier ignores overridden operator==', () {
+    // ValueNotifier should notify if the contained value is changed to a
+    // different instance, even if the == operator between the two instances
+    // returns true. They are distinct and the difference might be important.
+    final c = IntContainer(5);
+    final ValueNotifier<IntContainer> notifier = ValueNotifier<IntContainer>(c);
+    final List<int> log = <int>[];
+    final VoidCallback listener = () { log.add(notifier.value.x); };
+    notifier.addListener(listener);
+    // Set value to the same instance it already contains.
+    notifier.value = c;
+    expect(log, isEmpty);
+    // Set value to same content but a different instance.
+    notifier.value = IntContainer(5);
+    expect(log, equals(<int>[ 5 ]));
   });
 
   test('Listenable.merge toString', () {

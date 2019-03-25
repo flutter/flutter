@@ -260,7 +260,7 @@ class ValueNotifier<T> extends ChangeNotifier implements ValueListenable<T> {
   T get value => _value;
   T _value;
   set value(T newValue) {
-    if (_value == newValue)
+    if (identical(_value, newValue))
       return;
     _value = newValue;
     notifyListeners();
