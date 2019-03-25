@@ -355,7 +355,7 @@ Int32List _encodeTextStyle(
 ///
 /// See also:
 ///
-///  * [TextStyle], the class in the [painting] library that encapsulates this class.
+///  * [TextStyle](https://api.flutter.dev/flutter/painting/TextStyle-class.html), the class in the [painting] library.
 ///
 class TextStyle {
   /// Creates a new TextStyle object.
@@ -799,7 +799,7 @@ ByteData _encodeStrut(
 
 /// See also:
 ///
-///  * [StrutStyle], the class in the [painting] library that encapsulates this class.
+///  * [StrutStyle](https://api.flutter.dev/flutter/painting/StrutStyle-class.html), the class in the [painting] library.
 ///
 class StrutStyle {
   /// Creates a new StrutStyle object.
