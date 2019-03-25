@@ -13,6 +13,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.*;
+import android.view.accessibility.AccessibilityEvent;
 import android.widget.FrameLayout;
 
 import java.lang.reflect.*;
@@ -57,6 +58,9 @@ class SingleViewPresentation extends Presentation {
 
     private final PlatformViewFactory mViewFactory;
 
+    // A reference to the current accessibility bridge to which accessibility events will be delegated.
+    private final AccessibilityEventsDelegate mAccessibilityEventsDelegate;
+
     // This is the view id assigned by the Flutter framework to the embedded view, we keep it here
     // so when we create the platform view we can tell it its view id.
     private int mViewId;
@@ -67,7 +71,7 @@ class SingleViewPresentation extends Presentation {
 
     // The root view for the presentation, it has 2 childs: mContainer which contains the embedded view, and
     // mFakeWindowRootView which contains views that were added directly to the presentation's window manager.
-    private FrameLayout mRootView;
+    private AccessibilityDelegatingFrameLayout mRootView;
 
     // Contains the embedded platform view (mView.getView()) when it is attached to the presentation.
     private FrameLayout mContainer;
@@ -82,10 +86,13 @@ class SingleViewPresentation extends Presentation {
             Context outerContext,
             Display display,
             PlatformViewFactory viewFactory,
+            AccessibilityEventsDelegate accessibilityEventsDelegate,
             int viewId,
-            Object createParams) {
+            Object createParams
+    ) {
         super(outerContext, display);
         mViewFactory = viewFactory;
+        mAccessibilityEventsDelegate = accessibilityEventsDelegate;
         mViewId = viewId;
         mCreateParams = createParams;
         mState = new PresentationState();
@@ -102,8 +109,14 @@ class SingleViewPresentation extends Presentation {
      * <p>The display's density must match the density of the context used
      * when the view was created.
      */
-    public SingleViewPresentation(Context outerContext, Display display, PresentationState state) {
+    public SingleViewPresentation(
+            Context outerContext,
+            Display display,
+            AccessibilityEventsDelegate accessibilityEventsDelegate,
+            PresentationState state
+    ) {
         super(outerContext, display);
+        mAccessibilityEventsDelegate = accessibilityEventsDelegate;
         mViewFactory = null;
         mState = state;
         getWindow().setFlags(
@@ -130,8 +143,9 @@ class SingleViewPresentation extends Presentation {
             mState.mView = mViewFactory.create(context, mViewId, mCreateParams);
         }
 
-        mContainer.addView(mState.mView.getView());
-        mRootView = new FrameLayout(getContext());
+        View embeddedView = mState.mView.getView();
+        mContainer.addView(embeddedView);
+        mRootView = new AccessibilityDelegatingFrameLayout(getContext(), mAccessibilityEventsDelegate, embeddedView);
         mRootView.addView(mContainer);
         mRootView.addView(mState.mFakeWindowRootView);
         setContentView(mRootView);
@@ -318,6 +332,26 @@ class SingleViewPresentation extends Presentation {
             View view = (View) args[0];
             WindowManager.LayoutParams layoutParams = (WindowManager.LayoutParams) args[1];
             mFakeWindowRootView.updateViewLayout(view, layoutParams);
+        }
+    }
+
+    private static class AccessibilityDelegatingFrameLayout extends FrameLayout {
+        private final AccessibilityEventsDelegate mAccessibilityEventsDelegate;
+        private final View mEmbeddedView;
+
+        public AccessibilityDelegatingFrameLayout(
+                Context context,
+                AccessibilityEventsDelegate accessibilityEventsDelegate,
+                View ebeddedView
+        ) {
+            super(context);
+            mAccessibilityEventsDelegate = accessibilityEventsDelegate;
+            mEmbeddedView = ebeddedView;
+        }
+
+        @Override
+        public boolean requestSendAccessibilityEvent(View child, AccessibilityEvent event) {
+            return mAccessibilityEventsDelegate.requestSendAccessibilityEvent(mEmbeddedView, child, event);
         }
     }
 }
