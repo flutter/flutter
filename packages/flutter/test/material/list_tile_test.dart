@@ -787,6 +787,7 @@ void main() {
   });
 
   testWidgets('ListTile leading icon height does not exceed ListTile height', (WidgetTester tester) async {
+    // regression test for https://github.com/flutter/flutter/issues/28765
     const SizedBox oversizedWidget = SizedBox(height: 80.0, width: 24.0, child: Placeholder());
 
     // Dense One line
@@ -953,6 +954,7 @@ void main() {
   });
 
   testWidgets('ListTile trailing icon height does not exceed ListTile height', (WidgetTester tester) async {
+    // regression test for https://github.com/flutter/flutter/issues/28765
     const SizedBox oversizedWidget = SizedBox(height: 80.0, width: 24.0, child: Placeholder());
 
     // Dense One line
