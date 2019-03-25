@@ -6,16 +6,20 @@
 #include "embedder.h"
 #include "flutter/fml/file.h"
 #include "flutter/fml/mapping.h"
+#include "flutter/shell/platform/embedder/tests/embedder_config_builder.h"
+#include "flutter/shell/platform/embedder/tests/embedder_test.h"
 #include "flutter/testing/testing.h"
 
-namespace {
+namespace shell {
+namespace testing {
 
-void MapAOTAsset(std::vector<std::unique_ptr<fml::FileMapping>>& aot_mappings,
-                 const fml::UniqueFD& fixtures_dir,
-                 const char* path,
-                 bool executable,
-                 const uint8_t** data,
-                 size_t* size) {
+static void MapAOTAsset(
+    std::vector<std::unique_ptr<fml::FileMapping>>& aot_mappings,
+    const fml::UniqueFD& fixtures_dir,
+    const char* path,
+    bool executable,
+    const uint8_t** data,
+    size_t* size) {
   fml::UniqueFD file =
       fml::OpenFile(fixtures_dir, path, false, fml::FilePermission::kRead);
   std::unique_ptr<fml::FileMapping> mapping;
@@ -33,8 +37,6 @@ void MapAOTAsset(std::vector<std::unique_ptr<fml::FileMapping>>& aot_mappings,
   *size = mapping->GetSize();
   aot_mappings.emplace_back(std::move(mapping));
 }
-
-}  // anonymous namespace
 
 TEST(EmbedderTest, MustNotRunWithInvalidArgs) {
   FlutterEngine engine = nullptr;
@@ -58,14 +60,14 @@ TEST(EmbedderTest, CanLaunchAndShutdownWithValidProjectArgs) {
 
   FlutterProjectArgs args = {};
   args.struct_size = sizeof(FlutterProjectArgs);
-  args.assets_path = testing::GetFixturesPath();
+  args.assets_path = ::testing::GetFixturesPath();
   args.root_isolate_create_callback = [](void* data) {
     std::string str_data = reinterpret_cast<char*>(data);
     ASSERT_EQ(str_data, "Data");
   };
 
   fml::UniqueFD fixtures_dir = fml::OpenDirectory(
-      testing::GetFixturesPath(), false, fml::FilePermission::kRead);
+      ::testing::GetFixturesPath(), false, fml::FilePermission::kRead);
   std::vector<std::unique_ptr<fml::FileMapping>> aot_mappings;
   if (fml::FileExists(fixtures_dir, "vm_snapshot_data")) {
     MapAOTAsset(aot_mappings, fixtures_dir, "vm_snapshot_data", false,
@@ -90,3 +92,32 @@ TEST(EmbedderTest, CanLaunchAndShutdownWithValidProjectArgs) {
   result = FlutterEngineShutdown(engine);
   ASSERT_EQ(result, FlutterEngineResult::kSuccess);
 }
+
+using EmbedderFixture = testing::EmbedderTest;
+
+TEST_F(EmbedderFixture, CanLaunchAndShutdownWithFixture) {
+  EmbedderConfigBuilder builder;
+
+  builder.SetSoftwareRendererConfig();
+  builder.SetAssetsPathFromFixture(this);
+  builder.SetSnapshotsFromFixture(this);
+
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+}
+
+TEST_F(EmbedderFixture, CanLaunchAndShutdownWithFixtureMultipleTimes) {
+  EmbedderConfigBuilder builder;
+
+  builder.SetSoftwareRendererConfig();
+  builder.SetAssetsPathFromFixture(this);
+  builder.SetSnapshotsFromFixture(this);
+  for (size_t i = 0; i < 100; ++i) {
+    auto engine = builder.LaunchEngine();
+    ASSERT_TRUE(engine.is_valid());
+    FML_LOG(INFO) << "Engine launch count: " << i + 1;
+  }
+}
+
+}  // namespace testing
+}  // namespace shell
