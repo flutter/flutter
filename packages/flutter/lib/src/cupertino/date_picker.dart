@@ -1100,7 +1100,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
   Widget _buildLabel(String text) {
     return Text(
       text,
-      textScaleFactor: 0.9,
+      textScaleFactor: localizations.scaleFactor,
       style: const TextStyle(fontWeight: FontWeight.w600),
     );
   }

@@ -214,6 +214,16 @@ abstract class CupertinoLocalizations {
   // The global version uses the translated string from the arb file.
   String get selectAllButtonLabel;
 
+  /// The scaling factor of the language with which the font size is
+  /// going to be calculated. The scaling factor of `0.8` is based on the
+  /// English language.
+  ///
+  /// Example:
+  ///
+  ///  - English word: `hours`, scale factor: `0.9`
+  ///  - French word: `heures`, scale factor: `1.0`
+  double get scaleFactor;
+
   /// The `CupertinoLocalizations` from the closest [Localizations] instance
   /// that encloses the given context.
   ///
@@ -377,6 +387,9 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Select All';
+
+  @override
+  double get scaleFactor => 0.9;
 
   /// Creates an object that provides US English resource values for the
   /// cupertino library widgets.
