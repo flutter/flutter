@@ -587,10 +587,10 @@ void main() {
     );
     //                                                                    LEFT                  TOP          WIDTH  HEIGHT
     expect(tester.getRect(find.byType(ListTile).at(0)),     Rect.fromLTWH(                0.0,          0.0, 800.0, 177.0));
-    expect(tester.getRect(find.byType(CircleAvatar).at(0)), Rect.fromLTWH(               16.0,         16.0,  40.0,  32.0));
+    expect(tester.getRect(find.byType(CircleAvatar).at(0)), Rect.fromLTWH(               16.0,         16.0,  40.0,  40.0));
     expect(tester.getRect(find.byType(Placeholder).at(0)),  Rect.fromLTWH(800.0 - 24.0 - 16.0,         16.0,  24.0,  24.0));
     expect(tester.getRect(find.byType(ListTile).at(1)),     Rect.fromLTWH(                0.0,        177.0, 800.0,  48.0));
-    expect(tester.getRect(find.byType(CircleAvatar).at(1)), Rect.fromLTWH(               16.0, 177.0 +  8.0,  40.0,  32.0));
+    expect(tester.getRect(find.byType(CircleAvatar).at(1)), Rect.fromLTWH(               16.0, 177.0 +  4.0,  40.0,  40.0));
     expect(tester.getRect(find.byType(Placeholder).at(1)),  Rect.fromLTWH(800.0 - 24.0 - 16.0, 177.0 + 12.0,  24.0,  24.0));
 
     // NON-DENSE "ONE"-LINE
@@ -787,7 +787,7 @@ void main() {
   });
 
   testWidgets('ListTile leading icon height does not exceed ListTile height', (WidgetTester tester) async {
-    const SizedBox oversizedWidget = SizedBox(height: 80.0, width:24.0, child: Placeholder());
+    const SizedBox oversizedWidget = SizedBox(height: 80.0, width: 24.0, child: Placeholder());
 
     // Dense One line
     await tester.pumpWidget(
@@ -811,8 +811,8 @@ void main() {
       ),
     );
 
-    expect(tester.getRect(find.byType(Placeholder).at(0)), Rect.fromLTWH(16.0, 8.0, 24.0, 32.0));
-    expect(tester.getRect(find.byType(Placeholder).at(1)), Rect.fromLTWH(16.0, 48.0 + 8.0, 24.0, 32.0));
+    expect(tester.getRect(find.byType(Placeholder).at(0)), Rect.fromLTWH(16.0, 0.0, 24.0, 48.0));
+    expect(tester.getRect(find.byType(Placeholder).at(1)), Rect.fromLTWH(16.0, 48.0, 24.0, 48.0));
 
     // Non-dense One line
     await tester.pumpWidget(
@@ -836,8 +836,8 @@ void main() {
       ),
     );
 
-    expect(tester.getRect(find.byType(Placeholder).at(0)), Rect.fromLTWH(16.0, 8.0, 24.0, 40.0));
-    expect(tester.getRect(find.byType(Placeholder).at(1)), Rect.fromLTWH(16.0, 56.0 + 8.0, 24.0, 40.0));
+    expect(tester.getRect(find.byType(Placeholder).at(0)), Rect.fromLTWH(16.0, 0.0, 24.0, 56.0));
+    expect(tester.getRect(find.byType(Placeholder).at(1)), Rect.fromLTWH(16.0, 56.0, 24.0, 56.0));
 
     // Dense Two line
     await tester.pumpWidget(
@@ -977,8 +977,8 @@ void main() {
       ),
     );
 
-    expect(tester.getRect(find.byType(Placeholder).at(0)), Rect.fromLTWH(800.0 - 16.0 - 24.0, 8.0, 24.0, 32.0));
-    expect(tester.getRect(find.byType(Placeholder).at(1)), Rect.fromLTWH(800.0 - 16.0 - 24.0, 48.0 + 8.0, 24.0, 32.0));
+    expect(tester.getRect(find.byType(Placeholder).at(0)), Rect.fromLTWH(800.0 - 16.0 - 24.0, 0, 24.0, 48.0));
+    expect(tester.getRect(find.byType(Placeholder).at(1)), Rect.fromLTWH(800.0 - 16.0 - 24.0, 48.0, 24.0, 48.0));
 
     // Non-dense One line
     await tester.pumpWidget(
@@ -1002,8 +1002,8 @@ void main() {
       ),
     );
 
-    expect(tester.getRect(find.byType(Placeholder).at(0)), Rect.fromLTWH(800.0 - 16.0 - 24.0, 8.0, 24.0, 40.0));
-    expect(tester.getRect(find.byType(Placeholder).at(1)), Rect.fromLTWH(800.0 - 16.0 - 24.0, 56.0 + 8.0, 24.0, 40.0));
+    expect(tester.getRect(find.byType(Placeholder).at(0)), Rect.fromLTWH(800.0 - 16.0 - 24.0, 0.0, 24.0, 56.0));
+    expect(tester.getRect(find.byType(Placeholder).at(1)), Rect.fromLTWH(800.0 - 16.0 - 24.0, 56.0, 24.0, 56.0));
 
     // Dense Two line
     await tester.pumpWidget(

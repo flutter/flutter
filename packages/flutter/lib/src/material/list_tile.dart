@@ -880,11 +880,9 @@ class _RenderListTile extends RenderBox {
   }
 
   double get _maxIconHeight {
-    final bool hasSubtitle = subtitle != null;
-    final bool isOneLine = !isThreeLine && !hasSubtitle;
-
-    if (isOneLine)
-      return isDense ? 32.0 : 40.0;
+    // One-line trailing and leading widget sizing does not follow
+    // Material specifications, but this sizing required to adhere
+    // to accessibility requirements for smallest tappable widget.
     return isDense ? 48.0 : 56.0;
   }
 
