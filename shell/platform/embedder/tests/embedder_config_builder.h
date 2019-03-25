@@ -8,6 +8,7 @@
 #include "flutter/fml/macros.h"
 #include "flutter/fml/unique_object.h"
 #include "flutter/shell/platform/embedder/embedder.h"
+#include "flutter/shell/platform/embedder/tests/embedder_context.h"
 #include "flutter/shell/platform/embedder/tests/embedder_test.h"
 
 namespace shell {
@@ -28,23 +29,32 @@ using UniqueEngine = fml::UniqueObject<FlutterEngine, UniqueEngineTraits>;
 
 class EmbedderConfigBuilder {
  public:
-  EmbedderConfigBuilder();
+  enum class InitializationPreference {
+    kInitialize,
+    kNoInitialize,
+  };
+
+  EmbedderConfigBuilder(EmbedderContext& context,
+                        InitializationPreference preference =
+                            InitializationPreference::kInitialize);
 
   ~EmbedderConfigBuilder();
 
   void SetSoftwareRendererConfig();
 
-  void SetAssetsPathFromFixture(const EmbedderTest* fixture);
+  void SetAssetsPath();
 
-  void SetSnapshotsFromFixture(const EmbedderTest* fixture);
+  void SetSnapshots();
 
-  UniqueEngine LaunchEngine(void* user_data = nullptr) const;
+  void SetIsolateCreateCallbackHook();
+
+  UniqueEngine LaunchEngine() const;
 
  private:
+  EmbedderContext& context_;
   FlutterProjectArgs project_args_ = {};
   FlutterRendererConfig renderer_config_ = {};
   FlutterSoftwareRendererConfig software_renderer_config_ = {};
-  std::string assets_path_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(EmbedderConfigBuilder);
 };

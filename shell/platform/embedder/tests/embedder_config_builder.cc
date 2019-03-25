@@ -7,12 +7,21 @@
 namespace shell {
 namespace testing {
 
-EmbedderConfigBuilder::EmbedderConfigBuilder() {
+EmbedderConfigBuilder::EmbedderConfigBuilder(
+    EmbedderContext& context,
+    InitializationPreference preference)
+    : context_(context) {
   project_args_.struct_size = sizeof(project_args_);
-
   software_renderer_config_.struct_size = sizeof(FlutterSoftwareRendererConfig);
   software_renderer_config_.surface_present_callback =
       [](void*, const void*, size_t, size_t) { return true; };
+
+  if (preference == InitializationPreference::kInitialize) {
+    SetSoftwareRendererConfig();
+    SetAssetsPath();
+    SetSnapshots();
+    SetIsolateCreateCallbackHook();
+  }
 }
 
 EmbedderConfigBuilder::~EmbedderConfigBuilder() = default;
@@ -22,39 +31,41 @@ void EmbedderConfigBuilder::SetSoftwareRendererConfig() {
   renderer_config_.software = software_renderer_config_;
 }
 
-void EmbedderConfigBuilder::SetAssetsPathFromFixture(
-    const EmbedderTest* fixture) {
-  assets_path_ = fixture->GetAssetsPath();
-  project_args_.assets_path = assets_path_.c_str();
+void EmbedderConfigBuilder::SetAssetsPath() {
+  project_args_.assets_path = context_.GetAssetsPath().c_str();
 }
 
-void EmbedderConfigBuilder::SetSnapshotsFromFixture(
-    const EmbedderTest* fixture) {
-  if (auto mapping = fixture->GetVMSnapshotData()) {
+void EmbedderConfigBuilder::SetSnapshots() {
+  if (auto mapping = context_.GetVMSnapshotData()) {
     project_args_.vm_snapshot_data = mapping->GetMapping();
     project_args_.vm_snapshot_data_size = mapping->GetSize();
   }
 
-  if (auto mapping = fixture->GetVMSnapshotInstructions()) {
+  if (auto mapping = context_.GetVMSnapshotInstructions()) {
     project_args_.vm_snapshot_instructions = mapping->GetMapping();
     project_args_.vm_snapshot_instructions_size = mapping->GetSize();
   }
 
-  if (auto mapping = fixture->GetIsolateSnapshotData()) {
+  if (auto mapping = context_.GetIsolateSnapshotData()) {
     project_args_.isolate_snapshot_data = mapping->GetMapping();
     project_args_.isolate_snapshot_data_size = mapping->GetSize();
   }
 
-  if (auto mapping = fixture->GetIsolateSnapshotInstructions()) {
+  if (auto mapping = context_.GetIsolateSnapshotInstructions()) {
     project_args_.isolate_snapshot_instructions = mapping->GetMapping();
     project_args_.isolate_snapshot_instructions_size = mapping->GetSize();
   }
 }
 
-UniqueEngine EmbedderConfigBuilder::LaunchEngine(void* user_data) const {
+void EmbedderConfigBuilder::SetIsolateCreateCallbackHook() {
+  project_args_.root_isolate_create_callback =
+      EmbedderContext::GetIsolateCreateCallbackHook();
+}
+
+UniqueEngine EmbedderConfigBuilder::LaunchEngine() const {
   FlutterEngine engine = nullptr;
   auto result = FlutterEngineRun(FLUTTER_ENGINE_VERSION, &renderer_config_,
-                                 &project_args_, user_data, &engine);
+                                 &project_args_, &context_, &engine);
 
   if (result != kSuccess) {
     return {};
