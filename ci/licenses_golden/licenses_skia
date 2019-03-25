@@ -1,4 +1,4 @@
-Signature: 9c4e8e1b5530f5f42dced2baba4f1461
+Signature: f368701a4592543393e79f177469fc95
 
 UNUSED LICENSES:
 
@@ -2267,6 +2267,7 @@ FILE: ../../../third_party/skia/infra/bots/recipes/perf_pathkit.expected/Perf-De
 FILE: ../../../third_party/skia/infra/bots/recipes/perf_pathkit.expected/Perf-Debian9-EMCC-GCE-CPU-AVX2-wasm-Release-All-PathKit.json
 FILE: ../../../third_party/skia/infra/bots/recipes/perf_pathkit.expected/pathkit_trybot.json
 FILE: ../../../third_party/skia/infra/bots/recipes/perf_skottietrace.expected/Perf-Android-Clang-AndroidOne-GPU-Mali400MP2-arm-Release-All-Android_SkottieTracing.json
+FILE: ../../../third_party/skia/infra/bots/recipes/perf_skottietrace.expected/Perf-Debian9-Clang-GCE-CPU-AVX2-x86_64-Release-All-SkottieTracing.json
 FILE: ../../../third_party/skia/infra/bots/recipes/perf_skottietrace.expected/skottietracing_parse_trace_error.json
 FILE: ../../../third_party/skia/infra/bots/recipes/perf_skottietrace.expected/skottietracing_trybot.json
 FILE: ../../../third_party/skia/infra/bots/recipes/recreate_skps.expected/Housekeeper-Nightly-RecreateSKPs_Canary.json
@@ -2967,6 +2968,7 @@ FILE: ../../../third_party/skia/src/gpu/gl/GrGLGpu.h
 FILE: ../../../third_party/skia/src/gpu/gl/GrGLGpuProgramCache.cpp
 FILE: ../../../third_party/skia/src/gpu/gl/GrGLIRect.h
 FILE: ../../../third_party/skia/src/gpu/gl/GrGLInterface.cpp
+FILE: ../../../third_party/skia/src/gpu/gl/GrGLInterfaceAutogen.cpp
 FILE: ../../../third_party/skia/src/gpu/gl/GrGLMakeNativeInterface_none.cpp
 FILE: ../../../third_party/skia/src/gpu/gl/GrGLProgram.cpp
 FILE: ../../../third_party/skia/src/gpu/gl/GrGLProgram.h
@@ -5868,6 +5870,8 @@ FILE: ../../../third_party/skia/modules/particles/src/SkParticleDrawable.cpp
 FILE: ../../../third_party/skia/modules/particles/src/SkParticleEffect.cpp
 FILE: ../../../third_party/skia/modules/particles/src/SkReflected.cpp
 FILE: ../../../third_party/skia/src/core/SkColorFilterPriv.h
+FILE: ../../../third_party/skia/src/gpu/gl/GrGLAssembleGLESInterfaceAutogen.cpp
+FILE: ../../../third_party/skia/src/gpu/gl/GrGLAssembleGLInterfaceAutogen.cpp
 FILE: ../../../third_party/skia/src/gpu/gl/GrGLAssembleHelpers.cpp
 FILE: ../../../third_party/skia/src/gpu/gl/GrGLAssembleInterface_gl.cpp
 FILE: ../../../third_party/skia/src/gpu/gl/GrGLAssembleInterface_gles.cpp
