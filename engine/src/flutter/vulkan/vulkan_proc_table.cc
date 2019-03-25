@@ -139,6 +139,8 @@ bool VulkanProcTable::SetupDeviceProcAddresses(
 #if OS_FUCHSIA
   ACQUIRE_PROC(GetMemoryFuchsiaHandleKHR, handle);
   ACQUIRE_PROC(ImportSemaphoreFuchsiaHandleKHR, handle);
+  ACQUIRE_PROC(GetMemoryZirconHandleFUCHSIA, handle);
+  ACQUIRE_PROC(ImportSemaphoreZirconHandleFUCHSIA, handle);
 #endif  // OS_FUCHSIA
   device_ = {handle, nullptr};
   return true;
