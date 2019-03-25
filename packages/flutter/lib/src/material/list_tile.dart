@@ -1059,8 +1059,8 @@ class _RenderListTile extends RenderBox {
       case TextDirection.rtl: {
         if (hasLeading)
           _positionBox(leading, Offset(tileWidth - leadingSize.width, leadingY));
-          final double titleX = hasTrailing ? trailingSize.width + _horizontalTitleGap : 0.0;
-          _positionBox(title, Offset(titleX, titleY));
+        final double titleX = hasTrailing ? trailingSize.width + _horizontalTitleGap : 0.0;
+        _positionBox(title, Offset(titleX, titleY));
         if (hasSubtitle)
           _positionBox(subtitle, Offset(titleX, subtitleY));
         if (hasTrailing)
@@ -1070,7 +1070,7 @@ class _RenderListTile extends RenderBox {
       case TextDirection.ltr: {
         if (hasLeading)
           _positionBox(leading, Offset(0.0, leadingY));
-          _positionBox(title, Offset(titleStart, titleY));
+        _positionBox(title, Offset(titleStart, titleY));
         if (hasSubtitle)
           _positionBox(subtitle, Offset(titleStart, subtitleY));
         if (hasTrailing)
