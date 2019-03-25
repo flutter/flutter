@@ -909,7 +909,10 @@ class PubspecHeader extends PubspecLine {
 
 /// A dependency, as represented by a line (or two) from a pubspec.yaml file.
 class PubspecDependency extends PubspecLine {
-  PubspecDependency(String line, this.name, this.suffix, {
+  PubspecDependency(
+    String line,
+    this.name,
+    this.suffix, {
     @required this.isTransitive,
     DependencyKind kind,
     this.version,
@@ -1093,7 +1096,7 @@ class PubspecDependency extends PubspecLine {
 
 /// Generates the File object for the pubspec.yaml file of a given Directory.
 File _pubspecFor(Directory directory) {
-  return fs.file('${directory.path}/pubspec.yaml');
+  return fs.file(fs.path.join(directory.path, 'pubspec.yaml'));
 }
 
 /// Generates the source of a fake pubspec.yaml file given a list of

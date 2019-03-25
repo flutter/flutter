@@ -386,7 +386,7 @@ class RenderUiKitView extends RenderBox {
       return;
     }
     final Offset localOffset = globalToLocal(event.position);
-    if(!(Offset.zero & size).contains(localOffset)) {
+    if (!(Offset.zero & size).contains(localOffset)) {
       return;
     }
     if (event != _lastPointerDownEvent) {
@@ -419,9 +419,11 @@ class RenderUiKitView extends RenderBox {
 // When the team wins a gesture the recognizer notifies the engine that it should release
 // the touch sequence to the embedded UIView.
 class _UiKitViewGestureRecognizer extends OneSequenceGestureRecognizer {
-  _UiKitViewGestureRecognizer(this.controller, this.gestureRecognizerFactories, {
+  _UiKitViewGestureRecognizer(
+    this.controller,
+    this.gestureRecognizerFactories, {
     PointerDeviceKind kind,
-  }): super(kind: kind) {
+  }) : super(kind: kind) {
     team = GestureArenaTeam();
     team.captain = this;
     _gestureRecognizers = gestureRecognizerFactories.map(
@@ -481,9 +483,11 @@ class _UiKitViewGestureRecognizer extends OneSequenceGestureRecognizer {
 // When the team wins the recognizer sends all the cached point events to the embedded Android view, and
 // sets itself to a "forwarding mode" where it will forward any new pointer event to the Android view.
 class _AndroidViewGestureRecognizer extends OneSequenceGestureRecognizer {
-  _AndroidViewGestureRecognizer(this.dispatcher, this.gestureRecognizerFactories, {
+  _AndroidViewGestureRecognizer(
+    this.dispatcher,
+    this.gestureRecognizerFactories, {
     PointerDeviceKind kind,
-  }): super(kind: kind) {
+  }) : super(kind: kind) {
     team = GestureArenaTeam();
     team.captain = this;
     _gestureRecognizers = gestureRecognizerFactories.map(
@@ -499,7 +503,7 @@ class _AndroidViewGestureRecognizer extends OneSequenceGestureRecognizer {
   // Before the arena for a pointer is resolved all events are cached here, if we win the arena
   // the cached events are dispatched to the view, if we lose the arena we clear the cache for
   // the pointer.
-  final Map<int, List<PointerEvent>> cachedEvents = <int, List<PointerEvent>> {};
+  final Map<int, List<PointerEvent>> cachedEvents = <int, List<PointerEvent>>{};
 
   // Pointer for which we have already won the arena, events for pointers in this set are
   // immediately dispatched to the Android view.

@@ -481,7 +481,7 @@ void main() {
         addSemanticIndexes: false,
         itemCount: 50,
         itemBuilder: (BuildContext context, int index) {
-          if (index == 0){
+          if (index == 0) {
             return const _AlwaysKeepAlive(
               key: GlobalObjectKey<_AlwaysKeepAliveState>(0),
             );
@@ -515,7 +515,7 @@ void main() {
         addSemanticIndexes: false,
         itemCount: 250,
         itemBuilder: (BuildContext context, int index) {
-          if (index % 2 == 0){
+          if (index % 2 == 0) {
             return _AlwaysKeepAlive(
               key: GlobalObjectKey<_AlwaysKeepAliveState>(index),
             );

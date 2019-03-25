@@ -82,7 +82,6 @@ tasks:
       correctly.
     stage: devicelab_win
     required_agent_capabilities: ["windows/android"]
-    flaky: true
 
   codegen_integration_mac:
     description: >
@@ -90,7 +89,6 @@ tasks:
       correctly.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
-    flaky: true
 
   codegen_integration_linux:
     description: >
@@ -98,7 +96,6 @@ tasks:
       correctly.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
-    flaky: true
 
   flutter_gallery_android__compile:
     description: >
@@ -489,6 +486,13 @@ tasks:
     stage: devicelab_win
     required_agent_capabilities: ["windows/android"]
 
+  run_without_leak_win:
+    description: >
+      Checks that `flutter run` does not leak dart.exe on Windows.
+    stage: devicelab_win
+    required_agent_capabilities: ["windows/android"]
+    flaky: true
+
   # Tests running on Linux hosts
 
   hot_mode_dev_cycle_linux__benchmark:
@@ -554,6 +558,13 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
 
+  run_without_leak_linux:
+    description: >
+      Checks that `flutter run` does not leak dart on Linux.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+    flaky: true
+
   flutter_gallery_ios32__start_up:
     description: >
       Measures the startup time of the Flutter Gallery app on 32-bit iOS.
@@ -566,3 +577,10 @@ tasks:
       32-bit iOS.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios32"]
+
+  run_without_leak_mac:
+    description: >
+      Checks that `flutter run` does not leak dart on macOS.
+    stage: devicelab
+    required_agent_capabilities: ["mac/android"]
+    flaky: true

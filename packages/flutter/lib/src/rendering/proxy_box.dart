@@ -1033,11 +1033,20 @@ class RenderBackdropFilter extends RenderProxyBox {
   @override
   bool get alwaysNeedsCompositing => child != null;
 
+  // TODO(liyuqian): remove this after updating the engine BackdropFilterLayer.
+  void _addTrasnparentPaint(PaintingContext context, Offset offset) {
+    // Draw a fully transparent paint to make sure that the cull rect won't be
+    // shrunk by Skia.
+    final Paint transparentPaint = Paint()..color = const Color(0x00000000);
+    context.canvas.drawPaint(transparentPaint);
+    super.paint(context, offset);
+  }
+
   @override
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       assert(needsCompositing);
-      context.pushLayer(BackdropFilterLayer(filter: _filter), super.paint, offset);
+      context.pushLayer(BackdropFilterLayer(filter: _filter), _addTrasnparentPaint, offset);
     }
   }
 }
@@ -1572,7 +1581,7 @@ abstract class _RenderPhysicalModelBase<T> extends _RenderCustomClip<T> {
   }
 
   @override
-  bool get alwaysNeedsCompositing => _elevation != 0.0;
+  bool get alwaysNeedsCompositing => true;
 
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
@@ -2467,10 +2476,10 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
     this.onPointerSignal,
     HitTestBehavior behavior = HitTestBehavior.deferToChild,
     RenderBox child,
-  })  : _onPointerEnter = onPointerEnter,
-        _onPointerHover = onPointerHover,
-        _onPointerExit = onPointerExit,
-        super(behavior: behavior, child: child) {
+  }) : _onPointerEnter = onPointerEnter,
+       _onPointerHover = onPointerHover,
+       _onPointerExit = onPointerExit,
+       super(behavior: behavior, child: child) {
     if (_onPointerEnter != null || _onPointerHover != null || _onPointerExit != null) {
       _hoverAnnotation = MouseTrackerAnnotation(
         onEnter: _onPointerEnter,

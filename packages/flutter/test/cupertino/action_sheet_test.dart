@@ -718,19 +718,19 @@ void main() {
     expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, 600.0);
 
     await tester.pump(const Duration(milliseconds: 60));
-    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, closeTo(530.9, 0.1));
+    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, closeTo(470.0, 0.1));
 
     await tester.pump(const Duration(milliseconds: 60));
-    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, closeTo(426.7, 0.1));
+    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, closeTo(374.3, 0.1));
 
     await tester.pump(const Duration(milliseconds: 60));
-    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, closeTo(365.0, 0.1));
+    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, closeTo(337.1, 0.1));
 
     await tester.pump(const Duration(milliseconds: 60));
-    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, closeTo(334.0, 0.1));
+    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, closeTo(325.3, 0.1));
 
     await tester.pump(const Duration(milliseconds: 60));
-    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, closeTo(321.0, 0.1));
+    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, closeTo(320.8, 0.1));
 
     await tester.pump(const Duration(milliseconds: 60));
     expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, closeTo(319.3, 0.1));
@@ -745,19 +745,19 @@ void main() {
     expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, closeTo(319.3, 0.1));
 
     await tester.pump(const Duration(milliseconds: 60));
-    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, closeTo(388.4, 0.1));
+    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, closeTo(449.3, 0.1));
 
     await tester.pump(const Duration(milliseconds: 60));
-    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, closeTo(492.6, 0.1));
+    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, closeTo(544.9, 0.1));
 
     await tester.pump(const Duration(milliseconds: 60));
-    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, closeTo(554.2, 0.1));
+    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, closeTo(582.1, 0.1));
 
     await tester.pump(const Duration(milliseconds: 60));
-    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, closeTo(585.2, 0.1));
+    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, closeTo(593.9, 0.1));
 
     await tester.pump(const Duration(milliseconds: 60));
-    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, closeTo(598.2, 0.1));
+    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, closeTo(598.5, 0.1));
 
     // Action sheet has disappeared
     await tester.pump(const Duration(milliseconds: 60));
@@ -795,23 +795,23 @@ void main() {
     expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, 600.0);
 
     await tester.pump(const Duration(milliseconds: 60));
-    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, closeTo(530.9, 0.1));
+    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, closeTo(470.0, 0.1));
 
     await tester.pump(const Duration(milliseconds: 60));
-    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, closeTo(426.7, 0.1));
+    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, closeTo(374.3, 0.1));
 
     await tester.pump(const Duration(milliseconds: 60));
-    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, closeTo(365.0, 0.1));
+    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, closeTo(337.1, 0.1));
 
     // Exit animation
     await tester.tapAt(const Offset(20.0, 20.0));
     await tester.pump(const Duration(milliseconds: 60));
 
     await tester.pump(const Duration(milliseconds: 60));
-    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, closeTo(426.7, 0.1));
+    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, closeTo(374.3, 0.1));
 
     await tester.pump(const Duration(milliseconds: 60));
-    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, closeTo(530.9, 0.1));
+    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, closeTo(470.0, 0.1));
 
     await tester.pump(const Duration(milliseconds: 60));
     expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, 600.0);

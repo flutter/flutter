@@ -352,7 +352,6 @@ class AndroidDevice extends Device {
     DebuggingOptions debuggingOptions,
     Map<String, dynamic> platformArgs,
     bool prebuiltApplication = false,
-    bool applicationNeedsRebuild = false,
     bool usesTerminalUi = true,
     bool ipv6 = false,
   }) async {
@@ -430,6 +429,8 @@ class AndroidDevice extends Device {
       cmd.addAll(<String>['--ez', 'trace-skia', 'true']);
     if (debuggingOptions.traceSystrace)
       cmd.addAll(<String>['--ez', 'trace-systrace', 'true']);
+    if (debuggingOptions.dumpSkpOnShaderCompilation)
+      cmd.addAll(<String>['--ez', 'dump-skp-on-shader-compilation', 'true']);
     if (debuggingOptions.debuggingEnabled) {
       if (debuggingOptions.buildInfo.isDebug) {
         cmd.addAll(<String>['--ez', 'enable-checked-mode', 'true']);
@@ -439,6 +440,9 @@ class AndroidDevice extends Device {
         cmd.addAll(<String>['--ez', 'start-paused', 'true']);
       if (debuggingOptions.useTestFonts)
         cmd.addAll(<String>['--ez', 'use-test-fonts', 'true']);
+      if (debuggingOptions.verboseSystemLogs) {
+        cmd.addAll(<String>['--ez', 'verbose-logging', 'true']);
+      }
     }
     cmd.add(apk.launchActivity);
     final String result = (await runCheckedAsync(cmd)).stdout;
@@ -787,7 +791,7 @@ class _AdbLogReader extends DeviceLogReader {
       }
       _acceptedLastLine = false;
     } else if (line == '--------- beginning of system' ||
-               line == '--------- beginning of main' ) {
+               line == '--------- beginning of main') {
       // hide the ugly adb logcat log boundaries at the start
       _acceptedLastLine = false;
     } else {

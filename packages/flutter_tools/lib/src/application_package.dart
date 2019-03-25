@@ -10,6 +10,7 @@ import 'package:xml/xml.dart' as xml;
 
 import 'android/android_sdk.dart';
 import 'android/gradle.dart';
+import 'base/common.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/os.dart' show os;
@@ -161,7 +162,20 @@ class AndroidApk extends ApplicationPackage {
       return null;
 
     final String manifestString = manifest.readAsStringSync();
-    final xml.XmlDocument document = xml.parse(manifestString);
+    xml.XmlDocument document;
+    try {
+      document = xml.parse(manifestString);
+    } on xml.XmlParserException catch (exception) {
+      String manifestLocation;
+      if (androidProject.isUsingGradle) {
+        manifestLocation = fs.path.join(androidProject.hostAppGradleRoot.path, 'app', 'src', 'main', 'AndroidManifest.xml');
+      } else {
+        manifestLocation = fs.path.join(androidProject.hostAppGradleRoot.path, 'AndroidManifest.xml');
+      }
+      printError('AndroidManifest.xml is not a valid XML document.');
+      printError('Please check $manifestLocation for errors.');
+      throwToolExit('XML Parser error message: ${exception.toString()}');
+    }
 
     final Iterable<xml.XmlElement> manifests = document.findElements('manifest');
     if (manifests.isEmpty)
@@ -444,7 +458,7 @@ class ApkManifestData {
       final int level = line.length - trimLine.length;
 
       // Handle level out
-      while(level <= currentElement.level) {
+      while (level <= currentElement.level) {
         currentElement = currentElement.parent;
       }
 
