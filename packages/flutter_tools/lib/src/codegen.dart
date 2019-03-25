@@ -5,7 +5,6 @@
 import 'package:meta/meta.dart';
 
 import 'artifacts.dart';
-import 'base/common.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/platform.dart';
@@ -109,7 +108,8 @@ class CodeGeneratingKernelCompiler implements KernelCompiler {
     codegenDaemon.startBuild();
     await for (CodegenStatus codegenStatus in codegenDaemon.buildResults) {
       if (codegenStatus == CodegenStatus.Failed) {
-        throwToolExit('Code generation failed');
+        printError('Code generation failed, build may have compile errors.');
+        break;
       }
       if (codegenStatus == CodegenStatus.Succeeded) {
         break;
