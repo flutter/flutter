@@ -34,7 +34,8 @@ class CupertinoPageScaffold extends StatelessWidget {
   /// If translucent, the main content may slide behind it.
   /// Otherwise, the main content's top margin will be offset by its height.
   ///
-  /// The scaffold assumes the navigation bar will consume the [MediaQuery] top padding.
+  /// The scaffold assumes the navigation bar will account for the [MediaQuery] top padding,
+  /// also consume it if the navigation bar is opaque.
   // TODO(xster): document its page transition animation when ready
   final ObstructingPreferredSizeWidget navigationBar;
 
@@ -93,6 +94,7 @@ class CupertinoPageScaffold extends StatelessWidget {
       if (fullObstruction) {
         paddedContent = MediaQuery(
           data: existingMediaQuery.copyWith(
+            // If the navigation bar is opaque, the top media query padding is fully consumed by the navigation bar.
             padding: existingMediaQuery.padding.copyWith(
               top: 0,
             ),
