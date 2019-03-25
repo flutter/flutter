@@ -28,12 +28,12 @@ final bool useFlutterTestFormatter = Platform.environment['FLUTTER_TEST_FORMATTE
 final bool noUseBuildRunner = Platform.environment['FLUTTER_TEST_NO_BUILD_RUNNER'] == 'true';
 
 const Map<String, ShardRunner> _kShards = <String, ShardRunner>{
-  //'tests': _runTests,
+  'tests': _runTests,
   'tool_tests': _runToolTests,
-  // 'build_tests': _runBuildTests,
-  // 'coverage': _runCoverage,
-  // 'integration_tests': _runIntegrationTests,
-  // 'add2app_test': _runAdd2AppTest,
+  'build_tests': _runBuildTests,
+  'coverage': _runCoverage,
+  'integration_tests': _runIntegrationTests,
+  'add2app_test': _runAdd2AppTest,
 };
 
 const Duration _kLongTimeout = Duration(minutes: 45);
@@ -184,6 +184,7 @@ Future<void> _runToolTests() async {
     await _pubRunTest(
       path.join(flutterRoot, 'packages', 'flutter_tools'),
       tableData: bigqueryApi?.tabledata,
+      enableFlutterToolAsserts: true,
     );
   } else {
     await _buildRunnerTest(
