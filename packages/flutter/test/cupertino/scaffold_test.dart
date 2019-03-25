@@ -26,6 +26,7 @@ void main() {
   });
 
   testWidgets('Contents padding from viewInsets', (WidgetTester tester) async {
+    BuildContext childContext;
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: MediaQuery(
@@ -35,14 +36,20 @@ void main() {
             middle: Text('Opaque'),
             backgroundColor: Color(0xFFF8F8F8),
           ),
-          child: Container(),
+          child: Builder(builder: (BuildContext context) {
+            childContext = context;
+            return Container();
+          })
         ),
       ),
     ));
 
+    // If the navigation bar is opaque, the content should not draw behind it.
     expect(tester.getSize(find.byType(Container)).height, 600.0 - 44.0 - 100.0);
+    // The shouldn't see a media query top padding because it was consumed by
+    // the scaffold.
+    expect(MediaQuery.of(childContext).padding.top, 0);
 
-    BuildContext childContext;
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: MediaQuery(

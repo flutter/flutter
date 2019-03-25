@@ -93,10 +93,13 @@ class CupertinoPageScaffold extends StatelessWidget {
       if (fullObstruction) {
         paddedContent = MediaQuery(
           data: existingMediaQuery.copyWith(
+            padding: existingMediaQuery.padding.copyWith(
+              top: 0,
+            ),
             viewInsets: newViewInsets,
           ),
           child: Padding(
-            padding: EdgeInsets.only(top: topPadding, bottom: bottomPadding),
+            padding: EdgeInsets.only(top:topPadding, bottom: bottomPadding),
             child: child,
           ),
         );
