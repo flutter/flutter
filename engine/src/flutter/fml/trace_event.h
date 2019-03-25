@@ -13,6 +13,9 @@
 
 #include <trace/event.h>
 
+#define FML_TRACE_COUNTER(a, b, c, d, args...) TRACE_COUNTER(a, b, c, d)
+#define FML_TRACE_EVENT(a, b, args...) TRACE_DURATION(a, b)
+
 #define TRACE_EVENT0(a, b) TRACE_DURATION(a, b)
 #define TRACE_EVENT1(a, b, c, d) TRACE_DURATION(a, b, c, d)
 #define TRACE_EVENT2(a, b, c, d, e, f) TRACE_DURATION(a, b, c, d, e, f)
@@ -20,6 +23,7 @@
 #define TRACE_EVENT_ASYNC_END0(a, b, c) TRACE_ASYNC_END(a, b, c)
 #define TRACE_EVENT_ASYNC_BEGIN1(a, b, c, d, e) TRACE_ASYNC_BEGIN(a, b, c, d, e)
 #define TRACE_EVENT_ASYNC_END1(a, b, c, d, e) TRACE_ASYNC_END(a, b, c, d, e)
+#define TRACE_EVENT_INSTANT0(a, b) TRACE_INSTANT(a, b, TRACE_SCOPE_THREAD)
 
 #endif  // defined(OS_FUCHSIA)
 
