@@ -1,4 +1,4 @@
-Signature: f368701a4592543393e79f177469fc95
+Signature: 3d12a6d1a684e5f3b41c4b66c54bc5e7
 
 UNUSED LICENSES:
 
@@ -2025,43 +2025,6 @@ FILE: ../../../third_party/skia/docker/skia-release/Dockerfile
 FILE: ../../../third_party/skia/docker/skia-wasm-release/Dockerfile
 FILE: ../../../third_party/skia/docker/skia-with-swift-shader-base/Dockerfile
 FILE: ../../../third_party/skia/docker/skia-with-swift-shader-base/build-with-swift-shader-and-run
-FILE: ../../../third_party/skia/docs/SkAutoCanvasRestore_Reference.bmh
-FILE: ../../../third_party/skia/docs/SkBitmap_Reference.bmh
-FILE: ../../../third_party/skia/docs/SkBlendMode_Overview.bmh
-FILE: ../../../third_party/skia/docs/SkBlendMode_Reference.bmh
-FILE: ../../../third_party/skia/docs/SkCanvas_Reference.bmh
-FILE: ../../../third_party/skia/docs/SkColor4f_Reference.bmh
-FILE: ../../../third_party/skia/docs/SkColor_Reference.bmh
-FILE: ../../../third_party/skia/docs/SkDynamicMemoryWStream_Reference.bmh
-FILE: ../../../third_party/skia/docs/SkFILEStream_Reference.bmh
-FILE: ../../../third_party/skia/docs/SkFILEWStream_Reference.bmh
-FILE: ../../../third_party/skia/docs/SkFont_Reference.bmh
-FILE: ../../../third_party/skia/docs/SkIPoint_Reference.bmh
-FILE: ../../../third_party/skia/docs/SkIRect_Reference.bmh
-FILE: ../../../third_party/skia/docs/SkImageInfo_Reference.bmh
-FILE: ../../../third_party/skia/docs/SkImage_Reference.bmh
-FILE: ../../../third_party/skia/docs/SkMatrix_Reference.bmh
-FILE: ../../../third_party/skia/docs/SkMemoryStream_Reference.bmh
-FILE: ../../../third_party/skia/docs/SkPaint_Reference.bmh
-FILE: ../../../third_party/skia/docs/SkPath_Overview.bmh
-FILE: ../../../third_party/skia/docs/SkPath_Reference.bmh
-FILE: ../../../third_party/skia/docs/SkPicture_Reference.bmh
-FILE: ../../../third_party/skia/docs/SkPixmap_Reference.bmh
-FILE: ../../../third_party/skia/docs/SkPoint_Reference.bmh
-FILE: ../../../third_party/skia/docs/SkRRect_Reference.bmh
-FILE: ../../../third_party/skia/docs/SkRect_Reference.bmh
-FILE: ../../../third_party/skia/docs/SkRegion_Reference.bmh
-FILE: ../../../third_party/skia/docs/SkStream_Reference.bmh
-FILE: ../../../third_party/skia/docs/SkSurface_Reference.bmh
-FILE: ../../../third_party/skia/docs/SkTextBlobBuilder_Reference.bmh
-FILE: ../../../third_party/skia/docs/SkTextBlob_Reference.bmh
-FILE: ../../../third_party/skia/docs/SkWStream_Reference.bmh
-FILE: ../../../third_party/skia/docs/illustrations.bmh
-FILE: ../../../third_party/skia/docs/markup.bmh
-FILE: ../../../third_party/skia/docs/overview.bmh
-FILE: ../../../third_party/skia/docs/status.json
-FILE: ../../../third_party/skia/docs/undocumented.bmh
-FILE: ../../../third_party/skia/docs/usingBookmaker.bmh
 FILE: ../../../third_party/skia/experimental/docs/animationCommon.js
 FILE: ../../../third_party/skia/experimental/docs/backend.js
 FILE: ../../../third_party/skia/experimental/docs/canvasBackend.js
@@ -2968,7 +2931,6 @@ FILE: ../../../third_party/skia/src/gpu/gl/GrGLGpu.h
 FILE: ../../../third_party/skia/src/gpu/gl/GrGLGpuProgramCache.cpp
 FILE: ../../../third_party/skia/src/gpu/gl/GrGLIRect.h
 FILE: ../../../third_party/skia/src/gpu/gl/GrGLInterface.cpp
-FILE: ../../../third_party/skia/src/gpu/gl/GrGLInterfaceAutogen.cpp
 FILE: ../../../third_party/skia/src/gpu/gl/GrGLMakeNativeInterface_none.cpp
 FILE: ../../../third_party/skia/src/gpu/gl/GrGLProgram.cpp
 FILE: ../../../third_party/skia/src/gpu/gl/GrGLProgram.h
@@ -5870,8 +5832,6 @@ FILE: ../../../third_party/skia/modules/particles/src/SkParticleDrawable.cpp
 FILE: ../../../third_party/skia/modules/particles/src/SkParticleEffect.cpp
 FILE: ../../../third_party/skia/modules/particles/src/SkReflected.cpp
 FILE: ../../../third_party/skia/src/core/SkColorFilterPriv.h
-FILE: ../../../third_party/skia/src/gpu/gl/GrGLAssembleGLESInterfaceAutogen.cpp
-FILE: ../../../third_party/skia/src/gpu/gl/GrGLAssembleGLInterfaceAutogen.cpp
 FILE: ../../../third_party/skia/src/gpu/gl/GrGLAssembleHelpers.cpp
 FILE: ../../../third_party/skia/src/gpu/gl/GrGLAssembleInterface_gl.cpp
 FILE: ../../../third_party/skia/src/gpu/gl/GrGLAssembleInterface_gles.cpp
