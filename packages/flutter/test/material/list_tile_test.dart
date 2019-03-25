@@ -811,8 +811,8 @@ void main() {
       ),
     );
 
-    expect(tester.getRect(find.byType(Placeholder).at(0)), Rect.fromLTWH(16.0, 0.0, 24.0, 48.0));
-    expect(tester.getRect(find.byType(Placeholder).at(1)), Rect.fromLTWH(16.0, 48.0, 24.0, 48.0));
+    expect(tester.getRect(find.byType(Placeholder).at(0)),  Rect.fromLTWH(16.0,  0.0, 24.0, 48.0));
+    expect(tester.getRect(find.byType(Placeholder).at(1)),  Rect.fromLTWH(16.0, 48.0, 24.0, 48.0));
 
     // Non-dense One line
     await tester.pumpWidget(
@@ -836,8 +836,8 @@ void main() {
       ),
     );
 
-    expect(tester.getRect(find.byType(Placeholder).at(0)), Rect.fromLTWH(16.0, 0.0, 24.0, 56.0));
-    expect(tester.getRect(find.byType(Placeholder).at(1)), Rect.fromLTWH(16.0, 56.0, 24.0, 56.0));
+    expect(tester.getRect(find.byType(Placeholder).at(0)),  Rect.fromLTWH(16.0,  0.0, 24.0, 56.0));
+    expect(tester.getRect(find.byType(Placeholder).at(1)),  Rect.fromLTWH(16.0, 56.0, 24.0, 56.0));
 
     // Dense Two line
     await tester.pumpWidget(
@@ -863,8 +863,8 @@ void main() {
       ),
     );
 
-    expect(tester.getRect(find.byType(Placeholder).at(0)), Rect.fromLTWH(16.0, 8.0, 24.0, 48.0));
-    expect(tester.getRect(find.byType(Placeholder).at(1)), Rect.fromLTWH(16.0, 64.0 + 8.0, 24.0, 48.0));
+    expect(tester.getRect(find.byType(Placeholder).at(0)),  Rect.fromLTWH(16.0,        8.0, 24.0, 48.0));
+    expect(tester.getRect(find.byType(Placeholder).at(1)),  Rect.fromLTWH(16.0, 64.0 + 8.0, 24.0, 48.0));
 
     // Non-dense Two line
     await tester.pumpWidget(
@@ -890,8 +890,8 @@ void main() {
       ),
     );
 
-    expect(tester.getRect(find.byType(Placeholder).at(0)), Rect.fromLTWH(16.0, 8.0, 24.0, 56.0));
-    expect(tester.getRect(find.byType(Placeholder).at(1)), Rect.fromLTWH(16.0, 72.0 + 8.0, 24.0, 56.0));
+    expect(tester.getRect(find.byType(Placeholder).at(0)),  Rect.fromLTWH(16.0,        8.0, 24.0, 56.0));
+    expect(tester.getRect(find.byType(Placeholder).at(1)),  Rect.fromLTWH(16.0, 72.0 + 8.0, 24.0, 56.0));
 
     // Dense Three line
     await tester.pumpWidget(
@@ -919,8 +919,8 @@ void main() {
       ),
     );
 
-    expect(tester.getRect(find.byType(Placeholder).at(0)), Rect.fromLTWH(16.0, 16.0, 24.0, 48.0));
-    expect(tester.getRect(find.byType(Placeholder).at(1)), Rect.fromLTWH(16.0, 76.0 + 16.0, 24.0, 48.0));
+    expect(tester.getRect(find.byType(Placeholder).at(0)),  Rect.fromLTWH(16.0,        16.0, 24.0, 48.0));
+    expect(tester.getRect(find.byType(Placeholder).at(1)),  Rect.fromLTWH(16.0, 76.0 + 16.0, 24.0, 48.0));
 
     // Non-dense Three line
     await tester.pumpWidget(
@@ -948,12 +948,12 @@ void main() {
       ),
     );
 
-    expect(tester.getRect(find.byType(Placeholder).at(0)), Rect.fromLTWH(16.0, 16.0, 24.0, 56.0));
-    expect(tester.getRect(find.byType(Placeholder).at(1)), Rect.fromLTWH(16.0, 88.0 + 16.0, 24.0, 56.0));
+    expect(tester.getRect(find.byType(Placeholder).at(0)),  Rect.fromLTWH(16.0,        16.0, 24.0, 56.0));
+    expect(tester.getRect(find.byType(Placeholder).at(1)),  Rect.fromLTWH(16.0, 88.0 + 16.0, 24.0, 56.0));
   });
 
   testWidgets('ListTile trailing icon height does not exceed ListTile height', (WidgetTester tester) async {
-    const SizedBox oversizedWidget = SizedBox(height: 80.0, width:24.0, child: Placeholder());
+    const SizedBox oversizedWidget = SizedBox(height: 80.0, width: 24.0, child: Placeholder());
 
     // Dense One line
     await tester.pumpWidget(
@@ -977,8 +977,8 @@ void main() {
       ),
     );
 
-    expect(tester.getRect(find.byType(Placeholder).at(0)), Rect.fromLTWH(800.0 - 16.0 - 24.0, 0, 24.0, 48.0));
-    expect(tester.getRect(find.byType(Placeholder).at(1)), Rect.fromLTWH(800.0 - 16.0 - 24.0, 48.0, 24.0, 48.0));
+    expect(tester.getRect(find.byType(Placeholder).at(0)),  Rect.fromLTWH(800.0 - 16.0 - 24.0,    0, 24.0, 48.0));
+    expect(tester.getRect(find.byType(Placeholder).at(1)),  Rect.fromLTWH(800.0 - 16.0 - 24.0, 48.0, 24.0, 48.0));
 
     // Non-dense One line
     await tester.pumpWidget(
@@ -1002,8 +1002,8 @@ void main() {
       ),
     );
 
-    expect(tester.getRect(find.byType(Placeholder).at(0)), Rect.fromLTWH(800.0 - 16.0 - 24.0, 0.0, 24.0, 56.0));
-    expect(tester.getRect(find.byType(Placeholder).at(1)), Rect.fromLTWH(800.0 - 16.0 - 24.0, 56.0, 24.0, 56.0));
+    expect(tester.getRect(find.byType(Placeholder).at(0)),  Rect.fromLTWH(800.0 - 16.0 - 24.0,  0.0, 24.0, 56.0));
+    expect(tester.getRect(find.byType(Placeholder).at(1)),  Rect.fromLTWH(800.0 - 16.0 - 24.0, 56.0, 24.0, 56.0));
 
     // Dense Two line
     await tester.pumpWidget(
@@ -1029,8 +1029,8 @@ void main() {
       ),
     );
 
-    expect(tester.getRect(find.byType(Placeholder).at(0)), Rect.fromLTWH(800.0 - 16.0 - 24.0, 8.0, 24.0, 48.0));
-    expect(tester.getRect(find.byType(Placeholder).at(1)), Rect.fromLTWH(800.0 - 16.0 - 24.0, 64.0 + 8.0, 24.0, 48.0));
+    expect(tester.getRect(find.byType(Placeholder).at(0)),  Rect.fromLTWH(800.0 - 16.0 - 24.0,        8.0, 24.0, 48.0));
+    expect(tester.getRect(find.byType(Placeholder).at(1)),  Rect.fromLTWH(800.0 - 16.0 - 24.0, 64.0 + 8.0, 24.0, 48.0));
 
     // Non-dense Two line
     await tester.pumpWidget(
@@ -1056,8 +1056,8 @@ void main() {
       ),
     );
 
-    expect(tester.getRect(find.byType(Placeholder).at(0)), Rect.fromLTWH(800.0 - 16.0 - 24.0, 8.0, 24.0, 56.0));
-    expect(tester.getRect(find.byType(Placeholder).at(1)), Rect.fromLTWH(800.0 - 16.0 - 24.0, 72.0 + 8.0, 24.0, 56.0));
+    expect(tester.getRect(find.byType(Placeholder).at(0)),  Rect.fromLTWH(800.0 - 16.0 - 24.0,        8.0, 24.0, 56.0));
+    expect(tester.getRect(find.byType(Placeholder).at(1)),  Rect.fromLTWH(800.0 - 16.0 - 24.0, 72.0 + 8.0, 24.0, 56.0));
 
     // Dense Three line
     await tester.pumpWidget(
@@ -1085,8 +1085,8 @@ void main() {
       ),
     );
 
-    expect(tester.getRect(find.byType(Placeholder).at(0)), Rect.fromLTWH(800.0 - 16.0 - 24.0, 16.0, 24.0, 48.0));
-    expect(tester.getRect(find.byType(Placeholder).at(1)), Rect.fromLTWH(800.0 - 16.0 - 24.0, 76.0 + 16.0, 24.0, 48.0));
+    expect(tester.getRect(find.byType(Placeholder).at(0)),  Rect.fromLTWH(800.0 - 16.0 - 24.0,        16.0, 24.0, 48.0));
+    expect(tester.getRect(find.byType(Placeholder).at(1)),  Rect.fromLTWH(800.0 - 16.0 - 24.0, 76.0 + 16.0, 24.0, 48.0));
 
     // Non-dense Three line
     await tester.pumpWidget(
@@ -1114,7 +1114,7 @@ void main() {
       ),
     );
 
-    expect(tester.getRect(find.byType(Placeholder).at(0)), Rect.fromLTWH(800.0 - 16.0 - 24.0, 16.0, 24.0, 56.0));
-    expect(tester.getRect(find.byType(Placeholder).at(1)), Rect.fromLTWH(800.0 - 16.0 - 24.0, 88.0 + 16.0, 24.0, 56.0));
+    expect(tester.getRect(find.byType(Placeholder).at(0)),  Rect.fromLTWH(800.0 - 16.0 - 24.0,        16.0, 24.0, 56.0));
+    expect(tester.getRect(find.byType(Placeholder).at(1)),  Rect.fromLTWH(800.0 - 16.0 - 24.0, 88.0 + 16.0, 24.0, 56.0));
   });
 }
