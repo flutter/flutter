@@ -31,14 +31,14 @@ class RawKeyEventDataLinux extends RawKeyEventData {
        assert(codePoint != null),
        assert(keyCode != null),
        assert(modifiers != null),
-       assert(keyHelper != null); 
+       assert(keyHelper != null);
 
   /// A helper class that abstracts the fetching of the toolkit-specific mappings.
   ///
   /// There is no real concept of a "native" window toolkit on Linux, and each implementation
   /// (GLFW, GTK, QT, etc) may have a different key code mapping.
   final KeyHelper keyHelper;
-  
+
   /// The hardware scan code id corresponding to this key event.
   ///
   /// These values are not reliable and vary from device to device, so this
@@ -140,7 +140,7 @@ abstract class KeyHelper {
       throw FlutterError('Window toolkit not recognized: $toolkit');
     }
   }
-  
+
   /// Returns a [KeyboardSide] enum value that describes which side or sides of
   /// the given keyboard modifier key were pressed at the time of this event.
   KeyboardSide getModifierSide(ModifierKey key);
@@ -156,7 +156,7 @@ abstract class KeyHelper {
   LogicalKeyboardKey logicalKey(int keyCode);
 }
 
-/// Helper class that uses GLFW-specific key mappings. 
+/// Helper class that uses GLFW-specific key mappings.
 class GLFWKeyHelper with KeyHelper {
   /// This mask is used to check the [modifiers] field to test whether the CAPS
   /// LOCK modifier key is on.
