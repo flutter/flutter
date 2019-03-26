@@ -8,7 +8,7 @@ import '../base/common.dart';
 import '../base/logger.dart';
 import '../build_info.dart';
 import '../globals.dart';
-import '../runner/flutter_command.dart' show DevelopmentArtifact, ExitStatus, FlutterCommandResult;
+import '../runner/flutter_command.dart' show DevelopmentArtifact, FlutterCommandResult;
 import '../web/compile.dart';
 import 'build.dart';
 
