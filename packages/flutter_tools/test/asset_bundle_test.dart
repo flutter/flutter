@@ -70,6 +70,11 @@ flutter:
 ''');
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
       await bundle.build(manifestPath: 'pubspec.yaml');
+      // Expected assets:
+      //  - asset manifest
+      //  - font manifest
+      //  - license file
+      //  - assets/foo/bar.txt
       expect(bundle.entries.length, 4);
       expect(bundle.needsBuild(manifestPath: 'pubspec.yaml'), false);
 
@@ -81,6 +86,12 @@ flutter:
 
       expect(bundle.needsBuild(manifestPath: 'pubspec.yaml'), true);
       await bundle.build(manifestPath: 'pubspec.yaml');
+      // Expected assets:
+      //  - asset manifest
+      //  - font manifest
+      //  - license file
+      //  - assets/foo/bar.txt
+      //  - assets/foo/fizz.txt
       expect(bundle.entries.length, 5);
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
