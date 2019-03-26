@@ -239,11 +239,15 @@ class CupertinoTextField extends StatefulWidget {
   /// main text entry except a lighter font weight and a grey font color.
   final String placeholder;
 
-  /// The style to use for the placeholder text which overrides [style] property.
+  /// The style to use for the placeholder text.
   ///
-  /// If null, placeholder's style will be the same as [style].
+  /// The [placeholderStyle] is merged with the [style] [TextStyle] when applied
+  /// to the [placeholder] text. To avoid merging with [style], specify 
+  /// [TextStyle.inherit] as false. 
   ///
   /// Defaults to the [style] property with w300 font weight and grey color.
+  ///
+  /// If specifically set to null, placeholder's style will be the same as [style].
   final TextStyle placeholderStyle;
 
   /// An optional [Widget] to display before the text.
