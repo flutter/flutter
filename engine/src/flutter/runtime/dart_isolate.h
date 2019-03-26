@@ -138,8 +138,6 @@ class DartIsolate : public UIDartState {
       char** error);
 
   static Dart_Isolate DartCreateAndStartServiceIsolate(
-      const char* advisory_script_uri,
-      const char* advisory_script_entrypoint,
       const char* package_root,
       const char* package_config,
       Dart_IsolateFlags* flags,
