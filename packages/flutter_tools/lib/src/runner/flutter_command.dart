@@ -19,7 +19,6 @@ import '../base/user_messages.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../bundle.dart' as bundle;
-import '../cache.dart';
 import '../dart/package_map.dart';
 import '../dart/pub.dart';
 import '../device.dart';
@@ -28,8 +27,6 @@ import '../globals.dart';
 import '../project.dart';
 import '../usage.dart';
 import 'flutter_command_runner.dart';
-
-export '../cache.dart' show DevelopmentArtifact;
 
 enum ExitStatus {
   success,
@@ -533,9 +530,8 @@ abstract class FlutterCommand extends Command<void> {
 
     // Populate the cache. We call this before pub get below so that the sky_engine
     // package is available in the flutter cache for pub to find.
-    if (shouldUpdateCache) {
-      await cache.updateAll(requiredArtifacts);
-    }
+    if (shouldUpdateCache)
+      await cache.updateAll();
 
     if (shouldRunPub) {
       await pubGet(context: PubContext.getVerifyContext(name));
@@ -552,16 +548,6 @@ abstract class FlutterCommand extends Command<void> {
 
     return await runCommand();
   }
-
-  /// The set of development artifacts required for this command.
-  ///
-  /// Defaults to [DevelopmentArtifact.universal],
-  /// [DevelopmentArtifact.android], and [DevelopmentArtifact.iOS].
-  Set<DevelopmentArtifact> get requiredArtifacts => const <DevelopmentArtifact>{
-    DevelopmentArtifact.universal,
-    DevelopmentArtifact.iOS,
-    DevelopmentArtifact.android,
-  };
 
   /// Subclasses must implement this to execute the command.
   /// Optionally provide a [FlutterCommandResult] to send more details about the
