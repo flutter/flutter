@@ -73,7 +73,9 @@ class CupertinoSwitch extends StatefulWidget {
   /// change state until the parent widget rebuilds the switch with the new
   /// value.
   ///
-  /// If null, the switch will be displayed as disabled.
+  /// If null, the switch will be displayed as disabled with an opacity of 
+  /// 0.5. This is opacity value appears to be accurate in comparison to the
+  /// actual iOS switch.
   ///
   /// The callback provided to onChanged should update the state of the parent
   /// [StatefulWidget] using the [State.setState] method, so that the parent
@@ -132,7 +134,7 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
   @override
   Widget build(BuildContext context) {
     return Opacity(
-      opacity: widget.onChanged == null ? 0.4 : 1.0,
+      opacity: widget.onChanged == null ? 0.5 : 1.0,
       child: _CupertinoSwitchRenderObjectWidget(
         value: widget.value,
         activeColor: widget.activeColor ?? CupertinoColors.activeGreen,

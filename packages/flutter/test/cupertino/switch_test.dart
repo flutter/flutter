@@ -414,27 +414,39 @@ void main() {
 
     expect(value, isFalse);
   });
-  testWidgets('Switch is opaque when disabled', (WidgetTester tester) async {
-    final Key switchKey = UniqueKey();
+  testWidgets('Switch is translucent when disabled', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return Center(
-              child: CupertinoSwitch(
-                key: switchKey,
-                value: false,
-                dragStartBehavior: DragStartBehavior.down,
-                onChanged: null,
-              ),
-            );
-          },
-        ),
+        child: Center(
+          child: CupertinoSwitch(
+            value: false,
+            dragStartBehavior: DragStartBehavior.down,
+            onChanged: null,
+          ),
+        )
       ),
     );
 
-    expect(tester.widget<Opacity>(find.byType(Opacity).first).opacity, 0.4);
+    expect(find.byType(Opacity), findsOneWidget);
+    expect(tester.widget<Opacity>(find.byType(Opacity).first).opacity, 0.5);
+  });
+  testWidgets('Switch is opaque when enabled', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: CupertinoSwitch(
+            value: false,
+            dragStartBehavior: DragStartBehavior.down,
+            onChanged: (bool newValue) {},
+          ),
+        )
+      ),
+    );
+
+    expect(find.byType(Opacity), findsOneWidget);
+    expect(tester.widget<Opacity>(find.byType(Opacity).first).opacity, 1.0);
   });
 
 }
