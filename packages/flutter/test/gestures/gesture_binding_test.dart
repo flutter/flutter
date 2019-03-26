@@ -195,13 +195,14 @@ void main() {
     final List<PointerEvent> events = PointerEventConverter.expand(
       packet.data, ui.window.devicePixelRatio).toList();
 
-    expect(events.length, 5);
+    expect(events.length, 6);
     expect(events[0].runtimeType, equals(PointerAddedEvent));
     expect(events[1].runtimeType, equals(PointerHoverEvent));
     expect(events[1].delta, equals(const Offset(5.0, 7.0)));
     expect(events[2].runtimeType, equals(PointerDownEvent));
     expect(events[3].runtimeType, equals(PointerCancelEvent));
-    expect(events[4].runtimeType, equals(PointerRemovedEvent));
+    expect(events[4].runtimeType, equals(PointerHoverEvent));
+    expect(events[5].runtimeType, equals(PointerRemovedEvent));
   });
 
   test('Can expand pointer scroll events', () {
