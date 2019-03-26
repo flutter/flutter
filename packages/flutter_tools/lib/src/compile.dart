@@ -411,7 +411,8 @@ class _RejectRequest extends _CompilationRequest {
 /// The wrapper is intended to stay resident in memory as user changes, reloads,
 /// restarts the Flutter app.
 class ResidentCompiler {
-  ResidentCompiler(this._sdkRoot, {
+  ResidentCompiler(
+    this._sdkRoot, {
     bool trackWidgetCreation = false,
     String packagesPath,
     List<String> fileSystemRoots,

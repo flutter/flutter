@@ -28,8 +28,8 @@ class WebCompiler {
   Future<int> compile({@required String target, bool minify = true, bool enabledAssertions = false}) async {
     final String engineDartPath = artifacts.getArtifactPath(Artifact.engineDartBinary);
     final String dart2jsPath = artifacts.getArtifactPath(Artifact.dart2jsSnapshot);
-    final String flutterPatchedSdkPath = artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath);
-    final String librariesPath = fs.path.join(flutterPatchedSdkPath, 'libraries.json');
+    final String flutterWebSdkPath = artifacts.getArtifactPath(Artifact.flutterWebSdk);
+    final String librariesPath = fs.path.join(flutterWebSdkPath, 'libraries.json');
     final Directory outputDir = fs.directory(getWebBuildDirectory());
     if (!outputDir.existsSync()) {
       outputDir.createSync(recursive: true);
@@ -46,7 +46,6 @@ class WebCompiler {
       '-o',
       '$outputPath',
       '--libraries-spec=$librariesPath',
-      '--platform-binaries=$flutterPatchedSdkPath',
     ];
     if (minify) {
       command.add('-m');

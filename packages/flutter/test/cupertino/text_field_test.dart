@@ -8,7 +8,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart' show DragStartBehavior;
+import 'package:flutter/gestures.dart' show DragStartBehavior, PointerDeviceKind;
 import 'package:flutter_test/flutter_test.dart';
 
 class MockClipboard {
@@ -1789,6 +1789,99 @@ void main() {
     // The selection doesn't move beyond the left handle. There's always at
     // least 1 char selected.
     expect(controller.selection.extentOffset, 5);
+  });
+
+  testWidgets('Can select text by dragging with a mouse', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController();
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoTextField(
+            dragStartBehavior: DragStartBehavior.down,
+            controller: controller,
+            style: const TextStyle(
+              fontFamily: 'Ahem',
+              fontSize: 10.0,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    const String testValue = 'abc def ghi';
+    await tester.enterText(find.byType(CupertinoTextField), testValue);
+    // Skip past scrolling animation.
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
+
+    final Offset ePos = textOffsetToPosition(tester, testValue.indexOf('e'));
+    final Offset gPos = textOffsetToPosition(tester, testValue.indexOf('g'));
+
+    final TestGesture gesture = await tester.startGesture(ePos, kind: PointerDeviceKind.mouse);
+    await tester.pump();
+    await gesture.moveTo(gPos);
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(controller.selection.baseOffset, testValue.indexOf('e'));
+    expect(controller.selection.extentOffset, testValue.indexOf('g'));
+  });
+
+  testWidgets('Continuous dragging does not cause flickering', (WidgetTester tester) async {
+    int selectionChangedCount = 0;
+    const String testValue = 'abc def ghi';
+    final TextEditingController controller = TextEditingController(text: testValue);
+
+    controller.addListener(() {
+      selectionChangedCount++;
+    });
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoTextField(
+            dragStartBehavior: DragStartBehavior.down,
+            controller: controller,
+            style: const TextStyle(
+              fontFamily: 'Ahem',
+              fontSize: 10.0,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Offset cPos = textOffsetToPosition(tester, 2); // Index of 'c'.
+    final Offset gPos = textOffsetToPosition(tester, 8); // Index of 'g'.
+    final Offset hPos = textOffsetToPosition(tester, 9); // Index of 'h'.
+
+    // Drag from 'c' to 'g'.
+    final TestGesture gesture = await tester.startGesture(cPos, kind: PointerDeviceKind.mouse);
+    await tester.pump();
+    await gesture.moveTo(gPos);
+    await tester.pumpAndSettle();
+
+    expect(selectionChangedCount, isNonZero);
+    selectionChangedCount = 0;
+    expect(controller.selection.baseOffset, 2);
+    expect(controller.selection.extentOffset, 8);
+
+    // Tiny movement shouldn't cause text selection to change.
+    await gesture.moveTo(gPos + const Offset(4.0, 0.0));
+    await tester.pumpAndSettle();
+    expect(selectionChangedCount, 0);
+
+    // Now a text selection change will occur after a significant movement.
+    await gesture.moveTo(hPos);
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(selectionChangedCount, 1);
+    expect(controller.selection.baseOffset, 2);
+    expect(controller.selection.extentOffset, 9);
   });
 
   testWidgets(

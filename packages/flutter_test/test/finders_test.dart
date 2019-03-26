@@ -162,6 +162,5 @@ class SimpleCustomSemanticsRenderObject extends RenderBox {
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
     config..label = label..textDirection = TextDirection.ltr;
-
   }
 }

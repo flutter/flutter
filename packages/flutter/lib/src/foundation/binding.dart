@@ -140,7 +140,7 @@ abstract class BindingBase {
       registerServiceExtension(
         name: 'saveCompilationTrace',
         callback: (Map<String, String> parameters) async {
-          return <String, dynamic> {
+          return <String, dynamic>{
             'value': ui.saveCompilationTrace(),
           };
         },

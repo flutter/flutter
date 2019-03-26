@@ -213,22 +213,21 @@ Future<void> _runBuildTests() async {
     await _flutterBuildApk(path);
     await _flutterBuildIpa(path);
   }
-  // TODO(jonahwilliams): re-enable when engine rolls.
-  //await _flutterBuildDart2js(path.join('dev', 'integration_tests', 'web'));
+  await _flutterBuildDart2js(path.join('dev', 'integration_tests', 'web'));
 
   print('${bold}DONE: All build tests successful.$reset');
 }
 
-// Future<void> _flutterBuildDart2js(String relativePathToApplication) async {
-//   print('Running Dart2JS build tests...');
-//   await runCommand(flutter,
-//     <String>['build', 'web', '-v'],
-//     workingDirectory: path.join(flutterRoot, relativePathToApplication),
-//     expectNonZeroExit: false,
-//     timeout: _kShortTimeout,
-//   );
-//   print('Done.');
-// }
+Future<void> _flutterBuildDart2js(String relativePathToApplication) async {
+  print('Running Dart2JS build tests...');
+  await runCommand(flutter,
+    <String>['build', 'web', '-v'],
+    workingDirectory: path.join(flutterRoot, relativePathToApplication),
+    expectNonZeroExit: false,
+    timeout: _kShortTimeout,
+  );
+  print('Done.');
+}
 
 Future<void> _flutterBuildAot(String relativePathToApplication) async {
   print('Running AOT build tests...');

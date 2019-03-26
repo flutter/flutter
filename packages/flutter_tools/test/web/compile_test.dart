@@ -22,8 +22,8 @@ void main() {
     const WebCompiler webCompiler = WebCompiler();
     final String engineDartPath = artifacts.getArtifactPath(Artifact.engineDartBinary);
     final String dart2jsPath = artifacts.getArtifactPath(Artifact.dart2jsSnapshot);
-    final String flutterPatchedSdkPath = artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath);
-    final String librariesPath = fs.path.join(flutterPatchedSdkPath, 'libraries.json');
+    final String flutterWebSdkPath = artifacts.getArtifactPath(Artifact.flutterWebSdk);
+    final String librariesPath = fs.path.join(flutterWebSdkPath, 'libraries.json');
 
     when(mockProcess.stdout).thenAnswer((Invocation invocation) => const Stream<List<int>>.empty());
     when(mockProcess.stderr).thenAnswer((Invocation invocation) => const Stream<List<int>>.empty());
@@ -41,7 +41,6 @@ void main() {
       '-o',
       outputPath,
       '--libraries-spec=$librariesPath',
-      '--platform-binaries=$flutterPatchedSdkPath',
       '-m',
     ])).called(1);
   }, overrides: <Type, Generator>{

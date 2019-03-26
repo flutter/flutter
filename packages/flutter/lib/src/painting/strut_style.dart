@@ -302,7 +302,8 @@ class StrutStyle extends Diagnosticable {
   /// is inherited by being prepended onto the font family names. If
   /// [fontFamilyFallback] is meant to be empty, pass an empty list instead of null.
   /// This prevents the previous package name from being prepended twice.
-  StrutStyle.fromTextStyle(TextStyle textStyle, {
+  StrutStyle.fromTextStyle(
+    TextStyle textStyle, {
     String fontFamily,
     List<String> fontFamilyFallback,
     double fontSize,

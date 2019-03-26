@@ -844,7 +844,8 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
 }
 
 class _NestedScrollController extends ScrollController {
-  _NestedScrollController(this.coordinator, {
+  _NestedScrollController(
+    this.coordinator, {
     double initialScrollOffset = 0.0,
     String debugLabel,
   }) : super(initialScrollOffset: initialScrollOffset, debugLabel: debugLabel);
