@@ -58,6 +58,13 @@ class FlutterPlatformViewsController {
 
   void PrerollCompositeEmbeddedView(int view_id);
 
+  // Returns the `FlutterPlatformView` object associated with the view_id.
+  //
+  // If the `FlutterPlatformViewsController` does not contain any `FlutterPlatformView` object or
+  // a `FlutterPlatformView` object asscociated with the view_id cannot be found, the method returns
+  // nil.
+  NSObject<FlutterPlatformView>* GetPlatformViewByID(int view_id);
+
   std::vector<SkCanvas*> GetCurrentCanvases();
 
   SkCanvas* CompositeEmbeddedView(int view_id, const flow::EmbeddedViewParams& params);

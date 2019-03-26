@@ -165,6 +165,13 @@ void FlutterPlatformViewsController::PrerollCompositeEmbeddedView(int view_id) {
   composition_order_.push_back(view_id);
 }
 
+NSObject<FlutterPlatformView>* FlutterPlatformViewsController::GetPlatformViewByID(int view_id) {
+  if (views_.empty()) {
+    return nil;
+  }
+  return views_[view_id].get();
+}
+
 std::vector<SkCanvas*> FlutterPlatformViewsController::GetCurrentCanvases() {
   std::vector<SkCanvas*> canvases;
   for (size_t i = 0; i < composition_order_.size(); i++) {
