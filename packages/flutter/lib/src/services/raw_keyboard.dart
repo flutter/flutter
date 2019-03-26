@@ -7,10 +7,11 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 
 import 'keyboard_key.dart';
+import 'linux_key_helper.dart';
 import 'raw_keyboard_android.dart';
 import 'raw_keyboard_fuchsia.dart';
-import 'raw_keyboard_macos.dart';
 import 'raw_keyboard_linux.dart';
+import 'raw_keyboard_macos.dart';
 import 'system_channels.dart';
 
 /// An enum describing the side of the keyboard that a key is on, to allow
@@ -275,7 +276,7 @@ abstract class RawKeyEvent {
         break;
       case 'linux':
         data = RawKeyEventDataLinux(
-            toolkit: message['toolkit'] ?? '',
+            keyHelper: KeyHelper(message['toolkit'] ?? ''),
             codePoint: message['codePoint'] ?? 0,
             keyCode: message['keyCode'] ?? 0,
             scanCode: message['scanCode'] ?? 0,

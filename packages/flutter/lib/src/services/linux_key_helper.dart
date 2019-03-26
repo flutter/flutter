@@ -7,11 +7,18 @@ import 'keyboard_key.dart';
 import 'keyboard_maps.dart';
 import 'raw_keyboard.dart';
 
-/// Base class for window-specific key mappings.
+/// Abstract class for window-specific key mappings.
 ///
 /// Given that there might be multiple window toolkit implementations (GLFW, GTK, QT, etc), this creates a common
 /// interface for each of the different toolkits.
 abstract class KeyHelper {
+  factory KeyHelper(String toolkit) {
+    if (toolkit == 'glfw') {
+      return GLFWKeyHelper();
+    } else {
+      throw FlutterError('Window toolkit not recognized: $toolkit');
+    }
+  }
   
   /// Returns a [KeyboardSide] enum value that describes which side or sides of
   /// the given keyboard modifier key were pressed at the time of this event.
@@ -28,8 +35,8 @@ abstract class KeyHelper {
   LogicalKeyboardKey logicalKey(int keyCode);
 }
 
-
-class GLFWKeyHelper extends KeyHelper {
+/// Helper class that uses GLFW-specific key mappings. 
+class GLFWKeyHelper with KeyHelper {
   /// This mask is used to check the [modifiers] field to test whether the CAPS
   /// LOCK modifier key is on.
   ///

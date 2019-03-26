@@ -22,32 +22,23 @@ class RawKeyEventDataLinux extends RawKeyEventData {
   ///
   /// The [toolkit], [scanCode], [codePoint], [keyCode], and [modifiers], arguments
   /// must not be null.
-  RawKeyEventDataLinux({
-    this.toolkit = '',
+  const RawKeyEventDataLinux({
+    @required this.keyHelper,
     this.scanCode = 0,
     this.codePoint = 0,
     this.keyCode = 0,
     this.modifiers = 0,
-  }) : assert(toolkit != null),
-       assert(scanCode != null),
+  }) : assert(scanCode != null),
        assert(codePoint != null),
        assert(keyCode != null),
-       assert(modifiers != null) {
-           if (toolkit == 'glfw') {
-               _keyHelper = GLFWKeyHelper();
-           } else {
-               print('Toolkit not recognized $toolkit');
-           }
-       }
-       
-  // A helper class that abstracts the fetching of the toolkit-specific mappings.
-  KeyHelper _keyHelper;
+       assert(modifiers != null),
+       assert(keyHelper != null); 
 
-  /// The window tookit used to process the key events. 
+  /// A helper class that abstracts the fetching of the toolkit-specific mappings.
   ///
   /// There is no real concept of a "native" window toolkit on Linux, and each implementation
   /// (GLFW, GTK, QT, etc) may have a different key code mapping.
-  final String toolkit;
+  final KeyHelper keyHelper;
   
   /// The hardware scan code id corresponding to this key event.
   ///
@@ -84,7 +75,7 @@ class RawKeyEventDataLinux extends RawKeyEventData {
     // Look to see if the keyCode is a printable number pad key, so that a
     // difference between regular keys (e.g. "=") and the number pad version
     // (e.g. the "=" on the number pad) can be determined.
-    final LogicalKeyboardKey numPadKey = _keyHelper.numpadKey(keyCode);
+    final LogicalKeyboardKey numPadKey = keyHelper.numpadKey(keyCode);
     if (numPadKey != null) {
       return numPadKey;
     }
@@ -101,7 +92,7 @@ class RawKeyEventDataLinux extends RawKeyEventData {
     }
 
     // Look to see if the keyCode is one we know about and have a mapping for.
-    LogicalKeyboardKey newKey = _keyHelper.logicalKey(keyCode);
+    LogicalKeyboardKey newKey = keyHelper.logicalKey(keyCode);
     if (newKey != null) {
       return newKey;
     }
@@ -119,31 +110,14 @@ class RawKeyEventDataLinux extends RawKeyEventData {
     return newKey;
   }
 
-  bool _isLeftRightModifierPressed(KeyboardSide side, int anyMask, int leftMask, int rightMask) {
-    if (modifiers & anyMask == 0) {
-      return false;
-    }
-    switch (side) {
-      case KeyboardSide.any:
-        return true;
-      case KeyboardSide.all:
-        return modifiers & leftMask != 0 && modifiers & rightMask != 0;
-      case KeyboardSide.left:
-        return modifiers & leftMask != 0;
-      case KeyboardSide.right:
-        return modifiers & rightMask != 0;
-    }
-    return false;
-  }
-
   @override
   bool isModifierPressed(ModifierKey key, {KeyboardSide side = KeyboardSide.any}) {
-   return _keyHelper.isModifierPressed(key, modifiers, side: side);
+   return keyHelper.isModifierPressed(key, modifiers, side: side);
   }
 
   @override
   KeyboardSide getModifierSide(ModifierKey key) {
-    return _keyHelper.getModifierSide(key);
+    return keyHelper.getModifierSide(key);
   }
 
   @override
