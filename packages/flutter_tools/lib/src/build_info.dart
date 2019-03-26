@@ -10,7 +10,9 @@ import 'globals.dart';
 
 /// Information about a build to be performed or used.
 class BuildInfo {
-  const BuildInfo(this.mode, this.flavor, {
+  const BuildInfo(
+    this.mode,
+    this.flavor, {
     this.trackWidgetCreation = false,
     this.compilationTraceFilePath,
     this.createBaseline = false,
@@ -266,6 +268,7 @@ enum TargetPlatform {
   windows_x64,
   fuchsia,
   tester,
+  web,
 }
 
 /// iOS target device architecture.
@@ -325,6 +328,8 @@ String getNameForTargetPlatform(TargetPlatform platform) {
       return 'fuchsia';
     case TargetPlatform.tester:
       return 'flutter-tester';
+    case TargetPlatform.web:
+      return 'web';
   }
   assert(false);
   return null;
@@ -346,6 +351,8 @@ TargetPlatform getTargetPlatformForName(String platform) {
       return TargetPlatform.darwin_x64;
     case 'linux-x64':
       return TargetPlatform.linux_x64;
+    case 'web':
+      return TargetPlatform.web;
   }
   assert(platform != null);
   return null;
@@ -398,6 +405,11 @@ String getAssetBuildDirectory() {
 /// Returns the iOS build output directory.
 String getIosBuildDirectory() {
   return fs.path.join(getBuildDirectory(), 'ios');
+}
+
+/// Returns the web build output directory.
+String getWebBuildDirectory() {
+  return fs.path.join(getBuildDirectory(), 'web');
 }
 
 /// Returns directory used by incremental compiler (IKG - incremental kernel

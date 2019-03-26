@@ -26,7 +26,7 @@ void main() {
         TestSemantics.rootChild(
           label: 'test1',
           textDirection: TextDirection.ltr,
-        )
+        ),
       ],
     );
 
@@ -35,8 +35,8 @@ void main() {
         child: Semantics(
           label: 'test1',
           textDirection: TextDirection.ltr,
-          child: Container()
-        )
+          child: Container(),
+        ),
       )
     );
 
@@ -77,10 +77,10 @@ void main() {
             key: key,
             container: true,
             label: 'test2a',
-            child: Container()
-          )
-        )
-      )
+            child: Container(),
+          ),
+        ),
+      ),
     ));
 
     expect(semantics, hasSemantics(
@@ -91,9 +91,9 @@ void main() {
             children: <TestSemantics>[
               TestSemantics(
                 label: 'test2a',
-              )
-            ]
-          )
+              ),
+            ],
+          ),
         ]
       ),
       ignoreId: true,
@@ -113,11 +113,11 @@ void main() {
               key: key,
               container: true,
               label: 'test2b',
-              child: Container()
-            )
-          )
-        )
-      )
+              child: Container(),
+            ),
+          ),
+        ),
+      ),
     ));
 
     expect(semantics, hasSemantics(
@@ -133,9 +133,9 @@ void main() {
                     label: 'test2b',
                   ),
                 ],
-              )
-            ]
-          )
+              ),
+            ],
+          ),
         ]
       ),
       ignoreId: true,
@@ -188,7 +188,7 @@ void main() {
         TestSemantics.rootChild(
           label: 'test1',
           textDirection: TextDirection.ltr,
-        )
+        ),
       ]
     );
 
@@ -215,7 +215,7 @@ void main() {
         TestSemantics.rootChild(
           label: 'test1',
           textDirection: TextDirection.rtl,
-        )
+        ),
       ]
     );
 
@@ -256,7 +256,7 @@ void main() {
           hint: 'hint',
           value: 'value',
           textDirection: TextDirection.ltr,
-        )
+        ),
       ]
     );
 
@@ -279,7 +279,7 @@ void main() {
               ),
               Semantics(
                 hint: 'hint two',
-              )
+              ),
 
             ],
           ),
@@ -292,7 +292,7 @@ void main() {
         TestSemantics.rootChild(
           hint: 'hint one\nhint two',
           textDirection: TextDirection.ltr,
-        )
+        ),
       ]
     );
 
@@ -315,15 +315,15 @@ void main() {
                 child: Container(
                   height: 10.0,
                   width: 10.0,
-                )
+                ),
               ),
               Semantics(
                 value: 'value two',
                 child: Container(
                   height: 10.0,
                   width: 10.0,
-                )
-              )
+                ),
+              ),
             ],
           ),
         ),
@@ -343,7 +343,7 @@ void main() {
               textDirection: TextDirection.ltr,
             ),
           ]
-        )
+        ),
       ],
     );
 
@@ -379,7 +379,7 @@ void main() {
           hint: 'hint',
           value: 'value',
           textDirection: TextDirection.ltr,
-        )
+        ),
       ]
     );
 
@@ -639,24 +639,24 @@ void main() {
     final SemanticsHandle semantics = tester.ensureSemantics();
     await tester.pumpWidget(Semantics(
       container: true,
-      onTap: () {},
+      onTap: () { },
       onTapHint: 'test',
     ));
 
     expect(tester.getSemantics(find.byType(Semantics)), matchesSemantics(
       hasTapAction: true,
-      onTapHint: 'test'
+      onTapHint: 'test',
     ));
 
     await tester.pumpWidget(Semantics(
       container: true,
-      onLongPress: () {},
+      onLongPress: () { },
       onLongPressHint: 'foo',
     ));
 
     expect(tester.getSemantics(find.byType(Semantics)), matchesSemantics(
       hasLongPressAction: true,
-      onLongPressHint: 'foo'
+      onLongPressHint: 'foo',
     ));
     semantics.dispose();
   });
@@ -666,8 +666,8 @@ void main() {
     await tester.pumpWidget(Semantics(
       container: true,
       customSemanticsActions: <CustomSemanticsAction, VoidCallback>{
-        const CustomSemanticsAction(label: 'foo'): () {},
-        const CustomSemanticsAction(label: 'bar'): () {}
+        const CustomSemanticsAction(label: 'foo'): () { },
+        const CustomSemanticsAction(label: 'bar'): () { },
       },
     ));
 
@@ -691,8 +691,8 @@ void main() {
           value: '10s',
           increasedValue: '11s',
           decreasedValue: '9s',
-          onIncrease: () => () {},
-          onDecrease: () => () {},
+          onIncrease: () => () { },
+          onDecrease: () => () { },
         ),
       ),
     );
@@ -967,9 +967,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets(
-      'Semantics widgets without sort orders are sorted properly when no Directionality is present',
-      (WidgetTester tester) async {
+  testWidgets('Semantics widgets without sort orders are sorted properly when no Directionality is present', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     int semanticsUpdateCount = 0;
     final SemanticsHandle handle = tester.binding.pipelineOwner.ensureSemantics(listener: () {
@@ -1089,7 +1087,7 @@ void main() {
             textDirection: TextDirection.ltr,
           ),
         ],
-      ), ignoreId: true, ignoreRect: true, ignoreTransform: true)
+      ), ignoreId: true, ignoreRect: true, ignoreTransform: true),
     );
     semantics.dispose();
   });

@@ -110,7 +110,7 @@ void main() {
       fs.file(xcodebuild).deleteSync();
       expect(xcodeProjectInterpreter.isInstalled, isFalse);
     }, overrides: <Type, Generator>{
-      Platform: () => fakePlatform('notMacOS')
+      Platform: () => fakePlatform('notMacOS'),
     });
 
     testUsingOsxContext('isInstalled is false when xcodebuild does not exist', () {

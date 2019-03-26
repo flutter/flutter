@@ -17,7 +17,7 @@ void main() {
   testWidgets('Passing no CardTheme returns defaults', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(
       home: Scaffold(
-        body: Card()
+        body: Card(),
       ),
     ));
 
@@ -39,7 +39,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(cardTheme: cardTheme),
       home: const Scaffold(
-        body: Card()
+        body: Card(),
       ),
     ));
 
@@ -71,7 +71,7 @@ void main() {
           elevation: elevation,
           margin: margin,
           shape: shape,
-        )
+        ),
       ),
     ));
 
@@ -92,7 +92,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       theme: themeData,
       home: const Scaffold(
-        body: Card()
+        body: Card(),
       ),
     ));
 
@@ -106,7 +106,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       theme: themeData,
       home: const Scaffold(
-        body: Card()
+        body: Card(),
       ),
     ));
 
@@ -131,9 +131,9 @@ void main() {
           child: Center(
             child: Card(
               child: SizedBox.fromSize(size: const Size(200, 300),),
-            )
-          )
-        )
+            ),
+          ),
+        ),
       ),
     ));
 
@@ -153,7 +153,7 @@ CardTheme _cardTheme() {
     margin: EdgeInsets.all(7.0),
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.all(Radius.circular(5.0)),
-    )
+    ),
   );
 }
 

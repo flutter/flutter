@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert' show jsonEncode;
+
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -34,7 +36,7 @@ void main() {
                                              r'\[ (?: {0,2}\+[0-9]{1,3} ms|       )\] Oooh, I do I do I do\n$'));
       expect(mockLogger.traceText, '');
       expect(mockLogger.errorText, matches( r'^\[ (?: {0,2}\+[0-9]{1,3} ms|       )\] Helpless!\n$'));
-    }, overrides: <Type, Generator> {
+    }, overrides: <Type, Generator>{
       OutputPreferences: () => OutputPreferences(showColor: false),
       Platform: _kNoAnsiPlatform,
     });
@@ -55,7 +57,7 @@ void main() {
       expect(
           mockLogger.errorText,
           matches('^$red' r'\[ (?: {0,2}\+[0-9]{1,3} ms|       )\] ' '${bold}Helpless!$resetBold$resetColor' r'\n$'));
-    }, overrides: <Type, Generator> {
+    }, overrides: <Type, Generator>{
       OutputPreferences: () => OutputPreferences(showColor: true),
       Platform: () => FakePlatform()..stdoutSupportsAnsi = true,
     });
@@ -239,6 +241,16 @@ void main() {
           doWhileAsync(time, () => ansiStatus.ticks < 30); // three seconds
           expect(ansiStatus.seemsSlow, isTrue);
           expect(outputStdout().join('\n'), contains('This is taking an unexpectedly long time.'));
+
+          // Test that the number of '\b' is correct.
+          for (String line in outputStdout()) {
+            int currLength = 0;
+            for (int i = 0; i < line.length; i += 1) {
+              currLength += line[i] == '\b' ? -1 : 1;
+              expect(currLength, isNonNegative, reason: 'The following line has overflow backtraces:\n' + jsonEncode(line));
+            }
+          }
+
           ansiStatus.stop();
           expect(outputStdout().join('\n'), contains('(!)'));
           done = true;

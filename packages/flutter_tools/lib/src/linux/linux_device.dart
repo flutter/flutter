@@ -14,10 +14,10 @@ class LinuxDevice extends Device {
   LinuxDevice() : super('Linux');
 
   @override
-  void clearLogs() {}
+  void clearLogs() { }
 
   @override
-  DeviceLogReader getLogReader({ApplicationPackage app}) => NoOpDeviceLogReader('linux');
+  DeviceLogReader getLogReader({ ApplicationPackage app }) => NoOpDeviceLogReader('linux');
 
   @override
   Future<bool> installApp(ApplicationPackage app) {
@@ -50,13 +50,13 @@ class LinuxDevice extends Device {
   Future<String> get sdkNameAndVersion async => os.name;
 
   @override
-  Future<LaunchResult> startApp(ApplicationPackage package, {
+  Future<LaunchResult> startApp(
+    ApplicationPackage package, {
     String mainPath,
     String route,
     DebuggingOptions debuggingOptions,
     Map<String, dynamic> platformArgs,
     bool prebuiltApplication = false,
-    bool applicationNeedsRebuild = false,
     bool usesTerminalUi = true,
     bool ipv6 = false,
   }) {
@@ -92,7 +92,7 @@ class LinuxDevices extends PollingDeviceDiscovery {
       return const <Device>[];
     }
     return <Device>[
-      LinuxDevice()
+      LinuxDevice(),
     ];
   }
 

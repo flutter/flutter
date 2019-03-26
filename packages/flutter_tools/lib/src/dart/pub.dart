@@ -75,14 +75,15 @@ Future<void> pubGet({
   bool skipIfAbsent = false,
   bool upgrade = false,
   bool offline = false,
-  bool checkLastModified = true
+  bool checkLastModified = true,
+  bool skipPubspecYamlCheck = false,
 }) async {
   directory ??= fs.currentDirectory.path;
 
   final File pubSpecYaml = fs.file(fs.path.join(directory, 'pubspec.yaml'));
   final File dotPackages = fs.file(fs.path.join(directory, '.packages'));
 
-  if (!pubSpecYaml.existsSync()) {
+  if (!skipPubspecYamlCheck && !pubSpecYaml.existsSync()) {
     if (!skipIfAbsent)
       throwToolExit('$directory: no pubspec.yaml found');
     return;
@@ -135,7 +136,8 @@ typedef MessageFilter = String Function(String message);
 ///
 /// [context] provides extra information to package server requests to
 /// understand usage.
-Future<void> pub(List<String> arguments, {
+Future<void> pub(
+  List<String> arguments, {
   @required PubContext context,
   String directory,
   MessageFilter filter,
@@ -173,7 +175,8 @@ Future<void> pub(List<String> arguments, {
 /// Runs pub in 'interactive' mode, directly piping the stdin stream of this
 /// process to that of pub, and the stdout/stderr stream of pub to the corresponding
 /// streams of this process.
-Future<void> pubInteractively(List<String> arguments, {
+Future<void> pubInteractively(
+  List<String> arguments, {
   String directory,
 }) async {
   Cache.releaseLockEarly();

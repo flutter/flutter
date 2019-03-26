@@ -42,6 +42,10 @@ class CupertinoPicker extends StatefulWidget {
   /// than using [Colors.transparent]. Also, if it has transparency, no gradient
   /// effect will be rendered.
   ///
+  /// The [scrollController] argument can be used to specify a custom
+  /// [FixedExtentScrollController] for programmatically reading or changing
+  /// the current picker index or for selecting an initial index value.
+  ///
   /// The [looping] argument decides whether the child list loops and can be
   /// scrolled infinitely.  If set to true, scrolling past the end of the list
   /// will loop the list back to the beginning.  If set to false, the list will
@@ -263,7 +267,7 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
               border: Border(
                 top: BorderSide(width: 0.0, color: _kHighlighterBorder),
                 bottom: BorderSide(width: 0.0, color: _kHighlighterBorder),
-              )
+              ),
             ),
             constraints: BoxConstraints.expand(
                 height: widget.itemExtent * widget.magnification,
@@ -339,7 +343,7 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
         children: <Widget> [
           _buildUnderMagnifierScreen(),
           _addBackgroundToChild(result),
-        ]
+        ],
       );
     } else {
       result = _addBackgroundToChild(result);
@@ -411,7 +415,7 @@ class _RenderCupertinoPickerSemantics extends RenderProxyBox {
     if (_currentIndex == 0)
       return;
     controller.jumpToItem(_currentIndex - 1);
-   }
+  }
 
   void _handleScrollUpdate() {
     if (controller.selectedItem == _currentIndex)

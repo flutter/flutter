@@ -213,7 +213,7 @@ class ChangeNotifier implements Listenable {
             informationCollector: (StringBuffer information) {
               information.writeln('The $runtimeType sending notification was:');
               information.write('  $this');
-            }
+            },
           ));
         }
       }
@@ -228,7 +228,7 @@ class _MergingListenable extends Listenable {
 
   @override
   void addListener(VoidCallback listener) {
-    for (final Listenable child  in _children) {
+    for (final Listenable child in _children) {
       child?.addListener(listener);
     }
   }

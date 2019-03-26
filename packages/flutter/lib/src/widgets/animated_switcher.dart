@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:collection';
-
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 
@@ -278,7 +276,7 @@ class AnimatedSwitcher extends StatefulWidget {
 
 class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProviderStateMixin {
   _ChildEntry _currentEntry;
-  final Set<_ChildEntry> _outgoingEntries = LinkedHashSet<_ChildEntry>();
+  final Set<_ChildEntry> _outgoingEntries = <_ChildEntry>{};
   List<Widget> _outgoingWidgets = const <Widget>[];
   int _childNumber = 0;
 
@@ -321,7 +319,7 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProvider
     }
   }
 
-  void _addEntryForNewChild({@required bool animate}) {
+  void _addEntryForNewChild({ @required bool animate }) {
     assert(animate || _currentEntry == null);
     if (_currentEntry != null) {
       assert(animate);

@@ -1,3 +1,7 @@
+// Copyright 2018 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'package:flutter/foundation.dart';
 
 import 'animation.dart';
@@ -16,7 +20,7 @@ import 'tween.dart';
 /// 10.0 for the final 40%:
 ///
 /// ```dart
-/// final Animation<double> = TweenSequence(
+/// final Animation<double> animation = TweenSequence(
 ///   <TweenSequenceItem<double>>[
 ///     TweenSequenceItem<double>(
 ///       tween: Tween<double>(begin: 5.0, end: 10.0)
@@ -117,7 +121,7 @@ class TweenSequenceItem<T> {
   /// {@end-tool}
   final Animatable<T> tween;
 
-  /// An abitrary value that indicates the relative percentage of a
+  /// An arbitrary value that indicates the relative percentage of a
   /// [TweenSequence] animation's duration when [tween] will be used.
   ///
   /// The percentage for an individual item is the item's weight divided

@@ -15,7 +15,7 @@ Widget buildFrame() {
       scrollDirection: Axis.vertical,
       children: items.map<Widget>((int item) {
         return Container(
-          child: Text('$item')
+          child: Text('$item'),
         );
       }).toList(),
     ),
@@ -76,7 +76,7 @@ void main() {
           scrollDirection: Axis.vertical,
           children: items.map<Widget>((int item) {
             return Container(
-              child: Text('$item')
+              child: Text('$item'),
             );
           }).toList(),
         ),

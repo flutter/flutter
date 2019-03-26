@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -17,7 +19,7 @@ void main() {
           bottomNavigationBar: ShapeListener(
             BottomAppBar(
               child: SizedBox(height: 100.0),
-            )
+            ),
           ),
         ),
       ),
@@ -34,7 +36,7 @@ void main() {
       coversSameAreaAs(
         expectedPath,
         areaToCompare: (Offset.zero & renderBox.size).inflate(5.0),
-      )
+      ),
     );
   });
 
@@ -56,7 +58,7 @@ void main() {
                 bottomNavigationBar: BottomAppBar(
                   shape: AutomaticNotchedShape(
                     BeveledRectangleBorder(borderRadius: BorderRadius.circular(50.0)),
-                    SuperellipseShape(borderRadius: BorderRadius.circular(30.0)),
+                    ContinuousRectangleBorder(borderRadius: BorderRadius.circular(30.0)),
                   ),
                   notchMargin: 10.0,
                   color: Colors.green,
@@ -79,7 +81,7 @@ void main() {
       find.byKey(key),
       matchesGoldenFile('bottom_app_bar.custom_shape.2.png'),
     );
-  });
+  }, skip: !Platform.isLinux);
 
   testWidgets('color defaults to Theme.bottomAppBarColor', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -196,7 +198,7 @@ void main() {
       coversSameAreaAs(
         expectedPath,
         areaToCompare: (Offset.zero & renderBox.size).inflate(5.0),
-      )
+      ),
     );
   });
 
@@ -209,7 +211,7 @@ void main() {
               child: SizedBox(height: 100.0),
               shape: RectangularNotch(),
               notchMargin: 0.0,
-            )
+            ),
           ),
           floatingActionButton: FloatingActionButton(
             onPressed: null,
@@ -248,7 +250,7 @@ void main() {
       coversSameAreaAs(
         expectedPath,
         areaToCompare: (Offset.zero & babSize).inflate(5.0),
-      )
+      ),
     );
   });
 
@@ -261,7 +263,7 @@ void main() {
               child: SizedBox(height: 100.0),
               shape: RectangularNotch(),
               notchMargin: 6.0,
-            )
+            ),
           ),
           floatingActionButton: FloatingActionButton(
             onPressed: null,
@@ -300,7 +302,7 @@ void main() {
       coversSameAreaAs(
         expectedPath,
         areaToCompare: (Offset.zero & babSize).inflate(5.0),
-      )
+      ),
     );
   });
 
@@ -415,7 +417,7 @@ class ShapeListenerState extends State<ShapeListener> {
   Widget build(BuildContext context) {
     return CustomPaint(
       child: widget.child,
-      painter: cache
+      painter: cache,
     );
   }
 

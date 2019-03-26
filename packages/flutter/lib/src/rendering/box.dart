@@ -89,7 +89,7 @@ class BoxConstraints extends Constraints {
     this.minWidth = 0.0,
     this.maxWidth = double.infinity,
     this.minHeight = 0.0,
-    this.maxHeight = double.infinity
+    this.maxHeight = double.infinity,
   });
 
   /// Creates box constraints that is respected only by the given size.
@@ -108,7 +108,7 @@ class BoxConstraints extends Constraints {
   ///    infinite.
   const BoxConstraints.tightFor({
     double width,
-    double height
+    double height,
   }) : minWidth = width != null ? width : 0.0,
        maxWidth = width != null ? width : double.infinity,
        minHeight = height != null ? height : 0.0,
@@ -123,7 +123,7 @@ class BoxConstraints extends Constraints {
   ///    tight if the value is not infinite, is tight if the value is non-null.
   const BoxConstraints.tightForFinite({
     double width = double.infinity,
-    double height = double.infinity
+    double height = double.infinity,
   }) : minWidth = width != double.infinity ? width : 0.0,
        maxWidth = width != double.infinity ? width : double.infinity,
        minHeight = height != double.infinity ? height : 0.0,
@@ -142,7 +142,7 @@ class BoxConstraints extends Constraints {
   /// given value in the given dimension.
   const BoxConstraints.expand({
     double width,
-    double height
+    double height,
   }) : minWidth = width != null ? width : double.infinity,
        maxWidth = width != null ? width : double.infinity,
        minHeight = height != null ? height : double.infinity,
@@ -169,13 +169,13 @@ class BoxConstraints extends Constraints {
     double minWidth,
     double maxWidth,
     double minHeight,
-    double maxHeight
+    double maxHeight,
   }) {
     return BoxConstraints(
       minWidth: minWidth ?? this.minWidth,
       maxWidth: maxWidth ?? this.maxWidth,
       minHeight: minHeight ?? this.minHeight,
-      maxHeight: maxHeight ?? this.maxHeight
+      maxHeight: maxHeight ?? this.maxHeight,
     );
   }
 
@@ -191,7 +191,7 @@ class BoxConstraints extends Constraints {
       minWidth: deflatedMinWidth,
       maxWidth: math.max(deflatedMinWidth, maxWidth - horizontal),
       minHeight: deflatedMinHeight,
-      maxHeight: math.max(deflatedMinHeight, maxHeight - vertical)
+      maxHeight: math.max(deflatedMinHeight, maxHeight - vertical),
     );
   }
 
@@ -202,7 +202,7 @@ class BoxConstraints extends Constraints {
       minWidth: 0.0,
       maxWidth: maxWidth,
       minHeight: 0.0,
-      maxHeight: maxHeight
+      maxHeight: maxHeight,
     );
   }
 
@@ -213,7 +213,7 @@ class BoxConstraints extends Constraints {
       minWidth: minWidth.clamp(constraints.minWidth, constraints.maxWidth),
       maxWidth: maxWidth.clamp(constraints.minWidth, constraints.maxWidth),
       minHeight: minHeight.clamp(constraints.minHeight, constraints.maxHeight),
-      maxHeight: maxHeight.clamp(constraints.minHeight, constraints.maxHeight)
+      maxHeight: maxHeight.clamp(constraints.minHeight, constraints.maxHeight),
     );
   }
 
@@ -233,7 +233,7 @@ class BoxConstraints extends Constraints {
       minWidth: minHeight,
       maxWidth: maxHeight,
       minHeight: minWidth,
-      maxHeight: maxWidth
+      maxHeight: maxWidth,
     );
   }
 
@@ -247,14 +247,14 @@ class BoxConstraints extends Constraints {
 
   /// Returns the width that both satisfies the constraints and is as close as
   /// possible to the given width.
-  double constrainWidth([double width = double.infinity]) {
+  double constrainWidth([ double width = double.infinity ]) {
     assert(debugAssertIsValid());
     return width.clamp(minWidth, maxWidth);
   }
 
   /// Returns the height that both satisfies the constraints and is as close as
   /// possible to the given height.
-  double constrainHeight([double height = double.infinity]) {
+  double constrainHeight([ double height = double.infinity ]) {
     assert(debugAssertIsValid());
     return height.clamp(minHeight, maxHeight);
   }
@@ -410,7 +410,7 @@ class BoxConstraints extends Constraints {
       minWidth: minWidth * factor,
       maxWidth: maxWidth * factor,
       minHeight: minHeight * factor,
-      maxHeight: maxHeight * factor
+      maxHeight: maxHeight * factor,
     );
   }
 
@@ -420,7 +420,7 @@ class BoxConstraints extends Constraints {
       minWidth: minWidth / factor,
       maxWidth: maxWidth / factor,
       minHeight: minHeight / factor,
-      maxHeight: maxHeight / factor
+      maxHeight: maxHeight / factor,
     );
   }
 
@@ -430,7 +430,7 @@ class BoxConstraints extends Constraints {
       minWidth: (minWidth ~/ factor).toDouble(),
       maxWidth: (maxWidth ~/ factor).toDouble(),
       minHeight: (minHeight ~/ factor).toDouble(),
-      maxHeight: (maxHeight ~/ factor).toDouble()
+      maxHeight: (maxHeight ~/ factor).toDouble(),
     );
   }
 
@@ -440,7 +440,7 @@ class BoxConstraints extends Constraints {
       minWidth: minWidth % value,
       maxWidth: maxWidth % value,
       minHeight: minHeight % value,
-      maxHeight: maxHeight % value
+      maxHeight: maxHeight % value,
     );
   }
 
@@ -565,7 +565,7 @@ class BoxConstraints extends Constraints {
       minWidth: minWidth,
       maxWidth: minWidth > maxWidth ? minWidth : maxWidth,
       minHeight: minHeight,
-      maxHeight: minHeight > maxHeight ? minHeight : maxHeight
+      maxHeight: minHeight > maxHeight ? minHeight : maxHeight,
     );
   }
 
@@ -574,7 +574,7 @@ class BoxConstraints extends Constraints {
     assert(debugAssertIsValid());
     if (identical(this, other))
       return true;
-    if (other is! BoxConstraints)
+    if (runtimeType != other.runtimeType)
       return false;
     final BoxConstraints typedOther = other;
     assert(typedOther.debugAssertIsValid());
@@ -1096,7 +1096,7 @@ abstract class RenderBox extends RenderObject {
       _cachedIntrinsicDimensions ??= <_IntrinsicDimensionsCacheEntry, double>{};
       return _cachedIntrinsicDimensions.putIfAbsent(
         _IntrinsicDimensionsCacheEntry(dimension, argument),
-        () => computer(argument)
+        () => computer(argument),
       );
     }
     return computer(argument);
@@ -1801,9 +1801,9 @@ abstract class RenderBox extends RenderObject {
         testIntrinsicsForValues(getMinIntrinsicWidth, getMaxIntrinsicWidth, 'Width', double.infinity);
         testIntrinsicsForValues(getMinIntrinsicHeight, getMaxIntrinsicHeight, 'Height', double.infinity);
         if (constraints.hasBoundedWidth)
-          testIntrinsicsForValues(getMinIntrinsicWidth, getMaxIntrinsicWidth, 'Width', constraints.maxWidth);
+          testIntrinsicsForValues(getMinIntrinsicWidth, getMaxIntrinsicWidth, 'Width', constraints.maxHeight);
         if (constraints.hasBoundedHeight)
-          testIntrinsicsForValues(getMinIntrinsicHeight, getMaxIntrinsicHeight, 'Height', constraints.maxHeight);
+          testIntrinsicsForValues(getMinIntrinsicHeight, getMaxIntrinsicHeight, 'Height', constraints.maxWidth);
 
         // TODO(ianh): Test that values are internally consistent in more ways than the above.
 

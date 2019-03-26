@@ -138,7 +138,7 @@ GOTO :after_subroutine
         ECHO Running pub upgrade...
         CALL "%pub%" upgrade "%VERBOSITY%"
         IF "%ERRORLEVEL%" EQU "0" goto :upgrade_succeeded
-        ECHO Error Unable to 'pub upgrade' flutter tool. Retrying in five seconds... (%remaining_tries% tries left)
+        ECHO Error (%ERRORLEVEL%): Unable to 'pub upgrade' flutter tool. Retrying in five seconds... (%remaining_tries% tries left)
         timeout /t 5 /nobreak 2>NUL
         SET /A remaining_tries-=1
         IF "%remaining_tries%" EQU "0" GOTO upgrade_retries_exhausted
@@ -152,7 +152,7 @@ GOTO :after_subroutine
 
     POPD
 
-    "%dart%" --snapshot="%snapshot_path%" --packages="%flutter_tools_dir%\.packages" "%script_path%"
+    "%dart%" --snapshot="%snapshot_path%" --snapshot-kind=app-jit --packages="%flutter_tools_dir%\.packages" "%script_path%"
     IF "%ERRORLEVEL%" NEQ "0" (
       ECHO Error: Unable to create dart snapshot for flutter tool.
       SET exit_code=%ERRORLEVEL%

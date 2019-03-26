@@ -12,10 +12,12 @@ import '../android/android_sdk.dart';
 import '../artifacts.dart';
 import '../build_info.dart';
 import '../bundle.dart';
+import '../cache.dart';
 import '../compile.dart';
 import '../dart/package_map.dart';
 import '../globals.dart';
 import '../ios/mac.dart';
+import '../project.dart';
 import 'context.dart';
 import 'file_system.dart';
 import 'fingerprint.dart';
@@ -46,13 +48,11 @@ class GenSnapshot {
 
   Future<int> run({
     @required SnapshotType snapshotType,
-    @required String packagesPath,
     IOSArch iosArch,
     Iterable<String> additionalArgs = const <String>[],
   }) {
     final List<String> args = <String>[
       '--causal_async_stacks',
-      '--packages=$packagesPath',
     ]..addAll(additionalArgs);
 
     final String snapshotterPath = getSnapshotterPath(snapshotType);
@@ -81,6 +81,11 @@ class AOTSnapshotter {
     IOSArch iosArch,
     List<String> extraGenSnapshotOptions = const <String>[],
   }) async {
+    FlutterProject flutterProject;
+    if (fs.file('pubspec.yaml').existsSync()) {
+      flutterProject = await FlutterProject.current();
+    }
+    final FlutterEngine engine = FlutterEngine(cache);
     if (!_isValidAotPlatform(platform, buildMode)) {
       printError('${getNameForTargetPlatform(platform)} does not support AOT compilation.');
       return 1;
@@ -120,7 +125,7 @@ class AOTSnapshotter {
     final String vmServicePath = fs.path.join(skyEnginePkg, 'sdk_ext', 'vmservice_io.dart');
 
     final List<String> inputPaths = <String>[uiPath, vmServicePath, mainPath];
-    final Set<String> outputPaths = Set<String>();
+    final Set<String> outputPaths = <String>{};
 
     final String depfilePath = fs.path.join(outputDir.path, 'snapshot.d');
     final List<String> genSnapshotArgs = <String>[
@@ -182,6 +187,8 @@ class AOTSnapshotter {
         'entryPoint': mainPath,
         'sharedLib': buildSharedLibrary.toString(),
         'extraGenSnapshotOptions': extraGenSnapshotOptions.join(' '),
+        'engineHash': engine.version,
+        'buildersUsed': '${flutterProject != null ? flutterProject.hasBuilders : false}',
       },
       depfilePaths: <String>[],
     );
@@ -193,7 +200,6 @@ class AOTSnapshotter {
     final SnapshotType snapshotType = SnapshotType(platform, buildMode);
     final int genSnapshotExitCode = await genSnapshot.run(
       snapshotType: snapshotType,
-      packagesPath: packageMap.packagesPath,
       additionalArgs: genSnapshotArgs,
       iosArch: iosArch,
     );
@@ -293,6 +299,7 @@ class AOTSnapshotter {
     @required bool trackWidgetCreation,
     List<String> extraFrontEndOptions = const <String>[],
   }) async {
+    final FlutterProject flutterProject = await FlutterProject.current();
     final Directory outputDir = fs.directory(outputPath);
     outputDir.createSync(recursive: true);
 
@@ -302,7 +309,7 @@ class AOTSnapshotter {
       printTrace('Extra front-end options: $extraFrontEndOptions');
 
     final String depfilePath = fs.path.join(outputPath, 'kernel_compile.d');
-    final KernelCompiler kernelCompiler = await kernelCompilerFactory.create();
+    final KernelCompiler kernelCompiler = await kernelCompilerFactory.create(flutterProject);
     final CompilerOutput compilerOutput = await kernelCompiler.compile(
       sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
       mainPath: mainPath,
@@ -462,7 +469,7 @@ class JITSnapshotter {
       genSnapshotArgs.addAll(extraGenSnapshotOptions);
     }
 
-    final Set<String> outputPaths = Set<String>();
+    final Set<String> outputPaths = <String>{};
     outputPaths.addAll(<String>[isolateSnapshotData]);
     if (!createPatch) {
       outputPaths.add(isolateSnapshotInstructions);
@@ -538,7 +545,6 @@ class JITSnapshotter {
     final SnapshotType snapshotType = SnapshotType(platform, buildMode);
     final int genSnapshotExitCode = await genSnapshot.run(
       snapshotType: snapshotType,
-      packagesPath: packagesPath,
       additionalArgs: genSnapshotArgs,
     );
     if (genSnapshotExitCode != 0) {

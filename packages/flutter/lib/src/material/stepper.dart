@@ -39,7 +39,7 @@ enum StepState {
   /// A step that is disabled and does not to react to taps.
   disabled,
 
-  /// A step that is currently having an error. e.g. the use has submitted wrong
+  /// A step that is currently having an error. e.g. the user has submitted wrong
   /// input.
   error,
 }
@@ -192,44 +192,47 @@ class Stepper extends StatefulWidget {
   /// This callback which takes in a context and two functions,[onStepContinue]
   /// and [onStepCancel]. These can be used to control the stepper.
   ///
-  /// ## Sample Code:
+  /// {@tool snippet --template=stateless_widget_scaffold}
   /// Creates a stepper control with custom buttons.
   ///
   /// ```dart
-  /// Stepper(
-  ///   controlsBuilder:
-  ///     (BuildContext context, {VoidCallback onStepContinue, VoidCallback onStepCancel}) {
-  ///        return Row(
-  ///          children: <Widget>[
-  ///            FlatButton(
-  ///              onPressed: onStepContinue,
-  ///              child: const Text('My Awesome Continue Message!'),
-  ///            ),
-  ///            FlatButton(
-  ///              onPressed: onStepCancel,
-  ///              child: const Text('My Awesome Cancel Message!'),
-  ///            ),
-  ///          ],
-  ///        ),
-  ///     },
-  ///   steps: const <Step>[
-  ///     Step(
-  ///       title: Text('A'),
-  ///       content: SizedBox(
-  ///         width: 100.0,
-  ///         height: 100.0,
+  /// Widget build(BuildContext context) {
+  ///   return Stepper(
+  ///     controlsBuilder:
+  ///       (BuildContext context, {VoidCallback onStepContinue, VoidCallback onStepCancel}) {
+  ///          return Row(
+  ///            children: <Widget>[
+  ///              FlatButton(
+  ///                onPressed: onStepContinue,
+  ///                child: const Text('CONTINUE'),
+  ///              ),
+  ///              FlatButton(
+  ///                onPressed: onStepCancel,
+  ///                child: const Text('CANCEL'),
+  ///              ),
+  ///            ],
+  ///          );
+  ///       },
+  ///     steps: const <Step>[
+  ///       Step(
+  ///         title: Text('A'),
+  ///         content: SizedBox(
+  ///           width: 100.0,
+  ///           height: 100.0,
+  ///         ),
   ///       ),
-  ///     ),
-  ///     Step(
-  ///       title: Text('B'),
-  ///       content: SizedBox(
-  ///         width: 100.0,
-  ///         height: 100.0,
+  ///       Step(
+  ///         title: Text('B'),
+  ///         content: SizedBox(
+  ///           width: 100.0,
+  ///           height: 100.0,
+  ///         ),
   ///       ),
-  ///     ),
-  ///   ],
-  /// )
+  ///     ],
+  ///   );
+  /// }
   /// ```
+  /// {@end-tool}
   final ControlsWidgetBuilder controlsBuilder;
 
   @override
@@ -502,7 +505,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
-      children: children
+      children: children,
     );
   }
 
@@ -518,14 +521,14 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
               _buildLine(!_isFirst(index)),
               _buildIcon(index),
               _buildLine(!_isLast(index)),
-            ]
+            ],
           ),
           Container(
             margin: const EdgeInsetsDirectional.only(start: 12.0),
-            child: _buildHeaderText(index)
-          )
-        ]
-      )
+            child: _buildHeaderText(index),
+          ),
+        ],
+      ),
     );
   }
 
@@ -594,10 +597,10 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
                 if (widget.onStepTapped != null)
                   widget.onStepTapped(i);
               } : null,
-              child: _buildVerticalHeader(i)
+              child: _buildVerticalHeader(i),
             ),
-            _buildVerticalBody(i)
-          ]
+            _buildVerticalBody(i),
+          ],
         )
       );
     }
@@ -706,7 +709,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
 // top vertex the middle of its top.
 class _TrianglePainter extends CustomPainter {
   _TrianglePainter({
-    this.color
+    this.color,
   });
 
   final Color color;

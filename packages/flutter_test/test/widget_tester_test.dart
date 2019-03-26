@@ -223,7 +223,7 @@ void main() {
       try {
         expect(find.descendant(
           of: find.widgetWithText(Column, 'foo'),
-          matching: find.text('bar')
+          matching: find.text('bar'),
         ), findsOneWidget);
       } catch (e) {
         failure = e;
@@ -330,7 +330,7 @@ void main() {
     });
   });
 
-  group('pageBack', (){
+  group('pageBack', () {
     testWidgets('fails when there are no back buttons', (WidgetTester tester) async {
       await tester.pumpWidget(Container());
 
@@ -421,7 +421,7 @@ void main() {
   testWidgets('hasRunningAnimations control test', (WidgetTester tester) async {
     final AnimationController controller = AnimationController(
       duration: const Duration(seconds: 1),
-      vsync: const TestVSync()
+      vsync: const TestVSync(),
     );
     expect(tester.hasRunningAnimations, isFalse);
     controller.forward();
@@ -437,7 +437,7 @@ void main() {
   testWidgets('pumpAndSettle control test', (WidgetTester tester) async {
     final AnimationController controller = AnimationController(
       duration: const Duration(minutes: 525600),
-      vsync: const TestVSync()
+      vsync: const TestVSync(),
     );
     expect(await tester.pumpAndSettle(), 1);
     controller.forward();
@@ -492,7 +492,7 @@ void main() {
     testWidgets('disallows re-entry', (WidgetTester tester) async {
       final Completer<void> completer = Completer<void>();
       tester.runAsync<void>(() => completer.future);
-      expect(() => tester.runAsync(() async {}), throwsA(isInstanceOf<TestFailure>()));
+      expect(() => tester.runAsync(() async { }), throwsA(isInstanceOf<TestFailure>()));
       completer.complete();
     });
 
@@ -573,8 +573,8 @@ void main() {
           home: Scaffold(
             body: Container(
               child: OutlineButton(
-                  onPressed: () {},
-                  child: const Text('hello')
+                  onPressed: () { },
+                  child: const Text('hello'),
               ),
             ),
           ),
@@ -588,6 +588,27 @@ void main() {
       expect(semantics.hasFlag(SemanticsFlag.isButton), true);
       semanticsHandle.dispose();
     });
+
+    testWidgets('Can enable semantics for tests via semanticsEnabled', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Container(
+              child: OutlineButton(
+                  onPressed: () { },
+                  child: const Text('hello'),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final SemanticsNode node = tester.getSemantics(find.text('hello'));
+      final SemanticsData semantics = node.getSemanticsData();
+      expect(semantics.label, 'hello');
+      expect(semantics.hasAction(SemanticsAction.tap), true);
+      expect(semantics.hasFlag(SemanticsFlag.isButton), true);
+    }, semanticsEnabled: true);
 
     testWidgets('Returns merged SemanticsData', (WidgetTester tester) async {
       final SemanticsHandle semanticsHandle = tester.ensureSemantics();
@@ -605,7 +626,7 @@ void main() {
                   child: Container(),
                 ),
               ),
-            )
+            ),
           ),
         ),
       );

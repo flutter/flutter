@@ -62,7 +62,7 @@ void main() {
         await _pumpBoilerplate(tester, DayPicker(
           selectedDate: baseDate,
           currentDate: baseDate,
-          onChanged: (DateTime newValue) {},
+          onChanged: (DateTime newValue) { },
           firstDate: baseDate.subtract(const Duration(days: 90)),
           lastDate: baseDate.add(const Duration(days: 90)),
           displayedMonth: baseDate,
@@ -229,7 +229,7 @@ Future<void> _pumpBoilerplate(
   WidgetTester tester,
   Widget child, {
   Locale locale = const Locale('en', 'US'),
-  TextDirection textDirection = TextDirection.ltr
+  TextDirection textDirection = TextDirection.ltr,
 }) async {
   await tester.pumpWidget(Directionality(
     textDirection: TextDirection.ltr,

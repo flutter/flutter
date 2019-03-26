@@ -297,7 +297,7 @@ class _AndroidViewState extends State<AndroidView> {
   bool _initialized = false;
 
   static final Set<Factory<OneSequenceGestureRecognizer>> _emptyRecognizersSet =
-    Set<Factory<OneSequenceGestureRecognizer>>();
+    <Factory<OneSequenceGestureRecognizer>>{};
 
   @override
   Widget build(BuildContext context) {
@@ -367,10 +367,12 @@ class _AndroidViewState extends State<AndroidView> {
       id: _id,
       viewType: widget.viewType,
       layoutDirection: _layoutDirection,
-      onPlatformViewCreated: widget.onPlatformViewCreated,
       creationParams: widget.creationParams,
       creationParamsCodec: widget.creationParamsCodec,
     );
+    if (widget.onPlatformViewCreated != null) {
+      _controller.addOnPlatformViewCreatedListener(widget.onPlatformViewCreated);
+    }
   }
 }
 
@@ -380,7 +382,7 @@ class _UiKitViewState extends State<UiKitView> {
   bool _initialized = false;
 
   static final Set<Factory<OneSequenceGestureRecognizer>> _emptyRecognizersSet =
-    Set<Factory<OneSequenceGestureRecognizer>>();
+    <Factory<OneSequenceGestureRecognizer>>{};
 
   @override
   Widget build(BuildContext context) {

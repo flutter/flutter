@@ -112,7 +112,8 @@ class PageController extends ScrollController {
   /// The returned [Future] resolves when the animation completes.
   ///
   /// The `duration` and `curve` arguments must not be null.
-  Future<void> animateToPage(int page, {
+  Future<void> animateToPage(
+    int page, {
     @required Duration duration,
     @required Curve curve,
   }) {
@@ -424,7 +425,7 @@ class PageView extends StatefulWidget {
     this.pageSnapping = true,
     this.onPageChanged,
     List<Widget> children = const <Widget>[],
-    this.dragStartBehavior = DragStartBehavior.down,
+    this.dragStartBehavior = DragStartBehavior.start,
   }) : controller = controller ?? _defaultPageController,
        childrenDelegate = SliverChildListDelegate(children),
        super(key: key);
@@ -451,7 +452,7 @@ class PageView extends StatefulWidget {
     this.onPageChanged,
     @required IndexedWidgetBuilder itemBuilder,
     int itemCount,
-    this.dragStartBehavior = DragStartBehavior.down,
+    this.dragStartBehavior = DragStartBehavior.start,
   }) : controller = controller ?? _defaultPageController,
        childrenDelegate = SliverChildBuilderDelegate(itemBuilder, childCount: itemCount),
        super(key: key);
@@ -467,7 +468,7 @@ class PageView extends StatefulWidget {
     this.pageSnapping = true,
     this.onPageChanged,
     @required this.childrenDelegate,
-    this.dragStartBehavior = DragStartBehavior.down,
+    this.dragStartBehavior = DragStartBehavior.start,
   }) : assert(childrenDelegate != null),
        controller = controller ?? _defaultPageController,
        super(key: key);
@@ -581,7 +582,7 @@ class _PageViewState extends State<PageView> {
             slivers: <Widget>[
               SliverFillViewport(
                 viewportFraction: widget.controller.viewportFraction,
-                delegate: widget.childrenDelegate
+                delegate: widget.childrenDelegate,
               ),
             ],
           );
