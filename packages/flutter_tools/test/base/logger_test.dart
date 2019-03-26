@@ -95,6 +95,47 @@ void main() {
     }
 
     for (String testOs in testPlatforms) {
+      testUsingContext('dawg - $testOs', () async {
+        final AnsiStatus ansiStatus = _createAnsiStatus();
+        FakeAsync().run((FakeAsync time) {
+          ansiStatus.start();
+          mockStopwatch.elapsed = const Duration(seconds: 4);
+          doWhileAsync(time, () => ansiStatus.ticks < 40); // 4 seconds
+          ansiStatus.stop();
+          final String out = outputStdout().join('\n');
+          int newlineCount = 0;
+          for (String char in out.split('')) {
+            if (char == '\n') {
+              newlineCount++;
+            }
+          }
+          print('There were $newlineCount newline characters for OS $testOs');
+        });
+      }, overrides: <Type, Generator>{
+        Logger: () => StdoutLogger(),
+        Platform: () => FakePlatform(operatingSystem: testOs),
+        Stdio: () => mockStdio,
+        Stopwatch: () => mockStopwatch,
+      });
+      testUsingContext('yolo - $testOs', () async {
+        FakeAsync().run((FakeAsync time) {
+          final Logger logger = context[Logger];
+          final Status status = logger.startProgress(
+              'hello world',
+              timeout: const Duration(days: 2),
+              progressIndicatorPadding: 10,
+          );
+          logger.printStatus('yolo dawg');
+          status.stop();
+          final String str = outputStdout().join('\n');
+          print(str);
+        });
+      }, overrides: <Type, Generator>{
+        Logger: () => StdoutLogger(),
+        Platform: () => FakePlatform(operatingSystem: testOs),
+        Stdio: () => mockStdio,
+      });
+
       testUsingContext('AnsiSpinner works for $testOs', () async {
         bool done = false;
         FakeAsync().run((FakeAsync time) {
