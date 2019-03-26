@@ -502,17 +502,28 @@ class NetworkImage extends ImageProvider<NetworkImage> {
     assert(key == this);
 
     final Uri resolved = Uri.base.resolve(key.url);
-    final HttpClientRequest request = await _httpClient.getUrl(resolved);
-    headers?.forEach((String name, String value) {
-      request.headers.add(name, value);
-    });
-    final HttpClientResponse response = await request.close();
-    if (response.statusCode != HttpStatus.ok)
+    HttpClientResponse response;
+    try {
+      final HttpClientRequest request = await _httpClient.getUrl(resolved);
+      headers?.forEach((String name, String value) {
+        request.headers.add(name, value);
+      });
+      response = await request.close();
+    } catch (e) {
+      evict();
+      throw Exception('HTTP request failed, exception: $e');
+    }
+
+    if (response.statusCode != HttpStatus.ok) {
+      evict();
       throw Exception('HTTP request failed, statusCode: ${response?.statusCode}, $resolved');
+    }
 
     final Uint8List bytes = await consolidateHttpClientResponseBytes(response);
-    if (bytes.lengthInBytes == 0)
+    if (bytes.lengthInBytes == 0) {
+      evict();
       throw Exception('NetworkImage is an empty file: $resolved');
+    }
 
     return PaintingBinding.instance.instantiateImageCodec(bytes);
   }
