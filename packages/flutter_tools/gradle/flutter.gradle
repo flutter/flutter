@@ -185,21 +185,38 @@ class FlutterPlugin implements Plugin<Project> {
 
         File pluginsFile = new File(project.projectDir.parentFile.parentFile, '.flutter-plugins')
         Properties plugins = readPropertiesIfExist(pluginsFile)
-        // Plugins right now only have a notion of debug or release.
-        // Profile goes to release.
-        def Boolean isDebug = project.gradle.startParameter.taskRequests.any {it.args[0].contains("Debug")}
-        def String mode = isDebug ? "debug" : "release"
         plugins.each { name, path ->
-            def File pluginDepsFile = new File(Paths.get(path, 'android', 'build', 'deps.txt').toString())
-            project.dependencies {
-                if (pluginDepsFile.exists()) {
-                    def lines = pluginDepsFile.readLines()
-                    for (line in lines) {
-                        api line
+            def pluginProject = project.rootProject.findProject(":$name")
+            if (pluginProject != null) {
+                project.dependencies {
+                    if (project.getConfigurations().findByName("implementation")) {
+                        implementation pluginProject
+                    } else {
+                        compile pluginProject
                     }
                 }
-                api project.files(Paths.get(path, 'android', 'build', 'outputs', 'aar', "$name-${mode}.aar").toString());
+		        pluginProject.afterEvaluate {
+                    pluginProject.android.buildTypes {
+                        profile {
+                            initWith release
+                        }
+                    }
+    		    }
+                pluginProject.afterEvaluate this.&addFlutterJarCompileOnlyDependency
+            } else {
+                project.logger.error("Plugin project :$name not found. Please update settings.gradle.")
             }
+            // pluginProject.tasks.assembleDebug()
+            // def File pluginDepsFile = new File(Paths.get(path, 'android', 'build', 'deps.txt').toString())
+            // project.dependencies {
+            //     if (pluginDepsFile.exists()) {
+            //         def lines = pluginDepsFile.readLines()
+            //         for (line in lines) {
+            //             api line
+            //         }
+            //     }
+            //     api project.files(Paths.get(path, 'android', 'build', 'outputs', 'aar', "$name-${mode}.aar").toString());
+            // }
         }
     }
 
