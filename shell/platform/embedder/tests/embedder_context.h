@@ -16,11 +16,23 @@
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/embedder/tests/embedder_test_resolver.h"
 
+#define CREATE_NATIVE_ENTRY(native_entry)                                   \
+  ({                                                                        \
+    static ::shell::testing::EmbedderContext::NativeEntry closure;          \
+    static Dart_NativeFunction entrypoint = [](Dart_NativeArguments args) { \
+      closure(args);                                                        \
+    };                                                                      \
+    closure = (native_entry);                                               \
+    entrypoint;                                                             \
+  })
+
 namespace shell {
 namespace testing {
 
 class EmbedderContext {
  public:
+  using NativeEntry = std::function<void(Dart_NativeArguments)>;
+
   EmbedderContext(std::string assets_path = "");
 
   ~EmbedderContext();

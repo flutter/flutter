@@ -59,5 +59,45 @@ TEST_F(EmbedderTest, CanInvokeCustomEntrypoint) {
   ASSERT_TRUE(engine.is_valid());
 }
 
+TEST_F(EmbedderTest, CanInvokeCustomEntrypointMacro) {
+  auto& context = GetEmbedderContext();
+
+  fml::AutoResetWaitableEvent latch1;
+  fml::AutoResetWaitableEvent latch2;
+  fml::AutoResetWaitableEvent latch3;
+
+  // Can be defined separately.
+  auto entry1 = [&latch1](Dart_NativeArguments args) {
+    FML_LOG(ERROR) << "In Callback 1";
+    latch1.Signal();
+  };
+  auto native_entry1 = CREATE_NATIVE_ENTRY(entry1);
+  context.AddNativeCallback("SayHiFromCustomEntrypoint1", native_entry1);
+
+  // Can be wrapped in in the args.
+  auto entry2 = [&latch2](Dart_NativeArguments args) {
+    FML_LOG(ERROR) << "In Callback 2";
+    latch2.Signal();
+  };
+  context.AddNativeCallback("SayHiFromCustomEntrypoint2",
+                            CREATE_NATIVE_ENTRY(entry2));
+
+  // Everything can be inline.
+  context.AddNativeCallback(
+      "SayHiFromCustomEntrypoint3",
+      CREATE_NATIVE_ENTRY([&latch3](Dart_NativeArguments args) {
+        FML_LOG(ERROR) << "In Callback 3";
+        latch3.Signal();
+      }));
+
+  EmbedderConfigBuilder builder(context);
+  builder.SetDartEntrypoint("customEntrypoint1");
+  auto engine = builder.LaunchEngine();
+  latch1.Wait();
+  latch2.Wait();
+  latch3.Wait();
+  ASSERT_TRUE(engine.is_valid());
+}
+
 }  // namespace testing
 }  // namespace shell
