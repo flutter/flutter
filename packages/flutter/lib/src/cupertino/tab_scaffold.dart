@@ -96,9 +96,9 @@ class CupertinoTabScaffold extends StatefulWidget {
     @required this.tabBuilder,
     this.backgroundColor,
     this.resizeToAvoidBottomInset = true,
-  })  : assert(tabBar != null),
-        assert(tabBuilder != null),
-        super(key: key);
+  }) : assert(tabBar != null),
+       assert(tabBuilder != null),
+       super(key: key);
 
   /// The [tabBar] is a [CupertinoTabBar] drawn at the bottom of the screen
   /// that lets the user switch between different tabs in the main content area
@@ -171,7 +171,10 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
       // Clip down to an acceptable range.
       _currentPage = widget.tabBar.items.length - 1;
       // Sanity check, since CupertinoTabBar.items's minimum length is 2.
-      assert(_currentPage >= 0, 'CupertinoTabBar is expected to keep at least 2 tabs after updating',);
+      assert(
+        _currentPage >= 0,
+        'CupertinoTabBar is expected to keep at least 2 tabs after updating',
+      );
     }
     // The user can still specify an exact desired index.
     if (widget.tabBar.currentIndex != oldWidget.tabBar.currentIndex) {
@@ -203,10 +206,12 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
         // Only pad the content with the height of the tab bar if the tab
         // isn't already entirely obstructed by a keyboard or other view insets.
         // Don't double pad.
-        (!widget.resizeToAvoidBottomInset || widget.tabBar.preferredSize.height > existingMediaQuery.viewInsets.bottom)) {
+        (!widget.resizeToAvoidBottomInset ||
+            widget.tabBar.preferredSize.height > existingMediaQuery.viewInsets.bottom)) {
       // TODO(xster): Use real size after partial layout instead of preferred size.
       // https://github.com/flutter/flutter/issues/12912
-      final double bottomPadding = widget.tabBar.preferredSize.height + existingMediaQuery.padding.bottom;
+      final double bottomPadding =
+          widget.tabBar.preferredSize.height + existingMediaQuery.padding.bottom;
 
       // If tab bar opaque, directly stop the main content higher. If
       // translucent, let main content draw behind the tab bar but hint the
@@ -246,7 +251,8 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
               _currentPage = newIndex;
             });
             // Chain the user's original callback.
-            if (widget.tabBar.onTap != null) widget.tabBar.onTap(newIndex);
+            if (widget.tabBar.onTap != null)
+              widget.tabBar.onTap(newIndex);
           },
         ),
       ));
@@ -270,9 +276,9 @@ class _TabSwitchingView extends StatefulWidget {
     @required this.currentTabIndex,
     @required this.tabNumber,
     @required this.tabBuilder,
-  })  : assert(currentTabIndex != null),
-        assert(tabNumber != null && tabNumber > 0),
-        assert(tabBuilder != null);
+  }) : assert(currentTabIndex != null),
+       assert(tabNumber != null && tabNumber > 0),
+       assert(tabBuilder != null);
 
   final int currentTabIndex;
   final int tabNumber;
@@ -329,7 +335,7 @@ class _TabSwitchingViewState extends State<_TabSwitchingView> {
             enabled: active,
             child: FocusableScope(
               debugLabel: '${widget.runtimeType} Tab ${index + 1}',
-              onNodeChanged: (FocusableNode node) => tabFocusNodes[index] = node,
+              onFocusableNodeSet: (FocusableNode node, FocusableNode oldNode) => tabFocusNodes[index] = node,
               child: tabs[index] ?? Container(),
             ),
           ),

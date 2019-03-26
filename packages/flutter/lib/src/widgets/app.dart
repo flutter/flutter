@@ -12,6 +12,7 @@ import 'banner.dart';
 import 'basic.dart';
 import 'binding.dart';
 import 'focus_traversal.dart';
+import 'focusable.dart';
 import 'framework.dart';
 import 'localizations.dart';
 import 'media_query.dart';
@@ -1196,9 +1197,11 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
       child: Localizations(
         locale: appLocale,
         delegates: _localizationsDelegates.toList(),
-        child: DefaultFocusTraversal(
-          policy: const WidgetOrderFocusTraversalPolicy(),
-          child: title,
+        child: FocusableScope(
+          child: DefaultFocusTraversal(
+            policy: const WidgetOrderFocusTraversalPolicy(),
+            child: title,
+          ),
         ),
       ),
     );

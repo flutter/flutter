@@ -6,8 +6,6 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 
-import 'framework.dart';
-
 /// A leaf node in the focus tree that can receive focus.
 ///
 /// The focus tree keeps track of which widget is the user's current focus. The
@@ -155,7 +153,7 @@ class FocusScopeNode extends Object with DiagnosticableTreeMixin {
   List<FocusScopeNode> _getFocusPath() {
     final List<FocusScopeNode> nodes = <FocusScopeNode>[this];
     FocusScopeNode node = _parent;
-    while(node != null && node != _manager?.rootScope) {
+    while (node != null && node != _manager?.rootScope) {
       nodes.add(node);
       node = node._parent;
     }
@@ -483,7 +481,7 @@ class FocusManager {
     final String status = _haveScheduledUpdate ? ' UPDATE SCHEDULED' : '';
     const String indent = '  ';
     return '${describeIdentity(this)}$status\n'
-        '${indent}currentFocus: $_currentFocus\n'
-        '${rootScope.toStringDeep(prefixLineOne: indent, prefixOtherLines: indent)}';
+      '${indent}currentFocus: $_currentFocus\n'
+      '${rootScope.toStringDeep(prefixLineOne: indent, prefixOtherLines: indent)}';
   }
 }

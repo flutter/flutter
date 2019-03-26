@@ -367,12 +367,19 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
   /// See [FocusManager] for more details.
   FocusManager get focusManager => _buildOwner.focusManager;
 
-  /// The object in charge of the focus tree.
+  /// The object in charge of the tree of [FocusableNode] objects.
   ///
   /// Rarely used directly. Instead, consider using [FocusableScope.of] to
-  /// obtain the [FocusableScopeNode] for a given [BuildContext].
+  /// obtain the [FocusableScopeNode] for a given [BuildContext], or
+  /// [Focusable.of] to find the [FocusableNode] managed by the nearest
+  /// [Focusable].
   ///
-  /// See [FocusableManager] for more details.
+  /// See also:
+  ///
+  ///   * [FocusableManager], the type of manager referred to by this member.
+  ///   * [FocusableNode], the type of nodes in the focus tree.
+  ///   * [FocusableScopeNode], the type of nodes that provide context for a
+  ///     scope (group of nodes) in the focus tree.
   FocusableManager get focusableManager => _buildOwner.focusableManager;
 
   final List<WidgetsBindingObserver> _observers = <WidgetsBindingObserver>[];

@@ -10,15 +10,14 @@ import 'theme.dart';
 /// [Focusable] above it in the widget hierarchy is focused.
 ///
 /// It allows specification of a [focusedDecoration] to be shown when it
-/// has focus, and [unfocusedDecoration] when it is not.
+/// has focus, and [unfocusedDecoration] when it does not.
 ///
 /// By default, it uses the values derived from [Theme.focusHighlightTheme].
 class FocusHighlight extends StatefulWidget {
-  /// Creates a widget that manages a [FocusableNode]
+  /// Creates a widget that draws decorations based on whether its ancestor
+  /// [Focusable] is focused or not.
   ///
   /// The [child] argument is required and must not be null.
-  ///
-  /// The [autofocus], and [showDecorations] arguments must not be null.
   const FocusHighlight({
     Key key,
     @required this.child,
@@ -131,9 +130,9 @@ class _FocusHighlightState extends State<FocusHighlight> {
 /// This class is used to define the value of [ThemeData.focusHighlightTheme]. The
 /// [FocusHighlight] widget uses the current focusable theme to initialize
 /// [FocusHighlight] properties (like [FocusHighlight.focusedDecoration]) when
-/// they are not supplied.
+/// they are not supplied directly to the widget.
 class FocusHighlightThemeData extends Diagnosticable {
-  /// Creates a const FocusableThemeData object.
+  /// Creates a const [FocusableThemeData] object.
   ///
   /// All of the arguments are optional, and will use fallback values if not
   /// specified.
@@ -208,5 +207,7 @@ class FocusHighlightThemeData extends Diagnosticable {
     const FocusHighlightThemeData defaultTheme = FocusHighlightThemeData();
     properties.add(DiagnosticsProperty<Decoration>('focusedDecoration', focusedDecoration, defaultValue: defaultTheme.focusedDecoration));
     properties.add(DiagnosticsProperty<Decoration>('unfocusedDecoration', unfocusedDecoration, defaultValue: defaultTheme.unfocusedDecoration));
+    properties.add(DiagnosticsProperty<Curve>('focusAnimationCurve', focusAnimationCurve, defaultValue: defaultTheme.focusAnimationCurve));
+    properties.add(DiagnosticsProperty<Duration>('focusAnimationDuration', focusAnimationDuration, defaultValue: defaultTheme.focusAnimationDuration));
   }
 }

@@ -9,9 +9,23 @@ import 'focusable_manager.dart';
 import 'framework.dart';
 import 'raw_keyboard_listener.dart';
 
+/// Signature for key events that occurred on a [Focusable] widget.
+///
+/// This is the type of the [Focusable.onKey] callback.
 typedef FocusableOnKeyCallback = bool Function(FocusableNode node, RawKeyEvent event);
 
-/// A widget that manages a [FocusableNode] to allow keyboard focus to be given
+/// Signature for the callback that reports when the [Focusable] sets or changes
+/// the [FocusableNode] that it manages.
+///
+/// If the [newNode] is null, then the [oldNode] is being disposed, and you must
+/// unregister any listeners with [FocusableNode.removeListener].  If [oldNode]
+/// is null, then the node is being initialized.
+///
+/// It is used by the [Focusable.onFocusableNodeSet] and
+/// [EditableText.onFocusableNodeSet] callbacks, among others.
+typedef FocusableNodeSetCallback = void Function(FocusableNode newNode, FocusableNode oldNode);
+
+/// A widget that manages a [FocusableNode] to allow input focus to be given
 /// to this widget and its descendants.
 ///
 /// It manages a [FocusableNode], managing its lifecycle, and listening for
@@ -20,18 +34,18 @@ typedef FocusableOnKeyCallback = bool Function(FocusableNode node, RawKeyEvent e
 /// It provides [onFocusChange] as a way to be notified when the focus is given
 /// to or removed from this widget.
 ///
-/// The [onKey] argument allows specification of a key even handler that should
+/// The [onKey] argument allows specification of a key event handler that should
 /// be invoked when this node or one of its children has focus.
 ///
 /// This widget does not provide any visual indication that the focus has
 /// changed. To provide that, add a [FocusHighlight] widget as a descendant of
-/// this widget.
+/// this widget, or provide your own indication based on changes notified by
+/// [onFocusChange].
 ///
-/// To collect nodes into a group, use a [FocusableScopeNode].
+/// See also:
 ///
-/// To manipulate the focus, use methods on [FocusableScopeNode]. For instance,
-/// to move the focus to the next node, call
-/// `Focusable.of(context).nextFocus()`.
+///   * [FocusableScopeNode], to collect nodes into a group and specify focus
+///     traversal order within the group, and manipulate the focus.
 class Focusable extends StatefulWidget {
   /// Creates a widget that manages a [FocusableNode]
   ///
@@ -43,7 +57,7 @@ class Focusable extends StatefulWidget {
     @required this.child,
     this.autofocus = false,
     this.onFocusChange,
-    this.onNodeChanged,
+    this.onFocusableNodeSet,
     this.onKey,
     this.debugLabel,
   })  : assert(child != null),
@@ -68,7 +82,8 @@ class Focusable extends StatefulWidget {
   /// This is not the way to get text input in the manner of a text field: it
   /// leaves out support for input method editors, and doesn't support soft
   /// keyboards in general. For text input, consider [TextField] or
-  /// [CupertinoTextField], which do support these things.
+  /// [CupertinoTextField], or (if you need more control over the
+  /// behavior/presentation) [EditableText], which do support these things.
   final FocusableOnKeyCallback onKey;
 
   /// Handler called when the focus of this focusable changes.
@@ -78,7 +93,7 @@ class Focusable extends StatefulWidget {
   final ValueChanged<bool> onFocusChange;
 
   /// Called when the managed FocusableNode is created or changed.
-  final ValueChanged<FocusableNode> onNodeChanged;
+  final FocusableNodeSetCallback onFocusableNodeSet;
 
   /// True if this widget will be selected as the initial focus when no other
   /// node in its scope is currently focused.
@@ -94,6 +109,19 @@ class Focusable extends StatefulWidget {
   static FocusableNode of(BuildContext context) {
     assert(context != null);
     final _FocusableMarker marker = context.inheritFromWidgetOfExactType(_FocusableMarker);
+//    assert(() {
+//      if (marker == null) {
+//        throw FlutterError('Unable to find a Focusable or FocusableScope widget in the context.\n'
+//            'Focusable.of() was called with a context that does not contain a Focusable.\n'
+//            'No Focusable or FocusableScope ancestor could be found starting from the context that was '
+//            'passed to Focusable.of(). This can happen because you do not have a '
+//            'WidgetsApp or MaterialApp widget (those widgets introduce a FocusableScope at the top level), '
+//            'or it can happen if the context you use comes from a widget above those widgets.\n'
+//            'The context used was:\n'
+//            '  $context');
+//      }
+//      return true;
+//    }());
     return marker?.node ?? context.owner.focusableManager.rootScope;
   }
 
@@ -119,7 +147,7 @@ class _FocusableState extends State<Focusable> {
   FocusableNode node;
   bool _hasFocus;
 
-  FocusableNode _createNode(){
+  FocusableNode _createNode() {
     return FocusableNode(
       debugLabel: widget.debugLabel,
       autofocus: widget.autofocus,
@@ -130,8 +158,8 @@ class _FocusableState extends State<Focusable> {
   void _initNode() {
     final FocusableNode old = node;
     node ??= _createNode();
-    if (old != node && widget.onNodeChanged != null) {
-      widget.onNodeChanged(node);
+    if (old != node && widget.onFocusableNodeSet != null) {
+      widget.onFocusableNodeSet(node, null);
     }
     _hasFocus = node.hasFocus;
     // Add listener even if the _internalNode existed before, since it should
@@ -148,6 +176,9 @@ class _FocusableState extends State<Focusable> {
   @override
   void dispose() {
     node?.removeListener(_handleFocusChanged);
+    if (widget.onFocusableNodeSet != null) {
+      widget.onFocusableNodeSet(null, node);
+    }
     node?.dispose();
     super.dispose();
   }
@@ -243,7 +274,7 @@ class FocusableScope extends Focusable {
   /// The [autofocus], and [showDecorations] arguments must not be null.
   const FocusableScope({
     Key key,
-    ValueChanged<FocusableNode> onNodeChanged,
+    FocusableNodeSetCallback onFocusableNodeSet,
     @required Widget child,
     bool autofocus = false,
     ValueChanged<bool> onFocusChange,
@@ -252,14 +283,14 @@ class FocusableScope extends Focusable {
   })  : assert(child != null),
         assert(autofocus != null),
         super(
-        key: key,
-        child: child,
-        autofocus: autofocus,
-        onFocusChange: onFocusChange,
-        onNodeChanged: onNodeChanged,
-        onKey: onKey,
-        debugLabel: debugLabel,
-      );
+          key: key,
+          child: child,
+          autofocus: autofocus,
+          onFocusChange: onFocusChange,
+          onFocusableNodeSet: onFocusableNodeSet,
+          onKey: onKey,
+          debugLabel: debugLabel,
+        );
 
   /// Returns the node of the [FocusableScope] that most tightly encloses the given
   /// [BuildContext].
@@ -268,6 +299,19 @@ class FocusableScope extends Focusable {
   static FocusableScopeNode of(BuildContext context) {
     assert(context != null);
     final _FocusableMarker marker = context.inheritFromWidgetOfExactType(_FocusableMarker);
+//    assert(() {
+//      if (marker == null) {
+//        throw FlutterError('Unable to find a FocusableScope widget in the context.\n'
+//            'FocusableScope.of() was called with a context that does not contain a FocusableScope.\n'
+//            'No FocusableScope ancestor could be found starting from the context that was '
+//            'passed to FocusableScope.of(). This can happen because you do not have a '
+//            'WidgetsApp or MaterialApp widget (those widgets introduce a FocusableScope at the top level), '
+//            'or it can happen if the context you use comes from a widget above those widgets.\n'
+//            'The context used was:\n'
+//            '  $context');
+//      }
+//      return true;
+//    }());
     return marker?.node?.nearestScope ?? context.owner.focusableManager.rootScope;
   }
 
@@ -287,7 +331,7 @@ class FocusableScope extends Focusable {
 
 class _FocusableScopeState extends _FocusableState {
   @override
-  FocusableScopeNode _createNode(){
+  FocusableScopeNode _createNode() {
     return FocusableScopeNode(
       debugLabel: widget.debugLabel,
       autofocus: widget.autofocus,

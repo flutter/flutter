@@ -164,7 +164,7 @@ class ThemeData extends Diagnosticable {
     FloatingActionButtonThemeData floatingActionButtonTheme,
     Typography typography,
     CupertinoThemeData cupertinoOverrideTheme,
-    FocusHighlightThemeData focusableTheme,
+    FocusHighlightThemeData focusHighlightTheme,
   }) {
     brightness ??= Brightness.light;
     final bool isDark = brightness == Brightness.dark;
@@ -264,7 +264,7 @@ class ThemeData extends Diagnosticable {
     floatingActionButtonTheme ??= const FloatingActionButtonThemeData();
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
 
-    focusableTheme ??= const FocusHighlightThemeData();
+    focusHighlightTheme ??= const FocusHighlightThemeData();
 
     return ThemeData.raw(
       brightness: brightness,
@@ -318,7 +318,7 @@ class ThemeData extends Diagnosticable {
       floatingActionButtonTheme: floatingActionButtonTheme,
       typography: typography,
       cupertinoOverrideTheme: cupertinoOverrideTheme,
-      focusHighlightTheme: focusableTheme,
+      focusHighlightTheme: focusHighlightTheme,
     );
   }
 
@@ -700,7 +700,8 @@ class ThemeData extends Diagnosticable {
   /// This property is used to define the value of [ThemeData.focusHighlightTheme].
   ///
   /// The [Focusable] widget uses the current focusable theme to initialize some
-  /// [Focusable] properties (like [Focusable.focusedDecoration]).
+  /// [Focusable] properties (like [Focusable.focusedDecoration] and
+  /// [Focusable.unfocusedDecoration]).
   final FocusHighlightThemeData focusHighlightTheme;
 
   /// Creates a copy of this theme but with the given fields replaced with the new values.

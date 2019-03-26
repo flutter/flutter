@@ -14,19 +14,27 @@ import 'framework.dart';
 
 typedef FocusableNodeVisitor = bool Function(FocusableNode node);
 
-/// A node used by [Focusable] to represent and change the input focus.
+/// A node used to represent and change the input focus.
 ///
-/// A [FocusableNode] is created and managed by the [Focusable] widget, forming
-/// a tree of nodes that represent things that can be given the input focus in
-/// the UI.
+/// A [FocusableNode] is typically created and managed by the [Focusable]
+/// widget, forming a tree of nodes that represent things that can be given the
+/// input focus in the UI.
 ///
 /// [FocusableNode]s are persistent objects which are reparented and reorganized
 /// when the widget tree is rebuilt.
 ///
-/// The can be organized into "scopes", which form groups of nodes which are to
-/// be traversed together. Within a scope, the last item to have focus is
-/// remembered, and if another scope is focused and then the first is returned
-/// to, that node will gain focus again.
+/// They can be organized into "scopes" using [FocusableScopeNode]s, which form
+/// groups of nodes which are to be traversed together. Within a scope, the last
+/// item to have focus is remembered, and if another scope is focused and then
+/// the original returned to, the remembered node will gain focus again.
+///
+/// See also:
+///
+///   * [Focusable], a widget that manages a [FocusableNode]'s lifetime and
+///     provides an interface for accessing focus functionality from the widget
+///     hierarchy.
+///   * [FocusableScopeNode], a node for organizing nodes into groups.
+///   * [FocusableScope], a widget for managing [FocusableScopeNode]s.
 class FocusableNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// Creates a Focusable node
   ///
@@ -38,16 +46,23 @@ class FocusableNode with DiagnosticableTreeMixin, ChangeNotifier {
   })  : assert(autofocus != null),
         _autofocus = autofocus;
 
-  /// A debug label that used for diagnostic output.
+  /// A debug label that used to identify this focus node in diagnostic output.
   String debugLabel;
 
+  // The manager associated with this node.  It should only be null when not
+  // part of the focus tree.
   FocusableManager _manager;
+
+  // A bool indicating that this node has the keyboard token, and is thus
+  // showing a soft keyboard.
   bool _hasKeyboardToken = false;
 
   /// True if this node will be selected as the initial focus when no other node
-  /// in its scope is currently focused.
+  /// in its [FocusableScopeNode] is currently focused.
   ///
-  /// There must only be one node in a scope that has [autofocus] set.
+  /// There must only be one node in a [FocusableScopeNode]'s descendants that
+  /// has [autofocus] set, unless it is a descendant of a different
+  /// [FocusableScopeNode].
   bool get autofocus => _autofocus;
   set autofocus(bool value) {
     if (_autofocus == value) {
@@ -74,6 +89,12 @@ class FocusableNode with DiagnosticableTreeMixin, ChangeNotifier {
     if (scope._focusedChild == this) {
       scope._focusedChild = null;
     }
+    // TODO(gspencer): Should this be hasFocus instead?
+    if (hasPrimaryFocus) {
+      // If we're going to unfocus this node, and it has the primary focus, then
+      // move to the next focus.
+      scope.nextFocus();
+    }
     _manager?._willUnfocusNode(this);
   }
 
@@ -83,9 +104,9 @@ class FocusableNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// default and gaining focus as a result of an explicit user action.
   ///
   /// When a focus node requests the focus (either via
-  /// [FocusableScopeNode.requestFocus] or [FocusableScopeNode.autofocus]), the focus
-  /// node receives a keyboard token if it does not already have one. Later,
-  /// when the focus node becomes focused, the widget that manages the
+  /// [FocusableNode.requestFocus] or [FocusableNode.autofocus]), the focus node
+  /// receives a keyboard token if it does not already have one. Later, when the
+  /// focus node becomes focused, the widget that manages the
   /// [TextInputConnection] should show the keyboard (i.e., call
   /// [TextInputConnection.show]) only if it successfully consumes the keyboard
   /// token from the focus node.
@@ -112,22 +133,17 @@ class FocusableNode with DiagnosticableTreeMixin, ChangeNotifier {
   // Set to true if this focusable node changed, and needs to have its listeners
   // notified the next time the manager processes focus changes.
   void _markAsDirty() {
-    _manager?._dirtyNodes?.add(this);
+    _manager?._markAsDirty(this);
     _manager?._markNeedsUpdate();
   }
 
   final List<FocusableNode> _children = <FocusableNode>[];
 
-  /// Resets this node back to a base configuration.
-  ///
-  /// This is only used by tests to clear the root node. Do not call in other
-  /// contexts, as it doesn't properly detach children.
-  @visibleForTesting
+  // Resets this node back to a base configuration. This is only used by tests
+  // to forcefully reset the root node from [FocusableManager.reset]. Do not
+  // call in other contexts, as it doesn't properly detach children.
   @mustCallSuper
-  void clear() {
-    if (_manager != null) {
-      _manager._dirtyNodes.remove(this);
-    }
+  void _clear() {
     _manager = null;
     _parent = null;
     _children.clear();
@@ -356,6 +372,7 @@ class FocusableNode with DiagnosticableTreeMixin, ChangeNotifier {
   // node.
   void _setAsFocusedChild() {
     FocusableNode scopeFocus = this;
+    _hasKeyboardToken = true;
     for (FocusableNode ancestor in ancestors) {
       if (ancestor is FocusableScopeNode) {
         assert(scopeFocus != ancestor, "Somehow made a loop by setting focusedChild to it's scope.");
@@ -367,15 +384,15 @@ class FocusableNode with DiagnosticableTreeMixin, ChangeNotifier {
 
   /// Request that the widget move the focus to the next focusable node, by
   /// calling the [FocusTraversalPolicy.next] function.
-  bool nextFocus() => DefaultFocusTraversal.of(context).next(this);
+  bool nextFocus() => context != null ? DefaultFocusTraversal.of(context).next(this) : false;
 
   /// Request that the widget move the focus to the previous focusable node, by
   /// calling the [FocusTraversalPolicy.previous] function.
-  bool previousFocus() => DefaultFocusTraversal.of(context).previous(this);
+  bool previousFocus() => context != null ? DefaultFocusTraversal.of(context).previous(this) : false;
 
   /// Request that the widget move the focus to the previous focusable node, by
   /// calling the [FocusTraversalPolicy.inDirection] function.
-  bool focusInDirection(AxisDirection direction) => DefaultFocusTraversal.of(context).inDirection(this, direction);
+  bool focusInDirection(TraversalDirection direction) => context != null ? DefaultFocusTraversal.of(context).inDirection(this, direction) : false;
 
   /// Returns the size of the associated [Focusable] in logical units.
   Size get size => context.size;
@@ -488,13 +505,15 @@ class FocusableScopeNode extends FocusableNode {
   /// returning in the direction it just came from.
   ///
   /// This data will be cleared if the node moves to another scope.
+  ///
+  /// It is meant to be opaque data that only the policy knows how to
+  /// manipulate.
   Object policyData;
 
-  @visibleForTesting
   @override
-  void clear() {
-    super.clear();
+  void _clear() {
     _focusedChild = null;
+    super._clear();
   }
 
   @override
@@ -504,26 +523,26 @@ class FocusableScopeNode extends FocusableNode {
   }
 }
 
-/// Manages the focus tree.
+/// Manages the focusable tree.
 ///
-/// The focus tree keeps track of which [FocusableNode] is the user's current
-/// keyboard focus. The widget that owns the [FocusableNode] often listens for
-/// keyboard events.
+/// The focusable tree keeps track of which [FocusableNode] is the user's
+/// current keyboard focus. The [Focusable] widget that owns the [FocusableNode]
+/// often listens for keyboard events.
 ///
-/// The focus manager is responsible for holding the [FocusableScopeNode] that is
-/// the root of the focus tree and tracking which [FocusableNode] has the overall
-/// focus.
+/// The focus manager is responsible for holding the [FocusableScopeNode] that
+/// is the root of the focus tree and for tracking which [FocusableNode] has the
+/// overall primary focus.
 ///
 /// The [FocusableManager] is held by the [WidgetsBinding] as
-/// [WidgetsBinding.focusManager]. The [FocusableManager] is rarely accessed
-/// directly. Instead, to find the [FocusableScopeNode] for a given [BuildContext],
-/// use [FocusScope.of].
+/// [WidgetsBinding.focusableManager]. The [FocusableManager] is rarely accessed
+/// directly. Instead, to find the [FocusableScopeNode] for a given
+/// [BuildContext], use [FocusableScope.of], or to find the nearest
+/// [FocusableNode], use [Focusable.of].
 ///
-/// The [FocusableManager] knows nothing about [FocusableNode]s other than the one that
-/// is currently focused. If a [FocusableScopeNode] is removed, then the
-/// [FocusableManager] will attempt to focus the next [FocusableScopeNode] in the focus
-/// tree that it maintains, but if the current focus in that [FocusableScopeNode] is
-/// null, it will stop there, and no [FocusableNode] will have focus.
+/// The [FocusableManager] knows very little about [FocusableNode]s other than
+/// the one that is currently focused. If a currently focused
+/// [FocusableScopeNode] is removed, then the [FocusableManager] will attempt to
+/// focus the next [FocusableScopeNode] in the focus tree that it maintains.
 ///
 /// See also:
 ///
@@ -557,7 +576,8 @@ class FocusableManager with DiagnosticableTreeMixin {
       descendant.detach();
     }
 
-    rootScope.clear();
+    rootScope._clear();
+    _dirtyNodes.clear();
     rootScope._manager = this;
   }
 
@@ -577,13 +597,9 @@ class FocusableManager with DiagnosticableTreeMixin {
   FocusableNode _nextFocus;
   FocusableNode _nextAutofocus;
   final Set<FocusableNode> _dirtyNodes = <FocusableNode>{};
+  void _markAsDirty(FocusableNode node) => _dirtyNodes.add(node);
 
   void _willDisposeFocusNode(FocusableNode node) {
-    assert(node != null);
-    _willUnfocusNode(node);
-  }
-
-  void _willUnfocusNode(FocusableNode node) {
     assert(node != null);
     if (_currentFocus == node) {
       _currentFocus = null;
@@ -595,6 +611,11 @@ class FocusableManager with DiagnosticableTreeMixin {
       _nextFocus = null;
     }
     _dirtyNodes.remove(node);
+  }
+
+  void _willUnfocusNode(FocusableNode node) {
+    assert(node != null);
+    _willDisposeFocusNode(node);
   }
 
   bool _haveScheduledUpdate = false;

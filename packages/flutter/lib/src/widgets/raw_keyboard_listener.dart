@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 
 import 'basic.dart';
 import 'focus_manager.dart';
+import 'focusable.dart';
 import 'focusable_manager.dart';
 import 'framework.dart';
 
@@ -37,14 +38,17 @@ class RawKeyboardListener extends StatefulWidget {
     this.focusableNode,
     @required this.onKey,
     @required this.child,
-  }) : assert(focusNode != null || focusableNode != null),
-       assert(child != null),
+  }) : assert(child != null),
        super(key: key);
 
   /// Controls whether this widget has keyboard focus.
   final FocusNode focusNode;
 
-  /// Controls whether this widget has keyboard focus in the new style focus manager.
+  /// Controls whether this widget has keyboard focus in the
+  /// [FocusableManager]'s focus tree.
+  ///
+  /// If not provided, then will use the focusable node from the nearest
+  /// ancestor [Focusable].
   final FocusableNode focusableNode;
 
   /// Called whenever this widget receives a raw keyboard event.
@@ -67,11 +71,14 @@ class RawKeyboardListener extends StatefulWidget {
 }
 
 class _RawKeyboardListenerState extends State<RawKeyboardListener> {
+  FocusableNode focusableNode;
+
   @override
   void initState() {
     super.initState();
+    focusableNode = widget.focusableNode;
     widget.focusNode?.addListener(_handleFocusChanged);
-    widget.focusableNode?.addListener(_handleFocusChanged);
+    focusableNode?.addListener(_handleFocusChanged);
   }
 
   @override
@@ -81,23 +88,35 @@ class _RawKeyboardListenerState extends State<RawKeyboardListener> {
       oldWidget.focusNode?.removeListener(_handleFocusChanged);
       widget.focusNode?.addListener(_handleFocusChanged);
     }
-    if (widget.focusableNode != oldWidget.focusableNode) {
-      oldWidget.focusableNode?.removeListener(_handleFocusChanged);
-      widget.focusableNode?.addListener(_handleFocusChanged);
-    }
+    _handleNodeChange();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _handleNodeChange();
   }
 
   @override
   void dispose() {
     widget.focusNode?.removeListener(_handleFocusChanged);
-    widget.focusableNode?.removeListener(_handleFocusChanged);
+    focusableNode?.removeListener(_handleFocusChanged);
     _detachKeyboardIfAttached();
     super.dispose();
   }
 
+  void _handleNodeChange() {
+    final FocusableNode newNode = widget.focusableNode ?? Focusable.of(context);
+    if (newNode != focusableNode) {
+      focusableNode?.removeListener(_handleFocusChanged);
+      focusableNode = newNode;
+      focusableNode?.addListener(_handleFocusChanged);
+    }
+  }
+
   void _handleFocusChanged() {
     if (widget.focusNode != null && widget.focusNode.hasFocus ||
-        widget.focusableNode != null && widget.focusableNode.hasFocus)
+        focusableNode != null && focusableNode.hasFocus)
       _attachKeyboardIfDetached();
     else
       _detachKeyboardIfAttached();

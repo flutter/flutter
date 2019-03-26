@@ -114,7 +114,7 @@ void main() {
           tabBar: _buildTabBar(),
           tabBuilder: (BuildContext context, int index) {
             return CupertinoTextField(
-              onFocusableNodeChanged: (FocusableNode node) => focusNodes[index] = node,
+              onFocusableNodeSet: (FocusableNode node, [FocusableNode oldNode]) => focusNodes[index] = node,
               autofocus: true,
             );
           },
@@ -156,11 +156,11 @@ void main() {
             return Column(
               children: <Widget>[
                 CupertinoTextField(
-                  onFocusableNodeChanged: (FocusableNode node) =>  focusNodes[index * 2] = node,
+                  onFocusableNodeSet: (FocusableNode node, [FocusableNode oldNode]) =>  focusNodes[index * 2] = node,
                   placeholder: 'TextField 1',
                 ),
                 CupertinoTextField(
-                  onFocusableNodeChanged: (FocusableNode node) =>  focusNodes[index * 2 + 1] = node,
+                  onFocusableNodeSet: (FocusableNode node, [FocusableNode oldNode]) =>  focusNodes[index * 2 + 1] = node,
                   placeholder: 'TextField 2',
                 ),
               ],

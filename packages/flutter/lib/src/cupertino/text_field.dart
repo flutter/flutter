@@ -149,7 +149,7 @@ class CupertinoTextField extends StatefulWidget {
     Key key,
     this.controller,
     this.focusNode,
-    this.onFocusableNodeChanged,
+    this.onFocusableNodeSet,
     this.decoration = _kDefaultRoundedBorderDecoration,
     this.padding = const EdgeInsets.all(6.0),
     this.placeholder,
@@ -218,10 +218,15 @@ class CupertinoTextField extends StatefulWidget {
   /// If null, this widget will create its own [FocusNode].
   final FocusNode focusNode;
 
-  /// Controls whether this widget has keyboard focus.
+  /// Called when the [Focusable] within the text field changes the node that
+  /// controls whether this widget has keyboard focus.
   ///
-  /// If null, this widget will create its own [FocusableNode].
-  final ValueChanged<FocusableNode> onFocusableNodeChanged;
+  /// If the node changes and you have been listening to it, you will need to
+  /// call `removeListener` on the old node, and `addListener` for the new node.
+  ///
+  /// Will be called with `null` when the node is disposed, and you should call
+  /// `removeListener` for any callbacks registered earlier with `addListener`.
+  final FocusableNodeSetCallback onFocusableNodeSet;
 
   /// Controls the [BoxDecoration] of the box behind the text input.
   ///
@@ -452,7 +457,6 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
   TextEditingController get _effectiveController => widget.controller ?? _controller;
 
   FocusNode _focusNode;
-  FocusableNode _focusableNode;
   FocusNode get _effectiveFocusNode => widget.focusNode ?? (_focusNode ??= FocusNode());
 
   @override
@@ -477,14 +481,12 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
     final bool wasEnabled = oldWidget.enabled ?? true;
     if (wasEnabled && !isEnabled) {
       _effectiveFocusNode?.unfocus();
-      _focusableNode?.unfocus();
     }
   }
 
   @override
   void dispose() {
     _focusNode?.dispose();
-    _focusableNode?.dispose();
     _controller?.removeListener(updateKeepAlive);
     super.dispose();
   }
@@ -690,7 +692,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
           key: _editableTextKey,
           controller: controller,
           focusNode: _effectiveFocusNode,
-          onFocusableNodeChanged: widget.onFocusableNodeChanged,
+          onFocusableNodeSet: widget.onFocusableNodeSet,
           keyboardType: widget.keyboardType,
           textInputAction: widget.textInputAction,
           textCapitalization: widget.textCapitalization,

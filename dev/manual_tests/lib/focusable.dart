@@ -118,22 +118,22 @@ class _FocusableDemoState extends State<FocusableDemo> {
               }
               if (event.logicalKey == LogicalKeyboardKey.arrowLeft) {
                 setState(() {
-                  node.focusInDirection(AxisDirection.left);
+                  node.focusInDirection(TraversalDirection.left);
                 });
               }
               if (event.logicalKey == LogicalKeyboardKey.arrowRight) {
                 setState(() {
-                  node.focusInDirection(AxisDirection.right);
+                  node.focusInDirection(TraversalDirection.right);
                 });
               }
               if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
                 setState(() {
-                  node.focusInDirection(AxisDirection.up);
+                  node.focusInDirection(TraversalDirection.up);
                 });
               }
               if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
                 setState(() {
-                  node.focusInDirection(AxisDirection.down);
+                  node.focusInDirection(TraversalDirection.down);
                 });
               }
             }

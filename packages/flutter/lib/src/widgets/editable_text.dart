@@ -269,7 +269,7 @@ class EditableText extends StatefulWidget {
     Key key,
     @required this.controller,
     this.focusNode,
-    this.onFocusableNodeChanged,
+    this.onFocusableNodeSet,
     this.obscureText = false,
     this.autocorrect = true,
     @required this.style,
@@ -344,8 +344,15 @@ class EditableText extends StatefulWidget {
   /// Controls whether this widget has keyboard focus.
   final FocusNode focusNode;
 
-  /// Controls whether this widget has keyboard focus.
-  final ValueChanged<FocusableNode> onFocusableNodeChanged;
+  /// Called when the [Focusable] within the text field changes the node that
+  /// controls whether this widget has keyboard focus.
+  ///
+  /// If the node changes and you have been listening to it, you will need to
+  /// call `removeListener` on the old node, and `addListener` for the new node.
+  ///
+  /// Will be called with `null` when the node is disposed, and you should call
+  /// `removeListener` for any callbacks registered earlier with `addListener`.
+  final FocusableNodeSetCallback onFocusableNodeSet;
 
   /// {@template flutter.widgets.editableText.obscureText}
   /// Whether to hide the text being edited (e.g., for passwords).
@@ -813,16 +820,17 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _floatingCursorResetController.addListener(_onFloatingCursorResetTick);
   }
 
-  void _focusableNodeChanged(FocusableNode node) {
+  void _focusableNodeChanged(FocusableNode node, FocusableNode oldNode) {
     if (_focusableNode == node) {
       return;
     }
-    _focusableNode?.removeListener(_handleFocusChanged);
+    assert(_focusableNode == oldNode, 'EditableText is out of sync with its Focusable.');
+    oldNode?.removeListener(_handleFocusChanged);
     _focusableNode = node;
-    _focusableNode.autofocus = widget.autofocus;
+    _focusableNode?.autofocus = widget.autofocus;
     _focusableNode?.addListener(_handleFocusChanged);
-    if (widget.onFocusableNodeChanged != null) {
-      widget.onFocusableNodeChanged(_focusableNode);
+    if (widget.onFocusableNodeSet != null) {
+      widget.onFocusableNodeSet(_focusableNode, oldNode);
     }
   }
 
@@ -861,7 +869,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     assert(_cursorTimer == null);
     _selectionOverlay?.dispose();
     _selectionOverlay = null;
-    widget.focusNode?.removeListener(_handleFocusChanged);
+    // The _focusableNode doesn't need to be disposed or unlistened here because
+    // it is managed by the Focusable, and will be unregistered by calling
+    // _focusableNodeChanged when it disposes of it.
     super.dispose();
   }
 
@@ -1420,7 +1430,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
     final TextSelectionControls controls = widget.selectionControls;
     return Focusable(
-      onNodeChanged: _focusableNodeChanged,
+      onFocusableNodeSet: _focusableNodeChanged,
       child: Scrollable(
         excludeFromSemantics: true,
         axisDirection: _isMultiline ? AxisDirection.down : AxisDirection.right,
