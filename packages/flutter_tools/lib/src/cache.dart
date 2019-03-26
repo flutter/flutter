@@ -24,6 +24,7 @@ class Cache {
       _artifacts.add(MaterialFonts(this));
       _artifacts.add(FlutterEngine(this));
       _artifacts.add(GradleWrapper(this));
+      _artifacts.add(FlutterWebSdk(this));
     } else {
       _artifacts.addAll(artifacts);
     }
@@ -160,6 +161,12 @@ class Cache {
   /// `material_fonts` would return `bin/cache/artifacts/material_fonts`.
   Directory getArtifactDirectory(String name) {
     return getCacheArtifacts().childDirectory(name);
+  }
+
+  /// The web sdk has to be co-located with the dart-sdk so that they can share source
+  /// code.
+  Directory getWebSdkDirectory() {
+    return getRoot().childDirectory('flutter_web_sdk');
   }
 
   String getVersionFor(String artifactName) {
@@ -354,6 +361,47 @@ class MaterialFonts extends CachedArtifact {
   Future<void> updateInner() {
     final Uri archiveUri = _toStorageUri(version);
     return _downloadZipArchive('Downloading Material fonts...', archiveUri, location);
+  }
+}
+
+/// A cached artifact containing the web dart:ui sources, platform dill files,
+/// and libraries.json.
+///
+/// This SDK references code within the regular Dart sdk to reduce download size.
+class FlutterWebSdk extends CachedArtifact {
+  FlutterWebSdk(Cache cache) : super('flutter_web_sdk', cache);
+
+  @override
+  Directory get location => cache.getWebSdkDirectory();
+
+  @override
+  String get version => cache.getVersionFor('engine');
+
+  @override
+  Future<void> updateInner() async {
+    String platformName = 'flutter-web-sdk-';
+    if (platform.isMacOS) {
+      platformName += 'darwin-x64';
+    } else if (platform.isLinux) {
+      platformName += 'linux-x64';
+    } else if (platform.isWindows) {
+      platformName += 'windows-x64';
+    }
+    final Uri url = Uri.parse('$_storageBaseUrl/flutter_infra/flutter/$version/$platformName.zip');
+    await _downloadZipArchive('Downloading Web SDK...', url, location);
+    // This is a temporary work-around for not being able to safely download into a shared directory.
+    for (FileSystemEntity entity in location.listSync(recursive: true)) {
+      if (entity is File) {
+        final List<String> segments = fs.path.split(entity.path);
+        segments.remove('flutter_web_sdk');
+        final String newPath = fs.path.joinAll(segments);
+        final File newFile = fs.file(newPath);
+        if (!newFile.existsSync()) {
+          newFile.createSync(recursive: true);
+        }
+        entity.copySync(newPath);
+      }
+    }
   }
 }
 

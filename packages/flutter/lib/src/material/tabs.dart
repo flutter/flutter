@@ -778,6 +778,17 @@ class _TabBarState extends State<TabBar> {
       }
       return true;
     }());
+
+    assert(() {
+      if (newController.length != widget.tabs.length) {
+        throw FlutterError(
+          'Controller\'s length property (${newController.length}) does not match the \n'
+          'number of tab elements (${widget.tabs.length}) present in TabBar\'s tabs property.'
+        );
+      }
+      return true;
+    }());
+
     if (newController == _controller)
       return;
 
@@ -952,12 +963,14 @@ class _TabBarState extends State<TabBar> {
       );
     }
 
+    final TabBarTheme tabBarTheme = TabBarTheme.of(context);
+
     final List<Widget> wrappedTabs = List<Widget>(widget.tabs.length);
     for (int i = 0; i < widget.tabs.length; i += 1) {
       wrappedTabs[i] = Center(
         heightFactor: 1.0,
         child: Padding(
-          padding: widget.labelPadding ?? kTabLabelPadding,
+          padding: widget.labelPadding ?? tabBarTheme.labelPadding ?? kTabLabelPadding,
           child: KeyedSubtree(
             key: _tabKeys[i],
             child: widget.tabs[i],
@@ -1120,6 +1133,17 @@ class _TabBarViewState extends State<TabBarView> {
       }
       return true;
     }());
+
+    assert(() {
+      if (newController.length != widget.children.length) {
+        throw FlutterError(
+          'Controller\'s length property (${newController.length}) does not match the \n'
+          'number of elements (${widget.children.length}) present in TabBarView\'s children property.'
+        );
+      }
+      return true;
+    }());
+
     if (newController == _controller)
       return;
 

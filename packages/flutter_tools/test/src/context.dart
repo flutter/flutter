@@ -294,7 +294,7 @@ class MockXcodeProjectInterpreter implements XcodeProjectInterpreter {
   }
 
   @override
-  XcodeProjectInfo getInfo(String projectPath) {
+  Future<XcodeProjectInfo> getInfo(String projectPath) async {
     return XcodeProjectInfo(
       <String>['Runner'],
       <String>['Debug', 'Release'],

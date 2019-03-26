@@ -32,6 +32,10 @@ abstract class RunCommandBase extends FlutterCommand {
         negatable: false,
         help: 'Trace application startup, then exit, saving the trace to a file.',
       )
+      ..addFlag('verbose-system-logs',
+        negatable: false,
+        help: 'Include verbose logging from the flutter engine.',
+      )
       ..addOption('route',
         help: 'Which route to load when running the app.',
       )
@@ -94,6 +98,13 @@ class RunCommand extends RunCommandBase {
         negatable: false,
         help: 'Enable tracing to the system tracer. This is only useful on '
               'platforms where such a tracer is available (Android and Fuchsia).',
+      )
+      ..addFlag('dump-skp-on-shader-compilation',
+        negatable: false,
+        help: 'Automatically dump the skp that triggers new shader compilations. '
+              'This is useful for wrting custom ShaderWarmUp to reduce jank. '
+              'By default, this is not enabled to reduce the overhead. '
+              'This is only available in profile or debug build. ',
       )
       ..addFlag('await-first-frame-when-tracing',
         defaultsTo: true,
@@ -192,7 +203,7 @@ class RunCommand extends RunCommandBase {
             ? getNameForTargetPlatform(await devices[0].targetPlatform)
             : 'multiple';
 
-    return <String, String>{ 'cd3': '$isEmulator', 'cd4': deviceType };
+    return <String, String>{'cd3': '$isEmulator', 'cd4': deviceType};
   }
 
   @override
@@ -255,7 +266,9 @@ class RunCommand extends RunCommandBase {
         skiaDeterministicRendering: argResults['skia-deterministic-rendering'],
         traceSkia: argResults['trace-skia'],
         traceSystrace: argResults['trace-systrace'],
+        dumpSkpOnShaderCompilation: argResults['dump-skp-on-shader-compilation'],
         observatoryPort: observatoryPort,
+        verboseSystemLogs: argResults['verbose-system-logs'],
       );
     }
   }

@@ -76,13 +76,14 @@ Future<void> pubGet({
   bool upgrade = false,
   bool offline = false,
   bool checkLastModified = true,
+  bool skipPubspecYamlCheck = false,
 }) async {
   directory ??= fs.currentDirectory.path;
 
   final File pubSpecYaml = fs.file(fs.path.join(directory, 'pubspec.yaml'));
   final File dotPackages = fs.file(fs.path.join(directory, '.packages'));
 
-  if (!pubSpecYaml.existsSync()) {
+  if (!skipPubspecYamlCheck && !pubSpecYaml.existsSync()) {
     if (!skipIfAbsent)
       throwToolExit('$directory: no pubspec.yaml found');
     return;

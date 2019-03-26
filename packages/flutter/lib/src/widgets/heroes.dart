@@ -126,6 +126,7 @@ class Hero extends StatefulWidget {
   /// Create a hero.
   ///
   /// The [tag] and [child] parameters must not be null.
+  /// The [child] parameter and all of the its descendants must not be [Hero]s.
   const Hero({
     Key key,
     @required this.tag,
@@ -295,6 +296,11 @@ class _HeroState extends State<Hero> {
 
   @override
   Widget build(BuildContext context) {
+    assert(
+      context.ancestorWidgetOfExactType(Hero) == null,
+      'A Hero widget cannot be the descendant of another Hero widget.'
+    );
+
     if (_placeholderSize != null) {
       if (widget.placeholderBuilder == null) {
         return SizedBox(

@@ -1572,33 +1572,81 @@ class Padding extends SingleChildRenderObjectWidget {
 /// each other.
 ///
 /// {@tool sample}
-/// The [FractionalOffset] used in the following example defines two points:
-///
-///   * (0.2 * width of red [Container], 0.6 * height of red [Container]) = (8.0, 24.0)
-///     in the coordinate system of the red container.
-///   * (0.2 * width of [Align], 0.6 * height of [Align]) = (20.0, 60.0) in the
-///     coordinate system of the [Align] widget.
-///
-/// The [Align] widget positions the red [Container] such that the two points are on
-/// top of each other. In this example, the top left of the red [Container] will
-/// be placed at (20.0, 60.0) - (8.0, 24.0) = (12.0, 36.0) from the top left of
-/// the [Align] widget.
-///
-/// Using [Alignment] instead of [FractionalOffset] for [alignment] just changes
-/// the way how the two points for alignment are calculated.
+/// The [Align] widget in this example uses one of the defined constants from
+/// [Alignment], [topRight]. This places the [FlutterLogo] in the top right corner
+/// of the parent blue [Container].
 ///
 /// ```dart
 /// Center(
 ///   child: Container(
-///     height: 100.0,
-///     width: 100.0,
-///     color: Colors.yellow,
+///     height: 120.0,
+///     width: 120.0,
+///     color: Colors.blue[50],
+///     child: Align(
+///       alignment: Alignment.topRight,
+///       child: FlutterLogo(
+///         size: 60,
+///       ),
+///     ),
+///   ),
+/// )
+/// ```
+/// {@end-tool}
+///
+/// {@tool sample}
+/// The [Alignment] used in the following example defines a single point:
+///
+///   * (0.2 * width of [FlutterLogo]/2 + width of [FlutterLogo]/2, 0.6 * height
+///   of [FlutterLogo]/2 + height of [FlutterLogo]/2) = (36.0, 48.0).
+///
+/// The [Alignment] class uses a coordinate system with an origin in the center
+/// of the [Container], and so [Align] will place the [FlutterLogo] at (36.0, 48.0)
+/// according to this system.
+///
+/// ```dart
+/// Center(
+///   child: Container(
+///     height: 120.0,
+///     width: 120.0,
+///     color: Colors.blue[50],
+///     child: Align(
+///       alignment: Alignment(0.2, 0.6),
+///       child: FlutterLogo(
+///         size: 60,
+///       ),
+///     ),
+///   ),
+/// )
+/// ```
+/// {@end-tool}
+///
+/// {@tool sample}
+/// The [FractionalOffset] used in the following example defines two points:
+///
+///   * (0.2 * width of [FlutterLogo], 0.6 * height of [FlutterLogo]) = (12.0, 36.0)
+///     in the coordinate system of the blue container.
+///   * (0.2 * width of [Align], 0.6 * height of [Align]) = (24.0, 72.0) in the
+///     coordinate system of the [Align] widget.
+///
+/// The [Align] widget positions the [FlutterLogo] such that the two points are on
+/// top of each other. In this example, the top left of the [FlutterLogo] will
+/// be placed at (24.0, 72.0) - (12.0, 36.0) = (12.0, 36.0) from the top left of
+/// the [Align] widget.
+///
+/// The [FractionalOffset] class uses a coordinate system with an origin in the top-left
+/// corner of the [Container] in difference to the center-oriented system used in
+/// the example above with [Alignment].
+///
+/// ```dart
+/// Center(
+///   child: Container(
+///     height: 120.0,
+///     width: 120.0,
+///     color: Colors.blue[50],
 ///     child: Align(
 ///       alignment: FractionalOffset(0.2, 0.6),
-///       child: Container(
-///         height: 40.0,
-///         width: 40.0,
-///         color: Colors.red,
+///       child: FlutterLogo(
+///         size: 60,
 ///       ),
 ///     ),
 ///   ),
@@ -3520,8 +3568,8 @@ class PositionedDirectional extends StatelessWidget {
 /// horizontal) or [Column] (if it's vertical) instead, because that will be less
 /// verbose.
 ///
-/// To cause a child to expand to fill the available vertical space, wrap the
-/// child in an [Expanded] widget.
+/// To cause a child to expand to fill the available space in the [direction]
+/// of this widget's main axis, wrap the child in an [Expanded] widget.
 ///
 /// The [Flex] widget does not scroll (and in general it is considered an error
 /// to have more children in a [Flex] than will fit in the available room). If

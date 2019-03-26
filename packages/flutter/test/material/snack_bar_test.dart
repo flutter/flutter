@@ -336,8 +336,9 @@ void main() {
       TextStyle effectiveStyle = textWidget.style;
       effectiveStyle = defaultTextStyle.style.merge(textWidget.style);
       expect(effectiveStyle.color, Colors.lightBlue);
-    } else
+    } else {
       expect(false, true);
+    }
   });
 
   testWidgets('SnackBar button text alignment', (WidgetTester tester) async {
