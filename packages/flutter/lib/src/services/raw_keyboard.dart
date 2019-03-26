@@ -7,7 +7,6 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 
 import 'keyboard_key.dart';
-import 'linux_key_helper.dart';
 import 'raw_keyboard_android.dart';
 import 'raw_keyboard_fuchsia.dart';
 import 'raw_keyboard_linux.dart';
