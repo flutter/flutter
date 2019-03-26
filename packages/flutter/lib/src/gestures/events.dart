@@ -69,7 +69,7 @@ int nthMouseButton(int number) => (kPrimaryMouseButton << (number - 1)) & kMaxUn
 int nthStylusButton(int number) => (kPrimaryStylusButton << (number - 1)) & kMaxUnsignedSMI;
 
 /// Differences between the states of two [PointerEvent]s.
-/// 
+///
 // TODO(tongmu): Add all states, i.e. size, radiusMinor, radiusMajor,
 // orientation, and tilt.
 @immutable
