@@ -164,8 +164,9 @@ enum ListTileControlAffinity {
 /// and to ensure that [subtitle] doesn't wrap (if [isThreeLine] is false) or
 /// wraps to two lines (if it is true).
 ///
-/// Leading and trailing widgets will be constrained in height according to
-/// the [Material spec](https://material.io/design/components/lists.html).
+/// The heights of the [leading] and [trailing] widgets are constrained
+/// according to the [Material spec]
+/// (https://material.io/design/components/lists.html).
 /// An exception is made for one-line ListTiles for accessibility. Please
 /// see the example below to see how to adhere to both Material spec and
 /// accessibility requirements.
@@ -205,17 +206,21 @@ enum ListTileControlAffinity {
 /// ```
 /// {@end-tool}
 ///
-/// For accessibility purposes, tappable leading and trailing widgets have to
-/// be at least 48x48px in size. However, to adhere with Material spec,
-/// trailing/leading widgets in one-line ListTiles should visually be at
-/// most 32px (dense: true) or 40px (dense: false) in height, which may
+/// To be accessible, tappable [leading] and [trailing] widgets have to
+/// be at least 48x48 in size. However, to adhere to the Material spec,
+/// [trailing] and [leading] widgets in one-line ListTiles should visually be
+/// at most 32 (dense: true) or 40 (dense: false) in height, which may
 /// conflict with the accessibility requirement.
 ///
-/// For this reason, ListTile is implemented such that the height of leading
-/// and trailing widgets will be constrained by the actual height of the
-/// ListTile. The following is an example of a one-line, non-dense ListTile
-/// with a tappable leading widget that adheres to accessibility requirements
-/// and the Material spec.
+/// For this reason, a one-line ListTile allows the height of [leading]
+/// and [trailing] widgets to be constrained by the height of the ListTile.
+/// This allows for the creation of tappable [leading] and [trailing] widgets
+/// that are large enough, but it is up to the developer to ensure that
+/// their widgets follow the Material spec.
+///
+/// The following is an example of a one-line, non-dense ListTile with a
+/// tappable leading widget that adheres to accessibility requirements and
+/// the Material spec.
 ///
 /// {@tool sample}
 ///
@@ -231,7 +236,7 @@ enum ListTileControlAffinity {
 ///       width: 48,
 ///       height: 48,
 ///       child: Padding(
-///         // creates an avatar that visually adheres to Material
+///         // creates a 32x32 avatar per the Material spec
 ///         padding: EdgeInsets.all(8.0),
 ///         child: CircleAvatar(),
 ///       ),
@@ -969,9 +974,11 @@ class _RenderListTile extends RenderBox {
     final bool isOneLine = !isThreeLine && !hasSubtitle;
 
     final BoxConstraints maxIconHeightConstraint = BoxConstraints(
-      // One-line trailing and leading widget sizing does not follow
-      // Material specifications, but this sizing required to adhere
+      // One-line trailing and leading widget heights do not follow
+      // Material specifications, but this sizing is required to adhere
       // to accessibility requirements for smallest tappable widget.
+      // Two- and three-line trailing widget heights are constrained
+      // properly according to the Material spec.
       maxHeight: isDense ? 48.0 : 56.0,
     );
     final BoxConstraints looseConstraints = constraints.loosen();
