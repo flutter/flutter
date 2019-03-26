@@ -660,9 +660,14 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
         } else if (_showClearButton(text)) {
           rowChildren.add(
             GestureDetector(
-              onTap: widget.enabled ?? true
-                  ? () => _effectiveController.clear()
-                  : null,
+              onTap: widget.enabled ?? true ? () {
+                // Special handle onChanged for ClearButton
+                // Also call onChanged when the clear button is tapped.
+                final bool textChanged = _effectiveController.text.isNotEmpty;
+                _effectiveController.clear();
+                if (widget.onChanged != null && textChanged)
+                  widget.onChanged(_effectiveController.text);
+              } : null,
               child: const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 6.0),
                 child: Icon(
