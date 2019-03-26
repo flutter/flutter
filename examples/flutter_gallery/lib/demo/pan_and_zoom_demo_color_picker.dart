@@ -6,7 +6,8 @@ class ColorPicker extends StatelessWidget {
     @required this.colors,
     @required this.selectedColor,
     this.onTapColor,
-  });
+  }) : assert(colors != null),
+      assert(selectedColor != null);
 
   final Set<Color> colors;
   final Color selectedColor;
@@ -14,31 +15,31 @@ class ColorPicker extends StatelessWidget {
 
   @override
   Widget build (BuildContext context) {
-    return Container(
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: colors.map((Color color) => ColorPickerSwatch(
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: colors.map((Color color) {
+        return _ColorPickerSwatch(
           color: color,
           selected: color == selectedColor,
           onTap: () {
-            if (onTapColor == null) {
-              return;
+            if (onTapColor != null) {
+              onTapColor(color);
             }
-            onTapColor(color);
           },
-        )).toList(),
-      ),
+        );
+      }).toList(),
     );
   }
 }
 
 // A single selectable color widget in the ColorPicker
-class ColorPickerSwatch extends StatelessWidget {
-  const ColorPickerSwatch({
+class _ColorPickerSwatch extends StatelessWidget {
+  const _ColorPickerSwatch({
     @required this.color,
     @required this.selected,
     this.onTap,
-  });
+  }) : assert(color != null),
+      assert(selected != null);
 
   final Color color;
   final bool selected;
@@ -47,36 +48,19 @@ class ColorPickerSwatch extends StatelessWidget {
   @override
   Widget build (BuildContext context) {
     return Container(
-      child: Container(
-        width: 60,
-        height: 60,
-        padding: const EdgeInsets.fromLTRB(2, 0, 2, 0),
-        child: Stack(
-          children: <Widget>[
-            Container(
-              decoration: BoxDecoration(
-                border: Border.all(width: 2.0, color: const Color(0xff000000)),
-              ),
-              child: Material(
-                color: color,
-                child: InkWell(
-                  onTap: () {
-                    if (onTap == null) {
-                      return;
-                    }
-                    onTap();
-                  },
-                ),
-              ),
-            ),
-            Align(
-              alignment: Alignment.bottomRight,
-              child: !selected ? null : const Icon(
-                Icons.check,
-                color: Colors.white,
-              ),
-            ),
-          ],
+      width: 60.0,
+      height: 60.0,
+      padding: const EdgeInsets.fromLTRB(2.0, 0.0, 2.0, 0.0),
+      child: RawMaterialButton(
+        fillColor: color,
+        onPressed: () {
+          if (onTap != null) {
+            onTap();
+          }
+        },
+        child: !selected ? null : const Icon(
+          Icons.check,
+          color: Colors.white,
         ),
       ),
     );

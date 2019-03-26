@@ -8,7 +8,8 @@ class EditBoardPoint extends StatelessWidget {
     Key key,
     @required this.boardPoint,
     this.onSetColor,
-  }) : super(key: key);
+  }) : assert(boardPoint != null),
+      super(key: key);
 
   final BoardPoint boardPoint;
   final Function(Color) onSetColor;
