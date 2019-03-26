@@ -20,34 +20,7 @@ Future<void> pumpTestWidget(
   bool withOnDetailsPressedHandler = true,
 }) async {
   await tester.pumpWidget(
-    TestWidget(
-      withName: withName,
-      withEmail: withEmail,
-      withOnDetailsPressedHandler: withOnDetailsPressedHandler,
-    ),
-  );
-}
-
-class TestWidget extends StatefulWidget {
-  const TestWidget({
-    Key key,
-    this.withName = true,
-    this.withEmail = true,
-    this.withOnDetailsPressedHandler = true,
-  }) : super(key: key);
-
-  final bool withName;
-  final bool withEmail;
-  final bool withOnDetailsPressedHandler;
-
-  @override
-  _TestWidgetState createState() => _TestWidgetState();
-}
-
-class _TestWidgetState extends State<TestWidget> {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
+    MaterialApp(
       home: MediaQuery(
         data: const MediaQueryData(
           padding: EdgeInsets.only(
@@ -60,17 +33,11 @@ class _TestWidgetState extends State<TestWidget> {
         child: Material(
           child: Center(
             child: UserAccountsDrawerHeader(
-              onDetailsPressed: widget.withOnDetailsPressedHandler ? () { } : null,
+              onDetailsPressed: withOnDetailsPressedHandler ? () { } : null,
               currentAccountPicture: ExcludeSemantics(
-                child: GestureDetector(
-                  key: gestureKey,
-                  onTap: () {
-                    setState(() {});
-                  },
-                  child: const CircleAvatar(
-                    key: avatarA,
-                    child: Text('A'),
-                  ),
+                child: const CircleAvatar(
+                  key: avatarA,
+                  child: Text('A'),
                 ),
               ),
               otherAccountsPictures: const <Widget>[
@@ -89,14 +56,14 @@ class _TestWidgetState extends State<TestWidget> {
                   child: Text('E'),
                 ),
               ],
-              accountName: widget.withName ? const Text('name') : null,
-              accountEmail: widget.withEmail ? const Text('email') : null,
+              accountName: withName ? const Text('name') : null,
+              accountEmail: withEmail ? const Text('email') : null,
             ),
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
 }
 
 void main() {
@@ -173,21 +140,33 @@ void main() {
     expect(transformWidget.transform.getRotation()[4], 1.0);
   });
 
-  testWidgets('UserAccountsDrawerHeader icon does not rotate for setState', (WidgetTester tester) async {
-    await pumpTestWidget(tester);
+  // Regression test for https://github.com/flutter/flutter/issues/25801.
+  testWidgets('UserAccountsDrawerHeader icon does not rotate after setState', (WidgetTester tester) async {
+    StateSetter testSetState;
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            testSetState = setState;
+            return UserAccountsDrawerHeader(
+              onDetailsPressed: () { },
+            );
+          },
+        ),
+      ),
+    ));
+
     Transform transformWidget = tester.firstWidget(find.byType(Transform));
 
     // Icon is right side up.
     expect(transformWidget.transform.getRotation()[0], 1.0);
     expect(transformWidget.transform.getRotation()[4], 1.0);
 
-    await tester.tap(find.byKey(gestureKey));
-    await tester.pump();
+    testSetState(() { });
     await tester.pump(const Duration(milliseconds: 10));
     expect(tester.hasRunningAnimations, isFalse);
 
     await tester.pumpAndSettle();
-    await tester.pump();
     transformWidget = tester.firstWidget(find.byType(Transform));
 
     // Icon has not rotated.
