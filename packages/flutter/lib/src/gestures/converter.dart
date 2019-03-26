@@ -39,8 +39,9 @@ class _PointerState {
     return to - lastPosition;
   }
 
-  /// Update state with the latest event. 
+  /// Update state with the latest event.
   PointerEvent record(PointerEvent event) {
+    print('${event.pointer} ${event.buttons}');
     lastPosition = event.position;
     if (event.down && !_down) {
       setDown();
