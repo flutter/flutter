@@ -50,7 +50,7 @@ class _DeviceState {
         pressure: next.pressure,
         distance: next.distance,
       );
-      final PointerDifference received = next.changes; 
+      final PointerDifference received = next.changes;
       const double epsilon = 1e-10;
       return received.timeStamp == correct.timeStamp
           && (received.position - correct.position).distance < epsilon
@@ -58,16 +58,16 @@ class _DeviceState {
           && received.down == correct.down
           && (received.pressure - correct.pressure).abs() < epsilon
           && (received.distance - correct.distance).abs() < epsilon;
-    }()); 
+    }());
     // Make sure [next.delta] is a valid duplicate of [next.changes.position].
     assert(() {
       const double epsilon = 1e-10;
       return (next.delta - next.changes.position).distance < epsilon;
-    }()); 
+    }());
   }
 
   /// Set [event] with the specified event [source].
-  /// 
+  ///
   /// In terms of concept, it means the point of time that this state represents
   /// progresses from "before [next]" to "after [event]".
   PointerEvent record(PointerEvent next) {
@@ -81,7 +81,7 @@ class _DeviceState {
   /// will be assigned to.
   PointerDifference changes({
     @required Duration timeStamp,
-    @required Offset position, 
+    @required Offset position,
     @required int buttons,
     @required bool down,
     @required double pressure,
