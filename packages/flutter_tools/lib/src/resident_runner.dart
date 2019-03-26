@@ -28,7 +28,8 @@ import 'run_hot.dart';
 import 'vmservice.dart';
 
 class FlutterDevice {
-  FlutterDevice(this.device, {
+  FlutterDevice(
+    this.device, {
     @required this.trackWidgetCreation,
     this.dillOutputPath,
     this.fileSystemRoots,
@@ -48,7 +49,8 @@ class FlutterDevice {
        );
 
   /// Create a [FlutterDevice] with optional code generation enabled.
-  static Future<FlutterDevice> create(Device device, {
+  static Future<FlutterDevice> create(
+    Device device, {
     @required bool trackWidgetCreation,
     String dillOutputPath,
     List<String> fileSystemRoots,
@@ -61,7 +63,7 @@ class FlutterDevice {
   }) async {
     ResidentCompiler generator;
     final FlutterProject flutterProject = await FlutterProject.current();
-    if (experimentalBuildEnabled && await flutterProject.hasBuilders) {
+    if (flutterProject.hasBuilders) {
       generator = await CodeGeneratingResidentCompiler.create(
         flutterProject: flutterProject,
       );
@@ -345,7 +347,6 @@ class FlutterDevice {
     startEchoingDeviceLog();
 
     // Start the application.
-    final bool hasDirtyDependencies = hotRunner.hasDirtyDependencies(this);
     final Future<LaunchResult> futureResult = device.startApp(
       package,
       mainPath: hotRunner.mainPath,
@@ -353,7 +354,6 @@ class FlutterDevice {
       platformArgs: platformArgs,
       route: route,
       prebuiltApplication: prebuiltMode,
-      applicationNeedsRebuild: shouldBuild || hasDirtyDependencies,
       usesTerminalUi: hotRunner.usesTerminalUI,
       ipv6: hotRunner.ipv6,
     );
@@ -409,7 +409,6 @@ class FlutterDevice {
 
     startEchoingDeviceLog();
 
-    final bool hasDirtyDependencies = coldRunner.hasDirtyDependencies(this);
     final LaunchResult result = await device.startApp(
       package,
       mainPath: coldRunner.mainPath,
@@ -417,7 +416,6 @@ class FlutterDevice {
       platformArgs: platformArgs,
       route: route,
       prebuiltApplication: prebuiltMode,
-      applicationNeedsRebuild: shouldBuild || hasDirtyDependencies,
       usesTerminalUi: coldRunner.usesTerminalUI,
       ipv6: coldRunner.ipv6,
     );
@@ -445,7 +443,7 @@ class FlutterDevice {
     bool fullRestart = false,
     String projectRootPath,
     String pathToReload,
-    @required List<String> invalidatedFiles,
+    @required List<Uri> invalidatedFiles,
   }) async {
     final Status devFSStatus = logger.startProgress(
       'Syncing files to device ${device.name}...',
@@ -459,7 +457,6 @@ class FlutterDevice {
         bundle: bundle,
         firstBuildTime: firstBuildTime,
         bundleFirstUpload: bundleFirstUpload,
-        bundleDirty: bundleDirty,
         generator: generator,
         fullRestart: fullRestart,
         dillOutputPath: dillOutputPath,
@@ -487,7 +484,8 @@ class FlutterDevice {
 
 // Shared code between different resident application runners.
 abstract class ResidentRunner {
-  ResidentRunner(this.flutterDevices, {
+  ResidentRunner(
+    this.flutterDevices, {
     this.target,
     this.debuggingOptions,
     this.usesTerminalUI = true,
@@ -940,26 +938,6 @@ abstract class ResidentRunner {
     assert(exitCode != null);
     await cleanupAtFinish();
     return exitCode;
-  }
-
-  bool hasDirtyDependencies(FlutterDevice device) {
-    if (device.package.packagesFile == null || !device.package.packagesFile.existsSync()) {
-      return true;
-    }
-    // why is this sometimes an APK.
-    if (!device.package.packagesFile.path.contains('.packages')) {
-      return true;
-    }
-    // Leave pubspec null to check all dependencies.
-    final ProjectFileInvalidator projectFileInvalidator = ProjectFileInvalidator(device.package.packagesFile.path, null);
-    projectFileInvalidator.findInvalidated();
-    final int lastBuildTime = device.package.packagesFile.statSync().modified.millisecondsSinceEpoch;
-    for (int updateTime in projectFileInvalidator.updateTime.values) {
-      if (updateTime > lastBuildTime) {
-        return true;
-      }
-    }
-    return false;
   }
 
   Future<void> preStop() async { }

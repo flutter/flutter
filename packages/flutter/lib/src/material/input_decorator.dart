@@ -760,8 +760,9 @@ class _RenderDecoration extends RenderBox {
       // label from changing when text is entered.
       final RenderProxyBox typedHint = hint;
       visitor(typedHint.child);
-    } else if (!isFocused && label != null)
+    } else if (!isFocused && label != null) {
       visitor(label);
+    }
     if (input != null)
       visitor(input);
     if (suffixIcon != null)
@@ -1699,9 +1700,8 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       _effectiveDecoration = null;
 
     if (widget._labelShouldWithdraw != old._labelShouldWithdraw && widget.decoration.hasFloatingPlaceholder) {
-      if (widget._labelShouldWithdraw) {
+      if (widget._labelShouldWithdraw)
         _floatingLabelController.forward();
-      }
       else
         _floatingLabelController.reverse();
     }

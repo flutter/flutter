@@ -123,7 +123,7 @@ void main() {
         notifyingLogger: notifyingLogger,
       );
 
-      commands.add(<String, dynamic>{ 'id': 0, 'method': 'app.restart' });
+      commands.add(<String, dynamic>{'id': 0, 'method': 'app.restart'});
       final Map<String, dynamic> response = await responses.stream.firstWhere(_notEvent);
       expect(response['id'], 0);
       expect(response['error'], contains('appId is required'));
@@ -147,7 +147,7 @@ void main() {
       commands.add(<String, dynamic>{
         'id': 0,
         'method': 'app.callServiceExtension',
-        'params': <String, String> {
+        'params': <String, String>{
           'methodName': 'ext.flutter.debugPaint',
         },
       });
@@ -171,7 +171,7 @@ void main() {
         notifyingLogger: notifyingLogger,
       );
 
-      commands.add(<String, dynamic>{ 'id': 0, 'method': 'app.stop' });
+      commands.add(<String, dynamic>{'id': 0, 'method': 'app.stop'});
       final Map<String, dynamic> response = await responses.stream.firstWhere(_notEvent);
       expect(response['id'], 0);
       expect(response['error'], contains('appId is required'));
@@ -258,7 +258,7 @@ void main() {
         notifyingLogger: notifyingLogger,
       );
 
-      commands.add(<String, dynamic>{ 'id': 0, 'method': 'emulator.launch' });
+      commands.add(<String, dynamic>{'id': 0, 'method': 'emulator.launch'});
       final Map<String, dynamic> response = await responses.stream.firstWhere(_notEvent);
       expect(response['id'], 0);
       expect(response['error'], contains('emulatorId is required'));

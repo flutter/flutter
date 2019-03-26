@@ -741,7 +741,7 @@ class _TextStyleProxy implements TextStyle {
     double wordSpacingFactor = 1.0,
     double wordSpacingDelta = 0.0,
     double heightFactor = 1.0,
-    double heightDelta = 0.0
+    double heightDelta = 0.0,
   }) {
     throw UnimplementedError();
   }
@@ -773,7 +773,7 @@ class _TextStyleProxy implements TextStyle {
     Color decorationColor,
     TextDecorationStyle decorationStyle,
     double decorationThickness,
-    String debugLabel
+    String debugLabel,
   }) {
     throw UnimplementedError();
   }
@@ -796,7 +796,7 @@ class _TextStyleProxy implements TextStyle {
     FontWeight fontWeight,
     FontStyle fontStyle,
     double height,
-    StrutStyle strutStyle
+    StrutStyle strutStyle,
   }) {
     throw UnimplementedError();
   }

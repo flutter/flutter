@@ -21,15 +21,22 @@ void main() {
     }
 
     Map<String, dynamic> build(int timeStamp, int duration) => <String, dynamic>{
-      'name': 'Frame', 'ph': 'X', 'ts': timeStamp, 'dur': duration,
+      'name': 'Frame',
+      'ph': 'X',
+      'ts': timeStamp,
+      'dur': duration,
     };
 
     Map<String, dynamic> begin(int timeStamp) => <String, dynamic>{
-      'name': 'GPURasterizer::Draw', 'ph': 'B', 'ts': timeStamp,
+      'name': 'GPURasterizer::Draw',
+      'ph': 'B',
+      'ts': timeStamp,
     };
 
     Map<String, dynamic> end(int timeStamp) => <String, dynamic>{
-      'name': 'GPURasterizer::Draw', 'ph': 'E', 'ts': timeStamp,
+      'name': 'GPURasterizer::Draw',
+      'ph': 'E',
+      'ts': timeStamp,
     };
 
     List<Map<String, dynamic>> rasterizeTimeSequenceInMillis(List<int> sequence) {
@@ -221,7 +228,7 @@ void main() {
       ];
 
       test('computes 90th frame rasterizer time in milliseconds', () {
-        for(int i = 0; i < sequences.length; ++i) {
+        for (int i = 0; i < sequences.length; ++i) {
           expect(
             summarize(rasterizeTimeSequenceInMillis(sequences[i])).computePercentileFrameRasterizerTimeMillis(90.0),
             p90s[i],
@@ -231,7 +238,7 @@ void main() {
 
       test('compute 99th frame rasterizer time in milliseconds', () {
         final List<int> sequence = <int>[];
-        for(int i = 1; i <= 100; ++i) {
+        for (int i = 1; i <= 100; ++i) {
           sequence.add(i);
         }
         expect(

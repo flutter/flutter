@@ -370,14 +370,14 @@ class AndroidSdk {
   }
 
   static bool validSdkDirectory(String dir) {
-    return sdkDirectoryHasLicneses(dir) || sdkDirectoryHasPlatformTools(dir);
+    return sdkDirectoryHasLicenses(dir) || sdkDirectoryHasPlatformTools(dir);
   }
 
   static bool sdkDirectoryHasPlatformTools(String dir) {
     return fs.isDirectorySync(fs.path.join(dir, 'platform-tools'));
   }
 
-  static bool sdkDirectoryHasLicneses(String dir) {
+  static bool sdkDirectoryHasLicenses(String dir) {
     return fs.isDirectorySync(fs.path.join(dir, 'licenses'));
   }
 
@@ -588,7 +588,8 @@ class AndroidSdk {
 }
 
 class AndroidSdkVersion implements Comparable<AndroidSdkVersion> {
-  AndroidSdkVersion._(this.sdk, {
+  AndroidSdkVersion._(
+    this.sdk, {
     @required this.sdkLevel,
     @required this.platformName,
     @required this.buildToolsVersion,

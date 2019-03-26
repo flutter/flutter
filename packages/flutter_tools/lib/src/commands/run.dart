@@ -13,7 +13,6 @@ import '../cache.dart';
 import '../device.dart';
 import '../globals.dart';
 import '../ios/mac.dart';
-import '../project.dart';
 import '../resident_runner.dart';
 import '../run_cold.dart';
 import '../run_hot.dart';
@@ -35,7 +34,7 @@ abstract class RunCommandBase extends FlutterCommand {
       )
       ..addFlag('verbose-system-logs',
         negatable: false,
-        help: 'Include verbose logging from the flutter engine.'
+        help: 'Include verbose logging from the flutter engine.',
       )
       ..addOption('route',
         help: 'Which route to load when running the app.',
@@ -204,7 +203,7 @@ class RunCommand extends RunCommandBase {
             ? getNameForTargetPlatform(await devices[0].targetPlatform)
             : 'multiple';
 
-    return <String, String>{ 'cd3': '$isEmulator', 'cd4': deviceType };
+    return <String, String>{'cd3': '$isEmulator', 'cd4': deviceType};
   }
 
   @override
@@ -281,7 +280,6 @@ class RunCommand extends RunCommandBase {
     // Enable hot mode by default if `--no-hot` was not passed and we are in
     // debug mode.
     final bool hotMode = shouldUseHotMode();
-    final FlutterProject flutterProject = await FlutterProject.current();
 
     writePidFile(argResults['pid-file']);
 
@@ -391,7 +389,6 @@ class RunCommand extends RunCommandBase {
         saveCompilationTrace: argResults['train'],
         stayResident: stayResident,
         ipv6: ipv6,
-        flutterProject: flutterProject,
       );
     } else {
       runner = ColdRunner(

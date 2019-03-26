@@ -300,7 +300,7 @@ void main() {
 
         when(mockPeer.sendRequest('_getVMTimeline')).thenAnswer((Invocation invocation) async {
           log.add('download');
-          return <String, dynamic> {
+          return <String, dynamic>{
             'traceEvents': <dynamic>[
               <String, String>{
                 'name': 'test event',
@@ -359,7 +359,7 @@ void main() {
           });
 
         when(mockPeer.sendRequest('_getVMTimeline')).thenAnswer((Invocation invocation) async {
-          return <String, dynamic> {
+          return <String, dynamic>{
             'traceEvents': <dynamic>[
               <String, String>{
                 'name': 'test event',

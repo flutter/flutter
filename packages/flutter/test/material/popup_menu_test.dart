@@ -14,7 +14,7 @@ void main() {
     final Key targetKey = UniqueKey();
     await tester.pumpWidget(
       MaterialApp(
-        routes: <String, WidgetBuilder> {
+        routes: <String, WidgetBuilder>{
           '/next': (BuildContext context) {
             return const Text('Next');
           },
