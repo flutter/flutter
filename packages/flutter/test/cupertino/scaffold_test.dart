@@ -30,7 +30,7 @@ testWidgets('Opaque bar pushes contents down', (WidgetTester tester) async {
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: MediaQuery(
-        data: const MediaQueryData(viewInsets: EdgeInsets.only(bottom: 100.0)),
+        data: const MediaQueryData(viewInsets: EdgeInsets.only(top: 20)),
         child: CupertinoPageScaffold(
           navigationBar: const CupertinoNavigationBar(
             middle: Text('Opaque'),
@@ -46,8 +46,8 @@ testWidgets('Opaque bar pushes contents down', (WidgetTester tester) async {
       ),
     ));
 
-    expect(tester.getSize(find.byType(Container)).height, 600.0 - 44.0 - 100.0);
     expect(MediaQuery.of(childContext).padding.top, 0);
+    expect(tester.getRect(find.byType(Container)), Rect.fromLTRB(0, 44, 800, 600));
   });
 
   testWidgets('Contents padding from viewInsets', (WidgetTester tester) async {
