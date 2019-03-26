@@ -121,7 +121,7 @@ class TestFocusableState extends State<TestFocusable> {
     super.didChangeDependencies();
     if (!_didAutofocus && widget.autofocus) {
       _didAutofocus = true;
-      FocusScope.of(context).autofocus(widget.focusNode);
+      FocusScope.of(context).autofocus(widget.focusNode, context);
     }
   }
 

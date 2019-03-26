@@ -258,7 +258,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
       if (route != null) {
         _historyEntry = LocalHistoryEntry(onRemove: _handleHistoryEntryRemoved);
         route.addLocalHistoryEntry(_historyEntry);
-        FocusScope.of(context).setFirstFocus(_focusScopeNode);
+        FocusScope.of(context).setFirstFocus(_focusScopeNode, context);
       }
     }
   }

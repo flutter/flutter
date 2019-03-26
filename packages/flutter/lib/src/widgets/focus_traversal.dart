@@ -32,43 +32,12 @@ abstract class FocusTraversalPolicy {
   /// This is used by [next]/[previous] to determine which node to focus if they
   /// are called, but no node is currently focused.
   ///
-  /// Typically, it should take into account the [FocusNode.isAutoFocus]
-  /// setting, but can ignore it if that is the desired behavior. Nothing else
-  /// looks at the [autofocus] setting.
-  ///
   /// The default implementation returns the autofocus node in the scope
   /// containing the node, or the node itself if nothing is set to autofocus.
   ///
   /// If more than one node in the scope of [currentNode] has autofocus set,
   /// will assert.
-  FocusNode findFirstFocus(FocusNode currentNode) {
-    // Make sure there's only one autofocus child for the scope this node
-    // belongs to.
-    debugCheckUniqueAutofocusNode(currentNode);
-    final FocusScopeNode scope = currentNode.nearestScope;
-    assert(scope.focusedChild == null, 'There already is a focused node in $scope');
-    final FocusNode autofocus = scope.descendants.firstWhere(
-      (FocusNode node) => node.nearestScope == scope && node.isAutoFocus,
-      orElse: () => null,
-    );
-    return autofocus ?? currentNode;
-  }
-
-  /// A debug method to find the autofocus nodes in the nodes in the same scope
-  /// as the given [node], and if there exists more than one, assert.
-  ///
-  /// Does not descend into scope nodes, because they could have their own
-  /// separate autofocus node.
-  @protected
-  void debugCheckUniqueAutofocusNode(FocusNode node) {
-    assert(() {
-      final FocusNode nearestScope = node.nearestScope;
-      final List<FocusNode> autofocusNodes = nearestScope.descendants.where((FocusNode descendant) {
-        return descendant.nearestScope == nearestScope && descendant.isAutoFocus;
-      });
-      return autofocusNodes.length <= 1;
-    }(), 'More than one autofocus node was found in the descendants of scope ${node.nearestScope}, which is not allowed.');
-  }
+  FocusNode findFirstFocus(FocusNode currentNode) => currentNode.nearestScope.focusedChild ?? currentNode;
 
   /// Focuses the next widget in the focus scope that contains the given
   /// [currentNode].

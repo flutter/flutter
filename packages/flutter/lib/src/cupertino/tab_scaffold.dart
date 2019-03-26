@@ -315,7 +315,7 @@ class _TabSwitchingViewState extends State<_TabSwitchingView> {
   }
 
   void _focusActiveTab() {
-    FocusScope.of(context).setFirstFocus(tabFocusNodes[widget.currentTabIndex]);
+    FocusScope.of(context).setFirstFocus(tabFocusNodes[widget.currentTabIndex], context);
   }
 
   @override

@@ -8,6 +8,7 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
+import 'binding.dart';
 import 'focus_traversal.dart';
 import 'framework.dart';
 
@@ -31,11 +32,9 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   ///
   /// All parameters must not be null.
   FocusNode({
-    bool isAutoFocus = false,
     this.debugLabel,
     this.context,
-  })  : assert(isAutoFocus != null),
-        _isAutoFocus = isAutoFocus;
+  });
 
   /// A debug label that used for diagnostic output.
   String debugLabel;
@@ -43,42 +42,23 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   FocusManager _manager;
   bool _hasKeyboardToken = false;
 
-  /// True if this node will be selected as the initial focus when no other node
-  /// in its scope is currently focused.
-  ///
-  /// There must only be one node in a scope that has [isAutoFocus] set.
-  bool get isAutoFocus => _isAutoFocus;
-  set isAutoFocus(bool value) {
-    if (_isAutoFocus == value) {
-      return;
-    }
-    _isAutoFocus = value;
-    if (_isAutoFocus) {
-      _debugCheckUniqueAutofocusNode(this);
-      enclosingScope?._autofocusChild = this;
-      _manager?._requestAutofocus(this);
-    }
-  }
-
-  bool _isAutoFocus;
-
   /// Cancels any outstanding requests for focus.
   ///
   /// This method is safe to call regardless of whether this node has ever
   /// requested focus.
   void unfocus() {
-    final FocusScopeNode scope = enclosingScope;
-    if (scope == null) {
+    if (_manager == null) {
       return;
     }
-    final bool hadFocus = scope._focusedChild == this;
-    if (hadFocus) {
+    final FocusScopeNode scope = enclosingScope;
+    if (scope == null) {
+      // This node isn't part of a tree.
+      return;
+    }
+    if (scope._focusedChild == this) {
       scope._focusedChild = null;
     }
-    if (scope._autofocusChild == this) {
-      scope._autofocusChild = null;
-    }
-    _manager?._willUnfocusNode(this);
+    _manager._willUnfocusNode(this);
   }
 
   /// Removes the keyboard token from this focus node if it has one.
@@ -103,10 +83,14 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     return true;
   }
 
-  /// The context from the [InheritedWidget] associated with this node.
+  /// The context that describes the region for the element that the focus node
+  /// represents.
   ///
-  /// This is not the [Focusable] or [FocusScope] itself, but is a child of a
-  /// [Focusable] or [FocusScope], and it has the same dimensions.
+  /// This is typically the context in the build method for the widget that is
+  /// being focused, and is taken from the context argument to
+  /// [reparentIfNeeded].
+  ///
+  /// Must be updated when moving this node to another widget.
   BuildContext context;
 
   /// Returns the parent node for this object.
@@ -122,13 +106,11 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
 
   final List<FocusNode> _children = <FocusNode>[];
 
-  /// Resets this node back to a base configuration.
-  ///
-  /// This is only used by tests to clear the root node. Do not call in other
-  /// contexts, as it doesn't properly detach children.
-  @visibleForTesting
+  // Resets this node back to a base configuration. This is only used by tests
+  // to clear the root node. Do not call in other contexts, as it doesn't
+  // properly detach children.
   @mustCallSuper
-  void clear() {
+  void _clear() {
     if (_manager != null) {
       _manager._dirtyNodes.remove(this);
     }
@@ -141,6 +123,9 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   @mustCallSuper
   void removeChild(FocusNode node) {
     assert(_children.contains(node), "Tried to remove a node that wasn't a child.");
+    assert(node._parent == this);
+    assert(node._manager == _manager);
+
     // If this was the focused child for this scope, then unfocus it in that
     // scope.
     node.unfocus();
@@ -151,6 +136,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
 
   // Updates the manager for all descendants to the given manager.
   void _updateManager(FocusManager manager) {
+    // TODO(gspencer): There's probably a more efficient way to do this.
     for (FocusNode node in descendants) {
       node._manager = manager;
     }
@@ -166,37 +152,33 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// during its `build` method in case the widget is moved from one location
   /// in the tree to another location that has a different focus scope.
   @mustCallSuper
-  void reparentIfNeeded(FocusNode child) {
+  void reparentIfNeeded(FocusNode child, BuildContext childContext) {
     assert(child != null);
+    assert(childContext != null);
     assert(_manager == null || child != _manager.rootScope, "Can't reparent the root node");
     assert(!ancestors.contains(child), 'The supplied child is already an ancestor of this node. Inheritance loops are not allowed.');
+    child.context = childContext;
     if (child._parent == this) {
       assert(_children.contains(child), "Found a node that says it's a child, but doesn't appear in the child list.");
+      // The child is already a child of this parent.
       return;
     }
     FocusNode oldPrimaryFocus;
     if (child._manager != null) {
+      // We want to find out what the primary focus is, since the new child
+      // might be an ancestor of the primary focus, and it should move with the
+      // child.
       oldPrimaryFocus = child.hasFocus ? child._manager._currentFocus : null;
       assert(oldPrimaryFocus == null || oldPrimaryFocus == child || oldPrimaryFocus.ancestors.contains(child), "child has focus, but primary focus isn't a descendant of it for some reason");
     }
-    Set<FocusNode> oldFocusPath = <FocusNode>{};
-    if (oldPrimaryFocus != null) {
-      // The child currently has focus, so we have to do some extra work to keep
-      // that focus, and to notify any scopes that used to be ancestors, and no
-      // longer have focus after we move it.
-      oldFocusPath = oldPrimaryFocus.ancestors.toSet();
-    }
+    // The child currently has focus, so we have to do some extra work to keep
+    // that focus, and to notify any scopes that used to be ancestors, and no
+    // longer have focus after we move it.
+    final Set<FocusNode> oldFocusPath = oldPrimaryFocus?.ancestors?.toSet() ?? <FocusNode>{};
     child.detach();
     _children.add(child);
     child._parent = this;
     child._updateManager(_manager);
-    // If this child is an autofocus node, then set that as the focused child
-    // in its scope.
-    final FocusScopeNode scope = child.enclosingScope;
-    scope._focusedChild ??= child.isAutoFocus ? child : null;
-    if (child.isAutoFocus) {
-      scope._autofocusChild = child;
-    }
     if (oldPrimaryFocus != null) {
       final Set<FocusNode> newFocusPath = _manager?._currentFocus?.ancestors?.toSet() ?? <FocusNode>{};
       // Nodes that will no longer be focused need to be marked dirty.
@@ -206,25 +188,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
       // If the node used to have focus, make sure it keeps it's old primary
       // focus when it moves.
       oldPrimaryFocus.requestFocus();
-    } else if (child.isAutoFocus) {
-      _debugCheckUniqueAutofocusNode(child);
-      _manager._requestAutofocus(child);
     }
-  }
-
-  /// A debug method to find the autofocus nodes in the nodes in the same scope
-  /// as the given [node], and if there exists more than one, assert.
-  ///
-  /// Does not descend into scope nodes, because they could have their own
-  /// separate autofocus node.
-  void _debugCheckUniqueAutofocusNode(FocusNode node) {
-    assert(() {
-      final FocusNode enclosingScope = node.enclosingScope;
-      final List<FocusNode> autofocusNodes = enclosingScope?.descendants?.where((FocusNode descendant) {
-        return descendant.enclosingScope == enclosingScope && descendant.isAutoFocus;
-      })?.toList() ?? const <FocusNode>[];
-      return autofocusNodes.length <= 1;
-    }(), 'More than one autofocus node was found in the descendants of scope ${node.enclosingScope}, which is not allowed.');
   }
 
   /// An iterator over the children of this node.
@@ -304,7 +268,9 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
       // If an argument was given, then it expects to be a child of this node,
       // and have the focus given to it.  Reparent the node and then request
       // focus on it.
-      reparentIfNeeded(node);
+      if (node._parent == null) {
+        reparentIfNeeded(node, node.context);
+      }
       node.requestFocus();
       return;
     }
@@ -317,6 +283,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     if (!isFromPolicy) {
       enclosingScope?.policyData = null;
     }
+    _hasKeyboardToken = true;
     _manager._markNeedsUpdate(newFocus: this);
   }
 
@@ -341,9 +308,6 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     if (hasPrimaryFocus) {
       return true;
     }
-    if (_manager._currentFocus == this) {
-      return true;
-    }
     return _manager._currentFocus.ancestors.contains(this);
   }
 
@@ -354,7 +318,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// the chain to return true.
   bool get hasPrimaryFocus {
     assert(_manager != null);
-    return this == _manager._currentFocus;
+    return _manager._currentFocus == this;
   }
 
   /// Returns the nearest enclosing scope node above this node, including
@@ -421,7 +385,6 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<BuildContext>('context', context, defaultValue: null));
-    properties.add(FlagProperty('isAutoFocus', value: isAutoFocus, ifTrue: 'AUTOFOCUS', defaultValue: false));
     properties.add(FlagProperty('hasFocus', value: hasFocus, ifTrue: 'FOCUSED', defaultValue: false));
     properties.add(StringProperty('debugLabel', debugLabel, defaultValue: null));
   }
@@ -445,24 +408,27 @@ class FocusScopeNode extends FocusNode {
   ///
   /// All parameters must not be null.
   FocusScopeNode({
-    bool isAutoFocus = false,
     BuildContext context,
     String debugLabel,
-  })  : assert(isAutoFocus != null),
-        super(context: context, isAutoFocus: isAutoFocus, debugLabel: debugLabel);
+  }) : super(context: context, debugLabel: debugLabel);
 
   @override
   FocusScopeNode get nearestScope => this;
 
   @override
-  void reparentIfNeeded(FocusNode child) {
+  void reparentIfNeeded(FocusNode child, BuildContext childContext) {
     final FocusScopeNode previousEnclosingScope = child.enclosingScope;
-    super.reparentIfNeeded(child);
+    super.reparentIfNeeded(child, childContext);
     final FocusScopeNode currentEnclosingScope = child.enclosingScope;
     // If the child moved scopes, then the policy data is invalid.
     if (previousEnclosingScope != currentEnclosingScope) {
       policyData = null;
     }
+    // If no child has focus in this scope, then we give it to the first one to
+    // come along.
+//    if (_focusedChild == null) {
+//      child._setAsFocusedChild();
+//    }
   }
 
   /// Deprecated way to find out if this scope has focus.
@@ -472,9 +438,9 @@ class FocusScopeNode extends FocusNode {
 
   /// Add the given node as a child of this focus scope, and make it be the
   /// [focusedChild].
-  void setFirstFocus(FocusScopeNode node) {
-    reparentIfNeeded(node);
-    _focusedChild = node;
+  void setFirstFocus(FocusScopeNode node, BuildContext childContext) {
+    reparentIfNeeded(node, childContext);
+    node._setAsFocusedChild();
   }
 
   /// If this scope lacks a focus, reparent the node as a child of this one, and
@@ -485,9 +451,11 @@ class FocusScopeNode extends FocusNode {
   ///
   /// The node is notified that it has received the overall focus in a
   /// microtask.
-  void autofocus(FocusNode node) {
+  void autofocus(FocusNode node, BuildContext context) {
     if (_focusedChild == null) {
-      reparentIfNeeded(node);
+      if (node._parent == null) {
+        reparentIfNeeded(node, context);
+      }
       node.requestFocus();
     }
   }
@@ -506,14 +474,12 @@ class FocusScopeNode extends FocusNode {
 
   FocusNode _focusedChild;
 
-  FocusNode _autofocusChild;
-
   @override
   void _doRequestFocus(bool isFromPolicy) {
     assert(isFromPolicy != null);
     assert(_manager != null, "Tried to request focus for a node that isn't part of the focus tree.");
-    // Set the focus to the focused child of this scope, if it is one. Otherwise
-    // start with setting the focus to this node itself.
+    // Start with the primary focus as the focused child of this scope, if there
+    // is one. Otherwise start with this node itself.
     FocusNode primaryFocus = focusedChild ?? this;
     // Keep going down through scopes until the ultimately focusable item is
     // found, a scope doesn't have a focusedChild, or a non-scope is
@@ -526,8 +492,12 @@ class FocusScopeNode extends FocusNode {
       if (!isFromPolicy) {
         primaryFocus.policyData = null;
       }
+      // We didn't find a FocusNode at the leaf, so we're focusing the scope.
       _manager._markNeedsUpdate(newFocus: primaryFocus);
     } else {
+      // We found a FocusScope at the leaf, so ask it to focus itself instead of
+      // this scope. That will cause this scope to return true from hasFocus,
+      // but false from hasPrimaryFocus.
       if (isFromPolicy) {
         primaryFocus.requestFocusFromPolicy();
       } else {
@@ -546,10 +516,9 @@ class FocusScopeNode extends FocusNode {
   /// This data will be cleared if the node moves to another scope.
   Object policyData;
 
-  @visibleForTesting
   @override
-  void clear() {
-    super.clear();
+  void _clear() {
+    super._clear();
     _focusedChild = null;
   }
 
@@ -613,7 +582,7 @@ class FocusManager with DiagnosticableTreeMixin {
       descendant.detach();
     }
 
-    rootScope.clear();
+    rootScope._clear();
     rootScope._manager = this;
   }
 
@@ -631,12 +600,12 @@ class FocusManager with DiagnosticableTreeMixin {
   // _currentFocus;
   FocusNode _currentFocus;
   FocusNode _nextFocus;
-  FocusNode _nextAutofocus;
   final Set<FocusNode> _dirtyNodes = <FocusNode>{};
 
   void _willDisposeFocusNode(FocusNode node) {
     assert(node != null);
     _willUnfocusNode(node);
+    _dirtyNodes.remove(node);
   }
 
   void _willUnfocusNode(FocusNode node) {
@@ -644,13 +613,9 @@ class FocusManager with DiagnosticableTreeMixin {
     if (_currentFocus == node) {
       _currentFocus = null;
     }
-    if (_nextAutofocus == node) {
-      _nextAutofocus = null;
-    }
     if (_nextFocus == node) {
       _nextFocus = null;
     }
-    _dirtyNodes.remove(node);
   }
 
   bool _haveScheduledUpdate = false;
@@ -665,22 +630,9 @@ class FocusManager with DiagnosticableTreeMixin {
     scheduleMicrotask(_applyFocusChange);
   }
 
-  void _requestAutofocus(FocusNode node) {
-    _nextAutofocus = node;
-    _markNeedsUpdate();
-  }
-
   void _applyFocusChange() {
     _haveScheduledUpdate = false;
     final FocusNode previousFocus = _currentFocus;
-    if (_nextAutofocus != null) {
-      // If a child with autofocus was re-parented, and we don't have any focus
-      // or pending focus set, then use that as the focus.
-      if (_nextFocus == null && _currentFocus == null) {
-        _nextFocus = _nextAutofocus;
-      }
-      _nextAutofocus = null;
-    }
     if (_nextFocus != null && _nextFocus != _currentFocus) {
       // Even if the _currentFocus hasn't changed, it may have changed where it
       // was in the tree, so we have to make sure we update and notify.
@@ -720,4 +672,9 @@ class FocusManager with DiagnosticableTreeMixin {
         '${indent}currentFocus: $_currentFocus\n'
         '${rootScope.toStringDeep(prefixLineOne: indent, prefixOtherLines: indent)}';
   }
+}
+
+/// Returns a text representation of the current focus tree.
+String debugFocusTree() {
+  return WidgetsBinding.instance.focusManager.toStringDeep();
 }

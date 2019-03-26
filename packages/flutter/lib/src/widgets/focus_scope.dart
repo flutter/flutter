@@ -118,11 +118,11 @@ class _FocusableState extends State<Focusable> {
   FocusNode _internalNode;
   FocusNode get node => widget._externalNode ?? _internalNode;
   bool _hasFocus;
+  bool _didAutofocus = false;
 
   FocusNode _createNode(){
     return FocusNode(
       debugLabel: widget.debugLabel,
-      isAutoFocus: widget.autofocus,
       context: context,
     );
   }
@@ -192,9 +192,6 @@ class _FocusableState extends State<Focusable> {
       oldWidget._externalNode?.removeListener(_handleFocusChanged);
       widget._externalNode?.addListener(_handleFocusChanged);
     }
-    if (oldWidget.autofocus != widget.autofocus) {
-      node.isAutoFocus = widget.autofocus;
-    }
     if (oldWidget.debugLabel != widget.debugLabel) {
       node.debugLabel = widget.debugLabel;
     }
@@ -204,13 +201,17 @@ class _FocusableState extends State<Focusable> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     final FocusNode newParent = Focusable.of(context);
-    node.context = context;
-    newParent.reparentIfNeeded(node);
+    if (!_didAutofocus && widget.autofocus) {
+      FocusScope.of(context).setFirstFocus(node, context);
+      _didAutofocus = true;
+    } else {
+      newParent.reparentIfNeeded(node, context);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    Focusable.of(context).reparentIfNeeded(node);
+    Focusable.of(context).reparentIfNeeded(node, context);
     return RawKeyboardListener(
       focusNode: node,
       onKey: (RawKeyEvent event) {
@@ -300,10 +301,7 @@ class FocusScope extends Focusable {
     return parent?.ancestors?.cast<FocusScopeNode>()?.toList() ?? <FocusScopeNode>[];
   }
 
-  /// The focus scope node that this FocusScope will manage.
-  ///
-  /// You do not need to manage the lifetime of this, the FocusScope will adopt
-  /// it.
+  /// The focus scope node that this FocusScope will use.
   final FocusScopeNode node;
 
   @override
@@ -311,11 +309,18 @@ class FocusScope extends Focusable {
 }
 
 class _FocusableScopeState extends _FocusableState {
+  FocusScopeNode get _externalNode {
+    if (widget is! FocusScope) {
+      return null;
+    }
+    final FocusScope scope = widget;
+    return scope.node;
+  }
+
   @override
   FocusScopeNode _createNode(){
     return FocusScopeNode(
       debugLabel: widget.debugLabel,
-      isAutoFocus: widget.autofocus,
       context: context,
     );
   }

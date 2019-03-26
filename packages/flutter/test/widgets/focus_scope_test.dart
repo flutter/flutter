@@ -39,10 +39,10 @@ class TestFocusableState extends State<TestFocusable> {
 
   @override
   Widget build(BuildContext context) {
-    FocusScope.of(context).reparentIfNeeded(focusNode);
+    FocusScope.of(context).reparentIfNeeded(focusNode, context);
     if (!_didAutofocus && widget.autofocus) {
       _didAutofocus = true;
-      FocusScope.of(context).autofocus(focusNode);
+      FocusScope.of(context).autofocus(focusNode, context);
     }
     return GestureDetector(
       onTap: () {
@@ -197,9 +197,10 @@ void main() {
     expect(key.currentState.focusNode.hasFocus, isTrue);
     expect(find.text('A FOCUSED'), findsOneWidget);
 
+    print(debugFocusTree());
     expect(parentFocusScope, hasAGoodToStringDeep);
     expect(
-      parentFocusScope.toStringDeep(minLevel: DiagnosticLevel.info),
+      parentFocusScope.toStringDeep(),
       equalsIgnoringHashCodes('FocusScopeNode#00000\n'
           ' │ context: FocusScope\n'
           ' │ FOCUSED\n'
@@ -231,7 +232,7 @@ void main() {
     );
 
     // Add the child focus scope to the focus tree.
-    parentFocusScope.setFirstFocus(childFocusScope);
+    parentFocusScope.setFirstFocus(childFocusScope, key.currentContext);
     await tester.pumpAndSettle();
     expect(childFocusScope.isFirstFocus, isTrue);
 
@@ -274,7 +275,6 @@ void main() {
       ),
     );
 
-    key.currentState.focusNode.requestFocus();
     await tester.pumpAndSettle();
 
     expect(key.currentState.focusNode.hasFocus, isTrue);
@@ -358,8 +358,9 @@ void main() {
       ),
     );
 
-    WidgetsBinding.instance.focusManager.rootScope.setFirstFocus(FocusScope.of(keyA.currentContext));
+    final FocusScopeNode scope = FocusScope.of(keyA.currentContext);
     FocusScope.of(keyA.currentContext).requestFocus(keyA.currentState.focusNode);
+    WidgetsBinding.instance.focusManager.rootScope.setFirstFocus(scope, scope.context);
 
     await tester.pumpAndSettle();
 
@@ -381,8 +382,8 @@ void main() {
 
     await tester.pump();
     expect(childFocusScope.isFirstFocus, isTrue);
-    expect(keyA.currentState.focusNode.hasFocus, isTrue);
-    expect(find.text('A FOCUSED'), findsOneWidget);
+    expect(keyA.currentState.focusNode.hasFocus, isFalse);
+    expect(find.text('a'), findsOneWidget);
   });
 
   // Arguably, this isn't correct behavior, but it is what happens now.
@@ -402,7 +403,6 @@ void main() {
               debugLabel: 'Widget A',
               key: keyA,
               name: 'a',
-              autofocus: true,
             ),
             TestFocusable(
               debugLabel: 'Widget B',
@@ -415,7 +415,8 @@ void main() {
     );
 
     FocusScope.of(keyA.currentContext).requestFocus(keyA.currentState.focusNode);
-    WidgetsBinding.instance.focusManager.rootScope.setFirstFocus(FocusScope.of(keyA.currentContext));
+    final FocusScopeNode scope = FocusScope.of(keyA.currentContext);
+    WidgetsBinding.instance.focusManager.rootScope.setFirstFocus(scope, scope.context);
 
     await tester.pumpAndSettle();
 
@@ -465,7 +466,6 @@ void main() {
                   debugLabel: 'Child A',
                   key: keyA,
                   name: 'a',
-                  autofocus: true,
                 ),
               ],
             ),
@@ -489,8 +489,10 @@ void main() {
 
     FocusScope.of(keyB.currentContext).requestFocus(keyB.currentState.focusNode);
     FocusScope.of(keyA.currentContext).requestFocus(keyA.currentState.focusNode);
-    WidgetsBinding.instance.focusManager.rootScope.setFirstFocus(FocusScope.of(keyB.currentContext));
-    WidgetsBinding.instance.focusManager.rootScope.setFirstFocus(FocusScope.of(keyA.currentContext));
+    final FocusScopeNode bScope = FocusScope.of(keyB.currentContext);
+    final FocusScopeNode aScope = FocusScope.of(keyA.currentContext);
+    WidgetsBinding.instance.focusManager.rootScope.setFirstFocus(bScope, bScope.context);
+    WidgetsBinding.instance.focusManager.rootScope.setFirstFocus(aScope, aScope.context);
 
     await tester.pumpAndSettle();
 
@@ -548,7 +550,6 @@ void main() {
                   debugLabel: 'Child A',
                   key: keyA,
                   name: 'a',
-                  autofocus: true,
                 ),
               ],
             ),
@@ -571,8 +572,10 @@ void main() {
 
     FocusScope.of(keyB.currentContext).requestFocus(keyB.currentState.focusNode);
     FocusScope.of(keyA.currentContext).requestFocus(keyA.currentState.focusNode);
-    WidgetsBinding.instance.focusManager.rootScope.setFirstFocus(FocusScope.of(keyB.currentContext));
-    WidgetsBinding.instance.focusManager.rootScope.setFirstFocus(FocusScope.of(keyA.currentContext));
+    final FocusScopeNode aScope = FocusScope.of(keyA.currentContext);
+    final FocusScopeNode bScope = FocusScope.of(keyB.currentContext);
+    WidgetsBinding.instance.focusManager.rootScope.setFirstFocus(bScope, bScope.context);
+    WidgetsBinding.instance.focusManager.rootScope.setFirstFocus(aScope, aScope.context);
 
     await tester.pumpAndSettle();
 
@@ -606,8 +609,8 @@ void main() {
     );
     await tester.pump();
 
-    expect(keyB.currentState.focusNode.hasFocus, isTrue);
-    expect(find.text('B FOCUSED'), findsOneWidget);
+    expect(keyB.currentState.focusNode.hasFocus, isFalse);
+    expect(find.text('b'), findsOneWidget);
   });
 
   // Arguably, this isn't correct behavior, but it is what happens now.
@@ -627,7 +630,6 @@ void main() {
                 TestFocusable(
                   key: keyA,
                   name: 'a',
-                  autofocus: true,
                 ),
               ],
             ),
@@ -648,7 +650,8 @@ void main() {
     );
 
     FocusScope.of(keyA.currentContext).requestFocus(keyA.currentState.focusNode);
-    WidgetsBinding.instance.focusManager.rootScope.setFirstFocus(FocusScope.of(keyA.currentContext));
+    final FocusScopeNode aScope = FocusScope.of(keyA.currentContext);
+    WidgetsBinding.instance.focusManager.rootScope.setFirstFocus(aScope, aScope.context);
 
     await tester.pumpAndSettle();
 
@@ -678,7 +681,6 @@ void main() {
                 TestFocusable(
                   key: keyA,
                   name: 'a',
-                  autofocus: true,
                 ),
               ],
             ),
@@ -689,8 +691,8 @@ void main() {
 
     await tester.pump();
 
-    expect(keyA.currentState.focusNode.hasFocus, isTrue);
-    expect(find.text('A FOCUSED'), findsOneWidget);
+    expect(keyA.currentState.focusNode.hasFocus, isFalse);
+    expect(find.text('a'), findsOneWidget);
     expect(keyB.currentState.focusNode.hasFocus, isFalse);
     expect(find.text('b'), findsOneWidget);
   });
@@ -712,7 +714,6 @@ void main() {
                 TestFocusable(
                   key: keyA,
                   name: 'a',
-                  autofocus: true,
                 ),
               ],
             ),
@@ -733,7 +734,8 @@ void main() {
     );
 
     FocusScope.of(keyA.currentContext).requestFocus(keyA.currentState.focusNode);
-    WidgetsBinding.instance.focusManager.rootScope.setFirstFocus(FocusScope.of(keyA.currentContext));
+    final FocusScopeNode aScope = FocusScope.of(keyA.currentContext);
+    WidgetsBinding.instance.focusManager.rootScope.setFirstFocus(aScope, aScope.context);
 
     await tester.pumpAndSettle();
 
@@ -753,7 +755,6 @@ void main() {
                 TestFocusable(
                   key: keyA,
                   name: 'a',
-                  autofocus: true,
                 ),
               ],
             ),
@@ -775,8 +776,8 @@ void main() {
 
     await tester.pump();
 
-    expect(keyA.currentState.focusNode.hasFocus, isTrue);
-    expect(find.text('A FOCUSED'), findsOneWidget);
+    expect(keyA.currentState.focusNode.hasFocus, isFalse);
+    expect(find.text('a'), findsOneWidget);
     expect(keyB.currentState.focusNode.hasFocus, isFalse);
     expect(find.text('b'), findsOneWidget);
   });

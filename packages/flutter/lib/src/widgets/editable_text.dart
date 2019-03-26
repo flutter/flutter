@@ -810,7 +810,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!_didAutoFocus && widget.autofocus) {
-      FocusScope.of(context).autofocus(widget.focusNode);
+      FocusScope.of(context).autofocus(widget.focusNode, context);
       _didAutoFocus = true;
     }
   }
@@ -1078,7 +1078,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     } else {
       final List<FocusScopeNode> ancestorScopes = FocusScope.ancestorsOf(context);
       for (int i = ancestorScopes.length - 1; i >= 1; i -= 1)
-        ancestorScopes[i].setFirstFocus(ancestorScopes[i - 1]);
+        ancestorScopes[i].setFirstFocus(ancestorScopes[i - 1], context);
       FocusScope.of(context).requestFocus(widget.focusNode);
     }
   }
@@ -1385,8 +1385,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
-    widget.focusNode.context = context;
-    FocusScope.of(context).reparentIfNeeded(widget.focusNode);
+    FocusScope.of(context).reparentIfNeeded(widget.focusNode, context);
     super.build(context); // See AutomaticKeepAliveClientMixin.
 
     final TextSelectionControls controls = widget.selectionControls;
