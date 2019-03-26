@@ -1,4 +1,4 @@
-Signature: 191c43b2cc3260647a4ea7da4169f97e
+Signature: f161b2aef0c1e3da3efbff25e2c31298
 
 UNUSED LICENSES:
 
@@ -4609,6 +4609,17 @@ FILE: ../../../third_party/dart/runtime/observatory/web/index.html
 FILE: ../../../third_party/dart/runtime/observatory/web/third_party/trace_viewer_full.html
 FILE: ../../../third_party/dart/runtime/observatory/web/timeline.html
 FILE: ../../../third_party/dart/runtime/vm/snapshot_test_in.dat
+FILE: ../../../third_party/dart/samples/ffi/sqlite/docs/lib/scenario-default.svg
+FILE: ../../../third_party/dart/samples/ffi/sqlite/docs/lib/scenario-full.svg
+FILE: ../../../third_party/dart/samples/ffi/sqlite/lib/sqlite.dart
+FILE: ../../../third_party/dart/samples/ffi/sqlite/lib/src/bindings/bindings.dart
+FILE: ../../../third_party/dart/samples/ffi/sqlite/lib/src/bindings/constants.dart
+FILE: ../../../third_party/dart/samples/ffi/sqlite/lib/src/bindings/signatures.dart
+FILE: ../../../third_party/dart/samples/ffi/sqlite/lib/src/bindings/types.dart
+FILE: ../../../third_party/dart/samples/ffi/sqlite/lib/src/collections/closable_iterator.dart
+FILE: ../../../third_party/dart/samples/ffi/sqlite/lib/src/database.dart
+FILE: ../../../third_party/dart/samples/ffi/sqlite/lib/src/ffi/arena.dart
+FILE: ../../../third_party/dart/samples/ffi/sqlite/lib/src/ffi/cstring.dart
 FILE: ../../../third_party/dart/sdk/lib/html/html_common/conversions_dart2js.dart
 FILE: ../../../third_party/dart/sdk/lib/html/html_common/html_common.dart
 FILE: ../../../third_party/dart/sdk/lib/libraries.json
@@ -5192,6 +5203,7 @@ FILE: ../../../third_party/dart/samples/ffi/sample_ffi_functions.dart
 FILE: ../../../third_party/dart/samples/ffi/sample_ffi_functions_callbacks.dart
 FILE: ../../../third_party/dart/samples/ffi/sample_ffi_functions_structs.dart
 FILE: ../../../third_party/dart/samples/ffi/sample_ffi_structs.dart
+FILE: ../../../third_party/dart/samples/ffi/sqlite/lib/src/ffi/dylib_utils.dart
 FILE: ../../../third_party/dart/sdk/lib/ffi/annotations.dart
 FILE: ../../../third_party/dart/sdk/lib/ffi/dynamic_library.dart
 FILE: ../../../third_party/dart/sdk/lib/ffi/ffi.dart
