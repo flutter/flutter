@@ -55,17 +55,12 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     _isAutoFocus = value;
     if (_isAutoFocus) {
       _debugCheckUniqueAutofocusNode(this);
-      _manager._requestAutofocus(this);
+      enclosingScope?._autofocusChild = this;
+      _manager?._requestAutofocus(this);
     }
   }
 
   bool _isAutoFocus;
-
-  /// Deprecated. Use isAutoFocus instead.
-  void autofocus(FocusNode node) {
-    assert(node.enclosingScope == this, "Attempted to autofocus a focus node that wasn't a child of this scope.");
-    node.isAutoFocus = true;
-  }
 
   /// Cancels any outstanding requests for focus.
   ///
@@ -76,8 +71,12 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     if (scope == null) {
       return;
     }
-    if (scope._focusedChild == this) {
+    final bool hadFocus = scope._focusedChild == this;
+    if (hadFocus) {
       scope._focusedChild = null;
+    }
+    if (scope._autofocusChild == this) {
+      scope._autofocusChild = null;
     }
     _manager?._willUnfocusNode(this);
   }
@@ -193,7 +192,11 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     child._updateManager(_manager);
     // If this child is an autofocus node, then set that as the focused child
     // in its scope.
-    child.enclosingScope._focusedChild ??= child.isAutoFocus ? child : null;
+    final FocusScopeNode scope = child.enclosingScope;
+    scope._focusedChild ??= child.isAutoFocus ? child : null;
+    if (child.isAutoFocus) {
+      scope._autofocusChild = child;
+    }
     if (oldPrimaryFocus != null) {
       final Set<FocusNode> newFocusPath = _manager?._currentFocus?.ancestors?.toSet() ?? <FocusNode>{};
       // Nodes that will no longer be focused need to be marked dirty.
@@ -217,9 +220,9 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   void _debugCheckUniqueAutofocusNode(FocusNode node) {
     assert(() {
       final FocusNode enclosingScope = node.enclosingScope;
-      final List<FocusNode> autofocusNodes = enclosingScope.descendants.where((FocusNode descendant) {
+      final List<FocusNode> autofocusNodes = enclosingScope?.descendants?.where((FocusNode descendant) {
         return descendant.enclosingScope == enclosingScope && descendant.isAutoFocus;
-      }).toList();
+      })?.toList() ?? const <FocusNode>[];
       return autofocusNodes.length <= 1;
     }(), 'More than one autofocus node was found in the descendants of scope ${node.enclosingScope}, which is not allowed.');
   }
@@ -381,33 +384,44 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
 
   /// Request that the widget move the focus to the next focusable node, by
   /// calling the [FocusTraversalPolicy.next] function.
-  bool nextFocus() => DefaultFocusTraversal.of(context).next(this);
+  bool nextFocus() => context != null ? DefaultFocusTraversal.of(context).next(this) : false;
 
   /// Request that the widget move the focus to the previous focusable node, by
   /// calling the [FocusTraversalPolicy.previous] function.
-  bool previousFocus() => DefaultFocusTraversal.of(context).previous(this);
+  bool previousFocus() => context != null ? DefaultFocusTraversal.of(context).previous(this) : false;
 
   /// Request that the widget move the focus to the previous focusable node, by
   /// calling the [FocusTraversalPolicy.inDirection] function.
-  bool focusInDirection(AxisDirection direction) => DefaultFocusTraversal.of(context).inDirection(this, direction);
+  bool focusInDirection(AxisDirection direction) => context != null ? DefaultFocusTraversal.of(context).inDirection(this, direction) : false;
 
   /// Returns the size of the associated [Focusable] in logical units.
-  Size get size => context.size;
+  Size get size => context?.findRenderObject()?.semanticBounds?.size ?? Size.zero;
 
   /// Returns the global offset to the upper left corner of the [Focusable] in
   /// logical units.
   Offset get offset {
-    final RenderObject object = context.findRenderObject();
-    return MatrixUtils.transformPoint(object.getTransformTo(null), Offset.zero);
+    final RenderObject object = context?.findRenderObject();
+    if (object == null) {
+      return Offset.zero;
+    }
+    return MatrixUtils.transformPoint(object.getTransformTo(null), object.semanticBounds.topLeft);
   }
 
   /// Returns the global rectangle surrounding the node in logical units.
-  Rect get rect => offset & size;
+  Rect get rect {
+    final RenderObject object = context?.findRenderObject();
+    if (object == null) {
+      return Rect.zero;
+    }
+    final Offset globalOffset = MatrixUtils.transformPoint(object.getTransformTo(null), object.semanticBounds.topLeft);
+    return globalOffset & object.semanticBounds.size;
+  }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<BuildContext>('context', context, defaultValue: null));
+    properties.add(FlagProperty('isAutoFocus', value: isAutoFocus, ifTrue: 'AUTOFOCUS', defaultValue: false));
     properties.add(FlagProperty('hasFocus', value: hasFocus, ifTrue: 'FOCUSED', defaultValue: false));
     properties.add(StringProperty('debugLabel', debugLabel, defaultValue: null));
   }
@@ -463,6 +477,21 @@ class FocusScopeNode extends FocusNode {
     _focusedChild = node;
   }
 
+  /// If this scope lacks a focus, reparent the node as a child of this one, and
+  /// request that the given node becomes the focus.
+  ///
+  /// Useful for widgets that wish to grab the focus if no other widget already
+  /// has the focus.
+  ///
+  /// The node is notified that it has received the overall focus in a
+  /// microtask.
+  void autofocus(FocusNode node) {
+    if (_focusedChild == null) {
+      reparentIfNeeded(node);
+      node.requestFocus();
+    }
+  }
+
   /// Returns the child of this node which should receive focus if this scope
   /// node receives focus.
   ///
@@ -476,6 +505,8 @@ class FocusScopeNode extends FocusNode {
   }
 
   FocusNode _focusedChild;
+
+  FocusNode _autofocusChild;
 
   @override
   void _doRequestFocus(bool isFromPolicy) {

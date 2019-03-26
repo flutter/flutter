@@ -298,7 +298,7 @@ class _TabSwitchingViewState extends State<_TabSwitchingView> {
     tabs = List<Widget>(widget.tabNumber);
     tabFocusNodes = List<FocusScopeNode>.generate(
       widget.tabNumber,
-      (int index) => FocusScopeNode(),
+      (int index) => FocusScopeNode(debugLabel: 'Tab Focus Scope $index'),
     );
   }
 
@@ -342,10 +342,8 @@ class _TabSwitchingViewState extends State<_TabSwitchingView> {
           child: TickerMode(
             enabled: active,
             child: FocusScope(
-              child: Builder(builder: (BuildContext context) {
-                tabFocusNodes[index] = FocusScope.of(context);
-                return tabs[index] ?? Container();
-              }),
+              node: tabFocusNodes[index],
+              child: tabs[index] ?? Container(),
             ),
           ),
         );

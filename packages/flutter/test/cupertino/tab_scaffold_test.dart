@@ -106,7 +106,7 @@ void main() {
 
   testWidgets('Last tab gets focus', (WidgetTester tester) async {
     // 2 nodes for 2 tabs
-    final List<FocusNode> focusNodes = <FocusNode>[FocusNode(), FocusNode()];
+    final List<FocusNode> focusNodes = <FocusNode>[FocusNode(debugLabel: 'Node 1'), FocusNode(debugLabel: 'Node 2')];
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -129,9 +129,12 @@ void main() {
 
     expect(focusNodes[0].hasFocus, isFalse);
     expect(focusNodes[1].hasFocus, isTrue);
+    print(WidgetsBinding.instance.focusManager.rootScope.toStringDeep());
 
     await tester.tap(find.text('Tab 1'));
     await tester.pump();
+
+    print(WidgetsBinding.instance.focusManager.rootScope.toStringDeep());
 
     expect(focusNodes[0].hasFocus, isTrue);
     expect(focusNodes[1].hasFocus, isFalse);
@@ -139,7 +142,7 @@ void main() {
 
   testWidgets('Do not affect focus order in the route', (WidgetTester tester) async {
     final List<FocusNode> focusNodes = <FocusNode>[
-      FocusNode(), FocusNode(), FocusNode(), FocusNode(),
+      FocusNode(debugLabel: 'Node 1'), FocusNode(debugLabel: 'Node 2'), FocusNode(debugLabel: 'Node 3'), FocusNode(debugLabel: 'Node 4'),
     ];
 
     await tester.pumpWidget(
@@ -186,9 +189,12 @@ void main() {
       2,
     );
 
+    print(WidgetsBinding.instance.focusManager.rootScope.toStringDeep());
+
     await tester.tap(find.text('Tab 1'));
     await tester.pump();
 
+    print(WidgetsBinding.instance.focusManager.rootScope.toStringDeep());
     // Upon going back to tab 1, the item it tab 1 that previously had the focus
     // (TextField 2) gets it back.
     expect(
