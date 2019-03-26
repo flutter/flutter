@@ -85,6 +85,7 @@ class AOTSnapshotter {
     if (fs.file('pubspec.yaml').existsSync()) {
       flutterProject = await FlutterProject.current();
     }
+    final FlutterEngine engine = FlutterEngine(cache);
     if (!_isValidAotPlatform(platform, buildMode)) {
       printError('${getNameForTargetPlatform(platform)} does not support AOT compilation.');
       return 1;
@@ -186,7 +187,7 @@ class AOTSnapshotter {
         'entryPoint': mainPath,
         'sharedLib': buildSharedLibrary.toString(),
         'extraGenSnapshotOptions': extraGenSnapshotOptions.join(' '),
-        'engineHash': Cache.instance.engineRevision,
+        'engineHash': engine.version,
         'buildersUsed': '${flutterProject != null ? flutterProject.hasBuilders : false}',
       },
       depfilePaths: <String>[],
