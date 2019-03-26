@@ -37,6 +37,7 @@ abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
     @required intl.DateFormat singleDigitMinuteFormat,
     @required intl.DateFormat doubleDigitMinuteFormat,
     @required intl.DateFormat singleDigitSecondFormat,
+    @required intl.NumberFormat decimalFormat,
   }) : assert(localeName != null),
        _localeName = localeName,
        assert(fullYearFormat != null),
@@ -52,7 +53,9 @@ abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
        assert(doubleDigitMinuteFormat != null),
        _doubleDigitMinuteFormat = doubleDigitMinuteFormat,
        assert(singleDigitSecondFormat != null),
-       _singleDigitSecondFormat = singleDigitSecondFormat;
+       _singleDigitSecondFormat = singleDigitSecondFormat,
+       assert(decimalFormat != null),
+       _decimalFormat =decimalFormat;
 
   final String _localeName;
   final intl.DateFormat _fullYearFormat;
@@ -62,6 +65,7 @@ abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
   final intl.DateFormat _singleDigitMinuteFormat;
   final intl.DateFormat _doubleDigitMinuteFormat;
   final intl.DateFormat _singleDigitSecondFormat;
+  final intl.NumberFormat _decimalFormat;
 
   @override
   String datePickerYear(int yearIndex) {
@@ -120,7 +124,8 @@ abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
       few: datePickerHourSemanticsLabelFew,
       many: datePickerHourSemanticsLabelMany,
       other: datePickerHourSemanticsLabelOther,
-    ).replaceFirst(r'$hour', hour);
+      locale: _localeName,
+    ).replaceFirst(r'$hour', _decimalFormat.format(hour));
   }
 
   /// Subclasses should provide the optional zero pluralization of [datePickerMinuteSemanticsLabel] based on the ARB file.
@@ -146,7 +151,8 @@ abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
       few: datePickerMinuteSemanticsLabelFew,
       many: datePickerMinuteSemanticsLabelMany,
       other: datePickerMinuteSemanticsLabelOther,
-    ).replaceFirst(r'$minute', minute);
+      locale: _localeName,
+    ).replaceFirst(r'$minute', _decimalFormat.format(minute));
   }
 
   /// A string describing the [DatePickerDateOrder] enum value.
@@ -251,7 +257,8 @@ abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
       few: timerPickerHourLabelFew,
       many: timerPickerHourLabelMany,
       other: timerPickerHourLabelOther,
-    ).replaceFirst(r'$hour', hour);
+      locale: _localeName,
+    ).replaceFirst(r'$hour', _decimalFormat.format(hour));
   }
 
   /// Subclasses should provide the optional zero pluralization of [timerPickerMinuteLabel] based on the ARB file.
@@ -277,7 +284,8 @@ abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
       few: timerPickerMinuteLabelFew,
       many: timerPickerMinuteLabelMany,
       other: timerPickerMinuteLabelOther,
-    ).replaceFirst(r'$minute', minute);
+      locale: _localeName,
+    ).replaceFirst(r'$minute', _decimalFormat.format(minute));
   }
 
   /// Subclasses should provide the optional zero pluralization of [timerPickerSecondLabel] based on the ARB file.
@@ -303,7 +311,8 @@ abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
       few: timerPickerSecondLabelFew,
       many: timerPickerSecondLabelMany,
       other: timerPickerSecondLabelOther,
-    ).replaceFirst(r'$second', second);
+      locale: _localeName,
+    ).replaceFirst(r'$second', _decimalFormat.format(second));
   }
 
   /// A [LocalizationsDelegate] that uses [GlobalCupertinoLocalizations.load]
@@ -366,6 +375,7 @@ class _GlobalCupertinoLocalizationsDelegate extends LocalizationsDelegate<Cupert
       intl.DateFormat singleDigitMinuteFormat;
       intl.DateFormat doubleDigitMinuteFormat;
       intl.DateFormat singleDigitSecondFormat;
+      intl.NumberFormat decimalFormat;
 
       void loadFormats(String locale) {
         fullYearFormat = intl.DateFormat.y(locale);
@@ -376,6 +386,7 @@ class _GlobalCupertinoLocalizationsDelegate extends LocalizationsDelegate<Cupert
         singleDigitMinuteFormat = intl.DateFormat.m(locale);
         doubleDigitMinuteFormat = intl.DateFormat('mm', locale);
         singleDigitSecondFormat = intl.DateFormat.s(locale);
+        decimalFormat = intl.NumberFormat(locale);
       }
 
       if (intl.DateFormat.localeExists(localeName)) {
@@ -397,6 +408,7 @@ class _GlobalCupertinoLocalizationsDelegate extends LocalizationsDelegate<Cupert
         singleDigitMinuteFormat,
         doubleDigitMinuteFormat,
         singleDigitSecondFormat,
+        decimalFormat,
       ));
     });
   }
@@ -414,6 +426,7 @@ CupertinoLocalizations _getCupertinoTranslation(
   intl.DateFormat singleDigitMinuteFormat,
   intl.DateFormat doubleDigitMinuteFormat,
   intl.DateFormat singleDigitSecondFormat,
+  intl.NumberFormat decimalFormat,
 ) {
   return null; // TODO(xster): implement in generated subclass.
 }
