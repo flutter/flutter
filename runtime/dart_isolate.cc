@@ -487,8 +487,6 @@ bool DartIsolate::Shutdown() {
 }
 
 Dart_Isolate DartIsolate::DartCreateAndStartServiceIsolate(
-    const char* advisory_script_uri,
-    const char* advisory_script_entrypoint,
     const char* package_root,
     const char* package_config,
     Dart_IsolateFlags* flags,
@@ -517,19 +515,16 @@ Dart_Isolate DartIsolate::DartCreateAndStartServiceIsolate(
 
   std::weak_ptr<DartIsolate> weak_service_isolate =
       DartIsolate::CreateRootIsolate(
-          vm.get(),                  // vm
-          vm->GetIsolateSnapshot(),  // isolate snapshot
-          vm->GetSharedSnapshot(),   // shared snapshot
-          null_task_runners,         // task runners
-          nullptr,                   // window
-          {},                        // snapshot delegate
-          {},                        // IO Manager
-          advisory_script_uri == nullptr ? ""
-                                         : advisory_script_uri,  // script uri
-          advisory_script_entrypoint == nullptr
-              ? ""
-              : advisory_script_entrypoint,  // script entrypoint
-          flags                              // flags
+          vm.get(),                      // vm
+          vm->GetIsolateSnapshot(),      // isolate snapshot
+          vm->GetSharedSnapshot(),       // shared snapshot
+          null_task_runners,             // task runners
+          nullptr,                       // window
+          {},                            // snapshot delegate
+          {},                            // IO Manager
+          DART_VM_SERVICE_ISOLATE_NAME,  // script uri
+          DART_VM_SERVICE_ISOLATE_NAME,  // script entrypoint
+          flags                          // flags
       );
 
   std::shared_ptr<DartIsolate> service_isolate = weak_service_isolate.lock();
@@ -573,12 +568,10 @@ Dart_Isolate DartIsolate::DartIsolateCreateCallback(
     // DART_VM_SERVICE_ISOLATE_NAME. In such cases, we just create the service
     // isolate like normal but dont hold a reference to it at all. We also start
     // this isolate since we will never again reference it from the engine.
-    return DartCreateAndStartServiceIsolate(advisory_script_uri,         //
-                                            advisory_script_entrypoint,  //
-                                            package_root,                //
-                                            package_config,              //
-                                            flags,                       //
-                                            error                        //
+    return DartCreateAndStartServiceIsolate(package_root,    //
+                                            package_config,  //
+                                            flags,           //
+                                            error            //
     );
   }
 
