@@ -23,13 +23,15 @@ import '../cache.dart';
 import '../convert.dart';
 import '../flutter_manifest.dart';
 import '../globals.dart';
-import '../plugins.dart';
 import '../project.dart';
 import 'android_sdk.dart';
 import 'android_studio.dart';
 
 const String gradleVersion = '4.10.2';
 final RegExp _assembleTaskPattern = RegExp(r'assemble(\S+)');
+// This line existed in build.gradle, but prevents the build order from working
+// for Jetifier.  Plugins should not depend on :app, it really needs to be
+// the other way around (build plugins, then build app).
 const String _kSubprojectsNode = '''
 subprojects {
     project.evaluationDependsOn(':app')
