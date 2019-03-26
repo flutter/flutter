@@ -8,6 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/semantics_tester.dart';
 
+const Key gestureKey = Key('Gesture');
 const Key avatarA = Key('A');
 const Key avatarC = Key('C');
 const Key avatarD = Key('D');
@@ -19,7 +20,34 @@ Future<void> pumpTestWidget(
   bool withOnDetailsPressedHandler = true,
 }) async {
   await tester.pumpWidget(
-    MaterialApp(
+    TestWidget(
+      withName: withName,
+      withEmail: withEmail,
+      withOnDetailsPressedHandler: withOnDetailsPressedHandler,
+    ),
+  );
+}
+
+class TestWidget extends StatefulWidget {
+  const TestWidget({
+    Key key,
+    this.withName = true,
+    this.withEmail = true,
+    this.withOnDetailsPressedHandler = true,
+  }) : super(key: key);
+
+  final bool withName;
+  final bool withEmail;
+  final bool withOnDetailsPressedHandler;
+
+  @override
+  _TestWidgetState createState() => _TestWidgetState();
+}
+
+class _TestWidgetState extends State<TestWidget> {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
       home: MediaQuery(
         data: const MediaQueryData(
           padding: EdgeInsets.only(
@@ -32,11 +60,17 @@ Future<void> pumpTestWidget(
         child: Material(
           child: Center(
             child: UserAccountsDrawerHeader(
-              onDetailsPressed: withOnDetailsPressedHandler ? () { } : null,
-              currentAccountPicture: const ExcludeSemantics(
-                child: CircleAvatar(
-                  key: avatarA,
-                  child: Text('A'),
+              onDetailsPressed: widget.withOnDetailsPressedHandler ? () { } : null,
+              currentAccountPicture: ExcludeSemantics(
+                child: GestureDetector(
+                  key: gestureKey,
+                  onTap: () {
+                    setState(() {});
+                  },
+                  child: const CircleAvatar(
+                    key: avatarA,
+                    child: Text('A'),
+                  ),
                 ),
               ),
               otherAccountsPictures: const <Widget>[
@@ -55,14 +89,14 @@ Future<void> pumpTestWidget(
                   child: Text('E'),
                 ),
               ],
-              accountName: withName ? const Text('name') : null,
-              accountEmail: withEmail ? const Text('email') : null,
+              accountName: widget.withName ? const Text('name') : null,
+              accountEmail: widget.withEmail ? const Text('email') : null,
             ),
           ),
         ),
       ),
-    ),
-  );
+    );
+  }
 }
 
 void main() {
@@ -135,6 +169,28 @@ void main() {
     transformWidget = tester.firstWidget(find.byType(Transform));
 
     // Icon has rotated 180 degrees back to the original position.
+    expect(transformWidget.transform.getRotation()[0], 1.0);
+    expect(transformWidget.transform.getRotation()[4], 1.0);
+  });
+
+  testWidgets('UserAccountsDrawerHeader icon does not rotate for setState', (WidgetTester tester) async {
+    await pumpTestWidget(tester);
+    Transform transformWidget = tester.firstWidget(find.byType(Transform));
+
+    // Icon is right side up.
+    expect(transformWidget.transform.getRotation()[0], 1.0);
+    expect(transformWidget.transform.getRotation()[4], 1.0);
+
+    await tester.tap(find.byKey(gestureKey));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 10));
+    expect(tester.hasRunningAnimations, isFalse);
+
+    await tester.pumpAndSettle();
+    await tester.pump();
+    transformWidget = tester.firstWidget(find.byType(Transform));
+
+    // Icon has not rotated.
     expect(transformWidget.transform.getRotation()[0], 1.0);
     expect(transformWidget.transform.getRotation()[4], 1.0);
   });
