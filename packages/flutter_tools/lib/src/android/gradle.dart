@@ -30,6 +30,11 @@ import 'android_studio.dart';
 
 const String gradleVersion = '4.10.2';
 final RegExp _assembleTaskPattern = RegExp(r'assemble(\S+)');
+const String _kSubprojectsNode = '''
+subprojects {
+    project.evaluationDependsOn(':app')
+}
+''';
 
 GradleProject _cachedGradleProject;
 String _cachedGradleExecutable;
@@ -324,7 +329,7 @@ Future<void> buildGradleProject({
     case FlutterPluginVersion.v1:
       return _buildGradleProjectV1(project, gradle);
     case FlutterPluginVersion.v3:
-      // Fall through.
+      return _buildGradleProjectV3(project, gradle, buildInfo, target, isBuildingBundle);
     case FlutterPluginVersion.v2:
       return _buildGradleProjectV2(project, gradle, buildInfo, target, isBuildingBundle);
   }
@@ -378,14 +383,29 @@ Future<void> _buildGradleProjectV1(FlutterProject project, String gradle) async 
   printStatus('Built ${fs.path.relative(project.android.gradleAppOutV1File.path)}.');
 }
 
+Future <void> _buildGradleProjectV3(
+  FlutterProject flutterProject,
+  String gradle,
+  BuildInfo buildInfo,
+  String target,
+  bool isBuildingBundle,
+) async {
+  final String buildGradle = await flutterProject.android.rootBuildGradle.readAsString();
+  if (buildGradle.contains(_kSubprojectsNode)) {
+    printStatus('Updating build.gradle...');
+    final String updatedBuildGradle = buildGradle.replaceAll(_kSubprojectsNode, '');
+    await flutterProject.android.rootBuildGradle.writeAsString(updatedBuildGradle);
+  }
+  return _buildGradleProjectV2(flutterProject, gradle, buildInfo, target, isBuildingBundle);
+}
+
 Future<void> _buildGradleProjectV2(
   FlutterProject flutterProject,
   String gradle,
   BuildInfo buildInfo,
   String target,
-  bool isBuildingBundle, {
-  bool buildPlugins = false
-}) async {
+  bool isBuildingBundle,
+) async {
   final GradleProject project = await _gradleProject();
 
   String assembleTask;
@@ -413,13 +433,6 @@ Future<void> _buildGradleProjectV2(
     }
   }
 
-  // if (buildPlugins) {
-  //   final List<Plugin> plugins = findPlugins(flutterProject);
-  //   for (Plugin plugin in plugins) {
-  //     // Always build assembleRelease. Plugins don't know about profile.
-  //     await buildPluginAAR(plugin, gradle, buildInfo.mode == BuildMode.debug ? 'assembleDebug' : 'assembleRelease');
-  //   }
-  // }
   final Status status = logger.startProgress(
     'Running Gradle task \'$assembleTask\'...',
     timeout: kSlowOperation,
