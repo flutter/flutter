@@ -81,6 +81,9 @@ struct SemanticsNode {
   bool HasAction(SemanticsAction action);
   bool HasFlag(SemanticsFlags flag);
 
+  // Whether this node is for embeded platform views.
+  bool IsPlatformViewNode() const;
+
   int32_t id = 0;
   int32_t flags = 0;
   int32_t actions = 0;
