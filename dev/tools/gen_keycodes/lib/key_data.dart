@@ -198,7 +198,7 @@ class KeyData {
       replaced[match.group(1)] = int.tryParse(match.group(2)) ?? match.group(2).replaceAll('GLFW_KEY_', '');
     });
     final Map<String, int> result = <String, int>{};
-    replaced.forEach((key, value) {
+    replaced.forEach((String key, dynamic value) {
       // Some definition values point to other definitions (e.g #define GLFW_KEY_LAST GLFW_KEY_MENU).
       if (value is String) {
         result[key] = replaced[value];

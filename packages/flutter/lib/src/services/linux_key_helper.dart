@@ -12,6 +12,7 @@ import 'raw_keyboard.dart';
 /// Given that there might be multiple window toolkit implementations (GLFW, GTK, QT, etc), this creates a common
 /// interface for each of the different toolkits.
 abstract class KeyHelper {
+  /// Create a KeyHelper implementation depending on the given toolkit.
   factory KeyHelper(String toolkit) {
     if (toolkit == 'glfw') {
       return GLFWKeyHelper();
