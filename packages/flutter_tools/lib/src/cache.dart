@@ -322,7 +322,7 @@ abstract class CachedArtifact {
     // then we can claim we are up to date to skip downloading.
     if (!requiredArtifacts.any(developmentArtifacts.contains)) {
       printTrace('Artifact $this is not required, skipping update.');
-      return true;
+      return;
     }
     if (!location.existsSync()) {
       location.createSync(recursive: true);
