@@ -488,20 +488,23 @@ abstract class EngineCachedArtifact extends CachedArtifact {
     final Directory pkgDir = cache.getCacheDir('pkg');
     for (String pkgName in getPackageDirs()) {
       final String pkgPath = fs.path.join(pkgDir.path, pkgName);
-      if (!fs.directory(pkgPath).existsSync())
+      if (!fs.directory(pkgPath).existsSync()) {
         return false;
+      }
     }
 
     for (List<String> toolsDir in getBinaryDirs()) {
       final Directory dir = fs.directory(fs.path.join(location.path, toolsDir[0]));
-      if (!dir.existsSync())
+      if (!dir.existsSync()) {
         return false;
+      }
     }
 
     for (String licenseDir in getLicenseDirs()) {
       final File file = fs.file(fs.path.join(location.path, licenseDir, 'LICENSE'));
-      if (!file.existsSync())
+      if (!file.existsSync()) {
         return false;
+      }
     }
     return true;
   }
@@ -514,10 +517,9 @@ abstract class EngineCachedArtifact extends CachedArtifact {
     for (String pkgName in getPackageDirs()) {
       final String pkgPath = fs.path.join(pkgDir.path, pkgName);
       final Directory dir = fs.directory(pkgPath);
-      // if (dir.existsSync()) {
-      //   print('DELETING: $dir');
-      //   dir.deleteSync(recursive: true);
-      // }
+      if (dir.existsSync()) {
+        dir.deleteSync(recursive: true);
+      }
       await _downloadZipArchive('Downloading package $pkgName...', Uri.parse(url + pkgName + '.zip'), pkgDir);
     }
 
@@ -525,10 +527,6 @@ abstract class EngineCachedArtifact extends CachedArtifact {
       final String cacheDir = toolsDir[0];
       final String urlPath = toolsDir[1];
       final Directory dir = fs.directory(fs.path.join(location.path, cacheDir));
-      // if (dir.existsSync()) {
-      //   print('DELETING: $dir');
-      //   dir.deleteSync(recursive: true);
-      // }
       await _downloadZipArchive('Downloading $cacheDir tools...', Uri.parse(url + urlPath), dir);
 
       _makeFilesExecutable(dir);
@@ -536,10 +534,6 @@ abstract class EngineCachedArtifact extends CachedArtifact {
       final File frameworkZip = fs.file(fs.path.join(dir.path, 'Flutter.framework.zip'));
       if (frameworkZip.existsSync()) {
         final Directory framework = fs.directory(fs.path.join(dir.path, 'Flutter.framework'));
-        // if (framework.existsSync()) {
-        //   print('DELETING: $dir');
-        //   framework.deleteSync(recursive: true);
-        // }
         framework.createSync();
         os.unzip(frameworkZip, framework);
       }
