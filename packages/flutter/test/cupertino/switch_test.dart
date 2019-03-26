@@ -419,7 +419,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: CupertinoSwitch(
+          child: const CupertinoSwitch(
             value: false,
             dragStartBehavior: DragStartBehavior.down,
             onChanged: null,
