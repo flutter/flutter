@@ -416,10 +416,10 @@ void main() {
   });
   testWidgets('Switch is translucent when disabled', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: const CupertinoSwitch(
+          child: CupertinoSwitch(
             value: false,
             dragStartBehavior: DragStartBehavior.down,
             onChanged: null,
