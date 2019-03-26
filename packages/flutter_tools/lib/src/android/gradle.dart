@@ -335,33 +335,6 @@ Future<void> buildGradleProject({
   }
 }
 
-// TODO(mklim): Fix the obvious bugs.
-// - Do we need logic for passing along build architecture, local engine, etc?
-// - Make this smart enough to not rebuild the plugin every time?
-Future<void> buildPluginAAR(Plugin plugin, String gradle, String assembleTask) async {
-  final String pluginDir = fs.path.join(plugin.path, 'android');
-  writeLocalProperties(fs.file(fs.path.join(pluginDir, 'local.properties')));
-  final Status status = logger.startProgress(
-    'Running \'gradlew $assembleTask\' for ${plugin.androidPackage}...',
-    timeout: kSlowOperation,
-  );
-  final String initScriptPath = fs.path.join(Cache.flutterRoot, 'packages', 'flutter_tools', 'gradle', 'plugins_init.gradle');
-  final List<String> command =  <String>[
-    fs.file(gradle).absolute.path,
-    '--init-script',
-    initScriptPath,
-    assembleTask,
-    '-q',
-    '-Pflutter-root=${Cache.flutterRoot}',
-  ];
-
-  final int exitCode = await runCommandAndStreamOutput(command, workingDirectory: pluginDir);
-  status.stop();
-
-  if (exitCode != 0)
-    throwToolExit('Failed to build ${plugin.name}: $exitCode', exitCode: exitCode);
-}
-
 Future<void> _buildGradleProjectV1(FlutterProject project, String gradle) async {
   // Run 'gradlew build'.
   final Status status = logger.startProgress(

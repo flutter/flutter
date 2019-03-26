@@ -206,17 +206,6 @@ class FlutterPlugin implements Plugin<Project> {
             } else {
                 project.logger.error("Plugin project :$name not found. Please update settings.gradle.")
             }
-            // pluginProject.tasks.assembleDebug()
-            // def File pluginDepsFile = new File(Paths.get(path, 'android', 'build', 'deps.txt').toString())
-            // project.dependencies {
-            //     if (pluginDepsFile.exists()) {
-            //         def lines = pluginDepsFile.readLines()
-            //         for (line in lines) {
-            //             api line
-            //         }
-            //     }
-            //     api project.files(Paths.get(path, 'android', 'build', 'outputs', 'aar', "$name-${mode}.aar").toString());
-            // }
         }
     }
 
