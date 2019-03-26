@@ -183,7 +183,7 @@ class KeyData {
     });
     return result;
   }
-  
+
   /// Parses entries from GLFW's keycodes.h key code data file.
   ///
   /// Lines in this file look like this (without the ///):
