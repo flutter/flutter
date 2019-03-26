@@ -132,6 +132,8 @@ Future<void> precacheImage(
 ///  * [new Ink.image], which is the preferred way to show an image in a
 ///    material application (especially if the image is in a [Material] and will
 ///    have an [InkWell] on top of it).
+///  * [Image](https://api.flutter.dev/flutter/dart-ui/Image-class.html), the class in the [dart:ui] library.
+///
 class Image extends StatefulWidget {
   /// Creates a widget that displays an image.
   ///
