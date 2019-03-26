@@ -93,11 +93,10 @@ class CupertinoPageScaffold extends StatelessWidget {
       // obstructed area.
       if (fullObstruction) {
         paddedContent = MediaQuery(
-          data: existingMediaQuery.copyWith(
-            // If the navigation bar is opaque, the top media query padding is fully consumed by the navigation bar.
-            padding: existingMediaQuery.padding.copyWith(
-              top: 0,
-            ),
+          data: existingMediaQuery
+          // If the navigation bar is opaque, the top media query padding is fully consumed by the navigation bar.
+          .removePadding(removeTop: true)
+          .copyWith(
             viewInsets: newViewInsets,
           ),
           child: Padding(
