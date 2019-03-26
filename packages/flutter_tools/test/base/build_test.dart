@@ -35,15 +35,12 @@ class _FakeGenSnapshot implements GenSnapshot {
   Map<String, String> outputs = <String, String>{};
   int _callCount = 0;
   SnapshotType _snapshotType;
-  String _packagesPath;
   String _depfilePath;
   List<String> _additionalArgs;
 
   int get callCount => _callCount;
 
   SnapshotType get snapshotType => _snapshotType;
-
-  String get packagesPath => _packagesPath;
 
   String get depfilePath => _depfilePath;
 
@@ -52,14 +49,12 @@ class _FakeGenSnapshot implements GenSnapshot {
   @override
   Future<int> run({
     SnapshotType snapshotType,
-    String packagesPath,
     String depfilePath,
     IOSArch iosArch,
     Iterable<String> additionalArgs = const <String>[],
   }) async {
     _callCount += 1;
     _snapshotType = snapshotType;
-    _packagesPath = packagesPath;
     _depfilePath = depfilePath;
     _additionalArgs = additionalArgs.toList();
 
@@ -190,7 +185,6 @@ void main() {
       expect(genSnapshot.callCount, 1);
       expect(genSnapshot.snapshotType.platform, TargetPlatform.ios);
       expect(genSnapshot.snapshotType.mode, BuildMode.profile);
-      expect(genSnapshot.packagesPath, '.packages');
       expect(genSnapshot.additionalArgs, <String>[
         '--deterministic',
         '--snapshot_kind=app-aot-assembly',
@@ -229,7 +223,6 @@ void main() {
       expect(genSnapshot.callCount, 1);
       expect(genSnapshot.snapshotType.platform, TargetPlatform.ios);
       expect(genSnapshot.snapshotType.mode, BuildMode.profile);
-      expect(genSnapshot.packagesPath, '.packages');
       expect(genSnapshot.additionalArgs, <String>[
         '--deterministic',
         '--snapshot_kind=app-aot-assembly',
@@ -268,7 +261,6 @@ void main() {
       expect(genSnapshot.callCount, 1);
       expect(genSnapshot.snapshotType.platform, TargetPlatform.android_arm);
       expect(genSnapshot.snapshotType.mode, BuildMode.profile);
-      expect(genSnapshot.packagesPath, '.packages');
       expect(genSnapshot.additionalArgs, <String>[
         '--deterministic',
         '--snapshot_kind=app-aot-blobs',
@@ -312,7 +304,6 @@ void main() {
       expect(genSnapshot.callCount, 1);
       expect(genSnapshot.snapshotType.platform, TargetPlatform.android_arm64);
       expect(genSnapshot.snapshotType.mode, BuildMode.profile);
-      expect(genSnapshot.packagesPath, '.packages');
       expect(genSnapshot.additionalArgs, <String>[
         '--deterministic',
         '--snapshot_kind=app-aot-blobs',
@@ -352,7 +343,6 @@ void main() {
       expect(genSnapshot.callCount, 1);
       expect(genSnapshot.snapshotType.platform, TargetPlatform.ios);
       expect(genSnapshot.snapshotType.mode, BuildMode.release);
-      expect(genSnapshot.packagesPath, '.packages');
       expect(genSnapshot.additionalArgs, <String>[
         '--deterministic',
         '--snapshot_kind=app-aot-assembly',
@@ -391,7 +381,6 @@ void main() {
       expect(genSnapshot.callCount, 1);
       expect(genSnapshot.snapshotType.platform, TargetPlatform.ios);
       expect(genSnapshot.snapshotType.mode, BuildMode.release);
-      expect(genSnapshot.packagesPath, '.packages');
       expect(genSnapshot.additionalArgs, <String>[
         '--deterministic',
         '--snapshot_kind=app-aot-assembly',
@@ -448,7 +437,6 @@ void main() {
       expect(genSnapshot.callCount, 1);
       expect(genSnapshot.snapshotType.platform, TargetPlatform.android_arm);
       expect(genSnapshot.snapshotType.mode, BuildMode.release);
-      expect(genSnapshot.packagesPath, '.packages');
       expect(genSnapshot.additionalArgs, <String>[
         '--deterministic',
         '--snapshot_kind=app-aot-blobs',
@@ -492,7 +480,6 @@ void main() {
       expect(genSnapshot.callCount, 1);
       expect(genSnapshot.snapshotType.platform, TargetPlatform.android_arm64);
       expect(genSnapshot.snapshotType.mode, BuildMode.release);
-      expect(genSnapshot.packagesPath, '.packages');
       expect(genSnapshot.additionalArgs, <String>[
         '--deterministic',
         '--snapshot_kind=app-aot-blobs',
@@ -581,7 +568,6 @@ void main() {
       expect(genSnapshot.callCount, 1);
       expect(genSnapshot.snapshotType.platform, TargetPlatform.android_arm);
       expect(genSnapshot.snapshotType.mode, BuildMode.debug);
-      expect(genSnapshot.packagesPath, '.packages');
       expect(genSnapshot.additionalArgs, <String>[
         '--deterministic',
         '--enable_asserts',
@@ -622,7 +608,6 @@ void main() {
       expect(genSnapshot.callCount, 1);
       expect(genSnapshot.snapshotType.platform, TargetPlatform.android_arm64);
       expect(genSnapshot.snapshotType.mode, BuildMode.debug);
-      expect(genSnapshot.packagesPath, '.packages');
       expect(genSnapshot.additionalArgs, <String>[
         '--deterministic',
         '--enable_asserts',
@@ -674,7 +659,6 @@ void main() {
       expect(genSnapshot.callCount, 1);
       expect(genSnapshot.snapshotType.platform, TargetPlatform.android_arm);
       expect(genSnapshot.snapshotType.mode, BuildMode.profile);
-      expect(genSnapshot.packagesPath, '.packages');
       expect(genSnapshot.additionalArgs, <String>[
         '--deterministic',
         '--snapshot_kind=app-jit',
@@ -714,7 +698,6 @@ void main() {
       expect(genSnapshot.callCount, 1);
       expect(genSnapshot.snapshotType.platform, TargetPlatform.android_arm64);
       expect(genSnapshot.snapshotType.mode, BuildMode.profile);
-      expect(genSnapshot.packagesPath, '.packages');
       expect(genSnapshot.additionalArgs, <String>[
         '--deterministic',
         '--snapshot_kind=app-jit',
@@ -765,7 +748,6 @@ void main() {
       expect(genSnapshot.callCount, 1);
       expect(genSnapshot.snapshotType.platform, TargetPlatform.android_arm);
       expect(genSnapshot.snapshotType.mode, BuildMode.release);
-      expect(genSnapshot.packagesPath, '.packages');
       expect(genSnapshot.additionalArgs, <String>[
         '--deterministic',
         '--snapshot_kind=app-jit',
@@ -805,7 +787,6 @@ void main() {
       expect(genSnapshot.callCount, 1);
       expect(genSnapshot.snapshotType.platform, TargetPlatform.android_arm64);
       expect(genSnapshot.snapshotType.mode, BuildMode.release);
-      expect(genSnapshot.packagesPath, '.packages');
       expect(genSnapshot.additionalArgs, <String>[
         '--deterministic',
         '--snapshot_kind=app-jit',
@@ -860,7 +841,6 @@ void main() {
       expect(genSnapshot.callCount, 1);
       expect(genSnapshot.snapshotType.platform, TargetPlatform.android_arm);
       expect(genSnapshot.snapshotType.mode, BuildMode.release);
-      expect(genSnapshot.packagesPath, '.packages');
       expect(genSnapshot.additionalArgs, <String>[
         '--deterministic',
         '--snapshot_kind=app-jit',
@@ -917,7 +897,6 @@ void main() {
       expect(genSnapshot.callCount, 1);
       expect(genSnapshot.snapshotType.platform, TargetPlatform.android_arm);
       expect(genSnapshot.snapshotType.mode, BuildMode.release);
-      expect(genSnapshot.packagesPath, '.packages');
       expect(genSnapshot.additionalArgs, <String>[
         '--deterministic',
         '--snapshot_kind=app-jit',

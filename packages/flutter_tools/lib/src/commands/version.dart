@@ -16,7 +16,7 @@ import '../runner/flutter_command.dart';
 import '../version.dart';
 
 class VersionCommand extends FlutterCommand {
-  VersionCommand(): super() {
+  VersionCommand() : super() {
     argParser.addFlag('force',
       abbr: 'f',
       help: 'Force switch to older Flutter versions that do not include a version command',
@@ -36,7 +36,7 @@ class VersionCommand extends FlutterCommand {
   Future<List<String>> getTags() async {
     final RunResult runResult = await runCheckedAsync(
       <String>['git', 'tag', '-l', 'v*'],
-      workingDirectory: Cache.flutterRoot
+      workingDirectory: Cache.flutterRoot,
     );
     return runResult.toString().split('\n');
   }
@@ -71,7 +71,7 @@ class VersionCommand extends FlutterCommand {
     try {
       await runCheckedAsync(
         <String>['git', 'checkout', 'v$version'],
-        workingDirectory: Cache.flutterRoot
+        workingDirectory: Cache.flutterRoot,
       );
     } catch (e) {
       throwToolExit('Unable to checkout version branch for version $version.');
@@ -107,7 +107,7 @@ class VersionCommand extends FlutterCommand {
         context: PubContext.pubUpgrade,
         directory: projectRoot,
         upgrade: true,
-        checkLastModified: false
+        checkLastModified: false,
       );
     }
 

@@ -43,7 +43,7 @@ void main() {
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
         ..circle(color: const Color(0x1f000000))
-        ..circle(color: Colors.yellow[500])
+        ..circle(color: Colors.yellow[500]),
     );
 
     await tester.tap(find.byType(Switch));
@@ -56,14 +56,14 @@ void main() {
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
         ..circle(color: const Color(0x1f000000))
-        ..circle(color: Colors.red[500])
+        ..circle(color: Colors.red[500]),
     );
   });
 
   testWidgets('SwitchListTile.adaptive delegates to', (WidgetTester tester) async {
     bool value = false;
 
-     Widget buildFrame(TargetPlatform platform) {
+    Widget buildFrame(TargetPlatform platform) {
       return MaterialApp(
         theme: ThemeData(platform: platform),
         home: StatefulBuilder(

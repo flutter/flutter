@@ -46,6 +46,14 @@ TaskFunction createCullOpacityPerfTest() {
   ).run;
 }
 
+TaskFunction createCubicBezierPerfTest() {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test_driver/cubic_bezier_perf.dart',
+    'cubic_bezier_perf',
+  ).run;
+}
+
 TaskFunction createFlutterGalleryStartupTest() {
   return StartupTest(
     '${flutterDirectory.path}/examples/flutter_gallery',
@@ -412,7 +420,7 @@ class MemoryTest {
     _receivedNextMessage = Completer<void>();
   }
 
-  int get iterationCount => 15;
+  int get iterationCount => 10;
 
   Device get device => _device;
   Device _device;

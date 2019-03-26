@@ -9,13 +9,16 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/platform.dart';
 import '../cache.dart';
+import '../codegen.dart';
+import '../dart/pub.dart';
+import '../project.dart';
 import '../runner/flutter_command.dart';
 import '../test/coverage_collector.dart';
 import '../test/event_printer.dart';
 import '../test/runner.dart';
 import '../test/watcher.dart';
 
-class TestCommand extends FlutterCommand {
+class TestCommand extends FastFlutterCommand {
   TestCommand({ bool verboseHelp = false }) {
     requiresPubspecYaml();
     usesPubOption();
@@ -89,8 +92,7 @@ class TestCommand extends FlutterCommand {
   String get description => 'Run Flutter unit tests for the current project.';
 
   @override
-  Future<void> validateCommand() async {
-    await super.validateCommand();
+  Future<FlutterCommandResult> runCommand() async {
     if (!fs.isFileSync('pubspec.yaml')) {
       throwToolExit(
         'Error: No pubspec.yaml file found in the current working directory.\n'
@@ -98,12 +100,12 @@ class TestCommand extends FlutterCommand {
         'called *_test.dart and must reside in the package\'s \'test\' '
         'directory (or one of its subdirectories).');
     }
-  }
-
-  @override
-  Future<FlutterCommandResult> runCommand() async {
+    if (shouldRunPub) {
+      await pubGet(context: PubContext.getVerifyContext(name), skipPubspecYamlCheck: true);
+    }
     final List<String> names = argResults['name'];
     final List<String> plainNames = argResults['plain-name'];
+    final FlutterProject flutterProject = await FlutterProject.current();
 
     Iterable<String> files = argResults.rest.map<String>((String testPath) => fs.path.absolute(testPath)).toList();
 
@@ -157,6 +159,20 @@ class TestCommand extends FlutterCommand {
 
     Cache.releaseLockEarly();
 
+    // Run builders once before all tests.
+    if (flutterProject.hasBuilders) {
+      final CodegenDaemon codegenDaemon = await codeGenerator.daemon(flutterProject);
+      codegenDaemon.startBuild();
+      await for (CodegenStatus status in codegenDaemon.buildResults) {
+        if (status == CodegenStatus.Succeeded) {
+          break;
+        }
+        if (status == CodegenStatus.Failed) {
+          throwToolExit('Code generation failed.');
+        }
+      }
+    }
+
     final int result = await runTests(
       files,
       workDir: workDir,
@@ -170,6 +186,7 @@ class TestCommand extends FlutterCommand {
       trackWidgetCreation: argResults['track-widget-creation'],
       updateGoldens: argResults['update-goldens'],
       concurrency: jobs,
+      flutterProject: flutterProject,
     );
 
     if (collector != null) {

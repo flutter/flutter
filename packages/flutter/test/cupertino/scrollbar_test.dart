@@ -43,8 +43,7 @@ void main() {
     ));
   });
 
-  testWidgets('Scrollbar is not smaller than minLength with large scroll views',
-          (WidgetTester tester) async {
+  testWidgets('Scrollbar is not smaller than minLength with large scroll views', (WidgetTester tester) async {
     await tester.pumpWidget(const Directionality(
       textDirection: TextDirection.ltr,
       child: CupertinoScrollbar(

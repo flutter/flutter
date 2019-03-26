@@ -48,7 +48,7 @@ class FlexibleSpaceBar extends StatefulWidget {
     this.background,
     this.centerTitle,
     this.titlePadding,
-    this.collapseMode = CollapseMode.parallax
+    this.collapseMode = CollapseMode.parallax,
   }) : assert(collapseMode != null),
        super(key: key);
 
@@ -192,8 +192,8 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
           height: settings.maxExtent,
           child: Opacity(
             opacity: opacity,
-            child: widget.background
-          )
+            child: widget.background,
+          ),
         ));
       }
     }
@@ -223,7 +223,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
         final EdgeInsetsGeometry padding = widget.titlePadding ??
           EdgeInsetsDirectional.only(
             start: effectiveCenterTitle ? 0.0 : 72.0,
-            bottom: 16.0
+            bottom: 16.0,
           );
         final double scaleValue = Tween<double>(begin: 1.5, end: 1.0).transform(t);
         final Matrix4 scaleTransform = Matrix4.identity()
@@ -239,9 +239,9 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
               child: DefaultTextStyle(
                 style: titleStyle,
                 child: title,
-              )
-            )
-          )
+              ),
+            ),
+          ),
         ));
       }
     }

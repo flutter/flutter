@@ -32,6 +32,6 @@ class RenderTree extends Result {
 
   @override
   Map<String, dynamic> toJson() => <String, dynamic>{
-    'tree': tree
+    'tree': tree,
   };
 }

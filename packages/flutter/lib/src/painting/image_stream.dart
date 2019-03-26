@@ -194,8 +194,8 @@ class ImageStream extends Diagnosticable {
   /// Returns an object which can be used with `==` to determine if this
   /// [ImageStream] shares the same listeners list as another [ImageStream].
   ///
-  /// This can be used to avoid unregistering and reregistering listeners after
-  /// calling [ImageProvider.resolve] on a new, but possibly equivalent,
+  /// This can be used to avoid un-registering and re-registering listeners
+  /// after calling [ImageProvider.resolve] on a new, but possibly equivalent,
   /// [ImageProvider].
   ///
   /// The key may change once in the lifetime of the object. When it changes, it
@@ -505,7 +505,7 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
   MultiFrameImageStreamCompleter({
     @required Future<ui.Codec> codec,
     @required double scale,
-    InformationCollector informationCollector
+    InformationCollector informationCollector,
   }) : assert(codec != null),
        _informationCollector = informationCollector,
        _scale = scale,

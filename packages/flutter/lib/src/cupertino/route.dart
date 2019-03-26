@@ -61,7 +61,7 @@ final DecorationTween _kGradientShadowTween = DecorationTween(
         Color(0x00000000),
         Color(0x04000000),
         Color(0x12000000),
-        Color(0x38000000)
+        Color(0x38000000),
       ],
       stops: <double>[0.0, 0.3, 0.6, 1.0],
     ),
@@ -114,7 +114,7 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
 
   /// A title string for this route.
   ///
-  /// Used to autopopulate [CupertinoNavigationBar] and
+  /// Used to auto-populate [CupertinoNavigationBar] and
   /// [CupertinoSliverNavigationBar]'s `middle`/`largeTitle` widgets when
   /// one is not manually supplied.
   final String title;
@@ -193,7 +193,7 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
   ///  * [popGestureEnabled], which returns true if a user-triggered pop gesture
   ///    would be allowed.
   static bool isPopGestureInProgress(PageRoute<dynamic> route) => _popGestureInProgress.contains(route);
-  static final Set<PageRoute<dynamic>> _popGestureInProgress = Set<PageRoute<dynamic>>();
+  static final Set<PageRoute<dynamic>> _popGestureInProgress = <PageRoute<dynamic>>{};
 
   /// True if a Cupertino pop gesture is currently underway for this route.
   ///
@@ -272,8 +272,8 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
 
     _CupertinoBackGestureController<T> backController;
     backController = _CupertinoBackGestureController<T>(
-      navigator: route.navigator,
-      controller: route.controller,
+      route: route,
+      controller: route.controller, // protected access
       onEnded: () {
         backController?.dispose();
         backController = null;
@@ -417,9 +417,13 @@ class CupertinoFullscreenDialogTransition extends StatelessWidget {
     Key key,
     @required Animation<double> animation,
     @required this.child,
-  }) : _positionAnimation = animation
-         .drive(CurveTween(curve: Curves.easeInOut))
-         .drive(_kBottomUpTween),
+  }) : _positionAnimation = CurvedAnimation(
+         parent: animation,
+         curve: Curves.linearToEaseOut,
+         // The curve must be flipped so that the reverse animation doesn't play
+         // an ease-in curve, which iOS does not use.
+         reverseCurve: Curves.linearToEaseOut.flipped,
+       ).drive(_kBottomUpTween),
        super(key: key);
 
   final Animation<Offset> _positionAnimation;
@@ -576,22 +580,15 @@ class _CupertinoBackGestureController<T> {
   ///
   /// The [navigator] and [controller] arguments must not be null.
   _CupertinoBackGestureController({
-    @required this.navigator,
+    @required this.route,
     @required this.controller,
     @required this.onEnded,
-  }) : assert(navigator != null),
-       assert(controller != null),
-       assert(onEnded != null) {
-    navigator.didStartUserGesture();
+  }) : assert(route != null), assert(controller != null), assert(onEnded != null) {
+    route.navigator.didStartUserGesture();
   }
 
-  /// The navigator that this object is controlling.
-  final NavigatorState navigator;
-
-  /// The animation controller that the route uses to drive its transition
-  /// animation.
+  final PageRoute<T> route;
   final AnimationController controller;
-
   final VoidCallback onEnded;
 
   bool _animating = false;
@@ -626,8 +623,10 @@ class _CupertinoBackGestureController<T> {
       // The closer the panel is to dismissing, the shorter the animation is.
       // We want to cap the animation time, but we want to use a linear curve
       // to determine it.
-      final int droppedPageForwardAnimationTime = min(lerpDouble(_kMaxDroppedSwipePageForwardAnimationTime, 0, controller.value).floor(),
-                                   _kMaxPageBackAnimationTime);
+      final int droppedPageForwardAnimationTime = min(
+        lerpDouble(_kMaxDroppedSwipePageForwardAnimationTime, 0, controller.value).floor(),
+        _kMaxPageBackAnimationTime,
+      );
       controller.animateTo(1.0, duration: Duration(milliseconds: droppedPageForwardAnimationTime), curve: animationCurve);
     } else {
       final int droppedPageBackAnimationTime = lerpDouble(0, _kMaxDroppedSwipePageForwardAnimationTime, controller.value).floor();
@@ -652,14 +651,14 @@ class _CupertinoBackGestureController<T> {
     }
     _animating = false;
     if (status == AnimationStatus.dismissed)
-      navigator.pop<T>(); // this will cause the route to get disposed, which will dispose us
+      route.navigator.removeRoute(route); // this will cause the route to get disposed, which will dispose us
     onEnded(); // this will call dispose if popping the route failed to do so
   }
 
   void dispose() {
     if (_animating)
       controller.removeStatusListener(_handleStatusChanged);
-    navigator.didStopUserGesture();
+    route.navigator?.didStopUserGesture();
   }
 }
 
@@ -730,7 +729,7 @@ class _CupertinoEdgeShadowDecoration extends Decoration {
   }
 
   @override
-  _CupertinoEdgeShadowPainter createBoxPainter([VoidCallback onChanged]) {
+  _CupertinoEdgeShadowPainter createBoxPainter([ VoidCallback onChanged ]) {
     return _CupertinoEdgeShadowPainter(this, onChanged);
   }
 
@@ -821,8 +820,11 @@ class _CupertinoModalPopupRoute<T> extends PopupRoute<T> {
     assert(_animation == null);
     _animation = CurvedAnimation(
       parent: super.createAnimation(),
-      curve: Curves.ease,
-      reverseCurve: Curves.ease.flipped,
+
+      // These curves were initially measured from native iOS horizontal page
+      // route animations and seemed to be a good match here as well.
+      curve: Curves.linearToEaseOut,
+      reverseCurve: Curves.linearToEaseOut.flipped,
     );
     _offsetTween = Tween<Offset>(
       begin: const Offset(0.0, 1.0),
@@ -884,8 +886,11 @@ Future<T> showCupertinoModalPopup<T>({
   );
 }
 
-final Animatable<double> _dialogTween = Tween<double>(begin: 1.2, end: 1.0)
-  .chain(CurveTween(curve: Curves.fastOutSlowIn));
+// The curve and initial scale values were mostly eyeballed from iOS, however
+// they reuse the same animation curve that was modelled after native page
+// transitions.
+final Animatable<double> _dialogScaleTween = Tween<double>(begin: 1.3, end: 1.0)
+  .chain(CurveTween(curve: Curves.linearToEaseOut));
 
 Widget _buildCupertinoDialogTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
   final CurvedAnimation fadeAnimation = CurvedAnimation(
@@ -902,7 +907,7 @@ Widget _buildCupertinoDialogTransitions(BuildContext context, Animation<double> 
     opacity: fadeAnimation,
     child: ScaleTransition(
       child: child,
-      scale: animation.drive(_dialogTween),
+      scale: animation.drive(_dialogScaleTween),
     ),
   );
 }
@@ -946,7 +951,8 @@ Future<T> showCupertinoDialog<T>({
     context: context,
     barrierDismissible: false,
     barrierColor: _kModalBarrierColor,
-    transitionDuration: const Duration(milliseconds: 300),
+    // This transition duration was eyeballed comparing with iOS
+    transitionDuration: const Duration(milliseconds: 250),
     pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
       return builder(context);
     },

@@ -62,12 +62,12 @@ void main() {
     cocoaPodsUnderTest = CocoaPods();
     pretendPodVersionIs('1.5.0');
     fs.file(fs.path.join(
-      Cache.flutterRoot, 'packages', 'flutter_tools', 'templates', 'cocoapods', 'Podfile-objc'
+      Cache.flutterRoot, 'packages', 'flutter_tools', 'templates', 'cocoapods', 'Podfile-objc',
     ))
         ..createSync(recursive: true)
         ..writeAsStringSync('Objective-C podfile template');
     fs.file(fs.path.join(
-      Cache.flutterRoot, 'packages', 'flutter_tools', 'templates', 'cocoapods', 'Podfile-swift'
+      Cache.flutterRoot, 'packages', 'flutter_tools', 'templates', 'cocoapods', 'Podfile-swift',
     ))
         ..createSync(recursive: true)
         ..writeAsStringSync('Swift podfile template');
@@ -572,5 +572,5 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
 class MockProcessManager extends Mock implements ProcessManager {}
 class MockXcodeProjectInterpreter extends Mock implements XcodeProjectInterpreter {}
 
-ProcessResult exitsWithError([String stdout = '']) => ProcessResult(1, 1, stdout, '');
-ProcessResult exitsHappy([String stdout = '']) => ProcessResult(1, 0, stdout, '');
+ProcessResult exitsWithError([ String stdout = '' ]) => ProcessResult(1, 1, stdout, '');
+ProcessResult exitsHappy([ String stdout = '' ]) => ProcessResult(1, 0, stdout, '');

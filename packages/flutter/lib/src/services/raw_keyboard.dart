@@ -8,7 +8,8 @@ import 'package:flutter/foundation.dart';
 
 import 'keyboard_key.dart';
 import 'raw_keyboard_android.dart';
-import 'raw_keyboard_fuschia.dart';
+import 'raw_keyboard_fuchsia.dart';
+import 'raw_keyboard_macos.dart';
 import 'system_channels.dart';
 
 /// An enum describing the side of the keyboard that a key is on, to allow
@@ -121,7 +122,7 @@ abstract class RawKeyEventData {
   /// side of the keyboard. Defaults to checking for the key being down on
   /// either side of the keyboard. If there is only one instance of the key on
   /// the keyboard, then [side] is ignored.
-  bool isModifierPressed(ModifierKey key, {KeyboardSide side = KeyboardSide.any});
+  bool isModifierPressed(ModifierKey key, { KeyboardSide side = KeyboardSide.any });
 
   /// Returns a [KeyboardSide] enum value that describes which side or sides of
   /// the given keyboard modifier key were pressed at the time of this event.
@@ -263,6 +264,14 @@ abstract class RawKeyEvent {
           modifiers: message['modifiers'] ?? 0,
         );
         break;
+      case 'macos':
+        data = RawKeyEventDataMacOs(
+            characters: message['characters'] ?? '',
+            charactersIgnoringModifiers:
+                message['charactersIgnoringModifiers'] ?? '',
+            keyCode: message['keyCode'] ?? 0,
+            modifiers: message['modifiers'] ?? 0);
+        break;
       default:
         // We don't yet implement raw key events on iOS or other platforms, but
         // we don't hit this exception because the engine never sends us these
@@ -400,7 +409,7 @@ class RawKeyDownEvent extends RawKeyEvent {
   const RawKeyDownEvent({
     @required RawKeyEventData data,
     String character,
-  })  : super(data: data, character: character);
+  }) : super(data: data, character: character);
 }
 
 /// The user has released a key on the keyboard.
@@ -478,7 +487,7 @@ class RawKeyboard {
     }
   }
 
-  final Set<LogicalKeyboardKey> _keysPressed = Set<LogicalKeyboardKey>();
+  final Set<LogicalKeyboardKey> _keysPressed = <LogicalKeyboardKey>{};
 
   /// Returns the set of keys currently pressed.
   Set<LogicalKeyboardKey> get keysPressed {

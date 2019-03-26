@@ -67,7 +67,8 @@ ImageConfiguration createLocalImageConfiguration(BuildContext context, { Size si
 /// The [BuildContext] and [Size] are used to select an image configuration
 /// (see [createLocalImageConfiguration]).
 ///
-/// The `onError` argument can be used to manually handle errors while precaching.
+/// The `onError` argument can be used to manually handle errors while
+/// pre-caching.
 ///
 /// See also:
 ///
@@ -131,6 +132,8 @@ Future<void> precacheImage(
 ///  * [new Ink.image], which is the preferred way to show an image in a
 ///    material application (especially if the image is in a [Material] and will
 ///    have an [InkWell] on top of it).
+///  * [Image](https://api.flutter.dev/flutter/dart-ui/Image-class.html), the class in the [dart:ui] library.
+///
 class Image extends StatefulWidget {
   /// Creates a widget that displays an image.
   ///
@@ -194,7 +197,8 @@ class Image extends StatefulWidget {
   /// [FilterQuality.none] which corresponds to nearest-neighbor.
   ///
   /// If [excludeFromSemantics] is true, then [semanticLabel] will be ignored.
-  Image.network(String src, {
+  Image.network(
+    String src, {
     Key key,
     double scale = 1.0,
     this.semanticLabel,
@@ -235,7 +239,8 @@ class Image extends StatefulWidget {
   /// [FilterQuality.none] which corresponds to nearest-neighbor.
   ///
   /// If [excludeFromSemantics] is true, then [semanticLabel] will be ignored.
-  Image.file(File file, {
+  Image.file(
+    File file, {
     Key key,
     double scale = 1.0,
     this.semanticLabel,
@@ -383,7 +388,8 @@ class Image extends StatefulWidget {
   ///    scale is present.
   ///  * <https://flutter.io/assets-and-images/>, an introduction to assets in
   ///    Flutter.
-  Image.asset(String name, {
+  Image.asset(
+    String name, {
     Key key,
     AssetBundle bundle,
     this.semanticLabel,
@@ -424,7 +430,8 @@ class Image extends StatefulWidget {
   /// [FilterQuality.none] which corresponds to nearest-neighbor.
   ///
   /// If [excludeFromSemantics] is true, then [semanticLabel] will be ignored.
-  Image.memory(Uint8List bytes, {
+  Image.memory(
+    Uint8List bytes, {
     Key key,
     double scale = 1.0,
     this.semanticLabel,
@@ -561,7 +568,7 @@ class Image extends StatefulWidget {
 
   /// A Semantic description of the image.
   ///
-  /// Used to provide a description of the image to TalkBack on Andoid, and
+  /// Used to provide a description of the image to TalkBack on Android, and
   /// VoiceOver on iOS.
   final String semanticLabel;
 
@@ -630,7 +637,7 @@ class _ImageState extends State<Image> {
     final ImageStream newStream =
       widget.image.resolve(createLocalImageConfiguration(
           context,
-          size: widget.width != null && widget.height != null ? Size(widget.width, widget.height) : null
+          size: widget.width != null && widget.height != null ? Size(widget.width, widget.height) : null,
       ));
     assert(newStream != null);
     _updateSourceStream(newStream);

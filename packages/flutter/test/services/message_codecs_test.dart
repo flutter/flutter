@@ -32,7 +32,7 @@ void main() {
       final ByteData offsetByteData = ByteData.view(
           helloWorldByteData.buffer,
           helloByteData.lengthInBytes,
-          helloWorldByteData.lengthInBytes - helloByteData.lengthInBytes
+          helloWorldByteData.lengthInBytes - helloByteData.lengthInBytes,
       );
 
       expect(string.decodeMessage(offsetByteData), ' world');
@@ -67,7 +67,7 @@ void main() {
         '',
         'hello',
         <dynamic>['nested', <dynamic>[]],
-        <dynamic, dynamic>{ 'a': 'nested', 'b': <dynamic, dynamic>{} },
+        <dynamic, dynamic>{'a': 'nested', 'b': <dynamic, dynamic>{}},
         'world',
       ];
       _checkEncodeDecode<dynamic>(json, message);
@@ -182,10 +182,10 @@ void main() {
           double.minPositive,
           double.maxFinite,
           double.infinity,
-          double.nan
+          double.nan,
         ]),
         <dynamic>['nested', <dynamic>[]],
-        <dynamic, dynamic>{ 'a': 'nested', null: <dynamic, dynamic>{} },
+        <dynamic, dynamic>{'a': 'nested', null: <dynamic, dynamic>{}},
         'world',
       ];
       _checkEncodeDecode<dynamic>(standard, message);

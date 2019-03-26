@@ -74,10 +74,10 @@ class TestImage implements ui.Image {
   final int width;
 
   @override
-  void dispose() {}
+  void dispose() { }
 
   @override
-  Future<ByteData> toByteData({ImageByteFormat format = ImageByteFormat.rawRgba}) {
+  Future<ByteData> toByteData({ ImageByteFormat format = ImageByteFormat.rawRgba }) {
     throw UnimplementedError();
   }
 }
@@ -91,6 +91,18 @@ class ErrorImageProvider extends ImageProvider<ErrorImageProvider> {
   @override
   Future<ErrorImageProvider> obtainKey(ImageConfiguration configuration) {
     return SynchronousFuture<ErrorImageProvider>(this);
+  }
+}
+
+class ObtainKeyErrorImageProvider extends ImageProvider<ObtainKeyErrorImageProvider> {
+  @override
+  ImageStreamCompleter load(ObtainKeyErrorImageProvider key) {
+    throw Error();
+  }
+
+  @override
+  Future<ObtainKeyErrorImageProvider> obtainKey(ImageConfiguration configuration) {
+    throw Error();
   }
 }
 

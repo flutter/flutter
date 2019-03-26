@@ -74,7 +74,9 @@ Future<void> updateGeneratedXcodeProperties({
 
   if (artifacts is LocalEngineArtifacts) {
     final LocalEngineArtifacts localEngineArtifacts = artifacts;
-    localsBuffer.writeln('LOCAL_ENGINE=${localEngineArtifacts.engineOutPath}');
+    final String engineOutPath = localEngineArtifacts.engineOutPath;
+    localsBuffer.writeln('FLUTTER_ENGINE=${fs.path.dirname(fs.path.dirname(engineOutPath))}');
+    localsBuffer.writeln('LOCAL_ENGINE=${fs.path.basename(engineOutPath)}');
 
     // Tell Xcode not to build universal binaries for local engines, which are
     // single-architecture.
@@ -82,7 +84,7 @@ Future<void> updateGeneratedXcodeProperties({
     // NOTE: this assumes that local engine binary paths are consistent with
     // the conventions uses in the engine: 32-bit iOS engines are built to
     // paths ending in _arm, 64-bit builds are not.
-    final String arch = localEngineArtifacts.engineOutPath.endsWith('_arm') ? 'armv7' : 'arm64';
+    final String arch = engineOutPath.endsWith('_arm') ? 'armv7' : 'arm64';
     localsBuffer.writeln('ARCHS=$arch');
   }
 
@@ -154,16 +156,16 @@ class XcodeProjectInterpreter {
       fs.path.absolute(projectPath),
       '-target',
       target,
-      '-showBuildSettings'
+      '-showBuildSettings',
     ], workingDirectory: projectPath);
     return parseXcodeBuildSettings(out);
   }
 
-  XcodeProjectInfo getInfo(String projectPath) {
-    final String out = runCheckedSync(<String>[
+  Future<XcodeProjectInfo> getInfo(String projectPath) async {
+    final RunResult result = await runCheckedAsync(<String>[
       _executable, '-list',
     ], workingDirectory: projectPath);
-    return XcodeProjectInfo.fromXcodeBuildOutput(out);
+    return XcodeProjectInfo.fromXcodeBuildOutput(result.toString());
   }
 }
 

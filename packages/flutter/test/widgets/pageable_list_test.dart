@@ -17,7 +17,7 @@ Widget buildPage(int page) {
     key: globalKeys[page],
     width: pageSize.width,
     height: pageSize.height,
-    child: Text(page.toString())
+    child: Text(page.toString()),
   );
 }
 

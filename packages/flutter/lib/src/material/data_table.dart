@@ -162,7 +162,8 @@ class DataCell {
   /// If the cell has no data, then a [Text] widget with placeholder
   /// text should be provided instead, and then the [placeholder]
   /// argument should be set to true.
-  const DataCell(this.child, {
+  const DataCell(
+    this.child, {
     this.placeholder = false,
     this.showEditIcon = false,
     this.onTap,
@@ -362,7 +363,7 @@ class DataTable extends StatelessWidget {
     Color color,
     bool checked,
     VoidCallback onRowTap,
-    ValueChanged<bool> onCheckboxChanged
+    ValueChanged<bool> onCheckboxChanged,
   }) {
     Widget contents = Semantics(
       container: true,
@@ -481,8 +482,8 @@ class DataTable extends StatelessWidget {
             color: isLightTheme ? Colors.black54 : Colors.white70,
           ),
           child: DropdownButtonHideUnderline(child: label),
-        )
-      )
+        ),
+      ),
     );
     if (onTap != null) {
       label = InkWell(
@@ -523,7 +524,7 @@ class DataTable extends StatelessWidget {
           key: index == 0 ? _headingRowKey : rows[index - 1].key,
           decoration: index > 0 && rows[index - 1].selected ? _kSelectedDecoration
                                                             : _kUnselectedDecoration,
-          children: List<Widget>(tableColumns.length)
+          children: List<Widget>(tableColumns.length),
         );
       },
     );
@@ -705,7 +706,7 @@ class _SortArrowState extends State<_SortArrow> with TickerProviderStateMixin {
         duration: widget.duration,
         vsync: this,
       ),
-      curve: Curves.fastOutSlowIn
+      curve: Curves.fastOutSlowIn,
     )
     ..addListener(_rebuild);
     _opacityController.value = widget.visible ? 1.0 : 0.0;

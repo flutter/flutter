@@ -33,6 +33,12 @@ void main() {
       equals('TextStyle(inherit: true, size: 10.0, weight: 800, height: 123.0x)'),
     );
 
+    // Check that the inherit flag can be set with copyWith().
+    expect(
+      s1.copyWith(inherit: false).toString(),
+      equals('TextStyle(inherit: false, size: 10.0, weight: 800, height: 123.0x)'),
+    );
+
     final TextStyle s2 = s1.copyWith(color: const Color(0xFF00FF00), height: 100.0);
     expect(s1.fontFamily, isNull);
     expect(s1.fontSize, 10.0);
@@ -163,10 +169,10 @@ void main() {
 
     final ui.TextStyle ts5 = s5.getTextStyle();
     expect(ts5, equals(ui.TextStyle(fontWeight: FontWeight.w700, fontSize: 12.0, height: 123.0)));
-    expect(ts5.toString(), 'TextStyle(color: unspecified, decoration: unspecified, decorationColor: unspecified, decorationStyle: unspecified, fontWeight: FontWeight.w700, fontStyle: unspecified, textBaseline: unspecified, fontFamily: unspecified, fontFamilyFallback: unspecified, fontSize: 12.0, letterSpacing: unspecified, wordSpacing: unspecified, height: 123.0x, locale: unspecified, background: unspecified, foreground: unspecified, shadows: unspecified)');
+    expect(ts5.toString(), 'TextStyle(color: unspecified, decoration: unspecified, decorationColor: unspecified, decorationStyle: unspecified, decorationThickness: unspecified, fontWeight: FontWeight.w700, fontStyle: unspecified, textBaseline: unspecified, fontFamily: unspecified, fontFamilyFallback: unspecified, fontSize: 12.0, letterSpacing: unspecified, wordSpacing: unspecified, height: 123.0x, locale: unspecified, background: unspecified, foreground: unspecified, shadows: unspecified)');
     final ui.TextStyle ts2 = s2.getTextStyle();
     expect(ts2, equals(ui.TextStyle(color: const Color(0xFF00FF00), fontWeight: FontWeight.w800, fontSize: 10.0, height: 100.0)));
-    expect(ts2.toString(), 'TextStyle(color: Color(0xff00ff00), decoration: unspecified, decorationColor: unspecified, decorationStyle: unspecified, fontWeight: FontWeight.w800, fontStyle: unspecified, textBaseline: unspecified, fontFamily: unspecified, fontFamilyFallback: unspecified, fontSize: 10.0, letterSpacing: unspecified, wordSpacing: unspecified, height: 100.0x, locale: unspecified, background: unspecified, foreground: unspecified, shadows: unspecified)');
+    expect(ts2.toString(), 'TextStyle(color: Color(0xff00ff00), decoration: unspecified, decorationColor: unspecified, decorationStyle: unspecified, decorationThickness: unspecified, fontWeight: FontWeight.w800, fontStyle: unspecified, textBaseline: unspecified, fontFamily: unspecified, fontFamilyFallback: unspecified, fontSize: 10.0, letterSpacing: unspecified, wordSpacing: unspecified, height: 100.0x, locale: unspecified, background: unspecified, foreground: unspecified, shadows: unspecified)');
 
     final ui.ParagraphStyle ps2 = s2.getParagraphStyle(textAlign: TextAlign.center);
     expect(ps2, equals(ui.ParagraphStyle(textAlign: TextAlign.center, fontWeight: FontWeight.w800, fontSize: 10.0, height: 100.0)));
@@ -190,11 +196,11 @@ void main() {
   test('TextStyle using package font', () {
     const TextStyle s6 = TextStyle(fontFamily: 'test');
     expect(s6.fontFamily, 'test');
-    expect(s6.getTextStyle().toString(), 'TextStyle(color: unspecified, decoration: unspecified, decorationColor: unspecified, decorationStyle: unspecified, fontWeight: unspecified, fontStyle: unspecified, textBaseline: unspecified, fontFamily: test, fontFamilyFallback: unspecified, fontSize: unspecified, letterSpacing: unspecified, wordSpacing: unspecified, height: unspecified, locale: unspecified, background: unspecified, foreground: unspecified, shadows: unspecified)');
+    expect(s6.getTextStyle().toString(), 'TextStyle(color: unspecified, decoration: unspecified, decorationColor: unspecified, decorationStyle: unspecified, decorationThickness: unspecified, fontWeight: unspecified, fontStyle: unspecified, textBaseline: unspecified, fontFamily: test, fontFamilyFallback: unspecified, fontSize: unspecified, letterSpacing: unspecified, wordSpacing: unspecified, height: unspecified, locale: unspecified, background: unspecified, foreground: unspecified, shadows: unspecified)');
 
     const TextStyle s7 = TextStyle(fontFamily: 'test', package: 'p');
     expect(s7.fontFamily, 'packages/p/test');
-    expect(s7.getTextStyle().toString(), 'TextStyle(color: unspecified, decoration: unspecified, decorationColor: unspecified, decorationStyle: unspecified, fontWeight: unspecified, fontStyle: unspecified, textBaseline: unspecified, fontFamily: packages/p/test, fontFamilyFallback: unspecified, fontSize: unspecified, letterSpacing: unspecified, wordSpacing: unspecified, height: unspecified, locale: unspecified, background: unspecified, foreground: unspecified, shadows: unspecified)');
+    expect(s7.getTextStyle().toString(), 'TextStyle(color: unspecified, decoration: unspecified, decorationColor: unspecified, decorationStyle: unspecified, decorationThickness: unspecified, fontWeight: unspecified, fontStyle: unspecified, textBaseline: unspecified, fontFamily: packages/p/test, fontFamilyFallback: unspecified, fontSize: unspecified, letterSpacing: unspecified, wordSpacing: unspecified, height: unspecified, locale: unspecified, background: unspecified, foreground: unspecified, shadows: unspecified)');
 
     const TextStyle s8 = TextStyle(fontFamilyFallback: <String>['test', 'test2'], package: 'p');
     expect(s8.fontFamilyFallback[0], 'packages/p/test');
@@ -230,7 +236,7 @@ void main() {
     expect(s4.fontFamilyFallback.isEmpty, true);
 
     final ui.TextStyle uis1 = s2.getTextStyle();
-    expect(uis1.toString(), 'TextStyle(color: unspecified, decoration: unspecified, decorationColor: unspecified, decorationStyle: unspecified, fontWeight: unspecified, fontStyle: unspecified, textBaseline: unspecified, fontFamily: foo, fontFamilyFallback: [Roboto, test], fontSize: unspecified, letterSpacing: unspecified, wordSpacing: unspecified, height: unspecified, locale: unspecified, background: unspecified, foreground: unspecified, shadows: unspecified)');
+    expect(uis1.toString(), 'TextStyle(color: unspecified, decoration: unspecified, decorationColor: unspecified, decorationStyle: unspecified, decorationThickness: unspecified, fontWeight: unspecified, fontStyle: unspecified, textBaseline: unspecified, fontFamily: foo, fontFamilyFallback: [Roboto, test], fontSize: unspecified, letterSpacing: unspecified, wordSpacing: unspecified, height: unspecified, locale: unspecified, background: unspecified, foreground: unspecified, shadows: unspecified)');
   });
 
   test('TextStyle.debugLabel', () {
@@ -293,5 +299,59 @@ void main() {
     expect(TextStyle.lerp(redPaintTextStyle, bluePaintTextStyle, .25).color, isNull);
     expect(TextStyle.lerp(redPaintTextStyle, bluePaintTextStyle, .25).foreground.color, red);
     expect(TextStyle.lerp(redPaintTextStyle, bluePaintTextStyle, .75).foreground.color, blue);
+  });
+
+  test('backgroundColor', () {
+    const TextStyle s1 = TextStyle();
+    expect(s1.backgroundColor, isNull);
+    expect(s1.toString(), 'TextStyle(<all styles inherited>)');
+
+    const TextStyle s2 = TextStyle(backgroundColor: Color(0xFF00FF00));
+    expect(s2.backgroundColor, const Color(0xFF00FF00));
+    expect(s2.toString(), 'TextStyle(inherit: true, backgroundColor: Color(0xff00ff00))');
+
+    final ui.TextStyle ts2 = s2.getTextStyle();
+    expect(ts2.toString(), contains('background: Paint(Color(0xff00ff00))'));
+  });
+
+  test('TextStyle background and backgroundColor combos', () {
+    const Color red = Color.fromARGB(255, 255, 0, 0);
+    const Color blue = Color.fromARGB(255, 0, 0, 255);
+    const TextStyle redTextStyle = TextStyle(backgroundColor: red);
+    const TextStyle blueTextStyle = TextStyle(backgroundColor: blue);
+    final TextStyle redPaintTextStyle = TextStyle(background: Paint()..color = red);
+    final TextStyle bluePaintTextStyle = TextStyle(background: Paint()..color = blue);
+
+    // merge/copyWith
+    final TextStyle redBlueBothForegroundMerged = redTextStyle.merge(blueTextStyle);
+    expect(redBlueBothForegroundMerged.backgroundColor, blue);
+    expect(redBlueBothForegroundMerged.foreground, isNull);
+
+    final TextStyle redBlueBothPaintMerged = redPaintTextStyle.merge(bluePaintTextStyle);
+    expect(redBlueBothPaintMerged.backgroundColor, null);
+    expect(redBlueBothPaintMerged.background, bluePaintTextStyle.background);
+
+    final TextStyle redPaintBlueColorMerged = redPaintTextStyle.merge(blueTextStyle);
+    expect(redPaintBlueColorMerged.backgroundColor, null);
+    expect(redPaintBlueColorMerged.background, redPaintTextStyle.background);
+
+    final TextStyle blueColorRedPaintMerged = blueTextStyle.merge(redPaintTextStyle);
+    expect(blueColorRedPaintMerged.backgroundColor, null);
+    expect(blueColorRedPaintMerged.background, redPaintTextStyle.background);
+
+    // apply
+    expect(redPaintTextStyle.apply(backgroundColor: blue).backgroundColor, isNull);
+    expect(redPaintTextStyle.apply(backgroundColor: blue).background.color, red);
+    expect(redTextStyle.apply(backgroundColor: blue).backgroundColor, blue);
+
+    // lerp
+    expect(TextStyle.lerp(redTextStyle, blueTextStyle, .25).backgroundColor, Color.lerp(red, blue, .25));
+    expect(TextStyle.lerp(redTextStyle, bluePaintTextStyle, .25).backgroundColor, isNull);
+    expect(TextStyle.lerp(redTextStyle, bluePaintTextStyle, .25).background.color, red);
+    expect(TextStyle.lerp(redTextStyle, bluePaintTextStyle, .75).background.color, blue);
+
+    expect(TextStyle.lerp(redPaintTextStyle, bluePaintTextStyle, .25).backgroundColor, isNull);
+    expect(TextStyle.lerp(redPaintTextStyle, bluePaintTextStyle, .25).background.color, red);
+    expect(TextStyle.lerp(redPaintTextStyle, bluePaintTextStyle, .75).background.color, blue);
   });
 }

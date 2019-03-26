@@ -90,7 +90,7 @@ int nthStylusButton(int number) => (kPrimaryStylusButton << (number - 1)) & kMax
 ///
 ///  * [Window.devicePixelRatio], which defines the device's current resolution.
 @immutable
-abstract class PointerEvent {
+abstract class PointerEvent extends Diagnosticable {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
   const PointerEvent({
@@ -288,36 +288,37 @@ abstract class PointerEvent {
   final bool synthesized;
 
   @override
-  String toString() => '$runtimeType($position)';
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Offset>('position', position));
+    properties.add(DiagnosticsProperty<Offset>('delta', delta, defaultValue: Offset.zero, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<Duration>('timeStamp', timeStamp, defaultValue: Duration.zero, level: DiagnosticLevel.debug));
+    properties.add(IntProperty('pointer', pointer, level: DiagnosticLevel.debug));
+    properties.add(EnumProperty<PointerDeviceKind>('kind', kind, level: DiagnosticLevel.debug));
+    properties.add(IntProperty('device', device, defaultValue: 0, level: DiagnosticLevel.debug));
+    properties.add(IntProperty('buttons', buttons, defaultValue: 0, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<bool>('down', down, level: DiagnosticLevel.debug));
+    properties.add(DoubleProperty('pressure', pressure, defaultValue: 1.0, level: DiagnosticLevel.debug));
+    properties.add(DoubleProperty('pressureMin', pressureMin, defaultValue: 1.0, level: DiagnosticLevel.debug));
+    properties.add(DoubleProperty('pressureMax', pressureMax, defaultValue: 1.0, level: DiagnosticLevel.debug));
+    properties.add(DoubleProperty('distance', distance, defaultValue: 0.0, level: DiagnosticLevel.debug));
+    properties.add(DoubleProperty('distanceMin', distanceMin, defaultValue: 0.0, level: DiagnosticLevel.debug));
+    properties.add(DoubleProperty('distanceMax', distanceMax, defaultValue: 0.0, level: DiagnosticLevel.debug));
+    properties.add(DoubleProperty('size', size, defaultValue: 0.0, level: DiagnosticLevel.debug));
+    properties.add(DoubleProperty('radiusMajor', radiusMajor, defaultValue: 0.0, level: DiagnosticLevel.debug));
+    properties.add(DoubleProperty('radiusMinor', radiusMinor, defaultValue: 0.0, level: DiagnosticLevel.debug));
+    properties.add(DoubleProperty('radiusMin', radiusMin, defaultValue: 0.0, level: DiagnosticLevel.debug));
+    properties.add(DoubleProperty('radiusMax', radiusMax, defaultValue: 0.0, level: DiagnosticLevel.debug));
+    properties.add(DoubleProperty('orientation', orientation, defaultValue: 0.0, level: DiagnosticLevel.debug));
+    properties.add(DoubleProperty('tilt', tilt, defaultValue: 0.0, level: DiagnosticLevel.debug));
+    properties.add(IntProperty('platformData', platformData, defaultValue: 0, level: DiagnosticLevel.debug));
+    properties.add(FlagProperty('obscured', value: obscured, ifTrue: 'obscured', level: DiagnosticLevel.debug));
+    properties.add(FlagProperty('synthesized', value: synthesized, ifTrue: 'synthesized', level: DiagnosticLevel.debug));
+  }
 
   /// Returns a complete textual description of this event.
   String toStringFull() {
-    return '$runtimeType('
-             'timeStamp: $timeStamp, '
-             'pointer: $pointer, '
-             'kind: $kind, '
-             'device: $device, '
-             'position: $position, '
-             'delta: $delta, '
-             'buttons: $buttons, '
-             'down: $down, '
-             'obscured: $obscured, '
-             'pressure: $pressure, '
-             'pressureMin: $pressureMin, '
-             'pressureMax: $pressureMax, '
-             'distance: $distance, '
-             'distanceMin: $distanceMin, '
-             'distanceMax: $distanceMax, '
-             'size: $size, '
-             'radiusMajor: $radiusMajor, '
-             'radiusMinor: $radiusMinor, '
-             'radiusMin: $radiusMin, '
-             'radiusMax: $radiusMax, '
-             'orientation: $orientation, '
-             'tilt: $tilt, '
-             'platformData: $platformData, '
-             'synthesized: $synthesized'
-           ')';
+    return toString(minLevel: DiagnosticLevel.fine);
   }
 }
 
@@ -343,7 +344,7 @@ class PointerAddedEvent extends PointerEvent {
     double radiusMin = 0.0,
     double radiusMax = 0.0,
     double orientation = 0.0,
-    double tilt = 0.0
+    double tilt = 0.0,
   }) : super(
     timeStamp: timeStamp,
     kind: kind,
@@ -380,7 +381,7 @@ class PointerRemovedEvent extends PointerEvent {
     double pressureMax = 1.0,
     double distanceMax = 0.0,
     double radiusMin = 0.0,
-    double radiusMax = 0.0
+    double radiusMax = 0.0,
   }) : super(
     timeStamp: timeStamp,
     kind: kind,
@@ -655,7 +656,7 @@ class PointerDownEvent extends PointerEvent {
     double radiusMin = 0.0,
     double radiusMax = 0.0,
     double orientation = 0.0,
-    double tilt = 0.0
+    double tilt = 0.0,
   }) : super(
     timeStamp: timeStamp,
     pointer: pointer,
@@ -764,7 +765,7 @@ class PointerUpEvent extends PointerEvent {
     double radiusMin = 0.0,
     double radiusMax = 0.0,
     double orientation = 0.0,
-    double tilt = 0.0
+    double tilt = 0.0,
   }) : super(
     timeStamp: timeStamp,
     pointer: pointer,
@@ -787,6 +788,65 @@ class PointerUpEvent extends PointerEvent {
     orientation: orientation,
     tilt: tilt
   );
+}
+
+/// An event that corresponds to a discrete pointer signal.
+///
+/// Pointer signals are events that originate from the pointer but don't change
+/// the state of the pointer itself, and are discrete rather than needing to be
+/// interpreted in the context of a series of events.
+abstract class PointerSignalEvent extends PointerEvent {
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
+  const PointerSignalEvent({
+    Duration timeStamp = Duration.zero,
+    int pointer = 0,
+    PointerDeviceKind kind = PointerDeviceKind.mouse,
+    int device = 0,
+    Offset position = Offset.zero,
+  }) : super(
+    timeStamp: timeStamp,
+    pointer: pointer,
+    kind: kind,
+    device: device,
+    position: position,
+  );
+}
+
+/// The pointer issued a scroll event.
+///
+/// Scrolling the scroll wheel on a mouse is an example of an event that
+/// would create a [PointerScrollEvent].
+class PointerScrollEvent extends PointerSignalEvent {
+  /// Creates a pointer scroll event.
+  ///
+  /// All of the arguments must be non-null.
+  const PointerScrollEvent({
+    Duration timeStamp = Duration.zero,
+    PointerDeviceKind kind = PointerDeviceKind.mouse,
+    int device = 0,
+    Offset position = Offset.zero,
+    this.scrollDelta = Offset.zero,
+  }) : assert(timeStamp != null),
+       assert(kind != null),
+       assert(device != null),
+       assert(position != null),
+       assert(scrollDelta != null),
+       super(
+    timeStamp: timeStamp,
+    kind: kind,
+    device: device,
+    position: position,
+  );
+
+  /// The amount to scroll, in logical pixels.
+  final Offset scrollDelta;
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Offset>('scrollDelta', scrollDelta));
+  }
 }
 
 /// The input from the pointer is no longer directed towards this receiver.
@@ -813,7 +873,7 @@ class PointerCancelEvent extends PointerEvent {
     double radiusMin = 0.0,
     double radiusMax = 0.0,
     double orientation = 0.0,
-    double tilt = 0.0
+    double tilt = 0.0,
   }) : super(
     timeStamp: timeStamp,
     pointer: pointer,

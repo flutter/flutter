@@ -848,7 +848,7 @@ void main() {
       const Offset(0.0, 0.0),
       const Offset(210.0, 0.0),
       const Offset(420.0, 0.0),
-      const Offset(0.0, 20.0)
+      const Offset(0.0, 20.0),
     ]);
   });
 

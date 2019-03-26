@@ -20,13 +20,13 @@ void main() {
     Directory intellijDir;
     Directory toolsDir;
 
-    Map<String, String> _getFilesystemContents([Directory root]) {
+    Map<String, String> _getFilesystemContents([ Directory root ]) {
       final String tempPath = tempDir.absolute.path;
       final List<String> paths =
-          (root ?? tempDir).listSync(recursive: true).map((FileSystemEntity entity) {
-        final String relativePath = fs.path.relative(entity.path, from: tempPath);
-        return relativePath;
-      }).toList();
+        (root ?? tempDir).listSync(recursive: true).map((FileSystemEntity entity) {
+          final String relativePath = fs.path.relative(entity.path, from: tempPath);
+          return relativePath;
+        }).toList();
       final Map<String, String> contents = <String, String>{};
       for (String path in paths) {
         final String absPath = fs.path.join(tempPath, path);
@@ -39,7 +39,7 @@ void main() {
       return contents;
     }
 
-    Map<String, String> _getManifest(Directory base, String marker, {bool isTemplate = false}) {
+    Map<String, String> _getManifest(Directory base, String marker, { bool isTemplate = false }) {
       final String basePath = fs.path.relative(base.path, from: tempDir.absolute.path);
       final String suffix = isTemplate ? Template.copyTemplateExtension : '';
       return <String, String>{

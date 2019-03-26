@@ -322,7 +322,7 @@ class FlutterDriver {
         message: 'Flutter Driver extension is taking a long time to become available. '
                  'Ensure your test app (often "lib/main.dart") imports '
                  '"package:flutter_driver/driver_extension.dart" and '
-                 'calls enableFlutterDriverExtension() as the first call in main().'
+                 'calls enableFlutterDriverExtension() as the first call in main().',
       );
     } else if (isolate.pauseEvent is VMPauseExitEvent ||
                isolate.pauseEvent is VMPauseBreakpointEvent ||
@@ -416,7 +416,7 @@ class FlutterDriver {
     return response['response'];
   }
 
-  void _logCommunication(String message)  {
+  void _logCommunication(String message) {
     if (_printCommunication)
       _log.info(message);
     if (_logCommunicationToFile) {
@@ -427,27 +427,27 @@ class FlutterDriver {
   }
 
   /// Checks the status of the Flutter Driver extension.
-  Future<Health> checkHealth({Duration timeout}) async {
+  Future<Health> checkHealth({ Duration timeout }) async {
     return Health.fromJson(await _sendCommand(GetHealth(timeout: timeout)));
   }
 
   /// Returns a dump of the render tree.
-  Future<RenderTree> getRenderTree({Duration timeout}) async {
+  Future<RenderTree> getRenderTree({ Duration timeout }) async {
     return RenderTree.fromJson(await _sendCommand(GetRenderTree(timeout: timeout)));
   }
 
   /// Taps at the center of the widget located by [finder].
-  Future<void> tap(SerializableFinder finder, {Duration timeout}) async {
+  Future<void> tap(SerializableFinder finder, { Duration timeout }) async {
     await _sendCommand(Tap(finder, timeout: timeout));
   }
 
   /// Waits until [finder] locates the target.
-  Future<void> waitFor(SerializableFinder finder, {Duration timeout}) async {
+  Future<void> waitFor(SerializableFinder finder, { Duration timeout }) async {
     await _sendCommand(WaitFor(finder, timeout: timeout));
   }
 
   /// Waits until [finder] can no longer locate the target.
-  Future<void> waitForAbsent(SerializableFinder finder, {Duration timeout}) async {
+  Future<void> waitForAbsent(SerializableFinder finder, { Duration timeout }) async {
     await _sendCommand(WaitForAbsent(finder, timeout: timeout));
   }
 
@@ -455,7 +455,7 @@ class FlutterDriver {
   ///
   /// Use this method when you need to wait for the moment when the application
   /// becomes "stable", for example, prior to taking a [screenshot].
-  Future<void> waitUntilNoTransientCallbacks({Duration timeout}) async {
+  Future<void> waitUntilNoTransientCallbacks({ Duration timeout }) async {
     await _sendCommand(WaitUntilNoTransientCallbacks(timeout: timeout));
   }
 
@@ -509,7 +509,9 @@ class FlutterDriver {
   ///
   /// The [timeout] value should be long enough to accommodate as many scrolls
   /// as needed to bring an item into view. The default is to not time out.
-  Future<void> scrollUntilVisible(SerializableFinder scrollable, SerializableFinder item, {
+  Future<void> scrollUntilVisible(
+    SerializableFinder scrollable,
+    SerializableFinder item, {
     double alignment = 0.0,
     double dxScroll = 0.0,
     double dyScroll = 0.0,
@@ -723,7 +725,7 @@ class FlutterDriver {
     try {
       await _warnIfSlow<void>(
         future: _peer.sendRequest(_setVMTimelineFlagsMethodName, <String, String>{
-          'recordedStreams': _timelineStreamsToString(streams)
+          'recordedStreams': _timelineStreamsToString(streams),
         }),
         timeout: timeout,
         message: 'VM is taking an unusually long time to respond to being told to start tracing...',
@@ -795,7 +797,7 @@ class FlutterDriver {
   /// operation exceeds the specified timeout; it does not actually cancel the
   /// operation.
   Future<void> clearTimeline({
-    Duration timeout = _kUnusuallyLongTimeout
+    Duration timeout = _kUnusuallyLongTimeout,
   }) async {
     assert(timeout != null);
     try {
@@ -936,6 +938,9 @@ class CommonFinders {
 
   /// Finds widgets with a tooltip with the given [message].
   SerializableFinder byTooltip(String message) => ByTooltipMessage(message);
+
+  /// Finds widgets with the given semantics [label].
+  SerializableFinder bySemanticsLabel(Pattern label) => BySemanticsLabel(label);
 
   /// Finds widgets whose class name matches the given string.
   SerializableFinder byType(String type) => ByType(type);
