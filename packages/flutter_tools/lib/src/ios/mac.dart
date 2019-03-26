@@ -625,15 +625,13 @@ Future<void> diagnoseXcodeBuildFailure(XcodeBuildResult result) async {
 }
 
 class XcodeBuildResult {
-  XcodeBuildResult(
-    {
-      @required this.success,
-      this.output,
-      this.stdout,
-      this.stderr,
-      this.xcodeBuildExecution,
-    }
-  );
+  XcodeBuildResult({
+    @required this.success,
+    this.output,
+    this.stdout,
+    this.stderr,
+    this.xcodeBuildExecution,
+  });
 
   final bool success;
   final String output;
@@ -645,14 +643,12 @@ class XcodeBuildResult {
 
 /// Describes an invocation of a Xcode build command.
 class XcodeBuildExecution {
-  XcodeBuildExecution(
-    {
-      @required this.buildCommands,
-      @required this.appDirectory,
-      @required this.buildForPhysicalDevice,
-      @required this.buildSettings,
-    }
-  );
+  XcodeBuildExecution({
+    @required this.buildCommands,
+    @required this.appDirectory,
+    @required this.buildForPhysicalDevice,
+    @required this.buildSettings,
+  });
 
   /// The original list of Xcode build commands used to produce this build result.
   final List<String> buildCommands;

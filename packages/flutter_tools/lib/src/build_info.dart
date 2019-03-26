@@ -10,7 +10,9 @@ import 'globals.dart';
 
 /// Information about a build to be performed or used.
 class BuildInfo {
-  const BuildInfo(this.mode, this.flavor, {
+  const BuildInfo(
+    this.mode,
+    this.flavor, {
     this.trackWidgetCreation = false,
     this.compilationTraceFilePath,
     this.createBaseline = false,

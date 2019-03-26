@@ -195,7 +195,8 @@ class Image extends StatefulWidget {
   /// [FilterQuality.none] which corresponds to nearest-neighbor.
   ///
   /// If [excludeFromSemantics] is true, then [semanticLabel] will be ignored.
-  Image.network(String src, {
+  Image.network(
+    String src, {
     Key key,
     double scale = 1.0,
     this.semanticLabel,
@@ -236,7 +237,8 @@ class Image extends StatefulWidget {
   /// [FilterQuality.none] which corresponds to nearest-neighbor.
   ///
   /// If [excludeFromSemantics] is true, then [semanticLabel] will be ignored.
-  Image.file(File file, {
+  Image.file(
+    File file, {
     Key key,
     double scale = 1.0,
     this.semanticLabel,
@@ -384,7 +386,8 @@ class Image extends StatefulWidget {
   ///    scale is present.
   ///  * <https://flutter.io/assets-and-images/>, an introduction to assets in
   ///    Flutter.
-  Image.asset(String name, {
+  Image.asset(
+    String name, {
     Key key,
     AssetBundle bundle,
     this.semanticLabel,
@@ -425,7 +428,8 @@ class Image extends StatefulWidget {
   /// [FilterQuality.none] which corresponds to nearest-neighbor.
   ///
   /// If [excludeFromSemantics] is true, then [semanticLabel] will be ignored.
-  Image.memory(Uint8List bytes, {
+  Image.memory(
+    Uint8List bytes, {
     Key key,
     double scale = 1.0,
     this.semanticLabel,

@@ -528,7 +528,7 @@ class AppDomain extends Domain {
     return app.stop().then<bool>(
       (void value) => true,
       onError: (dynamic error, StackTrace stack) {
-        _sendAppEvent(app, 'log', <String, dynamic>{ 'log': '$error', 'error': true });
+        _sendAppEvent(app, 'log', <String, dynamic>{'log': '$error', 'error': true});
         app.closeLogger();
         _apps.remove(app);
         return false;
@@ -546,7 +546,7 @@ class AppDomain extends Domain {
     return app.detach().then<bool>(
       (void value) => true,
       onError: (dynamic error, StackTrace stack) {
-        _sendAppEvent(app, 'log', <String, dynamic>{ 'log': '$error', 'error': true });
+        _sendAppEvent(app, 'log', <String, dynamic>{'log': '$error', 'error': true});
         app.closeLogger();
         _apps.remove(app);
         return false;
@@ -559,7 +559,7 @@ class AppDomain extends Domain {
   }
 
   void _sendAppEvent(AppInstance app, String name, [ Map<String, dynamic> args ]) {
-    final Map<String, dynamic> eventArgs = <String, dynamic> {'appId': app.id};
+    final Map<String, dynamic> eventArgs = <String, dynamic>{'appId': app.id};
     if (args != null)
       eventArgs.addAll(args);
     sendEvent('app.$name', eventArgs);
@@ -951,7 +951,7 @@ class _AppRunLogger extends Logger {
     if (parent != null) {
       parent.printTrace(message);
     } else {
-      _sendLogEvent(<String, dynamic>{ 'log': message, 'trace': true });
+      _sendLogEvent(<String, dynamic>{'log': message, 'trace': true});
     }
   }
 

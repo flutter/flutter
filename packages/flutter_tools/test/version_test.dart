@@ -403,11 +403,12 @@ void main() {
     expect(GitTagVersion.parse('v1.2.3-4-gx$hash').frameworkVersionFor(hash), '0.0.0-unknown');
     expect(testLogger.statusText, '');
     expect(testLogger.errorText, '');
-    expect(testLogger.traceText,
+    expect(
+      testLogger.traceText,
       'Could not interpret results of "git describe": x1.2.3-4-gabcdef\n'
       'Could not interpret results of "git describe": v1.0.0-unknown-0-gabcdef\n'
       'Could not interpret results of "git describe": beta-1-gabcdef\n'
-      'Could not interpret results of "git describe": v1.2.3-4-gxabcdef\n'
+      'Could not interpret results of "git describe": v1.2.3-4-gxabcdef\n',
     );
   });
 }
