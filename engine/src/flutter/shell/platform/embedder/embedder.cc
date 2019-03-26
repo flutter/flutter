@@ -624,6 +624,13 @@ FlutterEngineResult FlutterEngineRun(size_t version,
   // Step 3: Run the engine.
   auto run_configuration = shell::RunConfiguration::InferFromSettings(settings);
 
+  if (SAFE_ACCESS(args, custom_dart_entrypoint, nullptr) != nullptr) {
+    auto dart_entrypoint = std::string{args->custom_dart_entrypoint};
+    if (dart_entrypoint.size() != 0) {
+      run_configuration.SetEntrypoint(std::move(dart_entrypoint));
+    }
+  }
+
   run_configuration.AddAssetResolver(
       std::make_unique<blink::DirectoryAssetBundle>(
           fml::Duplicate(settings.assets_dir)));

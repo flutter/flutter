@@ -74,6 +74,8 @@ executable("embedder_unittests") {
     "tests/embedder_context.h",
     "tests/embedder_test.cc",
     "tests/embedder_test.h",
+    "tests/embedder_test_resolver.cc",
+    "tests/embedder_test_resolver.h",
     "tests/embedder_unittests.cc",
   ]
 

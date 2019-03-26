@@ -62,6 +62,15 @@ void EmbedderConfigBuilder::SetIsolateCreateCallbackHook() {
       EmbedderContext::GetIsolateCreateCallbackHook();
 }
 
+void EmbedderConfigBuilder::SetDartEntrypoint(std::string entrypoint) {
+  if (entrypoint.size() == 0) {
+    return;
+  }
+
+  dart_entrypoint_ = std::move(entrypoint);
+  project_args_.custom_dart_entrypoint = dart_entrypoint_.c_str();
+}
+
 UniqueEngine EmbedderConfigBuilder::LaunchEngine() const {
   FlutterEngine engine = nullptr;
   auto result = FlutterEngineRun(FLUTTER_ENGINE_VERSION, &renderer_config_,

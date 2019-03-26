@@ -563,6 +563,15 @@ typedef struct {
   // internal engine-managed thread. If the components accessed on the embedder
   // are not thread safe, the appropriate re-threading must be done.
   VsyncCallback vsync_callback;
+
+  // The name of a custom Dart entrypoint. This is optional and specifying a
+  // null or empty entrypoint makes the engine look for a method named "main" in
+  // the root library of the application.
+  //
+  // Care must be taken to ensure that the custom entrypoint is not tree-shaken
+  // away. Usually, this is done using the `@pragma('vm:entry-point')`
+  // decoration.
+  const char* custom_dart_entrypoint;
 } FlutterProjectArgs;
 
 FLUTTER_EXPORT
