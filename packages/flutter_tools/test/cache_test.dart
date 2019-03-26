@@ -84,48 +84,48 @@ void main() {
     test('should not be up to date, if some cached artifact is not', () {
       final CachedArtifact artifact1 = MockCachedArtifact();
       final CachedArtifact artifact2 = MockCachedArtifact();
-      when(artifact1.isUpToDate(const <DevelopmentArtifact>{})).thenReturn(true);
-      when(artifact2.isUpToDate(const <DevelopmentArtifact>{})).thenReturn(false);
+      when(artifact1.isUpToDate()).thenReturn(true);
+      when(artifact2.isUpToDate()).thenReturn(false);
       final Cache cache = Cache(artifacts: <CachedArtifact>[artifact1, artifact2]);
-      expect(cache.isUpToDate(const <DevelopmentArtifact>{}), isFalse);
+      expect(cache.isUpToDate(), isFalse);
     });
     test('should be up to date, if all cached artifacts are', () {
       final CachedArtifact artifact1 = MockCachedArtifact();
       final CachedArtifact artifact2 = MockCachedArtifact();
-      when(artifact1.isUpToDate(const <DevelopmentArtifact>{})).thenReturn(true);
-      when(artifact2.isUpToDate(const <DevelopmentArtifact>{})).thenReturn(true);
+      when(artifact1.isUpToDate()).thenReturn(true);
+      when(artifact2.isUpToDate()).thenReturn(true);
       final Cache cache = Cache(artifacts: <CachedArtifact>[artifact1, artifact2]);
-      expect(cache.isUpToDate(const <DevelopmentArtifact>{}), isTrue);
+      expect(cache.isUpToDate(), isTrue);
     });
     test('should update cached artifacts which are not up to date', () async {
       final CachedArtifact artifact1 = MockCachedArtifact();
       final CachedArtifact artifact2 = MockCachedArtifact();
-      when(artifact1.isUpToDate(const <DevelopmentArtifact>{})).thenReturn(true);
-      when(artifact2.isUpToDate(const <DevelopmentArtifact>{})).thenReturn(false);
+      when(artifact1.isUpToDate()).thenReturn(true);
+      when(artifact2.isUpToDate()).thenReturn(false);
       final Cache cache = Cache(artifacts: <CachedArtifact>[artifact1, artifact2]);
-      await cache.updateAll(const <DevelopmentArtifact>{});
-      verifyNever(artifact1.update());
-      verify(artifact2.update());
+      await cache.updateAll(<DevelopmentArtifact>{});
+      verifyNever(artifact1.update(<DevelopmentArtifact>{}));
+      verify(artifact2.update(<DevelopmentArtifact>{}));
     });
     testUsingContext('failed storage.googleapis.com download shows China warning', () async {
       final CachedArtifact artifact1 = MockCachedArtifact();
       final CachedArtifact artifact2 = MockCachedArtifact();
-      when(artifact1.isUpToDate(const <DevelopmentArtifact>{})).thenReturn(false);
-      when(artifact2.isUpToDate(const <DevelopmentArtifact>{})).thenReturn(false);
+      when(artifact1.isUpToDate()).thenReturn(false);
+      when(artifact2.isUpToDate()).thenReturn(false);
       final MockInternetAddress address = MockInternetAddress();
       when(address.host).thenReturn('storage.googleapis.com');
-      when(artifact1.update()).thenThrow(SocketException(
+      when(artifact1.update(<DevelopmentArtifact>{})).thenThrow(SocketException(
         'Connection reset by peer',
         address: address,
       ));
       final Cache cache = Cache(artifacts: <CachedArtifact>[artifact1, artifact2]);
       try {
-        await cache.updateAll(const <DevelopmentArtifact>{});
+        await cache.updateAll(<DevelopmentArtifact>{});
         fail('Mock thrown exception expected');
       } catch (e) {
-        verify(artifact1.update());
+        verify(artifact1.update(<DevelopmentArtifact>{}));
         // Don't continue when retrieval fails.
-        verifyNever(artifact2.update());
+        verifyNever(artifact2.update(<DevelopmentArtifact>{}));
         expect(
           testLogger.errorText,
           contains('https://flutter.io/community/china'),

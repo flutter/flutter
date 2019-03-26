@@ -220,7 +220,7 @@ class Cache {
     return isOlderThanReference(entity: entity, referenceFile: flutterToolsStamp);
   }
 
-  bool isUpToDate(Set<DevelopmentArtifact> requiredArtifacts) => _artifacts.every((CachedArtifact artifact) => artifact.isUpToDate(requiredArtifacts));
+  bool isUpToDate() => _artifacts.every((CachedArtifact artifact) => artifact.isUpToDate());
 
   Future<String> getThirdPartyFile(String urlStr, String serviceName) async {
     final Uri url = Uri.parse(urlStr);
@@ -250,8 +250,8 @@ class Cache {
     }
     try {
       for (CachedArtifact artifact in _artifacts) {
-        if (!artifact.isUpToDate(requiredArtifacts)) {
-          await artifact.update();
+        if (!artifact.isUpToDate()) {
+          await artifact.update(requiredArtifacts);
         }
       }
     } on SocketException catch (e) {
@@ -303,12 +303,7 @@ abstract class CachedArtifact {
   /// starting from scratch.
   final List<File> _downloadedFiles = <File>[];
 
-  bool isUpToDate(Set<DevelopmentArtifact> requiredArtifacts) {
-    // If the set of required artifacts does not include any from this cache,
-    // then we can claim we are up to date to skip downloading.
-    if (!requiredArtifacts.any(developmentArtifacts.contains)) {
-      return true;
-    }
+  bool isUpToDate() {
     if (!location.existsSync()) {
       return false;
     }
@@ -318,7 +313,12 @@ abstract class CachedArtifact {
     return isUpToDateInner();
   }
 
-  Future<void> update() async {
+  Future<void> update(Set<DevelopmentArtifact> requiredArtifacts) async {
+    // If the set of required artifacts does not include any from this cache,
+    // then we can claim we are up to date to skip downloading.
+    if (!requiredArtifacts.any(developmentArtifacts.contains)) {
+      return true;
+    }
     if (!location.existsSync()) {
       location.createSync(recursive: true);
     }
@@ -514,9 +514,10 @@ abstract class EngineCachedArtifact extends CachedArtifact {
     for (String pkgName in getPackageDirs()) {
       final String pkgPath = fs.path.join(pkgDir.path, pkgName);
       final Directory dir = fs.directory(pkgPath);
-      if (dir.existsSync()) {
-        dir.deleteSync(recursive: true);
-      }
+      // if (dir.existsSync()) {
+      //   print('DELETING: $dir');
+      //   dir.deleteSync(recursive: true);
+      // }
       await _downloadZipArchive('Downloading package $pkgName...', Uri.parse(url + pkgName + '.zip'), pkgDir);
     }
 
@@ -524,6 +525,10 @@ abstract class EngineCachedArtifact extends CachedArtifact {
       final String cacheDir = toolsDir[0];
       final String urlPath = toolsDir[1];
       final Directory dir = fs.directory(fs.path.join(location.path, cacheDir));
+      // if (dir.existsSync()) {
+      //   print('DELETING: $dir');
+      //   dir.deleteSync(recursive: true);
+      // }
       await _downloadZipArchive('Downloading $cacheDir tools...', Uri.parse(url + urlPath), dir);
 
       _makeFilesExecutable(dir);
@@ -531,6 +536,10 @@ abstract class EngineCachedArtifact extends CachedArtifact {
       final File frameworkZip = fs.file(fs.path.join(dir.path, 'Flutter.framework.zip'));
       if (frameworkZip.existsSync()) {
         final Directory framework = fs.directory(fs.path.join(dir.path, 'Flutter.framework'));
+        // if (framework.existsSync()) {
+        //   print('DELETING: $dir');
+        //   framework.deleteSync(recursive: true);
+        // }
         framework.createSync();
         os.unzip(frameworkZip, framework);
       }
