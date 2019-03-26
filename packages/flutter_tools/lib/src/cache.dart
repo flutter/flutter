@@ -291,6 +291,10 @@ abstract class CachedArtifact {
   final String name;
   final Cache cache;
 
+  // The name of the stamp file. Defaults to the same as the
+  // artifact name.
+  String get stampName => name;
+
   /// All development artifacts this cache provides.
   final Set<DevelopmentArtifact> developmentArtifacts;
 
@@ -307,7 +311,7 @@ abstract class CachedArtifact {
     if (!location.existsSync()) {
       return false;
     }
-    if (version != cache.getStampFor(name)) {
+    if (version != cache.getStampFor(stampName)) {
       return false;
     }
     return isUpToDateInner();
@@ -317,13 +321,14 @@ abstract class CachedArtifact {
     // If the set of required artifacts does not include any from this cache,
     // then we can claim we are up to date to skip downloading.
     if (!requiredArtifacts.any(developmentArtifacts.contains)) {
+      printTrace('Artifact $this is not required, skipping update.');
       return true;
     }
     if (!location.existsSync()) {
       location.createSync(recursive: true);
     }
     await updateInner();
-    cache.setStampFor(name, version);
+    cache.setStampFor(stampName, version);
     _removeDownloadedFiles();
   }
 
@@ -470,9 +475,13 @@ class FlutterWebSdk extends CachedArtifact {
 
 abstract class EngineCachedArtifact extends CachedArtifact {
   EngineCachedArtifact(
+    this.stampName,
     Cache cache,
     Set<DevelopmentArtifact> requiredArtifacts,
   ) : super('engine', cache, requiredArtifacts);
+
+  @override
+  final String stampName;
 
   /// Return a list of (directory path, download URL path) tuples.
   List<List<String>> getBinaryDirs();
@@ -515,11 +524,6 @@ abstract class EngineCachedArtifact extends CachedArtifact {
 
     final Directory pkgDir = cache.getCacheDir('pkg');
     for (String pkgName in getPackageDirs()) {
-      final String pkgPath = fs.path.join(pkgDir.path, pkgName);
-      final Directory dir = fs.directory(pkgPath);
-      if (dir.existsSync()) {
-        dir.deleteSync(recursive: true);
-      }
       await _downloadZipArchive('Downloading package $pkgName...', Uri.parse(url + pkgName + '.zip'), pkgDir);
     }
 
@@ -587,6 +591,7 @@ abstract class EngineCachedArtifact extends CachedArtifact {
 /// A cached artifact containing the dart:ui source code.
 class FlutterSdk extends EngineCachedArtifact {
   FlutterSdk(Cache cache) : super(
+    'flutter_sdk',
     cache,
     const <DevelopmentArtifact>{ DevelopmentArtifact.universal },
   );
@@ -627,6 +632,7 @@ class FlutterSdk extends EngineCachedArtifact {
 
 class AndroidEngineArtifacts extends EngineCachedArtifact {
   AndroidEngineArtifacts(Cache cache) : super(
+    'android-sdk',
     cache,
     const <DevelopmentArtifact>{ DevelopmentArtifact.android },
   );
@@ -666,6 +672,7 @@ class AndroidEngineArtifacts extends EngineCachedArtifact {
 
 class IOSEngineArtifacts extends EngineCachedArtifact {
   IOSEngineArtifacts(Cache cache) : super(
+    'ios-sdk',
     cache,
     <DevelopmentArtifact>{ DevelopmentArtifact.iOS },
   );
