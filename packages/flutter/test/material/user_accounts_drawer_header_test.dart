@@ -8,7 +8,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/semantics_tester.dart';
 
-const Key gestureKey = Key('Gesture');
 const Key avatarA = Key('A');
 const Key avatarC = Key('C');
 const Key avatarD = Key('D');
@@ -34,8 +33,8 @@ Future<void> pumpTestWidget(
           child: Center(
             child: UserAccountsDrawerHeader(
               onDetailsPressed: withOnDetailsPressedHandler ? () { } : null,
-              currentAccountPicture: ExcludeSemantics(
-                child: const CircleAvatar(
+              currentAccountPicture: const ExcludeSemantics(
+                child: CircleAvatar(
                   key: avatarA,
                   child: Text('A'),
                 ),
