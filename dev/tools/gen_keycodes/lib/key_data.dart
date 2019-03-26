@@ -189,7 +189,6 @@ class KeyData {
   /// Lines in this file look like this (without the ///):
   ///  /** Space key. */
   ///  #define GLFW_KEY_SPACE              32,
-
   Map<String, int> _readGlfwKeyCodes(String headerFile) {
     // Only get the KEY definitions, ignore the rest (mouse, joystick, etc).
     final RegExp enumEntry = RegExp(r'''define GLFW_KEY_([A-Z0-9_]+)\s*([A-Z0-9_]+),?''');
