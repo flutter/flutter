@@ -25,7 +25,7 @@ void main() {
     expect(tester.getTopLeft(find.byType(Center)), const Offset(0.0, 0.0));
   });
 
-  testWidgets('Contents padding from viewInsets', (WidgetTester tester) async {
+testWidgets('Opaque bar pushes contents down', (WidgetTester tester) async {
     BuildContext childContext;
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
@@ -36,20 +36,38 @@ void main() {
             middle: Text('Opaque'),
             backgroundColor: Color(0xFFF8F8F8),
           ),
-          child: Builder(builder: (BuildContext context) {
-            childContext = context;
-            return Container();
-          })
+          child: Builder(
+            builder: (BuildContext context) {
+              childContext = context;
+              return Container();
+            },
+          ),
         ),
       ),
     ));
 
-    // If the navigation bar is opaque, the content should not draw behind it.
     expect(tester.getSize(find.byType(Container)).height, 600.0 - 44.0 - 100.0);
-    // The shouldn't see a media query top padding because it was consumed by
-    // the scaffold.
     expect(MediaQuery.of(childContext).padding.top, 0);
+  });
 
+  testWidgets('Contents padding from viewInsets', (WidgetTester tester) async {
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: MediaQuery(
+        data: const MediaQueryData(viewInsets: EdgeInsets.only(bottom: 100.0)),
+        child: CupertinoPageScaffold(
+          navigationBar: const CupertinoNavigationBar(
+            middle: Text('Opaque'),
+            backgroundColor: Color(0xFFF8F8F8),
+          ),
+          child: Container(),
+        ),
+      ),
+    ));
+
+    expect(tester.getSize(find.byType(Container)).height, 600.0 - 44.0 - 100.0);
+
+    BuildContext childContext;
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: MediaQuery(
