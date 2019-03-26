@@ -68,61 +68,6 @@ int nthMouseButton(int number) => (kPrimaryMouseButton << (number - 1)) & kMaxUn
 /// for some stylus buttons.
 int nthStylusButton(int number) => (kPrimaryStylusButton << (number - 1)) & kMaxUnsignedSMI;
 
-/// Differences between the states of two [PointerEvent]s.
-/// 
-// TODO(tongmu): Add all states, i.e. size, radiusMinor, radiusMajor,
-// orientation, and tilt.
-@immutable
-class PointerDifference extends Diagnosticable {
-  /// Create a record of pointer difference.
-  const PointerDifference({
-    @required this.timeStamp,
-    @required this.position,
-    @required this.buttons,
-    @required this.down,
-    @required this.pressure,
-    @required this.distance,
-  }) : assert(timeStamp != null),
-       assert(position != null),
-       assert(buttons != null),
-       assert(down != null),
-       assert(pressure != null),
-       assert(distance != null);
-
-  /// Time elapsed since last event. Always non-negative.
-  final Duration timeStamp;
-
-  /// Current position relative to last event. Can be negative on either
-  /// dimention.
-  final Offset position;
-
-  /// Buttons that have changed since last event. It's a bit field using the
-  /// *Button constants such as [kPrimaryMouseButton], [kSecondaryStylusButton],
-  /// etc.
-  ///
-  /// A button change can either be a press or a release. Use in conjuction with
-  /// [PointerEvent.buttons] to find out the direction of change.
-  /// For example, if last event has left mouse button pressed (0x01), and
-  /// this event has right mouse button pressed (0x02), then this value will be
-  /// 0x03 (0x01 ^ 0x02).
-  final int buttons;
-
-  /// Set if [PointerEvent.down] has changed since last event.
-  final bool down;
-
-  /// Difference in the pressure of the touch from last event. Can be negative.
-  final double pressure;
-
-  /// Difference in the distance of the detected object from the input surface
-  /// from last event. Can be negative.
-  final double distance;
-
-  /// Returns a complete textual description of differences.
-  String toStringFull() {
-    return toString(minLevel: DiagnosticLevel.fine);
-  }
-}
-
 /// Base class for touch, stylus, or mouse events.
 ///
 /// Pointer events operate in the coordinate space of the screen, scaled to
@@ -172,14 +117,6 @@ abstract class PointerEvent extends Diagnosticable {
     this.tilt = 0.0,
     this.platformData = 0,
     this.synthesized = false,
-    this.changes = const PointerDifference(
-      timeStamp: Duration.zero,
-      position: Offset.zero,
-      buttons: 0,
-      down: false,
-      pressure: 0.0,
-      distance: 0.0,
-    ),
   });
 
   /// Time of event dispatch, relative to an arbitrary timeline.
@@ -350,9 +287,6 @@ abstract class PointerEvent extends Diagnosticable {
   /// the difference between the 2 events in that case.
   final bool synthesized;
 
-  /// The state changes since last event.
-  final PointerDifference changes;
-
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
@@ -411,7 +345,6 @@ class PointerAddedEvent extends PointerEvent {
     double radiusMax = 0.0,
     double orientation = 0.0,
     double tilt = 0.0,
-    PointerDifference changes,
   }) : super(
          timeStamp: timeStamp,
          kind: kind,
@@ -428,7 +361,6 @@ class PointerAddedEvent extends PointerEvent {
          radiusMax: radiusMax,
          orientation: orientation,
          tilt: tilt,
-         changes: changes,
        );
 }
 
@@ -451,7 +383,6 @@ class PointerRemovedEvent extends PointerEvent {
     double distanceMax = 0.0,
     double radiusMin = 0.0,
     double radiusMax = 0.0,
-    PointerDifference changes,
   }) : super(
          timeStamp: timeStamp,
          kind: kind,
@@ -464,7 +395,6 @@ class PointerRemovedEvent extends PointerEvent {
          distanceMax: distanceMax,
          radiusMin: radiusMin,
          radiusMax: radiusMax,
-         changes: changes,
        );
 }
 
@@ -503,7 +433,6 @@ class PointerHoverEvent extends PointerEvent {
     double orientation = 0.0,
     double tilt = 0.0,
     bool synthesized = false,
-    PointerDifference changes,
   }) : super(
          timeStamp: timeStamp,
          kind: kind,
@@ -526,7 +455,6 @@ class PointerHoverEvent extends PointerEvent {
          orientation: orientation,
          tilt: tilt,
          synthesized: synthesized,
-         changes: changes,
        );
 }
 
@@ -565,7 +493,6 @@ class PointerEnterEvent extends PointerEvent {
     double orientation = 0.0,
     double tilt = 0.0,
     bool synthesized = false,
-    PointerDifference changes,
   }) : super(
          timeStamp: timeStamp,
          kind: kind,
@@ -588,7 +515,6 @@ class PointerEnterEvent extends PointerEvent {
          orientation: orientation,
          tilt: tilt,
          synthesized: synthesized,
-         changes: changes,
        );
 
   /// Creates an enter event from a [PointerHoverEvent].
@@ -617,7 +543,6 @@ class PointerEnterEvent extends PointerEvent {
     orientation: hover?.orientation,
     tilt: hover?.tilt,
     synthesized: hover?.synthesized,
-    changes: hover?.changes,
   );
 }
 
@@ -656,7 +581,6 @@ class PointerExitEvent extends PointerEvent {
     double orientation = 0.0,
     double tilt = 0.0,
     bool synthesized = false,
-    PointerDifference changes,
   }) : super(
          timeStamp: timeStamp,
          kind: kind,
@@ -679,7 +603,6 @@ class PointerExitEvent extends PointerEvent {
          orientation: orientation,
          tilt: tilt,
          synthesized: synthesized,
-         changes: changes,
        );
 
   /// Creates an exit event from a [PointerHoverEvent].
@@ -708,7 +631,6 @@ class PointerExitEvent extends PointerEvent {
     orientation: hover?.orientation,
     tilt: hover?.tilt,
     synthesized: hover?.synthesized,
-    changes: hover?.changes,
   );
 }
 
@@ -736,7 +658,6 @@ class PointerDownEvent extends PointerEvent {
     double radiusMax = 0.0,
     double orientation = 0.0,
     double tilt = 0.0,
-    PointerDifference changes,
   }) : super(
          timeStamp: timeStamp,
          pointer: pointer,
@@ -758,7 +679,6 @@ class PointerDownEvent extends PointerEvent {
          radiusMax: radiusMax,
          orientation: orientation,
          tilt: tilt,
-         changes: changes,
        );
 }
 
@@ -795,7 +715,6 @@ class PointerMoveEvent extends PointerEvent {
     double tilt = 0.0,
     int platformData = 0,
     bool synthesized = false,
-    PointerDifference changes,
   }) : super(
          timeStamp: timeStamp,
          pointer: pointer,
@@ -820,7 +739,6 @@ class PointerMoveEvent extends PointerEvent {
          tilt: tilt,
          platformData: platformData,
          synthesized: synthesized,
-         changes: changes,
        );
 }
 
@@ -849,7 +767,6 @@ class PointerUpEvent extends PointerEvent {
     double radiusMax = 0.0,
     double orientation = 0.0,
     double tilt = 0.0,
-    PointerDifference changes,
   }) : super(
          timeStamp: timeStamp,
          pointer: pointer,
@@ -871,7 +788,6 @@ class PointerUpEvent extends PointerEvent {
          radiusMax: radiusMax,
          orientation: orientation,
          tilt: tilt,
-         changes: changes,
        );
 }
 
@@ -889,14 +805,12 @@ abstract class PointerSignalEvent extends PointerEvent {
     PointerDeviceKind kind = PointerDeviceKind.mouse,
     int device = 0,
     Offset position = Offset.zero,
-    PointerDifference changes,
   }) : super(
          timeStamp: timeStamp,
          pointer: pointer,
          kind: kind,
          device: device,
          position: position,
-         changes: changes,
        );
 }
 
@@ -914,7 +828,6 @@ class PointerScrollEvent extends PointerSignalEvent {
     int device = 0,
     Offset position = Offset.zero,
     this.scrollDelta = Offset.zero,
-    PointerDifference changes,
   }) : assert(timeStamp != null),
        assert(kind != null),
        assert(device != null),
@@ -925,7 +838,6 @@ class PointerScrollEvent extends PointerSignalEvent {
          kind: kind,
          device: device,
          position: position,
-         changes: changes,
        );
 
   /// The amount to scroll, in logical pixels.
@@ -963,7 +875,6 @@ class PointerCancelEvent extends PointerEvent {
     double radiusMax = 0.0,
     double orientation = 0.0,
     double tilt = 0.0,
-    PointerDifference changes,
   }) : super(
          timeStamp: timeStamp,
          pointer: pointer,
@@ -985,6 +896,5 @@ class PointerCancelEvent extends PointerEvent {
          radiusMax: radiusMax,
          orientation: orientation,
          tilt: tilt,
-         changes: changes,
        );
 }

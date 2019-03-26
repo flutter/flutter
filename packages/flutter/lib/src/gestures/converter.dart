@@ -4,7 +4,7 @@
 
 import 'dart:ui' as ui show PointerData, PointerChange, PointerSignalKind;
 
-import 'package:flutter/foundation.dart' show visibleForTesting, required;
+import 'package:flutter/foundation.dart' show visibleForTesting;
 
 import 'events.dart';
 
@@ -40,34 +40,18 @@ class _DeviceState {
       next.pointer == 0 ||
       _event.pointer == next.pointer
     );
-    // Make sure [next.changes] contains correct information.
+    // Make sure [next.delta] is correct.
     assert(() {
-      final PointerDifference correct = changes(
-        timeStamp: next.timeStamp,
-        position: next.position,
-        buttons: next.buttons,
-        down: next.down,
-        pressure: next.pressure,
-        distance: next.distance,
-      );
-      final PointerDifference received = next.changes; 
+      final Offset correctDelta = deltaTo(next.position);
       const double epsilon = 1e-10;
-      return received.timeStamp == correct.timeStamp
-          && (received.position - correct.position).distance < epsilon
-          && received.buttons == correct.buttons
-          && received.down == correct.down
-          && (received.pressure - correct.pressure).abs() < epsilon
-          && (received.distance - correct.distance).abs() < epsilon;
-    }()); 
-    // Make sure [next.delta] is a valid duplicate of [next.changes.position].
-    assert(() {
-      const double epsilon = 1e-10;
-      return (next.delta - next.changes.position).distance < epsilon;
-    }()); 
+      return correctDelta != null
+          && next.delta != null
+          && (correctDelta - next.delta).distance < epsilon;
+    }());
   }
 
   /// Set [event] with the specified event [source].
-  /// 
+  ///
   /// In terms of concept, it means the point of time that this state represents
   /// progresses from "before [next]" to "after [event]".
   PointerEvent record(PointerEvent next) {
@@ -76,36 +60,19 @@ class _DeviceState {
     return _event;
   }
 
-  /// Computer the differences from from [lastEvent] to the received information.
-  /// All parameters should be identical to their counterparts of the event it
-  /// will be assigned to.
-  PointerDifference changes({
-    @required Duration timeStamp,
-    @required Offset position, 
-    @required int buttons,
-    @required bool down,
-    @required double pressure,
-    @required double distance,
-  }) {
-    assert(timeStamp != null);
-    // No assert(position != null), because position can be null in PointerRemovedEvent
-    assert(buttons != null);
-    assert(down != null);
-    assert(pressure != null);
-    assert(distance != null);
-    return PointerDifference(
-      timeStamp: timeStamp - (event?.timeStamp ?? Duration.zero),
-      position: position == null ? Offset.zero : position - (event?.position ?? Offset.zero),
-      buttons: buttons ^ (event?.buttons ?? 0),
-      down: down ^ (event?.down ?? false),
-      pressure: pressure - (event?.pressure ?? 0),
-      distance: distance - (event?.distance ?? 0),
-    );
-  }
+  bool get down => _event?.down ?? false;
+  int get pointer => _event?.pointer;
+  Offset get position => _event?.position;
 
-  bool get down => event?.down ?? false;
-  int get pointer => event?.pointer;
-  Offset get position => event?.position;
+  Offset deltaTo(Offset to) {
+    if (_event == null) { // [PointerAddedEvent]
+      return to;
+    }
+    if (to == null) { // [PointerRemovedEvent]
+      return Offset.zero;
+    }
+    return to - _event.position;
+  }
 
   @override
   String toString() {
@@ -168,14 +135,6 @@ class PointerEventConverter {
 
       PointerAddedEvent createAndRecordAddedEvent() {
         final _DeviceState state = _createDevice(device);
-        final PointerDifference changes = state.changes(
-          timeStamp: timeStamp,
-          position: position,
-          buttons: buttons,
-          down: false,
-          pressure: pressure,
-          distance: distance,
-        );
         return state.record(PointerAddedEvent(
           timeStamp: timeStamp,
           kind: kind,
@@ -190,7 +149,6 @@ class PointerEventConverter {
           radiusMax: radiusMax,
           orientation: datum.orientation,
           tilt: datum.tilt,
-          changes: changes,
         ));
       }
 
@@ -208,20 +166,12 @@ class PointerEventConverter {
               yield addedEvent;
             }
             final _DeviceState state = _getDeviceState(device);
-            final PointerDifference changes = state.changes(
-              timeStamp: timeStamp,
-              position: position,
-              buttons: buttons,
-              down: false, // Hover.down is false
-              pressure: pressure,
-              distance: distance,
-            );
             yield state.record(PointerHoverEvent(
               timeStamp: timeStamp,
               kind: kind,
               device: device,
               position: position,
-              delta: changes.position,
+              delta: state.deltaTo(position),
               buttons: buttons,
               obscured: datum.obscured,
               pressure: pressure,
@@ -236,7 +186,6 @@ class PointerEventConverter {
               radiusMax: radiusMax,
               orientation: datum.orientation,
               tilt: datum.tilt,
-              changes: changes,
             ));
             break;
           case ui.PointerChange.down:
@@ -252,20 +201,12 @@ class PointerEventConverter {
               // Not all sources of pointer packets respect the invariant that
               // they hover the pointer to the down location before sending the
               // down event. We restore the invariant here for our clients.
-              final PointerDifference changes = state.changes(
-                timeStamp: timeStamp,
-                position: position,
-                buttons: state.event.buttons, // Change buttons in later events
-                down: false, // Hover.down is false
-                pressure: state.event.pressure, // Change pressure in later events
-                distance: state.event.distance, // Change distance in later events
-              );
               yield state.record(PointerHoverEvent(
                 timeStamp: timeStamp,
                 kind: kind,
                 device: device,
                 position: position,
-                delta: changes.position,
+                delta: state.deltaTo(position),
                 buttons: buttons,
                 obscured: datum.obscured,
                 pressure: state.event.pressure,
@@ -281,18 +222,9 @@ class PointerEventConverter {
                 orientation: datum.orientation,
                 tilt: datum.tilt,
                 synthesized: true,
-                changes: changes,
               ));
             }
             final int pointer = _DeviceState.startNewPointer();
-            final PointerDifference changes = state.changes(
-              timeStamp: timeStamp,
-              position: position,
-              buttons: buttons,
-              down: true, // Down.down is true
-              pressure: pressure,
-              distance: 0.0, // Down.distance is 0
-            );
             yield state.record(PointerDownEvent(
               timeStamp: timeStamp,
               pointer: pointer,
@@ -312,7 +244,6 @@ class PointerEventConverter {
               radiusMax: radiusMax,
               orientation: datum.orientation,
               tilt: datum.tilt,
-              changes: changes,
             ));
             break;
           case ui.PointerChange.move:
@@ -321,21 +252,13 @@ class PointerEventConverter {
             // See also: https://github.com/flutter/flutter/issues/720
             final _DeviceState state = _getDeviceState(device);
             assert(state.down);
-            final PointerDifference changes = state.changes(
-              timeStamp: timeStamp,
-              position: position,
-              buttons: buttons,
-              down: true, // Move.down is true
-              pressure: pressure,
-              distance: 0.0, // Move.distance is 0
-            );
             yield state.record(PointerMoveEvent(
               timeStamp: timeStamp,
               pointer: state.pointer,
               kind: kind,
               device: device,
               position: position,
-              delta: changes.position,
+              delta: state.deltaTo(position),
               buttons: buttons,
               obscured: datum.obscured,
               pressure: pressure,
@@ -350,7 +273,6 @@ class PointerEventConverter {
               orientation: datum.orientation,
               tilt: datum.tilt,
               platformData: datum.platformData,
-              changes: changes,
             ));
             break;
           case ui.PointerChange.up:
@@ -364,21 +286,13 @@ class PointerEventConverter {
               // window, you'll get a stream of pointers that violates that
               // invariant. We restore the invariant here for our clients.
               assert(state.event != null);
-              final PointerDifference changes = state.changes(
-                timeStamp: timeStamp,
-                position: position,
-                buttons: state.event.buttons, // Change buttons in later events
-                down: true, // Move.down is true
-                pressure: state.event.pressure, // Change pressure in later events
-                distance: 0.0, // Move.distance is 0.0
-              );
               yield state.record(PointerMoveEvent(
                 timeStamp: timeStamp,
                 pointer: state.pointer,
                 kind: kind,
                 device: device,
                 position: position,
-                delta: changes.position,
+                delta: state.deltaTo(position),
                 buttons: buttons,
                 obscured: datum.obscured,
                 pressure: pressure,
@@ -393,18 +307,9 @@ class PointerEventConverter {
                 orientation: datum.orientation,
                 tilt: datum.tilt,
                 synthesized: true,
-                changes: changes,
               ));
             }
             if (datum.change == ui.PointerChange.up) {
-              final PointerDifference changes = state.changes(
-                timeStamp: timeStamp,
-                position: position,
-                buttons: buttons,
-                down: false, // Up.down is false
-                pressure: pressure,
-                distance: distance,
-              );
               yield state.record(PointerUpEvent(
                 timeStamp: timeStamp,
                 pointer: state.pointer,
@@ -425,17 +330,8 @@ class PointerEventConverter {
                 radiusMax: radiusMax,
                 orientation: datum.orientation,
                 tilt: datum.tilt,
-                changes: changes,
               ));
             } else {
-              final PointerDifference changes = state.changes(
-                timeStamp: timeStamp,
-                position: position,
-                buttons: buttons,
-                down: false, // Cancel.down is false
-                pressure: pressure,
-                distance: distance,
-              );
               yield state.record(PointerCancelEvent(
                 timeStamp: timeStamp,
                 pointer: state.pointer,
@@ -456,7 +352,6 @@ class PointerEventConverter {
                 radiusMax: radiusMax,
                 orientation: datum.orientation,
                 tilt: datum.tilt,
-                changes: changes,
               ));
             }
             break;
@@ -464,20 +359,12 @@ class PointerEventConverter {
             final _DeviceState state = _getDeviceState(device);
             if (state.down) {
               assert(state.event != null);
-              final PointerDifference changes = state.changes(
-                timeStamp: timeStamp,
-                position: state.event.position, // Change position in later events
-                buttons: buttons,
-                down: false, // Cancel.down is false
-                pressure: pressure,
-                distance: distance,
-              );
               yield state.record(PointerCancelEvent(
                 timeStamp: timeStamp,
                 pointer: state.pointer,
                 kind: kind,
                 device: device,
-                position: state.event.position,
+                position: state.event.position, // Change position in Hover
                 buttons: buttons,
                 obscured: datum.obscured,
                 pressure: pressure,
@@ -492,25 +379,16 @@ class PointerEventConverter {
                 radiusMax: radiusMax,
                 orientation: datum.orientation,
                 tilt: datum.tilt,
-                changes: changes,
               ));
             }
             if (position != state.position) {
               assert(state.event != null);
-              final PointerDifference changes = state.changes(
-                timeStamp: timeStamp,
-                position: position,
-                buttons: buttons,
-                down: false, // Hover.down is true
-                pressure: pressure,
-                distance: distance,
-              );
               yield state.record(PointerHoverEvent(
                 timeStamp: timeStamp,
                 kind: kind,
                 device: device,
                 position: position,
-                delta: changes.position,
+                delta: state.deltaTo(position),
                 buttons: buttons,
                 obscured: datum.obscured,
                 pressure: pressure,
@@ -526,18 +404,9 @@ class PointerEventConverter {
                 orientation: datum.orientation,
                 tilt: datum.tilt,
                 synthesized: true,
-                changes: changes,
               ));
             }
             _devices.remove(datum.device);
-            final PointerDifference changes = state.changes(
-              timeStamp: timeStamp,
-              position: position,
-              buttons: buttons,
-              down: false, // Removed.down is false
-              pressure: pressure,
-              distance: 0.0, // Removed.distance is 0
-            );
             yield state.record(PointerRemovedEvent(
               timeStamp: timeStamp,
               kind: kind,
@@ -549,7 +418,6 @@ class PointerEventConverter {
               distanceMax: datum.distanceMax,
               radiusMin: radiusMin,
               radiusMax: radiusMax,
-              changes: changes,
             ));
             break;
         }
@@ -565,21 +433,13 @@ class PointerEventConverter {
               // events.
               assert(state.event != null);
               if (state.down) {
-                final PointerDifference changes = state.changes(
-                  timeStamp: timeStamp,
-                  position: position,
-                  buttons: state.event.buttons, // Change buttons in later events
-                  down: true, // Move.down is true
-                  pressure: 1.0, // Move.pressure defaults to 1
-                  distance: 0.0, // Move.distance is 0
-                );
                 yield state.record(PointerMoveEvent(
                   timeStamp: timeStamp,
                   pointer: state.pointer,
                   kind: kind,
                   device: device,
                   position: position,
-                  delta: changes.position,
+                  delta: state.deltaTo(position),
                   buttons: buttons,
                   obscured: datum.obscured,
                   pressureMin: datum.pressureMin,
@@ -593,23 +453,14 @@ class PointerEventConverter {
                   orientation: datum.orientation,
                   tilt: datum.tilt,
                   synthesized: true,
-                  changes: changes,
                 ));
               } else {
-                final PointerDifference changes = state.changes(
-                  timeStamp: timeStamp,
-                  position: position,
-                  buttons: state.event.buttons, // Change buttons in later events
-                  down: false, // Hover.down is false
-                  pressure: pressure,
-                  distance: state.event.distance, // Change distance in later events
-                );
                 yield state.record(PointerHoverEvent(
                   timeStamp: timeStamp,
                   kind: kind,
                   device: device,
                   position: position,
-                  delta: changes.position,
+                  delta: state.deltaTo(position),
                   buttons: buttons,
                   obscured: datum.obscured,
                   pressure: pressure,
@@ -625,27 +476,17 @@ class PointerEventConverter {
                   orientation: datum.orientation,
                   tilt: datum.tilt,
                   synthesized: true,
-                  changes: changes,
                 ));
               }
             }
             final Offset scrollDelta =
                 Offset(datum.scrollDeltaX, datum.scrollDeltaY) / devicePixelRatio;
-            final PointerDifference changes = state.changes(
-              timeStamp: timeStamp,
-              position: position,
-              buttons: buttons,
-              down: false, // Scroll.down is false
-              pressure: 1.0, // Scroll.pressure is 1
-              distance: 0.0, // Scroll.distance is 0
-            );
             yield state.record(PointerScrollEvent(
               timeStamp: timeStamp,
               kind: kind,
               device: device,
               position: position,
               scrollDelta: scrollDelta,
-              changes: changes,
             ));
             break;
           case ui.PointerSignalKind.none:
