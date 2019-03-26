@@ -38,11 +38,25 @@ TEST_F(EmbedderTest, CanLaunchAndShutdownWithValidProjectArgs) {
 
 TEST_F(EmbedderTest, CanLaunchAndShutdownMultipleTimes) {
   EmbedderConfigBuilder builder(GetEmbedderContext());
-  for (size_t i = 0; i < 100; ++i) {
+  for (size_t i = 0; i < 3; ++i) {
     auto engine = builder.LaunchEngine();
     ASSERT_TRUE(engine.is_valid());
     FML_LOG(INFO) << "Engine launch count: " << i + 1;
   }
+}
+
+TEST_F(EmbedderTest, CanInvokeCustomEntrypoint) {
+  auto& context = GetEmbedderContext();
+  static fml::AutoResetWaitableEvent latch;
+  Dart_NativeFunction entrypoint = [](Dart_NativeArguments args) {
+    latch.Signal();
+  };
+  context.AddNativeCallback("SayHiFromCustomEntrypoint", entrypoint);
+  EmbedderConfigBuilder builder(context);
+  builder.SetDartEntrypoint("customEntrypoint");
+  auto engine = builder.LaunchEngine();
+  latch.Wait();
+  ASSERT_TRUE(engine.is_valid());
 }
 
 }  // namespace testing

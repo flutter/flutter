@@ -36,7 +36,8 @@ static std::unique_ptr<fml::Mapping> GetMapping(const fml::UniqueFD& directory,
 }
 
 EmbedderContext::EmbedderContext(std::string assets_path)
-    : assets_path_(std::move(assets_path)) {
+    : assets_path_(std::move(assets_path)),
+      native_resolver_(std::make_shared<EmbedderTestResolver>()) {
   auto assets_dir = fml::OpenDirectory(assets_path_.c_str(), false,
                                        fml::FilePermission::kRead);
   vm_snapshot_data_ = GetMapping(assets_dir, "vm_snapshot_data", false);
@@ -49,6 +50,14 @@ EmbedderContext::EmbedderContext(std::string assets_path)
     isolate_snapshot_instructions_ =
         GetMapping(assets_dir, "isolate_snapshot_instr", true);
   }
+
+  isolate_create_callbacks_.push_back(
+      [weak_resolver =
+           std::weak_ptr<EmbedderTestResolver>{native_resolver_}]() {
+        if (auto resolver = weak_resolver.lock()) {
+          resolver->SetNativeResolverForIsolate();
+        }
+      });
 }
 
 EmbedderContext::~EmbedderContext() = default;
@@ -89,6 +98,11 @@ void EmbedderContext::FireIsolateCreateCallbacks() {
   for (auto closure : isolate_create_callbacks_) {
     closure();
   }
+}
+
+void EmbedderContext::AddNativeCallback(const char* name,
+                                        Dart_NativeFunction function) {
+  native_resolver_->AddNativeCallback({name}, function);
 }
 
 }  // namespace testing
