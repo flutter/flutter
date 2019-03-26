@@ -120,7 +120,7 @@ abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
       few: datePickerHourSemanticsLabelFew,
       many: datePickerHourSemanticsLabelMany,
       other: datePickerHourSemanticsLabelOther,
-    );
+    ).replaceFirst(r'$hour', hour);
   }
 
   /// Subclasses should provide the optional zero pluralization of [datePickerMinuteSemanticsLabel] based on the ARB file.
@@ -146,7 +146,7 @@ abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
       few: datePickerMinuteSemanticsLabelFew,
       many: datePickerMinuteSemanticsLabelMany,
       other: datePickerMinuteSemanticsLabelOther,
-    );
+    ).replaceFirst(r'$minute', minute);
   }
 
   /// A string describing the [DatePickerDateOrder] enum value.
@@ -251,7 +251,7 @@ abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
       few: timerPickerHourLabelFew,
       many: timerPickerHourLabelMany,
       other: timerPickerHourLabelOther,
-    );
+    ).replaceFirst(r'$hour', hour);
   }
 
   /// Subclasses should provide the optional zero pluralization of [timerPickerMinuteLabel] based on the ARB file.
@@ -277,7 +277,7 @@ abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
       few: timerPickerMinuteLabelFew,
       many: timerPickerMinuteLabelMany,
       other: timerPickerMinuteLabelOther,
-    );
+    ).replaceFirst(r'$minute', minute);
   }
 
   /// Subclasses should provide the optional zero pluralization of [timerPickerSecondLabel] based on the ARB file.
@@ -303,7 +303,7 @@ abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
       few: timerPickerSecondLabelFew,
       many: timerPickerSecondLabelMany,
       other: timerPickerSecondLabelOther,
-    );
+    ).replaceFirst(r'$second', second);
   }
 
   /// A [LocalizationsDelegate] that uses [GlobalCupertinoLocalizations.load]
