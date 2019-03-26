@@ -67,7 +67,7 @@ class CupertinoSwitch extends StatefulWidget {
        super(key: key);
 
   /// Whether this switch is on or off.
-  /// 
+  ///
   /// Must not be null.
   final bool value;
 
