@@ -62,7 +62,7 @@ class TestFocusableState extends State<TestFocusable> {
 }
 
 void main() {
-  setUp((){
+  setUp(() {
     // Reset the focus manager between tests, to avoid leaking state.
     WidgetsBinding.instance.focusManager.reset();
   });
@@ -167,8 +167,8 @@ void main() {
   // This moves a focus node first into a focus scope that is added to its
   // parent, and then out of that focus scope again.
   testWidgets('Can move focus in and out of FocusScope', (WidgetTester tester) async {
-    final FocusScopeNode parentFocusScope = FocusScopeNode(debugLabel: 'Parent Scope');
-    final FocusScopeNode childFocusScope = FocusScopeNode(debugLabel: 'Child Scope');
+    final FocusScopeNode parentFocusScope = FocusScopeNode(debugLabel: 'Parent Scope Node');
+    final FocusScopeNode childFocusScope = FocusScopeNode(debugLabel: 'Child Scope Node');
     final GlobalKey<TestFocusableState> key = GlobalKey();
 
     // Initially create the focus inside of the parent FocusScope.
@@ -197,17 +197,18 @@ void main() {
     expect(key.currentState.focusNode.hasFocus, isTrue);
     expect(find.text('A FOCUSED'), findsOneWidget);
 
-    print(debugFocusTree());
     expect(parentFocusScope, hasAGoodToStringDeep);
     expect(
       parentFocusScope.toStringDeep(),
-      equalsIgnoringHashCodes('FocusScopeNode#00000\n'
+      equalsIgnoringHashCodes('FocusScopeNode#ff973\n'
           ' │ context: FocusScope\n'
           ' │ FOCUSED\n'
-          ' │ debugLabel: "Parent Scope"\n'
-          ' │ focusedChild: FocusNode#00000\n'
+          ' │ debugLabel: "Parent Scope Node"\n'
+          ' │ focusedChild: FocusNode#05eeb\n'
           ' │\n'
-          ' └─child 1: FocusNode#00000\n'
+          ' └─child 1: FocusNode#05eeb\n'
+          '     context:\n'
+          '       TestFocusable-[LabeledGlobalKey<TestFocusableState>#1c0f1]\n'
           '     FOCUSED\n'
           '     debugLabel: "Child"\n'),
     );
@@ -223,10 +224,12 @@ void main() {
           ' └─child 1: FocusScopeNode#00000\n'
           '   │ context: FocusScope\n'
           '   │ FOCUSED\n'
-          '   │ debugLabel: "Parent Scope"\n'
+          '   │ debugLabel: "Parent Scope Node"\n'
           '   │ focusedChild: FocusNode#00000\n'
           '   │\n'
           '   └─child 1: FocusNode#00000\n'
+          '       context:\n'
+          '         TestFocusable-[LabeledGlobalKey<TestFocusableState>#00000]\n'
           '       FOCUSED\n'
           '       debugLabel: "Child"\n'),
     );
@@ -236,7 +239,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(childFocusScope.isFirstFocus, isTrue);
 
-    // Now add the child focus scope with no child node in it to the tree.
+    // Now add the child focus scope with no child focusable in it to the tree.
     await tester.pumpWidget(
       FocusScope(
         debugLabel: 'Parent Scope',
@@ -263,12 +266,17 @@ void main() {
     // Now move the existing focus node into the child focus scope.
     await tester.pumpWidget(
       FocusScope(
+        debugLabel: 'Parent Scope',
         node: parentFocusScope,
         child: Column(
           children: <Widget>[
             FocusScope(
+              debugLabel: 'Child Scope',
               node: childFocusScope,
-              child: TestFocusable(key: key),
+              child: TestFocusable(
+                key: key,
+                debugLabel: 'Child',
+              ),
             ),
           ],
         ),
@@ -283,10 +291,14 @@ void main() {
     // Now remove the child focus scope.
     await tester.pumpWidget(
       FocusScope(
+        debugLabel: 'Parent Scope',
         node: parentFocusScope,
         child: Column(
           children: <Widget>[
-            TestFocusable(key: key),
+            TestFocusable(
+              key: key,
+              debugLabel: 'Child',
+            ),
           ],
         ),
       ),
@@ -346,23 +358,26 @@ void main() {
 
   testWidgets('Adding a new FocusScope attaches the child it to its parent.', (WidgetTester tester) async {
     final GlobalKey<TestFocusableState> keyA = GlobalKey();
-    final FocusScopeNode parentFocusScope = FocusScopeNode();
-    final FocusScopeNode childFocusScope = FocusScopeNode();
+    final FocusScopeNode parentFocusScope = FocusScopeNode(debugLabel: 'Parent Scope Node');
+    final FocusScopeNode childFocusScope = FocusScopeNode(debugLabel: 'Child Scope Node');
 
     await tester.pumpWidget(
       FocusScope(
         node: childFocusScope,
         child: TestFocusable(
+          debugLabel: 'Child',
           key: keyA,
         ),
       ),
     );
 
     final FocusScopeNode scope = FocusScope.of(keyA.currentContext);
-    FocusScope.of(keyA.currentContext).requestFocus(keyA.currentState.focusNode);
+    expect(scope, equals(childFocusScope));
+    scope.requestFocus(keyA.currentState.focusNode);
     WidgetsBinding.instance.focusManager.rootScope.setFirstFocus(scope, scope.context);
 
     await tester.pumpAndSettle();
+    print(debugFocusTree());
 
     expect(keyA.currentState.focusNode.hasFocus, isTrue);
     expect(find.text('A FOCUSED'), findsOneWidget);
@@ -374,6 +389,7 @@ void main() {
         child: FocusScope(
           node: childFocusScope,
           child: TestFocusable(
+            debugLabel: 'Child',
             key: keyA,
           ),
         ),

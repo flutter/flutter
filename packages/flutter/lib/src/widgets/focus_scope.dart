@@ -302,21 +302,24 @@ class FocusScope extends Focusable {
   }
 
   /// The focus scope node that this FocusScope will use.
+  ///
+  /// If not supplied, will create and manage its own.
   final FocusScopeNode node;
+
+  @override
+  FocusScopeNode get _externalNode => node;
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<FocusScopeNode>('node', node, defaultValue: null));
+  }
 
   @override
   _FocusableScopeState createState() => _FocusableScopeState();
 }
 
 class _FocusableScopeState extends _FocusableState {
-  FocusScopeNode get _externalNode {
-    if (widget is! FocusScope) {
-      return null;
-    }
-    final FocusScope scope = widget;
-    return scope.node;
-  }
-
   @override
   FocusScopeNode _createNode(){
     return FocusScopeNode(

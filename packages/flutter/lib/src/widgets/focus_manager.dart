@@ -348,35 +348,29 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
 
   /// Request that the widget move the focus to the next focusable node, by
   /// calling the [FocusTraversalPolicy.next] function.
-  bool nextFocus() => context != null ? DefaultFocusTraversal.of(context).next(this) : false;
+  bool nextFocus() => DefaultFocusTraversal.of(context).next(this);
 
   /// Request that the widget move the focus to the previous focusable node, by
   /// calling the [FocusTraversalPolicy.previous] function.
-  bool previousFocus() => context != null ? DefaultFocusTraversal.of(context).previous(this) : false;
+  bool previousFocus() => DefaultFocusTraversal.of(context).previous(this);
 
   /// Request that the widget move the focus to the previous focusable node, by
   /// calling the [FocusTraversalPolicy.inDirection] function.
-  bool focusInDirection(AxisDirection direction) => context != null ? DefaultFocusTraversal.of(context).inDirection(this, direction) : false;
+  bool focusInDirection(AxisDirection direction) => DefaultFocusTraversal.of(context).inDirection(this, direction);
 
   /// Returns the size of the associated [Focusable] in logical units.
-  Size get size => context?.findRenderObject()?.semanticBounds?.size ?? Size.zero;
+  Size get size => context.findRenderObject().semanticBounds.size;
 
   /// Returns the global offset to the upper left corner of the [Focusable] in
   /// logical units.
   Offset get offset {
-    final RenderObject object = context?.findRenderObject();
-    if (object == null) {
-      return Offset.zero;
-    }
+    final RenderObject object = context.findRenderObject();
     return MatrixUtils.transformPoint(object.getTransformTo(null), object.semanticBounds.topLeft);
   }
 
   /// Returns the global rectangle surrounding the node in logical units.
   Rect get rect {
-    final RenderObject object = context?.findRenderObject();
-    if (object == null) {
-      return Rect.zero;
-    }
+    final RenderObject object = context.findRenderObject();
     final Offset globalOffset = MatrixUtils.transformPoint(object.getTransformTo(null), object.semanticBounds.topLeft);
     return globalOffset & object.semanticBounds.size;
   }
@@ -424,23 +418,24 @@ class FocusScopeNode extends FocusNode {
     if (previousEnclosingScope != currentEnclosingScope) {
       policyData = null;
     }
-    // If no child has focus in this scope, then we give it to the first one to
-    // come along.
-//    if (_focusedChild == null) {
-//      child._setAsFocusedChild();
-//    }
+    // If we just added the first child to this scope, and it had the focus,
+    // then focus the child, otherwise make it the current focus.
+    if (currentEnclosingScope._focusedChild == null && currentEnclosingScope.children.length == 1) {
+      if (currentEnclosingScope.hasFocus) {
+        child.requestFocus();
+      }
+    }
   }
 
-  /// Deprecated way to find out if this scope has focus.
-  ///
-  /// Use [hasFocus] instead.
-  bool get isFirstFocus => hasFocus;
+  /// Returns true if this scope is the focused child of its parent.
+  bool get isFirstFocus => enclosingScope._focusedChild == this;
 
   /// Add the given node as a child of this focus scope, and make it be the
   /// [focusedChild].
   void setFirstFocus(FocusScopeNode node, BuildContext childContext) {
+    assert(node != null);
     reparentIfNeeded(node, childContext);
-    node._setAsFocusedChild();
+    node.requestFocus();
   }
 
   /// If this scope lacks a focus, reparent the node as a child of this one, and
@@ -634,8 +629,6 @@ class FocusManager with DiagnosticableTreeMixin {
     _haveScheduledUpdate = false;
     final FocusNode previousFocus = _currentFocus;
     if (_nextFocus != null && _nextFocus != _currentFocus) {
-      // Even if the _currentFocus hasn't changed, it may have changed where it
-      // was in the tree, so we have to make sure we update and notify.
       _currentFocus = _nextFocus;
       final Set<FocusNode> previousPath = previousFocus?.ancestors?.toSet() ?? <FocusNode>{};
       final Set<FocusNode> nextPath = _nextFocus.ancestors.toSet();
@@ -665,12 +658,9 @@ class FocusManager with DiagnosticableTreeMixin {
   }
 
   @override
-  String toString({DiagnosticLevel minLevel = DiagnosticLevel.debug}) {
-    final String status = _haveScheduledUpdate ? ' UPDATE SCHEDULED' : '';
-    const String indent = '  ';
-    return '${describeIdentity(this)}$status\n'
-        '${indent}currentFocus: $_currentFocus\n'
-        '${rootScope.toStringDeep(prefixLineOne: indent, prefixOtherLines: indent)}';
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    properties.add(FlagProperty('haveScheduledUpdate', value: _haveScheduledUpdate, ifTrue: 'UPDATE SCHEDULED'));
+    properties.add(DiagnosticsProperty<FocusNode>('currentFocus', _currentFocus, defaultValue: null));
   }
 }
 
