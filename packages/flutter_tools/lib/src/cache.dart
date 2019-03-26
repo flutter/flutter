@@ -378,7 +378,7 @@ class FlutterWebSdk extends CachedArtifact {
   String get version => cache.getVersionFor('engine');
 
   @override
-  Future<void> updateInner() {
+  Future<void> updateInner() async {
     String platformName = 'flutter-web-sdk-';
     if (platform.isMacOS) {
       platformName += 'darwin-x64';
@@ -388,7 +388,20 @@ class FlutterWebSdk extends CachedArtifact {
       platformName += 'windows-x64';
     }
     final Uri url = Uri.parse('$_storageBaseUrl/flutter_infra/flutter/$version/$platformName.zip');
-    return _downloadZipArchive('Downloading Web SDK...', url, location);
+    await _downloadZipArchive('Downloading Web SDK...', url, location);
+    // This is a temporary work-around for not being able to safely download into a shared directory.
+    for (FileSystemEntity entity in location.listSync(recursive: true)) {
+      if (entity is File) {
+        final List<String> segments = fs.path.split(entity.path);
+        segments.remove('flutter_web_sdk');
+        final String newPath = fs.path.joinAll(segments);
+        final File newFile = fs.file(newPath);
+        if (!newFile.existsSync()) {
+          newFile.createSync(recursive: true);
+        }
+        entity.copySync(newPath);
+      }
+    }
   }
 }
 
