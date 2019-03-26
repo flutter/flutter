@@ -750,6 +750,36 @@ void main() {
   );
 
   testWidgets(
+    'tapping clear button also calls onChanged when text not empty',
+        (WidgetTester tester) async {
+      String value = 'text entry';
+      final TextEditingController controller = TextEditingController();
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(
+            child: CupertinoTextField(
+              controller: controller,
+              placeholder: 'placeholder',
+              onChanged: (String newValue) => value = newValue,
+              clearButtonMode: OverlayVisibilityMode.always,
+            ),
+          ),
+        ),
+      );
+
+      controller.text = value;
+      await tester.pump();
+
+      await tester.tap(find.byIcon(CupertinoIcons.clear_thick_circled));
+      await tester.pump();
+
+      expect(controller.text, isEmpty);
+      expect(find.text('text entry'), findsNothing);
+      expect(value, isEmpty);
+    },
+  );
+
+  testWidgets(
     'clear button yields precedence to suffix',
     (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController();
