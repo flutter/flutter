@@ -180,18 +180,22 @@ Future<void> _runToolTests() async {
   final bq.BigqueryApi bigqueryApi = await _getBigqueryApi();
   await _runSmokeTests();
 
+  // The flutter_tool will currently be snapshotted without asserts. We need
+  // to force it to be regenerated with them enabled.
+  File(path.join(flutterRoot, 'bin', 'cache', 'flutter_tools.snapshot')).deleteSync();
+  File(path.join(flutterRoot, 'bin', 'cache', 'flutter_tools.stamp')).deleteSync();
   if (noUseBuildRunner) {
     await _pubRunTest(
       path.join(flutterRoot, 'packages', 'flutter_tools'),
       tableData: bigqueryApi?.tabledata,
-      enableFlutterToolAsserts: false, // need to configure cirrus to always use debug flutter tool.
+      enableFlutterToolAsserts: true,
     );
   } else {
     await _buildRunnerTest(
       path.join(flutterRoot, 'packages', 'flutter_tools'),
       flutterRoot,
       tableData: bigqueryApi?.tabledata,
-      enableFlutterToolAsserts: false, // need to configure cirrus to always use debug flutter tool.
+      enableFlutterToolAsserts: true,
     );
   }
 
