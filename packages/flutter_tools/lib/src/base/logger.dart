@@ -644,7 +644,7 @@ class AnsiSpinner extends Status {
     if (seemsSlow) {
       if (!timedOut) {
         timedOut = true;
-        stdout.write('\n');
+        stdout.write('$_clear\n');
       }
       if (slowWarningCallback != null) {
         _slowWarning = slowWarningCallback();

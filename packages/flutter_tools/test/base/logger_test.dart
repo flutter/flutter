@@ -344,7 +344,7 @@ void main() {
         Platform: () => FakePlatform(operatingSystem: testOs),
         Stdio: () => mockStdio,
         Stopwatch: () => mockStopwatch,
-      }); 
+      });
     }
   });
   group('Output format', () {
