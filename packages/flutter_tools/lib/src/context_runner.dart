@@ -91,6 +91,7 @@ Future<T> runInContext<T>(
       SimControl: () => SimControl(),
       SystemClock: () => const SystemClock(),
       Stdio: () => const Stdio(),
+      TimeoutConfiguration: () => const TimeoutConfiguration(),
       Usage: () => Usage(),
       UserMessages: () => UserMessages(),
       WindowsWorkflow: () => const WindowsWorkflow(),

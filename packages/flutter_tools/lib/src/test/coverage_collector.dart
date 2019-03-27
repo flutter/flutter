@@ -92,7 +92,7 @@ class CoverageCollector extends TestWatcher {
   }
 
   Future<bool> collectCoverageData(String coveragePath, { bool mergeCoverageData = false, Directory coverageDirectory }) async {
-    final Status status = logger.startProgress('Collecting coverage information...', timeout: kFastOperation);
+    final Status status = logger.startProgress('Collecting coverage information...', timeout: timeoutConfiguration.fastOperation);
     final String coverageData = await finalizeCoverage(
       coverageDirectory: coverageDirectory,
     );

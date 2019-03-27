@@ -166,7 +166,7 @@ void main() {
           final Status status = logger.startProgress(
             'Hello',
             progressId: null,
-            timeout: kSlowOperation,
+            timeout: timeoutConfiguration.slowOperation,
             progressIndicatorPadding: 20, // this minus the "Hello" equals the 15 below.
           );
           expect(outputStderr().length, equals(1));
@@ -357,7 +357,7 @@ void main() {
       called = 0;
       summaryStatus = SummaryStatus(
         message: 'Hello world',
-        timeout: kSlowOperation,
+        timeout: timeoutConfiguration.slowOperation,
         padding: 20,
         onFinish: () => called++,
       );
@@ -593,7 +593,7 @@ void main() {
         final Status status = logger.startProgress(
           'Hello',
           progressId: null,
-          timeout: kSlowOperation,
+          timeout: timeoutConfiguration.slowOperation,
           progressIndicatorPadding: 20, // this minus the "Hello" equals the 15 below.
         );
         expect(outputStderr().length, equals(1));
@@ -661,8 +661,8 @@ void main() {
 
     testUsingContext('sequential startProgress calls with StdoutLogger', () async {
       final Logger logger = context[Logger];
-      logger.startProgress('AAA', timeout: kFastOperation)..stop();
-      logger.startProgress('BBB', timeout: kFastOperation)..stop();
+      logger.startProgress('AAA', timeout: timeoutConfiguration.fastOperation)..stop();
+      logger.startProgress('BBB', timeout: timeoutConfiguration.fastOperation)..stop();
       final List<String> output = outputStdout();
       expect(output.length, equals(3));
       // There's 61 spaces at the start: 59 (padding default) - 3 (length of AAA) + 5 (margin).
@@ -679,8 +679,8 @@ void main() {
 
     testUsingContext('sequential startProgress calls with VerboseLogger and StdoutLogger', () async {
       final Logger logger = context[Logger];
-      logger.startProgress('AAA', timeout: kFastOperation)..stop();
-      logger.startProgress('BBB', timeout: kFastOperation)..stop();
+      logger.startProgress('AAA', timeout: timeoutConfiguration.fastOperation)..stop();
+      logger.startProgress('BBB', timeout: timeoutConfiguration.fastOperation)..stop();
       expect(outputStdout(), <Matcher>[
         matches(r'^\[ (?: {0,2}\+[0-9]{1,3} ms|       )\] AAA$'),
         matches(r'^\[ (?: {0,2}\+[0-9]{1,3} ms|       )\] AAA \(completed.*\)$'),
@@ -696,8 +696,8 @@ void main() {
 
     testUsingContext('sequential startProgress calls with BufferLogger', () async {
       final BufferLogger logger = context[Logger];
-      logger.startProgress('AAA', timeout: kFastOperation)..stop();
-      logger.startProgress('BBB', timeout: kFastOperation)..stop();
+      logger.startProgress('AAA', timeout: timeoutConfiguration.fastOperation)..stop();
+      logger.startProgress('BBB', timeout: timeoutConfiguration.fastOperation)..stop();
       expect(logger.statusText, 'AAA\nBBB\n');
     }, overrides: <Type, Generator>{
       Logger: () => BufferLogger(),
