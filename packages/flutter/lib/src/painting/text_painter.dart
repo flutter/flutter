@@ -395,7 +395,7 @@ class TextPainter {
     _needsLayout = false;
     if (_paragraph == null) {
       final ui.ParagraphBuilder builder = ui.ParagraphBuilder(_createParagraphStyle());
-      _text.build(builder, textScaleFactor: textScaleFactor);
+      _text.build(builder, textScaleFactor: textScaleFactor, dimensions: _placeholderDimensions);
       _paragraph = builder.build();
     }
     _lastMinWidth = minWidth;

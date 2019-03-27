@@ -365,11 +365,11 @@ class RenderParagraph extends RenderBox
     int childIndex = 0;
     while (child != null) {
       child.layout(BoxConstraints(), parentUsesSize: true);
-      child = childAfter(child);
       placeholderDimensions[childIndex] = PlaceholderDimensions(
         child.size,
         child.getDistanceToBaseline(TextBaseline.alphabetic)
       );
+      child = childAfter(child);
       childIndex++;
     }
     _textPainter.placeholderDimensions = placeholderDimensions;
