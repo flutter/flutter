@@ -108,7 +108,7 @@ class PointerEventConverter {
             assert(!_pointers.containsKey(datum.device));
             final _PointerState state = _ensureStateForPointer(datum, position);
             assert(state.lastPosition == position);
-            yield state.record(PointerAddedEvent(
+            yield PointerAddedEvent(
               timeStamp: timeStamp,
               kind: kind,
               device: datum.device,
@@ -122,7 +122,7 @@ class PointerEventConverter {
               radiusMax: radiusMax,
               orientation: datum.orientation,
               tilt: datum.tilt,
-            ));
+            );
             break;
           case ui.PointerChange.hover:
             final bool alreadyAdded = _pointers.containsKey(datum.device);
@@ -130,7 +130,7 @@ class PointerEventConverter {
             assert(!state.down);
             if (!alreadyAdded) {
               assert(state.lastPosition == position);
-              yield state.record(PointerAddedEvent(
+              yield PointerAddedEvent(
                 timeStamp: timeStamp,
                 kind: kind,
                 device: datum.device,
@@ -144,9 +144,9 @@ class PointerEventConverter {
                 radiusMax: radiusMax,
                 orientation: datum.orientation,
                 tilt: datum.tilt,
-              ));
+              );
             }
-            yield state.record(PointerHoverEvent(
+            yield PointerHoverEvent(
               timeStamp: timeStamp,
               kind: kind,
               device: datum.device,
@@ -166,7 +166,8 @@ class PointerEventConverter {
               radiusMax: radiusMax,
               orientation: datum.orientation,
               tilt: datum.tilt,
-            ));
+            );
+            state.lastPosition = position;
             break;
           case ui.PointerChange.down:
             final bool alreadyAdded = _pointers.containsKey(datum.device);
@@ -174,7 +175,7 @@ class PointerEventConverter {
             assert(!state.down);
             if (!alreadyAdded) {
               assert(state.lastPosition == position);
-              yield state.record(PointerAddedEvent(
+              yield PointerAddedEvent(
                 timeStamp: timeStamp,
                 kind: kind,
                 device: datum.device,
@@ -188,13 +189,13 @@ class PointerEventConverter {
                 radiusMax: radiusMax,
                 orientation: datum.orientation,
                 tilt: datum.tilt,
-              ));
+              );
             }
             if (state.lastPosition != position) {
               // Not all sources of pointer packets respect the invariant that
               // they hover the pointer to the down location before sending the
               // down event. We restore the invariant here for our clients.
-              yield state.record(PointerHoverEvent(
+              yield PointerHoverEvent(
                 timeStamp: timeStamp,
                 kind: kind,
                 device: datum.device,
@@ -214,11 +215,11 @@ class PointerEventConverter {
                 orientation: datum.orientation,
                 tilt: datum.tilt,
                 synthesized: true,
-              ));
+              );
             }
             state.startNewPointer();
             state.setDown();
-            yield state.record(PointerDownEvent(
+            yield PointerDownEvent(
               timeStamp: timeStamp,
               pointer: state.pointer,
               kind: kind,
@@ -237,7 +238,7 @@ class PointerEventConverter {
               radiusMax: radiusMax,
               orientation: datum.orientation,
               tilt: datum.tilt,
-            ));
+            );
             break;
           case ui.PointerChange.move:
             // If the service starts supporting hover pointers, then it must also
@@ -246,7 +247,7 @@ class PointerEventConverter {
             assert(_pointers.containsKey(datum.device));
             final _PointerState state = _pointers[datum.device];
             assert(state.down);
-            yield state.record(PointerMoveEvent(
+            yield PointerMoveEvent(
               timeStamp: timeStamp,
               pointer: state.pointer,
               kind: kind,
@@ -267,7 +268,8 @@ class PointerEventConverter {
               orientation: datum.orientation,
               tilt: datum.tilt,
               platformData: datum.platformData,
-            ));
+            );
+            state.lastPosition = position;
             break;
           case ui.PointerChange.up:
           case ui.PointerChange.cancel:
@@ -280,7 +282,7 @@ class PointerEventConverter {
               // event. For example, in the iOS simulator, of you drag outside the
               // window, you'll get a stream of pointers that violates that
               // invariant. We restore the invariant here for our clients.
-              yield state.record(PointerMoveEvent(
+              yield PointerMoveEvent(
                 timeStamp: timeStamp,
                 pointer: state.pointer,
                 kind: kind,
@@ -301,12 +303,13 @@ class PointerEventConverter {
                 orientation: datum.orientation,
                 tilt: datum.tilt,
                 synthesized: true,
-              ));
+              );
+              state.lastPosition = position;
             }
             assert(position == state.lastPosition);
             state.setUp();
             if (datum.change == ui.PointerChange.up) {
-              yield state.record(PointerUpEvent(
+              yield PointerUpEvent(
                 timeStamp: timeStamp,
                 pointer: state.pointer,
                 kind: kind,
@@ -326,9 +329,9 @@ class PointerEventConverter {
                 radiusMax: radiusMax,
                 orientation: datum.orientation,
                 tilt: datum.tilt,
-              ));
+              );
             } else {
-              yield state.record(PointerCancelEvent(
+              yield PointerCancelEvent(
                 timeStamp: timeStamp,
                 pointer: state.pointer,
                 kind: kind,
@@ -348,14 +351,14 @@ class PointerEventConverter {
                 radiusMax: radiusMax,
                 orientation: datum.orientation,
                 tilt: datum.tilt,
-              ));
+              );
             }
             break;
           case ui.PointerChange.remove:
             assert(_pointers.containsKey(datum.device));
             final _PointerState state = _pointers[datum.device];
             if (state.down) {
-              yield state.record(PointerCancelEvent(
+              yield PointerCancelEvent(
                 timeStamp: timeStamp,
                 pointer: state.pointer,
                 kind: kind,
@@ -374,10 +377,10 @@ class PointerEventConverter {
                 radiusMax: radiusMax,
                 orientation: datum.orientation,
                 tilt: datum.tilt,
-              ));
+              );
             }
             if (position != state.lastPosition) {
-              yield state.record(PointerHoverEvent(
+              yield PointerHoverEvent(
                 timeStamp: timeStamp,
                 kind: kind,
                 device: datum.device,
@@ -398,10 +401,10 @@ class PointerEventConverter {
                 orientation: datum.orientation,
                 tilt: datum.tilt,
                 synthesized: true,
-              ));
+              );
             }
             _pointers.remove(datum.device);
-            yield state.record(PointerRemovedEvent(
+            yield PointerRemovedEvent(
               timeStamp: timeStamp,
               kind: kind,
               device: datum.device,
@@ -411,7 +414,7 @@ class PointerEventConverter {
               distanceMax: datum.distanceMax,
               radiusMin: radiusMin,
               radiusMax: radiusMax,
-            ));
+            );
             break;
         }
       } else {
@@ -426,7 +429,7 @@ class PointerEventConverter {
               // don't have to worry about native ordering of hover and scroll
               // events.
               if (state.down) {
-                yield state.record(PointerMoveEvent(
+                yield PointerMoveEvent(
                   timeStamp: timeStamp,
                   pointer: state.pointer,
                   kind: kind,
@@ -447,9 +450,9 @@ class PointerEventConverter {
                   orientation: datum.orientation,
                   tilt: datum.tilt,
                   synthesized: true,
-                ));
+                );
               } else {
-                yield state.record(PointerHoverEvent(
+                yield PointerHoverEvent(
                   timeStamp: timeStamp,
                   kind: kind,
                   device: datum.device,
@@ -470,18 +473,19 @@ class PointerEventConverter {
                   orientation: datum.orientation,
                   tilt: datum.tilt,
                   synthesized: true,
-                ));
+                );
               }
+              state.lastPosition = position;
             }
             final Offset scrollDelta =
                 Offset(datum.scrollDeltaX, datum.scrollDeltaY) / devicePixelRatio;
-            yield state.record(PointerScrollEvent(
+            yield PointerScrollEvent(
               timeStamp: timeStamp,
               kind: kind,
               device: datum.device,
               position: position,
               scrollDelta: scrollDelta,
-            ));
+            );
             break;
           case ui.PointerSignalKind.none:
             assert(false); // This branch should already have 'none' filtered out.
