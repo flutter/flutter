@@ -361,10 +361,18 @@ class RenderParagraph extends RenderBox
   @override
   void performLayout() {
     RenderBox child = firstChild;
+    List<PlaceholderDimensions> placeholderDimensions = List(childCount);
+    int childIndex = 0;
     while (child != null) {
       child.layout(BoxConstraints(), parentUsesSize: true);
       child = childAfter(child);
+      placeholderDimensions[childIndex] = PlaceholderDimensions(
+        child.size,
+        child.getDistanceToBaseline(TextBaseline.alphabetic)
+      );
+      childIndex++;
     }
+    _textPainter.placeholderDimensions = placeholderDimensions;
     _layoutTextWithConstraints(constraints);
     // We grab _textPainter.size and _textPainter.didExceedMaxLines here because
     // assigning to `size` will trigger us to validate our intrinsic sizes,
@@ -476,11 +484,11 @@ class RenderParagraph extends RenderBox
 
     RenderBox child = firstChild;
     int childIndex = 0;
-    while (child != null && childIndex < _textPainter.inlineWidgetPlaceholderBoxes.length) {
+    while (child != null && childIndex < _textPainter.inlinePlaceholderBoxes.length) {
       print('PAINTING CHILD $child');
       child.paint(context, offset + Offset(
-          _textPainter.inlineWidgetPlaceholderBoxes[childIndex].left,
-          _textPainter.inlineWidgetPlaceholderBoxes[childIndex].top
+          _textPainter.inlinePlaceholderBoxes[childIndex].left,
+          _textPainter.inlinePlaceholderBoxes[childIndex].top
         )
       );
       child = childAfter(child);

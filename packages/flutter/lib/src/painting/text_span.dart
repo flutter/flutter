@@ -7,10 +7,10 @@ import 'dart:ui' as ui show ParagraphBuilder;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 
 import 'basic_types.dart';
 import 'text_style.dart';
+import 'text_painter.dart';
 
 /// An immutable span of text.
 ///
@@ -59,7 +59,7 @@ class TextSpan extends DiagnosticableTree {
     this.text,
     this.children,
     this.recognizer,
-    this.widget,
+    // this.widget,
   });
 
   /// The style to apply to the [text] and the [children].
@@ -82,7 +82,7 @@ class TextSpan extends DiagnosticableTree {
   /// The list must not contain any nulls.
   final List<TextSpan> children;
 
-  final Widget widget;
+  // final Widget widget;
 
   /// A gesture recognizer that will receive events that hit this text span.
   ///
@@ -167,14 +167,8 @@ class TextSpan extends DiagnosticableTree {
   /// Rather than using this directly, it's simpler to use the
   /// [TextPainter] class to paint [TextSpan] objects onto [Canvas]
   /// objects.
-  void build(ui.ParagraphBuilder builder, { double textScaleFactor = 1.0 }) {
+  void build(ui.ParagraphBuilder builder, { double textScaleFactor = 1.0, List<PlaceholderDimensions> dimensions }) {
     assert(debugAssertIsValid());
-
-    if (widget != null) {
-      builder.addPlaceholder(48, 48, 48);
-      return;
-    }
-
     final bool hasStyle = style != null;
     if (hasStyle)
       builder.pushStyle(style.getTextStyle(textScaleFactor: textScaleFactor));
@@ -183,7 +177,7 @@ class TextSpan extends DiagnosticableTree {
     if (children != null) {
       for (TextSpan child in children) {
         assert(child != null);
-        child.build(builder, textScaleFactor: textScaleFactor);
+        child.build(builder, textScaleFactor: textScaleFactor, dimensions: dimensions);
       }
     }
     if (hasStyle)

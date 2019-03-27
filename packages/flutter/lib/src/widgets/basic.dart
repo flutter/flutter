@@ -12,6 +12,7 @@ import 'package:flutter/services.dart';
 import 'debug.dart';
 import 'framework.dart';
 import 'localizations.dart';
+import 'widget_span.dart';
 
 export 'package:flutter/animation.dart';
 export 'package:flutter/foundation.dart' show
@@ -4774,8 +4775,11 @@ class RichText extends MultiChildRenderObjectWidget {
   static List<Widget> _extractChildren(TextSpan span) {
     List<Widget> result = [];
     void visitSpan(TextSpan span) {
-      if (span.widget != null) {
-        result.add(span.widget);
+      if (span is WidgetSpan) {
+        WidgetSpan widgetSpan = span as WidgetSpan;
+        if (widgetSpan.widget != null) {
+          result.add(widgetSpan.widget);
+        }
       }
       else {
         if (span.children != null) {
