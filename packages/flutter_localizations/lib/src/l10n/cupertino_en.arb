@@ -5,8 +5,8 @@
     "plural": "hour"
   },
 
-  "datePickerMinuteSemanticsOne": "1 minute",
-  "datePickerMinuteSemanticsOther": "$minute minutes",
+  "datePickerMinuteSemanticsLabelOne": "1 minute",
+  "datePickerMinuteSemanticsLabelOther": "$minute minutes",
   "@datePickerMinuteSemanticsLabel": {
     "description": "Accessibility announcement for the selected minute on a time picker such as '15 minutes' or '15分'",
     "plural": "minute"
