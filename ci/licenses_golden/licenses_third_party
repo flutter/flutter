@@ -1,4 +1,4 @@
-Signature: 7556d1d49a22dc670aa6ac43db2d04c2
+Signature: 6eb19e0e7f8dc1c24ff6d11400c5b80c
 
 UNUSED LICENSES:
 
@@ -4611,15 +4611,6 @@ FILE: ../../../third_party/dart/runtime/observatory/web/timeline.html
 FILE: ../../../third_party/dart/runtime/vm/snapshot_test_in.dat
 FILE: ../../../third_party/dart/samples/ffi/sqlite/docs/lib/scenario-default.svg
 FILE: ../../../third_party/dart/samples/ffi/sqlite/docs/lib/scenario-full.svg
-FILE: ../../../third_party/dart/samples/ffi/sqlite/lib/sqlite.dart
-FILE: ../../../third_party/dart/samples/ffi/sqlite/lib/src/bindings/bindings.dart
-FILE: ../../../third_party/dart/samples/ffi/sqlite/lib/src/bindings/constants.dart
-FILE: ../../../third_party/dart/samples/ffi/sqlite/lib/src/bindings/signatures.dart
-FILE: ../../../third_party/dart/samples/ffi/sqlite/lib/src/bindings/types.dart
-FILE: ../../../third_party/dart/samples/ffi/sqlite/lib/src/collections/closable_iterator.dart
-FILE: ../../../third_party/dart/samples/ffi/sqlite/lib/src/database.dart
-FILE: ../../../third_party/dart/samples/ffi/sqlite/lib/src/ffi/arena.dart
-FILE: ../../../third_party/dart/samples/ffi/sqlite/lib/src/ffi/cstring.dart
 FILE: ../../../third_party/dart/sdk/lib/html/html_common/conversions_dart2js.dart
 FILE: ../../../third_party/dart/sdk/lib/html/html_common/html_common.dart
 FILE: ../../../third_party/dart/sdk/lib/libraries.json
@@ -5203,6 +5194,16 @@ FILE: ../../../third_party/dart/samples/ffi/sample_ffi_functions.dart
 FILE: ../../../third_party/dart/samples/ffi/sample_ffi_functions_callbacks.dart
 FILE: ../../../third_party/dart/samples/ffi/sample_ffi_functions_structs.dart
 FILE: ../../../third_party/dart/samples/ffi/sample_ffi_structs.dart
+FILE: ../../../third_party/dart/samples/ffi/sqlite/example/main.dart
+FILE: ../../../third_party/dart/samples/ffi/sqlite/lib/sqlite.dart
+FILE: ../../../third_party/dart/samples/ffi/sqlite/lib/src/bindings/bindings.dart
+FILE: ../../../third_party/dart/samples/ffi/sqlite/lib/src/bindings/constants.dart
+FILE: ../../../third_party/dart/samples/ffi/sqlite/lib/src/bindings/signatures.dart
+FILE: ../../../third_party/dart/samples/ffi/sqlite/lib/src/bindings/types.dart
+FILE: ../../../third_party/dart/samples/ffi/sqlite/lib/src/collections/closable_iterator.dart
+FILE: ../../../third_party/dart/samples/ffi/sqlite/lib/src/database.dart
+FILE: ../../../third_party/dart/samples/ffi/sqlite/lib/src/ffi/arena.dart
+FILE: ../../../third_party/dart/samples/ffi/sqlite/lib/src/ffi/cstring.dart
 FILE: ../../../third_party/dart/samples/ffi/sqlite/lib/src/ffi/dylib_utils.dart
 FILE: ../../../third_party/dart/sdk/lib/ffi/annotations.dart
 FILE: ../../../third_party/dart/sdk/lib/ffi/dynamic_library.dart
