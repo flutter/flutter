@@ -13,7 +13,9 @@
 
 #include <trace/event.h>
 
-#define FML_TRACE_COUNTER(a, b, c, d, args...) TRACE_COUNTER(a, b, c, d)
+// TODO(DNO-448): This is disabled because the Fuchsia counter id json parsing
+// only handles ints whereas this can produce ints or strings.
+#define FML_TRACE_COUNTER(a, b, c, args...)
 #define FML_TRACE_EVENT(a, b, args...) TRACE_DURATION(a, b)
 
 #define TRACE_EVENT0(a, b) TRACE_DURATION(a, b)
