@@ -118,7 +118,7 @@ task:
     - bin\flutter.bat update-packages
     - git fetch origin master
   test_all_script:
-    - bin\cache\dart-sdk\bin\dart.exe -c dev\bots\test.dart
+    - bin\cache\dart-sdk\bin\dart.exe --enable-asserts dev\bots\test.dart
   matrix:
     - name: tests-windows
       env:
