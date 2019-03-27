@@ -33,11 +33,6 @@ class _PointerState {
   Offset lastPosition;
 
   Offset deltaTo(Offset to) {
-    // The only case where [PointerEvent.position] would be null is
-    // [PointerRemovedEvent], which implicitly assigns delta to be zero.
-    if (to == null) {
-      return Offset.zero;
-    }
     return to - lastPosition;
   }
 
