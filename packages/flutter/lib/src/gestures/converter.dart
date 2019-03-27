@@ -41,17 +41,6 @@ class _PointerState {
     return to - lastPosition;
   }
 
-  /// Update state with the latest event.
-  PointerEvent record(PointerEvent event) {
-    lastPosition = event.position;
-    if (event.down && !_down) {
-      setDown();
-    } else if (!event.down && _down) {
-      setUp();
-    }
-    return event;
-  }
-
   @override
   String toString() {
     return '_PointerState(pointer: $pointer, down: $down, lastPosition: $lastPosition)';
