@@ -6,6 +6,7 @@ import 'package:vector_math/vector_math_64.dart' show Vector3;
 
 // An abstraction of the hex board logic
 @immutable
+// TODO(justinmc): Not exactly immutable
 class Board extends Object with IterableMixin<BoardPoint> {
   Board({
     @required this.boardRadius,
@@ -98,7 +99,7 @@ class Board extends Object with IterableMixin<BoardPoint> {
 
   // Check if the board point is actually on the board.
   bool _validateBoardPoint(BoardPoint boardPoint) {
-    final BoardPoint center = BoardPoint(0, 0);
+    const BoardPoint center = BoardPoint(0, 0);
     final int distanceFromCenter = getDistance(center, boardPoint);
     return distanceFromCenter <= boardRadius;
   }
@@ -213,6 +214,7 @@ class _BoardIterator extends Iterator<BoardPoint> {
 }
 
 // A range of q/r board coordinate values
+@immutable
 class _Range {
   const _Range(this.min, this.max)
     : assert(min != null),
@@ -233,6 +235,7 @@ final Set<Color> boardPointColors = <Color>{
 // A location on the board in axial coordinates.
 // Axial coordinates use two integers, q and r, to locate a hexagon on a grid.
 // https://www.redblobgames.com/grids/hexagons/#coordinates-axial
+@immutable
 class BoardPoint {
   const BoardPoint(this.q, this.r, {
     this.color = Colors.grey,

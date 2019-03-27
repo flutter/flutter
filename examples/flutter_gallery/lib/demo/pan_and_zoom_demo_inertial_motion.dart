@@ -2,13 +2,16 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:vector_math/vector_math.dart' show Vector2;
 
-// Provides calculations for an object moving with inertia and friction
+// Provides calculations for an object moving with inertia and friction using
+// the equation of motion from physics.
+// https://en.wikipedia.org/wiki/Equations_of_motion#Constant_translational_acceleration_in_a_straight_line
+@immutable
 class InertialMotion {
-  InertialMotion(this._initialVelocity, this._initialPosition);
+  const InertialMotion(this._initialVelocity, this._initialPosition);
 
   static const double _kFrictionalAcceleration = 0.01; // How quickly to stop
-  Velocity _initialVelocity;
-  Offset _initialPosition;
+  final Velocity _initialVelocity;
+  final Offset _initialPosition;
 
   // The position when the motion stops
   Offset get finalPosition {
@@ -22,15 +25,14 @@ class InertialMotion {
 
   // The acceleration opposing the initial velocity in x and y components
   Vector2 get _acceleration {
+    // TODO(justinmc): Find actual velocity instead of summing?
     final double velocityTotal = _initialVelocity.pixelsPerSecond.dx.abs()
       + _initialVelocity.pixelsPerSecond.dy.abs();
-    final double vRatioX = _initialVelocity.pixelsPerSecond.dx.abs() / velocityTotal;
-    final double vRatioY = _initialVelocity.pixelsPerSecond.dy.abs() / velocityTotal;
-    final double vSignX = _initialVelocity.pixelsPerSecond.dx.isNegative ? 1 : -1;
-    final double vSignY = _initialVelocity.pixelsPerSecond.dy.isNegative ? 1 : -1;
+    final double vRatioX = _initialVelocity.pixelsPerSecond.dx / velocityTotal;
+    final double vRatioY = _initialVelocity.pixelsPerSecond.dy / velocityTotal;
     return Vector2(
-      vSignX * _kFrictionalAcceleration * vRatioX,
-      vSignY * _kFrictionalAcceleration * vRatioY,
+      _kFrictionalAcceleration * vRatioX,
+      _kFrictionalAcceleration * vRatioY,
     );
   }
 
@@ -51,7 +53,8 @@ class InertialMotion {
     return Offset(xf, yf);
   }
 
-  // Physics equation of motion
+  // Solve the equation of motion to find the position at a given point in time
+  // in one dimension.
   double _getPosition({double r0, double v0, int t, double a}) {
     // Stop movement when it would otherwise reverse direction.
     final double stopTime = (v0 / a).abs();

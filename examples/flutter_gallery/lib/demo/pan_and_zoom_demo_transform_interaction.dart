@@ -143,7 +143,7 @@ class TransformInteractionState extends State<TransformInteraction> with TickerP
     return matrix;
   }
 
-  // Return the scene point underneath the viewport point given.
+  // Return the scene point at the given viewport point.
   static Offset fromViewport(Offset viewportPoint, Matrix4 transform) {
     // On viewportPoint, perform the inverse transformation of the scene to get
     // where the point would be in the scene before the transformation.
@@ -165,9 +165,7 @@ class TransformInteractionState extends State<TransformInteraction> with TickerP
   @override
   void initState() {
     super.initState();
-    _visibleRect = widget.visibleRect != null
-      ? widget.visibleRect
-      : Rect.fromLTWH(0, 0, widget.size.width, widget.size.height);
+    _visibleRect = widget.visibleRect ?? Offset.zero & widget.size;
     _transform = _initialTransform;
     _controller = AnimationController(
       vsync: this,
@@ -237,7 +235,7 @@ class TransformInteractionState extends State<TransformInteraction> with TickerP
   // Return a new matrix representing the given matrix after applying the given
   // translation.
   Matrix4 matrixTranslate(Matrix4 matrix, Offset translation) {
-    if (widget.disableTranslation) {
+    if (widget.disableTranslation || translation == Offset.zero) {
       return matrix;
     }
 
@@ -270,9 +268,10 @@ class TransformInteractionState extends State<TransformInteraction> with TickerP
   // Return a new matrix representing the given matrix after applying the given
   // scale transform.
   Matrix4 matrixScale(Matrix4 matrix, double scale) {
-    if (widget.disableScale) {
+    if (widget.disableScale || scale == 1) {
       return matrix;
     }
+    assert(scale != 0);
 
     // Don't allow a scale that moves the viewport outside of _visibleRect.
     final Offset tl = fromViewport(const Offset(0, 0), _transform);
@@ -304,7 +303,7 @@ class TransformInteractionState extends State<TransformInteraction> with TickerP
   // rotation transform.
   // Rotating the scene cannot cause the viewport to view beyond _visibleRect.
   Matrix4 matrixRotate(Matrix4 matrix, double rotation, Offset focalPoint) {
-    if (widget.disableRotation) {
+    if (widget.disableRotation || rotation == 0) {
       return matrix;
     }
     final Offset focalPointScene = fromViewport(focalPoint, matrix);
@@ -316,7 +315,9 @@ class TransformInteractionState extends State<TransformInteraction> with TickerP
 
   // Handle panning and pinch zooming events
   void _onScaleStart(ScaleStartDetails details) {
-    widget.onScaleStart?.call();
+    if (widget.onScaleStart != null) {
+      widget.onScaleStart();
+    }
 
     // TODO(justinmc): Do things like this need to happen inside of setState? I
     // don't need build to be called because of any of this.
@@ -342,13 +343,19 @@ class TransformInteractionState extends State<TransformInteraction> with TickerP
     });
   }
   void _onScaleUpdate(ScaleUpdateDetails details) {
-    widget.onScaleUpdate?.call(fromViewport(details.focalPoint, _transform));
+    if (widget.onScaleUpdate != null) {
+      widget.onScaleUpdate(fromViewport(details.focalPoint, _transform));
+    }
     double scale = _transform.getMaxScaleOnAxis();
     final Offset focalPointScene = fromViewport(
       details.focalPoint,
       _transform,
     );
     if (gestureType == null) {
+      // Decide which type of gesture this is by comparing the amount of scale
+      // and rotation in the gesture, if any. Scale starts at 1 and rotation
+      // starts at 0. Translate will have 0 scale and 0 rotation becuase it uses
+      // only one finger.
       if ((details.scale - 1).abs() > details.rotation.abs()) {
         gestureType = GestureType.scale;
       } else if (details.rotation != 0) {
@@ -390,7 +397,9 @@ class TransformInteractionState extends State<TransformInteraction> with TickerP
     });
   }
   void _onScaleEnd(ScaleEndDetails details) {
-    widget.onScaleStart?.call();
+    if (widget.onScaleStart != null) {
+      widget.onScaleStart();
+    }
     setState(() {
       _scaleStart = null;
       _rotationStart = null;

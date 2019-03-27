@@ -45,14 +45,19 @@ class _PanAndZoomDemoState extends State<PanAndZoomDemo> {
               return;
             }
             showModalBottomSheet<Widget>(context: context, builder: (BuildContext context) {
-              return EditBoardPoint(
-                boardPoint: _board.selected,
-                onSetColor: (Color color) {
-                  setState(() {
-                    _board = _board.setBoardPointColor(_board.selected, color);
-                    Navigator.pop(context);
-                  });
-                },
+              return Container(
+                width: double.infinity,
+                height: 150,
+                padding: const EdgeInsets.all(12.0),
+                child: EditBoardPoint(
+                  boardPoint: _board.selected,
+                  onColorSelection: (Color color) {
+                    setState(() {
+                      _board = _board.setBoardPointColor(_board.selected, color);
+                      Navigator.pop(context);
+                    });
+                  },
+                ),
               );
             });
           },
