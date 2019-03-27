@@ -167,7 +167,7 @@ task:
     # Private repo for publishing certificates.
     PUBLISHING_MATCH_CERTIFICATE_REPO: git@github.com:flutter/private_publishing_certificates.git
   osx_instance:
-    image: mojave-xcode-10.1
+    image: mojave-xcode-10.2
   # occasionally the clock on these machines is out of sync
   # with the actual time - this should help to verify
   print_date_script:
@@ -185,7 +185,7 @@ task:
 task:
   use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true'
   osx_instance:
-    image: mojave-xcode-10.1
+    image: mojave-xcode-10.2
   depends_on:
     - analyze
   env:
