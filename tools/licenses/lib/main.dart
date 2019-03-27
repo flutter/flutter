@@ -1432,6 +1432,18 @@ class _RepositoryFreetypeDirectory extends _RepositoryDirectory {
   }
 }
 
+class _RepositoryGlfwDirectory extends _RepositoryDirectory {
+  _RepositoryGlfwDirectory(_RepositoryDirectory parent, fs.Directory io) : super(parent, io);
+
+  @override
+  bool shouldRecurse(fs.IoNode entry) {
+    return entry.name != 'examples' // Not linked in build.
+        && entry.name != 'tests' // Not linked in build.
+        && entry.name != 'deps' // Only used by examples and tests; not linked in build.
+        && super.shouldRecurse(entry);
+  }
+}
+
 class _RepositoryIcuDirectory extends _RepositoryDirectory {
   _RepositoryIcuDirectory(_RepositoryDirectory parent, fs.Directory io) : super(parent, io);
 
@@ -1759,6 +1771,8 @@ class _RepositoryRootThirdPartyDirectory extends _RepositoryGenericThirdPartyDir
       throw '//third_party/freetype-android is no longer part of this client: remove it';
     if (entry.name == 'freetype2')
       return _RepositoryFreetypeDirectory(this, entry);
+    if (entry.name == 'glfw')
+      return _RepositoryGlfwDirectory(this, entry);
     if (entry.name == 'harfbuzz')
       return _RepositoryHarfbuzzDirectory(this, entry);
     if (entry.name == 'icu')

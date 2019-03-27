@@ -1,4 +1,4 @@
-Signature: 6eb19e0e7f8dc1c24ff6d11400c5b80c
+Signature: 7836db551ccf7833d0c865f0d2a3cfad
 
 UNUSED LICENSES:
 
@@ -8012,6 +8012,304 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: glfw
+ORIGIN: ../../../third_party/glfw/COPYING.txt
+TYPE: LicenseType.zlib
+FILE: ../../../third_party/glfw/.appveyor.yml
+FILE: ../../../third_party/glfw/CMake/MacOSXBundleInfo.plist.in
+FILE: ../../../third_party/glfw/cmake_uninstall.cmake.in
+FILE: ../../../third_party/glfw/docs/Doxyfile.in
+FILE: ../../../third_party/glfw/docs/DoxygenLayout.xml
+FILE: ../../../third_party/glfw/docs/build.dox
+FILE: ../../../third_party/glfw/docs/compat.dox
+FILE: ../../../third_party/glfw/docs/compile.dox
+FILE: ../../../third_party/glfw/docs/context.dox
+FILE: ../../../third_party/glfw/docs/extra.less
+FILE: ../../../third_party/glfw/docs/footer.html
+FILE: ../../../third_party/glfw/docs/header.html
+FILE: ../../../third_party/glfw/docs/input.dox
+FILE: ../../../third_party/glfw/docs/internal.dox
+FILE: ../../../third_party/glfw/docs/intro.dox
+FILE: ../../../third_party/glfw/docs/main.dox
+FILE: ../../../third_party/glfw/docs/monitor.dox
+FILE: ../../../third_party/glfw/docs/moving.dox
+FILE: ../../../third_party/glfw/docs/news.dox
+FILE: ../../../third_party/glfw/docs/quick.dox
+FILE: ../../../third_party/glfw/docs/spaces.svg
+FILE: ../../../third_party/glfw/docs/vulkan.dox
+FILE: ../../../third_party/glfw/docs/window.dox
+FILE: ../../../third_party/glfw/include/GLFW/glfw3.h
+FILE: ../../../third_party/glfw/include/GLFW/glfw3native.h
+FILE: ../../../third_party/glfw/src/cocoa_monitor.m
+FILE: ../../../third_party/glfw/src/context.c
+FILE: ../../../third_party/glfw/src/egl_context.c
+FILE: ../../../third_party/glfw/src/egl_context.h
+FILE: ../../../third_party/glfw/src/glfw3.pc.in
+FILE: ../../../third_party/glfw/src/glfw3Config.cmake.in
+FILE: ../../../third_party/glfw/src/glx_context.c
+FILE: ../../../third_party/glfw/src/glx_context.h
+FILE: ../../../third_party/glfw/src/init.c
+FILE: ../../../third_party/glfw/src/input.c
+FILE: ../../../third_party/glfw/src/internal.h
+FILE: ../../../third_party/glfw/src/linux_joystick.c
+FILE: ../../../third_party/glfw/src/monitor.c
+FILE: ../../../third_party/glfw/src/posix_time.c
+FILE: ../../../third_party/glfw/src/posix_time.h
+FILE: ../../../third_party/glfw/src/posix_tls.c
+FILE: ../../../third_party/glfw/src/posix_tls.h
+FILE: ../../../third_party/glfw/src/vulkan.c
+FILE: ../../../third_party/glfw/src/wgl_context.c
+FILE: ../../../third_party/glfw/src/wgl_context.h
+FILE: ../../../third_party/glfw/src/win32_init.c
+FILE: ../../../third_party/glfw/src/win32_joystick.c
+FILE: ../../../third_party/glfw/src/win32_monitor.c
+FILE: ../../../third_party/glfw/src/win32_platform.h
+FILE: ../../../third_party/glfw/src/win32_time.c
+FILE: ../../../third_party/glfw/src/win32_tls.c
+FILE: ../../../third_party/glfw/src/win32_window.c
+FILE: ../../../third_party/glfw/src/x11_init.c
+FILE: ../../../third_party/glfw/src/x11_monitor.c
+FILE: ../../../third_party/glfw/src/x11_platform.h
+FILE: ../../../third_party/glfw/src/x11_window.c
+FILE: ../../../third_party/glfw/src/xkb_unicode.c
+----------------------------------------------------------------------------------------------------
+Copyright (c) 2002-2006 Marcus Geelnard
+Copyright (c) 2006-2016 Camilla Berglund <elmindreda@glfw.org>
+
+This software is provided 'as-is', without any express or implied
+warranty. In no event will the authors be held liable for any damages
+arising from the use of this software.
+
+Permission is granted to anyone to use this software for any purpose,
+including commercial applications, and to alter it and redistribute it
+freely, subject to the following restrictions:
+
+1. The origin of this software must not be misrepresented; you must not
+   claim that you wrote the original software. If you use this software
+   in a product, an acknowledgment in the product documentation would
+   be appreciated but is not required.
+
+2. Altered source versions must be plainly marked as such, and must not
+   be misrepresented as being the original software.
+
+3. This notice may not be removed or altered from any source
+   distribution.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: glfw
+ORIGIN: ../../../third_party/glfw/src/cocoa_init.m
+TYPE: LicenseType.zlib
+FILE: ../../../third_party/glfw/src/cocoa_init.m
+FILE: ../../../third_party/glfw/src/cocoa_platform.h
+FILE: ../../../third_party/glfw/src/cocoa_time.c
+FILE: ../../../third_party/glfw/src/cocoa_window.m
+FILE: ../../../third_party/glfw/src/nsgl_context.h
+FILE: ../../../third_party/glfw/src/nsgl_context.m
+----------------------------------------------------------------------------------------------------
+Copyright (c) 2009-2016 Camilla Berglund <elmindreda@glfw.org>
+
+This software is provided 'as-is', without any express or implied
+warranty. In no event will the authors be held liable for any damages
+arising from the use of this software.
+
+Permission is granted to anyone to use this software for any purpose,
+including commercial applications, and to alter it and redistribute it
+freely, subject to the following restrictions:
+
+1. The origin of this software must not be misrepresented; you must not
+   claim that you wrote the original software. If you use this software
+   in a product, an acknowledgment in the product documentation would
+   be appreciated but is not required.
+
+2. Altered source versions must be plainly marked as such, and must not
+   be misrepresented as being the original software.
+
+3. This notice may not be removed or altered from any source
+   distribution.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: glfw
+ORIGIN: ../../../third_party/glfw/src/cocoa_joystick.h
+TYPE: LicenseType.zlib
+FILE: ../../../third_party/glfw/src/cocoa_joystick.h
+FILE: ../../../third_party/glfw/src/win32_joystick.h
+----------------------------------------------------------------------------------------------------
+Copyright (c) 2006-2016 Camilla Berglund <elmindreda@glfw.org>
+
+This software is provided 'as-is', without any express or implied
+warranty. In no event will the authors be held liable for any damages
+arising from the use of this software.
+
+Permission is granted to anyone to use this software for any purpose,
+including commercial applications, and to alter it and redistribute it
+freely, subject to the following restrictions:
+
+1. The origin of this software must not be misrepresented; you must not
+   claim that you wrote the original software. If you use this software
+   in a product, an acknowledgment in the product documentation would
+   be appreciated but is not required.
+
+2. Altered source versions must be plainly marked as such, and must not
+   be misrepresented as being the original software.
+
+3. This notice may not be removed or altered from any source
+   distribution.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: glfw
+ORIGIN: ../../../third_party/glfw/src/cocoa_joystick.m
+TYPE: LicenseType.zlib
+FILE: ../../../third_party/glfw/src/cocoa_joystick.m
+----------------------------------------------------------------------------------------------------
+Copyright (c) 2009-2016 Camilla Berglund <elmindreda@glfw.org>
+Copyright (c) 2012 Torsten Walluhn <tw@mad-cad.net>
+
+This software is provided 'as-is', without any express or implied
+warranty. In no event will the authors be held liable for any damages
+arising from the use of this software.
+
+Permission is granted to anyone to use this software for any purpose,
+including commercial applications, and to alter it and redistribute it
+freely, subject to the following restrictions:
+
+1. The origin of this software must not be misrepresented; you must not
+   claim that you wrote the original software. If you use this software
+   in a product, an acknowledgment in the product documentation would
+   be appreciated but is not required.
+
+2. Altered source versions must be plainly marked as such, and must not
+   be misrepresented as being the original software.
+
+3. This notice may not be removed or altered from any source
+   distribution.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: glfw
+ORIGIN: ../../../third_party/glfw/src/glfw_config.h.in
+TYPE: LicenseType.zlib
+FILE: ../../../third_party/glfw/src/glfw_config.h.in
+----------------------------------------------------------------------------------------------------
+Copyright (c) 2010-2016 Camilla Berglund <elmindreda@glfw.org>
+
+This software is provided 'as-is', without any express or implied
+warranty. In no event will the authors be held liable for any damages
+arising from the use of this software.
+
+Permission is granted to anyone to use this software for any purpose,
+including commercial applications, and to alter it and redistribute it
+freely, subject to the following restrictions:
+
+1. The origin of this software must not be misrepresented; you must not
+   claim that you wrote the original software. If you use this software
+   in a product, an acknowledgment in the product documentation would
+   be appreciated but is not required.
+
+2. Altered source versions must be plainly marked as such, and must not
+   be misrepresented as being the original software.
+
+3. This notice may not be removed or altered from any source
+   distribution.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: glfw
+ORIGIN: ../../../third_party/glfw/src/linux_joystick.h
+TYPE: LicenseType.zlib
+FILE: ../../../third_party/glfw/src/linux_joystick.h
+FILE: ../../../third_party/glfw/src/wl_init.c
+FILE: ../../../third_party/glfw/src/wl_monitor.c
+FILE: ../../../third_party/glfw/src/wl_platform.h
+FILE: ../../../third_party/glfw/src/wl_window.c
+FILE: ../../../third_party/glfw/src/xkb_unicode.h
+----------------------------------------------------------------------------------------------------
+Copyright (c) 2014 Jonas Ådahl <jadahl@gmail.com>
+
+This software is provided 'as-is', without any express or implied
+warranty. In no event will the authors be held liable for any damages
+arising from the use of this software.
+
+Permission is granted to anyone to use this software for any purpose,
+including commercial applications, and to alter it and redistribute it
+freely, subject to the following restrictions:
+
+1. The origin of this software must not be misrepresented; you must not
+   claim that you wrote the original software. If you use this software
+   in a product, an acknowledgment in the product documentation would
+   be appreciated but is not required.
+
+2. Altered source versions must be plainly marked as such, and must not
+   be misrepresented as being the original software.
+
+3. This notice may not be removed or altered from any source
+   distribution.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: glfw
+ORIGIN: ../../../third_party/glfw/src/mir_init.c
+TYPE: LicenseType.zlib
+FILE: ../../../third_party/glfw/src/mir_init.c
+FILE: ../../../third_party/glfw/src/mir_monitor.c
+FILE: ../../../third_party/glfw/src/mir_platform.h
+FILE: ../../../third_party/glfw/src/mir_window.c
+----------------------------------------------------------------------------------------------------
+Copyright (c) 2014-2015 Brandon Schaefer <brandon.schaefer@canonical.com>
+
+This software is provided 'as-is', without any express or implied
+warranty. In no event will the authors be held liable for any damages
+arising from the use of this software.
+
+Permission is granted to anyone to use this software for any purpose,
+including commercial applications, and to alter it and redistribute it
+freely, subject to the following restrictions:
+
+1. The origin of this software must not be misrepresented; you must not
+   claim that you wrote the original software. If you use this software
+   in a product, an acknowledgment in the product documentation would
+   be appreciated but is not required.
+
+2. Altered source versions must be plainly marked as such, and must not
+   be misrepresented as being the original software.
+
+3. This notice may not be removed or altered from any source
+   distribution.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: glfw
+ORIGIN: ../../../third_party/glfw/src/window.c
+TYPE: LicenseType.zlib
+FILE: ../../../third_party/glfw/src/window.c
+----------------------------------------------------------------------------------------------------
+Copyright (c) 2002-2006 Marcus Geelnard
+Copyright (c) 2006-2016 Camilla Berglund <elmindreda@glfw.org>
+Copyright (c) 2012 Torsten Walluhn <tw@mad-cad.net>
+
+This software is provided 'as-is', without any express or implied
+warranty. In no event will the authors be held liable for any damages
+arising from the use of this software.
+
+Permission is granted to anyone to use this software for any purpose,
+including commercial applications, and to alter it and redistribute it
+freely, subject to the following restrictions:
+
+1. The origin of this software must not be misrepresented; you must not
+   claim that you wrote the original software. If you use this software
+   in a product, an acknowledgment in the product documentation would
+   be appreciated but is not required.
+
+2. Altered source versions must be plainly marked as such, and must not
+   be misrepresented as being the original software.
+
+3. This notice may not be removed or altered from any source
+   distribution.
 ====================================================================================================
 
 ====================================================================================================
@@ -18869,4 +19167,4 @@ freely, subject to the following restrictions:
    misrepresented as being the original software.
 3. This notice may not be removed or altered from any source distribution.
 ====================================================================================================
-Total license count: 311
+Total license count: 319
