@@ -23,13 +23,9 @@ source_set("glfw") {
     "$_checkout_dir/src/window.c",
   ]
 
-  include_dirs = [
-    "$_checkout_dir/src",
-  ]
+  include_dirs = [ "$_checkout_dir/src" ]
 
-  public_configs = [
-    ":relative_glfw_headers",
-  ]
+  public_configs = [ ":relative_glfw_headers" ]
 
   if (is_win) {
     sources += [
@@ -56,10 +52,10 @@ source_set("glfw") {
       "$_checkout_dir/src/glx_context.h",
       "$_checkout_dir/src/linux_joystick.c",
       "$_checkout_dir/src/linux_joystick.h",
-      "$_checkout_dir/src/posix_tls.c",
-      "$_checkout_dir/src/posix_tls.h",
       "$_checkout_dir/src/posix_time.c",
       "$_checkout_dir/src/posix_time.h",
+      "$_checkout_dir/src/posix_tls.c",
+      "$_checkout_dir/src/posix_tls.h",
       "$_checkout_dir/src/x11_init.c",
       "$_checkout_dir/src/x11_monitor.c",
       "$_checkout_dir/src/x11_platform.h",
@@ -71,6 +67,14 @@ source_set("glfw") {
     defines = [
       "_GLFW_X11",
       "_GLFW_HAS_XF86VM",
+    ]
+
+    libs = [
+      "X11",
+      "Xcursor",
+      "Xinerama",
+      "Xrandr",
+      "Xxf86vm",
     ]
 
     configs -= [ "//build/config/compiler:chromium_code" ]
