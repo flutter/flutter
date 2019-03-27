@@ -10,11 +10,6 @@
 #include <cstdlib>
 #include <iostream>
 
-#ifdef __linux__
-// Epoxy must be included before any graphics-related code.
-#include <epoxy/gl.h>
-#endif
-
 #include <GLFW/glfw3.h>
 
 #include "flutter/shell/platform/common/cpp/client_wrapper/include/flutter/plugin_registrar.h"

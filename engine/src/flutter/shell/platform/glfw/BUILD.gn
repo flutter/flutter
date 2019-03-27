@@ -59,7 +59,6 @@ source_set("flutter_glfw") {
     libs = [ "GL" ]
 
     configs += [
-      "$flutter_root/shell/platform/linux/config:epoxy",
       "$flutter_root/shell/platform/linux/config:glfw3",
       "$flutter_root/shell/platform/linux/config:gtk3",
       "$flutter_root/shell/platform/linux/config:x11",

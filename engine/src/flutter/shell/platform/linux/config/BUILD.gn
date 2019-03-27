@@ -4,10 +4,6 @@
 
 import("//build/config/linux/pkg_config.gni")
 
-pkg_config("epoxy") {
-  packages = [ "epoxy" ]
-}
-
 pkg_config("glfw3") {
   packages = [ "glfw3" ]
 }
