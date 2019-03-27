@@ -166,7 +166,7 @@ void main() {
           final Status status = logger.startProgress(
             'Hello',
             progressId: null,
-            timeout: timeoutConfiguration.fastOperation,
+            timeout: timeoutConfiguration.slowOperation,
             progressIndicatorPadding: 20, // this minus the "Hello" equals the 15 below.
           );
           expect(outputStderr().length, equals(1));
@@ -357,7 +357,7 @@ void main() {
       called = 0;
       summaryStatus = SummaryStatus(
         message: 'Hello world',
-        timeout: timeoutConfiguration.fastOperation,
+        timeout: timeoutConfiguration.slowOperation,
         padding: 20,
         onFinish: () => called++,
       );
@@ -593,7 +593,7 @@ void main() {
         final Status status = logger.startProgress(
           'Hello',
           progressId: null,
-          timeout: timeoutConfiguration.fastOperation,
+          timeout: timeoutConfiguration.slowOperation,
           progressIndicatorPadding: 20, // this minus the "Hello" equals the 15 below.
         );
         expect(outputStderr().length, equals(1));

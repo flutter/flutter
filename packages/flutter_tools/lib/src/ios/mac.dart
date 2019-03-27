@@ -480,7 +480,7 @@ Future<XcodeBuildResult> buildXcodeProject({
           initialBuildStatus = null;
           buildSubStatus = logger.startProgress(
             line,
-            timeout: timeoutConfiguration.fastOperation,
+            timeout: timeoutConfiguration.slowOperation,
             progressIndicatorPadding: kDefaultStatusPadding - 7,
           );
         }
