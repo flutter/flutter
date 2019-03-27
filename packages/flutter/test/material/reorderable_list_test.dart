@@ -922,7 +922,7 @@ void main() {
       await tester.pumpWidget(MaterialApp(
         home: reorderableListView,
       ));
-      expect(tester.getCenter(find.text('A')).dy, greaterThan(tester.getCenter(find.text('B')).dy));
+      expect(tester.getCenter(find.text('A')).dy, lessThan(tester.getCenter(find.text('B')).dy));
     });
     // TODO(djshuckerow): figure out how to write a test for scrolling the list.
   });
