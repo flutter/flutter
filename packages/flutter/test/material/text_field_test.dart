@@ -1443,7 +1443,7 @@ void main() {
     await tester.pumpWidget(builder(maxLines, multipleLineText));
     final Text hintTextWidget = tester.widget(find.text(multipleLineText));
     expect(hintTextWidget.maxLines, equals(maxLines));
-    expect(findHintText(multipleLineText).size, greaterThan(oneLineHintSize));
+    expect(findHintText(multipleLineText).size, greaterThanOrEqualTo(oneLineHintSize));
   });
 
   testWidgets('Can drag handles to change selection in multiline', (WidgetTester tester) async {
