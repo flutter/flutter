@@ -60,7 +60,8 @@ Rect _globalBoundingBoxFor(BuildContext context) {
   return MatrixUtils.transformRect(box.getTransformTo(null), Offset.zero & box.size);
 }
 
-/// A widget that marks its child as being a candidate for hero animations.
+/// A widget that marks its child as being a candidate for
+/// [hero animations](https://flutter.dev/docs/development/ui/animations/hero-animations).
 ///
 /// When a [PageRoute] is pushed or popped with the [Navigator], the entire
 /// screen's content is replaced. An old route disappears and a new route
