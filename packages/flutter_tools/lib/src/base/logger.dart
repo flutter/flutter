@@ -598,7 +598,7 @@ class AnsiSpinner extends Status {
 
   final String _backspaceChar = '\b';
   final String _clearChar = ' ';
-  
+
   bool timedOut = false;
 
   int ticks = 0;
