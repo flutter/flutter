@@ -152,7 +152,7 @@ GOTO :after_subroutine
 
     POPD
 
-    IF "%FLUTTER_TOOL_ARGS%"=="" (
+    IF "%FLUTTER_TOOL_ARGS%" == "" (
       "%dart%" --snapshot="%snapshot_path%" --snapshot-kind=app-jit --packages="%flutter_tools_dir%\.packages" "%script_path%"
     ) else (
       "%dart%" "%FLUTTER_TOOL_ARGS%" --snapshot="%snapshot_path%" --snapshot-kind=app-jit --packages="%flutter_tools_dir%\.packages" "%script_path%"
