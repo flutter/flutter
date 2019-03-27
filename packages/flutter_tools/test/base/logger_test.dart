@@ -110,6 +110,7 @@ void main() {
             }
           }
           print('There were $newlineCount newline characters for OS $testOs');
+          expect(newlineCount, 2);
         });
       }, overrides: <Type, Generator>{
         Logger: () => StdoutLogger(),
@@ -128,7 +129,7 @@ void main() {
           logger.printStatus('yolo dawg');
           status.stop();
           final String str = outputStdout().join('\n');
-          print(str);
+          //print(str);
         });
       }, overrides: <Type, Generator>{
         Logger: () => StdoutLogger(),
