@@ -148,8 +148,8 @@ void main() {
           await tenMillisecondsLater;
           doWhileAsync(time, () => ansiSpinner.ticks < 30); // three seconds
           expect(ansiSpinner.seemsSlow, isTrue);
-          final List<String> outputList = outputStdout();
-          expect(outputList[1], contains('This is taking an unexpectedly long time.'));
+          // Check the 2nd line to verify there's a newline before the warning
+          expect(outputStdout()[1], contains('This is taking an unexpectedly long time.'));
           ansiSpinner.stop();
           expect(outputStdout().join('\n'), isNot(contains('(!)')));
           done = true;
@@ -345,26 +345,6 @@ void main() {
         Stdio: () => mockStdio,
         Stopwatch: () => mockStopwatch,
       }); 
-
-      testUsingContext('A ansiStatus logs a newline before the slow warning', () async {
-        final AnsiStatus ansiStatus = _createAnsiStatus();
-        FakeAsync().run((FakeAsync time) {
-          ansiStatus.start();
-          // Wait 3 seconds, longer than kFastOperation
-          mockStopwatch.elapsed = const Duration(seconds: 3);
-          doWhileAsync(time, () => ansiStatus.ticks < 30);
-          ansiStatus.stop();
-          final List<String> out = outputStdout();
-          expect(out[0], isNot(contains('This is taking an unexpectedly long time.')));
-          expect(out[1], contains('This is taking an unexpectedly long time.'));
-          expect(out.length, 3);
-        });
-      }, overrides: <Type, Generator>{
-        Logger: () => StdoutLogger(),
-        Platform: () => FakePlatform(operatingSystem: testOs),
-        Stdio: () => mockStdio,
-        Stopwatch: () => mockStopwatch,
-      });
     }
   });
   group('Output format', () {
