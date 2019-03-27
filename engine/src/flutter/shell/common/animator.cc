@@ -92,7 +92,7 @@ void Animator::BeginFrame(fml::TimePoint frame_start_time,
   TRACE_EVENT0("flutter", "Animator::BeginFrame");
   while (!trace_flow_ids_.empty()) {
     uint64_t trace_flow_id = trace_flow_ids_.front();
-    TRACE_FLOW_END("flutter", "DispatchPointerDataPacket", trace_flow_id);
+    TRACE_FLOW_END("flutter", "PointerEvent", trace_flow_id);
     trace_flow_ids_.pop_front();
   }
 
