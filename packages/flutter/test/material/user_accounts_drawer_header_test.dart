@@ -149,6 +149,8 @@ void main() {
             testSetState = setState;
             return UserAccountsDrawerHeader(
               onDetailsPressed: () { },
+              accountName: const Text('name'),
+              accountEmail: const Text('email'),
             );
           },
         ),
