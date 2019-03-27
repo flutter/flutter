@@ -4,7 +4,8 @@ import 'dart:ui' show Vertices;
 import 'package:flutter/material.dart' hide Gradient;
 import 'package:vector_math/vector_math_64.dart' show Vector3;
 
-// An abstraction of the hex board logic
+// The entire state of the hex board and abstraction to get information about
+// it. Iterable so that all BoardPoints on the board can be iterated over.
 @immutable
 class Board extends Object with IterableMixin<BoardPoint> {
   Board({
@@ -14,8 +15,8 @@ class Board extends Object with IterableMixin<BoardPoint> {
     this.selected,
     List<BoardPoint> boardPoints,
   }) : assert(boardRadius > 0),
-      assert(hexagonRadius > 0),
-      assert(hexagonMargin >= 0) {
+       assert(hexagonRadius > 0),
+       assert(hexagonMargin >= 0) {
     // Set up the positions for the center hexagon where the entire board is
     // centered on the origin.
     // Start point of hexagon (top vertex)
@@ -57,6 +58,8 @@ class Board extends Object with IterableMixin<BoardPoint> {
   Iterator<BoardPoint> get iterator => _BoardIterator(_boardPoints);
 
   // For a given q axial coordinate, get the range of possible r values
+  // See the definition of BoardPoint for more information about hex grids and
+  // axial coordinates.
   _Range _getRRangeForQ(int q) {
     int rStart;
     int rEnd;

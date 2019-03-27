@@ -12,13 +12,16 @@ class PanAndZoomDemo extends StatefulWidget {
   @override _PanAndZoomDemoState createState() => _PanAndZoomDemoState();
 }
 class _PanAndZoomDemoState extends State<PanAndZoomDemo> {
+  // The radius of a hexagon tile in pixels
   static const double _kHexagonRadius = 32.0;
+  // The margin between hexagons
   static const double _kHexagonMargin = 1.0;
-  static const int _kBorderRadius = 8;
+  // The radius of the entire board in hexagons, not including the center
+  static const int _kBoardRadius = 8;
 
   bool _reset = false;
   Board _board = Board(
-    boardRadius: _kBorderRadius,
+    boardRadius: _kBoardRadius,
     hexagonRadius: _kHexagonRadius,
     hexagonMargin: _kHexagonMargin,
   );
@@ -28,42 +31,6 @@ class _PanAndZoomDemoState extends State<PanAndZoomDemo> {
     final BoardPainter painter = BoardPainter(
       board: _board,
     );
-    final FloatingActionButton floatingActionButton = _board.selected == null
-      ? FloatingActionButton(
-          onPressed: () {
-            setState(() {
-              _reset = true;
-            });
-          },
-          tooltip: 'Reset Transform',
-          backgroundColor: Theme.of(context).primaryColor,
-          child: const Icon(Icons.home),
-        )
-      : FloatingActionButton(
-          onPressed: () {
-            if (_board.selected == null) {
-              return;
-            }
-            showModalBottomSheet<Widget>(context: context, builder: (BuildContext context) {
-              return Container(
-                width: double.infinity,
-                height: 150,
-                padding: const EdgeInsets.all(12.0),
-                child: EditBoardPoint(
-                  boardPoint: _board.selected,
-                  onColorSelection: (Color color) {
-                    setState(() {
-                      _board = _board.setBoardPointColor(_board.selected, color);
-                      Navigator.pop(context);
-                    });
-                  },
-                ),
-              );
-            });
-          },
-          tooltip: 'Edit Tile',
-          child: const Icon(Icons.edit),
-        );
 
     // The scene is drawn by a CustomPaint, but user interaction is handled by
     // the TransformInteraction parent widget.
@@ -71,6 +38,8 @@ class _PanAndZoomDemoState extends State<PanAndZoomDemo> {
       appBar: AppBar(),
       body: LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
+          // Draw the scene as big as is available, but allow the user to
+          // translate beyond that to a visibleSize that's a bit bigger.
           final Size size = Size(constraints.maxWidth, constraints.maxHeight);
           final Size visibleSize = Size(size.width * 3, size.height * 2);
           return TransformInteraction(
@@ -84,10 +53,9 @@ class _PanAndZoomDemoState extends State<PanAndZoomDemo> {
               });
             },
             child: CustomPaint(
-              size: Size.infinite,
               painter: painter,
             ),
-            visibleRect: Rect.fromLTWH(
+            boundaryRect: Rect.fromLTWH(
               -visibleSize.width / 2,
               -visibleSize.height / 2,
               visibleSize.width,
@@ -101,11 +69,53 @@ class _PanAndZoomDemoState extends State<PanAndZoomDemo> {
           );
         },
       ),
-      floatingActionButton: floatingActionButton,
+      floatingActionButton: _board.selected == null ? resetButton : editButton,
     );
   }
 
-  void _onTapUp(Offset scenePoint) {
+  FloatingActionButton get resetButton {
+    return FloatingActionButton(
+      onPressed: () {
+        setState(() {
+          _reset = true;
+        });
+      },
+      tooltip: 'Reset Transform',
+      backgroundColor: Theme.of(context).primaryColor,
+      child: const Icon(Icons.home),
+    );
+  }
+
+  FloatingActionButton get editButton {
+    return FloatingActionButton(
+      onPressed: () {
+        if (_board.selected == null) {
+          return;
+        }
+        showModalBottomSheet<Widget>(context: context, builder: (BuildContext context) {
+          return Container(
+            width: double.infinity,
+            height: 150,
+            padding: const EdgeInsets.all(12.0),
+            child: EditBoardPoint(
+              boardPoint: _board.selected,
+              onColorSelection: (Color color) {
+                setState(() {
+                  _board = _board.setBoardPointColor(_board.selected, color);
+                  Navigator.pop(context);
+                });
+              },
+            ),
+          );
+        });
+      },
+      tooltip: 'Edit Tile',
+      child: const Icon(Icons.edit),
+    );
+  }
+
+  void _onTapUp(TapUpDetails details) {
+    final Offset scenePoint = details.globalPosition;
     final BoardPoint boardPoint = _board.pointToBoardPoint(scenePoint);
     setState(() {
       _board = _board.selectBoardPoint(boardPoint);

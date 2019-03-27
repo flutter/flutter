@@ -2,24 +2,31 @@ import 'package:flutter/material.dart';
 import 'package:vector_math/vector_math_64.dart' show Vector3;
 import 'pan_and_zoom_demo_inertial_motion.dart';
 
-// This widget allows 2D transform interaction on its child. The user can drag
-// to pan, pinch to zoom and rotate, and still get back untransformed
-// coordinates for targeted tap events.
+typedef ResetEndCallback = void Function();
+
+// This widget allows 2D transform interactions on its child in relation to its
+// parent. The user can transform the child by dragging to pan or pinching to
+// zoom and rotate. All event callbacks for GestureDetector are supported, and
+// the coordinates that are given are untransformed and in relation to the
+// original position of the child.
 @immutable
 class TransformInteraction extends StatefulWidget {
   const TransformInteraction({
-    // The child to perform the transformations on
+    // The child to perform the transformations on.
     @required this.child,
-    // The desired size of the area that can receive events
+    // The desired visible size of the widget and the area that is receptive to
+    // gestures. If a widget that's as big as possible is desired, then wrap
+    // this in a LayoutBuilder and pass
+    // `Size(constraints.maxWidth, constraints.maxHeight)`.
     @required this.size,
-    // The scale will be clamped to between these values
+    // The scale will be clamped to between these values.
     this.maxScale = 2.5,
     this.minScale = 0.8,
     // Transforms will be limited so that the viewport can not view beyond this
     // Rect. The Rect does not rotate with the rest of the scene, so it is
     // always aligned with the viewport.
-    this.visibleRect,
-    // Initial values for the transform can be provided
+    this.boundaryRect,
+    // Initial values for the transform can be provided.
     this.initialTranslation,
     this.initialScale,
     this.initialRotation,
@@ -60,40 +67,42 @@ class TransformInteraction extends StatefulWidget {
     this.onScaleUpdate,
     this.onScaleEnd,
   }) :
+    assert(child != null),
+    assert(size != null),
     assert(!reset || onResetEnd != null, 'Must implement onResetEnd to use reset.');
 
   final Widget child;
   final Size size;
   final bool reset;
-  final Function onTapDown;
-  final Function onTapUp;
-  final Function onTap;
-  final Function onTapCancel;
-  final Function onDoubleTap;
-  final Function onLongPress;
-  final Function onLongPressUp;
-  final Function onVerticalDragDown;
-  final Function onVerticalDragStart;
-  final Function onVerticalDragUpdate;
-  final Function onVerticalDragEnd;
-  final Function onVerticalDragCancel;
-  final Function onHorizontalDragDown;
-  final Function onHorizontalDragStart;
-  final Function onHorizontalDragUpdate;
-  final Function onHorizontalDragEnd;
-  final Function onHorizontalDragCancel;
-  final Function onPanDown;
-  final Function onPanStart;
-  final Function onPanUpdate;
-  final Function onPanEnd;
-  final Function onPanCancel;
-  final Function onResetEnd;
-  final Function onScaleStart;
-  final Function onScaleUpdate;
-  final Function onScaleEnd;
+  final GestureTapDownCallback onTapDown;
+  final GestureTapUpCallback onTapUp;
+  final GestureTapCallback onTap;
+  final GestureTapCancelCallback onTapCancel;
+  final GestureTapCallback onDoubleTap;
+  final GestureLongPressCallback onLongPress;
+  final GestureLongPressUpCallback onLongPressUp;
+  final GestureDragDownCallback onVerticalDragDown;
+  final GestureDragStartCallback onVerticalDragStart;
+  final GestureDragUpdateCallback onVerticalDragUpdate;
+  final GestureDragEndCallback onVerticalDragEnd;
+  final GestureDragCancelCallback onVerticalDragCancel;
+  final GestureDragDownCallback onHorizontalDragDown;
+  final GestureDragStartCallback onHorizontalDragStart;
+  final GestureDragUpdateCallback onHorizontalDragUpdate;
+  final GestureDragEndCallback onHorizontalDragEnd;
+  final GestureDragCancelCallback onHorizontalDragCancel;
+  final GestureDragDownCallback onPanDown;
+  final GestureDragStartCallback onPanStart;
+  final GestureDragUpdateCallback onPanUpdate;
+  final GestureDragEndCallback onPanEnd;
+  final GestureDragCancelCallback onPanCancel;
+  final ResetEndCallback onResetEnd;
+  final GestureScaleStartCallback onScaleStart;
+  final GestureScaleUpdateCallback onScaleUpdate;
+  final GestureScaleEndCallback onScaleEnd;
   final double maxScale;
   final double minScale;
-  final Rect visibleRect;
+  final Rect boundaryRect;
   final bool disableTranslation;
   final bool disableScale;
   final bool disableRotation;
@@ -121,7 +130,7 @@ class TransformInteractionState extends State<TransformInteraction> with TickerP
   Offset _translateFromScene; // Point where a single translation began
   double _scaleStart; // Scale value at start of scaling gesture
   double _rotationStart = 0.0; // Rotation at start of rotation gesture
-  Rect _visibleRect;
+  Rect _boundaryRect;
   Matrix4 _transform = Matrix4.identity();
   double _currentRotation = 0.0;
   GestureType gestureType;
@@ -163,7 +172,7 @@ class TransformInteractionState extends State<TransformInteraction> with TickerP
   @override
   void initState() {
     super.initState();
-    _visibleRect = widget.visibleRect ?? Offset.zero & widget.size;
+    _boundaryRect = widget.boundaryRect ?? Offset.zero & widget.size;
     _transform = _initialTransform;
     _controller = AnimationController(
       vsync: this,
@@ -191,27 +200,71 @@ class TransformInteractionState extends State<TransformInteraction> with TickerP
     // its child, which is the CustomPaint.
     return GestureDetector(
       behavior: HitTestBehavior.opaque, // Necessary when translating off screen
-      onTapDown: widget.onTapDown == null ? null : (TapDownDetails details) => widget.onTapDown(fromViewport(details.globalPosition - getOffset(context), _transform)),
-      onTapUp: widget.onTapUp == null ? null : (TapUpDetails details) => widget.onTapUp(fromViewport(details.globalPosition - getOffset(context), _transform)),
+      onTapDown: widget.onTapDown == null ? null : (TapDownDetails details) {
+        widget.onTapDown(TapDownDetails(
+          globalPosition: fromViewport(details.globalPosition - getOffset(context), _transform),
+        ));
+      },
+      onTapUp: widget.onTapUp == null ? null : (TapUpDetails details) {
+        widget.onTapUp(TapUpDetails(
+          globalPosition: fromViewport(details.globalPosition - getOffset(context), _transform),
+        ));
+      },
       onTap: widget.onTap,
       onTapCancel: widget.onTapCancel,
       onDoubleTap: widget.onDoubleTap,
       onLongPress: widget.onLongPress,
       onLongPressUp: widget.onLongPressUp,
-      onVerticalDragDown: widget.onVerticalDragDown == null ? null : (DragDownDetails details) => widget.onVerticalDragDown(fromViewport(details.globalPosition - getOffset(context), _transform)),
-      onVerticalDragStart: widget.onVerticalDragStart == null ? null : (DragStartDetails details) => widget.onVerticalDragStart(fromViewport(details.globalPosition - getOffset(context), _transform)),
-      onVerticalDragUpdate: widget.onVerticalDragUpdate == null ? null : (DragUpdateDetails details) => widget.onVerticalDragUpdate(fromViewport(details.globalPosition - getOffset(context), _transform)),
-      onVerticalDragEnd: widget.onVerticalDragEnd == null ? null : (DragEndDetails details) => widget.onVerticalDragEnd(),
+      onVerticalDragDown: widget.onVerticalDragDown == null ? null : (DragDownDetails details) {
+        widget.onVerticalDragDown(DragDownDetails(
+          globalPosition: fromViewport(details.globalPosition - getOffset(context), _transform),
+        ));
+      },
+      onVerticalDragStart: widget.onVerticalDragStart == null ? null : (DragStartDetails details) {
+        widget.onVerticalDragStart(DragStartDetails(
+          globalPosition: fromViewport(details.globalPosition - getOffset(context), _transform),
+        ));
+      },
+      onVerticalDragUpdate: widget.onVerticalDragUpdate == null ? null : (DragUpdateDetails details) {
+        widget.onVerticalDragUpdate(DragUpdateDetails(
+          globalPosition: fromViewport(details.globalPosition - getOffset(context), _transform),
+        ));
+      },
+      onVerticalDragEnd: widget.onVerticalDragEnd,
       onVerticalDragCancel: widget.onVerticalDragCancel,
-      onHorizontalDragDown: widget.onHorizontalDragDown == null ? null : (DragDownDetails details) => widget.onHorizontalDragDown(fromViewport(details.globalPosition - getOffset(context), _transform)),
-      onHorizontalDragStart: widget.onHorizontalDragStart == null ? null : (DragStartDetails details) => widget.onHorizontalDragStart(fromViewport(details.globalPosition - getOffset(context), _transform)),
-      onHorizontalDragUpdate: widget.onHorizontalDragUpdate == null ? null : (DragUpdateDetails details) => widget.onHorizontalDragUpdate(fromViewport(details.globalPosition - getOffset(context), _transform)),
+      onHorizontalDragDown: widget.onHorizontalDragDown == null ? null : (DragDownDetails details) {
+        widget.onHorizontalDragDown(DragDownDetails(
+          globalPosition: fromViewport(details.globalPosition - getOffset(context), _transform),
+        ));
+      },
+      onHorizontalDragStart: widget.onHorizontalDragStart == null ? null : (DragStartDetails details) {
+        widget.onHorizontalDragStart(DragStartDetails(
+          globalPosition: fromViewport(details.globalPosition - getOffset(context), _transform),
+        ));
+      },
+      onHorizontalDragUpdate: widget.onHorizontalDragUpdate == null ? null : (DragUpdateDetails details) {
+        widget.onHorizontalDragUpdate(DragUpdateDetails(
+          globalPosition: fromViewport(details.globalPosition - getOffset(context), _transform),
+        ));
+      },
       onHorizontalDragEnd: widget.onHorizontalDragEnd,
       onHorizontalDragCancel: widget.onHorizontalDragCancel,
-      onPanDown: widget.onPanDown == null ? null : (DragDownDetails details) => widget.onPanDown(fromViewport(details.globalPosition - getOffset(context), _transform)),
-      onPanStart: widget.onPanStart == null ? null : (DragStartDetails details) => widget.onPanStart(fromViewport(details.globalPosition - getOffset(context), _transform)),
-      onPanUpdate: widget.onPanUpdate == null ? null : (DragUpdateDetails details) => widget.onPanUpdate(fromViewport(details.globalPosition - getOffset(context), _transform)),
-      onPanEnd: widget.onPanEnd == null ? null : (DragEndDetails details) => widget.onPanEnd(),
+      onPanDown: widget.onPanDown == null ? null : (DragDownDetails details) {
+        widget.onPanDown(DragDownDetails(
+          globalPosition: fromViewport(details.globalPosition - getOffset(context), _transform),
+        ));
+      },
+      onPanStart: widget.onPanStart == null ? null : (DragStartDetails details) {
+        widget.onPanStart(DragStartDetails(
+          globalPosition: fromViewport(details.globalPosition - getOffset(context), _transform),
+        ));
+      },
+      onPanUpdate: widget.onPanUpdate == null ? null : (DragUpdateDetails details) {
+        widget.onPanUpdate(DragUpdateDetails(
+          globalPosition: fromViewport(details.globalPosition - getOffset(context), _transform),
+        ));
+      },
+      onPanEnd: widget.onPanEnd,
       onPanCancel: widget.onPanCancel,
       onScaleEnd: _onScaleEnd,
       onScaleStart: _onScaleStart,
@@ -237,22 +290,22 @@ class TransformInteractionState extends State<TransformInteraction> with TickerP
       return matrix;
     }
 
-    // Clamp translation so the viewport remains inside _visibleRect.
+    // Clamp translation so the viewport remains inside _boundaryRect.
     final double scale = _transform.getMaxScaleOnAxis();
     final Size scaledSize = widget.size / scale;
-    final Rect boundaries = Rect.fromLTRB(
-      _visibleRect.left,
-      _visibleRect.top,
-      _visibleRect.right - scaledSize.width,
-      _visibleRect.bottom - scaledSize.height,
+    final Rect viewportBoundaries = Rect.fromLTRB(
+      _boundaryRect.left,
+      _boundaryRect.top,
+      _boundaryRect.right - scaledSize.width,
+      _boundaryRect.bottom - scaledSize.height,
     );
     // Translation is reversed (a positive translation moves the scene to the
     // right, viewport to the left).
     final Rect translationBoundaries = Rect.fromLTRB(
-      boundaries.right * -1 * scale,
-      boundaries.bottom * -1 * scale,
-      boundaries.left * -1 * scale,
-      boundaries.top * -1 * scale,
+      viewportBoundaries.right * -1 * scale,
+      viewportBoundaries.bottom * -1 * scale,
+      viewportBoundaries.left * -1 * scale,
+      viewportBoundaries.top * -1 * scale,
     );
     final Matrix4 nextMatrix = matrix.clone()..translate(
       translation.dx,
@@ -283,7 +336,7 @@ class TransformInteractionState extends State<TransformInteraction> with TickerP
     }
     assert(scale != 0);
 
-    // Don't allow a scale that moves the viewport outside of _visibleRect.
+    // Don't allow a scale that moves the viewport outside of _boundaryRect.
     final Offset tl = fromViewport(const Offset(0, 0), _transform);
     final Offset tr = fromViewport(Offset(widget.size.width, 0), _transform);
     final Offset bl = fromViewport(Offset(0, widget.size.height), _transform);
@@ -291,10 +344,10 @@ class TransformInteractionState extends State<TransformInteraction> with TickerP
       Offset(widget.size.width, widget.size.height),
       _transform,
     );
-    if (!_visibleRect.contains(tl)
-      || !_visibleRect.contains(tr)
-      || !_visibleRect.contains(bl)
-      || !_visibleRect.contains(br)) {
+    if (!_boundaryRect.contains(tl)
+      || !_boundaryRect.contains(tr)
+      || !_boundaryRect.contains(bl)
+      || !_boundaryRect.contains(br)) {
       return matrix;
     }
 
@@ -311,7 +364,7 @@ class TransformInteractionState extends State<TransformInteraction> with TickerP
 
   // Return a new matrix representing the given matrix after applying the given
   // rotation transform.
-  // Rotating the scene cannot cause the viewport to view beyond _visibleRect.
+  // Rotating the scene cannot cause the viewport to view beyond _boundaryRect.
   Matrix4 matrixRotate(Matrix4 matrix, double rotation, Offset focalPoint) {
     if (widget.disableRotation || rotation == 0) {
       return matrix;
@@ -326,7 +379,7 @@ class TransformInteractionState extends State<TransformInteraction> with TickerP
   // Handle panning and pinch zooming events
   void _onScaleStart(ScaleStartDetails details) {
     if (widget.onScaleStart != null) {
-      widget.onScaleStart();
+      widget.onScaleStart(details);
     }
 
     // TODO(justinmc): Do things like this need to happen inside of setState? I
@@ -353,10 +406,14 @@ class TransformInteractionState extends State<TransformInteraction> with TickerP
     });
   }
   void _onScaleUpdate(ScaleUpdateDetails details) {
-    if (widget.onScaleUpdate != null) {
-      widget.onScaleUpdate(fromViewport(details.focalPoint, _transform));
-    }
     double scale = _transform.getMaxScaleOnAxis();
+    if (widget.onScaleUpdate != null) {
+      widget.onScaleUpdate(ScaleUpdateDetails(
+        focalPoint: fromViewport(details.focalPoint, _transform),
+        scale: details.scale,
+        rotation: details.rotation,
+      ));
+    }
     final Offset focalPointScene = fromViewport(
       details.focalPoint,
       _transform,
@@ -407,8 +464,8 @@ class TransformInteractionState extends State<TransformInteraction> with TickerP
     });
   }
   void _onScaleEnd(ScaleEndDetails details) {
-    if (widget.onScaleStart != null) {
-      widget.onScaleStart();
+    if (widget.onScaleEnd != null) {
+      widget.onScaleEnd(details);
     }
     setState(() {
       _scaleStart = null;
