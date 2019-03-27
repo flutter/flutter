@@ -44,9 +44,9 @@ abstract class CodeGenerator {
   Future<void> generateBuildScript(FlutterProject flutterProject);
 
   /// Create generated packages file which adds a multi-root scheme to the user's
-  // project directory. Currently we only replace the root package with a multiroot
-  // scheme. To support codegen on arbitrary packages we would need to do
-  // this for each dependency.
+  /// project directory. Currently we only replace the root package with a multiroot
+  /// scheme. To support codegen on arbitrary packages we would need to do
+  /// this for each dependency.
   void updatePackages(FlutterProject flutterProject) {
     final String oldPackagesContents = fs.file(PackageMap.globalPackagesPath).readAsStringSync();
     final String appName = flutterProject.manifest.appName;
@@ -221,7 +221,7 @@ class CodeGeneratingResidentCompiler implements ResidentCompiler {
       });
     }
     if (_codegenDaemon.lastStatus == CodegenStatus.Failed) {
-      printError('Codegeneration failed, build may have compile errors.');
+      printError('Code generation failed, build may have compile errors.');
     }
     // Update the generated packages file if the original packages file has changes.
     if (fs.statSync(PackageMap.globalPackagesPath).modified.millisecondsSinceEpoch >
