@@ -13,8 +13,29 @@ import 'terminal.dart';
 import 'utils.dart';
 
 const int kDefaultStatusPadding = 59;
-const Duration kFastOperation = Duration(seconds: 2);
-const Duration kSlowOperation = Duration(minutes: 2);
+const Duration _kFastOperation = Duration(seconds: 2);
+const Duration _kSlowOperation = Duration(minutes: 2);
+
+/// The [TimeoutConfiguration] instance.
+///
+/// If not provided via injection, a default instance is provided.
+TimeoutConfiguration get timeoutConfiguration => context[TimeoutConfiguration] ?? const TimeoutConfiguration();
+
+class TimeoutConfiguration {
+  const TimeoutConfiguration();
+
+  /// The expected time that various "slow" operations take, such as running
+  /// the analyzer.
+  ///
+  /// Defaults to 2 minutes.
+  Duration get slowOperation => _kSlowOperation;
+
+  /// The expected time that various "fast" operations take, such as a hot
+  /// reload.
+  ///
+  /// Defaults to 2 seconds.
+  Duration get fastOperation => _kFastOperation;
+}
 
 typedef VoidCallback = void Function();
 
@@ -375,7 +396,7 @@ class VerboseLogger extends Logger {
       timeout: timeout,
       onFinish: () {
         String time;
-        if (timeout == null || timeout > kFastOperation) {
+        if (timeout == null || timeout > timeoutConfiguration.fastOperation) {
           time = getElapsedAsSeconds(timer.elapsed);
         } else {
           time = getElapsedAsMilliseconds(timer.elapsed);
@@ -473,7 +494,7 @@ abstract class Status {
 
   @protected
   String get elapsedTime {
-    if (timeout == null || timeout > kFastOperation)
+    if (timeout == null || timeout > timeoutConfiguration.fastOperation)
       return getElapsedAsSeconds(_stopwatch.elapsed);
     return getElapsedAsMilliseconds(_stopwatch.elapsed);
   }
