@@ -3,11 +3,13 @@
 // found in the LICENSE file.
 
 import 'dart:math' show min, max;
-import 'dart:ui' as ui show Paragraph, ParagraphBuilder, ParagraphConstraints, ParagraphStyle;
+import 'dart:ui' as ui show Paragraph, ParagraphBuilder, ParagraphConstraints, ParagraphStyle, Rect;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/rendering.dart';
 
 import 'basic_types.dart';
 import 'strut_style.dart';
@@ -226,6 +228,9 @@ class TextPainter {
 
   ui.Paragraph _layoutTemplate;
 
+  List<TextBox> _inlineWidgetPlaceholderBoxes;
+  List<TextBox> get inlineWidgetPlaceholderBoxes => _inlineWidgetPlaceholderBoxes;
+
   ui.ParagraphStyle _createParagraphStyle([ TextDirection defaultTextDirection ]) {
     // The defaultTextDirection argument is used for preferredLineHeight in case
     // textDirection hasn't yet been set.
@@ -385,9 +390,11 @@ class TextPainter {
     _paragraph.layout(ui.ParagraphConstraints(width: maxWidth));
     if (minWidth != maxWidth) {
       final double newWidth = maxIntrinsicWidth.clamp(minWidth, maxWidth);
-      if (newWidth != width)
+      if (newWidth != width) {
         _paragraph.layout(ui.ParagraphConstraints(width: newWidth));
+      }
     }
+    _inlineWidgetPlaceholderBoxes = _paragraph.getBoxesForPlaceholders();
   }
 
   /// Paints the text onto the given canvas at the given offset.
@@ -413,7 +420,41 @@ class TextPainter {
       return true;
     }());
     canvas.drawParagraph(_paragraph, offset);
+    // Paint p = Paint();
+    // p.color = const Color(0x5FF00000);
+
+    // assert(_inlineWidgetPlaceholderBoxes != null);
+    // for (TextBox b in _inlineWidgetPlaceholderBoxes) {
+    //   canvas.drawRect(Rect.fromLTRB(offset.dx + b.left, offset.dy + b.top, offset.dx + b.right, offset.dy + b.bottom), p);
+    // }
   }
+
+  // int _widget_index;
+
+  // /// Paints the inline widgets.
+  // void paintInlineWidgets(PaintingContext context, Offset offset) {
+  //   _widget_index = 0;
+  //   _paintWidget(_text, context, offset);
+  // }
+
+  // void _paintWidget(TextSpan TextSpan, PaintingContext context, Offset offset) {
+  //   if (TextSpan is WidgetSpan) {
+  //     print("PAINTING INLINE WIDGET!!!!!!!!!!!!!!! ${_inlineWidgetPlaceholderBoxes[_widget_index]}");
+  //     WidgetSpan widgetSpan = TextSpan as WidgetSpan;
+  //     RenderObject robj = widgetSpan.child.createRenderObject(widgetSpan.child.createElement());
+  //     // robj.paint(context, offset + Offset(100, 55));
+  //     robj.paint(context, offset + Offset(_inlineWidgetPlaceholderBoxes[_widget_index].left, _inlineWidgetPlaceholderBoxes[_widget_index].top));
+  //     _widget_index++;
+  //   }
+  //   else {
+  //     TextSpan textSpan = TextSpan as TextSpan;
+  //     if (textSpan.children != null) {
+  //       for (TextSpan child in textSpan.children) {
+  //         _paintWidget(child, context, offset);
+  //       }
+  //     }
+  //   }
+  // }
 
   // Complex glyphs can be represented by two or more UTF16 codepoints. This
   // checks if the value represents a UTF16 glyph by itself or is a 'surrogate'.

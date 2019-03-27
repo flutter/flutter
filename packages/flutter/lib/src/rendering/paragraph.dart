@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show Gradient, Shader, TextBox;
+import 'dart:ui' as ui show Gradient, Shader, TextBox, Offset;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -14,6 +14,7 @@ import 'package:flutter/services.dart';
 import 'box.dart';
 import 'debug.dart';
 import 'object.dart';
+import 'stack.dart';
 
 /// How overflowing text should be handled.
 enum TextOverflow {
@@ -32,8 +33,75 @@ enum TextOverflow {
 
 const String _kEllipsis = '\u2026';
 
+/// Parent data for use with [RenderParagraph].
+class TextParentData extends ContainerBoxParentData<RenderBox> {
+  /// The distance by which the child's top edge is inset from the top of the stack.
+  double top;
+
+  /// The distance by which the child's right edge is inset from the right of the stack.
+  double right;
+
+  /// The distance by which the child's bottom edge is inset from the bottom of the stack.
+  double bottom;
+
+  /// The distance by which the child's left edge is inset from the left of the stack.
+  double left;
+
+  /// The child's width.
+  ///
+  /// Ignored if both left and right are non-null.
+  double width;
+
+  /// The child's height.
+  ///
+  /// Ignored if both top and bottom are non-null.
+  double height;
+
+  Offset offset;
+
+  /// Get or set the current values in terms of a RelativeRect object.
+  RelativeRect get rect => RelativeRect.fromLTRB(left, top, right, bottom);
+  set rect(RelativeRect value) {
+    top = value.top;
+    right = value.right;
+    bottom = value.bottom;
+    left = value.left;
+  }
+
+  /// Whether this child is considered positioned.
+  ///
+  /// A child is positioned if any of the top, right, bottom, or left properties
+  /// are non-null. Positioned children do not factor into determining the size
+  /// of the stack but are instead placed relative to the non-positioned
+  /// children in the stack.
+  bool get isPositioned => top != null || right != null || bottom != null || left != null || width != null || height != null;
+
+  @override
+  String toString() {
+    final List<String> values = <String>[];
+    if (top != null)
+      values.add('top=$top');
+    if (right != null)
+      values.add('right=$right');
+    if (bottom != null)
+      values.add('bottom=$bottom');
+    if (left != null)
+      values.add('left=$left');
+    if (width != null)
+      values.add('width=$width');
+    if (height != null)
+      values.add('height=$height');
+    if (values.isEmpty)
+      values.add('not positioned');
+    values.add(super.toString());
+    return values.join('; ');
+  }
+}
+
 /// A render object that displays a paragraph of text
-class RenderParagraph extends RenderBox {
+class RenderParagraph extends RenderBox
+    with ContainerRenderObjectMixin<RenderBox, TextParentData>,
+             RenderBoxContainerDefaultsMixin<RenderBox, TextParentData> {
   /// Creates a paragraph render object.
   ///
   /// The [text], [textAlign], [textDirection], [overflow], [softWrap], and
@@ -41,8 +109,7 @@ class RenderParagraph extends RenderBox {
   ///
   /// The [maxLines] property may be null (and indeed defaults to null), but if
   /// it is not null, it must be greater than zero.
-  RenderParagraph(
-    TextSpan text, {
+  RenderParagraph(TextSpan text, {
     TextAlign textAlign = TextAlign.start,
     @required TextDirection textDirection,
     bool softWrap = true,
@@ -51,6 +118,7 @@ class RenderParagraph extends RenderBox {
     int maxLines,
     Locale locale,
     StrutStyle strutStyle,
+    List<RenderBox> children,
   }) : assert(text != null),
        assert(text.debugAssertIsValid()),
        assert(textAlign != null),
@@ -70,7 +138,15 @@ class RenderParagraph extends RenderBox {
          ellipsis: overflow == TextOverflow.ellipsis ? _kEllipsis : null,
          locale: locale,
          strutStyle: strutStyle,
-       );
+       ) {
+   addAll(children);
+  }
+
+  @override
+  void setupParentData(RenderBox child) {
+    if (child.parentData is! TextParentData)
+      child.parentData = TextParentData();
+  }
 
   final TextPainter _textPainter;
 
@@ -284,6 +360,11 @@ class RenderParagraph extends RenderBox {
 
   @override
   void performLayout() {
+    RenderBox child = firstChild;
+    while (child != null) {
+      child.layout(BoxConstraints(), parentUsesSize: true);
+      child = childAfter(child);
+    }
     _layoutTextWithConstraints(constraints);
     // We grab _textPainter.size and _textPainter.didExceedMaxLines here because
     // assigning to `size` will trigger us to validate our intrinsic sizes,
@@ -392,6 +473,19 @@ class RenderParagraph extends RenderBox {
       canvas.clipRect(bounds);
     }
     _textPainter.paint(canvas, offset);
+
+    RenderBox child = firstChild;
+    int childIndex = 0;
+    while (child != null && childIndex < _textPainter.inlineWidgetPlaceholderBoxes.length) {
+      print('PAINTING CHILD $child');
+      child.paint(context, offset + Offset(
+          _textPainter.inlineWidgetPlaceholderBoxes[childIndex].left,
+          _textPainter.inlineWidgetPlaceholderBoxes[childIndex].top
+        )
+      );
+      child = childAfter(child);
+      childIndex++;
+    }
     if (_needsClipping) {
       if (_overflowShader != null) {
         canvas.translate(offset.dx, offset.dy);

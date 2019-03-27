@@ -169,6 +169,12 @@ class TextSpan extends DiagnosticableTree {
   /// objects.
   void build(ui.ParagraphBuilder builder, { double textScaleFactor = 1.0 }) {
     assert(debugAssertIsValid());
+
+    if (widget != null) {
+      builder.addPlaceholder(48, 48, 48);
+      return;
+    }
+
     final bool hasStyle = style != null;
     if (hasStyle)
       builder.pushStyle(style.getTextStyle(textScaleFactor: textScaleFactor));
