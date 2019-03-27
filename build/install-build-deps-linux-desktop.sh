@@ -8,4 +8,4 @@
 
 set -e
 
-sudo apt-get -y install libglfw3-dev libepoxy-dev libgtk-3-dev libx11-dev
+sudo apt-get -y install libglfw3-dev libgtk-3-dev libx11-dev
