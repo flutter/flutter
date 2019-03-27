@@ -39,19 +39,21 @@ static fml::RefPtr<EmbedderTaskRunner> CreateEmbedderTaskRunner(
       description->runs_task_on_current_thread_callback;
 
   EmbedderTaskRunner::DispatchTable task_runner_dispatch_table = {
-      .post_task_callback = [post_task_callback_c, user_data](
-                                EmbedderTaskRunner* task_runner,
-                                uint64_t task_baton,
-                                fml::TimePoint target_time) -> void {
+      // .post_task_callback
+      [post_task_callback_c, user_data](EmbedderTaskRunner* task_runner,
+                                        uint64_t task_baton,
+                                        fml::TimePoint target_time) -> void {
         FlutterTask task = {
-            .runner = reinterpret_cast<FlutterTaskRunner>(task_runner),
-            .task = task_baton,
+            // runner
+            reinterpret_cast<FlutterTaskRunner>(task_runner),
+            // task
+            task_baton,
         };
         post_task_callback_c(task, target_time.ToEpochDelta().ToNanoseconds(),
                              user_data);
       },
-      .runs_task_on_current_thread_callback =
-          [runs_task_on_current_thread_callback_c, user_data]() -> bool {
+      // runs_task_on_current_thread_callback
+      [runs_task_on_current_thread_callback_c, user_data]() -> bool {
         return runs_task_on_current_thread_callback_c(user_data);
       }};
 
