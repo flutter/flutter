@@ -205,6 +205,7 @@ class PointerEventConverter {
                 tilt: datum.tilt,
                 synthesized: true,
               );
+              state.lastPosition = position;
             }
             state.startNewPointer();
             state.setDown();
