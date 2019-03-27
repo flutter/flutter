@@ -8,7 +8,7 @@ import '../base/common.dart';
 import '../base/logger.dart';
 import '../build_info.dart';
 import '../globals.dart';
-import '../runner/flutter_command.dart' show FlutterCommandResult;
+import '../runner/flutter_command.dart' show DevelopmentArtifact, FlutterCommandResult;
 import '../web/compile.dart';
 import 'build.dart';
 
@@ -18,6 +18,12 @@ class BuildWebCommand extends BuildSubCommand {
     usesPubOption();
     defaultBuildMode = BuildMode.release;
   }
+
+  @override
+  Set<DevelopmentArtifact> get requiredArtifacts => const <DevelopmentArtifact>{
+    DevelopmentArtifact.universal,
+    DevelopmentArtifact.web,
+  };
 
   @override
   final String name = 'web';

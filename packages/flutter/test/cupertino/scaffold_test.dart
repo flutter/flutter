@@ -25,6 +25,34 @@ void main() {
     expect(tester.getTopLeft(find.byType(Center)), const Offset(0.0, 0.0));
   });
 
+testWidgets('Opaque bar pushes contents down', (WidgetTester tester) async {
+    BuildContext childContext;
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: MediaQuery(
+        data: const MediaQueryData(viewInsets: EdgeInsets.only(top: 20)),
+        child: CupertinoPageScaffold(
+          navigationBar: const CupertinoNavigationBar(
+            middle: Text('Opaque'),
+            backgroundColor: Color(0xFFF8F8F8),
+          ),
+          child: Builder(
+            builder: (BuildContext context) {
+              childContext = context;
+              return Container();
+            },
+          ),
+        ),
+      ),
+    ));
+
+    expect(MediaQuery.of(childContext).padding.top, 0);
+    // The top of the [Container] is 44 px from the top of the screen because
+    // it's pushed down by the opaque navigation bar whose height is 44 px,
+    // and the 20 px [MediaQuery] top padding is fully absorbed by the navigation bar.
+    expect(tester.getRect(find.byType(Container)), Rect.fromLTRB(0, 44, 800, 600));
+  });
+
   testWidgets('Contents padding from viewInsets', (WidgetTester tester) async {
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
@@ -314,5 +342,57 @@ void main() {
 
     final BoxDecoration decoration = decoratedBox.decoration;
     expect(decoration.color, const Color(0xFF010203));
+  });
+
+  testWidgets('Lists in CupertinoPageScaffold scroll to the top when status bar tapped', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        builder: (BuildContext context, Widget child) {
+          // Acts as a 20px status bar at the root of the app.
+          return MediaQuery(
+            data: MediaQuery.of(context).copyWith(padding: const EdgeInsets.only(top: 20)),
+            child: child,
+          );
+        },
+        home: CupertinoPageScaffold(
+          // Default nav bar is translucent.
+          navigationBar: const CupertinoNavigationBar(
+            middle: Text('Title'),
+          ),
+          child: ListView.builder(
+            itemExtent: 50,
+            itemBuilder: (BuildContext context, int index) => Text(index.toString()),
+          ),
+        ),
+      ),
+    );
+    // Top media query padding 20 + translucent nav bar 44.
+    expect(tester.getTopLeft(find.text('0')).dy, 64);
+    expect(tester.getTopLeft(find.text('6')).dy, 364);
+
+    await tester.fling(
+      find.text('5'), // Find some random text on the screen.
+      const Offset(0, -200),
+      20,
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(tester.getTopLeft(find.text('6')).dy, moreOrLessEquals(166.833, epsilon: 0.1));
+    expect(tester.getTopLeft(find.text('12')).dy, moreOrLessEquals(466.8333333333334, epsilon: 0.1));
+
+    // The media query top padding is 20. Tapping at 20 should do nothing.
+    await tester.tapAt(const Offset(400, 20));
+    await tester.pumpAndSettle();
+    expect(tester.getTopLeft(find.text('6')).dy, moreOrLessEquals(166.833, epsilon: 0.1));
+    expect(tester.getTopLeft(find.text('12')).dy, moreOrLessEquals(466.8333333333334, epsilon: 0.1));
+
+    // Tap 1 pixel higher.
+    await tester.tapAt(const Offset(400, 19));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(tester.getTopLeft(find.text('0')).dy, 64);
+    expect(tester.getTopLeft(find.text('6')).dy, 364);
+    expect(find.text('12'), findsNothing);
   });
 }
