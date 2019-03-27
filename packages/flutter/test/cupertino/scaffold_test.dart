@@ -320,6 +320,7 @@ void main() {
     await tester.pumpWidget(
       CupertinoApp(
         builder: (BuildContext context, Widget child) {
+          // Acts as a 20px status bar at the root of the app.
           return MediaQuery(
             data: MediaQuery.of(context).copyWith(padding: const EdgeInsets.only(top: 20)),
             child: child,
@@ -337,7 +338,7 @@ void main() {
         ),
       ),
     );
-    // Top padding 20 + translucent nav bar 44.
+    // Top media query padding 20 + translucent nav bar 44.
     expect(tester.getTopLeft(find.text('0')).dy, 64);
     expect(tester.getTopLeft(find.text('6')).dy, 364);
 

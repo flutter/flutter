@@ -68,6 +68,7 @@ class _CupertinoPageScaffoldState extends State<CupertinoPageScaffold> {
   final ScrollController _primaryScrollController = ScrollController();
 
   void _handleStatusBarTap() {
+    // Only act on the scroll controller if it has any attached scroll positions.
     if (_primaryScrollController.hasClients) {
       _primaryScrollController.animateTo(
         0.0,
@@ -82,14 +83,10 @@ class _CupertinoPageScaffoldState extends State<CupertinoPageScaffold> {
   Widget build(BuildContext context) {
     final List<Widget> stacked = <Widget>[];
 
-    Widget paddedContent = PrimaryScrollController(
-      controller: _primaryScrollController,
-      child: widget.child,
-    );
+    Widget paddedContent = widget.child;
 
     final MediaQueryData existingMediaQuery = MediaQuery.of(context);
     if (widget.navigationBar != null) {
-
       // TODO(xster): Use real size after partial layout instead of preferred size.
       // https://github.com/flutter/flutter/issues/12912
       final double topPadding =
@@ -139,7 +136,10 @@ class _CupertinoPageScaffoldState extends State<CupertinoPageScaffold> {
     }
 
     // The main content being at the bottom is added to the stack first.
-    stacked.add(paddedContent);
+    stacked.add(PrimaryScrollController(
+      controller: _primaryScrollController,
+      child: paddedContent,
+    ));
 
     if (widget.navigationBar != null) {
       stacked.add(Positioned(
@@ -150,6 +150,8 @@ class _CupertinoPageScaffoldState extends State<CupertinoPageScaffold> {
       ));
     }
 
+    // Add a touch handler the size of the status bar on top of all contents
+    // to handle scroll to top by status bar taps.
     stacked.add(Positioned(
       top: 0.0,
       left: 0.0,
