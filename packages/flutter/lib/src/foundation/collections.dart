@@ -46,7 +46,6 @@ bool listEquals<T>(List<T> a, List<T> b) {
   return true;
 }
 
-
 /// Returns the position of `value` in the `sortedList`, if it exists.
 ///
 /// Returns `-1` if the `value` is not in the list. Requires the list items
