@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 void main() {}
 
 @pragma('vm:entry-point')
@@ -18,3 +20,9 @@ void customEntrypoint1() {
 void sayHiFromCustomEntrypoint1() native "SayHiFromCustomEntrypoint1";
 void sayHiFromCustomEntrypoint2() native "SayHiFromCustomEntrypoint2";
 void sayHiFromCustomEntrypoint3() native "SayHiFromCustomEntrypoint3";
+
+
+@pragma('vm:entry-point')
+void invokePlatformTaskRunner() {
+  window.sendPlatformMessage('OhHi', null, null);
+}

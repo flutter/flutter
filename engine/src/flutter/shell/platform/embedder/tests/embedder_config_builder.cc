@@ -13,6 +13,7 @@ EmbedderConfigBuilder::EmbedderConfigBuilder(
     : context_(context) {
   project_args_.struct_size = sizeof(project_args_);
   software_renderer_config_.struct_size = sizeof(FlutterSoftwareRendererConfig);
+  custom_task_runners_.struct_size = sizeof(FlutterCustomTaskRunners);
   software_renderer_config_.surface_present_callback =
       [](void*, const void*, size_t, size_t) { return true; };
 
@@ -71,8 +72,43 @@ void EmbedderConfigBuilder::SetDartEntrypoint(std::string entrypoint) {
   project_args_.custom_dart_entrypoint = dart_entrypoint_.c_str();
 }
 
-UniqueEngine EmbedderConfigBuilder::LaunchEngine() const {
+void EmbedderConfigBuilder::AddCommandLineArgument(std::string arg) {
+  if (arg.size() == 0) {
+    return;
+  }
+
+  command_line_arguments_.emplace_back(std::move(arg));
+}
+
+void EmbedderConfigBuilder::SetPlatformTaskRunner(
+    const FlutterTaskRunnerDescription* runner) {
+  if (runner == nullptr) {
+    return;
+  }
+  custom_task_runners_.platform_task_runner = runner;
+  project_args_.custom_task_runners = &custom_task_runners_;
+}
+
+UniqueEngine EmbedderConfigBuilder::LaunchEngine() {
   FlutterEngine engine = nullptr;
+
+  std::vector<const char*> args;
+  args.reserve(command_line_arguments_.size());
+
+  for (const auto& arg : command_line_arguments_) {
+    args.push_back(arg.c_str());
+  }
+
+  if (args.size() > 0) {
+    project_args_.command_line_argv = args.data();
+    project_args_.command_line_argc = args.size();
+  } else {
+    // Clear it out in case this is not the first engine launch from the
+    // embedder config builder.
+    project_args_.command_line_argv = nullptr;
+    project_args_.command_line_argc = 0;
+  }
+
   auto result = FlutterEngineRun(FLUTTER_ENGINE_VERSION, &renderer_config_,
                                  &project_args_, &context_, &engine);
 

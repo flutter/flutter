@@ -19,7 +19,7 @@ struct UniqueEngineTraits {
 
   static bool IsValid(const FlutterEngine& value) { return value != nullptr; }
 
-  static void Free(FlutterEngine engine) {
+  static void Free(FlutterEngine& engine) {
     auto result = FlutterEngineShutdown(engine);
     FML_CHECK(result == kSuccess);
   }
@@ -50,7 +50,11 @@ class EmbedderConfigBuilder {
 
   void SetDartEntrypoint(std::string entrypoint);
 
-  UniqueEngine LaunchEngine() const;
+  void AddCommandLineArgument(std::string arg);
+
+  void SetPlatformTaskRunner(const FlutterTaskRunnerDescription* runner);
+
+  UniqueEngine LaunchEngine();
 
  private:
   EmbedderContext& context_;
@@ -58,6 +62,8 @@ class EmbedderConfigBuilder {
   FlutterRendererConfig renderer_config_ = {};
   FlutterSoftwareRendererConfig software_renderer_config_ = {};
   std::string dart_entrypoint_;
+  FlutterCustomTaskRunners custom_task_runners_ = {};
+  std::vector<std::string> command_line_arguments_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(EmbedderConfigBuilder);
 };
