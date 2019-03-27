@@ -25,6 +25,34 @@ void main() {
     expect(tester.getTopLeft(find.byType(Center)), const Offset(0.0, 0.0));
   });
 
+testWidgets('Opaque bar pushes contents down', (WidgetTester tester) async {
+    BuildContext childContext;
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: MediaQuery(
+        data: const MediaQueryData(viewInsets: EdgeInsets.only(top: 20)),
+        child: CupertinoPageScaffold(
+          navigationBar: const CupertinoNavigationBar(
+            middle: Text('Opaque'),
+            backgroundColor: Color(0xFFF8F8F8),
+          ),
+          child: Builder(
+            builder: (BuildContext context) {
+              childContext = context;
+              return Container();
+            },
+          ),
+        ),
+      ),
+    ));
+
+    expect(MediaQuery.of(childContext).padding.top, 0);
+    // The top of the [Container] is 44 px from the top of the screen because
+    // it's pushed down by the opaque navigation bar whose height is 44 px,
+    // and the 20 px [MediaQuery] top padding is fully absorbed by the navigation bar.
+    expect(tester.getRect(find.byType(Container)), Rect.fromLTRB(0, 44, 800, 600));
+  });
+
   testWidgets('Contents padding from viewInsets', (WidgetTester tester) async {
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
