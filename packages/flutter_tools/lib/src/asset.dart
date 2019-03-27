@@ -63,6 +63,10 @@ class _ManifestAssetBundle implements AssetBundle {
   @override
   final Map<String, DevFSContent> entries = <String, DevFSContent>{};
 
+  // If an asset corresponds to a wildcard directory, then it may have been
+  // updated without changes to the manifest.
+  final Map<Uri, Directory> _wildcardDirectories = <Uri, Directory>{};
+
   DateTime _lastBuildTimestamp;
 
   static const String defaultManifestPath = 'pubspec.yaml';
@@ -82,6 +86,12 @@ class _ManifestAssetBundle implements AssetBundle {
     final FileStat stat = fs.file(manifestPath).statSync();
     if (stat.type == FileSystemEntityType.notFound)
       return true;
+
+    for (Directory directory in _wildcardDirectories.values) {
+      if (directory.statSync().modified.isAfter(_lastBuildTimestamp)) {
+        return true;
+      }
+    }
 
     return stat.modified.isAfter(_lastBuildTimestamp);
   }
@@ -119,6 +129,7 @@ class _ManifestAssetBundle implements AssetBundle {
     final String assetBasePath = fs.path.dirname(fs.path.absolute(manifestPath));
 
     final PackageMap packageMap = PackageMap(packagesPath);
+    final List<Uri> wildcardDirectories = <Uri>[];
 
     // The _assetVariants map contains an entry for each asset listed
     // in the pubspec.yaml file's assets and font and sections. The
@@ -127,12 +138,14 @@ class _ManifestAssetBundle implements AssetBundle {
     final Map<_Asset, List<_Asset>> assetVariants = _parseAssets(
       packageMap,
       flutterManifest,
+      wildcardDirectories,
       assetBasePath,
       excludeDirs: <String>[assetDirPath, getBuildDirectory()],
     );
 
-    if (assetVariants == null)
+    if (assetVariants == null) {
       return 1;
+    }
 
     final List<Map<String, dynamic>> fonts = _parseFonts(
       flutterManifest,
@@ -156,6 +169,7 @@ class _ManifestAssetBundle implements AssetBundle {
         final Map<_Asset, List<_Asset>> packageAssets = _parseAssets(
           packageMap,
           packageFlutterManifest,
+          wildcardDirectories,
           packageBasePath,
           packageName: packageName,
         );
@@ -204,6 +218,11 @@ class _ManifestAssetBundle implements AssetBundle {
     for (_Asset asset in materialAssets) {
       assert(asset.assetFileExists);
       entries[asset.entryUri.path] ??= DevFSFileContent(asset.assetFile);
+    }
+
+    // Update wildcard directories we we can detect changes in them.
+    for (Uri uri in wildcardDirectories) {
+      _wildcardDirectories[uri] ??= fs.directory(uri);
     }
 
     entries[_assetManifestJson] = _createAssetManifest(assetVariants);
@@ -524,6 +543,7 @@ class _AssetDirectoryCache {
 Map<_Asset, List<_Asset>> _parseAssets(
   PackageMap packageMap,
   FlutterManifest flutterManifest,
+  List<Uri> wildcardDirectories,
   String assetBase, {
   List<String> excludeDirs = const <String>[],
   String packageName,
@@ -533,6 +553,7 @@ Map<_Asset, List<_Asset>> _parseAssets(
   final _AssetDirectoryCache cache = _AssetDirectoryCache(excludeDirs);
   for (Uri assetUri in flutterManifest.assets) {
     if (assetUri.toString().endsWith('/')) {
+      wildcardDirectories.add(assetUri);
       _parseAssetsFromFolder(packageMap, flutterManifest, assetBase,
           cache, result, assetUri,
           excludeDirs: excludeDirs, packageName: packageName);
