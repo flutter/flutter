@@ -118,8 +118,7 @@ class _AccountDetailsState extends State<_AccountDetails> with SingleTickerProvi
       return;
     }
 
-    if (_animation.status == AnimationStatus.dismissed ||
-        _animation.status == AnimationStatus.reverse) {
+    if (widget.isOpen) {
       _controller.forward();
     } else {
       _controller.reverse();
