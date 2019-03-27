@@ -360,6 +360,9 @@ class RenderParagraph extends RenderBox
 
   @override
   void performLayout() {
+    // Layout the child inline widgets. We pass the dimensions of the
+    // children to _textPainter so that appropriate placeholders can
+    // be inserted into the LibTxt layout.
     RenderBox child = firstChild;
     List<PlaceholderDimensions> placeholderDimensions = List(childCount);
     int childIndex = 0;
