@@ -182,8 +182,10 @@ Future<void> _runToolTests() async {
 
   // The flutter_tool will currently be snapshotted without asserts. We need
   // to force it to be regenerated with them enabled.
-  File(path.join(flutterRoot, 'bin', 'cache', 'flutter_tools.snapshot')).deleteSync();
-  File(path.join(flutterRoot, 'bin', 'cache', 'flutter_tools.stamp')).deleteSync();
+  if (!Platform.isWindows) {
+    File(path.join(flutterRoot, 'bin', 'cache', 'flutter_tools.snapshot')).deleteSync();
+    File(path.join(flutterRoot, 'bin', 'cache', 'flutter_tools.stamp')).deleteSync();
+  }
   if (noUseBuildRunner) {
     await _pubRunTest(
       path.join(flutterRoot, 'packages', 'flutter_tools'),
