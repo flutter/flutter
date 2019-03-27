@@ -7,6 +7,7 @@ import 'dart:ui' as ui show ParagraphBuilder;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 
 import 'basic_types.dart';
 import 'text_style.dart';
@@ -58,6 +59,7 @@ class TextSpan extends DiagnosticableTree {
     this.text,
     this.children,
     this.recognizer,
+    this.widget,
   });
 
   /// The style to apply to the [text] and the [children].
@@ -79,6 +81,8 @@ class TextSpan extends DiagnosticableTree {
   ///
   /// The list must not contain any nulls.
   final List<TextSpan> children;
+
+  final Widget widget;
 
   /// A gesture recognizer that will receive events that hit this text span.
   ///

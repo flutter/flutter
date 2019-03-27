@@ -4739,7 +4739,7 @@ class Flow extends MultiChildRenderObjectWidget {
 ///  * [TextSpan], which is used to describe the text in a paragraph.
 ///  * [Text], which automatically applies the ambient styles described by a
 ///    [DefaultTextStyle] to a single string.
-class RichText extends LeafRenderObjectWidget {
+class RichText extends MultiChildRenderObjectWidget {
   /// Creates a paragraph of rich text.
   ///
   /// The [text], [textAlign], [softWrap], [overflow], and [textScaleFactor]
@@ -4750,7 +4750,7 @@ class RichText extends LeafRenderObjectWidget {
   ///
   /// The [textDirection], if null, defaults to the ambient [Directionality],
   /// which in that case must not be null.
-  const RichText({
+  RichText({
     Key key,
     @required this.text,
     this.textAlign = TextAlign.start,
@@ -4767,7 +4767,27 @@ class RichText extends LeafRenderObjectWidget {
        assert(overflow != null),
        assert(textScaleFactor != null),
        assert(maxLines == null || maxLines > 0),
-       super(key: key);
+       super(key: key, children: _extractChildren(text));
+
+  // Traverses the LayoutSpan tree and depth-first collects the list of
+  // child widgets that are created in WidgetSpans.
+  static List<Widget> _extractChildren(TextSpan span) {
+    List<Widget> result = [];
+    void visitSpan(TextSpan span) {
+      if (span.widget != null) {
+        result.add(span.widget);
+      }
+      else {
+        if (span.children != null) {
+          for (TextSpan child in span.children) {
+            visitSpan(child);
+          }
+        }
+      }
+    }
+    visitSpan(span);
+    return result;
+  }
 
   /// The text to display in this widget.
   final TextSpan text;
