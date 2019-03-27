@@ -6,8 +6,6 @@ import 'pan_and_zoom_demo_inertial_motion.dart';
 // to pan, pinch to zoom and rotate, and still get back untransformed
 // coordinates for targeted tap events.
 @immutable
-// TODO(justinmc): Need a better name. The plan is to make this a full blown
-// reusable Flutter widget.
 class TransformInteraction extends StatefulWidget {
   const TransformInteraction({
     // The child to perform the transformations on
@@ -242,27 +240,39 @@ class TransformInteractionState extends State<TransformInteraction> with TickerP
     // Clamp translation so the viewport remains inside _visibleRect.
     final double scale = _transform.getMaxScaleOnAxis();
     final Size scaledSize = widget.size / scale;
-    final Vector3 currentTranslation = matrix.getTranslation() / scale;
     final Rect boundaries = Rect.fromLTRB(
-      _visibleRect.left * -1,
-      _visibleRect.top * -1,
-      (_visibleRect.right - scaledSize.width) * -1,
-      (_visibleRect.bottom - scaledSize.height) * -1,
+      _visibleRect.left,
+      _visibleRect.top,
+      _visibleRect.right - scaledSize.width,
+      _visibleRect.bottom - scaledSize.height,
     );
-    final Offset clampedTranslation = Offset(
-      translation.dx.clamp(
-        boundaries.right - currentTranslation.x,
-        boundaries.left - currentTranslation.x,
-      ),
-      translation.dy.clamp(
-        boundaries.bottom - currentTranslation.y,
-        boundaries.top - currentTranslation.y,
-      ),
+    // Translation is reversed (a positive translation moves the scene to the
+    // right, viewport to the left).
+    final Rect translationBoundaries = Rect.fromLTRB(
+      boundaries.right * -1 * scale,
+      boundaries.bottom * -1 * scale,
+      boundaries.left * -1 * scale,
+      boundaries.top * -1 * scale,
     );
-    return matrix..translate(
-      clampedTranslation.dx,
-      clampedTranslation.dy,
+    final Matrix4 nextMatrix = matrix.clone()..translate(
+      translation.dx,
+      translation.dy,
     );
+    final Vector3 nextTranslationVector = nextMatrix.getTranslation();
+    final Offset nextTranslation = Offset(
+      nextTranslationVector.x,
+      nextTranslationVector.y,
+    );
+    final bool inBoundaries = translationBoundaries.contains(
+      Offset(nextTranslation.dx, nextTranslation.dy),
+    );
+    if (!inBoundaries) {
+      // TODO(justinmc): Instead of canceling translation when it goes out of
+      // bounds, stop translation at boundary.
+      return matrix;
+    }
+
+    return nextMatrix;
   }
 
   // Return a new matrix representing the given matrix after applying the given
