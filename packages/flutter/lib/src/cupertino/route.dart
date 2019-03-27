@@ -182,7 +182,7 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
 
   /// True if an iOS-style back swipe pop gesture is currently underway for [route].
   ///
-  /// This just check for the route's [NavigatorState.userGestureInProgress].
+  /// This just check the route's [NavigatorState.userGestureInProgress].
   ///
   /// See also:
   ///

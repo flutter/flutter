@@ -116,7 +116,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
 
   /// The animation for the route being pushed on top of this route. This
   /// animation lets this route coordinate with the entrance and exit transition
-  /// of routes pushed on top of this route.
+  /// of route pushed on top of this route.
   Animation<double> get secondaryAnimation => _secondaryAnimation;
   final ProxyAnimation _secondaryAnimation = ProxyAnimation(kAlwaysDismissedAnimation);
 
