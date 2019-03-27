@@ -254,7 +254,7 @@ class CocoaPods {
   }
 
   Future<void> _runPodInstall(IosProject iosProject, String engineDirectory) async {
-    final Status status = logger.startProgress('Running pod install...', timeout: kSlowOperation);
+    final Status status = logger.startProgress('Running pod install...', timeout: timeoutConfiguration.slowOperation);
     final ProcessResult result = await processManager.run(
       <String>['pod', 'install', '--verbose'],
       workingDirectory: iosProject.hostAppRoot.path,
