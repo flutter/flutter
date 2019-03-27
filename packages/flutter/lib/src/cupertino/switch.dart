@@ -73,7 +73,7 @@ class CupertinoSwitch extends StatefulWidget {
   /// change state until the parent widget rebuilds the switch with the new
   /// value.
   ///
-  /// If null, the switch will be displayed as disabled with an opacity of 
+  /// If null, the switch will be displayed as disabled with an opacity of
   /// 0.5. This is opacity value appears to be accurate in comparison to the
   /// actual iOS switch.
   ///
