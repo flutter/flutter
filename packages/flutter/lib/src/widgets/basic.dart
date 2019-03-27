@@ -1576,6 +1576,8 @@ class Padding extends SingleChildRenderObjectWidget {
 /// [Alignment], [topRight]. This places the [FlutterLogo] in the top right corner
 /// of the parent blue [Container].
 ///
+/// ![A blue square container with the Flutter logo in the top right corner.](https://flutter.github.io/assets-for-api-docs/assets/widgets/align_constant.png)
+///
 /// ```dart
 /// Center(
 ///   child: Container(
@@ -1600,8 +1602,12 @@ class Padding extends SingleChildRenderObjectWidget {
 ///   of [FlutterLogo]/2 + height of [FlutterLogo]/2) = (36.0, 48.0).
 ///
 /// The [Alignment] class uses a coordinate system with an origin in the center
-/// of the [Container], and so [Align] will place the [FlutterLogo] at (36.0, 48.0)
-/// according to this system.
+/// of the [Container], as shown with the [Icon] above. [Align] will place the
+/// [FlutterLogo] at (36.0, 48.0) according to this coordinate system.
+///
+/// ![A blue square container with the Flutter logo positioned according to the
+/// Alignment specified above. A point is marked at the center of the container
+/// for the origin of the Alignment coordinate system.](https://flutter.github.io/assets-for-api-docs/assets/widgets/align_alignment.png)
 ///
 /// ```dart
 /// Center(
@@ -1636,6 +1642,10 @@ class Padding extends SingleChildRenderObjectWidget {
 /// The [FractionalOffset] class uses a coordinate system with an origin in the top-left
 /// corner of the [Container] in difference to the center-oriented system used in
 /// the example above with [Alignment].
+///
+/// ![A blue square container with the Flutter logo positioned according to the
+/// FractionalOffset specified above. A point is marked at the top left corner
+/// of the container for the origin of the FractionalOffset coordinate system.](https://flutter.github.io/assets-for-api-docs/assets/widgets/align_fractional_offset.png)
 ///
 /// ```dart
 /// Center(
