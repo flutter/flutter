@@ -6,7 +6,6 @@ import 'package:vector_math/vector_math_64.dart' show Vector3;
 
 // An abstraction of the hex board logic
 @immutable
-// TODO(justinmc): Not exactly immutable
 class Board extends Object with IterableMixin<BoardPoint> {
   Board({
     @required this.boardRadius,
@@ -36,7 +35,7 @@ class Board extends Object with IterableMixin<BoardPoint> {
     ]);
 
     if (boardPoints != null) {
-      _boardPoints = boardPoints;
+      _boardPoints.addAll(boardPoints);
     } else {
       // Generate boardPoints for a fresh board.
       BoardPoint boardPoint = _getNextBoardPoint(null);
@@ -52,7 +51,7 @@ class Board extends Object with IterableMixin<BoardPoint> {
   final double hexagonMargin; // Margin between hexagons
   final List<Offset> positionsForHexagonAtOrigin = <Offset>[];
   final BoardPoint selected;
-  List<BoardPoint> _boardPoints = <BoardPoint>[];
+  final List<BoardPoint> _boardPoints = <BoardPoint>[];
 
   @override
   Iterator<BoardPoint> get iterator => _BoardIterator(_boardPoints);
