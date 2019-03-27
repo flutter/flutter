@@ -61,53 +61,92 @@ public class FlutterFragment extends Fragment {
   private static final String ARG_INITIAL_ROUTE = "initial_route";
   private static final String ARG_APP_BUNDLE_PATH = "app_bundle_path";
   private static final String ARG_FLUTTER_INITIALIZATION_ARGS = "initialization_args";
+  private static final String ARG_FLUTTERVIEW_RENDER_MODE = "flutterview_render_mode";
 
   /**
-   * Factory method that creates a new {@link FlutterFragment} with a default configuration.
-   * <ul>
-   *   <li>default Dart entrypoint of "main"</li>
-   *   <li>initial route of "/"</li>
-   *   <li>default app bundle location</li>
-   *   <li>no special engine arguments</li>
-   * </ul>
-   * @return new {@link FlutterFragment}
-   */
-  public static FlutterFragment newInstance() {
-    return newInstance(
-        null,
-        null,
-        null,
-        null
-    );
-  }
-
-  /**
-   * Factory method that creates a new {@link FlutterFragment} with the given configuration.
+   * Builder that creates a new {@code FlutterFragment} with {@code arguments} that correspond
+   * to the values set on this {@code Builder}.
    * <p>
-   * @param dartEntrypoint the name of the initial Dart method to invoke, defaults to "main"
-   * @param initialRoute the first route that a Flutter app will render in this {@link FlutterFragment},
-   *                     defaults to "/"
-   * @param appBundlePath the path to the app bundle which contains the Dart app to execute, defaults
-   *                      to {@link FlutterMain#findAppBundlePath(Context)}
-   * @param flutterShellArgs any special configuration arguments for the Flutter engine
-   *
-   * @return a new {@link FlutterFragment}
+   * To create a {@code FlutterFragment} with default {@code arguments}, invoke {@code build()}
+   * immeidately:
+   * {@code
+   *   FlutterFragment fragment = new FlutterFragment.Builder().build();
+   * }
    */
-  public static FlutterFragment newInstance(@Nullable String dartEntrypoint,
-                                            @Nullable String initialRoute,
-                                            @Nullable String appBundlePath,
-                                            @Nullable FlutterShellArgs flutterShellArgs) {
-    FlutterFragment frag = new FlutterFragment();
+  public static class Builder {
+    private String dartEntrypoint = "main";
+    private String initialRoute = "/";
+    private String appBundlePath = null;
+    private FlutterShellArgs shellArgs = null;
+    private FlutterView.RenderMode renderMode = FlutterView.RenderMode.surface;
 
-    Bundle args = createArgsBundle(
-        dartEntrypoint,
-        initialRoute,
-        appBundlePath,
-        flutterShellArgs
-    );
-    frag.setArguments(args);
+    /**
+     * The name of the initial Dart method to invoke, defaults to "main".
+     */
+    @NonNull
+    public Builder dartEntrypoint(@NonNull String dartEntrypoint) {
+      this.dartEntrypoint = dartEntrypoint;
+      return this;
+    }
 
-    return frag;
+    /**
+     * The initial route that a Flutter app will render in this {@link FlutterFragment},
+     * defaults to "/".
+     */
+    @NonNull
+    public Builder initialRoute(@NonNull String initialRoute) {
+      this.initialRoute = initialRoute;
+      return this;
+    }
+
+    /**
+     * The path to the app bundle which contains the Dart app to execute, defaults
+     * to {@link FlutterMain#findAppBundlePath(Context)}
+     */
+    @NonNull
+    public Builder appBundlePath(@NonNull String appBundlePath) {
+      this.appBundlePath = appBundlePath;
+      return this;
+    }
+
+    /**
+     * Any special configuration arguments for the Flutter engine
+     */
+    @NonNull
+    public Builder flutterShellArgs(@NonNull FlutterShellArgs shellArgs) {
+      this.shellArgs = shellArgs;
+      return this;
+    }
+
+    /**
+     * Render Flutter either as a {@link FlutterView.RenderMode#surface} or a
+     * {@link FlutterView.RenderMode#texture}. You should use {@code surface} unless
+     * you have a specific reason to use {@code texture}. {@code texture} comes with
+     * a significant performance impact, but {@code texture} can be displayed
+     * beneath other Android {@code View}s and animated, whereas {@code surface}
+     * cannot.
+     */
+    @NonNull
+    public Builder renderMode(@NonNull FlutterView.RenderMode renderMode) {
+      this.renderMode = renderMode;
+      return this;
+    }
+
+    @NonNull
+    public FlutterFragment build() {
+      FlutterFragment frag = new FlutterFragment();
+
+      Bundle args = createArgsBundle(
+          dartEntrypoint,
+          initialRoute,
+          appBundlePath,
+          shellArgs,
+          renderMode
+      );
+      frag.setArguments(args);
+
+      return frag;
+    }
   }
 
   /**
@@ -118,16 +157,16 @@ public class FlutterFragment extends Fragment {
    * wants to this {@link Bundle}. Example:
    * <pre>{@code
    * public static MyFlutterFragment newInstance(String myNewArg) {
-   *   // Create an instance of our subclass Fragment.
+   *   // Create an instance of your subclass Fragment.
    *   MyFlutterFragment myFrag = new MyFlutterFragment();
    *
    *   // Create the Bundle or args that FlutterFragment understands.
    *   Bundle args = FlutterFragment.createArgsBundle(...);
    *
-   *   // Add our new args to the bundle.
+   *   // Add your new args to the bundle.
    *   args.putString(ARG_MY_NEW_ARG, myNewArg);
    *
-   *   // Give the args to our subclass Fragment.
+   *   // Give the args to your subclass Fragment.
    *   myFrag.setArguments(args);
    *
    *   // Return the newly created subclass Fragment.
@@ -139,13 +178,20 @@ public class FlutterFragment extends Fragment {
    * @param initialRoute the first route that a Flutter app will render in this {@link FlutterFragment}, defaults to "/"
    * @param appBundlePath the path to the app bundle which contains the Dart app to execute
    * @param flutterShellArgs any special configuration arguments for the Flutter engine
+   * @param renderMode render Flutter either as a {@link FlutterView.RenderMode#surface} or a
+   *                   {@link FlutterView.RenderMode#texture}. You should use {@code surface} unless
+   *                   you have a specific reason to use {@code texture}. {@code texture} comes with
+   *                   a significant performance impact, but {@code texture} can be displayed
+   *                   beneath other Android {@code View}s and animated, whereas {@code surface}
+   *                   cannot.
    *
    * @return Bundle of arguments that configure a {@link FlutterFragment}
    */
   protected static Bundle createArgsBundle(@Nullable String dartEntrypoint,
                                            @Nullable String initialRoute,
                                            @Nullable String appBundlePath,
-                                           @Nullable FlutterShellArgs flutterShellArgs) {
+                                           @Nullable FlutterShellArgs flutterShellArgs,
+                                           @Nullable FlutterView.RenderMode renderMode) {
     Bundle args = new Bundle();
     args.putString(ARG_INITIAL_ROUTE, initialRoute);
     args.putString(ARG_APP_BUNDLE_PATH, appBundlePath);
@@ -154,6 +200,7 @@ public class FlutterFragment extends Fragment {
     if (null != flutterShellArgs) {
       args.putStringArray(ARG_FLUTTER_INITIALIZATION_ARGS, flutterShellArgs.toArray());
     }
+    args.putString(ARG_FLUTTERVIEW_RENDER_MODE, renderMode != null ? renderMode.name() : FlutterView.RenderMode.surface.name());
     return args;
   }
 
@@ -252,7 +299,7 @@ public class FlutterFragment extends Fragment {
   @Nullable
   @Override
   public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-    flutterView = new FlutterView(getContext());
+    flutterView = new FlutterView(getContext(), getRenderMode());
     flutterView.attachToFlutterEngine(flutterEngine);
 
     // TODO(mattcarroll): the following call should exist here, but the plugin system needs to be revamped.
@@ -324,6 +371,18 @@ public class FlutterFragment extends Fragment {
   @NonNull
   protected String getDartEntrypointFunctionName() {
     return getArguments().getString(ARG_DART_ENTRYPOINT, "main");
+  }
+
+  /**
+   * Returns the desired {@link FlutterView.RenderMode} for the {@link FlutterView} displayed in
+   * this {@code FlutterFragment}.
+   *
+   * Defaults to {@link FlutterView.RenderMode#surface}.
+   */
+  @NonNull
+  protected FlutterView.RenderMode getRenderMode() {
+    String renderModeName = getArguments().getString(ARG_FLUTTERVIEW_RENDER_MODE, FlutterView.RenderMode.surface.name());
+    return FlutterView.RenderMode.valueOf(renderModeName);
   }
 
   // TODO(mattcarroll): determine why this can't be in onResume(). Comment reason, or move if possible.
