@@ -16,7 +16,10 @@ const int kDefaultStatusPadding = 59;
 const Duration _kFastOperation = Duration(seconds: 2);
 const Duration _kSlowOperation = Duration(minutes: 2);
 
-TimeoutConfiguration get timeoutConfiguration => context[TimeoutConfiguration];
+/// The [TimeoutConfiguration] instance.
+///
+/// If not provided via injection, a default instance is provided.
+TimeoutConfiguration get timeoutConfiguration => context[TimeoutConfiguration] ?? const TimeoutConfiguration();
 
 class TimeoutConfiguration {
   const TimeoutConfiguration();
