@@ -570,7 +570,7 @@ class HotRunner extends ResidentRunner {
             status?.cancel();
             status = logger.startProgress(
               message,
-              timeout: timeoutConfiguration.fastOperation,
+              timeout: timeoutConfiguration.slowOperation,
               progressId: 'hot.reload',
             );
             showTime = false;
