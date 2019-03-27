@@ -675,12 +675,17 @@ FILE: ../../../flutter/shell/platform/embedder/embedder_engine.h
 FILE: ../../../flutter/shell/platform/embedder/embedder_external_texture_gl.cc
 FILE: ../../../flutter/shell/platform/embedder/embedder_external_texture_gl.h
 FILE: ../../../flutter/shell/platform/embedder/embedder_include.c
+FILE: ../../../flutter/shell/platform/embedder/embedder_safe_access.h
 FILE: ../../../flutter/shell/platform/embedder/embedder_surface.cc
 FILE: ../../../flutter/shell/platform/embedder/embedder_surface.h
 FILE: ../../../flutter/shell/platform/embedder/embedder_surface_gl.cc
 FILE: ../../../flutter/shell/platform/embedder/embedder_surface_gl.h
 FILE: ../../../flutter/shell/platform/embedder/embedder_surface_software.cc
 FILE: ../../../flutter/shell/platform/embedder/embedder_surface_software.h
+FILE: ../../../flutter/shell/platform/embedder/embedder_task_runner.cc
+FILE: ../../../flutter/shell/platform/embedder/embedder_task_runner.h
+FILE: ../../../flutter/shell/platform/embedder/embedder_thread_host.cc
+FILE: ../../../flutter/shell/platform/embedder/embedder_thread_host.h
 FILE: ../../../flutter/shell/platform/embedder/fixtures/a11y_main.dart
 FILE: ../../../flutter/shell/platform/embedder/fixtures/simple_main.dart
 FILE: ../../../flutter/shell/platform/embedder/platform_view_embedder.cc

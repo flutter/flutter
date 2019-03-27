@@ -21,10 +21,6 @@ extern const intptr_t kPlatformStrongDillSize;
 #endif  // FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
 }
 
-#include "flutter/shell/platform/embedder/embedder.h"
-
-#include <type_traits>
-
 #include "flutter/assets/directory_asset_bundle.h"
 #include "flutter/common/task_runners.h"
 #include "flutter/fml/command_line.h"
@@ -38,17 +34,10 @@ extern const intptr_t kPlatformStrongDillSize;
 #include "flutter/shell/common/switches.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/embedder/embedder_engine.h"
+#include "flutter/shell/platform/embedder/embedder_safe_access.h"
+#include "flutter/shell/platform/embedder/embedder_task_runner.h"
+#include "flutter/shell/platform/embedder/embedder_thread_host.h"
 #include "flutter/shell/platform/embedder/platform_view_embedder.h"
-
-#define SAFE_ACCESS(pointer, member, default_value)                      \
-  ([=]() {                                                               \
-    if (offsetof(std::remove_pointer<decltype(pointer)>::type, member) + \
-            sizeof(pointer->member) <=                                   \
-        pointer->struct_size) {                                          \
-      return pointer->member;                                            \
-    }                                                                    \
-    return static_cast<decltype(pointer->member)>((default_value));      \
-  })()
 
 static FlutterEngineResult LogEmbedderError(FlutterEngineResult code,
                                             const char* name,
@@ -408,20 +397,6 @@ FlutterEngineResult FlutterEngineRun(size_t version,
     };
   }
 
-  // Create a thread host with the current thread as the platform thread and all
-  // other threads managed.
-  shell::ThreadHost thread_host("io.flutter", shell::ThreadHost::Type::GPU |
-                                                  shell::ThreadHost::Type::IO |
-                                                  shell::ThreadHost::Type::UI);
-  fml::MessageLoop::EnsureInitializedForCurrentThread();
-  blink::TaskRunners task_runners(
-      "io.flutter",
-      fml::MessageLoop::GetCurrent().GetTaskRunner(),  // platform
-      thread_host.gpu_thread->GetTaskRunner(),         // gpu
-      thread_host.ui_thread->GetTaskRunner(),          // ui
-      thread_host.io_thread->GetTaskRunner()           // io
-  );
-
   shell::PlatformViewEmbedder::UpdateSemanticsNodesCallback
       update_semantics_nodes_callback = nullptr;
   if (SAFE_ACCESS(args, update_semantics_node_callback, nullptr) != nullptr) {
@@ -600,6 +575,23 @@ FlutterEngineResult FlutterEngineRun(size_t version,
         return image;
       };
     }
+  }
+
+  auto thread_host =
+      shell::EmbedderThreadHost::CreateEmbedderOrEngineManagedThreadHost(
+          SAFE_ACCESS(args, custom_task_runners, nullptr));
+
+  if (!thread_host || !thread_host->IsValid()) {
+    FML_LOG(ERROR) << "Could not setup or infer thread configuration to run "
+                      "the Flutter engine on.";
+    return LOG_EMBEDDER_ERROR(kInvalidArguments);
+  }
+
+  auto task_runners = thread_host->GetTaskRunners();
+
+  if (!task_runners.IsValid()) {
+    FML_LOG(ERROR) << "Task runner configuration specified is invalid.";
+    return LOG_EMBEDDER_ERROR(kInvalidArguments);
   }
 
   // Step 1: Create the engine.
@@ -939,4 +931,19 @@ FlutterEngineResult FlutterEnginePostRenderThreadTask(FlutterEngine engine,
              task)
              ? kSuccess
              : LOG_EMBEDDER_ERROR(kInternalInconsistency);
+}
+
+uint64_t FlutterEngineGetCurrentTime() {
+  return fml::TimePoint::Now().ToEpochDelta().ToNanoseconds();
+}
+
+FlutterEngineResult FlutterEngineRunTask(FlutterEngine engine,
+                                         const FlutterTask* task) {
+  if (engine == nullptr) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments);
+  }
+
+  return reinterpret_cast<shell::EmbedderEngine*>(engine)->RunTask(task)
+             ? kSuccess
+             : LOG_EMBEDDER_ERROR(kInvalidArguments);
 }
