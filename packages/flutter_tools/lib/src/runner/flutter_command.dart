@@ -534,7 +534,7 @@ abstract class FlutterCommand extends Command<void> {
     // Populate the cache. We call this before pub get below so that the sky_engine
     // package is available in the flutter cache for pub to find.
     if (shouldUpdateCache) {
-      await cache.updateAll(requiredArtifacts);
+      await cache.updateAll(await requiredArtifacts);
     }
 
     if (shouldRunPub) {
@@ -557,7 +557,7 @@ abstract class FlutterCommand extends Command<void> {
   ///
   /// Defaults to [DevelopmentArtifact.universal],
   /// [DevelopmentArtifact.android], and [DevelopmentArtifact.iOS].
-  Set<DevelopmentArtifact> get requiredArtifacts => const <DevelopmentArtifact>{
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{
     DevelopmentArtifact.universal,
     DevelopmentArtifact.iOS,
     DevelopmentArtifact.android,
