@@ -7,7 +7,7 @@ import("$flutter_root/common/config.gni")
 # Whether to build the dartdevc sdk, libraries, and source files
 # required for the flutter web sdk.
 declare_args() {
-  full_dart_sdk = false  
+  full_dart_sdk = false
 }
 
 group("flutter") {
@@ -32,9 +32,7 @@ group("flutter") {
       ]
 
       if (full_dart_sdk) {
-        public_deps += [
-          "$flutter_root/web_sdk",
-        ]
+        public_deps += [ "$flutter_root/web_sdk" ]
       }
     }
   }
@@ -52,7 +50,6 @@ group("flutter") {
       "$flutter_root/runtime:runtime_unittests",
       "$flutter_root/shell/common:shell_unittests",
       "$flutter_root/shell/platform/embedder:embedder_unittests",
-      "$flutter_root/shell/platform/embedder:embedder_a11y_unittests", # TODO(cbracken) build these into a different kernel blob in the embedder tests and load that in a test in embedder_unittests
       "$flutter_root/synchronization:synchronization_unittests",
       "$flutter_root/third_party/txt:txt_unittests",
     ]

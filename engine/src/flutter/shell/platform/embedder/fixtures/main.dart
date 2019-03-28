@@ -2,6 +2,34 @@ import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui';
 
+void main() {}
+
+@pragma('vm:entry-point')
+void customEntrypoint() {
+  sayHiFromCustomEntrypoint();
+}
+
+void sayHiFromCustomEntrypoint() native "SayHiFromCustomEntrypoint";
+
+
+@pragma('vm:entry-point')
+void customEntrypoint1() {
+  sayHiFromCustomEntrypoint1();
+  sayHiFromCustomEntrypoint2();
+  sayHiFromCustomEntrypoint3();
+}
+
+void sayHiFromCustomEntrypoint1() native "SayHiFromCustomEntrypoint1";
+void sayHiFromCustomEntrypoint2() native "SayHiFromCustomEntrypoint2";
+void sayHiFromCustomEntrypoint3() native "SayHiFromCustomEntrypoint3";
+
+
+@pragma('vm:entry-point')
+void invokePlatformTaskRunner() {
+  window.sendPlatformMessage('OhHi', null, null);
+}
+
+
 Float64List kTestTransform = () {
   final Float64List values = Float64List(16);
   values[0] = 1.0;  // scaleX
@@ -17,9 +45,9 @@ Float64List kTestTransform = () {
 }();
 
 void signalNativeTest() native 'SignalNativeTest';
-void notifySemanticsEnabled(bool enabled) native 'NotifyTestData1';
-void notifyAccessibilityFeatures(bool reduceMotion) native 'NotifyTestData1';
-void notifySemanticsAction(int nodeId, int action, List<int> data) native 'NotifyTestData3';
+void notifySemanticsEnabled(bool enabled) native 'NotifyTestData';
+void notifyAccessibilityFeatures(bool reduceMotion) native 'NotifyTestData';
+void notifySemanticsAction(int nodeId, int action, List<int> data) native 'NotifyTestData';
 
 /// Returns a future that completes when `window.onSemanticsEnabledChanged`
 /// fires.
@@ -52,7 +80,8 @@ Future<SemanticsActionData> get semanticsAction {
   return actionReceived.future;
 }
 
-main() async {
+@pragma('vm:entry-point')
+void a11y_main() async {
   // Return initial state (semantics disabled).
   notifySemanticsEnabled(window.semanticsEnabled);
 
