@@ -677,6 +677,49 @@ abstract class FlutterCommand extends Command<void> {
   ApplicationPackageStore applicationPackages;
 }
 
+/// A mixin which applied an implementation of [requiredArtifacts] that only
+/// downloads artifacts corresponding to an attached device.
+mixin DeviceBasedDevelopmentArtifacts on FlutterCommand {
+  @override
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async {
+    // If there are no attached devices, use the default configuration.
+    // Otherwise, only add development artifacts which correspond to a
+    // connected device.
+    final List<Device> devices = await deviceManager.getDevices().toList();
+    if (devices.isEmpty) {
+      return super.requiredArtifacts;
+    }
+    final Set<DevelopmentArtifact> artifacts = <DevelopmentArtifact>{
+      DevelopmentArtifact.universal,
+    };
+    for (Device device in devices) {
+      final TargetPlatform targetPlatform = await device.targetPlatform;
+      switch (targetPlatform) {
+        case TargetPlatform.android_arm:
+        case TargetPlatform.android_arm64:
+        case TargetPlatform.android_x64:
+        case TargetPlatform.android_x86:
+          artifacts.add(DevelopmentArtifact.android);
+          break;
+        case TargetPlatform.web:
+          artifacts.add(DevelopmentArtifact.web);
+          break;
+        case TargetPlatform.ios:
+          artifacts.add(DevelopmentArtifact.iOS);
+          break;
+        case TargetPlatform.darwin_x64:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.tester:
+        case TargetPlatform.windows_x64:
+        case TargetPlatform.linux_x64:
+          // No artifacts currently supported.
+          break;
+      }
+    }
+    return artifacts;
+  }
+}
+
 /// A command which runs less analytics and checks to speed up startup time.
 abstract class FastFlutterCommand extends FlutterCommand {
   @override
