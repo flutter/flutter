@@ -165,6 +165,9 @@ dev_list="${dev_list} libgbm-dev${mesa_variant}
 if package_exists libnspr4-dbg; then
   dbg_list="${dbg_list} libnspr4-dbg libnss3-dbg"
   lib_list="${lib_list} libnspr4 libnss3"
+elif package_exists libnspr4-dbgsym; then
+  dbg_list="${dbg_list} libnspr4-dbgsym libnss3-dbgsym"
+  lib_list="${lib_list} libnspr4 libnss3"
 else
   dbg_list="${dbg_list} libnspr4-0d-dbg libnss3-1d-dbg"
   lib_list="${lib_list} libnspr4-0d libnss3-1d"
