@@ -506,7 +506,10 @@ class FlutterCommandRunner extends CommandRunner<void> {
     final List<String> projectPaths = fs.directory(rootPath)
       .listSync(followLinks: false)
       .expand((FileSystemEntity entity) {
-        return entity is Directory ? _gatherProjectPaths(entity.path) : <String>[];
+        if (entity is Directory && !entity.path.contains('.dart_tool')) {
+          return _gatherProjectPaths(entity.path);
+        }
+        return <String>[];
       })
       .toList();
 
