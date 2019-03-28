@@ -93,6 +93,46 @@ $otherComments  static const LogicalKeyboardKey ${entry.constantName} = LogicalK
     return keyCodeMap.toString().trimRight();
   }
 
+  /// This generates the map of GLFW number pad key codes to logical keys.
+  String get glfwNumpadMap {
+    final StringBuffer glfwNumpadMap = StringBuffer();
+    final List<Key> onlyNumpads = keyData.data.where((Key entry) {
+      return entry.constantName.startsWith('numpad') && entry.keyLabel != null;
+    }).toList();
+    for (Key entry in onlyNumpads) {
+      if (entry.glfwKeyCodes != null) {
+        for (int code in entry.glfwKeyCodes.cast<int>()) {
+          glfwNumpadMap.writeln('  $code: LogicalKeyboardKey.${entry.constantName},');
+        }
+      }
+    }
+    return glfwNumpadMap.toString().trimRight();
+  }
+
+  /// This generates the map of GLFW key codes to logical keys.
+  String get glfwKeyCodeMap {
+    final StringBuffer glfwKeyCodeMap = StringBuffer();
+    for (Key entry in keyData.data) {
+      if (entry.glfwKeyCodes != null) {
+        for (int code in entry.glfwKeyCodes.cast<int>()) {
+          glfwKeyCodeMap.writeln('  $code: LogicalKeyboardKey.${entry.constantName},');
+        }
+      }
+    }
+    return glfwKeyCodeMap.toString().trimRight();
+  }
+
+  /// This generates the map of XKB USB HID codes to physical keys.
+  String get xkbScanCodeMap {
+    final StringBuffer xkbScanCodeMap = StringBuffer();
+    for (Key entry in keyData.data) {
+      if (entry.xKbScanCode != null) {
+        xkbScanCodeMap.writeln('  ${toHex(entry.xKbScanCode)}: PhysicalKeyboardKey.${entry.constantName},');
+      }
+    }
+    return xkbScanCodeMap.toString().trimRight();
+  }
+
   /// This generates the map of Android key codes to logical keys.
   String get androidKeyCodeMap {
     final StringBuffer androidKeyCodeMap = StringBuffer();
@@ -210,6 +250,9 @@ $otherComments  static const LogicalKeyboardKey ${entry.constantName} = LogicalK
       'FUCHSIA_KEY_CODE_MAP': fuchsiaKeyCodeMap,
       'MACOS_SCAN_CODE_MAP': macOsScanCodeMap,
       'MACOS_NUMPAD_MAP': macOsNumpadMap,
+      'GLFW_KEY_CODE_MAP': glfwKeyCodeMap,
+      'GLFW_NUMPAD_MAP': glfwNumpadMap,
+      'XKB_SCAN_CODE_MAP': xkbScanCodeMap,
     };
 
     final String template = File(path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'keyboard_maps.tmpl')).readAsStringSync();
