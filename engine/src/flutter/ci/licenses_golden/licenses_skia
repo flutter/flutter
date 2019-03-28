@@ -1,4 +1,4 @@
-Signature: 030f180c2ea7f19ce2d731d1d314400b
+Signature: 0a9088015e0d2542676c0da7061ae844
 
 UNUSED LICENSES:
 
@@ -2207,6 +2207,7 @@ FILE: ../../../third_party/skia/infra/bots/recipes/housekeeper.expected/Housekee
 FILE: ../../../third_party/skia/infra/bots/recipes/infra.expected/infra_tests.json
 FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/Perf-Android-Clang-Nexus5-GPU-Adreno330-arm-Debug-All-Android.json
 FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/Perf-Android-Clang-Nexus5x-GPU-Adreno418-arm64-Release-All-Android_NoGPUThreads.json
+FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/Perf-Android-Clang-Nexus7-CPU-Tegra3-arm-Debug-All-Android.json
 FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/Perf-ChromeOS-Clang-ASUSChromebookFlipC100-GPU-MaliT764-arm-Release-All.json
 FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/Perf-Chromecast-Clang-Chorizo-CPU-Cortex_A7-arm-Debug-All.json
 FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/Perf-Chromecast-Clang-Chorizo-GPU-Cortex_A7-arm-Release-All.json
@@ -4580,6 +4581,8 @@ FILE: ../../../third_party/skia/modules/sksg/src/SkSGTransformPriv.h
 FILE: ../../../third_party/skia/samplecode/SampleDegenerateQuads.cpp
 FILE: ../../../third_party/skia/samplecode/SampleSG.cpp
 FILE: ../../../third_party/skia/samplecode/SampleThinAA.cpp
+FILE: ../../../third_party/skia/src/core/SkColorFilter_Mixer.cpp
+FILE: ../../../third_party/skia/src/core/SkColorFilter_Mixer.h
 FILE: ../../../third_party/skia/src/core/SkDescriptor.cpp
 FILE: ../../../third_party/skia/src/core/SkEffectPriv.h
 FILE: ../../../third_party/skia/src/core/SkMixer.cpp
