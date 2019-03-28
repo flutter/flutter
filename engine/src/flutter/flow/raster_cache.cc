@@ -36,8 +36,9 @@ void RasterCacheResult::draw(SkCanvas& canvas, const SkPaint* paint) const {
   canvas.drawImage(image_, bounds.fLeft, bounds.fTop, paint);
 }
 
-RasterCache::RasterCache(size_t threshold, size_t picture_cache_limit_per_frame)
-    : threshold_(threshold),
+RasterCache::RasterCache(size_t access_threshold,
+                         size_t picture_cache_limit_per_frame)
+    : access_threshold_(access_threshold),
       picture_cache_limit_per_frame_(picture_cache_limit_per_frame),
       checkerboard_images_(false),
       weak_factory_(this) {}
@@ -152,7 +153,7 @@ void RasterCache::Prepare(PrerollContext* context,
                           const SkMatrix& ctm) {
   LayerRasterCacheKey cache_key(layer, ctm);
   Entry& entry = layer_cache_[cache_key];
-  entry.access_count = ClampSize(entry.access_count + 1, 0, threshold_);
+  entry.access_count = ClampSize(entry.access_count + 1, 0, access_threshold_);
   entry.used_this_frame = true;
   if (!entry.image.is_valid()) {
     entry.image = Rasterize(context->gr_context, ctm, context->dst_color_space,
@@ -204,10 +205,10 @@ bool RasterCache::Prepare(GrContext* context,
   PictureRasterCacheKey cache_key(picture->uniqueID(), transformation_matrix);
 
   Entry& entry = picture_cache_[cache_key];
-  entry.access_count = ClampSize(entry.access_count + 1, 0, threshold_);
+  entry.access_count = ClampSize(entry.access_count + 1, 0, access_threshold_);
   entry.used_this_frame = true;
 
-  if (entry.access_count < threshold_ || threshold_ == 0) {
+  if (entry.access_count < access_threshold_ || access_threshold_ == 0) {
     // Frame threshold has not yet been reached.
     return false;
   }
