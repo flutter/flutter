@@ -56,7 +56,6 @@ class _CupertinoRefreshControlDemoState extends State<CupertinoRefreshControlDem
             // * [CupertinoSliverRefreshControl]
             // * [Scrollable.physics]
             // * [AlwaysScrollableScrollPhysics]
-            // * [ScrollPhysics.parent]
             physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
             slivers: <Widget>[
               CupertinoSliverNavigationBar(
