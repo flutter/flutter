@@ -173,7 +173,6 @@ TEST_F(EmbedderTest, CanSpecifyCustomTaskRunner) {
 
   thread.GetTaskRunner()->PostTask([&]() {
     EmbedderConfigBuilder builder(context);
-    builder.AddCommandLineArgument("--verbose-logging");
     const auto task_runner_description = runner.GetEmbedderDescription();
     runner.SetForwardingTaskRunner(
         fml::MessageLoop::GetCurrent().GetTaskRunner());
