@@ -4,7 +4,8 @@
 
 import 'dart:async';
 import 'dart:collection';
-import 'dart:ui' as ui show EngineLayer, Image, ImageFilter, Picture, Scene, SceneBuilder;
+import 'dart:ui' as ui show EngineLayer, Image, ImageFilter, PathMetric,
+                            Picture, PictureRecorder, Scene, SceneBuilder;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
@@ -193,6 +194,87 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
     }
     _engineLayer = addToScene(builder);
     _needsAddToScene = false;
+  }
+
+  Layer _highlightConflictingLayer(PhysicalModelLayer child) {
+    final ui.PictureRecorder recorder = ui.PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
+    canvas.drawPath(
+      child.clipPath,
+      Paint()
+        ..color = const Color(0xFFAA0000)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = child.elevation + 10.0,
+    );
+    final PictureLayer pictureLayer = PictureLayer(child.clipPath.getBounds())
+      ..picture = recorder.endRecording()
+      ..debugCreator = child;
+    child.append(pictureLayer);
+    return pictureLayer;
+  }
+
+  List<Layer> _processConflictingPhysicalLayers(PhysicalModelLayer predecessor, PhysicalModelLayer child) {
+    FlutterError.reportError(FlutterErrorDetails(
+      exception: FlutterError('Painting order is out of order with respect to elevation.'),
+      library: 'rendering library',
+      context: 'during compositing',
+      informationCollector: (StringBuffer buffer) {
+        buffer.writeln('Attempted to composite layer:');
+        buffer.writeln(child);
+        buffer.writeln('after layer:');
+        buffer.writeln(predecessor);
+        buffer.writeln('which occupies the same area at a higher elevation.');
+      }
+    ));
+    return <Layer>[
+      _highlightConflictingLayer(predecessor),
+      _highlightConflictingLayer(child),
+    ];
+  }
+
+  /// Checks that no [PhysicalModelLayer] would paint after another
+  /// [PhysicalModelLayer] that has a higher elevation.
+  ///
+  /// Returns a list of [Layer] objects it added to the tree to highlight bad
+  /// nodes.  These layers should be removed from the tree after it has been
+  /// shipped to the engine.
+  List<Layer> debugCheckElevations() {
+    if (this is! ContainerLayer) {
+      return null;
+    }
+    final List<PhysicalModelLayer> physicalModelLayers = <PhysicalModelLayer>[];
+    final List<Layer> addedLayers = <Layer>[];
+    final ContainerLayer container = this;
+    bool _predecessorIsNotDirectAncestor(Layer predecessor, Layer child) {
+      while (child != null) {
+        if (child == predecessor) {
+          return true;
+        }
+        child = child.parent;
+      }
+      return false;
+    }
+
+    for (Layer child in container.depthFirstIterateChildren()) {
+      if (child is PhysicalModelLayer) {
+        assert(child.lastChild?.debugCreator != child);
+        for (PhysicalModelLayer predecessor in physicalModelLayers) {
+          if (predecessor.elevation <= child.elevation || _predecessorIsNotDirectAncestor(predecessor, child)) {
+            continue;
+          }
+          final Path intersection = Path.combine(
+            PathOperation.intersect,
+            predecessor._debugTransformedClipPath,
+            child._debugTransformedClipPath,
+          );
+          if (intersection != null && intersection.computeMetrics().any((ui.PathMetric metric) => metric.length > 0)) {
+            addedLayers.addAll(_processConflictingPhysicalLayers(predecessor, child));
+          }
+        }
+        physicalModelLayers.add(child);
+      }
+    }
+    return addedLayers;
   }
 
   /// The object responsible for creating this layer.
@@ -679,6 +761,20 @@ class ContainerLayer extends Layer {
     assert(transform != null);
   }
 
+  /// Returns the descendants of this layer in depth first order.
+  Iterable<Layer> depthFirstIterateChildren() sync* {
+    if (firstChild == null)
+      return;
+    Layer child = firstChild;
+    while(child != null) {
+      yield child;
+      if (child is ContainerLayer) {
+        yield* child.depthFirstIterateChildren();
+      }
+      child = child.nextSibling;
+    }
+  }
+
   @override
   List<DiagnosticsNode> debugDescribeChildren() {
     final List<DiagnosticsNode> children = <DiagnosticsNode>[];
@@ -744,9 +840,21 @@ class OffsetLayer extends ContainerLayer {
   /// Consider this layer as the root and build a scene (a tree of layers)
   /// in the engine.
   ui.Scene buildScene(ui.SceneBuilder builder) {
+    List<Layer> temporaryLayers;
+    assert(() {
+      temporaryLayers = debugCheckElevations();
+      return true;
+    }());
     updateSubtreeNeedsAddToScene();
     addToScene(builder);
-    return builder.build();
+    final ui.Scene scene = builder.build();
+    assert(() {
+      for (Layer temporaryLayer in temporaryLayers) {
+        temporaryLayer.remove();
+      }
+      return true;
+    }());
+    return scene;
   }
 
   @override
@@ -1059,14 +1167,18 @@ class TransformLayer extends OffsetLayer {
   Matrix4 _invertedTransform;
   bool _inverseDirty = true;
 
-  @override
-  ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+  void _calculateLastEffectiveTransform(Offset layerOffset) {
     _lastEffectiveTransform = transform;
     final Offset totalOffset = offset + layerOffset;
     if (totalOffset != Offset.zero) {
       _lastEffectiveTransform = Matrix4.translationValues(totalOffset.dx, totalOffset.dy, 0.0)
         ..multiply(_lastEffectiveTransform);
     }
+  }
+
+  @override
+  ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+    _calculateLastEffectiveTransform(layerOffset);
     builder.pushTransform(_lastEffectiveTransform.storage);
     addChildrenToScene(builder);
     builder.pop();
@@ -1090,6 +1202,7 @@ class TransformLayer extends OffsetLayer {
   void applyTransform(Layer child, Matrix4 transform) {
     assert(child != null);
     assert(transform != null);
+    _calculateLastEffectiveTransform(Offset.zero);
     transform.multiply(_lastEffectiveTransform);
   }
 
@@ -1307,6 +1420,18 @@ class PhysicalModelLayer extends ContainerLayer {
       _clipPath = value;
       markNeedsAddToScene();
     }
+  }
+
+  Path get _debugTransformedClipPath {
+    Layer ancestor = parent;
+    final Matrix4 matrix = Matrix4.identity();
+    while (ancestor != null && ancestor.parent != null) {
+      if (ancestor is ContainerLayer) {
+        ancestor.applyTransform(this, matrix);
+      }
+      ancestor = ancestor.parent;
+    }
+    return clipPath.transform(matrix.storage);
   }
 
   /// {@macro flutter.widgets.Clip}
