@@ -26,14 +26,25 @@ class KeyData {
     String androidKeyboardLayout,
     String androidKeyCodeHeader,
     String androidNameMap,
+    String glfwKeyCodeHeader,
+    String glfwNameMap
   )   : assert(chromiumHidCodes != null),
         assert(androidKeyboardLayout != null),
         assert(androidKeyCodeHeader != null),
-        assert(androidNameMap != null) {
+        assert(androidNameMap != null),
+        assert(glfwKeyCodeHeader != null),
+        assert(glfwNameMap != null) {
     _nameToAndroidScanCodes = _readAndroidScanCodes(androidKeyboardLayout);
     _nameToAndroidKeyCode = _readAndroidKeyCodes(androidKeyCodeHeader);
-    final Map<String, List<dynamic>> dynamicNames = json.decode(androidNameMap).cast<String, List<dynamic>>();
-    _nameToAndroidName = dynamicNames.map<String, List<String>>((String key, List<dynamic> value) {
+    _nameToGlfwKeyCode = _readGlfwKeyCodes(glfwKeyCodeHeader);
+    // Cast Android dom map
+    final Map<String, List<dynamic>> dynamicAndroidNames = json.decode(androidNameMap).cast<String, List<dynamic>>();
+    _nameToAndroidName = dynamicAndroidNames.map<String, List<String>>((String key, List<dynamic> value) {
+      return MapEntry<String, List<String>>(key, value.cast<String>());
+    });
+    // Cast GLFW dom map
+    final Map<String, List<dynamic>> dynamicGlfwNames = json.decode(glfwNameMap).cast<String, List<dynamic>>();
+    _nameToGlfwName = dynamicGlfwNames.map<String, List<String>>((String key, List<dynamic> value) {
       return MapEntry<String, List<String>>(key, value.cast<String>());
     });
     data = _readHidEntries(chromiumHidCodes);
@@ -51,6 +62,7 @@ class KeyData {
   /// [KeyData.fromJson].
   Map<String, dynamic> toJson() {
     for (Key entry in data) {
+      // Android Key names
       entry.androidKeyNames = _nameToAndroidName[entry.constantName]?.cast<String>();
       if (entry.androidKeyNames != null && entry.androidKeyNames.isNotEmpty) {
         for (String androidKeyName in entry.androidKeyNames) {
@@ -61,6 +73,17 @@ class KeyData {
           if (_nameToAndroidScanCodes[androidKeyName] != null && _nameToAndroidScanCodes[androidKeyName].isNotEmpty) {
             entry.androidScanCodes ??= <int>[];
             entry.androidScanCodes.addAll(_nameToAndroidScanCodes[androidKeyName]);
+          }
+        }
+      }
+
+      // GLFW key names
+      entry.glfwKeyNames = _nameToGlfwName[entry.constantName]?.cast<String>();
+      if (entry.glfwKeyNames != null && entry.glfwKeyNames.isNotEmpty) {
+        for (String glfwKeyName in entry.glfwKeyNames) {
+          if (_nameToGlfwKeyCode[glfwKeyName] != null) {
+            entry.glfwKeyCodes ??= <int>[];
+            entry.glfwKeyCodes.add(_nameToGlfwKeyCode[glfwKeyName]);
           }
         }
       }
@@ -83,6 +106,13 @@ class KeyData {
   /// JSON.
   Map<String, List<String>> _nameToAndroidName;
 
+  /// The mapping from the Flutter name (e.g. "eject") to the GLFW name (e.g.
+  /// "GLFW_MEDIA_EJECT").
+  ///
+  /// Only populated if data is parsed from the source files, not if parsed from
+  /// JSON.
+  Map<String, List<String>> _nameToGlfwName;
+
   /// The mapping from the Android name (e.g. "MEDIA_EJECT") to the integer scan
   /// code (physical location) of the key.
   ///
@@ -96,6 +126,13 @@ class KeyData {
   /// Only populated if data is parsed from the source files, not if parsed from
   /// JSON.
   Map<String, int> _nameToAndroidKeyCode;
+
+  /// The mapping from GLFW name (e.g. "GLFW_KEY_COMMA") to the integer key code
+  /// (logical meaning) of the key.
+  ///
+  /// Only populated if data is parsed from the source files, not if parsed from
+  /// JSON.
+  Map<String, int> _nameToGlfwKeyCode;
 
   /// Parses entries from Androids Generic.kl scan code data file.
   ///
@@ -145,6 +182,30 @@ class KeyData {
       result[match.group(1)] = int.parse(match.group(2));
     });
     return result;
+  }
+
+  /// Parses entries from GLFW's keycodes.h key code data file.
+  ///
+  /// Lines in this file look like this (without the ///):
+  ///  /** Space key. */
+  ///  #define GLFW_KEY_SPACE              32,
+  Map<String, int> _readGlfwKeyCodes(String headerFile) {
+    // Only get the KEY definitions, ignore the rest (mouse, joystick, etc).
+    final RegExp enumEntry = RegExp(r'''define GLFW_KEY_([A-Z0-9_]+)\s*([A-Z0-9_]+),?''');
+    final Map<String, dynamic> replaced = <String, dynamic>{};
+    headerFile.replaceAllMapped(enumEntry, (Match match) {
+      replaced[match.group(1)] = int.tryParse(match.group(2)) ?? match.group(2).replaceAll('GLFW_KEY_', '');
+    });
+    final Map<String, int> result = <String, int>{};
+    replaced.forEach((String key, dynamic value) {
+      // Some definition values point to other definitions (e.g #define GLFW_KEY_LAST GLFW_KEY_MENU).
+      if (value is String) {
+        result[key] = replaced[value];
+      } else {
+        result[key] = value;
+      }
+    });
+        return result;
   }
 
   /// Parses entries from Chromium's HID code mapping header file.
@@ -211,6 +272,8 @@ class Key {
     this.androidKeyNames,
     this.androidScanCodes,
     this.androidKeyCodes,
+    this.glfwKeyNames,
+    this.glfwKeyCodes,
   })  : assert(usbHidCode != null),
         assert(chromiumName != null),
         _constantName = enumName;
@@ -261,6 +324,15 @@ class Key {
   /// code value.
   List<int> androidScanCodes;
 
+  /// The list of names that GFLW gives to this key (symbol names minus the
+  /// prefix).
+  List<String> glfwKeyNames;
+
+  /// The list of GLFW key codes matching this key, created by looking up the
+  /// Linux name in the Chromium data, and substituting the GLFW key code
+  /// value.
+  List<int> glfwKeyCodes;
+
   /// Creates a JSON map from the key data.
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
@@ -269,6 +341,7 @@ class Key {
         'android': androidKeyNames,
         'english': commentName,
         'chromium': chromiumName,
+        'glfw': glfwKeyNames,
       },
       'scanCodes': <String, dynamic>{
         'android': androidScanCodes,
@@ -280,6 +353,7 @@ class Key {
       },
       'keyCodes': <String, List<int>>{
         'android': androidKeyCodes,
+        'glfw': glfwKeyCodes,
       },
     };
   }
@@ -337,8 +411,8 @@ class Key {
   @override
   String toString() {
     return """'$constantName': (name: "$name", usbHidCode: ${toHex(usbHidCode)}, """
-        '''linuxKeyCode: ${toHex(linuxScanCode)}, xKbKeyCode: ${toHex(xKbScanCode)}, '''
-        '''windowsKeyCode: ${toHex(windowsScanCode)}, macOsKeyCode: ${toHex(macOsScanCode)}, '''
+        '''linuxScanCode: ${toHex(linuxScanCode)}, xKbScanCode: ${toHex(xKbScanCode)}, '''
+        '''windowsKeyCode: ${toHex(windowsScanCode)}, macOsScanCode: ${toHex(macOsScanCode)}, '''
         '''chromiumSymbolName: $chromiumName''';
   }
 
