@@ -18,7 +18,7 @@
 
 #define CREATE_NATIVE_ENTRY(native_entry)                                   \
   ([&]() {                                                                  \
-    static ::shell::testing::EmbedderContext::NativeEntry closure;          \
+    static ::shell::testing::NativeEntry closure;                           \
     static Dart_NativeFunction entrypoint = [](Dart_NativeArguments args) { \
       closure(args);                                                        \
     };                                                                      \
@@ -29,10 +29,13 @@
 namespace shell {
 namespace testing {
 
+using NativeEntry = std::function<void(Dart_NativeArguments)>;
+using SemanticsNodeCallback = std::function<void(const FlutterSemanticsNode*)>;
+using SemanticsActionCallback =
+    std::function<void(const FlutterSemanticsCustomAction*)>;
+
 class EmbedderContext {
  public:
-  using NativeEntry = std::function<void(Dart_NativeArguments)>;
-
   EmbedderContext(std::string assets_path = "");
 
   ~EmbedderContext();
@@ -51,6 +54,11 @@ class EmbedderContext {
 
   void AddNativeCallback(const char* name, Dart_NativeFunction function);
 
+  void SetSemanticsNodeCallback(SemanticsNodeCallback update_semantics_node);
+
+  void SetSemanticsCustomActionCallback(
+      SemanticsActionCallback semantics_custom_action);
+
  private:
   // This allows the builder to access the hooks.
   friend class EmbedderConfigBuilder;
@@ -62,8 +70,16 @@ class EmbedderContext {
   std::unique_ptr<fml::Mapping> isolate_snapshot_instructions_;
   std::vector<fml::closure> isolate_create_callbacks_;
   std::shared_ptr<EmbedderTestResolver> native_resolver_;
+  SemanticsNodeCallback update_semantics_node_callback_;
+  SemanticsActionCallback update_semantics_custom_action_callback_;
 
   static VoidCallback GetIsolateCreateCallbackHook();
+
+  static FlutterUpdateSemanticsNodeCallback
+  GetUpdateSemanticsNodeCallbackHook();
+
+  static FlutterUpdateSemanticsCustomActionCallback
+  GetUpdateSemanticsCustomActionCallbackHook();
 
   void FireIsolateCreateCallbacks();
 

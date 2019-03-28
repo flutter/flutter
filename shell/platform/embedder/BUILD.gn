@@ -64,7 +64,7 @@ source_set("embedder") {
 }
 
 test_fixtures("fixtures") {
-  fixtures = [ "fixtures/simple_main.dart" ]
+  fixtures = [ "fixtures/main.dart" ]
 }
 
 executable("embedder_unittests") {
@@ -73,6 +73,7 @@ executable("embedder_unittests") {
   include_dirs = [ "." ]
 
   sources = [
+    "tests/embedder_a11y_unittests.cc",
     "tests/embedder_config_builder.cc",
     "tests/embedder_config_builder.h",
     "tests/embedder_context.cc",
@@ -87,35 +88,8 @@ executable("embedder_unittests") {
   deps = [
     ":embedder",
     ":fixtures",
+    "$flutter_root/lib/ui",
     "$flutter_root/runtime",
-    "$flutter_root/testing",
-    "//third_party/skia",
-    "//third_party/tonic",
-  ]
-
-  if (is_linux) {
-    ldflags = [ "-rdynamic" ]
-  }
-}
-
-test_fixtures("fixtures_a11y") {
-  fixtures = [ "fixtures/a11y_main.dart" ]
-}
-
-executable("embedder_a11y_unittests") {
-  testonly = true
-
-  include_dirs = [ "." ]
-
-  sources = [
-    "tests/embedder_a11y_unittests.cc",
-  ]
-
-  deps = [
-    ":embedder",
-    ":fixtures_a11y",
-    "$flutter_root/lib/ui:ui",
-    "$flutter_root/shell/common",
     "$flutter_root/testing",
     "//third_party/skia",
     "//third_party/tonic",
