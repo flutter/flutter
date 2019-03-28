@@ -185,7 +185,7 @@ task:
 task:
   use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true'
   osx_instance:
-    image: mojave-xcode-10.2
+    image: mojave-xcode-10.1
   depends_on:
     - analyze
   env:
