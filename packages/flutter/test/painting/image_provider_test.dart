@@ -86,4 +86,32 @@ void main() {
     });
     expect(await caughtError.future, true);
   });
+
+  test('ImageProvider.resolve sync errors will be caught', () async {
+    final ImageProvider imageProvider = LoadErrorImageProvider();
+    final Completer<bool> caughtError = Completer<bool>();
+    FlutterError.onError = (FlutterErrorDetails details) {
+      caughtError.complete(false);
+    };
+    final ImageStream result = imageProvider.resolve(ImageConfiguration.empty);
+    result.addListener((ImageInfo info, bool syncCall) {
+    }, onError: (dynamic error, StackTrace stackTrace) {
+      caughtError.complete(true);
+    });
+    expect(await caughtError.future, true);
+  });
+
+   test('ImageProvider.resolve errors in the completer will be caught', () async {
+    final ImageProvider imageProvider = LoadErrorCompleterImageProvider();
+    final Completer<bool> caughtError = Completer<bool>();
+    FlutterError.onError = (FlutterErrorDetails details) {
+      caughtError.complete(false);
+    };
+    final ImageStream result = imageProvider.resolve(ImageConfiguration.empty);
+    result.addListener((ImageInfo info, bool syncCall) {
+    }, onError: (dynamic error, StackTrace stackTrace) {
+      caughtError.complete(true);
+    });
+    expect(await caughtError.future, true);
+  });
 }
