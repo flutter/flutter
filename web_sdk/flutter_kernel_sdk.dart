@@ -6,11 +6,11 @@ import 'dart:async';
 import 'dart:convert' show json;
 import 'dart:io';
 import 'package:args/args.dart' show ArgParser;
-import 'package:dev_compiler/src/compiler/module_builder.dart'; // ignore: uri_does_not_exist
-import 'package:dev_compiler/src/compiler/shared_command.dart' show SharedCompilerOptions; // ignore: uri_does_not_exist
-import 'package:dev_compiler/src/kernel/target.dart'; // ignore: uri_does_not_exist
-import 'package:dev_compiler/src/kernel/command.dart'; // ignore: uri_does_not_exist
-import 'package:dev_compiler/src/kernel/compiler.dart'; // ignore: uri_does_not_exist
+import 'package:dev_compiler/src/compiler/module_builder.dart';
+import 'package:dev_compiler/src/compiler/shared_command.dart' show SharedCompilerOptions;
+import 'package:dev_compiler/src/kernel/target.dart';
+import 'package:dev_compiler/src/kernel/command.dart';
+import 'package:dev_compiler/src/kernel/compiler.dart';
 import 'package:front_end/src/api_unstable/ddc.dart' show CompilerOptions, kernelForComponent;
 import 'package:kernel/kernel.dart';
 import 'package:path/path.dart' as path;
