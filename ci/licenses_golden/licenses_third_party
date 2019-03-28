@@ -1,4 +1,4 @@
-Signature: 7fd62bb67d412c7e900c9f47816f1440
+Signature: 94e50e38cee32854b41f95fc588edc59
 
 UNUSED LICENSES:
 
@@ -5137,6 +5137,8 @@ FILE: ../../../third_party/dart/runtime/lib/ffi_dynamic_library.cc
 FILE: ../../../third_party/dart/runtime/lib/ffi_dynamic_library_patch.dart
 FILE: ../../../third_party/dart/runtime/lib/ffi_native_type_patch.dart
 FILE: ../../../third_party/dart/runtime/lib/ffi_patch.dart
+FILE: ../../../third_party/dart/runtime/tools/dartfuzz/dartfuzz_api_table.dart
+FILE: ../../../third_party/dart/runtime/tools/dartfuzz/gen_api_table.dart
 FILE: ../../../third_party/dart/runtime/tools/graphexplorer/graphexplorer.html
 FILE: ../../../third_party/dart/runtime/tools/graphexplorer/graphexplorer.js
 FILE: ../../../third_party/dart/runtime/vm/catch_entry_moves_test.cc
