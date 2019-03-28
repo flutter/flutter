@@ -4,10 +4,6 @@
 
 import("//build/config/linux/pkg_config.gni")
 
-pkg_config("glfw3") {
-  packages = [ "glfw3" ]
-}
-
 pkg_config("gtk3") {
   packages = [ "gtk+-3.0" ]
 }
