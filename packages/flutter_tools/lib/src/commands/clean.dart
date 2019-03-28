@@ -23,6 +23,9 @@ class CleanCommand extends FlutterCommand {
   final String description = 'Delete the build/ and .dart_tool/ directories.';
 
   @override
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{};
+
+  @override
   Future<FlutterCommandResult> runCommand() async {
     final FlutterProject flutterProject = await FlutterProject.current();
     final Directory buildDir = fs.directory(getBuildDirectory());

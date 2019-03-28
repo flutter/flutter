@@ -45,6 +45,9 @@ class ConfigCommand extends FlutterCommand {
   bool get shouldUpdateCache => false;
 
   @override
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{};
+
+  @override
   String get usageFooter {
     // List all config settings.
     String values = config.keys.map<String>((String key) {

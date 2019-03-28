@@ -677,7 +677,7 @@ abstract class FlutterCommand extends Command<void> {
   ApplicationPackageStore applicationPackages;
 }
 
-/// A mixin which applied an implementation of [requiredArtifacts] that only
+/// A mixin which applies an implementation of [requiredArtifacts] that only
 /// downloads artifacts corresponding to an attached device.
 mixin DeviceBasedDevelopmentArtifacts on FlutterCommand {
   @override
@@ -715,6 +715,47 @@ mixin DeviceBasedDevelopmentArtifacts on FlutterCommand {
           // No artifacts currently supported.
           break;
       }
+    }
+    return artifacts;
+  }
+}
+
+/// A mixin which applies an implementation of [requiredArtifacts] that only
+/// downloads artifacts corresponding to a target device.
+mixin TargetPlatformBasedDevelopmentArtifacts on FlutterCommand {
+  @override
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async {
+    // If there is no specified target device, fallback to the default
+    // confiugration.
+    final String rawTargetPlatform = argResults['target-platform'];
+    final TargetPlatform targetPlatform = getTargetPlatformForName(rawTargetPlatform);
+    if (targetPlatform == null) {
+      return super.requiredArtifacts;
+    }
+
+    final Set<DevelopmentArtifact> artifacts = <DevelopmentArtifact>{
+      DevelopmentArtifact.universal,
+    };
+    switch (targetPlatform) {
+      case TargetPlatform.android_arm:
+      case TargetPlatform.android_arm64:
+      case TargetPlatform.android_x64:
+      case TargetPlatform.android_x86:
+        artifacts.add(DevelopmentArtifact.android);
+        break;
+      case TargetPlatform.web:
+        artifacts.add(DevelopmentArtifact.web);
+        break;
+      case TargetPlatform.ios:
+        artifacts.add(DevelopmentArtifact.iOS);
+        break;
+      case TargetPlatform.darwin_x64:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.tester:
+      case TargetPlatform.windows_x64:
+      case TargetPlatform.linux_x64:
+        // No artifacts currently supported.
+        break;
     }
     return artifacts;
   }
