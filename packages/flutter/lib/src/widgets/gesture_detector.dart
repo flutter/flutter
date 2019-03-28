@@ -580,12 +580,6 @@ class GestureDetector extends StatelessWidget {
   }
 }
 
-/// Keeps track of the last [PointerDeviceKind] that initiated a gesture.
-class DeviceKindTracker extends ValueNotifier<PointerDeviceKind> {
-  /// Creates an instance of [DeviceKindTracker].
-  DeviceKindTracker() : super(null);
-}
-
 /// A widget that detects gestures described by the given gesture
 /// factories.
 ///
@@ -638,7 +632,6 @@ class RawGestureDetector extends StatefulWidget {
     this.gestures = const <Type, GestureRecognizerFactory>{},
     this.behavior,
     this.excludeFromSemantics = false,
-    this.deviceKindTracker,
   }) : assert(gestures != null),
        assert(excludeFromSemantics != null),
        super(key: key);
@@ -669,11 +662,6 @@ class RawGestureDetector extends StatefulWidget {
   /// tree directly and so having a gesture to show it would result in
   /// duplication of information.
   final bool excludeFromSemantics;
-
-  /// {@template flutter.widgets.gestureDetector.deviceKindTracker}
-  /// Keeps track of the last device kind used to initiate a gesture.
-  /// {@endtemplate}
-  final DeviceKindTracker deviceKindTracker;
 
   @override
   RawGestureDetectorState createState() => RawGestureDetectorState();
@@ -787,9 +775,6 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
 
   void _handlePointerDown(PointerDownEvent event) {
     assert(_recognizers != null);
-    if (widget.deviceKindTracker != null) {
-      widget.deviceKindTracker.value = event.kind;
-    }
     for (GestureRecognizer recognizer in _recognizers.values)
       recognizer.addPointer(event);
   }

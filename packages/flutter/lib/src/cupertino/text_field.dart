@@ -469,8 +469,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
   FocusNode _focusNode;
   FocusNode get _effectiveFocusNode => widget.focusNode ?? (_focusNode ??= FocusNode());
 
-  final DeviceKindTracker _deviceKindTracker = DeviceKindTracker();
-  PointerDeviceKind get _lastUsedDeviceKind => _deviceKindTracker.value;
+  PointerDeviceKind _lastUsedDeviceKind;
 
   // The selection overlay should only be enabled when the user is interacting
   // through a touch screen. Mouse and other devices shouldn't trigger the
@@ -818,21 +817,25 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
                 : CupertinoTheme.of(context).brightness == Brightness.light
                     ? _kDisabledBackground
                     : CupertinoColors.darkBackgroundGray,
-            child: TextSelectionGestureDetector(
-              onTapDown: _handleTapDown,
-              onForcePressStart: _handleForcePressStarted,
-              onForcePressEnd: _handleForcePressEnded,
-              onSingleTapUp: _handleSingleTapUp,
-              onSingleLongTapStart: _handleSingleLongTapStart,
-              onSingleLongTapMoveUpdate: _handleSingleLongTapMoveUpdate,
-              onSingleLongTapEnd: _handleSingleLongTapEnd,
-              onDoubleTapDown: _handleDoubleTapDown,
-              onDragSelectionStart: _handleMouseDragSelectionStart,
-              onDragSelectionUpdate: _handleMouseDragSelectionUpdate,
-              onDragSelectionEnd: _handleMouseDragSelectionEnd,
-              behavior: HitTestBehavior.translucent,
-              deviceKindTracker: _deviceKindTracker,
-              child: _addTextDependentAttachments(paddedEditable, textStyle, placeholderStyle),
+            child: Listener(
+              onPointerDown: (PointerDownEvent event) {
+                _lastUsedDeviceKind = event.kind;
+              },
+              child: TextSelectionGestureDetector(
+                onTapDown: _handleTapDown,
+                onForcePressStart: _handleForcePressStarted,
+                onForcePressEnd: _handleForcePressEnded,
+                onSingleTapUp: _handleSingleTapUp,
+                onSingleLongTapStart: _handleSingleLongTapStart,
+                onSingleLongTapMoveUpdate: _handleSingleLongTapMoveUpdate,
+                onSingleLongTapEnd: _handleSingleLongTapEnd,
+                onDoubleTapDown: _handleDoubleTapDown,
+                onDragSelectionStart: _handleMouseDragSelectionStart,
+                onDragSelectionUpdate: _handleMouseDragSelectionUpdate,
+                onDragSelectionEnd: _handleMouseDragSelectionEnd,
+                behavior: HitTestBehavior.translucent,
+                child: _addTextDependentAttachments(paddedEditable, textStyle, placeholderStyle),
+              ),
             ),
           ),
         ),

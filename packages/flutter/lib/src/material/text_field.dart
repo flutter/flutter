@@ -513,8 +513,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     && widget.decoration != null
     && widget.decoration.counterText == null;
 
-  final DeviceKindTracker _deviceKindTracker = DeviceKindTracker();
-  PointerDeviceKind get _lastUsedDeviceKind => _deviceKindTracker.value;
+  PointerDeviceKind _lastUsedDeviceKind;
 
   // The selection overlay should only be enabled when the user is interacting
   // through a touch screen. Mouse and other devices shouldn't trigger the
@@ -977,20 +976,24 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
       },
       child: IgnorePointer(
         ignoring: !(widget.enabled ?? widget.decoration?.enabled ?? true),
-        child: TextSelectionGestureDetector(
-          onTapDown: _handleTapDown,
-          onForcePressStart: forcePressEnabled ? _handleForcePressStarted : null,
-          onSingleTapUp: _handleSingleTapUp,
-          onSingleTapCancel: _handleSingleTapCancel,
-          onSingleLongTapStart: _handleSingleLongTapStart,
-          onSingleLongTapMoveUpdate: _handleSingleLongTapMoveUpdate,
-          onSingleLongTapEnd: _handleSingleLongTapEnd,
-          onDoubleTapDown: _handleDoubleTapDown,
-          onDragSelectionStart: _handleMouseDragSelectionStart,
-          onDragSelectionUpdate: _handleMouseDragSelectionUpdate,
-          behavior: HitTestBehavior.translucent,
-          deviceKindTracker: _deviceKindTracker,
-          child: child,
+        child: Listener(
+          onPointerDown: (PointerDownEvent event) {
+            _lastUsedDeviceKind = event.kind;
+          },
+          child: TextSelectionGestureDetector(
+            onTapDown: _handleTapDown,
+            onForcePressStart: forcePressEnabled ? _handleForcePressStarted : null,
+            onSingleTapUp: _handleSingleTapUp,
+            onSingleTapCancel: _handleSingleTapCancel,
+            onSingleLongTapStart: _handleSingleLongTapStart,
+            onSingleLongTapMoveUpdate: _handleSingleLongTapMoveUpdate,
+            onSingleLongTapEnd: _handleSingleLongTapEnd,
+            onDoubleTapDown: _handleDoubleTapDown,
+            onDragSelectionStart: _handleMouseDragSelectionStart,
+            onDragSelectionUpdate: _handleMouseDragSelectionUpdate,
+            behavior: HitTestBehavior.translucent,
+            child: child,
+          ),
         ),
       ),
     );
