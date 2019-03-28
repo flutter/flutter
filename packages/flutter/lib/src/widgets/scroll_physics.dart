@@ -34,7 +34,14 @@ class ScrollPhysics {
   /// If a subclass of [ScrollPhysics] does not override a method, that subclass
   /// will inherit an implementation from this base class that defers to
   /// [parent]. This mechanism lets you assemble novel combinations of
-  /// [ScrollPhysics] subclasses at runtime.
+  /// [ScrollPhysics] subclasses at runtime. For example:
+  ///
+  /// ```dart
+  /// BouncingScrollPhysics(parent: AlwaysScrollPhysics())
+  ///
+  /// ```
+  /// will result in a [ScrollPhysics] that has the combined behavior
+  /// of [BouncingScrollPhysics] and [AlwaysScrollPhysics].
   final ScrollPhysics parent;
 
   /// If [parent] is null then return ancestor, otherwise recursively build a
@@ -56,6 +63,19 @@ class ScrollPhysics {
   /// If this scroll physics object already has a parent, then this method
   /// is applied recursively and ancestor will appear at the end of the
   /// existing chain of parents.
+  ///
+  /// {@tool sample}
+  ///
+  /// In the following example, the [applyTo] method is used to combine two existing [ScrollPhysics] instances,
+  /// the resulting [ScrollPhysics] instance [y] has the same behavior as [z]:
+  ///
+  /// ```dart
+  /// const FooScrollPhysics specifiedPhysics = FooScrollPhysics(parent: BarScrollPhysics());
+  ///
+  /// final FooScrollPhysics y = x.applyTo(FoobarScrollPhysics());
+  /// const FooScrollPhysics z = FooScrollPhysics(parent: BarScrollPhysics(parent: FoobarScrollPhysics()));
+  /// ```
+  /// {@end-tool}
   ///
   /// The returned object will combine some of the behaviors from this
   /// [ScrollPhysics] instance and some of the behaviors from [ancestor].

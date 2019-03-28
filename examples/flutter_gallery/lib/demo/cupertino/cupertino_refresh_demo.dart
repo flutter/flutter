@@ -48,6 +48,16 @@ class _CupertinoRefreshControlDemoState extends State<CupertinoRefreshControlDem
                 : CupertinoColors.darkBackgroundGray,
           ),
           child: CustomScrollView(
+            // If left unspecified, the physics here will fallback to [AlwaysScrollableScollPhysics],
+            // which, on Android, clamps overscrolls by default, thus prevents our
+            // [CupertinoSliverRefreshControl] from being triggered.
+            //
+            // See also:
+            // * [CupertinoSliverRefreshControl]
+            // * [Scrollable.physics]
+            // * [AlwaysScrollableScrollPhysics]
+            // * [ScrollPhysics.parent]
+            physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
             slivers: <Widget>[
               CupertinoSliverNavigationBar(
                 largeTitle: const Text('Refresh'),

@@ -249,7 +249,10 @@ typedef RefreshCallback = Future<void> Function();
 ///
 /// Can only be used in downward-scrolling vertical lists that overscrolls. In
 /// other words, refreshes can't be triggered with lists using
-/// [ClampingScrollPhysics].
+/// [ClampingScrollPhysics]. In order for [CupertinoSliverRefreshControl] to work properly
+/// on Android (which uses [ClampingScrollPhysics] by default), be sure to override
+/// the [Scrollable.physics] property with a [ScrollPhysics] that overscrolls (A combination
+/// of [BouncingScrollPhysics] and [AlwaysScrollPhysics], for example).
 ///
 /// In a typical application, this sliver should be inserted between the app bar
 /// sliver such as [CupertinoSliverNavigationBar] and your main scrollable
