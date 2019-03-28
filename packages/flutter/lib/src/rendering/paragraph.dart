@@ -34,50 +34,16 @@ const String _kEllipsis = '\u2026';
 
 /// Parent data for use with [RenderParagraph].
 class TextParentData extends ContainerBoxParentData<RenderBox> {
-  // /// The distance by which the child's top edge is inset from the top of the stack.
-  // double top;
-
-  // /// The distance by which the child's right edge is inset from the right of the stack.
-  // double right;
-
-  // /// The distance by which the child's bottom edge is inset from the bottom of the stack.
-  // double bottom;
-
-  // /// The distance by which the child's left edge is inset from the left of the stack.
-  // double left;
-
-  // /// The child's width.
-  // ///
-  // /// Ignored if both left and right are non-null.
-  // double width;
-
-  // /// The child's height.
-  // ///
-  // /// Ignored if both top and bottom are non-null.
-  // double height;
-
   // Offset offset;
 
-  // @override
-  // String toString() {
-  //   final List<String> values = <String>[];
-  //   if (top != null)
-  //     values.add('top=$top');
-  //   if (right != null)
-  //     values.add('right=$right');
-  //   if (bottom != null)
-  //     values.add('bottom=$bottom');
-  //   if (left != null)
-  //     values.add('left=$left');
-  //   if (width != null)
-  //     values.add('width=$width');
-  //   if (height != null)
-  //     values.add('height=$height');
-  //   if (values.isEmpty)
-  //     values.add('not positioned');
-  //   values.add(super.toString());
-  //   return values.join('; ');
-  // }
+  @override
+  String toString() {
+    final List<String> values = <String>[];
+    if (offset != null)
+      values.add('offset=$offset');
+    values.add(super.toString());
+    return values.join('; ');
+  }
 }
 
 /// A render object that displays a paragraph of text
@@ -323,15 +289,13 @@ class RenderParagraph extends RenderBox
     RenderBox child = firstChild;
     int childIndex = 0;
     while (child != null) {
-      if (child.hitTest(
-          result,
-          position: position - Offset(
-            _textPainter.inlinePlaceholderBoxes[childIndex].left,
-            _textPainter.inlinePlaceholderBoxes[childIndex].top
-          )
-        )
-      ) {
-        result.add(BoxHitTestEntry(this, position));
+      Offset adjustedPosition = position - Offset(
+        _textPainter.inlinePlaceholderBoxes[childIndex].left,
+        _textPainter.inlinePlaceholderBoxes[childIndex].top
+      );
+      if (child.hitTest(result, position: adjustedPosition)) {
+        // result.add(BoxHitTestEntry(child, adjustedPosition));
+        result.add(BoxHitTestEntry(child, position));
         return true;
       }
       child = childAfter(child);
@@ -347,6 +311,7 @@ class RenderParagraph extends RenderBox
       return;
     _layoutTextWithConstraints(constraints);
     final Offset offset = entry.localPosition;
+    // print('HANDLING EVENT ${entry.localPosition}');
     final TextPosition position = _textPainter.getPositionForOffset(offset);
     final TextSpan span = _textPainter.text.getSpanForPosition(position);
     span?.recognizer?.addPointer(event);
@@ -381,6 +346,7 @@ class RenderParagraph extends RenderBox
     }
     _textPainter.placeholderDimensions = placeholderDimensions;
     _layoutTextWithConstraints(constraints);
+
     // We grab _textPainter.size and _textPainter.didExceedMaxLines here because
     // assigning to `size` will trigger us to validate our intrinsic sizes,
     // which will change _textPainter's layout because the intrinsic size
@@ -492,7 +458,9 @@ class RenderParagraph extends RenderBox
     RenderBox child = firstChild;
     int childIndex = 0;
     while (child != null && childIndex < _textPainter.inlinePlaceholderBoxes.length) {
-      child.paint(context, offset + Offset(
+      context.paintChild(
+        child,
+        offset + Offset(
           _textPainter.inlinePlaceholderBoxes[childIndex].left,
           _textPainter.inlinePlaceholderBoxes[childIndex].top
         )
