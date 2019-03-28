@@ -70,10 +70,11 @@ class ScrollPhysics {
   /// the resulting [ScrollPhysics] instance [x] has the same behavior as [y]:
   ///
   /// ```dart
-  /// const FooScrollPhysics existingPhysics = FooScrollPhysics(parent: BarScrollPhysics());
+  /// const AlwaysScrollPhysics existingPhysics = AlwaysScrollPhysics(parent: BouncingScrollPhysics());
+  /// const NeverScrollableScrollPhysics newPhysics = NeverScrollableScrollPhysics();
   ///
-  /// final FooScrollPhysics x = existingPhysics.applyTo(FoobarScrollPhysics());
-  /// const FooScrollPhysics y = FooScrollPhysics(parent: BarScrollPhysics(parent: FoobarScrollPhysics()));
+  /// final AlwaysScrollPhysics x = existingPhysics.applyTo(newPhysics);
+  /// const AlwaysScrollPhysics y = AlwaysScrollPhysics(parent: BarScrollPhysics(parent: newPhysics));
   /// ```
   /// {@end-tool}
   ///
