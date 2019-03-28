@@ -53,10 +53,9 @@ BuildApp() {
 
   # Write User-Defined FLTAssetsPath to AppFrameworkInfo.plist
   local assets_path="flutter_assets"
+  FLTAssetsPath=$(/usr/libexec/PlistBuddy -c "Print :FLTAssetsPath" "${derived_dir}/AppFrameworkInfo.plist" 2>/dev/null)
   if [[ -n "$FLTAssetsPath" ]]; then
     assets_path="${FLTAssetsPath}"
-    /usr/libexec/PlistBuddy -c "Delete :FLTAssetsPath" "${derived_dir}/AppFrameworkInfo.plist"
-    /usr/libexec/PlistBuddy -c "Add :FLTAssetsPath string ${FLTAssetsPath}" "${derived_dir}/AppFrameworkInfo.plist"
   fi
 
   # Use FLUTTER_BUILD_MODE if it's set, otherwise use the Xcode build configuration name
