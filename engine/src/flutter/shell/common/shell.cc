@@ -163,16 +163,16 @@ static void RecordStartupTimestamp() {
 // that cause shell initialization failures will still lead to some of their
 // settings being applied.
 static void PerformInitializationTasks(const blink::Settings& settings) {
+  {
+    fml::LogSettings log_settings;
+    log_settings.min_log_level =
+        settings.verbose_logging ? fml::LOG_INFO : fml::LOG_ERROR;
+    fml::SetLogSettings(log_settings);
+  }
+
   static std::once_flag gShellSettingsInitialization = {};
   std::call_once(gShellSettingsInitialization, [&settings] {
     RecordStartupTimestamp();
-
-    {
-      fml::LogSettings log_settings;
-      log_settings.min_log_level =
-          settings.verbose_logging ? fml::LOG_INFO : fml::LOG_ERROR;
-      fml::SetLogSettings(log_settings);
-    }
 
     tonic::SetLogHandler(
         [](const char* message) { FML_LOG(ERROR) << message; });
