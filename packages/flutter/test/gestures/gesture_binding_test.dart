@@ -150,7 +150,7 @@ void main() {
         ]
     );
 
-    final List<PointerEvent> events = PointerEventConverter.format(
+    final List<PointerEvent> events = PointerEventConverter.expand(
         packet.data, ui.window.devicePixelRatio).toList();
 
     expect(events.length, 2);
