@@ -620,6 +620,8 @@ class AnsiSpinner extends Status {
   final String _backspaceChar = '\b';
   final String _clearChar = ' ';
 
+  bool timedOut = false;
+
   int ticks = 0;
   Timer timer;
 
@@ -660,15 +662,19 @@ class AnsiSpinner extends Status {
     assert(timer.isActive);
     stdout.write(_backspace);
     ticks += 1;
-    stdout.write('${_clearChar * spinnerIndent}$_currentAnimationFrame');
     if (seemsSlow) {
+      if (!timedOut) {
+        timedOut = true;
+        stdout.write('$_clear\n');
+      }
       if (slowWarningCallback != null) {
-        _slowWarning = ' ' + slowWarningCallback();
+        _slowWarning = slowWarningCallback();
       } else {
-        _slowWarning = ' ' + _defaultSlowWarning;
+        _slowWarning = _defaultSlowWarning;
       }
       stdout.write(_slowWarning);
     }
+    stdout.write('${_clearChar * spinnerIndent}$_currentAnimationFrame');
   }
 
   @override
