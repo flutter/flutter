@@ -608,6 +608,8 @@ abstract class BoxScrollView extends ScrollView {
 /// explicit [List<Widget>] of children. This [ListView]'s children are made up
 /// of [Container]s with [Text].
 ///
+/// ![A ListView of 3 amber colored containers with sample text.](https://flutter.github.io/assets-for-api-docs/assets/widgets/list_view.png)
+///
 /// ```dart
 /// ListView(
 ///   padding: const EdgeInsets.all(8.0),
@@ -631,10 +633,13 @@ abstract class BoxScrollView extends ScrollView {
 /// )
 /// ```
 /// {@end-tool}
+///
 /// {@tool sample}
 /// This example mirrors the previous one, creating the same list using the
 /// [ListView.builder] constructor. Using the [IndexedWidgetBuilder], children
 /// are built lazily and can be infinite in number.
+///
+/// ![A ListView of 3 amber colored containers with sample text.](https://flutter.github.io/assets-for-api-docs/assets/widgets/list_view_builder.png)
 ///
 /// ```dart
 /// final List<String> entries = <String>['A', 'B', 'C'];
@@ -653,10 +658,14 @@ abstract class BoxScrollView extends ScrollView {
 /// );
 /// ```
 /// {@end-tool}
+///
 /// {@tool sample}
 /// This example continues to build from our the previous ones, creating a
 /// similar list using [ListView.separated]. Here, a [Divider] is used as a
 /// separator.
+///
+/// ![A ListView of 3 amber colored containers with sample text and a Divider
+/// between each of them.](https://flutter.github.io/assets-for-api-docs/assets/widgets/list_view_separated.png)
 ///
 /// ```dart
 /// final List<String> entries = <String>['A', 'B', 'C'];

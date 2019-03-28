@@ -106,4 +106,28 @@ class ObtainKeyErrorImageProvider extends ImageProvider<ObtainKeyErrorImageProvi
   }
 }
 
+class LoadErrorImageProvider extends ImageProvider<LoadErrorImageProvider> {
+  @override
+  ImageStreamCompleter load(LoadErrorImageProvider key) {
+    throw Error();
+  }
+
+   @override
+  Future<LoadErrorImageProvider> obtainKey(ImageConfiguration configuration) {
+    return SynchronousFuture<LoadErrorImageProvider>(this);
+  }
+}
+
+ class LoadErrorCompleterImageProvider extends ImageProvider<LoadErrorCompleterImageProvider> {
+  @override
+  ImageStreamCompleter load(LoadErrorCompleterImageProvider key) {
+    return OneFrameImageStreamCompleter(SynchronousFuture<ImageInfo>(null).then((_) => throw Error()));
+  }
+
+   @override
+  Future<LoadErrorCompleterImageProvider> obtainKey(ImageConfiguration configuration) {
+    return SynchronousFuture<LoadErrorCompleterImageProvider>(this);
+  }
+}
+
 class TestImageStreamCompleter extends ImageStreamCompleter {}

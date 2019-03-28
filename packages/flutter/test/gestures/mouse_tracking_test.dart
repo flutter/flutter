@@ -256,5 +256,50 @@ void main() {
       expect(exit.first.device, isNull);
       expect(exit.first.runtimeType, equals(PointerExitEvent));
     });
+    test('handles mouse down and move', () {
+      final ui.PointerDataPacket packet1 = ui.PointerDataPacket(data: <ui.PointerData>[
+        ui.PointerData(
+          change: ui.PointerChange.hover,
+          physicalX: 0.0 * ui.window.devicePixelRatio,
+          physicalY: 0.0 * ui.window.devicePixelRatio,
+          kind: PointerDeviceKind.mouse,
+        ),
+        ui.PointerData(
+          change: ui.PointerChange.hover,
+          physicalX: 1.0 * ui.window.devicePixelRatio,
+          physicalY: 101.0 * ui.window.devicePixelRatio,
+          kind: PointerDeviceKind.mouse,
+        ),
+      ]);
+      final ui.PointerDataPacket packet2 = ui.PointerDataPacket(data: <ui.PointerData>[
+        ui.PointerData(
+          change: ui.PointerChange.down,
+          physicalX: 1.0 * ui.window.devicePixelRatio,
+          physicalY: 101.0 * ui.window.devicePixelRatio,
+          kind: PointerDeviceKind.mouse,
+        ),
+        ui.PointerData(
+          change: ui.PointerChange.move,
+          physicalX: 1.0 * ui.window.devicePixelRatio,
+          physicalY: 201.0 * ui.window.devicePixelRatio,
+          kind: PointerDeviceKind.mouse,
+        ),
+      ]);
+      isInHitRegion = true;
+      tracker.attachAnnotation(annotation);
+      ui.window.onPointerDataPacket(packet1);
+      tracker.collectMousePositions();
+      ui.window.onPointerDataPacket(packet2);
+      tracker.collectMousePositions();
+      expect(enter.length, equals(1), reason: 'enter contains $enter');
+      expect(enter.first.position, equals(const Offset(1.0, 101.0)));
+      expect(enter.first.device, equals(0));
+      expect(enter.first.runtimeType, equals(PointerEnterEvent));
+      expect(move.length, equals(1), reason: 'move contains $move');
+      expect(move.first.position, equals(const Offset(1.0, 101.0)));
+      expect(move.first.device, equals(0));
+      expect(move.first.runtimeType, equals(PointerHoverEvent));
+      expect(exit.length, equals(0), reason: 'exit contains $exit');
+    });
   });
 }
