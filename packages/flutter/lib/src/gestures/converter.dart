@@ -65,8 +65,7 @@ class PointerEventConverter {
     );
   }
 
-  static String _formatErrorMessage(ui.PointerChange change, String msg) => 'Invalid event \'$change\': $msg';
-
+  static String _formatErrorMessage(ui.PointerChange change, String message) => 'Invalid event \'$change\': $message';
 
   /// Format the given packet of pointer data into a framework
   /// pointer events.
@@ -75,8 +74,7 @@ class PointerEventConverter {
   /// [dart:ui.Window.devicePixelRatio]) is used to convert the incoming data
   /// from physical coordinates to logical pixels. See the discussion at
   /// [PointerEvent] for more details on the [PointerEvent] coordinate space.
-  static List<PointerEvent> format(List<ui.PointerData> data, double devicePixelRatio) {
-    final List<PointerEvent> frameworkPointerData = <PointerEvent>[];
+  static Iterable<PointerEvent> expand(List<ui.PointerData> data, double devicePixelRatio) sync* {
     for (ui.PointerData datum in data) {
       final Offset position = Offset(datum.physicalX, datum.physicalY) / devicePixelRatio;
       final double radiusMinor = _toLogicalPixels(datum.radiusMinor, devicePixelRatio);
@@ -93,22 +91,20 @@ class PointerEventConverter {
               _formatErrorMessage(datum.change, 'Pointer ${datum.device} already exist.'));
             final _PointerState state = _ensureStateForPointer(datum, position);
             assert(state.lastPosition == position);
-            frameworkPointerData.add(
-                PointerAddedEvent(
-                  timeStamp: timeStamp,
-                  kind: kind,
-                  device: datum.device,
-                  position: position,
-                  obscured: datum.obscured,
-                  pressureMin: datum.pressureMin,
-                  pressureMax: datum.pressureMax,
-                  distance: datum.distance,
-                  distanceMax: datum.distanceMax,
-                  radiusMin: radiusMin,
-                  radiusMax: radiusMax,
-                  orientation: datum.orientation,
-                  tilt: datum.tilt,
-                )
+            yield PointerAddedEvent(
+              timeStamp: timeStamp,
+              kind: kind,
+              device: datum.device,
+              position: position,
+              obscured: datum.obscured,
+              pressureMin: datum.pressureMin,
+              pressureMax: datum.pressureMax,
+              distance: datum.distance,
+              distanceMax: datum.distanceMax,
+              radiusMin: radiusMin,
+              radiusMax: radiusMax,
+              orientation: datum.orientation,
+              tilt: datum.tilt,
             );
             break;
           case ui.PointerChange.hover:
@@ -119,27 +115,25 @@ class PointerEventConverter {
               _formatErrorMessage(datum.change, 'Pointer ${datum.device} is down.'));
             final Offset offset = position - state.lastPosition;
             state.lastPosition = position;
-            frameworkPointerData.add(
-                PointerHoverEvent(
-                  timeStamp: timeStamp,
-                  kind: kind,
-                  device: datum.device,
-                  position: position,
-                  delta: offset,
-                  buttons: datum.buttons,
-                  obscured: datum.obscured,
-                  pressureMin: datum.pressureMin,
-                  pressureMax: datum.pressureMax,
-                  distance: datum.distance,
-                  distanceMax: datum.distanceMax,
-                  size: datum.size,
-                  radiusMajor: radiusMajor,
-                  radiusMinor: radiusMinor,
-                  radiusMin: radiusMin,
-                  radiusMax: radiusMax,
-                  orientation: datum.orientation,
-                  tilt: datum.tilt,
-                )
+            yield PointerHoverEvent(
+              timeStamp: timeStamp,
+              kind: kind,
+              device: datum.device,
+              position: position,
+              delta: offset,
+              buttons: datum.buttons,
+              obscured: datum.obscured,
+              pressureMin: datum.pressureMin,
+              pressureMax: datum.pressureMax,
+              distance: datum.distance,
+              distanceMax: datum.distanceMax,
+              size: datum.size,
+              radiusMajor: radiusMajor,
+              radiusMinor: radiusMinor,
+              radiusMin: radiusMin,
+              radiusMax: radiusMax,
+              orientation: datum.orientation,
+              tilt: datum.tilt,
             );
             break;
           case ui.PointerChange.move:
@@ -150,29 +144,27 @@ class PointerEventConverter {
               _formatErrorMessage(datum.change, 'Pointer ${datum.device} is up.'));
             final Offset offset = position - state.lastPosition;
             state.lastPosition = position;
-            frameworkPointerData.add(
-                PointerMoveEvent(
-                  timeStamp: timeStamp,
-                  pointer: state.pointer,
-                  kind: kind,
-                  device: datum.device,
-                  position: position,
-                  delta: offset,
-                  buttons: datum.buttons,
-                  obscured: datum.obscured,
-                  pressure: datum.pressure,
-                  pressureMin: datum.pressureMin,
-                  pressureMax: datum.pressureMax,
-                  distanceMax: datum.distanceMax,
-                  size: datum.size,
-                  radiusMajor: radiusMajor,
-                  radiusMinor: radiusMinor,
-                  radiusMin: radiusMin,
-                  radiusMax: radiusMax,
-                  orientation: datum.orientation,
-                  tilt: datum.tilt,
-                  platformData: datum.platformData,
-                )
+            yield PointerMoveEvent(
+              timeStamp: timeStamp,
+              pointer: state.pointer,
+              kind: kind,
+              device: datum.device,
+              position: position,
+              delta: offset,
+              buttons: datum.buttons,
+              obscured: datum.obscured,
+              pressure: datum.pressure,
+              pressureMin: datum.pressureMin,
+              pressureMax: datum.pressureMax,
+              distanceMax: datum.distanceMax,
+              size: datum.size,
+              radiusMajor: radiusMajor,
+              radiusMinor: radiusMinor,
+              radiusMin: radiusMin,
+              radiusMax: radiusMax,
+              orientation: datum.orientation,
+              tilt: datum.tilt,
+              platformData: datum.platformData,
             );
             break;
           case ui.PointerChange.down:
@@ -185,27 +177,25 @@ class PointerEventConverter {
               _formatErrorMessage(datum.change, 'Pointer ${datum.device} new position does not match previous position'));
             state.startNewPointer();
             state.setDown();
-            frameworkPointerData.add(
-                PointerDownEvent(
-                  timeStamp: timeStamp,
-                  pointer: state.pointer,
-                  kind: kind,
-                  device: datum.device,
-                  position: position,
-                  buttons: datum.buttons,
-                  obscured: datum.obscured,
-                  pressure: datum.pressure,
-                  pressureMin: datum.pressureMin,
-                  pressureMax: datum.pressureMax,
-                  distanceMax: datum.distanceMax,
-                  size: datum.size,
-                  radiusMajor: radiusMajor,
-                  radiusMinor: radiusMinor,
-                  radiusMin: radiusMin,
-                  radiusMax: radiusMax,
-                  orientation: datum.orientation,
-                  tilt: datum.tilt,
-                )
+            yield PointerDownEvent(
+              timeStamp: timeStamp,
+              pointer: state.pointer,
+              kind: kind,
+              device: datum.device,
+              position: position,
+              buttons: datum.buttons,
+              obscured: datum.obscured,
+              pressure: datum.pressure,
+              pressureMin: datum.pressureMin,
+              pressureMax: datum.pressureMax,
+              distanceMax: datum.distanceMax,
+              size: datum.size,
+              radiusMajor: radiusMajor,
+              radiusMinor: radiusMinor,
+              radiusMin: radiusMin,
+              radiusMax: radiusMax,
+              orientation: datum.orientation,
+              tilt: datum.tilt,
             );
             break;
           case ui.PointerChange.up:
@@ -217,28 +207,26 @@ class PointerEventConverter {
             assert(position == state.lastPosition,
               _formatErrorMessage(datum.change, 'Pointer ${datum.device} new position does not match previous position'));
             state.setUp();
-            frameworkPointerData.add(
-                PointerUpEvent(
-                  timeStamp: timeStamp,
-                  pointer: state.pointer,
-                  kind: kind,
-                  device: datum.device,
-                  position: position,
-                  buttons: datum.buttons,
-                  obscured: datum.obscured,
-                  pressure: datum.pressure,
-                  pressureMin: datum.pressureMin,
-                  pressureMax: datum.pressureMax,
-                  distance: datum.distance,
-                  distanceMax: datum.distanceMax,
-                  size: datum.size,
-                  radiusMajor: radiusMajor,
-                  radiusMinor: radiusMinor,
-                  radiusMin: radiusMin,
-                  radiusMax: radiusMax,
-                  orientation: datum.orientation,
-                  tilt: datum.tilt,
-                )
+            yield PointerUpEvent(
+              timeStamp: timeStamp,
+              pointer: state.pointer,
+              kind: kind,
+              device: datum.device,
+              position: position,
+              buttons: datum.buttons,
+              obscured: datum.obscured,
+              pressure: datum.pressure,
+              pressureMin: datum.pressureMin,
+              pressureMax: datum.pressureMax,
+              distance: datum.distance,
+              distanceMax: datum.distanceMax,
+              size: datum.size,
+              radiusMajor: radiusMajor,
+              radiusMinor: radiusMinor,
+              radiusMin: radiusMin,
+              radiusMax: radiusMax,
+              orientation: datum.orientation,
+              tilt: datum.tilt,
             );
             break;
           case ui.PointerChange.cancel:
@@ -249,27 +237,25 @@ class PointerEventConverter {
               _formatErrorMessage(datum.change, 'Pointer ${datum.device} is already up.'));
             assert(position == state.lastPosition,
               _formatErrorMessage(datum.change, 'Pointer ${datum.device} new position does not match previous position'));
-            frameworkPointerData.add(
-                PointerCancelEvent(
-                  timeStamp: timeStamp,
-                  pointer: state.pointer,
-                  kind: kind,
-                  device: datum.device,
-                  position: position,
-                  buttons: datum.buttons,
-                  obscured: datum.obscured,
-                  pressureMin: datum.pressureMin,
-                  pressureMax: datum.pressureMax,
-                  distance: datum.distance,
-                  distanceMax: datum.distanceMax,
-                  size: datum.size,
-                  radiusMajor: radiusMajor,
-                  radiusMinor: radiusMinor,
-                  radiusMin: radiusMin,
-                  radiusMax: radiusMax,
-                  orientation: datum.orientation,
-                  tilt: datum.tilt,
-                )
+            yield PointerCancelEvent(
+              timeStamp: timeStamp,
+              pointer: state.pointer,
+              kind: kind,
+              device: datum.device,
+              position: position,
+              buttons: datum.buttons,
+              obscured: datum.obscured,
+              pressureMin: datum.pressureMin,
+              pressureMax: datum.pressureMax,
+              distance: datum.distance,
+              distanceMax: datum.distanceMax,
+              size: datum.size,
+              radiusMajor: radiusMajor,
+              radiusMinor: radiusMinor,
+              radiusMin: radiusMin,
+              radiusMax: radiusMax,
+              orientation: datum.orientation,
+              tilt: datum.tilt,
             );
             break;
           case ui.PointerChange.remove:
@@ -279,18 +265,16 @@ class PointerEventConverter {
             assert(!state.down,
               _formatErrorMessage(datum.change, 'Pointer ${datum.device} is down.'));
             _pointers.remove(datum.device);
-            frameworkPointerData.add(
-                PointerRemovedEvent(
-                  timeStamp: timeStamp,
-                  kind: kind,
-                  device: datum.device,
-                  obscured: datum.obscured,
-                  pressureMin: datum.pressureMin,
-                  pressureMax: datum.pressureMax,
-                  distanceMax: datum.distanceMax,
-                  radiusMin: radiusMin,
-                  radiusMax: radiusMax,
-                )
+            yield PointerRemovedEvent(
+              timeStamp: timeStamp,
+              kind: kind,
+              device: datum.device,
+              obscured: datum.obscured,
+              pressureMin: datum.pressureMin,
+              pressureMax: datum.pressureMax,
+              distanceMax: datum.distanceMax,
+              radiusMin: radiusMin,
+              radiusMax: radiusMax,
             );
             break;
         }
@@ -303,14 +287,12 @@ class PointerEventConverter {
             assert(state.lastPosition == position);
             final Offset scrollDelta =
                 Offset(datum.scrollDeltaX, datum.scrollDeltaY) / devicePixelRatio;
-            frameworkPointerData.add(
-              PointerScrollEvent(
-                timeStamp: timeStamp,
-                kind: kind,
-                device: datum.device,
-                position: position,
-                scrollDelta: scrollDelta,
-              )
+            yield PointerScrollEvent(
+              timeStamp: timeStamp,
+              kind: kind,
+              device: datum.device,
+              position: position,
+              scrollDelta: scrollDelta,
             );
             break;
           case ui.PointerSignalKind.none:
@@ -322,7 +304,6 @@ class PointerEventConverter {
         }
       }
     }
-    return frameworkPointerData;
   }
 
   static double _toLogicalPixels(double physicalPixels, double devicePixelRatio) =>
