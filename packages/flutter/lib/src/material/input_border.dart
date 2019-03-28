@@ -412,7 +412,7 @@ class OutlineInputBorder extends InputBorder {
 
     const double cornerArcSweep = math.pi / 2.0;
     final double tlCornerArcSweep = start < center.tlRadiusX
-      ? math.asin(start / center.tlRadiusX)
+      ? math.asin((start / center.tlRadiusX).clamp(-1.0, 1.0))
       : math.pi / 2.0;
 
     final Path path = Path()
@@ -474,12 +474,12 @@ class OutlineInputBorder extends InputBorder {
       final double extent = lerpDouble(0.0, gapExtent + gapPadding * 2.0, gapPercentage);
       switch (textDirection) {
         case TextDirection.rtl: {
-          final Path path = _gapBorderPath(canvas, center, gapStart + gapPadding - extent, extent);
+          final Path path = _gapBorderPath(canvas, center, math.max(0.0, gapStart + gapPadding - extent), extent);
           canvas.drawPath(path, paint);
           break;
         }
         case TextDirection.ltr: {
-          final Path path = _gapBorderPath(canvas, center, gapStart - gapPadding, extent);
+          final Path path = _gapBorderPath(canvas, center, math.max(0.0, gapStart - gapPadding), extent);
           canvas.drawPath(path, paint);
           break;
         }
