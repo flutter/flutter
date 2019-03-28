@@ -7,9 +7,7 @@ import 'dart:ui' as ui show Paragraph, ParagraphBuilder, ParagraphConstraints, P
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/rendering.dart';
 
 import 'basic_types.dart';
 import 'strut_style.dart';

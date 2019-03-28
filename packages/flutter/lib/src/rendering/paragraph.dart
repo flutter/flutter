@@ -14,7 +14,6 @@ import 'package:flutter/services.dart';
 import 'box.dart';
 import 'debug.dart';
 import 'object.dart';
-import 'stack.dart';
 
 /// How overflowing text should be handled.
 enum TextOverflow {
@@ -35,67 +34,50 @@ const String _kEllipsis = '\u2026';
 
 /// Parent data for use with [RenderParagraph].
 class TextParentData extends ContainerBoxParentData<RenderBox> {
-  /// The distance by which the child's top edge is inset from the top of the stack.
-  double top;
+  // /// The distance by which the child's top edge is inset from the top of the stack.
+  // double top;
 
-  /// The distance by which the child's right edge is inset from the right of the stack.
-  double right;
+  // /// The distance by which the child's right edge is inset from the right of the stack.
+  // double right;
 
-  /// The distance by which the child's bottom edge is inset from the bottom of the stack.
-  double bottom;
+  // /// The distance by which the child's bottom edge is inset from the bottom of the stack.
+  // double bottom;
 
-  /// The distance by which the child's left edge is inset from the left of the stack.
-  double left;
+  // /// The distance by which the child's left edge is inset from the left of the stack.
+  // double left;
 
-  /// The child's width.
-  ///
-  /// Ignored if both left and right are non-null.
-  double width;
+  // /// The child's width.
+  // ///
+  // /// Ignored if both left and right are non-null.
+  // double width;
 
-  /// The child's height.
-  ///
-  /// Ignored if both top and bottom are non-null.
-  double height;
+  // /// The child's height.
+  // ///
+  // /// Ignored if both top and bottom are non-null.
+  // double height;
 
-  Offset offset;
+  // Offset offset;
 
-  /// Get or set the current values in terms of a RelativeRect object.
-  RelativeRect get rect => RelativeRect.fromLTRB(left, top, right, bottom);
-  set rect(RelativeRect value) {
-    top = value.top;
-    right = value.right;
-    bottom = value.bottom;
-    left = value.left;
-  }
-
-  /// Whether this child is considered positioned.
-  ///
-  /// A child is positioned if any of the top, right, bottom, or left properties
-  /// are non-null. Positioned children do not factor into determining the size
-  /// of the stack but are instead placed relative to the non-positioned
-  /// children in the stack.
-  bool get isPositioned => top != null || right != null || bottom != null || left != null || width != null || height != null;
-
-  @override
-  String toString() {
-    final List<String> values = <String>[];
-    if (top != null)
-      values.add('top=$top');
-    if (right != null)
-      values.add('right=$right');
-    if (bottom != null)
-      values.add('bottom=$bottom');
-    if (left != null)
-      values.add('left=$left');
-    if (width != null)
-      values.add('width=$width');
-    if (height != null)
-      values.add('height=$height');
-    if (values.isEmpty)
-      values.add('not positioned');
-    values.add(super.toString());
-    return values.join('; ');
-  }
+  // @override
+  // String toString() {
+  //   final List<String> values = <String>[];
+  //   if (top != null)
+  //     values.add('top=$top');
+  //   if (right != null)
+  //     values.add('right=$right');
+  //   if (bottom != null)
+  //     values.add('bottom=$bottom');
+  //   if (left != null)
+  //     values.add('left=$left');
+  //   if (width != null)
+  //     values.add('width=$width');
+  //   if (height != null)
+  //     values.add('height=$height');
+  //   if (values.isEmpty)
+  //     values.add('not positioned');
+  //   values.add(super.toString());
+  //   return values.join('; ');
+  // }
 }
 
 /// A render object that displays a paragraph of text
@@ -337,6 +319,28 @@ class RenderParagraph extends RenderBox
   bool hitTestSelf(Offset position) => true;
 
   @override
+  bool hitTestChildren(HitTestResult result, { Offset position }) {
+    RenderBox child = firstChild;
+    int childIndex = 0;
+    while (child != null) {
+      if (child.hitTest(
+          result,
+          position: position - Offset(
+            _textPainter.inlinePlaceholderBoxes[childIndex].left,
+            _textPainter.inlinePlaceholderBoxes[childIndex].top
+          )
+        )
+      ) {
+        result.add(BoxHitTestEntry(this, position));
+        return true;
+      }
+      child = childAfter(child);
+      childIndex++;
+    }
+    return false;
+  }
+
+  @override
   void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
     assert(debugHandleEvent(event, entry));
     if (event is! PointerDownEvent)
@@ -488,7 +492,6 @@ class RenderParagraph extends RenderBox
     RenderBox child = firstChild;
     int childIndex = 0;
     while (child != null && childIndex < _textPainter.inlinePlaceholderBoxes.length) {
-      print('PAINTING CHILD $child');
       child.paint(context, offset + Offset(
           _textPainter.inlinePlaceholderBoxes[childIndex].left,
           _textPainter.inlinePlaceholderBoxes[childIndex].top
