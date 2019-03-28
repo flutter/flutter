@@ -1058,6 +1058,7 @@ class _RenderDecoration extends RenderBox {
 
   @override
   double computeDistanceToActualBaseline(TextBaseline baseline) {
+    return computeMaxIntrinsicHeight(0);
     assert(false, 'not implemented');
     return 0.0;
   }

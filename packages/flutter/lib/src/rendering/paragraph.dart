@@ -32,10 +32,8 @@ enum TextOverflow {
 
 const String _kEllipsis = '\u2026';
 
-/// Parent data for use with [RenderParagraph].
+// /// Parent data for use with [RenderParagraph].
 class TextParentData extends ContainerBoxParentData<RenderBox> {
-  // Offset offset;
-
   @override
   String toString() {
     final List<String> values = <String>[];
@@ -294,8 +292,7 @@ class RenderParagraph extends RenderBox
         _textPainter.inlinePlaceholderBoxes[childIndex].top
       );
       if (child.hitTest(result, position: adjustedPosition)) {
-        // result.add(BoxHitTestEntry(child, adjustedPosition));
-        result.add(BoxHitTestEntry(child, position));
+        result.add(BoxHitTestEntry(child, adjustedPosition));
         return true;
       }
       child = childAfter(child);
@@ -311,7 +308,6 @@ class RenderParagraph extends RenderBox
       return;
     _layoutTextWithConstraints(constraints);
     final Offset offset = entry.localPosition;
-    // print('HANDLING EVENT ${entry.localPosition}');
     final TextPosition position = _textPainter.getPositionForOffset(offset);
     final TextSpan span = _textPainter.text.getSpanForPosition(position);
     span?.recognizer?.addPointer(event);
@@ -347,6 +343,18 @@ class RenderParagraph extends RenderBox
     _textPainter.placeholderDimensions = placeholderDimensions;
     _layoutTextWithConstraints(constraints);
 
+
+    child = firstChild;
+    childIndex = 0;
+    while (child != null) {
+      TextParentData textParentData = child.parentData as TextParentData;
+      textParentData.offset = Offset(
+        _textPainter.inlinePlaceholderBoxes[childIndex].left,
+        _textPainter.inlinePlaceholderBoxes[childIndex].top
+      );
+      child = childAfter(child);
+      childIndex++;
+    }
     // We grab _textPainter.size and _textPainter.didExceedMaxLines here because
     // assigning to `size` will trigger us to validate our intrinsic sizes,
     // which will change _textPainter's layout because the intrinsic size
