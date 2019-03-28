@@ -6,7 +6,7 @@ import 'package:flutter/src/foundation/collections.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  group('binarySearch', () {
+  test('binarySearch', () {
     final List<int> items = <int>[1, 2, 3];
 
     expect(binarySearch(items, 1), 0);
