@@ -1,4 +1,4 @@
-Signature: 0a9088015e0d2542676c0da7061ae844
+Signature: 9594aaa1f315c34c2f81231b4e21e6b8
 
 UNUSED LICENSES:
 
@@ -5840,6 +5840,7 @@ FILE: ../../../third_party/skia/src/core/SkColorFilterPriv.h
 FILE: ../../../third_party/skia/src/gpu/gl/GrGLAssembleGLESInterfaceAutogen.cpp
 FILE: ../../../third_party/skia/src/gpu/gl/GrGLAssembleGLInterfaceAutogen.cpp
 FILE: ../../../third_party/skia/src/gpu/gl/GrGLAssembleHelpers.cpp
+FILE: ../../../third_party/skia/src/gpu/gl/GrGLAssembleWebGLInterfaceAutogen.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLByteCode.h
 FILE: ../../../third_party/skia/src/sksl/SkSLByteCodeGenerator.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLByteCodeGenerator.h
