@@ -559,7 +559,7 @@ class _HeroFlight {
 
       heroRectTween = _doCreateRectTween(
           heroRectTween.evaluate(_proxyAnimation),
-          _boundingBoxFor(newManifest.toHero.context,newManifest.toRoute.subtreeContext),
+          _boundingBoxFor(newManifest.toHero.context, newManifest.toRoute.subtreeContext),
       );
       shuttle = null;
 
