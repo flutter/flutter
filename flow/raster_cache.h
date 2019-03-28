@@ -53,7 +53,7 @@ class RasterCache {
   static constexpr int kDefaultPictureCacheLimitPerFrame = 3;
 
   explicit RasterCache(
-      size_t threshold = 3,
+      size_t access_threshold = 3,
       size_t picture_cache_limit_per_frame = kDefaultPictureCacheLimitPerFrame);
 
   ~RasterCache();
@@ -124,7 +124,7 @@ class RasterCache {
     }
   }
 
-  const size_t threshold_;
+  const size_t access_threshold_;
   const size_t picture_cache_limit_per_frame_;
   size_t picture_cached_this_frame_ = 0;
   PictureRasterCacheKey::Map<Entry> picture_cache_;
