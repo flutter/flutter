@@ -81,6 +81,7 @@ static void SetEntityNodeClipPlanes(scenic::EntityNode* entity_node,
 
 void SceneUpdateContext::CreateFrame(
     std::unique_ptr<scenic::EntityNode> entity_node,
+    std::unique_ptr<scenic::ShapeNode> shape_node,
     const SkRRect& rrect,
     SkColor color,
     const SkRect& paint_bounds,
@@ -108,13 +109,10 @@ void SceneUpdateContext::CreateFrame(
       rrect.radii(SkRRect::kLowerRight_Corner).x(),  // bottom_right_radius
       rrect.radii(SkRRect::kLowerLeft_Corner).x()    // bottom_left_radius
   );
-  scenic::ShapeNode shape_node(session_);
-  shape_node.SetShape(shape);
-  shape_node.SetTranslation(shape_bounds.width() * 0.5f + shape_bounds.left(),
-                            shape_bounds.height() * 0.5f + shape_bounds.top(),
-                            0.f);
-  // TODO(SCN-1274): AddPart() and SetClip() will be deleted.
-  entity_node->AddPart(shape_node);
+  shape_node->SetShape(shape);
+  shape_node->SetTranslationRH(
+      shape_bounds.width() * 0.5f + shape_bounds.left(),
+      shape_bounds.height() * 0.5f + shape_bounds.top(), 0.f);
 
   // Check whether the painted layers will be visible.
   if (paint_bounds.isEmpty() || !paint_bounds.intersects(shape_bounds))
@@ -122,7 +120,7 @@ void SceneUpdateContext::CreateFrame(
 
   // Check whether a solid color will suffice.
   if (paint_layers.empty()) {
-    SetShapeColor(shape_node, color);
+    SetShapeColor(*shape_node, color);
     return;
   }
 
@@ -130,29 +128,8 @@ void SceneUpdateContext::CreateFrame(
   const float scale_x = ScaleX();
   const float scale_y = ScaleY();
 
-  // If the painted area only covers a portion of the frame then we can
-  // reduce the texture size by drawing just that smaller area.
-  SkRect inner_bounds = shape_bounds;
-  inner_bounds.intersect(paint_bounds);
-  if (inner_bounds != shape_bounds && rrect.contains(inner_bounds)) {
-    SetShapeColor(shape_node, color);
-
-    scenic::Rectangle inner_shape(session_, inner_bounds.width(),
-                                  inner_bounds.height());
-    scenic::ShapeNode inner_node(session_);
-    inner_node.SetShape(inner_shape);
-    inner_node.SetTranslation(inner_bounds.width() * 0.5f + inner_bounds.left(),
-                              inner_bounds.height() * 0.5f + inner_bounds.top(),
-                              0.f);
-    entity_node->AddPart(inner_node);
-    SetShapeTextureOrColor(inner_node, color, scale_x, scale_y, inner_bounds,
-                           std::move(paint_layers), layer,
-                           std::move(entity_node));
-    return;
-  }
-
   // Apply a texture to the whole shape.
-  SetShapeTextureOrColor(shape_node, color, scale_x, scale_y, shape_bounds,
+  SetShapeTextureOrColor(*shape_node, color, scale_x, scale_y, shape_bounds,
                          std::move(paint_layers), layer,
                          std::move(entity_node));
 }
@@ -266,6 +243,9 @@ SceneUpdateContext::ExecutePaintTasks(CompositorContext::ScopedFrame& frame) {
 SceneUpdateContext::Entity::Entity(SceneUpdateContext& context)
     : context_(context), previous_entity_(context.top_entity_) {
   entity_node_ptr_ = std::make_unique<scenic::EntityNode>(context.session());
+  shape_node_ptr_ = std::make_unique<scenic::ShapeNode>(context.session());
+  // TODO(SCN-1274): AddPart() and SetClip() will be deleted.
+  entity_node_ptr_->AddPart(*shape_node_ptr_);
   if (previous_entity_)
     previous_entity_->entity_node_ptr_->AddChild(*entity_node_ptr_);
   context.top_entity_ = this;
@@ -280,14 +260,10 @@ SceneUpdateContext::Clip::Clip(SceneUpdateContext& context,
                                scenic::Shape& shape,
                                const SkRect& shape_bounds)
     : Entity(context) {
-  scenic::ShapeNode shape_node(context.session());
-  shape_node.SetShape(shape);
-  shape_node.SetTranslation(shape_bounds.width() * 0.5f + shape_bounds.left(),
-                            shape_bounds.height() * 0.5f + shape_bounds.top(),
-                            0.f);
-
-  // TODO(SCN-1274): AddPart() and SetClip() will be deleted.
-  entity_node().AddPart(shape_node);
+  shape_node().SetShape(shape);
+  shape_node().SetTranslationRH(
+      shape_bounds.width() * 0.5f + shape_bounds.left(),
+      shape_bounds.height() * 0.5f + shape_bounds.top(), 0.f);
   entity_node().SetClip(0u, true /* clip to self */);
 
   SetEntityNodeClipPlanes(&entity_node(), shape_bounds);
@@ -360,7 +336,8 @@ SceneUpdateContext::Frame::Frame(SceneUpdateContext& context,
 }
 
 SceneUpdateContext::Frame::~Frame() {
-  context().CreateFrame(std::move(entity_node_ptr()), rrect_, color_,
+  context().CreateFrame(std::move(entity_node_ptr()),
+                        std::move(shape_node_ptr()), rrect_, color_,
                         paint_bounds_, std::move(paint_layers_), layer_);
 }
 
