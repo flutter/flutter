@@ -67,13 +67,13 @@ class ScrollPhysics {
   /// {@tool sample}
   ///
   /// In the following example, the [applyTo] method is used to combine two existing [ScrollPhysics] instances,
-  /// the resulting [ScrollPhysics] instance [y] has the same behavior as [z]:
+  /// the resulting [ScrollPhysics] instance [x] has the same behavior as [y]:
   ///
   /// ```dart
-  /// const FooScrollPhysics specifiedPhysics = FooScrollPhysics(parent: BarScrollPhysics());
+  /// const FooScrollPhysics existingPhysics = FooScrollPhysics(parent: BarScrollPhysics());
   ///
-  /// final FooScrollPhysics y = x.applyTo(FoobarScrollPhysics());
-  /// const FooScrollPhysics z = FooScrollPhysics(parent: BarScrollPhysics(parent: FoobarScrollPhysics()));
+  /// final FooScrollPhysics x = existingPhysics.applyTo(FoobarScrollPhysics());
+  /// const FooScrollPhysics y = FooScrollPhysics(parent: BarScrollPhysics(parent: FoobarScrollPhysics()));
   /// ```
   /// {@end-tool}
   ///
