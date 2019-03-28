@@ -51,8 +51,9 @@ BuildApp() {
     derived_dir="${project_path}/.ios/Flutter"
   fi
 
-  # Write User-Defined FLTAssetsPath to AppFrameworkInfo.plist
+  # Default value of assets_path is flutter_assets
   local assets_path="flutter_assets"
+  # The value of assets_path can set by add FLTAssetsPath to AppFrameworkInfo.plist
   FLTAssetsPath=$(/usr/libexec/PlistBuddy -c "Print :FLTAssetsPath" "${derived_dir}/AppFrameworkInfo.plist" 2>/dev/null)
   if [[ -n "$FLTAssetsPath" ]]; then
     assets_path="${FLTAssetsPath}"
