@@ -108,20 +108,20 @@ List<GalleryDemo> _buildGalleryDemos() {
       buildRoute: (BuildContext context) => ContactsDemo(),
     ),
     GalleryDemo(
-      title: 'Animation',
-      subtitle: 'Section organizer',
-      icon: GalleryIcons.animation,
-      category: _kDemos,
-      routeName: AnimationDemo.routeName,
-      buildRoute: (BuildContext context) => const AnimationDemo(),
-    ),
-    GalleryDemo(
       title: 'Shrine',
       subtitle: 'Basic shopping app',
       icon: GalleryIcons.shrine,
       category: _kDemos,
       routeName: ShrineDemo.routeName,
       buildRoute: (BuildContext context) => const ShrineDemo(),
+    ),
+    GalleryDemo(
+      title: 'Animation',
+      subtitle: 'Section organizer',
+      icon: GalleryIcons.animation,
+      category: _kDemos,
+      routeName: AnimationDemo.routeName,
+      buildRoute: (BuildContext context) => const AnimationDemo(),
     ),
 
     // Style
