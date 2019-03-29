@@ -135,29 +135,6 @@ void main() {
     expect(uncaught, false);
   });
 
-  test('ImageProvider.resolve errors in the completer will be caught', () async {
-    bool uncaught = false;
-    final Zone testZone = Zone.current.fork(specification: ZoneSpecification(
-      handleUncaughtError: (Zone zone, ZoneDelegate zoneDelegate, Zone parent, Object error, StackTrace stackTrace) {
-        uncaught = true;
-      }
-    ));
-    await testZone.run(() async {
-      final ImageProvider imageProvider = LoadErrorCompleterImageProvider();
-      final Completer<bool> caughtError = Completer<bool>();
-      FlutterError.onError = (FlutterErrorDetails details) {
-        throw Error();
-      };
-      final ImageStream result = imageProvider.resolve(ImageConfiguration.empty);
-      result.addListener((ImageInfo info, bool syncCall) {
-      }, onError: (dynamic error, StackTrace stackTrace) {
-        caughtError.complete(true);
-      });
-      expect(await caughtError.future, true);
-    });
-    expect(uncaught, false);
-  });
-
   test('ImageProvider.resolve errors in the http client will be caught', () async {
     bool uncaught = false;
     final HttpClientMock httpClientMock = HttpClientMock();
