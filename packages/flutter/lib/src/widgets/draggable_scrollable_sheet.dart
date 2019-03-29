@@ -82,28 +82,63 @@ class DraggableScrollableSheet extends StatefulWidget {
   _DraggableScrollableSheetState createState() => _DraggableScrollableSheetState();
 }
 
+class _DraggableSheetExtent {
+  _DraggableSheetExtent({
+    @required this.minExtent,
+    @required this.maxExtent,
+    @required this.initialExtent,
+    @required VoidCallback listener,
+  }) : assert(minExtent != null),
+       assert(maxExtent != null),
+       assert(initialExtent != null),
+       assert(minExtent >= 0),
+       assert(maxExtent <= 1),
+       assert(minExtent <= initialExtent),
+       assert(initialExtent <= maxExtent),
+       _currentExtent = ValueNotifier<double>(initialExtent)..addListener(listener),
+       availablePixels = double.infinity;
+
+  final double minExtent;
+  final double maxExtent;
+  final double initialExtent;
+  final ValueNotifier<double> _currentExtent;
+  double availablePixels;
+
+  bool get isAtMin => minExtent >= _currentExtent.value;
+  bool get isAtMax => maxExtent <= _currentExtent.value;
+
+  set currentExtent(double value) {
+    assert(value != null);
+    _currentExtent.value = value.clamp(minExtent, maxExtent);
+  }
+  double get currentExtent => _currentExtent.value;
+
+  void addPixelDelta(double delta) {
+    currentExtent += delta / availablePixels;
+  }
+}
+
 class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
   _DraggableScrollableSheetScrollController _scrollController;
+  _DraggableSheetExtent _extent;
   double _childSizePercentage;
-  double _maxSize;
 
   @override
   void initState() {
     super.initState();
-    _scrollController = _DraggableScrollableSheetScrollController(
-      extent: () => _maxSize,
-      maxExtent: widget.maxChildSize,
+    _extent = _DraggableSheetExtent(
       minExtent: widget.minChildSize,
-      occupiedExtent: widget.initialChildSize,
-      extentListener: _setExtent,
+      maxExtent: widget.maxChildSize,
+      initialExtent: widget.initialChildSize,
+      listener: _setExtent,
     );
-    _childSizePercentage = widget.initialChildSize;
-    _maxSize = double.infinity;
+    _childSizePercentage = _extent.availablePixels;
+    _scrollController = _DraggableScrollableSheetScrollController(extent: _extent);
   }
 
   void _setExtent() {
     setState(() {
-      _childSizePercentage = _scrollController.occupiedExtent;
+      _childSizePercentage = _extent.currentExtent;
     });
   }
 
@@ -113,17 +148,17 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
       builder: (BuildContext context, BoxConstraints constraints) {
         switch (widget.axis) {
           case Axis.vertical:
-            _maxSize = widget.maxChildSize * constraints.biggest.height;
+            _extent.availablePixels = widget.maxChildSize * constraints.biggest.height;
             return SizedBox.expand(
               child: FractionallySizedBox(
-                heightFactor: _childSizePercentage,
+                heightFactor: _extent.currentExtent,
                 child: widget.builder(context, _scrollController),
                 alignment: widget.alignment,
               ),
             );
             break;
           case Axis.horizontal:
-            _maxSize = widget.maxChildSize * constraints.biggest.width;
+            _extent.availablePixels = widget.maxChildSize * constraints.biggest.width;
             return SizedBox.expand(
               child: FractionallySizedBox(
                 widthFactor: _childSizePercentage,
@@ -151,12 +186,6 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
 /// of its container, this controller will allow the sheet to both be dragged to
 /// fill the container and then scroll the child content.
 ///
-/// While the [occupiedExtent] value is between [minTop] and [maxTop], scroll events will
-/// drive [top]. Once it has reached [minTop] or [maxTop], scroll events will
-/// drive [offset]. The [top] value is guaranteed to be clamped between
-/// [minTop] and [maxTop]. The owner must manage the controllers lifetime and
-/// call [dispose] when the controller is no longer needed.
-///
 /// See also:
 ///
 ///  * [_DraggableScrollableSheetScrollPosition], which manages the positioning logic for
@@ -169,30 +198,13 @@ class _DraggableScrollableSheetScrollController extends ScrollController {
     double initialScrollOffset = 0.0,
     String debugLabel,
     @required this.extent,
-    @required this.minExtent,
-    @required this.maxExtent,
-    @required double occupiedExtent,
-    @required VoidCallback extentListener,
-  }) : assert(minExtent != null),
-       assert(maxExtent != null),
-       assert(extent != null),
-       assert(occupiedExtent != null),
-       assert(extentListener != null),
-       assert(minExtent >= 0),
-       assert(maxExtent >= 1),
-       assert(minExtent <= occupiedExtent && occupiedExtent <= maxExtent),
-       _extentValueNotifier = ValueNotifier<double>(occupiedExtent)..addListener(extentListener),
+  }) : assert(extent != null),
        super(
          debugLabel: debugLabel,
          initialScrollOffset: initialScrollOffset,
        );
 
-  final ValueNotifier<double> _extentValueNotifier;
-  final ValueGetter<double> extent;
-  final double minExtent;
-  final double maxExtent;
-
-  double get occupiedExtent => _extentValueNotifier.value;
+  final _DraggableSheetExtent extent;
 
   @override
   _DraggableScrollableSheetScrollPosition createScrollPosition(
@@ -204,44 +216,31 @@ class _DraggableScrollableSheetScrollController extends ScrollController {
       physics: physics,
       context: context,
       oldPosition: oldPosition,
-      extentValueNotifier: _extentValueNotifier,
       extent: extent,
-      minExtent: minExtent,
-      maxExtent: maxExtent,
     );
   }
 
   @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
-    description.add('minExtent: $minExtent');
-    description.add('occupiedExtent: $occupiedExtent');
-    description.add('maxExtent: $maxExtent');
-    description.add('extent: ${extent()}');
+    description.add('extent: $extent');
   }
 }
 
 /// A scroll position that manages scroll activities for
-/// [_DraggableScrollableSheetScrollController], which delegates its [top]
-/// member to this class.
+/// [_DraggableScrollableSheetScrollController].
 ///
 /// This class is a concrete subclass of [ScrollPosition] logic that handles a
 /// single [ScrollContext], such as a [Scrollable]. An instance of this class
 /// manages [ScrollActivity] instances, which changes the
-/// [_DraggableScrollableSheetScrollController.top] or visible content offset in the
-/// [Scrollable]'s [Viewport].
+/// [_DraggableSheetExtent.currentExtent] or visible content offset in the
+/// [Scrollable]'s [Viewport]
 ///
 /// See also:
 ///
 ///  * [_DraggableScrollableSheetScrollController], which uses this as its [ScrollPosition].
 class _DraggableScrollableSheetScrollPosition
     extends ScrollPositionWithSingleContext {
-  /// Creates a new [_DraggableScrollableSheetScrollPosition].
-  ///
-  /// The [context], and [minTop] parameters
-  /// must not be null.  If [maxTop] is null, it will be defaulted to
-  /// [double.maxFinite].  The [minTop] and [maxTop] values must be positive
-  /// numbers.
   _DraggableScrollableSheetScrollPosition({
     @required ScrollPhysics physics,
     @required ScrollContext context,
@@ -249,16 +248,8 @@ class _DraggableScrollableSheetScrollPosition
     bool keepScrollOffset = true,
     ScrollPosition oldPosition,
     String debugLabel,
-    @required this.extentValueNotifier,
     @required this.extent,
-    @required this.minExtent,
-    @required this.maxExtent,
-  })  : assert(minExtent != null),
-        assert(maxExtent != null),
-        assert(minExtent >= 0),
-        assert(maxExtent <= 1),
-        assert(minExtent < maxExtent),
-        assert(extent != null),
+  })  : assert(extent != null),
         super(
           physics: physics,
           context: context,
@@ -268,25 +259,17 @@ class _DraggableScrollableSheetScrollPosition
           debugLabel: debugLabel,
         );
 
-  final ValueNotifier<double> extentValueNotifier;
   VoidCallback _dragCancelCallback;
-  final ValueGetter<double> extent;
-  final double minExtent;
-  final double maxExtent;
-  bool get isAtMin => minExtent >= extentValueNotifier.value;
-  bool get isAtMax => maxExtent <= extentValueNotifier.value;
-  bool get listIsAtTop => pixels <= 0.0;
+  final _DraggableSheetExtent extent;
+  bool get listShouldScroll => pixels > 0.0;
 
   @override
   void applyUserOffset(double delta) {
-    if (listIsAtTop &&
-        !(isAtMin || isAtMax) ||
-         (isAtMin && delta < 0) ||
-         (isAtMax && delta > 0)) {
-      extentValueNotifier.value = (extentValueNotifier.value - delta / extent()).clamp(
-        minExtent,
-        maxExtent,
-      );
+    if (!listShouldScroll &&
+        !(extent.isAtMin || extent.isAtMax) ||
+         (extent.isAtMin && delta < 0) ||
+         (extent.isAtMax && delta > 0)) {
+      extent.addPixelDelta(-delta);
     } else {
       super.applyUserOffset(delta);
     }
@@ -295,8 +278,8 @@ class _DraggableScrollableSheetScrollPosition
   @override
   void goBallistic(double velocity) {
     if (velocity == 0.0 ||
-       (velocity < 0.0 && !listIsAtTop) ||
-       (velocity > 0.0 && isAtMax)) {
+       (velocity < 0.0 && listShouldScroll) ||
+       (velocity > 0.0 && extent.isAtMax)) {
       super.goBallistic(velocity);
       return;
     }
@@ -307,7 +290,7 @@ class _DraggableScrollableSheetScrollPosition
     // The iOS bouncing simulation just isn't right here - once we delegate
     // the ballistic back to the ScrollView, it will use the right simulation.
     final Simulation simulation = ClampingScrollSimulation(
-      position: extentValueNotifier.value,
+      position: extent.currentExtent,
       velocity: velocity,
       tolerance: physics.tolerance,
     );
@@ -318,16 +301,16 @@ class _DraggableScrollableSheetScrollPosition
     );
     double lastDelta = 0;
     void _tick() {
-      final double delta = ballisticController.value / extent();
-      extentValueNotifier.value = (extentValueNotifier.value + delta - lastDelta).clamp(
-        minExtent,
-        maxExtent,
-      );
-      lastDelta = delta;
-      if ((velocity > 0 && isAtMax) || (velocity < 0 && isAtMin)) {
-        velocity = ballisticController.velocity;
-        ballisticController.stop();
+      final double delta = ballisticController.value - lastDelta;
+      lastDelta = ballisticController.value;
+      extent.addPixelDelta(delta);
+      if ((velocity > 0 && extent.isAtMax) || (velocity < 0 && extent.isAtMin)) {
+        // Make sure we pass along enough velocity to keep scrolling - otherwise
+        // we just "bounce" off the top making it look like the list doesn't
+        // have more to scroll.
+        velocity = ballisticController.velocity + (physics.tolerance.velocity * ballisticController.velocity.sign);
         super.goBallistic(velocity);
+        ballisticController.stop();
       }
     }
 
