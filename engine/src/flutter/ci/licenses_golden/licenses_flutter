@@ -246,21 +246,21 @@ FILE: ../../../flutter/lib/io/dart_io.cc
 FILE: ../../../flutter/lib/io/dart_io.h
 FILE: ../../../flutter/lib/snapshot/libraries.json
 FILE: ../../../flutter/lib/snapshot/snapshot.h
-FILE: ../../../flutter/lib/stub_ui/compositing.dart
-FILE: ../../../flutter/lib/stub_ui/geometry.dart
-FILE: ../../../flutter/lib/stub_ui/hash_codes.dart
-FILE: ../../../flutter/lib/stub_ui/hooks.dart
-FILE: ../../../flutter/lib/stub_ui/isolate_name_server.dart
-FILE: ../../../flutter/lib/stub_ui/lerp.dart
-FILE: ../../../flutter/lib/stub_ui/natives.dart
-FILE: ../../../flutter/lib/stub_ui/painting.dart
-FILE: ../../../flutter/lib/stub_ui/plugins.dart
-FILE: ../../../flutter/lib/stub_ui/pointer.dart
-FILE: ../../../flutter/lib/stub_ui/semantics.dart
-FILE: ../../../flutter/lib/stub_ui/text.dart
-FILE: ../../../flutter/lib/stub_ui/ui.dart
-FILE: ../../../flutter/lib/stub_ui/versions.dart
-FILE: ../../../flutter/lib/stub_ui/window.dart
+FILE: ../../../flutter/lib/stub_ui/lib/compositing.dart
+FILE: ../../../flutter/lib/stub_ui/lib/geometry.dart
+FILE: ../../../flutter/lib/stub_ui/lib/hash_codes.dart
+FILE: ../../../flutter/lib/stub_ui/lib/hooks.dart
+FILE: ../../../flutter/lib/stub_ui/lib/isolate_name_server.dart
+FILE: ../../../flutter/lib/stub_ui/lib/lerp.dart
+FILE: ../../../flutter/lib/stub_ui/lib/natives.dart
+FILE: ../../../flutter/lib/stub_ui/lib/painting.dart
+FILE: ../../../flutter/lib/stub_ui/lib/plugins.dart
+FILE: ../../../flutter/lib/stub_ui/lib/pointer.dart
+FILE: ../../../flutter/lib/stub_ui/lib/semantics.dart
+FILE: ../../../flutter/lib/stub_ui/lib/text.dart
+FILE: ../../../flutter/lib/stub_ui/lib/ui.dart
+FILE: ../../../flutter/lib/stub_ui/lib/versions.dart
+FILE: ../../../flutter/lib/stub_ui/lib/window.dart
 FILE: ../../../flutter/lib/ui/compositing.dart
 FILE: ../../../flutter/lib/ui/compositing/scene.cc
 FILE: ../../../flutter/lib/ui/compositing/scene.h
@@ -751,6 +751,7 @@ FILE: ../../../flutter/web_sdk/flutter_kernel_sdk.dart
 FILE: ../../../flutter/web_sdk/libraries.dart
 FILE: ../../../flutter/web_sdk/libraries.json
 FILE: ../../../flutter/web_sdk/make_combined_sdk.dart
+FILE: ../../../flutter/web_sdk/sdk_rewriter.dart
 ----------------------------------------------------------------------------------------------------
 Copyright 2013 The Flutter Authors. All rights reserved.
 
