@@ -10,8 +10,7 @@ import 'package:flutter/material.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
-  testWidgets('Navigator.push works within a PopupMenuButton', (
-      WidgetTester tester) async {
+  testWidgets('Navigator.push works within a PopupMenuButton', (WidgetTester tester) async {
     final Key targetKey = UniqueKey();
     await tester.pumpWidget(
       MaterialApp(
@@ -61,9 +60,7 @@ void main() {
     expect(find.text('Next'), findsOneWidget);
   });
 
-  testWidgets(
-      'PopupMenuButton calls onCanceled callback when an item is not selected', (
-      WidgetTester tester) async {
+  testWidgets('PopupMenuButton calls onCanceled callback when an item is not selected', (WidgetTester tester) async {
     int cancels = 0;
     BuildContext popupContext;
     final Key noCallbackKey = UniqueKey();
@@ -129,8 +126,7 @@ void main() {
     expect(cancels, equals(2));
   });
 
-  testWidgets(
-      'PopupMenuButton is horizontal on iOS', (WidgetTester tester) async {
+  testWidgets('PopupMenuButton is horizontal on iOS', (WidgetTester tester) async {
     Widget build(TargetPlatform platform) {
       return MaterialApp(
         theme: ThemeData(platform: platform),
@@ -170,37 +166,35 @@ void main() {
     List<PopupMenuItem<int>> simplePopupMenuItemBuilder(BuildContext context) {
       return <PopupMenuItem<int>>[
         const PopupMenuItem<int>(
-          value: 1,
-          child: Text('1'),
+            value: 1,
+            child: Text('1'),
         ),
       ];
     }
 
-    testWidgets('PopupMenuButton fails when given both child and icon', (
-        WidgetTester tester) async {
+    testWidgets('PopupMenuButton fails when given both child and icon', (WidgetTester tester) async {
       expect(() {
         PopupMenuButton<int>(
-          child: const Text('heyo'),
-          icon: const Icon(Icons.view_carousel),
-          itemBuilder: simplePopupMenuItemBuilder,
+            child: const Text('heyo'),
+            icon: const Icon(Icons.view_carousel),
+            itemBuilder: simplePopupMenuItemBuilder,
         );
       }, throwsA(isInstanceOf<AssertionError>()));
     });
 
-    testWidgets('PopupMenuButton creates IconButton when given an icon', (
-        WidgetTester tester) async {
+    testWidgets('PopupMenuButton creates IconButton when given an icon', (WidgetTester tester) async {
       final PopupMenuButton<int> button = PopupMenuButton<int>(
         icon: const Icon(Icons.view_carousel),
         itemBuilder: simplePopupMenuItemBuilder,
       );
 
       await tester.pumpWidget(MaterialApp(
-        home: Scaffold(
-          appBar: AppBar(
-            actions: <Widget>[button],
+          home: Scaffold(
+            appBar: AppBar(
+              actions: <Widget>[button],
+            ),
           ),
         ),
-      ),
       );
 
       expect(find.byType(IconButton), findsOneWidget);
@@ -227,15 +221,12 @@ void main() {
       final String widgetType = widget.runtimeType.toString();
       // TODO(mraleph): Remove the old case below.
       return widgetType == '_PopupMenu<int>' // normal case
-          || widgetType ==
-              '_PopupMenu'; // for old versions of Dart that don't reify method type arguments
+          || widgetType == '_PopupMenu'; // for old versions of Dart that don't reify method type arguments
     };
 
-    Future<void> openMenu(TextDirection textDirection,
-        Alignment alignment) async {
+    Future<void> openMenu(TextDirection textDirection, Alignment alignment) async {
       return TestAsyncUtils.guard<void>(() async {
-        await tester.pumpWidget(
-            Container()); // reset in case we had a menu up already
+        await tester.pumpWidget(Container()); // reset in case we had a menu up already
         await tester.pumpWidget(TestApp(
           textDirection: textDirection,
           child: Align(
@@ -248,11 +239,13 @@ void main() {
       });
     }
 
-    Future<void> testPositioningDown(WidgetTester tester,
-        TextDirection textDirection,
-        Alignment alignment,
-        TextDirection growthDirection,
-        Rect startRect,) {
+    Future<void> testPositioningDown(
+      WidgetTester tester,
+      TextDirection textDirection,
+      Alignment alignment,
+      TextDirection growthDirection,
+      Rect startRect,
+    ) {
       return TestAsyncUtils.guard<void>(() async {
         await openMenu(textDirection, alignment);
         Rect rect = tester.getRect(find.byWidgetPredicate(popupMenu));
@@ -261,8 +254,7 @@ void main() {
         bool doneHorizontally = false;
         do {
           await tester.pump(const Duration(milliseconds: 20));
-          final Rect newRect = tester.getRect(
-              find.byWidgetPredicate(popupMenu));
+          final Rect newRect = tester.getRect(find.byWidgetPredicate(popupMenu));
           expect(newRect.top, rect.top);
           if (doneVertically) {
             expect(newRect.bottom, rect.bottom);
@@ -304,11 +296,13 @@ void main() {
       });
     }
 
-    Future<void> testPositioningDownThenUp(WidgetTester tester,
-        TextDirection textDirection,
-        Alignment alignment,
-        TextDirection growthDirection,
-        Rect startRect,) {
+    Future<void> testPositioningDownThenUp(
+      WidgetTester tester,
+      TextDirection textDirection,
+      Alignment alignment,
+      TextDirection growthDirection,
+      Rect startRect,
+    ) {
       return TestAsyncUtils.guard<void>(() async {
         await openMenu(textDirection, alignment);
         Rect rect = tester.getRect(find.byWidgetPredicate(popupMenu));
@@ -317,8 +311,7 @@ void main() {
         bool doneHorizontally = false;
         do {
           await tester.pump(const Duration(milliseconds: 20));
-          final Rect newRect = tester.getRect(
-              find.byWidgetPredicate(popupMenu));
+          final Rect newRect = tester.getRect(find.byWidgetPredicate(popupMenu));
           switch (verticalStage) {
             case 0:
               if (newRect.top < rect.top) {
@@ -376,64 +369,27 @@ void main() {
       });
     }
 
-    await testPositioningDown(
-        tester, TextDirection.ltr, Alignment.topRight, TextDirection.rtl,
-        Rect.fromLTWH(792.0, 8.0, 0.0, 0.0));
-    await testPositioningDown(
-        tester, TextDirection.rtl, Alignment.topRight, TextDirection.rtl,
-        Rect.fromLTWH(792.0, 8.0, 0.0, 0.0));
-    await testPositioningDown(
-        tester, TextDirection.ltr, Alignment.topLeft, TextDirection.ltr,
-        Rect.fromLTWH(8.0, 8.0, 0.0, 0.0));
-    await testPositioningDown(
-        tester, TextDirection.rtl, Alignment.topLeft, TextDirection.ltr,
-        Rect.fromLTWH(8.0, 8.0, 0.0, 0.0));
-    await testPositioningDown(
-        tester, TextDirection.ltr, Alignment.topCenter, TextDirection.ltr,
-        Rect.fromLTWH(350.0, 8.0, 0.0, 0.0));
-    await testPositioningDown(
-        tester, TextDirection.rtl, Alignment.topCenter, TextDirection.rtl,
-        Rect.fromLTWH(450.0, 8.0, 0.0, 0.0));
-    await testPositioningDown(
-        tester, TextDirection.ltr, Alignment.centerRight, TextDirection.rtl,
-        Rect.fromLTWH(792.0, 250.0, 0.0, 0.0));
-    await testPositioningDown(
-        tester, TextDirection.rtl, Alignment.centerRight, TextDirection.rtl,
-        Rect.fromLTWH(792.0, 250.0, 0.0, 0.0));
-    await testPositioningDown(
-        tester, TextDirection.ltr, Alignment.centerLeft, TextDirection.ltr,
-        Rect.fromLTWH(8.0, 250.0, 0.0, 0.0));
-    await testPositioningDown(
-        tester, TextDirection.rtl, Alignment.centerLeft, TextDirection.ltr,
-        Rect.fromLTWH(8.0, 250.0, 0.0, 0.0));
-    await testPositioningDown(
-        tester, TextDirection.ltr, Alignment.center, TextDirection.ltr,
-        Rect.fromLTWH(350.0, 250.0, 0.0, 0.0));
-    await testPositioningDown(
-        tester, TextDirection.rtl, Alignment.center, TextDirection.rtl,
-        Rect.fromLTWH(450.0, 250.0, 0.0, 0.0));
-    await testPositioningDownThenUp(
-        tester, TextDirection.ltr, Alignment.bottomRight, TextDirection.rtl,
-        Rect.fromLTWH(792.0, 500.0, 0.0, 0.0));
-    await testPositioningDownThenUp(
-        tester, TextDirection.rtl, Alignment.bottomRight, TextDirection.rtl,
-        Rect.fromLTWH(792.0, 500.0, 0.0, 0.0));
-    await testPositioningDownThenUp(
-        tester, TextDirection.ltr, Alignment.bottomLeft, TextDirection.ltr,
-        Rect.fromLTWH(8.0, 500.0, 0.0, 0.0));
-    await testPositioningDownThenUp(
-        tester, TextDirection.rtl, Alignment.bottomLeft, TextDirection.ltr,
-        Rect.fromLTWH(8.0, 500.0, 0.0, 0.0));
-    await testPositioningDownThenUp(
-        tester, TextDirection.ltr, Alignment.bottomCenter, TextDirection.ltr,
-        Rect.fromLTWH(350.0, 500.0, 0.0, 0.0));
-    await testPositioningDownThenUp(
-        tester, TextDirection.rtl, Alignment.bottomCenter, TextDirection.rtl,
-        Rect.fromLTWH(450.0, 500.0, 0.0, 0.0));
+    await testPositioningDown(tester, TextDirection.ltr, Alignment.topRight, TextDirection.rtl, Rect.fromLTWH(792.0, 8.0, 0.0, 0.0));
+    await testPositioningDown(tester, TextDirection.rtl, Alignment.topRight, TextDirection.rtl, Rect.fromLTWH(792.0, 8.0, 0.0, 0.0));
+    await testPositioningDown(tester, TextDirection.ltr, Alignment.topLeft, TextDirection.ltr, Rect.fromLTWH(8.0, 8.0, 0.0, 0.0));
+    await testPositioningDown(tester, TextDirection.rtl, Alignment.topLeft, TextDirection.ltr, Rect.fromLTWH(8.0, 8.0, 0.0, 0.0));
+    await testPositioningDown(tester, TextDirection.ltr, Alignment.topCenter, TextDirection.ltr, Rect.fromLTWH(350.0, 8.0, 0.0, 0.0));
+    await testPositioningDown(tester, TextDirection.rtl, Alignment.topCenter, TextDirection.rtl, Rect.fromLTWH(450.0, 8.0, 0.0, 0.0));
+    await testPositioningDown(tester, TextDirection.ltr, Alignment.centerRight, TextDirection.rtl, Rect.fromLTWH(792.0, 250.0, 0.0, 0.0));
+    await testPositioningDown(tester, TextDirection.rtl, Alignment.centerRight, TextDirection.rtl, Rect.fromLTWH(792.0, 250.0, 0.0, 0.0));
+    await testPositioningDown(tester, TextDirection.ltr, Alignment.centerLeft, TextDirection.ltr, Rect.fromLTWH(8.0, 250.0, 0.0, 0.0));
+    await testPositioningDown(tester, TextDirection.rtl, Alignment.centerLeft, TextDirection.ltr, Rect.fromLTWH(8.0, 250.0, 0.0, 0.0));
+    await testPositioningDown(tester, TextDirection.ltr, Alignment.center, TextDirection.ltr, Rect.fromLTWH(350.0, 250.0, 0.0, 0.0));
+    await testPositioningDown(tester, TextDirection.rtl, Alignment.center, TextDirection.rtl, Rect.fromLTWH(450.0, 250.0, 0.0, 0.0));
+    await testPositioningDownThenUp(tester, TextDirection.ltr, Alignment.bottomRight, TextDirection.rtl, Rect.fromLTWH(792.0, 500.0, 0.0, 0.0));
+    await testPositioningDownThenUp(tester, TextDirection.rtl, Alignment.bottomRight, TextDirection.rtl, Rect.fromLTWH(792.0, 500.0, 0.0, 0.0));
+    await testPositioningDownThenUp(tester, TextDirection.ltr, Alignment.bottomLeft, TextDirection.ltr, Rect.fromLTWH(8.0, 500.0, 0.0, 0.0));
+    await testPositioningDownThenUp(tester, TextDirection.rtl, Alignment.bottomLeft, TextDirection.ltr, Rect.fromLTWH(8.0, 500.0, 0.0, 0.0));
+    await testPositioningDownThenUp(tester, TextDirection.ltr, Alignment.bottomCenter, TextDirection.ltr, Rect.fromLTWH(350.0, 500.0, 0.0, 0.0));
+    await testPositioningDownThenUp(tester, TextDirection.rtl, Alignment.bottomCenter, TextDirection.rtl, Rect.fromLTWH(450.0, 500.0, 0.0, 0.0));
   });
 
-  testWidgets(
-      'PopupMenu removes MediaQuery padding', (WidgetTester tester) async {
+  testWidgets('PopupMenu removes MediaQuery padding', (WidgetTester tester) async {
     BuildContext popupContext;
 
     await tester.pumpWidget(MaterialApp(
@@ -471,30 +427,28 @@ void main() {
 
     await tester.pump();
 
-    expect(MediaQuery
-        .of(popupContext)
-        .padding, EdgeInsets.zero);
+    expect(MediaQuery.of(popupContext).padding, EdgeInsets.zero);
   });
 
   testWidgets('Popup Menu Offset Test', (WidgetTester tester) async {
     const Offset offset = Offset(100.0, 100.0);
 
     final PopupMenuButton<int> popupMenuButton =
-    PopupMenuButton<int>(
-      offset: offset,
-      itemBuilder: (BuildContext context) {
-        return <PopupMenuItem<int>>[
-          PopupMenuItem<int>(
-            value: 1,
-            child: Builder(
-              builder: (BuildContext context) {
-                return const Text('AAA');
-              },
+      PopupMenuButton<int>(
+        offset: offset,
+        itemBuilder: (BuildContext context) {
+          return <PopupMenuItem<int>>[
+            PopupMenuItem<int>(
+              value: 1,
+              child: Builder(
+                builder: (BuildContext context) {
+                  return const Text('AAA');
+                },
+              ),
             ),
-          ),
-        ];
-      },
-    );
+          ];
+        },
+      );
 
     await tester.pumpWidget(
       MaterialApp(
@@ -512,14 +466,10 @@ void main() {
     await tester.pumpAndSettle();
 
     // The position is different than the offset because the default position isn't at the origin.
-    expect(tester.getTopLeft(
-        find.byWidgetPredicate((Widget w) =>
-        '${w.runtimeType}' ==
-            '_PopupMenu<int>')), const Offset(364.0, 324.0));
+    expect(tester.getTopLeft(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_PopupMenu<int>')), const Offset(364.0, 324.0));
   });
 
-  testWidgets(
-      'open PopupMenu has correct semantics', (WidgetTester tester) async {
+  testWidgets('open PopupMenu has correct semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(MaterialApp(
       home: Material(
@@ -617,8 +567,7 @@ void main() {
                 },
                 child: const Text('Menu Button'),
                 initialValue: '1',
-                itemBuilder: (BuildContext context) =>
-                <PopupMenuEntry<String>>[
+                itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
                   const PopupMenuItem<String>(
                     child: Text('1'),
                     value: '1',
@@ -659,33 +608,39 @@ void main() {
 
   testWidgets('showMenu position required', (WidgetTester tester) async {
     // Test for https://github.com/flutter/flutter/issues/22256
-    await tester.pumpWidget(MaterialApp(
-      home: Material(
-        child: Center(
-          child: Builder(
-            builder: (BuildContext context) {
-              return RaisedButton(
-                onPressed: () {
-                  // Ensure showMenu throws an assertion without a position
-                  expect(() {
-                    // ignore: missing_required_param
-                    showMenu<int>(
-                      context: context,
-                      items: <PopupMenuItem<int>>[
-                        const PopupMenuItem<int>(value: 1, child: Text('1')),
-                      ],
-                    );
-                  }, throwsAssertionError);
-                },
-                child: const Text('Menu Button'),
-              );
-            },
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: Builder(
+              builder: (BuildContext context) {
+                return RaisedButton(
+                  onPressed: () {
+                    // Ensure showMenu throws an assertion without a position
+                    expect(() {
+                      // ignore: missing_required_param
+                      showMenu<int>(
+                        context: context,
+                        items: <PopupMenuItem<int>>[
+                          const PopupMenuItem<int>(
+                              value: 1, child: Text('1')
+                          ),
+                        ],
+                      );
+                    }, throwsAssertionError);
+                  },
+                  child: const Text('Menu Button'),
+                );
+              },
+            ),
           ),
         ),
-      ),
-    ));
+      )
+    );
+
     await tester.tap(find.text('Menu Button'));
   });
+
 }
 
 class TestApp extends StatefulWidget {
