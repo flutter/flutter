@@ -88,7 +88,11 @@ class _ManifestAssetBundle implements AssetBundle {
       return true;
 
     for (Directory directory in _wildcardDirectories.values) {
-      if (directory.statSync().modified.isAfter(_lastBuildTimestamp)) {
+      final DateTime dateTime = directory.statSync().modified;
+      if (dateTime == null) {
+        continue;
+      }
+      if (dateTime.isAfter(_lastBuildTimestamp)) {
         return true;
       }
     }
