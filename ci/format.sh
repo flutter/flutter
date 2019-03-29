@@ -73,3 +73,6 @@ if [[ ! -z "$TRAILING_SPACES" ]]; then
   echo "ERROR: Some files have trailing spaces. To fix, try something like \`find . -name "*.dart" -exec sed -i -e 's/\s\+$//' {} \;\`."
   exit 1
 fi
+
+# Check GN format consistency
+./ci/check_gn_format.py --dry-run true --root-directory . --gn-binary "../buildtools/$OS/gn"
