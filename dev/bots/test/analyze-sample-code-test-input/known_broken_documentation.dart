@@ -41,3 +41,16 @@
 /// )
 /// ```
 /// {@end-tool}
+///
+/// {@tool sample}
+/// ```dart
+/// const Text('Poor wandering ones!')
+/// ```
+/// {@end-tool}
+///
+/// {@tool sample}
+/// ```dart
+/// const text0 = Text('Poor wandering ones!');
+/// const text1 = Text('Poor wandering ones!');
+/// ```
+/// {@end-tool}
