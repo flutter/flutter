@@ -82,6 +82,17 @@ class DraggableScrollableSheet extends StatefulWidget {
   _DraggableScrollableSheetState createState() => _DraggableScrollableSheetState();
 }
 
+/// Manages state between [_DraggableScrollableSheetState],
+/// [_DraggableScrollableSheetScrollController], and
+/// [_DraggableScrollableSheetScrollPosition].
+///
+/// The State knows the pixels available along the axis the widget wants to
+/// scroll, but expects to get a fraction of those pixels to render the sheet.
+///
+/// The ScrollPosition knows the number of pixels a user wants to move the sheet.
+///
+/// The `currentExtent` will never be null.
+/// The `availablePixels` will never be null, but may be `double.infinity`.
 class _DraggableSheetExtent {
   _DraggableSheetExtent({
     @required this.minExtent,
@@ -113,6 +124,8 @@ class _DraggableSheetExtent {
   }
   double get currentExtent => _currentExtent.value;
 
+  /// The scroll position gets inputs in terms of pixels, but the extent is
+  /// expected to be expressed as a number between 0..1.
   void addPixelDelta(double delta) {
     currentExtent += delta / availablePixels;
   }
