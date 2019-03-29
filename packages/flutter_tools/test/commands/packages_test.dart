@@ -309,20 +309,9 @@ void main() {
     });
 
     testUsingContext('pub publish', () async {
-      await createTestCommandRunner(PackagesCommand()).run(<String>['packages', 'pub', 'publish']);
-      final List<String> commands = mockProcessManager.commands;
-      expect(commands, hasLength(2));
-      expect(commands[0], matches(r'dart-sdk[\\/]bin[\\/]pub'));
-      expect(commands[1], 'publish');
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
-      Stdio: () => mockStdio,
-    });
-
-    testUsingContext('publish', () async {
       final PromptingProcess process = PromptingProcess();
       mockProcessManager.processFactory = (List<String> commands) => process;
-      final Future<void> runPackages = createTestCommandRunner(PackagesCommand()).run(<String>['packages', 'publish']);
+      final Future<void> runPackages = createTestCommandRunner(PackagesCommand()).run(<String>['packages', 'pub', 'publish']);
       final Future<void> runPrompt = process.showPrompt('Proceed (y/n)? ', <String>['hello', 'world']);
       final Future<void> simulateUserInput = Future<void>(() {
         mockStdio.simulateStdin('y');
@@ -338,6 +327,17 @@ void main() {
       expect(stdout.sublist(0, 2), contains('y\n'));
       expect(stdout[2], 'hello\n');
       expect(stdout[3], 'world\n');
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+      Stdio: () => mockStdio,
+    });
+
+    testUsingContext('publish', () async {
+      await createTestCommandRunner(PackagesCommand()).run(<String>['packages', 'publish']);
+      final List<String> commands = mockProcessManager.commands;
+      expect(commands, hasLength(2));
+      expect(commands[0], matches(r'dart-sdk[\\/]bin[\\/]pub'));
+      expect(commands[1], 'publish');
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
       Stdio: () => mockStdio,
