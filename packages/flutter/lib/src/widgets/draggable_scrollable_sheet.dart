@@ -27,20 +27,29 @@ typedef ScrollableWidgetBuilder = Widget Function(
 );
 
 /// A widget that can be dragged along the vertical axis between its
-/// `minChildSize`, which defaults to `0.25` and `maxChildSize`, which defaults
+/// minChildSize, which defaults to `0.25` and maxChildSize, which defaults
 /// to `1.0`. These sizes are percentages of the height of the parent container.
 ///
 /// The widget coordinates resizing and scrolling of the widget returned by
-/// `builder` as the user drags along the horizontal axis.
+/// builder as the user drags along the horizontal axis.
 ///
-/// The widget will initially be displayed at its `initialChildSize`, which
-/// defaults to `0.5`. To enable dragging of the widget, ensure that the
-/// `builder` creates a widget that uses the provided [ScrollController]. If
-/// the widget created by the [ScrollableWidgetBuilder] does not use the
-/// provided [ScrollController], the sheet will remain at the
-/// `initialChildSize`.
+/// The widget will initially be displayed at its initialChildSize which
+/// defaults to `0.5`, meaning half the height of its parent. Dragging will work
+/// between the range of minChildSize and maxChildSize (as percentages of the
+/// parent container's height) as long as the builder creates a widget which
+/// uses the provided [ScrollController]. If the widget created by the
+/// [ScrollableWidgetBuilder] does not use provided [ScrollController], the
+/// sheet will remain at the initialChildSize.
 ///
 /// {@tool sample}
+///
+/// This is a sample widget which shows a [ListView] that has 25 [ListTile]s.
+/// It starts out as taking up half the body of the [Scaffold], and can be
+/// dragged up to the full height of the scaffold or down to 25% of the height
+/// of the scaffold. Upon reaching full height, the list contents will be
+/// scrolled up or down, until they reach the top of the list again and the user
+/// drags the sheet back down.
+///
 /// ```dart
 /// class HomePage extends StatelessWidget {
 ///  @override
@@ -69,10 +78,11 @@ typedef ScrollableWidgetBuilder = Widget Function(
 ///  }
 ///}
 /// ```
+/// {@end-tool}
 class DraggableScrollableSheet extends StatefulWidget {
   /// Creates a widget that can be dragged and scrolled in a single gesture.
   ///
-  /// The `builder`, `initialChildSize`, `maxChildSize`, `axis`, and `alignment`
+  /// The builder, initialChildSize, minChildSize, and maxChildSize
   /// parameters must not be null.
   const DraggableScrollableSheet({
     Key key,
@@ -126,8 +136,8 @@ class DraggableScrollableSheet extends StatefulWidget {
 ///
 /// The ScrollPosition knows the number of pixels a user wants to move the sheet.
 ///
-/// The `currentExtent` will never be null.
-/// The `availablePixels` will never be null, but may be `double.infinity`.
+/// The [currentExtent] will never be null.
+/// The [availablePixels] will never be null, but may be `double.infinity`.
 class _DraggableSheetExtent {
   _DraggableSheetExtent({
     @required this.minExtent,
