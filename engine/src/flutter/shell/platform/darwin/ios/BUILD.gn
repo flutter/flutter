@@ -109,20 +109,11 @@ shared_library("create_flutter_framework_dylib") {
     "$flutter_root/fml",
     "$flutter_root/lib/ui",
     "$flutter_root/runtime",
+    "$flutter_root/runtime:libdart",
     "$flutter_root/shell/common",
     "$flutter_root/shell/platform/darwin/common",
     "//third_party/skia",
   ]
-  if (flutter_runtime_mode == "debug" ||
-      flutter_runtime_mode == "dynamic_profile" ||
-      flutter_runtime_mode == "dynamic_release") {
-    deps += [
-      "$flutter_root/lib/snapshot",
-      "//third_party/dart/runtime:libdart_jit",
-    ]
-  } else {
-    deps += [ "//third_party/dart/runtime:libdart_precompiled_runtime" ]
-  }
 
   public_configs = [ "$flutter_root:config" ]
 
