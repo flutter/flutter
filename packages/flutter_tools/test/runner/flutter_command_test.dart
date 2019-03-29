@@ -7,6 +7,7 @@ import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/usage.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
+import 'package:flutter_tools/src/version.dart';
 import 'package:mockito/mockito.dart';
 
 import '../src/common.dart';
@@ -155,4 +156,34 @@ void main() {
     });
 
   });
+
+  group('Experimental commands', () {
+    final MockVersion mockVersion = MockVersion();
+    final FakeCommand fakeCommand = FakeCommand();
+    when(mockVersion.getBranchName()).thenReturn('stable');
+
+    testUsingContext('Can be disabled on stable branch', () async {
+      expect(() => fakeCommand.run(), throwsA(isA<ToolExit>()));
+    }, overrides: <Type, Generator>{
+      FlutterVersion: () => mockVersion,
+    });
+  });
 }
+
+
+class FakeCommand extends FlutterCommand {
+  @override
+  String get description => null;
+
+  @override
+  String get name => 'fake';
+
+  @override
+  bool get isExperimental => true;
+
+  @override
+  Future<FlutterCommandResult> runCommand() async {
+    return null;
+  }
+}
+class MockVersion extends Mock implements FlutterVersion {}
