@@ -84,7 +84,7 @@ enum _RefreshIndicatorMode {
 class RefreshIndicator extends StatefulWidget {
   /// Creates a refresh indicator.
   ///
-  /// The [onRefresh], [child], and [notificationPredicate] arguments must be
+  /// The [onRefresh], [child], [edgeDistance], and [notificationPredicate] arguments must be
   /// non-null. The default
   /// [displacement] is 40.0 logical pixels.
   ///
@@ -96,6 +96,7 @@ class RefreshIndicator extends StatefulWidget {
     Key key,
     @required this.child,
     this.displacement = 40.0,
+    this.edgeDistance = 0.0,
     @required this.onRefresh,
     this.color,
     this.backgroundColor,
@@ -103,6 +104,7 @@ class RefreshIndicator extends StatefulWidget {
     this.semanticsLabel,
     this.semanticsValue,
   }) : assert(child != null),
+       assert(edgeDistance != null),
        assert(onRefresh != null),
        assert(notificationPredicate != null),
        super(key: key);
@@ -119,6 +121,11 @@ class RefreshIndicator extends StatefulWidget {
   /// indicator will settle. During the drag that exposes the refresh indicator,
   /// its actual displacement may significantly exceed this value.
   final double displacement;
+
+  /// The distance of [RefreshProgressIndicator] from the edge of the screen.
+  ///
+  /// By default, the edge distance is set to 0.
+  final double edgeDistance;
 
   /// A function that's called when the user has dragged the refresh indicator
   /// far enough to demonstrate that they want the app to refresh. The returned
@@ -433,8 +440,8 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
       children: <Widget>[
         child,
         Positioned(
-          top: _isIndicatorAtTop ? 0.0 : null,
-          bottom: !_isIndicatorAtTop ? 0.0 : null,
+          top: _isIndicatorAtTop ? widget.edgeDistance : null,
+          bottom: !_isIndicatorAtTop ? widget.edgeDistance : null,
           left: 0.0,
           right: 0.0,
           child: SizeTransition(
