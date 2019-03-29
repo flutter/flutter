@@ -102,9 +102,7 @@ class WidgetSpan extends TextSpan {
     final WidgetSpan typedOther = other;
     if (typedOther.widget != widget)
       return RenderComparison.layout;
-    if (other.text != text ||
-        children?.length != other.children?.length ||
-        (style == null) != (other.style == null))
+    if ((style == null) != (other.style == null))
       return RenderComparison.layout;
     RenderComparison result = recognizer == other.recognizer ? RenderComparison.identical : RenderComparison.metadata;
     if (style != null) {
@@ -114,15 +112,8 @@ class WidgetSpan extends TextSpan {
       if (result == RenderComparison.layout)
         return result;
     }
-    if (children != null) {
-      for (int index = 0; index < children.length; index += 1) {
-        final RenderComparison candidate = children[index].compareTo(other.children[index]);
-        if (candidate.index > result.index)
-          result = candidate;
-        if (result == RenderComparison.layout)
-          return result;
-      }
-    }
+    // WidgetSpans are always a leaf node in the TextSpan tree, and have
+    // no children.
     return result;
   }
 
