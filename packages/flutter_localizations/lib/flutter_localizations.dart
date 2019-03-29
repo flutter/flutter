@@ -5,6 +5,6 @@
 /// Localizations for the Flutter library
 library flutter_localizations;
 
-export 'src/l10n/localizations.dart';
+export 'src/l10n/generated_material_localizations.dart';
 export 'src/material_localizations.dart';
 export 'src/widgets_localizations.dart';
