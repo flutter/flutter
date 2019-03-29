@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
-import 'package:flutter_tools/src/version.dart';
 import 'package:meta/meta.dart';
 import 'package:quiver/strings.dart';
 
@@ -28,6 +27,7 @@ import '../doctor.dart';
 import '../globals.dart';
 import '../project.dart';
 import '../usage.dart';
+import '../version.dart';
 import 'flutter_command_runner.dart';
 
 export '../cache.dart' show DevelopmentArtifact;
