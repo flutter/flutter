@@ -4,6 +4,7 @@
 
 import("//build/compiled_action.gni")
 import("//third_party/dart/utils/compile_platform.gni")
+import("$flutter_root/common/config.gni")
 import("$flutter_root/lib/ui/dart_ui.gni")
 
 bindings_output_dir = "$root_gen_dir/sky/bindings"
@@ -55,7 +56,8 @@ compiled_action("generate_snapshot_bin") {
         rebase_path(isolate_snapshot_instructions),
   ]
 
-  if (is_debug) {
+  if (is_debug && flutter_runtime_mode != "profile" &&
+      flutter_runtime_mode != "release") {
     args += [ "--enable_asserts" ]
   }
 

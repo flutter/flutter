@@ -24,6 +24,20 @@ source_set("test_font") {
   }
 }
 
+# Picks the libdart implementation based on the Flutter runtime mode.
+group("libdart") {
+  deps = []
+
+  if (flutter_runtime_mode == "profile" || flutter_runtime_mode == "release") {
+    deps += [ "//third_party/dart/runtime:libdart_precompiled_runtime" ]
+  } else {
+    deps += [
+      "$flutter_root/lib/snapshot",
+      "//third_party/dart/runtime:libdart_jit",
+    ]
+  }
+}
+
 source_set("runtime") {
   sources = [
     "dart_isolate.cc",
