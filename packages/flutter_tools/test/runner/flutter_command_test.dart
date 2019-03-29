@@ -2,8 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/base/time.dart';
+import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/usage.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
@@ -153,6 +155,81 @@ void main() {
       SystemClock: () => clock,
       Usage: () => usage,
     });
-
   });
+
+  group('Development artifacts', () {
+    final MockDeviceManager mockDeviceManager = MockDeviceManager();
+     testUsingContext('should only request artifacts corresponding to connected devices', () async {
+      when(mockDeviceManager.getDevices()).thenAnswer((Invocation invocation) {
+        return Stream<Device>.fromIterable(<Device>[
+          MockDevice(TargetPlatform.android_arm),
+        ]);
+      });
+
+      expect(await FakeDeviceBasedDevelopmentArtifacts().requiredArtifacts, unorderedEquals(<DevelopmentArtifact>{
+        DevelopmentArtifact.universal,
+        DevelopmentArtifact.android,
+      }));
+
+      when(mockDeviceManager.getDevices()).thenAnswer((Invocation invocation) {
+        return Stream<Device>.fromIterable(<Device>[
+          MockDevice(TargetPlatform.ios),
+        ]);
+      });
+
+      expect(await FakeDeviceBasedDevelopmentArtifacts().requiredArtifacts, unorderedEquals(<DevelopmentArtifact>{
+        DevelopmentArtifact.universal,
+        DevelopmentArtifact.iOS,
+      }));
+
+      when(mockDeviceManager.getDevices()).thenAnswer((Invocation invocation) {
+        return Stream<Device>.fromIterable(<Device>[
+          MockDevice(TargetPlatform.ios),
+          MockDevice(TargetPlatform.android_arm),
+        ]);
+      });
+
+      expect(await FakeDeviceBasedDevelopmentArtifacts().requiredArtifacts, unorderedEquals(<DevelopmentArtifact>{
+        DevelopmentArtifact.universal,
+        DevelopmentArtifact.iOS,
+        DevelopmentArtifact.android,
+      }));
+
+      when(mockDeviceManager.getDevices()).thenAnswer((Invocation invocation) {
+        return Stream<Device>.fromIterable(<Device>[
+          MockDevice(TargetPlatform.web),
+        ]);
+      });
+
+      expect(await FakeDeviceBasedDevelopmentArtifacts().requiredArtifacts, unorderedEquals(<DevelopmentArtifact>{
+        DevelopmentArtifact.universal,
+        DevelopmentArtifact.web,
+      }));
+    }, overrides: <Type, Generator>{
+      DeviceManager: () => mockDeviceManager,
+    });
+  });
+}
+
+class MockDeviceManager extends Mock implements DeviceManager {}
+class MockDevice extends Mock implements Device {
+  MockDevice(this._targetPlatform);
+
+  final TargetPlatform _targetPlatform;
+
+  @override
+  Future<TargetPlatform> get targetPlatform async => _targetPlatform;
+}
+
+class FakeDeviceBasedDevelopmentArtifacts extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
+  @override
+  String get description => null;
+
+  @override
+  String get name => null;
+
+  @override
+  Future<FlutterCommandResult> runCommand() {
+    return null;
+  }
 }
