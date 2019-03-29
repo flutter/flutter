@@ -54,11 +54,11 @@ mixin PaintingBinding on BindingBase, ServicesBinding {
   ///
   ///  * [ShaderWarmUp], the interface of how this warm up works.
   static ShaderWarmUp get shaderWarmUp => _shaderWarmUp;
-  static void set shaderWarmUp(ShaderWarmUp value) {
+  static set shaderWarmUp(ShaderWarmUp value) {
     assert(_instance == null,
         'PaintingBinding.shaderWarmUp should only be set before the '
         'PaintingBinding singleton instance is initialized.\n\n'
-        'Set it after init would not affect how shaders are warmed up.\n\n'
+        'Setting it after init would not affect how shaders are warmed up.\n\n'
         'To fix this, try to change PaintingBinding.shaderWarmUp before:\n'
         ' 1. runApp\n'
         ' 2. WidgetsFlutterBinding.ensureInitialized\n'
