@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of dart.ui;
+part of ui;
 
 /// Static methods to allow for simple sharing of [SendPort]s across [Isolate]s.
 ///

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of dart.ui;
+part of ui;
 
 /// Linearly interpolate between two numbers.
 double lerpDouble(num a, num b, double t) {

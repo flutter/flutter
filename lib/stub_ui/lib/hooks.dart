@@ -4,7 +4,7 @@
 
 // TODO(dnfield): Remove unused_import ignores when https://github.com/dart-lang/sdk/issues/35164 is resolved.
 
-part of dart.ui;
+part of ui;
 
 // ignore: unused_element
 String _decodeUTF8(ByteData message) {

@@ -9,21 +9,21 @@ sdk_dill = "$root_out_dir/flutter_web_sdk/kernel/flutter_ddc_sdk.dill"
 sdk_libraries_json = "$flutter_root/web_sdk/libraries.json"
 
 web_ui_sources = [
-  "$flutter_root/lib/stub_ui/compositing.dart",
-  "$flutter_root/lib/stub_ui/geometry.dart",
-  "$flutter_root/lib/stub_ui/hash_codes.dart",
-  "$flutter_root/lib/stub_ui/hooks.dart",
-  "$flutter_root/lib/stub_ui/isolate_name_server.dart",
-  "$flutter_root/lib/stub_ui/lerp.dart",
-  "$flutter_root/lib/stub_ui/natives.dart",
-  "$flutter_root/lib/stub_ui/painting.dart",
-  "$flutter_root/lib/stub_ui/plugins.dart",
-  "$flutter_root/lib/stub_ui/pointer.dart",
-  "$flutter_root/lib/stub_ui/semantics.dart",
-  "$flutter_root/lib/stub_ui/text.dart",
-  "$flutter_root/lib/stub_ui/ui.dart",
-  "$flutter_root/lib/stub_ui/versions.dart",
-  "$flutter_root/lib/stub_ui/window.dart",
+  "$flutter_root/lib/stub_ui/lib/compositing.dart",
+  "$flutter_root/lib/stub_ui/lib/geometry.dart",
+  "$flutter_root/lib/stub_ui/lib/hash_codes.dart",
+  "$flutter_root/lib/stub_ui/lib/hooks.dart",
+  "$flutter_root/lib/stub_ui/lib/isolate_name_server.dart",
+  "$flutter_root/lib/stub_ui/lib/lerp.dart",
+  "$flutter_root/lib/stub_ui/lib/natives.dart",
+  "$flutter_root/lib/stub_ui/lib/painting.dart",
+  "$flutter_root/lib/stub_ui/lib/plugins.dart",
+  "$flutter_root/lib/stub_ui/lib/pointer.dart",
+  "$flutter_root/lib/stub_ui/lib/semantics.dart",
+  "$flutter_root/lib/stub_ui/lib/text.dart",
+  "$flutter_root/lib/stub_ui/lib/ui.dart",
+  "$flutter_root/lib/stub_ui/lib/versions.dart",
+  "$flutter_root/lib/stub_ui/lib/window.dart",
 ]
 
 group("web_sdk") {
@@ -33,12 +33,23 @@ group("web_sdk") {
   ]
 }
 
-copy("web_ui_sources") {
-  sources = web_ui_sources
+prebuilt_dart_action("web_ui_sources") {
+  inputs = web_ui_sources + [ "sdk_rewriter.dart" ]
+
+  packages = "//third_party/dart/.packages"
+  script = "sdk_rewriter.dart"
+  output_dir = rebase_path("$root_out_dir/flutter_web_sdk/lib/ui/")
+
+  args = [ "--output-dir=$output_dir" ]
 
   outputs = [
-    "$root_out_dir/flutter_web_sdk/lib/ui/{{source_file_part}}",
+    "$root_out_dir/flutter_web_sdk_stamp",
   ]
+
+  foreach(source_file, web_ui_sources) {
+    path = rebase_path(source_file)
+    args += [ "--input=$path" ]
+  }
 }
 
 copy("web_ui_library") {

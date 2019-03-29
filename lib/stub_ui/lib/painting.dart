@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of dart.ui;
+part of ui;
 
 // Some methods in this file assert that their arguments are not null. These
 // asserts are just to improve the error messages; they should only cover

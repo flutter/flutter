@@ -8,7 +8,7 @@ int main() {
   // These files just contain imports to the part files;
   final CompilationUnit uiUnit = parseDartFile('lib/ui/ui.dart',
       parseFunctionBodies: false, suppressErrors: false);
-  final CompilationUnit webUnit = parseDartFile('lib/stub_ui/ui.dart',
+  final CompilationUnit webUnit = parseDartFile('lib/stub_ui/lib/ui.dart',
       parseFunctionBodies: false, suppressErrors: false);
   final Map<String, ClassDeclaration> uiClasses = <String, ClassDeclaration>{};
   final Map<String, ClassDeclaration> webClasses = <String, ClassDeclaration>{};
@@ -16,7 +16,7 @@ int main() {
   // Gather all public classes from each library. For now we are skiping
   // other top level members.
   _collectPublicClasses(uiUnit, uiClasses, 'lib/ui/');
-  _collectPublicClasses(webUnit, webClasses, 'lib/stub_ui/');
+  _collectPublicClasses(webUnit, webClasses, 'lib/stub_ui/lib/');
 
   if (uiClasses.isEmpty || webClasses.isEmpty) {
     print('Warning: did not resolve any classes.');
