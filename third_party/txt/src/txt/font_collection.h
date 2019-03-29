@@ -40,7 +40,7 @@ class FontCollection : public std::enable_shared_from_this<FontCollection> {
 
   size_t GetFontManagersCount() const;
 
-  void SetDefaultFontManager(sk_sp<SkFontMgr> font_manager);
+  void SetupDefaultFontManager();
   void SetAssetFontManager(sk_sp<SkFontMgr> font_manager);
   void SetDynamicFontManager(sk_sp<SkFontMgr> font_manager);
   void SetTestFontManager(sk_sp<SkFontMgr> font_manager);

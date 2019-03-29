@@ -4,6 +4,8 @@
 
 #include "txt/platform.h"
 
+#include "third_party/skia/include/ports/SkFontMgr_directory.h"
+
 namespace txt {
 
 std::string GetDefaultFontFamily() {
@@ -11,7 +13,7 @@ std::string GetDefaultFontFamily() {
 }
 
 sk_sp<SkFontMgr> GetDefaultFontManager() {
-  return SkFontMgr::RefDefault();
+  return SkFontMgr_New_Custom_Directory("/usr/share/fonts/");
 }
 
 }  // namespace txt

@@ -87,8 +87,8 @@ size_t FontCollection::GetFontManagersCount() const {
   return GetFontManagerOrder().size();
 }
 
-void FontCollection::SetDefaultFontManager(sk_sp<SkFontMgr> font_manager) {
-  default_font_manager_ = font_manager;
+void FontCollection::SetupDefaultFontManager() {
+  default_font_manager_ = GetDefaultFontManager();
 }
 
 void FontCollection::SetAssetFontManager(sk_sp<SkFontMgr> font_manager) {
