@@ -148,7 +148,8 @@ void main() {
           await tenMillisecondsLater;
           doWhileAsync(time, () => ansiSpinner.ticks < 30); // three seconds
           expect(ansiSpinner.seemsSlow, isTrue);
-          expect(outputStdout().join('\n'), contains('This is taking an unexpectedly long time.'));
+          // Check the 2nd line to verify there's a newline before the warning
+          expect(outputStdout()[1], contains('This is taking an unexpectedly long time.'));
           ansiSpinner.stop();
           expect(outputStdout().join('\n'), isNot(contains('(!)')));
           done = true;
