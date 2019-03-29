@@ -165,7 +165,7 @@ class SampleChecker {
   static final RegExp _codeBlockEndRegex = RegExp(r'///\s+```\s*$');
 
   /// A RegExp that matches a Dart constructor.
-  static final RegExp _constructorRegExp = RegExp(r'(const )?[A-Z][a-zA-Z0-9<>.]*\(');
+  static final RegExp _constructorRegExp = RegExp(r'(const\s+)?_*[A-Z][a-zA-Z0-9<>._]*\(');
 
   /// Whether or not to keep the temp directory around after running.
   ///
