@@ -17,7 +17,7 @@ group("platform") {
     deps = [
       "windows",
     ]
-  } else if ( is_fuchsia) {
+  } else if (is_fuchsia) {
     # Fuchsia has its own runner implementation.
     deps = []
   } else {

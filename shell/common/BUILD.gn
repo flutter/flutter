@@ -2,8 +2,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import("$flutter_root/testing/testing.gni")
 import("$flutter_root/shell/gpu/gpu.gni")
+import("$flutter_root/testing/testing.gni")
 
 # Template to generate a dart embedder resource.cc file.
 # Required invoker inputs:

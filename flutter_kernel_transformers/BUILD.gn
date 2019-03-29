@@ -15,9 +15,9 @@ dart_library("flutter_kernel_transformers") {
   ]
 
   deps = [
+    "//third_party/dart-pkg/pub/meta",
     "//third_party/dart/pkg/front_end",
     "//third_party/dart/pkg/kernel",
     "//third_party/dart/pkg/vm",
-    "//third_party/dart-pkg/pub/meta",
   ]
 }

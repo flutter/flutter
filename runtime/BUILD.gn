@@ -73,7 +73,9 @@ source_set("runtime") {
       flutter_runtime_mode != "dynamic_release" && !is_fuchsia) {
     # Only link in Observatory in non-release modes on non-Fuchsia. Fuchsia
     # instead puts Observatory into the runner's package.
-    deps += [ "//third_party/dart/runtime/observatory:embedded_observatory_archive" ]
+    deps += [
+      "//third_party/dart/runtime/observatory:embedded_observatory_archive",
+    ]
   }
 }
 

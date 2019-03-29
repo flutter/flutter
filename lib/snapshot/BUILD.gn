@@ -20,7 +20,8 @@ compiled_action("generate_snapshot_bin") {
   tool = "//third_party/dart/runtime/bin:gen_snapshot"
 
   if (is_fuchsia || is_fuchsia_host) {
-    platform_kernel = "$root_out_dir/flutter_runner_patched_sdk/platform_strong.dill"
+    platform_kernel =
+        "$root_out_dir/flutter_runner_patched_sdk/platform_strong.dill"
   } else {
     platform_kernel = "$root_out_dir/flutter_patched_sdk/platform_strong.dill"
   }
@@ -55,12 +56,10 @@ compiled_action("generate_snapshot_bin") {
   ]
 
   if (is_debug) {
-    args += [
-      "--enable_asserts",
-    ]
+    args += [ "--enable_asserts" ]
   }
 
-  args += [rebase_path(platform_kernel)]
+  args += [ rebase_path(platform_kernel) ]
 }
 
 # Generates an assembly file defining a given symbol with the bytes from a
@@ -219,21 +218,22 @@ source_set("snapshot") {
   deps = [
     ":isolate_snapshot_data_linkable",
     ":isolate_snapshot_instructions_linkable",
+    ":platform_strong_dill_linkable",
     ":vm_snapshot_data_linkable",
     ":vm_snapshot_instructions_linkable",
-    ":platform_strong_dill_linkable",
   ]
   sources = get_target_outputs(":isolate_snapshot_data_linkable") +
-    get_target_outputs(":isolate_snapshot_instructions_linkable") +
-    get_target_outputs(":vm_snapshot_data_linkable") +
-    get_target_outputs(":vm_snapshot_instructions_linkable") +
-    get_target_outputs(":platform_strong_dill_linkable")
+            get_target_outputs(":isolate_snapshot_instructions_linkable") +
+            get_target_outputs(":vm_snapshot_data_linkable") +
+            get_target_outputs(":vm_snapshot_instructions_linkable") +
+            get_target_outputs(":platform_strong_dill_linkable")
 }
 
 compile_platform("non_strong_platform") {
   single_root_scheme = "org-dartlang-sdk"
   single_root_base = rebase_path("../../../")
-  libraries_specification_uri = "org-dartlang-sdk:///flutter/lib/snapshot/libraries.json"
+  libraries_specification_uri =
+      "org-dartlang-sdk:///flutter/lib/snapshot/libraries.json"
 
   outputs = [
     "$root_out_dir/flutter_patched_sdk/platform.dill",
@@ -249,7 +249,8 @@ compile_platform("non_strong_platform") {
 compile_platform("strong_platform") {
   single_root_scheme = "org-dartlang-sdk"
   single_root_base = rebase_path("../../../")
-  libraries_specification_uri = "org-dartlang-sdk:///flutter/lib/snapshot/libraries.json"
+  libraries_specification_uri =
+      "org-dartlang-sdk:///flutter/lib/snapshot/libraries.json"
 
   outputs = [
     "$root_out_dir/flutter_patched_sdk/platform_strong.dill",
@@ -266,7 +267,7 @@ compile_platform("strong_platform") {
 if (is_fuchsia || is_fuchsia_host) {
   group("kernel_platform_files") {
     public_deps = [
-      "//topaz/runtime/flutter_runner/kernel:kernel_platform_files"
+      "//topaz/runtime/flutter_runner/kernel:kernel_platform_files",
     ]
   }
 } else {
