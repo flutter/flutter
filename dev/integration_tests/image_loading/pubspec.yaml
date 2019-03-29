@@ -4,8 +4,6 @@ description: Integration testing library for Android semantics
 dependencies:
   flutter:
     sdk: flutter
-  flutter_driver:
-    sdk: flutter
   test: 1.6.1
   mockito: 4.0.0
 

@@ -165,7 +165,7 @@ void main() {
     when(httpClientMock.getUrl(any)).thenThrow(Error());
 
     await HttpOverrides.runZoned(() async {
-      final ImageProvider imageProvider = NetworkImage('asdasdasdas');
+      const ImageProvider imageProvider = NetworkImage('asdasdasdas');
       final Completer<bool> caughtError = Completer<bool>();
       FlutterError.onError = (FlutterErrorDetails details) {
         caughtError.complete(false);
