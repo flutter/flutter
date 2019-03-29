@@ -371,7 +371,10 @@ abstract class Route<T> {
   bool get isActive {
     if (_navigator == null)
       return false;
-    return _navigator._history.firstWhere(_RouteEntry.isRoutePredicate(this)).isPresent;
+    return _navigator._history.firstWhere(
+      _RouteEntry.isRoutePredicate(this),
+      orElse: () => null,
+    )?.isPresent == true;
   }
 }
 
@@ -1898,6 +1901,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       entry.dispose();
     super.dispose();
     // don't unlock, so that the object becomes unusable
+    assert(_debugLocked);
   }
 
   void _flushHistoryUpdates() {
@@ -2416,6 +2420,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       case RoutePopDisposition.doNotPop:
         return true;
     }
+    assert(false, 'unreachable');
     return null;
   }
 
