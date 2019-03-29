@@ -55,14 +55,14 @@
 /// {@end-tool}
 ///
 /// {@tool sample}
-/// const private constructor 
+/// const private constructor
 /// ```dart
 /// const             _Text('Poor wandering ones!')
 /// ```
 /// {@end-tool}
 ///
 /// {@tool sample}
-/// const private constructor 
+/// yet another const private constructor
 /// ```dart
 /// const        _Text.__('Poor wandering ones!')
 /// ```
