@@ -96,6 +96,49 @@ flutter:
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
     });
+
+    testUsingContext('handle removal of wildcard directories', () async {
+      fs.file('.packages').createSync();
+      fs.file(fs.path.join('assets', 'foo', 'bar.txt')).createSync(recursive: true);
+      fs.file('pubspec.yaml')
+        ..createSync()
+        ..writeAsStringSync(r'''
+name: example
+flutter:
+  assets:
+    - assets/foo/
+''');
+      final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
+      await bundle.build(manifestPath: 'pubspec.yaml');
+      // Expected assets:
+      //  - asset manifest
+      //  - font manifest
+      //  - license file
+      //  - assets/foo/bar.txt
+      expect(bundle.entries.length, 4);
+      expect(bundle.needsBuild(manifestPath: 'pubspec.yaml'), false);
+
+      // Delete the wildcard directory and update pubspec file.
+      fs.directory(fs.path.join('assets', 'foo')).deleteSync(recursive: true);
+      fs.file('pubspec.yaml')
+        ..createSync()
+        ..writeAsStringSync(r'''
+name: example''');
+
+      // Even though the previous file was removed, it is left in the
+      // asset manifest and not updated. This is due to the devfs not
+      // supporting file deletion.
+      expect(bundle.needsBuild(manifestPath: 'pubspec.yaml'), true);
+      await bundle.build(manifestPath: 'pubspec.yaml');
+      // Expected assets:
+      //  - asset manifest
+      //  - font manifest
+      //  - license file
+      //  - assets/foo/bar.txt
+      expect(bundle.entries.length, 4);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => testFileSystem,
+    });
   });
 
 }
