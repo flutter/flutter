@@ -1090,4 +1090,87 @@ void main() {
     expect(find.text('Hello'), findsOneWidget);
     expect(find.text('World'), findsNothing);
   });
+
+  testWidgets('pushAndRemove until animates the push', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/25080.
+
+    const Duration kFourTenthsOfTheTransitionDuration = Duration(milliseconds: 120);
+    final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
+    final Map<String, MaterialPageRoute<dynamic>> routeNameToContext = <String, MaterialPageRoute<dynamic>>{};
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Navigator(
+          key: navigator,
+          initialRoute: 'root',
+          onGenerateRoute: (RouteSettings settings) {
+            return MaterialPageRoute<void>(
+              settings: settings,
+              builder: (BuildContext context) {
+                routeNameToContext[settings.name] = ModalRoute.of(context);
+                return Text('Route: ${settings.name}');
+              },
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(find.text('Route: root'), findsOneWidget);
+
+    navigator.currentState.pushNamed('1');
+    await tester.pumpAndSettle();
+
+    expect(find.text('Route: 1'), findsOneWidget);
+
+    navigator.currentState.pushNamed('2');
+    await tester.pumpAndSettle();
+
+    expect(find.text('Route: 2'), findsOneWidget);
+
+    navigator.currentState.pushNamed('3');
+    await tester.pumpAndSettle();
+
+    expect(find.text('Route: 3'), findsOneWidget);
+    expect(find.text('Route: 2', skipOffstage: false), findsOneWidget);
+    expect(find.text('Route: 1', skipOffstage: false), findsOneWidget);
+    expect(find.text('Route: root', skipOffstage: false), findsOneWidget);
+
+    navigator.currentState.pushNamedAndRemoveUntil('4', (Route<dynamic> route) => route.isFirst);
+    await tester.pump();
+
+    expect(find.text('Route: 3'), findsOneWidget);
+    expect(find.text('Route: 4'), findsOneWidget);
+    final Animation<double> route4Entry = routeNameToContext['4'].animation;
+    expect(route4Entry.value, 0.0); // Entry animation has not started.
+
+    await tester.pump(kFourTenthsOfTheTransitionDuration);
+    expect(find.text('Route: 3'), findsOneWidget);
+    expect(find.text('Route: 4'), findsOneWidget);
+    expect(route4Entry.value, 0.4);
+
+    await tester.pump(kFourTenthsOfTheTransitionDuration);
+    expect(find.text('Route: 3'), findsOneWidget);
+    expect(find.text('Route: 4'), findsOneWidget);
+    expect(route4Entry.value, 0.8);
+    expect(find.text('Route: 2', skipOffstage: false), findsOneWidget);
+    expect(find.text('Route: 1', skipOffstage: false), findsOneWidget);
+    expect(find.text('Route: root', skipOffstage: false), findsOneWidget);
+
+    // When we hit 1.0 all but root and current have been removed.
+    await tester.pump(kFourTenthsOfTheTransitionDuration);
+    expect(find.text('Route: 3', skipOffstage: false), findsNothing);
+    expect(find.text('Route: 4'), findsOneWidget);
+    expect(route4Entry.value, 1.0);
+    expect(find.text('Route: 2', skipOffstage: false), findsNothing);
+    expect(find.text('Route: 1', skipOffstage: false), findsNothing);
+    expect(find.text('Route: root', skipOffstage: false), findsOneWidget);
+
+    navigator.currentState.pop();
+    await tester.pumpAndSettle();
+
+    expect(find.text('Route: root'), findsOneWidget);
+    expect(find.text('Route: 4', skipOffstage: false), findsNothing);
+  });
 }
