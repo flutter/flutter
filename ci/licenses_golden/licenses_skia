@@ -1,4 +1,4 @@
-Signature: cfb7f9511f3794178134f66e60c0510e
+Signature: 4f9684ee6c85476f7ecbcb317adeb5b5
 
 UNUSED LICENSES:
 
@@ -4407,8 +4407,6 @@ FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCClipProcessor.cpp
 FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCClipProcessor.h
 FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCCoverageProcessor.cpp
 FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCCoverageProcessor.h
-FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCCoverageProcessor_GSImpl.cpp
-FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCCoverageProcessor_VSImpl.cpp
 FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCCubicShader.cpp
 FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCCubicShader.h
 FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCFillGeometry.cpp
@@ -4421,6 +4419,8 @@ FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCQuadraticShader.cpp
 FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCQuadraticShader.h
 FILE: ../../../third_party/skia/src/gpu/ccpr/GrCoverageCountingPathRenderer.cpp
 FILE: ../../../third_party/skia/src/gpu/ccpr/GrCoverageCountingPathRenderer.h
+FILE: ../../../third_party/skia/src/gpu/ccpr/GrGSCoverageProcessor.cpp
+FILE: ../../../third_party/skia/src/gpu/ccpr/GrVSCoverageProcessor.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/GrAtlasedShaderHelpers.h
 FILE: ../../../third_party/skia/src/gpu/effects/GrBlurredEdgeFragmentProcessor.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/GrBlurredEdgeFragmentProcessor.fp
@@ -4563,6 +4563,7 @@ FILE: ../../../third_party/skia/bench/MixerBench.cpp
 FILE: ../../../third_party/skia/gm/backdrop.cpp
 FILE: ../../../third_party/skia/gm/compositor_quads.cpp
 FILE: ../../../third_party/skia/gm/crbug_938592.cpp
+FILE: ../../../third_party/skia/gm/crbug_947055.cpp
 FILE: ../../../third_party/skia/gm/mac_aa_explorer.cpp
 FILE: ../../../third_party/skia/gm/mixercolorfilter.cpp
 FILE: ../../../third_party/skia/gm/samplelocations.cpp
@@ -4604,6 +4605,8 @@ FILE: ../../../third_party/skia/src/gpu/GrRecordingContext.cpp
 FILE: ../../../third_party/skia/src/gpu/GrRecordingContextPriv.h
 FILE: ../../../third_party/skia/src/gpu/GrSamplePatternDictionary.cpp
 FILE: ../../../third_party/skia/src/gpu/GrSamplePatternDictionary.h
+FILE: ../../../third_party/skia/src/gpu/ccpr/GrGSCoverageProcessor.h
+FILE: ../../../third_party/skia/src/gpu/ccpr/GrVSCoverageProcessor.h
 FILE: ../../../third_party/skia/src/gpu/effects/GrMixerEffect.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/GrMixerEffect.fp
 FILE: ../../../third_party/skia/src/gpu/effects/GrMixerEffect.h
