@@ -209,7 +209,7 @@ enum ListTileControlAffinity {
 /// To be accessible, tappable [leading] and [trailing] widgets have to
 /// be at least 48x48 in size. However, to adhere to the Material spec,
 /// [trailing] and [leading] widgets in one-line ListTiles should visually be
-/// at most 32 (dense: true) or 40 (dense: false) in height, which may
+/// at most 32 ([dense]: true) or 40 ([dense]: false) in height, which may
 /// conflict with the accessibility requirement.
 ///
 /// For this reason, a one-line ListTile allows the height of [leading]
@@ -218,31 +218,28 @@ enum ListTileControlAffinity {
 /// that are large enough, but it is up to the developer to ensure that
 /// their widgets follow the Material spec.
 ///
-/// The following is an example of a one-line, non-dense ListTile with a
+/// The following is an example of a one-line, non-[dense] ListTile with a
 /// tappable leading widget that adheres to accessibility requirements and
-/// the Material spec.
+/// the Material spec. To adjust the use case below for a one-line, [dense]
+/// ListTile, adjust the vertical padding to 8.0.
 ///
 /// {@tool sample}
 ///
 /// ```dart
 /// ListTile(
-///   dense: true,
 ///   leading: GestureDetector(
-///     // allows background to be tappable
 ///     behavior: HitTestBehavior.translucent,
 ///     onTap: () {},
 ///     child: Container(
-///       // 48x48 box that is tappable
 ///       width: 48,
 ///       height: 48,
-///       child: Padding(
-///         // creates a 32x32 avatar per the Material spec
-///         padding: EdgeInsets.all(8.0),
-///         child: CircleAvatar(),
-///       ),
+///       padding: EdgeInsets.symmetric(vertical: 4.0),
+///       alignment: Alignment.center,
+///       child: CircleAvatar(),
 ///     ),
 ///   ),
 ///   title: Text('title'),
+///   dense: false,
 /// ),
 /// ```
 /// {@end-tool}
