@@ -22,7 +22,7 @@ ChromeLauncher get chromeLauncher => context[ChromeLauncher];
 /// environment variable is set to true.
 bool get flutterWebEnabled {
   _flutterWebEnabled = platform.environment['FLUTTER_WEB']?.toLowerCase() == 'true';
-  return _flutterWebEnabled && FlutterVersion.instance.getBranchName() != 'stable';
+  return _flutterWebEnabled && !FlutterVersion.instance.isStable;
 }
 bool _flutterWebEnabled;
 

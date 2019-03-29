@@ -643,7 +643,7 @@ abstract class FlutterCommand extends Command<void> {
   Future<void> validateCommand() async {
     // If we're on a stable branch, then don't allow the usage of
     // "experimental" features.
-    if (isExperimental && FlutterVersion.instance.getBranchName() == 'stable') {
+    if (isExperimental && FlutterVersion.instance.isStable) {
       throwToolExit('Experimental feature $name is not supported on stable branches');
     }
 

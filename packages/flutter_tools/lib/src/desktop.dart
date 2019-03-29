@@ -9,6 +9,6 @@ import 'version.dart';
 // `FLUTTER_DESKTOP_EMBEDDING` environment variable is set to true.
 bool get flutterDesktopEnabled {
   _flutterDesktopEnabled ??= platform.environment['FLUTTER_DESKTOP_EMBEDDING']?.toLowerCase() == 'true';
-  return _flutterDesktopEnabled && FlutterVersion.instance.getBranchName() != 'stable';
+  return _flutterDesktopEnabled && !FlutterVersion.instance.isStable;
 }
 bool _flutterDesktopEnabled;
