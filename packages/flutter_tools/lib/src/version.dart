@@ -34,7 +34,7 @@ class FlutterVersion {
 
   /// Whether we are currently on the stable branch.
   bool get isStable {
-    return getVersionString() == 'stable';
+    return getBranchName() == 'stable';
   }
 
   static const Set<String> officialChannels = <String>{
