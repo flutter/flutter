@@ -171,6 +171,9 @@ enum ListTileControlAffinity {
 /// see the example below to see how to adhere to both Material spec and
 /// accessibility requirements.
 ///
+/// Note that [leading] and [trailing] widgets can expand as far as they wish
+/// horizontally, so ensure that they are properly constrained.
+///
 /// List tiles are typically used in [ListView]s, or arranged in [Column]s in
 /// [Drawer]s and [Card]s.
 ///
