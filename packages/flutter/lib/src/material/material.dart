@@ -320,7 +320,10 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     final Color backgroundColor = _getBackgroundColor(context);
-    assert(backgroundColor != null || widget.type == MaterialType.transparency);
+    assert(
+      backgroundColor != null || widget.type == MaterialType.transparency,
+      'If Material type is not MaterialType.transparency, the color property must not be null'
+    );
     Widget contents = widget.child;
     if (contents != null) {
       contents = AnimatedDefaultTextStyle(
