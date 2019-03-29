@@ -71,6 +71,13 @@ TaskFunction createCodegenerationIntegrationTest() {
   );
 }
 
+TaskFunction createImageLoadingIntegrationTest() {
+  return DriverTest(
+    '${flutterDirectory.path}/dev/integration_tests/image_loading',
+    'lib/main.dart',
+  );
+}
+
 TaskFunction createFlutterCreateOfflineTest() {
   return () async {
     final Directory tempDir = Directory.systemTemp.createTempSync('flutter_create_test.');
