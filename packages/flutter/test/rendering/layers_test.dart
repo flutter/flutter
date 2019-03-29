@@ -4,6 +4,7 @@
 
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -287,6 +288,104 @@ void main() {
     });
     checkNeedsAddToScene(layer, () {
       layer.shadowColor = const Color(1);
+    });
+  });
+
+  group('PhysicalModelLayer checks elevations', () {
+    void _testConflicts(
+      PhysicalModelLayer layerA,
+      PhysicalModelLayer layerB,
+      int errorCount, [
+      bool enableCheck = true,
+    ]) {
+      assert(enableCheck || errorCount == 0, 'Cannot disable check and expect non-zero error count.');
+      final OffsetLayer container = OffsetLayer();
+      container.append(layerA);
+      container.append(layerB);
+      debugCheckElevationsEnabled = enableCheck;
+      debugDisableShadows = false;
+      int errors = 0;
+      if (enableCheck) {
+        FlutterError.onError = (FlutterErrorDetails details) {
+          errors++;
+        };
+      }
+      container.buildScene(SceneBuilder());
+      expect(errors, errorCount);
+      debugCheckElevationsEnabled = false;
+      debugCheckElevationsEnabled = true;
+    }
+
+    test('Overlapping layers at wrong elevation', () {
+      final PhysicalModelLayer layerA = PhysicalModelLayer(
+        clipPath: Path()..addRect(Rect.fromLTWH(0, 0, 20, 20)),
+        elevation: 3.0,
+        color: const Color(0),
+        shadowColor: const Color(0),
+      );
+      final PhysicalModelLayer layerB =PhysicalModelLayer(
+        clipPath: Path()..addRect(Rect.fromLTWH(10, 10, 20, 20)),
+        elevation: 2.0,
+        color: const Color(0),
+        shadowColor: const Color(0),
+      );
+      _testConflicts(layerA, layerB, 1);
+    });
+
+    test('Overlapping layers at wrong elevation, check disabled', () {
+      final PhysicalModelLayer layerA = PhysicalModelLayer(
+        clipPath: Path()..addRect(Rect.fromLTWH(0, 0, 20, 20)),
+        elevation: 3.0,
+        color: const Color(0),
+        shadowColor: const Color(0),
+      );
+      final PhysicalModelLayer layerB =PhysicalModelLayer(
+        clipPath: Path()..addRect(Rect.fromLTWH(10, 10, 20, 20)),
+        elevation: 2.0,
+        color: const Color(0),
+        shadowColor: const Color(0),
+      );
+      _testConflicts(layerA, layerB, 0, false);
+    });
+
+    test('Non-overlapping layers at wrong elevation', () {
+      final PhysicalModelLayer layerA = PhysicalModelLayer(
+        clipPath: Path()..addRect(Rect.fromLTWH(0, 0, 20, 20)),
+        elevation: 3.0,
+        color: const Color(0),
+        shadowColor: const Color(0),
+      );
+      final PhysicalModelLayer layerB =PhysicalModelLayer(
+        clipPath: Path()..addRect(Rect.fromLTWH(20, 20, 20, 20)),
+        elevation: 2.0,
+        color: const Color(0),
+        shadowColor: const Color(0),
+      );
+      _testConflicts(layerA, layerB, 0);
+    });
+
+    test('Non-overlapping layers at wrong elevation, child at lower elevation', () {
+      final PhysicalModelLayer layerA = PhysicalModelLayer(
+        clipPath: Path()..addRect(Rect.fromLTWH(0, 0, 20, 20)),
+        elevation: 3.0,
+        color: const Color(0),
+        shadowColor: const Color(0),
+      );
+
+      layerA.append(PhysicalModelLayer(
+        clipPath: Path()..addRect(Rect.fromLTWH(2, 2, 10, 10)),
+        elevation: 1.0,
+        color: const Color(0),
+        shadowColor: const Color(0),
+      ));
+
+      final PhysicalModelLayer layerB =PhysicalModelLayer(
+        clipPath: Path()..addRect(Rect.fromLTWH(20, 20, 20, 20)),
+        elevation: 2.0,
+        color: const Color(0),
+        shadowColor: const Color(0),
+      );
+      _testConflicts(layerA, layerB, 0);
     });
   });
 }

@@ -257,7 +257,10 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
 
     for (Layer child in container.depthFirstIterateChildren()) {
       if (child is PhysicalModelLayer) {
-        assert(child.lastChild?.debugCreator != child);
+        assert(
+          child.lastChild?.debugCreator != child,
+          'debugCheckElevations has either already visited this layer or failed to remove the added picture from it.',
+        );
         for (PhysicalModelLayer predecessor in physicalModelLayers) {
           if (predecessor.elevation <= child.elevation || _predecessorIsNotDirectAncestor(predecessor, child)) {
             continue;
@@ -269,6 +272,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
           );
           if (intersection != null && intersection.computeMetrics().any((ui.PathMetric metric) => metric.length > 0)) {
             addedLayers.addAll(_processConflictingPhysicalLayers(predecessor, child));
+          } else {
           }
         }
         physicalModelLayers.add(child);
