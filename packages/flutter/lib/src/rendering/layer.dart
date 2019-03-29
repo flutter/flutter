@@ -842,15 +842,19 @@ class OffsetLayer extends ContainerLayer {
   ui.Scene buildScene(ui.SceneBuilder builder) {
     List<Layer> temporaryLayers;
     assert(() {
-      temporaryLayers = debugCheckElevations();
+      if (debugCheckElevationsEnabled) {
+        temporaryLayers = debugCheckElevations();
+      }
       return true;
     }());
     updateSubtreeNeedsAddToScene();
     addToScene(builder);
     final ui.Scene scene = builder.build();
     assert(() {
-      for (Layer temporaryLayer in temporaryLayers) {
-        temporaryLayer.remove();
+      if (temporaryLayers != null) {
+        for (Layer temporaryLayer in temporaryLayers) {
+          temporaryLayer.remove();
+        }
       }
       return true;
     }());

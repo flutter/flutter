@@ -50,6 +50,13 @@ bool debugRepaintRainbowEnabled = false;
 /// Overlay a rotating set of colors when repainting text in checked mode.
 bool debugRepaintTextRainbowEnabled = false;
 
+/// Causes [PhysicalModelLayer]s to paint a red rectangle around themselves if
+/// they are painted out of order with regard to their elevation.
+///
+/// Android and iOS will show the last painted layer on top, whereas Fuchsia
+/// will show the layer with the highest elevation on top.
+bool debugCheckElevationsEnabled = false;
+
 /// The current color to overlay when repainting a layer.
 ///
 /// This is used by painting debug code that implements
