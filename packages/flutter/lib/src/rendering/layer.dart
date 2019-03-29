@@ -1206,7 +1206,9 @@ class TransformLayer extends OffsetLayer {
   void applyTransform(Layer child, Matrix4 transform) {
     assert(child != null);
     assert(transform != null);
-    _calculateLastEffectiveTransform(Offset.zero);
+    if (_lastEffectiveTransform == null) {
+      _calculateLastEffectiveTransform(Offset.zero);
+    }
     transform.multiply(_lastEffectiveTransform);
   }
 

@@ -112,6 +112,49 @@ void main() {
     expect(followerLayer.debugSubtreeNeedsAddToScene, true);
   });
 
+  test('depthFirstIterateChildren', () {
+    final ContainerLayer a = ContainerLayer();
+    final ContainerLayer b = ContainerLayer();
+    final ContainerLayer c = ContainerLayer();
+    final ContainerLayer d = ContainerLayer();
+    final ContainerLayer e = ContainerLayer();
+    final ContainerLayer f = ContainerLayer();
+    final ContainerLayer g = ContainerLayer();
+
+    final PictureLayer h = PictureLayer(Rect.zero);
+    final PictureLayer i = PictureLayer(Rect.zero);
+    final PictureLayer j = PictureLayer(Rect.zero);
+
+    // The tree is like the following:
+    //        a____
+    //       /     \
+    //      b___    c
+    //     / \  \   |
+    //    d   e  f  g
+    //   / \        |
+    //  h   i       j
+    a.append(b);
+    a.append(c);
+    b.append(d);
+    b.append(e);
+    b.append(f);
+    d.append(h);
+    d.append(i);
+    c.append(g);
+    g.append(j);
+
+    expect(
+      a.depthFirstIterateChildren(),
+      <Layer>[b, d, h, i, e, f, c, g, j],
+    );
+
+    d.remove();
+    expect(
+      a.depthFirstIterateChildren(),
+      <Layer>[b, e, f, c, g, j],
+    );
+  });
+
   void checkNeedsAddToScene(Layer layer, void mutateCallback()) {
     layer.debugMarkClean();
     layer.updateSubtreeNeedsAddToScene();
