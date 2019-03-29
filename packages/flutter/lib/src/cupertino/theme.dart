@@ -30,32 +30,59 @@ const Color _kDefaultBarDarkBackgroundColor = Color(0xB7212121);
 ///  * [CupertinoApp], which will automatically add a [CupertinoTheme].
 ///  * [Theme], a Material theme which will automatically add a [CupertinoTheme]
 ///    with a [CupertinoThemeData] derived from the Material [ThemeData].
-class CupertinoTheme extends InheritedWidget {
+class CupertinoTheme extends StatelessWidget {
   /// Creates a [CupertinoTheme] to change descendant Cupertino widgets' styling.
   ///
   /// The [data] and [child] parameters must not be null.
   const CupertinoTheme({
     Key key,
     @required this.data,
-    @required Widget child,
+    @required this.child,
   }) : assert(child != null),
        assert(data != null),
-       super(key: key, child: child);
+       super(key: key);
 
   /// The [CupertinoThemeData] styling for this theme.
   final CupertinoThemeData data;
-
-  @override
-  bool updateShouldNotify(CupertinoTheme oldWidget) => data != oldWidget.data;
 
   /// Retrieve the [CupertinoThemeData] from an ancestor [CupertinoTheme] widget.
   ///
   /// Returns a default [CupertinoThemeData] if no [CupertinoTheme] widgets
   /// exist in the ancestry tree.
   static CupertinoThemeData of(BuildContext context) {
-    final CupertinoTheme theme = context.inheritFromWidgetOfExactType(CupertinoTheme);
-    return theme?.data ?? const CupertinoThemeData();
+    final _InheritedTheme _inheritedTheme = context.inheritFromWidgetOfExactType(_InheritedTheme);
+    return _inheritedTheme.theme?.data ?? const CupertinoThemeData();
   }
+
+  /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return  _InheritedTheme(
+      theme: this,
+      child: IconTheme(
+        data: data.IconTheme,
+        child: child,
+      )
+    );
+  }
+}
+
+class _InheritedTheme extends InheritedWidget {
+  const _InheritedTheme({
+    Key key,
+    @required this.theme,
+    @required Widget child,
+  }) : assert(theme != null),
+       super(key: key, child: child);
+
+  final CupertinoTheme theme;
+
+  @override
+  bool updateShouldNotify(_InheritedTheme old) => theme.data != old.theme.data;
 }
 
 /// Styling specifications for a [CupertinoTheme].
@@ -84,6 +111,7 @@ class CupertinoThemeData extends Diagnosticable {
     Color primaryColor,
     Color primaryContrastingColor,
     CupertinoTextThemeData textTheme,
+    IconThemeData iconTheme,
     Color barBackgroundColor,
     Color scaffoldBackgroundColor,
   }) : this.raw(
@@ -91,6 +119,7 @@ class CupertinoThemeData extends Diagnosticable {
         primaryColor,
         primaryContrastingColor,
         textTheme,
+        iconTheme,
         barBackgroundColor,
         scaffoldBackgroundColor,
       );
@@ -105,6 +134,7 @@ class CupertinoThemeData extends Diagnosticable {
     this._primaryColor,
     this._primaryContrastingColor,
     this._textTheme,
+    this._iconTheme,
     this._barBackgroundColor,
     this._scaffoldBackgroundColor,
   );
@@ -164,6 +194,16 @@ class CupertinoThemeData extends Diagnosticable {
   }
   final CupertinoTextThemeData _textTheme;
 
+  /// Icon theme used by Cupertino widgets.
+  ///
+  /// Derived from [brightness] if unspecified.
+  IconThemeData get iconTheme {
+    return _iconTheme ?? IconThemeData(
+      color: _isLight ? CupertinoColors.black : CupertinoColors.white
+      );
+  }
+
+  final IconThemeData _iconTheme;
   /// Background color of the top nav bar and bottom tab bar.
   ///
   /// Defaults to a light gray or a dark gray translucent color depending
@@ -194,6 +234,7 @@ class CupertinoThemeData extends Diagnosticable {
       _primaryColor,
       _primaryContrastingColor,
       _textTheme,
+      _iconTheme,
       _barBackgroundColor,
       _scaffoldBackgroundColor,
     );
@@ -243,6 +284,7 @@ class _NoDefaultCupertinoThemeData extends CupertinoThemeData {
     this.primaryColor,
     this.primaryContrastingColor,
     this.textTheme,
+    this.iconTheme,
     this.barBackgroundColor,
     this.scaffoldBackgroundColor,
   ) : super.raw(
@@ -250,6 +292,7 @@ class _NoDefaultCupertinoThemeData extends CupertinoThemeData {
         primaryColor,
         primaryContrastingColor,
         textTheme,
+        iconTheme,
         barBackgroundColor,
         scaffoldBackgroundColor,
       );
@@ -262,6 +305,8 @@ class _NoDefaultCupertinoThemeData extends CupertinoThemeData {
   final Color primaryContrastingColor;
   @override
   final CupertinoTextThemeData textTheme;
+  @override
+  final IconThemeData iconTheme;
   @override
   final Color barBackgroundColor;
   @override
