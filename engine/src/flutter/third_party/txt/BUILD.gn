@@ -123,6 +123,8 @@ source_set("txt") {
     deps += [ "$flutter_root/fml" ]
   } else if (is_android) {
     sources += [ "src/txt/platform_android.cc" ]
+  } else if (is_linux) {
+    sources += [ "src/txt/platform_linux.cc" ]
   } else {
     sources += [ "src/txt/platform.cc" ]
   }
