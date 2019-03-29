@@ -60,7 +60,7 @@ class VideoCard extends StatelessWidget {
 
     void pushFullScreenWidget() {
       final TransitionRoute<void> route = PageRouteBuilder<void>(
-        settings: RouteSettings(name: title, isInitialRoute: false),
+        settings: RouteSettings(name: title),
         pageBuilder: fullScreenRoutePageBuilder,
       );
 
