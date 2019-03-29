@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
+import 'package:flutter_tools/src/version.dart';
 import 'package:meta/meta.dart';
 import 'package:quiver/strings.dart';
 
@@ -464,6 +465,11 @@ abstract class FlutterCommand extends Command<void> {
     }
   }
 
+  /// Whether this feature should not be usable on stable branches.
+  ///
+  /// Defaults to false, meaning it is usable.
+  bool get isExperimental => false;
+
   /// Additional usage values to be sent with the usage ping.
   Future<Map<String, String>> get usageValues async => const <String, String>{};
 
@@ -635,6 +641,12 @@ abstract class FlutterCommand extends Command<void> {
   @protected
   @mustCallSuper
   Future<void> validateCommand() async {
+    // If we're on a stable branch, then don't allow the usage of
+    // "experimental" features.
+    if (isExperimental && FlutterVersion.instance.getBranchName() == 'stable') {
+      throwToolExit('Experimental feature $name is not supported on stable branches');
+    }
+
     if (_requiresPubspecYaml && !PackageMap.isUsingCustomPackagesPath) {
       // Don't expect a pubspec.yaml file if the user passed in an explicit .packages file path.
       if (!fs.isFileSync('pubspec.yaml')) {

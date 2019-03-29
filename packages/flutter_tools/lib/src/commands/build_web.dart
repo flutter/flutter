@@ -32,6 +32,9 @@ class BuildWebCommand extends BuildSubCommand {
   bool get hidden => true;
 
   @override
+  bool get isExperimental => true;
+
+  @override
   final String description = '(EXPERIMENTAL) build a web application bundle.';
 
   @override
