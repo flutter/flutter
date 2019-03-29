@@ -80,8 +80,8 @@ source_set("flow") {
     ]
 
     public_deps += [
-      "//sdk/fidl/fuchsia.ui.scenic",
       "//garnet/public/lib/ui/scenic/cpp",
+      "//sdk/fidl/fuchsia.ui.scenic",
       "//topaz/public/dart-pkg/zircon",
     ]
 
@@ -94,18 +94,18 @@ executable("flow_unittests") {
 
   sources = [
     "flow_run_all_unittests.cc",
-    "flow_test_utils.h",
     "flow_test_utils.cc",
+    "flow_test_utils.h",
+    "layers/performance_overlay_layer_unittests.cc",
     "matrix_decomposition_unittests.cc",
     "raster_cache_unittests.cc",
-    "layers/performance_overlay_layer_unittests.cc",
   ]
 
   deps = [
     ":flow",
     "$flutter_root/fml",
-    "//third_party/googletest:gtest",
     "//third_party/dart/runtime:libdart_jit",  # for tracing
+    "//third_party/googletest:gtest",
     "//third_party/skia",
   ]
 }

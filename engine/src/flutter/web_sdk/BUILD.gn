@@ -28,8 +28,8 @@ web_ui_sources = [
 
 group("web_sdk") {
   deps = [
-    ":generate_web_summary_sdk",
     ":flutter_dartdevc_kernel_sdk",
+    ":generate_web_summary_sdk",
   ]
 }
 
@@ -37,7 +37,7 @@ copy("web_ui_sources") {
   sources = web_ui_sources
 
   outputs = [
-    "$root_out_dir/flutter_web_sdk/lib/ui/{{source_file_part}}"
+    "$root_out_dir/flutter_web_sdk/lib/ui/{{source_file_part}}",
   ]
 }
 
@@ -47,7 +47,7 @@ copy("web_ui_library") {
   ]
 
   outputs = [
-    "$root_out_dir/flutter_web_sdk/{{source_file_part}}"
+    "$root_out_dir/flutter_web_sdk/{{source_file_part}}",
   ]
 }
 
@@ -70,8 +70,8 @@ prebuilt_dart_action("generate_web_summary_sdk") {
   ]
 
   deps = [
-    ":web_ui_sources",
     ":web_ui_library",
+    ":web_ui_sources",
     "//third_party/dart:create_sdk",
   ]
 }
