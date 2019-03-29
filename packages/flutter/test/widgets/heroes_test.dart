@@ -1448,7 +1448,7 @@ void main() {
       routes: routes,
       initialRoute: '/two',
     ));
-    expect(find.text('two'), findsOneWidget);
+    expect(find.text('three'), findsOneWidget);
   });
 
   testWidgets('Can push/pop on outer Navigator if nested Navigator contains Heroes', (WidgetTester tester) async {

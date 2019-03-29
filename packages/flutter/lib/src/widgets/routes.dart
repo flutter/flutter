@@ -31,17 +31,15 @@ abstract class OverlayRoute<T> extends Route<T> {
   /// Subclasses should override this getter to return the builders for the overlay.
   Iterable<OverlayEntry> createOverlayEntries();
 
-  /// The entries this route has placed in the overlay.
   @override
   List<OverlayEntry> get overlayEntries => _overlayEntries;
   final List<OverlayEntry> _overlayEntries = <OverlayEntry>[];
 
   @override
-  void install(OverlayEntry insertionPoint) {
+  void install({ bool isInitialRoute = false }) {
     assert(_overlayEntries.isEmpty);
     _overlayEntries.addAll(createOverlayEntries());
-    navigator.overlay?.insertAll(_overlayEntries, above: insertionPoint);
-    super.install(insertionPoint);
+    super.install(isInitialRoute: isInitialRoute);
   }
 
   /// Controls whether [didPop] calls [NavigatorState.finalizeRoute].
@@ -99,6 +97,10 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   /// the opaque route will not be built to save resources.
   bool get opaque;
 
+  // This ensures that if we got to the dismissed state while still current,
+  // we will still be disposed when we are eventually popped.
+  //
+  // This situation arises when dealing with the Cupertino dismiss gesture.
   @override
   bool get finishedWhenPopped => _controller.status == AnimationStatus.dismissed;
 
@@ -123,15 +125,23 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   /// Called to create the animation controller that will drive the transitions to
   /// this route from the previous one, and back to the previous route from this
   /// one.
-  AnimationController createAnimationController() {
+  ///
+  /// The `isInitialRoute` argument indicates whether this route is part of the
+  /// first batch of routes being pushed onto the [Navigator]. The default
+  /// implementation will return an already-completed [AnimationController]
+  /// when this is true.
+  AnimationController createAnimationController({ bool isInitialRoute = false }) {
     assert(!_transitionCompleter.isCompleted, 'Cannot reuse a $runtimeType after disposing it.');
     final Duration duration = transitionDuration;
     assert(duration != null && duration >= Duration.zero);
-    return AnimationController(
+    final AnimationController result = AnimationController(
       duration: duration,
       debugLabel: debugLabel,
       vsync: navigator,
     );
+    if (isInitialRoute)
+      result.value = 1.0;
+    return result;
   }
 
   /// Called to create the animation that exposes the current progress of
@@ -171,13 +181,16 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   }
 
   @override
-  void install(OverlayEntry insertionPoint) {
+  void install({ bool isInitialRoute = false }) {
     assert(!_transitionCompleter.isCompleted, 'Cannot install a $runtimeType after disposing it.');
-    _controller = createAnimationController();
+    _controller = createAnimationController(isInitialRoute: isInitialRoute);
     assert(_controller != null, '$runtimeType.createAnimationController() returned null.');
     _animation = createAnimation();
     assert(_animation != null, '$runtimeType.createAnimation() returned null.');
-    super.install(insertionPoint);
+    super.install(isInitialRoute: isInitialRoute);
+    if (_animation.status == AnimationStatus.completed && overlayEntries.isNotEmpty) {
+      overlayEntries.first.opaque = opaque;
+    }
   }
 
   @override
@@ -506,7 +519,7 @@ mixin LocalHistoryRoute<T> on Route<T> {
   Future<RoutePopDisposition> willPop() async {
     if (willHandlePopInternally)
       return RoutePopDisposition.pop;
-    return await super.willPop();
+    return super.willPop();
   }
 
   @override
@@ -891,8 +904,8 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   final FocusScopeNode focusScopeNode = FocusScopeNode();
 
   @override
-  void install(OverlayEntry insertionPoint) {
-    super.install(insertionPoint);
+  void install({ bool isInitialRoute = false }) {
+    super.install(isInitialRoute: isInitialRoute);
     _animationProxy = ProxyAnimation(super.animation);
     _secondaryAnimationProxy = ProxyAnimation(super.secondaryAnimation);
   }

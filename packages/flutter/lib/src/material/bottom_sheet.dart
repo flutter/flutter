@@ -275,7 +275,8 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
   AnimationController _animationController;
 
   @override
-  AnimationController createAnimationController() {
+  AnimationController createAnimationController({ bool isInitialRoute = false }) {
+    assert(!isInitialRoute);
     assert(_animationController == null);
     _animationController = BottomSheet.createAnimationController(navigator.overlay);
     return _animationController;
