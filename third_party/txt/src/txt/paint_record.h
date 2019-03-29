@@ -39,14 +39,16 @@ class PaintRecord {
               sk_sp<SkTextBlob> text,
               SkFontMetrics metrics,
               size_t line,
-              double run_width,
+              double x_start,
+              double x_end,
               bool is_ghost);
 
   PaintRecord(TextStyle style,
               sk_sp<SkTextBlob> text,
               SkFontMetrics metrics,
               size_t line,
-              double run_width,
+              double x_start,
+              double x_end,
               bool is_ghost);
 
   PaintRecord(PaintRecord&& other);
@@ -65,7 +67,9 @@ class PaintRecord {
 
   size_t line() const { return line_; }
 
-  double GetRunWidth() const { return run_width_; }
+  double x_start() const { return x_start_; }
+  double x_end() const { return x_end_; }
+  double GetRunWidth() const { return x_end_ - x_start_; }
 
   bool isGhost() const { return is_ghost_; }
 
@@ -78,7 +82,8 @@ class PaintRecord {
   // FontMetrics stores the measurements of the font used.
   SkFontMetrics metrics_;
   size_t line_;
-  double run_width_ = 0.0f;
+  double x_start_ = 0.0f;
+  double x_end_ = 0.0f;
   // 'Ghost' runs represent trailing whitespace. 'Ghost' runs should not have
   // decorations painted on them and do not impact layout of visible glyphs.
   bool is_ghost_ = false;

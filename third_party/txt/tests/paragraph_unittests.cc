@@ -2914,10 +2914,10 @@ TEST_F(ParagraphTest, FontFallbackParagraph) {
 
   ASSERT_EQ(paragraph->records_.size(), 5ull);
   ASSERT_DOUBLE_EQ(paragraph->records_[0].GetRunWidth(), 64.19921875);
-  ASSERT_DOUBLE_EQ(paragraph->records_[1].GetRunWidth(), 167.1171875);
-  ASSERT_DOUBLE_EQ(paragraph->records_[2].GetRunWidth(), 167.1171875);
-  ASSERT_DOUBLE_EQ(paragraph->records_[3].GetRunWidth(), 90.24609375);
-  ASSERT_DOUBLE_EQ(paragraph->records_[4].GetRunWidth(), 90.24609375);
+  ASSERT_DOUBLE_EQ(paragraph->records_[1].GetRunWidth(), 139.1171875);
+  ASSERT_DOUBLE_EQ(paragraph->records_[2].GetRunWidth(), 28);
+  ASSERT_DOUBLE_EQ(paragraph->records_[3].GetRunWidth(), 62.24609375);
+  ASSERT_DOUBLE_EQ(paragraph->records_[4].GetRunWidth(), 28);
   // When a different font is resolved, then the metrics are different.
   ASSERT_TRUE(paragraph->records_[2].metrics().fTop -
                   paragraph->records_[4].metrics().fTop !=
