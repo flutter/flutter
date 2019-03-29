@@ -12,9 +12,8 @@ void main() {
   final ThrowingHttpClient httpClient = ThrowingHttpClient();
   final HttpOverrides overrides = ProvidedHttpOverrides(httpClient);
   HttpOverrides.global = overrides;
-  final ZoneSpecification specification = ZoneSpecification(handleUncaughtError:
-      (Zone zone, ZoneDelegate delegate, Zone parent, Object error,
-          StackTrace stackTrace) {
+  final ZoneSpecification specification = ZoneSpecification(
+    handleUncaughtError:(Zone zone, ZoneDelegate delegate, Zone parent, Object error, StackTrace stackTrace) {
     FlutterError.reportError(FlutterErrorDetails(
       exception: error,
       context: 'In the Zone handleUncaughtError handler',
@@ -26,7 +25,7 @@ void main() {
     completer.completeError(Error());
     return completer.future;
   });
-  Zone.current.fork(specification: specification).run(() {
+  Zone.current.fork(specification: specification).run<void>(() {
     runApp(ImageLoader());
   });
 }
@@ -42,7 +41,7 @@ class _ImageLoaderState extends State<ImageLoader> {
   @override
   void initState() {
     // This is not an image, but we don't care since we're using a faked
-    // http client
+    // http client.
     final NetworkImage image = NetworkImage('https://github.com/flutter/flutter');
     final ImageStream stream = image.resolve(ImageConfiguration.empty);
     stream.addListener((ImageInfo info, bool syncCall) {}, onError: (dynamic error, StackTrace stackTrace) {

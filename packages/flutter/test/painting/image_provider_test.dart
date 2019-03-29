@@ -92,7 +92,7 @@ void main() {
   test('ImageProvider.resolve sync errors will be caught', () async {
     bool uncaught = false;
     final Zone testZone = Zone.current.fork(specification: ZoneSpecification(
-      handleUncaughtError: (_, __, ___, ____, _____) {
+      handleUncaughtError: (Zone zone, ZoneDelegate zoneDelegate, Zone parent, Object error, StackTrace stackTrace) {
         uncaught = true;
       }
     ));
@@ -100,7 +100,7 @@ void main() {
       final ImageProvider imageProvider = LoadErrorImageProvider();
       final Completer<bool> caughtError = Completer<bool>();
       FlutterError.onError = (FlutterErrorDetails details) {
-        caughtError.complete(false);
+        throw Error();
       };
       final ImageStream result = imageProvider.resolve(ImageConfiguration.empty);
       result.addListener((ImageInfo info, bool syncCall) {
@@ -108,7 +108,6 @@ void main() {
         caughtError.complete(true);
       });
       expect(await caughtError.future, true);
-      print('done');
     });
     expect(uncaught, false);
   });
@@ -124,7 +123,7 @@ void main() {
       final ImageProvider imageProvider = LoadErrorCompleterImageProvider();
       final Completer<bool> caughtError = Completer<bool>();
       FlutterError.onError = (FlutterErrorDetails details) {
-        caughtError.complete(false);
+        throw Error();
       };
       final ImageStream result = imageProvider.resolve(ImageConfiguration.empty);
       result.addListener((ImageInfo info, bool syncCall) {
@@ -147,7 +146,7 @@ void main() {
       final ImageProvider imageProvider = LoadErrorCompleterImageProvider();
       final Completer<bool> caughtError = Completer<bool>();
       FlutterError.onError = (FlutterErrorDetails details) {
-        caughtError.complete(false);
+        throw Error();
       };
       final ImageStream result = imageProvider.resolve(ImageConfiguration.empty);
       result.addListener((ImageInfo info, bool syncCall) {
@@ -168,7 +167,7 @@ void main() {
       const ImageProvider imageProvider = NetworkImage('asdasdasdas');
       final Completer<bool> caughtError = Completer<bool>();
       FlutterError.onError = (FlutterErrorDetails details) {
-        caughtError.complete(false);
+        throw Error();
       };
       final ImageStream result = imageProvider.resolve(ImageConfiguration.empty);
       result.addListener((ImageInfo info, bool syncCall) {
@@ -176,14 +175,13 @@ void main() {
         caughtError.complete(true);
       });
       expect(await caughtError.future, true);
-    }, createHttpClient: (_) => httpClientMock, zoneSpecification: ZoneSpecification(
-      handleUncaughtError: (_, __, ___, ____, _____) {
+    }, createHttpClient: (SecurityContext context) => httpClientMock, zoneSpecification: ZoneSpecification(
+      handleUncaughtError: (Zone zone, ZoneDelegate zoneDelegate, Zone parent, Object error, StackTrace stackTrace) {
         uncaught = true;
       }
     ));
     expect(uncaught, false);
   });
 }
-
 
 class HttpClientMock extends Mock implements HttpClient {}
