@@ -984,6 +984,14 @@ class _RenderListTile extends RenderBox {
     final double tileWidth = looseConstraints.maxWidth;
     final Size leadingSize = _layoutBox(leading, iconConstraints);
     final Size trailingSize = _layoutBox(trailing, iconConstraints);
+    assert(
+      tileWidth != leadingSize.width,
+      'Leading widget consumes entire tile width. Please use a sized widget.'
+    );
+    assert(
+      tileWidth != trailingSize.width,
+      'Trailing widget consumes entire tile width. Please use a sized widget.'
+    );
 
     final double titleStart = hasLeading
       ? math.max(_minLeadingWidth, leadingSize.width) + _horizontalTitleGap
