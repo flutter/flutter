@@ -158,14 +158,22 @@ void main() {
   });
 
   group('Experimental commands', () {
-    final MockVersion mockVersion = MockVersion();
+    final MockVersion stableVersion = MockVersion();
+    final MockVersion betaVersion =MockVersion();
     final FakeCommand fakeCommand = FakeCommand();
-    when(mockVersion.getBranchName()).thenReturn('stable');
+    when(stableVersion.getBranchName()).thenReturn('stable');
+    when(betaVersion.getBranchName()).thenReturn('beta');
 
     testUsingContext('Can be disabled on stable branch', () async {
       expect(() => fakeCommand.run(), throwsA(isA<ToolExit>()));
     }, overrides: <Type, Generator>{
-      FlutterVersion: () => mockVersion,
+      FlutterVersion: () => stableVersion,
+    });
+
+    testUsingContext('Works normally on regular branches', () async {
+      expect(fakeCommand.run(), completes);
+    }, overrides: <Type, Generator>{
+      FlutterVersion: () => betaVersion,
     });
   });
 }
