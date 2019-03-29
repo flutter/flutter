@@ -76,7 +76,7 @@ typedef ScrollableWidgetBuilder = Widget Function(
 ///      ),
 ///    );
 ///  }
-///}
+/// }
 /// ```
 /// {@end-tool}
 class DraggableScrollableSheet extends StatefulWidget {
