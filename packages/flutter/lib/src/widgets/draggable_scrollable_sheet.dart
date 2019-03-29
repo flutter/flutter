@@ -14,23 +14,6 @@ import 'scroll_position.dart';
 import 'scroll_position_with_single_context.dart';
 import 'scroll_simulation.dart';
 
-/// The return signature of [_ApplyUserOffsetToSize].
-class _TopAndDeltaRemainder {
-  const _TopAndDeltaRemainder({@required this.top, @required this.hasRemainder})
-      : assert(top != null),
-        assert(hasRemainder != null);
-
-  /// Whether the operation consumed all of the delta or not.
-  final bool hasRemainder;
-
-  /// The new top percentage after the delta is applied.
-  final double top;
-}
-
-/// The signature for a method that takes a delta from a scroll controller
-/// and converts it to the proper ratio for the current layout constraints.
-typedef _ApplyUserOffsetToSize = _TopAndDeltaRemainder Function(double delta);
-
 /// The signature of a method that provides a [BuildContext] and
 /// [ScrollController] for building a widget that may overflow the draggable
 /// [Axis] of the containing [DraggableScrollSheet].
@@ -96,69 +79,60 @@ class DraggableScrollableSheet extends StatefulWidget {
   final ScrollableWidgetBuilder builder;
 
   @override
-  _DraggableScrollableSheetState createState() =>
-      _DraggableScrollableSheetState();
+  _DraggableScrollableSheetState createState() => _DraggableScrollableSheetState();
 }
 
 class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
   _DraggableScrollableSheetScrollController _scrollController;
   double _childSizePercentage;
-  BoxConstraints _constraints = const BoxConstraints.expand();
+  double _maxSize;
 
   @override
   void initState() {
     super.initState();
     _scrollController = _DraggableScrollableSheetScrollController(
-      context: context,
-      initialTop: widget.initialChildSize,
-      minTop: widget.minChildSize,
-      maxTop: widget.maxChildSize,
-      applyUserOffsetToSize: _setHeight,
+      extent: () => _maxSize,
+      maxExtent: widget.maxChildSize,
+      minExtent: widget.minChildSize,
+      occupiedExtent: widget.initialChildSize,
+      extentListener: _setExtent,
     );
     _childSizePercentage = widget.initialChildSize;
+    _maxSize = double.infinity;
   }
 
-  _TopAndDeltaRemainder _setHeight(double delta) {
-    assert(delta != null);
-    assert(_constraints != null);
-    final double percentage = delta / _constraints.biggest.height;
-    final double sizePercentage = _childSizePercentage - percentage;
-    final double newSizePercentage = sizePercentage.clamp(
-      widget.minChildSize,
-      widget.maxChildSize,
-    );
+  void _setExtent() {
     setState(() {
-      _childSizePercentage = newSizePercentage;
+      _childSizePercentage = _scrollController.occupiedExtent;
     });
-    return _TopAndDeltaRemainder(
-      top: _childSizePercentage,
-      hasRemainder: sizePercentage - newSizePercentage > 0,
-    );
   }
 
   @override
   Widget build(BuildContext context) {
-    FractionallySizedBox box;
-    switch (widget.axis) {
-      case Axis.vertical:
-        box = FractionallySizedBox(
-          heightFactor: _childSizePercentage,
-          child: widget.builder(context, _scrollController),
-          alignment: widget.alignment,
-        );
-        break;
-      case Axis.horizontal:
-        box = FractionallySizedBox(
-          widthFactor: _childSizePercentage,
-          child: widget.builder(context, _scrollController),
-          alignment: widget.alignment,
-        );
-        break;
-    }
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
-        _constraints = constraints;
-        return SizedBox.expand(child: box);
+        switch (widget.axis) {
+          case Axis.vertical:
+            _maxSize = widget.maxChildSize * constraints.biggest.height;
+            return SizedBox.expand(
+              child: FractionallySizedBox(
+                heightFactor: _childSizePercentage,
+                child: widget.builder(context, _scrollController),
+                alignment: widget.alignment,
+              ),
+            );
+            break;
+          case Axis.horizontal:
+            _maxSize = widget.maxChildSize * constraints.biggest.width;
+            return SizedBox.expand(
+              child: FractionallySizedBox(
+                widthFactor: _childSizePercentage,
+                child: widget.builder(context, _scrollController),
+                alignment: widget.alignment,
+              ),
+            );
+            break;
+        }
       },
     );
   }
@@ -177,7 +151,7 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
 /// of its container, this controller will allow the sheet to both be dragged to
 /// fill the container and then scroll the child content.
 ///
-/// While the [top] value is between [minTop] and [maxTop], scroll events will
+/// While the [occupiedExtent] value is between [minTop] and [maxTop], scroll events will
 /// drive [top]. Once it has reached [minTop] or [maxTop], scroll events will
 /// drive [offset]. The [top] value is guaranteed to be clamped between
 /// [minTop] and [maxTop]. The owner must manage the controllers lifetime and
@@ -193,29 +167,32 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
 class _DraggableScrollableSheetScrollController extends ScrollController {
   _DraggableScrollableSheetScrollController({
     double initialScrollOffset = 0.0,
-    this.initialTop = 0.5,
     String debugLabel,
-    @required BuildContext context,
-    @required this.maxTop,
-    this.minTop = 0.0,
-    @required this.applyUserOffsetToSize,
-  })  : assert(initialTop != null),
-        assert(context != null),
-        assert(maxTop != null),
-        assert(minTop != null),
-        assert(0.0 < minTop &&
-            minTop <= initialTop &&
-            initialTop <= maxTop &&
-            maxTop <= 1),
-        assert(applyUserOffsetToSize != null),
-        super(debugLabel: debugLabel, initialScrollOffset: initialScrollOffset);
+    @required this.extent,
+    @required this.minExtent,
+    @required this.maxExtent,
+    @required double occupiedExtent,
+    @required VoidCallback extentListener,
+  }) : assert(minExtent != null),
+       assert(maxExtent != null),
+       assert(extent != null),
+       assert(occupiedExtent != null),
+       assert(extentListener != null),
+       assert(minExtent >= 0),
+       assert(maxExtent >= 1),
+       assert(minExtent <= occupiedExtent && occupiedExtent <= maxExtent),
+       _extentValueNotifier = ValueNotifier<double>(occupiedExtent)..addListener(extentListener),
+       super(
+         debugLabel: debugLabel,
+         initialScrollOffset: initialScrollOffset,
+       );
 
-  final _ApplyUserOffsetToSize applyUserOffsetToSize;
+  final ValueNotifier<double> _extentValueNotifier;
+  final ValueGetter<double> extent;
+  final double minExtent;
+  final double maxExtent;
 
-  /// The position that was originally requested as the top for this sheet.
-  final double initialTop;
-  final double minTop;
-  final double maxTop;
+  double get occupiedExtent => _extentValueNotifier.value;
 
   @override
   _DraggableScrollableSheetScrollPosition createScrollPosition(
@@ -227,17 +204,20 @@ class _DraggableScrollableSheetScrollController extends ScrollController {
       physics: physics,
       context: context,
       oldPosition: oldPosition,
-      minTop: minTop,
-      maxTop: maxTop,
-      top: initialTop,
-      applyUserOffsetToSize: applyUserOffsetToSize,
+      extentValueNotifier: _extentValueNotifier,
+      extent: extent,
+      minExtent: minExtent,
+      maxExtent: maxExtent,
     );
   }
 
   @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
-    description.add('initialTop: $initialTop');
+    description.add('minExtent: $minExtent');
+    description.add('occupiedExtent: $occupiedExtent');
+    description.add('maxExtent: $maxExtent');
+    description.add('extent: ${extent()}');
   }
 }
 
@@ -269,14 +249,16 @@ class _DraggableScrollableSheetScrollPosition
     bool keepScrollOffset = true,
     ScrollPosition oldPosition,
     String debugLabel,
-    this.minTop = 0.0,
-    @required this.maxTop,
-    @required this.top,
-    @required this.applyUserOffsetToSize,
-  })  : assert(applyUserOffsetToSize != null),
-        assert(minTop != null),
-        assert(maxTop != null),
-        assert(top != null),
+    @required this.extentValueNotifier,
+    @required this.extent,
+    @required this.minExtent,
+    @required this.maxExtent,
+  })  : assert(minExtent != null),
+        assert(maxExtent != null),
+        assert(minExtent >= 0),
+        assert(maxExtent <= 1),
+        assert(minExtent < maxExtent),
+        assert(extent != null),
         super(
           physics: physics,
           context: context,
@@ -286,33 +268,25 @@ class _DraggableScrollableSheetScrollPosition
           debugLabel: debugLabel,
         );
 
-  final _ApplyUserOffsetToSize applyUserOffsetToSize;
-
+  final ValueNotifier<double> extentValueNotifier;
   VoidCallback _dragCancelCallback;
-
-  final double minTop;
-  final double maxTop;
-  double top;
-
-  bool _addDeltaToTop(double delta) {
-    final _TopAndDeltaRemainder newDelta = applyUserOffsetToSize(delta);
-    assert(minTop <= newDelta.top && newDelta.top <= maxTop);
-    top = newDelta.top;
-    return newDelta.hasRemainder;
-  }
-
-  bool get topIsAtMax => top >= maxTop;
+  final ValueGetter<double> extent;
+  final double minExtent;
+  final double maxExtent;
+  bool get isAtMin => minExtent >= extentValueNotifier.value;
+  bool get isAtMax => maxExtent <= extentValueNotifier.value;
   bool get listIsAtTop => pixels <= 0.0;
 
   @override
   void applyUserOffset(double delta) {
-    // If we haven't gotten the top of the widget to the maximum top,
-    // or we have gotten it there but the list is already scrolled up to the top.
-    // This is called much more frequently where topIsAtMax, so check that first.
-    if (!topIsAtMax || (topIsAtMax && listIsAtTop)) {
-      if (_addDeltaToTop(delta)) {
-        super.applyUserOffset(delta);
-      }
+    if (listIsAtTop &&
+        !(isAtMin || isAtMax) ||
+         (isAtMin && delta < 0) ||
+         (isAtMax && delta > 0)) {
+      extentValueNotifier.value = (extentValueNotifier.value - delta / extent()).clamp(
+        minExtent,
+        maxExtent,
+      );
     } else {
       super.applyUserOffset(delta);
     }
@@ -321,8 +295,8 @@ class _DraggableScrollableSheetScrollPosition
   @override
   void goBallistic(double velocity) {
     if (velocity == 0.0 ||
-        (velocity < 0.0 && !listIsAtTop) ||
-        (velocity > 0.0 && topIsAtMax)) {
+       (velocity < 0.0 && !listIsAtTop) ||
+       (velocity > 0.0 && isAtMax)) {
       super.goBallistic(velocity);
       return;
     }
@@ -330,44 +304,35 @@ class _DraggableScrollableSheetScrollPosition
     _dragCancelCallback?.call();
     _dragCancelCallback = null;
 
-    Simulation simulation = physics.createBallisticSimulation(this, velocity);
-    if (simulation == null) {
-      // On Android, physics will think we have nothing left to scroll
-      // and fail to give us a physical simulation - but we want one to finish
-      // scrolling the top down to minTop.
-      if (top != minTop) {
-        simulation = ClampingScrollSimulation(
-          position: pixels + velocity,
-          velocity: velocity,
-          tolerance: physics.tolerance,
-        );
-      } else {
-        goIdle();
-        return;
-      }
-    }
+    // The iOS bouncing simulation just isn't right here - once we delegate
+    // the ballistic back to the ScrollView, it will use the right simulation.
+    final Simulation simulation = ClampingScrollSimulation(
+      position: extentValueNotifier.value,
+      velocity: velocity,
+      tolerance: physics.tolerance,
+    );
 
-    final AnimationController ballisticController =
-        AnimationController.unbounded(
+    final AnimationController ballisticController = AnimationController.unbounded(
       debugLabel: '$runtimeType',
       vsync: context.vsync,
     );
-    void _tickUp() {
-      if (_addDeltaToTop(-ballisticController.value) || topIsAtMax) {
-        ballisticController.stop();
-        super.goBallistic(velocity);
-      }
-    }
-
-    void _tickDown() {
-      if (_addDeltaToTop(ballisticController.value.abs()) || listIsAtTop) {
+    double lastDelta = 0;
+    void _tick() {
+      final double delta = ballisticController.value / extent();
+      extentValueNotifier.value = (extentValueNotifier.value + delta - lastDelta).clamp(
+        minExtent,
+        maxExtent,
+      );
+      lastDelta = delta;
+      if ((velocity > 0 && isAtMax) || (velocity < 0 && isAtMin)) {
+        velocity = ballisticController.velocity;
         ballisticController.stop();
         super.goBallistic(velocity);
       }
     }
 
     ballisticController
-      ..addListener(velocity > 0.0 ? _tickUp : _tickDown)
+      ..addListener(_tick)
       ..animateWith(simulation).whenCompleteOrCancel(
         ballisticController.dispose,
       );

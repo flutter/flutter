@@ -93,16 +93,6 @@ void main() {
         expect(find.text('TapHere'), findsOneWidget);
         await tester.tap(find.text('TapHere'));
         expect(taps, 1);
-        expect(find.text('Item 1'), findsNothing);
-        expect(find.text('Item 21'), findsOneWidget);
-        expect(find.text('Item 36'), findsOneWidget);
-
-        // First drag will get us back to the top of the list.
-        await tester.dragFrom(const Offset(20, 20), const Offset(0, 325));
-        await tester.pumpAndSettle();
-        expect(find.text('TapHere'), findsOneWidget);
-        await tester.tap(find.text('TapHere'));
-        expect(taps, 1);
         expect(find.text('Item 1'), findsOneWidget);
         expect(find.text('Item 21'), findsOneWidget);
         expect(find.text('Item 36'), findsOneWidget);
@@ -116,6 +106,29 @@ void main() {
         expect(find.text('Item 36'), findsNothing);
       });
 
+      testWidgets('Can be flung up gently', (WidgetTester tester) async {
+        int taps = 0;
+        await tester.pumpWidget(_boilerplate(() => taps++));
+
+        expect(find.text('TapHere'), findsOneWidget);
+        await tester.tap(find.text('TapHere'));
+        expect(taps, 1);
+        expect(find.text('Item 1'), findsOneWidget);
+        expect(find.text('Item 21'), findsOneWidget);
+        expect(find.text('Item 36'), findsNothing);
+        expect(find.text('Item 70'), findsNothing);
+
+        await tester.fling(find.text('Item 1'), const Offset(0, -200), 350);
+        await tester.pumpAndSettle();
+        expect(find.text('TapHere'), findsOneWidget);
+        await tester.tap(find.text('TapHere'));
+        expect(taps, 2);
+        expect(find.text('Item 1'), findsOneWidget);
+        expect(find.text('Item 21'), findsOneWidget);
+        expect(find.text('Item 36'), findsOneWidget);
+        expect(find.text('Item 70'), findsNothing);
+      });
+
       testWidgets('Can be flung up', (WidgetTester tester) async {
         int taps = 0;
         await tester.pumpWidget(_boilerplate(() => taps++));
@@ -125,7 +138,7 @@ void main() {
         expect(taps, 1);
         expect(find.text('Item 1'), findsOneWidget);
         expect(find.text('Item 21'), findsOneWidget);
-        expect(find.text('Item 80'), findsNothing);
+        expect(find.text('Item 70'), findsNothing);
 
         await tester.fling(find.text('Item 1'), const Offset(0, -200), 2000);
         await tester.pumpAndSettle();
@@ -134,7 +147,7 @@ void main() {
         expect(taps, 1);
         expect(find.text('Item 1'), findsNothing);
         expect(find.text('Item 21'), findsNothing);
-        expect(find.text('Item 80'), findsOneWidget);
+        expect(find.text('Item 70'), findsOneWidget);
       });
 
       testWidgets('Can be flung down when not full height', (WidgetTester tester) async {
@@ -159,7 +172,7 @@ void main() {
         expect(taps, 1);
         expect(find.text('Item 1'), findsOneWidget);
         expect(find.text('Item 21'), findsOneWidget);
-        expect(find.text('Item 80'), findsNothing);
+        expect(find.text('Item 70'), findsNothing);
 
         await tester.fling(find.text('Item 1'), const Offset(0, -200), 2000);
         await tester.pumpAndSettle();
@@ -168,16 +181,16 @@ void main() {
         expect(taps, 1);
         expect(find.text('Item 1'), findsNothing);
         expect(find.text('Item 21'), findsNothing);
-        expect(find.text('Item 80'), findsOneWidget);
+        expect(find.text('Item 70'), findsOneWidget);
 
-        await tester.fling(find.text('Item 80'), const Offset(0, 200), 2000);
+        await tester.fling(find.text('Item 70'), const Offset(0, 200), 2000);
         await tester.pumpAndSettle();
         expect(find.text('TapHere'), findsOneWidget);
         await tester.tap(find.text('TapHere'));
         expect(taps, 1);
         expect(find.text('Item 1'), findsOneWidget);
         expect(find.text('Item 21'), findsOneWidget);
-        expect(find.text('Item 80'), findsNothing);
+        expect(find.text('Item 70'), findsNothing);
 
         await tester.fling(find.text('Item 1'), const Offset(0, 200), 2000);
         await tester.pumpAndSettle();
@@ -186,7 +199,7 @@ void main() {
         expect(taps, 2);
         expect(find.text('Item 1'), findsOneWidget);
         expect(find.text('Item 21'), findsNothing);
-        expect(find.text('Item 80'), findsNothing);
+        expect(find.text('Item 70'), findsNothing);
       });
 
       debugDefaultTargetPlatformOverride = null;
