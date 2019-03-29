@@ -18,22 +18,19 @@ void main() {
             onPressed: onButtonPressed,
           ),
           DraggableScrollableSheet(
-              alignment: Alignment.bottomCenter,
-              maxChildSize: 1.0,
-              minChildSize: .25,
-              builder:
-                  (BuildContext context, ScrollController scrollController) {
-                return Container(
-                  color: const Color(0xFFABCDEF),
-                  child: ListView.builder(
-                    controller: scrollController,
-                    itemCount: 100,
-                    itemBuilder: (BuildContext context, int index) => Text(
-                          'Item $index',
-                        ),
-                  ),
-                );
-              }),
+            maxChildSize: 1.0,
+            minChildSize: .25,
+            builder: (BuildContext context, ScrollController scrollController) {
+              return Container(
+                color: const Color(0xFFABCDEF),
+                child: ListView.builder(
+                  controller: scrollController,
+                  itemCount: 100,
+                  itemBuilder: (BuildContext context, int index) => Text('Item $index'),
+                ),
+              );
+            },
+          ),
         ],
       ),
     );

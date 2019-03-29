@@ -26,14 +26,49 @@ typedef ScrollableWidgetBuilder = Widget Function(
   ScrollController scrollController,
 );
 
-/// A widget that can be dragged along its [Axis] between its `minChildSize` and
-/// `maxChildSize`, which are relative to the parent container.
+/// A widget that can be dragged along the vertical axis between its
+/// `minChildSize`, which defaults to `0.25` and `maxChildSize`, which defaults
+/// to `1.0`. These sizes are percentages of the height of the parent container.
 ///
-/// The widget will initially be displayed at its `initialChildSize`. To enable
-/// dragging of the widget, ensure that the `builder` creates a widget that
-/// consumes the provided [ScrollController]. If the widget created by the
-/// [ScrollableWidgetBuilder] does not consume the provided [ScrollController],
-/// the sheet will remain at the `initialChildSize`.
+/// The widget coordinates resizing and scrolling of the widget returned by
+/// `builder` as the user drags along the horizontal axis.
+///
+/// The widget will initially be displayed at its `initialChildSize`, which
+/// defaults to `0.5`. To enable dragging of the widget, ensure that the
+/// `builder` creates a widget that uses the provided [ScrollController]. If
+/// the widget created by the [ScrollableWidgetBuilder] does not use the
+/// provided [ScrollController], the sheet will remain at the
+/// `initialChildSize`.
+///
+/// {@tool sample}
+/// ```dart
+/// class HomePage extends StatelessWidget {
+///  @override
+///  Widget build(BuildContext context) {
+///    return Scaffold(
+///      appBar: AppBar(
+///        title: const Text('DraggableScrollableSheet'),
+///      ),
+///      body: SizedBox.expand(
+///        child: DraggableScrollableSheet(
+///          builder: (BuildContext context, ScrollController scrollController) {
+///            return Container(
+///              color: Colors.blue[100],
+///              child: ListView.builder(
+///                controller: scrollController,
+///                itemCount: 25,
+///                itemBuilder: (BuildContext context, int index) {
+///                  return ListTile(title: Text('Item $index'));
+///                },
+///              ),
+///            );
+///          },
+///        ),
+///      ),
+///    );
+///  }
+///}
+/// ```
 class DraggableScrollableSheet extends StatefulWidget {
   /// Creates a widget that can be dragged and scrolled in a single gesture.
   ///
@@ -45,36 +80,36 @@ class DraggableScrollableSheet extends StatefulWidget {
     this.minChildSize = 0.25,
     this.maxChildSize = 1.0,
     @required this.builder,
-    this.axis = Axis.vertical,
-    this.alignment = Alignment.bottomCenter,
   })  : assert(initialChildSize != null),
         assert(minChildSize != null),
         assert(maxChildSize != null),
+        assert(minChildSize >= 0.0),
+        assert(maxChildSize <= 1.0),
+        assert(minChildSize <= initialChildSize),
+        assert(initialChildSize <= maxChildSize),
         assert(builder != null),
-        assert(axis != null),
-        assert(alignment != null),
         super(key: key);
 
-  /// The axis along which dragging and scrolling will occur for this widget.
-  final Axis axis;
-
-  /// The alignment to apply to the widget created by `builder`.
-  final Alignment alignment;
-
-  /// The initial fractional value of the parent container to use when
+  /// The initial fractional value of the parent container's height to use when
   /// displaying the widget.
+  ///
+  /// The default value is `0.5`.
   final double initialChildSize;
 
-  /// The minimum fractional value of the parent container to use when
+  /// The minimum fractional value of the parent container's height to use when
   /// displaying the widget.
+  ///
+  /// The default value is `0.25`.
   final double minChildSize;
 
-  /// The maximum fractional value of the parent container to use when
+  /// The maximum fractional value of the parent container's height to use when
   /// displaying the widget.
+  ///
+  /// The default value is `1.0`.
   final double maxChildSize;
 
   /// The builder that creates a child to display in this widget, which will
-  /// consume the provided [ScrollController] to enable dragging and scrolling
+  /// use the provided [ScrollController] to enable dragging and scrolling
   /// of the contents.
   final ScrollableWidgetBuilder builder;
 
@@ -134,7 +169,6 @@ class _DraggableSheetExtent {
 class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
   _DraggableScrollableSheetScrollController _scrollController;
   _DraggableSheetExtent _extent;
-  double _childSizePercentage;
 
   @override
   void initState() {
@@ -145,13 +179,12 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
       initialExtent: widget.initialChildSize,
       listener: _setExtent,
     );
-    _childSizePercentage = _extent.availablePixels;
     _scrollController = _DraggableScrollableSheetScrollController(extent: _extent);
   }
 
   void _setExtent() {
     setState(() {
-      _childSizePercentage = _extent.currentExtent;
+      // _extent has been updated when this is called.
     });
   }
 
@@ -159,36 +192,22 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
-        switch (widget.axis) {
-          case Axis.vertical:
-            _extent.availablePixels = widget.maxChildSize * constraints.biggest.height;
-            return SizedBox.expand(
-              child: FractionallySizedBox(
-                heightFactor: _extent.currentExtent,
-                child: widget.builder(context, _scrollController),
-                alignment: widget.alignment,
-              ),
-            );
-            break;
-          case Axis.horizontal:
-            _extent.availablePixels = widget.maxChildSize * constraints.biggest.width;
-            return SizedBox.expand(
-              child: FractionallySizedBox(
-                widthFactor: _childSizePercentage,
-                child: widget.builder(context, _scrollController),
-                alignment: widget.alignment,
-              ),
-            );
-            break;
-        }
+        _extent.availablePixels = widget.maxChildSize * constraints.biggest.height;
+        return SizedBox.expand(
+          child: FractionallySizedBox(
+            heightFactor: _extent.currentExtent,
+            child: widget.builder(context, _scrollController),
+            alignment: Alignment.bottomCenter,
+          ),
+        );
       },
     );
   }
 
   @override
   void dispose() {
-    super.dispose();
     _scrollController.dispose();
+    super.dispose();
   }
 }
 
