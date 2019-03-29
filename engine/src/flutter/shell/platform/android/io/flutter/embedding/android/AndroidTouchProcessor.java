@@ -277,6 +277,9 @@ public class AndroidTouchProcessor {
     if (maskedAction == MotionEvent.ACTION_MOVE) {
       return PointerChange.MOVE;
     }
+    if (maskedAction == MotionEvent.ACTION_HOVER_MOVE) {
+      return PointerChange.HOVER;
+    }
     if (maskedAction == MotionEvent.ACTION_CANCEL) {
       return PointerChange.CANCEL;
     }
