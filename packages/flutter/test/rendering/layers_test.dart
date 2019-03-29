@@ -149,6 +149,13 @@ void main() {
     );
 
     d.remove();
+    //        a____
+    //       /     \
+    //      b___    c
+    //       \  \   |
+    //        e  f  g
+    //              |
+    //              j
     expect(
       a.depthFirstIterateChildren(),
       <Layer>[b, e, f, c, g, j],
