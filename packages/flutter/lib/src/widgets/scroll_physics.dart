@@ -15,6 +15,11 @@ import 'scroll_simulation.dart';
 
 export 'package:flutter/physics.dart' show Simulation, ScrollSpringSimulation, Tolerance;
 
+ // Examples can assume:
+ // class FooScrollPhysics extends ScrollPhysics { }
+ // class BarScrollPhysics extends ScrollPhysics { }
+ // class FooBarScrollPhysics extends ScrollPhysics { }
+
 /// Determines the physics of a [Scrollable] widget.
 ///
 /// For example, determines how the [Scrollable] will behave when the user
@@ -70,11 +75,11 @@ class ScrollPhysics {
   /// the resulting [ScrollPhysics] instance [x] has the same behavior as [y]:
   ///
   /// ```dart
-  /// const AlwaysScrollableScrollPhysics existingPhysics = AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics());
-  /// const NeverScrollableScrollPhysics newPhysics = NeverScrollableScrollPhysics();
+  /// const FooScrollPhysics existingPhysics = FooScrollPhysics(parent: BarScrollPhysics());
+  /// const FooBarScrollPhysics newPhysics = FooBarScrollPhysics();
   ///
-  /// final AlwaysScrollableScrollPhysics x = existingPhysics.applyTo(newPhysics);
-  /// const AlwaysScrollableScrollPhysics y = AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics(parent: newPhysics));
+  /// final FooScrollPhysics x = existingPhysics.applyTo(newPhysics);
+  /// const FooScrollPhysics y = FooScrollPhysics(parent: BarScrollPhysics(parent: newPhysics));
   /// ```
   /// {@end-tool}
   ///
