@@ -92,14 +92,6 @@ List<GalleryDemo> _buildGalleryDemos() {
   final List<GalleryDemo> galleryDemos = <GalleryDemo>[
     // Demos
     GalleryDemo(
-      title: 'Shrine',
-      subtitle: 'Basic shopping app',
-      icon: GalleryIcons.shrine,
-      category: _kDemos,
-      routeName: ShrineDemo.routeName,
-      buildRoute: (BuildContext context) => const ShrineDemo(),
-    ),
-    GalleryDemo(
       title: 'Fortnightly',
       subtitle: 'Newspaper typography app',
       icon: GalleryIcons.custom_typography,
@@ -122,6 +114,14 @@ List<GalleryDemo> _buildGalleryDemos() {
       category: _kDemos,
       routeName: AnimationDemo.routeName,
       buildRoute: (BuildContext context) => const AnimationDemo(),
+    ),
+    GalleryDemo(
+      title: 'Shrine',
+      subtitle: 'Basic shopping app',
+      icon: GalleryIcons.shrine,
+      category: _kDemos,
+      routeName: ShrineDemo.routeName,
+      buildRoute: (BuildContext context) => const ShrineDemo(),
     ),
 
     // Style
