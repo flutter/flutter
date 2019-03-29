@@ -94,12 +94,12 @@ Future<void> _verifyInternationalizations() async {
   final EvalResult genResult = await _evalCommand(
     dart,
     <String>[
-      path.join('dev', 'tools', 'gen_localizations.dart'),
+      path.join('dev', 'tools', 'localization', 'gen_localizations.dart'),
     ],
     workingDirectory: flutterRoot,
   );
 
-  final String localizationsFile = path.join('packages', 'flutter_localizations', 'lib', 'src', 'l10n', 'localizations.dart');
+  final String localizationsFile = path.join('packages', 'flutter_localizations', 'lib', 'src', 'l10n', 'generated_material_localizations.dart');
   final String expectedResult = await File(localizationsFile).readAsString();
 
   if (genResult.stdout.trim() != expectedResult.trim()) {
