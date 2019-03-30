@@ -50,8 +50,8 @@ class CupertinoTheme extends StatelessWidget {
   /// Returns a default [CupertinoThemeData] if no [CupertinoTheme] widgets
   /// exist in the ancestry tree.
   static CupertinoThemeData of(BuildContext context) {
-    final _InheritedTheme _inheritedTheme = context.inheritFromWidgetOfExactType(_InheritedTheme);
-    return _inheritedTheme.theme?.data ?? const CupertinoThemeData();
+    final _InheritedCupertinoTheme _inheritedTheme = context.inheritFromWidgetOfExactType(_InheritedCupertinoTheme);
+    return _inheritedTheme?.theme?.data ?? const CupertinoThemeData();
   }
 
   /// The widget below this widget in the tree.
@@ -61,7 +61,7 @@ class CupertinoTheme extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return  _InheritedTheme(
+    return  _InheritedCupertinoTheme(
       theme: this,
       child: IconTheme(
         data: data._iconTheme,
@@ -71,8 +71,8 @@ class CupertinoTheme extends StatelessWidget {
   }
 }
 
-class _InheritedTheme extends InheritedWidget {
-  const _InheritedTheme({
+class _InheritedCupertinoTheme extends InheritedWidget {
+  const _InheritedCupertinoTheme({
     Key key,
     @required this.theme,
     @required Widget child,
@@ -82,7 +82,7 @@ class _InheritedTheme extends InheritedWidget {
   final CupertinoTheme theme;
 
   @override
-  bool updateShouldNotify(_InheritedTheme old) => theme.data != old.theme.data;
+  bool updateShouldNotify(_InheritedCupertinoTheme old) => theme.data != old.theme.data;
 }
 
 /// Styling specifications for a [CupertinoTheme].
