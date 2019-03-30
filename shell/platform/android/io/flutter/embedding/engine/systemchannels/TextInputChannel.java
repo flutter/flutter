@@ -242,7 +242,7 @@ public class TextInputChannel {
           TextCapitalization.fromValue(json.getString("textCapitalization")),
           InputType.fromJson(json.getJSONObject("inputType")),
           inputAction,
-          json.optString("actionLabel")
+          json.isNull("actionLabel") ? null : json.getString("actionLabel")
       );
     }
 
