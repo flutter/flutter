@@ -1,4 +1,4 @@
-Signature: 94e50e38cee32854b41f95fc588edc59
+Signature: 4fbe06d52d386154c027097dac450ce8
 
 UNUSED LICENSES:
 
@@ -5465,6 +5465,7 @@ FILE: ../../../third_party/dart/runtime/vm/compiler/backend/compile_type.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/backend/loops.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/backend/loops.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/backend/loops_test.cc
+FILE: ../../../third_party/dart/runtime/vm/compiler/backend/redundancy_elimination_test.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/backend/slot.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/backend/slot.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/compiler_pass.cc
