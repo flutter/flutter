@@ -8,6 +8,7 @@
 
 namespace testing {
 
+// |testing::Test|
 void ThreadTest::SetUp() {
   thread_ = std::make_unique<fml::Thread>();
   thread_task_runner_ = thread_->GetTaskRunner();
@@ -16,6 +17,7 @@ void ThreadTest::SetUp() {
   current_task_runner_ = fml::MessageLoop::GetCurrent().GetTaskRunner();
 }
 
+// |testing::Test|
 void ThreadTest::TearDown() {
   thread_task_runner_ = nullptr;
   thread_ = nullptr;
