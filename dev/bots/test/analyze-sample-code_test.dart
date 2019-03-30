@@ -25,6 +25,6 @@ void main() {
       'Found 1 sample code errors.',
       '',
     ]);
-    expect(stdoutLines, <String>['Found 2 sample code sections.', 'Starting analysis of samples.', '']);
+    expect(stdoutLines, <String>['Found 7 sample code sections.', 'Starting analysis of samples.', '']);
   }, skip: Platform.isWindows);
 }
