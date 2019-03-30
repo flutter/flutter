@@ -22,11 +22,6 @@ class GenerateCommand extends FlutterCommand {
   bool get hidden => true;
 
   @override
-  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{
-    DevelopmentArtifact.universal,
-  };
-
-  @override
   Future<FlutterCommandResult> runCommand() async {
     Cache.releaseLockEarly();
     final FlutterProject flutterProject = await FlutterProject.current();

@@ -65,7 +65,7 @@ class AnalyzeCommand extends FlutterCommand {
   String get description => "Analyze the project's Dart code.";
 
   @override
-  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{
+  Set<DevelopmentArtifact> get requiredArtifacts => const <DevelopmentArtifact>{
     DevelopmentArtifact.universal,
   };
 

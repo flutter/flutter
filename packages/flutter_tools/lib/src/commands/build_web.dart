@@ -20,7 +20,7 @@ class BuildWebCommand extends BuildSubCommand {
   }
 
   @override
-  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{
+  Set<DevelopmentArtifact> get requiredArtifacts => const <DevelopmentArtifact>{
     DevelopmentArtifact.universal,
     DevelopmentArtifact.web,
   };
