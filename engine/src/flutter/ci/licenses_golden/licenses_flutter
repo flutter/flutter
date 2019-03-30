@@ -391,6 +391,8 @@ FILE: ../../../flutter/runtime/runtime_controller.cc
 FILE: ../../../flutter/runtime/runtime_controller.h
 FILE: ../../../flutter/runtime/runtime_delegate.cc
 FILE: ../../../flutter/runtime/runtime_delegate.h
+FILE: ../../../flutter/runtime/runtime_test.cc
+FILE: ../../../flutter/runtime/runtime_test.h
 FILE: ../../../flutter/runtime/service_protocol.cc
 FILE: ../../../flutter/runtime/service_protocol.h
 FILE: ../../../flutter/runtime/start_up.cc

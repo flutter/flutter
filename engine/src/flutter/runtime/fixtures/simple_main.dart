@@ -5,10 +5,12 @@
 void main() {
 }
 
+@pragma('vm:entry-point')
 void sayHi() {
   print("Hi");
 }
 
+@pragma('vm:entry-point')
 void throwExceptionNow() {
   throw("Hello");
 }

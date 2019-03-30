@@ -7,15 +7,10 @@
 #include "flutter/fml/thread.h"
 #include "flutter/runtime/dart_isolate.h"
 #include "flutter/runtime/dart_vm.h"
+#include "flutter/runtime/runtime_test.h"
 #include "flutter/testing/testing.h"
 #include "flutter/testing/thread_test.h"
 #include "third_party/tonic/scopes/dart_isolate_scope.h"
-
-#if FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_DEBUG
-#define SKIP_IF_AOT() GTEST_SKIP()
-#else
-#define SKIP_IF_AOT() (void)0
-#endif
 
 #define CURRENT_TEST_NAME                                           \
   std::string {                                                     \
@@ -23,11 +18,13 @@
   }
 
 namespace blink {
+namespace testing {
 
-using DartIsolateTest = ::testing::ThreadTest;
+using DartIsolateTest = RuntimeTest;
 
 TEST_F(DartIsolateTest, RootIsolateCreationAndShutdown) {
   Settings settings = {};
+  SetSnapshotsAndAssets(settings);
   settings.task_observer_add = [](intptr_t, fml::closure) {};
   settings.task_observer_remove = [](intptr_t) {};
   auto vm = DartVM::ForProcess(settings);
@@ -130,7 +127,7 @@ class AutoIsolateShutdown {
   FML_DISALLOW_COPY_AND_ASSIGN(AutoIsolateShutdown);
 };
 
-std::unique_ptr<AutoIsolateShutdown> RunDartCodeInIsolate(
+static std::unique_ptr<AutoIsolateShutdown> RunDartCodeInIsolate(
     fml::RefPtr<fml::TaskRunner> task_runner,
     std::string entrypoint) {
   Settings settings = {};
@@ -174,34 +171,42 @@ std::unique_ptr<AutoIsolateShutdown> RunDartCodeInIsolate(
     return {};
   }
 
-  auto kernel_file_path =
-      fml::paths::JoinPaths({testing::GetFixturesPath(), "kernel_blob.bin"});
+  if (!DartVM::IsRunningPrecompiledCode()) {
+    auto kernel_file_path = fml::paths::JoinPaths(
+        {::testing::GetFixturesPath(), "kernel_blob.bin"});
 
-  if (!fml::IsFile(kernel_file_path)) {
-    FML_LOG(ERROR) << "Could not locate kernel file.";
-    return {};
-  }
+    if (!fml::IsFile(kernel_file_path)) {
+      FML_LOG(ERROR) << "Could not locate kernel file.";
+      return {};
+    }
 
-  auto kernel_file = fml::OpenFile(kernel_file_path.c_str(), false,
-                                   fml::FilePermission::kRead);
+    auto kernel_file = fml::OpenFile(kernel_file_path.c_str(), false,
+                                     fml::FilePermission::kRead);
 
-  if (!kernel_file.is_valid()) {
-    FML_LOG(ERROR) << "Kernel file descriptor was invalid.";
-    return {};
-  }
+    if (!kernel_file.is_valid()) {
+      FML_LOG(ERROR) << "Kernel file descriptor was invalid.";
+      return {};
+    }
 
-  auto kernel_mapping = std::make_unique<fml::FileMapping>(kernel_file);
+    auto kernel_mapping = std::make_unique<fml::FileMapping>(kernel_file);
 
-  if (kernel_mapping->GetMapping() == nullptr) {
-    FML_LOG(ERROR) << "Could not setup kernel mapping.";
-    return {};
-  }
+    if (kernel_mapping->GetMapping() == nullptr) {
+      FML_LOG(ERROR) << "Could not setup kernel mapping.";
+      return {};
+    }
 
-  if (!root_isolate->get()->PrepareForRunningFromKernel(
-          std::move(kernel_mapping))) {
-    FML_LOG(ERROR)
-        << "Could not prepare to run the isolate from the kernel file.";
-    return {};
+    if (!root_isolate->get()->PrepareForRunningFromKernel(
+            std::move(kernel_mapping))) {
+      FML_LOG(ERROR)
+          << "Could not prepare to run the isolate from the kernel file.";
+      return {};
+    }
+  } else {
+    if (!root_isolate->get()->PrepareForRunningFromPrecompiledCode()) {
+      FML_LOG(ERROR)
+          << "Could not prepare to run the isolate from precompiled code.";
+      return {};
+    }
   }
 
   if (root_isolate->get()->GetPhase() != DartIsolate::Phase::Ready) {
@@ -219,21 +224,18 @@ std::unique_ptr<AutoIsolateShutdown> RunDartCodeInIsolate(
 }
 
 TEST_F(DartIsolateTest, IsolateCanLoadAndRunDartCode) {
-  SKIP_IF_AOT();
   auto isolate = RunDartCodeInIsolate(GetCurrentTaskRunner(), "main");
   ASSERT_TRUE(isolate);
   ASSERT_EQ(isolate->get()->GetPhase(), DartIsolate::Phase::Running);
 }
 
 TEST_F(DartIsolateTest, IsolateCannotLoadAndRunUnknownDartEntrypoint) {
-  SKIP_IF_AOT();
   auto isolate =
       RunDartCodeInIsolate(GetCurrentTaskRunner(), "thisShouldNotExist");
   ASSERT_FALSE(isolate);
 }
 
 TEST_F(DartIsolateTest, CanRunDartCodeCodeSynchronously) {
-  SKIP_IF_AOT();
   auto isolate = RunDartCodeInIsolate(GetCurrentTaskRunner(), "main");
 
   ASSERT_TRUE(isolate);
@@ -247,4 +249,5 @@ TEST_F(DartIsolateTest, CanRunDartCodeCodeSynchronously) {
   }));
 }
 
+}  // namespace testing
 }  // namespace blink

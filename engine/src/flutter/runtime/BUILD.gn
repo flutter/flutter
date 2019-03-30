@@ -104,16 +104,18 @@ executable("runtime_unittests") {
     "dart_isolate_unittests.cc",
     "dart_service_isolate_unittests.cc",
     "dart_vm_unittests.cc",
+    "runtime_test.cc",
+    "runtime_test.h",
   ]
 
   deps = [
+    ":libdart",
     ":runtime",
     ":runtime_fixtures",
     "$flutter_root/common",
     "$flutter_root/fml",
     "$flutter_root/lib/snapshot",
     "$flutter_root/testing",
-    "//third_party/dart/runtime:libdart_jit",
     "//third_party/skia",
     "//third_party/tonic",
   ]
