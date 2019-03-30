@@ -39,10 +39,10 @@ void main() {
     expect(find.text('item 2'), findsOneWidget);
 
     listKey.currentState.removeItem(2, (BuildContext context, Animation<double> animation) {
-      return SizedBox(
+      return const SizedBox(
         height: 100.0,
         child: Center(
-          child: const Text('removing item'),
+          child: Text('removing item'),
         ),
       );
     }, duration: const Duration(milliseconds: 100));
