@@ -8,7 +8,7 @@
 
 namespace blink {
 
-constexpr int32_t kMinPlatfromViewId = -1;
+constexpr int32_t kMinPlatformViewId = -1;
 
 SemanticsNode::SemanticsNode() = default;
 
@@ -25,7 +25,7 @@ bool SemanticsNode::HasFlag(SemanticsFlags flag) {
 }
 
 bool SemanticsNode::IsPlatformViewNode() const {
-  return platformViewId > kMinPlatfromViewId;
+  return platformViewId > kMinPlatformViewId;
 }
 
 }  // namespace blink
