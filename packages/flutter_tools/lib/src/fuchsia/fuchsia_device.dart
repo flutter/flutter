@@ -188,7 +188,6 @@ class FuchsiaDevice extends Device {
     DebuggingOptions debuggingOptions,
     Map<String, dynamic> platformArgs,
     bool prebuiltApplication = false,
-    bool applicationNeedsRebuild = false,
     bool usesTerminalUi = true,
     bool ipv6 = false,
   }) => Future<void>.error('unimplemented');
@@ -214,8 +213,7 @@ class FuchsiaDevice extends Device {
   _FuchsiaPortForwarder _portForwarder;
 
   @override
-  void clearLogs() {
-  }
+  void clearLogs() { }
 
   @override
   bool get supportsScreenshot => false;
@@ -307,7 +305,9 @@ class FuchsiaDevice extends Device {
 }
 
 class FuchsiaIsolateDiscoveryProtocol {
-  FuchsiaIsolateDiscoveryProtocol(this._device, this._isolateName, [
+  FuchsiaIsolateDiscoveryProtocol(
+    this._device,
+    this._isolateName, [
     this._vmServiceConnector = _kDefaultFuchsiaIsolateDiscoveryConnector,
     this._pollOnce = false,
   ]);

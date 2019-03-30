@@ -15,6 +15,14 @@ import 'text.dart';
 import 'ticker_provider.dart';
 import 'transitions.dart';
 
+// Examples can assume:
+// class MyWidget extends ImplicitlyAnimatedWidget {
+//   MyWidget() : super(duration: const Duration(seconds: 1));
+//   final Color targetColor = Colors.black;
+//   @override
+//   MyWidgetState createState() => MyWidgetState();
+// }
+
 /// An interpolation between two [BoxConstraints].
 ///
 /// This class specializes the interpolation of [Tween<BoxConstraints>] to use
@@ -358,6 +366,45 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
   /// [forEachTween] should override [didUpdateTweens] to update those
   /// properties. Dependent properties should not be updated within
   /// [forEachTween].
+  ///
+  /// {@tool sample}
+  ///
+  /// Sample code implementing an implicitly animated widget's `State`.
+  /// The widget animates between colors whenever `widget.targetColor`
+  /// changes.
+  ///
+  /// ```dart
+  /// class MyWidgetState extends AnimatedWidgetBaseState<MyWidget> {
+  ///   ColorTween _colorTween;
+  ///
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return Text(
+  ///       'Hello World',
+  ///       // Computes the value of the text color at any given time.
+  ///       style: TextStyle(color: _colorTween.evaluate(animation)),
+  ///     );
+  ///   }
+  ///
+  ///   @override
+  ///   void forEachTween(TweenVisitor<dynamic> visitor) {
+  ///     // Update the tween using the provided visitor function.
+  ///     _colorTween = visitor(
+  ///       // The latest tween value. Can be `null`.
+  ///       _colorTween,
+  ///       // The color value toward which we are animating.
+  ///       widget.targetColor,
+  ///       // A function that takes a color value and returns a tween
+  ///       // beginning at that value.
+  ///       (value) => ColorTween(begin: value),
+  ///     );
+  ///
+  ///     // We could have more tweens than one by using the visitor
+  ///     // multiple times.
+  ///   }
+  /// }
+  /// ```
+  /// {@end-tool}
   @protected
   void forEachTween(TweenVisitor<dynamic> visitor);
 

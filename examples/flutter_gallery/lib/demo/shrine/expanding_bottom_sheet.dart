@@ -71,7 +71,8 @@ Animation<T> _getEmphasizedEasingAnimation<T>({
   @required T peak,
   @required T end,
   @required bool isForward,
-  @required Animation<double> parent}) {
+  @required Animation<double> parent,
+}) {
   Curve firstCurve;
   Curve secondCurve;
   double firstWeight;

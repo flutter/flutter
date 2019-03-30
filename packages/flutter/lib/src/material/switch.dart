@@ -445,7 +445,7 @@ class _RenderSwitch extends RenderToggleable {
   DragStartBehavior get dragStartBehavior => _drag.dragStartBehavior;
   set dragStartBehavior(DragStartBehavior value) {
     assert(value != null);
-    if(_drag.dragStartBehavior == value)
+    if (_drag.dragStartBehavior == value)
       return;
     _drag.dragStartBehavior = value;
   }

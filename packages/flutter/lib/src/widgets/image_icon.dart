@@ -23,7 +23,8 @@ class ImageIcon extends StatelessWidget {
   /// Creates an image icon.
   ///
   /// The [size] and [color] default to the value given by the current [IconTheme].
-  const ImageIcon(this.image, {
+  const ImageIcon(
+    this.image, {
     Key key,
     this.size,
     this.color,

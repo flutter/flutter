@@ -223,7 +223,7 @@ class DefaultWidgetsLocalizations implements WidgetsLocalizations {
 }
 
 class _LocalizationsScope extends InheritedWidget {
-  const _LocalizationsScope ({
+  const _LocalizationsScope({
     Key key,
     @required this.locale,
     @required this.localizationsState,

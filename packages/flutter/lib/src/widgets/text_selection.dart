@@ -640,7 +640,7 @@ class _TextSelectionHandleOverlayState
             ],
           ),
         ),
-      )
+      ),
     );
   }
 

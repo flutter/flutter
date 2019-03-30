@@ -24,7 +24,7 @@ import '../src/context.dart';
 const String frameworkRevision = '12345678';
 const String frameworkChannel = 'omega';
 final Generator _kNoColorTerminalPlatform = () => FakePlatform.fromPlatform(const LocalPlatform())..stdoutSupportsAnsi = false;
-final Map<Type, Generator> noColorTerminalOverride = <Type, Generator> {
+final Map<Type, Generator> noColorTerminalOverride = <Type, Generator>{
   Platform: _kNoColorTerminalPlatform,
 };
 const String samplesIndexJson = '''[
@@ -900,7 +900,7 @@ void main() {
     final List<String> args = <String>[
       'create',
       '--list-samples',
-      outputFile
+      outputFile,
     ];
 
     await runner.run(args);
@@ -918,7 +918,7 @@ void main() {
     final List<String> args = <String>[
       'create',
       '--list-samples',
-      outputFile
+      outputFile,
     ];
 
     await expectLater(runner.run(args), throwsToolExit(exitCode: 2, message: 'Failed to write samples'));
@@ -1000,6 +1000,17 @@ Future<void> _runFlutterTest(Directory workingDir, { String target }) async {
     'bin',
     'flutter_tools.dart',
   ));
+
+  // While flutter test does get packages, it doesn't write version
+  // files anymore.
+  await Process.run(
+    '$dartSdkPath/bin/dart',
+    <String>[]
+    ..addAll(dartVmFlags)
+    ..add(flutterToolsPath)
+    ..addAll(<String>['packages', 'get']),
+    workingDirectory: workingDir.path,
+  );
 
   final List<String> args = <String>[]
     ..addAll(dartVmFlags)

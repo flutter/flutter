@@ -29,7 +29,7 @@ String getValueFromFile(String plistFilePath, String key) {
     final List<String> args = <String>[
       executable, 'read', normalizedPlistPath,
     ];
-    if (key != null && key.isNotEmpty){
+    if (key != null && key.isNotEmpty) {
       args.add(key);
     }
     final String value = runCheckedSync(args);

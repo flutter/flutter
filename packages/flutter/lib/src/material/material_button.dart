@@ -23,7 +23,7 @@ import 'theme_data.dart';
 /// an enabled button, make sure to pass a non-null value for onPressed.
 ///
 /// Rather than using this class directly, consider using [FlatButton],
-/// OutlineButton, or [RaisedButton], which configure this class with
+/// [OutlineButton], or [RaisedButton], which configure this class with
 /// appropriate defaults that match the material design specification.
 ///
 /// To create a button directly, without inheriting theme defaults, use

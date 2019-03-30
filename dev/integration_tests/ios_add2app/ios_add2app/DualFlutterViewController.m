@@ -23,19 +23,18 @@
   stackView.layoutMarginsRelativeArrangement = YES;
   [self.view addSubview:stackView];
 
+  _topFlutterViewController = [[FlutterViewController alloc] init];
+  _bottomFlutterViewController= [[FlutterViewController alloc] init];
 
-  FlutterViewController* topFlutterViewController = [[FlutterViewController alloc] init];
-  FlutterViewController* bottomFlutterViewController= [[FlutterViewController alloc] init];
+  [_topFlutterViewController setInitialRoute:@"marquee_green"];
+  [self addChildViewController:_topFlutterViewController];
+  [stackView addArrangedSubview:_topFlutterViewController.view];
+  [_topFlutterViewController didMoveToParentViewController:self];
 
-  [topFlutterViewController setInitialRoute:@"marquee_green"];
-  [self addChildViewController:topFlutterViewController];
-  [stackView addArrangedSubview:topFlutterViewController.view];
-  [topFlutterViewController didMoveToParentViewController:self];
-
-  [bottomFlutterViewController setInitialRoute:@"marquee_purple"];
-  [self addChildViewController:bottomFlutterViewController];
-  [stackView addArrangedSubview:bottomFlutterViewController.view];
-  [topFlutterViewController didMoveToParentViewController:self];
+  [_bottomFlutterViewController setInitialRoute:@"marquee_purple"];
+  [self addChildViewController:_bottomFlutterViewController];
+  [stackView addArrangedSubview:_bottomFlutterViewController.view];
+  [_bottomFlutterViewController didMoveToParentViewController:self];
 }
 
 @end

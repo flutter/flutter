@@ -102,9 +102,8 @@ class FlutterManifest {
   String get buildName {
     if (appVersion != null && appVersion.contains('+'))
       return appVersion.split('+')?.elementAt(0);
-    else {
+    else
       return appVersion;
-    }
   }
 
   /// The build version number from the `pubspec.yaml` file.

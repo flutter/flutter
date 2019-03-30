@@ -16,6 +16,7 @@ import 'compile.dart';
 import 'dart/package_map.dart';
 import 'devfs.dart';
 import 'globals.dart';
+import 'project.dart';
 
 const String defaultMainPath = 'lib/main.dart';
 const String defaultAssetBasePath = '.';
@@ -72,6 +73,7 @@ Future<void> build({
   assetDirPath ??= getAssetBuildDirectory();
   packagesPath ??= fs.path.absolute(PackageMap.globalPackagesPath);
   applicationKernelFilePath ??= getDefaultApplicationKernelPath(trackWidgetCreation: trackWidgetCreation);
+  final FlutterProject flutterProject = await FlutterProject.current();
 
   if (compilationTraceFilePath != null) {
     if (buildMode != BuildMode.dynamicProfile && buildMode != BuildMode.dynamicRelease) {
@@ -99,6 +101,7 @@ Future<void> build({
     if ((extraFrontEndOptions != null) && extraFrontEndOptions.isNotEmpty)
       printTrace('Extra front-end options: $extraFrontEndOptions');
     ensureDirectoryExists(applicationKernelFilePath);
+    final KernelCompiler kernelCompiler = await kernelCompilerFactory.create(flutterProject);
     final CompilerOutput compilerOutput = await kernelCompiler.compile(
       sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
       incrementalCompilerByteStorePath: compilationTraceFilePath != null ? null :

@@ -939,6 +939,9 @@ class CommonFinders {
   /// Finds widgets with a tooltip with the given [message].
   SerializableFinder byTooltip(String message) => ByTooltipMessage(message);
 
+  /// Finds widgets with the given semantics [label].
+  SerializableFinder bySemanticsLabel(Pattern label) => BySemanticsLabel(label);
+
   /// Finds widgets whose class name matches the given string.
   SerializableFinder byType(String type) => ByType(type);
 

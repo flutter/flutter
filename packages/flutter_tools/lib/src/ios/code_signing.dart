@@ -163,7 +163,7 @@ Future<Map<String, String>> getCodeSigningIdentityDevelopmentTeam({
   if (await opensslProcess.exitCode != 0)
     return null;
 
-  return <String, String> {
+  return <String, String>{
     'DEVELOPMENT_TEAM': _certificateOrganizationalUnitExtractionPattern
       .firstMatch(opensslOutput)
       ?.group(1),
@@ -187,8 +187,7 @@ Future<String> _chooseSigningIdentity(List<String> validCodeSigningIdentities, b
       if (validCodeSigningIdentities.contains(savedCertChoice)) {
         printStatus('Found saved certificate choice "$savedCertChoice". To clear, use "flutter config".');
         return savedCertChoice;
-      }
-      else {
+      } else {
         printError('Saved signing certificate "$savedCertChoice" is not a valid development certificate');
       }
     }

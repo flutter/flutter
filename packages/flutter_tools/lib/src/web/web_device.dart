@@ -100,7 +100,6 @@ class WebDevice extends Device {
     DebuggingOptions debuggingOptions,
     Map<String, Object> platformArgs,
     bool prebuiltApplication = false,
-    bool applicationNeedsRebuild = false,
     bool usesTerminalUi = true,
     bool ipv6 = false,
   }) async {

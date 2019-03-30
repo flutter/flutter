@@ -1649,8 +1649,7 @@ void main() {
     expect(tester.takeException(), isAssertionError);
   });
 
-  testWidgets('Hero within a Hero subtree with Builder, throws', (
-      WidgetTester tester) async {
+  testWidgets('Hero within a Hero subtree with Builder, throws', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -1672,8 +1671,7 @@ void main() {
     expect(tester.takeException(),isAssertionError);
   });
 
-  testWidgets('Hero within a Hero subtree with LayoutBuilder, throws', (
-      WidgetTester tester) async {
+  testWidgets('Hero within a Hero subtree with LayoutBuilder, throws', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(

@@ -156,7 +156,7 @@ class RenderImage extends RenderBox {
   FilterQuality _filterQuality;
   set filterQuality(FilterQuality value) {
     assert(value != null);
-    if(value == _filterQuality)
+    if (value == _filterQuality)
       return;
     _filterQuality = value;
     markNeedsPaint();

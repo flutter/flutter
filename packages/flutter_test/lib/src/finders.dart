@@ -272,6 +272,51 @@ class CommonFinders {
   Finder ancestor({ Finder of, Finder matching, bool matchRoot = false }) {
     return _AncestorFinder(of, matching, matchRoot: matchRoot);
   }
+
+  /// Finds [Semantics] widgets matching the given `label`, either by
+  /// [RegExp.hasMatch] or string equality.
+  ///
+  /// The framework may combine semantics labels in certain scenarios, such as
+  /// when multiple [Text] widgets are in a [MaterialButton] widget. In such a
+  /// case, it may be preferable to match by regular expression. Consumers of
+  /// this API __must not__ introduce unsuitable content into the semantics tree
+  /// for the purposes of testing; in particular, you should prefer matching by
+  /// regular expression rather than by string if the framework has combined
+  /// your semantics, and not try to force the framework to break up the
+  /// semantics nodes. Breaking up the nodes would have an undesirable effect on
+  /// screen readers and other accessibility services.
+  ///
+  /// ## Sample code
+  ///
+  /// ```dart
+  /// expect(find.BySemanticsLabel('Back'), findsOneWidget);
+  /// ```
+  ///
+  /// If the `skipOffstage` argument is true (the default), then this skips
+  /// nodes that are [Offstage] or that are from inactive [Route]s.
+  Finder bySemanticsLabel(Pattern label, { bool skipOffstage = true }) {
+    if (WidgetsBinding.instance.pipelineOwner.semanticsOwner == null)
+      throw StateError('Semantics are not enabled. '
+                       'Make sure to call tester.enableSemantics() before using '
+                       'this finder, and call dispose on its return value after.');
+    return byElementPredicate(
+      (Element element) {
+        // Multiple elements can have the same renderObject - we want the "owner"
+        // of the renderObject, i.e. the RenderObjectElement.
+        if (element is! RenderObjectElement) {
+          return false;
+        }
+        final String semanticsLabel = element.renderObject?.debugSemantics?.label;
+        if (semanticsLabel == null) {
+          return false;
+        }
+        return label is RegExp
+            ? label.hasMatch(semanticsLabel)
+            : label == semanticsLabel;
+      },
+      skipOffstage: skipOffstage,
+    );
+  }
 }
 
 /// Searches a widget tree and returns nodes that match a particular
@@ -609,7 +654,9 @@ class _ElementPredicateFinder extends MatchFinder {
 }
 
 class _DescendantFinder extends Finder {
-  _DescendantFinder(this.ancestor, this.descendant, {
+  _DescendantFinder(
+    this.ancestor,
+    this.descendant, {
     this.matchRoot = false,
     bool skipOffstage = true,
   }) : super(skipOffstage: skipOffstage);

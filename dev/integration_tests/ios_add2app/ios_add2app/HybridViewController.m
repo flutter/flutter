@@ -43,7 +43,7 @@ static NSString *_kPing = @"ping";
   [stackView addArrangedSubview:nativeViewController.view];
   [nativeViewController didMoveToParentViewController:self];
 
-  FlutterViewController *flutterViewController =
+  _flutterViewController =
       [[FlutterViewController alloc] initWithEngine:[self engine]
                                             nibName:nil
                                              bundle:nil];
@@ -51,11 +51,11 @@ static NSString *_kPing = @"ping";
 
   _messageChannel = [[FlutterBasicMessageChannel alloc]
          initWithName:_kChannel
-      binaryMessenger:flutterViewController
+      binaryMessenger:_flutterViewController
                 codec:[FlutterStringCodec sharedInstance]];
-  [self addChildViewController:flutterViewController];
-  [stackView addArrangedSubview:flutterViewController.view];
-  [flutterViewController didMoveToParentViewController:self];
+  [self addChildViewController:_flutterViewController];
+  [stackView addArrangedSubview:_flutterViewController.view];
+  [_flutterViewController didMoveToParentViewController:self];
 
   __weak NativeViewController *weakNativeViewController = nativeViewController;
   [_messageChannel setMessageHandler:^(id message, FlutterReply reply) {

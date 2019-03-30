@@ -19,8 +19,7 @@ class ValidationError implements Exception {
   String toString() => message;
 }
 
-/// Sanity checking of the @foo metadata in the English translations,
-/// material_en.arb.
+/// Sanity checking of the @foo metadata in the English translations, *_en.arb.
 ///
 /// - For each foo, resource, there must be a corresponding @foo.
 /// - For each @foo resource, there must be a corresponding foo, except

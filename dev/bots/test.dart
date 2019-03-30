@@ -25,6 +25,8 @@ final List<String> flutterTestArgs = <String>[];
 
 final bool useFlutterTestFormatter = Platform.environment['FLUTTER_TEST_FORMATTER'] == 'true';
 
+final bool noUseBuildRunner = Platform.environment['FLUTTER_TEST_NO_BUILD_RUNNER'] == 'true';
+
 const Map<String, ShardRunner> _kShards = <String, ShardRunner>{
   'tests': _runTests,
   'tool_tests': _runToolTests,
@@ -178,11 +180,26 @@ Future<void> _runToolTests() async {
   final bq.BigqueryApi bigqueryApi = await _getBigqueryApi();
   await _runSmokeTests();
 
-  await _buildRunnerTest(
-    path.join(flutterRoot, 'packages', 'flutter_tools'),
-    flutterRoot,
-    tableData: bigqueryApi?.tabledata,
-  );
+  // The flutter_tool will currently be snapshotted without asserts. We need
+  // to force it to be regenerated with them enabled.
+  if (!Platform.isWindows) {
+    File(path.join(flutterRoot, 'bin', 'cache', 'flutter_tools.snapshot')).deleteSync();
+    File(path.join(flutterRoot, 'bin', 'cache', 'flutter_tools.stamp')).deleteSync();
+  }
+  if (noUseBuildRunner) {
+    await _pubRunTest(
+      path.join(flutterRoot, 'packages', 'flutter_tools'),
+      tableData: bigqueryApi?.tabledata,
+      enableFlutterToolAsserts: !Platform.isWindows,
+    );
+  } else {
+    await _buildRunnerTest(
+      path.join(flutterRoot, 'packages', 'flutter_tools'),
+      flutterRoot,
+      tableData: bigqueryApi?.tabledata,
+      enableFlutterToolAsserts: !Platform.isWindows,
+    );
+  }
 
   print('${bold}DONE: All tests successful.$reset');
 }
@@ -204,22 +221,21 @@ Future<void> _runBuildTests() async {
     await _flutterBuildApk(path);
     await _flutterBuildIpa(path);
   }
-  // TODO(jonahwilliams): re-enable when engine rolls.
-  //await _flutterBuildDart2js(path.join('dev', 'integration_tests', 'web'));
+  await _flutterBuildDart2js(path.join('dev', 'integration_tests', 'web'));
 
   print('${bold}DONE: All build tests successful.$reset');
 }
 
-// Future<void> _flutterBuildDart2js(String relativePathToApplication) async {
-//   print('Running Dart2JS build tests...');
-//   await runCommand(flutter,
-//     <String>['build', 'web', '-v'],
-//     workingDirectory: path.join(flutterRoot, relativePathToApplication),
-//     expectNonZeroExit: false,
-//     timeout: _kShortTimeout,
-//   );
-//   print('Done.');
-// }
+Future<void> _flutterBuildDart2js(String relativePathToApplication) async {
+  print('Running Dart2JS build tests...');
+  await runCommand(flutter,
+    <String>['build', 'web', '-v'],
+    workingDirectory: path.join(flutterRoot, relativePathToApplication),
+    expectNonZeroExit: false,
+    timeout: _kShortTimeout,
+  );
+  print('Done.');
+}
 
 Future<void> _flutterBuildAot(String relativePathToApplication) async {
   print('Running AOT build tests...');
