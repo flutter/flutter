@@ -5,6 +5,7 @@
 #ifndef FLUTTER_TESTING_TEST_DART_NATIVE_RESOLVER_H_
 #define FLUTTER_TESTING_TEST_DART_NATIVE_RESOLVER_H_
 
+#include <functional>
 #include <map>
 #include <memory>
 
