@@ -32,9 +32,6 @@ class ChannelCommand extends FlutterCommand {
   String get invocation => '${runner.executableName} $name [<channel-name>]';
 
   @override
-  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{};
-
-  @override
   Future<FlutterCommandResult> runCommand() async {
     switch (argResults.rest.length) {
       case 0:
