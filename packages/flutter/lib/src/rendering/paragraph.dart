@@ -236,33 +236,33 @@ class RenderParagraph extends RenderBox
 
   @override
   double computeMinIntrinsicWidth(double height) {
-    _layoutChildren();
+    // _layoutChildren();
     _layoutText();
     return _textPainter.minIntrinsicWidth;
   }
 
   @override
   double computeMaxIntrinsicWidth(double height) {
-    _layoutChildren();
+    // _layoutChildren();
     _layoutText();
     return _textPainter.maxIntrinsicWidth;
   }
 
   double _computeIntrinsicHeight(double width) {
-    _layoutChildren();
+    // _layoutChildren();
     _layoutText(minWidth: width, maxWidth: width);
     return _textPainter.height;
   }
 
   @override
   double computeMinIntrinsicHeight(double width) {
-    _layoutChildren();
+    // _layoutChildren();
     return _computeIntrinsicHeight(width);
   }
 
   @override
   double computeMaxIntrinsicHeight(double width) {
-    _layoutChildren();
+    // _layoutChildren();
     return _computeIntrinsicHeight(width);
   }
 
@@ -271,7 +271,7 @@ class RenderParagraph extends RenderBox
     assert(!debugNeedsLayout);
     assert(constraints != null);
     assert(constraints.debugAssertIsValid());
-    _layoutChildren();
+    // _layoutChildren();
     _layoutTextWithConstraints(constraints);
     return _textPainter.computeDistanceToActualBaseline(baseline);
   }
@@ -330,20 +330,23 @@ class RenderParagraph extends RenderBox
   // Layout the child inline widgets. We pass the dimensions of the
   // children to _textPainter so that appropriate placeholders can
   // be inserted into the LibTxt layout.
-  void _layoutChildren() {
+  void _layoutChildren({bool passDimensions = true}) {
     RenderBox child = firstChild;
     List<PlaceholderDimensions> placeholderDimensions = List(childCount);
     int childIndex = 0;
     while (child != null) {
       child.layout(BoxConstraints(), parentUsesSize: true);
-      placeholderDimensions[childIndex] = PlaceholderDimensions(
-        child.size,
-        child.getDistanceToBaseline(TextBaseline.alphabetic)
-      );
+      if (passDimensions) {
+        placeholderDimensions[childIndex] = PlaceholderDimensions(
+          child.size,
+          child.getDistanceToBaseline(TextBaseline.alphabetic)
+        );
+      }
       child = childAfter(child);
       childIndex++;
     }
-    _textPainter.placeholderDimensions = placeholderDimensions;
+    if (passDimensions)
+      _textPainter.placeholderDimensions = placeholderDimensions;
   }
 
   // Iterate through the laid-out children and set the parentData offsets based
