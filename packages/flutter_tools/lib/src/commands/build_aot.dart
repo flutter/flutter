@@ -16,7 +16,7 @@ import '../resident_runner.dart';
 import '../runner/flutter_command.dart';
 import 'build.dart';
 
-class BuildAotCommand extends BuildSubCommand {
+class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmentArtifacts {
   BuildAotCommand() {
     usesTargetOption();
     addBuildModeFlags();
