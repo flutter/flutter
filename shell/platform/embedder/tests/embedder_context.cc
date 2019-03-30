@@ -37,7 +37,7 @@ static std::unique_ptr<fml::Mapping> GetMapping(const fml::UniqueFD& directory,
 
 EmbedderContext::EmbedderContext(std::string assets_path)
     : assets_path_(std::move(assets_path)),
-      native_resolver_(std::make_shared<EmbedderTestResolver>()) {
+      native_resolver_(std::make_shared<::testing::TestDartNativeResolver>()) {
   auto assets_dir = fml::OpenDirectory(assets_path_.c_str(), false,
                                        fml::FilePermission::kRead);
   vm_snapshot_data_ = GetMapping(assets_dir, "vm_snapshot_data", false);
@@ -52,8 +52,8 @@ EmbedderContext::EmbedderContext(std::string assets_path)
   }
 
   isolate_create_callbacks_.push_back(
-      [weak_resolver =
-           std::weak_ptr<EmbedderTestResolver>{native_resolver_}]() {
+      [weak_resolver = std::weak_ptr<::testing::TestDartNativeResolver>{
+           native_resolver_}]() {
         if (auto resolver = weak_resolver.lock()) {
           resolver->SetNativeResolverForIsolate();
         }

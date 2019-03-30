@@ -5,8 +5,11 @@
 #ifndef FLUTTER_RUNTIME_RUNTIME_TEST_H_
 #define FLUTTER_RUNTIME_RUNTIME_TEST_H_
 
+#include <memory>
+
 #include "flutter/common/settings.h"
 #include "flutter/fml/macros.h"
+#include "flutter/testing/test_dart_native_resolver.h"
 #include "flutter/testing/thread_test.h"
 
 namespace blink {
@@ -18,7 +21,9 @@ class RuntimeTest : public ::testing::ThreadTest {
 
   ~RuntimeTest();
 
-  void SetSnapshotsAndAssets(Settings& settings);
+  Settings CreateSettingsForFixture();
+
+  void AddNativeCallback(std::string name, Dart_NativeFunction callback);
 
  protected:
   // |testing::ThreadTest|
@@ -29,6 +34,9 @@ class RuntimeTest : public ::testing::ThreadTest {
 
  private:
   fml::UniqueFD assets_dir_;
+  std::shared_ptr<::testing::TestDartNativeResolver> native_resolver_;
+
+  void SetSnapshotsAndAssets(Settings& settings);
 };
 
 }  // namespace testing
