@@ -82,7 +82,7 @@ typedef ScrollableWidgetBuilder = Widget Function(
 class DraggableScrollableSheet extends StatefulWidget {
   /// Creates a widget that can be dragged and scrolled in a single gesture.
   ///
-  /// The builder, initialChildSize, minChildSize, and maxChildSize
+  /// The [builder], [initialChildSize], [minChildSize], and [maxChildSize]
   /// parameters must not be null.
   const DraggableScrollableSheet({
     Key key,
