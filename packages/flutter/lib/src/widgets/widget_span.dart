@@ -9,7 +9,11 @@ import 'package:flutter/gestures.dart';
 
 import 'framework.dart';
 
-/// An immutable span of text.
+/// An immutable widget that is inline embedded within text.
+///
+/// The [widget] property is the widget that will be embedded. It is the
+/// widget's responsibility to size itself appropriately, the text will
+/// not enforce any constraints.
 ///
 /// A [TextSpan] object can be styled using its [style] property.
 /// The style will be applied to the [text] and the [children].
@@ -27,13 +31,24 @@ import 'framework.dart';
 ///
 /// {@tool sample}
 ///
-/// The text "Hello world!", in black:
+/// A card with `Hello World!` embedded inline within a TextSpan tree.
 ///
 /// ```dart
-/// TextSpan(
-///   text: 'Hello world!',
-///   style: TextStyle(color: Colors.black),
-/// )
+/// <TextSpan>[
+///   TextSpan(text: 'Flutter is'),
+///   WidgetSpan(
+///     widget: SizedBox(
+///       width: 120,
+///       height: 50,
+///       child: Card(
+///         child: Center(
+///           child: Text('Hello World!')
+///         )
+///       ),
+///     )
+///   ),
+///   TextSpan(text: 'the best!'),
+/// ]
 /// ```
 /// {@end-tool}
 ///

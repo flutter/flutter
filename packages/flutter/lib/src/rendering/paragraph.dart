@@ -234,15 +234,6 @@ class RenderParagraph extends RenderBox
     markNeedsLayout();
   }
 
-  void _layoutText({ double minWidth = 0.0, double maxWidth = double.infinity }) {
-    final bool widthMatters = softWrap || overflow == TextOverflow.ellipsis;
-    _textPainter.layout(minWidth: minWidth, maxWidth: widthMatters ? maxWidth : double.infinity);
-  }
-
-  void _layoutTextWithConstraints(BoxConstraints constraints) {
-    _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
-  }
-
   @override
   double computeMinIntrinsicWidth(double height) {
     _layoutChildren();
@@ -327,8 +318,53 @@ class RenderParagraph extends RenderBox
   @visibleForTesting
   bool get debugHasOverflowShader => _overflowShader != null;
 
+  void _layoutText({ double minWidth = 0.0, double maxWidth = double.infinity }) {
+    final bool widthMatters = softWrap || overflow == TextOverflow.ellipsis;
+    _textPainter.layout(minWidth: minWidth, maxWidth: widthMatters ? maxWidth : double.infinity);
+  }
+
+  void _layoutTextWithConstraints(BoxConstraints constraints) {
+    _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
+  }
+
+  // Layout the child inline widgets. We pass the dimensions of the
+  // children to _textPainter so that appropriate placeholders can
+  // be inserted into the LibTxt layout.
+  void _layoutChildren() {
+    RenderBox child = firstChild;
+    List<PlaceholderDimensions> placeholderDimensions = List(childCount);
+    int childIndex = 0;
+    while (child != null) {
+      child.layout(BoxConstraints(), parentUsesSize: true);
+      placeholderDimensions[childIndex] = PlaceholderDimensions(
+        child.size,
+        child.getDistanceToBaseline(TextBaseline.alphabetic)
+      );
+      child = childAfter(child);
+      childIndex++;
+    }
+    _textPainter.placeholderDimensions = placeholderDimensions;
+  }
+
+  // Iterate through the laid-out children and set the parentData offsets based
+  // off of the placeholders inserted for each child.
+  void _setParentData() {
+    RenderBox child = firstChild;
+    int childIndex = 0;
+    while (child != null) {
+      final TextParentData textParentData = child.parentData;
+      textParentData.offset = Offset(
+        _textPainter.inlinePlaceholderBoxes[childIndex].left,
+        _textPainter.inlinePlaceholderBoxes[childIndex].top
+      );
+      child = childAfter(child);
+      childIndex++;
+    }
+  }
+
   @override
   void performLayout() {
+    print('PERFORMING LAYOUT');
     _layoutChildren();
     _layoutTextWithConstraints(constraints);
     _setParentData();
@@ -401,41 +437,6 @@ class RenderParagraph extends RenderBox
     } else {
       _needsClipping = false;
       _overflowShader = null;
-    }
-  }
-
-  void _layoutChildren() {
-    // Layout the child inline widgets. We pass the dimensions of the
-    // children to _textPainter so that appropriate placeholders can
-    // be inserted into the LibTxt layout.
-    RenderBox child = firstChild;
-    List<PlaceholderDimensions> placeholderDimensions = List(childCount);
-    int childIndex = 0;
-    while (child != null) {
-      child.layout(BoxConstraints(), parentUsesSize: true);
-      placeholderDimensions[childIndex] = PlaceholderDimensions(
-        child.size,
-        child.getDistanceToBaseline(TextBaseline.alphabetic)
-      );
-      child = childAfter(child);
-      childIndex++;
-    }
-    _textPainter.placeholderDimensions = placeholderDimensions;
-  }
-
-  void _setParentData() {
-    // Iterate through the laid-out children and set the parentData offsets based
-    // off of the placeholders inserted for each child.
-    RenderBox child = firstChild;
-    int childIndex = 0;
-    while (child != null) {
-      final TextParentData textParentData = child.parentData;
-      textParentData.offset = Offset(
-        _textPainter.inlinePlaceholderBoxes[childIndex].left,
-        _textPainter.inlinePlaceholderBoxes[childIndex].top
-      );
-      child = childAfter(child);
-      childIndex++;
     }
   }
 
