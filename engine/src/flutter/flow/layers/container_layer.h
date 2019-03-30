@@ -35,6 +35,9 @@ class ContainerLayer : public Layer {
   void UpdateSceneChildren(SceneUpdateContext& context);
 #endif  // defined(OS_FUCHSIA)
 
+  // For OpacityLayer to restructure to have a single child.
+  void ClearChildren() { layers_.clear(); }
+
  private:
   std::vector<std::shared_ptr<Layer>> layers_;
 
