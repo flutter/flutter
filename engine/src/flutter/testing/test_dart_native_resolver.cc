@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/shell/platform/embedder/tests/embedder_test_resolver.h"
+#include "flutter/testing/test_dart_native_resolver.h"
 
 #include <mutex>
 #include <vector>
@@ -10,19 +10,18 @@
 #include "flutter/fml/synchronization/thread_annotations.h"
 #include "tonic/converter/dart_converter.h"
 
-namespace shell {
 namespace testing {
 
-EmbedderTestResolver::EmbedderTestResolver() = default;
+TestDartNativeResolver::TestDartNativeResolver() = default;
 
-EmbedderTestResolver::~EmbedderTestResolver() = default;
+TestDartNativeResolver::~TestDartNativeResolver() = default;
 
-void EmbedderTestResolver::AddNativeCallback(std::string name,
-                                             Dart_NativeFunction callback) {
+void TestDartNativeResolver::AddNativeCallback(std::string name,
+                                               Dart_NativeFunction callback) {
   native_callbacks_[name] = callback;
 }
 
-Dart_NativeFunction EmbedderTestResolver::ResolveCallback(
+Dart_NativeFunction TestDartNativeResolver::ResolveCallback(
     std::string name) const {
   auto found = native_callbacks_.find(name);
   if (found == native_callbacks_.end()) {
@@ -33,10 +32,10 @@ Dart_NativeFunction EmbedderTestResolver::ResolveCallback(
 }
 
 static std::mutex gIsolateResolversMutex;
-static std::map<Dart_Isolate, std::weak_ptr<EmbedderTestResolver>>
+static std::map<Dart_Isolate, std::weak_ptr<TestDartNativeResolver>>
     gIsolateResolvers FML_GUARDED_BY(gIsolateResolversMutex);
 
-Dart_NativeFunction EmbedderTestResolver::DartNativeEntryResolverCallback(
+Dart_NativeFunction TestDartNativeResolver::DartNativeEntryResolverCallback(
     Dart_Handle dart_name,
     int num_of_arguments,
     bool* auto_setup_scope) {
@@ -62,7 +61,7 @@ static const uint8_t* DartNativeEntrySymbolCallback(
   return reinterpret_cast<const uint8_t*>("¯\\_(ツ)_/¯");
 }
 
-void EmbedderTestResolver::SetNativeResolverForIsolate() {
+void TestDartNativeResolver::SetNativeResolverForIsolate() {
   auto result = Dart_SetNativeResolver(Dart_RootLibrary(),
                                        DartNativeEntryResolverCallback,
                                        DartNativeEntrySymbolCallback);
@@ -87,4 +86,3 @@ void EmbedderTestResolver::SetNativeResolverForIsolate() {
 }
 
 }  // namespace testing
-}  // namespace shell

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:isolate';
+
 void main() {
 }
 
@@ -14,3 +16,12 @@ void sayHi() {
 void throwExceptionNow() {
   throw("Hello");
 }
+
+@pragma('vm:entry-point')
+void canRegisterNativeCallback() async {
+  print("In function canRegisterNativeCallback");
+  NotifyNative();
+  print("Called native method from canRegisterNativeCallback");
+}
+
+void NotifyNative() native "NotifyNative";
