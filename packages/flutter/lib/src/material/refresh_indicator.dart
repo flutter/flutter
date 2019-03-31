@@ -84,7 +84,7 @@ enum _RefreshIndicatorMode {
 class RefreshIndicator extends StatefulWidget {
   /// Creates a refresh indicator.
   ///
-  /// The [onRefresh], [child], [edgeDistance], and [notificationPredicate] arguments must be
+  /// The [onRefresh], [child], and [notificationPredicate] arguments must be
   /// non-null. The default
   /// [displacement] is 40.0 logical pixels.
   ///
@@ -104,7 +104,6 @@ class RefreshIndicator extends StatefulWidget {
     this.semanticsLabel,
     this.semanticsValue,
   }) : assert(child != null),
-       assert(edgeDistance != null),
        assert(onRefresh != null),
        assert(notificationPredicate != null),
        super(key: key);
