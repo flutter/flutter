@@ -466,7 +466,8 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
       thumbShape: sliderTheme.thumbShape ?? _defaultThumbShape,
       overlayShape: sliderTheme.overlayShape ?? _defaultOverlayShape,
       valueIndicatorShape: sliderTheme.valueIndicatorShape ?? _defaultValueIndicatorShape,
-      showValueIndicator: sliderTheme.showValueIndicator ?? _defaultShowValueIndicator
+      showValueIndicator: sliderTheme.showValueIndicator ?? _defaultShowValueIndicator,
+      valueIndicatorTextStyle: sliderTheme.valueIndicatorTextStyle ?? theme.textTheme.body2,
     );
 
     return _SliderRenderObjectWidget(
