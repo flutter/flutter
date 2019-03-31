@@ -196,42 +196,6 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
     _needsAddToScene = false;
   }
 
-  Layer _highlightConflictingLayer(PhysicalModelLayer child) {
-    final ui.PictureRecorder recorder = ui.PictureRecorder();
-    final Canvas canvas = Canvas(recorder);
-    canvas.drawPath(
-      child.clipPath,
-      Paint()
-        ..color = const Color(0xFFAA0000)
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = child.elevation + 10.0,
-    );
-    final PictureLayer pictureLayer = PictureLayer(child.clipPath.getBounds())
-      ..picture = recorder.endRecording()
-      ..debugCreator = child;
-    child.append(pictureLayer);
-    return pictureLayer;
-  }
-
-  List<Layer> _processConflictingPhysicalLayers(PhysicalModelLayer predecessor, PhysicalModelLayer child) {
-    FlutterError.reportError(FlutterErrorDetails(
-      exception: FlutterError('Painting order is out of order with respect to elevation.'),
-      library: 'rendering library',
-      context: 'during compositing',
-      informationCollector: (StringBuffer buffer) {
-        buffer.writeln('Attempted to composite layer:');
-        buffer.writeln(child);
-        buffer.writeln('after layer:');
-        buffer.writeln(predecessor);
-        buffer.writeln('which occupies the same area at a higher elevation.');
-      }
-    ));
-    return <Layer>[
-      _highlightConflictingLayer(predecessor),
-      _highlightConflictingLayer(child),
-    ];
-  }
-
   /// The object responsible for creating this layer.
   ///
   /// Defaults to the value of [RenderObject.debugCreator] for the render object
@@ -540,17 +504,52 @@ class ContainerLayer extends Layer {
     return child == equals;
   }
 
+  PictureLayer _highlightConflictingLayer(PhysicalModelLayer child) {
+    final ui.PictureRecorder recorder = ui.PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
+    canvas.drawPath(
+      child.clipPath,
+      Paint()
+        ..color = const Color(0xFFAA0000)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = child.elevation + 10.0,
+    );
+    final PictureLayer pictureLayer = PictureLayer(child.clipPath.getBounds())
+      ..picture = recorder.endRecording()
+      ..debugCreator = child;
+    child.append(pictureLayer);
+    return pictureLayer;
+  }
+
+  List<PictureLayer> _processConflictingPhysicalLayers(PhysicalModelLayer predecessor, PhysicalModelLayer child) {
+    FlutterError.reportError(FlutterErrorDetails(
+      exception: FlutterError('Painting order is out of order with respect to elevation.'),
+      library: 'rendering library',
+      context: 'during compositing',
+      informationCollector: (StringBuffer buffer) {
+        buffer.writeln('Attempted to composite layer:');
+        buffer.writeln(child);
+        buffer.writeln('after layer:');
+        buffer.writeln(predecessor);
+        buffer.writeln('which occupies the same area at a higher elevation.');
+      }
+    ));
+    return <PictureLayer>[
+      _highlightConflictingLayer(predecessor),
+      _highlightConflictingLayer(child),
+    ];
+  }
+
   /// Checks that no [PhysicalModelLayer] would paint after another
   /// [PhysicalModelLayer] that has a higher elevation.
   ///
-  /// Returns a list of [Layer] objects it added to the tree to highlight bad
-  /// nodes.  These layers should be removed from the tree after it has been
+  /// Returns a list of [PictureLayer] objects it added to the tree to highlight
+  /// bad nodes.  These layers should be removed from the tree after it has been
   /// shipped to the engine.
-  List<Layer> _debugCheckElevations() {
-    final List<PhysicalModelLayer> physicalModelLayers = <PhysicalModelLayer>[];
-    final List<Layer> addedLayers = <Layer>[];
-    final ContainerLayer container = this;
-    bool _predecessorIsNotDirectAncestor(Layer predecessor, Layer child) {
+  List<PictureLayer> _debugCheckElevations() {
+    final List<PhysicalModelLayer> physicalModelLayers = depthFirstIterateChildren().whereType<PhysicalModelLayer>().toList();
+    final List<PictureLayer> addedLayers = <PictureLayer>[];
+    bool _predecessorIsNotDirectAncestor(PhysicalModelLayer predecessor, Layer child) {
       while (child != null) {
         if (child == predecessor) {
           return true;
@@ -559,27 +558,27 @@ class ContainerLayer extends Layer {
       }
       return false;
     }
-
-    for (PhysicalModelLayer child in container.depthFirstIterateChildren().whereType<PhysicalModelLayer>()) {
+    for (int i = 0; i < physicalModelLayers.length; i++) {
+      final PhysicalModelLayer physicalModelLayer = physicalModelLayers[i];
       assert(
-        child.lastChild?.debugCreator != child,
+        physicalModelLayer.lastChild?.debugCreator != physicalModelLayer,
         'debugCheckElevations has either already visited this layer or failed '
         'to remove the added picture from it.',
       );
-      for (PhysicalModelLayer predecessor in physicalModelLayers) {
-        if (predecessor.elevation <= child.elevation || _predecessorIsNotDirectAncestor(predecessor, child)) {
+      for (int j = 0; j <= i; j++) {
+        final PhysicalModelLayer predecessor = physicalModelLayers[j];
+        if (predecessor.elevation <= physicalModelLayer.elevation || _predecessorIsNotDirectAncestor(predecessor, physicalModelLayer)) {
           continue;
         }
         final Path intersection = Path.combine(
           PathOperation.intersect,
           predecessor._debugTransformedClipPath,
-          child._debugTransformedClipPath,
+          physicalModelLayer._debugTransformedClipPath,
         );
         if (intersection != null && intersection.computeMetrics().any((ui.PathMetric metric) => metric.length > 0)) {
-          addedLayers.addAll(_processConflictingPhysicalLayers(predecessor, child));
+          addedLayers.addAll(_processConflictingPhysicalLayers(predecessor, physicalModelLayer));
         }
       }
-      physicalModelLayers.add(child);
     }
     return addedLayers;
   }
@@ -840,7 +839,7 @@ class OffsetLayer extends ContainerLayer {
   /// Consider this layer as the root and build a scene (a tree of layers)
   /// in the engine.
   ui.Scene buildScene(ui.SceneBuilder builder) {
-    List<Layer> temporaryLayers;
+    List<PictureLayer> temporaryLayers;
     assert(() {
       if (debugCheckElevationsEnabled) {
         temporaryLayers = _debugCheckElevations();
@@ -852,7 +851,7 @@ class OffsetLayer extends ContainerLayer {
     final ui.Scene scene = builder.build();
     assert(() {
       if (temporaryLayers != null) {
-        for (Layer temporaryLayer in temporaryLayers) {
+        for (PictureLayer temporaryLayer in temporaryLayers) {
           temporaryLayer.remove();
         }
       }
