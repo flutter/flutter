@@ -232,55 +232,6 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
     ];
   }
 
-  /// Checks that no [PhysicalModelLayer] would paint after another
-  /// [PhysicalModelLayer] that has a higher elevation.
-  ///
-  /// Returns a list of [Layer] objects it added to the tree to highlight bad
-  /// nodes.  These layers should be removed from the tree after it has been
-  /// shipped to the engine.
-  List<Layer> debugCheckElevations() {
-    if (this is! ContainerLayer) {
-      return null;
-    }
-    final List<PhysicalModelLayer> physicalModelLayers = <PhysicalModelLayer>[];
-    final List<Layer> addedLayers = <Layer>[];
-    final ContainerLayer container = this;
-    bool _predecessorIsNotDirectAncestor(Layer predecessor, Layer child) {
-      while (child != null) {
-        if (child == predecessor) {
-          return true;
-        }
-        child = child.parent;
-      }
-      return false;
-    }
-
-    for (Layer child in container.depthFirstIterateChildren()) {
-      if (child is PhysicalModelLayer) {
-        assert(
-          child.lastChild?.debugCreator != child,
-          'debugCheckElevations has either already visited this layer or failed to remove the added picture from it.',
-        );
-        for (PhysicalModelLayer predecessor in physicalModelLayers) {
-          if (predecessor.elevation <= child.elevation || _predecessorIsNotDirectAncestor(predecessor, child)) {
-            continue;
-          }
-          final Path intersection = Path.combine(
-            PathOperation.intersect,
-            predecessor._debugTransformedClipPath,
-            child._debugTransformedClipPath,
-          );
-          if (intersection != null && intersection.computeMetrics().any((ui.PathMetric metric) => metric.length > 0)) {
-            addedLayers.addAll(_processConflictingPhysicalLayers(predecessor, child));
-          } else {
-          }
-        }
-        physicalModelLayers.add(child);
-      }
-    }
-    return addedLayers;
-  }
-
   /// The object responsible for creating this layer.
   ///
   /// Defaults to the value of [RenderObject.debugCreator] for the render object
@@ -589,6 +540,51 @@ class ContainerLayer extends Layer {
     return child == equals;
   }
 
+  /// Checks that no [PhysicalModelLayer] would paint after another
+  /// [PhysicalModelLayer] that has a higher elevation.
+  ///
+  /// Returns a list of [Layer] objects it added to the tree to highlight bad
+  /// nodes.  These layers should be removed from the tree after it has been
+  /// shipped to the engine.
+  List<Layer> _debugCheckElevations() {
+    final List<PhysicalModelLayer> physicalModelLayers = <PhysicalModelLayer>[];
+    final List<Layer> addedLayers = <Layer>[];
+    final ContainerLayer container = this;
+    bool _predecessorIsNotDirectAncestor(Layer predecessor, Layer child) {
+      while (child != null) {
+        if (child == predecessor) {
+          return true;
+        }
+        child = child.parent;
+      }
+      return false;
+    }
+
+    for (PhysicalModelLayer child in container.depthFirstIterateChildren().whereType<PhysicalModelLayer>()) {
+      assert(
+        child.lastChild?.debugCreator != child,
+        'debugCheckElevations has either already visited this layer or failed '
+        'to remove the added picture from it.',
+      );
+      for (PhysicalModelLayer predecessor in physicalModelLayers) {
+        if (predecessor.elevation <= child.elevation || _predecessorIsNotDirectAncestor(predecessor, child)) {
+          continue;
+        }
+        final Path intersection = Path.combine(
+          PathOperation.intersect,
+          predecessor._debugTransformedClipPath,
+          child._debugTransformedClipPath,
+        );
+        if (intersection != null && intersection.computeMetrics().any((ui.PathMetric metric) => metric.length > 0)) {
+          addedLayers.addAll(_processConflictingPhysicalLayers(predecessor, child));
+        }
+      }
+      physicalModelLayers.add(child);
+    }
+    return addedLayers;
+  }
+
+
   @override
   void updateSubtreeNeedsAddToScene() {
     super.updateSubtreeNeedsAddToScene();
@@ -847,7 +843,7 @@ class OffsetLayer extends ContainerLayer {
     List<Layer> temporaryLayers;
     assert(() {
       if (debugCheckElevationsEnabled) {
-        temporaryLayers = debugCheckElevations();
+        temporaryLayers = _debugCheckElevations();
       }
       return true;
     }());
