@@ -288,7 +288,7 @@ class ExpansionPanelList extends StatefulWidget {
   ///
   ///   Widget _buildPanel() {
   ///     return ExpansionPanelList.radio(
-  ///       initialOpenPanelValue: 4,
+  ///       initialOpenPanelValue: 2,
   ///       children: _data.map<ExpansionPanelRadio>((Item item) {
   ///         return ExpansionPanelRadio(
   ///           value: item.id,
