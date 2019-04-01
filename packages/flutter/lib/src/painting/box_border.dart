@@ -56,6 +56,8 @@ enum BoxShape {
 ///  * [BorderSide], which is used to describe each side of the box.
 ///  * [RoundedRectangleBorder], another way of describing a box's border.
 ///  * [CircleBorder], another way of describing a circle border.
+///  * [PathBorder], another way of describing arbitrary shapes for a box's
+///    border.
 ///  * [BoxDecoration], which uses a [BoxBorder] to describe its borders.
 abstract class BoxBorder extends ShapeBorder {
   /// Abstract const constructor. This constructor enables subclasses to provide
