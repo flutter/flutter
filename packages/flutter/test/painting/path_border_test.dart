@@ -20,11 +20,11 @@ void main() {
     ];
     final PathBorder p10 = PathBorder(
       pathBuilder: (Rect boundary, TextDirection textDirection) => Path()..addRect(boundary),
-      border: BorderSide(width: 10.0),
+      border: const BorderSide(width: 10.0),
     );
-    final PathBorder p20 = PathBorder(
+    final PathBorder p20 = PathBorder.withPaint(
       pathBuilder: (Rect boundary, TextDirection textDirection) => Path()..addRect(boundary),
-      border: BorderSide(width: 20.0),
+      pathPaint: Paint()..strokeWidth = 20.0..style = PaintingStyle.stroke,
     );
     expect(p10.dimensions, const EdgeInsets.all(10.0));
     expect(p10.scale(2.0).dimensions, p20.dimensions);
