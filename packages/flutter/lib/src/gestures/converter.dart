@@ -32,9 +32,7 @@ class _PointerState {
 
   Offset lastPosition;
 
-  Offset deltaTo(Offset to) {
-    return to - lastPosition;
-  }
+  Offset deltaTo(Offset to) => to - lastPosition;
 
   @override
   String toString() {
