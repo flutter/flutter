@@ -123,4 +123,17 @@ void main() {
       expect(theme.scaffoldBackgroundColor, CupertinoColors.black);
     },
   );
+
+  testWidgets("Theme has default IconThemeData, which is derived from the theme's primary color", (WidgetTester tester) async {
+      const Color primaryColor = CupertinoColors.destructiveRed;
+      const CupertinoThemeData themeData = CupertinoThemeData(primaryColor: primaryColor);
+      const Icon icon = Icon(CupertinoIcons.add);
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: CupertinoTheme(data: themeData, child: icon))
+      );
+
+      expect(IconTheme.of(tester.widget(find.byIcon(icon.icon))).color, themeData.primaryColor);
+  });
 }
