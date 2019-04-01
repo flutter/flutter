@@ -36,11 +36,11 @@ assignees: ''
 ## Proposal
 
 <!--
-     Succinctly describe what you would like Flutter to be able to do.
+     Briefly but precisely describe what you would like Flutter to be able to do.
 
      Consider attaching images showing what you are imagining.
 
      Does this have to be provided by Flutter directly, or can it be provided
-     by a package on pub.dartlang.org? If so, maybe consider providing
-     that package rather than filing a bug.
+     by a package on pub.dartlang.org? If so, maybe consider implementing and
+     publishing such a package rather than filing a bug.
 -->
