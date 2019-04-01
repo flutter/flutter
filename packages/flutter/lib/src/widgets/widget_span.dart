@@ -9,25 +9,25 @@ import 'package:flutter/gestures.dart';
 
 import 'framework.dart';
 
-/// An immutable widget that is inline embedded within text.
+/// An immutable widget that is embedded inline within text.
 ///
 /// The [widget] property is the widget that will be embedded. It is the
 /// widget's responsibility to size itself appropriately, the text will
 /// not enforce any constraints.
 ///
-/// A [TextSpan] object can be styled using its [style] property.
-/// The style will be applied to the [text] and the [children].
+/// [WidgetSpan]s must be leaf nodes in the [TextSpan] tree. [WidgetSpan]s
+/// cannot have any [TextSpan] children. However, the [widget] property 
+/// may contain its own children, including [RichText] widgets which may
+/// include additional [WidgetSpan]s. Child [RichText] widgets will be
+/// laid out independently and occupy a rectangular space in the parent
+/// text layout.
 ///
-/// A [TextSpan] object can just have plain text, or it can have
-/// children [TextSpan] objects with their own styles that (possibly
-/// only partially) override the [style] of this object. If a
-/// [TextSpan] has both [text] and [children], then the [text] is
-/// treated as if it was an unstyled [TextSpan] at the start of the
-/// [children] list.
+/// [WidgetSpan]s will be ignored when passed into a [TextPainter] directly.
+/// To properly layout and paint the [widget], [WidgetSpan] should be passed
+/// into a [RichText] widget.
 ///
-/// To paint a [TextSpan] on a [Canvas], use a [TextPainter]. To display a text
-/// span in a widget, use a [RichText]. For text with a single style, consider
-/// using the [Text] widget.
+/// Widgets will be aligned with the rest of the text along the
+/// [TextBaseline.alphabetic] baseline, defined by [RenderBox.getDistanceToBaseline]. 
 ///
 /// {@tool sample}
 ///
@@ -52,20 +52,21 @@ import 'framework.dart';
 /// ```
 /// {@end-tool}
 ///
-/// _There is some more detailed sample code in the documentation for the
-/// [recognizer] property._
-///
 /// See also:
 ///
+///  * [TextSpan], a node that represents text in a [TextSpan] tree.
 ///  * [Text], a widget for showing uniformly-styled text.
 ///  * [RichText], a widget for finer control of text rendering.
 ///  * [TextPainter], a class for painting [TextSpan] objects on a [Canvas].
 @immutable
 class WidgetSpan extends TextSpan {
-  /// Creates a [TextSpan] with the given values.
+  /// Creates a [WidgetSpan] with the given values.
   ///
-  /// For the object to be useful, at least one of [text] or
-  /// [children] should be set.
+  /// The [widget] property should be non-null. [WidgetSpan] cannot contain any
+  /// [TextSpan] or [WidgetSpan] children.
+  ///
+  /// A [TextStyle] may be provided with the [style] property, but only the
+  /// decoration, foreground, background, and spacing options will be used.
   const WidgetSpan({
     Widget widget,
     TextStyle style,
@@ -76,14 +77,15 @@ class WidgetSpan extends TextSpan {
 
   final Widget widget;
 
-  /// Apply the [style], [text], and [children] of this object to the
-  /// given [ParagraphBuilder], from which a [Paragraph] can be obtained.
-  /// [Paragraph] objects can be drawn on [Canvas] objects.
+  /// Adds a placeholder box to the paragraph builder if a size has been
+  /// calculated for the widget.
   ///
-  /// Rather than using this directly, it's simpler to use the
-  /// [TextPainter] class to paint [TextSpan] objects onto [Canvas]
-  /// objects.
-  /// 
+  /// Sizes are provided through [dimensions], which should contain a 1:1
+  /// in-order mapping of widget to laid out dimensions. If no such dimension
+  /// is provided, the widget will be skipped.
+  ///
+  /// Since widget sizes are calculated independently from the rest of the
+  /// paragraph, the [textScaleFactor] is ignored.
   @override
   void build(ui.ParagraphBuilder builder, { double textScaleFactor = 1.0, List<PlaceholderDimensions> dimensions }) {
     assert(debugAssertIsValid());
@@ -91,7 +93,7 @@ class WidgetSpan extends TextSpan {
     final bool hasStyle = style != null;
     if (hasStyle)
       builder.pushStyle(style.getTextStyle(textScaleFactor: textScaleFactor));
-    if (builder.placeholderCount < dimensions.length) {
+    if (dimensions != null && builder.placeholderCount < dimensions.length) {
       PlaceholderDimensions currentDimensions = dimensions[builder.placeholderCount];
       builder.addPlaceholder(
         currentDimensions.size.width,
@@ -103,8 +105,11 @@ class WidgetSpan extends TextSpan {
       builder.pop();
   }
 
-  /// Describe the difference between this text span and another, in terms of
-  /// how much damage it will make to the rendering. The comparison is deep.
+  /// Describe the difference between this widget span and another [TextSpan],
+  /// in terms of how much damage it will make to the rendering. The comparison
+  /// is deep.
+  ///
+  /// Comparing a [WidgetSpan] with a [TextSpan] will result in [RenderComparison.layout].
   ///
   /// See also:
   ///

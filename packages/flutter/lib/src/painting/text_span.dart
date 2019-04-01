@@ -43,8 +43,14 @@ import 'text_painter.dart';
 /// _There is some more detailed sample code in the documentation for the
 /// [recognizer] property._
 ///
+/// Widgets may be embedded inline. Specify a widget within the [children]
+/// tree by wrapping the widget with a [WidgetSpan]. The widget will be laid
+/// out inline within the paragraph.
+///
 /// See also:
 ///
+///  * [WidgetSpan], a leaf node that represents an embedded inline widget
+///    in a [TextSpan] tree.
 ///  * [Text], a widget for showing uniformly-styled text.
 ///  * [RichText], a widget for finer control of text rendering.
 ///  * [TextPainter], a class for painting [TextSpan] objects on a [Canvas].
@@ -285,12 +291,16 @@ class TextSpan extends DiagnosticableTree {
   /// Describe the difference between this text span and another, in terms of
   /// how much damage it will make to the rendering. The comparison is deep.
   ///
+  /// Comparing a [TextSpan] with a [WidgetSpan] will result in [RenderComparison.layout].
+  ///
   /// See also:
   ///
   ///  * [TextStyle.compareTo], which does the same thing for [TextStyle]s.
   RenderComparison compareTo(TextSpan other) {
     if (identical(this, other))
       return RenderComparison.identical;
+    if (!(other.runtimeType is TextSpan))
+      return RenderComparison.layout;
     if (other.text != text ||
         children?.length != other.children?.length ||
         (style == null) != (other.style == null))

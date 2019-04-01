@@ -32,7 +32,7 @@ enum TextOverflow {
 
 const String _kEllipsis = '\u2026';
 
-// /// Parent data for use with [RenderParagraph].
+/// Parent data for use with [RenderParagraph].
 class TextParentData extends ContainerBoxParentData<RenderBox> {
   @override
   String toString() {
