@@ -15,9 +15,9 @@ import 'scroll_simulation.dart';
 
 export 'package:flutter/physics.dart' show Simulation, ScrollSpringSimulation, Tolerance;
 
- // Examples can assume:
- // class FooScrollPhysics extends ScrollPhysics { }
- // class BarScrollPhysics extends ScrollPhysics { }
+// Examples can assume:
+// class FooScrollPhysics extends ScrollPhysics { }
+// class BarScrollPhysics extends ScrollPhysics { }
 
 /// Determines the physics of a [Scrollable] widget.
 ///
@@ -33,7 +33,7 @@ export 'package:flutter/physics.dart' show Simulation, ScrollSpringSimulation, T
 /// [ScrollPhysics] objects of differnt types to get the desired scroll physics.
 ///
 /// See also:
-/// * [parent], the parent [ScrollPhysics] that determines the default
+///  * [parent], the parent [ScrollPhysics] that determines the default
 ///    behavior for each method.
 @immutable
 class ScrollPhysics {
