@@ -18,7 +18,6 @@ export 'package:flutter/physics.dart' show Simulation, ScrollSpringSimulation, T
  // Examples can assume:
  // class FooScrollPhysics extends ScrollPhysics { }
  // class BarScrollPhysics extends ScrollPhysics { }
- // class FooBarScrollPhysics extends ScrollPhysics { }
 
 /// Determines the physics of a [Scrollable] widget.
 ///
@@ -30,7 +29,12 @@ export 'package:flutter/physics.dart' show Simulation, ScrollSpringSimulation, T
 /// simulation. The movement of the particle in the simulation is then used to
 /// determine the scroll position for the widget.
 ///
-/// Different types of 
+/// Instead of creating your own subclasses, [parent] can be used to combine
+/// [ScrollPhysics] objects of differnt types to get the desired scroll physics.
+///
+/// See also:
+/// * [parent], the parent [ScrollPhysics] that determines the default
+///    behavior for each method.
 @immutable
 class ScrollPhysics {
   /// Creates an object with the default scroll physics.
@@ -44,11 +48,13 @@ class ScrollPhysics {
   /// [ScrollPhysics] subclasses at runtime. For example:
   ///
   /// ```dart
-  /// BouncingScrollPhysics(parent: AlwaysScrollPhysics())
+  /// BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics())
   ///
   /// ```
   /// will result in a [ScrollPhysics] that has the combined behavior
-  /// of [BouncingScrollPhysics] and [AlwaysScrollPhysics].
+  /// of [BouncingScrollPhysics] and [AlwaysScrollableScrollPhysics]:
+  /// behaviors that are not specified in [BouncingScrollPhysics]
+  /// (e.g. [shouldAcceptUserOffset]) will defer to [AlwaysScrollableScrollPhysics].
   final ScrollPhysics parent;
 
   /// If [parent] is null then return ancestor, otherwise recursively build a
@@ -71,22 +77,20 @@ class ScrollPhysics {
   /// is applied recursively and ancestor will appear at the end of the
   /// existing chain of parents.
   ///
-  /// {@tool sample}
-  ///
-  /// In the following example, the [applyTo] method is used to combine two existing [ScrollPhysics] instances,
-  /// the resulting [ScrollPhysics] instance [x] has the same behavior as [y]:
-  ///
-  /// ```dart
-  /// const FooScrollPhysics existingPhysics = FooScrollPhysics(parent: BarScrollPhysics());
-  /// const FooBarScrollPhysics newPhysics = FooBarScrollPhysics();
-  ///
-  /// final FooScrollPhysics x = existingPhysics.applyTo(newPhysics);
-  /// const FooScrollPhysics y = FooScrollPhysics(parent: BarScrollPhysics(parent: newPhysics));
-  /// ```
-  /// {@end-tool}
-  ///
   /// The returned object will combine some of the behaviors from this
   /// [ScrollPhysics] instance and some of the behaviors from [ancestor].
+  ///
+  /// {@tool sample}
+  ///
+  /// In the following example, the [applyTo] method is used to combine the 
+  /// scroll physics of two [ScrollPhysics] objects, the resulting [ScrollPhysics]
+  /// `x` has the same behavior as `y`:
+  ///
+  /// ```dart
+  /// final FooScrollPhysics x = FooScrollPhysics().applyTo(BarScrollPhysics);
+  /// const FooScrollPhysics y = FooScrollPhysics(parent: BarScrollPhysics());
+  /// ```
+  /// {@end-tool}
   ///
   /// See also:
   ///
