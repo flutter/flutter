@@ -13,14 +13,14 @@
 namespace shell {
 
 IOSGLContext::IOSGLContext() {
-  context_.reset([[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES3]);
-  if (context_ != nullptr) {
-    resource_context_.reset([[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES3
-                                                  sharegroup:context_.get().sharegroup]);
+  resource_context_.reset([[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES3]);
+  if (resource_context_ != nullptr) {
+    context_.reset([[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES3
+                                         sharegroup:resource_context_.get().sharegroup]);
   } else {
-    context_.reset([[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2]);
-    resource_context_.reset([[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2
-                                                  sharegroup:context_.get().sharegroup]);
+    resource_context_.reset([[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2]);
+    context_.reset([[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2
+                                         sharegroup:resource_context_.get().sharegroup]);
   }
 
   // TODO:

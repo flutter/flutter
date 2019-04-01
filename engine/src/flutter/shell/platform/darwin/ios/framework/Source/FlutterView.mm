@@ -75,7 +75,7 @@ id<FlutterViewEngineDelegate> _delegate;
 #endif  // TARGET_IPHONE_SIMULATOR
 }
 
-- (std::unique_ptr<shell::IOSSurface>)createSurface {
+- (std::unique_ptr<shell::IOSSurface>)createSurface:(std::shared_ptr<shell::IOSGLContext>)context {
   if ([self.layer isKindOfClass:[CAEAGLLayer class]]) {
     fml::scoped_nsobject<CAEAGLLayer> eagl_layer(
         reinterpret_cast<CAEAGLLayer*>([self.layer retain]));
@@ -88,7 +88,7 @@ id<FlutterViewEngineDelegate> _delegate;
         eagl_layer.get().presentsWithTransaction = YES;
       }
     }
-    return std::make_unique<shell::IOSSurfaceGL>(std::move(eagl_layer),
+    return std::make_unique<shell::IOSSurfaceGL>(context, std::move(eagl_layer),
                                                  [_delegate platformViewsController]);
   } else {
     fml::scoped_nsobject<CALayer> layer(reinterpret_cast<CALayer*>([self.layer retain]));

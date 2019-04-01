@@ -33,7 +33,7 @@
 
 - (instancetype)initWithDelegate:(id<FlutterViewEngineDelegate>)delegate
                           opaque:(BOOL)opaque NS_DESIGNATED_INITIALIZER;
-- (std::unique_ptr<shell::IOSSurface>)createSurface;
+- (std::unique_ptr<shell::IOSSurface>)createSurface:(std::shared_ptr<shell::IOSGLContext>)context;
 
 @end
 
