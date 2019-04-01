@@ -236,6 +236,97 @@ class ExpansionPanelList extends StatefulWidget {
   /// expand/collapse button is pushed. The [children] and [animationDuration]
   /// arguments must not be null. The [children] objects must be instances
   /// of [ExpansionPanelRadio].
+  ///
+  /// {@tool sample}
+  ///
+  /// Here is a sample of a ExpansionPanelRadio example.
+  ///
+  /// ```dart
+  /// import 'package:flutter/material.dart';
+  ///
+  /// class Item<T> {
+  ///   Item({
+  ///     this.id,
+  ///     this.expandedValue,
+  ///     this.headerValue,
+  ///   });
+  ///
+  ///   int id;
+  ///   String expandedValue;
+  ///   String headerValue;
+  /// }
+  ///
+  /// void main() {
+  ///   runApp(
+  ///     MaterialApp(
+  ///       home: Scaffold(
+  ///         appBar: AppBar(title: Text("Expansion Panel Radio")),
+  ///         body: MyApp(),
+  ///       ),
+  ///     ),
+  ///   );
+  /// }
+  ///
+  /// class MyApp extends StatefulWidget {
+  ///   @override
+  ///   _MyAppState createState() => _MyAppState();
+  /// }
+  ///
+  /// class _MyAppState extends State<MyApp> {
+  ///   List<Item> _data = generateItems(8);
+  ///
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return SingleChildScrollView(
+  ///       child: Container(
+  ///         child: _buildPanel(),
+  ///       ),
+  ///     );
+  ///   }
+  ///
+  ///   Widget _buildPanel() {
+  ///     return ExpansionPanelList.radio(
+  ///       initialOpenPanelValue: 4,
+  ///       children: _data.map<ExpansionPanelRadio>((Item item) {
+  ///         return ExpansionPanelRadio(
+  ///           value: item.id,
+  ///           headerBuilder: (BuildContext context, bool isExpanded) {
+  ///             return ListTile(
+  ///               title: Text(item.headerValue),
+  ///             );
+  ///           },
+  ///           body: ListTile(
+  ///             title: Text(item.expandedValue),
+  ///             subtitle: Text('To delete this panel, tap the trash can icon'),
+  ///             trailing: Icon(Icons.delete),
+  ///             onTap: () {
+  ///               setState(() {
+  ///                 _data.removeWhere((currentItem) => item == currentItem);
+  ///               });
+  ///             }
+  ///           )
+  ///         );
+  ///       }).toList(),
+  ///     );
+  ///   }
+  /// }
+  ///
+  /// List<Item> generateItems(int numberOfItems) {
+  ///   List<Item> result = [];
+  ///
+  ///   for (int i = 1; i < numberOfItems + 1; i++) {
+  ///     result.add(Item(
+  ///       id: i,
+  ///       headerValue: 'Panel #$i',
+  ///       expandedValue: 'This is item number $i',
+  ///     ));
+  ///   }
+  ///
+  ///   return result;
+  /// }
+  /// ```
+  ///
+  /// {@end-tool}
   const ExpansionPanelList.radio({
     Key key,
     this.children = const <ExpansionPanelRadio>[],
