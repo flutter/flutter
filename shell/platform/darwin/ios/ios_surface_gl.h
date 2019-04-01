@@ -20,7 +20,8 @@ class IOSSurfaceGL : public IOSSurface,
                      public GPUSurfaceGLDelegate,
                      public flow::ExternalViewEmbedder {
  public:
-  IOSSurfaceGL(fml::scoped_nsobject<CAEAGLLayer> layer,
+  IOSSurfaceGL(std::shared_ptr<IOSGLContext> context,
+               fml::scoped_nsobject<CAEAGLLayer> layer,
                FlutterPlatformViewsController* platform_views_controller);
 
   IOSSurfaceGL(fml::scoped_nsobject<CAEAGLLayer> layer, std::shared_ptr<IOSGLContext> context);
