@@ -64,6 +64,7 @@ typedef ExpansionPanelHeaderBuilder = Widget Function(BuildContext context, bool
 ///  * <https://material.io/design/components/lists.html#types>
 class ExpansionPanel {
   /// Creates an expansion panel to be used as a child for [ExpansionPanelList].
+  /// See [ExpansionPanelList] for an example on how to use this widget.
   ///
   /// The [headerBuilder], [body], and [isExpanded] arguments must not be null.
   ExpansionPanel({
@@ -113,6 +114,99 @@ class ExpansionPanelRadio extends ExpansionPanel {
 /// A material expansion panel list that lays out its children and animates
 /// expansions.
 ///
+/// {@tool sample}
+///
+/// Here is a simple example of how to implement an ExpansionPanelList.
+///
+/// ```dart
+/// import 'package:flutter/material.dart';
+///
+/// void main() {
+///   runApp(
+///     MaterialApp(
+///       home: Scaffold(
+///         appBar: AppBar(title: Text("Expansion Panel")),
+///         body: MyApp(),
+///       ),
+///     ),
+///   );
+/// }
+///
+/// class MyApp extends StatefulWidget {
+///   @override
+///   _MyAppState createState() => _MyAppState();
+/// }
+///
+/// class _MyAppState extends State<MyApp> {
+///   List<Item> _data = generateItems(8);
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return SingleChildScrollView(
+///       child: Container(
+///         child: _buildPanel(),
+///       ),
+///     );
+///   }
+///
+///   Widget _buildPanel() {
+///     return ExpansionPanelList(
+///       expansionCallback: (int index, bool isExpanded) {
+///         setState(() {
+///           _data[index].isExpanded = !isExpanded;
+///         });
+///       },
+///       children: _data.map<ExpansionPanel>((Item item) {
+///         return ExpansionPanel(
+///           headerBuilder: (BuildContext context, bool isExpanded) {
+///             return ListTile(
+///               title: Text(item.headerValue),
+///             );
+///           },
+///           body: ListTile(
+///             title: Text(item.expandedValue),
+///             subtitle: Text('To delete this panel, tap the trash can icon'),
+///             trailing: Icon(Icons.delete),
+///             onTap: () {
+///               setState(() {
+///                 _data.removeWhere((currentItem) => item == currentItem);
+///               });
+///             }
+///           ),
+///           isExpanded: item.isExpanded,
+///         );
+///       }).toList(),
+///     );
+///   }
+/// }
+///
+/// List<Item> generateItems(int numberOfItems) {
+///   List<Item> result = [];
+///
+///   for (int i = 1; i < numberOfItems + 1; i++) {
+///     result.add(Item(
+///       headerValue: 'Panel #$i',
+///       expandedValue: 'This is item number $i',
+///     ));
+///   }
+///
+///   return result;
+/// }
+///
+/// class Item<T> {
+///   Item({
+///     this.expandedValue,
+///     this.headerValue,
+///     this.isExpanded = false,
+///   });
+///
+///   String expandedValue;
+///   String headerValue;
+///   bool isExpanded;
+/// }
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [ExpansionPanel]
@@ -122,99 +216,6 @@ class ExpansionPanelList extends StatefulWidget {
   /// triggered when an expansion panel expand/collapse button is pushed.
   ///
   /// The [children] and [animationDuration] arguments must not be null.
-  ///
-  /// {@tool sample}
-  ///
-  /// Here is an example of how to implement an ExpansionPanelList.
-  ///
-  /// ```dart
-  /// import 'package:flutter/material.dart';
-  ///
-  /// void main() {
-  ///   runApp(
-  ///     MaterialApp(
-  ///       home: Scaffold(
-  ///         appBar: AppBar(title: Text("Expansion Panel")),
-  ///         body: MyApp(),
-  ///       ),
-  ///     ),
-  ///   );
-  /// }
-  ///
-  /// class MyApp extends StatefulWidget {
-  ///   @override
-  ///   _MyAppState createState() => _MyAppState();
-  /// }
-  ///
-  /// class _MyAppState extends State<MyApp> {
-  ///   List<Item> _data = generateItems(8);
-  ///
-  ///   @override
-  ///   Widget build(BuildContext context) {
-  ///     return SingleChildScrollView(
-  ///       child: Container(
-  ///         child: _buildPanel(),
-  ///       ),
-  ///     );
-  ///   }
-  ///
-  ///   Widget _buildPanel() {
-  ///     return ExpansionPanelList(
-  ///       expansionCallback: (int index, bool isExpanded) {
-  ///         setState(() {
-  ///           _data[index].isExpanded = !isExpanded;
-  ///         });
-  ///       },
-  ///       children: _data.map<ExpansionPanel>((Item item) {
-  ///         return ExpansionPanel(
-  ///           headerBuilder: (BuildContext context, bool isExpanded) {
-  ///             return ListTile(
-  ///               title: Text(item.headerValue),
-  ///             );
-  ///           },
-  ///           body: ListTile(
-  ///             title: Text(item.expandedValue),
-  ///             subtitle: Text('To delete this panel, tap the trash can icon'),
-  ///             trailing: Icon(Icons.delete),
-  ///             onTap: () {
-  ///               setState(() {
-  ///                 _data.removeWhere((currentItem) => item == currentItem);
-  ///               });
-  ///             }
-  ///           ),
-  ///           isExpanded: item.isExpanded,
-  ///         );
-  ///       }).toList(),
-  ///     );
-  ///   }
-  /// }
-  ///
-  /// List<Item> generateItems(int numberOfItems) {
-  ///   List<Item> result = [];
-  ///
-  ///   for (int i = 1; i < numberOfItems + 1; i++) {
-  ///     result.add(Item(
-  ///       headerValue: 'Panel #$i',
-  ///       expandedValue: 'This is item number $i',
-  ///     ));
-  ///   }
-  ///
-  ///   return result;
-  /// }
-  ///
-  /// class Item<T> {
-  ///   Item({
-  ///     this.expandedValue,
-  ///     this.headerValue,
-  ///     this.isExpanded = false,
-  ///   });
-  ///
-  ///   String expandedValue;
-  ///   String headerValue;
-  ///   bool isExpanded;
-  /// }
-  /// ```
-  /// {@end-tool}
   const ExpansionPanelList({
     Key key,
     this.children = const <ExpansionPanel>[],
