@@ -121,6 +121,32 @@ class ExpansionPanelRadio extends ExpansionPanel {
 /// ```dart
 /// import 'package:flutter/material.dart';
 ///
+/// List<Item> generateItems(int numberOfItems) {
+///   List<Item> result = [];
+///
+///   for (int i = 1; i < numberOfItems + 1; i++) {
+///     result.add(Item(
+///       headerValue: 'Panel #$i',
+///       expandedValue: 'This is item number $i',
+///     ));
+///   }
+///
+///   return result;
+/// }
+///
+/// // stores ExpansionPanel state information
+/// class Item<T> {
+///   Item({
+///     this.expandedValue,
+///     this.headerValue,
+///     this.isExpanded = false,
+///   });
+///
+///   String expandedValue;
+///   String headerValue;
+///   bool isExpanded;
+/// }
+///
 /// void main() {
 ///   runApp(
 ///     MaterialApp(
@@ -179,37 +205,13 @@ class ExpansionPanelRadio extends ExpansionPanel {
 ///     );
 ///   }
 /// }
-///
-/// List<Item> generateItems(int numberOfItems) {
-///   List<Item> result = [];
-///
-///   for (int i = 1; i < numberOfItems + 1; i++) {
-///     result.add(Item(
-///       headerValue: 'Panel #$i',
-///       expandedValue: 'This is item number $i',
-///     ));
-///   }
-///
-///   return result;
-/// }
-///
-/// class Item<T> {
-///   Item({
-///     this.expandedValue,
-///     this.headerValue,
-///     this.isExpanded = false,
-///   });
-///
-///   String expandedValue;
-///   String headerValue;
-///   bool isExpanded;
-/// }
 /// ```
 /// {@end-tool}
 ///
 /// See also:
 ///
 ///  * [ExpansionPanel]
+///  * [ExpansionPanelList.radio]
 ///  * <https://material.io/design/components/lists.html#types>
 class ExpansionPanelList extends StatefulWidget {
   /// Creates an expansion panel list widget. The [expansionCallback] is
