@@ -236,20 +236,20 @@ class RenderParagraph extends RenderBox
 
   @override
   double computeMinIntrinsicWidth(double height) {
-    performLayout();
+    _layoutChildren(constraints);
     _layoutText();
     return _textPainter.minIntrinsicWidth;
   }
 
   @override
   double computeMaxIntrinsicWidth(double height) {
-    performLayout();
+    _layoutChildren(constraints);
     _layoutText();
     return _textPainter.maxIntrinsicWidth;
   }
 
   double _computeIntrinsicHeight(double width) {
-    performLayout();
+    _layoutChildren(constraints);
     _layoutText(minWidth: width, maxWidth: width);
     return _textPainter.height;
   }
@@ -269,7 +269,6 @@ class RenderParagraph extends RenderBox
     assert(!debugNeedsLayout);
     assert(constraints != null);
     assert(constraints.debugAssertIsValid());
-    // _layoutChildren();
     _layoutTextWithConstraints(constraints);
     return _textPainter.computeDistanceToActualBaseline(baseline);
   }
