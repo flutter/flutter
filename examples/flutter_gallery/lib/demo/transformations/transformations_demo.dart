@@ -1,17 +1,17 @@
 import 'dart:ui' show Vertices;
 import 'package:flutter/material.dart';
-import 'pan_and_zoom_demo_board.dart';
-import 'pan_and_zoom_demo_edit_board_point.dart';
-import 'pan_and_zoom_demo_gesture_transformable.dart';
+import 'transformations_demo_board.dart';
+import 'transformations_demo_edit_board_point.dart';
+import 'transformations_demo_gesture_transformable.dart';
 
-class PanAndZoomDemo extends StatefulWidget {
-  const PanAndZoomDemo({ Key key }) : super(key: key);
+class TransformationsDemo extends StatefulWidget {
+  const TransformationsDemo({ Key key }) : super(key: key);
 
-  static const String routeName = '/pan_and_zoom';
+  static const String routeName = '/transformations';
 
-  @override _PanAndZoomDemoState createState() => _PanAndZoomDemoState();
+  @override _TransformationsDemoState createState() => _TransformationsDemoState();
 }
-class _PanAndZoomDemoState extends State<PanAndZoomDemo> {
+class _TransformationsDemoState extends State<TransformationsDemo> {
   // The radius of a hexagon tile in pixels.
   static const double _kHexagonRadius = 32.0;
   // The margin between hexagons.

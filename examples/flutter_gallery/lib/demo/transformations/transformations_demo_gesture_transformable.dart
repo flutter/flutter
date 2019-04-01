@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:vector_math/vector_math_64.dart' show Vector3;
-import 'pan_and_zoom_demo_inertial_motion.dart';
+import 'transformations_demo_inertial_motion.dart';
 
 // Empty function type for the onResetEnd parameter.
 typedef _ResetEndCallback = void Function();
@@ -119,7 +119,7 @@ class GestureTransformable extends StatefulWidget {
   final double initialScale;
   final double initialRotation;
 
-  @override _GestureTransformableState createState() => _GestureTransformableState();
+  @override GestureTransformableState createState() => GestureTransformableState();
 }
 
 // A single user event can only represent one of these gestures. The user can't
@@ -130,7 +130,8 @@ enum _GestureType {
   rotate,
 }
 
-class _GestureTransformableState extends State<GestureTransformable> with TickerProviderStateMixin {
+// This is public only for access from a unit test.
+class GestureTransformableState extends State<GestureTransformable> with TickerProviderStateMixin {
   Animation<Offset> _animation;
   AnimationController _controller;
   Animation<Matrix4> _animationReset;

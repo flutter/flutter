@@ -124,12 +124,12 @@ List<GalleryDemo> _buildGalleryDemos() {
       buildRoute: (BuildContext context) => const AnimationDemo(),
     ),
     GalleryDemo(
-      title: 'Pan & Zoom',
-      subtitle: '2D transforms and gestures',
+      title: '2D Transformations',
+      subtitle: 'Pan, Zoom, Rotate',
       icon: GalleryIcons.grid_on,
       category: _kDemos,
-      routeName: PanAndZoomDemo.routeName,
-      buildRoute: (BuildContext context) => const PanAndZoomDemo(),
+      routeName: TransformationsDemo.routeName,
+      buildRoute: (BuildContext context) => const TransformationsDemo(),
     ),
 
     // Style
