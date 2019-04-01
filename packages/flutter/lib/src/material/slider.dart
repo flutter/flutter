@@ -467,7 +467,9 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
       overlayShape: sliderTheme.overlayShape ?? _defaultOverlayShape,
       valueIndicatorShape: sliderTheme.valueIndicatorShape ?? _defaultValueIndicatorShape,
       showValueIndicator: sliderTheme.showValueIndicator ?? _defaultShowValueIndicator,
-      valueIndicatorTextStyle: sliderTheme.valueIndicatorTextStyle ?? theme.textTheme.body2,
+      valueIndicatorTextStyle: sliderTheme.valueIndicatorTextStyle ?? theme.textTheme.body2.copyWith(
+        color: theme.colorScheme.onPrimary,
+      ),
     );
 
     return _SliderRenderObjectWidget(
@@ -1002,7 +1004,6 @@ class _RenderSlider extends RenderBox {
       isEnabled: isInteractive,
     );
 
-    // TODO(closkmith): Move this to paint after the thumb.
     if (!_overlayAnimation.isDismissed) {
       _sliderTheme.overlayShape.paint(
         context,
@@ -1019,7 +1020,6 @@ class _RenderSlider extends RenderBox {
     }
 
     if (isDiscrete) {
-      // TODO(clocksmith): Align tick mark centers to ends of track by not subtracting diameter from length.
       final double tickMarkWidth = _sliderTheme.tickMarkShape.getPreferredSize(
         isEnabled: isInteractive,
         sliderTheme: _sliderTheme,

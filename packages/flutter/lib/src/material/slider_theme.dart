@@ -1113,19 +1113,7 @@ class RectangularSliderTrackShape extends SliderTrackShape {
         rightTrackPaint = activePaint;
         break;
     }
-
-    // Used to create a gap around the thumb iff the slider is disabled.
-    // If the slider is enabled, the track can be drawn beneath the thumb
-    // without a gap. But when the slider is disabled, the track is shortened
-    // and this gap helps determine how much shorter it should be.
-    // TODO(clocksmith): The new Material spec has a gray circle in place of this gap.
-    double horizontalAdjustment = 0.0;
-    if (!isEnabled) {
-      final double disabledThumbRadius = sliderTheme.thumbShape.getPreferredSize(false, isDiscrete).width / 2.0;
-      final double gap = disabledThumbGapWidth * (1.0 - enableAnimation.value);
-      horizontalAdjustment = disabledThumbRadius + gap;
-    }
-
+    
     final Rect trackRect = getPreferredRect(
       parentBox: parentBox,
       offset: offset,
@@ -1134,9 +1122,9 @@ class RectangularSliderTrackShape extends SliderTrackShape {
       isDiscrete: isDiscrete,
     );
 
-    final Rect leftTrackSegment = Rect.fromLTRB(trackRect.left, trackRect.top, thumbCenter.dx - horizontalAdjustment, trackRect.bottom);
+    final Rect leftTrackSegment = Rect.fromLTRB(trackRect.left, trackRect.top, thumbCenter.dx, trackRect.bottom);
     context.canvas.drawRect(leftTrackSegment, leftTrackPaint);
-    final Rect rightTrackSegment = Rect.fromLTRB(thumbCenter.dx + horizontalAdjustment, trackRect.top, trackRect.right, trackRect.bottom);
+    final Rect rightTrackSegment = Rect.fromLTRB(thumbCenter.dx, trackRect.top, trackRect.right, trackRect.bottom);
     context.canvas.drawRect(rightTrackSegment, rightTrackPaint);
   }
 }
@@ -1225,7 +1213,6 @@ class RoundSliderTickMarkShape extends SliderTickMarkShape {
 ///    sliders in a widget subtree.
 class RoundSliderThumbShape extends SliderComponentShape {
   /// Create a slider thumb that draws a circle.
-  // TODO(clocksmith): This needs to be changed to 10 according to spec.
   const RoundSliderThumbShape({
     this.enabledThumbRadius = 10.0,
     this.disabledThumbRadius,
@@ -1326,11 +1313,6 @@ class RoundSliderOverlayShape extends SliderComponentShape {
       end: overlayRadius,
     );
 
-    // TODO(gspencer): We don't really follow the spec here for overlays.
-    // The spec says to use 16% opacity for drawing over light material,
-    // and 32% for colored material, but we don't really have a way to
-    // know what the underlying color is, so there's no easy way to
-    // implement this. Choosing the "light" version for now.
     canvas.drawCircle(
       center,
       radiusTween.evaluate(activationAnimation),
