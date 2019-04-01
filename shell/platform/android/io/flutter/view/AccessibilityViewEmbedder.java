@@ -420,25 +420,28 @@ class AccessibilityViewEmbedder {
             Method getParentNodeId = null;
             Method getRecordSourceNodeId = null;
             Method getChildId = null;
-            try {
-                getSourceNodeId = AccessibilityNodeInfo.class.getMethod("getSourceNodeId");
-            } catch (NoSuchMethodException e) {
-                Log.w(TAG, "can't invoke AccessibilityNodeInfo#getSourceNodeId with reflection");
-            }
-            try {
-                getParentNodeId = AccessibilityNodeInfo.class.getMethod("getParentNodeId");
-            } catch (NoSuchMethodException e) {
-                Log.w(TAG, "can't invoke getParentNodeId with reflection");
-            }
-            try {
-                getRecordSourceNodeId = AccessibilityRecord.class.getMethod("getSourceNodeId");
-            } catch (NoSuchMethodException e) {
-                Log.w(TAG, "can't invoke AccessibiiltyRecord#getSourceNodeId with reflection");
-            }
-            try {
-                getChildId = AccessibilityNodeInfo.class.getMethod("getChildId", int.class);
-            } catch (NoSuchMethodException e) {
-                Log.w(TAG, "can't invoke getChildId with reflection");
+            // Reflection access is not allowed starting Android P.
+            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.O) {
+                try {
+                    getSourceNodeId = AccessibilityNodeInfo.class.getMethod("getSourceNodeId");
+                } catch (NoSuchMethodException e) {
+                    Log.w(TAG, "can't invoke AccessibilityNodeInfo#getSourceNodeId with reflection");
+                }
+                try {
+                    getParentNodeId = AccessibilityNodeInfo.class.getMethod("getParentNodeId");
+                } catch (NoSuchMethodException e) {
+                    Log.w(TAG, "can't invoke getParentNodeId with reflection");
+                }
+                try {
+                    getRecordSourceNodeId = AccessibilityRecord.class.getMethod("getSourceNodeId");
+                } catch (NoSuchMethodException e) {
+                    Log.w(TAG, "can't invoke AccessibiiltyRecord#getSourceNodeId with reflection");
+                }
+                try {
+                    getChildId = AccessibilityNodeInfo.class.getMethod("getChildId", int.class);
+                } catch (NoSuchMethodException e) {
+                    Log.w(TAG, "can't invoke getChildId with reflection");
+                }
             }
             this.getSourceNodeId = getSourceNodeId;
             this.getParentNodeId = getParentNodeId;
