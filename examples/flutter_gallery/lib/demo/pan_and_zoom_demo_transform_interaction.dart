@@ -127,9 +127,9 @@ class TransformInteractionState extends State<TransformInteraction> with TickerP
   // The translation that will be applied to the scene (not viewport).
   // A positive x offset moves the scene right, viewport left.
   // A positive y offset moves the scene down, viewport up.
-  Offset _translateFromScene; // Point where a single translation began
-  double _scaleStart; // Scale value at start of scaling gesture
-  double _rotationStart = 0.0; // Rotation at start of rotation gesture
+  Offset _translateFromScene; // Point where a single translation began.
+  double _scaleStart; // Scale value at start of scaling gesture.
+  double _rotationStart = 0.0; // Rotation at start of rotation gesture.
   Rect _boundaryRect;
   Matrix4 _transform = Matrix4.identity();
   double _currentRotation = 0.0;
@@ -351,7 +351,8 @@ class TransformInteractionState extends State<TransformInteraction> with TickerP
       return matrix;
     }
 
-    // Don't allow a scale that results in an overall scale beyond min/max scale
+    // Don't allow a scale that results in an overall scale beyond min/max
+    // scale.
     final double currentScale = _transform.getMaxScaleOnAxis();
     final double totalScale = currentScale * scale;
     final double clampedTotalScale = totalScale.clamp(
@@ -376,14 +377,12 @@ class TransformInteractionState extends State<TransformInteraction> with TickerP
       ..translate(-focalPointScene.dx, -focalPointScene.dy);
   }
 
-  // Handle panning and pinch zooming events
+  // Handle panning and pinch zooming events.
   void _onScaleStart(ScaleStartDetails details) {
     if (widget.onScaleStart != null) {
       widget.onScaleStart(details);
     }
 
-    // TODO(justinmc): Do things like this need to happen inside of setState? I
-    // don't need build to be called because of any of this.
     if (_controller.isAnimating) {
       _controller.stop();
       _controller.reset();
@@ -495,7 +494,7 @@ class TransformInteractionState extends State<TransformInteraction> with TickerP
     _controller.fling();
   }
 
-  // Handle inertia drag animation
+  // Handle inertia drag animation.
   void _onAnimate() {
     setState(() {
       // Translate _transform such that the resulting translation is
@@ -514,7 +513,7 @@ class TransformInteractionState extends State<TransformInteraction> with TickerP
     }
   }
 
-  // Handle reset to home transform animation
+  // Handle reset to home transform animation.
   void _onAnimateReset() {
     setState(() {
       _transform = _animationReset.value;

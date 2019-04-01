@@ -19,7 +19,7 @@ class Board extends Object with IterableMixin<BoardPoint> {
        assert(hexagonMargin >= 0) {
     // Set up the positions for the center hexagon where the entire board is
     // centered on the origin.
-    // Start point of hexagon (top vertex)
+    // Start point of hexagon (top vertex).
     final Point<double> hexStart = Point<double>(0, -hexagonRadius);
     final double hexagonRadiusPadded = hexagonRadius - hexagonMargin;
     final double centerToFlat = sqrt(3) / 2 * hexagonRadiusPadded;
@@ -47,9 +47,9 @@ class Board extends Object with IterableMixin<BoardPoint> {
     }
   }
 
-  final int boardRadius; // Number of hexagons from center to edge
-  final double hexagonRadius; // Pixel radius of a hexagon (center to vertex)
-  final double hexagonMargin; // Margin between hexagons
+  final int boardRadius; // Number of hexagons from center to edge.
+  final double hexagonRadius; // Pixel radius of a hexagon (center to vertex).
+  final double hexagonMargin; // Margin between hexagons.
   final List<Offset> positionsForHexagonAtOrigin = <Offset>[];
   final BoardPoint selected;
   final List<BoardPoint> _boardPoints = <BoardPoint>[];
@@ -78,19 +78,19 @@ class Board extends Object with IterableMixin<BoardPoint> {
   // returns the origin BoardPoint. If given BoardPoint is the last, returns
   // null.
   BoardPoint _getNextBoardPoint (BoardPoint boardPoint) {
-    // If before the first element
+    // If before the first element.
     if (boardPoint == null) {
       return BoardPoint(-boardRadius, 0);
     }
 
     final _Range rRange = _getRRangeForQ(boardPoint.q);
 
-    // If at or after the last element
+    // If at or after the last element.
     if (boardPoint.q >= boardRadius && boardPoint.r >= rRange.max) {
       return null;
     }
 
-    // If wrapping from one q to the next
+    // If wrapping from one q to the next.
     if (boardPoint.r >= rRange.max) {
       return BoardPoint(boardPoint.q + 1, _getRRangeForQ(boardPoint.q + 1).min);
     }
@@ -215,7 +215,7 @@ class _BoardIterator extends Iterator<BoardPoint> {
   }
 }
 
-// A range of q/r board coordinate values
+// A range of q/r board coordinate values.
 @immutable
 class _Range {
   const _Range(this.min, this.max)
@@ -252,7 +252,7 @@ class BoardPoint {
     return 'BoardPoint($q, $r, $color)';
   }
 
-  // Only compares by location
+  // Only compares by location.
   @override
   bool operator ==(dynamic other) {
     if (other.runtimeType != runtimeType) {
@@ -267,7 +267,7 @@ class BoardPoint {
 
   BoardPoint copyWithColor(Color nextColor) => BoardPoint(q, r, color: nextColor);
 
-  // Convert from q,r axial coords to x,y,z cube coords
+  // Convert from q,r axial coords to x,y,z cube coords.
   Vector3 get cubeCoordinates {
     return Vector3(
       q.toDouble(),

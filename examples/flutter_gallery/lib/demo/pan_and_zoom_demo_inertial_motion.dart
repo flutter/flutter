@@ -13,17 +13,17 @@ class InertialMotion {
   final Velocity _initialVelocity;
   final Offset _initialPosition;
 
-  // The position when the motion stops
+  // The position when the motion stops.
   Offset get finalPosition {
     return _getPositionAt(Duration(milliseconds: duration.toInt()));
   }
 
-  // The total time that the animation takes start to stop in milliseconds
+  // The total time that the animation takes start to stop in milliseconds.
   double get duration {
     return (_initialVelocity.pixelsPerSecond.dx / 1000 / _acceleration.x).abs();
   }
 
-  // The acceleration opposing the initial velocity in x and y components
+  // The acceleration opposing the initial velocity in x and y components.
   Vector2 get _acceleration {
     // TODO(justinmc): Find actual velocity instead of summing?
     final double velocityTotal = _initialVelocity.pixelsPerSecond.dx.abs()
@@ -36,7 +36,7 @@ class InertialMotion {
     );
   }
 
-  // The position at a given time
+  // The position at a given time.
   Offset _getPositionAt(Duration time) {
     final double xf = _getPosition(
       r0: _initialPosition.dx,

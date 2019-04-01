@@ -12,11 +12,11 @@ class PanAndZoomDemo extends StatefulWidget {
   @override _PanAndZoomDemoState createState() => _PanAndZoomDemoState();
 }
 class _PanAndZoomDemoState extends State<PanAndZoomDemo> {
-  // The radius of a hexagon tile in pixels
+  // The radius of a hexagon tile in pixels.
   static const double _kHexagonRadius = 32.0;
-  // The margin between hexagons
+  // The margin between hexagons.
   static const double _kHexagonMargin = 1.0;
-  // The radius of the entire board in hexagons, not including the center
+  // The radius of the entire board in hexagons, not including the center.
   static const int _kBoardRadius = 8;
 
   bool _reset = false;
@@ -43,9 +43,6 @@ class _PanAndZoomDemoState extends State<PanAndZoomDemo> {
           final Size size = Size(constraints.maxWidth, constraints.maxHeight);
           final Size visibleSize = Size(size.width * 3, size.height * 2);
           return TransformInteraction(
-            // TODO(justinmc): I'm not sure that I like this pattern that I came up
-            // with for resetting TransformInteraction from the parent level. Would
-            // a controller pattern be better, or is there something else?
             reset: _reset,
             onResetEnd: () {
               setState(() {
@@ -61,8 +58,9 @@ class _PanAndZoomDemoState extends State<PanAndZoomDemo> {
               visibleSize.width,
               visibleSize.height,
             ),
-            // Center the board in the middle of the screen. It's drawn centered at
-            // the origin, which is the top left corner of the TransformInteraction.
+            // Center the board in the middle of the screen. It's drawn centered
+            // at the origin, which is the top left corner of the
+            // TransformInteraction.
             initialTranslation: Offset(size.width / 2, size.height / 2),
             onTapUp: _onTapUp,
             size: size,
