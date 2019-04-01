@@ -93,6 +93,10 @@ class ExpansionPanel {
 /// An expansion panel that allows for radio-like functionality.
 ///
 /// A unique identifier [value] must be assigned to each panel.
+/// This identifier allows the [ExpansionPanelList] to determine
+/// which [ExpansionPanelRadio] instance should stay open.
+///
+/// See [ExpansionPanelList.radio] for a sample implementation.
 class ExpansionPanelRadio extends ExpansionPanel {
 
   /// An expansion panel that allows for radio functionality.
