@@ -1,4 +1,4 @@
-Signature: 904d1207ab24d83189a5f0780836b4fd
+Signature: 0cafcf3959b077da7fab02aca9869893
 
 UNUSED LICENSES:
 
@@ -4231,7 +4231,6 @@ FILE: ../../../third_party/skia/modules/skottie/src/Skottie.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/SkottieAnimator.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/SkottieValue.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/SkottieValue.h
-FILE: ../../../third_party/skia/modules/sksg/include/SkSGColor.h
 FILE: ../../../third_party/skia/modules/sksg/include/SkSGDraw.h
 FILE: ../../../third_party/skia/modules/sksg/include/SkSGEffectNode.h
 FILE: ../../../third_party/skia/modules/sksg/include/SkSGGeometryNode.h
@@ -4239,13 +4238,12 @@ FILE: ../../../third_party/skia/modules/sksg/include/SkSGGroup.h
 FILE: ../../../third_party/skia/modules/sksg/include/SkSGInvalidationController.h
 FILE: ../../../third_party/skia/modules/sksg/include/SkSGMerge.h
 FILE: ../../../third_party/skia/modules/sksg/include/SkSGNode.h
-FILE: ../../../third_party/skia/modules/sksg/include/SkSGPaintNode.h
+FILE: ../../../third_party/skia/modules/sksg/include/SkSGPaint.h
 FILE: ../../../third_party/skia/modules/sksg/include/SkSGPath.h
 FILE: ../../../third_party/skia/modules/sksg/include/SkSGRect.h
 FILE: ../../../third_party/skia/modules/sksg/include/SkSGRenderNode.h
 FILE: ../../../third_party/skia/modules/sksg/include/SkSGTransform.h
 FILE: ../../../third_party/skia/modules/sksg/include/SkSGTrimEffect.h
-FILE: ../../../third_party/skia/modules/sksg/src/SkSGColor.cpp
 FILE: ../../../third_party/skia/modules/sksg/src/SkSGDraw.cpp
 FILE: ../../../third_party/skia/modules/sksg/src/SkSGEffectNode.cpp
 FILE: ../../../third_party/skia/modules/sksg/src/SkSGGeometryNode.cpp
@@ -4253,7 +4251,7 @@ FILE: ../../../third_party/skia/modules/sksg/src/SkSGGroup.cpp
 FILE: ../../../third_party/skia/modules/sksg/src/SkSGInvalidationController.cpp
 FILE: ../../../third_party/skia/modules/sksg/src/SkSGMerge.cpp
 FILE: ../../../third_party/skia/modules/sksg/src/SkSGNode.cpp
-FILE: ../../../third_party/skia/modules/sksg/src/SkSGPaintNode.cpp
+FILE: ../../../third_party/skia/modules/sksg/src/SkSGPaint.cpp
 FILE: ../../../third_party/skia/modules/sksg/src/SkSGPath.cpp
 FILE: ../../../third_party/skia/modules/sksg/src/SkSGRect.cpp
 FILE: ../../../third_party/skia/modules/sksg/src/SkSGRenderNode.cpp
