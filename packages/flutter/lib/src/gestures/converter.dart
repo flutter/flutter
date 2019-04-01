@@ -348,6 +348,7 @@ class PointerEventConverter {
                 position: state.lastPosition, // Change position in Hover
                 buttons: datum.buttons,
                 obscured: datum.obscured,
+                pressure: datum.pressure,
                 pressureMin: datum.pressureMin,
                 pressureMax: datum.pressureMax,
                 distance: datum.distance,
