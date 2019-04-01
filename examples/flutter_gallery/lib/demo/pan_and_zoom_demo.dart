@@ -99,7 +99,7 @@ class _PanAndZoomDemoState extends State<PanAndZoomDemo> {
               boardPoint: _board.selected,
               onColorSelection: (Color color) {
                 setState(() {
-                  _board = _board.setBoardPointColor(_board.selected, color);
+                  _board = _board.copyWithBoardPointColor(_board.selected, color);
                   Navigator.pop(context);
                 });
               },
@@ -116,7 +116,7 @@ class _PanAndZoomDemoState extends State<PanAndZoomDemo> {
     final Offset scenePoint = details.globalPosition;
     final BoardPoint boardPoint = _board.pointToBoardPoint(scenePoint);
     setState(() {
-      _board = _board.selectBoardPoint(boardPoint);
+      _board = _board.copyWithSelected(boardPoint);
     });
   }
 }

@@ -140,38 +140,6 @@ class Board extends Object with IterableMixin<BoardPoint> {
     );
   }
 
-  // Return a new board with the given BoardPoint selected.
-  Board selectBoardPoint(BoardPoint boardPoint) {
-    final Board nextBoard = Board(
-      boardRadius: boardRadius,
-      hexagonRadius: hexagonRadius,
-      hexagonMargin: hexagonMargin,
-      selected: boardPoint,
-      boardPoints: _boardPoints,
-    );
-    return nextBoard;
-  }
-
-  // Return a new board where boardPoint has the given color.
-  Board setBoardPointColor(BoardPoint boardPoint, Color color) {
-    final BoardPoint nextBoardPoint = boardPoint.copyWithColor(color);
-    final int boardPointIndex = _boardPoints.indexWhere((BoardPoint boardPointI) =>
-      boardPointI.q == boardPoint.q && boardPointI.r == boardPoint.r
-    );
-    final List<BoardPoint> nextBoardPoints = List<BoardPoint>.from(_boardPoints);
-    nextBoardPoints[boardPointIndex] = nextBoardPoint;
-    final BoardPoint selectedBoardPoint = boardPoint == selected
-      ? nextBoardPoint
-      : selected;
-    return Board(
-      boardRadius: boardRadius,
-      hexagonRadius: hexagonRadius,
-      hexagonMargin: hexagonMargin,
-      selected: selectedBoardPoint,
-      boardPoints: nextBoardPoints,
-    );
-  }
-
   // Get Vertices that can be drawn to a Canvas for the given BoardPoint.
   Vertices getVerticesForBoardPoint(BoardPoint boardPoint, Color color) {
     final Point<double> centerOfHexZeroCenter = boardPointToPoint(boardPoint);
@@ -184,6 +152,46 @@ class Board extends Object with IterableMixin<BoardPoint> {
       VertexMode.triangleFan,
       positions,
       colors: List<Color>.filled(positions.length, color),
+    );
+  }
+
+  // Return a new board with the given BoardPoint selected.
+  Board copyWithSelected(BoardPoint boardPoint) {
+    if (selected == boardPoint) {
+      return this;
+    }
+    final Board nextBoard = Board(
+      boardRadius: boardRadius,
+      hexagonRadius: hexagonRadius,
+      hexagonMargin: hexagonMargin,
+      selected: boardPoint,
+      boardPoints: _boardPoints,
+    );
+    return nextBoard;
+  }
+
+  // Return a new board where boardPoint has the given color.
+  Board copyWithBoardPointColor(BoardPoint boardPoint, Color color) {
+    final BoardPoint nextBoardPoint = boardPoint.copyWithColor(color);
+    final int boardPointIndex = _boardPoints.indexWhere((BoardPoint boardPointI) =>
+      boardPointI.q == boardPoint.q && boardPointI.r == boardPoint.r
+    );
+
+    if (elementAt(boardPointIndex) == boardPoint && boardPoint.color == color) {
+      return this;
+    }
+
+    final List<BoardPoint> nextBoardPoints = List<BoardPoint>.from(_boardPoints);
+    nextBoardPoints[boardPointIndex] = nextBoardPoint;
+    final BoardPoint selectedBoardPoint = boardPoint == selected
+      ? nextBoardPoint
+      : selected;
+    return Board(
+      boardRadius: boardRadius,
+      hexagonRadius: hexagonRadius,
+      hexagonMargin: hexagonMargin,
+      selected: selectedBoardPoint,
+      boardPoints: nextBoardPoints,
     );
   }
 }

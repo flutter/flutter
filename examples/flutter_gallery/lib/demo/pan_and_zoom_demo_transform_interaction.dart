@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:vector_math/vector_math_64.dart' show Vector3;
 import 'pan_and_zoom_demo_inertial_motion.dart';
 
-typedef ResetEndCallback = void Function();
+// Empty function type for the onResetEnd parameter.
+typedef _ResetEndCallback = void Function();
 
 // This widget allows 2D transform interactions on its child in relation to its
 // parent. The user can transform the child by dragging to pan or pinching to
@@ -19,12 +20,14 @@ class TransformInteraction extends StatefulWidget {
     // this in a LayoutBuilder and pass
     // `Size(constraints.maxWidth, constraints.maxHeight)`.
     @required this.size,
-    // The scale will be clamped to between these values.
+    // The scale will be clamped to between these values. A maxScale of null has
+    // no bounds. minScale must be greater than zero.
     this.maxScale = 2.5,
     this.minScale = 0.8,
     // Transforms will be limited so that the viewport can not view beyond this
     // Rect. The Rect does not rotate with the rest of the scene, so it is
-    // always aligned with the viewport.
+    // always aligned with the viewport. A null boundaryRect results in no
+    // limits to the distance that the viewport can be transformed to see.
     this.boundaryRect,
     // Initial values for the transform can be provided.
     this.initialTranslation,
@@ -69,6 +72,12 @@ class TransformInteraction extends StatefulWidget {
   }) :
     assert(child != null),
     assert(size != null),
+    assert(minScale != null),
+    assert(minScale > 0),
+    assert(disableTranslation != null),
+    assert(disableScale != null),
+    assert(disableRotation != null),
+    assert(reset != null),
     assert(!reset || onResetEnd != null, 'Must implement onResetEnd to use reset.');
 
   final Widget child;
@@ -96,7 +105,7 @@ class TransformInteraction extends StatefulWidget {
   final GestureDragUpdateCallback onPanUpdate;
   final GestureDragEndCallback onPanEnd;
   final GestureDragCancelCallback onPanCancel;
-  final ResetEndCallback onResetEnd;
+  final _ResetEndCallback onResetEnd;
   final GestureScaleStartCallback onScaleStart;
   final GestureScaleUpdateCallback onScaleUpdate;
   final GestureScaleEndCallback onScaleEnd;
@@ -110,16 +119,18 @@ class TransformInteraction extends StatefulWidget {
   final double initialScale;
   final double initialRotation;
 
-  @override TransformInteractionState createState() => TransformInteractionState();
+  @override _TransformInteractionState createState() => _TransformInteractionState();
 }
 
-enum GestureType {
+// A single user event can only represent one of these gestures. The user can't
+// do multiple at the same time, which results in more precise transformations.
+enum _GestureType {
   translate,
   scale,
   rotate,
 }
 
-class TransformInteractionState extends State<TransformInteraction> with TickerProviderStateMixin {
+class _TransformInteractionState extends State<TransformInteraction> with TickerProviderStateMixin {
   Animation<Offset> _animation;
   AnimationController _controller;
   Animation<Matrix4> _animationReset;
@@ -133,7 +144,7 @@ class TransformInteractionState extends State<TransformInteraction> with TickerP
   Rect _boundaryRect;
   Matrix4 _transform = Matrix4.identity();
   double _currentRotation = 0.0;
-  GestureType gestureType;
+  _GestureType gestureType;
 
   // The transformation matrix that gives the initial home position.
   Matrix4 get _initialTransform {
@@ -377,7 +388,7 @@ class TransformInteractionState extends State<TransformInteraction> with TickerP
       ..translate(-focalPointScene.dx, -focalPointScene.dy);
   }
 
-  // Handle panning and pinch zooming events.
+  // Handle the start of a gesture of _GestureType.
   void _onScaleStart(ScaleStartDetails details) {
     if (widget.onScaleStart != null) {
       widget.onScaleStart(details);
@@ -404,6 +415,8 @@ class TransformInteractionState extends State<TransformInteraction> with TickerP
       _rotationStart = _currentRotation;
     });
   }
+
+  // Handle an update to an ongoing gesture of _GestureType.
   void _onScaleUpdate(ScaleUpdateDetails details) {
     double scale = _transform.getMaxScaleOnAxis();
     if (widget.onScaleUpdate != null) {
@@ -423,15 +436,15 @@ class TransformInteractionState extends State<TransformInteraction> with TickerP
       // starts at 0. Translate will have 0 scale and 0 rotation becuase it uses
       // only one finger.
       if ((details.scale - 1).abs() > details.rotation.abs()) {
-        gestureType = GestureType.scale;
+        gestureType = _GestureType.scale;
       } else if (details.rotation != 0) {
-        gestureType = GestureType.rotate;
+        gestureType = _GestureType.rotate;
       } else {
-        gestureType = GestureType.translate;
+        gestureType = _GestureType.translate;
       }
     }
     setState(() {
-      if (gestureType == GestureType.scale && _scaleStart != null) {
+      if (gestureType == _GestureType.scale && _scaleStart != null) {
         // details.scale gives us the amount to change the scale as of the
         // start of this gesture, so calculate the amount to scale as of the
         // previous call to _onScaleUpdate.
@@ -449,7 +462,7 @@ class TransformInteractionState extends State<TransformInteraction> with TickerP
           _transform,
         );
         _transform = matrixTranslate(_transform, focalPointSceneNext - focalPointScene);
-      } else if (gestureType == GestureType.rotate && details.rotation != 0.0) {
+      } else if (gestureType == _GestureType.rotate && details.rotation != 0.0) {
         final double desiredRotation = _rotationStart + details.rotation;
         _transform = matrixRotate(_transform, _currentRotation - desiredRotation, details.focalPoint);
         _currentRotation = desiredRotation;
@@ -462,6 +475,8 @@ class TransformInteractionState extends State<TransformInteraction> with TickerP
       }
     });
   }
+
+  // Handle the end of a gesture of _GestureType.
   void _onScaleEnd(ScaleEndDetails details) {
     if (widget.onScaleEnd != null) {
       widget.onScaleEnd(details);
