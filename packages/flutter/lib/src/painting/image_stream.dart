@@ -510,7 +510,8 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
        _informationCollector = informationCollector,
        _scale = scale,
        _framesEmitted = 0,
-       _timer = null {
+       _timer = null,
+       _frameCallbackScheduled = false {
     codec.then<void>(_handleCodecReady, onError: (dynamic error, StackTrace stack) {
       reportError(
         context: 'resolving an image codec',
@@ -534,6 +535,9 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
   int _framesEmitted;
   Timer _timer;
 
+  // Used to guard against registering multiple _handleAppFrame callbacks for the same frame.
+  bool _frameCallbackScheduled;
+
   void _handleCodecReady(ui.Codec codec) {
     _codec = codec;
     assert(_codec != null);
@@ -542,6 +546,7 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
   }
 
   void _handleAppFrame(Duration timestamp) {
+    _frameCallbackScheduled = false;
     if (!hasListeners)
       return;
     if (_isFirstFrame() || _hasFrameDurationPassed(timestamp)) {
@@ -557,7 +562,7 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
     }
     final Duration delay = _frameDuration - (timestamp - _shownTimestamp);
     _timer = Timer(delay * timeDilation, () {
-      SchedulerBinding.instance.scheduleFrameCallback(_handleAppFrame);
+      _scheduleAppFrame();
     });
   }
 
@@ -589,6 +594,14 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
       _emitFrame(ImageInfo(image: _nextFrame.image, scale: _scale));
       return;
     }
+    _scheduleAppFrame();
+  }
+
+  void _scheduleAppFrame() {
+    if (_frameCallbackScheduled) {
+      return;
+    }
+    _frameCallbackScheduled = true;
     SchedulerBinding.instance.scheduleFrameCallback(_handleAppFrame);
   }
 

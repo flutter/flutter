@@ -469,4 +469,77 @@ void main() {
     expect(tester.takeException(), isNull);
     expect(capturedException, 'frame completion error');
   });
+
+  testWidgets('remove and add listener ', (WidgetTester tester) async {
+    final MockCodec mockCodec = MockCodec();
+    mockCodec.frameCount = 3;
+    mockCodec.repetitionCount = 0;
+    final Completer<Codec> codecCompleter = Completer<Codec>();
+
+    final ImageStreamCompleter imageStream = MultiFrameImageStreamCompleter(
+      codec: codecCompleter.future,
+      scale: 1.0,
+    );
+
+    final ImageListener listener = (ImageInfo image, bool synchronousCall) { };
+    imageStream.addListener(listener);
+
+    codecCompleter.complete(mockCodec);
+
+    await tester.idle(); // let nextFrameFuture complete
+
+    imageStream.removeListener(listener);
+    imageStream.addListener(listener);
+
+
+    final FrameInfo frame1 = FakeFrameInfo(20, 10, const Duration(milliseconds: 200));
+
+    mockCodec.completeNextFrame(frame1);
+    await tester.idle(); // let nextFrameFuture complete
+    await tester.pump(); // first animation frame shows on first app frame.
+
+    await tester.pump(const Duration(milliseconds: 200)); // emit 2nd frame.
+  });
+
+
+  // TODO(amirh): enable this once WidgetTester supports flushTimers.
+  // https://github.com/flutter/flutter/issues/30344
+  // testWidgets('remove and add listener before a delayed frame is scheduled', (WidgetTester tester) async {
+  //   final MockCodec mockCodec = MockCodec();
+  //   mockCodec.frameCount = 3;
+  //   mockCodec.repetitionCount = 0;
+  //   final Completer<Codec> codecCompleter = Completer<Codec>();
+  //
+  //   final ImageStreamCompleter imageStream = MultiFrameImageStreamCompleter(
+  //     codec: codecCompleter.future,
+  //     scale: 1.0,
+  //   );
+  //
+  //   final ImageListener listener = (ImageInfo image, bool synchronousCall) { };
+  //   imageStream.addListener(listener);
+  //
+  //   codecCompleter.complete(mockCodec);
+  //   await tester.idle();
+  //
+  //   final FrameInfo frame1 = FakeFrameInfo(20, 10, const Duration(milliseconds: 200));
+  //   final FrameInfo frame2 = FakeFrameInfo(200, 100, const Duration(milliseconds: 400));
+  //   final FrameInfo frame3 = FakeFrameInfo(200, 100, const Duration(milliseconds: 0));
+  //
+  //   mockCodec.completeNextFrame(frame1);
+  //   await tester.idle(); // let nextFrameFuture complete
+  //   await tester.pump(); // first animation frame shows on first app frame.
+  //
+  //   mockCodec.completeNextFrame(frame2);
+  //   await tester.pump(const Duration(milliseconds: 100)); // emit 2nd frame.
+  //
+  //   tester.flushTimers();
+  //
+  //   imageStream.removeListener(listener);
+  //   imageStream.addListener(listener);
+  //
+  //   mockCodec.completeNextFrame(frame3);
+  //   await tester.idle(); // let nextFrameFuture complete
+  //
+  //   await tester.pump();
+  // });
 }
