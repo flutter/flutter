@@ -91,8 +91,8 @@ class ExpansionPanel {
 }
 
 /// An expansion panel that allows for radio-like functionality.
-/// This means that at any given time, only one [ExpansionPanelRadio]
-/// can remain expanded at any given time.
+/// This means that at any given time, at most, one [ExpansionPanelRadio]
+/// can remain expanded.
 ///
 /// A unique identifier [value] must be assigned to each panel.
 /// This identifier allows the [ExpansionPanelList] to determine
@@ -128,20 +128,16 @@ class ExpansionPanelRadio extends ExpansionPanel {
 /// import 'package:flutter/material.dart';
 ///
 /// List<Item> generateItems(int numberOfItems) {
-///   List<Item> result = [];
-///
-///   for (int i = 1; i < numberOfItems + 1; i++) {
-///     result.add(Item(
-///       headerValue: 'Panel #$i',
-///       expandedValue: 'This is item number $i',
-///     ));
-///   }
-///
-///   return result;
+///   return List.generate(numberOfItems, (int index) {
+///     return Item(
+///       headerValue: 'Panel $index',
+///       expandedValue: 'This is item number $index',
+///     );
+///   });
 /// }
 ///
 /// // stores ExpansionPanel state information
-/// class Item<T> {
+/// class Item {
 ///   Item({
 ///     this.expandedValue,
 ///     this.headerValue,
@@ -250,7 +246,7 @@ class ExpansionPanelList extends StatefulWidget {
   /// ```dart
   /// import 'package:flutter/material.dart';
   ///
-  /// class Item<T> {
+  /// class Item {
   ///   Item({
   ///     this.id,
   ///     this.expandedValue,
@@ -318,17 +314,13 @@ class ExpansionPanelList extends StatefulWidget {
   /// }
   ///
   /// List<Item> generateItems(int numberOfItems) {
-  ///   List<Item> result = [];
-  ///
-  ///   for (int i = 1; i < numberOfItems + 1; i++) {
-  ///     result.add(Item(
-  ///       id: i,
-  ///       headerValue: 'Panel #$i',
-  ///       expandedValue: 'This is item number $i',
-  ///     ));
-  ///   }
-  ///
-  ///   return result;
+  ///   return List.generate(numberOfItems, (int index) {
+  ///     return Item(
+  ///       id: index,
+  ///       headerValue: 'Panel $index',
+  ///       expandedValue: 'This is item number $index',
+  ///     );
+  ///   });
   /// }
   /// ```
   ///
