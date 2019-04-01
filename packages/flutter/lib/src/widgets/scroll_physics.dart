@@ -29,6 +29,8 @@ export 'package:flutter/physics.dart' show Simulation, ScrollSpringSimulation, T
 /// velocity are used as the initial conditions for the particle in the
 /// simulation. The movement of the particle in the simulation is then used to
 /// determine the scroll position for the widget.
+///
+/// Different types of 
 @immutable
 class ScrollPhysics {
   /// Creates an object with the default scroll physics.

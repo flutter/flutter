@@ -255,7 +255,7 @@ typedef RefreshCallback = Future<void> Function();
 /// of [BouncingScrollPhysics] and [AlwaysScrollPhysics]). Such as:
 ///
 /// * by using such [ScrollPhysics] in the sliver list.
-/// * by using such [ScrollPhysics] in an ancestor [ScrollConfiguration] widget.
+/// * by using such [ScrollPhysics] in the ambient [ScrollConfiguration] widget.
 ///
 /// In a typical application, this sliver should be inserted between the app bar
 /// sliver such as [CupertinoSliverNavigationBar] and your main scrollable
