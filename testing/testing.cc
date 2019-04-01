@@ -6,6 +6,8 @@
 
 namespace testing {
 
-//
+std::string GetCurrentTestName() {
+  return UnitTest::GetInstance()->current_test_info()->name();
+}
 
 }  // namespace testing
