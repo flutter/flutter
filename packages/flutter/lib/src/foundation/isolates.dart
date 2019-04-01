@@ -18,7 +18,7 @@ import 'constants.dart';
 /// of classes, not closures or instance methods of objects.
 ///
 /// {@macro flutter.foundation.compute.limitations}
-typedef ComputeCallback<Q, R> = R Function(Q message);
+typedef ComputeCallback<Q, R> = FutureOr<R> Function(Q message);
 
 /// Spawn an isolate, run `callback` on that isolate, passing it `message`, and
 /// (eventually) return the value returned by `callback`.
@@ -53,58 +53,9 @@ Future<R> compute<Q, R>(ComputeCallback<Q, R> callback, Q message, { String debu
   final ReceivePort resultPort = ReceivePort();
   final ReceivePort errorPort = ReceivePort();
   Timeline.finishSync();
-  final Isolate isolate = await Isolate.spawn<_IsolateConfiguration<Q, R>>(
+  final Isolate isolate = await Isolate.spawn<_IsolateConfiguration<Q, FutureOr<R>>>(
     _spawn,
-    _IsolateConfiguration<Q, R>(
-      callback,
-      message,
-      resultPort.sendPort,
-      debugLabel,
-      flow.id,
-    ),
-    errorsAreFatal: true,
-    onExit: resultPort.sendPort,
-    onError: errorPort.sendPort,
-  );
-  final Completer<R> result = Completer<R>();
-  errorPort.listen((dynamic errorData) {
-    assert(errorData is List<dynamic>);
-    assert(errorData.length == 2);
-    final Exception exception = Exception(errorData[0]);
-    final StackTrace stack = StackTrace.fromString(errorData[1]);
-    if (result.isCompleted) {
-      Zone.current.handleUncaughtError(exception, stack);
-    } else {
-      result.completeError(exception, stack);
-    }
-  });
-  resultPort.listen((dynamic resultData) {
-    assert(resultData == null || resultData is R);
-    if (!result.isCompleted)
-      result.complete(resultData);
-  });
-  await result.future;
-  Timeline.startSync('$debugLabel: end', flow: Flow.end(flow.id));
-  resultPort.close();
-  errorPort.close();
-  isolate.kill();
-  Timeline.finishSync();
-  return result.future;
-}
-
-/// It works the same way as [compute], but `callback` can be asynchronous.
-Future<R> computeFuture<Q, R>(ComputeCallback<Q, Future<R>> callback, Q message, { String debugLabel }) async {
-  if (!kReleaseMode) {
-    debugLabel ??= callback.toString();
-  }
-  final Flow flow = Flow.begin();
-  Timeline.startSync('$debugLabel: start', flow: flow);
-  final ReceivePort resultPort = ReceivePort();
-  final ReceivePort errorPort = ReceivePort();
-  Timeline.finishSync();
-  final Isolate isolate = await Isolate.spawn<_IsolateConfiguration<Q, Future<R>>>(
-    _spawnAsync,
-    _IsolateConfiguration<Q, Future<R>>(
+    _IsolateConfiguration<Q, FutureOr<R>>(
       callback,
       message,
       resultPort.sendPort,
@@ -159,21 +110,7 @@ class _IsolateConfiguration<Q, R> {
   R apply() => callback(message);
 }
 
-void _spawn<Q, R>(_IsolateConfiguration<Q, R> configuration) {
-  R result;
-  Timeline.timeSync(
-    '${configuration.debugLabel}',
-    () { result = configuration.apply(); },
-    flow: Flow.step(configuration.flowId),
-  );
-  Timeline.timeSync(
-    '${configuration.debugLabel}: returning result',
-    () { configuration.resultPort.send(result); },
-    flow: Flow.step(configuration.flowId),
-  );
-}
-
-Future<void> _spawnAsync<Q, R>(_IsolateConfiguration<Q, Future<R>>configuration) async {
+Future<void> _spawn<Q, R>(_IsolateConfiguration<Q, FutureOr<R>> configuration) async {
   R result;
   await Timeline.timeSync(
     '${configuration.debugLabel}',

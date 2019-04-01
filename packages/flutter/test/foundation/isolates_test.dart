@@ -26,10 +26,8 @@ void main() {
   test('compute()', () async {
     expect(await compute(test1, 0), 1);
     expect(compute(test2, 0), throwsA(isInstanceOf<Exception>()));
-  });
 
-  test('computeFuture()', () async {
-    expect(await computeFuture(test1Async, 0), 1);
-    expect(computeFuture(test2Async, 0), throwsA(isInstanceOf<Exception>()));
+    expect(await compute(test1Async, 0), 1);
+    expect(compute(test2Async, 0), throwsA(isInstanceOf<Exception>()));
   });
 }
