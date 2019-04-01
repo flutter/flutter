@@ -122,7 +122,7 @@ class ExpansionPanelRadio extends ExpansionPanel {
 ///
 /// {@tool sample}
 ///
-/// Here is a simple example of how to implement an ExpansionPanelList.
+/// Here is a simple example of how to implement ExpansionPanelList.
 ///
 /// ```dart
 /// import 'package:flutter/material.dart';
@@ -245,7 +245,7 @@ class ExpansionPanelList extends StatefulWidget {
   ///
   /// {@tool sample}
   ///
-  /// Here is a sample of a ExpansionPanelRadio example.
+  /// Here is a simple example of how to implement ExpansionPanelList.radio.
   ///
   /// ```dart
   /// import 'package:flutter/material.dart';
