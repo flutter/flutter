@@ -236,33 +236,31 @@ class RenderParagraph extends RenderBox
 
   @override
   double computeMinIntrinsicWidth(double height) {
-    // _layoutChildren();
+    performLayout();
     _layoutText();
     return _textPainter.minIntrinsicWidth;
   }
 
   @override
   double computeMaxIntrinsicWidth(double height) {
-    // _layoutChildren();
+    performLayout();
     _layoutText();
     return _textPainter.maxIntrinsicWidth;
   }
 
   double _computeIntrinsicHeight(double width) {
-    // _layoutChildren();
+    performLayout();
     _layoutText(minWidth: width, maxWidth: width);
     return _textPainter.height;
   }
 
   @override
   double computeMinIntrinsicHeight(double width) {
-    // _layoutChildren();
     return _computeIntrinsicHeight(width);
   }
 
   @override
   double computeMaxIntrinsicHeight(double width) {
-    // _layoutChildren();
     return _computeIntrinsicHeight(width);
   }
 
