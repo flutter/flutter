@@ -501,7 +501,6 @@ void main() {
     await tester.pump(const Duration(milliseconds: 200)); // emit 2nd frame.
   });
 
-
   // TODO(amirh): enable this once WidgetTester supports flushTimers.
   // https://github.com/flutter/flutter/issues/30344
   // testWidgets('remove and add listener before a delayed frame is scheduled', (WidgetTester tester) async {
