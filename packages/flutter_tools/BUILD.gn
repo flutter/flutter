@@ -253,4 +253,8 @@ dart_tool("fuchsia_attach") {
   deps = [
     ":flutter_tools",
   ]
+
+  non_dart_deps = [
+    "//third_party/flutter/frontend_server:frontend_server_tool_snapshot($host_toolchain)",
+  ]
 }

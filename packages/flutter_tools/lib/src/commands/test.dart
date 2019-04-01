@@ -11,6 +11,7 @@ import '../base/platform.dart';
 import '../cache.dart';
 import '../codegen.dart';
 import '../dart/pub.dart';
+import '../globals.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
 import '../test/coverage_collector.dart';
@@ -93,6 +94,7 @@ class TestCommand extends FastFlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+    await cache.updateAll(requiredArtifacts);
     if (!fs.isFileSync('pubspec.yaml')) {
       throwToolExit(
         'Error: No pubspec.yaml file found in the current working directory.\n'
