@@ -18,12 +18,15 @@ import 'recognizer.dart';
 class TapDownDetails {
   /// Creates details for a [GestureTapDownCallback].
   ///
-  /// The [globalPosition] argument must not be null.
-  TapDownDetails({ this.globalPosition = Offset.zero })
-    : assert(globalPosition != null);
+  /// Arguments [globalPosition] and [buttons] must not be null.
+  TapDownDetails({ this.globalPosition = Offset.zero, this.buttons = 0 })
+    : assert(globalPosition != null), assert(buttons != null);
 
   /// The global position at which the pointer contacted the screen.
   final Offset globalPosition;
+
+  /// The buttons pressed when the pointer contacted the screen.
+  final int buttons;
 }
 
 /// Signature for when a pointer that might cause a tap has contacted the
@@ -47,12 +50,15 @@ typedef GestureTapDownCallback = void Function(TapDownDetails details);
 class TapUpDetails {
   /// Creates details for a [GestureTapUpCallback].
   ///
-  /// The [globalPosition] argument must not be null.
-  TapUpDetails({ this.globalPosition = Offset.zero })
-    : assert(globalPosition != null);
+  /// Arguments [globalPosition] and [buttons] must not be null.
+  TapUpDetails({ this.globalPosition = Offset.zero, this.buttons = 0 })
+    : assert(globalPosition != null), assert(buttons != null);
 
   /// The global position at which the pointer contacted the screen.
   final Offset globalPosition;
+
+  /// The buttons pressed when the pointer contacted the screen.
+  final int buttons;
 }
 
 /// Signature for when a pointer that will trigger a tap has stopped contacting
@@ -95,6 +101,9 @@ typedef GestureTapCancelCallback = void Function();
 /// pointer interactions during a tap sequence are not recognized as additional
 /// taps. For example, down-1, down-2, up-1, up-2 produces only one tap on up-1.
 ///
+/// [TapGestureRecognizer] requires that all events contain a same set of
+/// [buttons]. Any kind of button change during the gesture results in rejection.
+///
 /// The lifecycle of events for a tap gesture is as follows:
 ///
 /// * [onTapDown], which triggers after a short timeout ([deadline]) even if the
@@ -115,8 +124,8 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
   /// A pointer that might cause a tap has contacted the screen at a particular
   /// location.
   ///
-  /// This triggers before the gesture has won the arena, after a short timeout
-  /// ([deadline]).
+  /// This triggers once a short timeout ([deadline]) has elapsed, or once
+  /// the gestures has won the arena, whichever comes first.
   ///
   /// If the gesture doesn't win the arena, [onTapCancel] is called next.
   /// Otherwise, [onTapUp] is called next.
@@ -165,8 +174,20 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
   GestureTapCancelCallback onTapCancel;
 
   bool _sentTapDown = false;
+  // If the recognizer is terminated, it no longer triggers any callback until
+  // the end of event sequence.
+  bool _terminated = false;
   bool _wonArenaForPrimaryPointer = false;
   Offset _finalPosition;
+  // The buttons sent by PointerDownEvent. If any later event comes with a
+  // different set of buttons, the gesture is rejected and terminated.
+  int _initialButtons;
+
+  @override
+  void addAllowedPointer(PointerDownEvent event) {
+    super.addAllowedPointer(event);
+    _initialButtons = event.buttons;
+  }
 
   @override
   void handlePrimaryPointer(PointerEvent event) {
@@ -176,11 +197,22 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
         resolve(GestureDisposition.accepted);
         _checkUp();
       }
-    } else if (event is PointerCancelEvent) {
-      if (_sentTapDown && onTapCancel != null) {
-        invokeCallback<void>('onTapCancel', onTapCancel);
-      }
+      return;
+    }
+    if (event is PointerCancelEvent) {
+      _checkCancel();
       _reset();
+      return;
+    }
+    if (!_terminated && event.buttons != _initialButtons) {
+      if (_wonArenaForPrimaryPointer) {
+        _checkCancel('terminated onTapCancel');
+        _terminated = true;
+        // Don't reset here because the event sequence has not ended. Reset will
+        // be done by a PointerUpEvent or PointerCancelEvent.
+      } else {
+        resolve(GestureDisposition.rejected);
+      }
     }
   }
 
@@ -190,8 +222,7 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
       // This can happen if the superclass decides the primary pointer
       // exceeded the touch slop, or if the recognizer is disposed.
       assert(_sentTapDown);
-      if (onTapCancel != null)
-        invokeCallback<void>('spontaneous onTapCancel', onTapCancel);
+      _checkCancel('spontaneous onTapCancel');
       _reset();
     }
     super.resolve(disposition);
@@ -218,8 +249,7 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
     if (pointer == primaryPointer) {
       // Another gesture won the arena.
       assert(state != GestureRecognizerState.possible);
-      if (_sentTapDown && onTapCancel != null)
-        invokeCallback<void>('forced onTapCancel', onTapCancel);
+      _checkCancel('forced onTapCancel');
       _reset();
     }
   }
@@ -227,25 +257,42 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
   void _checkDown() {
     if (!_sentTapDown) {
       if (onTapDown != null)
-        invokeCallback<void>('onTapDown', () { onTapDown(TapDownDetails(globalPosition: initialPosition)); });
+        invokeCallback<void>('onTapDown', () {
+          onTapDown(TapDownDetails(globalPosition: initialPosition, buttons: _initialButtons));
+        });
       _sentTapDown = true;
     }
   }
 
   void _checkUp() {
     if (_finalPosition != null) {
-      if (onTapUp != null)
-        invokeCallback<void>('onTapUp', () { onTapUp(TapUpDetails(globalPosition: _finalPosition)); });
-      if (onTap != null)
-        invokeCallback<void>('onTap', onTap);
+      if (!_terminated) {
+        if (onTapUp != null)
+          invokeCallback<void>('onTapUp', () {
+            onTapUp(TapUpDetails(globalPosition: _finalPosition, buttons: _initialButtons));
+          });
+        if (onTap != null)
+          invokeCallback<void>('onTap', onTap);
+      }
       _reset();
+    }
+  }
+
+  void _checkCancel([String message = 'onTapCancel']) {
+    // Gesture cancel can be the last moment of an event sequence (caused by
+    // rejection or disposal of recognizer, etc.), or can happen during an event
+    // sequence (terminated due to button changes).
+    if (!_terminated && _sentTapDown && onTapCancel != null) {
+      invokeCallback<void>(message, onTapCancel);
     }
   }
 
   void _reset() {
     _sentTapDown = false;
+    _terminated = false;
     _wonArenaForPrimaryPointer = false;
     _finalPosition = null;
+    _initialButtons = null;
   }
 
   @override
