@@ -165,8 +165,8 @@ enum ListTileControlAffinity {
 /// wraps to two lines (if it is true).
 ///
 /// The heights of the [leading] and [trailing] widgets are constrained
-/// according to the [Material spec]
-/// (https://material.io/design/components/lists.html).
+/// according to the
+/// [Material spec](https://material.io/design/components/lists.html).
 /// An exception is made for one-line ListTiles for accessibility. Please
 /// see the example below to see how to adhere to both Material spec and
 /// accessibility requirements.
@@ -221,12 +221,12 @@ enum ListTileControlAffinity {
 /// that are large enough, but it is up to the developer to ensure that
 /// their widgets follow the Material spec.
 ///
-/// The following is an example of a one-line, non-[dense] ListTile with a
+/// {@tool sample}
+///
+/// Here is an example of a one-line, non-[dense] ListTile with a
 /// tappable leading widget that adheres to accessibility requirements and
 /// the Material spec. To adjust the use case below for a one-line, [dense]
 /// ListTile, adjust the vertical padding to 8.0.
-///
-/// {@tool sample}
 ///
 /// ```dart
 /// ListTile(
