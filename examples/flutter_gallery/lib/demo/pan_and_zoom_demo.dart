@@ -2,7 +2,7 @@ import 'dart:ui' show Vertices;
 import 'package:flutter/material.dart';
 import 'pan_and_zoom_demo_board.dart';
 import 'pan_and_zoom_demo_edit_board_point.dart';
-import 'pan_and_zoom_demo_transform_interaction.dart';
+import 'pan_and_zoom_demo_gesture_transformable.dart';
 
 class PanAndZoomDemo extends StatefulWidget {
   const PanAndZoomDemo({ Key key }) : super(key: key);
@@ -33,7 +33,7 @@ class _PanAndZoomDemoState extends State<PanAndZoomDemo> {
     );
 
     // The scene is drawn by a CustomPaint, but user interaction is handled by
-    // the TransformInteraction parent widget.
+    // the GestureTransformable parent widget.
     return Scaffold(
       appBar: AppBar(),
       body: LayoutBuilder(
@@ -42,7 +42,7 @@ class _PanAndZoomDemoState extends State<PanAndZoomDemo> {
           // translate beyond that to a visibleSize that's a bit bigger.
           final Size size = Size(constraints.maxWidth, constraints.maxHeight);
           final Size visibleSize = Size(size.width * 3, size.height * 2);
-          return TransformInteraction(
+          return GestureTransformable(
             reset: _reset,
             onResetEnd: () {
               setState(() {
@@ -60,7 +60,7 @@ class _PanAndZoomDemoState extends State<PanAndZoomDemo> {
             ),
             // Center the board in the middle of the screen. It's drawn centered
             // at the origin, which is the top left corner of the
-            // TransformInteraction.
+            // GestureTransformable.
             initialTranslation: Offset(size.width / 2, size.height / 2),
             onTapUp: _onTapUp,
             size: size,
