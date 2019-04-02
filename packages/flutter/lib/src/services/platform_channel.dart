@@ -400,7 +400,7 @@ class BaseMethodChannel {
       return codec.encodeErrorEnvelope(code: 'error', message: e.toString(), details: null);
     }
   }
-} 
+}
 
 /// A [BaseMessageChannel] that sends messages from the framework to platform plugins.
 class BasicMessageChannel<T> extends BaseMessageChannel<T> {
