@@ -24,12 +24,13 @@ class _LinkTextSpan extends TextSpan {
 
   _LinkTextSpan({TextStyle style, String url, String text})
       : super(
-            style: style,
-            text: text ?? url,
-            recognizer: TapGestureRecognizer()
-              ..onTap = () {
-                launch(url, forceSafariVC: false);
-              });
+          style: style,
+          text: text ?? url,
+          recognizer: TapGestureRecognizer()
+            ..onTap = () {
+              launch(url, forceSafariVC: false);
+            },
+        );
 }
 
 void showGalleryAboutDialog(BuildContext context) {

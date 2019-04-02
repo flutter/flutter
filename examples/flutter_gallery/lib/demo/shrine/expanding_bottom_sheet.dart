@@ -56,7 +56,8 @@ class ExpandingBottomSheet extends StatefulWidget {
       return result;
     }
     throw FlutterError(
-        'ExpandingBottomSheet.of() called with a context that does not contain a ExpandingBottomSheet.\n');
+      'ExpandingBottomSheet.of() called with a context that does not contain a ExpandingBottomSheet.\n',
+    );
   }
 }
 

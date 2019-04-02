@@ -69,10 +69,11 @@ class _MyHomePageState extends State<MyHomePage> {
                     Padding(
                       padding: const EdgeInsets.all(18.0),
                       child: RaisedButton(
-                          child: Platform.isIOS
-                              ? const Text('Continue in iOS view')
-                              : const Text('Continue in Android view'),
-                          onPressed: _launchPlatformCount),
+                        child: Platform.isIOS
+                            ? const Text('Continue in iOS view')
+                            : const Text('Continue in Android view'),
+                        onPressed: _launchPlatformCount,
+                      ),
                     ),
                   ],
                 ),

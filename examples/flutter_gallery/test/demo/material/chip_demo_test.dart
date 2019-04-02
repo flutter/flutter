@@ -15,24 +15,26 @@ void main() {
     ));
 
     expect(
-        tester.getSemantics(find.byIcon(Icons.vignette)),
-        matchesSemantics(
-          isButton: true,
-          hasEnabledState: true,
-          isEnabled: true,
-          hasTapAction: true,
-          label: 'Update border shape',
-        ));
+      tester.getSemantics(find.byIcon(Icons.vignette)),
+      matchesSemantics(
+        isButton: true,
+        hasEnabledState: true,
+        isEnabled: true,
+        hasTapAction: true,
+        label: 'Update border shape',
+      ),
+    );
 
     expect(
-        tester.getSemantics(find.byIcon(Icons.refresh)),
-        matchesSemantics(
-          isButton: true,
-          hasEnabledState: true,
-          isEnabled: true,
-          hasTapAction: true,
-          label: 'Reset chips',
-        ));
+      tester.getSemantics(find.byIcon(Icons.refresh)),
+      matchesSemantics(
+        isButton: true,
+        hasEnabledState: true,
+        isEnabled: true,
+        hasTapAction: true,
+        label: 'Reset chips',
+      ),
+    );
 
     handle.dispose();
   });

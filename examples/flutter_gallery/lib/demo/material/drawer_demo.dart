@@ -22,13 +22,7 @@ class DrawerDemo extends StatefulWidget {
 class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  static const List<String> _drawerContents = <String>[
-    'A',
-    'B',
-    'C',
-    'D',
-    'E',
-  ];
+  static const List<String> _drawerContents = <String>['A', 'B', 'C', 'D', 'E'];
 
   static final Animatable<Offset> _drawerDetailsTween = Tween<Offset>(
     begin: const Offset(0.0, -1.0),

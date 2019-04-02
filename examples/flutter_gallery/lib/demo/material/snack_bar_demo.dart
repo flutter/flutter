@@ -76,9 +76,10 @@ class _SnackBarDemoState extends State<SnackBarDemo> {
         actions: <Widget>[MaterialDemoDocumentationButton(SnackBarDemo.routeName)],
       ),
       body: Builder(
-          // Create an inner BuildContext so that the snackBar onPressed methods
-          // can refer to the Scaffold with Scaffold.of().
-          builder: buildBody),
+        // Create an inner BuildContext so that the snackBar onPressed methods
+        // can refer to the Scaffold with Scaffold.of().
+        builder: buildBody,
+      ),
     );
   }
 }

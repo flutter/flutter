@@ -193,16 +193,16 @@ class DialogDemoState extends State<DialogDemo> {
             child: const Text('FULLSCREEN'),
             onPressed: () {
               Navigator.push(
-                  context,
-                  MaterialPageRoute<DismissDialogAction>(
-                    builder: (BuildContext context) => FullScreenDialogDemo(),
-                    fullscreenDialog: true,
-                  ));
+                context,
+                MaterialPageRoute<DismissDialogAction>(
+                  builder: (BuildContext context) => FullScreenDialogDemo(),
+                  fullscreenDialog: true,
+                ),
+              );
             },
           ),
-        ]
-            // Add a little space between the buttons
-            .map<Widget>((Widget button) {
+        ].map<Widget>((Widget button) {
+          // Add a little space between the buttons
           return Container(
             padding: const EdgeInsets.symmetric(vertical: 8.0),
             child: button,

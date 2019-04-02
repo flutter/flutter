@@ -33,7 +33,9 @@ class _PersistentBottomSheetDemoState extends State<PersistentBottomSheetDemo> {
         .showBottomSheet<void>((BuildContext context) {
           final ThemeData themeData = Theme.of(context);
           return Container(
-            decoration: BoxDecoration(border: Border(top: BorderSide(color: themeData.disabledColor))),
+            decoration: BoxDecoration(
+              border: Border(top: BorderSide(color: themeData.disabledColor)),
+            ),
             child: Padding(
               padding: const EdgeInsets.all(32.0),
               child: Text(

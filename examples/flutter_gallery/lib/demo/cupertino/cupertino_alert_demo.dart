@@ -95,8 +95,9 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo> {
                         child: CupertinoAlertDialog(
                           title: const Text('Allow "Maps" to access your location while you are using the app?'),
                           content: const Text(
-                              'Your current location will be displayed on the map and used '
-                              'for directions, nearby search results, and estimated travel times.'),
+                            'Your current location will be displayed on the map and used '
+                            'for directions, nearby search results, and estimated travel times.',
+                          ),
                           actions: <Widget>[
                             CupertinoDialogAction(
                               child: const Text('Don\'t Allow'),
@@ -121,9 +122,10 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo> {
                         child: const CupertinoDessertDialog(
                           title: Text('Select Favorite Dessert'),
                           content: Text(
-                              'Please select your favorite type of dessert from the '
-                              'list below. Your selection will be used to customize the suggested '
-                              'list of eateries in your area.'),
+                            'Please select your favorite type of dessert from the '
+                            'list below. Your selection will be used to customize the suggested '
+                            'list of eateries in your area.',
+                          ),
                         ),
                       );
                     },

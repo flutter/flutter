@@ -115,11 +115,13 @@ class _IconsDemoCard extends StatelessWidget {
           child: Table(
             defaultVerticalAlignment: TableCellVerticalAlignment.middle,
             children: <TableRow>[
-              TableRow(children: <Widget>[
-                _centeredText('Size'),
-                _centeredText('Enabled'),
-                _centeredText('Disabled'),
-              ]),
+              TableRow(
+                children: <Widget>[
+                  _centeredText('Size'),
+                  _centeredText('Enabled'),
+                  _centeredText('Disabled'),
+                ],
+              ),
               _buildIconRow(18.0),
               _buildIconRow(24.0),
               _buildIconRow(36.0),

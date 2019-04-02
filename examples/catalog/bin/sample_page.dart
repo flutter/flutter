@@ -247,17 +247,19 @@ void generate(String commit) {
 void main(List<String> args) {
   if (args.length != 1) {
     logError(
-        'Usage (cd examples/catalog/; dart bin/sample_page.dart commit)\n'
-        'The flutter commit hash locates screenshots on storage.googleapis.com/flutter-catalog/');
+      'Usage (cd examples/catalog/; dart bin/sample_page.dart commit)\n'
+      'The flutter commit hash locates screenshots on storage.googleapis.com/flutter-catalog/',
+    );
     exit(255);
   }
   try {
     generate(args[0]);
   } catch (error) {
     logError(
-        'Error: sample_page.dart failed: $error\n'
-        'This sample_page.dart app expects to be run from the examples/catalog directory. '
-        'More information can be found in examples/catalog/README.md.');
+      'Error: sample_page.dart failed: $error\n'
+      'This sample_page.dart app expects to be run from the examples/catalog directory. '
+      'More information can be found in examples/catalog/README.md.',
+    );
     exit(255);
   }
   exit(0);

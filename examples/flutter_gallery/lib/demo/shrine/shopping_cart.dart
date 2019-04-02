@@ -31,13 +31,11 @@ class ShoppingCartPage extends StatefulWidget {
 class _ShoppingCartPageState extends State<ShoppingCartPage> {
   List<Widget> _createShoppingCartRows(AppStateModel model) {
     return model.productsInCart.keys
-        .map(
-          (int id) => ShoppingCartRow(
-            product: model.getProductById(id),
-            quantity: model.productsInCart[id],
-            onPressed: () { model.removeItemFromCart(id); },
-          ),
-        )
+        .map((int id) => ShoppingCartRow(
+              product: model.getProductById(id),
+              quantity: model.productsInCart[id],
+              onPressed: () { model.removeItemFromCart(id); },
+            ))
         .toList();
   }
 

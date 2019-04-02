@@ -96,7 +96,8 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> with Sing
     return Column(
       children: indicators
           .map<Widget>(
-              (Widget c) => Container(child: c, margin: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0)))
+            (Widget c) => Container(child: c, margin: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0)),
+          )
           .toList(),
     );
   }

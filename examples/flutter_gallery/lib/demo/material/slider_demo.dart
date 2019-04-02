@@ -117,14 +117,17 @@ class _CustomValueIndicatorShape extends SliderComponentShape {
       Paint()..color = paintColor,
     );
     canvas.drawLine(
-        thumbCenter,
-        thumbCenter + slideUpOffset,
-        Paint()
-          ..color = paintColor
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 2.0);
+      thumbCenter,
+      thumbCenter + slideUpOffset,
+      Paint()
+        ..color = paintColor
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2.0,
+    );
     labelPainter.paint(
-        canvas, thumbCenter + slideUpOffset + Offset(-labelPainter.width / 2.0, -labelPainter.height - 4.0));
+      canvas,
+      thumbCenter + slideUpOffset + Offset(-labelPainter.width / 2.0, -labelPainter.height - 4.0),
+    );
   }
 }
 

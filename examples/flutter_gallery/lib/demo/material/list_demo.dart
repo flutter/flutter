@@ -39,22 +39,7 @@ class _ListDemoState extends State<ListDemo> {
   bool _showIcons = false;
   bool _showDividers = false;
   bool _reverseSort = false;
-  List<String> items = <String>[
-    'A',
-    'B',
-    'C',
-    'D',
-    'E',
-    'F',
-    'G',
-    'H',
-    'I',
-    'J',
-    'K',
-    'L',
-    'M',
-    'N',
-  ];
+  List<String> items = <String>['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N'];
 
   void changeItemType(_MaterialListType type) {
     setState(() {

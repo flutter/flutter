@@ -45,7 +45,10 @@ ui.Picture paint(ui.Rect paintBounds) {
     const ui.Offset(0.0, 0.0),
     <ui.Color>[const ui.Color(0xFFFFFF00), const ui.Color(0xFF0000FF)],
   );
-  canvas.drawRect(ui.Rect.fromLTRB(-radius, -radius, radius, radius), ui.Paint()..shader = yellowBlue);
+  canvas.drawRect(
+    ui.Rect.fromLTRB(-radius, -radius, radius, radius),
+    ui.Paint()..shader = yellowBlue,
+  );
 
   // Scale x and y by 0.5.
   final Float64List scaleMatrix = Float64List.fromList(<double>[

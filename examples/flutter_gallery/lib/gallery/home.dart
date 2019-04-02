@@ -194,7 +194,9 @@ class _DemoItem extends StatelessWidget {
       titleChildren.add(
         Text(
           demo.subtitle,
-          style: theme.textTheme.body1.copyWith(color: isDark ? Colors.white : const Color(0xFF60646B)),
+          style: theme.textTheme.body1.copyWith(
+            color: isDark ? Colors.white : const Color(0xFF60646B),
+          ),
         ),
       );
     }

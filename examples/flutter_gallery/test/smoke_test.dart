@@ -34,7 +34,8 @@ void reportToStringError(String name, String route, int lineNumber, List<String>
   final int firstLine = math.max(0, lineNumber - margin);
   final int lastLine = math.min(lines.length, lineNumber + margin);
   print(
-      '$name : $route : line $lineNumber of ${lines.length} : $message; nearby lines were:\n  ${lines.sublist(firstLine, lastLine).join("\n  ")}');
+    '$name : $route : line $lineNumber of ${lines.length} : $message; nearby lines were:\n  ${lines.sublist(firstLine, lastLine).join("\n  ")}',
+  );
   toStringErrors += 1;
 }
 
@@ -81,7 +82,10 @@ Future<void> smokeDemo(WidgetTester tester, GalleryDemo demo) async {
   verifyToStringOutput('debugDumpApp', routeName, WidgetsBinding.instance.renderViewElement.toStringDeep());
   verifyToStringOutput('debugDumpRenderTree', routeName, RendererBinding.instance?.renderView?.toStringDeep());
   verifyToStringOutput(
-      'debugDumpLayerTree', routeName, RendererBinding.instance?.renderView?.debugLayer?.toStringDeep());
+    'debugDumpLayerTree',
+    routeName,
+    RendererBinding.instance?.renderView?.debugLayer?.toStringDeep(),
+  );
 
   // Scroll the demo around a bit more.
   await tester.flingFrom(const Offset(400.0, 300.0), const Offset(-200.0, 0.0), 500.0);

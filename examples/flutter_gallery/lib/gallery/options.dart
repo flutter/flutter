@@ -454,16 +454,14 @@ class GalleryOptionsPage extends StatelessWidget {
           ..addAll(
             _enabledDiagnosticItems(),
           )
-          ..addAll(
-            <Widget>[
-              const Divider(),
-              const _Heading('Flutter gallery'),
-              _ActionItem('About Flutter Gallery', () {
-                showGalleryAboutDialog(context);
-              }),
-              _ActionItem('Send feedback', onSendFeedback),
-            ],
-          ),
+          ..addAll(<Widget>[
+            const Divider(),
+            const _Heading('Flutter gallery'),
+            _ActionItem('About Flutter Gallery', () {
+              showGalleryAboutDialog(context);
+            }),
+            _ActionItem('Send feedback', onSendFeedback),
+          ]),
       ),
     );
   }

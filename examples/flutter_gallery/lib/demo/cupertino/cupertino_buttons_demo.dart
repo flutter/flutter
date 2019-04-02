@@ -35,15 +35,17 @@ class _CupertinoButtonDemoState extends State<CupertinoButtonsDemo> {
               const Padding(
                 padding: EdgeInsets.all(16.0),
                 child: Text(
-                    'iOS themed buttons are flat. They can have borders or backgrounds but '
-                    'only when necessary.'),
+                  'iOS themed buttons are flat. They can have borders or backgrounds but '
+                  'only when necessary.',
+                ),
               ),
               Expanded(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
                     Text(
-                        _pressedCount > 0 ? 'Button pressed $_pressedCount time${_pressedCount == 1 ? "" : "s"}' : ' '),
+                      _pressedCount > 0 ? 'Button pressed $_pressedCount time${_pressedCount == 1 ? "" : "s"}' : ' ',
+                    ),
                     const Padding(padding: EdgeInsets.all(12.0)),
                     Align(
                       alignment: const Alignment(0.0, -0.2),

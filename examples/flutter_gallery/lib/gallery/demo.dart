@@ -56,9 +56,11 @@ class TabbedComponentDemoScaffold extends StatelessWidget {
     final String tag = demos[DefaultTabController.of(context).index].exampleCodeTag;
     if (tag != null) {
       Navigator.push(
-          context,
-          MaterialPageRoute<FullScreenCodeDialog>(
-              builder: (BuildContext context) => FullScreenCodeDialog(exampleCodeTag: tag)));
+        context,
+        MaterialPageRoute<FullScreenCodeDialog>(
+          builder: (BuildContext context) => FullScreenCodeDialog(exampleCodeTag: tag),
+        ),
+      );
     }
   }
 
@@ -95,27 +97,25 @@ class TabbedComponentDemoScaffold extends StatelessWidget {
         appBar: AppBar(
           title: Text(title),
           actions: (actions ?? <Widget>[])
-            ..addAll(
-              <Widget>[
-                Builder(
-                  builder: (BuildContext context) {
-                    return IconButton(
-                      icon: const Icon(Icons.library_books, semanticLabel: 'Show documentation'),
-                      onPressed: () => _showApiDocumentation(context),
-                    );
-                  },
-                ),
-                Builder(
-                  builder: (BuildContext context) {
-                    return IconButton(
-                      icon: const Icon(Icons.code),
-                      tooltip: 'Show example code',
-                      onPressed: () => _showExampleCode(context),
-                    );
-                  },
-                ),
-              ],
-            ),
+            ..addAll(<Widget>[
+              Builder(
+                builder: (BuildContext context) {
+                  return IconButton(
+                    icon: const Icon(Icons.library_books, semanticLabel: 'Show documentation'),
+                    onPressed: () => _showApiDocumentation(context),
+                  );
+                },
+              ),
+              Builder(
+                builder: (BuildContext context) {
+                  return IconButton(
+                    icon: const Icon(Icons.code),
+                    tooltip: 'Show example code',
+                    onPressed: () => _showExampleCode(context),
+                  );
+                },
+              ),
+            ]),
           bottom: TabBar(
             isScrollable: true,
             tabs: demos.map<Widget>((ComponentDemoTabData data) => Tab(text: data.tabName)).toList(),

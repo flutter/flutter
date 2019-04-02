@@ -161,19 +161,21 @@ class GridDemoPhotoItem extends StatelessWidget {
   final BannerTapCallback onBannerTap; // User taps on the photo's header or footer.
 
   void showPhoto(BuildContext context) {
-    Navigator.push(context, MaterialPageRoute<void>(builder: (BuildContext context) {
-      return Scaffold(
-        appBar: AppBar(
-          title: Text(photo.title),
-        ),
-        body: SizedBox.expand(
-          child: Hero(
-            tag: photo.tag,
-            child: GridPhotoViewer(photo: photo),
+    Navigator.push(context, MaterialPageRoute<void>(
+      builder: (BuildContext context) {
+        return Scaffold(
+          appBar: AppBar(
+            title: Text(photo.title),
           ),
-        ),
-      );
-    }));
+          body: SizedBox.expand(
+            child: Hero(
+              tag: photo.tag,
+              child: GridPhotoViewer(photo: photo),
+            ),
+          ),
+        );
+      },
+    ));
   }
 
   @override

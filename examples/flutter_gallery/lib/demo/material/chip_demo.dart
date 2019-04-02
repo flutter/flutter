@@ -92,23 +92,26 @@ class _ChipsTile extends StatelessWidget {
     ];
     if (children.isNotEmpty) {
       cardChildren.add(Wrap(
-          children: children.map<Widget>((Widget chip) {
-        return Padding(
-          padding: const EdgeInsets.all(2.0),
-          child: chip,
-        );
-      }).toList()));
+        children: children.map<Widget>((Widget chip) {
+          return Padding(
+            padding: const EdgeInsets.all(2.0),
+            child: chip,
+          );
+        }).toList(),
+      ));
     } else {
       final TextStyle textStyle = Theme.of(context).textTheme.caption.copyWith(fontStyle: FontStyle.italic);
-      cardChildren.add(Semantics(
-        container: true,
-        child: Container(
-          alignment: Alignment.center,
-          constraints: const BoxConstraints(minWidth: 48.0, minHeight: 48.0),
-          padding: const EdgeInsets.all(8.0),
-          child: Text('None', style: textStyle),
+      cardChildren.add(
+        Semantics(
+          container: true,
+          child: Container(
+            alignment: Alignment.center,
+            constraints: const BoxConstraints(minWidth: 48.0, minHeight: 48.0),
+            padding: const EdgeInsets.all(8.0),
+            child: Text('None', style: textStyle),
+          ),
         ),
-      ));
+      );
     }
 
     return Card(
@@ -216,16 +219,17 @@ class _ChipDemoState extends State<ChipDemo> {
 
     final List<Widget> inputChips = _tools.map<Widget>((String name) {
       return InputChip(
-          key: ValueKey<String>(name),
-          avatar: CircleAvatar(
-            backgroundImage: _nameToAvatar(name),
-          ),
-          label: Text(_capitalize(name)),
-          onDeleted: () {
-            setState(() {
-              _removeTool(name);
-            });
+        key: ValueKey<String>(name),
+        avatar: CircleAvatar(
+          backgroundImage: _nameToAvatar(name),
+        ),
+        label: Text(_capitalize(name)),
+        onDeleted: () {
+          setState(() {
+            _removeTool(name);
           });
+        },
+      );
     }).toList();
 
     final List<Widget> choiceChips = _materials.map<Widget>((String name) {
@@ -319,9 +323,10 @@ class _ChipDemoState extends State<ChipDemo> {
         data: _showShapeBorder
             ? theme.chipTheme.copyWith(
                 shape: BeveledRectangleBorder(
-                side: const BorderSide(width: 0.66, style: BorderStyle.solid, color: Colors.grey),
-                borderRadius: BorderRadius.circular(10.0),
-              ))
+                  side: const BorderSide(width: 0.66, style: BorderStyle.solid, color: Colors.grey),
+                  borderRadius: BorderRadius.circular(10.0),
+                ),
+              )
             : theme.chipTheme,
         child: ListView(children: tiles),
       ),

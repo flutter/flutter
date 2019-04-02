@@ -158,13 +158,15 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
           },
         );
       },
-      child: _buildMenu(<Widget>[
-        const Text('Date'),
-        Text(
-          DateFormat.yMMMMd().format(date),
-          style: const TextStyle(color: CupertinoColors.inactiveGray),
-        ),
-      ]),
+      child: _buildMenu(
+        <Widget>[
+          const Text('Date'),
+          Text(
+            DateFormat.yMMMMd().format(date),
+            style: const TextStyle(color: CupertinoColors.inactiveGray),
+          ),
+        ],
+      ),
     );
   }
 

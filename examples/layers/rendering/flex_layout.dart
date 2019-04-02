@@ -20,9 +20,10 @@ void main() {
     );
     table.add(RenderPadding(child: paragraph, padding: const EdgeInsets.only(top: 20.0)));
     final RenderFlex row = RenderFlex(
-        crossAxisAlignment: crossAxisAlignment,
-        textBaseline: TextBaseline.alphabetic,
-        textDirection: TextDirection.ltr);
+      crossAxisAlignment: crossAxisAlignment,
+      textBaseline: TextBaseline.alphabetic,
+      textDirection: TextDirection.ltr,
+    );
     style = const TextStyle(fontSize: 15.0, color: Color(0xFF000000));
     row.add(RenderDecoratedBox(
       decoration: const BoxDecoration(color: Color(0x7FFFCCCC)),
@@ -40,9 +41,10 @@ void main() {
       ),
     ));
     final RenderFlex subrow = RenderFlex(
-        crossAxisAlignment: crossAxisAlignment,
-        textBaseline: TextBaseline.alphabetic,
-        textDirection: TextDirection.ltr);
+      crossAxisAlignment: crossAxisAlignment,
+      textBaseline: TextBaseline.alphabetic,
+      textDirection: TextDirection.ltr,
+    );
     style = const TextStyle(fontSize: 25.0, color: Color(0xFF000000));
     subrow.add(RenderDecoratedBox(
       decoration: const BoxDecoration(color: Color(0x7FCCCCFF)),

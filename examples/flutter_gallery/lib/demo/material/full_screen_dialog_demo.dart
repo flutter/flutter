@@ -38,7 +38,9 @@ class DateTimeItem extends StatelessWidget {
           Expanded(
             child: Container(
               padding: const EdgeInsets.symmetric(vertical: 8.0),
-              decoration: BoxDecoration(border: Border(bottom: BorderSide(color: theme.dividerColor))),
+              decoration: BoxDecoration(
+                border: Border(bottom: BorderSide(color: theme.dividerColor)),
+              ),
               child: InkWell(
                 onTap: () {
                   showDatePicker(
@@ -225,7 +227,9 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
               ],
             ),
             Container(
-              decoration: BoxDecoration(border: Border(bottom: BorderSide(color: theme.dividerColor))),
+              decoration: BoxDecoration(
+                border: Border(bottom: BorderSide(color: theme.dividerColor)),
+              ),
               child: Row(
                 children: <Widget>[
                   Checkbox(

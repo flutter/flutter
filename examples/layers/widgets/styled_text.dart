@@ -61,7 +61,11 @@ class SpeakerSeparator extends StatelessWidget {
     return Container(
       constraints: const BoxConstraints.expand(height: 0.0),
       margin: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 64.0),
-      decoration: const BoxDecoration(border: Border(bottom: BorderSide(color: Color.fromARGB(24, 0, 0, 0)))),
+      decoration: const BoxDecoration(
+        border: Border(
+          bottom: BorderSide(color: Color.fromARGB(24, 0, 0, 0)),
+        ),
+      ),
     );
   }
 }

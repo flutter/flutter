@@ -168,25 +168,27 @@ class _RecipeGridPageState extends State<RecipeGridPage> {
 
   void showFavoritesPage(BuildContext context) {
     Navigator.push(
-        context,
-        MaterialPageRoute<void>(
-          settings: const RouteSettings(name: '/pesto/favorites'),
-          builder: (BuildContext context) => PestoFavorites(),
-        ));
+      context,
+      MaterialPageRoute<void>(
+        settings: const RouteSettings(name: '/pesto/favorites'),
+        builder: (BuildContext context) => PestoFavorites(),
+      ),
+    );
   }
 
   void showRecipePage(BuildContext context, Recipe recipe) {
     Navigator.push(
-        context,
-        MaterialPageRoute<void>(
-          settings: const RouteSettings(name: '/pesto/recipe'),
-          builder: (BuildContext context) {
-            return Theme(
-              data: _kTheme.copyWith(platform: Theme.of(context).platform),
-              child: RecipePage(recipe: recipe),
-            );
-          },
-        ));
+      context,
+      MaterialPageRoute<void>(
+        settings: const RouteSettings(name: '/pesto/recipe'),
+        builder: (BuildContext context) {
+          return Theme(
+            data: _kTheme.copyWith(platform: Theme.of(context).platform),
+            child: RecipePage(recipe: recipe),
+          );
+        },
+      ),
+    );
   }
 }
 
@@ -460,48 +462,56 @@ class RecipeSheet extends StatelessWidget {
               0: FixedColumnWidth(64.0),
             },
             children: <TableRow>[
-              TableRow(children: <Widget>[
-                TableCell(
-                  verticalAlignment: TableCellVerticalAlignment.middle,
-                  child: Image.asset(
-                    recipe.ingredientsImagePath,
-                    package: recipe.ingredientsImagePackage,
-                    width: 32.0,
-                    height: 32.0,
-                    alignment: Alignment.centerLeft,
-                    fit: BoxFit.scaleDown,
+              TableRow(
+                children: <Widget>[
+                  TableCell(
+                    verticalAlignment: TableCellVerticalAlignment.middle,
+                    child: Image.asset(
+                      recipe.ingredientsImagePath,
+                      package: recipe.ingredientsImagePackage,
+                      width: 32.0,
+                      height: 32.0,
+                      alignment: Alignment.centerLeft,
+                      fit: BoxFit.scaleDown,
+                    ),
                   ),
-                ),
-                TableCell(
-                  verticalAlignment: TableCellVerticalAlignment.middle,
-                  child: Text(recipe.name, style: titleStyle),
-                ),
-              ]),
-              TableRow(children: <Widget>[
-                const SizedBox(),
-                Padding(
-                  padding: const EdgeInsets.only(top: 8.0, bottom: 4.0),
-                  child: Text(recipe.description, style: descriptionStyle),
-                ),
-              ]),
-              TableRow(children: <Widget>[
-                const SizedBox(),
-                Padding(
-                  padding: const EdgeInsets.only(top: 24.0, bottom: 4.0),
-                  child: Text('Ingredients', style: headingStyle),
-                ),
-              ]),
+                  TableCell(
+                    verticalAlignment: TableCellVerticalAlignment.middle,
+                    child: Text(recipe.name, style: titleStyle),
+                  ),
+                ],
+              ),
+              TableRow(
+                children: <Widget>[
+                  const SizedBox(),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8.0, bottom: 4.0),
+                    child: Text(recipe.description, style: descriptionStyle),
+                  ),
+                ],
+              ),
+              TableRow(
+                children: <Widget>[
+                  const SizedBox(),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 24.0, bottom: 4.0),
+                    child: Text('Ingredients', style: headingStyle),
+                  ),
+                ],
+              ),
             ]
               ..addAll(recipe.ingredients.map<TableRow>((RecipeIngredient ingredient) {
                 return _buildItemRow(ingredient.amount, ingredient.description);
               }))
-              ..add(TableRow(children: <Widget>[
-                const SizedBox(),
-                Padding(
-                  padding: const EdgeInsets.only(top: 24.0, bottom: 4.0),
-                  child: Text('Steps', style: headingStyle),
-                ),
-              ]))
+              ..add(TableRow(
+                children: <Widget>[
+                  const SizedBox(),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 24.0, bottom: 4.0),
+                    child: Text('Steps', style: headingStyle),
+                  ),
+                ],
+              ))
               ..addAll(recipe.steps.map<TableRow>((RecipeStep step) {
                 return _buildItemRow(step.duration ?? '', step.description);
               })),

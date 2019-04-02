@@ -189,10 +189,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
                 },
               ),
               const FlatButton(
-                child: Text(
-                  'DISABLED',
-                  semanticsLabel: 'DISABLED BUTTON 3',
-                ),
+                child: Text('DISABLED', semanticsLabel: 'DISABLED BUTTON 3'),
                 onPressed: null,
               ),
             ],

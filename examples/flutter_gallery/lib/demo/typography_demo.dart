@@ -62,12 +62,13 @@ class TypographyDemo extends StatelessWidget {
 
     if (MediaQuery.of(context).size.width > 500.0) {
       styleItems.insert(
-          0,
-          TextStyleItem(
-            name: 'Display 4',
-            style: textTheme.display4,
-            text: 'Light 112sp',
-          ));
+        0,
+        TextStyleItem(
+          name: 'Display 4',
+          style: textTheme.display4,
+          text: 'Light 112sp',
+        ),
+      );
     }
 
     return Scaffold(

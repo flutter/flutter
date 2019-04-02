@@ -118,12 +118,14 @@ class CollapsibleBody extends StatelessWidget {
                 margin: const EdgeInsets.only(right: 8.0),
                 child: FlatButton(
                   onPressed: onCancel,
-                  child: const Text('CANCEL',
-                      style: TextStyle(
-                        color: Colors.black54,
-                        fontSize: 15.0,
-                        fontWeight: FontWeight.w500,
-                      )),
+                  child: const Text(
+                    'CANCEL',
+                    style: TextStyle(
+                      color: Colors.black54,
+                      fontSize: 15.0,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
                 ),
               ),
               Container(
@@ -243,48 +245,50 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
           }
 
           return Form(
-            child: Builder(builder: (BuildContext context) {
-              return CollapsibleBody(
-                onSave: () {
-                  Form.of(context).save();
-                  close();
-                },
-                onCancel: () {
-                  Form.of(context).reset();
-                  close();
-                },
-                child: FormField<Location>(
-                  initialValue: item.value,
-                  onSaved: (Location result) { item.value = result; },
-                  builder: (FormFieldState<Location> field) {
-                    return Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        RadioListTile<Location>(
-                          value: Location.Bahamas,
-                          title: const Text('Bahamas'),
-                          groupValue: field.value,
-                          onChanged: field.didChange,
-                        ),
-                        RadioListTile<Location>(
-                          value: Location.Barbados,
-                          title: const Text('Barbados'),
-                          groupValue: field.value,
-                          onChanged: field.didChange,
-                        ),
-                        RadioListTile<Location>(
-                          value: Location.Bermuda,
-                          title: const Text('Bermuda'),
-                          groupValue: field.value,
-                          onChanged: field.didChange,
-                        ),
-                      ],
-                    );
+            child: Builder(
+              builder: (BuildContext context) {
+                return CollapsibleBody(
+                  onSave: () {
+                    Form.of(context).save();
+                    close();
                   },
-                ),
-              );
-            }),
+                  onCancel: () {
+                    Form.of(context).reset();
+                    close();
+                  },
+                  child: FormField<Location>(
+                    initialValue: item.value,
+                    onSaved: (Location result) { item.value = result; },
+                    builder: (FormFieldState<Location> field) {
+                      return Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          RadioListTile<Location>(
+                            value: Location.Bahamas,
+                            title: const Text('Bahamas'),
+                            groupValue: field.value,
+                            onChanged: field.didChange,
+                          ),
+                          RadioListTile<Location>(
+                            value: Location.Barbados,
+                            title: const Text('Barbados'),
+                            groupValue: field.value,
+                            onChanged: field.didChange,
+                          ),
+                          RadioListTile<Location>(
+                            value: Location.Bermuda,
+                            title: const Text('Bermuda'),
+                            groupValue: field.value,
+                            onChanged: field.didChange,
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                );
+              },
+            ),
           );
         },
       ),
@@ -301,33 +305,35 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
           }
 
           return Form(
-            child: Builder(builder: (BuildContext context) {
-              return CollapsibleBody(
-                onSave: () {
-                  Form.of(context).save();
-                  close();
-                },
-                onCancel: () {
-                  Form.of(context).reset();
-                  close();
-                },
-                child: FormField<double>(
-                  initialValue: item.value,
-                  onSaved: (double value) { item.value = value; },
-                  builder: (FormFieldState<double> field) {
-                    return Slider(
-                      min: 0.0,
-                      max: 100.0,
-                      divisions: 5,
-                      activeColor: Colors.orange[100 + (field.value * 5.0).round()],
-                      label: '${field.value.round()}',
-                      value: field.value,
-                      onChanged: field.didChange,
-                    );
+            child: Builder(
+              builder: (BuildContext context) {
+                return CollapsibleBody(
+                  onSave: () {
+                    Form.of(context).save();
+                    close();
                   },
-                ),
-              );
-            }),
+                  onCancel: () {
+                    Form.of(context).reset();
+                    close();
+                  },
+                  child: FormField<double>(
+                    initialValue: item.value,
+                    onSaved: (double value) { item.value = value; },
+                    builder: (FormFieldState<double> field) {
+                      return Slider(
+                        min: 0.0,
+                        max: 100.0,
+                        divisions: 5,
+                        activeColor: Colors.orange[100 + (field.value * 5.0).round()],
+                        label: '${field.value.round()}',
+                        value: field.value,
+                        onChanged: field.didChange,
+                      );
+                    },
+                  ),
+                );
+              },
+            ),
           );
         },
       ),

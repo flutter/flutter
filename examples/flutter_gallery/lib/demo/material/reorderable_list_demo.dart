@@ -43,22 +43,9 @@ class _ListDemoState extends State<ReorderableListDemo> {
   _ReorderableListType _itemType = _ReorderableListType.threeLine;
   bool _reverse = false;
   bool _reverseSort = false;
-  final List<_ListItem> _items = <String>[
-    'A',
-    'B',
-    'C',
-    'D',
-    'E',
-    'F',
-    'G',
-    'H',
-    'I',
-    'J',
-    'K',
-    'L',
-    'M',
-    'N',
-  ].map<_ListItem>((String item) => _ListItem(item, false)).toList();
+  final List<_ListItem> _items = <String>['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N']
+      .map<_ListItem>((String item) => _ListItem(item, false))
+      .toList();
 
   void changeItemType(_ReorderableListType type) {
     setState(() {
@@ -219,7 +206,8 @@ class _ListDemoState extends State<ReorderableListDemo> {
           header: _itemType != _ReorderableListType.threeLine
               ? Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: Text('Header of the list', style: Theme.of(context).textTheme.headline))
+                  child: Text('Header of the list', style: Theme.of(context).textTheme.headline),
+                )
               : null,
           onReorder: _onReorder,
           reverse: _reverse,

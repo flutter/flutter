@@ -174,11 +174,19 @@ abstract class RenderDecoratedSector extends RenderSector {
       final Path path = Path();
       final double outerRadius = parentData.radius + deltaRadius;
       final Rect outerBounds = Rect.fromLTRB(
-          offset.dx - outerRadius, offset.dy - outerRadius, offset.dx + outerRadius, offset.dy + outerRadius);
+        offset.dx - outerRadius,
+        offset.dy - outerRadius,
+        offset.dx + outerRadius,
+        offset.dy + outerRadius,
+      );
       path.arcTo(outerBounds, parentData.theta, deltaTheta, true);
       final double innerRadius = parentData.radius;
       final Rect innerBounds = Rect.fromLTRB(
-          offset.dx - innerRadius, offset.dy - innerRadius, offset.dx + innerRadius, offset.dy + innerRadius);
+        offset.dx - innerRadius,
+        offset.dy - innerRadius,
+        offset.dx + innerRadius,
+        offset.dy + innerRadius,
+      );
       path.arcTo(innerBounds, parentData.theta + deltaTheta, -deltaTheta, false);
       path.close();
       canvas.drawPath(path, paint);
@@ -279,7 +287,11 @@ class RenderSectorRing extends RenderSectorWithChildren {
         remainingDeltaTheta -= paddingTheta;
       }
     }
-    return SectorDimensions.withConstraints(constraints, deltaRadius: outerDeltaRadius, deltaTheta: innerTheta);
+    return SectorDimensions.withConstraints(
+      constraints,
+      deltaRadius: outerDeltaRadius,
+      deltaTheta: innerTheta,
+    );
   }
 
   @override
@@ -390,8 +402,11 @@ class RenderSectorSlice extends RenderSectorWithChildren {
       childRadius += padding;
       remainingDeltaRadius -= padding;
     }
-    return SectorDimensions.withConstraints(constraints,
-        deltaRadius: childRadius - parentData.radius, deltaTheta: outerDeltaTheta);
+    return SectorDimensions.withConstraints(
+      constraints,
+      deltaRadius: childRadius - parentData.radius,
+      deltaTheta: outerDeltaTheta,
+    );
   }
 
   @override
