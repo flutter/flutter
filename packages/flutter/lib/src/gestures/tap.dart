@@ -202,14 +202,11 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
         resolve(GestureDisposition.accepted);
         _checkUp();
       }
-      return;
-    }
-    if (event is PointerCancelEvent) {
-      _checkCancel();
-      _reset();
-      return;
-    }
-    if (event.buttons != _initialButtons) {
+    } else if (event is PointerCancelEvent) {
+      if (_sentTapDown && onTapCancel != null) {
+        invokeCallback<void>('onTapCancel', onTapCancel);
+      }
+    } else if (event.buttons != _initialButtons) {
       resolve(GestureDisposition.rejected);
       stopTrackingPointer(primaryPointer);
     }
@@ -221,7 +218,8 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
       // This can happen if the superclass decides the primary pointer
       // exceeded the touch slop, or if the recognizer is disposed.
       assert(_sentTapDown);
-      _checkCancel('spontaneous onTapCancel');
+      if (onTapCancel != null)
+        invokeCallback<void>('spontaneous onTapCancel', onTapCancel);
       _reset();
     }
     super.resolve(disposition);
@@ -248,7 +246,8 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
     if (pointer == primaryPointer) {
       // Another gesture won the arena.
       assert(state != GestureRecognizerState.possible);
-      _checkCancel('forced onTapCancel');
+      if (_sentTapDown && onTapCancel != null)
+        invokeCallback<void>('forced onTapCancel', onTapCancel);
       _reset();
     }
   }
@@ -272,15 +271,6 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
       if (onTap != null)
         invokeCallback<void>('onTap', onTap);
       _reset();
-    }
-  }
-
-  void _checkCancel([String message = 'onTapCancel']) {
-    // Gesture cancel can be the last moment of an event sequence (caused by
-    // rejection or disposal of recognizer, etc.), or can happen during an event
-    // sequence (terminated due to button changes).
-    if (_sentTapDown && onTapCancel != null) {
-      invokeCallback<void>(message, onTapCancel);
     }
   }
 
