@@ -1,4 +1,4 @@
-Signature: 7bb93da4b03881db83e145aaeca6df36
+Signature: 9dc1569e557e981bad887bab6ab265e9
 
 UNUSED LICENSES:
 
@@ -4577,6 +4577,7 @@ FILE: ../../../third_party/skia/modules/sksg/src/SkSGTransformPriv.h
 FILE: ../../../third_party/skia/samplecode/SampleDegenerateQuads.cpp
 FILE: ../../../third_party/skia/samplecode/SampleSG.cpp
 FILE: ../../../third_party/skia/samplecode/SampleThinAA.cpp
+FILE: ../../../third_party/skia/src/codec/SkScalingCodec.h
 FILE: ../../../third_party/skia/src/core/SkColorFilter_Mixer.cpp
 FILE: ../../../third_party/skia/src/core/SkColorFilter_Mixer.h
 FILE: ../../../third_party/skia/src/core/SkDescriptor.cpp
