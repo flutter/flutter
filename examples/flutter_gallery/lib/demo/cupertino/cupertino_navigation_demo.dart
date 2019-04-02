@@ -24,29 +24,10 @@ const List<Color> coolColors = <Color>[
 ];
 
 const List<String> coolColorNames = <String>[
-  'Sarcoline',
-  'Coquelicot',
-  'Smaragdine',
-  'Mikado',
-  'Glaucous',
-  'Wenge',
-  'Fulvous',
-  'Xanadu',
-  'Falu',
-  'Eburnean',
-  'Amaranth',
-  'Australien',
-  'Banan',
-  'Falu',
-  'Gingerline',
-  'Incarnadine',
-  'Labrador',
-  'Nattier',
-  'Pervenche',
-  'Sinoper',
-  'Verditer',
-  'Watchet',
-  'Zaffre',
+  'Sarcoline', 'Coquelicot', 'Smaragdine', 'Mikado', 'Glaucous', 'Wenge', //
+  'Fulvous', 'Xanadu', 'Falu', 'Eburnean', 'Amaranth', 'Australien',
+  'Banan', 'Falu', 'Gingerline', 'Incarnadine', 'Labrador', 'Nattier',
+  'Pervenche', 'Sinoper', 'Verditer', 'Watchet', 'Zaffre',
 ];
 
 const int _kChildCount = 50;

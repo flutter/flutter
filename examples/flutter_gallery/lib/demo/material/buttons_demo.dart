@@ -321,23 +321,8 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
                 });
               },
               items: <String>[
-                'One',
-                'Two',
-                'Free',
-                'Four',
-                'Can',
-                'I',
-                'Have',
-                'A',
-                'Little',
-                'Bit',
-                'More',
-                'Five',
-                'Six',
-                'Seven',
-                'Eight',
-                'Nine',
-                'Ten',
+                'One', 'Two', 'Free', 'Four', 'Can', 'I', 'Have', 'A', 'Little', //
+                'Bit', 'More', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten',
               ].map<DropdownMenuItem<String>>((String value) {
                 return DropdownMenuItem<String>(
                   value: value,

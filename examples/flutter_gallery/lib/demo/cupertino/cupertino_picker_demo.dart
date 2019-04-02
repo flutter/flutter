@@ -90,7 +90,11 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
                 scrollController: scrollController,
                 itemExtent: _kPickerItemHeight,
                 backgroundColor: CupertinoColors.white,
-                onSelectedItemChanged: (int index) { setState(() => _selectedColorIndex = index); },
+                onSelectedItemChanged: (int index) {
+                  setState(() {
+                    _selectedColorIndex = index;
+                  });
+                },
                 children: List<Widget>.generate(coolColorNames.length, (int index) {
                   return Center(
                     child: Text(coolColorNames[index]),
@@ -122,7 +126,11 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
             return _buildBottomPicker(
               CupertinoTimerPicker(
                 initialTimerDuration: timer,
-                onTimerDurationChanged: (Duration newTimer) { setState(() => timer = newTimer); },
+                onTimerDurationChanged: (Duration newTimer) {
+                  setState(() {
+                    timer = newTimer;
+                  });
+                },
               ),
             );
           },
@@ -152,7 +160,11 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
               CupertinoDatePicker(
                 mode: CupertinoDatePickerMode.date,
                 initialDateTime: date,
-                onDateTimeChanged: (DateTime newDateTime) { setState(() => date = newDateTime); },
+                onDateTimeChanged: (DateTime newDateTime) {
+                  setState(() {
+                    date = newDateTime;
+                  });
+                },
               ),
             );
           },
@@ -180,7 +192,11 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
               CupertinoDatePicker(
                 mode: CupertinoDatePickerMode.time,
                 initialDateTime: time,
-                onDateTimeChanged: (DateTime newDateTime) { setState(() => time = newDateTime); },
+                onDateTimeChanged: (DateTime newDateTime) {
+                  setState(() {
+                    time = newDateTime;
+                  });
+                },
               ),
             );
           },
@@ -208,7 +224,11 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
               CupertinoDatePicker(
                 mode: CupertinoDatePickerMode.dateAndTime,
                 initialDateTime: dateTime,
-                onDateTimeChanged: (DateTime newDateTime) { setState(() => dateTime = newDateTime); },
+                onDateTimeChanged: (DateTime newDateTime) {
+                  setState(() {
+                    dateTime = newDateTime;
+                  });
+                },
               ),
             );
           },
