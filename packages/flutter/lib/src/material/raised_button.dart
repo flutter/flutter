@@ -38,35 +38,48 @@ import 'theme_data.dart';
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
-///   return Scaffold(
-///     body: Center(
-///       child: Column(
-///         mainAxisSize: MainAxisSize.min,
-///         children: <Widget>[
-///           RaisedButton(
-///             onPressed: null,
-///             child: const Text('Disabled Button'),
+///   return Center(
+///     child: Column(
+///       mainAxisSize: MainAxisSize.min,
+///       children: <Widget>[
+///         const RaisedButton(
+///           onPressed: null,
+///           child: Text(
+///             'Disabled Button',
+///             style: TextStyle(fontSize: 20)
 ///           ),
-///           RaisedButton(
-///             onPressed: () {},
-///             child: const Text('Enabled Button'),
+///         ),
+///         const SizedBox(height: 30),
+///         RaisedButton(
+///           onPressed: () {},
+///           child: const Text(
+///             'Enabled Button',
+///             style: TextStyle(fontSize: 20)
 ///           ),
-///           RaisedButton(
-///             onPressed: () {},
-///             textColor: Colors.white,
-///             padding: const EdgeInsets.all(0.0),
-///             child: Container(
-///               decoration: const BoxDecoration(
-///                 gradient: LinearGradient(
-///                   colors: <Color>[Colors.red, Colors.green, Colors.blue],
-///                 ),
+///         ),
+///         const SizedBox(height: 30),
+///         RaisedButton(
+///           onPressed: () {},
+///           textColor: Colors.white,
+///           padding: const EdgeInsets.all(0.0),
+///           child: Container(
+///             decoration: const BoxDecoration(
+///               gradient: LinearGradient(
+///                 colors: <Color>[
+///                   Color(0xFF0D47A1),
+///                   Color(0xFF1976D2),
+///                   Color(0xFF42A5F5),
+///                 ],
 ///               ),
-///               padding: const EdgeInsets.all(10.0),
-///               child: Text('Gradient Button'),
+///             ),
+///             padding: const EdgeInsets.all(10.0),
+///             child: const Text(
+///               'Gradient Button',
+///               style: TextStyle(fontSize: 20)
 ///             ),
 ///           ),
-///         ],
-///       ),
+///         ),
+///       ],
 ///     ),
 ///   );
 /// }
