@@ -120,7 +120,7 @@ class GestureTransformable extends StatefulWidget {
   final double initialScale;
   final double initialRotation;
 
-  @override GestureTransformableState createState() => GestureTransformableState();
+  @override _GestureTransformableState createState() => _GestureTransformableState();
 }
 
 // A single user event can only represent one of these gestures. The user can't
@@ -132,7 +132,7 @@ enum _GestureType {
 }
 
 // This is public only for access from a unit test.
-class GestureTransformableState extends State<GestureTransformable> with TickerProviderStateMixin {
+class _GestureTransformableState extends State<GestureTransformable> with TickerProviderStateMixin {
   Animation<Offset> _animation;
   AnimationController _controller;
   Animation<Matrix4> _animationReset;
