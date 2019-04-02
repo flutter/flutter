@@ -97,6 +97,14 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
 
+  uncaught_image_error_linux:
+    description: >
+      Ensures that an error thrown into the zone can be caught by the ImageStream
+      completer
+    stage: devicelab
+    flaky: true
+    required_agent_capabilities: ["linux/android"]
+
   flutter_gallery_android__compile:
     description: >
       Collects various performance metrics of compiling the Flutter
