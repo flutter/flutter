@@ -2420,7 +2420,6 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       case RoutePopDisposition.doNotPop:
         return true;
     }
-    assert(false, 'unreachable');
     return null;
   }
 
