@@ -19,7 +19,9 @@ export 'package:flutter/physics.dart' show Simulation, ScrollSpringSimulation, T
 // class FooScrollPhysics extends ScrollPhysics {
 //   const FooScrollPhysics({ ScrollPhysics parent }): super(parent: parent);
 // }
-// class BarScrollPhysics extends ScrollPhysics { }
+// class BarScrollPhysics extends ScrollPhysics {
+//   const BarScrollPhysics({ ScrollPhysics parent }): super(parent: parent);
+// }
 
 /// Determines the physics of a [Scrollable] widget.
 ///
@@ -84,7 +86,7 @@ class ScrollPhysics {
   ///
   /// {@tool sample}
   ///
-  /// In the following example, the [applyTo] method is used to combine the 
+  /// In the following example, the [applyTo] method is used to combine the
   /// scroll physics of two [ScrollPhysics] objects, the resulting [ScrollPhysics]
   /// `x` has the same behavior as `y`:
   ///
