@@ -5,6 +5,7 @@ import 'package:vector_math/vector_math.dart' show Vector2;
 // Provides calculations for an object moving with inertia and friction using
 // the equation of motion from physics.
 // https://en.wikipedia.org/wiki/Equations_of_motion#Constant_translational_acceleration_in_a_straight_line
+// TODO(justinmc): Can this be replaced with friction_simulation.dart?
 @immutable
 class InertialMotion {
   const InertialMotion(this._initialVelocity, this._initialPosition);

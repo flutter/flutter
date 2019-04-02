@@ -8,7 +8,7 @@ class ColorPicker extends StatelessWidget {
     @required this.selectedColor,
     this.onColorSelection,
   }) : assert(colors != null),
-      assert(selectedColor != null);
+       assert(selectedColor != null);
 
   final Set<Color> colors;
   final Color selectedColor;
@@ -41,7 +41,7 @@ class _ColorPickerSwatch extends StatelessWidget {
     @required this.selected,
     this.onTap,
   }) : assert(color != null),
-      assert(selected != null);
+       assert(selected != null);
 
   final Color color;
   final bool selected;

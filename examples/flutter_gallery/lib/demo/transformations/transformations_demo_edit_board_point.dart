@@ -10,7 +10,7 @@ class EditBoardPoint extends StatelessWidget {
     @required this.boardPoint,
     this.onColorSelection,
   }) : assert(boardPoint != null),
-      super(key: key);
+       super(key: key);
 
   final BoardPoint boardPoint;
   final ValueChanged<Color> onColorSelection;

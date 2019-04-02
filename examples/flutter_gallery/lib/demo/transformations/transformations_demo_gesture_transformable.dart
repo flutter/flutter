@@ -2,9 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:vector_math/vector_math_64.dart' show Vector3;
 import 'transformations_demo_inertial_motion.dart';
 
-// Empty function type for the onResetEnd parameter.
-typedef _ResetEndCallback = void Function();
-
 // This widget allows 2D transform interactions on its child in relation to its
 // parent. The user can transform the child by dragging to pan or pinching to
 // zoom and rotate. All event callbacks for GestureDetector are supported, and
@@ -13,6 +10,7 @@ typedef _ResetEndCallback = void Function();
 @immutable
 class GestureTransformable extends StatefulWidget {
   const GestureTransformable({
+    Key key,
     // The child to perform the transformations on.
     @required this.child,
     // The desired visible size of the widget and the area that is receptive to
@@ -69,16 +67,19 @@ class GestureTransformable extends StatefulWidget {
     this.onScaleStart,
     this.onScaleUpdate,
     this.onScaleEnd,
-  }) :
-    assert(child != null),
-    assert(size != null),
-    assert(minScale != null),
-    assert(minScale > 0),
-    assert(disableTranslation != null),
-    assert(disableScale != null),
-    assert(disableRotation != null),
-    assert(reset != null),
-    assert(!reset || onResetEnd != null, 'Must implement onResetEnd to use reset.');
+  }) : assert(child != null),
+       assert(size != null),
+       assert(minScale != null),
+       assert(minScale > 0),
+       assert(disableTranslation != null),
+       assert(disableScale != null),
+       assert(disableRotation != null),
+       assert(reset != null),
+       assert(
+         !reset || onResetEnd != null,
+         'Must implement onResetEnd to use reset.',
+       ),
+       super(key: key);
 
   final Widget child;
   final Size size;
@@ -105,7 +106,7 @@ class GestureTransformable extends StatefulWidget {
   final GestureDragUpdateCallback onPanUpdate;
   final GestureDragEndCallback onPanEnd;
   final GestureDragCancelCallback onPanCancel;
-  final _ResetEndCallback onResetEnd;
+  final VoidCallback onResetEnd;
   final GestureScaleStartCallback onScaleStart;
   final GestureScaleUpdateCallback onScaleUpdate;
   final GestureScaleEndCallback onScaleEnd;
@@ -176,6 +177,7 @@ class GestureTransformableState extends State<GestureTransformable> with TickerP
   }
 
   // Get the offset of the current widget from the global screen coordinates.
+  // TODO(justinmc): Protect against calling this during first build.
   static Offset getOffset(BuildContext context) {
     final RenderBox renderObject = context.findRenderObject();
     return renderObject.localToGlobal(Offset.zero);
@@ -195,9 +197,9 @@ class GestureTransformableState extends State<GestureTransformable> with TickerP
   }
 
   @override
-  Widget build (BuildContext context) {
+  void didUpdateWidget(Widget oldWidget) {
+    super.didUpdateWidget(oldWidget);
     if (widget.reset && _animationReset == null) {
-      _animationReset?.removeListener(_onAnimateReset);
       _controllerReset.reset();
       _animationReset = Matrix4Tween(
         begin: _transform,
@@ -207,7 +209,10 @@ class GestureTransformableState extends State<GestureTransformable> with TickerP
       _animationReset.addListener(_onAnimateReset);
       _controllerReset.forward();
     }
+  }
 
+  @override
+  Widget build(BuildContext context) {
     // A GestureDetector allows the detection of panning and zooming gestures on
     // its child, which is the CustomPaint.
     return GestureDetector(
@@ -314,10 +319,10 @@ class GestureTransformableState extends State<GestureTransformable> with TickerP
     // Translation is reversed (a positive translation moves the scene to the
     // right, viewport to the left).
     final Rect translationBoundaries = Rect.fromLTRB(
-      viewportBoundaries.right * -1 * scale,
-      viewportBoundaries.bottom * -1 * scale,
-      viewportBoundaries.left * -1 * scale,
-      viewportBoundaries.top * -1 * scale,
+      -scale * viewportBoundaries.right,
+      -scale * viewportBoundaries.bottom,
+      -scale * viewportBoundaries.left,
+      -scale * viewportBoundaries.top,
     );
     final Matrix4 nextMatrix = matrix.clone()..translate(
       translation.dx,

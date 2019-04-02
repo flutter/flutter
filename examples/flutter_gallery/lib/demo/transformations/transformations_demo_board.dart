@@ -66,7 +66,7 @@ class Board extends Object with IterableMixin<BoardPoint> {
     if (q <= 0) {
       rStart = -boardRadius - q;
       rEnd = boardRadius;
-    } else if (q > 0) {
+    } else {
       rEnd = boardRadius - q;
       rStart = -boardRadius;
     }
