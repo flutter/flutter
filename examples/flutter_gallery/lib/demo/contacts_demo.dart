@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class _ContactCategory extends StatelessWidget {
-  const _ContactCategory({ Key key, this.icon, this.children }) : super(key: key);
+  const _ContactCategory({Key key, this.icon, this.children}) : super(key: key);
 
   final IconData icon;
   final List<Widget> children;
@@ -16,9 +16,7 @@ class _ContactCategory extends StatelessWidget {
     final ThemeData themeData = Theme.of(context);
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 16.0),
-      decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: themeData.dividerColor))
-      ),
+      decoration: BoxDecoration(border: Border(bottom: BorderSide(color: themeData.dividerColor))),
       child: DefaultTextStyle(
         style: Theme.of(context).textTheme.subhead,
         child: SafeArea(
@@ -42,9 +40,9 @@ class _ContactCategory extends StatelessWidget {
 }
 
 class _ContactItem extends StatelessWidget {
-  _ContactItem({ Key key, this.icon, this.lines, this.tooltip, this.onPressed })
-    : assert(lines.length > 1),
-      super(key: key);
+  _ContactItem({Key key, this.icon, this.lines, this.tooltip, this.onPressed})
+      : assert(lines.length > 1),
+        super(key: key);
 
   final IconData icon;
   final List<String> lines;
@@ -54,7 +52,8 @@ class _ContactItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData themeData = Theme.of(context);
-    final List<Widget> columnChildren = lines.sublist(0, lines.length - 1).map<Widget>((String line) => Text(line)).toList();
+    final List<Widget> columnChildren =
+        lines.sublist(0, lines.length - 1).map<Widget>((String line) => Text(line)).toList();
     columnChildren.add(Text(lines.last, style: themeData.textTheme.caption));
 
     final List<Widget> rowChildren = <Widget>[

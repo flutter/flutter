@@ -158,10 +158,10 @@ class CardItem extends StatelessWidget {
     this.onTap,
     @required this.item,
     this.selected = false,
-  }) : assert(animation != null),
-       assert(item != null && item >= 0),
-       assert(selected != null),
-       super(key: key);
+  })  : assert(animation != null),
+        assert(item != null && item >= 0),
+        assert(selected != null),
+        super(key: key);
 
   final Animation<double> animation;
   final VoidCallback onTap;

@@ -10,10 +10,10 @@ class TextStyleItem extends StatelessWidget {
     @required this.name,
     @required this.style,
     @required this.text,
-  }) : assert(name != null),
-       assert(style != null),
-       assert(text != null),
-       super(key: key);
+  })  : assert(name != null),
+        assert(style != null),
+        assert(text != null),
+        super(key: key);
 
   final String name;
   final TextStyle style;
@@ -61,11 +61,13 @@ class TypographyDemo extends StatelessWidget {
     ];
 
     if (MediaQuery.of(context).size.width > 500.0) {
-      styleItems.insert(0, TextStyleItem(
-        name: 'Display 4',
-        style: textTheme.display4,
-        text: 'Light 112sp',
-      ));
+      styleItems.insert(
+          0,
+          TextStyleItem(
+            name: 'Display 4',
+            style: textTheme.display4,
+            text: 'Light 112sp',
+          ));
     }
 
     return Scaffold(

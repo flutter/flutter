@@ -24,12 +24,12 @@ class TravelDestination {
     @required this.city,
     @required this.location,
     this.type = CardDemoType.standard,
-  }) : assert(assetName != null),
-       assert(assetPackage != null),
-       assert(title != null),
-       assert(description != null),
-       assert(city != null),
-       assert(location != null);
+  })  : assert(assetName != null),
+        assert(assetPackage != null),
+        assert(title != null),
+        assert(description != null),
+        assert(city != null),
+        assert(location != null);
 
   final String assetName;
   final String assetPackage;
@@ -70,9 +70,9 @@ const List<TravelDestination> destinations = <TravelDestination>[
 ];
 
 class TravelDestinationItem extends StatelessWidget {
-  const TravelDestinationItem({ Key key, @required this.destination, this.shape })
-    : assert(destination != null),
-      super(key: key);
+  const TravelDestinationItem({Key key, @required this.destination, this.shape})
+      : assert(destination != null),
+        super(key: key);
 
   // This height will allow for all the Card's content to fit comfortably within the card.
   static const double height = 338.0;
@@ -106,9 +106,9 @@ class TravelDestinationItem extends StatelessWidget {
 }
 
 class TappableTravelDestinationItem extends StatelessWidget {
-  const TappableTravelDestinationItem({ Key key, @required this.destination, this.shape })
-    : assert(destination != null),
-      super(key: key);
+  const TappableTravelDestinationItem({Key key, @required this.destination, this.shape})
+      : assert(destination != null),
+        super(key: key);
 
   // This height will allow for all the Card's content to fit comfortably within the card.
   static const double height = 298.0;
@@ -151,9 +151,9 @@ class TappableTravelDestinationItem extends StatelessWidget {
 }
 
 class SelectableTravelDestinationItem extends StatefulWidget {
-  const SelectableTravelDestinationItem({ Key key, @required this.destination, this.shape })
-    : assert(destination != null),
-      super(key: key);
+  const SelectableTravelDestinationItem({Key key, @required this.destination, this.shape})
+      : assert(destination != null),
+        super(key: key);
 
   final TravelDestination destination;
   final ShapeBorder shape;
@@ -163,7 +163,6 @@ class SelectableTravelDestinationItem extends StatefulWidget {
 }
 
 class _SelectableTravelDestinationItemState extends State<SelectableTravelDestinationItem> {
-
   // This height will allow for all the Card's content to fit comfortably within the card.
   static const double height = 298.0;
   bool _isSelected = false;
@@ -201,10 +200,10 @@ class _SelectableTravelDestinationItemState extends State<SelectableTravelDestin
                     children: <Widget>[
                       Container(
                         color: _isSelected
-                          // Generally, material cards use primary with 8% opacity for the selected state.
-                          // See: https://material.io/design/interaction/states.html#anatomy
-                          ? colorScheme.primary.withOpacity(0.08)
-                          : Colors.transparent,
+                            // Generally, material cards use primary with 8% opacity for the selected state.
+                            // See: https://material.io/design/interaction/states.html#anatomy
+                            ? colorScheme.primary.withOpacity(0.08)
+                            : Colors.transparent,
                       ),
                       TravelDestinationContent(destination: widget.destination),
                       Align(
@@ -250,9 +249,9 @@ class SectionTitle extends StatelessWidget {
 }
 
 class TravelDestinationContent extends StatelessWidget {
-  const TravelDestinationContent({ Key key, @required this.destination })
-    : assert(destination != null),
-      super(key: key);
+  const TravelDestinationContent({Key key, @required this.destination})
+      : assert(destination != null),
+        super(key: key);
 
   final TravelDestination destination;
 
@@ -331,12 +330,16 @@ class TravelDestinationContent extends StatelessWidget {
               FlatButton(
                 child: Text('SHARE', semanticsLabel: 'Share ${destination.title}'),
                 textColor: Colors.amber.shade500,
-                onPressed: () { print('pressed'); },
+                onPressed: () {
+                  print('pressed');
+                },
               ),
               FlatButton(
                 child: Text('EXPLORE', semanticsLabel: 'Explore ${destination.title}'),
                 textColor: Colors.amber.shade500,
-                onPressed: () { print('pressed'); },
+                onPressed: () {
+                  print('pressed');
+                },
               ),
             ],
           ),
@@ -375,14 +378,16 @@ class _CardsDemoState extends State<CardsDemo> {
             ),
             onPressed: () {
               setState(() {
-                _shape = _shape != null ? null : const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(16.0),
-                    topRight: Radius.circular(16.0),
-                    bottomLeft: Radius.circular(2.0),
-                    bottomRight: Radius.circular(2.0),
-                  ),
-                );
+                _shape = _shape != null
+                    ? null
+                    : const RoundedRectangleBorder(
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(16.0),
+                          topRight: Radius.circular(16.0),
+                          bottomLeft: Radius.circular(2.0),
+                          bottomRight: Radius.circular(2.0),
+                        ),
+                      );
               });
             },
           ),

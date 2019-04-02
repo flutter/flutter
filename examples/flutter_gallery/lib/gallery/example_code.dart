@@ -5,6 +5,8 @@
 // Note: This code is not runnable, it contains code snippets displayed in the
 // gallery.
 
+// @formatter:off
+
 import 'package:flutter/material.dart';
 
 class ButtonsDemo {
@@ -107,7 +109,8 @@ DropdownButton<String>(
     .map<DropdownMenuItem<String>>((String value) {
       return DropdownMenuItem<String>(
         value: value,
-        child: Text(value));
+        child: Text(value),
+      );
     })
     .toList(),
 );
@@ -233,9 +236,9 @@ Switch(
   onChanged: (bool value) {
     setState(() {
       switchValue = value;
-    }
-  );
-});
+    });
+  }
+);
 
 // Create a disabled switch.
 // Switches are disabled when onChanged isn't

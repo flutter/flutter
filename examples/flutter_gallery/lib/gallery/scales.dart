@@ -25,7 +25,6 @@ class GalleryTextScaleValue {
   String toString() {
     return '$runtimeType($label)';
   }
-
 }
 
 const List<GalleryTextScaleValue> kAllGalleryTextScaleValues = <GalleryTextScaleValue>[

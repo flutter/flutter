@@ -5,14 +5,13 @@
 import 'package:flutter/widgets.dart';
 
 class LifecycleWatcher extends StatefulWidget {
-  const LifecycleWatcher({ Key key }) : super(key: key);
+  const LifecycleWatcher({Key key}) : super(key: key);
 
   @override
   _LifecycleWatcherState createState() => _LifecycleWatcherState();
 }
 
-class _LifecycleWatcherState extends State<LifecycleWatcher>
-                             with WidgetsBindingObserver {
+class _LifecycleWatcherState extends State<LifecycleWatcher> with WidgetsBindingObserver {
   AppLifecycleState _lastLifecycleState;
 
   @override
@@ -41,7 +40,6 @@ class _LifecycleWatcherState extends State<LifecycleWatcher>
     return Text('The most recent lifecycle state this widget observed was: $_lastLifecycleState.');
   }
 }
-
 
 void main() {
   runApp(

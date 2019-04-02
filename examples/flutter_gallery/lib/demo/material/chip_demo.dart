@@ -92,24 +92,23 @@ class _ChipsTile extends StatelessWidget {
     ];
     if (children.isNotEmpty) {
       cardChildren.add(Wrap(
-        children: children.map<Widget>((Widget chip) {
-          return Padding(
-            padding: const EdgeInsets.all(2.0),
-            child: chip,
-          );
-        }).toList()));
+          children: children.map<Widget>((Widget chip) {
+        return Padding(
+          padding: const EdgeInsets.all(2.0),
+          child: chip,
+        );
+      }).toList()));
     } else {
       final TextStyle textStyle = Theme.of(context).textTheme.caption.copyWith(fontStyle: FontStyle.italic);
-      cardChildren.add(
-        Semantics(
-          container: true,
-          child: Container(
-            alignment: Alignment.center,
-            constraints: const BoxConstraints(minWidth: 48.0, minHeight: 48.0),
-            padding: const EdgeInsets.all(8.0),
-            child: Text('None', style: textStyle),
-          ),
-        ));
+      cardChildren.add(Semantics(
+        container: true,
+        child: Container(
+          alignment: Alignment.center,
+          constraints: const BoxConstraints(minWidth: 48.0, minHeight: 48.0),
+          padding: const EdgeInsets.all(8.0),
+          child: Text('None', style: textStyle),
+        ),
+      ));
     }
 
     return Card(

@@ -31,11 +31,11 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> with Sing
       curve: const Interval(0.0, 0.9, curve: Curves.fastOutSlowIn),
       reverseCurve: Curves.fastOutSlowIn,
     )..addStatusListener((AnimationStatus status) {
-      if (status == AnimationStatus.dismissed)
-        _controller.forward();
-      else if (status == AnimationStatus.completed)
-        _controller.reverse();
-    });
+        if (status == AnimationStatus.dismissed)
+          _controller.forward();
+        else if (status == AnimationStatus.completed)
+          _controller.reverse();
+      });
   }
 
   @override
@@ -78,14 +78,15 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> with Sing
         children: <Widget>[
           const CircularProgressIndicator(),
           SizedBox(
-              width: 20.0,
-              height: 20.0,
-              child: CircularProgressIndicator(value: _animation.value),
+            width: 20.0,
+            height: 20.0,
+            child: CircularProgressIndicator(value: _animation.value),
           ),
           SizedBox(
             width: 100.0,
             height: 20.0,
-            child: Text('${(_animation.value * 100.0).toStringAsFixed(1)}%',
+            child: Text(
+              '${(_animation.value * 100.0).toStringAsFixed(1)}%',
               textAlign: TextAlign.right,
             ),
           ),
@@ -94,8 +95,9 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> with Sing
     ];
     return Column(
       children: indicators
-        .map<Widget>((Widget c) => Container(child: c, margin: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0)))
-        .toList(),
+          .map<Widget>(
+              (Widget c) => Container(child: c, margin: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0)))
+          .toList(),
     );
   }
 

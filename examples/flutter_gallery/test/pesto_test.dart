@@ -14,15 +14,14 @@ void main() {
   // Regression test for https://github.com/flutter/flutter/pull/5168
   testWidgets('Pesto appbar heroics', (WidgetTester tester) async {
     await tester.pumpWidget(
-      // The bug only manifests itself when the screen's orientation is portrait
-      const Center(
-        child: SizedBox(
-          width: 450.0,
-          height: 800.0,
-          child: GalleryApp(testMode: true),
-        ),
-      )
-    );
+        // The bug only manifests itself when the screen's orientation is portrait
+        const Center(
+      child: SizedBox(
+        width: 450.0,
+        height: 800.0,
+        child: GalleryApp(testMode: true),
+      ),
+    ));
     await tester.pump(); // see https://github.com/flutter/flutter/issues/1865
     await tester.pump(); // triggers a frame
 

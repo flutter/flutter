@@ -30,9 +30,11 @@ class Entry {
 
 // The entire multilevel list displayed by this app.
 final List<Entry> data = <Entry>[
-  Entry('Chapter A',
+  Entry(
+    'Chapter A',
     <Entry>[
-      Entry('Section A0',
+      Entry(
+        'Section A0',
         <Entry>[
           Entry('Item A0.1'),
           Entry('Item A0.2'),
@@ -43,17 +45,20 @@ final List<Entry> data = <Entry>[
       Entry('Section A2'),
     ],
   ),
-  Entry('Chapter B',
+  Entry(
+    'Chapter B',
     <Entry>[
       Entry('Section B0'),
       Entry('Section B1'),
     ],
   ),
-  Entry('Chapter C',
+  Entry(
+    'Chapter C',
     <Entry>[
       Entry('Section C0'),
       Entry('Section C1'),
-      Entry('Section C2',
+      Entry(
+        'Section C2',
         <Entry>[
           Entry('Item C2.0'),
           Entry('Item C2.1'),

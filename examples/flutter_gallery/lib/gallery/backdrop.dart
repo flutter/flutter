@@ -130,7 +130,9 @@ class _BackAppBar extends StatelessWidget {
     this.leading = const SizedBox(width: 56.0),
     @required this.title,
     this.trailing,
-  }) : assert(leading != null), assert(title != null), super(key: key);
+  })  : assert(leading != null),
+        assert(title != null),
+        super(key: key);
 
   final Widget leading;
   final Widget title;
@@ -200,8 +202,8 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
   AnimationController _controller;
   Animation<double> _frontOpacity;
 
-  static final Animatable<double> _frontOpacityTween = Tween<double>(begin: 0.2, end: 1.0)
-    .chain(CurveTween(curve: const Interval(0.0, 0.4, curve: Curves.easeInOut)));
+  static final Animatable<double> _frontOpacityTween =
+      Tween<double>(begin: 0.2, end: 1.0).chain(CurveTween(curve: const Interval(0.0, 0.4, curve: Curves.easeInOut)));
 
   @override
   void initState() {

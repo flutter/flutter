@@ -37,7 +37,7 @@ class _CupertinoSliderDemoState extends State<CupertinoSliderDemo> {
               children: <Widget>[
                 Column(
                   mainAxisSize: MainAxisSize.min,
-                  children: <Widget> [
+                  children: <Widget>[
                     CupertinoSlider(
                       value: _value,
                       min: 0.0,
@@ -53,7 +53,7 @@ class _CupertinoSliderDemoState extends State<CupertinoSliderDemo> {
                 ),
                 Column(
                   mainAxisSize: MainAxisSize.min,
-                  children: <Widget> [
+                  children: <Widget>[
                     CupertinoSlider(
                       value: _discreteValue,
                       min: 0.0,

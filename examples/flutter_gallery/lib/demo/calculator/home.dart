@@ -138,7 +138,7 @@ class _CalculatorState extends State<Calculator> {
 }
 
 class CalcDisplay extends StatelessWidget {
-  const CalcDisplay({ this.content });
+  const CalcDisplay({this.content});
 
   final String content;
 
@@ -154,7 +154,7 @@ class CalcDisplay extends StatelessWidget {
 }
 
 class KeyPad extends StatelessWidget {
-  const KeyPad({ this.calcState });
+  const KeyPad({this.calcState});
 
   final _CalculatorState calcState;
 
@@ -252,9 +252,7 @@ class CalcKey extends StatelessWidget {
         child: Center(
           child: Text(
             text,
-            style: TextStyle(
-              fontSize: (orientation == Orientation.portrait) ? 32.0 : 24.0
-            ),
+            style: TextStyle(fontSize: (orientation == Orientation.portrait) ? 32.0 : 24.0),
           ),
         ),
       ),
@@ -264,7 +262,7 @@ class CalcKey extends StatelessWidget {
 
 class NumberKey extends CalcKey {
   NumberKey(int value, _CalculatorState calcState)
-    : super('$value', () {
-        calcState.handleNumberTap(value);
-      });
+      : super('$value', () {
+          calcState.handleNumberTap(value);
+        });
 }

@@ -34,10 +34,10 @@ class _RenderStatusBarPaddingSliver extends RenderSliver {
   _RenderStatusBarPaddingSliver({
     @required double maxHeight,
     @required double scrollFactor,
-  }) : assert(maxHeight != null && maxHeight >= 0.0),
-       assert(scrollFactor != null && scrollFactor >= 1.0),
-       _maxHeight = maxHeight,
-       _scrollFactor = scrollFactor;
+  })  : assert(maxHeight != null && maxHeight >= 0.0),
+        assert(scrollFactor != null && scrollFactor >= 1.0),
+        _maxHeight = maxHeight,
+        _scrollFactor = scrollFactor;
 
   // The height of the status bar
   double get maxHeight => _maxHeight;
@@ -78,9 +78,9 @@ class _StatusBarPaddingSliver extends SingleChildRenderObjectWidget {
     Key key,
     @required this.maxHeight,
     this.scrollFactor = 5.0,
-  }) : assert(maxHeight != null && maxHeight >= 0.0),
-       assert(scrollFactor != null && scrollFactor >= 1.0),
-       super(key: key);
+  })  : assert(maxHeight != null && maxHeight >= 0.0),
+        assert(scrollFactor != null && scrollFactor >= 1.0),
+        super(key: key);
 
   final double maxHeight;
   final double scrollFactor;
@@ -202,15 +202,14 @@ class _AllSectionsLayout extends MultiChildLayoutDelegate {
     // When tCollapsed > 0, the indicators move closer together
     //final double rowIndicatorWidth = 48.0 + (1.0 - tCollapsed) * (rowTitleWidth - 48.0);
     const double paddedSectionIndicatorWidth = kSectionIndicatorWidth + 8.0;
-    final double rowIndicatorWidth = paddedSectionIndicatorWidth +
-      (1.0 - tCollapsed) * (rowTitleWidth - paddedSectionIndicatorWidth);
+    final double rowIndicatorWidth =
+        paddedSectionIndicatorWidth + (1.0 - tCollapsed) * (rowTitleWidth - paddedSectionIndicatorWidth);
     double rowIndicatorX = (size.width - rowIndicatorWidth) / 2.0 - selectedIndex * rowIndicatorWidth;
 
     // Compute the size and origin of each card, title, and indicator for the maxHeight
     // "column" layout, and the midHeight "row" layout. The actual layout is just the
     // interpolated value between the column and row layouts for t.
     for (int index = 0; index < cardCount; index++) {
-
       // Layout the card for index.
       final Rect columnCardRect = Rect.fromLTWH(columnCardX, columnCardY, columnCardWidth, columnCardHeight);
       final Rect rowCardRect = Rect.fromLTWH(rowCardX, 0.0, rowCardWidth, size.height);
@@ -253,8 +252,8 @@ class _AllSectionsLayout extends MultiChildLayoutDelegate {
   @override
   bool shouldRelayout(_AllSectionsLayout oldDelegate) {
     return tColumnToRow != oldDelegate.tColumnToRow
-      || cardCount != oldDelegate.cardCount
-      || selectedIndex != oldDelegate.selectedIndex;
+        || cardCount != oldDelegate.cardCount
+        || selectedIndex != oldDelegate.selectedIndex;
   }
 }
 
@@ -268,13 +267,13 @@ class _AllSectionsView extends AnimatedWidget {
     this.midHeight,
     this.maxHeight,
     this.sectionCards = const <Widget>[],
-  }) : assert(sections != null),
-       assert(sectionCards != null),
-       assert(sectionCards.length == sections.length),
-       assert(sectionIndex >= 0 && sectionIndex < sections.length),
-       assert(selectedIndex != null),
-       assert(selectedIndex.value >= 0.0 && selectedIndex.value < sections.length.toDouble()),
-       super(key: key, listenable: selectedIndex);
+  })  : assert(sections != null),
+        assert(sectionCards != null),
+        assert(sectionCards.length == sections.length),
+        assert(sectionIndex >= 0 && sectionIndex < sections.length),
+        assert(selectedIndex != null),
+        assert(selectedIndex.value >= 0.0 && selectedIndex.value < sections.length.toDouble()),
+        super(key: key, listenable: selectedIndex);
 
   final int sectionIndex;
   final List<Section> sections;
@@ -294,17 +293,12 @@ class _AllSectionsView extends AnimatedWidget {
     // The layout's progress from from a column to a row. Its value is
     // 0.0 when size.height equals the maxHeight, 1.0 when the size.height
     // equals the midHeight.
-    final double tColumnToRow =
-      1.0 - ((size.height - midHeight) /
-             (maxHeight - midHeight)).clamp(0.0, 1.0);
-
+    final double tColumnToRow = 1.0 - ((size.height - midHeight) / (maxHeight - midHeight)).clamp(0.0, 1.0);
 
     // The layout's progress from from the midHeight row layout to
     // a minHeight row layout. Its value is 0.0 when size.height equals
     // midHeight and 1.0 when size.height equals minHeight.
-    final double tCollapsed =
-      1.0 - ((size.height - minHeight) /
-             (midHeight - minHeight)).clamp(0.0, 1.0);
+    final double tCollapsed = 1.0 - ((size.height - minHeight) / (midHeight - minHeight)).clamp(0.0, 1.0);
 
     double _indicatorOpacity(int index) {
       return 1.0 - _selectedIndexDelta(index) * 0.5;
@@ -366,8 +360,8 @@ class _SnappingScrollPhysics extends ClampingScrollPhysics {
   const _SnappingScrollPhysics({
     ScrollPhysics parent,
     @required this.midScrollOffset,
-  }) : assert(midScrollOffset != null),
-       super(parent: parent);
+  })  : assert(midScrollOffset != null),
+        super(parent: parent);
 
   final double midScrollOffset;
 
@@ -419,7 +413,7 @@ class _SnappingScrollPhysics extends ClampingScrollPhysics {
 }
 
 class AnimationDemoHome extends StatefulWidget {
-  const AnimationDemoHome({ Key key }) : super(key: key);
+  const AnimationDemoHome({Key key}) : super(key: key);
 
   static const String routeName = '/animation';
 
@@ -457,8 +451,8 @@ class _AnimationDemoHomeState extends State<AnimationDemoHome> {
   bool _handleScrollNotification(ScrollNotification notification, double midScrollOffset) {
     if (notification.depth == 0 && notification is ScrollUpdateNotification) {
       final ScrollPhysics physics = _scrollController.position.pixels >= midScrollOffset
-       ? const PageScrollPhysics()
-       : const NeverScrollableScrollPhysics();
+          ? const PageScrollPhysics()
+          : const NeverScrollableScrollPhysics();
       if (physics != _headingScrollPhysics) {
         setState(() {
           _headingScrollPhysics = physics;
@@ -519,20 +513,19 @@ class _AnimationDemoHomeState extends State<AnimationDemoHome> {
     final List<Widget> headings = <Widget>[];
     for (int index = 0; index < allSections.length; index++) {
       headings.add(Container(
-          color: _kAppBackgroundColor,
-          child: ClipRect(
-            child: _AllSectionsView(
-              sectionIndex: index,
-              sections: allSections,
-              selectedIndex: selectedIndex,
-              minHeight: _kAppBarMinHeight,
-              midHeight: _kAppBarMidHeight,
-              maxHeight: maxHeight,
-              sectionCards: sectionCards,
-            ),
+        color: _kAppBackgroundColor,
+        child: ClipRect(
+          child: _AllSectionsView(
+            sectionIndex: index,
+            sections: allSections,
+            selectedIndex: selectedIndex,
+            minHeight: _kAppBarMinHeight,
+            midHeight: _kAppBarMidHeight,
+            maxHeight: maxHeight,
+            sectionCards: sectionCards,
           ),
-        )
-      );
+        ),
+      ));
     }
     return headings;
   }

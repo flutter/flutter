@@ -19,11 +19,10 @@ void main() {
 
     // Verify it correctly exposes its semantics.
     // TODO(goderbauer): Use `SemanticsTester` after https://github.com/flutter/flutter/issues/12286.
-    final SemanticsNode semantics = tester
-        .renderObject(find.byType(AdjustableDropdownListTile))
-        .debugSemantics;
+    final SemanticsNode semantics = tester.renderObject(find.byType(AdjustableDropdownListTile)).debugSemantics;
 
-    expectAdjustable(semantics,
+    expectAdjustable(
+      semantics,
       hasIncreaseAction: true,
       hasDecreaseAction: true,
       label: 'Timeout',
@@ -36,7 +35,8 @@ void main() {
     semanticsOwner.performAction(semantics.id, SemanticsAction.increase);
     await tester.pump();
 
-    expectAdjustable(semantics,
+    expectAdjustable(
+      semantics,
       hasIncreaseAction: true,
       hasDecreaseAction: true,
       label: 'Timeout',
@@ -49,7 +49,8 @@ void main() {
     semanticsOwner.performAction(semantics.id, SemanticsAction.increase);
     await tester.pump();
 
-    expectAdjustable(semantics,
+    expectAdjustable(
+      semantics,
       hasIncreaseAction: false,
       hasDecreaseAction: true,
       label: 'Timeout',
@@ -61,7 +62,8 @@ void main() {
     semanticsOwner.performAction(semantics.id, SemanticsAction.decrease);
     await tester.pump();
 
-    expectAdjustable(semantics,
+    expectAdjustable(
+      semantics,
       hasIncreaseAction: true,
       hasDecreaseAction: true,
       label: 'Timeout',
@@ -78,7 +80,8 @@ void main() {
     semanticsOwner.performAction(semantics.id, SemanticsAction.decrease);
     await tester.pump();
 
-    expectAdjustable(semantics,
+    expectAdjustable(
+      semantics,
       hasIncreaseAction: true,
       hasDecreaseAction: false,
       label: 'Timeout',

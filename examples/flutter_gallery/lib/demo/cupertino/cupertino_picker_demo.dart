@@ -67,7 +67,7 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
         ),
         child: GestureDetector(
           // Blocks taps from propagating to the modal sheet and popping.
-          onTap: () { },
+          onTap: () {},
           child: SafeArea(
             top: false,
             child: picker,
@@ -78,8 +78,7 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
   }
 
   Widget _buildColorPicker(BuildContext context) {
-    final FixedExtentScrollController scrollController =
-        FixedExtentScrollController(initialItem: _selectedColorIndex);
+    final FixedExtentScrollController scrollController = FixedExtentScrollController(initialItem: _selectedColorIndex);
 
     return GestureDetector(
       onTap: () async {
@@ -95,8 +94,8 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
                   setState(() => _selectedColorIndex = index);
                 },
                 children: List<Widget>.generate(coolColorNames.length, (int index) {
-                  return Center(child:
-                  Text(coolColorNames[index]),
+                  return Center(
+                    child: Text(coolColorNames[index]),
                   );
                 }),
               ),
@@ -109,9 +108,7 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
           const Text('Favorite Color'),
           Text(
             coolColorNames[_selectedColorIndex],
-            style: const TextStyle(
-                color: CupertinoColors.inactiveGray
-            ),
+            style: const TextStyle(color: CupertinoColors.inactiveGray),
           ),
         ],
       ),
@@ -140,8 +137,8 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
           const Text('Countdown Timer'),
           Text(
             '${timer.inHours}:'
-                '${(timer.inMinutes % 60).toString().padLeft(2,'0')}:'
-                '${(timer.inSeconds % 60).toString().padLeft(2,'0')}',
+            '${(timer.inMinutes % 60).toString().padLeft(2, '0')}:'
+            '${(timer.inSeconds % 60).toString().padLeft(2, '0')}',
             style: const TextStyle(color: CupertinoColors.inactiveGray),
           ),
         ],
@@ -167,15 +164,13 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
           },
         );
       },
-      child: _buildMenu(
-        <Widget>[
-          const Text('Date'),
-          Text(
-            DateFormat.yMMMMd().format(date),
-            style: const TextStyle(color: CupertinoColors.inactiveGray),
-          ),
-        ]
-      ),
+      child: _buildMenu(<Widget>[
+        const Text('Date'),
+        Text(
+          DateFormat.yMMMMd().format(date),
+          style: const TextStyle(color: CupertinoColors.inactiveGray),
+        ),
+      ]),
     );
   }
 

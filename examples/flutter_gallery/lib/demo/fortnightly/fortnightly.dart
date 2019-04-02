@@ -31,7 +31,7 @@ class FortnightlyDemo extends StatelessWidget {
 }
 
 class ShortAppBar extends StatelessWidget {
-  const ShortAppBar({ this.onBackPressed });
+  const ShortAppBar({this.onBackPressed});
 
   final VoidCallback onBackPressed;
 
@@ -71,7 +71,8 @@ class FruitPage extends StatelessWidget {
  hard as soft lumber. You\'d be forgiven for thinking it\'s veneered Larch-wood.
  But inhale the aroma and you\'ll instantly know you have something wonderful.
  Its scent can fill a room for days. And all this before you\'ve even cooked it.
-'''.replaceAll('\n', '');
+'''
+      .replaceAll('\n', '');
 
   static final String paragraph2 = '''Pomegranates on the other hand have become
  almost ubiquitous. You can find its juice in any bodega, Walmart, and even some
@@ -80,7 +81,8 @@ class FruitPage extends StatelessWidget {
  of water to make that much pomegranate juice. Water the Resnicks get from their
  majority stake in the Kern Water Bank. How did one family come to hold control
  over water meant for the whole central valley of California? The story will shock you.
-'''.replaceAll('\n', '');
+'''
+      .replaceAll('\n', '');
 
   @override
   Widget build(BuildContext context) {
@@ -132,7 +134,7 @@ class FruitPage extends StatelessWidget {
                     const SizedBox(height: 10),
                     Text(
                       'How these crazy fruits sweetened our hearts, relationships,'
-                          'and puffed pastries',
+                      'and puffed pastries',
                       style: textTheme.body1,
                     ),
                     Padding(

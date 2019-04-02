@@ -85,7 +85,6 @@ class AdjustableDropdownExample extends StatefulWidget {
 }
 
 class AdjustableDropdownExampleState extends State<AdjustableDropdownExample> {
-
   final List<String> items = <String>[
     '1 second',
     '5 seconds',

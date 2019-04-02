@@ -40,13 +40,17 @@ class _AppBarBottomSampleState extends State<AppBarBottomSample> with SingleTick
           leading: IconButton(
             tooltip: 'Previous choice',
             icon: const Icon(Icons.arrow_back),
-            onPressed: () { _nextPage(-1); },
+            onPressed: () {
+              _nextPage(-1);
+            },
           ),
           actions: <Widget>[
             IconButton(
               icon: const Icon(Icons.arrow_forward),
               tooltip: 'Next choice',
-              onPressed: () { _nextPage(1); },
+              onPressed: () {
+                _nextPage(1);
+              },
             ),
           ],
           bottom: PreferredSize(
@@ -76,7 +80,7 @@ class _AppBarBottomSampleState extends State<AppBarBottomSample> with SingleTick
 }
 
 class Choice {
-  const Choice({ this.title, this.icon });
+  const Choice({this.title, this.icon});
   final String title;
   final IconData icon;
 }
@@ -91,7 +95,7 @@ const List<Choice> choices = <Choice>[
 ];
 
 class ChoiceCard extends StatelessWidget {
-  const ChoiceCard({ Key key, this.choice }) : super(key: key);
+  const ChoiceCard({Key key, this.choice}) : super(key: key);
 
   final Choice choice;
 

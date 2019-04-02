@@ -92,7 +92,8 @@ Future<void> saveDurationsHistogram(List<Map<String, dynamic>> events, String ou
   });
 
   if (unexpectedValueCounts.isNotEmpty) {
-    final StringBuffer error = StringBuffer('Some routes recorded wrong number of values (expected 2 values/route):\n\n');
+    final StringBuffer error =
+        StringBuffer('Some routes recorded wrong number of values (expected 2 values/route):\n\n');
     unexpectedValueCounts.forEach((String routeName, int count) {
       error.writeln(' - $routeName recorded $count values.');
     });
@@ -106,9 +107,7 @@ Future<void> saveDurationsHistogram(List<Map<String, dynamic>> events, String ou
       if (!<String>['Start Transition', 'Frame'].contains(eventName))
         continue;
 
-      final String routeName = eventName == 'Start Transition'
-        ? eventIter.current['args']['to']
-        : '';
+      final String routeName = eventName == 'Start Transition' ? eventIter.current['args']['to'] : '';
 
       if (eventName == lastEventName && routeName == lastRouteName) {
         error.write('.');
@@ -152,7 +151,9 @@ Future<void> runDemos(List<String> demos, FlutterDriver driver) async {
     currentDemoCategory = demoCategory;
 
     final SerializableFinder demoItem = find.text(demoName);
-    await driver.scrollUntilVisible(demoList, demoItem,
+    await driver.scrollUntilVisible(
+      demoList,
+      demoItem,
       dyScroll: -48.0,
       alignment: 0.5,
       timeout: const Duration(seconds: 30),
@@ -200,7 +201,6 @@ void main([List<String> args = const <String>[]]) {
     });
 
     test('all demos', () async {
-
       // Collect timeline data for just a limited set of demos to avoid OOMs.
       final Timeline timeline = await driver.traceAction(
         () async {
@@ -218,14 +218,11 @@ void main([List<String> args = const <String>[]]) {
       final TimelineSummary summary = TimelineSummary.summarize(timeline);
       await summary.writeSummaryToFile('transitions', pretty: true);
       final String histogramPath = path.join(testOutputsDirectory, 'transition_durations.timeline.json');
-      await saveDurationsHistogram(
-          List<Map<String, dynamic>>.from(timeline.json['traceEvents']),
-          histogramPath);
+      await saveDurationsHistogram(List<Map<String, dynamic>>.from(timeline.json['traceEvents']), histogramPath);
 
       // Execute the remaining tests.
       final Set<String> unprofiledDemos = Set<String>.from(_allDemos)..removeAll(kProfiledDemos);
       await runDemos(unprofiledDemos.toList(), driver);
-
     }, timeout: const Timeout(Duration(minutes: 5)));
   });
 }

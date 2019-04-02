@@ -85,6 +85,5 @@ void main() {
           expect(find.text(item.title), findsNothing);
       }
     }
-
   });
 }

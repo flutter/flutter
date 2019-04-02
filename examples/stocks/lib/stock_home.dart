@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart' show debugDumpRenderTree, debugDumpLayerTree, debugDumpSemanticsTree, DebugSemanticsDumpOrder;
+import 'package:flutter/rendering.dart'
+    show debugDumpRenderTree, debugDumpLayerTree, debugDumpSemanticsTree, DebugSemanticsDumpOrder;
 import 'package:flutter/scheduler.dart' show timeDilation;
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'stock_data.dart';
@@ -198,7 +199,9 @@ class StockHomeState extends State<StockHome> {
           tooltip: 'Search',
         ),
         PopupMenuButton<_StockMenuItem>(
-          onSelected: (_StockMenuItem value) { _handleStockMenu(context, value); },
+          onSelected: (_StockMenuItem value) {
+            _handleStockMenu(context, value);
+          },
           itemBuilder: (BuildContext context) => <PopupMenuItem<_StockMenuItem>>[
             CheckedPopupMenuItem<_StockMenuItem>(
               value: _StockMenuItem.autorefresh,
@@ -230,8 +233,7 @@ class StockHomeState extends State<StockHome> {
   }
 
   static Iterable<Stock> _getStockList(StockData stocks, Iterable<String> symbols) {
-    return symbols.map<Stock>((String symbol) => stocks[symbol])
-        .where((Stock stock) => stock != null);
+    return symbols.map<Stock>((String symbol) => stocks[symbol]).where((Stock stock) => stock != null);
   }
 
   Iterable<Stock> _filterBySearchQuery(Iterable<Stock> stocks) {
@@ -280,7 +282,7 @@ class StockHomeState extends State<StockHome> {
     );
   }
 
-  static const List<String> portfolioSymbols = <String>['AAPL','FIZZ', 'FIVE', 'FLAT', 'ZINC', 'ZNGA'];
+  static const List<String> portfolioSymbols = <String>['AAPL', 'FIZZ', 'FIVE', 'FLAT', 'ZINC', 'ZNGA'];
 
   Widget buildSearchBar() {
     return AppBar(

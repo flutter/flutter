@@ -22,7 +22,9 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo> {
       builder: (BuildContext context) => child,
     ).then((String value) {
       if (value != null) {
-        setState(() { lastSelectedValue = value; });
+        setState(() {
+          lastSelectedValue = value;
+        });
       }
     });
   }
@@ -33,7 +35,9 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo> {
       builder: (BuildContext context) => child,
     ).then((String value) {
       if (value != null) {
-        setState(() { lastSelectedValue = value; });
+        setState(() {
+          lastSelectedValue = value;
+        });
       }
     });
   }
@@ -56,8 +60,7 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo> {
             final List<Widget> stackChildren = <Widget>[
               ListView(
                 // Add more padding to the normal safe area.
-                padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 72.0)
-                    + MediaQuery.of(context).padding,
+                padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 72.0) + MediaQuery.of(context).padding,
                 children: <Widget>[
                   CupertinoButton.filled(
                     child: const Text('Alert'),
@@ -95,8 +98,9 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo> {
                         context: context,
                         child: CupertinoAlertDialog(
                           title: const Text('Allow "Maps" to access your location while you are using the app?'),
-                          content: const Text('Your current location will be displayed on the map and used '
-                            'for directions, nearby search results, and estimated travel times.'),
+                          content: const Text(
+                              'Your current location will be displayed on the map and used '
+                              'for directions, nearby search results, and estimated travel times.'),
                           actions: <Widget>[
                             CupertinoDialogAction(
                               child: const Text('Don\'t Allow'),
@@ -124,9 +128,10 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo> {
                         context: context,
                         child: const CupertinoDessertDialog(
                           title: Text('Select Favorite Dessert'),
-                          content: Text('Please select your favorite type of dessert from the '
-                            'list below. Your selection will be used to customize the suggested '
-                            'list of eateries in your area.'),
+                          content: Text(
+                              'Please select your favorite type of dessert from the '
+                              'list below. Your selection will be used to customize the suggested '
+                              'list of eateries in your area.'),
                         ),
                       );
                     },

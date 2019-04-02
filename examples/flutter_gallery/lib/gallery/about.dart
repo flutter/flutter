@@ -9,7 +9,6 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class _LinkTextSpan extends TextSpan {
-
   // Beware!
   //
   // This class is only safe because the TapGestureRecognizer is not
@@ -23,13 +22,14 @@ class _LinkTextSpan extends TextSpan {
   // manage the recognizer from outside the TextSpan, e.g. in the State of a
   // stateful widget that then hands the recognizer to the TextSpan.
 
-  _LinkTextSpan({ TextStyle style, String url, String text }) : super(
-    style: style,
-    text: text ?? url,
-    recognizer: TapGestureRecognizer()..onTap = () {
-      launch(url, forceSafariVC: false);
-    }
-  );
+  _LinkTextSpan({TextStyle style, String url, String text})
+      : super(
+            style: style,
+            text: text ?? url,
+            recognizer: TapGestureRecognizer()
+              ..onTap = () {
+                launch(url, forceSafariVC: false);
+              });
 }
 
 void showGalleryAboutDialog(BuildContext context) {
@@ -50,12 +50,13 @@ void showGalleryAboutDialog(BuildContext context) {
             children: <TextSpan>[
               TextSpan(
                 style: aboutTextStyle,
-                text: 'Flutter is an open-source project to help developers '
-                      'build high-performance, high-fidelity, mobile apps for '
-                      '${defaultTargetPlatform == TargetPlatform.iOS ? 'multiple platforms' : 'iOS and Android'} '
-                      'from a single codebase. This design lab is a playground '
-                      "and showcase of Flutter's many widgets, behaviors, "
-                      'animations, layouts, and more. Learn more about Flutter at ',
+                text:
+                    'Flutter is an open-source project to help developers '
+                    'build high-performance, high-fidelity, mobile apps for '
+                    '${defaultTargetPlatform == TargetPlatform.iOS ? 'multiple platforms' : 'iOS and Android'} '
+                    'from a single codebase. This design lab is a playground '
+                    "and showcase of Flutter's many widgets, behaviors, "
+                    'animations, layouts, and more. Learn more about Flutter at ',
               ),
               _LinkTextSpan(
                 style: linkStyle,

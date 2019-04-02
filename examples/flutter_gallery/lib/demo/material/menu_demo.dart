@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import '../../gallery/demo.dart';
 
 class MenuDemo extends StatefulWidget {
-  const MenuDemo({ Key key }) : super(key: key);
+  const MenuDemo({Key key}) : super(key: key);
 
   static const String routeName = '/material/menu';
 
@@ -38,7 +38,7 @@ class MenuDemoState extends State<MenuDemo> {
 
   void showInSnackBar(String value) {
     _scaffoldKey.currentState.showSnackBar(SnackBar(
-     content: Text(value),
+      content: Text(value),
     ));
   }
 

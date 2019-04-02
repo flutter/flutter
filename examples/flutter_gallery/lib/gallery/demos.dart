@@ -69,10 +69,10 @@ class GalleryDemo {
     @required this.routeName,
     this.documentationUrl,
     @required this.buildRoute,
-  }) : assert(title != null),
-       assert(category != null),
-       assert(routeName != null),
-       assert(buildRoute != null);
+  })  : assert(title != null),
+        assert(category != null),
+        assert(routeName != null),
+        assert(buildRoute != null);
 
   final String title;
   final IconData icon;
@@ -550,7 +550,8 @@ List<GalleryDemo> _buildGalleryDemos() {
   // Keep Pesto around for its regression test value. It is not included
   // in (release builds) the performance tests.
   assert(() {
-    galleryDemos.insert(0,
+    galleryDemos.insert(
+      0,
       GalleryDemo(
         title: 'Pesto',
         subtitle: 'Simple recipe browser',
@@ -569,19 +570,18 @@ List<GalleryDemo> _buildGalleryDemos() {
 final List<GalleryDemo> kAllGalleryDemos = _buildGalleryDemos();
 
 final Set<GalleryDemoCategory> kAllGalleryDemoCategories =
-  kAllGalleryDemos.map<GalleryDemoCategory>((GalleryDemo demo) => demo.category).toSet();
+    kAllGalleryDemos.map<GalleryDemoCategory>((GalleryDemo demo) => demo.category).toSet();
 
 final Map<GalleryDemoCategory, List<GalleryDemo>> kGalleryCategoryToDemos =
-  Map<GalleryDemoCategory, List<GalleryDemo>>.fromIterable(
-    kAllGalleryDemoCategories,
-    value: (dynamic category) {
-      return kAllGalleryDemos.where((GalleryDemo demo) => demo.category == category).toList();
-    },
-  );
+    Map<GalleryDemoCategory, List<GalleryDemo>>.fromIterable(
+  kAllGalleryDemoCategories,
+  value: (dynamic category) {
+    return kAllGalleryDemos.where((GalleryDemo demo) => demo.category == category).toList();
+  },
+);
 
-final Map<String, String> kDemoDocumentationUrl =
-    Map<String, String>.fromIterable(
-      kAllGalleryDemos.where((GalleryDemo demo) => demo.documentationUrl != null),
-      key: (dynamic demo) => demo.routeName,
-      value: (dynamic demo) => demo.documentationUrl,
-    );
+final Map<String, String> kDemoDocumentationUrl = Map<String, String>.fromIterable(
+  kAllGalleryDemos.where((GalleryDemo demo) => demo.documentationUrl != null),
+  key: (dynamic demo) => demo.routeName,
+  value: (dynamic demo) => demo.documentationUrl,
+);

@@ -44,13 +44,13 @@ class TwoProductCardColumn extends StatelessWidget {
           Padding(
             padding: const EdgeInsetsDirectional.only(start: 28.0),
             child: top != null
-              ? ProductCard(
-                  imageAspectRatio: imageAspectRatio,
-                  product: top,
-                )
-              : SizedBox(
-                  height: heightOfCards > 0 ? heightOfCards : spacerHeight,
-                ),
+                ? ProductCard(
+                    imageAspectRatio: imageAspectRatio,
+                    product: top,
+                  )
+                : SizedBox(
+                    height: heightOfCards > 0 ? heightOfCards : spacerHeight,
+                  ),
           ),
           const SizedBox(height: spacerHeight),
           Padding(

@@ -12,7 +12,8 @@ const String _raisedText =
 
 const String _raisedCode = 'buttons_raised';
 
-const String _flatText = 'A flat button displays an ink splash on press '
+const String _flatText =
+    'A flat button displays an ink splash on press '
     'but does not lift. Use flat buttons on toolbars, in dialogs and '
     'inline with padding';
 
@@ -57,9 +58,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
 
   @override
   Widget build(BuildContext context) {
-    final ButtonThemeData buttonTheme = ButtonTheme.of(context).copyWith(
-      shape: _buttonShape
-    );
+    final ButtonThemeData buttonTheme = ButtonTheme.of(context).copyWith(shape: _buttonShape);
 
     final List<ComponentDemoTabData> demos = <ComponentDemoTabData>[
       ComponentDemoTabData(
@@ -190,7 +189,10 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
                 },
               ),
               const FlatButton(
-                child: Text('DISABLED', semanticsLabel: 'DISABLED BUTTON 3',),
+                child: Text(
+                  'DISABLED',
+                  semanticsLabel: 'DISABLED BUTTON 3',
+                ),
                 onPressed: null,
               ),
             ],
@@ -322,17 +324,30 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
                 });
               },
               items: <String>[
-                  'One', 'Two', 'Free', 'Four', 'Can', 'I', 'Have', 'A', 'Little',
-                  'Bit', 'More', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten',
-                 ]
-                .map<DropdownMenuItem<String>>((String value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(value),
-                  );
-                })
-                .toList(),
-             ),
+                'One',
+                'Two',
+                'Free',
+                'Four',
+                'Can',
+                'I',
+                'Have',
+                'A',
+                'Little',
+                'Bit',
+                'More',
+                'Five',
+                'Six',
+                'Seven',
+                'Eight',
+                'Nine',
+                'Ten',
+              ].map<DropdownMenuItem<String>>((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(value),
+                );
+              }).toList(),
+            ),
           ),
         ],
       ),
@@ -364,9 +379,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
             ),
             onPressed: null,
           ),
-        ]
-        .map<Widget>((Widget button) => SizedBox(width: 64.0, height: 64.0, child: button))
-        .toList(),
+        ].map<Widget>((Widget button) => SizedBox(width: 64.0, height: 64.0, child: button)).toList(),
       ),
     );
   }
