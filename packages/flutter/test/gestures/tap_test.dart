@@ -22,54 +22,64 @@ void main() {
   // Down/up pair 1: normal tap sequence
   const PointerDownEvent down1 = PointerDownEvent(
     pointer: 1,
+    buttons: kPrimaryMouseButton,
     position: Offset(10.0, 10.0),
   );
 
   const PointerUpEvent up1 = PointerUpEvent(
     pointer: 1,
+    buttons: 0,
     position: Offset(11.0, 9.0),
   );
 
   // Down/up pair 2: normal tap sequence far away from pair 1
   const PointerDownEvent down2 = PointerDownEvent(
     pointer: 2,
+    buttons: kPrimaryMouseButton,
     position: Offset(30.0, 30.0),
   );
 
   const PointerUpEvent up2 = PointerUpEvent(
     pointer: 2,
+    buttons: 0,
     position: Offset(31.0, 29.0),
   );
 
   // Down/move/up sequence 3: intervening motion, more than kTouchSlop. (~21px)
   const PointerDownEvent down3 = PointerDownEvent(
     pointer: 3,
+    buttons: kPrimaryMouseButton,
     position: Offset(10.0, 10.0),
   );
 
   const PointerMoveEvent move3 = PointerMoveEvent(
     pointer: 3,
+    buttons: kPrimaryMouseButton,
     position: Offset(25.0, 25.0),
   );
 
   const PointerUpEvent up3 = PointerUpEvent(
     pointer: 3,
+    buttons: 0,
     position: Offset(25.0, 25.0),
   );
 
   // Down/move/up sequence 4: intervening motion, less than kTouchSlop. (~17px)
   const PointerDownEvent down4 = PointerDownEvent(
     pointer: 4,
+    buttons: kPrimaryMouseButton,
     position: Offset(10.0, 10.0),
   );
 
   const PointerMoveEvent move4 = PointerMoveEvent(
     pointer: 4,
+    buttons: kPrimaryMouseButton,
     position: Offset(22.0, 22.0),
   );
 
   const PointerUpEvent up4 = PointerUpEvent(
     pointer: 4,
+    buttons: 0,
     position: Offset(22.0, 22.0),
   );
 
@@ -428,6 +438,7 @@ void main() {
   testGesture('PointerCancelEvent cancels tap', (GestureTester tester) {
     const PointerDownEvent down = PointerDownEvent(
         pointer: 5,
+        buttons: kPrimaryMouseButton,
         position: Offset(10.0, 10.0),
     );
     const PointerCancelEvent cancel = PointerCancelEvent(
@@ -576,7 +587,7 @@ void main() {
     tester.closeArena(1);
     tester.async.elapse(const Duration(milliseconds: 1000));
     tester.route(up1);
-    expect(recognized, <String>['down 0', 'up']);
+    expect(recognized, <String>['down 1', 'up']);
 
     tap.dispose();
   });
@@ -644,7 +655,79 @@ void main() {
     tester.async.elapse(const Duration(milliseconds: 1000));
     tester.route(up1);
     GestureBinding.instance.gestureArena.sweep(1);
-    expect(recognized, <String>['down 1', 'cancel', 'down 0', 'up']);
+    expect(recognized, <String>['down 1', 'cancel', 'down 1', 'up']);
+
+    tap.dispose();
+  });
+
+  testGesture('Should not recognize taps with 0 button', (GestureTester tester) {
+    final TapGestureRecognizer tap = TapGestureRecognizer();
+
+    final List<String> recognized = <String>[];
+
+    tap.onTapDown = (TapDownDetails details) {
+      recognized.add('down');
+    };
+    tap.onTapUp = (TapUpDetails details) {
+      recognized.add('up');
+    };
+    tap.onTapCancel = () {
+      recognized.add('cancel');
+    };
+
+    const PointerDownEvent down = PointerDownEvent(
+      pointer: 1,
+      buttons: 0,
+      position: Offset(30.0, 30.0),
+    );
+
+    const PointerUpEvent up = PointerUpEvent(
+      pointer: 2,
+      buttons: 0,
+      position: Offset(31.0, 29.0),
+    );
+
+    tap.addPointer(down);
+    tester.closeArena(0);
+    tester.route(up);
+    GestureBinding.instance.gestureArena.sweep(1);
+    expect(recognized, <String>[]);
+
+    tap.dispose();
+  });
+
+  testGesture('Should not recognize taps with more than one buttons', (GestureTester tester) {
+    final TapGestureRecognizer tap = TapGestureRecognizer();
+
+    final List<String> recognized = <String>[];
+
+    tap.onTapDown = (TapDownDetails details) {
+      recognized.add('down');
+    };
+    tap.onTapUp = (TapUpDetails details) {
+      recognized.add('up');
+    };
+    tap.onTapCancel = () {
+      recognized.add('cancel');
+    };
+
+    const PointerDownEvent down = PointerDownEvent(
+      pointer: 1,
+      buttons: kPrimaryMouseButton | kSecondaryMouseButton,
+      position: Offset(30.0, 30.0),
+    );
+
+    const PointerUpEvent up = PointerUpEvent(
+      pointer: 2,
+      buttons: 0,
+      position: Offset(31.0, 29.0),
+    );
+
+    tap.addPointer(down);
+    tester.closeArena(0);
+    tester.route(up);
+    GestureBinding.instance.gestureArena.sweep(1);
+    expect(recognized, <String>[]);
 
     tap.dispose();
   });

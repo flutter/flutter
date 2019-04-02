@@ -181,6 +181,14 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
   int _initialButtons;
 
   @override
+  bool isPointerAllowed(PointerDownEvent event) {
+    if (!isSingleButton(event.buttons)) {
+      return false;
+    }
+    return super.isPointerAllowed(event);
+  }
+
+  @override
   void addAllowedPointer(PointerDownEvent event) {
     super.addAllowedPointer(event);
     _initialButtons = event.buttons;

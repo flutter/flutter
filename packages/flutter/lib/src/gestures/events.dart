@@ -68,6 +68,37 @@ int nthMouseButton(int number) => (kPrimaryMouseButton << (number - 1)) & kMaxUn
 /// for some stylus buttons.
 int nthStylusButton(int number) => (kPrimaryStylusButton << (number - 1)) & kMaxUnsignedSMI;
 
+/// Returns the button of [buttons] with the least integer value.
+/// 
+/// It returns 0 for 0.
+/// Technically, it returns the rightmost set bit. 
+/// 
+/// Example:
+/// 
+///   assert(rightmostButton(0x1) == 0x1);
+///   assert(rightmostButton(0x11) == 0x1);
+///   assert(rightmostButton(0) == 0);
+///
+/// See also:
+///
+///   * [isSingleButton], which checks if a set of buttons contains exactly one button.
+int smallestButton(int buttons) => buttons & (-buttons);
+
+/// Returns whether [buttons] contains one and only one button.
+/// 
+/// It returns false for 0.
+/// 
+/// Example:
+/// 
+///   assert(isSingleButton(0x1) == true);
+///   assert(isSingleButton(0x11) == false);
+///   assert(isSingleButton(0) == false);
+/// 
+/// See also:
+///
+///   * [smallestButton], which returns the smallest button of a set of buttons.
+bool isSingleButton(int buttons) => buttons != 0 && (smallestButton(buttons) == buttons);
+
 /// Base class for touch, stylus, or mouse events.
 ///
 /// Pointer events operate in the coordinate space of the screen, scaled to
