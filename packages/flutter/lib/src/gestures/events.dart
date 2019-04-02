@@ -420,9 +420,6 @@ class PointerHoverEvent extends PointerEvent {
     Offset delta = Offset.zero,
     int buttons = 0,
     bool obscured = false,
-    // ignore: avoid_unused_constructor_parameters, argument is temporarily kept for compatibility
-    @Deprecated('Hover does not support pressure. This arg is a no-op and will be removed in a future release')
-    double pressure = 0.0,
     double pressureMin = 1.0,
     double pressureMax = 1.0,
     double distance = 0.0,
