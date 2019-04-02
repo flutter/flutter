@@ -243,8 +243,7 @@ class ThemeData extends Diagnosticable {
     highlightColor ??= isDark ? _kDarkThemeHighlightColor : _kLightThemeHighlightColor;
     splashColor ??= isDark ? _kDarkThemeSplashColor : _kLightThemeSplashColor;
 
-    // TODO(clocksmith): make fromDefaults for sliderThemeData
-    sliderTheme ??= SliderThemeData();
+    sliderTheme ??= const SliderThemeData();
     tabBarTheme ??= const TabBarTheme();
     appBarTheme ??= const AppBarTheme();
     bottomAppBarTheme ??= const BottomAppBarTheme();
