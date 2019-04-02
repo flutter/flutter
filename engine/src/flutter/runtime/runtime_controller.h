@@ -30,8 +30,8 @@ class RuntimeController final : public WindowClient {
  public:
   RuntimeController(RuntimeDelegate& client,
                     DartVM* vm,
-                    fml::RefPtr<const DartSnapshot> isolate_snapshot,
-                    fml::RefPtr<const DartSnapshot> shared_snapshot,
+                    fml::RefPtr<DartSnapshot> isolate_snapshot,
+                    fml::RefPtr<DartSnapshot> shared_snapshot,
                     TaskRunners task_runners,
                     fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
                     fml::WeakPtr<IOManager> io_manager,
@@ -121,8 +121,8 @@ class RuntimeController final : public WindowClient {
 
   RuntimeDelegate& client_;
   DartVM* const vm_;
-  fml::RefPtr<const DartSnapshot> isolate_snapshot_;
-  fml::RefPtr<const DartSnapshot> shared_snapshot_;
+  fml::RefPtr<DartSnapshot> isolate_snapshot_;
+  fml::RefPtr<DartSnapshot> shared_snapshot_;
   TaskRunners task_runners_;
   fml::WeakPtr<SnapshotDelegate> snapshot_delegate_;
   fml::WeakPtr<IOManager> io_manager_;
@@ -135,8 +135,8 @@ class RuntimeController final : public WindowClient {
 
   RuntimeController(RuntimeDelegate& client,
                     DartVM* vm,
-                    fml::RefPtr<const DartSnapshot> isolate_snapshot,
-                    fml::RefPtr<const DartSnapshot> shared_snapshot,
+                    fml::RefPtr<DartSnapshot> isolate_snapshot,
+                    fml::RefPtr<DartSnapshot> shared_snapshot,
                     TaskRunners task_runners,
                     fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
                     fml::WeakPtr<IOManager> io_manager,

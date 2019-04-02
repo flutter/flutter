@@ -53,7 +53,7 @@ class UIDartState : public tonic::DartState {
 
   fml::WeakPtr<GrContext> GetResourceContext() const;
 
-  std::shared_ptr<IsolateNameServer> GetIsolateNameServer() const;
+  IsolateNameServer* GetIsolateNameServer();
 
   tonic::DartErrorHandleType GetLastError();
 
@@ -81,7 +81,7 @@ class UIDartState : public tonic::DartState {
               std::string advisory_script_entrypoint,
               std::string logger_prefix,
               UnhandledExceptionCallback unhandled_exception_callback,
-              std::shared_ptr<IsolateNameServer> isolate_name_server);
+              IsolateNameServer* isolate_name_server);
 
   ~UIDartState() override;
 
@@ -107,7 +107,7 @@ class UIDartState : public tonic::DartState {
   std::unique_ptr<Window> window_;
   tonic::DartMicrotaskQueue microtask_queue_;
   UnhandledExceptionCallback unhandled_exception_callback_;
-  const std::shared_ptr<IsolateNameServer> isolate_name_server_;
+  IsolateNameServer* isolate_name_server_;
 
   void AddOrRemoveTaskObserver(bool add);
 };

@@ -85,8 +85,6 @@ struct Settings {
   // Font settings
   bool use_test_fonts = false;
 
-  bool leak_vm = true;
-
   // Engine settings
   TaskObserverAdd task_observer_add;
   TaskObserverRemove task_observer_remove;

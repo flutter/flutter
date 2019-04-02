@@ -41,9 +41,9 @@ class DartIsolate : public UIDartState {
   // bindings. From the VM's perspective, this isolate is not special in any
   // way.
   static std::weak_ptr<DartIsolate> CreateRootIsolate(
-      const Settings& settings,
-      fml::RefPtr<const DartSnapshot> isolate_snapshot,
-      fml::RefPtr<const DartSnapshot> shared_snapshot,
+      DartVM* vm,
+      fml::RefPtr<DartSnapshot> isolate_snapshot,
+      fml::RefPtr<DartSnapshot> shared_snapshot,
       TaskRunners task_runners,
       std::unique_ptr<Window> window,
       fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
@@ -52,9 +52,9 @@ class DartIsolate : public UIDartState {
       std::string advisory_script_entrypoint,
       Dart_IsolateFlags* flags = nullptr);
 
-  DartIsolate(const Settings& settings,
-              fml::RefPtr<const DartSnapshot> isolate_snapshot,
-              fml::RefPtr<const DartSnapshot> shared_snapshot,
+  DartIsolate(DartVM* vm,
+              fml::RefPtr<DartSnapshot> isolate_snapshot,
+              fml::RefPtr<DartSnapshot> shared_snapshot,
               TaskRunners task_runners,
               fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
               fml::WeakPtr<IOManager> io_manager,
@@ -63,8 +63,6 @@ class DartIsolate : public UIDartState {
               ChildIsolatePreparer child_isolate_preparer);
 
   ~DartIsolate() override;
-
-  const Settings& GetSettings() const;
 
   Phase GetPhase() const;
 
@@ -88,9 +86,11 @@ class DartIsolate : public UIDartState {
 
   void AddIsolateShutdownCallback(fml::closure closure);
 
-  fml::RefPtr<const DartSnapshot> GetIsolateSnapshot() const;
+  DartVM* GetDartVM() const;
 
-  fml::RefPtr<const DartSnapshot> GetSharedSnapshot() const;
+  fml::RefPtr<DartSnapshot> GetIsolateSnapshot() const;
+
+  fml::RefPtr<DartSnapshot> GetSharedSnapshot() const;
 
   std::weak_ptr<DartIsolate> GetWeakIsolatePtr();
 
@@ -109,10 +109,10 @@ class DartIsolate : public UIDartState {
   };
   friend class DartVM;
 
+  DartVM* const vm_ = nullptr;
   Phase phase_ = Phase::Unknown;
-  const Settings settings_;
-  const fml::RefPtr<const DartSnapshot> isolate_snapshot_;
-  const fml::RefPtr<const DartSnapshot> shared_snapshot_;
+  const fml::RefPtr<DartSnapshot> isolate_snapshot_;
+  const fml::RefPtr<DartSnapshot> shared_snapshot_;
   std::vector<std::shared_ptr<const fml::Mapping>> kernel_buffers_;
   std::vector<std::unique_ptr<AutoFireClosure>> shutdown_callbacks_;
   ChildIsolatePreparer child_isolate_preparer_ = nullptr;

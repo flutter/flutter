@@ -36,20 +36,17 @@ namespace shell {
 constexpr char kSkiaChannel[] = "flutter/skia";
 
 std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
-    blink::DartVMRef vm,
     blink::TaskRunners task_runners,
     blink::Settings settings,
-    fml::RefPtr<const blink::DartSnapshot> isolate_snapshot,
-    fml::RefPtr<const blink::DartSnapshot> shared_snapshot,
+    fml::RefPtr<blink::DartSnapshot> isolate_snapshot,
+    fml::RefPtr<blink::DartSnapshot> shared_snapshot,
     Shell::CreateCallback<PlatformView> on_create_platform_view,
     Shell::CreateCallback<Rasterizer> on_create_rasterizer) {
   if (!task_runners.IsValid()) {
-    FML_LOG(ERROR) << "Task runners to run the shell were invalid.";
     return nullptr;
   }
 
-  auto shell =
-      std::unique_ptr<Shell>(new Shell(std::move(vm), task_runners, settings));
+  auto shell = std::unique_ptr<Shell>(new Shell(task_runners, settings));
 
   // Create the platform view on the platform thread (this thread).
   auto platform_view = on_create_platform_view(*shell.get());
@@ -78,7 +75,6 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
        &platform_view,  //
        io_task_runner   //
   ]() {
-        TRACE_EVENT0("flutter", "ShellSetupIOSubsystem");
         io_manager = std::make_unique<IOManager>(
             platform_view->CreateResourceContext(), io_task_runner);
         io_latch.Signal();
@@ -96,7 +92,6 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
                                         shell = shell.get(),   //
                                         &snapshot_delegate     //
   ]() {
-        TRACE_EVENT0("flutter", "ShellSetupGPUSubsystem");
         if (auto new_rasterizer = on_create_rasterizer(*shell)) {
           rasterizer = std::move(new_rasterizer);
           snapshot_delegate = rasterizer->GetSnapshotDelegate();
@@ -120,7 +115,6 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
                          snapshot_delegate = std::move(snapshot_delegate),  //
                          io_manager = io_manager->GetWeakPtr()              //
   ]() mutable {
-        TRACE_EVENT0("flutter", "ShellSetupUISubsystem");
         const auto& task_runners = shell->GetTaskRunners();
 
         // The animator is owned by the UI thread but it gets its vsync pulses
@@ -129,7 +123,7 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
                                                    std::move(vsync_waiter));
 
         engine = std::make_unique<Engine>(*shell,                        //
-                                          *shell->GetDartVM(),           //
+                                          shell->GetDartVM(),            //
                                           std::move(isolate_snapshot),   //
                                           std::move(shared_snapshot),    //
                                           task_runners,                  //
@@ -212,34 +206,25 @@ std::unique_ptr<Shell> Shell::Create(
     Shell::CreateCallback<Rasterizer> on_create_rasterizer) {
   PerformInitializationTasks(settings);
 
-  TRACE_EVENT0("flutter", "Shell::Create");
-
-  auto vm = blink::DartVMRef::Create(settings);
+  auto vm = blink::DartVM::ForProcess(settings);
   FML_CHECK(vm) << "Must be able to initialize the VM.";
-
-  auto vm_data = vm->GetVMData();
-
   return Shell::Create(std::move(task_runners),             //
                        std::move(settings),                 //
-                       vm_data->GetIsolateSnapshot(),       // isolate snapshot
-                       blink::DartSnapshot::Empty(),        // shared snapshot
+                       vm->GetIsolateSnapshot(),            //
+                       blink::DartSnapshot::Empty(),        //
                        std::move(on_create_platform_view),  //
-                       std::move(on_create_rasterizer),     //
-                       std::move(vm)                        //
+                       std::move(on_create_rasterizer)      //
   );
 }
 
 std::unique_ptr<Shell> Shell::Create(
     blink::TaskRunners task_runners,
     blink::Settings settings,
-    fml::RefPtr<const blink::DartSnapshot> isolate_snapshot,
-    fml::RefPtr<const blink::DartSnapshot> shared_snapshot,
+    fml::RefPtr<blink::DartSnapshot> isolate_snapshot,
+    fml::RefPtr<blink::DartSnapshot> shared_snapshot,
     Shell::CreateCallback<PlatformView> on_create_platform_view,
-    Shell::CreateCallback<Rasterizer> on_create_rasterizer,
-    blink::DartVMRef vm) {
+    Shell::CreateCallback<Rasterizer> on_create_rasterizer) {
   PerformInitializationTasks(settings);
-
-  TRACE_EVENT0("flutter", "Shell::CreateWithSnapshots");
 
   if (!task_runners.IsValid() || !on_create_platform_view ||
       !on_create_rasterizer) {
@@ -250,18 +235,16 @@ std::unique_ptr<Shell> Shell::Create(
   std::unique_ptr<Shell> shell;
   fml::TaskRunner::RunNowOrPostTask(
       task_runners.GetPlatformTaskRunner(),
-      fml::MakeCopyable([&latch,                                          //
-                         vm = std::move(vm),                              //
-                         &shell,                                          //
-                         task_runners = std::move(task_runners),          //
-                         settings,                                        //
-                         isolate_snapshot = std::move(isolate_snapshot),  //
-                         shared_snapshot = std::move(shared_snapshot),    //
-                         on_create_platform_view,                         //
-                         on_create_rasterizer                             //
-  ]() mutable {
-        shell = CreateShellOnPlatformThread(std::move(vm),
-                                            std::move(task_runners),      //
+      [&latch,                                          //
+       &shell,                                          //
+       task_runners = std::move(task_runners),          //
+       settings,                                        //
+       isolate_snapshot = std::move(isolate_snapshot),  //
+       shared_snapshot = std::move(shared_snapshot),    //
+       on_create_platform_view,                         //
+       on_create_rasterizer                             //
+  ]() {
+        shell = CreateShellOnPlatformThread(std::move(task_runners),      //
                                             settings,                     //
                                             std::move(isolate_snapshot),  //
                                             std::move(shared_snapshot),   //
@@ -269,18 +252,15 @@ std::unique_ptr<Shell> Shell::Create(
                                             on_create_rasterizer          //
         );
         latch.Signal();
-      }));
+      });
   latch.Wait();
   return shell;
 }
 
-Shell::Shell(blink::DartVMRef vm,
-             blink::TaskRunners task_runners,
-             blink::Settings settings)
+Shell::Shell(blink::TaskRunners task_runners, blink::Settings settings)
     : task_runners_(std::move(task_runners)),
       settings_(std::move(settings)),
-      vm_(std::move(vm)) {
-  FML_CHECK(vm_) << "Must have access to VM to create a shell.";
+      vm_(blink::DartVM::ForProcess(settings_)) {
   FML_DCHECK(task_runners_.IsValid());
   FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
 
@@ -322,7 +302,9 @@ Shell::~Shell() {
   PersistentCache::GetCacheForProcess()->RemoveWorkerTaskRunner(
       task_runners_.GetIOTaskRunner());
 
-  vm_->GetServiceProtocol()->RemoveHandler(this);
+  if (auto vm = blink::DartVM::ForProcessIfInitialized()) {
+    vm->GetServiceProtocol().RemoveHandler(this);
+  }
 
   fml::AutoResetWaitableEvent ui_latch, gpu_latch, platform_latch, io_latch;
 
@@ -393,7 +375,9 @@ bool Shell::Setup(std::unique_ptr<PlatformView> platform_view,
 
   is_setup_ = true;
 
-  vm_->GetServiceProtocol()->AddHandler(this, GetServiceProtocolDescription());
+  if (auto vm = blink::DartVM::ForProcessIfInitialized()) {
+    vm->GetServiceProtocol().AddHandler(this, GetServiceProtocolDescription());
+  }
 
   PersistentCache::GetCacheForProcess()->AddWorkerTaskRunner(
       task_runners_.GetIOTaskRunner());
@@ -427,13 +411,12 @@ fml::WeakPtr<PlatformView> Shell::GetPlatformView() {
   return platform_view_->GetWeakPtr();
 }
 
-blink::DartVM* Shell::GetDartVM() {
-  return &vm_;
+blink::DartVM& Shell::GetDartVM() const {
+  return *vm_;
 }
 
 // |shell::PlatformView::Delegate|
 void Shell::OnPlatformViewCreated(std::unique_ptr<Surface> surface) {
-  TRACE_EVENT0("flutter", "Shell::OnPlatformViewCreated");
   FML_DCHECK(is_setup_);
   FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
 
@@ -517,7 +500,6 @@ void Shell::OnPlatformViewCreated(std::unique_ptr<Surface> surface) {
 
 // |shell::PlatformView::Delegate|
 void Shell::OnPlatformViewDestroyed() {
-  TRACE_EVENT0("flutter", "Shell::OnPlatformViewDestroyed");
   FML_DCHECK(is_setup_);
   FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
 
@@ -878,8 +860,10 @@ void Shell::OnPreEngineRestart() {
 // |shell::Engine::Delegate|
 void Shell::UpdateIsolateDescription(const std::string isolate_name,
                                      int64_t isolate_port) {
-  Handler::Description description(isolate_port, isolate_name);
-  vm_->GetServiceProtocol()->SetHandlerDescription(this, description);
+  if (auto vm = blink::DartVM::ForProcessIfInitialized()) {
+    Handler::Description description(isolate_port, isolate_name);
+    vm->GetServiceProtocol().SetHandlerDescription(this, description);
+  }
 }
 
 // |blink::ServiceProtocol::Handler|

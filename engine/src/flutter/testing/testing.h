@@ -5,8 +5,6 @@
 #ifndef TESTING_TESTING_H_
 #define TESTING_TESTING_H_
 
-#include <string>
-
 #include "gtest/gtest.h"
 
 namespace testing {
@@ -15,8 +13,6 @@ namespace testing {
 // target has fixtures configured. If there are no fixtures, this is a link
 // error.
 const char* GetFixturesPath();
-
-std::string GetCurrentTestName();
 
 }  // namespace testing
 

@@ -14,10 +14,8 @@ namespace blink {
 
 Dart_Handle IsolateNameServerNatives::LookupPortByName(
     const std::string& name) {
-  auto name_server = UIDartState::Current()->GetIsolateNameServer();
-  if (!name_server) {
-    return Dart_Null();
-  }
+  IsolateNameServer* name_server =
+      UIDartState::Current()->GetIsolateNameServer();
   Dart_Port port = name_server->LookupIsolatePortByName(name);
   if (port == ILLEGAL_PORT) {
     return Dart_Null();
@@ -28,10 +26,8 @@ Dart_Handle IsolateNameServerNatives::LookupPortByName(
 Dart_Handle IsolateNameServerNatives::RegisterPortWithName(
     Dart_Handle port_handle,
     const std::string& name) {
-  auto name_server = UIDartState::Current()->GetIsolateNameServer();
-  if (!name_server) {
-    return Dart_False();
-  }
+  IsolateNameServer* name_server =
+      UIDartState::Current()->GetIsolateNameServer();
   Dart_Port port = ILLEGAL_PORT;
   Dart_SendPortGetId(port_handle, &port);
   if (!name_server->RegisterIsolatePortWithName(port, name)) {
@@ -42,10 +38,8 @@ Dart_Handle IsolateNameServerNatives::RegisterPortWithName(
 
 Dart_Handle IsolateNameServerNatives::RemovePortNameMapping(
     const std::string& name) {
-  auto name_server = UIDartState::Current()->GetIsolateNameServer();
-  if (!name_server) {
-    return Dart_False();
-  }
+  IsolateNameServer* name_server =
+      UIDartState::Current()->GetIsolateNameServer();
   if (!name_server->RemoveIsolateNameMapping(name)) {
     return Dart_False();
   }

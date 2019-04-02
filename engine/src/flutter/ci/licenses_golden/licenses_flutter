@@ -383,10 +383,6 @@ FILE: ../../../flutter/runtime/dart_snapshot_buffer.cc
 FILE: ../../../flutter/runtime/dart_snapshot_buffer.h
 FILE: ../../../flutter/runtime/dart_vm.cc
 FILE: ../../../flutter/runtime/dart_vm.h
-FILE: ../../../flutter/runtime/dart_vm_data.cc
-FILE: ../../../flutter/runtime/dart_vm_data.h
-FILE: ../../../flutter/runtime/dart_vm_lifecycle.cc
-FILE: ../../../flutter/runtime/dart_vm_lifecycle.h
 FILE: ../../../flutter/runtime/dart_vm_unittests.cc
 FILE: ../../../flutter/runtime/embedder_resources.cc
 FILE: ../../../flutter/runtime/embedder_resources.h
