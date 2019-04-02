@@ -49,8 +49,7 @@ class BaseMessageChannel<T> {
   /// Returns a [Future] which completes to the received response, which may
   /// be null.
   Future<T> send(T message) async {
-    return codec.decodeMessage(
-        await binaryMessenger.send(name, codec.encodeMessage(message)));
+    return codec.decodeMessage(await binaryMessenger.send(name, codec.encodeMessage(message)));
   }
 
   /// Sets a callback for receiving messages from the platform plugins on this
@@ -118,8 +117,7 @@ class BaseMethodChannel {
   /// specified.
   ///
   /// Neither [name] nor [codec] may be null.
-  const BaseMethodChannel(this.name, this.binaryMessenger,
-      [this.codec = const StandardMethodCodec()]);
+  const BaseMethodChannel(this.name, this.binaryMessenger, [this.codec = const StandardMethodCodec()]);
 
   /// The logical channel on which communication happens, not null.
   final String name;
@@ -357,9 +355,7 @@ class BaseMethodChannel {
   void setMethodCallHandler(Future<dynamic> handler(MethodCall call)) {
     binaryMessenger.setMessageHandler(
       name,
-      handler == null
-          ? null
-          : (ByteData message) => _handleAsMethodCall(message, handler),
+      handler == null ? null : (ByteData message) => _handleAsMethodCall(message, handler),
     );
   }
 
@@ -384,9 +380,7 @@ class BaseMethodChannel {
   void setMockMethodCallHandler(Future<dynamic> handler(MethodCall call)) {
     binaryMessenger.setMockMessageHandler(
       name,
-      handler == null
-          ? null
-          : (ByteData message) => _handleAsMethodCall(message, handler),
+      handler == null ? null : (ByteData message) => _handleAsMethodCall(message, handler),
     );
   }
 
