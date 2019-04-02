@@ -1,4 +1,5 @@
 {
+  "datePickerHourSemanticsLabelOne": "$hour o'clock",
   "datePickerHourSemanticsLabelOther": "$hour o'clock",
   "@datePickerHourSemanticsLabel": {
     "description": "Accessibility announcement for the selected hour on a time picker such as '5 o'clock' or '5点'",
@@ -44,12 +45,14 @@
     "plural": "hour"
   },
 
+  "timerPickerMinuteLabelOne": "min",
   "timerPickerMinuteLabelOther": "min",
   "@timerPickerMinuteLabel": {
     "description": "The label adjacent to a minute integer number in a countdown timer.",
     "plural": "minute"
   },
 
+  "timerPickerSecondLabelOne": "sec",
   "timerPickerSecondLabelOther": "sec",
   "@timerPickerSecondLabel": {
     "description": "The label adjacent to a second integer number in a countdown timer.",
