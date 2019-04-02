@@ -1,4 +1,4 @@
-Signature: 6928cdbcf2200936c961f80cf7e741cc
+Signature: 2d6c6916c1b3db8760ed776b42eb606f
 
 UNUSED LICENSES:
 
@@ -2827,7 +2827,6 @@ FILE: ../../../third_party/skia/samplecode/SampleBigGradient.cpp
 FILE: ../../../third_party/skia/samplecode/SampleBitmapRect.cpp
 FILE: ../../../third_party/skia/samplecode/SampleCamera.cpp
 FILE: ../../../third_party/skia/samplecode/SampleCircle.cpp
-FILE: ../../../third_party/skia/samplecode/SampleClamp.cpp
 FILE: ../../../third_party/skia/samplecode/SampleClip.cpp
 FILE: ../../../third_party/skia/samplecode/SampleColorFilter.cpp
 FILE: ../../../third_party/skia/samplecode/SampleComplexClip.cpp
@@ -2850,7 +2849,6 @@ FILE: ../../../third_party/skia/samplecode/SamplePatch.cpp
 FILE: ../../../third_party/skia/samplecode/SamplePath.cpp
 FILE: ../../../third_party/skia/samplecode/SamplePathClip.cpp
 FILE: ../../../third_party/skia/samplecode/SamplePathEffects.cpp
-FILE: ../../../third_party/skia/samplecode/SamplePathFill.cpp
 FILE: ../../../third_party/skia/samplecode/SamplePoints.cpp
 FILE: ../../../third_party/skia/samplecode/SamplePolyToPoly.cpp
 FILE: ../../../third_party/skia/samplecode/SampleRegion.cpp
