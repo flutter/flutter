@@ -63,7 +63,8 @@ class FontWeight {
   /// Rather than using fractional weights, the interpolation rounds to the
   /// nearest weight.
   ///
-  /// Any null values for `a` or `b` are interpreted as equivalent to [normal]
+  /// If both `a` and `b` are null, then this method will return null. Otherwise,
+  /// any null values for `a` or `b` are interpreted as equivalent to [normal]
   /// (also known as [w400]).
   ///
   /// The `t` argument represents position on the timeline, with 0.0 meaning
@@ -80,6 +81,8 @@ class FontWeight {
   /// an [AnimationController].
   static FontWeight lerp(FontWeight a, FontWeight b, double t) {
     assert(t != null);
+    if (a == null && b == null)
+      return null;
     return values[lerpDouble(a?.index ?? normal.index, b?.index ?? normal.index, t).round().clamp(0, 8)];
   }
 
