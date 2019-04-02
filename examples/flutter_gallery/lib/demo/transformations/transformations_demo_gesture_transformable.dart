@@ -194,20 +194,18 @@ class _GestureTransformableState extends State<GestureTransformable> with Ticker
     _controllerReset = AnimationController(
       vsync: this,
     );
+    if (widget.reset && _animationReset == null) {
+      _animateResetInitialize();
+    }
   }
 
   @override
-  void didUpdateWidget(Widget oldWidget) {
+  void didUpdateWidget(GestureTransformable oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.reset && _animationReset == null) {
-      _controllerReset.reset();
-      _animationReset = Matrix4Tween(
-        begin: _transform,
-        end: _initialTransform,
-      ).animate(_controllerReset);
-      _controllerReset.duration = const Duration(milliseconds: 400);
-      _animationReset.addListener(_onAnimateReset);
-      _controllerReset.forward();
+    if (widget.reset && !oldWidget.reset && _animationReset == null) {
+      _animateResetInitialize();
+    } else if (!widget.reset && oldWidget.reset && _animationReset != null) {
+      _animateResetStop();
     }
   }
 
@@ -407,11 +405,7 @@ class _GestureTransformableState extends State<GestureTransformable> with Ticker
       _animation = null;
     }
     if (_controllerReset.isAnimating) {
-      _controllerReset.stop();
-      _animationReset?.removeListener(_onAnimateReset);
-      _animationReset = null;
-      _controllerReset.reset();
-      widget.onResetEnd();
+      _animateResetStop();
     }
 
     gestureType = null;
@@ -545,6 +539,27 @@ class _GestureTransformableState extends State<GestureTransformable> with Ticker
       _controllerReset.reset();
       widget.onResetEnd();
     }
+  }
+
+  // Initialize the reset to home transform animation.
+  void _animateResetInitialize() {
+    _controllerReset.reset();
+    _animationReset = Matrix4Tween(
+      begin: _transform,
+      end: _initialTransform,
+    ).animate(_controllerReset);
+    _controllerReset.duration = const Duration(milliseconds: 400);
+    _animationReset.addListener(_onAnimateReset);
+    _controllerReset.forward();
+  }
+
+  // Stop a running reset to home transform animation.
+  void _animateResetStop() {
+    _controllerReset.stop();
+    _animationReset?.removeListener(_onAnimateReset);
+    _animationReset = null;
+    _controllerReset.reset();
+    widget.onResetEnd();
   }
 
   @override
