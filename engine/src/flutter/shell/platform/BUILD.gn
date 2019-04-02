@@ -12,9 +12,14 @@ group("platform") {
       "android",
     ]
   } else if (is_linux) {
-    deps = [
-      "linux",
-    ]
+    if (is_fuchsia_host) {
+      # The linux build is not supported as part of the Fuchsia host build.
+      deps = []
+    } else {
+      deps = [
+        "linux",
+      ]
+    }
   } else if (is_win) {
     deps = [
       "windows",
