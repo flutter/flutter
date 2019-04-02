@@ -194,7 +194,7 @@ class _GestureTransformableState extends State<GestureTransformable> with Ticker
     _controllerReset = AnimationController(
       vsync: this,
     );
-    if (widget.reset && _animationReset == null) {
+    if (widget.reset) {
       _animateResetInitialize();
     }
   }
