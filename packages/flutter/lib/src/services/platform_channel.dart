@@ -35,16 +35,16 @@ class BaseMessageChannel<T> {
   /// None of [name], [codec], or [binaryMessenger] may be null.
   const BaseMessageChannel(this.name, this.codec, this.binaryMessenger);
 
-   /// The logical channel on which communication happens, not null.
+  /// The logical channel on which communication happens, not null.
   final String name;
 
-   /// The message codec used by this channel, not null.
+  /// The message codec used by this channel, not null.
   final MessageCodec<T> codec;
 
-   /// The messenger which sends the bytes for this channel, not null.
+  /// The messenger which sends the bytes for this channel, not null.
   final BinaryMessenger binaryMessenger;
 
-   /// Sends the specified [message] to the platform plugins on this channel.
+  /// Sends the specified [message] to the platform plugins on this channel.
   ///
   /// Returns a [Future] which completes to the received response, which may
   /// be null.
@@ -53,7 +53,7 @@ class BaseMessageChannel<T> {
         await binaryMessenger.send(name, codec.encodeMessage(message)));
   }
 
-   /// Sets a callback for receiving messages from the platform plugins on this
+  /// Sets a callback for receiving messages from the platform plugins on this
   /// channel. Messages may be null.
   ///
   /// The given callback will replace the currently registered callback for this
@@ -72,7 +72,7 @@ class BaseMessageChannel<T> {
     }
   }
 
-   /// Sets a mock callback for intercepting messages sent on this channel.
+  /// Sets a mock callback for intercepting messages sent on this channel.
   /// Messages may be null.
   ///
   /// The given callback will replace the currently registered mock callback for
@@ -121,16 +121,16 @@ class BaseMethodChannel {
   const BaseMethodChannel(this.name, this.binaryMessenger,
       [this.codec = const StandardMethodCodec()]);
 
-   /// The logical channel on which communication happens, not null.
+  /// The logical channel on which communication happens, not null.
   final String name;
 
-   /// The message codec used by this channel, not null.
+  /// The message codec used by this channel, not null.
   final MethodCodec codec;
 
-   /// The messenger used by this channel to send platform messages, not null.
+  /// The messenger used by this channel to send platform messages, not null.
   final BinaryMessenger binaryMessenger;
 
-   /// Invokes a [method] on this channel with the specified [arguments].
+  /// Invokes a [method] on this channel with the specified [arguments].
   ///
   /// The static type of [arguments] is `dynamic`, but only values supported by
   /// the [codec] of this channel can be used. The same applies to the returned
@@ -306,14 +306,13 @@ class BaseMethodChannel {
       codec.encodeMethodCall(MethodCall(method, arguments)),
     );
     if (result == null) {
-      throw MissingPluginException(
-          'No implementation found for method $method on channel $name');
+      throw MissingPluginException('No implementation found for method $method on channel $name');
     }
     final T typedResult = codec.decodeEnvelope(result);
     return typedResult;
   }
 
-   /// An implementation of [invokeMethod] that can return typed lists.
+  /// An implementation of [invokeMethod] that can return typed lists.
   ///
   /// Dart generics are reified, meaning that an untyped List<dynamic>
   /// cannot masquerade as a List<T>. Since invokeMethod can only return
@@ -322,14 +321,12 @@ class BaseMethodChannel {
   /// See also:
   ///
   ///  * [invokeMethod], which this call delegates to.
-  Future<List<T>> invokeListMethod<T>(String method,
-      [dynamic arguments]) async {
-    final List<dynamic> result =
-        await invokeMethod<List<dynamic>>(method, arguments);
+  Future<List<T>> invokeListMethod<T>(String method, [ dynamic arguments ]) async {
+    final List<dynamic> result = await invokeMethod<List<dynamic>>(method, arguments);
     return result.cast<T>();
   }
 
-   /// An implementation of [invokeMethod] that can return typed maps.
+  /// An implementation of [invokeMethod] that can return typed maps.
   ///
   /// Dart generics are reified, meaning that an untyped Map<dynamic, dynamic>
   /// cannot masquerade as a Map<K, V>. Since invokeMethod can only return
@@ -338,14 +335,12 @@ class BaseMethodChannel {
   /// See also:
   ///
   ///  * [invokeMethod], which this call delegates to.
-  Future<Map<K, V>> invokeMapMethod<K, V>(String method,
-      [dynamic arguments]) async {
-    final Map<dynamic, dynamic> result =
-        await invokeMethod<Map<dynamic, dynamic>>(method, arguments);
+  Future<Map<K, V>> invokeMapMethod<K, V>(String method, [ dynamic arguments ]) async {
+    final Map<dynamic, dynamic> result = await invokeMethod<Map<dynamic, dynamic>>(method, arguments);
     return result.cast<K, V>();
   }
 
-   /// Sets a callback for receiving method calls on this channel.
+  /// Sets a callback for receiving method calls on this channel.
   ///
   /// The given callback will replace the currently registered callback for this
   /// channel, if any. To remove the handler, pass null as the
@@ -368,7 +363,7 @@ class BaseMethodChannel {
     );
   }
 
-   /// Sets a mock callback for intercepting method invocations on this channel.
+  /// Sets a mock callback for intercepting method invocations on this channel.
   ///
   /// The given callback will replace the currently registered mock callback for
   /// this channel, if any. To remove the mock handler, pass null as the
@@ -395,8 +390,7 @@ class BaseMethodChannel {
     );
   }
 
-   Future<ByteData> _handleAsMethodCall(
-      ByteData message, Future<dynamic> handler(MethodCall call)) async {
+  Future<ByteData> _handleAsMethodCall(ByteData message, Future<dynamic> handler(MethodCall call)) async {
     final MethodCall call = codec.decodeMethodCall(message);
     try {
       return codec.encodeSuccessEnvelope(await handler(call));
@@ -409,8 +403,7 @@ class BaseMethodChannel {
     } on MissingPluginException {
       return null;
     } catch (e) {
-      return codec.encodeErrorEnvelope(
-          code: 'error', message: e.toString(), details: null);
+      return codec.encodeErrorEnvelope(code: 'error', message: e.toString(), details: null);
     }
   }
 } 
@@ -420,7 +413,8 @@ class BasicMessageChannel<T> extends BaseMessageChannel<T> {
   /// Creates a [BasicMessageChannel] with the specified [name] and [codec].
   ///
   /// Neither [name] nor [codec] may be null.
-  const BasicMessageChannel(String name, MessageCodec<T> codec) : super(name, codec, const _ClientBinaryMessenger());
+  const BasicMessageChannel(String name, MessageCodec<T> codec)
+    : super(name, codec, const _ClientBinaryMessenger());
 }
 
 /// A [BaseMethodChannel] that sends method calls from the framework to platform plugins.
@@ -431,7 +425,8 @@ class MethodChannel extends BaseMethodChannel {
   /// specified.
   ///
   /// Neither [name] nor [codec] may be null.
-  const MethodChannel(String name, [MethodCodec codec = const StandardMethodCodec()]) : super(name, const _ClientBinaryMessenger(), codec);
+  const MethodChannel(String name, [MethodCodec codec = const StandardMethodCodec()])
+    : super(name, const _ClientBinaryMessenger(), codec);
 }
 
 /// A [MethodChannel] that ignores missing platform plugins.
