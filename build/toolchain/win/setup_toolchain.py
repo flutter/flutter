@@ -66,7 +66,7 @@ def _SetupScript(target_cpu, sdk_dir):
     # TODO(scottmg|dpranke): Non-depot_tools toolchain: need to get Visual
     # Studio install location from registry.
     return [os.path.normpath(os.path.join(os.environ['GYP_MSVS_OVERRIDE_PATH'],
-                                          'VC/vcvarsall.bat')),
+                                          'VC/Auxiliary/Build/vcvarsall.bat')),
             'amd64_x86' if target_cpu == 'x86' else 'amd64']
 
 
