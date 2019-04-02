@@ -238,6 +238,7 @@ class RenderParagraph extends RenderBox
   double computeMinIntrinsicWidth(double height) {
     _layoutChildren(constraints);
     _layoutText();
+    _setParentData();
     return _textPainter.minIntrinsicWidth;
   }
 
@@ -245,12 +246,14 @@ class RenderParagraph extends RenderBox
   double computeMaxIntrinsicWidth(double height) {
     _layoutChildren(constraints);
     _layoutText();
+    _setParentData();
     return _textPainter.maxIntrinsicWidth;
   }
 
   double _computeIntrinsicHeight(double width) {
     _layoutChildren(constraints);
     _layoutText(minWidth: width, maxWidth: width);
+    _setParentData();
     return _textPainter.height;
   }
 
@@ -324,9 +327,9 @@ class RenderParagraph extends RenderBox
     _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
   }
 
-  // Layout the child inline widgets. We pass the dimensions of the
-  // children to _textPainter so that appropriate placeholders can
-  // be inserted into the LibTxt layout.
+  // Layout the child inline widgets. Optionally, we pass the dimensions of the
+  // children to _textPainter so that appropriate placeholders can be inserted
+  // into the LibTxt layout.
   void _layoutChildren(BoxConstraints constraints, {bool passDimensions = true}) {
     RenderBox child = firstChild;
     List<PlaceholderDimensions> placeholderDimensions = List(childCount);
@@ -364,7 +367,6 @@ class RenderParagraph extends RenderBox
 
   @override
   void performLayout() {
-    print('PERFORMING LAYOUT');
     _layoutChildren(constraints);
     _layoutTextWithConstraints(constraints);
     _setParentData();

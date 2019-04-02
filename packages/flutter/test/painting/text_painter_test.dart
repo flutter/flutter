@@ -5,6 +5,7 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/painting.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -631,5 +632,118 @@ void main() {
     );
     expect(caretOffset.dx, closeTo(0.0, 0.0001));
     expect(caretOffset.dy, closeTo(0.0, 0.0001));
+  });
+
+  test('TextPainter widget span', () {
+    final TextPainter painter = TextPainter()
+      ..textDirection = TextDirection.ltr;
+
+    const String text = 'test';
+    painter.text = const TextSpan(
+      text: text,
+      children: <TextSpan>[
+        WidgetSpan(widget: SizedBox(width: 50, height: 30)),
+        TextSpan(text: text),
+        WidgetSpan(widget: SizedBox(width: 50, height: 30)),
+        WidgetSpan(widget: SizedBox(width: 50, height: 30)),
+        TextSpan(text: text),
+        WidgetSpan(widget: SizedBox(width: 50, height: 30)),
+        WidgetSpan(widget: SizedBox(width: 50, height: 30)),
+        WidgetSpan(widget: SizedBox(width: 50, height: 30)),
+        WidgetSpan(widget: SizedBox(width: 50, height: 30)),
+        WidgetSpan(widget: SizedBox(width: 50, height: 30)),
+        WidgetSpan(widget: SizedBox(width: 50, height: 30)),
+        WidgetSpan(widget: SizedBox(width: 50, height: 30)),
+        WidgetSpan(widget: SizedBox(width: 50, height: 30)),
+        WidgetSpan(widget: SizedBox(width: 50, height: 30)),
+        WidgetSpan(widget: SizedBox(width: 50, height: 30)),
+        WidgetSpan(widget: SizedBox(width: 50, height: 30)),
+      ]
+    );
+    painter.layout(maxWidth: 400);
+
+    Offset caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 0), ui.Rect.zero);
+    expect(caretOffset.dx, 0);
+    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: text.length), ui.Rect.zero);
+    expect(caretOffset.dx, 56);
+
+    // Since no placeholder dimensions were yet provided,
+    // the WidgetSpans are skipped.
+    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 1), ui.Rect.zero);
+    expect(caretOffset.dx, 14);
+    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 4), ui.Rect.zero);
+    expect(caretOffset.dx, 56);
+    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 5), ui.Rect.zero);
+    expect(caretOffset.dx, 70);
+    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 6), ui.Rect.zero);
+    expect(caretOffset.dx, 84);
+    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 10), ui.Rect.zero);
+    expect(caretOffset.dx, 140);
+    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 11), ui.Rect.zero);
+    expect(caretOffset.dx, 154);
+    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 12), ui.Rect.zero);
+    expect(caretOffset.dx, 168);
+
+    // We provide dimensions for the widgets
+    painter.placeholderDimensions = <PlaceholderDimensions>[
+      PlaceholderDimensions(Size(50, 30), 25),
+      PlaceholderDimensions(Size(50, 30), 25),
+      PlaceholderDimensions(Size(50, 30), 25),
+      PlaceholderDimensions(Size(50, 30), 25),
+      PlaceholderDimensions(Size(50, 30), 25),
+      PlaceholderDimensions(Size(50, 30), 25),
+      PlaceholderDimensions(Size(50, 30), 25),
+      PlaceholderDimensions(Size(50, 30), 25),
+      PlaceholderDimensions(Size(50, 30), 25),
+      PlaceholderDimensions(Size(50, 30), 25),
+      PlaceholderDimensions(Size(50, 30), 25),
+      PlaceholderDimensions(Size(50, 30), 25),
+      PlaceholderDimensions(Size(50, 30), 25),
+      PlaceholderDimensions(Size(50, 30), 25),
+    ];
+
+    painter.layout(maxWidth: 500);
+
+    // Now, each of the WidgetSpans will have their own placeholder 'hole'.
+    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 1), ui.Rect.zero);
+    expect(caretOffset.dx, 14);
+    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 4), ui.Rect.zero);
+    expect(caretOffset.dx, 56);
+    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 5), ui.Rect.zero);
+    expect(caretOffset.dx, 106);
+    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 6), ui.Rect.zero);
+    expect(caretOffset.dx, 120);
+    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 10), ui.Rect.zero);
+    expect(caretOffset.dx, 212);
+    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 11), ui.Rect.zero);
+    expect(caretOffset.dx, 262);
+    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 12), ui.Rect.zero);
+    expect(caretOffset.dx, 276);
+    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 13), ui.Rect.zero);
+    expect(caretOffset.dx, 290);
+    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 14), ui.Rect.zero);
+    expect(caretOffset.dx, 304);
+    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 15), ui.Rect.zero);
+    expect(caretOffset.dx, 318);
+    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 16), ui.Rect.zero);
+    expect(caretOffset.dx, 368);
+    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 17), ui.Rect.zero);
+    expect(caretOffset.dx, 418);
+    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 18), ui.Rect.zero);
+    expect(caretOffset.dx, 0);
+    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 19), ui.Rect.zero);
+    expect(caretOffset.dx, 50);
+
+    expect(painter.inlinePlaceholderBoxes.length, 14);
+    expect(painter.inlinePlaceholderBoxes[0], TextBox.fromLTRBD(56, 0, 106, 30, TextDirection.ltr));
+    expect(painter.inlinePlaceholderBoxes[2], TextBox.fromLTRBD(212, 0, 262, 30, TextDirection.ltr));
+    expect(painter.inlinePlaceholderBoxes[3], TextBox.fromLTRBD(318, 0, 368, 30, TextDirection.ltr));
+    expect(painter.inlinePlaceholderBoxes[4], TextBox.fromLTRBD(368, 0, 418, 30, TextDirection.ltr));
+    expect(painter.inlinePlaceholderBoxes[5], TextBox.fromLTRBD(418, 0, 468, 30, TextDirection.ltr));
+    // line should break here
+    expect(painter.inlinePlaceholderBoxes[6], TextBox.fromLTRBD(0, 30, 50, 60, TextDirection.ltr));
+    expect(painter.inlinePlaceholderBoxes[7], TextBox.fromLTRBD(50, 30, 100, 60, TextDirection.ltr));
+    expect(painter.inlinePlaceholderBoxes[10], TextBox.fromLTRBD(200, 30, 250, 60, TextDirection.ltr));
+    expect(painter.inlinePlaceholderBoxes[13], TextBox.fromLTRBD(350, 30, 400, 60, TextDirection.ltr));
   });
 }

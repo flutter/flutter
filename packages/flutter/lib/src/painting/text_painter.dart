@@ -240,6 +240,8 @@ class TextPainter {
   List<PlaceholderDimensions> _placeholderDimensions;
   set placeholderDimensions(List<PlaceholderDimensions> value) {
     _placeholderDimensions = value;
+    _needsLayout = true;
+    _paragraph = null;
   }
 
   ui.ParagraphStyle _createParagraphStyle([ TextDirection defaultTextDirection ]) {
