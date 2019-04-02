@@ -29,6 +29,7 @@ void main() {
   // Down/up pair 1: normal tap sequence
   const PointerDownEvent down1 = PointerDownEvent(
     pointer: 1,
+    buttons: kTouchContact,
     position: Offset(10.0, 10.0),
   );
 
@@ -40,6 +41,7 @@ void main() {
   // Down/up pair 2: normal tap sequence close to pair 1
   const PointerDownEvent down2 = PointerDownEvent(
     pointer: 2,
+    buttons: kTouchContact,
     position: Offset(12.0, 12.0),
   );
 
@@ -51,6 +53,7 @@ void main() {
   // Down/up pair 3: normal tap sequence far away from pair 1
   const PointerDownEvent down3 = PointerDownEvent(
     pointer: 3,
+    buttons: kTouchContact,
     position: Offset(130.0, 130.0),
   );
 
@@ -62,11 +65,13 @@ void main() {
   // Down/move/up sequence 4: intervening motion
   const PointerDownEvent down4 = PointerDownEvent(
     pointer: 4,
+    buttons: kTouchContact,
     position: Offset(10.0, 10.0),
   );
 
   const PointerMoveEvent move4 = PointerMoveEvent(
     pointer: 4,
+    buttons: kTouchContact,
     position: Offset(25.0, 25.0),
   );
 
@@ -78,6 +83,7 @@ void main() {
   // Down/up pair 5: normal tap sequence identical to pair 1 with different pointer
   const PointerDownEvent down5 = PointerDownEvent(
     pointer: 5,
+    buttons: kTouchContact,
     position: Offset(10.0, 10.0),
   );
 

@@ -20,6 +20,10 @@ const int kPrimaryMouseButton = 0x01;
 /// mouse but can be reconfigured to be a different physical button.
 const int kSecondaryMouseButton = 0x02;
 
+/// The bit of [PointerEvent.buttons] that corresponds to when a stylus
+/// contacting the screen.
+const int kStylusContact = 0x01;
+
 /// The bit of [PointerEvent.buttons] that corresponds to the primary stylus button.
 ///
 /// The primary stylus button is typically the top of the stylus and near the
@@ -50,6 +54,10 @@ const int kBackMouseButton = 0x08;
 /// The forward mouse button is typically on the right side of the mouse but can
 /// be reconfigured to be a different physical button.
 const int kForwardMouseButton = 0x10;
+
+/// The bit of [PointerEvent.buttons] that corresponds to the pointer contacting
+/// a touch screen.
+const int kTouchContact = 0x01;
 
 /// The bit of [PointerEvent.buttons] that corresponds to the nth mouse button.
 ///

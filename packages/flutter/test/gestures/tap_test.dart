@@ -22,6 +22,7 @@ void main() {
   // Down/up pair 1: normal tap sequence
   const PointerDownEvent down1 = PointerDownEvent(
     pointer: 1,
+    buttons: kTouchContact, 
     position: Offset(10.0, 10.0),
   );
 
@@ -33,6 +34,7 @@ void main() {
   // Down/up pair 2: normal tap sequence far away from pair 1
   const PointerDownEvent down2 = PointerDownEvent(
     pointer: 2,
+    buttons: kTouchContact, 
     position: Offset(30.0, 30.0),
   );
 
@@ -44,11 +46,13 @@ void main() {
   // Down/move/up sequence 3: intervening motion, more than kTouchSlop. (~21px)
   const PointerDownEvent down3 = PointerDownEvent(
     pointer: 3,
+    buttons: kTouchContact, 
     position: Offset(10.0, 10.0),
   );
 
   const PointerMoveEvent move3 = PointerMoveEvent(
     pointer: 3,
+    buttons: kTouchContact, 
     position: Offset(25.0, 25.0),
   );
 
@@ -60,11 +64,13 @@ void main() {
   // Down/move/up sequence 4: intervening motion, less than kTouchSlop. (~17px)
   const PointerDownEvent down4 = PointerDownEvent(
     pointer: 4,
+    buttons: kTouchContact, 
     position: Offset(10.0, 10.0),
   );
 
   const PointerMoveEvent move4 = PointerMoveEvent(
     pointer: 4,
+    buttons: kTouchContact, 
     position: Offset(22.0, 22.0),
   );
 
@@ -406,6 +412,7 @@ void main() {
   testGesture('PointerCancelEvent cancels tap', (GestureTester tester) {
     const PointerDownEvent down = PointerDownEvent(
         pointer: 5,
+        buttons: kTouchContact, 
         position: Offset(10.0, 10.0),
     );
     const PointerCancelEvent cancel = PointerCancelEvent(

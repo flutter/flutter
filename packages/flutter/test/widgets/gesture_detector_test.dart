@@ -375,6 +375,7 @@ void main() {
       forcePressOffset,
       const PointerDownEvent(
         pointer: pointerValue,
+        buttons: kTouchContact,
         position: forcePressOffset,
         pressure: 0.0,
         pressureMax: 6.0,
@@ -382,31 +383,31 @@ void main() {
       ),
     );
 
-    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(0.0, 0.0), pressure: 0.3, pressureMin: 0, pressureMax: 1));
+    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, buttons: kTouchContact, position: Offset(0.0, 0.0), pressure: 0.3, pressureMin: 0, pressureMax: 1));
 
     expect(forcePressStart, 0);
     expect(forcePressPeaked, 0);
     expect(forcePressUpdate, 0);
     expect(forcePressEnded, 0);
 
-    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(0.0, 0.0), pressure: 0.5, pressureMin: 0, pressureMax: 1));
+    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, buttons: kTouchContact, position: Offset(0.0, 0.0), pressure: 0.5, pressureMin: 0, pressureMax: 1));
 
     expect(forcePressStart, 1);
     expect(forcePressPeaked, 0);
     expect(forcePressUpdate, 1);
     expect(forcePressEnded, 0);
 
-    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(0.0, 0.0), pressure: 0.6, pressureMin: 0, pressureMax: 1));
-    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(0.0, 0.0), pressure: 0.7, pressureMin: 0, pressureMax: 1));
-    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(0.0, 0.0), pressure: 0.2, pressureMin: 0, pressureMax: 1));
-    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(0.0, 0.0), pressure: 0.3, pressureMin: 0, pressureMax: 1));
+    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, buttons: kTouchContact, position: Offset(0.0, 0.0), pressure: 0.6, pressureMin: 0, pressureMax: 1));
+    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, buttons: kTouchContact, position: Offset(0.0, 0.0), pressure: 0.7, pressureMin: 0, pressureMax: 1));
+    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, buttons: kTouchContact, position: Offset(0.0, 0.0), pressure: 0.2, pressureMin: 0, pressureMax: 1));
+    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, buttons: kTouchContact, position: Offset(0.0, 0.0), pressure: 0.3, pressureMin: 0, pressureMax: 1));
 
     expect(forcePressStart, 1);
     expect(forcePressPeaked, 0);
     expect(forcePressUpdate, 5);
     expect(forcePressEnded, 0);
 
-    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(0.0, 0.0), pressure: 0.9, pressureMin: 0, pressureMax: 1));
+    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, buttons: kTouchContact, position: Offset(0.0, 0.0), pressure: 0.9, pressureMin: 0, pressureMax: 1));
 
     expect(forcePressStart, 1);
     expect(forcePressPeaked, 1);
@@ -449,6 +450,7 @@ void main() {
       forcePressOffset,
       const PointerDownEvent(
         pointer: pointerValue,
+        buttons: kTouchContact,
         position: forcePressOffset,
         pressure: 0.0,
         pressureMax: maxPressure,
@@ -456,7 +458,7 @@ void main() {
       ),
     );
 
-    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(400.0, 50.0), pressure: 0.3, pressureMin: 0, pressureMax: maxPressure));
+    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, buttons: kTouchContact, position: Offset(400.0, 50.0), pressure: 0.3, pressureMin: 0, pressureMax: maxPressure));
 
     expect(forcePressStart, 0);
     expect(longPressTimes, 0);
@@ -468,7 +470,7 @@ void main() {
     expect(forcePressStart, 0);
 
     // Failed attempt to trigger the force press.
-    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(400.0, 50.0), pressure: 0.5, pressureMin: 0, pressureMax: maxPressure));
+    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, buttons: kTouchContact, position: Offset(400.0, 50.0), pressure: 0.5, pressureMin: 0, pressureMax: maxPressure));
 
     expect(longPressTimes, 1);
     expect(forcePressStart, 0);
@@ -501,6 +503,7 @@ void main() {
       forcePressOffset,
       const PointerDownEvent(
         pointer: pointerValue,
+        buttons: kTouchContact,
         position: forcePressOffset,
         pressure: 0.0,
         pressureMax: 6.0,
@@ -508,7 +511,7 @@ void main() {
       ),
     );
 
-    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(0.0, 0.0), pressure: 0.3, pressureMin: 0, pressureMax: 1));
+    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, buttons: kTouchContact, position: Offset(0.0, 0.0), pressure: 0.3, pressureMin: 0, pressureMax: 1));
 
     expect(forcePressStart, 0);
     expect(horizontalDragStart, 0);
@@ -520,7 +523,7 @@ void main() {
     expect(forcePressStart, 0);
 
     // Failed attempt to trigger the force press.
-    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(0.0, 0.0), pressure: 0.5, pressureMin: 0, pressureMax: 1));
+    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, buttons: kTouchContact, position: Offset(0.0, 0.0), pressure: 0.5, pressureMin: 0, pressureMax: 1));
 
     expect(horizontalDragStart, 1);
     expect(forcePressStart, 0);

@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/gestures.dart' show PointerDeviceKind;
+import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
 
 void main() {
@@ -176,6 +176,7 @@ void main() {
       forcePressOffset,
       const PointerDownEvent(
         pointer: pointerValue,
+        buttons: kTouchContact,
         position: forcePressOffset,
         pressure: 0.0,
         pressureMax: 6.0,
@@ -183,7 +184,7 @@ void main() {
       ),
     );
 
-    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(0.0, 0.0), pressure: 0.5, pressureMin: 0, pressureMax: 1));
+    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, buttons: kTouchContact, position: Offset(0.0, 0.0), pressure: 0.5, pressureMin: 0, pressureMax: 1));
     await gesture.up();
     await tester.pumpAndSettle();
 
@@ -191,13 +192,14 @@ void main() {
       forcePressOffset,
       const PointerDownEvent(
         pointer: pointerValue,
+        buttons: kTouchContact,
         position: forcePressOffset,
         pressure: 0.0,
         pressureMax: 6.0,
         pressureMin: 0.0,
       ),
     );
-    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(0.0, 0.0), pressure: 0.5, pressureMin: 0, pressureMax: 1));
+    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, buttons: kTouchContact, position: Offset(0.0, 0.0), pressure: 0.5, pressureMin: 0, pressureMax: 1));
     await gesture.up();
     await tester.pump(const Duration(milliseconds: 20));
 
@@ -205,13 +207,14 @@ void main() {
       forcePressOffset,
       const PointerDownEvent(
         pointer: pointerValue,
+        buttons: kTouchContact,
         position: forcePressOffset,
         pressure: 0.0,
         pressureMax: 6.0,
         pressureMin: 0.0,
       ),
     );
-    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(0.0, 0.0), pressure: 0.5, pressureMin: 0, pressureMax: 1));
+    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, buttons: kTouchContact, position: Offset(0.0, 0.0), pressure: 0.5, pressureMin: 0, pressureMax: 1));
     await gesture.up();
     await tester.pump(const Duration(milliseconds: 20));
 
@@ -219,13 +222,14 @@ void main() {
       forcePressOffset,
       const PointerDownEvent(
         pointer: pointerValue,
+        buttons: kTouchContact,
         position: forcePressOffset,
         pressure: 0.0,
         pressureMax: 6.0,
         pressureMin: 0.0,
       ),
     );
-    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, position: Offset(0.0, 0.0), pressure: 0.5, pressureMin: 0, pressureMax: 1));
+    await gesture.updateWithCustomEvent(const PointerMoveEvent(pointer: pointerValue, buttons: kTouchContact, position: Offset(0.0, 0.0), pressure: 0.5, pressureMin: 0, pressureMax: 1));
     await gesture.up();
 
     expect(forcePressStartCount, 4);
@@ -240,6 +244,7 @@ void main() {
       forcePressOffset,
       const PointerDownEvent(
           pointer: pointerValue,
+          buttons: kTouchContact,
           position: forcePressOffset,
           pressure: 0.0,
           pressureMax: 6.0,
@@ -251,6 +256,7 @@ void main() {
     await gesture.updateWithCustomEvent(
       const PointerMoveEvent(
         pointer: pointerValue,
+        buttons: kTouchContact,
         position: Offset(0.0, 0.0),
         pressure: 0.0,
         pressureMin: 0,
@@ -265,6 +271,7 @@ void main() {
       forcePressOffset,
       const PointerDownEvent(
         pointer: pointerValue,
+        buttons: kTouchContact,
         position: forcePressOffset,
         pressure: 0.0,
         pressureMax: 6.0,
@@ -273,6 +280,7 @@ void main() {
     );
     await gesture.updateWithCustomEvent(const PointerMoveEvent(
       pointer: pointerValue,
+      buttons: kTouchContact,
       position: Offset(0.0, 0.0),
       pressure: 0.5,
       pressureMin: 0,

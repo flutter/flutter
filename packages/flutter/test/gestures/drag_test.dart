@@ -376,6 +376,7 @@ void main() {
     tester.route(pointer.move(const Offset(50.0, 25.0), timeStamp: const Duration(milliseconds: 50)));
     tester.route(const PointerMoveEvent(
       pointer: 1,
+      buttons: kTouchContact,
       // Simulate a small synthesized wobble which would have slowed down the
       // horizontal velocity from 1 px/ms and introduced a slight vertical velocity.
       position: Offset(51.0, 26.0),

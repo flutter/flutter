@@ -78,6 +78,7 @@ class TestPointer {
     _location = newLocation;
     return PointerDownEvent(
       timeStamp: timeStamp,
+      buttons: kTouchContact,
       kind: kind,
       pointer: pointer,
       position: location,
@@ -103,6 +104,7 @@ class TestPointer {
       timeStamp: timeStamp,
       kind: kind,
       pointer: pointer,
+      buttons: kTouchContact,
       position: newLocation,
       delta: delta,
     );

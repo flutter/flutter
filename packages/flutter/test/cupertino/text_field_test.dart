@@ -8,7 +8,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart' show DragStartBehavior, PointerDeviceKind;
+import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class MockClipboard {
@@ -1733,6 +1733,7 @@ void main() {
       textfieldStart + const Offset(150.0, 5.0),
       PointerDownEvent(
         pointer: pointerValue,
+        buttons: 1,
         position: textfieldStart + const Offset(150.0, 5.0),
         pressure: 3.0,
         pressureMax: 6.0,
@@ -1774,6 +1775,7 @@ void main() {
       PointerDownEvent(
         pointer: pointerValue,
         position: textfieldStart + const Offset(150.0, 5.0),
+        buttons: kTouchContact,
         // iPhone 6 and below report 0 across the board.
         pressure: 0,
         pressureMax: 0,

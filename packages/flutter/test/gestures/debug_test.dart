@@ -21,7 +21,7 @@ void main() {
       ..onTapCancel = () { };
     expect(log, isEmpty);
 
-    event = const PointerDownEvent(pointer: 1, position: Offset(10.0, 10.0));
+    event = const PointerDownEvent(pointer: 1, buttons: kTouchContact, position: Offset(10.0, 10.0));
     tap.addPointer(event);
     expect(log, hasLength(2));
     expect(log[0], equalsIgnoringHashCodes('Gesture arena 1    ❙ ★ Opening new gesture arena.'));
@@ -67,7 +67,7 @@ void main() {
       ..onTapCancel = () { };
     expect(log, isEmpty);
 
-    event = const PointerDownEvent(pointer: 1, position: Offset(10.0, 10.0));
+    event = const PointerDownEvent(pointer: 1, buttons: kTouchContact, position: Offset(10.0, 10.0));
     tap.addPointer(event);
     expect(log, isEmpty);
 
@@ -110,7 +110,7 @@ void main() {
       ..onTapCancel = () { };
     expect(log, isEmpty);
 
-    event = const PointerDownEvent(pointer: 1, position: Offset(10.0, 10.0));
+    event = const PointerDownEvent(pointer: 1, buttons:kTouchContact, position: Offset(10.0, 10.0));
     tap.addPointer(event);
     expect(log, hasLength(2));
     expect(log[0], equalsIgnoringHashCodes('Gesture arena 1    ❙ ★ Opening new gesture arena.'));
@@ -149,7 +149,7 @@ void main() {
   test('TapGestureRecognizer _sentTapDown toString', () {
     final TapGestureRecognizer tap = TapGestureRecognizer();
     expect(tap.toString(), equalsIgnoringHashCodes('TapGestureRecognizer#00000(state: ready)'));
-    const PointerEvent event = PointerDownEvent(pointer: 1, position: Offset(10.0, 10.0));
+    const PointerEvent event = PointerDownEvent(pointer: 1, buttons:kTouchContact, position: Offset(10.0, 10.0));
     tap.addPointer(event);
     tap.didExceedDeadline();
     expect(tap.toString(), equalsIgnoringHashCodes('TapGestureRecognizer#00000(state: possible, sent tap down)'));
