@@ -37,6 +37,11 @@ def main():
   ]
   packages = [
     'io.flutter.app',
+    'io.flutter.embedding.android',
+    'io.flutter.embedding.engine',
+    'io.flutter.embedding.engine.dart',
+    'io.flutter.embedding.engine.renderer',
+    'io.flutter.embedding.engine.systemchannels',
     'io.flutter.plugin.common',
     'io.flutter.plugin.editing',
     'io.flutter.plugin.platform',
