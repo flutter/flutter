@@ -174,9 +174,6 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
   GestureTapCancelCallback onTapCancel;
 
   bool _sentTapDown = false;
-  // If the recognizer is terminated, it no longer triggers any callback until
-  // the end of event sequence.
-  bool _terminated = false;
   bool _wonArenaForPrimaryPointer = false;
   Offset _finalPosition;
   // The buttons sent by PointerDownEvent. If any later event comes with a
@@ -204,15 +201,9 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
       _reset();
       return;
     }
-    if (!_terminated && event.buttons != _initialButtons) {
-      if (_wonArenaForPrimaryPointer) {
-        _checkCancel('terminated onTapCancel');
-        _terminated = true;
-        // Don't reset here because the event sequence has not ended. Reset will
-        // be done by a PointerUpEvent or PointerCancelEvent.
-      } else {
-        resolve(GestureDisposition.rejected);
-      }
+    if (event.buttons != _initialButtons) {
+      resolve(GestureDisposition.rejected);
+      stopTrackingPointer(primaryPointer);
     }
   }
 
@@ -266,14 +257,12 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
 
   void _checkUp() {
     if (_finalPosition != null) {
-      if (!_terminated) {
-        if (onTapUp != null)
-          invokeCallback<void>('onTapUp', () {
-            onTapUp(TapUpDetails(globalPosition: _finalPosition, buttons: _initialButtons));
-          });
-        if (onTap != null)
-          invokeCallback<void>('onTap', onTap);
-      }
+      if (onTapUp != null)
+        invokeCallback<void>('onTapUp', () {
+          onTapUp(TapUpDetails(globalPosition: _finalPosition, buttons: _initialButtons));
+        });
+      if (onTap != null)
+        invokeCallback<void>('onTap', onTap);
       _reset();
     }
   }
@@ -282,14 +271,13 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
     // Gesture cancel can be the last moment of an event sequence (caused by
     // rejection or disposal of recognizer, etc.), or can happen during an event
     // sequence (terminated due to button changes).
-    if (!_terminated && _sentTapDown && onTapCancel != null) {
+    if (_sentTapDown && onTapCancel != null) {
       invokeCallback<void>(message, onTapCancel);
     }
   }
 
   void _reset() {
     _sentTapDown = false;
-    _terminated = false;
     _wonArenaForPrimaryPointer = false;
     _finalPosition = null;
     _initialButtons = null;
