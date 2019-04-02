@@ -206,6 +206,7 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
       if (_sentTapDown && onTapCancel != null) {
         invokeCallback<void>('onTapCancel', onTapCancel);
       }
+      _reset();
     } else if (event.buttons != _initialButtons) {
       resolve(GestureDisposition.rejected);
       stopTrackingPointer(primaryPointer);
