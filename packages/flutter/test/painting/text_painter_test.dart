@@ -698,7 +698,7 @@ void main() {
       PlaceholderDimensions(Size(50, 30), 25),
       PlaceholderDimensions(Size(50, 30), 25),
       PlaceholderDimensions(Size(50, 30), 25),
-      PlaceholderDimensions(Size(50, 30), 25),
+      PlaceholderDimensions(Size(51, 30), 25),
       PlaceholderDimensions(Size(50, 30), 25),
     ];
 
@@ -733,6 +733,8 @@ void main() {
     expect(caretOffset.dx, 0);
     caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 19), ui.Rect.zero);
     expect(caretOffset.dx, 50);
+    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 23), ui.Rect.zero);
+    expect(caretOffset.dx, 250);
 
     expect(painter.inlinePlaceholderBoxes.length, 14);
     expect(painter.inlinePlaceholderBoxes[0], TextBox.fromLTRBD(56, 0, 106, 30, TextDirection.ltr));
@@ -744,6 +746,8 @@ void main() {
     expect(painter.inlinePlaceholderBoxes[6], TextBox.fromLTRBD(0, 30, 50, 60, TextDirection.ltr));
     expect(painter.inlinePlaceholderBoxes[7], TextBox.fromLTRBD(50, 30, 100, 60, TextDirection.ltr));
     expect(painter.inlinePlaceholderBoxes[10], TextBox.fromLTRBD(200, 30, 250, 60, TextDirection.ltr));
-    expect(painter.inlinePlaceholderBoxes[13], TextBox.fromLTRBD(350, 30, 400, 60, TextDirection.ltr));
+    expect(painter.inlinePlaceholderBoxes[11], TextBox.fromLTRBD(250, 30, 300, 60, TextDirection.ltr));
+    expect(painter.inlinePlaceholderBoxes[12], TextBox.fromLTRBD(300, 30, 351, 60, TextDirection.ltr));
+    expect(painter.inlinePlaceholderBoxes[13], TextBox.fromLTRBD(351, 30, 401, 60, TextDirection.ltr));
   });
 }

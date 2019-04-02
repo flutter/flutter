@@ -6,6 +6,7 @@ import 'dart:io';
 import 'dart:ui' as ui show TextBox;
 
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -325,4 +326,35 @@ void main() {
     expect(paragraph.locale, const Locale('ja', 'JP'));
   });
 
+  test('inline widgets test', () {
+    final RenderParagraph paragraph = RenderParagraph(
+      const TextSpan(
+        text: _kText,
+        style: TextStyle(fontSize: 10.0),
+        children: <TextSpan>[
+          WidgetSpan(widget: SizedBox(width: 21, height: 21)),
+          WidgetSpan(widget: SizedBox(width: 21, height: 21)),
+          TextSpan(text: 'a'),
+          WidgetSpan(widget: SizedBox(width: 21, height: 21)),
+        ],
+      ),
+      textDirection: TextDirection.ltr,
+    );
+    layout(paragraph);
+
+    List<ui.TextBox> boxes = paragraph.getBoxesForSelection(
+        const TextSelection(baseOffset: 5, extentOffset: 25)
+    );
+
+    expect(boxes.length, equals(1));
+
+    boxes = paragraph.getBoxesForSelection(
+        const TextSelection(baseOffset: 25, extentOffset: 50)
+    );
+
+    expect(boxes.any((ui.TextBox box) => box.left == 250 && box.top == 0), isTrue);
+    expect(boxes.any((ui.TextBox box) => box.right == 100 && box.top == 10), isTrue);
+  },
+  // Ahem-based tests don't yet quite work on Windows or some MacOS environments
+  skip: Platform.isWindows || Platform.isMacOS);
 }
