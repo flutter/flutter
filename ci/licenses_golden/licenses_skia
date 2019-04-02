@@ -1,4 +1,4 @@
-Signature: 9dc1569e557e981bad887bab6ab265e9
+Signature: 6928cdbcf2200936c961f80cf7e741cc
 
 UNUSED LICENSES:
 
@@ -1291,6 +1291,8 @@ FILE: ../../../third_party/skia/src/gpu/effects/GrShadowGeoProc.h
 FILE: ../../../third_party/skia/src/gpu/gl/GrGLBuffer.cpp
 FILE: ../../../third_party/skia/src/gpu/gl/GrGLBuffer.h
 FILE: ../../../third_party/skia/src/gpu/gl/GrGLGpuCommandBuffer.h
+FILE: ../../../third_party/skia/src/gpu/gl/GrGLTestInterface.cpp
+FILE: ../../../third_party/skia/src/gpu/gl/GrGLTestInterface.h
 FILE: ../../../third_party/skia/src/gpu/gl/glfw/GrGLMakeNativeInterface_glfw.cpp
 FILE: ../../../third_party/skia/src/gpu/glsl/GrGLSLColorSpaceXformHelper.h
 FILE: ../../../third_party/skia/src/gpu/glsl/GrGLSLProgramDataManager.cpp
@@ -2921,6 +2923,7 @@ FILE: ../../../third_party/skia/src/gpu/GrStencilAttachment.h
 FILE: ../../../third_party/skia/src/gpu/GrStencilSettings.cpp
 FILE: ../../../third_party/skia/src/gpu/GrTexture.cpp
 FILE: ../../../third_party/skia/src/gpu/SkGpuDevice.cpp
+FILE: ../../../third_party/skia/src/gpu/gl/GrGLCreateNullInterface.cpp
 FILE: ../../../third_party/skia/src/gpu/gl/GrGLDefines.h
 FILE: ../../../third_party/skia/src/gpu/gl/GrGLGLSL.cpp
 FILE: ../../../third_party/skia/src/gpu/gl/GrGLGLSL.h
