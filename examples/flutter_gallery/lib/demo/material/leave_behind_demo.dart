@@ -104,9 +104,7 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
       content: Text('You archived item ${item.index}'),
       action: SnackBarAction(
         label: 'UNDO',
-        onPressed: () {
-          handleUndo(item);
-        },
+        onPressed: () { handleUndo(item); },
       ),
     ));
   }
@@ -119,9 +117,7 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
       content: Text('You deleted item ${item.index}'),
       action: SnackBarAction(
         label: 'UNDO',
-        onPressed: () {
-          handleUndo(item);
-        },
+        onPressed: () { handleUndo(item); },
       ),
     ));
   }

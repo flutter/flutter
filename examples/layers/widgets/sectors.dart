@@ -163,6 +163,4 @@ class SectorAppState extends State<SectorApp> {
   }
 }
 
-void main() {
-  runApp(SectorApp());
-}
+void main() { runApp(SectorApp()); }

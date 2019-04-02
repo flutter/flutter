@@ -73,16 +73,12 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo> {
                             CupertinoDialogAction(
                               child: const Text('Discard'),
                               isDestructiveAction: true,
-                              onPressed: () {
-                                Navigator.pop(context, 'Discard');
-                              },
+                              onPressed: () { Navigator.pop(context, 'Discard'); },
                             ),
                             CupertinoDialogAction(
                               child: const Text('Cancel'),
                               isDefaultAction: true,
-                              onPressed: () {
-                                Navigator.pop(context, 'Cancel');
-                              },
+                              onPressed: () { Navigator.pop(context, 'Cancel'); },
                             ),
                           ],
                         ),
@@ -104,15 +100,11 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo> {
                           actions: <Widget>[
                             CupertinoDialogAction(
                               child: const Text('Don\'t Allow'),
-                              onPressed: () {
-                                Navigator.pop(context, 'Disallow');
-                              },
+                              onPressed: () { Navigator.pop(context, 'Disallow'); },
                             ),
                             CupertinoDialogAction(
                               child: const Text('Allow'),
-                              onPressed: () {
-                                Navigator.pop(context, 'Allow');
-                              },
+                              onPressed: () { Navigator.pop(context, 'Allow'); },
                             ),
                           ],
                         ),
@@ -160,29 +152,21 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo> {
                           actions: <Widget>[
                             CupertinoActionSheetAction(
                               child: const Text('Profiteroles'),
-                              onPressed: () {
-                                Navigator.pop(context, 'Profiteroles');
-                              },
+                              onPressed: () { Navigator.pop(context, 'Profiteroles'); },
                             ),
                             CupertinoActionSheetAction(
                               child: const Text('Cannolis'),
-                              onPressed: () {
-                                Navigator.pop(context, 'Cannolis');
-                              },
+                              onPressed: () { Navigator.pop(context, 'Cannolis'); },
                             ),
                             CupertinoActionSheetAction(
                               child: const Text('Trifle'),
-                              onPressed: () {
-                                Navigator.pop(context, 'Trifle');
-                              },
+                              onPressed: () { Navigator.pop(context, 'Trifle'); },
                             ),
                           ],
                           cancelButton: CupertinoActionSheetAction(
                             child: const Text('Cancel'),
                             isDefaultAction: true,
-                            onPressed: () {
-                              Navigator.pop(context, 'Cancel');
-                            },
+                            onPressed: () { Navigator.pop(context, 'Cancel'); },
                           ),
                         ),
                       );
@@ -225,52 +209,36 @@ class CupertinoDessertDialog extends StatelessWidget {
       actions: <Widget>[
         CupertinoDialogAction(
           child: const Text('Cheesecake'),
-          onPressed: () {
-            Navigator.pop(context, 'Cheesecake');
-          },
+          onPressed: () { Navigator.pop(context, 'Cheesecake'); },
         ),
         CupertinoDialogAction(
           child: const Text('Tiramisu'),
-          onPressed: () {
-            Navigator.pop(context, 'Tiramisu');
-          },
+          onPressed: () { Navigator.pop(context, 'Tiramisu'); },
         ),
         CupertinoDialogAction(
           child: const Text('Apple Pie'),
-          onPressed: () {
-            Navigator.pop(context, 'Apple Pie');
-          },
+          onPressed: () { Navigator.pop(context, 'Apple Pie'); },
         ),
         CupertinoDialogAction(
           child: const Text("Devil's food cake"),
-          onPressed: () {
-            Navigator.pop(context, "Devil's food cake");
-          },
+          onPressed: () { Navigator.pop(context, "Devil's food cake"); },
         ),
         CupertinoDialogAction(
           child: const Text('Banana Split'),
-          onPressed: () {
-            Navigator.pop(context, 'Banana Split');
-          },
+          onPressed: () { Navigator.pop(context, 'Banana Split'); },
         ),
         CupertinoDialogAction(
           child: const Text('Oatmeal Cookie'),
-          onPressed: () {
-            Navigator.pop(context, 'Oatmeal Cookies');
-          },
+          onPressed: () { Navigator.pop(context, 'Oatmeal Cookies'); },
         ),
         CupertinoDialogAction(
           child: const Text('Chocolate Brownie'),
-          onPressed: () {
-            Navigator.pop(context, 'Chocolate Brownies');
-          },
+          onPressed: () { Navigator.pop(context, 'Chocolate Brownies'); },
         ),
         CupertinoDialogAction(
           child: const Text('Cancel'),
           isDestructiveAction: true,
-          onPressed: () {
-            Navigator.pop(context, 'Cancel');
-          },
+          onPressed: () { Navigator.pop(context, 'Cancel'); },
         ),
       ],
     );

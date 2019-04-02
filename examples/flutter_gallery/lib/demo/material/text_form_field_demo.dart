@@ -154,15 +154,11 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
                  actions: <Widget>[
                    FlatButton(
                      child: const Text('YES'),
-                     onPressed: () {
-                       Navigator.of(context).pop(true);
-                     },
+                     onPressed: () { Navigator.of(context).pop(true); },
                    ),
                    FlatButton(
                      child: const Text('NO'),
-                     onPressed: () {
-                       Navigator.of(context).pop(false);
-                     },
+                     onPressed: () { Navigator.of(context).pop(false); },
                    ),
                  ],
                );
@@ -203,9 +199,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
                     hintText: 'What do people call you?',
                     labelText: 'Name *',
                   ),
-                  onSaved: (String value) {
-                    person.name = value;
-                  },
+                  onSaved: (String value) { person.name = value; },
                   validator: _validateName,
                 ),
                 const SizedBox(height: 24.0),
@@ -219,9 +213,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
                     prefixText: '+1',
                   ),
                   keyboardType: TextInputType.phone,
-                  onSaved: (String value) {
-                    person.phoneNumber = value;
-                  },
+                  onSaved: (String value) { person.phoneNumber = value; },
                   validator: _validatePhoneNumber,
                   // TextInputFormatters are applied in sequence.
                   inputFormatters: <TextInputFormatter>[
@@ -240,9 +232,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
                     labelText: 'E-mail',
                   ),
                   keyboardType: TextInputType.emailAddress,
-                  onSaved: (String value) {
-                    person.email = value;
-                  },
+                  onSaved: (String value) { person.email = value; },
                 ),
                 const SizedBox(height: 24.0),
                 TextFormField(

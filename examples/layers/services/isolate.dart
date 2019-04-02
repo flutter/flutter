@@ -173,9 +173,7 @@ class CalculationManager {
   static void _calculate(CalculationMessage message) {
     final SendPort sender = message.sendPort;
     final Calculator calculator = Calculator(
-      onProgressListener: (double completed, double total) {
-        sender.send(<double>[completed, total]);
-      },
+      onProgressListener: (double completed, double total) { sender.send(<double>[completed, total]); },
       onResultListener: sender.send,
       data: message.data,
     );
@@ -293,6 +291,4 @@ class IsolateExampleState extends State<StatefulWidget> with SingleTickerProvide
   }
 }
 
-void main() {
-  runApp(MaterialApp(home: IsolateExampleWidget()));
-}
+void main() { runApp(MaterialApp(home: IsolateExampleWidget())); }

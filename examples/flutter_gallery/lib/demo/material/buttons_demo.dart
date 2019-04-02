@@ -367,9 +367,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
               Icons.thumb_up,
               semanticLabel: 'Thumbs up',
             ),
-            onPressed: () {
-              setState(() => iconButtonToggle = !iconButtonToggle);
-            },
+            onPressed: () { setState(() => iconButtonToggle = !iconButtonToggle); },
             color: iconButtonToggle ? Theme.of(context).primaryColor : null,
           ),
           const IconButton(

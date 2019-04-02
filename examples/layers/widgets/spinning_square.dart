@@ -43,6 +43,4 @@ class _SpinningSquareState extends State<SpinningSquare> with SingleTickerProvid
   }
 }
 
-void main() {
-  runApp(Center(child: SpinningSquare()));
-}
+void main() { runApp(Center(child: SpinningSquare())); }

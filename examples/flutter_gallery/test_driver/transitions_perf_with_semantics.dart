@@ -4,6 +4,4 @@
 
 import 'transitions_perf.dart' as transitions_perf;
 
-void main() {
-  transitions_perf.main();
-}
+void main() { transitions_perf.main(); }

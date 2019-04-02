@@ -93,9 +93,7 @@ class EntryItem extends StatelessWidget {
   }
 }
 
-void main() {
-  runApp(ExpansionTileSample());
-}
+void main() { runApp(ExpansionTileSample()); }
 
 /*
 Sample Catalog

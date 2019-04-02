@@ -98,9 +98,7 @@ class _DateTimePicker extends StatelessWidget {
             labelText: labelText,
             valueText: DateFormat.yMMMd().format(selectedDate),
             valueStyle: valueStyle,
-            onPressed: () {
-              _selectDate(context);
-            },
+            onPressed: () { _selectDate(context); },
           ),
         ),
         const SizedBox(width: 12.0),
@@ -109,9 +107,7 @@ class _DateTimePicker extends StatelessWidget {
           child: _InputDropdown(
             valueText: selectedTime.format(context),
             valueStyle: valueStyle,
-            onPressed: () {
-              _selectTime(context);
-            },
+            onPressed: () { _selectTime(context); },
           ),
         ),
       ],

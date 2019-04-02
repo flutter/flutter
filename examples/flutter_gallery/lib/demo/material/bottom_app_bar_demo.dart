@@ -246,9 +246,7 @@ class _RadioItem<T> extends StatelessWidget {
                 label: value.label,
                 child: GestureDetector(
                   behavior: HitTestBehavior.opaque,
-                  onTap: () {
-                    onChanged(value);
-                  },
+                  onTap: () { onChanged(value); },
                   child: Text(
                     value.title,
                     style: theme.textTheme.subhead,
@@ -283,9 +281,7 @@ class _ColorsItem extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: colors.map<Widget>((_NamedColor namedColor) {
         return RawMaterialButton(
-          onPressed: () {
-            onChanged(namedColor.color);
-          },
+          onPressed: () { onChanged(namedColor.color); },
           constraints: const BoxConstraints.tightFor(
             width: 32.0,
             height: 32.0,

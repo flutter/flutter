@@ -35,9 +35,7 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
           (int id) => ShoppingCartRow(
             product: model.getProductById(id),
             quantity: model.productsInCart[id],
-            onPressed: () {
-              model.removeItemFromCart(id);
-            },
+            onPressed: () { model.removeItemFromCart(id); },
           ),
         )
         .toList();

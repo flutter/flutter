@@ -91,9 +91,7 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
           icon: Icon(_backIcon()),
           alignment: Alignment.centerLeft,
           tooltip: 'Back',
-          onPressed: () {
-            Navigator.pop(context);
-          },
+          onPressed: () { Navigator.pop(context); },
         ),
         title: const Text('Navigation drawer'),
         actions: <Widget>[MaterialDemoDocumentationButton(DrawerDemo.routeName)],
@@ -113,9 +111,7 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
               otherAccountsPictures: <Widget>[
                 GestureDetector(
                   dragStartBehavior: DragStartBehavior.down,
-                  onTap: () {
-                    _onOtherAccountsTap(context);
-                  },
+                  onTap: () { _onOtherAccountsTap(context); },
                   child: Semantics(
                     label: 'Switch to Account B',
                     child: const CircleAvatar(
@@ -128,9 +124,7 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
                 ),
                 GestureDetector(
                   dragStartBehavior: DragStartBehavior.down,
-                  onTap: () {
-                    _onOtherAccountsTap(context);
-                  },
+                  onTap: () { _onOtherAccountsTap(context); },
                   child: Semantics(
                     label: 'Switch to Account C',
                     child: const CircleAvatar(
@@ -211,9 +205,7 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
       ),
       body: Center(
         child: InkWell(
-          onTap: () {
-            _scaffoldKey.currentState.openDrawer();
-          },
+          onTap: () { _scaffoldKey.currentState.openDrawer(); },
           child: Semantics(
             button: true,
             label: 'Open drawer',
@@ -258,9 +250,7 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
           actions: <Widget>[
             FlatButton(
               child: const Text('OK'),
-              onPressed: () {
-                Navigator.pop(context);
-              },
+              onPressed: () { Navigator.pop(context); },
             ),
           ],
         );

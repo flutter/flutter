@@ -101,9 +101,7 @@ class _LoginPageState extends State<LoginPage> {
                       shape: const BeveledRectangleBorder(
                         borderRadius: BorderRadius.all(Radius.circular(7.0)),
                       ),
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
+                      onPressed: () { Navigator.pop(context); },
                     ),
                   ],
                 ),

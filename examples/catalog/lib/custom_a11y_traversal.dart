@@ -294,9 +294,7 @@ class CustomTraversalExampleState extends State<CustomTraversalExample> {
   }
 }
 
-void main() {
-  runApp(CustomTraversalExample());
-}
+void main() { runApp(CustomTraversalExample()); }
 
 /*
 Sample Catalog

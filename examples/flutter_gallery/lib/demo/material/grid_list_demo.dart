@@ -179,9 +179,7 @@ class GridDemoPhotoItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Widget image = GestureDetector(
-      onTap: () {
-        showPhoto(context);
-      },
+      onTap: () { showPhoto(context); },
       child: Hero(
         key: Key(photo.assetName),
         tag: photo.tag,
@@ -202,9 +200,7 @@ class GridDemoPhotoItem extends StatelessWidget {
       case GridDemoTileStyle.oneLine:
         return GridTile(
           header: GestureDetector(
-            onTap: () {
-              onBannerTap(photo);
-            },
+            onTap: () { onBannerTap(photo); },
             child: GridTileBar(
               title: _GridTitleText(photo.title),
               backgroundColor: Colors.black45,
@@ -220,9 +216,7 @@ class GridDemoPhotoItem extends StatelessWidget {
       case GridDemoTileStyle.twoLine:
         return GridTile(
           footer: GestureDetector(
-            onTap: () {
-              onBannerTap(photo);
-            },
+            onTap: () { onBannerTap(photo); },
             child: GridTileBar(
               backgroundColor: Colors.black45,
               title: _GridTitleText(photo.title),

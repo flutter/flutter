@@ -30,16 +30,12 @@ class _BasicAppBarSampleState extends State<BasicAppBarSample> {
             IconButton(
               // action button
               icon: Icon(choices[0].icon),
-              onPressed: () {
-                _select(choices[0]);
-              },
+              onPressed: () { _select(choices[0]); },
             ),
             IconButton(
               // action button
               icon: Icon(choices[1].icon),
-              onPressed: () {
-                _select(choices[1]);
-              },
+              onPressed: () { _select(choices[1]); },
             ),
             PopupMenuButton<Choice>(
               // overflow menu
@@ -103,9 +99,7 @@ class ChoiceCard extends StatelessWidget {
   }
 }
 
-void main() {
-  runApp(BasicAppBarSample());
-}
+void main() { runApp(BasicAppBarSample()); }
 
 /*
 Sample Catalog

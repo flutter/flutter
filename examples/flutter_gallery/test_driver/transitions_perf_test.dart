@@ -203,9 +203,7 @@ void main([List<String> args = const <String>[]]) {
     test('all demos', () async {
       // Collect timeline data for just a limited set of demos to avoid OOMs.
       final Timeline timeline = await driver.traceAction(
-        () async {
-          await runDemos(kProfiledDemos, driver);
-        },
+        () async { await runDemos(kProfiledDemos, driver); },
         streams: const <TimelineStream>[
           TimelineStream.dart,
           TimelineStream.embedder,

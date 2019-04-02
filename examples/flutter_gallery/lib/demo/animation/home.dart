@@ -607,9 +607,7 @@ class _AnimationDemoHomeState extends State<AnimationDemoHome> {
                 child: IconButton(
                   icon: const BackButtonIcon(),
                   tooltip: 'Back',
-                  onPressed: () {
-                    _handleBackButton(appBarMidScrollOffset);
-                  },
+                  onPressed: () { _handleBackButton(appBarMidScrollOffset); },
                 ),
               ),
             ),

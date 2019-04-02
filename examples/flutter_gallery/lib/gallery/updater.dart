@@ -54,15 +54,11 @@ class UpdaterState extends State<Updater> {
       actions: <Widget>[
         FlatButton(
           child: const Text('NO THANKS'),
-          onPressed: () {
-            Navigator.pop(context, false);
-          },
+          onPressed: () { Navigator.pop(context, false); },
         ),
         FlatButton(
           child: const Text('UPDATE'),
-          onPressed: () {
-            Navigator.pop(context, true);
-          },
+          onPressed: () { Navigator.pop(context, true); },
         ),
       ],
     );

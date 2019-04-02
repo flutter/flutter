@@ -130,6 +130,4 @@ class StocksAppState extends State<StocksApp> {
   }
 }
 
-void main() {
-  runApp(StocksApp());
-}
+void main() { runApp(StocksApp()); }

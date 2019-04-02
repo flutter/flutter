@@ -41,9 +41,7 @@ class _NotImplementedDialog extends StatelessWidget {
           ),
         ),
         FlatButton(
-          onPressed: () {
-            Navigator.pop(context, false);
-          },
+          onPressed: () { Navigator.pop(context, false); },
           child: const Text('OH WELL'),
         ),
       ],
@@ -148,9 +146,7 @@ class StockHomeState extends State<StockHome> {
               groupValue: widget.configuration.stockMode,
               onChanged: _handleStockModeChange,
             ),
-            onTap: () {
-              _handleStockModeChange(StockMode.optimistic);
-            },
+            onTap: () { _handleStockModeChange(StockMode.optimistic); },
           ),
           ListTile(
             leading: const Icon(Icons.thumb_down),
@@ -160,9 +156,7 @@ class StockHomeState extends State<StockHome> {
               groupValue: widget.configuration.stockMode,
               onChanged: _handleStockModeChange,
             ),
-            onTap: () {
-              _handleStockModeChange(StockMode.pessimistic);
-            },
+            onTap: () { _handleStockModeChange(StockMode.pessimistic); },
           ),
           const Divider(),
           ListTile(
@@ -199,9 +193,7 @@ class StockHomeState extends State<StockHome> {
           tooltip: 'Search',
         ),
         PopupMenuButton<_StockMenuItem>(
-          onSelected: (_StockMenuItem value) {
-            _handleStockMenu(context, value);
-          },
+          onSelected: (_StockMenuItem value) { _handleStockMenu(context, value); },
           itemBuilder: (BuildContext context) => <PopupMenuItem<_StockMenuItem>>[
             CheckedPopupMenuItem<_StockMenuItem>(
               value: _StockMenuItem.autorefresh,
@@ -252,9 +244,7 @@ class StockHomeState extends State<StockHome> {
       content: Text('Purchased ${stock.symbol} for ${stock.lastSale}'),
       action: SnackBarAction(
         label: 'BUY MORE',
-        onPressed: () {
-          _buyStock(stock);
-        },
+        onPressed: () { _buyStock(stock); },
       ),
     ));
   }
@@ -263,9 +253,7 @@ class StockHomeState extends State<StockHome> {
     return StockList(
       stocks: stocks.toList(),
       onAction: _buyStock,
-      onOpen: (Stock stock) {
-        Navigator.pushNamed(context, '/stock', arguments: stock.symbol);
-      },
+      onOpen: (Stock stock) { Navigator.pushNamed(context, '/stock', arguments: stock.symbol); },
       onShow: (Stock stock) {
         _scaffoldKey.currentState.showBottomSheet<void>((BuildContext context) => StockSymbolBottomSheet(stock: stock));
       },

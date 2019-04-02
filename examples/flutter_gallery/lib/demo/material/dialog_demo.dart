@@ -107,15 +107,11 @@ class DialogDemoState extends State<DialogDemo> {
                   actions: <Widget>[
                     FlatButton(
                       child: const Text('CANCEL'),
-                      onPressed: () {
-                        Navigator.pop(context, DialogDemoAction.cancel);
-                      },
+                      onPressed: () { Navigator.pop(context, DialogDemoAction.cancel); },
                     ),
                     FlatButton(
                       child: const Text('DISCARD'),
-                      onPressed: () {
-                        Navigator.pop(context, DialogDemoAction.discard);
-                      },
+                      onPressed: () { Navigator.pop(context, DialogDemoAction.discard); },
                     ),
                   ],
                 ),
@@ -136,15 +132,11 @@ class DialogDemoState extends State<DialogDemo> {
                   actions: <Widget>[
                     FlatButton(
                       child: const Text('DISAGREE'),
-                      onPressed: () {
-                        Navigator.pop(context, DialogDemoAction.disagree);
-                      },
+                      onPressed: () { Navigator.pop(context, DialogDemoAction.disagree); },
                     ),
                     FlatButton(
                       child: const Text('AGREE'),
-                      onPressed: () {
-                        Navigator.pop(context, DialogDemoAction.agree);
-                      },
+                      onPressed: () { Navigator.pop(context, DialogDemoAction.agree); },
                     ),
                   ],
                 ),
@@ -163,17 +155,13 @@ class DialogDemoState extends State<DialogDemo> {
                       icon: Icons.account_circle,
                       color: theme.primaryColor,
                       text: 'username@gmail.com',
-                      onPressed: () {
-                        Navigator.pop(context, 'username@gmail.com');
-                      },
+                      onPressed: () { Navigator.pop(context, 'username@gmail.com'); },
                     ),
                     DialogDemoItem(
                       icon: Icons.account_circle,
                       color: theme.primaryColor,
                       text: 'user02@gmail.com',
-                      onPressed: () {
-                        Navigator.pop(context, 'user02@gmail.com');
-                      },
+                      onPressed: () { Navigator.pop(context, 'user02@gmail.com'); },
                     ),
                     DialogDemoItem(
                       icon: Icons.add_circle,

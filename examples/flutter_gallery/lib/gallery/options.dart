@@ -407,9 +407,7 @@ class GalleryOptionsPage extends StatelessWidget {
         _BooleanItem(
           'Highlight offscreen layers',
           options.showOffscreenLayersCheckerboard,
-          (bool value) {
-            onOptionsChanged(options.copyWith(showOffscreenLayersCheckerboard: value));
-          },
+          (bool value) { onOptionsChanged(options.copyWith(showOffscreenLayersCheckerboard: value)); },
         ),
       );
     }
@@ -418,9 +416,7 @@ class GalleryOptionsPage extends StatelessWidget {
         _BooleanItem(
           'Highlight raster cache images',
           options.showRasterCacheImagesCheckerboard,
-          (bool value) {
-            onOptionsChanged(options.copyWith(showRasterCacheImagesCheckerboard: value));
-          },
+          (bool value) { onOptionsChanged(options.copyWith(showRasterCacheImagesCheckerboard: value)); },
         ),
       );
     }
@@ -429,9 +425,7 @@ class GalleryOptionsPage extends StatelessWidget {
         _BooleanItem(
           'Show performance overlay',
           options.showPerformanceOverlay,
-          (bool value) {
-            onOptionsChanged(options.copyWith(showPerformanceOverlay: value));
-          },
+          (bool value) { onOptionsChanged(options.copyWith(showPerformanceOverlay: value)); },
         ),
       );
     }

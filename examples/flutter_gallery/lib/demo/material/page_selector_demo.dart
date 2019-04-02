@@ -33,18 +33,14 @@ class _PageSelector extends StatelessWidget {
                 IconButton(
                   icon: const Icon(Icons.chevron_left),
                   color: color,
-                  onPressed: () {
-                    _handleArrowButtonPress(context, -1);
-                  },
+                  onPressed: () { _handleArrowButtonPress(context, -1); },
                   tooltip: 'Page back',
                 ),
                 TabPageSelector(controller: controller),
                 IconButton(
                   icon: const Icon(Icons.chevron_right),
                   color: color,
-                  onPressed: () {
-                    _handleArrowButtonPress(context, 1);
-                  },
+                  onPressed: () { _handleArrowButtonPress(context, 1); },
                   tooltip: 'Page forward',
                 ),
               ],

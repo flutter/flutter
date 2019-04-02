@@ -18,9 +18,7 @@ class FortnightlyDemo extends StatelessWidget {
             FruitPage(),
             SafeArea(
               child: ShortAppBar(
-                onBackPressed: () {
-                  Navigator.pop(context);
-                },
+                onBackPressed: () { Navigator.pop(context); },
               ),
             ),
           ],

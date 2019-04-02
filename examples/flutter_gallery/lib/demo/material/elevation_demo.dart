@@ -51,9 +51,7 @@ class _ElevationDemoState extends State<ElevationDemo> {
           MaterialDemoDocumentationButton(ElevationDemo.routeName),
           IconButton(
             icon: const Icon(Icons.sentiment_very_satisfied),
-            onPressed: () {
-              setState(() => _showElevation = !_showElevation);
-            },
+            onPressed: () { setState(() => _showElevation = !_showElevation); },
           ),
         ],
       ),

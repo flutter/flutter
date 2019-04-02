@@ -18,9 +18,7 @@ void main() {
     await tester.pumpWidget(
       GalleryApp(
         testMode: true,
-        onSendFeedback: () {
-          hasFeedback = true;
-        },
+        onSendFeedback: () { hasFeedback = true; },
       ),
     );
     await tester.pump(); // see https://github.com/flutter/flutter/issues/1865

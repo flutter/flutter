@@ -49,9 +49,7 @@ class OverscrollDemoState extends State<OverscrollDemo> {
         content: const Text('Refresh complete'),
         action: SnackBarAction(
           label: 'RETRY',
-          onPressed: () {
-            _refreshIndicatorKey.currentState.show();
-          },
+          onPressed: () { _refreshIndicatorKey.currentState.show(); },
         ),
       ));
     });
@@ -68,9 +66,7 @@ class OverscrollDemoState extends State<OverscrollDemo> {
           IconButton(
             icon: const Icon(Icons.refresh),
             tooltip: 'Refresh',
-            onPressed: () {
-              _refreshIndicatorKey.currentState.show();
-            },
+            onPressed: () { _refreshIndicatorKey.currentState.show(); },
           ),
         ],
       ),

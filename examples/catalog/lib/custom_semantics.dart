@@ -120,9 +120,7 @@ class AdjustableDropdownExampleState extends State<AdjustableDropdownExample> {
   }
 }
 
-void main() {
-  runApp(AdjustableDropdownExample());
-}
+void main() { runApp(AdjustableDropdownExample()); }
 
 /*
 Sample Catalog

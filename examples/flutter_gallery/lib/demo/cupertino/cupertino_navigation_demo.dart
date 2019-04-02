@@ -791,9 +791,7 @@ class Tab3Dialog extends StatelessWidget {
         leading: CupertinoButton(
           child: const Text('Cancel'),
           padding: EdgeInsets.zero,
-          onPressed: () {
-            Navigator.of(context).pop(false);
-          },
+          onPressed: () { Navigator.of(context).pop(false); },
         ),
       ),
       child: Center(
@@ -808,9 +806,7 @@ class Tab3Dialog extends StatelessWidget {
             const Padding(padding: EdgeInsets.only(top: 18.0)),
             CupertinoButton.filled(
               child: const Text('Sign in'),
-              onPressed: () {
-                Navigator.pop(context);
-              },
+              onPressed: () { Navigator.pop(context); },
             ),
           ],
         ),

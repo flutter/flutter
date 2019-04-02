@@ -341,9 +341,7 @@ class _BackdropDemoState extends State<BackdropDemo> with SingleTickerProviderSt
         child: ListTile(
           title: Text(category.title),
           selected: selected,
-          onTap: () {
-            _changeCategory(category);
-          },
+          onTap: () { _changeCategory(category); },
         ),
       );
     }).toList();

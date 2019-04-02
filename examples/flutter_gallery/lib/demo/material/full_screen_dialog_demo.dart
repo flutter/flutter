@@ -149,9 +149,7 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
         actions: <Widget>[
           FlatButton(
             child: Text('SAVE', style: theme.textTheme.body1.copyWith(color: Colors.white)),
-            onPressed: () {
-              Navigator.pop(context, DismissDialogAction.save);
-            },
+            onPressed: () { Navigator.pop(context, DismissDialogAction.save); },
           ),
         ],
       ),

@@ -31,9 +31,7 @@ class _SearchDemoState extends State<SearchDemo> {
             color: Colors.white,
             progress: _delegate.transitionAnimation,
           ),
-          onPressed: () {
-            _scaffoldKey.currentState.openDrawer();
-          },
+          onPressed: () { _scaffoldKey.currentState.openDrawer(); },
         ),
         title: const Text('Numbers'),
         actions: <Widget>[
@@ -95,9 +93,7 @@ class _SearchDemoState extends State<SearchDemo> {
       ),
       floatingActionButton: FloatingActionButton.extended(
         tooltip: 'Back', // Tests depend on this label to exit the demo.
-        onPressed: () {
-          Navigator.of(context).pop();
-        },
+        onPressed: () { Navigator.of(context).pop(); },
         label: const Text('Close demo'),
         icon: const Icon(Icons.close),
       ),
@@ -143,9 +139,7 @@ class _SearchDemoSearchDelegate extends SearchDelegate<int> {
         icon: AnimatedIcons.menu_arrow,
         progress: transitionAnimation,
       ),
-      onPressed: () {
-        close(context, null);
-      },
+      onPressed: () { close(context, null); },
     );
   }
 
@@ -203,9 +197,7 @@ class _SearchDemoSearchDelegate extends SearchDelegate<int> {
           ? IconButton(
               tooltip: 'Voice Search',
               icon: const Icon(Icons.mic),
-              onPressed: () {
-                query = 'TODO: implement voice input';
-              },
+              onPressed: () { query = 'TODO: implement voice input'; },
             )
           : IconButton(
               tooltip: 'Clear',
@@ -230,9 +222,7 @@ class _ResultCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     return GestureDetector(
-      onTap: () {
-        searchDelegate.close(context, integer);
-      },
+      onTap: () { searchDelegate.close(context, integer); },
       child: Card(
         child: Padding(
           padding: const EdgeInsets.all(8.0),
@@ -279,9 +269,7 @@ class _SuggestionList extends StatelessWidget {
               ],
             ),
           ),
-          onTap: () {
-            onSelected(suggestion);
-          },
+          onTap: () { onSelected(suggestion); },
         );
       },
     );

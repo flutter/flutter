@@ -221,9 +221,7 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
                         hintText: item.hint,
                         labelText: item.name,
                       ),
-                      onSaved: (String value) {
-                        item.value = value;
-                      },
+                      onSaved: (String value) { item.value = value; },
                     ),
                   ),
                 );
@@ -257,9 +255,7 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
                 },
                 child: FormField<Location>(
                   initialValue: item.value,
-                  onSaved: (Location result) {
-                    item.value = result;
-                  },
+                  onSaved: (Location result) { item.value = result; },
                   builder: (FormFieldState<Location> field) {
                     return Column(
                       mainAxisSize: MainAxisSize.min,
@@ -317,9 +313,7 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
                 },
                 child: FormField<double>(
                   initialValue: item.value,
-                  onSaved: (double value) {
-                    item.value = value;
-                  },
+                  onSaved: (double value) { item.value = value; },
                   builder: (FormFieldState<double> field) {
                     return Slider(
                       min: 0.0,

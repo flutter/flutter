@@ -132,9 +132,7 @@ class TappableTravelDestinationItem extends StatelessWidget {
                 clipBehavior: Clip.antiAlias,
                 shape: shape,
                 child: InkWell(
-                  onTap: () {
-                    print('Card was tapped');
-                  },
+                  onTap: () { print('Card was tapped'); },
                   // Generally, material cards use onSurface with 12% opacity for the pressed state.
                   splashColor: Theme.of(context).colorScheme.onSurface.withOpacity(0.12),
                   // Generally, material cards do not have a highlight overlay.
@@ -330,16 +328,12 @@ class TravelDestinationContent extends StatelessWidget {
               FlatButton(
                 child: Text('SHARE', semanticsLabel: 'Share ${destination.title}'),
                 textColor: Colors.amber.shade500,
-                onPressed: () {
-                  print('pressed');
-                },
+                onPressed: () { print('pressed'); },
               ),
               FlatButton(
                 child: Text('EXPLORE', semanticsLabel: 'Explore ${destination.title}'),
                 textColor: Colors.amber.shade500,
-                onPressed: () {
-                  print('pressed');
-                },
+                onPressed: () { print('pressed'); },
               ),
             ],
           ),

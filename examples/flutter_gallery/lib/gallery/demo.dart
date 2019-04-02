@@ -204,9 +204,7 @@ class FullScreenCodeDialogState extends State<FullScreenCodeDialog> {
             Icons.clear,
             semanticLabel: 'Close',
           ),
-          onPressed: () {
-            Navigator.pop(context);
-          },
+          onPressed: () { Navigator.pop(context); },
         ),
         title: const Text('Example code'),
       ),

@@ -196,9 +196,7 @@ class CardItem extends StatelessWidget {
   }
 }
 
-void main() {
-  runApp(AnimatedListSample());
-}
+void main() { runApp(AnimatedListSample()); }
 
 /*
 Sample Catalog

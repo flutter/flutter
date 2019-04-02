@@ -157,9 +157,7 @@ class _RecipeGridPageState extends State<RecipeGridPage> {
             final Recipe recipe = widget.recipes[index];
             return RecipeCard(
               recipe: recipe,
-              onTap: () {
-                showRecipePage(context, recipe);
-              },
+              onTap: () { showRecipePage(context, recipe); },
             );
           },
           childCount: widget.recipes.length,

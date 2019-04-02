@@ -146,9 +146,7 @@ class _CategoriesPage extends StatelessWidget {
                         height: rowHeight,
                         child: _CategoryItem(
                           category: category,
-                          onTap: () {
-                            onCategoryTap(category);
-                          },
+                          onTap: () { onCategoryTap(category); },
                         ),
                       );
                     }),
@@ -205,9 +203,7 @@ class _DemoItem extends StatelessWidget {
       padding: EdgeInsets.zero,
       splashColor: theme.primaryColor.withOpacity(0.12),
       highlightColor: Colors.transparent,
-      onPressed: () {
-        _launchDemo(context);
-      },
+      onPressed: () { _launchDemo(context); },
       child: Container(
         constraints: BoxConstraints(minHeight: _kDemoItemHeight * textScaleFactor),
         child: Row(
@@ -371,9 +367,7 @@ class _GalleryHomeState extends State<GalleryHome> with SingleTickerProviderStat
                   ? _DemosPage(_category)
                   : _CategoriesPage(
                       categories: kAllGalleryDemoCategories,
-                      onCategoryTap: (GalleryDemoCategory category) {
-                        setState(() => _category = category);
-                      },
+                      onCategoryTap: (GalleryDemoCategory category) { setState(() => _category = category); },
                     ),
             ),
           ),
