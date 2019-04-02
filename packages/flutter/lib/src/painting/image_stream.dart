@@ -542,7 +542,9 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
     _codec = codec;
     assert(_codec != null);
 
-    _decodeNextFrameAndSchedule();
+    if (hasListeners) {
+      _decodeNextFrameAndSchedule();
+    }
   }
 
   void _handleAppFrame(Duration timestamp) {
