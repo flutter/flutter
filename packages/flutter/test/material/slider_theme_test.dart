@@ -343,10 +343,10 @@ void main() {
           color: sliderTheme.valueIndicatorColor,
           includes: <Offset>[
             const Offset(0.0, -40.0),
-            const Offset(98.0, -40.0),
-            const Offset(-16.0, -40.0),
+            const Offset(94.0, -40.0),
+            const Offset(-20.0, -40.0),
           ],
-          excludes: <Offset>[const Offset(98.1, -40.0), const Offset(-16.1, -40.0)],
+          excludes: <Offset>[const Offset(98.1, -40.0), const Offset(-20.1, -40.0)],
         ),
     );
     await gesture.up();
@@ -365,9 +365,9 @@ void main() {
           includes: <Offset>[
             const Offset(0.0, -40.0),
             const Offset(16.0, -40.0),
-            const Offset(-98.0, -40.0),
+            const Offset(-94.0, -40.0),
           ],
-          excludes: <Offset>[const Offset(16.1, -40.0), const Offset(-98.1, -40.0)],
+          excludes: <Offset>[const Offset(20.1, -40.0), const Offset(-98.1, -40.0)],
         ),
     );
     await gesture.up();
@@ -385,14 +385,14 @@ void main() {
           color: sliderTheme.valueIndicatorColor,
           includes: <Offset>[
             const Offset(0.0, -49.0),
-            const Offset(90.0, -49.0),
+            const Offset(74.0, -49.0),
             const Offset(-24.0, -49.0),
           ],
           excludes: <Offset>[
             const Offset(98.0, -32.0),  // inside full size, outside small
             const Offset(-16.0, -32.0),  // inside full size, outside small
             const Offset(90.1, -49.0),
-            const Offset(-24.1, -49.0),
+            const Offset(-40.1, -49.0),
           ],
         ),
     );
