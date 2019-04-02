@@ -272,7 +272,7 @@ String generateTranslationBundles() {
 ///
 ///  * [getMaterialTranslation], whose documentation describes these values.
 final Set<String> kSupportedLanguages = HashSet<String>.from(const <String>[
-${languageCodes.map<String>((String value) => "  '$value', // ${describeLocale(value)}").toList().join('\n')}
+${languageCodes.map<String>((String value) => "  '$value', // ${describeLocale(value)}").join('\n')}
 ]);
 
 /// Creates a [GlobalMaterialLocalizations] instance for the given `locale`.
