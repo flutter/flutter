@@ -100,12 +100,8 @@ void FlutterPlatformViewsController::OnDispose(FlutterMethodCall* call, FlutterR
                                details:[NSString stringWithFormat:@"view id: '%lld'", viewId]]);
     return;
   }
-
-  UIView* touch_interceptor = touch_interceptors_[viewId].get();
-  [touch_interceptor removeFromSuperview];
-  views_.erase(viewId);
-  touch_interceptors_.erase(viewId);
-  overlays_.erase(viewId);
+  // We wait for next submitFrame to dispose views.
+  views_to_dispose_.insert(viewId);
   result(nil);
 }
 
@@ -213,6 +209,8 @@ void FlutterPlatformViewsController::Reset() {
 bool FlutterPlatformViewsController::SubmitFrame(bool gl_rendering,
                                                  GrContext* gr_context,
                                                  std::shared_ptr<IOSGLContext> gl_context) {
+  DisposeViews();
+
   bool did_submit = true;
   for (size_t i = 0; i < composition_order_.size(); i++) {
     int64_t view_id = composition_order_[i];
@@ -265,10 +263,28 @@ void FlutterPlatformViewsController::DetachUnusedLayers() {
 
   for (int64_t view_id : active_composition_order_) {
     if (composition_order_set.find(view_id) == composition_order_set.end()) {
+      if (touch_interceptors_.find(view_id) == touch_interceptors_.end()) {
+        continue;
+      }
       [touch_interceptors_[view_id].get() removeFromSuperview];
       [overlays_[view_id]->overlay_view.get() removeFromSuperview];
     }
   }
+}
+
+void FlutterPlatformViewsController::DisposeViews() {
+  if (views_to_dispose_.empty()) {
+    return;
+  }
+
+  for (int64_t viewId : views_to_dispose_) {
+    UIView* touch_interceptor = touch_interceptors_[viewId].get();
+    [touch_interceptor removeFromSuperview];
+    views_.erase(viewId);
+    touch_interceptors_.erase(viewId);
+    overlays_.erase(viewId);
+  }
+  views_to_dispose_.clear();
 }
 
 void FlutterPlatformViewsController::EnsureOverlayInitialized(int64_t overlay_id) {
