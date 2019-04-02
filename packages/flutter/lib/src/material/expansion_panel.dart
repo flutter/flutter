@@ -120,22 +120,11 @@ class ExpansionPanelRadio extends ExpansionPanel {
 /// A material expansion panel list that lays out its children and animates
 /// expansions.
 ///
-/// {@tool snippet}
+/// {@tool snippet template=stateful_widget_material}
 ///
 /// Here is a simple example of how to implement ExpansionPanelList.
 ///
-/// ```dart
-/// import 'package:flutter/material.dart';
-///
-/// List<Item> generateItems(int numberOfItems) {
-///   return List.generate(numberOfItems, (int index) {
-///     return Item(
-///       headerValue: 'Panel $index',
-///       expandedValue: 'This is item number $index',
-///     );
-///   });
-/// }
-///
+/// ```dart preamble
 /// // stores ExpansionPanel state information
 /// class Item {
 ///   Item({
@@ -149,23 +138,17 @@ class ExpansionPanelRadio extends ExpansionPanel {
 ///   bool isExpanded;
 /// }
 ///
-/// void main() {
-///   runApp(
-///     MaterialApp(
-///       home: Scaffold(
-///         appBar: AppBar(title: Text("Expansion Panel")),
-///         body: MyApp(),
-///       ),
-///     ),
-///   );
+/// List<Item> generateItems(int numberOfItems) {
+///   return List.generate(numberOfItems, (int index) {
+///     return Item(
+///       headerValue: 'Panel $index',
+///       expandedValue: 'This is item number $index',
+///     );
+///   });
 /// }
+/// ```
 ///
-/// class MyApp extends StatefulWidget {
-///   @override
-///   _MyAppState createState() => _MyAppState();
-/// }
-///
-/// class _MyAppState extends State<MyApp> {
+/// ```dart
 ///   List<Item> _data = generateItems(8);
 ///
 ///   @override
@@ -239,13 +222,12 @@ class ExpansionPanelList extends StatefulWidget {
   /// arguments must not be null. The [children] objects must be instances
   /// of [ExpansionPanelRadio].
   ///
-  /// {@tool snippet}
+  /// {@tool snippet --template=stateful_widget_material}
   ///
   /// Here is a simple example of how to implement ExpansionPanelList.radio.
   ///
-  /// ```dart
-  /// import 'package:flutter/material.dart';
-  ///
+  /// ```dart preamble
+  /// // stores ExpansionPanel state information
   /// class Item {
   ///   Item({
   ///     this.id,
@@ -258,23 +240,18 @@ class ExpansionPanelList extends StatefulWidget {
   ///   String headerValue;
   /// }
   ///
-  /// void main() {
-  ///   runApp(
-  ///     MaterialApp(
-  ///       home: Scaffold(
-  ///         appBar: AppBar(title: Text("Expansion Panel Radio")),
-  ///         body: MyApp(),
-  ///       ),
-  ///     ),
-  ///   );
+  /// List<Item> generateItems(int numberOfItems) {
+  ///   return List.generate(numberOfItems, (int index) {
+  ///     return Item(
+  ///       id: index,
+  ///       headerValue: 'Panel $index',
+  ///       expandedValue: 'This is item number $index',
+  ///     );
+  ///   });
   /// }
+  /// ```
   ///
-  /// class MyApp extends StatefulWidget {
-  ///   @override
-  ///   _MyAppState createState() => _MyAppState();
-  /// }
-  ///
-  /// class _MyAppState extends State<MyApp> {
+  /// ```dart
   ///   List<Item> _data = generateItems(8);
   ///
   ///   @override
@@ -313,15 +290,6 @@ class ExpansionPanelList extends StatefulWidget {
   ///   }
   /// }
   ///
-  /// List<Item> generateItems(int numberOfItems) {
-  ///   return List.generate(numberOfItems, (int index) {
-  ///     return Item(
-  ///       id: index,
-  ///       headerValue: 'Panel $index',
-  ///       expandedValue: 'This is item number $index',
-  ///     );
-  ///   });
-  /// }
   /// ```
   ///
   /// {@end-tool}
