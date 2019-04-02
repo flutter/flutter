@@ -7,6 +7,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 
+import 'binary_messenger.dart';
 import 'message_codec.dart';
 import 'message_codecs.dart';
 import 'platform_messages.dart';
@@ -28,27 +29,31 @@ import 'platform_messages.dart';
 /// channels will interfere with each other's communication.
 ///
 /// See: <https://flutter.io/platform-channels/>
-class BasicMessageChannel<T> {
-  /// Creates a [BasicMessageChannel] with the specified [name] and [codec].
+class BaseMessageChannel<T> {
+  /// Creates a [BaseMessageChannel] with the specified [name], [codec] and [binaryMessenger].
   ///
-  /// Neither [name] nor [codec] may be null.
-  const BasicMessageChannel(this.name, this.codec);
+  /// None of [name], [codec], or [binaryMessenger] may be null.
+  const BaseMessageChannel(this.name, this.codec, this.binaryMessenger);
 
-  /// The logical channel on which communication happens, not null.
+   /// The logical channel on which communication happens, not null.
   final String name;
 
-  /// The message codec used by this channel, not null.
+   /// The message codec used by this channel, not null.
   final MessageCodec<T> codec;
 
-  /// Sends the specified [message] to the platform plugins on this channel.
+   /// The messenger which sends the bytes for this channel, not null.
+  final BinaryMessenger binaryMessenger;
+
+   /// Sends the specified [message] to the platform plugins on this channel.
   ///
   /// Returns a [Future] which completes to the received response, which may
   /// be null.
   Future<T> send(T message) async {
-    return codec.decodeMessage(await BinaryMessages.send(name, codec.encodeMessage(message)));
+    return codec.decodeMessage(
+        await binaryMessenger.send(name, codec.encodeMessage(message)));
   }
 
-  /// Sets a callback for receiving messages from the platform plugins on this
+   /// Sets a callback for receiving messages from the platform plugins on this
   /// channel. Messages may be null.
   ///
   /// The given callback will replace the currently registered callback for this
@@ -59,15 +64,15 @@ class BasicMessageChannel<T> {
   /// message reply. It may be null.
   void setMessageHandler(Future<T> handler(T message)) {
     if (handler == null) {
-      BinaryMessages.setMessageHandler(name, null);
+      binaryMessenger.setMessageHandler(name, null);
     } else {
-      BinaryMessages.setMessageHandler(name, (ByteData message) async {
+      binaryMessenger.setMessageHandler(name, (ByteData message) async {
         return codec.encodeMessage(await handler(codec.decodeMessage(message)));
       });
     }
   }
 
-  /// Sets a mock callback for intercepting messages sent on this channel.
+   /// Sets a mock callback for intercepting messages sent on this channel.
   /// Messages may be null.
   ///
   /// The given callback will replace the currently registered mock callback for
@@ -80,9 +85,9 @@ class BasicMessageChannel<T> {
   /// sent to platform plugins.
   void setMockMessageHandler(Future<T> handler(T message)) {
     if (handler == null) {
-      BinaryMessages.setMockMessageHandler(name, null);
+      binaryMessenger.setMockMessageHandler(name, null);
     } else {
-      BinaryMessages.setMockMessageHandler(name, (ByteData message) async {
+      binaryMessenger.setMockMessageHandler(name, (ByteData message) async {
         return codec.encodeMessage(await handler(codec.decodeMessage(message)));
       });
     }
@@ -106,22 +111,26 @@ class BasicMessageChannel<T> {
 /// channels will interfere with each other's communication.
 ///
 /// See: <https://flutter.io/platform-channels/>
-class MethodChannel {
-  /// Creates a [MethodChannel] with the specified [name].
+class BaseMethodChannel {
+  /// Creates a [BaseMethodChannel] with the specified [name].
   ///
   /// The [codec] used will be [StandardMethodCodec], unless otherwise
   /// specified.
   ///
   /// Neither [name] nor [codec] may be null.
-  const MethodChannel(this.name, [this.codec = const StandardMethodCodec()]);
+  const BaseMethodChannel(this.name, this.binaryMessenger,
+      [this.codec = const StandardMethodCodec()]);
 
-  /// The logical channel on which communication happens, not null.
+   /// The logical channel on which communication happens, not null.
   final String name;
 
-  /// The message codec used by this channel, not null.
+   /// The message codec used by this channel, not null.
   final MethodCodec codec;
 
-  /// Invokes a [method] on this channel with the specified [arguments].
+   /// The messenger used by this channel to send platform messages, not null.
+  final BinaryMessenger binaryMessenger;
+
+   /// Invokes a [method] on this channel with the specified [arguments].
   ///
   /// The static type of [arguments] is `dynamic`, but only values supported by
   /// the [codec] of this channel can be used. The same applies to the returned
@@ -290,20 +299,21 @@ class MethodChannel {
   ///  * <https://docs.flutter.io/javadoc/io/flutter/plugin/common/MethodCall.html>
   ///    for how to access method call arguments on Android.
   @optionalTypeArgs
-  Future<T> invokeMethod<T>(String method, [ dynamic arguments ]) async {
+  Future<T> invokeMethod<T>(String method, [dynamic arguments]) async {
     assert(method != null);
-    final ByteData result = await BinaryMessages.send(
+    final ByteData result = await binaryMessenger.send(
       name,
       codec.encodeMethodCall(MethodCall(method, arguments)),
     );
     if (result == null) {
-      throw MissingPluginException('No implementation found for method $method on channel $name');
+      throw MissingPluginException(
+          'No implementation found for method $method on channel $name');
     }
     final T typedResult = codec.decodeEnvelope(result);
     return typedResult;
   }
 
-  /// An implementation of [invokeMethod] that can return typed lists.
+   /// An implementation of [invokeMethod] that can return typed lists.
   ///
   /// Dart generics are reified, meaning that an untyped List<dynamic>
   /// cannot masquerade as a List<T>. Since invokeMethod can only return
@@ -312,12 +322,14 @@ class MethodChannel {
   /// See also:
   ///
   ///  * [invokeMethod], which this call delegates to.
-  Future<List<T>> invokeListMethod<T>(String method, [ dynamic arguments ]) async {
-    final List<dynamic> result = await invokeMethod<List<dynamic>>(method, arguments);
+  Future<List<T>> invokeListMethod<T>(String method,
+      [dynamic arguments]) async {
+    final List<dynamic> result =
+        await invokeMethod<List<dynamic>>(method, arguments);
     return result.cast<T>();
   }
 
-  /// An implementation of [invokeMethod] that can return typed maps.
+   /// An implementation of [invokeMethod] that can return typed maps.
   ///
   /// Dart generics are reified, meaning that an untyped Map<dynamic, dynamic>
   /// cannot masquerade as a Map<K, V>. Since invokeMethod can only return
@@ -326,12 +338,14 @@ class MethodChannel {
   /// See also:
   ///
   ///  * [invokeMethod], which this call delegates to.
-  Future<Map<K, V>> invokeMapMethod<K, V>(String method, [ dynamic arguments ]) async {
-    final Map<dynamic, dynamic> result = await invokeMethod<Map<dynamic, dynamic>>(method, arguments);
+  Future<Map<K, V>> invokeMapMethod<K, V>(String method,
+      [dynamic arguments]) async {
+    final Map<dynamic, dynamic> result =
+        await invokeMethod<Map<dynamic, dynamic>>(method, arguments);
     return result.cast<K, V>();
   }
 
-  /// Sets a callback for receiving method calls on this channel.
+   /// Sets a callback for receiving method calls on this channel.
   ///
   /// The given callback will replace the currently registered callback for this
   /// channel, if any. To remove the handler, pass null as the
@@ -346,13 +360,15 @@ class MethodChannel {
   /// similarly to what happens if no method call handler has been set.
   /// Any other exception results in an error envelope being sent.
   void setMethodCallHandler(Future<dynamic> handler(MethodCall call)) {
-    BinaryMessages.setMessageHandler(
+    binaryMessenger.setMessageHandler(
       name,
-      handler == null ? null : (ByteData message) => _handleAsMethodCall(message, handler),
+      handler == null
+          ? null
+          : (ByteData message) => _handleAsMethodCall(message, handler),
     );
   }
 
-  /// Sets a mock callback for intercepting method invocations on this channel.
+   /// Sets a mock callback for intercepting method invocations on this channel.
   ///
   /// The given callback will replace the currently registered mock callback for
   /// this channel, if any. To remove the mock handler, pass null as the
@@ -371,13 +387,16 @@ class MethodChannel {
   /// [MethodCodec.encodeSuccessEnvelope], to act as if platform plugin had
   /// returned that value.
   void setMockMethodCallHandler(Future<dynamic> handler(MethodCall call)) {
-    BinaryMessages.setMockMessageHandler(
+    binaryMessenger.setMockMessageHandler(
       name,
-      handler == null ? null : (ByteData message) => _handleAsMethodCall(message, handler),
+      handler == null
+          ? null
+          : (ByteData message) => _handleAsMethodCall(message, handler),
     );
   }
 
-  Future<ByteData> _handleAsMethodCall(ByteData message, Future<dynamic> handler(MethodCall call)) async {
+   Future<ByteData> _handleAsMethodCall(
+      ByteData message, Future<dynamic> handler(MethodCall call)) async {
     final MethodCall call = codec.decodeMethodCall(message);
     try {
       return codec.encodeSuccessEnvelope(await handler(call));
@@ -390,9 +409,29 @@ class MethodChannel {
     } on MissingPluginException {
       return null;
     } catch (e) {
-      return codec.encodeErrorEnvelope(code: 'error', message: e.toString(), details: null);
+      return codec.encodeErrorEnvelope(
+          code: 'error', message: e.toString(), details: null);
     }
   }
+} 
+
+/// A [BaseMessageChannel] that sends messages from the framework to platform plugins.
+class BasicMessageChannel<T> extends BaseMessageChannel<T> {
+  /// Creates a [BasicMessageChannel] with the specified [name] and [codec].
+  ///
+  /// Neither [name] nor [codec] may be null.
+  const BasicMessageChannel(String name, MessageCodec<T> codec) : super(name, codec, const _ClientBinaryMessenger());
+}
+
+/// A [BaseMethodChannel] that sends method calls from the framework to platform plugins.
+class MethodChannel extends BaseMethodChannel {
+  /// Creates a [MethodChannel] with the specified [name].
+  ///
+  /// The [codec] used will be [StandardMethodCodec], unless otherwise
+  /// specified.
+  ///
+  /// Neither [name] nor [codec] may be null.
+  const MethodChannel(String name, [MethodCodec codec = const StandardMethodCodec()]) : super(name, const _ClientBinaryMessenger(), codec);
 }
 
 /// A [MethodChannel] that ignores missing platform plugins.
@@ -510,5 +549,23 @@ class EventChannel {
       }
     });
     return controller.stream;
+  }
+}
+
+/// A [BinaryMessenger] which uses [BinaryMessages] to send platform messages.
+class _ClientBinaryMessenger extends BinaryMessenger {
+  const _ClientBinaryMessenger();
+
+  @override
+  Future<ByteData> send(String channel, ByteData message) => BinaryMessages.send(channel, message);
+
+  @override
+  void setMessageHandler(String channel, Future<ByteData> Function(ByteData message) handler) {
+    BinaryMessages.setMessageHandler(channel, handler);
+  }
+
+  @override
+  void setMockMessageHandler(String channel, Future<ByteData> Function(ByteData message) handler) {
+    BinaryMessages.setMockMessageHandler(channel, handler);
   }
 }
