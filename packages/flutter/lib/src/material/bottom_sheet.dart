@@ -56,6 +56,7 @@ class BottomSheet extends StatefulWidget {
     this.animationController,
     this.enableDrag = true,
     this.elevation = 0.0,
+    this.backgroundColor,
     @required this.onClosing,
     @required this.builder,
   }) : assert(enableDrag != null),
@@ -96,6 +97,12 @@ class BottomSheet extends StatefulWidget {
   /// Defaults to 0. The value is non-negative.
   final double elevation;
 
+  /// Override the default background color of the bottom sheet.
+  ///
+  /// If not specified, will default to the theme color of the Material
+  /// widget.
+  final Color backgroundColor;
+
   @override
   _BottomSheetState createState() => _BottomSheetState();
 
@@ -110,7 +117,6 @@ class BottomSheet extends StatefulWidget {
 }
 
 class _BottomSheetState extends State<BottomSheet> {
-
   final GlobalKey _childKey = GlobalKey(debugLabel: 'BottomSheet child');
 
   double get _childHeight {
@@ -149,6 +155,7 @@ class _BottomSheetState extends State<BottomSheet> {
     final Widget bottomSheet = Material(
       key: _childKey,
       elevation: widget.elevation,
+      color: widget.backgroundColor,
       child: widget.builder(context),
     );
     return !widget.enableDrag ? bottomSheet : GestureDetector(
@@ -238,6 +245,7 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
                 child: BottomSheet(
                   animationController: widget.route._animationController,
                   onClosing: () => Navigator.pop(context),
+                  backgroundColor: widget.route.backgroundColor,
                   builder: widget.route.builder,
                 ),
               ),
@@ -254,11 +262,13 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
     this.builder,
     this.theme,
     this.barrierLabel,
+    this.backgroundColor,
     RouteSettings settings,
   }) : super(settings: settings);
 
   final WidgetBuilder builder;
   final ThemeData theme;
+  final Color backgroundColor;
 
   @override
   Duration get transitionDuration => _kBottomSheetDuration;
@@ -325,15 +335,20 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
 Future<T> showModalBottomSheet<T>({
   @required BuildContext context,
   @required WidgetBuilder builder,
+  Color backgroundColor,
 }) {
   assert(context != null);
   assert(builder != null);
   assert(debugCheckHasMaterialLocalizations(context));
-  return Navigator.push(context, _ModalBottomSheetRoute<T>(
-    builder: builder,
-    theme: Theme.of(context, shadowThemeOnly: true),
-    barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
-  ));
+  return Navigator.push(
+      context,
+      _ModalBottomSheetRoute<T>(
+        builder: builder,
+        theme: Theme.of(context, shadowThemeOnly: true),
+        backgroundColor: backgroundColor,
+        barrierLabel:
+            MaterialLocalizations.of(context).modalBarrierDismissLabel,
+      ));
 }
 
 /// Shows a persistent material design bottom sheet in the nearest [Scaffold].
