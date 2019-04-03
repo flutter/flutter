@@ -7,7 +7,6 @@ import 'dart:ui' show Path, lerpDouble;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/src/material/color_scheme.dart';
 import 'package:flutter/widgets.dart';
 
 import 'theme.dart';
