@@ -136,7 +136,7 @@ class AccessibilityViewEmbedder {
 
         copyAccessibilityFields(originNode, result);
         setFlutterNodesTranslateBounds(originNode, displayBounds, result);
-        addChildrenToFlutterNode(originNode, embeddedView, displayBounds, result);
+        addChildrenToFlutterNode(originNode, embeddedView, result);
         setFlutterNodeParent(originNode, embeddedView, result);
 
         return result;
@@ -162,7 +162,6 @@ class AccessibilityViewEmbedder {
     private void addChildrenToFlutterNode(
             @NonNull AccessibilityNodeInfo originNode,
             @NonNull View embeddedView,
-            @NonNull Rect displayBounds,
             @NonNull AccessibilityNodeInfo resultNode
     ) {
         for (int i = 0; i < originNode.getChildCount(); i++) {
