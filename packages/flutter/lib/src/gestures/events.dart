@@ -350,7 +350,6 @@ class PointerAddedEvent extends PointerEvent {
          kind: kind,
          device: device,
          position: position,
-         delta: position,
          obscured: obscured,
          pressure: pressure,
          pressureMin: pressureMin,
