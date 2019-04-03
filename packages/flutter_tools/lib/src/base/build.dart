@@ -70,6 +70,13 @@ class GenSnapshot {
 }
 
 class AOTSnapshotter {
+  AOTSnapshotter({this.reportTimings = false});
+
+  /// If true then AOTSnapshotter would report timings for individual building
+  /// steps (Dart front-end parsing and snapshot generation) in a stable
+  /// machine readable form. See [AOTSnapshotter._timedStep].
+  final bool reportTimings;
+
   /// Builds an architecture-specific ahead-of-time compiled snapshot of the specified script.
   Future<int> build({
     @required TargetPlatform platform,
@@ -197,11 +204,11 @@ class AOTSnapshotter {
     }
 
     final SnapshotType snapshotType = SnapshotType(platform, buildMode);
-    final int genSnapshotExitCode = await genSnapshot.run(
+    final int genSnapshotExitCode = await _timedStep('gen_snapshot', () => genSnapshot.run(
       snapshotType: snapshotType,
       additionalArgs: genSnapshotArgs,
       iosArch: iosArch,
-    );
+    ));
     if (genSnapshotExitCode != 0) {
       printError('Dart snapshot generator failed with exit code $genSnapshotExitCode');
       return genSnapshotExitCode;
@@ -309,7 +316,7 @@ class AOTSnapshotter {
 
     final String depfilePath = fs.path.join(outputPath, 'kernel_compile.d');
     final KernelCompiler kernelCompiler = await kernelCompilerFactory.create(flutterProject);
-    final CompilerOutput compilerOutput = await kernelCompiler.compile(
+    final CompilerOutput compilerOutput = await _timedStep('frontend', () => kernelCompiler.compile(
       sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
       mainPath: mainPath,
       packagesPath: packagesPath,
@@ -323,7 +330,7 @@ class AOTSnapshotter {
       aot: true,
       trackWidgetCreation: trackWidgetCreation,
       targetProductVm: buildMode == BuildMode.release,
-    );
+    ));
 
     // Write path to frontend_server, since things need to be re-generated when that changes.
     final String frontendPath = artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk);
@@ -344,6 +351,20 @@ class AOTSnapshotter {
 
   String _getPackagePath(PackageMap packageMap, String package) {
     return fs.path.dirname(fs.path.fromUri(packageMap.map[package]));
+  }
+
+  /// This method is used to measure duration of an action and emit it into
+  /// verbose output from flutter_tool for other tools (e.g. benchmark runner)
+  /// to find.
+  /// Important: external performance tracking tools expect format of this
+  /// output to be stable.
+  Future<T> _timedStep<T>(String marker, FutureOr<T> Function() action) async {
+    final Stopwatch sw = Stopwatch()..start();
+    final T value = await action();
+    if (reportTimings) {
+      printStatus('$marker(RunTime): ${sw.elapsedMilliseconds} ms.');
+    }
+    return value;
   }
 }
 
