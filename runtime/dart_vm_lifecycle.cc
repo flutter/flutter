@@ -114,4 +114,9 @@ std::shared_ptr<IsolateNameServer> DartVMRef::GetIsolateNameServer() {
   return gVMIsolateNameServer.lock();
 }
 
+DartVM* DartVMRef::GetRunningVM() {
+  std::lock_guard<std::mutex> lock(gVMMutex);
+  return gVM.lock().get();
+}
+
 }  // namespace blink

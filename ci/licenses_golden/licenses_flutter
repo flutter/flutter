@@ -374,6 +374,7 @@ FILE: ../../../flutter/lib/ui/window/window.h
 FILE: ../../../flutter/runtime/dart_isolate.cc
 FILE: ../../../flutter/runtime/dart_isolate.h
 FILE: ../../../flutter/runtime/dart_isolate_unittests.cc
+FILE: ../../../flutter/runtime/dart_lifecycle_unittests.cc
 FILE: ../../../flutter/runtime/dart_service_isolate.cc
 FILE: ../../../flutter/runtime/dart_service_isolate.h
 FILE: ../../../flutter/runtime/dart_service_isolate_unittests.cc

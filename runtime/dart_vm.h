@@ -36,17 +36,27 @@ class DartVM {
 
   std::shared_ptr<const DartVMData> GetVMData() const;
 
+  // This accessor is racy and only meant to the used in tests where there is a
+  // consistent threading mode.
+  size_t GetIsolateCount() const;
+
   std::shared_ptr<ServiceProtocol> GetServiceProtocol() const;
 
   std::shared_ptr<IsolateNameServer> GetIsolateNameServer() const;
+
+  void ShutdownAllIsolates();
 
  private:
   const Settings settings_;
   std::shared_ptr<const DartVMData> vm_data_;
   const std::shared_ptr<IsolateNameServer> isolate_name_server_;
   const std::shared_ptr<ServiceProtocol> service_protocol_;
+  mutable std::mutex active_isolates_mutex_;
+  std::set<std::shared_ptr<DartIsolate>> active_isolates_
+      FML_GUARDED_BY(active_isolates_mutex_);
 
   friend class DartVMRef;
+  friend class DartIsolate;
 
   static std::shared_ptr<DartVM> Create(
       Settings settings,
@@ -57,6 +67,10 @@ class DartVM {
 
   DartVM(std::shared_ptr<const DartVMData> data,
          std::shared_ptr<IsolateNameServer> isolate_name_server);
+
+  void RegisterActiveIsolate(std::shared_ptr<DartIsolate> isolate);
+
+  void UnregisterActiveIsolate(std::shared_ptr<DartIsolate> isolate);
 
   FML_DISALLOW_COPY_AND_ASSIGN(DartVM);
 };
