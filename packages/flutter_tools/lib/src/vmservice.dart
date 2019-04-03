@@ -424,8 +424,10 @@ abstract class ServiceObject {
   /// Factory constructor given a [ServiceObjectOwner] and a service map,
   /// upgrade the map into a proper [ServiceObject]. This function always
   /// returns a new instance and does not interact with caches.
-  factory ServiceObject._fromMap(ServiceObjectOwner owner,
-                                 Map<String, dynamic> map) {
+  factory ServiceObject._fromMap(
+    ServiceObjectOwner owner,
+    Map<String, dynamic> map,
+  ) {
     if (map == null)
       return null;
 
@@ -873,7 +875,7 @@ class VM extends ServiceObjectOwner {
 
   /// Create a new development file system on the device.
   Future<Map<String, dynamic>> createDevFS(String fsName) {
-    return invokeRpcRaw('_createDevFS', params: <String, dynamic> {'fsName': fsName});
+    return invokeRpcRaw('_createDevFS', params: <String, dynamic>{'fsName': fsName});
   }
 
   /// List the development file system son the device.
@@ -928,7 +930,7 @@ class VM extends ServiceObjectOwner {
     Uri assetsDirectory,
   ) {
     return invokeRpc<ServiceMap>('_flutter.runInView',
-      params: <String, dynamic> {
+      params: <String, dynamic>{
         'viewId': viewId,
         'mainScript': main.toString(),
         'packagesFile': packages.toString(),

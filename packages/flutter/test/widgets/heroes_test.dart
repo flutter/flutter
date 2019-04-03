@@ -1649,8 +1649,7 @@ void main() {
     expect(tester.takeException(), isAssertionError);
   });
 
-  testWidgets('Hero within a Hero subtree with Builder, throws', (
-      WidgetTester tester) async {
+  testWidgets('Hero within a Hero subtree with Builder, throws', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -1672,8 +1671,7 @@ void main() {
     expect(tester.takeException(),isAssertionError);
   });
 
-  testWidgets('Hero within a Hero subtree with LayoutBuilder, throws', (
-      WidgetTester tester) async {
+  testWidgets('Hero within a Hero subtree with LayoutBuilder, throws', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -1693,5 +1691,92 @@ void main() {
     );
 
     expect(tester.takeException(), isAssertionError);
+  });
+
+  testWidgets('Heroes fly on pushReplacement', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/28041.
+
+    const String heroTag = 'foo';
+    final GlobalKey<NavigatorState> navigator = GlobalKey();
+    final Key smallContainer = UniqueKey();
+    final Key largeContainer = UniqueKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorKey: navigator,
+        home: Center(
+          child: Card(
+            child: Hero(
+              tag: heroTag,
+              child: Container(
+                key: largeContainer,
+                color: Colors.red,
+                height: 200.0,
+                width: 200.0,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // The initial setup.
+    expect(find.byKey(largeContainer), isOnstage);
+    expect(find.byKey(largeContainer), isInCard);
+    expect(find.byKey(smallContainer, skipOffstage: false), findsNothing);
+
+    navigator.currentState.pushReplacement(
+      MaterialPageRoute<void>(
+          builder: (BuildContext context) {
+            return Center(
+              child: Card(
+                child: Hero(
+                  tag: heroTag,
+                  child: Container(
+                    key: smallContainer,
+                    color: Colors.red,
+                    height: 100.0,
+                    width: 100.0,
+                  ),
+                ),
+              ),
+            );
+          }
+      ),
+    );
+    await tester.pump();
+
+    // The second route exists offstage.
+    expect(find.byKey(largeContainer), isOnstage);
+    expect(find.byKey(largeContainer), isInCard);
+    expect(find.byKey(smallContainer, skipOffstage: false), isOffstage);
+    expect(find.byKey(smallContainer, skipOffstage: false), isInCard);
+
+    await tester.pump();
+
+    // The hero started flying.
+    expect(find.byKey(largeContainer), findsNothing);
+    expect(find.byKey(smallContainer), isOnstage);
+    expect(find.byKey(smallContainer), isNotInCard);
+
+    await tester.pump(const Duration(milliseconds: 100));
+
+    // The hero is in-flight.
+    expect(find.byKey(largeContainer), findsNothing);
+    expect(find.byKey(smallContainer), isOnstage);
+    expect(find.byKey(smallContainer), isNotInCard);
+    final Size size = tester.getSize(find.byKey(smallContainer));
+    expect(size.height, greaterThan(100));
+    expect(size.width, greaterThan(100));
+    expect(size.height, lessThan(200));
+    expect(size.width, lessThan(200));
+
+    await tester.pumpAndSettle();
+
+    // The transition has ended.
+    expect(find.byKey(largeContainer), findsNothing);
+    expect(find.byKey(smallContainer), isOnstage);
+    expect(find.byKey(smallContainer), isInCard);
+    expect(tester.getSize(find.byKey(smallContainer)), const Size(100,100));
   });
 }

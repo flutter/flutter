@@ -76,7 +76,7 @@ Future<void> pubGet({
   bool upgrade = false,
   bool offline = false,
   bool checkLastModified = true,
-  bool skipPubspecYamlCheck = false
+  bool skipPubspecYamlCheck = false,
 }) async {
   directory ??= fs.currentDirectory.path;
 
@@ -93,7 +93,7 @@ Future<void> pubGet({
     final String command = upgrade ? 'upgrade' : 'get';
     final Status status = logger.startProgress(
       'Running "flutter packages $command" in ${fs.path.basename(directory)}...',
-      timeout: kSlowOperation,
+      timeout: timeoutConfiguration.slowOperation,
     );
     final List<String> args = <String>['--verbosity=warning'];
     if (FlutterCommand.current != null && FlutterCommand.current.globalResults['verbose'])

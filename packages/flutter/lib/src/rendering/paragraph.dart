@@ -41,7 +41,8 @@ class RenderParagraph extends RenderBox {
   ///
   /// The [maxLines] property may be null (and indeed defaults to null), but if
   /// it is not null, it must be greater than zero.
-  RenderParagraph(TextSpan text, {
+  RenderParagraph(
+    TextSpan text, {
     TextAlign textAlign = TextAlign.start,
     @required TextDirection textDirection,
     bool softWrap = true,

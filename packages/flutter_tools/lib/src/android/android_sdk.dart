@@ -588,7 +588,8 @@ class AndroidSdk {
 }
 
 class AndroidSdkVersion implements Comparable<AndroidSdkVersion> {
-  AndroidSdkVersion._(this.sdk, {
+  AndroidSdkVersion._(
+    this.sdk, {
     @required this.sdkLevel,
     @required this.platformName,
     @required this.buildToolsVersion,

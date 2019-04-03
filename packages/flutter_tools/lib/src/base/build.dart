@@ -85,7 +85,6 @@ class AOTSnapshotter {
     if (fs.file('pubspec.yaml').existsSync()) {
       flutterProject = await FlutterProject.current();
     }
-    final FlutterEngine engine = FlutterEngine(cache);
     if (!_isValidAotPlatform(platform, buildMode)) {
       printError('${getNameForTargetPlatform(platform)} does not support AOT compilation.');
       return 1;
@@ -187,8 +186,8 @@ class AOTSnapshotter {
         'entryPoint': mainPath,
         'sharedLib': buildSharedLibrary.toString(),
         'extraGenSnapshotOptions': extraGenSnapshotOptions.join(' '),
-        'engineHash': engine.version,
-        'buildersUsed': '${flutterProject != null ? await flutterProject.hasBuilders : false}',
+        'engineHash': Cache.instance.engineRevision,
+        'buildersUsed': '${flutterProject != null ? flutterProject.hasBuilders : false}',
       },
       depfilePaths: <String>[],
     );
@@ -299,6 +298,7 @@ class AOTSnapshotter {
     @required bool trackWidgetCreation,
     List<String> extraFrontEndOptions = const <String>[],
   }) async {
+    final FlutterProject flutterProject = await FlutterProject.current();
     final Directory outputDir = fs.directory(outputPath);
     outputDir.createSync(recursive: true);
 
@@ -308,6 +308,7 @@ class AOTSnapshotter {
       printTrace('Extra front-end options: $extraFrontEndOptions');
 
     final String depfilePath = fs.path.join(outputPath, 'kernel_compile.d');
+    final KernelCompiler kernelCompiler = await kernelCompilerFactory.create(flutterProject);
     final CompilerOutput compilerOutput = await kernelCompiler.compile(
       sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
       mainPath: mainPath,

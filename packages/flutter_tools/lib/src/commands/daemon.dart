@@ -19,7 +19,6 @@ import '../convert.dart';
 import '../device.dart';
 import '../emulator.dart';
 import '../globals.dart';
-import '../project.dart';
 import '../resident_runner.dart';
 import '../run_cold.dart';
 import '../run_hot.dart';
@@ -342,8 +341,6 @@ class AppDomain extends Domain {
     if (await device.isLocalEmulator && !options.buildInfo.supportsEmulator) {
       throw '${toTitleCase(options.buildInfo.friendlyModeName)} mode is not supported for emulators.';
     }
-    final FlutterProject flutterProject = await FlutterProject.current();
-
     // We change the current working directory for the duration of the `start` command.
     final Directory cwd = fs.currentDirectory;
     fs.currentDirectory = fs.directory(projectDirectory);
@@ -370,7 +367,6 @@ class AppDomain extends Domain {
         dillOutputPath: dillOutputPath,
         ipv6: ipv6,
         hostIsIde: true,
-        flutterProject: flutterProject,
       );
     } else {
       runner = ColdRunner(
@@ -532,7 +528,7 @@ class AppDomain extends Domain {
     return app.stop().then<bool>(
       (void value) => true,
       onError: (dynamic error, StackTrace stack) {
-        _sendAppEvent(app, 'log', <String, dynamic>{ 'log': '$error', 'error': true });
+        _sendAppEvent(app, 'log', <String, dynamic>{'log': '$error', 'error': true});
         app.closeLogger();
         _apps.remove(app);
         return false;
@@ -550,7 +546,7 @@ class AppDomain extends Domain {
     return app.detach().then<bool>(
       (void value) => true,
       onError: (dynamic error, StackTrace stack) {
-        _sendAppEvent(app, 'log', <String, dynamic>{ 'log': '$error', 'error': true });
+        _sendAppEvent(app, 'log', <String, dynamic>{'log': '$error', 'error': true});
         app.closeLogger();
         _apps.remove(app);
         return false;
@@ -563,7 +559,7 @@ class AppDomain extends Domain {
   }
 
   void _sendAppEvent(AppInstance app, String name, [ Map<String, dynamic> args ]) {
-    final Map<String, dynamic> eventArgs = <String, dynamic> {'appId': app.id};
+    final Map<String, dynamic> eventArgs = <String, dynamic>{'appId': app.id};
     if (args != null)
       eventArgs.addAll(args);
     sendEvent('app.$name', eventArgs);
@@ -955,7 +951,7 @@ class _AppRunLogger extends Logger {
     if (parent != null) {
       parent.printTrace(message);
     } else {
-      _sendLogEvent(<String, dynamic>{ 'log': message, 'trace': true });
+      _sendLogEvent(<String, dynamic>{'log': message, 'trace': true});
     }
   }
 

@@ -24,7 +24,8 @@ final Animatable<BorderRadius> _kFrontHeadingBevelRadius = BorderRadiusTween(
 );
 
 class _TappableWhileStatusIs extends StatefulWidget {
-  const _TappableWhileStatusIs(this.status, {
+  const _TappableWhileStatusIs(
+    this.status, {
     Key key,
     this.controller,
     this.child,

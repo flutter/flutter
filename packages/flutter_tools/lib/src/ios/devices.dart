@@ -235,7 +235,6 @@ class IOSDevice extends Device {
     DebuggingOptions debuggingOptions,
     Map<String, dynamic> platformArgs,
     bool prebuiltApplication = false,
-    bool applicationNeedsRebuild = false,
     bool usesTerminalUi = true,
     bool ipv6 = false,
   }) async {
@@ -310,7 +309,7 @@ class IOSDevice extends Device {
     int installationResult = -1;
     Uri localObservatoryUri;
 
-    final Status installStatus = logger.startProgress('Installing and launching...', timeout: kSlowOperation);
+    final Status installStatus = logger.startProgress('Installing and launching...', timeout: timeoutConfiguration.slowOperation);
 
     if (!debuggingOptions.debuggingEnabled) {
       // If debugging is not enabled, just launch the application and continue.
@@ -390,8 +389,7 @@ class IOSDevice extends Device {
   DevicePortForwarder get portForwarder => _portForwarder ??= _IOSDevicePortForwarder(this);
 
   @override
-  void clearLogs() {
-  }
+  void clearLogs() { }
 
   @override
   bool get supportsScreenshot => iMobileDevice.isInstalled;

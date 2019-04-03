@@ -848,4 +848,18 @@ class CupertinoIcons {
   ///
   ///  * [lab_flask], similar, but not filled in.
   static const IconData lab_flask_solid = IconData(0xf431, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// An outlined heart shape. Can be used to indicate like or favorite states.
+  ///
+  /// See also:
+  ///
+  ///  * [heart_solid], same shape, but filled in.
+  static const IconData heart = IconData(0xf442, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A filled heart shape. Can be used to indicate like or favorite states.
+  ///
+  /// See also:
+  ///
+  ///  * [heart], same shape, but not filled in.
+  static const IconData heart_solid = IconData(0xf443, fontFamily: iconFont, fontPackage: iconFontPackage);
 }

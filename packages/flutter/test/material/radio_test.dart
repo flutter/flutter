@@ -267,7 +267,7 @@ void main() {
                 groupValue: 1,
                 onChanged: (int value) { },
               ),
-            )
+            ),
           ),
         ),
       ),

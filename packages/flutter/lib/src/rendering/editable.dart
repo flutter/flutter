@@ -300,14 +300,14 @@ class RenderEditable extends RenderBox {
 
     final Offset startOffset = _textPainter.getOffsetForCaret(
       TextPosition(offset: _selection.start, affinity: _selection.affinity),
-      Rect.zero
+      Rect.zero,
     );
 
     _selectionStartInViewport.value = visibleRegion.contains(startOffset + effectiveOffset);
 
     final Offset endOffset =  _textPainter.getOffsetForCaret(
       TextPosition(offset: _selection.end, affinity: _selection.affinity),
-      Rect.zero
+      Rect.zero,
     );
 
     _selectionEndInViewport.value = visibleRegion.contains(endOffset + effectiveOffset);
@@ -1384,15 +1384,15 @@ class RenderEditable extends RenderBox {
         extentOffset = math.max(fromPosition.offset, toPosition.offset);
       }
 
-      onSelectionChanged(
-        TextSelection(
-          baseOffset: baseOffset,
-          extentOffset: extentOffset,
-          affinity: fromPosition.affinity,
-        ),
-        this,
-        cause,
+      final TextSelection newSelection = TextSelection(
+        baseOffset: baseOffset,
+        extentOffset: extentOffset,
+        affinity: fromPosition.affinity,
       );
+      // Call [onSelectionChanged] only when the selection actually changed.
+      if (newSelection != _selection) {
+        onSelectionChanged(newSelection, this, cause);
+      }
     }
   }
 

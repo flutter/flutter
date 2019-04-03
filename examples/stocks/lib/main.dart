@@ -84,7 +84,7 @@ class StocksAppState extends State<StocksApp> {
   }
 
   Route<dynamic> _getRoute(RouteSettings settings) {
-    if (settings.name == '/stocks') {
+    if (settings.name == '/stock') {
       final String symbol = settings.arguments;
       return MaterialPageRoute<void>(
         settings: settings,

@@ -128,7 +128,8 @@ class AssetImage extends AssetBundleImageProvider {
   /// from the set of images to choose from. The [package] argument must be
   /// non-null when fetching an asset that is included in package. See the
   /// documentation for the [AssetImage] class itself for details.
-  const AssetImage(this.assetName, {
+  const AssetImage(
+    this.assetName, {
     this.bundle,
     this.package,
   }) : assert(assetName != null);

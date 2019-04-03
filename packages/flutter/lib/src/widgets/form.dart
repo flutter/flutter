@@ -288,6 +288,13 @@ class FormField<T> extends StatefulWidget {
   /// The returned value is exposed by the [FormFieldState.errorText] property.
   /// The [TextFormField] uses this to override the [InputDecoration.errorText]
   /// value.
+  ///
+  /// Alternating between error and normal state can cause the height of the
+  /// [TextFormField] to change if no other subtext decoration is set on the
+  /// field. To create a field whose height is fixed regardless of whether or
+  /// not an error is displayed, either wrap the  [TextFormField] in a fixed
+  /// height parent like [SizedBox], or set the [TextFormField.helperText]
+  /// parameter to a space.
   final FormFieldValidator<T> validator;
 
   /// Function that returns the widget representing this form field. It is

@@ -37,8 +37,8 @@ void main() {
                 ),
               ),
             ],
-          )
-        )
+          ),
+        ),
       )
     );
     await expectLater(

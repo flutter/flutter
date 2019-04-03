@@ -39,6 +39,7 @@ Widget buildFrame({
   bool isExpanded = false,
   Widget hint,
   Widget disabledHint,
+  Widget underline,
   List<String> items = menuItems,
   Alignment alignment = Alignment.center,
   TextDirection textDirection = TextDirection.ltr,
@@ -61,6 +62,7 @@ Widget buildFrame({
             iconEnabledColor: iconEnabledColor,
             isDense: isDense,
             isExpanded: isExpanded,
+            underline: underline,
             items: items == null ? null : items.map<DropdownMenuItem<String>>((String item) {
               return DropdownMenuItem<String>(
                 key: ValueKey<String>(item),
@@ -1222,5 +1224,31 @@ void main() {
     await tester.tap(find.text('13').last);
     await tester.pumpAndSettle();
     expect(selectedIndex, 13);
+  });
+
+  testWidgets('Dropdown button will accept widgets as its underline', (
+      WidgetTester tester) async {
+
+    const BoxDecoration decoration = BoxDecoration(
+      border: Border(bottom: BorderSide(color: Color(0xFFCCBB00), width: 4.0)),
+    );
+    const BoxDecoration defaultDecoration = BoxDecoration(
+      border: Border(bottom: BorderSide(color: Color(0xFFBDBDBD), width: 0.0)),
+    );
+
+    final Widget customUnderline = Container(height: 4.0, decoration: decoration);
+    final Key buttonKey = UniqueKey();
+
+    final Finder decoratedBox = find.descendant(
+      of: find.byKey(buttonKey),
+      matching: find.byType(DecoratedBox),
+    );
+
+    await tester.pumpWidget(buildFrame(buttonKey: buttonKey, underline: customUnderline,
+        value: 'two', onChanged: onChanged));
+    expect(tester.widget<DecoratedBox>(decoratedBox).decoration, decoration);
+
+    await tester.pumpWidget(buildFrame(buttonKey: buttonKey, value: 'two', onChanged: onChanged));
+    expect(tester.widget<DecoratedBox>(decoratedBox).decoration, defaultDecoration);
   });
 }

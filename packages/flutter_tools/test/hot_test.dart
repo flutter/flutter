@@ -104,7 +104,6 @@ void main() {
       bundle: anyNamed('bundle'),
       firstBuildTime: anyNamed('firstBuildTime'),
       bundleFirstUpload: anyNamed('bundleFirstUpload'),
-      bundleDirty: anyNamed('bundleDirty'),
       generator: anyNamed('generator'),
       fullRestart: anyNamed('fullRestart'),
       dillOutputPath: anyNamed('dillOutputPath'),
@@ -116,6 +115,8 @@ void main() {
         UpdateFSReport(success: true, syncedBytes: 1000, invalidatedSourcesCount: 1)));
     when(mockDevFs.assetPathsToEvict).thenReturn(<String>{});
     when(mockDevFs.baseUri).thenReturn(Uri.file('test'));
+    when(mockDevFs.sources).thenReturn(<Uri>[Uri.file('test')]);
+    when(mockDevFs.lastCompiled).thenReturn(DateTime.now());
 
     setUp(() {
       mockArtifacts = MockLocalEngineArtifacts();
@@ -236,7 +237,7 @@ void main() {
         ];
         await HotRunner(devices).cleanupAfterSignal();
         expect(shutdownTestingConfig.shutdownHookCalled, true);
-      }, overrides: <Type, Generator> {
+      }, overrides: <Type, Generator>{
         Artifacts: () => mockArtifacts,
         HotRunnerConfig: () => shutdownTestingConfig,
       });
@@ -251,7 +252,7 @@ void main() {
         ];
         await HotRunner(devices).preStop();
         expect(shutdownTestingConfig.shutdownHookCalled, true);
-      }, overrides: <Type, Generator> {
+      }, overrides: <Type, Generator>{
         Artifacts: () => mockArtifacts,
         HotRunnerConfig: () => shutdownTestingConfig,
       });

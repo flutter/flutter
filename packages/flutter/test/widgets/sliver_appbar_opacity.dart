@@ -166,7 +166,7 @@ void main() {
 
 class _TestWidget extends StatelessWidget {
 
-  const _TestWidget({this.pinned, this.floating, this.bottom, this.controller,});
+  const _TestWidget({this.pinned, this.floating, this.bottom, this.controller});
 
   final bool pinned;
   final bool floating;
