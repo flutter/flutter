@@ -257,7 +257,7 @@ docker_builder:
 
 task:
   use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true'
-  name: build-ipas+drive-examples
+  name: plugins-ios-integration-tests
   osx_instance:
     image: mojave-xcode-10.1
   env:
