@@ -207,7 +207,7 @@ std::unique_ptr<IsolateConfiguration> CreateIsolateConfiguration(
     auto blob = asset_manager.GetAsMapping(snapshot_name);
     auto delta = asset_manager.GetAsMapping("kernel_delta.bin");
     if (blob && delta) {
-      std::vector<std::unique_ptr<fml::Mapping>> kernels;
+      std::vector<std::unique_ptr<const fml::Mapping>> kernels;
       kernels.emplace_back(std::move(blob));
       kernels.emplace_back(std::move(delta));
       return IsolateConfiguration::CreateForKernelList(std::move(kernels));
