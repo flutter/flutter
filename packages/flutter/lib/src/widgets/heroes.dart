@@ -618,7 +618,8 @@ class HeroController extends NavigatorObserver {
   void didPop(Route<dynamic> route, Route<dynamic> previousRoute) {
     assert(navigator != null);
     assert(route != null);
-    _maybeStartHeroTransition(route, previousRoute, HeroFlightDirection.pop, false);
+    if (!navigator.userGestureInProgress)
+      _maybeStartHeroTransition(route, previousRoute, HeroFlightDirection.pop, false);
   }
 
   @override
