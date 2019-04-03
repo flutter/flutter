@@ -13,9 +13,12 @@ using tonic::ToDart;
 namespace blink {
 
 void DartIO::InitForIsolate() {
-  DART_CHECK_VALID(Dart_SetNativeResolver(Dart_LookupLibrary(ToDart("dart:io")),
-                                          dart::bin::LookupIONative,
-                                          dart::bin::LookupIONativeSymbol));
+  Dart_Handle result = Dart_SetNativeResolver(
+      Dart_LookupLibrary(ToDart("dart:io")), dart::bin::LookupIONative,
+      dart::bin::LookupIONativeSymbol);
+  if (Dart_IsError(result)) {
+    Dart_PropagateError(result);
+  }
 }
 
 bool DartIO::EntropySource(uint8_t* buffer, intptr_t length) {
