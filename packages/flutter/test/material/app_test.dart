@@ -381,6 +381,23 @@ void main() {
     expect(log, <String>['onGenerateRoute /', 'onUnknownRoute /']);
   });
 
+  testWidgets('custom navigator with without routes supported', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/18904
+    await tester.pumpWidget(
+      MaterialApp(
+        builder: (BuildContext context, Widget child) {
+          return Navigator(
+            onGenerateRoute: (RouteSettings settings) {
+              return MaterialPageRoute<void>(builder: (BuildContext context) => Scaffold());
+            },
+          );
+        },
+      )
+    );
+    // This just tests that no exceptions are thrown from having a custom
+    // navigator with no routes.
+  });
+
   testWidgets('Can get text scale from media query', (WidgetTester tester) async {
     double textScaleFactor;
     await tester.pumpWidget(MaterialApp(
