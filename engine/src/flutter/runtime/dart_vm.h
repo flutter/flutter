@@ -5,9 +5,8 @@
 #ifndef FLUTTER_RUNTIME_DART_VM_H_
 #define FLUTTER_RUNTIME_DART_VM_H_
 
-#include <functional>
+#include <memory>
 #include <string>
-#include <vector>
 
 #include "flutter/common/settings.h"
 #include "flutter/fml/build_config.h"
@@ -19,57 +18,46 @@
 #include "flutter/lib/ui/isolate_name_server/isolate_name_server.h"
 #include "flutter/runtime/dart_isolate.h"
 #include "flutter/runtime/dart_snapshot.h"
+#include "flutter/runtime/dart_vm_data.h"
 #include "flutter/runtime/service_protocol.h"
 #include "third_party/dart/runtime/include/dart_api.h"
 
 namespace blink {
 
-class DartVM : public fml::RefCountedThreadSafe<DartVM> {
+class DartVM {
  public:
-  static fml::RefPtr<DartVM> ForProcess(Settings settings);
-
-  static fml::RefPtr<DartVM> ForProcess(
-      Settings settings,
-      fml::RefPtr<DartSnapshot> vm_snapshot,
-      fml::RefPtr<DartSnapshot> isolate_snapshot,
-      fml::RefPtr<DartSnapshot> shared_snapshot);
-
-  static fml::RefPtr<DartVM> ForProcessIfInitialized();
+  ~DartVM();
 
   static bool IsRunningPrecompiledCode();
 
+  static size_t GetVMLaunchCount();
+
   const Settings& GetSettings() const;
 
-  const DartSnapshot& GetVMSnapshot() const;
+  std::shared_ptr<const DartVMData> GetVMData() const;
 
-  IsolateNameServer* GetIsolateNameServer();
+  std::shared_ptr<ServiceProtocol> GetServiceProtocol() const;
 
-  fml::RefPtr<DartSnapshot> GetIsolateSnapshot() const;
-
-  fml::RefPtr<DartSnapshot> GetSharedSnapshot() const;
-
-  fml::WeakPtr<DartVM> GetWeakPtr();
-
-  ServiceProtocol& GetServiceProtocol();
+  std::shared_ptr<IsolateNameServer> GetIsolateNameServer() const;
 
  private:
   const Settings settings_;
-  const fml::RefPtr<DartSnapshot> vm_snapshot_;
-  IsolateNameServer isolate_name_server_;
-  const fml::RefPtr<DartSnapshot> isolate_snapshot_;
-  const fml::RefPtr<DartSnapshot> shared_snapshot_;
-  ServiceProtocol service_protocol_;
-  fml::WeakPtrFactory<DartVM> weak_factory_;
+  std::shared_ptr<const DartVMData> vm_data_;
+  const std::shared_ptr<IsolateNameServer> isolate_name_server_;
+  const std::shared_ptr<ServiceProtocol> service_protocol_;
 
-  DartVM(const Settings& settings,
-         fml::RefPtr<DartSnapshot> vm_snapshot,
-         fml::RefPtr<DartSnapshot> isolate_snapshot,
-         fml::RefPtr<DartSnapshot> shared_snapshot);
+  friend class DartVMRef;
 
-  ~DartVM();
+  static std::shared_ptr<DartVM> Create(
+      Settings settings,
+      fml::RefPtr<DartSnapshot> vm_snapshot,
+      fml::RefPtr<DartSnapshot> isolate_snapshot,
+      fml::RefPtr<DartSnapshot> shared_snapshot,
+      std::shared_ptr<IsolateNameServer> isolate_name_server);
 
-  FML_FRIEND_REF_COUNTED_THREAD_SAFE(DartVM);
-  FML_FRIEND_MAKE_REF_COUNTED(DartVM);
+  DartVM(std::shared_ptr<const DartVMData> data,
+         std::shared_ptr<IsolateNameServer> isolate_name_server);
+
   FML_DISALLOW_COPY_AND_ASSIGN(DartVM);
 };
 
