@@ -299,8 +299,6 @@ class TextSpan extends DiagnosticableTree {
   RenderComparison compareTo(TextSpan other) {
     if (identical(this, other))
       return RenderComparison.identical;
-    if (!(other.runtimeType is TextSpan))
-      return RenderComparison.layout;
     if (other.text != text ||
         children?.length != other.children?.length ||
         (style == null) != (other.style == null))
