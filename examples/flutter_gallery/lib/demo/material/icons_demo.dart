@@ -88,10 +88,10 @@ class _IconsDemoCard extends StatelessWidget {
   }
 
   Widget _centeredText(String label) => Padding(
-        // Match the default padding of IconButton.
-        padding: const EdgeInsets.all(8.0),
-        child: Text(label, textAlign: TextAlign.center),
-      );
+    // Match the default padding of IconButton.
+    padding: const EdgeInsets.all(8.0),
+    child: Text(label, textAlign: TextAlign.center),
+  );
 
   TableRow _buildIconRow(double size) {
     return TableRow(
