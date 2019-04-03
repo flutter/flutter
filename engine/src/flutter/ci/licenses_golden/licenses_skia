@@ -1,4 +1,4 @@
-Signature: 479ccc15b4edc62b97c7f0a8292dd014
+Signature: aa4ce47d179f622bf227d1feb5d5f694
 
 UNUSED LICENSES:
 
@@ -3666,7 +3666,6 @@ FILE: ../../../third_party/skia/src/core/SkBitmapController.cpp
 FILE: ../../../third_party/skia/src/core/SkBitmapController.h
 FILE: ../../../third_party/skia/src/core/SkBitmapProvider.cpp
 FILE: ../../../third_party/skia/src/core/SkBitmapProvider.h
-FILE: ../../../third_party/skia/src/core/SkFindAndPlaceGlyph.h
 FILE: ../../../third_party/skia/src/core/SkFontMgr.cpp
 FILE: ../../../third_party/skia/src/core/SkLatticeIter.cpp
 FILE: ../../../third_party/skia/src/core/SkLatticeIter.h
@@ -4559,6 +4558,7 @@ FILE: ../../../third_party/skia/gm/crbug_938592.cpp
 FILE: ../../../third_party/skia/gm/crbug_947055.cpp
 FILE: ../../../third_party/skia/gm/mac_aa_explorer.cpp
 FILE: ../../../third_party/skia/gm/mixercolorfilter.cpp
+FILE: ../../../third_party/skia/gm/overdrawcanvas.cpp
 FILE: ../../../third_party/skia/gm/samplelocations.cpp
 FILE: ../../../third_party/skia/gm/skbug_8664.cpp
 FILE: ../../../third_party/skia/include/core/SkMixer.h
