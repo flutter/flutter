@@ -254,3 +254,34 @@ docker_builder:
   build_script: "$CIRRUS_WORKING_DIR/dev/ci/docker_linux/docker_build.sh"
   login_script: "$CIRRUS_WORKING_DIR/dev/ci/docker_linux/docker_login.sh"
   push_script: "$CIRRUS_WORKING_DIR/dev/ci/docker_linux/docker_push.sh"
+
+task:
+  use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true'
+  name: build-ipas+drive-examples
+  osx_instance:
+    image: mojave-xcode-10.1
+  env:
+    PATH: $PATH:/usr/local/bin
+    matrix:
+      PLUGIN_SHARDING: "--shardIndex 0 --shardCount 4"
+      PLUGIN_SHARDING: "--shardIndex 1 --shardCount 4"
+      PLUGIN_SHARDING: "--shardIndex 2 --shardCount 4"
+      PLUGIN_SHARDING: "--shardIndex 3 --shardCount 4"
+    SIMCTL_CHILD_MAPS_API_KEY: ENCRYPTED[596a9f6bca436694625ac50851dc5da6b4d34cba8025f7db5bc9465142e8cd44e15f69e3507787753accebfc4910d550]
+  setup_script:
+  - brew update
+  - brew install libimobiledevice
+  - brew install ideviceinstaller
+  - brew install ios-deploy
+  - pod repo update
+  - git clone https://github.com/flutter/plugins.git
+  - git fetch origin master
+  - export PATH=`pwd`/bin:`pwd`/bin/cache/dart-sdk/bin:$PATH
+  - flutter doctor
+  - pub global activate flutter_plugin_tools
+  - xcrun simctl create Flutter-iPhone com.apple.CoreSimulator.SimDeviceType.iPhone-X com.apple.CoreSimulator.SimRuntime.iOS-12-1 | xargs xcrun simctl boot
+  build_script:
+  - export PATH=`pwd`/flutter/bin:`pwd`/flutter/bin/cache/dart-sdk/bin:$PATH
+  - cd plugins
+  - ./script/incremental_build.sh build-examples --ipa
+  - ./script/incremental_build.sh drive-examples
