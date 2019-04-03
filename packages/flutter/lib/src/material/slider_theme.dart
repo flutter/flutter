@@ -1546,7 +1546,7 @@ class PaddleSliderValueIndicatorShape extends SliderComponentShape {
     // factor of the value indicator.
     final double neckStretchBaseline = bottomLobeEnd.dy - math.max(neckLeftCenter.dy, neckRightCenter.dy);
     final double t = math.pow(inverseTextScale, 3.0);
-    final double stretch = (neckStretchBaseline * t).clamp(0.0, 10.0 * neckStretchBaseline);
+    final double stretch = (neckStretchBaseline * t).clamp(0.0, math.max(0.0, 10.0 * neckStretchBaseline));
     final Offset neckStretch = Offset(0.0, neckStretchBaseline - stretch);
 
     assert(!_debuggingLabelLocation ||
