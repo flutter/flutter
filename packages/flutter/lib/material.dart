@@ -6,6 +6,8 @@
 ///
 /// To use, import `package:flutter/material.dart`.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=DL0Ix1lnC4w}
+///
 /// See also:
 ///
 ///  * [flutter.io/widgets](https://flutter.io/widgets/)
