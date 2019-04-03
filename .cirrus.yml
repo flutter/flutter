@@ -256,6 +256,28 @@ docker_builder:
   push_script: "$CIRRUS_WORKING_DIR/dev/ci/docker_linux/docker_push.sh"
 
 task:
+  use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true' && $CIRRUS_PR == ''
+  container:
+    dockerfile: .ci/Dockerfile
+    cpu: 8
+    memory: 16G
+  setup_script:
+  - export PATH=`pwd`/flutter/bin:`pwd`/flutter/bin/cache/dart-sdk/bin:$PATH
+  - git clone https://github.com/flutter/plugins.git
+  upgrade_script:
+  - cd plugins
+  - git pull
+  activate_script: pub global activate flutter_plugin_tools
+  matrix:
+  - name: plugins-unit-tests
+    install_script:
+    - wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
+    - sudo apt-add-repository "deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-7 main"
+    - sudo apt-get update
+    - sudo apt-get install -y --allow-unauthenticated clang-format-7
+    test_script: ./script/incremental_build.sh test
+
+task:
   use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true'
   name: plugins-ios-integration-tests
   osx_instance:
