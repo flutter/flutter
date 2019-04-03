@@ -152,12 +152,18 @@ Dart_Handle DartCallbackCache::LookupDartClosure(
     const std::string& class_name,
     const std::string& library_path) {
   Dart_Handle closure_name = ToDart(name);
+  if (Dart_IsError(closure_name)) {
+    return closure_name;
+  }
   Dart_Handle library_name =
       library_path.empty() ? Dart_Null() : ToDart(library_path);
+  if (Dart_IsError(library_name)) {
+    return library_name;
+  }
   Dart_Handle cls_name = class_name.empty() ? Dart_Null() : ToDart(class_name);
-  DART_CHECK_VALID(closure_name);
-  DART_CHECK_VALID(library_name);
-  DART_CHECK_VALID(cls_name);
+  if (Dart_IsError(cls_name)) {
+    return cls_name;
+  }
 
   Dart_Handle library;
   if (library_name == Dart_Null()) {
@@ -165,21 +171,24 @@ Dart_Handle DartCallbackCache::LookupDartClosure(
   } else {
     library = Dart_LookupLibrary(library_name);
   }
-  DART_CHECK_VALID(library);
+  if (Dart_IsError(library)) {
+    return library;
+  }
 
   Dart_Handle closure;
   if (Dart_IsNull(cls_name)) {
     closure = Dart_GetField(library, closure_name);
   } else {
     Dart_Handle cls = Dart_GetClass(library, cls_name);
-    DART_CHECK_VALID(cls);
+    if (Dart_IsError(cls)) {
+      return cls;
+    }
     if (Dart_IsNull(cls)) {
       closure = Dart_Null();
     } else {
       closure = Dart_GetStaticMethodClosure(library, cls, closure_name);
     }
   }
-  DART_CHECK_VALID(closure);
   return closure;
 }
 
