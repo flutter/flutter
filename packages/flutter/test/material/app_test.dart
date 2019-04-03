@@ -388,7 +388,7 @@ void main() {
         builder: (BuildContext context, Widget child) {
           return Navigator(
             onGenerateRoute: (RouteSettings settings) {
-              return MaterialPageRoute<void>(builder: (BuildContext context) => Scaffold());
+              return MaterialPageRoute<void>(builder: (BuildContext context) => const Scaffold());
             },
           );
         },
