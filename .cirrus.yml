@@ -89,7 +89,14 @@ task:
       container:
         cpu: 4
         memory: 12G
-
+      - name: plugins_tests-linux
+        env:
+          SHARD: plugins_tests
+        activate_script: pub global activate flutter_plugin_tools
+        test_script:
+          - git clone https://github.com/flutter/plugins.git
+          - cd plugins
+          - ./script/incremental_build.sh test
 
 task:
   use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true' && $CIRRUS_PR == ''
