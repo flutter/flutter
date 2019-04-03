@@ -632,16 +632,21 @@ class _CupertinoBackGestureController<T> {
       controller.animateTo(1.0, duration: Duration(milliseconds: droppedPageForwardAnimationTime), curve: animationCurve);
     } else {
       navigator.pop();
-      final int droppedPageBackAnimationTime = lerpDouble(0, _kMaxDroppedSwipePageForwardAnimationTime, controller.value).floor();
-      controller.animateBack(0.0, duration: Duration(milliseconds: droppedPageBackAnimationTime), curve: animationCurve);
+
+      if (controller.isAnimating) {
+        final int droppedPageBackAnimationTime = lerpDouble(0, _kMaxDroppedSwipePageForwardAnimationTime, controller.value).floor();
+        controller.animateBack(0.0, duration: Duration(milliseconds: droppedPageBackAnimationTime), curve: animationCurve);
+      }
     }
 
-    AnimationStatusListener animationStatusCallback;
-    animationStatusCallback = (AnimationStatus status) {
-      navigator.didStopUserGesture();
-      controller.removeStatusListener(animationStatusCallback);
-    };
-    controller.addStatusListener(animationStatusCallback);
+    if (controller.isAnimating) {
+      AnimationStatusListener animationStatusCallback;
+      animationStatusCallback = (AnimationStatus status) {
+        navigator.didStopUserGesture();
+        controller.removeStatusListener(animationStatusCallback);
+      };
+      controller.addStatusListener(animationStatusCallback);
+    }
   }
 }
 
