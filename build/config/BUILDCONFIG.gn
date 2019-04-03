@@ -131,9 +131,6 @@ declare_args() {
   # Debug build.
   is_debug = true
 
-  # Product build.
-  is_product = false
-
   # Whether we're a traditional desktop unix.
   is_desktop_linux = current_os == "linux" && current_os != "chromeos"
 
