@@ -1344,7 +1344,7 @@ class PaddleSliderValueIndicatorShape extends SliderComponentShape {
   // was designed to contain. We scale it from here to fit other sizes.
   static const double _labelTextDesignSize = 14.0;
   // Radius of the bottom lobe of the value indicator.
-  static const double _bottomLobeRadius = 10.0;
+  static const double _bottomLobeRadius = 6.0;
   // The starting angle for the bottom lobe. Picked to get the desired
   // thickness for the neck.
   static const double _bottomLobeStartAngle = -1.1 * math.pi / 4.0;
@@ -1353,7 +1353,7 @@ class PaddleSliderValueIndicatorShape extends SliderComponentShape {
   static const double _bottomLobeEndAngle = 1.1 * 5 * math.pi / 4.0;
   // The padding on either side of the label.
   static const double _labelPadding = 8.0;
-  static const double _distanceBetweenTopBottomCenters = 44.0;
+  static const double _distanceBetweenTopBottomCenters = 40.0;
   static const Offset _topLobeCenter = Offset(0.0, -_distanceBetweenTopBottomCenters);
   static const double _topNeckRadius = 14.0;
   // The length of the hypotenuse of the triangle formed by the center
@@ -1387,7 +1387,7 @@ class PaddleSliderValueIndicatorShape extends SliderComponentShape {
   // Generates the bottom lobe path, which is the same for all instances of
   // the value indicator, so we reuse it for each one.
   static void _generateBottomLobe() {
-    const double bottomNeckRadius = 8.5;
+    const double bottomNeckRadius = 4.5;
     const double bottomNeckStartAngle = _bottomLobeEndAngle - math.pi;
     const double bottomNeckEndAngle = 0.0;
 
