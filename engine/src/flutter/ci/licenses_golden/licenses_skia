@@ -1,4 +1,4 @@
-Signature: 27640e6e3ae5e29abe45ac591b5f2a30
+Signature: c3208174f8bb78461fab6e1835080c02
 
 UNUSED LICENSES:
 
@@ -4565,6 +4565,7 @@ FILE: ../../../third_party/skia/gm/mixercolorfilter.cpp
 FILE: ../../../third_party/skia/gm/samplelocations.cpp
 FILE: ../../../third_party/skia/gm/skbug_8664.cpp
 FILE: ../../../third_party/skia/include/core/SkMixer.h
+FILE: ../../../third_party/skia/include/core/SkTileMode.h
 FILE: ../../../third_party/skia/include/gpu/GrContextThreadSafeProxy.h
 FILE: ../../../third_party/skia/include/private/GrContext_Base.h
 FILE: ../../../third_party/skia/include/private/GrImageContext.h
