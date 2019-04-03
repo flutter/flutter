@@ -343,8 +343,8 @@ void main() {
           color: sliderTheme.valueIndicatorColor,
           includes: <Offset>[
             const Offset(0.0, -40.0),
-            const Offset(94.0, -40.0),
-            const Offset(-20.0, -40.0),
+            const Offset(92.0, -40.0),
+            const Offset(-16.0, -40.0),
           ],
           excludes: <Offset>[const Offset(98.1, -40.0), const Offset(-20.1, -40.0)],
         ),
@@ -365,7 +365,7 @@ void main() {
           includes: <Offset>[
             const Offset(0.0, -40.0),
             const Offset(16.0, -40.0),
-            const Offset(-94.0, -40.0),
+            const Offset(-92.0, -40.0),
           ],
           excludes: <Offset>[const Offset(20.1, -40.0), const Offset(-98.1, -40.0)],
         ),
@@ -385,12 +385,12 @@ void main() {
           color: sliderTheme.valueIndicatorColor,
           includes: <Offset>[
             const Offset(0.0, -49.0),
-            const Offset(74.0, -49.0),
+            const Offset(68.0, -49.0),
             const Offset(-24.0, -49.0),
           ],
           excludes: <Offset>[
             const Offset(98.0, -32.0),  // inside full size, outside small
-            const Offset(-16.0, -32.0),  // inside full size, outside small
+            const Offset(-40.0, -32.0),  // inside full size, outside small
             const Offset(90.1, -49.0),
             const Offset(-40.1, -49.0),
           ],
@@ -411,10 +411,9 @@ void main() {
           color: sliderTheme.valueIndicatorColor,
           includes: <Offset>[
             const Offset(0.0, -38.8),
-            const Offset(98.0, -38.8),
-            const Offset(-16.0, -38.8),
-            const Offset(10.0, -23.0), // Inside large, outside scale=1.0
-            const Offset(-4.0, -23.0), // Inside large, outside scale=1.0
+            const Offset(92.0, -38.8),
+            const Offset(8.0, -23.0), // Inside large, outside scale=1.0
+            const Offset(-2.0, -23.0), // Inside large, outside scale=1.0
           ],
           excludes: <Offset>[
             const Offset(98.5, -38.8),
