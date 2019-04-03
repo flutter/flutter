@@ -26,8 +26,11 @@ typedef ScrollableWidgetBuilder = Widget Function(
   ScrollController scrollController,
 );
 
-/// A widget that can be dragged along the vertical axis between its
-/// minChildSize, which defaults to `0.25` and maxChildSize, which defaults
+/// A container for a [Scrollable] that responds to drag gestures by resizing
+/// the scrollable until a limit is reached, and then scrolling.
+///
+/// This widget can be dragged along the vertical axis between its
+/// [minChildSize], which defaults to `0.25` and [maxChildSize], which defaults
 /// to `1.0`. These sizes are percentages of the height of the parent container.
 ///
 /// The widget coordinates resizing and scrolling of the widget returned by
