@@ -135,7 +135,6 @@ class TabbedComponentDemoScaffold extends StatelessWidget {
                   Expanded(child: demo.demoWidget),
                 ],
               ),
-
             );
           }).toList(),
         ),
