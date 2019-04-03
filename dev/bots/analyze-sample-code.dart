@@ -165,7 +165,7 @@ class SampleChecker {
   static final RegExp _codeBlockEndRegex = RegExp(r'///\s+```\s*$');
 
   /// A RegExp that matches a Dart constructor.
-  static final RegExp _constructorRegExp = RegExp(r'[A-Z][a-zA-Z0-9<>.]*\(');
+  static final RegExp _constructorRegExp = RegExp(r'(const\s+)?_*[A-Z][a-zA-Z0-9<>._]*\(');
 
   /// Whether or not to keep the temp directory around after running.
   ///
@@ -742,7 +742,7 @@ linter:
     if (block.isEmpty) {
       throw SampleCheckerException('$line: Empty ```dart block in sample code.');
     }
-    if (block.first.startsWith('new ') || block.first.startsWith('const ') || block.first.startsWith(_constructorRegExp)) {
+    if (block.first.startsWith('new ') || block.first.startsWith(_constructorRegExp)) {
       _expressionId += 1;
       return Section.surround(line, 'dynamic expression$_expressionId = ', block.toList(), ';');
     } else if (block.first.startsWith('await ')) {
