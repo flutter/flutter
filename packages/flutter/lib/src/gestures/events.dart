@@ -519,16 +519,14 @@ class PointerEnterEvent extends PointerEvent {
   /// Creates an enter event from a [PointerEvent].
   ///
   /// This is used by the [MouseTracker] to synthesize enter events.
-  PointerEnterEvent.fromMouseEvent(PointerEvent event) : super(
+  PointerEnterEvent.fromMouseEvent(PointerEvent event) : this(
     timeStamp: event?.timeStamp,
     kind: event?.kind,
     device: event?.device,
     position: event?.position,
     delta: event?.delta,
     buttons: event?.buttons,
-    down: event?.down,
     obscured: event?.obscured,
-    pressure: event?.pressure,
     pressureMin: event?.pressureMin,
     pressureMax: event?.pressureMax,
     distance: event?.distance,
@@ -610,16 +608,14 @@ class PointerExitEvent extends PointerEvent {
   /// Creates an exit event from a [PointerEvent].
   ///
   /// This is used by the [MouseTracker] to synthesize exit events.
-  PointerExitEvent.fromMouseEvent(PointerEvent event) : super(
+  PointerExitEvent.fromMouseEvent(PointerEvent event) : this(
     timeStamp: event?.timeStamp,
     kind: event?.kind,
     device: event?.device,
     position: event?.position,
     delta: event?.delta,
     buttons: event?.buttons,
-    down: event?.down,
     obscured: event?.obscured,
-    pressure: event?.pressure,
     pressureMin: event?.pressureMin,
     pressureMax: event?.pressureMax,
     distance: event?.distance,
