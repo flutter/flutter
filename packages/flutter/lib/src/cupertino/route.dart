@@ -631,15 +631,21 @@ class _CupertinoBackGestureController<T> {
       );
       controller.animateTo(1.0, duration: Duration(milliseconds: droppedPageForwardAnimationTime), curve: animationCurve);
     } else {
+      // This route is destined to pop at this point. Reuse navigator's pop.
       navigator.pop();
 
+      // The popping may have finished inline if already at the target destination.
       if (controller.isAnimating) {
+        // Otherwise, use a custom popping animation duration and curve.
         final int droppedPageBackAnimationTime = lerpDouble(0, _kMaxDroppedSwipePageForwardAnimationTime, controller.value).floor();
         controller.animateBack(0.0, duration: Duration(milliseconds: droppedPageBackAnimationTime), curve: animationCurve);
       }
     }
 
     if (controller.isAnimating) {
+      // Keep the userGestureInProgress in true state so we don't change the
+      // curve of the page transition mid-flight since CupertinoPageTransition
+      // depends on userGestureInProgress.
       AnimationStatusListener animationStatusCallback;
       animationStatusCallback = (AnimationStatus status) {
         navigator.didStopUserGesture();
