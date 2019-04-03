@@ -429,7 +429,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
   }
 
   static const double _defaultTrackHeight = 2;
-  static const SliderTrackShape _defaultTrackShape = StadiumSliderTrackShape();
+  static const SliderTrackShape _defaultTrackShape = RoundedRectSliderTrackShape();
   static const SliderTickMarkShape _defaultTickMarkShape = RoundSliderTickMarkShape();
   static const SliderComponentShape _defaultThumbShape = RoundSliderThumbShape();
   static const SliderComponentShape _defaultOverlayShape = RoundSliderOverlayShape();
@@ -441,7 +441,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     assert(debugCheckHasMaterial(context));
     assert(debugCheckHasMediaQuery(context));
 
-    ThemeData theme = Theme.of(context);
+    final ThemeData theme = Theme.of(context);
     SliderThemeData sliderTheme = SliderTheme.of(context);
 
     // If the widget has active or inactive colors specified, then we plug them
@@ -520,7 +520,6 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
       divisions: divisions,
       label: label,
       sliderTheme: sliderTheme,
-      theme: Theme.of(context),
       mediaQueryData: mediaQueryData,
       onChanged: onChanged,
       onChangeStart: onChangeStart,
@@ -558,7 +557,6 @@ class _RenderSlider extends RenderBox {
     int divisions,
     String label,
     SliderThemeData sliderTheme,
-    ThemeData theme,
     MediaQueryData mediaQueryData,
     TargetPlatform platform,
     ValueChanged<double> onChanged,

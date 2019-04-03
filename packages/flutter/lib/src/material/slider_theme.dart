@@ -281,7 +281,7 @@ class SliderThemeData extends Diagnosticable {
       disabledThumbColor: primaryColorDark.withAlpha(disabledThumbAlpha),
       overlayColor: primaryColor.withAlpha(overlayAlpha),
       valueIndicatorColor: primaryColor.withAlpha(valueIndicatorAlpha),
-      trackShape: const StadiumSliderTrackShape(),
+      trackShape: const RoundedRectSliderTrackShape(),
       tickMarkShape: const RoundSliderTickMarkShape(),
       thumbShape: const RoundSliderThumbShape(),
       overlayShape: const RoundSliderOverlayShape(),
@@ -906,12 +906,13 @@ class _EmptySliderComponentShape extends SliderComponentShape {
 ///
 /// The [SliderTrackShape]s that use this base class are:
 ///   [RectangularSliderTrackShape],
-///   [StadiumSliderTrackShape]
+///   [RoundedRectSliderTrackShape]
 ///
 /// The height is set from [SliderThemeData.trackHeight] and the width is the
 /// width of the parent box, but with the largest shape subtracted out from
 /// [SliderThemeData.thumbShape] and [SliderThemeData.overlayShape].
 abstract class BaseSliderTrackShape {
+  @override
   Rect getPreferredRect({
     RenderBox parentBox,
     Offset offset = Offset.zero,
@@ -957,9 +958,9 @@ abstract class BaseSliderTrackShape {
 ///  * [SliderTrackShape] Base component for creating other custom track
 ///    shapes.
 ///  * [RectangularSliderTrackShape] for a similar track with blunt edges.
-class StadiumSliderTrackShape extends SliderTrackShape with BaseSliderTrackShape {
-  /// Create a slider track that draws 2 rectangles with stadium outer edges.
-  const StadiumSliderTrackShape();
+class RoundedRectSliderTrackShape extends SliderTrackShape with BaseSliderTrackShape {
+  /// Create a slider track that draws 2 rectangles with rounded outer edges.
+  const RoundedRectSliderTrackShape();
 
   @override
   void paint(
@@ -1039,7 +1040,7 @@ class StadiumSliderTrackShape extends SliderTrackShape with BaseSliderTrackShape
 ///    slider of the visual details of the its track.
 ///  * [SliderTrackShape] Base component for creating other custom track
 ///    shapes.
-///  * [StadiumSliderTrackShape] for a similar track with rounded edges.
+///  * [RoundedRectSliderTrackShape] for a similar track with rounded edges.
 class RectangularSliderTrackShape extends SliderTrackShape {
   /// Create a slider track that draws 2 rectangles.
   const RectangularSliderTrackShape({ this.disabledThumbGapWidth = 2.0 });
