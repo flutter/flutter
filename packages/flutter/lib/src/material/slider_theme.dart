@@ -1394,7 +1394,7 @@ class PaddleSliderValueIndicatorShape extends SliderComponentShape {
     final Path path = Path();
     final Offset bottomKnobStart = Offset(
       _bottomLobeRadius * math.cos(_bottomLobeStartAngle),
-      _bottomLobeRadius * math.sin(_bottomLobeStartAngle),
+      _bottomLobeRadius * math.sin(_bottomLobeStartAngle) - 2,
     );
     final Offset bottomNeckRightCenter = bottomKnobStart +
         Offset(
