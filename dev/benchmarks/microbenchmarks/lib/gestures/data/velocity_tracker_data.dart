@@ -309,7 +309,6 @@ final List<PointerEvent> velocityEventData = <PointerEvent>[
   const PointerUpEvent(
     timeStamp: Duration(milliseconds: 216691338),
     pointer: 1,
-    buttons: 0,
     position: Offset(260.28570556640625, 521.7142944335938),
   ),
   const PointerDownEvent(
@@ -417,7 +416,6 @@ final List<PointerEvent> velocityEventData = <PointerEvent>[
   const PointerUpEvent(
     timeStamp: Duration(milliseconds: 216691750),
     pointer: 2,
-    buttons: 0,
     position: Offset(248.0, 499.71429443359375),
   ),
   const PointerDownEvent(
@@ -567,7 +565,6 @@ final List<PointerEvent> velocityEventData = <PointerEvent>[
   const PointerUpEvent(
     timeStamp: Duration(milliseconds: 216692487),
     pointer: 3,
-    buttons: 0,
     position: Offset(223.7142791748047, 538.2857055664062),
   ),
   const PointerDownEvent(
@@ -657,7 +654,6 @@ final List<PointerEvent> velocityEventData = <PointerEvent>[
   const PointerUpEvent(
     timeStamp: Duration(milliseconds: 216692809),
     pointer: 4,
-    buttons: 0,
     position: Offset(249.14285278320312, 335.4285583496094),
   ),
   const PointerDownEvent(
@@ -717,7 +713,6 @@ final List<PointerEvent> velocityEventData = <PointerEvent>[
   const PointerUpEvent(
     timeStamp: Duration(milliseconds: 216693337),
     pointer: 5,
-    buttons: 0,
     position: Offset(222.2857208251953, 440.28570556640625),
   ),
   const PointerDownEvent(
@@ -1299,7 +1294,6 @@ final List<PointerEvent> velocityEventData = <PointerEvent>[
   const PointerUpEvent(
     timeStamp: Duration(milliseconds: 216694802),
     pointer: 6,
-    buttons: 0,
     position: Offset(233.42857360839844, 578.8571166992188),
   ),
   const PointerDownEvent(
@@ -1413,7 +1407,6 @@ final List<PointerEvent> velocityEventData = <PointerEvent>[
   const PointerUpEvent(
     timeStamp: Duration(milliseconds: 216695490),
     pointer: 7,
-    buttons: 0,
     position: Offset(235.7142791748047, 504.0),
   ),
   const PointerDownEvent(
@@ -1485,7 +1478,6 @@ final List<PointerEvent> velocityEventData = <PointerEvent>[
   const PointerUpEvent(
     timeStamp: Duration(milliseconds: 216695993),
     pointer: 8,
-    buttons: 0,
     position: Offset(238.57142639160156, 359.4285583496094),
   ),
   const PointerDownEvent(
@@ -1557,7 +1549,6 @@ final List<PointerEvent> velocityEventData = <PointerEvent>[
   const PointerUpEvent(
     timeStamp: Duration(milliseconds: 216696544),
     pointer: 9,
-    buttons: 0,
     position: Offset(224.2857208251953, 416.28570556640625),
   ),
   const PointerDownEvent(
@@ -1617,7 +1608,6 @@ final List<PointerEvent> velocityEventData = <PointerEvent>[
   const PointerUpEvent(
     timeStamp: Duration(milliseconds: 216697082),
     pointer: 10,
-    buttons: 0,
     position: Offset(233.7142791748047, 431.1428527832031),
   ),
   const PointerDownEvent(
@@ -1695,7 +1685,6 @@ final List<PointerEvent> velocityEventData = <PointerEvent>[
   const PointerUpEvent(
     timeStamp: Duration(milliseconds: 216697558),
     pointer: 11,
-    buttons: 0,
     position: Offset(233.42857360839844, 449.71429443359375),
   ),
   const PointerDownEvent(
@@ -1767,7 +1756,6 @@ final List<PointerEvent> velocityEventData = <PointerEvent>[
   const PointerUpEvent(
     timeStamp: Duration(milliseconds: 216697864),
     pointer: 12,
-    buttons: 0,
     position: Offset(254.2857208251953, 497.71429443359375),
   ),
   const PointerDownEvent(
@@ -1839,7 +1827,6 @@ final List<PointerEvent> velocityEventData = <PointerEvent>[
   const PointerUpEvent(
     timeStamp: Duration(milliseconds: 216698421),
     pointer: 13,
-    buttons: 0,
     position: Offset(241.14285278320312, 451.4285583496094),
   ),
 ];

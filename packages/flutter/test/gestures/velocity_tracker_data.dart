@@ -1906,7 +1906,6 @@ const List<PointerEvent> interruptedVelocityEventData = <PointerEvent>[
   PointerUpEvent(
     timeStamp: Duration(milliseconds: 216698421 + 40),
     pointer: 13,
-    buttons: 0,
     position: Offset(241.14285278320312, 451.4285583496094),
   ),
 ];

@@ -15,7 +15,6 @@ const PointerDownEvent down = PointerDownEvent(
 
 const PointerUpEvent up = PointerUpEvent(
   pointer: 5,
-  buttons: 0,
   position: Offset(11, 9),
 );
 
