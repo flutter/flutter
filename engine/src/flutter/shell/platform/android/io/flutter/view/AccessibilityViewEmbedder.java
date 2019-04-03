@@ -37,7 +37,7 @@ import java.util.Map;
  * for the virtual accessibility node IDs in the platform view's tree. Internally this class maintains a bidirectional
  * mapping between `flutterId`s and the corresponding platform view and `originId`.
  */
-class AccessibilityViewEmbedder {
+final class AccessibilityViewEmbedder {
     private static final String TAG = "AccessibilityBridge";
 
     private final ReflectionAccessors reflectionAccessors;
