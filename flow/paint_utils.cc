@@ -20,8 +20,8 @@ sk_sp<SkShader> CreateCheckerboardShader(SkColor c1, SkColor c2, int size) {
   bm.eraseColor(c1);
   bm.eraseArea(SkIRect::MakeLTRB(0, 0, size, size), c2);
   bm.eraseArea(SkIRect::MakeLTRB(size, size, 2 * size, 2 * size), c2);
-  return SkShader::MakeBitmapShader(bm, SkShader::kRepeat_TileMode,
-                                    SkShader::kRepeat_TileMode);
+  return SkShader::MakeBitmapShader(bm, SkTileMode::kRepeat,
+                                    SkTileMode::kRepeat);
 }
 
 }  // anonymous namespace
