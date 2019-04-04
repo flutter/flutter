@@ -414,6 +414,7 @@ void main() {
 
     expect(value, isFalse);
   });
+  
   testWidgets('Switch is translucent when disabled', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
@@ -431,6 +432,7 @@ void main() {
     expect(find.byType(Opacity), findsOneWidget);
     expect(tester.widget<Opacity>(find.byType(Opacity).first).opacity, 0.5);
   });
+
   testWidgets('Switch is opaque when enabled', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
