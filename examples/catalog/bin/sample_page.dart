@@ -37,7 +37,7 @@ File inputFile(String dir, String name) {
   return File(dir + Platform.pathSeparator + name);
 }
 
-File outputFile(String name, [Directory directory]) {
+File outputFile(String name, [ Directory directory ]) {
   return File((directory ?? outputDirectory).path + Platform.pathSeparator + name);
 }
 

@@ -178,7 +178,7 @@ Future<void> runDemos(List<String> demos, FlutterDriver driver) async {
   await driver.tap(find.byTooltip('Back'));
 }
 
-void main([List<String> args = const <String>[]]) {
+void main([ List<String> args = const <String>[] ]) {
   group('flutter gallery transitions', () {
     FlutterDriver driver;
     setUpAll(() async {

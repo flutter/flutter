@@ -21,7 +21,7 @@ enum _MaterialListType {
 }
 
 class ListDemo extends StatefulWidget {
-  const ListDemo({Key key}) : super(key: key);
+  const ListDemo({ Key key }) : super(key: key);
 
   static const String routeName = '/material/list';
 
@@ -45,7 +45,7 @@ class _ListDemoState extends State<ListDemo> {
     setState(() {
       _itemType = type;
     });
-    _bottomSheet?.setState(() {});
+    _bottomSheet?.setState(() { });
   }
 
   void _showConfigurationSheet() {
@@ -102,7 +102,7 @@ class _ListDemoState extends State<ListDemo> {
                     setState(() {
                       _showAvatars = value;
                     });
-                    _bottomSheet?.setState(() {});
+                    _bottomSheet?.setState(() { });
                   },
                 ),
               ),
@@ -117,7 +117,7 @@ class _ListDemoState extends State<ListDemo> {
                     setState(() {
                       _showIcons = value;
                     });
-                    _bottomSheet?.setState(() {});
+                    _bottomSheet?.setState(() { });
                   },
                 ),
               ),
@@ -132,7 +132,7 @@ class _ListDemoState extends State<ListDemo> {
                     setState(() {
                       _showDividers = value;
                     });
-                    _bottomSheet?.setState(() {});
+                    _bottomSheet?.setState(() { });
                   },
                 ),
               ),
@@ -147,7 +147,7 @@ class _ListDemoState extends State<ListDemo> {
                     setState(() {
                       _dense = value;
                     });
-                    _bottomSheet?.setState(() {});
+                    _bottomSheet?.setState(() { });
                   },
                 ),
               ),

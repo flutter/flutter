@@ -13,7 +13,7 @@ const String _explanatoryText =
     'by its key.';
 
 class _Page {
-  _Page({this.label, this.colors, this.icon});
+  _Page({ this.label, this.colors, this.icon });
 
   final String label;
   final MaterialColor colors;

@@ -67,7 +67,7 @@ class TwoProductCardColumn extends StatelessWidget {
 }
 
 class OneProductCardColumn extends StatelessWidget {
-  const OneProductCardColumn({this.product});
+  const OneProductCardColumn({ this.product });
 
   final Product product;
 

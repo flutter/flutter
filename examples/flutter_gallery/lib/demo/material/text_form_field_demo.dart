@@ -11,7 +11,7 @@ import 'package:flutter/gestures.dart' show DragStartBehavior;
 import '../../gallery/demo.dart';
 
 class TextFormFieldDemo extends StatefulWidget {
-  const TextFormFieldDemo({Key key}) : super(key: key);
+  const TextFormFieldDemo({ Key key }) : super(key: key);
 
   static const String routeName = '/material/text-form-field';
 

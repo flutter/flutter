@@ -34,12 +34,12 @@ const int _kChildCount = 50;
 
 class CupertinoNavigationDemo extends StatelessWidget {
   CupertinoNavigationDemo()
-      : colorItems = List<Color>.generate(_kChildCount, (int index) {
-          return coolColors[math.Random().nextInt(coolColors.length)];
-        }),
-        colorNameItems = List<String>.generate(_kChildCount, (int index) {
-          return coolColorNames[math.Random().nextInt(coolColorNames.length)];
-        });
+    : colorItems = List<Color>.generate(_kChildCount, (int index) {
+        return coolColors[math.Random().nextInt(coolColors.length)];
+      }),
+      colorNameItems = List<String>.generate(_kChildCount, (int index) {
+        return coolColorNames[math.Random().nextInt(coolColorNames.length)];
+      });
 
   static const String routeName = '/cupertino/navigation';
 
@@ -135,7 +135,7 @@ final Widget trailingButtons = Row(
 );
 
 class CupertinoDemoTab1 extends StatelessWidget {
-  const CupertinoDemoTab1({this.colorItems, this.colorNameItems});
+  const CupertinoDemoTab1({ this.colorItems, this.colorNameItems });
 
   final List<Color> colorItems;
   final List<String> colorNameItems;
@@ -180,7 +180,7 @@ class CupertinoDemoTab1 extends StatelessWidget {
 }
 
 class Tab1RowItem extends StatelessWidget {
-  const Tab1RowItem({this.index, this.lastItem, this.color, this.colorName});
+  const Tab1RowItem({ this.index, this.lastItem, this.color, this.colorName });
 
   final int index;
   final bool lastItem;
@@ -242,7 +242,7 @@ class Tab1RowItem extends StatelessWidget {
                   CupertinoIcons.plus_circled,
                   semanticLabel: 'Add',
                 ),
-                onPressed: () {},
+                onPressed: () { },
               ),
               CupertinoButton(
                 padding: EdgeInsets.zero,
@@ -250,7 +250,7 @@ class Tab1RowItem extends StatelessWidget {
                   CupertinoIcons.share,
                   semanticLabel: 'Share',
                 ),
-                onPressed: () {},
+                onPressed: () { },
               ),
             ],
           ),
@@ -275,7 +275,7 @@ class Tab1RowItem extends StatelessWidget {
 }
 
 class Tab1ItemPage extends StatefulWidget {
-  const Tab1ItemPage({this.color, this.colorName, this.index});
+  const Tab1ItemPage({ this.color, this.colorName, this.index });
 
   final Color color;
   final String colorName;
@@ -362,14 +362,14 @@ class Tab1ItemPageState extends State<Tab1ItemPage> {
                                   letterSpacing: -0.28,
                                 ),
                               ),
-                              onPressed: () {},
+                              onPressed: () { },
                             ),
                             CupertinoButton.filled(
                               minSize: 30.0,
                               padding: EdgeInsets.zero,
                               borderRadius: BorderRadius.circular(32.0),
                               child: const Icon(CupertinoIcons.ellipsis),
-                              onPressed: () {},
+                              onPressed: () { },
                             ),
                           ],
                         ),
@@ -412,7 +412,7 @@ class Tab1ItemPageState extends State<Tab1ItemPage> {
                             color: CupertinoColors.white,
                             size: 36.0,
                           ),
-                          onPressed: () {},
+                          onPressed: () { },
                         ),
                       ),
                     ),
@@ -570,7 +570,7 @@ enum Tab2ConversationBubbleColor {
 }
 
 class Tab2ConversationBubble extends StatelessWidget {
-  const Tab2ConversationBubble({this.text, this.color});
+  const Tab2ConversationBubble({ this.text, this.color });
 
   final String text;
   final Tab2ConversationBubbleColor color;
@@ -600,7 +600,7 @@ class Tab2ConversationBubble extends StatelessWidget {
 }
 
 class Tab2ConversationAvatar extends StatelessWidget {
-  const Tab2ConversationAvatar({this.text, this.color});
+  const Tab2ConversationAvatar({ this.text, this.color });
 
   final String text;
   final Color color;
@@ -639,7 +639,7 @@ class Tab2ConversationAvatar extends StatelessWidget {
 }
 
 class Tab2ConversationRow extends StatelessWidget {
-  const Tab2ConversationRow({this.avatar, this.text});
+  const Tab2ConversationRow({ this.avatar, this.text });
 
   final Tab2ConversationAvatar avatar;
   final String text;

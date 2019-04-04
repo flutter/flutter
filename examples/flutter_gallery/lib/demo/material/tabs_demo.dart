@@ -12,7 +12,7 @@ import '../../gallery/demo.dart';
 const String _kGalleryAssetsPackage = 'flutter_gallery_assets';
 
 class _Page {
-  _Page({this.label});
+  _Page({ this.label });
   final String label;
   String get id => label[0];
   @override
@@ -20,7 +20,7 @@ class _Page {
 }
 
 class _CardData {
-  const _CardData({this.title, this.imageAsset, this.imageAssetPackage});
+  const _CardData({ this.title, this.imageAsset, this.imageAssetPackage });
   final String title;
   final String imageAsset;
   final String imageAssetPackage;
@@ -94,7 +94,7 @@ final Map<_Page, List<_CardData>> _allPages = <_Page, List<_CardData>>{
 };
 
 class _CardDataItem extends StatelessWidget {
-  const _CardDataItem({this.page, this.data});
+  const _CardDataItem({ this.page, this.data });
 
   static const double height = 272.0;
   final _Page page;

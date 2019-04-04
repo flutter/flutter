@@ -74,7 +74,7 @@ class CutCornersBorder extends OutlineInputBorder {
     return super.lerpTo(b, t);
   }
 
-  Path _notchedCornerPath(Rect center, [double start = 0.0, double extent = 0.0]) {
+  Path _notchedCornerPath(Rect center, [ double start = 0.0, double extent = 0.0 ]) {
     final Path path = Path();
     if (start > 0.0 || extent > 0.0) {
       path.relativeMoveTo(extent + start, center.top);

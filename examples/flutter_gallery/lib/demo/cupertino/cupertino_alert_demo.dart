@@ -16,7 +16,7 @@ class CupertinoAlertDemo extends StatefulWidget {
 class _CupertinoAlertDemoState extends State<CupertinoAlertDemo> {
   String lastSelectedValue;
 
-  void showDemoDialog({BuildContext context, Widget child}) {
+  void showDemoDialog({ BuildContext context, Widget child }) {
     showCupertinoDialog<String>(
       context: context,
       builder: (BuildContext context) => child,
@@ -29,7 +29,7 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo> {
     });
   }
 
-  void showDemoActionSheet({BuildContext context, Widget child}) {
+  void showDemoActionSheet({ BuildContext context, Widget child }) {
     showCupertinoModalPopup<String>(
       context: context,
       builder: (BuildContext context) => child,
@@ -198,7 +198,7 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo> {
 }
 
 class CupertinoDessertDialog extends StatelessWidget {
-  const CupertinoDessertDialog({Key key, this.title, this.content}) : super(key: key);
+  const CupertinoDessertDialog({ Key key, this.title, this.content }) : super(key: key);
 
   final Widget title;
   final Widget content;

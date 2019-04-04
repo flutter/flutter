@@ -17,11 +17,11 @@ enum DismissDialogAction {
 }
 
 class DateTimeItem extends StatelessWidget {
-  DateTimeItem({Key key, DateTime dateTime, @required this.onChanged})
-      : assert(onChanged != null),
-        date = DateTime(dateTime.year, dateTime.month, dateTime.day),
-        time = TimeOfDay(hour: dateTime.hour, minute: dateTime.minute),
-        super(key: key);
+  DateTimeItem({ Key key, DateTime dateTime, @required this.onChanged })
+    : assert(onChanged != null),
+      date = DateTime(dateTime.year, dateTime.month, dateTime.day),
+      time = TimeOfDay(hour: dateTime.hour, minute: dateTime.minute),
+      super(key: key);
 
   final DateTime date;
   final TimeOfDay time;

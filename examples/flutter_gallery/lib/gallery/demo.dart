@@ -147,7 +147,7 @@ class TabbedComponentDemoScaffold extends StatelessWidget {
 }
 
 class FullScreenCodeDialog extends StatefulWidget {
-  const FullScreenCodeDialog({this.exampleCodeTag});
+  const FullScreenCodeDialog({ this.exampleCodeTag });
 
   final String exampleCodeTag;
 
@@ -214,13 +214,13 @@ class FullScreenCodeDialogState extends State<FullScreenCodeDialog> {
 }
 
 class MaterialDemoDocumentationButton extends StatelessWidget {
-  MaterialDemoDocumentationButton(String routeName, {Key key})
-      : documentationUrl = kDemoDocumentationUrl[routeName],
-        assert(
-          kDemoDocumentationUrl[routeName] != null,
-          'A documentation URL was not specified for demo route $routeName in kAllGalleryDemos',
-        ),
-        super(key: key);
+  MaterialDemoDocumentationButton(String routeName, { Key key })
+    : documentationUrl = kDemoDocumentationUrl[routeName],
+      assert(
+        kDemoDocumentationUrl[routeName] != null,
+        'A documentation URL was not specified for demo route $routeName in kAllGalleryDemos',
+      ),
+      super(key: key);
 
   final String documentationUrl;
 
@@ -235,13 +235,13 @@ class MaterialDemoDocumentationButton extends StatelessWidget {
 }
 
 class CupertinoDemoDocumentationButton extends StatelessWidget {
-  CupertinoDemoDocumentationButton(String routeName, {Key key})
-      : documentationUrl = kDemoDocumentationUrl[routeName],
-        assert(
-          kDemoDocumentationUrl[routeName] != null,
-          'A documentation URL was not specified for demo route $routeName in kAllGalleryDemos',
-        ),
-        super(key: key);
+  CupertinoDemoDocumentationButton(String routeName, { Key key })
+    : documentationUrl = kDemoDocumentationUrl[routeName],
+      assert(
+        kDemoDocumentationUrl[routeName] != null,
+        'A documentation URL was not specified for demo route $routeName in kAllGalleryDemos',
+      ),
+      super(key: key);
 
   final String documentationUrl;
 

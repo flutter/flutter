@@ -109,7 +109,7 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
 }
 
 class ShoppingCartSummary extends StatelessWidget {
-  const ShoppingCartSummary({this.model});
+  const ShoppingCartSummary({ this.model });
 
   final AppStateModel model;
 

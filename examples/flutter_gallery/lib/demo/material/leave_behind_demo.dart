@@ -18,13 +18,13 @@ enum LeaveBehindDemoAction {
 }
 
 class LeaveBehindItem implements Comparable<LeaveBehindItem> {
-  LeaveBehindItem({this.index, this.name, this.subject, this.body});
+  LeaveBehindItem({ this.index, this.name, this.subject, this.body });
 
   LeaveBehindItem.from(LeaveBehindItem item)
-      : index = item.index,
-        name = item.name,
-        subject = item.subject,
-        body = item.body;
+    : index = item.index,
+      name = item.name,
+      subject = item.subject,
+      body = item.body;
 
   final int index;
   final String name;
@@ -36,7 +36,7 @@ class LeaveBehindItem implements Comparable<LeaveBehindItem> {
 }
 
 class LeaveBehindDemo extends StatefulWidget {
-  const LeaveBehindDemo({Key key}) : super(key: key);
+  const LeaveBehindDemo({ Key key }) : super(key: key);
 
   static const String routeName = '/material/leave-behind';
 

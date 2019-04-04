@@ -18,11 +18,11 @@ class SectorConstraints extends Constraints {
   })  : assert(maxDeltaRadius >= minDeltaRadius),
         assert(maxDeltaTheta >= minDeltaTheta);
 
-  const SectorConstraints.tight({double deltaRadius = 0.0, double deltaTheta = 0.0})
-      : minDeltaRadius = deltaRadius,
-        maxDeltaRadius = deltaRadius,
-        minDeltaTheta = deltaTheta,
-        maxDeltaTheta = deltaTheta;
+  const SectorConstraints.tight({ double deltaRadius = 0.0, double deltaTheta = 0.0 })
+    : minDeltaRadius = deltaRadius,
+      maxDeltaRadius = deltaRadius,
+      minDeltaTheta = deltaTheta,
+      maxDeltaTheta = deltaTheta;
 
   final double minDeltaRadius;
   final double maxDeltaRadius;
@@ -54,7 +54,7 @@ class SectorConstraints extends Constraints {
 }
 
 class SectorDimensions {
-  const SectorDimensions({this.deltaRadius = 0.0, this.deltaTheta = 0.0});
+  const SectorDimensions({ this.deltaRadius = 0.0, this.deltaTheta = 0.0 });
 
   factory SectorDimensions.withConstraints(
     SectorConstraints constraints, {
@@ -129,7 +129,7 @@ abstract class RenderSector extends RenderObject {
   @override
   Rect get semanticBounds => Rect.fromLTWH(-deltaRadius, -deltaRadius, 2.0 * deltaRadius, 2.0 * deltaRadius);
 
-  bool hitTest(HitTestResult result, {double radius, double theta}) {
+  bool hitTest(HitTestResult result, { double radius, double theta }) {
     if (radius < parentData.radius ||
         radius >= parentData.radius + deltaRadius ||
         theta < parentData.theta ||
@@ -140,7 +140,7 @@ abstract class RenderSector extends RenderObject {
     return true;
   }
 
-  void hitTestChildren(HitTestResult result, {double radius, double theta}) {}
+  void hitTestChildren(HitTestResult result, { double radius, double theta }) { }
 
   double deltaRadius;
   double deltaTheta;
@@ -201,7 +201,7 @@ class RenderSectorWithChildren extends RenderDecoratedSector
   RenderSectorWithChildren(BoxDecoration decoration) : super(decoration);
 
   @override
-  void hitTestChildren(HitTestResult result, {double radius, double theta}) {
+  void hitTestChildren(HitTestResult result, { double radius, double theta }) {
     RenderSector child = lastChild;
     while (child != null) {
       if (child.hitTest(result, radius: radius, theta: theta))
@@ -455,7 +455,7 @@ class RenderSectorSlice extends RenderSectorWithChildren {
 }
 
 class RenderBoxToRenderSectorAdapter extends RenderBox with RenderObjectWithChildMixin<RenderSector> {
-  RenderBoxToRenderSectorAdapter({double innerRadius = 0.0, RenderSector child}) : _innerRadius = innerRadius {
+  RenderBoxToRenderSectorAdapter({ double innerRadius = 0.0, RenderSector child }) : _innerRadius = innerRadius {
     this.child = child;
   }
 
@@ -544,7 +544,7 @@ class RenderBoxToRenderSectorAdapter extends RenderBox with RenderObjectWithChil
   }
 
   @override
-  bool hitTest(HitTestResult result, {Offset position}) {
+  bool hitTest(HitTestResult result, { Offset position }) {
     if (child == null)
       return false;
     double x = position.dx;

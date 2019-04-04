@@ -10,7 +10,7 @@ import 'package:video_player/video_player.dart';
 import 'package:device_info/device_info.dart';
 
 class VideoCard extends StatelessWidget {
-  const VideoCard({Key key, this.controller, this.title, this.subtitle}) : super(key: key);
+  const VideoCard({ Key key, this.controller, this.title, this.subtitle }) : super(key: key);
 
   final VideoPlayerController controller;
   final String title;
@@ -147,7 +147,7 @@ class _VideoPlayPauseState extends State<VideoPlayPause> {
   _VideoPlayPauseState() {
     listener = () {
       if (mounted)
-        setState(() {});
+        setState(() { });
     };
   }
 
@@ -224,7 +224,7 @@ class _FadeAnimationState extends State<FadeAnimation> with SingleTickerProvider
     );
     animationController.addListener(() {
       if (mounted) {
-        setState(() {});
+        setState(() { });
       }
     });
     animationController.forward(from: 0.0);
@@ -332,7 +332,7 @@ class _ConnectivityOverlayState extends State<ConnectivityOverlay> {
 }
 
 class VideoDemo extends StatefulWidget {
-  const VideoDemo({Key key}) : super(key: key);
+  const VideoDemo({ Key key }) : super(key: key);
 
   static const String routeName = '/video';
 
@@ -374,7 +374,7 @@ class _VideoDemoState extends State<VideoDemo> with SingleTickerProviderStateMix
       await controller.initialize();
       if (mounted) {
         print('< VideoDemo initController "$name" done ${isDisposed ? "DISPOSED" : ""}');
-        setState(() {});
+        setState(() { });
       }
     }
 

@@ -38,16 +38,16 @@ const double _kCornerRadius = 24.0;
 const double _kWidthForCartIcon = 64.0;
 
 class ExpandingBottomSheet extends StatefulWidget {
-  const ExpandingBottomSheet({Key key, @required this.hideController})
-      : assert(hideController != null),
-        super(key: key);
+  const ExpandingBottomSheet({ Key key, @required this.hideController })
+    : assert(hideController != null),
+      super(key: key);
 
   final AnimationController hideController;
 
   @override
   _ExpandingBottomSheetState createState() => _ExpandingBottomSheetState();
 
-  static _ExpandingBottomSheetState of(BuildContext context, {bool isNullOk = false}) {
+  static _ExpandingBottomSheetState of(BuildContext context, { bool isNullOk = false }) {
     assert(isNullOk != null);
     assert(context != null);
     final _ExpandingBottomSheetState result =
@@ -112,7 +112,7 @@ Animation<T> _getEmphasizedEasingAnimation<T>({
 
 // Calculates the value where two double Animations should be joined. Used by
 // callers of _getEmphasisedEasing<double>().
-double _getPeakPoint({double begin, double end}) {
+double _getPeakPoint({ double begin, double end }) {
   return begin + (end - begin) * _kPeakVelocityProgress;
 }
 
