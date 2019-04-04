@@ -439,6 +439,8 @@ abstract class Widget extends DiagnosticableTree {
 /// description of the user interface is fully concrete (e.g., consists
 /// entirely of [RenderObjectWidget]s, which describe concrete [RenderObject]s).
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=wE7khGHVkYY}
+///
 /// Stateless widget are useful when the part of the user interface you are
 /// describing does not depend on anything other than the configuration
 /// information in the object itself and the [BuildContext] in which the widget
@@ -607,6 +609,8 @@ abstract class StatelessWidget extends Widget {
 /// depend only on the configuration information in the object itself and the
 /// [BuildContext] in which the widget is inflated, consider using
 /// [StatelessWidget].
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=AqCMFXEmf3w}
 ///
 /// [StatefulWidget] instances themselves are immutable and store their mutable
 /// state either in separate [State] objects that are created by the
@@ -1483,6 +1487,8 @@ abstract class ParentDataWidget<T extends RenderObjectWidget> extends ProxyWidge
 ///
 /// Inherited widgets, when referenced in this way, will cause the consumer to
 /// rebuild when the inherited widget itself changes state.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=Zbm3hjPjQMk}
 ///
 /// {@tool sample}
 ///
