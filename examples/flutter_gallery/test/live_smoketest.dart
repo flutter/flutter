@@ -138,7 +138,10 @@ class _LiveWidgetController extends LiveWidgetController {
 
   Future<void> scrollIntoView(Finder finder, { double alignment }) async {
     final Finder target = await _waitForElement(finder);
-    await Scrollable.ensureVisible(target.evaluate().single,
-        duration: const Duration(milliseconds: 100), alignment: alignment);
+    await Scrollable.ensureVisible(
+      target.evaluate().single,
+      duration: const Duration(milliseconds: 100),
+      alignment: alignment,
+    );
   }
 }

@@ -589,7 +589,9 @@ class Tab2ConversationBubble extends StatelessWidget {
       child: Text(
         text,
         style: TextStyle(
-          color: color == Tab2ConversationBubbleColor.blue ? CupertinoColors.white : CupertinoColors.black,
+          color: color == Tab2ConversationBubbleColor.blue //
+              ? CupertinoColors.white
+              : CupertinoColors.black,
           letterSpacing: -0.4,
           fontSize: 15.0,
           fontWeight: FontWeight.w400,
@@ -654,7 +656,9 @@ class Tab2ConversationRow extends StatelessWidget {
     children.add(
       Tab2ConversationBubble(
         text: text,
-        color: isSelf ? Tab2ConversationBubbleColor.blue : Tab2ConversationBubbleColor.gray,
+        color: isSelf //
+            ? Tab2ConversationBubbleColor.blue
+            : Tab2ConversationBubbleColor.gray,
       ),
     );
     return SafeArea(

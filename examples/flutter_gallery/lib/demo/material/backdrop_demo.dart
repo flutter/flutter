@@ -337,7 +337,9 @@ class _BackdropDemoState extends State<BackdropDemo> with SingleTickerProviderSt
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(4.0)),
         ),
-        color: selected ? Colors.white.withOpacity(0.25) : Colors.transparent,
+        color: selected //
+            ? Colors.white.withOpacity(0.25)
+            : Colors.transparent,
         child: ListTile(
           title: Text(category.title),
           selected: selected,

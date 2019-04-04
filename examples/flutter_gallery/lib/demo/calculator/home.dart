@@ -252,7 +252,9 @@ class CalcKey extends StatelessWidget {
         child: Center(
           child: Text(
             text,
-            style: TextStyle(fontSize: (orientation == Orientation.portrait) ? 32.0 : 24.0),
+            style: TextStyle(
+              fontSize: (orientation == Orientation.portrait) ? 32.0 : 24.0,
+            ),
           ),
         ),
       ),

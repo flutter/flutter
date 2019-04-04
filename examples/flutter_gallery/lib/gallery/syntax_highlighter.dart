@@ -121,12 +121,7 @@ class DartSyntaxHighlighter extends SyntaxHighlighter {
     'yield',
   ];
 
-  static const List<String> _builtInTypes = <String>[
-    'int',
-    'double',
-    'num',
-    'bool',
-  ];
+  static const List<String> _builtInTypes = <String>['int', 'double', 'num', 'bool'];
 
   String _src;
   StringScanner _scanner;
@@ -276,7 +271,11 @@ class DartSyntaxHighlighter extends SyntaxHighlighter {
 
       // Integer
       if (_scanner.scan(RegExp(r'\d+'))) {
-        _spans.add(_HighlightSpan(_HighlightType.number, _scanner.lastMatch.start, _scanner.lastMatch.end));
+        _spans.add(_HighlightSpan(
+          _HighlightType.number,
+          _scanner.lastMatch.start,
+          _scanner.lastMatch.end,
+        ));
         continue;
       }
 

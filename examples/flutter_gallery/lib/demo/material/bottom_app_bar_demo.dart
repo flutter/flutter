@@ -375,7 +375,9 @@ class _DemoBottomAppBar extends StatelessWidget {
       ),
       IconButton(
         icon: Icon(
-          Theme.of(context).platform == TargetPlatform.iOS ? Icons.more_horiz : Icons.more_vert,
+          Theme.of(context).platform == TargetPlatform.iOS //
+              ? Icons.more_horiz
+              : Icons.more_vert,
           semanticLabel: 'Show menu actions',
         ),
         onPressed: () {

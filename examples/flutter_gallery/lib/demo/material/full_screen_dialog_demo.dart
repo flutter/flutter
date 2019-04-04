@@ -66,7 +66,9 @@ class DateTimeItem extends StatelessWidget {
           Container(
             margin: const EdgeInsets.only(left: 8.0),
             padding: const EdgeInsets.symmetric(vertical: 8.0),
-            decoration: BoxDecoration(border: Border(bottom: BorderSide(color: theme.dividerColor))),
+            decoration: BoxDecoration(
+              border: Border(bottom: BorderSide(color: theme.dividerColor)),
+            ),
             child: InkWell(
               onTap: () {
                 showTimePicker(

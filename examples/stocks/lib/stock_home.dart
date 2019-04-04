@@ -225,7 +225,9 @@ class StockHomeState extends State<StockHome> {
   }
 
   static Iterable<Stock> _getStockList(StockData stocks, Iterable<String> symbols) {
-    return symbols.map<Stock>((String symbol) => stocks[symbol]).where((Stock stock) => stock != null);
+    return symbols //
+        .map<Stock>((String symbol) => stocks[symbol])
+        .where((Stock stock) => stock != null);
   }
 
   Iterable<Stock> _filterBySearchQuery(Iterable<Stock> stocks) {

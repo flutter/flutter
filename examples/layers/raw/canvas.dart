@@ -52,12 +52,10 @@ ui.Picture paint(ui.Rect paintBounds) {
 
   // Scale x and y by 0.5.
   final Float64List scaleMatrix = Float64List.fromList(<double>[
-    // @formatter:off
-    0.5, 0.0, 0.0, 0.0,
+    0.5, 0.0, 0.0, 0.0, //
     0.0, 0.5, 0.0, 0.0,
     0.0, 0.0, 1.0, 0.0,
     0.0, 0.0, 0.0, 1.0,
-    // @formatter:on
   ]);
   canvas.transform(scaleMatrix);
   paint.color = const ui.Color.fromARGB(128, 0, 255, 0);

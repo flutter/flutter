@@ -64,7 +64,9 @@ class AppStateModel extends Model {
     if (_selectedCategory == Category.all) {
       return List<Product>.from(_availableProducts);
     } else {
-      return _availableProducts.where((Product p) => p.category == _selectedCategory).toList();
+      return _availableProducts //
+          .where((Product p) => p.category == _selectedCategory)
+          .toList();
     }
   }
 

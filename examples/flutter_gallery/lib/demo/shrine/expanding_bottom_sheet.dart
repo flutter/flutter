@@ -50,8 +50,9 @@ class ExpandingBottomSheet extends StatefulWidget {
   static _ExpandingBottomSheetState of(BuildContext context, { bool isNullOk = false }) {
     assert(isNullOk != null);
     assert(context != null);
-    final _ExpandingBottomSheetState result =
-        context.ancestorStateOfType(const TypeMatcher<_ExpandingBottomSheetState>());
+    final _ExpandingBottomSheetState result = context.ancestorStateOfType(
+      const TypeMatcher<_ExpandingBottomSheetState>(),
+    );
     if (isNullOk || result != null) {
       return result;
     }
@@ -222,7 +223,9 @@ class _ExpandingBottomSheetState extends State<ExpandingBottomSheet> with Ticker
     return Tween<double>(begin: 1.0, end: 0.0).animate(
       CurvedAnimation(
         parent: _controller.view,
-        curve: _controller.status == AnimationStatus.forward ? const Interval(0.0, 0.3) : const Interval(0.532, 0.766),
+        curve: _controller.status == AnimationStatus.forward //
+            ? const Interval(0.0, 0.3)
+            : const Interval(0.532, 0.766),
       ),
     );
   }
@@ -230,7 +233,9 @@ class _ExpandingBottomSheetState extends State<ExpandingBottomSheet> with Ticker
   Animation<double> _getCartOpacityAnimation() {
     return CurvedAnimation(
       parent: _controller.view,
-      curve: _controller.status == AnimationStatus.forward ? const Interval(0.3, 0.6) : const Interval(0.766, 1.0),
+      curve: _controller.status == AnimationStatus.forward //
+          ? const Interval(0.3, 0.6)
+          : const Interval(0.766, 1.0),
     );
   }
 
@@ -350,7 +355,9 @@ class _ExpandingBottomSheetState extends State<ExpandingBottomSheet> with Ticker
           ),
           elevation: 4.0,
           color: kShrinePink50,
-          child: _cartIsVisible ? _buildShoppingCartPage() : _buildThumbnails(numProducts),
+          child: _cartIsVisible //
+              ? _buildShoppingCartPage()
+              : _buildThumbnails(numProducts),
         ),
       ),
     );

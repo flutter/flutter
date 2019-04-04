@@ -230,7 +230,9 @@ class _ListDemoState extends State<ListDemo> {
           ),
           IconButton(
             icon: Icon(
-              Theme.of(context).platform == TargetPlatform.iOS ? Icons.more_horiz : Icons.more_vert,
+              Theme.of(context).platform == TargetPlatform.iOS //
+                  ? Icons.more_horiz
+                  : Icons.more_vert,
             ),
             tooltip: 'Show menu',
             onPressed: _bottomSheet == null ? _showConfigurationSheet : null,

@@ -187,14 +187,17 @@ class _ListDemoState extends State<ReorderableListDemo> {
             onPressed: () {
               setState(() {
                 _reverseSort = !_reverseSort;
-                _items.sort((_ListItem a, _ListItem b) =>
-                    _reverseSort ? b.value.compareTo(a.value) : a.value.compareTo(b.value));
+                _items.sort((_ListItem a, _ListItem b) {
+                  return _reverseSort ? b.value.compareTo(a.value) : a.value.compareTo(b.value);
+                });
               });
             },
           ),
           IconButton(
             icon: Icon(
-              Theme.of(context).platform == TargetPlatform.iOS ? Icons.more_horiz : Icons.more_vert,
+              Theme.of(context).platform == TargetPlatform.iOS //
+                  ? Icons.more_horiz
+                  : Icons.more_vert,
             ),
             tooltip: 'Show menu',
             onPressed: _bottomSheet == null ? _showConfigurationSheet : null,

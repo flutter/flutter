@@ -110,7 +110,9 @@ class _CardDataItem extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
             Align(
-              alignment: page.id == 'H' ? Alignment.centerLeft : Alignment.centerRight,
+              alignment: page.id == 'H' //
+                  ? Alignment.centerLeft
+                  : Alignment.centerRight,
               child: CircleAvatar(child: Text('${page.id}')),
             ),
             SizedBox(
@@ -155,10 +157,8 @@ class TabsDemo extends StatelessWidget {
                   expandedHeight: 150.0,
                   forceElevated: innerBoxIsScrolled,
                   bottom: TabBar(
-                    tabs: _allPages.keys
-                        .map<Widget>(
-                          (_Page page) => Tab(text: page.label),
-                        )
+                    tabs: _allPages.keys //
+                        .map<Widget>((_Page page) => Tab(text: page.label))
                         .toList(),
                   ),
                 ),

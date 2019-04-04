@@ -208,8 +208,12 @@ class _PestoLogoState extends State<PestoLogo> {
   static const double kLogoWidth = 220.0;
   static const double kImageHeight = 108.0;
   static const double kTextHeight = 48.0;
-  final TextStyle titleStyle =
-      const PestoStyle(fontSize: kTextHeight, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 3.0);
+  final TextStyle titleStyle = const PestoStyle(
+    fontSize: kTextHeight,
+    fontWeight: FontWeight.w900,
+    color: Colors.white,
+    letterSpacing: 3.0,
+  );
   final RectTween _textRectTween = RectTween(
     begin: Rect.fromLTWH(0.0, kLogoHeight, kLogoWidth, kTextHeight),
     end: Rect.fromLTWH(0.0, kImageHeight, kLogoWidth, kTextHeight),
