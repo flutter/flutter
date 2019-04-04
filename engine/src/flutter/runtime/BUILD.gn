@@ -101,17 +101,18 @@ test_fixtures("runtime_fixtures") {
   fixtures = [ "fixtures/simple_main.dart" ]
 }
 
-source_set("runtime_unittests_common") {
-  visibility = [ ":*" ]
-
+executable("runtime_unittests") {
   testonly = true
 
   sources = [
+    "dart_isolate_unittests.cc",
+    "dart_service_isolate_unittests.cc",
+    "dart_vm_unittests.cc",
     "runtime_test.cc",
     "runtime_test.h",
   ]
 
-  public_deps = [
+  deps = [
     ":libdart",
     ":runtime",
     ":runtime_fixtures",
@@ -122,36 +123,6 @@ source_set("runtime_unittests_common") {
     "$flutter_root/testing:dart",
     "//third_party/skia",
     "//third_party/tonic",
-  ]
-}
-
-executable("runtime_unittests") {
-  testonly = true
-
-  sources = [
-    "dart_isolate_unittests.cc",
-    "dart_service_isolate_unittests.cc",
-    "dart_vm_unittests.cc",
-  ]
-
-  deps = [
-    ":runtime_unittests_common",
-  ]
-
-  if (is_linux) {
-    ldflags = [ "-rdynamic" ]
-  }
-}
-
-executable("runtime_lifecycle_unittests") {
-  testonly = true
-
-  sources = [
-    "dart_lifecycle_unittests.cc",
-  ]
-
-  deps = [
-    ":runtime_unittests_common",
   ]
 
   if (is_linux) {

@@ -29,8 +29,6 @@ using UnhandledExceptionCallback =
 // callback that generates the mapping from these paths.
 // https://github.com/flutter/flutter/issues/26783
 using MappingCallback = std::function<std::unique_ptr<fml::Mapping>(void)>;
-using MappingsCallback =
-    std::function<std::vector<std::unique_ptr<const fml::Mapping>>(void)>;
 
 struct Settings {
   Settings();
@@ -55,10 +53,8 @@ struct Settings {
   MappingCallback dart_library_sources_kernel;
 
   std::string application_library_path;
-
-  std::string application_kernel_asset;       // deprecated
-  std::string application_kernel_list_asset;  // deprecated
-  MappingsCallback application_kernels;
+  std::string application_kernel_asset;
+  std::string application_kernel_list_asset;
 
   std::string temp_directory_path;
   std::vector<std::string> dart_flags;
