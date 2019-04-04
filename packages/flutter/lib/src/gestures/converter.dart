@@ -403,6 +403,7 @@ class PointerEventConverter {
                   device: datum.device,
                   position: position,
                   delta: offset,
+                  // TODO(tongmu): Move button patching to embedder, https://github.com/flutter/flutter/issues/30454
                   buttons: datum.buttons | kPrimaryButton,
                   obscured: datum.obscured,
                   pressureMin: datum.pressureMin,
