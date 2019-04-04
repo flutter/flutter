@@ -208,7 +208,7 @@ void main() {
                   child: Container(
                     height: 100.0,
                     child: Text('Tile $i'),
-                  )
+                  ),
                 );
                 children.add(sliver);
                 return SliverPadding(
@@ -249,7 +249,7 @@ void main() {
                     child: Container(
                       width: 100.0,
                       child: Text('Tile $i'),
-                    )
+                    ),
                 );
                 children.add(sliver);
                 return SliverPadding(
@@ -290,7 +290,7 @@ void main() {
                     child: Container(
                       height: 100.0,
                       child: Text('Tile $i'),
-                    )
+                    ),
                 );
                 children.add(sliver);
                 return SliverPadding(
@@ -332,7 +332,7 @@ void main() {
                     child: Container(
                       width: 100.0,
                       child: Text('Tile $i'),
-                    )
+                    ),
                 );
                 children.add(sliver);
                 return SliverPadding(
@@ -517,7 +517,7 @@ void main() {
   group('Nested viewports (same orientation) showOnScreen', () {
     List<Widget> children;
 
-    Future<void> buildNestedScroller({WidgetTester tester, ScrollController inner, ScrollController outer}) {
+    Future<void> buildNestedScroller({ WidgetTester tester, ScrollController inner, ScrollController outer }) {
       return tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
@@ -547,7 +547,7 @@ void main() {
                   ),
                   Container(
                     height: 200.0,
-                  )
+                  ),
                 ],
               ),
             ),

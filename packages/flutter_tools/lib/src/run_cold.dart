@@ -44,7 +44,7 @@ class ColdRunner extends ResidentRunner {
     Completer<DebugConnectionInfo> connectionInfoCompleter,
     Completer<void> appStartedCompleter,
     String route,
-    bool shouldBuild = true
+    bool shouldBuild = true,
   }) async {
     final bool prebuiltMode = applicationBinary != null;
     if (!prebuiltMode) {

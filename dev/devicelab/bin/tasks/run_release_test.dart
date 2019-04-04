@@ -42,7 +42,7 @@ void main() {
         .transform<String>(const LineSplitter())
         .listen((String line) {
           print('run:stderr: $line');
-          stdout.add(line);
+          stderr.add(line);
         });
       run.exitCode.then<void>((int exitCode) { runExitCode = exitCode; });
       await Future.any<dynamic>(<Future<dynamic>>[ ready.future, run.exitCode ]);

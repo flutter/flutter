@@ -224,4 +224,15 @@ class SystemChannels {
     StandardMethodCodec(),
   );
 
+  /// A [MethodChannel] for configuring the Skia graphics library.
+  ///
+  /// The following outgoing methods are defined for this channel (invoked using
+  /// [OptionalMethodChannel.invokeMethod]):
+  ///
+  ///  * `Skia.setResourceCacheMaxBytes`: Set the maximum number of bytes that
+  ///    can be held in the GPU resource cache.
+  static const MethodChannel skia = MethodChannel(
+    'flutter/skia',
+    JSONMethodCodec(),
+  );
 }

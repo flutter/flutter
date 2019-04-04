@@ -46,15 +46,28 @@ BuildApp() {
     target_path="${FLUTTER_TARGET}"
   fi
 
+  local derived_dir="${SOURCE_ROOT}/Flutter"
+  if [[ -e "${project_path}/.ios" ]]; then
+    derived_dir="${project_path}/.ios/Flutter"
+  fi
+
+  # Default value of assets_path is flutter_assets
+  local assets_path="flutter_assets"
+  # The value of assets_path can set by add FLTAssetsPath to AppFrameworkInfo.plist
+  FLTAssetsPath=$(/usr/libexec/PlistBuddy -c "Print :FLTAssetsPath" "${derived_dir}/AppFrameworkInfo.plist" 2>/dev/null)
+  if [[ -n "$FLTAssetsPath" ]]; then
+    assets_path="${FLTAssetsPath}"
+  fi
+
   # Use FLUTTER_BUILD_MODE if it's set, otherwise use the Xcode build configuration name
   # This means that if someone wants to use an Xcode build config other than Debug/Profile/Release,
   # they _must_ set FLUTTER_BUILD_MODE so we know what type of artifact to build.
   local build_mode="$(echo "${FLUTTER_BUILD_MODE:-${CONFIGURATION}}" | tr "[:upper:]" "[:lower:]")"
   local artifact_variant="unknown"
   case "$build_mode" in
-    release*) build_mode="release"; artifact_variant="ios-release";;
-    profile*) build_mode="profile"; artifact_variant="ios-profile";;
-    debug*) build_mode="debug"; artifact_variant="ios";;
+    *release*) build_mode="release"; artifact_variant="ios-release";;
+    *profile*) build_mode="profile"; artifact_variant="ios-profile";;
+    *debug*) build_mode="debug"; artifact_variant="ios";;
     *)
       EchoError "========================================================================"
       EchoError "ERROR: Unknown FLUTTER_BUILD_MODE: ${build_mode}."
@@ -87,18 +100,19 @@ BuildApp() {
   AssertExists "${framework_path}"
   AssertExists "${project_path}"
 
-  local derived_dir="${SOURCE_ROOT}/Flutter"
-  if [[ -e "${project_path}/.ios" ]]; then
-    derived_dir="${project_path}/.ios/Flutter"
-  fi
   RunCommand mkdir -p -- "$derived_dir"
   AssertExists "$derived_dir"
 
   RunCommand rm -rf -- "${derived_dir}/App.framework"
 
+  local flutter_engine_flag=""
   local local_engine_flag=""
   local flutter_framework="${framework_path}/Flutter.framework"
   local flutter_podspec="${framework_path}/Flutter.podspec"
+
+  if [[ -n "$FLUTTER_ENGINE" ]]; then
+    flutter_engine_flag="--local-engine-src-path=${FLUTTER_ENGINE}"
+  fi
 
   if [[ -n "$LOCAL_ENGINE" ]]; then
     if [[ $(echo "$LOCAL_ENGINE" | tr "[:upper:]" "[:lower:]") != *"$build_mode"* ]]; then
@@ -114,8 +128,8 @@ BuildApp() {
       exit -1
     fi
     local_engine_flag="--local-engine=${LOCAL_ENGINE}"
-    flutter_framework="${LOCAL_ENGINE}/Flutter.framework"
-    flutter_podspec="${LOCAL_ENGINE}/Flutter.podspec"
+    flutter_framework="${FLUTTER_ENGINE}/out/${LOCAL_ENGINE}/Flutter.framework"
+    flutter_podspec="${FLUTTER_ENGINE}/out/${LOCAL_ENGINE}/Flutter.podspec"
   fi
 
   if [[ -e "${project_path}/.ios" ]]; then
@@ -168,6 +182,7 @@ BuildApp() {
       --target="${target_path}"                                             \
       --${build_mode}                                                       \
       --ios-arch="${archs}"                                                 \
+      ${flutter_engine_flag}                                                \
       ${local_engine_flag}                                                  \
       ${track_widget_creation_flag}
 
@@ -242,8 +257,9 @@ BuildApp() {
     --target="${target_path}"                                               \
     --${build_mode}                                                         \
     --depfile="${build_dir}/snapshot_blob.bin.d"                            \
-    --asset-dir="${derived_dir}/App.framework/flutter_assets"               \
+    --asset-dir="${derived_dir}/App.framework/${assets_path}"               \
     ${precompilation_flag}                                                  \
+    ${flutter_engine_flag}                                                  \
     ${local_engine_flag}                                                    \
     ${track_widget_creation_flag}
 

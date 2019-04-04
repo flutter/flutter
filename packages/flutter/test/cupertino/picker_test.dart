@@ -23,7 +23,7 @@ void main() {
               child: CupertinoPicker(
                 scrollController: controller,
                 itemExtent: 50.0,
-                onSelectedItemChanged: (_) {},
+                onSelectedItemChanged: (_) { },
                 children: List<Widget>.generate(3, (int index) {
                   return Container(
                     height: 50.0,
@@ -79,7 +79,7 @@ void main() {
                   Text('1'),
                   Text('1'),
                 ],
-                onSelectedItemChanged: (int i) {},
+                onSelectedItemChanged: (int i) { },
               ),
             ),
           ),
@@ -121,7 +121,7 @@ void main() {
                   Text('1'),
                   Text('1'),
                 ],
-                onSelectedItemChanged: (int i) {},
+                onSelectedItemChanged: (int i) { },
               ),
             ),
           ),
@@ -154,7 +154,7 @@ void main() {
                   Text('1'),
                   Text('1'),
                 ],
-                onSelectedItemChanged: (int i) {},
+                onSelectedItemChanged: (int i) { },
               ),
             ),
           ),
@@ -298,7 +298,7 @@ void main() {
       );
 
       // Drag it by a bit but not enough to move to the next item.
-      await tester.drag(find.text('10'), const Offset(0.0, 30.0));
+      await tester.drag(find.text('10'), const Offset(0.0, 30.0), touchSlopY: 0.0);
 
       // The item that was in the center now moved a bit.
       expect(
@@ -315,7 +315,7 @@ void main() {
       expect(selectedItems.isEmpty, true);
 
       // Drag it by enough to move to the next item.
-      await tester.drag(find.text('10'), const Offset(0.0, 70.0));
+      await tester.drag(find.text('10'), const Offset(0.0, 70.0), touchSlopY: 0.0);
 
       await tester.pumpAndSettle();
 

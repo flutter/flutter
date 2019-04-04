@@ -35,9 +35,6 @@ class Usage {
     final FlutterVersion flutterVersion = FlutterVersion.instance;
     final String version = versionOverride ?? flutterVersion.getVersionString(redactUnknownBranches: true);
     _analytics = AnalyticsIO(_kFlutterUA, settingsName, version,
-        // Analyzer doesn't recognize that [Directory] objects match up due to a
-        // conditional import.
-        // ignore: argument_type_not_assignable
         documentDirectory: configDirOverride != null ? fs.directory(configDirOverride) : null);
 
     // Report a more detailed OS version string than package:usage does by default.
@@ -94,8 +91,11 @@ class Usage {
     _analytics.sendScreenView(command, parameters: parameters);
   }
 
-  void sendEvent(String category, String parameter,
-      { Map<String, String> parameters }) {
+  void sendEvent(
+    String category,
+    String parameter, {
+    Map<String, String> parameters,
+  }) {
     if (suppressAnalytics)
       return;
 
@@ -109,7 +109,7 @@ class Usage {
     String variableName,
     Duration duration, {
     String label,
-    }) {
+  }) {
     if (!suppressAnalytics) {
       _analytics.sendTiming(
         variableName,

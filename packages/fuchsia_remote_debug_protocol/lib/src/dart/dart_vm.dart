@@ -164,13 +164,13 @@ class DartVm {
     Duration timeout = _kRpcTimeout,
   }) async {
     final Map<String, dynamic> result = await _peer
-        .sendRequest(function, params ?? <String, dynamic>{})
-        .timeout(timeout, onTimeout: () {
-      throw TimeoutException(
-        'Peer connection timed out during RPC call',
-        timeout,
-      );
-    });
+      .sendRequest(function, params ?? <String, dynamic>{})
+      .timeout(timeout, onTimeout: () {
+        throw TimeoutException(
+          'Peer connection timed out during RPC call',
+          timeout,
+        );
+      });
     return result;
   }
 

@@ -67,7 +67,7 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
         ),
         child: GestureDetector(
           // Blocks taps from propagating to the modal sheet and popping.
-          onTap: () {},
+          onTap: () { },
           child: SafeArea(
             top: false,
             child: picker,

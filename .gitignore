@@ -32,6 +32,9 @@
 /packages/flutter/coverage/
 version
 
+# packages file containing multi-root paths
+.packages.generated
+
 # Flutter/Dart/Pub related
 **/doc/api/
 .dart_tool/

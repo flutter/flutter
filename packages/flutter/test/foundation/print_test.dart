@@ -12,29 +12,29 @@ void main() {
   test('debugPrint', () {
     expect(
       captureOutput(() { debugPrintSynchronously('Hello, world'); }),
-      equals(<String>['Hello, world'])
+      equals(<String>['Hello, world']),
     );
 
     expect(
       captureOutput(() { debugPrintSynchronously('Hello, world', wrapWidth: 10); }),
-      equals(<String>['Hello,\nworld'])
+      equals(<String>['Hello,\nworld']),
     );
 
     for (int i = 0; i < 14; ++i) {
       expect(
         captureOutput(() { debugPrintSynchronously('Hello,   world', wrapWidth: i); }),
-        equals(<String>['Hello,\nworld'])
+        equals(<String>['Hello,\nworld']),
       );
     }
 
     expect(
       captureOutput(() { debugPrintThrottled('Hello, world'); }),
-      equals(<String>['Hello, world'])
+      equals(<String>['Hello, world']),
     );
 
     expect(
       captureOutput(() { debugPrintThrottled('Hello, world', wrapWidth: 10); }),
-      equals(<String>['Hello,', 'world'])
+      equals(<String>['Hello,', 'world']),
     );
   });
 

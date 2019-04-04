@@ -1,6 +1,11 @@
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'package:flutter/material.dart';
 
 import 'common.dart';
+import 'src/cubic_bezier.dart';
 import 'src/cull_opacity.dart';
 
 const String kMacrobenchmarks ='Macrobenchmarks';
@@ -16,6 +21,7 @@ class MacrobenchmarksApp extends StatelessWidget {
       routes: <String, WidgetBuilder>{
         '/': (BuildContext context) => HomePage(),
         kCullOpacityRouteName: (BuildContext context) => CullOpacityPage(),
+        kCubicBezierRouteName: (BuildContext context) => CubicBezierPage(),
       },
     );
   }
@@ -34,7 +40,14 @@ class HomePage extends StatelessWidget {
             onPressed: (){
               Navigator.pushNamed(context, kCullOpacityRouteName);
             },
-          )
+          ),
+          RaisedButton(
+            key: const Key(kCubicBezierRouteName),
+            child: const Text('Cubic Bezier'),
+            onPressed: (){
+              Navigator.pushNamed(context, kCubicBezierRouteName);
+            },
+          ),
         ],
       ),
     );

@@ -71,11 +71,13 @@ abstract class InputBorder extends ShapeBorder {
   /// [gapExtent] parameters define a floating label width interval, and
   /// [gapPercentage] defines the animation's progress (0.0 to 1.0).
   @override
-  void paint(Canvas canvas, Rect rect, {
-      double gapStart,
-      double gapExtent = 0.0,
-      double gapPercentage = 0.0,
-      TextDirection textDirection,
+  void paint(
+    Canvas canvas,
+    Rect rect, {
+    double gapStart,
+    double gapExtent = 0.0,
+    double gapPercentage = 0.0,
+    TextDirection textDirection,
   });
 }
 
@@ -106,11 +108,13 @@ class _NoInputBorder extends InputBorder {
   }
 
   @override
-  void paint(Canvas canvas, Rect rect, {
-      double gapStart,
-      double gapExtent = 0.0,
-      double gapPercentage = 0.0,
-      TextDirection textDirection,
+  void paint(
+    Canvas canvas,
+    Rect rect, {
+    double gapStart,
+    double gapExtent = 0.0,
+    double gapPercentage = 0.0,
+    TextDirection textDirection,
   }) {
     // Do not paint.
   }
@@ -217,11 +221,13 @@ class UnderlineInputBorder extends InputBorder {
   /// The [borderSide] defines the line's color and weight. The `textDirection`
   /// `gap` and `textDirection` parameters are ignored.
   @override
-  void paint(Canvas canvas, Rect rect, {
-      double gapStart,
-      double gapExtent = 0.0,
-      double gapPercentage = 0.0,
-      TextDirection textDirection,
+  void paint(
+    Canvas canvas,
+    Rect rect, {
+    double gapStart,
+    double gapExtent = 0.0,
+    double gapPercentage = 0.0,
+    TextDirection textDirection,
   }) {
     if (borderRadius.bottomLeft != Radius.zero || borderRadius.bottomRight != Radius.zero)
       canvas.clipPath(getOuterPath(rect, textDirection: textDirection));
@@ -406,7 +412,7 @@ class OutlineInputBorder extends InputBorder {
 
     const double cornerArcSweep = math.pi / 2.0;
     final double tlCornerArcSweep = start < center.tlRadiusX
-      ? math.asin(start / center.tlRadiusX)
+      ? math.asin((start / center.tlRadiusX).clamp(-1.0, 1.0))
       : math.pi / 2.0;
 
     final Path path = Path()
@@ -447,11 +453,13 @@ class OutlineInputBorder extends InputBorder {
   /// `gapStart - gapPadding` (assuming that the [textDirection] is [TextDirection.ltr]).
   /// The gap's width is `(gapPadding + gapExtent + gapPadding) * gapPercentage`.
   @override
-  void paint(Canvas canvas, Rect rect, {
-      double gapStart,
-      double gapExtent = 0.0,
-      double gapPercentage = 0.0,
-      TextDirection textDirection,
+  void paint(
+    Canvas canvas,
+    Rect rect, {
+    double gapStart,
+    double gapExtent = 0.0,
+    double gapPercentage = 0.0,
+    TextDirection textDirection,
   }) {
     assert(gapExtent != null);
     assert(gapPercentage >= 0.0 && gapPercentage <= 1.0);
@@ -466,12 +474,12 @@ class OutlineInputBorder extends InputBorder {
       final double extent = lerpDouble(0.0, gapExtent + gapPadding * 2.0, gapPercentage);
       switch (textDirection) {
         case TextDirection.rtl: {
-          final Path path = _gapBorderPath(canvas, center, gapStart + gapPadding - extent, extent);
+          final Path path = _gapBorderPath(canvas, center, math.max(0.0, gapStart + gapPadding - extent), extent);
           canvas.drawPath(path, paint);
           break;
         }
         case TextDirection.ltr: {
-          final Path path = _gapBorderPath(canvas, center, gapStart - gapPadding, extent);
+          final Path path = _gapBorderPath(canvas, center, math.max(0.0, gapStart - gapPadding), extent);
           canvas.drawPath(path, paint);
           break;
         }

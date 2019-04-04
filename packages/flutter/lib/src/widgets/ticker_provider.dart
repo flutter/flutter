@@ -22,7 +22,7 @@ class TickerMode extends InheritedWidget {
   const TickerMode({
     Key key,
     @required this.enabled,
-    Widget child
+    Widget child,
   }) : assert(enabled != null),
        super(key: key, child: child);
 
@@ -157,7 +157,7 @@ mixin TickerProviderStateMixin<T extends StatefulWidget> on State<T> implements 
 
   @override
   Ticker createTicker(TickerCallback onTick) {
-    _tickers ??= Set<_WidgetTicker>();
+    _tickers ??= <_WidgetTicker>{};
     final _WidgetTicker result = _WidgetTicker(onTick, this, debugLabel: 'created by $this');
     _tickers.add(result);
     return result;

@@ -21,9 +21,9 @@ void main() {
           heightFactor: 0.25,
           child: Container(
             key: inner
-          )
-        )
-      )
+          ),
+        ),
+      ),
     ));
     final RenderBox box = inner.currentContext.findRenderObject();
     expect(box.size, equals(const Size(50.0, 25.0)));

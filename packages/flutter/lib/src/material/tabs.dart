@@ -53,7 +53,7 @@ enum TabBarIndicatorSize {
 ///  * [TabBar], which displays a row of tabs.
 ///  * [TabBarView], which displays a widget for the currently selected tab.
 ///  * [TabController], which coordinates tab selection between a [TabBar] and a [TabBarView].
-///  * <https://material.google.com/components/tabs.html>
+///  * <https://material.io/design/components/tabs.html>
 class Tab extends StatelessWidget {
   /// Creates a material design [TabBar] tab. At least one of [text], [icon],
   /// and [child] must be non-null. The [text] and [child] arguments must not be
@@ -95,7 +95,7 @@ class Tab extends StatelessWidget {
     if (icon == null) {
       height = _kTabHeight;
       label = _buildLabelText();
-    } else if (text == null) {
+    } else if (text == null && child == null) {
       height = _kTabHeight;
       label = icon;
     } else {
@@ -108,8 +108,8 @@ class Tab extends StatelessWidget {
             child: icon,
             margin: const EdgeInsets.only(bottom: 10.0),
           ),
-          _buildLabelText()
-        ]
+          _buildLabelText(),
+        ],
       );
     }
 
@@ -153,16 +153,23 @@ class _TabStyle extends AnimatedWidget {
   Widget build(BuildContext context) {
     final ThemeData themeData = Theme.of(context);
     final TabBarTheme tabBarTheme = TabBarTheme.of(context);
+    final Animation<double> animation = listenable;
 
-    final TextStyle defaultStyle = labelStyle ?? tabBarTheme.labelStyle ?? themeData.primaryTextTheme.body2;
-    final TextStyle defaultUnselectedStyle = unselectedLabelStyle
+    // To enable TextStyle.lerp(style1, style2, value), both styles must have
+    // the same value of inherit. Force that to be inherit=true here.
+    final TextStyle defaultStyle = (labelStyle
+      ?? tabBarTheme.labelStyle
+      ?? themeData.primaryTextTheme.body2
+    ).copyWith(inherit: true);
+    final TextStyle defaultUnselectedStyle = (unselectedLabelStyle
       ?? tabBarTheme.unselectedLabelStyle
       ?? labelStyle
-      ?? themeData.primaryTextTheme.body2;
-    final Animation<double> animation = listenable;
+      ?? themeData.primaryTextTheme.body2
+    ).copyWith(inherit: true);
     final TextStyle textStyle = selected
       ? TextStyle.lerp(defaultStyle, defaultUnselectedStyle, animation.value)
       : TextStyle.lerp(defaultUnselectedStyle, defaultStyle, animation.value);
+
     final Color selectedColor = labelColor
        ?? tabBarTheme.labelColor
        ?? themeData.primaryTextTheme.body2.color;
@@ -476,10 +483,21 @@ class _TabBarScrollPosition extends ScrollPositionWithSingleContext {
 
   final _TabBarState tabBar;
 
+  bool _initialViewportDimensionWasZero;
+
   @override
   bool applyContentDimensions(double minScrollExtent, double maxScrollExtent) {
     bool result = true;
-    if (pixels == null) {
+    if (_initialViewportDimensionWasZero != true) {
+      // If the viewport never had a non-zero dimension, we just want to jump
+      // to the initial scroll position to avoid strange scrolling effects in
+      // release mode: In release mode, the viewport temporarily may have a
+      // dimension of zero before the actual dimension is calculated. In that
+      // scenario, setting the actual dimension would cause a strange scroll
+      // effect without this guard because the super call below would starts a
+      // ballistic scroll activity.
+      assert(viewportDimension != null);
+      _initialViewportDimensionWasZero = viewportDimension != 0.0;
       correctPixels(tabBar._initialScrollOffset(viewportDimension, minScrollExtent, maxScrollExtent));
       result = false;
     }
@@ -551,7 +569,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
     this.labelPadding,
     this.unselectedLabelColor,
     this.unselectedLabelStyle,
-    this.dragStartBehavior = DragStartBehavior.down,
+    this.dragStartBehavior = DragStartBehavior.start,
     this.onTap,
   }) : assert(tabs != null),
        assert(isScrollable != null),
@@ -637,8 +655,8 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// Unselected tab labels are rendered with the same color rendered at 70%
   /// opacity unless [unselectedLabelColor] is non-null.
   ///
-  /// If this parameter is null then the color of the theme's body2 text color
-  /// is used.
+  /// If this parameter is null then the color of the [ThemeData.primaryTextTheme]'s
+  /// body2 text color is used.
   final Color labelColor;
 
   /// The color of unselected tab labels.
@@ -651,8 +669,8 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// null then this text style will be used for both selected and unselected
   /// label styles.
   ///
-  /// If this property is null then the text style of the theme's body2
-  /// definition is used.
+  /// If this property is null then the text style of the [ThemeData.primaryTextTheme]'s
+  /// body2 definition is used.
   final TextStyle labelStyle;
 
   /// The padding added to each of the tab labels.
@@ -663,7 +681,8 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// The text style of the unselected tab labels
   ///
   /// If this property is null then the [labelStyle] value is used. If [labelStyle]
-  /// is null then the text style of the theme's body2 definition is used.
+  /// is null then the text style of the [ThemeData.primaryTextTheme]'s
+  /// body2 definition is used.
   final TextStyle unselectedLabelStyle;
 
   /// {@macro flutter.widgets.scrollable.dragStartBehavior}
@@ -730,7 +749,10 @@ class _TabBarState extends State<TabBar> {
     // When that happens, automatic transitions of the theme will likely look
     // ugly as the indicator color suddenly snaps to white at one end, but it's
     // not clear how to avoid that any further.
-    if (color.value == Material.of(context).color.value)
+    //
+    // The material's color might be null (if it's a transparency). In that case
+    // there's no good way for us to find out what the color is so we don't.
+    if (color.value == Material.of(context).color?.value)
       color = Colors.white;
 
     return UnderlineTabIndicator(
@@ -756,6 +778,17 @@ class _TabBarState extends State<TabBar> {
       }
       return true;
     }());
+
+    assert(() {
+      if (newController.length != widget.tabs.length) {
+        throw FlutterError(
+          'Controller\'s length property (${newController.length}) does not match the \n'
+          'number of tab elements (${widget.tabs.length}) present in TabBar\'s tabs property.'
+        );
+      }
+      return true;
+    }());
+
     if (newController == _controller)
       return;
 
@@ -930,12 +963,14 @@ class _TabBarState extends State<TabBar> {
       );
     }
 
+    final TabBarTheme tabBarTheme = TabBarTheme.of(context);
+
     final List<Widget> wrappedTabs = List<Widget>(widget.tabs.length);
     for (int i = 0; i < widget.tabs.length; i += 1) {
       wrappedTabs[i] = Center(
         heightFactor: 1.0,
         child: Padding(
-          padding: widget.labelPadding ?? kTabLabelPadding,
+          padding: widget.labelPadding ?? tabBarTheme.labelPadding ?? kTabLabelPadding,
           child: KeyedSubtree(
             key: _tabKeys[i],
             child: widget.tabs[i],
@@ -991,7 +1026,7 @@ class _TabBarState extends State<TabBar> {
                 selected: index == _currentIndex,
                 label: localizations.tabLabel(tabIndex: index + 1, tabCount: tabCount),
               ),
-            ]
+            ],
           ),
         ),
       );
@@ -1043,7 +1078,7 @@ class TabBarView extends StatefulWidget {
     @required this.children,
     this.controller,
     this.physics,
-    this.dragStartBehavior = DragStartBehavior.down,
+    this.dragStartBehavior = DragStartBehavior.start,
   }) : assert(children != null),
        assert(dragStartBehavior != null),
        super(key: key);
@@ -1098,6 +1133,17 @@ class _TabBarViewState extends State<TabBarView> {
       }
       return true;
     }());
+
+    assert(() {
+      if (newController.length != widget.children.length) {
+        throw FlutterError(
+          'Controller\'s length property (${newController.length}) does not match the \n'
+          'number of elements (${widget.children.length}) present in TabBarView\'s children property.'
+        );
+      }
+      return true;
+    }());
+
     if (newController == _controller)
       return;
 
@@ -1236,7 +1282,10 @@ class TabPageSelectorIndicator extends StatelessWidget {
     @required this.backgroundColor,
     @required this.borderColor,
     @required this.size,
-  }) : assert(backgroundColor != null), assert(borderColor != null), assert(size != null), super(key: key);
+  }) : assert(backgroundColor != null),
+       assert(borderColor != null),
+       assert(size != null),
+       super(key: key);
 
   /// The indicator circle's background color.
   final Color backgroundColor;
@@ -1275,7 +1324,8 @@ class TabPageSelector extends StatelessWidget {
     this.indicatorSize = 12.0,
     this.color,
     this.selectedColor,
-  }) : assert(indicatorSize != null && indicatorSize > 0.0), super(key: key);
+  }) : assert(indicatorSize != null && indicatorSize > 0.0),
+       super(key: key);
 
   /// This widget's selection and animation state.
   ///
@@ -1370,7 +1420,7 @@ class TabPageSelector extends StatelessWidget {
             }).toList(),
           ),
         );
-      }
+      },
     );
   }
 }

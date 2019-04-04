@@ -154,7 +154,15 @@ abstract class AlignmentGeometry {
 /// respect to the rectangle and vertically below the bottom of the rectangle by
 /// the height of the rectangle.
 ///
-/// [Alignment] use visual coordinates, which means increasing [x] moves the
+/// `Alignment(0.0, -0.5)` represents a point that is horizontally centered with
+/// respect to the rectangle and vertically half way between the top edge and
+/// the center.
+///
+/// `Alignment(x, y)` in a rectangle with height h and width w describes
+/// the point (x * w/2 + w/2, y * h/2 + h/2) in the coordinate system of the
+/// rectangle.
+///
+/// [Alignment] uses visual coordinates, which means increasing [x] moves the
 /// point from left to right. To support layouts with a right-to-left
 /// [TextDirection], consider using [AlignmentDirectional], in which the
 /// direction the point moves when increasing the horizontal value depends on

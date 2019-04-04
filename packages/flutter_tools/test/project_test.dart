@@ -271,6 +271,21 @@ void main() {
         when(mockIOSWorkflow.getPlistValueFromFile(any, any)).thenReturn('\$(PRODUCT_BUNDLE_IDENTIFIER).\$(SUFFIX)');
         expect(project.ios.productBundleIdentifier, 'io.flutter.someProject.suffix');
       });
+      testWithMocks('empty surrounded by quotes', () async {
+        final FlutterProject project = await someProject();
+        addIosWithBundleId(project.directory, '', qualifier: '"');
+        expect(project.ios.productBundleIdentifier, '');
+      });
+      testWithMocks('surrounded by double quotes', () async {
+        final FlutterProject project = await someProject();
+        addIosWithBundleId(project.directory, 'io.flutter.someProject', qualifier: '"');
+        expect(project.ios.productBundleIdentifier, 'io.flutter.someProject');
+      });
+      testWithMocks('surrounded by single quotes', () async {
+        final FlutterProject project = await someProject();
+        addIosWithBundleId(project.directory, 'io.flutter.someProject', qualifier: '\'');
+        expect(project.ios.productBundleIdentifier, 'io.flutter.someProject');
+      });
     });
 
     group('organization names set', () {
@@ -425,13 +440,13 @@ void expectNotExists(FileSystemEntity entity) {
   expect(entity.existsSync(), isFalse);
 }
 
-void addIosWithBundleId(Directory directory, String id) {
+void addIosWithBundleId(Directory directory, String id, {String qualifier}) {
   directory
       .childDirectory('ios')
       .childDirectory('Runner.xcodeproj')
       .childFile('project.pbxproj')
         ..createSync(recursive: true)
-        ..writeAsStringSync(projectFileWithBundleId(id));
+    ..writeAsStringSync(projectFileWithBundleId(id, qualifier: qualifier));
 }
 
 void addAndroidWithApplicationId(Directory directory, String id) {
@@ -460,13 +475,13 @@ flutter:
   invalid:
 ''';
 
-String projectFileWithBundleId(String id) {
+String projectFileWithBundleId(String id, {String qualifier}) {
   return '''
 97C147061CF9000F007C117D /* Debug */ = {
   isa = XCBuildConfiguration;
   baseConfigurationReference = 9740EEB21CF90195004384FC /* Debug.xcconfig */;
   buildSettings = {
-    PRODUCT_BUNDLE_IDENTIFIER = $id;
+    PRODUCT_BUNDLE_IDENTIFIER = ${qualifier ?? ''}$id${qualifier ?? ''};
     PRODUCT_NAME = "\$(TARGET_NAME)";
   };
   name = Debug;

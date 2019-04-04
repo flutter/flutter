@@ -54,7 +54,7 @@ void main() {
         'success': false,
         'details': <String, dynamic>{
           'notices': <Map<String, dynamic>>[
-            <String, dynamic>{ 'message': false, }
+            <String, dynamic>{'message': false},
           ],
         },
       }), false);
@@ -63,7 +63,7 @@ void main() {
         'success': false,
         'details': <String, dynamic>{
           'notices': <Map<String, dynamic>>[
-            <String, dynamic>{ 'message': <String>['error'], },
+            <String, dynamic>{'message': <String>['error']},
           ],
         },
       }), false);
@@ -72,8 +72,8 @@ void main() {
         'success': false,
         'details': <String, dynamic>{
           'notices': <Map<String, dynamic>>[
-            <String, dynamic>{ 'message': 'error', },
-            <String, dynamic>{ 'message': <String>['error'], },
+            <String, dynamic>{'message': 'error'},
+            <String, dynamic>{'message': <String>['error']},
           ],
         },
       }), false);
@@ -82,7 +82,7 @@ void main() {
         'success': false,
         'details': <String, dynamic>{
           'notices': <Map<String, dynamic>>[
-            <String, dynamic>{ 'message': 'error', },
+            <String, dynamic>{'message': 'error'},
           ],
         },
       }), false);
@@ -104,34 +104,23 @@ void main() {
       bundle: anyNamed('bundle'),
       firstBuildTime: anyNamed('firstBuildTime'),
       bundleFirstUpload: anyNamed('bundleFirstUpload'),
-      bundleDirty: anyNamed('bundleDirty'),
-      fileFilter: anyNamed('fileFilter'),
       generator: anyNamed('generator'),
       fullRestart: anyNamed('fullRestart'),
       dillOutputPath: anyNamed('dillOutputPath'),
       trackWidgetCreation: anyNamed('trackWidgetCreation'),
       projectRootPath: anyNamed('projectRootPath'),
       pathToReload: anyNamed('pathToReload'),
+      invalidatedFiles: anyNamed('invalidatedFiles'),
     )).thenAnswer((Invocation _) => Future<UpdateFSReport>.value(
         UpdateFSReport(success: true, syncedBytes: 1000, invalidatedSourcesCount: 1)));
-    when(mockDevFs.assetPathsToEvict).thenReturn(Set<String>());
+    when(mockDevFs.assetPathsToEvict).thenReturn(<String>{});
     when(mockDevFs.baseUri).thenReturn(Uri.file('test'));
+    when(mockDevFs.sources).thenReturn(<Uri>[Uri.file('test')]);
+    when(mockDevFs.lastCompiled).thenReturn(DateTime.now());
 
     setUp(() {
       mockArtifacts = MockLocalEngineArtifacts();
       when(mockArtifacts.getArtifactPath(Artifact.flutterPatchedSdkPath)).thenReturn('some/path');
-    });
-
-    testUsingContext('no setup', () async {
-      final MockDevice mockDevice = MockDevice();
-      when(mockDevice.supportsHotReload).thenReturn(true);
-      when(mockDevice.supportsHotRestart).thenReturn(true);
-      final List<FlutterDevice> devices = <FlutterDevice>[
-        FlutterDevice(mockDevice, generator: residentCompiler, trackWidgetCreation: false),
-      ];
-      expect((await HotRunner(devices).restart(fullRestart: true)).isOk, false);
-    }, overrides: <Type, Generator>{
-      Artifacts: () => mockArtifacts,
     });
 
     testUsingContext('Does not hot restart when device does not support it', () async {
@@ -141,7 +130,7 @@ void main() {
       when(mockDevice.supportsHotRestart).thenReturn(false);
       // Trigger hot restart.
       final List<FlutterDevice> devices = <FlutterDevice>[
-        FlutterDevice(mockDevice, generator: residentCompiler, trackWidgetCreation: false)..devFS = mockDevFs
+        FlutterDevice(mockDevice, generator: residentCompiler, trackWidgetCreation: false)..devFS = mockDevFs,
       ];
       final OperationResult result = await HotRunner(devices).restart(fullRestart: true);
       // Expect hot restart failed.
@@ -149,7 +138,7 @@ void main() {
       expect(result.message, 'hotRestart not supported');
     }, overrides: <Type, Generator>{
       Artifacts: () => mockArtifacts,
-      HotRunnerConfig: () => TestHotRunnerConfig(successfulSetup: true, computeDartDependencies: false),
+      HotRunnerConfig: () => TestHotRunnerConfig(successfulSetup: true),
     });
 
     testUsingContext('Does not hot restart when one of many devices does not support it', () async {
@@ -171,7 +160,7 @@ void main() {
       expect(result.message, 'hotRestart not supported');
     }, overrides: <Type, Generator>{
       Artifacts: () => mockArtifacts,
-      HotRunnerConfig: () => TestHotRunnerConfig(successfulSetup: true, computeDartDependencies: false),
+      HotRunnerConfig: () => TestHotRunnerConfig(successfulSetup: true),
     });
 
     testUsingContext('Does hot restarts when all devices support it', () async {
@@ -193,7 +182,7 @@ void main() {
       expect(result.message, isNot('hotRestart not supported'));
     }, overrides: <Type, Generator>{
       Artifacts: () => mockArtifacts,
-      HotRunnerConfig: () => TestHotRunnerConfig(successfulSetup: true, computeDartDependencies: false),
+      HotRunnerConfig: () => TestHotRunnerConfig(successfulSetup: true),
     });
 
     testUsingContext('setup function fails', () async {
@@ -201,7 +190,7 @@ void main() {
       when(mockDevice.supportsHotReload).thenReturn(true);
       when(mockDevice.supportsHotRestart).thenReturn(true);
       final List<FlutterDevice> devices = <FlutterDevice>[
-        FlutterDevice(mockDevice, generator: residentCompiler, trackWidgetCreation: false)
+        FlutterDevice(mockDevice, generator: residentCompiler, trackWidgetCreation: false),
       ];
       final OperationResult result = await HotRunner(devices).restart(fullRestart: true);
       expect(result.isOk, false);
@@ -218,7 +207,7 @@ void main() {
       when(mockDevice.supportsHotRestart).thenReturn(true);
       // Trigger hot restart.
       final List<FlutterDevice> devices = <FlutterDevice>[
-        FlutterDevice(mockDevice, generator: residentCompiler, trackWidgetCreation: false)..devFS = mockDevFs
+        FlutterDevice(mockDevice, generator: residentCompiler, trackWidgetCreation: false)..devFS = mockDevFs,
       ];
       final OperationResult result = await HotRunner(devices).restart(fullRestart: true);
       // Expect hot restart successful.
@@ -226,7 +215,7 @@ void main() {
       expect(result.message, isNot('setupHotRestart failed'));
     }, overrides: <Type, Generator>{
       Artifacts: () => mockArtifacts,
-      HotRunnerConfig: () => TestHotRunnerConfig(successfulSetup: true, computeDartDependencies: false),
+      HotRunnerConfig: () => TestHotRunnerConfig(successfulSetup: true),
     });
 
     group('shutdown hook tests', () {
@@ -235,7 +224,6 @@ void main() {
       setUp(() {
         shutdownTestingConfig = TestHotRunnerConfig(
           successfulSetup: true,
-          computeDartDependencies: false,
         );
       });
 
@@ -245,11 +233,11 @@ void main() {
         when(mockDevice.supportsHotRestart).thenReturn(true);
         when(mockDevice.supportsStopApp).thenReturn(false);
         final List<FlutterDevice> devices = <FlutterDevice>[
-          FlutterDevice(mockDevice, generator: residentCompiler, trackWidgetCreation: false)
+          FlutterDevice(mockDevice, generator: residentCompiler, trackWidgetCreation: false),
         ];
         await HotRunner(devices).cleanupAfterSignal();
         expect(shutdownTestingConfig.shutdownHookCalled, true);
-      }, overrides: <Type, Generator> {
+      }, overrides: <Type, Generator>{
         Artifacts: () => mockArtifacts,
         HotRunnerConfig: () => shutdownTestingConfig,
       });
@@ -260,11 +248,11 @@ void main() {
         when(mockDevice.supportsHotRestart).thenReturn(true);
         when(mockDevice.supportsStopApp).thenReturn(false);
         final List<FlutterDevice> devices = <FlutterDevice>[
-          FlutterDevice(mockDevice, generator: residentCompiler, trackWidgetCreation: false)
+          FlutterDevice(mockDevice, generator: residentCompiler, trackWidgetCreation: false),
         ];
         await HotRunner(devices).preStop();
         expect(shutdownTestingConfig.shutdownHookCalled, true);
-      }, overrides: <Type, Generator> {
+      }, overrides: <Type, Generator>{
         Artifacts: () => mockArtifacts,
         HotRunnerConfig: () => shutdownTestingConfig,
       });
@@ -283,10 +271,7 @@ class MockDevice extends Mock implements Device {
 }
 
 class TestHotRunnerConfig extends HotRunnerConfig {
-  TestHotRunnerConfig({@required this.successfulSetup, bool computeDartDependencies = true}) {
-    this.computeDartDependencies = computeDartDependencies;
-  }
-
+  TestHotRunnerConfig({@required this.successfulSetup});
   bool successfulSetup;
   bool shutdownHookCalled = false;
 

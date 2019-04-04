@@ -114,7 +114,7 @@ class IMobileDevice {
 
     // If no device is attached, we're unable to detect any problems. Assume all is well.
     final ProcessResult result = (await runAsync(<String>['idevice_id', '-l'])).processResult;
-    if (result.exitCode != 0 || result.stdout.isEmpty)
+    if (result.exitCode == 0 && result.stdout.isEmpty)
       return true;
 
     // Check that we can look up the names of any attached devices.
@@ -134,7 +134,7 @@ class IMobileDevice {
 
   Future<String> getInfoForDevice(String deviceID, String key) async {
     try {
-      final ProcessResult result = await processManager.run(<String>['ideviceinfo', '-u', deviceID, '-k', key, '--simple']);
+      final ProcessResult result = await processManager.run(<String>['ideviceinfo', '-u', deviceID, '-k', key]);
       if (result.exitCode == 255 && result.stdout != null && result.stdout.contains('No device found'))
         throw IOSDeviceNotFoundError('ideviceinfo could not find device:\n${result.stdout}');
       if (result.exitCode != 0)
@@ -163,7 +163,7 @@ class Xcode {
       try {
         _xcodeSelectPath = processManager.runSync(<String>['/usr/bin/xcode-select', '--print-path']).stdout.trim();
       } on ProcessException {
-        // Ignore: return null below.
+        // Ignored, return null below.
       }
     }
     return _xcodeSelectPath;
@@ -294,6 +294,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   BuildInfo buildInfo,
   String targetOverride,
   bool buildForDevice,
+  IOSArch activeArch,
   bool codesign = true,
   bool usesTerminalUi = true,
 }) async {
@@ -310,7 +311,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     modern: false,
   );
 
-  final XcodeProjectInfo projectInfo = xcodeProjectInterpreter.getInfo(app.project.hostAppRoot.path);
+  final XcodeProjectInfo projectInfo = await xcodeProjectInterpreter.getInfo(app.project.hostAppRoot.path);
   if (!projectInfo.targets.contains('Runner')) {
     printError('The Xcode project does not define target "Runner" which is needed by Flutter tooling.');
     printError('Open Xcode to fix the problem:');
@@ -387,7 +388,7 @@ Future<XcodeBuildResult> buildXcodeProject({
       iosProject: project.ios,
       iosEngineDir: flutterFrameworkDir(buildInfo.mode),
       isSwift: project.ios.isSwift,
-      dependenciesChanged: !await fingerprinter.doesFingerprintMatch()
+      dependenciesChanged: !await fingerprinter.doesFingerprintMatch(),
     );
     if (didPodInstall)
       await fingerprinter.writeFingerprint();
@@ -435,12 +436,20 @@ Future<XcodeBuildResult> buildXcodeProject({
     buildCommands.addAll(<String>['-sdk', 'iphonesimulator', '-arch', 'x86_64']);
   }
 
+  if (activeArch != null) {
+    final String activeArchName = getNameForIOSArch(activeArch);
+    if (activeArchName != null) {
+      buildCommands.add('ONLY_ACTIVE_ARCH=YES');
+      buildCommands.add('ARCHS=$activeArchName');
+    }
+  }
+
   if (!codesign) {
     buildCommands.addAll(
       <String>[
         'CODE_SIGNING_ALLOWED=NO',
         'CODE_SIGNING_REQUIRED=NO',
-        'CODE_SIGNING_IDENTITY=""'
+        'CODE_SIGNING_IDENTITY=""',
       ]
     );
   }
@@ -471,7 +480,7 @@ Future<XcodeBuildResult> buildXcodeProject({
           initialBuildStatus = null;
           buildSubStatus = logger.startProgress(
             line,
-            timeout: kSlowOperation,
+            timeout: timeoutConfiguration.slowOperation,
             progressIndicatorPadding: kDefaultStatusPadding - 7,
           );
         }
@@ -480,17 +489,17 @@ Future<XcodeBuildResult> buildXcodeProject({
     }
 
     // Trigger the start of the pipe -> stdout loop. Ignore exceptions.
-    listenToScriptOutputLine(); // ignore: unawaited_futures
+    unawaited(listenToScriptOutputLine());
 
     buildCommands.add('SCRIPT_OUTPUT_STREAM_FILE=${scriptOutputPipeFile.absolute.path}');
   }
 
   final Stopwatch buildStopwatch = Stopwatch()..start();
-  initialBuildStatus = logger.startProgress('Running Xcode build...', timeout: kFastOperation);
+  initialBuildStatus = logger.startProgress('Running Xcode build...', timeout: timeoutConfiguration.fastOperation);
   final RunResult buildResult = await runAsync(
     buildCommands,
     workingDirectory: app.project.hostAppRoot.path,
-    allowReentrantFlutter: true
+    allowReentrantFlutter: true,
   );
   // Notifies listener that no more output is coming.
   scriptOutputPipeFile?.writeAsStringSync('all done');
@@ -590,8 +599,7 @@ Future<void> diagnoseXcodeBuildFailure(XcodeBuildResult result) async {
   if (result.xcodeBuildExecution != null &&
       result.xcodeBuildExecution.buildForPhysicalDevice &&
       !<String>['DEVELOPMENT_TEAM', 'PROVISIONING_PROFILE'].any(
-        result.xcodeBuildExecution.buildSettings.containsKey)
-      ) {
+        result.xcodeBuildExecution.buildSettings.containsKey)) {
     printError(noDevelopmentTeamInstruction, emphasis: true);
     return;
   }
@@ -617,15 +625,13 @@ Future<void> diagnoseXcodeBuildFailure(XcodeBuildResult result) async {
 }
 
 class XcodeBuildResult {
-  XcodeBuildResult(
-    {
-      @required this.success,
-      this.output,
-      this.stdout,
-      this.stderr,
-      this.xcodeBuildExecution,
-    }
-  );
+  XcodeBuildResult({
+    @required this.success,
+    this.output,
+    this.stdout,
+    this.stderr,
+    this.xcodeBuildExecution,
+  });
 
   final bool success;
   final String output;
@@ -637,14 +643,12 @@ class XcodeBuildResult {
 
 /// Describes an invocation of a Xcode build command.
 class XcodeBuildExecution {
-  XcodeBuildExecution(
-    {
-      @required this.buildCommands,
-      @required this.appDirectory,
-      @required this.buildForPhysicalDevice,
-      @required this.buildSettings,
-    }
-  );
+  XcodeBuildExecution({
+    @required this.buildCommands,
+    @required this.appDirectory,
+    @required this.buildForPhysicalDevice,
+    @required this.buildSettings,
+  });
 
   /// The original list of Xcode build commands used to produce this build result.
   final List<String> buildCommands;
@@ -711,9 +715,9 @@ void _copyServiceDefinitionsManifest(List<Map<String, String>> services, File ma
     'name': service['name'],
     // Since we have already moved it to the Frameworks directory. Strip away
     // the directory and basenames.
-    'framework': fs.path.basenameWithoutExtension(service['ios-framework'])
+    'framework': fs.path.basenameWithoutExtension(service['ios-framework']),
   }).toList();
-  final Map<String, dynamic> jsonObject = <String, dynamic>{ 'services' : jsonServices };
+  final Map<String, dynamic> jsonObject = <String, dynamic>{'services': jsonServices};
   manifest.writeAsStringSync(json.encode(jsonObject), mode: FileMode.write, flush: true);
 }
 
@@ -724,7 +728,7 @@ Future<bool> upgradePbxProjWithFlutterAssets(IosProject project) async {
 
   final RegExp oldAssets = RegExp(r'\/\* (flutter_assets|app\.flx)');
   final StringBuffer buffer = StringBuffer();
-  final Set<String> printedStatuses = Set<String>();
+  final Set<String> printedStatuses = <String>{};
 
   for (final String line in lines) {
     final Match match = oldAssets.firstMatch(line);

@@ -32,7 +32,7 @@ class _CupertinoRefreshControlDemoState extends State<CupertinoRefreshControlDem
         return contacts[random.nextInt(contacts.length)]
             // Randomly adds a telephone icon next to the contact or not.
             ..add(random.nextBool().toString());
-      }
+      },
     );
   }
 

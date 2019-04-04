@@ -26,7 +26,7 @@ class Rectangle extends StatelessWidget {
     return Expanded(
       child: Container(
         color: color,
-      )
+      ),
     );
   }
 }

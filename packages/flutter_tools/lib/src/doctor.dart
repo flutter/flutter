@@ -50,7 +50,7 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
   List<DoctorValidator> get validators {
     if (_validators == null) {
       _validators = <DoctorValidator>[];
-      _validators.add(_FlutterValidator());
+      _validators.add(FlutterValidator());
 
       if (androidWorkflow.appliesToHostPlatform)
         _validators.add(GroupedValidator(<DoctorValidator>[androidValidator, androidLicenseValidator]));
@@ -170,9 +170,7 @@ class Doctor {
   }
 
   Future<bool> checkRemoteArtifacts(String engineRevision) async {
-    final Cache cache = Cache();
-    final FlutterEngine engine = FlutterEngine(cache);
-    return await engine.areRemoteArtifactsAvailable(engineVersion: engineRevision);
+    return Cache.instance.areRemoteArtifactsAvailable(engineVersion: engineRevision);
   }
 
   /// Print information about the state of installed tooling.
@@ -189,7 +187,7 @@ class Doctor {
     for (ValidatorTask validatorTask in startValidatorTasks()) {
       final DoctorValidator validator = validatorTask.validator;
       final Status status = Status.withSpinner(
-        timeout: kFastOperation,
+        timeout: timeoutConfiguration.fastOperation,
         slowWarningCallback: () => validator.slowWarning,
       );
       ValidationResult result;
@@ -312,7 +310,7 @@ class GroupedValidator extends DoctorValidator {
   String _currentSlowWarning = 'Initializing...';
 
   @override
-  Future<ValidationResult> validate() async  {
+  Future<ValidationResult> validate() async {
     final List<ValidatorTask> tasks = <ValidatorTask>[];
     for (DoctorValidator validator in subValidators) {
       tasks.add(ValidatorTask(validator, validator.validate()));
@@ -438,8 +436,8 @@ class ValidationMessage {
   String toString() => message;
 }
 
-class _FlutterValidator extends DoctorValidator {
-  _FlutterValidator() : super('Flutter');
+class FlutterValidator extends DoctorValidator {
+  FlutterValidator() : super('Flutter');
 
   @override
   Future<ValidationResult> validate() async {
@@ -467,7 +465,7 @@ class _FlutterValidator extends DoctorValidator {
     }
 
     return ValidationResult(valid, messages,
-      statusInfo: userMessages.flutterStatusInfo(version.channel, version.frameworkVersion, os.name, platform.localeName)
+      statusInfo: userMessages.flutterStatusInfo(version.channel, version.frameworkVersion, os.name, platform.localeName),
     );
   }
 }
@@ -501,8 +499,8 @@ abstract class IntelliJValidator extends DoctorValidator {
   String get pluginsPath;
 
   static final Map<String, String> _idToTitle = <String, String>{
-    'IntelliJIdea' : 'IntelliJ IDEA Ultimate Edition',
-    'IdeaIC' : 'IntelliJ IDEA Community Edition',
+    'IntelliJIdea': 'IntelliJ IDEA Ultimate Edition',
+    'IdeaIC': 'IntelliJ IDEA Community Edition',
   };
 
   static final Version kMinIdeaVersion = Version(2017, 1, 0);
@@ -615,9 +613,9 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
   final String id;
 
   static final Map<String, String> _dirNameToId = <String, String>{
-    'IntelliJ IDEA.app' : 'IntelliJIdea',
-    'IntelliJ IDEA Ultimate.app' : 'IntelliJIdea',
-    'IntelliJ IDEA CE.app' : 'IdeaIC',
+    'IntelliJ IDEA.app': 'IntelliJIdea',
+    'IntelliJ IDEA Ultimate.app': 'IntelliJIdea',
+    'IntelliJ IDEA CE.app': 'IdeaIC',
   };
 
   static Iterable<DoctorValidator> get installed {

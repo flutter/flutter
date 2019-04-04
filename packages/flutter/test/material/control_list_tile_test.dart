@@ -104,7 +104,7 @@ void main() {
             SemanticsFlag.hasToggledState,
             SemanticsFlag.isToggled,
             SemanticsFlag.hasEnabledState,
-            SemanticsFlag.isEnabled
+            SemanticsFlag.isEnabled,
           ],
           actions: SemanticsAction.tap.index,
           label: 'aaa\nAAA',
@@ -117,7 +117,7 @@ void main() {
             SemanticsFlag.hasCheckedState,
             SemanticsFlag.isChecked,
             SemanticsFlag.hasEnabledState,
-            SemanticsFlag.isEnabled
+            SemanticsFlag.isEnabled,
           ],
           actions: SemanticsAction.tap.index,
           label: 'bbb\nBBB',

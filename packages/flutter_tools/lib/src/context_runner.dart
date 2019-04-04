@@ -21,7 +21,6 @@ import 'base/platform.dart';
 import 'base/time.dart';
 import 'base/user_messages.dart';
 import 'base/utils.dart';
-import 'build_runner/build_runner.dart';
 import 'cache.dart';
 import 'compile.dart';
 import 'devfs.dart';
@@ -40,6 +39,8 @@ import 'macos/macos_workflow.dart';
 import 'run_hot.dart';
 import 'usage.dart';
 import 'version.dart';
+import 'web/compile.dart';
+import 'web/web_device.dart';
 import 'windows/windows_workflow.dart';
 
 Future<T> runInContext<T>(
@@ -60,11 +61,11 @@ Future<T> runInContext<T>(
       Artifacts: () => CachedArtifacts(),
       AssetBundleFactory: () => AssetBundleFactory.defaultInstance,
       BotDetector: () => const BotDetector(),
-      BuildRunnerFactory: () => const BuildRunnerFactory(),
       Cache: () => Cache(),
       CocoaPods: () => CocoaPods(),
       CocoaPodsValidator: () => const CocoaPodsValidator(),
       Config: () => Config(),
+      ChromeLauncher: () => const ChromeLauncher(),
       DevFSConfig: () => DevFSConfig(),
       DeviceManager: () => DeviceManager(),
       Doctor: () => const Doctor(),
@@ -81,7 +82,7 @@ Future<T> runInContext<T>(
       IOSSimulatorUtils: () => IOSSimulatorUtils(),
       IOSWorkflow: () => const IOSWorkflow(),
       IOSValidator: () => const IOSValidator(),
-      KernelCompiler: () => const KernelCompiler(),
+      KernelCompilerFactory: () => const KernelCompilerFactory(),
       LinuxWorkflow: () => const LinuxWorkflow(),
       Logger: () => platform.isWindows ? WindowsStdoutLogger() : StdoutLogger(),
       MacOSWorkflow: () => const MacOSWorkflow(),
@@ -90,9 +91,11 @@ Future<T> runInContext<T>(
       SimControl: () => SimControl(),
       SystemClock: () => const SystemClock(),
       Stdio: () => const Stdio(),
+      TimeoutConfiguration: () => const TimeoutConfiguration(),
       Usage: () => Usage(),
       UserMessages: () => UserMessages(),
       WindowsWorkflow: () => const WindowsWorkflow(),
+      WebCompiler: () => const WebCompiler(),
       Xcode: () => Xcode(),
       XcodeProjectInterpreter: () => XcodeProjectInterpreter(),
     },

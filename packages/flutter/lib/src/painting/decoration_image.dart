@@ -261,7 +261,7 @@ class DecorationImagePainter {
       centerSlice: _details.centerSlice,
       repeat: _details.repeat,
       flipHorizontally: flipHorizontally,
-      filterQuality: FilterQuality.low
+      filterQuality: FilterQuality.low,
     );
 
     if (clipPath != null)
@@ -373,7 +373,7 @@ void paintImage({
   ImageRepeat repeat = ImageRepeat.noRepeat,
   bool flipHorizontally = false,
   bool invertColors = false,
-  FilterQuality filterQuality = FilterQuality.low
+  FilterQuality filterQuality = FilterQuality.low,
 }) {
   assert(canvas != null);
   assert(image != null);
@@ -388,7 +388,7 @@ void paintImage({
   if (centerSlice != null) {
     sliceBorder = Offset(
       centerSlice.left + inputSize.width - centerSlice.right,
-      centerSlice.top + inputSize.height - centerSlice.bottom
+      centerSlice.top + inputSize.height - centerSlice.bottom,
     );
     outputSize -= sliceBorder;
     inputSize -= sliceBorder;
@@ -436,24 +436,27 @@ void paintImage({
   }
   if (centerSlice == null) {
     final Rect sourceRect = alignment.inscribe(
-      sourceSize, Offset.zero & inputSize
+      sourceSize, Offset.zero & inputSize,
     );
-    for (Rect tileRect in _generateImageTileRects(rect, destinationRect, repeat))
-      canvas.drawImageRect(image, sourceRect, tileRect, paint);
+    if (repeat == ImageRepeat.noRepeat) {
+      canvas.drawImageRect(image, sourceRect, destinationRect, paint);
+    } else {
+      for (Rect tileRect in _generateImageTileRects(rect, destinationRect, repeat))
+        canvas.drawImageRect(image, sourceRect, tileRect, paint);
+    }
   } else {
-    for (Rect tileRect in _generateImageTileRects(rect, destinationRect, repeat))
-      canvas.drawImageNine(image, centerSlice, tileRect, paint);
+    if (repeat == ImageRepeat.noRepeat) {
+      canvas.drawImageNine(image, centerSlice, destinationRect, paint);
+    } else {
+      for (Rect tileRect in _generateImageTileRects(rect, destinationRect, repeat))
+        canvas.drawImageNine(image, centerSlice, tileRect, paint);
+    }
   }
   if (needSave)
     canvas.restore();
 }
 
 Iterable<Rect> _generateImageTileRects(Rect outputRect, Rect fundamentalRect, ImageRepeat repeat) sync* {
-  if (repeat == ImageRepeat.noRepeat) {
-    yield fundamentalRect;
-    return;
-  }
-
   int startX = 0;
   int startY = 0;
   int stopX = 0;

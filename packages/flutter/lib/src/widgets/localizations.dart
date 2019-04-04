@@ -44,7 +44,7 @@ Future<Map<Type, dynamic>> _loadAll(Locale locale, Iterable<LocalizationsDelegat
 
   // Only load the first delegate for each delegate type that supports
   // locale.languageCode.
-  final Set<Type> types = Set<Type>();
+  final Set<Type> types = <Type>{};
   final List<LocalizationsDelegate<dynamic>> delegates = <LocalizationsDelegate<dynamic>>[];
   for (LocalizationsDelegate<dynamic> delegate in allDelegates) {
     if (!types.contains(delegate.type) && delegate.isSupported(locale)) {
@@ -223,7 +223,7 @@ class DefaultWidgetsLocalizations implements WidgetsLocalizations {
 }
 
 class _LocalizationsScope extends InheritedWidget {
-  const _LocalizationsScope ({
+  const _LocalizationsScope({
     Key key,
     @required this.locale,
     @required this.localizationsState,

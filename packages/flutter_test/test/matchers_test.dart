@@ -225,7 +225,7 @@ void main() {
         Path(),
         coversSameAreaAs(
           Path(),
-          areaToCompare: Rect.fromLTRB(0.0, 0.0, 10.0, 10.0)
+          areaToCompare: Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
         ),
       );
     });
@@ -237,7 +237,7 @@ void main() {
         Path(),
         isNot(coversSameAreaAs(
           rectPath,
-          areaToCompare: Rect.fromLTRB(0.0, 0.0, 10.0, 10.0)
+          areaToCompare: Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
         )),
       );
     });
@@ -250,7 +250,7 @@ void main() {
         Path(),
         coversSameAreaAs(
           rectPath,
-          areaToCompare: Rect.fromLTRB(0.0, 0.0, 4.0, 4.0)
+          areaToCompare: Rect.fromLTRB(0.0, 0.0, 4.0, 4.0),
         ),
       );
     });
@@ -268,12 +268,12 @@ void main() {
         linePath,
         coversSameAreaAs(
           rectPath,
-          areaToCompare: Rect.fromLTRB(0.0, 0.0, 10.0, 10.0)
+          areaToCompare: Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
         ),
       );
     });
 
-     test('partially overlapping paths', () {
+    test('partially overlapping paths', () {
       final Path rectPath = Path()
         ..addRect(Rect.fromLTRB(5.0, 5.0, 6.0, 6.0));
       final Path linePath = Path()
@@ -286,7 +286,7 @@ void main() {
         linePath,
         isNot(coversSameAreaAs(
           rectPath,
-          areaToCompare: Rect.fromLTRB(0.0, 0.0, 10.0, 10.0)
+          areaToCompare: Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
         )),
       );
     });
@@ -393,8 +393,8 @@ void main() {
         namesRoute: true,
         header: true,
         button: true,
-        onTap: () {},
-        onLongPress: () {},
+        onTap: () { },
+        onLongPress: () { },
         label: 'foo',
         hint: 'bar',
         value: 'baz',
@@ -404,8 +404,8 @@ void main() {
         onTapHint: 'scan',
         onLongPressHint: 'fill',
         customSemanticsActions: <CustomSemanticsAction, VoidCallback>{
-          const CustomSemanticsAction(label: 'foo'): () {},
-          const CustomSemanticsAction(label: 'bar'): () {},
+          const CustomSemanticsAction(label: 'foo'): () { },
+          const CustomSemanticsAction(label: 'bar'): () { },
         },
       ));
 
@@ -426,7 +426,7 @@ void main() {
           onLongPressHint: 'fill',
           customActions: <CustomSemanticsAction>[
             const CustomSemanticsAction(label: 'foo'),
-            const CustomSemanticsAction(label: 'bar')
+            const CustomSemanticsAction(label: 'bar'),
           ],
         ),
       );
@@ -447,7 +447,7 @@ void main() {
           onLongPressHint: 'fill',
           customActions: <CustomSemanticsAction>[
             const CustomSemanticsAction(label: 'foo'),
-            const CustomSemanticsAction(label: 'barz')
+            const CustomSemanticsAction(label: 'barz'),
           ],
         )),
       );
@@ -468,7 +468,7 @@ void main() {
           onLongPressHint: 'fills',
           customActions: <CustomSemanticsAction>[
             const CustomSemanticsAction(label: 'foo'),
-            const CustomSemanticsAction(label: 'bar')
+            const CustomSemanticsAction(label: 'bar'),
           ],
         )),
       );
@@ -502,6 +502,7 @@ void main() {
         scrollPosition: null,
         scrollExtentMax: null,
         scrollExtentMin: null,
+        platformViewId: 105,
         customSemanticsActionIds: <int>[CustomSemanticsAction.getIdentifier(action)],
       );
       final _FakeSemanticsNode node = _FakeSemanticsNode();
@@ -512,6 +513,7 @@ void main() {
          size: const Size(10.0, 10.0),
          elevation: 3.0,
          thickness: 4.0,
+         platformViewId: 105,
          /* Flags */
          hasCheckedState: true,
          isChecked: true,

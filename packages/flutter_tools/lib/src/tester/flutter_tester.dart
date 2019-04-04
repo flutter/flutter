@@ -27,8 +27,8 @@ class FlutterTesterApp extends ApplicationPackage {
   }
 
   FlutterTesterApp._(Directory directory)
-      : _directory = directory,
-        super(id: directory.path);
+    : _directory = directory,
+      super(id: directory.path);
 
   final Directory _directory;
 
@@ -65,13 +65,13 @@ class FlutterTesterDevice extends Device {
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.tester;
 
   @override
-  void clearLogs() {}
+  void clearLogs() { }
 
   final _FlutterTesterDeviceLogReader _logReader =
       _FlutterTesterDeviceLogReader();
 
   @override
-  DeviceLogReader getLogReader({ApplicationPackage app}) => _logReader;
+  DeviceLogReader getLogReader({ ApplicationPackage app }) => _logReader;
 
   @override
   Future<bool> installApp(ApplicationPackage app) async => true;
@@ -96,7 +96,6 @@ class FlutterTesterDevice extends Device {
     @required DebuggingOptions debuggingOptions,
     Map<String, dynamic> platformArgs,
     bool prebuiltApplication = false,
-    bool applicationNeedsRebuild = false,
     bool usesTerminalUi = true,
     bool ipv6 = false,
   }) async {
@@ -152,19 +151,19 @@ class FlutterTesterDevice extends Device {
         },
       );
       // Setting a bool can't fail in the callback.
-      _process.exitCode.then<void>((_) => _isRunning = false); // ignore: unawaited_futures
+      unawaited(_process.exitCode.then<void>((_) => _isRunning = false));
       _process.stdout
-          .transform<String>(utf8.decoder)
-          .transform<String>(const LineSplitter())
-          .listen((String line) {
-        _logReader.addLine(line);
-      });
+        .transform<String>(utf8.decoder)
+        .transform<String>(const LineSplitter())
+        .listen((String line) {
+          _logReader.addLine(line);
+        });
       _process.stderr
-          .transform<String>(utf8.decoder)
-          .transform<String>(const LineSplitter())
-          .listen((String line) {
-        _logReader.addLine(line);
-      });
+        .transform<String>(utf8.decoder)
+        .transform<String>(const LineSplitter())
+        .listen((String line) {
+          _logReader.addLine(line);
+        });
 
       if (!debuggingOptions.debuggingEnabled)
         return LaunchResult.succeeded();
@@ -235,7 +234,7 @@ class _FlutterTesterDeviceLogReader extends DeviceLogReader {
 /// where the VM is running on the same machine and does not need ports forwarding.
 class _NoopPortForwarder extends DevicePortForwarder {
   @override
-  Future<int> forward(int devicePort, {int hostPort}) {
+  Future<int> forward(int devicePort, { int hostPort }) {
     if (hostPort != null && hostPort != devicePort)
       throw 'Forwarding to a different port is not supported by flutter tester';
     return Future<int>.value(devicePort);

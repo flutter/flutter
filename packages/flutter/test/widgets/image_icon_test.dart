@@ -14,7 +14,7 @@ void main() {
   testWidgets('ImageIcon sizing - no theme, default size', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Center(
-        child: ImageIcon(_kImage)
+        child: ImageIcon(_kImage),
       )
     );
 
@@ -43,8 +43,8 @@ void main() {
       const Center(
         child: ImageIcon(
           null,
-          size: 96.0
-        )
+          size: 96.0,
+        ),
       )
     );
 
@@ -57,8 +57,8 @@ void main() {
       const Center(
         child: IconTheme(
           data: IconThemeData(size: 36.0),
-          child: ImageIcon(null)
-        )
+          child: ImageIcon(null),
+        ),
       )
     );
 
@@ -73,9 +73,9 @@ void main() {
           data: IconThemeData(size: 36.0),
           child: ImageIcon(
             null,
-            size: 48.0
-          )
-        )
+            size: 48.0,
+          ),
+        ),
       )
     );
 
@@ -88,8 +88,8 @@ void main() {
       const Center(
         child: IconTheme(
           data: IconThemeData(),
-          child: ImageIcon(null)
-        )
+          child: ImageIcon(null),
+        ),
       )
     );
 
@@ -105,7 +105,7 @@ void main() {
         child: Center(
           child: IconTheme(
             data: IconThemeData(),
-            child: ImageIcon(null, semanticLabel: 'test')
+            child: ImageIcon(null, semanticLabel: 'test'),
           ),
         ),
       ),

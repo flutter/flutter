@@ -53,7 +53,7 @@ void main() {
             label: 'a true',
             textDirection: TextDirection.rtl,
             actions: <SemanticsAction>[SemanticsAction.tap],
-          )
+          ),
         ],
       ),
       ignoreId: true,

@@ -107,10 +107,10 @@ class CupertinoActionSheet extends StatelessWidget {
     this.messageScrollController,
     this.actionScrollController,
     this.cancelButton,
-  })  : assert(actions != null || title != null || message != null || cancelButton != null,
+  }) : assert(actions != null || title != null || message != null || cancelButton != null,
           'An action sheet must have a non-null value for at least one of the following arguments: '
           'actions, title, message, or cancelButton'),
-        super(key: key);
+       super(key: key);
 
   /// An optional title of the action sheet. When the [message] is non-null,
   /// the font of the [title] is bold.
@@ -266,8 +266,8 @@ class CupertinoActionSheetAction extends StatelessWidget {
     this.isDefaultAction = false,
     this.isDestructiveAction = false,
     @required this.child,
-  })  : assert(child != null),
-        assert(onPressed != null);
+  }) : assert(child != null),
+       assert(onPressed != null);
 
   /// The callback that is called when the button is tapped.
   ///
@@ -514,9 +514,9 @@ class _RenderCupertinoAlert extends RenderBox {
     RenderBox contentSection,
     RenderBox actionsSection,
     double dividerThickness = 0.0,
-  }) :  _contentSection = contentSection,
-        _actionsSection = actionsSection,
-        _dividerThickness = dividerThickness;
+  }) : _contentSection = contentSection,
+       _actionsSection = actionsSection,
+       _dividerThickness = dividerThickness;
 
   RenderBox get contentSection => _contentSection;
   RenderBox _contentSection;
@@ -843,8 +843,8 @@ class _CupertinoAlertActionSection extends StatefulWidget {
     @required this.children,
     this.scrollController,
     this.hasCancelButton,
-  })  : assert(children != null),
-        super(key: key);
+  }) : assert(children != null),
+       super(key: key);
 
   final List<Widget> children;
 
@@ -975,9 +975,9 @@ class _CupertinoAlertActionsRenderWidget extends MultiChildRenderObjectWidget {
     @required List<Widget> actionButtons,
     double dividerThickness = 0.0,
     bool hasCancelButton = false,
-  }) :  _dividerThickness = dividerThickness,
-        _hasCancelButton = hasCancelButton,
-        super(key: key, children: actionButtons);
+  }) : _dividerThickness = dividerThickness,
+       _hasCancelButton = hasCancelButton,
+       super(key: key, children: actionButtons);
 
   final double _dividerThickness;
   final bool _hasCancelButton;
@@ -1022,8 +1022,8 @@ class _RenderCupertinoAlertActions extends RenderBox
     List<RenderBox> children,
     double dividerThickness = 0.0,
     bool hasCancelButton = false,
-  }) :  _dividerThickness = dividerThickness,
-        _hasCancelButton = hasCancelButton {
+  }) : _dividerThickness = dividerThickness,
+       _hasCancelButton = hasCancelButton {
     addAll(children);
   }
 
@@ -1185,7 +1185,7 @@ class _RenderCupertinoAlertActions extends RenderBox
 
     final Path backgroundFillPath = Path()
       ..fillType = PathFillType.evenOdd
-      ..addRect(Rect.largest);
+      ..addRect(Rect.fromLTWH(0.0, 0.0, size.width, size.height));
 
     final Path pressedBackgroundFillPath = Path();
 

@@ -4,6 +4,7 @@
 
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 
@@ -61,7 +62,7 @@ class ThirdWidget extends StatelessWidget {
           onException(e);
         }
       },
-      behavior: HitTestBehavior.opaque
+      behavior: HitTestBehavior.opaque,
     );
   }
 }
@@ -189,7 +190,7 @@ void main() {
       targetKey: targetKey,
       onException: (dynamic e) {
         exception = e;
-      }
+      },
     );
     await tester.pumpWidget(widget);
     await tester.tap(find.byKey(targetKey));
@@ -276,13 +277,13 @@ void main() {
                 log.add('left');
                 Navigator.pushNamed(context, '/second');
               },
-              child: const Text('left')
+              child: const Text('left'),
             ),
             GestureDetector(
               onTap: () { log.add('right'); },
-              child: const Text('right')
+              child: const Text('right'),
             ),
-          ]
+          ],
         );
       },
       '/second': (BuildContext context) => Container(),
@@ -359,8 +360,7 @@ void main() {
     expect(find.text('B'), findsOneWidget);
   });
 
-  testWidgets('Push and pop should trigger the observers',
-      (WidgetTester tester) async {
+  testWidgets('Push and pop should trigger the observers', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
        '/': (BuildContext context) => OnTapPage(id: '/', onTap: () { Navigator.pushNamed(context, '/A'); }),
       '/A': (BuildContext context) => OnTapPage(id: 'A', onTap: () { Navigator.pop(context); }),
@@ -565,7 +565,7 @@ void main() {
           },
         );
         return routes[settings.name];
-      }
+      },
     ));
 
     expect(find.text('/'), findsOneWidget);
@@ -722,8 +722,7 @@ void main() {
     expect(log, <String>['pushed / (previous is <none>)', 'pushed B (previous is /)', 'pushed C (previous is B)', 'replaced B with D']);
   });
 
-  testWidgets('didStartUserGesture observable',
-      (WidgetTester tester) async {
+  testWidgets('didStartUserGesture observable', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
        '/': (BuildContext context) => OnTapPage(id: '/', onTap: () { Navigator.pushNamed(context, '/A'); }),
       '/A': (BuildContext context) => OnTapPage(id: 'A', onTap: () { Navigator.pop(context); }),
@@ -869,5 +868,150 @@ void main() {
 
 
     semantics.dispose();
+  });
+
+  testWidgets('arguments for named routes on Navigator', (WidgetTester tester) async {
+    GlobalKey currentRouteKey;
+    final List<Object> arguments = <Object>[];
+
+    await tester.pumpWidget(MaterialApp(
+      onGenerateRoute: (RouteSettings settings) {
+        arguments.add(settings.arguments);
+        return MaterialPageRoute<void>(
+          settings: settings,
+          builder: (BuildContext context) => Center(key: currentRouteKey = GlobalKey(), child: Text(settings.name)),
+        );
+      },
+    ));
+
+    expect(find.text('/'), findsOneWidget);
+    expect(arguments.single, isNull);
+    arguments.clear();
+
+    Navigator.pushNamed(
+      currentRouteKey.currentContext,
+      '/A',
+      arguments: 'pushNamed',
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('/'), findsNothing);
+    expect(find.text('/A'), findsOneWidget);
+    expect(arguments.single, 'pushNamed');
+    arguments.clear();
+
+    Navigator.popAndPushNamed(
+      currentRouteKey.currentContext,
+      '/B',
+      arguments: 'popAndPushNamed',
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('/'), findsNothing);
+    expect(find.text('/A'), findsNothing);
+    expect(find.text('/B'), findsOneWidget);
+    expect(arguments.single, 'popAndPushNamed');
+    arguments.clear();
+
+    Navigator.pushNamedAndRemoveUntil(
+      currentRouteKey.currentContext,
+      '/C',
+      (Route<dynamic> route) => route.isFirst,
+      arguments: 'pushNamedAndRemoveUntil',
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('/'), findsNothing);
+    expect(find.text('/A'), findsNothing);
+    expect(find.text('/B'), findsNothing);
+    expect(find.text('/C'), findsOneWidget);
+    expect(arguments.single, 'pushNamedAndRemoveUntil');
+    arguments.clear();
+
+    Navigator.pushReplacementNamed(
+      currentRouteKey.currentContext,
+      '/D',
+      arguments: 'pushReplacementNamed',
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('/'), findsNothing);
+    expect(find.text('/A'), findsNothing);
+    expect(find.text('/B'), findsNothing);
+    expect(find.text('/C'), findsNothing);
+    expect(find.text('/D'), findsOneWidget);
+    expect(arguments.single, 'pushReplacementNamed');
+    arguments.clear();
+  });
+
+  testWidgets('arguments for named routes on NavigatorState', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+    final List<Object> arguments = <Object>[];
+
+    await tester.pumpWidget(MaterialApp(
+      navigatorKey: navigatorKey,
+      onGenerateRoute: (RouteSettings settings) {
+        arguments.add(settings.arguments);
+        return MaterialPageRoute<void>(
+          settings: settings,
+          builder: (BuildContext context) => Center(child: Text(settings.name)),
+        );
+      },
+    ));
+
+    expect(find.text('/'), findsOneWidget);
+    expect(arguments.single, isNull);
+    arguments.clear();
+
+    navigatorKey.currentState.pushNamed(
+      '/A',
+      arguments:'pushNamed',
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('/'), findsNothing);
+    expect(find.text('/A'), findsOneWidget);
+    expect(arguments.single, 'pushNamed');
+    arguments.clear();
+
+    navigatorKey.currentState.popAndPushNamed(
+      '/B',
+      arguments: 'popAndPushNamed',
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('/'), findsNothing);
+    expect(find.text('/A'), findsNothing);
+    expect(find.text('/B'), findsOneWidget);
+    expect(arguments.single, 'popAndPushNamed');
+    arguments.clear();
+
+    navigatorKey.currentState.pushNamedAndRemoveUntil(
+      '/C',
+      (Route<dynamic> route) => route.isFirst,
+      arguments: 'pushNamedAndRemoveUntil',
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('/'), findsNothing);
+    expect(find.text('/A'), findsNothing);
+    expect(find.text('/B'), findsNothing);
+    expect(find.text('/C'), findsOneWidget);
+    expect(arguments.single, 'pushNamedAndRemoveUntil');
+    arguments.clear();
+
+    navigatorKey.currentState.pushReplacementNamed(
+      '/D',
+      arguments: 'pushReplacementNamed',
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('/'), findsNothing);
+    expect(find.text('/A'), findsNothing);
+    expect(find.text('/B'), findsNothing);
+    expect(find.text('/C'), findsNothing);
+    expect(find.text('/D'), findsOneWidget);
+    expect(arguments.single, 'pushReplacementNamed');
+    arguments.clear();
   });
 }

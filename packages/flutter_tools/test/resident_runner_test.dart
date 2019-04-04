@@ -12,7 +12,7 @@ import 'src/context.dart';
 
 class TestRunner extends ResidentRunner {
   TestRunner(List<FlutterDevice> devices)
-      : super(devices);
+    : super(devices);
 
   bool hasHelpBeenPrinted = false;
   String receivedCommand;

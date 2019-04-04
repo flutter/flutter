@@ -195,7 +195,7 @@ void main() {
           <String, dynamic>{
             'type': 'FlutterView',
           },
-        ]
+        ],
       };
 
       Future<json_rpc.Peer> mockVmConnectionFunction(

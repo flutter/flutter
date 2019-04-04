@@ -26,7 +26,7 @@ class _DummyPortForwarder implements PortForwarder {
   int get remotePort => _remotePort;
 
   @override
-  Future<void> stop() async {}
+  Future<void> stop() async { }
 }
 
 class _DummySshCommandRunner implements SshCommandRunner {
@@ -49,7 +49,13 @@ class _DummySshCommandRunner implements SshCommandRunner {
       final List<String> splitCommand = command.split(' ');
       final String exe = splitCommand[0];
       final List<String> args = splitCommand.skip(1).toList();
-      final ProcessResult r = Process.runSync(exe, args);
+      // This needs to remain async in the event that this command attempts to
+      // access something (like the hub) that requires interaction with this
+      // process's event loop. A specific example is attempting to run `find`, a
+      // synchronous command, on this own process's `out` directory. As `find`
+      // will wait indefinitely for the `out` directory to be serviced, causing
+      // a deadlock.
+      final ProcessResult r = await Process.run(exe, args);
       return r.stdout.split('\n');
     } on ProcessException catch (e) {
       _log.warning("Error running '$command': $e");
@@ -93,7 +99,7 @@ class FuchsiaCompat {
   /// [FuchsiaRemoteConnection.stop].
   static Future<FuchsiaRemoteConnection> connect() async {
     FuchsiaCompat._init();
-    return FuchsiaRemoteConnection
-        .connectWithSshCommandRunner(_DummySshCommandRunner());
+    return FuchsiaRemoteConnection.connectWithSshCommandRunner(
+        _DummySshCommandRunner());
   }
 }

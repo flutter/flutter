@@ -44,7 +44,7 @@ Future<void> getPackages(String folder) async {
   final List<String> command = <String>[
     fs.path.join(getFlutterRoot(), 'bin', 'flutter'),
     'packages',
-    'get'
+    'get',
   ];
   final Process process = await processManager.start(command, workingDirectory: folder);
   final StringBuffer errorOutput = StringBuffer();

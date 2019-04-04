@@ -140,11 +140,11 @@ void main() {
       }
 
       testWidgets('formats dates in English', (WidgetTester tester) async {
-       final Map<DateType, String> formatted = await formatDate(tester, const Locale('en'), DateTime(2018, 8, 1));
-       expect(formatted[DateType.year], '2018');
-       expect(formatted[DateType.medium], 'Wed, Aug 1');
-       expect(formatted[DateType.full], 'Wednesday, August 1, 2018');
-       expect(formatted[DateType.monthYear], 'August 2018');
+        final Map<DateType, String> formatted = await formatDate(tester, const Locale('en'), DateTime(2018, 8, 1));
+        expect(formatted[DateType.year], '2018');
+        expect(formatted[DateType.medium], 'Wed, Aug 1');
+        expect(formatted[DateType.full], 'Wednesday, August 1, 2018');
+        expect(formatted[DateType.monthYear], 'August 2018');
       });
 
       testWidgets('formats dates in German', (WidgetTester tester) async {

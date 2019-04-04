@@ -75,7 +75,7 @@ void main() {
     g.append(j);
 
     a.debugMarkClean();
-    b.markNeedsAddToScene();  // ignore: invalid_use_of_protected_member
+    b.markNeedsAddToScene();
     c.debugMarkClean();
     d.debugMarkClean();
     e.debugMarkClean();
@@ -83,7 +83,7 @@ void main() {
     g.debugMarkClean();
     h.debugMarkClean();
     i.debugMarkClean();
-    j.markNeedsAddToScene();  // ignore: invalid_use_of_protected_member
+    j.markNeedsAddToScene();
 
     a.updateSubtreeNeedsAddToScene();
 
@@ -114,10 +114,10 @@ void main() {
 
   void checkNeedsAddToScene(Layer layer, void mutateCallback()) {
     layer.debugMarkClean();
-    layer.updateSubtreeNeedsAddToScene();  // ignore: invalid_use_of_protected_member
+    layer.updateSubtreeNeedsAddToScene();
     expect(layer.debugSubtreeNeedsAddToScene, false);
     mutateCallback();
-    layer.updateSubtreeNeedsAddToScene();  // ignore: invalid_use_of_protected_member
+    layer.updateSubtreeNeedsAddToScene();
     expect(layer.debugSubtreeNeedsAddToScene, true);
   }
 

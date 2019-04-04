@@ -9,20 +9,20 @@ import '../base/file_system.dart';
 import '../globals.dart';
 import '../ios/plist_utils.dart' as plist;
 
- /// Tests whether a [FileSystemEntity] is an macOS bundle directory
+/// Tests whether a [FileSystemEntity] is an macOS bundle directory
 bool _isBundleDirectory(FileSystemEntity entity) =>
     entity is Directory && entity.path.endsWith('.app');
 
 abstract class MacOSApp extends ApplicationPackage {
   MacOSApp({@required String projectBundleId}) : super(id: projectBundleId);
 
-   /// Creates a new [MacOSApp] from an existing app bundle.
-   ///
-   /// `applicationBinary` is the path to the framework directory created by an
-   /// Xcode build. By default, this is located under
-   /// "~/Library/Developer/Xcode/DerivedData/" and contains an executable
-   /// which is expected to start the application and send the observatory
-   /// port over stdout.
+  /// Creates a new [MacOSApp] from an existing app bundle.
+  ///
+  /// `applicationBinary` is the path to the framework directory created by an
+  /// Xcode build. By default, this is located under
+  /// "~/Library/Developer/Xcode/DerivedData/" and contains an executable
+  /// which is expected to start the application and send the observatory
+  /// port over stdout.
   factory MacOSApp.fromPrebuiltApp(FileSystemEntity applicationBinary) {
     final FileSystemEntityType entityType = fs.typeSync(applicationBinary.path);
     if (entityType == FileSystemEntityType.notFound) {
@@ -71,7 +71,7 @@ abstract class MacOSApp extends ApplicationPackage {
   String get executable;
 }
 
- class PrebuiltMacOSApp extends MacOSApp {
+class PrebuiltMacOSApp extends MacOSApp {
   PrebuiltMacOSApp({
     @required this.bundleDir,
     @required this.bundleName,

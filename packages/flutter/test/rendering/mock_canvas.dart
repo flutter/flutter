@@ -164,7 +164,7 @@ abstract class PaintPattern {
   ///
   /// Any calls made between the last matched call (if any) and the
   /// [Canvas.clipPath] call are ignored.
-  void clipPath({Matcher pathMatcher});
+  void clipPath({ Matcher pathMatcher });
 
   /// Indicates that a rectangle is expected next.
   ///
@@ -559,7 +559,8 @@ abstract class _TestRecordingCanvasMatcher extends Matcher {
 
 class _TestRecordingCanvasPaintsCountMatcher extends _TestRecordingCanvasMatcher {
   _TestRecordingCanvasPaintsCountMatcher(Symbol methodName, int count)
-      : _methodName = methodName, _count = count;
+    : _methodName = methodName,
+      _count = count;
 
   final Symbol _methodName;
   final int _count;
@@ -570,10 +571,9 @@ class _TestRecordingCanvasPaintsCountMatcher extends _TestRecordingCanvasMatcher
   }
 
   @override
-  bool _evaluatePredicates(Iterable<RecordedInvocation> calls,
-      StringBuffer description) {
+  bool _evaluatePredicates(Iterable<RecordedInvocation> calls, StringBuffer description) {
     int count = 0;
-    for(RecordedInvocation call in calls) {
+    for (RecordedInvocation call in calls) {
       if (call.invocation.isMethod && call.invocation.memberName == _methodName) {
         count++;
       }
@@ -709,7 +709,7 @@ class _TestRecordingCanvasPatternMatcher extends _TestRecordingCanvasMatcher imp
   }
 
   @override
-  void clipPath({Matcher pathMatcher}) {
+  void clipPath({ Matcher pathMatcher }) {
     _predicates.add(_FunctionPaintPredicate(#clipPath, <dynamic>[pathMatcher]));
   }
 
@@ -866,9 +866,15 @@ abstract class _PaintPredicate {
 
 abstract class _DrawCommandPaintPredicate extends _PaintPredicate {
   _DrawCommandPaintPredicate(
-    this.symbol, this.name, this.argumentCount, this.paintArgumentIndex,
-    { this.color, this.strokeWidth, this.hasMaskFilter, this.style }
-  );
+    this.symbol,
+    this.name,
+    this.argumentCount,
+    this.paintArgumentIndex, {
+    this.color,
+    this.strokeWidth,
+    this.hasMaskFilter,
+    this.style,
+  });
 
   final Symbol symbol;
   final String name;
@@ -934,12 +940,14 @@ abstract class _DrawCommandPaintPredicate extends _PaintPredicate {
 }
 
 class _OneParameterPaintPredicate<T> extends _DrawCommandPaintPredicate {
-  _OneParameterPaintPredicate(Symbol symbol, String name, {
+  _OneParameterPaintPredicate(
+    Symbol symbol,
+    String name, {
     @required this.expected,
     @required Color color,
     @required double strokeWidth,
     @required bool hasMaskFilter,
-    @required PaintingStyle style
+    @required PaintingStyle style,
   }) : super(
     symbol, name, 2, 1, color: color, strokeWidth: strokeWidth, hasMaskFilter: hasMaskFilter, style: style);
 
@@ -967,13 +975,15 @@ class _OneParameterPaintPredicate<T> extends _DrawCommandPaintPredicate {
 }
 
 class _TwoParameterPaintPredicate<T1, T2> extends _DrawCommandPaintPredicate {
-  _TwoParameterPaintPredicate(Symbol symbol, String name, {
+  _TwoParameterPaintPredicate(
+    Symbol symbol,
+    String name, {
     @required this.expected1,
     @required this.expected2,
     @required Color color,
     @required double strokeWidth,
     @required bool hasMaskFilter,
-    @required PaintingStyle style
+    @required PaintingStyle style,
   }) : super(
     symbol, name, 3, 2, color: color, strokeWidth: strokeWidth, hasMaskFilter: hasMaskFilter, style: style);
 

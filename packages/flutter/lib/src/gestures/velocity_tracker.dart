@@ -126,8 +126,8 @@ class VelocityEstimate {
 
 class _PointAtTime {
   const _PointAtTime(this.point, this.time)
-      : assert(point != null),
-        assert(time != null);
+    : assert(point != null),
+      assert(time != null);
 
   final Duration time;
   final Offset point;

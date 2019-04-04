@@ -16,7 +16,7 @@ import 'typography.dart';
 /// To obtain the current text theme, call [Theme.of] with the current
 /// [BuildContext] and read the [ThemeData.textTheme] property.
 ///
-/// The Material Design typography scheme was signficantly changed in the
+/// The Material Design typography scheme was significantly changed in the
 /// current (2018) version of the specification
 /// (https://material.io/design/typography).
 ///
@@ -43,7 +43,7 @@ import 'typography.dart';
 ///
 /// The [TextTheme] API is based on the original material (2014)
 /// design spec, which used different text style names. For backwards
-/// compatability's sake, this API continues to use the original
+/// compatibility's sake, this API continues to use the original
 /// names. The table below should help with understanding the API in
 /// terms of the 2018 material spec.
 ///
@@ -93,7 +93,7 @@ import 'typography.dart';
 ///  * [Typography], the class that generates [TextTheme]s appropriate for a platform.
 ///  * [Theme], for other aspects of a material design application that can be
 ///    globally adjusted, such as the color scheme.
-///  * <http://material.google.com/style/typography.html>
+///  * <https://material.io/design/typography/>
 @immutable
 class TextTheme extends Diagnosticable {
   /// Creates a text theme that uses the given values.
@@ -102,7 +102,7 @@ class TextTheme extends Diagnosticable {
   /// or [Typography.white], which implement the typography styles in the
   /// material design specification:
   ///
-  /// <https://material.google.com/style/typography.html#typography-styles>
+  /// <https://material.io/design/typography/#type-scale>
   ///
   /// If you do decide to create your own text theme, consider using one of
   /// those predefined themes as a starting point for [copyWith] or [apply].

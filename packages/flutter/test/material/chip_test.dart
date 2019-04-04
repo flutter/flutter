@@ -26,6 +26,15 @@ RenderBox getMaterialBox(WidgetTester tester) {
   );
 }
 
+Material getMaterial(WidgetTester tester) {
+  return tester.widget<Material>(
+    find.descendant(
+      of: find.byType(RawChip),
+      matching: find.byType(Material),
+    ),
+  );
+}
+
 IconThemeData getIconData(WidgetTester tester) {
   final IconTheme iconTheme = tester.firstWidget(
     find.descendant(
@@ -225,7 +234,7 @@ void main() {
       'available space and the delete icon is present', (WidgetTester tester) async {
     await _testConstrainedLabel(
       tester,
-      onDeleted: () {},
+      onDeleted: () { },
     );
   });
 
@@ -235,7 +244,7 @@ void main() {
     await _testConstrainedLabel(
       tester,
       avatar: const CircleAvatar(child: Text('A')),
-      onDeleted: () {},
+      onDeleted: () { },
     );
   });
 
@@ -285,7 +294,7 @@ void main() {
             return Material(
               child: Chip(
                 deleteIcon: Icon(Icons.delete, key: iconKey),
-                onDeleted: () {},
+                onDeleted: () { },
                 label: const Text('ABC'),
               ),
             );
@@ -458,7 +467,7 @@ void main() {
             Chip(
               deleteIcon: Container(key: keyA, width: 20.0, height: 20.0),
               label: const Text('Chip A'),
-              onDeleted: () {},
+              onDeleted: () { },
             ),
           ],
         ),
@@ -487,7 +496,7 @@ void main() {
                         width: 40.0,
                         height: 40.0,
                       ),
-                      onDeleted: () {},
+                      onDeleted: () { },
                     ),
                   ),
                 );
@@ -524,7 +533,7 @@ void main() {
                         width: 40.0,
                         height: 40.0,
                       ),
-                      onDeleted: () {},
+                      onDeleted: () { },
                     ),
                   ),
                 );
@@ -545,7 +554,7 @@ void main() {
 
   testWidgets('Avatar drawer works as expected on RawChip', (WidgetTester tester) async {
     final GlobalKey labelKey = GlobalKey();
-    Future<void> pushChip({Widget avatar}) async {
+    Future<void> pushChip({ Widget avatar }) async {
       return tester.pumpWidget(
         _wrapForChip(
           child: Wrap(
@@ -659,7 +668,7 @@ void main() {
     final UniqueKey labelKey = UniqueKey();
     final UniqueKey deleteButtonKey = UniqueKey();
     bool wasDeleted = false;
-    Future<void> pushChip({bool deletable = false}) async {
+    Future<void> pushChip({ bool deletable = false }) async {
       return tester.pumpWidget(
         _wrapForChip(
           child: Wrap(
@@ -774,7 +783,7 @@ void main() {
   testWidgets('Selection with avatar works as expected on RawChip', (WidgetTester tester) async {
     bool selected = false;
     final UniqueKey labelKey = UniqueKey();
-    Future<void> pushChip({Widget avatar, bool selectable = false}) async {
+    Future<void> pushChip({ Widget avatar, bool selectable = false }) async {
       return tester.pumpWidget(
         _wrapForChip(
           child: Wrap(
@@ -857,7 +866,7 @@ void main() {
   testWidgets('Selection without avatar works as expected on RawChip', (WidgetTester tester) async {
     bool selected = false;
     final UniqueKey labelKey = UniqueKey();
-    Future<void> pushChip({bool selectable = false}) async {
+    Future<void> pushChip({ bool selectable = false }) async {
       return tester.pumpWidget(
         _wrapForChip(
           child: Wrap(
@@ -933,7 +942,7 @@ void main() {
   testWidgets('Activation works as expected on RawChip', (WidgetTester tester) async {
     bool selected = false;
     final UniqueKey labelKey = UniqueKey();
-    Future<void> pushChip({Widget avatar, bool selectable = false}) async {
+    Future<void> pushChip({ Widget avatar, bool selectable = false }) async {
       return tester.pumpWidget(
         _wrapForChip(
           child: Wrap(
@@ -1080,7 +1089,7 @@ void main() {
             child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
               return RawChip(
                 showCheckmark: showCheckmark,
-                onDeleted: isDeletable ? () {} : null,
+                onDeleted: isDeletable ? () { } : null,
                 tapEnabled: true,
                 avatar: avatar,
                 deleteIcon: deleteIcon,
@@ -1218,7 +1227,7 @@ void main() {
         home: Material(
           child: RawChip(
             label: const Text('test'),
-            onPressed: () {},
+            onPressed: () { },
           ),
         ),
       ));
@@ -1345,7 +1354,7 @@ void main() {
         home: Material(
           child: RawChip(
             isEnabled: false,
-            onPressed: () {},
+            onPressed: () { },
             label: const Text('test'),
           ),
         ),
@@ -1436,7 +1445,7 @@ void main() {
       MaterialApp(
         home: Material(
           child: ActionChip(
-            onPressed: (){},
+            onPressed: () { },
             label: const Text('action chip'),
           ),
         ),
@@ -1450,7 +1459,7 @@ void main() {
       MaterialApp(
         home: Material(
           child: FilterChip(
-            onSelected: (bool valueChanged){},
+            onSelected: (bool valueChanged) { },
             selected: false,
             label: const Text('filter chip'),
           ),
@@ -1476,7 +1485,7 @@ void main() {
     expect(tester.takeException(), null);
   });
 
-  testWidgets('Chip elevation works correctly', (WidgetTester tester) async {
+  testWidgets('Chip elevation and shadow color work correctly', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(
       platform: TargetPlatform.android,
       primarySwatch: Colors.red,
@@ -1484,7 +1493,7 @@ void main() {
 
     final ChipThemeData chipTheme = theme.chipTheme;
 
-    InputChip inputChip = const InputChip(label: Text('Label'), pressElevation: 8.0);
+    InputChip inputChip = const InputChip(label: Text('Label'));
 
     Widget buildChip(ChipThemeData data) {
       return _wrapForChip(
@@ -1497,13 +1506,34 @@ void main() {
     }
 
     await tester.pumpWidget(buildChip(chipTheme));
-    expect(inputChip.pressElevation, 8.0);
+    Material material = getMaterial(tester);
+    expect(material.elevation, 0.0);
+    expect(material.shadowColor, Colors.black);
 
-    inputChip = const InputChip(label: Text('Label'), pressElevation: 12.0);
+    inputChip = const InputChip(
+      label: Text('Label'),
+      elevation: 4.0,
+      shadowColor: Colors.green,
+      selectedShadowColor: Colors.blue,
+    );
 
     await tester.pumpWidget(buildChip(chipTheme));
     await tester.pumpAndSettle();
-    expect(inputChip.pressElevation, 12.0);
+    material = getMaterial(tester);
+    expect(material.elevation, 4.0);
+    expect(material.shadowColor, Colors.green);
+
+    inputChip = const InputChip(
+      label: Text('Label'),
+      selected: true,
+      shadowColor: Colors.green,
+      selectedShadowColor: Colors.blue,
+    );
+
+    await tester.pumpWidget(buildChip(chipTheme));
+    await tester.pumpAndSettle();
+    material = getMaterial(tester);
+    expect(material.shadowColor, Colors.blue);
   });
 
   testWidgets('can be tapped outside of chip body', (WidgetTester tester) async {
@@ -1538,7 +1568,7 @@ void main() {
           shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(0.0))),
           avatar: const CircleAvatar(child: Text('A')),
           label: const Text('Chip A'),
-          onPressed: () {},
+          onPressed: () { },
         ),
       ),
     );
@@ -1553,12 +1583,12 @@ void main() {
   }
 
   testWidgets('Chip clipBehavior properly passes through to the Material', (WidgetTester tester) async {
-     const Text label = Text('label');
-     await tester.pumpWidget(_wrapForChip(child: const Chip(label: label)));
-     checkChipMaterialClipBehavior(tester, Clip.none);
+    const Text label = Text('label');
+    await tester.pumpWidget(_wrapForChip(child: const Chip(label: label)));
+    checkChipMaterialClipBehavior(tester, Clip.none);
 
-     await tester.pumpWidget(_wrapForChip(child: const Chip(label: label, clipBehavior: Clip.antiAlias)));
-     checkChipMaterialClipBehavior(tester, Clip.antiAlias);
+    await tester.pumpWidget(_wrapForChip(child: const Chip(label: label, clipBehavior: Clip.antiAlias)));
+    checkChipMaterialClipBehavior(tester, Clip.antiAlias);
   });
 
   testWidgets('ChoiceChip clipBehavior properly passes through to the Material', (WidgetTester tester) async {
@@ -1572,19 +1602,19 @@ void main() {
 
   testWidgets('FilterChip clipBehavior properly passes through to the Material', (WidgetTester tester) async {
     const Text label = Text('label');
-    await tester.pumpWidget(_wrapForChip(child: FilterChip(label: label, onSelected: (bool b){},)));
+    await tester.pumpWidget(_wrapForChip(child: FilterChip(label: label, onSelected: (bool b) { },)));
     checkChipMaterialClipBehavior(tester, Clip.none);
 
-    await tester.pumpWidget(_wrapForChip(child: FilterChip(label: label, onSelected: (bool b){}, clipBehavior: Clip.antiAlias)));
+    await tester.pumpWidget(_wrapForChip(child: FilterChip(label: label, onSelected: (bool b) { }, clipBehavior: Clip.antiAlias)));
     checkChipMaterialClipBehavior(tester, Clip.antiAlias);
   });
 
   testWidgets('ActionChip clipBehavior properly passes through to the Material', (WidgetTester tester) async {
     const Text label = Text('label');
-    await tester.pumpWidget(_wrapForChip(child: ActionChip(label: label, onPressed: (){},)));
+    await tester.pumpWidget(_wrapForChip(child: ActionChip(label: label, onPressed: () { },)));
     checkChipMaterialClipBehavior(tester, Clip.none);
 
-    await tester.pumpWidget(_wrapForChip(child: ActionChip(label: label, clipBehavior: Clip.antiAlias, onPressed: (){})));
+    await tester.pumpWidget(_wrapForChip(child: ActionChip(label: label, clipBehavior: Clip.antiAlias, onPressed: () { })));
     checkChipMaterialClipBehavior(tester, Clip.antiAlias);
   });
 
@@ -1609,7 +1639,7 @@ void main() {
         of: find.byType(RawChip),
         matching: find.byWidgetPredicate((Widget widget) {
           return widget.runtimeType.toString() == '_ChipRenderWidget';
-        })
+        }),
       )
     );
     const Color selectScrimColor = Color(0x60191919);
@@ -1618,5 +1648,20 @@ void main() {
     ], excludes: <Offset>[
       const Offset(4, 4),
     ]));
+  });
+
+  testWidgets('Chips should use InkWell instead of InkResponse.', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/28646
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: ActionChip(
+            onPressed: () { },
+            label: const Text('action chip'),
+          ),
+        ),
+      ),
+    );
+    expect(find.byType(InkWell), findsOneWidget);
   });
 }

@@ -250,7 +250,7 @@ void main() {
     final RenderParagraph paragraph = RenderParagraph(
         testSpan,
         textDirection: TextDirection.ltr,
-        textScaleFactor: 1.3
+        textScaleFactor: 1.3,
     );
     paragraph.layout(const BoxConstraints());
     // anyOf is needed here because Linux and Mac have different text

@@ -195,6 +195,7 @@ class ChangeNotifier implements Listenable {
   /// in response to a notification) that has been registered multiple times.
   /// See the discussion at [removeListener].
   @protected
+  @visibleForTesting
   void notifyListeners() {
     assert(_debugAssertNotDisposed());
     if (_listeners != null) {
@@ -212,7 +213,7 @@ class ChangeNotifier implements Listenable {
             informationCollector: (StringBuffer information) {
               information.writeln('The $runtimeType sending notification was:');
               information.write('  $this');
-            }
+            },
           ));
         }
       }
@@ -227,7 +228,7 @@ class _MergingListenable extends Listenable {
 
   @override
   void addListener(VoidCallback listener) {
-    for (final Listenable child  in _children) {
+    for (final Listenable child in _children) {
       child?.addListener(listener);
     }
   }

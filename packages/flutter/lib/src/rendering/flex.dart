@@ -480,7 +480,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   double _getIntrinsicSize({
     Axis sizingDirection,
     double extent, // the extent in the direction that isn't the sizing direction
-    _ChildSizingFunction childSize // a method to find the size in the sizing direction
+    _ChildSizingFunction childSize, // a method to find the size in the sizing direction
   }) {
     if (_direction == sizingDirection) {
       // INTRINSIC MAIN SIZE
@@ -563,7 +563,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     return _getIntrinsicSize(
       sizingDirection: Axis.horizontal,
       extent: height,
-      childSize: (RenderBox child, double extent) => child.getMinIntrinsicWidth(extent)
+      childSize: (RenderBox child, double extent) => child.getMinIntrinsicWidth(extent),
     );
   }
 
@@ -572,7 +572,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     return _getIntrinsicSize(
       sizingDirection: Axis.horizontal,
       extent: height,
-      childSize: (RenderBox child, double extent) => child.getMaxIntrinsicWidth(extent)
+      childSize: (RenderBox child, double extent) => child.getMaxIntrinsicWidth(extent),
     );
   }
 
@@ -581,7 +581,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     return _getIntrinsicSize(
       sizingDirection: Axis.vertical,
       extent: width,
-      childSize: (RenderBox child, double extent) => child.getMinIntrinsicHeight(extent)
+      childSize: (RenderBox child, double extent) => child.getMinIntrinsicHeight(extent),
     );
   }
 
@@ -590,7 +590,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     return _getIntrinsicSize(
       sizingDirection: Axis.vertical,
       extent: width,
-      childSize: (RenderBox child, double extent) => child.getMaxIntrinsicHeight(extent)
+      childSize: (RenderBox child, double extent) => child.getMaxIntrinsicHeight(extent),
     );
   }
 

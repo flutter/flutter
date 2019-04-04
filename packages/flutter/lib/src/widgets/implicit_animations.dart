@@ -15,6 +15,14 @@ import 'text.dart';
 import 'ticker_provider.dart';
 import 'transitions.dart';
 
+// Examples can assume:
+// class MyWidget extends ImplicitlyAnimatedWidget {
+//   MyWidget() : super(duration: const Duration(seconds: 1));
+//   final Color targetColor = Colors.black;
+//   @override
+//   MyWidgetState createState() => MyWidgetState();
+// }
+
 /// An interpolation between two [BoxConstraints].
 ///
 /// This class specializes the interpolation of [Tween<BoxConstraints>] to use
@@ -218,7 +226,7 @@ abstract class ImplicitlyAnimatedWidget extends StatefulWidget {
   const ImplicitlyAnimatedWidget({
     Key key,
     this.curve = Curves.linear,
-    @required this.duration
+    @required this.duration,
   }) : assert(curve != null),
        assert(duration != null),
        super(key: key);
@@ -358,6 +366,45 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
   /// [forEachTween] should override [didUpdateTweens] to update those
   /// properties. Dependent properties should not be updated within
   /// [forEachTween].
+  ///
+  /// {@tool sample}
+  ///
+  /// Sample code implementing an implicitly animated widget's `State`.
+  /// The widget animates between colors whenever `widget.targetColor`
+  /// changes.
+  ///
+  /// ```dart
+  /// class MyWidgetState extends AnimatedWidgetBaseState<MyWidget> {
+  ///   ColorTween _colorTween;
+  ///
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return Text(
+  ///       'Hello World',
+  ///       // Computes the value of the text color at any given time.
+  ///       style: TextStyle(color: _colorTween.evaluate(animation)),
+  ///     );
+  ///   }
+  ///
+  ///   @override
+  ///   void forEachTween(TweenVisitor<dynamic> visitor) {
+  ///     // Update the tween using the provided visitor function.
+  ///     _colorTween = visitor(
+  ///       // The latest tween value. Can be `null`.
+  ///       _colorTween,
+  ///       // The color value toward which we are animating.
+  ///       widget.targetColor,
+  ///       // A function that takes a color value and returns a tween
+  ///       // beginning at that value.
+  ///       (value) => ColorTween(begin: value),
+  ///     );
+  ///
+  ///     // We could have more tweens than one by using the visitor
+  ///     // multiple times.
+  ///   }
+  /// }
+  /// ```
+  /// {@end-tool}
   @protected
   void forEachTween(TweenVisitor<dynamic> visitor);
 
@@ -367,7 +414,7 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
   /// Any properties that depend upon tweens created by [forEachTween] should be
   /// updated within [didUpdateTweens], not within [forEachTween].
   @protected
-  void didUpdateTweens() {}
+  void didUpdateTweens() { }
 }
 
 /// A base class for widgets with implicit animations that need to rebuild their
@@ -404,6 +451,8 @@ abstract class AnimatedWidgetBaseState<T extends ImplicitlyAnimatedWidget> exten
 /// For more complex animations, you'll likely want to use a subclass of
 /// [AnimatedWidget] such as the [DecoratedBoxTransition] or use your own
 /// [AnimationController].
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=yI-8QHpGIP4}
 ///
 /// Here's an illustration of what using this widget looks like, using a [curve]
 /// of [Curves.fastOutSlowIn].
@@ -769,7 +818,7 @@ class AnimatedPositioned extends ImplicitlyAnimatedWidget {
     @required Duration duration,
   }) : assert(left == null || right == null || width == null),
        assert(top == null || bottom == null || height == null),
-      super(key: key, curve: curve, duration: duration);
+       super(key: key, curve: curve, duration: duration);
 
   /// Creates a widget that animates the rectangle it occupies implicitly.
   ///
@@ -779,7 +828,7 @@ class AnimatedPositioned extends ImplicitlyAnimatedWidget {
     this.child,
     Rect rect,
     Curve curve = Curves.linear,
-    @required Duration duration
+    @required Duration duration,
   }) : left = rect.left,
        top = rect.top,
        width = rect.width,
@@ -920,7 +969,7 @@ class AnimatedPositionedDirectional extends ImplicitlyAnimatedWidget {
     @required Duration duration,
   }) : assert(start == null || end == null || width == null),
        assert(top == null || bottom == null || height == null),
-      super(key: key, curve: curve, duration: duration);
+       super(key: key, curve: curve, duration: duration);
 
   /// The widget below this widget in the tree.
   ///
@@ -1116,7 +1165,7 @@ class _AnimatedOpacityState extends ImplicitlyAnimatedWidgetState<AnimatedOpacit
   Widget build(BuildContext context) {
     return FadeTransition(
       opacity: _opacityAnimation,
-      child: widget.child
+      child: widget.child,
     );
   }
 }

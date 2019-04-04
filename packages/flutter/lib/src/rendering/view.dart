@@ -4,7 +4,7 @@
 
 import 'dart:developer';
 import 'dart:io' show Platform;
-import 'dart:ui' as ui show Scene, SceneBuilder, window;
+import 'dart:ui' as ui show Scene, SceneBuilder, Window;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -56,8 +56,10 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   RenderView({
     RenderBox child,
     @required ViewConfiguration configuration,
+    @required ui.Window window,
   }) : assert(configuration != null),
-       _configuration = configuration {
+       _configuration = configuration,
+       _window = window {
     this.child = child;
   }
 
@@ -81,6 +83,8 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     assert(_rootTransform != null);
     markNeedsLayout();
   }
+
+  ui.Window _window;
 
   /// Whether Flutter should automatically compute the desired system UI.
   ///
@@ -195,7 +199,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
       final ui.Scene scene = layer.buildScene(builder);
       if (automaticSystemUiAdjustment)
         _updateSystemChrome();
-      ui.window.render(scene);
+      _window.render(scene);
       scene.dispose();
       assert(() {
         if (debugRepaintRainbowEnabled || debugRepaintTextRainbowEnabled)
@@ -209,8 +213,8 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
 
   void _updateSystemChrome() {
     final Rect bounds = paintBounds;
-    final Offset top = Offset(bounds.center.dx, ui.window.padding.top / ui.window.devicePixelRatio);
-    final Offset bottom = Offset(bounds.center.dx, bounds.center.dy - ui.window.padding.bottom / ui.window.devicePixelRatio);
+    final Offset top = Offset(bounds.center.dx, _window.padding.top / _window.devicePixelRatio);
+    final Offset bottom = Offset(bounds.center.dx, bounds.center.dy - _window.padding.bottom / _window.devicePixelRatio);
     final SystemUiOverlayStyle upperOverlayStyle = layer.find<SystemUiOverlayStyle>(top);
     // Only android has a customizable system navigation bar.
     SystemUiOverlayStyle lowerOverlayStyle;
@@ -254,10 +258,10 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
       properties.add(DiagnosticsNode.message('debug mode enabled - ${Platform.operatingSystem}'));
       return true;
     }());
-    properties.add(DiagnosticsProperty<Size>('window size', ui.window.physicalSize, tooltip: 'in physical pixels'));
-    properties.add(DoubleProperty('device pixel ratio', ui.window.devicePixelRatio, tooltip: 'physical pixels per logical pixel'));
+    properties.add(DiagnosticsProperty<Size>('window size', _window.physicalSize, tooltip: 'in physical pixels'));
+    properties.add(DoubleProperty('device pixel ratio', _window.devicePixelRatio, tooltip: 'physical pixels per logical pixel'));
     properties.add(DiagnosticsProperty<ViewConfiguration>('configuration', configuration, tooltip: 'in logical pixels'));
-    if (ui.window.semanticsEnabled)
+    if (_window.semanticsEnabled)
       properties.add(DiagnosticsNode.message('semantics enabled'));
   }
 }

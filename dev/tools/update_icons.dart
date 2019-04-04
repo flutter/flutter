@@ -71,7 +71,7 @@ const Map<String, String> kIdentifierRewrites = <String, String>{
 
 };
 
-final Set<String> kMirroredIcons = Set<String>.from(<String>[
+const Set<String> kMirroredIcons = <String>{
   // This list is obtained from:
   // http://google.github.io/material-design-icons/#icons-in-rtl
   'arrow_back',
@@ -145,7 +145,7 @@ final Set<String> kMirroredIcons = Set<String>.from(<String>[
   'view_list',
   'view_quilt',
   'wrap_text',
-]);
+};
 
 void main(List<String> args) {
   // If we're run from the `tools` dir, set the cwd to the repo root.

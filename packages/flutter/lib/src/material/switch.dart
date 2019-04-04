@@ -49,7 +49,7 @@ enum _SwitchType { material, adaptive }
 ///  * [Checkbox], another widget with similar semantics.
 ///  * [Radio], for selecting among a set of explicit values.
 ///  * [Slider], for selecting a value in a range.
-///  * <https://material.google.com/components/selection-controls.html#selection-controls-switch>
+///  * <https://material.io/design/components/selection-controls.html#switches>
 class Switch extends StatefulWidget {
   /// Creates a material design switch.
   ///
@@ -73,7 +73,7 @@ class Switch extends StatefulWidget {
     this.activeThumbImage,
     this.inactiveThumbImage,
     this.materialTapTargetSize,
-    this.dragStartBehavior = DragStartBehavior.down,
+    this.dragStartBehavior = DragStartBehavior.start,
   }) : _switchType = _SwitchType.material,
        assert(dragStartBehavior != null),
        super(key: key);
@@ -97,7 +97,7 @@ class Switch extends StatefulWidget {
     this.activeThumbImage,
     this.inactiveThumbImage,
     this.materialTapTargetSize,
-    this.dragStartBehavior = DragStartBehavior.down,
+    this.dragStartBehavior = DragStartBehavior.start,
   }) : _switchType = _SwitchType.adaptive,
        super(key: key);
 
@@ -445,7 +445,7 @@ class _RenderSwitch extends RenderToggleable {
   DragStartBehavior get dragStartBehavior => _drag.dragStartBehavior;
   set dragStartBehavior(DragStartBehavior value) {
     assert(value != null);
-    if(_drag.dragStartBehavior == value)
+    if (_drag.dragStartBehavior == value)
       return;
     _drag.dragStartBehavior = value;
   }
@@ -508,7 +508,7 @@ class _RenderSwitch extends RenderToggleable {
       color: color,
       image: image == null ? null : DecorationImage(image: image),
       shape: BoxShape.circle,
-      boxShadow: kElevationToShadow[1]
+      boxShadow: kElevationToShadow[1],
     );
   }
 
@@ -565,14 +565,14 @@ class _RenderSwitch extends RenderToggleable {
       offset.dx + trackHorizontalPadding,
       offset.dy + (size.height - _kTrackHeight) / 2.0,
       size.width - 2.0 * trackHorizontalPadding,
-      _kTrackHeight
+      _kTrackHeight,
     );
     final RRect trackRRect = RRect.fromRectAndRadius(trackRect, const Radius.circular(_kTrackRadius));
     canvas.drawRRect(trackRRect, paint);
 
     final Offset thumbPosition = Offset(
       kRadialReactionRadius + visualPosition * _trackInnerLength,
-      size.height / 2.0
+      size.height / 2.0,
     );
 
     paintRadialReaction(canvas, offset, thumbPosition);
@@ -593,7 +593,7 @@ class _RenderSwitch extends RenderToggleable {
       thumbPainter.paint(
         canvas,
         thumbPosition + offset - Offset(radius, radius),
-        configuration.copyWith(size: Size.fromRadius(radius))
+        configuration.copyWith(size: Size.fromRadius(radius)),
       );
     } finally {
       _isPainting = false;

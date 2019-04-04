@@ -39,7 +39,7 @@ void main() {
       const ProcessManager _processManager = LocalProcessManager();
       final ProcessResult _proc = await _processManager.run(
         <String>[flutterBin, 'run', '-d', 'invalid-device-id'],
-        workingDirectory: tempDir.path
+        workingDirectory: tempDir.path,
       );
 
       expect(_proc.stdout, isNot(contains('flutter has exited unexpectedly')));

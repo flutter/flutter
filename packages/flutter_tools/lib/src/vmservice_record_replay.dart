@@ -180,7 +180,7 @@ class _RecordingSink implements StreamSink<String> {
   }
 
   @override
-  void addError(dynamic errorEvent, [StackTrace stackTrace]) {
+  void addError(dynamic errorEvent, [ StackTrace stackTrace ]) {
     throw UnimplementedError('Add support for this if the need ever arises');
   }
 
@@ -195,7 +195,7 @@ class _RecordingSink implements StreamSink<String> {
 /// replays the corresponding responses back from the recording.
 class ReplayVMServiceChannel extends StreamChannelMixin<String> {
   ReplayVMServiceChannel(Directory location)
-      : _transactions = _loadTransactions(location);
+    : _transactions = _loadTransactions(location);
 
   final Map<int, _Transaction> _transactions;
   final StreamController<String> _controller = StreamController<String>();
@@ -272,7 +272,7 @@ class _ReplaySink implements StreamSink<String> {
   }
 
   @override
-  void addError(dynamic errorEvent, [StackTrace stackTrace]) {
+  void addError(dynamic errorEvent, [ StackTrace stackTrace ]) {
     throw UnimplementedError('Add support for this if the need ever arises');
   }
 

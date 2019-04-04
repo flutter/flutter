@@ -77,7 +77,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   /// pixels. Mustn't be null.
   final double mainAxisMargin;
 
-  /// Distance from the scrollbar's side to the nearest edge in pixels. Musn't
+  /// Distance from the scrollbar's side to the nearest edge in pixels. Must not
   /// be null.
   final double crossAxisMargin;
 

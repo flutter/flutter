@@ -9,13 +9,13 @@ import 'framework.dart';
 /// An interactive button within either material's [BottomNavigationBar]
 /// or the iOS themed [CupertinoTabBar] with an icon and title.
 ///
-/// This class is rarely used in isolation. Commonly embedded in one of the
-/// bottom navigation widgets above.
+/// This class is rarely used in isolation. It is typically embedded in one of
+/// the bottom navigation widgets above.
 ///
 /// See also:
 ///
 ///  * [BottomNavigationBar]
-///  * <https://material.google.com/components/bottom-navigation.html>
+///  * <https://material.io/design/components/bottom-navigation.html>
 ///  * [CupertinoTabBar]
 ///  * <https://developer.apple.com/ios/human-interface-guidelines/bars/tab-bars>
 class BottomNavigationBarItem {
@@ -67,7 +67,7 @@ class BottomNavigationBarItem {
   ///
   /// If the navigation bar's type is [BottomNavigationBarType.shifting], then
   /// the entire bar is flooded with the [backgroundColor] when this item is
-  /// tapped.
+  /// tapped. This will override [BottomNavigationBar.backgroundColor].
   ///
   /// Not used for [CupertinoTabBar]. Control the invariant bar color directly
   /// via [CupertinoTabBar.backgroundColor].

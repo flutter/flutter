@@ -26,13 +26,13 @@ class IconThemeData extends Diagnosticable {
   ///
   /// The [color] is black, the [opacity] is 1.0, and the [size] is 24.0.
   const IconThemeData.fallback()
-      : color = const Color(0xFF000000),
-        _opacity = 1.0,
-        size = 24.0;
+    : color = const Color(0xFF000000),
+      _opacity = 1.0,
+      size = 24.0;
 
   /// Creates a copy of this icon theme but with the given fields replaced with
   /// the new values.
-  IconThemeData copyWith({Color color, double opacity, double size}) {
+  IconThemeData copyWith({ Color color, double opacity, double size }) {
     return IconThemeData(
       color: color ?? this.color,
       opacity: opacity ?? this.opacity,

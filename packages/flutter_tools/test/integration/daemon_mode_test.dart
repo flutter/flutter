@@ -47,18 +47,18 @@ void main() {
           .listen((String line) => stdout.add(line));
 
       final Stream<Map<String, dynamic>> stream =
-          stdout.stream.where((String line) {
-        final Map<String, dynamic> response = parseFlutterResponse(line);
-        // ignore 'Starting device daemon...'
-        if (response == null) {
-          return false;
-        }
-        // TODO(devoncarew): Remove this after #25440 lands.
-        if (response['event'] == 'daemon.showMessage') {
-          return false;
-        }
-        return true;
-      }).map(parseFlutterResponse);
+        stdout.stream.where((String line) {
+          final Map<String, dynamic> response = parseFlutterResponse(line);
+          // ignore 'Starting device daemon...'
+          if (response == null) {
+            return false;
+          }
+          // TODO(devoncarew): Remove this after #25440 lands.
+          if (response['event'] == 'daemon.showMessage') {
+            return false;
+          }
+          return true;
+        }).map(parseFlutterResponse);
 
       Map<String, dynamic> response = await stream.first;
       expect(response['event'], 'daemon.connected');

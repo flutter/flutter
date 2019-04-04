@@ -1,4 +1,4 @@
- // Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2016 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -261,7 +261,7 @@ void main() {
 
     final TestNotifier source1 = TestNotifier();
     final TestNotifier source2 = TestNotifier();
-    final VoidCallback fakeListener = () {};
+    final VoidCallback fakeListener = () { };
 
     final Listenable listenableUnderTest = Listenable.merge(<Listenable>[source1, source2]);
     expect(source1.isListenedTo, isFalse);

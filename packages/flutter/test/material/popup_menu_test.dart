@@ -14,7 +14,7 @@ void main() {
     final Key targetKey = UniqueKey();
     await tester.pumpWidget(
       MaterialApp(
-        routes: <String, WidgetBuilder> {
+        routes: <String, WidgetBuilder>{
           '/next': (BuildContext context) {
             return const Text('Next');
           },
@@ -32,7 +32,7 @@ void main() {
                     return <PopupMenuItem<int>>[
                       const PopupMenuItem<int>(
                         value: 1,
-                        child: Text('One')
+                        child: Text('One'),
                       ),
                     ];
                   },
@@ -138,7 +138,7 @@ void main() {
                   return <PopupMenuItem<int>>[
                     const PopupMenuItem<int>(
                       value: 1,
-                      child: Text('One')
+                      child: Text('One'),
                     ),
                   ];
                 },
@@ -420,7 +420,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     ));
 
     await tester.tap(find.text('XXX'));
@@ -457,7 +457,7 @@ void main() {
             child: Material(
               child: popupMenuButton,
             ),
-          )
+          ),
         ),
       ),
     );
@@ -604,6 +604,41 @@ void main() {
     await tester.tap(find.text('2'));
     await tester.pumpAndSettle();
     expect(selectedValue, '2');
+  });
+
+  testWidgets('showMenu position required', (WidgetTester tester) async {
+    // Test for https://github.com/flutter/flutter/issues/22256
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: Builder(
+              builder: (BuildContext context) {
+                return RaisedButton(
+                  onPressed: () {
+                    // Ensure showMenu throws an assertion without a position
+                    expect(() {
+                      // ignore: missing_required_param
+                      showMenu<int>(
+                        context: context,
+                        items: <PopupMenuItem<int>>[
+                          const PopupMenuItem<int>(
+                              value: 1, child: Text('1')
+                          ),
+                        ],
+                      );
+                    }, throwsAssertionError);
+                  },
+                  child: const Text('Menu Button'),
+                );
+              },
+            ),
+          ),
+        ),
+      )
+    );
+
+    await tester.tap(find.text('Menu Button'));
   });
 
 }

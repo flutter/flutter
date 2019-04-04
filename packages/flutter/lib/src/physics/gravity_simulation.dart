@@ -55,7 +55,7 @@ class GravitySimulation extends Simulation {
     double acceleration,
     double distance,
     double endDistance,
-    double velocity
+    double velocity,
   ) : assert(acceleration != null),
       assert(distance != null),
       assert(velocity != null),

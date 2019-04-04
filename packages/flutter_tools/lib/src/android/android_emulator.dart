@@ -27,7 +27,7 @@ class AndroidEmulators extends EmulatorDiscovery {
 
 class AndroidEmulator extends Emulator {
   AndroidEmulator(String id, [this._properties])
-      : super(id, _properties != null && _properties.isNotEmpty);
+    : super(id, _properties != null && _properties.isNotEmpty);
 
   Map<String, String> _properties;
 
@@ -57,7 +57,7 @@ class AndroidEmulator extends Emulator {
     // seconds won't be recognized as such... :-/
     return Future.any<void>(<Future<void>>[
       launchResult,
-      Future<void>.delayed(const Duration(seconds: 3))
+      Future<void>.delayed(const Duration(seconds: 3)),
     ]);
   }
 }

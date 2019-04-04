@@ -28,7 +28,7 @@ void main() {
         const StringCodec().encodeMessage('hello'),
         (ByteData replyBinary) {
           reply = string.decodeMessage(replyBinary);
-        }
+        },
       );
       expect(reply, equals('hello world'));
     });
@@ -199,7 +199,7 @@ void main() {
       BinaryMessages.handlePlatformMessage(
         'ch',
         event,
-            (ByteData reply) {},
+            (ByteData reply) { },
       );
     }
     test('can receive event stream', () async {

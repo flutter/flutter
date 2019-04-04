@@ -126,6 +126,9 @@ Future<void> main(List<String> arguments) async {
   } else {
     dartdocBaseArgs.add('--no-validate-links');
   }
+  dartdocBaseArgs.addAll(<String>['--link-to-source-excludes', '../../bin/cache',
+                                  '--link-to-source-root', '../..',
+                                  '--link-to-source-uri-template', 'https://github.com/flutter/flutter/blob/${gitRevision()}/%f%#L%l%']);
   // Generate the documentation.
   // We don't need to exclude flutter_tools in this list because it's not in the
   // recursive dependencies of the package defined at dev/docs/pubspec.yaml
@@ -250,24 +253,25 @@ String getBranchName() {
   return gitBranchMatch == null ? '' : gitBranchMatch.group(1).split('...').first;
 }
 
-void createFooter(String footerPath) {
+String gitRevision() {
   const int kGitRevisionLength = 10;
 
   final ProcessResult gitResult = Process.runSync('git', <String>['rev-parse', 'HEAD']);
   if (gitResult.exitCode != 0)
     throw 'git rev-parse exit with non-zero exit code: ${gitResult.exitCode}';
-  String gitRevision = gitResult.stdout.trim();
+  final String gitRevision = gitResult.stdout.trim();
 
+  return gitRevision.length > kGitRevisionLength ? gitRevision.substring(0, kGitRevisionLength) : gitRevision;
+}
+
+void createFooter(String footerPath) {
+  final String timestamp = DateFormat('yyyy-MM-dd HH:mm').format(DateTime.now());
   final String gitBranch = getBranchName();
   final String gitBranchOut = gitBranch.isEmpty ? '' : '• </span class="no-break">$gitBranch</span>';
 
-  gitRevision = gitRevision.length > kGitRevisionLength ? gitRevision.substring(0, kGitRevisionLength) : gitRevision;
-
-  final String timestamp = DateFormat('yyyy-MM-dd HH:mm').format(DateTime.now());
-
   File(footerPath).writeAsStringSync(<String>[
     '• </span class="no-break">$timestamp<span>',
-    '• </span class="no-break">$gitRevision</span>',
+    '• </span class="no-break">${gitRevision()}</span>',
     gitBranchOut].join(' '));
 }
 

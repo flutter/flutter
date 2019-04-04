@@ -30,7 +30,7 @@ void main() {
             rect: Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
             label: 'a',
             textDirection: TextDirection.rtl,
-          )
+          ),
         ],
       ),
     ));
@@ -64,7 +64,7 @@ void main() {
             rect: Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
             label: 'a',
             textDirection: TextDirection.rtl,
-          )
+          ),
         ],
       ),
     ));
@@ -98,7 +98,7 @@ void main() {
             rect: Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
             label: 'a',
             textDirection: TextDirection.rtl,
-          )
+          ),
         ],
       ),
     ));
@@ -120,7 +120,7 @@ void main() {
             rect: Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
             label: 'a',
             textDirection: TextDirection.rtl,
-          )
+          ),
         ],
       ),
     ));
@@ -142,7 +142,7 @@ void main() {
             rect: Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
             label: 'a',
             textDirection: TextDirection.rtl,
-          )
+          ),
         ],
       ),
     ));
@@ -166,15 +166,15 @@ void main() {
                       padding: const EdgeInsets.all(5.0),
                       child: Container(
                           color: Colors.blue,
-                          height: 50
+                          height: 50,
                       ),
-                    )
+                    ),
                   );
                 }),
               ),
-            )
-          )
-        )
+            ),
+          ),
+        ),
       )
     );
     await expectLater(

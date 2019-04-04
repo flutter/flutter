@@ -40,6 +40,13 @@ void main() {
       expect(names.first.id, '192.168.42.56');
     });
 
+    test('parse junk dev_finder output', () {
+      const String example = 'junk';
+      final List<FuchsiaDevice> names = parseListDevices(example);
+
+      expect(names.length, 0);
+    });
+
     test('default capabilities', () async {
       final FuchsiaDevice device = FuchsiaDevice('123');
 
@@ -217,7 +224,7 @@ void main() {
         fuchsiaDevice,
         expectedIsolateName,
         (Uri uri) async => vmService,
-        true // only poll once.
+        true, // only poll once.
       );
       when(fuchsiaDevice.servicePorts()).thenAnswer((Invocation invocation) async => <int>[1]);
       when(portForwarder.forward(1)).thenAnswer((Invocation invocation) async => 2);
