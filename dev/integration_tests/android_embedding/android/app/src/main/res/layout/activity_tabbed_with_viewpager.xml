@@ -8,7 +8,6 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:fitsSystemWindows="true"
-    android:background="@android:color/holo_green_light"
     tools:context=".single_activity.TabbedWithViewPagerActivity">
 
     <android.support.design.widget.AppBarLayout
@@ -32,12 +31,12 @@
 
     </android.support.design.widget.AppBarLayout>
 
-    <FrameLayout
+    <android.support.v4.view.ViewPager
         android:id="@+id/container"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        />
+        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
     <android.support.design.widget.BottomNavigationView
         android:id="@+id/bottom_navigation"
