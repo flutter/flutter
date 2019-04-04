@@ -13,7 +13,8 @@ enum LeaveBehindDemoAction {
   reset,
   horizontalSwipe,
   leftSwipe,
-  rightSwipe
+  rightSwipe,
+  confirmDismiss
 }
 
 class LeaveBehindItem implements Comparable<LeaveBehindItem> {
@@ -43,6 +44,7 @@ class LeaveBehindDemo extends StatefulWidget {
 class LeaveBehindDemoState extends State<LeaveBehindDemo> {
   static final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   DismissDirection _dismissDirection = DismissDirection.horizontal;
+  bool _confirmDismiss = true;
   List<LeaveBehindItem> leaveBehindItems;
 
   void initListItems() {
@@ -76,6 +78,9 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
           break;
         case LeaveBehindDemoAction.rightSwipe:
           _dismissDirection = DismissDirection.startToEnd;
+          break;
+        case LeaveBehindDemoAction.confirmDismiss:
+          _confirmDismiss = !_confirmDismiss;
           break;
       }
     });
@@ -128,6 +133,7 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
       body = ListView(
         children: leaveBehindItems.map<Widget>((LeaveBehindItem item) {
           return _LeaveBehindListItem(
+            confirmDismiss: _confirmDismiss,
             item: item,
             onArchive: _handleArchive,
             onDelete: _handleDelete,
@@ -166,6 +172,11 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
                 checked: _dismissDirection == DismissDirection.startToEnd,
                 child: const Text('Only swipe right'),
               ),
+              CheckedPopupMenuItem<LeaveBehindDemoAction>(
+                value: LeaveBehindDemoAction.confirmDismiss,
+                checked: _confirmDismiss,
+                child: const Text('Confirm dismiss'),
+              ),
             ],
           ),
         ],
@@ -182,12 +193,14 @@ class _LeaveBehindListItem extends StatelessWidget {
     @required this.onArchive,
     @required this.onDelete,
     @required this.dismissDirection,
+    @required this.confirmDismiss,
   }) : super(key: key);
 
   final LeaveBehindItem item;
   final DismissDirection dismissDirection;
   final void Function(LeaveBehindItem) onArchive;
   final void Function(LeaveBehindItem) onDelete;
+  final bool confirmDismiss;
 
   void _handleArchive() {
     onArchive(item);
@@ -214,19 +227,29 @@ class _LeaveBehindListItem extends StatelessWidget {
           else
             _handleDelete();
         },
-        confirmDismiss: (DismissDirection dismissDirection) {
-          if (dismissDirection == DismissDirection.endToStart) {
-            confirmDismiss(context, 'archive').then((bool value) {
-              if(value) {
+        confirmDismiss: (DismissDirection dismissDirection) async {
+          switch(dismissDirection) {
+            case DismissDirection.endToStart:
+              if(confirmDismiss) {
+                if (await _showConfirmationDialog(context, 'archive'))
+                  _handleArchive();
+              } else {
                 _handleArchive();
               }
-            });
-          } else {
-            confirmDismiss(context, 'delete').then((bool value) {
-              if(value) {
+              break;
+            case DismissDirection.startToEnd:
+              if(confirmDismiss) {
+                if (await _showConfirmationDialog(context, 'delete'))
+                  _handleDelete();
+              } else {
                 _handleDelete();
               }
-            });
+              break;
+            case DismissDirection.horizontal:
+            case DismissDirection.vertical:
+            case DismissDirection.up:
+            case DismissDirection.down:
+              assert(false);
           }
         },
         background: Container(
@@ -256,7 +279,7 @@ class _LeaveBehindListItem extends StatelessWidget {
     );
   }
 
-  Future<bool> confirmDismiss(BuildContext context, String action) {
+  Future<bool> _showConfirmationDialog(BuildContext context, String action) {
     return showDialog<bool>(
       context: context,
       barrierDismissible: true,
