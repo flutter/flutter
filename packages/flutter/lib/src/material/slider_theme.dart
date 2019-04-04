@@ -1121,7 +1121,7 @@ class RectangularSliderTrackShape extends SliderTrackShape {
         rightTrackPaint = activePaint;
         break;
     }
-    
+
     final Rect trackRect = getPreferredRect(
       parentBox: parentBox,
       offset: offset,
