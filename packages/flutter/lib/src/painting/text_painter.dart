@@ -15,11 +15,27 @@ import 'text_span.dart';
 
 export 'package:flutter/services.dart' show TextRange, TextSelection;
 
+/// Holds the [Size] and baseline required to represent the dimensions of
+/// a placeholder in text.
+///
+/// Placeholders specify an empty space in the text layout, which is used
+/// to later render arbitrary inline widgets into defined by a [WidgetSpan].
+///
+/// See also:
+///
+///  * [WidgetSpan] a subclass of [TextSpan] that represents an inline widget
+///    embedded within text. The space this widget takes is indicated by a
+///    placeholder.
+///  * [TextSpan] specifies the content. [WidgetSpan]s may be inserted as leaf
+///    nodes within a [TextSpan] tree.
+///  * [RichText] text widget that supports text inline widgets.
 class PlaceholderDimensions {
   PlaceholderDimensions(this.size, this.baseline);
 
+  /// Width and height dimensions of the placeholder.
   Size size;
 
+  /// Distance of the alphabetic baseline from the upper edge of the placeholder.
   double baseline;
 
   @override

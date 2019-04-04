@@ -543,9 +543,6 @@ void main() {
                         fontSize: 16,
                       ),
                       children: <TextSpan>[
-                        // WidgetSpan(
-                        //   widget: SizedBox(width: 5, height: 5, child: TextField()),
-                        // ),
                         WidgetSpan(
                           widget: Checkbox(value: true, onChanged: (bool value) {}),
                         ),
@@ -613,6 +610,180 @@ void main() {
     await expectLater(
       find.byType(Container),
       matchesGoldenFile('text_golden.TextInlineWidget.1.0.png'),
+    );
+  }, skip: !Platform.isLinux); // Coretext uses different thicknesses for decoration
+
+  testWidgets('Text Inline widget textfield', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Center(
+        child: MaterialApp(
+          home: RepaintBoundary(
+            child: Material(
+              child: Container(
+                width: 400.0,
+                height: 200.0,
+                decoration: const BoxDecoration(
+                  color: Color(0xff00ff00),
+                ),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minWidth: 0, maxWidth: 200, minHeight: 0, maxHeight: 100),
+                  child: RichText(
+                    text: TextSpan(
+                      text: 'My name is: ',
+                      style: TextStyle(
+                        fontSize: 20,
+                      ),
+                      children: <TextSpan>[
+                        WidgetSpan(
+                          widget: SizedBox(width: 70, height: 25, child: TextField()),
+                        ),
+                        TextSpan(text: ', and my favorite city is: ', style: TextStyle(fontSize: 20)),
+                        WidgetSpan(
+                          widget: SizedBox(width: 70, height: 25, child: TextField()),
+                        ),
+                      ],
+                    ),
+                    textDirection: TextDirection.ltr,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await expectLater(
+      find.byType(Container),
+      matchesGoldenFile('text_golden.TextInlineWidget.2.0.png'),
+    );
+  }, skip: !Platform.isLinux); // Coretext uses different thicknesses for decoration
+
+  // This tests if multiple RichText widgets are able to inline nest within each other.
+  testWidgets('Text Inline widget nesting', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Center(
+        child: MaterialApp(
+          home: RepaintBoundary(
+            child: Material(
+              child: Container(
+                width: 400.0,
+                height: 200.0,
+                decoration: const BoxDecoration(
+                  color: Color(0xff00ff00),
+                ),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minWidth: 0, maxWidth: 200, minHeight: 0, maxHeight: 100),
+                  child: RichText(
+                    text: TextSpan(
+                      text: 'outer',
+                      style: TextStyle(
+                        fontSize: 20,
+                      ),
+                      children: <TextSpan>[
+                        WidgetSpan(
+                          widget: RichText(
+                            text: TextSpan(
+                              text: 'inner',
+                              style: TextStyle(color: Color(0xff402f4ff)),
+                              children: <TextSpan>[
+                                WidgetSpan(
+                                  widget: RichText(
+                                    text: TextSpan(
+                                      text: 'inner2',
+                                      style: TextStyle(color: Color(0xff003ffff)),
+                                      children: <TextSpan>[
+                                        WidgetSpan(
+                                          widget: SizedBox(
+                                            width: 50.0,
+                                            height: 55.0,
+                                            child: DecoratedBox(
+                                              decoration: const BoxDecoration(
+                                                color: Color(0xffffff30),
+                                              ),
+                                              child: Center(
+                                                child:SizedBox(
+                                                  width: 10.0,
+                                                  height: 15.0,
+                                                  child: DecoratedBox(
+                                                    decoration: const BoxDecoration(
+                                                      color: Color(0xff5f00f0),
+                                                    ),
+                                                  )
+                                                ),
+                                              ),
+                                            )
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                WidgetSpan(
+                                  widget: SizedBox(
+                                    width: 50.0,
+                                    height: 55.0,
+                                    child: DecoratedBox(
+                                      decoration: const BoxDecoration(
+                                        color: Color(0xff5fff00),
+                                      ),
+                                      child: Center(
+                                        child:SizedBox(
+                                          width: 10.0,
+                                          height: 15.0,
+                                          child: DecoratedBox(
+                                            decoration: const BoxDecoration(
+                                              color: Color(0xff5f0000),
+                                            ),
+                                          )
+                                        ),
+                                      ),
+                                    )
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        TextSpan(text: 'outer', style: TextStyle(fontSize: 20)),
+                        WidgetSpan(
+                          widget: SizedBox(width: 70, height: 25, child: TextField()),
+                        ),
+                        WidgetSpan(
+                          widget: SizedBox(
+                            width: 50.0,
+                            height: 55.0,
+                            child: DecoratedBox(
+                              decoration: const BoxDecoration(
+                                color: Color(0xffff00ff),
+                              ),
+                              child: Center(
+                                child:SizedBox(
+                                  width: 10.0,
+                                  height: 15.0,
+                                  child: DecoratedBox(
+                                    decoration: const BoxDecoration(
+                                      color: Color(0xff0000ff),
+                                    ),
+                                  )
+                                ),
+                              ),
+                            )
+                          ),
+                        ),
+                      ],
+                    ),
+                    textDirection: TextDirection.ltr,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await expectLater(
+      find.byType(Container),
+      matchesGoldenFile('text_golden.TextInlineWidgetNest.1.0.png'),
     );
   }, skip: !Platform.isLinux); // Coretext uses different thicknesses for decoration
 }

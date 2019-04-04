@@ -261,6 +261,7 @@ class RenderParagraph extends RenderBox
 
   @override
   double computeMinIntrinsicHeight(double width) {
+
     return _computeIntrinsicHeight(width);
   }
 
@@ -312,6 +313,24 @@ class RenderParagraph extends RenderBox
     }
     _textPainter.placeholderDimensions = placeholderDimensions;
   }
+
+  // void _sizeChildrenWithMinIntrinsics(double height) {
+  //   RenderBox child = firstChild;
+  //   List<PlaceholderDimensions> placeholderDimensions = List(childCount);
+  //   int childIndex = 0;
+  //   while (child != null) {
+  //     placeholderDimensions[childIndex] = PlaceholderDimensions(
+  //       Size(
+  //         child.getMinIntrinsicWidth(height),
+  //         child.getMinIntrinsicHeight(height)
+  //       ),
+  //       0
+  //     );
+  //     child = childAfter(child);
+  //     childIndex++;
+  //   }
+  //   _textPainter.placeholderDimensions = placeholderDimensions;
+  // }
 
   @override
   bool hitTestSelf(Offset position) => true;
