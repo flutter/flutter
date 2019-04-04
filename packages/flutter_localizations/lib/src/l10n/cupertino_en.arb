@@ -20,7 +20,7 @@
 
   "datePickerDateTimeOrder": "date_time_dayPeriod",
   "@datePickerDateTimeOrder": {
-    "description": "Choose a standard order for the locale to arrange date, time and am/pm in a datetime. Do not transliterate the choices themselves. The only options are date_time_dayPeriod, date_dayPeriod_time, time_dayPeriod_date and dayPeriod_time_date where 'dayPeriod' is am/pm. You can ignore the position of dayPeriod if the locale uses 24h time only. For instance, in French, use date_time_dayPeriod, but do not translate into date_heure_période etc."
+    "description": "Choose a standard order for the locale to arrange date, time and am/pm in a datetime. Do not transliterate the choices themselves. The only options are date_time_dayPeriod, date_dayPeriod_time, time_dayPeriod_date and dayPeriod_time_date where 'dayPeriod' is am/pm. You can ignore the position of dayPeriod if the locale uses 24h time only. For instance, in French, use date_time_dayPeriod, but do not translate into date_heure_périodeDuJour or some such."
   },
 
   "anteMeridiemAbbreviation": "AM",
