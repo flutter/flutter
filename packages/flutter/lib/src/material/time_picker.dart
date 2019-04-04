@@ -49,7 +49,7 @@ const double _kTimePickerHeightLandscapeCollapsed = 304.0;
 ///
 /// Normally there's only one horizontal sibling, and it may appear on the left
 /// or right depending on the current [TextDirection].
-const double _kPeriodGap = 8.0;
+const double _kPeriodGap = 4.0;
 
 /// The vertical gap between pieces when laid out vertically (in portrait mode).
 const double _kVerticalGap = 8.0;
@@ -253,10 +253,16 @@ class _DayPeriodControl extends StatelessWidget {
             onTap: () {
               _setAm(context);
             },
-            child: Text(materialLocalizations.anteMeridiemAbbreviation, style: amStyle),
+            child: Padding(
+              padding: const EdgeInsets.only(
+                  left: 4.0, right: 4.0, top: 4.0, bottom: 2.0),
+              child: Text(
+                materialLocalizations.anteMeridiemAbbreviation,
+                style: amStyle,
+              ),
+            ),
           ),
         ),
-        const SizedBox(width: 0.0, height: 4.0), // Vertical spacer
         GestureDetector(
           excludeFromSemantics: true,
           onTap: Feedback.wrapForTap(() {
@@ -268,7 +274,14 @@ class _DayPeriodControl extends StatelessWidget {
             onTap: () {
               _setPm(context);
             },
-            child: Text(materialLocalizations.postMeridiemAbbreviation, style: pmStyle),
+            child: Padding(
+              padding: const EdgeInsets.only(
+                  left: 4.0, right: 4.0, bottom: 4.0, top: 2.0),
+              child: Text(
+                materialLocalizations.postMeridiemAbbreviation,
+                style: pmStyle,
+              ),
+            ),
           ),
         ),
       ],
