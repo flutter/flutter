@@ -21,6 +21,11 @@ class PlaceholderDimensions {
   Size size;
 
   double baseline;
+
+  @override
+  String toString() {
+    return 'PlaceholderDimensions($size, $baseline)';
+  }
 }
 
 /// An object that paints a [TextSpan] tree into a [Canvas].

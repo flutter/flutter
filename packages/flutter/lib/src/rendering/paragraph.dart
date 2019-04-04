@@ -95,6 +95,8 @@ class RenderParagraph extends RenderBox
   }
 
   final TextPainter _textPainter;
+  bool _needsLayout = true;
+
 
   /// The text to display
   TextSpan get text => _textPainter.text;
@@ -236,24 +238,24 @@ class RenderParagraph extends RenderBox
 
   @override
   double computeMinIntrinsicWidth(double height) {
-    _layoutChildren(constraints);
-    _layoutText();
-    _setParentData();
+    if (_needsLayout) {
+      _sizeChildrenWithMinIntrinsics(height);
+      _layoutText();
+    }
     return _textPainter.minIntrinsicWidth;
   }
 
   @override
   double computeMaxIntrinsicWidth(double height) {
-    _layoutChildren(constraints);
-    _layoutText();
-    _setParentData();
+    if (_needsLayout) {
+      _sizeChildrenWithMaxIntrinsics(height);
+      _layoutText(); // layout with infinite width.
+    }
     return _textPainter.maxIntrinsicWidth;
   }
 
   double _computeIntrinsicHeight(double width) {
-    _layoutChildren(constraints);
     _layoutText(minWidth: width, maxWidth: width);
-    _setParentData();
     return _textPainter.height;
   }
 
@@ -274,6 +276,41 @@ class RenderParagraph extends RenderBox
     assert(constraints.debugAssertIsValid());
     _layoutTextWithConstraints(constraints);
     return _textPainter.computeDistanceToActualBaseline(baseline);
+  }
+
+  void _sizeChildrenWithMaxIntrinsics(double height) {
+    RenderBox child = firstChild;
+    List<PlaceholderDimensions> placeholderDimensions = List(childCount);
+    int childIndex = 0;
+    while (child != null) {
+      // Height and baseline is irrelevant as all text will be laid
+      // out in a single line.
+      placeholderDimensions[childIndex] = PlaceholderDimensions(
+        Size(child.getMaxIntrinsicWidth(height), 0),
+        0
+      );
+      child = childAfter(child);
+      childIndex++;
+    }
+    _textPainter.placeholderDimensions = placeholderDimensions;
+  }
+
+  void _sizeChildrenWithMinIntrinsics(double height) {
+    RenderBox child = firstChild;
+    List<PlaceholderDimensions> placeholderDimensions = List(childCount);
+    int childIndex = 0;
+    while (child != null) {
+      placeholderDimensions[childIndex] = PlaceholderDimensions(
+        Size(
+          child.getMinIntrinsicWidth(height),
+          0
+        ),
+        0
+      );
+      child = childAfter(child);
+      childIndex++;
+    }
+    _textPainter.placeholderDimensions = placeholderDimensions;
   }
 
   @override
@@ -330,23 +367,38 @@ class RenderParagraph extends RenderBox
   // Layout the child inline widgets. Optionally, we pass the dimensions of the
   // children to _textPainter so that appropriate placeholders can be inserted
   // into the LibTxt layout.
-  void _layoutChildren(BoxConstraints constraints, {bool passDimensions = true}) {
+  void _layoutChildren(BoxConstraints constraints) {
     RenderBox child = firstChild;
     List<PlaceholderDimensions> placeholderDimensions = List(childCount);
     int childIndex = 0;
     while (child != null) {
-      child.layout(constraints, parentUsesSize: true);
-      if (passDimensions) {
-        placeholderDimensions[childIndex] = PlaceholderDimensions(
-          child.size,
-          child.getDistanceToBaseline(TextBaseline.alphabetic)
-        );
-      }
+      // Set min constraints to 0, since the text min constraints don't apply
+      // to the inline widgets.
+      child.layout(
+        BoxConstraints(
+          minWidth: 0,
+          minHeight: 0,
+          maxWidth: constraints.maxWidth,
+          maxHeight: constraints.maxHeight
+        ),
+        parentUsesSize: true
+      );
+      placeholderDimensions[childIndex] = PlaceholderDimensions(
+        child.size,
+        child.getDistanceToBaseline(TextBaseline.alphabetic)
+      );
+      print(BoxConstraints(
+          minWidth: 0,
+          minHeight: 0,
+          maxWidth: constraints.maxWidth,
+          maxHeight: constraints.maxHeight
+        ),);
+      print(placeholderDimensions[childIndex].size);
+      print(placeholderDimensions[childIndex].baseline);
       child = childAfter(child);
       childIndex++;
     }
-    if (passDimensions)
-      _textPainter.placeholderDimensions = placeholderDimensions;
+    _textPainter.placeholderDimensions = placeholderDimensions;
   }
 
   // Iterate through the laid-out children and set the parentData offsets based
@@ -360,9 +412,16 @@ class RenderParagraph extends RenderBox
         _textPainter.inlinePlaceholderBoxes[childIndex].left,
         _textPainter.inlinePlaceholderBoxes[childIndex].top
       );
+      print(textParentData.offset);
       child = childAfter(child);
       childIndex++;
     }
+  }
+
+  @override
+  void markNeedsLayout() {
+    super.markNeedsLayout();
+    _needsLayout = true;
   }
 
   @override
@@ -370,6 +429,8 @@ class RenderParagraph extends RenderBox
     _layoutChildren(constraints);
     _layoutTextWithConstraints(constraints);
     _setParentData();
+
+    _needsLayout = false;
 
     // We grab _textPainter.size and _textPainter.didExceedMaxLines here because
     // assigning to `size` will trigger us to validate our intrinsic sizes,
@@ -455,13 +516,13 @@ class RenderParagraph extends RenderBox
     // If you remove this call, make sure that changing the textAlign still
     // works properly.
     _layoutTextWithConstraints(constraints);
-    final Canvas canvas = context.canvas;
+    // final Canvas canvas = context.canvas;
 
     assert(() {
       if (debugRepaintTextRainbowEnabled) {
         final Paint paint = Paint()
           ..color = debugCurrentRepaintColor.toColor();
-        canvas.drawRect(offset & size, paint);
+        context.canvas.drawRect(offset & size, paint);
       }
       return true;
     }());
@@ -471,13 +532,13 @@ class RenderParagraph extends RenderBox
       if (_overflowShader != null) {
         // This layer limits what the shader below blends with to be just the text
         // (as opposed to the text and its background).
-        canvas.saveLayer(bounds, Paint());
+        context.canvas.saveLayer(bounds, Paint());
       } else {
-        canvas.save();
+        context.canvas.save();
       }
-      canvas.clipRect(bounds);
+      context.canvas.clipRect(bounds);
     }
-    _textPainter.paint(canvas, offset);
+    _textPainter.paint(context.canvas, offset);
 
     RenderBox child = firstChild;
     int childIndex = 0;
@@ -492,13 +553,13 @@ class RenderParagraph extends RenderBox
     }
     if (_needsClipping) {
       if (_overflowShader != null) {
-        canvas.translate(offset.dx, offset.dy);
+        context.canvas.translate(offset.dx, offset.dy);
         final Paint paint = Paint()
           ..blendMode = BlendMode.modulate
           ..shader = _overflowShader;
-        canvas.drawRect(Offset.zero & size, paint);
+        context.canvas.drawRect(Offset.zero & size, paint);
       }
-      canvas.restore();
+      context.canvas.restore();
     }
   }
 

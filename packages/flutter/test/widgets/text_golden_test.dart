@@ -520,4 +520,99 @@ void main() {
       matchesGoldenFile('text_golden.DecorationThickness.1.0.png'),
     );
   }, skip: !Platform.isLinux); // Coretext uses different thicknesses for decoration
+
+  testWidgets('Text Inline widget', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Center(
+        child: RepaintBoundary(
+          child: Material(
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: Container(
+                width: 400.0,
+                height: 200.0,
+                decoration: const BoxDecoration(
+                  color: Color(0xff00ff00),
+                ),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minWidth: 0, maxWidth: 200, minHeight: 0, maxHeight: 100),
+                  child: RichText(
+                    text: TextSpan(
+                      text: 'C ',
+                      style: TextStyle(
+                        fontSize: 16,
+                      ),
+                      children: <TextSpan>[
+                        // WidgetSpan(
+                        //   widget: SizedBox(width: 5, height: 5, child: TextField()),
+                        // ),
+                        WidgetSpan(
+                          widget: Checkbox(value: true, onChanged: (bool value) {}),
+                        ),
+                        WidgetSpan(
+                          widget: Checkbox(value: false, onChanged: (bool value) {}),
+                        ),
+                        TextSpan(text: 'He ', style: TextStyle(fontSize: 20)),
+                        WidgetSpan(
+                          widget: SizedBox(
+                            width: 50.0,
+                            height: 55.0,
+                            child: DecoratedBox(
+                              decoration: const BoxDecoration(
+                                color: Color(0xffffff00),
+                              ),
+                              child: Center(
+                                child:SizedBox(
+                                  width: 10.0,
+                                  height: 15.0,
+                                  child: DecoratedBox(
+                                    decoration: const BoxDecoration(
+                                      color: Color(0xffff0000),
+                                    ),
+                                  )
+                                ),
+                              ),
+                            )
+                          ),
+                        ),
+                        TextSpan(text: 'hello world! sieze the day!'),
+                        WidgetSpan(
+                          widget: Checkbox(value: false, onChanged: (bool value) {}),
+                        ),
+                        WidgetSpan(
+                          widget: SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: Checkbox(value: true, onChanged: (bool value) {}),
+                          )
+                        ),
+                        WidgetSpan(
+                          widget: Checkbox(value: false, onChanged: (bool value) {}),
+                        ),
+                        WidgetSpan(
+                          widget: SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: Checkbox(value: true, onChanged: (bool value) {}),
+                          )
+                        ),
+                        WidgetSpan(
+                          widget: Text('embedded'),
+                        ),
+                      ],
+                    ),
+                    textDirection: TextDirection.ltr,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await expectLater(
+      find.byType(Container),
+      matchesGoldenFile('text_golden.TextInlineWidget.1.0.png'),
+    );
+  }, skip: !Platform.isLinux); // Coretext uses different thicknesses for decoration
 }

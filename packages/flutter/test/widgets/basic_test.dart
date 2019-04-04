@@ -2,10 +2,30 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' as ui show Image, ImageByteFormat;
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
 
+class TestImage implements ui.Image {
+  @override
+  int get width => 10;
+
+  @override
+  int get height => 10;
+
+  @override
+  Future<ByteData> toByteData({ ui.ImageByteFormat format = ui.ImageByteFormat.rawRgba }) async {
+    throw UnsupportedError('Cannot encode test image');
+  }
+
+  @override
+  String toString() => '[$width\u00D7$height]';
+
+  @override
+  void dispose() { }
+}
 
 void main() {
   group('PhysicalShape', () {
