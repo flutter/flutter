@@ -9,11 +9,13 @@ import 'package:flutter_test/flutter_test.dart';
 
 int buildCount;
 CupertinoThemeData actualTheme;
+IconThemeData actualIconTheme;
 
 final Widget singletonThemeSubtree = Builder(
   builder: (BuildContext context) {
     buildCount++;
     actualTheme = CupertinoTheme.of(context);
+    actualIconTheme = IconTheme.of(context);
     return const Placeholder();
   },
 );
@@ -26,6 +28,16 @@ Future<CupertinoThemeData> testTheme(WidgetTester tester, CupertinoThemeData the
     ),
   );
   return actualTheme;
+}
+
+Future<IconThemeData> testIconTheme(WidgetTester tester, CupertinoThemeData theme) async {
+  await tester.pumpWidget(
+    CupertinoTheme(
+      data: theme,
+      child: singletonThemeSubtree,
+    ),
+  );
+  return actualIconTheme;
 }
 
 void main() {
@@ -127,37 +139,20 @@ void main() {
   testWidgets('Theme has default IconThemeData, which is derived from the theme\'s primary color', (WidgetTester tester) async {
       const Color primaryColor = CupertinoColors.destructiveRed;
       const CupertinoThemeData themeData = CupertinoThemeData(primaryColor: primaryColor);
-      const IconData icon = CupertinoIcons.add;
-      await tester.pumpWidget(
-        const Directionality(
-          textDirection: TextDirection.ltr,
-          child: CupertinoTheme(data: themeData, child: Icon(icon))
-        )
-      );
 
-      final BuildContext context = tester.firstElement(find.byIcon(icon));
-      expect(IconTheme.of(context).color, themeData.primaryColor);
+      final IconThemeData resultingIconTheme = await testIconTheme(tester, themeData);
+
+      expect(resultingIconTheme.color, themeData.primaryColor);
   });
 
-  testWidgets('The default IconThemeData provided by CupertinoTheme is overrideable', (WidgetTester tester) async {
-      const Color primaryColor = CupertinoColors.destructiveRed;
-      const Color iconColor = CupertinoColors.white;
-      const CupertinoThemeData themeData = CupertinoThemeData(primaryColor: primaryColor);
-      const IconData icon = CupertinoIcons.add;
-      await tester.pumpWidget(
-        const Directionality(
-          textDirection: TextDirection.ltr,
-          child: IconTheme(
-            data: IconThemeData(color: iconColor),
-            child: CupertinoTheme(
-              data: themeData,
-              child: Icon(icon)
-            )
-          )
-        )
-      );
+  testWidgets('IconTheme.of creates a dependency on iconTheme', (WidgetTester tester) async {
+      IconThemeData iconTheme = await testIconTheme(tester, const CupertinoThemeData(primaryColor: CupertinoColors.destructiveRed));
 
-      final BuildContext context = tester.firstElement(find.byIcon(icon));
-      expect(IconTheme.of(context).color, iconColor);
+      expect(buildCount, 1);
+      expect(iconTheme.color, CupertinoColors.destructiveRed);
+
+      iconTheme = await testIconTheme(tester, const CupertinoThemeData(primaryColor: CupertinoColors.activeOrange));
+      expect(buildCount, 2);
+      expect(iconTheme.color, CupertinoColors.activeOrange);
   });
 }
