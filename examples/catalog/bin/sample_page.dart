@@ -137,8 +137,7 @@ class SampleInfo {
     commentValues['path'] = 'examples/catalog/${sourceFile.path}';
     commentValues['source'] = sourceCode.trim();
     commentValues['link'] = link;
-    commentValues['android screenshot'] =
-        'https://storage.googleapis.com/flutter-catalog/$commit/${sourceName}_small.png';
+    commentValues['android screenshot'] = 'https://storage.googleapis.com/flutter-catalog/$commit/${sourceName}_small.png';
 
     return true;
   }
