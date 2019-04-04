@@ -1733,7 +1733,7 @@ void main() {
       textfieldStart + const Offset(150.0, 5.0),
       PointerDownEvent(
         pointer: pointerValue,
-        buttons: 1,
+        buttons: kTouchContact,
         position: textfieldStart + const Offset(150.0, 5.0),
         pressure: 3.0,
         pressureMax: 6.0,
