@@ -124,16 +124,40 @@ void main() {
     },
   );
 
-  testWidgets("Theme has default IconThemeData, which is derived from the theme's primary color", (WidgetTester tester) async {
+  testWidgets('Theme has default IconThemeData, which is derived from the theme\'s primary color', (WidgetTester tester) async {
       const Color primaryColor = CupertinoColors.destructiveRed;
       const CupertinoThemeData themeData = CupertinoThemeData(primaryColor: primaryColor);
-      const Icon icon = Icon(CupertinoIcons.add);
+      const IconData icon = CupertinoIcons.add;
       await tester.pumpWidget(
-        Directionality(
+        const Directionality(
           textDirection: TextDirection.ltr,
-          child: CupertinoTheme(data: themeData, child: icon))
+          child: CupertinoTheme(data: themeData, child: Icon(icon))
+        )
       );
 
-      expect(IconTheme.of(tester.widget(find.byIcon(icon.icon))).color, themeData.primaryColor);
+      final BuildContext context = tester.firstElement(find.byIcon(icon));
+      expect(IconTheme.of(context).color, themeData.primaryColor);
+  });
+
+  testWidgets('The default IconThemeData provided by CupertinoTheme is overrideable', (WidgetTester tester) async {
+      const Color primaryColor = CupertinoColors.destructiveRed;
+      const Color iconColor = CupertinoColors.white;
+      const CupertinoThemeData themeData = CupertinoThemeData(primaryColor: primaryColor);
+      const IconData icon = CupertinoIcons.add;
+      await tester.pumpWidget(
+        const Directionality(
+          textDirection: TextDirection.ltr,
+          child: IconTheme(
+            data: IconThemeData(color: iconColor),
+            child: CupertinoTheme(
+              data: themeData,
+              child: Icon(icon)
+            )
+          )
+        )
+      );
+
+      final BuildContext context = tester.firstElement(find.byIcon(icon));
+      expect(IconTheme.of(context).color, iconColor);
   });
 }
