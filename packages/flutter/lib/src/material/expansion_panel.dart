@@ -56,12 +56,15 @@ typedef ExpansionPanelHeaderBuilder = Widget Function(BuildContext context, bool
 /// Expansion panels are only intended to be used as children for
 /// [ExpansionPanelList].
 ///
+/// See [ExpansionPanelList] for a sample implementation.
+///
 /// See also:
 ///
 ///  * [ExpansionPanelList]
 ///  * <https://material.io/design/components/lists.html#types>
 class ExpansionPanel {
   /// Creates an expansion panel to be used as a child for [ExpansionPanelList].
+  /// See [ExpansionPanelList] for an example on how to use this widget.
   ///
   /// The [headerBuilder], [body], and [isExpanded] arguments must not be null.
   ExpansionPanel({
@@ -88,8 +91,14 @@ class ExpansionPanel {
 }
 
 /// An expansion panel that allows for radio-like functionality.
+/// This means that at any given time, at most, one [ExpansionPanelRadio]
+/// can remain expanded.
 ///
 /// A unique identifier [value] must be assigned to each panel.
+/// This identifier allows the [ExpansionPanelList] to determine
+/// which [ExpansionPanelRadio] instance should be expanded.
+///
+/// See [ExpansionPanelList.radio] for a sample implementation.
 class ExpansionPanelRadio extends ExpansionPanel {
 
   /// An expansion panel that allows for radio functionality.
@@ -111,9 +120,82 @@ class ExpansionPanelRadio extends ExpansionPanel {
 /// A material expansion panel list that lays out its children and animates
 /// expansions.
 ///
+/// {@tool snippet --template=stateful_widget_material}
+///
+/// Here is a simple example of how to implement ExpansionPanelList.
+///
+/// ```dart preamble
+/// // stores ExpansionPanel state information
+/// class Item {
+///   Item({
+///     this.expandedValue,
+///     this.headerValue,
+///     this.isExpanded = false,
+///   });
+///
+///   String expandedValue;
+///   String headerValue;
+///   bool isExpanded;
+/// }
+///
+/// List<Item> generateItems(int numberOfItems) {
+///   return List.generate(numberOfItems, (int index) {
+///     return Item(
+///       headerValue: 'Panel $index',
+///       expandedValue: 'This is item number $index',
+///     );
+///   });
+/// }
+/// ```
+///
+/// ```dart
+/// List<Item> _data = generateItems(8);
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   return SingleChildScrollView(
+///     child: Container(
+///       child: _buildPanel(),
+///     ),
+///   );
+/// }
+///
+/// Widget _buildPanel() {
+///   return ExpansionPanelList(
+///     expansionCallback: (int index, bool isExpanded) {
+///       setState(() {
+///         _data[index].isExpanded = !isExpanded;
+///       });
+///     },
+///     children: _data.map<ExpansionPanel>((Item item) {
+///       return ExpansionPanel(
+///         headerBuilder: (BuildContext context, bool isExpanded) {
+///           return ListTile(
+///             title: Text(item.headerValue),
+///           );
+///         },
+///         body: ListTile(
+///           title: Text(item.expandedValue),
+///           subtitle: Text('To delete this panel, tap the trash can icon'),
+///           trailing: Icon(Icons.delete),
+///           onTap: () {
+///             setState(() {
+///               _data.removeWhere((currentItem) => item == currentItem);
+///             });
+///           }
+///         ),
+///         isExpanded: item.isExpanded,
+///       );
+///     }).toList(),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [ExpansionPanel]
+///  * [ExpansionPanelList.radio]
 ///  * <https://material.io/design/components/lists.html#types>
 class ExpansionPanelList extends StatefulWidget {
   /// Creates an expansion panel list widget. The [expansionCallback] is
@@ -138,6 +220,75 @@ class ExpansionPanelList extends StatefulWidget {
   /// expand/collapse button is pushed. The [children] and [animationDuration]
   /// arguments must not be null. The [children] objects must be instances
   /// of [ExpansionPanelRadio].
+  ///
+  /// {@tool snippet --template=stateful_widget_material}
+  ///
+  /// Here is a simple example of how to implement ExpansionPanelList.radio.
+  ///
+  /// ```dart preamble
+  /// // stores ExpansionPanel state information
+  /// class Item {
+  ///   Item({
+  ///     this.id,
+  ///     this.expandedValue,
+  ///     this.headerValue,
+  ///   });
+  ///
+  ///   int id;
+  ///   String expandedValue;
+  ///   String headerValue;
+  /// }
+  ///
+  /// List<Item> generateItems(int numberOfItems) {
+  ///   return List.generate(numberOfItems, (int index) {
+  ///     return Item(
+  ///       id: index,
+  ///       headerValue: 'Panel $index',
+  ///       expandedValue: 'This is item number $index',
+  ///     );
+  ///   });
+  /// }
+  /// ```
+  ///
+  /// ```dart
+  /// List<Item> _data = generateItems(8);
+  ///
+  /// @override
+  /// Widget build(BuildContext context) {
+  ///   return SingleChildScrollView(
+  ///     child: Container(
+  ///       child: _buildPanel(),
+  ///     ),
+  ///   );
+  /// }
+  ///
+  /// Widget _buildPanel() {
+  ///   return ExpansionPanelList.radio(
+  ///     initialOpenPanelValue: 2,
+  ///     children: _data.map<ExpansionPanelRadio>((Item item) {
+  ///       return ExpansionPanelRadio(
+  ///         value: item.id,
+  ///         headerBuilder: (BuildContext context, bool isExpanded) {
+  ///           return ListTile(
+  ///             title: Text(item.headerValue),
+  ///           );
+  ///         },
+  ///         body: ListTile(
+  ///           title: Text(item.expandedValue),
+  ///           subtitle: Text('To delete this panel, tap the trash can icon'),
+  ///           trailing: Icon(Icons.delete),
+  ///           onTap: () {
+  ///             setState(() {
+  ///               _data.removeWhere((currentItem) => item == currentItem);
+  ///             });
+  ///           }
+  ///         )
+  ///       );
+  ///     }).toList(),
+  ///   );
+  /// }
+  /// ```
+  /// {@end-tool}
   const ExpansionPanelList.radio({
     Key key,
     this.children = const <ExpansionPanelRadio>[],

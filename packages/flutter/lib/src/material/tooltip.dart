@@ -22,6 +22,8 @@ const Duration _kShowDuration = Duration(milliseconds: 1500);
 /// show a label when the widget long pressed (or when the user takes some
 /// other appropriate action).
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=EeEfD5fI-5Q}
+///
 /// Many widgets, such as [IconButton], [FloatingActionButton], and
 /// [PopupMenuButton] have a `tooltip` property that, when non-null, causes the
 /// widget to include a [Tooltip] in its build.
