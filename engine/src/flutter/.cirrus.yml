@@ -1,14 +1,13 @@
 gcp_credentials: ENCRYPTED[987a78af29b91ce8489594c9ab3fec21845bbe5ba68294b8f6def3cf0d380830f06687a89ea69c87344c5ade369700fe]
 
-gke_container:
- image: gcr.io/flutter-cirrus/build-engine-image:latest
- cluster_name: build-32-cluster
- zone: us-central1-a
- namespace: default
- cpu: 30 # can't use all 30-cores; system pods needs cores too
- memory: 100Gb # similarly, can't use all 100Gb memory
-
 task:
+  gke_container:
+   image: gcr.io/flutter-cirrus/build-engine-image:latest
+   cluster_name: build-32-cluster
+   zone: us-central1-a
+   namespace: default
+   cpu: 30 # can't use all 30-cores; system pods needs cores too
+   memory: 100Gb # similarly, can't use all 100Gb memory
   env:
     CIRRUS_WORKING_DIR: "/tmp/github_repo"
     ENGINE_PATH: "/tmp/clean_engine"
@@ -59,25 +58,36 @@ task:
         ninja -C out/android_debug_unopt
         mkdir javadoc_tmp
         ./flutter/tools/gen_javadoc.py --out-dir javadoc_tmp
+    - name: format_and_dart_test
+      format_script: cd $ENGINE_PATH/src/flutter && ./ci/format.sh
+      build_script: cd $ENGINE_PATH/src/flutter && ./ci/build.sh
 
-format_and_dart_test_task:
-  container:
-    image: gcr.io/flutter-cirrus/build-engine-image:latest
+build_windows_task:
+  gce_instance:
+    image_project: flutter-cirrus
+    image_name: flutter-engine-windows-server-2016-core
+    zone: us-central1-a
+    platform: windows
+    cpu: 32
+    memory: 32Gb
+    disk: 50
 
   env:
-    CIRRUS_WORKING_DIR: "/tmp/github_repo"
-    DEPOT_TOOLS: "/tmp/depot_tools"
-    ENGINE_PATH: "/tmp/clean_engine"
-    PATH: "$DEPOT_TOOLS:$PATH"
-  depot_tools_script:
-    git clone --depth 1 https://chromium.googlesource.com/chromium/tools/depot_tools.git $DEPOT_TOOLS
+    # Cirrus is somehow not picking up the environment variables set in the VM image.
+    PATH: "c:/depot_tools;c:/MinGit/cmd;$PATH"
+    DEPOT_TOOLS_WIN_TOOLCHAIN: 0
+    GYP_MSVS_OVERRIDE_PATH: "c:/Program Files (x86)/Microsoft Visual Studio/2017/Community"
+
+    ENGINE_PATH: "c:/flutter/engine"
+
+  # robocopy can return 1 for successful copy; suppress its error code.
+  # move somehow doesn't work as it complains that the file is being used by another process.
   gclient_sync_script: |
-    mkdir -p $ENGINE_PATH/src
-    echo 'solutions = [{"managed": False,"name": "src/flutter","url": "git@github.com:flutter/engine.git","deps_file": "DEPS", "custom_vars": {"download_android_deps" : False, "download_windows_deps" : False,},},]' > $ENGINE_PATH/.gclient
-    cd $ENGINE_PATH/src
-    rm -rf flutter
-    rm -rf out
-    mv $CIRRUS_WORKING_DIR flutter
+    robocopy %CIRRUS_WORKING_DIR% %ENGINE_PATH%/src/flutter /MIR || (cmd /s /c exit /b 0)
+    cd %ENGINE_PATH%/src
     gclient sync
-  format_script: cd $ENGINE_PATH/src/flutter && ./ci/format.sh
-  build_script: cd $ENGINE_PATH/src/flutter && ./ci/build.sh
+  # Currently there's a problem with `flutter/tools/gn --unoptimized` so we omit --unoptimized for now
+  compile_host_script: |
+    cd %ENGINE_PATH%/src
+    python flutter/tools/gn
+    ninja -C out/host_debug
