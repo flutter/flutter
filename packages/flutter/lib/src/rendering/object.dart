@@ -465,6 +465,7 @@ class PaintingContext extends ClipContext {
         childPaintBounds: MatrixUtils.inverseTransformRect(effectiveTransform, estimatedBounds),
       );
     } else {
+      print(effectiveTransform);
       canvas
         ..save()
         ..transform(effectiveTransform.storage);

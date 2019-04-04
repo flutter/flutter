@@ -7,8 +7,10 @@ import 'package:flutter/gestures.dart';
 import 'basic.dart';
 import 'framework.dart';
 import 'layout_builder.dart';
+import 'notification_listener.dart';
 import 'scroll_context.dart';
 import 'scroll_controller.dart';
+import 'scroll_notification.dart';
 import 'scroll_physics.dart';
 import 'scroll_position.dart';
 import 'scroll_position_with_single_context.dart';
@@ -43,6 +45,11 @@ typedef ScrollableWidgetBuilder = Widget Function(
 /// uses the provided [ScrollController]. If the widget created by the
 /// [ScrollableWidgetBuilder] does not use provided [ScrollController], the
 /// sheet will remain at the initialChildSize.
+///
+/// By default, the widget will expand its non-occupied area to fill availble
+/// space in the parent. If this is not desired, e.g. because the parent wants
+/// to position sheet based on the space it is taking, the [expand] property
+/// may be set ot false.
 ///
 /// {@tool sample}
 ///
@@ -85,13 +92,14 @@ typedef ScrollableWidgetBuilder = Widget Function(
 class DraggableScrollableSheet extends StatefulWidget {
   /// Creates a widget that can be dragged and scrolled in a single gesture.
   ///
-  /// The [builder], [initialChildSize], [minChildSize], and [maxChildSize]
-  /// parameters must not be null.
+  /// The [builder], [initialChildSize], [minChildSize], [maxChildSize] and
+  /// [expand] parameters must not be null.
   const DraggableScrollableSheet({
     Key key,
     this.initialChildSize = 0.5,
     this.minChildSize = 0.25,
     this.maxChildSize = 1.0,
+    this.expand = true,
     @required this.builder,
   })  : assert(initialChildSize != null),
         assert(minChildSize != null),
@@ -100,6 +108,7 @@ class DraggableScrollableSheet extends StatefulWidget {
         assert(maxChildSize <= 1.0),
         assert(minChildSize <= initialChildSize),
         assert(initialChildSize <= maxChildSize),
+        assert(expand != null),
         assert(builder != null),
         super(key: key);
 
@@ -121,6 +130,16 @@ class DraggableScrollableSheet extends StatefulWidget {
   /// The default value is `1.0`.
   final double maxChildSize;
 
+  /// Whether the widget should expand to fill the available space in its parent
+  /// or not.
+  ///
+  /// In most cases, this should be true. However, in the case of a parent
+  /// widget that will position this one based on its desired size (such as a
+  /// [MultiChildLayoutDelegate]), this should be set to false.
+  ///
+  /// The default value is true.
+  final bool expand;
+
   /// The builder that creates a child to display in this widget, which will
   /// use the provided [ScrollController] to enable dragging and scrolling
   /// of the contents.
@@ -128,6 +147,66 @@ class DraggableScrollableSheet extends StatefulWidget {
 
   @override
   _DraggableScrollableSheetState createState() => _DraggableScrollableSheetState();
+}
+
+/// A [Notification] related to the position of the [DraggableScrollableSheet].
+///
+/// [DraggableScrollableSheet] widgets notify their ancestors about layout
+/// related changes. When the extent of the sheet changes via a drag,
+/// this notification bubbles up through the tree, which means a given
+/// [NotificationListener] will recieve notifications for all descendant
+/// [DraggableScrollableSheet] widgets. To focus on notifications form the
+/// nearest [DraggableScorllableSheet] descendant, check that the [depth]
+/// property of the notification is zero.
+///
+/// When a extent notification is received by a [NotificationListener], the
+/// listener will already have completed build and layout, and it is therefore
+/// too late for that widget to call [State.setState]. Any attempt to adjust the
+/// build or layout based on an extent notification would result in a layout
+/// that lagged one frame behind, which is a poor user experience. Extent
+/// notifications are used primarily to drive animations. The [Scaffold] widget
+/// is an example of driving animations for the [FloatingActionButton] as the
+/// sheet scrolls up.
+class ExtentNotification extends Notification with ViewportNotificationMixin {
+  /// Creates a notification that the extent of a [DraggableScrollableSheet] has
+  /// changed.
+  ///
+  /// All parameters are required. The [minExtent] must be >= 0.  The [maxExtent]
+  /// must be <= 1.0.  The [extent] must be between [minExtent] and [maxExtent].
+  ExtentNotification({
+    @required this.extent,
+    @required this.minExtent,
+    @required this.maxExtent,
+    @required this.context,
+  }) : assert(extent != null),
+       assert(minExtent != null),
+       assert(maxExtent != null),
+       assert(0.0 <= minExtent),
+       assert(maxExtent <= 1.0),
+       assert(minExtent <= extent),
+       assert(extent <= maxExtent),
+       assert(context != null);
+
+  /// The current value of the extent, between [minExtent] and [maxExtent].
+  final double extent;
+
+  /// The minimum value of [extent], which is >= 0.
+  final double minExtent;
+
+  /// The maximum value of [extent].
+  final double maxExtent;
+
+  /// The build context of the widget that fired this notification.
+  ///
+  /// This can be used to find the sheet's render objects to determine the size
+  /// of the viewport, for instance.
+  final BuildContext context;
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('minExtent: $minExtent, extent: $extent, maxExtent: $maxExtent');
+  }
 }
 
 /// Manages state between [_DraggableScrollableSheetState],
@@ -174,8 +253,14 @@ class _DraggableSheetExtent {
 
   /// The scroll position gets inputs in terms of pixels, but the extent is
   /// expected to be expressed as a number between 0..1.
-  void addPixelDelta(double delta) {
+  void addPixelDelta(double delta, BuildContext context) {
     currentExtent += delta / availablePixels;
+    ExtentNotification(
+      minExtent: minExtent,
+      maxExtent: maxExtent,
+      extent: currentExtent,
+      context: context,
+    ).dispatch(context);
   }
 }
 
@@ -199,6 +284,7 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
     setState(() {
       // _extent has been updated when this is called.
     });
+
   }
 
   @override
@@ -206,13 +292,12 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
         _extent.availablePixels = widget.maxChildSize * constraints.biggest.height;
-        return SizedBox.expand(
-          child: FractionallySizedBox(
-            heightFactor: _extent.currentExtent,
-            child: widget.builder(context, _scrollController),
-            alignment: Alignment.bottomCenter,
-          ),
+        final Widget sheet = FractionallySizedBox(
+          heightFactor: _extent.currentExtent,
+          child: widget.builder(context, _scrollController),
+          alignment: Alignment.bottomCenter,
         );
+        return widget.expand ? SizedBox.expand(child: sheet) : sheet;
       },
     );
   }
@@ -311,10 +396,10 @@ class _DraggableScrollableSheetScrollPosition
   @override
   void applyUserOffset(double delta) {
     if (!listShouldScroll &&
-        !(extent.isAtMin || extent.isAtMax) ||
-         (extent.isAtMin && delta < 0) ||
-         (extent.isAtMax && delta > 0)) {
-      extent.addPixelDelta(-delta);
+        (!(extent.isAtMin || extent.isAtMax) ||
+          (extent.isAtMin && delta < 0) ||
+          (extent.isAtMax && delta > 0))) {
+      extent.addPixelDelta(-delta, context.notificationContext);
     } else {
       super.applyUserOffset(delta);
     }
@@ -348,7 +433,7 @@ class _DraggableScrollableSheetScrollPosition
     void _tick() {
       final double delta = ballisticController.value - lastDelta;
       lastDelta = ballisticController.value;
-      extent.addPixelDelta(delta);
+      extent.addPixelDelta(delta, context.notificationContext);
       if ((velocity > 0 && extent.isAtMax) || (velocity < 0 && extent.isAtMin)) {
         // Make sure we pass along enough velocity to keep scrolling - otherwise
         // we just "bounce" off the top making it look like the list doesn't

@@ -13,7 +13,6 @@ import 'package:flutter/gestures.dart' show DragStartBehavior;
 
 import 'app_bar.dart';
 import 'bottom_sheet.dart';
-import 'bottom_sheet_scroll_controller.dart';
 import 'button_bar.dart';
 import 'button_theme.dart';
 import 'colors.dart';
@@ -363,15 +362,13 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     @required this.currentFloatingActionButtonLocation,
     @required this.floatingActionButtonMoveAnimationProgress,
     @required this.floatingActionButtonMotionAnimator,
-    this.bottomSheetTop = 0.0,
     @required this.extendBody,
   }) : assert(minInsets != null),
        assert(textDirection != null),
        assert(geometryNotifier != null),
        assert(previousFloatingActionButtonLocation != null),
        assert(currentFloatingActionButtonLocation != null),
-       assert(extendBody != null),
-       assert(bottomSheetTop != null);
+       assert(extendBody != null);
 
   final bool extendBody;
   final EdgeInsets minInsets;
@@ -382,10 +379,6 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
   final FloatingActionButtonLocation currentFloatingActionButtonLocation;
   final double floatingActionButtonMoveAnimationProgress;
   final FloatingActionButtonAnimator floatingActionButtonMotionAnimator;
-
-  /// For a scroll controlled bottom sheet, this is where the top of the bottom
-  /// sheet should be laid out
-  final double bottomSheetTop;
 
   @override
   void performLayout(Size size) {
@@ -464,7 +457,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     if (hasChild(_ScaffoldSlot.bodyScrim)) {
       final BoxConstraints bottomSheetScrimConstraints = BoxConstraints(
         maxWidth: fullWidthConstraints.maxWidth,
-        maxHeight: bottomSheetTop + contentTop,
+        maxHeight: contentBottom,
       );
       layoutChild(_ScaffoldSlot.bodyScrim, bottomSheetScrimConstraints);
       positionChild(_ScaffoldSlot.bodyScrim, Offset.zero);
@@ -473,7 +466,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     if (hasChild(_ScaffoldSlot.bottomSheet)) {
       final BoxConstraints bottomSheetConstraints = BoxConstraints(
         maxWidth: fullWidthConstraints.maxWidth,
-        maxHeight: math.max(0.0, contentBottom - contentTop - bottomSheetTop),
+        maxHeight: math.max(0.0, contentBottom - contentTop),
       );
       bottomSheetSize = layoutChild(_ScaffoldSlot.bottomSheet, bottomSheetConstraints);
       positionChild(_ScaffoldSlot.bottomSheet, Offset((size.width - bottomSheetSize.width) / 2.0, contentBottom - bottomSheetSize.height));
@@ -538,8 +531,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
         || oldDelegate.textDirection != textDirection
         || oldDelegate.floatingActionButtonMoveAnimationProgress != floatingActionButtonMoveAnimationProgress
         || oldDelegate.previousFloatingActionButtonLocation != previousFloatingActionButtonLocation
-        || oldDelegate.currentFloatingActionButtonLocation != currentFloatingActionButtonLocation
-        || oldDelegate.bottomSheetTop != bottomSheetTop;
+        || oldDelegate.currentFloatingActionButtonLocation != currentFloatingActionButtonLocation;
   }
 }
 
@@ -577,7 +569,6 @@ class _FloatingActionButtonTransition extends StatefulWidget {
 }
 
 class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTransition> with TickerProviderStateMixin {
-
   // The animations applied to the Floating Action Button when it is entering or exiting.
   // Controls the previous widget.child as it exits.
   AnimationController _previousController;
@@ -892,7 +883,6 @@ class Scaffold extends StatefulWidget {
     this.endDrawer,
     this.bottomNavigationBar,
     this.bottomSheet,
-    this.bottomSheetIsScrollControlled = false,
     this.backgroundColor,
     this.resizeToAvoidBottomPadding,
     this.resizeToAvoidBottomInset,
@@ -1033,14 +1023,6 @@ class Scaffold extends StatefulWidget {
   ///    be dismissed with the scaffold's back button.
   ///  * [showModalBottomSheet], which displays a modal bottom sheet.
   final Widget bottomSheet;
-
-  /// Whether the [bottomSheet] is or has a scrollable widget with
-  /// [ScrollView.primary] set to true, which enables the persistent bottom
-  /// sheet to have a child such as a [ListView] or [GridView] that has
-  /// scrollable content beyond the screen's height.
-  ///
-  /// Defaults to false.
-  final bool bottomSheetIsScrollControlled;
 
   /// This flag is deprecated, please use [resizeToAvoidBottomInset]
   /// instead.
@@ -1481,24 +1463,17 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   // bottom sheet.
   final List<_StandardBottomSheet> _dismissedBottomSheets = <_StandardBottomSheet>[];
   PersistentBottomSheetController<dynamic> _currentBottomSheet;
-  BottomSheetScrollController _bottomSheetScrollController;
-  bool _showBodyScrim = false;
-  Color _bodyScrimColor;
 
   void _maybeBuildPersistentBottomSheet() {
     if (widget.bottomSheet != null && _currentBottomSheet == null) {
       // The new _currentBottomSheet is not a local history entry so a "back" button
       // will not be added to the Scaffold's appbar and the bottom sheet will not
       // support drag or swipe to dismiss.
-      AnimationController animationController;
-      if (!widget.bottomSheetIsScrollControlled) {
-        animationController = BottomSheet.createAnimationController(this)..value = 1.0;
-      }
+      final AnimationController animationController = BottomSheet.createAnimationController(this)..value = 1.0;
       _currentBottomSheet = _buildBottomSheet<void>(
         (BuildContext context) => widget.bottomSheet,
         true,
         animationController: animationController,
-        isScrollControlled: widget.bottomSheetIsScrollControlled,
       );
     }
   }
@@ -1518,9 +1493,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   PersistentBottomSheetController<T> _buildBottomSheet<T>(
     WidgetBuilder builder,
     bool isPersistent, {
-    double initialHeight = 0.5,
     AnimationController animationController,
-    bool isScrollControlled = false,
   }) {
     assert(() {
       if (widget.bottomSheet != null && isPersistent && _currentBottomSheet != null) {
@@ -1532,56 +1505,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       }
       return true;
     }());
-
-    LocalHistoryEntry persistentSheetHistoryEntry;
-    if (!isScrollControlled) {
-      _bottomSheetScrollController = null;
-    } else {
-      _bottomSheetScrollController = BottomSheet.createScrollController(
-        initialHeightPercentage: initialHeight,
-        minTop: isPersistent ? initialHeight : 0.0,
-        isPersistent: isPersistent,
-        context: context,
-      )..addTopListener(() {
-        setState(() {
-          // If we're very close to the top, just set the scale to 0.
-          // This avoids issues where a fling can send us up so fast we don't acutally
-          // fully dismiss the fab.
-          if (_bottomSheetScrollController.top < 2) {
-            floatingActionButtonVisibilityValue = 0.0;
-          } else {
-            final double screenHeight = MediaQuery.of(context).size.height;
-            floatingActionButtonVisibilityValue = _bottomSheetScrollController.top / (screenHeight * _kBottomSheetDominatesPercentage);
-          }
-          _bodyScrimColor = Colors.black.withOpacity(
-            math.max(
-              _kMinBottomSheetScrimOpacity,
-              _kMaxBottomSheetScrimOpacity - floatingActionButtonVisibilityValue,
-            ),
-          );
-          _showBodyScrim = floatingActionButtonVisibilityValue < 1.0;
-
-          // Check if we're a persistent bottom sheet.
-          // We need to add an artificial route here for a11y purposes. If a blind user
-          // were to scroll the bottom sheet up, there would be no clear way to get
-          // back to the state where the rest of the screen is visible.
-          if (isPersistent) {
-            if (_bottomSheetScrollController.top < _bottomSheetScrollController.initialTop) {
-              if (persistentSheetHistoryEntry == null) {
-                persistentSheetHistoryEntry = LocalHistoryEntry(onRemove: () {
-                  _bottomSheetScrollController.reset();
-                  persistentSheetHistoryEntry = null;
-                });
-                ModalRoute.of(context).addLocalHistoryEntry(persistentSheetHistoryEntry);
-              }
-            } else if (persistentSheetHistoryEntry != null) {
-              ModalRoute.of(context).removeLocalHistoryEntry(persistentSheetHistoryEntry);
-              persistentSheetHistoryEntry = null;
-            }
-          }
-        });
-      });
-    }
 
     final Completer<T> completer = Completer<T>();
     final GlobalKey<_StandardBottomSheetState> bottomSheetKey = GlobalKey<_StandardBottomSheetState>();
@@ -1604,13 +1527,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
           _currentBottomSheet = null;
         });
 
-        if (!isScrollControlled && animationController.status !=AnimationStatus.dismissed) {
+        if (animationController.status !=AnimationStatus.dismissed) {
           _dismissedBottomSheets.add(bottomSheet);
-        } else if (isScrollControlled) {
-          if (!bottomSheet.isPersistent && _bottomSheetScrollController.animationStatus != AnimationStatus.completed) {
-            _dismissedBottomSheets.add(bottomSheet);
-          }
-          _bottomSheetScrollController.dispose();
         }
         completer.complete();
       }
@@ -1628,7 +1546,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     bottomSheet = _StandardBottomSheet(
       key: bottomSheetKey,
       animationController: animationController,
-      enableDrag: isScrollControlled == false && !isPersistent,
+      enableDrag: !isPersistent,
       onClosing: () {
         assert(_currentBottomSheet._widget == bottomSheet);
         if (isPersistent) {
@@ -1647,7 +1565,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         }
       },
       builder: builder,
-      scrollController: _bottomSheetScrollController,
       isPersistent: isPersistent,
     );
 
@@ -1707,11 +1624,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   ///    sheet.
   ///  * [Scaffold.of], for information about how to obtain the [ScaffoldState].
   ///  * <https://material.io/design/components/sheets-bottom.html#standard-bottom-sheet>
-  PersistentBottomSheetController<T> showBottomSheet<T>(
-      WidgetBuilder builder, {
-      bool isScrollControlled = false,
-      double initialHeightPercentage = 0.5,
-  }) {
+  PersistentBottomSheetController<T> showBottomSheet<T>(WidgetBuilder builder) {
     assert(() {
       if (widget.bottomSheet != null) {
         throw FlutterError(
@@ -1725,17 +1638,12 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     assert(debugCheckHasMediaQuery(context));
 
     _closeCurrentBottomSheet();
-    AnimationController controller;
-    if (!isScrollControlled) {
-      controller = BottomSheet.createAnimationController(this)..forward();
-    }
+    final AnimationController controller = BottomSheet.createAnimationController(this)..forward();
     setState(() {
       _currentBottomSheet = _buildBottomSheet<T>(
         builder,
         false,
-        initialHeight: initialHeightPercentage,
         animationController: controller,
-        isScrollControlled: isScrollControlled,
       );
     });
     return _currentBottomSheet;
@@ -1757,7 +1665,10 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   /// [Scaffold.floatingActionButton].  This value must not be null.
   set floatingActionButtonVisibilityValue(double newValue) {
     assert(newValue != null);
-    _floatingActionButtonVisibilityController.value = newValue;
+    _floatingActionButtonVisibilityController.value = newValue.clamp(
+      _floatingActionButtonVisibilityController.lowerBound,
+      _floatingActionButtonVisibilityController.upperBound,
+    );
   }
 
   /// Hides the [Scaffold.floatingActionButton].
@@ -1893,11 +1804,9 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     _geometryNotifier.dispose();
     for (_StandardBottomSheet bottomSheet in _dismissedBottomSheets) {
       bottomSheet.animationController?.dispose();
-      bottomSheet.scrollController?.dispose();
     }
     if (_currentBottomSheet != null) {
       _currentBottomSheet._widget.animationController?.dispose();
-      _currentBottomSheet._widget.scrollController?.dispose();
     }
     _floatingActionButtonMoveController.dispose();
     _floatingActionButtonVisibilityController.dispose();
@@ -1977,6 +1886,20 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     }
   }
 
+  bool _showBodyScrim = false;
+  Color _bodyScrimColor = Colors.black;
+
+  /// Whether to show a [ModalBarrier] over the body of the scaffold.
+  void showBodyScrim(bool value, double opacity) {
+    if (_showBodyScrim == value && _bodyScrimColor.opacity == opacity) {
+      return;
+    }
+    setState(() {
+      _showBodyScrim = value;
+      _bodyScrimColor = Colors.black.withOpacity(opacity);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
@@ -2019,7 +1942,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       removeBottomPadding: widget.bottomNavigationBar != null || widget.persistentFooterButtons != null,
       removeBottomInset: _resizeToAvoidBottomInset,
     );
-
     if (_showBodyScrim == true) {
       _addIfNonNull(
         children,
@@ -2202,7 +2124,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
                 geometryNotifier: _geometryNotifier,
                 previousFloatingActionButtonLocation: _previousFloatingActionButtonLocation,
                 textDirection: textDirection,
-                bottomSheetTop: _bottomSheetScrollController?.top ?? 0.0,
               ),
             );
           }),
@@ -2238,7 +2159,6 @@ class _StandardBottomSheet extends StatefulWidget {
     this.onClosing,
     this.onDismissed,
     this.builder,
-    this.scrollController,
     this.isPersistent = false,
   }) : super(key: key);
 
@@ -2247,7 +2167,6 @@ class _StandardBottomSheet extends StatefulWidget {
   final VoidCallback onClosing;
   final VoidCallback onDismissed;
   final WidgetBuilder builder;
-  final BottomSheetScrollController scrollController;
   final bool isPersistent;
 
   @override
@@ -2258,9 +2177,6 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
   @override
   void initState() {
     super.initState();
-    if (widget.scrollController != null) {
-      return;
-    }
     assert(widget.animationController != null);
     assert(widget.animationController.status == AnimationStatus.forward
         || widget.animationController.status == AnimationStatus.completed);
@@ -2270,15 +2186,10 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
   @override
   void didUpdateWidget(_StandardBottomSheet oldWidget) {
     super.didUpdateWidget(oldWidget);
-    assert(widget.scrollController == oldWidget.scrollController
-        || widget.animationController == oldWidget.animationController);
+    assert(widget.animationController == oldWidget.animationController);
   }
 
   Future<void> close() {
-    if (widget.scrollController != null) {
-      assert(widget.animationController == null);
-      return widget.scrollController.dismiss();
-    }
     assert(widget.animationController != null);
     widget.animationController.reverse();
     return null;
@@ -2292,6 +2203,22 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final NotificationListenerCallback<ExtentNotification> extentChanged = (ExtentNotification notification) {
+      final double extentRemaining = 1.0 - notification.extent;
+      final ScaffoldState scaffold = Scaffold.of(context);
+      if (extentRemaining < _kBottomSheetDominatesPercentage) {
+        // TODO(dnfield): This epsilon should not be necessary. https://github.com/flutter/flutter/issues/30522
+        scaffold.floatingActionButtonVisibilityValue = extentRemaining * _kBottomSheetDominatesPercentage * 10 + .011;
+        scaffold.showBodyScrim(true,  math.max(
+          _kMinBottomSheetScrimOpacity,
+          _kMaxBottomSheetScrimOpacity - scaffold.floatingActionButtonVisibilityValue,
+        ));
+      } else {
+        scaffold.floatingActionButtonVisibilityValue = 1.0;
+        scaffold.showBodyScrim(false, 0.0);
+      }
+      return notification.depth == 0;
+    };
     if (widget.animationController != null) {
       return AnimatedBuilder(
         animation: widget.animationController,
@@ -2308,11 +2235,14 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
             close();
             widget.onClosing();
           },
-          child: BottomSheet(
-            animationController: widget.animationController,
-            enableDrag: widget.enableDrag,
-            onClosing: widget.onClosing,
-            builder: widget.builder
+          child:  NotificationListener<ExtentNotification>(
+            onNotification: extentChanged,
+            child: BottomSheet(
+              animationController: widget.animationController,
+              enableDrag: widget.enableDrag,
+              onClosing: widget.onClosing,
+              builder: widget.builder
+            ),
           ),
         ),
       );
@@ -2324,10 +2254,12 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
         close();
         widget.onClosing?.call();
       },
-      child: BottomSheet(
-        scrollController: widget.scrollController,
-        onClosing: widget.onClosing,
-        builder: widget.builder
+      child: NotificationListener<ExtentNotification>(
+        onNotification: extentChanged,
+        child: BottomSheet(
+          onClosing: widget.onClosing,
+          builder: widget.builder
+        ),
       ),
     );
   }

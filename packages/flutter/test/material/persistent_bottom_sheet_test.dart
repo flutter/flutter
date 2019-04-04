@@ -47,7 +47,6 @@ void main() {
             Container(height: 100.0, child: const Text('Three')),
           ],
         ),
-        bottomSheetIsScrollControlled: true,
       )
     ));
 
@@ -115,7 +114,6 @@ void main() {
           ],
         );
       },
-      isScrollControlled: true,
     );
 
     await tester.pumpAndSettle();
@@ -139,7 +137,6 @@ void main() {
         itemBuilder: (_, int index) => Text('Item $index'),
         primary: true,
       ),
-      bottomSheetIsScrollControlled: true,
       floatingActionButton: const FloatingActionButton(
         onPressed: null,
         child: Text('fab'),
@@ -200,7 +197,6 @@ void main() {
           ],
         );
       },
-      isScrollControlled: true,
     );
 
     await tester.pumpAndSettle();

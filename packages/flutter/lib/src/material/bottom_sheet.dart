@@ -8,7 +8,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 
-import 'bottom_sheet_scroll_controller.dart';
 import 'colors.dart';
 import 'debug.dart';
 import 'material.dart';
@@ -57,22 +56,13 @@ class BottomSheet extends StatefulWidget {
     Key key,
     this.animationController,
     this.enableDrag = true,
-    this.scrollController,
     this.elevation = 0.0,
+    this.color = Colors.white,
     @required this.onClosing,
     @required this.builder,
   }) : assert(enableDrag != null),
        assert(onClosing != null),
-       assert(
-         scrollController == null || animationController == null,
-         'A BottomSheet can either have a scrollController or an '
-         'animationController, but not both. If the scrollController is '
-         'specified, the animation will be controlled by the scroll controller.',
-       ),
-       assert(
-         (scrollController != null && enableDrag) || scrollController == null,
-         'A BottomSheet with a scrollController must have enableDrag set to true.',
-       ),
+       assert(color != null),
        assert(builder != null),
        assert(elevation != null && elevation >= 0.0),
        super(key: key);
@@ -83,12 +73,6 @@ class BottomSheet extends StatefulWidget {
   /// The BottomSheet widget will manipulate the position of this animation, it
   /// is not just a passive observer.
   final AnimationController animationController;
-
-  /// The [BottomSheetScrollController] will both animate the top of the bottom
-  /// sheet and act as the [PrimaryScrollController] for the child scrollable.
-  ///
-  /// If [animationController] is specified, this property must be null.
-  final BottomSheetScrollController scrollController;
 
   /// Called when the bottom sheet begins to close.
   ///
@@ -118,6 +102,11 @@ class BottomSheet extends StatefulWidget {
   /// Defaults to 0. The value is non-negative.
   final double elevation;
 
+  /// The color for the [Material] of the bottom sheet.
+  ///
+  /// Defaults to [Colors.white]. The value must not be null.
+  final Color color;
+
   @override
   _BottomSheetState createState() => _BottomSheetState();
 
@@ -134,34 +123,6 @@ class BottomSheet extends StatefulWidget {
       vsync: vsync,
     );
   }
-
-  /// Creates a [BottomSheetScrollController] suitable for use as the
-  /// [BottomSheet.scrollController]. The parameters are the same as those
-  /// on the constructor for [BottomSheetScrollController].
-  ///
-  /// This API is available as a convenience with default values for a Material
-  /// compliant bottom sheet that contains scrollable content.
-  static BottomSheetScrollController createScrollController({
-    double initialHeightPercentage = 0.5,
-    double minTop = 0.0,
-    bool isPersistent = false,
-    @required BuildContext context,
-    bool forFullScreen = false,
-  }) {
-    assert(initialHeightPercentage != null);
-    assert(minTop != null);
-    assert(context != null);
-    assert(debugCheckHasMediaQuery(context));
-
-    return BottomSheetScrollController(
-      debugLabel: 'BottomSheetScrollController',
-      initialHeightPercentage: initialHeightPercentage,
-      minTop: minTop,
-      isPersistent: isPersistent,
-      context: context,
-      forFullScreen: forFullScreen,
-    );
-  }
 }
 
 class _BottomSheetState extends State<BottomSheet> {
@@ -176,7 +137,6 @@ class _BottomSheetState extends State<BottomSheet> {
   bool get _dismissUnderway => widget.animationController.status == AnimationStatus.reverse;
 
   void _handleDragUpdate(DragUpdateDetails details) {
-    assert(widget.scrollController == null);
     assert(widget.enableDrag);
     if (_dismissUnderway)
       return;
@@ -184,7 +144,6 @@ class _BottomSheetState extends State<BottomSheet> {
   }
 
   void _handleDragEnd(DragEndDetails details) {
-    assert(widget.scrollController == null);
     assert(widget.enableDrag);
     if (_dismissUnderway)
       return;
@@ -206,59 +165,10 @@ class _BottomSheetState extends State<BottomSheet> {
   }
 
   @override
-  void initState() {
-    super.initState();
-    widget.scrollController?.addTopListener(_maybeCloseBottomSheet);
-  }
-
-  /// This method is only intended for use in a scroll controlled widget.
-  void _maybeCloseBottomSheet() {
-    assert(widget.scrollController != null);
-    if (!widget.scrollController.isPersistent &&
-        widget.scrollController.top >= widget.scrollController.maxTop) {
-      // onClosing is asserted not null
-      widget.onClosing();
-   }
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    // If the BottomSheet's child tree doesn't have a Scrollable widget that
-    // inherits our PrimaryScrollController, it will never become visible.
-    assert(() {
-      if (widget.scrollController == null) {
-        return true;
-      }
-      SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
-        assert(widget.scrollController.debugHasClient,
-          'Scroll controlled BottomSheets must be created with a scrollable '
-          'widget that has primary set to true.\n\n'
-          'If you have content that you do not wish to have scrolled beyond its '
-          'viewable area, you should either not use a scroll controlled '
-          'BottomSheet, or make the child of your scroll controlled BottomSheet '
-          'a SingleChildScrollView with freeze set to true.',
-        );
-      });
-      return true;
-    }());
-  }
-
-  @override
   Widget build(BuildContext context) {
-    if (widget.scrollController != null) {
-      return PrimaryScrollController(
-        controller: widget.scrollController,
-        child: Material(
-          elevation: widget.elevation,
-          child: SizedBox.expand(
-            child: widget.builder(context),
-          ),
-        ),
-      );
-    }
     final Widget bottomSheet = Material(
       key: _childKey,
+      color: widget.color,
       elevation: widget.elevation,
       child: widget.builder(context),
     );
@@ -269,12 +179,6 @@ class _BottomSheetState extends State<BottomSheet> {
       excludeFromSemantics: true,
     );
   }
-
-  @override
-  void dispose() {
-    widget.scrollController?.removeTopListener(_maybeCloseBottomSheet);
-    super.dispose();
-  }
 }
 
 // PERSISTENT BOTTOM SHEETS
@@ -283,33 +187,11 @@ class _BottomSheetState extends State<BottomSheet> {
 
 
 // MODAL BOTTOM SHEETS
-
-class _ModalBottomSheetScrollControllerLayout extends SingleChildLayoutDelegate {
-  _ModalBottomSheetScrollControllerLayout(this.top);
-
-  final double top;
-
-  @override
-  Size getSize(BoxConstraints constraints) {
-    return Size(constraints.maxWidth, top);
-  }
-
-  @override
-  Offset getPositionForChild(Size size, Size childSize) {
-    return Offset(0.0, top);
-  }
-
-  @override
-  bool shouldRelayout(_ModalBottomSheetScrollControllerLayout oldDelegate) {
-    return top != oldDelegate.top;
-  }
-}
-
-
 class _ModalBottomSheetAnimationControllerLayout extends SingleChildLayoutDelegate {
-  _ModalBottomSheetAnimationControllerLayout(this.progress);
+  _ModalBottomSheetAnimationControllerLayout(this.progress, this.isScrollControlled);
 
   final double progress;
+  final bool isScrollControlled;
 
   @override
   BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
@@ -317,7 +199,9 @@ class _ModalBottomSheetAnimationControllerLayout extends SingleChildLayoutDelega
       minWidth: constraints.maxWidth,
       maxWidth: constraints.maxWidth,
       minHeight: 0.0,
-      maxHeight: constraints.maxHeight * 9.0 / 16.0,
+      maxHeight: isScrollControlled
+          ? constraints.maxHeight
+          : constraints.maxHeight * 9.0 / 16.0,
     );
   }
 
@@ -337,28 +221,18 @@ class _ModalBottomSheet<T> extends StatefulWidget {
   const _ModalBottomSheet({
     Key key,
     this.route,
-    this.scrollController,
-  }) : super(key: key);
+    this.isScrollControlled = false,
+  }) : assert(isScrollControlled != null),
+       super(key: key);
 
   final _ModalBottomSheetRoute<T> route;
-  final BottomSheetScrollController scrollController;
+  final bool isScrollControlled;
 
   @override
   _ModalBottomSheetState<T> createState() => _ModalBottomSheetState<T>();
 }
 
 class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
-  @override
-  void initState() {
-    super.initState();
-    widget.scrollController?.addTopListener(_rebuild);
-  }
-
-  /// Rebuild the sheet when the [BottomSheetScrollController.top] value has changed.
-  void _rebuild() {
-    setState(() { /* state is contained in BottomSheetScrollController.top */ });
-  }
-
   String _getRouteLabel(MaterialLocalizations localizations) {
     switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:
@@ -370,28 +244,7 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
     return null;
   }
 
-  Widget _buildScrollControlledWidget(String routeLabel) {
-    assert(widget.scrollController != null);
-    return Semantics(
-      scopesRoute: true,
-      namesRoute: true,
-      label: routeLabel,
-      explicitChildNodes: true,
-      child: ClipRect(
-        child: CustomSingleChildLayout(
-          delegate: _ModalBottomSheetScrollControllerLayout(widget.scrollController.top),
-          child: BottomSheet(
-            onClosing: () => Navigator.pop(context),
-            builder: widget.route.builder,
-            scrollController: widget.scrollController,
-          ),
-        ),
-      ),
-    );
-  }
-
   Widget _buildAnimationControlledWidget(String routeLabel, BuildContext context) {
-    assert(widget.scrollController == null);
     final MediaQueryData mediaQuery = MediaQuery.of(context);
     return GestureDetector(
       excludeFromSemantics: true,
@@ -409,8 +262,9 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
             explicitChildNodes: true,
             child: ClipRect(
               child: CustomSingleChildLayout(
-                delegate: _ModalBottomSheetAnimationControllerLayout(animationValue),
+                delegate: _ModalBottomSheetAnimationControllerLayout(animationValue, widget.isScrollControlled),
                 child: BottomSheet(
+                  color: widget.isScrollControlled ? const Color(0x0) : Colors.white,
                   animationController: widget.route._animationController,
                   onClosing: () => Navigator.pop(context),
                   builder: widget.route.builder,
@@ -427,16 +281,7 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final String routeLabel = _getRouteLabel(localizations);
 
-    if (widget.scrollController != null) {
-      return _buildScrollControlledWidget(routeLabel);
-    }
     return _buildAnimationControlledWidget(routeLabel, context);
-  }
-
-  @override
-  void dispose() {
-    widget.scrollController?.removeTopListener(_rebuild);
-    super.dispose();
   }
 }
 
@@ -445,18 +290,14 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
     this.builder,
     this.theme,
     this.barrierLabel,
-    this.isScrollControlled = false,
-    this.initialHeightPercentage,
+    this.isScrollControlled,
     RouteSettings settings,
-  }) : assert(isScrollControlled != null),
-       super(settings: settings);
+  }) : super(settings: settings);
 
   final WidgetBuilder builder;
   final ThemeData theme;
   final bool isScrollControlled;
-  final double initialHeightPercentage;
 
-  BottomSheetScrollController _scrollController;
   AnimationController _animationController;
 
   @override
@@ -473,41 +314,19 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
 
   @override
   AnimationController createAnimationController() {
-    if (!isScrollControlled) {
-      assert(_animationController == null);
-      _animationController = BottomSheet.createAnimationController(navigator.overlay);
-      return _animationController;
-    }
-    return super.createAnimationController();
-  }
-
-  @override
-  void dispose() {
-    if (isScrollControlled) {
-      _scrollController?.dispose();
-    }
-    super.dispose();
+    assert(_animationController == null);
+    _animationController = BottomSheet.createAnimationController(navigator.overlay);
+    return _animationController;
   }
 
   @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
-    if (isScrollControlled) {
-      _scrollController = BottomSheet.createScrollController(
-        initialHeightPercentage: initialHeightPercentage,
-        minTop: 0.0,
-        context: context,
-        forFullScreen: true,
-      );
-    }
     // By definition, the bottom sheet is aligned to the bottom of the page
     // and isn't exposed to the top padding of the MediaQuery.
     Widget bottomSheet = MediaQuery.removePadding(
       context: context,
       removeTop: true,
-      child: _ModalBottomSheet<T>(
-        route: this,
-        scrollController: _scrollController,
-      ),
+      child: _ModalBottomSheet<T>(route: this, isScrollControlled: isScrollControlled),
     );
     if (theme != null)
       bottomSheet = Theme(data: theme, child: bottomSheet);
@@ -552,22 +371,18 @@ Future<T> showModalBottomSheet<T>({
   @required BuildContext context,
   @required WidgetBuilder builder,
   bool isScrollControlled = false,
-  double initialHeightPercentage = 0.5,
 }) {
   assert(context != null);
   assert(builder != null);
   assert(isScrollControlled != null);
-  assert(initialHeightPercentage != null);
-  assert(initialHeightPercentage >= 0.0 && initialHeightPercentage <= 1.0);
   assert(debugCheckHasMediaQuery(context));
   assert(debugCheckHasMaterialLocalizations(context));
 
   return Navigator.push(context, _ModalBottomSheetRoute<T>(
     builder: builder,
     theme: Theme.of(context, shadowThemeOnly: true),
-    barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
     isScrollControlled: isScrollControlled,
-    initialHeightPercentage: initialHeightPercentage,
+    barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
   ));
 }
 
@@ -615,16 +430,10 @@ Future<T> showModalBottomSheet<T>({
 PersistentBottomSheetController<T> showBottomSheet<T>({
   @required BuildContext context,
   @required WidgetBuilder builder,
-  bool isScrollControlled = false,
-  double initialHeightPercentage = 0.5,
 }) {
   assert(context != null);
   assert(builder != null);
   assert(debugCheckHasScaffold(context));
 
-  return Scaffold.of(context).showBottomSheet<T>(
-    builder,
-    isScrollControlled: isScrollControlled,
-    initialHeightPercentage: initialHeightPercentage,
-  );
+  return Scaffold.of(context).showBottomSheet<T>(builder);
 }

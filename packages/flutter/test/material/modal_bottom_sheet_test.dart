@@ -264,7 +264,6 @@ void main() {
 
 
     showModalBottomSheet<void>(
-      isScrollControlled: true,
       context: scaffoldKey.currentContext,
       builder: (BuildContext context) {
         return SingleChildScrollView(primary: true,
