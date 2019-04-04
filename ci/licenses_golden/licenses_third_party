@@ -1,4 +1,4 @@
-Signature: 3ae9b79b70f8f3445bc684cfda86e034
+Signature: 000c3eafbb894888c3cb2a57ebcf6ace
 
 UNUSED LICENSES:
 
@@ -4608,7 +4608,6 @@ FILE: ../../../third_party/dart/runtime/observatory/web/favicon.ico
 FILE: ../../../third_party/dart/runtime/observatory/web/index.html
 FILE: ../../../third_party/dart/runtime/observatory/web/third_party/trace_viewer_full.html
 FILE: ../../../third_party/dart/runtime/observatory/web/timeline.html
-FILE: ../../../third_party/dart/runtime/vm/snapshot_test_in.dat
 FILE: ../../../third_party/dart/samples/ffi/sqlite/docs/lib/scenario-default.svg
 FILE: ../../../third_party/dart/samples/ffi/sqlite/docs/lib/scenario-full.svg
 FILE: ../../../third_party/dart/sdk/lib/html/html_common/conversions_dart2js.dart
@@ -4970,7 +4969,6 @@ FILE: ../../../third_party/dart/runtime/vm/snapshot.cc
 FILE: ../../../third_party/dart/runtime/vm/snapshot.h
 FILE: ../../../third_party/dart/runtime/vm/snapshot_ids.h
 FILE: ../../../third_party/dart/runtime/vm/snapshot_test.cc
-FILE: ../../../third_party/dart/runtime/vm/snapshot_test.dart
 FILE: ../../../third_party/dart/runtime/vm/stack_frame.cc
 FILE: ../../../third_party/dart/runtime/vm/stack_frame_test.cc
 FILE: ../../../third_party/dart/runtime/vm/stub_code.cc
@@ -5150,9 +5148,11 @@ FILE: ../../../third_party/dart/runtime/vm/compiler/asm_intrinsifier_arm.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/asm_intrinsifier_arm64.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/asm_intrinsifier_ia32.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/asm_intrinsifier_x64.cc
+FILE: ../../../third_party/dart/runtime/vm/compiler/backend/block_builder.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/backend/flow_graph_checker.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/backend/flow_graph_checker.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/backend/slot_test.cc
+FILE: ../../../third_party/dart/runtime/vm/compiler/backend/type_propagator_test.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/graph_intrinsifier.cc
