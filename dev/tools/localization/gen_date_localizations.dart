@@ -7,7 +7,7 @@
 /// package.
 ///
 /// The extracted data is written into:
-///   packages/flutter_localizations/lib/src/l10n/date_localizations.dart
+///   packages/flutter_localizations/lib/src/l10n/generated_date_localizations.dart
 ///
 /// ## Usage
 ///
@@ -16,14 +16,14 @@
 /// The following outputs the generated Dart code to the console as a dry run:
 ///
 /// ```
-/// dart dev/tools/gen_date_localizations.dart
+/// dart dev/tools/localization/gen_date_localizations.dart
 /// ```
 ///
 /// If the data looks good, use the `--overwrite` option to overwrite the
 /// lib/src/l10n/date_localizations.dart file:
 ///
 /// ```
-/// dart dev/tools/gen_date_localizations.dart --overwrite
+/// dart dev/tools/localization/gen_date_localizations.dart --overwrite
 /// ```
 
 import 'dart:async';
@@ -79,7 +79,7 @@ Future<void> main(List<String> rawArgs) async {
 
 // This file has been automatically generated. Please do not edit it manually.
 // To regenerate run (omit --overwrite to print to console instead of the file):
-// dart --enable-asserts dev/tools/gen_date_localizations.dart --overwrite
+// dart --enable-asserts dev/tools/localization/gen_date_localizations.dart --overwrite
 
 '''
 );
@@ -113,7 +113,7 @@ Future<void> main(List<String> rawArgs) async {
   buffer.writeln('};');
 
   if (writeToFile) {
-    final File dateLocalizationsFile = File(path.join('packages', 'flutter_localizations', 'lib', 'src', 'l10n', 'date_localizations.dart'));
+    final File dateLocalizationsFile = File(path.join('packages', 'flutter_localizations', 'lib', 'src', 'l10n', 'generated_date_localizations.dart'));
     dateLocalizationsFile.writeAsStringSync(buffer.toString());
     Process.runSync(path.join('bin', 'cache', 'dart-sdk', 'bin', 'dartfmt'), <String>[
       '-w',
