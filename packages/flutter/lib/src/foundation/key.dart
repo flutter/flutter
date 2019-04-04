@@ -11,6 +11,8 @@ import 'package:meta/meta.dart';
 /// A new widget will only be used to update an existing element if its key is
 /// the same as the key of the current widget associated with the element.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=kn0EOS-ZiIc}
+///
 /// Keys must be unique amongst the [Element]s with the same parent.
 ///
 /// Subclasses of [Key] should either subclass [LocalKey] or [GlobalKey].
