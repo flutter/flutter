@@ -340,6 +340,7 @@ class _HourControl extends StatelessWidget {
     );
 
     return GestureDetector(
+      behavior: HitTestBehavior.opaque,
       onTap: Feedback.wrapForTap(() => fragmentContext.onModeChange(_TimePickerMode.hour), context),
       child: Semantics(
         hint: localizations.timePickerHourModeAnnouncement,
@@ -353,8 +354,36 @@ class _HourControl extends StatelessWidget {
         onDecrease: () {
           fragmentContext.onTimeChange(previousHour);
         },
-          child: Text(formattedHour, style: hourStyle),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            SizedBox(
+              width: hourStyle.fontSize * 0.6,
+              child: Text(
+                formattedHour.length == 2
+                // First digit
+                    ? formattedHour.substring(0, 1)
+                // Empty if formattedHour is only one digit
+                    : '',
+                style: hourStyle,
+                textAlign: TextAlign.center,
+              ),
+            ),
+            SizedBox(
+              width: hourStyle.fontSize * 0.6,
+              child: Text(
+                formattedHour.length == 2
+                // Second digit
+                    ? formattedHour.substring(1, 2)
+                // First digit if formattedHour is only one digit
+                    : formattedHour.substring(0, 1),
+                style: hourStyle,
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ],
         ),
+      ),
     );
   }
 }
@@ -404,6 +433,7 @@ class _MinuteControl extends StatelessWidget {
     final String formattedPreviousMinute = localizations.formatMinute(previousMinute);
 
     return GestureDetector(
+      behavior: HitTestBehavior.opaque,
       onTap: Feedback.wrapForTap(() => fragmentContext.onModeChange(_TimePickerMode.minute), context),
       child: Semantics(
         excludeSemantics: true,
@@ -417,8 +447,26 @@ class _MinuteControl extends StatelessWidget {
         onDecrease: () {
           fragmentContext.onTimeChange(previousMinute);
         },
-          child: Text(formattedMinute, style: minuteStyle),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            SizedBox(
+              width: minuteStyle.fontSize * 0.6,
+              child: Text(
+                formattedMinute.substring(0, 1), // First digit
+                style: minuteStyle,
+              ),
+            ),
+            SizedBox(
+              width: minuteStyle.fontSize * 0.6,
+              child: Text(
+                formattedMinute.substring(1, 2), // Second digit
+                style: minuteStyle,
+              ),
+            ),
+          ],
         ),
+      ),
     );
   }
 }
