@@ -47,6 +47,7 @@ void main() {
     ui.window.onPointerDataPacket(packet);
     expect(events.length, 2);
     expect(events[0].runtimeType, equals(PointerDownEvent));
+    expect(events[0].buttons, equals(1));
     expect(events[1].runtimeType, equals(PointerUpEvent));
   });
 
@@ -65,7 +66,9 @@ void main() {
     ui.window.onPointerDataPacket(packet);
     expect(events.length, 3);
     expect(events[0].runtimeType, equals(PointerDownEvent));
+    expect(events[0].buttons, equals(1));
     expect(events[1].runtimeType, equals(PointerMoveEvent));
+    expect(events[1].buttons, equals(1));
     expect(events[2].runtimeType, equals(PointerUpEvent));
   });
 
@@ -119,7 +122,9 @@ void main() {
     ui.window.onPointerDataPacket(packet);
     expect(events.length, 3);
     expect(events[0].runtimeType, equals(PointerDownEvent));
+    expect(events[0].buttons, equals(1));
     expect(events[1].runtimeType, equals(PointerMoveEvent));
+    expect(events[1].buttons, equals(1));
     expect(events[1].delta, equals(const Offset(9.0, 12.0)));
     expect(events[2].runtimeType, equals(PointerUpEvent));
   });
@@ -138,6 +143,7 @@ void main() {
     ui.window.onPointerDataPacket(packet);
     expect(events.length, 2);
     expect(events[0].runtimeType, equals(PointerDownEvent));
+    expect(events[0].buttons, equals(1));
     expect(events[1].runtimeType, equals(PointerCancelEvent));
   });
 
@@ -159,6 +165,7 @@ void main() {
     ui.window.onPointerDataPacket(packet);
     expect(events.length, 2);
     expect(events[0].runtimeType, equals(PointerDownEvent));
+    expect(events[0].buttons, equals(1));
     expect(events[1].runtimeType, equals(PointerCancelEvent));
   });
 
@@ -200,6 +207,7 @@ void main() {
     expect(events[1].runtimeType, equals(PointerHoverEvent));
     expect(events[1].delta, equals(const Offset(5.0, 7.0)));
     expect(events[2].runtimeType, equals(PointerDownEvent));
+    expect(events[2].buttons, equals(1));
     expect(events[3].runtimeType, equals(PointerCancelEvent));
     expect(events[4].runtimeType, equals(PointerHoverEvent));
     expect(events[5].runtimeType, equals(PointerRemovedEvent));
@@ -246,7 +254,9 @@ void main() {
     expect(events[2].runtimeType, equals(PointerScrollEvent));
     expect(events[3].runtimeType, equals(PointerHoverEvent));
     expect(events[4].runtimeType, equals(PointerDownEvent));
+    expect(events[4].buttons, equals(1));
     expect(events[5].runtimeType, equals(PointerMoveEvent));
+    expect(events[5].buttons, equals(1));
     expect(events[5].delta, equals(unexpectedOffset));
     expect(events[6].runtimeType, equals(PointerScrollEvent));
   });

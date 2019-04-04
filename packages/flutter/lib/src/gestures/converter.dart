@@ -207,7 +207,8 @@ class PointerEventConverter {
               kind: kind,
               device: datum.device,
               position: position,
-              buttons: datum.buttons,
+              // TODO(tongmu): Move button patching to embedder, https://github.com/flutter/flutter/issues/30454
+              buttons: datum.buttons | kPrimaryButton,
               obscured: datum.obscured,
               pressure: datum.pressure,
               pressureMin: datum.pressureMin,
@@ -236,7 +237,8 @@ class PointerEventConverter {
               device: datum.device,
               position: position,
               delta: state.deltaTo(position),
-              buttons: datum.buttons,
+              // TODO(tongmu): Move button patching to embedder, https://github.com/flutter/flutter/issues/30454
+              buttons: datum.buttons | kPrimaryButton,
               obscured: datum.obscured,
               pressure: datum.pressure,
               pressureMin: datum.pressureMin,
@@ -271,7 +273,8 @@ class PointerEventConverter {
                 device: datum.device,
                 position: position,
                 delta: state.deltaTo(position),
-                buttons: datum.buttons,
+                // TODO(tongmu): Move button patching to embedder, https://github.com/flutter/flutter/issues/30454
+                buttons: datum.buttons | kPrimaryButton,
                 obscured: datum.obscured,
                 pressure: datum.pressure,
                 pressureMin: datum.pressureMin,
@@ -418,7 +421,8 @@ class PointerEventConverter {
                   device: datum.device,
                   position: position,
                   delta: state.deltaTo(position),
-                  buttons: datum.buttons,
+                  // TODO(tongmu): Move button patching to embedder, https://github.com/flutter/flutter/issues/30454
+                  buttons: datum.buttons | kPrimaryButton,
                   obscured: datum.obscured,
                   pressure: datum.pressure,
                   pressureMin: datum.pressureMin,
