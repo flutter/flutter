@@ -11,7 +11,7 @@ import io.flutter.androidembedding.fullscreen.FullscreenFlutterActivity;
 import io.flutter.androidembedding.partial_flow.LoginActivity;
 import io.flutter.androidembedding.single_activity.NavDrawerActivity;
 import io.flutter.androidembedding.single_activity.TabbedActivity;
-import io.flutter.embedding.android.FlutterActivity;
+import io.flutter.androidembedding.single_activity.TabbedWithViewPagerActivity;
 import io.flutter.view.FlutterMain;
 
 public class MainActivity extends AppCompatActivity {
@@ -58,6 +58,13 @@ public class MainActivity extends AppCompatActivity {
       @Override
       public void onClick(View v) {
         startActivity(new Intent(MainActivity.this, TabbedActivity.class));
+      }
+    });
+
+    findViewById(R.id.button_page_tabs_with_viewpager).setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View v) {
+        startActivity(new Intent(MainActivity.this, TabbedWithViewPagerActivity.class));
       }
     });
 

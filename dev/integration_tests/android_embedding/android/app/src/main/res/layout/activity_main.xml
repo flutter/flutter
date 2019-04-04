@@ -61,6 +61,12 @@
             android:text="Flutter In Page Tabs"
             />
         <Button
+            android:id="@+id/button_page_tabs_with_viewpager"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Flutter In Page Tabs with ViewPager"
+            />
+        <Button
             android:id="@+id/button_standalone_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
