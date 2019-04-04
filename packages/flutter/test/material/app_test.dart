@@ -381,7 +381,7 @@ void main() {
     expect(log, <String>['onGenerateRoute /', 'onUnknownRoute /']);
   });
 
-  testWidgets('custom navigator with without routes supported', (WidgetTester tester) async {
+  testWidgets('custom navigator with no routes supported', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/18904
     await tester.pumpWidget(
       MaterialApp(
