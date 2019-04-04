@@ -64,10 +64,11 @@ class CupertinoTheme extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final IconThemeData iconTheme = IconTheme.of(context) ?? const IconThemeData();
     return  _InheritedCupertinoTheme(
       theme: this,
       child: IconTheme(
-        data: data._iconTheme,
+        data: iconTheme.copyWith(color: data.primaryColor),
         child: child,
       )
     );
@@ -193,11 +194,6 @@ class CupertinoThemeData extends Diagnosticable {
     );
   }
   final CupertinoTextThemeData _textTheme;
-
-  // Icon theme used by Cupertino widgets.
-  //
-  // The same color as [primaryColor].
-  IconThemeData get _iconTheme => IconThemeData(color: primaryColor);
 
   /// Background color of the top nav bar and bottom tab bar.
   ///
