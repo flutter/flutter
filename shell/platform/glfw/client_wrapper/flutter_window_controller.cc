@@ -24,6 +24,7 @@ FlutterWindowController::~FlutterWindowController() {
 bool FlutterWindowController::CreateWindow(
     int width,
     int height,
+    const std::string& title,
     const std::string& assets_path,
     const std::vector<std::string>& arguments) {
   if (!init_succeeded_) {
@@ -44,7 +45,7 @@ bool FlutterWindowController::CreateWindow(
   size_t arg_count = engine_arguments.size();
 
   window_ = FlutterDesktopCreateWindow(
-      width, height, assets_path.c_str(), icu_data_path_.c_str(),
+      width, height, title.c_str(), assets_path.c_str(), icu_data_path_.c_str(),
       arg_count > 0 ? &engine_arguments[0] : nullptr, arg_count);
   if (!window_) {
     std::cerr << "Failed to create window." << std::endl;
@@ -66,6 +67,16 @@ FlutterDesktopPluginRegistrarRef FlutterWindowController::GetRegistrarForPlugin(
 
 void FlutterWindowController::SetHoverEnabled(bool enabled) {
   FlutterDesktopSetHoverEnabled(window_, enabled);
+}
+
+void FlutterWindowController::SetTitle(const std::string& title) {
+  FlutterDesktopSetWindowTitle(window_, title.c_str());
+}
+
+void FlutterWindowController::SetIcon(uint8_t* pixel_data,
+                                      int width,
+                                      int height) {
+  FlutterDesktopSetWindowIcon(window_, pixel_data, width, height);
 }
 
 void FlutterWindowController::RunEventLoop() {

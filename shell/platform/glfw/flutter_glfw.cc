@@ -94,8 +94,6 @@ struct FlutterDesktopMessenger {
   shell::IncomingMessageDispatcher* dispatcher;
 };
 
-static constexpr char kDefaultWindowTitle[] = "Flutter";
-
 // Retrieves state bag for the window in question from the GLFWWindow.
 static FlutterDesktopWindowState* GetSavedWindowState(GLFWwindow* window) {
   return reinterpret_cast<FlutterDesktopWindowState*>(
@@ -473,6 +471,7 @@ void FlutterDesktopTerminate() {
 
 FlutterDesktopWindowRef FlutterDesktopCreateWindow(int initial_width,
                                                    int initial_height,
+                                                   const char* title,
                                                    const char* assets_path,
                                                    const char* icu_data_path,
                                                    const char** arguments,
@@ -481,8 +480,8 @@ FlutterDesktopWindowRef FlutterDesktopCreateWindow(int initial_width,
   gtk_init(0, nullptr);
 #endif
   // Create the window.
-  auto window = glfwCreateWindow(initial_width, initial_height,
-                                 kDefaultWindowTitle, NULL, NULL);
+  auto window =
+      glfwCreateWindow(initial_width, initial_height, title, NULL, NULL);
   if (window == nullptr) {
     return nullptr;
   }
@@ -541,6 +540,21 @@ void FlutterDesktopSetHoverEnabled(FlutterDesktopWindowRef flutter_window,
                                    bool enabled) {
   flutter_window->hover_tracking_enabled = enabled;
   SetHoverCallbacksEnabled(flutter_window->window, enabled);
+}
+
+void FlutterDesktopSetWindowTitle(FlutterDesktopWindowRef flutter_window,
+                                  const char* title) {
+  GLFWwindow* window = flutter_window->window;
+  glfwSetWindowTitle(window, title);
+}
+
+void FlutterDesktopSetWindowIcon(FlutterDesktopWindowRef flutter_window,
+                                 uint8_t* pixel_data,
+                                 int width,
+                                 int height) {
+  GLFWwindow* window = flutter_window->window;
+  GLFWimage image = {width, height, static_cast<unsigned char*>(pixel_data)};
+  glfwSetWindowIcon(window, pixel_data ? 1 : 0, &image);
 }
 
 void FlutterDesktopRunWindowLoop(FlutterDesktopWindowRef flutter_window) {
