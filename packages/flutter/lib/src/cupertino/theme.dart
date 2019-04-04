@@ -24,6 +24,9 @@ const Color _kDefaultBarDarkBackgroundColor = Color(0xB7212121);
 /// [CupertinoTheme.of]. An [InheritedWidget] dependency is created when
 /// an ancestor [CupertinoThemeData] is retrieved via [CupertinoTheme.of].
 ///
+/// The [CupertinoTheme] widget implies an [IconTheme] widget, whose
+/// [IconTheme.data] has the same color as [primaryColor]
+///
 /// See also:
 ///
 ///  * [CupertinoThemeData], specifies the theme's visual styling.
@@ -50,8 +53,8 @@ class CupertinoTheme extends StatelessWidget {
   /// Returns a default [CupertinoThemeData] if no [CupertinoTheme] widgets
   /// exist in the ancestry tree.
   static CupertinoThemeData of(BuildContext context) {
-    final _InheritedCupertinoTheme _inheritedTheme = context.inheritFromWidgetOfExactType(_InheritedCupertinoTheme);
-    return _inheritedTheme?.theme?.data ?? const CupertinoThemeData();
+    final _InheritedCupertinoTheme inheritedTheme = context.inheritFromWidgetOfExactType(_InheritedCupertinoTheme);
+    return inheritedTheme?.theme?.data ?? const CupertinoThemeData();
   }
 
   /// The widget below this widget in the tree.
@@ -191,9 +194,9 @@ class CupertinoThemeData extends Diagnosticable {
   }
   final CupertinoTextThemeData _textTheme;
 
-  /// Icon theme used by Cupertino widgets.
-  ///
-  /// The same color as [primaryColor].
+  // Icon theme used by Cupertino widgets.
+  //
+  // The same color as [primaryColor].
   IconThemeData get _iconTheme => IconThemeData(color: primaryColor);
 
   /// Background color of the top nav bar and bottom tab bar.

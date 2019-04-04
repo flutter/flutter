@@ -247,20 +247,20 @@ void main() {
       );
 
       DefaultTextStyle textStyle = tester.widget(find.widgetWithText(DefaultTextStyle, 'Child 1').first);
-      IconTheme iconTheme = tester.widget(find.widgetWithIcon(IconTheme, const IconData(1)).first);
+      IconThemeData iconTheme = IconTheme.of(tester.element(find.byIcon(const IconData(1))));
 
       expect(textStyle.style.color, CupertinoColors.black);
-      expect(iconTheme.data.color, CupertinoColors.activeOrange);
+      expect(iconTheme.color, CupertinoColors.activeOrange);
 
-      await tester.tap(find.widgetWithIcon(IconTheme, const IconData(1)).first);
+      await tester.tap(find.byIcon(const IconData(1)));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
 
       textStyle = tester.widget(find.widgetWithText(DefaultTextStyle, 'Child 1').first);
-      iconTheme = tester.widget(find.widgetWithIcon(IconTheme, const IconData(1)).first);
+      iconTheme = IconTheme.of(tester.element(find.byIcon(const IconData(1))));
 
       expect(textStyle.style.color, CupertinoColors.activeOrange);
-      expect(iconTheme.data.color, CupertinoColors.black);
+      expect(iconTheme.color, CupertinoColors.black);
     },
   );
 
