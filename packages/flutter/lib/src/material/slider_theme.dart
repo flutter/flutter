@@ -912,7 +912,15 @@ class _EmptySliderComponentShape extends SliderComponentShape {
 /// width of the parent box, but with the largest shape subtracted out from
 /// [SliderThemeData.thumbShape] and [SliderThemeData.overlayShape].
 abstract class BaseSliderTrackShape {
-  @override
+  /// Returns a rect that represents the track bounds that fits within the
+  /// [Slider].
+  ///
+  /// The width is the width of the [Slider], but padded by the max
+  /// of the overlay and thumb radius. The height is defined by the
+  /// [SliderThemeData.trackHeight].
+  ///
+  /// The rect is centered both horizontally and vertically within the slider
+  /// bounds.
   Rect getPreferredRect({
     RenderBox parentBox,
     Offset offset = Offset.zero,
