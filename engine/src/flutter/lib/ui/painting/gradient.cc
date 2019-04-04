@@ -42,7 +42,7 @@ fml::RefPtr<CanvasGradient> CanvasGradient::Create() {
 void CanvasGradient::initLinear(const tonic::Float32List& end_points,
                                 const tonic::Int32List& colors,
                                 const tonic::Float32List& color_stops,
-                                SkShader::TileMode tile_mode) {
+                                SkTileMode tile_mode) {
   FML_DCHECK(end_points.num_elements() == 4);
   FML_DCHECK(colors.num_elements() == color_stops.num_elements() ||
              color_stops.data() == nullptr);
@@ -63,7 +63,7 @@ void CanvasGradient::initRadial(double center_x,
                                 double radius,
                                 const tonic::Int32List& colors,
                                 const tonic::Float32List& color_stops,
-                                SkShader::TileMode tile_mode,
+                                SkTileMode tile_mode,
                                 const tonic::Float64List& matrix4) {
   FML_DCHECK(colors.num_elements() == color_stops.num_elements() ||
              color_stops.data() == nullptr);
@@ -87,7 +87,7 @@ void CanvasGradient::initSweep(double center_x,
                                double center_y,
                                const tonic::Int32List& colors,
                                const tonic::Float32List& color_stops,
-                               SkShader::TileMode tile_mode,
+                               SkTileMode tile_mode,
                                double start_angle,
                                double end_angle,
                                const tonic::Float64List& matrix4) {
@@ -118,7 +118,7 @@ void CanvasGradient::initTwoPointConical(double start_x,
                                          double end_radius,
                                          const tonic::Int32List& colors,
                                          const tonic::Float32List& color_stops,
-                                         SkShader::TileMode tile_mode,
+                                         SkTileMode tile_mode,
                                          const tonic::Float64List& matrix4) {
   FML_DCHECK(colors.num_elements() == color_stops.num_elements() ||
              color_stops.data() == nullptr);
