@@ -416,7 +416,6 @@ enum ListTileControlAffinity {
 ///   }
 /// }
 /// ```
-///
 /// {@end-tool}
 ///
 /// See also:
