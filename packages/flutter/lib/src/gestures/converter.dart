@@ -40,6 +40,22 @@ class _PointerState {
   }
 }
 
+// Add `kPrimaryButton` to [buttons] when a pointer of certain devices is down.
+//
+// TODO(tongmu): This patch is supposed to be done by embedders. Patching it
+// in framework is a workaround before [PointerEventConverter] is moved to embedders.
+// https://github.com/flutter/flutter/issues/30454
+int _synthesiseDownButtons(int buttons, PointerDeviceKind kind) {
+  switch (kind) {
+    case PointerDeviceKind.touch:
+    case PointerDeviceKind.stylus:
+    case PointerDeviceKind.invertedStylus:
+      return buttons | kPrimaryButton;
+    default:
+      return buttons;
+  }
+}
+
 /// Converts from engine pointer data to framework pointer events.
 ///
 /// This takes [PointerDataPacket] objects, as received from the engine via
@@ -207,8 +223,7 @@ class PointerEventConverter {
               kind: kind,
               device: datum.device,
               position: position,
-              // TODO(tongmu): Move button patching to embedder, https://github.com/flutter/flutter/issues/30454
-              buttons: datum.buttons | kPrimaryButton,
+              buttons: _synthesiseDownButtons(datum.buttons, kind),
               obscured: datum.obscured,
               pressure: datum.pressure,
               pressureMin: datum.pressureMin,
@@ -237,8 +252,7 @@ class PointerEventConverter {
               device: datum.device,
               position: position,
               delta: state.deltaTo(position),
-              // TODO(tongmu): Move button patching to embedder, https://github.com/flutter/flutter/issues/30454
-              buttons: datum.buttons | kPrimaryButton,
+              buttons: _synthesiseDownButtons(datum.buttons, kind),
               obscured: datum.obscured,
               pressure: datum.pressure,
               pressureMin: datum.pressureMin,
@@ -273,8 +287,7 @@ class PointerEventConverter {
                 device: datum.device,
                 position: position,
                 delta: state.deltaTo(position),
-                // TODO(tongmu): Move button patching to embedder, https://github.com/flutter/flutter/issues/30454
-                buttons: datum.buttons | kPrimaryButton,
+                buttons: _synthesiseDownButtons(datum.buttons, kind),
                 obscured: datum.obscured,
                 pressure: datum.pressure,
                 pressureMin: datum.pressureMin,
@@ -421,8 +434,7 @@ class PointerEventConverter {
                   device: datum.device,
                   position: position,
                   delta: state.deltaTo(position),
-                  // TODO(tongmu): Move button patching to embedder, https://github.com/flutter/flutter/issues/30454
-                  buttons: datum.buttons | kPrimaryButton,
+                  buttons: _synthesiseDownButtons(datum.buttons, kind),
                   obscured: datum.obscured,
                   pressure: datum.pressure,
                   pressureMin: datum.pressureMin,
