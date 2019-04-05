@@ -181,7 +181,9 @@ abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
       default:
         assert(
           false,
-          'Failed to load DatePickerDateOrder $datePickerDateOrderString for locale $_localeName',
+          'Failed to load DatePickerDateOrder $datePickerDateOrderString for '
+          'locale $_localeName.\nNon conforming string for ${_localeName}\'s '
+          '.arb file',
         );
         return null;
     }
@@ -213,7 +215,9 @@ abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
       default:
         assert(
           false,
-          'Failed to load DatePickerDateTimeOrder $datePickerDateTimeOrderString for locale $_localeName',
+          'Failed to load DatePickerDateTimeOrder $datePickerDateTimeOrderString '
+          'for locale $_localeName.\nNon conforming string for ${_localeName}\'s '
+          '.arb file',
         );
         return null;
     }
@@ -365,6 +369,7 @@ class _GlobalCupertinoLocalizationsDelegate extends LocalizationsDelegate<Cupert
       util.loadDateIntlDataIfNotLoaded();
 
       final String localeName = intl.Intl.canonicalizedLocale(locale.toString());
+      assert(locale.toString() == localeName, 'comparing "$locale" to "$localeName"');
 
       intl.DateFormat fullYearFormat;
       intl.DateFormat dayFormat;
@@ -396,8 +401,6 @@ class _GlobalCupertinoLocalizationsDelegate extends LocalizationsDelegate<Cupert
       } else {
         loadFormats(null);
       }
-
-      assert(locale.toString() == localeName, 'comparing "$locale" to "$localeName"');
 
       return SynchronousFuture<CupertinoLocalizations>(_getCupertinoTranslation(
         localeName,

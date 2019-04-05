@@ -567,6 +567,7 @@ class _MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocal
       util.loadDateIntlDataIfNotLoaded();
 
       final String localeName = intl.Intl.canonicalizedLocale(locale.toString());
+      assert(locale.toString() == localeName, 'comparing "$locale" to "$localeName"');
 
       intl.DateFormat fullYearFormat;
       intl.DateFormat mediumDateFormat;
@@ -601,8 +602,6 @@ class _MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocal
         decimalFormat = intl.NumberFormat.decimalPattern();
         twoDigitZeroPaddedFormat = intl.NumberFormat('00');
       }
-
-      assert(locale.toString() == localeName, 'comparing "$locale" to "$localeName"');
 
       return SynchronousFuture<MaterialLocalizations>(getMaterialTranslation(
         locale,
