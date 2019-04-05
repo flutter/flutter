@@ -2131,11 +2131,10 @@ class RenderTransform extends RenderProxyBox {
     if (child != null) {
       final Matrix4 transform = _effectiveTransform;
       final Offset childOffset = MatrixUtils.getAsTranslation(transform);
-      if (childOffset == null){
-        context.pushTransform(needsCompositing, offset, transform, super.paint);}
-      else{
+      if (childOffset == null)
+        context.pushTransform(needsCompositing, offset, transform, super.paint);
+      else
         super.paint(context, offset + childOffset);
-      }
     }
   }
 

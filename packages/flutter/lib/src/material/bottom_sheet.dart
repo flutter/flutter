@@ -67,8 +67,8 @@ class BottomSheet extends StatefulWidget {
        assert(elevation != null && elevation >= 0.0),
        super(key: key);
 
-  /// The animation controller that controls the bottom sheet's position, if
-  /// [scrollController] is not specified.
+  /// The animation controller that controls the bottom sheet's entrance and
+  /// exit animations.
   ///
   /// The BottomSheet widget will manipulate the position of this animation, it
   /// is not just a passive observer.
@@ -88,11 +88,9 @@ class BottomSheet extends StatefulWidget {
   final WidgetBuilder builder;
 
   /// If true, the bottom sheet can be dragged up and down and dismissed by
-  /// swiping downards. If [scrollController] is not null, dragging will both
-  /// resize and eventually scroll the bottom sheet contents.
+  /// swiping downards.
   ///
-  /// Default is true. If [scrollController] is not null, this property must be
-  /// true.
+  /// Default is true.
   final bool enableDrag;
 
   /// The z-coordinate at which to place this material relative to its parent.
@@ -187,8 +185,8 @@ class _BottomSheetState extends State<BottomSheet> {
 
 
 // MODAL BOTTOM SHEETS
-class _ModalBottomSheetAnimationControllerLayout extends SingleChildLayoutDelegate {
-  _ModalBottomSheetAnimationControllerLayout(this.progress, this.isScrollControlled);
+class _ModalBottomSheetLayout extends SingleChildLayoutDelegate {
+  _ModalBottomSheetLayout(this.progress, this.isScrollControlled);
 
   final double progress;
   final bool isScrollControlled;
@@ -211,7 +209,7 @@ class _ModalBottomSheetAnimationControllerLayout extends SingleChildLayoutDelega
   }
 
   @override
-  bool shouldRelayout(_ModalBottomSheetAnimationControllerLayout oldDelegate) {
+  bool shouldRelayout(_ModalBottomSheetLayout oldDelegate) {
     return progress != oldDelegate.progress;
   }
 }
@@ -244,8 +242,12 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
     return null;
   }
 
-  Widget _buildAnimationControlledWidget(String routeLabel, BuildContext context) {
+  @override
+  Widget build(BuildContext context) {
     final MediaQueryData mediaQuery = MediaQuery.of(context);
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
+    final String routeLabel = _getRouteLabel(localizations);
+
     return GestureDetector(
       excludeFromSemantics: true,
       onTap: () => Navigator.pop(context),
@@ -262,7 +264,7 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
             explicitChildNodes: true,
             child: ClipRect(
               child: CustomSingleChildLayout(
-                delegate: _ModalBottomSheetAnimationControllerLayout(animationValue, widget.isScrollControlled),
+                delegate: _ModalBottomSheetLayout(animationValue, widget.isScrollControlled),
                 child: BottomSheet(
                   color: widget.isScrollControlled ? const Color(0x0) : Colors.white,
                   animationController: widget.route._animationController,
@@ -275,13 +277,6 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
         },
       ),
     );
-  }
-  @override
-  Widget build(BuildContext context) {
-    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-    final String routeLabel = _getRouteLabel(localizations);
-
-    return _buildAnimationControlledWidget(routeLabel, context);
   }
 }
 
@@ -351,11 +346,9 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
 /// sheet is closed.
 ///
 /// The `isScrollControlled` parameter specifies whether this is a route for
-/// a bottom sheet that will utilize [BottomSheet.scrollController]. If you wish
+/// a bottom sheet that will utilize [DraggableScrollableSheet]. If you wish
 /// to have a bottom sheet that has a scrollable child such as a [ListView] or
-/// a [GridView], you should set this parameter to true. In such a case, the
-/// `initialHeightPercentage` specifies how much of the available screen space
-/// the sheet should take at the start.
+/// a [GridView], you should set this parameter to true.
 ///
 /// Returns a `Future` that resolves to the value (if any) that was passed to
 /// [Navigator.pop] when the modal bottom sheet was closed.
@@ -391,13 +384,6 @@ Future<T> showModalBottomSheet<T>({
 ///
 /// Returns a controller that can be used to close and otherwise manipulate the
 /// bottom sheet.
-///
-/// The `isScrollControlled` parameter specifies whether this is a route for
-/// a bottom sheet that will utilize [BottomSheet.scrollController]. If you wish
-/// to have a bottom sheet that has a scrollable child such as a [ListView] or
-/// a [GridView], you should set this parameter to true. In such a case, the
-/// `initialHeightPercentage` specifies how much of the available screen space
-/// the sheet should take at the start.
 ///
 /// To rebuild the bottom sheet (e.g. if it is stateful), call
 /// [PersistentBottomSheetController.setState] on the controller returned by
