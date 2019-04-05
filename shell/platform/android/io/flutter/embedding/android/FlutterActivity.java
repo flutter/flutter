@@ -15,6 +15,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -82,12 +83,33 @@ public class FlutterActivity extends FragmentActivity {
   private FlutterFragment flutterFragment;
 
   /**
+   * Creates an {@link Intent} that launches a {@code FlutterActivity}, which executes
+   * a {@code main()} Dart entrypoint, and displays the "/" route as Flutter's initial route.
+   */
+  public static Intent createDefaultIntent(@NonNull Context launchContext) {
+    return createBuilder().build(launchContext);
+  }
+
+  /**
+   * Creates an {@link IntentBuilder}, which can be used to configure an {@link Intent} to
+   * launch a {@code FlutterActivity}.
+   */
+  public static IntentBuilder createBuilder() {
+    return new IntentBuilder(FlutterActivity.class);
+  }
+
+  /**
    * Builder to create an {@code Intent} that launches a {@code FlutterActivity} with the
    * desired configuration.
    */
   public static class IntentBuilder {
+    private final Class<? extends FlutterActivity> activityClass;
     private String dartEntrypoint = DEFAULT_DART_ENTRYPOINT;
     private String initialRoute = DEFAULT_INITIAL_ROUTE;
+
+    protected IntentBuilder(@NonNull Class<? extends FlutterActivity> activityClass) {
+      this.activityClass = activityClass;
+    }
 
     /**
      * The name of the initial Dart method to invoke, defaults to "main".
@@ -108,9 +130,13 @@ public class FlutterActivity extends FragmentActivity {
       return this;
     }
 
+    /**
+     * Creates and returns an {@link Intent} that will launch a {@code FlutterActivity} with
+     * the desired configuration.
+     */
     @NonNull
     public Intent build(@NonNull Context context) {
-      return new Intent(context, FlutterActivity.class)
+      return new Intent(context, activityClass)
           .putExtra(EXTRA_DART_ENTRYPOINT, dartEntrypoint)
           .putExtra(EXTRA_INITIAL_ROUTE, initialRoute);
     }
@@ -118,6 +144,7 @@ public class FlutterActivity extends FragmentActivity {
 
   @Override
   public void onCreate(Bundle savedInstanceState) {
+    Log.d(TAG, "onCreate()");
     super.onCreate(savedInstanceState);
     setContentView(createFragmentContainer());
     configureStatusBarForFullscreenFlutterExperience();
