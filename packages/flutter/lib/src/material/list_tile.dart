@@ -181,7 +181,8 @@ enum ListTileControlAffinity {
 ///
 /// {@tool sample}
 ///
-/// This example contains the different ways that [ListTile]s can be used.
+/// This example uses a [ListView] to demonstrate different configurations of
+/// [ListTile]s in [Card]s.
 ///
 /// ![Different variations of ListTile](https://flutter.github.io/assets-for-api-docs/assets/material/list_tile.png)
 ///
@@ -294,44 +295,20 @@ enum ListTileControlAffinity {
 /// ```
 /// {@end-tool}
 ///
-/// If a ListTile is not what you are looking for, custom list items can be created
+/// ## The ListTile layout isn't exactly what I want
+///
+/// If the way ListTile pads and positions it's elements isn't quite what
+/// you're looking for, it's easy to create custom list items can be created
 /// with a combination of other widgets, such as [Row]s and [Column]s.
 ///
-/// {@tool sample}
+/// {@tool snippet --template=stateless_widget_material}
 ///
 /// Here is an example of a custom list item created with [Expanded] and [Icon]
 /// widgets.
 ///
 /// ![Custom list item](https://flutter.github.io/assets-for-api-docs/assets/widgets/custom_list_item.png)
 ///
-/// ```dart
-/// ListView(
-///   padding: const EdgeInsets.all(8.0),
-///   itemExtent: 106.0,
-///   children: const <CustomListItem>[
-///     CustomListItem(
-///       user: 'Flutter',
-///       viewCount: 999000,
-///       thumbnail: Icon(
-///         Icons.videocam,
-///         size: 80,
-///         color: Colors.blueGrey,
-///       ),
-///       title: 'The Flutter YouTube Channel',
-///     ),
-///     CustomListItem(
-///       user: 'Dash',
-///       viewCount: 884000,
-///       thumbnail: Icon(
-///         Icons.flight_takeoff,
-///         size: 80,
-///         color: Colors.blueGrey,
-///       ),
-///       title: 'Announcing Flutter 1.0',
-///     ),
-///   ],
-/// );
-///
+/// ```dart preamble
 /// class CustomListItem extends StatelessWidget {
 ///   const CustomListItem({
 ///     this.thumbnail,
@@ -414,6 +391,37 @@ enum ListTileControlAffinity {
 ///       ),
 ///     );
 ///   }
+/// }
+/// ```
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///  return ListView(
+///    padding: const EdgeInsets.all(8.0),
+///    itemExtent: 106.0,
+///    children: const <CustomListItem>[
+///      CustomListItem(
+///        user: 'Flutter',
+///        viewCount: 999000,
+///        thumbnail: Icon(
+///          Icons.videocam,
+///          size: 80,
+///          color: Colors.blueGrey,
+///        ),
+///        title: 'The Flutter YouTube Channel',
+///      ),
+///      CustomListItem(
+///        user: 'Dash',
+///        viewCount: 884000,
+///        thumbnail: Icon(
+///          Icons.flight_takeoff,
+///          size: 80,
+///          color: Colors.blueGrey,
+///        ),
+///        title: 'Announcing Flutter 1.0',
+///      ),
+///    ],
+///  );
 /// }
 /// ```
 /// {@end-tool}
