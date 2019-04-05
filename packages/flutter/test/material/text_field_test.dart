@@ -496,7 +496,10 @@ void main() {
       const TextPosition(offset: testValueSpaces.length),
     ).bottomRight;
 
-    expect(cursorOffsetSpaces.dx, inputWidth - 1);
+    // Gap between caret and edge of input, defined in editable.dart.
+    const int _kCaretGap = 1;
+
+    expect(cursorOffsetSpaces.dx, inputWidth - _kCaretGap);
   });
 
   testWidgets('obscureText control test', (WidgetTester tester) async {
