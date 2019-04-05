@@ -207,14 +207,42 @@ void main() {
                             ..lineTo(10, 15);
     final List<PathMetric> metrics = path.computeMetrics().toList();
     expect(metrics.length, 2);
-    print(metrics);
     expect(metrics[0].length, 20);
     expect(metrics[0].isClosed, true);
-    expect(() => metrics[0].getTangentForOffset(4.0), isNotNull);
-    expect(() => metrics[0].extractPath(4.0, 10.0), isNotNull);
+    expect(metrics[0].getTangentForOffset(4.0).vector, const Offset(0.0, 1.0));
+    expect(metrics[0].extractPath(4.0, 10.0).computeMetrics().first.length, 6.0);
     expect(metrics[1].length, 10);
     expect(metrics[1].isClosed, false);
-    expect(() => metrics[1].getTangentForOffset(4.0), isNotNull);
-    expect(() => metrics[1].extractPath(4.0, 10.0), isNotNull);
+    expect(metrics[1].getTangentForOffset(4.0).vector, const Offset(1.0, 0.0));
+    expect(metrics[1].extractPath(4.0, 6.0).computeMetrics().first.length, 2.0);
+  });
+
+  test('PathMetrics on a mutated path', () {
+    final Path path = Path()..lineTo(0, 10);
+    final PathMetrics metrics = path.computeMetrics();
+    final PathMetric firstMetric = metrics.first;
+    // We've consumed the iterator.
+    expect(metrics, isEmpty);
+    expect(firstMetric.length, 10);
+    expect(firstMetric.isClosed, false);
+    expect(firstMetric.getTangentForOffset(4.0).vector, const Offset(0.0, 1.0));
+    expect(firstMetric.extractPath(4.0, 10.0).computeMetrics().first.length, 6.0);
+
+    path..lineTo(10, 10)..lineTo(10, 0)..close();
+    // mutating the path shouldn't have added anything to the iterator.
+    expect(metrics, isEmpty);
+    expect(firstMetric.length, 10);
+    expect(firstMetric.isClosed, false);
+    expect(firstMetric.getTangentForOffset(4.0).vector, const Offset(0.0, 1.0));
+    expect(firstMetric.extractPath(4.0, 10.0).computeMetrics().first.length, 6.0);
+
+    // getting a new iterator should update us.
+    final PathMetrics newMetrics = path.computeMetrics();
+    final PathMetric newFirstMetric = newMetrics.first;
+    expect(newMetrics, isEmpty);
+    expect(newFirstMetric.length, 40);
+    expect(newFirstMetric.isClosed, true);
+    expect(newFirstMetric.getTangentForOffset(4.0).vector, const Offset(0.0, 1.0));
+    expect(newFirstMetric.extractPath(4.0, 10.0).computeMetrics().first.length, 6.0);
   });
 }
