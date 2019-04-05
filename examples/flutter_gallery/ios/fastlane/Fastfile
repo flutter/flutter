@@ -49,7 +49,7 @@ platform :ios do
     # suppress_output {
       # Retrieves all the necessary certs and provisioning profiles.
       sync_code_signing(
-        git_url: ENV['PUBLISHING_MATCH_CERTIFICATE_REPO'],
+        git_url:  "https://x-access-token:#{ENV['CIRRUS_REPO_CLONE_TOKEN']}@#{ENV['PUBLISHING_MATCH_CERTIFICATE_REPO']}" ,
         type: 'appstore',
         readonly: true,
         verbose: true,
