@@ -397,30 +397,66 @@ void _tests() {
     expect('${dialPaint.painter.activeRing}', '_DialRing.outer');
   });
 
-  testWidgets('can increment and decrement hours', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
+  Future<void> actAndExpect({
+    WidgetTester tester, SemanticsTester semantics, Finder ancestor,
+    String initialValue, SemanticsAction action, String finalValue
+  }) async {
+    // Move the dial
+    final SemanticsNode elevenHours = semantics.nodesWith(
+      value: initialValue,
+      ancestor: tester.renderObject(ancestor).debugSemantics,
+    ).single;
+    tester.binding.pipelineOwner.semanticsOwner.performAction(elevenHours.id, action);
+    await tester.pumpAndSettle();
 
-    Future<void> actAndExpect({ String initialValue, SemanticsAction action, String finalValue }) async {
-      final SemanticsNode elevenHours = semantics.nodesWith(
-        value: initialValue,
-        ancestor: tester.renderObject(_hourControl).debugSemantics,
-      ).single;
-      tester.binding.pipelineOwner.semanticsOwner.performAction(elevenHours.id, action);
-      await tester.pumpAndSettle();
+    // Find the changed digits in the ancestor
+    if (finalValue.length == 1) {
+      // If finalValue consists of one digit, only check that one.
       expect(
-        find.descendant(of: _hourControl, matching: find.text(finalValue)),
+        find.descendant(of: ancestor, matching: find.text(finalValue)),
         findsOneWidget,
       );
+    } else {
+      // If finalValue consists of two digits, check both.
+      final String digit1 = finalValue.substring(0, 1);
+      final String digit2 = finalValue.substring(1, 2);
+      if (digit1 == digit2) {
+        // If the digits are the same, find two widgets with that digit.
+        expect(
+          find.descendant(of: ancestor, matching: find.text(digit1)),
+          findsNWidgets(2),
+        );
+      } else {
+        // If the digits are different, find a widget for both.
+        expect(
+          find.descendant(of: ancestor, matching: find.text(digit1)),
+          findsOneWidget,
+        );
+        expect(
+          find.descendant(of: ancestor, matching: find.text(digit2)),
+          findsOneWidget,
+        );
+      }
     }
+  }
+
+  testWidgets('can increment and decrement hours', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
 
     // 12-hour format
     await mediaQueryBoilerplate(tester, false, initialTime: const TimeOfDay(hour: 11, minute: 0));
     await actAndExpect(
+      tester: tester,
+      semantics: semantics,
+      ancestor: _hourControl,
       initialValue: '11',
       action: SemanticsAction.increase,
       finalValue: '12',
     );
     await actAndExpect(
+      tester: tester,
+      semantics: semantics,
+      ancestor: _hourControl,
       initialValue: '12',
       action: SemanticsAction.increase,
       finalValue: '1',
@@ -431,6 +467,9 @@ void _tests() {
     expect(pickerState.selectedTime, const TimeOfDay(hour: 1, minute: 0));
 
     await actAndExpect(
+      tester: tester,
+      semantics: semantics,
+      ancestor: _hourControl,
       initialValue: '1',
       action: SemanticsAction.decrease,
       finalValue: '12',
@@ -440,21 +479,33 @@ void _tests() {
     // 24-hour format
     await mediaQueryBoilerplate(tester, true, initialTime: const TimeOfDay(hour: 23, minute: 0));
     await actAndExpect(
+      tester: tester,
+      semantics: semantics,
+      ancestor: _hourControl,
       initialValue: '23',
       action: SemanticsAction.increase,
       finalValue: '00',
     );
     await actAndExpect(
+      tester: tester,
+      semantics: semantics,
+      ancestor: _hourControl,
       initialValue: '00',
       action: SemanticsAction.increase,
       finalValue: '01',
     );
     await actAndExpect(
+      tester: tester,
+      semantics: semantics,
+      ancestor: _hourControl,
       initialValue: '01',
       action: SemanticsAction.decrease,
       finalValue: '00',
     );
     await actAndExpect(
+      tester: tester,
+      semantics: semantics,
+      ancestor: _hourControl,
       initialValue: '00',
       action: SemanticsAction.decrease,
       finalValue: '23',
@@ -466,26 +517,19 @@ void _tests() {
   testWidgets('can increment and decrement minutes', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
-    Future<void> actAndExpect({ String initialValue, SemanticsAction action, String finalValue }) async {
-      final SemanticsNode elevenHours = semantics.nodesWith(
-        value: initialValue,
-        ancestor: tester.renderObject(_minuteControl).debugSemantics,
-      ).single;
-      tester.binding.pipelineOwner.semanticsOwner.performAction(elevenHours.id, action);
-      await tester.pumpAndSettle();
-      expect(
-        find.descendant(of: _minuteControl, matching: find.text(finalValue)),
-        findsOneWidget,
-      );
-    }
-
     await mediaQueryBoilerplate(tester, false, initialTime: const TimeOfDay(hour: 11, minute: 58));
     await actAndExpect(
+      tester: tester,
+      semantics: semantics,
+      ancestor: _minuteControl,
       initialValue: '58',
       action: SemanticsAction.increase,
       finalValue: '59',
     );
     await actAndExpect(
+      tester: tester,
+      semantics: semantics,
+      ancestor: _minuteControl,
       initialValue: '59',
       action: SemanticsAction.increase,
       finalValue: '00',
@@ -496,11 +540,17 @@ void _tests() {
     expect(pickerState.selectedTime, const TimeOfDay(hour: 11, minute: 0));
 
     await actAndExpect(
+      tester: tester,
+      semantics: semantics,
+      ancestor: _minuteControl,
       initialValue: '00',
       action: SemanticsAction.decrease,
       finalValue: '59',
     );
     await actAndExpect(
+      tester: tester,
+      semantics: semantics,
+      ancestor: _minuteControl,
       initialValue: '59',
       action: SemanticsAction.decrease,
       finalValue: '58',
