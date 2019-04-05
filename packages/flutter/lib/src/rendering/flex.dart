@@ -683,7 +683,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
               information.write('  ');
               information.writeln(node.toStringShallow(joiner: '\n  '));
             }
-            information.writeln('See also: https://flutter.io/layout/');
+            information.writeln('See also: https://flutter.dev/layout/');
             addendum = information.toString();
           } else {
             return true;
@@ -704,7 +704,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
             '  $debugCreator\n'
             '$addendum'
             'If this message did not help you determine the problem, consider using debugDumpRenderTree():\n'
-            '  https://flutter.io/debugging/#rendering-layer\n'
+            '  https://flutter.dev/debugging/#rendering-layer\n'
             '  http://docs.flutter.io/flutter/rendering/debugDumpRenderTree.html\n'
             'If none of the above helps enough to fix this problem, please don\'t hesitate to file a bug:\n'
             '  https://github.com/flutter/flutter/issues/new?template=BUG.md'

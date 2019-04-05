@@ -128,16 +128,16 @@ void main() {
         verifyNever(artifact2.update(<DevelopmentArtifact>{}));
         expect(
           testLogger.errorText,
-          contains('https://flutter.io/community/china'),
+          contains('https://flutter.dev/community/china'),
         );
       }
     });
   });
 
   testUsingContext('flattenNameSubdirs', () {
-    expect(flattenNameSubdirs(Uri.parse('http://flutter.io/foo/bar')), 'flutter.io/foo/bar');
+    expect(flattenNameSubdirs(Uri.parse('http://flutter.dev/foo/bar')), 'flutter.dev/foo/bar');
     expect(flattenNameSubdirs(Uri.parse('http://docs.flutter.io/foo/bar')), 'docs.flutter.io/foo/bar');
-    expect(flattenNameSubdirs(Uri.parse('https://www.flutter.io')), 'www.flutter.io');
+    expect(flattenNameSubdirs(Uri.parse('https://www.flutter.dev')), 'www.flutter.dev');
   }, overrides: <Type, Generator>{
     FileSystem: () => MockFileSystem(),
   });
