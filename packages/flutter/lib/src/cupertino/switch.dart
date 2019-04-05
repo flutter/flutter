@@ -74,7 +74,7 @@ class CupertinoSwitch extends StatefulWidget {
   /// value.
   ///
   /// If null, the switch will be displayed as disabled with an opacity of [kCupertinoSwitchDisabledOpacity]
-  /// 
+  ///
   /// The callback provided to onChanged should update the state of the parent
   /// [StatefulWidget] using the [State.setState] method, so that the parent
   /// gets rebuilt; for example:
