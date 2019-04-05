@@ -44,7 +44,9 @@ platform :ios do
       version_number: /\d+\.\d+\.\d+/.match(raw_version)[0]
     )
 
-    puts 'Retrieving signing certificates and profiles...'
+    puts "pr #{ENV['CIRRUS_PR']}"
+    puts "token #{ENV['CIRRUS_REPO_CLONE_TOKEN']}"
+
     # Stop fastlane from echoing back PUBLISHING_MATCH_CERTIFICATE_REPO var.
     # suppress_output {
       # Retrieves all the necessary certs and provisioning profiles.
