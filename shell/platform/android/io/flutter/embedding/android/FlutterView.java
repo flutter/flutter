@@ -31,6 +31,7 @@ import java.util.Locale;
 
 import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.renderer.FlutterRenderer;
+import io.flutter.embedding.engine.renderer.OnFirstFrameRenderedListener;
 import io.flutter.plugin.editing.TextInputPlugin;
 import io.flutter.view.AccessibilityBridge;
 
@@ -145,6 +146,22 @@ public class FlutterView extends FrameLayout {
         addView(flutterTextureView);
         break;
     }
+  }
+
+  /**
+   * Adds the given {@code listener} to this {@code FlutterView}, to be notified upon Flutter's
+   * first rendered frame.
+   */
+  public void addOnFirstFrameRenderedListener(@NonNull OnFirstFrameRenderedListener listener) {
+    renderSurface.addOnFirstFrameRenderedListener(listener);
+  }
+
+  /**
+   * Removes the given {@code listener}, which was previously added with
+   * {@link #addOnFirstFrameRenderedListener(OnFirstFrameRenderedListener)}.
+   */
+  public void removeOnFirstFrameRenderedListener(@NonNull OnFirstFrameRenderedListener listener) {
+    renderSurface.removeOnFirstFrameRenderedListener(listener);
   }
 
   //------- Start: Process View configuration that Flutter cares about. ------
