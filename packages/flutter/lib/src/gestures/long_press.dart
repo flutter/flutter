@@ -50,12 +50,18 @@ typedef GestureLongPressEndCallback = void Function(LongPressEndDetails details)
 class LongPressStartDetails {
   /// Creates the details for a [GestureLongPressStartCallback].
   ///
-  /// The [globalPosition] argument must not be null.
-  const LongPressStartDetails({ this.globalPosition = Offset.zero })
-    : assert(globalPosition != null);
+  /// The [globalPosition] and [buttons] arguments must not be null.
+  const LongPressStartDetails({
+    this.globalPosition = Offset.zero,
+    this.buttons = 0,
+  }) : assert(globalPosition != null),
+       assert(buttons != null);
 
   /// The global position at which the pointer contacted the screen.
   final Offset globalPosition;
+
+  /// The buttons pressed when the pointer contacted the screen.
+  final int buttons;
 }
 
 /// Details for callbacks that use [GestureLongPressMoveUpdateCallback].
@@ -68,12 +74,14 @@ class LongPressStartDetails {
 class LongPressMoveUpdateDetails {
   /// Creates the details for a [GestureLongPressMoveUpdateCallback].
   ///
-  /// The [globalPosition] and [offsetFromOrigin] arguments must not be null.
+  /// The [globalPosition], [offsetFromOrigin] and [buttons] arguments must not be null.
   const LongPressMoveUpdateDetails({
     this.globalPosition = Offset.zero,
     this.offsetFromOrigin = Offset.zero,
+    this.buttons = 0,
   }) : assert(globalPosition != null),
-       assert(offsetFromOrigin != null);
+       assert(offsetFromOrigin != null),
+       assert(buttons != null);
 
   /// The global position of the pointer when it triggered this update.
   final Offset globalPosition;
@@ -82,6 +90,10 @@ class LongPressMoveUpdateDetails {
   /// the screen to the point where the pointer is currently located (the
   /// present [globalPosition]) when this callback is triggered.
   final Offset offsetFromOrigin;
+
+  /// The buttons pressed when the pointer contacted the screen (changing buttons
+  /// during a long press cancels the gesture.)
+  final int buttons;
 }
 
 /// Details for callbacks that use [GestureLongPressEndCallback].
@@ -94,12 +106,19 @@ class LongPressMoveUpdateDetails {
 class LongPressEndDetails {
   /// Creates the details for a [GestureLongPressEndCallback].
   ///
-  /// The [globalPosition] argument must not be null.
-  const LongPressEndDetails({ this.globalPosition = Offset.zero })
-    : assert(globalPosition != null);
+  /// The [globalPosition] and [buttons] arguments must not be null.
+  const LongPressEndDetails({
+    this.globalPosition = Offset.zero,
+    this.buttons = 0,
+  }) : assert(globalPosition != null),
+       assert(buttons != null);
 
   /// The global position at which the pointer lifted from the screen.
   final Offset globalPosition;
+
+  /// The buttons pressed when the pointer contacted the screen (changing buttons
+  /// during a long press cancels the gesture.)
+  final int buttons;
 }
 
 /// Recognizes when the user has pressed down at the same location for a long
@@ -109,6 +128,14 @@ class LongPressEndDetails {
 /// until it's recognized. Once the gesture is accepted, the finger can be
 /// moved, triggering [onLongPressMoveUpdate] callbacks, unless the
 /// [postAcceptSlopTolerance] constructor argument is specified.
+///
+/// The gesture must not change buttons throughout its lifespan, i.e. subsequent
+/// [PointerMoveEvent] must contain the same `buttons` as that in
+/// [PointerDownEvent], otherwise the gesture is rejected and canceled.
+/// 
+/// The `buttons` of [PointerDownEvent] must contain one and only one button. Since
+/// stylus touching the screen is also counted as a button, this means a stylus
+/// tap while pressing any physical button will not be recognized.
 class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
   /// Creates a long-press gesture recognizer.
   ///
@@ -133,8 +160,10 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
   );
 
   bool _longPressAccepted = false;
-
   Offset _longPressOrigin;
+  // The buttons sent by `PointerDownEvent`. If a `PointerMoveEvent` comes with a
+  // different set of buttons, the gesture is rejected and canceled.
+  int _initialButtons;
 
   /// Called when a long press gesture has been recognized.
   ///
@@ -151,7 +180,7 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
   ///  * [onLongPress], which has the same timing but without the location data.
   GestureLongPressStartCallback onLongPressStart;
 
-  /// Callback for moving the gesture after the lang press is recognized.
+  /// Callback for moving the gesture after the long press is recognized.
   GestureLongPressMoveUpdateCallback onLongPressMoveUpdate;
 
   /// Called when the pointer stops contacting the screen after the long-press.
@@ -170,7 +199,16 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
   GestureLongPressEndCallback onLongPressEnd;
 
   @override
+  bool isPointerAllowed(PointerDownEvent event) {
+    if (!isSingleButton(event.buttons)) {
+      return false;
+    }
+    return super.isPointerAllowed(event);
+  }
+
+  @override
   void didExceedDeadline() {
+    // Exceeding the deadline puts the gesture in accepted state.
     resolve(GestureDisposition.accepted);
     _longPressAccepted = true;
     super.acceptGesture(primaryPointer);
@@ -181,6 +219,7 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
       invokeCallback<void>('onLongPressStart', () {
         onLongPressStart(LongPressStartDetails(
           globalPosition: _longPressOrigin,
+          buttons: _initialButtons,
         ));
       });
     }
@@ -197,25 +236,51 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
           invokeCallback<void>('onLongPressEnd', () {
             onLongPressEnd(LongPressEndDetails(
               globalPosition: event.position,
+              buttons: _initialButtons,
             ));
           });
         }
-        _longPressAccepted = false;
       } else {
+        // Pointer is lifted before timeout.
         resolve(GestureDisposition.rejected);
       }
-    } else if (event is PointerDownEvent || event is PointerCancelEvent) {
+      _reset();
+    } else if (event is PointerCancelEvent) {
+      _reset();
+    } else if (event is PointerDownEvent) {
       // The first touch.
-      _longPressAccepted = false;
       _longPressOrigin = event.position;
-    } else if (event is PointerMoveEvent && _longPressAccepted && onLongPressMoveUpdate != null) {
-      invokeCallback<void>('onLongPressMoveUpdate', () {
-        onLongPressMoveUpdate(LongPressMoveUpdateDetails(
-          globalPosition: event.position,
-          offsetFromOrigin: event.position - _longPressOrigin,
-        ));
-      });
+      _initialButtons = event.buttons;
+    } else if (event is PointerMoveEvent) {
+      if (event.buttons != _initialButtons) {
+        resolve(GestureDisposition.rejected);
+        stopTrackingPointer(primaryPointer);
+      } else if (_longPressAccepted && onLongPressMoveUpdate != null) {
+        invokeCallback<void>('onLongPressMoveUpdate', () {
+          onLongPressMoveUpdate(LongPressMoveUpdateDetails(
+            globalPosition: event.position,
+            offsetFromOrigin: event.position - _longPressOrigin,
+            buttons: _initialButtons,
+          ));
+        });
+      }
     }
+  }
+
+  void _reset() {
+    _longPressAccepted = false;
+    _longPressOrigin = null;
+    _initialButtons = null;
+  }
+
+  @override
+  void resolve(GestureDisposition disposition) {
+    if (_longPressAccepted && disposition == GestureDisposition.rejected) {
+      // This can happen if the gesture has been terminated. For example when
+      // the buttons have been changed.
+      _reset();
+    }
+    super.resolve(disposition);
   }
 
   @override
