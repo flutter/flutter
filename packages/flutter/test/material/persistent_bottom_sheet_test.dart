@@ -127,21 +127,24 @@ void main() {
   });
 
   testWidgets('Verify that a persistent BottomSheet can fling up and hide the fab', (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(
+    await tester.pumpWidget(
+      MaterialApp(
         home: Scaffold(
-      appBar: AppBar(),
-      body: const Center(child: Text('body')),
-      bottomSheet: ListView.builder(
-        itemExtent: 50.0,
-        itemCount: 50,
-        itemBuilder: (_, int index) => Text('Item $index'),
-        primary: true,
+          appBar: AppBar(),
+          body: const Center(child: Text('body')),
+          bottomSheet: ListView.builder(
+            itemExtent: 50.0,
+            itemCount: 50,
+            itemBuilder: (_, int index) => Text('Item $index'),
+            primary: true,
+          ),
+          floatingActionButton: const FloatingActionButton(
+            onPressed: null,
+            child: Text('fab'),
+          ),
+        ),
       ),
-      floatingActionButton: const FloatingActionButton(
-        onPressed: null,
-        child: Text('fab'),
-      ),
-    )));
+    );
 
     await tester.pumpAndSettle();
 

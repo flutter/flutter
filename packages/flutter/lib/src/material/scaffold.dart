@@ -1480,7 +1480,9 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
   void _closeCurrentBottomSheet() {
     if (_currentBottomSheet != null) {
-      _currentBottomSheet.close();
+      if (!_currentBottomSheet._isLocalHistoryEntry) {
+        _currentBottomSheet.close();
+      }
       assert(() {
         _currentBottomSheet?._completer?.future?.whenComplete(() {
           assert(_currentBottomSheet == null);
@@ -1494,6 +1496,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     WidgetBuilder builder,
     bool isPersistent, {
     AnimationController animationController,
+    Color bottomSheetColor,
   }) {
     assert(() {
       if (widget.bottomSheet != null && isPersistent && _currentBottomSheet != null) {
@@ -1533,21 +1536,27 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         completer.complete();
       }
 
-      if (closing != null)
+      if (closing != null) {
         closing.then(_closed);
-      else
+      } else {
         _closed(null);
+      }
     }
 
     final LocalHistoryEntry entry = isPersistent
       ? null
-      : LocalHistoryEntry(onRemove: _removeCurrentBottomSheet);
+      : LocalHistoryEntry(onRemove: () {
+        if (!removedEntry) {
+          _removeCurrentBottomSheet();
+        }
+      });
 
     bottomSheet = _StandardBottomSheet(
       key: bottomSheetKey,
       animationController: animationController,
       enableDrag: !isPersistent,
       onClosing: () {
+        assert(_currentBottomSheet != null);
         assert(_currentBottomSheet._widget == bottomSheet);
         if (isPersistent) {
           _removeCurrentBottomSheet();
@@ -1566,6 +1575,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       },
       builder: builder,
       isPersistent: isPersistent,
+      bottomSheetColor: bottomSheetColor,
     );
 
     if (!isPersistent)
@@ -1624,7 +1634,10 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   ///    sheet.
   ///  * [Scaffold.of], for information about how to obtain the [ScaffoldState].
   ///  * <https://material.io/design/components/sheets-bottom.html#standard-bottom-sheet>
-  PersistentBottomSheetController<T> showBottomSheet<T>(WidgetBuilder builder) {
+  PersistentBottomSheetController<T> showBottomSheet<T>(
+    WidgetBuilder builder, {
+    Color bottomSheetColor,
+  }) {
     assert(() {
       if (widget.bottomSheet != null) {
         throw FlutterError(
@@ -1644,6 +1657,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         builder,
         false,
         animationController: controller,
+        bottomSheetColor: bottomSheetColor,
       );
     });
     return _currentBottomSheet;
@@ -2160,6 +2174,7 @@ class _StandardBottomSheet extends StatefulWidget {
     this.onDismissed,
     this.builder,
     this.isPersistent = false,
+    this.bottomSheetColor,
   }) : super(key: key);
 
   final AnimationController animationController; // we control it, but it must be disposed by whoever crated it.
@@ -2168,6 +2183,7 @@ class _StandardBottomSheet extends StatefulWidget {
   final VoidCallback onDismissed;
   final WidgetBuilder builder;
   final bool isPersistent;
+  final Color bottomSheetColor;
 
   @override
   _StandardBottomSheetState createState() => _StandardBottomSheetState();
@@ -2192,6 +2208,7 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
   Future<void> close() {
     assert(widget.animationController != null);
     widget.animationController.reverse();
+    widget.onClosing?.call();
     return null;
   }
 
@@ -2201,24 +2218,39 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
     }
   }
 
+  bool extentChanged(ExtentNotification notification) {
+    final double extentRemaining = 1.0 - notification.extent;
+    final ScaffoldState scaffold = Scaffold.of(context);
+    if (extentRemaining < _kBottomSheetDominatesPercentage) {
+      scaffold.floatingActionButtonVisibilityValue = extentRemaining * _kBottomSheetDominatesPercentage * 10;
+      scaffold.showBodyScrim(true,  math.max(
+        _kMinBottomSheetScrimOpacity,
+        _kMaxBottomSheetScrimOpacity - scaffold.floatingActionButtonVisibilityValue,
+      ));
+    } else {
+      scaffold.floatingActionButtonVisibilityValue = 1.0;
+      scaffold.showBodyScrim(false, 0.0);
+    }
+    if (notification.extent == notification.minExtent) {
+      close();
+    }
+
+    return notification.depth == 0;
+  }
+
+  Widget _wrapBottomSheet(Widget bottomSheet) {
+    return Semantics(
+      container: true,
+      onDismiss: close,
+      child:  NotificationListener<ExtentNotification>(
+        onNotification: extentChanged,
+        child: bottomSheet,
+      )
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final NotificationListenerCallback<ExtentNotification> extentChanged = (ExtentNotification notification) {
-      final double extentRemaining = 1.0 - notification.extent;
-      final ScaffoldState scaffold = Scaffold.of(context);
-      if (extentRemaining < _kBottomSheetDominatesPercentage) {
-        // TODO(dnfield): This epsilon should not be necessary. https://github.com/flutter/flutter/issues/30522
-        scaffold.floatingActionButtonVisibilityValue = extentRemaining * _kBottomSheetDominatesPercentage * 10 + .011;
-        scaffold.showBodyScrim(true,  math.max(
-          _kMinBottomSheetScrimOpacity,
-          _kMaxBottomSheetScrimOpacity - scaffold.floatingActionButtonVisibilityValue,
-        ));
-      } else {
-        scaffold.floatingActionButtonVisibilityValue = 1.0;
-        scaffold.showBodyScrim(false, 0.0);
-      }
-      return notification.depth == 0;
-    };
     if (widget.animationController != null) {
       return AnimatedBuilder(
         animation: widget.animationController,
@@ -2229,37 +2261,23 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
             child: child
           );
         },
-        child: Semantics(
-          container: true,
-          onDismiss: () {
-            close();
-            widget.onClosing();
-          },
-          child:  NotificationListener<ExtentNotification>(
-            onNotification: extentChanged,
-            child: BottomSheet(
-              animationController: widget.animationController,
-              enableDrag: widget.enableDrag,
-              onClosing: widget.onClosing,
-              builder: widget.builder
-            ),
+        child: _wrapBottomSheet(
+          BottomSheet(
+            animationController: widget.animationController,
+            enableDrag: widget.enableDrag,
+            onClosing: widget.onClosing,
+            builder: widget.builder,
+            color: widget.bottomSheetColor,
           ),
         ),
       );
     }
 
-    return Semantics(
-      container: true,
-      onDismiss: () {
-        close();
-        widget.onClosing?.call();
-      },
-      child: NotificationListener<ExtentNotification>(
-        onNotification: extentChanged,
-        child: BottomSheet(
-          onClosing: widget.onClosing,
-          builder: widget.builder
-        ),
+    return _wrapBottomSheet(
+      BottomSheet(
+        onClosing: widget.onClosing,
+        builder: widget.builder,
+        color: widget.bottomSheetColor,
       ),
     );
   }

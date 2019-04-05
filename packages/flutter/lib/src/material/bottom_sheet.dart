@@ -57,12 +57,11 @@ class BottomSheet extends StatefulWidget {
     this.animationController,
     this.enableDrag = true,
     this.elevation = 0.0,
-    this.color = Colors.white,
+    this.color,
     @required this.onClosing,
     @required this.builder,
   }) : assert(enableDrag != null),
        assert(onClosing != null),
-       assert(color != null),
        assert(builder != null),
        assert(elevation != null && elevation >= 0.0),
        super(key: key);
@@ -162,13 +161,24 @@ class _BottomSheetState extends State<BottomSheet> {
    }
   }
 
+
+  bool extentChanged(ExtentNotification notification) {
+    if (notification.extent == notification.minExtent) {
+      widget.onClosing();
+    }
+    return false;
+  }
+
   @override
   Widget build(BuildContext context) {
     final Widget bottomSheet = Material(
       key: _childKey,
       color: widget.color,
       elevation: widget.elevation,
-      child: widget.builder(context),
+      child: NotificationListener<ExtentNotification>(
+        onNotification: extentChanged,
+        child: widget.builder(context),
+      ),
     );
     return !widget.enableDrag ? bottomSheet : GestureDetector(
       onVerticalDragUpdate: _handleDragUpdate,
@@ -249,7 +259,10 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
 
     return GestureDetector(
       excludeFromSemantics: true,
-      onTap: () => Navigator.pop(context),
+      onTap: () {
+        if (widget.route.isCurrent)
+          Navigator.pop(context);
+      },
       child: AnimatedBuilder(
         animation: widget.route.animation,
         builder: (BuildContext context, Widget child) {
@@ -265,9 +278,13 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
               child: CustomSingleChildLayout(
                 delegate: _ModalBottomSheetLayout(animationValue, widget.isScrollControlled),
                 child: BottomSheet(
-                  color: widget.isScrollControlled ? const Color(0x0) : Colors.white,
+                  color: widget.route.bottomSheetColor,
                   animationController: widget.route._animationController,
-                  onClosing: () => Navigator.pop(context),
+                  onClosing: () {
+                    if (widget.route.isCurrent) {
+                      Navigator.pop(context);
+                    }
+                  },
                   builder: widget.route.builder,
                 ),
               ),
@@ -284,13 +301,16 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
     this.builder,
     this.theme,
     this.barrierLabel,
-    this.isScrollControlled,
+    @required this.isScrollControlled,
+    this.bottomSheetColor,
     RouteSettings settings,
-  }) : super(settings: settings);
+  }) : assert(isScrollControlled != null),
+       super(settings: settings);
 
   final WidgetBuilder builder;
   final ThemeData theme;
   final bool isScrollControlled;
+  final Color bottomSheetColor;
 
   @override
   Duration get transitionDuration => _kBottomSheetDuration;
@@ -363,6 +383,7 @@ Future<T> showModalBottomSheet<T>({
   @required BuildContext context,
   @required WidgetBuilder builder,
   bool isScrollControlled = false,
+  Color bottomSheetColor,
 }) {
   assert(context != null);
   assert(builder != null);
@@ -374,6 +395,7 @@ Future<T> showModalBottomSheet<T>({
     builder: builder,
     theme: Theme.of(context, shadowThemeOnly: true),
     isScrollControlled: isScrollControlled,
+    bottomSheetColor: bottomSheetColor,
     barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
   ));
 }
@@ -415,10 +437,14 @@ Future<T> showModalBottomSheet<T>({
 PersistentBottomSheetController<T> showBottomSheet<T>({
   @required BuildContext context,
   @required WidgetBuilder builder,
+  Color bottomSheetColor,
 }) {
   assert(context != null);
   assert(builder != null);
   assert(debugCheckHasScaffold(context));
 
-  return Scaffold.of(context).showBottomSheet<T>(builder);
+  return Scaffold.of(context).showBottomSheet<T>(
+    builder,
+    bottomSheetColor: bottomSheetColor,
+  );
 }
