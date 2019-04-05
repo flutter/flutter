@@ -41,11 +41,11 @@ function _rmlock () {
 
 function retry_upgrade {
   local total_tries="10"
-  local remaining_tries=$(($total_tries - 1))
-  while [[ "$remaining_tries" > 0 ]]; do
+  local remaining_tries=$((total_tries - 1))
+  while [[ "$remaining_tries" -gt 0 ]]; do
     (cd "$FLUTTER_TOOLS_DIR" && "$PUB" upgrade "$VERBOSITY") && break
     echo "Error: Unable to 'pub upgrade' flutter tool. Retrying in five seconds... ($remaining_tries tries left)"
-    remaining_tries=$(($remaining_tries - 1))
+    remaining_tries=$((remaining_tries - 1))
     sleep 5
   done
 
@@ -102,6 +102,12 @@ function upgrade_flutter () {
   fi
 
   local revision="$(cd "$FLUTTER_ROOT"; git rev-parse HEAD)"
+
+  # Invalidate cache if:
+  #  * SNAPSHOT_PATH is not a file, or
+  #  * STAMP_PATH is not a file with nonzero size, or
+  #  * Contents of STAMP_PATH is not our local git HEAD revision, or
+  #  * pubspec.yaml last modified after pubspec.lock
   if [[ ! -f "$SNAPSHOT_PATH" || ! -s "$STAMP_PATH" || "$(cat "$STAMP_PATH")" != "$revision" || "$FLUTTER_TOOLS_DIR/pubspec.yaml" -nt "$FLUTTER_TOOLS_DIR/pubspec.lock" ]]; then
     rm -f "$FLUTTER_ROOT/version"
     touch "$FLUTTER_ROOT/bin/cache/.dartignore"

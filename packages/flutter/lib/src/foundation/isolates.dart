@@ -18,7 +18,7 @@ import 'constants.dart';
 /// of classes, not closures or instance methods of objects.
 ///
 /// {@macro flutter.foundation.compute.limitations}
-typedef ComputeCallback<Q, R> = R Function(Q message);
+typedef ComputeCallback<Q, R> = FutureOr<R> Function(Q message);
 
 /// Spawn an isolate, run `callback` on that isolate, passing it `message`, and
 /// (eventually) return the value returned by `callback`.
@@ -53,9 +53,9 @@ Future<R> compute<Q, R>(ComputeCallback<Q, R> callback, Q message, { String debu
   final ReceivePort resultPort = ReceivePort();
   final ReceivePort errorPort = ReceivePort();
   Timeline.finishSync();
-  final Isolate isolate = await Isolate.spawn<_IsolateConfiguration<Q, R>>(
+  final Isolate isolate = await Isolate.spawn<_IsolateConfiguration<Q, FutureOr<R>>>(
     _spawn,
-    _IsolateConfiguration<Q, R>(
+    _IsolateConfiguration<Q, FutureOr<R>>(
       callback,
       message,
       resultPort.sendPort,
@@ -110,11 +110,11 @@ class _IsolateConfiguration<Q, R> {
   R apply() => callback(message);
 }
 
-void _spawn<Q, R>(_IsolateConfiguration<Q, R> configuration) {
+Future<void> _spawn<Q, R>(_IsolateConfiguration<Q, FutureOr<R>> configuration) async {
   R result;
-  Timeline.timeSync(
+  await Timeline.timeSync(
     '${configuration.debugLabel}',
-    () { result = configuration.apply(); },
+    () async { result = await configuration.apply(); },
     flow: Flow.step(configuration.flowId),
   );
   Timeline.timeSync(

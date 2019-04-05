@@ -133,6 +133,8 @@ class Directionality extends InheritedWidget {
 /// buffer. For the value 0.0, the child is simply not painted at all. For the
 /// value 1.0, the child is painted immediately without an intermediate buffer.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=9hltevOHQBw}
+///
 /// {@tool sample}
 ///
 /// This example shows some [Text] when the `_visible` member field is true, and
@@ -340,6 +342,8 @@ class ShaderMask extends SingleChildRenderObjectWidget {
 /// widget's clip. If there's no clip, the filter will be applied to the full
 /// screen.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=dYRs7Q1vfYI}
+///
 /// {@tool sample}
 /// If the [BackdropFilter] needs to be applied to an area that exactly matches
 /// its child, wraps the [BackdropFilter] with a clip widget that clips exactly
@@ -418,6 +422,8 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
 /// painting commands and the resulting behavior is undefined.)
 ///
 /// Painters are implemented by subclassing [CustomPainter].
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=kp14Y4uHpHs}
 ///
 /// Because custom paint calls its painters during paint, you cannot call
 /// `setState` or `markNeedsLayout` during the callback (the layout for this
@@ -606,6 +612,8 @@ class ClipRect extends SingleChildRenderObjectWidget {
 /// By default, [ClipRRect] uses its own bounds as the base rectangle for the
 /// clip, but the size and location of the clip can be customized using a custom
 /// [clipper].
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=eI43jkQkrvs}
 ///
 /// See also:
 ///
@@ -983,6 +991,8 @@ class PhysicalShape extends SingleChildRenderObjectWidget {
 
 /// A widget that applies a transformation before painting its child.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=9z_YNlRlWfA}
+///
 /// {@tool sample}
 ///
 /// This example rotates and skews an orange box containing text, keeping the
@@ -1305,6 +1315,8 @@ class CompositedTransformFollower extends SingleChildRenderObjectWidget {
 
 /// Scales and positions its child within itself according to [fit].
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=T4Uehk3_wlY}
+///
 /// See also:
 ///
 ///  * [Transform], which applies an arbitrary transform to its child widget at
@@ -1555,6 +1567,8 @@ class Padding extends SingleChildRenderObjectWidget {
 /// For example, to align a box at the bottom right, you would pass this box a
 /// tight constraint that is bigger than the child's natural size,
 /// with an alignment of [Alignment.bottomRight].
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=g2E7yl3MwMk}
 ///
 /// This widget will be as big as possible if its dimensions are constrained and
 /// [widthFactor] and [heightFactor] are null. If a dimension is unconstrained
@@ -3203,6 +3217,8 @@ class IndexedStack extends Stack {
 /// [StatelessWidget]s or [StatefulWidget]s (not other kinds of widgets, like
 /// [RenderObjectWidget]s).
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=EgtPleVwxBQ}
+///
 /// If a widget is wrapped in a [Positioned], then it is a _positioned_ widget
 /// in its [Stack]. If the [top] property is non-null, the top edge of this child
 /// will be positioned [top] layout units from the top of the stack widget. The
@@ -4293,6 +4309,8 @@ class Flexible extends ParentDataWidget<Flex> {
 /// [Flex] must contain only [StatelessWidget]s or [StatefulWidget]s (not other
 /// kinds of widgets, like [RenderObjectWidget]s).
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=_rnZaagadyo}
+///
 /// {@tool snippet --template=stateless_widget_material}
 /// This example shows how to use an [Expanded] widget in a [Column] so that
 /// it's middle child, a [Container] here, expands to fill the space.
@@ -4398,6 +4416,8 @@ class Expanded extends Flexible {
 ///
 /// The runs themselves are then positioned in the cross axis according to the
 /// [runSpacing] and [runAlignment].
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=z5iw2SeFx2M}
 ///
 /// {@tool sample}
 ///
@@ -5559,6 +5579,8 @@ class IgnorePointer extends SingleChildRenderObjectWidget {
 /// during layout and paints its child as usual. It just prevents its children
 /// from being the target of located events, because it returns true from
 /// [RenderBox.hitTest].
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=65HoWqBboI8}
 ///
 /// See also:
 ///

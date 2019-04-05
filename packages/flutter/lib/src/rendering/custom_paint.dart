@@ -39,6 +39,8 @@ typedef SemanticsBuilderCallback = List<CustomPainterSemantics> Function(Size si
 /// is provided, to check if the new instance actually represents different
 /// information.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=vvI_NUXK00s}
+///
 /// The most efficient way to trigger a repaint is to either:
 ///
 /// * Extend this class and supply a `repaint` argument to the constructor of
