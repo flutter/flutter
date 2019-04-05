@@ -44,16 +44,13 @@ platform :ios do
       version_number: /\d+\.\d+\.\d+/.match(raw_version)[0]
     )
 
-    puts "pr #{ENV['CIRRUS_PR']}"
-    puts "repo #{ENV['CIRRUS_REPO_FULL_NAME']}"
-    puts "branch #{ENV['CIRRUS_BRANCH']}"
-    puts "token #{ENV['CIRRUS_REPO_CLONE_TOKEN']}"
-
     # Stop fastlane from echoing back PUBLISHING_MATCH_CERTIFICATE_REPO var.
+    # Doesn't matter too much since Cirrus doesn't echo back encrypted variables
+    # anyway.
     # suppress_output {
       # Retrieves all the necessary certs and provisioning profiles.
       sync_code_signing(
-        git_url:  "https://x-access-token:#{ENV['CIRRUS_REPO_CLONE_TOKEN']}@#{ENV['PUBLISHING_MATCH_CERTIFICATE_REPO']}" ,
+        git_url:  "https://x-access-token:#{ENV['PUBLISHING_MATCH_REPO_TOKEN']}@#{ENV['PUBLISHING_MATCH_CERTIFICATE_REPO']}" ,
         type: 'appstore',
         readonly: true,
         verbose: true,
