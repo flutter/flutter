@@ -16,9 +16,9 @@ export 'dart:ui' show Offset, PointerDeviceKind;
 ///  * For touch screen, it's when the pointer contacts the screen.
 ///  * For stylus and inverted stylus, it's when the pen contacts the screen.
 ///  * For mouse, it's when the primary button is pressed.
-/// 
+///
 /// See also:
-/// 
+///
 ///  * [kTouchContact]: an alias of this constant when used by touch screen.
 ///  * [kStylusContact]: an alias of this constant when used by stylus.
 ///  * [kPrimaryMouseButton]: an alias of this constant when used by mouse.
@@ -28,9 +28,9 @@ const int kPrimaryButton = 0x01;
 ///
 /// The primary mouse button is typically the left button on the top of the
 /// mouse but can be reconfigured to be a different physical button.
-/// 
+///
 /// See also:
-/// 
+///
 ///  * [kTouchContact]: an alias of this constant when used by touch screen.
 const int kPrimaryMouseButton = kPrimaryButton;
 
@@ -42,9 +42,9 @@ const int kSecondaryMouseButton = 0x02;
 
 /// The bit of [PointerEvent.buttons] that corresponds to when a stylus
 /// contacting the screen.
-/// 
+///
 /// See also:
-/// 
+///
 ///  * [kPrimaryButton]: an alias of this constant for any device.
 const int kStylusContact = kPrimaryButton;
 
@@ -81,9 +81,9 @@ const int kForwardMouseButton = 0x10;
 
 /// The bit of [PointerEvent.buttons] that corresponds to the pointer contacting
 /// a touch screen.
-/// 
+///
 /// See also:
-/// 
+///
 ///  * [kPrimaryButton]: an alias of this constant for any device.
 const int kTouchContact = kPrimaryButton;
 
