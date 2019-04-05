@@ -144,20 +144,20 @@ task:
   pub_cache:
     folder: ~/.pub-cache
   depends_on:
-    # - analyze
-    # - build_tests-macos
+    - analyze
+    - build_tests-macos
   env:
     # Name the SDK directory to include a space so that we constantly
     # test path names with spaces in them.
     CIRRUS_WORKING_DIR: "/tmp/flutter sdk"
     SHARD: deploy_gallery
-    # Apple Certificates Match Passphrase
-    MATCH_PASSWORD: ENCRYPTED[db07f252234397090e3ec59152d9ec1831f5ecd0ef97d247b1dca757bbb9ef9b7c832a39bce2caf1949ccdf097e59a73]
     # Apple Fastlane password.
     FASTLANE_PASSWORD: ENCRYPTED[4b1f0b8d52874e9de965acd46c79743f3b81f3a513614179b9be7cf53dc8258753e257bdadb11a298ee455259df21865]
     # Private repo for publishing certificates.
     PUBLISHING_MATCH_CERTIFICATE_REPO: ENCRYPTED[3c0e78877d933fc80107aa6f3790fd1cf927250b852d6cb53202be696b4903ed8ca839b809626aaf18050bf7e436fab7]
     PUBLISHING_MATCH_REPO_TOKEN: ENCRYPTED[3d1230b744c6ed6c788a91bec741b769401dbcd426b18f9af8080bfeefdfc21913ca4047980c5b5b7ce823f12e7b6b19]
+    # Apple Certificates Match Passphrase
+    MATCH_PASSWORD: ENCRYPTED[db07f252234397090e3ec59152d9ec1831f5ecd0ef97d247b1dca757bbb9ef9b7c832a39bce2caf1949ccdf097e59a73]
   osx_instance:
     image: mojave-xcode-10.1
   # occasionally the clock on these machines is out of sync

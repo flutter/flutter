@@ -56,10 +56,6 @@ if [[ "$SHARD" = "deploy_gallery" ]]; then
       flutter build ios --release --no-codesign -t lib/main_publish.dart
     )
     echo "iOS Flutter Gallery built"
-    (
-          cd examples/flutter_gallery/ios
-          fastlane build_and_deploy_testflight upload:true
-        )
     if [[ -z "$CIRRUS_PR" ]]; then
       if [[ "$CIRRUS_BRANCH" == "dev" && "$version" != *"pre"* ]]; then
         echo "Archiving with distribution profile and deploying to TestFlight..."
