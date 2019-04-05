@@ -14,7 +14,7 @@ enum LeaveBehindDemoAction {
   horizontalSwipe,
   leftSwipe,
   rightSwipe,
-  confirmDismiss
+  confirmDismiss,
 }
 
 class LeaveBehindItem implements Comparable<LeaveBehindItem> {
@@ -227,23 +227,15 @@ class _LeaveBehindListItem extends StatelessWidget {
           else
             _handleDelete();
         },
-        confirmDismiss: (DismissDirection dismissDirection) async {
+        confirmDismiss: !confirmDismiss ? null : (DismissDirection dismissDirection) async {
           switch(dismissDirection) {
             case DismissDirection.endToStart:
-              if(confirmDismiss) {
-                if (await _showConfirmationDialog(context, 'archive'))
-                  _handleArchive();
-              } else {
+              if (await _showConfirmationDialog(context, 'archive'))
                 _handleArchive();
-              }
               break;
             case DismissDirection.startToEnd:
-              if(confirmDismiss) {
-                if (await _showConfirmationDialog(context, 'delete'))
-                  _handleDelete();
-              } else {
+              if (await _showConfirmationDialog(context, 'delete'))
                 _handleDelete();
-              }
               break;
             case DismissDirection.horizontal:
             case DismissDirection.vertical:
