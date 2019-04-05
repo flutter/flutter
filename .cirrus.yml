@@ -144,9 +144,8 @@ task:
   pub_cache:
     folder: ~/.pub-cache
   depends_on:
-    - analyze
-    - build_tests-macos
-    - add2app-macos
+    # - analyze
+    # - build_tests-macos
   env:
     # Name the SDK directory to include a space so that we constantly
     # test path names with spaces in them.
@@ -157,7 +156,7 @@ task:
     # Apple Fastlane password, ASP, and Session information.
     FASTLANE_PASSWORD: ENCRYPTED[0bf9bb0cc2cb32a0ed18470cf2c9df0f587cce5f8b04adbd6cff15ca5bde7a74f721ee580227b132ab6b032f08e52ae0]
     FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: ENCRYPTED[b219cc13c757f36cb62bfca5102d6115f1cc283aeb974f20c657bc4991c0cc144e30cf5d8183e41cc1df1668b4d14210]
-    FASTLANE_SESSION: ENCRYPTED[88246e355e55cd5e361a575f5d5b762f5826cb9d5285cb93a263b1cad04ec09bdedb1cbd74df5ec02d6043360fa04acd]
+    FASTLANE_SESSION: ENCRYPTED[264d2f4d1f90e59f9b1bb50aaef180d7b93d9a5cacd70cabbe106b94e053480f1a883f1db4c462c61b74b20eb781f26a]
     # Private repo for publishing certificates.
     PUBLISHING_MATCH_CERTIFICATE_REPO: https://github.com/flutter/private_publishing_certificates.git
   osx_instance:
