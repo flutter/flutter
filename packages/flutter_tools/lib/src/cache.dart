@@ -259,7 +259,7 @@ class Cache {
         printError(
           'Failed to retrieve Flutter tool dependencies: ${e.message}.\n'
           'If you\'re in China, please see this page: '
-          'https://flutter.io/community/china',
+          'https://flutter.dev/community/china',
           emphasis: true,
         );
       }

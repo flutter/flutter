@@ -27,7 +27,7 @@ import 'platform_messages.dart';
 /// The logical identity of the channel is given by its name. Identically named
 /// channels will interfere with each other's communication.
 ///
-/// See: <https://flutter.io/platform-channels/>
+/// See: <https://flutter.dev/platform-channels/>
 class BasicMessageChannel<T> {
   /// Creates a [BasicMessageChannel] with the specified [name] and [codec].
   ///
@@ -105,7 +105,7 @@ class BasicMessageChannel<T> {
 /// The logical identity of the channel is given by its name. Identically named
 /// channels will interfere with each other's communication.
 ///
-/// See: <https://flutter.io/platform-channels/>
+/// See: <https://flutter.dev/platform-channels/>
 class MethodChannel {
   /// Creates a [MethodChannel] with the specified [name].
   ///
@@ -148,7 +148,7 @@ class MethodChannel {
   /// {@tool sample}
   ///
   /// The code might be packaged up as a musical plugin, see
-  /// <https://flutter.io/developing-packages/>:
+  /// <https://flutter.dev/developing-packages/>:
   ///
   /// ```dart
   /// class Music {
@@ -441,7 +441,7 @@ class OptionalMethodChannel extends MethodChannel {
 /// The logical identity of the channel is given by its name. Identically named
 /// channels will interfere with each other's communication.
 ///
-/// See: <https://flutter.io/platform-channels/>
+/// See: <https://flutter.dev/platform-channels/>
 class EventChannel {
   /// Creates an [EventChannel] with the specified [name].
   ///
