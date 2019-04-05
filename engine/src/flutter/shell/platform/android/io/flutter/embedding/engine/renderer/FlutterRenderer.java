@@ -267,6 +267,18 @@ public class FlutterRenderer implements TextureRegistry {
      * never be called.
      */
     void onFirstFrameRendered();
+
+    /**
+     * Adds the given {@code listener} to this {@code FlutterRenderer}, to be notified upon Flutter's
+     * first rendered frame.
+     */
+    void addOnFirstFrameRenderedListener(@NonNull OnFirstFrameRenderedListener listener);
+
+    /**
+     * Removes the given {@code listener}, which was previously added with
+     * {@link #addOnFirstFrameRenderedListener(OnFirstFrameRenderedListener)}.
+     */
+    void removeOnFirstFrameRenderedListener(@NonNull OnFirstFrameRenderedListener listener);
   }
 
   /**

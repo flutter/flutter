@@ -21,6 +21,7 @@ import android.view.ViewGroup;
 import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.FlutterShellArgs;
 import io.flutter.embedding.engine.dart.DartExecutor;
+import io.flutter.embedding.engine.renderer.OnFirstFrameRenderedListener;
 import io.flutter.plugin.platform.PlatformPlugin;
 import io.flutter.view.FlutterMain;
 
@@ -214,14 +215,25 @@ public class FlutterFragment extends Fragment {
   @Nullable
   private PlatformPlugin platformPlugin;
 
+  private final OnFirstFrameRenderedListener onFirstFrameRenderedListener = new OnFirstFrameRenderedListener() {
+    @Override
+    public void onFirstFrameRendered() {
+      // Notify our subclasses that the first frame has been rendered.
+      FlutterFragment.this.onFirstFrameRendered();
+
+      // Notify our owning Activity that the first frame has been rendered.
+      FragmentActivity fragmentActivity = getActivity();
+      if (fragmentActivity != null && fragmentActivity instanceof OnFirstFrameRenderedListener) {
+        OnFirstFrameRenderedListener activityAsListener = (OnFirstFrameRenderedListener) fragmentActivity;
+        activityAsListener.onFirstFrameRendered();
+      }
+    }
+  };
+
   public FlutterFragment() {
     // Ensure that we at least have an empty Bundle of arguments so that we don't
     // need to continually check for null arguments before grabbing one.
     setArguments(new Bundle());
-  }
-
-  public void prepareForNavigation() {
-    flutterView.setAlpha(0.0f);
   }
 
   /**
@@ -304,6 +316,7 @@ public class FlutterFragment extends Fragment {
   @Override
   public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
     flutterView = new FlutterView(getContext(), getRenderMode());
+    flutterView.addOnFirstFrameRenderedListener(onFirstFrameRenderedListener);
 
     // We post() the code that attaches the FlutterEngine to our FlutterView because there is
     // some kind of blocking logic on the native side when the surface is connected. That lag
@@ -433,6 +446,7 @@ public class FlutterFragment extends Fragment {
   public void onDestroyView() {
     super.onDestroyView();
     Log.d(TAG, "onDestroyView()");
+    flutterView.removeOnFirstFrameRenderedListener(onFirstFrameRenderedListener);
     flutterView.detachFromFlutterEngine();
   }
 
@@ -579,6 +593,16 @@ public class FlutterFragment extends Fragment {
       ? getContext()
       : getActivity();
   }
+
+  /**
+   * Invoked after the {@link FlutterView} within this {@code FlutterFragment} renders its first
+   * frame.
+   * <p>
+   * The owning {@code Activity} is also sent this message, if it implements
+   * {@link OnFirstFrameRenderedListener}. This method is invoked before the {@code Activity}'s
+   * version.
+   */
+  protected void onFirstFrameRendered() {}
 
   /**
    * Provides a {@link FlutterEngine} instance to be used by a {@code FlutterFragment}.

@@ -9,6 +9,8 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -16,6 +18,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -24,6 +27,7 @@ import android.widget.FrameLayout;
 
 import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.FlutterShellArgs;
+import io.flutter.embedding.engine.renderer.OnFirstFrameRenderedListener;
 import io.flutter.plugin.platform.PlatformPlugin;
 import io.flutter.view.FlutterMain;
 
@@ -61,7 +65,7 @@ import io.flutter.view.FlutterMain;
  * {@code Fragment}.
  */
 // TODO(mattcarroll): explain each call forwarded to Fragment (first requires resolution of PluginRegistry API).
-public class FlutterActivity extends FragmentActivity {
+public class FlutterActivity extends FragmentActivity implements OnFirstFrameRenderedListener {
   private static final String TAG = "FlutterActivity";
 
   // Meta-data arguments, processed from manifest XML.
@@ -81,6 +85,10 @@ public class FlutterActivity extends FragmentActivity {
   // TODO(mattcarroll): replace ID with R.id when build system supports R.java
   private static final int FRAGMENT_CONTAINER_ID = 609893468; // random number
   private FlutterFragment flutterFragment;
+
+  // Used to cover the Activity until the 1st frame is rendered so as to
+  // avoid a brief black flicker from a SurfaceView version of FlutterView.
+  private View coverView;
 
   /**
    * Creates an {@link Intent} that launches a {@code FlutterActivity}, which executes
@@ -147,8 +155,62 @@ public class FlutterActivity extends FragmentActivity {
     Log.d(TAG, "onCreate()");
     super.onCreate(savedInstanceState);
     setContentView(createFragmentContainer());
+    showCoverView();
     configureStatusBarForFullscreenFlutterExperience();
     ensureFlutterFragmentCreated();
+  }
+
+  /**
+   * Cover all visible {@code Activity} area with a {@code View} that paints everything the same
+   * color as the {@code Window}.
+   * <p>
+   * This cover {@code View} should be displayed at the very beginning of the {@code Activity}'s
+   * lifespan and then hidden once Flutter renders its first frame. The purpose of this cover is to
+   * cover {@link FlutterSurfaceView}, which briefly displays a black rectangle before it can make
+   * itself transparent.
+   */
+  private void showCoverView() {
+    // Create the coverView.
+    if (coverView == null) {
+      coverView = new View(this);
+      addContentView(coverView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+    }
+
+    // Pain the coverView with the Window's background.
+    Drawable background = createCoverViewBackground();
+    if (background != null) {
+      coverView.setBackground(background);
+    } else {
+      // If we can't obtain a window background to replicate then we'd be guessing as to the least
+      // intrusive color. But there is no way to make an accurate guess. In this case we don't
+      // give the coverView any color, which means a brief black rectangle will be visible upon
+      // Activity launch.
+    }
+  }
+
+  @Nullable
+  private Drawable createCoverViewBackground() {
+    TypedValue typedValue = new TypedValue();
+    boolean hasBackgroundColor = getTheme().resolveAttribute(
+        android.R.attr.windowBackground,
+        typedValue,
+        true
+    );
+    if (hasBackgroundColor && typedValue.resourceId != 0) {
+      return getResources().getDrawable(typedValue.resourceId, getTheme());
+    } else {
+      return null;
+    }
+  }
+
+  /**
+   * Hides the cover {@code View}.
+   * <p>
+   * This method should be called when Flutter renders its first frame. See {@link #showCoverView()}
+   * for details.
+   */
+  private void hideCoverView() {
+    coverView.setVisibility(View.GONE);
   }
 
   private void configureStatusBarForFullscreenFlutterExperience() {
@@ -359,5 +421,10 @@ public class FlutterActivity extends FragmentActivity {
    */
   private boolean isDebuggable() {
     return (getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
+  }
+
+  @Override
+  public void onFirstFrameRendered() {
+    hideCoverView();
   }
 }
