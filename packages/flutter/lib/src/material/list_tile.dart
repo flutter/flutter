@@ -322,12 +322,11 @@ enum ListTileControlAffinity {
 ///     CustomListItem(
 ///       user: 'Dash',
 ///       viewCount: 884000,
-///       thumbnail:
-///         Icon(
-///           Icons.flight_takeoff,
-///           size: 80,
-///           color: Colors.blueGrey,
-///         ),
+///       thumbnail: Icon(
+///         Icons.flight_takeoff,
+///         size: 80,
+///         color: Colors.blueGrey,
+///       ),
 ///       title: 'Announcing Flutter 1.0',
 ///     ),
 ///   ],
