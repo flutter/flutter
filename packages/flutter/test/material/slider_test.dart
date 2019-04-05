@@ -1450,6 +1450,7 @@ void main() {
     }
 
     await tester.pumpWidget(buildFrame(TargetPlatform.iOS));
+    expect(find.byType(Slider), findsOneWidget);
     expect(find.byType(CupertinoSlider), findsOneWidget);
 
     expect(value, 0.5);
@@ -1461,6 +1462,7 @@ void main() {
     value = 0.5;
     await tester.pumpWidget(buildFrame(TargetPlatform.android));
     await tester.pumpAndSettle(); // Finish the theme change animation.
+    expect(find.byType(Slider), findsOneWidget);
     expect(find.byType(CupertinoSlider), findsNothing);
 
     expect(value, 0.5);

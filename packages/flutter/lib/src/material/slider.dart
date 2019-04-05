@@ -92,7 +92,7 @@ enum _SliderType { material, adaptive }
 ///  * <https://material.io/design/components/sliders.html>
 ///  * [MediaQuery], from which the text scale factor is obtained.
 class Slider extends StatefulWidget {
-  /// Creates a material design slider.
+  /// Creates a Material Design slider.
   ///
   /// The slider itself does not maintain any state. Instead, when the state of
   /// the slider changes, the widget calls the [onChanged] callback. Most
@@ -134,7 +134,7 @@ class Slider extends StatefulWidget {
        super(key: key);
 
   /// Creates a [CupertinoSlider] if the target platform is iOS, creates a
-  /// material design slider otherwise.
+  /// Material Design slider otherwise.
   ///
   /// If a [CupertinoSlider] is created, the following parameters are
   /// ignored: [label], [inactiveColor], [semanticFormatterCallback].
@@ -527,9 +527,9 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
   }
 
   Widget _buildCupertinoSlider(BuildContext context) {
-    // The render box of a slider has a fixed height by takes up the available
-    // width. Wrapping the cupertino slider in this manner will help ensure
-    // that it maintains the same size.
+    // The render box of a slider has a fixed height but takes up the available
+    // width. Wrapping the [CupertinoSlider] in this manner will help maintain
+    // the same size.
     return SizedBox(
       width: double.infinity,
       child: CupertinoSlider(
