@@ -13,7 +13,7 @@ namespace blink {
 // object weak pointer are behind this mutex.
 static std::mutex gVMMutex;
 static std::weak_ptr<DartVM> gVM FML_GUARDED_BY(gVMMutex);
-static std::shared_ptr<DartVM> gVMLeak FML_GUARDED_BY(gVMMutex);
+static std::shared_ptr<DartVM>* gVMLeak FML_GUARDED_BY(gVMMutex);
 
 // We are going to be modifying more than just the control blocks of the
 // following weak pointers (in the |Create| case where an old VM could not be
@@ -88,7 +88,7 @@ DartVMRef DartVMRef::Create(Settings settings,
   gVM = vm;
 
   if (settings.leak_vm) {
-    gVMLeak = vm;
+    gVMLeak = new std::shared_ptr<DartVM>(vm);
   }
 
   return DartVMRef{std::move(vm)};
@@ -112,6 +112,13 @@ std::shared_ptr<ServiceProtocol> DartVMRef::GetServiceProtocol() {
 std::shared_ptr<IsolateNameServer> DartVMRef::GetIsolateNameServer() {
   std::lock_guard<std::mutex> lock(gVMDependentsMutex);
   return gVMIsolateNameServer.lock();
+}
+
+DartVM* DartVMRef::GetRunningVM() {
+  std::lock_guard<std::mutex> lock(gVMMutex);
+  auto vm = gVM.lock().get();
+  FML_CHECK(vm) << "Caller assumed VM would be running when it wasn't";
+  return vm;
 }
 
 }  // namespace blink

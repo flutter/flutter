@@ -5,6 +5,7 @@
 #ifndef FLUTTER_RUNTIME_DART_ISOLATE_H_
 #define FLUTTER_RUNTIME_DART_ISOLATE_H_
 
+#include <memory>
 #include <set>
 #include <string>
 
@@ -76,6 +77,14 @@ class DartIsolate : public UIDartState {
                                    bool last_piece = true);
 
   FML_WARN_UNUSED_RESULT
+  bool PrepareForRunningFromKernels(
+      std::vector<std::shared_ptr<const fml::Mapping>> kernels);
+
+  FML_WARN_UNUSED_RESULT
+  bool PrepareForRunningFromKernels(
+      std::vector<std::unique_ptr<const fml::Mapping>> kernels);
+
+  FML_WARN_UNUSED_RESULT
   bool Run(const std::string& entrypoint, fml::closure on_run = nullptr);
 
   FML_WARN_UNUSED_RESULT
@@ -93,6 +102,8 @@ class DartIsolate : public UIDartState {
   fml::RefPtr<const DartSnapshot> GetSharedSnapshot() const;
 
   std::weak_ptr<DartIsolate> GetWeakIsolatePtr();
+
+  fml::RefPtr<fml::TaskRunner> GetMessageHandlingTaskRunner() const;
 
  private:
   bool LoadKernel(std::shared_ptr<const fml::Mapping> mapping, bool last_piece);
@@ -116,9 +127,13 @@ class DartIsolate : public UIDartState {
   std::vector<std::shared_ptr<const fml::Mapping>> kernel_buffers_;
   std::vector<std::unique_ptr<AutoFireClosure>> shutdown_callbacks_;
   ChildIsolatePreparer child_isolate_preparer_ = nullptr;
+  fml::RefPtr<fml::TaskRunner> message_handling_task_runner_;
 
   FML_WARN_UNUSED_RESULT
   bool Initialize(Dart_Isolate isolate, bool is_root_isolate);
+
+  void SetMessageHandlingTaskRunner(fml::RefPtr<fml::TaskRunner> runner,
+                                    bool is_root_isolate);
 
   FML_WARN_UNUSED_RESULT
   bool LoadLibraries(bool is_root_isolate);
@@ -127,6 +142,8 @@ class DartIsolate : public UIDartState {
 
   FML_WARN_UNUSED_RESULT
   bool MarkIsolateRunnable();
+
+  void OnShutdownCallback();
 
   // |Dart_IsolateCreateCallback|
   static Dart_Isolate DartIsolateCreateCallback(

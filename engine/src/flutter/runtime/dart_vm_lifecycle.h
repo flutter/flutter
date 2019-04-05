@@ -49,6 +49,11 @@ class DartVMRef {
 
   operator bool() const { return static_cast<bool>(vm_); }
 
+  DartVM* get() {
+    FML_DCHECK(vm_);
+    return vm_.get();
+  }
+
   DartVM* operator->() {
     FML_DCHECK(vm_);
     return vm_.get();
@@ -60,9 +65,14 @@ class DartVMRef {
   }
 
  private:
+  friend class DartIsolate;
+
   std::shared_ptr<DartVM> vm_;
 
   DartVMRef(std::shared_ptr<DartVM> vm);
+
+  // Only used by Dart Isolate to register itself with the VM.
+  static DartVM* GetRunningVM();
 
   FML_DISALLOW_COPY_AND_ASSIGN(DartVMRef);
 };
