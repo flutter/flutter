@@ -330,7 +330,7 @@ enum ListTileControlAffinity {
 ///       title: 'Announcing Flutter 1.0',
 ///     ),
 ///   ],
-/// )
+/// );
 ///
 /// class CustomListItem extends StatelessWidget {
 ///   const CustomListItem({
