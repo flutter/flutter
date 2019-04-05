@@ -270,7 +270,7 @@ class _LeaveBehindListItem extends StatelessWidget {
       ),
     );
   }
-  
+
   Future<bool> _showConfirmationDialog(BuildContext context, String action) {
     return showDialog<bool>(
       context: context,
