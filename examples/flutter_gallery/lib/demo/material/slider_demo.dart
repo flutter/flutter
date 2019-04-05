@@ -146,7 +146,7 @@ class _SliderDemoState extends State<SliderDemo> {
             Column(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                Slider(
+                Slider.adaptive(
                   value: _value,
                   min: 0.0,
                   max: 100.0,
@@ -156,7 +156,7 @@ class _SliderDemoState extends State<SliderDemo> {
                     });
                   },
                 ),
-                const Text('Continuous'),
+                const Text('Adaptive Continuous'),
               ],
             ),
             Column(
