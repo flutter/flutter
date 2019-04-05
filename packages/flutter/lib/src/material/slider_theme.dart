@@ -905,8 +905,8 @@ class _EmptySliderComponentShape extends SliderComponentShape {
 /// Base track shape with default sizing.
 ///
 /// The [SliderTrackShape]s that use this base class are:
-///   [RectangularSliderTrackShape],
-///   [RoundedRectSliderTrackShape]
+///   * [RectangularSliderTrackShape]
+///   * [RoundedRectSliderTrackShape]
 ///
 /// The height is set from [SliderThemeData.trackHeight] and the width is the
 /// width of the parent box, but with the largest shape subtracted out from
@@ -919,17 +919,15 @@ abstract class BaseSliderTrackShape {
   /// of the overlay and thumb radius. The height is defined by the
   /// [SliderThemeData.trackHeight].
   ///
-  /// The rect is centered both horizontally and vertically within the slider
+  /// The [Rect] is centered both horizontally and vertically within the slider
   /// bounds.
   Rect getPreferredRect({
     RenderBox parentBox,
     Offset offset = Offset.zero,
     SliderThemeData sliderTheme,
-    bool isEnabled,
-    bool isDiscrete,
+    bool isEnabled = false,
+    bool isDiscrete = false,
   }) {
-    isEnabled = isEnabled ?? false;
-    isDiscrete = isDiscrete ?? false;
     final double thumbWidth = sliderTheme.thumbShape.getPreferredSize(isEnabled, isDiscrete).width;
     final double overlayWidth = sliderTheme.overlayShape.getPreferredSize(isEnabled, isDiscrete).width;
     final double trackHeight = sliderTheme.trackHeight;
@@ -972,16 +970,16 @@ class RoundedRectSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
 
   @override
   void paint(
-      PaintingContext context,
-      Offset offset, {
-      RenderBox parentBox,
-      SliderThemeData sliderTheme,
-      Animation<double> enableAnimation,
-      TextDirection textDirection,
-      Offset thumbCenter,
-      bool isDiscrete,
-      bool isEnabled,
-    }) {
+    PaintingContext context,
+    Offset offset, {
+    RenderBox parentBox,
+    SliderThemeData sliderTheme,
+    Animation<double> enableAnimation,
+    TextDirection textDirection,
+    Offset thumbCenter,
+    bool isDiscrete,
+    bool isEnabled,
+  }) {
     // If the slider track height is 0, then it makes no difference whether the
     // track is painted or not, therefore the painting can be a no-op.
     if (sliderTheme.trackHeight == 0) {
@@ -990,8 +988,8 @@ class RoundedRectSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
 
     // Assign the track segment paints, which are left: active, right: inactive,
     // but reversed for right to left text.
-    final ColorTween activeTrackColorTween = ColorTween(begin: sliderTheme.disabledActiveTrackColor , end: sliderTheme.activeTrackColor);
-    final ColorTween inactiveTrackColorTween = ColorTween(begin: sliderTheme.disabledInactiveTrackColor , end: sliderTheme.inactiveTrackColor);
+    final ColorTween activeTrackColorTween = ColorTween(begin: sliderTheme.disabledActiveTrackColor, end: sliderTheme.activeTrackColor);
+    final ColorTween inactiveTrackColorTween = ColorTween(begin: sliderTheme.disabledInactiveTrackColor, end: sliderTheme.inactiveTrackColor);
     final Paint activePaint = Paint()..color = activeTrackColorTween.evaluate(enableAnimation);
     final Paint inactivePaint = Paint()..color = inactiveTrackColorTween.evaluate(enableAnimation);
     Paint leftTrackPaint;
@@ -1066,11 +1064,9 @@ class RectangularSliderTrackShape extends SliderTrackShape {
     RenderBox parentBox,
     Offset offset = Offset.zero,
     SliderThemeData sliderTheme,
-    bool isEnabled,
-    bool isDiscrete,
+    bool isEnabled = false,
+    bool isDiscrete = false,
   }) {
-    isEnabled = isEnabled ?? false;
-    isDiscrete = isDiscrete ?? false;
     final double thumbWidth = sliderTheme.thumbShape.getPreferredSize(isEnabled, isDiscrete).width;
     final double overlayWidth = sliderTheme.overlayShape.getPreferredSize(isEnabled, isDiscrete).width;
     final double trackHeight = sliderTheme.trackHeight;

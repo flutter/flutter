@@ -446,7 +446,9 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
 
     // If the widget has active or inactive colors specified, then we plug them
     // in to the slider theme as best we can. If the developer wants more
-    // control than that, then they need to use a SliderTheme.
+    // control than that, then they need to use a SliderTheme. The default
+    // colors come from the color scheme and are aligned to the Material Spec.
+    // The default shapes and text styles are also defined by the Material Spec.
     sliderTheme = sliderTheme.copyWith(
       trackHeight: sliderTheme.trackHeight ?? _defaultTrackHeight,
       activeTrackColor: widget.activeColor ?? sliderTheme.activeTrackColor ?? theme.colorScheme.primary,
