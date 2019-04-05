@@ -192,7 +192,7 @@ const double _kTrackInnerEnd = _kTrackWidth - _kTrackInnerStart;
 const double _kTrackInnerLength = _kTrackInnerEnd - _kTrackInnerStart;
 const double _kSwitchWidth = 59.0;
 const double _kSwitchHeight = 39.0;
-const double _kCupertinoSwitchDisabledOpacity = 0.5; //value appears to be accurate in comparison to the actual iOS switch
+const double _kCupertinoSwitchDisabledOpacity = 0.5;//value appears to be accurate in comparison to the actual iOS switch
 
 const Color _kTrackColor = CupertinoColors.lightBackgroundGray;
 const Duration _kReactionDuration = Duration(milliseconds: 300);
