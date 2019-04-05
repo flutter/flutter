@@ -44,7 +44,22 @@ mkdir c:/flutter/engine
 curl https://raw.githubusercontent.com/flutter/engine/master/ci/docker/build/engine_gclient `
     -o c:/flutter/engine/.gclient
 
-# Once all the environment variables above are loaded correctly, one may test
+# Once the above script finishes successfully, one can make an image of the VM
+# for the CI test.
+#
+# For sanity check, one can also test the VM to make sure that Flutter engine
+# can be built in that VM. (The test is optional and our current image is made
+# before doing these tests. We only did a reboot before making that image to
+# ensure environment variables are loaded. However, Cirrus CI seems to have
+# problems reading those environment variables so we ended up setting them in
+# ".cirrus.yml" manually.)
+#
+# To test, first reboot of the terminal (or VM) to ensure that environment
+# variables "path", "DEPOT_TOOLS_WIN_TOOLCHAIN", and "GYP_MSVS_OVERRIDE_PATH"
+# are set. (Those environment variables are not needed for Cirrus CI as Cirrus
+# sets those environment variables by itself.)
+#
+# After all the environment variables above are loaded correctly, one may test
 # build the engine by:
 #   cd c:/flutter/engine
 #   gclient sync
