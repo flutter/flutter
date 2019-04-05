@@ -179,7 +179,6 @@ enum ListTileControlAffinity {
 ///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
-///
 /// {@tool sample}
 ///
 /// This example contains the different ways that [ListTile]s can be used.
