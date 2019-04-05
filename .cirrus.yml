@@ -158,7 +158,7 @@ task:
     FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: ENCRYPTED[b219cc13c757f36cb62bfca5102d6115f1cc283aeb974f20c657bc4991c0cc144e30cf5d8183e41cc1df1668b4d14210]
     FASTLANE_SESSION: ENCRYPTED[264d2f4d1f90e59f9b1bb50aaef180d7b93d9a5cacd70cabbe106b94e053480f1a883f1db4c462c61b74b20eb781f26a]
     # Private repo for publishing certificates.
-    PUBLISHING_MATCH_CERTIFICATE_REPO: github.com/flutter/private_publishing_certificates.git
+    PUBLISHING_MATCH_CERTIFICATE_REPO: ENCRYPTED[3c0e78877d933fc80107aa6f3790fd1cf927250b852d6cb53202be696b4903ed8ca839b809626aaf18050bf7e436fab7]
   osx_instance:
     image: mojave-xcode-10.1
   # occasionally the clock on these machines is out of sync
