@@ -25,7 +25,7 @@ const Color _kDefaultBarDarkBackgroundColor = Color(0xB7212121);
 /// an ancestor [CupertinoThemeData] is retrieved via [CupertinoTheme.of].
 ///
 /// The [CupertinoTheme] widget implies an [IconTheme] widget, whose
-/// [IconTheme.data] has the same color as [primaryColor]
+/// [IconTheme.data] has the same color as [CupertinoThemeData.primaryColor]
 ///
 /// See also:
 ///
