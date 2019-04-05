@@ -47,12 +47,12 @@ class _PointerState {
 // https://github.com/flutter/flutter/issues/30454
 int _synthesiseDownButtons(int buttons, PointerDeviceKind kind) {
   switch (kind) {
-  case PointerDeviceKind.touch:
-  case PointerDeviceKind.stylus:
-  case PointerDeviceKind.invertedStylus:
-    return buttons | kPrimaryButton;
-  default:
-    return buttons;
+    case PointerDeviceKind.touch:
+    case PointerDeviceKind.stylus:
+    case PointerDeviceKind.invertedStylus:
+      return buttons | kPrimaryButton;
+    default:
+      return buttons;
   }
 }
 
