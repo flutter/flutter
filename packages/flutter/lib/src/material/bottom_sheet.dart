@@ -214,7 +214,6 @@ class _ModalBottomSheetLayout extends SingleChildLayoutDelegate {
   }
 }
 
-
 class _ModalBottomSheet<T> extends StatefulWidget {
   const _ModalBottomSheet({
     Key key,
@@ -293,8 +292,6 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
   final ThemeData theme;
   final bool isScrollControlled;
 
-  AnimationController _animationController;
-
   @override
   Duration get transitionDuration => _kBottomSheetDuration;
 
@@ -306,6 +303,8 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
 
   @override
   Color get barrierColor => Colors.black54;
+
+  AnimationController _animationController;
 
   @override
   AnimationController createAnimationController() {
