@@ -9,7 +9,7 @@ import 'gesture_tester.dart';
 
 const PointerDownEvent down = PointerDownEvent(
   pointer: 5,
-  buttons: kTouchContact, 
+  buttons: kTouchContact,
   position: Offset(10, 10),
 );
 
@@ -20,7 +20,7 @@ const PointerUpEvent up = PointerUpEvent(
 
 const PointerMoveEvent move = PointerMoveEvent(
   pointer: 5,
-  buttons: kTouchContact, 
+  buttons: kTouchContact,
   position: Offset(100, 200),
 );
 
@@ -291,13 +291,13 @@ void main() {
 
     const PointerDownEvent mouseDown = PointerDownEvent(
       pointer: 5,
-      buttons: kTouchContact, 
+      buttons: kTouchContact,
       position: Offset(10, 10),
       kind: PointerDeviceKind.mouse,
     );
     const PointerDownEvent touchDown = PointerDownEvent(
       pointer: 5,
-      buttons: kTouchContact, 
+      buttons: kTouchContact,
       position: Offset(10, 10),
       kind: PointerDeviceKind.touch,
     );
