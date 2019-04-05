@@ -45,6 +45,8 @@ platform :ios do
     )
 
     puts "pr #{ENV['CIRRUS_PR']}"
+    puts "repo #{ENV['CIRRUS_REPO_FULL_NAME']}"
+    puts "branch #{ENV['CIRRUS_BRANCH']}"
     puts "token #{ENV['CIRRUS_REPO_CLONE_TOKEN']}"
 
     # Stop fastlane from echoing back PUBLISHING_MATCH_CERTIFICATE_REPO var.
