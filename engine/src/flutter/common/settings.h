@@ -89,6 +89,18 @@ struct Settings {
   // Font settings
   bool use_test_fonts = false;
 
+  // All shells in the process share the same VM. The last shell to shutdown
+  // should typically shut down the VM as well. However, applications depend on
+  // the behavior of "warming-up" the VM by creating a shell that does not do
+  // anything. This used to work earlier when the VM could not be shut down (and
+  // hence never was). Shutting down the VM now breaks such assumptions in
+  // existing embedders. To keep this behavior consistent and allow existing
+  // embedders the chance to migrate, this flag defaults to true. Any shell
+  // launched with this flag set to true will leak the VM in the process. There
+  // is no way to shut down the VM once such a shell has been started. All
+  // shells in the platform (via their embedding APIs) should cooperate to make
+  // sure this flag is never set if they want the VM to shutdown and free all
+  // associated resources.
   bool leak_vm = true;
 
   // Engine settings
