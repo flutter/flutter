@@ -656,6 +656,8 @@ abstract class SliverMultiBoxAdaptorWidget extends SliverWithKeepAliveWidget {
 /// means [SliverList] cannot learn their main axis extent. Instead, newly
 /// materialized children are placed adjacent to existing children.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=ORiTTaVY6mM}
+///
 /// If the children have a fixed extent in the main axis, consider using
 /// [SliverFixedExtentList] rather than [SliverList] because
 /// [SliverFixedExtentList] does not need to perform layout on its children to
@@ -761,6 +763,8 @@ class SliverFixedExtentList extends SliverMultiBoxAdaptorWidget {
 ///
 /// The main axis direction of a grid is the direction in which it scrolls; the
 /// cross axis direction is the orthogonal direction.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=ORiTTaVY6mM}
 ///
 /// {@tool sample}
 ///

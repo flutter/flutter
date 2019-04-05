@@ -1,4 +1,5 @@
 {
+  "datePickerHourSemanticsLabelOne": "$hour o'clock",
   "datePickerHourSemanticsLabelOther": "$hour o'clock",
   "@datePickerHourSemanticsLabel": {
     "description": "Accessibility announcement for the selected hour on a time picker such as '5 o'clock' or '5点'",
@@ -19,17 +20,17 @@
 
   "datePickerDateTimeOrder": "date_time_dayPeriod",
   "@datePickerDateTimeOrder": {
-    "description": "The standard order for the locale to date, time and am/pm in a datetime. Options are date_time_dayPeriod, date_dayPeriod_time, time_dayPeriod_date and dayPeriod_time_date where 'dayPeriod' is am/pm."
+    "description": "The standard order for the locale to arrange date, time and am/pm in a datetime. Options are date_time_dayPeriod, date_dayPeriod_time, time_dayPeriod_date and dayPeriod_time_date where 'dayPeriod' is am/pm."
   },
 
   "anteMeridiemAbbreviation": "AM",
   "@anteMeridiemAbbreviation": {
-    "description": "The abbreviation for ante meridiem (before noon) shown in the time picker."
+    "description": "The abbreviation for ante meridiem (before noon) shown in the time picker when it's not using the 24h format."
   },
 
   "postMeridiemAbbreviation": "PM",
   "@postMeridiemAbbreviation": {
-    "description": "The abbreviation for post meridiem (after noon) shown in the time picker."
+    "description": "The abbreviation for post meridiem (after noon) shown in the time picker when it's not using the 24h format."
   },
 
   "alertDialogLabel": "Alert",
@@ -40,39 +41,41 @@
   "timerPickerHourLabelOne": "hour",
   "timerPickerHourLabelOther": "hours",
   "@timerPickerHourLabel": {
-    "description": "The label adjacent to an hour integer number in a countdown timer.",
+    "description": "The label adjacent to an hour integer number in a countdown timer. The reference abbreviation is what iOS does in the stock clock app's countdown timer.",
     "plural": "hour"
   },
 
+  "timerPickerMinuteLabelOne": "min",
   "timerPickerMinuteLabelOther": "min",
   "@timerPickerMinuteLabel": {
-    "description": "The label adjacent to a minute integer number in a countdown timer.",
+    "description": "The label adjacent to a minute integer number in a countdown timer. The reference abbreviation is what iOS does in the stock clock app's countdown timer.",
     "plural": "minute"
   },
 
+  "timerPickerSecondLabelOne": "sec",
   "timerPickerSecondLabelOther": "sec",
   "@timerPickerSecondLabel": {
-    "description": "The label adjacent to a second integer number in a countdown timer.",
+    "description": "The label adjacent to a second integer number in a countdown timer. The reference abbreviation is what iOS does in the stock clock app's countdown timer.",
     "plural": "second"
   },
 
   "cutButtonLabel": "Cut",
   "@cutButtonLabel": {
-    "description": "The label for cut buttons and menu items."
+    "description": "The label for cut buttons and menu items. The reference abbreviation is what iOS shows on text selection toolbars."
   },
 
   "copyButtonLabel": "Copy",
   "@copyButtonLabel": {
-    "description": "The label for copy buttons and menu items."
+    "description": "The label for copy buttons and menu items. The reference abbreviation is what iOS shows on text selection toolbars."
   },
 
   "pasteButtonLabel": "Paste",
   "@pasteButtonLabel": {
-    "description": "The label for paste buttons and menu items."
+    "description": "The label for paste buttons and menu items. The reference abbreviation is what iOS shows on text selection toolbars."
   },
 
   "selectAllButtonLabel": "Select All",
   "@selectAllButtonLabel": {
-    "description": "The label for select-all buttons and menu items."
+    "description": "The label for select-all buttons and menu items. The reference abbreviation is what iOS shows on text selection toolbars."
   }
 }

@@ -79,6 +79,8 @@ class _TableElementRow {
 
 /// A widget that uses the table layout algorithm for its children.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=_lbE0wsVZSw}
+///
 /// If you only have one row, the [Row] widget is more appropriate. If you only
 /// have one column, the [SliverList] or [Column] widgets will be more
 /// appropriate.

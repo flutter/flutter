@@ -87,6 +87,8 @@ Rect _globalBoundingBoxFor(BuildContext context) {
 ///
 /// Routes must not contain more than one [Hero] for each [tag].
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=Be9UH1kXFDw}
+///
 /// ## Discussion
 ///
 /// Heroes and the [Navigator]'s [Overlay] [Stack] must be axis-aligned for
@@ -619,6 +621,15 @@ class HeroController extends NavigatorObserver {
     assert(navigator != null);
     assert(route != null);
     _maybeStartHeroTransition(route, previousRoute, HeroFlightDirection.pop, false);
+  }
+
+  @override
+  void didReplace({ Route<dynamic> newRoute, Route<dynamic> oldRoute }) {
+    assert(navigator != null);
+    if (newRoute?.isCurrent == true) {
+      // Only run hero animations if the top-most route got replaced.
+      _maybeStartHeroTransition(oldRoute, newRoute, HeroFlightDirection.push, false);
+    }
   }
 
   @override
