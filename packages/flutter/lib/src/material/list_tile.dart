@@ -297,9 +297,9 @@ enum ListTileControlAffinity {
 ///
 /// ## The ListTile layout isn't exactly what I want
 ///
-/// If the way ListTile pads and positions it's elements isn't quite what
-/// you're looking for, it's easy to create custom list items can be created
-/// with a combination of other widgets, such as [Row]s and [Column]s.
+/// If the way ListTile pads and positions its elements isn't quite what
+/// you're looking for, it's easy to create custom list items with a
+/// combination of other widgets, such as [Row]s and [Column]s.
 ///
 /// {@tool snippet --template=stateless_widget_material}
 ///
