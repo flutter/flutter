@@ -18,7 +18,7 @@ import 'recognizer.dart';
 class TapDownDetails {
   /// Creates details for a [GestureTapDownCallback].
   ///
-  /// Arguments [globalPosition] and [buttons] must not be null.
+  /// The [globalPosition] and [buttons] arguments must not be null.
   TapDownDetails({ this.globalPosition = Offset.zero, this.buttons = 0 })
     : assert(globalPosition != null), assert(buttons != null);
 
@@ -50,14 +50,15 @@ typedef GestureTapDownCallback = void Function(TapDownDetails details);
 class TapUpDetails {
   /// Creates details for a [GestureTapUpCallback].
   ///
-  /// Arguments [globalPosition] and [buttons] must not be null.
+  /// The [globalPosition] and [buttons] arguments must not be null.
   TapUpDetails({ this.globalPosition = Offset.zero, this.buttons = 0 })
     : assert(globalPosition != null), assert(buttons != null);
 
   /// The global position at which the pointer contacted the screen.
   final Offset globalPosition;
 
-  /// The buttons pressed when the pointer contacted the screen.
+  /// The buttons pressed when the pointer contacted the screen (changing buttons
+  /// during a tap cancels the gesture.)
   final int buttons;
 }
 
@@ -101,8 +102,13 @@ typedef GestureTapCancelCallback = void Function();
 /// pointer interactions during a tap sequence are not recognized as additional
 /// taps. For example, down-1, down-2, up-1, up-2 produces only one tap on up-1.
 ///
-/// [TapGestureRecognizer] requires that all events contain a same set of
-/// [buttons]. Any kind of button change during the gesture results in rejection.
+/// The gesture must not change buttons throughout its lifespan, i.e. subsequent
+/// [PointerMoveEvent] must contain the same `buttons` as that in
+/// [PointerDownEvent], otherwise the gesture is rejected and canceled.
+/// 
+/// The `buttons` of [PointerDownEvent] must contain one and only one button. Since
+/// stylus touching the screen is also counted as a button, this means a stylus
+/// tap while pressing any physical button will not be recognized.
 ///
 /// The lifecycle of events for a tap gesture is as follows:
 ///
@@ -176,8 +182,8 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
   bool _sentTapDown = false;
   bool _wonArenaForPrimaryPointer = false;
   Offset _finalPosition;
-  // The buttons sent by PointerDownEvent. If any later event comes with a
-  // different set of buttons, the gesture is rejected and terminated.
+  // The buttons sent by `PointerDownEvent`. If a `PointerMoveEvent` comes with a
+  // different set of buttons, the gesture is rejected and canceled.
   int _initialButtons;
 
   @override
@@ -191,6 +197,9 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
   @override
   void addAllowedPointer(PointerDownEvent event) {
     super.addAllowedPointer(event);
+    // `_initialButtons` must be assigned here instead of `handlePrimaryPointer`,
+    // because `acceptGesture` might be called before `handlePrimaryPointer`,
+    // which relies on `_initialButtons` to create `TapDownDetails`.
     _initialButtons = event.buttons;
   }
 
@@ -198,10 +207,7 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
   void handlePrimaryPointer(PointerEvent event) {
     if (event is PointerUpEvent) {
       _finalPosition = event.position;
-      if (_wonArenaForPrimaryPointer) {
-        resolve(GestureDisposition.accepted);
-        _checkUp();
-      }
+      _checkUp();
     } else if (event is PointerCancelEvent) {
       if (_sentTapDown && onTapCancel != null) {
         invokeCallback<void>('onTapCancel', onTapCancel);
@@ -216,8 +222,9 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
   @override
   void resolve(GestureDisposition disposition) {
     if (_wonArenaForPrimaryPointer && disposition == GestureDisposition.rejected) {
-      // This can happen if the superclass decides the primary pointer
-      // exceeded the touch slop, or if the recognizer is disposed.
+      // This can happen if the gesture has been terminated. For example, when
+      // the pointer has exceeded the touch slop, the buttons have been changed,
+      // or if the recognizer is disposed.
       assert(_sentTapDown);
       if (onTapCancel != null)
         invokeCallback<void>('spontaneous onTapCancel', onTapCancel);
@@ -264,7 +271,7 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
   }
 
   void _checkUp() {
-    if (_finalPosition != null) {
+    if (_wonArenaForPrimaryPointer && _finalPosition != null) {
       if (onTapUp != null)
         invokeCallback<void>('onTapUp', () {
           onTapUp(TapUpDetails(globalPosition: _finalPosition, buttons: _initialButtons));
