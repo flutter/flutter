@@ -25,3 +25,7 @@ void canRegisterNativeCallback() async {
 }
 
 void NotifyNative() native "NotifyNative";
+
+
+@pragma('vm:entry-point')
+void testIsolateShutdown() {  }
