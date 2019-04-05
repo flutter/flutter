@@ -45,7 +45,7 @@ static FlutterEngineResult LogEmbedderError(FlutterEngineResult code,
                                             const char* file,
                                             int line) {
   FML_LOG(ERROR) << "Returning error '" << name << "' (" << code
-                 << ") from Flutter Embedder API call to '" << __FUNCTION__
+                 << ") from Flutter Embedder API call to '" << function
                  << "'. Origin: " << file << ":" << line;
   return code;
 }
