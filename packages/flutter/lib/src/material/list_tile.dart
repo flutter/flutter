@@ -179,14 +179,62 @@ enum ListTileControlAffinity {
 ///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
+///
 /// {@tool sample}
 ///
-/// Here is a simple tile with an icon and some text.
+/// This example contains the different ways that [ListTile]s can be used.
+///
+/// ![Different variations of ListTile](https://flutter.github.io/assets-for-api-docs/assets/material/list_tile.png)
 ///
 /// ```dart
-/// ListTile(
-///   leading: const Icon(Icons.event_seat),
-///   title: const Text('The seat for the narrator'),
+/// ListView(
+///   children: const <Widget>[
+///     Card(child: ListTile(title: Text('One-line ListTile'))),
+///     Card(
+///       child: ListTile(
+///         leading: FlutterLogo(),
+///         title: Text('One-line with leading widget'),
+///       ),
+///     ),
+///     Card(
+///       child: ListTile(
+///         title: Text('One-line with trailing widget'),
+///         trailing: Icon(Icons.more_vert),
+///       ),
+///     ),
+///     Card(
+///       child: ListTile(
+///         leading: FlutterLogo(),
+///         title: Text('One-line with both widgets'),
+///         trailing: Icon(Icons.more_vert),
+///       ),
+///     ),
+///     Card(
+///       child: ListTile(
+///         title: Text('One-line dense ListTile'),
+///         dense: true,
+///       ),
+///     ),
+///     Card(
+///       child: ListTile(
+///         leading: FlutterLogo(size: 56.0),
+///         title: Text('Two-line ListTile'),
+///         subtitle: Text('Here is a second line'),
+///         trailing: Icon(Icons.more_vert),
+///       ),
+///     ),
+///     Card(
+///       child: ListTile(
+///         leading: FlutterLogo(size: 72.0),
+///         title: Text('Three-line ListTile'),
+///         subtitle: Text(
+///           'A sufficiently long subtitle warrants three lines.'
+///         ),
+///         trailing: Icon(Icons.more_vert),
+///         isThreeLine: true,
+///       ),
+///     ),
+///   ],
 /// )
 /// ```
 /// {@end-tool}
@@ -245,6 +293,132 @@ enum ListTileControlAffinity {
 ///   dense: false,
 /// ),
 /// ```
+/// {@end-tool}
+///
+/// If a ListTile is not what you are looking for, custom list items can be created
+/// with a combination of other widgets, such as [Row]s and [Column]s.
+///
+/// {@tool sample}
+///
+/// Here is an example of a custom list item created with [Expanded] and [Icon]
+/// widgets.
+///
+/// ![Custom list item](https://flutter.github.io/assets-for-api-docs/assets/widgets/custom_list_item.png)
+///
+/// ```dart
+/// ListView(
+///   padding: const EdgeInsets.all(8.0),
+///   itemExtent: 106.0,
+///   children: const <CustomListItem>[
+///     CustomListItem(
+///       user: 'Flutter',
+///       viewCount: 999000,
+///       thumbnail: Icon(
+///         Icons.videocam,
+///         size: 80,
+///         color: Colors.blueGrey,
+///       ),
+///       title: 'The Flutter YouTube Channel',
+///     ),
+///     CustomListItem(
+///       user: 'Dash',
+///       viewCount: 884000,
+///       thumbnail:
+///         Icon(
+///           Icons.flight_takeoff,
+///           size: 80,
+///           color: Colors.blueGrey,
+///         ),
+///       title: 'Announcing Flutter 1.0',
+///     ),
+///   ],
+/// )
+///
+/// class CustomListItem extends StatelessWidget {
+///   const CustomListItem({
+///     this.thumbnail,
+///     this.title,
+///     this.user,
+///     this.viewCount,
+///   });
+///
+///   final Widget thumbnail;
+///   final String title;
+///   final String user;
+///   final int viewCount;
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return Padding(
+///       padding: const EdgeInsets.symmetric(vertical: 5.0),
+///       child: Row(
+///         crossAxisAlignment: CrossAxisAlignment.start,
+///         children: <Widget>[
+///           Expanded(
+///             child: thumbnail,
+///             flex: 2,
+///           ),
+///           Expanded(
+///             child: _VideoDescription(
+///               title: title,
+///               user: user,
+///               viewCount: viewCount,
+///             ),
+///             flex: 3,
+///           ),
+///           const Icon(
+///             Icons.more_vert,
+///             size: 16.0,
+///           ),
+///         ],
+///       ),
+///     );
+///   }
+/// }
+///
+/// class _VideoDescription extends StatelessWidget {
+///   const _VideoDescription({
+///     Key key,
+///     this.title,
+///     this.user,
+///     this.viewCount,
+///   }) : super(key: key);
+///
+///   final String title;
+///   final String user;
+///   final int viewCount;
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return Padding(
+///       padding: const EdgeInsets.fromLTRB(5.0, 0.0, 0.0, 0.0),
+///       child: Column(
+///         crossAxisAlignment: CrossAxisAlignment.start,
+///         children: <Widget>[
+///           Text(
+///             title,
+///             style: const TextStyle(
+///               fontWeight: FontWeight.w500,
+///               fontSize: 14.0,
+///             ),
+///           ),
+///           const Padding(padding: EdgeInsets.symmetric(vertical: 2.0)),
+///           Text(
+///             user,
+///             style: const TextStyle(fontSize: 10.0),
+///           ),
+///           const Padding(padding: EdgeInsets.symmetric(vertical: 1.0)),
+///           Text(
+///             '$viewCount views',
+///             style: const TextStyle(fontSize: 10.0),
+///           ),
+///         ],
+///       ),
+///     );
+///   }
+/// }
+/// ```
+///
 /// {@end-tool}
 ///
 /// See also:
