@@ -414,7 +414,7 @@ void main() {
 
     expect(value, isFalse);
   });
-  
+
   testWidgets('Switch is translucent when disabled', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
