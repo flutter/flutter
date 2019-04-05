@@ -1,4 +1,4 @@
-Signature: cf6c48b736d4219c0e182b4de96f1336
+Signature: 2df9b62db9970814911c832678507502
 
 UNUSED LICENSES:
 
@@ -2038,6 +2038,7 @@ FILE: ../../../third_party/skia/experimental/wasm-skp-debugger/debugger/sample.s
 FILE: ../../../third_party/skia/experimental/wasm-skp-debugger/externs.js
 FILE: ../../../third_party/skia/experimental/wasm-skp-debugger/fonts/NotoMono-Regular.ttf
 FILE: ../../../third_party/skia/experimental/wasm-skp-debugger/gpu.js
+FILE: ../../../third_party/skia/experimental/wasm-skp-debugger/helper.js
 FILE: ../../../third_party/skia/experimental/wasm-skp-debugger/karma.conf.js
 FILE: ../../../third_party/skia/experimental/wasm-skp-debugger/package.json
 FILE: ../../../third_party/skia/experimental/wasm-skp-debugger/ready.js
@@ -4561,6 +4562,7 @@ FILE: ../../../third_party/skia/gm/mixercolorfilter.cpp
 FILE: ../../../third_party/skia/gm/overdrawcanvas.cpp
 FILE: ../../../third_party/skia/gm/samplelocations.cpp
 FILE: ../../../third_party/skia/gm/skbug_8664.cpp
+FILE: ../../../third_party/skia/gm/skbug_8955.cpp
 FILE: ../../../third_party/skia/include/core/SkMixer.h
 FILE: ../../../third_party/skia/include/core/SkTileMode.h
 FILE: ../../../third_party/skia/include/gpu/GrContextThreadSafeProxy.h
