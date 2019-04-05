@@ -239,7 +239,7 @@ class RenderParagraph extends RenderBox
   @override
   double computeMinIntrinsicWidth(double height) {
     if (_needsLayout) {
-      _sizeChildrenWithMinIntrinsics(height);
+      _computeChildrenWidthWithMinIntrinsics(height);
       _layoutText();
     }
     return _textPainter.minIntrinsicWidth;
@@ -248,13 +248,14 @@ class RenderParagraph extends RenderBox
   @override
   double computeMaxIntrinsicWidth(double height) {
     if (_needsLayout) {
-      _sizeChildrenWithMaxIntrinsics(height);
+      _computeChildrenWidthWithMaxIntrinsics(height);
       _layoutText(); // layout with infinite width.
     }
     return _textPainter.maxIntrinsicWidth;
   }
 
   double _computeIntrinsicHeight(double width) {
+    _computeChildrenHeightWithMinIntrinsics(width);
     _layoutText(minWidth: width, maxWidth: width);
     return _textPainter.height;
   }
@@ -279,7 +280,7 @@ class RenderParagraph extends RenderBox
     return _textPainter.computeDistanceToActualBaseline(baseline);
   }
 
-  void _sizeChildrenWithMaxIntrinsics(double height) {
+  void _computeChildrenWidthWithMaxIntrinsics(double height) {
     RenderBox child = firstChild;
     List<PlaceholderDimensions> placeholderDimensions = List(childCount);
     int childIndex = 0;
@@ -296,7 +297,7 @@ class RenderParagraph extends RenderBox
     _textPainter.placeholderDimensions = placeholderDimensions;
   }
 
-  void _sizeChildrenWithMinIntrinsics(double height) {
+  void _computeChildrenWidthWithMinIntrinsics(double height) {
     RenderBox child = firstChild;
     List<PlaceholderDimensions> placeholderDimensions = List(childCount);
     int childIndex = 0;
@@ -314,23 +315,24 @@ class RenderParagraph extends RenderBox
     _textPainter.placeholderDimensions = placeholderDimensions;
   }
 
-  // void _sizeChildrenWithMinIntrinsics(double height) {
-  //   RenderBox child = firstChild;
-  //   List<PlaceholderDimensions> placeholderDimensions = List(childCount);
-  //   int childIndex = 0;
-  //   while (child != null) {
-  //     placeholderDimensions[childIndex] = PlaceholderDimensions(
-  //       Size(
-  //         child.getMinIntrinsicWidth(height),
-  //         child.getMinIntrinsicHeight(height)
-  //       ),
-  //       0
-  //     );
-  //     child = childAfter(child);
-  //     childIndex++;
-  //   }
-  //   _textPainter.placeholderDimensions = placeholderDimensions;
-  // }
+  void _computeChildrenHeightWithMinIntrinsics(double width) {
+    RenderBox child = firstChild;
+    List<PlaceholderDimensions> placeholderDimensions = List(childCount);
+    int childIndex = 0;
+    while (child != null) {
+      double childMinIntrinsicHeight = child.getMinIntrinsicHeight(width);
+      placeholderDimensions[childIndex] = PlaceholderDimensions(
+        Size(
+          child.getMinIntrinsicWidth(double.infinity),
+          childMinIntrinsicHeight
+        ),
+        childMinIntrinsicHeight
+      );
+      child = childAfter(child);
+      childIndex++;
+    }
+    _textPainter.placeholderDimensions = placeholderDimensions;
+  }
 
   @override
   bool hitTestSelf(Offset position) => true;
@@ -406,14 +408,6 @@ class RenderParagraph extends RenderBox
         child.size,
         child.getDistanceToBaseline(TextBaseline.alphabetic)
       );
-      print(BoxConstraints(
-          minWidth: 0,
-          minHeight: 0,
-          maxWidth: constraints.maxWidth,
-          maxHeight: constraints.maxHeight
-        ),);
-      print(placeholderDimensions[childIndex].size);
-      print(placeholderDimensions[childIndex].baseline);
       child = childAfter(child);
       childIndex++;
     }
@@ -431,7 +425,6 @@ class RenderParagraph extends RenderBox
         _textPainter.inlinePlaceholderBoxes[childIndex].left,
         _textPainter.inlinePlaceholderBoxes[childIndex].top
       );
-      print(textParentData.offset);
       child = childAfter(child);
       childIndex++;
     }
@@ -535,7 +528,6 @@ class RenderParagraph extends RenderBox
     // If you remove this call, make sure that changing the textAlign still
     // works properly.
     _layoutTextWithConstraints(constraints);
-    // final Canvas canvas = context.canvas;
 
     assert(() {
       if (debugRepaintTextRainbowEnabled) {
