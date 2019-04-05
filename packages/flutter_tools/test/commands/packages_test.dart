@@ -45,7 +45,7 @@ void main() {
       tryToDelete(tempDir);
     });
 
-    Future<String> createProjectWithPlugin(String plugin, {List<String> arguments}) async {
+    Future<String> createProjectWithPlugin(String plugin, { List<String> arguments }) async {
       final String projectPath = await createProject(tempDir, arguments: arguments);
       final File pubspec = fs.file(fs.path.join(projectPath, 'pubspec.yaml'));
       String content = await pubspec.readAsString();
@@ -82,7 +82,7 @@ void main() {
       expect(
         fs.file(fs.path.join(projectPath, relPath)).readAsStringSync(),
         contains(substring),
-        reason: '$projectPath/$relPath has unexpected content'
+        reason: '$projectPath/$relPath has unexpected content',
       );
     }
 

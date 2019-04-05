@@ -408,7 +408,7 @@ class GalleryOptionsPage extends StatelessWidget {
           options.showOffscreenLayersCheckerboard,
           (bool value) {
             onOptionsChanged(options.copyWith(showOffscreenLayersCheckerboard: value));
-          }
+          },
         ),
       );
     }

@@ -13,9 +13,6 @@ import 'package:fuchsia_remote_debug_protocol/fuchsia_remote_debug_protocol.dart
 
 import 'error.dart';
 
-// TODO(awdavies): Update this to use the hub.
-final Directory _kDartPortDir = Directory('/tmp/dart.services');
-
 class _DummyPortForwarder implements PortForwarder {
   _DummyPortForwarder(this._port, this._remotePort);
 
@@ -29,7 +26,7 @@ class _DummyPortForwarder implements PortForwarder {
   int get remotePort => _remotePort;
 
   @override
-  Future<void> stop() async {}
+  Future<void> stop() async { }
 }
 
 class _DummySshCommandRunner implements SshCommandRunner {
@@ -49,13 +46,19 @@ class _DummySshCommandRunner implements SshCommandRunner {
   @override
   Future<List<String>> run(String command) async {
     try {
-      return List<String>.of(_kDartPortDir
-          .listSync(recursive: false, followLinks: false)
-          .map((FileSystemEntity entity) => entity.path
-              .replaceAll(entity.parent.path, '')
-              .replaceFirst(Platform.pathSeparator, '')));
-    } on FileSystemException catch (e) {
-      _log.warning('Error listing directory: $e');
+      final List<String> splitCommand = command.split(' ');
+      final String exe = splitCommand[0];
+      final List<String> args = splitCommand.skip(1).toList();
+      // This needs to remain async in the event that this command attempts to
+      // access something (like the hub) that requires interaction with this
+      // process's event loop. A specific example is attempting to run `find`, a
+      // synchronous command, on this own process's `out` directory. As `find`
+      // will wait indefinitely for the `out` directory to be serviced, causing
+      // a deadlock.
+      final ProcessResult r = await Process.run(exe, args);
+      return r.stdout.split('\n');
+    } on ProcessException catch (e) {
+      _log.warning("Error running '$command': $e");
     }
     return <String>[];
   }
@@ -96,7 +99,7 @@ class FuchsiaCompat {
   /// [FuchsiaRemoteConnection.stop].
   static Future<FuchsiaRemoteConnection> connect() async {
     FuchsiaCompat._init();
-    return FuchsiaRemoteConnection
-        .connectWithSshCommandRunner(_DummySshCommandRunner());
+    return FuchsiaRemoteConnection.connectWithSshCommandRunner(
+        _DummySshCommandRunner());
   }
 }

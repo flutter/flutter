@@ -148,7 +148,7 @@ class RenderListBody extends RenderBox
         child.layout(innerConstraints, parentUsesSize: true);
         final ListBodyParentData childParentData = child.parentData;
         childParentData.offset = Offset(0.0, mainAxisExtent);
-          mainAxisExtent += child.size.height;
+        mainAxisExtent += child.size.height;
         assert(child.parentData == childParentData);
         child = childParentData.nextSibling;
       }

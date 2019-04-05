@@ -104,7 +104,7 @@ class _CupertinoActivityIndicatorPainter extends CustomPainter {
            -radius / 2.0,
            -1.0 * radius / _kDefaultIndicatorRadius,
            1.0,
-           1.0
+           1.0,
        ),
        super(repaint: position);
 

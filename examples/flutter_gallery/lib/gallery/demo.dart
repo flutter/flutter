@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -59,10 +61,28 @@ class TabbedComponentDemoScaffold extends StatelessWidget {
     }
   }
 
-  void _showApiDocumentation(BuildContext context) {
+  Future<void> _showApiDocumentation(BuildContext context) async {
     final String url = demos[DefaultTabController.of(context).index].documentationUrl;
-    if (url != null) {
-      launch(url, forceWebView: true);
+    if (url == null)
+      return;
+
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      showDialog<void>(
+        context: context,
+        builder: (BuildContext context) {
+          return SimpleDialog(
+            title: const Text('Couldn\'t display URL:'),
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Text(url),
+              ),
+            ],
+          );
+        },
+      );
     }
   }
 
@@ -91,7 +111,7 @@ class TabbedComponentDemoScaffold extends StatelessWidget {
                     onPressed: () => _showExampleCode(context),
                   );
                 },
-              )
+              ),
             ],
           ),
           bottom: TabBar(
@@ -109,10 +129,10 @@ class TabbedComponentDemoScaffold extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Text(demo.description,
-                      style: Theme.of(context).textTheme.subhead
-                    )
+                      style: Theme.of(context).textTheme.subhead,
+                    ),
                   ),
-                  Expanded(child: demo.demoWidget)
+                  Expanded(child: demo.demoWidget),
                 ],
               ),
             );
@@ -157,7 +177,7 @@ class FullScreenCodeDialogState extends State<FullScreenCodeDialog> {
     Widget body;
     if (_exampleCode == null) {
       body = const Center(
-        child: CircularProgressIndicator()
+        child: CircularProgressIndicator(),
       );
     } else {
       body = SingleChildScrollView(
@@ -167,11 +187,11 @@ class FullScreenCodeDialogState extends State<FullScreenCodeDialog> {
             text: TextSpan(
               style: const TextStyle(fontFamily: 'monospace', fontSize: 10.0),
               children: <TextSpan>[
-                DartSyntaxHighlighter(style).format(_exampleCode)
-              ]
-            )
-          )
-        )
+                DartSyntaxHighlighter(style).format(_exampleCode),
+              ],
+            ),
+          ),
+        ),
       );
     }
 
@@ -182,11 +202,11 @@ class FullScreenCodeDialogState extends State<FullScreenCodeDialog> {
             Icons.clear,
             semanticLabel: 'Close',
           ),
-          onPressed: () { Navigator.pop(context); }
+          onPressed: () { Navigator.pop(context); },
         ),
-        title: const Text('Example code')
+        title: const Text('Example code'),
       ),
-      body: body
+      body: body,
     );
   }
 }
@@ -207,7 +227,7 @@ class MaterialDemoDocumentationButton extends StatelessWidget {
     return IconButton(
       icon: const Icon(Icons.library_books),
       tooltip: 'API documentation',
-      onPressed: () => launch(documentationUrl, forceWebView: true)
+      onPressed: () => launch(documentationUrl, forceWebView: true),
     );
   }
 }
@@ -231,7 +251,7 @@ class CupertinoDemoDocumentationButton extends StatelessWidget {
         label: 'API documentation',
         child: const Icon(CupertinoIcons.book),
       ),
-      onPressed: () => launch(documentationUrl, forceWebView: true)
+      onPressed: () => launch(documentationUrl, forceWebView: true),
     );
   }
 }

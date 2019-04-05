@@ -21,8 +21,8 @@ void main() {
       child: RenderLimitedBox(
         maxWidth: 100.0,
         maxHeight: 200.0,
-        child: child
-      )
+        child: child,
+      ),
     );
     layout(parent);
     expect(child.size.width, 100.0);
@@ -70,8 +70,8 @@ void main() {
       child: RenderLimitedBox(
         maxWidth: 100.0,
         maxHeight: 200.0,
-        child: child
-      )
+        child: child,
+      ),
     );
     layout(parent);
     expect(child.size.width, 100.0);
@@ -90,8 +90,8 @@ void main() {
       child: RenderLimitedBox(
         maxWidth: 100.0,
         maxHeight: 200.0,
-        child: child
-      )
+        child: child,
+      ),
     );
     layout(parent);
 
@@ -109,7 +109,7 @@ void main() {
       child: box = RenderLimitedBox(
         maxWidth: 100.0,
         maxHeight: 200.0,
-      )
+      ),
     );
     layout(parent);
     expect(box.size, const Size(10.0, 0.0));
@@ -145,7 +145,7 @@ void main() {
         child: box = RenderLimitedBox(
           maxWidth: 100.0,
           maxHeight: 200.0,
-        )
+        ),
     );
     layout(parent);
     expect(box.size, const Size(10.0, 600.0));

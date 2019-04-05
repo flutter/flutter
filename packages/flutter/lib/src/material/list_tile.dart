@@ -160,10 +160,19 @@ enum ListTileControlAffinity {
 /// is true then the overall height of this tile and the size of the
 /// [DefaultTextStyle]s that wrap the [title] and [subtitle] widget are reduced.
 ///
-/// List tiles are always a fixed height (which height depends on how
-/// [isThreeLine], [dense], and [subtitle] are configured); they do not grow in
-/// height based on their contents. If you are looking for a widget that allows
-/// for arbitrary layout in a row, consider [Row].
+/// It is the responsibility of the caller to ensure that [title] does not wrap,
+/// and to ensure that [subtitle] doesn't wrap (if [isThreeLine] is false) or
+/// wraps to two lines (if it is true).
+///
+/// The heights of the [leading] and [trailing] widgets are constrained
+/// according to the
+/// [Material spec](https://material.io/design/components/lists.html).
+/// An exception is made for one-line ListTiles for accessibility. Please
+/// see the example below to see how to adhere to both Material spec and
+/// accessibility requirements.
+///
+/// Note that [leading] and [trailing] widgets can expand as far as they wish
+/// horizontally, so ensure that they are properly constrained.
 ///
 /// List tiles are typically used in [ListView]s, or arranged in [Column]s in
 /// [Drawer]s and [Card]s.
@@ -200,6 +209,44 @@ enum ListTileControlAffinity {
 /// ```
 /// {@end-tool}
 ///
+/// To be accessible, tappable [leading] and [trailing] widgets have to
+/// be at least 48x48 in size. However, to adhere to the Material spec,
+/// [trailing] and [leading] widgets in one-line ListTiles should visually be
+/// at most 32 ([dense]: true) or 40 ([dense]: false) in height, which may
+/// conflict with the accessibility requirement.
+///
+/// For this reason, a one-line ListTile allows the height of [leading]
+/// and [trailing] widgets to be constrained by the height of the ListTile.
+/// This allows for the creation of tappable [leading] and [trailing] widgets
+/// that are large enough, but it is up to the developer to ensure that
+/// their widgets follow the Material spec.
+///
+/// {@tool sample}
+///
+/// Here is an example of a one-line, non-[dense] ListTile with a
+/// tappable leading widget that adheres to accessibility requirements and
+/// the Material spec. To adjust the use case below for a one-line, [dense]
+/// ListTile, adjust the vertical padding to 8.0.
+///
+/// ```dart
+/// ListTile(
+///   leading: GestureDetector(
+///     behavior: HitTestBehavior.translucent,
+///     onTap: () {},
+///     child: Container(
+///       width: 48,
+///       height: 48,
+///       padding: EdgeInsets.symmetric(vertical: 4.0),
+///       alignment: Alignment.center,
+///       child: CircleAvatar(),
+///     ),
+///   ),
+///   title: Text('title'),
+///   dense: false,
+/// ),
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [ListTileTheme], which defines visual properties for [ListTile]s.
@@ -212,7 +259,7 @@ enum ListTileControlAffinity {
 ///  * [ListTile.divideTiles], a utility for inserting [Divider]s in between [ListTile]s.
 ///  * [CheckboxListTile], [RadioListTile], and [SwitchListTile], widgets
 ///    that combine [ListTile] with other controls.
-///  * <https://material.google.com/components/lists.html>
+///  * <https://material.io/design/components/lists.html>
 class ListTile extends StatelessWidget {
   /// Creates a list tile.
   ///
@@ -246,19 +293,35 @@ class ListTile extends StatelessWidget {
   /// The primary content of the list tile.
   ///
   /// Typically a [Text] widget.
+  ///
+  /// This should not wrap.
   final Widget title;
 
   /// Additional content displayed below the title.
   ///
   /// Typically a [Text] widget.
+  ///
+  /// If [isThreeLine] is false, this should not wrap.
+  ///
+  /// If [isThreeLine] is true, this should be configured to take a maximum of
+  /// two lines.
   final Widget subtitle;
 
   /// A widget to display after the title.
   ///
   /// Typically an [Icon] widget.
+  ///
+  /// To show right-aligned metadata (assuming left-to-right reading order;
+  /// left-aligned for right-to-left reading order), consider using a [Row] with
+  /// [MainAxisAlign.baseline] alignment whose first item is [Expanded] and
+  /// whose second child is the metadata text, instead of using the [trailing]
+  /// property.
   final Widget trailing;
 
   /// Whether this list tile is intended to display three lines of text.
+  ///
+  /// If true, then [subtitle] must be non-null (since it is expected to give
+  /// the second and third lines of text).
   ///
   /// If false, the list tile is treated as having one line if the subtitle is
   /// null and treated as having two lines if the subtitle is non-null.
@@ -267,6 +330,8 @@ class ListTile extends StatelessWidget {
   /// Whether this list tile is part of a vertically dense list.
   ///
   /// If this property is null then its value is based on [ListTileTheme.dense].
+  ///
+  /// Dense list tiles default to a smaller height.
   final bool dense;
 
   /// The tile's internal padding.
@@ -305,7 +370,7 @@ class ListTile extends StatelessWidget {
   ///
   /// See also:
   ///
-  /// * [Divider], which you can use to obtain this effect manually.
+  ///  * [Divider], which you can use to obtain this effect manually.
   static Iterable<Widget> divideTiles({ BuildContext context, @required Iterable<Widget> tiles, Color color }) sync* {
     assert(tiles != null);
     assert(color != null || context != null);
@@ -427,7 +492,7 @@ class ListTile extends StatelessWidget {
     final Widget titleText = AnimatedDefaultTextStyle(
       style: titleStyle,
       duration: kThemeChangeDuration,
-      child: title ?? const SizedBox()
+      child: title ?? const SizedBox(),
     );
 
     Widget subtitleText;
@@ -721,7 +786,7 @@ class _RenderListTile extends RenderBox {
   }
 
   // The returned list is ordered for hit testing.
-  Iterable<RenderBox> get _children sync *{
+  Iterable<RenderBox> get _children sync* {
     if (leading != null)
       yield leading;
     if (title != null)
@@ -866,7 +931,7 @@ class _RenderListTile extends RenderBox {
   double computeMinIntrinsicHeight(double width) {
     return math.max(
       _defaultTileHeight,
-      title.getMinIntrinsicHeight(width) + (subtitle?.getMinIntrinsicHeight(width) ?? 0.0)
+      title.getMinIntrinsicHeight(width) + (subtitle?.getMinIntrinsicHeight(width) ?? 0.0),
     );
   }
 
@@ -907,11 +972,29 @@ class _RenderListTile extends RenderBox {
     final bool hasTrailing = trailing != null;
     final bool isTwoLine = !isThreeLine && hasSubtitle;
     final bool isOneLine = !isThreeLine && !hasSubtitle;
+
+    final BoxConstraints maxIconHeightConstraint = BoxConstraints(
+      // One-line trailing and leading widget heights do not follow
+      // Material specifications, but this sizing is required to adhere
+      // to accessibility requirements for smallest tappable widget.
+      // Two- and three-line trailing widget heights are constrained
+      // properly according to the Material spec.
+      maxHeight: isDense ? 48.0 : 56.0,
+    );
     final BoxConstraints looseConstraints = constraints.loosen();
+    final BoxConstraints iconConstraints = looseConstraints.enforce(maxIconHeightConstraint);
 
     final double tileWidth = looseConstraints.maxWidth;
-    final Size leadingSize = _layoutBox(leading, looseConstraints);
-    final Size trailingSize = _layoutBox(trailing, looseConstraints);
+    final Size leadingSize = _layoutBox(leading, iconConstraints);
+    final Size trailingSize = _layoutBox(trailing, iconConstraints);
+    assert(
+      tileWidth != leadingSize.width,
+      'Leading widget consumes entire tile width. Please use a sized widget.'
+    );
+    assert(
+      tileWidth != trailingSize.width,
+      'Trailing widget consumes entire tile width. Please use a sized widget.'
+    );
 
     final double titleStart = hasLeading
       ? math.max(_minLeadingWidth, leadingSize.width) + _horizontalTitleGap
@@ -934,17 +1017,19 @@ class _RenderListTile extends RenderBox {
       assert(isOneLine);
     }
 
+    final double defaultTileHeight = _defaultTileHeight;
+
     double tileHeight;
     double titleY;
     double subtitleY;
     if (!hasSubtitle) {
-      tileHeight = math.max(_defaultTileHeight, titleSize.height + 2.0 * _minVerticalPadding);
+      tileHeight = math.max(defaultTileHeight, titleSize.height + 2.0 * _minVerticalPadding);
       titleY = (tileHeight - titleSize.height) / 2.0;
     } else {
       assert(subtitleBaselineType != null);
       titleY = titleBaseline - _boxBaseline(title, titleBaselineType);
       subtitleY = subtitleBaseline - _boxBaseline(subtitle, subtitleBaselineType);
-      tileHeight = _defaultTileHeight;
+      tileHeight = defaultTileHeight;
 
       // If the title and subtitle overlap, move the title upwards by half
       // the overlap and the subtitle down by the same amount, and adjust
@@ -966,8 +1051,24 @@ class _RenderListTile extends RenderBox {
       }
     }
 
-    final double leadingY = (tileHeight - leadingSize.height) / 2.0;
-    final double trailingY = (tileHeight - trailingSize.height) / 2.0;
+    // This attempts to implement the redlines for the vertical position of the
+    // leading and trailing icons on the spec page:
+    //   https://material.io/design/components/lists.html#specs
+    // The interpretation for these red lines is as follows:
+    //  - For large tiles (> 72dp), both leading and trailing controls should be
+    //    a fixed distance from top. As per guidelines this is set to 16dp.
+    //  - For smaller tiles, trailing should always be centered. Leading can be
+    //    centered or closer to the top. It should never be further than 16dp
+    //    to the top.
+    double leadingY;
+    double trailingY;
+    if (tileHeight > 72.0) {
+      leadingY = 16.0;
+      trailingY = 16.0;
+    } else {
+      leadingY = math.min((tileHeight - leadingSize.height) / 2.0, 16.0);
+      trailingY = (tileHeight - trailingSize.height) / 2.0;
+    }
 
     switch (textDirection) {
       case TextDirection.rtl: {

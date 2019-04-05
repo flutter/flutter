@@ -10,7 +10,7 @@ const List<int> kPointerActions = <int>[
   0, // DOWN
   1, // UP
   5, // POINTER_DOWN
-  6 // POINTER_UP
+  6, // POINTER_UP
 ];
 
 const double kDoubleErrorMargin = 0.0001;
@@ -152,7 +152,7 @@ String getActionName(int actionMasked, int action) {
     'HOVER_ENTER',
     'HOVER_EXIT',
     'BUTTON_PRESS',
-    'BUTTON_RELEASE'
+    'BUTTON_RELEASE',
   ];
   if (actionMasked < actionNames.length)
     return '${actionNames[actionMasked]}($action)';

@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		2D5378261FAA1A9400D5DBA9 /* flutter_assets in Resources */ = {isa = PBXBuildFile; fileRef = 2D5378251FAA1A9400D5DBA9 /* flutter_assets */; };
 		746232581E83C0C200CC1A5E /* App.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 746232571E83C0C200CC1A5E /* App.framework */; };
 		746232591E83C0C200CC1A5E /* App.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 746232571E83C0C200CC1A5E /* App.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		7462325D1E83C18C00CC1A5E /* AppFrameworkInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = 7462325C1E83C18C00CC1A5E /* AppFrameworkInfo.plist */; };
@@ -36,7 +35,6 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		2D5378251FAA1A9400D5DBA9 /* flutter_assets */ = {isa = PBXFileReference; lastKnownFileType = folder; name = flutter_assets; path = Flutter/flutter_assets; sourceTree = SOURCE_ROOT; };
 		746232571E83C0C200CC1A5E /* App.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = App.framework; path = Flutter/App.framework; sourceTree = "<group>"; };
 		7462325C1E83C18C00CC1A5E /* AppFrameworkInfo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = AppFrameworkInfo.plist; path = Flutter/AppFrameworkInfo.plist; sourceTree = "<group>"; };
 		9740EEB21CF90195004384FC /* Flutter.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = Flutter.xcconfig; path = Flutter/Flutter.xcconfig; sourceTree = "<group>"; };
@@ -66,7 +64,6 @@
 		9740EEB11CF90186004384FC /* Flutter */ = {
 			isa = PBXGroup;
 			children = (
-				2D5378251FAA1A9400D5DBA9 /* flutter_assets */,
 				7462325C1E83C18C00CC1A5E /* AppFrameworkInfo.plist */,
 				746232571E83C0C200CC1A5E /* App.framework */,
 				9740EEBA1CF902C7004384FC /* Flutter.framework */,
@@ -172,7 +169,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				2D5378261FAA1A9400D5DBA9 /* flutter_assets in Resources */,
 				97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */,
 				7462325D1E83C18C00CC1A5E /* AppFrameworkInfo.plist in Resources */,
 				9740EEB41CF90195004384FC /* Flutter.xcconfig in Resources */,

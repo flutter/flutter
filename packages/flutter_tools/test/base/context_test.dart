@@ -158,7 +158,7 @@ void main() {
           fallbacks: <Type, Generator>{
             int: () => int.parse(context[String]),
             String: () => '${context[double]}',
-            double: () => context[int] * 1.0,
+            double: () => (context[int] as int) * 1.0, // ignore: avoid_as
           },
         );
         try {

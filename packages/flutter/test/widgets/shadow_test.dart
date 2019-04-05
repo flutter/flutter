@@ -128,7 +128,7 @@ void main() {
       await tester.pumpWidget(build(elevation.toDouble()));
       await expectLater(
         find.byType(Container),
-        matchesGoldenFile('shadow.PhysicalShape.$elevation.png'),
+        matchesGoldenFile('shadow.PhysicalShape.$elevation.1.png'),
       );
     }
     debugDisableShadows = true;

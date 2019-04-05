@@ -60,16 +60,16 @@ class ButtonBar extends StatelessWidget {
       children: children.map<Widget>((Widget child) {
         return Padding(
           padding: EdgeInsets.symmetric(horizontal: paddingUnit),
-          child: child
+          child: child,
         );
-      }).toList()
+      }).toList(),
     );
     switch (buttonTheme.layoutBehavior) {
       case ButtonBarLayoutBehavior.padded:
         return Padding(
           padding: EdgeInsets.symmetric(
             vertical: 2.0 * paddingUnit,
-            horizontal: paddingUnit
+            horizontal: paddingUnit,
           ),
           child: child,
         );

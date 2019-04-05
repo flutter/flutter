@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		2D4B11271E55A15A00FF14DB /* NativeViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2D4B11261E55A15A00FF14DB /* NativeViewController.m */; };
-		2D5378261FAA1A9400D5DBA9 /* flutter_assets in Resources */ = {isa = PBXBuildFile; fileRef = 2D5378251FAA1A9400D5DBA9 /* flutter_assets */; };
 		2DD8945F1E5B87AF0010574F /* ic_add.png in Resources */ = {isa = PBXBuildFile; fileRef = 2DD8945E1E5B87AF0010574F /* ic_add.png */; };
 		2DE332E71E55C6D800393FD5 /* MainViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2DE332E61E55C6D800393FD5 /* MainViewController.m */; };
 		3B3967021E83382E004F5970 /* App.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B3967011E83382E004F5970 /* App.framework */; };
@@ -44,7 +43,6 @@
 		069A5C81CEBC82AF6693F60F /* Pods_Runner.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Runner.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		2D4B11261E55A15A00FF14DB /* NativeViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NativeViewController.m; sourceTree = "<group>"; };
 		2D4B11281E55A31800FF14DB /* NativeViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NativeViewController.h; sourceTree = "<group>"; };
-		2D5378251FAA1A9400D5DBA9 /* flutter_assets */ = {isa = PBXFileReference; lastKnownFileType = folder; name = flutter_assets; path = Flutter/flutter_assets; sourceTree = SOURCE_ROOT; };
 		2DD8945E1E5B87AF0010574F /* ic_add.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ic_add.png; sourceTree = "<group>"; };
 		2DE332E61E55C6D800393FD5 /* MainViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MainViewController.m; sourceTree = "<group>"; };
 		2DE332E81E55C6F100393FD5 /* MainViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MainViewController.h; sourceTree = "<group>"; };
@@ -88,7 +86,6 @@
 		9740EEB11CF90186004384FC /* Flutter */ = {
 			isa = PBXGroup;
 			children = (
-				2D5378251FAA1A9400D5DBA9 /* flutter_assets */,
 				3B3967011E83382E004F5970 /* App.framework */,
 				3B3967041E83383D004F5970 /* AppFrameworkInfo.plist */,
 				9740EEBA1CF902C7004384FC /* Flutter.framework */,
@@ -218,7 +215,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				2DD8945F1E5B87AF0010574F /* ic_add.png in Resources */,
-				2D5378261FAA1A9400D5DBA9 /* flutter_assets in Resources */,
 				97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */,
 				3B3967051E83383D004F5970 /* AppFrameworkInfo.plist in Resources */,
 				9740EEB41CF90195004384FC /* Debug.xcconfig in Resources */,

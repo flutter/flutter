@@ -6,11 +6,13 @@
 ///
 /// To use, import `package:flutter/material.dart`.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=DL0Ix1lnC4w}
+///
 /// See also:
 ///
 ///  * [flutter.io/widgets](https://flutter.io/widgets/)
 ///    for a catalog of commonly-used Flutter widgets.
-///  * [material.google.com](https://material.google.com/)
+///  * [material.io/design](https://material.io/design/)
 ///    for an introduction to Material Design.
 library material;
 
@@ -18,15 +20,18 @@ export 'src/material/about.dart';
 export 'src/material/animated_icons.dart';
 export 'src/material/app.dart';
 export 'src/material/app_bar.dart';
+export 'src/material/app_bar_theme.dart';
 export 'src/material/arc.dart';
 export 'src/material/back_button.dart';
 export 'src/material/bottom_app_bar.dart';
+export 'src/material/bottom_app_bar_theme.dart';
 export 'src/material/bottom_navigation_bar.dart';
 export 'src/material/bottom_sheet.dart';
 export 'src/material/button.dart';
 export 'src/material/button_bar.dart';
 export 'src/material/button_theme.dart';
 export 'src/material/card.dart';
+export 'src/material/card_theme.dart';
 export 'src/material/checkbox.dart';
 export 'src/material/checkbox_list_tile.dart';
 export 'src/material/chip.dart';
@@ -53,6 +58,7 @@ export 'src/material/flat_button.dart';
 export 'src/material/flexible_space_bar.dart';
 export 'src/material/floating_action_button.dart';
 export 'src/material/floating_action_button_location.dart';
+export 'src/material/floating_action_button_theme.dart';
 export 'src/material/flutter_logo.dart';
 export 'src/material/grid_tile.dart';
 export 'src/material/grid_tile_bar.dart';
@@ -105,7 +111,6 @@ export 'src/material/time.dart';
 export 'src/material/time_picker.dart';
 export 'src/material/toggleable.dart';
 export 'src/material/tooltip.dart';
-export 'src/material/two_level_list.dart';
 export 'src/material/typography.dart';
 export 'src/material/user_accounts_drawer_header.dart';
 export 'widgets.dart';

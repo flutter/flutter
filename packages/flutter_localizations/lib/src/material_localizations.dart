@@ -9,9 +9,9 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' as intl;
 import 'package:intl/date_symbols.dart' as intl;
 import 'package:intl/date_symbol_data_custom.dart' as date_symbol_data_custom;
-import 'l10n/date_localizations.dart' as date_localizations;
+import 'l10n/generated_date_localizations.dart' as date_localizations;
 
-import 'l10n/localizations.dart';
+import 'l10n/generated_material_localizations.dart';
 import 'widgets_localizations.dart';
 
 /// Implementation of localized strings for the material widgets using the
@@ -248,7 +248,7 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   String get tabLabelRaw;
 
   @override
-  String tabLabel({int tabIndex, int tabCount}) {
+  String tabLabel({ int tabIndex, int tabCount }) {
     assert(tabIndex >= 1);
     assert(tabCount >= 1);
     final String template = tabLabelRaw;
@@ -573,7 +573,7 @@ class _MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocal
       // Keep track of initialzed locales, or will fail on attempted double init.
       // This can only happen if a locale with a stripped scriptCode has already
       // been initialzed. This should be removed when scriptCode stripping is removed.
-      final Set<String> initializedLocales = Set<String>();
+      final Set<String> initializedLocales = <String>{};
       date_localizations.dateSymbols.forEach((String locale, dynamic data) {
         // Strip scriptCode from the locale, as we do not distinguish between scripts
         // for dates.
@@ -647,7 +647,7 @@ class _MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocal
 
       assert(locale.toString() == localeName, 'comparing "$locale" to "$localeName"');
 
-      return SynchronousFuture<MaterialLocalizations>(getTranslation(
+      return SynchronousFuture<MaterialLocalizations>(getMaterialTranslation(
         locale,
         fullYearFormat,
         mediumDateFormat,

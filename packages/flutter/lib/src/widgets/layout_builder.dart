@@ -19,22 +19,24 @@ typedef LayoutWidgetBuilder = Widget Function(BuildContext context, BoxConstrain
 /// the child's intrinsic size. The [LayoutBuilder]'s final size will match its
 /// child's size.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=IYDVcriKjsw}
+///
 /// If the child should be smaller than the parent, consider wrapping the child
 /// in an [Align] widget. If the child might want to be bigger, consider
 /// wrapping it in a [SingleChildScrollView].
 ///
 /// See also:
 ///
-/// * [Builder], which calls a `builder` function at build time.
-/// * [StatefulBuilder], which passes its `builder` function a `setState` callback.
-/// * [CustomSingleChildLayout], which positions its child during layout.
+///  * [Builder], which calls a `builder` function at build time.
+///  * [StatefulBuilder], which passes its `builder` function a `setState` callback.
+///  * [CustomSingleChildLayout], which positions its child during layout.
 class LayoutBuilder extends RenderObjectWidget {
   /// Creates a widget that defers its building until layout.
   ///
   /// The [builder] argument must not be null.
   const LayoutBuilder({
     Key key,
-    @required this.builder
+    @required this.builder,
   }) : assert(builder != null),
        super(key: key);
 
@@ -232,7 +234,7 @@ FlutterErrorDetails _debugReportException(
     exception: exception,
     stack: stack,
     library: 'widgets library',
-    context: context
+    context: context,
   );
   FlutterError.reportError(details);
   return details;

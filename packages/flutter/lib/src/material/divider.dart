@@ -27,7 +27,7 @@ import 'theme.dart';
 ///
 ///  * [PopupMenuDivider], which is the equivalent but for popup menus.
 ///  * [ListTile.divideTiles], another approach to dividing widgets in a list.
-///  * <https://material.google.com/components/dividers.html>
+///  * <https://material.io/design/components/dividers.html>
 class Divider extends StatelessWidget {
   /// Creates a material design divider.
   ///
@@ -36,7 +36,7 @@ class Divider extends StatelessWidget {
     Key key,
     this.height = 16.0,
     this.indent = 0.0,
-    this.color
+    this.color,
   }) : assert(height >= 0.0),
        super(key: key);
 
@@ -136,7 +136,7 @@ class Divider extends StatelessWidget {
 ///
 ///  * [PopupMenuDivider], which is the equivalent but for popup menus.
 ///  * [ListTile.divideTiles], another approach to dividing widgets in a list.
-///  * <https://material.google.com/components/dividers.html>
+///  * <https://material.io/design/components/dividers.html>
 class VerticalDivider extends StatelessWidget {
   /// Creates a material design divider.
   ///
@@ -145,7 +145,7 @@ class VerticalDivider extends StatelessWidget {
     Key key,
     this.width = 16.0,
     this.indent = 0.0,
-    this.color
+    this.color,
   }) : assert(width >= 0.0),
        super(key: key);
 

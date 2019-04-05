@@ -23,8 +23,8 @@ void main() {
       child: const SizedBox(
         width: 10.0,
         height: 10.0,
-        child: Text('target', textDirection: TextDirection.ltr)
-      )
+        child: Text('target', textDirection: TextDirection.ltr),
+      ),
     );
   });
 
@@ -34,7 +34,7 @@ void main() {
       children: <Widget>[
         tapTarget,
         const ModalBarrier(dismissible: false),
-      ]
+      ],
     );
 
     await tester.pumpWidget(subject);
@@ -50,7 +50,7 @@ void main() {
       children: <Widget>[
         const ModalBarrier(dismissible: false),
         tapTarget,
-      ]
+      ],
     );
 
     await tester.pumpWidget(subject);
@@ -217,23 +217,23 @@ void main() {
 class FirstWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-  return GestureDetector(
-    onTap: () {
-      Navigator.pushNamed(context, '/modal');
-    },
-    child: Container(
-      child: const Text('X')
-    )
-  );
+    return GestureDetector(
+      onTap: () {
+        Navigator.pushNamed(context, '/modal');
+      },
+      child: Container(
+        child: const Text('X'),
+      ),
+    );
   }
 }
 
 class SecondWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-  return const ModalBarrier(
-    key: ValueKey<String>('barrier'),
-    dismissible: true
-  );
+    return const ModalBarrier(
+      key: ValueKey<String>('barrier'),
+      dismissible: true,
+    );
   }
 }

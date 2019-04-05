@@ -4,7 +4,7 @@
 
 import 'dart:async';
 import 'dart:collection';
-import 'dart:ui' as ui show window, PointerDataPacket;
+import 'dart:ui' as ui show PointerDataPacket;
 
 import 'package:flutter/foundation.dart';
 
@@ -14,6 +14,7 @@ import 'debug.dart';
 import 'events.dart';
 import 'hit_test.dart';
 import 'pointer_router.dart';
+import 'pointer_signal_resolver.dart';
 
 /// A binding for the gesture subsystem.
 ///
@@ -62,7 +63,7 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
   void initInstances() {
     super.initInstances();
     _instance = this;
-    ui.window.onPointerDataPacket = _handlePointerDataPacket;
+    window.onPointerDataPacket = _handlePointerDataPacket;
   }
 
   @override
@@ -80,7 +81,7 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
   void _handlePointerDataPacket(ui.PointerDataPacket packet) {
     // We convert pointer data to logical pixels so that e.g. the touch slop can be
     // defined in a device-independent manner.
-    _pendingPointerEvents.addAll(PointerEventConverter.expand(packet.data, ui.window.devicePixelRatio));
+    _pendingPointerEvents.addAll(PointerEventConverter.expand(packet.data, window.devicePixelRatio));
     if (!locked)
       _flushPointerEventQueue();
   }
@@ -108,6 +109,10 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
   /// pointer events.
   final GestureArenaManager gestureArena = GestureArenaManager();
 
+  /// The resolver used for determining which widget handles a pointer
+  /// signal event.
+  final PointerSignalResolver pointerSignalResolver = PointerSignalResolver();
+
   /// State for all pointers which are currently down.
   ///
   /// The state of hovering pointers is not tracked because that would require
@@ -116,26 +121,40 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
 
   void _handlePointerEvent(PointerEvent event) {
     assert(!locked);
-    HitTestResult result;
-    if (event is PointerDownEvent) {
+    HitTestResult hitTestResult;
+    if (event is PointerDownEvent || event is PointerSignalEvent) {
       assert(!_hitTests.containsKey(event.pointer));
-      result = HitTestResult();
-      hitTest(result, event.position);
-      _hitTests[event.pointer] = result;
+      hitTestResult = HitTestResult();
+      hitTest(hitTestResult, event.position);
+      if (event is PointerDownEvent) {
+        _hitTests[event.pointer] = hitTestResult;
+      }
       assert(() {
         if (debugPrintHitTestResults)
-          debugPrint('$event: $result');
+          debugPrint('$event: $hitTestResult');
         return true;
       }());
     } else if (event is PointerUpEvent || event is PointerCancelEvent) {
-      result = _hitTests.remove(event.pointer);
+      hitTestResult = _hitTests.remove(event.pointer);
     } else if (event.down) {
-      result = _hitTests[event.pointer];
-    } else {
-      return; // We currently ignore add, remove, and hover move events.
+      // Because events that occur with the pointer down (like
+      // PointerMoveEvents) should be dispatched to the same place that their
+      // initial PointerDownEvent was, we want to re-use the path we found when
+      // the pointer went down, rather than do hit detection each time we get
+      // such an event.
+      hitTestResult = _hitTests[event.pointer];
     }
-    if (result != null)
-      dispatchEvent(event, result);
+    assert(() {
+      if (debugPrintMouseHoverEvents && event is PointerHoverEvent)
+        debugPrint('$event');
+      return true;
+    }());
+    if (hitTestResult != null ||
+        event is PointerHoverEvent ||
+        event is PointerAddedEvent ||
+        event is PointerRemovedEvent) {
+      dispatchEvent(event, hitTestResult);
+    }
   }
 
   /// Determine which [HitTestTarget] objects are located at a given position.
@@ -146,14 +165,36 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
 
   /// Dispatch an event to a hit test result's path.
   ///
-  /// This sends the given event to every [HitTestTarget] in the entries
-  /// of the given [HitTestResult], and catches exceptions that any of
-  /// the handlers might throw. The `result` argument must not be null.
+  /// This sends the given event to every [HitTestTarget] in the entries of the
+  /// given [HitTestResult], and catches exceptions that any of the handlers
+  /// might throw. The [hitTestResult] argument may only be null for
+  /// [PointerHoverEvent], [PointerAddedEvent], or [PointerRemovedEvent] events.
   @override // from HitTestDispatcher
-  void dispatchEvent(PointerEvent event, HitTestResult result) {
+  void dispatchEvent(PointerEvent event, HitTestResult hitTestResult) {
     assert(!locked);
-    assert(result != null);
-    for (HitTestEntry entry in result.path) {
+    // No hit test information implies that this is a hover or pointer
+    // add/remove event.
+    if (hitTestResult == null) {
+      assert(event is PointerHoverEvent || event is PointerAddedEvent || event is PointerRemovedEvent);
+      try {
+        pointerRouter.route(event);
+      } catch (exception, stack) {
+        FlutterError.reportError(FlutterErrorDetailsForPointerEventDispatcher(
+          exception: exception,
+          stack: stack,
+          library: 'gesture library',
+          context: 'while dispatching a non-hit-tested pointer event',
+          event: event,
+          hitTestEntry: null,
+          informationCollector: (StringBuffer information) {
+            information.writeln('Event:');
+            information.writeln('  $event');
+          },
+        ));
+      }
+      return;
+    }
+    for (HitTestEntry entry in hitTestResult.path) {
       try {
         entry.target.handleEvent(event, entry);
       } catch (exception, stack) {
@@ -169,7 +210,7 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
             information.writeln('  $event');
             information.writeln('Target:');
             information.write('  ${entry.target}');
-          }
+          },
         ));
       }
     }
@@ -182,6 +223,8 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
       gestureArena.close(event.pointer);
     } else if (event is PointerUpEvent) {
       gestureArena.sweep(event.pointer);
+    } else if (event is PointerSignalEvent) {
+      pointerSignalResolver.resolve(event);
     }
   }
 }
@@ -205,7 +248,7 @@ class FlutterErrorDetailsForPointerEventDispatcher extends FlutterErrorDetails {
     this.event,
     this.hitTestEntry,
     InformationCollector informationCollector,
-    bool silent = false
+    bool silent = false,
   }) : super(
     exception: exception,
     stack: stack,
@@ -219,7 +262,8 @@ class FlutterErrorDetailsForPointerEventDispatcher extends FlutterErrorDetails {
   final PointerEvent event;
 
   /// The hit test result entry for the object whose handleEvent method threw
-  /// the exception.
+  /// the exception. May be null if no hit test entry is associated with the
+  /// event (e.g. hover and pointer add/remove events).
   ///
   /// The target object itself is given by the [HitTestEntry.target] property of
   /// the hitTestEntry object.

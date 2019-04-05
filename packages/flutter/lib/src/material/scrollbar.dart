@@ -70,7 +70,7 @@ class _ScrollbarState extends State<Scrollbar> with TickerProviderStateMixin {
     );
     _fadeoutOpacityAnimation = CurvedAnimation(
       parent: _fadeoutAnimationController,
-      curve: Curves.fastOutSlowIn
+      curve: Curves.fastOutSlowIn,
     );
   }
 

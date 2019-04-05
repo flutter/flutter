@@ -12,7 +12,7 @@ import 'src/context.dart';
 
 class TestRunner extends ResidentRunner {
   TestRunner(List<FlutterDevice> devices)
-      : super(devices);
+    : super(devices);
 
   bool hasHelpBeenPrinted = false;
   String receivedCommand;
@@ -39,6 +39,12 @@ class TestRunner extends ResidentRunner {
     Completer<void> appStartedCompleter,
     String route,
     bool shouldBuild = true,
+  }) async => null;
+
+  @override
+  Future<int> attach({
+    Completer<DebugConnectionInfo> connectionInfoCompleter,
+    Completer<void> appStartedCompleter,
   }) async => null;
 }
 

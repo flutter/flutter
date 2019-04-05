@@ -27,9 +27,9 @@ import 'framework.dart';
 ///     MyScrollableTabView(
 ///       key: PageStorageKey<String>(tab.text), // like 'Tab 1'
 ///       tab: tab,
-///    ),
-///  }),
-///)
+///     ),
+///   }),
+/// )
 /// ```
 class PageStorageKey<T> extends ValueKey<T> {
   /// Creates a [ValueKey] that defines where [PageStorage] values will be saved.
@@ -139,7 +139,7 @@ class PageStorage extends StatelessWidget {
   const PageStorage({
     Key key,
     @required this.bucket,
-    @required this.child
+    @required this.child,
   }) : assert(bucket != null),
        super(key: key);
 

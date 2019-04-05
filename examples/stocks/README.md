@@ -15,7 +15,7 @@ the [Flutter Setup](https://flutter.io/setup/) guide.
 ### Building and installing the stocks demo app
 
 * `cd $FLUTTER_ROOT/examples/stocks`
-* `flutter upgrade`
+* `flutter packages get`
 * `flutter run --release`
 
 The `flutter run --release` command both builds and installs the Flutter app.

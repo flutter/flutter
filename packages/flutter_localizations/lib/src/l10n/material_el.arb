@@ -51,5 +51,5 @@
   "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "απομένει 1 χαρακτήρας",
   "remainingTextFieldCharacterCountOther": "απομένουν $remainingCount χαρακτήρες",
-  "refreshIndicatorSemanticLabel": "TBD"
+  "refreshIndicatorSemanticLabel": "Ανανέωση"
 }

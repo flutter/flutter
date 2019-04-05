@@ -53,7 +53,7 @@ void main() {
       final List<Emulator> emulators = <Emulator>[
         emulator1,
         emulator2,
-        emulator3
+        emulator3,
       ];
       final TestEmulatorManager testEmulatorManager =
           TestEmulatorManager(emulators);
@@ -70,8 +70,7 @@ void main() {
       await expectEmulator('ios', <Emulator>[emulator3]);
     });
 
-    testUsingContext('create emulator with an empty name does not fail',
-        () async {
+    testUsingContext('create emulator with an empty name does not fail', () async {
       final CreateEmulatorResult res = await emulatorManager.createEmulator();
       expect(res.success, equals(true));
     }, overrides: <Type, Generator>{
@@ -80,8 +79,7 @@ void main() {
       AndroidSdk: () => mockSdk,
     });
 
-    testUsingContext('create emulator with a unique name does not throw',
-        () async {
+    testUsingContext('create emulator with a unique name does not throw', () async {
       final CreateEmulatorResult res =
           await emulatorManager.createEmulator(name: 'test');
       expect(res.success, equals(true));
@@ -101,9 +99,7 @@ void main() {
       AndroidSdk: () => mockSdk,
     });
 
-    testUsingContext(
-        'create emulator without a name but when default exists adds a suffix',
-        () async {
+    testUsingContext('create emulator without a name but when default exists adds a suffix', () async {
       // First will get default name.
       CreateEmulatorResult res = await emulatorManager.createEmulator();
       expect(res.success, equals(true));
@@ -164,7 +160,7 @@ class TestEmulatorManager extends EmulatorManager {
 
 class _MockEmulator extends Emulator {
   _MockEmulator(String id, this.name, this.manufacturer, this.label)
-      : super(id, true);
+    : super(id, true);
 
   @override
   final String name;
@@ -203,8 +199,8 @@ class MockProcessManager extends Mock implements ProcessManager {
     Map<String, String> environment,
     bool includeParentEnvironment = true,
     bool runInShell = false,
-    Encoding stdoutEncoding,
-    Encoding stderrEncoding
+    Encoding stdoutEncoding = systemEncoding,
+    Encoding stderrEncoding = systemEncoding,
   }) {
     final String program = command[0];
     final List<String> args = command.sublist(1);

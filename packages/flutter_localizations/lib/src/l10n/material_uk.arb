@@ -35,7 +35,7 @@
   "postMeridiemAbbreviation": "пп",
   "timePickerHourModeAnnouncement": "Виберіть години",
   "timePickerMinuteModeAnnouncement": "Виберіть хвилини",
-  "modalBarrierDismissLabel": "Усунути",
+  "modalBarrierDismissLabel": "Закрити",
   "signedInLabel": "Ви ввійшли",
   "hideAccountsLabel": "Сховати облікові записи",
   "showAccountsLabel": "Показати облікові записи",
@@ -55,5 +55,5 @@
   "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "Залишився 1 символ",
   "remainingTextFieldCharacterCountOther": "Залишилося $remainingCount символу",
-  "refreshIndicatorSemanticLabel": "TBD"
+  "refreshIndicatorSemanticLabel": "Оновити"
 }

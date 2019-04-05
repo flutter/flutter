@@ -26,17 +26,19 @@ class LoggingThumbShape extends SliderComponentShape {
 
   @override
   void paint(
-    PaintingContext context,
-    Offset thumbCenter, {
-    Animation<double> activationAnimation,
-    Animation<double> enableAnimation,
-    bool isDiscrete,
-    TextPainter labelPainter,
-    RenderBox parentBox,
-    SliderThemeData sliderTheme,
-    TextDirection textDirection,
-    double value,
-  }) {
+      PaintingContext context,
+      Offset thumbCenter, {
+      Animation<double> activationAnimation,
+      Animation<double> enableAnimation,
+      bool isEnabled,
+      bool isDiscrete,
+      bool onActiveTrack,
+      TextPainter labelPainter,
+      RenderBox parentBox,
+      SliderThemeData sliderTheme,
+      TextDirection textDirection,
+      double value,
+    }) {
     log.add(thumbCenter);
     final Paint thumbPaint = Paint()..color = Colors.red;
     context.canvas.drawCircle(thumbCenter, 5.0, thumbPaint);
@@ -554,10 +556,10 @@ void main() {
       bool enabled = true,
     }) {
       final ValueChanged<double> onChanged = !enabled
-          ? null
-          : (double d) {
-              value = d;
-            };
+        ? null
+        : (double d) {
+            value = d;
+          };
       return Directionality(
         textDirection: TextDirection.ltr,
         child: MediaQuery(
@@ -720,14 +722,15 @@ void main() {
     expect(
       sliderBox,
       paints
-        ..rect(color: customColor1)
-        ..rect(color: customColor2)
-        ..circle(color: customColor1.withAlpha(0x29))
-        ..circle(color: customColor2)
-        ..circle(color: customColor2)
-        ..circle(color: customColor1)
-        ..path(color: customColor1)
-        ..circle(color: customColor1),
+        ..rect(color: customColor1) // active track
+        ..rect(color: customColor2) // inactive track
+        ..circle(color: customColor1.withAlpha(0x29)) // overlay
+        ..circle(color: customColor2) // 1st tick mark
+        ..circle(color: customColor2) // 2nd tick mark
+        ..circle(color: customColor2) // 3rd tick mark
+        ..circle(color: customColor1) // 4th tick mark
+        ..path(color: customColor1) // indicator
+        ..circle(color: customColor1), // thumb
     );
     await gesture.up();
   });
@@ -896,8 +899,8 @@ void main() {
               child: Material(
                 child: Theme(
                   data: Theme.of(context).copyWith(
-                        sliderTheme: Theme.of(context).sliderTheme.copyWith(showValueIndicator: show),
-                      ),
+                    sliderTheme: Theme.of(context).sliderTheme.copyWith(showValueIndicator: show),
+                  ),
                   child: Center(
                     child: OverflowBox(
                       maxWidth: double.infinity,
@@ -975,6 +978,55 @@ void main() {
     await tester.pumpAndSettle();
   });
 
+  testWidgets('Tick marks are skipped when they are too dense', (WidgetTester tester) async {
+    Widget buildSlider({
+      int divisions,
+    }) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: MediaQueryData.fromWindow(window),
+          child: Material(
+            child: Center(
+              child: Slider(
+                min: 0.0,
+                max: 100.0,
+                divisions: divisions,
+                value: 0.25,
+                onChanged: (double newValue) { },
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Pump a slider with a reasonable amount of divisions to verify that the
+    // tick marks are drawn when the number of tick marks is not too dense.
+    await tester.pumpWidget(
+      buildSlider(
+        divisions: 4,
+      ),
+    );
+
+    final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
+
+    // 5 tick marks and a thumb.
+    expect(sliderBox, paintsExactlyCountTimes(#drawCircle, 6));
+
+    // 200 divisions will produce a tick interval off less than 6,
+    // which would be too dense to draw.
+    await tester.pumpWidget(
+      buildSlider(
+        divisions: 200,
+      ),
+    );
+
+    // No tick marks are drawn because they are too dense, but the thumb is
+    // still drawn.
+    expect(sliderBox, paintsExactlyCountTimes(#drawCircle, 1));
+  });
+
   testWidgets('Slider has correct animations when reparented', (WidgetTester tester) async {
     final Key sliderKey = GlobalKey(debugLabel: 'A');
     double value = 0.0;
@@ -1025,6 +1077,7 @@ void main() {
       expect(
         sliderBox,
         paints
+          ..circle(x: 17.0, y: 16.0, radius: 1.0)
           ..circle(x: 208.5, y: 16.0, radius: 1.0)
           ..circle(x: 400.0, y: 16.0, radius: 1.0)
           ..circle(x: 591.5, y: 16.0, radius: 1.0)
@@ -1077,6 +1130,7 @@ void main() {
           ..circle(x: 400.0, y: 16.0, radius: 16.0)
           ..circle(x: 17.0, y: 16.0, radius: 1.0)
           ..circle(x: 208.5, y: 16.0, radius: 1.0)
+          ..circle(x: 400.0, y: 16.0, radius: 1.0)
           ..circle(x: 591.5, y: 16.0, radius: 1.0)
           ..circle(x: 783.0, y: 16.0, radius: 1.0)
           ..circle(x: 400.0, y: 16.0, radius: 6.0),
@@ -1089,6 +1143,7 @@ void main() {
         paints
           ..circle(x: 17.0, y: 16.0, radius: 1.0)
           ..circle(x: 208.5, y: 16.0, radius: 1.0)
+          ..circle(x: 400.0, y: 16.0, radius: 1.0)
           ..circle(x: 591.5, y: 16.0, radius: 1.0)
           ..circle(x: 783.0, y: 16.0, radius: 1.0)
           ..circle(x: 400.0, y: 16.0, radius: 6.0),
@@ -1112,7 +1167,7 @@ void main() {
         child: Material(
           child: Slider(
             value: 0.5,
-            onChanged: (double v) {},
+            onChanged: (double v) { },
           ),
         ),
       ),
@@ -1177,7 +1232,7 @@ void main() {
                 value: 100.0,
                 min: 0.0,
                 max: 200.0,
-                onChanged: (double v) {},
+                onChanged: (double v) { },
               ),
             ),
           ),
@@ -1218,7 +1273,7 @@ void main() {
             max: 200.0,
             divisions: 10,
             semanticFormatterCallback: (double value) => value.round().toString(),
-            onChanged: (double v) {},
+            onChanged: (double v) { },
           ),
         ),
       ),
@@ -1250,7 +1305,7 @@ void main() {
     );
     SliderThemeData theme = baseTheme.sliderTheme;
     double value = 0.45;
-    Widget buildApp({SliderThemeData sliderTheme, int divisions, bool enabled = true}) {
+    Widget buildApp({ SliderThemeData sliderTheme, int divisions, bool enabled = true }) {
       final ValueChanged<double> onChanged = enabled ? (double d) => value = d : null;
       return Directionality(
         textDirection: TextDirection.ltr,

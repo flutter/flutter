@@ -15,12 +15,13 @@ Future<void> main() async {
     final Stopwatch clock = Stopwatch()..start();
     final Process analysis = await startProcess(
       path.join(flutterDirectory.path, 'bin', 'flutter'),
-      <String>['analyze', '--no-preamble', '--no-congratulate', '--flutter-repo', '--dartdocs'],
+      <String>['analyze', '--no-preamble', '--flutter-repo', '--dartdocs'],
       workingDirectory: flutterDirectory.path,
     );
     int publicMembers = 0;
     int otherErrors = 0;
     int otherLines = 0;
+    bool sawFinalLine = false;
     await for (String entry in analysis.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter())) {
       entry = entry.trim();
       print('analyzer stdout: $entry');
@@ -30,22 +31,28 @@ Future<void> main() async {
         publicMembers += 1;
       } else if (entry.startsWith('info •') || entry.startsWith('warning •') || entry.startsWith('error •')) {
         otherErrors += 1;
-      } else if (entry.contains(' (ran in ')) {
-        // ignore this line
+      } else if (entry.contains(' (ran in ') && !sawFinalLine) {
+        // ignore this line once
+        sawFinalLine = true;
       } else if (entry.isNotEmpty) {
         otherLines += 1;
+        print('^ not sure what to do with that line ^');
       }
     }
     await for (String entry in analysis.stderr.transform<String>(utf8.decoder).transform<String>(const LineSplitter())) {
       print('analyzer stderr: $entry');
-      if (entry.startsWith('[lint] ')) {
-        // ignore this line
+      if (entry.contains(' (ran in ') && !sawFinalLine) {
+        // ignore this line once
+        sawFinalLine = true;
       } else {
         otherLines += 1;
+        print('^ not sure what to do with that line ^');
       }
     }
     final int result = await analysis.exitCode;
     clock.stop();
+    if (!sawFinalLine)
+      throw Exception('flutter analyze did not output final message');
     if (publicMembers == 0 && otherErrors == 0 && result != 0)
       throw Exception('flutter analyze exited with unexpected error code $result');
     if (publicMembers != 0 && otherErrors != 0 && result == 0)

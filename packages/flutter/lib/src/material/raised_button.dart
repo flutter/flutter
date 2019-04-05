@@ -28,8 +28,66 @@ import 'theme_data.dart';
 /// If you want an ink-splash effect for taps, but don't want to use a button,
 /// consider using [InkWell] directly.
 ///
-/// Raised buttons have a minimum size of 88.0 by 36.0 which can be overidden
+/// Raised buttons have a minimum size of 88.0 by 36.0 which can be overridden
 /// with [ButtonTheme].
+///
+/// {@tool snippet --template=stateless_widget_scaffold}
+///
+/// This sample shows how to render a disabled RaisedButton, an enabled RaisedButton
+/// and lastly a RaisedButton with gradient background.
+///
+/// ![Three raised buttons, one enabled, another disabled, and the last one
+/// styled with a blue gradient background](https://flutter.github.io/assets-for-api-docs/assets/material/raised_button.png)
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return Center(
+///     child: Column(
+///       mainAxisSize: MainAxisSize.min,
+///       children: <Widget>[
+///         const RaisedButton(
+///           onPressed: null,
+///           child: Text(
+///             'Disabled Button',
+///             style: TextStyle(fontSize: 20)
+///           ),
+///         ),
+///         const SizedBox(height: 30),
+///         RaisedButton(
+///           onPressed: () {},
+///           child: const Text(
+///             'Enabled Button',
+///             style: TextStyle(fontSize: 20)
+///           ),
+///         ),
+///         const SizedBox(height: 30),
+///         RaisedButton(
+///           onPressed: () {},
+///           textColor: Colors.white,
+///           padding: const EdgeInsets.all(0.0),
+///           child: Container(
+///             decoration: const BoxDecoration(
+///               gradient: LinearGradient(
+///                 colors: <Color>[
+///                   Color(0xFF0D47A1),
+///                   Color(0xFF1976D2),
+///                   Color(0xFF42A5F5),
+///                 ],
+///               ),
+///             ),
+///             padding: const EdgeInsets.all(10.0),
+///             child: const Text(
+///               'Gradient Button',
+///               style: TextStyle(fontSize: 20)
+///             ),
+///           ),
+///         ),
+///       ],
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -39,12 +97,13 @@ import 'theme_data.dart';
 ///  * [IconButton], to create buttons that just contain icons.
 ///  * [InkWell], which implements the ink splash part of a flat button.
 ///  * [RawMaterialButton], the widget this widget is based on.
-///  * <https://material.google.com/components/buttons.html>
+///  * <https://material.io/design/components/buttons.html>
 class RaisedButton extends MaterialButton {
   /// Create a filled button.
   ///
   /// The [elevation], [highlightElevation], [disabledElevation], and
-  /// [clipBehavior] arguments must not be null.
+  /// [clipBehavior] arguments must not be null. Additionally,  [elevation],
+  /// [highlightElevation], and [disabledElevation] must be non-negative.
   const RaisedButton({
     Key key,
     @required VoidCallback onPressed,
@@ -123,11 +182,10 @@ class RaisedButton extends MaterialButton {
     @required Widget label,
   }) = _RaisedButtonWithIcon;
 
- @override
+  @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final ButtonThemeData buttonTheme = ButtonTheme.of(context);
-
     return RawMaterialButton(
       onPressed: onPressed,
       onHighlightChanged: onHighlightChanged,

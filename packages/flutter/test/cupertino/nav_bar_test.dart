@@ -89,7 +89,7 @@ void main() {
               key: middleBox,
               alignment: Alignment.center,
               widthFactor: 1.0,
-              child: const Text('Title')
+              child: const Text('Title'),
             ),
             trailing: const CupertinoButton(child: Text('Puma'), onPressed: null),
             padding: const EdgeInsetsDirectional.only(
@@ -148,15 +148,62 @@ void main() {
     expect(tester.getCenter(find.text('Title')).dx, 400.0);
   });
 
-  testWidgets('Verify styles of each slot', (WidgetTester tester) async {
+  testWidgets('Nav bar uses theme defaults', (WidgetTester tester) async {
     count = 0x000000;
     await tester.pumpWidget(
-      const CupertinoApp(
+      CupertinoApp(
         home: CupertinoNavigationBar(
-          leading: _ExpectStyles(color: Color(0xFF001122), index: 0x000001),
-          middle: _ExpectStyles(color: Color(0xFF000000), letterSpacing: -0.08, index: 0x000100),
-          trailing: _ExpectStyles(color: Color(0xFF001122), index: 0x010000),
-          actionsForegroundColor: Color(0xFF001122),
+          leading: CupertinoButton(
+            onPressed: () { },
+            child: const _ExpectStyles(color: CupertinoColors.activeBlue, index: 0x000001),
+          ),
+          middle: const _ExpectStyles(color: CupertinoColors.black, index: 0x000100),
+          trailing: CupertinoButton(
+            onPressed: () { },
+            child: const _ExpectStyles(color: CupertinoColors.activeBlue, index: 0x010000),
+          ),
+        ),
+      ),
+    );
+    expect(count, 0x010101);
+  });
+
+  testWidgets('Nav bar respects themes', (WidgetTester tester) async {
+    count = 0x000000;
+    await tester.pumpWidget(
+      CupertinoApp(
+        theme: const CupertinoThemeData(brightness: Brightness.dark),
+        home: CupertinoNavigationBar(
+          leading: CupertinoButton(
+            onPressed: () { },
+            child: const _ExpectStyles(color: CupertinoColors.activeOrange, index: 0x000001),
+          ),
+          middle: const _ExpectStyles(color: CupertinoColors.white, index: 0x000100),
+          trailing: CupertinoButton(
+            onPressed: () { },
+            child: const _ExpectStyles(color: CupertinoColors.activeOrange, index: 0x010000),
+          ),
+        ),
+      ),
+    );
+    expect(count, 0x010101);
+  });
+
+  testWidgets('Theme active color can be overriden', (WidgetTester tester) async {
+    count = 0x000000;
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoNavigationBar(
+          leading: CupertinoButton(
+            onPressed: () { },
+            child: const _ExpectStyles(color: Color(0xFF001122), index: 0x000001),
+          ),
+          middle: const _ExpectStyles(color: Color(0xFF000000), index: 0x000100),
+          trailing: CupertinoButton(
+            onPressed: () { },
+            child: const _ExpectStyles(color: Color(0xFF001122), index: 0x010000),
+          ),
+          actionsForegroundColor: const Color(0xFF001122),
         ),
       ),
     );
@@ -400,7 +447,7 @@ void main() {
     // Large title initially visible.
     expect(
       largeTitleOpacity.opacity.value,
-      1.0
+      1.0,
     );
     // Middle widget not even wrapped with RenderOpacity, i.e. is always visible.
     expect(
@@ -419,7 +466,7 @@ void main() {
     // Large title no longer visible.
     expect(
       largeTitleOpacity.opacity.value,
-      0.0
+      0.0,
     );
 
     // The persistent toolbar doesn't move or change size.
@@ -598,9 +645,7 @@ void main() {
     expect(decoration.border, isNull);
   });
 
-  testWidgets(
-      'Border is displayed by default in sliver nav bar',
-      (WidgetTester tester) async {
+  testWidgets('Border is displayed by default in sliver nav bar', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: CupertinoPageScaffold(
@@ -628,9 +673,7 @@ void main() {
     expect(bottom, isNotNull);
   });
 
-  testWidgets(
-      'Border is not displayed when null in sliver nav bar',
-      (WidgetTester tester) async {
+  testWidgets('Border is not displayed when null in sliver nav bar', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: CupertinoPageScaffold(
@@ -702,9 +745,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets(
-      'Border can be overridden in sliver nav bar',
-      (WidgetTester tester) async {
+  testWidgets('Border can be overridden in sliver nav bar', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: CupertinoPageScaffold(
@@ -845,18 +886,18 @@ void main() {
 }
 
 class _ExpectStyles extends StatelessWidget {
-  const _ExpectStyles({ this.color, this.letterSpacing, this.index });
+  const _ExpectStyles({ this.color, this.index });
 
   final Color color;
-  final double letterSpacing;
   final int index;
 
   @override
   Widget build(BuildContext context) {
     final TextStyle style = DefaultTextStyle.of(context).style;
     expect(style.color, color);
+    expect(style.fontFamily, '.SF Pro Text');
     expect(style.fontSize, 17.0);
-    expect(style.letterSpacing, letterSpacing ?? -0.24);
+    expect(style.letterSpacing, -0.41);
     count += index;
     return Container();
   }

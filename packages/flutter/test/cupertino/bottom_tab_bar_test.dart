@@ -68,6 +68,70 @@ void main() {
     expect(actualActive.text.style.color, const Color(0xFF123456));
   });
 
+  testWidgets('Tabs respects themes', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoTabBar(
+          items: const <BottomNavigationBarItem>[
+            BottomNavigationBarItem(
+              icon: ImageIcon(TestImageProvider(24, 24)),
+              title: Text('Tab 1'),
+            ),
+            BottomNavigationBarItem(
+              icon: ImageIcon(TestImageProvider(24, 24)),
+              title: Text('Tab 2'),
+            ),
+          ],
+          currentIndex: 1,
+        ),
+      ),
+    );
+
+    RichText actualInactive = tester.widget(find.descendant(
+      of: find.text('Tab 1'),
+      matching: find.byType(RichText),
+    ));
+    expect(actualInactive.text.style.color, CupertinoColors.inactiveGray);
+
+    RichText actualActive = tester.widget(find.descendant(
+      of: find.text('Tab 2'),
+      matching: find.byType(RichText),
+    ));
+    expect(actualActive.text.style.color, CupertinoColors.activeBlue);
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        theme: const CupertinoThemeData(brightness: Brightness.dark),
+        home: CupertinoTabBar(
+          items: const <BottomNavigationBarItem>[
+            BottomNavigationBarItem(
+              icon: ImageIcon(TestImageProvider(24, 24)),
+              title: Text('Tab 1'),
+            ),
+            BottomNavigationBarItem(
+              icon: ImageIcon(TestImageProvider(24, 24)),
+              title: Text('Tab 2'),
+            ),
+          ],
+          currentIndex: 1,
+        ),
+      ),
+    );
+
+    actualInactive = tester.widget(find.descendant(
+      of: find.text('Tab 1'),
+      matching: find.byType(RichText),
+    ));
+    expect(actualInactive.text.style.color, CupertinoColors.inactiveGray);
+
+    actualActive = tester.widget(find.descendant(
+      of: find.text('Tab 2'),
+      matching: find.byType(RichText),
+    ));
+    expect(actualActive.text.style.color, CupertinoColors.activeOrange);
+
+  });
+
   testWidgets('Use active icon', (WidgetTester tester) async {
     const TestImageProvider activeIcon = TestImageProvider(16, 16);
     const TestImageProvider inactiveIcon = TestImageProvider(24, 24);
@@ -94,7 +158,7 @@ void main() {
 
     final Image image = tester.widget(find.descendant(
       of: find.widgetWithText(GestureDetector, 'Tab 2'),
-      matching: find.byType(Image)
+      matching: find.byType(Image),
     ));
 
     expect(image.color, const Color(0xFF123456));
@@ -182,22 +246,22 @@ void main() {
   testWidgets('Tap callback', (WidgetTester tester) async {
     int callbackTab;
 
-      await pumpWidgetWithBoilerplate(tester, MediaQuery(
-        data: const MediaQueryData(),
-        child: CupertinoTabBar(
-          items: const <BottomNavigationBarItem>[
-            BottomNavigationBarItem(
-              icon: ImageIcon(TestImageProvider(24, 24)),
-              title: Text('Tab 1'),
-            ),
-            BottomNavigationBarItem(
-              icon: ImageIcon(TestImageProvider(24, 24)),
-              title: Text('Tab 2'),
-            ),
-          ],
-          currentIndex: 1,
-          onTap: (int tab) { callbackTab = tab; },
-        ),
+    await pumpWidgetWithBoilerplate(tester, MediaQuery(
+      data: const MediaQueryData(),
+      child: CupertinoTabBar(
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: ImageIcon(TestImageProvider(24, 24)),
+            title: Text('Tab 1'),
+          ),
+          BottomNavigationBarItem(
+            icon: ImageIcon(TestImageProvider(24, 24)),
+            title: Text('Tab 2'),
+          ),
+        ],
+        currentIndex: 1,
+        onTap: (int tab) { callbackTab = tab; },
+      ),
     ));
 
     await tester.tap(find.text('Tab 1'));
@@ -274,8 +338,7 @@ void main() {
     expect(itemsTapped, <int>[1]);
   });
 
-  testWidgets('Hide border hides the top border of the tabBar',
-      (WidgetTester tester) async {
+  testWidgets('Hide border hides the top border of the tabBar', (WidgetTester tester) async {
     await pumpWidgetWithBoilerplate(
         tester,
         MediaQuery(

@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/gestures.dart' show DragStartBehavior;
 
 import 'data_table_test_utils.dart';
 
@@ -66,7 +67,7 @@ void main() {
           DataColumn(label: Text('Calories'), numeric: true),
           DataColumn(label: Text('Generation')),
         ],
-      )
+      ),
     ));
 
     await tester.tap(find.byTooltip('Next page'));
@@ -129,7 +130,7 @@ void main() {
             numeric: true,
             onSort: (int columnIndex, bool ascending) {
               log.add('column-sort: $columnIndex $ascending');
-            }
+            },
           ),
           const DataColumn(
             label: Text('Generation'),
@@ -248,26 +249,29 @@ void main() {
 
   testWidgets('PaginatedDataTable footer scrolls', (WidgetTester tester) async {
     final TestDataSource source = TestDataSource();
-    await tester.pumpWidget(MaterialApp(
-      home: Align(
-        alignment: Alignment.topLeft,
-        child: SizedBox(
-          width: 100.0,
-          child: PaginatedDataTable(
-            header: const Text('HEADER'),
-            source: source,
-            rowsPerPage: 5,
-            availableRowsPerPage: const <int>[ 5 ],
-            onRowsPerPageChanged: (int rowsPerPage) { },
-            columns: const <DataColumn>[
-              DataColumn(label: Text('COL1')),
-              DataColumn(label: Text('COL2')),
-              DataColumn(label: Text('COL3')),
-            ],
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Align(
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            width: 100.0,
+            child: PaginatedDataTable(
+              header: const Text('HEADER'),
+              source: source,
+              rowsPerPage: 5,
+              dragStartBehavior: DragStartBehavior.down,
+              availableRowsPerPage: const <int>[ 5 ],
+              onRowsPerPageChanged: (int rowsPerPage) { },
+              columns: const <DataColumn>[
+                DataColumn(label: Text('COL1')),
+                DataColumn(label: Text('COL2')),
+                DataColumn(label: Text('COL3')),
+              ],
+            ),
           ),
         ),
       ),
-    ));
+    );
     expect(find.text('Rows per page:'), findsOneWidget);
     expect(tester.getTopLeft(find.text('Rows per page:')).dx, lessThan(0.0)); // off screen
     await tester.dragFrom(

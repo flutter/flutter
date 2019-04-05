@@ -35,7 +35,7 @@ void main() {
           label: 'test1',
           rect: TestSemantics.fullScreen,
           flags: SemanticsFlag.isSelected.index,
-        )
+        ),
       ]
     )));
 
@@ -77,7 +77,7 @@ void main() {
           label: 'child1',
           rect: TestSemantics.fullScreen,
           flags: SemanticsFlag.isSelected.index,
-        )
+        ),
       ],
     )));
 
@@ -173,7 +173,7 @@ void main() {
           label: 'child1',
           rect: TestSemantics.fullScreen,
           flags: SemanticsFlag.isSelected.index,
-        )
+        ),
       ],
     )));
 

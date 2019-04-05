@@ -23,7 +23,7 @@ import 'theme_data.dart';
 /// an enabled button, make sure to pass a non-null value for onPressed.
 ///
 /// Rather than using this class directly, consider using [FlatButton],
-/// OutlineButton, or [RaisedButton], which configure this class with
+/// [OutlineButton], or [RaisedButton], which configure this class with
 /// appropriate defaults that match the material design specification.
 ///
 /// To create a button directly, without inheriting theme defaults, use
@@ -41,8 +41,6 @@ class MaterialButton extends StatelessWidget {
   /// Rather than creating a material button directly, consider using
   /// [FlatButton] or [RaisedButton]. To create a custom Material button
   /// consider using [RawMaterialButton].
-  ///
-  /// The [clipBehavior] argument must not be null.
   const MaterialButton({
     Key key,
     @required this.onPressed,
@@ -75,6 +73,10 @@ class MaterialButton extends StatelessWidget {
 
   /// Called by the underlying [InkWell] widget's [InkWell.onHighlightChanged]
   /// callback.
+  ///
+  /// If [onPressed] changes from null to non-null while a gesture is ongoing,
+  /// this can fire during the build phase (in which case calling
+  /// [State.setState] is not allowed).
   final ValueChanged<bool> onHighlightChanged;
 
   /// Defines the button's base colors, and the defaults for the button's minimum
@@ -92,8 +94,9 @@ class MaterialButton extends StatelessWidget {
   /// [ButtonThemeData.textTheme].
   ///
   /// See also:
-  ///   * [disabledTextColor], the text color to use when the button has been
-  ///     disabled.
+  ///
+  ///  * [disabledTextColor], the text color to use when the button has been
+  ///    disabled.
   final Color textColor;
 
   /// The color to use for this button's text when the button is disabled.
@@ -105,6 +108,7 @@ class MaterialButton extends StatelessWidget {
   /// [ThemeData.disabledColor].
   ///
   /// See also:
+  ///
   ///  * [textColor] - The color to use for this button's text when the button is [enabled].
   final Color disabledTextColor;
 
@@ -114,7 +118,8 @@ class MaterialButton extends StatelessWidget {
   /// The default fill color is the theme's button color, [ThemeData.buttonColor].
   ///
   /// See also:
-  ///   * [disabledColor] - the fill color of the button when the button is disabled.
+  ///
+  ///  * [disabledColor] - the fill color of the button when the button is disabled.
   final Color color;
 
   /// The fill color of the button when the button is disabled.
@@ -123,7 +128,8 @@ class MaterialButton extends StatelessWidget {
   /// [ThemeData.disabledColor].
   ///
   /// See also:
-  ///   * [color] - the fill color of the button when the button is [enabled].
+  ///
+  ///  * [color] - the fill color of the button when the button is [enabled].
   final Color disabledColor;
 
   /// The splash color of the button's [InkWell].
@@ -150,10 +156,12 @@ class MaterialButton extends StatelessWidget {
   /// the current theme's highlight color, [ThemeData.highlightColor].
   final Color highlightColor;
 
-  /// The z-coordinate at which to place this button. This controls the size of
-  /// the shadow below the raised button.
+  /// The z-coordinate at which to place this button relative to its parent.
   ///
-  /// Defaults to 2, the appropriate elevation for raised buttons.
+  /// This controls the size of the shadow below the raised button.
+  ///
+  /// Defaults to 2, the appropriate elevation for raised buttons. The value
+  /// is always non-negative.
   ///
   /// See also:
   ///
@@ -162,14 +170,14 @@ class MaterialButton extends StatelessWidget {
   ///  * [highlightElevation], the elevation when the button is pressed.
   final double elevation;
 
-  /// The elevation for the button's [Material] when the button
-  /// is [enabled] and pressed.
+  /// The elevation for the button's [Material] relative to its parent when the
+  /// button is [enabled] and pressed.
   ///
   /// This controls the size of the shadow below the button. When a tap
   /// down gesture occurs within the button, its [InkWell] displays a
   /// [highlightColor] "highlight".
   ///
-  /// Defaults to 8.0.
+  /// Defaults to 8.0. The value is always non-negative.
   ///
   /// See also:
   ///
@@ -177,10 +185,10 @@ class MaterialButton extends StatelessWidget {
   ///  * [disabledElevation], the elevation when the button is disabled.
   final double highlightElevation;
 
-  /// The elevation for the button's [Material] when the button
-  /// is not [enabled].
+  /// The elevation for the button's [Material] relative to its parent when the
+  /// button is not [enabled].
   ///
-  /// Defaults to 0.0.
+  /// Defaults to 0.0. The value is always non-negative.
   ///
   /// See also:
   ///
@@ -215,6 +223,9 @@ class MaterialButton extends StatelessWidget {
   /// The button's highlight and splash are clipped to this shape. If the
   /// button has an elevation, then its drop shadow is defined by this
   /// shape as well.
+  ///
+  /// Defaults to the value from the current [ButtonTheme],
+  /// [ButtonThemeData.shape].
   final ShapeBorder shape;
 
   /// {@macro flutter.widgets.Clip}
@@ -231,7 +242,7 @@ class MaterialButton extends StatelessWidget {
   ///
   /// See also:
   ///
-  ///   * [MaterialTapTargetSize], for a description of how this affects tap targets.
+  ///  * [MaterialTapTargetSize], for a description of how this affects tap targets.
   final MaterialTapTargetSize materialTapTargetSize;
 
   /// The smallest horizontal extent that the button will occupy.
@@ -251,7 +262,8 @@ class MaterialButton extends StatelessWidget {
 
     return RawMaterialButton(
       onPressed: onPressed,
-      fillColor: color,
+      onHighlightChanged: onHighlightChanged,
+      fillColor: buttonTheme.getFillColor(this),
       textStyle: theme.textTheme.button.copyWith(color: buttonTheme.getTextColor(this)),
       highlightColor: highlightColor ?? theme.highlightColor,
       splashColor: splashColor ?? theme.splashColor,
@@ -262,7 +274,7 @@ class MaterialButton extends StatelessWidget {
         minWidth: minWidth,
         minHeight: height,
       ),
-      shape: buttonTheme.shape,
+      shape: buttonTheme.getShape(this),
       clipBehavior: clipBehavior ?? Clip.none,
       animationDuration: buttonTheme.getAnimationDuration(this),
       child: child,

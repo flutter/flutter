@@ -196,7 +196,9 @@ abstract class BoxBorder extends ShapeBorder {
   ///
   ///  * [paintBorder], which is used if the border is not uniform.
   @override
-  void paint(Canvas canvas, Rect rect, {
+  void paint(
+    Canvas canvas,
+    Rect rect, {
     TextDirection textDirection,
     BoxShape shape = BoxShape.rectangle,
     BorderRadius borderRadius,
@@ -466,7 +468,9 @@ class Border extends BoxBorder {
   ///
   ///  * [paintBorder], which is used if the border is not uniform.
   @override
-  void paint(Canvas canvas, Rect rect, {
+  void paint(
+    Canvas canvas,
+    Rect rect, {
     TextDirection textDirection,
     BoxShape shape = BoxShape.rectangle,
     BorderRadius borderRadius,
@@ -759,7 +763,9 @@ class BorderDirectional extends BoxBorder {
   ///
   ///  * [paintBorder], which is used if the border is not uniform.
   @override
-  void paint(Canvas canvas, Rect rect, {
+  void paint(
+    Canvas canvas,
+    Rect rect, {
     TextDirection textDirection,
     BoxShape shape = BoxShape.rectangle,
     BorderRadius borderRadius,

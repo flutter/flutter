@@ -13,9 +13,9 @@ SDK.
 This site hosts Flutter's API documentation. Other documentation can be found at
 the following locations:
 
-* [flutter.io](https://flutter.io/) (main site)
-* [Installation](https://flutter.io/docs/get-started/install)
-* [Codelabs](https://flutter.io/docs/codelabs)
+* [flutter.dev](https://flutter.dev) (main site)
+* [Installation](https://flutter.dev/docs/get-started/install)
+* [Codelabs](https://flutter.dev/docs/codelabs)
 * [Contributing to Flutter](https://github.com/flutter/flutter/blob/master/CONTRIBUTING.md)
 
 ### Importing a Library

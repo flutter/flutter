@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/gestures.dart';
 
 import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
@@ -37,7 +38,7 @@ void main() {
               },
             ),
           ),
-        )
+        ),
       )
     );
 
@@ -51,9 +52,10 @@ void main() {
     log.clear();
 
     await tester.tap(find.byType(InkWell), pointer: 2);
+    await tester.pump(const Duration(milliseconds: 100));
     await tester.tap(find.byType(InkWell), pointer: 3);
 
-    expect(log, equals(<String>['tap-cancel', 'double-tap']));
+    expect(log, equals(<String>['double-tap']));
     log.clear();
 
     await tester.longPress(find.byType(InkWell), pointer: 4);
@@ -82,7 +84,7 @@ void main() {
         child: Center(
           child: InkWell(),
         ),
-      )
+      ),
     ));
     await tester.tap(find.byType(InkWell), pointer: 1);
     await tester.pump(const Duration(seconds: 1));
@@ -107,8 +109,8 @@ void main() {
           textDirection: TextDirection.ltr,
           child: Center(
             child: InkWell(
-              onTap: () {},
-              onLongPress: () {},
+              onTap: () { },
+              onLongPress: () { },
             ),
           ),
         ),
@@ -135,12 +137,12 @@ void main() {
           textDirection: TextDirection.ltr,
           child: Center(
             child: InkWell(
-              onTap: () {},
-              onLongPress: () {},
+              onTap: () { },
+              onLongPress: () { },
               enableFeedback: false,
             ),
           ),
-        )
+        ),
       ));
       await tester.tap(find.byType(InkWell), pointer: 1);
       await tester.pump(const Duration(seconds: 1));
@@ -164,6 +166,7 @@ void main() {
               link: LayerLink(),
               child: ListView(
                 addAutomaticKeepAlives: keepAlive,
+                dragStartBehavior: DragStartBehavior.down,
                 children: <Widget>[
                   Container(height: 500.0, child: InkWell(onTap: () { }, child: const Placeholder())),
                   Container(height: 500.0),

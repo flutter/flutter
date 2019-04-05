@@ -23,6 +23,8 @@ import 'media_query.dart';
 /// When a [minimum] padding is specified, the greater of the minimum padding
 /// or the safe area padding will be applied.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=lkF0TQJO0bA}
+///
 /// See also:
 ///
 ///  * [SliverSafeArea], for insetting slivers to avoid operating system

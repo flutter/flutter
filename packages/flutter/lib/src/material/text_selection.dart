@@ -51,8 +51,8 @@ class _TextSelectionToolbar extends StatelessWidget {
       elevation: 1.0,
       child: Container(
         height: 44.0,
-        child: Row(mainAxisSize: MainAxisSize.min, children: items)
-      )
+        child: Row(mainAxisSize: MainAxisSize.min, children: items),
+      ),
     );
   }
 }
@@ -147,7 +147,7 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
           handlePaste: canPaste(delegate) ? () => handlePaste(delegate) : null,
           handleSelectAll: canSelectAll(delegate) ? () => handleSelectAll(delegate) : null,
         ),
-      )
+      ),
     );
   }
 
@@ -174,14 +174,14 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
       case TextSelectionHandleType.left: // points up-right
         return Transform(
           transform: Matrix4.rotationZ(math.pi / 2.0),
-          child: handle
+          child: handle,
         );
       case TextSelectionHandleType.right: // points up-left
         return handle;
       case TextSelectionHandleType.collapsed: // points up
         return Transform(
           transform: Matrix4.rotationZ(math.pi / 4.0),
-          child: handle
+          child: handle,
         );
     }
     assert(type != null);

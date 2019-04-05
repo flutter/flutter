@@ -32,7 +32,7 @@ void main() {
       expect(utils.which(kExecutable), isNull);
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
-      Platform: () => FakePlatform(operatingSystem: 'linux')
+      Platform: () => FakePlatform(operatingSystem: 'linux'),
     });
 
     testUsingContext('returns exactly one result', () async {
@@ -42,7 +42,7 @@ void main() {
       expect(utils.which(kExecutable).path, kPath1);
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
-      Platform: () => FakePlatform(operatingSystem: 'linux')
+      Platform: () => FakePlatform(operatingSystem: 'linux'),
     });
 
     testUsingContext('returns all results for whichAll', () async {
@@ -55,7 +55,7 @@ void main() {
       expect(result[1].path, kPath2);
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
-      Platform: () => FakePlatform(operatingSystem: 'linux')
+      Platform: () => FakePlatform(operatingSystem: 'linux'),
     });
   });
 
@@ -68,7 +68,7 @@ void main() {
       expect(utils.which(kExecutable), isNull);
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
-      Platform: () => FakePlatform(operatingSystem: 'windows')
+      Platform: () => FakePlatform(operatingSystem: 'windows'),
     });
 
     testUsingContext('returns exactly one result', () async {
@@ -78,7 +78,7 @@ void main() {
       expect(utils.which(kExecutable).path, kPath1);
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
-      Platform: () => FakePlatform(operatingSystem: 'windows')
+      Platform: () => FakePlatform(operatingSystem: 'windows'),
     });
 
     testUsingContext('returns all results for whichAll', () async {
@@ -91,7 +91,7 @@ void main() {
       expect(result[1].path, kPath2);
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
-      Platform: () => FakePlatform(operatingSystem: 'windows')
+      Platform: () => FakePlatform(operatingSystem: 'windows'),
     });
   });
 }

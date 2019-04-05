@@ -10,16 +10,7 @@ import 'colors.dart';
 import 'icons.dart';
 import 'localizations.dart';
 import 'route.dart';
-
-// Based on specs from https://developer.apple.com/design/resources/ for
-// iOS 12.
-const TextStyle _kDefaultTextStyle = TextStyle(
-  fontFamily: '.SF Pro Text',
-  fontSize: 17.0,
-  letterSpacing: -0.38,
-  color: CupertinoColors.black,
-  decoration: TextDecoration.none,
-);
+import 'theme.dart';
 
 /// An application that uses Cupertino design.
 ///
@@ -79,6 +70,7 @@ class CupertinoApp extends StatefulWidget {
     Key key,
     this.navigatorKey,
     this.home,
+    this.theme,
     this.routes = const <String, WidgetBuilder>{},
     this.initialRoute,
     this.onGenerateRoute,
@@ -113,6 +105,12 @@ class CupertinoApp extends StatefulWidget {
 
   /// {@macro flutter.widgets.widgetsApp.home}
   final Widget home;
+
+  /// The top-level [CupertinoTheme] styling.
+  ///
+  /// A null [theme] or unspecified [theme] attributes will default to iOS
+  /// system values.
+  final CupertinoThemeData theme;
 
   /// The application's top-level routing table.
   ///
@@ -266,48 +264,50 @@ class _CupertinoAppState extends State<CupertinoApp> {
 
   @override
   Widget build(BuildContext context) {
+    final CupertinoThemeData effectiveThemeData = widget.theme ?? const CupertinoThemeData();
+
     return ScrollConfiguration(
       behavior: _AlwaysCupertinoScrollBehavior(),
-      child: WidgetsApp(
-        key: GlobalObjectKey(this),
-        navigatorKey: widget.navigatorKey,
-        navigatorObservers: _navigatorObservers,
-        // TODO(dnfield): when https://github.com/dart-lang/sdk/issues/34572 is resolved
-        // this can use type arguments again
-        pageRouteBuilder: (RouteSettings settings, WidgetBuilder builder) =>
-          CupertinoPageRoute<dynamic>(settings: settings, builder: builder),
-        home: widget.home,
-        routes: widget.routes,
-        initialRoute: widget.initialRoute,
-        onGenerateRoute: widget.onGenerateRoute,
-        onUnknownRoute: widget.onUnknownRoute,
-        builder: widget.builder,
-        title: widget.title,
-        onGenerateTitle: widget.onGenerateTitle,
-        textStyle: _kDefaultTextStyle,
-        color: widget.color ?? CupertinoColors.activeBlue,
-        locale: widget.locale,
-        localizationsDelegates: _localizationsDelegates,
-        localeResolutionCallback: widget.localeResolutionCallback,
-        localeListResolutionCallback: widget.localeListResolutionCallback,
-        supportedLocales: widget.supportedLocales,
-        showPerformanceOverlay: widget.showPerformanceOverlay,
-        checkerboardRasterCacheImages: widget.checkerboardRasterCacheImages,
-        checkerboardOffscreenLayers: widget.checkerboardOffscreenLayers,
-        showSemanticsDebugger: widget.showSemanticsDebugger,
-        debugShowCheckedModeBanner: widget.debugShowCheckedModeBanner,
-        inspectorSelectButtonBuilder: (BuildContext context, VoidCallback onPressed) {
-          return CupertinoButton(
-            child: const Icon(
-              CupertinoIcons.search,
-              size: 28.0,
-              color: CupertinoColors.white,
-            ),
-            color: CupertinoColors.activeBlue,
-            padding: EdgeInsets.zero,
-            onPressed: onPressed,
-          );
-        },
+      child: CupertinoTheme(
+        data: effectiveThemeData,
+        child: WidgetsApp(
+          key: GlobalObjectKey(this),
+          navigatorKey: widget.navigatorKey,
+          navigatorObservers: _navigatorObservers,
+          pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) =>
+            CupertinoPageRoute<T>(settings: settings, builder: builder),
+          home: widget.home,
+          routes: widget.routes,
+          initialRoute: widget.initialRoute,
+          onGenerateRoute: widget.onGenerateRoute,
+          onUnknownRoute: widget.onUnknownRoute,
+          builder: widget.builder,
+          title: widget.title,
+          onGenerateTitle: widget.onGenerateTitle,
+          textStyle: effectiveThemeData.textTheme.textStyle,
+          color: widget.color ?? CupertinoColors.activeBlue,
+          locale: widget.locale,
+          localizationsDelegates: _localizationsDelegates,
+          localeResolutionCallback: widget.localeResolutionCallback,
+          localeListResolutionCallback: widget.localeListResolutionCallback,
+          supportedLocales: widget.supportedLocales,
+          showPerformanceOverlay: widget.showPerformanceOverlay,
+          checkerboardRasterCacheImages: widget.checkerboardRasterCacheImages,
+          checkerboardOffscreenLayers: widget.checkerboardOffscreenLayers,
+          showSemanticsDebugger: widget.showSemanticsDebugger,
+          debugShowCheckedModeBanner: widget.debugShowCheckedModeBanner,
+          inspectorSelectButtonBuilder: (BuildContext context, VoidCallback onPressed) {
+            return CupertinoButton.filled(
+              child: const Icon(
+                CupertinoIcons.search,
+                size: 28.0,
+                color: CupertinoColors.white,
+              ),
+              padding: EdgeInsets.zero,
+              onPressed: onPressed,
+            );
+          },
+        ),
       ),
     );
   }

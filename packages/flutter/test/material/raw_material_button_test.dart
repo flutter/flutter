@@ -1,3 +1,7 @@
+// Copyright 2018 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -35,7 +39,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Center(
           child: RawMaterialButton(
-            onPressed: () {},
+            onPressed: () { },
             constraints: BoxConstraints.tight(const Size(10.0, 10.0)),
             materialTapTargetSize: MaterialTapTargetSize.padded,
             child: const Text('+'),
@@ -79,7 +83,7 @@ void main() {
         child: Center(
           child: RawMaterialButton(
             materialTapTargetSize: MaterialTapTargetSize.padded,
-            onPressed: () {},
+            onPressed: () { },
             fillColor: fillColor,
             highlightColor: highlightColor,
             splashColor: splashColor,
@@ -111,7 +115,7 @@ void main() {
         child: Center(
           child: RawMaterialButton(
             materialTapTargetSize: MaterialTapTargetSize.padded,
-            onPressed: () {},
+            onPressed: () { },
             fillColor: fillColor,
             highlightColor: highlightColor,
             splashColor: splashColor,
@@ -139,7 +143,7 @@ void main() {
           children: <Widget>[
             RawMaterialButton(
             materialTapTargetSize: MaterialTapTargetSize.padded,
-            onPressed: () {},
+            onPressed: () { },
             child: Container(
               width: 400.0,
               height: 400.0,
@@ -169,7 +173,7 @@ void main() {
           children: <Widget>[
             RawMaterialButton(
               materialTapTargetSize: MaterialTapTargetSize.padded,
-              onPressed: () {},
+              onPressed: () { },
               child: SizedBox(
                 key: key,
                 width: 8.0,
@@ -194,9 +198,9 @@ void main() {
           children: <Widget>[
             RawMaterialButton(
               key: key,
-              onPressed: () {},
+              onPressed: () { },
               child: const SizedBox(),
-            )
+            ),
           ],
         ),
       ),

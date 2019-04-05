@@ -65,7 +65,8 @@ abstract class RenderSliverBoxChildManager {
   /// Must return the total distance from the start of the child with the
   /// earliest possible index to the end of the child with the last possible
   /// index.
-  double estimateMaxScrollOffset(SliverConstraints constraints, {
+  double estimateMaxScrollOffset(
+    SliverConstraints constraints, {
     int firstIndex,
     int lastIndex,
     double leadingScrollOffset,
@@ -190,7 +191,7 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
   ///
   /// The [childManager] argument must not be null.
   RenderSliverMultiBoxAdaptor({
-    @required RenderSliverBoxChildManager childManager
+    @required RenderSliverBoxChildManager childManager,
   }) : assert(childManager != null),
        _childManager = childManager;
 
@@ -318,6 +319,12 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
     _keepAliveBucket.values.forEach(visitor);
   }
 
+  @override
+  void visitChildrenForSemantics(RenderObjectVisitor visitor) {
+    super.visitChildren(visitor);
+    // Do not visit children in [_keepAliveBucket].
+  }
+
   /// Called during layout to create and add the child with the given index and
   /// scroll offset.
   ///
@@ -364,7 +371,8 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
   /// during this layout pass. No child should be added during that call except
   /// for the one that is created and returned by `createChild`.
   @protected
-  RenderBox insertAndLayoutLeadingChild(BoxConstraints childConstraints, {
+  RenderBox insertAndLayoutLeadingChild(
+    BoxConstraints childConstraints, {
     bool parentUsesSize = false,
   }) {
     assert(_debugAssertChildListLocked());
@@ -391,7 +399,8 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
   /// Children after the `after` child may be removed in the process. Only the
   /// new child may be added.
   @protected
-  RenderBox insertAndLayoutChild(BoxConstraints childConstraints, {
+  RenderBox insertAndLayoutChild(
+    BoxConstraints childConstraints, {
     @required RenderBox after,
     bool parentUsesSize = false,
   }) {
@@ -596,7 +605,7 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
       final List<int> indices = _keepAliveBucket.keys.toList()..sort();
       for (int index in indices) {
         children.add(_keepAliveBucket[index].toDiagnosticsNode(
-          name: 'child with index $index (kept alive offstage)',
+          name: 'child with index $index (kept alive but not laid out)',
           style: DiagnosticsTreeStyle.offstage,
         ));
       }

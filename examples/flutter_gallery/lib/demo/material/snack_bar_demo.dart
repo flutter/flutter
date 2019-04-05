@@ -50,12 +50,12 @@ class _SnackBarDemoState extends State<SnackBarDemo> {
                     label: 'ACTION',
                     onPressed: () {
                       Scaffold.of(context).showSnackBar(SnackBar(
-                        content: Text('You pressed snackbar $thisSnackBarIndex\'s action.')
+                        content: Text('You pressed snackbar $thisSnackBarIndex\'s action.'),
                       ));
-                    }
+                    },
                   ),
                 ));
-              }
+              },
             ),
           ),
           const Text(_text3),
@@ -63,10 +63,10 @@ class _SnackBarDemoState extends State<SnackBarDemo> {
         .map<Widget>((Widget child) {
           return Container(
             margin: const EdgeInsets.symmetric(vertical: 12.0),
-            child: child
+            child: child,
           );
         })
-        .toList()
+        .toList(),
       ),
     );
   }
@@ -82,7 +82,7 @@ class _SnackBarDemoState extends State<SnackBarDemo> {
         // Create an inner BuildContext so that the snackBar onPressed methods
         // can refer to the Scaffold with Scaffold.of().
         builder: buildBody
-      )
+      ),
     );
   }
 }

@@ -128,6 +128,12 @@ class MethodChannel {
   /// result. The values supported by the default codec and their platform-specific
   /// counterparts are documented with [StandardMessageCodec].
   ///
+  /// The generic argument `T` of the method can be inferred by the surrounding
+  /// context, or provided explicitly. If it does not match the returned type of
+  /// the channel, a [TypeError] will be thrown at runtime. `T` cannot be a class
+  /// with generics other than `dynamic`. For example, `Map<String, String>`
+  /// is not supported but `Map<dynamic, dynamic>` or `Map` is.
+  ///
   /// Returns a [Future] which completes to one of the following:
   ///
   /// * a result (possibly null), on successful invocation;
@@ -149,10 +155,9 @@ class MethodChannel {
   ///   static const MethodChannel _channel = MethodChannel('music');
   ///
   ///   static Future<bool> isLicensed() async {
-  ///     // invokeMethod returns a Future<dynamic>, and we cannot pass that for
-  ///     // a Future<bool>, hence the indirection.
-  ///     final bool result = await _channel.invokeMethod('isLicensed');
-  ///     return result;
+  ///     // invokeMethod returns a Future<T> which can be inferred as bool
+  ///     // in this context.
+  ///     return _channel.invokeMethod('isLicensed');
   ///   }
   ///
   ///   static Future<List<Song>> songs() async {
@@ -160,6 +165,7 @@ class MethodChannel {
   ///     // List<dynamic> with Map<dynamic, dynamic> entries. Post-processing
   ///     // code thus cannot assume e.g. List<Map<String, String>> even though
   ///     // the actual values involved would support such a typed container.
+  ///     // The correct type cannot be inferred with any value of `T`.
   ///     final List<dynamic> songs = await _channel.invokeMethod('getSongs');
   ///     return songs.map(Song.fromJson).toList();
   ///   }
@@ -168,7 +174,7 @@ class MethodChannel {
   ///     // Errors occurring on the platform side cause invokeMethod to throw
   ///     // PlatformExceptions.
   ///     try {
-  ///       await _channel.invokeMethod('play', <String, dynamic>{
+  ///       return _channel.invokeMethod('play', <String, dynamic>{
   ///         'song': song.id,
   ///         'volume': volume,
   ///       });
@@ -275,21 +281,54 @@ class MethodChannel {
   ///
   /// See also:
   ///
-  /// * [StandardMessageCodec] which defines the payload values supported by
-  ///   [StandardMethodCodec].
-  /// * [JSONMessageCodec] which defines the payload values supported by
-  ///   [JSONMethodCodec].
-  /// * <https://docs.flutter.io/javadoc/io/flutter/plugin/common/MethodCall.html>
-  ///   for how to access method call arguments on Android.
-  Future<dynamic> invokeMethod(String method, [dynamic arguments]) async {
+  ///  * [invokeListMethod], for automatically returning typed lists.
+  ///  * [invokeMapMethod], for automatically returning typed maps.
+  ///  * [StandardMessageCodec] which defines the payload values supported by
+  ///    [StandardMethodCodec].
+  ///  * [JSONMessageCodec] which defines the payload values supported by
+  ///    [JSONMethodCodec].
+  ///  * <https://docs.flutter.io/javadoc/io/flutter/plugin/common/MethodCall.html>
+  ///    for how to access method call arguments on Android.
+  @optionalTypeArgs
+  Future<T> invokeMethod<T>(String method, [ dynamic arguments ]) async {
     assert(method != null);
-    final dynamic result = await BinaryMessages.send(
+    final ByteData result = await BinaryMessages.send(
       name,
       codec.encodeMethodCall(MethodCall(method, arguments)),
     );
-    if (result == null)
+    if (result == null) {
       throw MissingPluginException('No implementation found for method $method on channel $name');
-    return codec.decodeEnvelope(result);
+    }
+    final T typedResult = codec.decodeEnvelope(result);
+    return typedResult;
+  }
+
+  /// An implementation of [invokeMethod] that can return typed lists.
+  ///
+  /// Dart generics are reified, meaning that an untyped List<dynamic>
+  /// cannot masquerade as a List<T>. Since invokeMethod can only return
+  /// dynamic maps, we instead create a new typed list using [List.cast].
+  ///
+  /// See also:
+  ///
+  ///  * [invokeMethod], which this call delegates to.
+  Future<List<T>> invokeListMethod<T>(String method, [ dynamic arguments ]) async {
+    final List<dynamic> result = await invokeMethod<List<dynamic>>(method, arguments);
+    return result.cast<T>();
+  }
+
+  /// An implementation of [invokeMethod] that can return typed maps.
+  ///
+  /// Dart generics are reified, meaning that an untyped Map<dynamic, dynamic>
+  /// cannot masquerade as a Map<K, V>. Since invokeMethod can only return
+  /// dynamic maps, we instead create a new typed map using [Map.cast].
+  ///
+  /// See also:
+  ///
+  ///  * [invokeMethod], which this call delegates to.
+  Future<Map<K, V>> invokeMapMethod<K, V>(String method, [ dynamic arguments ]) async {
+    final Map<dynamic, dynamic> result = await invokeMethod<Map<dynamic, dynamic>>(method, arguments);
+    return result.cast<K, V>();
   }
 
   /// Sets a callback for receiving method calls on this channel.
@@ -366,13 +405,27 @@ class OptionalMethodChannel extends MethodChannel {
     : super(name, codec);
 
   @override
-  Future<dynamic> invokeMethod(String method, [dynamic arguments]) async {
+  Future<T> invokeMethod<T>(String method, [ dynamic arguments ]) async {
     try {
-      return await super.invokeMethod(method, arguments);
+      final T result = await super.invokeMethod<T>(method, arguments);
+      return result;
     } on MissingPluginException {
       return null;
     }
   }
+
+  @override
+  Future<List<T>> invokeListMethod<T>(String method, [ dynamic arguments ]) async {
+    final List<dynamic> result = await invokeMethod<List<dynamic>>(method, arguments);
+    return result.cast<T>();
+  }
+
+  @override
+  Future<Map<K, V>> invokeMapMethod<K, V>(String method, [ dynamic arguments ]) async {
+    final Map<dynamic, dynamic> result = await invokeMethod<Map<dynamic, dynamic>>(method, arguments);
+    return result.cast<K, V>();
+  }
+
 }
 
 /// A named channel for communicating with platform plugins using event streams.
@@ -417,7 +470,7 @@ class EventChannel {
   /// through the [FlutterError] facility. Stream activation happens only when
   /// stream listener count changes from 0 to 1. Stream deactivation happens
   /// only when stream listener count changes from 1 to 0.
-  Stream<dynamic> receiveBroadcastStream([dynamic arguments]) {
+  Stream<dynamic> receiveBroadcastStream([ dynamic arguments ]) {
     final MethodChannel methodChannel = MethodChannel(name, codec);
     StreamController<dynamic> controller;
     controller = StreamController<dynamic>.broadcast(onListen: () async {
@@ -434,7 +487,7 @@ class EventChannel {
         return null;
       });
       try {
-        await methodChannel.invokeMethod('listen', arguments);
+        await methodChannel.invokeMethod<void>('listen', arguments);
       } catch (exception, stack) {
         FlutterError.reportError(FlutterErrorDetails(
           exception: exception,
@@ -446,7 +499,7 @@ class EventChannel {
     }, onCancel: () async {
       BinaryMessages.setMessageHandler(name, null);
       try {
-        await methodChannel.invokeMethod('cancel', arguments);
+        await methodChannel.invokeMethod<void>('cancel', arguments);
       } catch (exception, stack) {
         FlutterError.reportError(FlutterErrorDetails(
           exception: exception,

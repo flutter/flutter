@@ -5,6 +5,7 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/gestures.dart' show DragStartBehavior;
 
 class Leaf extends StatefulWidget {
   const Leaf({ Key key, this.child }) : super(key: key);
@@ -476,10 +477,11 @@ void main() {
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: ListView.builder(
+        dragStartBehavior: DragStartBehavior.down,
         addSemanticIndexes: false,
         itemCount: 50,
-        itemBuilder: (BuildContext context, int index){
-          if (index == 0){
+        itemBuilder: (BuildContext context, int index) {
+          if (index == 0) {
             return const _AlwaysKeepAlive(
               key: GlobalObjectKey<_AlwaysKeepAliveState>(0),
             );
@@ -512,8 +514,8 @@ void main() {
       child: ListView.builder(
         addSemanticIndexes: false,
         itemCount: 250,
-        itemBuilder: (BuildContext context, int index){
-          if (index % 2 == 0){
+        itemBuilder: (BuildContext context, int index) {
+          if (index % 2 == 0) {
             return _AlwaysKeepAlive(
               key: GlobalObjectKey<_AlwaysKeepAliveState>(index),
             );
@@ -610,7 +612,7 @@ class RenderSliverMultiBoxAdaptorAlt extends RenderSliver with
     RenderSliverWithKeepAliveMixin {
 
   RenderSliverMultiBoxAdaptorAlt({
-    RenderSliverBoxChildManager childManager
+    RenderSliverBoxChildManager childManager,
   }) : _childManager = childManager;
 
   @protected
@@ -629,5 +631,5 @@ class RenderSliverMultiBoxAdaptorAlt extends RenderSliver with
   }
 
   @override
-  void performLayout() {}
+  void performLayout() { }
 }
