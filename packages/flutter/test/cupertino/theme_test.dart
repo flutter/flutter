@@ -136,7 +136,7 @@ void main() {
     },
   );
 
-  testWidgets('Theme has default IconThemeData, which is derived from the theme\'s primary color', (WidgetTester tester) async {
+  testWidgets("Theme has default IconThemeData, which is derived from the theme's primary color", (WidgetTester tester) async {
       const Color primaryColor = CupertinoColors.destructiveRed;
       const CupertinoThemeData themeData = CupertinoThemeData(primaryColor: primaryColor);
 
