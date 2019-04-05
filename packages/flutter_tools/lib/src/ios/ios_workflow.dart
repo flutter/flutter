@@ -67,7 +67,7 @@ class IOSValidator extends DoctorValidator {
     try {
       final Version version = Version.parse(await iosDeployVersionText);
       return version >= Version.parse(iosDeployMinimumVersion)
-          && !iosDeployBadVersions.map((v) => Version.parse(v)).contains(version);
+          && !iosDeployBadVersions.map((String v) => Version.parse(v)).contains(version);
     } on FormatException catch (_) {
       return false;
     }
