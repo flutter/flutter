@@ -48,7 +48,7 @@ compilation to native 32-bit and 64-bit ARM code for iOS and Android.
 Flutter offers stateful hot reload, allowing you to make changes to your code
 and see the results instantly without restarting your app or losing its state.
 
-[![Hot reload][]][Hot reload animation]
+[![Hot reload animation][]][Hot reload]
 
 ### Extensible and open model
 
