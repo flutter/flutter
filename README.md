@@ -52,7 +52,7 @@ and see the results instantly without restarting your app or losing its state.
 
 ### Extensible and open model
 
-Flutter is fully open source, and includes editor plug-ins for both
+Flutter works with any development tool, but includes editor plug-ins for both
 [Visual Studio Code] and [IntelliJ / Android Studio]. Flutter provides
 [thousands of packages][Flutter packages] to speed your development, regardless
 of your target platform. And accessing platform features is easy. Here is a
