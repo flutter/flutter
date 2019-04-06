@@ -60,7 +60,7 @@ class AlwaysKeepAliveState extends State<AlwaysKeepAliveWidget>
   bool get wantKeepAlive => true;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) { // ignore: must_call_super
     return Text(AlwaysKeepAliveWidget.text);
   }
 }

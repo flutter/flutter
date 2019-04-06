@@ -126,7 +126,7 @@ class ProblemWidget extends StatefulWidget {
 
 class ProblemWidgetState extends State<ProblemWidget> with AutomaticKeepAliveClientMixin<ProblemWidget> {
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) { // ignore: must_call_super
     Widget child = Semantics(
       container: true,
       child: Text(widget.text),

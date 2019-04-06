@@ -35,7 +35,7 @@ class AliveState extends State<Alive> with AutomaticKeepAliveClientMixin {
   bool get wantKeepAlive => widget.alive;
 
   @override
-  Widget build(BuildContext context) =>
+  Widget build(BuildContext context) => // ignore: must_call_super
      Text('${widget.index}:$wantKeepAlive');
 }
 
