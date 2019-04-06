@@ -262,9 +262,9 @@ class FlexibleSpaceBarSettings extends InheritedWidget {
   /// [FlexibleSpaceBar] widget in its tree for the settings to take affect.
   const FlexibleSpaceBarSettings({
     Key key,
-    this.toolbarOpacity,
-    this.minExtent,
-    this.maxExtent,
+    @required this.toolbarOpacity,
+    @required this.minExtent,
+    @required this.maxExtent,
     @required this.currentExtent,
     @required Widget child,
   }) : assert(currentExtent != null),
