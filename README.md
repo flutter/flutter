@@ -10,7 +10,7 @@ developers and organizations around the world, and is free and open source.
 ## Documentation
 
 * [Install Flutter](https://flutter.dev/get-started/)
-* [API documentation](https://docs.flutter.dev/)
+* [Flutter documentation](https://flutter.dev/docs)
 * [Development wiki](https://github.com/flutter/flutter/wiki)
 * [Contributing to Flutter](https://github.com/flutter/flutter/blob/master/CONTRIBUTING.md)
 
@@ -48,7 +48,7 @@ compilation to native 32-bit and 64-bit ARM code for iOS and Android.
 Flutter offers stateful hot reload, allowing you to make changes to your code
 and see the results instantly without restarting your app or losing its state.
 
-[![Hot reload][Make a change in your code, and your app changes instantly.]][Hot reload animation]
+[![Hot reload][]][Hot reload animation]
 
 ### Extensible and open model
 
