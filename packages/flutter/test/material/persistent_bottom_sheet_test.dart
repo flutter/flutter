@@ -38,14 +38,19 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: const Center(child: Text('body')),
-        bottomSheet: ListView(
-          shrinkWrap: true,
-          primary: true,
-          children: <Widget>[
-            Container(height: 100.0, child: const Text('One')),
-            Container(height: 100.0, child: const Text('Two')),
-            Container(height: 100.0, child: const Text('Three')),
-          ],
+        bottomSheet: DraggableScrollableSheet(
+          expand: false,
+          builder: (_, ScrollController controller) {
+            return ListView(
+              controller: controller,
+              shrinkWrap: true,
+              children: <Widget>[
+                Container(height: 100.0, child: const Text('One')),
+                Container(height: 100.0, child: const Text('Two')),
+                Container(height: 100.0, child: const Text('Three')),
+              ],
+            );
+          },
         ),
       )
     ));
@@ -104,14 +109,19 @@ void main() {
 
     scaffoldKey.currentState.showBottomSheet<void>(
       (BuildContext context) {
-        return ListView(
-          shrinkWrap: true,
-          primary: true,
-          children: <Widget>[
-            Container(height: 100.0, child: const Text('One')),
-            Container(height: 100.0, child: const Text('Two')),
-            Container(height: 100.0, child: const Text('Three')),
-          ],
+        return DraggableScrollableSheet(
+          expand: false,
+          builder: (_, ScrollController controller) {
+            return ListView(
+              shrinkWrap: true,
+              controller: controller,
+              children: <Widget>[
+                Container(height: 100.0, child: const Text('One')),
+                Container(height: 100.0, child: const Text('Two')),
+                Container(height: 100.0, child: const Text('Three')),
+              ],
+            );
+          },
         );
       },
     );
@@ -132,11 +142,16 @@ void main() {
         home: Scaffold(
           appBar: AppBar(),
           body: const Center(child: Text('body')),
-          bottomSheet: ListView.builder(
-            itemExtent: 50.0,
-            itemCount: 50,
-            itemBuilder: (_, int index) => Text('Item $index'),
-            primary: true,
+          bottomSheet: DraggableScrollableSheet(
+            expand: false,
+            builder: (_, ScrollController controller) {
+              return ListView.builder(
+                itemExtent: 50.0,
+                itemCount: 50,
+                itemBuilder: (_, int index) => Text('Item $index'),
+                controller: controller,
+              );
+            },
           ),
           floatingActionButton: const FloatingActionButton(
             onPressed: null,
@@ -190,14 +205,27 @@ void main() {
 
     scaffoldKey.currentState.showBottomSheet<void>(
       (BuildContext context) {
-        return ListView(
-          shrinkWrap: true,
-          primary: true,
-          children: <Widget>[
-            Container(height: 100.0, child: const Text('One')),
-            Container(height: 100.0, child: const Text('Two')),
-            Container(height: 100.0, child: const Text('Three')),
-          ],
+        return DraggableScrollableSheet(
+          expand: false,
+          builder: (_, ScrollController controller) {
+            return ListView(
+              controller: controller,
+              shrinkWrap: true,
+              children: <Widget>[
+                Container(height: 100.0, child: const Text('One')),
+                Container(height: 100.0, child: const Text('Two')),
+                Container(height: 100.0, child: const Text('Three')),
+                Container(height: 100.0, child: const Text('Three')),
+                Container(height: 100.0, child: const Text('Three')),
+                Container(height: 100.0, child: const Text('Three')),
+                Container(height: 100.0, child: const Text('Three')),
+                Container(height: 100.0, child: const Text('Three')),
+                Container(height: 100.0, child: const Text('Three')),
+                Container(height: 100.0, child: const Text('Three')),
+                Container(height: 100.0, child: const Text('Three')),
+              ],
+            );
+          },
         );
       },
     );

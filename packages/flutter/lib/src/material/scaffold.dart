@@ -1466,12 +1466,41 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
   void _maybeBuildPersistentBottomSheet() {
     if (widget.bottomSheet != null && _currentBottomSheet == null) {
+      final ResetNotifier _notifier = ResetNotifier();
       // The new _currentBottomSheet is not a local history entry so a "back" button
       // will not be added to the Scaffold's appbar and the bottom sheet will not
       // support drag or swipe to dismiss.
       final AnimationController animationController = BottomSheet.createAnimationController(this)..value = 1.0;
+      LocalHistoryEntry _persistentSheetHistoryEntry;
+      bool _persistentBottomSheetExtentChanged(ExtentNotification notification) {
+        if (notification.extent > notification.initialExtent) {
+          if (_persistentSheetHistoryEntry == null) {
+            _persistentSheetHistoryEntry = LocalHistoryEntry(onRemove: () {
+              if (notification.extent > notification.initialExtent) {
+                _notifier.sendReset();
+              }
+              showBodyScrim(false, 0.0);
+              floatingActionButtonVisibilityValue = 1.0;
+              _persistentSheetHistoryEntry = null;
+            });
+            ModalRoute.of(context).addLocalHistoryEntry(_persistentSheetHistoryEntry);
+          }
+        } else if (_persistentSheetHistoryEntry != null) {
+          ModalRoute.of(context).removeLocalHistoryEntry(_persistentSheetHistoryEntry);
+        }
+        return false;
+      }
+
       _currentBottomSheet = _buildBottomSheet<void>(
-        (BuildContext context) => widget.bottomSheet,
+        (BuildContext context) {
+          return NotificationListener<ExtentNotification>(
+            onNotification: _persistentBottomSheetExtentChanged,
+            child: InheritedResetNotifier(
+              child: widget.bottomSheet,
+              notifier: _notifier,
+            ),
+          );
+        },
         true,
         animationController: animationController,
       );
@@ -1523,19 +1552,18 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       assert(bottomSheetKey.currentState != null);
       showFloatingActionButton();
 
-      final Future<void> closing = bottomSheetKey.currentState.close();
-
       void _closed(void value) {
         setState(() {
           _currentBottomSheet = null;
         });
 
-        if (animationController.status !=AnimationStatus.dismissed) {
+        if (animationController.status != AnimationStatus.dismissed) {
           _dismissedBottomSheets.add(bottomSheet);
         }
         completer.complete();
       }
 
+      final Future<void> closing = bottomSheetKey.currentState.close();
       if (closing != null) {
         closing.then(_closed);
       } else {
@@ -1556,14 +1584,14 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       animationController: animationController,
       enableDrag: !isPersistent,
       onClosing: () {
-        assert(_currentBottomSheet != null);
+        if (_currentBottomSheet == null) {
+          return;
+        }
         assert(_currentBottomSheet._widget == bottomSheet);
-        if (isPersistent) {
-          _removeCurrentBottomSheet();
-        } else if (!removedEntry) {
+        if (!isPersistent && !removedEntry) {
           assert(entry != null);
-          removedEntry = true;
           entry.remove();
+          removedEntry = true;
         }
       },
       onDismissed: () {
@@ -2231,11 +2259,11 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
       scaffold.floatingActionButtonVisibilityValue = 1.0;
       scaffold.showBodyScrim(false, 0.0);
     }
-    if (notification.extent == notification.minExtent) {
+    // If the Scaffold.bottomSheet != null, we're a persistent bottom sheet.
+    if (notification.extent == notification.minExtent && scaffold.widget.bottomSheet == null) {
       close();
     }
-
-    return notification.depth == 0;
+    return false;
   }
 
   Widget _wrapBottomSheet(Widget bottomSheet) {

@@ -6,6 +6,7 @@ import 'package:flutter/gestures.dart';
 
 import 'basic.dart';
 import 'framework.dart';
+import 'inherited_notifier.dart';
 import 'layout_builder.dart';
 import 'notification_listener.dart';
 import 'scroll_context.dart';
@@ -177,8 +178,10 @@ class ExtentNotification extends Notification with ViewportNotificationMixin {
     @required this.extent,
     @required this.minExtent,
     @required this.maxExtent,
+    @required this.initialExtent,
     @required this.context,
   }) : assert(extent != null),
+       assert(initialExtent != null),
        assert(minExtent != null),
        assert(maxExtent != null),
        assert(0.0 <= minExtent),
@@ -196,6 +199,9 @@ class ExtentNotification extends Notification with ViewportNotificationMixin {
   /// The maximum value of [extent].
   final double maxExtent;
 
+  /// The initially requested value for [extent].
+  final double initialExtent;
+
   /// The build context of the widget that fired this notification.
   ///
   /// This can be used to find the sheet's render objects to determine the size
@@ -205,7 +211,7 @@ class ExtentNotification extends Notification with ViewportNotificationMixin {
   @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
-    description.add('minExtent: $minExtent, extent: $extent, maxExtent: $maxExtent');
+    description.add('minExtent: $minExtent, extent: $extent, maxExtent: $maxExtent, initialExtent: $initialExtent');
   }
 }
 
@@ -259,6 +265,7 @@ class _DraggableSheetExtent {
       minExtent: minExtent,
       maxExtent: maxExtent,
       extent: currentExtent,
+      initialExtent: initialExtent,
       context: context,
     ).dispatch(context);
   }
@@ -278,6 +285,24 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
       listener: _setExtent,
     );
     _scrollController = _DraggableScrollableSheetScrollController(extent: _extent);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (InheritedResetNotifier.shouldReset(context)) {
+      // jumpTo can result in trying to replace semantics during build.
+      // Just animate really fast.
+      // Avoid doing it at all if the offset is already 0.0.
+      if (_scrollController.offset != 0.0) {
+        _scrollController.animateTo(
+          0.0,
+          duration: Duration(milliseconds: 1),
+          curve: Curves.linear,
+        );
+      }
+      _extent._currentExtent.value = _extent.initialExtent;
+    }
   }
 
   void _setExtent() {
@@ -456,5 +481,65 @@ class _DraggableScrollableSheetScrollPosition
     // Save this so we can call it later if we have to [goBallistic] on our own.
     _dragCancelCallback = dragCancelCallback;
     return super.drag(details, dragCancelCallback);
+  }
+}
+
+/// A [ChangeNotifier] to use with [InheritedResetNotifer] to notify
+/// descendants that they should reset to initial state.
+class ResetNotifier extends ChangeNotifier {
+  bool _wasCalled = false;
+
+  /// Fires a reset notification to descendants.
+  ///
+  /// Returns false if there are no listeners.
+  bool sendReset() {
+    if (!hasListeners) {
+      return false;
+    }
+    _wasCalled = true;
+    notifyListeners();
+    return true;
+  }
+}
+
+/// An [InheritedNotifier] that can be used to notify descdendant
+/// [DraggableScrollableSheet]s set its extent to a particular value.
+///
+/// A widget that manipulates the [Navigator] on [ExtentNofitication]s may use
+/// a [DraggableScrollableSheetContext] to notify its children that they should
+/// scroll to a particular position. For example, when a persistent bottom sheet
+/// in a scaffold is scrolled upwards by a screen reader, a [LocalHistoryEntry]
+/// is added to the enclosing [ModalRoute] so that screen reading software will
+/// be able to notify the user that they can go back, and to enable a user to
+/// do so without requiring the use of a drag gesture that the screen reader
+/// cannot assist with.
+///
+/// See also:
+///   * [Scaffold.bottomSheet], which uses this mechanism.
+class InheritedResetNotifier extends InheritedNotifier<ResetNotifier> {
+  /// Creates an [InheritedNotifier] that the [DraggableScrollableSheet] will
+  /// listen to for an indication that it should change its extent.
+  ///
+  /// The [child] and [notifier] properties must not be null.
+  const InheritedResetNotifier({
+    Key key,
+    @required Widget child,
+    @required ResetNotifier notifier,
+  }) : super(key: key, child: child, notifier: notifier);
+
+  /// Specifies whether the [DraggableScrollableSheet] should reset to its
+  /// initial position.
+  ///
+  /// Returns true if the notifier requested a reset, false otherwise.
+  static bool shouldReset(BuildContext context) {
+    final InheritedWidget widget = context.inheritFromWidgetOfExactType(InheritedResetNotifier);
+    if (widget == null) {
+      return false;
+    }
+    assert(widget is InheritedResetNotifier);
+    final InheritedResetNotifier inheritedNotifier = widget;
+    final bool wasCalled = inheritedNotifier.notifier._wasCalled;
+    inheritedNotifier.notifier._wasCalled = false;
+    return wasCalled;
   }
 }

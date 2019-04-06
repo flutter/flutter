@@ -266,10 +266,16 @@ void main() {
     showModalBottomSheet<void>(
       context: scaffoldKey.currentContext,
       builder: (BuildContext context) {
-        return SingleChildScrollView(primary: true,
-          child: Container(
-            child: const Text('BottomSheet'),
-          ),
+        return DraggableScrollableSheet(
+          expand: false,
+          builder: (_, ScrollController controller) {
+            return SingleChildScrollView(
+              controller: controller,
+              child: Container(
+                child: const Text('BottomSheet'),
+              ),
+            );
+          },
         );
       },
     );
@@ -290,7 +296,6 @@ void main() {
               ],
               children: <TestSemantics>[
                 TestSemantics(
-                  actions: <SemanticsAction>[SemanticsAction.scrollUp],
                   flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
                   children: <TestSemantics>[
                     TestSemantics(
