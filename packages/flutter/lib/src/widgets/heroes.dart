@@ -702,7 +702,7 @@ class HeroController extends NavigatorObserver {
       return;
     }
 
-    final Rect navigatorRect = _boundingBoxFor(navigator.context, null);
+    final Rect navigatorRect = _boundingBoxFor(navigator.context);
 
     // At this point the toHeroes may have been built and laid out for the first time.
     final Map<Object, _HeroState> fromHeroes = Hero._allHeroesFor(from.subtreeContext, isUserGestureTransition, navigator);
