@@ -33,8 +33,8 @@
 // mostly explains a.), c. it makes parsing "subcommands", like "my_program
 // --flag_for_my_program subcommand --flag_for_subcommand" saner.
 
-#ifndef LIB_FXL_COMMAND_LINE_H_
-#define LIB_FXL_COMMAND_LINE_H_
+#ifndef LIB_FML_COMMAND_LINE_H_
+#define LIB_FML_COMMAND_LINE_H_
 
 #include <stddef.h>
 
@@ -239,4 +239,4 @@ std::vector<std::string> CommandLineToArgv(const CommandLine& command_line);
 
 }  // namespace fml
 
-#endif  // LIB_FXL_COMMAND_LINE_H_
+#endif  // LIB_FML_COMMAND_LINE_H_
