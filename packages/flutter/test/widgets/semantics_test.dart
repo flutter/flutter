@@ -857,14 +857,14 @@ void main() {
       }
     );
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.ltr,
         child: Column(
           children: <Widget>[
-            const Text('Label 1'),
-            const Text('Label 2'),
+            Text('Label 1'),
+            Text('Label 2'),
             Row(
-              children: const <Widget>[
+              children: <Widget>[
                 Text('Label 3'),
                 Text('Label 4'),
                 Text('Label 5'),
@@ -923,8 +923,8 @@ void main() {
             const Text('Label 2'),
             Transform.rotate(
               angle: pi / 2.0,
-              child: Row(
-                children: const <Widget>[
+              child: const Row(
+                children: <Widget>[
                   Text('Label 3'),
                   Text('Label 4'),
                   Text('Label 5'),

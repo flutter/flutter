@@ -49,9 +49,9 @@ void main() {
 
   testWidgets('Flexible defaults to loose', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Row(
+      const Row(
         textDirection: TextDirection.ltr,
-        children: const <Widget>[
+        children: <Widget>[
           Flexible(child: SizedBox(width: 100.0, height: 200.0)),
         ],
       ),
@@ -63,9 +63,9 @@ void main() {
 
   testWidgets('Can pass null for flex', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Row(
+      const Row(
         textDirection: TextDirection.ltr,
-        children: const <Widget>[
+        children: <Widget>[
           Expanded(flex: null, child: Text('one', textDirection: TextDirection.ltr)),
           Flexible(flex: null, child: Text('two', textDirection: TextDirection.ltr)),
         ],
@@ -116,7 +116,7 @@ void main() {
     // we only get a single exception. Otherwise we'd get two, the one we want and
     // an extra one when we discover we never computed a size.
     await tester.pumpWidget(
-      Column(
+      const Column(
         children: <Widget>[
           Column(),
         ],

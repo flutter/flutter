@@ -147,9 +147,9 @@ void main() {
             child: Container(
               width: 400.0,
               height: 400.0,
-              child: Column(
+              child: const Column(
                 mainAxisAlignment: MainAxisAlignment.end,
-                children: const <Widget>[
+                children: <Widget>[
                   SizedBox(
                     height: 50.0,
                     width: 400.0,

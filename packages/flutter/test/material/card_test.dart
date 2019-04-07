@@ -82,14 +82,14 @@ void main() {
     debugResetSemanticsIdCounter();
 
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.ltr,
         child: Material(
           child: Center(
             child: Card(
               semanticContainer: true,
               child: Column(
-                children: const <Widget>[
+                children: <Widget>[
                   Text('First child'),
                   Text('Second child'),
                 ],

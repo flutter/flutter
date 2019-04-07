@@ -20,8 +20,8 @@ void main() {
     expect(tester.takeException(), isFlutterError);
 
     await tester.pumpWidget(
-      Row(
-        children: const <Widget>[
+      const Row(
+        children: <Widget>[
           SliverList(
             delegate: SliverChildListDelegate(<Widget>[]),
           ),

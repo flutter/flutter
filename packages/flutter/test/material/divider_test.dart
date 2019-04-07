@@ -42,8 +42,8 @@ void main() {
         home: Material(
           child: Container(
             height: 24.0,
-            child: Row(
-              children: const <Widget>[
+            child: const Row(
+              children: <Widget>[
                 Text('Hey.'),
                 VerticalDivider(),
               ],

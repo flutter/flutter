@@ -274,8 +274,8 @@ void main() {
 
     await tester.pumpWidget(
       Container(
-        child: Row(
-          children: const <Widget>[
+        child: const Row(
+          children: <Widget>[
             Positioned(
               top: 6.0,
               left: 7.0,

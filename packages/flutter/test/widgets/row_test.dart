@@ -28,6 +28,14 @@ Widget log(int index) => CustomPaint(painter: OrderPainter(index));
 void main() {
   // NO DIRECTION
 
+  testWidgets('Row is const constructable', (WidgetTester tester) async {
+    const Row(
+      children: <Widget>[
+        Text('Billable Hours'),
+      ],
+    );
+  });
+
   testWidgets('Row with one Flexible child - no textDirection', (WidgetTester tester) async {
     OrderPainter.log.clear();
     const Key rowKey = Key('row');

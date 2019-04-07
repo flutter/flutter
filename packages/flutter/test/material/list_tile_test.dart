@@ -343,13 +343,13 @@ void main() {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
-      Material(
+      const Material(
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: MediaQuery(
-            data: const MediaQueryData(),
+            data: MediaQueryData(),
             child: Column(
-              children: const <Widget>[
+              children: <Widget>[
                 ListTile(
                   title: Text('one'),
                 ),

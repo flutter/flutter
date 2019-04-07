@@ -1150,16 +1150,16 @@ void main() {
     await gesture.moveTo(secondLocation);
     await tester.pump();
 
-    await tester.pumpWidget(MaterialApp(
-        home: Column(
-            children: const <Widget>[
-              Draggable<int>(
-                  data: 1,
-                  child: Text('Source'),
-                  feedback: Text('Dragging'),
-              ),
-            ],
-        ),
+    await tester.pumpWidget(const MaterialApp(
+      home: Column(
+        children: <Widget>[
+          Draggable<int>(
+            data: 1,
+            child: Text('Source'),
+            feedback: Text('Dragging'),
+          ),
+        ],
+      ),
     ));
 
     expect(events, isEmpty);
@@ -1626,9 +1626,9 @@ void main() {
     await gesture.moveTo(secondLocation);
     await tester.pump();
 
-    await tester.pumpWidget(MaterialApp(
+    await tester.pumpWidget(const MaterialApp(
       home: Column(
-        children: const <Widget>[
+        children: <Widget>[
           Draggable<int>(
             data: 1,
             child: Text('Source'),

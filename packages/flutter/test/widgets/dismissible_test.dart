@@ -582,8 +582,8 @@ void main() {
           child: Container(
             width: 100.0,
             height: 1000.0,
-            child: Column(
-              children: const <Widget>[
+            child: const Column(
+              children: <Widget>[
                 Test1215DismissibleWidget('1'),
                 Test1215DismissibleWidget('2'),
               ],
