@@ -45,7 +45,7 @@ typedef ValueWidgetBuilder<T> = Widget Function(BuildContext context, T value, W
 ///
 /// ```dart
 /// class _MyHomePageState extends State<MyHomePage> {
-///   ValueNotifier<int> _counter = ValueNotifier<int>(0);
+///   final ValueNotifier<int> _counter = ValueNotifier<int>(0);
 ///   final Widget goodJob = const Text('Good job!');
 ///   @override
 ///   Widget build(BuildContext context) {
