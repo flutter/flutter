@@ -51,6 +51,9 @@ class Cache {
       _artifacts.add(GradleWrapper(this));
       _artifacts.add(FlutterWebSdk(this));
       _artifacts.add(FlutterSdk(this));
+      _artifacts.add(WindowsEngineArtifacts(this));
+      _artifacts.add(MacOSEngineArtifacts(this));
+      _artifacts.add(LinuxEngineArtifacts(this));
     } else {
       _artifacts.addAll(artifacts);
     }
@@ -535,11 +538,18 @@ abstract class EngineCachedArtifact extends CachedArtifact {
 
       _makeFilesExecutable(dir);
 
+      // TODO(jonahwilliams): clean this logic up to better handle different framework names.
       final File frameworkZip = fs.file(fs.path.join(dir.path, 'Flutter.framework.zip'));
       if (frameworkZip.existsSync()) {
         final Directory framework = fs.directory(fs.path.join(dir.path, 'Flutter.framework'));
         framework.createSync();
         os.unzip(frameworkZip, framework);
+      }
+      final File desktopFrameworkZip = fs.file(fs.path.join(dir.path, 'FlutterMacOS.framework.zip'));
+      if (desktopFrameworkZip.existsSync()) {
+        final Directory framework = fs.directory(fs.path.join(dir.path, 'FlutterMacOS.framework'));
+        framework.createSync();
+        os.unzip(desktopFrameworkZip, framework);
       }
     }
 
@@ -624,6 +634,72 @@ class FlutterSdk extends EngineCachedArtifact {
       ]);
     }
     return binaryDirs;
+  }
+
+  @override
+  List<String> getLicenseDirs() => const <String>[];
+}
+
+class MacOSEngineArtifacts extends EngineCachedArtifact {
+  MacOSEngineArtifacts(Cache cache) : super(
+    'macos-sdk',
+    cache,
+    const <DevelopmentArtifact> { DevelopmentArtifact.macOS },
+  );
+
+  @override
+  List<String> getPackageDirs() => const <String>[];
+
+  @override
+  List<List<String>> getBinaryDirs() {
+    if (platform.isMacOS) {
+      return _macOSDesktopBinaryDirs;
+    }
+    return const <List<String>>[];
+  }
+
+  @override
+  List<String> getLicenseDirs() => const <String>[];
+}
+
+class WindowsEngineArtifacts extends EngineCachedArtifact {
+  WindowsEngineArtifacts(Cache cache) : super(
+    'windows-sdk',
+    cache,
+    const <DevelopmentArtifact> { DevelopmentArtifact.windows },
+  );
+
+  @override
+  List<String> getPackageDirs() => const <String>[];
+
+  @override
+  List<List<String>> getBinaryDirs() {
+    if (platform.isWindows) {
+      return _windowsDesktopBinaryDirs;
+    }
+    return const <List<String>>[];
+  }
+
+  @override
+  List<String> getLicenseDirs() => const <String>[];
+}
+
+class LinuxEngineArtifacts extends EngineCachedArtifact {
+  LinuxEngineArtifacts(Cache cache) : super(
+    'linux-sdk',
+    cache,
+    const <DevelopmentArtifact> { DevelopmentArtifact.linux },
+  );
+
+  @override
+  List<String> getPackageDirs() => const <String>[];
+
+  @override
+  List<List<String>> getBinaryDirs() {
+    if (platform.isLinux) {
+      return _linuxDesktopBinaryDirs;
+    }
+    return const <List<String>>[];
   }
 
   @override
@@ -793,6 +869,20 @@ void _ensureExists(Directory directory) {
     directory.createSync(recursive: true);
   }
 }
+
+const List<List<String>> _windowsDesktopBinaryDirs = <List<String>>[
+  <String>['windows-x64', 'windows-x64/windows-x64-flutter.zip'],
+  <String>['windows-x64', 'windows-x64/flutter-cpp-client-wrapper.zip'],
+];
+
+const List<List<String>> _linuxDesktopBinaryDirs = <List<String>>[
+  <String>['linux-x64', 'linux-x64/linux-x64-flutter.zip'],
+  <String>['linux-x64', 'linux-x64/flutter-cpp-client-wrapper.zip'],
+];
+
+const List<List<String>> _macOSDesktopBinaryDirs = <List<String>>[
+  <String>['darwin-x64', 'darwin-x64/FlutterMacOS.framework.zip'],
+];
 
 const List<List<String>> _osxBinaryDirs = <List<String>>[
   <String>['android-arm-profile/darwin-x64', 'android-arm-profile/darwin-x64.zip'],
