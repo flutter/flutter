@@ -5,9 +5,6 @@
 #include "flutter/lib/ui/compositing/scene_builder.h"
 
 #include "flutter/flow/layers/backdrop_filter_layer.h"
-#if defined(OS_FUCHSIA)
-#include "flutter/flow/layers/child_scene_layer.h"
-#endif
 #include "flutter/flow/layers/clip_path_layer.h"
 #include "flutter/flow/layers/clip_rect_layer.h"
 #include "flutter/flow/layers/clip_rrect_layer.h"
@@ -34,6 +31,10 @@
 #include "third_party/tonic/dart_binding_macros.h"
 #include "third_party/tonic/dart_library_natives.h"
 
+#if defined(OS_FUCHSIA)
+#include "flutter/flow/layers/child_scene_layer.h"
+#endif
+
 namespace blink {
 
 static void SceneBuilder_constructor(Dart_NativeArguments args) {
@@ -58,7 +59,6 @@ IMPLEMENT_WRAPPERTYPEINFO(ui, SceneBuilder);
   V(SceneBuilder, addRetained)                      \
   V(SceneBuilder, addPicture)                       \
   V(SceneBuilder, addTexture)                       \
-  V(SceneBuilder, addChildScene)                    \
   V(SceneBuilder, addPerformanceOverlay)            \
   V(SceneBuilder, setRasterizerTracingThreshold)    \
   V(SceneBuilder, setCheckerboardOffscreenLayers)   \
@@ -66,11 +66,18 @@ IMPLEMENT_WRAPPERTYPEINFO(ui, SceneBuilder);
   V(SceneBuilder, build)
 
 FOR_EACH_BINDING(DART_NATIVE_CALLBACK)
+#if defined(OS_FUCHSIA)
+DART_NATIVE_CALLBACK(SceneBuilder, addChildScene)
+#endif
 
 void SceneBuilder::RegisterNatives(tonic::DartLibraryNatives* natives) {
-  natives->Register(
-      {{"SceneBuilder_constructor", SceneBuilder_constructor, 1, true},
-       FOR_EACH_BINDING(DART_REGISTER_NATIVE)});
+  natives->Register({
+    {"SceneBuilder_constructor", SceneBuilder_constructor, 1, true},
+        FOR_EACH_BINDING(DART_REGISTER_NATIVE)
+#if defined(OS_FUCHSIA)
+            DART_REGISTER_NATIVE(SceneBuilder, addChildScene)
+#endif
+  });
 }
 
 SceneBuilder::SceneBuilder() = default;
@@ -251,24 +258,22 @@ void SceneBuilder::addPlatformView(double dx,
   current_layer_->Add(std::move(layer));
 }
 
+#if defined(OS_FUCHSIA)
 void SceneBuilder::addChildScene(double dx,
                                  double dy,
                                  double width,
                                  double height,
                                  SceneHost* sceneHost,
                                  bool hitTestable) {
-#if defined(OS_FUCHSIA)
   if (!current_layer_) {
     return;
   }
-  auto layer = std::make_unique<flow::ChildSceneLayer>();
-  layer->set_offset(SkPoint::Make(dx, dy));
-  layer->set_size(SkSize::Make(width, height));
-  layer->set_export_node_holder(sceneHost->export_node_holder());
-  layer->set_hit_testable(hitTestable);
+  auto layer = std::make_unique<flow::ChildSceneLayer>(
+      sceneHost->id(), sceneHost->use_view_holder(), SkPoint::Make(dx, dy),
+      SkSize::Make(width, height), hitTestable);
   current_layer_->Add(std::move(layer));
-#endif  // defined(OS_FUCHSIA)
 }
+#endif  // defined(OS_FUCHSIA)
 
 void SceneBuilder::addPerformanceOverlay(uint64_t enabledOptions,
                                          double left,

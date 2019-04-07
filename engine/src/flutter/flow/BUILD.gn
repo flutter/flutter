@@ -77,15 +77,17 @@ source_set("flow") {
       "layers/child_scene_layer.h",
       "scene_update_context.cc",
       "scene_update_context.h",
+      "view_holder.cc",
+      "view_holder.h",
     ]
 
     public_deps += [
-      "//garnet/public/lib/ui/scenic/cpp",
       "//sdk/fidl/fuchsia.ui.scenic",
+      "//sdk/fidl/fuchsia.ui.views",
+      "//sdk/lib/ui/scenic/cpp",
       "//topaz/public/dart-pkg/zircon",
+      "//zircon/public/lib/zx",
     ]
-
-    public_deps += [ "//zircon/public/lib/zx" ]
   }
 }
 

@@ -4,41 +4,11 @@
 
 #include "flutter/flow/scene_update_context.h"
 
-#include "flutter/flow/export_node.h"
 #include "flutter/flow/layers/layer.h"
 #include "flutter/flow/matrix_decomposition.h"
 #include "flutter/fml/trace_event.h"
 
 namespace flow {
-
-SceneUpdateContext::SceneUpdateContext(scenic::Session* session,
-                                       SurfaceProducer* surface_producer)
-    : session_(session), surface_producer_(surface_producer) {
-  FML_DCHECK(surface_producer_ != nullptr);
-}
-
-SceneUpdateContext::~SceneUpdateContext() {
-  // Release Mozart session resources for all ExportNodes.
-  for (auto export_node : export_nodes_) {
-    export_node->Dispose(false);
-  }
-};
-
-void SceneUpdateContext::AddChildScene(ExportNode* export_node,
-                                       SkPoint offset,
-                                       bool hit_testable) {
-  FML_DCHECK(top_entity_);
-
-  export_node->Bind(*this, top_entity_->entity_node(), offset, hit_testable);
-}
-
-void SceneUpdateContext::AddExportNode(ExportNode* export_node) {
-  export_nodes_.insert(export_node);  // Might already have been added.
-}
-
-void SceneUpdateContext::RemoveExportNode(ExportNode* export_node) {
-  export_nodes_.erase(export_node);
-}
 
 // Helper function to generate clip planes for a scenic::EntityNode.
 static void SetEntityNodeClipPlanes(scenic::EntityNode* entity_node,
@@ -77,6 +47,12 @@ static void SetEntityNodeClipPlanes(scenic::EntityNode* entity_node,
   clip_planes[3].dir.z = 0.f;
 
   entity_node->SetClipPlanes(std::move(clip_planes));
+}
+
+SceneUpdateContext::SceneUpdateContext(scenic::Session* session,
+                                       SurfaceProducer* surface_producer)
+    : session_(session), surface_producer_(surface_producer) {
+  FML_DCHECK(surface_producer_ != nullptr);
 }
 
 void SceneUpdateContext::CreateFrame(
@@ -256,21 +232,6 @@ SceneUpdateContext::Entity::~Entity() {
   context_.top_entity_ = previous_entity_;
 }
 
-SceneUpdateContext::Clip::Clip(SceneUpdateContext& context,
-                               scenic::Shape& shape,
-                               const SkRect& shape_bounds)
-    : Entity(context) {
-  shape_node().SetShape(shape);
-  shape_node().SetTranslationRH(
-      shape_bounds.width() * 0.5f + shape_bounds.left(),
-      shape_bounds.height() * 0.5f + shape_bounds.top(), 0.f);
-  entity_node().SetClip(0u, true /* clip to self */);
-
-  SetEntityNodeClipPlanes(&entity_node(), shape_bounds);
-}
-
-SceneUpdateContext::Clip::~Clip() = default;
-
 SceneUpdateContext::Transform::Transform(SceneUpdateContext& context,
                                          const SkMatrix& transform)
     : Entity(context),
@@ -283,7 +244,7 @@ SceneUpdateContext::Transform::Transform(SceneUpdateContext& context,
     if (decomposition.IsValid()) {
       entity_node().SetTranslation(decomposition.translation().x(),  //
                                    decomposition.translation().y(),  //
-                                   decomposition.translation().z()   //
+                                   -decomposition.translation().z()  //
       );
 
       entity_node().SetScale(decomposition.scale().x(),  //
@@ -345,6 +306,19 @@ void SceneUpdateContext::Frame::AddPaintLayer(Layer* layer) {
   FML_DCHECK(layer->needs_painting());
   paint_layers_.push_back(layer);
   paint_bounds_.join(layer->paint_bounds());
+}
+
+SceneUpdateContext::Clip::Clip(SceneUpdateContext& context,
+                               scenic::Shape& shape,
+                               const SkRect& shape_bounds)
+    : Entity(context) {
+  shape_node().SetShape(shape);
+  shape_node().SetTranslationRH(
+      shape_bounds.width() * 0.5f + shape_bounds.left(),
+      shape_bounds.height() * 0.5f + shape_bounds.top(), 0.f);
+  entity_node().SetClip(0u, true /* clip to self */);
+
+  SetEntityNodeClipPlanes(&entity_node(), shape_bounds);
 }
 
 }  // namespace flow

@@ -376,10 +376,37 @@ class SceneHost extends NativeFieldWrapperClass2 {
   SceneHost(dynamic exportTokenHandle) {
     _constructor(exportTokenHandle);
   }
+  SceneHost.fromViewHolderToken(
+      dynamic viewHolderTokenHandle,
+      void Function() viewConnectedCallback,
+      void Function() viewDisconnectedCallback,
+      void Function(bool) viewStateChangedCallback) {
+    _constructorViewHolderToken(viewHolderTokenHandle, viewConnectedCallback,
+        viewDisconnectedCallback, viewStateChangedCallback);
+  }
+
   void _constructor(dynamic exportTokenHandle) native 'SceneHost_constructor';
+  void
+      _constructorViewHolderToken(
+          dynamic viewHolderTokenHandle,
+          void Function() viewConnectedCallback,
+          void Function() viewDisconnectedCallback,
+          void Function(bool) viewStateChangedCallback)
+      native 'SceneHost_constructorViewHolderToken';
 
   /// Releases the resources associated with the child scene host.
   ///
   /// After calling this function, the child scene host cannot be used further.
   void dispose() native 'SceneHost_dispose';
+
+  /// Set properties on the linked scene.  These properties include its bounds,
+  /// as well as whether it can be the target of focus events or not.
+  void setProperties(
+      double width,
+      double height,
+      double insetTop,
+      double insetRight,
+      double insetBottom,
+      double insetLeft,
+      bool focusable) native 'SceneHost_setProperties';
 }

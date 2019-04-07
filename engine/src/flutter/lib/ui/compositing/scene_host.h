@@ -5,18 +5,16 @@
 #ifndef FLUTTER_LIB_UI_COMPOSITING_SCENE_HOST_H_
 #define FLUTTER_LIB_UI_COMPOSITING_SCENE_HOST_H_
 
+#include <dart-pkg/zircon/sdk_ext/handle.h>
+#include <lib/ui/scenic/cpp/id.h>
 #include <stdint.h>
+#include <third_party/tonic/dart_library_natives.h>
+#include <third_party/tonic/dart_persistent_value.h>
+#include <zircon/types.h>
 
-#include "flutter/fml/build_config.h"
+#include "flutter/fml/memory/ref_counted.h"
+#include "flutter/fml/task_runner.h"
 #include "flutter/lib/ui/dart_wrapper.h"
-
-#if defined(OS_FUCHSIA)
-#include "flutter/flow/export_node.h"
-#endif
-
-namespace tonic {
-class DartLibraryNatives;
-}  // namespace tonic
 
 namespace blink {
 
@@ -25,35 +23,45 @@ class SceneHost : public RefCountedDartWrappable<SceneHost> {
   FML_FRIEND_MAKE_REF_COUNTED(SceneHost);
 
  public:
-#if defined(OS_FUCHSIA)
-  static fml::RefPtr<SceneHost> create(
-      fml::RefPtr<zircon::dart::Handle> export_token_handle);
-#else
-  static fml::RefPtr<SceneHost> create(Dart_Handle export_token_handle);
-#endif
-
   ~SceneHost() override;
 
-#if defined(OS_FUCHSIA)
-  const fml::RefPtr<flow::ExportNodeHolder>& export_node_holder() const {
-    return export_node_holder_;
-  }
-#endif
+  static void RegisterNatives(tonic::DartLibraryNatives* natives);
+  static fml::RefPtr<SceneHost> Create(
+      fml::RefPtr<zircon::dart::Handle> exportTokenHandle);
+  static fml::RefPtr<SceneHost> CreateViewHolder(
+      fml::RefPtr<zircon::dart::Handle> viewHolderTokenHandle,
+      Dart_Handle viewConnectedCallback,
+      Dart_Handle viewDisconnectedCallback,
+      Dart_Handle viewStateChangedCallback);
+  static void OnViewConnected(scenic::ResourceId id);
+  static void OnViewDisconnected(scenic::ResourceId id);
+  static void OnViewStateChanged(scenic::ResourceId id, bool state);
 
+  zx_koid_t id() const { return id_; }
+  bool use_view_holder() const { return use_view_holder_; }
+
+  void setProperties(double width,
+                     double height,
+                     double insetTop,
+                     double insetRight,
+                     double insetBottom,
+                     double insetLeft,
+                     bool focusable);
   void dispose();
 
-  static void RegisterNatives(tonic::DartLibraryNatives* natives);
-
  private:
-#if defined(OS_FUCHSIA)
-  fml::RefPtr<flow::ExportNodeHolder> export_node_holder_;
-#endif
+  explicit SceneHost(fml::RefPtr<zircon::dart::Handle> exportTokenHandle);
+  SceneHost(fml::RefPtr<zircon::dart::Handle> viewHolderTokenHandle,
+            Dart_Handle viewConnectedCallback,
+            Dart_Handle viewDisconnectedCallback,
+            Dart_Handle viewStateChangedCallback);
 
-#if defined(OS_FUCHSIA)
-  explicit SceneHost(fml::RefPtr<zircon::dart::Handle> export_token_handle);
-#else
-  explicit SceneHost(Dart_Handle export_token_handle);
-#endif
+  fml::RefPtr<fml::TaskRunner> gpu_task_runner_;
+  std::unique_ptr<tonic::DartPersistentValue> view_connected_callback_;
+  std::unique_ptr<tonic::DartPersistentValue> view_disconnected_callback_;
+  std::unique_ptr<tonic::DartPersistentValue> view_state_changed_callback_;
+  zx_koid_t id_ = ZX_KOID_INVALID;
+  bool use_view_holder_ = false;
 };
 
 }  // namespace blink

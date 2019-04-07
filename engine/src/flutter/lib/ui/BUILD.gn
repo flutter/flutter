@@ -8,8 +8,6 @@ source_set("ui") {
     "compositing/scene.h",
     "compositing/scene_builder.cc",
     "compositing/scene_builder.h",
-    "compositing/scene_host.cc",
-    "compositing/scene_host.h",
     "dart_runtime_hooks.cc",
     "dart_runtime_hooks.h",
     "dart_ui.cc",
@@ -115,11 +113,17 @@ source_set("ui") {
     "//third_party/skia",
     "//third_party/tonic",
   ]
-  if (is_fuchsia) {
-    deps += [ "//topaz/public/dart-pkg/zircon" ]
-  }
 
   public_deps = [
     "$flutter_root/third_party/txt",
   ]
+
+  if (is_fuchsia) {
+    sources += [
+      "compositing/scene_host.cc",
+      "compositing/scene_host.h",
+    ]
+
+    deps += [ "//topaz/public/dart-pkg/zircon" ]
+  }
 }
