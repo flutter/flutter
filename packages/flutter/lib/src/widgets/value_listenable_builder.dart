@@ -44,6 +44,14 @@ typedef ValueWidgetBuilder<T> = Widget Function(BuildContext context, T value, W
 /// setting state on the whole [Scaffold] in the default `flutter create` app.
 ///
 /// ```dart
+/// class MyHomePage extends StatefulWidget {
+///   MyHomePage({Key key, this.title}) : super(key: key);
+///   final String title;
+///
+///   @override
+///   _MyHomePageState createState() => _MyHomePageState();
+/// }
+///
 /// class _MyHomePageState extends State<MyHomePage> {
 ///   final ValueNotifier<int> _counter = ValueNotifier<int>(0);
 ///   final Widget goodJob = const Text('Good job!');
