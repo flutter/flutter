@@ -902,7 +902,8 @@ class _EmptySliderComponentShape extends SliderComponentShape {
   }
 }
 
-/// Base track shape with default sizing.
+/// Base track shape that provides an implementation of [getPreferredRect] for
+/// default sizing.
 ///
 /// The [SliderTrackShape]s that use this base class are:
 ///   * [RectangularSliderTrackShape]
@@ -958,14 +959,13 @@ abstract class BaseSliderTrackShape {
 ///
 /// See also:
 ///
-///  * [Slider] for the component that this is meant to display this shape.
-///  * [SliderThemeData] where an instance of this class is set to inform the
+///  * [Slider], for the component that is meant to display this shape.
+///  * [SliderThemeData], where an instance of this class is set to inform the
 ///    slider of the visual details of the its track.
-///  * [SliderTrackShape] Base component for creating other custom track
-///    shapes.
-///  * [RectangularSliderTrackShape] for a similar track with blunt edges.
+///  * [SliderTrackShape], which is the base component for creating other
+///  * [RectangularSliderTrackShape], for a similar track with blunt edges.
 class RoundedRectSliderTrackShape extends SliderTrackShape with BaseSliderTrackShape {
-  /// Create a slider track that draws 2 rectangles with rounded outer edges.
+  /// Create a slider track that draws two rectangles with rounded outer edges.
   const RoundedRectSliderTrackShape();
 
   @override
@@ -1041,12 +1041,12 @@ class RoundedRectSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
 ///
 /// See also:
 ///
-///  * [Slider] for the component that this is meant to display this shape.
-///  * [SliderThemeData] where an instance of this class is set to inform the
+///  * [Slider], for the component that is meant to display this shape.
+///  * [SliderThemeData], where an instance of this class is set to inform the
 ///    slider of the visual details of the its track.
-///  * [SliderTrackShape] Base component for creating other custom track
-///    shapes.
-///  * [RoundedRectSliderTrackShape] for a similar track with rounded edges.
+///  * [SliderTrackShape], which is the base component for creating other
+///     custom track  shapes.
+///  * [RoundedRectSliderTrackShape], for a similar track with rounded edges.
 class RectangularSliderTrackShape extends SliderTrackShape {
   /// Create a slider track that draws 2 rectangles.
   const RectangularSliderTrackShape({ this.disabledThumbGapWidth = 2.0 });
