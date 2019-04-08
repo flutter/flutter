@@ -1,4 +1,4 @@
-Signature: c57817ef7ecddfa3a3e3a4fb74a7e125
+Signature: 4d703499240d61f71bfebdfc7445f256
 
 UNUSED LICENSES:
 
@@ -2683,6 +2683,7 @@ FILE: ../../../third_party/skia/src/sksl/sksl.inc
 FILE: ../../../third_party/skia/src/sksl/sksl_fp.inc
 FILE: ../../../third_party/skia/src/sksl/sksl_frag.inc
 FILE: ../../../third_party/skia/src/sksl/sksl_geom.inc
+FILE: ../../../third_party/skia/src/sksl/sksl_mixer.inc
 FILE: ../../../third_party/skia/src/sksl/sksl_pipeline.inc
 FILE: ../../../third_party/skia/src/sksl/sksl_vert.inc
 ----------------------------------------------------------------------------------------------------
@@ -5784,6 +5785,7 @@ FILE: ../../../third_party/skia/docs/examples/Text_Skew_X.cpp
 FILE: ../../../third_party/skia/docs/examples/Typeface_Methods.cpp
 FILE: ../../../third_party/skia/docs/examples/Xor.cpp
 FILE: ../../../third_party/skia/gm/crbug_918512.cpp
+FILE: ../../../third_party/skia/src/gpu/GrPersistentCacheUtils.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2019 Google LLC.
 
