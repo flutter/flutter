@@ -128,7 +128,8 @@ template("shell_host_executable") {
       ":common",
       "$flutter_root/fml",
       "$flutter_root/lib/snapshot",
-      "//third_party/dart/runtime:libdart_jit",
+      "$flutter_root/runtime",
+      "$flutter_root/runtime:libdart",
       "//third_party/skia",
       "//third_party/tonic",
     ]
@@ -145,15 +146,23 @@ shell_gpu_configuration("shell_unittests_gpu_configuration") {
   enable_gl = false
 }
 
+test_fixtures("shell_unittests_fixtures") {
+  fixtures = [ "fixtures/main.dart" ]
+}
+
 shell_host_executable("shell_unittests") {
   sources = [
+    "shell_test.cc",
+    "shell_test.h",
     "shell_unittests.cc",
   ]
 
   deps = [
+    ":shell_unittests_fixtures",
     ":shell_unittests_gpu_configuration",
-    "$flutter_root/shell/",
-    "$flutter_root/testing",
+    "$flutter_root/common",
+    "$flutter_root/shell",
+    "$flutter_root/testing:dart",
   ]
 }
 
