@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/macos/application_package.dart';
 import 'package:meta/meta.dart';
 
 import '../application_package.dart';
@@ -741,4 +742,276 @@ Future<bool> upgradePbxProjWithFlutterAssets(IosProject project) async {
   }
   await xcodeProjectFile.writeAsString(buffer.toString());
   return true;
+}
+
+
+Future<XcodeBuildResult> buildMacOSXcodeProject({
+  BuildableMacOSApp app,
+  BuildInfo buildInfo,
+  String targetOverride,
+  bool buildForDevice,
+  bool codesign = true,
+  bool usesTerminalUi = true,
+}) async {
+  if (!_checkXcodeVersion())
+    return XcodeBuildResult(success: false);
+
+  // TODO(cbracken): remove when https://github.com/flutter/flutter/issues/20685 is fixed.
+  await setXcodeWorkspaceBuildSystem(
+    workspaceDirectory: app.project.xcodeWorkspace,
+    workspaceSettings: app.project.xcodeWorkspaceSharedSettings,
+    modern: false,
+  );
+
+  final XcodeProjectInfo projectInfo = await xcodeProjectInterpreter.getInfo(app.project.hostAppRoot.path);
+  if (!projectInfo.targets.contains('Runner')) {
+    printError('The Xcode project does not define target "Runner" which is needed by Flutter tooling.');
+    printError('Open Xcode to fix the problem:');
+    printError('  open ios/Runner.xcworkspace');
+    return XcodeBuildResult(success: false);
+  }
+  final String scheme = projectInfo.schemeFor(buildInfo);
+  if (scheme == null) {
+    printError('');
+    if (projectInfo.definesCustomSchemes) {
+      printError('The Xcode project defines schemes: ${projectInfo.schemes.join(', ')}');
+      printError('You must specify a --flavor option to select one of them.');
+    } else {
+      printError('The Xcode project does not define custom schemes.');
+      printError('You cannot use the --flavor option.');
+    }
+    return XcodeBuildResult(success: false);
+  }
+  final String configuration = projectInfo.buildConfigurationFor(buildInfo, scheme);
+  if (configuration == null) {
+    printError('');
+    printError('The Xcode project defines build configurations: ${projectInfo.buildConfigurations.join(', ')}');
+    printError('Flutter expects a build configuration named ${XcodeProjectInfo.expectedBuildConfigurationFor(buildInfo, scheme)} or similar.');
+    printError('Open Xcode to fix the problem:');
+    printError('  open ios/Runner.xcworkspace');
+    printError('1. Click on "Runner" in the project navigator.');
+    printError('2. Ensure the Runner PROJECT is selected, not the Runner TARGET.');
+    if (buildInfo.isDebug) {
+      printError('3. Click the Editor->Add Configuration->Duplicate "Debug" Configuration.');
+    } else {
+      printError('3. Click the Editor->Add Configuration->Duplicate "Release" Configuration.');
+    }
+    printError('');
+    printError('   If this option is disabled, it is likely you have the target selected instead');
+    printError('   of the project; see:');
+    printError('   https://stackoverflow.com/questions/19842746/adding-a-build-configuration-in-xcode');
+    printError('');
+    printError('   If you have created a completely custom set of build configurations,');
+    printError('   you can set the FLUTTER_BUILD_MODE=${buildInfo.modeName.toLowerCase()}');
+    printError('   in the .xcconfig file for that configuration and run from Xcode.');
+    printError('');
+    printError('4. If you are not using completely custom build configurations, name the newly created configuration ${buildInfo.modeName}.');
+    return XcodeBuildResult(success: false);
+  }
+
+  Map<String, String> autoSigningConfigs;
+  // if (codesign && buildForDevice)
+  //   autoSigningConfigs = await getCodeSigningIdentityDevelopmentTeam(iosApp: app, usesTerminalUi: usesTerminalUi);
+
+  // Before the build, all service definitions must be updated and the dylibs
+  // copied over to a location that is suitable for Xcodebuild to find them.
+  await _addServicesToBundle(app.project.hostAppRoot);
+
+  final FlutterProject project = await FlutterProject.current();
+  await updateGeneratedMacOSXcodeProperties(
+    project: project,
+    targetOverride: targetOverride,
+    buildInfo: buildInfo,
+  );
+  // refreshPluginsList(project);
+  // if (hasPlugins(project) || (project.isModule && project.ios.podfile.existsSync())) {
+  //   // If the Xcode project, Podfile, or Generated.xcconfig have changed since
+  //   // last run, pods should be updated.
+  //   final Fingerprinter fingerprinter = Fingerprinter(
+  //     fingerprintPath: fs.path.join(getIosBuildDirectory(), 'pod_inputs.fingerprint'),
+  //     paths: <String>[
+  //       app.project.xcodeProjectInfoFile.path,
+  //       app.project.podfile.path,
+  //       app.project.generatedXcodePropertiesFile.path,
+  //     ],
+  //     properties: <String, String>{},
+  //   );
+  //   final bool didPodInstall = await cocoaPods.processPods(
+  //     iosProject: project.ios,
+  //     iosEngineDir: flutterFrameworkDir(buildInfo.mode),
+  //     isSwift: project.ios.isSwift,
+  //     dependenciesChanged: !await fingerprinter.doesFingerprintMatch(),
+  //   );
+  //   if (didPodInstall)
+  //     await fingerprinter.writeFingerprint();
+  // }
+
+  final List<String> buildCommands = <String>[
+    '/usr/bin/env',
+    'xcrun',
+    'xcodebuild',
+    '-configuration', configuration,
+  ];
+
+  if (logger.isVerbose) {
+    // An environment variable to be passed to xcode_backend.sh determining
+    // whether to echo back executed commands.
+    buildCommands.add('VERBOSE_SCRIPT_LOGGING=YES');
+  } else {
+    // This will print warnings and errors only.
+    buildCommands.add('-quiet');
+  }
+
+  if (autoSigningConfigs != null) {
+    for (MapEntry<String, String> signingConfig in autoSigningConfigs.entries) {
+      buildCommands.add('${signingConfig.key}=${signingConfig.value}');
+    }
+    buildCommands.add('-allowProvisioningUpdates');
+    buildCommands.add('-allowProvisioningDeviceRegistration');
+  }
+
+  final List<FileSystemEntity> contents = app.project.hostAppRoot.listSync();
+  for (FileSystemEntity entity in contents) {
+    if (fs.path.extension(entity.path) == '.xcworkspace') {
+      buildCommands.addAll(<String>[
+        '-workspace', fs.path.basename(entity.path),
+        '-scheme', scheme,
+        'BUILD_DIR=${fs.path.absolute(getMacOSBuildDirectory())}',
+      ]);
+      break;
+    }
+  }
+  buildCommands.addAll(<String>['-sdk', 'macosx']);
+  buildCommands.add('ONLY_ACTIVE_ARCH=YES');
+  buildCommands.add('ARCHS=x86_64');
+
+  if (!codesign) {
+    buildCommands.addAll(
+      <String>[
+        'CODE_SIGNING_ALLOWED=NO',
+        'CODE_SIGNING_REQUIRED=NO',
+        'CODE_SIGNING_IDENTITY=""',
+      ]
+    );
+  }
+
+  Status buildSubStatus;
+  Status initialBuildStatus;
+  Directory tempDir;
+
+  File scriptOutputPipeFile;
+  if (logger.hasTerminal) {
+    tempDir = fs.systemTempDirectory.createTempSync('flutter_build_log_pipe.');
+    scriptOutputPipeFile = tempDir.childFile('pipe_to_stdout');
+    os.makePipe(scriptOutputPipeFile.path);
+
+    Future<void> listenToScriptOutputLine() async {
+      final List<String> lines = await scriptOutputPipeFile.readAsLines();
+      for (String line in lines) {
+        if (line == 'done' || line == 'all done') {
+          buildSubStatus?.stop();
+          buildSubStatus = null;
+          if (line == 'all done') {
+            // Free pipe file.
+            tempDir?.deleteSync(recursive: true);
+            return;
+          }
+        } else {
+          initialBuildStatus?.cancel();
+          initialBuildStatus = null;
+          buildSubStatus = logger.startProgress(
+            line,
+            timeout: timeoutConfiguration.slowOperation,
+            progressIndicatorPadding: kDefaultStatusPadding - 7,
+          );
+        }
+      }
+      await listenToScriptOutputLine();
+    }
+
+    // Trigger the start of the pipe -> stdout loop. Ignore exceptions.
+    unawaited(listenToScriptOutputLine());
+
+    buildCommands.add('SCRIPT_OUTPUT_STREAM_FILE=${scriptOutputPipeFile.absolute.path}');
+  }
+
+  final Stopwatch buildStopwatch = Stopwatch()..start();
+  initialBuildStatus = logger.startProgress('Running Xcode build...', timeout: timeoutConfiguration.fastOperation);
+  final RunResult buildResult = await runAsync(
+    buildCommands,
+    workingDirectory: app.project.hostAppRoot.path,
+    allowReentrantFlutter: true,
+  );
+  // Notifies listener that no more output is coming.
+  scriptOutputPipeFile?.writeAsStringSync('all done');
+  buildSubStatus?.stop();
+  buildSubStatus = null;
+  initialBuildStatus?.cancel();
+  initialBuildStatus = null;
+  buildStopwatch.stop();
+  printStatus(
+    'Xcode build done.'.padRight(kDefaultStatusPadding + 1)
+        + '${getElapsedAsSeconds(buildStopwatch.elapsed).padLeft(5)}',
+  );
+
+  // Run -showBuildSettings again but with the exact same parameters as the build.
+  final Map<String, String> buildSettings = parseXcodeBuildSettings(runCheckedSync(
+    (List<String>
+        .from(buildCommands)
+        ..add('-showBuildSettings'))
+        // Undocumented behaviour: xcodebuild craps out if -showBuildSettings
+        // is used together with -allowProvisioningUpdates or
+        // -allowProvisioningDeviceRegistration and freezes forever.
+        .where((String buildCommand) {
+          return !const <String>[
+            '-allowProvisioningUpdates',
+            '-allowProvisioningDeviceRegistration',
+          ].contains(buildCommand);
+        }).toList(),
+    workingDirectory: app.project.hostAppRoot.path,
+  ));
+
+  if (buildResult.exitCode != 0) {
+    printStatus('Failed to build macOS app');
+    if (buildResult.stderr.isNotEmpty) {
+      printStatus('Error output from Xcode build:\n↳');
+      printStatus(buildResult.stderr, indent: 4);
+    }
+    if (buildResult.stdout.isNotEmpty) {
+      printStatus('Xcode\'s output:\n↳');
+      printStatus(buildResult.stdout, indent: 4);
+    }
+    return XcodeBuildResult(
+      success: false,
+      stdout: buildResult.stdout,
+      stderr: buildResult.stderr,
+      xcodeBuildExecution: XcodeBuildExecution(
+        buildCommands: buildCommands,
+        appDirectory: app.project.hostAppRoot.path,
+        buildForPhysicalDevice: buildForDevice,
+        buildSettings: buildSettings,
+      ),
+    );
+  } else {
+    final String expectedOutputDirectory = fs.path.join(
+      buildSettings['TARGET_BUILD_DIR'],
+      buildSettings['WRAPPER_NAME'],
+    );
+
+    String outputDir;
+    if (fs.isDirectorySync(expectedOutputDirectory)) {
+      // Copy app folder to a place where other tools can find it without knowing
+      // the BuildInfo.
+      outputDir = expectedOutputDirectory.replaceFirst('/$configuration-', '/');
+      if (fs.isDirectorySync(outputDir)) {
+        // Previous output directory might have incompatible artifacts
+        // (for example, kernel binary files produced from previous run).
+        fs.directory(outputDir).deleteSync(recursive: true);
+      }
+      copyDirectorySync(fs.directory(expectedOutputDirectory), fs.directory(outputDir));
+    } else {
+      printError('Build succeeded but the expected app at $expectedOutputDirectory not found');
+    }
+    return XcodeBuildResult(success: true, output: outputDir);
+  }
 }

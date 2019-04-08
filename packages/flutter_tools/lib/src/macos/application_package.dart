@@ -6,8 +6,10 @@ import 'package:meta/meta.dart';
 
 import '../application_package.dart';
 import '../base/file_system.dart';
+import '../build_info.dart';
 import '../globals.dart';
 import '../ios/plist_utils.dart' as plist;
+import '../project.dart';
 
 /// Tests whether a [FileSystemEntity] is an macOS bundle directory
 bool _isBundleDirectory(FileSystemEntity entity) =>
@@ -15,6 +17,14 @@ bool _isBundleDirectory(FileSystemEntity entity) =>
 
 abstract class MacOSApp extends ApplicationPackage {
   MacOSApp({@required String projectBundleId}) : super(id: projectBundleId);
+
+  /// Creates a new [MacOSApp] from a [MacOSProject].
+  factory MacOSApp.fromMacOSProject(MacOSProject macOSProject) {
+    if (getCurrentHostPlatform() != HostPlatform.darwin_x64) {
+      return null;
+    }
+    return BuildableMacOSApp(macOSProject);
+  }
 
   /// Creates a new [MacOSApp] from an existing app bundle.
   ///
@@ -69,6 +79,18 @@ abstract class MacOSApp extends ApplicationPackage {
   String get displayName => id;
 
   String get executable;
+}
+
+class BuildableMacOSApp extends MacOSApp {
+  BuildableMacOSApp(this.project) : super(projectBundleId: project.productBundleIdentifier);
+
+  final MacOSProject project;
+
+  @override
+  String get name => project.hostAppBundleName;
+
+  @override
+  String get executable => null;
 }
 
 class PrebuiltMacOSApp extends MacOSApp {

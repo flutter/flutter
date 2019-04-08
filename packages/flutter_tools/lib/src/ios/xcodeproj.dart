@@ -26,6 +26,10 @@ String flutterFrameworkDir(BuildMode mode) {
   return fs.path.normalize(fs.path.dirname(artifacts.getArtifactPath(Artifact.flutterFramework, TargetPlatform.ios, mode)));
 }
 
+String flutterMacOSFrameworkDir(BuildMode mode) {
+  return fs.path.normalize(fs.path.dirname(artifacts.getArtifactPath(Artifact.flutterMacOSFramework, TargetPlatform.darwin_x64, null)));
+}
+
 /// Writes or rewrites Xcode property files with the specified information.
 ///
 /// targetOverride: Optional parameter, if null or unspecified the default value
@@ -305,4 +309,63 @@ class XcodeProjectInfo {
   String toString() {
     return 'XcodeProjectInfo($targets, $buildConfigurations, $schemes)';
   }
+}
+
+Future<void> updateGeneratedMacOSXcodeProperties({
+  @required FlutterProject project,
+  @required BuildInfo buildInfo,
+  String targetOverride,
+}) async {
+  final StringBuffer localsBuffer = StringBuffer();
+
+  localsBuffer.writeln('// This is a generated file; do not edit or check into version control.');
+
+  final String flutterRoot = fs.path.normalize(Cache.flutterRoot);
+  localsBuffer.writeln('FLUTTER_ROOT=$flutterRoot');
+
+  // This holds because requiresProjectRoot is true for this command
+  localsBuffer.writeln('FLUTTER_APPLICATION_PATH=${fs.path.normalize(project.directory.path)}');
+
+  // Relative to FLUTTER_APPLICATION_PATH, which is [Directory.current].
+  if (targetOverride != null)
+    localsBuffer.writeln('FLUTTER_TARGET=$targetOverride');
+
+  // The build outputs directory, relative to FLUTTER_APPLICATION_PATH.
+  localsBuffer.writeln('FLUTTER_BUILD_DIR=${getBuildDirectory()}');
+
+  localsBuffer.writeln('SYMROOT=\${SOURCE_ROOT}/../${getMacOSBuildDirectory()}');
+
+  if (!project.isModule) {
+    // For module projects we do not want to write the FLUTTER_FRAMEWORK_DIR
+    // explicitly. Rather we rely on the xcode backend script and the Podfile
+    // logic to derive it from FLUTTER_ROOT and FLUTTER_BUILD_MODE.
+    // However, this is necessary for regular projects using Cocoapods.
+    localsBuffer.writeln('FLUTTER_FRAMEWORK_DIR=${flutterMacOSFrameworkDir(buildInfo.mode)}');
+  }
+
+  final String buildName = validatedBuildNameForPlatform(TargetPlatform.darwin_x64, buildInfo?.buildName ?? project.manifest.buildName);
+  if (buildName != null) {
+    localsBuffer.writeln('FLUTTER_BUILD_NAME=$buildName');
+  }
+
+  final String buildNumber = validatedBuildNumberForPlatform(TargetPlatform.darwin_x64, buildInfo?.buildNumber ?? project.manifest.buildNumber);
+  if (buildNumber != null) {
+    localsBuffer.writeln('FLUTTER_BUILD_NUMBER=$buildNumber');
+  }
+
+  if (artifacts is LocalEngineArtifacts) {
+    final LocalEngineArtifacts localEngineArtifacts = artifacts;
+    final String engineOutPath = localEngineArtifacts.engineOutPath;
+    localsBuffer.writeln('FLUTTER_ENGINE=${fs.path.dirname(fs.path.dirname(engineOutPath))}');
+    localsBuffer.writeln('LOCAL_ENGINE=${fs.path.basename(engineOutPath)}');
+    localsBuffer.writeln('ARCHS=x86-64');
+  }
+
+  if (buildInfo.trackWidgetCreation) {
+    localsBuffer.writeln('TRACK_WIDGET_CREATION=true');
+  }
+
+  final File generatedXcodePropertiesFile = project.ios.generatedXcodePropertiesFile;
+  generatedXcodePropertiesFile.createSync(recursive: true);
+  generatedXcodePropertiesFile.writeAsStringSync(localsBuffer.toString());
 }

@@ -357,6 +357,7 @@ class ApplicationPackageStore {
 
   AndroidApk android;
   IOSApp iOS;
+  MacOSApp macOS;
 
   Future<ApplicationPackage> getPackageForPlatform(TargetPlatform platform) async {
     switch (platform) {
@@ -370,6 +371,8 @@ class ApplicationPackageStore {
         iOS ??= IOSApp.fromIosProject((await FlutterProject.current()).ios);
         return iOS;
       case TargetPlatform.darwin_x64:
+        macOS ??= MacOSApp.fromMacOSProject((await FlutterProject.current()).macos);
+        return macOS;
       case TargetPlatform.linux_x64:
       case TargetPlatform.windows_x64:
       case TargetPlatform.fuchsia:

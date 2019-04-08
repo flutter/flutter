@@ -18,6 +18,7 @@ enum Artifact {
   flutterTester,
   snapshotDart,
   flutterFramework,
+  flutterMacOSFramework,
   vmSnapshotData,
   isolateSnapshotData,
   platformKernelDill,
@@ -80,6 +81,8 @@ String _artifactToFileName(Artifact artifact, [ TargetPlatform platform, BuildMo
       return 'dart2js.dart.snapshot';
     case Artifact.kernelWorkerSnapshot:
       return 'kernel_worker.dart.snapshot';
+    case Artifact.flutterMacOSFramework:
+      return 'FlutterMacOS.framework';
   }
   assert(false, 'Invalid artifact $artifact.');
   return null;
@@ -127,7 +130,11 @@ class CachedArtifacts extends Artifacts {
       case TargetPlatform.ios:
         return _getIosArtifactPath(artifact, platform, mode);
       case TargetPlatform.darwin_x64:
-      case TargetPlatform.linux_x64:
+        if (artifact == Artifact.flutterMacOSFramework) {
+          return _getMacOSArtifactPath(artifact, platform, mode);
+        }
+        continue next;
+      next: case TargetPlatform.linux_x64:
       case TargetPlatform.windows_x64:
       case TargetPlatform.fuchsia:
       case TargetPlatform.tester:
@@ -166,6 +173,17 @@ class CachedArtifacts extends Artifacts {
       case Artifact.snapshotDart:
       case Artifact.flutterFramework:
       case Artifact.frontendServerSnapshotForEngineDartSdk:
+        return fs.path.join(engineDir, _artifactToFileName(artifact));
+      default:
+        assert(false, 'Artifact $artifact not available for platform $platform.');
+        return null;
+    }
+  }
+
+  String _getMacOSArtifactPath(Artifact artifact, TargetPlatform platform, BuildMode mode) {
+    final String engineDir = _getEngineArtifactsPath(platform, mode);
+    switch (artifact) {
+      case Artifact.flutterMacOSFramework:
         return fs.path.join(engineDir, _artifactToFileName(artifact));
       default:
         assert(false, 'Artifact $artifact not available for platform $platform.');
@@ -293,6 +311,8 @@ class LocalEngineArtifacts extends Artifacts {
         return fs.path.join(_hostEngineOutPath, 'dart-sdk', 'bin', 'snapshots', _artifactToFileName(artifact));
       case Artifact.kernelWorkerSnapshot:
         return fs.path.join(_hostEngineOutPath, 'dart-sdk', 'bin', 'snapshots', _artifactToFileName(artifact));
+      case Artifact.flutterMacOSFramework:
+        return fs.path.join(engineOutPath, _artifactToFileName(artifact));
     }
     assert(false, 'Invalid artifact $artifact.');
     return null;

@@ -11,6 +11,7 @@ import 'build_appbundle.dart';
 import 'build_bundle.dart';
 import 'build_flx.dart';
 import 'build_ios.dart';
+import 'build_macos.dart';
 import 'build_web.dart';
 
 class BuildCommand extends FlutterCommand {
@@ -22,6 +23,7 @@ class BuildCommand extends FlutterCommand {
     addSubcommand(BuildFlxCommand());
     addSubcommand(BuildBundleCommand(verboseHelp: verboseHelp));
     addSubcommand(BuildWebCommand());
+    addSubcommand(BuildMacOSCommand());
   }
 
   @override
