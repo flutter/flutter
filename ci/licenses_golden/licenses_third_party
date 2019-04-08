@@ -1,4 +1,4 @@
-Signature: cbf8e245ca4d75c5fd125ab57b6b730e
+Signature: aad6f00938e9ac93307738cd263cb96a
 
 UNUSED LICENSES:
 
@@ -5155,6 +5155,7 @@ FILE: ../../../third_party/dart/runtime/vm/compiler/backend/il_test_helper.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/backend/il_test_helper.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/backend/slot_test.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/backend/type_propagator_test.cc
+FILE: ../../../third_party/dart/runtime/vm/compiler/backend/typed_data_aot_test.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/graph_intrinsifier.cc
