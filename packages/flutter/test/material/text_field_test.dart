@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io';
 import 'dart:math' as math;
 import 'dart:ui' as ui show window;
 
@@ -379,6 +380,42 @@ void main() {
     expect(textField.cursorWidth, 2.0);
     expect(textField.cursorRadius, const Radius.circular(3.0));
   });
+
+  testWidgets('text field render correctly inside opacity', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: Container(
+              width: 100,
+              height: 100,
+              child: Opacity(
+                opacity: 1.0,
+                child: const TextField(
+                  decoration: InputDecoration(hintText: 'Placeholder'),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.showKeyboard(find.byType(TextField));
+
+    const String testValue = 'ABC';
+    tester.testTextInput.updateEditingValue(const TextEditingValue(
+      text: testValue,
+      selection: TextSelection.collapsed(offset: testValue.length),
+    ));
+
+    await tester.pump();
+
+    await expectLater(
+      find.byType(TextField),
+      matchesGoldenFile('text_field_opacity_test.0.0.png'),
+    );
+  }, skip: !Platform.isLinux);
 
   // TODO(hansmuller): restore these tests after the fix for #24876 has landed.
   /*
