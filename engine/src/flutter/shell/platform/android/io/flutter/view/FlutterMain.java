@@ -12,6 +12,7 @@ import android.content.res.AssetManager;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
 import android.util.Log;
@@ -240,6 +241,41 @@ public class FlutterMain {
             Log.e(TAG, "Flutter initialization failed.", e);
             throw new RuntimeException(e);
         }
+    }
+
+    /**
+     * Same as {@link #ensureInitializationComplete(Context, String[])} but waiting on a background
+     * thread, then invoking {@code callback} on the {@code callbackHandler}.
+     */
+    public static void ensureInitializationCompleteAsync(
+        Context applicationContext,
+        String[] args,
+        Handler callbackHandler,
+        Runnable callback
+    ) {
+        if (Looper.myLooper() != Looper.getMainLooper()) {
+            throw new IllegalStateException("ensureInitializationComplete must be called on the main thread");
+        }
+        if (sSettings == null) {
+            throw new IllegalStateException("ensureInitializationComplete must be called after startInitialization");
+        }
+        if (sInitialized) {
+            return;
+        }
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                sResourceExtractor.waitForCompletion();
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                    @Override
+                    public void run() {
+                        ensureInitializationComplete(applicationContext.getApplicationContext(), args);
+                        callbackHandler.post(callback);
+                    }
+                });
+            }
+        }).start();
     }
 
     private static native void nativeInit(Context context, String[] args, String bundlePath, String appStoragePath, String engineCachesPath);
