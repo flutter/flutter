@@ -118,10 +118,12 @@ class LoadErrorImageProvider extends ImageProvider<LoadErrorImageProvider> {
   }
 }
 
- class LoadErrorCompleterImageProvider extends ImageProvider<LoadErrorCompleterImageProvider> {
+class LoadErrorCompleterImageProvider extends ImageProvider<LoadErrorCompleterImageProvider> {
   @override
   ImageStreamCompleter load(LoadErrorCompleterImageProvider key) {
-    return OneFrameImageStreamCompleter(SynchronousFuture<ImageInfo>(null).then((_) => throw Error()));
+    final Completer<void> completer = Completer<void>.sync();
+    completer.completeError(Error());
+    return OneFrameImageStreamCompleter(completer.future);
   }
 
    @override

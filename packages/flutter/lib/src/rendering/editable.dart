@@ -196,7 +196,6 @@ class RenderEditable extends RenderBox {
        _cursorColor = cursorColor,
        _backgroundCursorColor = backgroundCursorColor,
        _showCursor = showCursor ?? ValueNotifier<bool>(false),
-       _hasFocus = hasFocus ?? false,
        _maxLines = maxLines,
        _minLines = minLines,
        _expands = expands,
@@ -213,6 +212,7 @@ class RenderEditable extends RenderBox {
        _obscureText = obscureText {
     assert(_showCursor != null);
     assert(!_showCursor.value || cursorColor != null);
+    this.hasFocus = hasFocus ?? false;
     _tap = TapGestureRecognizer(debugOwner: this)
       ..onTapDown = _handleTapDown
       ..onTap = _handleTap;
@@ -707,7 +707,7 @@ class RenderEditable extends RenderBox {
 
   /// Whether the editable is currently focused.
   bool get hasFocus => _hasFocus;
-  bool _hasFocus;
+  bool _hasFocus = false;
   bool _listenerAttached = false;
   set hasFocus(bool value) {
     assert(value != null);
@@ -723,7 +723,6 @@ class RenderEditable extends RenderBox {
       RawKeyboard.instance.removeListener(_handleKeyEvent);
       _listenerAttached = false;
     }
-
     markNeedsSemanticsUpdate();
   }
 

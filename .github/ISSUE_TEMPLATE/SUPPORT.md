@@ -8,7 +8,7 @@ about: You have a question for how to achieve a particular effect, or you need h
 <!-- Thank you for using Flutter!
 
      Please check out our documentation first:
-      * https://flutter.io/
+      * https://flutter.dev/
       * https://docs.flutter.io/
 
      If you can't find the answer there, please consider asking a question on

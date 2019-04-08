@@ -422,4 +422,25 @@ void main() {
     expect(updatedSelection.extentOffset, 5);
     expect(selectionChangedCount, 1);
   });
+
+  test('editable hasFocus correctly initialized', () {
+    // Regression test for https://github.com/flutter/flutter/issues/21640
+    final TextSelectionDelegate delegate = FakeEditableTextState();
+    final RenderEditable editable = RenderEditable(
+      text: const TextSpan(
+        style: TextStyle(height: 1.0, fontSize: 10.0, fontFamily: 'Ahem'),
+        text: '12345',
+      ),
+      textAlign: TextAlign.start,
+      textDirection: TextDirection.ltr,
+      locale: const Locale('en', 'US'),
+      offset: ViewportOffset.zero(),
+      textSelectionDelegate: delegate,
+      hasFocus: true,
+    );
+
+    expect(editable.hasFocus, true);
+    editable.hasFocus = false;
+    expect(editable.hasFocus, false);
+  });
 }

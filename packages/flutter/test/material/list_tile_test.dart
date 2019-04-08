@@ -785,4 +785,338 @@ void main() {
     expect(tester.getRect(find.byType(Placeholder).at(2)),  Rect.fromLTWH(               16.0, 216.0 + 16.0,  24.0,  12.0));
     expect(tester.getRect(find.byType(Placeholder).at(3)),  Rect.fromLTWH(800.0 - 24.0 - 16.0, 216.0 + 16.0,  24.0,  24.0));
   });
+
+  testWidgets('ListTile leading icon height does not exceed ListTile height', (WidgetTester tester) async {
+    // regression test for https://github.com/flutter/flutter/issues/28765
+    const SizedBox oversizedWidget = SizedBox(height: 80.0, width: 24.0, child: Placeholder());
+
+    // Dense One line
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: ListView(
+            children: const <Widget>[
+              ListTile(
+                leading: oversizedWidget,
+                title: Text('A'),
+                dense: true,
+              ),
+              ListTile(
+                leading: oversizedWidget,
+                title: Text('B'),
+                dense: true,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getRect(find.byType(Placeholder).at(0)),  Rect.fromLTWH(16.0,  0.0, 24.0, 48.0));
+    expect(tester.getRect(find.byType(Placeholder).at(1)),  Rect.fromLTWH(16.0, 48.0, 24.0, 48.0));
+
+    // Non-dense One line
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: ListView(
+            children: const <Widget>[
+              ListTile(
+                leading: oversizedWidget,
+                title: Text('A'),
+                dense: false,
+              ),
+              ListTile(
+                leading: oversizedWidget,
+                title: Text('B'),
+                dense: false,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getRect(find.byType(Placeholder).at(0)),  Rect.fromLTWH(16.0,  0.0, 24.0, 56.0));
+    expect(tester.getRect(find.byType(Placeholder).at(1)),  Rect.fromLTWH(16.0, 56.0, 24.0, 56.0));
+
+    // Dense Two line
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: ListView(
+            children: const <Widget>[
+              ListTile(
+                leading: oversizedWidget,
+                title: Text('A'),
+                subtitle: Text('A'),
+                dense: true,
+              ),
+              ListTile(
+                leading: oversizedWidget,
+                title: Text('B'),
+                subtitle: Text('B'),
+                dense: true,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getRect(find.byType(Placeholder).at(0)),  Rect.fromLTWH(16.0,        8.0, 24.0, 48.0));
+    expect(tester.getRect(find.byType(Placeholder).at(1)),  Rect.fromLTWH(16.0, 64.0 + 8.0, 24.0, 48.0));
+
+    // Non-dense Two line
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: ListView(
+            children: const <Widget>[
+              ListTile(
+                leading: oversizedWidget,
+                title: Text('A'),
+                subtitle: Text('A'),
+                dense: false,
+              ),
+              ListTile(
+                leading: oversizedWidget,
+                title: Text('B'),
+                subtitle: Text('B'),
+                dense: false,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getRect(find.byType(Placeholder).at(0)),  Rect.fromLTWH(16.0,        8.0, 24.0, 56.0));
+    expect(tester.getRect(find.byType(Placeholder).at(1)),  Rect.fromLTWH(16.0, 72.0 + 8.0, 24.0, 56.0));
+
+    // Dense Three line
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: ListView(
+            children: const <Widget>[
+              ListTile(
+                leading: oversizedWidget,
+                title: Text('A'),
+                subtitle: Text('A'),
+                isThreeLine:  true,
+                dense: true,
+              ),
+              ListTile(
+                leading: oversizedWidget,
+                title: Text('B'),
+                subtitle: Text('B'),
+                isThreeLine:  true,
+                dense: true,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getRect(find.byType(Placeholder).at(0)),  Rect.fromLTWH(16.0,        16.0, 24.0, 48.0));
+    expect(tester.getRect(find.byType(Placeholder).at(1)),  Rect.fromLTWH(16.0, 76.0 + 16.0, 24.0, 48.0));
+
+    // Non-dense Three line
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: ListView(
+            children: const <Widget>[
+              ListTile(
+                leading: oversizedWidget,
+                title: Text('A'),
+                subtitle: Text('A'),
+                isThreeLine:  true,
+                dense: false,
+              ),
+              ListTile(
+                leading: oversizedWidget,
+                title: Text('B'),
+                subtitle: Text('B'),
+                isThreeLine:  true,
+                dense: false,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getRect(find.byType(Placeholder).at(0)),  Rect.fromLTWH(16.0,        16.0, 24.0, 56.0));
+    expect(tester.getRect(find.byType(Placeholder).at(1)),  Rect.fromLTWH(16.0, 88.0 + 16.0, 24.0, 56.0));
+  });
+
+  testWidgets('ListTile trailing icon height does not exceed ListTile height', (WidgetTester tester) async {
+    // regression test for https://github.com/flutter/flutter/issues/28765
+    const SizedBox oversizedWidget = SizedBox(height: 80.0, width: 24.0, child: Placeholder());
+
+    // Dense One line
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: ListView(
+            children: const <Widget>[
+              ListTile(
+                trailing: oversizedWidget,
+                title: Text('A'),
+                dense: true,
+              ),
+              ListTile(
+                trailing: oversizedWidget,
+                title: Text('B'),
+                dense: true,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getRect(find.byType(Placeholder).at(0)),  Rect.fromLTWH(800.0 - 16.0 - 24.0,    0, 24.0, 48.0));
+    expect(tester.getRect(find.byType(Placeholder).at(1)),  Rect.fromLTWH(800.0 - 16.0 - 24.0, 48.0, 24.0, 48.0));
+
+    // Non-dense One line
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: ListView(
+            children: const <Widget>[
+              ListTile(
+                trailing: oversizedWidget,
+                title: Text('A'),
+                dense: false,
+              ),
+              ListTile(
+                trailing: oversizedWidget,
+                title: Text('B'),
+                dense: false,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getRect(find.byType(Placeholder).at(0)),  Rect.fromLTWH(800.0 - 16.0 - 24.0,  0.0, 24.0, 56.0));
+    expect(tester.getRect(find.byType(Placeholder).at(1)),  Rect.fromLTWH(800.0 - 16.0 - 24.0, 56.0, 24.0, 56.0));
+
+    // Dense Two line
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: ListView(
+            children: const <Widget>[
+              ListTile(
+                trailing: oversizedWidget,
+                title: Text('A'),
+                subtitle: Text('A'),
+                dense: true,
+              ),
+              ListTile(
+                trailing: oversizedWidget,
+                title: Text('B'),
+                subtitle: Text('B'),
+                dense: true,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getRect(find.byType(Placeholder).at(0)),  Rect.fromLTWH(800.0 - 16.0 - 24.0,        8.0, 24.0, 48.0));
+    expect(tester.getRect(find.byType(Placeholder).at(1)),  Rect.fromLTWH(800.0 - 16.0 - 24.0, 64.0 + 8.0, 24.0, 48.0));
+
+    // Non-dense Two line
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: ListView(
+            children: const <Widget>[
+              ListTile(
+                trailing: oversizedWidget,
+                title: Text('A'),
+                subtitle: Text('A'),
+                dense: false,
+              ),
+              ListTile(
+                trailing: oversizedWidget,
+                title: Text('B'),
+                subtitle: Text('B'),
+                dense: false,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getRect(find.byType(Placeholder).at(0)),  Rect.fromLTWH(800.0 - 16.0 - 24.0,        8.0, 24.0, 56.0));
+    expect(tester.getRect(find.byType(Placeholder).at(1)),  Rect.fromLTWH(800.0 - 16.0 - 24.0, 72.0 + 8.0, 24.0, 56.0));
+
+    // Dense Three line
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: ListView(
+            children: const <Widget>[
+              ListTile(
+                trailing: oversizedWidget,
+                title: Text('A'),
+                subtitle: Text('A'),
+                isThreeLine:  true,
+                dense: true,
+              ),
+              ListTile(
+                trailing: oversizedWidget,
+                title: Text('B'),
+                subtitle: Text('B'),
+                isThreeLine:  true,
+                dense: true,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getRect(find.byType(Placeholder).at(0)),  Rect.fromLTWH(800.0 - 16.0 - 24.0,        16.0, 24.0, 48.0));
+    expect(tester.getRect(find.byType(Placeholder).at(1)),  Rect.fromLTWH(800.0 - 16.0 - 24.0, 76.0 + 16.0, 24.0, 48.0));
+
+    // Non-dense Three line
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: ListView(
+            children: const <Widget>[
+              ListTile(
+                trailing: oversizedWidget,
+                title: Text('A'),
+                subtitle: Text('A'),
+                isThreeLine:  true,
+                dense: false,
+              ),
+              ListTile(
+                trailing: oversizedWidget,
+                title: Text('B'),
+                subtitle: Text('B'),
+                isThreeLine:  true,
+                dense: false,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getRect(find.byType(Placeholder).at(0)),  Rect.fromLTWH(800.0 - 16.0 - 24.0,        16.0, 24.0, 56.0));
+    expect(tester.getRect(find.byType(Placeholder).at(1)),  Rect.fromLTWH(800.0 - 16.0 - 24.0, 88.0 + 16.0, 24.0, 56.0));
+  });
 }

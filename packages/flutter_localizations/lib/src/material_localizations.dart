@@ -9,9 +9,9 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' as intl;
 import 'package:intl/date_symbols.dart' as intl;
 import 'package:intl/date_symbol_data_custom.dart' as date_symbol_data_custom;
-import 'l10n/date_localizations.dart' as date_localizations;
+import 'l10n/generated_date_localizations.dart' as date_localizations;
 
-import 'l10n/localizations.dart';
+import 'l10n/generated_material_localizations.dart';
 import 'widgets_localizations.dart';
 
 /// Implementation of localized strings for the material widgets using the
@@ -63,7 +63,7 @@ import 'widgets_localizations.dart';
 /// See also:
 ///
 ///  * The Flutter Internationalization Tutorial,
-///    <https://flutter.io/tutorials/internationalization/>.
+///    <https://flutter.dev/tutorials/internationalization/>.
 ///  * [DefaultMaterialLocalizations], which only provides US English translations.
 abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   /// Initializes an object that defines the material widgets' localized strings
@@ -647,7 +647,7 @@ class _MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocal
 
       assert(locale.toString() == localeName, 'comparing "$locale" to "$localeName"');
 
-      return SynchronousFuture<MaterialLocalizations>(getTranslation(
+      return SynchronousFuture<MaterialLocalizations>(getMaterialTranslation(
         locale,
         fullYearFormat,
         mediumDateFormat,
