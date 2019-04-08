@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
 
@@ -143,6 +144,44 @@ void main() {
       expect(_pointerDown, isFalse);
       await tester.tap(find.byKey(key1));
       expect(_pointerDown, isTrue);
+    });
+  });
+
+  group('Row', () {
+    testWidgets('multiple baseline aligned children', (WidgetTester tester) async {
+      final GlobalKey key1 = GlobalKey();
+      final GlobalKey key2 = GlobalKey();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Container(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.baseline,
+                textBaseline: TextBaseline.alphabetic,
+                children: <Widget>[
+                  Text('big text', key: key1, style: TextStyle(fontSize: 54)),
+                  Text('one\ntwo\nthree\nfour\nfive\nsix\nseven', key: key2),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+
+      RenderBox textBox1 = tester.renderObject(find.byKey(key1));
+      RenderBox textBox2 = tester.renderObject(find.byKey(key2));
+      RenderBox rowBox = tester.renderObject(find.byType(Row));
+
+      // The two Texts are baseline aligned, so some portion of them extends
+      // both above and below the baseline. The first has a huge font size, so
+      // it extends higher above the baseline than usual. The second has many
+      // lines, but being aligned by the first line's baseline, they hang far
+      // below the baseline. The size of the parent row is just enough to
+      // contain both of them.
+      expect(rowBox.size.height, greaterThan(textBox1.size.height));
+      expect(rowBox.size.height, greaterThan(textBox2.size.height));
+      expect(rowBox.size.height, lessThan(textBox1.size.height + textBox2.size.height));
     });
   });
 

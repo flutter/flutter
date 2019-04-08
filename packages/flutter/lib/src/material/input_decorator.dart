@@ -809,6 +809,10 @@ class _RenderDecoration extends RenderBox {
     return box == null ? 0.0 : box.getMaxIntrinsicWidth(height);
   }
 
+  static double _minHeight(RenderBox box, double width) {
+    return box == null ? 0.0 : box.getMinIntrinsicHeight(width);
+  }
+
   static Size _boxSize(RenderBox box) => box == null ? Size.zero : box.size;
 
   static BoxParentData _boxParentData(RenderBox box) => box.parentData;
@@ -1023,14 +1027,16 @@ class _RenderDecoration extends RenderBox {
   }
 
   double _lineHeight(double width, List<RenderBox> boxes) {
-    double aboveBaseline = 0.0;
-    double belowBaseline = 0.0;
+    double height = 0.0;
     for (RenderBox box in boxes) {
-      final double baseline = box.getDistanceToBaseline(TextBaseline.alphabetic);
-      aboveBaseline = math.max(baseline, aboveBaseline);
-      belowBaseline = math.max(box.getMinIntrinsicHeight(width) - baseline, belowBaseline);
+      if (box == null)
+        continue;
+      height = math.max(_minHeight(box, width), height);
     }
-    return aboveBaseline + belowBaseline;
+    return height;
+    // TODO(hansmuller): this should compute the overall line height for the
+    // boxes when they've been baseline-aligned.
+    // See https://github.com/flutter/flutter/issues/13715
   }
 
   @override
