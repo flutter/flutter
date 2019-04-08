@@ -86,9 +86,9 @@ void SceneUpdateContext::CreateFrame(
       rrect.radii(SkRRect::kLowerLeft_Corner).x()    // bottom_left_radius
   );
   shape_node->SetShape(shape);
-  shape_node->SetTranslationRH(
-      shape_bounds.width() * 0.5f + shape_bounds.left(),
-      shape_bounds.height() * 0.5f + shape_bounds.top(), 0.f);
+  shape_node->SetTranslation(shape_bounds.width() * 0.5f + shape_bounds.left(),
+                             shape_bounds.height() * 0.5f + shape_bounds.top(),
+                             0.f);
 
   // Check whether the painted layers will be visible.
   if (paint_bounds.isEmpty() || !paint_bounds.intersects(shape_bounds))
@@ -313,9 +313,9 @@ SceneUpdateContext::Clip::Clip(SceneUpdateContext& context,
                                const SkRect& shape_bounds)
     : Entity(context) {
   shape_node().SetShape(shape);
-  shape_node().SetTranslationRH(
-      shape_bounds.width() * 0.5f + shape_bounds.left(),
-      shape_bounds.height() * 0.5f + shape_bounds.top(), 0.f);
+  shape_node().SetTranslation(shape_bounds.width() * 0.5f + shape_bounds.left(),
+                              shape_bounds.height() * 0.5f + shape_bounds.top(),
+                              0.f);
   entity_node().SetClip(0u, true /* clip to self */);
 
   SetEntityNodeClipPlanes(&entity_node(), shape_bounds);
