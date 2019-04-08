@@ -365,10 +365,9 @@ class FormFieldState<T> extends State<FormField<T>> {
     return !hasError;
   }
 
-  bool _validate() {
+  void _validate() {
     if (widget.validator != null)
       _errorText = widget.validator(_value);
-    return !hasError;
   }
 
   /// Updates this field's state to the new value. Useful for responding to
