@@ -229,6 +229,9 @@ class _FormScope extends InheritedWidget {
 
 /// Signature for validating a form field.
 ///
+/// Returns an error string to display if the input is invalid, or null
+/// otherwise.
+///
 /// Used by [FormField.validator].
 typedef FormFieldValidator<T> = String Function(T value);
 
