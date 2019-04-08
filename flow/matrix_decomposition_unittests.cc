@@ -58,8 +58,6 @@ TEST(MatrixDecomposition, Translate) {
 }
 
 TEST(MatrixDecomposition, Combination) {
-  SkMatrix44 matrix = SkMatrix44::I();
-
   const auto rotation = M_PI_4;
   const auto scale = 5;
   const auto translate = 125.0;
