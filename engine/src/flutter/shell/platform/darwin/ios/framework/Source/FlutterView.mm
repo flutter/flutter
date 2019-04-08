@@ -17,10 +17,6 @@
 #include "flutter/shell/platform/darwin/ios/ios_surface_software.h"
 #include "third_party/skia/include/utils/mac/SkCGUtils.h"
 
-@interface FlutterView () <UIInputViewAudioFeedback>
-
-@end
-
 @implementation FlutterView
 
 id<FlutterViewEngineDelegate> _delegate;
@@ -95,10 +91,6 @@ id<FlutterViewEngineDelegate> _delegate;
     return std::make_unique<shell::IOSSurfaceSoftware>(std::move(layer),
                                                        [_delegate platformViewsController]);
   }
-}
-
-- (BOOL)enableInputClicksWhenVisible {
-  return YES;
 }
 
 - (void)drawLayer:(CALayer*)layer inContext:(CGContextRef)context {
