@@ -35,8 +35,10 @@ class AliveState extends State<Alive> with AutomaticKeepAliveClientMixin {
   bool get wantKeepAlive => widget.alive;
 
   @override
-  Widget build(BuildContext context) =>
-     Text('${widget.index}:$wantKeepAlive');
+  Widget build(BuildContext context) {
+    super.build(context);
+    return Text('${widget.index}:$wantKeepAlive');
+  }
 }
 
 typedef WhetherToKeepAlive = bool Function(int);

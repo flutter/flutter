@@ -258,6 +258,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
       properties.add(DiagnosticsNode.message('debug mode enabled - ${Platform.operatingSystem}'));
       return true;
     }());
+    super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Size>('window size', _window.physicalSize, tooltip: 'in physical pixels'));
     properties.add(DoubleProperty('device pixel ratio', _window.devicePixelRatio, tooltip: 'physical pixels per logical pixel'));
     properties.add(DiagnosticsProperty<ViewConfiguration>('configuration', configuration, tooltip: 'in logical pixels'));
