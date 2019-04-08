@@ -410,6 +410,7 @@ FILE: ../../../flutter/shell/common/animator.cc
 FILE: ../../../flutter/shell/common/animator.h
 FILE: ../../../flutter/shell/common/engine.cc
 FILE: ../../../flutter/shell/common/engine.h
+FILE: ../../../flutter/shell/common/fixtures/main.dart
 FILE: ../../../flutter/shell/common/io_manager.cc
 FILE: ../../../flutter/shell/common/io_manager.h
 FILE: ../../../flutter/shell/common/isolate_configuration.cc
@@ -425,6 +426,8 @@ FILE: ../../../flutter/shell/common/run_configuration.h
 FILE: ../../../flutter/shell/common/shell.cc
 FILE: ../../../flutter/shell/common/shell.h
 FILE: ../../../flutter/shell/common/shell_benchmarks.cc
+FILE: ../../../flutter/shell/common/shell_test.cc
+FILE: ../../../flutter/shell/common/shell_test.h
 FILE: ../../../flutter/shell/common/shell_unittests.cc
 FILE: ../../../flutter/shell/common/skia_event_tracer_impl.cc
 FILE: ../../../flutter/shell/common/skia_event_tracer_impl.h
