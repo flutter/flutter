@@ -6,9 +6,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 
 void main() {
-  testWidgets('onSaved callback is called', (WidgetTester tester) async {
+  testWidgets('onSaved callbacks are called', (WidgetTester tester) async {
     final GlobalKey<FormState> formKey = GlobalKey<FormState>();
     String fieldValue;
+    bool fieldModifiedSinceFormOnSaved;
 
     Widget builder() {
       return MediaQuery(
@@ -19,8 +20,12 @@ void main() {
             child: Material(
               child: Form(
                 key: formKey,
+                onSaved: () { fieldModifiedSinceFormOnSaved = false; },
                 child: TextFormField(
-                  onSaved: (String value) { fieldValue = value; },
+                  onSaved: (String value) {
+                    fieldValue = value;
+                    fieldModifiedSinceFormOnSaved = true;
+                  },
                 ),
               ),
             ),
@@ -38,6 +43,7 @@ void main() {
       formKey.currentState.save();
       // pump'ing is unnecessary because callback happens regardless of frames
       expect(fieldValue, equals(testValue));
+      expect(fieldModifiedSinceFormOnSaved, isFalse);
     }
 
     await checkText('Test');

@@ -1,6 +1,6 @@
 name: flutter_driver
 description: Integration and performance test API for Flutter applications
-homepage: http://flutter.io
+homepage: http://flutter.dev
 author: Flutter Authors <flutter-dev@googlegroups.com>
 
 environment:
