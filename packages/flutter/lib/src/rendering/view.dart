@@ -250,6 +250,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   }
 
   @override
+  // ignore: MUST_CALL_SUPER
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     // call to ${super.debugFillProperties(description)} is omitted because the
     // root superclasses don't include any interesting information for this
@@ -258,7 +259,6 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
       properties.add(DiagnosticsNode.message('debug mode enabled - ${Platform.operatingSystem}'));
       return true;
     }());
-    super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Size>('window size', _window.physicalSize, tooltip: 'in physical pixels'));
     properties.add(DoubleProperty('device pixel ratio', _window.devicePixelRatio, tooltip: 'physical pixels per logical pixel'));
     properties.add(DiagnosticsProperty<ViewConfiguration>('configuration', configuration, tooltip: 'in logical pixels'));
