@@ -8,6 +8,7 @@ import '../application_package.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/process.dart';
+import '../base/terminal.dart';
 import '../cache.dart';
 import '../dart/package_map.dart';
 import '../dart/sdk.dart';
@@ -66,6 +67,14 @@ class DriveCommand extends RunCommandBase {
         valueHelp: 'path',
       );
   }
+
+  static const String kDebugWarning = '''
+================================================================================
+                          !!!!!!!WARNING!!!!!!!
+This flutter drive test is run in debug mode. Please don't trust any performance
+benchmark it outputs. For valid benchmarks, run with profile mode (`--profile`).
+================================================================================
+''';
 
   @override
   final String name = 'drive';
@@ -133,6 +142,9 @@ class DriveCommand extends RunCommandBase {
       } else {
         printStatus('Stopping application instance.');
         await appStopper(this);
+      }
+      if (getBuildInfo().isDebug) {
+        printStatus(kDebugWarning, emphasis: true, color: TerminalColor.red);
       }
     }
 
