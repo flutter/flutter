@@ -13,6 +13,7 @@
 namespace {
 
 constexpr char kTextPlainFormat[] = "text/plain";
+const UInt32 kKeyPressClickSoundId = 1306;
 
 }  // namespaces
 
@@ -93,9 +94,8 @@ using namespace shell;
 - (void)playSystemSound:(NSString*)soundType {
   if ([soundType isEqualToString:@"SystemSoundType.click"]) {
     // All feedback types are specific to Android and are treated as equal on
-    // iOS. The surface must (and does) adopt the UIInputViewAudioFeedback
-    // protocol
-    [[UIDevice currentDevice] playInputClick];
+    // iOS.
+    AudioServicesPlaySystemSound(kKeyPressClickSoundId);
   }
 }
 
