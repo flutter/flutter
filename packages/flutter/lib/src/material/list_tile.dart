@@ -303,8 +303,8 @@ enum ListTileControlAffinity {
 ///
 /// {@tool snippet --template=stateless_widget_material}
 ///
-/// Here is an example of a custom list item created with [Expanded] and [Icon]
-/// widgets.
+/// Here is an example of a custom list item that resembles a Youtube related
+/// video list item created with [Expanded] and [Container] widgets.
 ///
 /// ![Custom list item](https://flutter.github.io/assets-for-api-docs/assets/widgets/custom_list_item.png)
 ///
@@ -403,20 +403,16 @@ enum ListTileControlAffinity {
 ///      CustomListItem(
 ///        user: 'Flutter',
 ///        viewCount: 999000,
-///        thumbnail: Icon(
-///          Icons.videocam,
-///          size: 80,
-///          color: Colors.blueGrey,
+///        thumbnail: Container(
+///          decoration: const BoxDecoration(color: Colors.blue),
 ///        ),
 ///        title: 'The Flutter YouTube Channel',
 ///      ),
 ///      CustomListItem(
 ///        user: 'Dash',
 ///        viewCount: 884000,
-///        thumbnail: Icon(
-///          Icons.flight_takeoff,
-///          size: 80,
-///          color: Colors.blueGrey,
+///        thumbnail: Container(
+///          decoration: const BoxDecoration(color: Colors.yellow),
 ///        ),
 ///        title: 'Announcing Flutter 1.0',
 ///      ),
