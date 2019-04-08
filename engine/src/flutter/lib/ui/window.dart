@@ -374,21 +374,35 @@ class Locale {
   static Locale cachedLocale;
   static String cachedLocaleString;
 
+  /// Returns a string representing the locale.
+  ///
+  /// This identifier happens to be a valid Unicode Locale Identifier using
+  /// underscores as separator, however it is intended to be used for debugging
+  /// purposes only. For parseable results, use [toLanguageTag] instead.
   @override
-  String toString() {
+  String toString() => _toLanguageTag('_');
+
+  /// Returns a syntactically valid Unicode BCP47 Locale Identifier.
+  ///
+  /// Some examples of such identifiers: "en", "es-419", "hi-Deva-IN" and
+  /// "zh-Hans-CN". See http://www.unicode.org/reports/tr35/ for technical
+  /// details.
+  String toLanguageTag() => _toLanguageTag();
+
+  String _toLanguageTag([String separator = '-']) {
     if (!identical(cachedLocale, this)) {
       cachedLocale = this;
-      cachedLocaleString = _rawToString();
+      cachedLocaleString = _rawToString(separator);
     }
     return cachedLocaleString;
   }
 
-  String _rawToString() {
+  String _rawToString(String separator) {
     final StringBuffer out = StringBuffer(languageCode);
     if (scriptCode != null)
-      out.write('_$scriptCode');
+      out.write('$separator$scriptCode');
     if (_countryCode != null)
-      out.write('_$countryCode');
+      out.write('$separator$countryCode');
     return out.toString();
   }
 }
