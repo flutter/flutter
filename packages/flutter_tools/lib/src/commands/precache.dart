@@ -7,6 +7,7 @@ import 'dart:async';
 import '../cache.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
+import '../version.dart';
 
 class PrecacheCommand extends FlutterCommand {
   PrecacheCommand() {
@@ -16,14 +17,16 @@ class PrecacheCommand extends FlutterCommand {
         help: 'Precache artifacts for Android development');
     argParser.addFlag('ios', negatable: true, defaultsTo: true,
         help: 'Precache artifacts for iOS developemnt');
-    argParser.addFlag('web', negatable: true, defaultsTo: false,
-        help: 'Precache artifacts for web development');
-    argParser.addFlag('linux', negatable: true, defaultsTo: false,
-        help: 'Precache artifacts for linux desktop development');
-    argParser.addFlag('windows', negatable: true, defaultsTo: false,
-        help: 'Precache artifacts for windows desktop development');
-    argParser.addFlag('macos', negatable: true, defaultsTo: false,
-        help: 'Precache artifacts for macOS desktop development');
+    if (!FlutterVersion.instance.isStable) {
+      argParser.addFlag('web', negatable: true, defaultsTo: false,
+          help: 'Precache artifacts for web development');
+      argParser.addFlag('linux', negatable: true, defaultsTo: false,
+          help: 'Precache artifacts for linux desktop development');
+      argParser.addFlag('windows', negatable: true, defaultsTo: false,
+          help: 'Precache artifacts for windows desktop development');
+      argParser.addFlag('macos', negatable: true, defaultsTo: false,
+          help: 'Precache artifacts for macOS desktop development');
+    }
   }
 
   @override
