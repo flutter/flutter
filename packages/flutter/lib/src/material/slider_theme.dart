@@ -264,8 +264,8 @@ class SliderThemeData extends Diagnosticable {
     const int disabledInactiveTickMarkAlpha = 0x1f; // 12% opacity
     const int thumbAlpha = 0xff;
     const int disabledThumbAlpha = 0x52; // 32% opacity
-    const int valueIndicatorAlpha = 0xff;
     const int overlayAlpha = 0x1f; // 12% opacity
+    const int valueIndicatorAlpha = 0xff;
 
     return SliderThemeData(
       trackHeight: 2.0,

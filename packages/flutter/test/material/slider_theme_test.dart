@@ -503,9 +503,7 @@ void main() {
 
   testWidgets('The default slider tick mark shape size can be overridden', (WidgetTester tester) async {
     final SliderThemeData sliderTheme = ThemeData().sliderTheme.copyWith(
-      tickMarkShape: const RoundSliderTickMarkShape(
-        tickMarkRadius: 5,
-      ),
+      tickMarkShape: const RoundSliderTickMarkShape(tickMarkRadius: 5),
       activeTickMarkColor: const Color(0xfadedead),
       inactiveTickMarkColor: const Color(0xfadebeef),
       disabledActiveTickMarkColor: const Color(0xfadecafe),
