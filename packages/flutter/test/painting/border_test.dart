@@ -13,10 +13,10 @@ void main() {
     expect(() => Border(bottom: nonconst(null)), throwsAssertionError);
   });
 
-  test('Border.uniformSide constructor', () {
-    expect(() => Border.uniformSide(null), throwsAssertionError);
+  test('Border.uniform constructor', () {
+    expect(() => Border.uniform(null), throwsAssertionError);
     const BorderSide side = BorderSide();
-    const Border border = Border.uniformSide(side);
+    const Border border = Border.uniform(side);
     expect(border.left, same(side));
     expect(border.top, same(side));
     expect(border.right, same(side));
