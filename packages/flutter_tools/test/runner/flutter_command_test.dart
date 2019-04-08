@@ -159,10 +159,10 @@ void main() {
 
   group('Experimental commands', () {
     final MockVersion stableVersion = MockVersion();
-    final MockVersion betaVersion =MockVersion();
+    final MockVersion betaVersion = MockVersion();
     final FakeCommand fakeCommand = FakeCommand();
-    when(stableVersion.getBranchName()).thenReturn('stable');
-    when(betaVersion.getBranchName()).thenReturn('beta');
+    when(stableVersion.isStable).thenReturn(true);
+    when(betaVersion.isStable).thenReturn(false);
 
     testUsingContext('Can be disabled on stable branch', () async {
       expect(() => fakeCommand.run(), throwsA(isA<ToolExit>()));
@@ -194,4 +194,5 @@ class FakeCommand extends FlutterCommand {
     return null;
   }
 }
+
 class MockVersion extends Mock implements FlutterVersion {}
