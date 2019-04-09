@@ -60,13 +60,16 @@ class _TapTracker {
     @required Duration doubleTapMinTime,
   }) : assert(doubleTapMinTime != null),
        assert(event != null),
+       assert(event.buttons != null),
        pointer = event.pointer,
        _initialPosition = event.position,
+       _initialButtons = event.buttons,
        _doubleTapMinTimeCountdown = _CountdownZoned(duration: doubleTapMinTime);
 
   final int pointer;
   final GestureArenaEntry entry;
   final Offset _initialPosition;
+  final int _initialButtons;
   final _CountdownZoned _doubleTapMinTimeCountdown;
 
   bool _isTrackingPointer = false;
@@ -92,6 +95,10 @@ class _TapTracker {
 
   bool hasElapsedMinTime() {
     return _doubleTapMinTimeCountdown.timeout;
+  }
+
+  bool hasSameButton(PointerDownEvent event) {
+    return event.buttons == _initialButtons;
   }
 }
 
@@ -140,12 +147,17 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
       if (!_firstTap.isWithinTolerance(event, kDoubleTapSlop)) {
         // Ignore out-of-bounds second taps.
         return;
-      } else if (!_firstTap.hasElapsedMinTime()) {
-        // Restart when the second tap is too close to the first.
+      } else if (!_firstTap.hasElapsedMinTime() || !_firstTap.hasSameButton(event)) {
+        // Restart when the second tap is too close to the first, or when buttons
+        // mismatch.
         _reset();
-        return addAllowedPointer(event);
+        return _trackFirstTap(event);
       }
     }
+    _trackFirstTap(event);
+  }
+
+  void _trackFirstTap(PointerEvent event) {
     _stopDoubleTapTimer();
     final _TapTracker tracker = _TapTracker(
       event: event,
