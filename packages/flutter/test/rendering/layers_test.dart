@@ -318,7 +318,6 @@ void main() {
       container.buildScene(SceneBuilder());
       expect(errors, expectedErrorCount);
       debugCheckElevationsEnabled = false;
-      debugCheckElevationsEnabled = true;
     }
 
     // Tests:
