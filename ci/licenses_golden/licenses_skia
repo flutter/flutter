@@ -1,4 +1,4 @@
-Signature: 293260562f31775ed60f21797690a327
+Signature: b1495b48df1e7beb67be8faa3550c3b1
 
 UNUSED LICENSES:
 
@@ -5786,6 +5786,12 @@ FILE: ../../../third_party/skia/docs/examples/Typeface_Methods.cpp
 FILE: ../../../third_party/skia/docs/examples/Xor.cpp
 FILE: ../../../third_party/skia/gm/crbug_918512.cpp
 FILE: ../../../third_party/skia/src/gpu/GrPersistentCacheUtils.h
+FILE: ../../../third_party/skia/src/gpu/effects/GrComposeLerpEffect.cpp
+FILE: ../../../third_party/skia/src/gpu/effects/GrComposeLerpEffect.fp
+FILE: ../../../third_party/skia/src/gpu/effects/GrComposeLerpEffect.h
+FILE: ../../../third_party/skia/src/gpu/effects/GrComposeLerpRedEffect.cpp
+FILE: ../../../third_party/skia/src/gpu/effects/GrComposeLerpRedEffect.fp
+FILE: ../../../third_party/skia/src/gpu/effects/GrComposeLerpRedEffect.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2019 Google LLC.
 
