@@ -129,13 +129,13 @@ class LongPressEndDetails {
 /// moved, triggering [onLongPressMoveUpdate] callbacks, unless the
 /// [postAcceptSlopTolerance] constructor argument is specified.
 ///
-/// The gesture must not change buttons throughout its lifespan, i.e. subsequent
-/// [PointerMoveEvent] must contain the same `buttons` as that in
-/// [PointerDownEvent], otherwise the gesture is rejected and canceled.
+/// The gesture must keep consistent buttons throughout its lifespan. It will
+/// record the buttons from the first [PointerDownEvent], and subsequent
+/// [PointerMoveEvent]s with different buttons will lead to termination of the gesture.
 /// 
-/// The `buttons` of [PointerDownEvent] must contain one and only one button. Since
-/// stylus touching the screen is also counted as a button, this means a stylus
-/// tap while pressing any physical button will not be recognized.
+/// The buttons of [PointerDownEvent] must contain one and only one button.
+/// For example, since stylus touching the screen is also counted as a button,
+/// a stylus tap while pressing any physical button will not be recognized.
 class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
   /// Creates a long-press gesture recognizer.
   ///
