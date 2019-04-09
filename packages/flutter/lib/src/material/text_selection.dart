@@ -144,7 +144,7 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
     assert(debugCheckHasMaterialLocalizations(context));
 
     if (globalEditableRegion.top < _kToolbarArrowInvertDistance) {
-      position += Offset(0, _kHandlePadding);
+      position += const Offset(0, _kHandlePadding);
     }
 
     return ConstrainedBox(

@@ -48,20 +48,20 @@ const TextStyle _kToolbarButtonFontStyle = TextStyle(
   color: CupertinoColors.white,
 );
 
-enum ArrowDirection { up, down }
+enum _ArrowDirection { up, down }
 
 /// Paints a triangle below the toolbar.
 class _TextSelectionToolbarNotchPainter extends CustomPainter {
-  final ArrowDirection arrowDirection;
+  const _TextSelectionToolbarNotchPainter(this.arrowDirection);
 
-  _TextSelectionToolbarNotchPainter(this.arrowDirection);
+  final _ArrowDirection arrowDirection;
 
   @override
   void paint(Canvas canvas, Size size) {
     final Paint paint = Paint()
         ..color = _kToolbarBackgroundColor
         ..style = PaintingStyle.fill;
-    final py = (arrowDirection == ArrowDirection.down)
+    final double py = (arrowDirection == _ArrowDirection.down)
         ? 0.0
         : _kToolbarTriangleSize.height;
     final Path triangle = Path()
@@ -91,7 +91,7 @@ class _TextSelectionToolbar extends StatelessWidget {
   final VoidCallback handleCopy;
   final VoidCallback handlePaste;
   final VoidCallback handleSelectAll;
-  final ArrowDirection arrowDirection;
+  final _ArrowDirection arrowDirection;
 
   @override
   Widget build(BuildContext context) {
@@ -121,7 +121,7 @@ class _TextSelectionToolbar extends StatelessWidget {
       items.add(_buildToolbarButton(localizations.selectAllButtonLabel, handleSelectAll));
     }
 
-    final Widget padding = Padding(padding: EdgeInsets.only(bottom: 10.0));
+    const Widget padding = Padding(padding: EdgeInsets.only(bottom: 10.0));
 
     final Widget triangle = SizedBox.fromSize(
       size: _kToolbarTriangleSize,
@@ -144,7 +144,7 @@ class _TextSelectionToolbar extends StatelessWidget {
       ),
     );
 
-    final List<Widget> menus = (arrowDirection == ArrowDirection.down)
+    final List<Widget> menus = (arrowDirection == _ArrowDirection.down)
         ? <Widget>[
             toolbar,
             // TODO(xster): Position the triangle based on the layout delegate, and
@@ -269,13 +269,13 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
   Widget buildToolbar(BuildContext context, Rect globalEditableRegion, Offset position, TextSelectionDelegate delegate) {
     assert(debugCheckHasMediaQuery(context));
 
-    final ArrowDirection direction =
+    final _ArrowDirection direction =
     (globalEditableRegion.top > _kToolbarArrowInvertDistance)
-        ? ArrowDirection.down
-        : ArrowDirection.up;
+        ? _ArrowDirection.down
+        : _ArrowDirection.up;
 
-    if (direction == ArrowDirection.up) {
-      position += Offset(0, _kToolbarHeight);
+    if (direction == _ArrowDirection.up) {
+      position += const Offset(0, _kToolbarHeight);
     }
 
     return ConstrainedBox(
