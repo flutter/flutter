@@ -301,7 +301,7 @@ enum ListTileControlAffinity {
 /// you're looking for, it's easy to create custom list items with a
 /// combination of other widgets, such as [Row]s and [Column]s.
 ///
-/// {@tool snippet --template=stateless_widget_material}
+/// {@tool snippet --template=stateless_widget_scaffold}
 ///
 /// Here is an example of a custom list item that resembles a Youtube related
 /// video list item created with [Expanded] and [Container] widgets.
@@ -396,35 +396,35 @@ enum ListTileControlAffinity {
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
-///  return ListView(
-///    padding: const EdgeInsets.all(8.0),
-///    itemExtent: 106.0,
-///    children: <CustomListItem>[
-///      CustomListItem(
-///        user: 'Flutter',
-///        viewCount: 999000,
-///        thumbnail: Container(
-///          decoration: const BoxDecoration(color: Colors.blue),
-///        ),
-///        title: 'The Flutter YouTube Channel',
-///      ),
-///      CustomListItem(
-///        user: 'Dash',
-///        viewCount: 884000,
-///        thumbnail: Container(
-///          decoration: const BoxDecoration(color: Colors.yellow),
-///        ),
-///        title: 'Announcing Flutter 1.0',
-///      ),
-///    ],
-///  );
+///   return ListView(
+///     padding: const EdgeInsets.all(8.0),
+///     itemExtent: 106.0,
+///     children: <CustomListItem>[
+///       CustomListItem(
+///         user: 'Flutter',
+///         viewCount: 999000,
+///         thumbnail: Container(
+///           decoration: const BoxDecoration(color: Colors.blue),
+///         ),
+///         title: 'The Flutter YouTube Channel',
+///       ),
+///       CustomListItem(
+///         user: 'Dash',
+///         viewCount: 884000,
+///         thumbnail: Container(
+///           decoration: const BoxDecoration(color: Colors.yellow),
+///         ),
+///         title: 'Announcing Flutter 1.0',
+///       ),
+///     ],
+///   );
 /// }
 /// ```
 /// {@end-tool}
 ///
-/// {@tool snippet --template=stateless_widget_material}
+/// {@tool snippet --template=stateless_widget_scaffold}
 ///
-/// Here is another example of an article list item with multi-line titles and
+/// Here is an example of an article list item with multi-line titles and
 /// subtitles. It utilizes [Row]s and [Column]s, as well as [Expanded] and
 /// [AspectRatio] widgets to organize its layout.
 ///
@@ -453,13 +453,13 @@ enum ListTileControlAffinity {
 ///       crossAxisAlignment: CrossAxisAlignment.start,
 ///       children: <Widget>[
 ///         Expanded(
-///           flex: 3,
+///           flex: 2,
 ///           child: Column(
 ///             crossAxisAlignment: CrossAxisAlignment.start,
 ///             children: <Widget>[
 ///               Text(
 ///                 '$title',
-///                 maxLines: 1,
+///                 maxLines: 2,
 ///                 overflow: TextOverflow.ellipsis,
 ///                 style: const TextStyle(
 ///                   fontWeight: FontWeight.bold,
@@ -468,7 +468,7 @@ enum ListTileControlAffinity {
 ///               const Padding(padding: EdgeInsets.only(bottom: 2.0)),
 ///               Text(
 ///                 '$subtitle',
-///                 maxLines: 3,
+///                 maxLines: 2,
 ///                 overflow: TextOverflow.ellipsis,
 ///                 style: const TextStyle(
 ///                   fontSize: 12.0,
@@ -479,7 +479,7 @@ enum ListTileControlAffinity {
 ///           ),
 ///         ),
 ///         Expanded(
-///           flex: 2,
+///           flex: 1,
 ///           child: Column(
 ///             crossAxisAlignment: CrossAxisAlignment.start,
 ///             mainAxisAlignment: MainAxisAlignment.end,
