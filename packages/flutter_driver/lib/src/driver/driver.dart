@@ -806,6 +806,9 @@ class FlutterDriver {
   /// If [retainPriorEvents] is true, retains events recorded prior to calling
   /// [action]. Otherwise, prior events are cleared before calling [action]. By
   /// default, prior events are cleared.
+  ///
+  /// If this is run in debug mode, a warning message will be printed to suggest
+  /// running the benchmark in profile mode instead.
   Future<Timeline> traceAction(
     Future<dynamic> action(), {
     List<TimelineStream> streams = _defaultStreams,

@@ -8,6 +8,16 @@ import 'package:flutter_devicelab/framework/adb.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 
+Future<String> _runWithMode(String mode, String deviceId) {
+  return evalFlutter('drive', options: <String>[
+    mode,
+    '-t',
+    'test_driver/scroll_perf.dart',
+    '-d',
+    deviceId,
+  ]);
+}
+
 Future<TaskResult> run() async {
   cd('${flutterDirectory.path}/examples/flutter_gallery');
   final Device device = await devices.workingDevice;
@@ -15,21 +25,23 @@ Future<TaskResult> run() async {
   final String deviceId = device.deviceId;
   await flutter('packages', options: <String>['get']);
 
-  final String output = await evalFlutter('drive', options: <String>[
-    '-t',
-    'test_driver/scroll_perf.dart',
-    '-d',
-    deviceId,
-  ]);
-
   const String warningPiece = 'THIS BENCHMARK IS BEING RUN IN DEBUG MODE';
-  if (output.contains(warningPiece)) {
-    return TaskResult.success(null);
-  } else {
+
+  final String debugOutput = await _runWithMode('--debug', deviceId);
+  if (!debugOutput.contains(warningPiece)) {
     return TaskResult.failure(
-      'Could not find the following warning message piece: $warningPiece'
+        'Could not find the following warning message piece: $warningPiece'
     );
   }
+
+  final String profileOutput = await _runWithMode('--profile', deviceId);
+  if (profileOutput.contains(warningPiece)) {
+    return TaskResult.failure(
+      'Unexpected warning message piece in profile mode: $warningPiece'
+    );
+  }
+
+  return TaskResult.success(null);
 }
 
 Future<void> main() async {
