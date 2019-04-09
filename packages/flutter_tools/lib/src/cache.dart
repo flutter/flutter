@@ -701,11 +701,14 @@ class IOSEngineArtifacts extends EngineCachedArtifact {
 }
 
 /// A cached artifact containing Gradle Wrapper scripts and binaries.
+///
+/// While this is only required for Android, we need to always download it due
+/// the ensurePlatformSpecificTooling logic.
 class GradleWrapper extends CachedArtifact {
   GradleWrapper(Cache cache) : super(
     'gradle_wrapper',
     cache,
-    const <DevelopmentArtifact>{ DevelopmentArtifact.android },
+    const <DevelopmentArtifact>{ DevelopmentArtifact.universal },
   );
 
   List<String> get _gradleScripts => <String>['gradlew', 'gradlew.bat'];
