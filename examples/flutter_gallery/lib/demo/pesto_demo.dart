@@ -492,12 +492,12 @@ class RecipeSheet extends StatelessWidget {
                     child: Text('Ingredients', style: headingStyle),
                   ),
                 ]
-              ),
-            ]..addAll(recipe.ingredients.map<TableRow>(
-              (RecipeIngredient ingredient) {
-                return _buildItemRow(ingredient.amount, ingredient.description);
+              ), ...recipe.ingredients.map<TableRow>(
+                (RecipeIngredient ingredient) {
+                  return _buildItemRow(ingredient.amount, ingredient.description);
               }
-            ))..add(
+            ),
+            ]..add(
               TableRow(
                 children: <Widget>[
                   const SizedBox(),

@@ -195,8 +195,8 @@ void main() {
                     flexibleSpace: FlexibleSpaceBar(
                       title: Text('App Bar'),
                     ),
-                  ),
-                ]..addAll(slivers),
+                  ), ...slivers,
+                ],
               );
             },
           ),

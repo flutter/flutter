@@ -455,10 +455,7 @@ class GalleryOptionsPage extends StatelessWidget {
           const Divider(),
           const _Heading('Platform mechanics'),
           _PlatformItem(options, onOptionsChanged),
-        ]..addAll(
-          _enabledDiagnosticItems(),
-        )..addAll(
-          <Widget>[
+          ..._enabledDiagnosticItems(), ...<Widget>[
             const Divider(),
             const _Heading('Flutter gallery'),
             _ActionItem('About Flutter Gallery', () {
@@ -466,7 +463,7 @@ class GalleryOptionsPage extends StatelessWidget {
             }),
             _ActionItem('Send feedback', onSendFeedback),
           ],
-        ),
+        ],
       ),
     );
   }

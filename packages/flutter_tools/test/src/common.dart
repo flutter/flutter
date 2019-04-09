@@ -116,7 +116,7 @@ Future<String> createProject(Directory temp, { List<String> arguments }) async {
   final String projectPath = fs.path.join(temp.path, 'flutter_project');
   final CreateCommand command = CreateCommand();
   final CommandRunner<void> runner = createTestCommandRunner(command);
-  await runner.run(<String>['create']..addAll(arguments)..add(projectPath));
+  await runner.run(<String>['create', ...arguments]..add(projectPath));
   return projectPath;
 }
 

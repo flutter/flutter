@@ -124,7 +124,7 @@ class PackagesTestCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    await pub(<String>['run', 'test']..addAll(argResults.rest), context: PubContext.runTest, retry: false);
+    await pub(<String>['run', 'test', ...argResults.rest], context: PubContext.runTest, retry: false);
     return null;
   }
 }

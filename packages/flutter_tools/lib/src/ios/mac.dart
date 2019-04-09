@@ -40,7 +40,7 @@ class PlistBuddy {
 
   static const String path = '/usr/libexec/PlistBuddy';
 
-  Future<ProcessResult> run(List<String> args) => processManager.run(<String>[path]..addAll(args));
+  Future<ProcessResult> run(List<String> args) => processManager.run(<String>[path, ...args]);
 }
 
 /// A property list is a key-value representation commonly used for
@@ -228,11 +228,11 @@ class Xcode {
   }
 
   Future<RunResult> cc(List<String> args) {
-    return runCheckedAsync(<String>['xcrun', 'cc']..addAll(args));
+    return runCheckedAsync(<String>['xcrun', 'cc', ...args]);
   }
 
   Future<RunResult> clang(List<String> args) {
-    return runCheckedAsync(<String>['xcrun', 'clang']..addAll(args));
+    return runCheckedAsync(<String>['xcrun', 'clang', ...args]);
   }
 
   String getSimulatorPath() {

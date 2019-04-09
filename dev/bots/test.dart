@@ -602,7 +602,7 @@ Future<void> _runFlutterTest(String workingDirectory, {
   bq.TabledataResourceApi tableData,
   Map<String, String> environment,
 }) async {
-  final List<String> args = <String>['test']..addAll(options);
+  final List<String> args = <String>['test', ...options];
   if (flutterTestArgs != null && flutterTestArgs.isNotEmpty)
     args.addAll(flutterTestArgs);
 

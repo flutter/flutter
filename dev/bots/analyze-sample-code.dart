@@ -285,14 +285,14 @@ class SampleChecker {
         <String>[
           '--snapshot=$_snippetsSnapshotPath',
           '--snapshot-kind=app-jit',
-          path.canonicalize(_snippetsExecutable),
-        ]..addAll(args),
+          path.canonicalize(_snippetsExecutable), ...args,
+        ],
         workingDirectory: workingDirectory,
       );
     } else {
       return Process.runSync(
         _dartExecutable,
-        <String>[path.canonicalize(_snippetsSnapshotPath)]..addAll(args),
+        <String>[path.canonicalize(_snippetsSnapshotPath), ...args],
         workingDirectory: workingDirectory,
       );
     }
@@ -310,8 +310,8 @@ class SampleChecker {
     final File outputFile = File(path.join(_tempDirectory.path, '$snippetId.dart'));
     final List<String> args = <String>[
       '--output=${outputFile.absolute.path}',
-      '--input=${inputFile.absolute.path}',
-    ]..addAll(snippet.args);
+      '--input=${inputFile.absolute.path}', ...snippet.args,
+    ];
     print('Generating snippet for ${snippet.start?.filename}:${snippet.start?.line}');
     final ProcessResult process = _runSnippetsScript(args);
     if (process.exitCode != 0) {
@@ -854,9 +854,7 @@ class Section {
         ),
       );
     }
-    return Section(<Line>[Line(prefix)]
-      ..addAll(codeLines)
-      ..add(Line(postfix)));
+    return Section(<Line>[Line(prefix), ...codeLines]..add(Line(postfix)));
   }
   Line get start => code.firstWhere((Line line) => line.filename != null);
   final List<Line> code;

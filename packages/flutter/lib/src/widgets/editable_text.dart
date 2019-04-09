@@ -330,8 +330,8 @@ class EditableText extends StatefulWidget {
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
        inputFormatters = maxLines == 1
            ? (
-               <TextInputFormatter>[BlacklistingTextInputFormatter.singleLineFormatter]
-                 ..addAll(inputFormatters ?? const Iterable<TextInputFormatter>.empty())
+               <TextInputFormatter>[BlacklistingTextInputFormatter.singleLineFormatter, ...inputFormatters ?? const Iterable<TextInputFormatter>.empty()]
+
              )
            : inputFormatters,
        super(key: key);

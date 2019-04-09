@@ -381,14 +381,14 @@ class ArchiveCreator {
 
   Future<String> _runFlutter(List<String> args, {Directory workingDirectory}) {
     return _processRunner.runProcess(
-      <String>[_flutter]..addAll(args),
+      <String>[_flutter, ...args],
       workingDirectory: workingDirectory ?? flutterRoot,
     );
   }
 
   Future<String> _runGit(List<String> args, {Directory workingDirectory}) {
     return _processRunner.runProcess(
-      <String>['git']..addAll(args),
+      <String>['git', ...args],
       workingDirectory: workingDirectory ?? flutterRoot,
     );
   }
@@ -574,14 +574,14 @@ class ArchivePublisher {
   }) async {
     if (platform.isWindows) {
       return _processRunner.runProcess(
-        <String>['python', path.join(platform.environment['DEPOT_TOOLS'], 'gsutil.py'), '--']..addAll(args),
+        <String>['python', path.join(platform.environment['DEPOT_TOOLS'], 'gsutil.py'), '--', ...args],
         workingDirectory: workingDirectory,
         failOk: failOk,
       );
     }
 
     return _processRunner.runProcess(
-      <String>['gsutil.py', '--']..addAll(args),
+      <String>['gsutil.py', '--', ...args],
       workingDirectory: workingDirectory,
       failOk: failOk,
     );
