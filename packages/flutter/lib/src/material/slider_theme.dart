@@ -986,8 +986,8 @@ class RoundedRectSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
       return;
     }
 
-    // Assign the track segment paints, which are left: active, right: inactive,
-    // but reversed for right to left text.
+    // Assign the track segment paints, which are leading: active and
+    // trailing: inactive.
     final ColorTween activeTrackColorTween = ColorTween(begin: sliderTheme.disabledActiveTrackColor, end: sliderTheme.activeTrackColor);
     final ColorTween inactiveTrackColorTween = ColorTween(begin: sliderTheme.disabledInactiveTrackColor, end: sliderTheme.inactiveTrackColor);
     final Paint activePaint = Paint()..color = activeTrackColorTween.evaluate(enableAnimation);
