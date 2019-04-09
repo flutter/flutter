@@ -87,6 +87,11 @@ class TestCommand extends FastFlutterCommand {
   }
 
   @override
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
+    DevelopmentArtifact.universal,
+  };
+
+  @override
   String get name => 'test';
 
   @override
@@ -94,7 +99,7 @@ class TestCommand extends FastFlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    await cache.updateAll(requiredArtifacts);
+    await cache.updateAll(await requiredArtifacts);
     if (!fs.isFileSync('pubspec.yaml')) {
       throwToolExit(
         'Error: No pubspec.yaml file found in the current working directory.\n'
