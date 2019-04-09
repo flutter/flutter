@@ -330,16 +330,16 @@ enum ListTileControlAffinity {
 ///         crossAxisAlignment: CrossAxisAlignment.start,
 ///         children: <Widget>[
 ///           Expanded(
-///             child: thumbnail,
 ///             flex: 2,
+///             child: thumbnail,
 ///           ),
 ///           Expanded(
+///             flex: 3,
 ///             child: _VideoDescription(
 ///               title: title,
 ///               user: user,
 ///               viewCount: viewCount,
 ///             ),
-///             flex: 3,
 ///           ),
 ///           const Icon(
 ///             Icons.more_vert,
@@ -453,6 +453,7 @@ enum ListTileControlAffinity {
 ///       crossAxisAlignment: CrossAxisAlignment.start,
 ///       children: <Widget>[
 ///         Expanded(
+///           flex: 3,
 ///           child: Column(
 ///             crossAxisAlignment: CrossAxisAlignment.start,
 ///             children: <Widget>[
@@ -476,9 +477,9 @@ enum ListTileControlAffinity {
 ///               ),
 ///             ],
 ///           ),
-///           flex: 3,
 ///         ),
 ///         Expanded(
+///           flex: 2,
 ///           child: Column(
 ///             crossAxisAlignment: CrossAxisAlignment.start,
 ///             mainAxisAlignment: MainAxisAlignment.end,
@@ -499,7 +500,6 @@ enum ListTileControlAffinity {
 ///               ),
 ///             ],
 ///           ),
-///           flex: 2,
 ///         ),
 ///       ],
 ///     );
