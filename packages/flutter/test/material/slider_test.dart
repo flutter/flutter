@@ -540,7 +540,6 @@ void main() {
     log.clear();
   });
 
-  // TODO(clocksmith): delete this test in favor of something in slider_theme_test
   testWidgets('Slider uses the right theme colors for the right components', (WidgetTester tester) async {
     const Color customColor1 = Color(0xcafefeed);
     const Color customColor2 = Color(0xdeadbeef);
