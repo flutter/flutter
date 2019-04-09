@@ -80,7 +80,7 @@ sk_sp<SkColorFilter> ExtractColorFilter(const uint32_t* uint_data,
       SkBlendMode blend_mode =
           static_cast<SkBlendMode>(uint_data[kColorFilterBlendModeIndex]);
 
-      return SkColorFilter::MakeModeFilter(color, blend_mode);
+      return SkColorFilters::Blend(color, blend_mode);
     }
     case Matrix: {
       Dart_Handle matrixHandle = values[kColorFilterMatrixIndex];
@@ -92,15 +92,15 @@ sk_sp<SkColorFilter> ExtractColorFilter(const uint32_t* uint_data,
         FML_CHECK(length == 20);
 
         tonic::Float32List decoded(matrixHandle);
-        return SkColorFilter::MakeMatrixFilterRowMajor255(decoded.data());
+        return SkColorFilters::MatrixRowMajor255(decoded.data());
       }
       return nullptr;
     }
     case LinearToSRGBGamma: {
-      return SkColorFilter::MakeLinearToSRGBGamma();
+      return SkColorFilters::LinearToSRGBGamma();
     }
     case SRGBToLinearGamma: {
-      return SkColorFilter::MakeSRGBToLinearGamma();
+      return SkColorFilters::SRGBToLinearGamma();
     }
     default:
       FML_DLOG(ERROR) << "Out of range value received for kColorFilterIndex.";
@@ -178,12 +178,11 @@ Paint::Paint(Dart_Handle paint_objects, Dart_Handle paint_data) {
     sk_sp<SkColorFilter> color_filter = ExtractColorFilter(uint_data, values);
     if (color_filter) {
       sk_sp<SkColorFilter> invert_filter =
-          SkColorFilter::MakeMatrixFilterRowMajor255(invert_colors);
+          SkColorFilters::MatrixRowMajor255(invert_colors);
       paint_.setColorFilter(invert_filter->makeComposed(color_filter));
     }
   } else if (uint_data[kInvertColorIndex]) {
-    paint_.setColorFilter(
-        SkColorFilter::MakeMatrixFilterRowMajor255(invert_colors));
+    paint_.setColorFilter(SkColorFilters::MatrixRowMajor255(invert_colors));
   } else if (uint_data[kColorFilterIndex]) {
     sk_sp<SkColorFilter> color_filter = ExtractColorFilter(uint_data, values);
     if (color_filter) {
