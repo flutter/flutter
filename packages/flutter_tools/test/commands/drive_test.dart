@@ -9,7 +9,6 @@ import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/drive.dart';
@@ -31,44 +30,6 @@ void main() {
       mockDevice = mock ?? MockDevice();
       targetDeviceFinder = () async => mockDevice;
       testDeviceManager.addDevice(mockDevice);
-    }
-
-    Future<void> Function()
-    successfulLoggerTest(
-        void loggerExpectCallback(BufferLogger testLogger),
-        {List<String> additionalArgs}
-    ) {
-      return () async {
-        withMockDevice();
-
-        final String testApp = fs.path.join(tempDir.path, 'test', 'e2e.dart');
-        final String testFile = fs.path.join(tempDir.path, 'test_driver', 'e2e_test.dart');
-
-        appStarter = expectAsync1((DriveCommand command) async {
-          return LaunchResult.succeeded();
-        });
-        testRunner = expectAsync2((List<String> testArgs, String observatoryUri) async {
-          expect(testArgs, <String>[testFile]);
-          return null;
-        });
-        appStopper = expectAsync1((DriveCommand command) async {
-          return true;
-        });
-
-        final MemoryFileSystem memFs = fs;
-        await memFs.file(testApp).writeAsString('main() {}');
-        await memFs.file(testFile).writeAsString('main() {}');
-
-        final List<String> args = <String>[
-          'drive',
-          '--target=$testApp',
-        ];
-        if (additionalArgs != null) {
-          args.addAll(additionalArgs);
-        }
-        await createTestCommandRunner(command).run(args);
-        loggerExpectCallback(testLogger);
-      };
     }
 
     setUpAll(() {
@@ -201,42 +162,36 @@ void main() {
       FileSystem: () => fs,
     });
 
-    testUsingContext(
-      'returns 0 when test ends successfully',
-      successfulLoggerTest(
-        (BufferLogger testLogger) {
-          expect(testLogger.errorText, isEmpty);
-        }
-      ),
-      overrides: <Type, Generator>{
-        FileSystem: () => fs,
-      },
-    );
+    testUsingContext('returns 0 when test ends successfully', () async {
+      withMockDevice();
 
-    testUsingContext(
-      'prints warning in debug mode',
-      successfulLoggerTest(
-        (BufferLogger testLogger) {
-          expect(testLogger.statusText, contains(DriveCommand.kDebugWarning));
-        }
-      ),
-      overrides: <Type, Generator>{
-        FileSystem: () => fs,
-      },
-    );
+      final String testApp = fs.path.join(tempDir.path, 'test', 'e2e.dart');
+      final String testFile = fs.path.join(tempDir.path, 'test_driver', 'e2e_test.dart');
 
-    testUsingContext(
-      'no warning in profile mode',
-      successfulLoggerTest(
-        (BufferLogger testLogger) {
-          expect(testLogger.statusText, isNot(contains(DriveCommand.kDebugWarning)));
-        },
-        additionalArgs: <String>['--profile'],
-      ),
-      overrides: <Type, Generator>{
-        FileSystem: () => fs,
-      },
-    );
+      appStarter = expectAsync1((DriveCommand command) async {
+        return LaunchResult.succeeded();
+      });
+      testRunner = expectAsync2((List<String> testArgs, String observatoryUri) async {
+        expect(testArgs, <String>[testFile]);
+        return null;
+      });
+      appStopper = expectAsync1((DriveCommand command) async {
+        return true;
+      });
+
+      final MemoryFileSystem memFs = fs;
+      await memFs.file(testApp).writeAsString('main() {}');
+      await memFs.file(testFile).writeAsString('main() {}');
+
+      final List<String> args = <String>[
+        'drive',
+        '--target=$testApp',
+      ];
+      await createTestCommandRunner(command).run(args);
+      expect(testLogger.errorText, isEmpty);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+    });
 
     testUsingContext('returns exitCode set by test runner', () async {
       withMockDevice();
