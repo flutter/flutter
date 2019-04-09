@@ -20,11 +20,11 @@ namespace shell {
 class PlatformViewEmbedder final : public PlatformView {
  public:
   using UpdateSemanticsNodesCallback =
-      std::function<void(blink::SemanticsNodeUpdates update)>;
+      std::function<void(flutter::SemanticsNodeUpdates update)>;
   using UpdateSemanticsCustomActionsCallback =
-      std::function<void(blink::CustomAccessibilityActionUpdates actions)>;
+      std::function<void(flutter::CustomAccessibilityActionUpdates actions)>;
   using PlatformMessageResponseCallback =
-      std::function<void(fml::RefPtr<blink::PlatformMessage>)>;
+      std::function<void(fml::RefPtr<flutter::PlatformMessage>)>;
 
   struct PlatformDispatchTable {
     UpdateSemanticsNodesCallback update_semantics_nodes_callback;  // optional
@@ -37,7 +37,7 @@ class PlatformViewEmbedder final : public PlatformView {
 
   // Creates a platform view that sets up an OpenGL rasterizer.
   PlatformViewEmbedder(PlatformView::Delegate& delegate,
-                       blink::TaskRunners task_runners,
+                       flutter::TaskRunners task_runners,
                        EmbedderSurfaceGL::GLDispatchTable gl_dispatch_table,
                        bool fbo_reset_after_present,
                        PlatformDispatchTable platform_dispatch_table);
@@ -45,7 +45,7 @@ class PlatformViewEmbedder final : public PlatformView {
   // Create a platform view that sets up a software rasterizer.
   PlatformViewEmbedder(
       PlatformView::Delegate& delegate,
-      blink::TaskRunners task_runners,
+      flutter::TaskRunners task_runners,
       EmbedderSurfaceSoftware::SoftwareDispatchTable software_dispatch_table,
       PlatformDispatchTable platform_dispatch_table);
 
@@ -53,12 +53,12 @@ class PlatformViewEmbedder final : public PlatformView {
 
   // |shell::PlatformView|
   void UpdateSemantics(
-      blink::SemanticsNodeUpdates update,
-      blink::CustomAccessibilityActionUpdates actions) override;
+      flutter::SemanticsNodeUpdates update,
+      flutter::CustomAccessibilityActionUpdates actions) override;
 
   // |shell::PlatformView|
   void HandlePlatformMessage(
-      fml::RefPtr<blink::PlatformMessage> message) override;
+      fml::RefPtr<flutter::PlatformMessage> message) override;
 
  private:
   std::unique_ptr<EmbedderSurface> embedder_surface_;

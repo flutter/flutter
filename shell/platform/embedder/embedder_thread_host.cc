@@ -108,7 +108,7 @@ EmbedderThreadHost::CreateEmbedderManagedThreadHost(
                                                  ThreadHost::Type::IO |
                                                  ThreadHost::Type::UI);
 
-  blink::TaskRunners task_runners(
+  flutter::TaskRunners task_runners(
       kFlutterThreadName,
       platform_task_runner,                     // platform
       thread_host.gpu_thread->GetTaskRunner(),  // gpu
@@ -150,7 +150,7 @@ EmbedderThreadHost::CreateEngineManagedThreadHost() {
   // implementation.
   auto platform_task_runner = fml::MessageLoop::GetCurrent().GetTaskRunner();
 
-  blink::TaskRunners task_runners(
+  flutter::TaskRunners task_runners(
       kFlutterThreadName,
       platform_task_runner,                     // platform
       thread_host.gpu_thread->GetTaskRunner(),  // gpu
@@ -177,7 +177,7 @@ EmbedderThreadHost::CreateEngineManagedThreadHost() {
 
 EmbedderThreadHost::EmbedderThreadHost(
     ThreadHost host,
-    blink::TaskRunners runners,
+    flutter::TaskRunners runners,
     std::set<fml::RefPtr<EmbedderTaskRunner>> embedder_task_runners)
     : host_(std::move(host)), runners_(std::move(runners)) {
   for (const auto& runner : embedder_task_runners) {
@@ -191,7 +191,7 @@ bool EmbedderThreadHost::IsValid() const {
   return runners_.IsValid();
 }
 
-const blink::TaskRunners& EmbedderThreadHost::GetTaskRunners() const {
+const flutter::TaskRunners& EmbedderThreadHost::GetTaskRunners() const {
   return runners_;
 }
 

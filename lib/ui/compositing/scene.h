@@ -16,7 +16,7 @@ namespace tonic {
 class DartLibraryNatives;
 }  // namespace tonic
 
-namespace blink {
+namespace flutter {
 
 class Scene : public RefCountedDartWrappable<Scene> {
   DEFINE_WRAPPERTYPEINFO();
@@ -48,6 +48,6 @@ class Scene : public RefCountedDartWrappable<Scene> {
   std::unique_ptr<flow::LayerTree> m_layerTree;
 };
 
-}  // namespace blink
+}  // namespace flutter
 
 #endif  // FLUTTER_LIB_UI_COMPOSITING_SCENE_H_

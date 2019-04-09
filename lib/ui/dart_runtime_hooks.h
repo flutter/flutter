@@ -9,7 +9,7 @@
 #include "third_party/dart/runtime/include/dart_api.h"
 #include "third_party/tonic/dart_library_natives.h"
 
-namespace blink {
+namespace flutter {
 
 class DartRuntimeHooks {
  public:
@@ -20,6 +20,6 @@ class DartRuntimeHooks {
   FML_DISALLOW_IMPLICIT_CONSTRUCTORS(DartRuntimeHooks);
 };
 
-}  // namespace blink
+}  // namespace flutter
 
 #endif  // FLUTTER_LIB_UI_DART_RUNTIME_HOOKS_H_

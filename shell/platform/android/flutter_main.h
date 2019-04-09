@@ -20,12 +20,12 @@ class FlutterMain {
 
   static FlutterMain& Get();
 
-  const blink::Settings& GetSettings() const;
+  const flutter::Settings& GetSettings() const;
 
  private:
-  const blink::Settings settings_;
+  const flutter::Settings settings_;
 
-  FlutterMain(blink::Settings settings);
+  FlutterMain(flutter::Settings settings);
 
   static void Init(JNIEnv* env,
                    jclass clazz,

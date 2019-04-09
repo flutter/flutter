@@ -54,7 +54,7 @@ extern const uint8_t* observatory_assets_archive;
 }  // namespace observatory
 }  // namespace dart
 
-namespace blink {
+namespace flutter {
 
 // Arguments passed to the Dart VM in all configurations.
 static const char* kDartLanguageArgs[] = {
@@ -385,14 +385,15 @@ DartVM::DartVM(std::shared_ptr<const DartVMData> vm_data,
     // the very first frame gives us a good idea about Flutter's startup time.
     // Use a duration event so about:tracing will consider this event when
     // deciding the earliest event to use as time 0.
-    if (blink::engine_main_enter_ts != 0) {
-      Dart_TimelineEvent("FlutterEngineMainEnter",     // label
-                         blink::engine_main_enter_ts,  // timestamp0
-                         blink::engine_main_enter_ts,  // timestamp1_or_async_id
-                         Dart_Timeline_Event_Duration,  // event type
-                         0,                             // argument_count
-                         nullptr,                       // argument_names
-                         nullptr                        // argument_values
+    if (flutter::engine_main_enter_ts != 0) {
+      Dart_TimelineEvent(
+          "FlutterEngineMainEnter",       // label
+          flutter::engine_main_enter_ts,  // timestamp0
+          flutter::engine_main_enter_ts,  // timestamp1_or_async_id
+          Dart_Timeline_Event_Duration,   // event type
+          0,                              // argument_count
+          nullptr,                        // argument_names
+          nullptr                         // argument_values
       );
     }
   }
@@ -501,4 +502,4 @@ void DartVM::UnregisterActiveIsolate(std::shared_ptr<DartIsolate> isolate) {
   active_isolates_.erase(isolate);
 }
 
-}  // namespace blink
+}  // namespace flutter

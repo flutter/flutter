@@ -15,7 +15,7 @@
 #include "third_party/tonic/dart_persistent_value.h"
 #include "third_party/tonic/logging/dart_invoke.h"
 
-namespace blink {
+namespace flutter {
 
 IMPLEMENT_WRAPPERTYPEINFO(ui, Picture);
 
@@ -125,4 +125,4 @@ Dart_Handle Picture::RasterizeToImage(sk_sp<SkPicture> picture,
   return Dart_Null();
 }
 
-}  // namespace blink
+}  // namespace flutter

@@ -55,12 +55,12 @@ class AccessibilityBridge;
 /**
  * The semantics node used to produce this semantics object.
  */
-@property(nonatomic, readonly) blink::SemanticsNode node;
+@property(nonatomic, readonly) flutter::SemanticsNode node;
 
 /**
  * Updates this semantics object using data from the `node` argument.
  */
-- (void)setSemanticsNode:(const blink::SemanticsNode*)node NS_REQUIRES_SUPER;
+- (void)setSemanticsNode:(const flutter::SemanticsNode*)node NS_REQUIRES_SUPER;
 
 /**
  * Whether this semantics object has child semantics objects.
@@ -78,7 +78,7 @@ class AccessibilityBridge;
  */
 @property(strong, nonatomic) FlutterPlatformViewSemanticsContainer* platformViewSemanticsContainer;
 
-- (BOOL)nodeWillCauseLayoutChange:(const blink::SemanticsNode*)node;
+- (BOOL)nodeWillCauseLayoutChange:(const flutter::SemanticsNode*)node;
 
 #pragma mark - Designated initializers
 
@@ -142,11 +142,11 @@ class AccessibilityBridge final {
                       FlutterPlatformViewsController* platform_views_controller);
   ~AccessibilityBridge();
 
-  void UpdateSemantics(blink::SemanticsNodeUpdates nodes,
-                       blink::CustomAccessibilityActionUpdates actions);
-  void DispatchSemanticsAction(int32_t id, blink::SemanticsAction action);
+  void UpdateSemantics(flutter::SemanticsNodeUpdates nodes,
+                       flutter::CustomAccessibilityActionUpdates actions);
+  void DispatchSemanticsAction(int32_t id, flutter::SemanticsAction action);
   void DispatchSemanticsAction(int32_t id,
-                               blink::SemanticsAction action,
+                               flutter::SemanticsAction action,
                                std::vector<uint8_t> args);
 
   UIView<UITextInput>* textInputView();
@@ -162,7 +162,7 @@ class AccessibilityBridge final {
   void clearState();
 
  private:
-  SemanticsObject* GetOrCreateObject(int32_t id, blink::SemanticsNodeUpdates& updates);
+  SemanticsObject* GetOrCreateObject(int32_t id, flutter::SemanticsNodeUpdates& updates);
   void VisitObjectsRecursivelyAndRemove(SemanticsObject* object,
                                         NSMutableArray<NSNumber*>* doomed_uids);
   void HandleEvent(NSDictionary<NSString*, id>* annotatedEvent);
@@ -174,7 +174,7 @@ class AccessibilityBridge final {
   fml::scoped_nsprotocol<FlutterBasicMessageChannel*> accessibility_channel_;
   fml::WeakPtrFactory<AccessibilityBridge> weak_factory_;
   int32_t previous_route_id_;
-  std::unordered_map<int32_t, blink::CustomAccessibilityAction> actions_;
+  std::unordered_map<int32_t, flutter::CustomAccessibilityAction> actions_;
   std::vector<int32_t> previous_routes_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(AccessibilityBridge);

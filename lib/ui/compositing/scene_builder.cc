@@ -35,7 +35,7 @@
 #include "flutter/flow/layers/child_scene_layer.h"
 #endif
 
-namespace blink {
+namespace flutter {
 
 static void SceneBuilder_constructor(Dart_NativeArguments args) {
   DartCallConstructor(&SceneBuilder::create, args);
@@ -327,4 +327,4 @@ void SceneBuilder::PushLayer(std::shared_ptr<flow::ContainerLayer> layer) {
   current_layer_ = newLayer;
 }
 
-}  // namespace blink
+}  // namespace flutter

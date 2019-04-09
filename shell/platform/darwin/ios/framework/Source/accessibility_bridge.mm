@@ -18,7 +18,7 @@ namespace {
 
 constexpr int32_t kRootNodeId = 0;
 
-blink::SemanticsAction GetSemanticsActionForScrollDirection(
+flutter::SemanticsAction GetSemanticsActionForScrollDirection(
     UIAccessibilityScrollDirection direction) {
   // To describe scroll direction, UIAccessibilityScrollDirection uses the direction the scroll bar
   // moves in and SemanticsAction uses the direction the finger moves in. Both move in opposite
@@ -27,18 +27,18 @@ blink::SemanticsAction GetSemanticsActionForScrollDirection(
     case UIAccessibilityScrollDirectionRight:
     case UIAccessibilityScrollDirectionPrevious:  // TODO(abarth): Support RTL using
                                                   // _node.textDirection.
-      return blink::SemanticsAction::kScrollLeft;
+      return flutter::SemanticsAction::kScrollLeft;
     case UIAccessibilityScrollDirectionLeft:
     case UIAccessibilityScrollDirectionNext:  // TODO(abarth): Support RTL using
                                               // _node.textDirection.
-      return blink::SemanticsAction::kScrollRight;
+      return flutter::SemanticsAction::kScrollRight;
     case UIAccessibilityScrollDirectionUp:
-      return blink::SemanticsAction::kScrollDown;
+      return flutter::SemanticsAction::kScrollDown;
     case UIAccessibilityScrollDirectionDown:
-      return blink::SemanticsAction::kScrollUp;
+      return flutter::SemanticsAction::kScrollUp;
   }
   FML_DCHECK(false);  // Unreachable
-  return blink::SemanticsAction::kScrollUp;
+  return flutter::SemanticsAction::kScrollUp;
 }
 
 }  // namespace
@@ -134,21 +134,21 @@ blink::SemanticsAction GetSemanticsActionForScrollDirection(
 
 #pragma mark - Semantic object methods
 
-- (void)setSemanticsNode:(const blink::SemanticsNode*)node {
+- (void)setSemanticsNode:(const flutter::SemanticsNode*)node {
   _node = *node;
 }
 
 /**
  * Whether calling `setSemanticsNode:` with `node` would cause a layout change.
  */
-- (BOOL)nodeWillCauseLayoutChange:(const blink::SemanticsNode*)node {
+- (BOOL)nodeWillCauseLayoutChange:(const flutter::SemanticsNode*)node {
   return [self node].rect != node->rect || [self node].transform != node->transform;
 }
 
 /**
  * Whether calling `setSemanticsNode:` with `node` would cause a scroll event.
  */
-- (BOOL)nodeWillCauseScroll:(const blink::SemanticsNode*)node {
+- (BOOL)nodeWillCauseScroll:(const flutter::SemanticsNode*)node {
   return !isnan([self node].scrollPosition) && !isnan(node->scrollPosition) &&
          [self node].scrollPosition != node->scrollPosition;
 }
@@ -168,17 +168,17 @@ blink::SemanticsAction GetSemanticsActionForScrollDirection(
   // entire element tree looking for such a hit.
 
   //  We enforce in the framework that no other useful semantics are merged with these nodes.
-  if ([self node].HasFlag(blink::SemanticsFlags::kScopesRoute))
+  if ([self node].HasFlag(flutter::SemanticsFlags::kScopesRoute))
     return false;
 
   return ([self node].flags != 0 &&
-          [self node].flags != static_cast<int32_t>(blink::SemanticsFlags::kIsHidden)) ||
+          [self node].flags != static_cast<int32_t>(flutter::SemanticsFlags::kIsHidden)) ||
          ![self node].label.empty() || ![self node].value.empty() || ![self node].hint.empty() ||
-         ([self node].actions & ~blink::kScrollableSemanticsActions) != 0;
+         ([self node].actions & ~flutter::kScrollableSemanticsActions) != 0;
 }
 
 - (void)collectRoutes:(NSMutableArray<SemanticsObject*>*)edges {
-  if ([self node].HasFlag(blink::SemanticsFlags::kScopesRoute))
+  if ([self node].HasFlag(flutter::SemanticsFlags::kScopesRoute))
     [edges addObject:self];
   if ([self hasChildren]) {
     for (SemanticsObject* child in self.children) {
@@ -188,7 +188,7 @@ blink::SemanticsAction GetSemanticsActionForScrollDirection(
 }
 
 - (BOOL)onCustomAccessibilityAction:(FlutterCustomAccessibilityAction*)action {
-  if (![self node].HasAction(blink::SemanticsAction::kCustomAction))
+  if (![self node].HasAction(flutter::SemanticsAction::kCustomAction))
     return NO;
   int32_t action_id = action.uid;
   std::vector<uint8_t> args;
@@ -197,14 +197,15 @@ blink::SemanticsAction GetSemanticsActionForScrollDirection(
   args.push_back(action_id >> 8);
   args.push_back(action_id >> 16);
   args.push_back(action_id >> 24);
-  [self bridge] -> DispatchSemanticsAction([self uid], blink::SemanticsAction::kCustomAction, args);
+  [self bridge] -> DispatchSemanticsAction([self uid], flutter::SemanticsAction::kCustomAction,
+                                           args);
   return YES;
 }
 
 - (NSString*)routeName {
   // Returns the first non-null and non-empty semantic label of a child
   // with an NamesRoute flag. Otherwise returns nil.
-  if ([self node].HasFlag(blink::SemanticsFlags::kNamesRoute)) {
+  if ([self node].HasFlag(flutter::SemanticsFlags::kNamesRoute)) {
     NSString* newName = [self accessibilityLabel];
     if (newName != nil && [newName length] > 0) {
       return newName;
@@ -240,7 +241,7 @@ blink::SemanticsAction GetSemanticsActionForScrollDirection(
 }
 
 - (CGRect)accessibilityFrame {
-  if ([self node].HasFlag(blink::SemanticsFlags::kIsHidden)) {
+  if ([self node].HasFlag(flutter::SemanticsFlags::kIsHidden)) {
     return [super accessibilityFrame];
   }
   return [self globalRect];
@@ -292,28 +293,28 @@ blink::SemanticsAction GetSemanticsActionForScrollDirection(
 #pragma mark - UIAccessibilityAction overrides
 
 - (BOOL)accessibilityActivate {
-  if (![self node].HasAction(blink::SemanticsAction::kTap))
+  if (![self node].HasAction(flutter::SemanticsAction::kTap))
     return NO;
-  [self bridge] -> DispatchSemanticsAction([self uid], blink::SemanticsAction::kTap);
+  [self bridge] -> DispatchSemanticsAction([self uid], flutter::SemanticsAction::kTap);
   return YES;
 }
 
 - (void)accessibilityIncrement {
-  if ([self node].HasAction(blink::SemanticsAction::kIncrease)) {
+  if ([self node].HasAction(flutter::SemanticsAction::kIncrease)) {
     [self node].value = [self node].increasedValue;
-    [self bridge] -> DispatchSemanticsAction([self uid], blink::SemanticsAction::kIncrease);
+    [self bridge] -> DispatchSemanticsAction([self uid], flutter::SemanticsAction::kIncrease);
   }
 }
 
 - (void)accessibilityDecrement {
-  if ([self node].HasAction(blink::SemanticsAction::kDecrease)) {
+  if ([self node].HasAction(flutter::SemanticsAction::kDecrease)) {
     [self node].value = [self node].decreasedValue;
-    [self bridge] -> DispatchSemanticsAction([self uid], blink::SemanticsAction::kDecrease);
+    [self bridge] -> DispatchSemanticsAction([self uid], flutter::SemanticsAction::kDecrease);
   }
 }
 
 - (BOOL)accessibilityScroll:(UIAccessibilityScrollDirection)direction {
-  blink::SemanticsAction action = GetSemanticsActionForScrollDirection(direction);
+  flutter::SemanticsAction action = GetSemanticsActionForScrollDirection(direction);
   if (![self node].HasAction(action))
     return NO;
   [self bridge] -> DispatchSemanticsAction([self uid], action);
@@ -321,28 +322,28 @@ blink::SemanticsAction GetSemanticsActionForScrollDirection(
 }
 
 - (BOOL)accessibilityPerformEscape {
-  if (![self node].HasAction(blink::SemanticsAction::kDismiss))
+  if (![self node].HasAction(flutter::SemanticsAction::kDismiss))
     return NO;
-  [self bridge] -> DispatchSemanticsAction([self uid], blink::SemanticsAction::kDismiss);
+  [self bridge] -> DispatchSemanticsAction([self uid], flutter::SemanticsAction::kDismiss);
   return YES;
 }
 
 #pragma mark UIAccessibilityFocus overrides
 
 - (void)accessibilityElementDidBecomeFocused {
-  if ([self node].HasFlag(blink::SemanticsFlags::kIsHidden)) {
-    [self bridge] -> DispatchSemanticsAction([self uid], blink::SemanticsAction::kShowOnScreen);
+  if ([self node].HasFlag(flutter::SemanticsFlags::kIsHidden)) {
+    [self bridge] -> DispatchSemanticsAction([self uid], flutter::SemanticsAction::kShowOnScreen);
   }
-  if ([self node].HasAction(blink::SemanticsAction::kDidGainAccessibilityFocus)) {
+  if ([self node].HasAction(flutter::SemanticsAction::kDidGainAccessibilityFocus)) {
     [self bridge] -> DispatchSemanticsAction([self uid],
-                                             blink::SemanticsAction::kDidGainAccessibilityFocus);
+                                             flutter::SemanticsAction::kDidGainAccessibilityFocus);
   }
 }
 
 - (void)accessibilityElementDidLoseFocus {
-  if ([self node].HasAction(blink::SemanticsAction::kDidLoseAccessibilityFocus)) {
+  if ([self node].HasAction(flutter::SemanticsAction::kDidLoseAccessibilityFocus)) {
     [self bridge] -> DispatchSemanticsAction([self uid],
-                                             blink::SemanticsAction::kDidLoseAccessibilityFocus);
+                                             flutter::SemanticsAction::kDidLoseAccessibilityFocus);
   }
 }
 
@@ -371,30 +372,30 @@ blink::SemanticsAction GetSemanticsActionForScrollDirection(
 
 - (UIAccessibilityTraits)accessibilityTraits {
   UIAccessibilityTraits traits = UIAccessibilityTraitNone;
-  if ([self node].HasAction(blink::SemanticsAction::kIncrease) ||
-      [self node].HasAction(blink::SemanticsAction::kDecrease)) {
+  if ([self node].HasAction(flutter::SemanticsAction::kIncrease) ||
+      [self node].HasAction(flutter::SemanticsAction::kDecrease)) {
     traits |= UIAccessibilityTraitAdjustable;
   }
   // TODO(jonahwilliams): switches should have a value of "on" or "off"
-  if ([self node].HasFlag(blink::SemanticsFlags::kIsSelected) ||
-      [self node].HasFlag(blink::SemanticsFlags::kIsToggled) ||
-      [self node].HasFlag(blink::SemanticsFlags::kIsChecked)) {
+  if ([self node].HasFlag(flutter::SemanticsFlags::kIsSelected) ||
+      [self node].HasFlag(flutter::SemanticsFlags::kIsToggled) ||
+      [self node].HasFlag(flutter::SemanticsFlags::kIsChecked)) {
     traits |= UIAccessibilityTraitSelected;
   }
-  if ([self node].HasFlag(blink::SemanticsFlags::kIsButton)) {
+  if ([self node].HasFlag(flutter::SemanticsFlags::kIsButton)) {
     traits |= UIAccessibilityTraitButton;
   }
-  if ([self node].HasFlag(blink::SemanticsFlags::kHasEnabledState) &&
-      ![self node].HasFlag(blink::SemanticsFlags::kIsEnabled)) {
+  if ([self node].HasFlag(flutter::SemanticsFlags::kHasEnabledState) &&
+      ![self node].HasFlag(flutter::SemanticsFlags::kIsEnabled)) {
     traits |= UIAccessibilityTraitNotEnabled;
   }
-  if ([self node].HasFlag(blink::SemanticsFlags::kIsHeader)) {
+  if ([self node].HasFlag(flutter::SemanticsFlags::kIsHeader)) {
     traits |= UIAccessibilityTraitHeader;
   }
-  if ([self node].HasFlag(blink::SemanticsFlags::kIsImage)) {
+  if ([self node].HasFlag(flutter::SemanticsFlags::kIsImage)) {
     traits |= UIAccessibilityTraitImage;
   }
-  if ([self node].HasFlag(blink::SemanticsFlags::kIsLiveRegion)) {
+  if ([self node].HasFlag(flutter::SemanticsFlags::kIsLiveRegion)) {
     traits |= UIAccessibilityTraitUpdatesFrequently;
   }
   return traits;
@@ -559,16 +560,16 @@ UIView<UITextInput>* AccessibilityBridge::textInputView() {
   return [platform_view_->GetTextInputPlugin() textInputView];
 }
 
-void AccessibilityBridge::UpdateSemantics(blink::SemanticsNodeUpdates nodes,
-                                          blink::CustomAccessibilityActionUpdates actions) {
+void AccessibilityBridge::UpdateSemantics(flutter::SemanticsNodeUpdates nodes,
+                                          flutter::CustomAccessibilityActionUpdates actions) {
   BOOL layoutChanged = NO;
   BOOL scrollOccured = NO;
   for (const auto& entry : actions) {
-    const blink::CustomAccessibilityAction& action = entry.second;
+    const flutter::CustomAccessibilityAction& action = entry.second;
     actions_[action.id] = action;
   }
   for (const auto& entry : nodes) {
-    const blink::SemanticsNode& node = entry.second;
+    const flutter::SemanticsNode& node = entry.second;
     SemanticsObject* object = GetOrCreateObject(node.id, nodes);
     layoutChanged = layoutChanged || [object nodeWillCauseLayoutChange:&node];
     scrollOccured = scrollOccured || [object nodeWillCauseScroll:&node];
@@ -586,7 +587,7 @@ void AccessibilityBridge::UpdateSemantics(blink::SemanticsNodeUpdates nodes,
       NSMutableArray<FlutterCustomAccessibilityAction*>* accessibilityCustomActions =
           [[[NSMutableArray alloc] init] autorelease];
       for (int32_t action_id : node.customAccessibilityActions) {
-        blink::CustomAccessibilityAction& action = actions_[action_id];
+        flutter::CustomAccessibilityAction& action = actions_[action_id];
         if (action.overrideId != -1) {
           // iOS does not support overriding standard actions, so we ignore any
           // custom actions that have an override id provided.
@@ -672,24 +673,24 @@ void AccessibilityBridge::UpdateSemantics(blink::SemanticsNodeUpdates nodes,
   }
 }
 
-void AccessibilityBridge::DispatchSemanticsAction(int32_t uid, blink::SemanticsAction action) {
+void AccessibilityBridge::DispatchSemanticsAction(int32_t uid, flutter::SemanticsAction action) {
   std::vector<uint8_t> args;
   platform_view_->DispatchSemanticsAction(uid, action, args);
 }
 
 void AccessibilityBridge::DispatchSemanticsAction(int32_t uid,
-                                                  blink::SemanticsAction action,
+                                                  flutter::SemanticsAction action,
                                                   std::vector<uint8_t> args) {
   platform_view_->DispatchSemanticsAction(uid, action, args);
 }
 
 SemanticsObject* AccessibilityBridge::GetOrCreateObject(int32_t uid,
-                                                        blink::SemanticsNodeUpdates& updates) {
+                                                        flutter::SemanticsNodeUpdates& updates) {
   SemanticsObject* object = objects_.get()[@(uid)];
   if (!object) {
     // New node case: simply create a new SemanticsObject.
-    blink::SemanticsNode node = updates[uid];
-    if (node.HasFlag(blink::SemanticsFlags::kIsTextField)) {
+    flutter::SemanticsNode node = updates[uid];
+    if (node.HasFlag(flutter::SemanticsFlags::kIsTextField)) {
       // Text fields are backed by objects that implement UITextInput.
       object = [[[TextInputSemanticsObject alloc] initWithBridge:GetWeakPtr() uid:uid] autorelease];
     } else {
@@ -702,9 +703,9 @@ SemanticsObject* AccessibilityBridge::GetOrCreateObject(int32_t uid,
     auto nodeEntry = updates.find(object.node.id);
     if (nodeEntry != updates.end()) {
       // There's an update for this node
-      blink::SemanticsNode node = nodeEntry->second;
-      BOOL isTextField = node.HasFlag(blink::SemanticsFlags::kIsTextField);
-      BOOL wasTextField = object.node.HasFlag(blink::SemanticsFlags::kIsTextField);
+      flutter::SemanticsNode node = nodeEntry->second;
+      BOOL isTextField = node.HasFlag(flutter::SemanticsFlags::kIsTextField);
+      BOOL wasTextField = object.node.HasFlag(flutter::SemanticsFlags::kIsTextField);
       if (wasTextField != isTextField) {
         // The node changed its type from text field to something else, or vice versa. In this
         // case, we cannot reuse the existing SemanticsObject implementation. Instead, we replace

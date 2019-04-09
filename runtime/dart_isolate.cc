@@ -27,7 +27,7 @@
 #include "third_party/tonic/scopes/dart_api_scope.h"
 #include "third_party/tonic/scopes/dart_isolate_scope.h"
 
-namespace blink {
+namespace flutter {
 
 std::weak_ptr<DartIsolate> DartIsolate::CreateRootIsolate(
     const Settings& settings,
@@ -547,7 +547,7 @@ Dart_Isolate DartIsolate::DartCreateAndStartServiceIsolate(
     return nullptr;
   }
 
-  blink::TaskRunners null_task_runners(
+  flutter::TaskRunners null_task_runners(
       "io.flutter." DART_VM_SERVICE_ISOLATE_NAME, nullptr, nullptr, nullptr,
       nullptr);
 
@@ -659,8 +659,8 @@ DartIsolate::CreateDartVMAndEmbedderObjectPair(
   if (!is_root_isolate) {
     auto* raw_embedder_isolate = embedder_isolate.release();
 
-    blink::TaskRunners null_task_runners(advisory_script_uri, nullptr, nullptr,
-                                         nullptr, nullptr);
+    flutter::TaskRunners null_task_runners(advisory_script_uri, nullptr,
+                                           nullptr, nullptr, nullptr);
 
     embedder_isolate = std::make_unique<std::shared_ptr<DartIsolate>>(
         std::make_shared<DartIsolate>(
@@ -773,4 +773,4 @@ DartIsolate::AutoFireClosure::~AutoFireClosure() {
   }
 }
 
-}  // namespace blink
+}  // namespace flutter

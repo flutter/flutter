@@ -16,7 +16,7 @@
 #include "flutter/fml/mapping.h"
 #include "flutter/fml/unique_fd.h"
 
-namespace blink {
+namespace flutter {
 
 using TaskObserverAdd =
     std::function<void(intptr_t /* key */, fml::closure /* callback */)>;
@@ -145,6 +145,6 @@ struct Settings {
   std::string ToString() const;
 };
 
-}  // namespace blink
+}  // namespace flutter
 
 #endif  // FLUTTER_COMMON_SETTINGS_H_

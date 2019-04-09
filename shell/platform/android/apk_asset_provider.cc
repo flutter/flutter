@@ -5,7 +5,7 @@
 #include "flutter/fml/logging.h"
 #include "flutter/shell/platform/android/apk_asset_provider.h"
 
-namespace blink {
+namespace flutter {
 
 APKAssetProvider::APKAssetProvider(JNIEnv* env,
                                    jobject jassetManager,
@@ -52,4 +52,4 @@ std::unique_ptr<fml::Mapping> APKAssetProvider::GetAsMapping(
   return std::make_unique<APKAssetMapping>(asset);
 }
 
-}  // namespace blink
+}  // namespace flutter

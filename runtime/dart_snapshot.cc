@@ -13,7 +13,7 @@
 #include "flutter/runtime/dart_snapshot_buffer.h"
 #include "flutter/runtime/dart_vm.h"
 
-namespace blink {
+namespace flutter {
 
 const char* DartSnapshot::kVMDataSymbol = "kDartVmSnapshotData";
 const char* DartSnapshot::kVMInstructionsSymbol = "kDartVmSnapshotInstructions";
@@ -232,4 +232,4 @@ const uint8_t* DartSnapshot::GetInstructionsIfPresent() const {
   return instructions_ ? instructions_->GetSnapshotPointer() : nullptr;
 }
 
-}  // namespace blink
+}  // namespace flutter

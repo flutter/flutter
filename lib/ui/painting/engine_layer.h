@@ -13,7 +13,7 @@ namespace tonic {
 class DartLibraryNatives;
 }  // namespace tonic
 
-namespace blink {
+namespace flutter {
 
 class EngineLayer;
 
@@ -41,6 +41,6 @@ class EngineLayer : public RefCountedDartWrappable<EngineLayer> {
   FML_FRIEND_MAKE_REF_COUNTED(EngineLayer);
 };
 
-}  // namespace blink
+}  // namespace flutter
 
 #endif  // FLUTTER_LIB_UI_PAINTING_ENGINE_LAYER_H_

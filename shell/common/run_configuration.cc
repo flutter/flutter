@@ -13,15 +13,15 @@
 namespace shell {
 
 RunConfiguration RunConfiguration::InferFromSettings(
-    const blink::Settings& settings,
+    const flutter::Settings& settings,
     fml::RefPtr<fml::TaskRunner> io_worker) {
-  auto asset_manager = std::make_shared<blink::AssetManager>();
+  auto asset_manager = std::make_shared<flutter::AssetManager>();
 
-  asset_manager->PushBack(std::make_unique<blink::DirectoryAssetBundle>(
+  asset_manager->PushBack(std::make_unique<flutter::DirectoryAssetBundle>(
       fml::Duplicate(settings.assets_dir)));
 
   asset_manager->PushBack(
-      std::make_unique<blink::DirectoryAssetBundle>(fml::OpenDirectory(
+      std::make_unique<flutter::DirectoryAssetBundle>(fml::OpenDirectory(
           settings.assets_path.c_str(), false, fml::FilePermission::kRead)));
 
   return {IsolateConfiguration::InferFromSettings(settings, asset_manager,
@@ -32,11 +32,11 @@ RunConfiguration RunConfiguration::InferFromSettings(
 RunConfiguration::RunConfiguration(
     std::unique_ptr<IsolateConfiguration> configuration)
     : RunConfiguration(std::move(configuration),
-                       std::make_shared<blink::AssetManager>()) {}
+                       std::make_shared<flutter::AssetManager>()) {}
 
 RunConfiguration::RunConfiguration(
     std::unique_ptr<IsolateConfiguration> configuration,
-    std::shared_ptr<blink::AssetManager> asset_manager)
+    std::shared_ptr<flutter::AssetManager> asset_manager)
     : isolate_configuration_(std::move(configuration)),
       asset_manager_(std::move(asset_manager)) {}
 
@@ -49,7 +49,7 @@ bool RunConfiguration::IsValid() const {
 }
 
 bool RunConfiguration::AddAssetResolver(
-    std::unique_ptr<blink::AssetResolver> resolver) {
+    std::unique_ptr<flutter::AssetResolver> resolver) {
   if (!resolver || !resolver->IsValid()) {
     return false;
   }
@@ -68,7 +68,8 @@ void RunConfiguration::SetEntrypointAndLibrary(std::string entrypoint,
   entrypoint_library_ = std::move(library);
 }
 
-std::shared_ptr<blink::AssetManager> RunConfiguration::GetAssetManager() const {
+std::shared_ptr<flutter::AssetManager> RunConfiguration::GetAssetManager()
+    const {
   return asset_manager_;
 }
 

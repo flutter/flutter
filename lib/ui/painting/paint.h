@@ -8,7 +8,7 @@
 #include "third_party/skia/include/core/SkPaint.h"
 #include "third_party/tonic/converter/dart_converter.h"
 
-namespace blink {
+namespace flutter {
 
 class Paint {
  public:
@@ -30,22 +30,22 @@ class Paint {
 // data for a Paint object).
 class PaintData {};
 
-}  // namespace blink
+}  // namespace flutter
 
 namespace tonic {
 
 template <>
-struct DartConverter<blink::Paint> {
-  static blink::Paint FromArguments(Dart_NativeArguments args,
-                                    int index,
-                                    Dart_Handle& exception);
+struct DartConverter<flutter::Paint> {
+  static flutter::Paint FromArguments(Dart_NativeArguments args,
+                                      int index,
+                                      Dart_Handle& exception);
 };
 
 template <>
-struct DartConverter<blink::PaintData> {
-  static blink::PaintData FromArguments(Dart_NativeArguments args,
-                                        int index,
-                                        Dart_Handle& exception);
+struct DartConverter<flutter::PaintData> {
+  static flutter::PaintData FromArguments(Dart_NativeArguments args,
+                                          int index,
+                                          Dart_Handle& exception);
 };
 
 }  // namespace tonic

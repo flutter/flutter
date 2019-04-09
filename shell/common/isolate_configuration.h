@@ -22,8 +22,8 @@ namespace shell {
 class IsolateConfiguration {
  public:
   static std::unique_ptr<IsolateConfiguration> InferFromSettings(
-      const blink::Settings& settings,
-      std::shared_ptr<blink::AssetManager> asset_manager,
+      const flutter::Settings& settings,
+      std::shared_ptr<flutter::AssetManager> asset_manager,
       fml::RefPtr<fml::TaskRunner> io_worker);
 
   static std::unique_ptr<IsolateConfiguration> CreateForAppSnapshot();
@@ -42,10 +42,10 @@ class IsolateConfiguration {
 
   virtual ~IsolateConfiguration();
 
-  bool PrepareIsolate(blink::DartIsolate& isolate);
+  bool PrepareIsolate(flutter::DartIsolate& isolate);
 
  protected:
-  virtual bool DoPrepareIsolate(blink::DartIsolate& isolate) = 0;
+  virtual bool DoPrepareIsolate(flutter::DartIsolate& isolate) = 0;
 
  private:
   FML_DISALLOW_COPY_AND_ASSIGN(IsolateConfiguration);

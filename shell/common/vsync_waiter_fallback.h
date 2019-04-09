@@ -14,7 +14,7 @@ namespace shell {
 
 class VsyncWaiterFallback final : public VsyncWaiter {
  public:
-  VsyncWaiterFallback(blink::TaskRunners task_runners);
+  VsyncWaiterFallback(flutter::TaskRunners task_runners);
 
   ~VsyncWaiterFallback() override;
 

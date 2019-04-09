@@ -36,11 +36,11 @@ namespace shell {
 constexpr char kSkiaChannel[] = "flutter/skia";
 
 std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
-    blink::DartVMRef vm,
-    blink::TaskRunners task_runners,
-    blink::Settings settings,
-    fml::RefPtr<const blink::DartSnapshot> isolate_snapshot,
-    fml::RefPtr<const blink::DartSnapshot> shared_snapshot,
+    flutter::DartVMRef vm,
+    flutter::TaskRunners task_runners,
+    flutter::Settings settings,
+    fml::RefPtr<const flutter::DartSnapshot> isolate_snapshot,
+    fml::RefPtr<const flutter::DartSnapshot> shared_snapshot,
     Shell::CreateCallback<PlatformView> on_create_platform_view,
     Shell::CreateCallback<Rasterizer> on_create_rasterizer) {
   if (!task_runners.IsValid()) {
@@ -88,7 +88,7 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
   // Create the rasterizer on the GPU thread.
   fml::AutoResetWaitableEvent gpu_latch;
   std::unique_ptr<Rasterizer> rasterizer;
-  fml::WeakPtr<blink::SnapshotDelegate> snapshot_delegate;
+  fml::WeakPtr<flutter::SnapshotDelegate> snapshot_delegate;
   fml::TaskRunner::RunNowOrPostTask(
       task_runners.GetGPUTaskRunner(), [&gpu_latch,            //
                                         &rasterizer,           //
@@ -157,8 +157,8 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
 }
 
 static void RecordStartupTimestamp() {
-  if (blink::engine_main_enter_ts == 0) {
-    blink::engine_main_enter_ts = Dart_TimelineGetMicros();
+  if (flutter::engine_main_enter_ts == 0) {
+    flutter::engine_main_enter_ts = Dart_TimelineGetMicros();
   }
 }
 
@@ -168,7 +168,7 @@ static void RecordStartupTimestamp() {
 // TODO(chinmaygarde): The unfortunate side effect of this call is that settings
 // that cause shell initialization failures will still lead to some of their
 // settings being applied.
-static void PerformInitializationTasks(const blink::Settings& settings) {
+static void PerformInitializationTasks(const flutter::Settings& settings) {
   {
     fml::LogSettings log_settings;
     log_settings.min_log_level =
@@ -206,15 +206,15 @@ static void PerformInitializationTasks(const blink::Settings& settings) {
 }
 
 std::unique_ptr<Shell> Shell::Create(
-    blink::TaskRunners task_runners,
-    blink::Settings settings,
+    flutter::TaskRunners task_runners,
+    flutter::Settings settings,
     Shell::CreateCallback<PlatformView> on_create_platform_view,
     Shell::CreateCallback<Rasterizer> on_create_rasterizer) {
   PerformInitializationTasks(settings);
 
   TRACE_EVENT0("flutter", "Shell::Create");
 
-  auto vm = blink::DartVMRef::Create(settings);
+  auto vm = flutter::DartVMRef::Create(settings);
   FML_CHECK(vm) << "Must be able to initialize the VM.";
 
   auto vm_data = vm->GetVMData();
@@ -222,7 +222,7 @@ std::unique_ptr<Shell> Shell::Create(
   return Shell::Create(std::move(task_runners),             //
                        std::move(settings),                 //
                        vm_data->GetIsolateSnapshot(),       // isolate snapshot
-                       blink::DartSnapshot::Empty(),        // shared snapshot
+                       flutter::DartSnapshot::Empty(),      // shared snapshot
                        std::move(on_create_platform_view),  //
                        std::move(on_create_rasterizer),     //
                        std::move(vm)                        //
@@ -230,13 +230,13 @@ std::unique_ptr<Shell> Shell::Create(
 }
 
 std::unique_ptr<Shell> Shell::Create(
-    blink::TaskRunners task_runners,
-    blink::Settings settings,
-    fml::RefPtr<const blink::DartSnapshot> isolate_snapshot,
-    fml::RefPtr<const blink::DartSnapshot> shared_snapshot,
+    flutter::TaskRunners task_runners,
+    flutter::Settings settings,
+    fml::RefPtr<const flutter::DartSnapshot> isolate_snapshot,
+    fml::RefPtr<const flutter::DartSnapshot> shared_snapshot,
     Shell::CreateCallback<PlatformView> on_create_platform_view,
     Shell::CreateCallback<Rasterizer> on_create_rasterizer,
-    blink::DartVMRef vm) {
+    flutter::DartVMRef vm) {
   PerformInitializationTasks(settings);
 
   TRACE_EVENT0("flutter", "Shell::CreateWithSnapshots");
@@ -274,9 +274,9 @@ std::unique_ptr<Shell> Shell::Create(
   return shell;
 }
 
-Shell::Shell(blink::DartVMRef vm,
-             blink::TaskRunners task_runners,
-             blink::Settings settings)
+Shell::Shell(flutter::DartVMRef vm,
+             flutter::TaskRunners task_runners,
+             flutter::Settings settings)
     : task_runners_(std::move(task_runners)),
       settings_(std::move(settings)),
       vm_(std::move(vm)) {
@@ -286,36 +286,37 @@ Shell::Shell(blink::DartVMRef vm,
 
   // Install service protocol handlers.
 
-  service_protocol_handlers_[blink::ServiceProtocol::kScreenshotExtensionName
+  service_protocol_handlers_[flutter::ServiceProtocol::kScreenshotExtensionName
                                  .ToString()] = {
       task_runners_.GetGPUTaskRunner(),
       std::bind(&Shell::OnServiceProtocolScreenshot, this,
                 std::placeholders::_1, std::placeholders::_2)};
-  service_protocol_handlers_[blink::ServiceProtocol::kScreenshotSkpExtensionName
-                                 .ToString()] = {
-      task_runners_.GetGPUTaskRunner(),
-      std::bind(&Shell::OnServiceProtocolScreenshotSKP, this,
-                std::placeholders::_1, std::placeholders::_2)};
-  service_protocol_handlers_[blink::ServiceProtocol::kRunInViewExtensionName
+  service_protocol_handlers_
+      [flutter::ServiceProtocol::kScreenshotSkpExtensionName.ToString()] = {
+          task_runners_.GetGPUTaskRunner(),
+          std::bind(&Shell::OnServiceProtocolScreenshotSKP, this,
+                    std::placeholders::_1, std::placeholders::_2)};
+  service_protocol_handlers_[flutter::ServiceProtocol::kRunInViewExtensionName
                                  .ToString()] = {
       task_runners_.GetUITaskRunner(),
       std::bind(&Shell::OnServiceProtocolRunInView, this, std::placeholders::_1,
                 std::placeholders::_2)};
   service_protocol_handlers_
-      [blink::ServiceProtocol::kFlushUIThreadTasksExtensionName.ToString()] = {
-          task_runners_.GetUITaskRunner(),
-          std::bind(&Shell::OnServiceProtocolFlushUIThreadTasks, this,
-                    std::placeholders::_1, std::placeholders::_2)};
-  service_protocol_handlers_
-      [blink::ServiceProtocol::kSetAssetBundlePathExtensionName.ToString()] = {
-          task_runners_.GetUITaskRunner(),
-          std::bind(&Shell::OnServiceProtocolSetAssetBundlePath, this,
-                    std::placeholders::_1, std::placeholders::_2)};
-  service_protocol_handlers_
-      [blink::ServiceProtocol::kGetDisplayRefreshRateExtensionName.ToString()] =
+      [flutter::ServiceProtocol::kFlushUIThreadTasksExtensionName.ToString()] =
           {task_runners_.GetUITaskRunner(),
-           std::bind(&Shell::OnServiceProtocolGetDisplayRefreshRate, this,
+           std::bind(&Shell::OnServiceProtocolFlushUIThreadTasks, this,
                      std::placeholders::_1, std::placeholders::_2)};
+  service_protocol_handlers_
+      [flutter::ServiceProtocol::kSetAssetBundlePathExtensionName.ToString()] =
+          {task_runners_.GetUITaskRunner(),
+           std::bind(&Shell::OnServiceProtocolSetAssetBundlePath, this,
+                     std::placeholders::_1, std::placeholders::_2)};
+  service_protocol_handlers_
+      [flutter::ServiceProtocol::kGetDisplayRefreshRateExtensionName
+           .ToString()] = {
+          task_runners_.GetUITaskRunner(),
+          std::bind(&Shell::OnServiceProtocolGetDisplayRefreshRate, this,
+                    std::placeholders::_1, std::placeholders::_2)};
 }
 
 Shell::~Shell() {
@@ -404,11 +405,11 @@ bool Shell::Setup(std::unique_ptr<PlatformView> platform_view,
   return true;
 }
 
-const blink::Settings& Shell::GetSettings() const {
+const flutter::Settings& Shell::GetSettings() const {
   return settings_;
 }
 
-const blink::TaskRunners& Shell::GetTaskRunners() const {
+const flutter::TaskRunners& Shell::GetTaskRunners() const {
   return task_runners_;
 }
 
@@ -427,7 +428,7 @@ fml::WeakPtr<PlatformView> Shell::GetPlatformView() {
   return platform_view_->GetWeakPtr();
 }
 
-blink::DartVM* Shell::GetDartVM() {
+flutter::DartVM* Shell::GetDartVM() {
   return &vm_;
 }
 
@@ -591,7 +592,7 @@ void Shell::OnPlatformViewDestroyed() {
 
 // |shell::PlatformView::Delegate|
 void Shell::OnPlatformViewSetViewportMetrics(
-    const blink::ViewportMetrics& metrics) {
+    const flutter::ViewportMetrics& metrics) {
   FML_DCHECK(is_setup_);
   FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
 
@@ -605,7 +606,7 @@ void Shell::OnPlatformViewSetViewportMetrics(
 
 // |shell::PlatformView::Delegate|
 void Shell::OnPlatformViewDispatchPlatformMessage(
-    fml::RefPtr<blink::PlatformMessage> message) {
+    fml::RefPtr<flutter::PlatformMessage> message) {
   FML_DCHECK(is_setup_);
   FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
 
@@ -619,7 +620,7 @@ void Shell::OnPlatformViewDispatchPlatformMessage(
 
 // |shell::PlatformView::Delegate|
 void Shell::OnPlatformViewDispatchPointerDataPacket(
-    std::unique_ptr<blink::PointerDataPacket> packet) {
+    std::unique_ptr<flutter::PointerDataPacket> packet) {
   TRACE_EVENT0("flutter", "Shell::OnPlatformViewDispatchPointerDataPacket");
   TRACE_FLOW_BEGIN("flutter", "PointerEvent", next_pointer_flow_id_);
   FML_DCHECK(is_setup_);
@@ -635,9 +636,10 @@ void Shell::OnPlatformViewDispatchPointerDataPacket(
 }
 
 // |shell::PlatformView::Delegate|
-void Shell::OnPlatformViewDispatchSemanticsAction(int32_t id,
-                                                  blink::SemanticsAction action,
-                                                  std::vector<uint8_t> args) {
+void Shell::OnPlatformViewDispatchSemanticsAction(
+    int32_t id,
+    flutter::SemanticsAction action,
+    std::vector<uint8_t> args) {
   FML_DCHECK(is_setup_);
   FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
 
@@ -798,8 +800,8 @@ void Shell::OnAnimatorDrawLastLayerTree() {
 
 // |shell::Engine::Delegate|
 void Shell::OnEngineUpdateSemantics(
-    blink::SemanticsNodeUpdates update,
-    blink::CustomAccessibilityActionUpdates actions) {
+    flutter::SemanticsNodeUpdates update,
+    flutter::CustomAccessibilityActionUpdates actions) {
   FML_DCHECK(is_setup_);
   FML_DCHECK(task_runners_.GetUITaskRunner()->RunsTasksOnCurrentThread());
 
@@ -814,7 +816,7 @@ void Shell::OnEngineUpdateSemantics(
 
 // |shell::Engine::Delegate|
 void Shell::OnEngineHandlePlatformMessage(
-    fml::RefPtr<blink::PlatformMessage> message) {
+    fml::RefPtr<flutter::PlatformMessage> message) {
   FML_DCHECK(is_setup_);
   FML_DCHECK(task_runners_.GetUITaskRunner()->RunsTasksOnCurrentThread());
 
@@ -832,7 +834,7 @@ void Shell::OnEngineHandlePlatformMessage(
 }
 
 void Shell::HandleEngineSkiaMessage(
-    fml::RefPtr<blink::PlatformMessage> message) {
+    fml::RefPtr<flutter::PlatformMessage> message) {
   const auto& data = message->data();
 
   rapidjson::Document document;
@@ -882,7 +884,7 @@ void Shell::UpdateIsolateDescription(const std::string isolate_name,
   vm_->GetServiceProtocol()->SetHandlerDescription(this, description);
 }
 
-// |blink::ServiceProtocol::Handler|
+// |flutter::ServiceProtocol::Handler|
 fml::RefPtr<fml::TaskRunner> Shell::GetServiceProtocolHandlerTaskRunner(
     fml::StringView method) const {
   FML_DCHECK(is_setup_);
@@ -893,7 +895,7 @@ fml::RefPtr<fml::TaskRunner> Shell::GetServiceProtocolHandlerTaskRunner(
   return task_runners_.GetUITaskRunner();
 }
 
-// |blink::ServiceProtocol::Handler|
+// |flutter::ServiceProtocol::Handler|
 bool Shell::HandleServiceProtocolMessage(
     fml::StringView method,  // one if the extension names specified above.
     const ServiceProtocolMap& params,
@@ -905,8 +907,8 @@ bool Shell::HandleServiceProtocolMessage(
   return false;
 }
 
-// |blink::ServiceProtocol::Handler|
-blink::ServiceProtocol::Handler::Description
+// |flutter::ServiceProtocol::Handler|
+flutter::ServiceProtocol::Handler::Description
 Shell::GetServiceProtocolDescription() const {
   return {
       engine_->GetUIIsolateMainPort(),
@@ -939,7 +941,7 @@ static void ServiceProtocolFailureError(rapidjson::Document& response,
 
 // Service protocol handler
 bool Shell::OnServiceProtocolScreenshot(
-    const blink::ServiceProtocol::Handler::ServiceProtocolMap& params,
+    const flutter::ServiceProtocol::Handler::ServiceProtocolMap& params,
     rapidjson::Document& response) {
   FML_DCHECK(task_runners_.GetGPUTaskRunner()->RunsTasksOnCurrentThread());
   auto screenshot = rasterizer_->ScreenshotLastLayerTree(
@@ -960,7 +962,7 @@ bool Shell::OnServiceProtocolScreenshot(
 
 // Service protocol handler
 bool Shell::OnServiceProtocolScreenshotSKP(
-    const blink::ServiceProtocol::Handler::ServiceProtocolMap& params,
+    const flutter::ServiceProtocol::Handler::ServiceProtocolMap& params,
     rapidjson::Document& response) {
   FML_DCHECK(task_runners_.GetGPUTaskRunner()->RunsTasksOnCurrentThread());
   auto screenshot = rasterizer_->ScreenshotLastLayerTree(
@@ -981,7 +983,7 @@ bool Shell::OnServiceProtocolScreenshotSKP(
 
 // Service protocol handler
 bool Shell::OnServiceProtocolRunInView(
-    const blink::ServiceProtocol::Handler::ServiceProtocolMap& params,
+    const flutter::ServiceProtocol::Handler::ServiceProtocolMap& params,
     rapidjson::Document& response) {
   FML_DCHECK(task_runners_.GetUITaskRunner()->RunsTasksOnCurrentThread());
 
@@ -1024,7 +1026,7 @@ bool Shell::OnServiceProtocolRunInView(
   RunConfiguration configuration(std::move(isolate_configuration));
 
   configuration.AddAssetResolver(
-      std::make_unique<blink::DirectoryAssetBundle>(fml::OpenDirectory(
+      std::make_unique<flutter::DirectoryAssetBundle>(fml::OpenDirectory(
           asset_directory_path.c_str(), false, fml::FilePermission::kRead)));
 
   auto& allocator = response.GetAllocator();
@@ -1049,7 +1051,7 @@ bool Shell::OnServiceProtocolRunInView(
 
 // Service protocol handler
 bool Shell::OnServiceProtocolFlushUIThreadTasks(
-    const blink::ServiceProtocol::Handler::ServiceProtocolMap& params,
+    const flutter::ServiceProtocol::Handler::ServiceProtocolMap& params,
     rapidjson::Document& response) {
   FML_DCHECK(task_runners_.GetUITaskRunner()->RunsTasksOnCurrentThread());
   // This API should not be invoked by production code.
@@ -1064,7 +1066,7 @@ bool Shell::OnServiceProtocolFlushUIThreadTasks(
 }
 
 bool Shell::OnServiceProtocolGetDisplayRefreshRate(
-    const blink::ServiceProtocol::Handler::ServiceProtocolMap& params,
+    const flutter::ServiceProtocol::Handler::ServiceProtocolMap& params,
     rapidjson::Document& response) {
   FML_DCHECK(task_runners_.GetUITaskRunner()->RunsTasksOnCurrentThread());
   response.SetObject();
@@ -1075,7 +1077,7 @@ bool Shell::OnServiceProtocolGetDisplayRefreshRate(
 
 // Service protocol handler
 bool Shell::OnServiceProtocolSetAssetBundlePath(
-    const blink::ServiceProtocol::Handler::ServiceProtocolMap& params,
+    const flutter::ServiceProtocol::Handler::ServiceProtocolMap& params,
     rapidjson::Document& response) {
   FML_DCHECK(task_runners_.GetUITaskRunner()->RunsTasksOnCurrentThread());
 
@@ -1088,9 +1090,9 @@ bool Shell::OnServiceProtocolSetAssetBundlePath(
   auto& allocator = response.GetAllocator();
   response.SetObject();
 
-  auto asset_manager = std::make_shared<blink::AssetManager>();
+  auto asset_manager = std::make_shared<flutter::AssetManager>();
 
-  asset_manager->PushFront(std::make_unique<blink::DirectoryAssetBundle>(
+  asset_manager->PushFront(std::make_unique<flutter::DirectoryAssetBundle>(
       fml::OpenDirectory(params.at("assetDirectory").ToString().c_str(), false,
                          fml::FilePermission::kRead)));
 

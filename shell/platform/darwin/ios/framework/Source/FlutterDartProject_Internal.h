@@ -11,7 +11,7 @@
 
 @interface FlutterDartProject ()
 
-- (const blink::Settings&)settings;
+- (const flutter::Settings&)settings;
 
 - (shell::RunConfiguration)runConfiguration;
 - (shell::RunConfiguration)runConfigurationForEntrypoint:(NSString*)entrypointOrNil;

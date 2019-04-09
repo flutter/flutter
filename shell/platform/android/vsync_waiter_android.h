@@ -18,7 +18,7 @@ class VsyncWaiterAndroid final : public VsyncWaiter {
  public:
   static bool Register(JNIEnv* env);
 
-  VsyncWaiterAndroid(blink::TaskRunners task_runners);
+  VsyncWaiterAndroid(flutter::TaskRunners task_runners);
 
   ~VsyncWaiterAndroid() override;
 

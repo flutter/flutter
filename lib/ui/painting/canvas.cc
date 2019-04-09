@@ -22,7 +22,7 @@
 
 using tonic::ToDart;
 
-namespace blink {
+namespace flutter {
 
 static void Canvas_constructor(Dart_NativeArguments args) {
   DartCallConstructor(&Canvas::Create, args);
@@ -431,4 +431,4 @@ bool Canvas::IsRecording() const {
   return !!canvas_;
 }
 
-}  // namespace blink
+}  // namespace flutter

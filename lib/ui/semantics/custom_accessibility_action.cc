@@ -4,10 +4,10 @@
 
 #include "flutter/lib/ui/semantics/custom_accessibility_action.h"
 
-namespace blink {
+namespace flutter {
 
 CustomAccessibilityAction::CustomAccessibilityAction() = default;
 
 CustomAccessibilityAction::~CustomAccessibilityAction() = default;
 
-}  // namespace blink
+}  // namespace flutter

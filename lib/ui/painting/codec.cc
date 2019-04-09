@@ -21,7 +21,7 @@ using tonic::DartInvoke;
 using tonic::DartPersistentValue;
 using tonic::ToDart;
 
-namespace blink {
+namespace flutter {
 
 namespace {
 
@@ -553,4 +553,4 @@ void Codec::RegisterNatives(tonic::DartLibraryNatives* natives) {
   natives->Register({FOR_EACH_BINDING(DART_REGISTER_NATIVE)});
 }
 
-}  // namespace blink
+}  // namespace flutter

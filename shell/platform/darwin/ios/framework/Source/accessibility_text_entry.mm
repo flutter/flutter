@@ -186,10 +186,10 @@
 
 #pragma mark - SemanticsObject overrides
 
-- (void)setSemanticsNode:(const blink::SemanticsNode*)node {
+- (void)setSemanticsNode:(const flutter::SemanticsNode*)node {
   [super setSemanticsNode:node];
   _inactive_text_input.text = @(node->value.data());
-  if ([self node].HasFlag(blink::SemanticsFlags::kIsFocused)) {
+  if ([self node].HasFlag(flutter::SemanticsFlags::kIsFocused)) {
     // The text input view must have a non-trivial size for the accessibility
     // system to send text editing events.
     [self bridge] -> textInputView().frame = CGRectMake(0.0, 0.0, 1.0, 1.0);
@@ -207,7 +207,7 @@
  * we use an FlutterInactiveTextInput.
  */
 - (UIView<UITextInput>*)textInputSurrogate {
-  if ([self node].HasFlag(blink::SemanticsFlags::kIsFocused)) {
+  if ([self node].HasFlag(flutter::SemanticsFlags::kIsFocused)) {
     return [self bridge] -> textInputView();
   } else {
     return _inactive_text_input;
@@ -229,7 +229,7 @@
 }
 
 - (BOOL)accessibilityElementIsFocused {
-  return [self node].HasFlag(blink::SemanticsFlags::kIsFocused);
+  return [self node].HasFlag(flutter::SemanticsFlags::kIsFocused);
 }
 
 - (BOOL)accessibilityActivate {

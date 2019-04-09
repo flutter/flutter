@@ -7,7 +7,7 @@
 
 #include <stdint.h>
 
-namespace blink {
+namespace flutter {
 
 // The earliest available timestamp in the application's lifecycle. The
 // difference between this timestamp and the time we render the very first
@@ -19,6 +19,6 @@ namespace blink {
 // user code prior to initializing Flutter.
 extern int64_t engine_main_enter_ts;
 
-}  // namespace blink
+}  // namespace flutter
 
 #endif  // FLUTTER_RUNTIME_START_UP_H_

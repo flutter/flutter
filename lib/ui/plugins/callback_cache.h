@@ -14,7 +14,7 @@
 #include "flutter/fml/synchronization/thread_annotations.h"
 #include "third_party/dart/runtime/include/dart_api.h"
 
-namespace blink {
+namespace flutter {
 
 typedef struct {
   std::string name;
@@ -55,6 +55,6 @@ class DartCallbackCache {
   FML_DISALLOW_IMPLICIT_CONSTRUCTORS(DartCallbackCache);
 };
 
-}  // namespace blink
+}  // namespace flutter
 
 #endif  // FLUTTER_LIB_UI_CALLBACK_CACHE_H_

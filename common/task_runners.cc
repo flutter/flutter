@@ -6,7 +6,7 @@
 
 #include <utility>
 
-namespace blink {
+namespace flutter {
 
 TaskRunners::TaskRunners(std::string label,
                          fml::RefPtr<fml::TaskRunner> platform,
@@ -47,4 +47,4 @@ bool TaskRunners::IsValid() const {
   return platform_ && gpu_ && ui_ && io_;
 }
 
-}  // namespace blink
+}  // namespace flutter

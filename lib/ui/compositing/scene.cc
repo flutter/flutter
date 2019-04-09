@@ -14,7 +14,7 @@
 #include "third_party/tonic/dart_binding_macros.h"
 #include "third_party/tonic/dart_library_natives.h"
 
-namespace blink {
+namespace flutter {
 
 IMPLEMENT_WRAPPERTYPEINFO(ui, Scene);
 
@@ -72,4 +72,4 @@ std::unique_ptr<flow::LayerTree> Scene::takeLayerTree() {
   return std::move(m_layerTree);
 }
 
-}  // namespace blink
+}  // namespace flutter

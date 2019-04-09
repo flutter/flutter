@@ -10,7 +10,7 @@
 #include "flutter/fml/macros.h"
 #include "flutter/fml/task_runner.h"
 
-namespace blink {
+namespace flutter {
 
 class TaskRunners {
  public:
@@ -44,6 +44,6 @@ class TaskRunners {
   fml::RefPtr<fml::TaskRunner> io_;
 };
 
-}  // namespace blink
+}  // namespace flutter
 
 #endif  // FLUTTER_COMMON_TASK_RUNNERS_H_

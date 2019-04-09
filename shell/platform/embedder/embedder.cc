@@ -258,11 +258,11 @@ InferPlatformViewCreationCallback(
 }
 
 struct _FlutterPlatformMessageResponseHandle {
-  fml::RefPtr<blink::PlatformMessage> message;
+  fml::RefPtr<flutter::PlatformMessage> message;
 };
 
 void PopulateSnapshotMappingCallbacks(const FlutterProjectArgs* args,
-                                      blink::Settings& settings) {
+                                      flutter::Settings& settings) {
   // There are no ownership concerns here as all mappings are owned by the
   // embedder and not the engine.
   auto make_mapping_callback = [](const uint8_t* mapping, size_t size) {
@@ -271,7 +271,7 @@ void PopulateSnapshotMappingCallbacks(const FlutterProjectArgs* args,
     };
   };
 
-  if (blink::DartVM::IsRunningPrecompiledCode()) {
+  if (flutter::DartVM::IsRunningPrecompiledCode()) {
     if (SAFE_ACCESS(args, vm_snapshot_data_size, 0) != 0 &&
         SAFE_ACCESS(args, vm_snapshot_data, nullptr) != nullptr) {
       settings.vm_snapshot_data = make_mapping_callback(
@@ -363,14 +363,14 @@ FlutterEngineResult FlutterEngineRun(size_t version,
         SAFE_ACCESS(args, command_line_argv, nullptr));
   }
 
-  blink::Settings settings = shell::SettingsFromCommandLine(command_line);
+  flutter::Settings settings = shell::SettingsFromCommandLine(command_line);
 
   PopulateSnapshotMappingCallbacks(args, settings);
 
   settings.icu_data_path = icu_data_path;
   settings.assets_path = args->assets_path;
 
-  if (!blink::DartVM::IsRunningPrecompiledCode()) {
+  if (!flutter::DartVM::IsRunningPrecompiledCode()) {
     // Verify the assets path contains Dart 2 kernel assets.
     const std::string kApplicationKernelSnapshotFileName = "kernel_blob.bin";
     std::string application_kernel_path = fml::paths::JoinPaths(
@@ -402,7 +402,7 @@ FlutterEngineResult FlutterEngineRun(size_t version,
   if (SAFE_ACCESS(args, update_semantics_node_callback, nullptr) != nullptr) {
     update_semantics_nodes_callback =
         [ptr = args->update_semantics_node_callback,
-         user_data](blink::SemanticsNodeUpdates update) {
+         user_data](flutter::SemanticsNodeUpdates update) {
           for (const auto& value : update) {
             const auto& node = value.second;
             SkMatrix transform = static_cast<SkMatrix>(node.transform);
@@ -461,7 +461,7 @@ FlutterEngineResult FlutterEngineRun(size_t version,
       nullptr) {
     update_semantics_custom_actions_callback =
         [ptr = args->update_semantics_custom_action_callback,
-         user_data](blink::CustomAccessibilityActionUpdates actions) {
+         user_data](flutter::CustomAccessibilityActionUpdates actions) {
           for (const auto& value : actions) {
             const auto& action = value.second;
             const FlutterSemanticsCustomAction embedder_action = {
@@ -486,7 +486,7 @@ FlutterEngineResult FlutterEngineRun(size_t version,
   if (SAFE_ACCESS(args, platform_message_callback, nullptr) != nullptr) {
     platform_message_response_callback =
         [ptr = args->platform_message_callback,
-         user_data](fml::RefPtr<blink::PlatformMessage> message) {
+         user_data](fml::RefPtr<flutter::PlatformMessage> message) {
           auto handle = new FlutterPlatformMessageResponseHandle();
           const FlutterPlatformMessage incoming_message = {
               sizeof(FlutterPlatformMessage),  // struct_size
@@ -624,11 +624,11 @@ FlutterEngineResult FlutterEngineRun(size_t version,
   }
 
   run_configuration.AddAssetResolver(
-      std::make_unique<blink::DirectoryAssetBundle>(
+      std::make_unique<flutter::DirectoryAssetBundle>(
           fml::Duplicate(settings.assets_dir)));
 
   run_configuration.AddAssetResolver(
-      std::make_unique<blink::DirectoryAssetBundle>(fml::OpenDirectory(
+      std::make_unique<flutter::DirectoryAssetBundle>(fml::OpenDirectory(
           settings.assets_path.c_str(), false, fml::FilePermission::kRead)));
   if (!run_configuration.IsValid()) {
     return LOG_EMBEDDER_ERROR(kInvalidArguments);
@@ -660,7 +660,7 @@ FlutterEngineResult FlutterEngineSendWindowMetricsEvent(
     return LOG_EMBEDDER_ERROR(kInvalidArguments);
   }
 
-  blink::ViewportMetrics metrics;
+  flutter::ViewportMetrics metrics;
 
   metrics.physical_width = SAFE_ACCESS(flutter_metrics, width, 0.0);
   metrics.physical_height = SAFE_ACCESS(flutter_metrics, height, 0.0);
@@ -672,39 +672,39 @@ FlutterEngineResult FlutterEngineSendWindowMetricsEvent(
              : LOG_EMBEDDER_ERROR(kInvalidArguments);
 }
 
-// Returns the blink::PointerData::Change for the given FlutterPointerPhase.
-inline blink::PointerData::Change ToPointerDataChange(
+// Returns the flutter::PointerData::Change for the given FlutterPointerPhase.
+inline flutter::PointerData::Change ToPointerDataChange(
     FlutterPointerPhase phase) {
   switch (phase) {
     case kCancel:
-      return blink::PointerData::Change::kCancel;
+      return flutter::PointerData::Change::kCancel;
     case kUp:
-      return blink::PointerData::Change::kUp;
+      return flutter::PointerData::Change::kUp;
     case kDown:
-      return blink::PointerData::Change::kDown;
+      return flutter::PointerData::Change::kDown;
     case kMove:
-      return blink::PointerData::Change::kMove;
+      return flutter::PointerData::Change::kMove;
     case kAdd:
-      return blink::PointerData::Change::kAdd;
+      return flutter::PointerData::Change::kAdd;
     case kRemove:
-      return blink::PointerData::Change::kRemove;
+      return flutter::PointerData::Change::kRemove;
     case kHover:
-      return blink::PointerData::Change::kHover;
+      return flutter::PointerData::Change::kHover;
   }
-  return blink::PointerData::Change::kCancel;
+  return flutter::PointerData::Change::kCancel;
 }
 
-// Returns the blink::PointerData::SignalKind for the given
+// Returns the flutter::PointerData::SignalKind for the given
 // FlutterPointerSignaKind.
-inline blink::PointerData::SignalKind ToPointerDataSignalKind(
+inline flutter::PointerData::SignalKind ToPointerDataSignalKind(
     FlutterPointerSignalKind kind) {
   switch (kind) {
     case kFlutterPointerSignalKindNone:
-      return blink::PointerData::SignalKind::kNone;
+      return flutter::PointerData::SignalKind::kNone;
     case kFlutterPointerSignalKindScroll:
-      return blink::PointerData::SignalKind::kScroll;
+      return flutter::PointerData::SignalKind::kScroll;
   }
-  return blink::PointerData::SignalKind::kNone;
+  return flutter::PointerData::SignalKind::kNone;
 }
 
 FlutterEngineResult FlutterEngineSendPointerEvent(
@@ -715,17 +715,17 @@ FlutterEngineResult FlutterEngineSendPointerEvent(
     return LOG_EMBEDDER_ERROR(kInvalidArguments);
   }
 
-  auto packet = std::make_unique<blink::PointerDataPacket>(events_count);
+  auto packet = std::make_unique<flutter::PointerDataPacket>(events_count);
 
   const FlutterPointerEvent* current = pointers;
 
   for (size_t i = 0; i < events_count; ++i) {
-    blink::PointerData pointer_data;
+    flutter::PointerData pointer_data;
     pointer_data.Clear();
     pointer_data.time_stamp = SAFE_ACCESS(current, timestamp, 0);
     pointer_data.change = ToPointerDataChange(
         SAFE_ACCESS(current, phase, FlutterPointerPhase::kCancel));
-    pointer_data.kind = blink::PointerData::DeviceKind::kMouse;
+    pointer_data.kind = flutter::PointerData::DeviceKind::kMouse;
     pointer_data.physical_x = SAFE_ACCESS(current, x, 0.0);
     pointer_data.physical_y = SAFE_ACCESS(current, y, 0.0);
     pointer_data.device = SAFE_ACCESS(current, device, 0);
@@ -756,7 +756,7 @@ FlutterEngineResult FlutterEngineSendPlatformMessage(
     return LOG_EMBEDDER_ERROR(kInvalidArguments);
   }
 
-  auto message = fml::MakeRefCounted<blink::PlatformMessage>(
+  auto message = fml::MakeRefCounted<flutter::PlatformMessage>(
       flutter_message->channel,
       std::vector<uint8_t>(
           flutter_message->message,
@@ -872,7 +872,7 @@ FlutterEngineResult FlutterEngineDispatchSemanticsAction(
   if (engine == nullptr) {
     return LOG_EMBEDDER_ERROR(kInvalidArguments);
   }
-  auto engine_action = static_cast<blink::SemanticsAction>(action);
+  auto engine_action = static_cast<flutter::SemanticsAction>(action);
   if (!reinterpret_cast<shell::EmbedderEngine*>(engine)
            ->DispatchSemanticsAction(
                id, engine_action,

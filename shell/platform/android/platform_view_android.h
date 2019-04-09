@@ -27,12 +27,12 @@ class PlatformViewAndroid final : public PlatformView {
   // Creates a PlatformViewAndroid with no rendering surface for use with
   // background execution.
   PlatformViewAndroid(PlatformView::Delegate& delegate,
-                      blink::TaskRunners task_runners,
+                      flutter::TaskRunners task_runners,
                       fml::jni::JavaObjectWeakGlobalRef java_object);
 
   // Creates a PlatformViewAndroid with a rendering surface.
   PlatformViewAndroid(PlatformView::Delegate& delegate,
-                      blink::TaskRunners task_runners,
+                      flutter::TaskRunners task_runners,
                       fml::jni::JavaObjectWeakGlobalRef java_object,
                       bool use_software_rendering);
 
@@ -78,17 +78,17 @@ class PlatformViewAndroid final : public PlatformView {
   const std::unique_ptr<AndroidSurface> android_surface_;
   // We use id 0 to mean that no response is expected.
   int next_response_id_ = 1;
-  std::unordered_map<int, fml::RefPtr<blink::PlatformMessageResponse>>
+  std::unordered_map<int, fml::RefPtr<flutter::PlatformMessageResponse>>
       pending_responses_;
 
   // |shell::PlatformView|
   void UpdateSemantics(
-      blink::SemanticsNodeUpdates update,
-      blink::CustomAccessibilityActionUpdates actions) override;
+      flutter::SemanticsNodeUpdates update,
+      flutter::CustomAccessibilityActionUpdates actions) override;
 
   // |shell::PlatformView|
   void HandlePlatformMessage(
-      fml::RefPtr<blink::PlatformMessage> message) override;
+      fml::RefPtr<flutter::PlatformMessage> message) override;
 
   // |shell::PlatformView|
   void OnPreEngineRestart() const override;

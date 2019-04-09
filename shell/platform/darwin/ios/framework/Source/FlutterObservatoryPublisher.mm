@@ -42,7 +42,7 @@
   fml::scoped_nsobject<NSNetService> _netService;
 #endif  // TARGET_IPHONE_SIMULATOR
 
-  blink::DartServiceIsolate::CallbackHandle _callbackHandle;
+  flutter::DartServiceIsolate::CallbackHandle _callbackHandle;
   std::unique_ptr<fml::WeakPtrFactory<FlutterObservatoryPublisher>> _weakFactory;
 }
 
@@ -54,7 +54,7 @@
 
   fml::MessageLoop::EnsureInitializedForCurrentThread();
 
-  _callbackHandle = blink::DartServiceIsolate::AddServerStatusCallback(
+  _callbackHandle = flutter::DartServiceIsolate::AddServerStatusCallback(
       [weak = _weakFactory->GetWeakPtr(),
        runner = fml::MessageLoop::GetCurrent().GetTaskRunner()](const std::string& uri) {
         runner->PostTask([weak, uri]() {
@@ -81,7 +81,7 @@
 - (void)dealloc {
   [self stopService];
 
-  blink::DartServiceIsolate::RemoveServerStatusCallback(std::move(_callbackHandle));
+  flutter::DartServiceIsolate::RemoveServerStatusCallback(std::move(_callbackHandle));
   [super dealloc];
 }
 

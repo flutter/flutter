@@ -6,7 +6,7 @@
 
 #include <sstream>
 
-namespace blink {
+namespace flutter {
 
 Settings::Settings() = default;
 
@@ -54,4 +54,4 @@ std::string Settings::ToString() const {
   return stream.str();
 }
 
-}  // namespace blink
+}  // namespace flutter

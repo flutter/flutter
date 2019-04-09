@@ -11,7 +11,7 @@
 #include "third_party/tonic/dart_binding_macros.h"
 #include "third_party/tonic/dart_library_natives.h"
 
-namespace blink {
+namespace flutter {
 
 static void PictureRecorder_constructor(Dart_NativeArguments args) {
   DartCallConstructor(&PictureRecorder::Create, args);
@@ -60,4 +60,4 @@ fml::RefPtr<Picture> PictureRecorder::endRecording() {
   return picture;
 }
 
-}  // namespace blink
+}  // namespace flutter

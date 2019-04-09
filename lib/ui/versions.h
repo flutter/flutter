@@ -9,13 +9,13 @@ namespace tonic {
 class DartLibraryNatives;
 }  // namespace tonic
 
-namespace blink {
+namespace flutter {
 
 class Versions final {
  public:
   static void RegisterNatives(tonic::DartLibraryNatives* natives);
 };
 
-}  // namespace blink
+}  // namespace flutter
 
 #endif  // FLUTTER_LIB_UI_VERSIONS_H_

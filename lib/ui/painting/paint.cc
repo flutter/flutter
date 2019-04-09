@@ -13,7 +13,7 @@
 #include "third_party/tonic/typed_data/dart_byte_data.h"
 #include "third_party/tonic/typed_data/float32_list.h"
 
-namespace blink {
+namespace flutter {
 
 // Indices for 32bit values.
 constexpr int kIsAntiAliasIndex = 0;
@@ -202,11 +202,11 @@ Paint::Paint(Dart_Handle paint_objects, Dart_Handle paint_data) {
   }
 }
 
-}  // namespace blink
+}  // namespace flutter
 
 namespace tonic {
 
-blink::Paint DartConverter<blink::Paint>::FromArguments(
+flutter::Paint DartConverter<flutter::Paint>::FromArguments(
     Dart_NativeArguments args,
     int index,
     Dart_Handle& exception) {
@@ -216,14 +216,14 @@ blink::Paint DartConverter<blink::Paint>::FromArguments(
   Dart_Handle paint_data = Dart_GetNativeArgument(args, index + 1);
   FML_DCHECK(!LogIfError(paint_data));
 
-  return blink::Paint(paint_objects, paint_data);
+  return flutter::Paint(paint_objects, paint_data);
 }
 
-blink::PaintData DartConverter<blink::PaintData>::FromArguments(
+flutter::PaintData DartConverter<flutter::PaintData>::FromArguments(
     Dart_NativeArguments args,
     int index,
     Dart_Handle& exception) {
-  return blink::PaintData();
+  return flutter::PaintData();
 }
 
 }  // namespace tonic

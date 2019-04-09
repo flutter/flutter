@@ -4,10 +4,10 @@
 
 #include "flutter/lib/ui/window/platform_message_response.h"
 
-namespace blink {
+namespace flutter {
 
 PlatformMessageResponse::PlatformMessageResponse() = default;
 
 PlatformMessageResponse::~PlatformMessageResponse() = default;
 
-}  // namespace blink
+}  // namespace flutter

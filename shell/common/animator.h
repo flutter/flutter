@@ -33,7 +33,7 @@ class Animator final {
   };
 
   Animator(Delegate& delegate,
-           blink::TaskRunners task_runners,
+           flutter::TaskRunners task_runners,
            std::unique_ptr<VsyncWaiter> waiter);
 
   ~Animator();
@@ -68,7 +68,7 @@ class Animator final {
   const char* FrameParity();
 
   Delegate& delegate_;
-  blink::TaskRunners task_runners_;
+  flutter::TaskRunners task_runners_;
   std::shared_ptr<VsyncWaiter> waiter_;
 
   fml::TimePoint last_begin_frame_time_;

@@ -10,7 +10,7 @@
 #include "flutter/fml/memory/ref_counted.h"
 #include "flutter/fml/unique_fd.h"
 
-namespace blink {
+namespace flutter {
 
 class DirectoryAssetBundle : public AssetResolver {
  public:
@@ -22,16 +22,16 @@ class DirectoryAssetBundle : public AssetResolver {
   const fml::UniqueFD descriptor_;
   bool is_valid_ = false;
 
-  // |blink::AssetResolver|
+  // |flutter::AssetResolver|
   bool IsValid() const override;
 
-  // |blink::AssetResolver|
+  // |flutter::AssetResolver|
   std::unique_ptr<fml::Mapping> GetAsMapping(
       const std::string& asset_name) const override;
 
   FML_DISALLOW_COPY_AND_ASSIGN(DirectoryAssetBundle);
 };
 
-}  // namespace blink
+}  // namespace flutter
 
 #endif  // FLUTTER_ASSETS_DIRECTORY_ASSET_BUNDLE_H_

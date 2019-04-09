@@ -37,7 +37,7 @@ namespace shell {
 class Shell final : public PlatformView::Delegate,
                     public Animator::Delegate,
                     public Engine::Delegate,
-                    public blink::ServiceProtocol::Handler {
+                    public flutter::ServiceProtocol::Handler {
  public:
   template <class T>
   using CreateCallback = std::function<std::unique_ptr<T>(Shell&)>;
@@ -45,27 +45,27 @@ class Shell final : public PlatformView::Delegate,
   // Create a shell with the given task runners and settings. The isolate
   // snapshot will be shared with the snapshot of the service isolate.
   static std::unique_ptr<Shell> Create(
-      blink::TaskRunners task_runners,
-      blink::Settings settings,
+      flutter::TaskRunners task_runners,
+      flutter::Settings settings,
       CreateCallback<PlatformView> on_create_platform_view,
       CreateCallback<Rasterizer> on_create_rasterizer);
 
   // Creates a shell with the given task runners and settings. The isolate
   // snapshot is specified upfront.
   static std::unique_ptr<Shell> Create(
-      blink::TaskRunners task_runners,
-      blink::Settings settings,
-      fml::RefPtr<const blink::DartSnapshot> isolate_snapshot,
-      fml::RefPtr<const blink::DartSnapshot> shared_snapshot,
+      flutter::TaskRunners task_runners,
+      flutter::Settings settings,
+      fml::RefPtr<const flutter::DartSnapshot> isolate_snapshot,
+      fml::RefPtr<const flutter::DartSnapshot> shared_snapshot,
       CreateCallback<PlatformView> on_create_platform_view,
       CreateCallback<Rasterizer> on_create_rasterizer,
-      blink::DartVMRef vm);
+      flutter::DartVMRef vm);
 
   ~Shell();
 
-  const blink::Settings& GetSettings() const;
+  const flutter::Settings& GetSettings() const;
 
-  const blink::TaskRunners& GetTaskRunners() const;
+  const flutter::TaskRunners& GetTaskRunners() const;
 
   fml::WeakPtr<Rasterizer> GetRasterizer();
 
@@ -73,7 +73,7 @@ class Shell final : public PlatformView::Delegate,
 
   fml::WeakPtr<PlatformView> GetPlatformView();
 
-  blink::DartVM* GetDartVM();
+  flutter::DartVM* GetDartVM();
 
   bool IsSetup() const;
 
@@ -82,12 +82,12 @@ class Shell final : public PlatformView::Delegate,
 
  private:
   using ServiceProtocolHandler = std::function<bool(
-      const blink::ServiceProtocol::Handler::ServiceProtocolMap&,
+      const flutter::ServiceProtocol::Handler::ServiceProtocolMap&,
       rapidjson::Document&)>;
 
-  const blink::TaskRunners task_runners_;
-  const blink::Settings settings_;
-  blink::DartVMRef vm_;
+  const flutter::TaskRunners task_runners_;
+  const flutter::Settings settings_;
+  flutter::DartVMRef vm_;
   std::unique_ptr<PlatformView> platform_view_;  // on platform task runner
   std::unique_ptr<Engine> engine_;               // on UI task runner
   std::unique_ptr<Rasterizer> rasterizer_;       // on GPU task runner
@@ -102,17 +102,17 @@ class Shell final : public PlatformView::Delegate,
   bool is_setup_ = false;
   uint64_t next_pointer_flow_id_ = 0;
 
-  Shell(blink::TaskRunners task_runners, blink::Settings settings);
-  Shell(blink::DartVMRef vm,
-        blink::TaskRunners task_runners,
-        blink::Settings settings);
+  Shell(flutter::TaskRunners task_runners, flutter::Settings settings);
+  Shell(flutter::DartVMRef vm,
+        flutter::TaskRunners task_runners,
+        flutter::Settings settings);
 
   static std::unique_ptr<Shell> CreateShellOnPlatformThread(
-      blink::DartVMRef vm,
-      blink::TaskRunners task_runners,
-      blink::Settings settings,
-      fml::RefPtr<const blink::DartSnapshot> isolate_snapshot,
-      fml::RefPtr<const blink::DartSnapshot> shared_snapshot,
+      flutter::DartVMRef vm,
+      flutter::TaskRunners task_runners,
+      flutter::Settings settings,
+      fml::RefPtr<const flutter::DartSnapshot> isolate_snapshot,
+      fml::RefPtr<const flutter::DartSnapshot> shared_snapshot,
       Shell::CreateCallback<PlatformView> on_create_platform_view,
       Shell::CreateCallback<Rasterizer> on_create_rasterizer);
 
@@ -129,20 +129,20 @@ class Shell final : public PlatformView::Delegate,
 
   // |shell::PlatformView::Delegate|
   void OnPlatformViewSetViewportMetrics(
-      const blink::ViewportMetrics& metrics) override;
+      const flutter::ViewportMetrics& metrics) override;
 
   // |shell::PlatformView::Delegate|
   void OnPlatformViewDispatchPlatformMessage(
-      fml::RefPtr<blink::PlatformMessage> message) override;
+      fml::RefPtr<flutter::PlatformMessage> message) override;
 
   // |shell::PlatformView::Delegate|
   void OnPlatformViewDispatchPointerDataPacket(
-      std::unique_ptr<blink::PointerDataPacket> packet) override;
+      std::unique_ptr<flutter::PointerDataPacket> packet) override;
 
   // |shell::PlatformView::Delegate|
   void OnPlatformViewDispatchSemanticsAction(
       int32_t id,
-      blink::SemanticsAction action,
+      flutter::SemanticsAction action,
       std::vector<uint8_t> args) override;
 
   // |shell::PlatformView::Delegate|
@@ -179,14 +179,14 @@ class Shell final : public PlatformView::Delegate,
 
   // |shell::Engine::Delegate|
   void OnEngineUpdateSemantics(
-      blink::SemanticsNodeUpdates update,
-      blink::CustomAccessibilityActionUpdates actions) override;
+      flutter::SemanticsNodeUpdates update,
+      flutter::CustomAccessibilityActionUpdates actions) override;
 
   // |shell::Engine::Delegate|
   void OnEngineHandlePlatformMessage(
-      fml::RefPtr<blink::PlatformMessage> message) override;
+      fml::RefPtr<flutter::PlatformMessage> message) override;
 
-  void HandleEngineSkiaMessage(fml::RefPtr<blink::PlatformMessage> message);
+  void HandleEngineSkiaMessage(fml::RefPtr<flutter::PlatformMessage> message);
 
   // |shell::Engine::Delegate|
   void OnPreEngineRestart() override;
@@ -195,48 +195,48 @@ class Shell final : public PlatformView::Delegate,
   void UpdateIsolateDescription(const std::string isolate_name,
                                 int64_t isolate_port) override;
 
-  // |blink::ServiceProtocol::Handler|
+  // |flutter::ServiceProtocol::Handler|
   fml::RefPtr<fml::TaskRunner> GetServiceProtocolHandlerTaskRunner(
       fml::StringView method) const override;
 
-  // |blink::ServiceProtocol::Handler|
+  // |flutter::ServiceProtocol::Handler|
   bool HandleServiceProtocolMessage(
       fml::StringView method,  // one if the extension names specified above.
       const ServiceProtocolMap& params,
       rapidjson::Document& response) override;
 
-  // |blink::ServiceProtocol::Handler|
-  blink::ServiceProtocol::Handler::Description GetServiceProtocolDescription()
+  // |flutter::ServiceProtocol::Handler|
+  flutter::ServiceProtocol::Handler::Description GetServiceProtocolDescription()
       const override;
 
   // Service protocol handler
   bool OnServiceProtocolScreenshot(
-      const blink::ServiceProtocol::Handler::ServiceProtocolMap& params,
+      const flutter::ServiceProtocol::Handler::ServiceProtocolMap& params,
       rapidjson::Document& response);
 
   // Service protocol handler
   bool OnServiceProtocolScreenshotSKP(
-      const blink::ServiceProtocol::Handler::ServiceProtocolMap& params,
+      const flutter::ServiceProtocol::Handler::ServiceProtocolMap& params,
       rapidjson::Document& response);
 
   // Service protocol handler
   bool OnServiceProtocolRunInView(
-      const blink::ServiceProtocol::Handler::ServiceProtocolMap& params,
+      const flutter::ServiceProtocol::Handler::ServiceProtocolMap& params,
       rapidjson::Document& response);
 
   // Service protocol handler
   bool OnServiceProtocolFlushUIThreadTasks(
-      const blink::ServiceProtocol::Handler::ServiceProtocolMap& params,
+      const flutter::ServiceProtocol::Handler::ServiceProtocolMap& params,
       rapidjson::Document& response);
 
   // Service protocol handler
   bool OnServiceProtocolSetAssetBundlePath(
-      const blink::ServiceProtocol::Handler::ServiceProtocolMap& params,
+      const flutter::ServiceProtocol::Handler::ServiceProtocolMap& params,
       rapidjson::Document& response);
 
   // Service protocol handler
   bool OnServiceProtocolGetDisplayRefreshRate(
-      const blink::ServiceProtocol::Handler::ServiceProtocolMap& params,
+      const flutter::ServiceProtocol::Handler::ServiceProtocolMap& params,
       rapidjson::Document& response);
 
   FML_DISALLOW_COPY_AND_ASSIGN(Shell);

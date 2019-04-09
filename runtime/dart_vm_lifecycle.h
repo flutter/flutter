@@ -12,7 +12,7 @@
 #include "flutter/runtime/dart_vm.h"
 #include "flutter/runtime/service_protocol.h"
 
-namespace blink {
+namespace flutter {
 
 // A strong reference to the Dart VM. There can only be one VM running in the
 // process at any given time. A reference to the VM may only be obtained via the
@@ -77,6 +77,6 @@ class DartVMRef {
   FML_DISALLOW_COPY_AND_ASSIGN(DartVMRef);
 };
 
-}  // namespace blink
+}  // namespace flutter
 
 #endif  // FLUTTER_RUNTIME_DART_VM_LIFECYCLE_H_

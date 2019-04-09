@@ -20,7 +20,7 @@ constexpr fml::TimeDelta kNotifyIdleTaskWaitTime =
 }  // namespace
 
 Animator::Animator(Delegate& delegate,
-                   blink::TaskRunners task_runners,
+                   flutter::TaskRunners task_runners,
                    std::unique_ptr<VsyncWaiter> waiter)
     : delegate_(delegate),
       task_runners_(std::move(task_runners)),

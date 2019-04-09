@@ -4,7 +4,7 @@
 
 #include "flutter/lib/ui/window/viewport_metrics.h"
 
-namespace blink {
+namespace flutter {
 ViewportMetrics::ViewportMetrics() = default;
 
 ViewportMetrics::ViewportMetrics(double p_device_pixel_ratio,
@@ -32,4 +32,4 @@ ViewportMetrics::ViewportMetrics(double p_device_pixel_ratio,
 
 ViewportMetrics::ViewportMetrics(const ViewportMetrics& other) = default;
 
-}  // namespace blink
+}  // namespace flutter

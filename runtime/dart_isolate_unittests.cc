@@ -15,7 +15,7 @@
 #include "flutter/testing/thread_test.h"
 #include "third_party/tonic/scopes/dart_isolate_scope.h"
 
-namespace blink {
+namespace flutter {
 namespace testing {
 
 using DartIsolateTest = RuntimeTest;
@@ -88,7 +88,7 @@ class AutoIsolateShutdown {
  public:
   AutoIsolateShutdown() = default;
 
-  AutoIsolateShutdown(std::shared_ptr<blink::DartIsolate> isolate,
+  AutoIsolateShutdown(std::shared_ptr<flutter::DartIsolate> isolate,
                       fml::RefPtr<fml::TaskRunner> runner)
       : isolate_(std::move(isolate)), runner_(std::move(runner)) {}
 
@@ -131,13 +131,13 @@ class AutoIsolateShutdown {
     return true;
   }
 
-  blink::DartIsolate* get() {
+  flutter::DartIsolate* get() {
     FML_CHECK(isolate_);
     return isolate_.get();
   }
 
  private:
-  std::shared_ptr<blink::DartIsolate> isolate_;
+  std::shared_ptr<flutter::DartIsolate> isolate_;
   fml::RefPtr<fml::TaskRunner> runner_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(AutoIsolateShutdown);
@@ -307,4 +307,4 @@ TEST_F(DartIsolateTest, CanRegisterNativeCallback) {
 }
 
 }  // namespace testing
-}  // namespace blink
+}  // namespace flutter

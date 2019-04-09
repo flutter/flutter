@@ -13,7 +13,7 @@
 #include "flutter/fml/memory/ref_counted.h"
 #include "flutter/runtime/dart_snapshot_buffer.h"
 
-namespace blink {
+namespace flutter {
 
 class DartSnapshot : public fml::RefCountedThreadSafe<DartSnapshot> {
  public:
@@ -56,6 +56,6 @@ class DartSnapshot : public fml::RefCountedThreadSafe<DartSnapshot> {
   FML_DISALLOW_COPY_AND_ASSIGN(DartSnapshot);
 };
 
-}  // namespace blink
+}  // namespace flutter
 
 #endif  // FLUTTER_RUNTIME_DART_SNAPSHOT_H_

@@ -41,7 +41,7 @@ using tonic::DartConverter;
 using tonic::LogIfError;
 using tonic::ToDart;
 
-namespace blink {
+namespace flutter {
 
 #define REGISTER_FUNCTION(name, count) {"" #name, name, count, true},
 #define DECLARE_FUNCTION(name, count) \
@@ -344,4 +344,4 @@ void GetCallbackFromHandle(Dart_NativeArguments args) {
   Dart_SetReturnValue(args, DartCallbackCache::GetCallback(handle));
 }
 
-}  // namespace blink
+}  // namespace flutter

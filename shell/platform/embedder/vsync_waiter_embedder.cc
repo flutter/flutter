@@ -7,7 +7,7 @@
 namespace shell {
 
 VsyncWaiterEmbedder::VsyncWaiterEmbedder(VsyncCallback vsync_callback,
-                                         blink::TaskRunners task_runners)
+                                         flutter::TaskRunners task_runners)
     : VsyncWaiter(std::move(task_runners)), vsync_callback_(vsync_callback) {
   FML_DCHECK(vsync_callback_);
 }

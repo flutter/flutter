@@ -6,7 +6,7 @@
 #include "flutter/runtime/dart_vm_lifecycle.h"
 #include "gtest/gtest.h"
 
-namespace blink {
+namespace flutter {
 
 TEST(DartVM, SimpleInitialization) {
   Settings settings = {};
@@ -32,4 +32,4 @@ TEST(DartVM, SimpleIsolateNameServer) {
   ASSERT_TRUE(ns->RemoveIsolateNameMapping("foobar"));
 }
 
-}  // namespace blink
+}  // namespace flutter

@@ -14,7 +14,7 @@ namespace tonic {
 class DartLibraryNatives;
 }  // namespace tonic
 
-namespace blink {
+namespace flutter {
 
 class Vertices : public RefCountedDartWrappable<Vertices> {
   DEFINE_WRAPPERTYPEINFO();
@@ -41,6 +41,6 @@ class Vertices : public RefCountedDartWrappable<Vertices> {
   sk_sp<SkVertices> vertices_;
 };
 
-}  // namespace blink
+}  // namespace flutter
 
 #endif  // FLUTTER_LIB_UI_PAINTING_VERTICES_H_

@@ -7,7 +7,7 @@
 #include "flutter/runtime/dart_vm.h"
 #include "flutter/testing/testing.h"
 
-namespace blink {
+namespace flutter {
 namespace testing {
 
 RuntimeTest::RuntimeTest()
@@ -108,4 +108,4 @@ void RuntimeTest::AddNativeCallback(std::string name,
 }
 
 }  // namespace testing
-}  // namespace blink
+}  // namespace flutter

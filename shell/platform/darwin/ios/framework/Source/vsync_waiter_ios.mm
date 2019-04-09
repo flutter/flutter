@@ -27,7 +27,7 @@
 
 namespace shell {
 
-VsyncWaiterIOS::VsyncWaiterIOS(blink::TaskRunners task_runners)
+VsyncWaiterIOS::VsyncWaiterIOS(flutter::TaskRunners task_runners)
     : VsyncWaiter(std::move(task_runners)),
       client_([[VSyncClient alloc] initWithTaskRunner:task_runners_.GetUITaskRunner()
                                              callback:std::bind(&VsyncWaiterIOS::FireCallback,

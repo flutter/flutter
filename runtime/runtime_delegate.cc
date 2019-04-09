@@ -4,8 +4,8 @@
 
 #include "flutter/runtime/runtime_delegate.h"
 
-namespace blink {
+namespace flutter {
 
 RuntimeDelegate::~RuntimeDelegate() = default;
 
-}  // namespace blink
+}  // namespace flutter

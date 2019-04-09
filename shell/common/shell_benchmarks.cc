@@ -16,7 +16,7 @@ static void StartupAndShutdownShell(benchmark::State& state,
   std::unique_ptr<ThreadHost> thread_host;
   {
     benchmarking::ScopedPauseTiming pause(state, !measure_startup);
-    blink::Settings settings = {};
+    flutter::Settings settings = {};
     settings.task_observer_add = [](intptr_t, fml::closure) {};
     settings.task_observer_remove = [](intptr_t) {};
 
@@ -26,7 +26,7 @@ static void StartupAndShutdownShell(benchmark::State& state,
                                  ThreadHost::Type::GPU | ThreadHost::Type::IO |
                                  ThreadHost::Type::UI);
 
-    blink::TaskRunners task_runners(
+    flutter::TaskRunners task_runners(
         "test", thread_host->platform_thread->GetTaskRunner(),
         thread_host->gpu_thread->GetTaskRunner(),
         thread_host->ui_thread->GetTaskRunner(),

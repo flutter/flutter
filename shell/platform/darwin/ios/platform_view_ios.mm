@@ -19,7 +19,8 @@
 
 namespace shell {
 
-PlatformViewIOS::PlatformViewIOS(PlatformView::Delegate& delegate, blink::TaskRunners task_runners)
+PlatformViewIOS::PlatformViewIOS(PlatformView::Delegate& delegate,
+                                 flutter::TaskRunners task_runners)
     : PlatformView(delegate, std::move(task_runners)) {
 #if !TARGET_IPHONE_SIMULATOR
   gl_context_ = std::make_shared<IOSGLContext>();
@@ -33,7 +34,7 @@ PlatformMessageRouter& PlatformViewIOS::GetPlatformMessageRouter() {
 }
 
 // |shell::PlatformView|
-void PlatformViewIOS::HandlePlatformMessage(fml::RefPtr<blink::PlatformMessage> message) {
+void PlatformViewIOS::HandlePlatformMessage(fml::RefPtr<flutter::PlatformMessage> message) {
   platform_message_router_.HandlePlatformMessage(std::move(message));
 }
 
@@ -116,8 +117,8 @@ void PlatformViewIOS::SetAccessibilityFeatures(int32_t flags) {
 }
 
 // |shell::PlatformView|
-void PlatformViewIOS::UpdateSemantics(blink::SemanticsNodeUpdates update,
-                                      blink::CustomAccessibilityActionUpdates actions) {
+void PlatformViewIOS::UpdateSemantics(flutter::SemanticsNodeUpdates update,
+                                      flutter::CustomAccessibilityActionUpdates actions) {
   FML_DCHECK(owner_controller_);
   if (accessibility_bridge_) {
     accessibility_bridge_->UpdateSemantics(std::move(update), std::move(actions));

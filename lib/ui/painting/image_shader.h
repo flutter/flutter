@@ -18,7 +18,7 @@ namespace tonic {
 class DartLibraryNatives;
 }  // namespace tonic
 
-namespace blink {
+namespace flutter {
 
 class ImageShader : public Shader {
   DEFINE_WRAPPERTYPEINFO();
@@ -39,6 +39,6 @@ class ImageShader : public Shader {
   ImageShader();
 };
 
-}  // namespace blink
+}  // namespace flutter
 
 #endif  // FLUTTER_LIB_UI_PAINTING_IMAGE_SHADER_H_

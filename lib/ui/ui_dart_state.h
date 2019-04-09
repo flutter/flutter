@@ -23,7 +23,7 @@
 #include "third_party/tonic/dart_persistent_value.h"
 #include "third_party/tonic/dart_state.h"
 
-namespace blink {
+namespace flutter {
 class FontSelector;
 class Window;
 
@@ -112,6 +112,6 @@ class UIDartState : public tonic::DartState {
   void AddOrRemoveTaskObserver(bool add);
 };
 
-}  // namespace blink
+}  // namespace flutter
 
 #endif  // FLUTTER_LIB_UI_UI_DART_STATE_H_

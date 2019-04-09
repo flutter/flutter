@@ -33,7 +33,7 @@ extern const intptr_t kPlatformStrongDillSize;
 #endif
 }
 
-FlutterMain::FlutterMain(blink::Settings settings)
+FlutterMain::FlutterMain(flutter::Settings settings)
     : settings_(std::move(settings)) {}
 
 FlutterMain::~FlutterMain() = default;
@@ -46,7 +46,7 @@ FlutterMain& FlutterMain::Get() {
   return *g_flutter_main;
 }
 
-const blink::Settings& FlutterMain::GetSettings() const {
+const flutter::Settings& FlutterMain::GetSettings() const {
   return settings_;
 }
 
@@ -71,15 +71,15 @@ void FlutterMain::Init(JNIEnv* env,
   // Restore the callback cache.
   // TODO(chinmaygarde): Route all cache file access through FML and remove this
   // setter.
-  blink::DartCallbackCache::SetCachePath(
+  flutter::DartCallbackCache::SetCachePath(
       fml::jni::JavaStringToString(env, appStoragePath));
 
   fml::paths::InitializeAndroidCachesPath(
       fml::jni::JavaStringToString(env, engineCachesPath));
 
-  blink::DartCallbackCache::LoadCacheFromDisk();
+  flutter::DartCallbackCache::LoadCacheFromDisk();
 
-  if (!blink::DartVM::IsRunningPrecompiledCode()) {
+  if (!flutter::DartVM::IsRunningPrecompiledCode()) {
     // Check to see if the appropriate kernel files are present and configure
     // settings accordingly.
     auto application_kernel_path =
@@ -121,7 +121,7 @@ static void RecordStartTimestamp(JNIEnv* env,
                                  jlong initTimeMillis) {
   int64_t initTimeMicros =
       static_cast<int64_t>(initTimeMillis) * static_cast<int64_t>(1000);
-  blink::engine_main_enter_ts = Dart_TimelineGetMicros() - initTimeMicros;
+  flutter::engine_main_enter_ts = Dart_TimelineGetMicros() - initTimeMicros;
 }
 
 bool FlutterMain::Register(JNIEnv* env) {

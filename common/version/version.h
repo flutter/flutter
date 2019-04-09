@@ -5,7 +5,7 @@
 #ifndef FLUTTER_COMMON_VERSION_VERSION_H_
 #define FLUTTER_COMMON_VERSION_VERSION_H_
 
-namespace blink {
+namespace flutter {
 
 const char* GetFlutterEngineVersion();
 
@@ -13,6 +13,6 @@ const char* GetSkiaVersion();
 
 const char* GetDartVersion();
 
-}  // namespace blink
+}  // namespace flutter
 
 #endif  // FLUTTER_COMMON_VERSION_VERSION_H_

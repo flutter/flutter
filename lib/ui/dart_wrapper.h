@@ -8,7 +8,7 @@
 #include "flutter/fml/memory/ref_counted.h"
 #include "third_party/tonic/dart_wrappable.h"
 
-namespace blink {
+namespace flutter {
 
 template <typename T>
 class RefCountedDartWrappable : public fml::RefCountedThreadSafe<T>,
@@ -23,6 +23,6 @@ class RefCountedDartWrappable : public fml::RefCountedThreadSafe<T>,
   }
 };
 
-}  // namespace blink
+}  // namespace flutter
 
 #endif  // FLUTTER_LIB_UI_DART_WRAPPER_H_

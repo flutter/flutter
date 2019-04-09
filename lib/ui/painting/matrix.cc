@@ -6,7 +6,7 @@
 
 #include "flutter/fml/logging.h"
 
-namespace blink {
+namespace flutter {
 
 // Mappings from SkMatrix-index to input-index.
 static const int kSkMatrixIndexToMatrix4Index[] = {
@@ -38,4 +38,4 @@ tonic::Float64List ToMatrix4(const SkMatrix& sk_matrix) {
   return matrix4;
 }
 
-}  // namespace blink
+}  // namespace flutter

@@ -4,7 +4,7 @@
 
 #include "flutter/common/version/version.h"
 
-namespace blink {
+namespace flutter {
 
 const char* GetFlutterEngineVersion() {
   return FLUTTER_ENGINE_VERSION;
@@ -18,4 +18,4 @@ const char* GetDartVersion() {
   return DART_VERSION;
 }
 
-}  // namespace blink
+}  // namespace flutter

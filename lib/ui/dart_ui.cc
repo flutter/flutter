@@ -38,7 +38,7 @@
 
 using tonic::ToDart;
 
-namespace blink {
+namespace flutter {
 namespace {
 
 static tonic::DartLibraryNatives* g_natives;
@@ -117,4 +117,4 @@ void DartUI::InitForIsolate(bool is_root_isolate) {
   }
 }
 
-}  // namespace blink
+}  // namespace flutter

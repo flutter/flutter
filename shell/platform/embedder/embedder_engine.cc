@@ -11,8 +11,8 @@ namespace shell {
 
 EmbedderEngine::EmbedderEngine(
     std::unique_ptr<EmbedderThreadHost> thread_host,
-    blink::TaskRunners task_runners,
-    blink::Settings settings,
+    flutter::TaskRunners task_runners,
+    flutter::Settings settings,
     Shell::CreateCallback<PlatformView> on_create_platform_view,
     Shell::CreateCallback<Rasterizer> on_create_rasterizer,
     EmbedderExternalTextureGL::ExternalTextureCallback
@@ -74,7 +74,7 @@ bool EmbedderEngine::Run(RunConfiguration run_configuration) {
   return true;
 }
 
-bool EmbedderEngine::SetViewportMetrics(blink::ViewportMetrics metrics) {
+bool EmbedderEngine::SetViewportMetrics(flutter::ViewportMetrics metrics) {
   if (!IsValid()) {
     return false;
   }
@@ -89,7 +89,7 @@ bool EmbedderEngine::SetViewportMetrics(blink::ViewportMetrics metrics) {
 }
 
 bool EmbedderEngine::DispatchPointerDataPacket(
-    std::unique_ptr<blink::PointerDataPacket> packet) {
+    std::unique_ptr<flutter::PointerDataPacket> packet) {
   if (!IsValid() || !packet) {
     return false;
   }
@@ -110,7 +110,7 @@ bool EmbedderEngine::DispatchPointerDataPacket(
 }
 
 bool EmbedderEngine::SendPlatformMessage(
-    fml::RefPtr<blink::PlatformMessage> message) {
+    fml::RefPtr<flutter::PlatformMessage> message) {
   if (!IsValid() || !message) {
     return false;
   }
@@ -178,7 +178,7 @@ bool EmbedderEngine::SetAccessibilityFeatures(int32_t flags) {
 }
 
 bool EmbedderEngine::DispatchSemanticsAction(int id,
-                                             blink::SemanticsAction action,
+                                             flutter::SemanticsAction action,
                                              std::vector<uint8_t> args) {
   if (!IsValid()) {
     return false;

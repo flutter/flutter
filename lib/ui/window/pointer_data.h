@@ -7,7 +7,7 @@
 
 #include <stdint.h>
 
-namespace blink {
+namespace flutter {
 
 // This structure is unpacked by hooks.dart.
 struct alignas(8) PointerData {
@@ -64,6 +64,6 @@ struct alignas(8) PointerData {
   void Clear();
 };
 
-}  // namespace blink
+}  // namespace flutter
 
 #endif  // FLUTTER_LIB_UI_WINDOW_POINTER_DATA_H_

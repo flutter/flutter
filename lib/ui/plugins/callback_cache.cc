@@ -19,7 +19,7 @@ using rapidjson::StringBuffer;
 using rapidjson::Writer;
 using tonic::ToDart;
 
-namespace blink {
+namespace flutter {
 
 static const char* kHandleKey = "handle";
 static const char* kRepresentationKey = "representation";
@@ -192,4 +192,4 @@ Dart_Handle DartCallbackCache::LookupDartClosure(
   return closure;
 }
 
-}  // namespace blink
+}  // namespace flutter

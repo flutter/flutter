@@ -20,7 +20,7 @@
 #include "rapidjson/document.h"
 #include "rapidjson/stringbuffer.h"
 
-namespace blink {
+namespace flutter {
 class Scene;
 class RuntimeDelegate;
 class View;
@@ -149,31 +149,31 @@ class RuntimeController final : public WindowClient {
 
   bool FlushRuntimeStateToIsolate();
 
-  // |blink::WindowClient|
+  // |flutter::WindowClient|
   std::string DefaultRouteName() override;
 
-  // |blink::WindowClient|
+  // |flutter::WindowClient|
   void ScheduleFrame() override;
 
-  // |blink::WindowClient|
+  // |flutter::WindowClient|
   void Render(Scene* scene) override;
 
-  // |blink::WindowClient|
+  // |flutter::WindowClient|
   void UpdateSemantics(SemanticsUpdate* update) override;
 
-  // |blink::WindowClient|
+  // |flutter::WindowClient|
   void HandlePlatformMessage(fml::RefPtr<PlatformMessage> message) override;
 
-  // |blink::WindowClient|
+  // |flutter::WindowClient|
   FontCollection& GetFontCollection() override;
 
-  // |blink::WindowClient|
+  // |flutter::WindowClient|
   void UpdateIsolateDescription(const std::string isolate_name,
                                 int64_t isolate_port) override;
 
   FML_DISALLOW_COPY_AND_ASSIGN(RuntimeController);
 };
 
-}  // namespace blink
+}  // namespace flutter
 
 #endif  // FLUTTER_RUNTIME_RUNTIME_CONTROLLER_H_

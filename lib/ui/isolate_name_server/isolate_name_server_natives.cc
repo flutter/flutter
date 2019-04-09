@@ -10,7 +10,7 @@
 #include "third_party/tonic/dart_binding_macros.h"
 #include "third_party/tonic/dart_library_natives.h"
 
-namespace blink {
+namespace flutter {
 
 Dart_Handle IsolateNameServerNatives::LookupPortByName(
     const std::string& name) {
@@ -67,4 +67,4 @@ void IsolateNameServerNatives::RegisterNatives(
   natives->Register({FOR_EACH_BINDING(DART_REGISTER_NATIVE_STATIC_)});
 }
 
-}  // namespace blink
+}  // namespace flutter
