@@ -120,7 +120,7 @@ class ExpansionPanelRadio extends ExpansionPanel {
 /// A material expansion panel list that lays out its children and animates
 /// expansions.
 ///
-/// {@tool snippet --template=stateful_widget_material}
+/// {@tool snippet --template=stateful_widget_scaffold}
 ///
 /// Here is a simple example of how to implement ExpansionPanelList.
 ///
@@ -221,7 +221,7 @@ class ExpansionPanelList extends StatefulWidget {
   /// arguments must not be null. The [children] objects must be instances
   /// of [ExpansionPanelRadio].
   ///
-  /// {@tool snippet --template=stateful_widget_material}
+  /// {@tool snippet --template=stateful_widget_scaffold}
   ///
   /// Here is a simple example of how to implement ExpansionPanelList.radio.
   ///
