@@ -724,7 +724,7 @@ class FlutterDriver {
   /// [getFlagList]: https://github.com/dart-lang/sdk/blob/master/runtime/vm/service/service.md#getflaglist
   Future<List<Map<String, dynamic>>> getVmFlags() async {
     final Map<String, dynamic> result = await _peer.sendRequest('getFlagList');
-    return result['flags'].cast<Map<String,dynamic>>();
+    return result != null ? result['flags'].cast<Map<String,dynamic>>() : <Map<String, dynamic>>[];
   }
 
   /// Starts recording performance traces.
