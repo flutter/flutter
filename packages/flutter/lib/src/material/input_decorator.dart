@@ -809,10 +809,6 @@ class _RenderDecoration extends RenderBox {
     return box == null ? 0.0 : box.getMaxIntrinsicWidth(height);
   }
 
-  static double _minHeight(RenderBox box, double width) {
-    return box == null ? 0.0 : box.getMinIntrinsicHeight(width);
-  }
-
   static Size _boxSize(RenderBox box) => box == null ? Size.zero : box.size;
 
   static BoxParentData _boxParentData(RenderBox box) => box.parentData;
