@@ -1807,9 +1807,6 @@ dart:io,::,get:_OUTGOING_BUFFER_SIZE
 dart:io,::,_getHttpVersion
 dart:io,::,_setupHooks
 dart:io,::,_throwOnBadPort
-dart:mozart.internal,Mozart,offerServiceProvider
-dart:mozart.internal,Mozart,_offerServiceProvider
-dart:mozart.internal,MozartStartupInfo,takeViewContainer
 dart:ui,TextBaseline,get:index
 dart:ui,StrokeCap,get:index
 dart:ui,BlurStyle,get:index
