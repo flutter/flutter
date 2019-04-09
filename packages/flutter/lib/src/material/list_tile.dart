@@ -181,12 +181,60 @@ enum ListTileControlAffinity {
 ///
 /// {@tool sample}
 ///
-/// Here is a simple tile with an icon and some text.
+/// This example uses a [ListView] to demonstrate different configurations of
+/// [ListTile]s in [Card]s.
+///
+/// ![Different variations of ListTile](https://flutter.github.io/assets-for-api-docs/assets/material/list_tile.png)
 ///
 /// ```dart
-/// ListTile(
-///   leading: const Icon(Icons.event_seat),
-///   title: const Text('The seat for the narrator'),
+/// ListView(
+///   children: const <Widget>[
+///     Card(child: ListTile(title: Text('One-line ListTile'))),
+///     Card(
+///       child: ListTile(
+///         leading: FlutterLogo(),
+///         title: Text('One-line with leading widget'),
+///       ),
+///     ),
+///     Card(
+///       child: ListTile(
+///         title: Text('One-line with trailing widget'),
+///         trailing: Icon(Icons.more_vert),
+///       ),
+///     ),
+///     Card(
+///       child: ListTile(
+///         leading: FlutterLogo(),
+///         title: Text('One-line with both widgets'),
+///         trailing: Icon(Icons.more_vert),
+///       ),
+///     ),
+///     Card(
+///       child: ListTile(
+///         title: Text('One-line dense ListTile'),
+///         dense: true,
+///       ),
+///     ),
+///     Card(
+///       child: ListTile(
+///         leading: FlutterLogo(size: 56.0),
+///         title: Text('Two-line ListTile'),
+///         subtitle: Text('Here is a second line'),
+///         trailing: Icon(Icons.more_vert),
+///       ),
+///     ),
+///     Card(
+///       child: ListTile(
+///         leading: FlutterLogo(size: 72.0),
+///         title: Text('Three-line ListTile'),
+///         subtitle: Text(
+///           'A sufficiently long subtitle warrants three lines.'
+///         ),
+///         trailing: Icon(Icons.more_vert),
+///         isThreeLine: true,
+///       ),
+///     ),
+///   ],
 /// )
 /// ```
 /// {@end-tool}
@@ -244,6 +292,301 @@ enum ListTileControlAffinity {
 ///   title: Text('title'),
 ///   dense: false,
 /// ),
+/// ```
+/// {@end-tool}
+///
+/// ## The ListTile layout isn't exactly what I want
+///
+/// If the way ListTile pads and positions its elements isn't quite what
+/// you're looking for, it's easy to create custom list items with a
+/// combination of other widgets, such as [Row]s and [Column]s.
+///
+/// {@tool snippet --template=stateless_widget_material}
+///
+/// Here is an example of a custom list item that resembles a Youtube related
+/// video list item created with [Expanded] and [Container] widgets.
+///
+/// ![Custom list item a](https://flutter.github.io/assets-for-api-docs/assets/widgets/custom_list_item_a.png)
+///
+/// ```dart preamble
+/// class CustomListItem extends StatelessWidget {
+///   const CustomListItem({
+///     this.thumbnail,
+///     this.title,
+///     this.user,
+///     this.viewCount,
+///   });
+///
+///   final Widget thumbnail;
+///   final String title;
+///   final String user;
+///   final int viewCount;
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return Padding(
+///       padding: const EdgeInsets.symmetric(vertical: 5.0),
+///       child: Row(
+///         crossAxisAlignment: CrossAxisAlignment.start,
+///         children: <Widget>[
+///           Expanded(
+///             flex: 2,
+///             child: thumbnail,
+///           ),
+///           Expanded(
+///             flex: 3,
+///             child: _VideoDescription(
+///               title: title,
+///               user: user,
+///               viewCount: viewCount,
+///             ),
+///           ),
+///           const Icon(
+///             Icons.more_vert,
+///             size: 16.0,
+///           ),
+///         ],
+///       ),
+///     );
+///   }
+/// }
+///
+/// class _VideoDescription extends StatelessWidget {
+///   const _VideoDescription({
+///     Key key,
+///     this.title,
+///     this.user,
+///     this.viewCount,
+///   }) : super(key: key);
+///
+///   final String title;
+///   final String user;
+///   final int viewCount;
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return Padding(
+///       padding: const EdgeInsets.fromLTRB(5.0, 0.0, 0.0, 0.0),
+///       child: Column(
+///         crossAxisAlignment: CrossAxisAlignment.start,
+///         children: <Widget>[
+///           Text(
+///             title,
+///             style: const TextStyle(
+///               fontWeight: FontWeight.w500,
+///               fontSize: 14.0,
+///             ),
+///           ),
+///           const Padding(padding: EdgeInsets.symmetric(vertical: 2.0)),
+///           Text(
+///             user,
+///             style: const TextStyle(fontSize: 10.0),
+///           ),
+///           const Padding(padding: EdgeInsets.symmetric(vertical: 1.0)),
+///           Text(
+///             '$viewCount views',
+///             style: const TextStyle(fontSize: 10.0),
+///           ),
+///         ],
+///       ),
+///     );
+///   }
+/// }
+/// ```
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///  return ListView(
+///    padding: const EdgeInsets.all(8.0),
+///    itemExtent: 106.0,
+///    children: <CustomListItem>[
+///      CustomListItem(
+///        user: 'Flutter',
+///        viewCount: 999000,
+///        thumbnail: Container(
+///          decoration: const BoxDecoration(color: Colors.blue),
+///        ),
+///        title: 'The Flutter YouTube Channel',
+///      ),
+///      CustomListItem(
+///        user: 'Dash',
+///        viewCount: 884000,
+///        thumbnail: Container(
+///          decoration: const BoxDecoration(color: Colors.yellow),
+///        ),
+///        title: 'Announcing Flutter 1.0',
+///      ),
+///    ],
+///  );
+/// }
+/// ```
+/// {@end-tool}
+///
+/// {@tool snippet --template=stateless_widget_material}
+///
+/// Here is another example of an article list item with multi-line titles and
+/// subtitles. It utilizes [Row]s and [Column]s, as well as [Expanded] and
+/// [AspectRatio] widgets to organize its layout.
+///
+/// ![Custom list item b](https://flutter.github.io/assets-for-api-docs/assets/widgets/custom_list_item_b.png)
+///
+/// ```dart preamble
+/// class _ArticleDescription extends StatelessWidget {
+///   _ArticleDescription({
+///     Key key,
+///     this.title,
+///     this.subtitle,
+///     this.author,
+///     this.publishDate,
+///     this.readDuration,
+///   }) : super(key: key);
+///
+///   final String title;
+///   final String subtitle;
+///   final String author;
+///   final String publishDate;
+///   final String readDuration;
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return Column(
+///       crossAxisAlignment: CrossAxisAlignment.start,
+///       children: <Widget>[
+///         Expanded(
+///           flex: 3,
+///           child: Column(
+///             crossAxisAlignment: CrossAxisAlignment.start,
+///             children: <Widget>[
+///               Text(
+///                 '$title',
+///                 maxLines: 1,
+///                 overflow: TextOverflow.ellipsis,
+///                 style: const TextStyle(
+///                   fontWeight: FontWeight.bold,
+///                 ),
+///               ),
+///               const Padding(padding: EdgeInsets.only(bottom: 2.0)),
+///               Text(
+///                 '$subtitle',
+///                 maxLines: 3,
+///                 overflow: TextOverflow.ellipsis,
+///                 style: const TextStyle(
+///                   fontSize: 12.0,
+///                   color: Colors.black54,
+///                 ),
+///               ),
+///             ],
+///           ),
+///         ),
+///         Expanded(
+///           flex: 2,
+///           child: Column(
+///             crossAxisAlignment: CrossAxisAlignment.start,
+///             mainAxisAlignment: MainAxisAlignment.end,
+///             children: <Widget>[
+///               Text(
+///                 '$author',
+///                 style: const TextStyle(
+///                   fontSize: 12.0,
+///                   color: Colors.black87,
+///                 ),
+///               ),
+///               Text(
+///                 '$publishDate · $readDuration ★',
+///                 style: const TextStyle(
+///                   fontSize: 12.0,
+///                   color: Colors.black54,
+///                 ),
+///               ),
+///             ],
+///           ),
+///         ),
+///       ],
+///     );
+///   }
+/// }
+///
+/// class CustomListItemTwo extends StatelessWidget {
+///   CustomListItemTwo({
+///     Key key,
+///     this.thumbnail,
+///     this.title,
+///     this.subtitle,
+///     this.author,
+///     this.publishDate,
+///     this.readDuration,
+///   }) : super(key: key);
+///
+///   final Widget thumbnail;
+///   final String title;
+///   final String subtitle;
+///   final String author;
+///   final String publishDate;
+///   final String readDuration;
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return Padding(
+///       padding: const EdgeInsets.symmetric(vertical: 10.0),
+///       child: SizedBox(
+///         height: 100,
+///         child: Row(
+///           crossAxisAlignment: CrossAxisAlignment.start,
+///           children: <Widget>[
+///             AspectRatio(
+///               aspectRatio: 1.0,
+///               child: thumbnail,
+///             ),
+///             Expanded(
+///               child: Padding(
+///                 padding: const EdgeInsets.fromLTRB(20.0, 0.0, 2.0, 0.0),
+///                 child: _ArticleDescription(
+///                   title: title,
+///                   subtitle: subtitle,
+///                   author: author,
+///                   publishDate: publishDate,
+///                   readDuration: readDuration,
+///                 ),
+///               ),
+///             )
+///           ],
+///         ),
+///       ),
+///     );
+///   }
+/// }
+/// ```
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return ListView(
+///     padding: const EdgeInsets.all(10.0),
+///     children: <Widget>[
+///       CustomListItemTwo(
+///         thumbnail: Container(
+///           decoration: const BoxDecoration(color: Colors.pink),
+///         ),
+///         title: 'Flutter 1.0 Launch',
+///         subtitle:
+///           'Flutter continues to improve and expand its horizons.'
+///           'This text should max out at two lines and clip',
+///         author: 'Dash',
+///         publishDate: 'Dec 28',
+///         readDuration: '5 mins',
+///       ),
+///       CustomListItemTwo(
+///         thumbnail: Container(
+///           decoration: const BoxDecoration(color: Colors.blue),
+///         ),
+///         title: 'Flutter 1.2 Release - Continual updates to the framework',
+///         subtitle: 'Flutter once again improves and makes updates.',
+///         author: 'Flutter',
+///         publishDate: 'Feb 26',
+///         readDuration: '12 mins',
+///       ),
+///     ],
+///   );
+/// }
 /// ```
 /// {@end-tool}
 ///
