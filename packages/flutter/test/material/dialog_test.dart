@@ -6,6 +6,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matcher/matcher.dart';
 
@@ -47,6 +48,8 @@ RenderParagraph _getTextRenderObjectFromDialog(WidgetTester tester, String text)
 const ShapeBorder _defaultDialogShape = RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(2.0)));
 
 void main() {
+
+
   testWidgets('Dialog is scrollable', (WidgetTester tester) async {
     bool didPressOk = false;
     final AlertDialog dialog = AlertDialog(
@@ -606,5 +609,47 @@ void main() {
     expect(dismissedItems, <int>[0, 1]);
     expect(find.text('0'), findsNothing);
     expect(find.text('1'), findsNothing);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/28505.
+  testWidgets('Dialog uses proper context', (WidgetTester tester) async {
+    Widget buildFrame(Key builderKey) {
+      return MaterialApp(
+        home: Material(
+          child: Center(
+            child: Builder(
+              key: builderKey,
+              builder: (BuildContext outerContext) {
+                return RaisedButton(
+                  onPressed: () {
+                    showDialog<void>(
+                      context: outerContext,
+                      builder: (BuildContext innerContext) {
+                        return const AlertDialog(title: Text('Title'));
+                      },
+                    );
+                  },
+                  child: const Text('Show Dialog'),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+    }
+
+    // First time build.
+    await tester.pumpWidget(buildFrame(UniqueKey()));
+
+    // Open the dialog.
+    await tester.tap(find.byType(RaisedButton));
+    await tester.pumpAndSettle();
+
+    // Second time build.
+    await tester.pumpWidget(buildFrame(UniqueKey()));
+
+    // App crashes when we try to open the dialog, because it tries to get the
+    // Theme from the old context.
+    await tester.tap(find.byType(RaisedButton));
   });
 }
