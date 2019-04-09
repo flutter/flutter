@@ -559,7 +559,7 @@ enum ListTileControlAffinity {
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
-///   return body: ListView(
+///   return ListView(
 ///     padding: const EdgeInsets.all(10.0),
 ///     children: <Widget>[
 ///       CustomListItemTwo(
