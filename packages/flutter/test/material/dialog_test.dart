@@ -6,7 +6,6 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matcher/matcher.dart';
 
@@ -48,8 +47,6 @@ RenderParagraph _getTextRenderObjectFromDialog(WidgetTester tester, String text)
 const ShapeBorder _defaultDialogShape = RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(2.0)));
 
 void main() {
-
-
   testWidgets('Dialog is scrollable', (WidgetTester tester) async {
     bool didPressOk = false;
     final AlertDialog dialog = AlertDialog(
@@ -612,7 +609,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/28505.
-  testWidgets('Dialog uses proper context', (WidgetTester tester) async {
+  testWidgets('showDialog only gets Theme from context on the first call', (WidgetTester tester) async {
     Widget buildFrame(Key builderKey) {
       return MaterialApp(
         home: Material(
