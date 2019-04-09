@@ -9,6 +9,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 
 import 'basic_types.dart';
+import 'layout_span.dart';
 import 'text_style.dart';
 import 'text_painter.dart';
 import 'text_span.dart';
@@ -25,29 +26,6 @@ import 'text_span.dart';
 /// [PlaceholderSpan]s will be ignored when passed into a [TextPainter] directly.
 /// A [WidgetSpan] should be passed into a [RichText] widget instead.
 ///
-/// {@tool sample}
-///
-/// A card with `Hello World!` embedded inline within a TextSpan tree.
-///
-/// ```dart
-/// <TextSpan>[
-///   TextSpan(text: 'Flutter is'),
-///   WidgetSpan(
-///     widget: SizedBox(
-///       width: 120,
-///       height: 50,
-///       child: Card(
-///         child: Center(
-///           child: Text('Hello World!')
-///         )
-///       ),
-///     )
-///   ),
-///   TextSpan(text: 'the best!'),
-/// ]
-/// ```
-/// {@end-tool}
-///
 /// See also:
 ///
 ///  * [WidgetSpan], a leaf node that represents an embedded inline widget.
@@ -56,7 +34,7 @@ import 'text_span.dart';
 ///  * [RichText], a widget for finer control of text rendering.
 ///  * [TextPainter], a class for painting [TextSpan] objects on a [Canvas].
 @immutable
-abstract class PlaceholderSpan extends TextSpan {
+abstract class PlaceholderSpan extends LayoutSpan {
   /// Creates a [PlaceholderSpan] with the given values.
   ///
   /// The [widget] property should be non-null. [PlaceholderSpan] cannot contain any

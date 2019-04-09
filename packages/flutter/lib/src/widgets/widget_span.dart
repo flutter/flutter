@@ -118,7 +118,21 @@ class WidgetSpan extends PlaceholderSpan {
       case InlineWidgetAlignment.bottom: return ui.PlaceholderAlignment.bottom;
       case InlineWidgetAlignment.middle: return ui.PlaceholderAlignment.middle;
     }
-    print('NO MATCH!!');
+    return null;
+  }
+
+  /// Calls visitor on this [WidgetSpan]. There are no children spans to walk.
+  bool visitLayoutSpan(bool visitor(LayoutSpan span)) {
+    if (!visitor(this))
+      return false;
+    return true;
+  }
+
+  String toPlainText() {
+    return widget.toString();
+  }
+
+  int codeUnitAt(int index) {
     return null;
   }
 
@@ -131,7 +145,7 @@ class WidgetSpan extends PlaceholderSpan {
   /// See also:
   ///
   ///  * [TextStyle.compareTo], which does the same thing for [TextStyle]s.
-  RenderComparison compareTo(TextSpan other) {
+  RenderComparison compareTo(LayoutSpan other) {
     if (identical(this, other))
       return RenderComparison.identical;
     if (!(other.runtimeType is WidgetSpan))
@@ -164,5 +178,46 @@ class WidgetSpan extends PlaceholderSpan {
     return typedOther.widget == widget
         && typedOther.style == style
         && typedOther.recognizer == recognizer;
+  }
+
+  /// Returns the text span that contains the given position in the text.
+  TextSpan getSpanForPosition(TextPosition position) {
+    assert(debugAssertIsValid());
+    return null;
+  }
+
+
+  /// In checked mode, throws an exception if the object is not in a
+  /// valid configuration. Otherwise, returns true.
+  ///
+  /// This is intended to be used as follows:
+  ///
+  /// ```dart
+  /// assert(myTextSpan.debugAssertIsValid());
+  /// ```
+  bool debugAssertIsValid() {
+    assert(() {
+      if (!visitLayoutSpan((LayoutSpan span) {
+        if (span is WidgetSpan)
+          return (span as WidgetSpan).widget != null;
+        TextSpan textSpan = span;
+        if (textSpan.children != null) {
+          for (LayoutSpan child in textSpan.children) {
+            if (child == null)
+              return false;
+          }
+        }
+        return true;
+      })) {
+        throw FlutterError(
+          'TextSpan contains a null child.\n'
+          'A TextSpan object with a non-null child list should not have any nulls in its child list.\n'
+          'The full text in question was:\n'
+          '${toStringDeep(prefixLineOne: '  ')}'
+        );
+      }
+      return true;
+    }());
+    return true;
   }
 }

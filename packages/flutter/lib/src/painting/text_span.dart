@@ -9,6 +9,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 
 import 'basic_types.dart';
+import 'layout_span.dart';
 import 'text_style.dart';
 import 'text_painter.dart';
 
@@ -55,26 +56,26 @@ import 'text_painter.dart';
 ///  * [RichText], a widget for finer control of text rendering.
 ///  * [TextPainter], a class for painting [TextSpan] objects on a [Canvas].
 @immutable
-class TextSpan extends DiagnosticableTree {
+class TextSpan extends LayoutSpan {
   /// Creates a [TextSpan] with the given values.
   ///
   /// For the object to be useful, at least one of [text] or
   /// [children] should be set.
   const TextSpan({
-    this.style,
-    this.text,
+    TextStyle style,
+    String text,
     this.children,
-    this.recognizer,
-  });
+    GestureRecognizer recognizer,
+  }) : super(text: text, style: style, recognizer: recognizer);
 
-  /// The style to apply to the [text] and the [children].
-  final TextStyle style;
+  // /// The style to apply to the [text] and the [children].
+  // final TextStyle style;
 
-  /// The text contained in the span.
-  ///
-  /// If both [text] and [children] are non-null, the text will precede the
-  /// children.
-  final String text;
+  // /// The text contained in the span.
+  // ///
+  // /// If both [text] and [children] are non-null, the text will precede the
+  // /// children.
+  // final String text;
 
   /// Additional spans to include as children.
   ///
@@ -85,7 +86,7 @@ class TextSpan extends DiagnosticableTree {
   /// supported and may have unexpected results.
   ///
   /// The list must not contain any nulls.
-  final List<TextSpan> children;
+  final List<LayoutSpan> children;
 
   /// A gesture recognizer that will receive events that hit this text span.
   ///
@@ -161,7 +162,7 @@ class TextSpan extends DiagnosticableTree {
   /// }
   /// ```
   /// {@end-tool}
-  final GestureRecognizer recognizer;
+  // final GestureRecognizer recognizer;
 
   /// Apply the [style], [text], and [children] of this object to the
   /// given [ParagraphBuilder], from which a [Paragraph] can be obtained.
@@ -178,7 +179,7 @@ class TextSpan extends DiagnosticableTree {
     if (text != null)
       builder.addText(text);
     if (children != null) {
-      for (TextSpan child in children) {
+      for (LayoutSpan child in children) {
         assert(child != null);
         child.build(builder, textScaleFactor: textScaleFactor, dimensions: dimensions);
       }
@@ -189,14 +190,14 @@ class TextSpan extends DiagnosticableTree {
 
   /// Walks this text span and its descendants in pre-order and calls [visitor]
   /// for each span that has text.
-  bool visitTextSpan(bool visitor(TextSpan span)) {
+  bool visitLayoutSpan(bool visitor(LayoutSpan span)) {
     if (text != null) {
       if (!visitor(this))
         return false;
     }
     if (children != null) {
-      for (TextSpan child in children) {
-        if (!child.visitTextSpan(visitor))
+      for (LayoutSpan child in children) {
+        if (!child.visitLayoutSpan(visitor))
           return false;
       }
     }
@@ -210,9 +211,11 @@ class TextSpan extends DiagnosticableTree {
     final int targetOffset = position.offset;
     int offset = 0;
     TextSpan result;
-    visitTextSpan((TextSpan span) {
+    visitLayoutSpan((LayoutSpan span) {
       assert(result == null);
-      final int endOffset = offset + span.text.length;
+      if (span is! TextSpan)
+        return true;
+      final int endOffset = offset + (span as TextSpan).text.length;
       if (targetOffset == offset && affinity == TextAffinity.downstream ||
           targetOffset > offset && targetOffset < endOffset ||
           targetOffset == endOffset && affinity == TextAffinity.upstream) {
@@ -231,8 +234,10 @@ class TextSpan extends DiagnosticableTree {
   String toPlainText() {
     assert(debugAssertIsValid());
     final StringBuffer buffer = StringBuffer();
-    visitTextSpan((TextSpan span) {
-      buffer.write(span.text);
+    visitLayoutSpan((LayoutSpan span) {
+      if (span is! TextSpan)
+        return true;
+      buffer.write((span as TextSpan).text);
       return true;
     });
     return buffer.toString();
@@ -246,12 +251,15 @@ class TextSpan extends DiagnosticableTree {
       return null;
     int offset = 0;
     int result;
-    visitTextSpan((TextSpan span) {
-      if (index - offset < span.text.length) {
-        result = span.text.codeUnitAt(index - offset);
+    visitLayoutSpan((LayoutSpan span) {
+      if (span is! TextSpan)
+        return true;
+      TextSpan textSpan = span;
+      if (index - offset < textSpan.text.length) {
+        result = textSpan.text.codeUnitAt(index - offset);
         return false;
       }
-      offset += span.text.length;
+      offset += textSpan.text.length;
       return true;
     });
     return result;
@@ -267,9 +275,12 @@ class TextSpan extends DiagnosticableTree {
   /// ```
   bool debugAssertIsValid() {
     assert(() {
-      if (!visitTextSpan((TextSpan span) {
-        if (span.children != null) {
-          for (TextSpan child in span.children) {
+      if (!visitLayoutSpan((LayoutSpan span) {
+        if (span is! TextSpan)
+          return true;
+        TextSpan textSpan = span;
+        if (textSpan.children != null) {
+          for (LayoutSpan child in textSpan.children) {
             if (child == null)
               return false;
           }
@@ -296,16 +307,19 @@ class TextSpan extends DiagnosticableTree {
   /// See also:
   ///
   ///  * [TextStyle.compareTo], which does the same thing for [TextStyle]s.
-  RenderComparison compareTo(TextSpan other) {
+  RenderComparison compareTo(LayoutSpan other) {
     if (identical(this, other))
       return RenderComparison.identical;
-    if (other.text != text ||
-        children?.length != other.children?.length ||
-        (style == null) != (other.style == null))
+    if (!(other is TextSpan))
       return RenderComparison.layout;
-    RenderComparison result = recognizer == other.recognizer ? RenderComparison.identical : RenderComparison.metadata;
+    TextSpan textSpan = other;
+    if (textSpan.text != text ||
+        children?.length != textSpan.children?.length ||
+        (style == null) != (textSpan.style == null))
+      return RenderComparison.layout;
+    RenderComparison result = recognizer == textSpan.recognizer ? RenderComparison.identical : RenderComparison.metadata;
     if (style != null) {
-      final RenderComparison candidate = style.compareTo(other.style);
+      final RenderComparison candidate = style.compareTo(textSpan.style);
       if (candidate.index > result.index)
         result = candidate;
       if (result == RenderComparison.layout)
@@ -313,7 +327,7 @@ class TextSpan extends DiagnosticableTree {
     }
     if (children != null) {
       for (int index = 0; index < children.length; index += 1) {
-        final RenderComparison candidate = children[index].compareTo(other.children[index]);
+        final RenderComparison candidate = children[index].compareTo(textSpan.children[index]);
         if (candidate.index > result.index)
           result = candidate;
         if (result == RenderComparison.layout)
@@ -333,7 +347,7 @@ class TextSpan extends DiagnosticableTree {
     return typedOther.text == text
         && typedOther.style == style
         && typedOther.recognizer == recognizer
-        && listEquals<TextSpan>(typedOther.children, children);
+        && listEquals<LayoutSpan>(typedOther.children, children);
   }
 
   @override
@@ -366,7 +380,7 @@ class TextSpan extends DiagnosticableTree {
   List<DiagnosticsNode> debugDescribeChildren() {
     if (children == null)
       return const <DiagnosticsNode>[];
-    return children.map<DiagnosticsNode>((TextSpan child) {
+    return children.map<DiagnosticsNode>((LayoutSpan child) {
       if (child != null) {
         return child.toDiagnosticsNode();
       } else {

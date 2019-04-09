@@ -55,7 +55,7 @@ class RenderParagraph extends RenderBox
   ///
   /// The [maxLines] property may be null (and indeed defaults to null), but if
   /// it is not null, it must be greater than zero.
-  RenderParagraph(TextSpan text, {
+  RenderParagraph(LayoutSpan text, {
     TextAlign textAlign = TextAlign.start,
     @required TextDirection textDirection,
     bool softWrap = true,
@@ -100,8 +100,8 @@ class RenderParagraph extends RenderBox
 
 
   /// The text to display
-  TextSpan get text => _textPainter.text;
-  set text(TextSpan value) {
+  LayoutSpan get text => _textPainter.text;
+  set text(LayoutSpan value) {
     assert(value != null);
     switch (_textPainter.text.compareTo(value)) {
       case RenderComparison.identical:
@@ -123,16 +123,17 @@ class RenderParagraph extends RenderBox
   List<PlaceholderSpan> _placeholderSpans;
   // Traverses the LayoutSpan tree and depth-first collects the list of
   // child WidgetsSpans. Populates _placeholderSpans.
-  void _extractPlaceholderSpans(TextSpan span) {
+  void _extractPlaceholderSpans(LayoutSpan span) {
     _placeholderSpans = [];
-    void visitSpan(TextSpan span) {
+    void visitSpan(LayoutSpan span) {
       if (span is PlaceholderSpan) {
         PlaceholderSpan placeholderSpan = span;
         _placeholderSpans.add(placeholderSpan);
       }
       else {
-        if (span.children != null) {
-          for (TextSpan child in span.children) {
+        TextSpan textSpan = span;
+        if (textSpan.children != null) {
+          for (LayoutSpan child in textSpan.children) {
             visitSpan(child);
           }
         }
@@ -344,10 +345,10 @@ class RenderParagraph extends RenderBox
     List<PlaceholderDimensions> placeholderDimensions = List(childCount);
     int childIndex = 0;
     while (child != null) {
-      double width = child.getMinIntrinsicWidth(height);
-      double height = child.getMinIntrinsicHeight(width);
+      double intrinsicWidth = child.getMinIntrinsicWidth(height);
+      double intrinsicHeight = child.getMinIntrinsicHeight(intrinsicWidth);
       placeholderDimensions[childIndex] = PlaceholderDimensions(
-        size: Size(width, height),
+        size: Size(intrinsicWidth, height),
         alignment: _placeholderSpans[childIndex].alignment,
         baseline: _placeholderSpans[childIndex].baseline,
       );
@@ -362,10 +363,10 @@ class RenderParagraph extends RenderBox
     List<PlaceholderDimensions> placeholderDimensions = List(childCount);
     int childIndex = 0;
     while (child != null) {
-      double height = child.getMinIntrinsicHeight(width);
-      double width = child.getMinIntrinsicWidth(height);
+      double intrinsicHeight = child.getMinIntrinsicHeight(width);
+      double intrinsicWidth = child.getMinIntrinsicWidth(intrinsicHeight);
       placeholderDimensions[childIndex] = PlaceholderDimensions(
-        size: Size(width, height),
+        size: Size(intrinsicWidth, intrinsicHeight),
         alignment: _placeholderSpans[childIndex].alignment,
         baseline: _placeholderSpans[childIndex].baseline,
       );
@@ -686,13 +687,16 @@ class RenderParagraph extends RenderBox
     _recognizerOffsets.clear();
     _recognizers.clear();
     int offset = 0;
-    text.visitTextSpan((TextSpan span) {
-      if (span.recognizer != null && (span.recognizer is TapGestureRecognizer || span.recognizer is LongPressGestureRecognizer)) {
+    text.visitLayoutSpan((LayoutSpan span) {
+      if (span is! TextSpan)
+        return false;
+      TextSpan textSpan = span;
+      if (textSpan.recognizer != null && (textSpan.recognizer is TapGestureRecognizer || span.recognizer is LongPressGestureRecognizer)) {
         _recognizerOffsets.add(offset);
-        _recognizerOffsets.add(offset + span.text.length);
-        _recognizers.add(span.recognizer);
+        _recognizerOffsets.add(offset + textSpan.text.length);
+        _recognizers.add(textSpan.recognizer);
       }
-      offset += span.text.length;
+      offset += textSpan.text != null ? textSpan.text.length : 0;
       return true;
     });
     if (_recognizerOffsets.isNotEmpty) {
