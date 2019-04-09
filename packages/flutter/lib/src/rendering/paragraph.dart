@@ -314,9 +314,7 @@ class RenderParagraph extends RenderBox
       if (span.alignment == InlineWidgetAlignment.baseline ||
           span.alignment == InlineWidgetAlignment.aboveBaseline ||
           span.alignment == InlineWidgetAlignment.belowBaseline) {
-        assert(() {
-          return RenderObject.debugCheckingIntrinsics;
-        }(), 'Intrinsics are invalid');
+        assert(RenderObject.debugCheckingIntrinsics, 'Intrinsics are invalid');
         return false;
       }
     }
@@ -331,9 +329,9 @@ class RenderParagraph extends RenderBox
       // Height and baseline is irrelevant as all text will be laid
       // out in a single line.
       placeholderDimensions[childIndex] = PlaceholderDimensions(
-        size: Size(child.getMaxIntrinsicWidth(height), 0),
-        alignment: InlineWidgetAlignment.baseline,
-        baselineOffset: 0
+        size: Size(child.getMaxIntrinsicWidth(height), height),
+        alignment: _placeholderSpans[childIndex].alignment,
+        baseline: _placeholderSpans[childIndex].baseline,
       );
       child = childAfter(child);
       childIndex++;
@@ -346,13 +344,12 @@ class RenderParagraph extends RenderBox
     List<PlaceholderDimensions> placeholderDimensions = List(childCount);
     int childIndex = 0;
     while (child != null) {
+      double width = child.getMinIntrinsicWidth(height);
+      double height = child.getMinIntrinsicHeight(width);
       placeholderDimensions[childIndex] = PlaceholderDimensions(
-        size: Size(
-          child.getMinIntrinsicWidth(height),
-          0
-        ),
-        alignment: InlineWidgetAlignment.baseline,
-        baselineOffset: 0
+        size: Size(width, height),
+        alignment: _placeholderSpans[childIndex].alignment,
+        baseline: _placeholderSpans[childIndex].baseline,
       );
       child = childAfter(child);
       childIndex++;
@@ -365,14 +362,12 @@ class RenderParagraph extends RenderBox
     List<PlaceholderDimensions> placeholderDimensions = List(childCount);
     int childIndex = 0;
     while (child != null) {
-      double childMinIntrinsicHeight = child.getMinIntrinsicHeight(width);
+      double height = child.getMinIntrinsicHeight(width);
+      double width = child.getMinIntrinsicWidth(height);
       placeholderDimensions[childIndex] = PlaceholderDimensions(
-        size: Size(
-          child.getMinIntrinsicWidth(double.infinity),
-          childMinIntrinsicHeight
-        ),
-        alignment: InlineWidgetAlignment.baseline,
-        baselineOffset: childMinIntrinsicHeight
+        size: Size(width, height),
+        alignment: _placeholderSpans[childIndex].alignment,
+        baseline: _placeholderSpans[childIndex].baseline,
       );
       child = childAfter(child);
       childIndex++;
