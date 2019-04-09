@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io';
 
 import 'package:coverage/coverage.dart' as coverage;
 
@@ -14,12 +15,18 @@ import '../base/platform.dart';
 import '../base/process_manager.dart';
 import '../dart/package_map.dart';
 import '../globals.dart';
+import '../project.dart';
+import '../vmservice.dart';
 
 import 'watcher.dart';
 
 /// A class that's used to collect coverage data during tests.
 class CoverageCollector extends TestWatcher {
+  CoverageCollector(this.flutterProject, {this.coverageDirectory});
+
   Map<String, dynamic> _globalHitmap;
+  final Directory coverageDirectory;
+  final FlutterProject flutterProject;
 
   @override
   Future<void> handleFinishedTest(ProcessEvent event) async {
@@ -43,7 +50,6 @@ class CoverageCollector extends TestWatcher {
   Future<void> collectCoverage(Process process, Uri observatoryUri) async {
     assert(process != null);
     assert(observatoryUri != null);
-
     final int pid = process.pid;
     printTrace('pid $pid: collecting coverage data from $observatoryUri...');
 
@@ -52,7 +58,14 @@ class CoverageCollector extends TestWatcher {
       .then<void>((int code) {
         throw Exception('Failed to collect coverage, process terminated prematurely with exit code $code.');
       });
-    final Future<void> collectionComplete = coverage.collect(observatoryUri, false, false)
+    final Future<void> collectionComplete = collect(observatoryUri, (String libraryName) {
+      // If we have a specified coverage directory or could not find the package name, then
+      // accept all libraries.
+      if (coverageDirectory != null) {
+        return true;
+      }
+      return libraryName.contains(flutterProject.manifest.appName);
+    })
       .then<void>((Map<String, dynamic> result) {
         if (result == null)
           throw Exception('Failed to collect coverage.');
@@ -140,4 +153,121 @@ class CoverageCollector extends TestWatcher {
     }
     return true;
   }
+}
+
+Future<Map<String, dynamic>> collect(Uri serviceUri, bool Function(String) libraryPredicate) async {
+  VMService vmService;
+  try {
+    vmService = await VMService.connect(serviceUri, compression: CompressionOptions.compressionOff);
+    await vmService.getVM();
+  } on TimeoutException {
+    rethrow;
+  }
+  return await _getAllCoverage(vmService, libraryPredicate);
+}
+
+
+Future<Map<String, dynamic>> _getAllCoverage(VMService service, bool Function(String) libraryPredicate) async {
+  await service.getVM();
+  final List<Map<String, dynamic>> coverage = <Map<String, dynamic>>[];
+
+  for (Isolate isolateRef in service.vm.isolates) {
+    await isolateRef.load();
+    final Map<String, dynamic> scriptList = await isolateRef.invokeRpcRaw('getScripts', params: <String, dynamic>{'isolateId': isolateRef.id});
+    final List<Future<void>> futures = <Future<void>>[];
+
+    final Map<String, Map<String, dynamic>> scripts = <String, Map<String, dynamic>>{};
+    final Map<String, Map<String, dynamic>> sourceReports = <String, Map<String, dynamic>>{};
+    for (Map<String, dynamic> script in scriptList['scripts']) {
+      if (!libraryPredicate(script['uri'])) {
+        continue;
+      }
+      final String scriptId = script['id'];
+      futures.add(
+        isolateRef.invokeRpcRaw('getSourceReport', params: <String, dynamic>{'forceCompile': true, 'scriptId': scriptId, 'isolateId': isolateRef.id, 'reports': <String>['Coverage']})
+          .then((Map<String, dynamic> report) {
+            sourceReports[scriptId] = report;
+          })
+      );
+      futures.add(
+        isolateRef.invokeRpcRaw('getObject', params: <String, dynamic>{'isolateId': isolateRef.id, 'objectId': scriptId})
+          .then((Map<String, dynamic> script) {
+            scripts[scriptId] = script;
+          })
+      );
+    }
+    await Future.wait(futures);
+    final Map<Uri, Map<int, int>> hitMaps = <Uri, Map<int, int>>{};
+    for (String scriptId in scripts.keys) {
+      final Map<String, dynamic> sourceReport = sourceReports[scriptId];
+      for (Map<String, dynamic> range in sourceReport['ranges']) {
+        final Map<String, dynamic> coverage = range['coverage'];
+        final Map<String, dynamic> scriptRef = sourceReport['scripts'][range['scriptIndex']];
+        final Uri uri = Uri.parse(scriptRef['uri']);
+        hitMaps[uri] ??= <int, int>{};
+        final Map<int, int> hitMap = hitMaps[uri];
+        final List<dynamic>  hits = coverage['hits'];
+        final List<dynamic> misses = coverage['misses'];
+        final List<dynamic> tokenPositions = scripts[scriptRef['id']]['tokenPosTable'];
+        if (hits != null) {
+          for (dynamic hit in hits) {
+            final int line = _lineAndColumn(hit, tokenPositions)[0];
+            final int current = hitMap[line] ?? 0;
+            hitMap[line] = current + 1;
+          }
+        }
+        if (misses != null) {
+          for (dynamic miss in misses) {
+            final int line = _lineAndColumn(miss, tokenPositions)[0];
+            hitMap[line] ??= 0;
+          }
+        }
+      }
+    }
+    hitMaps.forEach((Uri uri, Map<int, int> hitMap) {
+      coverage.add(_toScriptCoverageJson(uri, hitMap));
+    });
+  }
+  return <String, dynamic>{'type': 'CodeCoverage', 'coverage': coverage};
+}
+
+List<int> _lineAndColumn(int position, List<dynamic> tokenPositions) {
+  int min = 0;
+  int max = tokenPositions.length;
+  while (min < max) {
+    final int mid = min + ((max - min) >> 1);
+    final List<dynamic> row = tokenPositions[mid];
+    if (row[1] > position) {
+      max = mid;
+    } else {
+      for (int i = 1; i < row.length; i += 2) {
+        if (row[i] == position) {
+          return <int>[row.first, row[i + 1]];
+        }
+      }
+      min = mid + 1;
+    }
+  }
+  throw StateError('Unreachable');
+}
+
+/// Returns a JSON hit map backward-compatible with pre-1.16.0 SDKs.
+Map<String, dynamic> _toScriptCoverageJson(
+    Uri scriptUri, Map<int, int> hitMap) {
+  final Map<String, dynamic> json = <String, dynamic>{};
+  final List<int> hits = <int>[];
+  hitMap.forEach((int line, int hitCount) {
+    hits.add(line);
+    hits.add(hitCount);
+  });
+  json['source'] = '$scriptUri';
+  json['script'] = <String, dynamic>{
+    'type': '@Script',
+    'fixedId': true,
+    'id': 'libraries/1/scripts/${Uri.encodeComponent(scriptUri.toString())}',
+    'uri': '$scriptUri',
+    '_kind': 'library',
+  };
+  json['hits'] = hits;
+  return json;
 }
