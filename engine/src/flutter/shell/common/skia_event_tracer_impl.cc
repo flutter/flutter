@@ -5,11 +5,10 @@
 #include "flutter/shell/common/skia_event_tracer_impl.h"
 
 #define TRACE_EVENT_HIDE_MACROS
-#include "flutter/fml/trace_event.h"
-
 #include <vector>
 
 #include "flutter/fml/logging.h"
+#include "flutter/fml/trace_event.h"
 #include "third_party/dart/runtime/include/dart_tools_api.h"
 #include "third_party/skia/include/utils/SkEventTracer.h"
 #include "third_party/skia/include/utils/SkTraceEventPhase.h"
@@ -33,6 +32,30 @@ class FlutterEventTracer : public SkEventTracer {
                                       const uint8_t* p_arg_types,
                                       const uint64_t* p_arg_values,
                                       uint8_t flags) override {
+#if defined(OS_FUCHSIA)
+    // In a manner analogous to "fml/trace_event.h", use Fuchsia's system
+    // tracing macros when running on Fuchsia.
+    switch (phase) {
+      case TRACE_EVENT_PHASE_BEGIN:
+      case TRACE_EVENT_PHASE_COMPLETE:
+        TRACE_DURATION_BEGIN(kSkiaTag, name);
+        break;
+      case TRACE_EVENT_PHASE_END:
+        TRACE_DURATION_END(kSkiaTag, name);
+        break;
+      case TRACE_EVENT_PHASE_INSTANT:
+        TRACE_INSTANT(kSkiaTag, name, TRACE_SCOPE_THREAD);
+        break;
+      case TRACE_EVENT_PHASE_ASYNC_BEGIN:
+        TRACE_ASYNC_BEGIN(kSkiaTag, name, id);
+        break;
+      case TRACE_EVENT_PHASE_ASYNC_END:
+        TRACE_ASYNC_END(kSkiaTag, name, id);
+        break;
+      default:
+        break;
+    }
+#else   // defined(OS_FUCHSIA)
     switch (phase) {
       case TRACE_EVENT_PHASE_BEGIN:
       case TRACE_EVENT_PHASE_COMPLETE:
@@ -53,6 +76,7 @@ class FlutterEventTracer : public SkEventTracer {
       default:
         break;
     }
+#endif  // defined(OS_FUCHSIA)
     return 0;
   }
 
@@ -61,7 +85,11 @@ class FlutterEventTracer : public SkEventTracer {
                                 SkEventTracer::Handle handle) override {
     // This is only ever called from a scoped trace event so we will just end
     // the section.
+#if defined(OS_FUCHSIA)
+    TRACE_DURATION_END(kSkiaTag, name);
+#else
     fml::tracing::TraceEventEnd(name);
+#endif
   }
 
   const uint8_t* getCategoryGroupEnabled(const char* name) override {
