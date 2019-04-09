@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show ParagraphBuilder;
+import 'dart:ui' as ui show ParagraphBuilder, PlaceholderAlignment;
 
 import 'package:flutter/painting.dart';
 import 'package:flutter/gestures.dart';
@@ -25,9 +25,6 @@ import 'framework.dart';
 /// [WidgetSpan]s will be ignored when passed into a [TextPainter] directly.
 /// To properly layout and paint the [widget], [WidgetSpan] should be passed
 /// into a [RichText] widget.
-///
-/// Widgets will be aligned with the rest of the text along the
-/// [TextBaseline.alphabetic] baseline, defined by [RenderBox.getDistanceToBaseline]. 
 ///
 /// {@tool sample}
 ///
@@ -59,7 +56,7 @@ import 'framework.dart';
 ///  * [RichText], a widget for finer control of text rendering.
 ///  * [TextPainter], a class for painting [TextSpan] objects on a [Canvas].
 @immutable
-class WidgetSpan extends TextSpan {
+class WidgetSpan extends PlaceholderSpan {
   /// Creates a [WidgetSpan] with the given values.
   ///
   /// The [widget] property should be non-null. [WidgetSpan] cannot contain any
@@ -69,11 +66,16 @@ class WidgetSpan extends TextSpan {
   /// decoration, foreground, background, and spacing options will be used.
   const WidgetSpan({
     Widget widget,
+    InlineWidgetAlignment alignment = InlineWidgetAlignment.middle,
+    TextBaseline baseline,
     TextStyle style,
     GestureRecognizer recognizer,
   }) : assert(widget != null),
+       assert((alignment == InlineWidgetAlignment.aboveBaseline ||
+               alignment == InlineWidgetAlignment.belowBaseline ||
+               alignment == InlineWidgetAlignment.baseline) ? baseline != null : true),
        widget = widget,
-       super(style: style, recognizer: recognizer);
+       super(alignment: alignment, baseline: baseline, style: style, recognizer: recognizer);
 
   final Widget widget;
 
@@ -98,11 +100,26 @@ class WidgetSpan extends TextSpan {
       builder.addPlaceholder(
         currentDimensions.size.width,
         currentDimensions.size.height,
-        currentDimensions.baseline
+        _inlineWidgetAlignmentToPlaceholderAlignment(alignment),
+        baseline: currentDimensions.baseline,
+        baselineOffset: currentDimensions.baselineOffset,
       );
     }
     if (hasStyle)
       builder.pop();
+  }
+
+  static ui.PlaceholderAlignment _inlineWidgetAlignmentToPlaceholderAlignment(InlineWidgetAlignment widgetAlignment) {
+    switch (widgetAlignment) {
+      case InlineWidgetAlignment.baseline: return ui.PlaceholderAlignment.baseline;
+      case InlineWidgetAlignment.aboveBaseline: return ui.PlaceholderAlignment.aboveBaseline;
+      case InlineWidgetAlignment.belowBaseline: return ui.PlaceholderAlignment.belowBaseline;
+      case InlineWidgetAlignment.top: return ui.PlaceholderAlignment.top;
+      case InlineWidgetAlignment.bottom: return ui.PlaceholderAlignment.bottom;
+      case InlineWidgetAlignment.middle: return ui.PlaceholderAlignment.middle;
+    }
+    print('NO MATCH!!');
+    return null;
   }
 
   /// Describe the difference between this widget span and another [TextSpan],

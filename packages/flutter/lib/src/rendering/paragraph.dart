@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show Gradient, Shader, TextBox, Offset;
+import 'dart:ui' as ui show Gradient, Shader, TextBox, Offsetff;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -86,6 +86,7 @@ class RenderParagraph extends RenderBox
          strutStyle: strutStyle,
        ) {
    addAll(children);
+   _extractPlaceholderSpans(text);
   }
 
   @override
@@ -117,6 +118,27 @@ class RenderParagraph extends RenderBox
         markNeedsLayout();
         break;
     }
+  }
+
+  List<PlaceholderSpan> _placeholderSpans;
+  // Traverses the LayoutSpan tree and depth-first collects the list of
+  // child WidgetsSpans. Populates _placeholderSpans.
+  void _extractPlaceholderSpans(TextSpan span) {
+    _placeholderSpans = [];
+    void visitSpan(TextSpan span) {
+      if (span is PlaceholderSpan) {
+        PlaceholderSpan placeholderSpan = span;
+        _placeholderSpans.add(placeholderSpan);
+      }
+      else {
+        if (span.children != null) {
+          for (TextSpan child in span.children) {
+            visitSpan(child);
+          }
+        }
+      }
+    }
+    visitSpan(span);
   }
 
   /// How the text should be aligned horizontally.
@@ -288,8 +310,9 @@ class RenderParagraph extends RenderBox
       // Height and baseline is irrelevant as all text will be laid
       // out in a single line.
       placeholderDimensions[childIndex] = PlaceholderDimensions(
-        Size(child.getMaxIntrinsicWidth(height), 0),
-        0
+        size: Size(child.getMaxIntrinsicWidth(height), 0),
+        alignment: InlineWidgetAlignment.baseline,
+        baselineOffset: 0
       );
       child = childAfter(child);
       childIndex++;
@@ -303,11 +326,12 @@ class RenderParagraph extends RenderBox
     int childIndex = 0;
     while (child != null) {
       placeholderDimensions[childIndex] = PlaceholderDimensions(
-        Size(
+        size: Size(
           child.getMinIntrinsicWidth(height),
           0
         ),
-        0
+        alignment: InlineWidgetAlignment.baseline,
+        baselineOffset: 0
       );
       child = childAfter(child);
       childIndex++;
@@ -322,11 +346,12 @@ class RenderParagraph extends RenderBox
     while (child != null) {
       double childMinIntrinsicHeight = child.getMinIntrinsicHeight(width);
       placeholderDimensions[childIndex] = PlaceholderDimensions(
-        Size(
+        size: Size(
           child.getMinIntrinsicWidth(double.infinity),
           childMinIntrinsicHeight
         ),
-        childMinIntrinsicHeight
+        alignment: InlineWidgetAlignment.baseline,
+        baselineOffset: childMinIntrinsicHeight
       );
       child = childAfter(child);
       childIndex++;
@@ -405,8 +430,10 @@ class RenderParagraph extends RenderBox
         parentUsesSize: true
       );
       placeholderDimensions[childIndex] = PlaceholderDimensions(
-        child.size,
-        child.getDistanceToBaseline(TextBaseline.alphabetic)
+        size: child.size,
+        alignment: _placeholderSpans[childIndex].alignment,
+        baseline: _placeholderSpans[childIndex].baseline,
+        baselineOffset: _placeholderSpans[childIndex].alignment == InlineWidgetAlignment.baseline ? child.getDistanceToBaseline(TextBaseline.alphabetic) : null,
       );
       child = childAfter(child);
       childIndex++;
