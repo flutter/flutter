@@ -428,12 +428,10 @@ class RunCommand extends RunCommandBase {
     return FlutterCommandResult(
       ExitStatus.success,
       timingLabelParts: <String>[
-        hotMode ? 'hot' : 'cold',
+        if (hotMode) 'hot' else 'cold',
         getModeName(getBuildMode()),
-        devices.length == 1
-            ? getNameForTargetPlatform(await devices[0].targetPlatform)
-            : 'multiple',
-        devices.length == 1 && await devices[0].isLocalEmulator ? 'emulator' : null,
+        if (devices.length == 1) getNameForTargetPlatform(await devices[0].targetPlatform) else 'multiple',
+        if (devices.length == 1 && await devices[0].isLocalEmulator) 'emulator' else null,
       ],
       endTimeOverride: appStartedTime,
     );

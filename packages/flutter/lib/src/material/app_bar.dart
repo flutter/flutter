@@ -542,7 +542,7 @@ class _AppBarState extends State<AppBar> {
               child: appBar,
             ),
           ),
-          widget.bottomOpacity == 1.0 ? widget.bottom : Opacity(
+          if (widget.bottomOpacity == 1.0) widget.bottom else Opacity(
             opacity: const Interval(0.25, 1.0, curve: Curves.fastOutSlowIn).transform(widget.bottomOpacity),
             child: widget.bottom,
           ),

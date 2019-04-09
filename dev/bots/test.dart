@@ -369,7 +369,7 @@ Future<void> _buildRunnerTest(
   bool enableFlutterToolAsserts = false,
   bq.TabledataResourceApi tableData,
 }) async {
-  final List<String> args = <String>['run', 'build_runner', 'test', '--', useFlutterTestFormatter ? '-rjson' : '-rcompact', '-j1'];
+  final List<String> args = <String>['run', 'build_runner', 'test', '--', if (useFlutterTestFormatter) '-rjson' else '-rcompact', '-j1'];
   if (!hasColor) {
     args.add('--no-color');
   }
@@ -417,7 +417,7 @@ Future<void> _pubRunTest(
   bool enableFlutterToolAsserts = false,
   bq.TabledataResourceApi tableData,
 }) async {
-  final List<String> args = <String>['run', 'test', useFlutterTestFormatter ? '-rjson' : '-rcompact', '-j1'];
+  final List<String> args = <String>['run', 'test', if (useFlutterTestFormatter) '-rjson' else '-rcompact', '-j1'];
   if (!hasColor)
     args.add('--no-color');
   if (testPath != null)

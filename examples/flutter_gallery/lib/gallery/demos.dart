@@ -580,8 +580,4 @@ final Map<GalleryDemoCategory, List<GalleryDemo>> kGalleryCategoryToDemos =
   );
 
 final Map<String, String> kDemoDocumentationUrl =
-    Map<String, String>.fromIterable(
-      kAllGalleryDemos.where((GalleryDemo demo) => demo.documentationUrl != null),
-      key: (dynamic demo) => demo.routeName,
-      value: (dynamic demo) => demo.documentationUrl,
-    );
+    { for (var demo in kAllGalleryDemos.where((GalleryDemo demo) => demo.documentationUrl != null)) demo.routeName : demo.documentationUrl };
