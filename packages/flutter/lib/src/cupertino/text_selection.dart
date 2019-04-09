@@ -21,7 +21,8 @@ const double _kToolbarHeight = 36.0;
 
 // If the distance from the top is less than a certain value,
 // the toolbar should be displayed below the input box.
-// If don't do this, won't be able to properly display and interact toolbar at the top of some phones, such as iPhone X.
+// If don't do this, won't be able to properly display and
+// interact toolbar at the top of some phones, such as iPhone X.
 // FIX https://github.com/flutter/flutter/issues/29808
 const double _kToolbarArrowInvertDistance = 100.0;
 
@@ -60,10 +61,13 @@ class _TextSelectionToolbarNotchPainter extends CustomPainter {
     final Paint paint = Paint()
         ..color = _kToolbarBackgroundColor
         ..style = PaintingStyle.fill;
+    final py = (arrowDirection == ArrowDirection.down)
+        ? 0.0
+        : _kToolbarTriangleSize.height;
     final Path triangle = Path()
-        ..lineTo(_kToolbarTriangleSize.width / 2, arrowDirection == ArrowDirection.down ? 0.0 : _kToolbarTriangleSize.height)
+        ..lineTo(_kToolbarTriangleSize.width / 2, py)
         ..lineTo(0.0, _kToolbarTriangleSize.height)
-        ..lineTo(-(_kToolbarTriangleSize.width / 2), arrowDirection == ArrowDirection.down ? 0.0 : _kToolbarTriangleSize.height)
+        ..lineTo(-(_kToolbarTriangleSize.width / 2), py)
         ..close();
     canvas.drawPath(triangle, paint);
   }
@@ -140,18 +144,20 @@ class _TextSelectionToolbar extends StatelessWidget {
       ),
     );
 
-    final List<Widget> menus = arrowDirection == ArrowDirection.down ? <Widget>[
-      toolbar,
-      // TODO(xster): Position the triangle based on the layout delegate, and
-      // avoid letting the triangle line up with any dividers.
-      // https://github.com/flutter/flutter/issues/11274
-      triangle,
-      padding,
-    ] : <Widget>[
-      padding,
-      triangle,
-      toolbar,
-    ];
+    final List<Widget> menus = (arrowDirection == ArrowDirection.down)
+        ? <Widget>[
+            toolbar,
+            // TODO(xster): Position the triangle based on the layout delegate, and
+            // avoid letting the triangle line up with any dividers.
+            // https://github.com/flutter/flutter/issues/11274
+            triangle,
+            padding,
+          ]
+        : <Widget>[
+            padding,
+            triangle,
+            toolbar,
+          ];
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -263,7 +269,11 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
   Widget buildToolbar(BuildContext context, Rect globalEditableRegion, Offset position, TextSelectionDelegate delegate) {
     assert(debugCheckHasMediaQuery(context));
 
-    final ArrowDirection direction = globalEditableRegion.top > _kToolbarArrowInvertDistance ? ArrowDirection.down : ArrowDirection.up;
+    final ArrowDirection direction =
+    (globalEditableRegion.top > _kToolbarArrowInvertDistance)
+        ? ArrowDirection.down
+        : ArrowDirection.up;
+
     if (direction == ArrowDirection.up) {
       position += Offset(0, _kToolbarHeight);
     }

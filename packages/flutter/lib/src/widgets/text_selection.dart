@@ -29,7 +29,8 @@ const Duration _kDragSelectionUpdateThrottle = Duration(milliseconds: 50);
 
 /// If the distance from the top is less than a certain value,
 /// the toolbar should be displayed below the input box.
-/// If don't do this, won't be able to properly display and interact toolbar at the top of some phones, such as iPhone X.
+/// If don't do this, won't be able to properly display and
+/// interact toolbar at the top of some phones, such as iPhone X.
 /// FIX https://github.com/flutter/flutter/issues/29808
 const double _kToolbarArrowInvertDistance = 100.0;
 
@@ -434,13 +435,12 @@ class TextSelectionOverlay {
       renderObject.localToGlobal(renderObject.size.bottomRight(Offset.zero)),
     );
 
-    double x = (endpoints.length == 1) ? endpoints[0].point.dx : (endpoints[0].point.dx + endpoints[1].point.dx) / 2.0;
-    double y;
-    if (editingRegion.top < _kToolbarArrowInvertDistance) {
-      y = endpoints[0].point.dy + editingRegion.height;
-    } else {
-      y = endpoints[0].point.dy - editingRegion.height;
-    }
+    final double x = (endpoints.length == 1)
+        ? endpoints[0].point.dx
+        : (endpoints[0].point.dx + endpoints[1].point.dx) / 2.0;
+    final double y = (editingRegion.top < _kToolbarArrowInvertDistance)
+        ? endpoints[0].point.dy + editingRegion.height
+        : endpoints[0].point.dy - editingRegion.height;
     final Offset midpoint = Offset(x, y);
 
     return FadeTransition(

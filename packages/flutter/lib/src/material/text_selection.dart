@@ -22,7 +22,8 @@ const double _kToolbarScreenPadding = 8.0;
 
 // If the distance from the top is less than a certain value,
 // the toolbar should be displayed below the input box.
-// If don't do this, won't be able to properly display and interact toolbar at the top of some phones.
+// If don't do this, won't be able to properly display and
+// interact toolbar at the top of some phones.
 // FIX https://github.com/flutter/flutter/issues/29808
 const double _kToolbarArrowInvertDistance = 100.0;
 
