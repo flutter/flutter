@@ -834,6 +834,11 @@ class _RenderDecoration extends RenderBox {
   // This method applies layout to all of the renderers except the container.
   // For convenience, the container is laid out in performLayout().
   _RenderDecorationLayout _layout(BoxConstraints layoutConstraints) {
+    assert(
+      layoutConstraints.maxWidth < double.infinity,
+      'A text input cannot have an unbounded width. If you want it to take up the leftover space inside its parent, try wrapping it in a Flexible.',
+    );
+
     // Margin on each side of subtext (counter and helperError)
     final Map<RenderBox, double> boxToBaseline = <RenderBox, double>{};
     final BoxConstraints boxConstraints = layoutConstraints.loosen();
