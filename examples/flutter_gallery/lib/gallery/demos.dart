@@ -580,4 +580,4 @@ final Map<GalleryDemoCategory, List<GalleryDemo>> kGalleryCategoryToDemos =
   );
 
 final Map<String, String> kDemoDocumentationUrl =
-    { for (var demo in kAllGalleryDemos.where((GalleryDemo demo) => demo.documentationUrl != null)) demo.routeName : demo.documentationUrl };
+  <String, String> { for (GalleryDemo demo in kAllGalleryDemos.where((GalleryDemo demo) => demo.documentationUrl != null)) demo.routeName : demo.documentationUrl };
