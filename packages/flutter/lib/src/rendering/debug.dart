@@ -55,6 +55,33 @@ bool debugRepaintTextRainbowEnabled = false;
 ///
 /// Android and iOS will show the last painted layer on top, whereas Fuchsia
 /// will show the layer with the highest elevation on top.
+///
+/// For example, a rectangular elevation at 3.0 that is painted before an
+/// overlapping rectangular elevation at 2.0 would render this way on Android
+/// and iOS (with fake shadows):
+/// ┌───────────────────┐
+/// │                   │
+/// │      3.0          │
+/// │            ┌───────────────────┐
+/// │            │                   │
+/// └────────────│                   │
+///              │        2.0        │
+///              │                   │
+///              └───────────────────┘
+///
+/// But this way on Fuchsia (with real shadows):
+/// ┌───────────────────┐
+/// │                   │
+/// │      3.0          │
+/// │                   │────────────┐
+/// │                   │            │
+/// └───────────────────┘            │
+///              │         2.0       │
+///              │                   │
+///              └───────────────────┘
+///
+/// This check helps developers that want a consistent look and feel detect
+/// where this inconsistency would occur.
 bool debugCheckElevationsEnabled = false;
 
 /// The current color to overlay when repainting a layer.

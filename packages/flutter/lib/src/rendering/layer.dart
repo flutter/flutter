@@ -540,24 +540,16 @@ class ContainerLayer extends Layer {
     ];
   }
 
-  /// Checks that no [PhysicalModelLayer] would paint after another
+  /// Checks that no [PhysicalModelLayer] would paint after another overlapping
   /// [PhysicalModelLayer] that has a higher elevation.
   ///
   /// Returns a list of [PictureLayer] objects it added to the tree to highlight
-  /// bad nodes.  These layers should be removed from the tree after it has been
-  /// shipped to the engine.
+  /// bad nodes. These layers should be removed from the tree after building the
+  /// [Scene].
   List<PictureLayer> _debugCheckElevations() {
     final List<PhysicalModelLayer> physicalModelLayers = depthFirstIterateChildren().whereType<PhysicalModelLayer>().toList();
     final List<PictureLayer> addedLayers = <PictureLayer>[];
-    bool _predecessorIsAncestor(PhysicalModelLayer predecessor, Layer child) {
-      while (child != null) {
-        if (child == predecessor) {
-          return true;
-        }
-        child = child.parent;
-      }
-      return false;
-    }
+
     for (int i = 0; i < physicalModelLayers.length; i++) {
       final PhysicalModelLayer physicalModelLayer = physicalModelLayers[i];
       assert(
@@ -565,9 +557,28 @@ class ContainerLayer extends Layer {
         'debugCheckElevations has either already visited this layer or failed '
         'to remove the added picture from it.',
       );
+      double accumulatedElevation = physicalModelLayer.elevation;
+      Layer ancestor = physicalModelLayer.parent;
+      while (ancestor != null) {
+        if (ancestor is PhysicalModelLayer) {
+          accumulatedElevation += ancestor.elevation;
+        }
+        ancestor = ancestor.parent;
+      }
       for (int j = 0; j <= i; j++) {
         final PhysicalModelLayer predecessor = physicalModelLayers[j];
-        if (predecessor.elevation <= physicalModelLayer.elevation || _predecessorIsAncestor(predecessor, physicalModelLayer)) {
+        double predecessorAccumulatedElevation = predecessor.elevation;
+        ancestor = predecessor.parent;
+        while (ancestor != null) {
+          if (ancestor == predecessor) {
+            continue;
+          }
+          if (ancestor is PhysicalModelLayer) {
+            predecessorAccumulatedElevation += ancestor.elevation;
+          }
+          ancestor = ancestor.parent;
+        }
+        if (predecessorAccumulatedElevation <= accumulatedElevation) {
           continue;
         }
         final Path intersection = Path.combine(
@@ -582,7 +593,6 @@ class ContainerLayer extends Layer {
     }
     return addedLayers;
   }
-
 
   @override
   void updateSubtreeNeedsAddToScene() {
@@ -764,7 +774,7 @@ class ContainerLayer extends Layer {
   @visibleForTesting
   List<Layer> depthFirstIterateChildren() {
     if (firstChild == null)
-      return null;
+      return <Layer>[];
     final List<Layer> children = <Layer>[];
     Layer child = firstChild;
     while(child != null) {
@@ -853,6 +863,10 @@ class OffsetLayer extends ContainerLayer {
     addToScene(builder);
     final ui.Scene scene = builder.build();
     assert(() {
+      // We should remove any layers that got added to highlight the incorrect
+      // PhysicalModelLayers. If we don't, we'll end up adding duplicate layers
+      // or potentially leaving a physical model that is now correct highlighted
+      // in red.
       if (temporaryLayers != null) {
         for (PictureLayer temporaryLayer in temporaryLayers) {
           temporaryLayer.remove();
@@ -1204,10 +1218,12 @@ class TransformLayer extends OffsetLayer {
   void applyTransform(Layer child, Matrix4 transform) {
     assert(child != null);
     assert(transform != null);
-    if (_lastEffectiveTransform == null && this.transform != null) {
+    assert(_lastEffectiveTransform != null || this.transform != null);
+    if (_lastEffectiveTransform == null) {
       transform.multiply(this.transform);
+    } else {
+      transform.multiply(_lastEffectiveTransform);
     }
-    transform.multiply(_lastEffectiveTransform);
   }
 
   @override

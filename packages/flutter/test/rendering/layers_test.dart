@@ -292,6 +292,10 @@ void main() {
   });
 
   group('PhysicalModelLayer checks elevations', () {
+    /// Adds the layers to a container where A paints before B.
+    ///
+    /// Expects there to be `errorCount` errors.  Checking elevations is enabled
+    /// by default.
     void _testConflicts(
       PhysicalModelLayer layerA,
       PhysicalModelLayer layerB,
@@ -316,6 +320,12 @@ void main() {
       debugCheckElevationsEnabled = true;
     }
 
+    // Tests:
+    //
+    //  ─────────────                    (LayerA, paints first)
+    //           ─────────────           (LayerB, paints second)
+    //
+    // ───────────────────────────
     test('Overlapping layers at wrong elevation', () {
       final PhysicalModelLayer layerA = PhysicalModelLayer(
         clipPath: Path()..addRect(Rect.fromLTWH(0, 0, 20, 20)),
@@ -332,6 +342,14 @@ void main() {
       _testConflicts(layerA, layerB, 1);
     });
 
+    // Tests:
+    //
+    //  ─────────────                    (LayerA, paints first)
+    //           ─────────────           (LayerB, paints second)
+    //
+    // ───────────────────────────
+    //
+    // Causes no error if check is disabled.
     test('Overlapping layers at wrong elevation, check disabled', () {
       final PhysicalModelLayer layerA = PhysicalModelLayer(
         clipPath: Path()..addRect(Rect.fromLTWH(0, 0, 20, 20)),
@@ -348,6 +366,12 @@ void main() {
       _testConflicts(layerA, layerB, 0, false);
     });
 
+    // Tests:
+    //
+    //   ──────────                      (LayerA, paints first)
+    //                ───────────        (LayerB, paints second)
+    //
+    // ────────────────────────────
     test('Non-overlapping layers at wrong elevation', () {
       final PhysicalModelLayer layerA = PhysicalModelLayer(
         clipPath: Path()..addRect(Rect.fromLTWH(0, 0, 20, 20)),
@@ -364,6 +388,13 @@ void main() {
       _testConflicts(layerA, layerB, 0);
     });
 
+    // Tests:
+    //
+    //     ───────                       (Child of A, paints second)
+    //   ───────────                     (LayerA, paints first)
+    //                ────────────       (LayerB, paints third)
+    //
+    // ────────────────────────────
     test('Non-overlapping layers at wrong elevation, child at lower elevation', () {
       final PhysicalModelLayer layerA = PhysicalModelLayer(
         clipPath: Path()..addRect(Rect.fromLTWH(0, 0, 20, 20)),
@@ -386,6 +417,42 @@ void main() {
         shadowColor: const Color(0),
       );
       _testConflicts(layerA, layerB, 0);
+    });
+
+    // Tests:
+    //
+    //          ─────────                (Child of A, paints second, overflows)
+    //                ────────────       (LayerB, paints third)
+    //   ───────────                     (LayerA, paints first)
+    //
+    //
+    // ────────────────────────────
+    //
+    // Which fails because the overflowing child overlaps something that paints
+    // after it at a lower elevation.
+    test('Child overflows parent and overlaps another physical layer', () {
+      final PhysicalModelLayer layerA = PhysicalModelLayer(
+        clipPath: Path()..addRect(Rect.fromLTWH(0, 0, 20, 20)),
+        elevation: 3.0,
+        color: const Color(0),
+        shadowColor: const Color(0),
+      );
+
+      layerA.append(PhysicalModelLayer(
+        clipPath: Path()..addRect(Rect.fromLTWH(15, 15, 25, 25)),
+        elevation: 2.0,
+        color: const Color(0),
+        shadowColor: const Color(0),
+      ));
+
+      final PhysicalModelLayer layerB =PhysicalModelLayer(
+        clipPath: Path()..addRect(Rect.fromLTWH(20, 20, 20, 20)),
+        elevation: 4.0,
+        color: const Color(0),
+        shadowColor: const Color(0),
+      );
+
+      _testConflicts(layerA, layerB, 1);
     });
   });
 }
