@@ -2535,7 +2535,7 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
   /// no longer directed towards this receiver.
   PointerCancelEventListener onPointerCancel;
 
-  /// Called when a pointer signal occures over this object.
+  /// Called when a pointer signal occurs over this object.
   PointerSignalEventListener onPointerSignal;
 
   // Object used for annotation of the layer used for hover hit detection.
@@ -2549,21 +2549,29 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
   MouseTrackerAnnotation get hoverAnnotation => _hoverAnnotation;
 
   void _updateAnnotations() {
-    if (_hoverAnnotation != null && attached) {
-      RendererBinding.instance.mouseTracker.detachAnnotation(_hoverAnnotation);
-    }
+    MouseTrackerAnnotation newAnnotation;
     if (_onPointerEnter != null || _onPointerHover != null || _onPointerExit != null) {
-      _hoverAnnotation = MouseTrackerAnnotation(
+      newAnnotation = MouseTrackerAnnotation(
         onEnter: _onPointerEnter,
         onHover: _onPointerHover,
         onExit: _onPointerExit,
       );
-      if (attached) {
-        RendererBinding.instance.mouseTracker.attachAnnotation(_hoverAnnotation);
-      }
-    } else {
-      _hoverAnnotation = null;
     }
+    if (newAnnotation == _hoverAnnotation) {
+      return;
+    }
+    if (_hoverAnnotation != null && attached) {
+      // Detach the existing annotation.
+      RendererBinding.instance.mouseTracker.detachAnnotation(_hoverAnnotation);
+    }
+    _hoverAnnotation = newAnnotation;
+    if (_hoverAnnotation != null && attached) {
+      // Attach the new annotation.
+      RendererBinding.instance.mouseTracker.attachAnnotation(_hoverAnnotation);
+    }
+    // Needs to paint in order to insert the annotation layer associated with
+    // the updated _hoverAnnotation.
+    markNeedsPaint();
   }
 
   @override
