@@ -749,14 +749,16 @@ class Navigator extends StatefulWidget {
   ///
   /// By default, this defers to [dart:ui.Window.defaultRouteName].
   ///
-  /// If this string contains any `/` characters, then the string is split on
-  /// those characters and substrings from the start of the string up to each
-  /// such character are, in turn, used as routes to push.
+  /// {@template flutter.widgets.navigator.routeName.splitting}
+  /// If the route name contains any `/` characters, then the string is split
+  /// on those characters, and substrings from the start of the string up to
+  /// each such character are, in turn, used as routes to push.
   ///
   /// For example, if the route `/stocks/HOOLI` was used as the [initialRoute],
   /// then the [Navigator] would push the following routes on startup: `/`,
   /// `/stocks`, `/stocks/HOOLI`. This enables deep linking while allowing the
   /// application to maintain a predictable route history.
+  /// {@endtemplate}
   final String initialRoute;
 
   /// Called to generate a route for a given [RouteSettings].
@@ -803,6 +805,8 @@ class Navigator extends StatefulWidget {
   ///
   /// The `T` type argument is the type of the return value of the route.
   /// {@endtemplate}
+  ///
+  /// {@macro flutter.widgets.navigator.routeName.splitting}
   ///
   /// {@template flutter.widgets.navigator.pushNamed.arguments}
   /// The provided `arguments` are passed to the pushed route via
@@ -910,6 +914,8 @@ class Navigator extends StatefulWidget {
   /// and `TO` is the type of the return value of the old route.
   /// {@endtemplate}
   ///
+  /// {@macro flutter.widgets.navigator.routeName.splitting}
+  ///
   /// {@macro flutter.widgets.navigator.pushNamed.arguments}
   ///
   /// {@tool sample}
@@ -964,6 +970,8 @@ class Navigator extends StatefulWidget {
   /// The `T` type argument is the type of the return value of the new route,
   /// and `TO` is the return value type of the old route.
   /// {@endtemplate}
+  ///
+  /// {@macro flutter.widgets.navigator.routeName.splitting}
   ///
   /// {@macro flutter.widgets.navigator.pushNamed.arguments}
   ///
@@ -1025,6 +1033,8 @@ class Navigator extends StatefulWidget {
   ///
   /// The `T` type argument is the type of the return value of the new route.
   /// {@endtemplate}
+  ///
+  /// {@macro flutter.widgets.navigator.routeName.splitting}
   ///
   /// {@macro flutter.widgets.navigator.pushNamed.arguments}
   ///
