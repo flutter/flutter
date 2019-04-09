@@ -66,7 +66,7 @@ class WidgetSpan extends PlaceholderSpan {
   /// decoration, foreground, background, and spacing options will be used.
   const WidgetSpan({
     Widget widget,
-    InlineWidgetAlignment alignment = InlineWidgetAlignment.middle,
+    InlineWidgetAlignment alignment = InlineWidgetAlignment.bottom,
     TextBaseline baseline,
     TextStyle style,
     GestureRecognizer recognizer,

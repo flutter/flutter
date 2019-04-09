@@ -585,6 +585,8 @@ void main() {
                         ),
                         WidgetSpan(
                           widget: Checkbox(value: false, onChanged: (bool value) {}),
+                          alignment: InlineWidgetAlignment.baseline,
+                          baseline: TextBaseline.alphabetic
                         ),
                         WidgetSpan(
                           widget: SizedBox(

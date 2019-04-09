@@ -260,6 +260,8 @@ class RenderParagraph extends RenderBox
 
   @override
   double computeMinIntrinsicWidth(double height) {
+    if (!_canComputeIntrinsics())
+      return 0;
     if (_needsLayout) {
       _computeChildrenWidthWithMinIntrinsics(height);
       _layoutText();
@@ -269,6 +271,8 @@ class RenderParagraph extends RenderBox
 
   @override
   double computeMaxIntrinsicWidth(double height) {
+    if (!_canComputeIntrinsics())
+      return 0;
     if (_needsLayout) {
       _computeChildrenWidthWithMaxIntrinsics(height);
       _layoutText(); // layout with infinite width.
@@ -277,6 +281,8 @@ class RenderParagraph extends RenderBox
   }
 
   double _computeIntrinsicHeight(double width) {
+    if (!_canComputeIntrinsics())
+      return 0;
     _computeChildrenHeightWithMinIntrinsics(width);
     _layoutText(minWidth: width, maxWidth: width);
     return _textPainter.height;
@@ -284,7 +290,6 @@ class RenderParagraph extends RenderBox
 
   @override
   double computeMinIntrinsicHeight(double width) {
-
     return _computeIntrinsicHeight(width);
   }
 
@@ -300,6 +305,22 @@ class RenderParagraph extends RenderBox
     assert(constraints.debugAssertIsValid());
     _layoutTextWithConstraints(constraints);
     return _textPainter.computeDistanceToActualBaseline(baseline);
+  }
+
+  /// Intrinsics cannot be calculated without a full layout for
+  /// alignments that require the baseline.
+  bool _canComputeIntrinsics() {
+    for (PlaceholderSpan span in _placeholderSpans) {
+      if (span.alignment == InlineWidgetAlignment.baseline ||
+          span.alignment == InlineWidgetAlignment.aboveBaseline ||
+          span.alignment == InlineWidgetAlignment.belowBaseline) {
+        assert(() {
+          return RenderObject.debugCheckingIntrinsics;
+        }(), 'Intrinsics are invalid');
+        return false;
+      }
+    }
+    return true;
   }
 
   void _computeChildrenWidthWithMaxIntrinsics(double height) {
