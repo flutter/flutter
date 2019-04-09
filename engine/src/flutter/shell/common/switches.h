@@ -90,9 +90,6 @@ DEF_SWITCH(SkiaDeterministicRendering,
            "Skips the call to SkGraphics::Init(), thus avoiding swapping out"
            "some Skia function pointers based on available CPU features. This"
            "is used to obtain 100% deterministic behavior in Skia rendering.")
-DEF_SWITCH(EnableBlink,
-           "enable-blink",
-           "Enable Blink as the text shaping library instead of libtxt.")
 DEF_SWITCH(FLX, "flx", "Specify the FLX path.")
 DEF_SWITCH(FlutterAssetsDir,
            "flutter-assets-dir",
