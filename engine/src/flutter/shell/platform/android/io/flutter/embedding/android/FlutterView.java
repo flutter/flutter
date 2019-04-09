@@ -62,6 +62,8 @@ public class FlutterView extends FrameLayout {
   // Behavior configuration of this FlutterView.
   @NonNull
   private RenderMode renderMode;
+  @Nullable
+  private TransparencyMode transparencyMode;
 
   // Internal view hierarchy references.
   @Nullable
@@ -96,20 +98,41 @@ public class FlutterView extends FrameLayout {
   };
 
   /**
-   * Constructs a {@code FlutterSurfaceView} programmatically, without any XML attributes.
-   *
-   * {@link #renderMode} defaults to {@link RenderMode#surface}.
+   * Constructs a {@code FlutterView} programmatically, without any XML attributes.
+   * <p>
+   * <ul>
+   *   <li>{@link #renderMode} defaults to {@link RenderMode#surface}.</li>
+   *   <li>{@link #transparencyMode} defaults to {@link TransparencyMode#opaque}.</li>
+   * </ul>
    */
   public FlutterView(@NonNull Context context) {
-    this(context, null, null);
+    this(context, null, null, null);
   }
 
   /**
-   * Constructs a {@code FlutterSurfaceView} programmatically, without any XML attributes,
+   * Constructs a {@code FlutterView} programmatically, without any XML attributes,
    * and allows selection of a {@link #renderMode}.
+   * <p>
+   * {@link #transparencyMode} defaults to {@link TransparencyMode#opaque}.
    */
   public FlutterView(@NonNull Context context, @NonNull RenderMode renderMode) {
-    this(context, null, renderMode);
+    this(context, null, renderMode, null);
+  }
+
+  /**
+   * Constructs a {@code FlutterView} programmatically, without any XML attributes,
+   * assumes the use of {@link RenderMode#surface}, and allows selection of a {@link #transparencyMode}.
+   */
+  public FlutterView(@NonNull Context context, @NonNull TransparencyMode transparencyMode) {
+    this(context, null, RenderMode.surface, transparencyMode);
+  }
+
+  /**
+   * Constructs a {@code FlutterView} programmatically, without any XML attributes, and allows
+   * a selection of {@link #renderMode} and {@link #transparencyMode}.
+   */
+  public FlutterView(@NonNull Context context, @NonNull RenderMode renderMode, @NonNull TransparencyMode transparencyMode) {
+    this(context, null, renderMode, transparencyMode);
   }
 
   /**
@@ -118,13 +141,14 @@ public class FlutterView extends FrameLayout {
    * // TODO(mattcarroll): expose renderMode in XML when build system supports R.attr
    */
   public FlutterView(@NonNull Context context, @Nullable AttributeSet attrs) {
-    this(context, attrs, null);
+    this(context, attrs, null, null);
   }
 
-  private FlutterView(@NonNull Context context, @Nullable AttributeSet attrs, @Nullable RenderMode renderMode) {
+  private FlutterView(@NonNull Context context, @Nullable AttributeSet attrs, @Nullable RenderMode renderMode, @Nullable TransparencyMode transparencyMode) {
     super(context, attrs);
 
     this.renderMode = renderMode == null ? RenderMode.surface : renderMode;
+    this.transparencyMode = transparencyMode != null ? transparencyMode : TransparencyMode.opaque;
 
     init();
   }
@@ -135,7 +159,7 @@ public class FlutterView extends FrameLayout {
     switch (renderMode) {
       case surface:
         Log.d(TAG, "Internally creating a FlutterSurfaceView.");
-        FlutterSurfaceView flutterSurfaceView = new FlutterSurfaceView(getContext());
+        FlutterSurfaceView flutterSurfaceView = new FlutterSurfaceView(getContext(), transparencyMode == TransparencyMode.transparent);
         renderSurface = flutterSurfaceView;
         addView(flutterSurfaceView);
         break;
@@ -590,5 +614,40 @@ public class FlutterView extends FrameLayout {
      * are required, developers should strongly prefer the {@link RenderMode#surface} render mode.
      */
     texture
+  }
+
+  /**
+   * Transparency mode for a {@code FlutterView}.
+   * <p>
+   * {@code TransparencyMode} impacts the visual behavior and performance of a {@link FlutterSurfaceView},
+   * which is displayed when a {@code FlutterView} uses {@link RenderMode#surface}.
+   * <p>
+   * {@code TransparencyMode} does not impact {@link FlutterTextureView}, which is displayed when
+   * a {@code FlutterView} uses {@link RenderMode#texture}, because a {@link FlutterTextureView}
+   * automatically comes with transparency.
+   */
+  public enum TransparencyMode {
+    /**
+     * Renders a {@code FlutterView} without any transparency. This affects {@code FlutterView}s in
+     * {@link RenderMode#surface} by introducing a base color of black, and places the
+     * {@link FlutterSurfaceView}'s {@code Window} behind all other content.
+     * <p>
+     * In {@link RenderMode#surface}, this mode is the most performant and is a good choice for
+     * fullscreen Flutter UIs that will not undergo {@code Fragment} transactions. If this mode is
+     * used within a {@code Fragment}, and that {@code Fragment} is replaced by another one, a
+     * brief black flicker may be visible during the switch.
+     */
+    opaque,
+    /**
+     * Renders a {@code FlutterView} with transparency. This affects {@code FlutterView}s in
+     * {@link RenderMode#surface} by allowing background transparency, and places the
+     * {@link FlutterSurfaceView}'s {@code Window} on top of all other content.
+     * <p>
+     * In {@link RenderMode#surface}, this mode is less performant than {@link #opaque}, but this
+     * mode avoids the black flicker problem that {@link #opaque} has when going through
+     * {@code Fragment} transactions. Consider using this {@code TransparencyMode} if you intend to
+     * switch {@code Fragment}s at runtime that contain a Flutter UI.
+     */
+    transparent
   }
 }

@@ -273,6 +273,7 @@ public class FlutterActivity extends FragmentActivity implements OnFirstFrameRen
         .appBundlePath(getAppBundlePath())
         .flutterShellArgs(FlutterShellArgs.fromIntent(getIntent()))
         .renderMode(FlutterView.RenderMode.surface)
+        .transparencyMode(FlutterView.TransparencyMode.opaque)
         .build();
   }
 
