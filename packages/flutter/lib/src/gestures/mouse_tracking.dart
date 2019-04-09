@@ -124,7 +124,7 @@ class MouseTracker {
     for (int deviceId in trackedAnnotation.activeDevices) {
       annotation.onExit(PointerExitEvent.fromMouseEvent(_lastMouseEvent[deviceId]));
     }
-    _trackedAnnotations.remove(annotation);
+    _trackedAnnotations.remove(trackedAnnotation);
   }
 
   void _scheduleMousePositionCheck() {
