@@ -276,45 +276,51 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
 
   @override
   void didStopTrackingLastPointer(int pointer) {
-    final int buttons = _initialButtons;
-    _initialButtons = null;
-    if (_state == _DragState.possible) {
-      resolve(GestureDisposition.rejected);
-      _state = _DragState.ready;
-      if (onCancel != null)
-        invokeCallback<void>('onCancel', onCancel);
-      return;
-    }
-    final bool wasAccepted = _state == _DragState.accepted;
-    _state = _DragState.ready;
-    if (wasAccepted && onEnd != null) {
-      final VelocityTracker tracker = _velocityTrackers[pointer];
-      assert(tracker != null);
+    assert(_state != _DragState.ready);
+    switch(_state) {
+      case _DragState.ready:
+        break;
 
-      final VelocityEstimate estimate = tracker.getVelocityEstimate();
-      if (estimate != null && _isFlingGesture(estimate)) {
-        final Velocity velocity = Velocity(pixelsPerSecond: estimate.pixelsPerSecond)
-          .clampMagnitude(minFlingVelocity ?? kMinFlingVelocity, maxFlingVelocity ?? kMaxFlingVelocity);
-        invokeCallback<void>('onEnd', () => onEnd(DragEndDetails(
-          velocity: velocity,
-          primaryVelocity: _getPrimaryValueFromOffset(velocity.pixelsPerSecond),
-          buttons: buttons,
-        )), debugReport: () {
-          return '$estimate; fling at $velocity.';
-        });
-      } else {
-        invokeCallback<void>('onEnd', () => onEnd(DragEndDetails(
-          velocity: Velocity.zero,
-          primaryVelocity: 0.0,
-          buttons: buttons,
-        )), debugReport: () {
-          if (estimate == null)
-            return 'Could not estimate velocity.';
-          return '$estimate; judged to not be a fling.';
-        });
-      }
+      case _DragState.possible:
+        resolve(GestureDisposition.rejected);
+        if (onCancel != null)
+          invokeCallback<void>('onCancel', onCancel);
+        break;
+
+      case _DragState.accepted:
+        if (onEnd == null) {
+          break;
+        }
+        final VelocityTracker tracker = _velocityTrackers[pointer];
+        assert(tracker != null);
+
+        final VelocityEstimate estimate = tracker.getVelocityEstimate();
+        if (estimate != null && _isFlingGesture(estimate)) {
+          final Velocity velocity = Velocity(pixelsPerSecond: estimate.pixelsPerSecond)
+            .clampMagnitude(minFlingVelocity ?? kMinFlingVelocity, maxFlingVelocity ?? kMaxFlingVelocity);
+          invokeCallback<void>('onEnd', () => onEnd(DragEndDetails(
+            velocity: velocity,
+            primaryVelocity: _getPrimaryValueFromOffset(velocity.pixelsPerSecond),
+            buttons: _initialButtons,
+          )), debugReport: () {
+            return '$estimate; fling at $velocity.';
+          });
+        } else {
+          invokeCallback<void>('onEnd', () => onEnd(DragEndDetails(
+            velocity: Velocity.zero,
+            primaryVelocity: 0.0,
+            buttons: _initialButtons,
+          )), debugReport: () {
+            if (estimate == null)
+              return 'Could not estimate velocity.';
+            return '$estimate; judged to not be a fling.';
+          });
+        }
+        break;
     }
     _velocityTrackers.clear();
+    _initialButtons = null;
+    _state = _DragState.ready;
   }
 
   @override
