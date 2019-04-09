@@ -65,6 +65,7 @@ public class FlutterFragment extends Fragment {
   private static final String ARG_APP_BUNDLE_PATH = "app_bundle_path";
   private static final String ARG_FLUTTER_INITIALIZATION_ARGS = "initialization_args";
   private static final String ARG_FLUTTERVIEW_RENDER_MODE = "flutterview_render_mode";
+  private static final String ARG_FLUTTERVIEW_TRANSPARENCY_MODE = "flutterview_transparency_mode";
 
   /**
    * Builder that creates a new {@code FlutterFragment} with {@code arguments} that correspond
@@ -82,6 +83,7 @@ public class FlutterFragment extends Fragment {
     private String appBundlePath = null;
     private FlutterShellArgs shellArgs = null;
     private FlutterView.RenderMode renderMode = FlutterView.RenderMode.surface;
+    private FlutterView.TransparencyMode transparencyMode = FlutterView.TransparencyMode.transparent;
 
     /**
      * The name of the initial Dart method to invoke, defaults to "main".
@@ -135,6 +137,18 @@ public class FlutterFragment extends Fragment {
       return this;
     }
 
+    /**
+     * Support a {@link FlutterView.TransparencyMode#transparent} background within {@link FlutterView},
+     * or force an {@link FlutterView.TransparencyMode#opaque} background.
+     * <p>
+     * See {@link FlutterView.TransparencyMode} for implications of this selection.
+     */
+    @NonNull
+    public Builder transparencyMode(@NonNull FlutterView.TransparencyMode transparencyMode) {
+      this.transparencyMode = transparencyMode;
+      return this;
+    }
+
     @NonNull
     public FlutterFragment build() {
       FlutterFragment frag = new FlutterFragment();
@@ -144,7 +158,8 @@ public class FlutterFragment extends Fragment {
           initialRoute,
           appBundlePath,
           shellArgs,
-          renderMode
+          renderMode,
+          transparencyMode
       );
       frag.setArguments(args);
 
@@ -194,7 +209,8 @@ public class FlutterFragment extends Fragment {
                                            @Nullable String initialRoute,
                                            @Nullable String appBundlePath,
                                            @Nullable FlutterShellArgs flutterShellArgs,
-                                           @Nullable FlutterView.RenderMode renderMode) {
+                                           @Nullable FlutterView.RenderMode renderMode,
+                                           @Nullable FlutterView.TransparencyMode transparencyMode) {
     Bundle args = new Bundle();
     args.putString(ARG_INITIAL_ROUTE, initialRoute);
     args.putString(ARG_APP_BUNDLE_PATH, appBundlePath);
@@ -204,6 +220,7 @@ public class FlutterFragment extends Fragment {
       args.putStringArray(ARG_FLUTTER_INITIALIZATION_ARGS, flutterShellArgs.toArray());
     }
     args.putString(ARG_FLUTTERVIEW_RENDER_MODE, renderMode != null ? renderMode.name() : FlutterView.RenderMode.surface.name());
+    args.putString(ARG_FLUTTERVIEW_TRANSPARENCY_MODE, transparencyMode != null ? transparencyMode.name() : FlutterView.TransparencyMode.transparent.name());
     return args;
   }
 
@@ -315,7 +332,7 @@ public class FlutterFragment extends Fragment {
   @Nullable
   @Override
   public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-    flutterView = new FlutterView(getContext(), getRenderMode());
+    flutterView = new FlutterView(getContext(), getRenderMode(), getTransparencyMode());
     flutterView.addOnFirstFrameRenderedListener(onFirstFrameRenderedListener);
 
     // We post() the code that attaches the FlutterEngine to our FlutterView because there is
@@ -411,6 +428,18 @@ public class FlutterFragment extends Fragment {
   protected FlutterView.RenderMode getRenderMode() {
     String renderModeName = getArguments().getString(ARG_FLUTTERVIEW_RENDER_MODE, FlutterView.RenderMode.surface.name());
     return FlutterView.RenderMode.valueOf(renderModeName);
+  }
+
+  /**
+   * Returns the desired {@link FlutterView.TransparencyMode} for the {@link FlutterView} displayed in
+   * this {@code FlutterFragment}.
+   * <p>
+   * Defaults to {@link FlutterView.TransparencyMode#transparent}.
+   */
+  @NonNull
+  protected FlutterView.TransparencyMode getTransparencyMode() {
+    String transparencyModeName = getArguments().getString(ARG_FLUTTERVIEW_TRANSPARENCY_MODE, FlutterView.TransparencyMode.transparent.name());
+    return FlutterView.TransparencyMode.valueOf(transparencyModeName);
   }
 
   // TODO(mattcarroll): determine why this can't be in onResume(). Comment reason, or move if possible.
