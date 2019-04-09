@@ -76,20 +76,60 @@ abstract class ShaderWarmUp {
   @protected
   Future<void> warmUpOnCanvas(ui.Canvas canvas);
 
+  /// Do multiple rounds of shader warm-ups additional to the [warmUpOnCanvas].
+  ///
+  /// Skia's GPU backend can group the operations within a single
+  /// round of [warmUpOnCanvas], and only generate a single shader for them.
+  /// Splitting those operations in multiple rounds disables such grouping and
+  /// forces Skia to generate multiple shaders.
+  ///
+  /// For example, let A be drawing an image without transparency, and B be
+  /// drawing an image with transparency. Drawing A and B in one round (frame)
+  /// would only generate one shader. Drawing A and B in multiple rounds
+  /// (frames) would generate two shaders, one for each of them. For the
+  /// purpose of removing all shader compilations in later animations, it's
+  /// better to compile both of them during the shader warm up.
+  ///
+  /// This is default to be empty. Override it and draw different things based
+  /// on [round] if [moreWarmUpCount] is overriden to be positive.
+  ///
+  /// The [round] will be between 1 and [moreWarmUpCount].
+  @protected
+  Future<void> moreWarmUpOnCanvas(ui.Canvas canvas, int round) async {}
+
+  /// Number of additional shader warm up rounds to do in [moreWarmUpOnCanvas].
+  ///
+  /// This is default to be 0 so no additional shader warm up is done. Override
+  /// this to be positive if additional shader warm up rounds are needed.
+  int get moreWarmUpCount => 0;
+
   /// Construct an offscreen image of [size], and execute [warmUpOnCanvas] on a
   /// canvas associated with that image.
   Future<void> execute() async {
-    final ui.PictureRecorder recorder = ui.PictureRecorder();
-    final ui.Canvas canvas = ui.Canvas(recorder);
+    final List<ui.Picture> pictures = <ui.Picture>[];
 
-    await warmUpOnCanvas(canvas);
+    for (int i = 0; i < 1 + moreWarmUpCount; i += 1) {
+      final ui.PictureRecorder recorder = ui.PictureRecorder();
+      final ui.Canvas canvas = ui.Canvas(recorder);
+      if (i == 0) {
+        await warmUpOnCanvas(canvas);
+      } else {
+        await moreWarmUpOnCanvas(canvas, i);
+      }
+      pictures.add(recorder.endRecording());
+    }
 
-    final ui.Picture picture = recorder.endRecording();
-    final TimelineTask shaderWarmUpTask = TimelineTask();
-    shaderWarmUpTask.start('Warm-up shader');
-    picture.toImage(size.width.ceil(), size.height.ceil()).then((ui.Image image) {
-      shaderWarmUpTask.finish();
-    });
+    // TODO(liyuqian): add an engine API to draw multiple pictures with flush added in between.
+    //
+    // The current way of drawing each picture in a separate screenshot is costly.
+    // A flush between pictures should be enough.
+    for (int i = 0; i < 1 + moreWarmUpCount; i += 1) {
+      final TimelineTask shaderWarmUpTask = TimelineTask();
+      shaderWarmUpTask.start('Warm-up shader $i');
+      pictures[i].toImage(size.width.ceil(), size.height.ceil()).then((ui.Image image) {
+        shaderWarmUpTask.finish();
+      });
+    }
   }
 }
 
