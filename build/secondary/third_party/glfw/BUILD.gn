@@ -76,8 +76,26 @@ source_set("glfw") {
       "Xrandr",
       "Xxf86vm",
     ]
+  } else if (is_mac) {
+    sources += [
+      "$_checkout_dir/src/cocoa_init.m",
+      "$_checkout_dir/src/cocoa_joystick.h",
+      "$_checkout_dir/src/cocoa_joystick.m",
+      "$_checkout_dir/src/cocoa_monitor.m",
+      "$_checkout_dir/src/cocoa_platform.h",
+      "$_checkout_dir/src/cocoa_time.c",
+      "$_checkout_dir/src/cocoa_window.m",
+      "$_checkout_dir/src/nsgl_context.h",
+      "$_checkout_dir/src/nsgl_context.m",
+      "$_checkout_dir/src/posix_tls.c",
+      "$_checkout_dir/src/posix_tls.h",
+    ]
 
-    configs -= [ "//build/config/compiler:chromium_code" ]
-    configs += [ "//build/config/compiler:no_chromium_code" ]
+    defines = [ "_GLFW_COCOA" ]
+
+    cflags = [ "-Wno-deprecated-declarations" ]
   }
+
+  configs -= [ "//build/config/compiler:chromium_code" ]
+  configs += [ "//build/config/compiler:no_chromium_code" ]
 }
