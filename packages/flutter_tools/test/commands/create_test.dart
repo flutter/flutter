@@ -978,8 +978,7 @@ Future<void> _analyzeProject(String workingDir) async {
     'flutter_tools.dart',
   ));
 
-  final List<String> args = <String>[]
-    ..addAll(dartVmFlags)
+  final List<String> args = <String>[...dartVmFlags]
     ..add(flutterToolsPath)
     ..add('analyze');
 
@@ -1005,15 +1004,13 @@ Future<void> _runFlutterTest(Directory workingDir, { String target }) async {
   // files anymore.
   await Process.run(
     '$dartSdkPath/bin/dart',
-    <String>[]
-    ..addAll(dartVmFlags)
+    <String>[...dartVmFlags]
     ..add(flutterToolsPath)
     ..addAll(<String>['packages', 'get']),
     workingDirectory: workingDir.path,
   );
 
-  final List<String> args = <String>[]
-    ..addAll(dartVmFlags)
+  final List<String> args = <String>[...dartVmFlags]
     ..add(flutterToolsPath)
     ..add('test')
     ..add('--no-color');

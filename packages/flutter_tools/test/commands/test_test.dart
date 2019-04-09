@@ -160,8 +160,7 @@ Future<ProcessResult> _runFlutterTest(
   if (!testFile.existsSync())
     fail('missing test file: $testFile');
 
-  final List<String> args = <String>[]
-    ..addAll(dartVmFlags)
+  final List<String> args = <String>[...dartVmFlags]
     ..add(fs.path.absolute(fs.path.join('bin', 'flutter_tools.dart')))
     ..add('test')
     ..add('--no-color')

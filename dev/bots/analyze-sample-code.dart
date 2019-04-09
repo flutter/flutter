@@ -866,8 +866,8 @@ class Section {
 /// analyzed.
 class Snippet {
   Snippet({this.start, List<String> input, List<String> args, this.serial}) {
-    this.input = <String>[]..addAll(input);
-    this.args = <String>[]..addAll(args);
+    this.input = <String>[...input];
+    this.args = <String>[...args];
   }
   final Line start;
   final int serial;

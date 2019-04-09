@@ -112,7 +112,7 @@ Future<void> main(List<String> arguments) async {
   // Verify which version of dartdoc we're using.
   final ProcessResult result = Process.runSync(
     pubExecutable,
-    <String>[]..addAll(dartdocBaseArgs)..add('--version'),
+    <String>[...dartdocBaseArgs]..add('--version'),
     workingDirectory: kDocsRoot,
     environment: pubEnvironment,
   );
@@ -132,7 +132,7 @@ Future<void> main(List<String> arguments) async {
   // Generate the documentation.
   // We don't need to exclude flutter_tools in this list because it's not in the
   // recursive dependencies of the package defined at dev/docs/pubspec.yaml
-  final List<String> dartdocArgs = <String>[]..addAll(dartdocBaseArgs)..addAll(<String>[
+  final List<String> dartdocArgs = <String>[...dartdocBaseArgs, ...<String>[
     '--inject-html',
     '--header', 'styles.html',
     '--header', 'analytics.html',
@@ -193,7 +193,7 @@ Future<void> main(List<String> arguments) async {
     '--favicon=favicon.ico',
     '--package-order', 'flutter,Dart,platform_integration,flutter_test,flutter_driver',
     '--auto-include-dependencies',
-  ]);
+  ]];
 
   String quote(String arg) => arg.contains(' ') ? "'$arg'" : arg;
   print('Executing: (cd $kDocsRoot ; $pubExecutable ${dartdocArgs.map<String>(quote).join(' ')})');
