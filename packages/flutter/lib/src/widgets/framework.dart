@@ -702,7 +702,11 @@ abstract class StatelessWidget extends Widget {
 ///
 /// {@tool sample}
 ///
-/// The following is a skeleton of a stateful widget subclass called `YellowBird`:
+/// This is a skeleton of a stateful widget subclass called `YellowBird`.
+///
+/// In this example. the [State] has no actual state. State is normally
+/// represented as private member fields. Also, normally widgets have more
+/// constructor arguments, each of which corresponds to a `final` property.
 ///
 /// ```dart
 /// class YellowBird extends StatefulWidget {
@@ -721,10 +725,6 @@ abstract class StatelessWidget extends Widget {
 /// ```
 /// {@end-tool}
 /// {@tool sample}
-///
-/// In this example. the [State] has no actual state. State is normally
-/// represented as private member fields. Also, normally widgets have more
-/// constructor arguments, each of which corresponds to a `final` property.
 ///
 /// The next example shows the more generic widget `Bird` which can be given a
 /// color and a child, and which has some internal state with a method that
