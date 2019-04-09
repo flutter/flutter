@@ -23,7 +23,7 @@
 #include "txt/asset_font_manager.h"
 #include "txt/test_font_manager.h"
 
-namespace blink {
+namespace flutter {
 
 namespace {
 
@@ -161,4 +161,4 @@ void FontCollection::LoadFontFromList(const uint8_t* font_data,
   collection_->ClearFontFamilyCache();
 }
 
-}  // namespace blink
+}  // namespace flutter

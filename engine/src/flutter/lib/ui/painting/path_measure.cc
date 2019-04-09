@@ -15,7 +15,7 @@
 
 using tonic::ToDart;
 
-namespace blink {
+namespace flutter {
 
 typedef CanvasPathMeasure PathMeasure;
 
@@ -132,4 +132,4 @@ bool CanvasPathMeasure::nextContour() {
   return false;
 }
 
-}  // namespace blink
+}  // namespace flutter

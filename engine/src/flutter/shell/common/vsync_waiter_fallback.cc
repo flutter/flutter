@@ -20,7 +20,7 @@ static fml::TimePoint SnapToNextTick(fml::TimePoint value,
 
 }  // namespace
 
-VsyncWaiterFallback::VsyncWaiterFallback(blink::TaskRunners task_runners)
+VsyncWaiterFallback::VsyncWaiterFallback(flutter::TaskRunners task_runners)
     : VsyncWaiter(std::move(task_runners)), phase_(fml::TimePoint::Now()) {}
 
 VsyncWaiterFallback::~VsyncWaiterFallback() = default;

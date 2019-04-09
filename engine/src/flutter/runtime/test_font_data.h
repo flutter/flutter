@@ -10,11 +10,11 @@
 
 #include "third_party/skia/include/core/SkStream.h"
 
-namespace blink {
+namespace flutter {
 
 std::unique_ptr<SkStreamAsset> GetTestFontData();
 std::string GetTestFontFamilyName();
 
-}  // namespace blink
+}  // namespace flutter
 
 #endif  // FLUTTER_RUNTIME_TEST_FONT_DATA_H_

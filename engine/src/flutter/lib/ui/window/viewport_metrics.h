@@ -7,7 +7,7 @@
 
 #include <stdint.h>
 
-namespace blink {
+namespace flutter {
 
 struct ViewportMetrics {
   ViewportMetrics();
@@ -58,6 +58,6 @@ struct LogicalMetrics {
   LogicalInset view_inset;
 };
 
-}  // namespace blink
+}  // namespace flutter
 
 #endif  // FLUTTER_LIB_UI_WINDOW_VIEWPORT_METRICS_H_

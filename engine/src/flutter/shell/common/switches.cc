@@ -46,11 +46,11 @@ void PrintUsage(const std::string& executable_name) {
 
   std::cerr << "Versions: " << std::endl << std::endl;
 
-  std::cerr << "Flutter Engine Version: " << blink::GetFlutterEngineVersion()
+  std::cerr << "Flutter Engine Version: " << flutter::GetFlutterEngineVersion()
             << std::endl;
-  std::cerr << "Skia Version: " << blink::GetSkiaVersion() << std::endl;
+  std::cerr << "Skia Version: " << flutter::GetSkiaVersion() << std::endl;
 
-  std::cerr << "Dart Version: " << blink::GetDartVersion() << std::endl
+  std::cerr << "Dart Version: " << flutter::GetDartVersion() << std::endl
             << std::endl;
 
   std::cerr << "Available Flags:" << std::endl;
@@ -150,8 +150,9 @@ std::unique_ptr<fml::Mapping> GetSymbolMapping(std::string symbol_prefix,
   return std::make_unique<fml::NonOwnedMapping>(mapping, size);
 }
 
-blink::Settings SettingsFromCommandLine(const fml::CommandLine& command_line) {
-  blink::Settings settings = {};
+flutter::Settings SettingsFromCommandLine(
+    const fml::CommandLine& command_line) {
+  flutter::Settings settings = {};
 
   // Enable Observatory
   settings.enable_observatory =

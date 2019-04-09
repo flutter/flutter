@@ -17,7 +17,7 @@ struct ResourcesEntry {
 }  // namespace runtime
 }  // namespace flutter
 
-namespace blink {
+namespace flutter {
 
 class EmbedderResources {
  public:
@@ -34,6 +34,6 @@ class EmbedderResources {
   flutter::runtime::ResourcesEntry* resources_table_;
 };
 
-}  // namespace blink
+}  // namespace flutter
 
 #endif  // FLUTTER_RUNTIME_EMBEDDER_RESOURCES_H_

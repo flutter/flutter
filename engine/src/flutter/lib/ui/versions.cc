@@ -12,7 +12,7 @@
 
 using tonic::DartConverter;
 
-namespace blink {
+namespace flutter {
 
 // returns a vector with 3 versions.
 // Dart, Skia and Flutter engine versions in this order.
@@ -28,4 +28,4 @@ void Versions::RegisterNatives(tonic::DartLibraryNatives* natives) {
   natives->Register({{"Versions_getVersions", GetVersions, 0, true}});
 }
 
-}  // namespace blink
+}  // namespace flutter

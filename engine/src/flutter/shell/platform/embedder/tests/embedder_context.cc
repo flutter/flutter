@@ -44,7 +44,7 @@ EmbedderContext::EmbedderContext(std::string assets_path)
   isolate_snapshot_data_ =
       GetMapping(assets_dir, "isolate_snapshot_data", false);
 
-  if (blink::DartVM::IsRunningPrecompiledCode()) {
+  if (flutter::DartVM::IsRunningPrecompiledCode()) {
     vm_snapshot_instructions_ =
         GetMapping(assets_dir, "vm_snapshot_instr", true);
     isolate_snapshot_instructions_ =

@@ -17,7 +17,7 @@ namespace tonic {
 class DartLibraryNatives;
 }  // namespace tonic
 
-namespace blink {
+namespace flutter {
 
 class FontCollection {
  public:
@@ -44,6 +44,6 @@ class FontCollection {
   FML_DISALLOW_COPY_AND_ASSIGN(FontCollection);
 };
 
-}  // namespace blink
+}  // namespace flutter
 
 #endif  // FLUTTER_LIB_UI_TEXT_FONT_COLLECTION_H_

@@ -8,7 +8,7 @@
 #include "third_party/tonic/logging/dart_error.h"
 #include "third_party/tonic/typed_data/float32_list.h"
 
-using namespace blink;
+using namespace flutter;
 
 namespace tonic {
 

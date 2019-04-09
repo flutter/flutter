@@ -4,8 +4,8 @@
 
 #include "flutter/runtime/start_up.h"
 
-namespace blink {
+namespace flutter {
 
 int64_t engine_main_enter_ts = 0;
 
-}  // namespace blink
+}  // namespace flutter

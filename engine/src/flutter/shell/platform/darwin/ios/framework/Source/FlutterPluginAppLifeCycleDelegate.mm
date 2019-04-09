@@ -60,7 +60,7 @@ static BOOL isPowerOfTwo(NSUInteger x) {
 
 - (BOOL)application:(UIApplication*)application
     willFinishLaunchingWithOptions:(NSDictionary*)launchOptions {
-  blink::DartCallbackCache::LoadCacheFromDisk();
+  flutter::DartCallbackCache::LoadCacheFromDisk();
   for (id<FlutterPlugin> plugin in [_pluginDelegates allObjects]) {
     if (!plugin) {
       continue;

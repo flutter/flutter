@@ -166,7 +166,7 @@ static void DestroyJNI(JNIEnv* env, jobject jcaller, jlong shell_holder) {
 
 static jstring GetObservatoryUri(JNIEnv* env, jclass clazz) {
   return env->NewStringUTF(
-      blink::DartServiceIsolate::GetObservatoryUri().c_str());
+      flutter::DartServiceIsolate::GetObservatoryUri().c_str());
 }
 
 static void SurfaceCreated(JNIEnv* env,
@@ -196,8 +196,8 @@ static void SurfaceDestroyed(JNIEnv* env, jobject jcaller, jlong shell_holder) {
 }
 
 std::unique_ptr<IsolateConfiguration> CreateIsolateConfiguration(
-    const blink::AssetManager& asset_manager) {
-  if (blink::DartVM::IsRunningPrecompiledCode()) {
+    const flutter::AssetManager& asset_manager) {
+  if (flutter::DartVM::IsRunningPrecompiledCode()) {
     return IsolateConfiguration::CreateForAppSnapshot();
   }
 
@@ -236,7 +236,7 @@ static void RunBundleAndSnapshotFromLibrary(JNIEnv* env,
                                             jstring jEntrypoint,
                                             jstring jLibraryUrl,
                                             jobject jAssetManager) {
-  auto asset_manager = std::make_shared<blink::AssetManager>();
+  auto asset_manager = std::make_shared<flutter::AssetManager>();
   for (const auto& bundlepath :
        fml::jni::StringArrayToVector(env, jbundlepaths)) {
     if (bundlepath.empty()) {
@@ -247,12 +247,12 @@ static void RunBundleAndSnapshotFromLibrary(JNIEnv* env,
     // bundle or a zip asset bundle.
     const auto file_ext_index = bundlepath.rfind(".");
     if (bundlepath.substr(file_ext_index) == ".zip") {
-      asset_manager->PushBack(std::make_unique<blink::ZipAssetStore>(
+      asset_manager->PushBack(std::make_unique<flutter::ZipAssetStore>(
           bundlepath, "assets/flutter_assets"));
 
     } else {
       asset_manager->PushBack(
-          std::make_unique<blink::DirectoryAssetBundle>(fml::OpenDirectory(
+          std::make_unique<flutter::DirectoryAssetBundle>(fml::OpenDirectory(
               bundlepath.c_str(), false, fml::FilePermission::kRead)));
 
       // Use the last path component of the bundle path to determine the
@@ -262,7 +262,7 @@ static void RunBundleAndSnapshotFromLibrary(JNIEnv* env,
         auto apk_asset_dir = bundlepath.substr(
             last_slash_index + 1, bundlepath.size() - last_slash_index);
 
-        asset_manager->PushBack(std::make_unique<blink::APKAssetProvider>(
+        asset_manager->PushBack(std::make_unique<flutter::APKAssetProvider>(
             env,                       // jni environment
             jAssetManager,             // asset manager
             std::move(apk_asset_dir))  // apk asset dir
@@ -299,7 +299,7 @@ static void RunBundleAndSnapshotFromLibrary(JNIEnv* env,
 static jobject LookupCallbackInformation(JNIEnv* env,
                                          /* unused */ jobject,
                                          jlong handle) {
-  auto cbInfo = blink::DartCallbackCache::GetCallbackInformation(handle);
+  auto cbInfo = flutter::DartCallbackCache::GetCallbackInformation(handle);
   if (cbInfo == nullptr) {
     return nullptr;
   }
@@ -321,7 +321,7 @@ static void SetViewportMetrics(JNIEnv* env,
                                jint physicalViewInsetRight,
                                jint physicalViewInsetBottom,
                                jint physicalViewInsetLeft) {
-  const blink::ViewportMetrics metrics{
+  const flutter::ViewportMetrics metrics{
       static_cast<double>(devicePixelRatio),
       static_cast<double>(physicalWidth),
       static_cast<double>(physicalHeight),
@@ -445,7 +445,7 @@ static void DispatchPointerDataPacket(JNIEnv* env,
                                       jobject buffer,
                                       jint position) {
   uint8_t* data = static_cast<uint8_t*>(env->GetDirectBufferAddress(buffer));
-  auto packet = std::make_unique<blink::PointerDataPacket>(data, position);
+  auto packet = std::make_unique<flutter::PointerDataPacket>(data, position);
   ANDROID_SHELL_HOLDER->DispatchPointerDataPacket(std::move(packet));
 }
 

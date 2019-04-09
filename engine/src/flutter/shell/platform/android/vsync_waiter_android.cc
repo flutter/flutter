@@ -19,7 +19,7 @@ namespace shell {
 static fml::jni::ScopedJavaGlobalRef<jclass>* g_vsync_waiter_class = nullptr;
 static jmethodID g_async_wait_for_vsync_method_ = nullptr;
 
-VsyncWaiterAndroid::VsyncWaiterAndroid(blink::TaskRunners task_runners)
+VsyncWaiterAndroid::VsyncWaiterAndroid(flutter::TaskRunners task_runners)
     : VsyncWaiter(std::move(task_runners)) {}
 
 VsyncWaiterAndroid::~VsyncWaiterAndroid() = default;

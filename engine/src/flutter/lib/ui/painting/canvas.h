@@ -22,7 +22,7 @@ namespace tonic {
 class DartLibraryNatives;
 }  // namespace tonic
 
-namespace blink {
+namespace flutter {
 class CanvasImage;
 
 class Canvas : public RefCountedDartWrappable<Canvas> {
@@ -181,6 +181,6 @@ class Canvas : public RefCountedDartWrappable<Canvas> {
   SkCanvas* canvas_;
 };
 
-}  // namespace blink
+}  // namespace flutter
 
 #endif  // FLUTTER_LIB_UI_PAINTING_CANVAS_H_

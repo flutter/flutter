@@ -8,7 +8,7 @@ namespace shell {
 
 PlatformViewEmbedder::PlatformViewEmbedder(
     PlatformView::Delegate& delegate,
-    blink::TaskRunners task_runners,
+    flutter::TaskRunners task_runners,
     EmbedderSurfaceGL::GLDispatchTable gl_dispatch_table,
     bool fbo_reset_after_present,
     PlatformDispatchTable platform_dispatch_table)
@@ -20,7 +20,7 @@ PlatformViewEmbedder::PlatformViewEmbedder(
 
 PlatformViewEmbedder::PlatformViewEmbedder(
     PlatformView::Delegate& delegate,
-    blink::TaskRunners task_runners,
+    flutter::TaskRunners task_runners,
     EmbedderSurfaceSoftware::SoftwareDispatchTable software_dispatch_table,
     PlatformDispatchTable platform_dispatch_table)
     : PlatformView(delegate, std::move(task_runners)),
@@ -31,8 +31,8 @@ PlatformViewEmbedder::PlatformViewEmbedder(
 PlatformViewEmbedder::~PlatformViewEmbedder() = default;
 
 void PlatformViewEmbedder::UpdateSemantics(
-    blink::SemanticsNodeUpdates update,
-    blink::CustomAccessibilityActionUpdates actions) {
+    flutter::SemanticsNodeUpdates update,
+    flutter::CustomAccessibilityActionUpdates actions) {
   if (platform_dispatch_table_.update_semantics_nodes_callback != nullptr) {
     platform_dispatch_table_.update_semantics_nodes_callback(std::move(update));
   }
@@ -44,7 +44,7 @@ void PlatformViewEmbedder::UpdateSemantics(
 }
 
 void PlatformViewEmbedder::HandlePlatformMessage(
-    fml::RefPtr<blink::PlatformMessage> message) {
+    fml::RefPtr<flutter::PlatformMessage> message) {
   if (!message) {
     return;
   }

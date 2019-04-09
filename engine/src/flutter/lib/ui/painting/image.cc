@@ -10,7 +10,7 @@
 #include "third_party/tonic/dart_binding_macros.h"
 #include "third_party/tonic/dart_library_natives.h"
 
-namespace blink {
+namespace flutter {
 
 typedef CanvasImage Image;
 
@@ -48,4 +48,4 @@ size_t CanvasImage::GetAllocationSize() {
   }
 }
 
-}  // namespace blink
+}  // namespace flutter

@@ -6,7 +6,7 @@
 
 #include <string.h>
 
-namespace blink {
+namespace flutter {
 
 // If this value changes, update the pointer data unpacking code in hooks.dart.
 static constexpr int kPointerDataFieldCount = 24;
@@ -18,4 +18,4 @@ void PointerData::Clear() {
   memset(this, 0, sizeof(PointerData));
 }
 
-}  // namespace blink
+}  // namespace flutter

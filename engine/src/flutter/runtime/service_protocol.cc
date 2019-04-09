@@ -18,7 +18,7 @@
 #include "rapidjson/writer.h"
 #include "third_party/dart/runtime/include/dart_tools_api.h"
 
-namespace blink {
+namespace flutter {
 
 const fml::StringView ServiceProtocol::kScreenshotExtensionName =
     "_flutter.screenshot";
@@ -276,4 +276,4 @@ bool ServiceProtocol::HandleListViewsMethod(
   return true;
 }
 
-}  // namespace blink
+}  // namespace flutter

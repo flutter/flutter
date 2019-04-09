@@ -17,7 +17,7 @@ namespace tonic {
 class DartLibraryNatives;
 }  // namespace tonic
 
-namespace blink {
+namespace flutter {
 
 // A handle to an SkCodec object.
 //
@@ -96,6 +96,6 @@ class SingleFrameCodec : public Codec {
   FML_FRIEND_REF_COUNTED_THREAD_SAFE(SingleFrameCodec);
 };
 
-}  // namespace blink
+}  // namespace flutter
 
 #endif  // FLUTTER_LIB_UI_PAINTING_CODEC_H_

@@ -20,7 +20,7 @@ namespace shell {
 
 PlatformViewAndroid::PlatformViewAndroid(
     PlatformView::Delegate& delegate,
-    blink::TaskRunners task_runners,
+    flutter::TaskRunners task_runners,
     fml::jni::JavaObjectWeakGlobalRef java_object,
     bool use_software_rendering)
     : PlatformView(delegate, std::move(task_runners)),
@@ -33,7 +33,7 @@ PlatformViewAndroid::PlatformViewAndroid(
 
 PlatformViewAndroid::PlatformViewAndroid(
     PlatformView::Delegate& delegate,
-    blink::TaskRunners task_runners,
+    flutter::TaskRunners task_runners,
     fml::jni::JavaObjectWeakGlobalRef java_object)
     : PlatformView(delegate, std::move(task_runners)),
       java_object_(java_object),
@@ -99,29 +99,29 @@ void PlatformViewAndroid::DispatchPlatformMessage(JNIEnv* env,
   std::vector<uint8_t> message =
       std::vector<uint8_t>(message_data, message_data + java_message_position);
 
-  fml::RefPtr<blink::PlatformMessageResponse> response;
+  fml::RefPtr<flutter::PlatformMessageResponse> response;
   if (response_id) {
     response = fml::MakeRefCounted<PlatformMessageResponseAndroid>(
         response_id, java_object_, task_runners_.GetPlatformTaskRunner());
   }
 
   PlatformView::DispatchPlatformMessage(
-      fml::MakeRefCounted<blink::PlatformMessage>(
+      fml::MakeRefCounted<flutter::PlatformMessage>(
           std::move(name), std::move(message), std::move(response)));
 }
 
 void PlatformViewAndroid::DispatchEmptyPlatformMessage(JNIEnv* env,
                                                        std::string name,
                                                        jint response_id) {
-  fml::RefPtr<blink::PlatformMessageResponse> response;
+  fml::RefPtr<flutter::PlatformMessageResponse> response;
   if (response_id) {
     response = fml::MakeRefCounted<PlatformMessageResponseAndroid>(
         response_id, java_object_, task_runners_.GetPlatformTaskRunner());
   }
 
   PlatformView::DispatchPlatformMessage(
-      fml::MakeRefCounted<blink::PlatformMessage>(std::move(name),
-                                                  std::move(response)));
+      fml::MakeRefCounted<flutter::PlatformMessage>(std::move(name),
+                                                    std::move(response)));
 }
 
 void PlatformViewAndroid::InvokePlatformMessageResponseCallback(
@@ -159,7 +159,7 @@ void PlatformViewAndroid::InvokePlatformMessageEmptyResponseCallback(
 
 // |shell::PlatformView|
 void PlatformViewAndroid::HandlePlatformMessage(
-    fml::RefPtr<blink::PlatformMessage> message) {
+    fml::RefPtr<flutter::PlatformMessage> message) {
   JNIEnv* env = fml::jni::AttachCurrentThread();
   fml::jni::ScopedJavaLocalRef<jobject> view = java_object_.get(env);
   if (view.is_null())
@@ -210,7 +210,7 @@ void PlatformViewAndroid::DispatchSemanticsAction(JNIEnv* env,
   if (env->IsSameObject(args, NULL)) {
     std::vector<uint8_t> args_vector;
     PlatformView::DispatchSemanticsAction(
-        id, static_cast<blink::SemanticsAction>(action), args_vector);
+        id, static_cast<flutter::SemanticsAction>(action), args_vector);
     return;
   }
 
@@ -219,13 +219,14 @@ void PlatformViewAndroid::DispatchSemanticsAction(JNIEnv* env,
       std::vector<uint8_t>(args_data, args_data + args_position);
 
   PlatformView::DispatchSemanticsAction(
-      id, static_cast<blink::SemanticsAction>(action), std::move(args_vector));
+      id, static_cast<flutter::SemanticsAction>(action),
+      std::move(args_vector));
 }
 
 // |shell::PlatformView|
 void PlatformViewAndroid::UpdateSemantics(
-    blink::SemanticsNodeUpdates update,
-    blink::CustomAccessibilityActionUpdates actions) {
+    flutter::SemanticsNodeUpdates update,
+    flutter::CustomAccessibilityActionUpdates actions) {
   constexpr size_t kBytesPerNode = 39 * sizeof(int32_t);
   constexpr size_t kBytesPerChild = sizeof(int32_t);
   constexpr size_t kBytesPerAction = 4 * sizeof(int32_t);
@@ -256,7 +257,7 @@ void PlatformViewAndroid::UpdateSemantics(
       // If you edit this code, make sure you update kBytesPerNode
       // and/or kBytesPerChild above to match the number of values you are
       // sending.
-      const blink::SemanticsNode& node = value.second;
+      const flutter::SemanticsNode& node = value.second;
       buffer_int32[position++] = node.id;
       buffer_int32[position++] = node.flags;
       buffer_int32[position++] = node.actions;
@@ -330,7 +331,7 @@ void PlatformViewAndroid::UpdateSemantics(
       // If you edit this code, make sure you update kBytesPerAction
       // to match the number of values you are
       // sending.
-      const blink::CustomAccessibilityAction& action = value.second;
+      const flutter::CustomAccessibilityAction& action = value.second;
       actions_buffer_int32[actions_position++] = action.id;
       actions_buffer_int32[actions_position++] = action.overrideId;
       if (action.label.empty()) {

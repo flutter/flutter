@@ -29,7 +29,7 @@
 
 namespace shell {
 
-class Engine final : public blink::RuntimeDelegate {
+class Engine final : public flutter::RuntimeDelegate {
  public:
   // Used by Engine::Run
   enum class RunStatus {
@@ -42,11 +42,11 @@ class Engine final : public blink::RuntimeDelegate {
   class Delegate {
    public:
     virtual void OnEngineUpdateSemantics(
-        blink::SemanticsNodeUpdates update,
-        blink::CustomAccessibilityActionUpdates actions) = 0;
+        flutter::SemanticsNodeUpdates update,
+        flutter::CustomAccessibilityActionUpdates actions) = 0;
 
     virtual void OnEngineHandlePlatformMessage(
-        fml::RefPtr<blink::PlatformMessage> message) = 0;
+        fml::RefPtr<flutter::PlatformMessage> message) = 0;
 
     virtual void OnPreEngineRestart() = 0;
 
@@ -55,14 +55,14 @@ class Engine final : public blink::RuntimeDelegate {
   };
 
   Engine(Delegate& delegate,
-         blink::DartVM& vm,
-         fml::RefPtr<const blink::DartSnapshot> isolate_snapshot,
-         fml::RefPtr<const blink::DartSnapshot> shared_snapshot,
-         blink::TaskRunners task_runners,
-         blink::Settings settings,
+         flutter::DartVM& vm,
+         fml::RefPtr<const flutter::DartSnapshot> isolate_snapshot,
+         fml::RefPtr<const flutter::DartSnapshot> shared_snapshot,
+         flutter::TaskRunners task_runners,
+         flutter::Settings settings,
          std::unique_ptr<Animator> animator,
-         fml::WeakPtr<blink::SnapshotDelegate> snapshot_delegate,
-         fml::WeakPtr<blink::IOManager> io_manager);
+         fml::WeakPtr<flutter::SnapshotDelegate> snapshot_delegate,
+         fml::WeakPtr<flutter::IOManager> io_manager);
 
   ~Engine() override;
 
@@ -80,7 +80,7 @@ class Engine final : public blink::RuntimeDelegate {
   FML_WARN_UNUSED_RESULT
   bool Restart(RunConfiguration configuration);
 
-  bool UpdateAssetManager(std::shared_ptr<blink::AssetManager> asset_manager);
+  bool UpdateAssetManager(std::shared_ptr<flutter::AssetManager> asset_manager);
 
   void BeginFrame(fml::TimePoint frame_time);
 
@@ -100,15 +100,15 @@ class Engine final : public blink::RuntimeDelegate {
 
   void OnOutputSurfaceDestroyed();
 
-  void SetViewportMetrics(const blink::ViewportMetrics& metrics);
+  void SetViewportMetrics(const flutter::ViewportMetrics& metrics);
 
-  void DispatchPlatformMessage(fml::RefPtr<blink::PlatformMessage> message);
+  void DispatchPlatformMessage(fml::RefPtr<flutter::PlatformMessage> message);
 
-  void DispatchPointerDataPacket(const blink::PointerDataPacket& packet,
+  void DispatchPointerDataPacket(const flutter::PointerDataPacket& packet,
                                  uint64_t trace_flow_id);
 
   void DispatchSemanticsAction(int id,
-                               blink::SemanticsAction action,
+                               flutter::SemanticsAction action,
                                std::vector<uint8_t> args);
 
   void SetSemanticsEnabled(bool enabled);
@@ -117,38 +117,38 @@ class Engine final : public blink::RuntimeDelegate {
 
   void ScheduleFrame(bool regenerate_layer_tree = true) override;
 
-  // |blink::RuntimeDelegate|
-  blink::FontCollection& GetFontCollection() override;
+  // |flutter::RuntimeDelegate|
+  flutter::FontCollection& GetFontCollection() override;
 
  private:
   Engine::Delegate& delegate_;
-  const blink::Settings settings_;
+  const flutter::Settings settings_;
   std::unique_ptr<Animator> animator_;
-  std::unique_ptr<blink::RuntimeController> runtime_controller_;
+  std::unique_ptr<flutter::RuntimeController> runtime_controller_;
   std::string initial_route_;
-  blink::ViewportMetrics viewport_metrics_;
-  std::shared_ptr<blink::AssetManager> asset_manager_;
+  flutter::ViewportMetrics viewport_metrics_;
+  std::shared_ptr<flutter::AssetManager> asset_manager_;
   bool activity_running_;
   bool have_surface_;
-  blink::FontCollection font_collection_;
+  flutter::FontCollection font_collection_;
   fml::WeakPtrFactory<Engine> weak_factory_;
 
-  // |blink::RuntimeDelegate|
+  // |flutter::RuntimeDelegate|
   std::string DefaultRouteName() override;
 
-  // |blink::RuntimeDelegate|
+  // |flutter::RuntimeDelegate|
   void Render(std::unique_ptr<flow::LayerTree> layer_tree) override;
 
-  // |blink::RuntimeDelegate|
+  // |flutter::RuntimeDelegate|
   void UpdateSemantics(
-      blink::SemanticsNodeUpdates update,
-      blink::CustomAccessibilityActionUpdates actions) override;
+      flutter::SemanticsNodeUpdates update,
+      flutter::CustomAccessibilityActionUpdates actions) override;
 
-  // |blink::RuntimeDelegate|
+  // |flutter::RuntimeDelegate|
   void HandlePlatformMessage(
-      fml::RefPtr<blink::PlatformMessage> message) override;
+      fml::RefPtr<flutter::PlatformMessage> message) override;
 
-  // |blink::RuntimeDelegate|
+  // |flutter::RuntimeDelegate|
   void UpdateIsolateDescription(const std::string isolate_name,
                                 int64_t isolate_port) override;
 
@@ -156,16 +156,17 @@ class Engine final : public blink::RuntimeDelegate {
 
   void StartAnimatorIfPossible();
 
-  bool HandleLifecyclePlatformMessage(blink::PlatformMessage* message);
+  bool HandleLifecyclePlatformMessage(flutter::PlatformMessage* message);
 
   bool HandleNavigationPlatformMessage(
-      fml::RefPtr<blink::PlatformMessage> message);
+      fml::RefPtr<flutter::PlatformMessage> message);
 
-  bool HandleLocalizationPlatformMessage(blink::PlatformMessage* message);
+  bool HandleLocalizationPlatformMessage(flutter::PlatformMessage* message);
 
-  void HandleSettingsPlatformMessage(blink::PlatformMessage* message);
+  void HandleSettingsPlatformMessage(flutter::PlatformMessage* message);
 
-  void HandleAssetPlatformMessage(fml::RefPtr<blink::PlatformMessage> message);
+  void HandleAssetPlatformMessage(
+      fml::RefPtr<flutter::PlatformMessage> message);
 
   bool GetAssetAsBuffer(const std::string& name, std::vector<uint8_t>* data);
 

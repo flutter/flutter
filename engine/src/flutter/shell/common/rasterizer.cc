@@ -22,12 +22,12 @@ namespace shell {
 // used within this interval.
 static constexpr std::chrono::milliseconds kSkiaCleanupExpiration(15000);
 
-Rasterizer::Rasterizer(blink::TaskRunners task_runners)
+Rasterizer::Rasterizer(flutter::TaskRunners task_runners)
     : Rasterizer(std::move(task_runners),
                  std::make_unique<flow::CompositorContext>()) {}
 
 Rasterizer::Rasterizer(
-    blink::TaskRunners task_runners,
+    flutter::TaskRunners task_runners,
     std::unique_ptr<flow::CompositorContext> compositor_context)
     : task_runners_(std::move(task_runners)),
       compositor_context_(std::move(compositor_context)),
@@ -41,7 +41,8 @@ fml::WeakPtr<Rasterizer> Rasterizer::GetWeakPtr() const {
   return weak_factory_.GetWeakPtr();
 }
 
-fml::WeakPtr<blink::SnapshotDelegate> Rasterizer::GetSnapshotDelegate() const {
+fml::WeakPtr<flutter::SnapshotDelegate> Rasterizer::GetSnapshotDelegate()
+    const {
   return weak_factory_.GetWeakPtr();
 }
 

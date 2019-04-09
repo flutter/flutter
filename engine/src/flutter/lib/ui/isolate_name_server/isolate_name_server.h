@@ -13,7 +13,7 @@
 #include "flutter/fml/synchronization/thread_annotations.h"
 #include "third_party/dart/runtime/include/dart_api.h"
 
-namespace blink {
+namespace flutter {
 
 class IsolateNameServer {
  public:
@@ -46,6 +46,6 @@ class IsolateNameServer {
   FML_DISALLOW_COPY_AND_ASSIGN(IsolateNameServer);
 };
 
-}  // namespace blink
+}  // namespace flutter
 
 #endif  // FLUTTER_LIB_UI_ISOLATE_NAME_SERVER_H_

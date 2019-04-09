@@ -10,7 +10,7 @@
 #include "third_party/tonic/typed_data/float64_list.h"
 #include "third_party/tonic/typed_data/int32_list.h"
 
-namespace blink {
+namespace flutter {
 
 /// A custom accessibility action is used to indicate additional semantics
 /// actions that a user can perform on a semantics node beyond the
@@ -32,6 +32,6 @@ struct CustomAccessibilityAction {
 using CustomAccessibilityActionUpdates =
     std::unordered_map<int32_t, CustomAccessibilityAction>;
 
-}  // namespace blink
+}  // namespace flutter
 
 #endif  // FLUTTER_LIB_UI_SEMANTICS_LOCAL_CONTEXT_ACTION_H_

@@ -15,7 +15,7 @@
 
 using tonic::ToDart;
 
-namespace blink {
+namespace flutter {
 
 IMPLEMENT_WRAPPERTYPEINFO(ui, Paragraph);
 
@@ -101,4 +101,4 @@ Dart_Handle Paragraph::getWordBoundary(unsigned offset) {
   return m_paragraphImpl->getWordBoundary(offset);
 }
 
-}  // namespace blink
+}  // namespace flutter

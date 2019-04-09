@@ -9,7 +9,7 @@
 #include "flutter/lib/ui/text/paragraph_impl.h"
 #include "flutter/lib/ui/text/text_box.h"
 
-namespace blink {
+namespace flutter {
 
 class ParagraphImplTxt : public ParagraphImpl {
  public:
@@ -41,6 +41,6 @@ class ParagraphImplTxt : public ParagraphImpl {
   double m_width = -1.0;
 };
 
-}  // namespace blink
+}  // namespace flutter
 
 #endif  // FLUTTER_LIB_UI_TEXT_PARAGRAPH_IMPL_TXT_H_

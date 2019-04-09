@@ -4,4 +4,4 @@
 
 #include "flutter/lib/ui/text/paragraph_impl.h"
 
-namespace blink {}  // namespace blink
+namespace flutter {}  // namespace flutter

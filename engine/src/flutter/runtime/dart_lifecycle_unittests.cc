@@ -9,7 +9,7 @@
 #include "flutter/runtime/dart_vm_lifecycle.h"
 #include "flutter/runtime/runtime_test.h"
 
-namespace blink {
+namespace flutter {
 namespace testing {
 
 using DartLifecycleTest = RuntimeTest;
@@ -139,4 +139,4 @@ TEST_F(DartLifecycleTest, ShuttingDownTheVMShutsDownTheIsolate) {
 }
 
 }  // namespace testing
-}  // namespace blink
+}  // namespace flutter

@@ -9,7 +9,7 @@
 #include "third_party/tonic/dart_state.h"
 #include "third_party/tonic/logging/dart_error.h"
 
-using namespace blink;
+using namespace flutter;
 
 namespace tonic {
 

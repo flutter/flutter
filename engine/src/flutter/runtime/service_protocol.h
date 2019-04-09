@@ -18,7 +18,7 @@
 #include "flutter/fml/task_runner.h"
 #include "rapidjson/document.h"
 
-namespace blink {
+namespace flutter {
 
 class ServiceProtocol {
  public:
@@ -100,6 +100,6 @@ class ServiceProtocol {
   FML_DISALLOW_COPY_AND_ASSIGN(ServiceProtocol);
 };
 
-}  // namespace blink
+}  // namespace flutter
 
 #endif  // FLUTTER_RUNTIME_SERVICE_PROTOCOL_H_

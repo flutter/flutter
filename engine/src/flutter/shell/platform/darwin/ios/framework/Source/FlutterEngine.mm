@@ -110,7 +110,7 @@
   return _weakFactory->GetWeakPtr();
 }
 
-- (void)updateViewportMetrics:(blink::ViewportMetrics)viewportMetrics {
+- (void)updateViewportMetrics:(flutter::ViewportMetrics)viewportMetrics {
   self.shell.GetTaskRunners().GetUITaskRunner()->PostTask(
       [engine = self.shell.GetEngine(), metrics = viewportMetrics]() {
         if (engine) {
@@ -119,7 +119,7 @@
       });
 }
 
-- (void)dispatchPointerDataPacket:(std::unique_ptr<blink::PointerDataPacket>)packet {
+- (void)dispatchPointerDataPacket:(std::unique_ptr<flutter::PointerDataPacket>)packet {
   TRACE_EVENT0("flutter", "dispatchPointerDataPacket");
   TRACE_FLOW_BEGIN("flutter", "PointerEvent", _nextPointerFlowId);
   self.shell.GetTaskRunners().GetUITaskRunner()->PostTask(fml::MakeCopyable(
@@ -360,11 +360,11 @@
     // TODO(amirh/chinmaygarde): remove this, and dynamically change the thread configuration.
     // https://github.com/flutter/flutter/issues/23975
 
-    blink::TaskRunners task_runners(threadLabel.UTF8String,                          // label
-                                    fml::MessageLoop::GetCurrent().GetTaskRunner(),  // platform
-                                    fml::MessageLoop::GetCurrent().GetTaskRunner(),  // gpu
-                                    _threadHost.ui_thread->GetTaskRunner(),          // ui
-                                    _threadHost.io_thread->GetTaskRunner()           // io
+    flutter::TaskRunners task_runners(threadLabel.UTF8String,                          // label
+                                      fml::MessageLoop::GetCurrent().GetTaskRunner(),  // platform
+                                      fml::MessageLoop::GetCurrent().GetTaskRunner(),  // gpu
+                                      _threadHost.ui_thread->GetTaskRunner(),          // ui
+                                      _threadHost.io_thread->GetTaskRunner()           // io
     );
     // Create the shell. This is a blocking operation.
     _shell = shell::Shell::Create(std::move(task_runners),  // task runners
@@ -373,11 +373,11 @@
                                   on_create_rasterizer      // rasterzier creation
     );
   } else {
-    blink::TaskRunners task_runners(threadLabel.UTF8String,                          // label
-                                    fml::MessageLoop::GetCurrent().GetTaskRunner(),  // platform
-                                    _threadHost.gpu_thread->GetTaskRunner(),         // gpu
-                                    _threadHost.ui_thread->GetTaskRunner(),          // ui
-                                    _threadHost.io_thread->GetTaskRunner()           // io
+    flutter::TaskRunners task_runners(threadLabel.UTF8String,                          // label
+                                      fml::MessageLoop::GetCurrent().GetTaskRunner(),  // platform
+                                      _threadHost.gpu_thread->GetTaskRunner(),         // gpu
+                                      _threadHost.ui_thread->GetTaskRunner(),          // ui
+                                      _threadHost.io_thread->GetTaskRunner()           // io
     );
     // Create the shell. This is a blocking operation.
     _shell = shell::Shell::Create(std::move(task_runners),  // task runners
@@ -510,9 +510,9 @@
                                 callback(reply);
                               },
                               _shell->GetTaskRunners().GetPlatformTaskRunner());
-  fml::RefPtr<blink::PlatformMessage> platformMessage =
-      (message == nil) ? fml::MakeRefCounted<blink::PlatformMessage>(channel.UTF8String, response)
-                       : fml::MakeRefCounted<blink::PlatformMessage>(
+  fml::RefPtr<flutter::PlatformMessage> platformMessage =
+      (message == nil) ? fml::MakeRefCounted<flutter::PlatformMessage>(channel.UTF8String, response)
+                       : fml::MakeRefCounted<flutter::PlatformMessage>(
                              channel.UTF8String, shell::GetVectorFromNSData(message), response);
 
   _shell->GetPlatformView()->DispatchPlatformMessage(platformMessage);

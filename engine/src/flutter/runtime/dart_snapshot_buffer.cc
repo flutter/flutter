@@ -8,7 +8,7 @@
 
 #include "flutter/fml/mapping.h"
 
-namespace blink {
+namespace flutter {
 
 class NativeLibrarySnapshotBuffer final : public DartSnapshotBuffer {
  public:
@@ -99,4 +99,4 @@ DartSnapshotBuffer::CreateWithUnmanagedAllocation(const uint8_t* allocation) {
 
 DartSnapshotBuffer::~DartSnapshotBuffer() = default;
 
-}  // namespace blink
+}  // namespace flutter

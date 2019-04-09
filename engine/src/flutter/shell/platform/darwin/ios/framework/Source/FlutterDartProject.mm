@@ -25,7 +25,7 @@ extern const intptr_t kPlatformStrongDillSize;
 
 static const char* kApplicationKernelSnapshotFileName = "kernel_blob.bin";
 
-static blink::Settings DefaultSettingsForProcess(NSBundle* bundle = nil) {
+static flutter::Settings DefaultSettingsForProcess(NSBundle* bundle = nil) {
   auto command_line = shell::CommandLineFromNSProcessInfo();
 
   // Precedence:
@@ -66,7 +66,7 @@ static blink::Settings DefaultSettingsForProcess(NSBundle* bundle = nil) {
     }
   }
 
-  if (blink::DartVM::IsRunningPrecompiledCode()) {
+  if (flutter::DartVM::IsRunningPrecompiledCode()) {
     if (hasExplicitBundle) {
       NSString* executablePath = bundle.executablePath;
       if ([[NSFileManager defaultManager] fileExistsAtPath:executablePath]) {
@@ -118,7 +118,7 @@ static blink::Settings DefaultSettingsForProcess(NSBundle* bundle = nil) {
       // Check if there is an application kernel snapshot in the assets directory we could
       // potentially use.  Looking for the snapshot makes sense only if we have a VM that can use
       // it.
-      if (!blink::DartVM::IsRunningPrecompiledCode()) {
+      if (!flutter::DartVM::IsRunningPrecompiledCode()) {
         NSURL* applicationKernelSnapshotURL =
             [NSURL URLWithString:@(kApplicationKernelSnapshotFileName)
                    relativeToURL:[NSURL fileURLWithPath:assetsPath]];
@@ -147,7 +147,7 @@ static blink::Settings DefaultSettingsForProcess(NSBundle* bundle = nil) {
 
 @implementation FlutterDartProject {
   fml::scoped_nsobject<NSBundle> _precompiledDartBundle;
-  blink::Settings _settings;
+  flutter::Settings _settings;
 }
 
 #pragma mark - Override base class designated initializers
@@ -171,7 +171,7 @@ static blink::Settings DefaultSettingsForProcess(NSBundle* bundle = nil) {
 
 #pragma mark - Settings accessors
 
-- (const blink::Settings&)settings {
+- (const flutter::Settings&)settings {
   return _settings;
 }
 

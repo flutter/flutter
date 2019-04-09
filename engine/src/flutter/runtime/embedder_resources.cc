@@ -8,7 +8,7 @@
 
 #include "flutter/fml/logging.h"
 
-namespace blink {
+namespace flutter {
 
 using flutter::runtime::ResourcesEntry;
 
@@ -49,4 +49,4 @@ ResourcesEntry* EmbedderResources::At(int idx) {
   return nullptr;
 }
 
-}  // namespace blink
+}  // namespace flutter

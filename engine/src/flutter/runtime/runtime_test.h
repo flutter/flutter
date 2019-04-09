@@ -12,7 +12,7 @@
 #include "flutter/testing/test_dart_native_resolver.h"
 #include "flutter/testing/thread_test.h"
 
-namespace blink {
+namespace flutter {
 namespace testing {
 
 class RuntimeTest : public ::testing::ThreadTest {
@@ -40,6 +40,6 @@ class RuntimeTest : public ::testing::ThreadTest {
 };
 
 }  // namespace testing
-}  // namespace blink
+}  // namespace flutter
 
 #endif  // FLUTTER_RUNTIME_RUNTIME_TEST_H_

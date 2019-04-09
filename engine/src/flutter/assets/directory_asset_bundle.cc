@@ -10,7 +10,7 @@
 #include "flutter/fml/file.h"
 #include "flutter/fml/mapping.h"
 
-namespace blink {
+namespace flutter {
 
 DirectoryAssetBundle::DirectoryAssetBundle(fml::UniqueFD descriptor)
     : descriptor_(std::move(descriptor)) {
@@ -22,12 +22,12 @@ DirectoryAssetBundle::DirectoryAssetBundle(fml::UniqueFD descriptor)
 
 DirectoryAssetBundle::~DirectoryAssetBundle() = default;
 
-// |blink::AssetResolver|
+// |flutter::AssetResolver|
 bool DirectoryAssetBundle::IsValid() const {
   return is_valid_;
 }
 
-// |blink::AssetResolver|
+// |flutter::AssetResolver|
 std::unique_ptr<fml::Mapping> DirectoryAssetBundle::GetAsMapping(
     const std::string& asset_name) const {
   if (!is_valid_) {
@@ -45,4 +45,4 @@ std::unique_ptr<fml::Mapping> DirectoryAssetBundle::GetAsMapping(
   return mapping;
 }
 
-}  // namespace blink
+}  // namespace flutter

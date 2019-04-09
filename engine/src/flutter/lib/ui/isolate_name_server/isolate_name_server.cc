@@ -4,7 +4,7 @@
 
 #include "flutter/lib/ui/isolate_name_server/isolate_name_server.h"
 
-namespace blink {
+namespace flutter {
 
 IsolateNameServer::IsolateNameServer() {}
 
@@ -45,4 +45,4 @@ bool IsolateNameServer::RemoveIsolateNameMapping(const std::string& name) {
   return true;
 }
 
-}  // namespace blink
+}  // namespace flutter

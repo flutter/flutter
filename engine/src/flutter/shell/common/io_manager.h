@@ -15,7 +15,7 @@
 
 namespace shell {
 
-class IOManager : public blink::IOManager {
+class IOManager : public flutter::IOManager {
  public:
   // Convenience methods for platforms to create a GrContext used to supply to
   // the IOManager. The platforms may create the context themselves if they so

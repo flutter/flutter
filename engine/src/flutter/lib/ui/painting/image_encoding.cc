@@ -25,7 +25,7 @@ using tonic::DartInvoke;
 using tonic::DartPersistentValue;
 using tonic::ToDart;
 
-namespace blink {
+namespace flutter {
 namespace {
 
 // This must be kept in sync with the enum in painting.dart
@@ -231,4 +231,4 @@ Dart_Handle EncodeImage(CanvasImage* canvas_image,
   return Dart_Null();
 }
 
-}  // namespace blink
+}  // namespace flutter

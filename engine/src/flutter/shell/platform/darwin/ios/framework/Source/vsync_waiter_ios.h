@@ -16,7 +16,7 @@ namespace shell {
 
 class VsyncWaiterIOS final : public VsyncWaiter {
  public:
-  VsyncWaiterIOS(blink::TaskRunners task_runners);
+  VsyncWaiterIOS(flutter::TaskRunners task_runners);
 
   ~VsyncWaiterIOS() override;
 

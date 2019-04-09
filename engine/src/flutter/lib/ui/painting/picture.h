@@ -14,7 +14,7 @@ namespace tonic {
 class DartLibraryNatives;
 }  // namespace tonic
 
-namespace blink {
+namespace flutter {
 class Canvas;
 
 class Picture : public RefCountedDartWrappable<Picture> {
@@ -48,6 +48,6 @@ class Picture : public RefCountedDartWrappable<Picture> {
   flow::SkiaGPUObject<SkPicture> picture_;
 };
 
-}  // namespace blink
+}  // namespace flutter
 
 #endif  // FLUTTER_LIB_UI_PAINTING_PICTURE_H_

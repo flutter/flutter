@@ -18,7 +18,7 @@ typedef void (^PlatformMessageResponseCallback)(NSData*);
 
 namespace shell {
 
-class PlatformMessageResponseDarwin : public blink::PlatformMessageResponse {
+class PlatformMessageResponseDarwin : public flutter::PlatformMessageResponse {
  public:
   void Complete(std::unique_ptr<fml::Mapping> data) override;
 

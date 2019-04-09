@@ -7,7 +7,7 @@
 
 #include "flutter/fml/macros.h"
 
-namespace blink {
+namespace flutter {
 
 class DartUI {
  public:
@@ -18,6 +18,6 @@ class DartUI {
   FML_DISALLOW_IMPLICIT_CONSTRUCTORS(DartUI);
 };
 
-}  // namespace blink
+}  // namespace flutter
 
 #endif  // FLUTTER_LIB_UI_DART_UI_H_

@@ -13,7 +13,7 @@
 #include "flutter/fml/mapping.h"
 #include "flutter/fml/native_library.h"
 
-namespace blink {
+namespace flutter {
 
 // TODO(chinmaygarde): Replace this with just |fml::Mapping|.
 // https://github.com/flutter/flutter/issues/26782
@@ -40,6 +40,6 @@ class DartSnapshotBuffer {
   virtual size_t GetSnapshotSize() const = 0;
 };
 
-}  // namespace blink
+}  // namespace flutter
 
 #endif  // FLUTTER_RUNTIME_DART_SNAPSHOT_BUFFER_H_

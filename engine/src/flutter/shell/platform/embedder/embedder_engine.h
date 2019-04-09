@@ -23,8 +23,8 @@ namespace shell {
 class EmbedderEngine {
  public:
   EmbedderEngine(std::unique_ptr<EmbedderThreadHost> thread_host,
-                 blink::TaskRunners task_runners,
-                 blink::Settings settings,
+                 flutter::TaskRunners task_runners,
+                 flutter::Settings settings,
                  Shell::CreateCallback<PlatformView> on_create_platform_view,
                  Shell::CreateCallback<Rasterizer> on_create_rasterizer,
                  EmbedderExternalTextureGL::ExternalTextureCallback
@@ -40,12 +40,12 @@ class EmbedderEngine {
 
   bool IsValid() const;
 
-  bool SetViewportMetrics(blink::ViewportMetrics metrics);
+  bool SetViewportMetrics(flutter::ViewportMetrics metrics);
 
   bool DispatchPointerDataPacket(
-      std::unique_ptr<blink::PointerDataPacket> packet);
+      std::unique_ptr<flutter::PointerDataPacket> packet);
 
-  bool SendPlatformMessage(fml::RefPtr<blink::PlatformMessage> message);
+  bool SendPlatformMessage(fml::RefPtr<flutter::PlatformMessage> message);
 
   bool RegisterTexture(int64_t texture);
 
@@ -58,7 +58,7 @@ class EmbedderEngine {
   bool SetAccessibilityFeatures(int32_t flags);
 
   bool DispatchSemanticsAction(int id,
-                               blink::SemanticsAction action,
+                               flutter::SemanticsAction action,
                                std::vector<uint8_t> args);
 
   bool OnVsyncEvent(intptr_t baton,

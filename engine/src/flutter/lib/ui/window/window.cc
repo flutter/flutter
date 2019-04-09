@@ -14,7 +14,7 @@
 #include "third_party/tonic/logging/dart_invoke.h"
 #include "third_party/tonic/typed_data/dart_byte_data.h"
 
-namespace blink {
+namespace flutter {
 namespace {
 
 void DefaultRouteName(Dart_NativeArguments args) {
@@ -356,4 +356,4 @@ void Window::RegisterNatives(tonic::DartLibraryNatives* natives) {
   });
 }
 
-}  // namespace blink
+}  // namespace flutter

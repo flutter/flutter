@@ -20,7 +20,7 @@ class DartLibraryNatives;
 // Be sure that the client doesn't modify a path on us before Skia finishes
 // See AOSP's reasoning in PathMeasure.cpp
 
-namespace blink {
+namespace flutter {
 
 class CanvasPathMeasure : public RefCountedDartWrappable<CanvasPathMeasure> {
   DEFINE_WRAPPERTYPEINFO();
@@ -52,6 +52,6 @@ class CanvasPathMeasure : public RefCountedDartWrappable<CanvasPathMeasure> {
   std::vector<sk_sp<SkContourMeasure>> measures_;
 };
 
-}  // namespace blink
+}  // namespace flutter
 
 #endif  // FLUTTER_LIB_UI_PAINTING_PATH_MEASURE_H_

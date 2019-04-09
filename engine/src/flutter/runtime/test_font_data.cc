@@ -1215,7 +1215,7 @@ static const unsigned int kAhemFontLength = 0;
 
 #endif  // EMBED_TEST_FONT_DATA
 
-namespace blink {
+namespace flutter {
 
 std::unique_ptr<SkStreamAsset> GetTestFontData() {
   if (kAhemFontLength == 0) {
@@ -1229,4 +1229,4 @@ std::string GetTestFontFamilyName() {
   return "Ahem";
 }
 
-}  // namespace blink
+}  // namespace flutter

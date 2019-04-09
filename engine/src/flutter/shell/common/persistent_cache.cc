@@ -61,8 +61,8 @@ PersistentCache::PersistentCache(bool read_only) : is_read_only_(read_only) {
   if (cache_base_dir.is_valid()) {
     cache_directory_ = std::make_shared<fml::UniqueFD>(
         CreateDirectory(cache_base_dir,
-                        {"flutter_engine", blink::GetFlutterEngineVersion(),
-                         "skia", blink::GetSkiaVersion()},
+                        {"flutter_engine", flutter::GetFlutterEngineVersion(),
+                         "skia", flutter::GetSkiaVersion()},
                         read_only ? fml::FilePermission::kRead
                                   : fml::FilePermission::kReadWrite));
   }

@@ -19,11 +19,11 @@
 
 namespace shell {
 
-class Rasterizer final : public blink::SnapshotDelegate {
+class Rasterizer final : public flutter::SnapshotDelegate {
  public:
-  Rasterizer(blink::TaskRunners task_runners);
+  Rasterizer(flutter::TaskRunners task_runners);
 
-  Rasterizer(blink::TaskRunners task_runners,
+  Rasterizer(flutter::TaskRunners task_runners,
              std::unique_ptr<flow::CompositorContext> compositor_context);
 
   ~Rasterizer();
@@ -34,7 +34,7 @@ class Rasterizer final : public blink::SnapshotDelegate {
 
   fml::WeakPtr<Rasterizer> GetWeakPtr() const;
 
-  fml::WeakPtr<blink::SnapshotDelegate> GetSnapshotDelegate() const;
+  fml::WeakPtr<flutter::SnapshotDelegate> GetSnapshotDelegate() const;
 
   flow::LayerTree* GetLastLayerTree();
 
@@ -76,14 +76,14 @@ class Rasterizer final : public blink::SnapshotDelegate {
   void SetResourceCacheMaxBytes(int max_bytes);
 
  private:
-  blink::TaskRunners task_runners_;
+  flutter::TaskRunners task_runners_;
   std::unique_ptr<Surface> surface_;
   std::unique_ptr<flow::CompositorContext> compositor_context_;
   std::unique_ptr<flow::LayerTree> last_layer_tree_;
   fml::closure next_frame_callback_;
   fml::WeakPtrFactory<Rasterizer> weak_factory_;
 
-  // |blink::SnapshotDelegate|
+  // |flutter::SnapshotDelegate|
   sk_sp<SkImage> MakeRasterSnapshot(sk_sp<SkPicture> picture,
                                     SkISize picture_size) override;
 

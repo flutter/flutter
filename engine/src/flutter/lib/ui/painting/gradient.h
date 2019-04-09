@@ -17,7 +17,7 @@ namespace tonic {
 class DartLibraryNatives;
 }  // namespace tonic
 
-namespace blink {
+namespace flutter {
 
 // TODO: update this if/when Skia adds Decal mode skbug.com/7638
 static_assert(kSkTileModeCount >= 3, "Need to update tile mode enum");
@@ -69,6 +69,6 @@ class CanvasGradient : public Shader {
   CanvasGradient();
 };
 
-}  // namespace blink
+}  // namespace flutter
 
 #endif  // FLUTTER_LIB_UI_PAINTING_GRADIENT_H_

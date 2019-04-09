@@ -15,7 +15,7 @@
 
 #include "third_party/dart/runtime/include/dart_api.h"
 
-namespace blink {
+namespace flutter {
 
 class DartServiceIsolate {
  public:
@@ -51,6 +51,6 @@ class DartServiceIsolate {
       FML_GUARDED_BY(callbacks_mutex_);
 };
 
-}  // namespace blink
+}  // namespace flutter
 
 #endif  // FLUTTER_RUNTIME_DART_SERVICE_ISOLATE_H_

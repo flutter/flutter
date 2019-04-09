@@ -9,7 +9,7 @@
 
 #include "flutter/fml/macros.h"
 
-namespace blink {
+namespace flutter {
 
 class DartIO {
  public:
@@ -20,6 +20,6 @@ class DartIO {
   FML_DISALLOW_IMPLICIT_CONSTRUCTORS(DartIO);
 };
 
-}  // namespace blink
+}  // namespace flutter
 
 #endif  // FLUTTER_LIB_IO_DART_IO_H_

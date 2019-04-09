@@ -12,12 +12,12 @@
 
 namespace shell {
 
-class PlatformMessageResponseAndroid : public blink::PlatformMessageResponse {
+class PlatformMessageResponseAndroid : public flutter::PlatformMessageResponse {
  public:
-  // |blink::PlatformMessageResponse|
+  // |flutter::PlatformMessageResponse|
   void Complete(std::unique_ptr<fml::Mapping> data) override;
 
-  // |blink::PlatformMessageResponse|
+  // |flutter::PlatformMessageResponse|
   void CompleteEmpty() override;
 
  private:

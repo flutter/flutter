@@ -16,7 +16,7 @@
 
 #include "flutter/fml/trace_event.h"
 
-namespace blink {
+namespace flutter {
 
 void UniqueUnzipperTraits::Free(void* file) {
   unzClose(file);
@@ -33,12 +33,12 @@ UniqueUnzipper ZipAssetStore::CreateUnzipper() const {
   return UniqueUnzipper{::unzOpen2(file_path_.c_str(), nullptr)};
 }
 
-// |blink::AssetResolver|
+// |flutter::AssetResolver|
 bool ZipAssetStore::IsValid() const {
   return stat_cache_.size() > 0;
 }
 
-// |blink::AssetResolver|
+// |flutter::AssetResolver|
 std::unique_ptr<fml::Mapping> ZipAssetStore::GetAsMapping(
     const std::string& asset_name) const {
   TRACE_EVENT1("flutter", "ZipAssetStore::GetAsMapping", "name",
@@ -126,4 +126,4 @@ void ZipAssetStore::BuildStatCache() {
   } while (unzGoToNextFile(unzipper.get()) == UNZ_OK);
 }
 
-}  // namespace blink
+}  // namespace flutter

@@ -15,7 +15,7 @@
 
 using tonic::ToDart;
 
-namespace blink {
+namespace flutter {
 
 typedef CanvasPath Path;
 
@@ -299,4 +299,4 @@ fml::RefPtr<CanvasPath> CanvasPath::clone() {
   return path;
 }
 
-}  // namespace blink
+}  // namespace flutter

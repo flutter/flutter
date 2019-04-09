@@ -12,7 +12,7 @@
 @implementation FlutterCallbackCache
 
 + (FlutterCallbackInformation*)lookupCallbackInformation:(int64_t)handle {
-  auto info = blink::DartCallbackCache::GetCallbackInformation(handle);
+  auto info = flutter::DartCallbackCache::GetCallbackInformation(handle);
   if (info == nullptr) {
     return nil;
   }
@@ -25,9 +25,9 @@
 
 + (void)setCachePath:(NSString*)path {
   assert(path != nil);
-  blink::DartCallbackCache::SetCachePath([path UTF8String]);
+  flutter::DartCallbackCache::SetCachePath([path UTF8String]);
   NSString* cache_path =
-      [NSString stringWithUTF8String:blink::DartCallbackCache::GetCachePath().c_str()];
+      [NSString stringWithUTF8String:flutter::DartCallbackCache::GetCachePath().c_str()];
   // Set the "Do Not Backup" flag to ensure that the cache isn't moved off disk in
   // low-memory situations.
   if (![[NSFileManager defaultManager] fileExistsAtPath:cache_path]) {

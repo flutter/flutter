@@ -21,7 +21,7 @@
 #include "third_party/dart/runtime/include/dart_api.h"
 #include "third_party/tonic/dart_state.h"
 
-namespace blink {
+namespace flutter {
 class DartVM;
 
 class DartIsolate : public UIDartState {
@@ -184,6 +184,6 @@ class DartIsolate : public UIDartState {
   FML_DISALLOW_COPY_AND_ASSIGN(DartIsolate);
 };
 
-}  // namespace blink
+}  // namespace flutter
 
 #endif  // FLUTTER_RUNTIME_DART_ISOLATE_H_

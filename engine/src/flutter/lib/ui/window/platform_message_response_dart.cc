@@ -12,7 +12,7 @@
 #include "third_party/tonic/dart_state.h"
 #include "third_party/tonic/logging/dart_invoke.h"
 
-namespace blink {
+namespace flutter {
 
 namespace {
 
@@ -92,4 +92,4 @@ void PlatformMessageResponseDart::CompleteEmpty() {
       }));
 }
 
-}  // namespace blink
+}  // namespace flutter

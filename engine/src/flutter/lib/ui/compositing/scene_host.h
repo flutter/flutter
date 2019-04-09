@@ -16,7 +16,7 @@
 #include "flutter/fml/task_runner.h"
 #include "flutter/lib/ui/dart_wrapper.h"
 
-namespace blink {
+namespace flutter {
 
 class SceneHost : public RefCountedDartWrappable<SceneHost> {
   DEFINE_WRAPPERTYPEINFO();
@@ -64,6 +64,6 @@ class SceneHost : public RefCountedDartWrappable<SceneHost> {
   bool use_view_holder_ = false;
 };
 
-}  // namespace blink
+}  // namespace flutter
 
 #endif  // FLUTTER_LIB_UI_COMPOSITING_SCENE_HOST_H_

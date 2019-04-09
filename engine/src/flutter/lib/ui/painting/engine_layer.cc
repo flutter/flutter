@@ -13,7 +13,7 @@
 
 using tonic::ToDart;
 
-namespace blink {
+namespace flutter {
 
 EngineLayer::EngineLayer(std::shared_ptr<flow::ContainerLayer> layer)
     : layer_(layer) {}
@@ -33,4 +33,4 @@ IMPLEMENT_WRAPPERTYPEINFO(ui, EngineLayer);
 
 DART_BIND_ALL(EngineLayer, FOR_EACH_BINDING)
 
-}  // namespace blink
+}  // namespace flutter

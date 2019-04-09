@@ -25,20 +25,20 @@ class EmbedderThreadHost {
 
   EmbedderThreadHost(
       ThreadHost host,
-      blink::TaskRunners runners,
+      flutter::TaskRunners runners,
       std::set<fml::RefPtr<EmbedderTaskRunner>> embedder_task_runners);
 
   ~EmbedderThreadHost();
 
   bool IsValid() const;
 
-  const blink::TaskRunners& GetTaskRunners() const;
+  const flutter::TaskRunners& GetTaskRunners() const;
 
   bool PostTask(int64_t runner, uint64_t task) const;
 
  private:
   ThreadHost host_;
-  blink::TaskRunners runners_;
+  flutter::TaskRunners runners_;
   std::map<int64_t, fml::RefPtr<EmbedderTaskRunner>> runners_map_;
 
   static std::unique_ptr<EmbedderThreadHost> CreateEmbedderManagedThreadHost(

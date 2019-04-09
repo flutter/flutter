@@ -18,14 +18,14 @@
 
 namespace {
 
-using SceneHostBindings = std::unordered_map<zx_koid_t, blink::SceneHost*>;
+using SceneHostBindings = std::unordered_map<zx_koid_t, flutter::SceneHost*>;
 
 FML_THREAD_LOCAL fml::ThreadLocal tls_scene_host_bindings([](intptr_t value) {
   delete reinterpret_cast<SceneHostBindings*>(value);
 });
 
 void SceneHost_constructor(Dart_NativeArguments args) {
-  tonic::DartCallConstructor(&blink::SceneHost::Create, args);
+  tonic::DartCallConstructor(&flutter::SceneHost::Create, args);
 }
 
 void SceneHost_constructorViewHolderToken(Dart_NativeArguments args) {
@@ -36,10 +36,10 @@ void SceneHost_constructorViewHolderToken(Dart_NativeArguments args) {
         reinterpret_cast<intptr_t>(new SceneHostBindings()));
   }
 
-  tonic::DartCallConstructor(&blink::SceneHost::CreateViewHolder, args);
+  tonic::DartCallConstructor(&flutter::SceneHost::CreateViewHolder, args);
 }
 
-blink::SceneHost* GetSceneHost(scenic::ResourceId id) {
+flutter::SceneHost* GetSceneHost(scenic::ResourceId id) {
   auto* bindings =
       reinterpret_cast<SceneHostBindings*>(tls_scene_host_bindings.Get());
   FML_DCHECK(bindings);
@@ -80,7 +80,7 @@ void InvokeDartFunction(tonic::DartPersistentValue* function, T& arg) {
 
 }  // namespace
 
-namespace blink {
+namespace flutter {
 
 IMPLEMENT_WRAPPERTYPEINFO(ui, SceneHost);
 
@@ -229,4 +229,4 @@ void SceneHost::dispose() {
   ClearDartWrapper();
 }
 
-}  // namespace blink
+}  // namespace flutter

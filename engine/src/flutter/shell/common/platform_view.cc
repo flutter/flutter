@@ -16,7 +16,8 @@
 
 namespace shell {
 
-PlatformView::PlatformView(Delegate& delegate, blink::TaskRunners task_runners)
+PlatformView::PlatformView(Delegate& delegate,
+                           flutter::TaskRunners task_runners)
     : delegate_(delegate),
       task_runners_(std::move(task_runners)),
       size_(SkISize::Make(0, 0)),
@@ -32,17 +33,17 @@ std::unique_ptr<VsyncWaiter> PlatformView::CreateVSyncWaiter() {
 }
 
 void PlatformView::DispatchPlatformMessage(
-    fml::RefPtr<blink::PlatformMessage> message) {
+    fml::RefPtr<flutter::PlatformMessage> message) {
   delegate_.OnPlatformViewDispatchPlatformMessage(std::move(message));
 }
 
 void PlatformView::DispatchPointerDataPacket(
-    std::unique_ptr<blink::PointerDataPacket> packet) {
+    std::unique_ptr<flutter::PointerDataPacket> packet) {
   delegate_.OnPlatformViewDispatchPointerDataPacket(std::move(packet));
 }
 
 void PlatformView::DispatchSemanticsAction(int32_t id,
-                                           blink::SemanticsAction action,
+                                           flutter::SemanticsAction action,
                                            std::vector<uint8_t> args) {
   delegate_.OnPlatformViewDispatchSemanticsAction(id, action, std::move(args));
 }
@@ -55,7 +56,7 @@ void PlatformView::SetAccessibilityFeatures(int32_t flags) {
   delegate_.OnPlatformViewSetAccessibilityFeatures(flags);
 }
 
-void PlatformView::SetViewportMetrics(const blink::ViewportMetrics& metrics) {
+void PlatformView::SetViewportMetrics(const flutter::ViewportMetrics& metrics) {
   delegate_.OnPlatformViewSetViewportMetrics(metrics);
 }
 
@@ -93,11 +94,11 @@ fml::WeakPtr<PlatformView> PlatformView::GetWeakPtr() const {
 }
 
 void PlatformView::UpdateSemantics(
-    blink::SemanticsNodeUpdates update,
-    blink::CustomAccessibilityActionUpdates actions) {}
+    flutter::SemanticsNodeUpdates update,
+    flutter::CustomAccessibilityActionUpdates actions) {}
 
 void PlatformView::HandlePlatformMessage(
-    fml::RefPtr<blink::PlatformMessage> message) {
+    fml::RefPtr<flutter::PlatformMessage> message) {
   if (auto response = message->response())
     response->CompleteEmpty();
 }

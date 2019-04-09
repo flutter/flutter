@@ -11,7 +11,7 @@
 #include "flutter/fml/macros.h"
 #include "third_party/zlib/contrib/minizip/unzip.h"
 
-namespace blink {
+namespace flutter {
 
 struct UniqueUnzipperTraits {
   static inline void* InvalidValue() { return nullptr; }
@@ -40,10 +40,10 @@ class ZipAssetStore final : public AssetResolver {
 
   mutable std::map<std::string, CacheEntry> stat_cache_;
 
-  // |blink::AssetResolver|
+  // |flutter::AssetResolver|
   bool IsValid() const override;
 
-  // |blink::AssetResolver|
+  // |flutter::AssetResolver|
   std::unique_ptr<fml::Mapping> GetAsMapping(
       const std::string& asset_name) const override;
 
@@ -54,6 +54,6 @@ class ZipAssetStore final : public AssetResolver {
   FML_DISALLOW_COPY_AND_ASSIGN(ZipAssetStore);
 };
 
-}  // namespace blink
+}  // namespace flutter
 
 #endif  // FLUTTER_ASSETS_ZIP_ASSET_STORE_H_

@@ -12,7 +12,7 @@
 #include "flutter/runtime/runtime_delegate.h"
 #include "third_party/tonic/dart_message_handler.h"
 
-namespace blink {
+namespace flutter {
 
 RuntimeController::RuntimeController(
     RuntimeDelegate& p_client,
@@ -344,4 +344,4 @@ RuntimeController::WindowData::WindowData(const WindowData& other) = default;
 
 RuntimeController::WindowData::~WindowData() = default;
 
-}  // namespace blink
+}  // namespace flutter

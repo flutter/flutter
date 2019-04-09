@@ -12,7 +12,7 @@
 #include "flutter/fml/macros.h"
 #include "flutter/lib/ui/window/pointer_data.h"
 
-namespace blink {
+namespace flutter {
 
 class PointerDataPacket {
  public:
@@ -29,6 +29,6 @@ class PointerDataPacket {
   FML_DISALLOW_COPY_AND_ASSIGN(PointerDataPacket);
 };
 
-}  // namespace blink
+}  // namespace flutter
 
 #endif  // FLUTTER_LIB_UI_WINDOW_POINTER_DATA_PACKET_H_

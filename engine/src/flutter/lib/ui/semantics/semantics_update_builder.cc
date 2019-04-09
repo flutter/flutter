@@ -9,7 +9,7 @@
 #include "third_party/tonic/dart_binding_macros.h"
 #include "third_party/tonic/dart_library_natives.h"
 
-namespace blink {
+namespace flutter {
 
 static void SemanticsUpdateBuilder_constructor(Dart_NativeArguments args) {
   DartCallConstructor(&SemanticsUpdateBuilder::create, args);
@@ -114,4 +114,4 @@ fml::RefPtr<SemanticsUpdate> SemanticsUpdateBuilder::build() {
   return SemanticsUpdate::create(std::move(nodes_), std::move(actions_));
 }
 
-}  // namespace blink
+}  // namespace flutter

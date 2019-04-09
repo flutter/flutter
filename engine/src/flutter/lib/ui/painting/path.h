@@ -16,7 +16,7 @@ namespace tonic {
 class DartLibraryNatives;
 }  // namespace tonic
 
-namespace blink {
+namespace flutter {
 
 class CanvasPath : public RefCountedDartWrappable<CanvasPath> {
   DEFINE_WRAPPERTYPEINFO();
@@ -112,6 +112,6 @@ class CanvasPath : public RefCountedDartWrappable<CanvasPath> {
   SkPath path_;
 };
 
-}  // namespace blink
+}  // namespace flutter
 
 #endif  // FLUTTER_LIB_UI_PAINTING_PATH_H_

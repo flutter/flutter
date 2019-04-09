@@ -14,7 +14,7 @@
 
 using tonic::ToDart;
 
-namespace blink {
+namespace flutter {
 
 ParagraphImplTxt::ParagraphImplTxt(std::unique_ptr<txt::Paragraph> paragraph)
     : m_paragraph(std::move(paragraph)) {}
@@ -71,7 +71,7 @@ std::vector<TextBox> ParagraphImplTxt::getRectsForRange(
       start, end, rect_height_style, rect_width_style);
   for (const txt::Paragraph::TextBox& box : boxes) {
     result.emplace_back(box.rect,
-                        static_cast<blink::TextDirection>(box.direction));
+                        static_cast<flutter::TextDirection>(box.direction));
   }
   return result;
 }
@@ -93,4 +93,4 @@ Dart_Handle ParagraphImplTxt::getWordBoundary(unsigned offset) {
   return result;
 }
 
-}  // namespace blink
+}  // namespace flutter

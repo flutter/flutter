@@ -11,7 +11,7 @@
 
 using tonic::ToDart;
 
-namespace blink {
+namespace flutter {
 
 UIDartState::UIDartState(
     TaskRunners task_runners,
@@ -149,4 +149,4 @@ void UIDartState::ReportUnhandledException(const std::string& error,
                  << stack_trace;
 }
 
-}  // namespace blink
+}  // namespace flutter

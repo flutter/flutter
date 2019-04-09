@@ -14,7 +14,8 @@ class VsyncWaiterEmbedder final : public VsyncWaiter {
  public:
   using VsyncCallback = std::function<void(intptr_t)>;
 
-  VsyncWaiterEmbedder(VsyncCallback callback, blink::TaskRunners task_runners);
+  VsyncWaiterEmbedder(VsyncCallback callback,
+                      flutter::TaskRunners task_runners);
 
   ~VsyncWaiterEmbedder() override;
 

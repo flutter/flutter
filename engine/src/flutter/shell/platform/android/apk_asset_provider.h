@@ -12,7 +12,7 @@
 #include "flutter/fml/memory/ref_counted.h"
 #include "flutter/fml/platform/android/scoped_java_ref.h"
 
-namespace blink {
+namespace flutter {
 
 class APKAssetProvider final : public AssetResolver {
  public:
@@ -26,16 +26,16 @@ class APKAssetProvider final : public AssetResolver {
   AAssetManager* assetManager_;
   const std::string directory_;
 
-  // |blink::AssetResolver|
+  // |flutter::AssetResolver|
   bool IsValid() const override;
 
-  // |blink::AssetResolver|
+  // |flutter::AssetResolver|
   std::unique_ptr<fml::Mapping> GetAsMapping(
       const std::string& asset_name) const override;
 
   FML_DISALLOW_COPY_AND_ASSIGN(APKAssetProvider);
 };
 
-}  // namespace blink
+}  // namespace flutter
 
 #endif  // FLUTTER_ASSETS_APK_ASSET_PROVIDER_H

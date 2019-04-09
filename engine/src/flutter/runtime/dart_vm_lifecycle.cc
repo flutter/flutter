@@ -6,7 +6,7 @@
 
 #include <mutex>
 
-namespace blink {
+namespace flutter {
 
 // We need to explicitly put the constructor and destructor of the DartVM in the
 // critical section. All accesses (not just const members) to the global VM
@@ -121,4 +121,4 @@ DartVM* DartVMRef::GetRunningVM() {
   return vm;
 }
 
-}  // namespace blink
+}  // namespace flutter

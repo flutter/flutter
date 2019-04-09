@@ -12,7 +12,7 @@
 
 using tonic::ToDart;
 
-namespace blink {
+namespace flutter {
 
 static void ImageShader_constructor(Dart_NativeArguments args) {
   DartCallConstructor(&ImageShader::Create, args);
@@ -51,4 +51,4 @@ ImageShader::ImageShader() = default;
 
 ImageShader::~ImageShader() = default;
 
-}  // namespace blink
+}  // namespace flutter

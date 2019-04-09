@@ -28,8 +28,8 @@
 
 - (shell::Shell&)shell;
 
-- (void)updateViewportMetrics:(blink::ViewportMetrics)viewportMetrics;
-- (void)dispatchPointerDataPacket:(std::unique_ptr<blink::PointerDataPacket>)packet;
+- (void)updateViewportMetrics:(flutter::ViewportMetrics)viewportMetrics;
+- (void)dispatchPointerDataPacket:(std::unique_ptr<flutter::PointerDataPacket>)packet;
 
 - (fml::RefPtr<fml::TaskRunner>)platformTaskRunner;
 

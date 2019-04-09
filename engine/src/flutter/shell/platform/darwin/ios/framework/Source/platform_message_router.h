@@ -19,7 +19,8 @@ class PlatformMessageRouter {
   PlatformMessageRouter();
   ~PlatformMessageRouter();
 
-  void HandlePlatformMessage(fml::RefPtr<blink::PlatformMessage> message) const;
+  void HandlePlatformMessage(
+      fml::RefPtr<flutter::PlatformMessage> message) const;
 
   void SetMessageHandler(const std::string& channel,
                          FlutterBinaryMessageHandler handler);

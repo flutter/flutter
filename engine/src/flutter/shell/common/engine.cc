@@ -36,14 +36,14 @@ static constexpr char kLocalizationChannel[] = "flutter/localization";
 static constexpr char kSettingsChannel[] = "flutter/settings";
 
 Engine::Engine(Delegate& delegate,
-               blink::DartVM& vm,
-               fml::RefPtr<const blink::DartSnapshot> isolate_snapshot,
-               fml::RefPtr<const blink::DartSnapshot> shared_snapshot,
-               blink::TaskRunners task_runners,
-               blink::Settings settings,
+               flutter::DartVM& vm,
+               fml::RefPtr<const flutter::DartSnapshot> isolate_snapshot,
+               fml::RefPtr<const flutter::DartSnapshot> shared_snapshot,
+               flutter::TaskRunners task_runners,
+               flutter::Settings settings,
                std::unique_ptr<Animator> animator,
-               fml::WeakPtr<blink::SnapshotDelegate> snapshot_delegate,
-               fml::WeakPtr<blink::IOManager> io_manager)
+               fml::WeakPtr<flutter::SnapshotDelegate> snapshot_delegate,
+               fml::WeakPtr<flutter::IOManager> io_manager)
     : delegate_(delegate),
       settings_(std::move(settings)),
       animator_(std::move(animator)),
@@ -53,7 +53,7 @@ Engine::Engine(Delegate& delegate,
   // Runtime controller is initialized here because it takes a reference to this
   // object as its delegate. The delegate may be called in the constructor and
   // we want to be fully initilazed by that point.
-  runtime_controller_ = std::make_unique<blink::RuntimeController>(
+  runtime_controller_ = std::make_unique<flutter::RuntimeController>(
       *this,                                 // runtime delegate
       &vm,                                   // VM
       std::move(isolate_snapshot),           // isolate snapshot
@@ -78,7 +78,7 @@ fml::WeakPtr<Engine> Engine::GetWeakPtr() const {
 }
 
 bool Engine::UpdateAssetManager(
-    std::shared_ptr<blink::AssetManager> new_asset_manager) {
+    std::shared_ptr<flutter::AssetManager> new_asset_manager) {
   if (asset_manager_ == new_asset_manager) {
     return false;
   }
@@ -127,11 +127,11 @@ Engine::RunStatus Engine::Run(RunConfiguration configuration) {
     return isolate_launch_status;
   }
 
-  std::shared_ptr<blink::DartIsolate> isolate =
+  std::shared_ptr<flutter::DartIsolate> isolate =
       runtime_controller_->GetRootIsolate().lock();
 
   bool isolate_running =
-      isolate && isolate->GetPhase() == blink::DartIsolate::Phase::Running;
+      isolate && isolate->GetPhase() == flutter::DartIsolate::Phase::Running;
 
   if (isolate_running) {
     tonic::DartState::Scope scope(isolate.get());
@@ -158,7 +158,7 @@ shell::Engine::RunStatus Engine::PrepareAndLaunchIsolate(
 
   auto isolate_configuration = configuration.TakeIsolateConfiguration();
 
-  std::shared_ptr<blink::DartIsolate> isolate =
+  std::shared_ptr<flutter::DartIsolate> isolate =
       runtime_controller_->GetRootIsolate().lock();
 
   if (!isolate) {
@@ -167,7 +167,7 @@ shell::Engine::RunStatus Engine::PrepareAndLaunchIsolate(
 
   // This can happen on iOS after a plugin shows a native window and returns to
   // the Flutter ViewController.
-  if (isolate->GetPhase() == blink::DartIsolate::Phase::Running) {
+  if (isolate->GetPhase() == flutter::DartIsolate::Phase::Running) {
     FML_DLOG(WARNING) << "Isolate was already running!";
     return RunStatus::FailureAlreadyRunning;
   }
@@ -235,7 +235,7 @@ void Engine::OnOutputSurfaceDestroyed() {
   StopAnimator();
 }
 
-void Engine::SetViewportMetrics(const blink::ViewportMetrics& metrics) {
+void Engine::SetViewportMetrics(const flutter::ViewportMetrics& metrics) {
   bool dimensions_changed =
       viewport_metrics_.physical_height != metrics.physical_height ||
       viewport_metrics_.physical_width != metrics.physical_width;
@@ -250,7 +250,7 @@ void Engine::SetViewportMetrics(const blink::ViewportMetrics& metrics) {
 }
 
 void Engine::DispatchPlatformMessage(
-    fml::RefPtr<blink::PlatformMessage> message) {
+    fml::RefPtr<flutter::PlatformMessage> message) {
   if (message->channel() == kLifecycleChannel) {
     if (HandleLifecyclePlatformMessage(message.get()))
       return;
@@ -272,7 +272,7 @@ void Engine::DispatchPlatformMessage(
     HandleNavigationPlatformMessage(std::move(message));
 }
 
-bool Engine::HandleLifecyclePlatformMessage(blink::PlatformMessage* message) {
+bool Engine::HandleLifecyclePlatformMessage(flutter::PlatformMessage* message) {
   const auto& data = message->data();
   std::string state(reinterpret_cast<const char*>(data.data()), data.size());
   if (state == "AppLifecycleState.paused" ||
@@ -297,7 +297,7 @@ bool Engine::HandleLifecyclePlatformMessage(blink::PlatformMessage* message) {
 }
 
 bool Engine::HandleNavigationPlatformMessage(
-    fml::RefPtr<blink::PlatformMessage> message) {
+    fml::RefPtr<flutter::PlatformMessage> message) {
   const auto& data = message->data();
 
   rapidjson::Document document;
@@ -314,7 +314,7 @@ bool Engine::HandleNavigationPlatformMessage(
 }
 
 bool Engine::HandleLocalizationPlatformMessage(
-    blink::PlatformMessage* message) {
+    flutter::PlatformMessage* message) {
   const auto& data = message->data();
 
   rapidjson::Document document;
@@ -348,7 +348,7 @@ bool Engine::HandleLocalizationPlatformMessage(
   return runtime_controller_->SetLocales(locale_data);
 }
 
-void Engine::HandleSettingsPlatformMessage(blink::PlatformMessage* message) {
+void Engine::HandleSettingsPlatformMessage(flutter::PlatformMessage* message) {
   const auto& data = message->data();
   std::string jsonData(reinterpret_cast<const char*>(data.data()), data.size());
   if (runtime_controller_->SetUserSettingsData(std::move(jsonData)) &&
@@ -357,7 +357,7 @@ void Engine::HandleSettingsPlatformMessage(blink::PlatformMessage* message) {
   }
 }
 
-void Engine::DispatchPointerDataPacket(const blink::PointerDataPacket& packet,
+void Engine::DispatchPointerDataPacket(const flutter::PointerDataPacket& packet,
                                        uint64_t trace_flow_id) {
   TRACE_EVENT0("flutter", "Engine::DispatchPointerDataPacket");
   TRACE_FLOW_STEP("flutter", "PointerEvent", trace_flow_id);
@@ -366,7 +366,7 @@ void Engine::DispatchPointerDataPacket(const blink::PointerDataPacket& packet,
 }
 
 void Engine::DispatchSemanticsAction(int id,
-                                     blink::SemanticsAction action,
+                                     flutter::SemanticsAction action,
                                      std::vector<uint8_t> args) {
   runtime_controller_->DispatchSemanticsAction(id, action, std::move(args));
 }
@@ -412,13 +412,14 @@ void Engine::Render(std::unique_ptr<flow::LayerTree> layer_tree) {
   animator_->Render(std::move(layer_tree));
 }
 
-void Engine::UpdateSemantics(blink::SemanticsNodeUpdates update,
-                             blink::CustomAccessibilityActionUpdates actions) {
+void Engine::UpdateSemantics(
+    flutter::SemanticsNodeUpdates update,
+    flutter::CustomAccessibilityActionUpdates actions) {
   delegate_.OnEngineUpdateSemantics(std::move(update), std::move(actions));
 }
 
 void Engine::HandlePlatformMessage(
-    fml::RefPtr<blink::PlatformMessage> message) {
+    fml::RefPtr<flutter::PlatformMessage> message) {
   if (message->channel() == kAssetChannel) {
     HandleAssetPlatformMessage(std::move(message));
   } else {
@@ -431,13 +432,13 @@ void Engine::UpdateIsolateDescription(const std::string isolate_name,
   delegate_.UpdateIsolateDescription(isolate_name, isolate_port);
 }
 
-blink::FontCollection& Engine::GetFontCollection() {
+flutter::FontCollection& Engine::GetFontCollection() {
   return font_collection_;
 }
 
 void Engine::HandleAssetPlatformMessage(
-    fml::RefPtr<blink::PlatformMessage> message) {
-  fml::RefPtr<blink::PlatformMessageResponse> response = message->response();
+    fml::RefPtr<flutter::PlatformMessage> message) {
+  fml::RefPtr<flutter::PlatformMessageResponse> response = message->response();
   if (!response) {
     return;
   }

@@ -12,7 +12,7 @@
 #include "third_party/tonic/dart_binding_macros.h"
 #include "third_party/tonic/dart_library_natives.h"
 
-namespace blink {
+namespace flutter {
 
 IMPLEMENT_WRAPPERTYPEINFO(ui, SemanticsUpdate);
 
@@ -45,4 +45,4 @@ void SemanticsUpdate::dispose() {
   ClearDartWrapper();
 }
 
-}  // namespace blink
+}  // namespace flutter

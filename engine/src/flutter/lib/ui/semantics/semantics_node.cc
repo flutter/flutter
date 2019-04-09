@@ -6,7 +6,7 @@
 
 #include <string.h>
 
-namespace blink {
+namespace flutter {
 
 constexpr int32_t kMinPlatformViewId = -1;
 
@@ -28,4 +28,4 @@ bool SemanticsNode::IsPlatformViewNode() const {
   return platformViewId > kMinPlatformViewId;
 }
 
-}  // namespace blink
+}  // namespace flutter

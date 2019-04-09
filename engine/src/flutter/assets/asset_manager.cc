@@ -7,7 +7,7 @@
 #include "flutter/assets/directory_asset_bundle.h"
 #include "flutter/fml/trace_event.h"
 
-namespace blink {
+namespace flutter {
 
 AssetManager::AssetManager() = default;
 
@@ -29,7 +29,7 @@ void AssetManager::PushBack(std::unique_ptr<AssetResolver> resolver) {
   resolvers_.push_back(std::move(resolver));
 }
 
-// |blink::AssetResolver|
+// |flutter::AssetResolver|
 std::unique_ptr<fml::Mapping> AssetManager::GetAsMapping(
     const std::string& asset_name) const {
   if (asset_name.size() == 0) {
@@ -47,9 +47,9 @@ std::unique_ptr<fml::Mapping> AssetManager::GetAsMapping(
   return nullptr;
 }
 
-// |blink::AssetResolver|
+// |flutter::AssetResolver|
 bool AssetManager::IsValid() const {
   return resolvers_.size() > 0;
 }
 
-}  // namespace blink
+}  // namespace flutter

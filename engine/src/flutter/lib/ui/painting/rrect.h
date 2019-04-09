@@ -9,7 +9,7 @@
 #include "third_party/skia/include/core/SkRRect.h"
 #include "third_party/tonic/converter/dart_converter.h"
 
-namespace blink {
+namespace flutter {
 
 class RRect {
  public:
@@ -17,16 +17,16 @@ class RRect {
   bool is_null;
 };
 
-}  // namespace blink
+}  // namespace flutter
 
 namespace tonic {
 
 template <>
-struct DartConverter<blink::RRect> {
-  static blink::RRect FromDart(Dart_Handle handle);
-  static blink::RRect FromArguments(Dart_NativeArguments args,
-                                    int index,
-                                    Dart_Handle& exception);
+struct DartConverter<flutter::RRect> {
+  static flutter::RRect FromDart(Dart_Handle handle);
+  static flutter::RRect FromArguments(Dart_NativeArguments args,
+                                      int index,
+                                      Dart_Handle& exception);
 };
 
 }  // namespace tonic

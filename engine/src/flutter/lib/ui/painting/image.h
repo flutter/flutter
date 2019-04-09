@@ -14,7 +14,7 @@ namespace tonic {
 class DartLibraryNatives;
 }  // namespace tonic
 
-namespace blink {
+namespace flutter {
 
 class CanvasImage final : public RefCountedDartWrappable<CanvasImage> {
   DEFINE_WRAPPERTYPEINFO();
@@ -49,6 +49,6 @@ class CanvasImage final : public RefCountedDartWrappable<CanvasImage> {
   flow::SkiaGPUObject<SkImage> image_;
 };
 
-}  // namespace blink
+}  // namespace flutter
 
 #endif  // FLUTTER_LIB_UI_PAINTING_IMAGE_H_

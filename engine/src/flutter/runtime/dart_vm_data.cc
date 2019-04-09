@@ -4,7 +4,7 @@
 
 #include "flutter/runtime/dart_vm_data.h"
 
-namespace blink {
+namespace flutter {
 
 std::shared_ptr<const DartVMData> DartVMData::Create(
     Settings settings,
@@ -76,4 +76,4 @@ fml::RefPtr<const DartSnapshot> DartVMData::GetSharedSnapshot() const {
   return shared_snapshot_;
 }
 
-}  // namespace blink
+}  // namespace flutter

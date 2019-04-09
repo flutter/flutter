@@ -11,7 +11,7 @@
 #include "third_party/tonic/dart_binding_macros.h"
 #include "third_party/tonic/dart_library_natives.h"
 
-namespace blink {
+namespace flutter {
 
 typedef CanvasGradient
     Gradient;  // Because the C++ name doesn't match the Dart name.
@@ -143,4 +143,4 @@ CanvasGradient::CanvasGradient() = default;
 
 CanvasGradient::~CanvasGradient() = default;
 
-}  // namespace blink
+}  // namespace flutter
