@@ -549,7 +549,7 @@ class ContainerLayer extends Layer {
   List<PictureLayer> _debugCheckElevations() {
     final List<PhysicalModelLayer> physicalModelLayers = depthFirstIterateChildren().whereType<PhysicalModelLayer>().toList();
     final List<PictureLayer> addedLayers = <PictureLayer>[];
-    bool _predecessorIsNotDirectAncestor(PhysicalModelLayer predecessor, Layer child) {
+    bool _predecessorIsAncestor(PhysicalModelLayer predecessor, Layer child) {
       while (child != null) {
         if (child == predecessor) {
           return true;
@@ -567,7 +567,7 @@ class ContainerLayer extends Layer {
       );
       for (int j = 0; j <= i; j++) {
         final PhysicalModelLayer predecessor = physicalModelLayers[j];
-        if (predecessor.elevation <= physicalModelLayer.elevation || _predecessorIsNotDirectAncestor(predecessor, physicalModelLayer)) {
+        if (predecessor.elevation <= physicalModelLayer.elevation || _predecessorIsAncestor(predecessor, physicalModelLayer)) {
           continue;
         }
         final Path intersection = Path.combine(
@@ -761,17 +761,20 @@ class ContainerLayer extends Layer {
   }
 
   /// Returns the descendants of this layer in depth first order.
-  Iterable<Layer> depthFirstIterateChildren() sync* {
+  @visibleForTesting
+  List<Layer> depthFirstIterateChildren() {
     if (firstChild == null)
-      return;
+      return null;
+    final List<Layer> children = <Layer>[];
     Layer child = firstChild;
     while(child != null) {
-      yield child;
+      children.add(child);
       if (child is ContainerLayer) {
-        yield* child.depthFirstIterateChildren();
+        children.addAll(child.depthFirstIterateChildren());
       }
       child = child.nextSibling;
     }
+    return children;
   }
 
   @override
@@ -1170,18 +1173,14 @@ class TransformLayer extends OffsetLayer {
   Matrix4 _invertedTransform;
   bool _inverseDirty = true;
 
-  void _calculateLastEffectiveTransform(Offset layerOffset) {
+  @override
+  ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
     _lastEffectiveTransform = transform;
     final Offset totalOffset = offset + layerOffset;
     if (totalOffset != Offset.zero) {
       _lastEffectiveTransform = Matrix4.translationValues(totalOffset.dx, totalOffset.dy, 0.0)
         ..multiply(_lastEffectiveTransform);
     }
-  }
-
-  @override
-  ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
-    _calculateLastEffectiveTransform(layerOffset);
     builder.pushTransform(_lastEffectiveTransform.storage);
     addChildrenToScene(builder);
     builder.pop();
@@ -1205,8 +1204,8 @@ class TransformLayer extends OffsetLayer {
   void applyTransform(Layer child, Matrix4 transform) {
     assert(child != null);
     assert(transform != null);
-    if (_lastEffectiveTransform == null) {
-      _calculateLastEffectiveTransform(Offset.zero);
+    if (_lastEffectiveTransform == null && this.transform != null) {
+      transform.multiply(this.transform);
     }
     transform.multiply(_lastEffectiveTransform);
   }
@@ -1428,12 +1427,10 @@ class PhysicalModelLayer extends ContainerLayer {
   }
 
   Path get _debugTransformedClipPath {
-    Layer ancestor = parent;
+    ContainerLayer ancestor = parent;
     final Matrix4 matrix = Matrix4.identity();
     while (ancestor != null && ancestor.parent != null) {
-      if (ancestor is ContainerLayer) {
-        ancestor.applyTransform(this, matrix);
-      }
+      ancestor.applyTransform(this, matrix);
       ancestor = ancestor.parent;
     }
     return clipPath.transform(matrix.storage);
