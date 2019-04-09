@@ -294,15 +294,16 @@ void main() {
   group('PhysicalModelLayer checks elevations', () {
     /// Adds the layers to a container where A paints before B.
     ///
-    /// Expects there to be `errorCount` errors.  Checking elevations is enabled
-    /// by default.
+    /// Expects there to be `expectedErrorCount` errors.  Checking elevations is
+    /// enabled by default.
     void _testConflicts(
       PhysicalModelLayer layerA,
-      PhysicalModelLayer layerB,
-      int errorCount, [
+      PhysicalModelLayer layerB, {
+      @required int expectedErrorCount,
       bool enableCheck = true,
-    ]) {
-      assert(enableCheck || errorCount == 0, 'Cannot disable check and expect non-zero error count.');
+    }) {
+      assert(expectedErrorCount != null);
+      assert(enableCheck || expectedErrorCount == 0, 'Cannot disable check and expect non-zero error count.');
       final OffsetLayer container = OffsetLayer();
       container.append(layerA);
       container.append(layerB);
@@ -315,7 +316,7 @@ void main() {
         };
       }
       container.buildScene(SceneBuilder());
-      expect(errors, errorCount);
+      expect(errors, expectedErrorCount);
       debugCheckElevationsEnabled = false;
       debugCheckElevationsEnabled = true;
     }
@@ -323,8 +324,8 @@ void main() {
     // Tests:
     //
     //  ─────────────                    (LayerA, paints first)
-    //           ─────────────           (LayerB, paints second)
-    //
+    //      │     ─────────────          (LayerB, paints second)
+    //      │          │
     // ───────────────────────────
     test('Overlapping layers at wrong elevation', () {
       final PhysicalModelLayer layerA = PhysicalModelLayer(
@@ -339,14 +340,14 @@ void main() {
         color: const Color(0),
         shadowColor: const Color(0),
       );
-      _testConflicts(layerA, layerB, 1);
+      _testConflicts(layerA, layerB, expectedErrorCount: 1);
     });
 
     // Tests:
     //
     //  ─────────────                    (LayerA, paints first)
-    //           ─────────────           (LayerB, paints second)
-    //
+    //      │     ─────────────          (LayerB, paints second)
+    //      │         │
     // ───────────────────────────
     //
     // Causes no error if check is disabled.
@@ -363,14 +364,14 @@ void main() {
         color: const Color(0),
         shadowColor: const Color(0),
       );
-      _testConflicts(layerA, layerB, 0, false);
+      _testConflicts(layerA, layerB, expectedErrorCount: 0, enableCheck: false);
     });
 
     // Tests:
     //
     //   ──────────                      (LayerA, paints first)
-    //                ───────────        (LayerB, paints second)
-    //
+    //        │       ───────────        (LayerB, paints second)
+    //        │            │
     // ────────────────────────────
     test('Non-overlapping layers at wrong elevation', () {
       final PhysicalModelLayer layerA = PhysicalModelLayer(
@@ -385,15 +386,16 @@ void main() {
         color: const Color(0),
         shadowColor: const Color(0),
       );
-      _testConflicts(layerA, layerB, 0);
+      _testConflicts(layerA, layerB, expectedErrorCount: 0);
     });
 
     // Tests:
     //
     //     ───────                       (Child of A, paints second)
+    //        │
     //   ───────────                     (LayerA, paints first)
-    //                ────────────       (LayerB, paints third)
-    //
+    //        │       ────────────       (LayerB, paints third)
+    //        │             │
     // ────────────────────────────
     test('Non-overlapping layers at wrong elevation, child at lower elevation', () {
       final PhysicalModelLayer layerA = PhysicalModelLayer(
@@ -416,16 +418,16 @@ void main() {
         color: const Color(0),
         shadowColor: const Color(0),
       );
-      _testConflicts(layerA, layerB, 0);
+      _testConflicts(layerA, layerB, expectedErrorCount: 0);
     });
 
     // Tests:
     //
-    //          ─────────                (Child of A, paints second, overflows)
-    //                ────────────       (LayerB, paints third)
-    //   ───────────                     (LayerA, paints first)
-    //
-    //
+    //        ───────────                (Child of A, paints second, overflows)
+    //           │    ────────────       (LayerB, paints third)
+    //   ───────────       │             (LayerA, paints first)
+    //         │           │
+    //         │           │
     // ────────────────────────────
     //
     // Which fails because the overflowing child overlaps something that paints
@@ -452,7 +454,7 @@ void main() {
         shadowColor: const Color(0),
       );
 
-      _testConflicts(layerA, layerB, 1);
+      _testConflicts(layerA, layerB, expectedErrorCount: 1);
     });
   });
 }

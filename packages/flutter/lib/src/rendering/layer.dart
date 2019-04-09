@@ -512,6 +512,8 @@ class ContainerLayer extends Layer {
       Paint()
         ..color = const Color(0xFFAA0000)
         ..style = PaintingStyle.stroke
+        // The elevation may be 0 or otherwise too small to notice.
+        // Adding 10 to it makes it more visually obvious.
         ..strokeWidth = child.elevation + 10.0,
     );
     final PictureLayer pictureLayer = PictureLayer(child.clipPath.getBounds())
@@ -523,7 +525,9 @@ class ContainerLayer extends Layer {
 
   List<PictureLayer> _processConflictingPhysicalLayers(PhysicalModelLayer predecessor, PhysicalModelLayer child) {
     FlutterError.reportError(FlutterErrorDetails(
-      exception: FlutterError('Painting order is out of order with respect to elevation.'),
+      exception: FlutterError('Painting order is out of order with respect to elevation.\n'
+                              'See https://api.flutter.dev/flutter/rendering/debugCheckElevations.html '
+                              'for more details.'),
       library: 'rendering library',
       context: 'during compositing',
       informationCollector: (StringBuffer buffer) {

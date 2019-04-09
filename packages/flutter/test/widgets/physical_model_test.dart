@@ -74,10 +74,11 @@ void main() {
   group('PhysicalModelLayer checks elevation', () {
     Future<void> _testStackChildren(
       WidgetTester tester,
-      List<Widget> children,
-      int expectedErrorCount,
-      [bool enableCheck = true]
-    ) async {
+      List<Widget> children, {
+      @required int expectedErrorCount,
+      bool enableCheck = true,
+    }) async {
+      assert(expectedErrorCount != null);
       if (enableCheck) {
         debugCheckElevationsEnabled = true;
       } else {
@@ -104,6 +105,13 @@ void main() {
       debugDisableShadows = true;
     }
 
+    // Tests:
+    //
+    //        ───────────             (red rect, paints second, child)
+    //              │
+    //        ───────────             (green rect, paints first)
+    //            │
+    // ────────────────────────────
     testWidgets('entirely overlapping, direct child', (WidgetTester tester) async {
       final List<Widget> children = <Widget>[
         Container(
@@ -120,10 +128,18 @@ void main() {
         ),
       ];
 
-      await _testStackChildren(tester, children, 0);
+      await _testStackChildren(tester, children, expectedErrorCount: 0);
       expect(find.byType(Material), findsNWidgets(2));
     });
 
+
+    // Tests:
+    //
+    //        ───────────────          (green rect, paints second)
+    //        ─────────── │            (blue rect, paints first)
+    //         │          │
+    //         │          │
+    // ────────────────────────────
     testWidgets('entirely overlapping, correct painting order', (WidgetTester tester) async {
       final List<Widget> children = <Widget>[
         Container(
@@ -144,10 +160,18 @@ void main() {
         ),
       ];
 
-      await _testStackChildren(tester, children, 0);
+      await _testStackChildren(tester, children, expectedErrorCount: 0);
       expect(find.byType(Material), findsNWidgets(2));
     });
 
+
+    // Tests:
+    //
+    //        ───────────────          (green rect, paints first)
+    //         │  ───────────          (blue rect, paints second)
+    //         │        │
+    //         │        │
+    // ────────────────────────────
     testWidgets('entirely overlapping, wrong painting order', (WidgetTester tester) async {
       final List<Widget> children = <Widget>[
         Container(
@@ -168,10 +192,18 @@ void main() {
         ),
       ];
 
-      await _testStackChildren(tester, children, 1);
+      await _testStackChildren(tester, children, expectedErrorCount: 1);
       expect(find.byType(Material), findsNWidgets(2));
     });
 
+
+    // Tests:
+    //
+    //  ───────────────                      (brown rect, paints first)
+    //         │        ───────────          (red circle, paints second)
+    //         │            │
+    //         │            │
+    // ────────────────────────────
     testWidgets('not non-rect not overlapping, wrong painting order', (WidgetTester tester) async {
       // These would be overlapping if we only took the rectangular bounds of the circle.
       final List<Widget> children = <Widget>[
@@ -200,10 +232,17 @@ void main() {
         ),
       ];
 
-      await _testStackChildren(tester, children, 0);
+      await _testStackChildren(tester, children, expectedErrorCount: 0);
       expect(find.byType(Material), findsNWidgets(2));
     });
 
+    // Tests:
+    //
+    //        ───────────────          (brown rect, paints first)
+    //         │  ───────────          (red circle, paints second)
+    //         │        │
+    //         │        │
+    // ────────────────────────────
     testWidgets('not non-rect entirely overlapping, wrong painting order', (WidgetTester tester) async {
       final List<Widget> children = <Widget>[
         Positioned.fromRect(
@@ -231,11 +270,17 @@ void main() {
         ),
       ];
 
-      await _testStackChildren(tester, children, 1);
+      await _testStackChildren(tester, children, expectedErrorCount: 1);
       expect(find.byType(Material), findsNWidgets(2));
     });
 
-
+    // Tests:
+    //
+    //   ───────────────                 (brown rect, paints first)
+    //         │      ────────────       (red circle, paints second)
+    //         │           │
+    //         │           │
+    // ────────────────────────────
     testWidgets('non-rect partially overlapping, wrong painting order', (WidgetTester tester) async {
       final List<Widget> children = <Widget>[
         Positioned.fromRect(
@@ -263,10 +308,20 @@ void main() {
         ),
       ];
 
-      await _testStackChildren(tester, children, 1);
+      await _testStackChildren(tester, children, expectedErrorCount: 1);
       expect(find.byType(Material), findsNWidgets(2));
     });
 
+    // Tests:
+    //
+    //   ───────────────                 (green rect, paints second, overlaps red rect)
+    //         │
+    //         │
+    //   ──────────────────────────      (brown and red rects, overlapping but same elevation, paint first and third)
+    //         │           │
+    // ────────────────────────────
+    //
+    // Fails because the green rect overlaps the
     testWidgets('child partially overlapping, wrong painting order', (WidgetTester tester) async {
       final List<Widget> children = <Widget>[
         Positioned.fromRect(
@@ -300,10 +355,17 @@ void main() {
         ),
       ];
 
-      await _testStackChildren(tester, children, 1);
+      await _testStackChildren(tester, children, expectedErrorCount: 1);
       expect(find.byType(Material), findsNWidgets(3));
     });
 
+    // Tests:
+    //
+    //   ───────────────                 (brown rect, paints first)
+    //         │      ────────────       (red circle, paints second)
+    //         │           │
+    //         │           │
+    // ────────────────────────────
     testWidgets('non-rect partially overlapping, wrong painting order, check disabled', (WidgetTester tester) async {
        final List<Widget> children = <Widget>[
         Positioned.fromRect(
@@ -331,10 +393,22 @@ void main() {
         ),
       ];
 
-      await _testStackChildren(tester, children, 0, false);
+      await _testStackChildren(
+        tester,
+        children,
+        expectedErrorCount: 0,
+        enableCheck: false,
+      );
       expect(find.byType(Material), findsNWidgets(2));
     });
 
+    // Tests:
+    //
+    //   ────────────                    (brown rect, paints first, rotated but doesn't overlap)
+    //         │      ────────────       (red circle, paints second)
+    //         │           │
+    //         │           │
+    // ────────────────────────────
     testWidgets('with a RenderTransform, non-overlapping', (WidgetTester tester) async {
 
       final List<Widget> children = <Widget>[
@@ -365,10 +439,18 @@ void main() {
         ),
       ];
 
-      await _testStackChildren(tester, children, 0);
+      await _testStackChildren(tester, children, expectedErrorCount: 0);
       expect(find.byType(Material), findsNWidgets(2));
     });
 
+    // Tests:
+    //
+    //   ──────────────                  (brown rect, paints first, rotated so it overlaps)
+    //         │      ────────────       (red circle, paints second)
+    //         │           │
+    //         │           │
+    // ────────────────────────────
+    // This would be fine without the rotation.
     testWidgets('with a RenderTransform, overlapping', (WidgetTester tester) async {
       final List<Widget> children = <Widget>[
         Positioned.fromRect(
@@ -398,7 +480,7 @@ void main() {
         ),
       ];
 
-      await _testStackChildren(tester, children, 1);
+      await _testStackChildren(tester, children, expectedErrorCount: 1);
       expect(find.byType(Material), findsNWidgets(2));
     });
   });

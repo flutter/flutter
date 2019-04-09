@@ -51,7 +51,7 @@ bool debugRepaintRainbowEnabled = false;
 bool debugRepaintTextRainbowEnabled = false;
 
 /// Causes [PhysicalModelLayer]s to paint a red rectangle around themselves if
-/// they are painted out of order with regard to their elevation.
+/// they are overlapping and painted out of order with regard to their elevation.
 ///
 /// Android and iOS will show the last painted layer on top, whereas Fuchsia
 /// will show the layer with the highest elevation on top.
