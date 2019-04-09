@@ -159,7 +159,6 @@ tasks:
       Measures the runtime performance of cubic bezier animations on Android.
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
-    flaky: true
 
   flavors_test:
     description: >
