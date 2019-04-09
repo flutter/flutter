@@ -490,7 +490,10 @@ abstract class Widget extends DiagnosticableTree {
 ///
 /// {@tool sample}
 ///
-/// The following is a skeleton of a stateless widget subclass called `GreenFrog`:
+/// The following is a skeleton of a stateless widget subclass called `GreenFrog`.
+///
+/// Normally, widgets have more constructor arguments, each of which corresponds
+/// to a `final` property.
 ///
 /// ```dart
 /// class GreenFrog extends StatelessWidget {
@@ -503,11 +506,11 @@ abstract class Widget extends DiagnosticableTree {
 /// }
 /// ```
 /// {@end-tool}
+///
 /// {@tool sample}
 ///
-/// Normally widgets have more constructor arguments, each of which corresponds
-/// to a `final` property. The next example shows the more generic widget `Frog`
-/// which can be given a color and a child:
+/// This next example shows the more generic widget `Frog` which can be given
+/// a color and a child:
 ///
 /// ```dart
 /// class Frog extends StatelessWidget {
@@ -726,7 +729,7 @@ abstract class StatelessWidget extends Widget {
 /// {@end-tool}
 /// {@tool sample}
 ///
-/// The next example shows the more generic widget `Bird` which can be given a
+/// This example shows the more generic widget `Bird` which can be given a
 /// color and a child, and which has some internal state with a method that
 /// can be called to mutate it:
 ///
