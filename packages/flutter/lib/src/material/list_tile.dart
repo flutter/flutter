@@ -301,7 +301,7 @@ enum ListTileControlAffinity {
 /// you're looking for, it's easy to create custom list items with a
 /// combination of other widgets, such as [Row]s and [Column]s.
 ///
-/// {@tool snippet --template=stateless_widget_material}
+/// {@tool snippet --template=stateless_widget_scaffold}
 ///
 /// Here is an example of a custom list item that resembles a Youtube related
 /// video list item created with [Expanded] and [Container] widgets.
@@ -396,36 +396,33 @@ enum ListTileControlAffinity {
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
-///   return Scaffold(
-///     appBar: AppBar(title: Text('Sample Video List Item')),
-///     body: ListView(
-///       padding: const EdgeInsets.all(8.0),
-///       itemExtent: 106.0,
-///       children: <CustomListItem>[
-///         CustomListItem(
-///           user: 'Flutter',
-///           viewCount: 999000,
-///           thumbnail: Container(
-///             decoration: const BoxDecoration(color: Colors.blue),
-///           ),
-///           title: 'The Flutter YouTube Channel',
+///   return ListView(
+///     padding: const EdgeInsets.all(8.0),
+///     itemExtent: 106.0,
+///     children: <CustomListItem>[
+///       CustomListItem(
+///         user: 'Flutter',
+///         viewCount: 999000,
+///         thumbnail: Container(
+///           decoration: const BoxDecoration(color: Colors.blue),
 ///         ),
-///         CustomListItem(
-///           user: 'Dash',
-///           viewCount: 884000,
-///           thumbnail: Container(
-///             decoration: const BoxDecoration(color: Colors.yellow),
-///           ),
-///           title: 'Announcing Flutter 1.0',
+///         title: 'The Flutter YouTube Channel',
+///       ),
+///       CustomListItem(
+///         user: 'Dash',
+///         viewCount: 884000,
+///         thumbnail: Container(
+///           decoration: const BoxDecoration(color: Colors.yellow),
 ///         ),
-///       ],
-///     ),
+///         title: 'Announcing Flutter 1.0',
+///       ),
+///     ],
 ///   );
 /// }
 /// ```
 /// {@end-tool}
 ///
-/// {@tool snippet --template=stateless_widget_material}
+/// {@tool snippet --template=stateless_widget_scaffold}
 ///
 /// Here is an example of an article list item with multi-line titles and
 /// subtitles. It utilizes [Row]s and [Column]s, as well as [Expanded] and
@@ -562,35 +559,32 @@ enum ListTileControlAffinity {
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
-///   return Scaffold(
-///     appBar: AppBar(title: Text('Sample Article List Item')),
-///     body: ListView(
-///       padding: const EdgeInsets.all(10.0),
-///       children: <Widget>[
-///         CustomListItemTwo(
-///           thumbnail: Container(
-///             decoration: const BoxDecoration(color: Colors.pink),
-///           ),
-///           title: 'Flutter 1.0 Launch',
-///           subtitle:
-///             'Flutter continues to improve and expand its horizons.'
-///             'This text should max out at two lines and clip',
-///           author: 'Dash',
-///           publishDate: 'Dec 28',
-///           readDuration: '5 mins',
+///   return body: ListView(
+///     padding: const EdgeInsets.all(10.0),
+///     children: <Widget>[
+///       CustomListItemTwo(
+///         thumbnail: Container(
+///           decoration: const BoxDecoration(color: Colors.pink),
 ///         ),
-///         CustomListItemTwo(
-///           thumbnail: Container(
-///             decoration: const BoxDecoration(color: Colors.blue),
-///           ),
-///           title: 'Flutter 1.2 Release - Continual updates to the framework',
-///           subtitle: 'Flutter once again improves and makes updates.',
-///           author: 'Flutter',
-///           publishDate: 'Feb 26',
-///           readDuration: '12 mins',
+///         title: 'Flutter 1.0 Launch',
+///         subtitle:
+///           'Flutter continues to improve and expand its horizons.'
+///           'This text should max out at two lines and clip',
+///         author: 'Dash',
+///         publishDate: 'Dec 28',
+///         readDuration: '5 mins',
+///       ),
+///       CustomListItemTwo(
+///         thumbnail: Container(
+///           decoration: const BoxDecoration(color: Colors.blue),
 ///         ),
-///       ],
-///     ),
+///         title: 'Flutter 1.2 Release - Continual updates to the framework',
+///         subtitle: 'Flutter once again improves and makes updates.',
+///         author: 'Flutter',
+///         publishDate: 'Feb 26',
+///         readDuration: '12 mins',
+///       ),
+///     ],
 ///   );
 /// }
 /// ```
