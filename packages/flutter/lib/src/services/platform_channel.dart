@@ -314,7 +314,7 @@ class MethodChannel {
   ///  * [invokeMethod], which this call delegates to.
   Future<List<T>> invokeListMethod<T>(String method, [ dynamic arguments ]) async {
     final List<dynamic> result = await invokeMethod<List<dynamic>>(method, arguments);
-    return result.cast<T>();
+    return result?.cast<T>();
   }
 
   /// An implementation of [invokeMethod] that can return typed maps.
@@ -328,7 +328,7 @@ class MethodChannel {
   ///  * [invokeMethod], which this call delegates to.
   Future<Map<K, V>> invokeMapMethod<K, V>(String method, [ dynamic arguments ]) async {
     final Map<dynamic, dynamic> result = await invokeMethod<Map<dynamic, dynamic>>(method, arguments);
-    return result.cast<K, V>();
+    return result?.cast<K, V>();
   }
 
   /// Sets a callback for receiving method calls on this channel.
