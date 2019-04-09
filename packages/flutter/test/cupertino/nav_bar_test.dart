@@ -883,6 +883,16 @@ void main() {
     );
     expect(SystemChrome.latestStyle, SystemUiOverlayStyle.dark);
   });
+
+  testWidgets('Back button shows an error when manually added outside a route', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const CupertinoNavigationBarBackButton()
+    );
+
+    final dynamic exception = tester.takeException();
+    expect(exception, isAssertionError);
+    expect(exception.toString(), contains('can be popped'));
+  });
 }
 
 class _ExpectStyles extends StatelessWidget {
