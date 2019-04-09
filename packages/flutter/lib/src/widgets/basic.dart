@@ -4297,10 +4297,11 @@ class Flexible extends ParentDataWidget<Flex> {
   }
 }
 
-/// A widget that expands a child of a [Row], [Column], or [Flex].
+/// A widget that expands a child of a [Row], [Column], or [Flex]
+/// so that the child fills the available space.
 ///
 /// Using an [Expanded] widget makes a child of a [Row], [Column], or [Flex]
-/// expand to fill the available space in the main axis (e.g., horizontally for
+/// expand to fill the available space along the main axis (e.g., horizontally for
 /// a [Row] or vertically for a [Column]). If multiple children are expanded,
 /// the available space is divided among them according to the [flex] factor.
 ///
@@ -4395,7 +4396,8 @@ class Flexible extends ParentDataWidget<Flex> {
 ///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
 class Expanded extends Flexible {
   /// Creates a widget that expands a child of a [Row], [Column], or [Flex]
-  /// expand to fill the available space in the main axis.
+  /// so that the child fills the available space along the flex widget's
+  /// main axis.
   const Expanded({
     Key key,
     int flex = 1,
