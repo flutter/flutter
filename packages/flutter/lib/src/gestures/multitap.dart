@@ -16,7 +16,20 @@ import 'tap.dart';
 
 /// Signature for callback when the user has tapped the screen at the same
 /// location twice in quick succession.
+/// 
+/// See also:
+/// 
+///  * [GestureDetector.onDoubleTap], which matches this signature.
 typedef GestureDoubleTapCallback = void Function();
+
+/// Signature for callback when the user has tapped the screen at the same
+/// location twice in quick succession.
+/// 
+/// See also:
+/// 
+///  * [GestureDetector.onDoubleTapUp], which matches this signature
+///  * [DoubleTapGestureRecognizer], which uses this signature in one of its callbacks.
+typedef GestureDoubleTapUpCallback = void Function(DoubleTapUpDetails details);
 
 /// Signature used by [MultiTapGestureRecognizer] for when a pointer that might
 /// cause a tap has contacted the screen at a particular location.
@@ -32,6 +45,24 @@ typedef GestureMultiTapCallback = void Function(int pointer);
 /// Signature for when the pointer that previously triggered a
 /// [GestureMultiTapDownCallback] will not end up causing a tap.
 typedef GestureMultiTapCancelCallback = void Function(int pointer);
+
+/// Details for [GestureDoubleTapUpCallback], such as buttons.
+///
+/// See also:
+///
+///  * [GestureDetector.onDoubleTapUp], which receives this information.
+///  * [DoubleTapGestureRecognizer], which passes this information to one of its callbacks.
+class DoubleTapUpDetails {
+  /// Creates details for a [GestureDoubleTapUpCallback].
+  ///
+  /// The [globalPosition] and [buttons] arguments must not be null.
+  DoubleTapUpDetails({ this.buttons = kPrimaryButton })
+    : assert(buttons != null);
+
+  /// The buttons pressed when the pointer first contacted the screen (changing
+  /// buttons during a double tap cancels the gesture.)
+  final int buttons;
+}
 
 /// CountdownZoned tracks whether the specified duration has elapsed since
 /// creation, honoring [Zone].
@@ -63,13 +94,13 @@ class _TapTracker {
        assert(event.buttons != null),
        pointer = event.pointer,
        _initialPosition = event.position,
-       _initialButtons = event.buttons,
+       initialButtons = event.buttons,
        _doubleTapMinTimeCountdown = _CountdownZoned(duration: doubleTapMinTime);
 
   final int pointer;
   final GestureArenaEntry entry;
   final Offset _initialPosition;
-  final int _initialButtons;
+  final int initialButtons;
   final _CountdownZoned _doubleTapMinTimeCountdown;
 
   bool _isTrackingPointer = false;
@@ -98,7 +129,7 @@ class _TapTracker {
   }
 
   bool hasSameButton(PointerDownEvent event) {
-    return event.buttons == _initialButtons;
+    return event.buttons == initialButtons;
   }
 }
 
@@ -134,8 +165,26 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
   // - The gesture arena decides we have been rejected wholesale
 
   /// Called when the user has tapped the screen at the same location twice in
-  /// quick succession.
+  /// quick succession by any button.
+  /// 
+  /// This triggers when the pointer stops contacting the device after the 2nd tap,
+  /// immediately after [onDoubleTapUp].
+  /// 
+  /// See also:
+  /// 
+  ///   * [onDoubleTapUp], triggers at the same time but with details.
   GestureDoubleTapCallback onDoubleTap;
+
+  /// Called when the user has tapped the screen at the same location twice in
+  /// quick succession by any button.
+  /// 
+  /// This triggers when the pointer stops contacting the device after the 2nd tap,
+  /// immediately before [onDoubleTap].
+  /// 
+  /// See also:
+  /// 
+  ///   * [onDoubleTap], triggers at the same time but without details.
+  GestureDoubleTapUpCallback onDoubleTapUp;
 
   Timer _doubleTapTimer;
   _TapTracker _firstTap;
@@ -247,6 +296,10 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
     tracker.entry.resolve(GestureDisposition.accepted);
     _freezeTracker(tracker);
     _trackers.remove(tracker.pointer);
+    if (onDoubleTapUp != null)
+      invokeCallback<void>('onDoubleTapUp', () {
+        return onDoubleTapUp(DoubleTapUpDetails(buttons: tracker.initialButtons));
+      });
     if (onDoubleTap != null)
       invokeCallback<void>('onDoubleTap', onDoubleTap);
     _reset();
