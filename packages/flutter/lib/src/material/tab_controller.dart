@@ -318,4 +318,16 @@ class _DefaultTabControllerState extends State<DefaultTabController> with Single
       child: widget.child,
     );
   }
+
+  @override
+  void didUpdateWidget(DefaultTabController oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.initialIndex != widget.initialIndex || oldWidget.length != widget.length) {
+      _controller = TabController(
+        vsync: this,
+        length: widget.length,
+        initialIndex: widget.initialIndex,
+      );
+    }
+  }
 }
