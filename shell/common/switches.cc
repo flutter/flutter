@@ -20,7 +20,7 @@
 #undef SHELL_COMMON_SWITCHES_H_
 
 struct SwitchDesc {
-  shell::Switch sw;
+  flutter::Switch sw;
   const fml::StringView flag;
   const char* help;
 };
@@ -32,14 +32,14 @@ struct SwitchDesc {
 // clang-format off
 #define DEF_SWITCHES_START static const struct SwitchDesc gSwitchDescs[] = {
 #define DEF_SWITCH(p_swtch, p_flag, p_help) \
-  { shell::Switch:: p_swtch, p_flag, p_help },
+  { flutter::Switch:: p_swtch, p_flag, p_help },
 #define DEF_SWITCHES_END };
 // clang-format on
 
 // Include again for struct definition.
 #include "flutter/shell/common/switches.h"
 
-namespace shell {
+namespace flutter {
 
 void PrintUsage(const std::string& executable_name) {
   std::cerr << std::endl << "  " << executable_name << std::endl << std::endl;
@@ -105,11 +105,11 @@ const fml::StringView FlagForSwitch(Switch swtch) {
 
 template <typename T>
 static bool GetSwitchValue(const fml::CommandLine& command_line,
-                           shell::Switch sw,
+                           Switch sw,
                            T* result) {
   std::string switch_string;
 
-  if (!command_line.GetOptionValue(shell::FlagForSwitch(sw), &switch_string)) {
+  if (!command_line.GetOptionValue(FlagForSwitch(sw), &switch_string)) {
     return false;
   }
 
@@ -283,4 +283,4 @@ flutter::Settings SettingsFromCommandLine(
   return settings;
 }
 
-}  // namespace shell
+}  // namespace flutter

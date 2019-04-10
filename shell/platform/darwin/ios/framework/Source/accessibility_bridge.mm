@@ -84,7 +84,7 @@ flutter::SemanticsAction GetSemanticsActionForScrollDirection(
 @interface SemanticsObjectContainer : NSObject
 - (instancetype)init __attribute__((unavailable("Use initWithSemanticsObject instead")));
 - (instancetype)initWithSemanticsObject:(SemanticsObject*)semanticsObject
-                                 bridge:(fml::WeakPtr<shell::AccessibilityBridge>)bridge
+                                 bridge:(fml::WeakPtr<flutter::AccessibilityBridge>)bridge
     NS_DESIGNATED_INITIALIZER;
 
 @property(nonatomic, weak) SemanticsObject* semanticsObject;
@@ -106,7 +106,7 @@ flutter::SemanticsAction GetSemanticsActionForScrollDirection(
 
 #pragma mark - Designated initializers
 
-- (instancetype)initWithBridge:(fml::WeakPtr<shell::AccessibilityBridge>)bridge uid:(int32_t)uid {
+- (instancetype)initWithBridge:(fml::WeakPtr<flutter::AccessibilityBridge>)bridge uid:(int32_t)uid {
   FML_DCHECK(bridge) << "bridge must be set";
   FML_DCHECK(uid >= kRootNodeId);
   self = [super init];
@@ -363,7 +363,7 @@ flutter::SemanticsAction GetSemanticsActionForScrollDirection(
 
 #pragma mark - Designated initializers
 
-- (instancetype)initWithBridge:(fml::WeakPtr<shell::AccessibilityBridge>)bridge uid:(int32_t)uid {
+- (instancetype)initWithBridge:(fml::WeakPtr<flutter::AccessibilityBridge>)bridge uid:(int32_t)uid {
   self = [super initWithBridge:bridge uid:uid];
   return self;
 }
@@ -424,7 +424,7 @@ flutter::SemanticsAction GetSemanticsActionForScrollDirection(
 
 @implementation SemanticsObjectContainer {
   SemanticsObject* _semanticsObject;
-  fml::WeakPtr<shell::AccessibilityBridge> _bridge;
+  fml::WeakPtr<flutter::AccessibilityBridge> _bridge;
 }
 
 #pragma mark - initializers
@@ -437,7 +437,7 @@ flutter::SemanticsAction GetSemanticsActionForScrollDirection(
 }
 
 - (instancetype)initWithSemanticsObject:(SemanticsObject*)semanticsObject
-                                 bridge:(fml::WeakPtr<shell::AccessibilityBridge>)bridge {
+                                 bridge:(fml::WeakPtr<flutter::AccessibilityBridge>)bridge {
   FML_DCHECK(semanticsObject) << "semanticsObject must be set";
   self = [super init];
 
@@ -529,7 +529,7 @@ flutter::SemanticsAction GetSemanticsActionForScrollDirection(
 
 #pragma mark - AccessibilityBridge impl
 
-namespace shell {
+namespace flutter {
 
 AccessibilityBridge::AccessibilityBridge(UIView* view,
                                          PlatformViewIOS* platform_view,
@@ -606,7 +606,7 @@ void AccessibilityBridge::UpdateSemantics(flutter::SemanticsNodeUpdates nodes,
     }
 
     if (object.node.IsPlatformViewNode()) {
-      shell::FlutterPlatformViewsController* controller = GetPlatformViewsController();
+      FlutterPlatformViewsController* controller = GetPlatformViewsController();
       if (controller) {
         object.platformViewSemanticsContainer = [[FlutterPlatformViewSemanticsContainer alloc]
             initWithAccessibilityContainer:[object accessibilityContainer]];
@@ -753,4 +753,4 @@ void AccessibilityBridge::clearState() {
   previous_routes_.clear();
 }
 
-}  // namespace shell
+}  // namespace flutter

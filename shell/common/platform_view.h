@@ -21,7 +21,7 @@
 #include "third_party/skia/include/core/SkSize.h"
 #include "third_party/skia/include/gpu/GrContext.h"
 
-namespace shell {
+namespace flutter {
 
 class Shell;
 
@@ -132,6 +132,6 @@ class PlatformView {
   FML_DISALLOW_COPY_AND_ASSIGN(PlatformView);
 };
 
-}  // namespace shell
+}  // namespace flutter
 
 #endif  // COMMON_PLATFORM_VIEW_H_

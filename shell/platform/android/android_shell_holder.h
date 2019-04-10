@@ -16,7 +16,7 @@
 #include "flutter/shell/common/thread_host.h"
 #include "flutter/shell/platform/android/platform_view_android.h"
 
-namespace shell {
+namespace flutter {
 
 class AndroidShellHolder {
  public:
@@ -59,6 +59,6 @@ class AndroidShellHolder {
   FML_DISALLOW_COPY_AND_ASSIGN(AndroidShellHolder);
 };
 
-}  // namespace shell
+}  // namespace flutter
 
 #endif  // FLUTTER_SHELL_PLATFORM_ANDROID_ANDROID_SHELL_HOLDER_H_

@@ -16,7 +16,7 @@
 #include "flutter/fml/unique_fd.h"
 #include "flutter/shell/common/isolate_configuration.h"
 
-namespace shell {
+namespace flutter {
 
 class RunConfiguration {
  public:
@@ -58,6 +58,6 @@ class RunConfiguration {
   FML_DISALLOW_COPY_AND_ASSIGN(RunConfiguration);
 };
 
-}  // namespace shell
+}  // namespace flutter
 
 #endif  // FLUTTER_SHELL_COMMON_RUN_CONFIGURATION_H_

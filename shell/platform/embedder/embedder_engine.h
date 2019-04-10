@@ -16,7 +16,7 @@
 #include "flutter/shell/platform/embedder/embedder_external_texture_gl.h"
 #include "flutter/shell/platform/embedder/embedder_thread_host.h"
 
-namespace shell {
+namespace flutter {
 
 // The object that is returned to the embedder as an opaque pointer to the
 // instance of the Flutter engine.
@@ -80,6 +80,6 @@ class EmbedderEngine {
   FML_DISALLOW_COPY_AND_ASSIGN(EmbedderEngine);
 };
 
-}  // namespace shell
+}  // namespace flutter
 
 #endif  // FLUTTER_SHELL_PLATFORM_EMBEDDER_EMBEDDER_ENGINE_H_

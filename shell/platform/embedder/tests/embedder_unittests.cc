@@ -17,7 +17,7 @@
 #include "flutter/shell/platform/embedder/tests/embedder_test.h"
 #include "flutter/testing/testing.h"
 
-namespace shell {
+namespace flutter {
 namespace testing {
 
 using EmbedderTest = testing::EmbedderTest;
@@ -210,4 +210,4 @@ TEST(EmbedderTestNoFixture, CanGetCurrentTimeInNanoseconds) {
 }
 
 }  // namespace testing
-}  // namespace shell
+}  // namespace flutter

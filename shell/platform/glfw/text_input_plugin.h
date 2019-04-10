@@ -14,7 +14,7 @@
 #include "flutter/shell/platform/glfw/keyboard_hook_handler.h"
 #include "flutter/shell/platform/glfw/public/flutter_glfw.h"
 
-namespace shell {
+namespace flutter {
 
 // Implements a text input plugin.
 //
@@ -25,14 +25,14 @@ class TextInputPlugin : public KeyboardHookHandler {
 
   virtual ~TextInputPlugin();
 
-  // |shell::KeyboardHookHandler|
+  // |KeyboardHookHandler|
   void KeyboardHook(GLFWwindow* window,
                     int key,
                     int scancode,
                     int action,
                     int mods) override;
 
-  // |shell::KeyboardHookHandler|
+  // |KeyboardHookHandler|
   void CharHook(GLFWwindow* window, unsigned int code_point) override;
 
  private:
@@ -57,6 +57,6 @@ class TextInputPlugin : public KeyboardHookHandler {
   TextInputModel* active_model_;
 };
 
-}  // namespace shell
+}  // namespace flutter
 
 #endif  // FLUTTER_SHELL_PLATFORM_GLFW_TEXT_INPUT_PLUGIN_H_

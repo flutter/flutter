@@ -9,7 +9,7 @@
 #include "flutter/fml/macros.h"
 #include "flutter/shell/platform/android/platform_view_android.h"
 
-namespace shell {
+namespace flutter {
 
 void FlutterViewHandlePlatformMessage(JNIEnv* env,
                                       jobject obj,
@@ -46,6 +46,6 @@ void SurfaceTextureGetTransformMatrix(JNIEnv* env,
 
 void SurfaceTextureDetachFromGLContext(JNIEnv* env, jobject obj);
 
-}  // namespace shell
+}  // namespace flutter
 
 #endif  // FLUTTER_SHELL_PLATFORM_ANDROID_PLATFORM_VIEW_ANDROID_JNI_H_

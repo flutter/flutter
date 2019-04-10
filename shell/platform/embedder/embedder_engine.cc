@@ -7,7 +7,7 @@
 #include "flutter/fml/make_copyable.h"
 #include "flutter/shell/platform/embedder/vsync_waiter_embedder.h"
 
-namespace shell {
+namespace flutter {
 
 EmbedderEngine::EmbedderEngine(
     std::unique_ptr<EmbedderThreadHost> thread_host,
@@ -65,7 +65,7 @@ bool EmbedderEngine::Run(RunConfiguration run_configuration) {
   ]() mutable {
         if (engine) {
           auto result = engine->Run(std::move(config));
-          if (result == shell::Engine::RunStatus::Failure) {
+          if (result == Engine::RunStatus::Failure) {
             FML_LOG(ERROR) << "Could not launch the engine with configuration.";
           }
         }
@@ -224,4 +224,4 @@ bool EmbedderEngine::RunTask(const FlutterTask* task) {
                                 task->task);
 }
 
-}  // namespace shell
+}  // namespace flutter

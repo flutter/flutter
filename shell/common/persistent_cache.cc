@@ -15,7 +15,7 @@
 #include "flutter/fml/paths.h"
 #include "flutter/fml/trace_event.h"
 
-namespace shell {
+namespace flutter {
 
 std::string PersistentCache::cache_base_path_;
 
@@ -205,4 +205,4 @@ fml::RefPtr<fml::TaskRunner> PersistentCache::GetWorkerTaskRunner() const {
   return worker;
 }
 
-}  // namespace shell
+}  // namespace flutter

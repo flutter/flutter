@@ -4,7 +4,7 @@
 
 #include "flutter/shell/platform/darwin/common/buffer_conversions.h"
 
-namespace shell {
+namespace flutter {
 
 std::vector<uint8_t> GetVectorFromNSData(NSData* data) {
   const uint8_t* bytes = reinterpret_cast<const uint8_t*>(data.bytes);
@@ -23,4 +23,4 @@ NSData* GetNSDataFromMapping(std::unique_ptr<fml::Mapping> mapping) {
   return [NSData dataWithBytes:mapping->GetMapping() length:mapping->GetSize()];
 }
 
-}  // namespace shell
+}  // namespace flutter

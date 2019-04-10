@@ -22,12 +22,12 @@
 #include "flutter/runtime/runtime_controller.h"
 #include "flutter/runtime/runtime_delegate.h"
 #include "flutter/shell/common/animator.h"
-#include "flutter/shell/common/io_manager.h"
 #include "flutter/shell/common/rasterizer.h"
 #include "flutter/shell/common/run_configuration.h"
+#include "flutter/shell/common/shell_io_manager.h"
 #include "third_party/skia/include/core/SkPicture.h"
 
-namespace shell {
+namespace flutter {
 
 class Engine final : public flutter::RuntimeDelegate {
  public:
@@ -175,6 +175,6 @@ class Engine final : public flutter::RuntimeDelegate {
   FML_DISALLOW_COPY_AND_ASSIGN(Engine);
 };
 
-}  // namespace shell
+}  // namespace flutter
 
 #endif  // SHELL_COMMON_ENGINE_H_

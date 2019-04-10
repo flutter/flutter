@@ -4,7 +4,7 @@
 
 #include "flutter/shell/platform/darwin/ios/framework/Source/platform_message_response_darwin.h"
 
-namespace shell {
+namespace flutter {
 
 PlatformMessageResponseDarwin::PlatformMessageResponseDarwin(
     PlatformMessageResponseCallback callback,
@@ -17,7 +17,7 @@ PlatformMessageResponseDarwin::~PlatformMessageResponseDarwin() = default;
 void PlatformMessageResponseDarwin::Complete(std::unique_ptr<fml::Mapping> data) {
   fml::RefPtr<PlatformMessageResponseDarwin> self(this);
   platform_task_runner_->PostTask(fml::MakeCopyable([self, data = std::move(data)]() mutable {
-    self->callback_.get()(shell::GetNSDataFromMapping(std::move(data)));
+    self->callback_.get()(GetNSDataFromMapping(std::move(data)));
   }));
 }
 
@@ -27,4 +27,4 @@ void PlatformMessageResponseDarwin::CompleteEmpty() {
       fml::MakeCopyable([self]() mutable { self->callback_.get()(nil); }));
 }
 
-}  // namespace shell
+}  // namespace flutter

@@ -9,7 +9,7 @@
 
 #include "flutter/shell/platform/glfw/public/flutter_glfw.h"
 
-namespace shell {
+namespace flutter {
 
 // Abstract class for handling keyboard input events.
 class KeyboardHookHandler {
@@ -27,6 +27,6 @@ class KeyboardHookHandler {
   virtual void CharHook(GLFWwindow* window, unsigned int code_point) = 0;
 };
 
-}  // namespace shell
+}  // namespace flutter
 
 #endif  // FLUTTER_SHELL_PLATFORM_GLFW_KEYBOARD_HOOK_HANDLER_H_

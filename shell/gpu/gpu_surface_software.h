@@ -11,7 +11,7 @@
 #include "flutter/shell/common/surface.h"
 #include "third_party/skia/include/core/SkSurface.h"
 
-namespace shell {
+namespace flutter {
 
 class GPUSurfaceSoftwareDelegate {
  public:
@@ -28,19 +28,19 @@ class GPUSurfaceSoftware : public Surface {
 
   ~GPUSurfaceSoftware() override;
 
-  // |shell::Surface|
+  // |Surface|
   bool IsValid() override;
 
-  // |shell::Surface|
+  // |Surface|
   std::unique_ptr<SurfaceFrame> AcquireFrame(const SkISize& size) override;
 
-  // |shell::Surface|
+  // |Surface|
   SkMatrix GetRootTransformation() const override;
 
-  // |shell::Surface|
+  // |Surface|
   GrContext* GetContext() override;
 
-  // |shell::Surface|
+  // |Surface|
   flow::ExternalViewEmbedder* GetExternalViewEmbedder() override;
 
  private:
@@ -50,6 +50,6 @@ class GPUSurfaceSoftware : public Surface {
   FML_DISALLOW_COPY_AND_ASSIGN(GPUSurfaceSoftware);
 };
 
-}  // namespace shell
+}  // namespace flutter
 
 #endif  // FLUTTER_SHELL_GPU_GPU_SURFACE_SOFTWARE_H_

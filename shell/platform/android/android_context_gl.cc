@@ -10,7 +10,7 @@
 
 #include "flutter/fml/trace_event.h"
 
-namespace shell {
+namespace flutter {
 
 template <class T>
 using EGLResult = std::pair<bool, T>;
@@ -272,4 +272,4 @@ bool AndroidContextGL::Resize(const SkISize& size) {
   return true;
 }
 
-}  // namespace shell
+}  // namespace flutter

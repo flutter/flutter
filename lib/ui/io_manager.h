@@ -15,6 +15,8 @@ namespace flutter {
 // i.e. the shell's IOManager.
 class IOManager {
  public:
+  virtual ~IOManager() = default;
+
   virtual fml::WeakPtr<GrContext> GetResourceContext() const = 0;
 
   virtual fml::RefPtr<flow::SkiaUnrefQueue> GetSkiaUnrefQueue() const = 0;

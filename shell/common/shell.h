@@ -27,12 +27,12 @@
 #include "flutter/runtime/service_protocol.h"
 #include "flutter/shell/common/animator.h"
 #include "flutter/shell/common/engine.h"
-#include "flutter/shell/common/io_manager.h"
 #include "flutter/shell/common/platform_view.h"
 #include "flutter/shell/common/rasterizer.h"
+#include "flutter/shell/common/shell_io_manager.h"
 #include "flutter/shell/common/surface.h"
 
-namespace shell {
+namespace flutter {
 
 class Shell final : public PlatformView::Delegate,
                     public Animator::Delegate,
@@ -91,7 +91,7 @@ class Shell final : public PlatformView::Delegate,
   std::unique_ptr<PlatformView> platform_view_;  // on platform task runner
   std::unique_ptr<Engine> engine_;               // on UI task runner
   std::unique_ptr<Rasterizer> rasterizer_;       // on GPU task runner
-  std::unique_ptr<IOManager> io_manager_;        // on IO task runner
+  std::unique_ptr<ShellIOManager> io_manager_;   // on IO task runner
 
   std::unordered_map<std::string,  // method
                      std::pair<fml::RefPtr<fml::TaskRunner>,
@@ -119,79 +119,79 @@ class Shell final : public PlatformView::Delegate,
   bool Setup(std::unique_ptr<PlatformView> platform_view,
              std::unique_ptr<Engine> engine,
              std::unique_ptr<Rasterizer> rasterizer,
-             std::unique_ptr<IOManager> io_manager);
+             std::unique_ptr<ShellIOManager> io_manager);
 
-  // |shell::PlatformView::Delegate|
+  // |PlatformView::Delegate|
   void OnPlatformViewCreated(std::unique_ptr<Surface> surface) override;
 
-  // |shell::PlatformView::Delegate|
+  // |PlatformView::Delegate|
   void OnPlatformViewDestroyed() override;
 
-  // |shell::PlatformView::Delegate|
+  // |PlatformView::Delegate|
   void OnPlatformViewSetViewportMetrics(
       const flutter::ViewportMetrics& metrics) override;
 
-  // |shell::PlatformView::Delegate|
+  // |PlatformView::Delegate|
   void OnPlatformViewDispatchPlatformMessage(
       fml::RefPtr<flutter::PlatformMessage> message) override;
 
-  // |shell::PlatformView::Delegate|
+  // |PlatformView::Delegate|
   void OnPlatformViewDispatchPointerDataPacket(
       std::unique_ptr<flutter::PointerDataPacket> packet) override;
 
-  // |shell::PlatformView::Delegate|
+  // |PlatformView::Delegate|
   void OnPlatformViewDispatchSemanticsAction(
       int32_t id,
       flutter::SemanticsAction action,
       std::vector<uint8_t> args) override;
 
-  // |shell::PlatformView::Delegate|
+  // |PlatformView::Delegate|
   void OnPlatformViewSetSemanticsEnabled(bool enabled) override;
 
   // |shell:PlatformView::Delegate|
   void OnPlatformViewSetAccessibilityFeatures(int32_t flags) override;
 
-  // |shell::PlatformView::Delegate|
+  // |PlatformView::Delegate|
   void OnPlatformViewRegisterTexture(
       std::shared_ptr<flow::Texture> texture) override;
 
-  // |shell::PlatformView::Delegate|
+  // |PlatformView::Delegate|
   void OnPlatformViewUnregisterTexture(int64_t texture_id) override;
 
-  // |shell::PlatformView::Delegate|
+  // |PlatformView::Delegate|
   void OnPlatformViewMarkTextureFrameAvailable(int64_t texture_id) override;
 
-  // |shell::PlatformView::Delegate|
+  // |PlatformView::Delegate|
   void OnPlatformViewSetNextFrameCallback(fml::closure closure) override;
 
-  // |shell::Animator::Delegate|
+  // |Animator::Delegate|
   void OnAnimatorBeginFrame(fml::TimePoint frame_time) override;
 
-  // |shell::Animator::Delegate|
+  // |Animator::Delegate|
   void OnAnimatorNotifyIdle(int64_t deadline) override;
 
-  // |shell::Animator::Delegate|
+  // |Animator::Delegate|
   void OnAnimatorDraw(
       fml::RefPtr<flutter::Pipeline<flow::LayerTree>> pipeline) override;
 
-  // |shell::Animator::Delegate|
+  // |Animator::Delegate|
   void OnAnimatorDrawLastLayerTree() override;
 
-  // |shell::Engine::Delegate|
+  // |Engine::Delegate|
   void OnEngineUpdateSemantics(
       flutter::SemanticsNodeUpdates update,
       flutter::CustomAccessibilityActionUpdates actions) override;
 
-  // |shell::Engine::Delegate|
+  // |Engine::Delegate|
   void OnEngineHandlePlatformMessage(
       fml::RefPtr<flutter::PlatformMessage> message) override;
 
   void HandleEngineSkiaMessage(fml::RefPtr<flutter::PlatformMessage> message);
 
-  // |shell::Engine::Delegate|
+  // |Engine::Delegate|
   void OnPreEngineRestart() override;
 
-  // |shell::Engine::Delegate|
+  // |Engine::Delegate|
   void UpdateIsolateDescription(const std::string isolate_name,
                                 int64_t isolate_port) override;
 
@@ -242,6 +242,6 @@ class Shell final : public PlatformView::Delegate,
   FML_DISALLOW_COPY_AND_ASSIGN(Shell);
 };
 
-}  // namespace shell
+}  // namespace flutter
 
 #endif  // SHELL_COMMON_SHELL_H_

@@ -15,7 +15,7 @@
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/embedder/embedder_task_runner.h"
 
-namespace shell {
+namespace flutter {
 
 class EmbedderThreadHost {
  public:
@@ -49,6 +49,6 @@ class EmbedderThreadHost {
   FML_DISALLOW_COPY_AND_ASSIGN(EmbedderThreadHost);
 };
 
-}  // namespace shell
+}  // namespace flutter
 
 #endif  // FLUTTER_SHELL_PLATFORM_EMBEDDER_EMBEDDER_THREAD_HOST_H_

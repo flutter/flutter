@@ -10,7 +10,7 @@
 #include "third_party/skia/include/core/SkMatrix.h"
 #include "third_party/skia/include/gpu/gl/GrGLInterface.h"
 
-namespace shell {
+namespace flutter {
 
 class GPUSurfaceGLDelegate {
  public:
@@ -64,6 +64,6 @@ class GPUSurfaceGLDelegate {
   virtual GLProcResolver GetGLProcResolver() const;
 };
 
-}  // namespace shell
+}  // namespace flutter
 
 #endif  // FLUTTER_SHELL_GPU_GPU_SURFACE_GL_DELEGATE_H_

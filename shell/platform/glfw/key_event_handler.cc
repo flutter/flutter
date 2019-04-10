@@ -18,7 +18,7 @@ static constexpr char kAndroidKeyMap[] = "android";
 static constexpr char kKeyUp[] = "keyup";
 static constexpr char kKeyDown[] = "keydown";
 
-namespace shell {
+namespace flutter {
 
 KeyEventHandler::KeyEventHandler(flutter::BinaryMessenger* messenger)
     : channel_(
@@ -57,4 +57,4 @@ void KeyEventHandler::KeyboardHook(GLFWwindow* window,
   channel_->Send(event);
 }
 
-}  // namespace shell
+}  // namespace flutter

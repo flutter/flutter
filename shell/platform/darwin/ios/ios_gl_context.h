@@ -15,7 +15,7 @@
 #include "flutter/shell/common/platform_view.h"
 #include "ios_gl_render_target.h"
 
-namespace shell {
+namespace flutter {
 
 class IOSGLContext {
  public:
@@ -40,6 +40,6 @@ class IOSGLContext {
   FML_DISALLOW_COPY_AND_ASSIGN(IOSGLContext);
 };
 
-}  // namespace shell
+}  // namespace flutter
 
 #endif  // FLUTTER_SHELL_PLATFORM_DARWIN_IOS_IOS_GL_CONTEXT_H_

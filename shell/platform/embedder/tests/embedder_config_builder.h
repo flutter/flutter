@@ -11,7 +11,7 @@
 #include "flutter/shell/platform/embedder/tests/embedder_context.h"
 #include "flutter/shell/platform/embedder/tests/embedder_test.h"
 
-namespace shell {
+namespace flutter {
 namespace testing {
 
 struct UniqueEngineTraits {
@@ -71,6 +71,6 @@ class EmbedderConfigBuilder {
 };
 
 }  // namespace testing
-}  // namespace shell
+}  // namespace flutter
 
 #endif  // FLUTTER_SHELL_PLATFORM_EMBEDDER_TESTS_EMBEDDER_CONFIG_BUILDER_H_

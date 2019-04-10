@@ -17,7 +17,7 @@ const UInt32 kKeyPressClickSoundId = 1306;
 
 }  // namespaces
 
-namespace shell {
+namespace flutter {
 
 // TODO(abarth): Move these definitions from system_chrome_impl.cc to here.
 const char* const kOrientationUpdateNotificationName =
@@ -29,9 +29,9 @@ const char* const kOverlayStyleUpdateNotificationName =
 const char* const kOverlayStyleUpdateNotificationKey =
     "io.flutter.plugin.platform.SystemChromeOverlayNotificationKey";
 
-}  // namespace shell
+}  // namespace flutter
 
-using namespace shell;
+using namespace flutter;
 
 @implementation FlutterPlatformPlugin {
   fml::WeakPtr<FlutterEngine> _engine;

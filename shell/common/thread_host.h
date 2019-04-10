@@ -10,7 +10,7 @@
 #include "flutter/fml/macros.h"
 #include "flutter/fml/thread.h"
 
-namespace shell {
+namespace flutter {
 
 struct ThreadHost {
   enum Type {
@@ -38,6 +38,6 @@ struct ThreadHost {
   void Reset();
 };
 
-}  // namespace shell
+}  // namespace flutter
 
 #endif  // FLUTTER_SHELL_COMMON_THREAD_HOST_H_

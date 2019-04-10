@@ -16,15 +16,15 @@ JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void* reserved) {
   bool result = false;
 
   // Register FlutterMain.
-  result = shell::FlutterMain::Register(env);
+  result = flutter::FlutterMain::Register(env);
   FML_CHECK(result);
 
   // Register PlatformView
-  result = shell::PlatformViewAndroid::Register(env);
+  result = flutter::PlatformViewAndroid::Register(env);
   FML_CHECK(result);
 
   // Register VSyncWaiter.
-  result = shell::VsyncWaiterAndroid::Register(env);
+  result = flutter::VsyncWaiterAndroid::Register(env);
   FML_CHECK(result);
 
   return JNI_VERSION_1_4;

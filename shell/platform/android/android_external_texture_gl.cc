@@ -9,7 +9,7 @@
 #include "flutter/shell/platform/android/platform_view_android_jni.h"
 #include "third_party/skia/include/gpu/GrBackendSurface.h"
 
-namespace shell {
+namespace flutter {
 
 AndroidExternalTextureGL::AndroidExternalTextureGL(
     int64_t id,
@@ -120,4 +120,4 @@ void AndroidExternalTextureGL::Detach() {
   }
 }
 
-}  // namespace shell
+}  // namespace flutter

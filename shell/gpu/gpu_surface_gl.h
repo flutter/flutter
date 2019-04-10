@@ -15,7 +15,7 @@
 #include "flutter/shell/gpu/gpu_surface_gl_delegate.h"
 #include "third_party/skia/include/gpu/GrContext.h"
 
-namespace shell {
+namespace flutter {
 
 class GPUSurfaceGL : public Surface {
  public:
@@ -26,22 +26,22 @@ class GPUSurfaceGL : public Surface {
 
   ~GPUSurfaceGL() override;
 
-  // |shell::Surface|
+  // |Surface|
   bool IsValid() override;
 
-  // |shell::Surface|
+  // |Surface|
   std::unique_ptr<SurfaceFrame> AcquireFrame(const SkISize& size) override;
 
-  // |shell::Surface|
+  // |Surface|
   SkMatrix GetRootTransformation() const override;
 
-  // |shell::Surface|
+  // |Surface|
   GrContext* GetContext() override;
 
-  // |shell::Surface|
+  // |Surface|
   flow::ExternalViewEmbedder* GetExternalViewEmbedder() override;
 
-  // |shell::Surface|
+  // |Surface|
   bool MakeRenderContextCurrent() override;
 
  private:
@@ -64,6 +64,6 @@ class GPUSurfaceGL : public Surface {
   FML_DISALLOW_COPY_AND_ASSIGN(GPUSurfaceGL);
 };
 
-}  // namespace shell
+}  // namespace flutter
 
 #endif  // SHELL_GPU_GPU_SURFACE_GL_H_

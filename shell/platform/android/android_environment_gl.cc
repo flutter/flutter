@@ -4,7 +4,7 @@
 
 #include "flutter/shell/platform/android/android_environment_gl.h"
 
-namespace shell {
+namespace flutter {
 
 AndroidEnvironmentGL::AndroidEnvironmentGL()
     : display_(EGL_NO_DISPLAY), valid_(false) {
@@ -38,4 +38,4 @@ EGLDisplay AndroidEnvironmentGL::Display() const {
   return display_;
 }
 
-}  // namespace shell
+}  // namespace flutter

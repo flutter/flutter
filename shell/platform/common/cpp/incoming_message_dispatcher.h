@@ -13,7 +13,7 @@
 
 #include "flutter/shell/platform/common/cpp/public/flutter_messenger.h"
 
-namespace shell {
+namespace flutter {
 
 // Manages per-channel registration of callbacks for handling messages from the
 // Flutter engine, and dispatching incoming messages to those handlers.
@@ -73,6 +73,6 @@ class IncomingMessageDispatcher {
   std::set<std::string> input_blocking_channels_;
 };
 
-}  // namespace shell
+}  // namespace flutter
 
 #endif  // FLUTTER_SHELL_PLATFORM_CPP_INCOMING_MESSAGE_DISPATCHER_H_

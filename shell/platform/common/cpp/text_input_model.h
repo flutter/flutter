@@ -9,7 +9,7 @@
 
 #include "rapidjson/document.h"
 
-namespace shell {
+namespace flutter {
 // Handles underlying text input state, using a simple ASCII model.
 //
 // Ignores special states like "insert mode" for now.
@@ -96,6 +96,6 @@ class TextInputModel {
   std::string::iterator selection_extent_;
 };
 
-}  // namespace shell
+}  // namespace flutter
 
 #endif  // FLUTTER_SHELL_PLATFORM_CPP_TEXT_INPUT_MODEL_H_

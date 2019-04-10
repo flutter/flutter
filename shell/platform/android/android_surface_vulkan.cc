@@ -10,7 +10,7 @@
 #include "flutter/shell/gpu/gpu_surface_vulkan.h"
 #include "flutter/vulkan/vulkan_native_surface_android.h"
 
-namespace shell {
+namespace flutter {
 
 AndroidSurfaceVulkan::AndroidSurfaceVulkan()
     : proc_table_(fml::MakeRefCounted<vulkan::VulkanProcTable>()) {}
@@ -21,12 +21,12 @@ bool AndroidSurfaceVulkan::IsValid() const {
   return proc_table_->HasAcquiredMandatoryProcAddresses();
 }
 
-// |shell::AndroidSurface|
+// |AndroidSurface|
 void AndroidSurfaceVulkan::TeardownOnScreenContext() {
   // Nothing to do.
 }
 
-// |shell::AndroidSurface|
+// |AndroidSurface|
 std::unique_ptr<Surface> AndroidSurfaceVulkan::CreateGPUSurface() {
   if (!IsValid()) {
     return nullptr;
@@ -54,28 +54,28 @@ std::unique_ptr<Surface> AndroidSurfaceVulkan::CreateGPUSurface() {
   return gpu_surface;
 }
 
-// |shell::AndroidSurface|
+// |AndroidSurface|
 bool AndroidSurfaceVulkan::OnScreenSurfaceResize(const SkISize& size) const {
   return true;
 }
 
-// |shell::AndroidSurface|
+// |AndroidSurface|
 bool AndroidSurfaceVulkan::ResourceContextMakeCurrent() {
   FML_DLOG(ERROR) << "The vulkan backend does not support resource contexts.";
   return false;
 }
 
-// |shell::AndroidSurface|
+// |AndroidSurface|
 bool AndroidSurfaceVulkan::ResourceContextClearCurrent() {
   FML_DLOG(ERROR) << "The vulkan backend does not support resource contexts.";
   return false;
 }
 
-// |shell::AndroidSurface|
+// |AndroidSurface|
 bool AndroidSurfaceVulkan::SetNativeWindow(
     fml::RefPtr<AndroidNativeWindow> window) {
   native_window_ = std::move(window);
   return native_window_ && native_window_->IsValid();
 }
 
-}  // namespace shell
+}  // namespace flutter

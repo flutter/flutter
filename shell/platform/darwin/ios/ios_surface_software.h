@@ -13,7 +13,7 @@
 
 @class CALayer;
 
-namespace shell {
+namespace flutter {
 
 class IOSSurfaceSoftware final : public IOSSurface,
                                  public GPUSurfaceSoftwareDelegate,
@@ -24,25 +24,25 @@ class IOSSurfaceSoftware final : public IOSSurface,
 
   ~IOSSurfaceSoftware() override;
 
-  // |shell::IOSSurface|
+  // |IOSSurface|
   bool IsValid() const override;
 
-  // |shell::IOSSurface|
+  // |IOSSurface|
   bool ResourceContextMakeCurrent() override;
 
-  // |shell::IOSSurface|
+  // |IOSSurface|
   void UpdateStorageSizeIfNecessary() override;
 
-  // |shell::IOSSurface|
+  // |IOSSurface|
   std::unique_ptr<Surface> CreateGPUSurface() override;
 
-  // |shell::GPUSurfaceSoftwareDelegate|
+  // |GPUSurfaceSoftwareDelegate|
   sk_sp<SkSurface> AcquireBackingStore(const SkISize& size) override;
 
-  // |shell::GPUSurfaceSoftwareDelegate|
+  // |GPUSurfaceSoftwareDelegate|
   bool PresentBackingStore(sk_sp<SkSurface> backing_store) override;
 
-  // |shell::GPUSurfaceSoftwareDelegate|
+  // |GPUSurfaceSoftwareDelegate|
   flow::ExternalViewEmbedder* GetExternalViewEmbedder() override;
 
   // |flow::ExternalViewEmbedder|
@@ -67,6 +67,6 @@ class IOSSurfaceSoftware final : public IOSSurface,
   FML_DISALLOW_COPY_AND_ASSIGN(IOSSurfaceSoftware);
 };
 
-}  // namespace shell
+}  // namespace flutter
 
 #endif  // FLUTTER_SHELL_PLATFORM_DARWIN_IOS_IOS_SURFACE_SOFTWARE_H_

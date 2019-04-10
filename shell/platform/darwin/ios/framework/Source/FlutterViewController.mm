@@ -135,12 +135,12 @@ NSNotificationName const FlutterSemanticsUpdateNotification = @"FlutterSemantics
   NSNotificationCenter* center = [NSNotificationCenter defaultCenter];
   [center addObserver:self
              selector:@selector(onOrientationPreferencesUpdated:)
-                 name:@(shell::kOrientationUpdateNotificationName)
+                 name:@(flutter::kOrientationUpdateNotificationName)
                object:nil];
 
   [center addObserver:self
              selector:@selector(onPreferredStatusBarStyleUpdated:)
-                 name:@(shell::kOverlayStyleUpdateNotificationName)
+                 name:@(flutter::kOverlayStyleUpdateNotificationName)
                object:nil];
 
   [center addObserver:self
@@ -752,7 +752,7 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   dispatch_async(dispatch_get_main_queue(), ^{
     NSDictionary* info = notification.userInfo;
 
-    NSNumber* update = info[@(shell::kOrientationUpdateNotificationKey)];
+    NSNumber* update = info[@(flutter::kOrientationUpdateNotificationKey)];
 
     if (update == nil) {
       return;
@@ -975,7 +975,7 @@ constexpr CGFloat kStandardStatusBarHeight = 20.0;
   dispatch_async(dispatch_get_main_queue(), ^{
     NSDictionary* info = notification.userInfo;
 
-    NSNumber* update = info[@(shell::kOverlayStyleUpdateNotificationKey)];
+    NSNumber* update = info[@(flutter::kOverlayStyleUpdateNotificationKey)];
 
     if (update == nil) {
       return;
@@ -992,7 +992,7 @@ constexpr CGFloat kStandardStatusBarHeight = 20.0;
 
 #pragma mark - Platform views
 
-- (shell::FlutterPlatformViewsController*)platformViewsController {
+- (flutter::FlutterPlatformViewsController*)platformViewsController {
   return [_engine.get() platformViewsController];
 }
 

@@ -4,7 +4,7 @@
 
 #include "flutter/shell/platform/embedder/tests/embedder_config_builder.h"
 
-namespace shell {
+namespace flutter {
 namespace testing {
 
 EmbedderConfigBuilder::EmbedderConfigBuilder(
@@ -128,4 +128,4 @@ UniqueEngine EmbedderConfigBuilder::LaunchEngine() {
 }
 
 }  // namespace testing
-}  // namespace shell
+}  // namespace flutter

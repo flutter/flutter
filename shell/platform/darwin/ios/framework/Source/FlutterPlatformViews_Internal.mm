@@ -6,7 +6,8 @@
 
 #include "flutter/shell/platform/darwin/ios/ios_surface.h"
 
-namespace shell {
+namespace flutter {
+
 FlutterPlatformViewLayer::FlutterPlatformViewLayer(fml::scoped_nsobject<UIView> overlay_view,
                                                    std::unique_ptr<IOSSurface> ios_surface,
                                                    std::unique_ptr<Surface> surface)
@@ -20,4 +21,4 @@ FlutterPlatformViewsController::FlutterPlatformViewsController() = default;
 
 FlutterPlatformViewsController::~FlutterPlatformViewsController() = default;
 
-}  // namespace shell
+}  // namespace flutter

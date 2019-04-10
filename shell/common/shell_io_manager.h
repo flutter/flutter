@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_SHELL_COMMON_IO_MANAGER_H_
-#define FLUTTER_SHELL_COMMON_IO_MANAGER_H_
+#ifndef FLUTTER_SHELL_COMMON_SHELL_IO_MANAGER_H_
+#define FLUTTER_SHELL_COMMON_SHELL_IO_MANAGER_H_
 
 #include <memory>
 
@@ -13,9 +13,9 @@
 #include "flutter/lib/ui/io_manager.h"
 #include "third_party/skia/include/gpu/GrContext.h"
 
-namespace shell {
+namespace flutter {
 
-class IOManager : public flutter::IOManager {
+class ShellIOManager final : public IOManager {
  public:
   // Convenience methods for platforms to create a GrContext used to supply to
   // the IOManager. The platforms may create the context themselves if they so
@@ -24,10 +24,10 @@ class IOManager : public flutter::IOManager {
       GrBackend backend,
       sk_sp<const GrGLInterface> gl_interface);
 
-  IOManager(sk_sp<GrContext> resource_context,
-            fml::RefPtr<fml::TaskRunner> unref_queue_task_runner);
+  ShellIOManager(sk_sp<GrContext> resource_context,
+                 fml::RefPtr<fml::TaskRunner> unref_queue_task_runner);
 
-  virtual ~IOManager();
+  ~ShellIOManager() override;
 
   fml::WeakPtr<GrContext> GetResourceContext() const override;
 
@@ -44,7 +44,7 @@ class IOManager : public flutter::IOManager {
 
   fml::RefPtr<flow::SkiaUnrefQueue> GetSkiaUnrefQueue() const override;
 
-  fml::WeakPtr<IOManager> GetWeakPtr();
+  fml::WeakPtr<ShellIOManager> GetWeakPtr();
 
  private:
   // Resource context management.
@@ -55,11 +55,11 @@ class IOManager : public flutter::IOManager {
   // Unref queue management.
   fml::RefPtr<flow::SkiaUnrefQueue> unref_queue_;
 
-  fml::WeakPtrFactory<IOManager> weak_factory_;
+  fml::WeakPtrFactory<ShellIOManager> weak_factory_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(IOManager);
+  FML_DISALLOW_COPY_AND_ASSIGN(ShellIOManager);
 };
 
-}  // namespace shell
+}  // namespace flutter
 
-#endif  // FLUTTER_SHELL_COMMON_IO_MANAGER_H_
+#endif  // FLUTTER_SHELL_COMMON_SHELL_IO_MANAGER_H_

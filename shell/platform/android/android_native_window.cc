@@ -4,7 +4,7 @@
 
 #include "flutter/shell/platform/android/android_native_window.h"
 
-namespace shell {
+namespace flutter {
 
 AndroidNativeWindow::AndroidNativeWindow(Handle window) : window_(window) {}
 
@@ -29,4 +29,4 @@ SkISize AndroidNativeWindow::GetSize() const {
                                             ANativeWindow_getHeight(window_));
 }
 
-}  // namespace shell
+}  // namespace flutter

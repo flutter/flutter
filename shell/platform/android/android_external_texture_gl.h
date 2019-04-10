@@ -9,7 +9,7 @@
 #include "flutter/flow/texture.h"
 #include "flutter/fml/platform/android/jni_weak_ref.h"
 
-namespace shell {
+namespace flutter {
 
 class AndroidExternalTextureGL : public flow::Texture {
  public:
@@ -51,6 +51,6 @@ class AndroidExternalTextureGL : public flow::Texture {
   FML_DISALLOW_COPY_AND_ASSIGN(AndroidExternalTextureGL);
 };
 
-}  // namespace shell
+}  // namespace flutter
 
 #endif  // FLUTTER_SHELL_PLATFORM_ANDROID_EXTERNAL_TEXTURE_GL_H_

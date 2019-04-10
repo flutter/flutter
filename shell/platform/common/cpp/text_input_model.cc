@@ -26,7 +26,7 @@ static constexpr char kTextInputAction[] = "inputAction";
 static constexpr char kTextInputType[] = "inputType";
 static constexpr char kTextInputTypeName[] = "name";
 
-namespace shell {
+namespace flutter {
 
 TextInputModel::TextInputModel(int client_id, const rapidjson::Value& config)
     : text_(""),
@@ -178,4 +178,4 @@ std::unique_ptr<rapidjson::Document> TextInputModel::GetState() const {
   return args;
 }
 
-}  // namespace shell
+}  // namespace flutter

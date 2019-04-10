@@ -14,7 +14,7 @@
 #include "flutter/testing/test_dart_native_resolver.h"
 #include "flutter/testing/thread_test.h"
 
-namespace shell {
+namespace flutter {
 namespace testing {
 
 class ShellTest : public ::testing::ThreadTest {
@@ -45,6 +45,6 @@ class ShellTest : public ::testing::ThreadTest {
 };
 
 }  // namespace testing
-}  // namespace shell
+}  // namespace flutter
 
 #endif  // FLUTTER_SHELL_COMMON_SHELL_TEST_H_

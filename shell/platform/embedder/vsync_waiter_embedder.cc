@@ -4,7 +4,7 @@
 
 #include "flutter/shell/platform/embedder/vsync_waiter_embedder.h"
 
-namespace shell {
+namespace flutter {
 
 VsyncWaiterEmbedder::VsyncWaiterEmbedder(VsyncCallback vsync_callback,
                                          flutter::TaskRunners task_runners)
@@ -14,7 +14,7 @@ VsyncWaiterEmbedder::VsyncWaiterEmbedder(VsyncCallback vsync_callback,
 
 VsyncWaiterEmbedder::~VsyncWaiterEmbedder() = default;
 
-// |shell::VsyncWaiter|
+// |VsyncWaiter|
 void VsyncWaiterEmbedder::AwaitVSync() {
   auto* weak_waiter = new std::weak_ptr<VsyncWaiter>(shared_from_this());
   vsync_callback_(reinterpret_cast<intptr_t>(weak_waiter));
@@ -40,4 +40,4 @@ bool VsyncWaiterEmbedder::OnEmbedderVsync(intptr_t baton,
   return true;
 }
 
-}  // namespace shell
+}  // namespace flutter

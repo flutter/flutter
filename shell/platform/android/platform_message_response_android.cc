@@ -7,7 +7,7 @@
 #include "flutter/fml/make_copyable.h"
 #include "flutter/shell/platform/android/platform_view_android_jni.h"
 
-namespace shell {
+namespace flutter {
 
 PlatformMessageResponseAndroid::PlatformMessageResponseAndroid(
     int response_id,
@@ -72,4 +72,4 @@ void PlatformMessageResponseAndroid::CompleteEmpty() {
                                                  response, nullptr);
       }));
 }
-}  // namespace shell
+}  // namespace flutter

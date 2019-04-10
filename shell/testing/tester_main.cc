@@ -21,7 +21,7 @@
 #include "flutter/shell/common/thread_host.h"
 #include "third_party/dart/runtime/include/bin/dart_io_api.h"
 
-namespace shell {
+namespace flutter {
 
 // Checks whether the engine's main Dart isolate has no pending work.  If so,
 // then exit the given message loop.
@@ -186,7 +186,7 @@ int RunTester(const flutter::Settings& settings, bool run_forever) {
             reinterpret_cast<intptr_t>(&completion_observer),
             [&completion_observer]() { completion_observer.DidProcessTask(); });
         if (engine->Run(std::move(config)) !=
-            shell::Engine::RunStatus::Failure) {
+            flutter::Engine::RunStatus::Failure) {
           engine_did_run = true;
 
           flutter::ViewportMetrics metrics;
@@ -226,7 +226,7 @@ int RunTester(const flutter::Settings& settings, bool run_forever) {
   return completion_observer.GetExitCodeForLastError();
 }
 
-}  // namespace shell
+}  // namespace flutter
 
 int main(int argc, char* argv[]) {
   dart::bin::SetExecutableName(argv[0]);
@@ -234,12 +234,12 @@ int main(int argc, char* argv[]) {
 
   auto command_line = fml::CommandLineFromArgcArgv(argc, argv);
 
-  if (command_line.HasOption(shell::FlagForSwitch(shell::Switch::Help))) {
-    shell::PrintUsage("flutter_tester");
+  if (command_line.HasOption(flutter::FlagForSwitch(flutter::Switch::Help))) {
+    flutter::PrintUsage("flutter_tester");
     return EXIT_SUCCESS;
   }
 
-  auto settings = shell::SettingsFromCommandLine(command_line);
+  auto settings = flutter::SettingsFromCommandLine(command_line);
   if (command_line.positional_args().size() > 0) {
     // The tester may not use the switch for the main dart file path. Specifying
     // it as a positional argument instead.
@@ -266,7 +266,7 @@ int main(int argc, char* argv[]) {
     fml::MessageLoop::GetCurrent().RemoveTaskObserver(key);
   };
 
-  return shell::RunTester(
-      settings,
-      command_line.HasOption(shell::FlagForSwitch(shell::Switch::RunForever)));
+  return flutter::RunTester(
+      settings, command_line.HasOption(
+                    flutter::FlagForSwitch(flutter::Switch::RunForever)));
 }

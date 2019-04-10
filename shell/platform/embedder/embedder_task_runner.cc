@@ -6,7 +6,7 @@
 
 #include "flutter/fml/message_loop_impl.h"
 
-namespace shell {
+namespace flutter {
 
 EmbedderTaskRunner::EmbedderTaskRunner(DispatchTable table)
     : TaskRunner(nullptr /* loop implemenation*/),
@@ -69,4 +69,4 @@ bool EmbedderTaskRunner::PostTask(uint64_t baton) {
   return true;
 }
 
-}  // namespace shell
+}  // namespace flutter

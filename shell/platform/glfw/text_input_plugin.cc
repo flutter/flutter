@@ -34,7 +34,7 @@ static constexpr char kInternalConsistencyError[] =
 
 static constexpr uint32_t kInputModelLimit = 256;
 
-namespace shell {
+namespace flutter {
 
 void TextInputPlugin::CharHook(GLFWwindow* window, unsigned int code_point) {
   if (active_model_ == nullptr) {
@@ -207,4 +207,4 @@ void TextInputPlugin::EnterPressed(TextInputModel* model) {
   channel_->InvokeMethod(kPerformActionMethod, std::move(args));
 }
 
-}  // namespace shell
+}  // namespace flutter

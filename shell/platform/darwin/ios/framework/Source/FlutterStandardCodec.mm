@@ -145,7 +145,7 @@
 }
 @end
 
-using namespace shell;
+using namespace flutter;
 
 #pragma mark - Standard serializable types
 

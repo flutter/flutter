@@ -8,7 +8,7 @@
 
 #include "flutter/shell/platform/darwin/common/buffer_conversions.h"
 
-namespace shell {
+namespace flutter {
 
 PlatformMessageRouter::PlatformMessageRouter() = default;
 
@@ -49,4 +49,4 @@ void PlatformMessageRouter::SetMessageHandler(const std::string& channel,
   }
 }
 
-}  // namespace shell
+}  // namespace flutter

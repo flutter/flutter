@@ -6,7 +6,7 @@
 
 #include "flutter/fml/logging.h"
 
-namespace shell {
+namespace flutter {
 
 EmbedderExternalTextureGL::EmbedderExternalTextureGL(
     int64_t texture_identifier,
@@ -43,4 +43,4 @@ void EmbedderExternalTextureGL::OnGrContextDestroyed() {}
 // |flow::Texture|
 void EmbedderExternalTextureGL::MarkNewFrameAvailable() {}
 
-}  // namespace shell
+}  // namespace flutter

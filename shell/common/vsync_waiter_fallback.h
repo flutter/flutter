@@ -10,7 +10,7 @@
 #include "flutter/fml/time/time_point.h"
 #include "flutter/shell/common/vsync_waiter.h"
 
-namespace shell {
+namespace flutter {
 
 class VsyncWaiterFallback final : public VsyncWaiter {
  public:
@@ -21,12 +21,12 @@ class VsyncWaiterFallback final : public VsyncWaiter {
  private:
   fml::TimePoint phase_;
 
-  // |shell::VsyncWaiter|
+  // |VsyncWaiter|
   void AwaitVSync() override;
 
   FML_DISALLOW_COPY_AND_ASSIGN(VsyncWaiterFallback);
 };
 
-}  // namespace shell
+}  // namespace flutter
 
 #endif  // FLUTTER_SHELL_COMMON_VSYNC_WAITER_FALLBACK_H_

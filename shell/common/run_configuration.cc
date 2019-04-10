@@ -10,7 +10,7 @@
 #include "flutter/fml/file.h"
 #include "flutter/runtime/dart_vm.h"
 
-namespace shell {
+namespace flutter {
 
 RunConfiguration RunConfiguration::InferFromSettings(
     const flutter::Settings& settings,
@@ -86,4 +86,4 @@ RunConfiguration::TakeIsolateConfiguration() {
   return std::move(isolate_configuration_);
 }
 
-}  // namespace shell
+}  // namespace flutter
