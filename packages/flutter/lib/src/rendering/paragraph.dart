@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show Gradient, Shader, TextBox;
+import 'dart:ui' as ui show Gradient, Shader, TextBox, TextWidthType;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -49,6 +49,7 @@ class RenderParagraph extends RenderBox {
     TextOverflow overflow = TextOverflow.clip,
     double textScaleFactor = 1.0,
     int maxLines,
+    ui.TextWidthType widthType = ui.TextWidthType.full,
     Locale locale,
     StrutStyle strutStyle,
   }) : assert(text != null),
@@ -59,6 +60,7 @@ class RenderParagraph extends RenderBox {
        assert(overflow != null),
        assert(textScaleFactor != null),
        assert(maxLines == null || maxLines > 0),
+       assert(widthType != null),
        _softWrap = softWrap,
        _overflow = overflow,
        _textPainter = TextPainter(
@@ -70,6 +72,7 @@ class RenderParagraph extends RenderBox {
          ellipsis: overflow == TextOverflow.ellipsis ? _kEllipsis : null,
          locale: locale,
          strutStyle: strutStyle,
+         widthType: widthType,
        );
 
   final TextPainter _textPainter;
@@ -208,6 +211,17 @@ class RenderParagraph extends RenderBox {
     if (_textPainter.strutStyle == value)
       return;
     _textPainter.strutStyle = value;
+    _overflowShader = null;
+    markNeedsLayout();
+  }
+
+  /// {@macro flutter.widgets.basic.TextWidthType}
+  ui.TextWidthType get widthType => _textPainter.widthType;
+  set widthType(ui.TextWidthType value) {
+    assert(value != null);
+    if (_textPainter.widthType == value)
+      return;
+    _textPainter.widthType = value;
     _overflowShader = null;
     markNeedsLayout();
   }

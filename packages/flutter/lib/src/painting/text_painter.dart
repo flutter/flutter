@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' show min, max;
-import 'dart:ui' as ui show Paragraph, ParagraphBuilder, ParagraphConstraints, ParagraphStyle;
+import 'dart:ui' as ui show Paragraph, ParagraphBuilder, ParagraphConstraints, ParagraphStyle, TextWidthType;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -12,6 +12,7 @@ import 'package:flutter/services.dart';
 import 'basic_types.dart';
 import 'strut_style.dart';
 import 'text_span.dart';
+import 'text_style.dart';
 
 export 'package:flutter/services.dart' show TextRange, TextSelection;
 
@@ -50,10 +51,13 @@ class TextPainter {
     String ellipsis,
     Locale locale,
     StrutStyle strutStyle,
+    ui.TextWidthType widthType,
   }) : assert(text == null || text.debugAssertIsValid()),
        assert(textAlign != null),
        assert(textScaleFactor != null),
        assert(maxLines == null || maxLines > 0),
+       // TODO(justinmc): get your defaults right and know when this can be null
+       //assert(widthType != null),
        _text = text,
        _textAlign = textAlign,
        _textDirection = textDirection,
@@ -61,7 +65,8 @@ class TextPainter {
        _maxLines = maxLines,
        _ellipsis = ellipsis,
        _locale = locale,
-       _strutStyle = strutStyle;
+       _strutStyle = strutStyle,
+       _widthType = widthType;
 
   ui.Paragraph _paragraph;
   bool _needsLayout = true;
@@ -223,6 +228,18 @@ class TextPainter {
     _needsLayout = true;
   }
 
+  /// {@macro flutter.dart:ui.text.TextWidthType}
+  ui.TextWidthType get widthType => _widthType;
+  ui.TextWidthType _widthType;
+  set widthType(ui.TextWidthType value) {
+    assert(value != null);
+    if (_widthType == value)
+      return;
+    _widthType = value;
+    _paragraph = null;
+    _needsLayout = true;
+  }
+
 
   ui.Paragraph _layoutTemplate;
 
@@ -239,6 +256,7 @@ class TextPainter {
       ellipsis: _ellipsis,
       locale: _locale,
       strutStyle: _strutStyle,
+      widthType: _widthType,
     ) ?? ui.ParagraphStyle(
       textAlign: textAlign,
       textDirection: textDirection ?? defaultTextDirection,

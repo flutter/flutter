@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' as ui show TextWidthType;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
@@ -33,12 +35,14 @@ class DefaultTextStyle extends InheritedWidget {
     this.softWrap = true,
     this.overflow = TextOverflow.clip,
     this.maxLines,
+    this.widthType = ui.TextWidthType.full,
     @required Widget child,
   }) : assert(style != null),
        assert(softWrap != null),
        assert(overflow != null),
        assert(maxLines == null || maxLines > 0),
        assert(child != null),
+       assert(widthType != null),
        super(key: key, child: child);
 
   /// A const-constructible default text style that provides fallback values.
@@ -52,7 +56,8 @@ class DefaultTextStyle extends InheritedWidget {
       textAlign = null,
       softWrap = true,
       maxLines = null,
-      overflow = TextOverflow.clip;
+      overflow = TextOverflow.clip,
+      widthType = ui.TextWidthType.full;
 
   /// Creates a default text style that overrides the text styles in scope at
   /// this point in the widget tree.
@@ -77,6 +82,7 @@ class DefaultTextStyle extends InheritedWidget {
     bool softWrap,
     TextOverflow overflow,
     int maxLines,
+    ui.TextWidthType widthType,
     @required Widget child,
   }) {
     assert(child != null);
@@ -90,6 +96,7 @@ class DefaultTextStyle extends InheritedWidget {
           softWrap: softWrap ?? parent.softWrap,
           overflow: overflow ?? parent.overflow,
           maxLines: maxLines ?? parent.maxLines,
+          widthType: widthType ?? parent.widthType,
           child: child,
         );
       },
@@ -121,6 +128,10 @@ class DefaultTextStyle extends InheritedWidget {
   /// [Text.maxLines].
   final int maxLines;
 
+  /// The strategy to use when calculating the width of the Text. See
+  /// [ui.TextWidthType] for possible values and their implications.
+  final ui.TextWidthType widthType;
+
   /// The closest instance of this class that encloses the given context.
   ///
   /// If no such instance exists, returns an instance created by
@@ -141,7 +152,8 @@ class DefaultTextStyle extends InheritedWidget {
         textAlign != oldWidget.textAlign ||
         softWrap != oldWidget.softWrap ||
         overflow != oldWidget.overflow ||
-        maxLines != oldWidget.maxLines;
+        maxLines != oldWidget.maxLines ||
+        widthType != oldWidget.widthType;
   }
 
   @override
@@ -152,6 +164,7 @@ class DefaultTextStyle extends InheritedWidget {
     properties.add(FlagProperty('softWrap', value: softWrap, ifTrue: 'wrapping at box width', ifFalse: 'no wrapping except at line break characters', showName: true));
     properties.add(EnumProperty<TextOverflow>('overflow', overflow, defaultValue: null));
     properties.add(IntProperty('maxLines', maxLines, defaultValue: null));
+    properties.add(EnumProperty<ui.TextWidthType>('widthType', widthType, defaultValue: ui.TextWidthType.full));
   }
 }
 
@@ -237,6 +250,7 @@ class Text extends StatelessWidget {
     this.textScaleFactor,
     this.maxLines,
     this.semanticsLabel,
+    this.widthType,
   }) : assert(
          data != null,
          'A non-null String must be provided to a Text widget.',
@@ -260,6 +274,7 @@ class Text extends StatelessWidget {
     this.textScaleFactor,
     this.maxLines,
     this.semanticsLabel,
+    this.widthType,
   }) : assert(
          textSpan != null,
          'A non-null TextSpan must be provided to a Text.rich widget.',
@@ -358,6 +373,9 @@ class Text extends StatelessWidget {
   /// ```
   final String semanticsLabel;
 
+  /// {@macro flutter.dart:ui.text.TextWidthType}
+  final ui.TextWidthType widthType;
+
   @override
   Widget build(BuildContext context) {
     final DefaultTextStyle defaultTextStyle = DefaultTextStyle.of(context);
@@ -375,6 +393,7 @@ class Text extends StatelessWidget {
       textScaleFactor: textScaleFactor ?? MediaQuery.textScaleFactorOf(context),
       maxLines: maxLines ?? defaultTextStyle.maxLines,
       strutStyle: strutStyle,
+      widthType: widthType ?? defaultTextStyle.widthType,
       text: TextSpan(
         style: effectiveTextStyle,
         text: data,

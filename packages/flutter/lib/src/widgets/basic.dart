@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show Image, ImageFilter;
+import 'dart:ui' as ui show Image, ImageFilter, TextWidthType;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -4761,12 +4761,14 @@ class RichText extends LeafRenderObjectWidget {
     this.maxLines,
     this.locale,
     this.strutStyle,
+    this.widthType = ui.TextWidthType.full,
   }) : assert(text != null),
        assert(textAlign != null),
        assert(softWrap != null),
        assert(overflow != null),
        assert(textScaleFactor != null),
        assert(maxLines == null || maxLines > 0),
+       assert(widthType != null),
        super(key: key);
 
   /// The text to display in this widget.
@@ -4825,6 +4827,9 @@ class RichText extends LeafRenderObjectWidget {
   /// {@macro flutter.painting.textPainter.strutStyle}
   final StrutStyle strutStyle;
 
+  /// {@macro flutter.widgets.text.DefaultTextStyle.widthType}
+  final ui.TextWidthType widthType;
+
   @override
   RenderParagraph createRenderObject(BuildContext context) {
     assert(textDirection != null || debugCheckHasDirectionality(context));
@@ -4836,6 +4841,7 @@ class RichText extends LeafRenderObjectWidget {
       textScaleFactor: textScaleFactor,
       maxLines: maxLines,
       strutStyle: strutStyle,
+      widthType: widthType,
       locale: locale ?? Localizations.localeOf(context, nullOk: true),
     );
   }
@@ -4852,6 +4858,7 @@ class RichText extends LeafRenderObjectWidget {
       ..textScaleFactor = textScaleFactor
       ..maxLines = maxLines
       ..strutStyle = strutStyle
+      ..widthType = widthType
       ..locale = locale ?? Localizations.localeOf(context, nullOk: true);
   }
 
@@ -4864,6 +4871,7 @@ class RichText extends LeafRenderObjectWidget {
     properties.add(EnumProperty<TextOverflow>('overflow', overflow, defaultValue: TextOverflow.clip));
     properties.add(DoubleProperty('textScaleFactor', textScaleFactor, defaultValue: 1.0));
     properties.add(IntProperty('maxLines', maxLines, ifNull: 'unlimited'));
+    properties.add(EnumProperty<ui.TextWidthType>('widthType', widthType, defaultValue: ui.TextWidthType.full));
     properties.add(StringProperty('text', text.toPlainText()));
   }
 }
