@@ -572,12 +572,12 @@ class GestureDetector extends StatelessWidget {
               }
             }
             ..onTapUp = (TapUpDetails details) {
-              if (details.buttons != kPrimaryButton)
-                return;
-              if (onTapUp != null)
-                onTapUp(details);
-              if (onTap != null)
-                onTap();
+              if (details.buttons == kPrimaryButton) {
+                if (onTapUp != null)
+                  onTapUp(details);
+                if (onTap != null)
+                  onTap();
+              }
             }
             ..onTapCancel = onTapCancel;
         },
@@ -590,12 +590,12 @@ class GestureDetector extends StatelessWidget {
         (DoubleTapGestureRecognizer instance) {
           instance
             ..onDoubleTapUp = (DoubleTapUpDetails details) {
-              if (details.buttons != kPrimaryButton)
-                return;
-              if (onDoubleTapUp != null)
-                onDoubleTapUp(details);
-              if (onDoubleTap != null)
-                onDoubleTap();
+              if (details.buttons == kPrimaryButton) {
+                if (onDoubleTapUp != null)
+                  onDoubleTapUp(details);
+                if (onDoubleTap != null)
+                  onDoubleTap();
+              }
             };
         },
       );
@@ -611,26 +611,24 @@ class GestureDetector extends StatelessWidget {
         (LongPressGestureRecognizer instance) {
           instance
             ..onLongPressStart = (LongPressStartDetails details) {
-              if (details.buttons != kPrimaryButton)
-                return;
-              if (onLongPressStart != null)
-                onLongPressStart(details);
-              if (onLongPress != null)
-                onLongPress();
+              if (details.buttons == kPrimaryButton) {
+                if (onLongPressStart != null)
+                  onLongPressStart(details);
+                if (onLongPress != null)
+                  onLongPress();
+              }
             }
-            ..onLongPressMoveUpdate = (LongPressMoveUpdateDetails details) {
-              if (details.buttons != kPrimaryButton)
-                return;
-              if (onLongPressMoveUpdate != null)
+            ..onLongPressMoveUpdate = onLongPressMoveUpdate == null ? null : (LongPressMoveUpdateDetails details) {
+              if (details.buttons == kPrimaryButton)
                 onLongPressMoveUpdate(details);
             }
             ..onLongPressEnd = (LongPressEndDetails details) {
-              if (details.buttons != kPrimaryButton)
-                return;
-              if (onLongPressEnd != null)
-                onLongPressEnd(details);
-              if (onLongPressUp != null)
-                onLongPressUp();
+              if (details.buttons == kPrimaryButton) {
+                if (onLongPressEnd != null)
+                  onLongPressEnd(details);
+                if (onLongPressUp != null)
+                  onLongPressUp();
+              }
             };
         },
       );
@@ -645,28 +643,20 @@ class GestureDetector extends StatelessWidget {
         () => VerticalDragGestureRecognizer(debugOwner: this),
         (VerticalDragGestureRecognizer instance) {
           instance
-            ..onDown = (DragDownDetails details) {
-              if (details.buttons != kPrimaryButton)
-                return;
-              if (onVerticalDragDown != null)
+            ..onDown = onVerticalDragDown == null ? null : (DragDownDetails details) {
+              if (details.buttons == kPrimaryButton)
                 onVerticalDragDown(details);
             }
-            ..onStart = (DragStartDetails details) {
-              if (details.buttons != kPrimaryButton)
-                return;
-              if (onVerticalDragStart != null)
+            ..onStart = onVerticalDragStart == null ? null : (DragStartDetails details) {
+              if (details.buttons == kPrimaryButton)
                 onVerticalDragStart(details);
             }
-            ..onUpdate = (DragUpdateDetails details) {
-              if (details.buttons != kPrimaryButton)
-                return;
-              if (onVerticalDragUpdate != null)
+            ..onUpdate = onVerticalDragUpdate == null ? null : (DragUpdateDetails details) {
+              if (details.buttons == kPrimaryButton)
                 onVerticalDragUpdate(details);
             }
-            ..onEnd = (DragEndDetails details) {
-              if (details.buttons != kPrimaryButton)
-                return;
-              if (onVerticalDragEnd != null)
+            ..onEnd = onVerticalDragEnd == null ? null :j (DragEndDetails details) {
+              if (details.buttons == kPrimaryButton)
                 onVerticalDragEnd(details);
             }
             ..onCancel = onVerticalDragCancel
@@ -684,28 +674,20 @@ class GestureDetector extends StatelessWidget {
         () => HorizontalDragGestureRecognizer(debugOwner: this),
         (HorizontalDragGestureRecognizer instance) {
           instance
-            ..onDown = (DragDownDetails details) {
-              if (details.buttons != kPrimaryButton)
-                return;
-              if (onHorizontalDragDown != null)
+            ..onDown = onHorizontalDragDown == null ? null : (DragDownDetails details) {
+              if (details.buttons == kPrimaryButton)
                 onHorizontalDragDown(details);
             }
-            ..onStart = (DragStartDetails details) {
-              if (details.buttons != kPrimaryButton)
-                return;
-              if (onHorizontalDragStart != null)
+            ..onStart = onHorizontalDragStart == null ? null : (DragStartDetails details) {
+              if (details.buttons == kPrimaryButton)
                 onHorizontalDragStart(details);
             }
-            ..onUpdate = (DragUpdateDetails details) {
-              if (details.buttons != kPrimaryButton)
-                return;
-              if (onHorizontalDragUpdate != null)
+            ..onUpdate = onHorizontalDragUpdate == null ? null : (DragUpdateDetails details) {
+              if (details.buttons == kPrimaryButton)
                 onHorizontalDragUpdate(details);
             }
-            ..onEnd = (DragEndDetails details) {
-              if (details.buttons != kPrimaryButton)
-                return;
-              if (onHorizontalDragEnd != null)
+            ..onEnd = onHorizontalDragEnd == null ? null : (DragEndDetails details) {
+              if (details.buttons == kPrimaryButton)
                 onHorizontalDragEnd(details);
             }
             ..onCancel = onHorizontalDragCancel
@@ -723,28 +705,20 @@ class GestureDetector extends StatelessWidget {
         () => PanGestureRecognizer(debugOwner: this),
         (PanGestureRecognizer instance) {
           instance
-            ..onDown = (DragDownDetails details) {
-              if (details.buttons != kPrimaryButton)
-                return;
-              if (onPanDown != null)
+            ..onDown = onPanDown == null ? null : (DragDownDetails details) {
+              if (details.buttons == kPrimaryButton)
                 onPanDown(details);
             }
-            ..onStart = (DragStartDetails details) {
-              if (details.buttons != kPrimaryButton)
-                return;
-              if (onPanStart != null)
+            ..onStart = onPanStart == null ? null : (DragStartDetails details) {
+              if (details.buttons == kPrimaryButton)
                 onPanStart(details);
             }
-            ..onUpdate = (DragUpdateDetails details) {
-              if (details.buttons != kPrimaryButton)
-                return;
-              if (onPanUpdate != null)
+            ..onUpdate = onPanUpdate == null ? null : (DragUpdateDetails details) {
+              if (details.buttons == kPrimaryButton)
                 onPanUpdate(details);
             }
-            ..onEnd = (DragEndDetails details) {
-              if (details.buttons != kPrimaryButton)
-                return;
-              if (onPanEnd != null)
+            ..onEnd = onPanEnd == null ? null : (DragEndDetails details) {
+              if (details.buttons == kPrimaryButton)
                 onPanEnd(details);
             }
             ..onCancel = onPanCancel
