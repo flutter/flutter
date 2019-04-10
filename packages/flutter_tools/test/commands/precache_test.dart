@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/precache.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:mockito/mockito.dart';
 
+import '../src/common.dart';
 import '../src/context.dart';
 import '../src/mocks.dart';
 
@@ -20,7 +20,7 @@ void main() {
     when(cache.isUpToDate()).thenReturn(false);
     when(cache.updateAll(any)).thenAnswer((Invocation invocation) {
       artifacts = invocation.positionalArguments.first;
-      return Future<Null>.value(null);
+      return Future<void>.value(null);
     });
 
     testUsingContext('Adds artifact flags to requested artifacts', () async {
