@@ -356,10 +356,10 @@ void main() {
     );
 
     expect(boxes.length, equals(5));
-    expect(boxes[0], TextBox.fromLTRBD(0.0, 3.1999998092651367, 10.0, 13.199999809265137, TextDirection.ltr));
+    expect(boxes[0], TextBox.fromLTRBD(0.0, 4.0, 10.0, 14.0, TextDirection.ltr));
     expect(boxes[1], TextBox.fromLTRBD(10.0, 0.0, 24.0, 14.0, TextDirection.ltr));
     expect(boxes[2], TextBox.fromLTRBD(24.0, 0.0, 38.0, 14.0, TextDirection.ltr));
-    expect(boxes[3], TextBox.fromLTRBD(38.0, 3.1999998092651367, 48.0, 13.199999809265137, TextDirection.ltr));
+    expect(boxes[3], TextBox.fromLTRBD(38.0, 4.0, 48.0, 14.0, TextDirection.ltr));
     expect(boxes[4], TextBox.fromLTRBD(48.0, 0.0, 62.0, 14.0, TextDirection.ltr));
   },
   // Ahem-based tests don't yet quite work on Windows or some MacOS environments
@@ -403,10 +403,10 @@ void main() {
     );
 
     expect(boxes.length, equals(9));
-    expect(boxes[0], TextBox.fromLTRBD(0.0, 3.1999998092651367, 10.0, 13.199999809265137, TextDirection.ltr));
+    expect(boxes[0], TextBox.fromLTRBD(0.0, 4.0, 10.0, 14.0, TextDirection.ltr));
     expect(boxes[1], TextBox.fromLTRBD(10.0, 0.0, 24.0, 14.0, TextDirection.ltr));
     expect(boxes[2], TextBox.fromLTRBD(24.0, 0.0, 38.0, 14.0, TextDirection.ltr));
-    expect(boxes[3], TextBox.fromLTRBD(38.0, 3.1999998092651367, 48.0, 13.199999809265137, TextDirection.ltr));
+    expect(boxes[3], TextBox.fromLTRBD(38.0, 4.0, 48.0, 14.0, TextDirection.ltr));
     // Wraps
     expect(boxes[4], TextBox.fromLTRBD(0.0, 14.0, 14.0, 28.0 , TextDirection.ltr));
     expect(boxes[5], TextBox.fromLTRBD(14.0, 14.0, 28.0, 28.0, TextDirection.ltr));
