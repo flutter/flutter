@@ -951,9 +951,9 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: Padding(
-            padding: EdgeInsets.all(30.0),
-            child: TextField(
-              controller: controller,
+          padding: const EdgeInsets.all(30.0),
+          child: TextField(
+            controller: controller,
             ),
           ),
         ),
@@ -985,9 +985,9 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: Padding(
-          padding: EdgeInsets.all(150.0),
+          padding: const EdgeInsets.all(150.0),
           child: TextField(
-              controller: controller,
+            controller: controller,
             ),
           ),
         ),
@@ -1001,6 +1001,7 @@ void main() {
     await tester.tapAt(textOffsetToPosition(tester, testValue.indexOf('e')));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
+    renderEditable = findRenderEditable(tester);
     endpoints = globalize(
       renderEditable.getEndpointsForSelection(controller.selection),
       renderEditable,
