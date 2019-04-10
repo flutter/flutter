@@ -10,11 +10,11 @@
 #include "flutter/common/task_runners.h"
 #include "flutter/fml/memory/ref_ptr.h"
 #include "flutter/fml/memory/weak_ptr.h"
+#include "flutter/fml/synchronization/semaphore.h"
 #include "flutter/fml/time/time_point.h"
+#include "flutter/shell/common/pipeline.h"
 #include "flutter/shell/common/rasterizer.h"
 #include "flutter/shell/common/vsync_waiter.h"
-#include "flutter/synchronization/pipeline.h"
-#include "flutter/synchronization/semaphore.h"
 
 namespace flutter {
 
@@ -74,7 +74,7 @@ class Animator final {
   fml::TimePoint last_begin_frame_time_;
   int64_t dart_frame_deadline_;
   fml::RefPtr<LayerTreePipeline> layer_tree_pipeline_;
-  Semaphore pending_frame_semaphore_;
+  fml::Semaphore pending_frame_semaphore_;
   LayerTreePipeline::ProducerContinuation producer_continuation_;
   int64_t frame_number_;
   bool paused_;

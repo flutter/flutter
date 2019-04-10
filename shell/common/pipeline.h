@@ -2,14 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SYNCHRONIZATION_PIPELINE_H_
-#define SYNCHRONIZATION_PIPELINE_H_
+#ifndef FLUTTER_SHELL_COMMON_PIPELINE_H_
+#define FLUTTER_SHELL_COMMON_PIPELINE_H_
 
 #include "flutter/fml/macros.h"
 #include "flutter/fml/memory/ref_counted.h"
+#include "flutter/fml/synchronization/semaphore.h"
 #include "flutter/fml/trace_event.h"
-#include "flutter/synchronization/pipeline.h"
-#include "flutter/synchronization/semaphore.h"
 
 #include <memory>
 #include <mutex>
@@ -142,8 +141,8 @@ class Pipeline : public fml::RefCountedThreadSafe<Pipeline<R>> {
   }
 
  private:
-  Semaphore empty_;
-  Semaphore available_;
+  fml::Semaphore empty_;
+  fml::Semaphore available_;
   std::mutex queue_mutex_;
   std::queue<std::pair<ResourcePtr, size_t>> queue_;
 
@@ -162,4 +161,4 @@ class Pipeline : public fml::RefCountedThreadSafe<Pipeline<R>> {
 
 }  // namespace flutter
 
-#endif  // SYNCHRONIZATION_PIPELINE_H_
+#endif  // FLUTTER_SHELL_COMMON_PIPELINE_H_
