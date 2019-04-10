@@ -55,7 +55,9 @@ class BottomSheet extends StatefulWidget {
     Key key,
     this.animationController,
     this.enableDrag = true,
+    this.color,
     this.elevation = 0.0,
+    this.shape,
     @required this.onClosing,
     @required this.builder,
   }) : assert(enableDrag != null),
@@ -89,12 +91,26 @@ class BottomSheet extends StatefulWidget {
   /// Default is true.
   final bool enableDrag;
 
+  /// The bottom sheet's background color.
+  ///
+  /// Defines the bottom sheet's [Material.color].
+  ///
+  /// Defaults to [Colors.white].
+  final Color color;
+
   /// The z-coordinate at which to place this material relative to its parent.
   ///
   /// This controls the size of the shadow below the material.
   ///
   /// Defaults to 0. The value is non-negative.
   final double elevation;
+
+  /// The shape of the bottom sheet's [Material].
+  ///
+  /// Defines the bottom sheet's [Material.shape].
+  ///
+  /// Defaults to null.
+  final ShapeBorder shape;
 
   @override
   _BottomSheetState createState() => _BottomSheetState();
@@ -148,7 +164,9 @@ class _BottomSheetState extends State<BottomSheet> {
   Widget build(BuildContext context) {
     final Widget bottomSheet = Material(
       key: _childKey,
+      color: widget.color,
       elevation: widget.elevation,
+      shape: widget.shape,
       child: widget.builder(context),
     );
     return !widget.enableDrag ? bottomSheet : GestureDetector(
