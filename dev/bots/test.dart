@@ -186,6 +186,8 @@ Future<void> _runToolTests() async {
     File(path.join(flutterRoot, 'bin', 'cache', 'flutter_tools.snapshot')).deleteSync();
     File(path.join(flutterRoot, 'bin', 'cache', 'flutter_tools.stamp')).deleteSync();
   }
+  // Build the snapshot and precache artifacts.
+  await runCommand('flutter', ['precache', '--android', '--ios']);
   if (noUseBuildRunner) {
     await _pubRunTest(
       path.join(flutterRoot, 'packages', 'flutter_tools'),
