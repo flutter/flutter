@@ -17,16 +17,14 @@ class PrecacheCommand extends FlutterCommand {
         help: 'Precache artifacts for Android development');
     argParser.addFlag('ios', negatable: true, defaultsTo: true,
         help: 'Precache artifacts for iOS developemnt');
-    if (!FlutterVersion.instance.isStable) {
-      argParser.addFlag('web', negatable: true, defaultsTo: false,
-          help: 'Precache artifacts for web development');
-      argParser.addFlag('linux', negatable: true, defaultsTo: false,
-          help: 'Precache artifacts for linux desktop development');
-      argParser.addFlag('windows', negatable: true, defaultsTo: false,
-          help: 'Precache artifacts for windows desktop development');
-      argParser.addFlag('macos', negatable: true, defaultsTo: false,
-          help: 'Precache artifacts for macOS desktop development');
-    }
+    argParser.addFlag('web', negatable: true, defaultsTo: false,
+        help: 'Precache artifacts for web development');
+    argParser.addFlag('linux', negatable: true, defaultsTo: false,
+        help: 'Precache artifacts for linux desktop development');
+    argParser.addFlag('windows', negatable: true, defaultsTo: false,
+        help: 'Precache artifacts for windows desktop development');
+    argParser.addFlag('macos', negatable: true, defaultsTo: false,
+        help: 'Precache artifacts for macOS desktop development');
   }
 
   @override
@@ -50,7 +48,7 @@ class PrecacheCommand extends FlutterCommand {
     if (argResults['ios']) {
       requiredArtifacts.add(DevelopmentArtifact.iOS);
     }
-    if (FlutterVersion.instance.isStable) {
+    if (!FlutterVersion.instance.isStable) {
       if (argResults['web']) {
         requiredArtifacts.add(DevelopmentArtifact.web);
       }
