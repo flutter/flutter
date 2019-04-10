@@ -177,7 +177,7 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
   ///
   /// See also:
   ///
-  ///  * [onLongPress], which has the same timing but without the location data.
+  ///  * [onLongPress], which has the same timing but without details.
   GestureLongPressStartCallback onLongPressStart;
 
   /// Callback for moving the gesture after the long press is recognized.
@@ -195,7 +195,7 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
   ///
   /// See also:
   ///
-  ///  * [onLongPressUp], which has the same timing but without the location data.
+  ///  * [onLongPressUp], which has the same timing but without details.
   GestureLongPressEndCallback onLongPressEnd;
 
   @override

@@ -9,7 +9,7 @@ import 'constants.dart';
 import 'events.dart';
 import 'recognizer.dart';
 
-/// Details for [GestureTapDownCallback], such as position.
+/// Details for [GestureTapDownCallback], such as position and buttons.
 ///
 /// See also:
 ///
@@ -41,7 +41,7 @@ class TapDownDetails {
 ///  * [TapGestureRecognizer], which uses this signature in one of its callbacks.
 typedef GestureTapDownCallback = void Function(TapDownDetails details);
 
-/// Details for [GestureTapUpCallback], such as position.
+/// Details for [GestureTapUpCallback], such as position and buttons.
 ///
 /// See also:
 ///
