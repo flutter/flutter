@@ -12,7 +12,7 @@ public class ProfileActivity {
 
   @NonNull
   public static Intent newIntent(@NonNull Context context) {
-    return new FlutterActivity.IntentBuilder()
+    return FlutterActivity.createBuilder()
         .dartEntrypoint("profileScreen")
         .build(context);
   }

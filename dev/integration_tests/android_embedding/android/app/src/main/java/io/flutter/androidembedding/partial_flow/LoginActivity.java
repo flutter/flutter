@@ -12,7 +12,7 @@ public class LoginActivity {
 
   @NonNull
   public static Intent newIntent(@NonNull Context context) {
-    return new FlutterActivity.IntentBuilder()
+    return FlutterActivity.createBuilder()
         .dartEntrypoint("loginScreen")
         .build(context);
   }
