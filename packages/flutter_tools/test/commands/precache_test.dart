@@ -17,8 +17,6 @@ void main() {
 
   group('precache', () {
     final MockCache cache = MockCache();
-    final MockFlutterVersion flutterVersion = MockFlutterVersion();
-   
     Set<DevelopmentArtifact> artifacts;
 
     when(cache.isUpToDate()).thenReturn(false);
@@ -26,7 +24,6 @@ void main() {
       artifacts = invocation.positionalArguments.first;
       return Future.value(null);
     });
-    when(flutterVersion.isStable).thenReturn(true);
 
     testUsingContext('Adds artifact flags to requested artifacts', () async {
       final PrecacheCommand command = PrecacheCommand(); 
@@ -34,21 +31,24 @@ void main() {
       await createTestCommandRunner(command).run(
         const <String>['precache', '--ios', '--android', '--web', '--macos', '--linux', '--windows']
       );
-       expect(artifacts, unorderedEquals(<DevelopmentArtifact>{
-         DevelopmentArtifact.universal,
-         DevelopmentArtifact.iOS,
-         DevelopmentArtifact.android,
-         DevelopmentArtifact.web,
-         DevelopmentArtifact.macOS,
-         DevelopmentArtifact.linux,
-         DevelopmentArtifact.windows,
-       }));
-      }, overrides: <Type, Generator>{
-        Cache: () => cache,
-      });
+      expect(artifacts, unorderedEquals(<DevelopmentArtifact>{
+        DevelopmentArtifact.universal,
+        DevelopmentArtifact.iOS,
+        DevelopmentArtifact.android,
+        DevelopmentArtifact.web,
+        DevelopmentArtifact.macOS,
+        DevelopmentArtifact.linux,
+        DevelopmentArtifact.windows,
+      }));
+    }, overrides: <Type, Generator>{
+      Cache: () => cache,
+    });
+    
+    final MockFlutterVersion flutterVersion = MockFlutterVersion();
+    when(flutterVersion.isStable).thenReturn(true);
 
     testUsingContext('Adds artifact flags to requested artifacts on stable', () async {
-      // Rlease lock between test cases.
+      // Release lock between test cases.
       Cache.releaseLockEarly();
       final PrecacheCommand command = PrecacheCommand(); 
       applyMocksToCommand(command);
