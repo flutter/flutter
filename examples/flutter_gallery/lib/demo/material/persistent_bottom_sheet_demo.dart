@@ -61,20 +61,17 @@ class _PersistentBottomSheetDemoState extends State<PersistentBottomSheetDemo> {
   }
 
   void _showMessage() {
-    showDialog<void>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          content: const Text('You tapped the floating action button.'),
-          actions: <Widget>[
-            FlatButton(
-              onPressed: () { Navigator.pop(context); },
-              child: const Text('OK'),
-            ),
-          ],
-        );
-      },
-    );
+    showDialog<void>(context: context, builder: (BuildContext context) {
+      return AlertDialog(
+        content: const Text('You tapped the floating action button.'),
+        actions: <Widget>[
+          FlatButton(
+            onPressed: () { Navigator.pop(context); },
+            child: const Text('OK'),
+          ),
+        ],
+      );
+    });
   }
 
   @override

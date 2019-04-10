@@ -115,31 +115,28 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
     final ThemeData theme = Theme.of(context);
     final TextStyle dialogTextStyle = theme.textTheme.subhead.copyWith(color: theme.textTheme.caption.color);
 
-    return await showDialog<bool>(
-             context: context,
-             builder: (BuildContext context) {
-               return AlertDialog(
-                 content: Text(
-                   'Discard new event?',
-                   style: dialogTextStyle,
+    return await showDialog<bool>(context: context, builder: (BuildContext context) {
+             return AlertDialog(
+               content: Text(
+                 'Discard new event?',
+                 style: dialogTextStyle,
+               ),
+               actions: <Widget>[
+                 FlatButton(
+                   child: const Text('CANCEL'),
+                   onPressed: () {
+                     Navigator.of(context).pop(false); // Pops the confirmation dialog but not the page.
+                   },
                  ),
-                 actions: <Widget>[
-                   FlatButton(
-                     child: const Text('CANCEL'),
-                     onPressed: () {
-                       Navigator.of(context).pop(false); // Pops the confirmation dialog but not the page.
-                     },
-                   ),
-                   FlatButton(
-                     child: const Text('DISCARD'),
-                     onPressed: () {
-                       Navigator.of(context).pop(true); // Returning true to _onWillPop will pop again.
-                     },
-                   ),
-                 ],
-               );
-             },
-           )
+                 FlatButton(
+                   child: const Text('DISCARD'),
+                   onPressed: () {
+                     Navigator.of(context).pop(true); // Returning true to _onWillPop will pop again.
+                   },
+                 ),
+               ],
+             );
+           })
         ?? false;
   }
 

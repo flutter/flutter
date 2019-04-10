@@ -303,19 +303,17 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
         IconButton(
           icon: const Icon(Icons.search, semanticLabel: 'login'),
           onPressed: () {
-            Navigator.push<void>(
-              context,
-              MaterialPageRoute<void>(builder: (BuildContext context) => LoginPage()),
-            );
+            Navigator.push<void>(context, MaterialPageRoute<void>(
+              builder: (BuildContext context) => LoginPage(),
+            ));
           },
         ),
         IconButton(
           icon: const Icon(Icons.tune, semanticLabel: 'login'),
           onPressed: () {
-            Navigator.push<void>(
-              context,
-              MaterialPageRoute<void>(builder: (BuildContext context) => LoginPage()),
-            );
+            Navigator.push<void>(context, MaterialPageRoute<void>(
+              builder: (BuildContext context) => LoginPage(),
+            ));
           },
         ),
       ],

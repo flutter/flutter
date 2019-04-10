@@ -145,25 +145,22 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
     if (form == null || !_formWasEdited || form.validate())
       return true;
 
-    return await showDialog<bool>(
-             context: context,
-             builder: (BuildContext context) {
-               return AlertDialog(
-                 title: const Text('This form has errors'),
-                 content: const Text('Really leave this form?'),
-                 actions: <Widget>[
-                   FlatButton(
-                     child: const Text('YES'),
-                     onPressed: () { Navigator.of(context).pop(true); },
-                   ),
-                   FlatButton(
-                     child: const Text('NO'),
-                     onPressed: () { Navigator.of(context).pop(false); },
-                   ),
-                 ],
-               );
-             },
-           )
+    return await showDialog<bool>(context: context, builder: (BuildContext context) {
+             return AlertDialog(
+               title: const Text('This form has errors'),
+               content: const Text('Really leave this form?'),
+               actions: <Widget>[
+                 FlatButton(
+                   child: const Text('YES'),
+                   onPressed: () { Navigator.of(context).pop(true); },
+                 ),
+                 FlatButton(
+                   child: const Text('NO'),
+                   onPressed: () { Navigator.of(context).pop(false); },
+                 ),
+               ],
+             );
+           })
         ?? false;
   }
 

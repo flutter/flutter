@@ -167,28 +167,22 @@ class _RecipeGridPageState extends State<RecipeGridPage> {
   }
 
   void showFavoritesPage(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute<void>(
-        settings: const RouteSettings(name: '/pesto/favorites'),
-        builder: (BuildContext context) => PestoFavorites(),
-      ),
-    );
+    Navigator.push(context, MaterialPageRoute<void>(
+      settings: const RouteSettings(name: '/pesto/favorites'),
+      builder: (BuildContext context) => PestoFavorites(),
+    ));
   }
 
   void showRecipePage(BuildContext context, Recipe recipe) {
-    Navigator.push(
-      context,
-      MaterialPageRoute<void>(
-        settings: const RouteSettings(name: '/pesto/recipe'),
-        builder: (BuildContext context) {
-          return Theme(
-            data: _kTheme.copyWith(platform: Theme.of(context).platform),
-            child: RecipePage(recipe: recipe),
-          );
-        },
-      ),
-    );
+    Navigator.push(context, MaterialPageRoute<void>(
+      settings: const RouteSettings(name: '/pesto/recipe'),
+      builder: (BuildContext context) {
+        return Theme(
+          data: _kTheme.copyWith(platform: Theme.of(context).platform),
+          child: RecipePage(recipe: recipe),
+        );
+      },
+    ));
   }
 }
 
