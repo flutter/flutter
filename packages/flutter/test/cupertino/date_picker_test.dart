@@ -834,8 +834,8 @@ void main() {
         skip: !Platform.isLinux
       );
 
-      // slightly drag the hour component to make the current hour off-center.
-      await tester.drag(find.text('4'), Offset(0, _kRowOffset.dy/2));
+      // Slightly drag the hour component to make the current hour off-center.
+      await tester.drag(find.text('4'), Offset(0, _kRowOffset.dy / 2));
       await tester.pump();
 
       await expectLater(
