@@ -324,14 +324,4 @@ void main() {
     paragraph.locale = const Locale('ja', 'JP');
     expect(paragraph.locale, const Locale('ja', 'JP'));
   });
-
-  test('semantics configuration handles TextSpans with semanticsLabels', () {
-    final RenderParagraph paragraph = RenderParagraph(
-      const TextSpan(text: 'hello', semanticsLabel: 'goodbye'),
-      textDirection: TextDirection.ltr,
-    );
-    dynamic config;
-    paragraph.describeSemanticsConfiguration(config);
-    expect(paragraph.describeSemanticsConfiguration(), null);
-  });
 }
