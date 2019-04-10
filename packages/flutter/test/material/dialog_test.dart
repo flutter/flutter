@@ -612,24 +612,22 @@ void main() {
   testWidgets('showDialog only gets Theme from context on the first call', (WidgetTester tester) async {
     Widget buildFrame(Key builderKey) {
       return MaterialApp(
-        home: Material(
-          child: Center(
-            child: Builder(
-              key: builderKey,
-              builder: (BuildContext outerContext) {
-                return RaisedButton(
-                  onPressed: () {
-                    showDialog<void>(
-                      context: outerContext,
-                      builder: (BuildContext innerContext) {
-                        return const AlertDialog(title: Text('Title'));
-                      },
-                    );
-                  },
-                  child: const Text('Show Dialog'),
-                );
-              },
-            ),
+        home: Center(
+          child: Builder(
+            key: builderKey,
+            builder: (BuildContext outerContext) {
+              return RaisedButton(
+                onPressed: () {
+                  showDialog<void>(
+                    context: outerContext,
+                    builder: (BuildContext innerContext) {
+                      return const AlertDialog(title: Text('Title'));
+                    },
+                  );
+                },
+                child: const Text('Show Dialog'),
+              );
+            },
           ),
         ),
       );
@@ -642,11 +640,10 @@ void main() {
     await tester.tap(find.byType(RaisedButton));
     await tester.pumpAndSettle();
 
-    // Second time build.
+    // Second time build (deactivate old context).
     await tester.pumpWidget(buildFrame(UniqueKey()));
 
-    // App crashes when we try to open the dialog, because it tries to get the
-    // Theme from the old context.
+    // Before the fix, app crashes when we try to open the dialog again.
     await tester.tap(find.byType(RaisedButton));
   });
 }
