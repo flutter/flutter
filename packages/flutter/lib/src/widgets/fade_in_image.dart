@@ -22,6 +22,8 @@ import 'ticker_provider.dart';
 /// so that the image appears on screen with a graceful animation rather than
 /// abruptly pops onto the screen.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=pK738Pg9cxc}
+///
 /// If the [image] emits an [ImageInfo] synchronously, such as when the image
 /// has been loaded and cached, the [image] is displayed immediately and the
 /// [placeholder] is never displayed.

@@ -72,6 +72,7 @@ class Form extends StatefulWidget {
     this.autovalidate = false,
     this.onWillPop,
     this.onChanged,
+    this.onSaved,
   }) : assert(child != null),
        super(key: key);
 
@@ -117,6 +118,13 @@ class Form extends StatefulWidget {
   /// In addition to this callback being invoked, all the form fields themselves
   /// will rebuild.
   final VoidCallback onChanged;
+
+  /// Called when the form is saved (after all the form fields have been saved).
+  ///
+  /// See also:
+  ///
+  ///  * [FormState.save]
+  final VoidCallback onSaved;
 
   @override
   FormState createState() => FormState();
@@ -172,6 +180,8 @@ class FormState extends State<Form> {
   void save() {
     for (FormFieldState<dynamic> field in _fields)
       field.save();
+    if (widget.onSaved != null)
+      widget.onSaved();
   }
 
   /// Resets every [FormField] that is a descendant of this [Form] back to its
@@ -228,6 +238,9 @@ class _FormScope extends InheritedWidget {
 }
 
 /// Signature for validating a form field.
+///
+/// Returns an error string to display if the input is invalid, or null
+/// otherwise.
 ///
 /// Used by [FormField.validator].
 typedef FormFieldValidator<T> = String Function(T value);
@@ -362,10 +375,9 @@ class FormFieldState<T> extends State<FormField<T>> {
     return !hasError;
   }
 
-  bool _validate() {
+  void _validate() {
     if (widget.validator != null)
       _errorText = widget.validator(_value);
-    return !hasError;
   }
 
   /// Updates this field's state to the new value. Useful for responding to

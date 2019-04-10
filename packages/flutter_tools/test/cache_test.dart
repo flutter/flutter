@@ -103,9 +103,9 @@ void main() {
       when(artifact1.isUpToDate()).thenReturn(true);
       when(artifact2.isUpToDate()).thenReturn(false);
       final Cache cache = Cache(artifacts: <CachedArtifact>[artifact1, artifact2]);
-      await cache.updateAll();
-      verifyNever(artifact1.update());
-      verify(artifact2.update());
+      await cache.updateAll(<DevelopmentArtifact>{});
+      verifyNever(artifact1.update(<DevelopmentArtifact>{}));
+      verify(artifact2.update(<DevelopmentArtifact>{}));
     });
     testUsingContext('failed storage.googleapis.com download shows China warning', () async {
       final CachedArtifact artifact1 = MockCachedArtifact();
@@ -114,30 +114,30 @@ void main() {
       when(artifact2.isUpToDate()).thenReturn(false);
       final MockInternetAddress address = MockInternetAddress();
       when(address.host).thenReturn('storage.googleapis.com');
-      when(artifact1.update()).thenThrow(SocketException(
+      when(artifact1.update(<DevelopmentArtifact>{})).thenThrow(SocketException(
         'Connection reset by peer',
         address: address,
       ));
       final Cache cache = Cache(artifacts: <CachedArtifact>[artifact1, artifact2]);
       try {
-        await cache.updateAll();
+        await cache.updateAll(<DevelopmentArtifact>{});
         fail('Mock thrown exception expected');
       } catch (e) {
-        verify(artifact1.update());
+        verify(artifact1.update(<DevelopmentArtifact>{}));
         // Don't continue when retrieval fails.
-        verifyNever(artifact2.update());
+        verifyNever(artifact2.update(<DevelopmentArtifact>{}));
         expect(
           testLogger.errorText,
-          contains('https://flutter.io/community/china'),
+          contains('https://flutter.dev/community/china'),
         );
       }
     });
   });
 
   testUsingContext('flattenNameSubdirs', () {
-    expect(flattenNameSubdirs(Uri.parse('http://flutter.io/foo/bar')), 'flutter.io/foo/bar');
+    expect(flattenNameSubdirs(Uri.parse('http://flutter.dev/foo/bar')), 'flutter.dev/foo/bar');
     expect(flattenNameSubdirs(Uri.parse('http://docs.flutter.io/foo/bar')), 'docs.flutter.io/foo/bar');
-    expect(flattenNameSubdirs(Uri.parse('https://www.flutter.io')), 'www.flutter.io');
+    expect(flattenNameSubdirs(Uri.parse('https://www.flutter.dev')), 'www.flutter.dev');
   }, overrides: <Type, Generator>{
     FileSystem: () => MockFileSystem(),
   });

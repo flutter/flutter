@@ -33,12 +33,9 @@ task:
         FIREBASE_PUBLIC_TOKEN: ENCRYPTED[37e8b82f167864cae9a3f4d2cf3f37dea331d9375c295327c45de524f6c588fa6f6d63e5784f10f6d43ce29689f36c92]
       docs_script: ./dev/bots/docs.sh
     - name: deploy_gallery
-      only_if: $CIRRUS_BRANCH == 'dev'
       depends_on:
         - docs
         - analyze
-        - tests-linux
-        - tool_tests-linux
         - build_tests-linux
       env:
         SHARD: deploy_gallery
@@ -144,28 +141,23 @@ task:
 task:
   use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true'
   name: deploy_gallery-macos
-  only_if: $CIRRUS_BRANCH == 'dev'
   pub_cache:
     folder: ~/.pub-cache
   depends_on:
     - analyze
-    - tests-macos
-    - tool_tests-macos
     - build_tests-macos
-    - add2app-macos
   env:
     # Name the SDK directory to include a space so that we constantly
     # test path names with spaces in them.
     CIRRUS_WORKING_DIR: "/tmp/flutter sdk"
     SHARD: deploy_gallery
+    # Apple Fastlane password.
+    FASTLANE_PASSWORD: ENCRYPTED[4b1f0b8d52874e9de965acd46c79743f3b81f3a513614179b9be7cf53dc8258753e257bdadb11a298ee455259df21865]
+    # Private repo for publishing certificates.
+    PUBLISHING_MATCH_CERTIFICATE_REPO: ENCRYPTED[3c0e78877d933fc80107aa6f3790fd1cf927250b852d6cb53202be696b4903ed8ca839b809626aaf18050bf7e436fab7]
+    PUBLISHING_MATCH_REPO_TOKEN: ENCRYPTED[3d1230b744c6ed6c788a91bec741b769401dbcd426b18f9af8080bfeefdfc21913ca4047980c5b5b7ce823f12e7b6b19]
     # Apple Certificates Match Passphrase
     MATCH_PASSWORD: ENCRYPTED[db07f252234397090e3ec59152d9ec1831f5ecd0ef97d247b1dca757bbb9ef9b7c832a39bce2caf1949ccdf097e59a73]
-    # Apple Fastlane password, ASP, and Session information.
-    FASTLANE_PASSWORD: ENCRYPTED[0bf9bb0cc2cb32a0ed18470cf2c9df0f587cce5f8b04adbd6cff15ca5bde7a74f721ee580227b132ab6b032f08e52ae0]
-    FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: ENCRYPTED[b219cc13c757f36cb62bfca5102d6115f1cc283aeb974f20c657bc4991c0cc144e30cf5d8183e41cc1df1668b4d14210]
-    FASTLANE_SESSION: ENCRYPTED[88246e355e55cd5e361a575f5d5b762f5826cb9d5285cb93a263b1cad04ec09bdedb1cbd74df5ec02d6043360fa04acd]
-    # Private repo for publishing certificates.
-    PUBLISHING_MATCH_CERTIFICATE_REPO: git@github.com:flutter/private_publishing_certificates.git
   osx_instance:
     image: mojave-xcode-10.1
   # occasionally the clock on these machines is out of sync

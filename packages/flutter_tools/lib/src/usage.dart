@@ -148,7 +148,7 @@ class Usage {
     printStatus('');
     printStatus('''
   ╔════════════════════════════════════════════════════════════════════════════╗
-  ║                 Welcome to Flutter! - https://flutter.io                   ║
+  ║                 Welcome to Flutter! - https://flutter.dev                  ║
   ║                                                                            ║
   ║ The Flutter tool anonymously reports feature usage statistics and crash    ║
   ║ reports to Google in order to help Google contribute improvements to       ║

@@ -195,13 +195,14 @@ void main() {
     final List<PointerEvent> events = PointerEventConverter.expand(
       packet.data, ui.window.devicePixelRatio).toList();
 
-    expect(events.length, 5);
+    expect(events.length, 6);
     expect(events[0].runtimeType, equals(PointerAddedEvent));
     expect(events[1].runtimeType, equals(PointerHoverEvent));
     expect(events[1].delta, equals(const Offset(5.0, 7.0)));
     expect(events[2].runtimeType, equals(PointerDownEvent));
     expect(events[3].runtimeType, equals(PointerCancelEvent));
-    expect(events[4].runtimeType, equals(PointerRemovedEvent));
+    expect(events[4].runtimeType, equals(PointerHoverEvent));
+    expect(events[5].runtimeType, equals(PointerRemovedEvent));
   });
 
   test('Can expand pointer scroll events', () {
@@ -248,5 +249,106 @@ void main() {
     expect(events[5].runtimeType, equals(PointerMoveEvent));
     expect(events[5].delta, equals(unexpectedOffset));
     expect(events[6].runtimeType, equals(PointerScrollEvent));
+  });
+
+  test('Should synthesise kPrimaryButton for touch', () {
+    final Offset location = const Offset(10.0, 10.0) * ui.window.devicePixelRatio;
+    const PointerDeviceKind kind = PointerDeviceKind.touch;
+    final ui.PointerDataPacket packet = ui.PointerDataPacket(
+      data: <ui.PointerData>[
+        ui.PointerData(change: ui.PointerChange.add, kind: kind, physicalX: location.dx, physicalY: location.dy),
+        ui.PointerData(change: ui.PointerChange.hover, kind: kind, physicalX: location.dx, physicalY: location.dy),
+        ui.PointerData(change: ui.PointerChange.down, kind: kind, physicalX: location.dx, physicalY: location.dy),
+        ui.PointerData(change: ui.PointerChange.move, kind: kind, physicalX: location.dx, physicalY: location.dy),
+        ui.PointerData(change: ui.PointerChange.up, kind: kind, physicalX: location.dx, physicalY: location.dy),
+      ]
+    );
+
+    final List<PointerEvent> events = PointerEventConverter.expand(
+      packet.data, ui.window.devicePixelRatio).toList();
+
+    expect(events.length, 5);
+    expect(events[0].runtimeType, equals(PointerAddedEvent));
+    expect(events[0].buttons, equals(0));
+    expect(events[1].runtimeType, equals(PointerHoverEvent));
+    expect(events[1].buttons, equals(0));
+    expect(events[2].runtimeType, equals(PointerDownEvent));
+    expect(events[2].buttons, equals(kPrimaryButton));
+    expect(events[3].runtimeType, equals(PointerMoveEvent));
+    expect(events[3].buttons, equals(kPrimaryButton));
+    expect(events[4].runtimeType, equals(PointerUpEvent));
+    expect(events[4].buttons, equals(0));
+
+    PointerEventConverter.clearPointers();
+  });
+
+  test('Should synthesise kPrimaryButton for stylus', () {
+    final Offset location = const Offset(10.0, 10.0) * ui.window.devicePixelRatio;
+    for (PointerDeviceKind kind in <PointerDeviceKind>[
+      PointerDeviceKind.stylus,
+      PointerDeviceKind.invertedStylus,
+    ]) {
+
+      final ui.PointerDataPacket packet = ui.PointerDataPacket(
+        data: <ui.PointerData>[
+          ui.PointerData(change: ui.PointerChange.add, kind: kind, physicalX: location.dx, physicalY: location.dy),
+          ui.PointerData(change: ui.PointerChange.hover, kind: kind, physicalX: location.dx, physicalY: location.dy),
+          ui.PointerData(change: ui.PointerChange.down, kind: kind, physicalX: location.dx, physicalY: location.dy),
+          ui.PointerData(change: ui.PointerChange.move, buttons: kSecondaryStylusButton, kind: kind, physicalX: location.dx, physicalY: location.dy),
+          ui.PointerData(change: ui.PointerChange.up, kind: kind, physicalX: location.dx, physicalY: location.dy),
+        ]
+      );
+
+      final List<PointerEvent> events = PointerEventConverter.expand(
+        packet.data, ui.window.devicePixelRatio).toList();
+
+      expect(events.length, 5);
+      expect(events[0].runtimeType, equals(PointerAddedEvent));
+      expect(events[0].buttons, equals(0));
+      expect(events[1].runtimeType, equals(PointerHoverEvent));
+      expect(events[1].buttons, equals(0));
+      expect(events[2].runtimeType, equals(PointerDownEvent));
+      expect(events[2].buttons, equals(kPrimaryButton));
+      expect(events[3].runtimeType, equals(PointerMoveEvent));
+      expect(events[3].buttons, equals(kPrimaryButton | kSecondaryStylusButton));
+      expect(events[4].runtimeType, equals(PointerUpEvent));
+      expect(events[4].buttons, equals(0));
+
+      PointerEventConverter.clearPointers();
+    }
+  });
+
+  test('Should not synthesise kPrimaryButton for certain devices', () {
+    final Offset location = const Offset(10.0, 10.0) * ui.window.devicePixelRatio;
+    for (PointerDeviceKind kind in <PointerDeviceKind>[
+      PointerDeviceKind.mouse,
+    ]) {
+      final ui.PointerDataPacket packet = ui.PointerDataPacket(
+        data: <ui.PointerData>[
+          ui.PointerData(change: ui.PointerChange.add, kind: kind, physicalX: location.dx, physicalY: location.dy),
+          ui.PointerData(change: ui.PointerChange.hover, kind: kind, physicalX: location.dx, physicalY: location.dy),
+          ui.PointerData(change: ui.PointerChange.down, kind: kind, buttons: kMiddleMouseButton, physicalX: location.dx, physicalY: location.dy),
+          ui.PointerData(change: ui.PointerChange.move, kind: kind, buttons: kMiddleMouseButton | kSecondaryMouseButton, physicalX: location.dx, physicalY: location.dy),
+          ui.PointerData(change: ui.PointerChange.up, kind: kind, physicalX: location.dx, physicalY: location.dy),
+        ]
+      );
+
+      final List<PointerEvent> events = PointerEventConverter.expand(
+        packet.data, ui.window.devicePixelRatio).toList();
+
+      expect(events.length, 5);
+      expect(events[0].runtimeType, equals(PointerAddedEvent));
+      expect(events[0].buttons, equals(0));
+      expect(events[1].runtimeType, equals(PointerHoverEvent));
+      expect(events[1].buttons, equals(0));
+      expect(events[2].runtimeType, equals(PointerDownEvent));
+      expect(events[2].buttons, equals(kMiddleMouseButton));
+      expect(events[3].runtimeType, equals(PointerMoveEvent));
+      expect(events[3].buttons, equals(kMiddleMouseButton | kSecondaryMouseButton));
+      expect(events[4].runtimeType, equals(PointerUpEvent));
+      expect(events[4].buttons, equals(0));
+
+      PointerEventConverter.clearPointers();
+    }
   });
 }
