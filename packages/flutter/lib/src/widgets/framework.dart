@@ -490,7 +490,10 @@ abstract class Widget extends DiagnosticableTree {
 ///
 /// {@tool sample}
 ///
-/// The following is a skeleton of a stateless widget subclass called `GreenFrog`:
+/// The following is a skeleton of a stateless widget subclass called `GreenFrog`.
+///
+/// Normally, widgets have more constructor arguments, each of which corresponds
+/// to a `final` property.
 ///
 /// ```dart
 /// class GreenFrog extends StatelessWidget {
@@ -503,22 +506,21 @@ abstract class Widget extends DiagnosticableTree {
 /// }
 /// ```
 /// {@end-tool}
+///
 /// {@tool sample}
 ///
-/// Normally widgets have more constructor arguments, each of which corresponds
-/// to a `final` property. The next example shows the more generic widget `Frog`
-/// which can be given a color and a child:
+/// This next example shows the more generic widget `Frog` which can be given
+/// a color and a child:
 ///
 /// ```dart
 /// class Frog extends StatelessWidget {
 ///   const Frog({
 ///     Key key,
-///     this.color: const Color(0xFF2DBD3A),
+///     this.color = const Color(0xFF2DBD3A),
 ///     this.child,
 ///   }) : super(key: key);
 ///
 ///   final Color color;
-///
 ///   final Widget child;
 ///
 ///   @override
@@ -702,7 +704,11 @@ abstract class StatelessWidget extends Widget {
 ///
 /// {@tool sample}
 ///
-/// The following is a skeleton of a stateful widget subclass called `YellowBird`:
+/// This is a skeleton of a stateful widget subclass called `YellowBird`.
+///
+/// In this example. the [State] has no actual state. State is normally
+/// represented as private member fields. Also, normally widgets have more
+/// constructor arguments, each of which corresponds to a `final` property.
 ///
 /// ```dart
 /// class YellowBird extends StatefulWidget {
@@ -722,11 +728,7 @@ abstract class StatelessWidget extends Widget {
 /// {@end-tool}
 /// {@tool sample}
 ///
-/// In this example. the [State] has no actual state. State is normally
-/// represented as private member fields. Also, normally widgets have more
-/// constructor arguments, each of which corresponds to a `final` property.
-///
-/// The next example shows the more generic widget `Bird` which can be given a
+/// This example shows the more generic widget `Bird` which can be given a
 /// color and a child, and which has some internal state with a method that
 /// can be called to mutate it:
 ///
@@ -734,12 +736,11 @@ abstract class StatelessWidget extends Widget {
 /// class Bird extends StatefulWidget {
 ///   const Bird({
 ///     Key key,
-///     this.color: const Color(0xFFFFE306),
+///     this.color = const Color(0xFFFFE306),
 ///     this.child,
 ///   }) : super(key: key);
 ///
 ///   final Color color;
-///
 ///   final Widget child;
 ///
 ///   _BirdState createState() => _BirdState();
