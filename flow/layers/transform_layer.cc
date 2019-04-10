@@ -16,7 +16,9 @@ void TransformLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
 
   SkRect previous_cull_rect = context->cull_rect;
   SkMatrix inverse_transform_;
-  if (transform_.invert(&inverse_transform_)) {
+  // Perspective projections don't produce rectangles that are useful for
+  // culling for some reason.
+  if (!transform_.hasPerspective() && transform_.invert(&inverse_transform_)) {
     inverse_transform_.mapRect(&context->cull_rect);
   } else {
     context->cull_rect = kGiantRect;
