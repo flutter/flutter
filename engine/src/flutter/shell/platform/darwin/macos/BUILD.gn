@@ -7,6 +7,21 @@ assert(is_mac)
 import("//build/config/mac/mac_sdk.gni")
 import("$flutter_root/common/config.gni")
 import("$flutter_root/shell/platform/darwin/framework_shared.gni")
+import("$flutter_root/shell/platform/glfw/config.gni")
+
+group("macos") {
+  deps = [
+    ":flutter_framework",
+  ]
+  if (build_glfw_shell) {
+    deps += [
+      ":flutter_macos_glfw",
+      "$flutter_root/shell/platform/common/cpp/client_wrapper:publish_wrapper",
+      "$flutter_root/shell/platform/glfw:publish_headers_glfw",
+      "$flutter_root/shell/platform/glfw/client_wrapper:publish_wrapper_glfw",
+    ]
+  }
+}
 
 _flutter_framework_name = "FlutterMacOS"
 _flutter_framework_filename = "$_flutter_framework_name.framework"
@@ -193,4 +208,14 @@ group("flutter_framework") {
   deps = [
     ":_generate_symlinks",
   ]
+}
+
+if (build_glfw_shell) {
+  shared_library("flutter_macos_glfw") {
+    deps = [
+      "$flutter_root/shell/platform/glfw:flutter_glfw",
+    ]
+
+    public_configs = [ "$flutter_root:config" ]
+  }
 }
