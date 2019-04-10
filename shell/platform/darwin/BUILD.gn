@@ -14,7 +14,7 @@ group("darwin") {
   }
   if (is_mac) {
     deps = [
-      "macos:flutter_framework",
+      "macos",
     ]
   }
 }
