@@ -6,6 +6,7 @@ import 'dart:ui' show Offset;
 
 import 'package:flutter/foundation.dart';
 
+import 'events.dart' show kPrimaryButton;
 import 'velocity_tracker.dart';
 
 /// Details object for callbacks that use [GestureDragDownCallback].
@@ -20,7 +21,7 @@ class DragDownDetails {
   /// Creates details for a [GestureDragDownCallback].
   ///
   /// The [globalPosition] and [buttons] arguments must not be null.
-  DragDownDetails({ this.globalPosition = Offset.zero, this.buttons = 0 })
+  DragDownDetails({ this.globalPosition = Offset.zero, this.buttons = kPrimaryButton })
     : assert(globalPosition != null), assert(buttons != null);
 
   /// The global position at which the pointer contacted the screen.
@@ -58,7 +59,7 @@ class DragStartDetails {
   DragStartDetails({
     this.sourceTimeStamp,
     this.globalPosition = Offset.zero,
-    this.buttons = 0,
+    this.buttons = kPrimaryButton,
   }) : assert(globalPosition != null),
        assert(buttons != null);
 
@@ -115,7 +116,7 @@ class DragUpdateDetails {
     this.delta = Offset.zero,
     this.primaryDelta,
     @required this.globalPosition,
-    this.buttons = 0,
+    this.buttons = kPrimaryButton,
   }) : assert(delta != null),
        assert(primaryDelta == null
            || (primaryDelta == delta.dx && delta.dy == 0.0)
@@ -184,12 +185,10 @@ class DragEndDetails {
   DragEndDetails({
     this.velocity = Velocity.zero,
     this.primaryVelocity,
-    this.buttons = 0,
   }) : assert(velocity != null),
        assert(primaryVelocity == null
            || primaryVelocity == velocity.pixelsPerSecond.dx
-           || primaryVelocity == velocity.pixelsPerSecond.dy),
-       assert(buttons != null);
+           || primaryVelocity == velocity.pixelsPerSecond.dy);
 
   /// The velocity the pointer was moving when it stopped contacting the screen.
   ///
@@ -207,10 +206,6 @@ class DragEndDetails {
   ///
   /// Defaults to null if not specified in the constructor.
   final double primaryVelocity;
-
-  /// The buttons pressed when the pointer contacted the screen (changing buttons
-  /// during a drag cancels the gesture.)
-  final int buttons;
 
   @override
   String toString() => '$runtimeType($velocity)';

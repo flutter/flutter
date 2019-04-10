@@ -19,7 +19,7 @@ class TapDownDetails {
   /// Creates details for a [GestureTapDownCallback].
   ///
   /// The [globalPosition] and [buttons] arguments must not be null.
-  TapDownDetails({ this.globalPosition = Offset.zero, this.buttons = 0 })
+  TapDownDetails({ this.globalPosition = Offset.zero, this.buttons = kPrimaryButton })
     : assert(globalPosition != null), assert(buttons != null);
 
   /// The global position at which the pointer contacted the screen.
@@ -51,7 +51,7 @@ class TapUpDetails {
   /// Creates details for a [GestureTapUpCallback].
   ///
   /// The [globalPosition] and [buttons] arguments must not be null.
-  TapUpDetails({ this.globalPosition = Offset.zero, this.buttons = 0 })
+  TapUpDetails({ this.globalPosition = Offset.zero, this.buttons = kPrimaryButton })
     : assert(globalPosition != null), assert(buttons != null);
 
   /// The global position at which the pointer contacted the screen.

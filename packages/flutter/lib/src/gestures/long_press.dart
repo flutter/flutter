@@ -53,7 +53,7 @@ class LongPressStartDetails {
   /// The [globalPosition] and [buttons] arguments must not be null.
   const LongPressStartDetails({
     this.globalPosition = Offset.zero,
-    this.buttons = 0,
+    this.buttons = kPrimaryButton,
   }) : assert(globalPosition != null),
        assert(buttons != null);
 
@@ -78,7 +78,7 @@ class LongPressMoveUpdateDetails {
   const LongPressMoveUpdateDetails({
     this.globalPosition = Offset.zero,
     this.offsetFromOrigin = Offset.zero,
-    this.buttons = 0,
+    this.buttons = kPrimaryButton,
   }) : assert(globalPosition != null),
        assert(offsetFromOrigin != null),
        assert(buttons != null);
@@ -109,7 +109,7 @@ class LongPressEndDetails {
   /// The [globalPosition] and [buttons] arguments must not be null.
   const LongPressEndDetails({
     this.globalPosition = Offset.zero,
-    this.buttons = 0,
+    this.buttons = kPrimaryButton,
   }) : assert(globalPosition != null),
        assert(buttons != null);
 
