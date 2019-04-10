@@ -25,9 +25,8 @@ class RuntimeDelegate {
 
   virtual void Render(std::unique_ptr<flow::LayerTree> layer_tree) = 0;
 
-  virtual void UpdateSemantics(
-      flutter::SemanticsNodeUpdates update,
-      flutter::CustomAccessibilityActionUpdates actions) = 0;
+  virtual void UpdateSemantics(SemanticsNodeUpdates update,
+                               CustomAccessibilityActionUpdates actions) = 0;
 
   virtual void HandlePlatformMessage(fml::RefPtr<PlatformMessage> message) = 0;
 

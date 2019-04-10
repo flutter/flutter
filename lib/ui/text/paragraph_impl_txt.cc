@@ -70,8 +70,7 @@ std::vector<TextBox> ParagraphImplTxt::getRectsForRange(
   std::vector<txt::Paragraph::TextBox> boxes = m_paragraph->GetRectsForRange(
       start, end, rect_height_style, rect_width_style);
   for (const txt::Paragraph::TextBox& box : boxes) {
-    result.emplace_back(box.rect,
-                        static_cast<flutter::TextDirection>(box.direction));
+    result.emplace_back(box.rect, static_cast<TextDirection>(box.direction));
   }
   return result;
 }

@@ -22,12 +22,12 @@ DirectoryAssetBundle::DirectoryAssetBundle(fml::UniqueFD descriptor)
 
 DirectoryAssetBundle::~DirectoryAssetBundle() = default;
 
-// |flutter::AssetResolver|
+// |AssetResolver|
 bool DirectoryAssetBundle::IsValid() const {
   return is_valid_;
 }
 
-// |flutter::AssetResolver|
+// |AssetResolver|
 std::unique_ptr<fml::Mapping> DirectoryAssetBundle::GetAsMapping(
     const std::string& asset_name) const {
   if (!is_valid_) {

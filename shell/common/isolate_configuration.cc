@@ -13,8 +13,8 @@ IsolateConfiguration::IsolateConfiguration() = default;
 
 IsolateConfiguration::~IsolateConfiguration() = default;
 
-bool IsolateConfiguration::PrepareIsolate(flutter::DartIsolate& isolate) {
-  if (isolate.GetPhase() != flutter::DartIsolate::Phase::LibrariesSetup) {
+bool IsolateConfiguration::PrepareIsolate(DartIsolate& isolate) {
+  if (isolate.GetPhase() != DartIsolate::Phase::LibrariesSetup) {
     FML_DLOG(ERROR)
         << "Isolate was in incorrect phase to be prepared for running.";
     return false;
@@ -28,7 +28,7 @@ class AppSnapshotIsolateConfiguration final : public IsolateConfiguration {
   AppSnapshotIsolateConfiguration() = default;
 
   // |IsolateConfiguration|
-  bool DoPrepareIsolate(flutter::DartIsolate& isolate) override {
+  bool DoPrepareIsolate(DartIsolate& isolate) override {
     return isolate.PrepareForRunningFromPrecompiledCode();
   }
 
@@ -42,8 +42,8 @@ class KernelIsolateConfiguration : public IsolateConfiguration {
       : kernel_(std::move(kernel)) {}
 
   // |IsolateConfiguration|
-  bool DoPrepareIsolate(flutter::DartIsolate& isolate) override {
-    if (flutter::DartVM::IsRunningPrecompiledCode()) {
+  bool DoPrepareIsolate(DartIsolate& isolate) override {
+    if (DartVM::IsRunningPrecompiledCode()) {
       return false;
     }
     return isolate.PrepareForRunningFromKernel(std::move(kernel_));
@@ -63,8 +63,8 @@ class KernelListIsolateConfiguration final : public IsolateConfiguration {
       : kernel_pieces_(std::move(kernel_pieces)) {}
 
   // |IsolateConfiguration|
-  bool DoPrepareIsolate(flutter::DartIsolate& isolate) override {
-    if (flutter::DartVM::IsRunningPrecompiledCode()) {
+  bool DoPrepareIsolate(DartIsolate& isolate) override {
+    if (DartVM::IsRunningPrecompiledCode()) {
       return false;
     }
 
@@ -115,7 +115,7 @@ static std::vector<std::string> ParseKernelListPaths(
 
 static std::vector<std::future<std::unique_ptr<const fml::Mapping>>>
 PrepareKernelMappings(std::vector<std::string> kernel_pieces_paths,
-                      std::shared_ptr<flutter::AssetManager> asset_manager,
+                      std::shared_ptr<AssetManager> asset_manager,
                       fml::RefPtr<fml::TaskRunner> io_worker) {
   FML_DCHECK(asset_manager);
   std::vector<std::future<std::unique_ptr<const fml::Mapping>>> fetch_futures;
@@ -142,11 +142,11 @@ PrepareKernelMappings(std::vector<std::string> kernel_pieces_paths,
 }
 
 std::unique_ptr<IsolateConfiguration> IsolateConfiguration::InferFromSettings(
-    const flutter::Settings& settings,
-    std::shared_ptr<flutter::AssetManager> asset_manager,
+    const Settings& settings,
+    std::shared_ptr<AssetManager> asset_manager,
     fml::RefPtr<fml::TaskRunner> io_worker) {
   // Running in AOT mode.
-  if (flutter::DartVM::IsRunningPrecompiledCode()) {
+  if (DartVM::IsRunningPrecompiledCode()) {
     return CreateForAppSnapshot();
   }
 

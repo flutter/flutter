@@ -22,12 +22,12 @@ namespace flutter {
 // used within this interval.
 static constexpr std::chrono::milliseconds kSkiaCleanupExpiration(15000);
 
-Rasterizer::Rasterizer(flutter::TaskRunners task_runners)
+Rasterizer::Rasterizer(TaskRunners task_runners)
     : Rasterizer(std::move(task_runners),
                  std::make_unique<flow::CompositorContext>()) {}
 
 Rasterizer::Rasterizer(
-    flutter::TaskRunners task_runners,
+    TaskRunners task_runners,
     std::unique_ptr<flow::CompositorContext> compositor_context)
     : task_runners_(std::move(task_runners)),
       compositor_context_(std::move(compositor_context)),
@@ -41,8 +41,7 @@ fml::WeakPtr<Rasterizer> Rasterizer::GetWeakPtr() const {
   return weak_factory_.GetWeakPtr();
 }
 
-fml::WeakPtr<flutter::SnapshotDelegate> Rasterizer::GetSnapshotDelegate()
-    const {
+fml::WeakPtr<SnapshotDelegate> Rasterizer::GetSnapshotDelegate() const {
   return weak_factory_.GetWeakPtr();
 }
 
@@ -72,17 +71,16 @@ void Rasterizer::DrawLastLayerTree() {
   DrawToSurface(*last_layer_tree_);
 }
 
-void Rasterizer::Draw(
-    fml::RefPtr<flutter::Pipeline<flow::LayerTree>> pipeline) {
+void Rasterizer::Draw(fml::RefPtr<Pipeline<flow::LayerTree>> pipeline) {
   TRACE_EVENT0("flutter", "GPURasterizer::Draw");
 
-  flutter::Pipeline<flow::LayerTree>::Consumer consumer =
+  Pipeline<flow::LayerTree>::Consumer consumer =
       std::bind(&Rasterizer::DoDraw, this, std::placeholders::_1);
 
   // Consume as many pipeline items as possible. But yield the event loop
   // between successive tries.
   switch (pipeline->Consume(consumer)) {
-    case flutter::PipelineConsumeResult::MoreAvailable: {
+    case PipelineConsumeResult::MoreAvailable: {
       task_runners_.GetGPUTaskRunner()->PostTask(
           [weak_this = weak_factory_.GetWeakPtr(), pipeline]() {
             if (weak_this) {

@@ -15,7 +15,7 @@ namespace tonic {
 // Construct an SkRRect from a Dart RRect object.
 // The Dart RRect is a Float32List containing
 //   [left, top, right, bottom, xRadius, yRadius]
-RRect DartConverter<RRect>::FromDart(Dart_Handle value) {
+RRect DartConverter<flutter::RRect>::FromDart(Dart_Handle value) {
   Float32List buffer(value);
 
   RRect result;
@@ -35,9 +35,9 @@ RRect DartConverter<RRect>::FromDart(Dart_Handle value) {
   return result;
 }
 
-RRect DartConverter<RRect>::FromArguments(Dart_NativeArguments args,
-                                          int index,
-                                          Dart_Handle& exception) {
+RRect DartConverter<flutter::RRect>::FromArguments(Dart_NativeArguments args,
+                                                   int index,
+                                                   Dart_Handle& exception) {
   Dart_Handle value = Dart_GetNativeArgument(args, index);
   FML_DCHECK(!LogIfError(value));
   return FromDart(value);

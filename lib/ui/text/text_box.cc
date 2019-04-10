@@ -25,7 +25,8 @@ Dart_Handle GetTextBoxType() {
 
 }  // anonymous namespace
 
-Dart_Handle DartConverter<TextBox>::ToDart(const TextBox& val) {
+Dart_Handle DartConverter<flutter::TextBox>::ToDart(
+    const flutter::TextBox& val) {
   constexpr int argc = 5;
   Dart_Handle argv[argc] = {
       tonic::ToDart(val.rect.fLeft),
@@ -37,7 +38,7 @@ Dart_Handle DartConverter<TextBox>::ToDart(const TextBox& val) {
   return Dart_New(GetTextBoxType(), tonic::ToDart("_"), argc, argv);
 }
 
-Dart_Handle DartListFactory<TextBox>::NewList(intptr_t length) {
+Dart_Handle DartListFactory<flutter::TextBox>::NewList(intptr_t length) {
   return Dart_NewListOfType(GetTextBoxType(), length);
 }
 

@@ -40,10 +40,10 @@ class ZipAssetStore final : public AssetResolver {
 
   mutable std::map<std::string, CacheEntry> stat_cache_;
 
-  // |flutter::AssetResolver|
+  // |AssetResolver|
   bool IsValid() const override;
 
-  // |flutter::AssetResolver|
+  // |AssetResolver|
   std::unique_ptr<fml::Mapping> GetAsMapping(
       const std::string& asset_name) const override;
 

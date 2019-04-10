@@ -547,9 +547,8 @@ Dart_Isolate DartIsolate::DartCreateAndStartServiceIsolate(
     return nullptr;
   }
 
-  flutter::TaskRunners null_task_runners(
-      "io.flutter." DART_VM_SERVICE_ISOLATE_NAME, nullptr, nullptr, nullptr,
-      nullptr);
+  TaskRunners null_task_runners("io.flutter." DART_VM_SERVICE_ISOLATE_NAME,
+                                nullptr, nullptr, nullptr, nullptr);
 
   flags->load_vmservice_library = true;
 
@@ -659,8 +658,8 @@ DartIsolate::CreateDartVMAndEmbedderObjectPair(
   if (!is_root_isolate) {
     auto* raw_embedder_isolate = embedder_isolate.release();
 
-    flutter::TaskRunners null_task_runners(advisory_script_uri, nullptr,
-                                           nullptr, nullptr, nullptr);
+    TaskRunners null_task_runners(advisory_script_uri, nullptr, nullptr,
+                                  nullptr, nullptr);
 
     embedder_isolate = std::make_unique<std::shared_ptr<DartIsolate>>(
         std::make_shared<DartIsolate>(

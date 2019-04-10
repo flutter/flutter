@@ -16,8 +16,7 @@
 
 namespace flutter {
 
-PlatformView::PlatformView(Delegate& delegate,
-                           flutter::TaskRunners task_runners)
+PlatformView::PlatformView(Delegate& delegate, TaskRunners task_runners)
     : delegate_(delegate),
       task_runners_(std::move(task_runners)),
       size_(SkISize::Make(0, 0)),
@@ -33,17 +32,17 @@ std::unique_ptr<VsyncWaiter> PlatformView::CreateVSyncWaiter() {
 }
 
 void PlatformView::DispatchPlatformMessage(
-    fml::RefPtr<flutter::PlatformMessage> message) {
+    fml::RefPtr<PlatformMessage> message) {
   delegate_.OnPlatformViewDispatchPlatformMessage(std::move(message));
 }
 
 void PlatformView::DispatchPointerDataPacket(
-    std::unique_ptr<flutter::PointerDataPacket> packet) {
+    std::unique_ptr<PointerDataPacket> packet) {
   delegate_.OnPlatformViewDispatchPointerDataPacket(std::move(packet));
 }
 
 void PlatformView::DispatchSemanticsAction(int32_t id,
-                                           flutter::SemanticsAction action,
+                                           SemanticsAction action,
                                            std::vector<uint8_t> args) {
   delegate_.OnPlatformViewDispatchSemanticsAction(id, action, std::move(args));
 }
@@ -56,7 +55,7 @@ void PlatformView::SetAccessibilityFeatures(int32_t flags) {
   delegate_.OnPlatformViewSetAccessibilityFeatures(flags);
 }
 
-void PlatformView::SetViewportMetrics(const flutter::ViewportMetrics& metrics) {
+void PlatformView::SetViewportMetrics(const ViewportMetrics& metrics) {
   delegate_.OnPlatformViewSetViewportMetrics(metrics);
 }
 
@@ -93,12 +92,10 @@ fml::WeakPtr<PlatformView> PlatformView::GetWeakPtr() const {
   return weak_factory_.GetWeakPtr();
 }
 
-void PlatformView::UpdateSemantics(
-    flutter::SemanticsNodeUpdates update,
-    flutter::CustomAccessibilityActionUpdates actions) {}
+void PlatformView::UpdateSemantics(SemanticsNodeUpdates update,
+                                   CustomAccessibilityActionUpdates actions) {}
 
-void PlatformView::HandlePlatformMessage(
-    fml::RefPtr<flutter::PlatformMessage> message) {
+void PlatformView::HandlePlatformMessage(fml::RefPtr<PlatformMessage> message) {
   if (auto response = message->response())
     response->CompleteEmpty();
 }

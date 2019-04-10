@@ -149,25 +149,25 @@ class RuntimeController final : public WindowClient {
 
   bool FlushRuntimeStateToIsolate();
 
-  // |flutter::WindowClient|
+  // |WindowClient|
   std::string DefaultRouteName() override;
 
-  // |flutter::WindowClient|
+  // |WindowClient|
   void ScheduleFrame() override;
 
-  // |flutter::WindowClient|
+  // |WindowClient|
   void Render(Scene* scene) override;
 
-  // |flutter::WindowClient|
+  // |WindowClient|
   void UpdateSemantics(SemanticsUpdate* update) override;
 
-  // |flutter::WindowClient|
+  // |WindowClient|
   void HandlePlatformMessage(fml::RefPtr<PlatformMessage> message) override;
 
-  // |flutter::WindowClient|
+  // |WindowClient|
   FontCollection& GetFontCollection() override;
 
-  // |flutter::WindowClient|
+  // |WindowClient|
   void UpdateIsolateDescription(const std::string isolate_name,
                                 int64_t isolate_port) override;
 

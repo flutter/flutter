@@ -88,7 +88,7 @@ class AutoIsolateShutdown {
  public:
   AutoIsolateShutdown() = default;
 
-  AutoIsolateShutdown(std::shared_ptr<flutter::DartIsolate> isolate,
+  AutoIsolateShutdown(std::shared_ptr<DartIsolate> isolate,
                       fml::RefPtr<fml::TaskRunner> runner)
       : isolate_(std::move(isolate)), runner_(std::move(runner)) {}
 
@@ -131,13 +131,13 @@ class AutoIsolateShutdown {
     return true;
   }
 
-  flutter::DartIsolate* get() {
+  DartIsolate* get() {
     FML_CHECK(isolate_);
     return isolate_.get();
   }
 
  private:
-  std::shared_ptr<flutter::DartIsolate> isolate_;
+  std::shared_ptr<DartIsolate> isolate_;
   fml::RefPtr<fml::TaskRunner> runner_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(AutoIsolateShutdown);

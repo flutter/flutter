@@ -33,12 +33,12 @@ UniqueUnzipper ZipAssetStore::CreateUnzipper() const {
   return UniqueUnzipper{::unzOpen2(file_path_.c_str(), nullptr)};
 }
 
-// |flutter::AssetResolver|
+// |AssetResolver|
 bool ZipAssetStore::IsValid() const {
   return stat_cache_.size() > 0;
 }
 
-// |flutter::AssetResolver|
+// |AssetResolver|
 std::unique_ptr<fml::Mapping> ZipAssetStore::GetAsMapping(
     const std::string& asset_name) const {
   TRACE_EVENT1("flutter", "ZipAssetStore::GetAsMapping", "name",

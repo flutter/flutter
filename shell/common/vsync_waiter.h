@@ -36,9 +36,9 @@ class VsyncWaiter : public std::enable_shared_from_this<VsyncWaiter> {
   friend class VsyncWaiterAndroid;
   friend class VsyncWaiterEmbedder;
 
-  const flutter::TaskRunners task_runners_;
+  const TaskRunners task_runners_;
 
-  VsyncWaiter(flutter::TaskRunners task_runners);
+  VsyncWaiter(TaskRunners task_runners);
 
   // Implementations are meant to override this method and arm their vsync
   // latches when in response to this invocation. On vsync, they are meant to

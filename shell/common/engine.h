@@ -29,7 +29,7 @@
 
 namespace flutter {
 
-class Engine final : public flutter::RuntimeDelegate {
+class Engine final : public RuntimeDelegate {
  public:
   // Used by Engine::Run
   enum class RunStatus {
@@ -42,11 +42,11 @@ class Engine final : public flutter::RuntimeDelegate {
   class Delegate {
    public:
     virtual void OnEngineUpdateSemantics(
-        flutter::SemanticsNodeUpdates update,
-        flutter::CustomAccessibilityActionUpdates actions) = 0;
+        SemanticsNodeUpdates update,
+        CustomAccessibilityActionUpdates actions) = 0;
 
     virtual void OnEngineHandlePlatformMessage(
-        fml::RefPtr<flutter::PlatformMessage> message) = 0;
+        fml::RefPtr<PlatformMessage> message) = 0;
 
     virtual void OnPreEngineRestart() = 0;
 
@@ -55,14 +55,14 @@ class Engine final : public flutter::RuntimeDelegate {
   };
 
   Engine(Delegate& delegate,
-         flutter::DartVM& vm,
-         fml::RefPtr<const flutter::DartSnapshot> isolate_snapshot,
-         fml::RefPtr<const flutter::DartSnapshot> shared_snapshot,
-         flutter::TaskRunners task_runners,
-         flutter::Settings settings,
+         DartVM& vm,
+         fml::RefPtr<const DartSnapshot> isolate_snapshot,
+         fml::RefPtr<const DartSnapshot> shared_snapshot,
+         TaskRunners task_runners,
+         Settings settings,
          std::unique_ptr<Animator> animator,
-         fml::WeakPtr<flutter::SnapshotDelegate> snapshot_delegate,
-         fml::WeakPtr<flutter::IOManager> io_manager);
+         fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
+         fml::WeakPtr<IOManager> io_manager);
 
   ~Engine() override;
 
@@ -80,7 +80,7 @@ class Engine final : public flutter::RuntimeDelegate {
   FML_WARN_UNUSED_RESULT
   bool Restart(RunConfiguration configuration);
 
-  bool UpdateAssetManager(std::shared_ptr<flutter::AssetManager> asset_manager);
+  bool UpdateAssetManager(std::shared_ptr<AssetManager> asset_manager);
 
   void BeginFrame(fml::TimePoint frame_time);
 
@@ -100,15 +100,15 @@ class Engine final : public flutter::RuntimeDelegate {
 
   void OnOutputSurfaceDestroyed();
 
-  void SetViewportMetrics(const flutter::ViewportMetrics& metrics);
+  void SetViewportMetrics(const ViewportMetrics& metrics);
 
-  void DispatchPlatformMessage(fml::RefPtr<flutter::PlatformMessage> message);
+  void DispatchPlatformMessage(fml::RefPtr<PlatformMessage> message);
 
-  void DispatchPointerDataPacket(const flutter::PointerDataPacket& packet,
+  void DispatchPointerDataPacket(const PointerDataPacket& packet,
                                  uint64_t trace_flow_id);
 
   void DispatchSemanticsAction(int id,
-                               flutter::SemanticsAction action,
+                               SemanticsAction action,
                                std::vector<uint8_t> args);
 
   void SetSemanticsEnabled(bool enabled);
@@ -117,38 +117,36 @@ class Engine final : public flutter::RuntimeDelegate {
 
   void ScheduleFrame(bool regenerate_layer_tree = true) override;
 
-  // |flutter::RuntimeDelegate|
-  flutter::FontCollection& GetFontCollection() override;
+  // |RuntimeDelegate|
+  FontCollection& GetFontCollection() override;
 
  private:
   Engine::Delegate& delegate_;
-  const flutter::Settings settings_;
+  const Settings settings_;
   std::unique_ptr<Animator> animator_;
-  std::unique_ptr<flutter::RuntimeController> runtime_controller_;
+  std::unique_ptr<RuntimeController> runtime_controller_;
   std::string initial_route_;
-  flutter::ViewportMetrics viewport_metrics_;
-  std::shared_ptr<flutter::AssetManager> asset_manager_;
+  ViewportMetrics viewport_metrics_;
+  std::shared_ptr<AssetManager> asset_manager_;
   bool activity_running_;
   bool have_surface_;
-  flutter::FontCollection font_collection_;
+  FontCollection font_collection_;
   fml::WeakPtrFactory<Engine> weak_factory_;
 
-  // |flutter::RuntimeDelegate|
+  // |RuntimeDelegate|
   std::string DefaultRouteName() override;
 
-  // |flutter::RuntimeDelegate|
+  // |RuntimeDelegate|
   void Render(std::unique_ptr<flow::LayerTree> layer_tree) override;
 
-  // |flutter::RuntimeDelegate|
-  void UpdateSemantics(
-      flutter::SemanticsNodeUpdates update,
-      flutter::CustomAccessibilityActionUpdates actions) override;
+  // |RuntimeDelegate|
+  void UpdateSemantics(SemanticsNodeUpdates update,
+                       CustomAccessibilityActionUpdates actions) override;
 
-  // |flutter::RuntimeDelegate|
-  void HandlePlatformMessage(
-      fml::RefPtr<flutter::PlatformMessage> message) override;
+  // |RuntimeDelegate|
+  void HandlePlatformMessage(fml::RefPtr<PlatformMessage> message) override;
 
-  // |flutter::RuntimeDelegate|
+  // |RuntimeDelegate|
   void UpdateIsolateDescription(const std::string isolate_name,
                                 int64_t isolate_port) override;
 
@@ -156,17 +154,15 @@ class Engine final : public flutter::RuntimeDelegate {
 
   void StartAnimatorIfPossible();
 
-  bool HandleLifecyclePlatformMessage(flutter::PlatformMessage* message);
+  bool HandleLifecyclePlatformMessage(PlatformMessage* message);
 
-  bool HandleNavigationPlatformMessage(
-      fml::RefPtr<flutter::PlatformMessage> message);
+  bool HandleNavigationPlatformMessage(fml::RefPtr<PlatformMessage> message);
 
-  bool HandleLocalizationPlatformMessage(flutter::PlatformMessage* message);
+  bool HandleLocalizationPlatformMessage(PlatformMessage* message);
 
-  void HandleSettingsPlatformMessage(flutter::PlatformMessage* message);
+  void HandleSettingsPlatformMessage(PlatformMessage* message);
 
-  void HandleAssetPlatformMessage(
-      fml::RefPtr<flutter::PlatformMessage> message);
+  void HandleAssetPlatformMessage(fml::RefPtr<PlatformMessage> message);
 
   bool GetAssetAsBuffer(const std::string& name, std::vector<uint8_t>* data);
 

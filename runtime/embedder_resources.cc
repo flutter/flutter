@@ -10,7 +10,7 @@
 
 namespace flutter {
 
-using flutter::runtime::ResourcesEntry;
+using runtime::ResourcesEntry;
 
 EmbedderResources::EmbedderResources(ResourcesEntry* resources_table)
     : resources_table_(resources_table) {}
