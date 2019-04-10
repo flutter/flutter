@@ -407,7 +407,7 @@ Your $application code is in $relativeAppMain.
 Your plugin code is in $relativePluginMain.
 
 Host platform code is in the "android" and "ios" directories under $relativePluginPath.
-To edit platform code in an IDE see https://flutter.io/developing-packages/#edit-plugin-package.
+To edit platform code in an IDE see https://flutter.dev/developing-packages/#edit-plugin-package.
 ''');
         }
       } else {

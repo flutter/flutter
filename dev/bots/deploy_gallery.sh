@@ -35,7 +35,7 @@ if [[ "$SHARD" = "deploy_gallery" ]]; then
       flutter build apk --release -t lib/main_publish.dart
     )
     echo "Android Flutter Gallery built"
-    if [[ -z "$CIRRUS_PULL_REQUEST" && "$CIRRUS_BRANCH" == "dev" && "$version" != *"pre"* ]]; then
+    if [[ -z "$CIRRUS_PR" && "$CIRRUS_BRANCH" == "dev" && "$version" != *"pre"* ]]; then
       echo "Deploying Flutter Gallery $version to Play Store..."
       set +x # Don't echo back the below.
       if [ -n "$ANDROID_GALLERY_UPLOAD_KEY" ]; then
@@ -56,7 +56,7 @@ if [[ "$SHARD" = "deploy_gallery" ]]; then
       flutter build ios --release --no-codesign -t lib/main_publish.dart
     )
     echo "iOS Flutter Gallery built"
-    if [[ -z "$CIRRUS_PULL_REQUEST" ]]; then
+    if [[ -z "$CIRRUS_PR" ]]; then
       if [[ "$CIRRUS_BRANCH" == "dev" && "$version" != *"pre"* ]]; then
         echo "Archiving with distribution profile and deploying to TestFlight..."
         (

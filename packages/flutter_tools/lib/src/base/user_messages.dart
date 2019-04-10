@@ -23,7 +23,7 @@ class UserMessages {
   String get flutterBinariesLinuxRepairCommands =>
       'On Debian/Ubuntu/Mint: sudo apt-get install lib32stdc++6\n'
       'On Fedora: dnf install libstdc++.i686\n'
-      'On Arch: pacman -S lib32-libstdc++5 (you need to enable multilib: https://wiki.archlinux.org/index.php/Official_repositories#multilib)';
+      'On Arch: pacman -S lib32-gcc-libs';
 
   // Messages used in NoIdeValidator
   String get noIdeStatusInfo => 'No supported IDEs installed';
@@ -33,7 +33,7 @@ class UserMessages {
   String intellijStatusInfo(String version) => 'version $version';
   String get intellijPluginInfo =>
       'For information about installing plugins, see\n'
-      'https://flutter.io/intellij-setup/#installing-the-plugins';
+      'https://flutter.dev/intellij-setup/#installing-the-plugins';
   String intellijMinimumVersion(String minVersion) =>
       'This install is older than the minimum recommended version of $minVersion.';
   String intellijLocation(String installPath) => 'IntelliJ at $installPath';
@@ -65,7 +65,7 @@ class UserMessages {
       'Unable to locate Android SDK.\n'
       'Install Android Studio from: https://developer.android.com/studio/index.html\n'
       'On first launch it will assist you in installing the Android SDK components.\n'
-      '(or visit https://flutter.io/setup/#android-setup for detailed instructions).\n'
+      '(or visit https://flutter.dev/setup/#android-setup for detailed instructions).\n'
       'If the Android SDK has been installed to a custom location, set $envKey to that location.\n'
       'You may also want to add it to your PATH environment variable.\n';
   String androidSdkLocation(String directory) => 'Android SDK at $directory';
@@ -73,7 +73,7 @@ class UserMessages {
       'Platform $platform, build-tools $tools';
   String get androidSdkInstallHelp =>
       'Try re-installing or updating your Android SDK,\n'
-      'visit https://flutter.io/setup/#android-setup for detailed instructions.';
+      'visit https://flutter.dev/setup/#android-setup for detailed instructions.';
   String get androidMissingNdk => 'Android NDK location not configured (optional; useful for native profiling support)';
   String androidNdkLocation(String directory) => 'Android NDK at $directory';
   // Also occurs in AndroidLicenseValidator
@@ -92,7 +92,7 @@ class UserMessages {
       'Android license status unknown.\n'
       'Try re-installing or updating your Android SDK Manager.\n'
       'See https://developer.android.com/studio/#downloads or visit '
-      'https://flutter.io/setup/#android-setup for detailed instructions.';
+      'https://flutter.dev/setup/#android-setup for detailed instructions.';
   String androidSdkManagerOutdated(String managerPath) =>
       'A newer version of the Android SDK is required. To update, run:\n'
       '$managerPath --update\n';
@@ -101,12 +101,12 @@ class UserMessages {
   String androidMissingSdkManager(String sdkManagerPath) =>
       'Android sdkmanager tool not found ($sdkManagerPath).\n'
       'Try re-installing or updating your Android SDK,\n'
-      'visit https://flutter.io/setup/#android-setup for detailed instructions.';
+      'visit https://flutter.dev/setup/#android-setup for detailed instructions.';
   String androidSdkBuildToolsOutdated(String managerPath, int sdkMinVersion, String buildToolsMinVersion) =>
       'Flutter requires Android SDK $sdkMinVersion and the Android BuildTools $buildToolsMinVersion\n'
       'To update using sdkmanager, run:\n'
       '  "$managerPath" "platforms;android-$sdkMinVersion" "build-tools;$buildToolsMinVersion"\n'
-      'or visit https://flutter.io/setup/#android-setup for detailed instructions.';
+      'or visit https://flutter.dev/setup/#android-setup for detailed instructions.';
 
   // Messages used in AndroidStudioValidator
   String androidStudioVersion(String version) => 'version $version';
@@ -124,7 +124,7 @@ class UserMessages {
       'but Android Studio not found at this location.';
   String get androidStudioInstallation =>
       'Android Studio not found; download from https://developer.android.com/studio/index.html\n'
-      '(or visit https://flutter.io/setup/#android-setup for detailed instructions).';
+      '(or visit https://flutter.dev/setup/#android-setup for detailed instructions).';
 
   // Messages used in IOSValidator
   String iOSXcodeLocation(String location) => 'Xcode at $location';

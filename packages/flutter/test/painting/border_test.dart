@@ -13,6 +13,16 @@ void main() {
     expect(() => Border(bottom: nonconst(null)), throwsAssertionError);
   });
 
+  test('Border.uniform constructor', () {
+    expect(() => Border.uniform(null), throwsAssertionError);
+    const BorderSide side = BorderSide();
+    const Border border = Border.uniform(side);
+    expect(border.left, same(side));
+    expect(border.top, same(side));
+    expect(border.right, same(side));
+    expect(border.bottom, same(side));
+  });
+
   test('Border.merge', () {
     const BorderSide magenta3 = BorderSide(color: Color(0xFFFF00FF), width: 3.0);
     const BorderSide magenta6 = BorderSide(color: Color(0xFFFF00FF), width: 6.0);

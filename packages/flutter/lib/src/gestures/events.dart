@@ -8,17 +8,31 @@ import 'package:flutter/foundation.dart';
 
 export 'dart:ui' show Offset, PointerDeviceKind;
 
+/// The bit of [PointerEvent.buttons] that corresponds to a unified behavior of
+/// "basic operation".
+///
+/// It is equivalent to:
+///
+///  * [kTouchContact]: The pointer contacts the touch screen.
+///  * [kStylusContact]: The stylus contacts the screen.
+///  * [kPrimaryMouseButton]: The primary mouse button.
+const int kPrimaryButton = 0x01;
+
 /// The bit of [PointerEvent.buttons] that corresponds to the primary mouse button.
 ///
 /// The primary mouse button is typically the left button on the top of the
 /// mouse but can be reconfigured to be a different physical button.
-const int kPrimaryMouseButton = 0x01;
+const int kPrimaryMouseButton = kPrimaryButton;
 
 /// The bit of [PointerEvent.buttons] that corresponds to the secondary mouse button.
 ///
 /// The secondary mouse button is typically the right button on the top of the
 /// mouse but can be reconfigured to be a different physical button.
 const int kSecondaryMouseButton = 0x02;
+
+/// The bit of [PointerEvent.buttons] that corresponds to when a stylus
+/// contacting the screen.
+const int kStylusContact = kPrimaryButton;
 
 /// The bit of [PointerEvent.buttons] that corresponds to the primary stylus button.
 ///
@@ -50,6 +64,10 @@ const int kBackMouseButton = 0x08;
 /// The forward mouse button is typically on the right side of the mouse but can
 /// be reconfigured to be a different physical button.
 const int kForwardMouseButton = 0x10;
+
+/// The bit of [PointerEvent.buttons] that corresponds to the pointer contacting
+/// a touch screen.
+const int kTouchContact = kPrimaryButton;
 
 /// The bit of [PointerEvent.buttons] that corresponds to the nth mouse button.
 ///

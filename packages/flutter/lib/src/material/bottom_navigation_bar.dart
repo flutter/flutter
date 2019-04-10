@@ -65,12 +65,15 @@ enum BottomNavigationBarType {
 /// {@tool snippet --template=stateful_widget_material}
 /// This example shows a [BottomNavigationBar] as it is used within a [Scaffold]
 /// widget. The [BottomNavigationBar] has three [BottomNavigationBarItem]
-/// widgets and the [currentIndex] is set to index 1. The selected item is
+/// widgets and the [currentIndex] is set to index 0. The selected item is
 /// amber. The `_onItemTapped` function changes the selected item's index
 /// and displays a corresponding message in the center of the [Scaffold].
 ///
+/// ![A scaffold with a bottom navigation bar containing three bottom navigation
+/// bar items. The first one is selected.](https://flutter.github.io/assets-for-api-docs/assets/material/bottom_navigation_bar.png)
+///
 /// ```dart
-/// int _selectedIndex = 1;
+/// int _selectedIndex = 0;
 /// static const TextStyle optionStyle = TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
 /// static const List<Widget> _widgetOptions = <Widget>[
 ///   Text(
