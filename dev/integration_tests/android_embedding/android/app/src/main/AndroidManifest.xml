@@ -3,9 +3,10 @@
     package="io.flutter.androidembedding">
 
     <application
-        android:name="io.flutter.app.FlutterApplication"
+        android:name=".App"
         android:icon="@mipmap/ic_launcher"
-        android:label="Android Embedding Test">
+        android:label="Android Embedding Test"
+        >
         <activity
             android:name=".as_view.SingleFlutterViewActivity"
             android:theme="@style/AppTheme.NoActionBar"
@@ -56,9 +57,14 @@
             android:launchMode="singleTop"
             android:theme="@style/LaunchTheme"
             android:windowSoftInputMode="adjustResize">
-            <meta-data
-                android:name="io.flutter.app.android.SplashScreenUntilFirstFrame"
-                android:value="true" />
+        </activity>
+        <activity
+            android:name=".fullscreen.FullscreenCustomFlutterActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
+            android:hardwareAccelerated="true"
+            android:launchMode="singleTop"
+            android:theme="@style/LaunchTheme"
+            android:windowSoftInputMode="adjustResize">
         </activity>
     </application>
 

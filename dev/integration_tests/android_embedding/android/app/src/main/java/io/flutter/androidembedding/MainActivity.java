@@ -7,6 +7,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 
 import io.flutter.androidembedding.as_view.SingleFlutterViewActivity;
+import io.flutter.androidembedding.fullscreen.FullscreenCustomFlutterActivity;
 import io.flutter.androidembedding.fullscreen.FullscreenFlutterActivity;
 import io.flutter.androidembedding.partial_flow.LoginActivity;
 import io.flutter.androidembedding.single_activity.NavDrawerActivity;
@@ -33,10 +34,17 @@ public class MainActivity extends AppCompatActivity {
       }
     });
 
+//    findViewById(R.id.button_fullscreen).setOnClickListener(new View.OnClickListener() {
+//      @Override
+//      public void onClick(View v) {
+//        startActivity(FullscreenFlutterActivity.newIntent(MainActivity.this));
+//      }
+//    });
+
     findViewById(R.id.button_fullscreen).setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
-        startActivity(FullscreenFlutterActivity.newIntent(MainActivity.this));
+        startActivity(FullscreenCustomFlutterActivity.createDefaultIntent(MainActivity.this));
       }
     });
 
