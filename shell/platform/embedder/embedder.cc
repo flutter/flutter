@@ -39,6 +39,9 @@ extern const intptr_t kPlatformStrongDillSize;
 #include "flutter/shell/platform/embedder/embedder_thread_host.h"
 #include "flutter/shell/platform/embedder/platform_view_embedder.h"
 
+const int32_t kFlutterSemanticsNodeIdBatchEnd = -1;
+const int32_t kFlutterSemanticsCustomActionIdBatchEnd = -1;
+
 static FlutterEngineResult LogEmbedderError(FlutterEngineResult code,
                                             const char* name,
                                             const char* function,
