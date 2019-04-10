@@ -58,6 +58,7 @@ class TextSpan extends DiagnosticableTree {
     this.text,
     this.children,
     this.recognizer,
+    this.semanticsLabel,
   });
 
   /// The style to apply to the [text] and the [children].
@@ -156,6 +157,19 @@ class TextSpan extends DiagnosticableTree {
   /// {@end-tool}
   final GestureRecognizer recognizer;
 
+  /// An alternative semantics label for this text.
+  ///
+  /// If present, the semantics of this span will contain this value instead
+  /// of the actual text.
+  ///
+  /// This is useful for replacing abbreviations or shorthands with the full
+  /// text value:
+  ///
+  /// ```dart
+  /// TextSpan(text: r'$$', semanticsLabel: 'Double dollars')
+  /// ```
+  final String semanticsLabel;
+
   /// Apply the [style], [text], and [children] of this object to the
   /// given [ParagraphBuilder], from which a [Paragraph] can be obtained.
   /// [Paragraph] objects can be drawn on [Canvas] objects.
@@ -220,12 +234,18 @@ class TextSpan extends DiagnosticableTree {
 
   /// Flattens the [TextSpan] tree into a single string.
   ///
-  /// Styles are not honored in this process.
-  String toPlainText() {
+  /// Styles are not honored in this process. If `includeSemanticsLabels` is
+  /// true, then the text returned will include the [semanticsLabel]s instead of
+  /// the text contents when they are present.
+  String toPlainText({bool includeSemanticsLabels = true}) {
     assert(debugAssertIsValid());
     final StringBuffer buffer = StringBuffer();
     visitTextSpan((TextSpan span) {
-      buffer.write(span.text);
+      if (span.semanticsLabel != null && includeSemanticsLabels) {
+        buffer.write(span.semanticsLabel);
+      } else {
+        buffer.write(span.text);
+      }
       return true;
     });
     return buffer.toString();
@@ -324,11 +344,12 @@ class TextSpan extends DiagnosticableTree {
     return typedOther.text == text
         && typedOther.style == style
         && typedOther.recognizer == recognizer
+        && typedOther.semanticsLabel == semanticsLabel
         && listEquals<TextSpan>(typedOther.children, children);
   }
 
   @override
-  int get hashCode => hashValues(style, text, recognizer, hashList(children));
+  int get hashCode => hashValues(style, text, recognizer, semanticsLabel, hashList(children));
 
   @override
   String toStringShort() => '$runtimeType';
@@ -347,6 +368,12 @@ class TextSpan extends DiagnosticableTree {
       description: recognizer?.runtimeType?.toString(),
       defaultValue: null,
     ));
+
+
+    if (semanticsLabel != null) {
+      properties.add(StringProperty('semanticsLabel', semanticsLabel));
+    }
+
 
     properties.add(StringProperty('text', text, showName: false, defaultValue: null));
     if (style == null && text == null && children == null)
