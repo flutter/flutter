@@ -14,9 +14,9 @@ void main() {
   });
 
   test('Border.uniform constructor', () {
-    expect(() => Border.fromSide(null), throwsAssertionError);
+    expect(() => Border.fromBorderSide(null), throwsAssertionError);
     const BorderSide side = BorderSide();
-    const Border border = Border.fromSide(side);
+    const Border border = Border.fromBorderSide(side);
     expect(border.left, same(side));
     expect(border.top, same(side));
     expect(border.right, same(side));
