@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io' show Platform;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -61,6 +63,10 @@ void main() {
     );
 
     expect(tester.takeException(), startsWith('A RenderFlex overflowed by '));
-    expect(find.byKey(key), matchesGoldenFile('physical_model_overflow.png'));
+    await expectLater(
+      find.byKey(key),
+      matchesGoldenFile('physical_model_overflow.png'),
+      skip: !Platform.isLinux,
+    );
   });
 }

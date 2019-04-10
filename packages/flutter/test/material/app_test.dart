@@ -381,6 +381,17 @@ void main() {
     expect(log, <String>['onGenerateRoute /', 'onUnknownRoute /']);
   });
 
+  testWidgets('MaterialApp with builder and no route information works.', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/18904
+    await tester.pumpWidget(
+      MaterialApp(
+        builder: (BuildContext context, Widget child) {
+          return const SizedBox();
+        },
+      ),
+    );
+  });
+
   testWidgets('Can get text scale from media query', (WidgetTester tester) async {
     double textScaleFactor;
     await tester.pumpWidget(MaterialApp(

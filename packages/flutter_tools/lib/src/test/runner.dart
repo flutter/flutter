@@ -36,6 +36,7 @@ Future<int> runTests(
   TestWatcher watcher,
   @required int concurrency,
   FlutterProject flutterProject,
+  String icudtlPath,
 }) async {
   // Compute the command-line arguments for package:test.
   final List<String> testArgs = <String>[];
@@ -83,6 +84,7 @@ Future<int> runTests(
     updateGoldens: updateGoldens,
     projectRootDirectory: fs.currentDirectory.uri,
     flutterProject: flutterProject,
+    icudtlPath: icudtlPath,
   );
 
   // Make the global packages path absolute.

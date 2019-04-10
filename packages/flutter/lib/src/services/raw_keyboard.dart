@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'keyboard_key.dart';
 import 'raw_keyboard_android.dart';
 import 'raw_keyboard_fuchsia.dart';
+import 'raw_keyboard_linux.dart';
 import 'raw_keyboard_macos.dart';
 import 'system_channels.dart';
 
@@ -270,6 +271,14 @@ abstract class RawKeyEvent {
             charactersIgnoringModifiers:
                 message['charactersIgnoringModifiers'] ?? '',
             keyCode: message['keyCode'] ?? 0,
+            modifiers: message['modifiers'] ?? 0);
+        break;
+      case 'linux':
+        data = RawKeyEventDataLinux(
+            keyHelper: KeyHelper(message['toolkit'] ?? ''),
+            codePoint: message['codePoint'] ?? 0,
+            keyCode: message['keyCode'] ?? 0,
+            scanCode: message['scanCode'] ?? 0,
             modifiers: message['modifiers'] ?? 0);
         break;
       default:

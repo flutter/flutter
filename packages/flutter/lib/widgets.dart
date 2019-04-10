@@ -8,7 +8,7 @@
 ///
 /// See also:
 ///
-///  * [flutter.io/widgets](https://flutter.io/widgets/)
+///  * [flutter.dev/widgets](https://flutter.dev/widgets/)
 ///    for a catalog of commonly-used Flutter widgets.
 library widgets;
 
@@ -30,6 +30,7 @@ export 'src/widgets/container.dart';
 export 'src/widgets/debug.dart';
 export 'src/widgets/dismissible.dart';
 export 'src/widgets/drag_target.dart';
+export 'src/widgets/draggable_scrollable_sheet.dart';
 export 'src/widgets/editable_text.dart';
 export 'src/widgets/fade_in_image.dart';
 export 'src/widgets/focus_manager.dart';

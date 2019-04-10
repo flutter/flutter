@@ -7,17 +7,16 @@ import 'package:flutter/foundation.dart';
 import 'animation.dart';
 import 'tween.dart';
 
-/// Enables creating an [Animation] whose value is defined by a
-/// sequence of [Tween]s.
+/// Enables creating an [Animation] whose value is defined by a sequence of
+/// [Tween]s.
 ///
-/// Each [TweenSequenceItem] has a weight that defines its percentage
-/// of the animation's duration. Each tween defines the animation's value
-/// during the interval indicated by its weight.
+/// Each [TweenSequenceItem] has a weight that defines its percentage of the
+/// animation's duration. Each tween defines the animation's value during the
+/// interval indicated by its weight.
 ///
-/// For example, to define an animation that uses an easing curve to
-/// interpolate between 5.0 and 10.0 during the first 40% of the
-/// animation, remain at 10.0 for the next 20%, and then return to
-/// 10.0 for the final 40%:
+/// For example, to define an animation that uses an easing curve to interpolate
+/// between 5.0 and 10.0 during the first 40% of the animation, remain at 10.0
+/// for the next 20%, and then return to 10.0 for the final 40%:
 ///
 /// ```dart
 /// final Animation<double> animation = TweenSequence(
@@ -42,12 +41,11 @@ import 'tween.dart';
 class TweenSequence<T> extends Animatable<T> {
   /// Construct a TweenSequence.
   ///
-  /// The [items] parameter must be a list of one or more
-  /// [TweenSequenceItem]s.
+  /// The [items] parameter must be a list of one or more [TweenSequenceItem]s.
   ///
-  /// There's a small cost associated with building a `TweenSequence` so
-  /// it's best to reuse one, rather than rebuilding it on every frame,
-  /// when that's possible.
+  /// There's a small cost associated with building a `TweenSequence` so it's
+  /// best to reuse one, rather than rebuilding it on every frame, when that's
+  /// possible.
   TweenSequence(List<TweenSequenceItem<T>> items)
       : assert(items != null),
         assert(items.isNotEmpty) {
@@ -124,8 +122,8 @@ class TweenSequenceItem<T> {
   /// An arbitrary value that indicates the relative percentage of a
   /// [TweenSequence] animation's duration when [tween] will be used.
   ///
-  /// The percentage for an individual item is the item's weight divided
-  /// by the sum of all of the items' weights.
+  /// The percentage for an individual item is the item's weight divided by the
+  /// sum of all of the items' weights.
   final double weight;
 }
 

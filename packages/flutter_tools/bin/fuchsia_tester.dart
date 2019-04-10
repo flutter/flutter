@@ -99,8 +99,7 @@ Future<void> run(List<String> args) async {
         fs.link(artifacts.getArtifactPath(Artifact.flutterTester));
     testerDestLink.parent.createSync(recursive: true);
     testerDestLink.createSync(fs.path.absolute(shellPath));
-    final Link icudtlLink = testerDestLink.parent.childLink('icudtl.dat');
-    icudtlLink.createSync(fs.path.absolute(argResults[_kOptionIcudtl]));
+
     final Directory sdkRootDest =
         fs.directory(artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath));
     sdkRootDest.createSync(recursive: true);
@@ -141,6 +140,7 @@ Future<void> run(List<String> args) async {
       enableObservatory: collector != null,
       precompiledDillFiles: tests,
       concurrency: math.max(1, platform.numberOfProcessors - 2),
+      icudtlPath: fs.path.absolute(argResults[_kOptionIcudtl]),
     );
 
     if (collector != null) {

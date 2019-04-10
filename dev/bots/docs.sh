@@ -104,7 +104,7 @@ if [[ -d "$FLUTTER_PUB_CACHE" ]]; then
 fi
 
 # Install and activate dartdoc.
-"$PUB" global activate dartdoc 0.28.2
+"$PUB" global activate dartdoc 0.28.3+1
 
 # This script generates a unified doc set, and creates
 # a custom index.html, placing everything into dev/docs/doc.
