@@ -4806,23 +4806,15 @@ class RichText extends MultiChildRenderObjectWidget {
   // child widgets that are created in WidgetSpans.
   static List<Widget> _extractChildren(LayoutSpan span) {
     List<Widget> result = [];
-    void visitSpan(LayoutSpan span) {
-      if (span is WidgetSpan) {
-        WidgetSpan widgetSpan = span;
-        if (widgetSpan.widget != null) {
-          result.add(widgetSpan.widget);
-        }
+    span.visitLayoutSpan((LayoutSpan span) {
+      WidgetSpan widgetSpan = LayoutSpan.asType<WidgetSpan>(span);
+      if (widgetSpan == null)
+        return true;
+      if (widgetSpan.widget != null) {
+        result.add(widgetSpan.widget);
       }
-      else {
-        TextSpan textSpan = span;
-        if (textSpan.children != null) {
-          for (LayoutSpan child in textSpan.children) {
-            visitSpan(child);
-          }
-        }
-      }
-    }
-    visitSpan(span);
+      return true;
+    });
     return result;
   }
 

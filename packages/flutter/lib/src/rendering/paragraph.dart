@@ -125,21 +125,13 @@ class RenderParagraph extends RenderBox
   // child WidgetsSpans. Populates _placeholderSpans.
   void _extractPlaceholderSpans(LayoutSpan span) {
     _placeholderSpans = [];
-    void visitSpan(LayoutSpan span) {
+    span.visitLayoutSpan((LayoutSpan span) {
       if (span is PlaceholderSpan) {
         PlaceholderSpan placeholderSpan = span;
         _placeholderSpans.add(placeholderSpan);
       }
-      else {
-        TextSpan textSpan = span;
-        if (textSpan.children != null) {
-          for (LayoutSpan child in textSpan.children) {
-            visitSpan(child);
-          }
-        }
-      }
-    }
-    visitSpan(span);
+      return true;
+    });
   }
 
   /// How the text should be aligned horizontally.
@@ -694,9 +686,9 @@ class RenderParagraph extends RenderBox
     _recognizers.clear();
     int offset = 0;
     text.visitLayoutSpan((LayoutSpan span) {
-      if (span is! TextSpan)
-        return false;
-      TextSpan textSpan = span;
+      TextSpan textSpan = LayoutSpan.asType<TextSpan>(span);
+      if (textSpan == null)
+        return true;
       if (textSpan.recognizer != null && (textSpan.recognizer is TapGestureRecognizer || span.recognizer is LongPressGestureRecognizer)) {
         _recognizerOffsets.add(offset);
         _recognizerOffsets.add(offset + textSpan.text.length);

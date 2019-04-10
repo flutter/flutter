@@ -2668,7 +2668,7 @@ class _InspectorOverlayLayer extends Layer {
   ) {
     canvas.save();
     final double maxWidth = size.width - 2 * (_kScreenEdgeMargin + _kTooltipPadding);
-    if (_textPainter == null || _textPainter.text.text != message || _textPainterMaxWidth != maxWidth) {
+    if (_textPainter == null || LayoutSpan.asType<TextSpan>(_textPainter.text).text != message || _textPainterMaxWidth != maxWidth) {
       _textPainterMaxWidth = maxWidth;
       _textPainter = TextPainter()
         ..maxLines = _kMaxTooltipLines

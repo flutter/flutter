@@ -36,14 +36,16 @@ abstract class LayoutSpan extends DiagnosticableTree {
     this.recognizer,
   });
 
-  /// Provided for API compatibility, LayoutSpan does not represent text.
-  /// [TextSpan] should be used instead.
-  String get text => null;
-
-  /// The style to apply to the [text] and the [children].
+  /// The style to apply to this span and any children.
   final TextStyle style;
 
-  /// A gesture recognizer that will receive events that hit this text span.
+  static T asType<T>(LayoutSpan span) {
+    if (span is! T)
+      return null;
+    return span as T;
+  }
+
+  /// A gesture recognizer that will receive events that hit this span.
   ///
   /// [LayoutSpan] itself does not implement hit testing or event dispatch. The
   /// object that manages the [LayoutSpan] painting is also responsible for
@@ -130,6 +132,9 @@ abstract class LayoutSpan extends DiagnosticableTree {
 
   /// Walks this text span and any descendants in pre-order and calls [visitor]
   /// for each span that has content.
+  ///
+  /// When [visitor] returns true, the walk will continue. When [visitor] returns
+  /// false, then the walk will end.
   bool visitLayoutSpan(bool visitor(LayoutSpan span));
 
   /// Returns the text span that contains the given position in the text.

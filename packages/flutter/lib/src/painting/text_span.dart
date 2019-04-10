@@ -62,20 +62,17 @@ class TextSpan extends LayoutSpan {
   /// For the object to be useful, at least one of [text] or
   /// [children] should be set.
   const TextSpan({
-    TextStyle style,
-    String text,
+    this.text,
     this.children,
+    TextStyle style,
     GestureRecognizer recognizer,
-  }) : _text = text,
-       super(style: style, recognizer: recognizer);
+  }) : super(style: style, recognizer: recognizer);
 
-  // /// The text contained in the span.
-  // ///
-  // /// If both [text] and [children] are non-null, the text will precede the
-  // /// children.
-  @override
-  String get text => _text;
-  final String _text;
+  /// The text contained in the span.
+  ///
+  /// If both [text] and [children] are non-null, the text will precede the
+  /// children.
+  final String text;
 
   /// Additional spans to include as children.
   ///
@@ -190,6 +187,7 @@ class TextSpan extends LayoutSpan {
 
   /// Walks this text span and its descendants in pre-order and calls [visitor]
   /// for each span that has text.
+  @override
   bool visitLayoutSpan(bool visitor(LayoutSpan span)) {
     if (text != null) {
       if (!visitor(this))
@@ -213,9 +211,10 @@ class TextSpan extends LayoutSpan {
     TextSpan result;
     visitLayoutSpan((LayoutSpan span) {
       assert(result == null);
-      if (span is! TextSpan)
+      TextSpan textSpan = LayoutSpan.asType<TextSpan>(span);
+      if (textSpan == null)
         return true;
-      final int endOffset = offset + (span as TextSpan).text.length;
+      final int endOffset = offset + textSpan.text.length;
       if (targetOffset == offset && affinity == TextAffinity.downstream ||
           targetOffset > offset && targetOffset < endOffset ||
           targetOffset == endOffset && affinity == TextAffinity.upstream) {
@@ -235,9 +234,10 @@ class TextSpan extends LayoutSpan {
     assert(debugAssertIsValid());
     final StringBuffer buffer = StringBuffer();
     visitLayoutSpan((LayoutSpan span) {
-      if (span is! TextSpan)
+      TextSpan textSpan = LayoutSpan.asType<TextSpan>(span);
+      if (textSpan == null)
         return true;
-      buffer.write((span as TextSpan).text);
+      buffer.write(textSpan.text);
       return true;
     });
     return buffer.toString();
@@ -252,9 +252,9 @@ class TextSpan extends LayoutSpan {
     int offset = 0;
     int result;
     visitLayoutSpan((LayoutSpan span) {
-      if (span is! TextSpan)
+      TextSpan textSpan = LayoutSpan.asType<TextSpan>(span);
+      if (textSpan == null)
         return true;
-      TextSpan textSpan = span;
       if (index - offset < textSpan.text.length) {
         result = textSpan.text.codeUnitAt(index - offset);
         return false;
@@ -276,9 +276,9 @@ class TextSpan extends LayoutSpan {
   bool debugAssertIsValid() {
     assert(() {
       if (!visitLayoutSpan((LayoutSpan span) {
-        if (span is! TextSpan)
+        TextSpan textSpan = LayoutSpan.asType<TextSpan>(span);
+        if (textSpan == null)
           return true;
-        TextSpan textSpan = span;
         if (textSpan.children != null) {
           for (LayoutSpan child in textSpan.children) {
             if (child == null)

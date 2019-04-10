@@ -274,7 +274,7 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
     for (_OverflowRegionData region in overflowRegions) {
       context.canvas.drawRect(region.rect.shift(offset), _indicatorPaint);
 
-      if (_indicatorLabel[region.side.index].text?.text != region.label) {
+      if (LayoutSpan.asType<TextSpan>(_indicatorLabel[region.side.index].text)?.text != region.label) {
         _indicatorLabel[region.side.index].text = TextSpan(
           text: region.label,
           style: _indicatorTextStyle,
