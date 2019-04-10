@@ -19,6 +19,11 @@ class DevicesCommand extends FlutterCommand {
   final String description = 'List all connected devices.';
 
   @override
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
+    DevelopmentArtifact.universal,
+  };
+
+  @override
   Future<FlutterCommandResult> runCommand() async {
     if (!doctor.canListAnything) {
       throwToolExit(

@@ -22,6 +22,13 @@ class StopCommand extends FlutterCommand {
   @override
   final String description = 'Stop your Flutter app on an attached device.';
 
+  @override
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{
+    DevelopmentArtifact.android,
+    DevelopmentArtifact.iOS,
+    DevelopmentArtifact.universal,
+  };
+
   Device device;
 
   @override

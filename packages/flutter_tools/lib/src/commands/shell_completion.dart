@@ -37,6 +37,9 @@ class ShellCompletionCommand extends FlutterCommand {
   @override
   bool get shouldUpdateCache => false;
 
+  @override
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{};
+
   /// Return null to disable analytics recording of the `bash-completion` command.
   @override
   Future<String> get usagePath async => null;

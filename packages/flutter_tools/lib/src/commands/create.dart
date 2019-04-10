@@ -145,6 +145,11 @@ class CreateCommand extends FlutterCommand {
     'If run on a project that already exists, this will repair the project, recreating any files that are missing.';
 
   @override
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
+    DevelopmentArtifact.universal,
+  };
+
+  @override
   String get invocation => '${runner.executableName} $name <output directory>';
 
   // If it has a .metadata file with the project_type in it, use that.

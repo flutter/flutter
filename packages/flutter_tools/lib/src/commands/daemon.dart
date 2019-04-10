@@ -46,6 +46,11 @@ class DaemonCommand extends FlutterCommand {
   final bool hidden;
 
   @override
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
+    DevelopmentArtifact.universal,
+  };
+
+  @override
   Future<FlutterCommandResult> runCommand() async {
     printStatus('Starting device daemon...');
 

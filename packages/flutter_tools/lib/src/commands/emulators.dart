@@ -33,6 +33,13 @@ class EmulatorsCommand extends FlutterCommand {
   final List<String> aliases = <String>['emulator'];
 
   @override
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
+    DevelopmentArtifact.universal,
+    DevelopmentArtifact.android,
+    DevelopmentArtifact.iOS,
+  };
+
+  @override
   Future<FlutterCommandResult> runCommand() async {
     if (doctor.workflows.every((Workflow w) => !w.canListEmulators)) {
       throwToolExit(

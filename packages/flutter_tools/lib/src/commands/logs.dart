@@ -11,7 +11,7 @@ import '../device.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
 
-class LogsCommand extends FlutterCommand {
+class LogsCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
   LogsCommand() {
     argParser.addFlag('clear',
       negatable: false,
@@ -25,9 +25,6 @@ class LogsCommand extends FlutterCommand {
 
   @override
   final String description = 'Show log output for running Flutter apps.';
-
-  @override
-  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{};
 
   Device device;
 

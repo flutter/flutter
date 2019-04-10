@@ -42,6 +42,13 @@ class MakeHostAppEditableCommand extends FlutterCommand {
   }
 
   @override
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
+    DevelopmentArtifact.universal,
+    DevelopmentArtifact.iOS,
+    DevelopmentArtifact.android,
+  };
+
+  @override
   Future<FlutterCommandResult> runCommand() async {
     await _project.ensureReadyForPlatformSpecificTooling();
 

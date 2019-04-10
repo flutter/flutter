@@ -30,6 +30,13 @@ class DoctorCommand extends FlutterCommand {
   @override
   final String description = 'Show information about the installed tooling.';
 
+
+  @override
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
+    DevelopmentArtifact.universal,
+    DevelopmentArtifact.android, // TODO(jonahwilliams): make the check that requires this lazy.
+  };
+
   @override
   Future<FlutterCommandResult> runCommand() async {
     if (argResults.wasParsed('check-for-remote-artifacts')) {

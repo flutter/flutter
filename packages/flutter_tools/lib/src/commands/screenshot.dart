@@ -61,6 +61,13 @@ class ScreenshotCommand extends FlutterCommand {
   @override
   final List<String> aliases = <String>['pic'];
 
+  @override
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
+    DevelopmentArtifact.universal,
+    DevelopmentArtifact.android,
+    DevelopmentArtifact.iOS,
+  };
+
   Device device;
 
   @override

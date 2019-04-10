@@ -24,6 +24,11 @@ class VersionCommand extends FlutterCommand {
   }
 
   @override
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{
+    DevelopmentArtifact.universal,
+  };
+
+  @override
   final String name = 'version';
 
   @override
