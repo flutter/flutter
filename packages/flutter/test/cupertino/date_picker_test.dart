@@ -264,6 +264,30 @@ void main() {
       expect(picker.initialDateTime, isNotNull);
     });
 
+    testWidgets('initial date honors minuteInterval', (WidgetTester tester) async {
+        DateTime newDateTime;
+        await tester.pumpWidget(
+          CupertinoApp(
+            home: SizedBox(
+              width: 400,
+              height: 400,
+              child: CupertinoDatePicker(
+                onDateTimeChanged: (DateTime d) => newDateTime = d,
+                initialDateTime: DateTime(2018, 10, 10, 10, 3),
+                minuteInterval: 3,
+              )
+            )
+          )
+        );
+
+        // 03 -> 06
+        await tester.drag(find.text('03'), _kRowOffset);
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 500));
+
+        expect(newDateTime.minute, 6);
+    });
+
     testWidgets('changing initialDateTime after first build does not do anything', (WidgetTester tester) async {
       DateTime selectedDateTime;
       await tester.pumpWidget(
