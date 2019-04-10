@@ -86,6 +86,10 @@ struct Settings {
   uint32_t observatory_port = 0;
   bool ipv6 = false;
 
+  // Determines whether an authentication code is required to communicate with
+  // the VM service.
+  bool disable_service_auth_codes = true;
+
   // Font settings
   bool use_test_fonts = false;
 
