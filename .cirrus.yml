@@ -62,7 +62,7 @@ task:
       format_script: cd $ENGINE_PATH/src/flutter && ./ci/format.sh
       build_script: cd $ENGINE_PATH/src/flutter && ./ci/build.sh
 
-build_windows_task:
+task:
   gce_instance:
     image_project: flutter-cirrus
     image_name: flutter-engine-windows-server-2016-core
@@ -86,8 +86,16 @@ build_windows_task:
     robocopy %CIRRUS_WORKING_DIR% %ENGINE_PATH%/src/flutter /MIR || (cmd /s /c exit /b 0)
     cd %ENGINE_PATH%/src
     gclient sync
-  # Currently there's a problem with `flutter/tools/gn --unoptimized` so we omit --unoptimized for now
-  compile_host_script: |
-    cd %ENGINE_PATH%/src
-    python flutter/tools/gn
-    ninja -C out/host_debug
+
+  matrix:
+    - name: build_windows_debug
+      compile_host_script: |
+        cd %ENGINE_PATH%/src
+        python flutter/tools/gn --runtime-mode debug --unoptimized
+        ninja -C out/host_debug_unopt
+
+    - name: build_windows_debug_unopt
+      compile_host_script: |
+        cd %ENGINE_PATH%/src
+        python flutter/tools/gn --runtime-mode debug
+        ninja -C out/host_debug
