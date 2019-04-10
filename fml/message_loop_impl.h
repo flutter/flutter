@@ -16,6 +16,7 @@
 #include "flutter/fml/macros.h"
 #include "flutter/fml/memory/ref_counted.h"
 #include "flutter/fml/message_loop.h"
+#include "flutter/fml/synchronization/thread_annotations.h"
 #include "flutter/fml/time/time_point.h"
 
 namespace fml {
@@ -42,9 +43,14 @@ class MessageLoopImpl : public fml::RefCountedThreadSafe<MessageLoopImpl> {
 
   void DoTerminate();
 
+ protected:
   // Exposed for the embedder shell which allows clients to poll for events
   // instead of dedicating a thread to the message loop.
+  friend class MessageLoop;
+
   void RunExpiredTasksNow();
+
+  void RunSingleExpiredTaskNow();
 
  protected:
   MessageLoopImpl();
@@ -76,13 +82,17 @@ class MessageLoopImpl : public fml::RefCountedThreadSafe<MessageLoopImpl> {
 
   std::map<intptr_t, fml::closure> task_observers_;
   std::mutex delayed_tasks_mutex_;
-  DelayedTaskQueue delayed_tasks_;
-  size_t order_;
+  DelayedTaskQueue delayed_tasks_ FML_GUARDED_BY(delayed_tasks_mutex_);
+  size_t order_ FML_GUARDED_BY(delayed_tasks_mutex_);
   std::atomic_bool terminated_;
 
   void RegisterTask(fml::closure task, fml::TimePoint target_time);
 
-  void RunExpiredTasks();
+  enum class FlushType {
+    kSingle,
+    kAll,
+  };
+  void FlushTasks(FlushType type);
 
   FML_DISALLOW_COPY_AND_ASSIGN(MessageLoopImpl);
 };

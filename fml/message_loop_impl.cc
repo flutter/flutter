@@ -48,10 +48,6 @@ void MessageLoopImpl::PostTask(fml::closure task, fml::TimePoint target_time) {
   RegisterTask(task, target_time);
 }
 
-void MessageLoopImpl::RunExpiredTasksNow() {
-  RunExpiredTasks();
-}
-
 void MessageLoopImpl::AddTaskObserver(intptr_t key, fml::closure callback) {
   FML_DCHECK(callback != nullptr);
   FML_DCHECK(MessageLoop::GetCurrent().GetLoopImpl().get() == this)
@@ -112,8 +108,8 @@ void MessageLoopImpl::RegisterTask(fml::closure task,
   WakeUp(delayed_tasks_.top().target_time);
 }
 
-void MessageLoopImpl::RunExpiredTasks() {
-  TRACE_EVENT0("fml", "MessageLoop::RunExpiredTasks");
+void MessageLoopImpl::FlushTasks(FlushType type) {
+  TRACE_EVENT0("fml", "MessageLoop::FlushTasks");
   std::vector<fml::closure> invocations;
 
   {
@@ -131,6 +127,9 @@ void MessageLoopImpl::RunExpiredTasks() {
       }
       invocations.emplace_back(std::move(top.task));
       delayed_tasks_.pop();
+      if (type == FlushType::kSingle) {
+        break;
+      }
     }
 
     WakeUp(delayed_tasks_.empty() ? fml::TimePoint::Max()
@@ -143,6 +142,14 @@ void MessageLoopImpl::RunExpiredTasks() {
       observer.second();
     }
   }
+}
+
+void MessageLoopImpl::RunExpiredTasksNow() {
+  FlushTasks(FlushType::kAll);
+}
+
+void MessageLoopImpl::RunSingleExpiredTaskNow() {
+  FlushTasks(FlushType::kSingle);
 }
 
 MessageLoopImpl::DelayedTask::DelayedTask(size_t p_order,
