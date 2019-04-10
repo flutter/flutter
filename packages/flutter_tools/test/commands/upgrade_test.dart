@@ -29,6 +29,7 @@ void main() {
       fakeCommandRunner = FakeUpgradeCommandRunner();
       realCommandRunner = UpgradeCommandRunner();
       processManager = MockProcessManager();
+      fakeCommandRunner.willHaveUncomittedChanges = false;
     });
 
     test('throws on unknown tag, official branch,  noforce', () async {
@@ -44,6 +45,26 @@ void main() {
       final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
         true,
         const GitTagVersion.unknown(),
+        flutterVersion,
+      );
+      expect(await result, null);
+    });
+
+    test('throws tool exit with uncommited changes', () async {
+      fakeCommandRunner.willHaveUncomittedChanges = true;
+      final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
+        false,
+        gitTagVersion,
+        flutterVersion,
+      );
+      expect(result, throwsA(isA<ToolExit>()));
+    });
+
+    test('does not throw tool exit with uncommited changes and force', () async {
+      fakeCommandRunner.willHaveUncomittedChanges = true;
+      final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
+        true,
+        gitTagVersion,
         flutterVersion,
       );
       expect(await result, null);
@@ -127,8 +148,13 @@ void main() {
 }
 
 class FakeUpgradeCommandRunner extends UpgradeCommandRunner {
+  bool willHaveUncomittedChanges = false;
+
   @override
   Future<void> verifyUpstreamConfigured() async {}
+
+  @override
+  Future<bool> hasUncomittedChanges() async => willHaveUncomittedChanges;
 
   @override
   Future<void> resetChanges(GitTagVersion gitTagVersion) async {}
