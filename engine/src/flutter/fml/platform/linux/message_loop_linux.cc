@@ -43,6 +43,7 @@ bool MessageLoopLinux::AddOrRemoveTimerSource(bool add) {
   return ctl_result == 0;
 }
 
+// |fml::MessageLoopImpl|
 void MessageLoopLinux::Run() {
   running_ = true;
 
@@ -71,11 +72,13 @@ void MessageLoopLinux::Run() {
   }
 }
 
+// |fml::MessageLoopImpl|
 void MessageLoopLinux::Terminate() {
   running_ = false;
   WakeUp(fml::TimePoint::Now());
 }
 
+// |fml::MessageLoopImpl|
 void MessageLoopLinux::WakeUp(fml::TimePoint time_point) {
   bool result = TimerRearm(timer_fd_.get(), time_point);
   FML_DCHECK(result);

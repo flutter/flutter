@@ -12,6 +12,8 @@ source_set("fml") {
     "command_line.cc",
     "command_line.h",
     "compiler_specific.h",
+    "concurrent_message_loop.cc",
+    "concurrent_message_loop.h",
     "eintr_wrapper.h",
     "file.cc",
     "file.h",

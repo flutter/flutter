@@ -6,6 +6,7 @@
 
 #include <utility>
 
+#include "flutter/fml/concurrent_message_loop.h"
 #include "flutter/fml/memory/ref_counted.h"
 #include "flutter/fml/memory/ref_ptr.h"
 #include "flutter/fml/message_loop_impl.h"
@@ -40,6 +41,13 @@ bool MessageLoop::IsInitializedForCurrentThread() {
 
 MessageLoop::MessageLoop()
     : loop_(MessageLoopImpl::Create()),
+      task_runner_(fml::MakeRefCounted<fml::TaskRunner>(loop_)) {
+  FML_CHECK(loop_);
+  FML_CHECK(task_runner_);
+}
+
+MessageLoop::MessageLoop(Type)
+    : loop_(fml::MakeRefCounted<ConcurrentMessageLoop>()),
       task_runner_(fml::MakeRefCounted<fml::TaskRunner>(loop_)) {
   FML_CHECK(loop_);
   FML_CHECK(task_runner_);

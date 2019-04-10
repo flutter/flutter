@@ -4,9 +4,11 @@
 
 #define FML_USED_ON_EMBEDDER
 
+#include <iostream>
 #include <thread>
 
 #include "flutter/fml/message_loop.h"
+#include "flutter/fml/synchronization/count_down_latch.h"
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/fml/task_runner.h"
 #include "gtest/gtest.h"
@@ -277,4 +279,19 @@ TEST(MessageLoop, TaskObserverFire) {
   thread.join();
   ASSERT_TRUE(started);
   ASSERT_TRUE(terminated);
+}
+
+TEST(MessageLoop, CanCreateConcurrentMessageLoop) {
+  fml::MessageLoop loop(fml::MessageLoop::Type::kConcurrent);
+  auto task_runner = loop.GetTaskRunner();
+  const size_t kCount = 10;
+  fml::CountDownLatch latch(kCount);
+  for (size_t i = 0; i < kCount; ++i) {
+    task_runner->PostTask([&latch]() {
+      std::this_thread::sleep_for(std::chrono::milliseconds(5));
+      std::cout << "Ran on thread: " << std::this_thread::get_id() << std::endl;
+      latch.CountDown();
+    });
+  }
+  latch.Wait();
 }

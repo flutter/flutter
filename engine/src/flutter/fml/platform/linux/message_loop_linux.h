@@ -23,10 +23,13 @@ class MessageLoopLinux : public MessageLoopImpl {
 
   ~MessageLoopLinux() override;
 
+  // |fml::MessageLoopImpl|
   void Run() override;
 
+  // |fml::MessageLoopImpl|
   void Terminate() override;
 
+  // |fml::MessageLoopImpl|
   void WakeUp(fml::TimePoint time_point) override;
 
   void OnEventFired();
