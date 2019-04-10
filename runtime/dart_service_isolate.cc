@@ -134,6 +134,7 @@ bool DartServiceIsolate::Startup(std::string server_ip,
                                  intptr_t server_port,
                                  Dart_LibraryTagHandler embedder_tag_handler,
                                  bool disable_origin_check,
+                                 bool disable_service_auth_codes,
                                  char** error) {
   Dart_Isolate isolate = Dart_CurrentIsolate();
   FML_CHECK(isolate);
@@ -195,6 +196,10 @@ bool DartServiceIsolate::Startup(std::string server_ip,
   result =
       Dart_SetField(library, Dart_NewStringFromCString("_originCheckDisabled"),
                     Dart_NewBoolean(disable_origin_check));
+  SHUTDOWN_ON_ERROR(result);
+  result =
+      Dart_SetField(library, Dart_NewStringFromCString("_authCodesDisabled"),
+                    Dart_NewBoolean(disable_service_auth_codes));
   SHUTDOWN_ON_ERROR(result);
   return true;
 }

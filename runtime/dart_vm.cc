@@ -84,6 +84,10 @@ static const char* kDartStartPausedArgs[]{
     "--pause_isolates_on_start",
 };
 
+static const char* kDartDisableServiceAuthCodesArgs[]{
+    "--disable-service-auth-codes",
+};
+
 static const char* kDartTraceStartupArgs[]{
     "--timeline_streams=Compiler,Dart,Debugger,Embedder,GC,Isolate,VM",
 };
@@ -323,6 +327,11 @@ DartVM::DartVM(std::shared_ptr<const DartVMData> vm_data,
 
   if (settings_.start_paused) {
     PushBackAll(&args, kDartStartPausedArgs, arraysize(kDartStartPausedArgs));
+  }
+
+  if (settings_.disable_service_auth_codes) {
+    PushBackAll(&args, kDartDisableServiceAuthCodesArgs,
+                arraysize(kDartDisableServiceAuthCodesArgs));
   }
 
   if (settings_.endless_trace_buffer || settings_.trace_startup) {

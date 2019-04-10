@@ -166,6 +166,13 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line) {
     }
   }
 
+  // Enable need for authentication codes for VM service communication, if
+  // specified.
+  // TODO(bkonyi): when authentication codes are enabled by default, change
+  // to 'DisableServiceAuthCodes' and un-negate.
+  settings.disable_service_auth_codes =
+      !command_line.HasOption(FlagForSwitch(Switch::EnableServiceAuthCodes));
+
   // Checked mode overrides.
   settings.disable_dart_asserts =
       command_line.HasOption(FlagForSwitch(Switch::DisableDartAsserts));
