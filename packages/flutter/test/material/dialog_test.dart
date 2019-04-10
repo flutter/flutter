@@ -633,17 +633,16 @@ void main() {
       );
     }
 
-    // First time build.
     await tester.pumpWidget(buildFrame(UniqueKey()));
 
     // Open the dialog.
     await tester.tap(find.byType(RaisedButton));
     await tester.pumpAndSettle();
 
-    // Second time build (deactivate old context).
+    // Force the Builder to be recreated (new key) which causes outerContext to
+    // be deactivated. If showDialog()'s implementation were to refer to
+    // outerContext again, it would crash.
     await tester.pumpWidget(buildFrame(UniqueKey()));
-
-    // Before the fix, app crashes when we try to open the dialog again.
-    await tester.tap(find.byType(RaisedButton));
+    await tester.pump();
   });
 }
