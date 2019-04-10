@@ -198,6 +198,11 @@ void main() {
       expect(rowBox.size.height, greaterThan(textBox1.size.height));
       expect(rowBox.size.height, greaterThan(textBox2.size.height));
       expect(rowBox.size.height, closeTo(aboveBaseline + belowBaseline, .000001));
+      expect(tester.getTopLeft(find.byKey(key1)).dy, 0);
+      expect(
+        tester.getTopLeft(find.byKey(key2)).dy,
+        closeTo(aboveBaseline1 - aboveBaseline2, .000001),
+      );
     });
   });
 
