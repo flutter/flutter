@@ -59,6 +59,7 @@ bool debugRepaintTextRainbowEnabled = false;
 /// For example, a rectangular elevation at 3.0 that is painted before an
 /// overlapping rectangular elevation at 2.0 would render this way on Android
 /// and iOS (with fake shadows):
+/// ```
 /// ┌───────────────────┐
 /// │                   │
 /// │      3.0          │
@@ -68,8 +69,10 @@ bool debugRepaintTextRainbowEnabled = false;
 ///              │        2.0        │
 ///              │                   │
 ///              └───────────────────┘
+/// ```
 ///
 /// But this way on Fuchsia (with real shadows):
+/// ```
 /// ┌───────────────────┐
 /// │                   │
 /// │      3.0          │
@@ -79,6 +82,7 @@ bool debugRepaintTextRainbowEnabled = false;
 ///              │         2.0       │
 ///              │                   │
 ///              └───────────────────┘
+/// ```
 ///
 /// This check helps developers that want a consistent look and feel detect
 /// where this inconsistency would occur.
