@@ -307,55 +307,33 @@ abstract class LayoutSpan extends DiagnosticableTree {
   //   return result;
   // }
 
-  // @override
-  // bool operator ==(dynamic other) {
-  //   if (identical(this, other))
-  //     return true;
-  //   if (other.runtimeType != runtimeType)
-  //     return false;
-  //   final LayoutSpan typedOther = other;
-  //   return typedOther.text == text
-  //       && typedOther.style == style
-  //       && typedOther.recognizer == recognizer
-  //       && listEquals<LayoutSpan>(typedOther.children, children);
-  // }
+  @override
+  bool operator ==(dynamic other) {
+    if (identical(this, other))
+      return true;
+    if (other.runtimeType != runtimeType)
+      return false;
+    final LayoutSpan typedOther = other;
+    return typedOther.style == style
+        && typedOther.recognizer == recognizer;
+  }
 
-  // @override
-  // int get hashCode => hashValues(style, text, recognizer, hashList(children));
+  @override
+  int get hashCode => hashValues(style, recognizer);
 
-  // @override
-  // String toStringShort() => '$runtimeType';
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.defaultDiagnosticsTreeStyle = DiagnosticsTreeStyle.whitespace;
+    // Properties on style are added as if they were properties directly on
+    // this LayoutSpan.
+    if (style != null)
+      style.debugFillProperties(properties);
 
-  // @override
-  // void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-  //   super.debugFillProperties(properties);
-  //   properties.defaultDiagnosticsTreeStyle = DiagnosticsTreeStyle.whitespace;
-  //   // Properties on style are added as if they were properties directly on
-  //   // this LayoutSpan.
-  //   if (style != null)
-  //     style.debugFillProperties(properties);
-
-  //   properties.add(DiagnosticsProperty<GestureRecognizer>(
-  //     'recognizer', recognizer,
-  //     description: recognizer?.runtimeType?.toString(),
-  //     defaultValue: null,
-  //   ));
-
-  //   properties.add(StringProperty('text', text, showName: false, defaultValue: null));
-  //   if (style == null && text == null && children == null)
-  //     properties.add(DiagnosticsNode.message('(empty)'));
-  // }
-
-  // @override
-  // List<DiagnosticsNode> debugDescribeChildren() {
-  //   if (children == null)
-  //     return const <DiagnosticsNode>[];
-  //   return children.map<DiagnosticsNode>((LayoutSpan child) {
-  //     if (child != null) {
-  //       return child.toDiagnosticsNode();
-  //     } else {
-  //       return DiagnosticsNode.message('<null child>');
-  //     }
-  //   }).toList();
-  // }
+    properties.add(DiagnosticsProperty<GestureRecognizer>(
+      'recognizer', recognizer,
+      description: recognizer?.runtimeType?.toString(),
+      defaultValue: null,
+    ));
+  }
 }

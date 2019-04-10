@@ -359,17 +359,6 @@ class TextSpan extends LayoutSpan {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.defaultDiagnosticsTreeStyle = DiagnosticsTreeStyle.whitespace;
-    // Properties on style are added as if they were properties directly on
-    // this TextSpan.
-    if (style != null)
-      style.debugFillProperties(properties);
-
-    properties.add(DiagnosticsProperty<GestureRecognizer>(
-      'recognizer', recognizer,
-      description: recognizer?.runtimeType?.toString(),
-      defaultValue: null,
-    ));
 
     properties.add(StringProperty('text', text, showName: false, defaultValue: null));
     if (style == null && text == null && children == null)
