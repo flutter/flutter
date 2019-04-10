@@ -666,7 +666,9 @@ class Rect {
   }
 
   static const int _kDataSize = 4;
-  final Float32List _value = new Float32List(_kDataSize);
+  final Float64List _value = new Float64List(_kDataSize);
+
+  Float32List get _value32 => Float32List.fromList(_value);
 
   /// The offset of the left edge of this rectangle from the x axis.
   double get left => _value[0];
@@ -1157,8 +1159,10 @@ class RRect {
   }
 
   static const int _kDataSize = 12;
-  final Float32List _value = new Float32List(_kDataSize);
+  final Float64List _value = new Float64List(_kDataSize);
   RRect _scaled; // same RRect with scaled radii per side
+
+  Float32List get _value32 => Float32List.fromList(_value);
 
   /// The offset of the left edge of this rectangle from the x axis.
   double get left => _value[0];
