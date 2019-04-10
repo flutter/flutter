@@ -88,6 +88,10 @@ Future<T> showSearch<T>({
 /// call. Call [SearchDelegate.close] before re-using the same delegate instance
 /// for another [showSearch] call.
 abstract class SearchDelegate<T> {
+  
+  /// This variable helps you to change hintText into search page.
+  /// By default MaterialLocalizations' searchFieldLabel
+  String hint;
 
   /// Suggestions shown in the body of the search page while the user types a
   /// query into the search field.
@@ -396,7 +400,13 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
     final ThemeData theme = widget.delegate.appBarTheme(context);
-    final String searchFieldLabel = MaterialLocalizations.of(context).searchFieldLabel;
+    final String defaultSearchFieldLabelText = MaterialLocalizations.of(context).searchFieldLabel;
+    String searchFieldLabel = widget.delegate.hint;
+
+    if (searchFieldLabel == '') {
+      searchFieldLabel = defaultSearchFieldLabelText;
+    }
+
     Widget body;
     switch(widget.delegate._currentBody) {
       case _SearchBody.suggestions:
