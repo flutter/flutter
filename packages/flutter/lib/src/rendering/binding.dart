@@ -87,6 +87,17 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
           return Future<void>.value();
         },
       );
+      registerBoolServiceExtension(
+        name: 'debugCheckElevationsEnabled',
+        getter: () async => debugCheckElevationsEnabled,
+        setter: (bool value) {
+          if (debugCheckElevationsEnabled == value) {
+            return Future<void>.value();
+          }
+          debugCheckElevationsEnabled = value;
+          return _forceRepaint();
+        }
+      );
       registerSignalServiceExtension(
         name: 'debugDumpLayerTree',
         callback: () {
