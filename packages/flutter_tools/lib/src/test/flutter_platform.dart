@@ -83,6 +83,7 @@ void installHook({
   bool enableObservatory = false,
   bool machine = false,
   bool startPaused = false,
+  bool disableServiceAuthCodes = false,
   int port = 0,
   String precompiledDillPath,
   Map<String, String> precompiledDillFiles,
@@ -103,6 +104,7 @@ void installHook({
       machine: machine,
       enableObservatory: enableObservatory,
       startPaused: startPaused,
+      disableServiceAuthCodes: disableServiceAuthCodes,
       explicitObservatoryPort: observatoryPort,
       host: _kHosts[serverType],
       port: port,
@@ -383,6 +385,7 @@ class _FlutterPlatform extends PlatformPlugin {
     this.enableObservatory,
     this.machine,
     this.startPaused,
+    this.disableServiceAuthCodes,
     this.explicitObservatoryPort,
     this.host,
     this.port,
@@ -400,6 +403,7 @@ class _FlutterPlatform extends PlatformPlugin {
   final bool enableObservatory;
   final bool machine;
   final bool startPaused;
+  final bool disableServiceAuthCodes;
   final int explicitObservatoryPort;
   final InternetAddress host;
   final int port;
@@ -581,6 +585,7 @@ class _FlutterPlatform extends PlatformPlugin {
         packages: PackageMap.globalPackagesPath,
         enableObservatory: enableObservatory,
         startPaused: startPaused,
+        disableServiceAuthCodes: disableServiceAuthCodes,
         observatoryPort: explicitObservatoryPort,
         serverPort: server.port,
       );
@@ -928,6 +933,7 @@ class _FlutterPlatform extends PlatformPlugin {
     String packages,
     bool enableObservatory = false,
     bool startPaused = false,
+    bool disableServiceAuthCodes = false,
     int observatoryPort,
     int serverPort,
   }) {
@@ -948,6 +954,9 @@ class _FlutterPlatform extends PlatformPlugin {
         command.add('--observatory-port=$observatoryPort');
       if (startPaused) {
         command.add('--start-paused');
+      }
+      if (disableServiceAuthCodes) {
+        command.add('--disable-service-auth-codes');
       }
     } else {
       command.add('--disable-observatory');

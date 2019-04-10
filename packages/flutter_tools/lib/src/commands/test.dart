@@ -42,6 +42,13 @@ class TestCommand extends FastFlutterCommand {
               'Instructions for connecting with a debugger and printed to the '
               'console once the test has started.',
       )
+      ..addFlag('disable-service-auth-codes',
+        hide: !verboseHelp,
+        defaultsTo: false,
+        negatable: false,
+        help: 'No longer require an authentication code to connect to the VM '
+              'service (not recommended).'
+      )
       ..addFlag('coverage',
         defaultsTo: false,
         negatable: false,
@@ -175,6 +182,9 @@ class TestCommand extends FastFlutterCommand {
       }
     }
 
+    final bool disableServiceAuthCodes =
+      argResults['disable-service-auth-codes'];
+
     final int result = await runTests(
       files,
       workDir: workDir,
@@ -183,6 +193,7 @@ class TestCommand extends FastFlutterCommand {
       watcher: watcher,
       enableObservatory: collector != null || startPaused,
       startPaused: startPaused,
+      disableServiceAuthCodes: disableServiceAuthCodes,
       ipv6: argResults['ipv6'],
       machine: machine,
       trackWidgetCreation: argResults['track-widget-creation'],
