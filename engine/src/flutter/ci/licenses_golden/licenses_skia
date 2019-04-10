@@ -1,4 +1,4 @@
-Signature: b1495b48df1e7beb67be8faa3550c3b1
+Signature: 5eb2f5708f3faf3dd3d52c3bf7025f17
 
 UNUSED LICENSES:
 
@@ -2336,14 +2336,14 @@ FILE: ../../../third_party/skia/infra/cross-compile/docker/cross-linux-arm64/Doc
 FILE: ../../../third_party/skia/infra/cts/whitelist_devices.json
 FILE: ../../../third_party/skia/infra/lottiecap/docker/gold-lottie-web-puppeteer/Dockerfile
 FILE: ../../../third_party/skia/infra/lottiecap/docker/lottie-web-puppeteer/Dockerfile
-FILE: ../../../third_party/skia/infra/pathkit/docker/emsdk-base/Dockerfile
-FILE: ../../../third_party/skia/infra/pathkit/docker/gold-karma-chrome-tests/Dockerfile
-FILE: ../../../third_party/skia/infra/pathkit/docker/karma-chrome-tests/Dockerfile
-FILE: ../../../third_party/skia/infra/pathkit/docker/perf-karma-chrome-tests/Dockerfile
 FILE: ../../../third_party/skia/infra/project-config/cr-buildbucket.cfg
 FILE: ../../../third_party/skia/infra/project-config/project.cfg
 FILE: ../../../third_party/skia/infra/project-config/refs.cfg
 FILE: ../../../third_party/skia/infra/skqp/docker/android-skqp/Dockerfile
+FILE: ../../../third_party/skia/infra/wasm-common/docker/emsdk-base/Dockerfile
+FILE: ../../../third_party/skia/infra/wasm-common/docker/gold-karma-chrome-tests/Dockerfile
+FILE: ../../../third_party/skia/infra/wasm-common/docker/karma-chrome-tests/Dockerfile
+FILE: ../../../third_party/skia/infra/wasm-common/docker/perf-karma-chrome-tests/Dockerfile
 FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/NotoSerif-Regular.ttf
 FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/Roboto-Regular.ttf
 FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/Roboto-Regular.woff
@@ -6587,8 +6587,8 @@ TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/include/gpu/GrDriverBugWorkaroundsAutogen.h
 FILE: ../../../third_party/skia/include/utils/SkTraceEventPhase.h
 FILE: ../../../third_party/skia/infra/lottiecap/gold/lottie-web-aggregator.go
-FILE: ../../../third_party/skia/infra/pathkit/gold/wasm_gold_aggregator.go
-FILE: ../../../third_party/skia/infra/pathkit/perf/wasm_perf_aggregator.go
+FILE: ../../../third_party/skia/infra/wasm-common/gold/wasm_gold_aggregator.go
+FILE: ../../../third_party/skia/infra/wasm-common/perf/wasm_perf_aggregator.go
 ----------------------------------------------------------------------------------------------------
 Copyright 2018 The Chromium Authors. All rights reserved.
 
