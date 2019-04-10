@@ -219,6 +219,9 @@ FILE: ../../../flutter/fml/synchronization/atomic_object.h
 FILE: ../../../flutter/fml/synchronization/count_down_latch.cc
 FILE: ../../../flutter/fml/synchronization/count_down_latch.h
 FILE: ../../../flutter/fml/synchronization/count_down_latch_unittests.cc
+FILE: ../../../flutter/fml/synchronization/semaphore.cc
+FILE: ../../../flutter/fml/synchronization/semaphore.h
+FILE: ../../../flutter/fml/synchronization/semaphore_unittest.cc
 FILE: ../../../flutter/fml/synchronization/shared_mutex.h
 FILE: ../../../flutter/fml/synchronization/shared_mutex_std.cc
 FILE: ../../../flutter/fml/synchronization/shared_mutex_std.h
@@ -417,6 +420,8 @@ FILE: ../../../flutter/shell/common/isolate_configuration.cc
 FILE: ../../../flutter/shell/common/isolate_configuration.h
 FILE: ../../../flutter/shell/common/persistent_cache.cc
 FILE: ../../../flutter/shell/common/persistent_cache.h
+FILE: ../../../flutter/shell/common/pipeline.cc
+FILE: ../../../flutter/shell/common/pipeline.h
 FILE: ../../../flutter/shell/common/platform_view.cc
 FILE: ../../../flutter/shell/common/platform_view.h
 FILE: ../../../flutter/shell/common/rasterizer.cc
@@ -717,11 +722,6 @@ FILE: ../../../flutter/shell/platform/glfw/text_input_plugin.cc
 FILE: ../../../flutter/shell/platform/glfw/text_input_plugin.h
 FILE: ../../../flutter/sky/packages/flutter_services/lib/empty.dart
 FILE: ../../../flutter/sky/tools/roll/patches/chromium/android_build.patch
-FILE: ../../../flutter/synchronization/pipeline.cc
-FILE: ../../../flutter/synchronization/pipeline.h
-FILE: ../../../flutter/synchronization/semaphore.cc
-FILE: ../../../flutter/synchronization/semaphore.h
-FILE: ../../../flutter/synchronization/semaphore_unittest.cc
 FILE: ../../../flutter/third_party/txt/src/txt/platform.cc
 FILE: ../../../flutter/third_party/txt/src/txt/platform.h
 FILE: ../../../flutter/third_party/txt/src/txt/platform_android.cc

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/synchronization/semaphore.h"
+#include "flutter/fml/synchronization/semaphore.h"
 
 #include "flutter/fml/build_config.h"
 #include "flutter/fml/logging.h"
@@ -10,7 +10,7 @@
 #if OS_MACOSX
 #include <dispatch/dispatch.h>
 
-namespace flutter {
+namespace fml {
 
 class PlatformSemaphore {
  public:
@@ -50,12 +50,12 @@ class PlatformSemaphore {
   FML_DISALLOW_COPY_AND_ASSIGN(PlatformSemaphore);
 };
 
-}  // namespace flutter
+}  // namespace fml
 
 #elif OS_WIN
 #include <windows.h>
 
-namespace flutter {
+namespace fml {
 
 class PlatformSemaphore {
  public:
@@ -91,13 +91,13 @@ class PlatformSemaphore {
   FML_DISALLOW_COPY_AND_ASSIGN(PlatformSemaphore);
 };
 
-}  // namespace flutter
+}  // namespace fml
 
 #else
 #include <semaphore.h>
 #include "flutter/fml/eintr_wrapper.h"
 
-namespace flutter {
+namespace fml {
 
 class PlatformSemaphore {
  public:
@@ -140,11 +140,11 @@ class PlatformSemaphore {
   FML_DISALLOW_COPY_AND_ASSIGN(PlatformSemaphore);
 };
 
-}  // namespace flutter
+}  // namespace fml
 
 #endif
 
-namespace flutter {
+namespace fml {
 
 Semaphore::Semaphore(uint32_t count) : _impl(new PlatformSemaphore(count)) {}
 
@@ -162,4 +162,4 @@ void Semaphore::Signal() {
   return _impl->Signal();
 }
 
-}  // namespace flutter
+}  // namespace fml

@@ -50,7 +50,6 @@ group("flutter") {
       "$flutter_root/runtime:runtime_unittests",
       "$flutter_root/shell/common:shell_unittests",
       "$flutter_root/shell/platform/embedder:embedder_unittests",
-      "$flutter_root/synchronization:synchronization_unittests",
       "$flutter_root/third_party/txt:txt_unittests",
     ]
 

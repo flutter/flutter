@@ -68,6 +68,8 @@ source_set("common") {
     "isolate_configuration.h",
     "persistent_cache.cc",
     "persistent_cache.h",
+    "pipeline.cc",
+    "pipeline.h",
     "platform_view.cc",
     "platform_view.h",
     "rasterizer.cc",
@@ -99,7 +101,6 @@ source_set("common") {
     "$flutter_root/fml",
     "$flutter_root/lib/ui",
     "$flutter_root/runtime",
-    "$flutter_root/synchronization",
     "//third_party/dart/runtime:dart_api",
     "//third_party/skia",
   ]
