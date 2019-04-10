@@ -641,7 +641,7 @@ void main() {
     const String text = 'test';
     painter.text = const TextSpan(
       text: text,
-      children: <TextSpan>[
+      children: <LayoutSpan>[
         WidgetSpan(widget: SizedBox(width: 50, height: 30)),
         TextSpan(text: text),
         WidgetSpan(widget: SizedBox(width: 50, height: 30)),
@@ -686,20 +686,20 @@ void main() {
 
     // We provide dimensions for the widgets
     painter.placeholderDimensions = <PlaceholderDimensions>[
-      PlaceholderDimensions(Size(50, 30), 25),
-      PlaceholderDimensions(Size(50, 30), 25),
-      PlaceholderDimensions(Size(50, 30), 25),
-      PlaceholderDimensions(Size(50, 30), 25),
-      PlaceholderDimensions(Size(50, 30), 25),
-      PlaceholderDimensions(Size(50, 30), 25),
-      PlaceholderDimensions(Size(50, 30), 25),
-      PlaceholderDimensions(Size(50, 30), 25),
-      PlaceholderDimensions(Size(50, 30), 25),
-      PlaceholderDimensions(Size(50, 30), 25),
-      PlaceholderDimensions(Size(50, 30), 25),
-      PlaceholderDimensions(Size(50, 30), 25),
-      PlaceholderDimensions(Size(51, 30), 25),
-      PlaceholderDimensions(Size(50, 30), 25),
+      PlaceholderDimensions(size: Size(50, 30), baselineOffset: 25),
+      PlaceholderDimensions(size: Size(50, 30), baselineOffset: 25),
+      PlaceholderDimensions(size: Size(50, 30), baselineOffset: 25),
+      PlaceholderDimensions(size: Size(50, 30), baselineOffset: 25),
+      PlaceholderDimensions(size: Size(50, 30), baselineOffset: 25),
+      PlaceholderDimensions(size: Size(50, 30), baselineOffset: 25),
+      PlaceholderDimensions(size: Size(50, 30), baselineOffset: 25),
+      PlaceholderDimensions(size: Size(50, 30), baselineOffset: 25),
+      PlaceholderDimensions(size: Size(50, 30), baselineOffset: 25),
+      PlaceholderDimensions(size: Size(50, 30), baselineOffset: 25),
+      PlaceholderDimensions(size: Size(50, 30), baselineOffset: 25),
+      PlaceholderDimensions(size: Size(50, 30), baselineOffset: 25),
+      PlaceholderDimensions(size: Size(51, 30), baselineOffset: 25),
+      PlaceholderDimensions(size: Size(50, 30), baselineOffset: 25),
     ];
 
     painter.layout(maxWidth: 500);

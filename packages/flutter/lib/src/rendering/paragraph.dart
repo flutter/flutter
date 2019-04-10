@@ -264,9 +264,9 @@ class RenderParagraph extends RenderBox
     if (!_canComputeIntrinsics())
       return 0;
     if (_needsLayout) {
+    }
       _computeChildrenWidthWithMinIntrinsics(height);
       _layoutText();
-    }
     return _textPainter.minIntrinsicWidth;
   }
 
@@ -275,9 +275,9 @@ class RenderParagraph extends RenderBox
     if (!_canComputeIntrinsics())
       return 0;
     if (_needsLayout) {
+    }
       _computeChildrenWidthWithMaxIntrinsics(height);
       _layoutText(); // layout with infinite width.
-    }
     return _textPainter.maxIntrinsicWidth;
   }
 
