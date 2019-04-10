@@ -13,10 +13,10 @@
 
 - (const flutter::Settings&)settings;
 
-- (shell::RunConfiguration)runConfiguration;
-- (shell::RunConfiguration)runConfigurationForEntrypoint:(NSString*)entrypointOrNil;
-- (shell::RunConfiguration)runConfigurationForEntrypoint:(NSString*)entrypointOrNil
-                                            libraryOrNil:(NSString*)dartLibraryOrNil;
+- (flutter::RunConfiguration)runConfiguration;
+- (flutter::RunConfiguration)runConfigurationForEntrypoint:(NSString*)entrypointOrNil;
+- (flutter::RunConfiguration)runConfigurationForEntrypoint:(NSString*)entrypointOrNil
+                                              libraryOrNil:(NSString*)dartLibraryOrNil;
 
 + (NSString*)flutterAssetsName:(NSBundle*)bundle;
 

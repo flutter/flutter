@@ -14,7 +14,7 @@
 #include "third_party/skia/include/gpu/GrContextOptions.h"
 #include "third_party/skia/include/gpu/gl/GrGLInterface.h"
 
-namespace shell {
+namespace flutter {
 
 PlatformView::PlatformView(Delegate& delegate,
                            flutter::TaskRunners task_runners)
@@ -133,4 +133,4 @@ void PlatformView::SetNextFrameCallback(fml::closure closure) {
   delegate_.OnPlatformViewSetNextFrameCallback(std::move(closure));
 }
 
-}  // namespace shell
+}  // namespace flutter

@@ -25,9 +25,9 @@
 #include "flutter/shell/platform/android/flutter_main.h"
 
 #define ANDROID_SHELL_HOLDER \
-  (reinterpret_cast<shell::AndroidShellHolder*>(shell_holder))
+  (reinterpret_cast<AndroidShellHolder*>(shell_holder))
 
-namespace shell {
+namespace flutter {
 
 namespace {
 
@@ -540,114 +540,112 @@ bool RegisterApi(JNIEnv* env) {
       {
           .name = "nativeAttach",
           .signature = "(Lio/flutter/embedding/engine/FlutterJNI;Z)J",
-          .fnPtr = reinterpret_cast<void*>(&shell::AttachJNI),
+          .fnPtr = reinterpret_cast<void*>(&AttachJNI),
       },
       {
           .name = "nativeDestroy",
           .signature = "(J)V",
-          .fnPtr = reinterpret_cast<void*>(&shell::DestroyJNI),
+          .fnPtr = reinterpret_cast<void*>(&DestroyJNI),
       },
       {
           .name = "nativeRunBundleAndSnapshotFromLibrary",
           .signature = "(J[Ljava/lang/String;Ljava/lang/String;"
                        "Ljava/lang/String;Landroid/content/res/AssetManager;)V",
-          .fnPtr =
-              reinterpret_cast<void*>(&shell::RunBundleAndSnapshotFromLibrary),
+          .fnPtr = reinterpret_cast<void*>(&RunBundleAndSnapshotFromLibrary),
       },
       {
           .name = "nativeGetObservatoryUri",
           .signature = "()Ljava/lang/String;",
-          .fnPtr = reinterpret_cast<void*>(&shell::GetObservatoryUri),
+          .fnPtr = reinterpret_cast<void*>(&GetObservatoryUri),
       },
       {
           .name = "nativeDispatchEmptyPlatformMessage",
           .signature = "(JLjava/lang/String;I)V",
-          .fnPtr =
-              reinterpret_cast<void*>(&shell::DispatchEmptyPlatformMessage),
+          .fnPtr = reinterpret_cast<void*>(&DispatchEmptyPlatformMessage),
       },
       {
           .name = "nativeDispatchPlatformMessage",
           .signature = "(JLjava/lang/String;Ljava/nio/ByteBuffer;II)V",
-          .fnPtr = reinterpret_cast<void*>(&shell::DispatchPlatformMessage),
+          .fnPtr = reinterpret_cast<void*>(&DispatchPlatformMessage),
       },
       {
           .name = "nativeInvokePlatformMessageResponseCallback",
           .signature = "(JILjava/nio/ByteBuffer;I)V",
-          .fnPtr = reinterpret_cast<void*>(
-              &shell::InvokePlatformMessageResponseCallback),
+          .fnPtr =
+              reinterpret_cast<void*>(&InvokePlatformMessageResponseCallback),
       },
       {
           .name = "nativeInvokePlatformMessageEmptyResponseCallback",
           .signature = "(JI)V",
           .fnPtr = reinterpret_cast<void*>(
-              &shell::InvokePlatformMessageEmptyResponseCallback),
+              &InvokePlatformMessageEmptyResponseCallback),
       },
 
       // Start of methods from FlutterView
       {
           .name = "nativeGetBitmap",
           .signature = "(J)Landroid/graphics/Bitmap;",
-          .fnPtr = reinterpret_cast<void*>(&shell::GetBitmap),
+          .fnPtr = reinterpret_cast<void*>(&GetBitmap),
       },
       {
           .name = "nativeSurfaceCreated",
           .signature = "(JLandroid/view/Surface;)V",
-          .fnPtr = reinterpret_cast<void*>(&shell::SurfaceCreated),
+          .fnPtr = reinterpret_cast<void*>(&SurfaceCreated),
       },
       {
           .name = "nativeSurfaceChanged",
           .signature = "(JII)V",
-          .fnPtr = reinterpret_cast<void*>(&shell::SurfaceChanged),
+          .fnPtr = reinterpret_cast<void*>(&SurfaceChanged),
       },
       {
           .name = "nativeSurfaceDestroyed",
           .signature = "(J)V",
-          .fnPtr = reinterpret_cast<void*>(&shell::SurfaceDestroyed),
+          .fnPtr = reinterpret_cast<void*>(&SurfaceDestroyed),
       },
       {
           .name = "nativeSetViewportMetrics",
           .signature = "(JFIIIIIIIIII)V",
-          .fnPtr = reinterpret_cast<void*>(&shell::SetViewportMetrics),
+          .fnPtr = reinterpret_cast<void*>(&SetViewportMetrics),
       },
       {
           .name = "nativeDispatchPointerDataPacket",
           .signature = "(JLjava/nio/ByteBuffer;I)V",
-          .fnPtr = reinterpret_cast<void*>(&shell::DispatchPointerDataPacket),
+          .fnPtr = reinterpret_cast<void*>(&DispatchPointerDataPacket),
       },
       {
           .name = "nativeDispatchSemanticsAction",
           .signature = "(JIILjava/nio/ByteBuffer;I)V",
-          .fnPtr = reinterpret_cast<void*>(&shell::DispatchSemanticsAction),
+          .fnPtr = reinterpret_cast<void*>(&DispatchSemanticsAction),
       },
       {
           .name = "nativeSetSemanticsEnabled",
           .signature = "(JZ)V",
-          .fnPtr = reinterpret_cast<void*>(&shell::SetSemanticsEnabled),
+          .fnPtr = reinterpret_cast<void*>(&SetSemanticsEnabled),
       },
       {
           .name = "nativeSetAccessibilityFeatures",
           .signature = "(JI)V",
-          .fnPtr = reinterpret_cast<void*>(&shell::SetAccessibilityFeatures),
+          .fnPtr = reinterpret_cast<void*>(&SetAccessibilityFeatures),
       },
       {
           .name = "nativeGetIsSoftwareRenderingEnabled",
           .signature = "()Z",
-          .fnPtr = reinterpret_cast<void*>(&shell::GetIsSoftwareRendering),
+          .fnPtr = reinterpret_cast<void*>(&GetIsSoftwareRendering),
       },
       {
           .name = "nativeRegisterTexture",
           .signature = "(JJLandroid/graphics/SurfaceTexture;)V",
-          .fnPtr = reinterpret_cast<void*>(&shell::RegisterTexture),
+          .fnPtr = reinterpret_cast<void*>(&RegisterTexture),
       },
       {
           .name = "nativeMarkTextureFrameAvailable",
           .signature = "(JJ)V",
-          .fnPtr = reinterpret_cast<void*>(&shell::MarkTextureFrameAvailable),
+          .fnPtr = reinterpret_cast<void*>(&MarkTextureFrameAvailable),
       },
       {
           .name = "nativeUnregisterTexture",
           .signature = "(JJ)V",
-          .fnPtr = reinterpret_cast<void*>(&shell::UnregisterTexture),
+          .fnPtr = reinterpret_cast<void*>(&UnregisterTexture),
       },
   };
 
@@ -751,7 +749,7 @@ bool PlatformViewAndroid::Register(JNIEnv* env) {
       {
           .name = "nativeLookupCallbackInformation",
           .signature = "(J)Lio/flutter/view/FlutterCallbackInformation;",
-          .fnPtr = reinterpret_cast<void*>(&shell::LookupCallbackInformation),
+          .fnPtr = reinterpret_cast<void*>(&LookupCallbackInformation),
       },
   };
 
@@ -797,4 +795,4 @@ bool PlatformViewAndroid::Register(JNIEnv* env) {
   return RegisterApi(env);
 }
 
-}  // namespace shell
+}  // namespace flutter

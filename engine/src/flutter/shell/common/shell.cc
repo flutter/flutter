@@ -31,7 +31,7 @@
 #include "third_party/skia/include/core/SkGraphics.h"
 #include "third_party/tonic/common/log.h"
 
-namespace shell {
+namespace flutter {
 
 constexpr char kSkiaChannel[] = "flutter/skia";
 
@@ -69,7 +69,7 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
   // first be booted and the necessary references obtained to initialize the
   // other subsystems.
   fml::AutoResetWaitableEvent io_latch;
-  std::unique_ptr<IOManager> io_manager;
+  std::unique_ptr<ShellIOManager> io_manager;
   auto io_task_runner = shell->GetTaskRunners().GetIOTaskRunner();
   fml::TaskRunner::RunNowOrPostTask(
       io_task_runner,
@@ -79,7 +79,7 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
        io_task_runner   //
   ]() {
         TRACE_EVENT0("flutter", "ShellSetupIOSubsystem");
-        io_manager = std::make_unique<IOManager>(
+        io_manager = std::make_unique<ShellIOManager>(
             platform_view->CreateResourceContext(), io_task_runner);
         io_latch.Signal();
       });
@@ -378,7 +378,7 @@ bool Shell::IsSetup() const {
 bool Shell::Setup(std::unique_ptr<PlatformView> platform_view,
                   std::unique_ptr<Engine> engine,
                   std::unique_ptr<Rasterizer> rasterizer,
-                  std::unique_ptr<IOManager> io_manager) {
+                  std::unique_ptr<ShellIOManager> io_manager) {
   if (is_setup_) {
     return false;
   }
@@ -432,7 +432,7 @@ flutter::DartVM* Shell::GetDartVM() {
   return &vm_;
 }
 
-// |shell::PlatformView::Delegate|
+// |PlatformView::Delegate|
 void Shell::OnPlatformViewCreated(std::unique_ptr<Surface> surface) {
   TRACE_EVENT0("flutter", "Shell::OnPlatformViewCreated");
   FML_DCHECK(is_setup_);
@@ -516,7 +516,7 @@ void Shell::OnPlatformViewCreated(std::unique_ptr<Surface> surface) {
   }
 }
 
-// |shell::PlatformView::Delegate|
+// |PlatformView::Delegate|
 void Shell::OnPlatformViewDestroyed() {
   TRACE_EVENT0("flutter", "Shell::OnPlatformViewDestroyed");
   FML_DCHECK(is_setup_);
@@ -590,7 +590,7 @@ void Shell::OnPlatformViewDestroyed() {
   }
 }
 
-// |shell::PlatformView::Delegate|
+// |PlatformView::Delegate|
 void Shell::OnPlatformViewSetViewportMetrics(
     const flutter::ViewportMetrics& metrics) {
   FML_DCHECK(is_setup_);
@@ -604,7 +604,7 @@ void Shell::OnPlatformViewSetViewportMetrics(
       });
 }
 
-// |shell::PlatformView::Delegate|
+// |PlatformView::Delegate|
 void Shell::OnPlatformViewDispatchPlatformMessage(
     fml::RefPtr<flutter::PlatformMessage> message) {
   FML_DCHECK(is_setup_);
@@ -618,7 +618,7 @@ void Shell::OnPlatformViewDispatchPlatformMessage(
       });
 }
 
-// |shell::PlatformView::Delegate|
+// |PlatformView::Delegate|
 void Shell::OnPlatformViewDispatchPointerDataPacket(
     std::unique_ptr<flutter::PointerDataPacket> packet) {
   TRACE_EVENT0("flutter", "Shell::OnPlatformViewDispatchPointerDataPacket");
@@ -635,7 +635,7 @@ void Shell::OnPlatformViewDispatchPointerDataPacket(
   next_pointer_flow_id_++;
 }
 
-// |shell::PlatformView::Delegate|
+// |PlatformView::Delegate|
 void Shell::OnPlatformViewDispatchSemanticsAction(
     int32_t id,
     flutter::SemanticsAction action,
@@ -651,7 +651,7 @@ void Shell::OnPlatformViewDispatchSemanticsAction(
       });
 }
 
-// |shell::PlatformView::Delegate|
+// |PlatformView::Delegate|
 void Shell::OnPlatformViewSetSemanticsEnabled(bool enabled) {
   FML_DCHECK(is_setup_);
   FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
@@ -664,7 +664,7 @@ void Shell::OnPlatformViewSetSemanticsEnabled(bool enabled) {
       });
 }
 
-// |shell::PlatformView::Delegate|
+// |PlatformView::Delegate|
 void Shell::OnPlatformViewSetAccessibilityFeatures(int32_t flags) {
   FML_DCHECK(is_setup_);
   FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
@@ -677,7 +677,7 @@ void Shell::OnPlatformViewSetAccessibilityFeatures(int32_t flags) {
       });
 }
 
-// |shell::PlatformView::Delegate|
+// |PlatformView::Delegate|
 void Shell::OnPlatformViewRegisterTexture(
     std::shared_ptr<flow::Texture> texture) {
   FML_DCHECK(is_setup_);
@@ -693,7 +693,7 @@ void Shell::OnPlatformViewRegisterTexture(
       });
 }
 
-// |shell::PlatformView::Delegate|
+// |PlatformView::Delegate|
 void Shell::OnPlatformViewUnregisterTexture(int64_t texture_id) {
   FML_DCHECK(is_setup_);
   FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
@@ -708,7 +708,7 @@ void Shell::OnPlatformViewUnregisterTexture(int64_t texture_id) {
       });
 }
 
-// |shell::PlatformView::Delegate|
+// |PlatformView::Delegate|
 void Shell::OnPlatformViewMarkTextureFrameAvailable(int64_t texture_id) {
   FML_DCHECK(is_setup_);
   FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
@@ -739,7 +739,7 @@ void Shell::OnPlatformViewMarkTextureFrameAvailable(int64_t texture_id) {
   });
 }
 
-// |shell::PlatformView::Delegate|
+// |PlatformView::Delegate|
 void Shell::OnPlatformViewSetNextFrameCallback(fml::closure closure) {
   FML_DCHECK(is_setup_);
   FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
@@ -752,7 +752,7 @@ void Shell::OnPlatformViewSetNextFrameCallback(fml::closure closure) {
       });
 }
 
-// |shell::Animator::Delegate|
+// |Animator::Delegate|
 void Shell::OnAnimatorBeginFrame(fml::TimePoint frame_time) {
   FML_DCHECK(is_setup_);
   FML_DCHECK(task_runners_.GetUITaskRunner()->RunsTasksOnCurrentThread());
@@ -762,7 +762,7 @@ void Shell::OnAnimatorBeginFrame(fml::TimePoint frame_time) {
   }
 }
 
-// |shell::Animator::Delegate|
+// |Animator::Delegate|
 void Shell::OnAnimatorNotifyIdle(int64_t deadline) {
   FML_DCHECK(is_setup_);
   FML_DCHECK(task_runners_.GetUITaskRunner()->RunsTasksOnCurrentThread());
@@ -772,7 +772,7 @@ void Shell::OnAnimatorNotifyIdle(int64_t deadline) {
   }
 }
 
-// |shell::Animator::Delegate|
+// |Animator::Delegate|
 void Shell::OnAnimatorDraw(
     fml::RefPtr<flutter::Pipeline<flow::LayerTree>> pipeline) {
   FML_DCHECK(is_setup_);
@@ -786,7 +786,7 @@ void Shell::OnAnimatorDraw(
       });
 }
 
-// |shell::Animator::Delegate|
+// |Animator::Delegate|
 void Shell::OnAnimatorDrawLastLayerTree() {
   FML_DCHECK(is_setup_);
 
@@ -798,7 +798,7 @@ void Shell::OnAnimatorDrawLastLayerTree() {
       });
 }
 
-// |shell::Engine::Delegate|
+// |Engine::Delegate|
 void Shell::OnEngineUpdateSemantics(
     flutter::SemanticsNodeUpdates update,
     flutter::CustomAccessibilityActionUpdates actions) {
@@ -814,7 +814,7 @@ void Shell::OnEngineUpdateSemantics(
       });
 }
 
-// |shell::Engine::Delegate|
+// |Engine::Delegate|
 void Shell::OnEngineHandlePlatformMessage(
     fml::RefPtr<flutter::PlatformMessage> message) {
   FML_DCHECK(is_setup_);
@@ -858,7 +858,7 @@ void Shell::HandleEngineSkiaMessage(
       });
 }
 
-// |shell::Engine::Delegate|
+// |Engine::Delegate|
 void Shell::OnPreEngineRestart() {
   FML_DCHECK(is_setup_);
   FML_DCHECK(task_runners_.GetUITaskRunner()->RunsTasksOnCurrentThread());
@@ -877,7 +877,7 @@ void Shell::OnPreEngineRestart() {
   latch.Wait();
 }
 
-// |shell::Engine::Delegate|
+// |Engine::Delegate|
 void Shell::UpdateIsolateDescription(const std::string isolate_name,
                                      int64_t isolate_port) {
   Handler::Description description(isolate_port, isolate_name);
@@ -1136,4 +1136,4 @@ Rasterizer::Screenshot Shell::Screenshot(
   return screenshot;
 }
 
-}  // namespace shell
+}  // namespace flutter

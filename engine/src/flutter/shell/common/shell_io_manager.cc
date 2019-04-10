@@ -2,15 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/shell/common/io_manager.h"
+#include "flutter/shell/common/shell_io_manager.h"
 
 #include "flutter/fml/message_loop.h"
 #include "flutter/shell/common/persistent_cache.h"
 #include "third_party/skia/include/gpu/gl/GrGLInterface.h"
 
-namespace shell {
+namespace flutter {
 
-sk_sp<GrContext> IOManager::CreateCompatibleResourceLoadingContext(
+sk_sp<GrContext> ShellIOManager::CreateCompatibleResourceLoadingContext(
     GrBackend backend,
     sk_sp<const GrGLInterface> gl_interface) {
   if (backend != GrBackend::kOpenGL_GrBackend) {
@@ -42,8 +42,9 @@ sk_sp<GrContext> IOManager::CreateCompatibleResourceLoadingContext(
   return nullptr;
 }
 
-IOManager::IOManager(sk_sp<GrContext> resource_context,
-                     fml::RefPtr<fml::TaskRunner> unref_queue_task_runner)
+ShellIOManager::ShellIOManager(
+    sk_sp<GrContext> resource_context,
+    fml::RefPtr<fml::TaskRunner> unref_queue_task_runner)
     : resource_context_(std::move(resource_context)),
       resource_context_weak_factory_(
           resource_context_ ? std::make_unique<fml::WeakPtrFactory<GrContext>>(
@@ -62,19 +63,19 @@ IOManager::IOManager(sk_sp<GrContext> resource_context,
   }
 }
 
-IOManager::~IOManager() {
+ShellIOManager::~ShellIOManager() {
   // Last chance to drain the IO queue as the platform side reference to the
   // underlying OpenGL context may be going away.
   unref_queue_->Drain();
 }
 
-fml::WeakPtr<GrContext> IOManager::GetResourceContext() const {
+fml::WeakPtr<GrContext> ShellIOManager::GetResourceContext() const {
   return resource_context_weak_factory_
              ? resource_context_weak_factory_->GetWeakPtr()
              : fml::WeakPtr<GrContext>();
 }
 
-void IOManager::NotifyResourceContextAvailable(
+void ShellIOManager::NotifyResourceContextAvailable(
     sk_sp<GrContext> resource_context) {
   // The resource context needs to survive as long as we have Dart objects
   // referencing. We shouldn't ever need to replace it if we have one - unless
@@ -84,7 +85,7 @@ void IOManager::NotifyResourceContextAvailable(
   }
 }
 
-void IOManager::UpdateResourceContext(sk_sp<GrContext> resource_context) {
+void ShellIOManager::UpdateResourceContext(sk_sp<GrContext> resource_context) {
   resource_context_ = std::move(resource_context);
   resource_context_weak_factory_ =
       resource_context_ ? std::make_unique<fml::WeakPtrFactory<GrContext>>(
@@ -92,11 +93,11 @@ void IOManager::UpdateResourceContext(sk_sp<GrContext> resource_context) {
                         : nullptr;
 }
 
-fml::RefPtr<flow::SkiaUnrefQueue> IOManager::GetSkiaUnrefQueue() const {
+fml::RefPtr<flow::SkiaUnrefQueue> ShellIOManager::GetSkiaUnrefQueue() const {
   return unref_queue_;
 }
 
-fml::WeakPtr<IOManager> IOManager::GetWeakPtr() {
+fml::WeakPtr<ShellIOManager> ShellIOManager::GetWeakPtr() {
   return weak_factory_.GetWeakPtr();
 }
-}  // namespace shell
+}  // namespace flutter

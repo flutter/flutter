@@ -27,7 +27,7 @@
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkPictureRecorder.h"
 
-namespace shell {
+namespace flutter {
 
 static constexpr char kAssetChannel[] = "flutter/assets";
 static constexpr char kLifecycleChannel[] = "flutter/lifecycle";
@@ -150,7 +150,7 @@ Engine::RunStatus Engine::Run(RunConfiguration configuration) {
                          : Engine::RunStatus::Failure;
 }
 
-shell::Engine::RunStatus Engine::PrepareAndLaunchIsolate(
+Engine::RunStatus Engine::PrepareAndLaunchIsolate(
     RunConfiguration configuration) {
   TRACE_EVENT0("flutter", "Engine::PrepareAndLaunchIsolate");
 
@@ -458,4 +458,4 @@ void Engine::HandleAssetPlatformMessage(
   response->CompleteEmpty();
 }
 
-}  // namespace shell
+}  // namespace flutter

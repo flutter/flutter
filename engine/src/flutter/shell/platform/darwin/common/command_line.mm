@@ -6,7 +6,7 @@
 
 #import <Foundation/Foundation.h>
 
-namespace shell {
+namespace flutter {
 
 fml::CommandLine CommandLineFromNSProcessInfo() {
   std::vector<std::string> args_vector;
@@ -18,4 +18,4 @@ fml::CommandLine CommandLineFromNSProcessInfo() {
   return fml::CommandLineFromIterators(args_vector.begin(), args_vector.end());
 }
 
-}  // namespace shell
+}  // namespace flutter

@@ -9,7 +9,7 @@
 #ifndef SHELL_COMMON_SWITCHES_H_
 #define SHELL_COMMON_SWITCHES_H_
 
-namespace shell {
+namespace flutter {
 
 // clang-format off
 #ifndef DEF_SWITCHES_START
@@ -150,6 +150,6 @@ const fml::StringView FlagForSwitch(Switch swtch);
 
 flutter::Settings SettingsFromCommandLine(const fml::CommandLine& command_line);
 
-}  // namespace shell
+}  // namespace flutter
 
 #endif  // SHELL_COMMON_SWITCHES_H_

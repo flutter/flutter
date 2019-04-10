@@ -10,7 +10,7 @@
 #include "flutter/fml/message_loop.h"
 #include "flutter/shell/platform/embedder/embedder_safe_access.h"
 
-namespace shell {
+namespace flutter {
 
 static fml::RefPtr<EmbedderTaskRunner> CreateEmbedderTaskRunner(
     const FlutterTaskRunnerDescription* description) {
@@ -203,4 +203,4 @@ bool EmbedderThreadHost::PostTask(int64_t runner, uint64_t task) const {
   return found->second->PostTask(task);
 }
 
-}  // namespace shell
+}  // namespace flutter

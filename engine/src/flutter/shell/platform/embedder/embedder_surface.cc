@@ -4,10 +4,10 @@
 
 #include "flutter/shell/platform/embedder/embedder_surface.h"
 
-namespace shell {
+namespace flutter {
 
 EmbedderSurface::EmbedderSurface() = default;
 
 EmbedderSurface::~EmbedderSurface() = default;
 
-}  // namespace shell
+}  // namespace flutter

@@ -26,7 +26,7 @@ extern const intptr_t kPlatformStrongDillSize;
 static const char* kApplicationKernelSnapshotFileName = "kernel_blob.bin";
 
 static flutter::Settings DefaultSettingsForProcess(NSBundle* bundle = nil) {
-  auto command_line = shell::CommandLineFromNSProcessInfo();
+  auto command_line = flutter::CommandLineFromNSProcessInfo();
 
   // Precedence:
   // 1. Settings from the specified NSBundle.
@@ -45,7 +45,7 @@ static flutter::Settings DefaultSettingsForProcess(NSBundle* bundle = nil) {
     bundle = mainBundle;
   }
 
-  auto settings = shell::SettingsFromCommandLine(command_line);
+  auto settings = flutter::SettingsFromCommandLine(command_line);
 
   settings.task_observer_add = [](intptr_t key, fml::closure callback) {
     fml::MessageLoop::GetCurrent().AddTaskObserver(key, std::move(callback));
@@ -175,17 +175,17 @@ static flutter::Settings DefaultSettingsForProcess(NSBundle* bundle = nil) {
   return _settings;
 }
 
-- (shell::RunConfiguration)runConfiguration {
+- (flutter::RunConfiguration)runConfiguration {
   return [self runConfigurationForEntrypoint:nil];
 }
 
-- (shell::RunConfiguration)runConfigurationForEntrypoint:(NSString*)entrypointOrNil {
+- (flutter::RunConfiguration)runConfigurationForEntrypoint:(NSString*)entrypointOrNil {
   return [self runConfigurationForEntrypoint:entrypointOrNil libraryOrNil:nil];
 }
 
-- (shell::RunConfiguration)runConfigurationForEntrypoint:(NSString*)entrypointOrNil
-                                            libraryOrNil:(NSString*)dartLibraryOrNil {
-  shell::RunConfiguration config = shell::RunConfiguration::InferFromSettings(_settings);
+- (flutter::RunConfiguration)runConfigurationForEntrypoint:(NSString*)entrypointOrNil
+                                              libraryOrNil:(NSString*)dartLibraryOrNil {
+  auto config = flutter::RunConfiguration::InferFromSettings(_settings);
   if (dartLibraryOrNil && entrypointOrNil) {
     config.SetEntrypointAndLibrary(std::string([entrypointOrNil UTF8String]),
                                    std::string([dartLibraryOrNil UTF8String]));

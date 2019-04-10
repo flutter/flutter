@@ -71,11 +71,12 @@ id<FlutterViewEngineDelegate> _delegate;
 #endif  // TARGET_IPHONE_SIMULATOR
 }
 
-- (std::unique_ptr<shell::IOSSurface>)createSurface:(std::shared_ptr<shell::IOSGLContext>)context {
+- (std::unique_ptr<flutter::IOSSurface>)createSurface:
+    (std::shared_ptr<flutter::IOSGLContext>)context {
   if ([self.layer isKindOfClass:[CAEAGLLayer class]]) {
     fml::scoped_nsobject<CAEAGLLayer> eagl_layer(
         reinterpret_cast<CAEAGLLayer*>([self.layer retain]));
-    if (shell::IsIosEmbeddedViewsPreviewEnabled()) {
+    if (flutter::IsIosEmbeddedViewsPreviewEnabled()) {
       // TODO(amirh): We can lower this to iOS 8.0 once we have a Metal rendering backend.
       // https://github.com/flutter/flutter/issues/24132
       if (@available(iOS 9.0, *)) {
@@ -84,12 +85,12 @@ id<FlutterViewEngineDelegate> _delegate;
         eagl_layer.get().presentsWithTransaction = YES;
       }
     }
-    return std::make_unique<shell::IOSSurfaceGL>(context, std::move(eagl_layer),
-                                                 [_delegate platformViewsController]);
+    return std::make_unique<flutter::IOSSurfaceGL>(context, std::move(eagl_layer),
+                                                   [_delegate platformViewsController]);
   } else {
     fml::scoped_nsobject<CALayer> layer(reinterpret_cast<CALayer*>([self.layer retain]));
-    return std::make_unique<shell::IOSSurfaceSoftware>(std::move(layer),
-                                                       [_delegate platformViewsController]);
+    return std::make_unique<flutter::IOSSurfaceSoftware>(std::move(layer),
+                                                         [_delegate platformViewsController]);
   }
 }
 
@@ -100,7 +101,7 @@ id<FlutterViewEngineDelegate> _delegate;
     return;
   }
 
-  auto screenshot = [_delegate takeScreenshot:shell::Rasterizer::ScreenshotType::UncompressedImage
+  auto screenshot = [_delegate takeScreenshot:flutter::Rasterizer::ScreenshotType::UncompressedImage
                               asBase64Encoded:NO];
 
   if (!screenshot.data || screenshot.data->isEmpty() || screenshot.frame_size.isEmpty()) {

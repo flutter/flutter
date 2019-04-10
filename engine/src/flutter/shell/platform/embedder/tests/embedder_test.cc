@@ -4,7 +4,7 @@
 
 #include "flutter/shell/platform/embedder/tests/embedder_test.h"
 
-namespace shell {
+namespace flutter {
 namespace testing {
 
 EmbedderTest::EmbedderTest() = default;
@@ -36,4 +36,4 @@ void EmbedderTest::TearDown() {
 }
 
 }  // namespace testing
-}  // namespace shell
+}  // namespace flutter

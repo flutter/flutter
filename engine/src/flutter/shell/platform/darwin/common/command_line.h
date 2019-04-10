@@ -8,10 +8,10 @@
 #include "flutter/fml/command_line.h"
 #include "flutter/fml/macros.h"
 
-namespace shell {
+namespace flutter {
 
 fml::CommandLine CommandLineFromNSProcessInfo();
 
-}  // namespace shell
+}  // namespace flutter
 
 #endif  // FLUTTER_SHELL_PLATFORM_DARWIN_COMMON_COMMAND_LINE_H_

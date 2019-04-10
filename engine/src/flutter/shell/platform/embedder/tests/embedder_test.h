@@ -11,7 +11,7 @@
 #include "flutter/shell/platform/embedder/tests/embedder_context.h"
 #include "flutter/testing/testing.h"
 
-namespace shell {
+namespace flutter {
 namespace testing {
 
 class EmbedderTest : public ::testing::Test {
@@ -37,6 +37,6 @@ class EmbedderTest : public ::testing::Test {
 };
 
 }  // namespace testing
-}  // namespace shell
+}  // namespace flutter
 
 #endif  // FLUTTER_SHELL_PLATFORM_EMBEDDER_TESTS_EMBEDDER_TEST_H_

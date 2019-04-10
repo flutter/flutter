@@ -10,7 +10,7 @@
 #include "flutter/fml/task_runner.h"
 #include "flutter/lib/ui/window/platform_message_response.h"
 
-namespace shell {
+namespace flutter {
 
 class PlatformMessageResponseAndroid : public flutter::PlatformMessageResponse {
  public:
@@ -36,6 +36,6 @@ class PlatformMessageResponseAndroid : public flutter::PlatformMessageResponse {
   FML_DISALLOW_COPY_AND_ASSIGN(PlatformMessageResponseAndroid);
 };
 
-}  // namespace shell
+}  // namespace flutter
 
 #endif  // FLUTTER_SHELL_PLATFORM_ANDROID_PLATFORM_MESSAGE_RESPONSE_ANDROID_H_

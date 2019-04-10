@@ -8,7 +8,7 @@
 #include <utility>
 
 #include "flutter/fml/synchronization/waitable_event.h"
-#include "flutter/shell/common/io_manager.h"
+#include "flutter/shell/common/shell_io_manager.h"
 #include "flutter/shell/gpu/gpu_surface_gl_delegate.h"
 #include "flutter/shell/platform/android/android_external_texture_gl.h"
 #include "flutter/shell/platform/android/android_surface_gl.h"
@@ -16,7 +16,7 @@
 #include "flutter/shell/platform/android/platform_view_android_jni.h"
 #include "flutter/shell/platform/android/vsync_waiter_android.h"
 
-namespace shell {
+namespace flutter {
 
 PlatformViewAndroid::PlatformViewAndroid(
     PlatformView::Delegate& delegate,
@@ -157,7 +157,7 @@ void PlatformViewAndroid::InvokePlatformMessageEmptyResponseCallback(
   message_response->CompleteEmpty();
 }
 
-// |shell::PlatformView|
+// |PlatformView|
 void PlatformViewAndroid::HandlePlatformMessage(
     fml::RefPtr<flutter::PlatformMessage> message) {
   JNIEnv* env = fml::jni::AttachCurrentThread();
@@ -191,7 +191,7 @@ void PlatformViewAndroid::HandlePlatformMessage(
   }
 }
 
-// |shell::PlatformView|
+// |PlatformView|
 void PlatformViewAndroid::OnPreEngineRestart() const {
   JNIEnv* env = fml::jni::AttachCurrentThread();
   fml::jni::ScopedJavaLocalRef<jobject> view = java_object_.get(env);
@@ -223,7 +223,7 @@ void PlatformViewAndroid::DispatchSemanticsAction(JNIEnv* env,
       std::move(args_vector));
 }
 
-// |shell::PlatformView|
+// |PlatformView|
 void PlatformViewAndroid::UpdateSemantics(
     flutter::SemanticsNodeUpdates update,
     flutter::CustomAccessibilityActionUpdates actions) {
@@ -376,12 +376,12 @@ void PlatformViewAndroid::RegisterExternalTexture(
       std::make_shared<AndroidExternalTextureGL>(texture_id, surface_texture));
 }
 
-// |shell::PlatformView|
+// |PlatformView|
 std::unique_ptr<VsyncWaiter> PlatformViewAndroid::CreateVSyncWaiter() {
   return std::make_unique<VsyncWaiterAndroid>(task_runners_);
 }
 
-// |shell::PlatformView|
+// |PlatformView|
 std::unique_ptr<Surface> PlatformViewAndroid::CreateRenderingSurface() {
   if (!android_surface_) {
     return nullptr;
@@ -389,7 +389,7 @@ std::unique_ptr<Surface> PlatformViewAndroid::CreateRenderingSurface() {
   return android_surface_->CreateGPUSurface();
 }
 
-// |shell::PlatformView|
+// |PlatformView|
 sk_sp<GrContext> PlatformViewAndroid::CreateResourceContext() const {
   if (!android_surface_) {
     return nullptr;
@@ -399,7 +399,7 @@ sk_sp<GrContext> PlatformViewAndroid::CreateResourceContext() const {
     // TODO(chinmaygarde): Currently, this code depends on the fact that only
     // the OpenGL surface will be able to make a resource context current. If
     // this changes, this assumption breaks. Handle the same.
-    resource_context = IOManager::CreateCompatibleResourceLoadingContext(
+    resource_context = ShellIOManager::CreateCompatibleResourceLoadingContext(
         GrBackend::kOpenGL_GrBackend,
         GPUSurfaceGLDelegate::GetDefaultPlatformGLInterface());
   } else {
@@ -409,7 +409,7 @@ sk_sp<GrContext> PlatformViewAndroid::CreateResourceContext() const {
   return resource_context;
 }
 
-// |shell::PlatformView|
+// |PlatformView|
 void PlatformViewAndroid::ReleaseResourceContext() const {
   if (android_surface_) {
     android_surface_->ResourceContextClearCurrent();
@@ -442,4 +442,4 @@ void PlatformViewAndroid::FireFirstFrameCallback() {
   FlutterViewOnFirstFrame(fml::jni::AttachCurrentThread(), view.obj());
 }
 
-}  // namespace shell
+}  // namespace flutter

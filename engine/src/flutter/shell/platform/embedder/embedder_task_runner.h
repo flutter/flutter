@@ -12,7 +12,7 @@
 #include "flutter/fml/synchronization/thread_annotations.h"
 #include "flutter/fml/task_runner.h"
 
-namespace shell {
+namespace flutter {
 
 class EmbedderTaskRunner final : public fml::TaskRunner {
  public:
@@ -52,6 +52,6 @@ class EmbedderTaskRunner final : public fml::TaskRunner {
   FML_DISALLOW_COPY_AND_ASSIGN(EmbedderTaskRunner);
 };
 
-}  // namespace shell
+}  // namespace flutter
 
 #endif  // FLUTTER_SHELL_PLATFORM_EMBEDDER_EMBEDDER_TASK_RUNNER_H_

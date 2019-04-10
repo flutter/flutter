@@ -12,7 +12,7 @@
 #include "flutter/shell/platform/android/android_surface_vulkan.h"
 #endif  // SHELL_ENABLE_VULKAN
 
-namespace shell {
+namespace flutter {
 
 std::unique_ptr<AndroidSurface> AndroidSurface::Create(
     bool use_software_rendering) {
@@ -32,4 +32,4 @@ std::unique_ptr<AndroidSurface> AndroidSurface::Create(
 
 AndroidSurface::~AndroidSurface() = default;
 
-}  // namespace shell
+}  // namespace flutter

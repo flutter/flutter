@@ -10,7 +10,7 @@
 #include "third_party/skia/include/core/SkImage.h"
 #include "third_party/skia/include/core/SkSize.h"
 
-namespace shell {
+namespace flutter {
 
 class EmbedderExternalTextureGL : public flow::Texture {
  public:
@@ -41,6 +41,6 @@ class EmbedderExternalTextureGL : public flow::Texture {
   FML_DISALLOW_COPY_AND_ASSIGN(EmbedderExternalTextureGL);
 };
 
-}  // namespace shell
+}  // namespace flutter
 
 #endif  // FLUTTER_SHELL_PLATFORM_EMBEDDER_EMBEDDER_EXTERNAL_TEXTURE_GL_H_

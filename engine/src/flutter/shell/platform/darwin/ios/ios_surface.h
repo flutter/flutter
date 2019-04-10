@@ -13,7 +13,7 @@
 #include "flutter/fml/platform/darwin/scoped_nsobject.h"
 #include "flutter/shell/common/surface.h"
 
-namespace shell {
+namespace flutter {
 
 // Returns true if the app explicitly specified to use the iOS view embedding
 // mechanism which is still in a release preview.
@@ -43,6 +43,6 @@ class IOSSurface {
   FML_DISALLOW_COPY_AND_ASSIGN(IOSSurface);
 };
 
-}  // namespace shell
+}  // namespace flutter
 
 #endif  // FLUTTER_SHELL_PLATFORM_DARWIN_IOS_IOS_SURFACE_H_

@@ -17,7 +17,7 @@
 #include "flutter/fml/memory/weak_ptr.h"
 #include "flutter/runtime/dart_isolate.h"
 
-namespace shell {
+namespace flutter {
 
 class IsolateConfiguration {
  public:
@@ -51,6 +51,6 @@ class IsolateConfiguration {
   FML_DISALLOW_COPY_AND_ASSIGN(IsolateConfiguration);
 };
 
-}  // namespace shell
+}  // namespace flutter
 
 #endif  // FLUTTER_SHELL_COMMON_ISOLATE_CONFIGURATION_H_

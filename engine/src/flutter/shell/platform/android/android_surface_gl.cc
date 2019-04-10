@@ -9,7 +9,7 @@
 #include "flutter/fml/logging.h"
 #include "flutter/fml/memory/ref_ptr.h"
 
-namespace shell {
+namespace flutter {
 
 static fml::RefPtr<AndroidContextGL> CreateResourceLoadingContext() {
   auto environment = fml::MakeRefCounted<AndroidEnvironmentGL>();
@@ -125,4 +125,4 @@ intptr_t AndroidSurfaceGL::GLContextFBO() const {
   return 0;
 }
 
-}  // namespace shell
+}  // namespace flutter

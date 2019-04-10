@@ -10,7 +10,7 @@
 #include "flutter/common/settings.h"
 #include "flutter/fml/macros.h"
 
-namespace shell {
+namespace flutter {
 
 class FlutterMain {
  public:
@@ -38,6 +38,6 @@ class FlutterMain {
   FML_DISALLOW_COPY_AND_ASSIGN(FlutterMain);
 };
 
-}  // namespace shell
+}  // namespace flutter
 
 #endif  // SHELL_PLATFORM_ANDROID_FLUTTER_MAIN_H_

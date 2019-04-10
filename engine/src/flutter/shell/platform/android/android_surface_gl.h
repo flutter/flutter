@@ -14,7 +14,7 @@
 #include "flutter/shell/platform/android/android_environment_gl.h"
 #include "flutter/shell/platform/android/android_surface.h"
 
-namespace shell {
+namespace flutter {
 
 class AndroidSurfaceGL final : public GPUSurfaceGLDelegate,
                                public AndroidSurface {
@@ -25,37 +25,37 @@ class AndroidSurfaceGL final : public GPUSurfaceGLDelegate,
 
   bool IsOffscreenContextValid() const;
 
-  // |shell::AndroidSurface|
+  // |AndroidSurface|
   bool IsValid() const override;
 
-  // |shell::AndroidSurface|
+  // |AndroidSurface|
   std::unique_ptr<Surface> CreateGPUSurface() override;
 
-  // |shell::AndroidSurface|
+  // |AndroidSurface|
   void TeardownOnScreenContext() override;
 
-  // |shell::AndroidSurface|
+  // |AndroidSurface|
   bool OnScreenSurfaceResize(const SkISize& size) const override;
 
-  // |shell::AndroidSurface|
+  // |AndroidSurface|
   bool ResourceContextMakeCurrent() override;
 
-  // |shell::AndroidSurface|
+  // |AndroidSurface|
   bool ResourceContextClearCurrent() override;
 
-  // |shell::AndroidSurface|
+  // |AndroidSurface|
   bool SetNativeWindow(fml::RefPtr<AndroidNativeWindow> window) override;
 
-  // |shell::GPUSurfaceGLDelegate|
+  // |GPUSurfaceGLDelegate|
   bool GLContextMakeCurrent() override;
 
-  // |shell::GPUSurfaceGLDelegate|
+  // |GPUSurfaceGLDelegate|
   bool GLContextClearCurrent() override;
 
-  // |shell::GPUSurfaceGLDelegate|
+  // |GPUSurfaceGLDelegate|
   bool GLContextPresent() override;
 
-  // |shell::GPUSurfaceGLDelegate|
+  // |GPUSurfaceGLDelegate|
   intptr_t GLContextFBO() const override;
 
  private:
@@ -65,6 +65,6 @@ class AndroidSurfaceGL final : public GPUSurfaceGLDelegate,
   FML_DISALLOW_COPY_AND_ASSIGN(AndroidSurfaceGL);
 };
 
-}  // namespace shell
+}  // namespace flutter
 
 #endif  // FLUTTER_SHELL_PLATFORM_ANDROID_ANDROID_SURFACE_GL_H_

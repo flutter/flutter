@@ -14,7 +14,7 @@
 #include "flutter/fml/platform/android/scoped_java_ref.h"
 #include "flutter/fml/trace_event.h"
 
-namespace shell {
+namespace flutter {
 
 static fml::jni::ScopedJavaGlobalRef<jclass>* g_vsync_waiter_class = nullptr;
 static jmethodID g_async_wait_for_vsync_method_ = nullptr;
@@ -24,7 +24,7 @@ VsyncWaiterAndroid::VsyncWaiterAndroid(flutter::TaskRunners task_runners)
 
 VsyncWaiterAndroid::~VsyncWaiterAndroid() = default;
 
-// |shell::VsyncWaiter|
+// |VsyncWaiter|
 void VsyncWaiterAndroid::AwaitVSync() {
   auto* weak_this = new std::weak_ptr<VsyncWaiter>(shared_from_this());
   jlong java_baton = reinterpret_cast<jlong>(weak_this);
@@ -105,4 +105,4 @@ bool VsyncWaiterAndroid::Register(JNIEnv* env) {
   return env->RegisterNatives(clazz, methods, arraysize(methods)) == 0;
 }
 
-}  // namespace shell
+}  // namespace flutter

@@ -6,7 +6,7 @@
 
 #include "flutter/fml/logging.h"
 
-namespace shell {
+namespace flutter {
 namespace {
 
 static fml::TimePoint SnapToNextTick(fml::TimePoint value,
@@ -25,7 +25,7 @@ VsyncWaiterFallback::VsyncWaiterFallback(flutter::TaskRunners task_runners)
 
 VsyncWaiterFallback::~VsyncWaiterFallback() = default;
 
-// |shell::VsyncWaiter|
+// |VsyncWaiter|
 void VsyncWaiterFallback::AwaitVSync() {
   constexpr fml::TimeDelta kSingleFrameInterval =
       fml::TimeDelta::FromSecondsF(1.0 / 60.0);
@@ -36,4 +36,4 @@ void VsyncWaiterFallback::AwaitVSync() {
   FireCallback(next, next + kSingleFrameInterval);
 }
 
-}  // namespace shell
+}  // namespace flutter

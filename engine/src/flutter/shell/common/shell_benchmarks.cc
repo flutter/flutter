@@ -7,7 +7,7 @@
 #include "flutter/shell/common/shell.h"
 #include "flutter/shell/common/thread_host.h"
 
-namespace shell {
+namespace flutter {
 
 static void StartupAndShutdownShell(benchmark::State& state,
                                     bool measure_startup,
@@ -77,4 +77,4 @@ static void BM_ShellInitializationAndShutdown(benchmark::State& state) {
 
 BENCHMARK(BM_ShellInitializationAndShutdown);
 
-}  // namespace shell
+}  // namespace flutter

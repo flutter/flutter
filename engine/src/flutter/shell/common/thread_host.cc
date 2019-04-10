@@ -4,7 +4,7 @@
 
 #include "flutter/shell/common/thread_host.h"
 
-namespace shell {
+namespace flutter {
 
 ThreadHost::ThreadHost() = default;
 
@@ -37,4 +37,4 @@ void ThreadHost::Reset() {
   io_thread.reset();
 }
 
-}  // namespace shell
+}  // namespace flutter

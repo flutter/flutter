@@ -10,7 +10,7 @@
 
 #include <EGL/egl.h>
 
-namespace shell {
+namespace flutter {
 
 class AndroidEnvironmentGL
     : public fml::RefCountedThreadSafe<AndroidEnvironmentGL> {
@@ -35,6 +35,6 @@ class AndroidEnvironmentGL
   FML_DISALLOW_COPY_AND_ASSIGN(AndroidEnvironmentGL);
 };
 
-}  // namespace shell
+}  // namespace flutter
 
 #endif  // FLUTTER_SHELL_PLATFORM_ANDROID_ANDROID_ENVIRONMENT_GL_H_

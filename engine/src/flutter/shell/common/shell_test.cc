@@ -10,7 +10,7 @@
 #include "flutter/runtime/dart_vm.h"
 #include "flutter/testing/testing.h"
 
-namespace shell {
+namespace flutter {
 namespace testing {
 
 ShellTest::ShellTest()
@@ -130,4 +130,4 @@ void ShellTest::AddNativeCallback(std::string name,
 }
 
 }  // namespace testing
-}  // namespace shell
+}  // namespace flutter

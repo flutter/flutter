@@ -12,7 +12,7 @@
 
 @class VSyncClient;
 
-namespace shell {
+namespace flutter {
 
 class VsyncWaiterIOS final : public VsyncWaiter {
  public:
@@ -23,12 +23,12 @@ class VsyncWaiterIOS final : public VsyncWaiter {
  private:
   fml::scoped_nsobject<VSyncClient> client_;
 
-  // |shell::VsyncWaiter|
+  // |VsyncWaiter|
   void AwaitVSync() override;
 
   FML_DISALLOW_COPY_AND_ASSIGN(VsyncWaiterIOS);
 };
 
-}  // namespace shell
+}  // namespace flutter
 
 #endif  // FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_VSYNC_WAITER_IOS_H_

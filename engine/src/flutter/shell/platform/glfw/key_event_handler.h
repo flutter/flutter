@@ -13,7 +13,7 @@
 #include "flutter/shell/platform/glfw/public/flutter_glfw.h"
 #include "rapidjson/document.h"
 
-namespace shell {
+namespace flutter {
 
 // Implements a KeyboardHookHandler
 //
@@ -24,14 +24,14 @@ class KeyEventHandler : public KeyboardHookHandler {
 
   virtual ~KeyEventHandler();
 
-  // |shell::KeyboardHookHandler|
+  // |KeyboardHookHandler|
   void KeyboardHook(GLFWwindow* window,
                     int key,
                     int scancode,
                     int action,
                     int mods) override;
 
-  // |shell::KeyboardHookHandler|
+  // |KeyboardHookHandler|
   void CharHook(GLFWwindow* window, unsigned int code_point) override;
 
  private:
@@ -39,6 +39,6 @@ class KeyEventHandler : public KeyboardHookHandler {
   std::unique_ptr<flutter::BasicMessageChannel<rapidjson::Document>> channel_;
 };
 
-}  // namespace shell
+}  // namespace flutter
 
 #endif  // FLUTTER_SHELL_PLATFORM_GLFW_KEY_EVENT_HANDLER_H_

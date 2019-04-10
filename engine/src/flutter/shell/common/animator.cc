@@ -7,7 +7,7 @@
 #include "flutter/fml/trace_event.h"
 #include "third_party/dart/runtime/include/dart_tools_api.h"
 
-namespace shell {
+namespace flutter {
 
 namespace {
 
@@ -233,4 +233,4 @@ void Animator::AwaitVSync() {
   delegate_.OnAnimatorNotifyIdle(dart_frame_deadline_);
 }
 
-}  // namespace shell
+}  // namespace flutter

@@ -17,7 +17,7 @@
 #include "flutter/shell/common/surface.h"
 #include "flutter/synchronization/pipeline.h"
 
-namespace shell {
+namespace flutter {
 
 class Rasterizer final : public flutter::SnapshotDelegate {
  public:
@@ -96,6 +96,6 @@ class Rasterizer final : public flutter::SnapshotDelegate {
   FML_DISALLOW_COPY_AND_ASSIGN(Rasterizer);
 };
 
-}  // namespace shell
+}  // namespace flutter
 
 #endif  // SHELL_COMMON_RASTERIZER_H_

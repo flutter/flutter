@@ -16,7 +16,7 @@
 #include "flutter/shell/platform/embedder/tests/embedder_config_builder.h"
 #include "flutter/testing/testing.h"
 
-namespace shell {
+namespace flutter {
 namespace testing {
 
 using Embedder11yTest = testing::EmbedderTest;
@@ -168,4 +168,4 @@ TEST_F(Embedder11yTest, A11yTreeIsConsistent) {
 }
 
 }  // namespace testing
-}  // namespace shell
+}  // namespace flutter

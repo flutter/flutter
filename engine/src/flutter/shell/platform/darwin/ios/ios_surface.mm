@@ -9,7 +9,7 @@
 #include "flutter/shell/platform/darwin/ios/ios_surface_gl.h"
 #include "flutter/shell/platform/darwin/ios/ios_surface_software.h"
 
-namespace shell {
+namespace flutter {
 
 // The name of the Info.plist flag to enable the embedded iOS views preview.
 const char* const kEmbeddedViewsPreview = "io.flutter.embedded_views_preview";
@@ -26,4 +26,4 @@ IOSSurface::~IOSSurface() = default;
 FlutterPlatformViewsController* IOSSurface::GetPlatformViewsController() {
   return platform_views_controller_;
 }
-}  // namespace shell
+}  // namespace flutter

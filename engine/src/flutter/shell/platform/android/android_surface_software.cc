@@ -13,7 +13,7 @@
 #include "flutter/fml/trace_event.h"
 #include "flutter/shell/platform/android/platform_view_android_jni.h"
 
-namespace shell {
+namespace flutter {
 
 namespace {
 
@@ -153,4 +153,4 @@ bool AndroidSurfaceSoftware::SetNativeWindow(
   return true;
 }
 
-}  // namespace shell
+}  // namespace flutter

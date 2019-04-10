@@ -10,7 +10,7 @@
 #include "third_party/skia/include/gpu/GrContextOptions.h"
 #include "third_party/skia/include/gpu/gl/GrGLInterface.h"
 
-namespace shell {
+namespace flutter {
 
 IOSGLRenderTarget::IOSGLRenderTarget(fml::scoped_nsobject<CAEAGLLayer> layer,
                                      EAGLContext* context,
@@ -138,4 +138,4 @@ bool IOSGLRenderTarget::ResourceMakeCurrent() {
   return [EAGLContext setCurrentContext:resource_context_.get()];
 }
 
-}  // namespace shell
+}  // namespace flutter

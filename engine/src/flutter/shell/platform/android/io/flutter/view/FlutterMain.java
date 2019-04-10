@@ -28,7 +28,7 @@ import java.util.*;
 public class FlutterMain {
     private static final String TAG = "FlutterMain";
 
-    // Must match values in sky::shell::switches
+    // Must match values in sky::switches
     private static final String AOT_SHARED_LIBRARY_PATH = "aot-shared-library-path";
     private static final String AOT_SNAPSHOT_PATH_KEY = "aot-snapshot-path";
     private static final String AOT_VM_SNAPSHOT_DATA_KEY = "vm-snapshot-data";

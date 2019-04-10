@@ -16,7 +16,7 @@
 #include "flutter/synchronization/pipeline.h"
 #include "flutter/synchronization/semaphore.h"
 
-namespace shell {
+namespace flutter {
 
 class Animator final {
  public:
@@ -90,6 +90,6 @@ class Animator final {
   FML_DISALLOW_COPY_AND_ASSIGN(Animator);
 };
 
-}  // namespace shell
+}  // namespace flutter
 
 #endif  // FLUTTER_SHELL_COMMON_ANIMATOR_H_

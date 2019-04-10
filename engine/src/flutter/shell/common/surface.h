@@ -12,7 +12,7 @@
 #include "flutter/fml/macros.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 
-namespace shell {
+namespace flutter {
 
 /// Represents a Frame that has been fully configured for the underlying client
 /// rendering API. A frame may only be submitted once.
@@ -63,6 +63,6 @@ class Surface {
   FML_DISALLOW_COPY_AND_ASSIGN(Surface);
 };
 
-}  // namespace shell
+}  // namespace flutter
 
 #endif  // FLUTTER_SHELL_COMMON_SURFACE_H_

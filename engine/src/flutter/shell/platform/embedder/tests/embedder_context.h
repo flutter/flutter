@@ -16,7 +16,7 @@
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/testing/test_dart_native_resolver.h"
 
-namespace shell {
+namespace flutter {
 namespace testing {
 
 using SemanticsNodeCallback = std::function<void(const FlutterSemanticsNode*)>;
@@ -78,6 +78,6 @@ class EmbedderContext {
 };
 
 }  // namespace testing
-}  // namespace shell
+}  // namespace flutter
 
 #endif  // FLUTTER_SHELL_PLATFORM_EMBEDDER_TESTS_EMBEDDER_CONTEXT_H_

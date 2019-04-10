@@ -12,7 +12,7 @@
 #include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/skia/include/gpu/GrBackendSurface.h"
 
-namespace shell {
+namespace flutter {
 
 IOSExternalTextureGL::IOSExternalTextureGL(int64_t textureId,
                                            NSObject<FlutterTexture>* externalTexture)
@@ -74,4 +74,4 @@ void IOSExternalTextureGL::OnGrContextDestroyed() {
 
 void IOSExternalTextureGL::MarkNewFrameAvailable() {}
 
-}  // namespace shell
+}  // namespace flutter

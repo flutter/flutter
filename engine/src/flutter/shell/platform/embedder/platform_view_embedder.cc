@@ -4,7 +4,7 @@
 
 #include "flutter/shell/platform/embedder/platform_view_embedder.h"
 
-namespace shell {
+namespace flutter {
 
 PlatformViewEmbedder::PlatformViewEmbedder(
     PlatformView::Delegate& delegate,
@@ -62,7 +62,7 @@ void PlatformViewEmbedder::HandlePlatformMessage(
       std::move(message));
 }
 
-// |shell::PlatformView|
+// |PlatformView|
 std::unique_ptr<Surface> PlatformViewEmbedder::CreateRenderingSurface() {
   if (embedder_surface_ == nullptr) {
     FML_LOG(ERROR) << "Embedder surface was null.";
@@ -71,7 +71,7 @@ std::unique_ptr<Surface> PlatformViewEmbedder::CreateRenderingSurface() {
   return embedder_surface_->CreateGPUSurface();
 }
 
-// |shell::PlatformView|
+// |PlatformView|
 sk_sp<GrContext> PlatformViewEmbedder::CreateResourceContext() const {
   if (embedder_surface_ == nullptr) {
     FML_LOG(ERROR) << "Embedder surface was null.";
@@ -80,7 +80,7 @@ sk_sp<GrContext> PlatformViewEmbedder::CreateResourceContext() const {
   return embedder_surface_->CreateResourceContext();
 }
 
-// |shell::PlatformView|
+// |PlatformView|
 std::unique_ptr<VsyncWaiter> PlatformViewEmbedder::CreateVSyncWaiter() {
   if (!platform_dispatch_table_.vsync_callback) {
     // Superclass implementation creates a timer based fallback.
@@ -91,4 +91,4 @@ std::unique_ptr<VsyncWaiter> PlatformViewEmbedder::CreateVSyncWaiter() {
       platform_dispatch_table_.vsync_callback, task_runners_);
 }
 
-}  // namespace shell
+}  // namespace flutter

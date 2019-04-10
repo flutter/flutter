@@ -16,7 +16,7 @@
 #include "third_party/skia/include/core/SkSurfaceCharacterization.h"
 #include "third_party/skia/include/utils/SkBase64.h"
 
-namespace shell {
+namespace flutter {
 
 // The rasterizer will tell Skia to purge cached resources that have not been
 // used within this interval.
@@ -389,4 +389,4 @@ Rasterizer::Screenshot::Screenshot(const Screenshot& other) = default;
 
 Rasterizer::Screenshot::~Screenshot() = default;
 
-}  // namespace shell
+}  // namespace flutter

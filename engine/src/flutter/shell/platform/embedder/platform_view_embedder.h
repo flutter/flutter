@@ -15,7 +15,7 @@
 #include "flutter/shell/platform/embedder/embedder_surface_software.h"
 #include "flutter/shell/platform/embedder/vsync_waiter_embedder.h"
 
-namespace shell {
+namespace flutter {
 
 class PlatformViewEmbedder final : public PlatformView {
  public:
@@ -51,12 +51,12 @@ class PlatformViewEmbedder final : public PlatformView {
 
   ~PlatformViewEmbedder() override;
 
-  // |shell::PlatformView|
+  // |PlatformView|
   void UpdateSemantics(
       flutter::SemanticsNodeUpdates update,
       flutter::CustomAccessibilityActionUpdates actions) override;
 
-  // |shell::PlatformView|
+  // |PlatformView|
   void HandlePlatformMessage(
       fml::RefPtr<flutter::PlatformMessage> message) override;
 
@@ -64,18 +64,18 @@ class PlatformViewEmbedder final : public PlatformView {
   std::unique_ptr<EmbedderSurface> embedder_surface_;
   PlatformDispatchTable platform_dispatch_table_;
 
-  // |shell::PlatformView|
+  // |PlatformView|
   std::unique_ptr<Surface> CreateRenderingSurface() override;
 
-  // |shell::PlatformView|
+  // |PlatformView|
   sk_sp<GrContext> CreateResourceContext() const override;
 
-  // |shell::PlatformView|
+  // |PlatformView|
   std::unique_ptr<VsyncWaiter> CreateVSyncWaiter() override;
 
   FML_DISALLOW_COPY_AND_ASSIGN(PlatformViewEmbedder);
 };
 
-}  // namespace shell
+}  // namespace flutter
 
 #endif  // FLUTTER_SHELL_PLATFORM_EMBEDDER_PLATFORM_VIEW_EMBEDDER_H_

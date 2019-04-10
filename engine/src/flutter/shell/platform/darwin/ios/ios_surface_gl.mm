@@ -7,7 +7,7 @@
 #include "flutter/fml/trace_event.h"
 #include "flutter/shell/gpu/gpu_surface_gl.h"
 
-namespace shell {
+namespace flutter {
 
 IOSSurfaceGL::IOSSurfaceGL(std::shared_ptr<IOSGLContext> context,
                            fml::scoped_nsobject<CAEAGLLayer> layer,
@@ -118,4 +118,4 @@ bool IOSSurfaceGL::SubmitFrame(GrContext* context) {
   return submitted;
 }
 
-}  // namespace shell
+}  // namespace flutter

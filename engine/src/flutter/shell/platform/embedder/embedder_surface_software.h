@@ -9,7 +9,7 @@
 #include "flutter/shell/gpu/gpu_surface_software.h"
 #include "flutter/shell/platform/embedder/embedder_surface.h"
 
-namespace shell {
+namespace flutter {
 
 class EmbedderSurfaceSoftware final : public EmbedderSurface,
                                       public GPUSurfaceSoftwareDelegate {
@@ -28,24 +28,24 @@ class EmbedderSurfaceSoftware final : public EmbedderSurface,
   SoftwareDispatchTable software_dispatch_table_;
   sk_sp<SkSurface> sk_surface_;
 
-  // |shell::EmbedderSurface|
+  // |EmbedderSurface|
   bool IsValid() const override;
 
-  // |shell::EmbedderSurface|
+  // |EmbedderSurface|
   std::unique_ptr<Surface> CreateGPUSurface() override;
 
-  // |shell::EmbedderSurface|
+  // |EmbedderSurface|
   sk_sp<GrContext> CreateResourceContext() const override;
 
-  // |shell::GPUSurfaceSoftwareDelegate|
+  // |GPUSurfaceSoftwareDelegate|
   sk_sp<SkSurface> AcquireBackingStore(const SkISize& size) override;
 
-  // |shell::GPUSurfaceSoftwareDelegate|
+  // |GPUSurfaceSoftwareDelegate|
   bool PresentBackingStore(sk_sp<SkSurface> backing_store) override;
 
   FML_DISALLOW_COPY_AND_ASSIGN(EmbedderSurfaceSoftware);
 };
 
-}  // namespace shell
+}  // namespace flutter
 
 #endif  // FLUTTER_SHELL_PLATFORM_EMBEDDER_EMBEDDER_SURFACE_SOFTWARE_H_

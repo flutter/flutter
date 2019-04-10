@@ -13,7 +13,7 @@
 #include "flutter/shell/platform/android/android_native_window.h"
 #include "third_party/skia/include/core/SkSize.h"
 
-namespace shell {
+namespace flutter {
 
 class AndroidContextGL : public fml::RefCountedThreadSafe<AndroidContextGL> {
  public:
@@ -53,6 +53,6 @@ class AndroidContextGL : public fml::RefCountedThreadSafe<AndroidContextGL> {
   FML_DISALLOW_COPY_AND_ASSIGN(AndroidContextGL);
 };
 
-}  // namespace shell
+}  // namespace flutter
 
 #endif  // FLUTTER_SHELL_PLATFORM_ANDROID_ANDROID_CONTEXT_GL_H_

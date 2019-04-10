@@ -4,7 +4,7 @@
 
 #include "flutter/shell/platform/common/cpp/incoming_message_dispatcher.h"
 
-namespace shell {
+namespace flutter {
 
 IncomingMessageDispatcher::IncomingMessageDispatcher(
     FlutterDesktopMessengerRef messenger)
@@ -54,4 +54,4 @@ void IncomingMessageDispatcher::EnableInputBlockingForChannel(
   input_blocking_channels_.insert(channel);
 }
 
-}  // namespace shell
+}  // namespace flutter

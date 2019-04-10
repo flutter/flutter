@@ -23,9 +23,9 @@
 #include "third_party/skia/include/core/SkMatrix44.h"
 #include "third_party/skia/include/core/SkRect.h"
 
-namespace shell {
+namespace flutter {
 class AccessibilityBridge;
-}  // namespace shell
+}  // namespace flutter
 
 @class FlutterPlatformViewSemanticsContainer;
 
@@ -50,7 +50,7 @@ class AccessibilityBridge;
  * object may use the bridge to access contextual application information. A weak pointer is used
  * because the platform view owns the accessibility bridge.
  */
-@property(nonatomic, readonly) fml::WeakPtr<shell::AccessibilityBridge> bridge;
+@property(nonatomic, readonly) fml::WeakPtr<flutter::AccessibilityBridge> bridge;
 
 /**
  * The semantics node used to produce this semantics object.
@@ -83,7 +83,7 @@ class AccessibilityBridge;
 #pragma mark - Designated initializers
 
 - (instancetype)init __attribute__((unavailable("Use initWithBridge instead")));
-- (instancetype)initWithBridge:(fml::WeakPtr<shell::AccessibilityBridge>)bridge
+- (instancetype)initWithBridge:(fml::WeakPtr<flutter::AccessibilityBridge>)bridge
                            uid:(int32_t)uid NS_DESIGNATED_INITIALIZER;
 
 @end
@@ -132,7 +132,7 @@ class AccessibilityBridge;
 
 @end
 
-namespace shell {
+namespace flutter {
 class PlatformViewIOS;
 
 class AccessibilityBridge final {
@@ -180,6 +180,6 @@ class AccessibilityBridge final {
   FML_DISALLOW_COPY_AND_ASSIGN(AccessibilityBridge);
 };
 
-}  // namespace shell
+}  // namespace flutter
 
 #endif  // SHELL_PLATFORM_IOS_FRAMEWORK_SOURCE_ACCESSIBILITY_BRIDGE_H_

@@ -8,7 +8,7 @@
 #include "flutter/fml/macros.h"
 #include "flutter/shell/common/vsync_waiter.h"
 
-namespace shell {
+namespace flutter {
 
 class VsyncWaiterEmbedder final : public VsyncWaiter {
  public:
@@ -26,12 +26,12 @@ class VsyncWaiterEmbedder final : public VsyncWaiter {
  private:
   const VsyncCallback vsync_callback_;
 
-  // |shell::VsyncWaiter|
+  // |VsyncWaiter|
   void AwaitVSync() override;
 
   FML_DISALLOW_COPY_AND_ASSIGN(VsyncWaiterEmbedder);
 };
 
-}  // namespace shell
+}  // namespace flutter
 
 #endif  // SHELL_PLATFORM_EMBEDDER_VSYNC_WAITER_EMBEDDER_H_

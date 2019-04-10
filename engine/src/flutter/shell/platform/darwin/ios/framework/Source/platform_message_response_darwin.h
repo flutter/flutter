@@ -16,7 +16,7 @@
 
 typedef void (^PlatformMessageResponseCallback)(NSData*);
 
-namespace shell {
+namespace flutter {
 
 class PlatformMessageResponseDarwin : public flutter::PlatformMessageResponse {
  public:
@@ -36,6 +36,6 @@ class PlatformMessageResponseDarwin : public flutter::PlatformMessageResponse {
   FML_FRIEND_MAKE_REF_COUNTED(PlatformMessageResponseDarwin);
 };
 
-}  // namespace shell
+}  // namespace flutter
 
 #endif  // FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_PLATFORM_MESSAGE_RESPONSE_DARWIN_H_

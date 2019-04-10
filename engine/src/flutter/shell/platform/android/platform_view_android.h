@@ -18,7 +18,7 @@
 #include "flutter/shell/platform/android/android_native_window.h"
 #include "flutter/shell/platform/android/android_surface.h"
 
-namespace shell {
+namespace flutter {
 
 class PlatformViewAndroid final : public PlatformView {
  public:
@@ -42,7 +42,7 @@ class PlatformViewAndroid final : public PlatformView {
 
   void NotifyChanged(const SkISize& size);
 
-  // |shell::PlatformView|
+  // |PlatformView|
   void NotifyDestroyed() override;
 
   void DispatchPlatformMessage(JNIEnv* env,
@@ -81,28 +81,28 @@ class PlatformViewAndroid final : public PlatformView {
   std::unordered_map<int, fml::RefPtr<flutter::PlatformMessageResponse>>
       pending_responses_;
 
-  // |shell::PlatformView|
+  // |PlatformView|
   void UpdateSemantics(
       flutter::SemanticsNodeUpdates update,
       flutter::CustomAccessibilityActionUpdates actions) override;
 
-  // |shell::PlatformView|
+  // |PlatformView|
   void HandlePlatformMessage(
       fml::RefPtr<flutter::PlatformMessage> message) override;
 
-  // |shell::PlatformView|
+  // |PlatformView|
   void OnPreEngineRestart() const override;
 
-  // |shell::PlatformView|
+  // |PlatformView|
   std::unique_ptr<VsyncWaiter> CreateVSyncWaiter() override;
 
-  // |shell::PlatformView|
+  // |PlatformView|
   std::unique_ptr<Surface> CreateRenderingSurface() override;
 
-  // |shell::PlatformView|
+  // |PlatformView|
   sk_sp<GrContext> CreateResourceContext() const override;
 
-  // |shell::PlatformView|
+  // |PlatformView|
   void ReleaseResourceContext() const override;
 
   void InstallFirstFrameCallback();
@@ -112,6 +112,6 @@ class PlatformViewAndroid final : public PlatformView {
   FML_DISALLOW_COPY_AND_ASSIGN(PlatformViewAndroid);
 };
 
-}  // namespace shell
+}  // namespace flutter
 
 #endif  // SHELL_PLATFORM_ANDROID_PLATFORM_VIEW_ANDROID_H_

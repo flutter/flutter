@@ -6,7 +6,7 @@
 
 #include "flutter/runtime/dart_vm.h"
 
-namespace shell {
+namespace flutter {
 namespace testing {
 
 static std::unique_ptr<fml::Mapping> GetMapping(const fml::UniqueFD& directory,
@@ -137,4 +137,4 @@ EmbedderContext::GetUpdateSemanticsCustomActionCallbackHook() {
 }
 
 }  // namespace testing
-}  // namespace shell
+}  // namespace flutter

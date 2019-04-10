@@ -23,7 +23,7 @@
 #include "flutter/shell/common/switches.h"
 #include "third_party/dart/runtime/include/dart_tools_api.h"
 
-namespace shell {
+namespace flutter {
 
 extern "C" {
 #if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
@@ -148,4 +148,4 @@ bool FlutterMain::Register(JNIEnv* env) {
   return env->RegisterNatives(clazz, methods, arraysize(methods)) == 0;
 }
 
-}  // namespace shell
+}  // namespace flutter

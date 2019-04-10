@@ -14,7 +14,7 @@
 #include "flutter/fml/platform/darwin/scoped_nsobject.h"
 #include "flutter/shell/common/platform_view.h"
 
-namespace shell {
+namespace flutter {
 
 class IOSGLRenderTarget {
  public:
@@ -52,6 +52,6 @@ class IOSGLRenderTarget {
   FML_DISALLOW_COPY_AND_ASSIGN(IOSGLRenderTarget);
 };
 
-}  // namespace shell
+}  // namespace flutter
 
 #endif  // FLUTTER_SHELL_PLATFORM_DARWIN_IOS_IOS_GL_RENDER_TARGET_H_

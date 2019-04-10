@@ -7,7 +7,7 @@
 #include "flutter/fml/make_copyable.h"
 #include "flutter/runtime/dart_vm.h"
 
-namespace shell {
+namespace flutter {
 
 IsolateConfiguration::IsolateConfiguration() = default;
 
@@ -27,7 +27,7 @@ class AppSnapshotIsolateConfiguration final : public IsolateConfiguration {
  public:
   AppSnapshotIsolateConfiguration() = default;
 
-  // |shell::IsolateConfiguration|
+  // |IsolateConfiguration|
   bool DoPrepareIsolate(flutter::DartIsolate& isolate) override {
     return isolate.PrepareForRunningFromPrecompiledCode();
   }
@@ -41,7 +41,7 @@ class KernelIsolateConfiguration : public IsolateConfiguration {
   KernelIsolateConfiguration(std::unique_ptr<const fml::Mapping> kernel)
       : kernel_(std::move(kernel)) {}
 
-  // |shell::IsolateConfiguration|
+  // |IsolateConfiguration|
   bool DoPrepareIsolate(flutter::DartIsolate& isolate) override {
     if (flutter::DartVM::IsRunningPrecompiledCode()) {
       return false;
@@ -62,7 +62,7 @@ class KernelListIsolateConfiguration final : public IsolateConfiguration {
           kernel_pieces)
       : kernel_pieces_(std::move(kernel_pieces)) {}
 
-  // |shell::IsolateConfiguration|
+  // |IsolateConfiguration|
   bool DoPrepareIsolate(flutter::DartIsolate& isolate) override {
     if (flutter::DartVM::IsRunningPrecompiledCode()) {
       return false;
@@ -219,4 +219,4 @@ std::unique_ptr<IsolateConfiguration> IsolateConfiguration::CreateForKernelList(
       std::move(kernel_pieces));
 }
 
-}  // namespace shell
+}  // namespace flutter

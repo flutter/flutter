@@ -13,7 +13,7 @@
 #include "flutter/fml/synchronization/thread_annotations.h"
 #include "flutter/fml/time/time_point.h"
 
-namespace shell {
+namespace flutter {
 
 class VsyncWaiter : public std::enable_shared_from_this<VsyncWaiter> {
  public:
@@ -56,6 +56,6 @@ class VsyncWaiter : public std::enable_shared_from_this<VsyncWaiter> {
   FML_DISALLOW_COPY_AND_ASSIGN(VsyncWaiter);
 };
 
-}  // namespace shell
+}  // namespace flutter
 
 #endif  // FLUTTER_SHELL_COMMON_VSYNC_WAITER_H_

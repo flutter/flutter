@@ -13,7 +13,7 @@
 #include "third_party/skia/include/utils/SkEventTracer.h"
 #include "third_party/skia/include/utils/SkTraceEventPhase.h"
 
-namespace skia {
+namespace flutter {
 
 class FlutterEventTracer : public SkEventTracer {
  public:
@@ -120,14 +120,15 @@ bool enableSkiaTracingCallback(const char* method,
   return true;
 }
 
-}  // namespace skia
-
 void InitSkiaEventTracer(bool enabled) {
-  skia::FlutterEventTracer* tracer = new skia::FlutterEventTracer(enabled);
+  // TODO(chinmaygarde): Leaked https://github.com/flutter/flutter/issues/30808.
+  auto tracer = new FlutterEventTracer(enabled);
   Dart_RegisterRootServiceRequestCallback("_flutter.enableSkiaTracing",
-                                          skia::enableSkiaTracingCallback,
+                                          enableSkiaTracingCallback,
                                           static_cast<void*>(tracer));
   // Initialize the binding to Skia's tracing events. Skia will
   // take ownership of and clean up the memory allocated here.
   SkEventTracer::SetInstance(tracer);
 }
+
+}  // namespace flutter

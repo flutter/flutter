@@ -15,7 +15,7 @@
 #include "flutter/fml/unique_fd.h"
 #include "third_party/skia/include/gpu/GrContextOptions.h"
 
-namespace shell {
+namespace flutter {
 
 class PersistentCache : public GrContextOptions::PersistentCache {
  public:
@@ -72,6 +72,6 @@ class PersistentCache : public GrContextOptions::PersistentCache {
   FML_DISALLOW_COPY_AND_ASSIGN(PersistentCache);
 };
 
-}  // namespace shell
+}  // namespace flutter
 
 #endif  // FLUTTER_SHELL_COMMON_PERSISTENT_CACHE_H_
