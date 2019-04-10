@@ -58,7 +58,7 @@ class TextRange {
   String textBefore(String text) {
     assert(isNormalized);
     if(text.isNotEmpty && start > 0 && start < text.length ){
-      var startCodeUnit = text.codeUnitAt(start);
+      final int startCodeUnit = text.codeUnitAt(start);
       if( startCodeUnit & 0x8C00 == 0x8C00 ){
         return text.substring(0,start -1);
       }
@@ -71,7 +71,7 @@ class TextRange {
   String textAfter(String text) {
     assert(isNormalized);
     if(text.isNotEmpty && end > 0 && end < text.length){
-      var endCodeUnit = text.codeUnitAt(end);
+      final int endCodeUnit = text.codeUnitAt(end);
       if(endCodeUnit & 0x8C00 == 0x8C00 ){
         return text.substring(end -1);
       }
