@@ -83,11 +83,37 @@ class TabController extends ChangeNotifier {
       assert(initialIndex != null && initialIndex >= 0 && (length == 0 || initialIndex < length)),
       _index = initialIndex,
       _previousIndex = initialIndex,
-      _animationController = length < 2 ? null : AnimationController(
+      _animationController = AnimationController.unbounded(
         value: initialIndex.toDouble(),
-        upperBound: (length - 1).toDouble(),
         vsync: vsync,
       );
+
+  // Private constructor used by `copyWith`. This allows a new TabController to
+  // be created without having to create a new animationController.
+  TabController._({
+    int index,
+    int previousIndex,
+    AnimationController animationController,
+    @required this.length,
+  }) : _index = index, _previousIndex = previousIndex, _animationController = animationController;
+
+
+  /// Creates a new [TabController] with `index` and `length` if they are
+  /// non-null.
+  ///
+  /// This will reuse the existing [_previousIndex] and [_animationController].
+  ///
+  /// This is useful for [DefaultTabController], for example when
+  /// [DefaultTabController.length] is updated, this method is called so that a
+  /// new [TabController] is created without having to create a new [AnimationController].
+  TabController copyWith({ int index, int length }) {
+    return TabController._(
+      index: index ?? _index,
+      length: length ?? this.length,
+      animationController: _animationController,
+      previousIndex: _previousIndex,
+    );
+  }
 
   /// An animation whose value represents the current position of the [TabBar]'s
   /// selected tab indicator as well as the scrollOffsets of the [TabBar]
@@ -175,9 +201,8 @@ class TabController extends ChangeNotifier {
   /// drags left or right. A value between -1.0 and 0.0 implies that the
   /// TabBarView has been dragged to the left. Similarly a value between
   /// 0.0 and 1.0 implies that the TabBarView has been dragged to the right.
-  double get offset => length > 1 ? _animationController.value - _index.toDouble() : 0.0;
+  double get offset => _animationController.value - _index.toDouble();
   set offset(double value) {
-    assert(length > 1);
     assert(value != null);
     assert(value >= -1.0 && value <= 1.0);
     assert(!indexIsChanging);
@@ -322,12 +347,14 @@ class _DefaultTabControllerState extends State<DefaultTabController> with Single
   @override
   void didUpdateWidget(DefaultTabController oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.initialIndex != widget.initialIndex || oldWidget.length != widget.length) {
-      _controller = TabController(
-        vsync: this,
-        length: widget.length,
-        initialIndex: widget.initialIndex,
-      );
+    if (oldWidget.length != widget.length) {
+      // If the length is shortened while the last tab is selected, we should
+      // automatically update the index of the controller to be the new last tab.
+      int newIndex;
+      if (_controller.index >= widget.length) {
+        newIndex = widget.length - 1;
+      }
+      _controller = _controller.copyWith(length: widget.length, index: newIndex);
     }
   }
 }

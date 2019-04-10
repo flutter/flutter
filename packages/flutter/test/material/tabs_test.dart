@@ -640,7 +640,7 @@ void main() {
     expect(tabController.previousIndex, 1);
     expect(tabController.indexIsChanging, false);
     expect(tabController.animation.value, 1.0);
-    expect(tabController.animation.status, AnimationStatus.completed);
+    expect(tabController.animation.status, AnimationStatus.forward);
 
     tabController.index = 0;
     await tester.pump(const Duration(milliseconds: 500));
