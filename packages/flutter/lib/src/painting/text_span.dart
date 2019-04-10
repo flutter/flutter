@@ -66,16 +66,16 @@ class TextSpan extends LayoutSpan {
     String text,
     this.children,
     GestureRecognizer recognizer,
-  }) : super(text: text, style: style, recognizer: recognizer);
-
-  // /// The style to apply to the [text] and the [children].
-  // final TextStyle style;
+  }) : _text = text,
+       super(style: style, recognizer: recognizer);
 
   // /// The text contained in the span.
   // ///
   // /// If both [text] and [children] are non-null, the text will precede the
   // /// children.
-  // final String text;
+  @override
+  String get text => _text;
+  final String _text;
 
   /// Additional spans to include as children.
   ///

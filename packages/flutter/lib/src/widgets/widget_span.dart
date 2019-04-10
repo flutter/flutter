@@ -148,7 +148,7 @@ class WidgetSpan extends PlaceholderSpan {
   RenderComparison compareTo(LayoutSpan other) {
     if (identical(this, other))
       return RenderComparison.identical;
-    if (!(other.runtimeType is WidgetSpan))
+    if (other.runtimeType is! WidgetSpan)
       return RenderComparison.layout;
     final WidgetSpan typedOther = other;
     if (typedOther.widget != widget)

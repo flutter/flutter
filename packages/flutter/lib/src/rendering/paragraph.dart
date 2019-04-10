@@ -264,10 +264,12 @@ class RenderParagraph extends RenderBox
     if (!_canComputeIntrinsics())
       return 0;
     if (_needsLayout) {
-    }
       _computeChildrenWidthWithMinIntrinsics(height);
       _layoutText();
-    return _textPainter.minIntrinsicWidth;
+      _needsLayout = true; // Purposefully not markNeedsLayout(). Does not call super.
+    }
+    double minWidth = _textPainter.minIntrinsicWidth;
+    return minWidth;
   }
 
   @override
@@ -275,10 +277,12 @@ class RenderParagraph extends RenderBox
     if (!_canComputeIntrinsics())
       return 0;
     if (_needsLayout) {
-    }
       _computeChildrenWidthWithMaxIntrinsics(height);
       _layoutText(); // layout with infinite width.
-    return _textPainter.maxIntrinsicWidth;
+      _needsLayout = true; // Purposefully not markNeedsLayout(). Does not call super.
+    }
+    double maxWidth = _textPainter.maxIntrinsicWidth;
+    return maxWidth;
   }
 
   double _computeIntrinsicHeight(double width) {
@@ -286,7 +290,9 @@ class RenderParagraph extends RenderBox
       return 0;
     _computeChildrenHeightWithMinIntrinsics(width);
     _layoutText(minWidth: width, maxWidth: width);
-    return _textPainter.height;
+    _needsLayout = true; // Purposefully not markNeedsLayout(). Does not call super.
+    double height = _textPainter.height;
+    return height;
   }
 
   @override
