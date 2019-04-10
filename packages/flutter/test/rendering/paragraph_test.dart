@@ -324,4 +324,5 @@ void main() {
     paragraph.locale = const Locale('ja', 'JP');
     expect(paragraph.locale, const Locale('ja', 'JP'));
   });
+
 }
