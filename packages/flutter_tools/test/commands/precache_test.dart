@@ -9,13 +9,10 @@ import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:mockito/mockito.dart';
 
-import '../src/common.dart';
 import '../src/context.dart';
 import '../src/mocks.dart';
 
 void main() {
-  final MockDeviceManager mockDeviceManager = MockDeviceManager();
-
   group('precache', () {
     final MockCache cache = MockCache();
     Set<DevelopmentArtifact> artifacts;
@@ -23,7 +20,7 @@ void main() {
     when(cache.isUpToDate()).thenReturn(false);
     when(cache.updateAll(any)).thenAnswer((Invocation invocation) {
       artifacts = invocation.positionalArguments.first;
-      return Future.value(null);
+      return Future<Null>.value(null);
     });
 
     testUsingContext('Adds artifact flags to requested artifacts', () async {
