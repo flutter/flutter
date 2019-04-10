@@ -438,6 +438,40 @@ class SliderThemeData extends Diagnosticable {
     );
   }
 
+  /// Creates a new [SliderThemeData] where each value from this object has been
+  /// merged with the matching value from the [other] object.
+  ///
+  /// For all values except [valueIndicatorTextStyle], the field on the
+  /// [SliderThemeData] calling [merge] is used if non-null. The
+  /// [valueIndicatorTextStyle] is merged by calling its own [merge]. For each
+  /// null field, the value from [other[ is used.
+  SliderThemeData merge(SliderThemeData other) {
+    if (other == null)
+      return this;
+    return copyWith(
+      trackHeight: trackHeight ?? other.trackHeight,
+      activeTrackColor: activeTrackColor ?? other.activeTrackColor,
+      inactiveTrackColor: inactiveTrackColor ?? other.inactiveTrackColor,
+      disabledActiveTrackColor: disabledActiveTrackColor ?? other.disabledActiveTrackColor,
+      disabledInactiveTrackColor: disabledInactiveTrackColor ?? other.disabledInactiveTrackColor,
+      activeTickMarkColor: activeTickMarkColor ?? other.activeTickMarkColor,
+      inactiveTickMarkColor: inactiveTickMarkColor ?? other.inactiveTickMarkColor,
+      disabledActiveTickMarkColor: disabledActiveTickMarkColor ?? other.disabledActiveTickMarkColor,
+      disabledInactiveTickMarkColor: disabledInactiveTickMarkColor ?? other.disabledInactiveTickMarkColor,
+      thumbColor: thumbColor ?? other.thumbColor,
+      disabledThumbColor: disabledThumbColor ?? other.disabledThumbColor,
+      overlayColor: overlayColor ?? other.overlayColor,
+      valueIndicatorColor: valueIndicatorColor ?? other.valueIndicatorColor,
+      trackShape: trackShape ?? other.trackShape,
+      tickMarkShape: tickMarkShape ?? other.tickMarkShape,
+      thumbShape: thumbShape ?? other.thumbShape,
+      overlayShape: overlayShape ?? other.overlayShape,
+      valueIndicatorShape: valueIndicatorShape ?? other.valueIndicatorShape,
+      showValueIndicator: showValueIndicator ?? other.showValueIndicator,
+      valueIndicatorTextStyle: valueIndicatorTextStyle?.merge(other.valueIndicatorTextStyle) ?? other.valueIndicatorTextStyle,
+    );
+  }
+
   /// Linearly interpolate between two slider themes.
   ///
   /// The arguments must not be null.
