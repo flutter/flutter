@@ -166,7 +166,7 @@ class TextSpan extends DiagnosticableTree {
   /// text value:
   ///
   /// ```dart
-  /// TextSpan(r'$$', semanticsLabel: 'Double dollars')
+  /// TextSpan(text: r'$$', semanticsLabel: 'Double dollars')
   /// ```
   final String semanticsLabel;
 
