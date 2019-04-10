@@ -166,6 +166,7 @@ class GestureDetector extends StatelessWidget {
     this.onTapUp,
     this.onTap,
     this.onTapCancel,
+    this.onSecondaryTapDown,
     this.onDoubleTap,
     this.onDoubleTapUp,
     this.onLongPress,
@@ -271,6 +272,21 @@ class GestureDetector extends StatelessWidget {
   /// This is called after [onTapDown], and instead of [onTapUp] and [onTap], if
   /// the tap gesture did not win.
   final GestureTapCancelCallback onTapCancel;
+
+  /// A pointer that might cause a tap has contacted the screen at a particular
+  /// location. Only responds to secondary buttons.
+  ///
+  /// This is called after a short timeout, even if the winning gesture has not
+  /// yet been selected.
+  /// 
+  /// It does not respond when a stylus touches the screen while its secondary button
+  /// is pressed, since screen touching is counted as a button and fails button
+  /// check.
+  /// 
+  /// See also:
+  ///
+  ///  * [kSecondaryMouseButton], which is the button this callback responds to.
+  final GestureTapDownCallback onSecondaryTapDown;
 
   /// The user has tapped the screen at the same location twice in quick
   /// succession. Only responds to primary buttons.
@@ -541,16 +557,19 @@ class GestureDetector extends StatelessWidget {
   Widget build(BuildContext context) {
     final Map<Type, GestureRecognizerFactory> gestures = <Type, GestureRecognizerFactory>{};
 
-    if (onTapDown != null || onTapUp != null || onTap != null || onTapCancel != null) {
+    if (onTapDown != null || onTapUp != null || onTap != null || onTapCancel != null || onSecondaryTapDown != null) {
       gestures[TapGestureRecognizer] = GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
         () => TapGestureRecognizer(debugOwner: this),
         (TapGestureRecognizer instance) {
           instance
             ..onTapDown = (TapDownDetails details) {
-              if (details.buttons != kPrimaryButton)
-                return;
-              if (onTapDown != null)
-                onTapDown(details);
+              if (details.buttons == kPrimaryButton) {
+                if (onTapDown != null)
+                  onTapDown(details);
+              } else if (details.buttons == kSecondaryMouseButton) {
+                if (onSecondaryTapDown != null)
+                  onSecondaryTapDown(details);
+              }
             }
             ..onTapUp = (TapUpDetails details) {
               if (details.buttons != kPrimaryButton)
