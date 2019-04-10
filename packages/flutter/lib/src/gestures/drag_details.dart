@@ -185,10 +185,12 @@ class DragEndDetails {
   DragEndDetails({
     this.velocity = Velocity.zero,
     this.primaryVelocity,
+    this.buttons = kPrimaryButton,
   }) : assert(velocity != null),
        assert(primaryVelocity == null
            || primaryVelocity == velocity.pixelsPerSecond.dx
-           || primaryVelocity == velocity.pixelsPerSecond.dy);
+           || primaryVelocity == velocity.pixelsPerSecond.dy),
+       assert(buttons != null);
 
   /// The velocity the pointer was moving when it stopped contacting the screen.
   ///
@@ -206,6 +208,10 @@ class DragEndDetails {
   ///
   /// Defaults to null if not specified in the constructor.
   final double primaryVelocity;
+
+  /// The buttons pressed when the pointer contacted the screen (changing buttons
+  /// during a drag cancels the gesture.)
+  final int buttons;
 
   @override
   String toString() => '$runtimeType($velocity)';
