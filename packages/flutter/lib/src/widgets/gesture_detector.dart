@@ -167,6 +167,7 @@ class GestureDetector extends StatelessWidget {
     this.onTap,
     this.onTapCancel,
     this.onDoubleTap,
+    this.onDoubleTapUp,
     this.onLongPress,
     this.onLongPressStart,
     this.onLongPressMoveUpdate,
@@ -244,61 +245,84 @@ class GestureDetector extends StatelessWidget {
   /// winning. If the tap gesture did not win, [onTapCancel] is called instead.
   final GestureTapUpCallback onTapUp;
 
-  /// A tap has occurred.
+  /// A tap has occurred. Limited to primary buttons.
   ///
   /// This triggers when the tap gesture wins. If the tap gesture did not win,
   /// [onTapCancel] is called instead.
   ///
   /// See also:
   ///
-  ///  * [onTapUp], which is called at the same time but includes details
-  ///    regarding the pointer position.
+  ///  * [kPrimaryButton], which is the buttons this callback is limited to.
+  ///  * [onTapUp], which is called at the same time but limited to primary
+  ///    buttons, and includes details regarding the pointer position and buttons.
   final GestureTapCallback onTap;
 
   /// The pointer that previously triggered [onTapDown] will not end up causing
-  /// a tap.
+  /// a tap. It accepts any buttons.
   ///
   /// This is called after [onTapDown], and instead of [onTapUp] and [onTap], if
   /// the tap gesture did not win.
   final GestureTapCancelCallback onTapCancel;
 
   /// The user has tapped the screen at the same location twice in quick
-  /// succession.
-  final GestureTapCallback onDoubleTap;
+  /// succession. Limited to primary buttons.
+  /// 
+  /// It triggers when the pointer stops contacting the device at the second tap. 
+  ///
+  /// See also:
+  ///
+  ///  * [kPrimaryButton], which is the buttons this callback is limited to.
+  ///  * [onDoubleTapUp], which is called at the same time but has no button 
+  ///    limitation, and includes details regarding buttons.
+  final GestureDoubleTapCallback onDoubleTap;
+
+  /// The user has tapped the screen at the same location twice in quick
+  /// succession. It accepts any buttons (two taps must still use the same button.)
+  /// 
+  /// It triggers when the pointer stops contacting the device at the second tap.
+  ///
+  /// See also:
+  ///
+  ///  * [onDoubleTapUp], which is called at the same time but limited to primary
+  ///    buttons, and doesn't include details. 
+  final GestureDoubleTapUpCallback onDoubleTapUp;
 
   /// Called when a long press gesture has been recognized.
   ///
   /// Triggered when a pointer has remained in contact with the screen at the
-  /// same location for a long period of time.
+  /// same location for a long period of time. Limited to primary buttons.
   ///
   /// See also:
   ///
+  ///  * [kPrimaryButton], which is the buttons this callback is limited to.
   ///  * [onLongPressStart], which has the same timing but has data for the
-  ///    press location.
+  ///    press location and triggering buttons.
   final GestureLongPressCallback onLongPress;
 
-  /// Callback for long press start with gesture location.
+  /// Callback for long press start with gesture location. It accepts any buttons.
   ///
   /// Triggered when a pointer has remained in contact with the screen at the
   /// same location for a long period of time.
   ///
   /// See also:
   ///
-  ///  * [onLongPress], which has the same timing but without the location data.
+  ///  * [onLongPress], which has the same timing but without the details data.
   final GestureLongPressStartCallback onLongPressStart;
 
   /// A pointer has been drag-moved after a long press.
   final GestureLongPressMoveUpdateCallback onLongPressMoveUpdate;
 
   /// A pointer that has triggered a long-press has stopped contacting the screen.
+  /// It accepts any buttons.
   ///
   /// See also:
   ///
   ///  * [onLongPressEnd], which has the same timing but has data for the up
-  ///    gesture location.
+  ///    gesture location and triggering buttons.
   final GestureLongPressUpCallback onLongPressUp;
 
   /// A pointer that has triggered a long-press has stopped contacting the screen.
+  /// It accepts any buttons.
   ///
   /// See also:
   ///
@@ -446,8 +470,12 @@ class GestureDetector extends StatelessWidget {
         (TapGestureRecognizer instance) {
           instance
             ..onTapDown = onTapDown
-            ..onTapUp = onTapUp
-            ..onTap = onTap
+            ..onTapUp = (TapUpDetails details) {
+              if (onTapUp != null)
+                onTapUp(details);
+              if (details.buttons == kPrimaryButton && onTap != null)
+                onTap();
+            }
             ..onTapCancel = onTapCancel;
         },
       );
@@ -458,7 +486,12 @@ class GestureDetector extends StatelessWidget {
         () => DoubleTapGestureRecognizer(debugOwner: this),
         (DoubleTapGestureRecognizer instance) {
           instance
-            ..onDoubleTap = onDoubleTap;
+            ..onDoubleTapUp = (DoubleTapUpDetails details) {
+              if (onDoubleTapUp != null)
+                onDoubleTapUp(details);
+              if (details.buttons == kPrimaryButton && onDoubleTap != null)
+                onDoubleTap();
+            };
         },
       );
     }
@@ -472,8 +505,12 @@ class GestureDetector extends StatelessWidget {
         () => LongPressGestureRecognizer(debugOwner: this),
         (LongPressGestureRecognizer instance) {
           instance
-            ..onLongPress = onLongPress
-            ..onLongPressStart = onLongPressStart
+            ..onLongPressStart = (LongPressStartDetails details) {
+              if (onLongPressStart != null)
+                onLongPressStart(details);
+              if (details.buttons == kPrimaryButton && onLongPress != null)
+                onLongPress();
+            }
             ..onLongPressMoveUpdate = onLongPressMoveUpdate
             ..onLongPressEnd =onLongPressEnd
             ..onLongPressUp = onLongPressUp;
