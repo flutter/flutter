@@ -21,13 +21,13 @@ namespace flutter {
 class RunConfiguration {
  public:
   static RunConfiguration InferFromSettings(
-      const flutter::Settings& settings,
+      const Settings& settings,
       fml::RefPtr<fml::TaskRunner> io_worker = nullptr);
 
   RunConfiguration(std::unique_ptr<IsolateConfiguration> configuration);
 
   RunConfiguration(std::unique_ptr<IsolateConfiguration> configuration,
-                   std::shared_ptr<flutter::AssetManager> asset_manager);
+                   std::shared_ptr<AssetManager> asset_manager);
 
   RunConfiguration(RunConfiguration&&);
 
@@ -35,13 +35,13 @@ class RunConfiguration {
 
   bool IsValid() const;
 
-  bool AddAssetResolver(std::unique_ptr<flutter::AssetResolver> resolver);
+  bool AddAssetResolver(std::unique_ptr<AssetResolver> resolver);
 
   void SetEntrypoint(std::string entrypoint);
 
   void SetEntrypointAndLibrary(std::string entrypoint, std::string library);
 
-  std::shared_ptr<flutter::AssetManager> GetAssetManager() const;
+  std::shared_ptr<AssetManager> GetAssetManager() const;
 
   const std::string& GetEntrypoint() const;
 
@@ -51,7 +51,7 @@ class RunConfiguration {
 
  private:
   std::unique_ptr<IsolateConfiguration> isolate_configuration_;
-  std::shared_ptr<flutter::AssetManager> asset_manager_;
+  std::shared_ptr<AssetManager> asset_manager_;
   std::string entrypoint_ = "main";
   std::string entrypoint_library_ = "";
 

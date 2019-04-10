@@ -44,7 +44,7 @@ static std::unique_ptr<fml::Mapping> GetMapping(const fml::UniqueFD& directory,
   return mapping;
 }
 
-void ShellTest::SetSnapshotsAndAssets(flutter::Settings& settings) {
+void ShellTest::SetSnapshotsAndAssets(Settings& settings) {
   if (!assets_dir_.is_valid()) {
     return;
   }
@@ -53,7 +53,7 @@ void ShellTest::SetSnapshotsAndAssets(flutter::Settings& settings) {
 
   // In JIT execution, all snapshots are present within the binary itself and
   // don't need to be explicitly suppiled by the embedder.
-  if (flutter::DartVM::IsRunningPrecompiledCode()) {
+  if (DartVM::IsRunningPrecompiledCode()) {
     settings.vm_snapshot_data = [this]() {
       return GetMapping(assets_dir_, "vm_snapshot_data", false);
     };
@@ -62,7 +62,7 @@ void ShellTest::SetSnapshotsAndAssets(flutter::Settings& settings) {
       return GetMapping(assets_dir_, "isolate_snapshot_data", false);
     };
 
-    if (flutter::DartVM::IsRunningPrecompiledCode()) {
+    if (DartVM::IsRunningPrecompiledCode()) {
       settings.vm_snapshot_instr = [this]() {
         return GetMapping(assets_dir_, "vm_snapshot_instr", true);
       };
@@ -81,8 +81,8 @@ void ShellTest::SetSnapshotsAndAssets(flutter::Settings& settings) {
   }
 }
 
-flutter::Settings ShellTest::CreateSettingsForFixture() {
-  flutter::Settings settings;
+Settings ShellTest::CreateSettingsForFixture() {
+  Settings settings;
   settings.task_observer_add = [](intptr_t key, fml::closure handler) {
     fml::MessageLoop::GetCurrent().AddTaskObserver(key, handler);
   };
@@ -96,7 +96,7 @@ flutter::Settings ShellTest::CreateSettingsForFixture() {
   return settings;
 }
 
-flutter::TaskRunners ShellTest::GetTaskRunnersForFixture() {
+TaskRunners ShellTest::GetTaskRunnersForFixture() {
   return {
       "test",
       thread_host_->platform_thread->GetTaskRunner(),  // platform

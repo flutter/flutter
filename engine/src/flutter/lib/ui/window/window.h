@@ -88,7 +88,7 @@ class Window final {
 
   // We use id 0 to mean that no response is expected.
   int next_response_id_ = 1;
-  std::unordered_map<int, fml::RefPtr<flutter::PlatformMessageResponse>>
+  std::unordered_map<int, fml::RefPtr<PlatformMessageResponse>>
       pending_responses_;
 };
 

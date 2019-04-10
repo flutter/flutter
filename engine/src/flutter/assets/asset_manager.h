@@ -25,10 +25,10 @@ class AssetManager final : public AssetResolver {
 
   void PushBack(std::unique_ptr<AssetResolver> resolver);
 
-  // |flutter::AssetResolver|
+  // |AssetResolver|
   bool IsValid() const override;
 
-  // |flutter::AssetResolver|
+  // |AssetResolver|
   std::unique_ptr<fml::Mapping> GetAsMapping(
       const std::string& asset_name) const override;
 

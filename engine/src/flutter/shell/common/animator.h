@@ -27,13 +27,13 @@ class Animator final {
     virtual void OnAnimatorNotifyIdle(int64_t deadline) = 0;
 
     virtual void OnAnimatorDraw(
-        fml::RefPtr<flutter::Pipeline<flow::LayerTree>> pipeline) = 0;
+        fml::RefPtr<Pipeline<flow::LayerTree>> pipeline) = 0;
 
     virtual void OnAnimatorDrawLastLayerTree() = 0;
   };
 
   Animator(Delegate& delegate,
-           flutter::TaskRunners task_runners,
+           TaskRunners task_runners,
            std::unique_ptr<VsyncWaiter> waiter);
 
   ~Animator();
@@ -55,7 +55,7 @@ class Animator final {
   void EnqueueTraceFlowId(uint64_t trace_flow_id);
 
  private:
-  using LayerTreePipeline = flutter::Pipeline<flow::LayerTree>;
+  using LayerTreePipeline = Pipeline<flow::LayerTree>;
 
   void BeginFrame(fml::TimePoint frame_start_time,
                   fml::TimePoint frame_target_time);
@@ -68,13 +68,13 @@ class Animator final {
   const char* FrameParity();
 
   Delegate& delegate_;
-  flutter::TaskRunners task_runners_;
+  TaskRunners task_runners_;
   std::shared_ptr<VsyncWaiter> waiter_;
 
   fml::TimePoint last_begin_frame_time_;
   int64_t dart_frame_deadline_;
   fml::RefPtr<LayerTreePipeline> layer_tree_pipeline_;
-  flutter::Semaphore pending_frame_semaphore_;
+  Semaphore pending_frame_semaphore_;
   LayerTreePipeline::ProducerContinuation producer_continuation_;
   int64_t frame_number_;
   bool paused_;

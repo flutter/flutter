@@ -14,7 +14,7 @@ namespace flutter {
 
 class VsyncWaiterFallback final : public VsyncWaiter {
  public:
-  VsyncWaiterFallback(flutter::TaskRunners task_runners);
+  VsyncWaiterFallback(TaskRunners task_runners);
 
   ~VsyncWaiterFallback() override;
 

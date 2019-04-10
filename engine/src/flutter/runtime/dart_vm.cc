@@ -385,15 +385,14 @@ DartVM::DartVM(std::shared_ptr<const DartVMData> vm_data,
     // the very first frame gives us a good idea about Flutter's startup time.
     // Use a duration event so about:tracing will consider this event when
     // deciding the earliest event to use as time 0.
-    if (flutter::engine_main_enter_ts != 0) {
-      Dart_TimelineEvent(
-          "FlutterEngineMainEnter",       // label
-          flutter::engine_main_enter_ts,  // timestamp0
-          flutter::engine_main_enter_ts,  // timestamp1_or_async_id
-          Dart_Timeline_Event_Duration,   // event type
-          0,                              // argument_count
-          nullptr,                        // argument_names
-          nullptr                         // argument_values
+    if (engine_main_enter_ts != 0) {
+      Dart_TimelineEvent("FlutterEngineMainEnter",  // label
+                         engine_main_enter_ts,      // timestamp0
+                         engine_main_enter_ts,      // timestamp1_or_async_id
+                         Dart_Timeline_Event_Duration,  // event type
+                         0,                             // argument_count
+                         nullptr,                       // argument_names
+                         nullptr                        // argument_values
       );
     }
   }

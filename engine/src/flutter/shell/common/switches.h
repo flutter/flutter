@@ -148,7 +148,7 @@ void PrintUsage(const std::string& executable_name);
 
 const fml::StringView FlagForSwitch(Switch swtch);
 
-flutter::Settings SettingsFromCommandLine(const fml::CommandLine& command_line);
+Settings SettingsFromCommandLine(const fml::CommandLine& command_line);
 
 }  // namespace flutter
 

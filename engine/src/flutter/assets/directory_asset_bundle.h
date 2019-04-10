@@ -22,10 +22,10 @@ class DirectoryAssetBundle : public AssetResolver {
   const fml::UniqueFD descriptor_;
   bool is_valid_ = false;
 
-  // |flutter::AssetResolver|
+  // |AssetResolver|
   bool IsValid() const override;
 
-  // |flutter::AssetResolver|
+  // |AssetResolver|
   std::unique_ptr<fml::Mapping> GetAsMapping(
       const std::string& asset_name) const override;
 

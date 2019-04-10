@@ -23,7 +23,7 @@ static constexpr const char* kVsyncTraceName = "VSYNC";
 
 static constexpr const char* kVsyncFlowName = "VsyncFlow";
 
-VsyncWaiter::VsyncWaiter(flutter::TaskRunners task_runners)
+VsyncWaiter::VsyncWaiter(TaskRunners task_runners)
     : task_runners_(std::move(task_runners)) {}
 
 VsyncWaiter::~VsyncWaiter() = default;
