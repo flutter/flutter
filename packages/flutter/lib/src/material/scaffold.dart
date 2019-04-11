@@ -1466,7 +1466,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
   void _maybeBuildPersistentBottomSheet() {
     if (widget.bottomSheet != null && _currentBottomSheet == null) {
-      final ResetNotifier _notifier = ResetNotifier();
       // The new _currentBottomSheet is not a local history entry so a "back" button
       // will not be added to the Scaffold's appbar and the bottom sheet will not
       // support drag or swipe to dismiss.
@@ -1477,7 +1476,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
           if (_persistentSheetHistoryEntry == null) {
             _persistentSheetHistoryEntry = LocalHistoryEntry(onRemove: () {
               if (notification.extent > notification.initialExtent) {
-                _notifier.sendReset();
+                DraggableScrollableSheetResetter.reset(notification.context);
               }
               showBodyScrim(false, 0.0);
               floatingActionButtonVisibilityValue = 1.0;
@@ -1495,9 +1494,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         (BuildContext context) {
           return NotificationListener<ExtentNotification>(
             onNotification: _persistentBottomSheetExtentChanged,
-            child: InheritedResetNotifier(
+            child: DraggableScrollableSheetResetter(
               child: widget.bottomSheet,
-              notifier: _notifier,
             ),
           );
         },

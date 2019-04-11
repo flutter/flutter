@@ -174,8 +174,6 @@ void main() {
 
     expect(find.text('Item 2'), findsOneWidget);
     expect(find.text('Item 22'), findsNothing);
-    // We've started to drag up, we should have a back button now for a11y
-    expect(find.byType(BackButton).hitTestable(), findsOneWidget);
     expect(find.byType(FloatingActionButton), findsOneWidget);
     expect(find.byType(FloatingActionButton).hitTestable(), findsOneWidget);
 
@@ -184,9 +182,69 @@ void main() {
 
     expect(find.text('Item 2'), findsNothing);
     expect(find.text('Item 22'), findsOneWidget);
-    expect(find.byType(BackButton).hitTestable(), findsOneWidget);
     expect(find.byType(FloatingActionButton), findsOneWidget);
     expect(find.byType(FloatingActionButton).hitTestable(), findsNothing);
+  });
+
+  testWidgets('Verify that a back button resets a persistent BottomSheet', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(),
+          body: const Center(child: Text('body')),
+          bottomSheet: DraggableScrollableSheet(
+            expand: false,
+            builder: (_, ScrollController controller) {
+              return ListView.builder(
+                itemExtent: 50.0,
+                itemCount: 50,
+                itemBuilder: (_, int index) => Text('Item $index'),
+                controller: controller,
+              );
+            },
+          ),
+          floatingActionButton: const FloatingActionButton(
+            onPressed: null,
+            child: Text('fab'),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(find.text('Item 2'), findsOneWidget);
+    expect(find.text('Item 22'), findsNothing);
+    expect(find.byType(BackButton).hitTestable(), findsNothing);
+
+    await tester.drag(find.text('Item 2'), const Offset(0, -20.0));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Item 2'), findsOneWidget);
+    expect(find.text('Item 22'), findsNothing);
+    // We've started to drag up, we should have a back button now for a11y
+    expect(find.byType(BackButton).hitTestable(), findsOneWidget);
+
+    await tester.tap(find.byType(BackButton));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(BackButton).hitTestable(), findsNothing);
+    expect(find.text('Item 2'), findsOneWidget);
+    expect(find.text('Item 22'), findsNothing);
+
+    await tester.fling(find.text('Item 2'), const Offset(0.0, -600.0), 2000.0);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Item 2'), findsNothing);
+    expect(find.text('Item 22'), findsOneWidget);
+    expect(find.byType(BackButton).hitTestable(), findsOneWidget);
+
+    await tester.tap(find.byType(BackButton));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(BackButton).hitTestable(), findsNothing);
+    expect(find.text('Item 2'), findsOneWidget);
+    expect(find.text('Item 22'), findsNothing);
   });
 
   testWidgets('Verify that a scrollable BottomSheet hides the fab when scrolled up', (WidgetTester tester) async {
