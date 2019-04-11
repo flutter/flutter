@@ -27,18 +27,18 @@ class _BasicAppBarSampleState extends State<BasicAppBarSample> {
         appBar: AppBar(
           title: const Text('Basic AppBar'),
           actions: <Widget>[
+            // action button
             IconButton(
-              // action button
               icon: Icon(choices[0].icon),
               onPressed: () { _select(choices[0]); },
             ),
+            // action button
             IconButton(
-              // action button
               icon: Icon(choices[1].icon),
               onPressed: () { _select(choices[1]); },
             ),
+            // overflow menu
             PopupMenuButton<Choice>(
-              // overflow menu
               onSelected: _select,
               itemBuilder: (BuildContext context) {
                 return choices.skip(2).map<PopupMenuItem<Choice>>((Choice choice) {

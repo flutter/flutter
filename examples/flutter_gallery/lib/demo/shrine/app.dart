@@ -108,19 +108,17 @@ ThemeData _buildShrineTheme() {
 }
 
 TextTheme _buildShrineTextTheme(TextTheme base) {
-  return base
-      .copyWith(
-        headline: base.headline.copyWith(fontWeight: FontWeight.w500),
-        title: base.title.copyWith(fontSize: 18.0),
-        caption: base.caption.copyWith(fontWeight: FontWeight.w400, fontSize: 14.0),
-        body2: base.body2.copyWith(fontWeight: FontWeight.w500, fontSize: 16.0),
-        button: base.button.copyWith(fontWeight: FontWeight.w500, fontSize: 14.0),
-      )
-      .apply(
-        fontFamily: 'Raleway',
-        displayColor: kShrineBrown900,
-        bodyColor: kShrineBrown900,
-      );
+  return base.copyWith(
+    headline: base.headline.copyWith(fontWeight: FontWeight.w500),
+    title: base.title.copyWith(fontSize: 18.0),
+    caption: base.caption.copyWith(fontWeight: FontWeight.w400, fontSize: 14.0),
+    body2: base.body2.copyWith(fontWeight: FontWeight.w500, fontSize: 16.0),
+    button: base.button.copyWith(fontWeight: FontWeight.w500, fontSize: 14.0),
+  ).apply(
+    fontFamily: 'Raleway',
+    displayColor: kShrineBrown900,
+    bodyColor: kShrineBrown900,
+  );
 }
 
 const ColorScheme kShrineColorScheme = ColorScheme(
