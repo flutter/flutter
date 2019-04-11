@@ -508,7 +508,6 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
       // Intrinsic cross size is the max of the intrinsic cross sizes of the
       // children, after the flexible children are fit into the available space,
       // with the children sized using their max intrinsic dimensions.
-      // TODO(ianh): Support baseline alignment.
 
       // Get inflexible space using the max intrinsic dimensions of fixed children in the main direction.
       final double availableMainSpace = extent;
@@ -750,6 +749,8 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     if (totalFlex > 0 || crossAxisAlignment == CrossAxisAlignment.baseline) {
       final double spacePerFlex = canFlex && totalFlex > 0 ? (freeSpace / totalFlex) : double.nan;
       child = firstChild;
+      double maxSizeAboveBaseline = 0;
+      double maxSizeBelowBaseline = 0;
       while (child != null) {
         final int flex = _getFlex(child);
         if (flex > 0) {
@@ -809,8 +810,18 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
             return true;
           }());
           final double distance = child.getDistanceToBaseline(textBaseline, onlyReal: true);
-          if (distance != null)
+          if (distance != null) {
             maxBaselineDistance = math.max(maxBaselineDistance, distance);
+            maxSizeAboveBaseline = math.max(
+              distance,
+              maxSizeAboveBaseline,
+            );
+            maxSizeBelowBaseline = math.max(
+              child.size.height - distance,
+              maxSizeBelowBaseline,
+            );
+            crossSize = maxSizeAboveBaseline + maxSizeBelowBaseline;
+          }
         }
         final FlexParentData childParentData = child.parentData;
         child = childParentData.nextSibling;

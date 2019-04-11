@@ -1058,8 +1058,7 @@ class _RenderDecoration extends RenderBox {
 
   @override
   double computeDistanceToActualBaseline(TextBaseline baseline) {
-    assert(false, 'not implemented');
-    return 0.0;
+    return _boxParentData(input).offset.dy + input.computeDistanceToActualBaseline(baseline);
   }
 
   // Records where the label was painted.
