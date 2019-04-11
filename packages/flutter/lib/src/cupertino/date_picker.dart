@@ -540,7 +540,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
 
   Widget _buildMinutePicker(double offAxisFraction, TransitionBuilder itemPositioningBuilder) {
     return CupertinoPicker(
-      scrollController: FixedExtentScrollController(initialItem: selectedMinute),
+      scrollController: FixedExtentScrollController(initialItem: selectedMinute ~/ widget.minuteInterval),
       offAxisFraction: offAxisFraction,
       itemExtent: _kItemExtent,
       useMagnifier: _kUseMagnifier,
