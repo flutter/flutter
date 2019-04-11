@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show Gradient, Shader, TextBox, Offsetff;
+import 'dart:ui' as ui show Gradient, Shader, TextBox, Offsetff, PlaceholderAlignment;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -310,9 +310,9 @@ class RenderParagraph extends RenderBox
   /// alignments that require the baseline.
   bool _canComputeIntrinsics() {
     for (PlaceholderSpan span in _placeholderSpans) {
-      if (span.alignment == InlineWidgetAlignment.baseline ||
-          span.alignment == InlineWidgetAlignment.aboveBaseline ||
-          span.alignment == InlineWidgetAlignment.belowBaseline) {
+      if (span.alignment == ui.PlaceholderAlignment.baseline ||
+          span.alignment == ui.PlaceholderAlignment.aboveBaseline ||
+          span.alignment == ui.PlaceholderAlignment.belowBaseline) {
         assert(RenderObject.debugCheckingIntrinsics, 'Intrinsics are invalid');
         return false;
       }
@@ -448,7 +448,7 @@ class RenderParagraph extends RenderBox
         size: child.size,
         alignment: _placeholderSpans[childIndex].alignment,
         baseline: _placeholderSpans[childIndex].baseline,
-        baselineOffset: _placeholderSpans[childIndex].alignment == InlineWidgetAlignment.baseline ? child.getDistanceToBaseline(TextBaseline.alphabetic) : null,
+        baselineOffset: _placeholderSpans[childIndex].alignment == ui.PlaceholderAlignment.baseline ? child.getDistanceToBaseline(TextBaseline.alphabetic) : null,
       );
       child = childAfter(child);
       childIndex++;

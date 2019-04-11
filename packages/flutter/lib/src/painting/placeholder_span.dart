@@ -43,7 +43,7 @@ abstract class PlaceholderSpan extends LayoutSpan {
   /// A [TextStyle] may be provided with the [style] property, but only the
   /// decoration, foreground, background, and spacing options will be used.
   const PlaceholderSpan({
-    InlineWidgetAlignment alignment = InlineWidgetAlignment.bottom,
+    ui.PlaceholderAlignment alignment = ui.PlaceholderAlignment.bottom,
     TextBaseline baseline,
     TextStyle style,
     GestureRecognizer recognizer,
@@ -51,7 +51,24 @@ abstract class PlaceholderSpan extends LayoutSpan {
        baseline = baseline,
        super(style: style, recognizer: recognizer);
 
-  final InlineWidgetAlignment alignment;
+  /// How the placeholder aligns vertically with the text.
+  ///
+  /// See [ui.PlaceholderAlignment] for details on each mode.
+  final ui.PlaceholderAlignment alignment;
 
+  /// The [TextBaseline] to align against when using [ui.PlaceholderAlignment.baseline],
+  /// [ui.PlaceholderAlignment.aboveBaseline], and [ui.PlaceholderAlignment.belowBaseline].
+  ///
+  /// This is ignored when using other alignment modes.
   final TextBaseline baseline;
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.defaultDiagnosticsTreeStyle = DiagnosticsTreeStyle.whitespace;
+    // Properties on style are added as if they were properties directly on
+    // this LayoutSpan.
+    properties.add(EnumProperty<ui.PlaceholderAlignment>('alignment', alignment, defaultValue: null));
+    properties.add(EnumProperty<TextBaseline>('baseline', baseline, defaultValue: null));
+  }
 }

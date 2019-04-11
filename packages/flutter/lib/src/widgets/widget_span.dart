@@ -9,6 +9,44 @@ import 'package:flutter/gestures.dart';
 
 import 'framework.dart';
 
+/// Where to vertically align the widget relative to the surrounding text.
+///
+/// This is parallel to [ui.PlaceholderAignment], but refers to widgets.
+enum InlineWidgetAlignment {
+  /// Match the baseline of the widget with the baseline specified in
+  /// [WidgetSpan.baseline]. Using widget-baseline alignment results in
+  /// the inability to use min/max intrinsic width/height on the entire
+  /// [RenderParagraph] due to the requirement that layout be called before
+  /// getting the baseline.
+  ///
+  /// This is useful when aligning text-based inline widgets such as
+  /// [TextField]s and will ensure the text will line up correctly.
+  baseline,
+
+  /// Align the bottom edge of the widget with the baseline specified in
+  /// [WidgetSpan.baseline] such that the widget sits on top of the baseline.
+  aboveBaseline,
+
+  /// Align the top edge of the widget with the baseline specified in
+  /// [WidgetSpan.baseline] such that the widget hangs below the baseline.
+  belowBaseline,
+
+  /// Align the top edge of the widget with the top edge of the font specified
+  /// in [WidgetSpan.style]. When the widget is very tall, the extra space
+  /// will hang from the top and extend through the bottom of the line.
+  top,
+
+  /// Align the bottom edge of the widget with the top edge of the font specified
+  /// in [WidgetSpan.style]. When the widget is very tall, the extra space
+  /// will rise from the bottom and extend through the top of the line.
+  bottom,
+
+  /// Align the middle of the placeholder with the middle of the text. When the
+  /// widget is very tall, the extra space will grow equally from the top and
+  /// bottom of the line.
+  middle,
+}
+
 /// An immutable widget that is embedded inline within text.
 ///
 /// The [widget] property is the widget that will be embedded. It is the
@@ -75,8 +113,18 @@ class WidgetSpan extends PlaceholderSpan {
                alignment == InlineWidgetAlignment.belowBaseline ||
                alignment == InlineWidgetAlignment.baseline) ? baseline != null : true),
        widget = widget,
-       super(alignment: alignment, baseline: baseline, style: style, recognizer: recognizer);
+       super(alignment:
+           // Convert InlineWidgetAlignment to PlaceholderAlignment in a const fashion.
+           alignment == InlineWidgetAlignment.baseline ? ui.PlaceholderAlignment.baseline :
+           alignment == InlineWidgetAlignment.aboveBaseline ? ui.PlaceholderAlignment.aboveBaseline :
+           alignment == InlineWidgetAlignment.belowBaseline ? ui.PlaceholderAlignment.belowBaseline :
+           alignment == InlineWidgetAlignment.top ? ui.PlaceholderAlignment.top :
+           alignment == InlineWidgetAlignment.bottom ? ui.PlaceholderAlignment.bottom :
+           alignment == InlineWidgetAlignment.middle ? ui.PlaceholderAlignment.middle : null,
+         baseline: baseline, style: style, recognizer: recognizer
+       );
 
+  /// The widget to embed inline with text.
   final Widget widget;
 
   /// Adds a placeholder box to the paragraph builder if a size has been
@@ -100,25 +148,13 @@ class WidgetSpan extends PlaceholderSpan {
       builder.addPlaceholder(
         currentDimensions.size.width,
         currentDimensions.size.height,
-        _inlineWidgetAlignmentToPlaceholderAlignment(alignment),
+        alignment,
         baseline: currentDimensions.baseline,
         baselineOffset: currentDimensions.baselineOffset,
       );
     }
     if (hasStyle)
       builder.pop();
-  }
-
-  static ui.PlaceholderAlignment _inlineWidgetAlignmentToPlaceholderAlignment(InlineWidgetAlignment widgetAlignment) {
-    switch (widgetAlignment) {
-      case InlineWidgetAlignment.baseline: return ui.PlaceholderAlignment.baseline;
-      case InlineWidgetAlignment.aboveBaseline: return ui.PlaceholderAlignment.aboveBaseline;
-      case InlineWidgetAlignment.belowBaseline: return ui.PlaceholderAlignment.belowBaseline;
-      case InlineWidgetAlignment.top: return ui.PlaceholderAlignment.top;
-      case InlineWidgetAlignment.bottom: return ui.PlaceholderAlignment.bottom;
-      case InlineWidgetAlignment.middle: return ui.PlaceholderAlignment.middle;
-    }
-    return null;
   }
 
   /// Calls visitor on this [WidgetSpan]. There are no children spans to walk.

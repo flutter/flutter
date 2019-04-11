@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' show min, max;
-import 'dart:ui' as ui show Paragraph, ParagraphBuilder, ParagraphConstraints, ParagraphStyle, Rect, Size;
+import 'dart:ui' as ui show Paragraph, ParagraphBuilder, ParagraphConstraints, ParagraphStyle, Rect, Size, PlaceholderAlignment;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -15,42 +15,6 @@ import 'strut_style.dart';
 import 'text_span.dart';
 
 export 'package:flutter/services.dart' show TextRange, TextSelection;
-
-/// Where to vertically align the widget relative to the surrounding text.
-enum InlineWidgetAlignment {
-  /// Match the baseline of the widget with the baseline specified in
-  /// [WidgetSpan.baseline]. Using widget-baseline alignment results in
-  /// the inability to use min/max intrinsic width/height on the entire
-  /// [RenderParagraph] due to the requirement that layout be called before
-  /// getting the baseline.
-  ///
-  /// This is useful when aligning text-based inline widgets such as
-  /// [TextField]s and will ensure the text will line up correctly.
-  baseline,
-
-  /// Align the bottom edge of the widget with the baseline specified in
-  /// [WidgetSpan.baseline] such that the widget sits on top of the baseline.
-  aboveBaseline,
-
-  /// Align the top edge of the widget with the baseline specified in
-  /// [WidgetSpan.baseline] such that the widget hangs below the baseline.
-  belowBaseline,
-
-  /// Align the top edge of the widget with the top edge of the font specified
-  /// in [WidgetSpan.style]. When the widget is very tall, the extra space
-  /// will hang from the top and extend through the bottom of the line.
-  top,
-
-  /// Align the bottom edge of the widget with the top edge of the font specified
-  /// in [WidgetSpan.style]. When the widget is very tall, the extra space
-  /// will rise from the bottom and extend through the top of the line.
-  bottom,
-
-  /// Align the middle of the placeholder with the middle of the text. When the
-  /// widget is very tall, the extra space will grow equally from the top and
-  /// bottom of the line.
-  middle,
-}
 
 /// Holds the [Size] and baseline required to represent the dimensions of
 /// a placeholder in text.
@@ -78,18 +42,18 @@ class PlaceholderDimensions {
   Size size;
 
   /// How to align the placeholder with the text.
-  InlineWidgetAlignment alignment;
+  ui.PlaceholderAlignment alignment;
 
   /// Distance of the alphabetic baseline from the upper edge of the placeholder.
   ///
-  /// Only used when [alignment] is [InlineWidgetAlignment.baseline].
+  /// Only used when [alignment] is [ui.PlaceholderAlignment.baseline].
   double baselineOffset;
 
   /// The [TextBaseline] to align to. Used with:
-  ///  * [InlineWidgetAlignment.baseline]
-  ///  * [InlineWidgetAlignment.aboveBaseline]
-  ///  * [InlineWidgetAlignment.underBaseline]
-  ///  * [InlineWidgetAlignment.middle]
+  ///  * [ui.PlaceholderAlignment.baseline]
+  ///  * [ui.PlaceholderAlignment.aboveBaseline]
+  ///  * [ui.PlaceholderAlignment.underBaseline]
+  ///  * [ui.PlaceholderAlignment.middle]
   TextBaseline baseline;
 
   @override

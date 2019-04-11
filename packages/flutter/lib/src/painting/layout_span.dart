@@ -12,19 +12,16 @@ import 'basic_types.dart';
 import 'text_style.dart';
 import 'text_painter.dart';
 
-/// An immutable span of content. [LayoutSpan]s do not contain content directly and
-/// should be instances of [TextSpan] or [WidgetSpan] to properly represent content.
+/// An immutable span of content which form a paragraph.
 ///
-/// Widgets may be embedded inline. Specify a widget within the [TextSpan.children]
-/// tree by wrapping the widget with a [WidgetSpan]. The widget will be laid
-/// out inline within the paragraph.
+/// The subclass [TextSpan] specifies text and may contain child [LayoutSpan]s.
+///
+/// [WidgetSpan] specifies embedded inline widgets. Specify a widget by wrapping
+/// the widget with a [WidgetSpan]. The widget will be laid out inline within
+/// the paragraph.
 ///
 /// See also:
 ///
-///  * [TextSpan], a [LayoutSpan] node that represents text in a [LayoutSpan] tree. Only [TextSpan]
-///    may have children nodes.
-///  * [WidgetSpan], a leaf [LayoutSpan] node that represents an embedded inline widget
-///    in a [LayoutSpan] tree.
 ///  * [Text], a widget for showing uniformly-styled text.
 ///  * [RichText], a widget for finer control of text rendering.
 ///  * [TextPainter], a class for painting [LayoutSpan] objects on a [Canvas].
@@ -38,12 +35,6 @@ abstract class LayoutSpan extends DiagnosticableTree {
 
   /// The style to apply to this span and any children.
   final TextStyle style;
-
-  static T asType<T>(LayoutSpan span) {
-    if (span is! T)
-      return null;
-    return span as T;
-  }
 
   /// A gesture recognizer that will receive events that hit this span.
   ///
@@ -96,11 +87,11 @@ abstract class LayoutSpan extends DiagnosticableTree {
   ///   @override
   ///   Widget build(BuildContext context) {
   ///     return RichText(
-  ///       text: LayoutSpan(
+  ///       text: TextSpan(
   ///         text: 'Can you ',
   ///         style: TextStyle(color: Colors.black),
   ///         children: <LayoutSpan>[
-  ///           LayoutSpan(
+  ///           TextSpan(
   ///             text: 'find the',
   ///             style: TextStyle(
   ///               color: Colors.green,
@@ -109,7 +100,7 @@ abstract class LayoutSpan extends DiagnosticableTree {
   ///             ),
   ///             recognizer: _longPressRecognizer,
   ///           ),
-  ///           LayoutSpan(
+  ///           TextSpan(
   ///             text: ' secret?',
   ///           ),
   ///         ],
@@ -121,20 +112,29 @@ abstract class LayoutSpan extends DiagnosticableTree {
   /// {@end-tool}
   final GestureRecognizer recognizer;
 
-  /// Apply the [style], [text], and [children] of this object to the
-  /// given [ParagraphBuilder], from which a [Paragraph] can be obtained.
-  /// [Paragraph] objects can be drawn on [Canvas] objects.
+  /// Utility method to convert LayoutSpan into [TextSpan] or [WidgetSpan].
   ///
-  /// Rather than using this directly, it's simpler to use the
-  /// [TextPainter] class to paint [TextSpan] objects onto [Canvas]
-  /// objects.
+  /// Will return null if span is not of type T or null. Otherwise, return
+  /// the span cast as T. Values of T that are not subclasses of [LayoutSpan]
+  /// will result in null.
+  static T asType<T>(LayoutSpan span) {
+    if (span is! T)
+      return null;
+    return span as T;
+  }
+
+  /// Apply the properties of this object to the given [ParagraphBuilder], from
+  /// which a [Paragraph] can be obtained. [Paragraph] objects can be drawn on
+  /// [Canvas] objects.
   void build(ui.ParagraphBuilder builder, { double textScaleFactor = 1.0, List<PlaceholderDimensions> dimensions });
 
-  /// Walks this text span and any descendants in pre-order and calls [visitor]
+  /// Walks this LayoutSpan and any descendants in pre-order and calls [visitor]
   /// for each span that has content.
   ///
   /// When [visitor] returns true, the walk will continue. When [visitor] returns
   /// false, then the walk will end.
+  ///
+  /// The type of the span may be checked using [asType].
   bool visitLayoutSpan(bool visitor(LayoutSpan span));
 
   /// Returns the text span that contains the given position in the text.
