@@ -275,8 +275,11 @@ Future<LaunchResult> _startApp(DriveCommand command) async {
     prebuiltApplication: !command.shouldBuild,
     usesTerminalUi: false,
   );
+  print('value of result is $result');
+  print('whew');
 
   if (!result.started) {
+    print('hi there');
     await command._deviceLogSubscription.cancel();
     return null;
   }

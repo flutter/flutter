@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -20,6 +21,74 @@ import '../src/context.dart';
 import '../src/mocks.dart';
 
 void main() {
+  group('AppStarter', () {
+    DriveCommand command;
+    Device mockDevice;
+    MemoryFileSystem fs;
+    Directory tempDir;
+
+    testUsingContext('yolo', () async {
+      Cache.disableLocking();
+      command = DriveCommand();
+      fs = MemoryFileSystem();
+      applyMocksToCommand(command);
+      tempDir = fs.systemTempDirectory.createTempSync('flutter_drive_test.');
+      fs.currentDirectory = tempDir;
+      fs.directory('test').createSync();
+      fs.directory('test_driver').createSync();
+      fs.file('pubspec.yaml')..createSync();
+      fs.file('.packages').createSync();
+      setExitFunctionForTests();
+      targetDeviceFinder = () {
+        throw 'Unexpected call to targetDeviceFinder';
+      };
+      //appStarter = (DriveCommand command) {
+      //  throw 'Unexpected call to appStarter';
+      //};
+      testRunner = (List<String> testArgs, String observatoryUri) {
+        throw 'Unexpected call to testRunner';
+      };
+      appStopper = (DriveCommand command) {
+        throw 'Unexpected call to appStopper';
+      };
+      mockDevice = MockDevice();
+      targetDeviceFinder = () async => mockDevice;
+      testDeviceManager.addDevice(mockDevice);
+
+      final String testApp = fs.path.join(tempDir.path, 'test', 'e2e.dart');
+      final String testFile = fs.path.join(tempDir.path, 'test_driver', 'e2e_test.dart');
+
+      //appStarter = expectAsync1((DriveCommand command) async {
+      //  return LaunchResult.succeeded();
+      //});
+      testRunner = (List<String> testArgs, String observatoryUri) async {
+        throwToolExit(null, exitCode: 123);
+      };
+      appStopper = expectAsync1((DriveCommand command) async {
+        return true;
+      });
+
+      final MemoryFileSystem memFs = fs;
+      await memFs.file(testApp).writeAsString('main() {}');
+      await memFs.file(testFile).writeAsString('main() {}');
+
+      final List<String> args = <String>[
+        'drive',
+        '--no-build',
+        '--target=$testApp',
+      ];
+      try {
+        await createTestCommandRunner(command).run(args);
+      } on ToolExit catch (e) {
+        print('Yolo!');
+        print(e.exitCode);
+        print(e.message);
+      }
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+    });
+  });
+
   group('drive', () {
     DriveCommand command;
     Device mockDevice;
@@ -297,7 +366,16 @@ void main() {
 class MockDevice extends Mock implements Device {
   MockDevice() {
     when(isSupported()).thenReturn(true);
+    when(getLogReader()).thenReturn(MockDeviceLogReader());
   }
 }
+
+class MockDeviceLogReader extends Mock implements DeviceLogReader {
+  MockDeviceLogReader() {
+    when(logLines).thenReturn(MockStream());
+  }
+}
+
+class MockStream extends Mock implements Stream<String> { }
 
 class MockAndroidDevice extends Mock implements AndroidDevice { }
