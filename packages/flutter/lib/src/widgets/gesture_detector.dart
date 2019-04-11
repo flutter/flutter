@@ -986,8 +986,14 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
   void _handleSemanticsLongPress() {
     final LongPressGestureRecognizer recognizer = _recognizers[LongPressGestureRecognizer];
     assert(recognizer != null);
+    if (recognizer.onLongPressStart != null)
+      recognizer.onLongPressStart(LongPressStartDetails());
     if (recognizer.onLongPress != null)
       recognizer.onLongPress();
+    if (recognizer.onLongPressEnd != null)
+      recognizer.onLongPressEnd(LongPressEndDetails());
+    if (recognizer.onLongPressUp != null)
+      recognizer.onLongPressUp();
   }
 
   void _handleSemanticsHorizontalDragUpdate(DragUpdateDetails updateDetails) {
