@@ -788,4 +788,539 @@ void main() {
       matchesGoldenFile('text_golden.TextInlineWidgetNest.1.0.png'),
     );
   }, skip: !Platform.isLinux); // Coretext uses different thicknesses for decoration
+
+  testWidgets('Text Inline widget baseline', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Center(
+        child: RepaintBoundary(
+          child: Material(
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: Container(
+                width: 400.0,
+                height: 200.0,
+                decoration: const BoxDecoration(
+                  color: Color(0xff00ff00),
+                ),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minWidth: 0, maxWidth: 200, minHeight: 0, maxHeight: 100),
+                  child: RichText(
+                    text: TextSpan(
+                      text: 'C ',
+                      style: TextStyle(
+                        fontSize: 16,
+                      ),
+                      children: <InlineSpan>[
+                        WidgetSpan(
+                          alignment: InlineWidgetAlignment.baseline,
+                          baseline: TextBaseline.alphabetic,
+                          widget: Checkbox(value: true, onChanged: (bool value) {}),
+                        ),
+                        WidgetSpan(
+                          widget: Checkbox(value: false, onChanged: (bool value) {}),
+                        ),
+                        TextSpan(text: 'He ', style: TextStyle(fontSize: 20)),
+                        WidgetSpan(
+                          alignment: InlineWidgetAlignment.baseline,
+                          baseline: TextBaseline.alphabetic,
+                          widget: SizedBox(
+                            width: 50.0,
+                            height: 55.0,
+                            child: DecoratedBox(
+                              decoration: const BoxDecoration(
+                                color: Color(0xffffff00),
+                              ),
+                              child: Center(
+                                child:SizedBox(
+                                  width: 10.0,
+                                  height: 15.0,
+                                  child: DecoratedBox(
+                                    decoration: const BoxDecoration(
+                                      color: Color(0xffff0000),
+                                    ),
+                                  )
+                                ),
+                              ),
+                            )
+                          ),
+                        ),
+                        TextSpan(text: 'hello world! sieze the day!'),
+                        WidgetSpan(
+                          alignment: InlineWidgetAlignment.baseline,
+                          baseline: TextBaseline.alphabetic,
+                          widget: Checkbox(value: false, onChanged: (bool value) {}),
+                        ),
+                        WidgetSpan(
+                          alignment: InlineWidgetAlignment.baseline,
+                          baseline: TextBaseline.alphabetic,
+                          widget: SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: Checkbox(value: true, onChanged: (bool value) {}),
+                          )
+                        ),
+                        WidgetSpan(
+                          alignment: InlineWidgetAlignment.baseline,
+                          baseline: TextBaseline.alphabetic,
+                          widget: Checkbox(value: false, onChanged: (bool value) {}),
+                        ),
+                        WidgetSpan(
+                          alignment: InlineWidgetAlignment.baseline,
+                          baseline: TextBaseline.alphabetic,
+                          widget: SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: Checkbox(value: true, onChanged: (bool value) {}),
+                          )
+                        ),
+                        WidgetSpan(
+                          alignment: InlineWidgetAlignment.baseline,
+                          baseline: TextBaseline.alphabetic,
+                          widget: Text('embedded'),
+                        ),
+                        TextSpan(text: 'ref'),
+                      ],
+                    ),
+                    textDirection: TextDirection.ltr,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await expectLater(
+      find.byType(Container),
+      matchesGoldenFile('text_golden.TextInlineWidgetBaseline.1.0.png'),
+    );
+  }, skip: !Platform.isLinux); // Coretext uses different thicknesses for decoration
+
+  testWidgets('Text Inline widget aboveBaseline', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Center(
+        child: RepaintBoundary(
+          child: Material(
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: Container(
+                width: 400.0,
+                height: 200.0,
+                decoration: const BoxDecoration(
+                  color: Color(0xff00ff00),
+                ),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minWidth: 0, maxWidth: 200, minHeight: 0, maxHeight: 100),
+                  child: RichText(
+                    text: TextSpan(
+                      text: 'C ',
+                      style: TextStyle(
+                        fontSize: 16,
+                      ),
+                      children: <InlineSpan>[
+                        WidgetSpan(
+                          alignment: InlineWidgetAlignment.aboveBaseline,
+                          baseline: TextBaseline.alphabetic,
+                          widget: Checkbox(value: true, onChanged: (bool value) {}),
+                        ),
+                        WidgetSpan(
+                          widget: Checkbox(value: false, onChanged: (bool value) {}),
+                        ),
+                        TextSpan(text: 'He ', style: TextStyle(fontSize: 20)),
+                        WidgetSpan(
+                          alignment: InlineWidgetAlignment.aboveBaseline,
+                          baseline: TextBaseline.alphabetic,
+                          widget: SizedBox(
+                            width: 50.0,
+                            height: 55.0,
+                            child: DecoratedBox(
+                              decoration: const BoxDecoration(
+                                color: Color(0xffffff00),
+                              ),
+                              child: Center(
+                                child:SizedBox(
+                                  width: 10.0,
+                                  height: 15.0,
+                                  child: DecoratedBox(
+                                    decoration: const BoxDecoration(
+                                      color: Color(0xffff0000),
+                                    ),
+                                  )
+                                ),
+                              ),
+                            )
+                          ),
+                        ),
+                        TextSpan(text: 'hello world! sieze the day!'),
+                        WidgetSpan(
+                          alignment: InlineWidgetAlignment.aboveBaseline,
+                          baseline: TextBaseline.alphabetic,
+                          widget: Checkbox(value: false, onChanged: (bool value) {}),
+                        ),
+                        WidgetSpan(
+                          alignment: InlineWidgetAlignment.aboveBaseline,
+                          baseline: TextBaseline.alphabetic,
+                          widget: SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: Checkbox(value: true, onChanged: (bool value) {}),
+                          )
+                        ),
+                        WidgetSpan(
+                          alignment: InlineWidgetAlignment.aboveBaseline,
+                          baseline: TextBaseline.alphabetic,
+                          widget: Checkbox(value: false, onChanged: (bool value) {}),
+                        ),
+                        WidgetSpan(
+                          alignment: InlineWidgetAlignment.aboveBaseline,
+                          baseline: TextBaseline.alphabetic,
+                          widget: SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: Checkbox(value: true, onChanged: (bool value) {}),
+                          )
+                        ),
+                        WidgetSpan(
+                          alignment: InlineWidgetAlignment.aboveBaseline,
+                          baseline: TextBaseline.alphabetic,
+                          widget: Text('embedded'),
+                        ),
+                        TextSpan(text: 'ref'),
+                      ],
+                    ),
+                    textDirection: TextDirection.ltr,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await expectLater(
+      find.byType(Container),
+      matchesGoldenFile('text_golden.TextInlineWidgetAboveBaseline.1.0.png'),
+    );
+  }, skip: !Platform.isLinux); // Coretext uses different thicknesses for decoration
+
+  testWidgets('Text Inline widget belowBaseline', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Center(
+        child: RepaintBoundary(
+          child: Material(
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: Container(
+                width: 400.0,
+                height: 200.0,
+                decoration: const BoxDecoration(
+                  color: Color(0xff00ff00),
+                ),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minWidth: 0, maxWidth: 200, minHeight: 0, maxHeight: 100),
+                  child: RichText(
+                    text: TextSpan(
+                      text: 'C ',
+                      style: TextStyle(
+                        fontSize: 16,
+                      ),
+                      children: <InlineSpan>[
+                        WidgetSpan(
+                          alignment: InlineWidgetAlignment.belowBaseline,
+                          baseline: TextBaseline.alphabetic,
+                          widget: Checkbox(value: true, onChanged: (bool value) {}),
+                        ),
+                        WidgetSpan(
+                          widget: Checkbox(value: false, onChanged: (bool value) {}),
+                        ),
+                        TextSpan(text: 'He ', style: TextStyle(fontSize: 20)),
+                        WidgetSpan(
+                          alignment: InlineWidgetAlignment.belowBaseline,
+                          baseline: TextBaseline.alphabetic,
+                          widget: SizedBox(
+                            width: 50.0,
+                            height: 55.0,
+                            child: DecoratedBox(
+                              decoration: const BoxDecoration(
+                                color: Color(0xffffff00),
+                              ),
+                              child: Center(
+                                child:SizedBox(
+                                  width: 10.0,
+                                  height: 15.0,
+                                  child: DecoratedBox(
+                                    decoration: const BoxDecoration(
+                                      color: Color(0xffff0000),
+                                    ),
+                                  )
+                                ),
+                              ),
+                            )
+                          ),
+                        ),
+                        TextSpan(text: 'hello world! sieze the day!'),
+                        WidgetSpan(
+                          alignment: InlineWidgetAlignment.belowBaseline,
+                          baseline: TextBaseline.alphabetic,
+                          widget: Checkbox(value: false, onChanged: (bool value) {}),
+                        ),
+                        WidgetSpan(
+                          alignment: InlineWidgetAlignment.belowBaseline,
+                          baseline: TextBaseline.alphabetic,
+                          widget: SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: Checkbox(value: true, onChanged: (bool value) {}),
+                          )
+                        ),
+                        WidgetSpan(
+                          alignment: InlineWidgetAlignment.belowBaseline,
+                          baseline: TextBaseline.alphabetic,
+                          widget: Checkbox(value: false, onChanged: (bool value) {}),
+                        ),
+                        WidgetSpan(
+                          alignment: InlineWidgetAlignment.belowBaseline,
+                          baseline: TextBaseline.alphabetic,
+                          widget: SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: Checkbox(value: true, onChanged: (bool value) {}),
+                          )
+                        ),
+                        WidgetSpan(
+                          alignment: InlineWidgetAlignment.belowBaseline,
+                          baseline: TextBaseline.alphabetic,
+                          widget: Text('embedded'),
+                        ),
+                        TextSpan(text: 'ref'),
+                      ],
+                    ),
+                    textDirection: TextDirection.ltr,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await expectLater(
+      find.byType(Container),
+      matchesGoldenFile('text_golden.TextInlineWidgetBelowBaseline.1.0.png'),
+    );
+  }, skip: !Platform.isLinux); // Coretext uses different thicknesses for decoration
+
+  testWidgets('Text Inline widget top', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Center(
+        child: RepaintBoundary(
+          child: Material(
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: Container(
+                width: 400.0,
+                height: 200.0,
+                decoration: const BoxDecoration(
+                  color: Color(0xff00ff00),
+                ),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minWidth: 0, maxWidth: 200, minHeight: 0, maxHeight: 100),
+                  child: RichText(
+                    text: TextSpan(
+                      text: 'C ',
+                      style: TextStyle(
+                        fontSize: 16,
+                      ),
+                      children: <InlineSpan>[
+                        WidgetSpan(
+                          alignment: InlineWidgetAlignment.top,
+                          baseline: TextBaseline.alphabetic,
+                          widget: Checkbox(value: true, onChanged: (bool value) {}),
+                        ),
+                        WidgetSpan(
+                          widget: Checkbox(value: false, onChanged: (bool value) {}),
+                        ),
+                        TextSpan(text: 'He ', style: TextStyle(fontSize: 20)),
+                        WidgetSpan(
+                          alignment: InlineWidgetAlignment.top,
+                          baseline: TextBaseline.alphabetic,
+                          widget: SizedBox(
+                            width: 50.0,
+                            height: 55.0,
+                            child: DecoratedBox(
+                              decoration: const BoxDecoration(
+                                color: Color(0xffffff00),
+                              ),
+                              child: Center(
+                                child:SizedBox(
+                                  width: 10.0,
+                                  height: 15.0,
+                                  child: DecoratedBox(
+                                    decoration: const BoxDecoration(
+                                      color: Color(0xffff0000),
+                                    ),
+                                  )
+                                ),
+                              ),
+                            )
+                          ),
+                        ),
+                        TextSpan(text: 'hello world! sieze the day!'),
+                        WidgetSpan(
+                          alignment: InlineWidgetAlignment.top,
+                          baseline: TextBaseline.alphabetic,
+                          widget: Checkbox(value: false, onChanged: (bool value) {}),
+                        ),
+                        WidgetSpan(
+                          alignment: InlineWidgetAlignment.top,
+                          baseline: TextBaseline.alphabetic,
+                          widget: SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: Checkbox(value: true, onChanged: (bool value) {}),
+                          )
+                        ),
+                        WidgetSpan(
+                          alignment: InlineWidgetAlignment.top,
+                          baseline: TextBaseline.alphabetic,
+                          widget: Checkbox(value: false, onChanged: (bool value) {}),
+                        ),
+                        WidgetSpan(
+                          alignment: InlineWidgetAlignment.top,
+                          baseline: TextBaseline.alphabetic,
+                          widget: SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: Checkbox(value: true, onChanged: (bool value) {}),
+                          )
+                        ),
+                        WidgetSpan(
+                          alignment: InlineWidgetAlignment.top,
+                          baseline: TextBaseline.alphabetic,
+                          widget: Text('embedded'),
+                        ),
+                        TextSpan(text: 'ref'),
+                      ],
+                    ),
+                    textDirection: TextDirection.ltr,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await expectLater(
+      find.byType(Container),
+      matchesGoldenFile('text_golden.TextInlineWidgetTop.1.0.png'),
+    );
+  }, skip: !Platform.isLinux); // Coretext uses different thicknesses for decoration
+
+  testWidgets('Text Inline widget middle', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Center(
+        child: RepaintBoundary(
+          child: Material(
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: Container(
+                width: 400.0,
+                height: 200.0,
+                decoration: const BoxDecoration(
+                  color: Color(0xff00ff00),
+                ),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minWidth: 0, maxWidth: 200, minHeight: 0, maxHeight: 100),
+                  child: RichText(
+                    text: TextSpan(
+                      text: 'C ',
+                      style: TextStyle(
+                        fontSize: 16,
+                      ),
+                      children: <InlineSpan>[
+                        WidgetSpan(
+                          alignment: InlineWidgetAlignment.middle,
+                          baseline: TextBaseline.alphabetic,
+                          widget: Checkbox(value: true, onChanged: (bool value) {}),
+                        ),
+                        WidgetSpan(
+                          widget: Checkbox(value: false, onChanged: (bool value) {}),
+                        ),
+                        TextSpan(text: 'He ', style: TextStyle(fontSize: 20)),
+                        WidgetSpan(
+                          alignment: InlineWidgetAlignment.middle,
+                          baseline: TextBaseline.alphabetic,
+                          widget: SizedBox(
+                            width: 50.0,
+                            height: 55.0,
+                            child: DecoratedBox(
+                              decoration: const BoxDecoration(
+                                color: Color(0xffffff00),
+                              ),
+                              child: Center(
+                                child:SizedBox(
+                                  width: 10.0,
+                                  height: 15.0,
+                                  child: DecoratedBox(
+                                    decoration: const BoxDecoration(
+                                      color: Color(0xffff0000),
+                                    ),
+                                  )
+                                ),
+                              ),
+                            )
+                          ),
+                        ),
+                        TextSpan(text: 'hello world! sieze the day!'),
+                        WidgetSpan(
+                          alignment: InlineWidgetAlignment.middle,
+                          baseline: TextBaseline.alphabetic,
+                          widget: Checkbox(value: false, onChanged: (bool value) {}),
+                        ),
+                        WidgetSpan(
+                          alignment: InlineWidgetAlignment.middle,
+                          baseline: TextBaseline.alphabetic,
+                          widget: SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: Checkbox(value: true, onChanged: (bool value) {}),
+                          )
+                        ),
+                        WidgetSpan(
+                          alignment: InlineWidgetAlignment.middle,
+                          baseline: TextBaseline.alphabetic,
+                          widget: Checkbox(value: false, onChanged: (bool value) {}),
+                        ),
+                        WidgetSpan(
+                          alignment: InlineWidgetAlignment.middle,
+                          baseline: TextBaseline.alphabetic,
+                          widget: SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: Checkbox(value: true, onChanged: (bool value) {}),
+                          )
+                        ),
+                        WidgetSpan(
+                          alignment: InlineWidgetAlignment.middle,
+                          baseline: TextBaseline.alphabetic,
+                          widget: Text('embedded'),
+                        ),
+                        TextSpan(text: 'ref'),
+                      ],
+                    ),
+                    textDirection: TextDirection.ltr,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await expectLater(
+      find.byType(Container),
+      matchesGoldenFile('text_golden.TextInlineWidgetMiddle.1.0.png'),
+    );
+  }, skip: !Platform.isLinux); // Coretext uses different thicknesses for decoration
 }
