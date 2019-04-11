@@ -6,6 +6,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/src/widgets/editable_text.dart';
 
 import 'button.dart';
 import 'colors.dart';
@@ -18,13 +19,6 @@ const double _kHandlesPadding = 18.0;
 // viewport.
 const double _kToolbarScreenPadding = 8.0;
 const double _kToolbarHeight = 36.0;
-
-// If the distance from the top is less than a certain value,
-// the toolbar should be displayed below the input box.
-// If don't do this, won't be able to properly display and
-// interact toolbar at the top of some phones, such as iPhone X.
-// FIX https://github.com/flutter/flutter/issues/29808
-const double _kToolbarArrowInvertDistance = 100.0;
 
 const Color _kToolbarBackgroundColor = Color(0xFF2E2E2E);
 const Color _kToolbarDividerColor = Color(0xFFB9B9B9);
@@ -266,17 +260,29 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
 
   /// Builder for iOS-style copy/paste text selection toolbar.
   @override
-  Widget buildToolbar(BuildContext context, Rect globalEditableRegion, Offset position, TextSelectionDelegate delegate) {
+  Widget buildToolbar(
+      BuildContext context,
+      Rect globalEditableRegion,
+      TextSelectionPoint leftTextSelectionPoint,
+      TextSelectionPoint rightTextSelectionPoint,
+      TextSelectionDelegate delegate) {
     assert(debugCheckHasMediaQuery(context));
 
+    // If the distance from the top is less than a certain value,
+    // the toolbar should be displayed below the input box.
+    // FIX https://github.com/flutter/flutter/issues/29808
     final _ArrowDirection direction =
-    (globalEditableRegion.top > _kToolbarArrowInvertDistance)
+    (globalEditableRegion.top - MediaQuery.of(context).padding.top > _kToolbarHeight)
         ? _ArrowDirection.down
         : _ArrowDirection.up;
 
-    if (direction == _ArrowDirection.up) {
-      position += const Offset(0, _kToolbarHeight);
-    }
+    final double x = (rightTextSelectionPoint == null)
+        ? leftTextSelectionPoint.point.dx
+        : (leftTextSelectionPoint.point.dx + rightTextSelectionPoint.point.dx) / 2.0;
+    final double y = (direction == _ArrowDirection.up)
+        ? leftTextSelectionPoint.point.dy + globalEditableRegion.height + _kToolbarHeight
+        : leftTextSelectionPoint.point.dy - globalEditableRegion.height;
+    final Offset position = Offset(x, y);
 
     return ConstrainedBox(
       constraints: BoxConstraints.tight(globalEditableRegion.size),

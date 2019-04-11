@@ -26,14 +26,6 @@ export 'package:flutter/services.dart' show TextSelectionDelegate;
 /// called.
 const Duration _kDragSelectionUpdateThrottle = Duration(milliseconds: 50);
 
-
-/// If the distance from the top is less than a certain value,
-/// the toolbar should be displayed below the input box.
-/// If don't do this, won't be able to properly display and
-/// interact toolbar at the top of some phones, such as iPhone X.
-/// FIX https://github.com/flutter/flutter/issues/29808
-const double _kToolbarArrowInvertDistance = 100.0;
-
 /// Which type of selection handle to be displayed.
 ///
 /// With mixed-direction text, both handles may be the same type. Examples:
@@ -105,7 +97,12 @@ abstract class TextSelectionControls {
   /// Builds a toolbar near a text selection.
   ///
   /// Typically displays buttons for copying and pasting text.
-  Widget buildToolbar(BuildContext context, Rect globalEditableRegion, Offset position, TextSelectionDelegate delegate);
+  Widget buildToolbar(
+      BuildContext context,
+      Rect globalEditableRegion,
+      TextSelectionPoint leftTextSelectionPoint,
+      TextSelectionPoint rightTextSelectionPoint,
+      TextSelectionDelegate delegate);
 
   /// Returns the size of the selection handle.
   Size get handleSize;
@@ -427,21 +424,18 @@ class TextSelectionOverlay {
     if (selectionControls == null)
       return Container();
 
-    // Find the horizontal midpoint, just above the selected text.
-    final List<TextSelectionPoint> endpoints = renderObject.getEndpointsForSelection(_selection);
-
     final Rect editingRegion = Rect.fromPoints(
       renderObject.localToGlobal(Offset.zero),
       renderObject.localToGlobal(renderObject.size.bottomRight(Offset.zero)),
     );
 
-    final double x = (endpoints.length == 1)
-        ? endpoints[0].point.dx
-        : (endpoints[0].point.dx + endpoints[1].point.dx) / 2.0;
-    final double y = (editingRegion.top < _kToolbarArrowInvertDistance)
-        ? endpoints[0].point.dy + editingRegion.height
-        : endpoints[0].point.dy - editingRegion.height;
-    final Offset midpoint = Offset(x, y);
+    // Send points to a specific implementation to
+    // find the horizontal midpoint, just above the selected text.
+    final List<TextSelectionPoint> endpoints = renderObject.getEndpointsForSelection(_selection);
+    final TextSelectionPoint leftTextSelectionPoint = endpoints[0];
+    final TextSelectionPoint rightTextSelectionPoint = (endpoints.length > 1)
+        ? endpoints[1]
+        : null;
 
     return FadeTransition(
       opacity: _toolbarOpacity,
@@ -449,7 +443,7 @@ class TextSelectionOverlay {
         link: layerLink,
         showWhenUnlinked: false,
         offset: -editingRegion.topLeft,
-        child: selectionControls.buildToolbar(context, editingRegion, midpoint, selectionDelegate),
+        child: selectionControls.buildToolbar(context, editingRegion, leftTextSelectionPoint, rightTextSelectionPoint, selectionDelegate),
       ),
     );
   }
