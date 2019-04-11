@@ -297,7 +297,7 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
       if (_scrollController.offset != 0.0) {
         _scrollController.animateTo(
           0.0,
-          duration: Duration(milliseconds: 1),
+          duration: const Duration(milliseconds: 1),
           curve: Curves.linear,
         );
       }
