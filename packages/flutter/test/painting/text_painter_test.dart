@@ -643,7 +643,7 @@ void main() {
     const String text = 'test';
     painter.text = const TextSpan(
       text: text,
-      children: <LayoutSpan>[
+      children: <InlineSpan>[
         WidgetSpan(widget: SizedBox(width: 50, height: 30)),
         TextSpan(text: text),
         WidgetSpan(widget: SizedBox(width: 50, height: 30)),

@@ -10,7 +10,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 
 import 'basic_types.dart';
-import 'layout_span.dart';
+import 'inline_span.dart';
 import 'strut_style.dart';
 import 'text_span.dart';
 
@@ -89,7 +89,7 @@ class TextPainter {
   ///
   /// The [maxLines] property, if non-null, must be greater than zero.
   TextPainter({
-    LayoutSpan text,
+    InlineSpan text,
     TextAlign textAlign = TextAlign.start,
     TextDirection textDirection,
     double textScaleFactor = 1.0,
@@ -118,9 +118,9 @@ class TextPainter {
   /// After this is set, you must call [layout] before the next call to [paint].
   ///
   /// This and [textDirection] must be non-null before you call [layout].
-  LayoutSpan get text => _text;
-  LayoutSpan _text;
-  set text(LayoutSpan value) {
+  InlineSpan get text => _text;
+  InlineSpan _text;
+  set text(InlineSpan value) {
     assert(value == null || value.debugAssertIsValid());
     if (_text == value)
       return;

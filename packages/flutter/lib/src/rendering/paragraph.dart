@@ -55,7 +55,7 @@ class RenderParagraph extends RenderBox
   ///
   /// The [maxLines] property may be null (and indeed defaults to null), but if
   /// it is not null, it must be greater than zero.
-  RenderParagraph(LayoutSpan text, {
+  RenderParagraph(InlineSpan text, {
     TextAlign textAlign = TextAlign.start,
     @required TextDirection textDirection,
     bool softWrap = true,
@@ -100,8 +100,8 @@ class RenderParagraph extends RenderBox
 
 
   /// The text to display
-  LayoutSpan get text => _textPainter.text;
-  set text(LayoutSpan value) {
+  InlineSpan get text => _textPainter.text;
+  set text(InlineSpan value) {
     assert(value != null);
     switch (_textPainter.text.compareTo(value)) {
       case RenderComparison.identical:
@@ -121,11 +121,11 @@ class RenderParagraph extends RenderBox
   }
 
   List<PlaceholderSpan> _placeholderSpans;
-  // Traverses the LayoutSpan tree and depth-first collects the list of
+  // Traverses the InlineSpan tree and depth-first collects the list of
   // child WidgetsSpans. Populates _placeholderSpans.
-  void _extractPlaceholderSpans(LayoutSpan span) {
+  void _extractPlaceholderSpans(InlineSpan span) {
     _placeholderSpans = [];
-    span.visitLayoutSpan((LayoutSpan span) {
+    span.visitInlineSpan((InlineSpan span) {
       if (span is PlaceholderSpan) {
         PlaceholderSpan placeholderSpan = span;
         _placeholderSpans.add(placeholderSpan);
@@ -685,8 +685,8 @@ class RenderParagraph extends RenderBox
     _recognizerOffsets.clear();
     _recognizers.clear();
     int offset = 0;
-    text.visitLayoutSpan((LayoutSpan span) {
-      TextSpan textSpan = LayoutSpan.asType<TextSpan>(span);
+    text.visitInlineSpan((InlineSpan span) {
+      TextSpan textSpan = InlineSpan.asType<TextSpan>(span);
       if (textSpan == null)
         return true;
       if (textSpan.recognizer != null && (textSpan.recognizer is TapGestureRecognizer || span.recognizer is LongPressGestureRecognizer)) {

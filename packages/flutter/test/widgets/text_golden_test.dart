@@ -162,7 +162,7 @@ void main() {
                   background: Paint()
                     ..color = red.withOpacity(0.5),
                 ),
-                children: <LayoutSpan>[
+                children: <InlineSpan>[
                   TextSpan(
                     text: 'text2',
                     style: TextStyle(
@@ -321,7 +321,7 @@ void main() {
                   color: Colors.red,
                   fontSize: 30,
                 ),
-                children: <LayoutSpan>[
+                children: <InlineSpan>[
                   TextSpan(
                     text: 'Second line!\n',
                     style: TextStyle(
@@ -409,7 +409,7 @@ void main() {
                   color: Colors.red,
                   fontSize: 30,
                 ),
-                children: <LayoutSpan>[
+                children: <InlineSpan>[
                   TextSpan(
                     text: 'Second line!\n',
                     style: TextStyle(
@@ -542,7 +542,7 @@ void main() {
                       style: TextStyle(
                         fontSize: 16,
                       ),
-                      children: <LayoutSpan>[
+                      children: <InlineSpan>[
                         WidgetSpan(
                           widget: Checkbox(value: true, onChanged: (bool value) {}),
                         ),
@@ -635,7 +635,7 @@ void main() {
                       style: TextStyle(
                         fontSize: 20,
                       ),
-                      children: <LayoutSpan>[
+                      children: <InlineSpan>[
                         WidgetSpan(
                           widget: SizedBox(width: 70, height: 25, child: TextField()),
                         ),
@@ -681,19 +681,19 @@ void main() {
                       style: TextStyle(
                         fontSize: 20,
                       ),
-                      children: <LayoutSpan>[
+                      children: <InlineSpan>[
                         WidgetSpan(
                           widget: RichText(
                             text: TextSpan(
                               text: 'inner',
                               style: TextStyle(color: Color(0xff402f4ff)),
-                              children: <LayoutSpan>[
+                              children: <InlineSpan>[
                                 WidgetSpan(
                                   widget: RichText(
                                     text: TextSpan(
                                       text: 'inner2',
                                       style: TextStyle(color: Color(0xff003ffff)),
-                                      children: <LayoutSpan>[
+                                      children: <InlineSpan>[
                                         WidgetSpan(
                                           widget: SizedBox(
                                             width: 50.0,

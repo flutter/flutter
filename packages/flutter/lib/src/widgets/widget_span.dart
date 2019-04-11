@@ -158,7 +158,7 @@ class WidgetSpan extends PlaceholderSpan {
   }
 
   /// Calls visitor on this [WidgetSpan]. There are no children spans to walk.
-  bool visitLayoutSpan(bool visitor(LayoutSpan span)) {
+  bool visitInlineSpan(bool visitor(InlineSpan span)) {
     if (!visitor(this))
       return false;
     return true;
@@ -181,7 +181,7 @@ class WidgetSpan extends PlaceholderSpan {
   /// See also:
   ///
   ///  * [TextStyle.compareTo], which does the same thing for [TextStyle]s.
-  RenderComparison compareTo(LayoutSpan other) {
+  RenderComparison compareTo(InlineSpan other) {
     if (identical(this, other))
       return RenderComparison.identical;
     if (other.runtimeType is! WidgetSpan)
@@ -233,12 +233,12 @@ class WidgetSpan extends PlaceholderSpan {
   /// ```
   bool debugAssertIsValid() {
     assert(() {
-      if (!visitLayoutSpan((LayoutSpan span) {
+      if (!visitInlineSpan((InlineSpan span) {
         if (span is WidgetSpan)
           return (span as WidgetSpan).widget != null;
         TextSpan textSpan = span;
         if (textSpan.children != null) {
-          for (LayoutSpan child in textSpan.children) {
+          for (InlineSpan child in textSpan.children) {
             if (child == null)
               return false;
           }

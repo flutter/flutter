@@ -330,7 +330,7 @@ void main() {
     final TextSpan text = const TextSpan(
       text: 'a',
       style: TextStyle(fontSize: 10.0),
-      children: <LayoutSpan>[
+      children: <InlineSpan>[
         WidgetSpan(widget: SizedBox(width: 21, height: 21)),
         WidgetSpan(widget: SizedBox(width: 21, height: 21)),
         TextSpan(text: 'a'),
@@ -369,7 +369,7 @@ void main() {
     final TextSpan text = const TextSpan(
       text: 'a',
       style: TextStyle(fontSize: 10.0),
-      children: <LayoutSpan>[
+      children: <InlineSpan>[
         WidgetSpan(widget: SizedBox(width: 21, height: 21)),
         WidgetSpan(widget: SizedBox(width: 21, height: 21)),
         TextSpan(text: 'a'),

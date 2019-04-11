@@ -9,7 +9,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 
 import 'basic_types.dart';
-import 'layout_span.dart';
+import 'inline_span.dart';
 import 'text_style.dart';
 import 'text_painter.dart';
 
@@ -56,7 +56,7 @@ import 'text_painter.dart';
 ///  * [RichText], a widget for finer control of text rendering.
 ///  * [TextPainter], a class for painting [TextSpan] objects on a [Canvas].
 @immutable
-class TextSpan extends LayoutSpan {
+class TextSpan extends InlineSpan {
   /// Creates a [TextSpan] with the given values.
   ///
   /// For the object to be useful, at least one of [text] or
@@ -84,7 +84,7 @@ class TextSpan extends LayoutSpan {
   /// supported and may have unexpected results.
   ///
   /// The list must not contain any nulls.
-  final List<LayoutSpan> children;
+  final List<InlineSpan> children;
 
   /// Apply the [style], [text], and [children] of this object to the
   /// given [ParagraphBuilder], from which a [Paragraph] can be obtained.
@@ -101,7 +101,7 @@ class TextSpan extends LayoutSpan {
     if (text != null)
       builder.addText(text);
     if (children != null) {
-      for (LayoutSpan child in children) {
+      for (InlineSpan child in children) {
         assert(child != null);
         child.build(builder, textScaleFactor: textScaleFactor, dimensions: dimensions);
       }
@@ -113,14 +113,14 @@ class TextSpan extends LayoutSpan {
   /// Walks this text span and its descendants in pre-order and calls [visitor]
   /// for each span that has text.
   @override
-  bool visitLayoutSpan(bool visitor(LayoutSpan span)) {
+  bool visitInlineSpan(bool visitor(InlineSpan span)) {
     if (text != null) {
       if (!visitor(this))
         return false;
     }
     if (children != null) {
-      for (LayoutSpan child in children) {
-        if (!child.visitLayoutSpan(visitor))
+      for (InlineSpan child in children) {
+        if (!child.visitInlineSpan(visitor))
           return false;
       }
     }
@@ -134,9 +134,9 @@ class TextSpan extends LayoutSpan {
     final int targetOffset = position.offset;
     int offset = 0;
     TextSpan result;
-    visitLayoutSpan((LayoutSpan span) {
+    visitInlineSpan((InlineSpan span) {
       assert(result == null);
-      TextSpan textSpan = LayoutSpan.asType<TextSpan>(span);
+      TextSpan textSpan = InlineSpan.asType<TextSpan>(span);
       if (textSpan == null)
         return true;
       final int endOffset = offset + textSpan.text.length;
@@ -160,8 +160,8 @@ class TextSpan extends LayoutSpan {
   String toPlainText({bool includeSemanticsLabels = true}) {
     assert(debugAssertIsValid());
     final StringBuffer buffer = StringBuffer();
-    visitLayoutSpan((LayoutSpan span) {
-      TextSpan textSpan = LayoutSpan.asType<TextSpan>(span);
+    visitInlineSpan((InlineSpan span) {
+      TextSpan textSpan = InlineSpan.asType<TextSpan>(span);
       if (textSpan == null)
         return true;
       if (textSpan.semanticsLabel != null && includeSemanticsLabels) {
@@ -182,8 +182,8 @@ class TextSpan extends LayoutSpan {
       return null;
     int offset = 0;
     int result;
-    visitLayoutSpan((LayoutSpan span) {
-      TextSpan textSpan = LayoutSpan.asType<TextSpan>(span);
+    visitInlineSpan((InlineSpan span) {
+      TextSpan textSpan = InlineSpan.asType<TextSpan>(span);
       if (textSpan == null)
         return true;
       if (index - offset < textSpan.text.length) {
@@ -206,12 +206,12 @@ class TextSpan extends LayoutSpan {
   /// ```
   bool debugAssertIsValid() {
     assert(() {
-      if (!visitLayoutSpan((LayoutSpan span) {
-        TextSpan textSpan = LayoutSpan.asType<TextSpan>(span);
+      if (!visitInlineSpan((InlineSpan span) {
+        TextSpan textSpan = InlineSpan.asType<TextSpan>(span);
         if (textSpan == null)
           return true;
         if (textSpan.children != null) {
-          for (LayoutSpan child in textSpan.children) {
+          for (InlineSpan child in textSpan.children) {
             if (child == null)
               return false;
           }
@@ -238,7 +238,7 @@ class TextSpan extends LayoutSpan {
   /// See also:
   ///
   ///  * [TextStyle.compareTo], which does the same thing for [TextStyle]s.
-  RenderComparison compareTo(LayoutSpan other) {
+  RenderComparison compareTo(InlineSpan other) {
     if (identical(this, other))
       return RenderComparison.identical;
     if (!(other is TextSpan))
@@ -279,7 +279,7 @@ class TextSpan extends LayoutSpan {
         && typedOther.style == style
         && typedOther.recognizer == recognizer
         && typedOther.semanticsLabel == semanticsLabel
-        && listEquals<LayoutSpan>(typedOther.children, children);
+        && listEquals<InlineSpan>(typedOther.children, children);
   }
 
   @override
@@ -301,7 +301,7 @@ class TextSpan extends LayoutSpan {
   List<DiagnosticsNode> debugDescribeChildren() {
     if (children == null)
       return const <DiagnosticsNode>[];
-    return children.map<DiagnosticsNode>((LayoutSpan child) {
+    return children.map<DiagnosticsNode>((InlineSpan child) {
       if (child != null) {
         return child.toDiagnosticsNode();
       } else {

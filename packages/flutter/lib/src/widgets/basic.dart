@@ -4802,12 +4802,12 @@ class RichText extends MultiChildRenderObjectWidget {
        assert(maxLines == null || maxLines > 0),
        super(key: key, children: _extractChildren(text));
 
-  // Traverses the LayoutSpan tree and depth-first collects the list of
+  // Traverses the InlineSpan tree and depth-first collects the list of
   // child widgets that are created in WidgetSpans.
-  static List<Widget> _extractChildren(LayoutSpan span) {
+  static List<Widget> _extractChildren(InlineSpan span) {
     List<Widget> result = [];
-    span.visitLayoutSpan((LayoutSpan span) {
-      WidgetSpan widgetSpan = LayoutSpan.asType<WidgetSpan>(span);
+    span.visitInlineSpan((InlineSpan span) {
+      WidgetSpan widgetSpan = InlineSpan.asType<WidgetSpan>(span);
       if (widgetSpan == null)
         return true;
       if (widgetSpan.widget != null) {
@@ -4819,7 +4819,7 @@ class RichText extends MultiChildRenderObjectWidget {
   }
 
   /// The text to display in this widget.
-  final LayoutSpan text;
+  final InlineSpan text;
 
   /// How the text should be aligned horizontally.
   final TextAlign textAlign;

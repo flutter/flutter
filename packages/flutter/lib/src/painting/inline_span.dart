@@ -14,7 +14,7 @@ import 'text_painter.dart';
 
 /// An immutable span of content which form a paragraph.
 ///
-/// The subclass [TextSpan] specifies text and may contain child [LayoutSpan]s.
+/// The subclass [TextSpan] specifies text and may contain child [InlineSpan]s.
 ///
 /// [WidgetSpan] specifies embedded inline widgets. Specify a widget by wrapping
 /// the widget with a [WidgetSpan]. The widget will be laid out inline within
@@ -24,11 +24,11 @@ import 'text_painter.dart';
 ///
 ///  * [Text], a widget for showing uniformly-styled text.
 ///  * [RichText], a widget for finer control of text rendering.
-///  * [TextPainter], a class for painting [LayoutSpan] objects on a [Canvas].
+///  * [TextPainter], a class for painting [InlineSpan] objects on a [Canvas].
 @immutable
-abstract class LayoutSpan extends DiagnosticableTree {
-  /// Creates a [LayoutSpan] with the given values.
-  const LayoutSpan({
+abstract class InlineSpan extends DiagnosticableTree {
+  /// Creates a [InlineSpan] with the given values.
+  const InlineSpan({
     this.style,
     this.recognizer,
     this.semanticsLabel,
@@ -39,22 +39,22 @@ abstract class LayoutSpan extends DiagnosticableTree {
 
   /// A gesture recognizer that will receive events that hit this span.
   ///
-  /// [LayoutSpan] itself does not implement hit testing or event dispatch. The
-  /// object that manages the [LayoutSpan] painting is also responsible for
+  /// [InlineSpan] itself does not implement hit testing or event dispatch. The
+  /// object that manages the [InlineSpan] painting is also responsible for
   /// dispatching events. In the rendering library, that is the
   /// [RenderParagraph] object, which corresponds to the [RichText] widget in
-  /// the widgets layer; these objects do not bubble events in [LayoutSpan]s, so a
+  /// the widgets layer; these objects do not bubble events in [InlineSpan]s, so a
   /// [recognizer] is only effective for events that directly hit the [text] of
-  /// that [LayoutSpan], not any of its [children].
+  /// that [InlineSpan], not any of its [children].
   ///
-  /// [LayoutSpan] also does not manage the lifetime of the gesture recognizer.
+  /// [InlineSpan] also does not manage the lifetime of the gesture recognizer.
   /// The code that owns the [GestureRecognizer] object must call
-  /// [GestureRecognizer.dispose] when the [LayoutSpan] object is no longer used.
+  /// [GestureRecognizer.dispose] when the [InlineSpan] object is no longer used.
   ///
   /// {@tool sample}
   ///
   /// This example shows how to manage the lifetime of a gesture recognizer
-  /// provided to a [LayoutSpan] object. It defines a `BuzzingText` widget which
+  /// provided to a [InlineSpan] object. It defines a `BuzzingText` widget which
   /// uses the [HapticFeedback] class to vibrate the device when the user
   /// long-presses the "find the" span, which is underlined in wavy green. The
   /// hit-testing is handled by the [RichText] widget.
@@ -91,7 +91,7 @@ abstract class LayoutSpan extends DiagnosticableTree {
   ///       text: TextSpan(
   ///         text: 'Can you ',
   ///         style: TextStyle(color: Colors.black),
-  ///         children: <LayoutSpan>[
+  ///         children: <InlineSpan>[
   ///           TextSpan(
   ///             text: 'find the',
   ///             style: TextStyle(
@@ -126,12 +126,12 @@ abstract class LayoutSpan extends DiagnosticableTree {
   /// ```
   final String semanticsLabel;
 
-  /// Utility method to convert LayoutSpan into [TextSpan] or [WidgetSpan].
+  /// Utility method to convert InlineSpan into [TextSpan] or [WidgetSpan].
   ///
   /// Will return null if span is not of type T or null. Otherwise, return
-  /// the span cast as T. Values of T that are not subclasses of [LayoutSpan]
+  /// the span cast as T. Values of T that are not subclasses of [InlineSpan]
   /// will result in null.
-  static T asType<T>(LayoutSpan span) {
+  static T asType<T>(InlineSpan span) {
     if (span is! T)
       return null;
     return span as T;
@@ -142,19 +142,19 @@ abstract class LayoutSpan extends DiagnosticableTree {
   /// [Canvas] objects.
   void build(ui.ParagraphBuilder builder, { double textScaleFactor = 1.0, List<PlaceholderDimensions> dimensions });
 
-  /// Walks this LayoutSpan and any descendants in pre-order and calls [visitor]
+  /// Walks this InlineSpan and any descendants in pre-order and calls [visitor]
   /// for each span that has content.
   ///
   /// When [visitor] returns true, the walk will continue. When [visitor] returns
   /// false, then the walk will end.
   ///
   /// The type of the span may be checked using [asType].
-  bool visitLayoutSpan(bool visitor(LayoutSpan span));
+  bool visitInlineSpan(bool visitor(InlineSpan span));
 
   /// Returns the text span that contains the given position in the text.
-  LayoutSpan getSpanForPosition(TextPosition position);
+  InlineSpan getSpanForPosition(TextPosition position);
 
-  /// Flattens the [LayoutSpan] tree into a single string.
+  /// Flattens the [InlineSpan] tree into a single string.
   ///
   /// Styles are not honored in this process.
   String toPlainText();
@@ -170,7 +170,7 @@ abstract class LayoutSpan extends DiagnosticableTree {
   /// This is intended to be used as follows:
   ///
   /// ```dart
-  /// assert(myLayoutSpan.debugAssertIsValid());
+  /// assert(myInlineSpan.debugAssertIsValid());
   /// ```
   bool debugAssertIsValid();
 
@@ -182,7 +182,7 @@ abstract class LayoutSpan extends DiagnosticableTree {
   /// See also:
   ///
   ///  * [TextStyle.compareTo], which does the same thing for [TextStyle]s.
-  RenderComparison compareTo(LayoutSpan other);
+  RenderComparison compareTo(InlineSpan other);
 
   @override
   bool operator ==(dynamic other) {
@@ -190,7 +190,7 @@ abstract class LayoutSpan extends DiagnosticableTree {
       return true;
     if (other.runtimeType != runtimeType)
       return false;
-    final LayoutSpan typedOther = other;
+    final InlineSpan typedOther = other;
     return typedOther.style == style
         && typedOther.recognizer == recognizer
         && typedOther.semanticsLabel == semanticsLabel;
@@ -204,7 +204,7 @@ abstract class LayoutSpan extends DiagnosticableTree {
     super.debugFillProperties(properties);
     properties.defaultDiagnosticsTreeStyle = DiagnosticsTreeStyle.whitespace;
     // Properties on style are added as if they were properties directly on
-    // this LayoutSpan.
+    // this InlineSpan.
     if (style != null)
       style.debugFillProperties(properties);
 

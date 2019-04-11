@@ -9,7 +9,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 
 import 'basic_types.dart';
-import 'layout_span.dart';
+import 'inline_span.dart';
 import 'text_style.dart';
 import 'text_painter.dart';
 import 'text_span.dart';
@@ -34,7 +34,7 @@ import 'text_span.dart';
 ///  * [RichText], a widget for finer control of text rendering.
 ///  * [TextPainter], a class for painting [TextSpan] objects on a [Canvas].
 @immutable
-abstract class PlaceholderSpan extends LayoutSpan {
+abstract class PlaceholderSpan extends InlineSpan {
   /// Creates a [PlaceholderSpan] with the given values.
   ///
   /// The [widget] property should be non-null. [PlaceholderSpan] cannot contain any
@@ -67,7 +67,7 @@ abstract class PlaceholderSpan extends LayoutSpan {
     super.debugFillProperties(properties);
     properties.defaultDiagnosticsTreeStyle = DiagnosticsTreeStyle.whitespace;
     // Properties on style are added as if they were properties directly on
-    // this LayoutSpan.
+    // this InlineSpan.
     properties.add(EnumProperty<ui.PlaceholderAlignment>('alignment', alignment, defaultValue: null));
     properties.add(EnumProperty<TextBaseline>('baseline', baseline, defaultValue: null));
   }
