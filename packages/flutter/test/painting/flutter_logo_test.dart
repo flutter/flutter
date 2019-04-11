@@ -8,19 +8,19 @@ import 'package:flutter/painting.dart';
 void main() {
   // Here and below, see: https://github.com/dart-lang/sdk/issues/26980
   const FlutterLogoDecoration start = FlutterLogoDecoration(
-    lightColor: const Color(0xFF000000),
-    darkColor: const Color(0xFFFFFFFF),
-    textColor: const Color(0xFFD4F144),
+    lightColor: Color(0xFF000000),
+    darkColor: Color(0xFFFFFFFF),
+    textColor: Color(0xFFD4F144),
     style: FlutterLogoStyle.stacked,
-    margin: const EdgeInsets.all(10.0),
+    margin: EdgeInsets.all(10.0),
   );
 
   const FlutterLogoDecoration end = FlutterLogoDecoration(
-    lightColor: const Color(0xFFFFFFFF),
-    darkColor: const Color(0xFF000000),
-    textColor: const Color(0xFF81D4FA),
+    lightColor: Color(0xFFFFFFFF),
+    darkColor: Color(0xFF000000),
+    textColor: Color(0xFF81D4FA),
     style: FlutterLogoStyle.stacked,
-    margin: const EdgeInsets.all(10.0),
+    margin: EdgeInsets.all(10.0),
   );
 
   test('FlutterLogoDecoration lerp from null to null is null', () {
