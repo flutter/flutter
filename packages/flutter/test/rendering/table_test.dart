@@ -49,8 +49,7 @@ void main() {
 
   test('Table control test: constrained flex columns', () {
     final RenderTable table = RenderTable(textDirection: TextDirection.ltr);
-    final List<RenderBox> children =
-        List<RenderBox>.generate(6, (_) => RenderPositionedBox());
+    final List<RenderBox> children = List<RenderBox>.generate(6, (_) => RenderPositionedBox());
 
     table.setFlatChildren(6, children);
     layout(table, constraints: const BoxConstraints.tightFor(width: 100.0));
