@@ -122,7 +122,9 @@ class MouseTracker {
     final _TrackedAnnotation trackedAnnotation = _findAnnotation(annotation);
     assert(trackedAnnotation != null, "Tried to detach an annotation that wasn't attached: $annotation");
     for (int deviceId in trackedAnnotation.activeDevices) {
-      annotation.onExit(PointerExitEvent.fromMouseEvent(_lastMouseEvent[deviceId]));
+      if (annotation.onExit != null) {
+        annotation.onExit(PointerExitEvent.fromMouseEvent(_lastMouseEvent[deviceId]));
+      }
     }
     _trackedAnnotations.remove(annotation);
   }
