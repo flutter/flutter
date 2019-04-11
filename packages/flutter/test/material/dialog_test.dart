@@ -607,4 +607,42 @@ void main() {
     expect(find.text('0'), findsNothing);
     expect(find.text('1'), findsNothing);
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/28505.
+  testWidgets('showDialog only gets Theme from context on the first call', (WidgetTester tester) async {
+    Widget buildFrame(Key builderKey) {
+      return MaterialApp(
+        home: Center(
+          child: Builder(
+            key: builderKey,
+            builder: (BuildContext outerContext) {
+              return RaisedButton(
+                onPressed: () {
+                  showDialog<void>(
+                    context: outerContext,
+                    builder: (BuildContext innerContext) {
+                      return const AlertDialog(title: Text('Title'));
+                    },
+                  );
+                },
+                child: const Text('Show Dialog'),
+              );
+            },
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(UniqueKey()));
+
+    // Open the dialog.
+    await tester.tap(find.byType(RaisedButton));
+    await tester.pumpAndSettle();
+
+    // Force the Builder to be recreated (new key) which causes outerContext to
+    // be deactivated. If showDialog()'s implementation were to refer to
+    // outerContext again, it would crash.
+    await tester.pumpWidget(buildFrame(UniqueKey()));
+    await tester.pump();
+  });
 }
