@@ -170,6 +170,10 @@ public class FlutterView extends FrameLayout {
         addView(flutterTextureView);
         break;
     }
+
+    // FlutterView needs to be focusable so that the InputMethodManager can interact with it.
+    setFocusable(true);
+    setFocusableInTouchMode(true);
   }
 
   /**
