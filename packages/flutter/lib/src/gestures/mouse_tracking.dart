@@ -71,6 +71,8 @@ class _TrackedAnnotation {
   /// This is used to detect layers that used to have the mouse pointer inside
   /// them, but now no longer do (to facilitate exit notification).
   Set<int> activeDevices = <int>{};
+
+  String toString() => 'TrackedAnnotation $annotation $activeDevices';
 }
 
 /// Describes a function that finds an annotation given an offset in logical
@@ -122,7 +124,9 @@ class MouseTracker {
     final _TrackedAnnotation trackedAnnotation = _findAnnotation(annotation);
     assert(trackedAnnotation != null, "Tried to detach an annotation that wasn't attached: $annotation");
     for (int deviceId in trackedAnnotation.activeDevices) {
-      annotation.onExit(PointerExitEvent.fromMouseEvent(_lastMouseEvent[deviceId]));
+      if (annotation.onExit != null) {
+        annotation.onExit(PointerExitEvent.fromMouseEvent(_lastMouseEvent[deviceId]));
+      }
     }
     _trackedAnnotations.remove(annotation);
   }
