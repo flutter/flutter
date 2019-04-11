@@ -902,7 +902,7 @@ class TestImageProvider extends ImageProvider<TestImageProvider> {
 }
 
 class TestImageStreamCompleter extends ImageStreamCompleter {
-  final Map<ImageListener, ImageErrorListener> listeners = <ImageListener, ImageErrorListener> {};
+  final Map<ImageListener, ImageErrorListener> listeners = <ImageListener, ImageErrorListener>{};
 
   @override
   void addListener(ImageListener listener, { ImageErrorListener onError }) {

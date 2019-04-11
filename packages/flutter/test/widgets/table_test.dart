@@ -73,7 +73,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Center(
           child: Table(
-            columnWidths: const <int, TableColumnWidth> {
+            columnWidths: const <int, TableColumnWidth>{
               0: FixedColumnWidth(100.0),
               1: FixedColumnWidth(110.0),
               2: FixedColumnWidth(125.0),
@@ -143,7 +143,7 @@ void main() {
         textDirection: TextDirection.rtl,
         child: Center(
           child: Table(
-            columnWidths: const <int, TableColumnWidth> {
+            columnWidths: const <int, TableColumnWidth>{
               0: FixedColumnWidth(100.0),
               1: FixedColumnWidth(110.0),
               2: FixedColumnWidth(125.0),

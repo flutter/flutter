@@ -59,7 +59,7 @@ class PointerSignalResolver {
         informationCollector: (StringBuffer information) {
           information.writeln('Event:');
           information.write('  $event');
-        }
+        },
       ));
     }
     _firstRegisteredCallback = null;

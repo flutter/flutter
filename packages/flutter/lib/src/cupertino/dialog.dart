@@ -125,6 +125,7 @@ bool _isInAccessibilityMode(BuildContext context) {
 ///  * [CupertinoPopupSurface], which is a generic iOS-style popup surface that
 ///    holds arbitrary content to create custom popups.
 ///  * [CupertinoDialogAction], which is an iOS-style dialog button.
+///  * [AlertDialog], a Material Design alert dialog.
 ///  * <https://developer.apple.com/ios/human-interface-guidelines/views/alerts/>
 class CupertinoAlertDialog extends StatelessWidget {
   /// Creates an iOS-style alert dialog.

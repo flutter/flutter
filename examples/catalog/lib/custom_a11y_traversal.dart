@@ -61,14 +61,15 @@ class RowColumnTraversal extends StatelessWidget {
 /// A Button class that wraps an [IconButton] with a [RowColumnTraversal] to
 /// set its traversal order.
 class SpinnerButton extends StatelessWidget {
-  const SpinnerButton(
-      {Key key,
-      this.onPressed,
-      this.icon,
-      this.rowOrder,
-      this.columnOrder,
-      this.field,
-      this.increment}) : super(key: key);
+  const SpinnerButton({
+    Key key,
+    this.onPressed,
+    this.icon,
+    this.rowOrder,
+    this.columnOrder,
+    this.field,
+    this.increment,
+  }) : super(key: key);
 
   final VoidCallback onPressed;
   final IconData icon;

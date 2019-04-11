@@ -224,7 +224,8 @@ class Text extends StatelessWidget {
   /// closest enclosing [DefaultTextStyle].
   ///
   /// The [data] parameter must not be null.
-  const Text(this.data, {
+  const Text(
+    this.data, {
     Key key,
     this.style,
     this.strutStyle,
@@ -246,7 +247,8 @@ class Text extends StatelessWidget {
   /// Creates a text widget with a [TextSpan].
   ///
   /// The [textSpan] parameter must not be null.
-  const Text.rich(this.textSpan, {
+  const Text.rich(
+    this.textSpan, {
     Key key,
     this.style,
     this.strutStyle,
@@ -346,7 +348,8 @@ class Text extends StatelessWidget {
   /// An alternative semantics label for this text.
   ///
   /// If present, the semantics of this widget will contain this value instead
-  /// of the actual text.
+  /// of the actual text. This will overwrite any of the semantics labels applied
+  /// directly to the [TextSpan]s.
   ///
   /// This is useful for replacing abbreviations or shorthands with the full
   /// text value:

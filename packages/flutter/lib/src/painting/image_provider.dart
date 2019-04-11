@@ -262,7 +262,12 @@ abstract class ImageProvider<T> {
     assert(configuration != null);
     final ImageStream stream = ImageStream();
     T obtainedKey;
+    bool didError = false;
     Future<void> handleError(dynamic exception, StackTrace stack) async {
+      if (didError) {
+        return;
+      }
+      didError = true;
       await null; // wait an event turn in case a listener has been added to the image stream.
       final _ErrorImageCompleter imageCompleter = _ErrorImageCompleter();
       stream.setCompleter(imageCompleter);
@@ -281,27 +286,38 @@ abstract class ImageProvider<T> {
       );
     }
 
-    // `obtainKey` can throw both sync and async errors.
-    // `catchError` handles cases where async errors are thrown and the try block is for sync errors.
-    //
-    // `onError` callback on [ImageCache] handles the cases where `obtainKey` is a sync future and `load` throws.
-    Future<T> key;
-    try {
-      key = obtainKey(configuration);
-    } catch (error, stackTrace) {
-      handleError(error, stackTrace);
-      return stream;
-    }
-
-    key.then<void>((T key) {
-      obtainedKey = key;
-      final ImageStreamCompleter completer = PaintingBinding.instance
-          .imageCache.putIfAbsent(key, () => load(key), onError: handleError);
-      if (completer != null) {
-        stream.setCompleter(completer);
+    // If an error is added to a synchronous completer before a listener has been
+    // added, it can throw an error both into the zone and up the stack. Thus, it
+    // looks like the error has been caught, but it is in fact also bubbling to the
+    // zone. Since we cannot prevent all usage of Completer.sync here, or rather
+    // that changing them would be too breaking, we instead hook into the same
+    // zone mechanism to intercept the uncaught error and deliver it to the
+    // image stream's error handler. Note that these errors may be duplicated,
+    // hence the need for the `didError` flag.
+    final Zone dangerZone = Zone.current.fork(
+      specification: ZoneSpecification(
+        handleUncaughtError: (Zone zone, ZoneDelegate delegate, Zone parent, Object error, StackTrace stackTrace) {
+          handleError(error, stackTrace);
+        }
+      )
+    );
+    dangerZone.runGuarded(() {
+      Future<T> key;
+      try {
+        key = obtainKey(configuration);
+      } catch (error, stackTrace) {
+        handleError(error, stackTrace);
+        return;
       }
-    }).catchError(handleError);
-
+      key.then<void>((T key) {
+        obtainedKey = key;
+        final ImageStreamCompleter completer = PaintingBinding.instance
+            .imageCache.putIfAbsent(key, () => load(key), onError: handleError);
+        if (completer != null) {
+          stream.setCompleter(completer);
+        }
+      }).catchError(handleError);
+    });
     return stream;
   }
 
@@ -466,7 +482,7 @@ class NetworkImage extends ImageProvider<NetworkImage> {
   /// Creates an object that fetches the image at the given URL.
   ///
   /// The arguments must not be null.
-  const NetworkImage(this.url, { this.scale = 1.0 , this.headers })
+  const NetworkImage(this.url, { this.scale = 1.0, this.headers })
     : assert(url != null),
       assert(scale != null);
 
@@ -736,7 +752,8 @@ class ExactAssetImage extends AssetBundleImageProvider {
   /// The [package] argument must be non-null when fetching an asset that is
   /// included in a package. See the documentation for the [ExactAssetImage] class
   /// itself for details.
-  const ExactAssetImage(this.assetName, {
+  const ExactAssetImage(
+    this.assetName, {
     this.scale = 1.0,
     this.bundle,
     this.package,

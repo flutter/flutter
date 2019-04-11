@@ -8,7 +8,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart' show DragStartBehavior;
+import 'package:flutter/gestures.dart' show DragStartBehavior, PointerDeviceKind;
 import 'package:flutter_test/flutter_test.dart';
 
 class MockClipboard {
@@ -400,6 +400,40 @@ void main() {
   );
 
   testWidgets(
+    "placeholderStyle modifies placeholder's style and doesn't affect text's style",
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const CupertinoApp(
+          home: Center(
+            child: CupertinoTextField(
+              placeholder: 'placeholder',
+              style: TextStyle(
+                color: Color(0X00FFFFFF),
+                fontWeight: FontWeight.w300,
+              ),
+              placeholderStyle: TextStyle(
+                color: Color(0XAAFFFFFF),
+                fontWeight: FontWeight.w600
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final Text placeholder = tester.widget(find.text('placeholder'));
+      expect(placeholder.style.color, const Color(0XAAFFFFFF));
+      expect(placeholder.style.fontWeight, FontWeight.w600);
+
+      await tester.enterText(find.byType(CupertinoTextField), 'input');
+      await tester.pump();
+
+      final EditableText inputText = tester.widget(find.text('input'));
+      expect(inputText.style.color, const Color(0X00FFFFFF));
+      expect(inputText.style.fontWeight, FontWeight.w300);
+    },
+  );
+
+  testWidgets(
     'prefix widget is in front of the text',
     (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -746,6 +780,36 @@ void main() {
       expect(find.text('placeholder'), findsOneWidget);
       expect(find.text('text entry'), findsNothing);
       expect(find.byIcon(CupertinoIcons.clear_thick_circled), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'tapping clear button also calls onChanged when text not empty',
+        (WidgetTester tester) async {
+      String value = 'text entry';
+      final TextEditingController controller = TextEditingController();
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(
+            child: CupertinoTextField(
+              controller: controller,
+              placeholder: 'placeholder',
+              onChanged: (String newValue) => value = newValue,
+              clearButtonMode: OverlayVisibilityMode.always,
+            ),
+          ),
+        ),
+      );
+
+      controller.text = value;
+      await tester.pump();
+
+      await tester.tap(find.byIcon(CupertinoIcons.clear_thick_circled));
+      await tester.pump();
+
+      expect(controller.text, isEmpty);
+      expect(find.text('text entry'), findsNothing);
+      expect(value, isEmpty);
     },
   );
 
@@ -1791,6 +1855,99 @@ void main() {
     expect(controller.selection.extentOffset, 5);
   });
 
+  testWidgets('Can select text by dragging with a mouse', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController();
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoTextField(
+            dragStartBehavior: DragStartBehavior.down,
+            controller: controller,
+            style: const TextStyle(
+              fontFamily: 'Ahem',
+              fontSize: 10.0,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    const String testValue = 'abc def ghi';
+    await tester.enterText(find.byType(CupertinoTextField), testValue);
+    // Skip past scrolling animation.
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
+
+    final Offset ePos = textOffsetToPosition(tester, testValue.indexOf('e'));
+    final Offset gPos = textOffsetToPosition(tester, testValue.indexOf('g'));
+
+    final TestGesture gesture = await tester.startGesture(ePos, kind: PointerDeviceKind.mouse);
+    await tester.pump();
+    await gesture.moveTo(gPos);
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(controller.selection.baseOffset, testValue.indexOf('e'));
+    expect(controller.selection.extentOffset, testValue.indexOf('g'));
+  });
+
+  testWidgets('Continuous dragging does not cause flickering', (WidgetTester tester) async {
+    int selectionChangedCount = 0;
+    const String testValue = 'abc def ghi';
+    final TextEditingController controller = TextEditingController(text: testValue);
+
+    controller.addListener(() {
+      selectionChangedCount++;
+    });
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoTextField(
+            dragStartBehavior: DragStartBehavior.down,
+            controller: controller,
+            style: const TextStyle(
+              fontFamily: 'Ahem',
+              fontSize: 10.0,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Offset cPos = textOffsetToPosition(tester, 2); // Index of 'c'.
+    final Offset gPos = textOffsetToPosition(tester, 8); // Index of 'g'.
+    final Offset hPos = textOffsetToPosition(tester, 9); // Index of 'h'.
+
+    // Drag from 'c' to 'g'.
+    final TestGesture gesture = await tester.startGesture(cPos, kind: PointerDeviceKind.mouse);
+    await tester.pump();
+    await gesture.moveTo(gPos);
+    await tester.pumpAndSettle();
+
+    expect(selectionChangedCount, isNonZero);
+    selectionChangedCount = 0;
+    expect(controller.selection.baseOffset, 2);
+    expect(controller.selection.extentOffset, 8);
+
+    // Tiny movement shouldn't cause text selection to change.
+    await gesture.moveTo(gPos + const Offset(4.0, 0.0));
+    await tester.pumpAndSettle();
+    expect(selectionChangedCount, 0);
+
+    // Now a text selection change will occur after a significant movement.
+    await gesture.moveTo(hPos);
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(selectionChangedCount, 1);
+    expect(controller.selection.baseOffset, 2);
+    expect(controller.selection.extentOffset, 9);
+  });
+
   testWidgets(
     'text field respects theme',
     (WidgetTester tester) async {
@@ -1917,5 +2074,21 @@ void main() {
 
     await tester.pump();
     expect(renderEditable.cursorColor, const Color(0xFFF44336));
+  });
+
+  testWidgets('cursor can override color from theme', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        theme: CupertinoThemeData(),
+        home: Center(
+          child: CupertinoTextField(
+            cursorColor: Color(0xFFF44336),
+          ),
+        ),
+      ),
+    );
+
+    final EditableText editableText = tester.firstWidget(find.byType(EditableText));
+    expect(editableText.cursorColor, const Color(0xFFF44336));
   });
 }

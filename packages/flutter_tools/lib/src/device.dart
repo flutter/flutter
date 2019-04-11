@@ -364,7 +364,8 @@ abstract class Device {
 }
 
 class DebuggingOptions {
-  DebuggingOptions.enabled(this.buildInfo, {
+  DebuggingOptions.enabled(
+    this.buildInfo, {
     this.startPaused = false,
     this.enableSoftwareRendering = false,
     this.skiaDeterministicRendering = false,

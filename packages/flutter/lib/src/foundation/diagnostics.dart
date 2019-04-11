@@ -1045,7 +1045,9 @@ class MessageProperty extends DiagnosticsProperty<void> {
   /// message is stored as the description.
   ///
   /// The [name], `message`, and [level] arguments must not be null.
-  MessageProperty(String name, String message, {
+  MessageProperty(
+    String name,
+    String message, {
     DiagnosticLevel level = DiagnosticLevel.info,
   }) : assert(name != null),
        assert(message != null),
@@ -1063,7 +1065,9 @@ class StringProperty extends DiagnosticsProperty<String> {
   /// Create a diagnostics property for strings.
   ///
   /// The [showName], [quoted], and [level] arguments must not be null.
-  StringProperty(String name, String value, {
+  StringProperty(
+    String name,
+    String value, {
     String description,
     String tooltip,
     bool showName = true,
@@ -1119,7 +1123,8 @@ class StringProperty extends DiagnosticsProperty<String> {
 }
 
 abstract class _NumProperty<T extends num> extends DiagnosticsProperty<T> {
-  _NumProperty(String name,
+  _NumProperty(
+    String name,
     T value, {
     String ifNull,
     this.unit,
@@ -1137,7 +1142,8 @@ abstract class _NumProperty<T extends num> extends DiagnosticsProperty<T> {
     level: level,
   );
 
-  _NumProperty.lazy(String name,
+  _NumProperty.lazy(
+    String name,
     ComputePropertyValueCallback<T> computeValue, {
     String ifNull,
     this.unit,
@@ -1190,7 +1196,9 @@ class DoubleProperty extends _NumProperty<double> {
   /// If specified, [unit] describes the unit for the [value] (e.g. px).
   ///
   /// The [showName] and [level] arguments must not be null.
-  DoubleProperty(String name, double value, {
+  DoubleProperty(
+    String name,
+    double value, {
     String ifNull,
     String unit,
     String tooltip,
@@ -1249,7 +1257,9 @@ class IntProperty extends _NumProperty<int> {
   /// Create a diagnostics property for integers.
   ///
   /// The [showName] and [level] arguments must not be null.
-  IntProperty(String name, int value, {
+  IntProperty(
+    String name,
+    int value, {
     String ifNull,
     bool showName = true,
     String unit,
@@ -1282,7 +1292,9 @@ class PercentProperty extends DoubleProperty {
   /// be sufficient to disambiguate its meaning.
   ///
   /// The [showName] and [level] arguments must not be null.
-  PercentProperty(String name, double fraction, {
+  PercentProperty(
+    String name,
+    double fraction, {
     String ifNull,
     bool showName = true,
     String tooltip,
@@ -1361,7 +1373,8 @@ class FlagProperty extends DiagnosticsProperty<bool> {
   /// be descriptions that make the property name redundant.
   ///
   /// The [showName] and [level] arguments must not be null.
-  FlagProperty(String name, {
+  FlagProperty(
+    String name, {
     @required bool value,
     this.ifTrue,
     this.ifFalse,
@@ -1456,7 +1469,9 @@ class IterableProperty<T> extends DiagnosticsProperty<Iterable<T>> {
   /// interesting to display.
   ///
   /// The [style], [showName], and [level] arguments must not be null.
-  IterableProperty(String name, Iterable<T> value, {
+  IterableProperty(
+    String name,
+    Iterable<T> value, {
     Object defaultValue = kNoDefaultValue,
     String ifNull,
     String ifEmpty = '[]',
@@ -1531,7 +1546,9 @@ class EnumProperty<T> extends DiagnosticsProperty<T> {
   /// Create a diagnostics property that displays an enum.
   ///
   /// The [level] argument must also not be null.
-  EnumProperty(String name, T value, {
+  EnumProperty(
+    String name,
+    T value, {
     Object defaultValue = kNoDefaultValue,
     DiagnosticLevel level  = DiagnosticLevel.info,
   }) : assert(level != null),
@@ -1575,7 +1592,9 @@ class ObjectFlagProperty<T> extends DiagnosticsProperty<T> {
   ///
   /// The [showName] and [level] arguments must not be null. Additionally, at
   /// least one of [ifPresent] and [ifNull] must not be null.
-  ObjectFlagProperty(String name, T value, {
+  ObjectFlagProperty(
+    String name,
+    T value, {
     this.ifPresent,
     String ifNull,
     bool showName = false,

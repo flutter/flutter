@@ -44,7 +44,7 @@ void main() {
           equals('${AnsiTerminal.colorCode(color)}output${AnsiTerminal.resetColor}'),
         );
       }
-    }, overrides: <Type, Generator> {
+    }, overrides: <Type, Generator>{
       OutputPreferences: () => OutputPreferences(showColor: true),
       Platform: () => FakePlatform()..stdoutSupportsAnsi = true,
     });
@@ -54,7 +54,7 @@ void main() {
         terminal.bolden('output'),
         equals('${AnsiTerminal.bold}output${AnsiTerminal.resetBold}'),
       );
-    }, overrides: <Type, Generator> {
+    }, overrides: <Type, Generator>{
       OutputPreferences: () => OutputPreferences(showColor: true),
       Platform: () => FakePlatform()..stdoutSupportsAnsi = true,
     });
@@ -68,7 +68,7 @@ void main() {
         terminal.color('non-bold ${terminal.bolden('output')} also non-bold', TerminalColor.blue),
         equals('${AnsiTerminal.blue}non-bold ${AnsiTerminal.bold}output${AnsiTerminal.resetBold} also non-bold${AnsiTerminal.resetColor}'),
       );
-    }, overrides: <Type, Generator> {
+    }, overrides: <Type, Generator>{
       OutputPreferences: () => OutputPreferences(showColor: true),
       Platform: () => FakePlatform()..stdoutSupportsAnsi = true,
     });
@@ -82,7 +82,7 @@ void main() {
         terminal.bolden('non-color ${terminal.color('output', TerminalColor.blue)} also non-color'),
         equals('${AnsiTerminal.bold}non-color ${AnsiTerminal.blue}output${AnsiTerminal.resetColor} also non-color${AnsiTerminal.resetBold}'),
       );
-    }, overrides: <Type, Generator> {
+    }, overrides: <Type, Generator>{
       OutputPreferences: () => OutputPreferences(showColor: true),
       Platform: () => FakePlatform()..stdoutSupportsAnsi = true,
     });
@@ -96,7 +96,7 @@ void main() {
         terminal.color('magenta ${terminal.color('output', TerminalColor.blue)} also magenta', TerminalColor.magenta),
         equals('${AnsiTerminal.magenta}magenta ${AnsiTerminal.blue}output${AnsiTerminal.resetColor}${AnsiTerminal.magenta} also magenta${AnsiTerminal.resetColor}'),
       );
-    }, overrides: <Type, Generator> {
+    }, overrides: <Type, Generator>{
       OutputPreferences: () => OutputPreferences(showColor: true),
       Platform: () => FakePlatform()..stdoutSupportsAnsi = true,
     });
@@ -110,7 +110,7 @@ void main() {
         terminal.bolden('bold ${terminal.bolden('output')} still bold'),
         equals('${AnsiTerminal.bold}bold output still bold${AnsiTerminal.resetBold}'),
       );
-    }, overrides: <Type, Generator> {
+    }, overrides: <Type, Generator>{
       OutputPreferences: () => OutputPreferences(showColor: true),
       Platform: () => FakePlatform()..stdoutSupportsAnsi = true,
     });

@@ -380,18 +380,26 @@ class _LicensePageState extends State<LicensePage> {
   bool _loaded = false;
 
   Future<void> _initLicenses() async {
-    final Flow flow = Flow.begin();
-    Timeline.timeSync('_initLicenses()', () { }, flow: flow);
+    int debugFlowId = -1;
+    assert(() {
+      final Flow flow = Flow.begin();
+      Timeline.timeSync('_initLicenses()', () { }, flow: flow);
+      debugFlowId = flow.id;
+      return true;
+    }());
     await for (LicenseEntry license in LicenseRegistry.licenses) {
-      if (!mounted)
+      if (!mounted) {
         return;
-      Timeline.timeSync('_initLicenses()', () { }, flow: Flow.step(flow.id));
+      }
+      assert(() {
+        Timeline.timeSync('_initLicenses()', () { }, flow: Flow.step(debugFlowId));
+        return true;
+      }());
       final List<LicenseParagraph> paragraphs =
         await SchedulerBinding.instance.scheduleTask<List<LicenseParagraph>>(
-          () => license.paragraphs.toList(),
+          license.paragraphs.toList,
           Priority.animation,
           debugLabel: 'License',
-          flow: flow,
         );
       setState(() {
         _licenses.add(const Padding(
@@ -434,7 +442,10 @@ class _LicensePageState extends State<LicensePage> {
     setState(() {
       _loaded = true;
     });
-    Timeline.timeSync('Build scheduled', () { }, flow: Flow.end(flow.id));
+    assert(() {
+      Timeline.timeSync('Build scheduled', () { }, flow: Flow.end(debugFlowId));
+      return true;
+    }());
   }
 
   @override

@@ -480,7 +480,7 @@ Future<XcodeBuildResult> buildXcodeProject({
           initialBuildStatus = null;
           buildSubStatus = logger.startProgress(
             line,
-            timeout: kSlowOperation,
+            timeout: timeoutConfiguration.slowOperation,
             progressIndicatorPadding: kDefaultStatusPadding - 7,
           );
         }
@@ -495,7 +495,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   }
 
   final Stopwatch buildStopwatch = Stopwatch()..start();
-  initialBuildStatus = logger.startProgress('Running Xcode build...', timeout: kFastOperation);
+  initialBuildStatus = logger.startProgress('Running Xcode build...', timeout: timeoutConfiguration.fastOperation);
   final RunResult buildResult = await runAsync(
     buildCommands,
     workingDirectory: app.project.hostAppRoot.path,
@@ -625,15 +625,13 @@ Future<void> diagnoseXcodeBuildFailure(XcodeBuildResult result) async {
 }
 
 class XcodeBuildResult {
-  XcodeBuildResult(
-    {
-      @required this.success,
-      this.output,
-      this.stdout,
-      this.stderr,
-      this.xcodeBuildExecution,
-    }
-  );
+  XcodeBuildResult({
+    @required this.success,
+    this.output,
+    this.stdout,
+    this.stderr,
+    this.xcodeBuildExecution,
+  });
 
   final bool success;
   final String output;
@@ -645,14 +643,12 @@ class XcodeBuildResult {
 
 /// Describes an invocation of a Xcode build command.
 class XcodeBuildExecution {
-  XcodeBuildExecution(
-    {
-      @required this.buildCommands,
-      @required this.appDirectory,
-      @required this.buildForPhysicalDevice,
-      @required this.buildSettings,
-    }
-  );
+  XcodeBuildExecution({
+    @required this.buildCommands,
+    @required this.appDirectory,
+    @required this.buildForPhysicalDevice,
+    @required this.buildSettings,
+  });
 
   /// The original list of Xcode build commands used to produce this build result.
   final List<String> buildCommands;

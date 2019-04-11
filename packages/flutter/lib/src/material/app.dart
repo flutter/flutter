@@ -71,7 +71,7 @@ const TextStyle _errorTextStyle = TextStyle(
 ///  * [MaterialPageRoute], which defines an app page that transitions in a material-specific way.
 ///  * [WidgetsApp], which defines the basic app elements but does not depend on the material library.
 ///  * The Flutter Internationalization Tutorial,
-///    <https://flutter.io/tutorials/internationalization/>.
+///    <https://flutter.dev/tutorials/internationalization/>.
 class MaterialApp extends StatefulWidget {
   /// Creates a MaterialApp.
   ///
@@ -300,7 +300,7 @@ class MaterialApp extends StatefulWidget {
   ///  * [GlobalMaterialLocalizations], a [localizationsDelegates] value
   ///    which provides material localizations for many languages.
   ///  * The Flutter Internationalization Tutorial,
-  ///    <https://flutter.io/tutorials/internationalization/>.
+  ///    <https://flutter.dev/tutorials/internationalization/>.
   final Iterable<LocalizationsDelegate<dynamic>> localizationsDelegates;
 
   /// {@macro flutter.widgets.widgetsApp.localeListResolutionCallback}
@@ -324,14 +324,14 @@ class MaterialApp extends StatefulWidget {
   ///  * [GlobalMaterialLocalizations], a [localizationsDelegates] value
   ///    which provides material localizations for many languages.
   ///  * The Flutter Internationalization Tutorial,
-  ///    <https://flutter.io/tutorials/internationalization/>.
+  ///    <https://flutter.dev/tutorials/internationalization/>.
   final Iterable<Locale> supportedLocales;
 
   /// Turns on a performance overlay.
   ///
   /// See also:
   ///
-  ///  * <https://flutter.io/debugging/#performanceoverlay>
+  ///  * <https://flutter.dev/debugging/#performanceoverlay>
   final bool showPerformanceOverlay;
 
   /// Turns on checkerboarding of raster cache images.
@@ -419,7 +419,7 @@ class _MaterialAppState extends State<MaterialApp> {
       _navigatorObservers = List<NavigatorObserver>.from(widget.navigatorObservers)
         ..add(_heroController);
     } else {
-      _navigatorObservers = null;
+      _navigatorObservers = const <NavigatorObserver>[];
     }
   }
 

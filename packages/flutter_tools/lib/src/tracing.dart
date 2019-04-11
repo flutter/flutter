@@ -40,7 +40,7 @@ class Tracing {
     if (awaitFirstFrame) {
       final Status status = logger.startProgress(
         'Waiting for application to render first frame...',
-        timeout: kFastOperation,
+        timeout: timeoutConfiguration.fastOperation,
       );
       try {
         final Completer<void> whenFirstFrameRendered = Completer<void>();

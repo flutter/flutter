@@ -22,7 +22,7 @@ Future<void> main() async {
     await tester.pumpWidget(
       MaterialApp(
         home: Image(image: fakeImageProvider, excludeFromSemantics: true, key: imageKey),
-        routes: <String, WidgetBuilder> {
+        routes: <String, WidgetBuilder>{
           '/page': (BuildContext context) => Container(),
         },
       )

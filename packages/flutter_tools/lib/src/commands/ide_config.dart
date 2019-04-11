@@ -43,6 +43,9 @@ class IdeConfigCommand extends FlutterCommand {
   final String name = 'ide-config';
 
   @override
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{};
+
+  @override
   final String description = 'Configure the IDE for use in the Flutter tree.\n\n'
       'If run on a Flutter tree that is already configured for the IDE, this '
       'command will add any new configurations, recreate any files that are '
@@ -223,7 +226,7 @@ class IdeConfigCommand extends FlutterCommand {
       throwToolExit('Currently, the only supported IDE is IntelliJ\n$usage', exitCode: 2);
     }
 
-    await Cache.instance.updateAll();
+    await Cache.instance.updateAll(<DevelopmentArtifact>{ DevelopmentArtifact.universal });
 
     if (argResults['update-templates']) {
       _handleTemplateUpdate();

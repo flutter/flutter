@@ -85,7 +85,7 @@ class TimelineSummary {
 
   /// Encodes this summary as JSON.
   Map<String, dynamic> get summaryJson {
-    return <String, dynamic> {
+    return <String, dynamic>{
       'average_frame_build_time_millis': computeAverageFrameBuildTimeMillis(),
       '90th_percentile_frame_build_time_millis': computePercentileFrameBuildTimeMillis(90.0),
       '99th_percentile_frame_build_time_millis': computePercentileFrameBuildTimeMillis(99.0),

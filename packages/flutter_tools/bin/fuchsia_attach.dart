@@ -113,7 +113,7 @@ Future<void> main(List<String> args) async {
         platformKernelDill: platformKernelDill,
         flutterPatchedSdk: flutterPatchedSdk,
       ),
-    }
+    },
   );
 }
 

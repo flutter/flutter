@@ -151,7 +151,7 @@ void main() {
           'version': 'test-version',
         },
       ));
-    }, overrides: <Type, Generator> {
+    }, overrides: <Type, Generator>{
       Platform: () => FakePlatform(
         operatingSystem: 'linux',
         environment: <String, String>{

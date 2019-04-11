@@ -162,7 +162,8 @@ class DataCell {
   /// If the cell has no data, then a [Text] widget with placeholder
   /// text should be provided instead, and then the [placeholder]
   /// argument should be set to true.
-  const DataCell(this.child, {
+  const DataCell(
+    this.child, {
     this.placeholder = false,
     this.showEditIcon = false,
     this.onTap,

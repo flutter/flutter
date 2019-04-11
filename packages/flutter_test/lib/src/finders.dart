@@ -654,7 +654,9 @@ class _ElementPredicateFinder extends MatchFinder {
 }
 
 class _DescendantFinder extends Finder {
-  _DescendantFinder(this.ancestor, this.descendant, {
+  _DescendantFinder(
+    this.ancestor,
+    this.descendant, {
     this.matchRoot = false,
     bool skipOffstage = true,
   }) : super(skipOffstage: skipOffstage);

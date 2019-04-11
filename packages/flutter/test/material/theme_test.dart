@@ -417,28 +417,26 @@ void main() {
   group('Cupertino theme', () {
     int buildCount;
     CupertinoThemeData actualTheme;
+    IconThemeData actualIconTheme;
 
     final Widget singletonThemeSubtree = Builder(
       builder: (BuildContext context) {
         buildCount++;
         actualTheme = CupertinoTheme.of(context);
+        actualIconTheme = IconTheme.of(context);
         return const Placeholder();
       },
     );
 
     Future<CupertinoThemeData> testTheme(WidgetTester tester, ThemeData theme) async {
-      await tester.pumpWidget(
-        Theme(
-          data: theme,
-          child: singletonThemeSubtree,
-        ),
-      );
+      await tester.pumpWidget(Theme(data: theme, child: singletonThemeSubtree));
       return actualTheme;
     }
 
     setUp(() {
       buildCount = 0;
       actualTheme = null;
+      actualIconTheme = null;
     });
 
     testWidgets('Default theme has defaults', (WidgetTester tester) async {
@@ -507,6 +505,20 @@ void main() {
 
       expect(buildCount, 2);
       expect(theme.primaryColor, Colors.orange);
+    });
+
+    testWidgets("CupertinoThemeData does not override material theme's icon theme",
+      (WidgetTester tester) async {
+        const Color materialIconColor = Colors.blue;
+        const Color cupertinoIconColor = Colors.black;
+
+        await testTheme(tester, ThemeData(
+            iconTheme: const IconThemeData(color: materialIconColor),
+            cupertinoOverrideTheme: const CupertinoThemeData(primaryColor: cupertinoIconColor)
+        ));
+
+        expect(buildCount, 1);
+        expect(actualIconTheme.color, materialIconColor);
     });
 
     testWidgets(
@@ -741,7 +753,7 @@ class _TextStyleProxy implements TextStyle {
     double wordSpacingFactor = 1.0,
     double wordSpacingDelta = 0.0,
     double heightFactor = 1.0,
-    double heightDelta = 0.0
+    double heightDelta = 0.0,
   }) {
     throw UnimplementedError();
   }
@@ -773,7 +785,7 @@ class _TextStyleProxy implements TextStyle {
     Color decorationColor,
     TextDecorationStyle decorationStyle,
     double decorationThickness,
-    String debugLabel
+    String debugLabel,
   }) {
     throw UnimplementedError();
   }
@@ -796,7 +808,7 @@ class _TextStyleProxy implements TextStyle {
     FontWeight fontWeight,
     FontStyle fontStyle,
     double height,
-    StrutStyle strutStyle
+    StrutStyle strutStyle,
   }) {
     throw UnimplementedError();
   }

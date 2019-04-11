@@ -67,7 +67,7 @@ void main() {
         '',
         'hello',
         <dynamic>['nested', <dynamic>[]],
-        <dynamic, dynamic>{ 'a': 'nested', 'b': <dynamic, dynamic>{} },
+        <dynamic, dynamic>{'a': 'nested', 'b': <dynamic, dynamic>{}},
         'world',
       ];
       _checkEncodeDecode<dynamic>(json, message);
@@ -185,7 +185,7 @@ void main() {
           double.nan,
         ]),
         <dynamic>['nested', <dynamic>[]],
-        <dynamic, dynamic>{ 'a': 'nested', null: <dynamic, dynamic>{} },
+        <dynamic, dynamic>{'a': 'nested', null: <dynamic, dynamic>{}},
         'world',
       ];
       _checkEncodeDecode<dynamic>(standard, message);

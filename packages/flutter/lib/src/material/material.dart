@@ -53,7 +53,7 @@ enum MaterialType {
 ///
 ///  * [MaterialType]
 ///  * [Material]
-final Map<MaterialType, BorderRadius> kMaterialEdges = <MaterialType, BorderRadius> {
+final Map<MaterialType, BorderRadius> kMaterialEdges = <MaterialType, BorderRadius>{
   MaterialType.canvas: null,
   MaterialType.card: BorderRadius.circular(2.0),
   MaterialType.circle: null,
@@ -320,7 +320,13 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     final Color backgroundColor = _getBackgroundColor(context);
-    assert(backgroundColor != null || widget.type == MaterialType.transparency);
+    assert(
+      backgroundColor != null || widget.type == MaterialType.transparency,
+      'If Material type is not MaterialType.transparency, a color must '
+      'either be passed in through the `color` property, or be defined '
+      'in the theme (ex. canvasColor != null if type is set to '
+      'MaterialType.canvas)'
+    );
     Widget contents = widget.child;
     if (contents != null) {
       contents = AnimatedDefaultTextStyle(
