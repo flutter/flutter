@@ -914,6 +914,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   void updateFloatingCursor(RawFloatingCursorPoint point) {
     switch(point.state){
       case FloatingCursorDragState.Start:
+        if (_floatingCursorResetController.isAnimating) {
+          _floatingCursorResetController.stop();
+          _onFloatingCursorResetTick();
+        }
         final TextPosition currentTextPosition = TextPosition(offset: renderEditable.selection.baseOffset);
         _startCaretRect = renderEditable.getLocalRectForCaret(currentTextPosition);
         renderEditable.setFloatingCursor(point.state, _startCaretRect.center - _floatingCursorOffset, currentTextPosition);

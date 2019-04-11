@@ -1,4 +1,4 @@
-# Flutter (https://flutter.io) Developement Environment for Linux
+# Flutter (https://flutter.dev) Developement Environment for Linux
 # ===============================================================
 #
 # This environment passes all Linux Flutter Doctor checks and is sufficient
@@ -100,6 +100,10 @@ ENV LANG en_US.UTF-8
 
 # Install coveralls and Firebase
 # This is why we need ruby installed.
-RUN gem install coveralls
-RUN gem install bundler
+# Skip all the documentation (-N) since it's just on CI.
+RUN gem install coveralls -N
+RUN gem install bundler -N
+# Install fastlane which is used on Linux to build and deploy Android
+# builds to the Play Store.
+RUN gem install fastlane -N
 

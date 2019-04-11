@@ -13202,7 +13202,7 @@ final Set<String> kSupportedLanguages = HashSet<String>.from(const <String>[
 
 /// Creates a [GlobalMaterialLocalizations] instance for the given `locale`.
 ///
-/// All of the function's arguments except `locale` will be passed to the [new
+/// All of the function's arguments except `locale` will be passed to the [
 /// GlobalMaterialLocalizations] constructor. (The `localeName` argument of that
 /// constructor is specified by the actual subclass constructor by this
 /// function.)

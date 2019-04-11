@@ -1,6 +1,6 @@
 name: fuchsia_remote_debug_protocol
 description: Provides an API to test/debug Flutter applications on remote Fuchsia devices and emulators.
-homepage: http://flutter.io
+homepage: http://flutter.dev
 author: Flutter Authors <flutter-dev@googlegroups.com>
 
 environment:

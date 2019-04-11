@@ -175,7 +175,7 @@ class CupertinoApp extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///  * <https://flutter.io/debugging/#performanceoverlay>
+  ///  * <https://flutter.dev/debugging/#performanceoverlay>
   final bool showPerformanceOverlay;
 
   /// Turns on checkerboarding of raster cache images.

@@ -452,6 +452,8 @@ abstract class AnimatedWidgetBaseState<T extends ImplicitlyAnimatedWidget> exten
 /// [AnimatedWidget] such as the [DecoratedBoxTransition] or use your own
 /// [AnimationController].
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=yI-8QHpGIP4}
+///
 /// Here's an illustration of what using this widget looks like, using a [curve]
 /// of [Curves.fastOutSlowIn].
 /// {@animation 250 266 https://flutter.github.io/assets-for-api-docs/assets/widgets/animated_container.mp4}
@@ -460,7 +462,7 @@ abstract class AnimatedWidgetBaseState<T extends ImplicitlyAnimatedWidget> exten
 ///
 ///  * [AnimatedPadding], which is a subset of this widget that only
 ///    supports animating the [padding].
-///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
+///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
 ///  * [AnimatedPositioned], which, as a child of a [Stack], automatically
 ///    transitions its child's position over a given duration whenever the given
 ///    position changes.
