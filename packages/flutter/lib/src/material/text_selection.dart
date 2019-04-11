@@ -6,7 +6,6 @@ import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/src/widgets/editable_text.dart';
 
 import 'debug.dart';
 import 'flat_button.dart';
@@ -148,7 +147,9 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
     final double x = (rightTextSelectionPoint == null)
         ? leftTextSelectionPoint.point.dx
         : (leftTextSelectionPoint.point.dx + rightTextSelectionPoint.point.dx) / 2.0;
-    final double y = (globalEditableRegion.top - MediaQuery.of(context).padding.top < _kToolbarHeight)
+    final double availableHeight
+    = globalEditableRegion.top - MediaQuery.of(context).padding.top - _kToolbarScreenPadding;
+    final double y = (availableHeight < _kToolbarHeight)
         ? leftTextSelectionPoint.point.dy + globalEditableRegion.height + _kToolbarHeight + _kToolbarScreenPadding
         : leftTextSelectionPoint.point.dy - globalEditableRegion.height;
     final Offset position = Offset(x, y);

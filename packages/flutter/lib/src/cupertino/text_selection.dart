@@ -6,7 +6,6 @@ import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/src/widgets/editable_text.dart';
 
 import 'button.dart';
 import 'colors.dart';
@@ -42,11 +41,19 @@ const TextStyle _kToolbarButtonFontStyle = TextStyle(
   color: CupertinoColors.white,
 );
 
+/// The direction of the triangle next to the toolbar.
+///
+/// If the remaining space at the top shows the toolbar properly,
+/// the direction of the triangle will be [down],
+/// otherwise the toolbar will appear at the bottom of the input box and
+/// the triangle will be [up].
 enum _ArrowDirection { up, down }
 
 /// Paints a triangle below the toolbar.
 class _TextSelectionToolbarNotchPainter extends CustomPainter {
-  const _TextSelectionToolbarNotchPainter(this.arrowDirection);
+  const _TextSelectionToolbarNotchPainter(
+      this.arrowDirection
+      ): assert(arrowDirection != null);
 
   final _ArrowDirection arrowDirection;
 
@@ -55,13 +62,13 @@ class _TextSelectionToolbarNotchPainter extends CustomPainter {
     final Paint paint = Paint()
         ..color = _kToolbarBackgroundColor
         ..style = PaintingStyle.fill;
-    final double py = (arrowDirection == _ArrowDirection.down)
+    final double triangleBottomY = (arrowDirection == _ArrowDirection.down)
         ? 0.0
         : _kToolbarTriangleSize.height;
     final Path triangle = Path()
-        ..lineTo(_kToolbarTriangleSize.width / 2, py)
+        ..lineTo(_kToolbarTriangleSize.width / 2, triangleBottomY)
         ..lineTo(0.0, _kToolbarTriangleSize.height)
-        ..lineTo(-(_kToolbarTriangleSize.width / 2), py)
+        ..lineTo(-(_kToolbarTriangleSize.width / 2), triangleBottomY)
         ..close();
     canvas.drawPath(triangle, paint);
   }
@@ -271,8 +278,9 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
     // If the distance from the top is less than a certain value,
     // the toolbar should be displayed below the input box.
     // FIX https://github.com/flutter/flutter/issues/29808
-    final _ArrowDirection direction =
-    (globalEditableRegion.top - MediaQuery.of(context).padding.top > _kToolbarHeight)
+    final double availableHeight
+        = globalEditableRegion.top - MediaQuery.of(context).padding.top - _kToolbarScreenPadding;
+    final _ArrowDirection direction = (availableHeight > _kToolbarHeight)
         ? _ArrowDirection.down
         : _ArrowDirection.up;
 
