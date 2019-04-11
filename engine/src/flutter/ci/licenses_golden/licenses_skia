@@ -1,4 +1,4 @@
-Signature: 5f7fdd9bab270790e9572824f09bb8b9
+Signature: d8912b05ae5ac462d5b7a163eb36768f
 
 UNUSED LICENSES:
 
@@ -4418,7 +4418,6 @@ FILE: ../../../third_party/skia/src/gpu/ccpr/GrVSCoverageProcessor.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/GrAtlasedShaderHelpers.h
 FILE: ../../../third_party/skia/src/gpu/effects/GrBlurredEdgeFragmentProcessor.fp
 FILE: ../../../third_party/skia/src/gpu/effects/GrCircleEffect.fp
-FILE: ../../../third_party/skia/src/gpu/effects/GrCircleEffect.h
 FILE: ../../../third_party/skia/src/gpu/effects/GrEllipseEffect.fp
 FILE: ../../../third_party/skia/src/gpu/effects/GrSimpleTextureEffect.fp
 FILE: ../../../third_party/skia/src/gpu/effects/generated/GrBlurredEdgeFragmentProcessor.cpp
