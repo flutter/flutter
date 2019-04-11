@@ -655,7 +655,7 @@ class GestureDetector extends StatelessWidget {
               if (details.buttons == kPrimaryButton)
                 onVerticalDragUpdate(details);
             }
-            ..onEnd = onVerticalDragEnd == null ? null :j (DragEndDetails details) {
+            ..onEnd = onVerticalDragEnd == null ? null : (DragEndDetails details) {
               if (details.buttons == kPrimaryButton)
                 onVerticalDragEnd(details);
             }
