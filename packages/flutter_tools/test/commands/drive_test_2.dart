@@ -27,11 +27,20 @@ void main() {
     MemoryFileSystem fs;
     Directory tempDir;
 
-    testUsingContext('--build', () async {
+    void withMockDevice([ Device mock ]) {
+      mockDevice = mock ?? MockDevice();
+      targetDeviceFinder = () async => mockDevice;
+      testDeviceManager.addDevice(mockDevice);
+    }
+
+    setUpAll(() {
       Cache.disableLocking();
+    });
+
+    setUp(() {
       command = DriveCommand();
-      fs = MemoryFileSystem();
       applyMocksToCommand(command);
+      fs = MemoryFileSystem();
       tempDir = fs.systemTempDirectory.createTempSync('flutter_drive_test.');
       fs.currentDirectory = tempDir;
       fs.directory('test').createSync();
@@ -42,7 +51,29 @@ void main() {
       targetDeviceFinder = () {
         throw 'Unexpected call to targetDeviceFinder';
       };
-      mockDevice = MockDevice();
+      //appStarter = (DriveCommand command) {
+      //  throw 'Unexpected call to appStarter';
+      //};
+      testRunner = (List<String> testArgs, String observatoryUri) {
+        throw 'Unexpected call to testRunner';
+      };
+      appStopper = (DriveCommand command) {
+        throw 'Unexpected call to appStopper';
+      };
+    });
+
+    tearDown(() {
+      command = null;
+      restoreExitFunction();
+      restoreAppStarter();
+      restoreAppStopper();
+      restoreTestRunner();
+      restoreTargetDeviceFinder();
+      tryToDelete(tempDir);
+    });
+
+    testUsingContext('--build', () async {
+      withMockDevice();
 
       final MockDeviceLogReader mockDeviceLogReader = MockDeviceLogReader();
       when(mockDevice.getLogReader()).thenReturn(mockDeviceLogReader);
@@ -57,15 +88,12 @@ void main() {
               prebuiltApplication: anyNamed('prebuiltApplication'),
               usesTerminalUi: false,
       )).thenAnswer((_) => Future<LaunchResult>.value(mockLaunchResult));
-      targetDeviceFinder = () async => mockDevice;
-      testDeviceManager.addDevice(mockDevice);
+      //targetDeviceFinder = () async => mockDevice;
+      //testDeviceManager.addDevice(mockDevice);
 
       final String testApp = fs.path.join(tempDir.path, 'test', 'e2e.dart');
       final String testFile = fs.path.join(tempDir.path, 'test_driver', 'e2e_test.dart');
 
-      //appStarter = expectAsync1((DriveCommand command) async {
-      //  return LaunchResult.succeeded();
-      //});
       testRunner = (List<String> testArgs, String observatoryUri) async {
         throwToolExit(null, exitCode: 123);
       };
@@ -88,9 +116,8 @@ void main() {
       try {
         await createTestCommandRunner(command).run(args);
       } on ToolExit catch (e) {
-        print('Yolo!');
-        print(e.exitCode);
-        print(e.message);
+        expect(e.exitCode, 123);
+        expect(e.message, null);
       }
       verify(mockDevice.startApp(
               null,
@@ -100,7 +127,7 @@ void main() {
               platformArgs: anyNamed('platformArgs'),
               prebuiltApplication: true,
               usesTerminalUi: false,
-        ));
+      ));
 
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
