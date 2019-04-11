@@ -1709,6 +1709,10 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
         color: color,
         shadowColor: shadowColor,
       );
+      assert(() {
+        physicalModel.debugCreator = debugCreator;
+        return true;
+      }());
       context.pushLayer(physicalModel, super.paint, offset, childPaintBounds: offsetBounds);
     }
   }
@@ -1799,6 +1803,10 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
         color: color,
         shadowColor: shadowColor,
       );
+      assert(() {
+        physicalModel.debugCreator = debugCreator;
+        return true;
+      }());
       context.pushLayer(physicalModel, super.paint, offset, childPaintBounds: offsetBounds);
     }
   }

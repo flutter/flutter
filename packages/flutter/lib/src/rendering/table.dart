@@ -958,8 +958,8 @@ class RenderTable extends RenderBox {
                 deficit -= widths[x] - minWidths[x];
                 widths[x] = minWidths[x];
               } else {
-                deficit -= availableDelta;
-                widths[x] -= availableDelta;
+                deficit -= delta;
+                widths[x] -= delta;
                 newAvailableColumns += 1;
               }
             }
