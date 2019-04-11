@@ -198,6 +198,7 @@ void main() {
 
   testWidgets('Can override ErrorWidget.build', (WidgetTester tester) async {
     const Text errorText = Text('error');
+    final ErrorWidgetBuilder oldBuilder = ErrorWidget.builder;
     ErrorWidget.builder = (FlutterErrorDetails details) => errorText;
     final SliverChildBuilderDelegate builderThrowsDelegate = SliverChildBuilderDelegate(
       (_, __) => throw 'builder',
@@ -207,5 +208,6 @@ void main() {
     );
     expect(builderThrowsDelegate.build(null, 0), errorText);
     expect(tester.takeException(), 'builder');
+    ErrorWidget.builder = oldBuilder;
   });
 }
