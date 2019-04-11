@@ -32,7 +32,6 @@ Future<Map<String, dynamic>> runTask(String taskName, { bool silent = false }) a
   final Process runner = await startProcess(dartBin, <String>[
     '--enable-vm-service=0', // zero causes the system to choose a free port
     '--no-pause-isolates-on-exit',
-    '--disable-service-auth-codes', // TODO(bkonyi): enable auth codes
     taskExecutable,
   ]);
 
