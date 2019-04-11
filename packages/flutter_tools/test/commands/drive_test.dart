@@ -315,6 +315,7 @@ void main() {
                 prebuiltApplication: anyNamed('prebuiltApplication'),
                 usesTerminalUi: false,
         )).thenAnswer((_) => Future<LaunchResult>.value(mockLaunchResult));
+        when(mockDevice.isAppInstalled(any)).thenAnswer((_) => Future<bool>.value(false));
 
         testApp = fs.path.join(tempDir.path, 'test', 'e2e.dart');
         testFile = fs.path.join(tempDir.path, 'test_driver', 'e2e_test.dart');
@@ -333,8 +334,8 @@ void main() {
         await memFs.file(testApp).writeAsString('main() {}');
         await memFs.file(testFile).writeAsString('main() {}');
       }
-/*
-      testUsingContext('no build arg', () async {
+
+      testUsingContext('does not use pre-built app if no build arg provided', () async {
         await appStarterSetup();
 
         final List<String> args = <String>[
@@ -353,19 +354,46 @@ void main() {
                 route: anyNamed('route'),
                 debuggingOptions: anyNamed('debuggingOptions'),
                 platformArgs: anyNamed('platformArgs'),
-                prebuiltApplication: true,
+                prebuiltApplication: false,
                 usesTerminalUi: false,
         ));
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
       });
-*/
-      testUsingContext('--no-build', () async {
+
+      testUsingContext('does not use pre-built app if --build arg provided', () async {
         await appStarterSetup();
 
         final List<String> args = <String>[
           'drive',
-          //'--no-build',
+          '--build',
+          '--target=$testApp',
+        ];
+        try {
+          await createTestCommandRunner(command).run(args);
+        } on ToolExit catch (e) {
+          expect(e.exitCode, 123);
+          expect(e.message, null);
+        }
+        verify(mockDevice.startApp(
+                null,
+                mainPath: anyNamed('mainPath'),
+                route: anyNamed('route'),
+                debuggingOptions: anyNamed('debuggingOptions'),
+                platformArgs: anyNamed('platformArgs'),
+                prebuiltApplication: false,
+                usesTerminalUi: false,
+        ));
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+      });
+
+      testUsingContext('uses prebuilt app if --no-build arg provided', () async {
+        await appStarterSetup();
+
+        final List<String> args = <String>[
+          'drive',
+          '--no-build',
           '--target=$testApp',
         ];
         try {

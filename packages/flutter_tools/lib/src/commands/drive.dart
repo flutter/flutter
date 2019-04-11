@@ -257,7 +257,6 @@ Future<LaunchResult> _startApp(DriveCommand command) async {
   final ApplicationPackage package = await command.applicationPackages
       .getPackageForPlatform(await command.device.targetPlatform);
 
-  print('about to fail...');
   if (command.shouldBuild) {
     printTrace('Installing application package.');
     if (await command.device.isAppInstalled(package))
