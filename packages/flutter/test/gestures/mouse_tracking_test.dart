@@ -258,6 +258,7 @@ void main() {
       ui.window.onPointerDataPacket(packet);
       tracker.collectMousePositions();
       tracker.detachAnnotation(partialAnnotation);
+      isInHitRegionTwo = false;
     });
     test('detects exit when mouse goes away', () {
       final ui.PointerDataPacket packet1 = ui.PointerDataPacket(data: <ui.PointerData>[
