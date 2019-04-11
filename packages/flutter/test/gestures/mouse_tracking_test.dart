@@ -62,6 +62,7 @@ void main() {
     setUp(() {
       clear();
       isInHitRegionOne = true;
+      isInHitRegionTwo = false;
       tracker = MouseTracker(
         GestureBinding.instance.pointerRouter,
         (Offset _) {
@@ -201,7 +202,7 @@ void main() {
           kind: PointerDeviceKind.mouse,
         ),
       ]);
-      isInHitRegion = true;
+      isInHitRegionOne = true;
       tracker.attachAnnotation(annotation);
 
       ui.window.onPointerDataPacket(packet1);
@@ -217,7 +218,7 @@ void main() {
       expect(exit.length, equals(0), reason: 'exit contains $exit');
       // Simulate layer going away by detaching it.
       clear();
-      isInHitRegion = false;
+      isInHitRegionOne = false;
 
       ui.window.onPointerDataPacket(packet2);
       tracker.collectMousePositions();
@@ -231,13 +232,13 @@ void main() {
       // Actually detatch annotation. Shouldn't receive hit.
       tracker.detachAnnotation(annotation);
       clear();
-      isInHitRegion = false;
+      isInHitRegionOne = false;
 
       ui.window.onPointerDataPacket(packet2);
       tracker.collectMousePositions();
       expect(enter.length, equals(0), reason: 'enter contains $enter');
       expect(move.length, equals(0), reason: 'enter contains $move');
-      expecexit.length, equals(0), reason: 'enter contains $exit');
+      expect(exit.length, equals(0), reason: 'enter contains $exit');
     });
 
     test("don't flip out if not all mouse events are listened to", () {
@@ -279,7 +280,7 @@ void main() {
           kind: PointerDeviceKind.mouse,
         ),
       ]);
-      isInHitRegion = true;
+      isInHitRegionOne = true;
       tracker.attachAnnotation(annotation);
       ui.window.onPointerDataPacket(packet1);
       tracker.collectMousePositions();
@@ -327,7 +328,7 @@ void main() {
           kind: PointerDeviceKind.mouse,
         ),
       ]);
-      isInHitRegion = true;
+      isInHitRegionOne = true;
       tracker.attachAnnotation(annotation);
       ui.window.onPointerDataPacket(packet1);
       tracker.collectMousePositions();
