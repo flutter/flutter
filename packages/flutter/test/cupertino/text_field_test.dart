@@ -2042,6 +2042,8 @@ void main() {
     // Long press to trigger the text field.
     await tester.longPress(find.byType(CupertinoTextField));
     await tester.pump();
+    // A long press in Cupertino should position the cursor without any selection.
+    expect(controller.selection.isCollapsed, isTrue);
 
     final EditableTextState editableText = tester.state(find.byType(EditableText));
     expect(editableText.selectionOverlay.handlesAreVisible, isFalse);

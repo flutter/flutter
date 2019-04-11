@@ -1239,6 +1239,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   Duration get cursorBlinkInterval => _kCursorBlinkHalfPeriod;
 
   /// The current status of the text selection handles.
+  @visibleForTesting
   TextSelectionOverlay get selectionOverlay => _selectionOverlay;
 
   int _obscureShowCharTicksPending = 0;
@@ -1378,15 +1379,25 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     return true;
   }
 
+  @override
+  void hideToolbar() {
+    _selectionOverlay?.hide();
+  }
+
+  /// Toggles the visibility of the toolbar.
+  void toggleToolbar() {
+    assert(_selectionOverlay != null);
+    if (_selectionOverlay.toolbarIsVisible) {
+      hideToolbar();
+    } else {
+      showToolbar();
+    }
+  }
+
   /// Shows the handles at the location of the current selection.
   void showHandles() {
     assert(_selectionOverlay != null);
     _selectionOverlay.showHandles();
-  }
-
-  @override
-  void hideToolbar() {
-    _selectionOverlay?.hide();
   }
 
   VoidCallback _semanticsOnCopy(TextSelectionControls controls) {

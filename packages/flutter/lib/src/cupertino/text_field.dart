@@ -471,12 +471,15 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
 
   PointerDeviceKind _lastUsedDeviceKind;
 
-  // The selection overlay should only be enabled when the user is interacting
-  // through a touch screen. Mouse and other devices shouldn't trigger the
-  // selection overlay.
+  // The selection overlay should only be shown when the user is interacting
+  // through a touch screen (via either a finger or a stylus). A mouse shouldn't
+  // trigger the selection overlay.
   // For backwards-compatibility, we treat a null kind the same as touch.
-  bool get _isSelectionOverlayEnabled =>
-      _lastUsedDeviceKind == null || _lastUsedDeviceKind == PointerDeviceKind.touch;
+  bool get _shouldShowSelectionOverlay {
+    return _lastUsedDeviceKind == null
+        || _lastUsedDeviceKind == PointerDeviceKind.touch
+        || _lastUsedDeviceKind == PointerDeviceKind.stylus;
+  }
 
   @override
   void initState() {
@@ -534,7 +537,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
       from: details.globalPosition,
       cause: SelectionChangedCause.forcePress,
     );
-    if (_isSelectionOverlayEnabled)
+    if (_shouldShowSelectionOverlay)
       _editableText.showToolbar();
   }
 
@@ -558,31 +561,32 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
   }
 
   void _handleSingleLongTapEnd(LongPressEndDetails details) {
-    if (_isSelectionOverlayEnabled)
+    if (_shouldShowSelectionOverlay)
       _editableText.showToolbar();
   }
 
   void _handleDoubleTapDown(TapDownDetails details) {
     _renderEditable.selectWord(cause: SelectionChangedCause.tap);
-    if (_isSelectionOverlayEnabled)
+    if (_shouldShowSelectionOverlay)
       _editableText.showToolbar();
   }
 
   bool _shouldShowHandles(SelectionChangedCause cause) {
-    // When the text field was triggered by anything other than a touch screen,
-    // we shouldn't show the selection handles.
-    // If [_deviceKind] is null we still show the handles for backwards-compatibility
-    // reasons.
-    if (!_isSelectionOverlayEnabled)
+    // When the text field is activated by something that doesn't trigger the
+    // selection overlay, we shouldn't show the handles either.
+    if (!_shouldShowSelectionOverlay)
       return false;
+
     // On iOS, we don't show handles when the selection is collapsed.
     if (_effectiveController.selection.isCollapsed)
       return false;
+
     if (cause == SelectionChangedCause.keyboard)
       return false;
 
     if (cause == SelectionChangedCause.longPress)
       return true;
+
     if (_effectiveController.text.isNotEmpty)
       return true;
 
@@ -740,6 +744,10 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
     );
   }
 
+  void _updateLastUsedDeviceKind(PointerDownEvent event) {
+    _lastUsedDeviceKind = event.kind;
+  }
+
   @override
   Widget build(BuildContext context) {
     super.build(context); // See AutomaticKeepAliveClientMixin.
@@ -818,9 +826,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
                     ? _kDisabledBackground
                     : CupertinoColors.darkBackgroundGray,
             child: Listener(
-              onPointerDown: (PointerDownEvent event) {
-                _lastUsedDeviceKind = event.kind;
-              },
+              onPointerDown: _updateLastUsedDeviceKind,
               child: TextSelectionGestureDetector(
                 onTapDown: _handleTapDown,
                 onForcePressStart: _handleForcePressStarted,

@@ -515,12 +515,15 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
 
   PointerDeviceKind _lastUsedDeviceKind;
 
-  // The selection overlay should only be enabled when the user is interacting
-  // through a touch screen. Mouse and other devices shouldn't trigger the
-  // selection overlay.
+  // The selection overlay should only be shown when the user is interacting
+  // through a touch screen (via either a finger or a stylus). A mouse shouldn't
+  // trigger the selection overlay.
   // For backwards-compatibility, we treat a null kind the same as touch.
-  bool get _isSelectionOverlayEnabled =>
-      _lastUsedDeviceKind == null || _lastUsedDeviceKind == PointerDeviceKind.touch;
+  bool get _shouldShowSelectionOverlay {
+    return _lastUsedDeviceKind == null
+        || _lastUsedDeviceKind == PointerDeviceKind.touch
+        || _lastUsedDeviceKind == PointerDeviceKind.stylus;
+  }
 
   InputDecoration _getEffectiveDecoration() {
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
@@ -621,17 +624,17 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
   }
 
   bool _shouldShowHandles(SelectionChangedCause cause) {
-    // When the text field was triggered by anything other than a touch screen,
-    // we shouldn't show the selection handles.
-    // If [_deviceKind] is null we still show the handles for backwards-compatibility
-    // reasons.
-    if (!_isSelectionOverlayEnabled)
+    // When the text field is activated by something that doesn't trigger the
+    // selection overlay, we shouldn't show the handles either.
+    if (!_shouldShowSelectionOverlay)
       return false;
+
     if (cause == SelectionChangedCause.keyboard)
       return false;
 
     if (cause == SelectionChangedCause.longPress)
       return true;
+
     if (_effectiveController.text.isNotEmpty)
       return true;
 
@@ -660,12 +663,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
   /// Toggle the toolbar when a selection handle is tapped.
   void _handleSelectionHandleTapped() {
     if (_effectiveController.selection.isCollapsed) {
-      final TextSelectionOverlay overlay = _editableText.selectionOverlay;
-      if (overlay.toolbarIsVisible) {
-        overlay.hideToolbar();
-      } else {
-        overlay.showToolbar();
-      }
+      _editableText.toggleToolbar();
     }
   }
 
@@ -716,7 +714,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         from: details.globalPosition,
         cause: SelectionChangedCause.forcePress,
       );
-      if (_isSelectionOverlayEnabled)
+      if (_shouldShowSelectionOverlay)
         _editableTextKey.currentState.showToolbar();
     }
   }
@@ -784,14 +782,14 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
   }
 
   void _handleSingleLongTapEnd(LongPressEndDetails details) {
-    if (_isSelectionOverlayEnabled)
+    if (_shouldShowSelectionOverlay)
       _editableTextKey.currentState.showToolbar();
   }
 
   void _handleDoubleTapDown(TapDownDetails details) {
     if (widget.selectionEnabled) {
       _renderEditable.selectWord(cause: SelectionChangedCause.doubleTap);
-      if (_isSelectionOverlayEnabled)
+      if (_shouldShowSelectionOverlay)
         _editableTextKey.currentState.showToolbar();
     }
   }
@@ -813,6 +811,10 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
       to: updateDetails.globalPosition,
       cause: SelectionChangedCause.drag,
     );
+  }
+
+  void _updateLastUsedDeviceKind(PointerDownEvent event) {
+    _lastUsedDeviceKind = event.kind;
   }
 
   void _startSplash(Offset globalPosition) {
@@ -977,9 +979,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
       child: IgnorePointer(
         ignoring: !(widget.enabled ?? widget.decoration?.enabled ?? true),
         child: Listener(
-          onPointerDown: (PointerDownEvent event) {
-            _lastUsedDeviceKind = event.kind;
-          },
+          onPointerDown: _updateLastUsedDeviceKind,
           child: TextSelectionGestureDetector(
             onTapDown: _handleTapDown,
             onForcePressStart: forcePressEnabled ? _handleForcePressStarted : null,

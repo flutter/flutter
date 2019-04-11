@@ -319,6 +319,9 @@ class TextSelectionOverlay {
 
   /// {@template flutter.widgets.textSelection.onSelectionHandleTapped}
   /// A callback that's invoked when a selection handle is tapped.
+  ///
+  /// Both regular taps and long presses invoke this callback, but a drag
+  /// gesture won't.
   /// {@endtemplate}
   final VoidCallback onSelectionHandleTapped;
 
