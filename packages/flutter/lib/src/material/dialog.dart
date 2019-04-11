@@ -189,6 +189,7 @@ class Dialog extends StatelessWidget {
 ///
 ///  * [SimpleDialog], which handles the scrolling of the contents but has no [actions].
 ///  * [Dialog], on which [AlertDialog] and [SimpleDialog] are based.
+///  * [CupertinoAlertDialog], an iOS-styled alert dialog.
 ///  * [showDialog], which actually displays the dialog and returns its result.
 ///  * <https://material.io/design/components/dialogs.html#alert-dialog>
 class AlertDialog extends StatelessWidget {
