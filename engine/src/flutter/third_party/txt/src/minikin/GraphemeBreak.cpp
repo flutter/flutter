@@ -150,7 +150,6 @@ bool GraphemeBreak::isGraphemeBreak(const float* advances,
     if (p0 == U_GCB_EXTEND && offset_backback > start) {
       // skip over emoji variation selector
       U16_PREV(buf, start, offset_backback, c0);
-      p0 = tailoredGraphemeClusterBreak(c0);
     }
     if (isEmojiBase(c0)) {
       return false;
