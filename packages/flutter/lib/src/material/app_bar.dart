@@ -800,6 +800,8 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 /// common actions with [IconButton]s which are optionally followed by a
 /// [PopupMenuButton] for less common operations.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=R9C5KMJKluE}
+///
 /// Sliver app bars are typically used as the first child of a
 /// [CustomScrollView], which lets the app bar integrate with the scroll view so
 /// that it can vary in height according to the scroll offset or float above the

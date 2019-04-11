@@ -32,6 +32,11 @@ class FlutterVersion {
     return _repositoryUrl;
   }
 
+  /// Whether we are currently on the stable branch.
+  bool get isStable {
+    return getBranchName() == 'stable';
+  }
+
   static const Set<String> officialChannels = <String>{
     'master',
     'dev',

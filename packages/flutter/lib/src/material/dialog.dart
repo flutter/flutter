@@ -189,6 +189,7 @@ class Dialog extends StatelessWidget {
 ///
 ///  * [SimpleDialog], which handles the scrolling of the contents but has no [actions].
 ///  * [Dialog], on which [AlertDialog] and [SimpleDialog] are based.
+///  * [CupertinoAlertDialog], an iOS-styled alert dialog.
 ///  * [showDialog], which actually displays the dialog and returns its result.
 ///  * <https://material.io/design/components/dialogs.html#alert-dialog>
 class AlertDialog extends StatelessWidget {
@@ -699,11 +700,12 @@ Future<T> showDialog<T>({
 }) {
   assert(child == null || builder == null);
   assert(debugCheckHasMaterialLocalizations(context));
+
+  final ThemeData theme = Theme.of(context, shadowThemeOnly: true);
   return showGeneralDialog(
     context: context,
     pageBuilder: (BuildContext buildContext, Animation<double> animation, Animation<double> secondaryAnimation) {
-      final ThemeData theme = Theme.of(context, shadowThemeOnly: true);
-      final Widget pageChild =  child ?? Builder(builder: builder);
+      final Widget pageChild = child ?? Builder(builder: builder);
       return SafeArea(
         child: Builder(
           builder: (BuildContext context) {

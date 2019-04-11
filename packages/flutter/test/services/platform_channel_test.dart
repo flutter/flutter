@@ -69,6 +69,21 @@ void main() {
       expect(await channel.invokeListMethod<String>('sayHello', 'hello'), <String>['hello', 'world']);
     });
 
+    test('can invoke list method and get null result', () async {
+      BinaryMessages.setMockMessageHandler(
+        'ch7',
+        (ByteData message) async {
+          final Map<dynamic, dynamic> methodCall = jsonMessage.decodeMessage(message);
+          if (methodCall['method'] == 'sayHello') {
+            return jsonMessage.encodeMessage(<dynamic>[null]);
+          } else {
+            return jsonMessage.encodeMessage(<dynamic>['unknown', null, null]);
+          }
+        },
+      );
+      expect(await channel.invokeListMethod<String>('sayHello', 'hello'), null);
+    });
+
 
     test('can invoke map method and get result', () async {
       BinaryMessages.setMockMessageHandler(
@@ -84,6 +99,21 @@ void main() {
       );
       expect(channel.invokeMethod<Map<String, String>>('sayHello', 'hello'), throwsA(isInstanceOf<TypeError>()));
       expect(await channel.invokeMapMethod<String, String>('sayHello', 'hello'), <String, String>{'hello': 'world'});
+    });
+
+    test('can invoke map method and get null result', () async {
+      BinaryMessages.setMockMessageHandler(
+        'ch7',
+        (ByteData message) async {
+          final Map<dynamic, dynamic> methodCall = jsonMessage.decodeMessage(message);
+          if (methodCall['method'] == 'sayHello') {
+            return jsonMessage.encodeMessage(<dynamic>[null]);
+          } else {
+            return jsonMessage.encodeMessage(<dynamic>['unknown', null, null]);
+          }
+        },
+      );
+      expect(await channel.invokeMapMethod<String, String>('sayHello', 'hello'), null);
     });
 
     test('can invoke method and get error', () async {

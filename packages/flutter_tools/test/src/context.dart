@@ -304,7 +304,10 @@ class MockXcodeProjectInterpreter implements XcodeProjectInterpreter {
   }
 }
 
-class MockFlutterVersion extends Mock implements FlutterVersion {}
+class MockFlutterVersion extends Mock implements FlutterVersion {
+  @override
+  bool get isStable => false;
+}
 
 class MockClock extends Mock implements SystemClock {}
 

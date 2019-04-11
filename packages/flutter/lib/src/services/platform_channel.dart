@@ -109,7 +109,7 @@ class BaseMessageChannel<T> {
 /// The logical identity of the channel is given by its name. Identically named
 /// channels will interfere with each other's communication.
 ///
-/// See: <https://flutter.io/platform-channels/>
+/// See: <https://flutter.dev/platform-channels/>
 class BaseMethodChannel {
   /// Creates a [BaseMethodChannel] with the specified [name].
   ///
@@ -155,7 +155,7 @@ class BaseMethodChannel {
   /// {@tool sample}
   ///
   /// The code might be packaged up as a musical plugin, see
-  /// <https://flutter.io/developing-packages/>:
+  /// <https://flutter.dev/developing-packages/>:
   ///
   /// ```dart
   /// class Music {
@@ -297,7 +297,7 @@ class BaseMethodChannel {
   ///  * <https://docs.flutter.io/javadoc/io/flutter/plugin/common/MethodCall.html>
   ///    for how to access method call arguments on Android.
   @optionalTypeArgs
-  Future<T> invokeMethod<T>(String method, [dynamic arguments]) async {
+  Future<T> invokeMethod<T>(String method, [ dynamic arguments ]) async {
     assert(method != null);
     final ByteData result = await binaryMessenger.send(
       name,
@@ -321,7 +321,7 @@ class BaseMethodChannel {
   ///  * [invokeMethod], which this call delegates to.
   Future<List<T>> invokeListMethod<T>(String method, [ dynamic arguments ]) async {
     final List<dynamic> result = await invokeMethod<List<dynamic>>(method, arguments);
-    return result.cast<T>();
+    return result?.cast<T>();
   }
 
   /// An implementation of [invokeMethod] that can return typed maps.
@@ -335,7 +335,7 @@ class BaseMethodChannel {
   ///  * [invokeMethod], which this call delegates to.
   Future<Map<K, V>> invokeMapMethod<K, V>(String method, [ dynamic arguments ]) async {
     final Map<dynamic, dynamic> result = await invokeMethod<Map<dynamic, dynamic>>(method, arguments);
-    return result.cast<K, V>();
+    return result?.cast<K, V>();
   }
 
   /// Sets a callback for receiving method calls on this channel.
@@ -469,7 +469,7 @@ class OptionalMethodChannel extends MethodChannel {
 /// The logical identity of the channel is given by its name. Identically named
 /// channels will interfere with each other's communication.
 ///
-/// See: <https://flutter.io/platform-channels/>
+/// See: <https://flutter.dev/platform-channels/>
 class EventChannel {
   /// Creates an [EventChannel] with the specified [name].
   ///
