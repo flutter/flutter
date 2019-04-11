@@ -408,11 +408,11 @@ using namespace flutter;
   return [FlutterStandardTypedData typedDataWithData:data type:type];
 }
 
-- (id)readValue {
+- (nullable id)readValue {
   return [self readValueOfType:[self readByte]];
 }
 
-- (id)readValueOfType:(UInt8)type {
+- (nullable id)readValueOfType:(UInt8)type {
   FlutterStandardField field = (FlutterStandardField)type;
   switch (field) {
     case FlutterStandardFieldNil:
