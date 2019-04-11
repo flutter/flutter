@@ -24,7 +24,7 @@ void main() {
     });
 
     testUsingContext('Adds artifact flags to requested artifacts', () async {
-      final PrecacheCommand command = PrecacheCommand(); 
+      final PrecacheCommand command = PrecacheCommand();
       applyMocksToCommand(command);
       await createTestCommandRunner(command).run(
         const <String>['precache', '--ios', '--android', '--web', '--macos', '--linux', '--windows']
@@ -41,14 +41,14 @@ void main() {
     }, overrides: <Type, Generator>{
       Cache: () => cache,
     });
-    
+
     final MockFlutterVersion flutterVersion = MockFlutterVersion();
     when(flutterVersion.isStable).thenReturn(true);
 
     testUsingContext('Adds artifact flags to requested artifacts on stable', () async {
       // Release lock between test cases.
       Cache.releaseLockEarly();
-      final PrecacheCommand command = PrecacheCommand(); 
+      final PrecacheCommand command = PrecacheCommand();
       applyMocksToCommand(command);
       await createTestCommandRunner(command).run(
        const <String>['precache', '--ios', '--android', '--web', '--macos', '--linux', '--windows']
