@@ -82,6 +82,21 @@ class DriveCommand extends RunCommandBase {
 
   Device _device;
   Device get device => _device;
+  /*
+  bool get shouldBuild {
+    dynamic returnValue;
+    if (argResults == null)
+      returnValue = true;
+    else if (argResults['build'] == null)
+      returnValue = true;
+    else
+      returnValue = argResults['build'];
+    print('in our getter...');
+    print(argResults['build']);
+    print(returnValue);
+    return returnValue;
+  }
+  */
   bool get shouldBuild => argResults['build'] ?? true;
 
   /// Subscription to log messages printed on the device or simulator.
@@ -242,6 +257,7 @@ Future<LaunchResult> _startApp(DriveCommand command) async {
   final ApplicationPackage package = await command.applicationPackages
       .getPackageForPlatform(await command.device.targetPlatform);
 
+  print('about to fail...');
   if (command.shouldBuild) {
     printTrace('Installing application package.');
     if (await command.device.isAppInstalled(package))
