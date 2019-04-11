@@ -35,7 +35,7 @@ class _TransformationsDemoState extends State<TransformationsDemo> {
     // The scene is drawn by a CustomPaint, but user interaction is handled by
     // the GestureTransformable parent widget.
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(title: const Text('2D Tranformations')),
       body: LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
           // Draw the scene as big as is available, but allow the user to
