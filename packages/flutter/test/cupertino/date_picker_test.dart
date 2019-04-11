@@ -1,6 +1,8 @@
 // Copyright 2017 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
+import 'dart:io' show Platform;
 import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
@@ -810,6 +812,37 @@ void main() {
     ));
     expect(lastSelectedItem, 1);
     handle.dispose();
+  });
+
+  testWidgets('DatePicker golden tests', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: SizedBox(
+            width: 200,
+            child: CupertinoDatePicker(
+              mode: CupertinoDatePickerMode.dateAndTime,
+              initialDateTime: DateTime(2019, 1, 1, 4),
+              onDateTimeChanged: (_) {},
+            )
+          )
+        )
+      );
+
+      await expectLater(
+        find.byType(CupertinoDatePicker),
+        matchesGoldenFile('date_picker_test.datetime.initial.png'),
+        skip: !Platform.isLinux
+      );
+
+      // Slightly drag the hour component to make the current hour off-center.
+      await tester.drag(find.text('4'), Offset(0, _kRowOffset.dy / 2));
+      await tester.pump();
+
+      await expectLater(
+        find.byType(CupertinoDatePicker),
+        matchesGoldenFile('date_picker_test.datetime.drag.png'),
+        skip: !Platform.isLinux
+      );
   });
 }
 
