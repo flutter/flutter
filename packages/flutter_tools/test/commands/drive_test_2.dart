@@ -88,8 +88,6 @@ void main() {
               prebuiltApplication: anyNamed('prebuiltApplication'),
               usesTerminalUi: false,
       )).thenAnswer((_) => Future<LaunchResult>.value(mockLaunchResult));
-      //targetDeviceFinder = () async => mockDevice;
-      //testDeviceManager.addDevice(mockDevice);
 
       final String testApp = fs.path.join(tempDir.path, 'test', 'e2e.dart');
       final String testFile = fs.path.join(tempDir.path, 'test_driver', 'e2e_test.dart');
@@ -140,8 +138,6 @@ class MockDevice extends Mock implements Device {
     when(isSupported()).thenReturn(true);
   }
 }
-
-//class MockDeviceLogReader extends Mock implements DeviceLogReader { }
 
 class MockStream extends Mock implements Stream<String> { }
 
