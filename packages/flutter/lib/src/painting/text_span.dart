@@ -66,7 +66,8 @@ class TextSpan extends LayoutSpan {
     this.children,
     TextStyle style,
     GestureRecognizer recognizer,
-  }) : super(style: style, recognizer: recognizer);
+    String semanticsLabel,
+  }) : super(style: style, recognizer: recognizer, semanticsLabel: semanticsLabel);
 
   /// The text contained in the span.
   ///
@@ -84,82 +85,6 @@ class TextSpan extends LayoutSpan {
   ///
   /// The list must not contain any nulls.
   final List<LayoutSpan> children;
-
-  /// A gesture recognizer that will receive events that hit this text span.
-  ///
-  /// [TextSpan] itself does not implement hit testing or event dispatch. The
-  /// object that manages the [TextSpan] painting is also responsible for
-  /// dispatching events. In the rendering library, that is the
-  /// [RenderParagraph] object, which corresponds to the [RichText] widget in
-  /// the widgets layer; these objects do not bubble events in [TextSpan]s, so a
-  /// [recognizer] is only effective for events that directly hit the [text] of
-  /// that [TextSpan], not any of its [children].
-  ///
-  /// [TextSpan] also does not manage the lifetime of the gesture recognizer.
-  /// The code that owns the [GestureRecognizer] object must call
-  /// [GestureRecognizer.dispose] when the [TextSpan] object is no longer used.
-  ///
-  /// {@tool sample}
-  ///
-  /// This example shows how to manage the lifetime of a gesture recognizer
-  /// provided to a [TextSpan] object. It defines a `BuzzingText` widget which
-  /// uses the [HapticFeedback] class to vibrate the device when the user
-  /// long-presses the "find the" span, which is underlined in wavy green. The
-  /// hit-testing is handled by the [RichText] widget.
-  ///
-  /// ```dart
-  /// class BuzzingText extends StatefulWidget {
-  ///   @override
-  ///   _BuzzingTextState createState() => _BuzzingTextState();
-  /// }
-  ///
-  /// class _BuzzingTextState extends State<BuzzingText> {
-  ///   LongPressGestureRecognizer _longPressRecognizer;
-  ///
-  ///   @override
-  ///   void initState() {
-  ///     super.initState();
-  ///     _longPressRecognizer = LongPressGestureRecognizer()
-  ///       ..onLongPress = _handlePress;
-  ///   }
-  ///
-  ///   @override
-  ///   void dispose() {
-  ///     _longPressRecognizer.dispose();
-  ///     super.dispose();
-  ///   }
-  ///
-  ///   void _handlePress() {
-  ///     HapticFeedback.vibrate();
-  ///   }
-  ///
-  ///   @override
-  ///   Widget build(BuildContext context) {
-  ///     return RichText(
-  ///       text: TextSpan(
-  ///         text: 'Can you ',
-  ///         style: TextStyle(color: Colors.black),
-  ///         children: <TextSpan>[
-  ///           TextSpan(
-  ///             text: 'find the',
-  ///             style: TextStyle(
-  ///               color: Colors.green,
-  ///               decoration: TextDecoration.underline,
-  ///               decorationStyle: TextDecorationStyle.wavy,
-  ///             ),
-  ///             recognizer: _longPressRecognizer,
-  ///           ),
-  ///           TextSpan(
-  ///             text: ' secret?',
-  ///           ),
-  ///         ],
-  ///       ),
-  ///     );
-  ///   }
-  /// }
-  /// ```
-  /// {@end-tool}
-  // final GestureRecognizer recognizer;
 
   /// Apply the [style], [text], and [children] of this object to the
   /// given [ParagraphBuilder], from which a [Paragraph] can be obtained.
@@ -229,15 +154,21 @@ class TextSpan extends LayoutSpan {
 
   /// Flattens the [TextSpan] tree into a single string.
   ///
-  /// Styles are not honored in this process.
-  String toPlainText() {
+  /// Styles are not honored in this process. If `includeSemanticsLabels` is
+  /// true, then the text returned will include the [semanticsLabel]s instead of
+  /// the text contents when they are present.
+  String toPlainText({bool includeSemanticsLabels = true}) {
     assert(debugAssertIsValid());
     final StringBuffer buffer = StringBuffer();
     visitLayoutSpan((LayoutSpan span) {
       TextSpan textSpan = LayoutSpan.asType<TextSpan>(span);
       if (textSpan == null)
         return true;
-      buffer.write(textSpan.text);
+      if (textSpan.semanticsLabel != null && includeSemanticsLabels) {
+        buffer.write(textSpan.semanticsLabel);
+      } else {
+        buffer.write(textSpan.text);
+      }
       return true;
     });
     return buffer.toString();
@@ -347,11 +278,12 @@ class TextSpan extends LayoutSpan {
     return typedOther.text == text
         && typedOther.style == style
         && typedOther.recognizer == recognizer
+        && typedOther.semanticsLabel == semanticsLabel
         && listEquals<LayoutSpan>(typedOther.children, children);
   }
 
   @override
-  int get hashCode => hashValues(style, text, recognizer, hashList(children));
+  int get hashCode => hashValues(style, text, recognizer, semanticsLabel, hashList(children));
 
   @override
   String toStringShort() => '$runtimeType';

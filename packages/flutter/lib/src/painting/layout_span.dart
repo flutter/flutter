@@ -31,6 +31,7 @@ abstract class LayoutSpan extends DiagnosticableTree {
   const LayoutSpan({
     this.style,
     this.recognizer,
+    this.semanticsLabel,
   });
 
   /// The style to apply to this span and any children.
@@ -112,6 +113,19 @@ abstract class LayoutSpan extends DiagnosticableTree {
   /// {@end-tool}
   final GestureRecognizer recognizer;
 
+  /// An alternative semantics label for this text.
+  ///
+  /// If present, the semantics of this span will contain this value instead
+  /// of the actual text.
+  ///
+  /// This is useful for replacing abbreviations or shorthands with the full
+  /// text value:
+  ///
+  /// ```dart
+  /// TextSpan(text: r'$$', semanticsLabel: 'Double dollars')
+  /// ```
+  final String semanticsLabel;
+
   /// Utility method to convert LayoutSpan into [TextSpan] or [WidgetSpan].
   ///
   /// Will return null if span is not of type T or null. Otherwise, return
@@ -178,7 +192,8 @@ abstract class LayoutSpan extends DiagnosticableTree {
       return false;
     final LayoutSpan typedOther = other;
     return typedOther.style == style
-        && typedOther.recognizer == recognizer;
+        && typedOther.recognizer == recognizer
+        && typedOther.semanticsLabel == semanticsLabel;
   }
 
   @override
@@ -198,5 +213,9 @@ abstract class LayoutSpan extends DiagnosticableTree {
       description: recognizer?.runtimeType?.toString(),
       defaultValue: null,
     ));
+
+    if (semanticsLabel != null) {
+      properties.add(StringProperty('semanticsLabel', semanticsLabel));
+    }
   }
 }
