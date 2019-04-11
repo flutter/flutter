@@ -42,15 +42,6 @@ void main() {
       targetDeviceFinder = () {
         throw 'Unexpected call to targetDeviceFinder';
       };
-      //appStarter = (DriveCommand command) {
-      //  throw 'Unexpected call to appStarter';
-      //};
-      testRunner = (List<String> testArgs, String observatoryUri) {
-        throw 'Unexpected call to testRunner';
-      };
-      appStopper = (DriveCommand command) {
-        throw 'Unexpected call to appStopper';
-      };
       mockDevice = MockDevice();
 
       final MockDeviceLogReader mockDeviceLogReader = MockDeviceLogReader();
@@ -66,8 +57,6 @@ void main() {
               prebuiltApplication: anyNamed('prebuiltApplication'),
               usesTerminalUi: false,
       )).thenAnswer((_) => Future<LaunchResult>.value(mockLaunchResult));
-      //final MockStream mockStream = MockStream();
-      //when(mockDeviceLogReader.logLines).thenAnswer((_) => mockStream);
       targetDeviceFinder = () async => mockDevice;
       testDeviceManager.addDevice(mockDevice);
 
@@ -80,9 +69,12 @@ void main() {
       testRunner = (List<String> testArgs, String observatoryUri) async {
         throwToolExit(null, exitCode: 123);
       };
-      appStopper = expectAsync1((DriveCommand command) async {
-        return true;
-      });
+      appStopper = expectAsync1(
+          (DriveCommand command) async {
+            return true;
+          },
+          count: 2,
+      );
 
       final MemoryFileSystem memFs = fs;
       await memFs.file(testApp).writeAsString('main() {}');
@@ -100,6 +92,16 @@ void main() {
         print(e.exitCode);
         print(e.message);
       }
+      verify(mockDevice.startApp(
+              null,
+              mainPath: anyNamed('mainPath'),
+              route: anyNamed('route'),
+              debuggingOptions: anyNamed('debuggingOptions'),
+              platformArgs: anyNamed('platformArgs'),
+              prebuiltApplication: true,
+              usesTerminalUi: false,
+        ));
+
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
     });
