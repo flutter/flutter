@@ -442,12 +442,16 @@ public class FlutterFragment extends Fragment {
     return FlutterView.TransparencyMode.valueOf(transparencyModeName);
   }
 
+  @Override
+  public void onResume() {
+    super.onResume();
+    flutterEngine.getLifecycleChannel().appIsResumed();
+  }
+
   // TODO(mattcarroll): determine why this can't be in onResume(). Comment reason, or move if possible.
   public void onPostResume() {
     Log.d(TAG, "onPostResume()");
     if (flutterEngine != null) {
-      flutterEngine.getLifecycleChannel().appIsResumed();
-
       // TODO(mattcarroll): find a better way to handle the update of UI overlays than calling through
       //                    to platformPlugin. We're implicitly entangling the Window, Activity, Fragment,
       //                    and engine all with this one call.
