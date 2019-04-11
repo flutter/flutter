@@ -212,7 +212,7 @@ std::shared_ptr<minikin::FontFamily> FontCollection::CreateMinikinFontFamily(
 
   // Add fonts to the Minikin font family.
   for (int i = 0; i < font_style_set->count(); ++i) {
-    TRACE_EVENT0("flutter", "CreateMinikinFont")
+    TRACE_EVENT0("flutter", "CreateMinikinFont");
     // Create the skia typeface.
     sk_sp<SkTypeface> skia_typeface(
         sk_sp<SkTypeface>(font_style_set->createTypeface(i)));
