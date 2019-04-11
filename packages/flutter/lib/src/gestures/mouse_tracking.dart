@@ -120,7 +120,6 @@ class MouseTracker {
   /// [collectMousePositions] will assert the next time it is called.
   void detachAnnotation(MouseTrackerAnnotation annotation) {
     final _TrackedAnnotation trackedAnnotation = _findAnnotation(annotation);
-    assert(trackedAnnotation != null, "Tried to detach an annotation that wasn't attached: $annotation");
     for (int deviceId in trackedAnnotation.activeDevices) {
       annotation.onExit(PointerExitEvent.fromMouseEvent(_lastMouseEvent[deviceId]));
     }
@@ -178,7 +177,7 @@ class MouseTracker {
   /// MouseTracker. Do not call in other contexts.
   @visibleForTesting
   bool isAnnotationAttached(MouseTrackerAnnotation annotation) {
-    return _trackedAnnotations[annotation] != null;
+    return _trackedAnnotations.containsKey(annotation);
   }
 
   /// Tells interested objects that a mouse has entered, exited, or moved, given

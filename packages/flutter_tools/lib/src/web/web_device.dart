@@ -13,6 +13,7 @@ import '../build_info.dart';
 import '../device.dart';
 import '../globals.dart';
 import '../project.dart';
+import '../version.dart';
 import '../web/compile.dart';
 
 ChromeLauncher get chromeLauncher => context[ChromeLauncher];
@@ -21,7 +22,7 @@ ChromeLauncher get chromeLauncher => context[ChromeLauncher];
 /// environment variable is set to true.
 bool get flutterWebEnabled {
   _flutterWebEnabled = platform.environment['FLUTTER_WEB']?.toLowerCase() == 'true';
-  return _flutterWebEnabled;
+  return _flutterWebEnabled && !FlutterVersion.instance.isStable;
 }
 bool _flutterWebEnabled;
 

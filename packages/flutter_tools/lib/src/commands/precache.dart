@@ -7,6 +7,7 @@ import 'dart:async';
 import '../cache.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
+import '../version.dart';
 
 class PrecacheCommand extends FlutterCommand {
   PrecacheCommand() {
@@ -47,17 +48,19 @@ class PrecacheCommand extends FlutterCommand {
     if (argResults['ios']) {
       requiredArtifacts.add(DevelopmentArtifact.iOS);
     }
-    if (argResults['web']) {
-      requiredArtifacts.add(DevelopmentArtifact.web);
-    }
-    if (argResults['linux']) {
-      requiredArtifacts.add(DevelopmentArtifact.linux);
-    }
-    if (argResults['windows']) {
-      requiredArtifacts.add(DevelopmentArtifact.windows);
-    }
-    if (argResults['macos']) {
-      requiredArtifacts.add(DevelopmentArtifact.macOS);
+    if (!FlutterVersion.instance.isStable) {
+      if (argResults['web']) {
+        requiredArtifacts.add(DevelopmentArtifact.web);
+      }
+      if (argResults['linux']) {
+        requiredArtifacts.add(DevelopmentArtifact.linux);
+      }
+      if (argResults['windows']) {
+        requiredArtifacts.add(DevelopmentArtifact.windows);
+      }
+      if (argResults['macos']) {
+        requiredArtifacts.add(DevelopmentArtifact.macOS);
+      }
     }
 
     if (cache.isUpToDate()) {

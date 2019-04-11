@@ -150,6 +150,22 @@ class FlutterDriver {
 
   static int _nextDriverId = 0;
 
+  // The additional blank line in the beginning is for _log.warning.
+  static const String _kDebugWarning = '''
+
+┏╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍┓
+┇ ⚠    THIS BENCHMARK IS BEING RUN IN DEBUG MODE     ⚠  ┇
+┡╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍┦
+│                                                       │
+│  Numbers obtained from a benchmark while asserts are  │
+│  enabled will not accurately reflect the performance  │
+│  that will be experienced by end users using release  ╎
+│  builds. Benchmarks should be run using this command  ┆
+│  line:  flutter drive --profile test_perf.dart        ┊
+│                                                       ┊
+└─────────────────────────────────────────────────╌┄┈  🐢
+''';
+
   /// Connects to a Flutter application.
   ///
   /// Resumes the application if it is currently paused (e.g. at a breakpoint).
@@ -708,7 +724,9 @@ class FlutterDriver {
   /// [getFlagList]: https://github.com/dart-lang/sdk/blob/master/runtime/vm/service/service.md#getflaglist
   Future<List<Map<String, dynamic>>> getVmFlags() async {
     final Map<String, dynamic> result = await _peer.sendRequest('getFlagList');
-    return result['flags'];
+    return result != null
+        ? result['flags'].cast<Map<String,dynamic>>()
+        : const <Map<String, dynamic>>[];
   }
 
   /// Starts recording performance traces.
@@ -764,6 +782,16 @@ class FlutterDriver {
     }
   }
 
+  Future<bool> _isPrecompiledMode() async {
+    final List<Map<String, dynamic>> flags = await getVmFlags();
+    for(Map<String, dynamic> flag in flags) {
+      if (flag['name'] == 'precompiled_mode') {
+        return flag['valueAsString'] == 'true';
+      }
+    }
+    return false;
+  }
+
   /// Runs [action] and outputs a performance trace for it.
   ///
   /// Waits for the `Future` returned by [action] to complete prior to stopping
@@ -778,6 +806,9 @@ class FlutterDriver {
   /// If [retainPriorEvents] is true, retains events recorded prior to calling
   /// [action]. Otherwise, prior events are cleared before calling [action]. By
   /// default, prior events are cleared.
+  ///
+  /// If this is run in debug mode, a warning message will be printed to suggest
+  /// running the benchmark in profile mode instead.
   Future<Timeline> traceAction(
     Future<dynamic> action(), {
     List<TimelineStream> streams = _defaultStreams,
@@ -788,6 +819,10 @@ class FlutterDriver {
     }
     await startTracing(streams: streams);
     await action();
+
+    if (!(await _isPrecompiledMode())) {
+      _log.warning(_kDebugWarning);
+    }
     return stopTracingAndDownloadTimeline();
   }
 

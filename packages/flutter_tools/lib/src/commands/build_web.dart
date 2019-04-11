@@ -20,7 +20,7 @@ class BuildWebCommand extends BuildSubCommand {
   }
 
   @override
-  Set<DevelopmentArtifact> get requiredArtifacts => const <DevelopmentArtifact>{
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{
     DevelopmentArtifact.universal,
     DevelopmentArtifact.web,
   };
@@ -30,6 +30,9 @@ class BuildWebCommand extends BuildSubCommand {
 
   @override
   bool get hidden => true;
+
+  @override
+  bool get isExperimental => true;
 
   @override
   final String description = '(EXPERIMENTAL) build a web application bundle.';

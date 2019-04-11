@@ -486,7 +486,7 @@ class TextPainter {
 
       final double caretEnd = box.end;
       final double dx = box.direction == TextDirection.rtl ? caretEnd - caretPrototype.width : caretEnd;
-      return Offset(dx, box.top);
+      return Offset(min(dx, width), box.top);
     }
     return null;
   }
@@ -526,7 +526,7 @@ class TextPainter {
       final TextBox box = boxes.last;
       final double caretStart = box.start;
       final double dx = box.direction == TextDirection.rtl ? caretStart - caretPrototype.width : caretStart;
-      return Offset(dx, box.top);
+      return Offset(min(dx, width), box.top);
     }
     return null;
   }
