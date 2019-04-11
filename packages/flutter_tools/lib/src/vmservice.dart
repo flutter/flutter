@@ -1289,6 +1289,8 @@ class Isolate extends ServiceObjectOwner {
 
   Future<Map<String, dynamic>> flutterToggleWidgetInspector() => _flutterToggle('inspector.show');
 
+  Future<Map<String, dynamic>> flutterToggleProfileWidgetBuilds() => _flutterToggle('profileWidgetBuilds');
+
   Future<Map<String, dynamic>> flutterDebugAllowBanner(bool show) {
     return invokeFlutterExtensionRpcRaw(
       'ext.flutter.debugAllowBanner',
