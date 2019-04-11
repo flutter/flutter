@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:file/file.dart';
@@ -25,10 +24,10 @@ import 'vmservice_record_replay.dart';
 
 /// Override `WebSocketConnector` in [context] to use a different constructor
 /// for [WebSocket]s (used by tests).
-typedef WebSocketConnector = Future<io.WebSocket> Function(String url, {CompressionOptions compression});
+typedef WebSocketConnector = Future<io.WebSocket> Function(String url, {io.CompressionOptions compression});
 
 /// A function that opens a two-way communication channel to the specified [uri].
-typedef _OpenChannel = Future<StreamChannel<String>> Function(Uri uri, {CompressionOptions compression});
+typedef _OpenChannel = Future<StreamChannel<String>> Function(Uri uri, {io.CompressionOptions compression});
 
 _OpenChannel _openChannel = _defaultOpenChannel;
 
@@ -63,7 +62,7 @@ typedef CompileExpression = Future<String> Function(
 
 const String _kRecordingType = 'vmservice';
 
-Future<StreamChannel<String>> _defaultOpenChannel(Uri uri, {CompressionOptions compression = CompressionOptions.compressionDefault}) async {
+Future<StreamChannel<String>> _defaultOpenChannel(Uri uri, {io.CompressionOptions compression = io.CompressionOptions.compressionDefault}) async {
   Duration delay = const Duration(milliseconds: 100);
   int attempts = 0;
   io.WebSocket socket;
@@ -221,7 +220,7 @@ class VMService {
   /// `"vmservice"` subdirectory.
   static void enableRecordingConnection(String location) {
     final Directory dir = getRecordingSink(location, _kRecordingType);
-    _openChannel = (Uri uri, {CompressionOptions compression}) async {
+    _openChannel = (Uri uri, {io.CompressionOptions compression}) async {
       final StreamChannel<String> delegate = await _defaultOpenChannel(uri);
       return RecordingVMServiceChannel(delegate, dir);
     };
@@ -234,7 +233,7 @@ class VMService {
   /// passed to [enableRecordingConnection]), or a [ToolExit] will be thrown.
   static void enableReplayConnection(String location) {
     final Directory dir = getReplaySource(location, _kRecordingType);
-    _openChannel = (Uri uri, {CompressionOptions compression}) async => ReplayVMServiceChannel(dir);
+    _openChannel = (Uri uri, {io.CompressionOptions compression}) async => ReplayVMServiceChannel(dir);
   }
 
   /// Connect to a Dart VM Service at [httpUri].
@@ -250,7 +249,7 @@ class VMService {
     ReloadSources reloadSources,
     Restart restart,
     CompileExpression compileExpression,
-    CompressionOptions compression = CompressionOptions.compressionDefault,
+    io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
   }) async {
     final Uri wsUri = httpUri.replace(scheme: 'ws', path: fs.path.join(httpUri.path, 'ws'));
     final StreamChannel<String> channel = await _openChannel(wsUri, compression: compression);
