@@ -16,17 +16,17 @@ import 'tap.dart';
 
 /// Signature for callback when the user has tapped the screen at the same
 /// location twice in quick succession.
-/// 
+///
 /// See also:
-/// 
+///
 ///  * [GestureDetector.onDoubleTap], which matches this signature.
 typedef GestureDoubleTapCallback = void Function();
 
 /// Signature for callback when the user has tapped the screen at the same
 /// location twice in quick succession.
-/// 
+///
 /// See also:
-/// 
+///
 ///  * [GestureDetector.onDoubleTapUp], which matches this signature
 ///  * [DoubleTapGestureRecognizer], which uses this signature in one of its callbacks.
 typedef GestureDoubleTapUpCallback = void Function(DoubleTapUpDetails details);
@@ -166,23 +166,23 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
 
   /// Called when the user has tapped the screen at the same location twice in
   /// quick succession by any button.
-  /// 
+  ///
   /// This triggers when the pointer stops contacting the device after the 2nd tap,
   /// immediately after [onDoubleTapUp].
-  /// 
+  ///
   /// See also:
-  /// 
+  ///
   ///   * [onDoubleTapUp], triggers at the same time but with details.
   GestureDoubleTapCallback onDoubleTap;
 
   /// Called when the user has tapped the screen at the same location twice in
   /// quick succession by any button.
-  /// 
+  ///
   /// This triggers when the pointer stops contacting the device after the 2nd tap,
   /// immediately before [onDoubleTap].
-  /// 
+  ///
   /// See also:
-  /// 
+  ///
   ///   * [onDoubleTap], triggers at the same time but without details.
   GestureDoubleTapUpCallback onDoubleTapUp;
 

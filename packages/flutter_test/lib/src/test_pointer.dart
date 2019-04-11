@@ -25,7 +25,7 @@ class TestPointer {
   TestPointer([
     this.pointer = 1,
     this.kind = PointerDeviceKind.touch,
-    this.buttons = kPrimaryButton, 
+    this.buttons = kPrimaryButton,
   ])
       : assert(kind != null),
         assert(pointer != null),

@@ -237,7 +237,7 @@ class GestureDetector extends StatelessWidget {
   /// This is called after a short timeout, even if the winning gesture has not
   /// yet been selected. If the tap gesture wins, [onTapUp] will be called,
   /// otherwise [onTapCancel] will be called.
-  /// 
+  ///
   /// See also:
   ///
   ///  * [kPrimaryButton], which is the buttons this callback responds to.
@@ -248,7 +248,7 @@ class GestureDetector extends StatelessWidget {
   ///
   /// This triggers immediately before [onTap] in the case of the tap gesture
   /// winning. If the tap gesture did not win, [onTapCancel] is called instead.
-  /// 
+  ///
   /// See also:
   ///
   ///  * [kPrimaryButton], which is the buttons this callback responds to.
@@ -278,11 +278,11 @@ class GestureDetector extends StatelessWidget {
   ///
   /// This is called after a short timeout, even if the winning gesture has not
   /// yet been selected.
-  /// 
+  ///
   /// It does not respond when a stylus touches the screen while its secondary button
   /// is pressed, since screen touching is counted as a button and fails button
   /// check.
-  /// 
+  ///
   /// See also:
   ///
   ///  * [kSecondaryMouseButton], which is the button this callback responds to.
@@ -290,25 +290,25 @@ class GestureDetector extends StatelessWidget {
 
   /// The user has tapped the screen at the same location twice in quick
   /// succession. Only responds to primary buttons.
-  /// 
-  /// It triggers when the pointer stops contacting the device at the second tap. 
   ///
-  /// See also:
-  ///
-  ///  * [kPrimaryButton], which is the buttons this callback responds to.
-  ///  * [onDoubleTapUp], which is called at the same time but has no button 
-  ///    limitation, and includes details regarding buttons.
-  final GestureDoubleTapCallback onDoubleTap;
-
-  /// The user has tapped the screen at the same location twice in quick
-  /// succession. Only responds to primary buttons.
-  /// 
   /// It triggers when the pointer stops contacting the device at the second tap.
   ///
   /// See also:
   ///
   ///  * [kPrimaryButton], which is the buttons this callback responds to.
-  ///  * [onDoubleTapUp], which is called at the same time but doesn't include details. 
+  ///  * [onDoubleTapUp], which is called at the same time but has no button
+  ///    limitation, and includes details regarding buttons.
+  final GestureDoubleTapCallback onDoubleTap;
+
+  /// The user has tapped the screen at the same location twice in quick
+  /// succession. Only responds to primary buttons.
+  ///
+  /// It triggers when the pointer stops contacting the device at the second tap.
+  ///
+  /// See also:
+  ///
+  ///  * [kPrimaryButton], which is the buttons this callback responds to.
+  ///  * [onDoubleTapUp], which is called at the same time but doesn't include details.
   final GestureDoubleTapUpCallback onDoubleTapUp;
 
   /// Called when a long press gesture has been recognized. Only responds to primary
@@ -338,7 +338,7 @@ class GestureDetector extends StatelessWidget {
 
   /// A pointer has been drag-moved after a long press. Only responds to primary
   /// buttons.
-  /// 
+  ///
   /// See also:
   ///
   ///  * [kPrimaryButton], which is the buttons this callback responds to.

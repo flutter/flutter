@@ -38,11 +38,11 @@ typedef GestureDragCancelCallback = void Function();
 /// recognizes a single gesture sequence for all the pointers it watches, which
 /// means that the recognizer has at most one drag sequence active at any given
 /// time regardless of how many pointers are in contact with the screen.
-/// 
+///
 /// The gesture must keep consistent buttons throughout its lifespan. It will
 /// record the buttons from the first [PointerDownEvent], and subsequent pointers
 /// with different buttons will be ignored or terminated.
-/// 
+///
 /// The buttons of [PointerDownEvent] must contain one and only one button.
 /// For example, since stylus touching the screen is also counted as a button,
 /// a stylus tap while pressing any physical button will not be recognized.

@@ -87,12 +87,12 @@ int nthMouseButton(int number) => (kPrimaryMouseButton << (number - 1)) & kMaxUn
 int nthStylusButton(int number) => (kPrimaryStylusButton << (number - 1)) & kMaxUnsignedSMI;
 
 /// Returns the button of [buttons] with the least integer value.
-/// 
+///
 /// It returns 0 for 0.
-/// Technically, it returns the rightmost set bit. 
-/// 
+/// Technically, it returns the rightmost set bit.
+///
 /// Example:
-/// 
+///
 ///   assert(rightmostButton(0x1) == 0x1);
 ///   assert(rightmostButton(0x11) == 0x1);
 ///   assert(rightmostButton(0) == 0);
@@ -103,15 +103,15 @@ int nthStylusButton(int number) => (kPrimaryStylusButton << (number - 1)) & kMax
 int smallestButton(int buttons) => buttons & (-buttons);
 
 /// Returns whether [buttons] contains one and only one button.
-/// 
+///
 /// It returns false for 0.
-/// 
+///
 /// Example:
-/// 
+///
 ///   assert(isSingleButton(0x1) == true);
 ///   assert(isSingleButton(0x11) == false);
 ///   assert(isSingleButton(0) == false);
-/// 
+///
 /// See also:
 ///
 ///   * [smallestButton], which returns the smallest button of a set of buttons.
@@ -694,7 +694,7 @@ class PointerDownEvent extends PointerEvent {
     PointerDeviceKind kind = PointerDeviceKind.touch,
     int device = 0,
     Offset position = Offset.zero,
-    int buttons = 0,
+    int buttons = kPrimaryButton,
     bool obscured = false,
     double pressure = 1.0,
     double pressureMin = 1.0,
@@ -749,7 +749,7 @@ class PointerMoveEvent extends PointerEvent {
     int device = 0,
     Offset position = Offset.zero,
     Offset delta = Offset.zero,
-    int buttons = 0,
+    int buttons = kPrimaryButton,
     bool obscured = false,
     double pressure = 1.0,
     double pressureMin = 1.0,

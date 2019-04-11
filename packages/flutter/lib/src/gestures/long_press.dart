@@ -132,7 +132,7 @@ class LongPressEndDetails {
 /// The gesture must keep consistent buttons throughout its lifespan. It will
 /// record the buttons from the first [PointerDownEvent], and subsequent
 /// [PointerMoveEvent]s with different buttons will lead to termination of the gesture.
-/// 
+///
 /// The buttons of [PointerDownEvent] must contain one and only one button.
 /// For example, since stylus touching the screen is also counted as a button,
 /// a stylus tap while pressing any physical button will not be recognized.
