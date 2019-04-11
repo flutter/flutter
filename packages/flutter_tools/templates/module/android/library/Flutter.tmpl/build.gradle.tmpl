@@ -1,7 +1,9 @@
 // Generated file. Do not edit.
 
+def localDirectory = buildscript.sourceFile.parentFile.parentFile
+
 def localProperties = new Properties()
-def localPropertiesFile = new File(buildscript.sourceFile.parentFile.parentFile, 'local.properties')
+def localPropertiesFile = new File(localDirectory, 'local.properties')
 if (localPropertiesFile.exists()) {
     localPropertiesFile.withReader('UTF-8') { reader ->
         localProperties.load(reader)
@@ -36,6 +38,11 @@ android {
         versionName flutterVersionName
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
+}
+
+def localAndroidFile = new File(localDirectory.parentFile, 'flutter-android.gradle')
+if (localAndroidFile.exists()) {
+    apply from: localAndroidFile
 }
 
 flutter {
