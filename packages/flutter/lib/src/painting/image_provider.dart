@@ -276,11 +276,10 @@ abstract class ImageProvider<T> {
         stack: stack,
         context: ErrorDescription('while resolving an image'),
         silent: true, // could be a network error or whatnot
-        informationCollector: (List<DiagnosticsNode> information) {
-          information
-            ..add(DiagnosticsProperty<ImageProvider>('Image provider', this))
-            ..add(DiagnosticsProperty<ImageConfiguration>('Image configuration', configuration))
-            ..add(DiagnosticsProperty<T>('Image key', obtainedKey, defaultValue: null));
+        informationCollector: () sync* {
+          yield DiagnosticsProperty<ImageProvider>('Image provider', this);
+          yield DiagnosticsProperty<ImageConfiguration>('Image configuration', configuration);
+          yield DiagnosticsProperty<T>('Image key', obtainedKey, defaultValue: null);
         },
       );
     }
@@ -447,9 +446,9 @@ abstract class AssetBundleImageProvider extends ImageProvider<AssetBundleImageKe
     return MultiFrameImageStreamCompleter(
       codec: _loadAsync(key),
       scale: key.scale,
-      informationCollector: (List<DiagnosticsNode> information) {
-        information.add(DiagnosticsProperty<ImageProvider>('Image provider', this));
-        information.add(DiagnosticsProperty<AssetBundleImageKey>('Image key', key));
+      informationCollector: () sync* {
+        yield DiagnosticsProperty<ImageProvider>('Image provider', this);
+        yield DiagnosticsProperty<AssetBundleImageKey>('Image key', key);
       },
     );
   }
@@ -504,9 +503,9 @@ class NetworkImage extends ImageProvider<NetworkImage> {
     return MultiFrameImageStreamCompleter(
       codec: _loadAsync(key),
       scale: key.scale,
-      informationCollector: (List<DiagnosticsNode> information) {
-        information.add(DiagnosticsProperty<ImageProvider>('Image provider', this));
-        information.add(DiagnosticsProperty<NetworkImage>('Image key', key));
+      informationCollector: () sync* {
+        yield DiagnosticsProperty<ImageProvider>('Image provider', this);
+        yield DiagnosticsProperty<NetworkImage>('Image key', key);
       },
     );
   }
@@ -578,8 +577,8 @@ class FileImage extends ImageProvider<FileImage> {
     return MultiFrameImageStreamCompleter(
       codec: _loadAsync(key),
       scale: key.scale,
-      informationCollector: (List<DiagnosticsNode> information) {
-        information.add(ErrorDescription('Path: ${file?.path}'));
+      informationCollector: () sync* {
+        yield ErrorDescription('Path: ${file?.path}');
       },
     );
   }

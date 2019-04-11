@@ -1189,13 +1189,13 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       library: 'rendering library',
       context: ErrorDescription('during $method()'),
       renderObject: this,
-      informationCollector: (List<DiagnosticsNode> information) {
-        information.add(describeForError('The following RenderObject was being processed when the exception was fired'));
+      informationCollector: () sync* {
+        yield describeForError('The following RenderObject was being processed when the exception was fired');
         // TODO(jacobr): this error message has a code smell. Consider whether
         // displaying the truncated children is really useful for command line
         // users. Inspector users can see the full tree by clicking on the
         // render object so this may not be that useful.
-        information.add(describeForError('This RenderObject', style: DiagnosticsTreeStyle.truncateChildren));
+        yield describeForError('This RenderObject', style: DiagnosticsTreeStyle.truncateChildren);
       }
     ));
   }
@@ -1536,7 +1536,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     assert(constraints != null);
     assert(constraints.debugAssertIsValid(
       isAppliedConstraint: true,
-      informationCollector: (List<DiagnosticsNode> information) {
+      informationCollector: () sync* {
         final List<String> stack = StackTrace.current.toString().split('\n');
         int targetFrame;
         final Pattern layoutFramePattern = RegExp(r'^#[0-9]+ +RenderObject.layout \(');
@@ -1551,12 +1551,12 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
           final Match targetFrameMatch = targetFramePattern.matchAsPrefix(stack[targetFrame]);
           final String problemFunction = (targetFrameMatch != null && targetFrameMatch.groupCount > 0) ? targetFrameMatch.group(1) : stack[targetFrame].trim();
           // TODO(jacobr): this case is similar to displaying a single stack frame.
-          information.add(ErrorDescription(
+          yield ErrorDescription(
             'These invalid constraints were provided to $runtimeType\'s layout() '
             'function by the following function, which probably computed the '
             'invalid constraints in question:\n'
             '  $problemFunction'
-          ));
+          );
         }
       },
     ));

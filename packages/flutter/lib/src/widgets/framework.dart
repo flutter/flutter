@@ -2324,8 +2324,8 @@ class BuildOwner {
             ErrorDescription('while rebuilding dirty elements'),
             e,
             stack,
-            informationCollector: (List<DiagnosticsNode> information) {
-              information.add(_dirtyElements[index].describeElement('The element being rebuilt at the time was index $index of $dirtyCount'));
+            informationCollector: () sync* {
+              yield _dirtyElements[index].describeElement('The element being rebuilt at the time was index $index of $dirtyCount');
             },
           );
         }
@@ -3778,7 +3778,7 @@ class ErrorWidget extends LeafRenderObjectWidget {
     if (_flutterError == null)
       properties.add(StringProperty('message', message, quoted: false));
     else
-      _flutterError.debugFillProperties(properties);
+      properties.add(_flutterError.toDiagnosticsNode(style: DiagnosticsTreeStyle.whitespace));
   }
 }
 

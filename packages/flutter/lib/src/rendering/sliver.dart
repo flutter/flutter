@@ -425,7 +425,7 @@ class SliverConstraints extends Constraints {
         information.add(ErrorSummary('$runtimeType is not valid: $message'));
 
         if (informationCollector != null) {
-          informationCollector(information);
+          information.addAll(informationCollector());
         }
         information.add(DiagnosticsProperty<SliverConstraints>('The offending constraints were', this, style: DiagnosticsTreeStyle.indentedSingleLine));
         throw FlutterError(information);
@@ -708,7 +708,7 @@ class SliverGeometry extends Diagnosticable {
           information.addAll(details);
         }
         if (informationCollector != null) {
-          informationCollector(information);
+          information.addAll(informationCollector());
         }
         throw FlutterError(information);
       }
@@ -1111,8 +1111,8 @@ abstract class RenderSliver extends RenderObject {
   @override
   void debugAssertDoesMeetConstraints() {
     assert(geometry.debugAssertIsValid(
-      informationCollector: (List<DiagnosticsNode> information) {
-        information.add(describeForError('The RenderSliver that returned the offending geometry was'));
+      informationCollector: () sync* {
+        yield describeForError('The RenderSliver that returned the offending geometry was');
       }
     ));
     assert(() {

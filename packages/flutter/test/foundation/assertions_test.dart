@@ -23,8 +23,8 @@ void main() {
         stack: StackTrace.current,
         library: 'Example library',
         context: ErrorDescription('Example context'),
-        informationCollector: (List<DiagnosticsNode> information) {
-          information.add(ErrorDescription('Example information'));
+        informationCollector: () sync* {
+          yield ErrorDescription('Example information');
         },
       );
 
@@ -47,8 +47,8 @@ void main() {
         exception: 'MESSAGE',
         library: 'LIBRARY',
         context: ErrorDescription('CONTEXTING'),
-        informationCollector: (List<DiagnosticsNode> information) {
-          information.add(ErrorDescription('INFO'));
+        informationCollector: () sync* {
+          yield ErrorDescription('INFO');
         },
       ).toString(),
         '══╡ EXCEPTION CAUGHT BY LIBRARY ╞════════════════════════════════\n'
@@ -62,8 +62,8 @@ void main() {
       FlutterErrorDetails(
         library: 'LIBRARY',
         context: ErrorDescription('CONTEXTING'),
-        informationCollector: (List<DiagnosticsNode> information) {
-          information.add(ErrorDescription('INFO'));
+        informationCollector: () sync* {
+          yield ErrorDescription('INFO');
         },
       ).toString(),
       '══╡ EXCEPTION CAUGHT BY LIBRARY ╞════════════════════════════════\n'
@@ -76,8 +76,8 @@ void main() {
       FlutterErrorDetails(
         exception: 'MESSAGE',
         context: ErrorDescription('CONTEXTING'),
-        informationCollector: (List<DiagnosticsNode> information) {
-          information.add(ErrorDescription('INFO'));
+        informationCollector: () sync* {
+          yield ErrorDescription('INFO');
         },
       ).toString(),
         '══╡ EXCEPTION CAUGHT BY FLUTTER FRAMEWORK ╞══════════════════════\n'
@@ -90,8 +90,8 @@ void main() {
       FlutterErrorDetails(
         exception: 'MESSAGE',
         context: ErrorDescription('CONTEXTING ${'SomeContext(BlaBla)'}'),
-        informationCollector: (List<DiagnosticsNode> information) {
-          information.add(ErrorDescription('INFO'));
+        informationCollector: () sync* {
+          yield ErrorDescription('INFO');
         },
       ).toString(),
       '══╡ EXCEPTION CAUGHT BY FLUTTER FRAMEWORK ╞══════════════════════\n'

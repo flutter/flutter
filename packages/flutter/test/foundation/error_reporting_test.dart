@@ -57,9 +57,9 @@ Future<void> main() async {
       stack: sampleStack,
       library: 'error handling test',
       context: ErrorDescription('testing the error handling logic'),
-      informationCollector: (List<DiagnosticsNode> information) {
-       information.add(ErrorDescription('line 1 of extra information'));
-       information.add(ErrorHint('line 2 of extra information\n'));
+      informationCollector: () sync* {
+       yield ErrorDescription('line 1 of extra information');
+       yield ErrorHint('line 2 of extra information\n');
       },
     ));
     expect(console.join('\n'), matches(
@@ -143,9 +143,9 @@ Future<void> main() async {
       stack: sampleStack,
       library: 'error handling test',
       context: ErrorDescription('testing the error handling logic'),
-      informationCollector: (List<DiagnosticsNode> information) {
-        information.add(ErrorDescription('line 1 of extra information'));
-        information.add(ErrorDescription('line 2 of extra information\n')); // the trailing newlines here are intentional
+      informationCollector: () sync* {
+        yield ErrorDescription('line 1 of extra information');
+        yield ErrorDescription('line 2 of extra information\n'); // the trailing newlines here are intentional
       }
     ));
     expect(console.join('\n'), matches(

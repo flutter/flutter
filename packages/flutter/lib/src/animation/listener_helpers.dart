@@ -130,12 +130,12 @@ mixin AnimationLocalListenersMixin {
           stack: stack,
           library: 'animation library',
           context: ErrorDescription('while notifying listeners for $runtimeType'),
-          informationCollector: (List<DiagnosticsNode> information) {
-            information.add(DiagnosticsProperty<AnimationLocalListenersMixin>(
+          informationCollector: () sync* {
+            yield DiagnosticsProperty<AnimationLocalListenersMixin>(
               'The $runtimeType notifying listeners was',
               this,
               style: DiagnosticsTreeStyle.indentedSingleLine,
-            ));
+            );
           },
         ));
       }
@@ -199,12 +199,12 @@ mixin AnimationLocalStatusListenersMixin {
           stack: stack,
           library: 'animation library',
           context: ErrorDescription('while notifying status listeners for $runtimeType'),
-          informationCollector: (List<DiagnosticsNode> information) {
-            information.add(DiagnosticsProperty<AnimationLocalStatusListenersMixin>(
+          informationCollector: () sync* {
+            yield DiagnosticsProperty<AnimationLocalStatusListenersMixin>(
               'The $runtimeType notifying status listeners was',
               this,
               style: DiagnosticsTreeStyle.indentedSingleLine,
-            ));
+            );
           },
         ));
       }

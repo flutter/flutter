@@ -80,8 +80,8 @@ class PointerRouter {
         router: this,
         route: route,
         event: event,
-        informationCollector: (List<DiagnosticsNode> information) {
-          information.add(DiagnosticsProperty<PointerEvent>('Event', event, style: DiagnosticsTreeStyle.indentedSingleLine));
+        informationCollector: () sync* {
+          yield DiagnosticsProperty<PointerEvent>('Event', event, style: DiagnosticsTreeStyle.indentedSingleLine);
         },
       ));
     }

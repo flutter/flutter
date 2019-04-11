@@ -247,14 +247,13 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
         library: 'rendering library',
         context: ErrorDescription('during layout'),
         renderObject: this,
-        informationCollector: (List<DiagnosticsNode> information) {
-          information
-            ..addAll(overflowHints)
-            ..add(describeForError('The specific $runtimeType in question is'))
-            // TODO(jacobr): this line is ascii art that it would be nice to
-            // handle a little more generically in GUI debugging clients in the
-            // future.
-            ..add(DiagnosticsNode.message('◢◤' * (FlutterError.wrapWidth ~/ 2), allowWrap: false));
+        informationCollector: () sync* {
+          yield* overflowHints;
+          yield describeForError('The specific $runtimeType in question is');
+          // TODO(jacobr): this line is ascii art that it would be nice to
+          // handle a little more generically in GUI debugging clients in the
+          // future.
+          yield DiagnosticsNode.message('◢◤' * (FlutterError.wrapWidth ~/ 2), allowWrap: false);
         }
       ),
     );

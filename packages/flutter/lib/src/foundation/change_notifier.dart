@@ -210,12 +210,12 @@ class ChangeNotifier implements Listenable {
             stack: stack,
             library: 'foundation library',
             context: ErrorDescription('while dispatching notifications for $runtimeType'),
-            informationCollector: (List<DiagnosticsNode> information) {
-              information.add(DiagnosticsProperty<ChangeNotifier>(
+            informationCollector: () sync* {
+              yield DiagnosticsProperty<ChangeNotifier>(
                 'The $runtimeType sending notification was',
                 this,
                 style: DiagnosticsTreeStyle.indentedSingleLine,
-              ));
+              );
             },
           ));
         }

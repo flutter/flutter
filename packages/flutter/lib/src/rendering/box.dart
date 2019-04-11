@@ -500,7 +500,7 @@ class BoxConstraints extends Constraints {
       void throwError(DiagnosticsNode message) {
         final List<DiagnosticsNode> information = <DiagnosticsNode>[message];
         if (informationCollector != null) {
-          informationCollector(information);
+          information.addAll(informationCollector());
         }
 
         information.add(DiagnosticsProperty<BoxConstraints>('The offending constraints were', this, style: DiagnosticsTreeStyle.indentedSingleLine));

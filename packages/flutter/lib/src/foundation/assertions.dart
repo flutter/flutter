@@ -13,7 +13,7 @@ typedef FlutterExceptionHandler = void Function(FlutterErrorDetails details);
 
 /// Signature for [FlutterErrorDetails.informationCollector] callback
 /// and other callbacks that collect information describing an error.
-typedef InformationCollector = void Function(List<DiagnosticsNode> information);
+typedef InformationCollector = Iterable<DiagnosticsNode> Function();
 
 class _ErrorDiagnostic extends DiagnosticsProperty<List<Object>> {
   /// In debug builds, a kernel transformer rewrites calls to the default
@@ -357,9 +357,7 @@ class FlutterErrorDetails extends Diagnosticable {
         properties.add(DiagnosticsNode.message(''));
     }
     if (informationCollector != null) {
-      final List<DiagnosticsNode> information = <DiagnosticsNode>[];
-      informationCollector(information);
-      information.forEach(properties.add);
+      informationCollector().forEach(properties.add);
     }
   }
 
@@ -578,7 +576,6 @@ void debugPrintStack({ String label, int maxFrames }) {
 /// * [FlutterErrorBuilder.addStackTrace], which is the typical way [StackTrace]
 ///   objects are added to a [FlutterError].
 class DiagnosticsStackTrace extends DiagnosticsBlock {
-
   /// Creates a diagnostic for a stack trace.
   ///
   /// [name] describes a name the stacktrace is given, e.g.
@@ -589,7 +586,7 @@ class DiagnosticsStackTrace extends DiagnosticsBlock {
   /// [showSeparator] indicates whether to include a ':' after the [name].
   DiagnosticsStackTrace(
     String name,
-   StackTrace stack, {
+    StackTrace stack, {
     IterableFilter<String> stackFilter,
     bool showSeparator = true,
   }) : super(

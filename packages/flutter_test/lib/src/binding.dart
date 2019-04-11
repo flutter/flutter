@@ -550,14 +550,14 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
         stackFilter: (Iterable<String> frames) {
           return FlutterError.defaultStackFilter(frames.skip(stackLinesToOmit));
         },
-        informationCollector: (List<DiagnosticsNode> information) {
+        informationCollector: () sync* {
           if (stackLinesToOmit > 0)
-            information.addAll(omittedFrames);
+            yield* omittedFrames;
           if (showAppDumpInErrors) {
-            information.add(DiagnosticsProperty<DiagnosticsNode>('At the time of the failure, the widget tree looked as follows', treeDump, linePrefix: '# ', style: DiagnosticsTreeStyle.flat));
+            yield DiagnosticsProperty<DiagnosticsNode>('At the time of the failure, the widget tree looked as follows', treeDump, linePrefix: '# ', style: DiagnosticsTreeStyle.flat);
           }
           if (description.isNotEmpty)
-            information.add(DiagnosticsProperty<String>('The test description was', description, style: DiagnosticsTreeStyle.indentedSingleLine));
+            yield DiagnosticsProperty<String>('The test description was', description, style: DiagnosticsTreeStyle.indentedSingleLine);
         },
       ));
       assert(_parentZone != null);
