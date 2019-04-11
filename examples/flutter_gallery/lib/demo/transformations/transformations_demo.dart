@@ -25,9 +25,26 @@ class _TransformationsDemoState extends State<TransformationsDemo> {
     hexagonRadius: _kHexagonRadius,
     hexagonMargin: _kHexagonMargin,
   );
+  bool _seenInstructionDialog = false;
 
   @override
   Widget build (BuildContext context) {
+    if (!_seenInstructionDialog) {
+      Future<void>.delayed(Duration.zero, () {
+        if (_seenInstructionDialog) {
+          return;
+        }
+        setState(() {
+          _seenInstructionDialog = true;
+        });
+
+        showDialog<Column>(
+          context: context,
+          builder: (BuildContext context) => instructionDialog,
+        );
+      });
+    }
+
     final BoardPainter painter = BoardPainter(
       board: _board,
     );
@@ -68,6 +85,31 @@ class _TransformationsDemoState extends State<TransformationsDemo> {
         },
       ),
       floatingActionButton: _board.selected == null ? resetButton : editButton,
+    );
+  }
+
+  Widget get instructionDialog {
+    return AlertDialog(
+      title: const Text('2D Transformations'),
+      content: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: const <Widget>[
+          Text('Tap to edit hex tiles, and use gestures to move around the scene:\n'),
+          Text('- Drag to pan.'),
+          Text('- Pinch to zoom.'),
+          Text('- Rotate with two fingers.'),
+          Text('\nYou can always press the home button to return to the starting orientation!'),
+        ],
+      ),
+      actions: <Widget>[
+        FlatButton(
+          child: const Text('OK'),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
+      ],
     );
   }
 
