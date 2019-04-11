@@ -27,7 +27,7 @@ abstract class BinaryMessenger {
   /// The handler's return value, if non-null, is sent as a response, unencoded.
   void setMessageHandler(String channel, Future<ByteData> handler(ByteData message));
 
-  /// Set a mock callback for intercepting messages from the `send*` methods on
+  /// Set a mock callback for intercepting messages from the [send] method on
   /// this class, on the given channel, without decoding them.
   ///
   /// The given callback will replace the currently registered mock callback for

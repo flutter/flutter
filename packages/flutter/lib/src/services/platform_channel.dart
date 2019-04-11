@@ -33,7 +33,10 @@ class BaseMessageChannel<T> {
   /// Creates a [BaseMessageChannel] with the specified [name], [codec] and [binaryMessenger].
   ///
   /// None of [name], [codec], or [binaryMessenger] may be null.
-  const BaseMessageChannel(this.name, this.codec, this.binaryMessenger);
+  const BaseMessageChannel(this.name, this.codec, this.binaryMessenger)
+    : assert(name != null),
+      assert(codec != null),
+      assert(binaryMessenger != null);
 
   /// The logical channel on which communication happens, not null.
   final String name;
@@ -116,8 +119,11 @@ class BaseMethodChannel {
   /// The [codec] used will be [StandardMethodCodec], unless otherwise
   /// specified.
   ///
-  /// Neither [name] nor [codec] may be null.
-  const BaseMethodChannel(this.name, this.binaryMessenger, [this.codec = const StandardMethodCodec()]);
+  /// None of [name], [binaryMessenger], or [codec] may be null.
+  const BaseMethodChannel(this.name, this.binaryMessenger, [this.codec = const StandardMethodCodec()])
+    : assert(name != null),
+      assert(binaryMessenger != null),
+      assert(codec != null);
 
   /// The logical channel on which communication happens, not null.
   final String name;
@@ -125,7 +131,9 @@ class BaseMethodChannel {
   /// The message codec used by this channel, not null.
   final MethodCodec codec;
 
-  /// The messenger used by this channel to send platform messages, not null.
+  /// The messenger used by this channel to send platform messages.
+  ///
+  /// The messenger may not be null.
   final BinaryMessenger binaryMessenger;
 
   /// Invokes a [method] on this channel with the specified [arguments].
@@ -542,6 +550,8 @@ class EventChannel {
 }
 
 /// A [BinaryMessenger] which uses [BinaryMessages] to send platform messages.
+///
+/// This messenger sends messages from the application side to platform plugins.
 class _ClientBinaryMessenger extends BinaryMessenger {
   const _ClientBinaryMessenger();
 
