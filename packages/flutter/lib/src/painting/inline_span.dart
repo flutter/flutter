@@ -12,13 +12,46 @@ import 'basic_types.dart';
 import 'text_style.dart';
 import 'text_painter.dart';
 
-/// An immutable span of content which form a paragraph.
+/// An immutable span of inline content which form a paragraph.
 ///
 /// The subclass [TextSpan] specifies text and may contain child [InlineSpan]s.
 ///
-/// [WidgetSpan] specifies embedded inline widgets. Specify a widget by wrapping
-/// the widget with a [WidgetSpan]. The widget will be laid out inline within
-/// the paragraph.
+/// The subclass [WidgetSpan] specifies embedded inline widgets. Specify a
+/// widget by wrapping the widget with a [WidgetSpan]. The widget will be
+/// laid out inline within the paragraph.
+///
+/// Only [TextSpan] may contain children, so in order to include multiple
+/// [InlineSpan]s, the root node must be a [TextSpan]. Leaving the
+/// [TextSpan.text] field null results in the [TextSpan] acting as an empty
+/// node with a list of children.
+///
+/// {@tool sample}
+///
+/// This example shows a tree of [InlineSpan]s that make a query asking for a
+/// name with a [TextField] embedded inline.
+///
+/// ```dart
+/// RichText(
+///   text: TextSpan(
+///     text: 'My name is ',
+///     style: TextStyle(color: Colors.black),
+///     children: <InlineSpan>[
+///       WidgetSpan(
+///         alignment: InlineWidgetAlignment.baseline,
+///         baseline: TextBaseline.alphabetic,
+///         widget: ConstrainedBox(
+///           constraints: BoxConstraints(maxWidth: 100),
+///           child: TextField,
+///         )
+///       ),
+///       TextSpan(
+///         text: '.',
+///       ),
+///     ],
+///   ),
+/// )
+/// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -34,7 +67,10 @@ abstract class InlineSpan extends DiagnosticableTree {
     this.semanticsLabel,
   });
 
-  /// The style to apply to this span and any children.
+  /// The style to apply to this span.
+  ///
+  /// The [style] is also applied to any child spans when this is an instance
+  /// of [TextSpan].
   final TextStyle style;
 
   /// A gesture recognizer that will receive events that hit this span.
