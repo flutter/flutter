@@ -222,6 +222,21 @@ Matcher moreOrLessEquals(double value, { double epsilon = 1e-10 }) {
   return _MoreOrLessEquals(value, epsilon);
 }
 
+/// Asserts that two [Rect]s are equal, within some tolerated error.
+///
+/// Two values are considered equal if the difference between them is within
+/// 1e-10 of the larger one. This is an arbitrary value which can be adjusted
+/// using the `epsilon` argument. This matcher is intended to compare floating
+/// point numbers that are the result of different sequences of operations, such
+/// that they may have accumulated slightly different errors.
+///
+/// See also:
+///
+///  * [moreOrLessEquals], which is for [double]s.
+Matcher rectMoreOrLessEquals(Rect value, { double epsilon = 1e-10 }) {
+  return _RectMoreOrLessEquals(value, epsilon);
+}
+
 /// Asserts that two [String]s are equal after normalizing likely hash codes.
 ///
 /// A `#` followed by 5 hexadecimal digits is assumed to be a short hash code
@@ -1078,6 +1093,31 @@ class _MoreOrLessEquals extends Matcher {
       return true;
     final double test = object;
     return (test - value).abs() <= epsilon;
+  }
+
+  @override
+  Description describe(Description description) => description.add('$value (±$epsilon)');
+}
+
+class _RectMoreOrLessEquals extends Matcher {
+  const _RectMoreOrLessEquals(this.value, this.epsilon);
+
+  final Rect value;
+  final double epsilon;
+
+  @override
+  bool matches(Object object, Map<dynamic, dynamic> matchState) {
+    if (object is! Rect) {
+      return false;
+    }
+    if (object == value) {
+      return true;
+    }
+    final Rect rect = object;
+    return (rect.left    - value.left).abs() <= epsilon &&
+           (rect.top     - value.top).abs() <= epsilon &&
+           (rect.right   - value.right).abs() <= epsilon &&
+           (rect.bottom  - value.bottom).abs() <= epsilon;
   }
 
   @override
