@@ -508,7 +508,7 @@ class CupertinoIcons {
   ///  * [double_music_note], which is similar, but with 2 connected notes.
   static const IconData music_note = IconData(0xf46b, fontFamily: iconFont, fontPackage: iconFontPackage);
 
-  /// A symbol representing 2 connected musical note.
+  /// A symbol representing 2 connected musical notes.
   ///
   /// See also:
   ///
