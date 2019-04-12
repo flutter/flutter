@@ -211,13 +211,13 @@ void _buildCoverageMap(
   Map<String, Map<String, dynamic>> sourceReports,
   List<Map<String, dynamic>> coverage,
 ) {
-  final Map<Uri, Map<int, int>> hitMaps = <Uri, Map<int, int>>{};
+  final Map<String, Map<int, int>> hitMaps = <String, Map<int, int>>{};
   for (String scriptId in scripts.keys) {
     final Map<String, dynamic> sourceReport = sourceReports[scriptId];
     for (Map<String, dynamic> range in sourceReport['ranges']) {
       final Map<String, dynamic> coverage = range['coverage'];
       final Map<String, dynamic> scriptRef = sourceReport['scripts'][range['scriptIndex']];
-      final Uri uri = Uri.parse(scriptRef['uri']);
+      final String uri = scriptRef['uri'];
 
       hitMaps[uri] ??= <int, int>{};
       final Map<int, int> hitMap = hitMaps[uri];
@@ -239,7 +239,7 @@ void _buildCoverageMap(
       }
     }
   }
-  hitMaps.forEach((Uri uri, Map<int, int> hitMap) {
+  hitMaps.forEach((String uri, Map<int, int> hitMap) {
     coverage.add(_toScriptCoverageJson(uri, hitMap));
   });
 }
@@ -268,19 +268,19 @@ List<int> _lineAndColumn(int position, List<dynamic> tokenPositions) {
 }
 
 // Returns a JSON hit map backward-compatible with pre-1.16.0 SDKs.
-Map<String, dynamic> _toScriptCoverageJson(Uri scriptUri, Map<int, int> hitMap) {
+Map<String, dynamic> _toScriptCoverageJson(String scriptUri, Map<int, int> hitMap) {
   final Map<String, dynamic> json = <String, dynamic>{};
   final List<int> hits = <int>[];
   hitMap.forEach((int line, int hitCount) {
     hits.add(line);
     hits.add(hitCount);
   });
-  json['source'] = '$scriptUri';
+  json['source'] = scriptUri;
   json['script'] = <String, dynamic>{
     'type': '@Script',
     'fixedId': true,
-    'id': 'libraries/1/scripts/${Uri.encodeComponent(scriptUri.toString())}',
-    'uri': '$scriptUri',
+    'id': 'libraries/1/scripts/${Uri.encodeComponent(scriptUri)}',
+    'uri': scriptUri,
     '_kind': 'library',
   };
   json['hits'] = hits;
