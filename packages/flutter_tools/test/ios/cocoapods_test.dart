@@ -30,6 +30,28 @@ void main() {
   CocoaPods cocoaPodsUnderTest;
   InvokeProcess resultOfPodVersion;
 
+  const String contentWithRunnerDependencies = """
+  project 'Runner', {
+    'Debug' => :debug,
+    'Profile' => :release,
+    'Release' => :release,
+  }
+  target 'Runner' do
+    pod 'Flutter'
+  end
+  """;
+
+  const String contentWithoutRunnerDependencies = """
+  project 'Runner', {
+    'Debug' => :debug,
+    'Profile' => :release,
+    'Release' => :release,
+  }
+  target 'OtherTarget' do
+    pod 'SomeDependency'
+  end
+  """;
+
   void pretendPodIsNotInstalled() {
     resultOfPodVersion = () async => throw 'Executable does not exist';
   }
@@ -189,7 +211,7 @@ void main() {
     });
 
     testUsingContext('includes Pod config in xcconfig files, if not present', () async {
-      projectUnderTest.ios.podfile..createSync()..writeAsStringSync('Existing Podfile');
+      projectUnderTest.ios.podfile..createSync()..writeAsStringSync(contentWithRunnerDependencies);
       projectUnderTest.ios.xcodeConfigFor('Debug')
         ..createSync(recursive: true)
         ..writeAsStringSync('Existing debug config');
@@ -215,7 +237,7 @@ void main() {
 
   group('Update xcconfig', () {
     testUsingContext('includes Pod config in xcconfig files, if the user manually added Pod dependencies without using Flutter plugins', () async {
-      projectUnderTest.ios.podfile..createSync()..writeAsStringSync('Custom Podfile');
+      projectUnderTest.ios.podfile..createSync()..writeAsStringSync(contentWithRunnerDependencies);
       projectUnderTest.ios.podfileLock..createSync()..writeAsStringSync('Podfile.lock from user executed `pod install`');
       projectUnderTest.packagesFile..createSync()..writeAsStringSync('');
       projectUnderTest.ios.xcodeConfigFor('Debug')
