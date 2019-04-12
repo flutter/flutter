@@ -9,10 +9,10 @@
 #include <sstream>
 #include <string>
 
-#include "flutter/common/version/version.h"
 #include "flutter/fml/native_library.h"
 #include "flutter/fml/paths.h"
 #include "flutter/fml/string_view.h"
+#include "flutter/shell/version/version.h"
 
 // Include once for the default enum definition.
 #include "flutter/shell/common/switches.h"
