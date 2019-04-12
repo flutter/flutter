@@ -287,6 +287,12 @@ class FlutterDevice {
       await view.uiIsolate.flutterToggleWidgetInspector();
   }
 
+  Future<void> toggleProfileWidgetBuilds() async {
+    for (FlutterView view in views) {
+      await view.uiIsolate.flutterToggleProfileWidgetBuilds();
+    }
+  }
+
   Future<String> togglePlatform({ String from }) async {
     String to;
     switch (from) {
@@ -643,6 +649,13 @@ abstract class ResidentRunner {
       await device.toggleWidgetInspector();
   }
 
+  Future<void> _debugToggleProfileWidgetBuilds() async {
+    await refreshViews();
+    for (FlutterDevice device in flutterDevices) {
+      await device.toggleProfileWidgetBuilds();
+    }
+  }
+
   Future<void> _screenshot(FlutterDevice device) async {
     final Status status = logger.startProgress('Taking screenshot for ${device.device.name}...', timeout: timeoutConfiguration.fastOperation);
     final File outputFile = getUniqueFile(fs.currentDirectory, 'flutter', 'png');
@@ -870,6 +883,10 @@ abstract class ResidentRunner {
           await _screenshot(device);
       }
       return true;
+    } else if (character == 'a') {
+      if (supportsServiceProtocol && isRunningDebug) {
+        await _debugToggleProfileWidgetBuilds();
+      }
     } else if (lower == 'o') {
       if (supportsServiceProtocol && isRunningDebug) {
         await _debugTogglePlatform();
@@ -976,6 +993,7 @@ abstract class ResidentRunner {
         printStatus('To toggle the widget inspector (WidgetsApp.showWidgetInspectorOverride), press "i".');
         printStatus('To toggle the display of construction lines (debugPaintSizeEnabled), press "p".');
         printStatus('To simulate different operating systems, (defaultTargetPlatform), press "o".');
+        printStatus('To enable timeline events for all widget build methods, (debugProfileWidgetBuilds), press "a"');
         printStatus('To toggle the elevation checker, press "z".');
       } else {
         printStatus('To dump the accessibility tree (debugDumpSemantics), press "S" (for traversal order) or "U" (for inverse hit test order).');
