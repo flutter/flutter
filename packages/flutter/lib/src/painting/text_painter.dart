@@ -454,7 +454,7 @@ class TextPainter {
   // Unicode value for a zero width joiner character.
   static const int _zwjUtf16 = 0x200d;
 
-  // Get the Offset of the cursor (in logical pixels) based off the near edge
+  // Get the Rect of the cursor (in logical pixels) based off the near edge
   // of the character upstream from the given string offset.
   // TODO(garyq): Use actual extended grapheme cluster length instead of
   // an increasing cluster length amount to achieve deterministic performance.
@@ -501,7 +501,7 @@ class TextPainter {
     return null;
   }
 
-  // Get the Offset of the cursor (in logical pixels) based off the near edge
+  // Get the Rect of the cursor (in logical pixels) based off the near edge
   // of the character downstream from the given string offset.
   // TODO(garyq): Use actual extended grapheme cluster length instead of
   // an increasing cluster length amount to achieve deterministic performance.
