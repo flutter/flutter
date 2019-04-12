@@ -166,7 +166,7 @@ class AnimatedList extends StatefulWidget {
     final AnimatedListState result = context.ancestorStateOfType(const TypeMatcher<AnimatedListState>());
     if (nullOk || result != null)
       return result;
-    throw FlutterError(<DiagnosticsNode>[
+    throw FlutterError.fromParts(<DiagnosticsNode>[
       ErrorSummary('AnimatedList.of() called with a context that does not contain an AnimatedList.'),
       ErrorDescription('No AnimatedList ancestor could be found starting from the context that was passed to AnimatedList.of().'),
       ErrorHint(

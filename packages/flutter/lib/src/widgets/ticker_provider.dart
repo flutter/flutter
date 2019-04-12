@@ -82,7 +82,7 @@ mixin SingleTickerProviderStateMixin<T extends StatefulWidget> on State<T> imple
     assert(() {
       if (_ticker == null)
         return true;
-      throw FlutterError(<DiagnosticsNode>[
+      throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary('$runtimeType is a SingleTickerProviderStateMixin but multiple tickers were created.'),
         ErrorDescription('A SingleTickerProviderStateMixin can only be used as a TickerProvider once.'),
         ErrorHint(
@@ -105,7 +105,7 @@ mixin SingleTickerProviderStateMixin<T extends StatefulWidget> on State<T> imple
     assert(() {
       if (_ticker == null || !_ticker.isActive)
         return true;
-      throw FlutterError(<DiagnosticsNode>[
+      throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary('$this was disposed with an active Ticker.'),
         ErrorDescription(
           '$runtimeType created a Ticker via its SingleTickerProviderStateMixin, but at the time '
@@ -182,7 +182,7 @@ mixin TickerProviderStateMixin<T extends StatefulWidget> on State<T> implements 
       if (_tickers != null) {
         for (Ticker ticker in _tickers) {
           if (ticker.isActive) {
-            throw FlutterError(<DiagnosticsNode>[
+            throw FlutterError.fromParts(<DiagnosticsNode>[
               ErrorSummary('$this was disposed with an active Ticker.'),
               ErrorDescription(
                 '$runtimeType created a Ticker via its TickerProviderStateMixin, but at the time '

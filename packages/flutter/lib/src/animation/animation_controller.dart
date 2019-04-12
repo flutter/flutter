@@ -428,7 +428,7 @@ class AnimationController extends Animation<double>
   TickerFuture forward({ double from }) {
     assert(() {
       if (duration == null) {
-        throw FlutterError(<DiagnosticsNode>[
+        throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('AnimationController.forward() called with no default Duration.'),
           ErrorDescription(
             'The "duration" property should be set, either in the constructor or later, before '
@@ -463,7 +463,7 @@ class AnimationController extends Animation<double>
   TickerFuture reverse({ double from }) {
     assert(() {
       if (duration == null) {
-        throw FlutterError(<DiagnosticsNode>[
+        throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('AnimationController.reverse() called with no default Duration.'),
           ErrorDescription(
             'The "duration" property should be set, either in the constructor or later, before '
@@ -546,7 +546,7 @@ class AnimationController extends Animation<double>
     if (simulationDuration == null) {
       assert(() {
         if (this.duration == null) {
-          throw FlutterError(<DiagnosticsNode>[
+          throw FlutterError.fromParts(<DiagnosticsNode>[
             ErrorSummary('AnimationController.animateTo() called with no explicit Duration and no default Duration.'),
             ErrorDescription(
               'Either the "duration" argument to the animateTo() method should be provided, or the '
@@ -602,7 +602,7 @@ class AnimationController extends Animation<double>
     period ??= duration;
     assert(() {
       if (period == null) {
-        throw FlutterError(<DiagnosticsNode>[
+        throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('AnimationController.repeat() called without an explicit period and with no default Duration.'),
           ErrorDescription(
             'Either the "period" argument to the repeat() method should be provided, or the '
@@ -721,7 +721,7 @@ class AnimationController extends Animation<double>
   void dispose() {
     assert(() {
       if (_ticker == null) {
-        throw FlutterError(<DiagnosticsNode>[
+        throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('AnimationController.dispose() called more than once.'),
           ErrorDescription('A given $runtimeType cannot be disposed more than once.\n'),
           DiagnosticsProperty<AnimationController>(

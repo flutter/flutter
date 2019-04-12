@@ -206,7 +206,7 @@ class GestureDetector extends StatelessWidget {
          final bool haveScale = onScaleStart != null || onScaleUpdate != null || onScaleEnd != null;
          if (havePan || haveScale) {
            if (havePan && haveScale) {
-             throw FlutterError(<DiagnosticsNode>[
+             throw FlutterError.fromParts(<DiagnosticsNode>[
                ErrorSummary('Incorrect GestureDetector arguments.'),
                ErrorDescription(
                  'Having both a pan gesture recognizer and a scale gesture recognizer is redundant; scale is a superset of pan.'
@@ -216,7 +216,7 @@ class GestureDetector extends StatelessWidget {
            }
            final String recognizer = havePan ? 'pan' : 'scale';
            if (haveVerticalDrag && haveHorizontalDrag) {
-             throw FlutterError(<DiagnosticsNode>[
+             throw FlutterError.fromParts(<DiagnosticsNode>[
                ErrorSummary('Incorrect GestureDetector arguments.'),
                ErrorDescription(
                  'Simultaneously having a vertical drag gesture recognizer, a horizontal drag gesture recognizer, and a $recognizer gesture recognizer '
@@ -704,7 +704,7 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
   void replaceGestureRecognizers(Map<Type, GestureRecognizerFactory> gestures) {
     assert(() {
       if (!context.findRenderObject().owner.debugDoingLayout) {
-        throw FlutterError(<DiagnosticsNode>[
+        throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('Unexpected call to replaceGestureRecognizers() method of RawGestureDetectorState.'),
           ErrorDescription('The replaceGestureRecognizers() method can only be called during the layout phase.'),
           ErrorHint(
@@ -741,7 +741,7 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
     assert(() {
       final Element element = context;
       if (element.owner.debugBuilding) {
-        throw FlutterError(<DiagnosticsNode>[
+        throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('Unexpected call to replaceSemanticsActions() method of RawGestureDetectorState.'),
           ErrorDescription('The replaceSemanticsActions() method can only be called outside of the build phase.'),
         ]);

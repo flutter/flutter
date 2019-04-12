@@ -531,7 +531,7 @@ class RenderCustomPaint extends RenderProxyBox {
       // below that number.
       final int debugNewCanvasSaveCount = canvas.getSaveCount();
       if (debugNewCanvasSaveCount > debugPreviousCanvasSaveCount) {
-        throw FlutterError(<DiagnosticsNode>[
+        throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary(
             'The $painter custom painter called canvas.save() or canvas.saveLayer() at least '
             '${debugNewCanvasSaveCount - debugPreviousCanvasSaveCount} more '
@@ -543,7 +543,7 @@ class RenderCustomPaint extends RenderProxyBox {
         ]);
       }
       if (debugNewCanvasSaveCount < debugPreviousCanvasSaveCount) {
-        throw FlutterError(<DiagnosticsNode>[
+        throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('The $painter custom painter called canvas.restore() '
             '${debugPreviousCanvasSaveCount - debugNewCanvasSaveCount} more '
             'time${debugPreviousCanvasSaveCount - debugNewCanvasSaveCount == 1 ? '' : 's' } '
@@ -606,7 +606,7 @@ class RenderCustomPaint extends RenderProxyBox {
   ) {
     assert(() {
       if (child == null && children.isNotEmpty) {
-        throw FlutterError(<DiagnosticsNode>[
+        throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary(
             '$runtimeType does not have a child widget but received a non-empty list of child SemanticsNode:\n'
             '${children.join('\n')}'
@@ -688,7 +688,7 @@ class RenderCustomPaint extends RenderProxyBox {
 
       if (information.isNotEmpty) {
         information.insert(0, ErrorSummary('Failed to update the list of CustomPainterSemantics:'));
-        throw FlutterError(information);
+        throw FlutterError.fromParts(information);
       }
 
       return true;

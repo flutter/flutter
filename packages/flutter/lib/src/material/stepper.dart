@@ -687,7 +687,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     assert(debugCheckHasMaterialLocalizations(context));
     assert(() {
       if (context.ancestorWidgetOfExactType(Stepper) != null)
-        throw FlutterError(<DiagnosticsNode>[
+        throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('Steppers must not be nested.'),
           // TODO(jacobr): is this non-standard display of a link intentional?
           ErrorDescription(

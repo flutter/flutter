@@ -139,7 +139,7 @@ abstract class KeyHelper {
     if (toolkit == 'glfw') {
       return GLFWKeyHelper();
     } else {
-      throw FlutterError(<DiagnosticsNode>[ErrorSummary('Window toolkit not recognized: $toolkit')]);
+      throw FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary('Window toolkit not recognized: $toolkit')]);
     }
   }
 

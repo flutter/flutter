@@ -109,7 +109,7 @@ class Table extends RenderObjectWidget {
        assert(defaultVerticalAlignment != null),
        assert(() {
          if (children.any((TableRow row) => row.children.any((Widget cell) => cell == null))) {
-           throw FlutterError(<DiagnosticsNode>[
+           throw FlutterError.fromParts(<DiagnosticsNode>[
              ErrorSummary('One of the children of one of the rows of the table was null.'),
              ErrorDescription('The children of a TableRow must not be null.')
            ]);
@@ -118,7 +118,7 @@ class Table extends RenderObjectWidget {
        }()),
        assert(() {
          if (children.any((TableRow row1) => row1.key != null && children.any((TableRow row2) => row1 != row2 && row1.key == row2.key))) {
-           throw FlutterError(<DiagnosticsNode>[
+           throw FlutterError.fromParts(<DiagnosticsNode>[
              ErrorSummary('Two or more TableRow children of this Table had the same key.'),
              ErrorDescription('All the keyed TableRow children of a Table must have different Keys.')
            ]);
@@ -129,7 +129,7 @@ class Table extends RenderObjectWidget {
          if (children.isNotEmpty) {
            final int cellCount = children.first.children.length;
            if (children.any((TableRow row) => row.children.length != cellCount)) {
-             throw FlutterError(<DiagnosticsNode>[
+             throw FlutterError.fromParts(<DiagnosticsNode>[
                ErrorSummary('Table contains irregular row lengths.'),
                ErrorDescription(
                 'Every TableRow in a Table must have the same number of children, so that every cell is filled. '
@@ -147,7 +147,7 @@ class Table extends RenderObjectWidget {
     assert(() {
       final List<Widget> flatChildren = children.expand<Widget>((TableRow row) => row.children).toList(growable: false);
       if (debugChildrenHaveDuplicateKeys(this, flatChildren)) {
-        throw FlutterError(<DiagnosticsNode>[
+        throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('Two or more cells in this Table contain widgets with the same key.'),
           ErrorDescription(
             'Every widget child of every TableRow in a Table must have different keys. The cells of a Table are '

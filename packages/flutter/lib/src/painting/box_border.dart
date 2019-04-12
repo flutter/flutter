@@ -152,7 +152,7 @@ abstract class BoxBorder extends ShapeBorder {
         bottom: BorderSide.lerp(a.bottom, b.bottom, t),
       );
     }
-    throw FlutterError(<DiagnosticsNode>[
+    throw FlutterError.fromParts(<DiagnosticsNode>[
       ErrorSummary('BoxBorder.lerp can only interpolate Border and BorderDirectional classes.'),
       ErrorDescription(
         'BoxBorder.lerp() was called with two objects of type ${a.runtimeType} and ${b.runtimeType}:\n'

@@ -504,7 +504,7 @@ class BoxConstraints extends Constraints {
         }
 
         information.add(DiagnosticsProperty<BoxConstraints>('The offending constraints were', this, style: DiagnosticsTreeStyle.indentedSingleLine));
-        throw FlutterError(information);
+        throw FlutterError.fromParts(information);
       }
       if (minWidth.isNaN || maxWidth.isNaN || minHeight.isNaN || maxHeight.isNaN) {
         final List<String> affectedFieldsList = <String>[];
@@ -1125,14 +1125,14 @@ abstract class RenderBox extends RenderObject {
   double getMinIntrinsicWidth(double height) {
     assert(() {
       if (height == null) {
-        throw FlutterError(<DiagnosticsNode>[
+        throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('The height argument to getMinIntrinsicWidth was null.'),
           ErrorDescription('The argument to getMinIntrinsicWidth must not be negative or null.'),
           ErrorHint('If you do not have a specific height in mind, then pass double.infinity instead.')
         ]);
       }
       if (height < 0.0) {
-        throw FlutterError(<DiagnosticsNode>[
+        throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('The height argument to getMinIntrinsicWidth was negative.'),
           ErrorDescription('The argument to getMinIntrinsicWidth must not be negative or null.'),
           ErrorHint(
@@ -1266,14 +1266,14 @@ abstract class RenderBox extends RenderObject {
   double getMaxIntrinsicWidth(double height) {
     assert(() {
       if (height == null) {
-        throw FlutterError(<DiagnosticsNode>[
+        throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('The height argument to getMaxIntrinsicWidth was null.'),
           ErrorDescription('The argument to getMaxIntrinsicWidth must not be negative or null.'),
           ErrorHint('If you do not have a specific height in mind, then pass double.infinity instead.')
         ]);
       }
       if (height < 0.0) {
-        throw FlutterError(<DiagnosticsNode>[
+        throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('The height argument to getMaxIntrinsicWidth was negative.'),
           ErrorDescription('The argument to getMaxIntrinsicWidth must not be negative or null.'),
           ErrorHint(
@@ -1344,14 +1344,14 @@ abstract class RenderBox extends RenderObject {
   double getMinIntrinsicHeight(double width) {
     assert(() {
       if (width == null) {
-        throw FlutterError(<DiagnosticsNode>[
+        throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('The width argument to getMinIntrinsicHeight was null.'),
           ErrorDescription('The argument to getMinIntrinsicHeight must not be negative or null.'),
           ErrorHint('If you do not have a specific width in mind, then pass double.infinity instead.')
         ]);
       }
       if (width < 0.0) {
-        throw FlutterError(<DiagnosticsNode>[
+        throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('The width argument to getMinIntrinsicHeight was negative.'),
           ErrorDescription('The argument to getMinIntrinsicHeight must not be negative or null.'),
           ErrorHint(
@@ -1419,14 +1419,14 @@ abstract class RenderBox extends RenderObject {
   double getMaxIntrinsicHeight(double width) {
     assert(() {
       if (width == null) {
-        throw FlutterError(<DiagnosticsNode>[
+        throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('The width argument to getMaxIntrinsicHeight was null.'),
           ErrorDescription('The argument to getMaxIntrinsicHeight must not be negative or null.'),
           ErrorHint('If you do not have a specific width in mind, then pass double.infinity instead.')
         ]);
       }
       if (width < 0.0) {
-        throw FlutterError(<DiagnosticsNode>[
+        throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('The width argument to getMaxIntrinsicHeight was negative.'),
           ErrorDescription('The argument to getMaxIntrinsicHeight must not be negative or null.'),
           ErrorHint(
@@ -1539,7 +1539,7 @@ abstract class RenderBox extends RenderObject {
         information.add(ErrorDescription('Because this RenderBox has sizedByParent set to true, it must set its size in performResize().'));
       else
         information.add(ErrorDescription('Because this RenderBox has sizedByParent set to false, it must set its size in performLayout().'));
-      throw FlutterError(information);
+      throw FlutterError.fromParts(information);
     }());
     assert(() {
       value = debugAdoptSize(value);
@@ -1568,7 +1568,7 @@ abstract class RenderBox extends RenderObject {
       if (value is _DebugSize) {
         if (value._owner != this) {
           if (value._owner.parent != this) {
-            throw FlutterError(<DiagnosticsNode>[
+            throw FlutterError.fromParts(<DiagnosticsNode>[
               ErrorSummary('The size property was assigned a size inappropriately.'),
               describeForError('The following render object'),
               value._owner.describeForError('...was assigned a size obtained from'),
@@ -1594,7 +1594,7 @@ abstract class RenderBox extends RenderObject {
             ]);
           }
           if (!value._canBeUsedByParent) {
-            throw FlutterError(<DiagnosticsNode>[
+            throw FlutterError.fromParts(<DiagnosticsNode>[
               ErrorSummary('A child\'s size was used without setting parentUsesSize.'),
               describeForError('The following render object'),
               value._owner.describeForError('...was assigned a size obtained from its child'),
@@ -1728,7 +1728,7 @@ abstract class RenderBox extends RenderObject {
           contract = ErrorDescription('Because this RenderBox has sizedByParent set to true, it must set its size in performResize().');
         else
           contract = ErrorDescription('Because this RenderBox has sizedByParent set to false, it must set its size in performLayout().');
-        throw FlutterError(<DiagnosticsNode>[
+        throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('RenderBox did not set its size during layout.'),
           contract,
           ErrorDescription('It appears that this did not happen; layout completed, but the size property is still null.'),
@@ -1770,11 +1770,11 @@ abstract class RenderBox extends RenderObject {
         errorParts.add(DiagnosticsProperty<BoxConstraints>('The constraints that applied to the $runtimeType were', constraints, style: DiagnosticsTreeStyle.indentedSingleLine));
         errorParts.add(DiagnosticsProperty<Size>('The exact size it was given was', _size, style: DiagnosticsTreeStyle.indentedSingleLine));
         errorParts.add(ErrorHint('See https://flutter.io/layout/ for more information.'));
-        throw FlutterError(errorParts);
+        throw FlutterError.fromParts(errorParts);
      }
       // verify that the size is within the constraints
       if (!constraints.isSatisfiedBy(_size)) {
-        throw FlutterError(<DiagnosticsNode>[
+        throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('$runtimeType does not meet its constraints.'),
           DiagnosticsProperty<BoxConstraints>('Constraints', constraints, style: DiagnosticsTreeStyle.indentedSingleLine),
           DiagnosticsProperty<Size>('Size', _size, style: DiagnosticsTreeStyle.indentedSingleLine),
@@ -1821,7 +1821,7 @@ abstract class RenderBox extends RenderObject {
         RenderObject.debugCheckingIntrinsics = false;
         if (failures.isNotEmpty) {
           // TODO(jacobr): consider nesting the failures object so it is collapsible.
-          throw FlutterError(<DiagnosticsNode>[
+          throw FlutterError.fromParts(<DiagnosticsNode>[
             ErrorSummary('The intrinsic dimension methods of the $runtimeType class returned values that violate the intrinsic protocol contract.'),
             ErrorDescription('The following ${failures.length > 1 ? "failures" : "failure"} was detected:') // should this be tagged as an error or not?
           ]..addAll(failures)
@@ -1866,7 +1866,7 @@ abstract class RenderBox extends RenderObject {
   void performLayout() {
     assert(() {
       if (!sizedByParent) {
-        throw FlutterError(<DiagnosticsNode>[
+        throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('$runtimeType did not implement performLayout().'),
           ErrorHint(
             'RenderBox subclasses need to either override performLayout() to '
@@ -1901,7 +1901,7 @@ abstract class RenderBox extends RenderObject {
     assert(() {
       if (!hasSize) {
         if (debugNeedsLayout) {
-          throw FlutterError(<DiagnosticsNode>[
+          throw FlutterError.fromParts(<DiagnosticsNode>[
             ErrorSummary('Cannot hit test a render box that has never been laid out.'),
             describeForError('The hitTest() method was called on this RenderBox'),
             ErrorDescription(
@@ -1917,7 +1917,7 @@ abstract class RenderBox extends RenderObject {
             )
           ]);
         }
-        throw FlutterError(<DiagnosticsNode>[
+        throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('Cannot hit test a render box with no size.'),
           describeForError('The hitTest() method was called on this RenderBox'),
           ErrorDescription(
@@ -1988,7 +1988,7 @@ abstract class RenderBox extends RenderObject {
     assert(child.parent == this);
     assert(() {
       if (child.parentData is! BoxParentData) {
-        throw FlutterError(<DiagnosticsNode>[
+        throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('$runtimeType does not implement applyPaintTransform.'),
           describeForError('The following $runtimeType object'),
           child.describeForError('...did not use a BoxParentData class for the parentData field of the following child'),

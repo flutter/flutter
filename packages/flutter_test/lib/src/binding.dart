@@ -637,7 +637,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     assert(() {
       if (autoUpdateGoldenFiles != valueBeforeTest) {
         FlutterError.reportError(FlutterErrorDetails(
-          exception: FlutterError(<DiagnosticsNode>[
+          exception: FlutterError.fromParts(<DiagnosticsNode>[
             ErrorSummary('The value of autoUpdateGoldenFiles was changed by the test.'),
           ]),
           stack: StackTrace.current,
@@ -657,7 +657,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
         // this error.
         reportTestException = valueBeforeTest;
         FlutterError.reportError(FlutterErrorDetails(
-          exception: FlutterError(<DiagnosticsNode>[
+          exception: FlutterError.fromParts(<DiagnosticsNode>[
             ErrorSummary('The value of reportTestException was changed by the test.'),
           ]),
           stack: StackTrace.current,

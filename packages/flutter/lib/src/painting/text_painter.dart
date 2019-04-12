@@ -405,7 +405,7 @@ class TextPainter {
   void paint(Canvas canvas, Offset offset) {
     assert(() {
       if (_needsLayout) {
-        throw FlutterError(<DiagnosticsNode>[
+        throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('TextPainter.paint called when text geometry was not yet calculated.'),
           ErrorHint('Please call layout() before paint() to position the text before painting it.'),
         ]);

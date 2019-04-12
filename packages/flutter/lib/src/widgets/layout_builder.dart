@@ -166,7 +166,7 @@ class _RenderLayoutBuilder extends RenderBox with RenderObjectWithChildMixin<Ren
   bool _debugThrowIfNotCheckingIntrinsics() {
     assert(() {
       if (!RenderObject.debugCheckingIntrinsics) {
-        throw FlutterError(<DiagnosticsNode>[
+        throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('LayoutBuilder does not support returning intrinsic dimensions.'),
           ErrorDescription(
             'Calculating the intrinsic dimensions would require running the layout '

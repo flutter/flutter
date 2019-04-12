@@ -66,7 +66,7 @@ abstract class AssetBundle {
   Future<String> loadString(String key, { bool cache = true }) async {
     final ByteData data = await load(key);
     if (data == null)
-      throw FlutterError(<DiagnosticsNode>[ErrorSummary('Unable to load asset: $key')]);
+      throw FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary('Unable to load asset: $key')]);
     if (data.lengthInBytes < 10 * 1024) {
       // 10KB takes about 3ms to parse on a Pixel 2 XL.
       // See: https://github.com/dart-lang/sdk/issues/31954
@@ -116,7 +116,7 @@ class NetworkAssetBundle extends AssetBundle {
     final HttpClientRequest request = await _httpClient.getUrl(_urlFromKey(key));
     final HttpClientResponse response = await request.close();
     if (response.statusCode != HttpStatus.ok)
-      throw FlutterError(<DiagnosticsNode>[
+      throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary('Unable to load asset: $key'),
         IntProperty('HTTP status code', response.statusCode),
       ]);
@@ -218,7 +218,7 @@ class PlatformAssetBundle extends CachingAssetBundle {
     final ByteData asset =
         await BinaryMessages.send('flutter/assets', encoded.buffer.asByteData());
     if (asset == null)
-      throw FlutterError(<DiagnosticsNode>[ErrorSummary('Unable to load asset: $key')]);
+      throw FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary('Unable to load asset: $key')]);
     return asset;
   }
 }

@@ -456,7 +456,7 @@ class RenderAspectRatio extends RenderProxyBox {
     assert(constraints.debugAssertIsValid());
     assert(() {
       if (!constraints.hasBoundedWidth && !constraints.hasBoundedHeight) {
-        throw FlutterError(<DiagnosticsNode>[
+        throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('$runtimeType has unbounded constraints.'),
           ErrorDescription(
             'This $runtimeType was given an aspect ratio of $aspectRatio but was given '
@@ -1920,7 +1920,7 @@ class RenderDecoratedBox extends RenderProxyBox {
       _painter.paint(context.canvas, offset, filledConfiguration);
       assert(() {
         if (debugSaveCount != context.canvas.getSaveCount()) {
-          throw FlutterError(<DiagnosticsNode>[
+          throw FlutterError.fromParts(<DiagnosticsNode>[
             ErrorSummary('${_decoration.runtimeType} painter had mismatching save and restore calls.'),
             ErrorDescription(
               'Before painting the decoration, the canvas save count was $debugSaveCount. '

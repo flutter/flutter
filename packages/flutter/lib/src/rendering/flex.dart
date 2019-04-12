@@ -686,7 +686,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
           } else {
             return true;
           }
-          throw FlutterError(<DiagnosticsNode>[
+          throw FlutterError.fromParts(<DiagnosticsNode>[
             error,
             message,
             ErrorDescription(
@@ -808,7 +808,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
         if (crossAxisAlignment == CrossAxisAlignment.baseline) {
           assert(() {
             if (textBaseline == null)
-              throw FlutterError(<DiagnosticsNode>[
+              throw FlutterError.fromParts(<DiagnosticsNode>[
                 ErrorSummary(
                     'To use FlexAlignItems.baseline, you must also specify which baseline to use using the "baseline" argument.'),
               ]);

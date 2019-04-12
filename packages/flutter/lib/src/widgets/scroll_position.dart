@@ -203,7 +203,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
       assert(() {
         final double delta = newPixels - pixels;
         if (overscroll.abs() > delta.abs()) {
-          throw FlutterError(<DiagnosticsNode>[
+          throw FlutterError.fromParts(<DiagnosticsNode>[
             ErrorSummary('$runtimeType.applyBoundaryConditions returned invalid overscroll value.'),
             ErrorDescription(
               'setPixels() was called to change the scroll offset from $pixels to $newPixels.\n'
@@ -376,7 +376,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     assert(() {
       final double delta = value - pixels;
       if (result.abs() > delta.abs()) {
-        throw FlutterError(<DiagnosticsNode>[
+        throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('${physics.runtimeType}.applyBoundaryConditions returned invalid overscroll value.'),
           ErrorDescription(
             'The method was called to consider a change from $pixels to $value, which is a '

@@ -147,7 +147,7 @@ class Ticker {
   TickerFuture start() {
     assert(() {
       if (isActive) {
-        throw FlutterError(<DiagnosticsNode>[
+        throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('A ticker was started twice.'),
           ErrorDescription('A ticker that is already active cannot be started again without first stopping it.'),
           describeForError('The affected ticker was'),

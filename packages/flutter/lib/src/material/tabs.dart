@@ -768,7 +768,7 @@ class _TabBarState extends State<TabBar> {
     final TabController newController = widget.controller ?? DefaultTabController.of(context);
     assert(() {
       if (newController == null) {
-        throw FlutterError(<DiagnosticsNode>[
+        throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('No TabController for ${widget.runtimeType}.'),
           ErrorHint(
             'When creating a ${widget.runtimeType}, you must either provide an explicit '
@@ -783,7 +783,7 @@ class _TabBarState extends State<TabBar> {
 
     assert(() {
       if (newController.length != widget.tabs.length) {
-        throw FlutterError(<DiagnosticsNode>[
+        throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary(
             // TODO(jacobr): is this line break in the middle of the summary intentional?
             'Controller\'s length property (${newController.length}) does not match the \n'
@@ -1128,7 +1128,7 @@ class _TabBarViewState extends State<TabBarView> {
     final TabController newController = widget.controller ?? DefaultTabController.of(context);
     assert(() {
       if (newController == null) {
-        throw FlutterError(<DiagnosticsNode>[
+        throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('No TabController for ${widget.runtimeType}.'),
           ErrorHint(
             'When creating a ${widget.runtimeType}, you must either provide an explicit '
@@ -1143,7 +1143,7 @@ class _TabBarViewState extends State<TabBarView> {
 
     assert(() {
       if (newController.length != widget.children.length) {
-        throw FlutterError(<DiagnosticsNode>[
+        throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary(
             // TODO(jacobr): is this line break in the middle of the summary intentional?
             'Controller\'s length property (${newController.length}) does not match the \n'
@@ -1404,7 +1404,7 @@ class TabPageSelector extends StatelessWidget {
     final TabController tabController = controller ?? DefaultTabController.of(context);
     assert(() {
       if (tabController == null) {
-        throw FlutterError(<DiagnosticsNode>[
+        throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('No TabController for $runtimeType.'),
           ErrorHint(
             'When creating a $runtimeType, you must either provide an explicit TabController '

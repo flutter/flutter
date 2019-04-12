@@ -525,7 +525,7 @@ class MediaQuery extends InheritedWidget {
       return query.data;
     if (nullOk)
       return null;
-    throw FlutterError(<DiagnosticsNode>[
+    throw FlutterError.fromParts(<DiagnosticsNode>[
       ErrorSummary('MediaQuery.of() called with a context that does not contain a MediaQuery.'),
       ErrorDescription(
         'No MediaQuery ancestor could be found starting from the context that was passed '

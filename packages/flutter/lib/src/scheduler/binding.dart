@@ -94,7 +94,7 @@ class _FrameCallbackEntry {
       if (rescheduling) {
         assert(() {
           if (debugCurrentCallbackStack == null) {
-            throw FlutterError(<DiagnosticsNode>[
+            throw FlutterError.fromParts(<DiagnosticsNode>[
               ErrorSummary('scheduleFrameCallback called with rescheduling true, but no callback is in scope.'),
               ErrorDescription(
                 'The "rescheduling" argument should only be set to true if the '

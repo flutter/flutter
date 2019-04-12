@@ -118,11 +118,94 @@ void main() {
     );
   });
 
+  test('FlutterError default constructor', () {
+    FlutterError error = FlutterError(
+      'My Error Summary.\n'
+      'My first description.\n'
+      'My second description.'
+    );
+    expect(error.diagnostics.length, equals(3));
+    expect(error.diagnostics[0].level, DiagnosticLevel.summary);
+    expect(error.diagnostics[1].level, DiagnosticLevel.info);
+    expect(error.diagnostics[2].level, DiagnosticLevel.info);
+    expect(error.diagnostics[0].toString(), 'My Error Summary.');
+    expect(error.diagnostics[1].toString(), 'My first description.');
+    expect(error.diagnostics[2].toString(), 'My second description.');
+    expect(
+      error.toStringDeep(),
+      'FlutterError\n'
+      '   My Error Summary.\n'
+      '   My first description.\n'
+      '   My second description.\n'
+    );
+
+    error = FlutterError(
+      'My Error Summary.\n'
+      'My first description.\n'
+      'My second description.\n'
+      '\n'
+    );
+
+    expect(error.diagnostics.length, equals(5));
+    expect(error.diagnostics[0].level, DiagnosticLevel.summary);
+    expect(error.diagnostics[1].level, DiagnosticLevel.info);
+    expect(error.diagnostics[2].level, DiagnosticLevel.info);
+    expect(error.diagnostics[0].toString(), 'My Error Summary.');
+    expect(error.diagnostics[1].toString(), 'My first description.');
+    expect(error.diagnostics[2].toString(), 'My second description.');
+    expect(error.diagnostics[3].toString(), '');
+    expect(error.diagnostics[4].toString(), '');
+    expect(
+      error.toStringDeep(),
+      'FlutterError\n'
+      '   My Error Summary.\n'
+      '   My first description.\n'
+      '   My second description.\n'
+      '\n'
+      '\n'
+    );
+
+    error = FlutterError(
+      'My Error Summary.\n'
+      'My first description.\n'
+      '\n'
+      'My second description.'
+    );
+    expect(error.diagnostics.length, equals(4));
+    expect(error.diagnostics[0].level, DiagnosticLevel.summary);
+    expect(error.diagnostics[1].level, DiagnosticLevel.info);
+    expect(error.diagnostics[2].level, DiagnosticLevel.info);
+    expect(error.diagnostics[3].level, DiagnosticLevel.info);
+    expect(error.diagnostics[0].toString(), 'My Error Summary.');
+    expect(error.diagnostics[1].toString(), 'My first description.');
+    expect(error.diagnostics[2].toString(), '');
+    expect(error.diagnostics[3].toString(), 'My second description.');
+
+    expect(
+      error.toStringDeep(),
+      'FlutterError\n'
+      '   My Error Summary.\n'
+      '   My first description.\n'
+      '\n'
+      '   My second description.\n'
+    );
+    error = FlutterError('My Error Summary.');
+    expect(error.diagnostics.length, 1);
+    expect(error.diagnostics.first.level, DiagnosticLevel.summary);
+    expect(error.diagnostics.first.toString(), 'My Error Summary.');
+
+    expect(
+      error.toStringDeep(),
+      'FlutterError\n'
+      '   My Error Summary.\n'
+    );
+  });
+
   test('Malformed FlutterError objects', () {
     {
       AssertionError error;
       try {
-        throw FlutterError(<DiagnosticsNode>[]);
+        throw FlutterError.fromParts(<DiagnosticsNode>[]);
       } on AssertionError catch (e) {
         error = e;
       }
@@ -138,7 +221,7 @@ void main() {
     {
       AssertionError error;
       try {
-        throw FlutterError(<DiagnosticsNode>[
+        throw FlutterError.fromParts(<DiagnosticsNode>[
           (ErrorDescription('Error description without a summary'))]);
       } on AssertionError catch (e) {
         error = e;
@@ -164,7 +247,7 @@ void main() {
     {
       AssertionError error;
       try {
-        throw FlutterError(<DiagnosticsNode>[
+        throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('Error Summary A'),
           ErrorDescription('Some descriptionA'),
           ErrorSummary('Error Summary B'),
@@ -201,7 +284,7 @@ void main() {
     {
       AssertionError error;
       try {
-        throw FlutterError(<DiagnosticsNode>[
+        throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorDescription('Some description'),
           ErrorSummary('Error summary'),
         ]);

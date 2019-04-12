@@ -104,7 +104,7 @@ class TestAsyncUtils {
           ));
           information.add(DiagnosticsStackTrace('The stack trace associated with this exception was', stack));
         }
-        throw FlutterError(information);
+        throw FlutterError.fromParts(information);
       }
       if (error != null)
         return Future<T>.error(error, stack);
@@ -262,7 +262,7 @@ class TestAsyncUtils {
         scope.creationStack,
       ));
     }
-    throw FlutterError(information);
+    throw FlutterError.fromParts(information);
   }
 
   /// Verifies that there are no guarded methods currently pending (see [guard]).
@@ -286,7 +286,7 @@ class TestAsyncUtils {
           ));
         }
       }
-      throw FlutterError(information);
+      throw FlutterError.fromParts(information);
     }
   }
 

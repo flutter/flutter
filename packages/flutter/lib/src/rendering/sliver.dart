@@ -428,7 +428,7 @@ class SliverConstraints extends Constraints {
           information.addAll(informationCollector());
         }
         information.add(DiagnosticsProperty<SliverConstraints>('The offending constraints were', this, style: DiagnosticsTreeStyle.indentedSingleLine));
-        throw FlutterError(information);
+        throw FlutterError.fromParts(information);
       }
       verify(axis != null, 'The "axis" is null.');
       verify(growthDirection != null, 'The "growthDirection" is null.');
@@ -710,7 +710,7 @@ class SliverGeometry extends Diagnosticable {
         if (informationCollector != null) {
           information.addAll(informationCollector());
         }
-        throw FlutterError(information);
+        throw FlutterError.fromParts(information);
       }
 
       verify(scrollExtent != null, 'The "scrollExtent" is null.');
@@ -1077,7 +1077,7 @@ abstract class RenderSliver extends RenderObject {
       information.add(contract);
       information.add(describeForError('The RenderSliver in question is'));
 
-      throw FlutterError(information);
+      throw FlutterError.fromParts(information);
     }());
     _geometry = value;
   }
@@ -1117,7 +1117,7 @@ abstract class RenderSliver extends RenderObject {
     ));
     assert(() {
       if (geometry.paintExtent > constraints.remainingPaintExtent) {
-        throw FlutterError(<DiagnosticsNode>[
+        throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('SliverGeometry has a paintOffset that exceeds the remainingPaintExtent from the constraints.'),
           describeForError('The render object whose geometry violates the constraints is the following')
         ]..addAll(_debugCompareFloats(
@@ -1298,7 +1298,7 @@ abstract class RenderSliver extends RenderObject {
   @protected
   double childMainAxisPosition(covariant RenderObject child) {
     assert(() {
-      throw FlutterError(<DiagnosticsNode>[ErrorSummary('$runtimeType does not implement childPosition.')]);
+      throw FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary('$runtimeType does not implement childPosition.')]);
     }());
     return 0.0;
   }
@@ -1335,7 +1335,7 @@ abstract class RenderSliver extends RenderObject {
   @override
   void applyPaintTransform(RenderObject child, Matrix4 transform) {
     assert(() {
-      throw FlutterError(<DiagnosticsNode>[ErrorSummary('$runtimeType does not implement applyPaintTransform.')]);
+      throw FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary('$runtimeType does not implement applyPaintTransform.')]);
     }());
   }
 

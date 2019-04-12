@@ -316,12 +316,12 @@ class TestDelegateThatCanThrow extends SliverPersistentHeaderDelegate {
 
   @override
   double get maxExtent {
-    return shouldThrow ? throw FlutterError(<DiagnosticsNode>[ErrorSummary('Unavailable maxExtent')]) : 200.0;
+    return shouldThrow ? throw FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary('Unavailable maxExtent')]) : 200.0;
   }
 
   @override
   double get minExtent {
-    return shouldThrow ? throw FlutterError(<DiagnosticsNode>[ErrorSummary('Unavailable minExtent')]) : 100.0;
+    return shouldThrow ? throw FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary('Unavailable minExtent')]) : 100.0;
   }
 
   @override

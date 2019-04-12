@@ -24,7 +24,7 @@ import 'material_localizations.dart';
 bool debugCheckHasMaterial(BuildContext context) {
   assert(() {
     if (context.widget is! Material && context.ancestorWidgetOfExactType(Material) == null) {
-      throw FlutterError(<DiagnosticsNode>[
+      throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary('No Material widget found.'),
         ErrorDescription(
           '${context.widget.runtimeType} widgets require a Material '
@@ -67,7 +67,7 @@ bool debugCheckHasMaterial(BuildContext context) {
 bool debugCheckHasMaterialLocalizations(BuildContext context) {
   assert(() {
     if (Localizations.of<MaterialLocalizations>(context, MaterialLocalizations) == null) {
-      throw FlutterError(<DiagnosticsNode>[
+      throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary('No MaterialLocalizations found.'),
         ErrorDescription(
           '${context.widget.runtimeType} widgets require MaterialLocalizations '

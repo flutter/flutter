@@ -251,7 +251,7 @@ class _ScaffoldGeometryNotifier extends ChangeNotifier implements ValueListenabl
     assert(() {
       final RenderObject renderObject = context.findRenderObject();
       if (renderObject == null || !renderObject.owner.debugDoingPaint)
-        throw FlutterError(<DiagnosticsNode>[
+        throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('Scaffold.geometryOf() must only be accessed during the paint phase.'),
           ErrorDescription(
             'The ScaffoldGeometry is only available during the paint phase, because\n'
@@ -1154,7 +1154,7 @@ class Scaffold extends StatefulWidget {
     final ScaffoldState result = context.ancestorStateOfType(const TypeMatcher<ScaffoldState>());
     if (nullOk || result != null)
       return result;
-    throw FlutterError(<DiagnosticsNode>[
+    throw FlutterError.fromParts(<DiagnosticsNode>[
       ErrorSummary('Scaffold.of() called with a context that does not contain a Scaffold.'),
       ErrorDescription(
         'No Scaffold ancestor could be found starting from the context that was passed to Scaffold.of(). '
@@ -1203,7 +1203,7 @@ class Scaffold extends StatefulWidget {
   static ValueListenable<ScaffoldGeometry> geometryOf(BuildContext context) {
     final _ScaffoldScope scaffoldScope = context.inheritFromWidgetOfExactType(_ScaffoldScope);
     if (scaffoldScope == null)
-      throw FlutterError(<DiagnosticsNode>[
+      throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary('Scaffold.geometryOf() called with a context that does not contain a Scaffold.'),
         ErrorDescription(
           'This usually happens when the context provided is from the same StatefulWidget as that '
@@ -1656,7 +1656,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     if (widget.bottomSheet != oldWidget.bottomSheet) {
       assert(() {
         if (widget.bottomSheet != null && _currentBottomSheet?._isLocalHistoryEntry == true) {
-          throw FlutterError(<DiagnosticsNode>[
+          throw FlutterError.fromParts(<DiagnosticsNode>[
             ErrorSummary(
               'Scaffold.bottomSheet cannot be specified while a bottom sheet displayed '
               'with showBottomSheet() is still visible.'

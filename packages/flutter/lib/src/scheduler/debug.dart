@@ -59,7 +59,7 @@ bool debugAssertAllSchedulerVarsUnset(String reason) {
   assert(() {
     if (debugPrintBeginFrameBanner ||
         debugPrintEndFrameBanner) {
-      throw FlutterError(<DiagnosticsNode>[ErrorSummary('$reason')]);
+      throw FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary('$reason')]);
     }
     return true;
   }());

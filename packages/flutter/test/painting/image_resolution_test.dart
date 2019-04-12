@@ -33,7 +33,7 @@ class TestAssetBundle extends CachingAssetBundle {
     if (key == 'one')
       return ByteData(1)
         ..setInt8(0, 49);
-    throw FlutterError(<DiagnosticsNode>[ErrorSummary('key not found')]);
+    throw FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary('key not found')]);
   }
 }
 

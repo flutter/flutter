@@ -297,7 +297,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     assert(() {
       if (!RenderObject.debugCheckingIntrinsics) {
         assert(this is! RenderShrinkWrappingViewport); // it has its own message
-        throw FlutterError(<DiagnosticsNode>[
+        throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('$runtimeType does not support returning intrinsic dimensions.'),
           ErrorDescription(
             'Calculating the intrinsic dimensions would require instantiating every child of '
@@ -1136,7 +1136,7 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
         switch (axis) {
           case Axis.vertical:
             if (!constraints.hasBoundedHeight) {
-              throw FlutterError(<DiagnosticsNode>[
+              throw FlutterError.fromParts(<DiagnosticsNode>[
                 ErrorSummary('Vertical viewport was given unbounded height.'),
                 ErrorDescription(
                   'Viewports expand in the scrolling direction to fill their container.'
@@ -1155,7 +1155,7 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
               ]);
             }
             if (!constraints.hasBoundedWidth) {
-              throw FlutterError(<DiagnosticsNode>[
+              throw FlutterError.fromParts(<DiagnosticsNode>[
                 ErrorSummary('Vertical viewport was given unbounded width.'),
                 ErrorDescription(
                   'Viewports expand in the cross axis to fill their container and '
@@ -1168,7 +1168,7 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
             break;
           case Axis.horizontal:
             if (!constraints.hasBoundedWidth) {
-              throw FlutterError(<DiagnosticsNode>[
+              throw FlutterError.fromParts(<DiagnosticsNode>[
                 ErrorSummary('Horizontal viewport was given unbounded width.'),
                 ErrorDescription(
                   'Viewports expand in the scrolling direction to fill their container.'
@@ -1187,7 +1187,7 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
               ]);
             }
             if (!constraints.hasBoundedHeight) {
-              throw FlutterError(<DiagnosticsNode>[
+              throw FlutterError.fromParts(<DiagnosticsNode>[
                 ErrorSummary('Horizontal viewport was given unbounded height.'),
                 ErrorDescription(
                   'Viewports expand in the cross axis to fill their container and '
@@ -1269,7 +1269,7 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
       if (count >= _maxLayoutCycles) {
         assert(count != 1);
         // TODO(jacobr): should this message be broken up to include 3 hints?
-        throw FlutterError(<DiagnosticsNode>[
+        throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('A RenderViewport exceeded its maximum number of layout cycles.'),
           ErrorDescription(
             'RenderViewport render objects, during layout, can retry if either their '
@@ -1571,7 +1571,7 @@ class RenderShrinkWrappingViewport extends RenderViewportBase<SliverLogicalConta
   bool debugThrowIfNotCheckingIntrinsics() {
     assert(() {
       if (!RenderObject.debugCheckingIntrinsics) {
-        throw FlutterError(<DiagnosticsNode>[
+        throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('$runtimeType does not support returning intrinsic dimensions.'),
           ErrorDescription(
            'Calculating the intrinsic dimensions would require instantiating every child of '

@@ -127,7 +127,7 @@ bool debugChildrenHaveDuplicateKeys(Widget parent, Iterable<Widget> children) {
   assert(() {
     final Key nonUniqueKey = _firstNonUniqueKey(children);
     if (nonUniqueKey != null) {
-      throw FlutterError(<DiagnosticsNode>[
+      throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary('Duplicate keys found.'),
         ErrorDescription(
           'If multiple keyed nodes exist as children of another node, they must have unique keys.\n'
@@ -156,7 +156,7 @@ bool debugItemsHaveDuplicateKeys(Iterable<Widget> items) {
   assert(() {
     final Key nonUniqueKey = _firstNonUniqueKey(items);
     if (nonUniqueKey != null)
-      throw FlutterError(<DiagnosticsNode>[ErrorSummary('Duplicate key found: $nonUniqueKey')]);
+      throw FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary('Duplicate key found: $nonUniqueKey')]);
     return true;
   }());
   return false;
@@ -177,7 +177,7 @@ bool debugItemsHaveDuplicateKeys(Iterable<Widget> items) {
 bool debugCheckHasTable(BuildContext context) {
   assert(() {
     if (context.widget is! Table && context.ancestorWidgetOfExactType(Table) == null) {
-      throw FlutterError(<DiagnosticsNode>[
+      throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary('No Table widget found.'),
         ErrorDescription('${context.widget.runtimeType} widgets require a Table widget ancestor.'),
         context.describeWidget('The specific widget that could not find a Table ancestor was'),
@@ -205,7 +205,7 @@ bool debugCheckHasTable(BuildContext context) {
 bool debugCheckHasMediaQuery(BuildContext context) {
   assert(() {
     if (context.widget is! MediaQuery && context.ancestorWidgetOfExactType(MediaQuery) == null) {
-      throw FlutterError(<DiagnosticsNode>[
+      throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary('No MediaQuery widget found.'),
         ErrorDescription('${context.widget.runtimeType} widgets require a MediaQuery widget ancestor.'),
         context.describeWidget('The specific widget that could not find a MediaQuery ancestor was'),
@@ -237,7 +237,7 @@ bool debugCheckHasMediaQuery(BuildContext context) {
 bool debugCheckHasDirectionality(BuildContext context) {
   assert(() {
     if (context.widget is! Directionality && context.ancestorWidgetOfExactType(Directionality) == null) {
-      throw FlutterError(<DiagnosticsNode>[
+      throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary('No Directionality widget found.'),
         ErrorDescription('${context.widget.runtimeType} widgets require a Directionality widget ancestor.\n'),
         context.describeWidget('The specific widget that could not find a Directionality ancestor was'),
@@ -266,7 +266,7 @@ bool debugCheckHasDirectionality(BuildContext context) {
 void debugWidgetBuilderValue(Widget widget, Widget built) {
   assert(() {
     if (built == null) {
-      throw FlutterError(<DiagnosticsNode>[
+      throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary('A build function returned null.'),
         DiagnosticsProperty<Widget>('The offending widget is', widget, style: DiagnosticsTreeStyle.indentedSingleLine),
         ErrorDescription('Build functions must never return null.'),
@@ -277,7 +277,7 @@ void debugWidgetBuilderValue(Widget widget, Widget built) {
       ]);
     }
     if (widget == built) {
-      throw FlutterError(<DiagnosticsNode>[
+      throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary('A build function returned context.widget.'),
         DiagnosticsProperty<Widget>('The offending widget is', widget, style: DiagnosticsTreeStyle.indentedSingleLine),
         ErrorDescription(
@@ -305,7 +305,7 @@ bool debugAssertAllWidgetVarsUnset(String reason) {
         debugPrintGlobalKeyedWidgetLifecycle ||
         debugProfileBuildsEnabled ||
         debugHighlightDeprecatedWidgets) {
-      throw FlutterError(<DiagnosticsNode>[ErrorSummary('$reason')]);
+      throw FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary('$reason')]);
     }
     return true;
   }());

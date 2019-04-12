@@ -184,7 +184,7 @@ class _CupertinoTabViewState extends State<CupertinoTabView> {
   Route<dynamic> _onUnknownRoute(RouteSettings settings) {
     assert(() {
       if (widget.onUnknownRoute == null) {
-        throw FlutterError(<DiagnosticsNode>[
+        throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('Could not find a generator for route $settings in the $runtimeType.'),
           ErrorDescription(
             'Generators for routes are searched for in the following order:\n'
@@ -203,7 +203,7 @@ class _CupertinoTabViewState extends State<CupertinoTabView> {
     final Route<dynamic> result = widget.onUnknownRoute(settings);
     assert(() {
       if (result == null) {
-        throw FlutterError(<DiagnosticsNode>[
+        throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('The onUnknownRoute callback returned null.'),
           ErrorDescription(
             'When the $runtimeType requested the route $settings from its '

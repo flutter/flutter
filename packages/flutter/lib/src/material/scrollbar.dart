@@ -157,6 +157,6 @@ class _ScrollbarState extends State<Scrollbar> with TickerProviderStateMixin {
         );
     }
     // TODO(jacobr): is there any reason the build context is not included here?
-    throw FlutterError(<DiagnosticsNode>[ErrorSummary('Unknown platform for scrollbar insertion')]);
+    throw FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary('Unknown platform for scrollbar insertion')]);
   }
 }

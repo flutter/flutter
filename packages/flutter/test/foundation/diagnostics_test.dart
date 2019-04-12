@@ -1115,7 +1115,7 @@ void main() {
 
     final DoubleProperty throwingProperty = DoubleProperty.lazy(
       'name',
-      () => throw FlutterError(<DiagnosticsNode>[ErrorSummary('Invalid constraints')]),
+      () => throw FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary('Invalid constraints')]),
     );
     // TODO(jacobr): it would be better if throwingProperty.object threw an
     // exception.
@@ -1559,7 +1559,7 @@ void main() {
 
     final DiagnosticsProperty<Object> throwingWithDescription = DiagnosticsProperty<Object>.lazy(
       'name',
-      () => throw FlutterError(<DiagnosticsNode>[ErrorSummary('Property not available')]),
+      () => throw FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary('Property not available')]),
       description: 'missing',
       defaultValue: null,
     );
@@ -1571,7 +1571,7 @@ void main() {
 
     final DiagnosticsProperty<Object> throwingProperty = DiagnosticsProperty<Object>.lazy(
       'name',
-      () => throw FlutterError(<DiagnosticsNode>[ErrorSummary('Property not available')]),
+      () => throw FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary('Property not available')]),
       defaultValue: null,
     );
     expect(throwingProperty.value, isNull);

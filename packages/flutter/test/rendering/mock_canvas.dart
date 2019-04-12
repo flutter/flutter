@@ -860,7 +860,7 @@ abstract class _PaintPredicate {
 
   @override
   String toString() {
-    throw FlutterError(<DiagnosticsNode>[ErrorSummary('$runtimeType does not implement toString.')]);
+    throw FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary('$runtimeType does not implement toString.')]);
   }
 }
 

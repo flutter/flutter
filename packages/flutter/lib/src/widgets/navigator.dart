@@ -1446,7 +1446,7 @@ class Navigator extends StatefulWidget {
         : context.ancestorStateOfType(const TypeMatcher<NavigatorState>());
     assert(() {
       if (navigator == null && !nullOk) {
-        throw FlutterError(<DiagnosticsNode>[
+        throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('Navigator operation requested with a context that does not include a Navigator.'),
           ErrorDescription(
             'The context used to push or pop routes from the Navigator must be that of a '
@@ -1588,7 +1588,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     if (route == null && !allowNull) {
       assert(() {
         if (widget.onUnknownRoute == null) {
-          throw FlutterError(<DiagnosticsNode>[
+          throw FlutterError.fromParts(<DiagnosticsNode>[
             ErrorSummary('If a Navigator has no onUnknownRoute, then its onGenerateRoute must never return null.'),
             ErrorDescription(
               'When trying to build the route "$name", onGenerateRoute returned null, but there was no '
@@ -1602,7 +1602,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       route = widget.onUnknownRoute(settings);
       assert(() {
         if (route == null) {
-          throw FlutterError(<DiagnosticsNode>[
+          throw FlutterError.fromParts(<DiagnosticsNode>[
             ErrorSummary('A Navigator\'s onUnknownRoute returned null.'),
             ErrorDescription(
               'When trying to build the route "$name", both onGenerateRoute and onUnknownRoute returned '

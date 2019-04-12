@@ -10,7 +10,7 @@ void main() {
     throw 'Who lives, who dies, who tells your story?';
   });
   testWidgets('Exception handling in test harness - FlutterError', (WidgetTester tester) async {
-    throw FlutterError(<DiagnosticsNode>[ErrorSummary('Who lives, who dies, who tells your story?')]);
+    throw FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary('Who lives, who dies, who tells your story?')]);
   });
   testWidgets('Exception handling in test harness - uncaught Future error', (WidgetTester tester) async {
     Future<void>.error('Who lives, who dies, who tells your story?');

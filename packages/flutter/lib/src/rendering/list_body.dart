@@ -74,7 +74,7 @@ class RenderListBody extends RenderBox
             return true;
           break;
       }
-      throw FlutterError(<DiagnosticsNode>[
+      throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary('RenderListBody must have unlimited space along its main axis.'),
         ErrorDescription(
           'RenderListBody does not clip or resize its children, so it must be '
@@ -101,7 +101,7 @@ class RenderListBody extends RenderBox
       // TODO(ianh): Detect if we're actually nested blocks and say something
       // more specific to the exact situation in that case, and don't mention
       // nesting blocks in the negative case.
-      throw FlutterError(<DiagnosticsNode>[
+      throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary('RenderListBody must have a bounded constraint for its cross axis.'),
         ErrorDescription(
           'RenderListBody forces its children to expand to fit the RenderListBody\'s container, '
