@@ -479,7 +479,7 @@ void main() {
     );
 
     expect(find.byType(Opacity), findsOneWidget);
-    expect(tester.widget<Opacity>(find.byType(Opacity).first).opacity, 0.5);    
+    expect(tester.widget<Opacity>(find.byType(Opacity).first).opacity, 0.5);
   });
 
     testWidgets('Switch turns opaque after becoming enabled', (WidgetTester tester) async {
@@ -510,7 +510,7 @@ void main() {
     );
 
     expect(find.byType(Opacity), findsOneWidget);
-    expect(tester.widget<Opacity>(find.byType(Opacity).first).opacity, 1.0);    
+    expect(tester.widget<Opacity>(find.byType(Opacity).first).opacity, 1.0);
   });
 
 }
