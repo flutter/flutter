@@ -30,7 +30,7 @@ class _TransformationsDemoState extends State<TransformationsDemo> {
   @override
   Widget build (BuildContext context) {
     if (!_seenInstructionDialog) {
-      Future<void>.delayed(Duration.zero, () {
+      Future<void>.delayed(Duration(seconds: 1), () {
         if (_seenInstructionDialog) {
           return;
         }
