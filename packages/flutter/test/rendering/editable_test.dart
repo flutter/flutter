@@ -134,7 +134,7 @@ void main() {
 
     expect(editable, paints..rect(
       color: const Color.fromARGB(0xFF, 0xFF, 0x00, 0x00),
-      rect: Rect.fromLTWH(40, 2, 1, 6),
+      rect: Rect.fromLTWH(40, 0, 1, 10),
     ));
 
     // Now change to a rounded caret.
@@ -146,7 +146,7 @@ void main() {
     expect(editable, paints..rrect(
       color: const Color.fromARGB(0xFF, 0x00, 0x00, 0xFF),
       rrect: RRect.fromRectAndRadius(
-        Rect.fromLTWH(40, 2, 4, 6),
+        Rect.fromLTWH(40, 0, 4, 10),
         const Radius.circular(3),
       ),
     ));
@@ -158,7 +158,7 @@ void main() {
     expect(editable, paints..rrect(
       color: const Color.fromARGB(0xFF, 0x00, 0x00, 0xFF),
       rrect: RRect.fromRectAndRadius(
-        Rect.fromLTWH(80, 2, 4, 16),
+        Rect.fromLTWH(80, 0, 4, 20),
         const Radius.circular(3),
       ),
     ));

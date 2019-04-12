@@ -91,7 +91,7 @@ void main() {
 
     await expectLater(
       find.byKey(const ValueKey<int>(1)),
-      matchesGoldenFile('editable_text_test.0.0.png'),
+      matchesGoldenFile('editable_text_test.0.1.png'),
     );
   }, skip: !Platform.isLinux);
 
@@ -142,7 +142,7 @@ void main() {
 
     await expectLater(
       find.byKey(const ValueKey<int>(1)),
-      matchesGoldenFile('editable_text_test.1.0.png'),
+      matchesGoldenFile('editable_text_test.1.1.png'),
     );
   }, skip: !Platform.isLinux);
 
@@ -617,7 +617,7 @@ void main() {
     expect(editable, paints
       ..rrect(
         rrect: RRect.fromRectAndRadius(
-          Rect.fromLTRB(463.3333435058594, 2.0833332538604736, 465.3333435058594, 14.083333015441895),
+          Rect.fromLTRB(463.3333435058594, 0.0833332538604736, 465.3333435058594, 16.083333015441895),
           const Radius.circular(2.0),
         ),
         color: const Color(0xff8e8e93),
@@ -642,7 +642,7 @@ void main() {
     expect(find.byType(EditableText), paints
       ..rrect(
         rrect: RRect.fromRectAndRadius(
-          Rect.fromLTRB(191.3333282470703, 2.0833332538604736, 193.3333282470703, 14.083333015441895),
+          Rect.fromLTRB(191.3333282470703, 0.0833332538604736, 193.3333282470703, 16.083333015441895),
           const Radius.circular(2.0),
         ),
         color: const Color(0xff8e8e93),
