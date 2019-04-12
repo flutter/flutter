@@ -5,6 +5,7 @@
 #ifndef FLUTTER_SHELL_PLATFORM_CPP_TEXT_INPUT_MODEL_H_
 #define FLUTTER_SHELL_PLATFORM_CPP_TEXT_INPUT_MODEL_H_
 
+#include <memory>
 #include <string>
 
 #include "rapidjson/document.h"
