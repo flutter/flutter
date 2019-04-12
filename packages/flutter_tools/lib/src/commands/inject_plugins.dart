@@ -24,6 +24,9 @@ class InjectPluginsCommand extends FlutterCommand {
   final bool hidden;
 
   @override
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{};
+
+  @override
   Future<FlutterCommandResult> runCommand() async {
     final FlutterProject project = await FlutterProject.current();
     refreshPluginsList(project);

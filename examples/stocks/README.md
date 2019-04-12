@@ -10,7 +10,7 @@ and install it onto your device.
 ### Prerequisites
 
 If you are new to Flutter, please first follow
-the [Flutter Setup](https://flutter.io/setup/) guide.
+the [Flutter Setup](https://flutter.dev/setup/) guide.
 
 ### Building and installing the stocks demo app
 
@@ -26,7 +26,7 @@ This app has been internationalized (just enough to show how it's
 done). It's an example of how one can do so with the
 [Dart intl package](https://pub.dartlang.org/packages/intl).
 
-The [Flutter Internationalization Tutorial](https://flutter.io/tutorials/internationalization/)
+The [Flutter Internationalization Tutorial](https://flutter.dev/tutorials/internationalization/)
 covers Flutter app internationalization in general.
 
 See [regenerate.md](lib/i18n/regenerate.md) for an explanation

@@ -491,7 +491,7 @@ class ButtonThemeData extends Diagnosticable {
     if (fillColor != null)
       return fillColor;
 
-    if (button is FlatButton || button is OutlineButton)
+    if (button is FlatButton || button is OutlineButton || button.runtimeType == MaterialButton)
       return null;
 
     if (button.enabled && button is RaisedButton && _buttonColor != null)

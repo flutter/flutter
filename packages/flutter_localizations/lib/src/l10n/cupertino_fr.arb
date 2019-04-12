@@ -1,0 +1,20 @@
+{
+  "datePickerHourSemanticsLabelOne": "une heure",
+  "datePickerHourSemanticsLabelOther": "$hour heures",
+  "datePickerMinuteSemanticsLabelOne": "une minute",
+  "datePickerMinuteSemanticsLabelOther": "$minute minutes",
+  "datePickerDateOrder": "dmy",
+  "datePickerDateTimeOrder": "date_time_dayPeriod",
+  "anteMeridiemAbbreviation": "AM",
+  "postMeridiemAbbreviation": "PM",
+  "alertDialogLabel": "Alerte",
+  "timerPickerHourLabelOne": "heure",
+  "timerPickerHourLabelOther": "heures",
+  "timerPickerMinuteLabelOne": "minute",
+  "timerPickerMinuteLabelOther": "minutes",
+  "timerPickerSecondLabelOther": "s",
+  "cutButtonLabel": "Couper",
+  "copyButtonLabel": "Copier",
+  "pasteButtonLabel": "Coller",
+  "selectAllButtonLabel": "Tout sélect."
+}

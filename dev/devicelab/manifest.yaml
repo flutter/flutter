@@ -97,6 +97,14 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
 
+  uncaught_image_error_linux:
+    description: >
+      Ensures that an error thrown into the zone can be caught by the ImageStream
+      completer
+    stage: devicelab
+    flaky: true
+    required_agent_capabilities: ["linux/android"]
+
   flutter_gallery_android__compile:
     description: >
       Collects various performance metrics of compiling the Flutter
@@ -140,6 +148,13 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
+  drive_perf_debug_warning:
+    description: >
+      Check that driver will print warnings when traceAction is called in debug mode.
+    stage: devicelab
+    required_agent_capabilities: ["mac/android"]
+    flaky: true
+
   cull_opacity_perf__timeline_summary:
     description: >
       Measures the runtime performance of culling opacity widgets on Android.
@@ -151,7 +166,6 @@ tasks:
       Measures the runtime performance of cubic bezier animations on Android.
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
-    flaky: true
 
   flavors_test:
     description: >

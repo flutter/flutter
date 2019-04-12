@@ -400,6 +400,40 @@ void main() {
   );
 
   testWidgets(
+    "placeholderStyle modifies placeholder's style and doesn't affect text's style",
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const CupertinoApp(
+          home: Center(
+            child: CupertinoTextField(
+              placeholder: 'placeholder',
+              style: TextStyle(
+                color: Color(0X00FFFFFF),
+                fontWeight: FontWeight.w300,
+              ),
+              placeholderStyle: TextStyle(
+                color: Color(0XAAFFFFFF),
+                fontWeight: FontWeight.w600
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final Text placeholder = tester.widget(find.text('placeholder'));
+      expect(placeholder.style.color, const Color(0XAAFFFFFF));
+      expect(placeholder.style.fontWeight, FontWeight.w600);
+
+      await tester.enterText(find.byType(CupertinoTextField), 'input');
+      await tester.pump();
+
+      final EditableText inputText = tester.widget(find.text('input'));
+      expect(inputText.style.color, const Color(0X00FFFFFF));
+      expect(inputText.style.fontWeight, FontWeight.w300);
+    },
+  );
+
+  testWidgets(
     'prefix widget is in front of the text',
     (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -746,6 +780,36 @@ void main() {
       expect(find.text('placeholder'), findsOneWidget);
       expect(find.text('text entry'), findsNothing);
       expect(find.byIcon(CupertinoIcons.clear_thick_circled), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'tapping clear button also calls onChanged when text not empty',
+        (WidgetTester tester) async {
+      String value = 'text entry';
+      final TextEditingController controller = TextEditingController();
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(
+            child: CupertinoTextField(
+              controller: controller,
+              placeholder: 'placeholder',
+              onChanged: (String newValue) => value = newValue,
+              clearButtonMode: OverlayVisibilityMode.always,
+            ),
+          ),
+        ),
+      );
+
+      controller.text = value;
+      await tester.pump();
+
+      await tester.tap(find.byIcon(CupertinoIcons.clear_thick_circled));
+      await tester.pump();
+
+      expect(controller.text, isEmpty);
+      expect(find.text('text entry'), findsNothing);
+      expect(value, isEmpty);
     },
   );
 

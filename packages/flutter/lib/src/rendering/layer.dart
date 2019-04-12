@@ -4,7 +4,8 @@
 
 import 'dart:async';
 import 'dart:collection';
-import 'dart:ui' as ui show EngineLayer, Image, ImageFilter, Picture, Scene, SceneBuilder;
+import 'dart:ui' as ui show EngineLayer, Image, ImageFilter, PathMetric,
+                            Picture, PictureRecorder, Scene, SceneBuilder;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
@@ -503,6 +504,100 @@ class ContainerLayer extends Layer {
     return child == equals;
   }
 
+  PictureLayer _highlightConflictingLayer(PhysicalModelLayer child) {
+    final ui.PictureRecorder recorder = ui.PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
+    canvas.drawPath(
+      child.clipPath,
+      Paint()
+        ..color = const Color(0xFFAA0000)
+        ..style = PaintingStyle.stroke
+        // The elevation may be 0 or otherwise too small to notice.
+        // Adding 10 to it makes it more visually obvious.
+        ..strokeWidth = child.elevation + 10.0,
+    );
+    final PictureLayer pictureLayer = PictureLayer(child.clipPath.getBounds())
+      ..picture = recorder.endRecording()
+      ..debugCreator = child;
+    child.append(pictureLayer);
+    return pictureLayer;
+  }
+
+  List<PictureLayer> _processConflictingPhysicalLayers(PhysicalModelLayer predecessor, PhysicalModelLayer child) {
+    FlutterError.reportError(FlutterErrorDetails(
+      exception: FlutterError('Painting order is out of order with respect to elevation.\n'
+                              'See https://api.flutter.dev/flutter/rendering/debugCheckElevations.html '
+                              'for more details.'),
+      library: 'rendering library',
+      context: 'during compositing',
+      informationCollector: (StringBuffer buffer) {
+        buffer.writeln('Attempted to composite layer:');
+        buffer.writeln(child);
+        buffer.writeln('after layer:');
+        buffer.writeln(predecessor);
+        buffer.writeln('which occupies the same area at a higher elevation.');
+      }
+    ));
+    return <PictureLayer>[
+      _highlightConflictingLayer(predecessor),
+      _highlightConflictingLayer(child),
+    ];
+  }
+
+  /// Checks that no [PhysicalModelLayer] would paint after another overlapping
+  /// [PhysicalModelLayer] that has a higher elevation.
+  ///
+  /// Returns a list of [PictureLayer] objects it added to the tree to highlight
+  /// bad nodes. These layers should be removed from the tree after building the
+  /// [Scene].
+  List<PictureLayer> _debugCheckElevations() {
+    final List<PhysicalModelLayer> physicalModelLayers = depthFirstIterateChildren().whereType<PhysicalModelLayer>().toList();
+    final List<PictureLayer> addedLayers = <PictureLayer>[];
+
+    for (int i = 0; i < physicalModelLayers.length; i++) {
+      final PhysicalModelLayer physicalModelLayer = physicalModelLayers[i];
+      assert(
+        physicalModelLayer.lastChild?.debugCreator != physicalModelLayer,
+        'debugCheckElevations has either already visited this layer or failed '
+        'to remove the added picture from it.',
+      );
+      double accumulatedElevation = physicalModelLayer.elevation;
+      Layer ancestor = physicalModelLayer.parent;
+      while (ancestor != null) {
+        if (ancestor is PhysicalModelLayer) {
+          accumulatedElevation += ancestor.elevation;
+        }
+        ancestor = ancestor.parent;
+      }
+      for (int j = 0; j <= i; j++) {
+        final PhysicalModelLayer predecessor = physicalModelLayers[j];
+        double predecessorAccumulatedElevation = predecessor.elevation;
+        ancestor = predecessor.parent;
+        while (ancestor != null) {
+          if (ancestor == predecessor) {
+            continue;
+          }
+          if (ancestor is PhysicalModelLayer) {
+            predecessorAccumulatedElevation += ancestor.elevation;
+          }
+          ancestor = ancestor.parent;
+        }
+        if (predecessorAccumulatedElevation <= accumulatedElevation) {
+          continue;
+        }
+        final Path intersection = Path.combine(
+          PathOperation.intersect,
+          predecessor._debugTransformedClipPath,
+          physicalModelLayer._debugTransformedClipPath,
+        );
+        if (intersection != null && intersection.computeMetrics().any((ui.PathMetric metric) => metric.length > 0)) {
+          addedLayers.addAll(_processConflictingPhysicalLayers(predecessor, physicalModelLayer));
+        }
+      }
+    }
+    return addedLayers;
+  }
+
   @override
   void updateSubtreeNeedsAddToScene() {
     super.updateSubtreeNeedsAddToScene();
@@ -679,6 +774,23 @@ class ContainerLayer extends Layer {
     assert(transform != null);
   }
 
+  /// Returns the descendants of this layer in depth first order.
+  @visibleForTesting
+  List<Layer> depthFirstIterateChildren() {
+    if (firstChild == null)
+      return <Layer>[];
+    final List<Layer> children = <Layer>[];
+    Layer child = firstChild;
+    while(child != null) {
+      children.add(child);
+      if (child is ContainerLayer) {
+        children.addAll(child.depthFirstIterateChildren());
+      }
+      child = child.nextSibling;
+    }
+    return children;
+  }
+
   @override
   List<DiagnosticsNode> debugDescribeChildren() {
     final List<DiagnosticsNode> children = <DiagnosticsNode>[];
@@ -744,9 +856,29 @@ class OffsetLayer extends ContainerLayer {
   /// Consider this layer as the root and build a scene (a tree of layers)
   /// in the engine.
   ui.Scene buildScene(ui.SceneBuilder builder) {
+    List<PictureLayer> temporaryLayers;
+    assert(() {
+      if (debugCheckElevationsEnabled) {
+        temporaryLayers = _debugCheckElevations();
+      }
+      return true;
+    }());
     updateSubtreeNeedsAddToScene();
     addToScene(builder);
-    return builder.build();
+    final ui.Scene scene = builder.build();
+    assert(() {
+      // We should remove any layers that got added to highlight the incorrect
+      // PhysicalModelLayers. If we don't, we'll end up adding duplicate layers
+      // or potentially leaving a physical model that is now correct highlighted
+      // in red.
+      if (temporaryLayers != null) {
+        for (PictureLayer temporaryLayer in temporaryLayers) {
+          temporaryLayer.remove();
+        }
+      }
+      return true;
+    }());
+    return scene;
   }
 
   @override
@@ -1090,7 +1222,12 @@ class TransformLayer extends OffsetLayer {
   void applyTransform(Layer child, Matrix4 transform) {
     assert(child != null);
     assert(transform != null);
-    transform.multiply(_lastEffectiveTransform);
+    assert(_lastEffectiveTransform != null || this.transform != null);
+    if (_lastEffectiveTransform == null) {
+      transform.multiply(this.transform);
+    } else {
+      transform.multiply(_lastEffectiveTransform);
+    }
   }
 
   @override
@@ -1307,6 +1444,16 @@ class PhysicalModelLayer extends ContainerLayer {
       _clipPath = value;
       markNeedsAddToScene();
     }
+  }
+
+  Path get _debugTransformedClipPath {
+    ContainerLayer ancestor = parent;
+    final Matrix4 matrix = Matrix4.identity();
+    while (ancestor != null && ancestor.parent != null) {
+      ancestor.applyTransform(this, matrix);
+      ancestor = ancestor.parent;
+    }
+    return clipPath.transform(matrix.storage);
   }
 
   /// {@macro flutter.widgets.Clip}

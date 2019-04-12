@@ -272,6 +272,11 @@ class FlutterDevice {
       await view.uiIsolate.flutterToggleDebugPaintSizeEnabled();
   }
 
+  Future<void> toggleDebugCheckElevationsEnabled() async {
+    for (FlutterView view in views)
+      await view.uiIsolate.flutterToggleDebugCheckElevationsEnabled();
+  }
+
   Future<void> debugTogglePerformanceOverlayOverride() async {
     for (FlutterView view in views)
       await view.uiIsolate.flutterTogglePerformanceOverlayOverride();
@@ -280,6 +285,12 @@ class FlutterDevice {
   Future<void> toggleWidgetInspector() async {
     for (FlutterView view in views)
       await view.uiIsolate.flutterToggleWidgetInspector();
+  }
+
+  Future<void> toggleProfileWidgetBuilds() async {
+    for (FlutterView view in views) {
+      await view.uiIsolate.flutterToggleProfileWidgetBuilds();
+    }
   }
 
   Future<String> togglePlatform({ String from }) async {
@@ -447,7 +458,7 @@ class FlutterDevice {
   }) async {
     final Status devFSStatus = logger.startProgress(
       'Syncing files to device ${device.name}...',
-      timeout: kFastOperation,
+      timeout: timeoutConfiguration.fastOperation,
     );
     UpdateFSReport report;
     try {
@@ -620,6 +631,12 @@ abstract class ResidentRunner {
       await device.toggleDebugPaintSizeEnabled();
   }
 
+  Future<void> _debugToggleDebugCheckElevationsEnabled() async {
+    await refreshViews();
+    for (FlutterDevice device in flutterDevices)
+      await device.toggleDebugCheckElevationsEnabled();
+  }
+
   Future<void> _debugTogglePerformanceOverlayOverride() async {
     await refreshViews();
     for (FlutterDevice device in flutterDevices)
@@ -632,8 +649,15 @@ abstract class ResidentRunner {
       await device.toggleWidgetInspector();
   }
 
+  Future<void> _debugToggleProfileWidgetBuilds() async {
+    await refreshViews();
+    for (FlutterDevice device in flutterDevices) {
+      await device.toggleProfileWidgetBuilds();
+    }
+  }
+
   Future<void> _screenshot(FlutterDevice device) async {
-    final Status status = logger.startProgress('Taking screenshot for ${device.device.name}...', timeout: kFastOperation);
+    final Status status = logger.startProgress('Taking screenshot for ${device.device.name}...', timeout: timeoutConfiguration.fastOperation);
     final File outputFile = getUniqueFile(fs.currentDirectory, 'flutter', 'png');
     try {
       if (supportsServiceProtocol && isRunningDebug) {
@@ -859,6 +883,10 @@ abstract class ResidentRunner {
           await _screenshot(device);
       }
       return true;
+    } else if (character == 'a') {
+      if (supportsServiceProtocol && isRunningDebug) {
+        await _debugToggleProfileWidgetBuilds();
+      }
     } else if (lower == 'o') {
       if (supportsServiceProtocol && isRunningDebug) {
         await _debugTogglePlatform();
@@ -870,6 +898,9 @@ abstract class ResidentRunner {
       return true;
     } else if (lower == 'd') {
       await detach();
+      return true;
+    } else if (lower == 'z') {
+      await _debugToggleDebugCheckElevationsEnabled();
       return true;
     }
 
@@ -962,6 +993,8 @@ abstract class ResidentRunner {
         printStatus('To toggle the widget inspector (WidgetsApp.showWidgetInspectorOverride), press "i".');
         printStatus('To toggle the display of construction lines (debugPaintSizeEnabled), press "p".');
         printStatus('To simulate different operating systems, (defaultTargetPlatform), press "o".');
+        printStatus('To enable timeline events for all widget build methods, (debugProfileWidgetBuilds), press "a"');
+        printStatus('To toggle the elevation checker, press "z".');
       } else {
         printStatus('To dump the accessibility tree (debugDumpSemantics), press "S" (for traversal order) or "U" (for inverse hit test order).');
       }
