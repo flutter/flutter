@@ -8,7 +8,6 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.app.Activity;
 import android.app.Application;
-import android.app.UiModeManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
