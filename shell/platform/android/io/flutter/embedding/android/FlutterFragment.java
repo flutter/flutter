@@ -60,30 +60,80 @@ import static android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW;
 public class FlutterFragment extends Fragment {
   private static final String TAG = "FlutterFragment";
 
-  private static final String ARG_DART_ENTRYPOINT = "dart_entrypoint";
-  private static final String ARG_INITIAL_ROUTE = "initial_route";
-  private static final String ARG_APP_BUNDLE_PATH = "app_bundle_path";
-  private static final String ARG_FLUTTER_INITIALIZATION_ARGS = "initialization_args";
-  private static final String ARG_FLUTTERVIEW_RENDER_MODE = "flutterview_render_mode";
-  private static final String ARG_FLUTTERVIEW_TRANSPARENCY_MODE = "flutterview_transparency_mode";
+  protected static final String ARG_DART_ENTRYPOINT = "dart_entrypoint";
+  protected static final String ARG_INITIAL_ROUTE = "initial_route";
+  protected static final String ARG_APP_BUNDLE_PATH = "app_bundle_path";
+  protected static final String ARG_FLUTTER_INITIALIZATION_ARGS = "initialization_args";
+  protected static final String ARG_FLUTTERVIEW_RENDER_MODE = "flutterview_render_mode";
+  protected static final String ARG_FLUTTERVIEW_TRANSPARENCY_MODE = "flutterview_transparency_mode";
 
   /**
    * Builder that creates a new {@code FlutterFragment} with {@code arguments} that correspond
    * to the values set on this {@code Builder}.
    * <p>
    * To create a {@code FlutterFragment} with default {@code arguments}, invoke {@code build()}
-   * immeidately:
+   * without setting any builder properties:
    * {@code
    *   FlutterFragment fragment = new FlutterFragment.Builder().build();
    * }
+   * <p>
+   * Subclasses of {@code FlutterFragment} that do not introduce any new arguments can use this
+   * {@code Builder} to construct instances of the subclass without subclassing this {@code Builder}.
+   * {@code
+   *   MyFlutterFragment f = new FlutterFragment.Builder(MyFlutterFragment.class)
+   *     .someProperty(...)
+   *     .someOtherProperty(...)
+   *     .build<MyFlutterFragment>();
+   * }
+   * <p>
+   * Subclasses of {@code FlutterFragment} that introduce new arguments should subclass this
+   * {@code Builder} to add the new properties:
+   * <ol>
+   *   <li>Ensure the {@code FlutterFragment} subclass has a no-arg constructor.</li>
+   *   <li>Subclass this {@code Builder}.</li>
+   *   <li>Override the new {@code Builder}'s no-arg constructor and invoke the super constructor
+   *   to set the {@code FlutterFragment} subclass: {@code
+   *     public MyBuilder() {
+   *       super(MyFlutterFragment.class);
+   *     }
+   *   }</li>
+   *   <li>Add appropriate property methods for the new properties.</li>
+   *   <li>Override {@link Builder#createArgs()}, call through to the super method, then add
+   *   the new properties as arguments in the {@link Bundle}.</li>
+   * </ol>
+   * Once a {@code Builder} subclass is defined, the {@code FlutterFragment} subclass can be
+   * instantiated as follows.
+   * {@code
+   *   MyFlutterFragment f = new MyBuilder()
+   *     .someExistingProperty(...)
+   *     .someNewProperty(...)
+   *     .build<MyFlutterFragment>();
+   * }
    */
   public static class Builder {
+    private final Class<? extends FlutterFragment> fragmentClass;
     private String dartEntrypoint = "main";
     private String initialRoute = "/";
     private String appBundlePath = null;
     private FlutterShellArgs shellArgs = null;
     private FlutterView.RenderMode renderMode = FlutterView.RenderMode.surface;
     private FlutterView.TransparencyMode transparencyMode = FlutterView.TransparencyMode.transparent;
+
+    /**
+     * Constructs a {@code Builder} that is configured to construct an instance of
+     * {@code FlutterFragment}.
+     */
+    public Builder() {
+      fragmentClass = FlutterFragment.class;
+    }
+
+    /**
+     * Constructs a {@code Builder} that is configured to construct an instance of
+     * {@code subclass}, which extends {@code FlutterFragment}.
+     */
+    public Builder(@NonNull Class<? extends FlutterFragment> subclass) {
+      fragmentClass = subclass;
+    }
 
     /**
      * The name of the initial Dart method to invoke, defaults to "main".
@@ -149,79 +199,49 @@ public class FlutterFragment extends Fragment {
       return this;
     }
 
+    /**
+     * Creates a {@link Bundle} of arguments that are assigned to the new {@code FlutterFragment}.
+     * <p>
+     * Subclasses should override this method to add new properties to the {@link Bundle}. Subclasses
+     * must call through to the super method to collect all existing property values.
+     */
     @NonNull
-    public FlutterFragment build() {
-      FlutterFragment frag = new FlutterFragment();
-
-      Bundle args = createArgsBundle(
-          dartEntrypoint,
-          initialRoute,
-          appBundlePath,
-          shellArgs,
-          renderMode,
-          transparencyMode
-      );
-      frag.setArguments(args);
-
-      return frag;
+    protected Bundle createArgs() {
+      Bundle args = new Bundle();
+      args.putString(ARG_INITIAL_ROUTE, initialRoute);
+      args.putString(ARG_APP_BUNDLE_PATH, appBundlePath);
+      args.putString(ARG_DART_ENTRYPOINT, dartEntrypoint);
+      // TODO(mattcarroll): determine if we should have an explicit FlutterTestFragment instead of conflating.
+      if (null != shellArgs) {
+        args.putStringArray(ARG_FLUTTER_INITIALIZATION_ARGS, shellArgs.toArray());
+      }
+      args.putString(ARG_FLUTTERVIEW_RENDER_MODE, renderMode != null ? renderMode.name() : FlutterView.RenderMode.surface.name());
+      args.putString(ARG_FLUTTERVIEW_TRANSPARENCY_MODE, transparencyMode != null ? transparencyMode.name() : FlutterView.TransparencyMode.transparent.name());
+      return args;
     }
-  }
 
-  /**
-   * Creates a {@link Bundle} of arguments that can be used to configure a {@link FlutterFragment}.
-   * This method is exposed so that developers can create subclasses of {@link FlutterFragment}.
-   * Subclasses should declare static factories that use this method to create arguments that will
-   * be understood by the base class, and then the subclass can add any additional arguments it
-   * wants to this {@link Bundle}. Example:
-   * <pre>{@code
-   * public static MyFlutterFragment newInstance(String myNewArg) {
-   *   // Create an instance of your subclass Fragment.
-   *   MyFlutterFragment myFrag = new MyFlutterFragment();
-   *
-   *   // Create the Bundle or args that FlutterFragment understands.
-   *   Bundle args = FlutterFragment.createArgsBundle(...);
-   *
-   *   // Add your new args to the bundle.
-   *   args.putString(ARG_MY_NEW_ARG, myNewArg);
-   *
-   *   // Give the args to your subclass Fragment.
-   *   myFrag.setArguments(args);
-   *
-   *   // Return the newly created subclass Fragment.
-   *   return myFrag;
-   * }
-   * }</pre>
-   *
-   * @param dartEntrypoint the name of the initial Dart method to invoke, defaults to "main"
-   * @param initialRoute the first route that a Flutter app will render in this {@link FlutterFragment}, defaults to "/"
-   * @param appBundlePath the path to the app bundle which contains the Dart app to execute
-   * @param flutterShellArgs any special configuration arguments for the Flutter engine
-   * @param renderMode render Flutter either as a {@link FlutterView.RenderMode#surface} or a
-   *                   {@link FlutterView.RenderMode#texture}. You should use {@code surface} unless
-   *                   you have a specific reason to use {@code texture}. {@code texture} comes with
-   *                   a significant performance impact, but {@code texture} can be displayed
-   *                   beneath other Android {@code View}s and animated, whereas {@code surface}
-   *                   cannot.
-   *
-   * @return Bundle of arguments that configure a {@link FlutterFragment}
-   */
-  protected static Bundle createArgsBundle(@Nullable String dartEntrypoint,
-                                           @Nullable String initialRoute,
-                                           @Nullable String appBundlePath,
-                                           @Nullable FlutterShellArgs flutterShellArgs,
-                                           @Nullable FlutterView.RenderMode renderMode,
-                                           @Nullable FlutterView.TransparencyMode transparencyMode) {
-    Bundle args = new Bundle();
-    args.putString(ARG_INITIAL_ROUTE, initialRoute);
-    args.putString(ARG_APP_BUNDLE_PATH, appBundlePath);
-    args.putString(ARG_DART_ENTRYPOINT, dartEntrypoint);
-    // TODO(mattcarroll): determine if we should have an explicit FlutterTestFragment instead of conflating.
-    if (null != flutterShellArgs) {
-      args.putStringArray(ARG_FLUTTER_INITIALIZATION_ARGS, flutterShellArgs.toArray());
+    /**
+     * Constructs a new {@code FlutterFragment} (or a subclass) that is configured based on
+     * properties set on this {@code Builder}.
+     */
+    @NonNull
+    public <T extends FlutterFragment> T build() {
+      try {
+        @SuppressWarnings("unchecked")
+        T frag = (T) fragmentClass.newInstance();
+        if (frag == null) {
+          throw new RuntimeException("The FlutterFragment subclass sent in the constructor ("
+              + fragmentClass.getCanonicalName() + ") does not match the expected return type.");
+        }
+
+        Bundle args = createArgs();
+        frag.setArguments(args);
+
+        return frag;
+      } catch (Exception e) {
+        throw new RuntimeException("Could not instantiate FlutterFragment subclass (" + fragmentClass.getName() + ")", e);
+      }
     }
-    args.putString(ARG_FLUTTERVIEW_RENDER_MODE, renderMode != null ? renderMode.name() : FlutterView.RenderMode.surface.name());
-    args.putString(ARG_FLUTTERVIEW_TRANSPARENCY_MODE, transparencyMode != null ? transparencyMode.name() : FlutterView.TransparencyMode.transparent.name());
-    return args;
   }
 
   @Nullable
@@ -296,15 +316,24 @@ public class FlutterFragment extends Fragment {
   /**
    * Obtains a reference to a FlutterEngine to back this {@code FlutterFragment}.
    * <p>
-   * First, the {@link FragmentActivity} that owns this {@code FlutterFragment} is
+   * First, {@code FlutterFragment} subclasses are given an opportunity to provide a
+   * {@link FlutterEngine} by overriding {@link #createFlutterEngine(Context)}.
+   * <p>
+   * Second, the {@link FragmentActivity} that owns this {@code FlutterFragment} is
    * given the opportunity to provide a {@link FlutterEngine} as a {@link FlutterEngineProvider}.
    * <p>
-   * If the owning {@link FragmentActivity} does not implement {@link FlutterEngineProvider}, or
-   * chooses to return {@code null}, then a new {@link FlutterEngine} is instantiated. Subclasses
-   * may override this method to provide a {@link FlutterEngine} of choice.
+   * If subclasses do not provide a {@link FlutterEngine}, and the owning {@link FragmentActivity}
+   * does not implement {@link FlutterEngineProvider} or chooses to return {@code null}, then a new
+   * {@link FlutterEngine} is instantiated.
    */
-  protected void setupFlutterEngine() {
-    // First, defer to the FragmentActivity that owns us to see if it wants to provide a
+  private void setupFlutterEngine() {
+    // First, defer to subclasses for a custom FlutterEngine.
+    flutterEngine = createFlutterEngine(getContextCompat());
+    if (flutterEngine != null) {
+      return;
+    }
+
+    // Second, defer to the FragmentActivity that owns us to see if it wants to provide a
     // FlutterEngine.
     FragmentActivity attachedActivity = getActivity();
     if (attachedActivity instanceof FlutterEngineProvider) {
@@ -315,18 +344,33 @@ public class FlutterFragment extends Fragment {
       if (flutterEngine != null) {
         isFlutterEngineFromActivity = true;
       }
+      return;
     }
 
-    // If flutterEngine is null then either our Activity is not a FlutterEngineProvider,
-    // or our Activity decided that it didn't want to provide a FlutterEngine. Either way,
-    // we will now create a FlutterEngine for this FlutterFragment.
-    if (flutterEngine == null) {
-      // Create a FlutterEngine to back our FlutterView.
-      Log.d(TAG, "Our attached Activity did not want to provide a FlutterEngine. Creating a "
-          + "new FlutterEngine for this FlutterFragment.");
-      flutterEngine = new FlutterEngine(getContext());
-      isFlutterEngineFromActivity = false;
-    }
+    // Neither our subclass, nor our owning Activity wanted to provide a custom FlutterEngine.
+    // Create a FlutterEngine to back our FlutterView.
+    Log.d(TAG, "No subclass or our attached Activity provided a custom FlutterEngine. Creating a "
+        + "new FlutterEngine for this FlutterFragment.");
+    flutterEngine = new FlutterEngine(getContext());
+    isFlutterEngineFromActivity = false;
+  }
+
+  /**
+   * Hook for subclasses to return a {@link FlutterEngine} with whatever configuration
+   * is desired.
+   * <p>
+   * This method takes precedence for creation of a {@link FlutterEngine} over any owning
+   * {@code Activity} that may implement {@link FlutterEngineProvider}.
+   * <p>
+   * Consider returning a cached {@link FlutterEngine} instance from this method to avoid the
+   * typical warm-up time that a new {@link FlutterEngine} instance requires.
+   * <p>
+   * If null is returned then a new default {@link FlutterEngine} will be created to back this
+   * {@code FlutterFragment}.
+   */
+  @Nullable
+  protected FlutterEngine createFlutterEngine(@NonNull Context context) {
+    return null;
   }
 
   @Nullable
