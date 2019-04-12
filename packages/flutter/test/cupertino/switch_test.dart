@@ -451,4 +451,66 @@ void main() {
     expect(tester.widget<Opacity>(find.byType(Opacity).first).opacity, 1.0);
   });
 
+  testWidgets('Switch turns translucent after becoming disabled', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: CupertinoSwitch(
+            value: false,
+            dragStartBehavior: DragStartBehavior.down,
+            onChanged: (bool newValue) {},
+          ),
+        )
+      ),
+    );
+
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: CupertinoSwitch(
+            value: false,
+            dragStartBehavior: DragStartBehavior.down,
+            onChanged: null,
+          ),
+        )
+      ),
+    );
+
+    expect(find.byType(Opacity), findsOneWidget);
+    expect(tester.widget<Opacity>(find.byType(Opacity).first).opacity, 0.5);    
+  });
+
+    testWidgets('Switch turns opaque after becoming enabled', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: CupertinoSwitch(
+            value: false,
+            dragStartBehavior: DragStartBehavior.down,
+            onChanged: null,
+          ),
+        )
+      ),
+    );
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: CupertinoSwitch(
+            value: false,
+            dragStartBehavior: DragStartBehavior.down,
+            onChanged: (bool newValue) {},
+          ),
+        )
+      ),
+    );
+
+    expect(find.byType(Opacity), findsOneWidget);
+    expect(tester.widget<Opacity>(find.byType(Opacity).first).opacity, 1.0);    
+  });
+
 }
