@@ -3730,7 +3730,7 @@ abstract class ComponentElement extends Element {
   /// [rebuild] when the element needs updating.
   @override
   void performRebuild() {
-    if (debugProfileBuildsEnabled)
+    if (!kReleaseMode && debugProfileBuildsEnabled)
       Timeline.startSync('${widget.runtimeType}',  arguments: timelineWhitelistArguments);
 
     assert(_debugSetAllowIgnoredCallsToMarkNeedsBuild(true));
@@ -3754,7 +3754,7 @@ abstract class ComponentElement extends Element {
       _child = updateChild(null, built, slot);
     }
 
-    if (debugProfileBuildsEnabled)
+    if (!kReleaseMode && debugProfileBuildsEnabled)
       Timeline.finishSync();
   }
 
