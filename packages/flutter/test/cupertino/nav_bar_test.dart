@@ -896,8 +896,8 @@ void main() {
 
   testWidgets('CupertinoNavigationBarBackButton shows an error when placed in a route that cannot be popped', (WidgetTester tester) async {
       await tester.pumpWidget(
-        CupertinoApp(
-          home: const CupertinoNavigationBarBackButton(),
+        const CupertinoApp(
+          home: CupertinoNavigationBarBackButton(),
         ),
       );
 
