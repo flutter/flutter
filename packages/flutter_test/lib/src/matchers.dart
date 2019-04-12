@@ -1114,10 +1114,10 @@ class _RectMoreOrLessEquals extends Matcher {
       return true;
     }
     final Rect rect = object;
-    return (rect.left    - value.left).abs() <= epsilon &&
-           (rect.top     - value.top).abs() <= epsilon &&
-           (rect.right   - value.right).abs() <= epsilon &&
-           (rect.bottom  - value.bottom).abs() <= epsilon;
+    return (rect.left   - value.left).abs() <= epsilon &&
+           (rect.top    - value.top).abs() <= epsilon &&
+           (rect.right  - value.right).abs() <= epsilon &&
+           (rect.bottom - value.bottom).abs() <= epsilon;
   }
 
   @override
