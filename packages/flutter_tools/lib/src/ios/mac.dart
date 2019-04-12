@@ -808,11 +808,6 @@ Future<XcodeBuildResult> buildMacOSXcodeProject({
     printError('4. If you are not using completely custom build configurations, name the newly created configuration ${buildInfo.modeName}.');
     return XcodeBuildResult(success: false);
   }
-
-  Map<String, String> autoSigningConfigs;
-  // if (codesign && buildForDevice)
-  //   autoSigningConfigs = await getCodeSigningIdentityDevelopmentTeam(iosApp: app, usesTerminalUi: usesTerminalUi);
-
   // Before the build, all service definitions must be updated and the dylibs
   // copied over to a location that is suitable for Xcodebuild to find them.
   await _addServicesToBundle(app.project.hostAppRoot);
@@ -823,28 +818,6 @@ Future<XcodeBuildResult> buildMacOSXcodeProject({
     targetOverride: targetOverride,
     buildInfo: buildInfo,
   );
-  // refreshPluginsList(project);
-  // if (hasPlugins(project) || (project.isModule && project.ios.podfile.existsSync())) {
-  //   // If the Xcode project, Podfile, or Generated.xcconfig have changed since
-  //   // last run, pods should be updated.
-  //   final Fingerprinter fingerprinter = Fingerprinter(
-  //     fingerprintPath: fs.path.join(getIosBuildDirectory(), 'pod_inputs.fingerprint'),
-  //     paths: <String>[
-  //       app.project.xcodeProjectInfoFile.path,
-  //       app.project.podfile.path,
-  //       app.project.generatedXcodePropertiesFile.path,
-  //     ],
-  //     properties: <String, String>{},
-  //   );
-  //   final bool didPodInstall = await cocoaPods.processPods(
-  //     iosProject: project.ios,
-  //     iosEngineDir: flutterFrameworkDir(buildInfo.mode),
-  //     isSwift: project.ios.isSwift,
-  //     dependenciesChanged: !await fingerprinter.doesFingerprintMatch(),
-  //   );
-  //   if (didPodInstall)
-  //     await fingerprinter.writeFingerprint();
-  // }
 
   final List<String> buildCommands = <String>[
     '/usr/bin/env',
@@ -860,14 +833,6 @@ Future<XcodeBuildResult> buildMacOSXcodeProject({
   } else {
     // This will print warnings and errors only.
     buildCommands.add('-quiet');
-  }
-
-  if (autoSigningConfigs != null) {
-    for (MapEntry<String, String> signingConfig in autoSigningConfigs.entries) {
-      buildCommands.add('${signingConfig.key}=${signingConfig.value}');
-    }
-    buildCommands.add('-allowProvisioningUpdates');
-    buildCommands.add('-allowProvisioningDeviceRegistration');
   }
 
   final List<FileSystemEntity> contents = app.project.hostAppRoot.listSync();

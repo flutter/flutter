@@ -6,6 +6,7 @@ import 'dart:async';
 
 import '../base/common.dart';
 import '../build_info.dart';
+import '../cache.dart';
 import '../globals.dart';
 import '../ios/mac.dart';
 import '../macos/application_package.dart';
@@ -22,18 +23,18 @@ class BuildMacOSCommand extends BuildSubCommand {
     argParser
       ..addFlag('debug',
         negatable: false,
-        help: 'Build a debug version of your app (default mode for iOS simulator builds).',
+        help: 'Build a debug version of your app.',
+        defaultsTo: true,
       )
       ..addFlag('profile',
         negatable: false,
-        help: 'Build a version of your app specialized for performance profiling.',
+        help: 'Build a debug version of your app.',
+        defaultsTo: false,
       )
       ..addFlag('release',
         negatable: false,
-        help: 'Build a release version of your app (default mode for device builds).',
-      )
-      ..addFlag('simulator',
-        help: 'Build for the iOS simulator instead of the device.',
+        help: 'Build a debug version of your app.',
+        defaultsTo: false,
       )
       ..addFlag('codesign',
         defaultsTo: true,
@@ -46,6 +47,15 @@ class BuildMacOSCommand extends BuildSubCommand {
 
   @override
   final String description = 'Build a macOS application bundle (Mac OS X host only).';
+
+  @override
+  bool get isExperimental => true;
+
+  @override
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
+    DevelopmentArtifact.universal,
+    DevelopmentArtifact.macOS,
+  };
 
   @override
   Future<FlutterCommandResult> runCommand() async {
