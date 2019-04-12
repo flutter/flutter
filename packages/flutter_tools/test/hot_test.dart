@@ -237,7 +237,7 @@ void main() {
         ];
         await HotRunner(devices).cleanupAfterSignal();
         expect(shutdownTestingConfig.shutdownHookCalled, true);
-      }, overrides: <Type, Generator> {
+      }, overrides: <Type, Generator>{
         Artifacts: () => mockArtifacts,
         HotRunnerConfig: () => shutdownTestingConfig,
       });
@@ -252,7 +252,7 @@ void main() {
         ];
         await HotRunner(devices).preStop();
         expect(shutdownTestingConfig.shutdownHookCalled, true);
-      }, overrides: <Type, Generator> {
+      }, overrides: <Type, Generator>{
         Artifacts: () => mockArtifacts,
         HotRunnerConfig: () => shutdownTestingConfig,
       });

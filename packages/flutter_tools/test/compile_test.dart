@@ -532,9 +532,12 @@ Future<void> _recompile(
   mockFrontendServerStdIn._stdInWrites.clear();
 }
 
-Future<void> _accept(StreamController<List<int>> streamController,
-    ResidentCompiler generator, MockStdIn mockFrontendServerStdIn,
-    String expected) async {
+Future<void> _accept(
+  StreamController<List<int>> streamController,
+  ResidentCompiler generator,
+  MockStdIn mockFrontendServerStdIn,
+  String expected,
+) async {
   // Put content into the output stream after generator.recompile gets
   // going few lines below, resets completer.
   generator.accept();
@@ -544,9 +547,13 @@ Future<void> _accept(StreamController<List<int>> streamController,
   mockFrontendServerStdIn._stdInWrites.clear();
 }
 
-Future<void> _reject(StreamController<List<int>> streamController,
-    ResidentCompiler generator, MockStdIn mockFrontendServerStdIn,
-    String mockCompilerOutput, String expected) async {
+Future<void> _reject(
+  StreamController<List<int>> streamController,
+  ResidentCompiler generator,
+  MockStdIn mockFrontendServerStdIn,
+  String mockCompilerOutput,
+  String expected,
+) async {
   // Put content into the output stream after generator.recompile gets
   // going few lines below, resets completer.
   scheduleMicrotask(() {

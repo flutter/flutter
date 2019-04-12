@@ -4,10 +4,11 @@
 
 import 'dart:async';
 
+import '../base/common.dart';
 import '../base/logger.dart';
 import '../build_info.dart';
 import '../globals.dart';
-import '../runner/flutter_command.dart' show ExitStatus, FlutterCommandResult;
+import '../runner/flutter_command.dart' show DevelopmentArtifact, FlutterCommandResult;
 import '../web/compile.dart';
 import 'build.dart';
 
@@ -19,10 +20,19 @@ class BuildWebCommand extends BuildSubCommand {
   }
 
   @override
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{
+    DevelopmentArtifact.universal,
+    DevelopmentArtifact.web,
+  };
+
+  @override
   final String name = 'web';
 
   @override
   bool get hidden => true;
+
+  @override
+  bool get isExperimental => true;
 
   @override
   final String description = '(EXPERIMENTAL) build a web application bundle.';
@@ -33,6 +43,9 @@ class BuildWebCommand extends BuildSubCommand {
     final Status status = logger.startProgress('Compiling $target to JavaScript...', timeout: null);
     final int result = await webCompiler.compile(target: target);
     status.stop();
-    return FlutterCommandResult(result == 0 ? ExitStatus.success : ExitStatus.fail);
+    if (result == 1) {
+      throwToolExit('Failed to compile $target to JavaScript.');
+    }
+    return null;
   }
 }

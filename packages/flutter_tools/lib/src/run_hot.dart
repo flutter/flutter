@@ -93,8 +93,11 @@ class HotRunner extends ResidentRunner {
     benchmarkData[name].add(value);
   }
 
-  Future<void> _reloadSourcesService(String isolateId,
-      { bool force = false, bool pause = false }) async {
+  Future<void> _reloadSourcesService(
+    String isolateId, {
+    bool force = false,
+    bool pause = false,
+  }) async {
     // TODO(cbernaschina): check that isolateId is the id of the UI isolate.
     final OperationResult result = await restart(pauseAfterRestart: pause);
     if (!result.isOk) {
@@ -535,7 +538,7 @@ class HotRunner extends ResidentRunner {
       }
       final Status status = logger.startProgress(
         'Performing hot restart...',
-        timeout: kFastOperation,
+        timeout: timeoutConfiguration.fastOperation,
         progressId: 'hot.restart',
       );
       try {
@@ -554,7 +557,7 @@ class HotRunner extends ResidentRunner {
       final String progressPrefix = reloadOnTopOfSnapshot ? 'Initializing' : 'Performing';
       Status status = logger.startProgress(
         '$progressPrefix hot reload...',
-        timeout: kFastOperation,
+        timeout: timeoutConfiguration.fastOperation,
         progressId: 'hot.reload',
       );
       OperationResult result;
@@ -567,7 +570,7 @@ class HotRunner extends ResidentRunner {
             status?.cancel();
             status = logger.startProgress(
               message,
-              timeout: kSlowOperation,
+              timeout: timeoutConfiguration.slowOperation,
               progressId: 'hot.reload',
             );
             showTime = false;
@@ -589,7 +592,7 @@ class HotRunner extends ResidentRunner {
     }
   }
 
-  Future<OperationResult> _reloadSources({ bool pause = false, String reason, void Function(String message) onSlow, }) async {
+  Future<OperationResult> _reloadSources({ bool pause = false, String reason, void Function(String message) onSlow }) async {
     final Map<String, String> analyticsParameters = <String, String>{};
     if (reason != null) {
       analyticsParameters[kEventReloadReasonParameterName] = reason;

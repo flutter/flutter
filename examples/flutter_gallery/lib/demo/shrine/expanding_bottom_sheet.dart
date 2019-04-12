@@ -71,7 +71,8 @@ Animation<T> _getEmphasizedEasingAnimation<T>({
   @required T peak,
   @required T end,
   @required bool isForward,
-  @required Animation<double> parent}) {
+  @required Animation<double> parent,
+}) {
   Curve firstCurve;
   Curve secondCurve;
   double firstWeight;
@@ -612,7 +613,7 @@ class _ListModel {
     Iterable<int> initialItems,
   }) : assert(listKey != null),
        assert(removedItemBuilder != null),
-       _items = List<int>.from(initialItems ?? <int>[]);
+       _items = initialItems?.toList() ?? <int>[];
 
   final GlobalKey<AnimatedListState> listKey;
   final dynamic removedItemBuilder;

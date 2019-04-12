@@ -9,12 +9,10 @@ import 'src/common.dart';
 import 'src/context.dart';
 
 void main() {
-  setUpAll(() {
-  });
+  setUpAll(() { });
 
   group('Validate build number', () {
-    setUp(() async {
-    });
+    setUp(() async { });
 
     testUsingContext('CFBundleVersion for iOS', () async {
       String buildName = validatedBuildNumberForPlatform(TargetPlatform.ios, 'xyz');
@@ -34,8 +32,7 @@ void main() {
   });
 
   group('Validate build name', () {
-    setUp(() async {
-    });
+    setUp(() async { });
 
     testUsingContext('CFBundleShortVersionString for iOS', () async {
       String buildName = validatedBuildNameForPlatform(TargetPlatform.ios, 'xyz');

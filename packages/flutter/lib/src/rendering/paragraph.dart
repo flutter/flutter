@@ -41,7 +41,8 @@ class RenderParagraph extends RenderBox {
   ///
   /// The [maxLines] property may be null (and indeed defaults to null), but if
   /// it is not null, it must be greater than zero.
-  RenderParagraph(TextSpan text, {
+  RenderParagraph(
+    TextSpan text, {
     TextAlign textAlign = TextAlign.start,
     @required TextDirection textDirection,
     bool softWrap = true,
@@ -474,8 +475,9 @@ class RenderParagraph extends RenderBox {
     int offset = 0;
     text.visitTextSpan((TextSpan span) {
       if (span.recognizer != null && (span.recognizer is TapGestureRecognizer || span.recognizer is LongPressGestureRecognizer)) {
+        final int length = span.semanticsLabel?.length ?? span.text.length;
         _recognizerOffsets.add(offset);
-        _recognizerOffsets.add(offset + span.text.length);
+        _recognizerOffsets.add(offset + length);
         _recognizers.add(span.recognizer);
       }
       offset += span.text.length;

@@ -311,8 +311,12 @@ class RenderUiKitView extends RenderBox {
   UiKitViewController _viewController;
   set viewController(UiKitViewController viewController) {
     assert(viewController != null);
+    final bool needsSemanticsUpdate = _viewController.id != viewController.id;
     _viewController = viewController;
     markNeedsPaint();
+    if (needsSemanticsUpdate) {
+      markNeedsSemanticsUpdate();
+    }
   }
 
   /// How to behave during hit testing.
@@ -397,6 +401,13 @@ class RenderUiKitView extends RenderBox {
       _viewController.rejectGesture();
     }
     _lastPointerDownEvent = null;
+  }
+
+  @override
+  void describeSemanticsConfiguration (SemanticsConfiguration config) {
+    super.describeSemanticsConfiguration(config);
+    config.isSemanticBoundary = true;
+    config.platformViewId = _viewController.id;
   }
 
   @override
@@ -503,7 +514,7 @@ class _AndroidViewGestureRecognizer extends OneSequenceGestureRecognizer {
   // Before the arena for a pointer is resolved all events are cached here, if we win the arena
   // the cached events are dispatched to the view, if we lose the arena we clear the cache for
   // the pointer.
-  final Map<int, List<PointerEvent>> cachedEvents = <int, List<PointerEvent>> {};
+  final Map<int, List<PointerEvent>> cachedEvents = <int, List<PointerEvent>>{};
 
   // Pointer for which we have already won the arena, events for pointers in this set are
   // immediately dispatched to the Android view.
@@ -715,4 +726,3 @@ class _MotionEventsDispatcher {
   bool isSinglePointerAction(PointerEvent event) =>
       !(event is PointerDownEvent) && !(event is PointerUpEvent);
 }
-

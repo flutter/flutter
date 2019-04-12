@@ -26,7 +26,10 @@ final List<SizedBox> _sizedTabs = <SizedBox>[
 ];
 
 Widget _withTheme(
-  TabBarTheme theme, { List<Widget> tabs = _tabs, bool isScrollable = false }) {
+  TabBarTheme theme, {
+  List<Widget> tabs = _tabs,
+  bool isScrollable = false,
+}) {
   return MaterialApp(
     theme: ThemeData(tabBarTheme: theme),
     home: Scaffold(
@@ -102,7 +105,7 @@ void main() {
     const double indicatorWeight = 2.0; // default value
 
     const EdgeInsetsGeometry labelPadding = EdgeInsets.fromLTRB(
-      leftPadding, topPadding, rightPadding, bottomPadding
+      leftPadding, topPadding, rightPadding, bottomPadding,
     );
 
     const TabBarTheme tabBarTheme = TabBarTheme(labelPadding: labelPadding);

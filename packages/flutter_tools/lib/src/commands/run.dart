@@ -20,7 +20,7 @@ import '../runner/flutter_command.dart';
 import '../tracing.dart';
 import 'daemon.dart';
 
-abstract class RunCommandBase extends FlutterCommand {
+abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
   // Used by run and drive commands.
   RunCommandBase({ bool verboseHelp = false }) {
     addBuildModeFlags(defaultToRelease: false, verboseHelp: verboseHelp);
@@ -34,7 +34,7 @@ abstract class RunCommandBase extends FlutterCommand {
       )
       ..addFlag('verbose-system-logs',
         negatable: false,
-        help: 'Include verbose logging from the flutter engine.'
+        help: 'Include verbose logging from the flutter engine.',
       )
       ..addOption('route',
         help: 'Which route to load when running the app.',
@@ -64,6 +64,7 @@ abstract class RunCommandBase extends FlutterCommand {
   }
 
   bool get traceStartup => argResults['trace-startup'];
+
   String get route => argResults['route'];
 }
 
@@ -203,7 +204,7 @@ class RunCommand extends RunCommandBase {
             ? getNameForTargetPlatform(await devices[0].targetPlatform)
             : 'multiple';
 
-    return <String, String>{ 'cd3': '$isEmulator', 'cd4': deviceType };
+    return <String, String>{'cd3': '$isEmulator', 'cd4': deviceType};
   }
 
   @override
@@ -215,7 +216,7 @@ class RunCommand extends RunCommandBase {
       printStatus("Run 'flutter emulators' to list and start any available device emulators.");
       printStatus('');
       printStatus('If you expected your device to be detected, please run "flutter doctor" to diagnose');
-      printStatus('potential issues, or visit https://flutter.io/setup/ for troubleshooting tips.');
+      printStatus('potential issues, or visit https://flutter.dev/setup/ for troubleshooting tips.');
     }
   }
 

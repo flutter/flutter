@@ -9,6 +9,9 @@ import 'dart:io';
 import 'package:args/args.dart' as argslib;
 import 'package:meta/meta.dart';
 
+typedef HeaderGenerator = String Function(String regenerateInstructions);
+typedef ConstructorGenerator = String Function(LocaleInfo locale);
+
 /// Simple data class to hold parsed locale. Does not promise validity of any data.
 class LocaleInfo implements Comparable<LocaleInfo> {
   LocaleInfo({
@@ -126,6 +129,75 @@ class LocaleInfo implements Comparable<LocaleInfo> {
   @override
   int compareTo(LocaleInfo other) {
     return originalString.compareTo(other.originalString);
+  }
+}
+
+/// Parse the data for a locale from a file, and store it in the [attributes]
+/// and [resources] keys.
+void loadMatchingArbsIntoBundleMaps({
+  @required Directory directory,
+  @required RegExp filenamePattern,
+  @required Map<LocaleInfo, Map<String, String>> localeToResources,
+  @required Map<LocaleInfo, Map<String, dynamic>> localeToResourceAttributes,
+}) {
+  assert(directory != null);
+  assert(filenamePattern != null);
+  assert(localeToResources != null);
+  assert(localeToResourceAttributes != null);
+
+  /// Set that holds the locales that were assumed from the existing locales.
+  ///
+  /// For example, when the data lacks data for zh_Hant, we will use the data of
+  /// the first Hant Chinese locale as a default by repeating the data. If an
+  /// explicit match is later found, we can reference this set to see if we should
+  /// overwrite the existing assumed data.
+  final Set<LocaleInfo> assumedLocales = <LocaleInfo>{};
+
+  for (FileSystemEntity entity in directory.listSync()) {
+    final String entityPath = entity.path;
+    if (FileSystemEntity.isFileSync(entityPath) && filenamePattern.hasMatch(entityPath)) {
+      final String localeString = filenamePattern.firstMatch(entityPath)[1];
+      final File arbFile = File(entityPath);
+
+      // Helper method to fill the maps with the correct data from file.
+      void populateResources(LocaleInfo locale, File file) {
+        final Map<String, String> resources = localeToResources[locale];
+        final Map<String, dynamic> attributes = localeToResourceAttributes[locale];
+        final Map<String, dynamic> bundle = json.decode(file.readAsStringSync());
+        for (String key in bundle.keys) {
+          // The ARB file resource "attributes" for foo are called @foo.
+          if (key.startsWith('@'))
+            attributes[key.substring(1)] = bundle[key];
+          else
+            resources[key] = bundle[key];
+        }
+      }
+      // Only pre-assume scriptCode if there is a country or script code to assume off of.
+      // When we assume scriptCode based on languageCode-only, we want this initial pass
+      // to use the un-assumed version as a base class.
+      LocaleInfo locale = LocaleInfo.fromString(localeString, deriveScriptCode: localeString.split('_').length > 1);
+      // Allow overwrite if the existing data is assumed.
+      if (assumedLocales.contains(locale)) {
+        localeToResources[locale] = <String, String>{};
+        localeToResourceAttributes[locale] = <String, dynamic>{};
+        assumedLocales.remove(locale);
+      } else {
+        localeToResources[locale] ??= <String, String>{};
+        localeToResourceAttributes[locale] ??= <String, dynamic>{};
+      }
+      populateResources(locale, arbFile);
+      // Add an assumed locale to default to when there is no info on scriptOnly locales.
+      locale = LocaleInfo.fromString(localeString, deriveScriptCode: true);
+      if (locale.scriptCode != null) {
+        final LocaleInfo scriptLocale = LocaleInfo.fromString(locale.languageCode + '_' + locale.scriptCode);
+        if (!localeToResources.containsKey(scriptLocale)) {
+          assumedLocales.add(scriptLocale);
+          localeToResources[scriptLocale] ??= <String, String>{};
+          localeToResourceAttributes[scriptLocale] ??= <String, dynamic>{};
+          populateResources(scriptLocale, arbFile);
+        }
+      }
+    }
   }
 }
 
@@ -266,4 +338,50 @@ String describeLocale(String tag) {
   if (script != null)
     output += ', using the $script script';
   return output;
+}
+
+/// Writes the header of each class which corresponds to a locale.
+String generateClassDeclaration(
+  LocaleInfo locale,
+  String classNamePrefix,
+  String superClass,
+) {
+  final String camelCaseName = camelCase(locale);
+  return '''
+
+/// The translations for ${describeLocale(locale.originalString)} (`${locale.originalString}`).
+class $classNamePrefix$camelCaseName extends $superClass {''';
+}
+
+/// Return `s` as a Dart-parseable raw string in single or double quotes.
+///
+/// Double quotes are expanded:
+///
+/// ```
+/// foo => r'foo'
+/// foo "bar" => r'foo "bar"'
+/// foo 'bar' => r'foo ' "'" r'bar' "'"
+/// ```
+String generateString(String s) {
+  if (!s.contains("'"))
+    return "r'$s'";
+
+  final StringBuffer output = StringBuffer();
+  bool started = false; // Have we started writing a raw string.
+  for (int i = 0; i < s.length; i++) {
+    if (s[i] == "'") {
+      if (started)
+        output.write("'");
+      output.write(' "\'" ');
+      started = false;
+    } else if (!started) {
+      output.write("r'${s[i]}");
+      started = true;
+    } else {
+      output.write(s[i]);
+    }
+  }
+  if (started)
+    output.write("'");
+  return output.toString();
 }

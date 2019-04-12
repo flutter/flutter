@@ -232,7 +232,6 @@ class KernelCompiler {
     if (fs.file('pubspec.yaml').existsSync()) {
       flutterProject = await FlutterProject.current();
     }
-    final FlutterEngine engine = FlutterEngine(cache);
 
     // TODO(cbracken): eliminate pathFilter.
     // Currently the compiler emits buildbot paths for the core libs in the
@@ -246,7 +245,7 @@ class KernelCompiler {
           'entryPoint': mainPath,
           'trackWidgetCreation': trackWidgetCreation.toString(),
           'linkPlatformKernelIn': linkPlatformKernelIn.toString(),
-          'engineHash': engine.version,
+          'engineHash': Cache.instance.engineRevision,
           'buildersUsed': '${flutterProject != null ? flutterProject.hasBuilders : false}',
         },
         depfilePaths: <String>[depFilePath],
@@ -412,7 +411,8 @@ class _RejectRequest extends _CompilationRequest {
 /// The wrapper is intended to stay resident in memory as user changes, reloads,
 /// restarts the Flutter app.
 class ResidentCompiler {
-  ResidentCompiler(this._sdkRoot, {
+  ResidentCompiler(
+    this._sdkRoot, {
     bool trackWidgetCreation = false,
     String packagesPath,
     List<String> fileSystemRoots,

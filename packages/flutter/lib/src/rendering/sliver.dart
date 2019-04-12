@@ -686,7 +686,8 @@ class SliverGeometry extends Diagnosticable {
   ///  * [RenderViewport.cacheExtent] for a description of a viewport's cache area.
   final double cacheExtent;
 
-  static const double _epsilon = 1e-10;
+  /// The epsilon of tolerable double precision error.
+  static const double precisionErrorTolerance = 1e-10;
 
   /// Asserts that this geometry is internally consistent.
   ///
@@ -719,8 +720,8 @@ class SliverGeometry extends Diagnosticable {
       }
       verify(maxPaintExtent != null, 'The "maxPaintExtent" is null.');
       // If the paintExtent is slightly more than the maxPaintExtent, but the difference is still less
-      // than epsilon, we will not throw the assert below.
-      if (paintExtent - maxPaintExtent > _epsilon) {
+      // than precisionErrorTolerance, we will not throw the assert below.
+      if (paintExtent - maxPaintExtent > precisionErrorTolerance) {
         verify(false,
           'The "maxPaintExtent" is less than the "paintExtent".\n' +
           _debugCompareFloats('maxPaintExtent', maxPaintExtent, 'paintExtent', paintExtent) +
@@ -773,7 +774,8 @@ class SliverHitTestEntry extends HitTestEntry {
   /// Creates a sliver hit test entry.
   ///
   /// The [mainAxisPosition] and [crossAxisPosition] arguments must not be null.
-  const SliverHitTestEntry(RenderSliver target, {
+  const SliverHitTestEntry(
+    RenderSliver target, {
     @required this.mainAxisPosition,
     @required this.crossAxisPosition,
   }) : assert(mainAxisPosition != null),
