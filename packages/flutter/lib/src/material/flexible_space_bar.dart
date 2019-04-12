@@ -267,16 +267,26 @@ class FlexibleSpaceBarSettings extends InheritedWidget {
     @required this.maxExtent,
     @required this.currentExtent,
     @required Widget child,
-  }) : assert(currentExtent != null),
+  }) : assert(toolbarOpacity != null),
+       assert(minExtent != null),
+       assert(maxExtent != null),
+       assert(currentExtent != null),
+       assert(toolbarOpacity >= 0.0),
+       assert(minExtent <= maxExtent),
+       assert(minExtent <= currentExtent),
+       assert(currentExtent <= maxExtent),
        super(key: key, child: child);
 
-  /// Affects how transparent the text within the toolbar appears.
+  /// Affects how transparent the text within the toolbar appears. Must not
+  /// be null
   final double toolbarOpacity;
 
   /// Minimum height of the resulting [FlexibleSpaceBar] when fully collapsed.
+  /// Must not be null
   final double minExtent;
 
   /// Maximum height of the resulting [FlexibleSpaceBar] when fully expanded.
+  /// Must not be null
   final double maxExtent;
 
   /// If the [FlexibleSpaceBar.title] or the [FlexibleSpaceBar.background] is
