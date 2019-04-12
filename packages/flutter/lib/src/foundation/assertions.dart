@@ -76,6 +76,8 @@ class _ErrorDiagnostic extends DiagnosticsProperty<List<Object>> {
 ///   problem that was detected.
 /// * [ErrorHint], which provides specific, non-obvious advice that may be
 ///   applicable.
+/// * [FlutterError], which is the most common place to use an
+///   [ErrorDescription].
 class ErrorDescription extends _ErrorDiagnostic {
   /// This constructor provides a reliable hook for a kernel transformer to find
   /// error messages that need to be rewritten to include object references for
@@ -98,13 +100,17 @@ class ErrorDescription extends _ErrorDiagnostic {
 /// so that they can be recognized as related. For example, they shouldn't
 /// include hash codes.
 ///
+/// A [FlutterError] must start with an [ErrorSummary] and may not contain
+/// multiple summaries.
+///
 /// See also:
 ///
-/// * [ErrorHint], which provides specific, non-obvious advice that may be
-///   applicable.
 /// * [ErrorDescription], which provides an explanation of the problem and its
 ///   cause, any information that may help track down the problem, background
 ///   information, etc.
+/// * [ErrorHint], which provides specific, non-obvious advice that may be
+///   applicable.
+/// * [FlutterError], which is the most common place to use an [ErrorSummary].
 class ErrorSummary extends _ErrorDiagnostic {
   /// This constructor provides a reliable hook for a kernel transformer to find
   /// error messages that need to be rewritten to include object references for
@@ -133,6 +139,7 @@ class ErrorSummary extends _ErrorDiagnostic {
 /// * [ErrorDescription], which provides an explanation of the problem and its
 ///   cause, any information that may help track down the problem, background
 ///   information, etc.
+/// * [FlutterError], which is the most common place to use an [ErrorHint].
 class ErrorHint extends _ErrorDiagnostic {
   /// A lint enforces that this constructor can only be called with a string
   /// literal to match the limitations of the Dart Kernel transformer that
@@ -258,7 +265,7 @@ class FlutterErrorDetails extends Diagnosticable {
       // some code snippets. This leads to ugly messages. To avoid this, we move
       // the assertion message up to before the code snippets, separated by a
       // newline, if we recognise that format is being used.
-      final String message = exception.message;
+      final Object message = exception.message;
       final String fullMessage = exception.toString();
       if (message is String && message != fullMessage) {
         if (fullMessage.length > message.length) {
@@ -284,10 +291,36 @@ class FlutterErrorDetails extends Diagnosticable {
     return longMessage;
   }
 
+  Diagnosticable _exceptionToDiagnosticable() {
+    if (exception is FlutterError) {
+      return exception;
+    }
+    if (exception is AssertionError && exception.message is FlutterError) {
+      return exception.message;
+    }
+    return null;
+  }
+
+  /// Returns a short (one line) description of the problem that was detected.
+  ///
+  /// If the exception contains an [ErrorSummary] that summary is used otherwise
+  /// the summary is inferred from the string representation of the exception.
+  DiagnosticsNode get summary {
+    final Diagnosticable diagnosticable = _exceptionToDiagnosticable();
+    DiagnosticsNode summary;
+    if (diagnosticable != null) {
+      final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+      debugFillProperties(builder);
+      summary = builder.properties.firstWhere((DiagnosticsNode node) => node.level == DiagnosticLevel.summary, orElse: () => null);
+    }
+    return summary ?? ErrorSummary('${exceptionAsString().split("\n")[0].trimLeft()}');
+  }
+
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     final DiagnosticsNode verb = ErrorDescription('thrown${ context != null ? ErrorDescription(" $context") : ""}');
+    final Diagnosticable diagnosticable = _exceptionToDiagnosticable();
     if (exception is NullThrownError) {
       properties.add(ErrorDescription('The null value was $verb.'));
     } else if (exception is num) {
@@ -304,8 +337,8 @@ class FlutterErrorDetails extends Diagnosticable {
         errorName = ErrorDescription('${exception.runtimeType} object');
       }
       properties.add(ErrorDescription('The following $errorName was $verb:'));
-      if (exception is FlutterError) {
-        exception.debugFillProperties(properties);
+      if (diagnosticable != null) {
+        diagnosticable.debugFillProperties(properties);
       } else {
         // Many exception classes put their type at the head of their message.
         // This is redundant with the way we display exceptions, so attempt to
@@ -319,7 +352,7 @@ class FlutterErrorDetails extends Diagnosticable {
     }
 
     final Iterable<String> stackLines = (stack != null) ? stack.toString().trimRight().split('\n') : null;
-    if ((exception is AssertionError) && (exception is! FlutterError)) {
+    if (exception is AssertionError && diagnosticable == null) {
       bool ourFault = true;
       if (stackLines != null) {
         final List<String> stackList = stackLines.take(2).toList();
@@ -374,20 +407,8 @@ class FlutterErrorDetails extends Diagnosticable {
 
 /// Error class used to report Flutter-specific assertion failures and
 /// contract violations.
-class FlutterError extends AssertionError with DiagnosticableTreeMixin {
-  /// Creates a [FlutterError].
-  ///
-  /// See [message] for details on the format that the message should
-  /// take.
-  ///
-  /// Include as much detail as possible in the full error message,
-  /// including specifics about the state of the app that might be
-  /// relevant to debugging the error.
-  FlutterError(this._diagnostics) : super(null);
-
-  final List<DiagnosticsNode> _diagnostics;
-
-  /// The message associated with this error.
+class FlutterError extends Error with DiagnosticableTreeMixin implements AssertionError {
+  /// Create an error message from a string.
   ///
   /// The message may have newlines in it. The first line should be a terse
   /// description of the error, e.g. "Incorrect GlobalKey usage" or "setState()
@@ -402,6 +423,98 @@ class FlutterError extends AssertionError with DiagnosticableTreeMixin {
   ///
   /// All sentences in the error should be correctly punctuated (i.e.,
   /// do end the error message with a period).
+  ///
+  /// This constructor defers to the [new FlutterError.fromParts] constructor.
+  /// The first line is wrapped in an implied [ErrorSummary], and subsequent
+  /// lines are wrapped in implied [ErrorDescription]s. Consider using the
+  /// [new FlutterError.fromParts] constructor to provide more detail, e.g.
+  /// using [ErrorHint]s or other [DiagnosticsNode]s.
+  factory FlutterError(String message) {
+    final List<String> lines = message.split('\n');
+    final List<DiagnosticsNode> parts = <DiagnosticsNode>[];
+    parts.add(ErrorSummary(lines.first));
+    if (lines.length > 1)  {
+      parts.addAll(lines.skip(1).map<DiagnosticsNode>((String line) => ErrorDescription(line)));
+    }
+    return FlutterError.fromParts(parts);
+  }
+
+  /// Create an error message from a list of [DiagnosticsNode]s.
+  ///
+  /// By convention, there should be exactly one [FlutterSummary] in the list,
+  /// and it should be the first entry.
+  ///
+  /// Other entries are typically [ErrorDescription]s (for material that is
+  /// always applicable for this error) and [ErrorHint]s (for material that may
+  /// be sometimes useful, but may not always apply). Other [DiagnosticsNode]
+  /// subclasses, such as [DiagnosticsStackTrace], may
+  /// also be used.
+  FlutterError.fromParts(this.diagnostics) : assert(diagnostics.isNotEmpty, FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary('Empty FlutterError')])) {
+    assert(
+      diagnostics.first.level == DiagnosticLevel.summary,
+      FlutterError(<DiagnosticsNode>[
+        ErrorSummary('FlutterError is missing a summary.'),
+        ErrorDescription(
+          'All FlutterError objects should start with a short (one line) '
+          'summary description of the problem that was detected.'
+        ),
+        DiagnosticsProperty<FlutterError>('Malformed', this, expandableValue: true, showSeparator: false, style: DiagnosticsTreeStyle.whitespace),
+        ErrorDescription(
+          '\nThis error should still help you solve your problem, '
+          'however please also report this malformed error in the '
+          'framework by filing a bug on GitHub:\n'
+          '  https://github.com/flutter/flutter/issues/new?template=BUG.md'
+        ),
+      ],
+    ));
+    assert(() {
+      final Iterable<DiagnosticsNode> summaries = diagnostics.where((DiagnosticsNode node) => node.level == DiagnosticLevel.summary);
+      if (summaries.length > 1) {
+        final List<DiagnosticsNode> message = <DiagnosticsNode>[
+          ErrorSummary('FlutterError contained multiple error summaries.'),
+          ErrorDescription(
+            'All FlutterError objects should have only a single short '
+            '(one line) summary description of the problem that was '
+            'detected.'
+          ),
+        ];
+        message.add(DiagnosticsProperty<FlutterError>('Malformed', this, expandableValue: true, showSeparator: false, style: DiagnosticsTreeStyle.whitespace));
+        message.add(ErrorDescription('\nThe malformed error has ${summaries.length} summaries.'));
+        int i = 1;
+        for (DiagnosticsNode summary in summaries) {
+          message.add(DiagnosticsProperty<DiagnosticsNode>('Summary $i', summary, expandableValue : true));
+          i += 1;
+        }
+        message.add(ErrorDescription(
+          '\nThis error should still help you solve your problem, '
+          'however please also report this malformed error in the '
+          'framework by filing a bug on GitHub:\n'
+          '  https://github.com/flutter/flutter/issues/new?template=BUG.md'
+        ));
+        throw FlutterError(message);
+      }
+      return true;
+    }());
+  }
+
+  /// The message associated with this error.
+  ///
+  /// There must be exactly one [FlutterSummary] in the list, and it must be the
+  /// first entry. Other entries are typically [ErrorDescription]s (for material
+  /// that is always applicable for this error) and [ErrorHint]s (for material
+  /// that may be sometimes useful, but may not always apply). Other
+  /// [DiagnosticsNode] subclasses, such as [DiagnosticsStackTrace], may
+  /// also be used.
+  ///
+  /// In some cases, when a FlutterError is reported to the user, only the
+  /// summary is included. For example, Flutter will typically only fully report
+  /// the first exception at runtime, displaying only the summary of subsequent
+  /// errors.
+  ///
+  /// All diagnostics in the error should be correctly punctuated (i.e.,
+  /// do end the error message with a period).
+  final List<DiagnosticsNode> diagnostics;
+
   @override
   String get message => toString();
 
@@ -459,9 +572,15 @@ class FlutterError extends AssertionError with DiagnosticableTreeMixin {
     if (!reportError && !forceReport)
       return;
     if (_errorCount == 0 || forceReport) {
-      debugPrint(TextTreeRenderer(wrapWidth: wrapWidth, wrapWidthProperties: wrapWidth, maxDescendentsTruncatableNode: 5).render(details.toDiagnosticsNode(style: DiagnosticsTreeStyle.error)));
+      debugPrint(
+        TextTreeRenderer(
+          wrapWidth: wrapWidth,
+          wrapWidthProperties: wrapWidth,
+          maxDescendentsTruncatableNode: 5,
+        ).render(details.toDiagnosticsNode(style: DiagnosticsTreeStyle.error))
+      );
     } else {
-      debugPrint('Another exception was thrown: ${details.exceptionAsString().split("\n")[0].trimLeft()}');
+      debugPrint('Another exception was thrown: ${details.summary}');
     }
     _errorCount += 1;
   }
@@ -529,7 +648,7 @@ class FlutterError extends AssertionError with DiagnosticableTreeMixin {
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    _diagnostics?.forEach(properties.add);
+    diagnostics?.forEach(properties.add);
   }
 
   @override
@@ -537,8 +656,9 @@ class FlutterError extends AssertionError with DiagnosticableTreeMixin {
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.debug}) {
-    final TextTreeRenderer renderer = TextTreeRenderer(wrapWidth: 4000000000); // XXX
-    return _diagnostics.map((DiagnosticsNode node) => renderer.render(node).trimRight()).join('\n');
+    // Avoid wrapping lines.
+    final TextTreeRenderer renderer = TextTreeRenderer(wrapWidth: 4000000000);
+    return diagnostics.map((DiagnosticsNode node) => renderer.render(node).trimRight()).join('\n');
   }
 
   /// Calls [onError] with the given details, unless it is null.

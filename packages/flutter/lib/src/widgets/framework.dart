@@ -205,7 +205,6 @@ abstract class GlobalKey<T extends State<StatefulWidget>> extends Key {
         information.add(ErrorSummary('Multiple widgets used the same GlobalKey.'));
         for (GlobalKey key in duplicates.keys) {
           final Set<Element> elements = duplicates[key];
-          // XXX
           // TODO(jacobr): this will omit the '- ' before each widget name and
           // use the more standard whitespace style instead. Please let me know
           // if the '- ' style is a feature we want to maintain and we can add
@@ -2348,7 +2347,6 @@ class BuildOwner {
       }
       assert(() {
         if (_dirtyElements.any((Element element) => element._active && element.dirty)) {
-          // TODO(jacobr): this will keep each element on its own line which seems superior. XXX. Verify?
           throw FlutterError(<DiagnosticsNode>[
             ErrorSummary('buildScope missed some dirty elements.'),
             ErrorHint('This probably indicates that the dirty list should have been resorted but was not.'),

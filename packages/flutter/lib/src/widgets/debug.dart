@@ -266,15 +266,13 @@ bool debugCheckHasDirectionality(BuildContext context) {
 void debugWidgetBuilderValue(Widget widget, Widget built) {
   assert(() {
     if (built == null) {
-      // XXX review how this message looks.
       throw FlutterError(<DiagnosticsNode>[
         ErrorSummary('A build function returned null.'),
         DiagnosticsProperty<Widget>('The offending widget is', widget, style: DiagnosticsTreeStyle.indentedSingleLine),
         ErrorDescription('Build functions must never return null.'),
-        // TODO(jacobr): remove the word "new" from this hint.
         ErrorHint(
-          'To return an empty space that causes the building widget to fill available room, return "new Container()". '
-          'To return an empty space that takes as little room as possible, return "new Container(width: 0.0, height: 0.0)".'
+          'To return an empty space that causes the building widget to fill available room, return "Container()". '
+          'To return an empty space that takes as little room as possible, return "Container(width: 0.0, height: 0.0)".'
         ),
       ]);
     }
