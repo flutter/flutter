@@ -14,7 +14,7 @@ void main() {
   print('RRect contains benchmark...');
   watch.start();
   for (int i = 0; i < _kNumIters; i += 1) {
-    RRect outter = RRect.fromLTRBR(10, 10, 20, 20, const Radius.circular(2.0));
+    final RRect outter = RRect.fromLTRBR(10, 10, 20, 20, const Radius.circular(2.0));
     outter.contains(const Offset(15, 15));
   }
   watch.stop();
