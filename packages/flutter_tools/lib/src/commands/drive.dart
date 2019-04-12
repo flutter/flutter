@@ -82,11 +82,7 @@ class DriveCommand extends RunCommandBase {
 
   Device _device;
   Device get device => _device;
-  bool get shouldBuild {
-    if (argResults == null || argResults['build'] == null)
-      return true;
-    return argResults['build'];
-  }
+  bool get shouldBuild => argResults['build'];
 
   /// Subscription to log messages printed on the device or simulator.
   // ignore: cancel_subscriptions

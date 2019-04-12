@@ -307,13 +307,13 @@ void main() {
         final MockLaunchResult mockLaunchResult = MockLaunchResult();
         when(mockLaunchResult.started).thenReturn(true);
         when(mockDevice.startApp(
-                null,
-                mainPath: anyNamed('mainPath'),
-                route: anyNamed('route'),
-                debuggingOptions: anyNamed('debuggingOptions'),
-                platformArgs: anyNamed('platformArgs'),
-                prebuiltApplication: anyNamed('prebuiltApplication'),
-                usesTerminalUi: false,
+            null,
+            mainPath: anyNamed('mainPath'),
+            route: anyNamed('route'),
+            debuggingOptions: anyNamed('debuggingOptions'),
+            platformArgs: anyNamed('platformArgs'),
+            prebuiltApplication: anyNamed('prebuiltApplication'),
+            usesTerminalUi: false,
         )).thenAnswer((_) => Future<LaunchResult>.value(mockLaunchResult));
         when(mockDevice.isAppInstalled(any)).thenAnswer((_) => Future<bool>.value(false));
 
