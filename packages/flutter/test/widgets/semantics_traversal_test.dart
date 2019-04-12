@@ -251,11 +251,8 @@ void main() {
 
     for (int i = 0; i < 8; i += 1) {
       final double angle = start + i.toDouble() * math.pi / 4.0;
-      // Round these to the first decimal place so that a `Rect` that supports
-      // full 64 bit precision won't cause strange failures here when this is
-      // passed through to a SizedBox.
-      final double dx = (math.cos(angle) * 50.0).roundToDouble() / 10.0;
-      final double dy = (math.sin(angle) * 50.0).roundToDouble() / 10.0;
+      final double dx = math.cos(angle) * 5.0;
+      final double dy = math.sin(angle) * 5.0;
 
       final Map<String, Rect> children = <String, Rect>{
         'A': const Offset(10.0, 10.0) & tenByTen,

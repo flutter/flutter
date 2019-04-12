@@ -233,8 +233,10 @@ Matcher moreOrLessEquals(double value, { double epsilon = 1e-10 }) {
 /// See also:
 ///
 ///  * [moreOrLessEquals], which is for [double]s.
+///  * [within], which offers a generic version of this functionality that can
+///    be used to match [Rect]s as well as other types.
 Matcher rectMoreOrLessEquals(Rect value, { double epsilon = 1e-10 }) {
-  return _RectMoreOrLessEquals(value, epsilon);
+  return _IsWithinDistance<Rect>(_rectDistance, value, epsilon);
 }
 
 /// Asserts that two [String]s are equal after normalizing likely hash codes.
@@ -1019,6 +1021,8 @@ double _sizeDistance(Size a, Size b) {
 ///
 ///  * [moreOrLessEquals], which is similar to this function, but specializes in
 ///    [double]s and has an optional `epsilon` parameter.
+///  * [rectMoreOrLessEquals], which is similar to this function, but
+///    specializes in [Rect]s and has an optional `epsilon` parameter.
 ///  * [closeTo], which specializes in numbers only.
 Matcher within<T>({
   @required num distance,
@@ -1093,31 +1097,6 @@ class _MoreOrLessEquals extends Matcher {
       return true;
     final double test = object;
     return (test - value).abs() <= epsilon;
-  }
-
-  @override
-  Description describe(Description description) => description.add('$value (±$epsilon)');
-}
-
-class _RectMoreOrLessEquals extends Matcher {
-  const _RectMoreOrLessEquals(this.value, this.epsilon);
-
-  final Rect value;
-  final double epsilon;
-
-  @override
-  bool matches(Object object, Map<dynamic, dynamic> matchState) {
-    if (object is! Rect) {
-      return false;
-    }
-    if (object == value) {
-      return true;
-    }
-    final Rect rect = object;
-    return (rect.left   - value.left).abs() <= epsilon &&
-           (rect.top    - value.top).abs() <= epsilon &&
-           (rect.right  - value.right).abs() <= epsilon &&
-           (rect.bottom - value.bottom).abs() <= epsilon;
   }
 
   @override
