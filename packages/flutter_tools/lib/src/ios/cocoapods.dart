@@ -189,6 +189,7 @@ class CocoaPods {
       return;
     }
     final File podfile = iosProject.podfile;
+
     if (!podfile.existsSync()) {
       final bool isSwift = xcodeProjectInterpreter.getBuildSettings(
         runnerProject.path,
@@ -204,19 +205,19 @@ class CocoaPods {
       ));
       podfileTemplate.copySync(podfile.path);
     }
+
+    final String content = podfile.readAsStringSync();
+    if (!content.contains("target 'Runner' do")) {
+      //Don't do anything if the Runner target has no dependencies.
+      return;
+    }
+
     addPodsDependencyToFlutterXcconfig(iosProject);
   }
 
   /// Ensures all `Flutter/Xxx.xcconfig` files for the given iOS sub-project of
   /// a parent Flutter project include pods configuration.
   void addPodsDependencyToFlutterXcconfig(IosProject iosProject) {
-    //Don't do anything if the Runner target has no dependencies.
-    final File podfile = iosProject.podfile;
-    final String content = podfile.readAsStringSync();
-    if (!content.contains("target 'Runner' do")) {
-      return;
-    }
-
     _addPodsDependencyToFlutterXcconfig(iosProject, 'Debug');
     _addPodsDependencyToFlutterXcconfig(iosProject, 'Release');
   }

@@ -306,6 +306,11 @@ Future<void> injectPlugins(FlutterProject project) async {
     /// The user may have a custom maintained Podfile that they're running `pod install`
     /// on themselves.
     else if (iosProject.podfile.existsSync() && iosProject.podfileLock.existsSync()) {
+      final String content = iosProject.podfile.readAsStringSync();
+      if (!content.contains("target 'Runner' do")) {
+        /// Don't do anything if the Runner target has no dependencies.
+        return;
+      }
       cocoaPods.addPodsDependencyToFlutterXcconfig(iosProject);
     }
   }
