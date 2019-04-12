@@ -987,11 +987,11 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
     final LongPressGestureRecognizer recognizer = _recognizers[LongPressGestureRecognizer];
     assert(recognizer != null);
     if (recognizer.onLongPressStart != null)
-      recognizer.onLongPressStart(LongPressStartDetails());
+      recognizer.onLongPressStart(const LongPressStartDetails());
     if (recognizer.onLongPress != null)
       recognizer.onLongPress();
     if (recognizer.onLongPressEnd != null)
-      recognizer.onLongPressEnd(LongPressEndDetails());
+      recognizer.onLongPressEnd(const LongPressEndDetails());
     if (recognizer.onLongPressUp != null)
       recognizer.onLongPressUp();
   }
