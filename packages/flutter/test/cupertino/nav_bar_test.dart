@@ -884,14 +884,26 @@ void main() {
     expect(SystemChrome.latestStyle, SystemUiOverlayStyle.dark);
   });
 
-  testWidgets('Back button shows an error when manually added outside a route', (WidgetTester tester) async {
+  testWidgets('CupertinoNavigationBarBackButton shows an error when manually added outside a route', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoNavigationBarBackButton()
     );
 
     final dynamic exception = tester.takeException();
     expect(exception, isAssertionError);
-    expect(exception.toString(), contains('can be popped'));
+    expect(exception.toString(), contains('CupertinoNavigationBarBackButton should only be used in routes that can be popped'));
+  });
+
+  testWidgets('CupertinoNavigationBarBackButton shows an error when placed in a route that cannot be popped', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: const CupertinoNavigationBarBackButton(),
+        ),
+      );
+
+      final dynamic exception = tester.takeException();
+      expect(exception, isAssertionError);
+      expect(exception.toString(), contains('CupertinoNavigationBarBackButton should only be used in routes that can be popped'));
   });
 }
 
