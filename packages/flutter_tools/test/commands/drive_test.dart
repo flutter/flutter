@@ -292,7 +292,7 @@ void main() {
       });
     });
 
-    group('restore AppStarter', () {
+    group('build arguments', () {
       String testApp, testFile;
 
       setUp(() {
