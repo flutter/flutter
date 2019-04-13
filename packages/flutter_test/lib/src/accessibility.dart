@@ -225,11 +225,17 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
       // contrast ratio based on text size/weight.
       double fontSize;
       bool isBold;
-      Color textColorGuess;
       final String text = (data.label?.isEmpty == true) ? data.value : data.label;
       final List<Element> elements = find.text(text).hitTestable().evaluate().toList();
+      Rect paintBounds;
       if (elements.length == 1) {
         final Element element = elements.single;
+        final RenderBox renderObject = element.renderObject;
+        element.renderObject.paintBounds;
+        paintBounds = Rect.fromPoints(
+          renderObject.localToGlobal(element.renderObject.paintBounds.topLeft - const Offset(4.0, 4.0)),
+          renderObject.localToGlobal(element.renderObject.paintBounds.bottomRight + const Offset(4.0, 4.0)),
+        );
         final Widget widget = element.widget;
         final DefaultTextStyle defaultTextStyle = DefaultTextStyle.of(element);
         if (widget is Text) {
@@ -237,7 +243,6 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
           if (widget.style == null || widget.style.inherit) {
             effectiveTextStyle = defaultTextStyle.style.merge(widget.style);
           }
-          textColorGuess = effectiveTextStyle.color;
           fontSize = effectiveTextStyle.fontSize;
           isBold = effectiveTextStyle.fontWeight == FontWeight.bold;
         } else if (widget is EditableText) {
@@ -254,16 +259,7 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
         return result;
       }
 
-      // Transform local coordinate to screen coordinates.
-      Rect paintBounds = node.rect;
-      SemanticsNode current = node;
-      while (current != null && current.parent != null) {
-        if (current.transform != null && current.parent?.parent != null) {
-          paintBounds = MatrixUtils.transformRect(current.transform, paintBounds);
-        }
-        paintBounds = paintBounds.shift(current.parent?.rect?.topLeft ?? Offset.zero);
-        current = current.parent;
-      }
+      // Shrink the rect to only surround the text values.
       if (_isNodeOffScreen(paintBounds)) {
         return result;
       }
@@ -272,7 +268,7 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
       if (subset.isEmpty) {
         return result;
       }
-      final _ContrastReport report = _ContrastReport(subset, textColorGuess);
+      final _ContrastReport report = _ContrastReport(subset);
       final double contrastRatio = report.contrastRatio();
       const double delta = -0.01;
       double targetContrastRatio;
@@ -348,7 +344,7 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
 }
 
 class _ContrastReport {
-  factory _ContrastReport(List<int> colors, Color textColorGuess) {
+  factory _ContrastReport(List<int> colors) {
     final Map<int, int> colorHistogram = <int, int>{};
     for (int color in colors) {
       colorHistogram[color] = (colorHistogram[color] ?? 0) + 1;
@@ -382,14 +378,22 @@ class _ContrastReport {
         lightCount = count;
       }
     }
-    if (textColorGuess != null && colorHistogram.containsKey(textColorGuess.value)) {
-      final HSLColor textColor = HSLColor.fromColor(textColorGuess);
-      if (textColor.lightness <= averageLightness) {
-        darkColor = textColorGuess.value;
-      } else if (textColor.lightness > averageLightness) {
-        lightColor = textColorGuess.value;
-      }
-    }
+    // if (textColorGuess != null && colorHistogram.containsKey(textColorGuess.value)) {
+    //   final HSLColor textColor = HSLColor.fromColor(textColorGuess);
+    //   // Text is a darker color.
+    //   if (textColor.lightness <= averageLightness) {
+    //     if (textColorGuess.value != darkColor) {
+    //       lightColor = darkColor;
+    //     }
+    //     darkColor = textColorGuess.value;
+    //   } else {
+    //     if (textColorGuess.value != lightColor) {
+    //       darkColor = lightColor;
+    //     }
+    //     lightColor = textColorGuess.value;
+    //   }
+    // }
+    //print('lightColor: ${Color(lightColor)}, darkColor: ${Color(darkColor)} ');
     assert (lightColor != 0 && darkColor != 0);
     return _ContrastReport._(Color(lightColor), Color(darkColor));
   }
