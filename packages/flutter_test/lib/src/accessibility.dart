@@ -200,7 +200,7 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
     final ByteData byteData = await tester.binding.runAsync<ByteData>(() async {
       // Needs to be the same pixel ratio otherwise our dimensions won't match the
       // last transform layer.
-      image = await layer.toImage(renderView.paintBounds, pixelRatio: 1.0);
+      image = await layer.toImage(renderView.paintBounds, pixelRatio: 1 / 3);
       return image.toByteData();
     });
 
@@ -214,15 +214,18 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
         children.add(child);
         return true;
       });
-      for (SemanticsNode child in children)
+      for (SemanticsNode child in children) {
         result += await evaluateNode(child);
-      if (_shouldSkipNode(data))
+      }
+      if (_shouldSkipNode(data)) {
         return result;
+      }
 
       // We need to look up the inherited text properties to determine the
       // contrast ratio based on text size/weight.
       double fontSize;
       bool isBold;
+      Color textColorGuess;
       final String text = (data.label?.isEmpty == true) ? data.value : data.label;
       final List<Element> elements = find.text(text).hitTestable().evaluate().toList();
       if (elements.length == 1) {
@@ -231,8 +234,10 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
         final DefaultTextStyle defaultTextStyle = DefaultTextStyle.of(element);
         if (widget is Text) {
           TextStyle effectiveTextStyle = widget.style;
-          if (widget.style == null || widget.style.inherit)
+          if (widget.style == null || widget.style.inherit) {
             effectiveTextStyle = defaultTextStyle.style.merge(widget.style);
+          }
+          textColorGuess = effectiveTextStyle.color;
           fontSize = effectiveTextStyle.fontSize;
           isBold = effectiveTextStyle.fontWeight == FontWeight.bold;
         } else if (widget is EditableText) {
@@ -253,18 +258,21 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
       Rect paintBounds = node.rect;
       SemanticsNode current = node;
       while (current != null && current.parent != null) {
-        if (current.transform != null)
+        if (current.transform != null && current.parent?.parent != null) {
           paintBounds = MatrixUtils.transformRect(current.transform, paintBounds);
+        }
         paintBounds = paintBounds.shift(current.parent?.rect?.topLeft ?? Offset.zero);
         current = current.parent;
       }
-      if (_isNodeOffScreen(paintBounds))
+      if (_isNodeOffScreen(paintBounds)) {
         return result;
+      }
       final List<int> subset = _subsetToRect(byteData, paintBounds, image.width, image.height);
       // Node was too far off screen.
-      if (subset.isEmpty)
+      if (subset.isEmpty) {
         return result;
-      final _ContrastReport report = _ContrastReport(subset);
+      }
+      final _ContrastReport report = _ContrastReport(subset, textColorGuess);
       final double contrastRatio = report.contrastRatio();
       const double delta = -0.01;
       double targetContrastRatio;
@@ -340,10 +348,11 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
 }
 
 class _ContrastReport {
-  factory _ContrastReport(List<int> colors) {
+  factory _ContrastReport(List<int> colors, Color textColorGuess) {
     final Map<int, int> colorHistogram = <int, int>{};
-    for (int color in colors)
+    for (int color in colors) {
       colorHistogram[color] = (colorHistogram[color] ?? 0) + 1;
+    }
     if (colorHistogram.length == 1) {
       final Color hslColor = Color(colorHistogram.keys.first);
       return _ContrastReport._(hslColor, hslColor);
@@ -371,6 +380,14 @@ class _ContrastReport {
       } else if (color.lightness > averageLightness && count > lightCount) {
         lightColor = entry.key;
         lightCount = count;
+      }
+    }
+    if (textColorGuess != null && colorHistogram.containsKey(textColorGuess.value)) {
+      final HSLColor textColor = HSLColor.fromColor(textColorGuess);
+      if (textColor.lightness <= averageLightness) {
+        darkColor = textColorGuess.value;
+      } else if (textColor.lightness > averageLightness) {
+        lightColor = textColorGuess.value;
       }
     }
     assert (lightColor != 0 && darkColor != 0);

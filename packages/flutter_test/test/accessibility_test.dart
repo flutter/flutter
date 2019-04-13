@@ -92,13 +92,17 @@ void main() {
       await tester.pumpWidget(MaterialApp(
           home: Scaffold(
             body: Center(
-              child: TextField(
-                controller: TextEditingController(text: 'this is a test'),
+              child: SizedBox(
+                width: 100,
+                child: TextField(
+                  controller: TextEditingController(text: 'this is a test'),
+                ),
               ),
             ),
           ),
         ),
       );
+      await tester.idle();
       await expectLater(tester, meetsGuideline(textContrastGuideline));
       handle.dispose();
     });
@@ -418,6 +422,24 @@ void main() {
     });
   });
 
+  testWidgets('regression test for material widget', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.light(),
+        home: Scaffold(
+          backgroundColor: Colors.white,
+          body: RaisedButton(
+            color: const Color(0xFFFBBC04),
+            elevation: 0,
+            onPressed: () {},
+            child: const Text('Button', style: TextStyle(color: Colors.black)),
+        ),
+      ),
+    ));
+    await expectLater(tester, meetsGuideline(textContrastGuideline));
+    handle.dispose();
+  });
 }
 
 Widget _boilerplate(Widget child) {
