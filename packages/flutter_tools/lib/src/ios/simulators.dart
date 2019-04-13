@@ -22,6 +22,7 @@ import '../globals.dart';
 import '../protocol_discovery.dart';
 import 'ios_workflow.dart';
 import 'mac.dart';
+import 'plist_utils.dart';
 
 const String _xcrunPath = '/usr/bin/xcrun';
 
@@ -340,7 +341,11 @@ class IOSSimulator extends Device {
 
     // Launch the updated application in the simulator.
     try {
-      await SimControl.instance.launch(id, package.id, args);
+      final IOSApp iosApp = package;
+      final String plistPath = fs.path.join(iosApp.simulatorBundlePath , 'Info.plist');
+      final String bundleIdentifier = getValueFromFile(plistPath, kCFBundleIdentifierKey);
+
+      await SimControl.instance.launch(id, bundleIdentifier, args);
     } catch (error) {
       printError('$error');
       return LaunchResult.failed();
