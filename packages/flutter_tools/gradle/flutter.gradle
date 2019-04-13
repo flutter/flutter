@@ -196,42 +196,57 @@ class FlutterPlugin implements Plugin<Project> {
                         compile pluginProject
                     }
                 }
-		pluginProject.afterEvaluate {
-                    pluginProject.android.buildTypes {
+                pluginProject.afterEvaluate {
+                    pluginProject.android.buildTypes { buildTypes ->
                         profile {
                             initWith debug
                         }
+
+                        buildTypes.each {
+                            this.addFlutterJarCompileOnlyDependency(pluginProject, it)
+                        }
                     }
-		}
-                pluginProject.afterEvaluate this.&addFlutterJarCompileOnlyDependency
+                }
             } else {
                 project.logger.error("Plugin project :$name not found. Please update settings.gradle.")
             }
         }
     }
 
-    private void addFlutterJarCompileOnlyDependency(Project project) {
+    /**
+     * Adds suitable flutter.jar api dependencies to the specified buildType.
+     *
+     * Note: The BuildType DSL type is not public, and is therefore omitted from the signature.
+     */
+    private void addFlutterJarCompileOnlyDependency(Project project, buildType) {
         if (project.state.failure) {
             return
         }
+
         project.dependencies {
-            if (flutterJar != null) {
-                if (project.getConfigurations().findByName("compileOnly")) {
-                    compileOnly project.files(flutterJar)
-                } else {
-                    provided project.files(flutterJar)
-                }
+            String configuration;
+            if (project.getConfigurations().any { it.name.endsWith("CompileOnly") }) {
+                configuration = buildType.name + "CompileOnly";
             } else {
-                if (project.getConfigurations().findByName("debugCompileOnly")) {
-                    debugCompileOnly project.files(debugFlutterJar)
-                    profileCompileOnly project.files(profileFlutterJar)
-                    releaseCompileOnly project.files(releaseFlutterJar)
-                } else {
-                    debugProvided project.files(debugFlutterJar)
-                    profileProvided project.files(profileFlutterJar)
-                    releaseProvided project.files(releaseFlutterJar)
-                }
+                configuration = buildType.name + "Provided";
             }
+            add(configuration, project.files {
+                String buildMode = buildModeFor(buildType)
+
+                if (buildMode == "profile") {
+                    profileFlutterJar
+                } else if (buildMode == "dynamicProfile") {
+                    dynamicProfileFlutterJar
+                } else if (buildMode == "dynamicRelease") {
+                    dynamicReleaseFlutterJar
+                } else {
+                    if (buildType.debuggable) {
+                        debugFlutterJar
+                    } else {
+                        releaseFlutterJar
+                    }
+                }
+            })
         }
     }
 
@@ -250,16 +265,18 @@ class FlutterPlugin implements Plugin<Project> {
             }
             add(configuration, project.files {
                 String buildMode = buildModeFor(buildType)
-                if (buildMode == "debug") {
-                    [flutterX86JarTask, debugFlutterJar]
-                } else if (buildMode == "profile") {
+                if (buildMode == "profile") {
                     profileFlutterJar
                 } else if (buildMode == "dynamicProfile") {
                     dynamicProfileFlutterJar
                 } else if (buildMode == "dynamicRelease") {
                     dynamicReleaseFlutterJar
                 } else {
-                    releaseFlutterJar
+                    if (buildType.debuggable) {
+                        [flutterX86JarTask, debugFlutterJar]
+                    } else {
+                        releaseFlutterJar
+                    }
                 }
             })
         }
