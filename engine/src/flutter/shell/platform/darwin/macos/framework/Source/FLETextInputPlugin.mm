@@ -242,11 +242,13 @@ static NSString* const kMultilineInputType = @"TextInputType.multiline";
 }
 
 - (void)insertNewline:(id)sender {
-  if ([self.activeModel.inputType isEqualToString:kMultilineInputType]) {
-    [self insertText:@"\n" replacementRange:self.activeModel.selectedRange];
+  if (self.activeModel != nil) {
+    if ([self.activeModel.inputType isEqualToString:kMultilineInputType]) {
+      [self insertText:@"\n" replacementRange:self.activeModel.selectedRange];
+    }
+    [_channel invokeMethod:kPerformAction
+                 arguments:@[ _activeClientID, self.activeModel.inputAction ]];
   }
-  [_channel invokeMethod:kPerformAction
-               arguments:@[ _activeClientID, self.activeModel.inputAction ]];
 }
 
 - (void)setMarkedText:(id)string
