@@ -73,7 +73,6 @@ void main() {
   testWidgets('Fixed BottomNavigationBar defaults', (WidgetTester tester) async {
     const Color primaryColor = Colors.black;
     const Color captionColor = Colors.purple;
-    const TextStyle textStyle = TextStyle(fontWeight: FontWeight.w200, height: 2);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -82,10 +81,54 @@ void main() {
           textTheme: const TextTheme(caption: TextStyle(color: captionColor)),
         ),
         home: Scaffold(
-          bottomNavigationBar: DefaultTextStyle(
-            style: textStyle,
-            child: BottomNavigationBar(
+          bottomNavigationBar: BottomNavigationBar(
+            type: BottomNavigationBarType.fixed,
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: Icon(Icons.ac_unit),
+                title: Text('AC'),
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.access_alarm),
+                title: Text('Alarm'),
+              ),
+            ],
+          ),
+        ),
+      )
+    );
+
+    const double selectedFontSize = 14.0;
+    const double unselectedFontSize = 12.0;
+    final TextStyle selectedFontStyle = tester.renderObject<RenderParagraph>(find.text('AC')).text.style;
+    final TextStyle unselectedFontStyle = tester.renderObject<RenderParagraph>(find.text('Alarm')).text.style;
+    expect(selectedFontStyle.color, equals(primaryColor));
+    expect(selectedFontStyle.fontSize, selectedFontSize);
+    expect(selectedFontStyle.fontWeight, isNull);
+    expect(selectedFontStyle.height, isNull);
+    expect(unselectedFontStyle.color, equals(captionColor));
+    expect(unselectedFontStyle.fontWeight, isNull);
+    expect(unselectedFontStyle.height, isNull);
+    // Unselected label has a font size of 14 but is scaled down to be font size 12.
+    expect(
+      tester.firstWidget<Transform>(find.ancestor(of: find.text('Alarm'), matching: find.byType(Transform))).transform,
+      equals(Matrix4.diagonal3(Vector3.all(unselectedFontSize / selectedFontSize))),
+    );
+    expect(_getOpacity(tester, 'Alarm'), equals(1.0));
+    expect(_getMaterial(tester).elevation, equals(8.0));
+  });
+
+  testWidgets('Custom selected and unselected font styles', (WidgetTester tester) async {
+    const TextStyle selectedTextStyle = TextStyle(fontWeight: FontWeight.w200, fontSize: 18.0);
+    const TextStyle unselectedTextStyle = TextStyle(fontWeight: FontWeight.w600, fontSize: 12.0);
+
+    await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            bottomNavigationBar: BottomNavigationBar(
               type: BottomNavigationBarType.fixed,
+              selectedLabelStyle: selectedTextStyle,
+              unselectedLabelStyle: unselectedTextStyle,
               items: const <BottomNavigationBarItem>[
                 BottomNavigationBarItem(
                   icon: Icon(Icons.ac_unit),
@@ -98,28 +141,56 @@ void main() {
               ],
             ),
           ),
-        ),
-      )
+        )
     );
 
-    const double selectedFontSize = 14.0;
-    const double unselectedFontSize = 12.0;
     final TextStyle selectedFontStyle = tester.renderObject<RenderParagraph>(find.text('AC')).text.style;
     final TextStyle unselectedFontStyle = tester.renderObject<RenderParagraph>(find.text('Alarm')).text.style;
-    expect(selectedFontStyle.color, equals(primaryColor));
-    expect(selectedFontStyle.fontSize, selectedFontSize);
-    expect(selectedFontStyle.fontWeight, textStyle.fontWeight);
-    expect(selectedFontStyle.height, textStyle.height);
-    expect(unselectedFontStyle.color, equals(captionColor));
-    expect(unselectedFontStyle.fontWeight, textStyle.fontWeight);
-    expect(unselectedFontStyle.height, textStyle.height);
-    // Unselected label has a font size of 14 but is scaled down to be font size 12.
+    expect(selectedFontStyle.fontSize, equals(selectedTextStyle.fontSize));
+    expect(selectedFontStyle.fontWeight, equals(selectedTextStyle.fontWeight));
     expect(
       tester.firstWidget<Transform>(find.ancestor(of: find.text('Alarm'), matching: find.byType(Transform))).transform,
-      equals(Matrix4.diagonal3(Vector3.all(unselectedFontSize / selectedFontSize))),
+      equals(Matrix4.diagonal3(Vector3.all(unselectedTextStyle.fontSize / selectedTextStyle.fontSize))),
     );
-    expect(_getOpacity(tester, 'Alarm'), equals(1.0));
-    expect(_getMaterial(tester).elevation, equals(8.0));
+    expect(unselectedFontStyle.fontWeight, equals(unselectedTextStyle.fontWeight));
+  });
+
+  testWidgets('font size on text styles overrides font size params', (WidgetTester tester) async {
+    const TextStyle selectedTextStyle = TextStyle(fontSize: 18.0);
+    const TextStyle unselectedTextStyle = TextStyle(fontSize: 12.0);
+    const double selectedFontSize = 17.0;
+    const double unselectedFontSize = 11.0;
+
+    await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            bottomNavigationBar: BottomNavigationBar(
+              type: BottomNavigationBarType.fixed,
+              selectedLabelStyle: selectedTextStyle,
+              unselectedLabelStyle: unselectedTextStyle,
+              selectedFontSize: selectedFontSize,
+              unselectedFontSize: unselectedFontSize,
+              items: const <BottomNavigationBarItem>[
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.ac_unit),
+                  title: Text('AC'),
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.access_alarm),
+                  title: Text('Alarm'),
+                ),
+              ],
+            ),
+          ),
+        )
+    );
+
+    final TextStyle selectedFontStyle = tester.renderObject<RenderParagraph>(find.text('AC')).text.style;
+    expect(selectedFontStyle.fontSize, equals(selectedTextStyle.fontSize));
+    expect(
+      tester.firstWidget<Transform>(find.ancestor(of: find.text('Alarm'), matching: find.byType(Transform))).transform,
+      equals(Matrix4.diagonal3(Vector3.all(unselectedTextStyle.fontSize / selectedTextStyle.fontSize))),
+    );
   });
 
   testWidgets('Shifting BottomNavigationBar defaults', (WidgetTester tester) async {
