@@ -1,3 +1,7 @@
+// Copyright 2019 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'dart:io';
 
 import 'package:args/args.dart';
@@ -14,6 +18,10 @@ final String flutterDrivePath = path.join(flutterRoot, 'packages', 'flutter_driv
 final List<List<Pattern>> codePatterns = <List<Pattern>>[
   <Pattern>['import \'dart:ui\'', 'import \'package:flutter_web_ui/ui.dart\''],
   <Pattern>['export \'dart:ui\'', 'export \'package:flutter_web_ui/ui.dart\''],
+  <Pattern>[
+    'export \'bitfield.dart\' if (dart.library.html) \'bitfield_unsupported.dart\';',
+    'export \'bitfield_unsupported.dart\';'
+  ]
 ];
 
 final List<List<Pattern>> configPatterns = <List<Pattern>>[
