@@ -279,8 +279,16 @@ class BottomNavigationBar extends StatefulWidget {
   /// Whether the labels are shown for the unselected [BottomNavigationBarItem]s.
   final bool showSelectedLabels;
 
+  /// Convenience getter for knowing the font size of the selected [BottomNavigationBarItem].
+  ///
+  /// This is mostly to be backwards compatible, because [selectedFontSize] used
+  /// to be a field that could be called directly.
   double get selectedFontSize => selectedLabelStyle.fontSize;
 
+  /// Convenience getter for knowing the font size of the unselected [BottomNavigationBarItem]s.
+  ///
+  /// This is mostly to be backwards compatible, because [unselectedFontSize] used
+  /// to be a field that could be called directly.
   double get unselectedFontSize => unselectedLabelStyle.fontSize;
 
   // Used by the [BottomNavigationBar] constructor to set the [type] parameter.
