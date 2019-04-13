@@ -283,7 +283,6 @@ class BottomNavigationBar extends StatefulWidget {
 
   double get unselectedFontSize => unselectedLabelStyle.fontSize;
 
-
   // Used by the [BottomNavigationBar] constructor to set the [type] parameter.
   //
   // If type is provided, it is returned. Otherwise,
