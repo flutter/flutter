@@ -609,6 +609,7 @@ class FlutterSdk extends EngineCachedArtifact {
   List<List<String>> getBinaryDirs() {
     final List<List<String>> binaryDirs = <List<String>>[
       <String>['common', 'flutter_patched_sdk.zip'],
+      <String>['common', 'flutter_patched_sdk_product.zip'],
     ];
     if (cache.includeAllPlatforms) {
       binaryDirs.addAll(<List<String>>[
