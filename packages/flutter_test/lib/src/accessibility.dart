@@ -259,7 +259,6 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
         return result;
       }
 
-      // Shrink the rect to only surround the text values.
       if (_isNodeOffScreen(paintBounds)) {
         return result;
       }
@@ -378,22 +377,6 @@ class _ContrastReport {
         lightCount = count;
       }
     }
-    // if (textColorGuess != null && colorHistogram.containsKey(textColorGuess.value)) {
-    //   final HSLColor textColor = HSLColor.fromColor(textColorGuess);
-    //   // Text is a darker color.
-    //   if (textColor.lightness <= averageLightness) {
-    //     if (textColorGuess.value != darkColor) {
-    //       lightColor = darkColor;
-    //     }
-    //     darkColor = textColorGuess.value;
-    //   } else {
-    //     if (textColorGuess.value != lightColor) {
-    //       darkColor = lightColor;
-    //     }
-    //     lightColor = textColorGuess.value;
-    //   }
-    // }
-    //print('lightColor: ${Color(lightColor)}, darkColor: ${Color(darkColor)} ');
     assert (lightColor != 0 && darkColor != 0);
     return _ContrastReport._(Color(lightColor), Color(darkColor));
   }
