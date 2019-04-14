@@ -420,6 +420,9 @@ class AndroidProject {
   /// True if the parent Flutter project is a module.
   bool get isModule => parent.isModule;
 
+  ///True if the Flutter project is using the AndroidX support library
+  bool get usesAndroidX => parent.manifest.usesAndroidX;
+
   /// True, if the app project is using Kotlin.
   bool get isKotlin {
     final File gradleFile = hostAppGradleRoot.childDirectory('app').childFile('build.gradle');
@@ -430,6 +433,10 @@ class AndroidProject {
     return isUsingGradle
         ? fs.file(fs.path.join(hostAppGradleRoot.path, 'app', 'src', 'main', 'AndroidManifest.xml'))
         : hostAppGradleRoot.childFile('AndroidManifest.xml');
+  }
+
+  File get gradlePropertiesFile {
+    return hostAppGradleRoot.childFile('gradle.properties');
   }
 
   File get gradleAppOutV1File => gradleAppOutV1Directory.childFile('app-debug.apk');
@@ -512,6 +519,7 @@ class AndroidProject {
       <String, dynamic>{
         'projectName': parent.manifest.appName,
         'androidIdentifier': parent.manifest.androidPackage,
+        'androidX': usesAndroidX,
       },
       printStatusWhenWriting: false,
       overwriteExisting: true,
