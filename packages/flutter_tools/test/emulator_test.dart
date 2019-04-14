@@ -72,7 +72,7 @@ void main() {
 
     testUsingContext('create emulator with an empty name does not fail', () async {
       final CreateEmulatorResult res = await emulatorManager.createEmulator();
-      expect(res.success, equals(true));
+      expect(res.success, true);
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
       Config: () => mockConfig,

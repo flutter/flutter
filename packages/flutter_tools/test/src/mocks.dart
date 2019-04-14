@@ -162,7 +162,7 @@ class MockProcessManager implements ProcessManager {
     }
 
     commands = command as List<String>;
-    return Future<Process>.value(processFactory(commands));
+    return Future<Process>.value(processFactory(command as List<String>));
   }
 
   @override

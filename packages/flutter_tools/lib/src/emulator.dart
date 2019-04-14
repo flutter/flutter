@@ -142,7 +142,6 @@ class EmulatorManager {
         environment: androidSdk?.sdkManagerEnv);
     if (runResult.exitCode != 0)
       return null;
-
     final List<String> availableDevices = (runResult.stdout as String)
         .split('\n')
         .where((String l) => preferredDevices.contains(l.trim()))
@@ -168,7 +167,7 @@ class EmulatorManager {
         environment: androidSdk?.sdkManagerEnv);
 
     // Get the list of IDs that match our criteria
-    final List<String> availableIDs = (runResult.stdout as String)
+    final List<String> availableIDs = (runResult.stderr as String)
         .split('\n')
         .where((String l) => androidApiVersion.hasMatch(l))
         .where((String l) => l.contains('system-images'))
