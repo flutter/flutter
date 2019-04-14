@@ -17,7 +17,7 @@ import '../convert.dart';
 import '../globals.dart';
 import 'android_studio.dart' as android_studio;
 
-AndroidSdk get androidSdk => context[AndroidSdk];
+AndroidSdk get androidSdk => context[AndroidSdk] as AndroidSdk;
 
 const String kAndroidHome = 'ANDROID_HOME';
 const String kAndroidSdkRoot = 'ANDROID_SDK_ROOT';
@@ -304,7 +304,7 @@ class AndroidSdk {
     String findAndroidHomeDir() {
       String androidHomeDir;
       if (config.containsKey('android-sdk')) {
-        androidHomeDir = config.getValue('android-sdk');
+        androidHomeDir = config.getValue('android-sdk') as String;
       } else if (platform.environment.containsKey(kAndroidHome)) {
         androidHomeDir = platform.environment[kAndroidHome];
       } else if (platform.environment.containsKey(kAndroidSdkRoot)) {
@@ -580,7 +580,7 @@ class AndroidSdk {
       printTrace('sdkmanager --version failed: exitCode: ${result.exitCode} stdout: ${result.stdout} stderr: ${result.stderr}');
       return null;
     }
-    return result.stdout.trim();
+    return result.stdout.trim() as String;
   }
 
   @override

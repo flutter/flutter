@@ -40,7 +40,7 @@ class HotRunnerConfig {
   }
 }
 
-HotRunnerConfig get hotRunnerConfig => context[HotRunnerConfig];
+HotRunnerConfig get hotRunnerConfig => context[HotRunnerConfig] as HotRunnerConfig;
 
 const bool kHotReloadDefault = true;
 
@@ -503,8 +503,8 @@ class HotRunner extends ResidentRunner {
            (reloadReport['success'] == false &&
             (reloadReport['details'] is Map<String, dynamic> &&
              reloadReport['details']['notices'] is List<dynamic> &&
-             reloadReport['details']['notices'].isNotEmpty &&
-             reloadReport['details']['notices'].every(
+             reloadReport['details']['notices'].isNotEmpty as bool &&
+             (reloadReport['details']['notices'] as List<Map<String, dynamic>>).every(
                (dynamic item) => item is Map<String, dynamic> && item['message'] is String
              )
             )
@@ -515,7 +515,7 @@ class HotRunner extends ResidentRunner {
         printError('Hot reload received invalid response: $reloadReport');
       return false;
     }
-    if (!reloadReport['success']) {
+    if (!(reloadReport['success'] as bool)) {
       if (printErrors) {
         printError('Hot reload was rejected:');
         for (Map<String, dynamic> notice in reloadReport['details']['notices'])
@@ -670,7 +670,7 @@ class HotRunner extends ResidentRunner {
           // many libraries were affected by the hot reload request.
           // Relation of [invalidatedSourcesCount] to [syncedLibraryCount] should help
           // understand sync/transfer "overhead" of updating this number of source files.
-          final Map<String, dynamic> details = reloadReport['details'];
+          final Map<String, dynamic> details = reloadReport['details'] as Map<String, dynamic>;
           analyticsParameters[kEventReloadFinalLibraryCount] = "${details['finalLibraryCount']}";
           analyticsParameters[kEventReloadSyncedLibraryCount] = "${details['receivedLibraryCount']}";
           analyticsParameters[kEventReloadSyncedClassesCount] = "${details['receivedClassesCount']}";
@@ -678,16 +678,16 @@ class HotRunner extends ResidentRunner {
           analyticsParameters[kEventReloadSyncedBytes] = '${updatedDevFS.syncedBytes}';
           analyticsParameters[kEventReloadInvalidatedSourcesCount] = '${updatedDevFS.invalidatedSourcesCount}';
           analyticsParameters[kEventReloadTransferTimeInMs] = '${devFSTimer.elapsed.inMilliseconds}';
-          final int loadedLibraryCount = reloadReport['details']['loadedLibraryCount'];
-          final int finalLibraryCount = reloadReport['details']['finalLibraryCount'];
+          final int loadedLibraryCount = reloadReport['details']['loadedLibraryCount'] as int;
+          final int finalLibraryCount = reloadReport['details']['finalLibraryCount'] as int;
           printTrace('reloaded $loadedLibraryCount of $finalLibraryCount libraries');
           reloadMessage = 'Reloaded $loadedLibraryCount of $finalLibraryCount libraries';
         }
       }
     } on Map<String, dynamic> catch (error, stackTrace) {
       printTrace('Hot reload failed: $error\n$stackTrace');
-      final int errorCode = error['code'];
-      String errorMessage = error['message'];
+      final int errorCode = error['code'] as int;
+      String errorMessage = error['message'] as String;
       if (errorCode == Isolate.kIsolateReloadBarred) {
         errorMessage = 'Unable to hot reload application due to an unrecoverable error in '
                        'the source code. Please address the error and then use "R" to '

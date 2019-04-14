@@ -57,7 +57,7 @@ class VersionCommand extends FlutterCommand {
     final Version targetVersion = Version.parse(version);
     bool withForce = false;
     if (targetVersion < minSupportedVersion) {
-      if (!argResults['force']) {
+      if (!(argResults['force'] as bool)) {
         printError(
           'Version command is not supported in $targetVersion and it is supported since version $minSupportedVersion'
           'which means if you switch to version $minSupportedVersion then you can not use version command.'

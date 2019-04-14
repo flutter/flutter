@@ -23,7 +23,7 @@ import 'file_system.dart';
 import 'fingerprint.dart';
 import 'process.dart';
 
-GenSnapshot get genSnapshot => context[GenSnapshot];
+GenSnapshot get genSnapshot => context[GenSnapshot] as GenSnapshot;
 
 /// A snapshot build configuration.
 class SnapshotType {
@@ -433,11 +433,10 @@ class JITSnapshotter {
         // snapshot instructions from the previous full build, so we need to extract
         // it from saves baseline APK.
         if (!f.existsSync()) {
-          f.writeAsBytesSync(af.content, flush: true);
+          f.writeAsBytesSync(af.content as List<int>, flush: true);
         } else {
           // But if this file is already extracted, we make sure that it's identical.
-          final Function contentEquals = const ListEquality<int>().equals;
-          if (!contentEquals(f.readAsBytesSync(), af.content)) {
+          if (!const ListEquality<int>().equals(f.readAsBytesSync(), af.content as List<int>)) {
             printError('Error: Detected changes unsupported by dynamic patching.');
             return 1;
           }
@@ -459,8 +458,7 @@ class JITSnapshotter {
           // But if engine snapshot exists, its content must match the engine snapshot
           // in baseline APK. Otherwise, we're trying to build an update at an engine
           // version that might be binary incompatible with baseline APK.
-          final Function contentEquals = const ListEquality<int>().equals;
-          if (!contentEquals(f.readAsBytesSync(), af.content)) {
+          if (const ListEquality<int>().equals(f.readAsBytesSync(), af.content as List<int>)) {
             printError('Error: Detected engine changes unsupported by dynamic patching.');
             return 1;
           }

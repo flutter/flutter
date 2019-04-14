@@ -38,27 +38,27 @@ class PrecacheCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    if (argResults['all-platforms']) {
+    if (argResults['all-platforms'] as bool) {
       cache.includeAllPlatforms = true;
     }
     final Set<DevelopmentArtifact> requiredArtifacts = <DevelopmentArtifact>{ DevelopmentArtifact.universal };
-    if (argResults['android']) {
+    if (argResults['android'] as bool) {
       requiredArtifacts.add(DevelopmentArtifact.android);
     }
-    if (argResults['ios']) {
+    if (argResults['ios'] as bool) {
       requiredArtifacts.add(DevelopmentArtifact.iOS);
     }
     if (!FlutterVersion.instance.isStable) {
-      if (argResults['web']) {
+      if (argResults['web'] as bool) {
         requiredArtifacts.add(DevelopmentArtifact.web);
       }
-      if (argResults['linux']) {
+      if (argResults['linux'] as bool) {
         requiredArtifacts.add(DevelopmentArtifact.linux);
       }
-      if (argResults['windows']) {
+      if (argResults['windows'] as bool) {
         requiredArtifacts.add(DevelopmentArtifact.windows);
       }
-      if (argResults['macos']) {
+      if (argResults['macos'] as bool) {
         requiredArtifacts.add(DevelopmentArtifact.macOS);
       }
     }

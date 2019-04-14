@@ -30,11 +30,11 @@ import 'tester/flutter_tester.dart';
 import 'version.dart';
 import 'vscode/vscode_validator.dart';
 
-Doctor get doctor => context[Doctor];
+Doctor get doctor => context[Doctor] as Doctor;
 
 abstract class DoctorValidatorsProvider {
   /// The singleton instance, pulled from the [AppContext].
-  static DoctorValidatorsProvider get instance => context[DoctorValidatorsProvider];
+  static DoctorValidatorsProvider get instance => context[DoctorValidatorsProvider] as DoctorValidatorsProvider;
 
   static final DoctorValidatorsProvider defaultInstance = _DefaultDoctorValidatorsProvider();
 

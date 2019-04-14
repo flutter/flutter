@@ -80,7 +80,7 @@ void main() {
         await context.run<void>(
           body: () {
             outer.future.then<void>((_) {
-              value = context[String];
+              value = context[String] as String;
               inner.complete();
             });
           },
@@ -142,7 +142,7 @@ void main() {
 
       test('returns null if generated value is null', () async {
         final String value = await context.run<String>(
-          body: () => context[String],
+          body: () => context[String] as String,
           overrides: <Type, Generator>{
             String: () => null,
           },
@@ -153,10 +153,10 @@ void main() {
       test('throws if generator has dependency cycle', () async {
         final Future<String> value = context.run<String>(
           body: () async {
-            return context[String];
+            return context[String] as String;
           },
           fallbacks: <Type, Generator>{
-            int: () => int.parse(context[String]),
+            int: () => int.parse(context[String] as String),
             String: () => '${context[double]}',
             double: () => (context[int] as int) * 1.0, // ignore: avoid_as
           },
@@ -197,7 +197,7 @@ void main() {
               return context.run<String>(
                 body: () {
                   called = true;
-                  return context[String];
+                  return context[String] as String;
                 },
                 fallbacks: <Type, Generator>{
                   String: () => 'child',
@@ -216,7 +216,7 @@ void main() {
               return context.run<String>(
                 body: () {
                   called = true;
-                  return context[String];
+                  return context[String] as String;
                 },
                 fallbacks: <Type, Generator>{
                   String: () {
@@ -238,7 +238,7 @@ void main() {
         test('may depend on one another', () async {
           final String value = await context.run<String>(
             body: () {
-              return context[String];
+              return context[String] as String;
             },
             fallbacks: <Type, Generator>{
               int: () => 123,
@@ -255,7 +255,7 @@ void main() {
           final String value = await context.run<String>(
             body: () {
               return context.run<String>(
-                body: () => context[String],
+                body: () => context[String] as String,
                 overrides: <Type, Generator>{
                   String: () => 'child',
                 },

@@ -15,9 +15,9 @@ import 'cocoapods.dart';
 import 'mac.dart';
 import 'plist_utils.dart' as plist;
 
-IOSWorkflow get iosWorkflow => context[IOSWorkflow];
-IOSValidator get iosValidator => context[IOSValidator];
-CocoaPodsValidator get cocoapodsValidator => context[CocoaPodsValidator];
+IOSWorkflow get iosWorkflow => context[IOSWorkflow] as IOSWorkflow;
+IOSValidator get iosValidator => context[IOSValidator] as IOSValidator;
+CocoaPodsValidator get cocoapodsValidator => context[CocoaPodsValidator] as CocoaPodsValidator;
 
 class IOSWorkflow implements Workflow {
   const IOSWorkflow();
@@ -55,11 +55,11 @@ class IOSValidator extends DoctorValidator {
   // ios-deploy <= v1.9.3 declares itself as v2.0.0
   List<String> get iosDeployBadVersions => <String>['2.0.0'];
 
-  Future<String> get iosDeployVersionText async => (await runAsync(<String>['ios-deploy', '--version'])).processResult.stdout.replaceAll('\n', '');
+  Future<String> get iosDeployVersionText async => (await runAsync(<String>['ios-deploy', '--version'])).processResult.stdout.replaceAll('\n', '') as String;
 
   bool get hasHomebrew => os.which('brew') != null;
 
-  Future<String> get macDevMode async => (await runAsync(<String>['DevToolsSecurity', '-status'])).processResult.stdout;
+  Future<String> get macDevMode async => (await runAsync(<String>['DevToolsSecurity', '-status'])).processResult.stdout as String;
 
   Future<bool> get _iosDeployIsInstalledAndMeetsVersionCheck async {
     if (!await hasIosDeploy)

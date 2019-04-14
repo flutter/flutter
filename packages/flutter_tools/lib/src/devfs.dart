@@ -26,7 +26,7 @@ class DevFSConfig {
   bool noDirectorySymlinks = false;
 }
 
-DevFSConfig get devFSConfig => context[DevFSConfig];
+DevFSConfig get devFSConfig => context[DevFSConfig] as DevFSConfig;
 
 /// Common superclass for content copied to the device.
 abstract class DevFSContent {
@@ -63,13 +63,13 @@ class DevFSFileContent extends DevFSContent {
 
   File _getFile() {
     if (_linkTarget != null) {
-      return _linkTarget;
+      return _linkTarget as File;
     }
     if (file is Link) {
       // The link target.
       return fs.file(file.resolveSymbolicLinksSync());
     }
-    return file;
+    return file as File;
   }
 
   void _stat() {
@@ -221,7 +221,7 @@ class ServiceProtocolDevFSOperations implements DevFSOperations {
   @override
   Future<Uri> create(String fsName) async {
     final Map<String, dynamic> response = await vmService.vm.createDevFS(fsName);
-    return Uri.parse(response['uri']);
+    return Uri.parse(response['uri'] as String);
   }
 
   @override

@@ -174,7 +174,7 @@ abstract class FlutterTestDriver {
   }
 
   Future<Isolate> _getFlutterIsolate() async {
-    final Isolate isolate = await _vmService.getIsolate(await _getFlutterIsolateId());
+    final Isolate isolate = await _vmService.getIsolate(await _getFlutterIsolateId()) as Isolate;
     return isolate;
   }
 
@@ -223,7 +223,7 @@ abstract class FlutterTestDriver {
         // But also check if the isolate was already paused (only after we've set
         // up the subscription) to avoid races. If it was paused, we don't need to wait
         // for the event.
-        final Isolate isolate = await _vmService.getIsolate(flutterIsolate);
+        final Isolate isolate = await _vmService.getIsolate(flutterIsolate) as Isolate;
         if (isolate.pauseEvent.kind.startsWith('Pause')) {
           _debugPrint('Isolate was already paused (${isolate.pauseEvent.kind}).');
         } else {
@@ -268,14 +268,14 @@ abstract class FlutterTestDriver {
 
   Future<InstanceRef> evaluateInFrame(String expression) async {
     return _timeoutWithMessages<InstanceRef>(
-      () async => await _vmService.evaluateInFrame(await _getFlutterIsolateId(), 0, expression),
+      () async => await _vmService.evaluateInFrame(await _getFlutterIsolateId(), 0, expression) as InstanceRef,
       task: 'Evaluating expression ($expression)',
     );
   }
 
   Future<InstanceRef> evaluate(String targetId, String expression) async {
     return _timeoutWithMessages<InstanceRef>(
-      () async => await _vmService.evaluate(await _getFlutterIsolateId(), targetId, expression),
+      () async => await _vmService.evaluate(await _getFlutterIsolateId(), targetId, expression) as InstanceRef,
       task: 'Evaluating expression ($expression for $targetId)',
     );
   }
@@ -292,7 +292,7 @@ abstract class FlutterTestDriver {
   Future<SourcePosition> getSourceLocation() async {
     final String flutterIsolateId = await _getFlutterIsolateId();
     final Frame frame = await getTopStackFrame();
-    final Script script = await _vmService.getObject(flutterIsolateId, frame.location.script.id);
+    final Script script = await _vmService.getObject(flutterIsolateId, frame.location.script.id) as Script;
     return _lookupTokenPos(script.tokenPosTable, frame.location.tokenPos);
   }
 
@@ -332,7 +332,7 @@ abstract class FlutterTestDriver {
           (id    != null && json['id']    == id)) {
         await subscription.cancel();
         _debugPrint('OK ($interestingOccurrence)');
-        response.complete(json);
+        response.complete(json as Map<String, dynamic>);
       } else if (!ignoreAppStopEvent && json['event'] == 'app.stop') {
         await subscription.cancel();
         final StringBuffer error = StringBuffer();
@@ -472,7 +472,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     // _process.kill() (`flutter` is a shell script so _process itself is a
     // shell, not the flutter tool's Dart process).
     final Map<String, dynamic> connected = await _waitFor(event: 'daemon.connected');
-    _processPid = connected['params']['pid'];
+    _processPid = connected['params']['pid'] as int;
 
     // Set this up now, but we don't wait it yet. We want to make sure we don't
     // miss it while waiting for debugPort below.
@@ -480,7 +480,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
 
     if (withDebugger) {
       final Map<String, dynamic> debugPort = await _waitFor(event: 'app.debugPort', timeout: appStartTimeout);
-      final String wsUriString = debugPort['params']['wsUri'];
+      final String wsUriString = debugPort['params']['wsUri'] as String;
       _vmServiceWsUri = Uri.parse(wsUriString);
       await connectToVmService(pauseOnExceptions: pauseOnExceptions);
       if (!startPaused)
@@ -489,7 +489,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
 
     // Now await the started event; if it had already happened the future will
     // have already completed.
-    _currentRunningAppId = (await started)['params']['appId'];
+    _currentRunningAppId = (await started)['params']['appId'] as String;
   }
 
   Future<void> hotRestart({ bool pause = false }) => _restart(fullRestart: true, pause: pause);
@@ -630,11 +630,11 @@ class FlutterTestTestDriver extends FlutterTestDriver {
     // _proc.kill() (because _proc is a shell, because `flutter` is a shell
     // script).
     final Map<String, dynamic> version = await _waitForJson();
-    _processPid = version['pid'];
+    _processPid = version['pid'] as int;
 
     if (withDebugger) {
       final Map<String, dynamic> startedProcess = await _waitFor(event: 'test.startedProcess', timeout: appStartTimeout);
-      final String vmServiceHttpString = startedProcess['params']['observatoryUri'];
+      final String vmServiceHttpString = startedProcess['params']['observatoryUri'] as String;
       _vmServiceWsUri = Uri.parse(vmServiceHttpString).replace(scheme: 'ws', path: '/ws');
       await connectToVmService(pauseOnExceptions: pauseOnExceptions);
       // Allow us to run code before we start, eg. to set up breakpoints.
@@ -657,7 +657,7 @@ class FlutterTestTestDriver extends FlutterTestDriver {
 
   Map<String, dynamic> _parseJsonResponse(String line) {
     try {
-      return json.decode(line);
+      return json.decode(line) as Map<String, dynamic>;
     } catch (e) {
       // Not valid JSON, so likely some other output.
       return null;
@@ -672,7 +672,7 @@ Stream<String> transformToLines(Stream<List<int>> byteStream) {
 Map<String, dynamic> parseFlutterResponse(String line) {
   if (line.startsWith('[') && line.endsWith(']')) {
     try {
-      final Map<String, dynamic> response = json.decode(line)[0];
+      final Map<String, dynamic> response = json.decode(line)[0] as Map<String, dynamic>;
       return response;
     } catch (e) {
       // Not valid JSON, so likely some other output that was surrounded by [brackets]

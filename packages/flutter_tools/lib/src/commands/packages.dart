@@ -72,7 +72,7 @@ class PackagesGetCommand extends FlutterCommand {
     await pubGet(context: PubContext.pubGet,
       directory: directory,
       upgrade: upgrade ,
-      offline: argResults['offline'],
+      offline: argResults['offline'] as bool,
       checkLastModified: false,
     );
   }

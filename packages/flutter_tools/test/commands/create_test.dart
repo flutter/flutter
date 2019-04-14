@@ -1042,7 +1042,7 @@ class LoggingProcessManager extends LocalProcessManager {
 
   @override
   Future<Process> start(
-    List<dynamic> command, {
+    List<String> command, {
     String workingDirectory,
     Map<String, String> environment,
     bool includeParentEnvironment = true,

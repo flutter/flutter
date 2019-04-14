@@ -16,7 +16,7 @@ final AnsiTerminal _kAnsiTerminal = AnsiTerminal();
 AnsiTerminal get terminal {
   return (context == null || context[AnsiTerminal] == null)
       ? _kAnsiTerminal
-      : context[AnsiTerminal];
+      : context[AnsiTerminal] as AnsiTerminal;
 }
 
 enum TerminalColor {
@@ -33,7 +33,7 @@ final OutputPreferences _kOutputPreferences = OutputPreferences();
 
 OutputPreferences get outputPreferences => (context == null || context[OutputPreferences] == null)
     ? _kOutputPreferences
-    : context[OutputPreferences];
+    : context[OutputPreferences] as OutputPreferences;
 
 /// A class that contains the context settings for command text output to the
 /// console.

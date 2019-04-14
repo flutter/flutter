@@ -90,10 +90,10 @@ class AndroidDevice extends Device {
           stderrEncoding: latin1,
         );
         if (result.exitCode == 0) {
-          _properties = parseAdbDeviceProperties(result.stdout);
+          _properties = parseAdbDeviceProperties(result.stdout as String);
         } else {
           printError('Error retrieving device properties for $name:');
-          printError(result.stderr);
+          printError(result.stderr as String);
         }
       } on ProcessException catch (error) {
         printError('Error retrieving device properties for $name: $error');
@@ -239,7 +239,7 @@ class AndroidDevice extends Device {
     return result.stdout;
   }
 
-  String _getSourceSha1(ApplicationPackage app) {
+  String _getSourceSha1(covariant AndroidApk app) {
     final AndroidApk apk = app;
     final File shaFile = fs.file('${apk.file.path}.sha1');
     return shaFile.existsSync() ? shaFile.readAsStringSync() : '';
@@ -261,13 +261,13 @@ class AndroidDevice extends Device {
   }
 
   @override
-  Future<bool> isLatestBuildInstalled(ApplicationPackage app) async {
+  Future<bool> isLatestBuildInstalled(covariant AndroidApk app) async {
     final String installedSha1 = await _getDeviceApkSha1(app);
     return installedSha1.isNotEmpty && installedSha1 == _getSourceSha1(app);
   }
 
   @override
-  Future<bool> installApp(ApplicationPackage app) async {
+  Future<bool> installApp(covariant AndroidApk app) async {
     final AndroidApk apk = app;
     if (!apk.file.existsSync()) {
       printError('"${fs.path.relative(apk.file.path)}" does not exist.');
@@ -316,7 +316,7 @@ class AndroidDevice extends Device {
     return true;
   }
 
-  Future<bool> _installLatestApp(ApplicationPackage package) async {
+  Future<bool> _installLatestApp(covariant AndroidApk package) async {
     final bool wasInstalled = await isAppInstalled(package);
     if (wasInstalled) {
       if (await isLatestBuildInstalled(package)) {
@@ -346,7 +346,7 @@ class AndroidDevice extends Device {
 
   @override
   Future<LaunchResult> startApp(
-    ApplicationPackage package, {
+    covariant AndroidApk package, {
     String mainPath,
     String route,
     DebuggingOptions debuggingOptions,
@@ -390,7 +390,7 @@ class AndroidDevice extends Device {
     if (!await _installLatestApp(package))
       return LaunchResult.failed();
 
-    final bool traceStartup = platformArgs['trace-startup'] ?? false;
+    final bool traceStartup = platformArgs['trace-startup'] as bool ?? false;
     final AndroidApk apk = package;
     printTrace('$this startApp');
 

@@ -162,7 +162,7 @@ class Cache {
     return _engineRevision;
   }
 
-  static Cache get instance => context[Cache];
+  static Cache get instance => context[Cache] as Cache;
 
   /// Return the top-level directory in the cache; this is `bin/cache`.
   Directory getRoot() {

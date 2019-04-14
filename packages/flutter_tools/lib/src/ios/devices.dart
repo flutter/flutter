@@ -198,16 +198,15 @@ class IOSDevice extends Device {
   Future<bool> isLatestBuildInstalled(ApplicationPackage app) async => false;
 
   @override
-  Future<bool> installApp(ApplicationPackage app) async {
-    final IOSApp iosApp = app;
-    final Directory bundle = fs.directory(iosApp.deviceBundlePath);
+  Future<bool> installApp(covariant IOSApp app) async {
+    final Directory bundle = fs.directory(app.deviceBundlePath);
     if (!bundle.existsSync()) {
       printError('Could not find application bundle at ${bundle.path}; have you run "flutter build ios"?');
       return false;
     }
 
     try {
-      await runCheckedAsync(<String>[_installerPath, '-i', iosApp.deviceBundlePath]);
+      await runCheckedAsync(<String>[_installerPath, '-i', app.deviceBundlePath]);
       return true;
     } catch (e) {
       return false;
@@ -229,7 +228,7 @@ class IOSDevice extends Device {
 
   @override
   Future<LaunchResult> startApp(
-    ApplicationPackage package, {
+    covariant IOSApp package, {
     String mainPath,
     String route,
     DebuggingOptions debuggingOptions,
@@ -247,7 +246,7 @@ class IOSDevice extends Device {
 
       // Step 1: Build the precompiled/DBC application if necessary.
       final XcodeBuildResult buildResult = await buildXcodeProject(
-          app: package,
+          app: package as BuildableIOSApp,
           buildInfo: debuggingOptions.buildInfo,
           targetOverride: mainPath,
           buildForDevice: true,
@@ -303,7 +302,7 @@ class IOSDevice extends Device {
       launchArguments.add('--verbose-logging');
     }
 
-    if (platformArgs['trace-startup'] ?? false)
+    if (platformArgs['trace-startup'] as bool ?? false)
       launchArguments.add('--trace-startup');
 
     int installationResult = -1;
@@ -513,7 +512,7 @@ class _IOSDeviceLogReader extends DeviceLogReader {
   // any specific prefix. To properly capture those, we enter "printing" mode
   // after matching a log line from the runner. When in printing mode, we print
   // all lines until we find the start of another log message (from any app).
-  Function _newLineHandler() {
+  void Function(String) _newLineHandler() {
     bool printing = false;
 
     return (String line) {
@@ -605,7 +604,7 @@ class _IOSDevicePortForwarder extends DevicePortForwarder {
 
     printTrace('Unforwarding port $forwardedPort');
 
-    final Process process = forwardedPort.context;
+    final Process process = forwardedPort.context as Process;
 
     if (process != null) {
       processManager.killPid(process.pid);

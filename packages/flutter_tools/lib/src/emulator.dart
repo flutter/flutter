@@ -13,7 +13,7 @@ import 'base/process_manager.dart';
 import 'globals.dart';
 import 'ios/ios_emulators.dart';
 
-EmulatorManager get emulatorManager => context[EmulatorManager];
+EmulatorManager get emulatorManager => context[EmulatorManager] as EmulatorManager;
 
 /// A class to get all available emulators.
 class EmulatorManager {
@@ -122,8 +122,8 @@ class EmulatorManager {
     return CreateEmulatorResult(
       name,
       success: runResult.exitCode == 0,
-      output: runResult.stdout,
-      error: cleanError(runResult.stderr),
+      output: runResult.stdout as String,
+      error: cleanError(runResult.stderr as String),
     );
   }
 
@@ -143,7 +143,7 @@ class EmulatorManager {
     if (runResult.exitCode != 0)
       return null;
 
-    final List<String> availableDevices = runResult.stdout
+    final List<String> availableDevices = (runResult.stdout as String)
         .split('\n')
         .where((String l) => preferredDevices.contains(l.trim()))
         .toList();
@@ -168,7 +168,7 @@ class EmulatorManager {
         environment: androidSdk?.sdkManagerEnv);
 
     // Get the list of IDs that match our criteria
-    final List<String> availableIDs = runResult.stderr
+    final List<String> availableIDs = (runResult.stdout as String)
         .split('\n')
         .where((String l) => androidApiVersion.hasMatch(l))
         .where((String l) => l.contains('system-images'))

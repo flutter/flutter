@@ -60,7 +60,7 @@ class _FuchsiaLogReader extends DeviceLogReader {
       : RegExp('INFO: ${_app.name}\\(flutter\\): ');
     return Stream<String>.eventTransformed(
       lines,
-      (Sink<String> outout) => _FuchsiaLogSink(outout, matchRegExp, startTime),
+      (EventSink<String> outout) => _FuchsiaLogSink(outout, matchRegExp, startTime),
     );
   }
 
@@ -190,7 +190,7 @@ class FuchsiaDevice extends Device {
     bool prebuiltApplication = false,
     bool usesTerminalUi = true,
     bool ipv6 = false,
-  }) => Future<void>.error('unimplemented');
+  }) => Future<LaunchResult>.error('unimplemented');
 
   @override
   Future<bool> stopApp(ApplicationPackage app) async {
@@ -431,7 +431,7 @@ class _FuchsiaPortForwarder extends DevicePortForwarder {
         '-L', '${forwardedPort.hostPort}:$_ipv4Loopback:${forwardedPort.devicePort}', device.id];
     final ProcessResult result = await processManager.run(command);
     if (result.exitCode != 0) {
-      throwToolExit(result.stderr);
+      throwToolExit(result.stderr as String);
     }
   }
 

@@ -21,9 +21,9 @@ import 'android_sdk.dart';
 const int kAndroidSdkMinVersion = 28;
 final Version kAndroidSdkBuildToolsMinVersion = Version(28, 0, 3);
 
-AndroidWorkflow get androidWorkflow => context[AndroidWorkflow];
-AndroidValidator get androidValidator => context[AndroidValidator];
-AndroidLicenseValidator get androidLicenseValidator => context[AndroidLicenseValidator];
+AndroidWorkflow get androidWorkflow => context[AndroidWorkflow] as AndroidWorkflow;
+AndroidValidator get androidValidator => context[AndroidValidator] as AndroidValidator;
+AndroidLicenseValidator get androidLicenseValidator => context[AndroidLicenseValidator] as AndroidLicenseValidator;
 
 enum LicensesAccepted {
   none,
@@ -71,7 +71,7 @@ class AndroidValidator extends DoctorValidator {
         printTrace('java -version');
         final ProcessResult result = await processManager.run(<String>[javaBinary, '-version']);
         if (result.exitCode == 0) {
-          final List<String> versionLines = result.stderr.split('\n');
+          final List<String> versionLines = result.stderr.split('\n') as List<String>;
           javaVersion = versionLines.length >= 2 ? versionLines[1] : versionLines[0];
         }
       } catch (error) {
@@ -220,7 +220,7 @@ class AndroidLicenseValidator extends DoctorValidator {
     try {
       final ProcessResult result = await processManager.run(<String>[javaBinary, '-version']);
       if (result.exitCode == 0) {
-        final List<String> versionLines = result.stderr.split('\n');
+        final List<String> versionLines = result.stderr.split('\n') as List<String>;
         javaVersion = versionLines.length >= 2 ? versionLines[1] : versionLines[0];
       }
     } catch (error) {

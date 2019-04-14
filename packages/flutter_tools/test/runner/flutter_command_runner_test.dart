@@ -49,13 +49,13 @@ void main() {
         version: '1 2 3 4 5',
       );
 
-      runner = createTestCommandRunner(DummyFlutterCommand());
+      runner = createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
       processManager = MockProcessManager();
     });
 
     group('run', () {
       testUsingContext('checks that Flutter installation is up-to-date', () async {
-        final MockFlutterVersion version = FlutterVersion.instance;
+        final MockFlutterVersion version = FlutterVersion.instance as MockFlutterVersion;
         bool versionChecked = false;
         when(version.checkFlutterVersionFreshness()).thenAnswer((_) async {
           versionChecked = true;

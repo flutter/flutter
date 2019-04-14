@@ -73,7 +73,7 @@ Future<void> updateGeneratedXcodeProperties({
   }
 
   if (artifacts is LocalEngineArtifacts) {
-    final LocalEngineArtifacts localEngineArtifacts = artifacts;
+    final LocalEngineArtifacts localEngineArtifacts = artifacts as LocalEngineArtifacts;
     final String engineOutPath = localEngineArtifacts.engineOutPath;
     localsBuffer.writeln('FLUTTER_ENGINE=${fs.path.dirname(fs.path.dirname(engineOutPath))}');
     localsBuffer.writeln('LOCAL_ENGINE=${fs.path.basename(engineOutPath)}');
@@ -97,7 +97,7 @@ Future<void> updateGeneratedXcodeProperties({
   generatedXcodePropertiesFile.writeAsStringSync(localsBuffer.toString());
 }
 
-XcodeProjectInterpreter get xcodeProjectInterpreter => context[XcodeProjectInterpreter];
+XcodeProjectInterpreter get xcodeProjectInterpreter => context[XcodeProjectInterpreter] as XcodeProjectInterpreter;
 
 /// Interpreter of Xcode projects.
 class XcodeProjectInterpreter {
@@ -113,7 +113,7 @@ class XcodeProjectInterpreter {
       if (result.exitCode != 0) {
         return;
       }
-      _versionText = result.stdout.trim().replaceAll('\n', ', ');
+      _versionText = result.stdout.trim().replaceAll('\n', ', ') as String;
       final Match match = _versionRegex.firstMatch(versionText);
       if (match == null)
         return;

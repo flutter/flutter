@@ -98,7 +98,7 @@ class MacOSDevice extends Device {
       if (result.exitCode != 0) {
         return false;
       }
-      final List<String> lines = result.stdout.split('\n');
+      final List<String> lines = result.stdout.split('\n') as List<String>;
       for (String line in lines) {
         if (!line.contains(app.executable)) {
           continue;

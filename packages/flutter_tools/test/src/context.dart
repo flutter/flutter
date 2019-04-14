@@ -30,10 +30,10 @@ import 'common.dart';
 export 'package:flutter_tools/src/base/context.dart' show Generator;
 
 /// Return the test logger. This assumes that the current Logger is a BufferLogger.
-BufferLogger get testLogger => context[Logger];
+BufferLogger get testLogger => context[Logger] as BufferLogger;
 
-MockDeviceManager get testDeviceManager => context[DeviceManager];
-MockDoctor get testDoctor => context[Doctor];
+MockDeviceManager get testDeviceManager => context[DeviceManager] as MockDeviceManager;
+MockDoctor get testDoctor => context[Doctor] as MockDoctor;
 
 typedef ContextInitializer = void Function(AppContext testContext);
 
@@ -127,7 +127,7 @@ void testUsingContext(
 
 void _printBufferedErrors(AppContext testContext) {
   if (testContext[Logger] is BufferLogger) {
-    final BufferLogger bufferLogger = testContext[Logger];
+    final BufferLogger bufferLogger = testContext[Logger] as BufferLogger;
     if (bufferLogger.errorText.isNotEmpty)
       print(bufferLogger.errorText);
     bufferLogger.clear();

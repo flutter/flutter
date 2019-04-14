@@ -175,7 +175,7 @@ void main() {
         environment: anyNamed('environment')),
       ).thenAnswer((Invocation _) async {
         final MockProcessResult result = MockProcessResult();
-        when<String>(result.stdout).thenReturn(r'''
+        when<String>(result.stdout as String).thenReturn(r'''
 Usage: ideviceinfo [OPTIONS]
 Show information about a connected device.
 

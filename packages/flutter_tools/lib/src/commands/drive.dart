@@ -116,7 +116,7 @@ class DriveCommand extends RunCommandBase {
       observatoryUri = result.observatoryUri.toString();
     } else {
       printStatus('Will connect to already running application instance.');
-      observatoryUri = argResults['use-existing-app'];
+      observatoryUri = argResults['use-existing-app'] as String;
     }
 
     Cache.releaseLockEarly();
@@ -128,7 +128,7 @@ class DriveCommand extends RunCommandBase {
         rethrow;
       throwToolExit('CAUGHT EXCEPTION: $error\n$stackTrace');
     } finally {
-      if (argResults['keep-app-running'] ?? (argResults['use-existing-app'] != null)) {
+      if (argResults['keep-app-running'] as bool ?? (argResults['use-existing-app'] != null)) {
         printStatus('Leaving the application running.');
       } else {
         printStatus('Stopping application instance.');
@@ -141,7 +141,7 @@ class DriveCommand extends RunCommandBase {
 
   String _getTestFile() {
     if (argResults['driver'] != null)
-      return argResults['driver'];
+      return argResults['driver'] as String;
 
     // If the --driver argument wasn't provided, then derive the value from
     // the target file.

@@ -11,10 +11,10 @@ class Config {
   Config([File configFile]) {
     _configFile = configFile ?? fs.file(fs.path.join(_userHomeDir(), '.flutter_settings'));
     if (_configFile.existsSync())
-      _values = json.decode(_configFile.readAsStringSync());
+      _values = json.decode(_configFile.readAsStringSync()) as Map<String, dynamic>;
   }
 
-  static Config get instance => context[Config];
+  static Config get instance => context[Config] as Config;
 
   File _configFile;
   String get configPath => _configFile.path;

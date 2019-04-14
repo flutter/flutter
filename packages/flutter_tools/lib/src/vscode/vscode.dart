@@ -83,7 +83,7 @@ class VsCode {
   bool get isValid => _isValid;
   String get productName => 'VS Code' + (edition != null ? ', $edition' : '');
 
-  Iterable<ValidationMessage> get validationMessages => _validationMessages;
+  List<ValidationMessage> get validationMessages => _validationMessages;
 
   static List<VsCode> allInstalled() {
     if (platform.isMacOS)
@@ -219,8 +219,8 @@ class VsCode {
     if (!fs.isFileSync(packageJsonPath))
       return null;
     final String jsonString = fs.file(packageJsonPath).readAsStringSync();
-    final Map<String, dynamic> jsonObject = json.decode(jsonString);
-    return jsonObject['version'];
+    final Map<String, dynamic> jsonObject = json.decode(jsonString) as Map<String, dynamic>;
+    return jsonObject['version'] as String;
   }
 }
 

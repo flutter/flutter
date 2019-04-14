@@ -85,24 +85,24 @@ class AnalysisServer {
 
     if (response is Map<dynamic, dynamic>) {
       if (response['event'] != null) {
-        final String event = response['event'];
+        final String event = response['event'] as String;
         final dynamic params = response['params'];
 
         if (params is Map<dynamic, dynamic>) {
           if (event == 'server.status')
-            _handleStatus(response['params']);
+            _handleStatus(response['params'] as Map<String, dynamic>);
           else if (event == 'analysis.errors')
-            _handleAnalysisIssues(response['params']);
+            _handleAnalysisIssues(response['params'] as Map<String, dynamic>);
           else if (event == 'server.error')
-            _handleServerError(response['params']);
+            _handleServerError(response['params'] as Map<String, dynamic>);
         }
       } else if (response['error'] != null) {
         // Fields are 'code', 'message', and 'stackTrace'.
-        final Map<String, dynamic> error = response['error'];
+        final Map<String, dynamic> error = response['error'] as Map<String, dynamic>;
         printError(
             'Error response from the server: ${error['code']} ${error['message']}');
         if (error['stackTrace'] != null) {
-          printError(error['stackTrace']);
+          printError(error['stackTrace'] as String);
         }
       }
     }
@@ -111,7 +111,7 @@ class AnalysisServer {
   void _handleStatus(Map<String, dynamic> statusInfo) {
     // {"event":"server.status","params":{"analysis":{"isAnalyzing":true}}}
     if (statusInfo['analysis'] != null && !_analyzingController.isClosed) {
-      final bool isAnalyzing = statusInfo['analysis']['isAnalyzing'];
+      final bool isAnalyzing = statusInfo['analysis']['isAnalyzing'] as bool;
       _analyzingController.add(isAnalyzing);
     }
   }
@@ -120,15 +120,15 @@ class AnalysisServer {
     // Fields are 'isFatal', 'message', and 'stackTrace'.
     printError('Error from the analysis server: ${error['message']}');
     if (error['stackTrace'] != null) {
-      printError(error['stackTrace']);
+      printError(error['stackTrace'] as String);
     }
     _didServerErrorOccur = true;
   }
 
   void _handleAnalysisIssues(Map<String, dynamic> issueInfo) {
     // {"event":"analysis.errors","params":{"file":"/Users/.../lib/main.dart","errors":[]}}
-    final String file = issueInfo['file'];
-    final List<dynamic> errorsList = issueInfo['errors'];
+    final String file = issueInfo['file'] as String;
+    final List<dynamic> errorsList = issueInfo['errors'] as List<dynamic>;
     final List<AnalysisError> errors = errorsList
         .map<Map<String, dynamic>>(castStringKeyedMap)
         .map<AnalysisError>((Map<String, dynamic> json) => AnalysisError(json))
@@ -167,7 +167,7 @@ class AnalysisError implements Comparable<AnalysisError> {
   // },"message":"...","hasFix":false}
   Map<String, dynamic> json;
 
-  String get severity => json['severity'];
+  String get severity => json['severity'] as String;
   String get colorSeverity {
     switch(_severityLevel) {
       case _AnalysisSeverity.error:
@@ -181,14 +181,14 @@ class AnalysisError implements Comparable<AnalysisError> {
     return null;
   }
   _AnalysisSeverity get _severityLevel => _severityMap[severity] ?? _AnalysisSeverity.none;
-  String get type => json['type'];
-  String get message => json['message'];
-  String get code => json['code'];
+  String get type => json['type'] as String;
+  String get message => json['message'] as String;
+  String get code => json['code'] as String;
 
-  String get file => json['location']['file'];
-  int get startLine => json['location']['startLine'];
-  int get startColumn => json['location']['startColumn'];
-  int get offset => json['location']['offset'];
+  String get file => json['location']['file'] as String;
+  int get startLine => json['location']['startLine'] as int;
+  int get startColumn => json['location']['startColumn'] as int;
+  int get offset => json['location']['offset'] as int;
 
   String get messageSentenceFragment {
     if (message.endsWith('.')) {

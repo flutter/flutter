@@ -110,13 +110,13 @@ class TestCommand extends FastFlutterCommand {
     if (shouldRunPub) {
       await pubGet(context: PubContext.getVerifyContext(name), skipPubspecYamlCheck: true);
     }
-    final List<String> names = argResults['name'];
-    final List<String> plainNames = argResults['plain-name'];
+    final List<String> names = argResults['name'] as List<String>;
+    final List<String> plainNames = argResults['plain-name'] as List<String>;
     final FlutterProject flutterProject = await FlutterProject.current();
 
-    Iterable<String> files = argResults.rest.map<String>((String testPath) => fs.path.absolute(testPath)).toList();
+    List<String> files = argResults.rest.map<String>((String testPath) => fs.path.absolute(testPath)).toList();
 
-    final bool startPaused = argResults['start-paused'];
+    final bool startPaused = argResults['start-paused'] as bool;
     if (startPaused && files.length != 1) {
       throwToolExit(
         'When using --start-paused, you must specify a single test file to run.',
@@ -124,7 +124,7 @@ class TestCommand extends FastFlutterCommand {
       );
     }
 
-    final int jobs = int.tryParse(argResults['concurrency']);
+    final int jobs = int.tryParse(argResults['concurrency'] as String);
     if (jobs == null || jobs <= 0 || !jobs.isFinite) {
       throwToolExit(
         'Could not parse -j/--concurrency argument. It must be an integer greater than zero.'
@@ -148,11 +148,11 @@ class TestCommand extends FastFlutterCommand {
     }
 
     CoverageCollector collector;
-    if (argResults['coverage'] || argResults['merge-coverage']) {
+    if (argResults['coverage'] as bool || argResults['merge-coverage'] as bool) {
       collector = CoverageCollector();
     }
 
-    final bool machine = argResults['machine'];
+    final bool machine = argResults['machine'] as bool;
     if (collector != null && machine) {
       throwToolExit("The test command doesn't support --machine and coverage together");
     }
@@ -188,17 +188,17 @@ class TestCommand extends FastFlutterCommand {
       watcher: watcher,
       enableObservatory: collector != null || startPaused,
       startPaused: startPaused,
-      ipv6: argResults['ipv6'],
+      ipv6: argResults['ipv6'] as bool,
       machine: machine,
-      trackWidgetCreation: argResults['track-widget-creation'],
-      updateGoldens: argResults['update-goldens'],
+      trackWidgetCreation: argResults['track-widget-creation'] as bool,
+      updateGoldens: argResults['update-goldens'] as bool,
       concurrency: jobs,
       flutterProject: flutterProject,
     );
 
     if (collector != null) {
       if (!await collector.collectCoverageData(
-          argResults['coverage-path'], mergeCoverageData: argResults['merge-coverage']))
+          argResults['coverage-path'] as String, mergeCoverageData: argResults['merge-coverage'] as bool))
         throwToolExit(null);
     }
 

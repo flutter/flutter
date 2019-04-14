@@ -414,7 +414,7 @@ Future<void> _buildGradleProjectV2(
     command.add('-q');
   }
   if (artifacts is LocalEngineArtifacts) {
-    final LocalEngineArtifacts localEngineArtifacts = artifacts;
+    final LocalEngineArtifacts localEngineArtifacts = artifacts as LocalEngineArtifacts;
     printTrace('Using local engine: ${localEngineArtifacts.engineOutPath}');
     command.add('-PlocalEngineOut=${localEngineArtifacts.engineOutPath}');
   }
@@ -539,12 +539,12 @@ Future<void> _buildGradleProjectV2(
 
         final String name = newFile.name;
         if (name.contains('_snapshot_') || name.endsWith('.so')) {
-          final List<int> diff = bsdiff(oldFile.content, newFile.content);
-          final int ratio = 100 * diff.length ~/ newFile.content.length;
+          final List<int> diff = bsdiff(oldFile.content as List<int>, newFile.content as List<int>);
+          final int ratio = 100 * diff.length ~/ (newFile.content.length as int);
           printStatus('Deflated $name by ${ratio == 0 ? 99 : 100 - ratio}%');
           update.addFile(ArchiveFile(name + '.bzdiff40', diff.length, diff));
         } else {
-          update.addFile(ArchiveFile(name, newFile.content.length, newFile.content));
+          update.addFile(ArchiveFile(name, newFile.content.length as int, newFile.content));
         }
       }
 
@@ -571,7 +571,7 @@ Future<void> _buildGradleProjectV2(
       for (String fn in checksumFiles) {
         final ArchiveFile oldFile = oldApk.findFile(fn);
         if (oldFile != null)
-          baselineChecksum = getCrc32(oldFile.content, baselineChecksum);
+          baselineChecksum = getCrc32(oldFile.content as List<int>, baselineChecksum);
       }
       if (baselineChecksum == 0)
         throwToolExit('Error: Could not find baseline VM snapshot.');

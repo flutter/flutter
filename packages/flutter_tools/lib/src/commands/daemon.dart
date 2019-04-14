@@ -131,7 +131,7 @@ class Daemon {
     }
 
     try {
-      final String method = request['method'];
+      final String method = request['method'] as String;
       if (!method.contains('.'))
         throw 'method not understood: $method';
 
@@ -140,7 +140,7 @@ class Daemon {
       if (_domainMap[prefix] == null)
         throw 'no domain for method: $method';
 
-      _domainMap[prefix].handleCommand(name, id, request['params'] ?? const <String, dynamic>{});
+      _domainMap[prefix].handleCommand(name, id, request['params'] as Map<String, dynamic> ?? const <String, dynamic>{});
     } catch (error, trace) {
       _send(<String, dynamic>{
         'id': id,
@@ -216,7 +216,7 @@ abstract class Domain {
     final dynamic val = args[name];
     if (val != null && val is! String)
       throw '$name is not a String';
-    return val;
+    return val as String;
   }
 
   bool _getBoolArg(Map<String, dynamic> args, String name, { bool required = false }) {
@@ -225,7 +225,7 @@ abstract class Domain {
     final dynamic val = args[name];
     if (val != null && val is! bool)
       throw '$name is not a bool';
-    return val;
+    return val as bool;
   }
 
   int _getIntArg(Map<String, dynamic> args, String name, { bool required = false }) {
@@ -234,7 +234,7 @@ abstract class Domain {
     final dynamic val = args[name];
     if (val != null && val is! int)
       throw '$name is not an int';
-    return val;
+    return val as int;
   }
 
   void dispose() { }
@@ -589,8 +589,8 @@ class DeviceDomain extends Domain {
     if (!discoverer.supportsPlatform)
       return;
 
-    _discoverers.add(discoverer);
     if (discoverer is PollingDeviceDiscovery) {
+      _discoverers.add(discoverer);
       discoverer.onAdded.listen(_onDeviceEvent('device.added'));
       discoverer.onRemoved.listen(_onDeviceEvent('device.removed'));
     }
@@ -687,7 +687,7 @@ Stream<Map<String, dynamic>> get stdinCommandStream => stdin
   .where((String line) => line.startsWith('[{') && line.endsWith('}]'))
   .map<Map<String, dynamic>>((String line) {
     line = line.substring(1, line.length - 1);
-    return json.decode(line);
+    return json.decode(line) as Map<String, dynamic>;
   });
 
 void stdoutCommandResponse(Map<String, dynamic> command) {
@@ -819,7 +819,7 @@ class AppInstance {
     _logger.close();
   }
 
-  Future<T> _runInZone<T>(AppDomain domain, dynamic method()) {
+  Future<T> _runInZone<T>(AppDomain domain, FutureOr<T> method()) {
     _logger ??= _AppRunLogger(domain, this, parent: logToStdout ? logger : null);
 
     return context.run<T>(

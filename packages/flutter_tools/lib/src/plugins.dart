@@ -35,9 +35,9 @@ class Plugin {
     String iosPrefix;
     String pluginClass;
     if (pluginYaml != null) {
-      androidPackage = pluginYaml['androidPackage'];
-      iosPrefix = pluginYaml['iosPrefix'] ?? '';
-      pluginClass = pluginYaml['pluginClass'];
+      androidPackage = pluginYaml['androidPackage'] as String;
+      iosPrefix = pluginYaml['iosPrefix'] as String ?? '';
+      pluginClass = pluginYaml['pluginClass'] as String;
     }
     return Plugin(
       name: name,
@@ -63,7 +63,7 @@ Plugin _pluginFromPubspec(String name, Uri packageRoot) {
   if (pubspec == null)
     return null;
   final dynamic flutterConfig = pubspec['flutter'];
-  if (flutterConfig == null || !flutterConfig.containsKey('plugin'))
+  if (flutterConfig == null || !(flutterConfig.containsKey('plugin') as bool))
     return null;
   final String packageRootPath = fs.path.fromUri(packageRoot);
   printTrace('Found plugin $name at $packageRootPath');

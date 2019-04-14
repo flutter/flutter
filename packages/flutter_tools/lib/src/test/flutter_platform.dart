@@ -537,7 +537,7 @@ class _FlutterPlatform extends PlatformPlugin {
           if (!webSocket.isCompleted)
             webSocket.complete(WebSocketTransformer.upgrade(request));
         },
-        onError: (dynamic error, dynamic stack) {
+        onError: (dynamic error, StackTrace stack) {
           // If you reach here, it's unlikely we're going to be able to really handle this well.
           printTrace('test $ourTestCount: test harness socket server experienced an unexpected error: $error');
           if (!controllerSinkClosed) {
@@ -709,7 +709,7 @@ class _FlutterPlatform extends PlatformPlugin {
               testSocket.add(json.encode(event));
             },
             onDone: harnessDone.complete,
-            onError: (dynamic error, dynamic stack) {
+            onError: (dynamic error, StackTrace stack) {
               // If you reach here, it's unlikely we're going to be able to really handle this well.
               printError('test harness controller stream experienced an unexpected error\ntest: $testPath\nerror: $error');
               if (!controllerSinkClosed) {
@@ -725,12 +725,11 @@ class _FlutterPlatform extends PlatformPlugin {
           final Completer<void> testDone = Completer<void>();
           final StreamSubscription<dynamic> testToHarness = testSocket.listen(
             (dynamic encodedEvent) {
-              assert(encodedEvent
-                  is String); // we shouldn't ever get binary messages
-              controller.sink.add(json.decode(encodedEvent));
+              assert(encodedEvent is String); // we shouldn't ever get binary messages
+              controller.sink.add(json.decode(encodedEvent as String));
             },
             onDone: testDone.complete,
-            onError: (dynamic error, dynamic stack) {
+            onError: (dynamic error, StackTrace stack) {
               // If you reach here, it's unlikely we're going to be able to really handle this well.
               printError('test socket stream experienced an unexpected error\ntest: $testPath\nerror: $error');
               if (!controllerSinkClosed) {
@@ -1081,7 +1080,7 @@ class _FlutterPlatformStreamSinkWrapper<S> implements StreamSink<S> {
         assert(futureResults.length == 2);
         assert(futureResults.first == null);
         if (futureResults.last is _AsyncError) {
-          _done.completeError(futureResults.last.error, futureResults.last.stack);
+          _done.completeError(futureResults.last.error, futureResults.last.stack as StackTrace);
         } else {
           assert(futureResults.last == null);
           _done.complete();

@@ -69,7 +69,7 @@ List<AndroidEmulator> getEmulatorAvds() {
     return <AndroidEmulator>[];
   }
 
-  final String listAvdsOutput = processManager.runSync(<String>[emulatorPath, '-list-avds']).stdout;
+  final String listAvdsOutput = processManager.runSync(<String>[emulatorPath, '-list-avds']).stdout as String;
 
   final List<AndroidEmulator> emulators = <AndroidEmulator>[];
   if (listAvdsOutput != null) {

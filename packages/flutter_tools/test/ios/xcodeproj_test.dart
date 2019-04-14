@@ -31,7 +31,7 @@ void main() {
     setUp(() {
       mockProcessManager = MockProcessManager();
       xcodeProjectInterpreter = XcodeProjectInterpreter();
-      macOS = fakePlatform('macos');
+      macOS = fakePlatform('macos') as FakePlatform;
       fs = MemoryFileSystem();
       fs.file(xcodebuild).createSync(recursive: true);
     });
@@ -268,7 +268,7 @@ Information about project "Runner":
       fs = MemoryFileSystem();
       mockArtifacts = MockLocalEngineArtifacts();
       mockProcessManager = MockProcessManager();
-      macOS = fakePlatform('macos');
+      macOS = fakePlatform('macos') as FakePlatform;
       fs.file(xcodebuild).createSync(recursive: true);
     });
 

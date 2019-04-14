@@ -8,7 +8,7 @@ import '../desktop.dart';
 import '../doctor.dart';
 
 /// The [WindowsWorkflow] instance.
-WindowsWorkflow get windowsWorkflow => context[WindowsWorkflow];
+WindowsWorkflow get windowsWorkflow => context[WindowsWorkflow] as WindowsWorkflow;
 
 /// The windows-specific implementation of a [Workflow].
 ///

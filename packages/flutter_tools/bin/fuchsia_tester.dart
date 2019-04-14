@@ -85,7 +85,7 @@ Future<void> run(List<String> args) async {
       throwToolExit('Cannot find SDK files at ${sdkRootSrc.path}');
     }
     Directory coverageDirectory;
-    final String coverageDirectoryPath = argResults[_kOptionCoverageDirectory];
+    final String coverageDirectoryPath = argResults[_kOptionCoverageDirectory] as String;
     if (coverageDirectoryPath != null) {
       if (!fs.isDirectorySync(coverageDirectoryPath)) {
         throwToolExit('Cannot find coverage directory at $coverageDirectoryPath');
@@ -110,11 +110,11 @@ Future<void> run(List<String> args) async {
     fs.link(sdkRootDest.childFile('platform.dill').path).createSync('platform_strong.dill');
 
     PackageMap.globalPackagesPath =
-        fs.path.normalize(fs.path.absolute(argResults[_kOptionPackages]));
+        fs.path.normalize(fs.path.absolute(argResults[_kOptionPackages] as String));
 
     Directory testDirectory;
     CoverageCollector collector;
-    if (argResults['coverage']) {
+    if (argResults['coverage'] as bool) {
       collector = CoverageCollector();
       if (!argResults.options.contains(_kOptionTestDirectory)) {
         throwToolExit('Use of --coverage requires setting --test-directory');
@@ -125,7 +125,7 @@ Future<void> run(List<String> args) async {
 
     final Map<String, String> tests = <String, String>{};
     final List<Map<String, dynamic>> jsonList = List<Map<String, dynamic>>.from(
-      json.decode(fs.file(argResults[_kOptionTests]).readAsStringSync()));
+      json.decode(fs.file(argResults[_kOptionTests] as String).readAsStringSync()) as Iterable<dynamic>);
     for (Map<String, dynamic> map in jsonList) {
       final String source = fs.file(map['source']).resolveSymbolicLinksSync();
       final String dill = fs.file(map['dill']).resolveSymbolicLinksSync();
@@ -140,7 +140,7 @@ Future<void> run(List<String> args) async {
       enableObservatory: collector != null,
       precompiledDillFiles: tests,
       concurrency: math.max(1, platform.numberOfProcessors - 2),
-      icudtlPath: fs.path.absolute(argResults[_kOptionIcudtl]),
+      icudtlPath: fs.path.absolute(argResults[_kOptionIcudtl] as String),
     );
 
     if (collector != null) {
@@ -152,7 +152,7 @@ Future<void> run(List<String> args) async {
       } else {
         fs.currentDirectory = testDirectory;
       }
-      if (!await collector.collectCoverageData(argResults[_kOptionCoveragePath], coverageDirectory: coverageDirectory))
+      if (!await collector.collectCoverageData(argResults[_kOptionCoveragePath] as String, coverageDirectory: coverageDirectory))
         throwToolExit('Failed to collect coverage data');
     }
   } finally {

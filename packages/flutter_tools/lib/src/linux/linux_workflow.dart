@@ -8,7 +8,7 @@ import '../desktop.dart';
 import '../doctor.dart';
 
 /// The [WindowsWorkflow] instance.
-LinuxWorkflow get linuxWorkflow => context[LinuxWorkflow];
+LinuxWorkflow get linuxWorkflow => context[LinuxWorkflow] as LinuxWorkflow;
 
 /// The windows-specific implementation of a [Workflow].
 ///

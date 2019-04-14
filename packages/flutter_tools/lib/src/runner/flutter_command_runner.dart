@@ -204,7 +204,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
     } catch (error) {
       // we don't have a logger at the time this is run
       // (which is why we don't use printTrace here)
-      print(userMessages.runnerNoRoot(error));
+      print(userMessages.runnerNoRoot(error as String));
     }
     return '.';
   }
@@ -216,7 +216,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
       // override this function so we can call tryArgsCompletion instead, so the
       // completion package can interrogate the argParser, and as part of that,
       // it calls argParser.parse(args) itself and returns the result.
-      return tryArgsCompletion(args, argParser);
+      return tryArgsCompletion(args.toList(), argParser);
     } on ArgParserException catch (error) {
       if (error.commands.isEmpty) {
         usageException(error.message);
@@ -249,7 +249,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
     };
 
     // Check for verbose.
-    if (topLevelResults['verbose']) {
+    if (topLevelResults['verbose'] as bool) {
       // Override the logger.
       contextOverrides[Logger] = VerboseLogger(logger);
     }
@@ -260,7 +260,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
     int wrapColumn;
     if (topLevelResults.wasParsed('wrap-column')) {
       try {
-        wrapColumn = int.parse(topLevelResults['wrap-column']);
+        wrapColumn = int.parse(topLevelResults['wrap-column'] as String);
         if (wrapColumn < 0) {
           throwToolExit(userMessages.runnerWrapColumnInvalid(topLevelResults['wrap-column']));
         }
@@ -272,23 +272,23 @@ class FlutterCommandRunner extends CommandRunner<void> {
     // If we're not writing to a terminal with a defined width, then don't wrap
     // anything, unless the user explicitly said to.
     final bool useWrapping = topLevelResults.wasParsed('wrap')
-        ? topLevelResults['wrap']
-        : io.stdio.terminalColumns == null ? false : topLevelResults['wrap'];
+        ? topLevelResults['wrap'] as bool
+        : io.stdio.terminalColumns == null ? false : topLevelResults['wrap'] as bool;
     contextOverrides[OutputPreferences] = OutputPreferences(
       wrapText: useWrapping,
-      showColor: topLevelResults['color'],
+      showColor: topLevelResults['color'] as bool,
       wrapColumn: wrapColumn,
     );
 
-    if (topLevelResults['show-test-device'] ||
+    if (topLevelResults['show-test-device'] as bool ||
         topLevelResults['device-id'] == FlutterTesterDevices.kTesterDeviceId) {
       FlutterTesterDevices.showFlutterTesterDevice = true;
     }
 
-    String recordTo = topLevelResults['record-to'];
-    String replayFrom = topLevelResults['replay-from'];
+    String recordTo = topLevelResults['record-to'] as String;
+    String replayFrom = topLevelResults['replay-from'] as String;
 
-    if (topLevelResults['bug-report']) {
+    if (topLevelResults['bug-report'] as bool) {
       // --bug-report implies --record-to=<tmp_path>
       final Directory tempDir = const LocalFileSystem()
           .systemTempDirectory
@@ -342,7 +342,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
 
     // We must set Cache.flutterRoot early because other features use it (e.g.
     // enginePath's initializer uses it).
-    final String flutterRoot = topLevelResults['flutter-root'] ?? _defaultFlutterRoot;
+    final String flutterRoot = topLevelResults['flutter-root'] as String ?? _defaultFlutterRoot;
     Cache.flutterRoot = fs.path.normalize(fs.path.absolute(flutterRoot));
 
     // Set up the tooling configuration.
@@ -358,30 +358,30 @@ class FlutterCommandRunner extends CommandRunner<void> {
         return MapEntry<Type, Generator>(type, () => value);
       }),
       body: () async {
-        logger.quiet = topLevelResults['quiet'];
+        logger.quiet = topLevelResults['quiet'] as bool;
 
         if (platform.environment['FLUTTER_ALREADY_LOCKED'] != 'true')
           await Cache.lock();
 
-        if (topLevelResults['suppress-analytics'])
+        if (topLevelResults['suppress-analytics'] as bool)
           flutterUsage.suppressAnalytics = true;
 
         _checkFlutterCopy();
         await FlutterVersion.instance.ensureVersionFile();
-        if (topLevelResults.command?.name != 'upgrade' && topLevelResults['version-check']) {
+        if (topLevelResults.command?.name != 'upgrade' && topLevelResults['version-check'] as bool) {
           await FlutterVersion.instance.checkFlutterVersionFreshness();
         }
 
         if (topLevelResults.wasParsed('packages'))
-          PackageMap.globalPackagesPath = fs.path.normalize(fs.path.absolute(topLevelResults['packages']));
+          PackageMap.globalPackagesPath = fs.path.normalize(fs.path.absolute(topLevelResults['packages'] as String));
 
         // See if the user specified a specific device.
-        deviceManager.specifiedDeviceId = topLevelResults['device-id'];
+        deviceManager.specifiedDeviceId = topLevelResults['device-id'] as String;
 
-        if (topLevelResults['version']) {
+        if (topLevelResults['version'] as bool) {
           flutterUsage.sendCommand('version');
           String status;
-          if (topLevelResults['machine']) {
+          if (topLevelResults['machine'] as bool) {
             status = const JsonEncoder.withIndent('  ').convert(FlutterVersion.instance.toJson());
           } else {
             status = FlutterVersion.instance.toString();
@@ -390,7 +390,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
           return;
         }
 
-        if (topLevelResults['machine']) {
+        if (topLevelResults['machine'] as bool) {
           throwToolExit('The --machine flag is only valid with the --version flag.', exitCode: 2);
         }
         await super.runCommand(topLevelResults);
@@ -405,7 +405,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
   }
 
   String _findEnginePath(ArgResults globalResults) {
-    String engineSourcePath = globalResults['local-engine-src-path'] ?? platform.environment[kFlutterEngineEnvironmentVariableName];
+    String engineSourcePath = globalResults['local-engine-src-path'] as String ?? platform.environment[kFlutterEngineEnvironmentVariableName];
 
     if (engineSourcePath == null && globalResults['local-engine'] != null) {
       try {
@@ -457,7 +457,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
   EngineBuildPaths _findEngineBuildPath(ArgResults globalResults, String enginePath) {
     String localEngine;
     if (globalResults['local-engine'] != null) {
-      localEngine = globalResults['local-engine'];
+      localEngine = globalResults['local-engine'] as String;
     } else {
       throwToolExit(userMessages.runnerLocalEngineRequired, exitCode: 2);
     }

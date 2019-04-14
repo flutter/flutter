@@ -55,7 +55,7 @@ class Usage {
   }
 
   /// Returns [Usage] active in the current app context.
-  static Usage get instance => context[Usage];
+  static Usage get instance => context[Usage] as Usage;
 
   Analytics _analytics;
 

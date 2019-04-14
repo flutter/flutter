@@ -27,7 +27,7 @@ void main() {
   testUsingContext('pub get 69', () async {
     String error;
 
-    final MockProcessManager processMock = context[ProcessManager];
+    final MockProcessManager processMock = context[ProcessManager] as MockProcessManager;
 
     FakeAsync().run((FakeAsync time) {
       expect(processMock.lastPubEnvironment, isNull);
@@ -95,8 +95,8 @@ void main() {
   testUsingContext('pub cache in root is used', () async {
     String error;
 
-    final MockProcessManager processMock = context[ProcessManager];
-    final MockFileSystem fsMock = context[FileSystem];
+    final MockProcessManager processMock = context[ProcessManager] as MockProcessManager;
+    final MockFileSystem fsMock = context[FileSystem] as MockFileSystem;
 
     FakeAsync().run((FakeAsync time) {
       MockDirectory.findCache = true;
@@ -122,7 +122,7 @@ void main() {
   testUsingContext('pub cache in environment is used', () async {
     String error;
 
-    final MockProcessManager processMock = context[ProcessManager];
+    final MockProcessManager processMock = context[ProcessManager] as MockProcessManager;
 
     FakeAsync().run((FakeAsync time) {
       MockDirectory.findCache = true;
@@ -229,7 +229,7 @@ class MockFileSystem extends ForwardingFileSystem {
   }
 
   @override
-  Directory directory(dynamic path) {
+  Directory directory(covariant String path) {
     return MockDirectory(path);
   }
 }

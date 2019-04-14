@@ -11,7 +11,7 @@ import 'process.dart';
 import 'process_manager.dart';
 
 /// Returns [OperatingSystemUtils] active in the current app context (i.e. zone).
-OperatingSystemUtils get os => context[OperatingSystemUtils];
+OperatingSystemUtils get os => context[OperatingSystemUtils] as OperatingSystemUtils;
 
 abstract class OperatingSystemUtils {
   factory OperatingSystemUtils() {
@@ -91,7 +91,7 @@ class _PosixUtils extends OperatingSystemUtils {
     final ProcessResult result = processManager.runSync(command);
     if (result.exitCode != 0)
       return const <File>[];
-    final String stdout = result.stdout;
+    final String stdout = result.stdout as String;
     return stdout.trim().split('\n').map<File>((String path) => fs.file(path.trim())).toList();
   }
 
@@ -164,7 +164,7 @@ class _WindowsUtils extends OperatingSystemUtils {
     final ProcessResult result = processManager.runSync(<String>['where', execName]);
     if (result.exitCode != 0)
       return const <File>[];
-    final List<String> lines = result.stdout.trim().split('\n');
+    final List<String> lines = result.stdout.trim().split('\n') as List<String>;
     if (all)
       return lines.map<File>((String path) => fs.file(path.trim())).toList();
     return <File>[fs.file(lines.first.trim())];
@@ -177,7 +177,7 @@ class _WindowsUtils extends OperatingSystemUtils {
       if (entity is! File) {
         continue;
       }
-      final File file = entity;
+      final File file = entity as File;
       final String path = file.fileSystem.path.relative(file.path, from: data.path);
       final List<int> bytes = file.readAsBytesSync();
       archive.addFile(ArchiveFile(path, bytes.length, bytes));
@@ -232,7 +232,7 @@ class _WindowsUtils extends OperatingSystemUtils {
       final File destFile = fs.file(fs.path.join(targetDirectory.path, archiveFile.name));
       if (!destFile.parent.existsSync())
         destFile.parent.createSync(recursive: true);
-      destFile.writeAsBytesSync(archiveFile.content);
+      destFile.writeAsBytesSync(archiveFile.content as List<int>);
     }
   }
 
@@ -249,7 +249,7 @@ class _WindowsUtils extends OperatingSystemUtils {
       final ProcessResult result = processManager.runSync(
           <String>['ver'], runInShell: true);
       if (result.exitCode == 0)
-        _name = result.stdout.trim();
+        _name = result.stdout.trim() as String;
       else
         _name = super.name;
     }

@@ -81,7 +81,7 @@ class BuildRunner extends CodeGenerator {
       stringBuffer.writeln('dependencies:');
       final YamlMap builders = flutterProject.builders;
       if (builders != null) {
-        for (String name in builders.keys) {
+        for (Object name in builders.keys) {
           final Object node = builders[name];
           stringBuffer.writeln('  $name: $node');
         }

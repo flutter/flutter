@@ -47,14 +47,14 @@ class TraceCommand extends FlutterCommand {
   Future<FlutterCommandResult> runCommand() async {
     int observatoryPort;
     if (argResults.wasParsed('debug-port')) {
-      observatoryPort = int.tryParse(argResults['debug-port']);
+      observatoryPort = int.tryParse(argResults['debug-port'] as String);
     }
     if (observatoryPort == null) {
       throwToolExit('The --debug-port argument must be specified.');
     }
 
-    bool start = argResults['start'];
-    bool stop = argResults['stop'];
+    bool start = argResults['start'] as bool;
+    bool stop = argResults['stop'] as bool;
     if (!start && !stop) {
       start = true;
       stop = true;
@@ -64,7 +64,7 @@ class TraceCommand extends FlutterCommand {
     Duration duration;
     if (argResults.wasParsed('duration')) {
       try {
-        duration = Duration(seconds: int.parse(argResults['duration']));
+        duration = Duration(seconds: int.parse(argResults['duration'] as String));
       } on FormatException {
         throwToolExit('Invalid duration passed to --duration; it should be a positive number of seconds.');
       }

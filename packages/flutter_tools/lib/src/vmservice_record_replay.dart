@@ -57,14 +57,14 @@ abstract class _Message implements Comparable<_Message> {
 
   factory _Message.fromRecording(Map<String, dynamic> recordingData) {
     return recordingData[_kType] == _kRequest
-        ? _Request(recordingData[_kData])
-        : _Response(recordingData[_kData]);
+        ? _Request(recordingData[_kData] as Map<String, dynamic>)
+        : _Response(recordingData[_kData] as Map<String, dynamic>);
   }
 
   final String type;
   final Map<String, dynamic> data;
 
-  int get id => data[_kId];
+  int get id => data[_kId] as int;
 
   /// Allows [JsonEncoder] to properly encode objects of this type.
   Map<String, dynamic> toJson() {
@@ -94,13 +94,13 @@ abstract class _Message implements Comparable<_Message> {
 /// A VM service JSON-rpc request (sent to the VM).
 class _Request extends _Message {
   _Request(Map<String, dynamic> data) : super(_kRequest, data);
-  _Request.fromString(String data) : this(json.decoder.convert(data));
+  _Request.fromString(String data) : this(json.decoder.convert(data) as Map<String, dynamic>);
 }
 
 /// A VM service JSON-rpc response (from the VM).
 class _Response extends _Message {
   _Response(Map<String, dynamic> data) : super(_kResponse, data);
-  _Response.fromString(String data) : this(json.decoder.convert(data));
+  _Response.fromString(String data) : this(json.decoder.convert(data) as Map<String, dynamic>);
 }
 
 /// A matching request/response pair.
@@ -204,17 +204,17 @@ class ReplayVMServiceChannel extends StreamChannelMixin<String> {
   static Map<int, _Transaction> _loadTransactions(Directory location) {
     final File file = _getManifest(location);
     final String jsonData = file.readAsStringSync();
-    final Iterable<_Message> messages = json.decoder.convert(jsonData).map<_Message>(_toMessage);
+    final Iterable<_Message> messages = json.decoder.convert(jsonData).map<_Message>(_toMessage) as Iterable<_Message>;
     final Map<int, _Transaction> transactions = <int, _Transaction>{};
     for (_Message message in messages) {
       final _Transaction transaction =
           transactions.putIfAbsent(message.id, () => _Transaction());
       if (message.type == _kRequest) {
         assert(transaction.request == null);
-        transaction.request = message;
+        transaction.request = message as _Request;
       } else {
         assert(transaction.response == null);
-        transaction.response = message;
+        transaction.response = message as _Response;
       }
     }
     return transactions;

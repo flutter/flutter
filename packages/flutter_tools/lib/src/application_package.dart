@@ -26,7 +26,7 @@ import 'tester/flutter_tester.dart';
 import 'web/web_device.dart';
 
 class ApplicationPackageFactory {
-  static ApplicationPackageFactory get instance => context[ApplicationPackageFactory];
+  static ApplicationPackageFactory get instance => context[ApplicationPackageFactory] as ApplicationPackageFactory;
 
   Future<ApplicationPackage> getPackageForPlatform(
     TargetPlatform platform, {
@@ -196,7 +196,7 @@ class AndroidApk extends ApplicationPackage {
           if (!(node is xml.XmlElement)) {
             continue;
           }
-          final xml.XmlElement xmlElement = node;
+          final xml.XmlElement xmlElement = node as xml.XmlElement;
           final String name = xmlElement.getAttribute('android:name');
           if (name == 'android.intent.action.MAIN') {
             actionName = name;
@@ -269,7 +269,7 @@ abstract class IOSApp extends ApplicationPackage {
         return null;
       }
       try {
-        bundleDir = payloadDir.listSync().singleWhere(_isBundleDirectory);
+        bundleDir = payloadDir.listSync().singleWhere(_isBundleDirectory) as Directory;
       } on StateError {
         printError(
             'Invalid prebuilt iOS ipa. Does not contain a single app bundle.');
@@ -407,14 +407,14 @@ class _Element extends _Entry {
     return children.firstWhere(
         (_Entry e) => e is _Attribute && e.key.startsWith(name),
         orElse: () => null,
-    );
+    ) as _Attribute;
   }
 
   _Element firstElement(String name) {
     return children.firstWhere(
         (_Entry e) => e is _Element && e.name.startsWith(name),
         orElse: () => null,
-    );
+    ) as _Element;
   }
 
   Iterable<_Entry> allElements(String name) {
@@ -482,7 +482,7 @@ class ApkManifestData {
     final Iterable<_Entry> activities = application.allElements('activity');
 
     _Element launchActivity;
-    for (_Element activity in activities) {
+    for (_Element activity in activities.cast<_Element>()) {
       final _Attribute enabled = activity.firstAttribute('android:enabled');
       final Iterable<_Element> intentFilters = activity
           .allElements('intent-filter')

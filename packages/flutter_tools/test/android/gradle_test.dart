@@ -227,7 +227,7 @@ someOtherTask
       fs = MemoryFileSystem();
       mockArtifacts = MockLocalEngineArtifacts();
       mockProcessManager = MockProcessManager();
-      android = fakePlatform('android');
+      android = fakePlatform('android') as FakePlatform;
     });
 
     void testUsingAndroidContext(String description, dynamic testMethod()) {

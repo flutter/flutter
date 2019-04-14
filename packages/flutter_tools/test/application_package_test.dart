@@ -146,21 +146,21 @@ void main() {
     testUsingContext('Error when parsing manifest with no Activity that has enabled set to true nor has no value for its enabled field', () {
       final ApkManifestData data = ApkManifestData.parseFromXmlDump(_aaptDataWithNoEnabledActivity);
       expect(data, isNull);
-      final BufferLogger logger = context[Logger];
+      final BufferLogger logger = context[Logger] as BufferLogger;
       expect(
           logger.errorText, 'Error running io.flutter.examples.hello_world. Default activity not found\n');
     }, overrides: noColorTerminalOverride);
     testUsingContext('Error when parsing manifest with no Activity that has action set to android.intent.action.MAIN', () {
       final ApkManifestData data = ApkManifestData.parseFromXmlDump(_aaptDataWithNoMainActivity);
       expect(data, isNull);
-      final BufferLogger logger = context[Logger];
+      final BufferLogger logger = context[Logger] as BufferLogger;
       expect(
           logger.errorText, 'Error running io.flutter.examples.hello_world. Default activity not found\n');
     }, overrides: noColorTerminalOverride);
     testUsingContext('Error when parsing manifest with no Activity that has category set to android.intent.category.LAUNCHER', () {
       final ApkManifestData data = ApkManifestData.parseFromXmlDump(_aaptDataWithNoLauncherActivity);
       expect(data, isNull);
-      final BufferLogger logger = context[Logger];
+      final BufferLogger logger = context[Logger] as BufferLogger;
       expect(
           logger.errorText, 'Error running io.flutter.examples.hello_world. Default activity not found\n');
     }, overrides: noColorTerminalOverride);
@@ -174,9 +174,9 @@ void main() {
     };
     testUsingContext('Error on non-existing file', () {
       final PrebuiltIOSApp iosApp =
-          IOSApp.fromPrebuiltApp(fs.file('not_existing.ipa'));
+          IOSApp.fromPrebuiltApp(fs.file('not_existing.ipa')) as PrebuiltIOSApp;
       expect(iosApp, isNull);
-      final BufferLogger logger = context[Logger];
+      final BufferLogger logger = context[Logger] as BufferLogger;
       expect(
         logger.errorText,
         'File "not_existing.ipa" does not exist. Use an app bundle or an ipa.\n',
@@ -185,17 +185,17 @@ void main() {
     testUsingContext('Error on non-app-bundle folder', () {
       fs.directory('regular_folder').createSync();
       final PrebuiltIOSApp iosApp =
-          IOSApp.fromPrebuiltApp(fs.file('regular_folder'));
+          IOSApp.fromPrebuiltApp(fs.file('regular_folder')) as PrebuiltIOSApp;
       expect(iosApp, isNull);
-      final BufferLogger logger = context[Logger];
+      final BufferLogger logger = context[Logger] as BufferLogger;
       expect(
           logger.errorText, 'Folder "regular_folder" is not an app bundle.\n');
     }, overrides: overrides);
     testUsingContext('Error on no info.plist', () {
       fs.directory('bundle.app').createSync();
-      final PrebuiltIOSApp iosApp = IOSApp.fromPrebuiltApp(fs.file('bundle.app'));
+      final PrebuiltIOSApp iosApp = IOSApp.fromPrebuiltApp(fs.file('bundle.app')) as PrebuiltIOSApp;
       expect(iosApp, isNull);
-      final BufferLogger logger = context[Logger];
+      final BufferLogger logger = context[Logger] as BufferLogger;
       expect(
         logger.errorText,
         'Invalid prebuilt iOS app. Does not contain Info.plist.\n',
@@ -204,9 +204,9 @@ void main() {
     testUsingContext('Error on bad info.plist', () {
       fs.directory('bundle.app').createSync();
       fs.file('bundle.app/Info.plist').writeAsStringSync(badPlistData);
-      final PrebuiltIOSApp iosApp = IOSApp.fromPrebuiltApp(fs.file('bundle.app'));
+      final PrebuiltIOSApp iosApp = IOSApp.fromPrebuiltApp(fs.file('bundle.app')) as PrebuiltIOSApp;
       expect(iosApp, isNull);
-      final BufferLogger logger = context[Logger];
+      final BufferLogger logger = context[Logger] as BufferLogger;
       expect(
         logger.errorText,
         contains(
@@ -216,8 +216,8 @@ void main() {
     testUsingContext('Success with app bundle', () {
       fs.directory('bundle.app').createSync();
       fs.file('bundle.app/Info.plist').writeAsStringSync(plistData);
-      final PrebuiltIOSApp iosApp = IOSApp.fromPrebuiltApp(fs.file('bundle.app'));
-      final BufferLogger logger = context[Logger];
+      final PrebuiltIOSApp iosApp = IOSApp.fromPrebuiltApp(fs.file('bundle.app')) as PrebuiltIOSApp;
+      final BufferLogger logger = context[Logger] as BufferLogger;
       expect(logger.errorText, isEmpty);
       expect(iosApp.bundleDir.path, 'bundle.app');
       expect(iosApp.id, 'fooBundleId');
@@ -226,9 +226,9 @@ void main() {
     testUsingContext('Bad ipa zip-file, no payload dir', () {
       fs.file('app.ipa').createSync();
       when(os.unzip(fs.file('app.ipa'), any)).thenAnswer((Invocation _) { });
-      final PrebuiltIOSApp iosApp = IOSApp.fromPrebuiltApp(fs.file('app.ipa'));
+      final PrebuiltIOSApp iosApp = IOSApp.fromPrebuiltApp(fs.file('app.ipa')) as PrebuiltIOSApp;
       expect(iosApp, isNull);
-      final BufferLogger logger = context[Logger];
+      final BufferLogger logger = context[Logger] as BufferLogger;
       expect(
         logger.errorText,
         'Invalid prebuilt iOS ipa. Does not contain a "Payload" directory.\n',
@@ -237,11 +237,11 @@ void main() {
     testUsingContext('Bad ipa zip-file, two app bundles', () {
       fs.file('app.ipa').createSync();
       when(os.unzip(any, any)).thenAnswer((Invocation invocation) {
-        final File zipFile = invocation.positionalArguments[0];
+        final File zipFile = invocation.positionalArguments[0] as File;
         if (zipFile.path != 'app.ipa') {
           return null;
         }
-        final Directory targetDirectory = invocation.positionalArguments[1];
+        final Directory targetDirectory = invocation.positionalArguments[1] as Directory;
         final String bundlePath1 =
             fs.path.join(targetDirectory.path, 'Payload', 'bundle1.app');
         final String bundlePath2 =
@@ -249,20 +249,20 @@ void main() {
         fs.directory(bundlePath1).createSync(recursive: true);
         fs.directory(bundlePath2).createSync(recursive: true);
       });
-      final PrebuiltIOSApp iosApp = IOSApp.fromPrebuiltApp(fs.file('app.ipa'));
+      final PrebuiltIOSApp iosApp = IOSApp.fromPrebuiltApp(fs.file('app.ipa')) as PrebuiltIOSApp;
       expect(iosApp, isNull);
-      final BufferLogger logger = context[Logger];
+      final BufferLogger logger = context[Logger] as BufferLogger;
       expect(logger.errorText,
           'Invalid prebuilt iOS ipa. Does not contain a single app bundle.\n');
     }, overrides: overrides);
     testUsingContext('Success with ipa', () {
       fs.file('app.ipa').createSync();
       when(os.unzip(any, any)).thenAnswer((Invocation invocation) {
-        final File zipFile = invocation.positionalArguments[0];
+        final File zipFile = invocation.positionalArguments[0] as File;
         if (zipFile.path != 'app.ipa') {
           return null;
         }
-        final Directory targetDirectory = invocation.positionalArguments[1];
+        final Directory targetDirectory = invocation.positionalArguments[1] as Directory;
         final Directory bundleAppDir = fs.directory(
             fs.path.join(targetDirectory.path, 'Payload', 'bundle.app'));
         bundleAppDir.createSync(recursive: true);
@@ -270,8 +270,8 @@ void main() {
             .file(fs.path.join(bundleAppDir.path, 'Info.plist'))
             .writeAsStringSync(plistData);
       });
-      final PrebuiltIOSApp iosApp = IOSApp.fromPrebuiltApp(fs.file('app.ipa'));
-      final BufferLogger logger = context[Logger];
+      final PrebuiltIOSApp iosApp = IOSApp.fromPrebuiltApp(fs.file('app.ipa')) as PrebuiltIOSApp;
+      final BufferLogger logger = context[Logger] as BufferLogger;
       expect(logger.errorText, isEmpty);
       expect(iosApp.bundleDir.path, endsWith('bundle.app'));
       expect(iosApp.id, 'fooBundleId');
@@ -455,7 +455,7 @@ class MockIosWorkFlow extends Mock implements IOSWorkflow {
     if (!file.existsSync()) {
       return null;
     }
-    return json.decode(file.readAsStringSync())[key];
+    return json.decode(file.readAsStringSync())[key] as String;
   }
 }
 

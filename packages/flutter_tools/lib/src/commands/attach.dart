@@ -95,7 +95,7 @@ class AttachCommand extends FlutterCommand {
     if (argResults['debug-port'] == null)
       return null;
     try {
-      return int.parse(argResults['debug-port']);
+      return int.parse(argResults['debug-port'] as String);
     } catch (error) {
       throwToolExit('Invalid port for `--debug-port`: $error');
     }
@@ -103,7 +103,7 @@ class AttachCommand extends FlutterCommand {
   }
 
   String get appId {
-    return argResults['app-id'];
+    return argResults['app-id'] as String;
   }
 
   @override
@@ -136,7 +136,7 @@ class AttachCommand extends FlutterCommand {
 
     await _validateArguments();
 
-    writePidFile(argResults['pid-file']);
+    writePidFile(argResults['pid-file'] as String);
 
     final Device device = await findTargetDevice();
     Future<int> getDevicePort() async {
@@ -153,7 +153,7 @@ class AttachCommand extends FlutterCommand {
     }
     final int devicePort = await getDevicePort();
 
-    final Daemon daemon = argResults['machine']
+    final Daemon daemon = argResults['machine'] as bool
       ? Daemon(stdinCommandStream, stdoutCommandResponse,
             notifyingLogger: NotifyingLogger(), logToStdout: true)
       : null;
@@ -164,7 +164,7 @@ class AttachCommand extends FlutterCommand {
     if (devicePort == null) {
       if (device is FuchsiaDevice) {
         attachLogger = true;
-        final String module = argResults['module'];
+        final String module = argResults['module'] as String;
         if (module == null)
           throwToolExit('\'--module\' is required for attaching to a Fuchsia device');
         usesIpv6 = device.ipv6;
@@ -210,12 +210,12 @@ class AttachCommand extends FlutterCommand {
       final FlutterDevice flutterDevice = await FlutterDevice.create(
         device,
         trackWidgetCreation: false,
-        dillOutputPath: argResults['output-dill'],
-        fileSystemRoots: argResults['filesystem-root'],
-        fileSystemScheme: argResults['filesystem-scheme'],
-        viewFilter: argResults['isolate-filter'],
-        target: argResults['target'],
-        targetModel: TargetModel(argResults['target-model']),
+        dillOutputPath: argResults['output-dill'] as String,
+        fileSystemRoots: argResults['filesystem-root'] as List<String>,
+        fileSystemScheme: argResults['filesystem-scheme'] as String,
+        viewFilter: argResults['isolate-filter'] as String,
+        target: argResults['target'] as String,
+        targetModel: TargetModel(argResults['target-model'] as String),
       );
       flutterDevice.observatoryUris = <Uri>[ observatoryUri ];
       final List<FlutterDevice> flutterDevices =  <FlutterDevice>[flutterDevice];
@@ -225,10 +225,10 @@ class AttachCommand extends FlutterCommand {
             flutterDevices,
             target: targetFile,
             debuggingOptions: debuggingOptions,
-            packagesFilePath: globalResults['packages'],
+            packagesFilePath: globalResults['packages'] as String,
             usesTerminalUI: daemon == null,
-            projectRootPath: argResults['project-root'],
-            dillOutputPath: argResults['output-dill'],
+            projectRootPath: argResults['project-root'] as String,
+            dillOutputPath: argResults['output-dill'] as String,
             ipv6: usesIpv6,
             flutterProject: flutterProject,
           )

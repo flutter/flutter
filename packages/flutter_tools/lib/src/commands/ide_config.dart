@@ -132,7 +132,7 @@ class IdeConfigCommand extends FlutterCommand {
         continue;
       }
 
-      final File srcFile = entity;
+      final File srcFile = entity as File;
 
       // Skip template files in both the ide_templates and templates
       // directories to avoid copying onto themselves.
@@ -163,7 +163,7 @@ class IdeConfigCommand extends FlutterCommand {
           manifest.add('$relativePath${Template.copyTemplateExtension}');
           continue;
         }
-        if (argResults['overwrite']) {
+        if (argResults['overwrite'] as bool) {
           finalDestinationFile.deleteSync();
           printStatus('  $relativeDestination (overwritten)');
         } else {
@@ -184,7 +184,7 @@ class IdeConfigCommand extends FlutterCommand {
     }
 
     // If we're not overwriting, then we're not going to remove missing items either.
-    if (!argResults['overwrite']) {
+    if (!(argResults['overwrite'] as bool)) {
       return;
     }
 
@@ -195,7 +195,7 @@ class IdeConfigCommand extends FlutterCommand {
       if (entity is! File) {
         continue;
       }
-      final File templateFile = entity;
+      final File templateFile = entity as File;
       final String relativePath = fs.path.relative(
         templateFile.absolute.path,
         from: _templateDirectory.absolute.path,
@@ -228,7 +228,7 @@ class IdeConfigCommand extends FlutterCommand {
 
     await Cache.instance.updateAll(<DevelopmentArtifact>{ DevelopmentArtifact.universal });
 
-    if (argResults['update-templates']) {
+    if (argResults['update-templates'] as bool) {
       _handleTemplateUpdate();
       return null;
     }
@@ -262,7 +262,7 @@ class IdeConfigCommand extends FlutterCommand {
     return template.render(
       fs.directory(dirPath),
       context,
-      overwriteExisting: argResults['overwrite'],
+      overwriteExisting: argResults['overwrite'] as bool,
     );
   }
 }

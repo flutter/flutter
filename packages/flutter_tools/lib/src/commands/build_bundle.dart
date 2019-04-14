@@ -63,34 +63,34 @@ class BuildBundleCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final String targetPlatform = argResults['target-platform'];
+    final String targetPlatform = argResults['target-platform'] as String;
     final TargetPlatform platform = getTargetPlatformForName(targetPlatform);
     if (platform == null)
       throwToolExit('Unknown platform: $targetPlatform');
 
     final BuildMode buildMode = getBuildMode();
 
-    final String buildNumber = argResults['build-number'] != null ? argResults['build-number'] : null;
+    final String buildNumber = argResults['build-number'] != null ? argResults['build-number'] as String : null;
 
     await build(
       platform: platform,
       buildMode: buildMode,
       mainPath: targetFile,
-      manifestPath: argResults['manifest'],
-      depfilePath: argResults['depfile'],
-      privateKeyPath: argResults['private-key'],
-      assetDirPath: argResults['asset-dir'],
-      precompiledSnapshot: argResults['precompiled'],
-      reportLicensedPackages: argResults['report-licensed-packages'],
-      trackWidgetCreation: argResults['track-widget-creation'],
-      compilationTraceFilePath: argResults['compilation-trace-file'],
-      createPatch: argResults['patch'],
+      manifestPath: argResults['manifest'] as String,
+      depfilePath: argResults['depfile'] as String,
+      privateKeyPath: argResults['private-key'] as String,
+      assetDirPath: argResults['asset-dir'] as String,
+      precompiledSnapshot: argResults['precompiled'] as bool,
+      reportLicensedPackages: argResults['report-licensed-packages'] as bool,
+      trackWidgetCreation: argResults['track-widget-creation'] as bool,
+      compilationTraceFilePath: argResults['compilation-trace-file'] as String,
+      createPatch: argResults['patch'] as bool,
       buildNumber: buildNumber,
-      baselineDir: argResults['baseline-dir'],
-      extraFrontEndOptions: argResults[FlutterOptions.kExtraFrontEndOptions],
-      extraGenSnapshotOptions: argResults[FlutterOptions.kExtraGenSnapshotOptions],
-      fileSystemScheme: argResults['filesystem-scheme'],
-      fileSystemRoots: argResults['filesystem-root'],
+      baselineDir: argResults['baseline-dir'] as String,
+      extraFrontEndOptions: argResults[FlutterOptions.kExtraFrontEndOptions] as List<String>,
+      extraGenSnapshotOptions: argResults[FlutterOptions.kExtraGenSnapshotOptions] as List<String>,
+      fileSystemScheme: argResults['filesystem-scheme'] as String,
+      fileSystemRoots: argResults['filesystem-root'] as List<String>,
     );
     return null;
   }

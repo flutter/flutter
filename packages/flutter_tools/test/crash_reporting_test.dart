@@ -64,11 +64,11 @@ void main() {
               })
               .where((List<String> pair) => pair != null),
           key: (dynamic key) {
-            final List<String> pair = key;
+            final List<String> pair = key as List<String>;
             return pair[0];
           },
           value: (dynamic value) {
-            final List<String> pair = value;
+            final List<String> pair = value as List<String>;
             return pair[1];
           },
         );
@@ -109,7 +109,7 @@ void main() {
       expect(fields['error_runtime_type'], 'StateError');
       expect(fields['error_message'], 'Bad state: Test bad state error');
 
-      final BufferLogger logger = context[Logger];
+      final BufferLogger logger = context[Logger] as BufferLogger;
       expect(logger.statusText, 'Sending crash report to Google.\n'
           'Crash report sent (report ID: test-report-id)\n');
 

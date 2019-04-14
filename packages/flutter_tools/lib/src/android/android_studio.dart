@@ -13,7 +13,7 @@ import '../globals.dart';
 import '../ios/ios_workflow.dart';
 import '../ios/plist_utils.dart' as plist;
 
-AndroidStudio get androidStudio => context[AndroidStudio];
+AndroidStudio get androidStudio => context[AndroidStudio] as AndroidStudio;
 
 // Android Studio layout:
 
@@ -152,7 +152,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
 
   /// Locates the newest, valid version of Android Studio.
   static AndroidStudio latestValid() {
-    final String configuredStudio = config.getValue('android-studio-dir');
+    final String configuredStudio = config.getValue('android-studio-dir') as String;
     if (configuredStudio != null) {
       String configuredStudioPath = configuredStudio;
       if (platform.isMacOS && !configuredStudioPath.endsWith('Contents'))
@@ -202,7 +202,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     _checkForStudio('/Applications');
     _checkForStudio(fs.path.join(homeDirPath, 'Applications'));
 
-    final String configuredStudioDir = config.getValue('android-studio-dir');
+    final String configuredStudioDir = config.getValue('android-studio-dir') as String;
     if (configuredStudioDir != null) {
       FileSystemEntity configuredStudio = fs.file(configuredStudioDir);
       if (configuredStudio.basename == 'Contents') {
@@ -248,7 +248,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
       }
     }
 
-    final String configuredStudioDir = config.getValue('android-studio-dir');
+    final String configuredStudioDir = config.getValue('android-studio-dir') as String;
     if (configuredStudioDir != null && !_hasStudioAt(configuredStudioDir)) {
       studios.add(AndroidStudio(configuredStudioDir,
           configured: configuredStudioDir));
@@ -297,7 +297,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     } else {
       final ProcessResult result = processManager.runSync(<String>[javaExecutable, '-version']);
       if (result.exitCode == 0) {
-        final List<String> versionLines = result.stderr.split('\n');
+        final List<String> versionLines = result.stderr.split('\n') as List<String>;
         final String javaVersion = versionLines.length >= 2 ? versionLines[1] : versionLines[0];
         _validationMessages.add('Java version $javaVersion');
         _javaPath = javaPath;

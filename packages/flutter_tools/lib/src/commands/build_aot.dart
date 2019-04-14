@@ -62,7 +62,7 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final String targetPlatform = argResults['target-platform'];
+    final String targetPlatform = argResults['target-platform'] as String;
     final TargetPlatform platform = getTargetPlatformForName(targetPlatform);
     if (platform == null)
       throwToolExit('Unknown platform: $targetPlatform');
@@ -70,15 +70,15 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
     final BuildMode buildMode = getBuildMode();
 
     Status status;
-    if (!argResults['quiet']) {
+    if (!(argResults['quiet'] as bool)) {
       final String typeName = artifacts.getEngineType(platform, buildMode);
       status = logger.startProgress(
         'Building AOT snapshot in ${getFriendlyModeName(getBuildMode())} mode ($typeName)...',
         timeout: timeoutConfiguration.slowOperation,
       );
     }
-    final String outputPath = argResults['output-dir'] ?? getAotBuildDirectory();
-    final bool reportTimings = argResults['report-timings'];
+    final String outputPath = argResults['output-dir'] as String ?? getAotBuildDirectory();
+    final bool reportTimings = argResults['report-timings'] as bool;
     try {
       String mainPath = findMainDartFile(targetFile);
       final AOTSnapshotter snapshotter = AOTSnapshotter(reportTimings: reportTimings);
@@ -91,7 +91,7 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
         packagesPath: PackageMap.globalPackagesPath,
         trackWidgetCreation: false,
         outputPath: outputPath,
-        extraFrontEndOptions: argResults[FlutterOptions.kExtraFrontEndOptions],
+        extraFrontEndOptions: argResults[FlutterOptions.kExtraFrontEndOptions] as List<String>,
       );
       if (mainPath == null) {
         throwToolExit('Compiler terminated unexpectedly.');
@@ -101,7 +101,7 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
       // Build AOT snapshot.
       if (platform == TargetPlatform.ios) {
         // Determine which iOS architectures to build for.
-        final Iterable<IOSArch> buildArchs = argResults['ios-arch'].map<IOSArch>(getIOSArchForName);
+        final Iterable<IOSArch> buildArchs = (argResults['ios-arch'] as Iterable<String>).map<IOSArch>(getIOSArchForName);
         final Map<IOSArch, String> iosBuilds = <IOSArch, String>{};
         for (IOSArch arch in buildArchs)
           iosBuilds[arch] = fs.path.join(outputPath, getNameForIOSArch(arch));
@@ -117,7 +117,7 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
             packagesPath: PackageMap.globalPackagesPath,
             outputPath: outputPath,
             buildSharedLibrary: false,
-            extraGenSnapshotOptions: argResults[FlutterOptions.kExtraGenSnapshotOptions],
+            extraGenSnapshotOptions: argResults[FlutterOptions.kExtraGenSnapshotOptions] as List<String>,
           ).then<int>((int buildExitCode) {
             return buildExitCode;
           });
@@ -146,8 +146,8 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
           mainPath: mainPath,
           packagesPath: PackageMap.globalPackagesPath,
           outputPath: outputPath,
-          buildSharedLibrary: argResults['build-shared-library'],
-          extraGenSnapshotOptions: argResults[FlutterOptions.kExtraGenSnapshotOptions],
+          buildSharedLibrary: argResults['build-shared-library'] as bool,
+          extraGenSnapshotOptions: argResults[FlutterOptions.kExtraGenSnapshotOptions] as List<String>,
         );
         if (snapshotExitCode != 0) {
           status?.cancel();
@@ -166,7 +166,7 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
       throwToolExit(null);
 
     final String builtMessage = 'Built to $outputPath${fs.path.separator}.';
-    if (argResults['quiet']) {
+    if (argResults['quiet'] as bool) {
       printTrace(builtMessage);
     } else {
       printStatus(builtMessage);

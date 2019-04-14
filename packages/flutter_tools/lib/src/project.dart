@@ -166,8 +166,8 @@ class FlutterProject {
     if (!pubspecFile.existsSync()) {
       return null;
     }
-    final YamlMap pubspec = loadYaml(pubspecFile.readAsStringSync());
-    return pubspec['builders'];
+    final YamlMap pubspec = loadYaml(pubspecFile.readAsStringSync()) as YamlMap;
+    return pubspec['builders'] as YamlMap;
   }
 
   /// Whether there are any builders used by this package.

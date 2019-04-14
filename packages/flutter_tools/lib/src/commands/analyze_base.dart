@@ -50,7 +50,7 @@ abstract class AnalyzeBase {
     printStatus('Analysis benchmark written to $benchmarkOut ($data).');
   }
 
-  bool get isBenchmarking => argResults['benchmark'];
+  bool get isBenchmarking => argResults['benchmark'] as bool;
 }
 
 /// Return true if [fileList] contains a path that resides inside the Flutter repository.
@@ -167,8 +167,8 @@ class PackageDependencyTracker {
         // we are analyzing the actual canonical source for this package;
         // make sure we remember that, in case all the packages are actually
         // pointing elsewhere somehow.
-        final yaml.YamlMap pubSpecYaml = yaml.loadYaml(fs.file(pubSpecYamlPath).readAsStringSync());
-        final String packageName = pubSpecYaml['name'];
+        final yaml.YamlMap pubSpecYaml = yaml.loadYaml(fs.file(pubSpecYamlPath).readAsStringSync()) as yaml.YamlMap;
+        final String packageName = pubSpecYaml['name'] as String;
         final String packagePath = fs.path.normalize(fs.path.absolute(fs.path.join(directory.path, 'lib')));
         dependencies.addCanonicalCase(packageName, packagePath, pubSpecYamlPath);
       }

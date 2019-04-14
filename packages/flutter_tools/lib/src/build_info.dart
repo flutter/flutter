@@ -378,7 +378,7 @@ String getBuildDirectory() {
   if (context == null || config == null)
     return 'build';
 
-  final String buildDir = config.getValue('build-dir') ?? 'build';
+  final String buildDir = config.getValue('build-dir') as String ?? 'build';
   if (fs.path.isAbsolute(buildDir)) {
     throw Exception(
         'build-dir config setting in ${config.configPath} must be relative');

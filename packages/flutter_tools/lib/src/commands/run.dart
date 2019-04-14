@@ -63,9 +63,9 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     usesIsolateFilterOption(hide: !verboseHelp);
   }
 
-  bool get traceStartup => argResults['trace-startup'];
+  bool get traceStartup => argResults['trace-startup'] as bool;
 
-  String get route => argResults['route'];
+  String get route => argResults['route'] as String;
 }
 
 class RunCommand extends RunCommandBase {
@@ -230,7 +230,7 @@ class RunCommand extends RunCommandBase {
   }
 
   bool shouldUseHotMode() {
-    final bool hotArg = argResults['hot'] ?? false;
+    final bool hotArg = argResults['hot'] as bool ?? false;
     final bool shouldUseHotMode = hotArg && !traceStartup;
     return getBuildInfo().isDebug && shouldUseHotMode;
   }
@@ -238,8 +238,8 @@ class RunCommand extends RunCommandBase {
   bool get runningWithPrebuiltApplication =>
       argResults['use-application-binary'] != null;
 
-  bool get stayResident => argResults['resident'];
-  bool get awaitFirstFrameWhenTracing => argResults['await-first-frame-when-tracing'];
+  bool get stayResident => argResults['resident'] as bool;
+  bool get awaitFirstFrameWhenTracing => argResults['await-first-frame-when-tracing'] as bool;
 
   @override
   Future<void> validateCommand() async {
@@ -261,15 +261,15 @@ class RunCommand extends RunCommandBase {
     } else {
       return DebuggingOptions.enabled(
         buildInfo,
-        startPaused: argResults['start-paused'],
-        useTestFonts: argResults['use-test-fonts'],
-        enableSoftwareRendering: argResults['enable-software-rendering'],
-        skiaDeterministicRendering: argResults['skia-deterministic-rendering'],
-        traceSkia: argResults['trace-skia'],
-        traceSystrace: argResults['trace-systrace'],
-        dumpSkpOnShaderCompilation: argResults['dump-skp-on-shader-compilation'],
+        startPaused: argResults['start-paused'] as bool,
+        useTestFonts: argResults['use-test-fonts'] as bool,
+        enableSoftwareRendering: argResults['enable-software-rendering'] as bool,
+        skiaDeterministicRendering: argResults['skia-deterministic-rendering'] as bool,
+        traceSkia: argResults['trace-skia'] as bool,
+        traceSystrace: argResults['trace-systrace'] as bool,
+        dumpSkpOnShaderCompilation: argResults['dump-skp-on-shader-compilation'] as bool,
         observatoryPort: observatoryPort,
-        verboseSystemLogs: argResults['verbose-system-logs'],
+        verboseSystemLogs: argResults['verbose-system-logs'] as bool,
       );
     }
   }
@@ -282,26 +282,26 @@ class RunCommand extends RunCommandBase {
     // debug mode.
     final bool hotMode = shouldUseHotMode();
 
-    writePidFile(argResults['pid-file']);
+    writePidFile(argResults['pid-file'] as String);
 
-    if (argResults['machine']) {
+    if (argResults['machine'] as bool) {
       if (devices.length > 1)
         throwToolExit('--machine does not support -d all.');
       final Daemon daemon = Daemon(stdinCommandStream, stdoutCommandResponse,
           notifyingLogger: NotifyingLogger(), logToStdout: true);
       AppInstance app;
       try {
-        final String applicationBinaryPath = argResults['use-application-binary'];
+        final String applicationBinaryPath = argResults['use-application-binary'] as String;
         app = await daemon.appDomain.startApp(
           devices.first, fs.currentDirectory.path, targetFile, route,
           _createDebuggingOptions(), hotMode,
           applicationBinary: applicationBinaryPath == null
               ? null
               : fs.file(applicationBinaryPath),
-          trackWidgetCreation: argResults['track-widget-creation'],
-          projectRootPath: argResults['project-root'],
-          packagesFilePath: globalResults['packages'],
-          dillOutputPath: argResults['output-dill'],
+          trackWidgetCreation: argResults['track-widget-creation'] as bool,
+          projectRootPath: argResults['project-root'] as String,
+          packagesFilePath: globalResults['packages'] as String,
+          dillOutputPath: argResults['output-dill'] as String,
           ipv6: ipv6,
         );
       } catch (error) {
@@ -348,46 +348,46 @@ class RunCommand extends RunCommandBase {
       }
     }
 
-    if (argResults['train'] &&
+    if (argResults['train'] as bool &&
         getBuildMode() != BuildMode.debug && getBuildMode() != BuildMode.dynamicProfile)
       throwToolExit('Error: --train is only allowed when running as --dynamic --profile '
           '(recommended) or --debug (may include unwanted debug symbols).');
 
     List<String> expFlags;
     if (argParser.options.containsKey(FlutterOptions.kEnableExperiment) &&
-        argResults[FlutterOptions.kEnableExperiment].isNotEmpty) {
-      expFlags = argResults[FlutterOptions.kEnableExperiment];
+        (argResults[FlutterOptions.kEnableExperiment] as List<String>).isNotEmpty) {
+      expFlags = argResults[FlutterOptions.kEnableExperiment] as List<String>;
     }
     final List<FlutterDevice> flutterDevices = <FlutterDevice>[];
     for (Device device in devices) {
       final FlutterDevice flutterDevice = await FlutterDevice.create(
         device,
-        trackWidgetCreation: argResults['track-widget-creation'],
-        dillOutputPath: argResults['output-dill'],
-        fileSystemRoots: argResults['filesystem-root'],
-        fileSystemScheme: argResults['filesystem-scheme'],
-        viewFilter: argResults['isolate-filter'],
+        trackWidgetCreation: argResults['track-widget-creation'] as bool,
+        dillOutputPath: argResults['output-dill'] as String,
+        fileSystemRoots: argResults['filesystem-root'] as List<String>,
+        fileSystemScheme: argResults['filesystem-scheme'] as String,
+        viewFilter: argResults['isolate-filter'] as String,
         experimentalFlags: expFlags,
-        target: argResults['target'],
+        target: argResults['target'] as String,
       );
       flutterDevices.add(flutterDevice);
     }
 
     ResidentRunner runner;
-    final String applicationBinaryPath = argResults['use-application-binary'];
+    final String applicationBinaryPath = argResults['use-application-binary'] as String;
     if (hotMode) {
       runner = HotRunner(
         flutterDevices,
         target: targetFile,
         debuggingOptions: _createDebuggingOptions(),
-        benchmarkMode: argResults['benchmark'],
+        benchmarkMode: argResults['benchmark'] as bool,
         applicationBinary: applicationBinaryPath == null
             ? null
             : fs.file(applicationBinaryPath),
-        projectRootPath: argResults['project-root'],
-        packagesFilePath: globalResults['packages'],
-        dillOutputPath: argResults['output-dill'],
-        saveCompilationTrace: argResults['train'],
+        projectRootPath: argResults['project-root'] as String,
+        packagesFilePath: globalResults['packages'] as String,
+        dillOutputPath: argResults['output-dill'] as String,
+        saveCompilationTrace: argResults['train'] as bool,
         stayResident: stayResident,
         ipv6: ipv6,
       );
@@ -401,7 +401,7 @@ class RunCommand extends RunCommandBase {
         applicationBinary: applicationBinaryPath == null
             ? null
             : fs.file(applicationBinaryPath),
-        saveCompilationTrace: argResults['train'],
+        saveCompilationTrace: argResults['train'] as bool,
         stayResident: stayResident,
         ipv6: ipv6,
       );
@@ -421,7 +421,7 @@ class RunCommand extends RunCommandBase {
     final int result = await runner.run(
       appStartedCompleter: appStartedTimeRecorder,
       route: route,
-      shouldBuild: !runningWithPrebuiltApplication && argResults['build'],
+      shouldBuild: !runningWithPrebuiltApplication && argResults['build'] as bool,
     );
     if (result != 0)
       throwToolExit(null, exitCode: result);

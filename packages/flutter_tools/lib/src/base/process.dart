@@ -338,19 +338,21 @@ String _runWithLoggingSync(
 
   printTrace('Exit code ${results.exitCode} from: ${cmd.join(' ')}');
 
-  if (results.stdout.isNotEmpty && !hideStdout) {
+  final String stdout = results.stdout as String;
+  if (stdout.isNotEmpty && !hideStdout) {
     if (results.exitCode != 0 && noisyErrors)
-      printStatus(results.stdout.trim());
+      printStatus(stdout.trim());
     else
-      printTrace(results.stdout.trim());
+      printTrace(stdout.trim());
   }
 
   if (results.exitCode != 0) {
-    if (results.stderr.isNotEmpty) {
+    final String stderr = results.stderr as String;
+    if (stderr.isNotEmpty) {
       if (noisyErrors)
-        printError(results.stderr.trim());
+        printError(stderr.trim());
       else
-        printTrace(results.stderr.trim());
+        printTrace(stderr.trim());
     }
 
     if (throwStandardErrorOnError)
@@ -360,7 +362,7 @@ String _runWithLoggingSync(
       throw 'Exit code ${results.exitCode} from: ${cmd.join(' ')}';
   }
 
-  return results.stdout.trim();
+  return stdout.trim();
 }
 
 class ProcessExit implements Exception {
@@ -385,15 +387,15 @@ class RunResult {
   final List<String> _command;
 
   int get exitCode => processResult.exitCode;
-  String get stdout => processResult.stdout;
-  String get stderr => processResult.stderr;
+  String get stdout => processResult.stdout as String;
+  String get stderr => processResult.stderr as String;
 
   @override
   String toString() {
     final StringBuffer out = StringBuffer();
-    if (processResult.stdout.isNotEmpty)
+    if (processResult.stdout.isNotEmpty as bool)
       out.writeln(processResult.stdout);
-    if (processResult.stderr.isNotEmpty)
+    if (processResult.stderr.isNotEmpty as bool)
       out.writeln(processResult.stderr);
     return out.toString().trimRight();
   }

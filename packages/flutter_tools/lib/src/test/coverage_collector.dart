@@ -19,7 +19,7 @@ import 'watcher.dart';
 
 /// A class that's used to collect coverage data during tests.
 class CoverageCollector extends TestWatcher {
-  Map<String, dynamic> _globalHitmap;
+  Map<String, Map<int, int>> _globalHitmap;
 
   @override
   Future<void> handleFinishedTest(ProcessEvent event) async {
@@ -27,7 +27,7 @@ class CoverageCollector extends TestWatcher {
     await collectCoverage(event.process, event.observatoryUri);
   }
 
-  void _addHitmap(Map<String, dynamic> hitmap) {
+  void _addHitmap(Map<String, Map<int, int>> hitmap) {
     if (_globalHitmap == null)
       _globalHitmap = hitmap;
     else
@@ -62,7 +62,7 @@ class CoverageCollector extends TestWatcher {
     assert(data != null);
 
     printTrace('pid $pid ($observatoryUri): collected coverage data; merging...');
-    _addHitmap(coverage.createHitmap(data['coverage']));
+    _addHitmap(coverage.createHitmap(data['coverage'] as List<dynamic>));
     printTrace('pid $pid ($observatoryUri): done merging coverage data into global coverage map.');
   }
 

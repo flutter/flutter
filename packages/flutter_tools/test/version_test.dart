@@ -414,7 +414,7 @@ void main() {
 }
 
 void _expectVersionMessage(String message) {
-  final BufferLogger logger = context[Logger];
+  final BufferLogger logger = context[Logger] as BufferLogger;
   expect(logger.statusText.trim(), message.trim());
   logger.clear();
 }
@@ -457,7 +457,7 @@ void fakeData(
     expect(invocation.positionalArguments.first, VersionCheckStamp.flutterVersionCheckStampFile);
 
     if (expectSetStamp) {
-      stamp = VersionCheckStamp.fromJson(json.decode(invocation.positionalArguments[1]));
+      stamp = VersionCheckStamp.fromJson(json.decode(invocation.positionalArguments[1] as String) as Map<String, dynamic>);
       return null;
     }
 
@@ -467,7 +467,7 @@ void fakeData(
   final Answering<ProcessResult> syncAnswer = (Invocation invocation) {
     bool argsAre(String a1, [ String a2, String a3, String a4, String a5, String a6, String a7, String a8 ]) {
       const ListEquality<String> equality = ListEquality<String>();
-      final List<String> args = invocation.positionalArguments.single;
+      final List<String> args = invocation.positionalArguments.single as List<String>;
       final List<String> expectedArgs = <String>[a1, a2, a3, a4, a5, a6, a7, a8].where((String arg) => arg != null).toList();
       return equality.equals(args, expectedArgs);
     }

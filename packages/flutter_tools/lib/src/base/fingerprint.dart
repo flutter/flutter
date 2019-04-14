@@ -115,13 +115,13 @@ class Fingerprint {
   /// Throws [ArgumentError], if there is a version mismatch between the
   /// serializing framework and this framework.
   Fingerprint.fromJson(String jsonData) {
-    final Map<String, dynamic> content = json.decode(jsonData);
+    final Map<String, dynamic> content = json.decode(jsonData) as Map<String, dynamic>;
 
-    final String version = content['version'];
+    final String version = content['version'] as String;
     if (version != FlutterVersion.instance.frameworkRevision)
       throw ArgumentError('Incompatible fingerprint version: $version');
-    _checksums = content['files']?.cast<String,String>() ?? <String, String>{};
-    _properties = content['properties']?.cast<String,String>() ?? <String, String>{};
+    _checksums = (content['files'] as Map<dynamic, dynamic>)?.cast<String,String>() ?? <String, String>{};
+    _properties = (content['properties'] as Map<dynamic, dynamic>)?.cast<String,String>() ?? <String, String>{};
   }
 
   Map<String, String> _checksums;
@@ -134,14 +134,15 @@ class Fingerprint {
   });
 
   @override
-  bool operator==(dynamic other) {
+  bool operator==(Object other) {
     if (identical(other, this))
       return true;
-    if (other.runtimeType != runtimeType)
-      return false;
-    final Fingerprint typedOther = other;
-    return _equalMaps(typedOther._checksums, _checksums)
-        && _equalMaps(typedOther._properties, _properties);
+    if (other is Fingerprint) {
+      final Fingerprint typedOther = other;
+      return _equalMaps(typedOther._checksums, _checksums)
+          && _equalMaps(typedOther._properties, _properties);
+    }
+    return false;
   }
 
   bool _equalMaps(Map<String, String> a, Map<String, String> b) {

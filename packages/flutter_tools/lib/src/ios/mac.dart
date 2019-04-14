@@ -31,9 +31,9 @@ import 'xcodeproj.dart';
 const int kXcodeRequiredVersionMajor = 9;
 const int kXcodeRequiredVersionMinor = 0;
 
-IMobileDevice get iMobileDevice => context[IMobileDevice];
-PlistBuddy get plistBuddy => context[PlistBuddy];
-Xcode get xcode => context[Xcode];
+IMobileDevice get iMobileDevice => context[IMobileDevice] as IMobileDevice;
+PlistBuddy get plistBuddy => context[PlistBuddy] as PlistBuddy;
+Xcode get xcode => context[Xcode] as Xcode;
 
 class PlistBuddy {
   const PlistBuddy();
@@ -54,7 +54,7 @@ class PropertyList {
   Future<String> read(String key) async {
     final ProcessResult result = await _runCommand('Print $key');
     if (result.exitCode == 0)
-      return result.stdout.trim();
+      return result.stdout.trim() as String;
     return null;
   }
 
@@ -108,13 +108,13 @@ class IMobileDevice {
     // If usage info is printed in a hyphenated id, we need to update.
     const String fakeIphoneId = '00008020-001C2D903C42002E';
     final ProcessResult ideviceResult = (await runAsync(<String>['ideviceinfo', '-u', fakeIphoneId])).processResult;
-    if (ideviceResult.stdout.contains('Usage: ideviceinfo')) {
+    if (ideviceResult.stdout.contains('Usage: ideviceinfo') as bool) {
       return false;
     }
 
     // If no device is attached, we're unable to detect any problems. Assume all is well.
     final ProcessResult result = (await runAsync(<String>['idevice_id', '-l'])).processResult;
-    if (result.exitCode == 0 && result.stdout.isEmpty)
+    if (result.exitCode == 0 && result.stdout.isEmpty as bool)
       return true;
 
     // Check that we can look up the names of any attached devices.
@@ -126,7 +126,7 @@ class IMobileDevice {
       final ProcessResult result = await processManager.run(<String>['idevice_id', '-l']);
       if (result.exitCode != 0)
         throw ToolExit('idevice_id returned an error:\n${result.stderr}');
-      return result.stdout;
+      return result.stdout as String;
     } on ProcessException {
       throw ToolExit('Failed to invoke idevice_id. Run flutter doctor.');
     }
@@ -135,11 +135,11 @@ class IMobileDevice {
   Future<String> getInfoForDevice(String deviceID, String key) async {
     try {
       final ProcessResult result = await processManager.run(<String>['ideviceinfo', '-u', deviceID, '-k', key]);
-      if (result.exitCode == 255 && result.stdout != null && result.stdout.contains('No device found'))
+      if (result.exitCode == 255 && result.stdout != null && result.stdout.contains('No device found') as bool)
         throw IOSDeviceNotFoundError('ideviceinfo could not find device:\n${result.stdout}');
       if (result.exitCode != 0)
         throw ToolExit('ideviceinfo returned an error:\n${result.stderr}');
-      return result.stdout.trim();
+      return result.stdout.trim() as String;
     } on ProcessException {
       throw ToolExit('Failed to invoke ideviceinfo. Run flutter doctor.');
     }
@@ -161,7 +161,7 @@ class Xcode {
   String get xcodeSelectPath {
     if (_xcodeSelectPath == null) {
       try {
-        _xcodeSelectPath = processManager.runSync(<String>['/usr/bin/xcode-select', '--print-path']).stdout.trim();
+        _xcodeSelectPath = processManager.runSync(<String>['/usr/bin/xcode-select', '--print-path']).stdout.trim() as String;
       } on ProcessException {
         // Ignored, return null below.
       }
@@ -187,9 +187,9 @@ class Xcode {
     if (_eulaSigned == null) {
       try {
         final ProcessResult result = processManager.runSync(<String>['/usr/bin/xcrun', 'clang']);
-        if (result.stdout != null && result.stdout.contains('license'))
+        if (result.stdout != null && result.stdout.contains('license') as bool)
           _eulaSigned = false;
-        else if (result.stderr != null && result.stderr.contains('license'))
+        else if (result.stderr != null && result.stderr.contains('license') as bool)
           _eulaSigned = false;
         else
           _eulaSigned = true;

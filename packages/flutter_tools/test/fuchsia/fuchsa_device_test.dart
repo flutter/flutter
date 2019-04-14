@@ -67,8 +67,8 @@ void main() {
       workingDirectory: anyNamed('workingDirectory'),
     )).thenAnswer((Invocation invocation) => Future<ProcessResult>.value(mockProcessResult));
     when(mockProcessResult.exitCode).thenReturn(1);
-    when<String>(mockProcessResult.stdout).thenReturn('');
-    when<String>(mockProcessResult.stderr).thenReturn('');
+    when<String>(mockProcessResult.stdout as String).thenReturn('');
+    when<String>(mockProcessResult.stderr as String).thenReturn('');
     when(mockFile.absolute).thenReturn(mockFile);
     when(mockFile.path).thenReturn('');
 
@@ -80,8 +80,8 @@ void main() {
       workingDirectory: anyNamed('workingDirectory'),
     )).thenAnswer((Invocation invocation) => Future<ProcessResult>.value(emptyStdoutProcessResult));
     when(emptyStdoutProcessResult.exitCode).thenReturn(0);
-    when<String>(emptyStdoutProcessResult.stdout).thenReturn('');
-    when<String>(emptyStdoutProcessResult.stderr).thenReturn('');
+    when<String>(emptyStdoutProcessResult.stdout as String).thenReturn('');
+    when<String>(emptyStdoutProcessResult.stderr as String).thenReturn('');
 
     testUsingContext('No vmservices found', () async {
       final FuchsiaDevice device = FuchsiaDevice('id');
@@ -209,7 +209,7 @@ void main() {
   });
 
   group(FuchsiaIsolateDiscoveryProtocol, () {
-    Future<Uri> findUri(List<MockFlutterView> views, String expectedIsolateName) {
+    Future<Uri> findUri(List<MockFlutterView> views, String expectedIsolateName) async {
       final MockPortForwarder portForwarder = MockPortForwarder();
       final MockVMService vmService = MockVMService();
       final MockVM vm = MockVM();

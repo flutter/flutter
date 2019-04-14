@@ -143,7 +143,7 @@ void main() {
 
     testUsingContext('compound command usage path', () async {
       final BuildCommand buildCommand = BuildCommand();
-      final FlutterCommand buildApkCommand = buildCommand.subcommands['apk'];
+      final FlutterCommand buildApkCommand = buildCommand.subcommands['apk'] as FlutterCommand;
       expect(await buildApkCommand.usagePath, 'build/apk');
     }, overrides: <Type, Generator>{
       Usage: () => mockUsage,

@@ -40,7 +40,7 @@ class IOSSimulators extends PollingDeviceDiscovery {
 
 class IOSSimulatorUtils {
   /// Returns [IOSSimulatorUtils] active in the current app context (i.e. zone).
-  static IOSSimulatorUtils get instance => context[IOSSimulatorUtils];
+  static IOSSimulatorUtils get instance => context[IOSSimulatorUtils] as IOSSimulatorUtils;
 
   List<IOSSimulator> getAttachedDevices() {
     if (!xcode.isInstalledAndMeetsVersionCheck)
@@ -55,7 +55,7 @@ class IOSSimulatorUtils {
 /// A wrapper around the `simctl` command line tool.
 class SimControl {
   /// Returns [SimControl] active in the current app context (i.e. zone).
-  static SimControl get instance => context[SimControl];
+  static SimControl get instance => context[SimControl] as SimControl;
 
   /// Runs `simctl list --json` and returns the JSON of the corresponding
   /// [section].
@@ -85,7 +85,7 @@ class SimControl {
       return <String, Map<String, dynamic>>{};
     }
 
-    return json.decode(results.stdout)[section.name];
+    return json.decode(results.stdout as String)[section.name] as Map<String, dynamic>;
   }
 
   /// Returns a list of all available devices, both potential and connected.
@@ -95,7 +95,7 @@ class SimControl {
     final Map<String, dynamic> devicesSection = _list(SimControlListSection.devices);
 
     for (String deviceCategory in devicesSection.keys) {
-      final List<dynamic> devicesData = devicesSection[deviceCategory];
+      final List<dynamic> devicesData = devicesSection[deviceCategory] as List<dynamic>;
       for (Map<String, dynamic> data in devicesData.map<Map<String, dynamic>>(castStringKeyedMap)) {
         devices.add(SimDevice(deviceCategory, data));
       }
@@ -203,10 +203,10 @@ class SimDevice {
   final String category;
   final Map<String, dynamic> data;
 
-  String get state => data['state'];
-  String get availability => data['availability'];
-  String get name => data['name'];
-  String get udid => data['udid'];
+  String get state => data['state'] as String;
+  String get availability => data['availability'] as String;
+  String get name => data['name'] as String;
+  String get udid => data['udid'] as String;
 
   bool get isBooted => state == 'Booted';
 }
@@ -242,10 +242,9 @@ class IOSSimulator extends Device {
   Future<bool> isLatestBuildInstalled(ApplicationPackage app) async => false;
 
   @override
-  Future<bool> installApp(ApplicationPackage app) async {
+  Future<bool> installApp(covariant IOSApp app) async {
     try {
-      final IOSApp iosApp = app;
-      await SimControl.instance.install(id, iosApp.simulatorBundlePath);
+      await SimControl.instance.install(id, app.simulatorBundlePath);
       return true;
     } catch (e) {
       return false;
@@ -291,7 +290,7 @@ class IOSSimulator extends Device {
 
   @override
   Future<LaunchResult> startApp(
-    ApplicationPackage package, {
+    covariant IOSApp package, {
     String mainPath,
     String route,
     DebuggingOptions debuggingOptions,
@@ -304,7 +303,7 @@ class IOSSimulator extends Device {
       printTrace('Building ${package.name} for $id.');
 
       try {
-        await _setupUpdatedApplicationBundle(package, debuggingOptions.buildInfo, mainPath, usesTerminalUi);
+        await _setupUpdatedApplicationBundle(package as BuildableIOSApp, debuggingOptions.buildInfo, mainPath, usesTerminalUi);
       } on ToolExit catch (e) {
         printError(e.message);
         return LaunchResult.failed();
@@ -365,7 +364,7 @@ class IOSSimulator extends Device {
     }
   }
 
-  Future<void> _setupUpdatedApplicationBundle(ApplicationPackage app, BuildInfo buildInfo, String mainPath, bool usesTerminalUi) async {
+  Future<void> _setupUpdatedApplicationBundle(BuildableIOSApp app, BuildInfo buildInfo, String mainPath, bool usesTerminalUi) async {
     await _sideloadUpdatedAssetsForInstalledApplicationBundle(app, buildInfo, mainPath);
 
     // Step 1: Build the Xcode project.
@@ -429,14 +428,14 @@ class IOSSimulator extends Device {
 
   Future<int> get sdkMajorVersion async {
     final Match sdkMatch = _iosSdkRegExp.firstMatch(await sdkNameAndVersion);
-    return int.parse(sdkMatch?.group(2) ?? 11);
+    return int.parse(sdkMatch?.group(2) ?? '11');
   }
 
   @override
   DeviceLogReader getLogReader({ ApplicationPackage app }) {
     assert(app is IOSApp);
     _logReaders ??= <ApplicationPackage, _IOSSimulatorLogReader>{};
-    return _logReaders.putIfAbsent(app, () => _IOSSimulatorLogReader(this, app));
+    return _logReaders.putIfAbsent(app, () => _IOSSimulatorLogReader(this, app as IOSApp));
   }
 
   @override
