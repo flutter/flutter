@@ -44,17 +44,11 @@
                         }
                     }
                 },
-                "android": {
-                    "type": "object",
-                    "additionalProperties": false,
-                    "properties": {
-                        "androidX": { "type": "boolean" },
-                    }
-                },
                 "module": {
                     "type": "object",
                     "additionalProperties": false,
                     "properties": {
+                        "androidX": { "type": "boolean" },
                         "androidPackage": { "type": "string" },
                         "iosBundleIdentifier": { "type": "string" }
                     }

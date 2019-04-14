@@ -120,7 +120,7 @@ class FlutterManifest {
   }
 
   bool get usesAndroidX {
-    return _flutterDescriptor['android']['androidx'] ?? true;
+    return _flutterDescriptor['module']['androidx'] ?? true;
   }
 
   /// True if this manifest declares a Flutter module project.
@@ -355,7 +355,7 @@ void _validateFlutter(YamlMap yaml, List<String> errors) {
         }
         _validateFonts(kvp.value, errors);
         break;
-      case 'android':
+      case 'module':
         if (kvp.value is! YamlMap) {
           errors.add('Expected "${kvp.key}" to be an object, but got ${kvp.value} (${kvp.value.runtimeType}).');
         }
@@ -363,12 +363,6 @@ void _validateFlutter(YamlMap yaml, List<String> errors) {
         if (kvp.value['androidX'] != null && kvp.value['androidX'] is! bool) {
           errors.add('The "androidX" value must be a bool if set.');
         }
-        break;
-      case 'module':
-        if (kvp.value is! YamlMap) {
-          errors.add('Expected "${kvp.key}" to be an object, but got ${kvp.value} (${kvp.value.runtimeType}).');
-        }
-
         if (kvp.value['androidPackage'] != null && kvp.value['androidPackage'] is! String) {
           errors.add('The "androidPackage" value must be a string if set.');
         }
