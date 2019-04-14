@@ -342,8 +342,8 @@ class IOSSimulator extends Device {
     // Launch the updated application in the simulator.
     try {
       final IOSApp iosApp = package;
-      final String plistPath = fs.path.join(iosApp.simulatorBundlePath , 'Info.plist');
-      final String bundleIdentifier = getValueFromFile(plistPath, kCFBundleIdentifierKey);
+      final String plistPath = fs.path.join(iosApp.simulatorBundlePath, 'Info.plist');
+      final String bundleIdentifier = iosWorkflow.getPlistValueFromFile(plistPath, kCFBundleIdentifierKey);
 
       await SimControl.instance.launch(id, bundleIdentifier, args);
     } catch (error) {
