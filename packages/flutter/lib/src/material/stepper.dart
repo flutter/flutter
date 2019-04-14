@@ -577,11 +577,14 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
   }
 
   Widget _buildVertical() {
-    final List<Widget> children = <Widget>[];
 
-    for (int i = 0; i < widget.steps.length; i += 1) {
-      children.add(
-        Column(
+    return ListView.builder(
+      shrinkWrap: true,
+      itemCount: widget.steps.length,
+      itemBuilder: (BuildContext context, int i){
+
+        i < _keys.length ? _keys[i] : _keys.add(GlobalKey());
+        return Column(
           key: _keys[i],
           children: <Widget>[
             InkWell(
@@ -597,18 +600,12 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
                 if (widget.onStepTapped != null)
                   widget.onStepTapped(i);
               } : null,
-              child: _buildVerticalHeader(i),
+              child: _buildVerticalHeader(i)
             ),
-            _buildVerticalBody(i),
-          ],
-        )
-      );
-    }
-
-    return ListView(
-      shrinkWrap: true,
-      physics: widget.physics,
-      children: children,
+            _buildVerticalBody(i)
+          ]
+        );
+      }
     );
   }
 
