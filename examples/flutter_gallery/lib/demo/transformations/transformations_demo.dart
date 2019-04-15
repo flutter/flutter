@@ -25,26 +25,9 @@ class _TransformationsDemoState extends State<TransformationsDemo> {
     hexagonRadius: _kHexagonRadius,
     hexagonMargin: _kHexagonMargin,
   );
-  bool _seenInstructionDialog = false;
 
   @override
   Widget build (BuildContext context) {
-    if (!_seenInstructionDialog) {
-      Future<void>.delayed(const Duration(seconds: 1), () {
-        if (_seenInstructionDialog) {
-          return;
-        }
-        setState(() {
-          _seenInstructionDialog = true;
-        });
-
-        showDialog<Column>(
-          context: context,
-          builder: (BuildContext context) => instructionDialog,
-        );
-      });
-    }
-
     final BoardPainter painter = BoardPainter(
       board: _board,
     );
@@ -52,7 +35,21 @@ class _TransformationsDemoState extends State<TransformationsDemo> {
     // The scene is drawn by a CustomPaint, but user interaction is handled by
     // the GestureTransformable parent widget.
     return Scaffold(
-      appBar: AppBar(title: const Text('2D Tranformations')),
+      appBar: AppBar(
+        title: const Text('2D Tranformations'),
+        actions: <Widget>[
+          IconButton(
+            icon: const Icon(Icons.help),
+            tooltip: 'Help',
+            onPressed: () {
+              showDialog<Column>(
+                context: context,
+                builder: (BuildContext context) => instructionDialog,
+              );
+            },
+          ),
+        ],
+      ),
       body: LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
           // Draw the scene as big as is available, but allow the user to
