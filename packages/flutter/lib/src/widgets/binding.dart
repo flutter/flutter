@@ -302,10 +302,8 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
           };
         },
       );
-    }
 
-    // Expose the ability to send Widget rebuilds as [Timeline] events.
-    if (!kReleaseMode) {
+      // Expose the ability to send Widget rebuilds as [Timeline] events.
       registerBoolServiceExtension(
         name: 'profileWidgetBuilds',
         getter: () async => debugProfileBuildsEnabled,
