@@ -301,7 +301,7 @@ class EditableText extends StatefulWidget {
     this.keyboardAppearance = Brightness.light,
     this.dragStartBehavior = DragStartBehavior.start,
     this.enableInteractiveSelection,
-    this.scrollPhysics = const ScrollPhysics(),
+    this.scrollPhysics = const ClampingScrollPhysics(),
   }) : assert(controller != null),
        assert(focusNode != null),
        assert(obscureText != null),
@@ -763,7 +763,7 @@ class EditableText extends StatefulWidget {
     properties.add(DiagnosticsProperty<bool>('expands', expands, defaultValue: false));
     properties.add(DiagnosticsProperty<bool>('autofocus', autofocus, defaultValue: false));
     properties.add(DiagnosticsProperty<TextInputType>('keyboardType', keyboardType, defaultValue: null));
-    properties.add(DiagnosticsProperty<ScrollPhysics>('scrollPhysics', scrollPhysics, defaultValue: const ScrollPhysics()));
+    properties.add(DiagnosticsProperty<ScrollPhysics>('scrollPhysics', scrollPhysics, defaultValue: const ClampingScrollPhysics()));
   }
 }
 
