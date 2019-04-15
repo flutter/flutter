@@ -28,12 +28,12 @@ import 'platform_messages.dart';
 /// The logical identity of the channel is given by its name. Identically named
 /// channels will interfere with each other's communication.
 ///
-/// See: <https://flutter.io/platform-channels/>
-class BaseMessageChannel<T> {
-  /// Creates a [BaseMessageChannel] with the specified [name], [codec] and [binaryMessenger].
+/// See: <https://flutter.dev/platform-channels/>
+class BasicMessageChannel<T> {
+  /// Creates a [BasicMessageChannel] with the specified [name], [codec] and [binaryMessenger].
   ///
   /// None of [name], [codec], or [binaryMessenger] may be null.
-  const BaseMessageChannel(this.name, this.codec, this.binaryMessenger)
+  const BasicMessageChannel(this.name, this.codec, [ this.binaryMessenger = const _ClientBinaryMessenger() ])
     : assert(name != null),
       assert(codec != null),
       assert(binaryMessenger != null);
@@ -113,14 +113,14 @@ class BaseMessageChannel<T> {
 /// channels will interfere with each other's communication.
 ///
 /// See: <https://flutter.dev/platform-channels/>
-class BaseMethodChannel {
-  /// Creates a [BaseMethodChannel] with the specified [name].
+class MethodChannel {
+  /// Creates a [MethodChannel] with the specified [name].
   ///
   /// The [codec] used will be [StandardMethodCodec], unless otherwise
   /// specified.
   ///
   /// None of [name], [binaryMessenger], or [codec] may be null.
-  const BaseMethodChannel(this.name, this.binaryMessenger, [this.codec = const StandardMethodCodec()])
+  const MethodChannel(this.name, [this.codec = const StandardMethodCodec(), this.binaryMessenger = const _ClientBinaryMessenger() ])
     : assert(name != null),
       assert(binaryMessenger != null),
       assert(codec != null);
@@ -302,7 +302,7 @@ class BaseMethodChannel {
   ///    [StandardMethodCodec].
   ///  * [JSONMessageCodec] which defines the payload values supported by
   ///    [JSONMethodCodec].
-  ///  * <https://docs.flutter.io/javadoc/io/flutter/plugin/common/MethodCall.html>
+  ///  * <https://docs.flutter.dev/javadoc/io/flutter/plugin/common/MethodCall.html>
   ///    for how to access method call arguments on Android.
   @optionalTypeArgs
   Future<T> invokeMethod<T>(String method, [ dynamic arguments ]) async {
@@ -408,27 +408,6 @@ class BaseMethodChannel {
       return codec.encodeErrorEnvelope(code: 'error', message: e.toString(), details: null);
     }
   }
-}
-
-/// A [BaseMessageChannel] that sends messages from the framework to platform plugins.
-class BasicMessageChannel<T> extends BaseMessageChannel<T> {
-  /// Creates a [BasicMessageChannel] with the specified [name] and [codec].
-  ///
-  /// Neither [name] nor [codec] may be null.
-  const BasicMessageChannel(String name, MessageCodec<T> codec)
-    : super(name, codec, const _ClientBinaryMessenger());
-}
-
-/// A [BaseMethodChannel] that sends method calls from the framework to platform plugins.
-class MethodChannel extends BaseMethodChannel {
-  /// Creates a [MethodChannel] with the specified [name].
-  ///
-  /// The [codec] used will be [StandardMethodCodec], unless otherwise
-  /// specified.
-  ///
-  /// Neither [name] nor [codec] may be null.
-  const MethodChannel(String name, [MethodCodec codec = const StandardMethodCodec()])
-    : super(name, const _ClientBinaryMessenger(), codec);
 }
 
 /// A [MethodChannel] that ignores missing platform plugins.
