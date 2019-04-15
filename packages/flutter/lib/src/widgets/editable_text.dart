@@ -301,6 +301,7 @@ class EditableText extends StatefulWidget {
     this.keyboardAppearance = Brightness.light,
     this.dragStartBehavior = DragStartBehavior.start,
     this.enableInteractiveSelection,
+    this.scrollPhysics = const ScrollPhysics(),
   }) : assert(controller != null),
        assert(focusNode != null),
        assert(obscureText != null),
@@ -326,6 +327,7 @@ class EditableText extends StatefulWidget {
        assert(rendererIgnoresPointer != null),
        assert(scrollPadding != null),
        assert(dragStartBehavior != null),
+       assert(scrollPhysics != null),
        _strutStyle = strutStyle,
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
        inputFormatters = maxLines == 1
@@ -733,6 +735,9 @@ class EditableText extends StatefulWidget {
   /// {@macro flutter.widgets.scrollable.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
 
+  /// {@macro flutter.material.TextField.scrollPhysics}
+  final ScrollPhysics scrollPhysics;
+
   /// {@macro flutter.rendering.editable.selectionEnabled}
   bool get selectionEnabled {
     return enableInteractiveSelection ?? !obscureText;
@@ -758,6 +763,7 @@ class EditableText extends StatefulWidget {
     properties.add(DiagnosticsProperty<bool>('expands', expands, defaultValue: false));
     properties.add(DiagnosticsProperty<bool>('autofocus', autofocus, defaultValue: false));
     properties.add(DiagnosticsProperty<TextInputType>('keyboardType', keyboardType, defaultValue: null));
+    properties.add(DiagnosticsProperty<ScrollPhysics>('scrollPhysics', scrollPhysics, defaultValue: const ScrollPhysics()));
   }
 }
 
@@ -1397,7 +1403,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       excludeFromSemantics: true,
       axisDirection: _isMultiline ? AxisDirection.down : AxisDirection.right,
       controller: _scrollController,
-      physics: const ClampingScrollPhysics(),
+      physics: widget.scrollPhysics,
       dragStartBehavior: widget.dragStartBehavior,
       viewportBuilder: (BuildContext context, ViewportOffset offset) {
         return CompositedTransformTarget(
