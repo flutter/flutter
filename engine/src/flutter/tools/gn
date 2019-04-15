@@ -110,18 +110,13 @@ def to_gn_args(args):
       # The GN arg is not available in the windows toolchain.
       gn_args['enable_lto'] = enable_lto
 
-    aot = not runtime_mode in ['debug', 'dynamic_profile', 'dynamic_release']
     if args.target_os == 'android':
         gn_args['target_os'] = 'android'
     elif args.target_os == 'ios':
         gn_args['target_os'] = 'ios'
         gn_args['use_ios_simulator'] = args.simulator
-        if not args.simulator:
-          aot = True
     elif args.target_os is not None:
         gn_args['target_os'] = args.target_os
-    else:
-      aot = False
 
     gn_args['dart_lib_export_symbols'] = False
 
@@ -189,7 +184,6 @@ def to_gn_args(args):
       gn_args["host_cpu"] = "x86"
 
     gn_args['flutter_runtime_mode'] = runtime_mode
-    gn_args['flutter_aot'] = aot
 
     if args.target_sysroot:
       gn_args['target_sysroot'] = args.target_sysroot
