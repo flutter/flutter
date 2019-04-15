@@ -12,7 +12,6 @@ import 'package:flutter/services.dart';
 import 'basic_types.dart';
 import 'strut_style.dart';
 import 'text_span.dart';
-import 'text_style.dart';
 
 export 'package:flutter/services.dart' show TextRange, TextSelection;
 
@@ -51,13 +50,12 @@ class TextPainter {
     String ellipsis,
     Locale locale,
     StrutStyle strutStyle,
-    ui.TextWidthType widthType,
+    ui.TextWidthType widthType = ui.TextWidthType.full,
   }) : assert(text == null || text.debugAssertIsValid()),
        assert(textAlign != null),
        assert(textScaleFactor != null),
        assert(maxLines == null || maxLines > 0),
-       // TODO(justinmc): get your defaults right and know when this can be null
-       //assert(widthType != null),
+       assert(widthType != null),
        _text = text,
        _textAlign = textAlign,
        _textDirection = textDirection,
