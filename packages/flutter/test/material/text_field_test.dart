@@ -381,7 +381,7 @@ void main() {
     expect(textField.cursorRadius, const Radius.circular(3.0));
   });
 
-  testWidgets('text field render correctly inside opacity', (WidgetTester tester) async {
+  testWidgets('text field selection toolbar renders correctly inside opacity', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -389,9 +389,9 @@ void main() {
             child: Container(
               width: 100,
               height: 100,
-              child: Opacity(
-                opacity: 1.0,
-                child: const TextField(
+              child: const Opacity(
+                opacity: 0.5,
+                child: TextField(
                   decoration: InputDecoration(hintText: 'Placeholder'),
                 ),
               ),
@@ -403,16 +403,32 @@ void main() {
 
     await tester.showKeyboard(find.byType(TextField));
 
-    const String testValue = 'ABC';
-    tester.testTextInput.updateEditingValue(const TextEditingValue(
-      text: testValue,
-      selection: TextSelection.collapsed(offset: testValue.length),
-    ));
-
+    const String testValue = 'A B C';
+    tester.testTextInput.updateEditingValue(
+        const TextEditingValue(
+          text: testValue
+        )
+    );
     await tester.pump();
 
+    // The selectWordsInRange with SelectionChangedCause.tap seems to be needed to show the toolbar.
+    // (This is true even if we provide selection parameter to the TextEditingValue above.)
+    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+    state.renderEditable.selectWordsInRange(from: const Offset(0, 0), cause: SelectionChangedCause.tap);
+    await tester.pump();
+
+    expect(state.showToolbar(), true);
+    await tester.pump();
+
+    // This is needed for the AnimatedOpacity to turn from 0 to 1 so the toolbar is visible.
+    await tester.pumpAndSettle();
+
+    // Sanity check that the toolbar widget exists.
+    expect(find.text('PASTE'), findsOneWidget);
+
     await expectLater(
-      find.byType(TextField),
+      // The toolbar exists in the Overlay above the MaterialApp.
+      find.byType(Overlay),
       matchesGoldenFile('text_field_opacity_test.0.0.png'),
     );
   }, skip: !Platform.isLinux);

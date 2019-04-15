@@ -1280,6 +1280,13 @@ class OpacityLayer extends ContainerLayer {
   }
 
   @override
+  void applyTransform(Layer child, Matrix4 transform) {
+    assert(child != null);
+    assert(transform != null);
+    transform.multiply(Matrix4.translationValues(offset.dx, offset.dy, 0.0));
+  }
+
+  @override
   ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
     bool enabled = true;
     assert(() {
