@@ -884,7 +884,7 @@ abstract class ResidentRunner {
       }
       return true;
     } else if (character == 'a') {
-      if (supportsServiceProtocol && isRunningDebug) {
+      if (supportsServiceProtocol) {
         await _debugToggleProfileWidgetBuilds();
       }
     } else if (lower == 'o') {
@@ -993,12 +993,12 @@ abstract class ResidentRunner {
         printStatus('To toggle the widget inspector (WidgetsApp.showWidgetInspectorOverride), press "i".');
         printStatus('To toggle the display of construction lines (debugPaintSizeEnabled), press "p".');
         printStatus('To simulate different operating systems, (defaultTargetPlatform), press "o".');
-        printStatus('To enable timeline events for all widget build methods, (debugProfileWidgetBuilds), press "a"');
         printStatus('To toggle the elevation checker, press "z".');
       } else {
         printStatus('To dump the accessibility tree (debugDumpSemantics), press "S" (for traversal order) or "U" (for inverse hit test order).');
       }
       printStatus('To display the performance overlay (WidgetsApp.showPerformanceOverlay), press "P".');
+      printStatus('To enable timeline events for all widget build methods, (debugProfileWidgetBuilds), press "a"');
     }
     if (flutterDevices.any((FlutterDevice d) => d.device.supportsScreenshot)) {
       printStatus('To save a screenshot to flutter.png, press "s".');
