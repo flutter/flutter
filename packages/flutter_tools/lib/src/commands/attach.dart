@@ -89,7 +89,7 @@ class AttachCommand extends FlutterCommand {
   final String name = 'attach';
 
   @override
-  final String description = 'Attach to a running application.';
+  final String description = 'Attach to a running application.'; // TODO(fujino): YOLO
 
   int get debugPort {
     if (argResults['debug-port'] == null)
