@@ -1811,7 +1811,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
-          textTheme: TextTheme(
+          textTheme: const TextTheme(
             body1: TextStyle(color: Colors.blue),
           ),
         ),
