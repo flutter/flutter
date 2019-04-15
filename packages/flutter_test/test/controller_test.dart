@@ -210,6 +210,166 @@ void main() {
       }
     },
   );
+
+  testWidgets(
+    'WidgetTester.tap must respect buttons',
+    (WidgetTester tester) async {
+      final List<String> logs = <String>[];
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Listener(
+            onPointerDown: (PointerDownEvent event) => logs.add('down ${event.buttons}'),
+            onPointerMove: (PointerMoveEvent event) => logs.add('move ${event.buttons}'),
+            onPointerUp: (PointerUpEvent event) => logs.add('up ${event.buttons}'),
+            child: const Text('test'),
+          ),
+        ),
+      );
+
+      final WidgetControllerSpy spyController = WidgetControllerSpy(tester.binding);
+
+      await spyController.tap(find.text('test'), buttons: kSecondaryMouseButton);
+
+      const String b = '$kSecondaryMouseButton';
+      for(int i = 0; i < logs.length; i++) {
+        if (i == 0)
+          expect(logs[i], 'down $b');
+        else if (i != logs.length - 1)
+          expect(logs[i], 'move $b');
+        else
+          expect(logs[i], 'up 0');
+      }
+    },
+  );
+
+  testWidgets(
+    'WidgetTester.press must respect buttons',
+    (WidgetTester tester) async {
+      final List<String> logs = <String>[];
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Listener(
+            onPointerDown: (PointerDownEvent event) => logs.add('down ${event.buttons}'),
+            onPointerMove: (PointerMoveEvent event) => logs.add('move ${event.buttons}'),
+            onPointerUp: (PointerUpEvent event) => logs.add('up ${event.buttons}'),
+            child: const Text('test'),
+          ),
+        ),
+      );
+
+      final WidgetControllerSpy spyController = WidgetControllerSpy(tester.binding);
+
+      await spyController.press(find.text('test'), buttons: kSecondaryMouseButton);
+
+      const String b = '$kSecondaryMouseButton';
+      expect(logs, equals(<String>['down $b']));
+    },
+  );
+
+  testWidgets(
+    'WidgetTester.longPress must respect buttons',
+    (WidgetTester tester) async {
+      final List<String> logs = <String>[];
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Listener(
+            onPointerDown: (PointerDownEvent event) => logs.add('down ${event.buttons}'),
+            onPointerMove: (PointerMoveEvent event) => logs.add('move ${event.buttons}'),
+            onPointerUp: (PointerUpEvent event) => logs.add('up ${event.buttons}'),
+            child: const Text('test'),
+          ),
+        ),
+      );
+
+      final WidgetControllerSpy spyController = WidgetControllerSpy(tester.binding);
+
+      await spyController.longPress(find.text('test'), buttons: kSecondaryMouseButton);
+      await tester.pumpAndSettle();
+
+      const String b = '$kSecondaryMouseButton';
+      for(int i = 0; i < logs.length; i++) {
+        if (i == 0)
+          expect(logs[i], 'down $b');
+        else if (i != logs.length - 1)
+          expect(logs[i], 'move $b');
+        else
+          expect(logs[i], 'up 0');
+      }
+    },
+  );
+
+  testWidgets(
+    'WidgetTester.drag must respect buttons',
+    (WidgetTester tester) async {
+      final List<String> logs = <String>[];
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Listener(
+            onPointerDown: (PointerDownEvent event) => logs.add('down ${event.buttons}'),
+            onPointerMove: (PointerMoveEvent event) => logs.add('move ${event.buttons}'),
+            onPointerUp: (PointerUpEvent event) => logs.add('up ${event.buttons}'),
+            child: const Text('test'),
+          ),
+        ),
+      );
+
+      final WidgetControllerSpy spyController = WidgetControllerSpy(tester.binding);
+
+      await spyController.drag(find.text('test'), const Offset(-150.0, 200.0), buttons: kSecondaryMouseButton);
+
+      const String b = '$kSecondaryMouseButton';
+      for(int i = 0; i < logs.length; i++) {
+        if (i == 0)
+          expect(logs[i], 'down $b');
+        else if (i != logs.length - 1)
+          expect(logs[i], 'move $b');
+        else
+          expect(logs[i], 'up 0');
+      }
+    },
+  );
+
+  testWidgets(
+    'WidgetTester.fling must respect buttons',
+    (WidgetTester tester) async {
+      final List<String> logs = <String>[];
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Listener(
+            onPointerDown: (PointerDownEvent event) => logs.add('down ${event.buttons}'),
+            onPointerMove: (PointerMoveEvent event) => logs.add('move ${event.buttons}'),
+            onPointerUp: (PointerUpEvent event) => logs.add('up ${event.buttons}'),
+            child: const Text('test'),
+          ),
+        ),
+      );
+
+      final WidgetControllerSpy spyController = WidgetControllerSpy(tester.binding);
+
+      await spyController.fling(find.text('test'), const Offset(-10.0, 0.0), 1000.0, buttons: kSecondaryMouseButton);
+      await tester.pumpAndSettle();
+
+      const String b = '$kSecondaryMouseButton';
+      for(int i = 0; i < logs.length; i++) {
+        if (i == 0)
+          expect(logs[i], 'down $b');
+        else if (i != logs.length - 1)
+          expect(logs[i], 'move $b');
+        else
+          expect(logs[i], 'up 0');
+      }
+    },
+  );
 }
 
 class WidgetControllerSpy extends WidgetController {
@@ -224,9 +384,10 @@ class WidgetControllerSpy extends WidgetController {
   @override
   Future<void> pump(Duration duration) async {
     if (duration != null)
-      await Future<void>.delayed(duration);
+      await _binding.pump(duration);
     _binding.scheduleFrame();
-    await _binding.endOfFrame;
+    // TODO(tongmu): This line hangs tests and removing it doesn't seem to break any tests.
+    // await _binding.endOfFrame;
   }
 
   int _getNextPointer() {
@@ -255,6 +416,7 @@ class WidgetControllerSpy extends WidgetController {
       kind: kind,
       dispatcher: sendEventToBinding,
       hitTester: hitTestOnBinding,
+      buttons: buttons,
     );
   }
 }
