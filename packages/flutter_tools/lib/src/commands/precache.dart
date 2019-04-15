@@ -25,6 +25,8 @@ class PrecacheCommand extends FlutterCommand {
         help: 'Precache artifacts for windows desktop development');
     argParser.addFlag('macos', negatable: true, defaultsTo: false,
         help: 'Precache artifacts for macOS desktop development');
+    argParser.addFlag('fuchsia', negatable: true, defaultsTo: false,
+        help: 'Precache artifacts for Fuchsia development');
   }
 
   @override
@@ -60,6 +62,9 @@ class PrecacheCommand extends FlutterCommand {
       }
       if (argResults['macos']) {
         requiredArtifacts.add(DevelopmentArtifact.macOS);
+      }
+      if (argResults['fuchsia']) {
+        requiredArtifacts.add(DevelopmentArtifact.fuchsia);
       }
     }
 
