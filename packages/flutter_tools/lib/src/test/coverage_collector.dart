@@ -21,7 +21,7 @@ import 'watcher.dart';
 
 /// A class that's used to collect coverage data during tests.
 class CoverageCollector extends TestWatcher {
-  CoverageCollector(this.flutterProject, {this.coverageDirectory});
+  CoverageCollector({this.flutterProject, this.coverageDirectory});
 
   Map<String, dynamic> _globalHitmap;
   final Directory coverageDirectory;
@@ -61,6 +61,9 @@ class CoverageCollector extends TestWatcher {
       // If we have a specified coverage directory or could not find the package name, then
       // accept all libraries.
       if (coverageDirectory != null) {
+        return true;
+      }
+      if (flutterProject == null) {
         return true;
       }
       return libraryName.contains(flutterProject.manifest.appName);
