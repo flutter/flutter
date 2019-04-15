@@ -291,6 +291,130 @@ void main() {
         Platform: macOsPlatform,
       });
     });
+
+    group('build arguments', () {
+      String testApp, testFile;
+
+      setUp(() {
+        restoreAppStarter();
+      });
+
+      Future<void> appStarterSetup() async {
+        withMockDevice();
+
+        final MockDeviceLogReader mockDeviceLogReader = MockDeviceLogReader();
+        when(mockDevice.getLogReader()).thenReturn(mockDeviceLogReader);
+        final MockLaunchResult mockLaunchResult = MockLaunchResult();
+        when(mockLaunchResult.started).thenReturn(true);
+        when(mockDevice.startApp(
+            null,
+            mainPath: anyNamed('mainPath'),
+            route: anyNamed('route'),
+            debuggingOptions: anyNamed('debuggingOptions'),
+            platformArgs: anyNamed('platformArgs'),
+            prebuiltApplication: anyNamed('prebuiltApplication'),
+            usesTerminalUi: false,
+        )).thenAnswer((_) => Future<LaunchResult>.value(mockLaunchResult));
+        when(mockDevice.isAppInstalled(any)).thenAnswer((_) => Future<bool>.value(false));
+
+        testApp = fs.path.join(tempDir.path, 'test', 'e2e.dart');
+        testFile = fs.path.join(tempDir.path, 'test_driver', 'e2e_test.dart');
+
+        testRunner = (List<String> testArgs, String observatoryUri) async {
+          throwToolExit(null, exitCode: 123);
+        };
+        appStopper = expectAsync1(
+            (DriveCommand command) async {
+              return true;
+            },
+            count: 2,
+        );
+
+        final MemoryFileSystem memFs = fs;
+        await memFs.file(testApp).writeAsString('main() {}');
+        await memFs.file(testFile).writeAsString('main() {}');
+      }
+
+      testUsingContext('does not use pre-built app if no build arg provided', () async {
+        await appStarterSetup();
+
+        final List<String> args = <String>[
+          'drive',
+          '--target=$testApp',
+        ];
+        try {
+          await createTestCommandRunner(command).run(args);
+        } on ToolExit catch (e) {
+          expect(e.exitCode, 123);
+          expect(e.message, null);
+        }
+        verify(mockDevice.startApp(
+                null,
+                mainPath: anyNamed('mainPath'),
+                route: anyNamed('route'),
+                debuggingOptions: anyNamed('debuggingOptions'),
+                platformArgs: anyNamed('platformArgs'),
+                prebuiltApplication: false,
+                usesTerminalUi: false,
+        ));
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+      });
+
+      testUsingContext('does not use pre-built app if --build arg provided', () async {
+        await appStarterSetup();
+
+        final List<String> args = <String>[
+          'drive',
+          '--build',
+          '--target=$testApp',
+        ];
+        try {
+          await createTestCommandRunner(command).run(args);
+        } on ToolExit catch (e) {
+          expect(e.exitCode, 123);
+          expect(e.message, null);
+        }
+        verify(mockDevice.startApp(
+                null,
+                mainPath: anyNamed('mainPath'),
+                route: anyNamed('route'),
+                debuggingOptions: anyNamed('debuggingOptions'),
+                platformArgs: anyNamed('platformArgs'),
+                prebuiltApplication: false,
+                usesTerminalUi: false,
+        ));
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+      });
+
+      testUsingContext('uses prebuilt app if --no-build arg provided', () async {
+        await appStarterSetup();
+
+        final List<String> args = <String>[
+          'drive',
+          '--no-build',
+          '--target=$testApp',
+        ];
+        try {
+          await createTestCommandRunner(command).run(args);
+        } on ToolExit catch (e) {
+          expect(e.exitCode, 123);
+          expect(e.message, null);
+        }
+        verify(mockDevice.startApp(
+                null,
+                mainPath: anyNamed('mainPath'),
+                route: anyNamed('route'),
+                debuggingOptions: anyNamed('debuggingOptions'),
+                platformArgs: anyNamed('platformArgs'),
+                prebuiltApplication: true,
+                usesTerminalUi: false,
+        ));
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+      });
+    });
   });
 }
 
@@ -301,3 +425,5 @@ class MockDevice extends Mock implements Device {
 }
 
 class MockAndroidDevice extends Mock implements AndroidDevice { }
+
+class MockLaunchResult extends Mock implements LaunchResult { }
