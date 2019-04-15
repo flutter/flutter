@@ -55,6 +55,12 @@
             android:text="Flutter Under Drawer"
             />
         <Button
+            android:id="@+id/button_fragment_transitions"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Fragment Transitions"
+            />
+        <Button
             android:id="@+id/button_page_tabs"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

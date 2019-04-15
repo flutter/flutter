@@ -10,6 +10,7 @@ import io.flutter.androidembedding.as_view.SingleFlutterViewActivity;
 import io.flutter.androidembedding.fullscreen.FullscreenCustomFlutterActivity;
 import io.flutter.androidembedding.fullscreen.FullscreenFlutterActivity;
 import io.flutter.androidembedding.partial_flow.LoginActivity;
+import io.flutter.androidembedding.single_activity.FragTransitionActivity;
 import io.flutter.androidembedding.single_activity.NavDrawerActivity;
 import io.flutter.androidembedding.single_activity.TabbedActivity;
 import io.flutter.androidembedding.single_activity.TabbedWithViewPagerActivity;
@@ -59,6 +60,13 @@ public class MainActivity extends AppCompatActivity {
       @Override
       public void onClick(View v) {
         startActivity(new Intent(MainActivity.this, NavDrawerActivity.class));
+      }
+    });
+
+    findViewById(R.id.button_fragment_transitions).setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View v) {
+        startActivity(new Intent(MainActivity.this, FragTransitionActivity.class));
       }
     });
 
