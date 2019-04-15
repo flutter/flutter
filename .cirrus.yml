@@ -40,7 +40,7 @@ task:
       env:
         SHARD: deploy_gallery
         GOOGLE_DEVELOPER_SERVICE_ACCOUNT_ACTOR_FASTLANE: ENCRYPTED[d9ac1462c3c556fc2f8165c9d5566a16497d8ebc38a50357f7f3abf136b7f83e1d1d76dde36fee356cb0f9ebf7a89346]
-        ANDROID_GALLERY_UPLOAD_KEY: ENCRYPTED[0b3e681b4507aec433ef29c79b715f15f8c75ecd25315ea286b0b2bcb8b28d578634eead5aa2c54086a25e8da1bb219a]
+        ANDROID_GALLERY_UPLOAD_KEY: ENCRYPTED[0f2aca35f05b26add5d9edea2a7449341269a2b7e22d5c667f876996e2e8bc44ff1369431ebf73b7c5581fd95d0e5902]
       test_script: ./dev/bots/deploy_gallery.sh
     - name: analyze
       test_script:
