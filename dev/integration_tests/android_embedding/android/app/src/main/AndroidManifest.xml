@@ -15,6 +15,11 @@
             android:name=".partial_flow.HomeActivity"
             />
         <activity
+            android:name=".single_activity.FragTransitionActivity"
+            android:label="@string/title_activity_tabbed"
+            android:theme="@style/AppTheme.NoActionBar"
+            />
+        <activity
             android:name=".single_activity.TabbedActivity"
             android:label="@string/title_activity_tabbed"
             android:theme="@style/AppTheme.NoActionBar"
