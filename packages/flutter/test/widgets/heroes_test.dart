@@ -1779,4 +1779,110 @@ void main() {
     expect(find.byKey(smallContainer), isInCard);
     expect(tester.getSize(find.byKey(smallContainer)), const Size(100,100));
   });
+
+  testWidgets('TextStyle persists during flight for Text-only Hero', (WidgetTester tester) async {
+    const Key homeHeroKey = Key('home hero');
+    const Key routeHeroKey = Key('route hero');
+
+    // Show a Text Hero tagged 'H', with key routeHeroKey
+    final MaterialPageRoute<void> route = MaterialPageRoute<void>(
+      builder: (BuildContext context) {
+        return Material(
+          child: Column(
+            children: <Widget>[
+              const Hero(
+                tag: 'H',
+                key: routeHeroKey,
+                child: Text(
+                  'Zero',
+                ),
+              ),
+              RaisedButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Icon(Icons.add),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+
+// Show a Text Hero tagged 'H' with key homeHeroKey
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          textTheme: TextTheme(
+            body1: TextStyle(color: Colors.blue),
+          ),
+        ),
+        home: Scaffold(
+          body: Builder(
+            builder: (BuildContext context) { // Navigator.push() needs context
+              return Column(
+                children: <Widget> [
+                  const Hero(
+                    tag: 'H',
+                    key: homeHeroKey,
+                    child: Text(
+                      'Hero',
+                    ),
+                  ),
+                  FlatButton(
+                    onPressed: () => Navigator.push(context, route),
+                    child: const Icon(Icons.add)
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
+      )
+    );
+
+    // Pushes route
+    await tester.tap(find.byType(FlatButton));
+    await tester.pump();
+    await tester.pump();
+    final Iterable<Widget> initialTextStyles = tester.widgetList(find.byType(DefaultTextStyle));
+    final DefaultTextStyle initialStyle = initialTextStyles.last;
+    expect(initialStyle.style.color, Colors.blue);
+    expect(initialStyle.style.decoration, isNot(TextDecoration.underline));
+
+    await tester.pump(const Duration(milliseconds: 10));
+    Iterable<Widget> midFlightTextStyles = tester.widgetList(find.byType(DefaultTextStyle));
+    DefaultTextStyle midFlightStyle = midFlightTextStyles.last;
+    expect(midFlightStyle.style.color, Colors.blue);
+    expect(midFlightStyle.style.decoration, isNot(TextDecoration.underline));
+
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pump();
+    Iterable<Widget> finalTextStyles = tester.widgetList(find.byType(DefaultTextStyle));
+    DefaultTextStyle finalStyle = finalTextStyles.last;
+    expect(finalStyle.style.color, isNot(Colors.blue));
+    expect(finalStyle.style.decoration, isNot(TextDecoration.underline));
+
+    await tester.pump();
+
+    // Pops route
+    await tester.tap(find.byType(RaisedButton));
+    await tester.pump();
+    await tester.pump();
+
+    await tester.pump(const Duration(milliseconds: 10));
+    midFlightTextStyles = tester.widgetList(find.byType(DefaultTextStyle));
+    midFlightStyle = midFlightTextStyles.last;
+    expect(midFlightStyle.style.color, Colors.blue);
+    expect(midFlightStyle.style.decoration, isNot(TextDecoration.underline));
+
+    await tester.pump();
+
+    await tester.pump(const Duration(milliseconds: 300));
+    finalTextStyles = tester.widgetList(find.byType(DefaultTextStyle));
+    finalStyle = finalTextStyles.last;
+    expect(finalStyle.style.color, isNot(Colors.blue));
+    expect(finalStyle.style.decoration, isNot(TextDecoration.underline));
+
+  });
+
 }
+

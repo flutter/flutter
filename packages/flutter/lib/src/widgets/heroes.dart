@@ -12,6 +12,7 @@ import 'overlay.dart';
 import 'pages.dart';
 import 'routes.dart';
 import 'transitions.dart';
+import 'package:flutter/material.dart';
 
 /// Signature for a function that takes two [Rect] instances and returns a
 /// [RectTween] that transitions between them.
@@ -754,6 +755,9 @@ class HeroController extends NavigatorObserver {
     BuildContext toHeroContext,
   ) {
     final Hero toHero = toHeroContext.widget;
-    return toHero.child;
+    return DefaultTextStyle(
+      child: toHero.child,
+      style: DefaultTextStyle.of(toHeroContext).style,
+    );
   };
 }
