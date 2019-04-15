@@ -163,7 +163,7 @@ class MatrixUtils {
   /// 0.0 before computing its bounding rect.
   static Rect inverseTransformRect(Matrix4 transform, Rect rect) {
     assert(rect != null);
-    assert(transform.determinant != 0.0);
+    assert(transform.determinant() != 0.0);
     if (isIdentity(transform))
       return rect;
     transform = Matrix4.copy(transform)..invert();
