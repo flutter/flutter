@@ -541,6 +541,20 @@ int parseServicePort(String line, {
   return match == null ? null : int.parse(match.group(2));
 }
 
+/// Tries to extract a Uri from the string.
+///
+/// The `prefix`, if specified, is a regular expression pattern and must not contain groups.
+///
+/// The `multiLine` flag should be set to true if `line` is actually a buffer of many lines.
+Uri parseServiceUri(String line, {
+  String prefix = 'An Observatory debugger .* is available at: ',
+  bool multiLine = false,
+}) {
+  final RegExp r = RegExp('$prefix((http|\/\/)[a-zA-Z0-9:/=\.\\[\\]]+)');
+  final Match match = r.firstMatch(line);
+  return match == null ? null : Uri.parse(match.group(1));
+}
+
 /// If FLUTTER_ENGINE environment variable is set then we need to pass
 /// correct --local-engine setting too.
 void setLocalEngineOptionIfNecessary(List<String> options, [String flavor]) {
