@@ -149,7 +149,9 @@ class TestCommand extends FastFlutterCommand {
 
     CoverageCollector collector;
     if (argResults['coverage'] || argResults['merge-coverage']) {
-      collector = CoverageCollector(await FlutterProject.current());
+      collector = CoverageCollector(
+        flutterProject: await FlutterProject.current(),
+      );
     }
 
     final bool machine = argResults['machine'];
