@@ -309,7 +309,7 @@ class _TabSwitchingViewState extends State<_TabSwitchingView> {
     );
     tabFocusAttachments = List<FocusAttachment>.generate(
       widget.tabNumber,
-          (int index) => tabFocusNodes[index].attach(context),
+      (int index) => tabFocusNodes[index].attach(context),
     );
   }
 

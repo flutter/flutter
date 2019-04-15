@@ -1693,7 +1693,7 @@ class RenderEditable extends RenderBox {
 
   void _paintContents(PaintingContext context, Offset offset) {
     assert(_textLayoutLastWidth == constraints.maxWidth,
-    'Last width ($_textLayoutLastWidth) not the same as max width constraint (${constraints.maxWidth}).');
+      'Last width ($_textLayoutLastWidth) not the same as max width constraint (${constraints.maxWidth}).');
     final Offset effectiveOffset = offset + _paintOffset;
 
     bool showSelection = false;
