@@ -2,10 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' as ui show TextWidthType;
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 
 import '../rendering/mock_canvas.dart';
 import 'semantics_tester.dart';
@@ -317,6 +320,43 @@ void main() {
     );
 
     expect(find.byType(Text), isNot(paints..clipRect()));
+  });
+
+  testWidgets('Text respects textScaleFactor with default font size', (WidgetTester tester) async {
+    Future createText(ui.TextWidthType widthType) {
+      return tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: Container(
+                // Each word takes up more than a half of a line. Together they
+                // wrap onto two lines, but leave a lot of extra space.
+                child: Text('twowordsthateachtakeupmorethanhalfof alineoftextsothattheywrapwithlotsofextraspace',
+                  textDirection: TextDirection.ltr,
+                  widthType: widthType,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    const double fontHeight = 14.0;
+    const double screenWidth = 800.0;
+
+    // When widthType is full, takes up full screen width
+    await createText(ui.TextWidthType.full);
+    final Size textSizeFull = tester.getSize(find.byType(Text));
+    expect(textSizeFull.width, equals(screenWidth));
+    expect(textSizeFull.height, equals(fontHeight * 2));
+
+    // When widthType is tight, sets the width to as small as possible for the
+    // two lines.
+    await createText(ui.TextWidthType.tight);
+    final Size textSizeTight = tester.getSize(find.byType(Text));
+    expect(textSizeTight.width, equals(630.0));
+    expect(textSizeTight.height, equals(fontHeight * 2));
   });
 }
 
