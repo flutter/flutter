@@ -37,6 +37,7 @@ Future<int> runTests(
   @required int concurrency,
   FlutterProject flutterProject,
   String icudtlPath,
+  Directory coverageDirectory,
 }) async {
   // Compute the command-line arguments for package:test.
   final List<String> testArgs = <String>[];
