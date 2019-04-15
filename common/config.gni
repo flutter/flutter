@@ -11,9 +11,6 @@ if (target_cpu == "arm" || target_cpu == "arm64") {
 }
 
 declare_args() {
-  # Enable ahead-of-time compilation on platforms where AOT is optional.
-  flutter_aot = false
-
   # The runtime mode ("debug", "profile", "release", "dynamic_profile", or "dynamic_release")
   flutter_runtime_mode = "debug"
 }
@@ -40,8 +37,4 @@ if (flutter_runtime_mode == "debug") {
   feature_defines_list += [ "FLUTTER_RUNTIME_MODE=5" ]
 } else {
   feature_defines_list += [ "FLUTTER_RUNTIME_MODE=0" ]
-}
-
-if (flutter_aot) {
-  feature_defines_list += [ "FLUTTER_AOT=1" ]
 }
