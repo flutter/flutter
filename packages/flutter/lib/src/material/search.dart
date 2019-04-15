@@ -191,7 +191,7 @@ abstract class SearchDelegate<T> {
   ///
   ///  * [showSuggestions] to show the search suggestions again.
   void showResults(BuildContext context) {
-    _focusNode.unfocus();
+    _focusNode?.unfocus();
     _currentBody = _SearchBody.results;
   }
 
@@ -208,6 +208,7 @@ abstract class SearchDelegate<T> {
   ///
   ///  * [showResults] to show the search results.
   void showSuggestions(BuildContext context) {
+    assert(_focusNode != null, '_focusNode must be set by route before showSuggestions is called.');
     FocusScope.of(context).requestFocus(_focusNode);
     _currentBody = _SearchBody.suggestions;
   }
@@ -218,11 +219,15 @@ abstract class SearchDelegate<T> {
   /// to [showSearch] that launched the search initially.
   void close(BuildContext context, T result) {
     _currentBody = null;
-    _focusNode.unfocus();
+    _focusNode?.unfocus();
     Navigator.of(context)
       ..popUntil((Route<dynamic> route) => route == _route)
       ..pop(result);
   }
+
+  // The focus node to use for manipulating focus on the search page.
+  // This is managed  and set by the _SearchPageRoute using this delegate.
+  FocusNode _focusNode;
 
   /// [Animation] triggered when the search pages fades in or out.
   ///
@@ -231,9 +236,6 @@ abstract class SearchDelegate<T> {
   /// used to animate [IconButton]s contained within the route below the search
   /// page.
   Animation<double> get transitionAnimation => _proxyAnimation;
-
-  final FocusNode _focusNode = FocusNode();
-  FocusAttachment _focusAttachment;
 
   final TextEditingController _queryTextController = TextEditingController();
 
@@ -247,7 +249,6 @@ abstract class SearchDelegate<T> {
   }
 
   _SearchPageRoute<T> _route;
-
 }
 
 /// Describes the body that is currently shown under the [AppBar] in the
@@ -347,14 +348,18 @@ class _SearchPage<T> extends StatefulWidget {
 }
 
 class _SearchPageState<T> extends State<_SearchPage<T>> {
+  FocusNode focusNode = FocusNode();
+  FocusAttachment focusAttachment;
+
   @override
   void initState() {
     super.initState();
     queryTextController.addListener(_onQueryChanged);
     widget.animation.addStatusListener(_onAnimationStatusChanged);
     widget.delegate._currentBodyNotifier.addListener(_onSearchBodyChanged);
-    widget.delegate._focusAttachment = widget.delegate._focusNode.attach(context);
-    widget.delegate._focusNode.addListener(_onFocusChanged);
+    focusAttachment = focusNode.attach(context);
+    focusNode.addListener(_onFocusChanged);
+    widget.delegate._focusNode = focusNode;
   }
 
   @override
@@ -363,7 +368,8 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
     queryTextController.removeListener(_onQueryChanged);
     widget.animation.removeStatusListener(_onAnimationStatusChanged);
     widget.delegate._currentBodyNotifier.removeListener(_onSearchBodyChanged);
-    widget.delegate._focusNode.removeListener(_onFocusChanged);
+    widget.delegate._focusNode = null;
+    focusNode.dispose();
   }
 
   void _onAnimationStatusChanged(AnimationStatus status) {
@@ -377,7 +383,7 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
   }
 
   void _onFocusChanged() {
-    if (widget.delegate._focusNode.hasFocus && widget.delegate._currentBody != _SearchBody.suggestions) {
+    if (focusNode.hasFocus && widget.delegate._currentBody != _SearchBody.suggestions) {
       widget.delegate.showSuggestions(context);
     }
   }
@@ -397,7 +403,7 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
-    widget.delegate._focusAttachment.reparent(Focus.of(context));
+    focusAttachment.reparent(Focus.of(context));
     final ThemeData theme = widget.delegate.appBarTheme(context);
     final String searchFieldLabel = MaterialLocalizations.of(context).searchFieldLabel;
     Widget body;
@@ -439,7 +445,7 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
           leading: widget.delegate.buildLeading(context),
           title: TextField(
             controller: queryTextController,
-            focusNode: widget.delegate._focusNode,
+            focusNode: focusNode,
             style: theme.textTheme.title,
             textInputAction: TextInputAction.search,
             onSubmitted: (String _) {

@@ -331,8 +331,8 @@ class _TabSwitchingViewState extends State<_TabSwitchingView> {
 
   @override
   void dispose() {
-    for (FocusAttachment focusAttachment in tabFocusAttachments) {
-      focusAttachment.detach();
+    for (FocusNode focusNode in tabFocusNodes) {
+      focusNode.dispose();
     }
     super.dispose();
   }

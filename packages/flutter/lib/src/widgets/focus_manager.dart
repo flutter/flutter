@@ -391,33 +391,30 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
 
   /// Returns the size of the associated [Focus] in logical units.
   Size get size {
-    assert(
-    context != null,
-    "Tried to get the size of a focus node that didn't have its context set yet.\n"
-        'The context needs to be set before trying to evaluate traversal policies. This '
-        'is typically done by the reparent method, called from a build method.');
+    assert(context != null,
+      "Tried to get the size of a focus node that didn't have its context set yet.\n"
+      'The context needs to be set before trying to evaluate traversal policies. This '
+      'is typically done by the reparent method, called from a build method.');
     return context.findRenderObject().semanticBounds.size;
   }
 
   /// Returns the global offset to the upper left corner of the [Focus] in
   /// logical units.
   Offset get offset {
-    assert(
-    context != null,
-    "Tried to get the offset of a focus node that didn't have its context set yet.\n"
-        'The context needs to be set before trying to evaluate traversal policies. This '
-        'is typically done by the reparent method, called from a build method.');
+    assert(context != null,
+      "Tried to get the offset of a focus node that didn't have its context set yet.\n"
+      'The context needs to be set before trying to evaluate traversal policies. This '
+      'is typically done by the reparent method, called from a build method.');
     final RenderObject object = context.findRenderObject();
     return MatrixUtils.transformPoint(object.getTransformTo(null), object.semanticBounds.topLeft);
   }
 
   /// Returns the global rectangle surrounding the node in logical units.
   Rect get rect {
-    assert(
-    context != null,
-    "Tried to get the bounds of a focus node that didn't have its context set yet.\n"
-        'The context needs to be set before trying to evaluate traversal policies. This '
-        'is typically done by the reparent method, called from a build method.');
+    assert(context != null,
+      "Tried to get the bounds of a focus node that didn't have its context set yet.\n"
+      'The context needs to be set before trying to evaluate traversal policies. This '
+      'is typically done by the reparent method, called from a build method.');
     final RenderObject object = context.findRenderObject();
     final Offset globalOffset = MatrixUtils.transformPoint(object.getTransformTo(null), object.semanticBounds.topLeft);
     return globalOffset & object.semanticBounds.size;
