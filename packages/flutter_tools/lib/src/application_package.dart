@@ -193,7 +193,7 @@ class AndroidApk extends ApplicationPackage {
         String actionName = '';
         String categoryName = '';
         for (xml.XmlNode node in element.children) {
-          if (!(node is xml.XmlElement)) {
+          if (node is! xml.XmlElement) {
             continue;
           }
           final xml.XmlElement xmlElement = node as xml.XmlElement;
@@ -404,22 +404,27 @@ class _Element extends _Entry {
   }
 
   _Attribute firstAttribute(String name) {
-    return children.firstWhere(
-        (_Entry e) => e is _Attribute && e.key.startsWith(name),
+    return children
+      .whereType<_Attribute>()
+      .firstWhere(
+        (_Attribute e) => e.key.startsWith(name),
         orElse: () => null,
-    ) as _Attribute;
+      );
   }
 
   _Element firstElement(String name) {
-    return children.firstWhere(
-        (_Entry e) => e is _Element && e.name.startsWith(name),
+    return children
+      .whereType<_Element>()
+      .firstWhere(
+        (_Element e) => e.name.startsWith(name),
         orElse: () => null,
-    ) as _Element;
+    );
   }
 
-  Iterable<_Entry> allElements(String name) {
-    return children.where(
-            (_Entry e) => e is _Element && e.name.startsWith(name));
+  Iterable<_Element> allElements(String name) {
+    return children
+      .whereType<_Element>()
+      .where((_Element e) => e.name.startsWith(name));
   }
 }
 

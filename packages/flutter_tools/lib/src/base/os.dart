@@ -249,7 +249,7 @@ class _WindowsUtils extends OperatingSystemUtils {
       final ProcessResult result = processManager.runSync(
           <String>['ver'], runInShell: true);
       if (result.exitCode == 0)
-        _name = result.stdout.trim() as String;
+        _name = (result.stdout as String).trim();
       else
         _name = super.name;
     }

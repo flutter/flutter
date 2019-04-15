@@ -458,8 +458,6 @@ class JITSnapshotter {
           // But if engine snapshot exists, its content must match the engine snapshot
           // in baseline APK. Otherwise, we're trying to build an update at an engine
           // version that might be binary incompatible with baseline APK.
-          print(af.content.runtimeType);
-          print(f.readAsBytesSync().runtimeType);
           if (!const ListEquality<Object>().equals(f.readAsBytesSync(), af.content as List<Object>)) {
             printError('Error: Detected engine changes unsupported by dynamic patching.');
             return 1;
