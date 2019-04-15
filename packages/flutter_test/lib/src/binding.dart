@@ -584,6 +584,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
 
     final bool autoUpdateGoldensBeforeTest = autoUpdateGoldenFiles;
     final TestExceptionReporter reportTestExceptionBeforeTest = reportTestException;
+    final ErrorWidgetBuilder errorWidgetBuilderBeforeTest = ErrorWidget.builder;
 
     // run the test
     await testBody();
@@ -598,6 +599,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       invariantTester();
       _verifyAutoUpdateGoldensUnset(autoUpdateGoldensBeforeTest);
       _verifyReportTestExceptionUnset(reportTestExceptionBeforeTest);
+      _verifyErrorWidgetBuilderUnset(errorWidgetBuilderBeforeTest);
       _verifyInvariants();
     }
 
@@ -658,6 +660,21 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
         FlutterError.reportError(FlutterErrorDetails(
           exception: FlutterError(
             'The value of reportTestException was changed by the test.',
+          ),
+          stack: StackTrace.current,
+          library: 'Flutter test framework',
+        ));
+      }
+      return true;
+    }());
+  }
+
+  void _verifyErrorWidgetBuilderUnset(ErrorWidgetBuilder valueBeforeTest) {
+    assert(() {
+      if (ErrorWidget.builder != valueBeforeTest) {
+        FlutterError.reportError(FlutterErrorDetails(
+          exception: FlutterError(
+              'The value of ErrorWidget.builder was changed by the test.',
           ),
           stack: StackTrace.current,
           library: 'Flutter test framework',
