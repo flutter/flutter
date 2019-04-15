@@ -219,7 +219,7 @@ void _buildCoverageMap(
     final Map<String, dynamic> sourceReport = sourceReports[scriptId];
     for (Map<String, dynamic> range in sourceReport['ranges']) {
       final Map<String, dynamic> coverage = range['coverage'];
-      // Coverage reports may sometimes be null in google3.
+      // Coverage reports may sometimes be null for a Script.
       if (coverage == null) {
         continue;
       }
@@ -231,7 +231,7 @@ void _buildCoverageMap(
       final List<dynamic> hits = coverage['hits'];
       final List<dynamic> misses = coverage['misses'];
       final List<dynamic> tokenPositions = scripts[scriptRef['id']]['tokenPosTable'];
-      // The token positions can be null if the script has no coveragble lines.
+      // The token positions can be null if the script has no coverable lines.
       if (tokenPositions == null) {
         continue;
       }
