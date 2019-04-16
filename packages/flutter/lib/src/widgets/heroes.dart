@@ -60,7 +60,8 @@ Rect _globalBoundingBoxFor(BuildContext context) {
   return MatrixUtils.transformRect(box.getTransformTo(null), Offset.zero & box.size);
 }
 
-/// A widget that marks its child as being a candidate for hero animations.
+/// A widget that marks its child as being a candidate for
+/// [hero animations](https://flutter.dev/docs/development/ui/animations/hero-animations).
 ///
 /// When a [PageRoute] is pushed or popped with the [Navigator], the entire
 /// screen's content is replaced. An old route disappears and a new route
@@ -77,12 +78,16 @@ Rect _globalBoundingBoxFor(BuildContext context) {
 /// same tag, a hero animation is triggered.
 ///
 /// If a [Hero] is already in flight when navigation occurs, its
-/// flight animation will be redirected to its new destination.
-
-/// The widget shown in-flight during the transition is, by default, the
+/// flight animation will be redirected to its new destination. The
+/// widget shown in-flight during the transition is, by default, the
 /// destination route's [Hero]'s child.
 ///
+/// For a Hero animation to trigger, the Hero has to exist on the very first
+/// frame of the new page's animation.
+///
 /// Routes must not contain more than one [Hero] for each [tag].
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=Be9UH1kXFDw}
 ///
 /// ## Discussion
 ///
@@ -616,6 +621,15 @@ class HeroController extends NavigatorObserver {
     assert(navigator != null);
     assert(route != null);
     _maybeStartHeroTransition(route, previousRoute, HeroFlightDirection.pop, false);
+  }
+
+  @override
+  void didReplace({ Route<dynamic> newRoute, Route<dynamic> oldRoute }) {
+    assert(navigator != null);
+    if (newRoute?.isCurrent == true) {
+      // Only run hero animations if the top-most route got replaced.
+      _maybeStartHeroTransition(oldRoute, newRoute, HeroFlightDirection.push, false);
+    }
   }
 
   @override

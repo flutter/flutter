@@ -6,9 +6,11 @@
 ///
 /// To use, import `package:flutter/material.dart`.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=DL0Ix1lnC4w}
+///
 /// See also:
 ///
-///  * [flutter.io/widgets](https://flutter.io/widgets/)
+///  * [flutter.dev/widgets](https://flutter.dev/widgets/)
 ///    for a catalog of commonly-used Flutter widgets.
 ///  * [material.io/design](https://material.io/design/)
 ///    for an introduction to Material Design.

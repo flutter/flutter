@@ -43,7 +43,7 @@ class GenSnapshot {
 
   static String getSnapshotterPath(SnapshotType snapshotType) {
     return artifacts.getArtifactPath(
-        Artifact.genSnapshot, snapshotType.platform, snapshotType.mode);
+        Artifact.genSnapshot, platform: snapshotType.platform, mode: snapshotType.mode);
   }
 
   Future<int> run({
@@ -70,6 +70,13 @@ class GenSnapshot {
 }
 
 class AOTSnapshotter {
+  AOTSnapshotter({this.reportTimings = false});
+
+  /// If true then AOTSnapshotter would report timings for individual building
+  /// steps (Dart front-end parsing and snapshot generation) in a stable
+  /// machine readable form. See [AOTSnapshotter._timedStep].
+  final bool reportTimings;
+
   /// Builds an architecture-specific ahead-of-time compiled snapshot of the specified script.
   Future<int> build({
     @required TargetPlatform platform,
@@ -85,7 +92,6 @@ class AOTSnapshotter {
     if (fs.file('pubspec.yaml').existsSync()) {
       flutterProject = await FlutterProject.current();
     }
-    final FlutterEngine engine = FlutterEngine(cache);
     if (!_isValidAotPlatform(platform, buildMode)) {
       printError('${getNameForTargetPlatform(platform)} does not support AOT compilation.');
       return 1;
@@ -187,7 +193,7 @@ class AOTSnapshotter {
         'entryPoint': mainPath,
         'sharedLib': buildSharedLibrary.toString(),
         'extraGenSnapshotOptions': extraGenSnapshotOptions.join(' '),
-        'engineHash': engine.version,
+        'engineHash': Cache.instance.engineRevision,
         'buildersUsed': '${flutterProject != null ? flutterProject.hasBuilders : false}',
       },
       depfilePaths: <String>[],
@@ -198,11 +204,11 @@ class AOTSnapshotter {
     }
 
     final SnapshotType snapshotType = SnapshotType(platform, buildMode);
-    final int genSnapshotExitCode = await genSnapshot.run(
+    final int genSnapshotExitCode = await _timedStep('gen_snapshot', () => genSnapshot.run(
       snapshotType: snapshotType,
       additionalArgs: genSnapshotArgs,
       iosArch: iosArch,
-    );
+    ));
     if (genSnapshotExitCode != 0) {
       printError('Dart snapshot generator failed with exit code $genSnapshotExitCode');
       return genSnapshotExitCode;
@@ -310,8 +316,8 @@ class AOTSnapshotter {
 
     final String depfilePath = fs.path.join(outputPath, 'kernel_compile.d');
     final KernelCompiler kernelCompiler = await kernelCompilerFactory.create(flutterProject);
-    final CompilerOutput compilerOutput = await kernelCompiler.compile(
-      sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
+    final CompilerOutput compilerOutput = await _timedStep('frontend', () => kernelCompiler.compile(
+      sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath, mode: buildMode),
       mainPath: mainPath,
       packagesPath: packagesPath,
       outputFilePath: getKernelPathForTransformerOptions(
@@ -324,7 +330,7 @@ class AOTSnapshotter {
       aot: true,
       trackWidgetCreation: trackWidgetCreation,
       targetProductVm: buildMode == BuildMode.release,
-    );
+    ));
 
     // Write path to frontend_server, since things need to be re-generated when that changes.
     final String frontendPath = artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk);
@@ -345,6 +351,20 @@ class AOTSnapshotter {
 
   String _getPackagePath(PackageMap packageMap, String package) {
     return fs.path.dirname(fs.path.fromUri(packageMap.map[package]));
+  }
+
+  /// This method is used to measure duration of an action and emit it into
+  /// verbose output from flutter_tool for other tools (e.g. benchmark runner)
+  /// to find.
+  /// Important: external performance tracking tools expect format of this
+  /// output to be stable.
+  Future<T> _timedStep<T>(String marker, FutureOr<T> Function() action) async {
+    final Stopwatch sw = Stopwatch()..start();
+    final T value = await action();
+    if (reportTimings) {
+      printStatus('$marker(RunTime): ${sw.elapsedMilliseconds} ms.');
+    }
+    return value;
   }
 }
 
@@ -371,8 +391,8 @@ class JITSnapshotter {
     final Directory outputDir = fs.directory(outputPath);
     outputDir.createSync(recursive: true);
 
-    final String engineVmSnapshotData = artifacts.getArtifactPath(Artifact.vmSnapshotData, null, buildMode);
-    final String engineIsolateSnapshotData = artifacts.getArtifactPath(Artifact.isolateSnapshotData, null, buildMode);
+    final String engineVmSnapshotData = artifacts.getArtifactPath(Artifact.vmSnapshotData, mode: buildMode);
+    final String engineIsolateSnapshotData = artifacts.getArtifactPath(Artifact.isolateSnapshotData, mode: buildMode);
     final String isolateSnapshotData = fs.path.join(outputDir.path, 'isolate_snapshot_data');
     final String isolateSnapshotInstructions = fs.path.join(outputDir.path, 'isolate_snapshot_instr');
 

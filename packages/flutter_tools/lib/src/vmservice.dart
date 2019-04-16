@@ -24,10 +24,10 @@ import 'vmservice_record_replay.dart';
 
 /// Override `WebSocketConnector` in [context] to use a different constructor
 /// for [WebSocket]s (used by tests).
-typedef WebSocketConnector = Future<io.WebSocket> Function(String url);
+typedef WebSocketConnector = Future<io.WebSocket> Function(String url, {io.CompressionOptions compression});
 
 /// A function that opens a two-way communication channel to the specified [uri].
-typedef _OpenChannel = Future<StreamChannel<String>> Function(Uri uri);
+typedef _OpenChannel = Future<StreamChannel<String>> Function(Uri uri, {io.CompressionOptions compression});
 
 _OpenChannel _openChannel = _defaultOpenChannel;
 
@@ -62,7 +62,7 @@ typedef CompileExpression = Future<String> Function(
 
 const String _kRecordingType = 'vmservice';
 
-Future<StreamChannel<String>> _defaultOpenChannel(Uri uri) async {
+Future<StreamChannel<String>> _defaultOpenChannel(Uri uri, {io.CompressionOptions compression = io.CompressionOptions.compressionDefault}) async {
   Duration delay = const Duration(milliseconds: 100);
   int attempts = 0;
   io.WebSocket socket;
@@ -86,7 +86,7 @@ Future<StreamChannel<String>> _defaultOpenChannel(Uri uri) async {
   while (socket == null) {
     attempts += 1;
     try {
-      socket = await constructor(uri.toString());
+      socket = await constructor(uri.toString(), compression: compression);
     } on io.WebSocketException catch (e) {
       await handleError(e);
     } on io.SocketException catch (e) {
@@ -220,7 +220,7 @@ class VMService {
   /// `"vmservice"` subdirectory.
   static void enableRecordingConnection(String location) {
     final Directory dir = getRecordingSink(location, _kRecordingType);
-    _openChannel = (Uri uri) async {
+    _openChannel = (Uri uri, {io.CompressionOptions compression}) async {
       final StreamChannel<String> delegate = await _defaultOpenChannel(uri);
       return RecordingVMServiceChannel(delegate, dir);
     };
@@ -233,7 +233,7 @@ class VMService {
   /// passed to [enableRecordingConnection]), or a [ToolExit] will be thrown.
   static void enableReplayConnection(String location) {
     final Directory dir = getReplaySource(location, _kRecordingType);
-    _openChannel = (Uri uri) async => ReplayVMServiceChannel(dir);
+    _openChannel = (Uri uri, {io.CompressionOptions compression}) async => ReplayVMServiceChannel(dir);
   }
 
   /// Connect to a Dart VM Service at [httpUri].
@@ -249,9 +249,10 @@ class VMService {
     ReloadSources reloadSources,
     Restart restart,
     CompileExpression compileExpression,
+    io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
   }) async {
     final Uri wsUri = httpUri.replace(scheme: 'ws', path: fs.path.join(httpUri.path, 'ws'));
-    final StreamChannel<String> channel = await _openChannel(wsUri);
+    final StreamChannel<String> channel = await _openChannel(wsUri, compression: compression);
     final rpc.Peer peer = rpc.Peer.withoutJson(jsonDocument.bind(channel));
     final VMService service = VMService(peer, httpUri, wsUri, reloadSources, restart, compileExpression);
     // This call is to ensure we are able to establish a connection instead of
@@ -1283,9 +1284,13 @@ class Isolate extends ServiceObjectOwner {
 
   Future<Map<String, dynamic>> flutterToggleDebugPaintSizeEnabled() => _flutterToggle('debugPaint');
 
+  Future<Map<String, dynamic>> flutterToggleDebugCheckElevationsEnabled() => _flutterToggle('debugCheckElevationsEnabled');
+
   Future<Map<String, dynamic>> flutterTogglePerformanceOverlayOverride() => _flutterToggle('showPerformanceOverlay');
 
   Future<Map<String, dynamic>> flutterToggleWidgetInspector() => _flutterToggle('inspector.show');
+
+  Future<Map<String, dynamic>> flutterToggleProfileWidgetBuilds() => _flutterToggle('profileWidgetBuilds');
 
   Future<Map<String, dynamic>> flutterDebugAllowBanner(bool show) {
     return invokeFlutterExtensionRpcRaw(

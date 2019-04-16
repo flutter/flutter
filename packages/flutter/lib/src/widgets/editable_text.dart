@@ -596,7 +596,7 @@ class EditableText extends StatefulWidget {
   /// Called when the user initiates a change to the TextField's
   /// value: when they have inserted or deleted text.
   ///
-  /// This callback does run not when the TextField's text is changed
+  /// This callback doesn't run when the TextField's text is changed
   /// programmatically, via the TextField's [controller]. Typically it
   /// isn't necessary to be notified of such changes, since they're
   /// initiated by the app itself.
@@ -914,6 +914,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   void updateFloatingCursor(RawFloatingCursorPoint point) {
     switch(point.state){
       case FloatingCursorDragState.Start:
+        if (_floatingCursorResetController.isAnimating) {
+          _floatingCursorResetController.stop();
+          _onFloatingCursorResetTick();
+        }
         final TextPosition currentTextPosition = TextPosition(offset: renderEditable.selection.baseOffset);
         _startCaretRect = renderEditable.getLocalRectForCaret(currentTextPosition);
         renderEditable.setFloatingCursor(point.state, _startCaretRect.center - _floatingCursorOffset, currentTextPosition);

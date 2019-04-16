@@ -597,9 +597,9 @@ void main() {
     expect(find.text('route'), findsNothing);
 
 
-    // Run the dismiss animation 75%, which exposes the route "push" button,
-    // and then press the button. MaterialPageTransition duration is 300ms,
-    // 275 = 300 * 0.75.
+    // Run the dismiss animation 60%, which exposes the route "push" button,
+    // and then press the button. A drag dropped animation is 400ms when dropped
+    // exactly halfway. It follows a curve that is very steep initially.
 
     await tester.tap(find.text('push'));
     await tester.pumpAndSettle();
@@ -607,10 +607,19 @@ void main() {
     expect(find.text('push'), findsNothing);
 
     gesture = await tester.startGesture(const Offset(5, 300));
-    await gesture.moveBy(const Offset(400, 0)); // drag halfway
+    await gesture.moveBy(const Offset(400, 0)); // Drag halfway.
     await gesture.up();
-    await tester.pump(const Duration(milliseconds: 275)); // partially dismiss "route"
-    expect(find.text('route'), findsOneWidget);
+    await tester.pump(); // Trigger the dropped snapping animation.
+    expect(
+      tester.getTopLeft(find.ancestor(of: find.text('route'), matching: find.byType(Scaffold))),
+      const Offset(400, 0),
+    );
+    // Let the dismissing snapping animation go 60%.
+    await tester.pump(const Duration(milliseconds: 240));
+    expect(
+      tester.getTopLeft(find.ancestor(of: find.text('route'), matching: find.byType(Scaffold))).dx,
+      moreOrLessEquals(798, epsilon: 1),
+    );
     await tester.tap(find.text('push'));
     await tester.pumpAndSettle();
     expect(find.text('route'), findsOneWidget);

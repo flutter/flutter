@@ -106,4 +106,30 @@ class ObtainKeyErrorImageProvider extends ImageProvider<ObtainKeyErrorImageProvi
   }
 }
 
+class LoadErrorImageProvider extends ImageProvider<LoadErrorImageProvider> {
+  @override
+  ImageStreamCompleter load(LoadErrorImageProvider key) {
+    throw Error();
+  }
+
+   @override
+  Future<LoadErrorImageProvider> obtainKey(ImageConfiguration configuration) {
+    return SynchronousFuture<LoadErrorImageProvider>(this);
+  }
+}
+
+class LoadErrorCompleterImageProvider extends ImageProvider<LoadErrorCompleterImageProvider> {
+  @override
+  ImageStreamCompleter load(LoadErrorCompleterImageProvider key) {
+    final Completer<void> completer = Completer<void>.sync();
+    completer.completeError(Error());
+    return OneFrameImageStreamCompleter(completer.future);
+  }
+
+   @override
+  Future<LoadErrorCompleterImageProvider> obtainKey(ImageConfiguration configuration) {
+    return SynchronousFuture<LoadErrorCompleterImageProvider>(this);
+  }
+}
+
 class TestImageStreamCompleter extends ImageStreamCompleter {}

@@ -92,6 +92,7 @@ void installHook({
   InternetAddressType serverType = InternetAddressType.IPv4,
   Uri projectRootDirectory,
   FlutterProject flutterProject,
+  String icudtlPath,
 }) {
   assert(enableObservatory || (!startPaused && observatoryPort == null));
   hack.registerPlatformPlugin(
@@ -111,6 +112,7 @@ void installHook({
       updateGoldens: updateGoldens,
       projectRootDirectory: projectRootDirectory,
       flutterProject: flutterProject,
+      icudtlPath: icudtlPath,
     ),
   );
 }
@@ -390,6 +392,7 @@ class _FlutterPlatform extends PlatformPlugin {
     this.updateGoldens,
     this.projectRootDirectory,
     this.flutterProject,
+    this.icudtlPath,
   }) : assert(shellPath != null);
 
   final String shellPath;
@@ -406,6 +409,7 @@ class _FlutterPlatform extends PlatformPlugin {
   final bool updateGoldens;
   final Uri projectRootDirectory;
   final FlutterProject flutterProject;
+  final String icudtlPath;
 
   Directory fontsDirectory;
   _Compiler compiler;
@@ -950,6 +954,10 @@ class _FlutterPlatform extends PlatformPlugin {
     }
     if (host.type == InternetAddressType.IPv6) {
       command.add('--ipv6');
+    }
+
+    if (icudtlPath != null) {
+      command.add('--icu-data-file-path=$icudtlPath');
     }
 
     command.addAll(<String>[

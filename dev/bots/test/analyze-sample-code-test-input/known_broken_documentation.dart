@@ -7,6 +7,10 @@
 
 // Examples can assume:
 // bool _visible = true;
+// class _Text extends Text {
+//   const _Text(String text) : super(text);
+//   const _Text.__(String text) : super(text);
+// }
 
 /// A blabla that blabla its blabla blabla blabla.
 ///
@@ -39,5 +43,43 @@
 ///   opacity: _visible ? 1.0 : 0.0,
 ///   child: const Text('Poor wandering ones!'),
 /// )
+/// ```
+/// {@end-tool}
+///
+/// {@tool sample}
+/// regular const constructor
+///
+/// ```dart
+/// const Text('Poor wandering ones!')
+/// ```
+/// {@end-tool}
+///
+/// {@tool sample}
+/// const private constructor
+/// ```dart
+/// const             _Text('Poor wandering ones!')
+/// ```
+/// {@end-tool}
+///
+/// {@tool sample}
+/// yet another const private constructor
+/// ```dart
+/// const        _Text.__('Poor wandering ones!')
+/// ```
+/// {@end-tool}
+///
+/// {@tool sample}
+/// const variable
+///
+/// ```dart
+/// const text0 = Text('Poor wandering ones!');
+/// ```
+/// {@end-tool}
+///
+/// {@tool sample}
+/// more const variables
+///
+/// ```dart
+/// const text1 = _Text('Poor wandering ones!');
 /// ```
 /// {@end-tool}
