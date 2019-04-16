@@ -31,6 +31,12 @@ import '../runner/flutter_command.dart';
 /// With an application already running, a HotRunner can be attached to it
 /// with:
 /// ```
+/// $ flutter attach --debug-uri http://127.0.0.1:12345/QqL7EFEDNG0=/
+/// ```
+///
+/// If `--disable-service-auth-codes` was provided to the application at startup
+/// time, a HotRunner can be attached with just a port:
+/// ```
 /// $ flutter attach --debug-port 12345
 /// ```
 ///
@@ -56,7 +62,14 @@ class AttachCommand extends FlutterCommand {
     argParser
       ..addOption(
         'debug-port',
-        help: 'Device port where the observatory is listening.',
+        hide: !verboseHelp,
+        help: 'Device port where the observatory is listening. Requires '
+        '--disable-service-auth-codes to also be provided to the Flutter '
+        'application at launch, otherwise this command will fail to connect to '
+        'the application. In general, --debug-uri should be used instead.',
+      )..addOption(
+        'debug-uri',
+        help: 'The URI at which the observatory is listening.',
       )..addOption(
         'app-id',
         help: 'The package name (Android) or bundle identifier (iOS) for the application. '
@@ -102,6 +115,17 @@ class AttachCommand extends FlutterCommand {
     return null;
   }
 
+  Uri get debugUri {
+    if (argResults['debug-uri'] == null) {
+      return null;
+    }
+    final Uri uri = Uri.parse(argResults['debug-uri']);
+    if (!uri.hasPort) {
+      throwToolExit('Port not specified for `--debug-uri`: $uri');
+    }
+    return uri;
+  }
+
   String get appId {
     return argResults['app-id'];
   }
@@ -112,17 +136,21 @@ class AttachCommand extends FlutterCommand {
     if (await findTargetDevice() == null)
       throwToolExit(null);
     debugPort;
-    if (debugPort == null && argResults.wasParsed(FlutterCommand.ipv6Flag)) {
+    if (debugPort == null && debugUri == null && argResults.wasParsed(FlutterCommand.ipv6Flag)) {
       throwToolExit(
-        'When the --debug-port is unknown, this command determines '
+        'When the --debug-port or --debug-uri is unknown, this command determines '
         'the value of --ipv6 on its own.',
       );
     }
-    if (debugPort == null && argResults.wasParsed(FlutterCommand.observatoryPortOption)) {
+    if (debugPort == null && debugUri == null && argResults.wasParsed(FlutterCommand.observatoryPortOption)) {
       throwToolExit(
-        'When the --debug-port is unknown, this command does not use '
+        'When the --debug-port or --debug-uri is unknown, this command does not use '
         'the value of --observatory-port.',
       );
+    }
+    if (debugPort != null && debugUri != null) {
+      throwToolExit(
+        'Either --debugPort or --debugUri can be provided, not both.');
     }
   }
 
@@ -161,7 +189,7 @@ class AttachCommand extends FlutterCommand {
     Uri observatoryUri;
     bool usesIpv6 = false;
     bool attachLogger = false;
-    if (devicePort == null) {
+    if (devicePort == null && debugUri == null) {
       if (device is FuchsiaDevice) {
         attachLogger = true;
         final String module = argResults['module'];
@@ -199,11 +227,18 @@ class AttachCommand extends FlutterCommand {
       }
     } else {
       usesIpv6 = ipv6;
-      final int localPort = observatoryPort
-        ?? await device.portForwarder.forward(devicePort);
-      observatoryUri = usesIpv6
-        ? Uri.parse('http://[$ipv6Loopback]:$localPort/')
-        : Uri.parse('http://$ipv4Loopback:$localPort/');
+      if (debugUri != null) {
+        final int localPort = observatoryPort
+          ?? await device.portForwarder.forward(debugUri.port);
+        observatoryUri = Uri(scheme: 'http', host: debugUri.host, port:
+            localPort, path: debugUri.path);
+      } else {
+        final int localPort = observatoryPort
+          ?? await device.portForwarder.forward(devicePort);
+        observatoryUri = usesIpv6
+          ? Uri.parse('http://[$ipv6Loopback]:$localPort/')
+          : Uri.parse('http://$ipv4Loopback:$localPort/');
+      }
     }
     try {
       final bool useHot = getBuildInfo().isDebug;
