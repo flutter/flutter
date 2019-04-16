@@ -156,8 +156,6 @@ class AttachCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final String ipv4Loopback = InternetAddress.loopbackIPv4.address;
-    final String ipv6Loopback = InternetAddress.loopbackIPv6.address;
     final FlutterProject flutterProject = await FlutterProject.current();
 
     Cache.releaseLockEarly();
@@ -227,18 +225,7 @@ class AttachCommand extends FlutterCommand {
       }
     } else {
       usesIpv6 = ipv6;
-      if (debugUri != null) {
-        final int localPort = observatoryPort
-          ?? await device.portForwarder.forward(debugUri.port);
-        observatoryUri = Uri(scheme: 'http', host: debugUri.host, port:
-            localPort, path: debugUri.path);
-      } else {
-        final int localPort = observatoryPort
-          ?? await device.portForwarder.forward(devicePort);
-        observatoryUri = usesIpv6
-          ? Uri.parse('http://[$ipv6Loopback]:$localPort/')
-          : Uri.parse('http://$ipv4Loopback:$localPort/');
-      }
+      observatoryUri = await _buildObservatoryUri(device, devicePort, usesIpv6);
     }
     try {
       final bool useHot = getBuildInfo().isDebug;
@@ -312,6 +299,24 @@ class AttachCommand extends FlutterCommand {
   }
 
   Future<void> _validateArguments() async { }
+
+  Future<Uri> _buildObservatoryUri(Device device,
+      int devicePort, bool usesIpv6) async {
+    final String ipv4Loopback = InternetAddress.loopbackIPv4.address;
+    final String ipv6Loopback = InternetAddress.loopbackIPv6.address;
+    if (debugUri != null) {
+      final int localPort = observatoryPort
+        ?? await device.portForwarder.forward(debugUri.port);
+     return Uri(scheme: 'http', host: debugUri.host, port:
+          localPort, path: debugUri.path);
+    } else {
+      final int localPort = observatoryPort
+        ?? await device.portForwarder.forward(devicePort);
+      return usesIpv6
+        ? Uri.parse('http://[$ipv6Loopback]:$localPort/')
+        : Uri.parse('http://$ipv4Loopback:$localPort/');
+    }
+  }
 }
 
 class HotRunnerFactory {
