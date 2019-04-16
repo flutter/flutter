@@ -1,4 +1,4 @@
-Signature: 1f1d4e10470c3d2050811a5a9e0f9e1a
+Signature: e4826915478bc70bedc3991b23ebc9bd
 
 UNUSED LICENSES:
 
@@ -2806,7 +2806,6 @@ FILE: ../../../third_party/skia/include/core/SkImageEncoder.h
 FILE: ../../../third_party/skia/include/core/SkImageFilter.h
 FILE: ../../../third_party/skia/include/core/SkMatrix44.h
 FILE: ../../../third_party/skia/include/core/SkSize.h
-FILE: ../../../third_party/skia/include/core/SkTLazy.h
 FILE: ../../../third_party/skia/include/effects/SkLayerDrawLooper.h
 FILE: ../../../third_party/skia/include/gpu/GrRenderTarget.h
 FILE: ../../../third_party/skia/include/gpu/GrTexture.h
@@ -2897,6 +2896,7 @@ FILE: ../../../third_party/skia/src/core/SkPictureRecord.h
 FILE: ../../../third_party/skia/src/core/SkPixelRef.cpp
 FILE: ../../../third_party/skia/src/core/SkPtrRecorder.cpp
 FILE: ../../../third_party/skia/src/core/SkReadBuffer.h
+FILE: ../../../third_party/skia/src/core/SkTLazy.h
 FILE: ../../../third_party/skia/src/core/SkTypefaceCache.cpp
 FILE: ../../../third_party/skia/src/core/SkTypefaceCache.h
 FILE: ../../../third_party/skia/src/core/SkUnPreMultiply.cpp
