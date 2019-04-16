@@ -219,6 +219,10 @@ void _buildCoverageMap(
     final Map<String, dynamic> sourceReport = sourceReports[scriptId];
     for (Map<String, dynamic> range in sourceReport['ranges']) {
       final Map<String, dynamic> coverage = range['coverage'];
+      // Coverage reports may sometimes be null for a Script.
+      if (coverage == null) {
+        continue;
+      }
       final Map<String, dynamic> scriptRef = sourceReport['scripts'][range['scriptIndex']];
       final String uri = scriptRef['uri'];
 
@@ -227,6 +231,10 @@ void _buildCoverageMap(
       final List<dynamic> hits = coverage['hits'];
       final List<dynamic> misses = coverage['misses'];
       final List<dynamic> tokenPositions = scripts[scriptRef['id']]['tokenPosTable'];
+      // The token positions can be null if the script has no coverable lines.
+      if (tokenPositions == null) {
+        continue;
+      }
       if (hits != null) {
         for (int hit in hits) {
           final int line = _lineAndColumn(hit, tokenPositions)[0];
