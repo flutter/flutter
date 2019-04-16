@@ -55,7 +55,7 @@ typedef GestureDragDownCallback = void Function(DragDownDetails details);
 class DragStartDetails {
   /// Creates details for a [GestureDragStartCallback].
   ///
-  /// The [globalPosition] and [buttons] argument must not be null.
+  /// The [globalPosition] and [buttons] arguments must not be null.
   DragStartDetails({
     this.sourceTimeStamp,
     this.globalPosition = Offset.zero,
@@ -154,7 +154,7 @@ class DragUpdateDetails {
   final Offset globalPosition;
 
   /// The buttons pressed when the pointer contacted the screen (changing buttons
-  /// during a drag cancels the gesture.)
+  /// during a drag cancels the gesture).
   final int buttons;
 
   @override
@@ -210,7 +210,7 @@ class DragEndDetails {
   final double primaryVelocity;
 
   /// The buttons pressed when the pointer contacted the screen (changing buttons
-  /// during a drag cancels the gesture.)
+  /// during a drag cancels the gesture).
   final int buttons;
 
   @override

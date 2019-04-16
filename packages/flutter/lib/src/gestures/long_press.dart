@@ -74,7 +74,7 @@ class LongPressStartDetails {
 class LongPressMoveUpdateDetails {
   /// Creates the details for a [GestureLongPressMoveUpdateCallback].
   ///
-  /// The [globalPosition], [offsetFromOrigin] and [buttons] arguments must not be null.
+  /// The [globalPosition], [offsetFromOrigin], and [buttons] arguments must not be null.
   const LongPressMoveUpdateDetails({
     this.globalPosition = Offset.zero,
     this.offsetFromOrigin = Offset.zero,
@@ -134,7 +134,7 @@ class LongPressEndDetails {
 /// [PointerMoveEvent]s with different buttons will lead to termination of the gesture.
 ///
 /// The buttons of [PointerDownEvent] must contain one and only one button.
-/// For example, since stylus touching the screen is also counted as a button,
+/// For example, since a stylus touching the screen is also counted as a button,
 /// a stylus tap while pressing any physical button will not be recognized.
 class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
   /// Creates a long-press gesture recognizer.
@@ -195,7 +195,7 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
   ///
   /// See also:
   ///
-  ///  * [onLongPressUp], which has the same timing but without details.
+  ///  * [onLongPressUp], which has the same timing, but without details.
   GestureLongPressEndCallback onLongPressEnd;
 
   @override
@@ -208,7 +208,7 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
 
   @override
   void didExceedDeadline() {
-    // Exceeding the deadline puts the gesture in accepted state.
+    // Exceeding the deadline puts the gesture in the accepted state.
     resolve(GestureDisposition.accepted);
     _longPressAccepted = true;
     super.acceptGesture(primaryPointer);
@@ -277,7 +277,7 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
   void resolve(GestureDisposition disposition) {
     if (_longPressAccepted && disposition == GestureDisposition.rejected) {
       // This can happen if the gesture has been terminated. For example when
-      // the buttons have been changed.
+      // the buttons have changed.
       _reset();
     }
     super.resolve(disposition);

@@ -44,7 +44,7 @@ typedef GestureDragCancelCallback = void Function();
 /// with different buttons will be ignored or terminated.
 ///
 /// The buttons of [PointerDownEvent] must contain one and only one button.
-/// For example, since stylus touching the screen is also counted as a button,
+/// For example, since a stylus touching the screen is also counted as a button,
 /// a stylus tap while pressing any physical button will not be recognized.
 ///
 /// [DragGestureRecognizer] is not intended to be used directly. Instead,
