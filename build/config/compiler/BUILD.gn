@@ -177,6 +177,7 @@ config("compiler") {
       common_mac_flags += [
         "-arch",
         "x86_64",
+        "-msse2",
       ]
     } else if (current_cpu == "x86") {
       common_mac_flags += [
