@@ -8,14 +8,16 @@ import 'package:flutter_devicelab/framework/adb.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 
-Future<String> _runWithMode(String mode, String deviceId) {
-  return evalFlutter('drive', options: <String>[
+Future<String> _runWithMode(String mode, String deviceId) async {
+  final StringBuffer stderr = StringBuffer();
+  await evalFlutter('drive', stderr: stderr, options: <String>[
     mode,
     '-t',
     'test_driver/scroll_perf.dart',
     '-d',
     deviceId,
   ]);
+  return stderr.toString();
 }
 
 Future<TaskResult> run() async {

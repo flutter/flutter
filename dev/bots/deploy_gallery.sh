@@ -61,6 +61,7 @@ if [[ "$SHARD" = "deploy_gallery" ]]; then
         echo "Archiving with distribution profile and deploying to TestFlight..."
         (
           cd examples/flutter_gallery/ios
+          export DELIVER_ITMSTRANSPORTER_ADDITIONAL_UPLOAD_PARAMETERS="-t DAV"
           fastlane build_and_deploy_testflight upload:true
         )
       else
