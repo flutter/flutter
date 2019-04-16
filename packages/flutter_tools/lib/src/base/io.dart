@@ -37,6 +37,7 @@ import 'process.dart';
 export 'dart:io'
     show
         BytesBuilder,
+        CompressionOptions,
         // Directory         NO! Use `file_system.dart`
         exitCode,
         // File              NO! Use `file_system.dart`
