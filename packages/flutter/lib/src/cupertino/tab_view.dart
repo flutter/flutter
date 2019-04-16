@@ -57,6 +57,15 @@ class CupertinoTabView extends StatefulWidget {
   ///
   /// If a [builder] is specified, then [routes] must not include an entry for `/`,
   /// as [builder] takes its place.
+  ///
+  /// Updating the [builder]'s existing [WidgetBuilder] instance will not clear
+  /// the current navigation stack or update the [CupertinoTabView]'s
+  /// descendant UI. To update the UI after the [CupertinoTabView] is built,
+  /// trigger a rebuild from its descendant such as:
+  ///
+  ///  * By calling a descendant [State]'s [State.setState].
+  ///  * Or by modifying a [InheritedWidget] that a descendant registered itself
+  ///    as a dependent to.
   final WidgetBuilder builder;
 
   /// A key to use when building this widget's [Navigator].
