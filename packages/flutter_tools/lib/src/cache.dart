@@ -834,7 +834,7 @@ class FuchsiaCacheArtifacts extends CachedArtifact {
     DevelopmentArtifact.fuchsia,
   });
 
-  static const String _cipdBaseUrl = 'https://chrome-infra-packages.appspot.com/p/';
+  static const String _cipdBaseUrl = 'https://chrome-infra-packages.appspot.com/dl';
   static const String _macOSSdk = 'fuchsia/sdk/core/mac-amd64';
   static const String _linuxSdk = 'fuchsia/sdk/core/linux-amd64';
 
@@ -847,26 +847,11 @@ class FuchsiaCacheArtifacts extends CachedArtifact {
     } else if (platform.isMacOS) {
       packageName = _macOSSdk;
     } else {
-      // Unsupported/
+      // Unsupported.
       return;
     }
-    // Step 2: Contact CIPD to determine download link.
-    final HttpClient client = HttpClient();
-    final String url = '$_cipdBaseUrl/client?instance_id=$_cipdInstanceId&package_name=$packageName';
-    final HttpClientRequest request = await client.getUrl(Uri.parse(url));
-    final HttpClientResponse response = await request.close();
-    if (response.statusCode != HttpStatus.ok) {
-      printError('Failed to acquire download link for Fuchsia SDK');
-      return;
-    }
-    final Map<String, dynamic> body = json.decode(await response.transform(utf8.decoder).join(''));
-    final Map<String, dynamic> clientBinary = body['client_binary'];
-    if (clientBinary == null) {
-      printError('Error requesting the link to download CIPD: $body');
-    }
-    // Step 3: Use download link to place SDK into cache.
-    final String downloadUrl = clientBinary['fetch_url'];
-    await _downloadZipArchive('Downloading package fuchsia SDK...', Uri.parse(downloadUrl), location);
+    final String url = '$_cipdBaseUrl/$packageName/+/$version';
+    await _downloadZipArchive('Downloading package fuchsia SDK...', Uri.parse(url), location);
   }
 }
 
