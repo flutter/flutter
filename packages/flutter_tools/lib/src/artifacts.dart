@@ -281,7 +281,11 @@ class LocalEngineArtifacts extends Artifacts {
       case Artifact.flutterFramework:
         return fs.path.join(engineOutPath, _artifactToFileName(artifact));
       case Artifact.flutterPatchedSdkPath:
-        return _getFlutterPatchedSdkPath(mode);
+        // When using local engine always use [BuildMode.debug] regardless of
+        // what was specified in [mode] argument because local engine will
+        // have only one flutter_patched_sdk in standard location, that
+        // is happen to be what debug(non-release) mode is using.
+        return _getFlutterPatchedSdkPath(BuildMode.debug);
       case Artifact.flutterWebSdk:
         return _getFlutterWebSdkPath();
       case Artifact.frontendServerSnapshotForEngineDartSdk:
