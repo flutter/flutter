@@ -11,18 +11,19 @@ import 'inherited_notifier.dart';
 /// A widget that manages a [FocusNode] to allow keyboard focus to be given
 /// to this widget and its descendants.
 ///
-/// When the focus is gained or lost, [onFocusChanged] is called. For keyboard
-/// events, if [FocusNode.hasFocus] is true for this widget's [focusNode] then
-/// [onKey] is called, unless a focused descendant's [onKey] callback returns
-/// false when called.
+/// When the focus is gained or lost, [onFocusChanged] is called.
+///
+/// For keyboard events, [onKey] is called if [FocusNode.hasFocus] is true for
+/// this widget's [focusNode], unless a focused descendant's [onKey] callback
+/// returns false when called.
 ///
 /// This widget does not provide any visual indication that the focus has
 /// changed. Any desired visual changes should be made when [onFocusChanged] is
 /// called.
 ///
-/// To access the [FocusNode] of the [Focus] widget above this one in the widget
-/// hierarchy and establish a relationship that will rebuild the widget when
-/// the focus changes, use the [Focus.of] and [FocusScope.of] static methods.
+/// To access the [FocusNode] of the nearest ancestor [Focus] widget and
+/// establish a relationship that will rebuild the widget when the focus
+/// changes, use the [Focus.of] and [FocusScope.of] static methods.
 ///
 /// To access the focused state of the nearest [Focus] widget, use
 /// [Focus.hasFocus] from a build method, which also establishes a relationship
@@ -145,9 +146,11 @@ class Focus extends StatefulWidget {
   /// A debug label for this widget.
   ///
   /// Not used for anything except to be printed in the diagnostic output from
-  /// [toString] or [toStringDeep].
+  /// [toString] or [toStringDeep].  Also unused if a [focusNode] is provided,
+  /// since that node can have its own [FocusNode.debugLabel].
   ///
-  /// To see the entire tree, call [debugDescribeFocusTree].
+  /// To get a string with the entire tree, call [debugDescribeFocusTree].  To
+  /// print it to the console call [debugDumpFocusTree].
   ///
   /// Defaults to null.
   final String debugLabel;
@@ -160,10 +163,10 @@ class Focus extends StatefulWidget {
   /// Handler for keys pressed when this object or one of its children has
   /// focus.
   ///
-  /// Key events are first given to the leaf nodes, and if their [onKey] methods
-  /// return false, then they are given to each ancestor node up the focus
-  /// hierarchy in turn. If an event reaches the root of the hierarchy, it is
-  /// discarded.
+  /// Key events are first given to the [FocusNode] that has primary focus, and
+  /// if its [onKey] method return false, then they are given to each ancestor
+  /// node up the focus hierarchy in turn. If an event reaches the root of the
+  /// hierarchy, it is discarded.
   ///
   /// This is not the way to get text input in the manner of a text field: it
   /// leaves out support for input method editors, and doesn't support soft
@@ -184,8 +187,14 @@ class Focus extends StatefulWidget {
 
   /// An optional focus node to use as the focus node for this [Focus] widget.
   ///
-  /// If one is not supplied, then one will be allocated and managed by this
+  /// If one is not supplied, then one will be allocated and owned by this
   /// widget.
+  ///
+  /// Supplying a focus node is sometimes useful if an ancestor to this widget
+  /// wants to control when this widget has the focus. The owner will be
+  /// responsible for calling [FocusNode.dispose] on the focus node when it is
+  /// done with it, but this [Focus] widget will attach/detach and reparent the
+  /// node when needed.
   final FocusNode focusNode;
 
   /// Returns the [focusNode] of the [Focus] that most tightly encloses the given

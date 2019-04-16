@@ -20,15 +20,22 @@ typedef FocusOnKeyCallback = bool Function(FocusNode node, RawKeyEvent event);
 
 /// An attachment point for a [FocusNode].
 ///
-/// Once created, a [FocusNode] must be attached to the element tree by its
-/// _host_ [StatefulWidget] via a [FocusAttachment] object.  This attachment is
-/// created by calling [FocusNode.attach], usually from the host widget's
-/// [State.initState] method. If the widget is updated to have a different focus
-/// node, then the new node needs to be attached in [State.didUpdateWidget],
-/// after calling [detach] on the previous [FocusAttachment].
+/// Once created, a [FocusNode] must be attached to the widget tree by its
+/// _host_ [StatefulWidget] via a [FocusAttachment] object. [FocusAttachment]s
+/// are owned by the [StatefulWidget] that hosts a [FocusNode] or
+/// [FocusScopeNode]. There can be multiple [FocusAttachment]s for each
+/// [FocusNode], but the node will only ever be attached to one of them at a
+/// time.
 ///
-/// Without these attachment points, it would be possible for the focus node to
-/// simultaneously be attached to more than one part of the element tree during
+/// This attachment is created by calling [FocusNode.attach], usually from the
+/// host widget's [State.initState] method. If the widget is updated to have a
+/// different focus node, then the new node needs to be attached in
+/// [State.didUpdateWidget], after calling [detach] on the previous
+/// [FocusAttachment]. Once detached, the attachment is defunct and will no
+/// longer make changes to the [FocusNode] through [reparent].
+///
+/// Without these attachment points, it would be possible for a focus node to
+/// simultaneously be attached to more than one part of the widget tree during
 /// the build stage.
 class FocusAttachment {
   /// A private constructor, because [FocusAttachment]s are only to be created
@@ -38,9 +45,9 @@ class FocusAttachment {
   /// The focus node that this attachment manages an attachment for.
   final FocusNode node;
 
-  /// Returns true if the node is attached to the element tree.
+  /// Returns true if the associated node is attached to this attachment.
   ///
-  /// It is possible to be attached to the element tree, but not be placed in
+  /// It is possible to be attached to the widget tree, but not be placed in
   /// the focus tree (i.e. to not have a parent yet in the focus tree).
   bool get isAttached => node._attachment == this;
 
@@ -86,13 +93,17 @@ class FocusAttachment {
 /// they aren't appropriate, [FocusNode]s can be managed directly._
 ///
 /// [FocusNode]s are persistent objects that form a _focus tree_ that is a
-/// representation of the widgets in the hierarchy that are interested in
-/// focus.
+/// representation of the widgets in the hierarchy that are interested in focus.
+/// A focus node might need to be created if it is passed in from an ancestor of
+/// a [Focus] widget to control the focus of the children from the ancestor, or
+/// a widget might need to host one if the widget subsystem is not being used,
+/// or if for some reason the [Focus] and [FocusScope] widgets provide
+/// insufficient control.
 ///
 /// [FocusNodes] are organized into _scopes_ (see [FocusScopeNode]), which form
 /// sub-trees of nodes that can be traversed as a group. Within a scope, the
 /// most recent nodes to have focus are remembered, and if a node is focused and
-/// then removed, the original node receives focus again.
+/// then removed, the previous node receives focus again.
 ///
 /// The focus node hierarchy can be traversed using the [parent], [children],
 /// [ancestors] and [descendants] accessors.
@@ -108,21 +119,29 @@ class FocusAttachment {
 /// To see the focus tree in the debug console, call [debugDumpFocusTree]. To
 /// get the focus tree as a string, call [debugDescribeFocusTree].
 ///
-/// {@template flutter.widgets.focusManager.hierarchyManagement}
-/// ## Hierarchy Management
+/// {@template flutter.widgets.focus_manager.focus.lifecycle}
+/// ## Lifecycle
+///
+/// There are several actors involved in the lifecycle of a
+/// [FocusNode]/[FocusScopeNode]. They are created and disposed by their
+/// _owner_, attached, detached, and reparented using a [FocusAttachment] by
+/// their _host_ (which must be owned by the [State] of a [StatefulWidget]), and
+/// they are managed by the [FocusManager]. Different parts of the [FocusNode]
+/// API are intended for these different actors.
 ///
 /// [FocusNode]s (and hence [FocusScopeNode]s) are persistent objects that form
-/// part of a _focus tree_ that is a representation of the widgets in the
+/// part of a _focus tree_ that is a sparse representation of the widgets in the
 /// hierarchy that are interested in receiving keyboard events. They must be
 /// managed like other persistent state, which is typically done by a
-/// [StatefulWidget]. A stateful widget that manages a focus scope node must
-/// call [dispose] from its [State.dispose] method.
+/// [StatefulWidget] which owns the node. A stateful widget that owns a focus
+/// scope node must call [dispose] from its [State.dispose] method.
 ///
-/// Once created, a [FocusNode] must be attached to the focus tree via a
-/// [FocusAttachment] object.  This attachment is created by calling [attach],
-/// usually from a widget's [State.initState] method, and if the widget is
-/// updated, again in [State.didUpdateWidget], after calling
-/// [FocusAttachment.detach] on the previous [FocusAttachment].
+/// Once created, a [FocusNode] must be attached to the widget tree via a
+/// [FocusAttachment] object. This attachment is created by calling [attach],
+/// usually from the [State.initState] method. If the hosting widget is updated
+/// to have a different focus node, then the updated node needs to be attached
+/// in [State.didUpdateWidget], after calling [detach] on the previous
+/// [FocusAttachment].
 ///
 /// Because [FocusNode]s form a sparse representation of the widget tree,
 /// they must be updated whenever the widget tree is rebuilt. This is done by
@@ -131,37 +150,16 @@ class FocusAttachment {
 /// focused region, so that the [BuildContext] assigned to the [FocusScopeNode]
 /// can be tracked (the context is used to obtain the [RenderObject], from which
 /// the geometry of focused regions can be determined).
-/// {@endtemplate}
 ///
-/// {@template flutter.widgets.focus_manager.focus.lifecycle}
-/// ## Lifecycle
-///
-/// There are several actors involved in the lifecycle of a
-/// [FocusNode]/[FocusScopeNode]. They are created and disposed by their
-/// _owner_, attached, detached, and reparented using a [FocusAttachment] by
-/// their _host_ (which must be the [State] of a [StatefulWidget]), and they are
-/// managed by the [FocusManager]. Different parts of the [FocusNode] API are
-/// intended for these different actors.
-///
-/// Focus nodes are long-lived objects. For example, if a host [StatefulWidget]
-/// should be able to receive focus, and is not using a [Focus] or [FocusScope]
-/// widget, it would [attach] a [FocusNode] in its [State.initState] method, and
-/// [detach] from it in the [State.dispose] method, providing the same
-/// [FocusNode] to the [FocusAttachment.reparent] call each time its
-/// [State.build] method is run. Creating a [FocusNode] each time [State.build]
-/// is invoked will cause the focus to be lost each time the widget is built,
-/// which is usually not desired behavior (call [unfocus] if losing focus is
-/// desired).
+/// Creating a [FocusNode] each time [State.build] is invoked will cause the
+/// focus to be lost each time the widget is built, which is usually not desired
+/// behavior (call [unfocus] if losing focus is desired).
 ///
 /// If, as is common, the hosting [StatefulWidget] is also the owner of the
 /// focus node, then it will also call [dispose] from its [State.dispose] (in
 /// which case the [detach] may be skipped, since dispose will automatically
 /// detach). If another object owns the focus node, then it must call [dispose]
 /// when the node is done being used.
-///
-/// If the hosting widget is updated to have a different focus node, then the
-/// updated node needs to be attached in [State.didUpdateWidget], after calling
-/// [detach] on the previous [FocusAttachment].
 /// {@endtemplate}
 ///
 /// {@template flutter.widgets.focus_manager.focus.keyEvents}
@@ -278,7 +276,7 @@ class FocusAttachment {
 ///   * [FocusScope], a widget that manages a [FocusScopeNode] and provides
 ///     access to scope information and actions to its descendant widgets.
 ///   * [FocusAttachment], a widget that connects a [FocusScopeNode] to the
-///     element tree.
+///     widget tree.
 ///   * [FocusManager], a singleton that manages the focus and distributes key
 ///     events to focused nodes.
 class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
@@ -289,14 +287,14 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     String debugLabel,
     FocusOnKeyCallback onKey,
   }) : _onKey = onKey {
-    // Set it this way so that it does nothing on release builds.
+    // Set it via the setter so that it does nothing on release builds.
     this.debugLabel = debugLabel;
   }
 
-  /// The context that was supplied to [reparent].
+  /// The context that was supplied to [attach].
   ///
-  /// This is typically the context in the build method for the widget that is
-  /// being focused, as it is used to determine the bounds of the widget.
+  /// This is typically the context for the widget that is being focused, as it
+  /// is used to determine the bounds of the widget.
   BuildContext get context => _context;
   BuildContext _context;
 
@@ -314,7 +312,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   ///
   /// All nodes except for the root [FocusScopeNode] ([FocusManager.rootScope])
   /// will be given a parent when they are added to the focus tree, which is
-  /// done using [reparent].
+  /// done using [FocusAttachment.reparent].
   FocusNode get parent => _parent;
   FocusNode _parent;
 
@@ -359,18 +357,18 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     }
   }
 
-  /// Whether this node has focus.
+  /// Whether this node has input focus.
   ///
-  /// A [FocusNode] has the primary focus when the node is focused in its
-  /// parent [FocusScopeNode] and [FocusScopeNode.hasFocus] is true for
-  /// that scope and all its ancestor scopes.
+  /// A [FocusNode] has focus when it is an ancestor of a node that returns true
+  /// from [hasPrimaryFocus], or it has the primary focus itself.
   ///
-  /// To request focus, find the [FocusScopeNode] for the current [BuildContext]
-  /// and call the [FocusScopeNode.requestFocus] method:
+  /// The [hasFocus] accessor is different from [hasPrimaryFocus] in that
+  /// [hasFocus] is true if the node is anywhere in the focus chain, but for
+  /// [hasPrimaryFocus] the node must to be at the end of the chain to return
+  /// true.
   ///
-  /// ```dart
-  /// FocusScope.of(context).requestFocus(focusNode);
-  /// ```
+  /// A node that returns true for [hasFocus] will receive key events if none of
+  /// its focused descendants returned true from their [onKey] handler.
   ///
   /// This object notifies its listeners whenever this value changes.
   bool get hasFocus {
@@ -383,14 +381,20 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     return _manager._currentFocus.ancestors.contains(this);
   }
 
-  /// Returns true if this node currently has the application-wide focus.
+  /// Returns true if this node currently has the application-wide input focus.
+  ///
+  /// A [FocusNode] has the primary focus when the node is focused in its
+  /// nearest ancestor [FocusScopeNode] and [hasFocus] is true for all its
+  /// ancestor nodes, but none of its descendants.
   ///
   /// This is different from [hasFocus] in that [hasFocus] is true if the node
   /// is anywhere in the focus chain, but here the node has to be at the end of
   /// the chain to return true.
   ///
   /// A node that returns true for [hasPrimaryFocus] will be the first node to
-  /// receive key events.
+  /// receive key events through its [onKey] handler.
+  ///
+  /// This object notifies its listeners whenever this value changes.
   bool get hasPrimaryFocus => _manager?._currentFocus == this;
 
   /// Returns the nearest enclosing scope node above this node, including
@@ -412,32 +416,37 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     return ancestors.firstWhere((FocusNode node) => node is FocusScopeNode, orElse: () => null);
   }
 
-  /// Returns the size of the associated [Focus] in logical units.
+  /// Returns the size of the attached widget's [RenderObject], in logical
+  /// units.
   Size get size {
-    assert(context != null,
-      "Tried to get the size of a focus node that didn't have its context set yet.\n"
-      'The context needs to be set before trying to evaluate traversal policies. This '
-      'is typically done by the reparent method, called from a build method.');
+    assert(
+        context != null,
+        "Tried to get the size of a focus node that didn't have its context set yet.\n"
+        'The context needs to be set before trying to evaluate traversal policies. This '
+        'is typically done with the attach method.');
     return context.findRenderObject().semanticBounds.size;
   }
 
-  /// Returns the global offset to the upper left corner of the [Focus] in
-  /// logical units.
+  /// Returns the global offset to the upper left corner of the attached
+  /// widget's [RenderObject], in logical units.
   Offset get offset {
-    assert(context != null,
-      "Tried to get the offset of a focus node that didn't have its context set yet.\n"
-      'The context needs to be set before trying to evaluate traversal policies. This '
-      'is typically done by the reparent method, called from a build method.');
+    assert(
+        context != null,
+        "Tried to get the offset of a focus node that didn't have its context set yet.\n"
+        'The context needs to be set before trying to evaluate traversal policies. This '
+        'is typically done with the attach method.');
     final RenderObject object = context.findRenderObject();
     return MatrixUtils.transformPoint(object.getTransformTo(null), object.semanticBounds.topLeft);
   }
 
-  /// Returns the global rectangle surrounding the node in logical units.
+  /// Returns the global rectangle of the attached widget's [RenderObject], in
+  /// logical units.
   Rect get rect {
-    assert(context != null,
-      "Tried to get the bounds of a focus node that didn't have its context set yet.\n"
-      'The context needs to be set before trying to evaluate traversal policies. This '
-      'is typically done by the reparent method, called from a build method.');
+    assert(
+        context != null,
+        "Tried to get the bounds of a focus node that didn't have its context set yet.\n"
+        'The context needs to be set before trying to evaluate traversal policies. This '
+        'is typically done with the attach method.');
     final RenderObject object = context.findRenderObject();
     final Offset globalOffset = MatrixUtils.transformPoint(object.getTransformTo(null), object.semanticBounds.topLeft);
     return globalOffset & object.semanticBounds.size;
@@ -554,13 +563,13 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     FocusNode oldPrimaryFocus;
     if (child._manager != null) {
       // We want to find out what the primary focus is, since the new child
-      // might be an ancestor of the primary focus, and it should move with the
-      // child.
+      // might be an ancestor of the primary focus, and the primary focus should
+      // move with the child.
       oldPrimaryFocus = child.hasFocus ? child._manager._currentFocus : null;
       assert(oldPrimaryFocus == null || oldPrimaryFocus == child || oldPrimaryFocus.ancestors.contains(child),
-        "child has focus, but primary focus isn't a descendant of it for some reason.");
+        "child has focus, but primary focus isn't a descendant of it.");
     }
-    // The child currently has focus, so we have to do some extra work to keep
+    // If the child currently has focus, we have to do some extra work to keep
     // that focus, and to notify any scopes that used to be ancestors, and no
     // longer have focus after we move it.
     final Set<FocusNode> oldFocusPath = oldPrimaryFocus?.ancestors?.toSet() ?? <FocusNode>{};
@@ -580,11 +589,11 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     }
   }
 
-  /// Called by the _host_ [StatefulWidget] to attach a [FocusNode] to the focus tree.
+  /// Called by the _host_ [StatefulWidget] to attach a [FocusNode] to the
+  /// widget tree.
   ///
-  /// In order to attach a [FocusNode] to the focus tree, call [attach] when the
-  /// node is ready to be added to the focus tree, typically from the
-  /// [StatefulWidget]'s [State.initState] method.
+  /// In order to attach a [FocusNode] to the widget tree, call [attach],
+  /// typically from the [StatefulWidget]'s [State.initState] method.
   ///
   /// If the focus node in the host widget is swapped out, the new node will
   /// need to be attached. [FocusAttachment.detach] should be called on the old
@@ -617,10 +626,13 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     notifyListeners();
   }
 
-  /// Requests the primary focus for a [node], which will also give
-  /// focus to its [ancestors].
+  /// Requests the primary focus for this node, or for a supplied [node], which
+  /// will also give focus to its [ancestors].
   ///
   /// If called without a node, request focus for this node.
+  ///
+  /// If the given [node] is not yet a part of the focus tree, then this method
+  /// will add the [node] as a child of this node before requesting focus.
   ///
   /// If the given [node] is a [FocusScopeNode] and that focus scope node has a
   /// non-null [focusedChild], then request the focus for the focused child.
@@ -637,13 +649,14 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
       }
       assert(node.ancestors.contains(this),
         'Focus was requested for a node that is not a descendant of the scope from which it was requested.');
-      node._doRequestFocus(false);
+      node._doRequestFocus(isFromPolicy: false);
       return;
     }
-    _doRequestFocus(false);
+    _doRequestFocus(isFromPolicy: false);
   }
 
-  void _doRequestFocus(bool isFromPolicy) {
+  // Note that this is overridden in FocusScopeNode.
+  void _doRequestFocus({@required bool isFromPolicy}) {
     assert(isFromPolicy != null);
     _hasKeyboardToken = true;
     _setAsFocusedChild();
@@ -652,7 +665,10 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
 
   // Sets this node as the focused child for the enclosing scope, and that scope
   // as the focused child for the scope above it, etc., until it reaches the
-  // root node.
+  // root node. It doesn't change the primary focus, it just changes what node
+  // would be focused if the enclosing scope receives focus, and keeps track of
+  // previously focused children so that if one is removed, the previous focus
+  // returns.
   void _setAsFocusedChild() {
     FocusNode scopeFocus = this;
     for (FocusScopeNode ancestor in ancestors.whereType<FocusScopeNode>()) {
@@ -677,9 +693,9 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   @override
   List<DiagnosticsNode> debugDescribeChildren() {
     int count = 1;
-    return _children.map<DiagnosticsNode>(
-        (FocusNode child) => child.toDiagnosticsNode(name: 'Child ${count++}')
-    ).toList();
+    return _children.map<DiagnosticsNode>((FocusNode child) {
+      return child.toDiagnosticsNode(name: 'Child ${count++}');
+    }).toList();
   }
 }
 
@@ -700,7 +716,6 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
 /// as the [focusedChild] of this node, adopting if it isn't already part of the
 /// focus tree.
 ///
-/// {@macro flutter.widgets.focusManager.hierarchyManagement}
 /// {@macro flutter.widgets.focusManager.lifecycle}
 /// {@macro flutter.widgets.focus_manager.focus.keyEvents}
 ///
@@ -738,10 +753,12 @@ class FocusScopeNode extends FocusNode {
   /// Returns null if there is no currently focused child.
   FocusNode get focusedChild {
     assert(_focusedChildren.isEmpty || _focusedChildren.last.enclosingScope == this,
-    'Focused child does not have the same idea of its enclosing scope as the scope does.');
+      'Focused child does not have the same idea of its enclosing scope as the scope does.');
     return _focusedChildren.isNotEmpty ? _focusedChildren.last : null;
   }
 
+  // A stack of the children that have been set as the focusedChild, most recent
+  // last (which is the top of the stack).
   final List<FocusNode> _focusedChildren = <FocusNode>[];
 
   @override
@@ -777,9 +794,9 @@ class FocusScopeNode extends FocusNode {
       descendantFocus = descendantScope.focusedChild;
     }
     if (descendantFocus != null) {
-      descendantFocus?._doRequestFocus(false);
+      descendantFocus?._doRequestFocus(isFromPolicy: false);
     } else {
-      scope._doRequestFocus(false);
+      scope._doRequestFocus(isFromPolicy: false);
     }
   }
 
@@ -805,7 +822,7 @@ class FocusScopeNode extends FocusNode {
   }
 
   @override
-  void _doRequestFocus(bool isFromPolicy) {
+  void _doRequestFocus({@required bool isFromPolicy}) {
     assert(isFromPolicy != null);
     // Start with the primary focus as the focused child of this scope, if there
     // is one. Otherwise start with this node itself.
@@ -861,11 +878,13 @@ class FocusScopeNode extends FocusNode {
 ///
 /// See also:
 ///
-///  * [FocusNode], which is a leaf node in the focus tree that can receive
-///    focus.
-///  * [FocusScopeNode], which is an interior node in the focus tree.
-///  * [FocusScope.of], which provides the [FocusScopeNode] for a given
+///  * [FocusNode], which is a node in the focus tree that can receive focus.
+///  * [FocusScopeNode], which is an node in the focus tree used to collect
+///    subtrees into groups.
+///  * [Focus.of], which provides the nearest ancestor [FocusNode] for a given
 ///    [BuildContext].
+///  * [FocusScope.of], which provides the nearest ancestor [FocusScopeNode] for
+///    a given [BuildContext].
 class FocusManager with DiagnosticableTreeMixin {
   /// Creates an object that manages the focus tree.
   ///
@@ -876,16 +895,15 @@ class FocusManager with DiagnosticableTreeMixin {
     RawKeyboard.instance.addListener(_handleRawKeyEvent);
   }
 
-  /// The root [FocusNode] in the focus tree.
+  /// The root [FocusScopeNode] in the focus tree.
   ///
-  /// This field is rarely used directly. Typically, to find the nearest
-  /// [FocusNode] for a given [BuildContext], [Focus.of] or [FocusScope.of] is
-  /// used.
+  /// This field is rarely used directly. To find the nearest [FocusScopeNode]
+  /// for a given [FocusNode], call [FocusNode.nearestScope].
   final FocusScopeNode rootScope = FocusScopeNode(debugLabel: 'Root Focus Scope');
 
   void _handleRawKeyEvent(RawKeyEvent event) {
-    // Walk the current focus from the leaf to the root, calling each one on the
-    // way up, and if one responds that they handled it, stop.
+    // Walk the current focus from the leaf to the root, calling each one's
+    // onKey on the way up, and if one responds that they handled it, stop.
     if (_currentFocus == null) {
       return;
     }
@@ -924,19 +942,24 @@ class FocusManager with DiagnosticableTreeMixin {
     rootScope._manager = this;
   }
 
-  // The entire focus path, except for the rootFocus, which is implicitly
-  // at the beginning of the list.  The last element should correspond with
-  // _currentFocus;
+  // The node that currently has the primary focus.
   FocusNode _currentFocus;
+  // The node that has requested to have the primary focus, but hasn't been
+  // given it yet.
   FocusNode _nextFocus;
+  // The set of nodes that need to notify their listeners of changes at the next
+  // update.
   final Set<FocusNode> _dirtyNodes = <FocusNode>{};
 
+  // Called to indicate that the given node is being disposed.
   void _willDisposeFocusNode(FocusNode node) {
     assert(node != null);
     _willUnfocusNode(node);
     _dirtyNodes.remove(node);
   }
 
+  // Called to indicate that the given node is being unfocused, and that any
+  // pending request to be focused should be canceled.
   void _willUnfocusNode(FocusNode node) {
     assert(node != null);
     if (_currentFocus == node) {
@@ -951,7 +974,11 @@ class FocusManager with DiagnosticableTreeMixin {
     }
   }
 
+  // True indicates that there is an update pending.
   bool _haveScheduledUpdate = false;
+
+  // Request that an update be scheduled, optionally requesting focus for the
+  // given newFocus node.
   void _markNeedsUpdate({FocusNode newFocus}) {
     // If newFocus isn't specified, then don't mess with _nextFocus, just
     // schedule the update.
