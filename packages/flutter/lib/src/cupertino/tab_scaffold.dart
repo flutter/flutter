@@ -136,6 +136,7 @@ class CupertinoTabScaffold extends StatefulWidget {
   /// Must not be null.
   final CupertinoTabBar tabBar;
 
+  /// The selection state of the [tabBar].
   final CupertinoTabController controller;
   /// An [IndexedWidgetBuilder] that's called when tabs become active.
   ///
