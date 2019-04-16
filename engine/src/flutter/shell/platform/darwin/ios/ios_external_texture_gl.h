@@ -18,7 +18,7 @@ class IOSExternalTextureGL : public flow::Texture {
   ~IOSExternalTextureGL() override;
 
   // Called from GPU thread.
-  void Paint(SkCanvas& canvas, const SkRect& bounds, bool freeze) override;
+  void Paint(SkCanvas& canvas, const SkRect& bounds, bool freeze, GrContext* context) override;
 
   void OnGrContextCreated() override;
 

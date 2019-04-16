@@ -22,7 +22,10 @@ class Texture {
   virtual ~Texture();
 
   // Called from GPU thread.
-  virtual void Paint(SkCanvas& canvas, const SkRect& bounds, bool freeze) = 0;
+  virtual void Paint(SkCanvas& canvas,
+                     const SkRect& bounds,
+                     bool freeze,
+                     GrContext* context) = 0;
 
   // Called from GPU thread.
   virtual void OnGrContextCreated() = 0;
