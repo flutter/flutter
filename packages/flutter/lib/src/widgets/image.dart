@@ -17,17 +17,18 @@ import 'localizations.dart';
 import 'media_query.dart';
 import 'ticker_provider.dart';
 
-export 'package:flutter/painting.dart' show
-  AssetImage,
-  ExactAssetImage,
-  FileImage,
-  FilterQuality,
-  ImageConfiguration,
-  ImageInfo,
-  ImageStream,
-  ImageProvider,
-  MemoryImage,
-  NetworkImage;
+export 'package:flutter/painting.dart'
+    show
+        AssetImage,
+        ExactAssetImage,
+        FileImage,
+        FilterQuality,
+        ImageConfiguration,
+        ImageInfo,
+        ImageStream,
+        ImageProvider,
+        MemoryImage,
+        NetworkImage;
 
 /// Creates an [ImageConfiguration] based on the given [BuildContext] (and
 /// optionally size).
@@ -43,10 +44,12 @@ export 'package:flutter/painting.dart' show
 /// See also:
 ///
 ///  * [ImageProvider], which has an example showing how this might be used.
-ImageConfiguration createLocalImageConfiguration(BuildContext context, { Size size }) {
+ImageConfiguration createLocalImageConfiguration(BuildContext context,
+    {Size size}) {
   return ImageConfiguration(
     bundle: DefaultAssetBundle.of(context),
-    devicePixelRatio: MediaQuery.of(context, nullOk: true)?.devicePixelRatio ?? 1.0,
+    devicePixelRatio:
+        MediaQuery.of(context, nullOk: true)?.devicePixelRatio ?? 1.0,
     locale: Localizations.localeOf(context, nullOk: true),
     textDirection: Directionality.of(context),
     size: size,
@@ -79,13 +82,15 @@ Future<void> precacheImage(
   Size size,
   ImageErrorListener onError,
 }) {
-  final ImageConfiguration config = createLocalImageConfiguration(context, size: size);
+  final ImageConfiguration config =
+      createLocalImageConfiguration(context, size: size);
   final Completer<void> completer = Completer<void>();
   final ImageStream stream = provider.resolve(config);
   void listener(ImageInfo image, bool sync) {
     completer.complete();
     stream.removeListener(listener);
   }
+
   void errorListener(dynamic exception, StackTrace stackTrace) {
     completer.complete();
     stream.removeListener(listener);
@@ -101,6 +106,7 @@ Future<void> precacheImage(
       ));
     }
   }
+
   stream.addListener(listener, onError: errorListener);
   return completer.future;
 }
@@ -170,12 +176,12 @@ class Image extends StatefulWidget {
     this.matchTextDirection = false,
     this.gaplessPlayback = false,
     this.filterQuality = FilterQuality.low,
-  }) : assert(image != null),
-       assert(alignment != null),
-       assert(repeat != null),
-       assert(filterQuality != null),
-       assert(matchTextDirection != null),
-       super(key: key);
+  })  : assert(image != null),
+        assert(alignment != null),
+        assert(repeat != null),
+        assert(filterQuality != null),
+        assert(matchTextDirection != null),
+        super(key: key);
 
   /// Creates a widget that displays an [ImageStream] obtained from the network.
   ///
@@ -215,11 +221,11 @@ class Image extends StatefulWidget {
     this.gaplessPlayback = false,
     this.filterQuality = FilterQuality.low,
     Map<String, String> headers,
-  }) : image = NetworkImage(src, scale: scale, headers: headers),
-       assert(alignment != null),
-       assert(repeat != null),
-       assert(matchTextDirection != null),
-       super(key: key);
+  })  : image = NetworkImage(src, scale: scale, headers: headers),
+        assert(alignment != null),
+        assert(repeat != null),
+        assert(matchTextDirection != null),
+        super(key: key);
 
   /// Creates a widget that displays an [ImageStream] obtained from a [File].
   ///
@@ -256,12 +262,12 @@ class Image extends StatefulWidget {
     this.matchTextDirection = false,
     this.gaplessPlayback = false,
     this.filterQuality = FilterQuality.low,
-  }) : image = FileImage(file, scale: scale),
-       assert(alignment != null),
-       assert(repeat != null),
-       assert(filterQuality != null),
-       assert(matchTextDirection != null),
-       super(key: key);
+  })  : image = FileImage(file, scale: scale),
+        assert(alignment != null),
+        assert(repeat != null),
+        assert(filterQuality != null),
+        assert(matchTextDirection != null),
+        super(key: key);
 
   /// Creates a widget that displays an [ImageStream] obtained from an asset
   /// bundle. The key for the image is given by the `name` argument.
@@ -407,13 +413,14 @@ class Image extends StatefulWidget {
     this.gaplessPlayback = false,
     String package,
     this.filterQuality = FilterQuality.low,
-  }) : image = scale != null
-         ? ExactAssetImage(name, bundle: bundle, scale: scale, package: package)
-         : AssetImage(name, bundle: bundle, package: package),
-       assert(alignment != null),
-       assert(repeat != null),
-       assert(matchTextDirection != null),
-       super(key: key);
+  })  : image = scale != null
+            ? ExactAssetImage(name,
+                bundle: bundle, scale: scale, package: package)
+            : AssetImage(name, bundle: bundle, package: package),
+        assert(alignment != null),
+        assert(repeat != null),
+        assert(matchTextDirection != null),
+        super(key: key);
 
   /// Creates a widget that displays an [ImageStream] obtained from a [Uint8List].
   ///
@@ -447,11 +454,11 @@ class Image extends StatefulWidget {
     this.matchTextDirection = false,
     this.gaplessPlayback = false,
     this.filterQuality = FilterQuality.low,
-  }) : image = MemoryImage(bytes, scale: scale),
-       assert(alignment != null),
-       assert(repeat != null),
-       assert(matchTextDirection != null),
-       super(key: key);
+  })  : image = MemoryImage(bytes, scale: scale),
+        assert(alignment != null),
+        assert(repeat != null),
+        assert(matchTextDirection != null),
+        super(key: key);
 
   /// The image to display.
   final ImageProvider image;
@@ -587,15 +594,24 @@ class Image extends StatefulWidget {
     properties.add(DiagnosticsProperty<ImageProvider>('image', image));
     properties.add(DoubleProperty('width', width, defaultValue: null));
     properties.add(DoubleProperty('height', height, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('color', color, defaultValue: null));
-    properties.add(EnumProperty<BlendMode>('colorBlendMode', colorBlendMode, defaultValue: null));
+    properties
+        .add(DiagnosticsProperty<Color>('color', color, defaultValue: null));
+    properties.add(EnumProperty<BlendMode>('colorBlendMode', colorBlendMode,
+        defaultValue: null));
     properties.add(EnumProperty<BoxFit>('fit', fit, defaultValue: null));
-    properties.add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, defaultValue: null));
-    properties.add(EnumProperty<ImageRepeat>('repeat', repeat, defaultValue: ImageRepeat.noRepeat));
-    properties.add(DiagnosticsProperty<Rect>('centerSlice', centerSlice, defaultValue: null));
-    properties.add(FlagProperty('matchTextDirection', value: matchTextDirection, ifTrue: 'match text direction'));
-    properties.add(StringProperty('semanticLabel', semanticLabel, defaultValue: null));
-    properties.add(DiagnosticsProperty<bool>('this.excludeFromSemantics', excludeFromSemantics));
+    properties.add(DiagnosticsProperty<AlignmentGeometry>(
+        'alignment', alignment,
+        defaultValue: null));
+    properties.add(EnumProperty<ImageRepeat>('repeat', repeat,
+        defaultValue: ImageRepeat.noRepeat));
+    properties.add(DiagnosticsProperty<Rect>('centerSlice', centerSlice,
+        defaultValue: null));
+    properties.add(FlagProperty('matchTextDirection',
+        value: matchTextDirection, ifTrue: 'match text direction'));
+    properties.add(
+        StringProperty('semanticLabel', semanticLabel, defaultValue: null));
+    properties.add(DiagnosticsProperty<bool>(
+        'this.excludeFromSemantics', excludeFromSemantics));
     properties.add(EnumProperty<FilterQuality>('filterQuality', filterQuality));
   }
 }
@@ -608,8 +624,8 @@ class _ImageState extends State<Image> {
 
   @override
   void didChangeDependencies() {
-    _invertColors = MediaQuery.of(context, nullOk: true)?.invertColors
-      ?? SemanticsBinding.instance.accessibilityFeatures.invertColors;
+    _invertColors = MediaQuery.of(context, nullOk: true)?.invertColors ??
+        SemanticsBinding.instance.accessibilityFeatures.invertColors;
     _resolveImage();
 
     if (TickerMode.of(context))
@@ -623,8 +639,7 @@ class _ImageState extends State<Image> {
   @override
   void didUpdateWidget(Image oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.image != oldWidget.image)
-      _resolveImage();
+    if (widget.image != oldWidget.image) _resolveImage();
   }
 
   @override
@@ -635,10 +650,12 @@ class _ImageState extends State<Image> {
 
   void _resolveImage() {
     final ImageStream newStream =
-      widget.image.resolve(createLocalImageConfiguration(
-          context,
-          size: widget.width != null && widget.height != null ? Size(widget.width, widget.height) : null,
-      ));
+        widget.image.resolve(createLocalImageConfiguration(
+      context,
+      size: widget.width != null && widget.height != null
+          ? Size(widget.width, widget.height)
+          : null,
+    ));
     assert(newStream != null);
     _updateSourceStream(newStream);
   }
@@ -653,30 +670,27 @@ class _ImageState extends State<Image> {
   // registration from the old stream to the new stream (if a listener was
   // registered).
   void _updateSourceStream(ImageStream newStream) {
-    if (_imageStream?.key == newStream?.key)
-      return;
+    if (_imageStream?.key == newStream?.key) return;
 
-    if (_isListeningToStream)
-      _imageStream.removeListener(_handleImageChanged);
+    if (_isListeningToStream) _imageStream.removeListener(_handleImageChanged);
 
     if (!widget.gaplessPlayback)
-      setState(() { _imageInfo = null; });
+      setState(() {
+        _imageInfo = null;
+      });
 
     _imageStream = newStream;
-    if (_isListeningToStream)
-      _imageStream.addListener(_handleImageChanged);
+    if (_isListeningToStream) _imageStream.addListener(_handleImageChanged);
   }
 
   void _listenToStream() {
-    if (_isListeningToStream)
-      return;
+    if (_isListeningToStream) return;
     _imageStream.addListener(_handleImageChanged);
     _isListeningToStream = true;
   }
 
   void _stopListeningToStream() {
-    if (!_isListeningToStream)
-      return;
+    if (!_isListeningToStream) return;
     _imageStream.removeListener(_handleImageChanged);
     _isListeningToStream = false;
   }
@@ -705,8 +719,7 @@ class _ImageState extends State<Image> {
       invertColors: _invertColors,
       filterQuality: widget.filterQuality,
     );
-    if (widget.excludeFromSemantics)
-      return image;
+    if (widget.excludeFromSemantics) return image;
     return Semantics(
       container: widget.semanticLabel != null,
       image: true,

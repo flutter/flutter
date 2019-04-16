@@ -93,6 +93,7 @@ mixin PaintingBinding on BindingBase, ServicesBinding {
   @deprecated
   double get decodedCacheRatioCap => _kDecodedCacheRatioCap;
   double _kDecodedCacheRatioCap = _kDefaultDecodedCacheRatioCap;
+
   /// Changes the maximum multiple of compressed image size used when caching an
   /// animated image.
   ///
@@ -106,15 +107,17 @@ mixin PaintingBinding on BindingBase, ServicesBinding {
   /// for more context.
   @deprecated
   set decodedCacheRatioCap(double value) {
-    assert (value != null);
-    assert (value >= 0.0);
+    assert(value != null);
+    assert(value >= 0.0);
     _kDecodedCacheRatioCap = value;
   }
 
   // ignore: deprecated_member_use_from_same_package
   /// Calls through to [dart:ui] with [decodedCacheRatioCap] from [ImageCache].
   Future<ui.Codec> instantiateImageCodec(Uint8List list) {
-    return ui.instantiateImageCodec(list, decodedCacheRatioCap: decodedCacheRatioCap); // ignore: deprecated_member_use_from_same_package
+    return ui.instantiateImageCodec(list,
+        decodedCacheRatioCap:
+            decodedCacheRatioCap); // ignore: deprecated_member_use_from_same_package
   }
 
   @override
