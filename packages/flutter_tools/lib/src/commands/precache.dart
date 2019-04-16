@@ -27,6 +27,8 @@ class PrecacheCommand extends FlutterCommand {
         help: 'Precache artifacts for macOS desktop development');
     argParser.addFlag('fuchsia', negatable: true, defaultsTo: false,
         help: 'Precache artifacts for Fuchsia development');
+    argParser.addFlag('universal', negatable: true, defaultsTo: true,
+        help: 'Precache artifacts required for all developments');
   }
 
   @override
@@ -43,7 +45,7 @@ class PrecacheCommand extends FlutterCommand {
     if (argResults['all-platforms']) {
       cache.includeAllPlatforms = true;
     }
-    final Set<DevelopmentArtifact> requiredArtifacts = <DevelopmentArtifact>{ DevelopmentArtifact.universal };
+    final Set<DevelopmentArtifact> requiredArtifacts = <DevelopmentArtifact>{};
     for (DevelopmentArtifact artifact in DevelopmentArtifact.values) {
       // Don't include unstable artifacts on stable branches.
       if (FlutterVersion.instance.isStable && artifact.unstable) {
