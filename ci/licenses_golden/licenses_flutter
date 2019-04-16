@@ -560,9 +560,11 @@ FILE: ../../../flutter/shell/platform/android/platform_view_android_jni.cc
 FILE: ../../../flutter/shell/platform/android/platform_view_android_jni.h
 FILE: ../../../flutter/shell/platform/android/vsync_waiter_android.cc
 FILE: ../../../flutter/shell/platform/android/vsync_waiter_android.h
+FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/encodable_value_unittests.cc
 FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/engine_method_result.cc
 FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/include/flutter/basic_message_channel.h
 FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/include/flutter/binary_messenger.h
+FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/include/flutter/encodable_value.h
 FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/include/flutter/engine_method_result.h
 FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/include/flutter/json_message_codec.h
 FILE: ../../../flutter/shell/platform/common/cpp/client_wrapper/include/flutter/json_method_codec.h

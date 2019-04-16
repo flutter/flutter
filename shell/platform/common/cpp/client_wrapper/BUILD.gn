@@ -7,6 +7,7 @@ import("publish.gni")
 _wrapper_includes = [
   "include/flutter/basic_message_channel.h",
   "include/flutter/binary_messenger.h",
+  "include/flutter/encodable_value.h",
   "include/flutter/engine_method_result.h",
   "include/flutter/json_message_codec.h",
   "include/flutter/json_method_codec.h",
@@ -72,6 +73,7 @@ executable("client_wrapper_unittests") {
 
   # TODO: Add more unit tests.
   sources = [
+    "encodable_value_unittests.cc",
     "method_call_unittests.cc",
     "plugin_registrar_unittests.cc",
   ]
