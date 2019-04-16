@@ -40,31 +40,33 @@ typedef FocusOnKeyCallback = bool Function(FocusNode node, RawKeyEvent event);
 class FocusAttachment {
   /// A private constructor, because [FocusAttachment]s are only to be created
   /// by [FocusNode.attach].
-  FocusAttachment._(this.node);
+  FocusAttachment._(this._node) : assert(_node != null);
 
-  /// The focus node that this attachment manages an attachment for.
-  final FocusNode node;
+  // The focus node that this attachment manages an attachment for. The node not
+  // yet have a parent, or may have been detached from this attachment, so don't
+  // count on this node being in a usable state.
+  final FocusNode _node;
 
   /// Returns true if the associated node is attached to this attachment.
   ///
   /// It is possible to be attached to the widget tree, but not be placed in
   /// the focus tree (i.e. to not have a parent yet in the focus tree).
-  bool get isAttached => node._attachment == this;
+  bool get isAttached => _node._attachment == this;
 
-  /// Detaches the [node] this attachment point is associated with from the
+  /// Detaches the [_node] this attachment point is associated with from the
   /// focus tree, and disconnects it from this attachment point.
   ///
   /// Calling [FocusNode.dispose] will also automatically detach the node.
   void detach() {
-    assert(node != null);
+    assert(_node != null);
     if (isAttached) {
-      node._parent?._removeChild(node);
-      node._attachment = null;
+      _node._parent?._removeChild(_node);
+      _node._attachment = null;
     }
     assert(!isAttached);
   }
 
-  /// Ensures that the given [parent] node is the parent of the [node] which is
+  /// Ensures that the given [parent] node is the parent of the node which is
   /// attached at this attachment point, changing it if necessary.
   ///
   /// If [isAttached] is false, then calling this method does nothing.
@@ -78,9 +80,9 @@ class FocusAttachment {
   /// another location that has a different [FocusScope] or context.
   void reparent(FocusNode parent) {
     assert(parent != null);
-    assert(node != null);
+    assert(_node != null);
     if (isAttached) {
-      parent._reparent(node);
+      parent._reparent(_node);
     }
   }
 }
@@ -97,8 +99,7 @@ class FocusAttachment {
 /// A focus node might need to be created if it is passed in from an ancestor of
 /// a [Focus] widget to control the focus of the children from the ancestor, or
 /// a widget might need to host one if the widget subsystem is not being used,
-/// or if for some reason the [Focus] and [FocusScope] widgets provide
-/// insufficient control.
+/// or if the [Focus] and [FocusScope] widgets provide insufficient control.
 ///
 /// [FocusNodes] are organized into _scopes_ (see [FocusScopeNode]), which form
 /// sub-trees of nodes that can be traversed as a group. Within a scope, the
@@ -405,8 +406,8 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// Use [enclosingScope] to look for scopes above this node.
   FocusScopeNode get nearestScope => enclosingScope;
 
-  /// Returns the nearest enclosing scope node above this node, or null if none
-  /// is found.
+  /// Returns the nearest enclosing scope node above this node, or null if the
+  /// node has not yet be added to the focus tree.
   ///
   /// If this node is itself a scope, this will only return ancestors of this
   /// scope.

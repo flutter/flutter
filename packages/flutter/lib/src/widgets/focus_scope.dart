@@ -146,10 +146,10 @@ class Focus extends StatefulWidget {
   /// A debug label for this widget.
   ///
   /// Not used for anything except to be printed in the diagnostic output from
-  /// [toString] or [toStringDeep].  Also unused if a [focusNode] is provided,
+  /// [toString] or [toStringDeep]. Also unused if a [focusNode] is provided,
   /// since that node can have its own [FocusNode.debugLabel].
   ///
-  /// To get a string with the entire tree, call [debugDescribeFocusTree].  To
+  /// To get a string with the entire tree, call [debugDescribeFocusTree]. To
   /// print it to the console call [debugDumpFocusTree].
   ///
   /// Defaults to null.
@@ -183,6 +183,10 @@ class Focus extends StatefulWidget {
 
   /// True if this widget will be selected as the initial focus when no other
   /// node in its scope is currently focused.
+  ///
+  /// Ideally, there is only one [Focus] with autofocus set in each
+  /// [FocusScope]. If there is more than one [Focus] with autofocus set, then
+  /// the first one added to the tree will get focus.
   final bool autofocus;
 
   /// An optional focus node to use as the focus node for this [Focus] widget.
@@ -213,9 +217,9 @@ class Focus extends StatefulWidget {
   /// Returns true if the nearest enclosing [Focus] widget's node is focused.
   ///
   /// A convenience method to allow build methods to write:
-  /// `Focus.hasFocus(context)` to get whether or not the nearest [Focus] above
-  /// them in the widget hierarchy currently has the keyboard focus.
-  static bool hasFocus(BuildContext context) => Focus.of(context).hasFocus;
+  /// `Focus.isOn(context)` to get whether or not the nearest [Focus] above them
+  /// in the widget hierarchy currently has the keyboard focus.
+  static bool isOn(BuildContext context) => Focus.of(context).hasFocus;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

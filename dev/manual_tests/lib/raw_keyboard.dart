@@ -28,7 +28,6 @@ class RawKeyboardDemo extends StatefulWidget {
 
 class _HardwareKeyDemoState extends State<RawKeyboardDemo> {
   final FocusNode _focusNode = FocusNode();
-  FocusAttachment _focusAttachment;
   RawKeyEvent _event;
 
   @override
@@ -52,15 +51,8 @@ class _HardwareKeyDemoState extends State<RawKeyboardDemo> {
   }
 
   @override
-  void initState() {
-    super.initState();
-    _focusAttachment = _focusNode.attach(context);
-  }
-
-  @override
   Widget build(BuildContext context) {
     final TextTheme textTheme = Theme.of(context).textTheme;
-    _focusAttachment.reparent(Focus.of(context));
     return RawKeyboardListener(
       focusNode: _focusNode,
       onKey: _handleKeyEvent,
@@ -70,7 +62,7 @@ class _HardwareKeyDemoState extends State<RawKeyboardDemo> {
           if (!_focusNode.hasFocus) {
             return GestureDetector(
               onTap: () {
-                FocusScope.of(context).requestFocus(_focusNode);
+                _focusNode.requestFocus();
               },
               child: Text('Tap to focus', style: textTheme.display1),
             );

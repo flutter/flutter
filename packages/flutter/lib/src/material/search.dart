@@ -225,8 +225,8 @@ abstract class SearchDelegate<T> {
       ..pop(result);
   }
 
-  // The focus node to use for manipulating focus on the search page.
-  // This is managed  and set by the _SearchPageRoute using this delegate.
+  // The focus node to use for manipulating focus on the search page. This is
+  // managed, owned, and set by the _SearchPageRoute using this delegate.
   FocusNode _focusNode;
 
   /// [Animation] triggered when the search pages fades in or out.
@@ -349,7 +349,6 @@ class _SearchPage<T> extends StatefulWidget {
 
 class _SearchPageState<T> extends State<_SearchPage<T>> {
   FocusNode focusNode = FocusNode();
-  FocusAttachment focusAttachment;
 
   @override
   void initState() {
@@ -357,7 +356,6 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
     queryTextController.addListener(_onQueryChanged);
     widget.animation.addStatusListener(_onAnimationStatusChanged);
     widget.delegate._currentBodyNotifier.addListener(_onSearchBodyChanged);
-    focusAttachment = focusNode.attach(context);
     focusNode.addListener(_onFocusChanged);
     widget.delegate._focusNode = focusNode;
   }
@@ -378,7 +376,7 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
     }
     widget.animation.removeStatusListener(_onAnimationStatusChanged);
     if (widget.delegate._currentBody == _SearchBody.suggestions) {
-      FocusScope.of(context).requestFocus(widget.delegate._focusNode);
+      focusNode.requestFocus();
     }
   }
 
@@ -403,7 +401,6 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
-    focusAttachment.reparent(Focus.of(context));
     final ThemeData theme = widget.delegate.appBarTheme(context);
     final String searchFieldLabel = MaterialLocalizations.of(context).searchFieldLabel;
     Widget body;

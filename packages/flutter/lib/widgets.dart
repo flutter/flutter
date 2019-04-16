@@ -35,7 +35,6 @@ export 'src/widgets/editable_text.dart';
 export 'src/widgets/fade_in_image.dart';
 export 'src/widgets/focus_manager.dart';
 export 'src/widgets/focus_scope.dart';
-export 'src/widgets/focus_scope.dart';
 export 'src/widgets/form.dart';
 export 'src/widgets/framework.dart';
 export 'src/widgets/gesture_detector.dart';

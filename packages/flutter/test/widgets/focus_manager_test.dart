@@ -450,21 +450,21 @@ void main() {
     });
     testWidgets('debugDescribeFocusTree produces correct output', (WidgetTester tester) async {
       final BuildContext context = await setupWidget(tester);
-      final FocusScopeNode scope1 = FocusScopeNode();
+      final FocusScopeNode scope1 = FocusScopeNode(debugLabel: 'Scope 1');
       final FocusAttachment scope1Attachment = scope1.attach(context);
-      final FocusScopeNode scope2 = FocusScopeNode();
+      final FocusScopeNode scope2 = FocusScopeNode(); // No label, Just to test that it works.
       final FocusAttachment scope2Attachment = scope2.attach(context);
-      final FocusNode parent1 = FocusNode();
+      final FocusNode parent1 = FocusNode(debugLabel: 'Parent 1');
       final FocusAttachment parent1Attachment = parent1.attach(context);
-      final FocusNode parent2 = FocusNode();
+      final FocusNode parent2 = FocusNode(debugLabel: 'Parent 2');
       final FocusAttachment parent2Attachment = parent2.attach(context);
-      final FocusNode child1 = FocusNode();
+      final FocusNode child1 = FocusNode(debugLabel: 'Child 1');
       final FocusAttachment child1Attachment = child1.attach(context);
-      final FocusNode child2 = FocusNode();
+      final FocusNode child2 = FocusNode(); // No label, Just to test that it works.
       final FocusAttachment child2Attachment = child2.attach(context);
-      final FocusNode child3 = FocusNode();
+      final FocusNode child3 = FocusNode(debugLabel: 'Child 3');
       final FocusAttachment child3Attachment = child3.attach(context);
-      final FocusNode child4 = FocusNode();
+      final FocusNode child4 = FocusNode(debugLabel: 'Child 4');
       final FocusAttachment child4Attachment = child4.attach(context);
       scope1Attachment.reparent(tester.binding.focusManager.rootScope);
       scope2Attachment.reparent(tester.binding.focusManager.rootScope);
@@ -478,44 +478,50 @@ void main() {
       await tester.pump();
       final String description = debugDescribeFocusTree();
       expect(
-          description,
-          equalsIgnoringHashCodes(
-            'FocusManager#00000\n'
-                ' │ currentFocus: FocusNode#00000\n'
-                ' │\n'
-                ' └─rootScope: FocusScopeNode#00000\n'
-                '   │ FOCUSED\n'
-                '   │ debugLabel: "Root Focus Scope"\n'
-                '   │ focusedChild: FocusScopeNode#00000\n'
-                '   │\n'
-                '   ├─Child 1: FocusScopeNode#00000\n'
-                '   │ │ context: Container-[GlobalKey#00000]\n'
-                '   │ │\n'
-                '   │ └─Child 1: FocusNode#00000\n'
-                '   │   │ context: Container-[GlobalKey#00000]\n'
-                '   │   │\n'
-                '   │   ├─Child 1: FocusNode#00000\n'
-                '   │   │   context: Container-[GlobalKey#00000]\n'
-                '   │   │\n'
-                '   │   └─Child 2: FocusNode#00000\n'
-                '   │       context: Container-[GlobalKey#00000]\n'
-                '   │\n'
-                '   └─Child 2: FocusScopeNode#00000\n'
-                '     │ context: Container-[GlobalKey#00000]\n'
-                '     │ FOCUSED\n'
-                '     │ focusedChild: FocusNode#00000\n'
-                '     │\n'
-                '     └─Child 1: FocusNode#00000\n'
-                '       │ context: Container-[GlobalKey#00000]\n'
-                '       │ FOCUSED\n'
-                '       │\n'
-                '       ├─Child 1: FocusNode#00000\n'
-                '       │   context: Container-[GlobalKey#00000]\n'
-                '       │\n'
-                '       └─Child 2: FocusNode#00000\n'
-                '           context: Container-[GlobalKey#00000]\n'
-                '           FOCUSED\n',
-          ));
+        description,
+        equalsIgnoringHashCodes(
+          'FocusManager#00000\n'
+            ' │ currentFocus: FocusNode#00000\n'
+            ' │\n'
+            ' └─rootScope: FocusScopeNode#00000\n'
+            '   │ FOCUSED\n'
+            '   │ debugLabel: "Root Focus Scope"\n'
+            '   │ focusedChild: FocusScopeNode#00000\n'
+            '   │\n'
+            '   ├─Child 1: FocusScopeNode#00000\n'
+            '   │ │ context: Container-[GlobalKey#00000]\n'
+            '   │ │ debugLabel: "Scope 1"\n'
+            '   │ │\n'
+            '   │ └─Child 1: FocusNode#00000\n'
+            '   │   │ context: Container-[GlobalKey#00000]\n'
+            '   │   │ debugLabel: "Parent 1"\n'
+            '   │   │\n'
+            '   │   ├─Child 1: FocusNode#00000\n'
+            '   │   │   context: Container-[GlobalKey#00000]\n'
+            '   │   │   debugLabel: "Child 1"\n'
+            '   │   │\n'
+            '   │   └─Child 2: FocusNode#00000\n'
+            '   │       context: Container-[GlobalKey#00000]\n'
+            '   │\n'
+            '   └─Child 2: FocusScopeNode#00000\n'
+            '     │ context: Container-[GlobalKey#00000]\n'
+            '     │ FOCUSED\n'
+            '     │ focusedChild: FocusNode#00000\n'
+            '     │\n'
+            '     └─Child 1: FocusNode#00000\n'
+            '       │ context: Container-[GlobalKey#00000]\n'
+            '       │ FOCUSED\n'
+            '       │ debugLabel: "Parent 2"\n'
+            '       │\n'
+            '       ├─Child 1: FocusNode#00000\n'
+            '       │   context: Container-[GlobalKey#00000]\n'
+            '       │   debugLabel: "Child 3"\n'
+            '       │\n'
+            '       └─Child 2: FocusNode#00000\n'
+            '           context: Container-[GlobalKey#00000]\n'
+            '           FOCUSED\n'
+            '           debugLabel: "Child 4"\n'
+        ));
     });
   });
 }
