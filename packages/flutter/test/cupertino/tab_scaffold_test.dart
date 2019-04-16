@@ -253,7 +253,7 @@ void main() {
   });
 
   testWidgets('Tab bar respects themes', (WidgetTester tester) async {
-      final CupertinoTabController controller = CupertinoTabController();
+    final CupertinoTabController controller = CupertinoTabController();
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoTabScaffold(

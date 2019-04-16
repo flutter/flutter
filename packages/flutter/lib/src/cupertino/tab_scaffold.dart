@@ -8,15 +8,53 @@ import 'theme.dart';
 
 /// Coordinates tab selection between a [CupertinoTabBar] and a [CupertinoTabScaffold].
 ///
+/// The [currentIndex] property is the index of the selected tab, changing its value updates
+/// the current tab of the [CupertinoTabScaffold](s) the [CupertinoTabController] controls.
+///
+/// {@tool sample}
+///
+/// `CupertionoTabController` can be used to switch tabs from ancestor widgets:
+///
+/// ```dart
+/// class MyCupertinoTabScaffoldPage extends StatefulWidget {
+///   @override
+///   _CupertinoTabScaffoldPageState createState() => _CupertinoTabScaffoldPageState();
+/// }
+///
+/// class _CupertinoTabScaffoldPageState extends State<MyCupertinoTabScaffoldPage> {
+///   final CupertinoTabController _controller = CupertinoTabController();
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return CupertinoTabScaffold(
+///       tabBar: CupertinoTabBar(
+///         items: <BottomNavigationBarItem> [
+///           // ...
+///         ]
+///       ),
+///       controller: _controller,
+///       tabBuilder: (_, _) {
+///         return Center(
+///           child: CupertinoButton(
+///             text: const Text('Go to first tab'),
+///             onPressed: () => _controller.currentIndex = 0
+///           )
+///         );
+///       }
+///     );
+///   }
+/// }
+/// ```
+/// {@end-tool}
 class CupertinoTabController extends ValueNotifier<int> {
-  /// Creates an object that manages the state required by a [CupertinoTabBar] and a [CupertinoTabScaffold].
+  /// Creates an object that manages the current tab state required by a [CupertinoTabBar]
+  /// and a [CupertinoTabScaffold].
   CupertinoTabController({ int selectedIndex = 0 }):
   assert(selectedIndex >= 0),
   super(selectedIndex);
 
-  /// The index of the current selected tab.
-  ///
-  /// [currentIndex] is an alias for [value].
+  /// The index of the current selected tab. Changing the value of [currentIndex]
+  /// updates the current tab of [CupertinoTabScaffold] the [CupertinoTabController] controls.
   int get currentIndex => value;
   set currentIndex(int value) => this.value = value;
 }
@@ -26,7 +64,7 @@ class CupertinoTabController extends ValueNotifier<int> {
 /// The scaffold lays out the tab bar at the bottom and the content between or
 /// behind the tab bar.
 ///
-/// A [tabBar] and a [tabBuilder] are required. The [CupertinoTabScaffold]
+/// A [tabBar], a [controller] and a [tabBuilder] are required. The [CupertinoTabScaffold]
 /// will automatically listen to the provided [CupertinoTabBar]'s tap callbacks
 /// to change the active tab.
 ///
@@ -49,6 +87,7 @@ class CupertinoTabController extends ValueNotifier<int> {
 ///       // ...
 ///     ],
 ///   ),
+///   controller: CupertinoTabController(),
 ///   tabBuilder: (BuildContext context, int index) {
 ///     return CupertinoTabView(
 ///       builder: (BuildContext context) {
@@ -93,9 +132,13 @@ class CupertinoTabController extends ValueNotifier<int> {
 /// `Navigator.of(rootNavigator: true)` from inside the [BuildContext] of a
 /// [CupertinoTabView].
 ///
+/// To manage the current tab from an ancestor widget, use a [CupertinoTabController]
+/// and pass it to the descendent [CupertinoPageScaffold].
+///
 /// See also:
 ///
 ///  * [CupertinoTabBar], the bottom tab bar inserted in the scaffold.
+///  * [CupertinoTabController], the exposed current page state of a [CupertinoPageScaffold].
 ///  * [CupertinoTabView], the typical root content of each tab that holds its own
 ///    [Navigator] stack.
 ///  * [CupertinoPageRoute], a route hosting modal pages with iOS style transitions.
