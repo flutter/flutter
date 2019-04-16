@@ -147,9 +147,8 @@ class BottomNavigationBar extends StatefulWidget {
   /// The [iconSize], [selectedFontSize], [unselectedFontSize], and [elevation]
   /// arguments must be non-null and non-negative.
   ///
-  /// The [selectedLabelStyle] and [unselectedLabelStyle] arguments should not
-  /// have a color set. Instead, [selectedItemColor] and [unselectedItemColor]
-  /// should and will be used.
+  /// The [selectedLabelStyle.color] and [unselectedLabelStyle.color] values
+  /// will be ignored in favor of [selectedItemColor] and [unselectedItemColor].
   ///
   /// If both [selectedLabelStyle.fontSize] and [selectedFontSize] are set,
   /// [selectedLabelStyle.fontSize] will be used.
@@ -280,15 +279,9 @@ class BottomNavigationBar extends StatefulWidget {
   final bool showSelectedLabels;
 
   /// Convenience getter for knowing the font size of the selected [BottomNavigationBarItem].
-  ///
-  /// This is mostly to be backwards compatible, because [selectedFontSize] used
-  /// to be a field that could be called directly.
   double get selectedFontSize => selectedLabelStyle.fontSize;
 
   /// Convenience getter for knowing the font size of the unselected [BottomNavigationBarItem]s.
-  ///
-  /// This is mostly to be backwards compatible, because [unselectedFontSize] used
-  /// to be a field that could be called directly.
   double get unselectedFontSize => unselectedLabelStyle.fontSize;
 
   // Used by the [BottomNavigationBar] constructor to set the [type] parameter.
