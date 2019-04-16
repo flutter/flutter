@@ -24,6 +24,7 @@ void main() {
         home: Material(
           child: CupertinoTabScaffold(
             tabBar: _buildTabBar(),
+            controller: CupertinoTabController(),
             tabBuilder: (BuildContext context, int index) {
               return TextField(
                 focusNode: focusNodes[index],
@@ -60,6 +61,7 @@ void main() {
         home: Material(
           child: CupertinoTabScaffold(
             tabBar: _buildTabBar(),
+            controller: CupertinoTabController(),
             tabBuilder: (BuildContext context, int index) {
               return Column(
                 children: <Widget>[
@@ -117,10 +119,12 @@ void main() {
   });
 
   testWidgets('Tab bar respects themes', (WidgetTester tester) async {
+    final CupertinoTabController controller = CupertinoTabController();
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoTabScaffold(
           tabBar: _buildTabBar(),
+          controller: controller,
           tabBuilder: (BuildContext context, int index) {
             return const Placeholder();
           },
@@ -147,6 +151,7 @@ void main() {
         ),
         home: CupertinoTabScaffold(
           tabBar: _buildTabBar(),
+          controller: controller,
           tabBuilder: (BuildContext context, int index) {
             return const Placeholder();
           },
@@ -186,6 +191,7 @@ void main() {
           home: Material(
             child: CupertinoTabScaffold(
               tabBar: _buildTabBar(),
+              controller: CupertinoTabController(),
               tabBuilder: (BuildContext context, int index) {
                 return const TextField();
               },
@@ -208,6 +214,7 @@ void main() {
           home: Material(
             child: CupertinoTabScaffold(
               tabBar: _buildTabBar(),
+              controller: CupertinoTabController(),
               tabBuilder: (BuildContext context, int index) {
                 return const TextField();
               },

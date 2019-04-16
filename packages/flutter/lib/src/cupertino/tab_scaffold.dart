@@ -10,9 +10,9 @@ import 'theme.dart';
 ///
 class CupertinoTabController extends ValueNotifier<int> {
   /// Creates an object that manages the state required by a [CupertinoTabBar] and a [CupertinoTabScaffold].
-  CupertinoTabController({ int initialIndex = 0 }):
-  assert(initialIndex >= 0),
-  super(initialIndex);
+  CupertinoTabController({ int selectedIndex = 0 }):
+  assert(selectedIndex >= 0),
+  super(selectedIndex);
 
   /// The index of the current selected tab.
   ///

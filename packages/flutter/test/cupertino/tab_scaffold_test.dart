@@ -22,6 +22,7 @@ void main() {
       CupertinoApp(
         home: CupertinoTabScaffold(
           tabBar: _buildTabBar(),
+          controller: CupertinoTabController(),
           tabBuilder: (BuildContext context, int index) {
             return CustomPaint(
               child: Text('Page ${index + 1}'),
@@ -76,6 +77,7 @@ void main() {
       CupertinoApp(
         home: CupertinoTabScaffold(
           tabBar: _buildTabBar(),
+          controller: CupertinoTabController(),
           tabBuilder: (BuildContext context, int index) {
             tabsBuilt.add(index);
             return Text('Page ${index + 1}');
@@ -112,6 +114,7 @@ void main() {
       CupertinoApp(
         home: CupertinoTabScaffold(
           tabBar: _buildTabBar(),
+          controller: CupertinoTabController(),
           tabBuilder: (BuildContext context, int index) {
             return CupertinoTextField(
               focusNode: focusNodes[index],
@@ -146,6 +149,7 @@ void main() {
       CupertinoApp(
         home: CupertinoTabScaffold(
           tabBar: _buildTabBar(),
+          controller: CupertinoTabController(),
           tabBuilder: (BuildContext context, int index) {
             return Column(
               children: <Widget>[
@@ -204,6 +208,7 @@ void main() {
       CupertinoApp(
         home: CupertinoTabScaffold(
           tabBar: _buildTabBar(),
+          controller: CupertinoTabController(),
           tabBuilder: (BuildContext context, int index) {
             return CustomPaint(
               child: Text('Page ${index + 1}'),
@@ -222,6 +227,7 @@ void main() {
       CupertinoApp(
         home: CupertinoTabScaffold(
           tabBar: _buildTabBar(selectedTab: 1), // Programmatically change the tab now.
+          controller: CupertinoTabController(selectedIndex: 1),
           tabBuilder: (BuildContext context, int index) {
             return CustomPaint(
               child: Text('Page ${index + 1}'),
@@ -247,10 +253,12 @@ void main() {
   });
 
   testWidgets('Tab bar respects themes', (WidgetTester tester) async {
+      final CupertinoTabController controller = CupertinoTabController();
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoTabScaffold(
           tabBar: _buildTabBar(),
+          controller: controller,
           tabBuilder: (BuildContext context, int index) {
             return const Placeholder();
           },
@@ -276,7 +284,8 @@ void main() {
           primaryColor: CupertinoColors.destructiveRed,
         ),
         home: CupertinoTabScaffold(
-          tabBar: _buildTabBar(),
+          tabBar: _buildTabBar(selectedTab: controller.currentIndex),
+          controller: controller,
           tabBuilder: (BuildContext context, int index) {
             return const Placeholder();
           },
@@ -315,6 +324,7 @@ void main() {
           ),
           child: CupertinoTabScaffold(
             tabBar: _buildTabBar(),
+            controller: CupertinoTabController(),
             tabBuilder: (BuildContext context, int index) {
               innerContext = context;
               return const Placeholder();
@@ -342,6 +352,7 @@ void main() {
           child: CupertinoTabScaffold(
             resizeToAvoidBottomInset: false,
             tabBar: _buildTabBar(),
+            controller: CupertinoTabController(),
             tabBuilder: (BuildContext context, int index) {
               innerContext = context;
               return const Placeholder();
@@ -368,6 +379,7 @@ void main() {
           ),
           child: CupertinoTabScaffold(
             tabBar: _buildTabBar(),
+            controller: CupertinoTabController(),
             tabBuilder: (BuildContext context, int index) {
               return CupertinoPageScaffold(
                 child: Builder(
@@ -404,6 +416,7 @@ void main() {
             items: List<BottomNavigationBarItem>.generate(4, tabGenerator),
             onTap: (int newTab) => selectedTabs.add(newTab),
           ),
+          controller: CupertinoTabController(),
           tabBuilder: (BuildContext context, int index) {
             tabsBuilt.add(index);
             return Text('Page ${index + 1}');
@@ -436,6 +449,7 @@ void main() {
             items: List<BottomNavigationBarItem>.generate(2, tabGenerator),
             onTap: (int newTab) => selectedTabs.add(newTab),
           ),
+          controller: CupertinoTabController(),
           tabBuilder: (BuildContext context, int index) {
             tabsBuilt.add(index);
             // Change the builder too.
@@ -474,6 +488,7 @@ void main() {
         child: CupertinoApp(
           home: CupertinoTabScaffold(
             tabBar: _buildTabBar(),
+            controller: CupertinoTabController(),
             tabBuilder: (BuildContext context, int index) {
               return const CupertinoTextField();
             },
@@ -493,6 +508,7 @@ void main() {
         ),
         child: CupertinoApp(
           home: CupertinoTabScaffold(
+            controller: CupertinoTabController(),
             tabBar: _buildTabBar(),
             tabBuilder: (BuildContext context, int index) {
               return const CupertinoTextField();
