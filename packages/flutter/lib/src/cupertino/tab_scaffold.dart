@@ -9,7 +9,8 @@ import 'theme.dart';
 /// Coordinates tab selection between a [CupertinoTabBar] and a [CupertinoTabScaffold].
 ///
 /// The [currentIndex] property is the index of the selected tab, changing its value updates
-/// the current tab of the [CupertinoTabScaffold](s) the [CupertinoTabController] controls.
+/// the actively displayed tab of the [CupertinoTabScaffold] the [CupertinoTabController] controls,
+/// as well as the currently selected tab item of its [CupertinoTabBar].
 ///
 /// {@tool sample}
 ///
@@ -54,7 +55,8 @@ class CupertinoTabController extends ValueNotifier<int> {
   super(selectedIndex);
 
   /// The index of the current selected tab. Changing the value of [currentIndex]
-  /// updates the current tab of [CupertinoTabScaffold] the [CupertinoTabController] controls.
+  /// updates the actively displayed tab of the [CupertinoTabScaffold]
+  /// controlled by the [CupertinoTabController], as well as the currently selected tab item of its [CupertinoTabScaffold.tabBar].
   int get currentIndex => value;
   set currentIndex(int value) => this.value = value;
 }
@@ -163,13 +165,14 @@ class CupertinoTabScaffold extends StatefulWidget {
   /// that lets the user switch between different tabs in the main content area
   /// when present.
   ///
-  /// Setting and changing [CupertinoTabBar.currentIndex] programmatically will
-  /// change the currently selected tab item in the [tabBar] as well as change
-  /// the currently focused tab from the [tabBuilder].
+  /// The [CupertinoTabBar.currentIndex] property of [tabBar] is *overridden*
+  /// by the [CupertinoTabController.currentIndex] value in [controller],
+  /// and it does not affect the currently selected tab item in the [tabBar]
+  /// or the currently focused tab from the [tabBuilder] whatsoever.
 
   /// If [CupertinoTabBar.onTap] is provided, it will still be called.
   /// [CupertinoTabScaffold] automatically also listen to the
-  /// [CupertinoTabBar]'s `onTap` to change the [CupertinoTabBar]'s `currentIndex`
+  /// [CupertinoTabBar]'s `onTap` to change the [controller]'s `currentIndex`
   /// and change the actively displayed tab in [CupertinoTabScaffold]'s own
   /// main content area.
   ///
@@ -179,7 +182,8 @@ class CupertinoTabScaffold extends StatefulWidget {
   /// Must not be null.
   final CupertinoTabBar tabBar;
 
-  /// The selection state of the [tabBar].
+  /// Controls the current selected tab item of the [tabBar], as well as the
+  /// the currently focused tab from the [tabBuilder].
   final CupertinoTabController controller;
   /// An [IndexedWidgetBuilder] that's called when tabs become active.
   ///
