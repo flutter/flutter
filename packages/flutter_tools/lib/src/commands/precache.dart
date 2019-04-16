@@ -44,30 +44,15 @@ class PrecacheCommand extends FlutterCommand {
       cache.includeAllPlatforms = true;
     }
     final Set<DevelopmentArtifact> requiredArtifacts = <DevelopmentArtifact>{ DevelopmentArtifact.universal };
-    if (argResults['android']) {
-      requiredArtifacts.add(DevelopmentArtifact.android);
-    }
-    if (argResults['ios']) {
-      requiredArtifacts.add(DevelopmentArtifact.iOS);
-    }
-    if (!FlutterVersion.instance.isStable) {
-      if (argResults['web']) {
-        requiredArtifacts.add(DevelopmentArtifact.web);
+    for (DevelopmentArtifact artifact in DevelopmentArtifact.values) {
+      // Don't include unstable artifacts on stable branches.
+      if (FlutterVersion.instance.isStable && artifact.unstable) {
+        continue;
       }
-      if (argResults['linux']) {
-        requiredArtifacts.add(DevelopmentArtifact.linux);
-      }
-      if (argResults['windows']) {
-        requiredArtifacts.add(DevelopmentArtifact.windows);
-      }
-      if (argResults['macos']) {
-        requiredArtifacts.add(DevelopmentArtifact.macOS);
-      }
-      if (argResults['fuchsia']) {
-        requiredArtifacts.add(DevelopmentArtifact.fuchsia);
+      if (argResults[artifact.name]) {
+        requiredArtifacts.add(artifact);
       }
     }
-
     if (cache.isUpToDate()) {
       printStatus('Already up-to-date.');
     } else {

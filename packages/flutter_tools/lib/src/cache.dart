@@ -8,39 +8,60 @@ import 'package:meta/meta.dart';
 
 import 'base/context.dart';
 import 'base/file_system.dart';
-import 'base/io.dart' show HttpClient, HttpClientRequest, HttpClientResponse, HttpStatus, SocketException;
+import 'base/io.dart' show SocketException;
 import 'base/logger.dart';
 import 'base/net.dart';
 import 'base/os.dart';
 import 'base/platform.dart';
-import 'convert.dart';
 import 'globals.dart';
 
-/// A tag for a set of development artifacts that need to be cached.
-enum DevelopmentArtifact {
+class DevelopmentArtifact {
+
+  const DevelopmentArtifact._(this.name, {this.unstable = false});
+
+  /// The name of the artifact.
+  ///
+  /// This should match the flag name in precache.dart
+  final String name;
+
+  /// Whether this artifact is usable on stable branches.
+  final bool unstable;
+
   /// Artifacts required for Android development.
-  android,
+  static const DevelopmentArtifact android = DevelopmentArtifact._('android');
 
   /// Artifacts required for iOS development.
-  iOS,
+  static const DevelopmentArtifact iOS = DevelopmentArtifact._('ios');
 
   /// Artifacts required for web development,
-  web,
+  static const DevelopmentArtifact web = DevelopmentArtifact._('web', unstable: true);
 
   /// Artifacts required for desktop macOS.
-  macOS,
+  static const DevelopmentArtifact macOS = DevelopmentArtifact._('macos', unstable: true);
 
   /// Artifacts required for desktop Windows.
-  windows,
+  static const DevelopmentArtifact windows = DevelopmentArtifact._('windows', unstable: true);
 
   /// Artifacts required for desktop linux.
-  linux,
+  static const DevelopmentArtifact linux = DevelopmentArtifact._('linux', unstable: true);
 
   /// Artifacts required for Fuchsia.
-  fuchsia,
+  static const DevelopmentArtifact fuchsia = DevelopmentArtifact._('fuchsia', unstable: true);
 
   /// Artifacts required by all developments.
-  universal,
+  static const DevelopmentArtifact universal = DevelopmentArtifact._('universal');
+
+  /// THe vaulues of DevelopmentArtifacts.
+  static final List<DevelopmentArtifact> values = <DevelopmentArtifact>[
+    android,
+    iOS,
+    web,
+    macOS,
+    windows,
+    linux,
+    fuchsia,
+    universal,
+  ];
 }
 
 /// A wrapper around the `bin/cache/` directory.
