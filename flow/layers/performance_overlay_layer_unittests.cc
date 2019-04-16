@@ -48,7 +48,7 @@ TEST(PerformanceOverlayLayer, Gold) {
   flow::TextureRegistry unused_texture_registry;
 
   flow::Layer::PaintContext paintContext = {
-      nullptr,        surface->getCanvas(),    nullptr, mock_stopwatch,
+      nullptr,        surface->getCanvas(),    nullptr, nullptr, mock_stopwatch,
       mock_stopwatch, unused_texture_registry, nullptr, false};
 
   // Specify font file to ensure the same font across different operation

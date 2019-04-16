@@ -27,7 +27,10 @@ class EmbedderExternalTextureGL : public flow::Texture {
   sk_sp<SkImage> last_image_;
 
   // |flow::Texture|
-  void Paint(SkCanvas& canvas, const SkRect& bounds, bool freeze) override;
+  void Paint(SkCanvas& canvas,
+             const SkRect& bounds,
+             bool freeze,
+             GrContext* context) override;
 
   // |flow::Texture|
   void OnGrContextCreated() override;

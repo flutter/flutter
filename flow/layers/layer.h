@@ -80,6 +80,7 @@ class Layer {
     // layers.
     SkCanvas* internal_nodes_canvas;
     SkCanvas* leaf_nodes_canvas;
+    GrContext* gr_context;
     ExternalViewEmbedder* view_embedder;
     const Stopwatch& frame_time;
     const Stopwatch& engine_time;

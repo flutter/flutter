@@ -32,7 +32,8 @@ void AndroidExternalTextureGL::MarkNewFrameAvailable() {
 
 void AndroidExternalTextureGL::Paint(SkCanvas& canvas,
                                      const SkRect& bounds,
-                                     bool freeze) {
+                                     bool freeze,
+                                     GrContext* context) {
   if (state_ == AttachmentState::detached) {
     return;
   }
