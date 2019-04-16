@@ -335,11 +335,12 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
   void initState() {
     super.initState();
     if (widget._allowOnlyOnePanelOpen) {
-      assert(_allIdentifiersUnique(), 'All object identifiers are not unique!');
-      for (ExpansionPanelRadio child in widget.children) {
-        if (widget.initialOpenPanelValue != null &&
-            child.value == widget.initialOpenPanelValue)
-          _currentOpenPanel = child;
+      assert(_allIdentifiersUnique(), 'All ExpansionPanelRadio identifier values are not unique.');
+      if (widget.initialOpenPanelValue != null) {
+        for (ExpansionPanelRadio child in widget.children) {
+          if (child.value == widget.initialOpenPanelValue)
+            _currentOpenPanel = child;
+        }
       }
     }
   }
@@ -347,14 +348,13 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
   @override
   void didUpdateWidget(ExpansionPanelList oldWidget) {
     super.didUpdateWidget(oldWidget);
+    print('widget was updated');
     if (widget._allowOnlyOnePanelOpen) {
-      assert(_allIdentifiersUnique(), 'All object identifiers are not unique!');
-      for (ExpansionPanelRadio newChild in widget.children) {
-        if (widget.initialOpenPanelValue != null &&
-            newChild.value == widget.initialOpenPanelValue)
-          _currentOpenPanel = newChild;
-      }
+      assert(_allIdentifiersUnique(), 'All ExpansionPanelRadio identifier values are not unique.');
+
+      // TODO (shihaohong): figure out what cases could occur here
     } else if (oldWidget._allowOnlyOnePanelOpen) {
+      // TODO (shihaohong): ditto above
       _currentOpenPanel = null;
     }
   }
@@ -386,12 +386,16 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
         final ExpansionPanelRadio child = widget.children[childIndex];
         if (widget.expansionCallback != null &&
             childIndex != index &&
-            child.value == _currentOpenPanel?.value)
+            child.value == _currentOpenPanel?.value) {
+          // TODO (shihaohong): figure out if this behavior is desirable or not for radio implementation
           widget.expansionCallback(childIndex, false);
+        }
       }
-      _currentOpenPanel = isExpanded ? null : pressedChild;
+
+      setState(() {
+        _currentOpenPanel = isExpanded ? null : pressedChild;
+      });
     }
-    setState(() { });
   }
 
   @override
