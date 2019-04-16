@@ -24,7 +24,7 @@ class DevelopmentArtifact {
   /// This should match the flag name in precache.dart
   final String name;
 
-  /// Whether this artifact is usable on stable branches.
+  /// Whether this artifact should not be usable on stable branches.
   final bool unstable;
 
   /// Artifacts required for Android development.
