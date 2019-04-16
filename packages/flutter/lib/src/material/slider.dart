@@ -450,63 +450,30 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     // colors come from the ThemeData.colorScheme. These colors, along with
     // the default shapes and text styles are aligned to the Material
     // Guidelines.
-//    sliderTheme = sliderTheme.copyWith(
-//      trackHeight: sliderTheme.trackHeight ?? _defaultTrackHeight,
-//      activeTrackColor: widget.activeColor ?? sliderTheme.activeTrackColor ?? theme.colorScheme.primary,
-//      inactiveTrackColor: widget.inactiveColor ?? sliderTheme.inactiveTrackColor ?? theme.colorScheme.primary.withOpacity(0.24),
-//      disabledActiveTrackColor: sliderTheme.disabledActiveTrackColor ?? theme.colorScheme.onSurface.withOpacity(0.32),
-//      disabledInactiveTrackColor: sliderTheme.disabledInactiveTrackColor ?? theme.colorScheme.onSurface.withOpacity(0.12),
-//      activeTickMarkColor: widget.inactiveColor ?? sliderTheme.activeTickMarkColor ?? theme.colorScheme.onPrimary.withOpacity(0.54),
-//      inactiveTickMarkColor: widget.activeColor ?? sliderTheme.inactiveTickMarkColor ?? theme.colorScheme.primary.withOpacity(0.54),
-//      disabledActiveTickMarkColor: sliderTheme.disabledActiveTickMarkColor ?? theme.colorScheme.onPrimary.withOpacity(0.12),
-//      disabledInactiveTickMarkColor: sliderTheme.disabledInactiveTickMarkColor ?? theme.colorScheme.onSurface.withOpacity(0.12),
-//      thumbColor: widget.activeColor ?? sliderTheme.thumbColor ?? theme.colorScheme.primary,
-//      disabledThumbColor: sliderTheme.disabledThumbColor ?? theme.colorScheme.onSurface.withOpacity(0.38),
-//      overlayColor: widget.activeColor?.withOpacity(0.12) ?? sliderTheme.overlayColor ?? theme.colorScheme.primary.withOpacity(0.12),
-//      valueIndicatorColor: widget.activeColor ?? sliderTheme.valueIndicatorColor ?? theme.colorScheme.primary,
-//      trackShape: sliderTheme.trackShape ?? _defaultTrackShape,
-//      tickMarkShape: sliderTheme.tickMarkShape ?? _defaultTickMarkShape,
-//      thumbShape: sliderTheme.thumbShape ?? _defaultThumbShape,
-//      overlayShape: sliderTheme.overlayShape ?? _defaultOverlayShape,
-//      valueIndicatorShape: sliderTheme.valueIndicatorShape ?? _defaultValueIndicatorShape,
-//      showValueIndicator: sliderTheme.showValueIndicator ?? _defaultShowValueIndicator,
-//      valueIndicatorTextStyle: sliderTheme.valueIndicatorTextStyle ?? theme.textTheme.body2.copyWith(
-//        color: theme.colorScheme.onPrimary,
-//      ),
-//    );
-
     sliderTheme = sliderTheme.copyWith(
-      // Non-null widget properties override SliderTheme values.
-      activeTrackColor: widget.activeColor,
-      inactiveTrackColor: widget.inactiveColor,
-      activeTickMarkColor: widget.inactiveColor,
-      inactiveTickMarkColor: widget.activeColor,
-      thumbColor: widget.activeColor,
-      overlayColor: widget.activeColor?.withOpacity(0.12),
-      valueIndicatorColor: widget.activeColor,
-    ).merge(SliderThemeData(
-      // Default all of the remaining null SliderTheme properties.
-      trackHeight: _defaultTrackHeight,
-      activeTrackColor: theme.colorScheme.primary,
-      inactiveTrackColor: theme.colorScheme.primary.withOpacity(0.24),
-      disabledActiveTrackColor: theme.colorScheme.onSurface.withOpacity(0.32),
-      disabledInactiveTrackColor: theme.colorScheme.onSurface.withOpacity(0.12),
-      activeTickMarkColor: theme.colorScheme.onPrimary.withOpacity(0.54),
-      inactiveTickMarkColor: theme.colorScheme.primary.withOpacity(0.54),
-      disabledActiveTickMarkColor: theme.colorScheme.onPrimary.withOpacity(0.12),
-      disabledInactiveTickMarkColor: theme.colorScheme.onSurface.withOpacity(0.12),
-      thumbColor: theme.colorScheme.primary,
-      disabledThumbColor: theme.colorScheme.onSurface.withOpacity(0.38),
-      overlayColor: theme.colorScheme.primary.withOpacity(0.12),
-      valueIndicatorColor: theme.colorScheme.primary,
-      trackShape: _defaultTrackShape,
-      tickMarkShape: _defaultTickMarkShape,
-      thumbShape: _defaultThumbShape,
-      overlayShape: _defaultOverlayShape,
-      valueIndicatorShape: _defaultValueIndicatorShape,
-      showValueIndicator:_defaultShowValueIndicator,
-      valueIndicatorTextStyle: theme.textTheme.body2.copyWith(color: theme.colorScheme.onPrimary),
-    ));
+      trackHeight: sliderTheme.trackHeight ?? _defaultTrackHeight,
+      activeTrackColor: widget.activeColor ?? sliderTheme.activeTrackColor ?? theme.colorScheme.primary,
+      inactiveTrackColor: widget.inactiveColor ?? sliderTheme.inactiveTrackColor ?? theme.colorScheme.primary.withOpacity(0.24),
+      disabledActiveTrackColor: sliderTheme.disabledActiveTrackColor ?? theme.colorScheme.onSurface.withOpacity(0.32),
+      disabledInactiveTrackColor: sliderTheme.disabledInactiveTrackColor ?? theme.colorScheme.onSurface.withOpacity(0.12),
+      activeTickMarkColor: widget.inactiveColor ?? sliderTheme.activeTickMarkColor ?? theme.colorScheme.onPrimary.withOpacity(0.54),
+      inactiveTickMarkColor: widget.activeColor ?? sliderTheme.inactiveTickMarkColor ?? theme.colorScheme.primary.withOpacity(0.54),
+      disabledActiveTickMarkColor: sliderTheme.disabledActiveTickMarkColor ?? theme.colorScheme.onPrimary.withOpacity(0.12),
+      disabledInactiveTickMarkColor: sliderTheme.disabledInactiveTickMarkColor ?? theme.colorScheme.onSurface.withOpacity(0.12),
+      thumbColor: widget.activeColor ?? sliderTheme.thumbColor ?? theme.colorScheme.primary,
+      disabledThumbColor: sliderTheme.disabledThumbColor ?? theme.colorScheme.onSurface.withOpacity(0.38),
+      overlayColor: widget.activeColor?.withOpacity(0.12) ?? sliderTheme.overlayColor ?? theme.colorScheme.primary.withOpacity(0.12),
+      valueIndicatorColor: widget.activeColor ?? sliderTheme.valueIndicatorColor ?? theme.colorScheme.primary,
+      trackShape: sliderTheme.trackShape ?? _defaultTrackShape,
+      tickMarkShape: sliderTheme.tickMarkShape ?? _defaultTickMarkShape,
+      thumbShape: sliderTheme.thumbShape ?? _defaultThumbShape,
+      overlayShape: sliderTheme.overlayShape ?? _defaultOverlayShape,
+      valueIndicatorShape: sliderTheme.valueIndicatorShape ?? _defaultValueIndicatorShape,
+      showValueIndicator: sliderTheme.showValueIndicator ?? _defaultShowValueIndicator,
+      valueIndicatorTextStyle: sliderTheme.valueIndicatorTextStyle ?? theme.textTheme.body2.copyWith(
+        color: theme.colorScheme.onPrimary,
+      ),
+    );
 
     return _SliderRenderObjectWidget(
       value: _unlerp(widget.value),
