@@ -15,6 +15,7 @@ import 'base/os.dart';
 import 'base/platform.dart';
 import 'globals.dart';
 
+/// A tag for a set of development artifacts that need to be cached.
 class DevelopmentArtifact {
 
   const DevelopmentArtifact._(this.name, {this.unstable = false});
@@ -51,7 +52,7 @@ class DevelopmentArtifact {
   /// Artifacts required by all developments.
   static const DevelopmentArtifact universal = DevelopmentArtifact._('universal');
 
-  /// THe vaulues of DevelopmentArtifacts.
+  /// The vaulues of DevelopmentArtifacts.
   static final List<DevelopmentArtifact> values = <DevelopmentArtifact>[
     android,
     iOS,
