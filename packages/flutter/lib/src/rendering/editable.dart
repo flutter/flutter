@@ -1476,6 +1476,13 @@ class RenderEditable extends RenderBox {
     _textLayoutLastWidth = constraintWidth;
   }
 
+  // TODO(garyq): This is no longer producing the highest-fidelity caret
+  // heights for Android, especially when non-alphabetic languages
+  // are involved. The current implementation overrides the height set
+  // here with the full measured height of the text on Android which looks
+  // superior (subjectively and in terms of fidelity). We should rework
+  // this properly to once again match the platform.
+  //
   /// On iOS, the cursor is taller than the the cursor on Android. The height
   /// of the cursor for iOS is approximate and obtained through an eyeball
   /// comparison.
@@ -1520,16 +1527,27 @@ class RenderEditable extends RenderBox {
 
   void _paintCaret(Canvas canvas, Offset effectiveOffset, TextPosition textPosition) {
     assert(_textLayoutLastWidth == constraints.maxWidth);
-    final Offset caretOffset = _textPainter.getOffsetForCaret(textPosition, _caretPrototype);
 
     // If the floating cursor is enabled, the text cursor's color is [backgroundCursorColor] while
     // the floating cursor's color is _cursorColor;
     final Paint paint = Paint()
       ..color = _floatingCursorOn ? backgroundCursorColor : _cursorColor;
 
-    Rect caretRect = _caretPrototype.shift(caretOffset + effectiveOffset);
+    Rect caretRect = _caretPrototype.shift(_textPainter.getOffsetForCaret(textPosition, _caretPrototype) + effectiveOffset);
     if (_cursorOffset != null)
       caretRect = caretRect.shift(_cursorOffset);
+
+    // Override the height to take the full height of the glyph at the TextPosition
+    // when not on iOS. iOS has special handling that creates a taller caret.
+    // TODO(garyq): See the TODO for _getCaretPrototype.
+    if (defaultTargetPlatform != TargetPlatform.iOS && _textPainter.getFullHeightForCaret(textPosition, _caretPrototype) != null) {
+      caretRect = Rect.fromLTRB(
+        caretRect.left,
+        (caretRect.bottom + caretRect.top) / 2 - (_textPainter.getFullHeightForCaret(textPosition, _caretPrototype) / 2),
+        caretRect.right,
+        (caretRect.bottom + caretRect.top) / 2 + (_textPainter.getFullHeightForCaret(textPosition, _caretPrototype) / 2),
+      );
+    }
 
     caretRect = caretRect.shift(_getPixelPerfectCursorOffset(caretRect));
 
