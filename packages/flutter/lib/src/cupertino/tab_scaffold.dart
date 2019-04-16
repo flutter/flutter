@@ -6,6 +6,21 @@ import 'package:flutter/widgets.dart';
 import 'bottom_tab_bar.dart';
 import 'theme.dart';
 
+/// Coordinates tab selection between a [CupertinoTabBar] and a [CupertinoTabScaffold].
+///
+class CupertinoTabController extends ValueNotifier<int> {
+  /// Creates an object that manages the state required by a [CupertinoTabBar] and a [CupertinoTabScaffold].
+  CupertinoTabController({ int initialIndex = 0 }):
+  assert(initialIndex >= 0),
+  super(initialIndex);
+
+  /// The index of the current selected tab.
+  ///
+  /// [currentIndex] is an alias for [value].
+  int get currentIndex => value;
+  set currentIndex(int value) => this.value = value;
+}
+
 /// Implements a tabbed iOS application's root layout and behavior structure.
 ///
 /// The scaffold lays out the tab bar at the bottom and the content between or
@@ -93,6 +108,7 @@ class CupertinoTabScaffold extends StatefulWidget {
   const CupertinoTabScaffold({
     Key key,
     @required this.tabBar,
+    @required this.controller,
     @required this.tabBuilder,
     this.backgroundColor,
     this.resizeToAvoidBottomInset = true,
@@ -120,6 +136,7 @@ class CupertinoTabScaffold extends StatefulWidget {
   /// Must not be null.
   final CupertinoTabBar tabBar;
 
+  final CupertinoTabController controller;
   /// An [IndexedWidgetBuilder] that's called when tabs become active.
   ///
   /// The widgets built by [IndexedWidgetBuilder] is typically a [CupertinoTabView]
@@ -156,29 +173,53 @@ class CupertinoTabScaffold extends StatefulWidget {
 }
 
 class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
-  int _currentPage;
+  CupertinoTabController _controller;
 
   @override
   void initState() {
     super.initState();
-    _currentPage = widget.tabBar.currentIndex;
+    _updateTabController();
   }
+
+  void _updateTabController() {
+    final CupertinoTabController newController = widget.controller;
+    assert(() {
+        if (newController == null) {
+          throw FlutterError(
+            'No CupertinoTabController for ${widget.runtimeType}.\n'
+            'When creating a ${widget.runtimeType}, you must provide a '
+            'CupertinoTabController using the "controller" property'
+          );
+        }
+        return true;
+      }());
+
+    assert(() {
+        if (newController.currentIndex >= widget.tabBar.items.length) {
+          throw FlutterError(
+            'current index ${newController.currentIndex} out of bounds.'
+            'The total number of tabs is {widget.tabBar.items.length} '
+          );
+        }
+        return true;
+      }());
+
+    if (newController == _controller) {
+      return;
+    }
+
+    _controller?.removeListener(_onCurrentIndexChange);
+    newController?.addListener(_onCurrentIndexChange);
+    _controller = newController;
+  }
+
+  void _onCurrentIndexChange() => setState(() {});
 
   @override
   void didUpdateWidget(CupertinoTabScaffold oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (_currentPage >= widget.tabBar.items.length) {
-      // Clip down to an acceptable range.
-      _currentPage = widget.tabBar.items.length - 1;
-      // Sanity check, since CupertinoTabBar.items's minimum length is 2.
-      assert(
-        _currentPage >= 0,
-        'CupertinoTabBar is expected to keep at least 2 tabs after updating',
-      );
-    }
-    // The user can still specify an exact desired index.
-    if (widget.tabBar.currentIndex != oldWidget.tabBar.currentIndex) {
-      _currentPage = widget.tabBar.currentIndex;
+    if (widget.controller != oldWidget.controller) {
+      _updateTabController();
     }
   }
 
@@ -190,7 +231,7 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
     MediaQueryData newMediaQuery = MediaQuery.of(context);
 
     Widget content = _TabSwitchingView(
-      currentTabIndex: _currentPage,
+      currentTabIndex: _controller.currentIndex,
       tabNumber: widget.tabBar.items.length,
       tabBuilder: widget.tabBuilder,
     );
@@ -245,11 +286,9 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
         // our own listener to update the _currentPage on top of a possibly user
         // provided callback.
         child: widget.tabBar.copyWith(
-          currentIndex: _currentPage,
+          currentIndex: _controller.currentIndex,
           onTap: (int newIndex) {
-            setState(() {
-              _currentPage = newIndex;
-            });
+            _controller.currentIndex = newIndex;
             // Chain the user's original callback.
             if (widget.tabBar.onTap != null)
               widget.tabBar.onTap(newIndex);
@@ -266,6 +305,12 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
         children: stacked,
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    widget.controller?.removeListener(_onCurrentIndexChange);
+    super.dispose();
   }
 }
 
