@@ -280,10 +280,11 @@ Matcher coversSameAreaAs(Path expectedPath, { @required Rect areaToCompare, int 
 /// await expectLater(imageFuture, matchesGoldenFile('save.png'));
 /// ```
 ///
+/// Golden image files can be created by running `flutter test --update-goldens`
+/// on the test.
+///
 /// See also:
 ///
-///  * [Writing a golden file test](https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package:flutter),
-///    which shows how to create golden image files to test against.
 ///  * [goldenFileComparator], which acts as the backend for this matcher.
 ///  * [matchesReferenceImage], which should be used instead if you want to
 ///    verify that two different code paths create identical images.
