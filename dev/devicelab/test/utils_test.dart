@@ -17,23 +17,20 @@ void main() {
     });
   });
 
-  group('parse service information', () {
-    test('parse service uri', () {
-      final String badOutput = 'No uri here';
-      final String sampleOutput = 'An Observatory debugger and profiler on '
-        'Pixel 3 XL is available at: http://127.0.0.1:9090/LpjUpsdEjqI=/';
-      expect(parseServiceUri(sampleOutput),
+  group('parse service', () {
+    final String badOutput = 'No uri here';
+    final String sampleOutput = 'An Observatory debugger and profiler on '
+      'Pixel 3 XL is available at: http://127.0.0.1:9090/LpjUpsdEjqI=/';
+
+    test('uri', () {
+        expect(parseServiceUri(sampleOutput),
           Uri.parse('http://127.0.0.1:9090/LpjUpsdEjqI=/'));
       expect(parseServiceUri(badOutput), null);
     });
 
-    test('parse service port', () {
-      final String badOutput = 'No uri here';
-      final String sampleOutput = 'An Observatory debugger and profiler on '
-        'Pixel 3 XL is available at: http://127.0.0.1:9090/LpjUpsdEjqI=/';
+    test('port', () {
       expect(parseServicePort(sampleOutput), 9090);
       expect(parseServicePort(badOutput), null);
     });
-
   });
 }
