@@ -2048,6 +2048,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
     bool hideOwner = true;
     if (_dirty) {
       final bool inDirtyNodes = owner != null && owner._dirtyNodes.contains(this);

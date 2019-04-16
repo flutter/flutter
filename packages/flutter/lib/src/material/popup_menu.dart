@@ -712,13 +712,14 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
 ///    semantics.
 Future<T> showMenu<T>({
   @required BuildContext context,
-  RelativeRect position,
+  @required RelativeRect position,
   @required List<PopupMenuEntry<T>> items,
   T initialValue,
   double elevation = 8.0,
   String semanticLabel,
 }) {
   assert(context != null);
+  assert(position != null);
   assert(items != null && items.isNotEmpty);
   assert(debugCheckHasMaterialLocalizations(context));
   String label = semanticLabel;

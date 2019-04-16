@@ -18,6 +18,7 @@ import 'package:flutter_tools/src/dart/package_map.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/disabled_usage.dart';
 import 'package:flutter_tools/src/globals.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/test/coverage_collector.dart';
 import 'package:flutter_tools/src/test/runner.dart';
 import 'package:flutter_tools/src/usage.dart';
@@ -99,8 +100,7 @@ Future<void> run(List<String> args) async {
         fs.link(artifacts.getArtifactPath(Artifact.flutterTester));
     testerDestLink.parent.createSync(recursive: true);
     testerDestLink.createSync(fs.path.absolute(shellPath));
-    final Link icudtlLink = testerDestLink.parent.childLink('icudtl.dat');
-    icudtlLink.createSync(fs.path.absolute(argResults[_kOptionIcudtl]));
+
     final Directory sdkRootDest =
         fs.directory(artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath));
     sdkRootDest.createSync(recursive: true);
@@ -116,7 +116,10 @@ Future<void> run(List<String> args) async {
     Directory testDirectory;
     CoverageCollector collector;
     if (argResults['coverage']) {
-      collector = CoverageCollector();
+      collector = CoverageCollector(
+        flutterProject: await FlutterProject.current(),
+        coverageDirectory: coverageDirectory,
+      );
       if (!argResults.options.contains(_kOptionTestDirectory)) {
         throwToolExit('Use of --coverage requires setting --test-directory');
       }
@@ -141,6 +144,8 @@ Future<void> run(List<String> args) async {
       enableObservatory: collector != null,
       precompiledDillFiles: tests,
       concurrency: math.max(1, platform.numberOfProcessors - 2),
+      icudtlPath: fs.path.absolute(argResults[_kOptionIcudtl]),
+      coverageDirectory: coverageDirectory,
     );
 
     if (collector != null) {

@@ -184,6 +184,51 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('recognizers split semantic nodes with text span labels', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    const TextStyle textStyle = TextStyle(fontFamily: 'Ahem');
+    await tester.pumpWidget(
+      Text.rich(
+        TextSpan(
+          children: <TextSpan>[
+            const TextSpan(text: 'hello '),
+            TextSpan(text: 'world', recognizer: TapGestureRecognizer()..onTap = () { }),
+            const TextSpan(text: ' this is a '),
+            const TextSpan(text: 'cat-astrophe', semanticsLabel: 'regrettable event'),
+          ],
+          style: textStyle,
+        ),
+        textDirection: TextDirection.ltr,
+      ),
+    );
+    final TestSemantics expectedSemantics = TestSemantics.root(
+      children: <TestSemantics>[
+        TestSemantics.rootChild(
+          children: <TestSemantics>[
+            TestSemantics(
+              label: 'hello ',
+              textDirection: TextDirection.ltr,
+            ),
+            TestSemantics(
+              label: 'world',
+              textDirection: TextDirection.ltr,
+              actions: <SemanticsAction>[
+                SemanticsAction.tap,
+              ],
+            ),
+            TestSemantics(
+              label: ' regrettable event',
+              textDirection: TextDirection.ltr,
+            ),
+          ],
+        ),
+      ],
+    );
+    expect(semantics, hasSemantics(expectedSemantics, ignoreTransform: true, ignoreId: true, ignoreRect: true));
+    semantics.dispose();
+  });
+
+
   testWidgets('recognizers split semantic node - bidi', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     const TextStyle textStyle = TextStyle(fontFamily: 'Ahem');

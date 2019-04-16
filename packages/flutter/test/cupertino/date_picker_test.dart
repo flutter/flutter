@@ -1,6 +1,8 @@
 // Copyright 2017 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
+import 'dart:io' show Platform;
 import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
@@ -262,6 +264,31 @@ void main() {
         onDateTimeChanged: (_) { },
       );
       expect(picker.initialDateTime, isNotNull);
+    });
+
+    testWidgets('initial date honors minuteInterval', (WidgetTester tester) async {
+        DateTime newDateTime;
+        await tester.pumpWidget(
+          CupertinoApp(
+            home: SizedBox(
+              width: 400,
+              height: 400,
+              child: CupertinoDatePicker(
+                onDateTimeChanged: (DateTime d) => newDateTime = d,
+                initialDateTime: DateTime(2018, 10, 10, 10, 3),
+                minuteInterval: 3,
+              )
+            )
+          )
+        );
+
+        // Drag the minute picker to the next slot (03 -> 06).
+        // The `initialDateTime` and the `minuteInterval` values are specifically choosen
+        // so that `find.text` finds exactly one widget.
+        await tester.drag(find.text('03'), _kRowOffset);
+        await tester.pump();
+
+        expect(newDateTime.minute, 6);
     });
 
     testWidgets('changing initialDateTime after first build does not do anything', (WidgetTester tester) async {
@@ -810,6 +837,37 @@ void main() {
     ));
     expect(lastSelectedItem, 1);
     handle.dispose();
+  });
+
+  testWidgets('DatePicker golden tests', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: SizedBox(
+            width: 200,
+            child: CupertinoDatePicker(
+              mode: CupertinoDatePickerMode.dateAndTime,
+              initialDateTime: DateTime(2019, 1, 1, 4),
+              onDateTimeChanged: (_) {},
+            )
+          )
+        )
+      );
+
+      await expectLater(
+        find.byType(CupertinoDatePicker),
+        matchesGoldenFile('date_picker_test.datetime.initial.png'),
+        skip: !Platform.isLinux
+      );
+
+      // Slightly drag the hour component to make the current hour off-center.
+      await tester.drag(find.text('4'), Offset(0, _kRowOffset.dy / 2));
+      await tester.pump();
+
+      await expectLater(
+        find.byType(CupertinoDatePicker),
+        matchesGoldenFile('date_picker_test.datetime.drag.png'),
+        skip: !Platform.isLinux
+      );
   });
 }
 

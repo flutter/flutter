@@ -311,8 +311,12 @@ class RenderUiKitView extends RenderBox {
   UiKitViewController _viewController;
   set viewController(UiKitViewController viewController) {
     assert(viewController != null);
+    final bool needsSemanticsUpdate = _viewController.id != viewController.id;
     _viewController = viewController;
     markNeedsPaint();
+    if (needsSemanticsUpdate) {
+      markNeedsSemanticsUpdate();
+    }
   }
 
   /// How to behave during hit testing.
@@ -397,6 +401,13 @@ class RenderUiKitView extends RenderBox {
       _viewController.rejectGesture();
     }
     _lastPointerDownEvent = null;
+  }
+
+  @override
+  void describeSemanticsConfiguration (SemanticsConfiguration config) {
+    super.describeSemanticsConfiguration(config);
+    config.isSemanticBoundary = true;
+    config.platformViewId = _viewController.id;
   }
 
   @override
@@ -715,4 +726,3 @@ class _MotionEventsDispatcher {
   bool isSinglePointerAction(PointerEvent event) =>
       !(event is PointerDownEvent) && !(event is PointerUpEvent);
 }
-

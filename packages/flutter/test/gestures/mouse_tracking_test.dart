@@ -44,7 +44,13 @@ void main() {
       onHover: (PointerHoverEvent event) => move.add(event),
       onExit: (PointerExitEvent event) => exit.add(event),
     );
-    bool isInHitRegion;
+    // Only respond to some mouse events.
+    final MouseTrackerAnnotation partialAnnotation = MouseTrackerAnnotation(
+      onEnter: (PointerEnterEvent event) => enter.add(event),
+      onHover: (PointerHoverEvent event) => move.add(event),
+    );
+    bool isInHitRegionOne;
+    bool isInHitRegionTwo;
     MouseTracker tracker;
 
     void clear() {
@@ -55,10 +61,17 @@ void main() {
 
     setUp(() {
       clear();
-      isInHitRegion = true;
+      isInHitRegionOne = true;
+      isInHitRegionTwo = false;
       tracker = MouseTracker(
         GestureBinding.instance.pointerRouter,
-        (Offset _) => isInHitRegion ? annotation : null,
+        (Offset _) {
+          if (isInHitRegionOne)
+            return annotation;
+          else if (isInHitRegionTwo)
+            return partialAnnotation;
+          return null;
+        },
       );
     });
 
@@ -103,7 +116,7 @@ void main() {
         ),
       ]);
       tracker.attachAnnotation(annotation);
-      isInHitRegion = true;
+      isInHitRegionOne = true;
       ui.window.onPointerDataPacket(packet1);
       tracker.collectMousePositions();
       expect(enter.length, equals(1), reason: 'enter contains $enter');
@@ -189,7 +202,7 @@ void main() {
           kind: PointerDeviceKind.mouse,
         ),
       ]);
-      isInHitRegion = true;
+      isInHitRegionOne = true;
       tracker.attachAnnotation(annotation);
 
       ui.window.onPointerDataPacket(packet1);
@@ -205,7 +218,7 @@ void main() {
       expect(exit.length, equals(0), reason: 'exit contains $exit');
       // Simulate layer going away by detaching it.
       clear();
-      isInHitRegion = false;
+      isInHitRegionOne = false;
 
       ui.window.onPointerDataPacket(packet2);
       tracker.collectMousePositions();
@@ -215,6 +228,37 @@ void main() {
       expect(exit.first.position, const Offset(1.0, 201.0));
       expect(exit.first.device, equals(0));
       expect(exit.first.runtimeType, equals(PointerExitEvent));
+
+      // Actually detatch annotation. Shouldn't receive hit.
+      tracker.detachAnnotation(annotation);
+      clear();
+      isInHitRegionOne = false;
+
+      ui.window.onPointerDataPacket(packet2);
+      tracker.collectMousePositions();
+      expect(enter.length, equals(0), reason: 'enter contains $enter');
+      expect(move.length, equals(0), reason: 'enter contains $move');
+      expect(exit.length, equals(0), reason: 'enter contains $exit');
+    });
+
+    test("don't flip out if not all mouse events are listened to", () {
+      final ui.PointerDataPacket packet = ui.PointerDataPacket(data: <ui.PointerData>[
+        ui.PointerData(
+          change: ui.PointerChange.hover,
+          physicalX: 1.0 * ui.window.devicePixelRatio,
+          physicalY: 101.0 * ui.window.devicePixelRatio,
+          kind: PointerDeviceKind.mouse,
+        ),
+      ]);
+
+      isInHitRegionOne = false;
+      isInHitRegionTwo = true;
+      tracker.attachAnnotation(partialAnnotation);
+
+      ui.window.onPointerDataPacket(packet);
+      tracker.collectMousePositions();
+      tracker.detachAnnotation(partialAnnotation);
+      isInHitRegionTwo = false;
     });
     test('detects exit when mouse goes away', () {
       final ui.PointerDataPacket packet1 = ui.PointerDataPacket(data: <ui.PointerData>[
@@ -237,7 +281,7 @@ void main() {
           kind: PointerDeviceKind.mouse,
         ),
       ]);
-      isInHitRegion = true;
+      isInHitRegionOne = true;
       tracker.attachAnnotation(annotation);
       ui.window.onPointerDataPacket(packet1);
       tracker.collectMousePositions();
@@ -255,6 +299,51 @@ void main() {
       expect(exit.first.position, isNull);
       expect(exit.first.device, isNull);
       expect(exit.first.runtimeType, equals(PointerExitEvent));
+    });
+    test('handles mouse down and move', () {
+      final ui.PointerDataPacket packet1 = ui.PointerDataPacket(data: <ui.PointerData>[
+        ui.PointerData(
+          change: ui.PointerChange.hover,
+          physicalX: 0.0 * ui.window.devicePixelRatio,
+          physicalY: 0.0 * ui.window.devicePixelRatio,
+          kind: PointerDeviceKind.mouse,
+        ),
+        ui.PointerData(
+          change: ui.PointerChange.hover,
+          physicalX: 1.0 * ui.window.devicePixelRatio,
+          physicalY: 101.0 * ui.window.devicePixelRatio,
+          kind: PointerDeviceKind.mouse,
+        ),
+      ]);
+      final ui.PointerDataPacket packet2 = ui.PointerDataPacket(data: <ui.PointerData>[
+        ui.PointerData(
+          change: ui.PointerChange.down,
+          physicalX: 1.0 * ui.window.devicePixelRatio,
+          physicalY: 101.0 * ui.window.devicePixelRatio,
+          kind: PointerDeviceKind.mouse,
+        ),
+        ui.PointerData(
+          change: ui.PointerChange.move,
+          physicalX: 1.0 * ui.window.devicePixelRatio,
+          physicalY: 201.0 * ui.window.devicePixelRatio,
+          kind: PointerDeviceKind.mouse,
+        ),
+      ]);
+      isInHitRegionOne = true;
+      tracker.attachAnnotation(annotation);
+      ui.window.onPointerDataPacket(packet1);
+      tracker.collectMousePositions();
+      ui.window.onPointerDataPacket(packet2);
+      tracker.collectMousePositions();
+      expect(enter.length, equals(1), reason: 'enter contains $enter');
+      expect(enter.first.position, equals(const Offset(1.0, 101.0)));
+      expect(enter.first.device, equals(0));
+      expect(enter.first.runtimeType, equals(PointerEnterEvent));
+      expect(move.length, equals(1), reason: 'move contains $move');
+      expect(move.first.position, equals(const Offset(1.0, 101.0)));
+      expect(move.first.device, equals(0));
+      expect(move.first.runtimeType, equals(PointerHoverEvent));
+      expect(exit.length, equals(0), reason: 'exit contains $exit');
     });
   });
 }

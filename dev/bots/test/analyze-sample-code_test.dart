@@ -17,14 +17,14 @@ void main() {
       ..removeWhere((String line) => line.startsWith('Analyzer output:'));
     expect(process.exitCode, isNot(equals(0)));
     expect(stderrLines, <String>[
-      'known_broken_documentation.dart:26:9: new Opacity(',
+      'known_broken_documentation.dart:30:9: new Opacity(',
       '>>> Unnecessary new keyword (unnecessary_new)',
-      'known_broken_documentation.dart:38:9: new Opacity(',
+      'known_broken_documentation.dart:42:9: new Opacity(',
       '>>> Unnecessary new keyword (unnecessary_new)',
       '',
       'Found 1 sample code errors.',
       '',
     ]);
-    expect(stdoutLines, <String>['Found 2 sample code sections.', 'Starting analysis of samples.', '']);
+    expect(stdoutLines, <String>['Found 7 sample code sections.', 'Starting analysis of samples.', '']);
   }, skip: Platform.isWindows);
 }

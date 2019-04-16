@@ -1756,7 +1756,7 @@ abstract class RenderBox extends RenderObject {
           '  $constraints\n'
           'The exact size it was given was:\n'
           '  $_size\n'
-          'See https://flutter.io/layout/ for more information.'
+          'See https://flutter.dev/layout/ for more information.'
         );
       }
       // verify that the size is within the constraints
