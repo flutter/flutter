@@ -7,13 +7,13 @@ without `flutter run`.
 
 With an application already running, a HotRunner can be attached to it
 with:
-```shell
+```
 $ flutter attach --debug-port 12345
 ```
 
 Alternatively, the attach command can start listening and scan for new
 programs that become active:
-```bash
+```
 $ flutter attach
 ```
 As soon as a new observatory is detected the command attaches to it and
