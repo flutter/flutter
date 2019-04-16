@@ -309,6 +309,7 @@ Future<String> eval(
   bool canFail =
       false, // as in, whether failures are ok. False means that they are fatal.
   String workingDirectory,
+  StringBuffer stderr, // if not null, the stderr will be written here
 }) async {
   final Process process = await startProcess(executable, arguments,
       environment: environment, workingDirectory: workingDirectory);
@@ -330,6 +331,7 @@ Future<String> eval(
       .transform<String>(const LineSplitter())
       .listen((String line) {
     print('stderr: $line');
+    stderr?.writeln(line);
   }, onDone: () {
     stderrDone.complete();
   });
@@ -362,10 +364,11 @@ Future<String> evalFlutter(
   bool canFail =
       false, // as in, whether failures are ok. False means that they are fatal.
   Map<String, String> environment,
+  StringBuffer stderr, // if not null, the stderr will be written here.
 }) {
   final List<String> args = <String>[command]..addAll(options);
   return eval(path.join(flutterDirectory.path, 'bin', 'flutter'), args,
-      canFail: canFail, environment: environment);
+      canFail: canFail, environment: environment, stderr: stderr);
 }
 
 String get dartBin =>

@@ -7,6 +7,7 @@ import 'dart:async';
 import '../cache.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
+import '../version.dart';
 
 class PrecacheCommand extends FlutterCommand {
   PrecacheCommand() {
@@ -18,6 +19,16 @@ class PrecacheCommand extends FlutterCommand {
         help: 'Precache artifacts for iOS developemnt');
     argParser.addFlag('web', negatable: true, defaultsTo: false,
         help: 'Precache artifacts for web development');
+    argParser.addFlag('linux', negatable: true, defaultsTo: false,
+        help: 'Precache artifacts for linux desktop development');
+    argParser.addFlag('windows', negatable: true, defaultsTo: false,
+        help: 'Precache artifacts for windows desktop development');
+    argParser.addFlag('macos', negatable: true, defaultsTo: false,
+        help: 'Precache artifacts for macOS desktop development');
+    argParser.addFlag('fuchsia', negatable: true, defaultsTo: false,
+        help: 'Precache artifacts for Fuchsia development');
+    argParser.addFlag('universal', negatable: true, defaultsTo: true,
+        help: 'Precache artifacts required for all developments');
   }
 
   @override
@@ -34,17 +45,16 @@ class PrecacheCommand extends FlutterCommand {
     if (argResults['all-platforms']) {
       cache.includeAllPlatforms = true;
     }
-    final Set<DevelopmentArtifact> requiredArtifacts = <DevelopmentArtifact>{ DevelopmentArtifact.universal };
-    if (argResults['android']) {
-      requiredArtifacts.add(DevelopmentArtifact.android);
+    final Set<DevelopmentArtifact> requiredArtifacts = <DevelopmentArtifact>{};
+    for (DevelopmentArtifact artifact in DevelopmentArtifact.values) {
+      // Don't include unstable artifacts on stable branches.
+      if (FlutterVersion.instance.isStable && artifact.unstable) {
+        continue;
+      }
+      if (argResults[artifact.name]) {
+        requiredArtifacts.add(artifact);
+      }
     }
-    if (argResults['ios']) {
-      requiredArtifacts.add(DevelopmentArtifact.iOS);
-    }
-    if (argResults['web']) {
-      requiredArtifacts.add(DevelopmentArtifact.web);
-    }
-
     if (cache.isUpToDate()) {
       printStatus('Already up-to-date.');
     } else {

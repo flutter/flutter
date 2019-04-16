@@ -20,7 +20,7 @@ import '../runner/flutter_command.dart';
 import '../tracing.dart';
 import 'daemon.dart';
 
-abstract class RunCommandBase extends FlutterCommand {
+abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
   // Used by run and drive commands.
   RunCommandBase({ bool verboseHelp = false }) {
     addBuildModeFlags(defaultToRelease: false, verboseHelp: verboseHelp);
@@ -64,6 +64,7 @@ abstract class RunCommandBase extends FlutterCommand {
   }
 
   bool get traceStartup => argResults['trace-startup'];
+
   String get route => argResults['route'];
 }
 
@@ -374,6 +375,7 @@ class RunCommand extends RunCommandBase {
         viewFilter: argResults['isolate-filter'],
         experimentalFlags: expFlags,
         target: argResults['target'],
+        buildMode: getBuildMode(),
       );
       flutterDevices.add(flutterDevice);
     }

@@ -1291,8 +1291,8 @@ class KeepAlive extends ParentDataWidget<SliverWithKeepAliveWidget> {
   }
 }
 
-// Return an ErrorWidget for the given Exception
-ErrorWidget _createErrorWidget(dynamic exception, StackTrace stackTrace) {
+// Return a Widget for the given Exception
+Widget _createErrorWidget(dynamic exception, StackTrace stackTrace) {
   final FlutterErrorDetails details = FlutterErrorDetails(
     exception: exception,
     stack: stackTrace,

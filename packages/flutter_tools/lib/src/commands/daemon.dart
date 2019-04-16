@@ -351,6 +351,7 @@ class AppDomain extends Domain {
       dillOutputPath: dillOutputPath,
       viewFilter: isolateFilter,
       target: target,
+      buildMode: options.buildInfo.mode,
     );
 
     ResidentRunner runner;
