@@ -23,7 +23,8 @@ final RegExp _settingExpr = RegExp(r'(\w+)\s*=\s*(.*)$');
 final RegExp _varExpr = RegExp(r'\$\(([^)]*)\)');
 
 String flutterFrameworkDir(BuildMode mode) {
-  return fs.path.normalize(fs.path.dirname(artifacts.getArtifactPath(Artifact.flutterFramework, TargetPlatform.ios, mode)));
+  return fs.path.normalize(fs.path.dirname(artifacts.getArtifactPath(
+      Artifact.flutterFramework, platform: TargetPlatform.ios, mode: mode)));
 }
 
 /// Writes or rewrites Xcode property files with the specified information.

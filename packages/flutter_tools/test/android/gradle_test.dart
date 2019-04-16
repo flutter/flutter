@@ -252,7 +252,8 @@ someOtherTask
       String expectedBuildName,
       String expectedBuildNumber,
     }) async {
-      when(mockArtifacts.getArtifactPath(Artifact.flutterFramework, TargetPlatform.android_arm, any)).thenReturn('engine');
+      when(mockArtifacts.getArtifactPath(Artifact.flutterFramework,
+          platform: TargetPlatform.android_arm, mode: anyNamed('mode'))).thenReturn('engine');
       when(mockArtifacts.engineOutPath).thenReturn(fs.path.join('out', 'android_arm'));
 
       final File manifestFile = fs.file('path/to/project/pubspec.yaml');
