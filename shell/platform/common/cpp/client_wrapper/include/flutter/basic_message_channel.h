@@ -34,8 +34,6 @@ class BasicMessageChannel {
  public:
   // Creates an instance that sends and receives method calls on the channel
   // named |name|, encoded with |codec| and dispatched via |messenger|.
-  //
-  // TODO: Make codec optional once the standard codec is supported (Issue #67).
   BasicMessageChannel(BinaryMessenger* messenger,
                       const std::string& name,
                       const MessageCodec<T>* codec)

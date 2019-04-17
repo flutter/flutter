@@ -26,10 +26,18 @@ class MessageCodec {
 
   // Returns the message encoded in |binary_message|, or nullptr if it cannot be
   // decoded by this codec.
-  // TODO: Consider adding absl as a dependency and using absl::Span.
   std::unique_ptr<T> DecodeMessage(const uint8_t* binary_message,
                                    const size_t message_size) const {
     return std::move(DecodeMessageInternal(binary_message, message_size));
+  }
+
+  // Returns the message encoded in |binary_message|, or nullptr if it cannot be
+  // decoded by this codec.
+  std::unique_ptr<T> DecodeMessage(
+      const std::vector<uint8_t>& binary_message) const {
+    size_t size = binary_message.size();
+    const uint8_t* data = size > 0 ? &binary_message[0] : nullptr;
+    return std::move(DecodeMessageInternal(data, size));
   }
 
   // Returns a binary encoding of the given |message|, or nullptr if the

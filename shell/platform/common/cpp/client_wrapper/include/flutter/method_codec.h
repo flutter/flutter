@@ -28,11 +28,19 @@ class MethodCodec {
 
   // Returns the MethodCall encoded in |message|, or nullptr if it cannot be
   // decoded.
-  // TODO: Consider adding absl as a dependency and using absl::Span.
   std::unique_ptr<MethodCall<T>> DecodeMethodCall(
       const uint8_t* message,
       const size_t message_size) const {
     return std::move(DecodeMethodCallInternal(message, message_size));
+  }
+
+  // Returns the MethodCall encoded in |message|, or nullptr if it cannot be
+  // decoded.
+  std::unique_ptr<MethodCall<T>> DecodeMethodCall(
+      const std::vector<uint8_t>& message) const {
+    size_t size = message.size();
+    const uint8_t* data = size > 0 ? &message[0] : nullptr;
+    return std::move(DecodeMethodCallInternal(data, size));
   }
 
   // Returns a binary encoding of the given |method_call|, or nullptr if the
