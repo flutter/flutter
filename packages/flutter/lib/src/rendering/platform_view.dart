@@ -389,8 +389,7 @@ class RenderUiKitView extends RenderBox {
     if (event is! PointerDownEvent) {
       return;
     }
-    final Offset localOffset = globalToLocal(event.position);
-    if (!(Offset.zero & size).contains(localOffset)) {
+    if (!(Offset.zero & size).contains(event.localPosition)) {
       return;
     }
     if (event != _lastPointerDownEvent) {
@@ -455,7 +454,7 @@ class _UiKitViewGestureRecognizer extends OneSequenceGestureRecognizer {
 
   @override
   void addAllowedPointer(PointerDownEvent event) {
-    startTrackingPointer(event.pointer);
+    startTrackingPointer(event.pointer, event.transform);
     for (OneSequenceGestureRecognizer recognizer in _gestureRecognizers) {
       recognizer.addPointer(event);
     }
@@ -528,7 +527,7 @@ class _AndroidViewGestureRecognizer extends OneSequenceGestureRecognizer {
 
   @override
   void addAllowedPointer(PointerDownEvent event) {
-    startTrackingPointer(event.pointer);
+    startTrackingPointer(event.pointer, event.transform);
     for (OneSequenceGestureRecognizer recognizer in _gestureRecognizers) {
       recognizer.addPointer(event);
     }

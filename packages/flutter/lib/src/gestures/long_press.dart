@@ -51,11 +51,17 @@ class LongPressStartDetails {
   /// Creates the details for a [GestureLongPressStartCallback].
   ///
   /// The [globalPosition] argument must not be null.
-  const LongPressStartDetails({ this.globalPosition = Offset.zero })
-    : assert(globalPosition != null);
+  const LongPressStartDetails({
+    this.globalPosition = Offset.zero,
+    Offset localPosition,
+  }) : assert(globalPosition != null),
+       localPosition = localPosition ?? globalPosition;
 
   /// The global position at which the pointer contacted the screen.
   final Offset globalPosition;
+
+  /// The local position at which the pointer contacted the screen.
+  final Offset localPosition;
 }
 
 /// Details for callbacks that use [GestureLongPressMoveUpdateCallback].
@@ -71,17 +77,29 @@ class LongPressMoveUpdateDetails {
   /// The [globalPosition] and [offsetFromOrigin] arguments must not be null.
   const LongPressMoveUpdateDetails({
     this.globalPosition = Offset.zero,
+    Offset localPosition,
     this.offsetFromOrigin = Offset.zero,
+    Offset localOffsetFromOrigin,
   }) : assert(globalPosition != null),
-       assert(offsetFromOrigin != null);
+       assert(offsetFromOrigin != null),
+       localPosition = localPosition ?? globalPosition,
+       localOffsetFromOrigin = localOffsetFromOrigin ?? offsetFromOrigin;
 
   /// The global position of the pointer when it triggered this update.
   final Offset globalPosition;
+
+  /// The local position of the pointer when it triggered this update.
+  final Offset localPosition;
 
   /// A delta offset from the point where the long press drag initially contacted
   /// the screen to the point where the pointer is currently located (the
   /// present [globalPosition]) when this callback is triggered.
   final Offset offsetFromOrigin;
+
+  /// A local delta offset from the point where the long press drag initially contacted
+  /// the screen to the point where the pointer is currently located (the
+  /// present [localPosition]) when this callback is triggered.
+  final Offset localOffsetFromOrigin;
 }
 
 /// Details for callbacks that use [GestureLongPressEndCallback].
@@ -95,11 +113,17 @@ class LongPressEndDetails {
   /// Creates the details for a [GestureLongPressEndCallback].
   ///
   /// The [globalPosition] argument must not be null.
-  const LongPressEndDetails({ this.globalPosition = Offset.zero })
-    : assert(globalPosition != null);
+  const LongPressEndDetails({
+    this.globalPosition = Offset.zero,
+    Offset localPosition,
+  }) : assert(globalPosition != null),
+       localPosition = localPosition ?? globalPosition;
 
   /// The global position at which the pointer lifted from the screen.
   final Offset globalPosition;
+
+  /// The local position at which the pointer contacted the screen.
+  final Offset localPosition;
 }
 
 /// Recognizes when the user has pressed down at the same location for a long
@@ -134,7 +158,7 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
 
   bool _longPressAccepted = false;
 
-  Offset _longPressOrigin;
+  CombinedOffset _longPressOrigin;
 
   /// Called when a long press gesture has been recognized.
   ///
@@ -180,7 +204,8 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
     if (onLongPressStart != null) {
       invokeCallback<void>('onLongPressStart', () {
         onLongPressStart(LongPressStartDetails(
-          globalPosition: _longPressOrigin,
+          globalPosition: _longPressOrigin.global,
+          localPosition: _longPressOrigin.local,
         ));
       });
     }
@@ -197,6 +222,7 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
           invokeCallback<void>('onLongPressEnd', () {
             onLongPressEnd(LongPressEndDetails(
               globalPosition: event.position,
+              localPosition: event.localPosition,
             ));
           });
         }
@@ -207,12 +233,14 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
     } else if (event is PointerDownEvent || event is PointerCancelEvent) {
       // The first touch.
       _longPressAccepted = false;
-      _longPressOrigin = event.position;
+      _longPressOrigin = CombinedOffset.fromEventPosition(event);
     } else if (event is PointerMoveEvent && _longPressAccepted && onLongPressMoveUpdate != null) {
       invokeCallback<void>('onLongPressMoveUpdate', () {
         onLongPressMoveUpdate(LongPressMoveUpdateDetails(
           globalPosition: event.position,
-          offsetFromOrigin: event.position - _longPressOrigin,
+          localPosition: event.localPosition,
+          offsetFromOrigin: event.position - _longPressOrigin.global,
+          localOffsetFromOrigin: event.localPosition - _longPressOrigin.local,
         ));
       });
     }

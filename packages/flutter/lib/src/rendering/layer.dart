@@ -8,6 +8,7 @@ import 'dart:ui' as ui show EngineLayer, Image, ImageFilter, PathMetric,
                             Picture, PictureRecorder, Scene, SceneBuilder;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/painting.dart';
 import 'package:vector_math/vector_math_64.dart';
 
@@ -1208,14 +1209,15 @@ class TransformLayer extends OffsetLayer {
   @override
   S find<S>(Offset regionOffset) {
     if (_inverseDirty) {
-      _invertedTransform = Matrix4.tryInvert(transform);
+      _invertedTransform = Matrix4.tryInvert(
+        PointerEvent.paintTransformToPointerEventTransform(transform)
+      );
       _inverseDirty = false;
     }
     if (_invertedTransform == null)
       return null;
-    final Vector4 vector = Vector4(regionOffset.dx, regionOffset.dy, 0.0, 1.0);
-    final Vector4 result = _invertedTransform.transform(vector);
-    return super.find<S>(Offset(result[0], result[1]));
+    final Offset transformed = MatrixUtils.transformPoint(_invertedTransform, regionOffset);
+    return super.find<S>(transformed);
   }
 
   @override
@@ -1940,7 +1942,7 @@ class AnnotatedRegionLayer<T> extends ContainerLayer {
       final S typedResult = untypedResult;
       return typedResult;
     }
-    return super.find<S>(regionOffset);
+    return null;
   }
 
   @override
