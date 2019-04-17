@@ -197,7 +197,45 @@ void main() {
     );
   });
 
-  testWidgets('Programmatic tab switching', (WidgetTester tester) async {
+  testWidgets('Programmatic tab switching by changing currentIndex of an existing controller', (WidgetTester tester) async {
+    final CupertinoTabController controller = CupertinoTabController(selectedIndex: 1);
+    final List<int> tabsPainted = <int>[];
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoTabScaffold(
+          tabBar: _buildTabBar(),
+          controller: controller,
+          tabBuilder: (BuildContext context, int index) {
+            return CustomPaint(
+              child: Text('Page ${index + 1}'),
+              painter: TestCallbackPainter(
+                onPaint: () { tabsPainted.add(index); }
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(tabsPainted, <int>[1]);
+
+    controller.currentIndex = 0;
+    await tester.pumpAndSettle();
+
+    expect(tabsPainted, <int>[1, 0]);
+    // onTap is not called when changing tabs programmatically.
+    expect(selectedTabs, isEmpty);
+
+    // Can still tap out of the programmatically selected tab.
+    await tester.tap(find.text('Tab 2'));
+    await tester.pump();
+
+    expect(tabsPainted, <int>[1, 0, 1]);
+    expect(selectedTabs, <int>[1]);
+  });
+
+  testWidgets('Programmatic tab switching by passing in a new controller', (WidgetTester tester) async {
     final List<int> tabsPainted = <int>[];
 
     await tester.pumpWidget(

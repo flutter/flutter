@@ -171,8 +171,8 @@ class CupertinoTabScaffold extends StatefulWidget {
   const CupertinoTabScaffold({
     Key key,
     @required this.tabBar,
-    @required this.controller,
     @required this.tabBuilder,
+    this.controller,
     this.backgroundColor,
     this.resizeToAvoidBottomInset = true,
   }) : assert(tabBar != null),
