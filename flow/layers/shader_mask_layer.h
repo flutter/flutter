@@ -9,7 +9,7 @@
 
 #include "third_party/skia/include/core/SkShader.h"
 
-namespace flow {
+namespace flutter {
 
 class ShaderMaskLayer : public ContainerLayer {
  public:
@@ -32,6 +32,6 @@ class ShaderMaskLayer : public ContainerLayer {
   FML_DISALLOW_COPY_AND_ASSIGN(ShaderMaskLayer);
 };
 
-}  // namespace flow
+}  // namespace flutter
 
 #endif  // FLUTTER_FLOW_LAYERS_SHADER_MASK_LAYER_H_

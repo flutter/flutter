@@ -7,7 +7,7 @@
 
 #include "flutter/flow/layers/container_layer.h"
 
-namespace flow {
+namespace flutter {
 
 class ClipPathLayer : public ContainerLayer {
  public:
@@ -31,6 +31,6 @@ class ClipPathLayer : public ContainerLayer {
   FML_DISALLOW_COPY_AND_ASSIGN(ClipPathLayer);
 };
 
-}  // namespace flow
+}  // namespace flutter
 
 #endif  // FLUTTER_FLOW_LAYERS_CLIP_PATH_LAYER_H_

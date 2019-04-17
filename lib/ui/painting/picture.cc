@@ -26,11 +26,12 @@ IMPLEMENT_WRAPPERTYPEINFO(ui, Picture);
 
 DART_BIND_ALL(Picture, FOR_EACH_BINDING)
 
-fml::RefPtr<Picture> Picture::Create(flow::SkiaGPUObject<SkPicture> picture) {
+fml::RefPtr<Picture> Picture::Create(
+    flutter::SkiaGPUObject<SkPicture> picture) {
   return fml::MakeRefCounted<Picture>(std::move(picture));
 }
 
-Picture::Picture(flow::SkiaGPUObject<SkPicture> picture)
+Picture::Picture(flutter::SkiaGPUObject<SkPicture> picture)
     : picture_(std::move(picture)) {}
 
 Picture::~Picture() = default;

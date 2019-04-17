@@ -19,7 +19,7 @@ class IOManager {
 
   virtual fml::WeakPtr<GrContext> GetResourceContext() const = 0;
 
-  virtual fml::RefPtr<flow::SkiaUnrefQueue> GetSkiaUnrefQueue() const = 0;
+  virtual fml::RefPtr<flutter::SkiaUnrefQueue> GetSkiaUnrefQueue() const = 0;
 };
 
 }  // namespace flutter

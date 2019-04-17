@@ -23,9 +23,9 @@
 int main(int argc, char** argv) {
   testing::InitGoogleTest(&argc, argv);
   fml::CommandLine cmd = fml::CommandLineFromArgcArgv(argc, argv);
-  flow::SetGoldenDir(
+  flutter::SetGoldenDir(
       cmd.GetOptionValueWithDefault("golden-dir", "flutter/testing/resources"));
-  flow::SetFontFile(cmd.GetOptionValueWithDefault(
+  flutter::SetFontFile(cmd.GetOptionValueWithDefault(
       "font-file",
       "flutter/third_party/txt/third_party/fonts/Roboto-Regular.ttf"));
   return RUN_ALL_TESTS();

@@ -179,7 +179,7 @@ std::vector<SkCanvas*> FlutterPlatformViewsController::GetCurrentCanvases() {
 
 SkCanvas* FlutterPlatformViewsController::CompositeEmbeddedView(
     int view_id,
-    const flow::EmbeddedViewParams& params) {
+    const flutter::EmbeddedViewParams& params) {
   // TODO(amirh): assert that this is running on the platform thread once we support the iOS
   // embedded views thread configuration.
   // TODO(amirh): do nothing if the params didn't change.

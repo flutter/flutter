@@ -8,7 +8,7 @@
 #include <vector>
 #include "flutter/flow/layers/layer.h"
 
-namespace flow {
+namespace flutter {
 
 class ContainerLayer : public Layer {
  public:
@@ -44,6 +44,6 @@ class ContainerLayer : public Layer {
   FML_DISALLOW_COPY_AND_ASSIGN(ContainerLayer);
 };
 
-}  // namespace flow
+}  // namespace flutter
 
 #endif  // FLUTTER_FLOW_LAYERS_CONTAINER_LAYER_H_

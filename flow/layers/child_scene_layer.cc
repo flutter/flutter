@@ -7,7 +7,7 @@
 #include "flutter/flow/export_node.h"
 #include "flutter/flow/view_holder.h"
 
-namespace flow {
+namespace flutter {
 
 ChildSceneLayer::ChildSceneLayer(zx_koid_t layer_id,
                                  bool use_view_holder,
@@ -44,4 +44,4 @@ void ChildSceneLayer::UpdateScene(SceneUpdateContext& context) {
   }
 }
 
-}  // namespace flow
+}  // namespace flutter

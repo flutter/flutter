@@ -7,7 +7,7 @@
 #include "flutter/flow/layers/layer_tree.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 
-namespace flow {
+namespace flutter {
 
 CompositorContext::CompositorContext() = default;
 
@@ -60,7 +60,7 @@ CompositorContext::ScopedFrame::~ScopedFrame() {
   context_.EndFrame(*this, instrumentation_enabled_);
 }
 
-bool CompositorContext::ScopedFrame::Raster(flow::LayerTree& layer_tree,
+bool CompositorContext::ScopedFrame::Raster(flutter::LayerTree& layer_tree,
                                             bool ignore_raster_cache) {
   layer_tree.Preroll(*this, ignore_raster_cache);
   // Clearing canvas after preroll reduces one render target switch when preroll
@@ -82,4 +82,4 @@ void CompositorContext::OnGrContextDestroyed() {
   raster_cache_.Clear();
 }
 
-}  // namespace flow
+}  // namespace flutter

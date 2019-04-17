@@ -55,7 +55,7 @@ class Surface {
 
   virtual GrContext* GetContext() = 0;
 
-  virtual flow::ExternalViewEmbedder* GetExternalViewEmbedder();
+  virtual flutter::ExternalViewEmbedder* GetExternalViewEmbedder();
 
   virtual bool MakeRenderContextCurrent();
 

@@ -35,7 +35,7 @@
 
 #endif  // defined(OS_FUCHSIA)
 
-namespace flow {
+namespace flutter {
 
 static constexpr SkRect kGiantRect = SkRect::MakeLTRB(-1E9F, -1E9F, 1E9F, 1E9F);
 
@@ -151,6 +151,6 @@ class Layer {
   FML_DISALLOW_COPY_AND_ASSIGN(Layer);
 };
 
-}  // namespace flow
+}  // namespace flutter
 
 #endif  // FLUTTER_FLOW_LAYERS_LAYER_H_

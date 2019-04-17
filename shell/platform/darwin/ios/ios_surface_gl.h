@@ -18,7 +18,7 @@ namespace flutter {
 
 class IOSSurfaceGL : public IOSSurface,
                      public GPUSurfaceGLDelegate,
-                     public flow::ExternalViewEmbedder {
+                     public flutter::ExternalViewEmbedder {
  public:
   IOSSurfaceGL(std::shared_ptr<IOSGLContext> context,
                fml::scoped_nsobject<CAEAGLLayer> layer,
@@ -49,21 +49,21 @@ class IOSSurfaceGL : public IOSSurface,
   bool UseOffscreenSurface() const override;
 
   // |GPUSurfaceGLDelegate|
-  flow::ExternalViewEmbedder* GetExternalViewEmbedder() override;
+  flutter::ExternalViewEmbedder* GetExternalViewEmbedder() override;
 
-  // |flow::ExternalViewEmbedder|
+  // |flutter::ExternalViewEmbedder|
   void BeginFrame(SkISize frame_size) override;
 
-  // |flow::ExternalViewEmbedder|
+  // |flutter::ExternalViewEmbedder|
   void PrerollCompositeEmbeddedView(int view_id) override;
 
-  // |flow::ExternalViewEmbedder|
+  // |flutter::ExternalViewEmbedder|
   std::vector<SkCanvas*> GetCurrentCanvases() override;
 
-  // |flow::ExternalViewEmbedder|
-  SkCanvas* CompositeEmbeddedView(int view_id, const flow::EmbeddedViewParams& params) override;
+  // |flutter::ExternalViewEmbedder|
+  SkCanvas* CompositeEmbeddedView(int view_id, const flutter::EmbeddedViewParams& params) override;
 
-  // |flow::ExternalViewEmbedder|
+  // |flutter::ExternalViewEmbedder|
   bool SubmitFrame(GrContext* context) override;
 
  private:

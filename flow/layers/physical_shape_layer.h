@@ -7,7 +7,7 @@
 
 #include "flutter/flow/layers/container_layer.h"
 
-namespace flow {
+namespace flutter {
 
 class PhysicalShapeLayer : public ContainerLayer {
  public:
@@ -54,6 +54,6 @@ class PhysicalShapeLayer : public ContainerLayer {
   Clip clip_behavior_;
 };
 
-}  // namespace flow
+}  // namespace flutter
 
 #endif  // FLUTTER_FLOW_LAYERS_PHYSICAL_SHAPE_LAYER_H_

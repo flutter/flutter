@@ -35,7 +35,7 @@ class CanvasImage final : public RefCountedDartWrappable<CanvasImage> {
   void dispose();
 
   sk_sp<SkImage> image() const { return image_.get(); }
-  void set_image(flow::SkiaGPUObject<SkImage> image) {
+  void set_image(flutter::SkiaGPUObject<SkImage> image) {
     image_ = std::move(image);
   }
 
@@ -46,7 +46,7 @@ class CanvasImage final : public RefCountedDartWrappable<CanvasImage> {
  private:
   CanvasImage();
 
-  flow::SkiaGPUObject<SkImage> image_;
+  flutter::SkiaGPUObject<SkImage> image_;
 };
 
 }  // namespace flutter

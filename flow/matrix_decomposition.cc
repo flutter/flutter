@@ -4,7 +4,7 @@
 
 #include "flutter/flow/matrix_decomposition.h"
 
-namespace flow {
+namespace flutter {
 
 static inline SkVector3 SkVector3Combine(const SkVector3& a,
                                          float a_scale,
@@ -151,4 +151,4 @@ bool MatrixDecomposition::IsValid() const {
   return valid_;
 }
 
-}  // namespace flow
+}  // namespace flutter

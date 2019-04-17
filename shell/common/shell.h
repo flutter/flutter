@@ -151,7 +151,7 @@ class Shell final : public PlatformView::Delegate,
 
   // |PlatformView::Delegate|
   void OnPlatformViewRegisterTexture(
-      std::shared_ptr<flow::Texture> texture) override;
+      std::shared_ptr<flutter::Texture> texture) override;
 
   // |PlatformView::Delegate|
   void OnPlatformViewUnregisterTexture(int64_t texture_id) override;
@@ -169,7 +169,8 @@ class Shell final : public PlatformView::Delegate,
   void OnAnimatorNotifyIdle(int64_t deadline) override;
 
   // |Animator::Delegate|
-  void OnAnimatorDraw(fml::RefPtr<Pipeline<flow::LayerTree>> pipeline) override;
+  void OnAnimatorDraw(
+      fml::RefPtr<Pipeline<flutter::LayerTree>> pipeline) override;
 
   // |Animator::Delegate|
   void OnAnimatorDrawLastLayerTree() override;

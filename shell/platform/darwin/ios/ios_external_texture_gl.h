@@ -11,7 +11,7 @@
 
 namespace flutter {
 
-class IOSExternalTextureGL : public flow::Texture {
+class IOSExternalTextureGL : public flutter::Texture {
  public:
   IOSExternalTextureGL(int64_t textureId, NSObject<FlutterTexture>* externalTexture);
 

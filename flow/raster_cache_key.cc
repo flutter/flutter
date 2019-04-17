@@ -4,8 +4,8 @@
 
 #include "flutter/flow/raster_cache_key.h"
 
-namespace flow {
+namespace flutter {
 
 //
 
-}  // namespace flow
+}  // namespace flutter

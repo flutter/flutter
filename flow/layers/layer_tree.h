@@ -16,7 +16,7 @@
 #include "third_party/skia/include/core/SkPicture.h"
 #include "third_party/skia/include/core/SkSize.h"
 
-namespace flow {
+namespace flutter {
 
 class LayerTree {
  public:
@@ -83,6 +83,6 @@ class LayerTree {
   FML_DISALLOW_COPY_AND_ASSIGN(LayerTree);
 };
 
-}  // namespace flow
+}  // namespace flutter
 
 #endif  // FLUTTER_FLOW_LAYERS_LAYER_TREE_H_

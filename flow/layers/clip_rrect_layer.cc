@@ -4,7 +4,7 @@
 
 #include "flutter/flow/layers/clip_rrect_layer.h"
 
-namespace flow {
+namespace flutter {
 
 ClipRRectLayer::ClipRRectLayer(Clip clip_behavior)
     : clip_behavior_(clip_behavior) {
@@ -67,4 +67,4 @@ void ClipRRectLayer::Paint(PaintContext& context) const {
   }
 }
 
-}  // namespace flow
+}  // namespace flutter

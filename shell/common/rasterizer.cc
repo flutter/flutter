@@ -24,11 +24,11 @@ static constexpr std::chrono::milliseconds kSkiaCleanupExpiration(15000);
 
 Rasterizer::Rasterizer(TaskRunners task_runners)
     : Rasterizer(std::move(task_runners),
-                 std::make_unique<flow::CompositorContext>()) {}
+                 std::make_unique<flutter::CompositorContext>()) {}
 
 Rasterizer::Rasterizer(
     TaskRunners task_runners,
-    std::unique_ptr<flow::CompositorContext> compositor_context)
+    std::unique_ptr<flutter::CompositorContext> compositor_context)
     : task_runners_(std::move(task_runners)),
       compositor_context_(std::move(compositor_context)),
       weak_factory_(this) {
@@ -56,11 +56,11 @@ void Rasterizer::Teardown() {
   last_layer_tree_.reset();
 }
 
-flow::TextureRegistry* Rasterizer::GetTextureRegistry() {
+flutter::TextureRegistry* Rasterizer::GetTextureRegistry() {
   return &compositor_context_->texture_registry();
 }
 
-flow::LayerTree* Rasterizer::GetLastLayerTree() {
+flutter::LayerTree* Rasterizer::GetLastLayerTree() {
   return last_layer_tree_.get();
 }
 
@@ -71,10 +71,10 @@ void Rasterizer::DrawLastLayerTree() {
   DrawToSurface(*last_layer_tree_);
 }
 
-void Rasterizer::Draw(fml::RefPtr<Pipeline<flow::LayerTree>> pipeline) {
+void Rasterizer::Draw(fml::RefPtr<Pipeline<flutter::LayerTree>> pipeline) {
   TRACE_EVENT0("flutter", "GPURasterizer::Draw");
 
-  Pipeline<flow::LayerTree>::Consumer consumer =
+  Pipeline<flutter::LayerTree>::Consumer consumer =
       std::bind(&Rasterizer::DoDraw, this, std::placeholders::_1);
 
   // Consume as many pipeline items as possible. But yield the event loop
@@ -146,7 +146,7 @@ sk_sp<SkImage> Rasterizer::MakeRasterSnapshot(sk_sp<SkPicture> picture,
   return nullptr;
 }
 
-void Rasterizer::DoDraw(std::unique_ptr<flow::LayerTree> layer_tree) {
+void Rasterizer::DoDraw(std::unique_ptr<flutter::LayerTree> layer_tree) {
   if (!layer_tree || !surface_) {
     return;
   }
@@ -166,7 +166,7 @@ void Rasterizer::DoDraw(std::unique_ptr<flow::LayerTree> layer_tree) {
   }
 }
 
-bool Rasterizer::DrawToSurface(flow::LayerTree& layer_tree) {
+bool Rasterizer::DrawToSurface(flutter::LayerTree& layer_tree) {
   FML_DCHECK(surface_);
 
   auto frame = surface_->AcquireFrame(layer_tree.frame_size());
@@ -213,8 +213,8 @@ static sk_sp<SkData> SerializeTypeface(SkTypeface* typeface, void* ctx) {
 }
 
 static sk_sp<SkData> ScreenshotLayerTreeAsPicture(
-    flow::LayerTree* tree,
-    flow::CompositorContext& compositor_context) {
+    flutter::LayerTree* tree,
+    flutter::CompositorContext& compositor_context) {
   FML_DCHECK(tree != nullptr);
   SkPictureRecorder recorder;
   recorder.beginRecording(
@@ -256,8 +256,8 @@ static sk_sp<SkSurface> CreateSnapshotSurface(GrContext* surface_context,
 }
 
 static sk_sp<SkData> ScreenshotLayerTreeAsImage(
-    flow::LayerTree* tree,
-    flow::CompositorContext& compositor_context,
+    flutter::LayerTree* tree,
+    flutter::CompositorContext& compositor_context,
     GrContext* surface_context,
     bool compressed) {
   // Attempt to create a snapshot surface depending on whether we have access to

@@ -4,7 +4,7 @@
 
 #include "flutter/flow/layers/shader_mask_layer.h"
 
-namespace flow {
+namespace flutter {
 
 ShaderMaskLayer::ShaderMaskLayer() = default;
 
@@ -26,4 +26,4 @@ void ShaderMaskLayer::Paint(PaintContext& context) const {
       SkRect::MakeWH(mask_rect_.width(), mask_rect_.height()), paint);
 }
 
-}  // namespace flow
+}  // namespace flutter

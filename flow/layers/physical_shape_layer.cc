@@ -7,7 +7,7 @@
 #include "flutter/flow/paint_utils.h"
 #include "third_party/skia/include/utils/SkShadowUtils.h"
 
-namespace flow {
+namespace flutter {
 
 const SkScalar kLightHeight = 600;
 const SkScalar kLightRadius = 800;
@@ -204,4 +204,4 @@ void PhysicalShapeLayer::DrawShadow(SkCanvas* canvas,
       dpr * kLightRadius, ambientColor, spotColor, flags);
 }
 
-}  // namespace flow
+}  // namespace flutter

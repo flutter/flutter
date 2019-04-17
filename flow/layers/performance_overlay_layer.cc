@@ -9,7 +9,7 @@
 #include "flutter/flow/layers/performance_overlay_layer.h"
 #include "third_party/skia/include/core/SkFont.h"
 
-namespace flow {
+namespace flutter {
 namespace {
 
 void DrawStatisticsText(SkCanvas& canvas,
@@ -94,4 +94,4 @@ void PerformanceOverlayLayer::Paint(PaintContext& context) const {
                      options_ & kDisplayEngineStatistics, "UI", font_path_);
 }
 
-}  // namespace flow
+}  // namespace flutter

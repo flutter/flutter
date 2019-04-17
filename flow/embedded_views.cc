@@ -4,9 +4,9 @@
 
 #include "flutter/flow/embedded_views.h"
 
-namespace flow {
+namespace flutter {
 
 bool ExternalViewEmbedder::SubmitFrame(GrContext* context) {
   return false;
 };
-}  // namespace flow
+}  // namespace flutter

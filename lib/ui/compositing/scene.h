@@ -24,12 +24,12 @@ class Scene : public RefCountedDartWrappable<Scene> {
 
  public:
   ~Scene() override;
-  static fml::RefPtr<Scene> create(std::shared_ptr<flow::Layer> rootLayer,
+  static fml::RefPtr<Scene> create(std::shared_ptr<flutter::Layer> rootLayer,
                                    uint32_t rasterizerTracingThreshold,
                                    bool checkerboardRasterCacheImages,
                                    bool checkerboardOffscreenLayers);
 
-  std::unique_ptr<flow::LayerTree> takeLayerTree();
+  std::unique_ptr<flutter::LayerTree> takeLayerTree();
 
   Dart_Handle toImage(uint32_t width,
                       uint32_t height,
@@ -40,12 +40,12 @@ class Scene : public RefCountedDartWrappable<Scene> {
   static void RegisterNatives(tonic::DartLibraryNatives* natives);
 
  private:
-  explicit Scene(std::shared_ptr<flow::Layer> rootLayer,
+  explicit Scene(std::shared_ptr<flutter::Layer> rootLayer,
                  uint32_t rasterizerTracingThreshold,
                  bool checkerboardRasterCacheImages,
                  bool checkerboardOffscreenLayers);
 
-  std::unique_ptr<flow::LayerTree> m_layerTree;
+  std::unique_ptr<flutter::LayerTree> m_layerTree;
 };
 
 }  // namespace flutter

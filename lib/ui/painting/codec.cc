@@ -81,7 +81,7 @@ static sk_sp<SkImage> DecodeImage(fml::WeakPtr<GrContext> context,
 
 fml::RefPtr<Codec> InitCodec(fml::WeakPtr<GrContext> context,
                              sk_sp<SkData> buffer,
-                             fml::RefPtr<flow::SkiaUnrefQueue> unref_queue,
+                             fml::RefPtr<flutter::SkiaUnrefQueue> unref_queue,
                              const float decodedCacheRatioCap,
                              size_t trace_id) {
   TRACE_FLOW_STEP("flutter", kInitCodecTraceTag, trace_id);
@@ -117,7 +117,7 @@ fml::RefPtr<Codec> InitCodecUncompressed(
     fml::WeakPtr<GrContext> context,
     sk_sp<SkData> buffer,
     ImageInfo image_info,
-    fml::RefPtr<flow::SkiaUnrefQueue> unref_queue,
+    fml::RefPtr<flutter::SkiaUnrefQueue> unref_queue,
     const float decodedCacheRatioCap,
     size_t trace_id) {
   TRACE_FLOW_STEP("flutter", kInitCodecTraceTag, trace_id);
@@ -147,7 +147,7 @@ fml::RefPtr<Codec> InitCodecUncompressed(
 void InitCodecAndInvokeCodecCallback(
     fml::RefPtr<fml::TaskRunner> ui_task_runner,
     fml::WeakPtr<GrContext> context,
-    fml::RefPtr<flow::SkiaUnrefQueue> unref_queue,
+    fml::RefPtr<flutter::SkiaUnrefQueue> unref_queue,
     std::unique_ptr<DartPersistentValue> callback,
     sk_sp<SkData> buffer,
     std::unique_ptr<ImageInfo> image_info,
@@ -468,7 +468,7 @@ void MultiFrameCodec::GetNextFrameAndInvokeCallback(
     std::unique_ptr<DartPersistentValue> callback,
     fml::RefPtr<fml::TaskRunner> ui_task_runner,
     fml::WeakPtr<GrContext> resourceContext,
-    fml::RefPtr<flow::SkiaUnrefQueue> unref_queue,
+    fml::RefPtr<flutter::SkiaUnrefQueue> unref_queue,
     size_t trace_id) {
   fml::RefPtr<FrameInfo> frameInfo = NULL;
   sk_sp<SkImage> skImage = GetNextFrameImage(resourceContext);

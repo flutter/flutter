@@ -9,7 +9,7 @@
 #include "flutter/flow/matrix_decomposition.h"
 #include "flutter/fml/logging.h"
 
-namespace flow {
+namespace flutter {
 
 template <typename ID>
 class RasterCacheKey {
@@ -58,6 +58,6 @@ class Layer;
 
 using LayerRasterCacheKey = RasterCacheKey<Layer*>;
 
-}  // namespace flow
+}  // namespace flutter
 
 #endif  // FLUTTER_FLOW_RASTER_CACHE_KEY_H_

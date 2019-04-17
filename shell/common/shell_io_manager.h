@@ -42,7 +42,7 @@ class ShellIOManager final : public IOManager {
   // resource context, but may be called if the Dart VM is restarted.
   void UpdateResourceContext(sk_sp<GrContext> resource_context);
 
-  fml::RefPtr<flow::SkiaUnrefQueue> GetSkiaUnrefQueue() const override;
+  fml::RefPtr<flutter::SkiaUnrefQueue> GetSkiaUnrefQueue() const override;
 
   fml::WeakPtr<ShellIOManager> GetWeakPtr();
 
@@ -53,7 +53,7 @@ class ShellIOManager final : public IOManager {
       resource_context_weak_factory_;
 
   // Unref queue management.
-  fml::RefPtr<flow::SkiaUnrefQueue> unref_queue_;
+  fml::RefPtr<flutter::SkiaUnrefQueue> unref_queue_;
 
   fml::WeakPtrFactory<ShellIOManager> weak_factory_;
 

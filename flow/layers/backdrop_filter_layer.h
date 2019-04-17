@@ -9,7 +9,7 @@
 
 #include "third_party/skia/include/core/SkImageFilter.h"
 
-namespace flow {
+namespace flutter {
 
 class BackdropFilterLayer : public ContainerLayer {
  public:
@@ -26,6 +26,6 @@ class BackdropFilterLayer : public ContainerLayer {
   FML_DISALLOW_COPY_AND_ASSIGN(BackdropFilterLayer);
 };
 
-}  // namespace flow
+}  // namespace flutter
 
 #endif  // FLUTTER_FLOW_LAYERS_BACKDROP_FILTER_LAYER_H_

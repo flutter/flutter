@@ -27,7 +27,7 @@ class Animator final {
     virtual void OnAnimatorNotifyIdle(int64_t deadline) = 0;
 
     virtual void OnAnimatorDraw(
-        fml::RefPtr<Pipeline<flow::LayerTree>> pipeline) = 0;
+        fml::RefPtr<Pipeline<flutter::LayerTree>> pipeline) = 0;
 
     virtual void OnAnimatorDrawLastLayerTree() = 0;
   };
@@ -42,7 +42,7 @@ class Animator final {
 
   void RequestFrame(bool regenerate_layer_tree = true);
 
-  void Render(std::unique_ptr<flow::LayerTree> layer_tree);
+  void Render(std::unique_ptr<flutter::LayerTree> layer_tree);
 
   void Start();
 
@@ -55,7 +55,7 @@ class Animator final {
   void EnqueueTraceFlowId(uint64_t trace_flow_id);
 
  private:
-  using LayerTreePipeline = Pipeline<flow::LayerTree>;
+  using LayerTreePipeline = Pipeline<flutter::LayerTree>;
 
   void BeginFrame(fml::TimePoint frame_start_time,
                   fml::TimePoint frame_target_time);

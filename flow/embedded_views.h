@@ -12,7 +12,7 @@
 #include "third_party/skia/include/core/SkPoint.h"
 #include "third_party/skia/include/core/SkSize.h"
 
-namespace flow {
+namespace flutter {
 
 class EmbeddedViewParams {
  public:
@@ -44,6 +44,6 @@ class ExternalViewEmbedder {
   FML_DISALLOW_COPY_AND_ASSIGN(ExternalViewEmbedder);
 };
 
-}  // namespace flow
+}  // namespace flutter
 
 #endif  // FLUTTER_FLOW_EMBEDDED_VIEWS_H_

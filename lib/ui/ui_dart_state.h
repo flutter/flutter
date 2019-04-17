@@ -47,7 +47,7 @@ class UIDartState : public tonic::DartState {
 
   void FlushMicrotasksNow();
 
-  fml::RefPtr<flow::SkiaUnrefQueue> GetSkiaUnrefQueue() const;
+  fml::RefPtr<flutter::SkiaUnrefQueue> GetSkiaUnrefQueue() const;
 
   fml::WeakPtr<SnapshotDelegate> GetSnapshotDelegate() const;
 
@@ -61,7 +61,7 @@ class UIDartState : public tonic::DartState {
                                 const std::string& stack_trace);
 
   template <class T>
-  static flow::SkiaGPUObject<T> CreateGPUObject(sk_sp<T> object) {
+  static flutter::SkiaGPUObject<T> CreateGPUObject(sk_sp<T> object) {
     if (!object) {
       return {};
     }

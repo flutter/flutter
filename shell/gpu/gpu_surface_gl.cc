@@ -320,7 +320,7 @@ GrContext* GPUSurfaceGL::GetContext() {
 }
 
 // |Surface|
-flow::ExternalViewEmbedder* GPUSurfaceGL::GetExternalViewEmbedder() {
+flutter::ExternalViewEmbedder* GPUSurfaceGL::GetExternalViewEmbedder() {
   return delegate_->GetExternalViewEmbedder();
 }
 

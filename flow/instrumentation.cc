@@ -10,7 +10,7 @@
 #include "third_party/skia/include/core/SkPath.h"
 #include "third_party/skia/include/core/SkSurface.h"
 
-namespace flow {
+namespace flutter {
 
 static const size_t kMaxSamples = 120;
 static const size_t kMaxFrameMarkers = 8;
@@ -311,4 +311,4 @@ int64_t CounterValues::GetMinValue() const {
   return min;
 }
 
-}  // namespace flow
+}  // namespace flutter

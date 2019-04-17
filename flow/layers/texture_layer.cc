@@ -6,7 +6,7 @@
 
 #include "flutter/flow/texture.h"
 
-namespace flow {
+namespace flutter {
 
 TextureLayer::TextureLayer() = default;
 
@@ -27,4 +27,4 @@ void TextureLayer::Paint(PaintContext& context) const {
                  context.gr_context);
 }
 
-}  // namespace flow
+}  // namespace flutter

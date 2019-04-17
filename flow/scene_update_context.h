@@ -18,7 +18,7 @@
 #include "third_party/skia/include/core/SkRect.h"
 #include "third_party/skia/include/core/SkSurface.h"
 
-namespace flow {
+namespace flutter {
 
 class Layer;
 
@@ -232,6 +232,6 @@ class SceneUpdateContext {
   FML_DISALLOW_COPY_AND_ASSIGN(SceneUpdateContext);
 };
 
-}  // namespace flow
+}  // namespace flutter
 
 #endif  // FLUTTER_FLOW_SCENE_UPDATE_CONTEXT_H_

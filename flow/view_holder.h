@@ -21,7 +21,7 @@
 #include "flutter/fml/memory/ref_counted.h"
 #include "flutter/fml/task_runner.h"
 
-namespace flow {
+namespace flutter {
 
 // Represents a Scenic |ViewHolder| resource that imports a |View| from another
 // session.
@@ -70,6 +70,6 @@ class ViewHolder {
   FML_DISALLOW_COPY_AND_ASSIGN(ViewHolder);
 };
 
-}  // namespace flow
+}  // namespace flutter
 
 #endif  // FLUTTER_FLOW_VIEW_HOLDER_H_

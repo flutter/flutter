@@ -24,7 +24,7 @@ IMPLEMENT_WRAPPERTYPEINFO(ui, Scene);
 
 DART_BIND_ALL(Scene, FOR_EACH_BINDING)
 
-fml::RefPtr<Scene> Scene::create(std::shared_ptr<flow::Layer> rootLayer,
+fml::RefPtr<Scene> Scene::create(std::shared_ptr<flutter::Layer> rootLayer,
                                  uint32_t rasterizerTracingThreshold,
                                  bool checkerboardRasterCacheImages,
                                  bool checkerboardOffscreenLayers) {
@@ -33,11 +33,11 @@ fml::RefPtr<Scene> Scene::create(std::shared_ptr<flow::Layer> rootLayer,
       checkerboardRasterCacheImages, checkerboardOffscreenLayers);
 }
 
-Scene::Scene(std::shared_ptr<flow::Layer> rootLayer,
+Scene::Scene(std::shared_ptr<flutter::Layer> rootLayer,
              uint32_t rasterizerTracingThreshold,
              bool checkerboardRasterCacheImages,
              bool checkerboardOffscreenLayers)
-    : m_layerTree(new flow::LayerTree()) {
+    : m_layerTree(new flutter::LayerTree()) {
   m_layerTree->set_root_layer(std::move(rootLayer));
   m_layerTree->set_rasterizer_tracing_threshold(rasterizerTracingThreshold);
   m_layerTree->set_checkerboard_raster_cache_images(
@@ -68,7 +68,7 @@ Dart_Handle Scene::toImage(uint32_t width,
   return Picture::RasterizeToImage(picture, width, height, raw_image_callback);
 }
 
-std::unique_ptr<flow::LayerTree> Scene::takeLayerTree() {
+std::unique_ptr<flutter::LayerTree> Scene::takeLayerTree() {
   return std::move(m_layerTree);
 }
 

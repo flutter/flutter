@@ -15,7 +15,7 @@
 #include "third_party/skia/include/core/SkImage.h"
 #include "third_party/skia/include/core/SkSize.h"
 
-namespace flow {
+namespace flutter {
 
 class RasterCacheResult {
  public:
@@ -137,6 +137,6 @@ class RasterCache {
   FML_DISALLOW_COPY_AND_ASSIGN(RasterCache);
 };
 
-}  // namespace flow
+}  // namespace flutter
 
 #endif  // FLUTTER_FLOW_RASTER_CACHE_H_

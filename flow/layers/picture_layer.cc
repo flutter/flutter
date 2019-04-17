@@ -6,7 +6,7 @@
 
 #include "flutter/fml/logging.h"
 
-namespace flow {
+namespace flutter {
 
 PictureLayer::PictureLayer() = default;
 
@@ -52,4 +52,4 @@ void PictureLayer::Paint(PaintContext& context) const {
   context.leaf_nodes_canvas->drawPicture(picture());
 }
 
-}  // namespace flow
+}  // namespace flutter

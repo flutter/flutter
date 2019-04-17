@@ -17,7 +17,7 @@ namespace flutter {
 
 class IOSSurfaceSoftware final : public IOSSurface,
                                  public GPUSurfaceSoftwareDelegate,
-                                 public flow::ExternalViewEmbedder {
+                                 public flutter::ExternalViewEmbedder {
  public:
   IOSSurfaceSoftware(fml::scoped_nsobject<CALayer> layer,
                      FlutterPlatformViewsController* platform_views_controller);
@@ -43,21 +43,21 @@ class IOSSurfaceSoftware final : public IOSSurface,
   bool PresentBackingStore(sk_sp<SkSurface> backing_store) override;
 
   // |GPUSurfaceSoftwareDelegate|
-  flow::ExternalViewEmbedder* GetExternalViewEmbedder() override;
+  flutter::ExternalViewEmbedder* GetExternalViewEmbedder() override;
 
-  // |flow::ExternalViewEmbedder|
+  // |flutter::ExternalViewEmbedder|
   void BeginFrame(SkISize frame_size) override;
 
-  // |flow::ExternalViewEmbedder|
+  // |flutter::ExternalViewEmbedder|
   void PrerollCompositeEmbeddedView(int view_id) override;
 
-  // |flow::ExternalViewEmbedder|
+  // |flutter::ExternalViewEmbedder|
   std::vector<SkCanvas*> GetCurrentCanvases() override;
 
-  // |flow::ExternalViewEmbedder|
-  SkCanvas* CompositeEmbeddedView(int view_id, const flow::EmbeddedViewParams& params) override;
+  // |flutter::ExternalViewEmbedder|
+  SkCanvas* CompositeEmbeddedView(int view_id, const flutter::EmbeddedViewParams& params) override;
 
-  // |flow::ExternalViewEmbedder|
+  // |flutter::ExternalViewEmbedder|
   bool SubmitFrame(GrContext* context) override;
 
  private:

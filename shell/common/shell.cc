@@ -674,7 +674,7 @@ void Shell::OnPlatformViewSetAccessibilityFeatures(int32_t flags) {
 
 // |PlatformView::Delegate|
 void Shell::OnPlatformViewRegisterTexture(
-    std::shared_ptr<flow::Texture> texture) {
+    std::shared_ptr<flutter::Texture> texture) {
   FML_DCHECK(is_setup_);
   FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
 
@@ -768,7 +768,7 @@ void Shell::OnAnimatorNotifyIdle(int64_t deadline) {
 }
 
 // |Animator::Delegate|
-void Shell::OnAnimatorDraw(fml::RefPtr<Pipeline<flow::LayerTree>> pipeline) {
+void Shell::OnAnimatorDraw(fml::RefPtr<Pipeline<flutter::LayerTree>> pipeline) {
   FML_DCHECK(is_setup_);
 
   task_runners_.GetGPUTaskRunner()->PostTask(

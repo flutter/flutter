@@ -9,7 +9,7 @@
 #include "flutter/fml/trace_event.h"
 #include "flutter/lib/ui/window/viewport_metrics.h"
 
-namespace flow {
+namespace flutter {
 
 // Helper function to generate clip planes for a scenic::EntityNode.
 static void SetEntityNodeClipPlanes(scenic::EntityNode* entity_node,
@@ -188,7 +188,8 @@ scenic::Image* SceneUpdateContext::GenerateImageIfNeeded(
   return image;
 }
 
-std::vector<std::unique_ptr<flow::SceneUpdateContext::SurfaceProducerSurface>>
+std::vector<
+    std::unique_ptr<flutter::SceneUpdateContext::SurfaceProducerSurface>>
 SceneUpdateContext::ExecutePaintTasks(CompositorContext::ScopedFrame& frame) {
   TRACE_EVENT0("flutter", "SceneUpdateContext::ExecutePaintTasks");
   std::vector<std::unique_ptr<SurfaceProducerSurface>> surfaces_to_submit;
@@ -331,4 +332,4 @@ SceneUpdateContext::Clip::Clip(SceneUpdateContext& context,
   SetEntityNodeClipPlanes(&entity_node(), shape_bounds);
 }
 
-}  // namespace flow
+}  // namespace flutter

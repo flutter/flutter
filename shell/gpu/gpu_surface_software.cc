@@ -9,7 +9,7 @@
 
 namespace flutter {
 
-flow::ExternalViewEmbedder*
+flutter::ExternalViewEmbedder*
 GPUSurfaceSoftwareDelegate::GetExternalViewEmbedder() {
   return nullptr;
 }
@@ -81,7 +81,7 @@ GrContext* GPUSurfaceSoftware::GetContext() {
 }
 
 // |Surface|
-flow::ExternalViewEmbedder* GPUSurfaceSoftware::GetExternalViewEmbedder() {
+flutter::ExternalViewEmbedder* GPUSurfaceSoftware::GetExternalViewEmbedder() {
   return delegate_->GetExternalViewEmbedder();
 }
 

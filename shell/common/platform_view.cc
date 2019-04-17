@@ -102,7 +102,7 @@ void PlatformView::HandlePlatformMessage(fml::RefPtr<PlatformMessage> message) {
 
 void PlatformView::OnPreEngineRestart() const {}
 
-void PlatformView::RegisterTexture(std::shared_ptr<flow::Texture> texture) {
+void PlatformView::RegisterTexture(std::shared_ptr<flutter::Texture> texture) {
   delegate_.OnPlatformViewRegisterTexture(std::move(texture));
 }
 
