@@ -195,7 +195,7 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
     }
     for (HitTestEntry entry in hitTestResult.path) {
       try {
-        entry.target.handleEvent(event, entry);
+        entry.target.handleEvent(event.transformed(entry.transform), entry);
       } catch (exception, stack) {
         FlutterError.reportError(FlutterErrorDetailsForPointerEventDispatcher(
           exception: exception,

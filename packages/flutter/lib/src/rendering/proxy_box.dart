@@ -2488,9 +2488,9 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
        super(behavior: behavior, child: child) {
     if (_onPointerEnter != null || _onPointerHover != null || _onPointerExit != null) {
       _hoverAnnotation = MouseTrackerAnnotation(
-        onEnter: _onPointerEnter,
-        onHover: _onPointerHover,
-        onExit: _onPointerExit,
+        onEnter: _onPointerEnterInternal,
+        onHover: _onPointerHoverInternal,
+        onExit: _onPointerExitInternal,
       );
     }
   }
@@ -2563,6 +2563,21 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
   @visibleForTesting
   MouseTrackerAnnotation get hoverAnnotation => _hoverAnnotation;
 
+  void _onPointerEnterInternal(PointerEnterEvent event) {
+    final Matrix4 transform = _getLayerTransform();
+    _onPointerEnter(event.transformed(transform));
+  }
+
+  void _onPointerHoverInternal(PointerHoverEvent event) {
+    final Matrix4 transform = _getLayerTransform();
+    _onPointerHover(event.transformed(transform));
+  }
+
+  void _onPointerExitInternal(PointerExitEvent event) {
+    final Matrix4 transform = _getLayerTransform();
+    _onPointerExit(event.transformed(transform));
+  }
+
   void _updateAnnotations() {
     bool changed = false;
     final bool hadHoverAnnotation = _hoverAnnotation != null;
@@ -2573,9 +2588,9 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
     if (RendererBinding.instance.mouseTracker.mouseIsConnected &&
         (_onPointerEnter != null || _onPointerHover != null || _onPointerExit != null)) {
       _hoverAnnotation = MouseTrackerAnnotation(
-        onEnter: _onPointerEnter,
-        onHover: _onPointerHover,
-        onExit: _onPointerExit,
+        onEnter: _onPointerEnterInternal,
+        onHover: _onPointerHoverInternal,
+        onExit: _onPointerExitInternal,
       );
       if (attached) {
         RendererBinding.instance.mouseTracker.attachAnnotation(_hoverAnnotation);
@@ -2591,6 +2606,23 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
     if (hadHoverAnnotation != hasHoverAnnotation) {
       markNeedsCompositingBitsUpdate();
     }
+  }
+
+  Matrix4 _getLayerTransform() {
+    assert(_lastAnnotationLayerUsed != null);
+    Matrix4 result = Matrix4.identity();
+    Layer previous = _lastAnnotationLayerUsed;
+    Layer current = previous.parent;
+    while (current?.parent != null) {
+      if (current is ContainerLayer) {
+        final Matrix4 r = Matrix4.identity();
+        current.applyTransform(previous, r);
+        result = PointerEvent.paintTransformToPointerEventTransform(r) * result;
+      }
+      previous = current;
+      current = current.parent;
+    }
+    return Matrix4.tryInvert(result);
   }
 
   @override
@@ -2612,17 +2644,21 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
     super.detach();
   }
 
+  Layer _lastAnnotationLayerUsed;
+
   @override
   bool get needsCompositing => _hoverAnnotation != null;
 
   @override
   void paint(PaintingContext context, Offset offset) {
+    _lastAnnotationLayerUsed = null;
     if (_hoverAnnotation != null) {
       final AnnotatedRegionLayer<MouseTrackerAnnotation> layer = AnnotatedRegionLayer<MouseTrackerAnnotation>(
         _hoverAnnotation,
         size: size,
         offset: offset,
       );
+      _lastAnnotationLayerUsed = layer;
       context.pushLayer(layer, super.paint, offset);
     }
     super.paint(context, offset);

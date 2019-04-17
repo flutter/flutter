@@ -856,7 +856,7 @@ class SliverHitTestEntry extends HitTestEntry {
   /// Creates a sliver hit test entry.
   ///
   /// The [mainAxisPosition] and [crossAxisPosition] arguments must not be null.
-  const SliverHitTestEntry(
+  SliverHitTestEntry(
     RenderSliver target, {
     @required this.mainAxisPosition,
     @required this.crossAxisPosition,

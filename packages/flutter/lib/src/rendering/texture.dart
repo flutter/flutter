@@ -66,9 +66,7 @@ class TextureBox extends RenderBox {
   }
 
   @override
-  bool hitTestSelf(Offset position) {
-    return true;
-  }
+  bool hitTestSelf(Offset position) => true;
 
   @override
   void paint(PaintingContext context, Offset offset) {

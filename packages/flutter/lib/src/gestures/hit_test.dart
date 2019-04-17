@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:collection';
+
+import 'package:vector_math/vector_math_64.dart';
+
 import 'events.dart';
 
 /// An object that can hit-test pointers.
@@ -43,13 +47,24 @@ abstract class HitTestTarget {
 /// to the event propagation phase.
 class HitTestEntry {
   /// Creates a hit test entry.
-  const HitTestEntry(this.target);
+  HitTestEntry(this.target);
 
   /// The [HitTestTarget] encountered during the hit test.
   final HitTestTarget target;
 
   @override
   String toString() => '$target';
+
+  /// Returns a matrix describing how [PointerEvent]s delivered to this
+  /// [HitTestEntry] should be transformed from the global coordinate space of
+  /// the screen to the local coordinate space of [target].
+  ///
+  /// See also:
+  ///
+  ///  * [HitTestResult.addWithPaintTransform], which is used during hit testing
+  ///    to build up the transform returned by this method.
+  Matrix4 get transform => _transform;
+  Matrix4 _transform;
 }
 
 /// The result of performing a hit test.
@@ -79,7 +94,28 @@ class HitTestResult {
   /// be added in order from most specific to least specific, typically during an
   /// upward walk of the tree being hit tested.
   void add(HitTestEntry entry) {
+    assert(entry._transform == null);
+    entry._transform = _transforms.isEmpty ? null : _transforms.last;
     _path.add(entry);
+  }
+
+  final Queue<Matrix4> _transforms = Queue<Matrix4>();
+
+  void _pushTransform(Matrix4 transform) {
+    // TODO(goderbauer): It needs to be "moreOrLessEqualTo" due to rounding errors.
+//    assert(transform.getRow(2) == Vector4(0, 0, 1, 0) && transform.getColumn(2) == Vector4(0, 0, 1, 0),
+//      'The third row and third column of a transform matrix for pointer '
+//      'events must be Vector4(0, 0, 1, 0) to ensure that a transformed '
+//      point is directly under the pointer device. Did you forget to run the paint '
+//      'matrix through PointerEvent.paintTransformToPointerEventTransform?'
+//      'The provided matrix is:\n$transform'
+//    );
+    _transforms.add(_transforms.isEmpty ? transform :  transform * _transforms.last);
+  }
+
+  void _popTransform() {
+    assert(_transforms.isNotEmpty);
+    _transforms.removeLast();
   }
 
   @override

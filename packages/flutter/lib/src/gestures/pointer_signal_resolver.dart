@@ -47,9 +47,9 @@ class PointerSignalResolver {
       assert(_currentEvent == null);
       return;
     }
-    assert(_currentEvent == event);
+    assert((_currentEvent.original ?? _currentEvent) == event);
     try {
-    _firstRegisteredCallback(event);
+    _firstRegisteredCallback(_currentEvent);
     } catch (exception, stack) {
       FlutterError.reportError(FlutterErrorDetails(
         exception: exception,
