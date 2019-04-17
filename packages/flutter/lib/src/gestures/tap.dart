@@ -102,15 +102,6 @@ typedef GestureTapCancelCallback = void Function();
 /// pointer interactions during a tap sequence are not recognized as additional
 /// taps. For example, down-1, down-2, up-1, up-2 produces only one tap on up-1.
 ///
-/// The lifecycle of events for a tap gesture is as follows:
-///
-/// * [onTapDown], which triggers after a short timeout ([deadline]) even if the
-///   gesture has not won its arena yet.
-/// * [onTapUp] and [onTap], which trigger when the pointer is released if the
-///   gesture wins the arena.
-/// * [onTapCancel], which triggers instead of [onTapUp] and [onTap] in the case
-///   of the gesture not winning the arena.
-///
 /// See also:
 ///
 ///  * [GestureDetector.onTap], which uses this recognizer.
@@ -127,15 +118,15 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
   ///
   /// If the gesture doesn't win the arena, [onAnyTapCancel] is called next.
   /// Otherwise, [onAnyTapUp] is called next.
-  /// 
+  ///
   /// {@template flutter.tapGestureRecognizer.anyButton}
-  /// It does not limit the button that triggers the tap, letting the callback
-  /// decide which gesture to respond to. 
-  /// 
-  /// However, the gesture is required keep a consistent button throughout the
-  /// lifespan, i.e. subsequent [PointerMoveEvent]s must contain the same button
+  /// It does not limit the button that triggers the tap. The callback should
+  /// decide which call to respond to based on the detail data.
+  ///
+  /// The pointer is required to keep a consistent button throughout the
+  /// gesture, i.e. subsequent [PointerMoveEvent]s must contain the same button
   /// as the first [PointerDownEvent].
-  /// 
+  ///
   /// Also, it must contain one and only one button. For example, since a stylus
   /// touching the screen is also counted as a button, a stylus tap while
   /// pressing any physical button will not be recognized.
@@ -154,7 +145,7 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
   /// This triggers once the gesture has won the arena.
   ///
   /// If the gesture doesn't win the arena, [onAnyTapCancel] is called instead.
-  /// 
+  ///
   /// {@macro flutter.tapGestureRecognizer.consistentButtons}
   ///
   /// See also:
@@ -170,10 +161,10 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
   /// This triggers if the gesture loses the arena.
   ///
   /// If the gesture wins the arena, [onAnyTapUp] is called instead.
-  /// 
+  ///
   /// It does not send any details. However, it's guaranteed that [onAnyTapDown]
   /// is called before it, which can be used to determine the button of the
-  /// canceled tap. 
+  /// canceled tap.
   ///
   /// See also:
   ///

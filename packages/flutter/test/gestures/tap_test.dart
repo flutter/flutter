@@ -83,28 +83,6 @@ void main() {
     position: Offset(22.0, 22.0),
   );
 
-  // Down/move/up sequence 5: tap sequence with left or right mouse button
-  const PointerDownEvent down5l = PointerDownEvent(
-    pointer: 5,
-    position: Offset(20.0, 20.0),
-    buttons: kPrimaryMouseButton,
-  );
-  const PointerMoveEvent move5lr = PointerMoveEvent(
-    pointer: 5,
-    position: Offset(20.0, 20.0),
-    buttons: kPrimaryMouseButton | kSecondaryMouseButton,
-  );
-  const PointerMoveEvent move5r = PointerMoveEvent(
-    pointer: 5,
-    position: Offset(20.0, 20.0),
-    buttons: kSecondaryMouseButton,
-  );
-  const PointerUpEvent up5 = PointerUpEvent(
-    pointer: 5,
-    position: Offset(20.0, 20.0),
-    buttons: 0,
-  );
-
   testGesture('Should recognize tap', (GestureTester tester) {
     final TapGestureRecognizer tap = TapGestureRecognizer();
 
@@ -501,234 +479,241 @@ void main() {
     drag.dispose();
   });
 
-  testGesture('should send the clicked buttons via details', (GestureTester tester) {
-    final TapGestureRecognizer tap = TapGestureRecognizer();
-
-    final List<String> recognized = <String>[];
-
-    tap.onTapDown = (TapDownDetails details) {
-      recognized.add('down ${details.buttons}');
-    };
-    tap.onTapUp = (TapUpDetails details) {
-      recognized.add('up');
-    };
-    tap.onTapCancel = () {
-      recognized.add('cancel');
-    };
-
-    tap.addPointer(down5l);
-    tester.closeArena(5);
-    expect(recognized, <String>[]);
-    tester.async.elapse(const Duration(milliseconds: 1000));
-    expect(recognized, <String>['down 1']);
-
-    tester.route(up5);
-    expect(recognized, <String>['down 1', 'up']);
-    GestureBinding.instance.gestureArena.sweep(5);
-
-    tap.dispose();
-  });
-
-  testGesture('changing buttons before TapDown should terminate gesture without sending cancel', (GestureTester tester) {
-    final TapGestureRecognizer tap = TapGestureRecognizer();
-
-    final List<String> recognized = <String>[];
-
-    tap.onTapDown = (TapDownDetails details) {
-      recognized.add('down ${details.buttons}');
-    };
-    tap.onTapUp = (TapUpDetails details) {
-      recognized.add('up');
-    };
-    tap.onTapCancel = () {
-      recognized.add('cancel');
-    };
-
-    tap.addPointer(down5l);
-    tester.closeArena(5);
-    expect(recognized, <String>[]);
-
-    tester.route(move5lr);
-    expect(recognized, <String>[]);
-
-    tester.route(move5r);
-    expect(recognized, <String>[]);
-
-    tester.route(up5);
-    expect(recognized, <String>[]);
-
-    tap.dispose();
-  });
-
-  testGesture('changing buttons before TapDown should not prevent the next tap', (GestureTester tester) {
-    final TapGestureRecognizer tap = TapGestureRecognizer();
-
-    final List<String> recognized = <String>[];
-
-    tap.onTapDown = (TapDownDetails details) {
-      recognized.add('down ${details.buttons}');
-    };
-    tap.onTapUp = (TapUpDetails details) {
-      recognized.add('up');
-    };
-    tap.onTapCancel = () {
-      recognized.add('cancel');
-    };
-
-    tap.addPointer(down5l);
-    tester.closeArena(5);
-
-    tester.route(move5lr);
-    tester.route(move5r);
-    tester.route(up5);
-    expect(recognized, <String>[]);
-
-    tap.addPointer(down1);
-    tester.closeArena(1);
-    tester.async.elapse(const Duration(milliseconds: 1000));
-    tester.route(up1);
-    expect(recognized, <String>['down 1', 'up']);
-
-    tap.dispose();
-  });
-
-  testGesture('changing buttons after TapDown should terminate gesture and send cancel', (GestureTester tester) {
-    final TapGestureRecognizer tap = TapGestureRecognizer();
-
-    final List<String> recognized = <String>[];
-
-    tap.onTapDown = (TapDownDetails details) {
-      recognized.add('down ${details.buttons}');
-    };
-    tap.onTapUp = (TapUpDetails details) {
-      recognized.add('up');
-    };
-    tap.onTapCancel = () {
-      recognized.add('cancel');
-    };
-
-    tap.addPointer(down5l);
-    tester.closeArena(5);
-    expect(recognized, <String>[]);
-    tester.async.elapse(const Duration(milliseconds: 1000));
-    expect(recognized, <String>['down 1']);
-
-    tester.route(move5lr);
-    expect(recognized, <String>['down 1', 'cancel']);
-
-    tester.route(move5r);
-    expect(recognized, <String>['down 1', 'cancel']);
-
-    tester.route(up5);
-    expect(recognized, <String>['down 1', 'cancel']);
-
-    tap.dispose();
-  });
-
-  testGesture('changing buttons after TapDown should not prevent the next tap', (GestureTester tester) {
-    final TapGestureRecognizer tap = TapGestureRecognizer();
-
-    final List<String> recognized = <String>[];
-
-    tap.onTapDown = (TapDownDetails details) {
-      recognized.add('down ${details.buttons}');
-    };
-    tap.onTapUp = (TapUpDetails details) {
-      recognized.add('up');
-    };
-    tap.onTapCancel = () {
-      recognized.add('cancel');
-    };
-
-    tap.addPointer(down5l);
-    tester.closeArena(5);
-    tester.async.elapse(const Duration(milliseconds: 1000));
-
-    tester.route(move5lr);
-    tester.route(move5r);
-    tester.route(up5);
-    GestureBinding.instance.gestureArena.sweep(5);
-    expect(recognized, <String>['down 1', 'cancel']);
-
-    tap.addPointer(down1);
-    tester.closeArena(1);
-    tester.async.elapse(const Duration(milliseconds: 1000));
-    tester.route(up1);
-    GestureBinding.instance.gestureArena.sweep(1);
-    expect(recognized, <String>['down 1', 'cancel', 'down 1', 'up']);
-
-    tap.dispose();
-  });
-
-  testGesture('Should not recognize taps with 0 button', (GestureTester tester) {
-    final TapGestureRecognizer tap = TapGestureRecognizer();
-
-    final List<String> recognized = <String>[];
-
-    tap.onTapDown = (TapDownDetails details) {
-      recognized.add('down');
-    };
-    tap.onTapUp = (TapUpDetails details) {
-      recognized.add('up');
-    };
-    tap.onTapCancel = () {
-      recognized.add('cancel');
-    };
-
-    const PointerDownEvent down = PointerDownEvent(
-      pointer: 1,
-      buttons: 0,
-      position: Offset(30.0, 30.0),
+  group('Enforce consistent-button restriction for onAnyTap:', () {
+    // Down/move/up sequence 5: tap sequence with left or right mouse button
+    const PointerDownEvent down5l = PointerDownEvent(
+      pointer: 5,
+      position: Offset(20.0, 20.0),
+      buttons: kPrimaryMouseButton,
     );
-
-    const PointerUpEvent up = PointerUpEvent(
-      pointer: 2,
-      buttons: 0,
-      position: Offset(31.0, 29.0),
-    );
-
-    tap.addPointer(down);
-    tester.closeArena(0);
-    tester.route(up);
-    GestureBinding.instance.gestureArena.sweep(1);
-    expect(recognized, <String>[]);
-
-    tap.dispose();
-  });
-
-  testGesture('Should not recognize taps with more than one buttons', (GestureTester tester) {
-    final TapGestureRecognizer tap = TapGestureRecognizer();
-
-    final List<String> recognized = <String>[];
-
-    tap.onTapDown = (TapDownDetails details) {
-      recognized.add('down');
-    };
-    tap.onTapUp = (TapUpDetails details) {
-      recognized.add('up');
-    };
-    tap.onTapCancel = () {
-      recognized.add('cancel');
-    };
-
-    const PointerDownEvent down = PointerDownEvent(
-      pointer: 1,
+    const PointerMoveEvent move5lr = PointerMoveEvent(
+      pointer: 5,
+      position: Offset(20.0, 20.0),
       buttons: kPrimaryMouseButton | kSecondaryMouseButton,
-      position: Offset(30.0, 30.0),
     );
-
-    const PointerUpEvent up = PointerUpEvent(
-      pointer: 2,
+    const PointerMoveEvent move5r = PointerMoveEvent(
+      pointer: 5,
+      position: Offset(20.0, 20.0),
+      buttons: kSecondaryMouseButton,
+    );
+    const PointerUpEvent up5 = PointerUpEvent(
+      pointer: 5,
+      position: Offset(20.0, 20.0),
       buttons: 0,
-      position: Offset(31.0, 29.0),
     );
 
-    tap.addPointer(down);
-    tester.closeArena(0);
-    tester.route(up);
-    GestureBinding.instance.gestureArena.sweep(1);
-    expect(recognized, <String>[]);
+    final List<String> recognized = <String>[];
+    TapGestureRecognizer tap;
+    setUp(() {
+      recognized.clear();
+      tap = TapGestureRecognizer()
+        ..onAnyTapDown = (TapDownDetails details) {
+          recognized.add('down ${details.buttons}');
+        }
+        ..onAnyTapUp = (TapUpDetails details) {
+          recognized.add('up');
+        }
+        ..onAnyTapCancel = () {
+          recognized.add('cancel');
+        };
+    });
 
-    tap.dispose();
+    testGesture('changing buttons before TapDown should terminate gesture without sending cancel', (GestureTester tester) {
+      tap.addPointer(down5l);
+      tester.closeArena(5);
+      expect(recognized, <String>[]);
+
+      tester.route(move5lr);
+      expect(recognized, <String>[]);
+
+      tester.route(move5r);
+      expect(recognized, <String>[]);
+
+      tester.route(up5);
+      expect(recognized, <String>[]);
+
+      tap.dispose();
+    });
+
+    testGesture('changing buttons before TapDown should not prevent the next tap', (GestureTester tester) {
+      tap.addPointer(down5l);
+      tester.closeArena(5);
+
+      tester.route(move5lr);
+      tester.route(move5r);
+      tester.route(up5);
+      expect(recognized, <String>[]);
+
+      tap.addPointer(down1);
+      tester.closeArena(1);
+      tester.async.elapse(const Duration(milliseconds: 1000));
+      tester.route(up1);
+      expect(recognized, <String>['down 1', 'up']);
+
+      tap.dispose();
+    });
+
+    testGesture('changing buttons after TapDown should terminate gesture and send cancel', (GestureTester tester) {
+      tap.addPointer(down5l);
+      tester.closeArena(5);
+      expect(recognized, <String>[]);
+      tester.async.elapse(const Duration(milliseconds: 1000));
+      expect(recognized, <String>['down 1']);
+
+      tester.route(move5lr);
+      expect(recognized, <String>['down 1', 'cancel']);
+
+      tester.route(move5r);
+      expect(recognized, <String>['down 1', 'cancel']);
+
+      tester.route(up5);
+      expect(recognized, <String>['down 1', 'cancel']);
+
+      tap.dispose();
+    });
+
+    testGesture('changing buttons after TapDown should not prevent the next tap', (GestureTester tester) {
+      tap.addPointer(down5l);
+      tester.closeArena(5);
+      tester.async.elapse(const Duration(milliseconds: 1000));
+
+      tester.route(move5lr);
+      tester.route(move5r);
+      tester.route(up5);
+      GestureBinding.instance.gestureArena.sweep(5);
+      expect(recognized, <String>['down 1', 'cancel']);
+
+      tap.addPointer(down1);
+      tester.closeArena(1);
+      tester.async.elapse(const Duration(milliseconds: 1000));
+      tester.route(up1);
+      GestureBinding.instance.gestureArena.sweep(1);
+      expect(recognized, <String>['down 1', 'cancel', 'down 1', 'up']);
+
+      tap.dispose();
+    });
+  });
+
+  group('Dispatch to different callbacks per buttons:', () {
+    final List<String> recognized = <String>[];
+    TapGestureRecognizer tap;
+    setUp(() {
+      recognized.clear();
+      tap = TapGestureRecognizer()
+        ..onAnyTapDown = (TapDownDetails details) {
+          recognized.add('anyDown ${details.buttons}');
+        }
+        ..onAnyTapUp = (TapUpDetails details) {
+          recognized.add('anyUp');
+        }
+        ..onAnyTapCancel = () {
+          recognized.add('anyCancel');
+        }
+        ..onTapDown = (TapDownDetails details) {
+          recognized.add('primaryDown ${details.buttons}');
+        }
+        ..onTapUp = (TapUpDetails details) {
+          recognized.add('primaryUp');
+        }
+        ..onTap = () {
+          recognized.add('primary');
+        }
+        ..onTapCancel = () {
+          recognized.add('primaryCancel');
+        }
+        ..onSecondaryTapDown = (TapDownDetails details) {
+          recognized.add('secondaryDown ${details.buttons}');
+        }
+        ..onSecondaryTapUp = (TapUpDetails details) {
+          recognized.add('secondaryUp');
+        }
+        ..onSecondaryTapCancel = () {
+          recognized.add('secondaryCancel');
+        };
+    });
+
+    testGesture('A primary tap should trigger any and primary', (GestureTester tester) {
+      const PointerDownEvent down = PointerDownEvent(
+        pointer: 1,
+        buttons: kPrimaryButton,
+        position: Offset(30.0, 30.0),
+      );
+
+      const PointerUpEvent up = PointerUpEvent(
+        pointer: 1,
+        position: Offset(31.0, 29.0),
+      );
+
+      tap.addPointer(down);
+      tester.closeArena(1);
+      tester.route(up);
+      GestureBinding.instance.gestureArena.sweep(1);
+      expect(recognized, <String>['anyDown 1', 'primaryDown 1', 'anyUp', 'primaryUp', 'primary']);
+
+      tap.dispose();
+    });
+
+    testGesture('A secondary tap should trigger any and secondary', (GestureTester tester) {
+      const PointerDownEvent down = PointerDownEvent(
+        pointer: 1,
+        buttons: kSecondaryButton,
+        position: Offset(30.0, 30.0),
+      );
+
+      const PointerUpEvent up = PointerUpEvent(
+        pointer: 1,
+        position: Offset(31.0, 29.0),
+      );
+
+      tap.addPointer(down);
+      tester.closeArena(1);
+      tester.route(up);
+      GestureBinding.instance.gestureArena.sweep(1);
+      expect(recognized, <String>['anyDown 2', 'secondaryDown 2', 'anyUp', 'secondaryUp']);
+
+      tap.dispose();
+    });
+
+    testGesture('A tap with 0 buttons should trigger nothing', (GestureTester tester) {
+      const PointerDownEvent down = PointerDownEvent(
+        pointer: 1,
+        buttons: 0,
+        position: Offset(30.0, 30.0),
+      );
+
+      const PointerUpEvent up = PointerUpEvent(
+        pointer: 1,
+        position: Offset(31.0, 29.0),
+      );
+
+      tap.addPointer(down);
+      tester.closeArena(1);
+      tester.route(up);
+      GestureBinding.instance.gestureArena.sweep(1);
+      expect(recognized, <String>[]);
+
+      tap.dispose();
+    });
+
+    testGesture('A tap with 2 buttons should trigger nothing', (GestureTester tester) {
+      const PointerDownEvent down = PointerDownEvent(
+        pointer: 1,
+        buttons: kPrimaryButton | kSecondaryButton,
+        position: Offset(30.0, 30.0),
+      );
+
+      const PointerUpEvent up = PointerUpEvent(
+        pointer: 1,
+        position: Offset(31.0, 29.0),
+      );
+
+      tap.addPointer(down);
+      tester.closeArena(1);
+      tester.route(up);
+      GestureBinding.instance.gestureArena.sweep(1);
+      expect(recognized, <String>[]);
+
+      tap.dispose();
+    });
   });
 }
