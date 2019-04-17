@@ -6,6 +6,7 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
 import 'package:mockito/mockito.dart';
@@ -20,6 +21,8 @@ void main() {
   final MockProcessManager mockProcessManager = MockProcessManager();
   final MemoryFileSystem memoryFilesystem = MemoryFileSystem();
   final MockProcess mockProcess = MockProcess();
+  final MockPlatform macosPlatform = MockPlatform();
+  final MockPlatform notMacosPlatform = MockPlatform();
 
   when(mockProcess.exitCode).thenAnswer((Invocation invocation) async {
     return 0;
@@ -30,16 +33,35 @@ void main() {
   when(mockProcess.stdout).thenAnswer((Invocation invocation) {
     return const Stream<List<int>>.empty();
   });
+  when(macosPlatform.isMacOS).thenReturn(true);
+  when(notMacosPlatform.isMacOS).thenReturn(false);
 
-  testUsingContext('Macos build fails when there is no macos project', () async {
+  testUsingContext('macOS build fails when there is no macos project', () async {
     final BuildCommand command = BuildCommand();
     applyMocksToCommand(command);
     expect(createTestCommandRunner(command).run(
       const <String>['build', 'macos']
     ), throwsA(isInstanceOf<ToolExit>()));
+  }, overrides: <Type, Generator>{
+    Platform: () => macosPlatform,
   });
 
-  testUsingContext('Macos build invokes build script', () async {
+  testUsingContext('macOS build fails on non-macOS platform', () async {
+    final BuildCommand command = BuildCommand();
+    applyMocksToCommand(command);
+    fs.file('macos/build.sh').createSync(recursive: true);
+    fs.file('pubspec.yaml').createSync();
+    fs.file('.packages').createSync();
+
+    expect(createTestCommandRunner(command).run(
+      const <String>['build', 'macos']
+    ), throwsA(isInstanceOf<ToolExit>()));
+  }, overrides: <Type, Generator>{
+    Platform: () => notMacosPlatform,
+    FileSystem: () => memoryFilesystem,
+  });
+
+  testUsingContext('macOS build invokes build script', () async {
     final BuildCommand command = BuildCommand();
     applyMocksToCommand(command);
     fs.file('macos/build.sh').createSync(recursive: true);
@@ -58,8 +80,15 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => memoryFilesystem,
     ProcessManager: () => mockProcessManager,
+    Platform: () => macosPlatform,
   });
 }
 
 class MockProcessManager extends Mock implements ProcessManager {}
 class MockProcess extends Mock implements Process {}
+class MockPlatform extends Mock implements Platform {
+  @override
+  Map<String, String> environment = <String, String>{
+    'FLUTTER_ROOT': '/',
+  };
+}

@@ -4,10 +4,9 @@
 
 import 'dart:async';
 
-import 'package:flutter_tools/src/base/platform.dart';
-
 import '../base/common.dart';
 import '../base/io.dart';
+import '../base/platform.dart';
 import '../base/process_manager.dart';
 import '../cache.dart';
 import '../convert.dart';
