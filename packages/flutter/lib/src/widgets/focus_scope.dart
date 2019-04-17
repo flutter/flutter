@@ -217,9 +217,10 @@ class Focus extends StatefulWidget {
   /// Returns true if the nearest enclosing [Focus] widget's node is focused.
   ///
   /// A convenience method to allow build methods to write:
-  /// `Focus.isOn(context)` to get whether or not the nearest [Focus] above them
-  /// in the widget hierarchy currently has the keyboard focus.
-  static bool isOn(BuildContext context) => Focus.of(context).hasFocus;
+  /// `Focus.isAt(context)` to get whether or not the nearest [Focus] or
+  /// [FocusScope] above them in the widget hierarchy currently has the keyboard
+  /// focus.
+  static bool isAt(BuildContext context) => Focus.of(context).hasFocus;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
