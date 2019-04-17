@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'events.dart';
@@ -100,33 +99,34 @@ class HitTestResult {
   /// ```dart
   /// abstract class Foo extends RenderBox {
   ///
-  /// final Matrix4 _effectiveTransform = Matrix4.rotationZ(50);
+  ///   final Matrix4 _effectiveTransform = Matrix4.rotationZ(50);
   ///
-  /// @override
-  /// void applyPaintTransform(RenderBox child, Matrix4 transform) {
-  ///   transform.multiply(_effectiveTransform);
-  /// }
-  ///
-  /// @override
-  /// bool hitTestChildren(HitTestResult result, { Offset position }) {
-  ///   final Matrix4 inverse = Matrix4.tryInvert(
-  ///     PointerEvent.paintTransformToPointerEventTransform(_effectiveTransform)
-  ///   );
-  ///
-  ///   if (inverse == null) {
-  ///     // We cannot invert the effective transform. That means the child
-  ///     // doesn't appear on screen and cannot be hit.
-  ///     return false;
+  ///   @override
+  ///   void applyPaintTransform(RenderBox child, Matrix4 transform) {
+  ///     transform.multiply(_effectiveTransform);
   ///   }
   ///
-  ///   result.pushTransform(inverse);
+  ///   @override
+  ///   bool hitTestChildren(HitTestResult result, { Offset position }) {
+  ///     final Matrix4 inverse = Matrix4.tryInvert(
+  ///       PointerEvent.paintTransformToPointerEventTransform(_effectiveTransform)
+  ///     );
   ///
-  ///   position = MatrixUtils.transformPoint(inverse, position);
-  ///   final bool absorbed = super.hitTestChildren(result, position: position);
+  ///     if (inverse == null) {
+  ///       // We cannot invert the effective transform. That means the child
+  ///       // doesn't appear on screen and cannot be hit.
+  ///       return false;
+  ///     }
   ///
-  ///   result.popTransform();
+  ///     result.pushTransform(inverse);
   ///
-  ///   return absorbed;
+  ///     position = MatrixUtils.transformPoint(inverse, position);
+  ///     final bool absorbed = super.hitTestChildren(result, position: position);
+  ///
+  ///     result.popTransform();
+  ///
+  ///     return absorbed;
+  ///   }
   /// }
   /// ```
   /// {@end-tool}
