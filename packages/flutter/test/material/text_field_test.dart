@@ -409,6 +409,8 @@ void main() {
           text: testValue
         )
     );
+    await tester.pump();
+
     // The selectWordsInRange with SelectionChangedCause.tap seems to be needed to show the toolbar.
     // (This is true even if we provide selection parameter to the TextEditingValue above.)
     final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
