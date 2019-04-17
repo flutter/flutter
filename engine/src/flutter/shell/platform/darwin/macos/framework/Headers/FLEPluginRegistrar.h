@@ -16,6 +16,9 @@
 #import "FlutterMacros.h"
 #endif
 
+// TODO: Merge this file and FLEPlugin.h with FlutterPlugin.h, sharing all but
+// the platform-specific methods.
+
 /**
  * The protocol for an object managing registration for a plugin. It provides access to application
  * context, as as allowing registering for callbacks for handling various conditions.
@@ -44,5 +47,32 @@ FLUTTER_EXPORT
  */
 - (void)addMethodCallDelegate:(nonnull id<FLEPlugin>)delegate
                       channel:(nonnull FlutterMethodChannel*)channel;
+
+@end
+
+/**
+ * A registry of Flutter macOS plugins.
+ *
+ * Plugins are identified by unique string keys, typically the name of the
+ * plugin's main class.
+ *
+ * Plugins typically need contextual information and the ability to register
+ * callbacks for various application events. To keep the API of the registry
+ * focused, these facilities are not provided directly by the registry, but by
+ * a `FlutterPluginRegistrar`, created by the registry in exchange for the unique
+ * key of the plugin.
+ *
+ * There is no implied connection between the registry and the registrar.
+ * Specifically, callbacks registered by the plugin via the registrar may be
+ * relayed directly to the underlying iOS application objects.
+ */
+@protocol FLEPluginRegistry <NSObject>
+
+/**
+ * Returns a registrar for registering a plugin.
+ *
+ * @param pluginKey The unique key identifying the plugin.
+ */
+- (nonnull id<FLEPluginRegistrar>)registrarForPlugin:(nonnull NSString*)pluginKey;
 
 @end

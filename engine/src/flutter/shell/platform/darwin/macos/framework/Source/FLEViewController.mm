@@ -251,13 +251,6 @@ static void CommonInit(FLEViewController* controller) {
                              commandLineArguments:arguments];
 }
 
-- (id<FLEPluginRegistrar>)registrarForPlugin:(NSString*)pluginName {
-  // Currently, the view controller acts as the registrar for all plugins, so the
-  // name is ignored. It is part of the API to reduce churn in the future when
-  // aligning more closely with the Flutter registrar system.
-  return self;
-}
-
 #pragma mark - Framework-internal methods
 
 - (void)addKeyResponder:(NSResponder*)responder {
@@ -527,6 +520,14 @@ static void CommonInit(FLEViewController* controller) {
   [channel setMethodCallHandler:^(FlutterMethodCall* call, FlutterResult result) {
     [delegate handleMethodCall:call result:result];
   }];
+}
+
+#pragma mark - FLEPluginRegistry
+
+- (id<FLEPluginRegistrar>)registrarForPlugin:(NSString*)pluginName {
+  // Currently, the view controller acts as the registrar for all plugins, so the
+  // name is ignored.
+  return self;
 }
 
 #pragma mark - NSResponder
