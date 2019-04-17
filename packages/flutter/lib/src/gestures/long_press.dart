@@ -313,14 +313,33 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
     );
     if (onAnyLongPressStart != null)
       invokeCallback<void>('onAnyLongPressStart',
-        () => onLongPressStart(details));
+        () => onAnyLongPressStart(details));
     switch (_initialButtons) {
       case kPrimaryButton:
-        if (onLongPress != null)
-          invokeCallback<void>('onLongPress', onLongPress);
         if (onLongPressStart != null)
           invokeCallback<void>('onLongPressStart',
             () => onLongPressStart(details));
+        if (onLongPress != null)
+          invokeCallback<void>('onLongPress', onLongPress);
+        break;
+      default:
+    }
+  }
+
+  void _handleLongPressMoveUpdate(PointerEvent event) {
+    final LongPressMoveUpdateDetails details = LongPressMoveUpdateDetails(
+      globalPosition: event.position,
+      offsetFromOrigin: event.position - _longPressOrigin,
+      buttons: _initialButtons,
+    );
+    if (onAnyLongPressMoveUpdate != null)
+      invokeCallback<void>('onAnyLongPressMoveUpdate',
+        () => onAnyLongPressMoveUpdate(details));
+    switch (_initialButtons) {
+      case kPrimaryButton:
+        if (onLongPressMoveUpdate != null)
+          invokeCallback<void>('onLongPressMoveUpdate',
+            () => onLongPressMoveUpdate(details));
         break;
       default:
     }
@@ -341,25 +360,6 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
             () => onLongPressEnd(details));
         if (onLongPressUp != null)
           invokeCallback<void>('onLongPressUp', onLongPressUp);
-        break;
-      default:
-    }
-  }
-
-  void _handleLongPressMoveUpdate(PointerEvent event) {
-    final LongPressMoveUpdateDetails details = LongPressMoveUpdateDetails(
-      globalPosition: event.position,
-      offsetFromOrigin: event.position - _longPressOrigin,
-      buttons: _initialButtons,
-    );
-    if (onAnyLongPressMoveUpdate != null)
-      invokeCallback<void>('onAnyLongPressMoveUpdate',
-        () => onAnyLongPressMoveUpdate(details));
-    switch (_initialButtons) {
-      case kPrimaryButton:
-        if (onLongPressMoveUpdate != null)
-          invokeCallback<void>('onLongPressMoveUpdate',
-            () => onLongPressMoveUpdate(details));
         break;
       default:
     }

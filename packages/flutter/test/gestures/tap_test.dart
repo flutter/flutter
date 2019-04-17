@@ -646,9 +646,15 @@ void main() {
 
       tap.addPointer(down);
       tester.closeArena(1);
+      expect(recognized, <String>[]);
+
+      tester.async.elapse(const Duration(milliseconds: 500));
+      expect(recognized, <String>['anyDown 1', 'primaryDown 1']);
+      recognized.clear();
+
       tester.route(up);
       GestureBinding.instance.gestureArena.sweep(1);
-      expect(recognized, <String>['anyDown 1', 'primaryDown 1', 'anyUp', 'primaryUp', 'primary']);
+      expect(recognized, <String>['anyUp', 'primaryUp', 'primary']);
 
       tap.dispose();
     });
@@ -667,9 +673,15 @@ void main() {
 
       tap.addPointer(down);
       tester.closeArena(1);
+      expect(recognized, <String>[]);
+
+      tester.async.elapse(const Duration(milliseconds: 500));
+      expect(recognized, <String>['anyDown 2', 'secondaryDown 2']);
+      recognized.clear();
+
       tester.route(up);
       GestureBinding.instance.gestureArena.sweep(1);
-      expect(recognized, <String>['anyDown 2', 'secondaryDown 2', 'anyUp', 'secondaryUp']);
+      expect(recognized, <String>['anyUp', 'secondaryUp']);
 
       tap.dispose();
     });
