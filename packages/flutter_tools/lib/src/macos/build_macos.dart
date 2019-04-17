@@ -34,7 +34,7 @@ Future<void> buildMacOS(FlutterProject flutterProject, BuildInfo buildInfo) asyn
     .transform(const LineSplitter())
     .listen(printTrace);
   } finally {
-    status.toString();
+    status.cancel();
   }
   final int result = await process.exitCode;
   if (result != 0) {
