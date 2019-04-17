@@ -529,10 +529,10 @@ String extractCloudAuthTokenArg(List<String> rawArgs) {
   return token;
 }
 
-final RegExp obsRegExp =
+final RegExp _obsRegExp =
   RegExp('An Observatory debugger .* is available at: ');
-final RegExp obsPortRegExp = RegExp('(\\S+:(\\d+)/\\S*)\$');
-final RegExp obsUriRegExp = RegExp('((http|\/\/)[a-zA-Z0-9:/=\.\\[\\]]+)');
+final RegExp _obsPortRegExp = RegExp('(\\S+:(\\d+)/\\S*)\$');
+final RegExp _obsUriRegExp = RegExp('((http|\/\/)[a-zA-Z0-9:/=_\\-\.\\[\\]]+)');
 
 /// Tries to extract a port from the string.
 ///
@@ -541,13 +541,13 @@ final RegExp obsUriRegExp = RegExp('((http|\/\/)[a-zA-Z0-9:/=\.\\[\\]]+)');
 int parseServicePort(String line, {
   Pattern prefix,
 }) {
-  prefix ??= obsRegExp;
+  prefix ??= _obsRegExp;
   final Match prefixMatch = prefix.matchAsPrefix(line);
   if (prefixMatch == null) {
     return null;
   }
   final List<Match> matches =
-    obsPortRegExp.allMatches(line, prefixMatch.end).toList();
+    _obsPortRegExp.allMatches(line, prefixMatch.end).toList();
   return matches.isEmpty ? null : int.parse(matches[0].group(2));
 }
 
@@ -558,13 +558,13 @@ int parseServicePort(String line, {
 Uri parseServiceUri(String line, {
   Pattern prefix,
 }) {
-  prefix ??= obsRegExp;
+  prefix ??= _obsRegExp;
   final Match prefixMatch = prefix.matchAsPrefix(line);
   if (prefixMatch == null) {
     return null;
   }
   final List<Match> matches =
-    obsUriRegExp.allMatches(line, prefixMatch.end).toList();
+    _obsUriRegExp.allMatches(line, prefixMatch.end).toList();
   return matches.isEmpty ? null : Uri.parse(matches[0].group(0));
 }
 

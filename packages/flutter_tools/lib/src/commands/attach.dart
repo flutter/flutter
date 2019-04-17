@@ -173,7 +173,6 @@ class AttachCommand extends FlutterCommand {
       // simulators support it.
       // If/when we do this on Android or other platforms, we can update it here.
       if (device is IOSDevice || device is IOSSimulator) {
-        return MDnsObservatoryPortDiscovery().queryForPort(applicationId: appId);
       }
       return null;
     }
@@ -185,9 +184,13 @@ class AttachCommand extends FlutterCommand {
       : null;
 
     Uri observatoryUri;
-    bool usesIpv6 = false;
+    bool usesIpv6 = ipv6;
+    final String ipv6Loopback = InternetAddress.loopbackIPv6.address;
+    final String ipv4Loopback = InternetAddress.loopbackIPv4.address;
+    final String hostname = usesIpv6 ? ipv6Loopback : ipv4Loopback;
+
     bool attachLogger = false;
-    if (devicePort == null && debugUri == null) {
+    if (devicePort == null  && debugUri == null) {
       if (device is FuchsiaDevice) {
         attachLogger = true;
         final String module = argResults['module'];
@@ -207,7 +210,12 @@ class AttachCommand extends FlutterCommand {
           }
           rethrow;
         }
-      } else {
+      } else if ((device is IOSDevice) || (device is IOSSimulator)) {
+        final MDnsObservatoryDiscoveryResult result = await MDnsObservatoryDiscovery().query(applicationId: appId);
+        observatoryUri = await _buildObservatoryUri(device, hostname, result.port, result.authCode);
+      }
+      // If MDNS discovery fails or we're not on iOS, fallback to ProtocolDiscovery.
+      if (observatoryUri == null) {
         ProtocolDiscovery observatoryDiscovery;
         try {
           observatoryDiscovery = ProtocolDiscovery.observatory(
@@ -224,8 +232,8 @@ class AttachCommand extends FlutterCommand {
         }
       }
     } else {
-      usesIpv6 = ipv6;
-      observatoryUri = await _buildObservatoryUri(device, devicePort, usesIpv6);
+      observatoryUri = await _buildObservatoryUri(device,
+          debugUri?.host ?? hostname, devicePort, debugUri?.path);
     }
     try {
       final bool useHot = getBuildInfo().isDebug;
@@ -301,21 +309,10 @@ class AttachCommand extends FlutterCommand {
   Future<void> _validateArguments() async { }
 
   Future<Uri> _buildObservatoryUri(Device device,
-      int devicePort, bool usesIpv6) async {
-    final String ipv4Loopback = InternetAddress.loopbackIPv4.address;
-    final String ipv6Loopback = InternetAddress.loopbackIPv6.address;
-    if (debugUri != null) {
-      final int localPort = observatoryPort
-        ?? await device.portForwarder.forward(debugUri.port);
-     return Uri(scheme: 'http', host: debugUri.host, port:
-          localPort, path: debugUri.path);
-    } else {
-      final int localPort = observatoryPort
+      String host, int devicePort, [String authCode]) async {
+    final int localPort = observatoryPort
         ?? await device.portForwarder.forward(devicePort);
-      return usesIpv6
-        ? Uri.parse('http://[$ipv6Loopback]:$localPort/')
-        : Uri.parse('http://$ipv4Loopback:$localPort/');
-    }
+    return Uri(scheme: 'http', host: host, port: localPort, path: authCode);
   }
 }
 
@@ -350,15 +347,21 @@ class HotRunnerFactory {
   );
 }
 
-/// A wrapper around [MDnsClient] to find a Dart observatory port.
-class MDnsObservatoryPortDiscovery {
-  /// Creates a new [MDnsObservatoryPortDiscovery] object.
+class MDnsObservatoryDiscoveryResult {
+  final int port;
+  final String authCode;
+  MDnsObservatoryDiscoveryResult(this.port, this.authCode);
+}
+
+/// A wrapper around [MDnsClient] to find a Dart observatory instance.
+class MDnsObservatoryDiscovery {
+  /// Creates a new [MDnsObservatoryDiscovery] object.
   ///
   /// The [client] parameter will be defaulted to a new [MDnsClient] if null.
   /// The [applicationId] parameter may be null, and can be used to
   /// automatically select which application to use if multiple are advertising
   /// Dart observatory ports.
-  MDnsObservatoryPortDiscovery({MDnsClient mdnsClient})
+  MDnsObservatoryDiscovery({MDnsClient mdnsClient})
     : client = mdnsClient ?? MDnsClient();
 
   /// The [MDnsClient] used to do a lookup.
@@ -366,14 +369,14 @@ class MDnsObservatoryPortDiscovery {
 
   static const String dartObservatoryName = '_dartobservatory._tcp.local';
 
-  /// Executes an mDNS query for a Dart Observatory port.
+  /// Executes an mDNS query for a Dart Observatory.
   ///
   /// The [applicationId] parameter may be used to specify which application
   /// to find.  For Android, it refers to the package name; on iOS, it refers to
   /// the bundle ID.
   ///
-  /// If it is not null, this method will find the port of the
-  /// Dart Observatory for that application. If it cannot find a Dart
+  /// If it is not null, this method will find the port and authentication code
+  /// of the Dart Observatory for that application. If it cannot find a Dart
   /// Observatory matching that application identifier, it will call
   /// [throwToolExit].
   ///
@@ -381,9 +384,10 @@ class MDnsObservatoryPortDiscovery {
   /// prompted with a list of available observatory ports and asked to select
   /// one.
   ///
-  /// If it is null and there is only one available port, it will return that
-  /// port regardless of what application the port is for.
-  Future<int> queryForPort({String applicationId}) async {
+  /// If it is null and there is only one available instance of Observatory,
+  /// it will return that instance's information regardless of what application
+  /// the Observatory instance is for.
+  Future<MDnsObservatoryDiscoveryResult> query({String applicationId}) async {
     printStatus('Checking for advertised Dart observatories...');
     try {
       await client.start();
@@ -418,7 +422,7 @@ class MDnsObservatoryPortDiscovery {
         buffer.writeln('There are multiple observatory ports available.');
         buffer.writeln('Rerun this command with one of the following passed in as the appId:');
         buffer.writeln('');
-        for (final String uniqueDomainName in uniqueDomainNames) {
+         for (final String uniqueDomainName in uniqueDomainNames) {
           buffer.writeln('  flutter attach --app-id ${uniqueDomainName.replaceAll('.$dartObservatoryName', '')}');
         }
         throwToolExit(buffer.toString());
@@ -439,7 +443,23 @@ class MDnsObservatoryPortDiscovery {
         printError('Unexpectedly found more than one observatory report for $domainName '
                    '- using first one (${srv.first.port}).');
       }
-      return srv.first.port;
+      printStatus('Checking for authentication code for $domainName');
+      final List<TxtResourceRecord> txt = await client
+        .lookup<TxtResourceRecord>(
+            ResourceRecordQuery.text(domainName),
+        )
+        .toList();
+      String authCode = '';
+      if (txt.isNotEmpty) {
+        String raw = txt.first.text;
+        // TXT has a format of [<length byte>, text], so if the length is 2,
+        // that means that TXT is empty.
+        if (raw.length > 2) {
+          // Remove length byte from raw txt.
+          authCode = raw.substring(1);
+        }
+      }
+      return MDnsObservatoryDiscoveryResult(srv.first.port, authCode);
     } finally {
       client.stop();
     }
