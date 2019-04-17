@@ -11,7 +11,7 @@
 
 namespace flutter {
 
-class AndroidExternalTextureGL : public flow::Texture {
+class AndroidExternalTextureGL : public flutter::Texture {
  public:
   AndroidExternalTextureGL(
       int64_t id,

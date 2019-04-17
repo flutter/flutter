@@ -74,7 +74,7 @@ bool IOSSurfaceGL::GLContextPresent() {
   return IsValid() && render_target_->PresentRenderBuffer();
 }
 
-flow::ExternalViewEmbedder* IOSSurfaceGL::GetExternalViewEmbedder() {
+flutter::ExternalViewEmbedder* IOSSurfaceGL::GetExternalViewEmbedder() {
   if (IsIosEmbeddedViewsPreviewEnabled()) {
     return this;
   } else {
@@ -101,7 +101,8 @@ std::vector<SkCanvas*> IOSSurfaceGL::GetCurrentCanvases() {
   return platform_views_controller->GetCurrentCanvases();
 }
 
-SkCanvas* IOSSurfaceGL::CompositeEmbeddedView(int view_id, const flow::EmbeddedViewParams& params) {
+SkCanvas* IOSSurfaceGL::CompositeEmbeddedView(int view_id,
+                                              const flutter::EmbeddedViewParams& params) {
   FlutterPlatformViewsController* platform_views_controller = GetPlatformViewsController();
   FML_CHECK(platform_views_controller != nullptr);
   return platform_views_controller->CompositeEmbeddedView(view_id, params);

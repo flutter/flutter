@@ -4,7 +4,7 @@
 
 #include "flutter/flow/texture.h"
 
-namespace flow {
+namespace flutter {
 
 TextureRegistry::TextureRegistry() = default;
 
@@ -39,4 +39,4 @@ Texture::Texture(int64_t id) : id_(id) {}
 
 Texture::~Texture() = default;
 
-}  // namespace flow
+}  // namespace flutter

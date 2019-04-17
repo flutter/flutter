@@ -11,7 +11,7 @@
 #include "flutter/flow/raster_cache.h"
 #include "flutter/flow/skia_gpu_object.h"
 
-namespace flow {
+namespace flutter {
 
 class PictureLayer : public Layer {
  public:
@@ -43,6 +43,6 @@ class PictureLayer : public Layer {
   FML_DISALLOW_COPY_AND_ASSIGN(PictureLayer);
 };
 
-}  // namespace flow
+}  // namespace flutter
 
 #endif  // FLUTTER_FLOW_LAYERS_PICTURE_LAYER_H_

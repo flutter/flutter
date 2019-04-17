@@ -10,7 +10,7 @@
 
 #endif  // defined(OS_FUCHSIA)
 
-namespace flow {
+namespace flutter {
 
 ClipPathLayer::ClipPathLayer(Clip clip_behavior)
     : clip_behavior_(clip_behavior) {
@@ -69,4 +69,4 @@ void ClipPathLayer::Paint(PaintContext& context) const {
   }
 }
 
-}  // namespace flow
+}  // namespace flutter

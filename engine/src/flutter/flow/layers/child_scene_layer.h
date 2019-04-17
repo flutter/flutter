@@ -12,7 +12,7 @@
 #include "flutter/flow/layers/layer.h"
 #include "flutter/flow/scene_update_context.h"
 
-namespace flow {
+namespace flutter {
 
 // Layer that represents an embedded child.
 class ChildSceneLayer : public Layer {
@@ -40,6 +40,6 @@ class ChildSceneLayer : public Layer {
   FML_DISALLOW_COPY_AND_ASSIGN(ChildSceneLayer);
 };
 
-}  // namespace flow
+}  // namespace flutter
 
 #endif  // FLUTTER_FLOW_LAYERS_CHILD_SCENE_LAYER_H_

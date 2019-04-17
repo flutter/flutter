@@ -16,7 +16,7 @@
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkPictureRecorder.h"
 
-namespace flow {
+namespace flutter {
 
 class LayerTree;
 
@@ -97,6 +97,6 @@ class CompositorContext {
   FML_DISALLOW_COPY_AND_ASSIGN(CompositorContext);
 };
 
-}  // namespace flow
+}  // namespace flutter
 
 #endif  // FLUTTER_FLOW_COMPOSITOR_CONTEXT_H_

@@ -9,12 +9,12 @@
 #include "third_party/skia/include/core/SkColor.h"
 #include "third_party/skia/include/core/SkRect.h"
 
-namespace flow {
+namespace flutter {
 
 void DrawCheckerboard(SkCanvas* canvas, SkColor c1, SkColor c2, int size);
 
 void DrawCheckerboard(SkCanvas* canvas, const SkRect& rect);
 
-}  // namespace flow
+}  // namespace flutter
 
 #endif  // FLUTTER_FLOW_PAINT_UTILS_H_

@@ -56,7 +56,7 @@ Surface::Surface() = default;
 
 Surface::~Surface() = default;
 
-flow::ExternalViewEmbedder* Surface::GetExternalViewEmbedder() {
+flutter::ExternalViewEmbedder* Surface::GetExternalViewEmbedder() {
   return nullptr;
 }
 

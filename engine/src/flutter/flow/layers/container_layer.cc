@@ -4,7 +4,7 @@
 
 #include "flutter/flow/layers/container_layer.h"
 
-namespace flow {
+namespace flutter {
 
 ContainerLayer::ContainerLayer() {}
 
@@ -69,4 +69,4 @@ void ContainerLayer::UpdateSceneChildren(SceneUpdateContext& context) {
 
 #endif  // defined(OS_FUCHSIA)
 
-}  // namespace flow
+}  // namespace flutter

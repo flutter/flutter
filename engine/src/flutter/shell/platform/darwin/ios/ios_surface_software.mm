@@ -127,7 +127,7 @@ bool IOSSurfaceSoftware::PresentBackingStore(sk_sp<SkSurface> backing_store) {
   return true;
 }
 
-flow::ExternalViewEmbedder* IOSSurfaceSoftware::GetExternalViewEmbedder() {
+flutter::ExternalViewEmbedder* IOSSurfaceSoftware::GetExternalViewEmbedder() {
   if (IsIosEmbeddedViewsPreviewEnabled()) {
     return this;
   } else {
@@ -154,7 +154,7 @@ std::vector<SkCanvas*> IOSSurfaceSoftware::GetCurrentCanvases() {
 }
 
 SkCanvas* IOSSurfaceSoftware::CompositeEmbeddedView(int view_id,
-                                                    const flow::EmbeddedViewParams& params) {
+                                                    const flutter::EmbeddedViewParams& params) {
   FlutterPlatformViewsController* platform_views_controller = GetPlatformViewsController();
   FML_CHECK(platform_views_controller != nullptr);
   return platform_views_controller->CompositeEmbeddedView(view_id, params);

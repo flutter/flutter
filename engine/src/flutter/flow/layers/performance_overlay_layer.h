@@ -10,7 +10,7 @@
 #include "flutter/flow/layers/layer.h"
 #include "flutter/fml/macros.h"
 
-namespace flow {
+namespace flutter {
 
 const int kDisplayRasterizerStatistics = 1 << 0;
 const int kVisualizeRasterizerStatistics = 1 << 1;
@@ -31,6 +31,6 @@ class PerformanceOverlayLayer : public Layer {
   FML_DISALLOW_COPY_AND_ASSIGN(PerformanceOverlayLayer);
 };
 
-}  // namespace flow
+}  // namespace flutter
 
 #endif  // FLUTTER_FLOW_LAYERS_PERFORMANCE_OVERLAY_LAYER_H_

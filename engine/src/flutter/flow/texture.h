@@ -11,7 +11,7 @@
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 
-namespace flow {
+namespace flutter {
 
 class Texture {
  protected:
@@ -70,6 +70,6 @@ class TextureRegistry {
   FML_DISALLOW_COPY_AND_ASSIGN(TextureRegistry);
 };
 
-}  // namespace flow
+}  // namespace flutter
 
 #endif  // FLUTTER_FLOW_TEXTURE_H_

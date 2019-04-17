@@ -52,7 +52,7 @@ class MultiFrameCodec : public Codec {
       std::unique_ptr<DartPersistentValue> callback,
       fml::RefPtr<fml::TaskRunner> ui_task_runner,
       fml::WeakPtr<GrContext> resourceContext,
-      fml::RefPtr<flow::SkiaUnrefQueue> unref_queue,
+      fml::RefPtr<flutter::SkiaUnrefQueue> unref_queue,
       size_t trace_id);
 
   const std::unique_ptr<SkCodec> codec_;

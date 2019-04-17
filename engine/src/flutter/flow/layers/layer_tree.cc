@@ -9,7 +9,7 @@
 #include "third_party/skia/include/core/SkPictureRecorder.h"
 #include "third_party/skia/include/utils/SkNWayCanvas.h"
 
-namespace flow {
+namespace flutter {
 
 LayerTree::LayerTree()
     : frame_size_{},
@@ -150,4 +150,4 @@ sk_sp<SkPicture> LayerTree::Flatten(const SkRect& bounds) {
   return recorder.finishRecordingAsPicture();
 }
 
-}  // namespace flow
+}  // namespace flutter

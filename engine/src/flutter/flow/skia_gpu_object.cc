@@ -6,7 +6,7 @@
 
 #include "flutter/fml/message_loop.h"
 
-namespace flow {
+namespace flutter {
 
 SkiaUnrefQueue::SkiaUnrefQueue(fml::RefPtr<fml::TaskRunner> task_runner,
                                fml::TimeDelta delay)
@@ -41,4 +41,4 @@ void SkiaUnrefQueue::Drain() {
   }
 }
 
-}  // namespace flow
+}  // namespace flutter

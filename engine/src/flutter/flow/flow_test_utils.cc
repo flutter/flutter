@@ -16,7 +16,7 @@
 
 #include <string>
 
-namespace flow {
+namespace flutter {
 
 static std::string gGoldenDir;
 static std::string gFontFile;
@@ -37,4 +37,4 @@ void SetFontFile(const std::string& file) {
   gFontFile = file;
 }
 
-}  // namespace flow
+}  // namespace flutter

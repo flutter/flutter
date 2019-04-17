@@ -17,7 +17,7 @@
 #include "flutter/flow/scene_update_context.h"
 #include "flutter/fml/macros.h"
 
-namespace flow {
+namespace flutter {
 
 // Represents a Scenic |ExportNode| resource that exports an |EntityNode| to
 // another session.
@@ -45,6 +45,6 @@ class ExportNode {
   FML_DISALLOW_COPY_AND_ASSIGN(ExportNode);
 };
 
-}  // namespace flow
+}  // namespace flutter
 
 #endif  // FLUTTER_FLOW_EXPORT_NODE_H_

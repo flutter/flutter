@@ -4,7 +4,7 @@
 
 #include "flutter/flow/layers/transform_layer.h"
 
-namespace flow {
+namespace flutter {
 
 TransformLayer::TransformLayer() {
   transform_.setIdentity();
@@ -69,4 +69,4 @@ void TransformLayer::Paint(PaintContext& context) const {
   PaintChildren(context);
 }
 
-}  // namespace flow
+}  // namespace flutter

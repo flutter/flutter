@@ -7,7 +7,7 @@
 #include "flutter/flow/paint_utils.h"
 #include "third_party/skia/include/core/SkColorFilter.h"
 
-namespace flow {
+namespace flutter {
 
 Layer::Layer()
     : parent_(nullptr),
@@ -55,4 +55,4 @@ Layer::AutoSaveLayer::~AutoSaveLayer() {
   paint_context_.internal_nodes_canvas->restore();
 }
 
-}  // namespace flow
+}  // namespace flutter

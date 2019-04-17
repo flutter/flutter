@@ -8,7 +8,8 @@
 
 #include "third_party/skia/include/core/SkString.h"
 
-std::ostream& operator<<(std::ostream& os, const flow::MatrixDecomposition& m) {
+std::ostream& operator<<(std::ostream& os,
+                         const flutter::MatrixDecomposition& m) {
   if (!m.IsValid()) {
     os << "Invalid Matrix!" << std::endl;
     return os;
@@ -72,7 +73,7 @@ std::ostream& operator<<(std::ostream& os, const SkPoint& r) {
 }
 
 std::ostream& operator<<(std::ostream& os,
-                         const flow::PictureRasterCacheKey& k) {
+                         const flutter::PictureRasterCacheKey& k) {
   os << "Picture: " << k.id() << " matrix: " << k.matrix();
   return os;
 }

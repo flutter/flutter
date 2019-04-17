@@ -9,7 +9,7 @@
 namespace {
 
 using ViewHolderBindings =
-    std::unordered_map<zx_koid_t, std::unique_ptr<flow::ViewHolder>>;
+    std::unordered_map<zx_koid_t, std::unique_ptr<flutter::ViewHolder>>;
 
 FML_THREAD_LOCAL fml::ThreadLocal tls_view_holder_bindings([](intptr_t value) {
   delete reinterpret_cast<ViewHolderBindings*>(value);
@@ -47,7 +47,7 @@ fuchsia::ui::gfx::ViewProperties ToViewProperties(float width,
 
 }  // namespace
 
-namespace flow {
+namespace flutter {
 
 ViewHolder::ViewHolder(fml::RefPtr<fml::TaskRunner> ui_task_runner,
                        fuchsia::ui::views::ViewHolderToken view_holder_token,
@@ -148,4 +148,4 @@ void ViewHolder::SetProperties(double width,
   has_pending_properties_ = true;
 }
 
-}  // namespace flow
+}  // namespace flutter

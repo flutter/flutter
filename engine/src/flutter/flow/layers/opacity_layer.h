@@ -7,7 +7,7 @@
 
 #include "flutter/flow/layers/container_layer.h"
 
-namespace flow {
+namespace flutter {
 
 class OpacityLayer : public ContainerLayer {
  public:
@@ -41,6 +41,6 @@ class OpacityLayer : public ContainerLayer {
   FML_DISALLOW_COPY_AND_ASSIGN(OpacityLayer);
 };
 
-}  // namespace flow
+}  // namespace flutter
 
 #endif  // FLUTTER_FLOW_LAYERS_OPACITY_LAYER_H_

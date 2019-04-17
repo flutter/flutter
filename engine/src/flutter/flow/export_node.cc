@@ -9,7 +9,7 @@
 namespace {
 
 using ExportNodeBindings =
-    std::unordered_map<zx_koid_t, std::unique_ptr<flow::ExportNode>>;
+    std::unordered_map<zx_koid_t, std::unique_ptr<flutter::ExportNode>>;
 
 FML_THREAD_LOCAL fml::ThreadLocal tls_export_node_bindings([](intptr_t value) {
   delete reinterpret_cast<ExportNodeBindings*>(value);
@@ -17,7 +17,7 @@ FML_THREAD_LOCAL fml::ThreadLocal tls_export_node_bindings([](intptr_t value) {
 
 }  // namespace
 
-namespace flow {
+namespace flutter {
 
 ExportNode::ExportNode(zx::eventpair export_token)
     : pending_export_token_(std::move(export_token)) {
@@ -82,4 +82,4 @@ void ExportNode::UpdateScene(SceneUpdateContext& context,
                    : fuchsia::ui::gfx::HitTestBehavior::kSuppress);
 }
 
-}  // namespace flow
+}  // namespace flutter

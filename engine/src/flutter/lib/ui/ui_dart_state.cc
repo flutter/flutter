@@ -78,7 +78,7 @@ const TaskRunners& UIDartState::GetTaskRunners() const {
   return task_runners_;
 }
 
-fml::RefPtr<flow::SkiaUnrefQueue> UIDartState::GetSkiaUnrefQueue() const {
+fml::RefPtr<flutter::SkiaUnrefQueue> UIDartState::GetSkiaUnrefQueue() const {
   if (!io_manager_) {
     return nullptr;
   }

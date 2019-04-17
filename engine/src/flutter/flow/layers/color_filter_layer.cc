@@ -4,7 +4,7 @@
 
 #include "flutter/flow/layers/color_filter_layer.h"
 
-namespace flow {
+namespace flutter {
 
 ColorFilterLayer::ColorFilterLayer() = default;
 
@@ -22,4 +22,4 @@ void ColorFilterLayer::Paint(PaintContext& context) const {
   PaintChildren(context);
 }
 
-}  // namespace flow
+}  // namespace flutter

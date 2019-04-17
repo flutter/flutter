@@ -121,7 +121,7 @@ SceneHost::SceneHost(fml::RefPtr<zircon::dart::Handle> exportTokenHandle)
   gpu_task_runner_->PostTask(
       [id = id_, handle = std::move(exportTokenHandle)]() {
         auto export_token = zx::eventpair(handle->ReleaseHandle());
-        flow::ExportNode::Create(id, std::move(export_token));
+        flutter::ExportNode::Create(id, std::move(export_token));
       });
 }
 
@@ -163,9 +163,9 @@ SceneHost::SceneHost(fml::RefPtr<zircon::dart::Handle> viewHolderTokenHandle,
                               bind_callback = std::move(bind_callback)]() {
     auto view_holder_token =
         scenic::ToViewHolderToken(zx::eventpair(handle->ReleaseHandle()));
-    flow::ViewHolder::Create(id, std::move(ui_task_runner),
-                             std::move(view_holder_token),
-                             std::move(bind_callback));
+    flutter::ViewHolder::Create(id, std::move(ui_task_runner),
+                                std::move(view_holder_token),
+                                std::move(bind_callback));
   });
 }
 
@@ -176,9 +176,11 @@ SceneHost::~SceneHost() {
     FML_DCHECK(bindings);
     bindings->erase(id_);
 
-    gpu_task_runner_->PostTask([id = id_]() { flow::ViewHolder::Destroy(id); });
+    gpu_task_runner_->PostTask(
+        [id = id_]() { flutter::ViewHolder::Destroy(id); });
   } else {
-    gpu_task_runner_->PostTask([id = id_]() { flow::ExportNode::Destroy(id); });
+    gpu_task_runner_->PostTask(
+        [id = id_]() { flutter::ExportNode::Destroy(id); });
   }
 }
 
@@ -217,7 +219,7 @@ void SceneHost::setProperties(double width,
 
   gpu_task_runner_->PostTask([id = id_, width, height, insetTop, insetRight,
                               insetBottom, insetLeft, focusable]() {
-    auto* view_holder = flow::ViewHolder::FromId(id);
+    auto* view_holder = flutter::ViewHolder::FromId(id);
     FML_DCHECK(view_holder);
 
     view_holder->SetProperties(width, height, insetTop, insetRight, insetBottom,

@@ -7,7 +7,7 @@
 
 #include "flutter/flow/layers/container_layer.h"
 
-namespace flow {
+namespace flutter {
 
 class ColorFilterLayer : public ContainerLayer {
  public:
@@ -27,6 +27,6 @@ class ColorFilterLayer : public ContainerLayer {
   FML_DISALLOW_COPY_AND_ASSIGN(ColorFilterLayer);
 };
 
-}  // namespace flow
+}  // namespace flutter
 
 #endif  // FLUTTER_FLOW_LAYERS_COLOR_FILTER_LAYER_H_

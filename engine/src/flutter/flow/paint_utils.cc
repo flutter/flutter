@@ -10,7 +10,7 @@
 #include "third_party/skia/include/core/SkPaint.h"
 #include "third_party/skia/include/core/SkShader.h"
 
-namespace flow {
+namespace flutter {
 
 namespace {
 
@@ -50,4 +50,4 @@ void DrawCheckerboard(SkCanvas* canvas, const SkRect& rect) {
   canvas->drawRect(rect, debugPaint);
 }
 
-}  // namespace flow
+}  // namespace flutter

@@ -50,7 +50,7 @@ ShellIOManager::ShellIOManager(
           resource_context_ ? std::make_unique<fml::WeakPtrFactory<GrContext>>(
                                   resource_context_.get())
                             : nullptr),
-      unref_queue_(fml::MakeRefCounted<flow::SkiaUnrefQueue>(
+      unref_queue_(fml::MakeRefCounted<flutter::SkiaUnrefQueue>(
           std::move(unref_queue_task_runner),
           fml::TimeDelta::FromMilliseconds(250))),
       weak_factory_(this) {
@@ -93,7 +93,7 @@ void ShellIOManager::UpdateResourceContext(sk_sp<GrContext> resource_context) {
                         : nullptr;
 }
 
-fml::RefPtr<flow::SkiaUnrefQueue> ShellIOManager::GetSkiaUnrefQueue() const {
+fml::RefPtr<flutter::SkiaUnrefQueue> ShellIOManager::GetSkiaUnrefQueue() const {
   return unref_queue_;
 }
 

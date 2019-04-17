@@ -15,7 +15,7 @@
 #include "third_party/skia/include/core/SkPicture.h"
 #include "third_party/skia/include/core/SkSurface.h"
 
-namespace flow {
+namespace flutter {
 
 RasterCacheResult::RasterCacheResult() {}
 
@@ -292,4 +292,4 @@ void RasterCache::TraceStatsToTimeline() const {
 #endif  // FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_RELEASE
 }
 
-}  // namespace flow
+}  // namespace flutter

@@ -157,7 +157,7 @@ void Animator::BeginFrame(fml::TimePoint frame_start_time,
   }
 }
 
-void Animator::Render(std::unique_ptr<flow::LayerTree> layer_tree) {
+void Animator::Render(std::unique_ptr<flutter::LayerTree> layer_tree) {
   if (dimension_change_pending_ &&
       layer_tree->frame_size() != last_layer_tree_size_) {
     dimension_change_pending_ = false;

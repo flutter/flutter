@@ -18,7 +18,7 @@ TEST(MatrixDecomposition, Rotation) {
   const auto angle = M_PI_4;
   matrix.setRotateAbout(0.0, 0.0, 1.0, angle);
 
-  flow::MatrixDecomposition decomposition(matrix);
+  flutter::MatrixDecomposition decomposition(matrix);
   ASSERT_TRUE(decomposition.IsValid());
 
   const auto sine = sin(angle * 0.5);
@@ -35,7 +35,7 @@ TEST(MatrixDecomposition, Scale) {
   const auto scale = 5.0;
   matrix.setScale(scale + 0, scale + 1, scale + 2);
 
-  flow::MatrixDecomposition decomposition(matrix);
+  flutter::MatrixDecomposition decomposition(matrix);
   ASSERT_TRUE(decomposition.IsValid());
 
   ASSERT_FLOAT_EQ(scale + 0, decomposition.scale().fX);
@@ -49,7 +49,7 @@ TEST(MatrixDecomposition, Translate) {
   const auto translate = 125.0;
   matrix.setTranslate(translate + 0, translate + 1, translate + 2);
 
-  flow::MatrixDecomposition decomposition(matrix);
+  flutter::MatrixDecomposition decomposition(matrix);
   ASSERT_TRUE(decomposition.IsValid());
 
   ASSERT_FLOAT_EQ(translate + 0, decomposition.translation().fX);
@@ -73,7 +73,7 @@ TEST(MatrixDecomposition, Combination) {
 
   SkMatrix44 combined = m3 * m2 * m1;
 
-  flow::MatrixDecomposition decomposition(combined);
+  flutter::MatrixDecomposition decomposition(combined);
   ASSERT_TRUE(decomposition.IsValid());
 
   ASSERT_FLOAT_EQ(translate, decomposition.translation().fX);
@@ -97,7 +97,7 @@ TEST(MatrixDecomposition, ScaleFloatError) {
     SkMatrix44 matrix = SkMatrix44::I();
     matrix.setScale(scale, scale, 1.0f);
 
-    flow::MatrixDecomposition decomposition3(matrix);
+    flutter::MatrixDecomposition decomposition3(matrix);
     ASSERT_TRUE(decomposition3.IsValid());
 
     ASSERT_FLOAT_EQ(scale, decomposition3.scale().fX);
@@ -122,13 +122,13 @@ TEST(MatrixDecomposition, ScaleFloatError) {
   SkMatrix44 matrix3 = SkMatrix44::I();
   matrix3.setScale(scale3, scale3, 1.f);
 
-  flow::MatrixDecomposition decomposition(matrix);
+  flutter::MatrixDecomposition decomposition(matrix);
   ASSERT_TRUE(decomposition.IsValid());
 
-  flow::MatrixDecomposition decomposition2(matrix2);
+  flutter::MatrixDecomposition decomposition2(matrix2);
   ASSERT_TRUE(decomposition2.IsValid());
 
-  flow::MatrixDecomposition decomposition3(matrix3);
+  flutter::MatrixDecomposition decomposition3(matrix3);
   ASSERT_TRUE(decomposition3.IsValid());
 
   ASSERT_FLOAT_EQ(scale, decomposition.scale().fX);

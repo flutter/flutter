@@ -17,7 +17,7 @@ EmbedderExternalTextureGL::EmbedderExternalTextureGL(
 
 EmbedderExternalTextureGL::~EmbedderExternalTextureGL() = default;
 
-// |flow::Texture|
+// |flutter::Texture|
 void EmbedderExternalTextureGL::Paint(SkCanvas& canvas,
                                       const SkRect& bounds,
                                       bool freeze,
@@ -35,13 +35,13 @@ void EmbedderExternalTextureGL::Paint(SkCanvas& canvas,
   }
 }
 
-// |flow::Texture|
+// |flutter::Texture|
 void EmbedderExternalTextureGL::OnGrContextCreated() {}
 
-// |flow::Texture|
+// |flutter::Texture|
 void EmbedderExternalTextureGL::OnGrContextDestroyed() {}
 
-// |flow::Texture|
+// |flutter::Texture|
 void EmbedderExternalTextureGL::MarkNewFrameAvailable() {}
 
 }  // namespace flutter

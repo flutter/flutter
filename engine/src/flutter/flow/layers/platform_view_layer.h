@@ -9,7 +9,7 @@
 #include "third_party/skia/include/core/SkPoint.h"
 #include "third_party/skia/include/core/SkSize.h"
 
-namespace flow {
+namespace flutter {
 
 class PlatformViewLayer : public Layer {
  public:
@@ -31,6 +31,6 @@ class PlatformViewLayer : public Layer {
   FML_DISALLOW_COPY_AND_ASSIGN(PlatformViewLayer);
 };
 
-}  // namespace flow
+}  // namespace flutter
 
 #endif  // FLUTTER_FLOW_LAYERS_PLATFORM_VIEW_LAYER_H_

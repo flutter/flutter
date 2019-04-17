@@ -9,7 +9,7 @@
 #include "third_party/skia/include/core/SkPoint.h"
 #include "third_party/skia/include/core/SkSize.h"
 
-namespace flow {
+namespace flutter {
 
 class TextureLayer : public Layer {
  public:
@@ -33,6 +33,6 @@ class TextureLayer : public Layer {
   FML_DISALLOW_COPY_AND_ASSIGN(TextureLayer);
 };
 
-}  // namespace flow
+}  // namespace flutter
 
 #endif  // FLUTTER_FLOW_LAYERS_TEXTURE_LAYER_H_
