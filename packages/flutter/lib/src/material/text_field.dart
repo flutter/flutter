@@ -165,7 +165,7 @@ class TextField extends StatefulWidget {
     this.enableInteractiveSelection,
     this.onTap,
     this.buildCounter,
-    this.scrollPhysics = const ClampingScrollPhysics(),
+    this.scrollPhysics,
   }) : assert(textAlign != null),
        assert(autofocus != null),
        assert(obscureText != null),
@@ -185,7 +185,6 @@ class TextField extends StatefulWidget {
          'minLines and maxLines must be null when expands is true.',
        ),
        assert(maxLength == null || maxLength == TextField.noMaxLength || maxLength > 0),
-       assert(scrollPhysics != null),
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
        super(key: key);
 
@@ -463,6 +462,8 @@ class TextField extends StatefulWidget {
 
   /// The [ScrollPhysics] to use when vertically scrolling the TextField.
   ///
+  /// If not specified, it will behave according to the current platform.
+  ///
   /// See [Scrollable.physics].
   final ScrollPhysics scrollPhysics;
 
@@ -496,7 +497,7 @@ class TextField extends StatefulWidget {
     properties.add(DiagnosticsProperty<Brightness>('keyboardAppearance', keyboardAppearance, defaultValue: null));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('scrollPadding', scrollPadding, defaultValue: const EdgeInsets.all(20.0)));
     properties.add(FlagProperty('selectionEnabled', value: selectionEnabled, defaultValue: true, ifFalse: 'selection disabled'));
-    properties.add(DiagnosticsProperty<ScrollPhysics>('scrollPhysics', scrollPhysics, defaultValue: const ClampingScrollPhysics()));
+    properties.add(DiagnosticsProperty<ScrollPhysics>('scrollPhysics', scrollPhysics));
   }
 }
 
