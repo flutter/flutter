@@ -35,8 +35,10 @@ typedef NS_ENUM(NSInteger, FlutterMouseTrackingMode) {
  * Flutter engine in non-interactive mode, or with a drawable Flutter canvas.
  */
 FLUTTER_EXPORT
-@interface FLEViewController
-    : NSViewController <FlutterBinaryMessenger, FLEPluginRegistrar, FLEReshapeListener>
+@interface FLEViewController : NSViewController <FlutterBinaryMessenger,
+                                                 FLEPluginRegistrar,
+                                                 FLEPluginRegistry,
+                                                 FLEReshapeListener>
 
 /**
  * The view this controller manages when launched in interactive mode (headless set to false). Must
@@ -72,10 +74,5 @@ FLUTTER_EXPORT
  */
 - (BOOL)launchHeadlessEngineWithAssetsPath:(nonnull NSURL*)assets
                       commandLineArguments:(nullable NSArray<NSString*>*)arguments;
-
-/**
- * Returns the FLEPluginRegistrar that should be used to register the plugin with the given name.
- */
-- (nonnull id<FLEPluginRegistrar>)registrarForPlugin:(nonnull NSString*)pluginName;
 
 @end
