@@ -21,7 +21,7 @@ typedef FingerprintPathFilter = bool Function(String path);
 /// This is done by always returning false from fingerprinter invocations. This
 /// is safe to do generally, because fingerprinting is only a performance
 /// improvement.
-bool get disableBuildCache => platform.environment['DISABLE_FLUTTER_BUILD_CACHE']?.toLowerCase() == 'true';
+bool get _disableBuildCache => platform.environment['DISABLE_FLUTTER_BUILD_CACHE']?.toLowerCase() == 'true';
 
 /// A tool that can be used to compute, compare, and write [Fingerprint]s for a
 /// set of input files and associated build settings.
@@ -58,7 +58,7 @@ class Fingerprinter {
   }
 
   Future<bool> doesFingerprintMatch() async {
-    if (disableBuildCache) {
+    if (_disableBuildCache) {
       return false;
     }
     try {
