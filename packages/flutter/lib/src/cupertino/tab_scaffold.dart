@@ -12,6 +12,13 @@ import 'theme.dart';
 /// the actively displayed tab of the [CupertinoTabScaffold] the [CupertinoTabController] controls,
 /// as well as the currently selected tab item of its [CupertinoTabBar].
 ///
+/// There're 2 ways to programmatically change the actively displayed tab of a [CupertinoTabScaffold]
+/// (and the selected tab item of the [CupertinoTabBar]):
+/// 1. Change the [currentIndex] of the existing controller of the [CupertinoTabScaffold],
+///    see the example below.
+/// 2. Rebuild the [CupertinoTabScaffold] widget with a new [CupertinoTabController], whose
+///    [currentIndex] is set to the new value.
+///
 /// {@tool sample}
 ///
 /// `CupertionoTabController` can be used to switch tabs from ancestor widgets:
@@ -77,7 +84,7 @@ class CupertinoTabController extends ValueNotifier<int> {
 /// to change the active tab.
 ///
 /// A [controller] can be supplied to update the actively displayed tab and manage
-/// subsequent tab changes. If left unspecified, [CupertinoTabScaffold] will keep
+/// subsequent tab changes. If set to null, [CupertinoTabScaffold] will keep
 /// using the current [CupertinoTabController] that exists in its internal state object,
 /// or create a new [CupertinoTabController] using the 'currentIndex' of [tabBar]
 /// if there's no existing [CupertinoTabController].
@@ -177,8 +184,9 @@ class CupertinoTabScaffold extends StatefulWidget {
   /// when present.
   ///
   /// The [CupertinoTabBar.currentIndex] property of [tabBar] is *overridden*
-  /// by the [CupertinoTabController.currentIndex] value in [controller],
-  /// and it does not affect the currently selected tab item in the [tabBar]
+  /// by the [CupertinoTabController.currentIndex] value in [controller] if [controller]
+  /// is not null or there's an existing controller in this [CupertinoTabScaffold]'s
+  /// internal state object.
   /// or the currently focused tab from the [tabBuilder] whatsoever.
 
   /// If [CupertinoTabBar.onTap] is provided, it will still be called.
@@ -195,6 +203,8 @@ class CupertinoTabScaffold extends StatefulWidget {
 
   /// Controls the current selected tab item of the [tabBar], as well as the
   /// the currently focused tab from the [tabBuilder].
+  ///
+  /// Defaults to null.
   final CupertinoTabController controller;
 
   /// An [IndexedWidgetBuilder] that's called when tabs become active.
@@ -242,8 +252,13 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
   }
 
   void _updateTabController() {
-    final CupertinoTabController newController = widget.controller
+    final CupertinoTabController newController =
+      // User provided a new controller, update [_controller] with it.
+      widget.controller
+      // User didn't provide a new controller, keep using [_controller].
       ?? _controller
+      // This Only happens in [initState]. If there's no existing controller,
+      // create one using [widget.tabBar.currentIndex] as its initial index.
       ?? CupertinoTabController(selectedIndex: widget.tabBar.currentIndex);
 
     assert(() {
@@ -335,7 +350,7 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
       stacked.add(Align(
         alignment: Alignment.bottomCenter,
         // Override the tab bar's currentIndex to the current tab and hook in
-        // our own listener to update the _currentPage on top of a possibly user
+        // our own listener to update the [_controller.currentIndex] on top of a possibly user
         // provided callback.
         child: widget.tabBar.copyWith(
           currentIndex: _controller.currentIndex,
