@@ -237,7 +237,8 @@ void Engine::OnOutputSurfaceDestroyed() {
 void Engine::SetViewportMetrics(const ViewportMetrics& metrics) {
   bool dimensions_changed =
       viewport_metrics_.physical_height != metrics.physical_height ||
-      viewport_metrics_.physical_width != metrics.physical_width;
+      viewport_metrics_.physical_width != metrics.physical_width ||
+      viewport_metrics_.physical_depth != metrics.physical_depth;
   viewport_metrics_ = metrics;
   runtime_controller_->SetViewportMetrics(viewport_metrics_);
   if (animator_) {

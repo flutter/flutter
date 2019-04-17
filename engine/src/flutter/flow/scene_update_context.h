@@ -112,7 +112,9 @@ class SceneUpdateContext {
     Frame(SceneUpdateContext& context,
           const SkRRect& rrect,
           SkColor color,
-          float elevation,
+          float local_elevation = 0.0f,
+          float parent_elevation = 0.0f,
+          float depth = 0.0f,
           Layer* layer = nullptr);
 
     ~Frame();

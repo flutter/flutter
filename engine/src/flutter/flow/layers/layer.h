@@ -56,6 +56,7 @@ struct PrerollContext {
   const Stopwatch& engine_time;
   TextureRegistry& texture_registry;
   const bool checkerboard_offscreen_layers;
+  float total_elevation = 0.0f;
 };
 
 // Represents a single composited layer. Created on the UI thread but then
