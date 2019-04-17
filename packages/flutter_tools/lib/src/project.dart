@@ -99,6 +99,15 @@ class FlutterProject {
   /// The web sub project of this project.
   WebProject get web => WebProject._(this);
 
+  /// The macos sub project of this project.
+  MacOSProject get macos => MacOSProject._(this);
+
+  /// The linux sub project of this project.
+  LinuxProject get linux => LinuxProject._(this);
+
+  /// The windows sub project of this project.
+  WindowsProject get windows => WindowsProject._(this);
+
   /// The `pubspec.yaml` file of this project.
   File get pubspecFile => directory.childFile('pubspec.yaml');
 
@@ -517,4 +526,40 @@ Match _firstMatchInFile(File file, RegExp regExp) {
     }
   }
   return null;
+}
+
+/// The macOS sub project.
+class MacOSProject {
+  MacOSProject._(this.project);
+
+  final FlutterProject project;
+
+  bool existsSync() => project.directory.childDirectory('macos').existsSync();
+
+  // Note: The build script file exists as a temporary shim.
+  File get buildScript => project.directory.childDirectory('macos').childFile('build.sh');
+}
+
+/// The Windows sub project
+class WindowsProject {
+  WindowsProject._(this.project);
+
+  final FlutterProject project;
+
+  bool existsSync() => project.directory.childDirectory('windows').existsSync();
+
+  // Note: The build script file exists as a temporary shim.
+  File get buildScript => project.directory.childDirectory('windows').childFile('build.bat');
+}
+
+/// The Linux sub project.
+class LinuxProject {
+  LinuxProject._(this.project);
+
+  final FlutterProject project;
+
+  bool existsSync() => project.directory.childDirectory('linux').existsSync();
+
+  // Note: The build script file exists as a temporary shim.
+  File get buildScript => project.directory.childDirectory('linux').childFile('build.sh');
 }
