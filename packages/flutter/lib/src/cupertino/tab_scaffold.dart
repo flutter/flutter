@@ -186,9 +186,9 @@ class CupertinoTabScaffold extends StatefulWidget {
   /// The [CupertinoTabBar.currentIndex] property of [tabBar] is *overridden*
   /// by the [CupertinoTabController.currentIndex] value in [controller] if [controller]
   /// is not null or there's an existing controller in this [CupertinoTabScaffold]'s
-  /// internal state object.
-  /// or the currently focused tab from the [tabBuilder] whatsoever.
-
+  /// internal state object. Otherwise, the scaffold will use [CupertinoTabBar.currentIndex]
+  /// as the index of the selected tab.
+  ///
   /// If [CupertinoTabBar.onTap] is provided, it will still be called.
   /// [CupertinoTabScaffold] automatically also listen to the
   /// [CupertinoTabBar]'s `onTap` to change the [controller]'s `currentIndex`
@@ -257,7 +257,7 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
       widget.controller
       // User didn't provide a new controller, keep using [_controller].
       ?? _controller
-      // This Only happens in [initState]. If there's no existing controller,
+      // This only happens in [initState]. If there's no existing controller,
       // create one using [widget.tabBar.currentIndex] as its initial index.
       ?? CupertinoTabController(selectedIndex: widget.tabBar.currentIndex);
 
