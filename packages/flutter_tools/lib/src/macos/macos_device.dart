@@ -75,7 +75,9 @@ class MacOSDevice extends Device {
       Cache.releaseLockEarly();
       await buildMacOS(await FlutterProject.current(), debuggingOptions.buildInfo);
     }
-    final Process process = await processManager.start(<String>[package.executable(debuggingOptions.buildInfo.mode)]);
+    final Process process = await processManager.start(<String>[
+      package.executable(debuggingOptions.buildInfo.mode)
+    ]);
     if (debuggingOptions.buildInfo.isRelease) {
       return LaunchResult.succeeded();
     }
@@ -83,6 +85,10 @@ class MacOSDevice extends Device {
     final ProtocolDiscovery observatoryDiscovery = ProtocolDiscovery.observatory(logReader);
     try {
       final Uri observatoryUri = await observatoryDiscovery.uri;
+      // Bring app to foreground.
+      await processManager.run(<String>[
+        'open', package.applicationBundle(debuggingOptions.buildInfo.mode),
+      ], runInShell: true);
       return LaunchResult.succeeded(observatoryUri: observatoryUri);
     } catch (error) {
       printError('Error waiting for a debug connection: $error');

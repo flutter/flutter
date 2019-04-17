@@ -83,6 +83,8 @@ abstract class MacOSApp extends ApplicationPackage {
   @override
   String get displayName => id;
 
+  String applicationBundle(BuildMode buildMode);
+
   String executable(BuildMode buildMode);
 }
 
@@ -105,6 +107,9 @@ class PrebuiltMacOSApp extends MacOSApp {
   String get name => bundleName;
 
   @override
+  String applicationBundle(BuildMode buildMode) => bundleDir.path;
+
+  @override
   String executable(BuildMode buildMode) => _executable;
 }
 
@@ -115,6 +120,16 @@ class BuildableMacOSApp extends MacOSApp {
 
   @override
   String get name => 'macOS';
+
+  @override
+  String applicationBundle(BuildMode buildMode) {
+    final ProcessResult result = processManager.runSync(<String>[
+      project.nameScript.path,
+      buildMode == BuildMode.debug ? 'debug' : 'release'
+    ], runInShell: true);
+    final String directory = result.stdout.toString().trim();
+    return directory;
+  }
 
   @override
   String executable(BuildMode buildMode) {

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools/src/base/logger.dart';
+
 import '../base/common.dart';
 import '../base/io.dart';
 import '../base/process_manager.dart';
@@ -18,6 +20,11 @@ Future<void> buildMacOS(FlutterProject flutterProject, BuildInfo buildInfo) asyn
     Cache.flutterRoot,
     buildInfo.isDebug ? 'debug' : 'release',
   ], runInShell: true);
+  final Status status = logger.startProgress(
+    'building macOS application...',
+    timeout: null,
+  );
+  try {
   process.stderr
     .transform(utf8.decoder)
     .transform(const LineSplitter())
@@ -25,7 +32,10 @@ Future<void> buildMacOS(FlutterProject flutterProject, BuildInfo buildInfo) asyn
   process.stdout
     .transform(utf8.decoder)
     .transform(const LineSplitter())
-    .listen(printStatus);
+    .listen(printTrace);
+  } finally {
+    status.toString();
+  }
   final int result = await process.exitCode;
   if (result != 0) {
     throwToolExit('Build process failed');
