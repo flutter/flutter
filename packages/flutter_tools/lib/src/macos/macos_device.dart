@@ -89,7 +89,7 @@ class MacOSDevice extends Device {
       // Bring app to foreground.
       await processManager.run(<String>[
         'open', package.applicationBundle(debuggingOptions.buildInfo.mode),
-      ], runInShell: true);
+      ]);
       return LaunchResult.succeeded(observatoryUri: observatoryUri);
     } catch (error) {
       printError('Error waiting for a debug connection: $error');
