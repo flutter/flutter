@@ -41,10 +41,10 @@ import 'theme.dart';
 ///         ]
 ///       ),
 ///       controller: _controller,
-///       tabBuilder: (_, _) {
+///       tabBuilder: (BuildContext context, int index) {
 ///         return Center(
 ///           child: CupertinoButton(
-///             text: const Text('Go to first tab'),
+///             child: const Text('Go to first tab'),
 ///             onPressed: () => _controller.currentIndex = 0
 ///           )
 ///         );
