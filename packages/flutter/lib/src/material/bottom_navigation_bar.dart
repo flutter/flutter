@@ -317,9 +317,8 @@ class BottomNavigationBar extends StatefulWidget {
 
   static TextStyle _defaultTextStyle(TextStyle textStyle, double fontSize) {
     textStyle ??= const TextStyle(inherit: false);
-    if (textStyle.fontSize == null)
-      return textStyle.copyWith(fontSize: fontSize);
-    return textStyle;
+    // Prefer the font size on textStyle if present.
+    return textStyle.fontSize == null ? textStyle.copyWith(fontSize: fontSize) : textStyle;
   }
 
   @override
