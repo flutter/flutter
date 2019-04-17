@@ -193,8 +193,8 @@ void main() {
       expect(await fingerprinter.doesFingerprintMatch(), isTrue);
     }, overrides: contextOverrides);
 
-    final Platform mockPlatform = MockPlatform();
-    mockPlatform.environment['DISABLE_FLUTTER_BUILD_CACHE']  = 'true';
+    final Platform mockPlatformDisabledCache = MockPlatform();
+    mockPlatformDisabledCache.environment['DISABLE_FLUTTER_BUILD_CACHE']  = 'true';
     testUsingContext('can be disabled with an environment variable', () async {
       await fs.file('a.dart').create();
       await fs.file('b.dart').create();
@@ -210,10 +210,11 @@ void main() {
       await fingerprinter.writeFingerprint();
       expect(await fingerprinter.doesFingerprintMatch(), isFalse);
     }, overrides: <Type, Generator>{
-      Platform: () => mockPlatform,
+      Platform: () => mockPlatformDisabledCache,
     }..addAll(contextOverrides));
 
-    mockPlatform.environment['DISABLE_FLUTTER_BUILD_CACHE']  = 'false';
+    final Platform mockPlatformEnabledCache = MockPlatform();
+    mockPlatformEnabledCache.environment['DISABLE_FLUTTER_BUILD_CACHE']  = 'false';
     testUsingContext('can be not-disabled with an environment variable', () async {
       await fs.file('a.dart').create();
       await fs.file('b.dart').create();
@@ -229,7 +230,7 @@ void main() {
       await fingerprinter.writeFingerprint();
       expect(await fingerprinter.doesFingerprintMatch(), isTrue);
     }, overrides: <Type, Generator>{
-      Platform: () => mockPlatform,
+      Platform: () => mockPlatformEnabledCache,
     }..addAll(contextOverrides));
 
     testUsingContext('fails to write fingerprint if inputs are missing', () async {
