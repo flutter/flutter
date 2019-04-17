@@ -1481,7 +1481,8 @@ class RenderEditable extends RenderBox {
   // are involved. The current implementation overrides the height set
   // here with the full measured height of the text on Android which looks
   // superior (subjectively and in terms of fidelity) in _paintCaret. We
-  // should rework this properly to once again match the platform.
+  // should rework this properly to once again match the platform. The constant
+  // _kCaretHeightOffset scales poorly for small font sizes.
   //
   /// On iOS, the cursor is taller than the the cursor on Android. The height
   /// of the cursor for iOS is approximate and obtained through an eyeball
@@ -1541,11 +1542,14 @@ class RenderEditable extends RenderBox {
     // when not on iOS. iOS has special handling that creates a taller caret.
     // TODO(garyq): See the TODO for _getCaretPrototype.
     if (defaultTargetPlatform != TargetPlatform.iOS && _textPainter.getFullHeightForCaret(textPosition, _caretPrototype) != null) {
-      caretRect = Rect.fromLTRB(
+      caretRect = Rect.fromLTWH(
         caretRect.left,
-        caretRect.top,
-        caretRect.right,
-        caretRect.top + _textPainter.getFullHeightForCaret(textPosition, _caretPrototype),
+        // Offset by _kCaretHeightOffset to counteract the same value added in
+        // _getCaretPrototype. This prevents this from scaling poorly for small
+        // font sizes.
+        caretRect.top - _kCaretHeightOffset,
+        caretRect.width,
+        _textPainter.getFullHeightForCaret(textPosition, _caretPrototype),
       );
     }
 
