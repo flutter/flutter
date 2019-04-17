@@ -72,7 +72,7 @@ TEST(StandardMessageCodec, CanEncodeAndDecodeInt32) {
 TEST(StandardMessageCodec, CanEncodeAndDecodeInt64) {
   std::vector<uint8_t> bytes = {0x04, 0xef, 0xcd, 0xab, 0x90,
                                 0x78, 0x56, 0x34, 0x12};
-  CheckEncodeDecode(EncodableValue(0x1234567890abcdef), bytes);
+  CheckEncodeDecode(EncodableValue(INT64_C(0x1234567890abcdef)), bytes);
 }
 
 TEST(StandardMessageCodec, CanEncodeAndDecodeDouble) {

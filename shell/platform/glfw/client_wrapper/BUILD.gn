@@ -52,6 +52,8 @@ source_set("client_wrapper_library_stubs_glfw") {
     "testing/stub_flutter_glfw_api.h",
   ]
 
+  defines = [ "FLUTTER_DESKTOP_LIBRARY" ]
+
   public_deps = [
     "$flutter_root/shell/platform/glfw:flutter_glfw_headers",
   ]
