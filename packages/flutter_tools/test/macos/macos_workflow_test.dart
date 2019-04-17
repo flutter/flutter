@@ -16,7 +16,7 @@ void main() {
   group(MacOSWorkflow, () {
     final MockPlatform mac = MockPlatform();
     final MockPlatform macWithFde = MockPlatform()
-      ..environment['FLUTTER_DESKTOP_EMBEDDING'] = 'true';
+      ..environment['FLUTTER_DESKTOP_ENABLED'] = 'true';
     final MockPlatform notMac = MockPlatform();
     when(mac.isMacOS).thenReturn(true);
     when(macWithFde.isMacOS).thenReturn(true);
