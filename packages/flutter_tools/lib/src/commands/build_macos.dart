@@ -5,13 +5,10 @@
 import 'dart:async';
 
 import '../base/common.dart';
-import '../base/io.dart';
 import '../base/platform.dart';
-import '../base/process_manager.dart';
 import '../build_info.dart';
 import '../cache.dart';
-import '../convert.dart';
-import '../globals.dart';
+import '../macos/build_macos.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart' show FlutterCommandResult;
 import 'build.dart';
@@ -62,23 +59,7 @@ class BuildMacosCommand extends BuildSubCommand {
     if (!flutterProject.macos.existsSync()) {
       throwToolExit('No macOS desktop project configured.');
     }
-    final Process process = await processManager.start(<String>[
-      flutterProject.macos.buildScript.path,
-      Cache.flutterRoot,
-      buildInfo.isDebug ? 'debug' : 'release',
-    ], runInShell: true);
-    process.stderr
-      .transform(utf8.decoder)
-      .transform(const LineSplitter())
-      .listen(printError);
-    process.stdout
-      .transform(utf8.decoder)
-      .transform(const LineSplitter())
-      .listen(printStatus);
-    final int result = await process.exitCode;
-    if (result != 0) {
-      throwToolExit('Build process failed');
-    }
+    await buildMacOS(flutterProject, buildInfo);
     return null;
   }
 }

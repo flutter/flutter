@@ -2,12 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/process_manager.dart';
 import 'package:meta/meta.dart';
 
 import '../application_package.dart';
 import '../base/file_system.dart';
+import '../build_info.dart';
 import '../globals.dart';
 import '../ios/plist_utils.dart' as plist;
+import '../project.dart';
 
 /// Tests whether a [FileSystemEntity] is an macOS bundle directory
 bool _isBundleDirectory(FileSystemEntity entity) =>
@@ -15,6 +19,11 @@ bool _isBundleDirectory(FileSystemEntity entity) =>
 
 abstract class MacOSApp extends ApplicationPackage {
   MacOSApp({@required String projectBundleId}) : super(id: projectBundleId);
+
+  /// Creates a new [MacOSApp] from a macOS project directory.
+  factory MacOSApp.fromMacOSProject(MacOSProject project) {
+    return BuildableMacOSApp(project);
+  }
 
   /// Creates a new [MacOSApp] from an existing app bundle.
   ///
@@ -68,7 +77,7 @@ abstract class MacOSApp extends ApplicationPackage {
   @override
   String get displayName => id;
 
-  String get executable;
+  String executable(BuildMode buildMode);
 }
 
 class PrebuiltMacOSApp extends MacOSApp {
@@ -76,16 +85,37 @@ class PrebuiltMacOSApp extends MacOSApp {
     @required this.bundleDir,
     @required this.bundleName,
     @required this.projectBundleId,
-    @required this.executable,
-  }) : super(projectBundleId: projectBundleId);
+    @required String executable,
+  }) : _executable = executable,
+       super(projectBundleId: projectBundleId);
 
   final Directory bundleDir;
   final String bundleName;
   final String projectBundleId;
 
-  @override
-  final String executable;
+  final String _executable;
 
   @override
   String get name => bundleName;
+
+  @override
+  String executable(BuildMode buildMode) => _executable;
+}
+
+class BuildableMacOSApp extends MacOSApp {
+  BuildableMacOSApp(this.project);
+
+  final MacOSProject project;
+
+  @override
+  String get name => 'macOS_fde';
+
+  @override
+  String executable(BuildMode buildMode) {
+    final ProcessResult result = processManager.runSync(<String>[
+      project.nameScript.path,
+      buildMode == BuildMode.debug ? 'debug' : 'release'
+    ], runInShell: true);
+    return result.stdout.toString().trim();
+  }
 }
