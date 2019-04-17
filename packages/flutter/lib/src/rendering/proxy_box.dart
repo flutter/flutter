@@ -2490,9 +2490,9 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
        super(behavior: behavior, child: child) {
     if (_onPointerEnter != null || _onPointerHover != null || _onPointerExit != null) {
       _hoverAnnotation = MouseTrackerAnnotation(
-        onEnter: _onPointerEnter,
-        onHover: _onPointerHover,
-        onExit: _onPointerExit,
+        onEnter: _onPointerEnter != null ? _onPointerEnterInternal : null,
+        onHover: _onPointerHover != null ? _onPointerHoverInternal : null,
+        onExit: _onPointerExit != null ? _onPointerExitInternal: null,
       );
     }
     _mouseIsConnected = RendererBinding.instance.mouseTracker.mouseIsConnected;
@@ -2566,6 +2566,24 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
   @visibleForTesting
   MouseTrackerAnnotation get hoverAnnotation => _hoverAnnotation;
 
+  void _onPointerEnterInternal(PointerEnterEvent event) {
+    assert(_onPointerEnter != null);
+    final Matrix4 transform = _getLayerTransform();
+    _onPointerEnter(event.transformed(transform));
+  }
+
+  void _onPointerHoverInternal(PointerHoverEvent event) {
+    assert(_onPointerHover != null);
+    final Matrix4 transform = _getLayerTransform();
+    _onPointerHover(event.transformed(transform));
+  }
+
+  void _onPointerExitInternal(PointerExitEvent event) {
+    assert(_onPointerExit != null);
+    final Matrix4 transform = _getLayerTransform();
+    _onPointerExit(event.transformed(transform));
+  }
+
   void _updateAnnotations() {
     assert(_hoverAnnotation == null || _onPointerEnter != _hoverAnnotation.onEnter || _onPointerHover != _hoverAnnotation.onHover || _onPointerExit != _hoverAnnotation.onExit,
       "Shouldn't call _updateAnnotations if nothing has changed.");
@@ -2577,9 +2595,9 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
     }
     if (_onPointerEnter != null || _onPointerHover != null || _onPointerExit != null) {
       _hoverAnnotation = MouseTrackerAnnotation(
-        onEnter: _onPointerEnter,
-        onHover: _onPointerHover,
-        onExit: _onPointerExit,
+        onEnter: _onPointerEnter != null ? _onPointerEnterInternal : null,
+        onHover: _onPointerHover != null ? _onPointerHoverInternal : null,
+        onExit: _onPointerExit != null ? _onPointerExitInternal: null,
       );
       if (attached) {
         RendererBinding.instance.mouseTracker.attachAnnotation(_hoverAnnotation);
@@ -2607,6 +2625,23 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
         markNeedsPaint();
       }
     }
+  }
+
+  Matrix4 _getLayerTransform() {
+    assert(_lastAnnotationLayerUsed != null);
+    Matrix4 result = Matrix4.translationValues(_lastAnnotationLayerUsed.offset.dx, _lastAnnotationLayerUsed.offset.dy, 0);
+    Layer previous = _lastAnnotationLayerUsed;
+    Layer current = previous.parent;
+    while (current?.parent != null) {
+      if (current is ContainerLayer) {
+        final Matrix4 r = Matrix4.identity();
+        current.applyTransform(previous, r);
+        result = PointerEvent.removePerspectiveTransform(r) * result;
+      }
+      previous = current;
+      current = current.parent;
+    }
+    return Matrix4.tryInvert(result);
   }
 
   @override
@@ -2653,17 +2688,21 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
 
   bool get _hasActiveAnnotation => _hoverAnnotation != null && _mouseIsConnected;
 
+  AnnotatedRegionLayer<MouseTrackerAnnotation> _lastAnnotationLayerUsed;
+
   @override
   bool get needsCompositing => super.needsCompositing || _hasActiveAnnotation;
 
   @override
   void paint(PaintingContext context, Offset offset) {
+    _lastAnnotationLayerUsed = null;
     if (_hasActiveAnnotation) {
       final AnnotatedRegionLayer<MouseTrackerAnnotation> layer = AnnotatedRegionLayer<MouseTrackerAnnotation>(
         _hoverAnnotation,
         size: size,
         offset: offset,
       );
+      _lastAnnotationLayerUsed = layer;
       context.pushLayer(layer, super.paint, offset);
     }
     super.paint(context, offset);
