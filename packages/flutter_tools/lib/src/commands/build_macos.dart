@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/base/platform.dart';
+
 import '../base/common.dart';
 import '../base/io.dart';
 import '../base/process_manager.dart';
@@ -26,14 +28,23 @@ class BuildMacosCommand extends BuildSubCommand {
   bool hidden = true;
 
   @override
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
+    DevelopmentArtifact.macOS,
+    DevelopmentArtifact.universal,
+  };
+
+  @override
   String get description => 'build the MacOS desktop target (Experimental).';
 
   @override
   Future<FlutterCommandResult> runCommand() async {
     Cache.releaseLockEarly();
     final FlutterProject flutterProject = await FlutterProject.current();
+    if (!platform.isMacOS) {
+      throwToolExit('"build macos" only supported on macOS hosts.');
+    }
     if (!flutterProject.macos.existsSync()) {
-      throwToolExit('No MacOS desktop project configured.');
+      throwToolExit('No macOS desktop project configured.');
     }
     final Process process = await processManager.start(<String>[
       flutterProject.macos.buildScript.path,

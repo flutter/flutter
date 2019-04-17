@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/base/platform.dart';
+
 import '../base/common.dart';
 import '../base/io.dart';
 import '../base/process_manager.dart';
@@ -26,14 +28,23 @@ class BuildWindowsCommand extends BuildSubCommand {
   bool hidden = true;
 
   @override
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
+    DevelopmentArtifact.windows,
+    DevelopmentArtifact.universal,
+  };
+
+  @override
   String get description => 'build the desktop windows target (Experimental).';
 
   @override
   Future<FlutterCommandResult> runCommand() async {
     Cache.releaseLockEarly();
     final FlutterProject flutterProject = await FlutterProject.current();
+    if (!platform.isWindows) {
+      throwToolExit('"build windows" only supported on Windows hosts.');
+    }
     if (!flutterProject.windows.existsSync()) {
-      throwToolExit('No windows desktop project configured.');
+      throwToolExit('No Windows desktop project configured.');
     }
     final Process process = await processManager.start(<String>[
       flutterProject.windows.buildScript.path,

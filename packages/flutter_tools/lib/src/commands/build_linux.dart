@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/base/platform.dart';
+
 import '../base/common.dart';
 import '../base/io.dart';
 import '../base/process_manager.dart';
@@ -26,14 +28,23 @@ class BuildLinuxCommand extends BuildSubCommand {
   bool hidden = true;
 
   @override
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
+    DevelopmentArtifact.linux,
+    DevelopmentArtifact.universal,
+  };
+
+  @override
   String get description => 'build the linux desktop target (Experimental).';
 
   @override
   Future<FlutterCommandResult> runCommand() async {
     Cache.releaseLockEarly();
     final FlutterProject flutterProject = await FlutterProject.current();
+    if (!platform.isLinux) {
+      throwToolExit('"build linux" only supported on Linux hosts.');
+    }
     if (!flutterProject.linux.existsSync()) {
-      throwToolExit('No linux desktop project configured.');
+      throwToolExit('No Linux desktop project configured.');
     }
     final Process process = await processManager.start(<String>[
       flutterProject.linux.buildScript.path,
