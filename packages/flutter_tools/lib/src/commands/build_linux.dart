@@ -23,10 +23,14 @@ class BuildLinuxCommand extends BuildSubCommand {
   bool isExperimental = true;
 
   @override
+  bool hidden = true;
+
+  @override
   String get description => 'build the linux desktop target (Experimental).';
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+    Cache.releaseLockEarly();
     final FlutterProject flutterProject = await FlutterProject.current();
     if (!flutterProject.linux.existsSync()) {
       throwToolExit('No linux desktop project configured.');

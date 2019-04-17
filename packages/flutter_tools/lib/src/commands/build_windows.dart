@@ -23,10 +23,14 @@ class BuildWindowsCommand extends BuildSubCommand {
   bool isExperimental = true;
 
   @override
+  bool hidden = true;
+
+  @override
   String get description => 'build the desktop windows target (Experimental).';
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+    Cache.releaseLockEarly();
     final FlutterProject flutterProject = await FlutterProject.current();
     if (!flutterProject.windows.existsSync()) {
       throwToolExit('No windows desktop project configured.');

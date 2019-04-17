@@ -23,10 +23,14 @@ class BuildMacosCommand extends BuildSubCommand {
   bool isExperimental = true;
 
   @override
+  bool hidden = true;
+
+  @override
   String get description => 'build the MacOS desktop target (Experimental).';
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+    Cache.releaseLockEarly();
     final FlutterProject flutterProject = await FlutterProject.current();
     if (!flutterProject.macos.existsSync()) {
       throwToolExit('No MacOS desktop project configured.');
