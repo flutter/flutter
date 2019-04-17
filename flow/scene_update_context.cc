@@ -197,6 +197,7 @@ SceneUpdateContext::ExecutePaintTasks(CompositorContext::ScopedFrame& frame) {
     SkCanvas* canvas = task.surface->GetSkiaSurface()->getCanvas();
     Layer::PaintContext context = {canvas,
                                    canvas,
+                                   frame.gr_context(),
                                    nullptr,
                                    frame.context().frame_time(),
                                    frame.context().engine_time(),
