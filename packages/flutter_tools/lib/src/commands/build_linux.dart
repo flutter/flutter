@@ -49,7 +49,7 @@ class BuildLinuxCommand extends BuildSubCommand {
   };
 
   @override
-  String get description => 'build the linux desktop target (Experimental).';
+  String get description => 'build the Linux desktop target (Experimental).';
 
   @override
   Future<FlutterCommandResult> runCommand() async {

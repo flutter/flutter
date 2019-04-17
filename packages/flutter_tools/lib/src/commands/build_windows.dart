@@ -49,7 +49,7 @@ class BuildWindowsCommand extends BuildSubCommand {
   };
 
   @override
-  String get description => 'build the desktop windows target (Experimental).';
+  String get description => 'build the desktop Windows target (Experimental).';
 
   @override
   Future<FlutterCommandResult> runCommand() async {

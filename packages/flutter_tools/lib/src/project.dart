@@ -528,6 +528,7 @@ Match _firstMatchInFile(File file, RegExp regExp) {
   return null;
 }
 
+/// The macOS sub project.
 class MacOSProject {
   MacOSProject._(this.project);
 
@@ -535,9 +536,11 @@ class MacOSProject {
 
   bool existsSync() => project.directory.childDirectory('macos').existsSync();
 
+  // Note: The build script file exists as a temporary shim.
   File get buildScript => project.directory.childDirectory('macos').childFile('build.sh');
 }
 
+/// The Windows sub project
 class WindowsProject {
   WindowsProject._(this.project);
 
@@ -545,9 +548,11 @@ class WindowsProject {
 
   bool existsSync() => project.directory.childDirectory('windows').existsSync();
 
+  // Note: The build script file exists as a temporary shim.
   File get buildScript => project.directory.childDirectory('windows').childFile('build.bat');
 }
 
+/// The Linux sub project.
 class LinuxProject {
   LinuxProject._(this.project);
 
@@ -555,5 +560,6 @@ class LinuxProject {
 
   bool existsSync() => project.directory.childDirectory('linux').existsSync();
 
+  // Note: The build script file exists as a temporary shim.
   File get buildScript => project.directory.childDirectory('linux').childFile('build.sh');
 }
