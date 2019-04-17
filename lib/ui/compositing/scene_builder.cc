@@ -190,6 +190,8 @@ fml::RefPtr<EngineLayer> SceneBuilder::pushPhysicalShape(const CanvasPath* path,
   layer->set_shadow_color(static_cast<SkColor>(shadow_color));
   layer->set_device_pixel_ratio(
       UIDartState::Current()->window()->viewport_metrics().device_pixel_ratio);
+  layer->set_viewport_depth(
+      UIDartState::Current()->window()->viewport_metrics().physical_depth);
   PushLayer(layer);
   return EngineLayer::MakeRetained(layer);
 }

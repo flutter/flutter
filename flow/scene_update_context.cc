@@ -7,6 +7,7 @@
 #include "flutter/flow/layers/layer.h"
 #include "flutter/flow/matrix_decomposition.h"
 #include "flutter/fml/trace_event.h"
+#include "flutter/lib/ui/window/viewport_metrics.h"
 
 namespace flow {
 
@@ -285,15 +286,23 @@ SceneUpdateContext::Transform::~Transform() {
 SceneUpdateContext::Frame::Frame(SceneUpdateContext& context,
                                  const SkRRect& rrect,
                                  SkColor color,
-                                 float elevation,
+                                 float local_elevation,
+                                 float world_elevation,
+                                 float depth,
                                  Layer* layer)
     : Entity(context),
       rrect_(rrect),
       color_(color),
       paint_bounds_(SkRect::MakeEmpty()),
       layer_(layer) {
-  if (elevation != 0.0)
-    entity_node().SetTranslation(0.f, 0.f, -elevation);
+  if (local_elevation != 0.0) {
+    if (depth > flutter::kUnsetDepth && world_elevation >= depth) {
+      // TODO(mklim): Deal with bounds overflow correctly.
+      FML_LOG(ERROR) << "Elevation " << world_elevation << " is outside of "
+                     << depth;
+    }
+    entity_node().SetTranslation(0.f, 0.f, -local_elevation);
+  }
 }
 
 SceneUpdateContext::Frame::~Frame() {

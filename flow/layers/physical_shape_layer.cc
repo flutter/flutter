@@ -43,6 +43,8 @@ void PhysicalShapeLayer::set_path(const SkPath& path) {
 
 void PhysicalShapeLayer::Preroll(PrerollContext* context,
                                  const SkMatrix& matrix) {
+  context->total_elevation += elevation_;
+  total_elevation_ = context->total_elevation;
   SkRect child_paint_bounds;
   PrerollChildren(context, matrix, &child_paint_bounds);
 
@@ -118,7 +120,7 @@ void PhysicalShapeLayer::UpdateScene(SceneUpdateContext& context) {
 
   // If we can't find an existing retained surface, create one.
   SceneUpdateContext::Frame frame(context, frameRRect_, color_, elevation_,
-                                  this);
+                                  total_elevation_, viewport_depth_, this);
   for (auto& layer : layers()) {
     if (layer->needs_painting()) {
       frame.AddPaintLayer(layer.get());
