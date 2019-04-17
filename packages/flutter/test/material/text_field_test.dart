@@ -409,16 +409,12 @@ void main() {
           text: testValue
         )
     );
-    await tester.pump();
-
     // The selectWordsInRange with SelectionChangedCause.tap seems to be needed to show the toolbar.
     // (This is true even if we provide selection parameter to the TextEditingValue above.)
     final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
     state.renderEditable.selectWordsInRange(from: const Offset(0, 0), cause: SelectionChangedCause.tap);
-    await tester.pump();
 
     expect(state.showToolbar(), true);
-    await tester.pump();
 
     // This is needed for the AnimatedOpacity to turn from 0 to 1 so the toolbar is visible.
     await tester.pumpAndSettle();
