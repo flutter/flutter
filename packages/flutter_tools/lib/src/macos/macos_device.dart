@@ -70,11 +70,12 @@ class MacOSDevice extends Device {
     bool ipv6 = false,
   }) async {
     // Stop any running applications with the same executable.
-    await stopApp(package);
     if (!prebuiltApplication) {
       Cache.releaseLockEarly();
       await buildMacOS(await FlutterProject.current(), debuggingOptions.buildInfo);
     }
+    // Make sure to call stop app after we've built.
+    await stopApp(package);
     final Process process = await processManager.start(<String>[
       package.executable(debuggingOptions.buildInfo.mode)
     ]);

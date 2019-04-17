@@ -24,19 +24,20 @@ Future<void> buildMacOS(FlutterProject flutterProject, BuildInfo buildInfo) asyn
     'building macOS application...',
     timeout: null,
   );
+  int result;
   try {
-  process.stderr
-    .transform(utf8.decoder)
-    .transform(const LineSplitter())
-    .listen(printError);
-  process.stdout
-    .transform(utf8.decoder)
-    .transform(const LineSplitter())
-    .listen(printTrace);
+    process.stderr
+      .transform(utf8.decoder)
+      .transform(const LineSplitter())
+      .listen(printError);
+    process.stdout
+      .transform(utf8.decoder)
+      .transform(const LineSplitter())
+      .listen(printTrace);
+    result = await process.exitCode;
   } finally {
     status.cancel();
   }
-  final int result = await process.exitCode;
   if (result != 0) {
     throwToolExit('Build process failed');
   }
