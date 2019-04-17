@@ -20,7 +20,7 @@ Future<void> buildMacOS(FlutterProject flutterProject, BuildInfo buildInfo) asyn
     buildInfo.isDebug ? 'debug' : 'release',
   ], runInShell: true);
   final Status status = logger.startProgress(
-    'building macOS application...',
+    'Building macOS application...',
     timeout: null,
   );
   int result;
