@@ -51,8 +51,7 @@ import 'theme.dart';
 /// see also:
 /// [CupertinoTabScaffold], a tabbed application root layout that can be controlled by a [CupertinoTabController].
 class CupertinoTabController extends ValueNotifier<int> {
-  /// Creates an object that manages the index of the current selected tab required by a [CupertinoTabBar]
-  /// or a [CupertinoTabScaffold].
+  /// Creates an object that manages the index of the current selected tab required by a [CupertinoTabScaffold].
   ///
   /// [selectedIndex] must not be null and defaults to 0. The value must be greater than or equal to 0,
   /// and less than the total number of tabs.
@@ -251,7 +250,7 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
         if (newController.currentIndex >= widget.tabBar.items.length) {
           throw FlutterError(
             'current index ${newController.currentIndex} is out of bounds.'
-            'The total number of tabs is {widget.tabBar.items.length} '
+            'The total number of tabs is ${widget.tabBar.items.length} '
           );
         }
         return true;
