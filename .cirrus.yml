@@ -195,6 +195,8 @@ task:
     - name: $SHARD-macos
       env:
         matrix:
+          # The flakiness of this target has increased beyond tolerable levels. Until we can stabilize it,
+          # keep the shard disabled.
           # - SHARD: integration_tests
           - SHARD: build_tests
             COCOAPODS_DISABLE_STATS: true
