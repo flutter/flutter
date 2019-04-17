@@ -6,11 +6,27 @@
 
 namespace flow {
 
-TransformLayer::TransformLayer() = default;
+TransformLayer::TransformLayer() {
+  transform_.setIdentity();
+}
 
 TransformLayer::~TransformLayer() = default;
 
 void TransformLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
+  // Checks (in some degree) that SkMatrix transform_ is valid and initialized.
+  //
+  // We need this even if is_set_ is true since one can call set_transform with
+  // an uninitialized SkMatrix.
+  //
+  // If transform_ is uninitialized, this assert may look flaky as it doesn't
+  // fail all the time, and some rerun may make it pass. But don't ignore it and
+  // just rerun the test if this is triggered, since even a flaky failure here
+  // may signify a potentially big problem in the code.
+  //
+  // We have to write this flaky test because there is no reliable way to test
+  // whether a variable is initialized or not in C++.
+  FML_CHECK(transform_.isFinite());
+
   SkMatrix child_matrix;
   child_matrix.setConcat(matrix, transform_);
 
