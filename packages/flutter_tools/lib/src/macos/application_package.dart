@@ -33,21 +33,33 @@ abstract class MacOSApp extends ApplicationPackage {
   /// which is expected to start the application and send the observatory
   /// port over stdout.
   factory MacOSApp.fromPrebuiltApp(FileSystemEntity applicationBinary) {
-    final FileSystemEntityType entityType = fs.typeSync(applicationBinary.path);
+    final _ExecutableAndId executableAndId = _executableFromBundle(applicationBinary);
+    final Directory applicationBundle = fs.directory(applicationBinary);
+    return PrebuiltMacOSApp(
+      bundleDir: applicationBundle,
+      bundleName: applicationBundle.path,
+      projectBundleId: executableAndId.id,
+      executable: executableAndId.executable,
+    );
+  }
+
+  /// Look up the executable name for a macOS application bundle.
+  static _ExecutableAndId _executableFromBundle(Directory applicationBundle) {
+    final FileSystemEntityType entityType = fs.typeSync(applicationBundle.path);
     if (entityType == FileSystemEntityType.notFound) {
-      printError('File "${applicationBinary.path}" does not exist.');
+      printError('File "${applicationBundle.path}" does not exist.');
       return null;
     }
     Directory bundleDir;
     if (entityType == FileSystemEntityType.directory) {
-      final Directory directory = fs.directory(applicationBinary);
+      final Directory directory = fs.directory(applicationBundle);
       if (!_isBundleDirectory(directory)) {
-        printError('Folder "${applicationBinary.path}" is not an app bundle.');
+        printError('Folder "${applicationBundle.path}" is not an app bundle.');
         return null;
       }
-      bundleDir = fs.directory(applicationBinary);
+      bundleDir = fs.directory(applicationBundle);
     } else {
-      printError('Folder "${applicationBinary.path}" is not an app bundle.');
+      printError('Folder "${applicationBundle.path}" is not an app bundle.');
       return null;
     }
     final String plistPath = fs.path.join(bundleDir.path, 'Contents', 'Info.plist');
@@ -64,14 +76,8 @@ abstract class MacOSApp extends ApplicationPackage {
     final String executable = fs.path.join(bundleDir.path, 'Contents', 'MacOS', executableName);
     if (!fs.file(executable).existsSync()) {
       printError('Could not find macOS binary at $executable');
-      return null;
     }
-    return PrebuiltMacOSApp(
-      bundleDir: bundleDir,
-      bundleName: fs.path.basename(bundleDir.path),
-      projectBundleId: id,
-      executable: executable,
-    );
+    return _ExecutableAndId(executable, id);
   }
 
   @override
@@ -108,7 +114,7 @@ class BuildableMacOSApp extends MacOSApp {
   final MacOSProject project;
 
   @override
-  String get name => 'macOS_fde';
+  String get name => 'macOS';
 
   @override
   String executable(BuildMode buildMode) {
@@ -116,6 +122,15 @@ class BuildableMacOSApp extends MacOSApp {
       project.nameScript.path,
       buildMode == BuildMode.debug ? 'debug' : 'release'
     ], runInShell: true);
-    return result.stdout.toString().trim();
+    final String directory = result.stdout.toString().trim();
+    final _ExecutableAndId executableAndId = MacOSApp._executableFromBundle(fs.directory(directory));
+    return executableAndId.executable;
   }
+}
+
+class _ExecutableAndId {
+  _ExecutableAndId(this.executable, this.id);
+
+  final String executable;
+  final String id;
 }
