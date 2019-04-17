@@ -68,7 +68,8 @@ void main() {
     fs.file('.packages').createSync();
     when(mockProcessManager.start(<String>[
       '/linux/build.sh',
-      '/'
+      '/',
+      'release'
     ], runInShell: true)).thenAnswer((Invocation invocation) async {
       return mockProcess;
     });

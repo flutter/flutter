@@ -8,6 +8,7 @@ import '../base/common.dart';
 import '../base/io.dart';
 import '../base/platform.dart';
 import '../base/process_manager.dart';
+import '../build_info.dart';
 import '../cache.dart';
 import '../convert.dart';
 import '../globals.dart';
@@ -17,6 +18,21 @@ import 'build.dart';
 
 /// A command to build a windows desktop target through a build shell script.
 class BuildWindowsCommand extends BuildSubCommand {
+  BuildWindowsCommand() {
+    argParser.addFlag('debug',
+      negatable: false,
+      help: 'Build a debug version of your app.',
+    );
+    argParser.addFlag('profile',
+      negatable: false,
+      help: 'Build a version of your app specialized for performance profiling.'
+    );
+    argParser.addFlag('release',
+      negatable: false,
+      help: 'Build a version of your app specialized for performance profiling.',
+    );
+  }
+
   @override
   final String name = 'windows';
 
@@ -39,6 +55,7 @@ class BuildWindowsCommand extends BuildSubCommand {
   Future<FlutterCommandResult> runCommand() async {
     Cache.releaseLockEarly();
     final FlutterProject flutterProject = await FlutterProject.current();
+    final BuildInfo buildInfo = getBuildInfo();
     if (!platform.isWindows) {
       throwToolExit('"build windows" only supported on Windows hosts.');
     }
@@ -48,6 +65,7 @@ class BuildWindowsCommand extends BuildSubCommand {
     final Process process = await processManager.start(<String>[
       flutterProject.windows.buildScript.path,
       Cache.flutterRoot,
+      buildInfo.isDebug ? 'debug' : 'release',
     ], runInShell: true);
     process.stderr
       .transform(utf8.decoder)

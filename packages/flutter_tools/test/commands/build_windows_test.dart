@@ -70,7 +70,8 @@ void main() {
     fs.file('.packages').createSync();
     when(mockProcessManager.start(<String>[
       r'C:\windows\build.bat',
-      r'C:\'
+      r'C:\',
+      'release',
     ], runInShell: true)).thenAnswer((Invocation invocation) async {
       return mockProcess;
     });
