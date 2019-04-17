@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show Image, ImageFilter, TextWidthType;
+import 'dart:ui' as ui show Image, ImageFilter;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -4761,7 +4761,7 @@ class RichText extends LeafRenderObjectWidget {
     this.maxLines,
     this.locale,
     this.strutStyle,
-    this.widthType = ui.TextWidthType.full,
+    this.widthType = TextWidthType.full,
   }) : assert(text != null),
        assert(textAlign != null),
        assert(softWrap != null),
@@ -4828,7 +4828,7 @@ class RichText extends LeafRenderObjectWidget {
   final StrutStyle strutStyle;
 
   /// {@macro flutter.widgets.text.DefaultTextStyle.widthType}
-  final ui.TextWidthType widthType;
+  final TextWidthType widthType;
 
   @override
   RenderParagraph createRenderObject(BuildContext context) {
@@ -4871,7 +4871,7 @@ class RichText extends LeafRenderObjectWidget {
     properties.add(EnumProperty<TextOverflow>('overflow', overflow, defaultValue: TextOverflow.clip));
     properties.add(DoubleProperty('textScaleFactor', textScaleFactor, defaultValue: 1.0));
     properties.add(IntProperty('maxLines', maxLines, ifNull: 'unlimited'));
-    properties.add(EnumProperty<ui.TextWidthType>('widthType', widthType, defaultValue: ui.TextWidthType.full));
+    properties.add(EnumProperty<TextWidthType>('widthType', widthType, defaultValue: TextWidthType.full));
     properties.add(StringProperty('text', text.toPlainText()));
   }
 }

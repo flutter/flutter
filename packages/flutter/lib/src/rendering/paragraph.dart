@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show Gradient, Shader, TextBox, TextWidthType;
+import 'dart:ui' as ui show Gradient, Shader, TextBox;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -49,7 +49,7 @@ class RenderParagraph extends RenderBox {
     TextOverflow overflow = TextOverflow.clip,
     double textScaleFactor = 1.0,
     int maxLines,
-    ui.TextWidthType widthType = ui.TextWidthType.full,
+    TextWidthType widthType = TextWidthType.full,
     Locale locale,
     StrutStyle strutStyle,
   }) : assert(text != null),
@@ -216,8 +216,8 @@ class RenderParagraph extends RenderBox {
   }
 
   /// {@macro flutter.widgets.basic.TextWidthType}
-  ui.TextWidthType get widthType => _textPainter.widthType;
-  set widthType(ui.TextWidthType value) {
+  TextWidthType get widthType => _textPainter.widthType;
+  set widthType(TextWidthType value) {
     assert(value != null);
     if (_textPainter.widthType == value)
       return;

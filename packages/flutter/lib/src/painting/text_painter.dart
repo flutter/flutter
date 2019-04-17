@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' show min, max;
-import 'dart:ui' as ui show Paragraph, ParagraphBuilder, ParagraphConstraints, ParagraphStyle, TextWidthType;
+import 'dart:ui' as ui show Paragraph, ParagraphBuilder, ParagraphConstraints, ParagraphStyle;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -14,6 +14,18 @@ import 'strut_style.dart';
 import 'text_span.dart';
 
 export 'package:flutter/services.dart' show TextRange, TextSelection;
+
+/// The different ways of considering the width of a Text widget.
+enum TextWidthType {
+  /// The width will take up as much space as is given to it. This is useful for
+  /// most common use cases, like a series of several paragraphs in a column.
+  full,
+
+  /// The width will be as small as possible, even when the text wraps on to
+  /// multiple lines. For example, this is useful when wrapping text in chat
+  /// bubbles.
+  tight,
+}
 
 /// An object that paints a [TextSpan] tree into a [Canvas].
 ///
@@ -50,7 +62,7 @@ class TextPainter {
     String ellipsis,
     Locale locale,
     StrutStyle strutStyle,
-    ui.TextWidthType widthType = ui.TextWidthType.full,
+    TextWidthType widthType = TextWidthType.full,
   }) : assert(text == null || text.debugAssertIsValid()),
        assert(textAlign != null),
        assert(textScaleFactor != null),
@@ -227,9 +239,9 @@ class TextPainter {
   }
 
   /// {@macro flutter.dart:ui.text.TextWidthType}
-  ui.TextWidthType get widthType => _widthType;
-  ui.TextWidthType _widthType;
-  set widthType(ui.TextWidthType value) {
+  TextWidthType get widthType => _widthType;
+  TextWidthType _widthType;
+  set widthType(TextWidthType value) {
     assert(value != null);
     if (_widthType == value)
       return;
@@ -254,7 +266,6 @@ class TextPainter {
       ellipsis: _ellipsis,
       locale: _locale,
       strutStyle: _strutStyle,
-      widthType: _widthType,
     ) ?? ui.ParagraphStyle(
       textAlign: textAlign,
       textDirection: textDirection ?? defaultTextDirection,
@@ -323,7 +334,9 @@ class TextPainter {
   /// Valid only after [layout] has been called.
   double get width {
     assert(!_needsLayout);
-    return _applyFloatingPointHack(_paragraph.width);
+    return _applyFloatingPointHack(
+      widthType == TextWidthType.tight ? _paragraph.tightWidth : _paragraph.width,
+    );
   }
 
   /// The vertical space required to paint this text.

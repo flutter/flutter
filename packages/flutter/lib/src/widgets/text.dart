@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show TextWidthType;
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
@@ -35,7 +33,7 @@ class DefaultTextStyle extends InheritedWidget {
     this.softWrap = true,
     this.overflow = TextOverflow.clip,
     this.maxLines,
-    this.widthType = ui.TextWidthType.full,
+    this.widthType = TextWidthType.full,
     @required Widget child,
   }) : assert(style != null),
        assert(softWrap != null),
@@ -57,7 +55,7 @@ class DefaultTextStyle extends InheritedWidget {
       softWrap = true,
       maxLines = null,
       overflow = TextOverflow.clip,
-      widthType = ui.TextWidthType.full;
+      widthType = TextWidthType.full;
 
   /// Creates a default text style that overrides the text styles in scope at
   /// this point in the widget tree.
@@ -82,7 +80,7 @@ class DefaultTextStyle extends InheritedWidget {
     bool softWrap,
     TextOverflow overflow,
     int maxLines,
-    ui.TextWidthType widthType,
+    TextWidthType widthType,
     @required Widget child,
   }) {
     assert(child != null);
@@ -129,8 +127,8 @@ class DefaultTextStyle extends InheritedWidget {
   final int maxLines;
 
   /// The strategy to use when calculating the width of the Text. See
-  /// [ui.TextWidthType] for possible values and their implications.
-  final ui.TextWidthType widthType;
+  /// [TextWidthType] for possible values and their implications.
+  final TextWidthType widthType;
 
   /// The closest instance of this class that encloses the given context.
   ///
@@ -164,7 +162,7 @@ class DefaultTextStyle extends InheritedWidget {
     properties.add(FlagProperty('softWrap', value: softWrap, ifTrue: 'wrapping at box width', ifFalse: 'no wrapping except at line break characters', showName: true));
     properties.add(EnumProperty<TextOverflow>('overflow', overflow, defaultValue: null));
     properties.add(IntProperty('maxLines', maxLines, defaultValue: null));
-    properties.add(EnumProperty<ui.TextWidthType>('widthType', widthType, defaultValue: ui.TextWidthType.full));
+    properties.add(EnumProperty<TextWidthType>('widthType', widthType, defaultValue: TextWidthType.full));
   }
 }
 
@@ -374,7 +372,7 @@ class Text extends StatelessWidget {
   final String semanticsLabel;
 
   /// {@macro flutter.dart:ui.text.TextWidthType}
-  final ui.TextWidthType widthType;
+  final TextWidthType widthType;
 
   @override
   Widget build(BuildContext context) {
