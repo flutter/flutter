@@ -184,7 +184,6 @@ void main() {
       data: const MediaQueryData(),
       child: CupertinoTabScaffold(
         tabBar: tabBar,
-        controller: CupertinoTabController(),
         tabBuilder: (BuildContext context, int index) {
           return const Placeholder();
         },
@@ -197,7 +196,6 @@ void main() {
       data: const MediaQueryData(padding: EdgeInsets.only(bottom: 40.0)),
       child: CupertinoTabScaffold(
         tabBar: tabBar,
-        controller: CupertinoTabController(),
         tabBuilder: (BuildContext context, int index) {
           return const Placeholder();
         },

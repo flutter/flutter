@@ -130,7 +130,6 @@ testWidgets('Opaque bar pushes contents down', (WidgetTester tester) async {
               ),
             ],
           ),
-          controller: CupertinoTabController(),
           tabBuilder: (BuildContext context, int index) {
             return index == 0
                 ? const CupertinoPageScaffold(
@@ -171,7 +170,6 @@ testWidgets('Opaque bar pushes contents down', (WidgetTester tester) async {
                 ),
               ],
             ),
-            controller: CupertinoTabController(),
             tabBuilder: (BuildContext context, int index) {
               return index == 0
                   ? CupertinoPageScaffold(
@@ -222,7 +220,6 @@ testWidgets('Opaque bar pushes contents down', (WidgetTester tester) async {
               ),
             ],
           ),
-          controller: CupertinoTabController(),
           tabBuilder: (BuildContext context, int index) {
             // For 1-indexed readability.
             ++index;

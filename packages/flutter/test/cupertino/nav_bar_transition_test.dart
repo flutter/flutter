@@ -436,7 +436,6 @@ void main() {
               ),
             ],
           ),
-          controller: CupertinoTabController(),
           tabBuilder: (BuildContext context, int tab) {
             return CupertinoTabView(
               builder: (BuildContext context) {

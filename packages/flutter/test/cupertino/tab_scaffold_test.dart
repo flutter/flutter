@@ -22,7 +22,6 @@ void main() {
       CupertinoApp(
         home: CupertinoTabScaffold(
           tabBar: _buildTabBar(),
-          controller: CupertinoTabController(),
           tabBuilder: (BuildContext context, int index) {
             return CustomPaint(
               child: Text('Page ${index + 1}'),
@@ -77,7 +76,6 @@ void main() {
       CupertinoApp(
         home: CupertinoTabScaffold(
           tabBar: _buildTabBar(),
-          controller: CupertinoTabController(),
           tabBuilder: (BuildContext context, int index) {
             tabsBuilt.add(index);
             return Text('Page ${index + 1}');
@@ -114,7 +112,6 @@ void main() {
       CupertinoApp(
         home: CupertinoTabScaffold(
           tabBar: _buildTabBar(),
-          controller: CupertinoTabController(),
           tabBuilder: (BuildContext context, int index) {
             return CupertinoTextField(
               focusNode: focusNodes[index],
@@ -149,7 +146,6 @@ void main() {
       CupertinoApp(
         home: CupertinoTabScaffold(
           tabBar: _buildTabBar(),
-          controller: CupertinoTabController(),
           tabBuilder: (BuildContext context, int index) {
             return Column(
               children: <Widget>[
@@ -208,7 +204,6 @@ void main() {
       CupertinoApp(
         home: CupertinoTabScaffold(
           tabBar: _buildTabBar(),
-          controller: CupertinoTabController(),
           tabBuilder: (BuildContext context, int index) {
             return CustomPaint(
               child: Text('Page ${index + 1}'),
@@ -226,8 +221,8 @@ void main() {
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoTabScaffold(
-          tabBar: _buildTabBar(selectedTab: 1), // Programmatically change the tab now.
-          controller: CupertinoTabController(selectedIndex: 1),
+          tabBar: _buildTabBar(),
+          controller: CupertinoTabController(selectedIndex: 1), // Programmatically change the tab now.
           tabBuilder: (BuildContext context, int index) {
             return CustomPaint(
               child: Text('Page ${index + 1}'),
@@ -253,12 +248,10 @@ void main() {
   });
 
   testWidgets('Tab bar respects themes', (WidgetTester tester) async {
-    final CupertinoTabController controller = CupertinoTabController();
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoTabScaffold(
           tabBar: _buildTabBar(),
-          controller: controller,
           tabBuilder: (BuildContext context, int index) {
             return const Placeholder();
           },
@@ -284,8 +277,7 @@ void main() {
           primaryColor: CupertinoColors.destructiveRed,
         ),
         home: CupertinoTabScaffold(
-          tabBar: _buildTabBar(selectedTab: controller.currentIndex),
-          controller: controller,
+          tabBar: _buildTabBar(),
           tabBuilder: (BuildContext context, int index) {
             return const Placeholder();
           },
@@ -324,7 +316,6 @@ void main() {
           ),
           child: CupertinoTabScaffold(
             tabBar: _buildTabBar(),
-            controller: CupertinoTabController(),
             tabBuilder: (BuildContext context, int index) {
               innerContext = context;
               return const Placeholder();
@@ -352,7 +343,6 @@ void main() {
           child: CupertinoTabScaffold(
             resizeToAvoidBottomInset: false,
             tabBar: _buildTabBar(),
-            controller: CupertinoTabController(),
             tabBuilder: (BuildContext context, int index) {
               innerContext = context;
               return const Placeholder();
@@ -379,7 +369,6 @@ void main() {
           ),
           child: CupertinoTabScaffold(
             tabBar: _buildTabBar(),
-            controller: CupertinoTabController(),
             tabBuilder: (BuildContext context, int index) {
               return CupertinoPageScaffold(
                 child: Builder(
@@ -399,7 +388,7 @@ void main() {
     expect(MediaQuery.of(innerContext).padding.bottom, 0);
   });
 
-  testWidgets('Deleting tabs after selecting them works', (WidgetTester tester) async {
+  testWidgets('Deleting tabs after selecting them throws', (WidgetTester tester) async {
     final List<int> tabsBuilt = <int>[];
 
     BottomNavigationBarItem tabGenerator(int index) {
@@ -416,7 +405,6 @@ void main() {
             items: List<BottomNavigationBarItem>.generate(4, tabGenerator),
             onTap: (int newTab) => selectedTabs.add(newTab),
           ),
-          controller: CupertinoTabController(),
           tabBuilder: (BuildContext context, int index) {
             tabsBuilt.add(index);
             return Text('Page ${index + 1}');
@@ -441,7 +429,7 @@ void main() {
     expect(find.text('Page 4'), findsOneWidget);
     tabsBuilt.clear();
 
-    // Delete 2 tabs.
+    // Delete 2 tabs while Page 4 is still selected.
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoTabScaffold(
@@ -449,32 +437,16 @@ void main() {
             items: List<BottomNavigationBarItem>.generate(2, tabGenerator),
             onTap: (int newTab) => selectedTabs.add(newTab),
           ),
-          controller: CupertinoTabController(),
           tabBuilder: (BuildContext context, int index) {
             tabsBuilt.add(index);
             // Change the builder too.
             return Text('Different page ${index + 1}');
           },
         ),
-      ),
+      )
     );
 
-    expect(tabsBuilt, <int>[0, 1]);
-    // We didn't tap on any additional tabs to invoke the onTap callback. We
-    // just deleted a tab.
-    expect(selectedTabs, <int>[3]);
-    // Tab 1 was previously built so it's rebuilt again, albeit offstage.
-    expect(find.text('Different page 1', skipOffstage: false), isOffstage);
-    // Since all the tabs after tab 2 are deleted, tab 2 is now the last tab and
-    // the actively shown tab.
-    expect(find.text('Different page 2'), findsOneWidget);
-    // No more tab 4 since it's deleted.
-    expect(find.text('Different page 4', skipOffstage: false), findsNothing);
-    // We also changed the builder so no tabs should be built with the old
-    // builder.
-    expect(find.text('Page 1', skipOffstage: false), findsNothing);
-    expect(find.text('Page 2', skipOffstage: false), findsNothing);
-    expect(find.text('Page 4', skipOffstage: false), findsNothing);
+    expect(tester.takeException(), isAssertionError);
   });
 
   testWidgets('Does not lose state when focusing on text input', (WidgetTester tester) async {
@@ -488,7 +460,6 @@ void main() {
         child: CupertinoApp(
           home: CupertinoTabScaffold(
             tabBar: _buildTabBar(),
-            controller: CupertinoTabController(),
             tabBuilder: (BuildContext context, int index) {
               return const CupertinoTextField();
             },
@@ -508,7 +479,6 @@ void main() {
         ),
         child: CupertinoApp(
           home: CupertinoTabScaffold(
-            controller: CupertinoTabController(),
             tabBar: _buildTabBar(),
             tabBuilder: (BuildContext context, int index) {
               return const CupertinoTextField();
