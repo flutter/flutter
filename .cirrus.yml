@@ -174,62 +174,62 @@ task:
   test_all_script:
     - ./dev/bots/deploy_gallery.sh
 
-# task:
-#   use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true'
-#   osx_instance:
-#     image: mojave-xcode-10.1
-#   depends_on:
-#     - analyze
-#   env:
-#     CIRRUS_WORKING_DIR: "/tmp/flutter sdk"
-#     COCOAPODS_DISABLE_STATS: true
-#   matrix:
-#     - name: tests-macos
-#       env:
-#         GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
-#         SHARD: tests
-#     - name: tool_tests-macos
-#       env:
-#         GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
-#         SHARD: tool_tests
-#     - name: $SHARD-macos
-#       env:
-#         matrix:
-#           - SHARD: integration_tests
-#           - SHARD: build_tests
-#             COCOAPODS_DISABLE_STATS: true
-#             FLUTTER_FRAMEWORK_DIR: "/tmp/flutter sdk/bin/cache/artifacts/engine/ios/"
-#       osx_instance:
-#         image: mojave-flutter
-#       remove_preinstalled_fluuter_script: rm -rf $FLUTTER_HOME
-#     - name: add2app-macos
-#       env:
-#         SHARD: add2app_test
-#   # occasionally the clock on these machines is out of sync
-#   # with the actual time - this should help to verify
-#   print_date_script:
-#     - date
-#   install_cocoapods_script:
-#     - sudo gem install cocoapods
-#   git_fetch_script:
-#     - git clean -xfd
-#     - git fetch origin
-#     - git fetch origin master # To set FETCH_HEAD for "git merge-base" to work
-#   pub_cache:
-#     folder: $HOME/.pub-cache
-#     fingerprint_script: echo $OS; grep -r --include=pubspec.yaml 'PUBSPEC CHECKSUM' "$CIRRUS_WORKING_DIR"
-#   flutter_pkg_cache:
-#     folder: bin/cache/pkg
-#     fingerprint_script: echo $OS; cat bin/internal/engine.version
-#   artifacts_cache:
-#     folder: bin/cache/artifacts
-#     fingerprint_script: echo $OS; cat bin/internal/engine.version
-#   setup_script:
-#     - bin/flutter config --no-analytics
-#     - bin/flutter update-packages
-#   test_all_script: |
-#     ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
-#     bin/cache/dart-sdk/bin/dart --enable-asserts dev/bots/test.dart
+task:
+  use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true'
+  osx_instance:
+    image: mojave-xcode-10.1
+  depends_on:
+    - analyze
+  env:
+    CIRRUS_WORKING_DIR: "/tmp/flutter sdk"
+    COCOAPODS_DISABLE_STATS: true
+  matrix:
+    - name: tests-macos
+      env:
+        GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
+        SHARD: tests
+    - name: tool_tests-macos
+      env:
+        GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
+        SHARD: tool_tests
+    - name: $SHARD-macos
+      env:
+        matrix:
+          # - SHARD: integration_tests
+          - SHARD: build_tests
+            COCOAPODS_DISABLE_STATS: true
+            FLUTTER_FRAMEWORK_DIR: "/tmp/flutter sdk/bin/cache/artifacts/engine/ios/"
+      osx_instance:
+        image: mojave-flutter
+      remove_preinstalled_fluuter_script: rm -rf $FLUTTER_HOME
+    - name: add2app-macos
+      env:
+        SHARD: add2app_test
+  # occasionally the clock on these machines is out of sync
+  # with the actual time - this should help to verify
+  print_date_script:
+    - date
+  install_cocoapods_script:
+    - sudo gem install cocoapods
+  git_fetch_script:
+    - git clean -xfd
+    - git fetch origin
+    - git fetch origin master # To set FETCH_HEAD for "git merge-base" to work
+  pub_cache:
+    folder: $HOME/.pub-cache
+    fingerprint_script: echo $OS; grep -r --include=pubspec.yaml 'PUBSPEC CHECKSUM' "$CIRRUS_WORKING_DIR"
+  flutter_pkg_cache:
+    folder: bin/cache/pkg
+    fingerprint_script: echo $OS; cat bin/internal/engine.version
+  artifacts_cache:
+    folder: bin/cache/artifacts
+    fingerprint_script: echo $OS; cat bin/internal/engine.version
+  setup_script:
+    - bin/flutter config --no-analytics
+    - bin/flutter update-packages
+  test_all_script: |
+    ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
+    bin/cache/dart-sdk/bin/dart --enable-asserts dev/bots/test.dart
 
 docker_builder:
   # Only build a new docker image when we tag a release (for dev, beta, or release.)
