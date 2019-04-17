@@ -1476,6 +1476,13 @@ class RenderEditable extends RenderBox {
     _textLayoutLastWidth = constraintWidth;
   }
 
+  // TODO(garyq): This is no longer producing the highest-fidelity caret
+  // heights for Android, especially when non-alphabetic languages
+  // are involved. The current implementation overrides the height set
+  // here with the full measured height of the text on Android which looks
+  // superior (subjectively and in terms of fidelity) in _paintCaret. We
+  // should rework this properly to once again match the platform.
+  //
   /// On iOS, the cursor is taller than the the cursor on Android. The height
   /// of the cursor for iOS is approximate and obtained through an eyeball
   /// comparison.
@@ -1526,10 +1533,22 @@ class RenderEditable extends RenderBox {
     // the floating cursor's color is _cursorColor;
     final Paint paint = Paint()
       ..color = _floatingCursorOn ? backgroundCursorColor : _cursorColor;
-
-    Rect caretRect = _caretPrototype.shift(caretOffset + effectiveOffset);
+    Offset caretOffset = _textPainter.getOffsetForCaret(textPosition, _caretPrototype) + effectiveOffset;
+    Rect caretRect = _caretPrototype.shift(caretOffset);
     if (_cursorOffset != null)
       caretRect = caretRect.shift(_cursorOffset);
+
+    // Override the height to take the full height of the glyph at the TextPosition
+    // when not on iOS. iOS has special handling that creates a taller caret.
+    // TODO(garyq): See the TODO for _getCaretPrototype.
+    if (defaultTargetPlatform != TargetPlatform.iOS && _textPainter.getFullHeightForCaret(textPosition, _caretPrototype) != null) {
+      caretRect = Rect.fromLTRB(
+        caretRect.left,
+        caretRect.top,
+        caretRect.right,
+        caretRect.top + _textPainter.getFullHeightForCaret(textPosition, _caretPrototype),
+      );
+    }
 
     caretRect = caretRect.shift(_getPixelPerfectCursorOffset(caretRect));
 

@@ -617,7 +617,7 @@ void main() {
     expect(editable, paints
       ..rrect(
         rrect: RRect.fromRectAndRadius(
-          Rect.fromLTRB(463.3333435058594, 2.0833332538604736, 465.3333435058594, 14.083333015441895),
+          Rect.fromLTRB(463.3333435058594, 2.0833332538604736, 465.3333435058594, 18.083333015441895),
           const Radius.circular(2.0),
         ),
         color: const Color(0xff8e8e93),
@@ -642,7 +642,7 @@ void main() {
     expect(find.byType(EditableText), paints
       ..rrect(
         rrect: RRect.fromRectAndRadius(
-          Rect.fromLTRB(191.3333282470703, 2.0833332538604736, 193.3333282470703, 14.083333015441895),
+          Rect.fromLTRB(191.3333282470703, 2.0833332538604736, 193.3333282470703, 18.083333015441895),
           const Radius.circular(2.0),
         ),
         color: const Color(0xff8e8e93),
