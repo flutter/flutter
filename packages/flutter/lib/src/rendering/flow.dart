@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 
 import 'package:vector_math/vector_math_64.dart';
 
@@ -380,15 +381,17 @@ class RenderFlow extends RenderBox
       final Matrix4 transform = childParentData._transform;
       if (transform == null)
         continue;
-      final Matrix4 inverse = Matrix4.zero();
-      final double determinate = inverse.copyInverse(transform);
-      if (determinate == 0.0) {
+      final Matrix4 inverse = Matrix4.tryInvert(PointerEvent.paintTransformToPointerEventTransform(transform));
+      if (inverse == null) {
         // We cannot invert the transform. That means the child doesn't appear
         // on screen and cannot be hit.
         continue;
       }
       final Offset childPosition = MatrixUtils.transformPoint(inverse, position);
-      if (child.hitTest(result, position: childPosition))
+      result.pushTransform(inverse);
+      final bool absorbed = child.hitTest(result, position: childPosition);
+      result.popTransform();
+      if (absorbed)
         return true;
     }
     return false;
