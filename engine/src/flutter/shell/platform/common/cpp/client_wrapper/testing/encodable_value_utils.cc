@@ -24,7 +24,7 @@ bool EncodableValuesAreEqual(const EncodableValue& a, const EncodableValue& b) {
     case EncodableValue::Type::kLong:
       return a.LongValue() == b.LongValue();
     case EncodableValue::Type::kDouble:
-      // This is a crude epsilon, but fine for the values in the the unit tests.
+      // This is a crude epsilon, but fine for the values in the unit tests.
       return std::abs(a.DoubleValue() - b.DoubleValue()) < 0.0001l;
     case EncodableValue::Type::kString:
       return a.StringValue() == b.StringValue();
