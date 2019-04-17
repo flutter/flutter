@@ -263,39 +263,6 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
   ///    callback.
   GestureLongPressEndCallback onLongPressEnd;
 
-  /// Called when a long press gesture by a secondary button has been recognized.
-  ///
-  /// See also:
-  ///
-  ///  * [kSecondaryButton], the button this callback responds to.
-  ///  * [onLongPressStart], a similar callback but for a primary button.
-  ///  * [onAnyLongPressStart], a similar callback but for any single button.
-  ///  * [LongPressStartDetails], which is passed as an argument to this callback.
-  GestureLongPressStartCallback onSecondaryLongPressStart;
-
-  /// Called when moving after the long press by a secondary button is recognized.
-  ///
-  /// See also:
-  ///
-  ///  * [kSecondaryButton], the button this callback responds to.
-  ///  * [onLongPressMoveUpdate], a similar callback but for a primary button.
-  ///  * [onAnyLongPressMoveUpdate], a similar callback but for any single button.
-  ///  * [LongPressMoveUpdateDetails], which is passed as an argument to this
-  ///    callback.
-  GestureLongPressMoveUpdateCallback onSecondaryLongPressMoveUpdate;
-
-  /// Called when the pointer stops contacting the screen after a long-press
-  /// by a secondary button.
-  ///
-  /// See also:
-  ///
-  ///  * [kSecondaryButton], the button this callback responds to.
-  ///  * [onLongPressEnd], a similar callback but for a primary button.
-  ///  * [onAnyLongPressEnd], a similar callback but for any single button.
-  ///  * [LongPressEndDetails], which is passed as an argument to this
-  ///    callback.
-  GestureLongPressEndCallback onSecondaryLongPressEnd;
-
   @override
   bool isPointerAllowed(PointerDownEvent event) {
     if (!isSingleButton(event.buttons)) {
@@ -334,7 +301,7 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
         resolve(GestureDisposition.rejected);
         stopTrackingPointer(primaryPointer);
       } else if (_longPressAccepted) {
-        _handleLongPressMoveUpdate();
+        _handleLongPressMoveUpdate(event);
       }
     }
   }
@@ -354,11 +321,6 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
         if (onLongPressStart != null)
           invokeCallback<void>('onLongPressStart',
             () => onLongPressStart(details));
-        break;
-      case kSecondaryButton:
-        if (onSecondaryLongPressStart != null)
-          invokeCallback<void>('onSecondaryLongPressStart',
-            () => onSecondaryLongPressStart(details));
         break;
       default:
     }
@@ -380,11 +342,6 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
         if (onLongPressUp != null)
           invokeCallback<void>('onLongPressUp', onLongPressUp);
         break;
-      case kSecondaryButton:
-        if (onSecondaryLongPressEnd != null)
-          invokeCallback<void>('onSecondaryLongPressEnd',
-            () => onSecondaryLongPressEnd(details));
-        break;
       default:
     }
   }
@@ -403,11 +360,6 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
         if (onLongPressMoveUpdate != null)
           invokeCallback<void>('onLongPressMoveUpdate',
             () => onLongPressMoveUpdate(details));
-        break;
-      case kSecondaryButton:
-        if (onSecondaryLongPressMoveUpdate != null)
-          invokeCallback<void>('onSecondaryLongPressMoveUpdate',
-            () => onSecondaryLongPressMoveUpdate(details));
         break;
       default:
     }
