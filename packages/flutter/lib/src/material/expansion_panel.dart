@@ -348,13 +348,11 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
   @override
   void didUpdateWidget(ExpansionPanelList oldWidget) {
     super.didUpdateWidget(oldWidget);
-    print('widget was updated');
     if (widget._allowOnlyOnePanelOpen) {
+      // If widget is updated to ExpansionPanelList.radio
       assert(_allIdentifiersUnique(), 'All ExpansionPanelRadio identifier values are not unique.');
-
-      // TODO (shihaohong): figure out what cases could occur here
     } else if (oldWidget._allowOnlyOnePanelOpen) {
-      // TODO (shihaohong): ditto above
+      // If widget is updated to ExpansionPanelList
       _currentOpenPanel = null;
     }
   }
@@ -382,13 +380,15 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
     if (widget._allowOnlyOnePanelOpen) {
       final ExpansionPanelRadio pressedChild = widget.children[index];
 
+      // Determine if an ExpansionPanelRadio was opened prior, invoking
+      // expansionCallback if not null for that panel with isExpanded set to
+      // false
       for (int childIndex = 0; childIndex < widget.children.length; childIndex += 1) {
         final ExpansionPanelRadio child = widget.children[childIndex];
         if (widget.expansionCallback != null &&
             childIndex != index &&
             child.value == _currentOpenPanel?.value) {
-          // TODO (shihaohong): figure out if this behavior is desirable or not for radio implementation
-          widget.expansionCallback(childIndex, false);
+              widget.expansionCallback(childIndex, false);
         }
       }
 
