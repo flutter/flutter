@@ -4,6 +4,7 @@
 
 #include "flutter/common/task_runners.h"
 #include "flutter/fml/paths.h"
+#include "flutter/fml/synchronization/count_down_latch.h"
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/runtime/dart_vm.h"
 #include "flutter/runtime/dart_vm_lifecycle.h"
@@ -41,8 +42,7 @@ TEST_F(DartLifecycleTest, CanStartAndShutdownVMOverAndOver) {
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());
 }
 
-static void CreateAndRunRootIsolate(
-    std::shared_ptr<DartIsolate>& isolate_result,
+static std::shared_ptr<DartIsolate> CreateAndRunRootIsolate(
     const Settings& settings,
     const DartVMData& vm,
     fml::RefPtr<fml::TaskRunner> task_runner,
@@ -67,73 +67,74 @@ static void CreateAndRunRootIsolate(
 
   if (!isolate) {
     FML_LOG(ERROR) << "Could not create valid isolate.";
-    return;
+    return nullptr;
   }
 
   if (DartVM::IsRunningPrecompiledCode()) {
     if (!isolate->PrepareForRunningFromPrecompiledCode()) {
       FML_LOG(ERROR)
           << "Could not prepare to run the isolate from precompiled code.";
-      return;
+      return nullptr;
     }
 
   } else {
     if (!isolate->PrepareForRunningFromKernels(
             settings.application_kernels())) {
       FML_LOG(ERROR) << "Could not prepare isolate from application kernels.";
-      return;
+      return nullptr;
     }
   }
 
   if (isolate->GetPhase() != DartIsolate::Phase::Ready) {
     FML_LOG(ERROR) << "Isolate was not ready.";
-    return;
+    return nullptr;
   }
 
   if (!isolate->Run(entrypoint, settings.root_isolate_create_callback)) {
     FML_LOG(ERROR) << "Could not run entrypoint: " << entrypoint << ".";
-    return;
+    return nullptr;
   }
 
   if (isolate->GetPhase() != DartIsolate::Phase::Running) {
     FML_LOG(ERROR) << "Isolate was not Running.";
-    return;
+    return nullptr;
   }
 
-  isolate_result = isolate;
-}
-
-static std::shared_ptr<DartIsolate> CreateAndRunRootIsolate(
-    const Settings& settings,
-    const DartVMData& vm,
-    fml::RefPtr<fml::TaskRunner> task_runner,
-    std::string entrypoint) {
-  fml::AutoResetWaitableEvent latch;
-  std::shared_ptr<DartIsolate> isolate;
-  fml::TaskRunner::RunNowOrPostTask(task_runner, [&]() {
-    CreateAndRunRootIsolate(isolate, settings, vm, task_runner, entrypoint);
-    latch.Signal();
-  });
-  latch.Wait();
   return isolate;
 }
 
-TEST_F(DartLifecycleTest, ShuttingDownTheVMShutsDownTheIsolate) {
+TEST_F(DartLifecycleTest, ShuttingDownTheVMShutsDownAllIsolates) {
   auto settings = CreateSettingsForFixture();
   settings.leak_vm = false;
-  settings.enable_observatory = false;
-  ASSERT_FALSE(DartVMRef::IsInstanceRunning());
-  {
+  // Make sure the service protocol launches
+  settings.enable_observatory = true;
+
+  for (size_t i = 0; i < 3; i++) {
+    ASSERT_FALSE(DartVMRef::IsInstanceRunning());
+
+    const auto last_launch_count = DartVM::GetVMLaunchCount();
+
     auto vm_ref = DartVMRef::Create(settings);
+
     ASSERT_TRUE(DartVMRef::IsInstanceRunning());
-    ASSERT_EQ(vm_ref->GetIsolateCount(), 0u);
-    auto isolate =
-        CreateAndRunRootIsolate(settings, *vm_ref.GetVMData(),
-                                GetThreadTaskRunner(), "testIsolateShutdown");
-    ASSERT_TRUE(isolate);
-    ASSERT_EQ(vm_ref->GetIsolateCount(), 1u);
-    vm_ref->ShutdownAllIsolates();
-    ASSERT_EQ(vm_ref->GetIsolateCount(), 0u);
+    ASSERT_EQ(last_launch_count + 1, DartVM::GetVMLaunchCount());
+
+    const size_t isolate_count = 100;
+
+    fml::CountDownLatch latch(isolate_count);
+    auto vm_data = vm_ref.GetVMData();
+    auto thread_task_runner = GetThreadTaskRunner();
+    for (size_t i = 0; i < isolate_count; ++i) {
+      thread_task_runner->PostTask(
+          [vm_data, &settings, &latch, thread_task_runner]() {
+            ASSERT_TRUE(CreateAndRunRootIsolate(settings, *vm_data.get(),
+                                                thread_task_runner,
+                                                "testIsolateShutdown"));
+            latch.CountDown();
+          });
+    }
+
+    latch.Wait();
   }
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());
 }

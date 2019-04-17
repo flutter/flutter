@@ -721,8 +721,6 @@ DartIsolate::CreateDartVMAndEmbedderObjectPair(
     }
   }
 
-  DartVMRef::GetRunningVM()->RegisterActiveIsolate(*embedder_isolate);
-
   // The ownership of the embedder object is controlled by the Dart VM. So the
   // only reference returned to the caller is weak.
   embedder_isolate.release();
@@ -760,8 +758,6 @@ void DartIsolate::AddIsolateShutdownCallback(fml::closure closure) {
 
 void DartIsolate::OnShutdownCallback() {
   shutdown_callbacks_.clear();
-  DartVMRef::GetRunningVM()->UnregisterActiveIsolate(
-      std::static_pointer_cast<DartIsolate>(shared_from_this()));
 }
 
 DartIsolate::AutoFireClosure::AutoFireClosure(fml::closure closure)
