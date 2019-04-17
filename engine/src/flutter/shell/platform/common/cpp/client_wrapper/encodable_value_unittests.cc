@@ -59,7 +59,7 @@ TEST(EncodableValueTest, LongValueFromInt) {
 }
 
 TEST(EncodableValueTest, Long) {
-  EncodableValue value(42l);
+  EncodableValue value(INT64_C(42));
   VerifyType(value, EncodableValue::Type::kLong);
 
   EXPECT_EQ(value.LongValue(), 42);
@@ -170,7 +170,7 @@ TEST(EncodableValueTest, List) {
 TEST(EncodableValueTest, Map) {
   EncodableMap encodables = {
       {EncodableValue(), EncodableValue(std::vector<int32_t>{1, 2, 3})},
-      {EncodableValue(1), EncodableValue(10000l)},
+      {EncodableValue(1), EncodableValue(INT64_C(10000))},
       {EncodableValue("two"), EncodableValue(7)},
   };
   EncodableValue value(encodables);
@@ -178,7 +178,7 @@ TEST(EncodableValueTest, Map) {
 
   EncodableMap& map_value = value.MapValue();
   EXPECT_EQ(map_value[EncodableValue()].IsIntList(), true);
-  EXPECT_EQ(map_value[EncodableValue(1)].LongValue(), 10000l);
+  EXPECT_EQ(map_value[EncodableValue(1)].LongValue(), INT64_C(10000));
   EXPECT_EQ(map_value[EncodableValue("two")].IntValue(), 7);
 
   // Ensure that it's a modifiable copy of the original map.
@@ -192,7 +192,8 @@ TEST(EncodableValueTest, EmptyTypeConstructor) {
   EXPECT_TRUE(EncodableValue(EncodableValue::Type::kNull).IsNull());
   EXPECT_EQ(EncodableValue(EncodableValue::Type::kBool).BoolValue(), false);
   EXPECT_EQ(EncodableValue(EncodableValue::Type::kInt).IntValue(), 0);
-  EXPECT_EQ(EncodableValue(EncodableValue::Type::kLong).LongValue(), 0l);
+  EXPECT_EQ(EncodableValue(EncodableValue::Type::kLong).LongValue(),
+            INT64_C(0));
   EXPECT_EQ(EncodableValue(EncodableValue::Type::kDouble).DoubleValue(), 0.0);
   EXPECT_EQ(EncodableValue(EncodableValue::Type::kString).StringValue().size(),
             0u);
@@ -226,9 +227,9 @@ TEST(EncodableValueTest, Comparison) {
       EncodableValue(0),
       EncodableValue(100),
       // Long
-      EncodableValue(-7l),
-      EncodableValue(0l),
-      EncodableValue(100l),
+      EncodableValue(INT64_C(-7)),
+      EncodableValue(INT64_C(0)),
+      EncodableValue(INT64_C(100)),
       // Double
       EncodableValue(-7.0),
       EncodableValue(0.0),
@@ -243,11 +244,11 @@ TEST(EncodableValueTest, Comparison) {
       EncodableValue(std::vector<int32_t>{0, 1}),
       EncodableValue(std::vector<int32_t>{0, 100}),
       // LongList
-      EncodableValue(std::vector<int64_t>{0, 1l}),
-      EncodableValue(std::vector<int64_t>{0, 100l}),
+      EncodableValue(std::vector<int64_t>{0, INT64_C(1)}),
+      EncodableValue(std::vector<int64_t>{0, INT64_C(100)}),
       // DoubleList
-      EncodableValue(std::vector<int64_t>{0, 1l}),
-      EncodableValue(std::vector<int64_t>{0, 100l}),
+      EncodableValue(std::vector<int64_t>{0, INT64_C(1)}),
+      EncodableValue(std::vector<int64_t>{0, INT64_C(100)}),
       // List
       EncodableValue(EncodableList{EncodableValue(), EncodableValue(true)}),
       EncodableValue(EncodableList{EncodableValue(), EncodableValue(1.0)}),
@@ -289,7 +290,7 @@ TEST(EncodableValueTest, DeepCopy) {
   EncodableList encodables = {
       EncodableValue(EncodableMap{
           {EncodableValue(), EncodableValue(std::vector<int32_t>{1, 2, 3})},
-          {EncodableValue(1), EncodableValue(10000l)},
+          {EncodableValue(1), EncodableValue(INT64_C(0000))},
           {EncodableValue("two"), EncodableValue(7)},
       }),
       EncodableValue(EncodableList{

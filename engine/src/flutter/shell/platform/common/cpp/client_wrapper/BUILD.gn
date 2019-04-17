@@ -68,6 +68,8 @@ source_set("client_wrapper_library_stubs") {
     "testing/stub_flutter_api.h",
   ]
 
+  defines = [ "FLUTTER_DESKTOP_LIBRARY" ]
+
   public_deps = [
     "$flutter_root/shell/platform/common/cpp:common_cpp_library_headers",
   ]
