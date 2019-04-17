@@ -38,9 +38,10 @@ class FlutterDevice {
     TargetModel targetModel = TargetModel.flutter,
     List<String> experimentalFlags,
     ResidentCompiler generator,
+    @required BuildMode buildMode,
   }) : assert(trackWidgetCreation != null),
        generator = generator ?? ResidentCompiler(
-         artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
+         artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath, mode: buildMode),
          trackWidgetCreation: trackWidgetCreation,
          fileSystemRoots: fileSystemRoots,
          fileSystemScheme: fileSystemScheme,
@@ -60,6 +61,7 @@ class FlutterDevice {
     TargetModel targetModel = TargetModel.flutter,
     List<String> experimentalFlags,
     ResidentCompiler generator,
+    @required BuildMode buildMode,
   }) async {
     ResidentCompiler generator;
     final FlutterProject flutterProject = await FlutterProject.current();
@@ -69,7 +71,7 @@ class FlutterDevice {
       );
     } else {
       generator = ResidentCompiler(
-        artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
+        artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath, mode: buildMode),
         trackWidgetCreation: trackWidgetCreation,
         fileSystemRoots: fileSystemRoots,
         fileSystemScheme: fileSystemScheme,
@@ -87,6 +89,7 @@ class FlutterDevice {
       experimentalFlags: experimentalFlags,
       targetModel: targetModel,
       generator: generator,
+      buildMode: buildMode,
     );
   }
 
@@ -285,6 +288,12 @@ class FlutterDevice {
   Future<void> toggleWidgetInspector() async {
     for (FlutterView view in views)
       await view.uiIsolate.flutterToggleWidgetInspector();
+  }
+
+  Future<void> toggleProfileWidgetBuilds() async {
+    for (FlutterView view in views) {
+      await view.uiIsolate.flutterToggleProfileWidgetBuilds();
+    }
   }
 
   Future<String> togglePlatform({ String from }) async {
@@ -643,6 +652,13 @@ abstract class ResidentRunner {
       await device.toggleWidgetInspector();
   }
 
+  Future<void> _debugToggleProfileWidgetBuilds() async {
+    await refreshViews();
+    for (FlutterDevice device in flutterDevices) {
+      await device.toggleProfileWidgetBuilds();
+    }
+  }
+
   Future<void> _screenshot(FlutterDevice device) async {
     final Status status = logger.startProgress('Taking screenshot for ${device.device.name}...', timeout: timeoutConfiguration.fastOperation);
     final File outputFile = getUniqueFile(fs.currentDirectory, 'flutter', 'png');
@@ -870,6 +886,10 @@ abstract class ResidentRunner {
           await _screenshot(device);
       }
       return true;
+    } else if (character == 'a') {
+      if (supportsServiceProtocol) {
+        await _debugToggleProfileWidgetBuilds();
+      }
     } else if (lower == 'o') {
       if (supportsServiceProtocol && isRunningDebug) {
         await _debugTogglePlatform();
@@ -981,6 +1001,7 @@ abstract class ResidentRunner {
         printStatus('To dump the accessibility tree (debugDumpSemantics), press "S" (for traversal order) or "U" (for inverse hit test order).');
       }
       printStatus('To display the performance overlay (WidgetsApp.showPerformanceOverlay), press "P".');
+      printStatus('To enable timeline events for all widget build methods, (debugProfileWidgetBuilds), press "a"');
     }
     if (flutterDevices.any((FlutterDevice d) => d.device.supportsScreenshot)) {
       printStatus('To save a screenshot to flutter.png, press "s".');

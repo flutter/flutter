@@ -369,6 +369,7 @@ class RunCommand extends RunCommandBase {
         viewFilter: argResults['isolate-filter'],
         experimentalFlags: expFlags,
         target: argResults['target'],
+        buildMode: getBuildMode(),
       );
       flutterDevices.add(flutterDevice);
     }

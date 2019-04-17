@@ -27,7 +27,7 @@ void main() {
       final PrecacheCommand command = PrecacheCommand();
       applyMocksToCommand(command);
       await createTestCommandRunner(command).run(
-        const <String>['precache', '--ios', '--android', '--web', '--macos', '--linux', '--windows']
+        const <String>['precache', '--ios', '--android', '--web', '--macos', '--linux', '--windows', '--fuchsia']
       );
       expect(artifacts, unorderedEquals(<DevelopmentArtifact>{
         DevelopmentArtifact.universal,
@@ -37,6 +37,7 @@ void main() {
         DevelopmentArtifact.macOS,
         DevelopmentArtifact.linux,
         DevelopmentArtifact.windows,
+        DevelopmentArtifact.fuchsia,
       }));
     }, overrides: <Type, Generator>{
       Cache: () => cache,
@@ -51,7 +52,7 @@ void main() {
       final PrecacheCommand command = PrecacheCommand();
       applyMocksToCommand(command);
       await createTestCommandRunner(command).run(
-       const <String>['precache', '--ios', '--android', '--web', '--macos', '--linux', '--windows']
+       const <String>['precache', '--ios', '--android', '--web', '--macos', '--linux', '--windows', '--fuchsia']
       );
      expect(artifacts, unorderedEquals(<DevelopmentArtifact>{
        DevelopmentArtifact.universal,
