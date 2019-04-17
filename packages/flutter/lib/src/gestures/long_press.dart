@@ -175,8 +175,6 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
   /// See also:
   ///
   ///  * [onLongPressStart], a similar callback limited to a primary button.
-  ///  * [onSecondaryLongPressStart], a similar callback limited to a secondary
-  ///    button.
   ///  * [LongPressStartDetails], which is passed as an argument to this callback.
   GestureLongPressStartCallback onAnyLongPressStart;
 
@@ -187,8 +185,6 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
   /// See also:
   ///
   ///  * [onLongPressMoveUpdate], a similar callback limited to a primary button.
-  ///  * [onSecondaryLongPressMoveUpdate], a similar callback limited to a
-  ///    secondary button.
   ///  * [LongPressMoveUpdateDetails], which is passed as an argument to this
   ///    callback.
   GestureLongPressMoveUpdateCallback onAnyLongPressMoveUpdate;
@@ -201,8 +197,6 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
   /// See also:
   ///
   ///  * [onLongPressEnd], a similar callback limited to a primary button.
-  ///  * [onSecondaryLongPressEnd], a similar callback limited to a secondary
-  ///    button.
   ///  * [LongPressEndDetails], which is passed as an argument to this
   ///    callback.
   GestureLongPressEndCallback onAnyLongPressEnd;
@@ -221,8 +215,6 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
   /// See also:
   ///
   ///  * [kPrimaryButton], the button this callback responds to.
-  ///  * [onSecondaryLongPressStart], a similar callback but for a secondary
-  ///    button.
   ///  * [onAnyLongPressStart], a similar callback but for any single button.
   ///  * [onLongPress], which has the same timing but without details.
   ///  * [LongPressStartDetails], which is passed as an argument to this callback.
@@ -233,8 +225,6 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
   /// See also:
   ///
   ///  * [kPrimaryButton], the button this callback responds to.
-  ///  * [onSecondaryLongPressMoveUpdate], a similar callback but for a
-  ///    secondary button.
   ///  * [onAnyLongPressMoveUpdate], a similar callback but for any single button.
   ///  * [LongPressMoveUpdateDetails], which is passed as an argument to this
   ///    callback.
@@ -256,7 +246,6 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
   /// See also:
   ///
   ///  * [kPrimaryButton], the button this callback responds to.
-  ///  * [onSecondaryLongPressEnd], a similar callback but for a secondary button.
   ///  * [onAnyLongPressEnd], a similar callback but for any single button.
   ///  * [onLongPressUp], which has the same timing, but without details.
   ///  * [LongPressEndDetails], which is passed as an argument to this
@@ -277,14 +266,14 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
     resolve(GestureDisposition.accepted);
     _longPressAccepted = true;
     super.acceptGesture(primaryPointer);
-    _handleLongPressStart();
+    _checkLongPressStart();
   }
 
   @override
   void handlePrimaryPointer(PointerEvent event) {
     if (event is PointerUpEvent) {
       if (_longPressAccepted == true) {
-        _handleLongPressEnd(event);
+        _checkLongPressEnd(event);
       } else {
         // Pointer is lifted before timeout.
         resolve(GestureDisposition.rejected);
@@ -301,12 +290,12 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
         resolve(GestureDisposition.rejected);
         stopTrackingPointer(primaryPointer);
       } else if (_longPressAccepted) {
-        _handleLongPressMoveUpdate(event);
+        _checkLongPressMoveUpdate(event);
       }
     }
   }
 
-  void _handleLongPressStart() {
+  void _checkLongPressStart() {
     final LongPressStartDetails details = LongPressStartDetails(
       globalPosition: _longPressOrigin,
       buttons: _initialButtons,
@@ -326,7 +315,7 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
     }
   }
 
-  void _handleLongPressMoveUpdate(PointerEvent event) {
+  void _checkLongPressMoveUpdate(PointerEvent event) {
     final LongPressMoveUpdateDetails details = LongPressMoveUpdateDetails(
       globalPosition: event.position,
       offsetFromOrigin: event.position - _longPressOrigin,
@@ -345,7 +334,7 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
     }
   }
 
-  void _handleLongPressEnd(PointerEvent event) {
+  void _checkLongPressEnd(PointerEvent event) {
     final LongPressEndDetails details = LongPressEndDetails(
       globalPosition: event.position,
       buttons: _initialButtons,
@@ -356,8 +345,7 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
     switch (_initialButtons) {
       case kPrimaryButton:
         if (onLongPressEnd != null)
-          invokeCallback<void>('onLongPressEnd',
-            () => onLongPressEnd(details));
+          invokeCallback<void>('onLongPressEnd', () => onLongPressEnd(details));
         if (onLongPressUp != null)
           invokeCallback<void>('onLongPressUp', onLongPressUp);
         break;

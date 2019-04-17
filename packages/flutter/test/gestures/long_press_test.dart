@@ -321,7 +321,7 @@ void main() {
     });
   });
 
-  group('Enforce consistent-button restriction for onAnyTap:', () {
+  group('Enforce consistent-button restriction for onAnyLongPress:', () {
     // In sequence between `down` and `up` but with buttons changed
     const PointerMoveEvent moveM = PointerMoveEvent(
       pointer: 5,
@@ -348,15 +348,18 @@ void main() {
     setUp(() {
       longPress = LongPressGestureRecognizer();
       longPressDown = false;
-      longPress.onLongPress = () {
+      longPress.onAnyLongPressStart = (LongPressStartDetails details) {
         longPressDown = true;
       };
       longPressUp = false;
-      longPress.onLongPressUp = () {
+      longPress.onAnyLongPressEnd = (LongPressEndDetails details) {
         longPressUp = true;
       };
     });
 
+    tearDown(() {
+      longPress.dispose();
+    });
     testGesture('Buttons change before acceptance should not prevent the next long press', (GestureTester tester) {
       // First press
       longPress.addPointer(down);
@@ -377,8 +380,6 @@ void main() {
       expect(longPressDown, isTrue);
       tester.route(up2);
       expect(longPressUp, isTrue);
-
-      longPress.dispose();
     });
 
     testGesture('Should cancel long press when buttons change after acceptance', (GestureTester tester) {
@@ -392,8 +393,6 @@ void main() {
       tester.route(moveM);
       tester.route(up);
       expect(longPressUp, isFalse);
-
-      longPress.dispose();
     });
 
     testGesture('Buttons change after acceptance should not prevent the next long press', (GestureTester tester) {
@@ -417,8 +416,6 @@ void main() {
       expect(longPressDown, isTrue);
       tester.route(up2);
       expect(longPressUp, isTrue);
-
-      longPress.dispose();
     });
   });
 
@@ -466,7 +463,6 @@ void main() {
     final List<String> recognized = <String>[];
     LongPressGestureRecognizer longPress;
     setUp(() {
-      recognized.clear();
       longPress = LongPressGestureRecognizer()
         ..onAnyLongPressStart = (LongPressStartDetails details) {
           recognized.add('anyStart ${details.buttons}');
@@ -494,6 +490,11 @@ void main() {
         };
     });
 
+    tearDown(() {
+      longPress.dispose();
+      recognized.clear();
+    });
+
     testGesture('A primary long press should trigger any and primary', (GestureTester tester) {
       const PointerDownEvent down2 = PointerDownEvent(
         pointer: 2,
@@ -503,6 +504,7 @@ void main() {
 
       const PointerMoveEvent move2 = PointerMoveEvent(
         pointer: 2,
+        buttons: kPrimaryButton,
         position: Offset(100, 200),
       );
 
@@ -524,11 +526,42 @@ void main() {
 
       tester.route(up2);
       expect(recognized, <String>['anyEnd 1', 'primaryEnd 1', 'primaryUp']);
-
-      longPress.dispose();
     });
 
-    testGesture('A tap with 0 buttons should trigger nothing', (GestureTester tester) {
+    testGesture('A secondary long press should trigger any', (GestureTester tester) {
+      const PointerDownEvent down2 = PointerDownEvent(
+        pointer: 2,
+        buttons: kSecondaryButton,
+        position: Offset(30.0, 30.0),
+      );
+
+      const PointerMoveEvent move2 = PointerMoveEvent(
+        pointer: 2,
+        buttons: kSecondaryButton,
+        position: Offset(100, 200),
+      );
+
+      const PointerUpEvent up2 = PointerUpEvent(
+        pointer: 2,
+        position: Offset(100, 201),
+      );
+
+      longPress.addPointer(down2);
+      tester.closeArena(2);
+      tester.route(down2);
+      tester.async.elapse(const Duration(milliseconds: 700));
+      expect(recognized, <String>['anyStart 2']);
+      recognized.clear();
+
+      tester.route(move2);
+      expect(recognized, <String>['anyUpdate 2']);
+      recognized.clear();
+
+      tester.route(up2);
+      expect(recognized, <String>['anyEnd 2']);
+    });
+
+    testGesture('A long press with 0 buttons should trigger nothing', (GestureTester tester) {
       const PointerDownEvent down2 = PointerDownEvent(
         pointer: 1,
         buttons: 0,
@@ -546,11 +579,9 @@ void main() {
       tester.async.elapse(const Duration(milliseconds: 700));
       tester.route(up2);
       expect(recognized, <String>[]);
-
-      longPress.dispose();
     });
 
-    testGesture('A tap with 2 buttons should trigger nothing', (GestureTester tester) {
+    testGesture('A long press with 2 buttons should trigger nothing', (GestureTester tester) {
       const PointerDownEvent down2 = PointerDownEvent(
         pointer: 1,
         buttons: kPrimaryButton | kSecondaryButton,
@@ -568,8 +599,6 @@ void main() {
       tester.async.elapse(const Duration(milliseconds: 700));
       tester.route(up2);
       expect(recognized, <String>[]);
-
-      longPress.dispose();
     });
   });
 }

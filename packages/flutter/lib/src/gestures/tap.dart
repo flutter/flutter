@@ -317,7 +317,7 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
       _checkUp();
     } else if (event is PointerCancelEvent) {
       if (_sentTapDown) {
-        _handleCancel('');
+        _checkCancel('');
       }
       _reset();
     } else if (event.buttons != _initialButtons) {
@@ -333,7 +333,7 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
       // the pointer has exceeded the touch slop, the buttons have been changed,
       // or if the recognizer is disposed.
       assert(_sentTapDown);
-      _handleCancel('spontaneous ');
+      _checkCancel('spontaneous ');
       _reset();
     }
     super.resolve(disposition);
@@ -361,25 +361,8 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
       // Another gesture won the arena.
       assert(state != GestureRecognizerState.possible);
       if (_sentTapDown)
-        _handleCancel('forced ');
+        _checkCancel('forced ');
       _reset();
-    }
-  }
-
-  void _handleCancel(String note) {
-    if (onAnyTapCancel != null)
-      invokeCallback<void>('${note}onAnyTapCancel', onAnyTapCancel);
-    switch (_initialButtons) {
-      case kPrimaryButton:
-        if (onTapCancel != null)
-          invokeCallback<void>('${note}onTapCancel', onTapCancel);
-        break;
-      case kSecondaryButton:
-        if (onSecondaryTapCancel != null)
-          invokeCallback<void>('${note}onSecondaryTapCancel',
-            onSecondaryTapCancel);
-        break;
-      default:
     }
   }
 
@@ -433,6 +416,23 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
       default:
     }
     _reset();
+  }
+
+  void _checkCancel(String note) {
+    if (onAnyTapCancel != null)
+      invokeCallback<void>('${note}onAnyTapCancel', onAnyTapCancel);
+    switch (_initialButtons) {
+      case kPrimaryButton:
+        if (onTapCancel != null)
+          invokeCallback<void>('${note}onTapCancel', onTapCancel);
+        break;
+      case kSecondaryButton:
+        if (onSecondaryTapCancel != null)
+          invokeCallback<void>('${note}onSecondaryTapCancel',
+            onSecondaryTapCancel);
+        break;
+      default:
+    }
   }
 
   void _reset() {

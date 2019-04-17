@@ -598,7 +598,6 @@ void main() {
     final List<String> recognized = <String>[];
     TapGestureRecognizer tap;
     setUp(() {
-      recognized.clear();
       tap = TapGestureRecognizer()
         ..onAnyTapDown = (TapDownDetails details) {
           recognized.add('anyDown ${details.buttons}');
@@ -632,6 +631,11 @@ void main() {
         };
     });
 
+    tearDown(() {
+      recognized.clear();
+      tap.dispose();
+    });
+
     testGesture('A primary tap should trigger any and primary', (GestureTester tester) {
       const PointerDownEvent down = PointerDownEvent(
         pointer: 1,
@@ -655,8 +659,6 @@ void main() {
       tester.route(up);
       GestureBinding.instance.gestureArena.sweep(1);
       expect(recognized, <String>['anyUp', 'primaryUp', 'primary']);
-
-      tap.dispose();
     });
 
     testGesture('A secondary tap should trigger any and secondary', (GestureTester tester) {
@@ -682,8 +684,6 @@ void main() {
       tester.route(up);
       GestureBinding.instance.gestureArena.sweep(1);
       expect(recognized, <String>['anyUp', 'secondaryUp']);
-
-      tap.dispose();
     });
 
     testGesture('A tap with 0 buttons should trigger nothing', (GestureTester tester) {
@@ -703,8 +703,6 @@ void main() {
       tester.route(up);
       GestureBinding.instance.gestureArena.sweep(1);
       expect(recognized, <String>[]);
-
-      tap.dispose();
     });
 
     testGesture('A tap with 2 buttons should trigger nothing', (GestureTester tester) {
@@ -724,8 +722,6 @@ void main() {
       tester.route(up);
       GestureBinding.instance.gestureArena.sweep(1);
       expect(recognized, <String>[]);
-
-      tap.dispose();
     });
   });
 }
