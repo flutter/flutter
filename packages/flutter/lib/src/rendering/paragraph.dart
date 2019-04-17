@@ -346,7 +346,7 @@ class RenderParagraph extends RenderBox
       double intrinsicWidth = child.getMinIntrinsicWidth(height);
       double intrinsicHeight = child.getMinIntrinsicHeight(intrinsicWidth);
       placeholderDimensions[childIndex] = PlaceholderDimensions(
-        size: Size(intrinsicWidth, height),
+        size: Size(intrinsicWidth, intrinsicHeight),
         alignment: _placeholderSpans[childIndex].alignment,
         baseline: _placeholderSpans[childIndex].baseline,
       );
