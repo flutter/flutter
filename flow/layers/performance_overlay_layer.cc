@@ -22,7 +22,6 @@ void DrawStatisticsText(SkCanvas& canvas,
     font = SkFont(SkTypeface::MakeFromFile(font_path.c_str()));
   }
   font.setSize(15);
-  font.setLinearMetrics(false);
   SkPaint paint;
   paint.setColor(SK_ColorGRAY);
   canvas.drawSimpleText(string.c_str(), string.size(), kUTF8_SkTextEncoding, x,
