@@ -518,7 +518,7 @@ void main() {
         )
       );
     } on AssertionError catch (e) {
-      expect(e.toString(), contains('index'));
+      expect(e.toString(), contains('controller.index < tabBar.items.length'));
     }
 
     await tester.pumpWidget(
