@@ -448,7 +448,7 @@ class MDnsObservatoryDiscovery {
         .lookup<TxtResourceRecord>(
             ResourceRecordQuery.text(domainName),
         )
-        .toList()
+        .toList();
       if (txt.isEmpty) {
         return MDnsObservatoryDiscoveryResult(srv.first.port, '');
       }
