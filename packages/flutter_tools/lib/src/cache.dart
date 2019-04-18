@@ -950,10 +950,6 @@ const List<List<String>> _osxBinaryDirs = <List<String>>[
   <String>['android-arm-release/darwin-x64', 'android-arm-release/darwin-x64.zip'],
   <String>['android-arm64-profile/darwin-x64', 'android-arm64-profile/darwin-x64.zip'],
   <String>['android-arm64-release/darwin-x64', 'android-arm64-release/darwin-x64.zip'],
-  <String>['android-arm-dynamic-profile/darwin-x64', 'android-arm-dynamic-profile/darwin-x64.zip'],
-  <String>['android-arm-dynamic-release/darwin-x64', 'android-arm-dynamic-release/darwin-x64.zip'],
-  <String>['android-arm64-dynamic-profile/darwin-x64', 'android-arm64-dynamic-profile/darwin-x64.zip'],
-  <String>['android-arm64-dynamic-release/darwin-x64', 'android-arm64-dynamic-release/darwin-x64.zip'],
 ];
 
 const List<List<String>> _linuxBinaryDirs = <List<String>>[
@@ -961,10 +957,6 @@ const List<List<String>> _linuxBinaryDirs = <List<String>>[
   <String>['android-arm-release/linux-x64', 'android-arm-release/linux-x64.zip'],
   <String>['android-arm64-profile/linux-x64', 'android-arm64-profile/linux-x64.zip'],
   <String>['android-arm64-release/linux-x64', 'android-arm64-release/linux-x64.zip'],
-  <String>['android-arm-dynamic-profile/linux-x64', 'android-arm-dynamic-profile/linux-x64.zip'],
-  <String>['android-arm-dynamic-release/linux-x64', 'android-arm-dynamic-release/linux-x64.zip'],
-  <String>['android-arm64-dynamic-profile/linux-x64', 'android-arm64-dynamic-profile/linux-x64.zip'],
-  <String>['android-arm64-dynamic-release/linux-x64', 'android-arm64-dynamic-release/linux-x64.zip'],
 ];
 
 const List<List<String>> _windowsBinaryDirs = <List<String>>[
@@ -972,10 +964,6 @@ const List<List<String>> _windowsBinaryDirs = <List<String>>[
   <String>['android-arm-release/windows-x64', 'android-arm-release/windows-x64.zip'],
   <String>['android-arm64-profile/windows-x64', 'android-arm64-profile/windows-x64.zip'],
   <String>['android-arm64-release/windows-x64', 'android-arm64-release/windows-x64.zip'],
-  <String>['android-arm-dynamic-profile/windows-x64', 'android-arm-dynamic-profile/windows-x64.zip'],
-  <String>['android-arm-dynamic-release/windows-x64', 'android-arm-dynamic-release/windows-x64.zip'],
-  <String>['android-arm64-dynamic-profile/windows-x64', 'android-arm64-dynamic-profile/windows-x64.zip'],
-  <String>['android-arm64-dynamic-release/windows-x64', 'android-arm64-dynamic-release/windows-x64.zip'],
 ];
 
 const List<List<String>> _androidBinaryDirs = <List<String>>[
@@ -987,10 +975,6 @@ const List<List<String>> _androidBinaryDirs = <List<String>>[
   <String>['android-arm64', 'android-arm64/artifacts.zip'],
   <String>['android-arm64-profile', 'android-arm64-profile/artifacts.zip'],
   <String>['android-arm64-release', 'android-arm64-release/artifacts.zip'],
-  <String>['android-arm-dynamic-profile', 'android-arm-dynamic-profile/artifacts.zip'],
-  <String>['android-arm-dynamic-release', 'android-arm-dynamic-release/artifacts.zip'],
-  <String>['android-arm64-dynamic-profile', 'android-arm64-dynamic-profile/artifacts.zip'],
-  <String>['android-arm64-dynamic-release', 'android-arm64-dynamic-release/artifacts.zip'],
 ];
 
 const List<List<String>> _iosBinaryDirs = <List<String>>[
