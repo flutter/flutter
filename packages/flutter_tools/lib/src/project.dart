@@ -538,6 +538,9 @@ class MacOSProject {
 
   // Note: The build script file exists as a temporary shim.
   File get buildScript => project.directory.childDirectory('macos').childFile('build.sh');
+
+  // Note: The name script file exists as a temporary shim.
+  File get nameScript => project.directory.childDirectory('macos').childFile('name_output.sh');
 }
 
 /// The Windows sub project
@@ -550,6 +553,9 @@ class WindowsProject {
 
   // Note: The build script file exists as a temporary shim.
   File get buildScript => project.directory.childDirectory('windows').childFile('build.bat');
+
+  // Note: The name script file exists as a temporary shim.
+  File get nameScript => project.directory.childDirectory('windows').childFile('name_output.sh');
 }
 
 /// The Linux sub project.
@@ -562,4 +568,7 @@ class LinuxProject {
 
   // Note: The build script file exists as a temporary shim.
   File get buildScript => project.directory.childDirectory('linux').childFile('build.sh');
+
+  // Note: The name script file exists as a temporary shim.
+  File get nameScript => project.directory.childDirectory('linux').childFile('name_output.sh');
 }

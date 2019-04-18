@@ -50,9 +50,9 @@ class ApplicationPackageFactory {
       case TargetPlatform.tester:
         return FlutterTesterApp.fromCurrentDirectory();
       case TargetPlatform.darwin_x64:
-        return applicationBinary != null
-          ? MacOSApp.fromPrebuiltApp(applicationBinary)
-          : null;
+        return applicationBinary == null
+          ? MacOSApp.fromMacOSProject((await FlutterProject.current()).macos)
+          : MacOSApp.fromPrebuiltApp(applicationBinary);
       case TargetPlatform.web:
         return WebApplicationPackage(await FlutterProject.current());
       case TargetPlatform.linux_x64:
