@@ -13,6 +13,8 @@ class PrecacheCommand extends FlutterCommand {
   PrecacheCommand() {
     argParser.addFlag('all-platforms', abbr: 'a', negatable: false,
         help: 'Precache artifacts for all platforms.');
+    argParser.addFlag('force', abbr: 'f', negatable: false,
+        help: 'Force downloading of artifacts.');
     argParser.addFlag('android', negatable: true, defaultsTo: true,
         help: 'Precache artifacts for Android development');
     argParser.addFlag('ios', negatable: true, defaultsTo: true,
@@ -55,7 +57,7 @@ class PrecacheCommand extends FlutterCommand {
         requiredArtifacts.add(artifact);
       }
     }
-    if (cache.isUpToDate()) {
+    if (cache.isUpToDate() && !argResults['force']) {
       printStatus('Already up-to-date.');
     } else {
       await cache.updateAll(requiredArtifacts);
