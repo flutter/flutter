@@ -35,9 +35,6 @@ echo "Running fml_unittests..."
 echo "Running runtime_unittests..."
 "$HOST_DIR/runtime_unittests"
 
-echo "Running runtime_lifecycle_unittests..."
-"$HOST_DIR/runtime_lifecycle_unittests"
-
 echo "Running shell_unittests..."
 "$HOST_DIR/shell_unittests"
 
