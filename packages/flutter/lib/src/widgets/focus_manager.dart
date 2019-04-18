@@ -10,6 +10,7 @@ import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
 
 import 'binding.dart';
+import 'focus_scope.dart';
 import 'framework.dart';
 
 /// Signature of a callback used by [Focus.onKey] and [FocusScope.onKey]
@@ -71,17 +72,23 @@ class FocusAttachment {
   ///
   /// If [isAttached] is false, then calling this method does nothing.
   ///
-  /// Called whenever the associated widget is rebuilt in order to maintain the
-  /// focus hierarchy.
+  /// Should be called whenever the associated widget is rebuilt in order to
+  /// maintain the focus hierarchy.
   ///
   /// A [StatefulWidget] that hosts a [FocusNode] should call this method on the
   /// node it hosts during its [State.build] or [State.didChangeDependencies]
   /// methods in case the widget is moved from one location in the tree to
   /// another location that has a different [FocusScope] or context.
-  void reparent(FocusNode parent) {
-    assert(parent != null);
+  ///
+  /// The optional [parent] argument must be supplied if you are not using
+  /// [Focus] and [FocusScope] widgets to build the focus tree, or need to
+  /// supply the parent explicitly (which are both uncommon).
+  void reparent({FocusNode parent}) {
     assert(_node != null);
     if (isAttached) {
+      assert(_node.context != null);
+      parent ??= Focus.of(_node.context);
+      assert(parent != null);
       parent._reparent(_node);
     }
   }

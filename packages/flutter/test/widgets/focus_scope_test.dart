@@ -41,7 +41,7 @@ class TestFocusState extends State<TestFocus> {
 
   @override
   Widget build(BuildContext context) {
-    focusAttachment.reparent(FocusScope.of(context));
+    focusAttachment.reparent();
     if (!_didAutofocus && widget.autofocus) {
       _didAutofocus = true;
       FocusScope.of(context).autofocus(focusNode);

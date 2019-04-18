@@ -281,7 +281,7 @@ class _FocusState extends State<Focus> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _focusAttachment?.reparent(Focus.of(context));
+    _focusAttachment?.reparent();
     if (!_didAutofocus && widget.autofocus) {
       FocusScope.of(context).autofocus(node);
       _didAutofocus = true;
@@ -336,7 +336,7 @@ class _FocusState extends State<Focus> {
 
   @override
   Widget build(BuildContext context) {
-    _focusAttachment.reparent(Focus.of(context));
+    _focusAttachment.reparent();
     return Semantics(
       explicitChildNodes: true,
       child: _FocusMarker(

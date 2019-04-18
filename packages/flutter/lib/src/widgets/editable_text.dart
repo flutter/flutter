@@ -1391,7 +1391,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
-    _focusAttachment.reparent(FocusScope.of(context));
+    _focusAttachment.reparent();
     super.build(context); // See AutomaticKeepAliveClientMixin.
 
     final TextSelectionControls controls = widget.selectionControls;
