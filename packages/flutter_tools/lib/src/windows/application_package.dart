@@ -5,14 +5,18 @@
 import 'package:meta/meta.dart';
 
 import '../application_package.dart';
+import '../base/common.dart';
 import '../base/file_system.dart';
+import '../base/io.dart';
+import '../base/process_manager.dart';
+import '../build_info.dart';
 import '../project.dart';
 
 abstract class WindowsApp extends ApplicationPackage {
   WindowsApp({@required String projectBundleId}) : super(id: projectBundleId);
 
   /// Creates a new [WindowsApp] from a windows sub project.
-  factory WindowsApp.fromLinuxProject(WindowsProject project) {
+  factory WindowsApp.fromWindowsProject(WindowsProject project) {
     return BuildableWindowsApp(
       project: project,
     );
@@ -30,28 +34,42 @@ abstract class WindowsApp extends ApplicationPackage {
   @override
   String get displayName => id;
 
-  String get executable;
+  String executable(BuildMode buildMode);
 }
 
 class PrebuiltWindowsApp extends WindowsApp {
   PrebuiltWindowsApp({
-    @required this.executable,
-  }) : super(projectBundleId: executable);
+    @required String executable,
+  }) : _executable = executable,
+       super(projectBundleId: executable);
+
+  final String _executable;
 
   @override
-  final String executable;
+  String executable(BuildMode buildMode) => _executable;
 
   @override
-  String get name => executable;
+  String get name => _executable;
 }
 
 class BuildableWindowsApp extends WindowsApp {
-  BuildableWindowsApp({this.project}) : super(projectBundleId: project.project.manifest.appName);
+  BuildableWindowsApp({
+    @required this.project,
+  }) : super(projectBundleId: project.project.manifest.appName);
 
   final WindowsProject project;
 
   @override
-  String get executable => null;
+  String executable(BuildMode buildMode) {
+    final ProcessResult result = processManager.runSync(<String>[
+      project.nameScript.path,
+      buildMode == BuildMode.debug ? 'debug' : 'release',
+    ]);
+    if (result.exitCode != 0) {
+      throwToolExit('Failed to find Windows project name');
+    }
+    return result.stdout.toString().trim();
+  }
 
   @override
   String get name => project.project.manifest.appName;
