@@ -18,6 +18,7 @@ Future<void> buildMacOS(FlutterProject flutterProject, BuildInfo buildInfo) asyn
     flutterProject.macos.buildScript.path,
     Cache.flutterRoot,
     buildInfo?.isDebug == true ? 'debug' : 'release',
+    buildInfo?.trackWidgetCreation == true ? 'true' : 'false',
   ], runInShell: true);
   final Status status = logger.startProgress(
     'Building macOS application...',
