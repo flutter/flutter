@@ -87,8 +87,8 @@ void main() {
     }
     await Future.wait(pending);
     final String lcovData = await coverageCollector.finalizeCoverage();
-    final String lcovPath = path.join('.coverage_report', 'tools.lcov');
-    final String htmlPath = path.join('.coverage_report', 'report.html');
+    final String lcovPath = path.join('coverage', 'lcov.info');
+    final String htmlPath = path.join('coverage', 'report.html');
     File(lcovPath)
       ..createSync(recursive: true)
       ..writeAsStringSync(lcovData);
