@@ -152,6 +152,9 @@ int smallestButton(int buttons) => buttons & (-buttons);
 
 /// Returns whether [buttons] contains one and only one button.
 ///
+/// A `buttons` is a bitfield where each set bit represents a button. This
+/// function returns whether there is only one set bit in the given integer.
+///
 /// It returns false for 0.
 ///
 /// Example:
