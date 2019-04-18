@@ -1,9 +1,10 @@
-
-
-import 'package:flutter_tools/src/base/logger.dart';
+// Copyright 2019 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file
 
 import '../base/common.dart';
 import '../base/io.dart';
+import '../base/logger.dart';
 import '../base/process_manager.dart';
 import '../build_info.dart';
 import '../cache.dart';
