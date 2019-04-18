@@ -88,7 +88,7 @@ class MacOSDevice extends Device {
       final Uri observatoryUri = await observatoryDiscovery.uri;
       // Bring app to foreground.
       await processManager.run(<String>[
-        'open', package.applicationBundle(debuggingOptions.buildInfo.mode),
+        'open', package.applicationBundle(debuggingOptions?.buildInfo?.mode),
       ]);
       return LaunchResult.succeeded(observatoryUri: observatoryUri);
     } catch (error) {
