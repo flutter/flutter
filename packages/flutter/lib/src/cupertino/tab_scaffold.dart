@@ -57,21 +57,28 @@ import 'theme.dart';
 ///
 /// see also:
 /// * [CupertinoTabScaffold], a tabbed application root layout that can be controlled by a [CupertinoTabController].
-class CupertinoTabController extends ValueNotifier<int> {
+class CupertinoTabController extends ChangeNotifier {
   /// Creates a [CupertinoTabController] to control the tab index of [CupertinoTabScaffold] and [CupertinoTabBar].
   ///
   /// The [initialIndex] must not be null and defaults to 0. The value must be greater than or equal to 0,
   /// and less than the total number of tabs.
   CupertinoTabController({ int initialIndex = 0 })
     : assert(initialIndex != null && initialIndex >= 0),
-      super(initialIndex);
+      _index = initialIndex;
 
+  int _index;
   /// The index of the currently selected tab. Changing the value of [index]
   /// updates the actively displayed tab of the [CupertinoTabScaffold]
   /// controlled by this [CupertinoTabController], as well as the currently selected tab item
   /// of its [CupertinoTabScaffold.tabBar].
-  int get index => value;
-  set index(int value) => this.value = value;
+  ///
+  /// The value must be greater than or equal to 0,
+  /// and less than the total number of tabs.
+  int get index => _index;
+  set index(int value) {
+    assert(value != null && value >= 0);
+    _index = value;
+  }
 }
 
 /// Implements a tabbed iOS application's root layout and behavior structure.
@@ -201,8 +208,8 @@ class CupertinoTabScaffold extends StatefulWidget {
   /// Must not be null.
   final CupertinoTabBar tabBar;
 
-  /// Controls the current selected tab item of the [tabBar], as well as the
-  /// the currently focused tab from the [tabBuilder].
+  /// Controls the current selected tab index of the [tabBar], as well as the
+  /// active tab index of the [tabBuilder].
   ///
   /// Defaults to null.
   final CupertinoTabController controller;
@@ -280,14 +287,37 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
     _controller = newController;
   }
 
-  void _onCurrentIndexChange() => setState(() {});
+  void _onCurrentIndexChange() {
+    assert(() {
+        if (_controller.index < 0 || _controller.index >= widget.tabBar.items.length) {
+          throw FlutterError(
+            'current index ${_controller.index} is out of bounds.'
+            'The total number of tabs is ${widget.tabBar.items.length} '
+          );
+        }
+        return true;
+      }());
+
+    setState(() {});
+  }
 
   @override
   void didUpdateWidget(CupertinoTabScaffold oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.controller != null && widget.controller != oldWidget.controller) {
-      _updateTabController();
+
+    if (widget.controller == null || widget.controller == oldWidget.controller) {
+      assert(() {
+          if (oldWidget.controller.index >= widget.tabBar.items.length) {
+            throw FlutterError(
+              'current index ${oldWidget.controller.index} is out of bounds.'
+              'The total number of tabs is ${widget.tabBar.items.length} '
+            );
+          }
+          return true;
+        }());
+      return;
     }
+    _updateTabController();
   }
 
   @override

@@ -198,7 +198,7 @@ void main() {
   });
 
   testWidgets('Programmatic tab switching by changing currentIndex of an existing controller', (WidgetTester tester) async {
-    final CupertinoTabController controller = CupertinoTabController(selectedIndex: 1);
+    final CupertinoTabController controller = CupertinoTabController(initialIndex: 1);
     final List<int> tabsPainted = <int>[];
 
     await tester.pumpWidget(
@@ -220,8 +220,8 @@ void main() {
 
     expect(tabsPainted, <int>[1]);
 
-    controller.currentIndex = 0;
-    await tester.pumpAndSettle();
+    controller.index = 0;
+    await tester.pump();
 
     expect(tabsPainted, <int>[1, 0]);
     // onTap is not called when changing tabs programmatically.
@@ -260,7 +260,7 @@ void main() {
       CupertinoApp(
         home: CupertinoTabScaffold(
           tabBar: _buildTabBar(),
-          controller: CupertinoTabController(selectedIndex: 1), // Programmatically change the tab now.
+          controller: CupertinoTabController(initialIndex: 1), // Programmatically change the tab now.
           tabBuilder: (BuildContext context, int index) {
             return CustomPaint(
               child: Text('Page ${index + 1}'),
