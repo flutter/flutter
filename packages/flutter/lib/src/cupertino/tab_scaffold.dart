@@ -12,13 +12,6 @@ import 'theme.dart';
 /// the actively displayed tab of the [CupertinoTabScaffold] the [CupertinoTabController] controls,
 /// as well as the currently selected tab item of its [CupertinoTabBar].
 ///
-/// There're 2 ways to programmatically change the actively displayed tab of a [CupertinoTabScaffold]
-/// (and the selected tab item of the [CupertinoTabBar]):
-/// 1. Change the [index] of the existing controller of the [CupertinoTabScaffold],
-///    see the example below.
-/// 2. Rebuild the [CupertinoTabScaffold] widget with a new [CupertinoTabController], whose
-///    [currentIndex] is set to the new value.
-///
 /// {@tool sample}
 ///
 /// [CupertinoTabController] can be used to switch tabs from ancestor widgets:
@@ -55,7 +48,7 @@ import 'theme.dart';
 /// ```
 /// {@end-tool}
 ///
-/// see also:
+/// See also:
 /// * [CupertinoTabScaffold], a tabbed application root layout that can be controlled by a [CupertinoTabController].
 class CupertinoTabController extends ChangeNotifier {
   /// Creates a [CupertinoTabController] to control the tab index of [CupertinoTabScaffold] and [CupertinoTabBar].
