@@ -84,7 +84,7 @@ enum MaterialTapTargetSize {
 
 /// Configures whether SnackBar should be fixed to the bottom or floating
 /// like described in Material Design spec.
-enum SnackBarBehaviour {
+enum SnackBarBehavior {
   /// Fixed the SnackBar position to the bottom of the Scaffold when possible.
   /// One of the possible scenario where SnackBar will be shown above another
   /// widget is SnackBar above BottomNavigationBar.
@@ -92,9 +92,9 @@ enum SnackBarBehaviour {
   /// Scaffold to be pushed above (e.g. Floating Action Button).
   fixed,
 
-  /// Change the design and behaviour of SnackBar to float like described in
+  /// Change the design and behavior of SnackBar to float like described in
   /// <https://material.io/design/components/snackbars.html>.
-  /// This behaviour will cause SnackBar to be shown on top of other non-fixed
+  /// This behavior will cause SnackBar to be shown on top of other non-fixed
   /// widget like Floating Action Button rather than pushing it above SnackBar.
   floating
 }
@@ -180,7 +180,7 @@ class ThemeData extends Diagnosticable {
     FloatingActionButtonThemeData floatingActionButtonTheme,
     Typography typography,
     CupertinoThemeData cupertinoOverrideTheme,
-    SnackBarBehaviour snackBarBehaviour,
+    SnackBarBehavior snackBarBehavior,
   }) {
     brightness ??= Brightness.light;
     final bool isDark = brightness == Brightness.dark;
@@ -279,7 +279,7 @@ class ThemeData extends Diagnosticable {
     dialogTheme ??= const DialogTheme();
     floatingActionButtonTheme ??= const FloatingActionButtonThemeData();
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
-    snackBarBehaviour ??= SnackBarBehaviour.fixed;
+    snackBarBehavior ??= SnackBarBehavior.fixed;
 
     return ThemeData.raw(
       brightness: brightness,
@@ -333,7 +333,7 @@ class ThemeData extends Diagnosticable {
       floatingActionButtonTheme: floatingActionButtonTheme,
       typography: typography,
       cupertinoOverrideTheme: cupertinoOverrideTheme,
-      snackBarBehaviour: snackBarBehaviour,
+      snackBarBehavior: snackBarBehavior,
     );
   }
 
@@ -399,7 +399,7 @@ class ThemeData extends Diagnosticable {
     @required this.floatingActionButtonTheme,
     @required this.typography,
     @required this.cupertinoOverrideTheme,
-    @required this.snackBarBehaviour,
+    @required this.snackBarBehavior,
   }) : assert(brightness != null),
        assert(primaryColor != null),
        assert(primaryColorBrightness != null),
@@ -449,7 +449,7 @@ class ThemeData extends Diagnosticable {
        assert(dialogTheme != null),
        assert(floatingActionButtonTheme != null),
        assert(typography != null),
-       assert(snackBarBehaviour != null);
+       assert(snackBarBehavior != null);
 
   // Warning: make sure these properties are in the exact same order as in
   // hashValues() and in the raw constructor and in the order of fields in
@@ -688,7 +688,7 @@ class ThemeData extends Diagnosticable {
   final ColorScheme colorScheme;
 
   /// Configures how SnackBar should be positioned and shown.
-  final SnackBarBehaviour snackBarBehaviour;
+  final SnackBarBehavior snackBarBehavior;
 
   /// A theme for customizing the shape of a dialog.
   final DialogTheme dialogTheme;
@@ -766,7 +766,7 @@ class ThemeData extends Diagnosticable {
     FloatingActionButtonThemeData floatingActionButtonTheme,
     Typography typography,
     CupertinoThemeData cupertinoOverrideTheme,
-    SnackBarBehaviour snackBarBehaviour,
+    SnackBarBehavior snackBarBehavior,
   }) {
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
     return ThemeData.raw(
@@ -821,7 +821,7 @@ class ThemeData extends Diagnosticable {
       floatingActionButtonTheme: floatingActionButtonTheme ?? this.floatingActionButtonTheme,
       typography: typography ?? this.typography,
       cupertinoOverrideTheme: cupertinoOverrideTheme ?? this.cupertinoOverrideTheme,
-      snackBarBehaviour: snackBarBehaviour ?? this.snackBarBehaviour,
+      snackBarBehavior: snackBarBehavior ?? this.snackBarBehavior,
     );
   }
 
@@ -954,7 +954,7 @@ class ThemeData extends Diagnosticable {
       floatingActionButtonTheme: FloatingActionButtonThemeData.lerp(a.floatingActionButtonTheme, b.floatingActionButtonTheme, t),
       typography: Typography.lerp(a.typography, b.typography, t),
       cupertinoOverrideTheme: t < 0.5 ? a.cupertinoOverrideTheme : b.cupertinoOverrideTheme,
-      snackBarBehaviour: t < 0.5 ? a.snackBarBehaviour : b.snackBarBehaviour,
+      snackBarBehavior: t < 0.5 ? a.snackBarBehavior : b.snackBarBehavior,
     );
   }
 
@@ -1016,7 +1016,8 @@ class ThemeData extends Diagnosticable {
            (otherData.dialogTheme == dialogTheme) &&
            (otherData.floatingActionButtonTheme == floatingActionButtonTheme) &&
            (otherData.typography == typography) &&
-           (otherData.cupertinoOverrideTheme == cupertinoOverrideTheme);
+           (otherData.cupertinoOverrideTheme == cupertinoOverrideTheme) &&
+           (otherData.snackBarBehavior == snackBarBehavior);
   }
 
   @override
@@ -1079,6 +1080,7 @@ class ThemeData extends Diagnosticable {
           floatingActionButtonTheme,
           typography,
           cupertinoOverrideTheme,
+          snackBarBehavior,
         ),
       ),
     );
@@ -1136,6 +1138,7 @@ class ThemeData extends Diagnosticable {
     properties.add(DiagnosticsProperty<FloatingActionButtonThemeData>('floatingActionButtonThemeData', floatingActionButtonTheme, defaultValue: defaultData.floatingActionButtonTheme));
     properties.add(DiagnosticsProperty<Typography>('typography', typography, defaultValue: defaultData.typography));
     properties.add(DiagnosticsProperty<CupertinoThemeData>('cupertinoOverrideTheme', cupertinoOverrideTheme, defaultValue: defaultData.cupertinoOverrideTheme));
+    properties.add(DiagnosticsProperty<SnackBarBehavior>('snackBarBehavior', snackBarBehavior, defaultValue: defaultData.snackBarBehavior));
   }
 }
 

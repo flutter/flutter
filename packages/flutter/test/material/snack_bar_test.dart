@@ -475,7 +475,7 @@ void main() {
                     action: SnackBarAction(label: 'ACTION', onPressed: () {}),
                   ));
                 },
-                child: const Text('X')
+                child: const Text('X'),
               );
             }
           ),
@@ -502,7 +502,7 @@ void main() {
   testWidgets('Floating SnackBar button text alignment', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(
-        snackBarBehaviour: SnackBarBehaviour.floating,
+        snackBarBehavior: SnackBarBehavior.floating,
       ),
       home: MediaQuery(
         data: const MediaQueryData(
@@ -515,18 +515,18 @@ void main() {
         ),
         child: Scaffold(
           body: Builder(
-              builder: (BuildContext context) {
-                return GestureDetector(
-                    onTap: () {
-                      Scaffold.of(context).showSnackBar(SnackBar(
-                          content: const Text('I am a snack bar.'),
-                          duration: const Duration(seconds: 2),
-                          action: SnackBarAction(label: 'ACTION', onPressed: () {}),
-                      ));
-                    },
-                    child: const Text('X')
-                );
-              }
+            builder: (BuildContext context) {
+              return GestureDetector(
+                onTap: () {
+                  Scaffold.of(context).showSnackBar(SnackBar(
+                    content: const Text('I am a snack bar.'),
+                    duration: const Duration(seconds: 2),
+                    action: SnackBarAction(label: 'ACTION', onPressed: () {}),
+                  ));
+                },
+                child: const Text('X'),
+              );
+            }
           ),
         ),
       ),
@@ -556,7 +556,7 @@ void main() {
   testWidgets('Floating SnackBar is positioned above BottomNavigationBar', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(
-        snackBarBehaviour: SnackBarBehaviour.floating,
+        snackBarBehavior: SnackBarBehavior.floating,
       ),
       home: MediaQuery(
         data: const MediaQueryData(
@@ -575,18 +575,18 @@ void main() {
             ],
           ),
           body: Builder(
-              builder: (BuildContext context) {
-                return GestureDetector(
-                    onTap: () {
-                      Scaffold.of(context).showSnackBar(SnackBar(
-                          content: const Text('I am a snack bar.'),
-                          duration: const Duration(seconds: 2),
-                          action: SnackBarAction(label: 'ACTION', onPressed: () {}),
-                      ));
-                    },
-                    child: const Text('X')
-                );
-              }
+            builder: (BuildContext context) {
+              return GestureDetector(
+                onTap: () {
+                  Scaffold.of(context).showSnackBar(SnackBar(
+                    content: const Text('I am a snack bar.'),
+                    duration: const Duration(seconds: 2),
+                    action: SnackBarAction(label: 'ACTION', onPressed: () {}),
+                  ));
+                },
+                child: const Text('X'),
+              );
+            }
           ),
         ),
       ),
@@ -616,7 +616,7 @@ void main() {
   testWidgets('Floating SnackBar is positioned above FloatingActionButton', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(
-        snackBarBehaviour: SnackBarBehaviour.floating,
+        snackBarBehavior: SnackBarBehavior.floating,
       ),
       home: MediaQuery(
         data: const MediaQueryData(
@@ -633,18 +633,18 @@ void main() {
               onPressed: () {}
           ),
           body: Builder(
-              builder: (BuildContext context) {
-                return GestureDetector(
-                    onTap: () {
-                      Scaffold.of(context).showSnackBar(SnackBar(
-                        content: const Text('I am a snack bar.'),
-                        duration: const Duration(seconds: 2),
-                        action: SnackBarAction(label: 'ACTION', onPressed: () {}),
-                      ));
-                    },
-                    child: const Text('X')
-                );
-              }
+            builder: (BuildContext context) {
+              return GestureDetector(
+                onTap: () {
+                  Scaffold.of(context).showSnackBar(SnackBar(
+                    content: const Text('I am a snack bar.'),
+                    duration: const Duration(seconds: 2),
+                    action: SnackBarAction(label: 'ACTION', onPressed: () {}),
+                  ));
+                },
+                child: const Text('X'),
+              );
+            }
           ),
         ),
       ),

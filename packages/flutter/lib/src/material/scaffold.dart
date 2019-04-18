@@ -451,7 +451,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     Size bottomSheetSize = Size.zero;
     Size snackBarSize = Size.zero;
 
-    // Set the size of the SnackBar early if the behaviour is fixed one so
+    // Set the size of the SnackBar early if the behavior is fixed so
     // the FAB can be positioned based on SnackBar availability.
     if (hasChild(_ScaffoldSlot.snackBar) && !shouldShowFloatingSnackBar) {
       snackBarSize = layoutChild(_ScaffoldSlot.snackBar, fullWidthConstraints);
@@ -497,8 +497,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
       if (snackBarSize == Size.zero) {
         snackBarSize = layoutChild(_ScaffoldSlot.snackBar, fullWidthConstraints);
       }
-      final double snackBarYOffsetBase =
-      floatingActionButtonRect != null && shouldShowFloatingSnackBar
+      final double snackBarYOffsetBase = floatingActionButtonRect != null && shouldShowFloatingSnackBar
           ? floatingActionButtonRect.top
           : contentBottom;
       positionChild(_ScaffoldSlot.snackBar,
@@ -1849,8 +1848,13 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     if (_snackBars.isNotEmpty) {
       final bool removeBottomPadding = widget.persistentFooterButtons != null ||
         widget.bottomNavigationBar != null;
-      shouldShowFloatingSnackBar =
-          themeData.snackBarBehaviour == SnackBarBehaviour.floating;
+      switch (themeData.snackBarBehavior) {
+        case SnackBarBehavior.floating:
+          shouldShowFloatingSnackBar = true;
+          break;
+        default:
+          break;
+      }
       _addIfNonNull(
         children,
         _snackBars.first._widget,

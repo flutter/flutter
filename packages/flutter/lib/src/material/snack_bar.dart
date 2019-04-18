@@ -237,12 +237,13 @@ class SnackBar extends StatelessWidget {
     final CurvedAnimation fadeInAnimation =
         CurvedAnimation(parent: animation, curve: _snackBarFadeInCurve);
     final CurvedAnimation fadeOutAnimation = CurvedAnimation(
-        parent: animation,
-        curve: _snackBarFadeOutCurve,
-        reverseCurve: const Threshold(0.0));
+      parent: animation,
+      curve: _snackBarFadeOutCurve,
+      reverseCurve: const Threshold(0.0),
+    );
 
     final bool isFloatingSnackBar =
-        theme.snackBarBehaviour == SnackBarBehaviour.floating;
+        theme.snackBarBehavior == SnackBarBehavior.floating;
 
     Widget snackBar = SafeArea(
       top: false,
@@ -270,8 +271,9 @@ class SnackBar extends StatelessWidget {
 
     if (isFloatingSnackBar) {
       snackBar = Container(
-          margin: const EdgeInsets.fromLTRB(15.0, 5.0, 15.0, 10.0),
-          child: snackBar);
+        margin: const EdgeInsets.fromLTRB(15.0, 5.0, 15.0, 10.0),
+        child: snackBar,
+      );
     }
 
     snackBar = Semantics(
@@ -321,8 +323,9 @@ class SnackBar extends StatelessWidget {
 
   /// Creates an animation controller useful for driving a snack bar's entrance
   /// and exit animation.
-  static AnimationController createAnimationController(
-      {@required TickerProvider vsync}) {
+  static AnimationController createAnimationController({
+    @required TickerProvider vsync,
+  }) {
     return AnimationController(
       duration: _kSnackBarTransitionDuration,
       debugLabel: 'SnackBar',
