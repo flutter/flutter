@@ -531,8 +531,8 @@ class ContainerLayer extends Layer {
       library: 'rendering library',
       context: ErrorDescription('during compositing'),
       informationCollector: () sync* {
-        yield child.toDiagnosticsNode(name: 'Attempted to composite layer', style: DiagnosticsTreeStyle.indentedSingleLine);
-        yield predecessor.toDiagnosticsNode(name: 'after layer', style: DiagnosticsTreeStyle.indentedSingleLine);
+        yield child.toDiagnosticsNode(name: 'Attempted to composite layer', style: DiagnosticsTreeStyle.errorProperty);
+        yield predecessor.toDiagnosticsNode(name: 'after layer', style: DiagnosticsTreeStyle.errorProperty);
         yield ErrorDescription('which occupies the same area at a higher elevation.');
       }
     ));

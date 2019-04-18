@@ -134,7 +134,7 @@ mixin AnimationLocalListenersMixin {
             yield DiagnosticsProperty<AnimationLocalListenersMixin>(
               'The $runtimeType notifying listeners was',
               this,
-              style: DiagnosticsTreeStyle.indentedSingleLine,
+              style: DiagnosticsTreeStyle.errorProperty,
             );
           },
         ));
@@ -203,7 +203,7 @@ mixin AnimationLocalStatusListenersMixin {
             yield DiagnosticsProperty<AnimationLocalStatusListenersMixin>(
               'The $runtimeType notifying status listeners was',
               this,
-              style: DiagnosticsTreeStyle.indentedSingleLine,
+              style: DiagnosticsTreeStyle.errorProperty,
             );
           },
         ));

@@ -503,7 +503,7 @@ class BoxConstraints extends Constraints {
           information.addAll(informationCollector());
         }
 
-        information.add(DiagnosticsProperty<BoxConstraints>('The offending constraints were', this, style: DiagnosticsTreeStyle.indentedSingleLine));
+        information.add(DiagnosticsProperty<BoxConstraints>('The offending constraints were', this, style: DiagnosticsTreeStyle.errorProperty));
         throw FlutterError.fromParts(information);
       }
       if (minWidth.isNaN || maxWidth.isNaN || minHeight.isNaN || maxHeight.isNaN) {
@@ -1720,7 +1720,7 @@ abstract class RenderBox extends RenderObject {
           ErrorSummary('RenderBox did not set its size during layout.'),
           contract,
           ErrorDescription('It appears that this did not happen; layout completed, but the size property is still null.'),
-          DiagnosticsProperty<RenderBox>('The RenderBox in question is', this, style: DiagnosticsTreeStyle.indentedSingleLine)
+          DiagnosticsProperty<RenderBox>('The RenderBox in question is', this, style: DiagnosticsTreeStyle.errorProperty)
         ]);
       }
       // verify that the size is not infinite
@@ -1755,8 +1755,8 @@ abstract class RenderBox extends RenderObject {
           'that allows its children to pick their own size.'
         ));
         errorParts.addAll(information);
-        errorParts.add(DiagnosticsProperty<BoxConstraints>('The constraints that applied to the $runtimeType were', constraints, style: DiagnosticsTreeStyle.indentedSingleLine));
-        errorParts.add(DiagnosticsProperty<Size>('The exact size it was given was', _size, style: DiagnosticsTreeStyle.indentedSingleLine));
+        errorParts.add(DiagnosticsProperty<BoxConstraints>('The constraints that applied to the $runtimeType were', constraints, style: DiagnosticsTreeStyle.errorProperty));
+        errorParts.add(DiagnosticsProperty<Size>('The exact size it was given was', _size, style: DiagnosticsTreeStyle.errorProperty));
         errorParts.add(ErrorHint('See https://flutter.io/layout/ for more information.'));
         throw FlutterError.fromParts(errorParts);
      }
@@ -1764,8 +1764,8 @@ abstract class RenderBox extends RenderObject {
       if (!constraints.isSatisfiedBy(_size)) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('$runtimeType does not meet its constraints.'),
-          DiagnosticsProperty<BoxConstraints>('Constraints', constraints, style: DiagnosticsTreeStyle.indentedSingleLine),
-          DiagnosticsProperty<Size>('Size', _size, style: DiagnosticsTreeStyle.indentedSingleLine),
+          DiagnosticsProperty<BoxConstraints>('Constraints', constraints, style: DiagnosticsTreeStyle.errorProperty),
+          DiagnosticsProperty<Size>('Size', _size, style: DiagnosticsTreeStyle.errorProperty),
           ErrorHint(
             'If you are not writing your own RenderBox subclass, then this is not '
             'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=BUG.md'

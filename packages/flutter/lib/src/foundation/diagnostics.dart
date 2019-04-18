@@ -146,16 +146,16 @@ enum DiagnosticsTreeStyle {
   /// Render the tree on a single line without showing children.
   singleLine,
 
-  /// Render the tree on a single line without showing children.
+  /// Render the tree using a style appropriate for properties that are part
+  /// of an error message.
+  ///
+  /// The name is placed on one line with the value and properties placed on
+  /// the following line.
   ///
   /// See also:
-  ///  * [FlutterErrorDetails], which uses this style to display the header
-  ///    describing the context where an error occurred.
-  headerLine,
-
-  /// Render the tree on a single line with the name and value on separate
-  /// lines.
-  indentedSingleLine,
+  ///  * [singleLine], which displays the same information but keeps the
+  ///    property and value on the same line.
+  errorProperty,
 
   /// Render only the immediate properties of a node instead of the full tree.
   ///
@@ -235,10 +235,6 @@ class TextTreeConfiguration {
   /// Prefix to add to the first line to display a child with this style.
   final String prefixLineOne;
 
-  /// Similar to prefixLineOne but applies even when this is the root node in
-  /// the tree.
-  final String beforeName;
-
   /// Suffix to add to end of the first line to make its length match the footer.
   final String suffixLineOne;
 
@@ -289,6 +285,13 @@ class TextTreeConfiguration {
   /// Whether to place line breaks between properties or to leave all
   /// properties on one line.
   final bool lineBreakProperties;
+
+
+  /// Text added immediately before the name of the node.
+  ///
+  /// See [errorTextConfiguration] for an example of using this to achieve a
+  /// custom line art style.
+  final String beforeName;
 
   /// Text added immediately after the name of the node.
   ///
@@ -638,8 +641,7 @@ final TextTreeConfiguration whitespaceTextConfiguration = TextTreeConfiguration(
   isBlankLineBetweenPropertiesAndChildren: false,
 );
 
-/// Whitespace only configuration where children are consistently indented
-/// two spaces.
+/// Whitespace only configuration where children are not indented.
 ///
 /// Use this style when indentation is not needed to disambiguate parents from
 /// children as in the case of a [DiagnosticsStackTrace].
@@ -698,34 +700,8 @@ final TextTreeConfiguration singleLineTextConfiguration = TextTreeConfiguration(
   prefixOtherLinesRootNode: '',
 );
 
-/// Render a node as a single line omitting children styling the node like it is
-/// a header describing content following it in the tree even though the node is
-/// not actually the parent of the content following it.
-///
-/// Example:
-/// `<name>: <description>(<property1>, <property2>, ..., <propertyN>):`
-///
-/// See also:
-///
-///  * [DiagnosticsTreeStyle.headerLine]
-final TextTreeConfiguration headerLineTextConfiguration = TextTreeConfiguration(
-  propertySeparator: ', ',
-  beforeProperties: '(',
-  afterProperties: ')',
-  mandatoryAfterProperties: ':',  // Colon that makes this style look like a header.
-  prefixLineOne: '',
-  prefixOtherLines: '  ',
-  prefixLastChildLineOne: '',
-  lineBreak: '',
-  lineBreakProperties: false,
-  addBlankLineIfNoChildren: false,
-  showChildren: false,
-  propertyPrefixIfChildren: '',
-  propertyPrefixNoChildren: '',
-  linkCharacter: '',
-  prefixOtherLinesRootNode: '',
-);
-/// Render a node as a single line omitting children.
+/// Render the name on a line followed by the body and properties on the next
+/// line omitting the children.
 ///
 /// Example:
 /// ```
@@ -735,8 +711,8 @@ final TextTreeConfiguration headerLineTextConfiguration = TextTreeConfiguration(
 ///
 /// See also:
 ///
-///  * [DiagnosticsTreeStyle.indentedSingleLine]
-final TextTreeConfiguration singleLineTextConfigurationIndented = TextTreeConfiguration(
+///  * [DiagnosticsTreeStyle.errorProperty]
+final TextTreeConfiguration errorPropertyTextConfiguration = TextTreeConfiguration(
   propertySeparator: ', ',
   beforeProperties: '(',
   afterProperties: ')',
@@ -1072,7 +1048,7 @@ class _NoDefaultValue {
 const _NoDefaultValue kNoDefaultValue = _NoDefaultValue();
 
 bool _isSingleLine(DiagnosticsTreeStyle style) {
-  return style == DiagnosticsTreeStyle.singleLine || style == DiagnosticsTreeStyle.headerLine;
+  return style == DiagnosticsTreeStyle.singleLine;
 }
 
 /// Renderer that creates ascii art representations of trees of
@@ -1120,7 +1096,7 @@ class TextTreeRenderer {
       TextTreeConfiguration textStyle,
   ) {
     final DiagnosticsTreeStyle childStyle = child?.style;
-    return (_isSingleLine(childStyle) || childStyle == DiagnosticsTreeStyle.indentedSingleLine) ? textStyle : child.textTreeConfiguration;
+    return (_isSingleLine(childStyle) || childStyle == DiagnosticsTreeStyle.errorProperty) ? textStyle : child.textTreeConfiguration;
   }
 
   /// Renders a [node] to a String.
@@ -1633,10 +1609,8 @@ abstract class DiagnosticsNode {
         return transitionTextConfiguration;
       case DiagnosticsTreeStyle.singleLine:
         return singleLineTextConfiguration;
-      case DiagnosticsTreeStyle.headerLine:
-        return headerLineTextConfiguration;
-      case DiagnosticsTreeStyle.indentedSingleLine:
-        return singleLineTextConfigurationIndented;
+      case DiagnosticsTreeStyle.errorProperty:
+        return errorPropertyTextConfiguration;
       case DiagnosticsTreeStyle.shallow:
         return shallowTextConfiguration;
       case DiagnosticsTreeStyle.error:

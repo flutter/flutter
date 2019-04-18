@@ -57,7 +57,7 @@ class PointerSignalResolver {
         library: 'gesture library',
         context: ErrorDescription('while resolving a PointerSignalEvent'),
         informationCollector: () sync* {
-          yield DiagnosticsProperty<PointerSignalEvent>('Event', event, style: DiagnosticsTreeStyle.indentedSingleLine);
+          yield DiagnosticsProperty<PointerSignalEvent>('Event', event, style: DiagnosticsTreeStyle.errorProperty);
         },
       ));
     }

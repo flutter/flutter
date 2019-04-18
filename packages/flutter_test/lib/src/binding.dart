@@ -560,7 +560,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
             yield DiagnosticsProperty<DiagnosticsNode>('At the time of the failure, the widget tree looked as follows', treeDump, linePrefix: '# ', style: DiagnosticsTreeStyle.flat);
           }
           if (description.isNotEmpty)
-            yield DiagnosticsProperty<String>('The test description was', description, style: DiagnosticsTreeStyle.indentedSingleLine);
+            yield DiagnosticsProperty<String>('The test description was', description, style: DiagnosticsTreeStyle.errorProperty);
         },
       ));
       assert(_parentZone != null);

@@ -214,7 +214,7 @@ class ChangeNotifier implements Listenable {
               yield DiagnosticsProperty<ChangeNotifier>(
                 'The $runtimeType sending notification was',
                 this,
-                style: DiagnosticsTreeStyle.indentedSingleLine,
+                style: DiagnosticsTreeStyle.errorProperty,
               );
             },
           ));

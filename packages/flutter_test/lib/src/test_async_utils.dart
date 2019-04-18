@@ -100,7 +100,7 @@ class TestAsyncUtils {
           information.add(DiagnosticsProperty<dynamic>(
             'An uncaught exception may have caused the guarded function leak. The exception was',
             error,
-            style: DiagnosticsTreeStyle.indentedSingleLine,
+            style: DiagnosticsTreeStyle.errorProperty,
           ));
           information.add(DiagnosticsStackTrace('The stack trace associated with this exception was', stack));
         }

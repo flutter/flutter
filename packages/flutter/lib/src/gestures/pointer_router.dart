@@ -81,7 +81,7 @@ class PointerRouter {
         route: route,
         event: event,
         informationCollector: () sync* {
-          yield DiagnosticsProperty<PointerEvent>('Event', event, style: DiagnosticsTreeStyle.indentedSingleLine);
+          yield DiagnosticsProperty<PointerEvent>('Event', event, style: DiagnosticsTreeStyle.errorProperty);
         },
       ));
     }

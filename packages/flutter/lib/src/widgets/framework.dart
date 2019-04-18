@@ -2071,10 +2071,10 @@ abstract class BuildContext {
   void visitChildElements(ElementVisitor visitor);
 
   /// Returns a description of an [Element] from the current build context.
-  DiagnosticsNode describeElement(String name, {DiagnosticsTreeStyle style = DiagnosticsTreeStyle.indentedSingleLine});
+  DiagnosticsNode describeElement(String name, {DiagnosticsTreeStyle style = DiagnosticsTreeStyle.errorProperty});
 
   /// Returns a description of the [Widget] associated with the current build context.
-  DiagnosticsNode describeWidget(String name, {DiagnosticsTreeStyle style = DiagnosticsTreeStyle.indentedSingleLine});
+  DiagnosticsNode describeWidget(String name, {DiagnosticsTreeStyle style = DiagnosticsTreeStyle.errorProperty});
 
   /// Adds a description of a specific type of widget missing from the current
   /// build context's ancestry tree.
@@ -2674,7 +2674,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     information.add(DiagnosticsProperty<Element>(
       'The specific widget that could not find a $expectedAncestorType ancestor was',
       this,
-      style: DiagnosticsTreeStyle.indentedSingleLine,
+      style: DiagnosticsTreeStyle.errorProperty,
     ));
 
     if (ancestors.isNotEmpty) {
@@ -2698,12 +2698,12 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   }
 
   @override
-  DiagnosticsNode describeElement(String name, {DiagnosticsTreeStyle style = DiagnosticsTreeStyle.indentedSingleLine}) {
+  DiagnosticsNode describeElement(String name, {DiagnosticsTreeStyle style = DiagnosticsTreeStyle.errorProperty}) {
     return DiagnosticsProperty<Element>(name, this, style: style);
   }
 
   @override
-  DiagnosticsNode describeWidget(String name, {DiagnosticsTreeStyle style = DiagnosticsTreeStyle.indentedSingleLine}) {
+  DiagnosticsNode describeWidget(String name, {DiagnosticsTreeStyle style = DiagnosticsTreeStyle.errorProperty}) {
     return DiagnosticsProperty<Element>(name, this, style: style);
   }
 

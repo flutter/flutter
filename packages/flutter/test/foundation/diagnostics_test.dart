@@ -348,13 +348,6 @@ void main() {
       style: DiagnosticsTreeStyle.singleLine,
       golden: 'TestTree#00000',
     );
-
-    // Header line mode does not display children.
-    goldenStyleTest(
-      'header line',
-      style: DiagnosticsTreeStyle.headerLine,
-      golden: 'TestTree#00000:',
-    );
   });
 
   test('TreeDiagnosticsMixin tree with properties test', () async {
@@ -414,8 +407,7 @@ void main() {
       );
 
       if (tree.style != DiagnosticsTreeStyle.singleLine &&
-          tree.style != DiagnosticsTreeStyle.headerLine &&
-          tree.style != DiagnosticsTreeStyle.indentedSingleLine) {
+          tree.style != DiagnosticsTreeStyle.errorProperty) {
         expect(tree, hasAGoodToStringDeep);
       }
 
@@ -461,7 +453,7 @@ void main() {
     goldenStyleTest(
       'sparse with indented single line properties',
       style: DiagnosticsTreeStyle.sparse,
-      propertyStyle: DiagnosticsTreeStyle.indentedSingleLine,
+      propertyStyle: DiagnosticsTreeStyle.errorProperty,
       golden:
       'TestTree#00000\n'
       ' │ stringProperty1:\n'
@@ -718,32 +710,17 @@ void main() {
       golden: 'some name: TestTree#00000(stringProperty1: value1, doubleProperty1: 42.5, roundedProperty: 0.3, nullProperty: null, <root node>)',
     );
 
-    // Header line mode does not display children and acts like the line is a
-    // header describing the rest of the content.
-    goldenStyleTest(
-      'header line',
-      style: DiagnosticsTreeStyle.headerLine,
-      golden: 'TestTree#00000(stringProperty1: value1, doubleProperty1: 42.5, roundedProperty: 0.3, nullProperty: null, <root node>):',
-    );
-
-    goldenStyleTest(
-      'header line',
-      name: 'some name',
-      style: DiagnosticsTreeStyle.headerLine,
-      golden: 'some name: TestTree#00000(stringProperty1: value1, doubleProperty1: 42.5, roundedProperty: 0.3, nullProperty: null, <root node>):',
-    );
-
     // No name so we don't indent.
     goldenStyleTest(
       'indented single line',
-      style: DiagnosticsTreeStyle.indentedSingleLine,
+      style: DiagnosticsTreeStyle.errorProperty,
       golden: 'TestTree#00000(stringProperty1: value1, doubleProperty1: 42.5, roundedProperty: 0.3, nullProperty: null, <root node>)\n',
     );
 
     goldenStyleTest(
       'indented single line',
       name: 'some name',
-      style: DiagnosticsTreeStyle.indentedSingleLine,
+      style: DiagnosticsTreeStyle.errorProperty,
       golden:
       'some name:\n'
       '  TestTree#00000(stringProperty1: value1, doubleProperty1: 42.5, roundedProperty: 0.3, nullProperty: null, <root node>)\n',
@@ -786,41 +763,9 @@ void main() {
     // should instead be places in front of other nodes that they
     // function as a header for.
     goldenStyleTest(
-      'header single line last child',
-      style: DiagnosticsTreeStyle.sparse,
-      lastChildStyle: DiagnosticsTreeStyle.headerLine,
-      golden:
-      'TestTree#00000\n'
-      ' │ stringProperty1: value1\n'
-      ' │ doubleProperty1: 42.5\n'
-      ' │ roundedProperty: 0.3\n'
-      ' │ nullProperty: null\n'
-      ' │ <root node>\n'
-      ' │\n'
-      ' ├─child node A: TestTree#00000\n'
-      ' ├─child node B: TestTree#00000\n'
-      ' │ │ p1: v1\n'
-      ' │ │ p2: v2\n'
-      ' │ │\n'
-      ' │ ├─child node B1: TestTree#00000\n'
-      ' │ ├─child node B2: TestTree#00000\n'
-      ' │ │   property1: value1\n'
-      ' │ │\n'
-      ' │ └─child node B3: TestTree#00000(<leaf node>, foo: 42):\n'
-      ' └─child node C: TestTree#00000(foo: multi\\nline\\nvalue!):\n',
-    );
-
-    // TODO(jacobr): this is an ugly test case.
-    // There isn't anything interesting for this case as the children look the
-    // same with and without children. Only difference is the odd and
-    // undesirable density of B3 being right next to node C.
-    // Typically header lines should not be places as leaves in the tree and
-    // should instead be places in front of other nodes that they
-    // function as a header for.
-    goldenStyleTest(
       'indented single line last child',
       style: DiagnosticsTreeStyle.sparse,
-      lastChildStyle: DiagnosticsTreeStyle.indentedSingleLine,
+      lastChildStyle: DiagnosticsTreeStyle.errorProperty,
       golden:
       'TestTree#00000\n'
       ' │ stringProperty1: value1\n'
@@ -1758,16 +1703,6 @@ void main() {
       ),
     );
 
-    expect(
-      TestTree(
-        properties: <DiagnosticsNode>[objectsProperty, IntProperty('foo', 42)],
-        style: DiagnosticsTreeStyle.headerLine,
-      ).toStringDeep(),
-      equalsIgnoringHashCodes(
-        'TestTree#00000(objects: [Rect.fromLTRB(0.0, 0.0, 20.0, 20.0), Color(0xffffffff)], foo: 42):',
-      ),
-    );
-
     // Iterable with a single entry. Verify that rendering is sensible and that
     // multi line rendering isn't used even though it is not helpful.
     final List<Object> singleElementList = <Object>[const Color.fromARGB(255, 255, 255, 255)];
@@ -1835,14 +1770,6 @@ void main() {
     expect(message.value, isNull);
     expect(message.showName, isFalse);
     validateNodeJsonSerialization(message);
-
-    final DiagnosticsNode headerMessage = DiagnosticsNode.message('hello world', style: DiagnosticsTreeStyle.headerLine);
-    expect(headerMessage.toString(), equals('hello world:'));
-    expect(headerMessage.style, equals(DiagnosticsTreeStyle.headerLine));
-    expect(headerMessage.name, isEmpty);
-    expect(headerMessage.value, isNull);
-    expect(headerMessage.showName, isFalse);
-    validateNodeJsonSerialization(headerMessage);
 
     final DiagnosticsNode messageProperty = MessageProperty('diagnostics', 'hello world');
     expect(messageProperty.toString(), equals('diagnostics: hello world'));
@@ -2101,7 +2028,7 @@ void main() {
     expect(
         renderer.render(createTreeWithWrappingNodes(
           rootStyle: DiagnosticsTreeStyle.error,
-          propertyStyle: DiagnosticsTreeStyle.indentedSingleLine,
+          propertyStyle: DiagnosticsTreeStyle.errorProperty,
         )),
         equalsIgnoringHashCodes(
           '══╡ TESTTREE#00000 ╞════════════════════\n'

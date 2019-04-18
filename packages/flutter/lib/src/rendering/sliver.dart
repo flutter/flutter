@@ -427,7 +427,7 @@ class SliverConstraints extends Constraints {
         if (informationCollector != null) {
           information.addAll(informationCollector());
         }
-        information.add(DiagnosticsProperty<SliverConstraints>('The offending constraints were', this, style: DiagnosticsTreeStyle.indentedSingleLine));
+        information.add(DiagnosticsProperty<SliverConstraints>('The offending constraints were', this, style: DiagnosticsTreeStyle.errorProperty));
         throw FlutterError.fromParts(information);
       }
       verify(axis != null, 'The "axis" is null.');

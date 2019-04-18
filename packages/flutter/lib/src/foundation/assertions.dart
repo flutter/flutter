@@ -20,7 +20,25 @@ typedef FlutterExceptionHandler = void Function(FlutterErrorDetails details);
 /// and other callbacks that collect information describing an error.
 typedef InformationCollector = Iterable<DiagnosticsNode> Function();
 
-class _ErrorDiagnostic extends DiagnosticsProperty<List<Object>> {
+abstract class _ErrorDiagnostic extends DiagnosticsProperty<List<Object>> {
+  /// This constructor provides a reliable hook for a kernel transformer to find
+  /// error messages that need to be rewritten to include object references for
+  /// interactive display of errors.
+  _ErrorDiagnostic(
+    String message, {
+      DiagnosticsTreeStyle style = DiagnosticsTreeStyle.flat,
+      DiagnosticLevel level = DiagnosticLevel.info,
+    }) : assert(message != null),
+         super(
+           null,
+           <Object>[message],
+           showName: false,
+           showSeparator: false,
+           defaultValue: null,
+           style: style,
+           level: level,
+         );
+
   /// In debug builds, a kernel transformer rewrites calls to the default
   /// constructors for [ErrorSummary], [ErrorDetails], and [ErrorHint] to use
   /// this constructor.
@@ -31,7 +49,7 @@ class _ErrorDiagnostic extends DiagnosticsProperty<List<Object>> {
   /// ```
   /// Desugars to:
   /// ```dart
-  /// _ErrorDiagnostic._fromParts(<Object>['Element ', element, ' must be ', color])
+  /// _ErrorDiagnostic.fromParts(<Object>['Element ', element, ' must be ', color])
   /// ```
   ///
   /// Slightly more complex case:
@@ -40,7 +58,7 @@ class _ErrorDiagnostic extends DiagnosticsProperty<List<Object>> {
   /// ```
   /// Desugars to:
   ///```dart
-  /// _ErrorDiagnostic._fromParts(<Object>[
+  /// _ErrorDiagnostic.fromParts(<Object>[
   ///   'Element ',
   ///   DiagnosticsProperty(null, element, description: element.runtimeType?.toString()),
   ///   ' must be ',
@@ -84,15 +102,16 @@ class _ErrorDiagnostic extends DiagnosticsProperty<List<Object>> {
 /// * [FlutterError], which is the most common place to use an
 ///   [ErrorDescription].
 class ErrorDescription extends _ErrorDiagnostic {
-  /// This constructor provides a reliable hook for a kernel transformer to find
-  /// error messages that need to be rewritten to include object references for
-  /// interactive display of errors.
+  /// A lint enforces that this constructor can only be called with a string
+  /// literal to match the limitations of the Dart Kernel transformer that
+  /// optionally extracts out objects referenced using string interpolation in
+  /// the message passed in.
   ///
   /// The message will display with the same text regardless of whether the
   /// kernel transformer is used. The kernel transformer is required so that
   /// debugging tools can provide interactive displays of objects described by
   /// the error.
-  ErrorDescription(String message) : super._fromParts(<Object>[message], level: DiagnosticLevel.info);
+  ErrorDescription(String message) : super(message, level: DiagnosticLevel.info);
 
   /// Calls to the default constructor may be rewritten to use this constructor
   /// in debug mode using a kernel transformer.
@@ -117,15 +136,16 @@ class ErrorDescription extends _ErrorDiagnostic {
 ///   applicable.
 /// * [FlutterError], which is the most common place to use an [ErrorSummary].
 class ErrorSummary extends _ErrorDiagnostic {
-  /// This constructor provides a reliable hook for a kernel transformer to find
-  /// error messages that need to be rewritten to include object references for
-  /// interactive display of errors.
+  /// A lint enforces that this constructor can only be called with a string
+  /// literal to match the limitations of the Dart Kernel transformer that
+  /// optionally extracts out objects referenced using string interpolation in
+  /// the message passed in.
   ///
   /// The message will display with the same text regardless of whether the
   /// kernel transformer is used. The kernel transformer is required so that
   /// debugging tools can provide interactive displays of objects described by
   /// the error.
-  ErrorSummary(String message) : super._fromParts(<Object>[message], level: DiagnosticLevel.summary);
+  ErrorSummary(String message) : super(message, level: DiagnosticLevel.summary);
 
   /// Calls to the default constructor may be rewritten to use this constructor
   /// in debug mode using a kernel transformer.
@@ -155,7 +175,7 @@ class ErrorHint extends _ErrorDiagnostic {
   /// kernel transformer is used. The kernel transformer is required so that
   /// debugging tools can provide interactive displays of objects described by
   /// the error.
-  ErrorHint(String message) : super._fromParts(<Object>[message], level:DiagnosticLevel.hint);
+  ErrorHint(String message) : super(message, level:DiagnosticLevel.hint);
 
   /// Calls to the default constructor may be rewritten to use this constructor
   /// in debug mode using a kernel transformer.
@@ -315,8 +335,9 @@ class FlutterErrorDetails extends Diagnosticable {
 
   /// Returns a short (one line) description of the problem that was detected.
   ///
-  /// If the exception contains an [ErrorSummary] that summary is used otherwise
-  /// the summary is inferred from the string representation of the exception.
+  /// If the exception contains an [ErrorSummary] that summary is used,
+  /// otherwise the summary is inferred from the string representation of the
+  /// exception.
   DiagnosticsNode get summary {
     final Diagnosticable diagnosticable = _exceptionToDiagnosticable();
     DiagnosticsNode summary;

@@ -704,8 +704,8 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
               '  https://flutter.dev/debugging/#rendering-layer\n'
               '  http://docs.flutter.io/flutter/rendering/debugDumpRenderTree.html'
             ),
-            describeForError('The affected RenderFlex is', style: DiagnosticsTreeStyle.indentedSingleLine),
-            DiagnosticsProperty<dynamic>('The creator information is set to', debugCreator, style: DiagnosticsTreeStyle.indentedSingleLine)
+            describeForError('The affected RenderFlex is', style: DiagnosticsTreeStyle.errorProperty),
+            DiagnosticsProperty<dynamic>('The creator information is set to', debugCreator, style: DiagnosticsTreeStyle.errorProperty)
           ]..addAll(addendum)
            ..add(ErrorHint(
              'If none of the above helps enough to fix this problem, please don\'t hesitate to file a bug:\n'
