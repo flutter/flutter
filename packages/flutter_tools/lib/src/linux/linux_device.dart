@@ -101,10 +101,10 @@ class LinuxDevice extends Device {
   @override
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.linux_x64;
 
+  // Since the host and target devices are the same, no work needs to be done
+  // to uninstall the application.
   @override
-  Future<bool> uninstallApp(ApplicationPackage app) {
-    throw UnimplementedError();
-  }
+  Future<bool> uninstallApp(ApplicationPackage app) async => true;
 }
 
 class LinuxDevices extends PollingDeviceDiscovery {

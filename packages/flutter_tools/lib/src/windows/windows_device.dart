@@ -107,10 +107,10 @@ class WindowsDevice extends Device {
   @override
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.windows_x64;
 
+  // Since the host and target devices are the same, no work needs to be done
+  // to uninstall the application.
   @override
-  Future<bool> uninstallApp(ApplicationPackage app) {
-    throw UnimplementedError();
-  }
+  Future<bool> uninstallApp(ApplicationPackage app) async => true;
 }
 
 class WindowsDevices extends PollingDeviceDiscovery {
@@ -143,7 +143,7 @@ final RegExp _whitespace = RegExp(r'\w+');
 /// This list contains the process name and id.
 @visibleForTesting
 List<String> runningProcess(String processName) {
-  // Does this only work from powershell?
+  // TODO(jonahwilliams): find a way to do this without powershell.
   final ProcessResult result = processManager.runSync(<String>['powershell', '-script="Get-CimInstance Win32_Process"']);
   if (result.exitCode != 0) {
     return null;

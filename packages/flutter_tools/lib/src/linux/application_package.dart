@@ -64,7 +64,7 @@ class BuildableLinuxApp extends LinuxApp {
       buildMode == BuildMode.debug ? 'debug' : 'release',
     ]);
     if (result.exitCode != 0) {
-      throwToolExit('Failed to find Windows project name');
+      throwToolExit('Failed to find Linux project name');
     }
     return result.stdout.toString().trim();
   }
