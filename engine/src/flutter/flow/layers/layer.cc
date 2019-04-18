@@ -12,9 +12,19 @@ namespace flutter {
 Layer::Layer()
     : parent_(nullptr),
       needs_system_composite_(false),
-      paint_bounds_(SkRect::MakeEmpty()) {}
+      paint_bounds_(SkRect::MakeEmpty()),
+      unique_id_(NextUniqueID()) {}
 
 Layer::~Layer() = default;
+
+uint64_t Layer::NextUniqueID() {
+  static std::atomic<uint64_t> nextID(1);
+  uint64_t id;
+  do {
+    id = nextID.fetch_add(1);
+  } while (id == 0);  // 0 is reserved for an invalid id.
+  return id;
+}
 
 void Layer::Preroll(PrerollContext* context, const SkMatrix& matrix) {}
 
