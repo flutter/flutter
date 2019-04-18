@@ -90,7 +90,7 @@ class CupertinoTabController extends ChangeNotifier {
 /// A [controller] can be used to provide an initialy selected tab index and manage
 /// subsequent tab changes. If set to null, [CupertinoTabScaffold] will keep
 /// using the current [CupertinoTabController] that exists in its internal state object,
-/// or create a new [CupertinoTabController] using the 'currentIndex' of [tabBar]
+/// or create a new [CupertinoTabController] using the `currentIndex` of [tabBar]
 /// if there's no existing [CupertinoTabController].
 ///
 /// Tabs' contents are built with the provided [tabBuilder] at the active
@@ -156,13 +156,10 @@ class CupertinoTabController extends ChangeNotifier {
 /// `Navigator.of(rootNavigator: true)` from inside the [BuildContext] of a
 /// [CupertinoTabView].
 ///
-/// To manage the current tab from an ancestor widget, use a [CupertinoTabController]
-/// and pass it to the descendent [CupertinoPageScaffold].
-///
 /// See also:
 ///
 ///  * [CupertinoTabBar], the bottom tab bar inserted in the scaffold.
-///  * [CupertinoTabController], the exposed current page state of a [CupertinoPageScaffold].
+///  * [CupertinoTabController], the selection state of this widget
 ///  * [CupertinoTabView], the typical root content of each tab that holds its own
 ///    [Navigator] stack.
 ///  * [CupertinoPageRoute], a route hosting modal pages with iOS style transitions.
