@@ -91,7 +91,10 @@ class ToolCoverageRunner {
     await Process.run(genHtmlExecutable, <String>[outputLcovPath, '-o', outputHtmlPath], runInShell: true);
   }
 
-  // Creates a synthetic test file and returns the resulting path.
+  // Creates a synthetic test file to wrap the test main in a group invocation.
+  // This will set up several fields used by the test methods on the context. Normally
+  // this would be handled automatically by the test runner, but since we're executing
+  // the files directly with dart we need to handle it manually.
   String _createTest(File testFile) {
     final File fakeTest = File(path.join(tempDirectory.path, testFile.path))
       ..createSync(recursive: true)
