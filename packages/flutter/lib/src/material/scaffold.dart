@@ -1451,6 +1451,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         (BuildContext context) => widget.bottomSheet,
         BottomSheet.createAnimationController(this) ..value = 1.0,
         false,
+        widget.backgroundColor,
       );
     }
   }
@@ -1462,7 +1463,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     }
   }
 
-  PersistentBottomSheetController<T> _buildBottomSheet<T>(WidgetBuilder builder, AnimationController controller, bool isLocalHistoryEntry) {
+  PersistentBottomSheetController<T> _buildBottomSheet<T>(WidgetBuilder builder, AnimationController controller, bool isLocalHistoryEntry, Color backgroundColor) {
     final Completer<T> completer = Completer<T>();
     final GlobalKey<_PersistentBottomSheetState> bottomSheetKey = GlobalKey<_PersistentBottomSheetState>();
     _PersistentBottomSheet bottomSheet;
@@ -1503,6 +1504,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         }
       },
       builder: builder,
+      backgroundColor: backgroundColor,
     );
 
     if (isLocalHistoryEntry)
@@ -1551,12 +1553,12 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   ///    sheet.
   ///  * [Scaffold.of], for information about how to obtain the [ScaffoldState].
   ///  * <https://material.io/design/components/sheets-bottom.html#standard-bottom-sheet>
-  PersistentBottomSheetController<T> showBottomSheet<T>(WidgetBuilder builder) {
+  PersistentBottomSheetController<T> showBottomSheet<T>(WidgetBuilder builder, [Color backgroundColor]) {
     _closeCurrentBottomSheet();
     final AnimationController controller = BottomSheet.createAnimationController(this)
       ..forward();
     setState(() {
-      _currentBottomSheet = _buildBottomSheet<T>(builder, controller, true);
+      _currentBottomSheet = _buildBottomSheet<T>(builder, controller, true, backgroundColor);
     });
     return _currentBottomSheet;
   }
@@ -2008,6 +2010,7 @@ class _PersistentBottomSheet extends StatefulWidget {
     this.onClosing,
     this.onDismissed,
     this.builder,
+    this.backgroundColor,
   }) : super(key: key);
 
   final AnimationController animationController; // we control it, but it must be disposed by whoever created it
@@ -2015,6 +2018,7 @@ class _PersistentBottomSheet extends StatefulWidget {
   final VoidCallback onClosing;
   final VoidCallback onDismissed;
   final WidgetBuilder builder;
+  final Color backgroundColor;
 
   @override
   _PersistentBottomSheetState createState() => _PersistentBottomSheetState();
@@ -2066,6 +2070,7 @@ class _PersistentBottomSheetState extends State<_PersistentBottomSheet> {
           enableDrag: widget.enableDrag,
           onClosing: widget.onClosing,
           builder: widget.builder,
+          backgroundColor: widget.backgroundColor,
         ),
       ),
     );

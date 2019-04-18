@@ -58,6 +58,7 @@ class BottomSheet extends StatefulWidget {
     this.elevation = 0.0,
     @required this.onClosing,
     @required this.builder,
+    this.backgroundColor,
   }) : assert(enableDrag != null),
        assert(onClosing != null),
        assert(builder != null),
@@ -95,6 +96,10 @@ class BottomSheet extends StatefulWidget {
   ///
   /// Defaults to 0. The value is non-negative.
   final double elevation;
+
+  /// The bottom sheet's background color. The current theme's
+  /// [ThemeData.canvasColor] by default.
+  final Color backgroundColor;
 
   @override
   _BottomSheetState createState() => _BottomSheetState();
@@ -150,6 +155,7 @@ class _BottomSheetState extends State<BottomSheet> {
       key: _childKey,
       elevation: widget.elevation,
       child: widget.builder(context),
+      color: widget.backgroundColor ?? Theme.of(context).canvasColor,
     );
     return !widget.enableDrag ? bottomSheet : GestureDetector(
       onVerticalDragUpdate: _handleDragUpdate,
@@ -239,6 +245,7 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
                   animationController: widget.route._animationController,
                   onClosing: () => Navigator.pop(context),
                   builder: widget.route.builder,
+                  backgroundColor: widget.route.backgroundColor,
                 ),
               ),
             ),
@@ -255,10 +262,12 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
     this.theme,
     this.barrierLabel,
     RouteSettings settings,
+    this.backgroundColor,
   }) : super(settings: settings);
 
   final WidgetBuilder builder;
   final ThemeData theme;
+  final Color backgroundColor;
 
   @override
   Duration get transitionDuration => _kBottomSheetDuration;
@@ -325,6 +334,7 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
 Future<T> showModalBottomSheet<T>({
   @required BuildContext context,
   @required WidgetBuilder builder,
+  Color backgroundColor,
 }) {
   assert(context != null);
   assert(builder != null);
@@ -333,6 +343,7 @@ Future<T> showModalBottomSheet<T>({
     builder: builder,
     theme: Theme.of(context, shadowThemeOnly: true),
     barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+    backgroundColor: backgroundColor,
   ));
 }
 
@@ -365,6 +376,10 @@ Future<T> showModalBottomSheet<T>({
 /// The `context` argument is used to look up the [Scaffold] for the bottom
 /// sheet. It is only used when the method is called. Its corresponding widget
 /// can be safely removed from the tree before the bottom sheet is closed.
+/// 
+/// The optional `backgroundColor` argument can be used to set a different
+/// background color for the bottom sheet. By default, the background color of
+/// the bottom sheet is the current theme's [ThemeData.canvasColor].
 ///
 /// See also:
 ///
@@ -376,8 +391,9 @@ Future<T> showModalBottomSheet<T>({
 PersistentBottomSheetController<T> showBottomSheet<T>({
   @required BuildContext context,
   @required WidgetBuilder builder,
+  Color backgroundColor,
 }) {
   assert(context != null);
   assert(builder != null);
-  return Scaffold.of(context).showBottomSheet<T>(builder);
+  return Scaffold.of(context).showBottomSheet<T>(builder, backgroundColor);
 }
