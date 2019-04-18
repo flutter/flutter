@@ -680,8 +680,11 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   // Note that this is overridden in FocusScopeNode.
   void _doRequestFocus({@required bool isFromPolicy}) {
     assert(isFromPolicy != null);
-    _hasKeyboardToken = true;
     _setAsFocusedChild();
+    if (hasPrimaryFocus) {
+      return;
+    }
+    _hasKeyboardToken = true;
     _markAsDirty(newFocus: this);
   }
 
@@ -921,7 +924,8 @@ class FocusManager with DiagnosticableTreeMixin {
   ///
   /// This field is rarely used directly. To find the nearest [FocusScopeNode]
   /// for a given [FocusNode], call [FocusNode.nearestScope].
-  final FocusScopeNode rootScope = FocusScopeNode(debugLabel: 'Root Focus Scope');
+  FocusScopeNode get rootScope => _rootScope;
+  FocusScopeNode _rootScope = FocusScopeNode(debugLabel: 'Root Focus Scope');
 
   void _handleRawKeyEvent(RawKeyEvent event) {
     // Walk the current focus from the leaf to the root, calling each one's
@@ -954,13 +958,7 @@ class FocusManager with DiagnosticableTreeMixin {
     _currentFocus = null;
     _nextFocus = null;
     _haveScheduledUpdate = false;
-    for (FocusNode descendant in rootScope.descendants.toList()) {
-      descendant.dispose();
-    }
-    _currentFocus = null;
-    _nextFocus = null;
-    _haveScheduledUpdate = false;
-    rootScope._clear();
+    _rootScope = FocusScopeNode(debugLabel: 'Root Focus Scope');
     rootScope._manager = this;
   }
 
@@ -1028,11 +1026,13 @@ class FocusManager with DiagnosticableTreeMixin {
       _dirtyNodes.addAll(previousPath.difference(nextPath));
       _nextFocus = null;
     }
-    if (previousFocus != null) {
-      _dirtyNodes.add(previousFocus);
-    }
-    if (_currentFocus != null) {
-      _dirtyNodes.add(_currentFocus);
+    if (previousFocus != _currentFocus) {
+      if (previousFocus != null) {
+        _dirtyNodes.add(previousFocus);
+      }
+      if (_currentFocus != null) {
+        _dirtyNodes.add(_currentFocus);
+      }
     }
     for (FocusNode node in _dirtyNodes) {
       node._notify();

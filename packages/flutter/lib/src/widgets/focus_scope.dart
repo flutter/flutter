@@ -344,12 +344,9 @@ class _FocusState extends State<Focus> {
   @override
   Widget build(BuildContext context) {
     _focusAttachment.reparent();
-    return Semantics(
-      explicitChildNodes: true,
-      child: _FocusMarker(
-        node: node,
-        child: widget.child,
-      ),
+    return _FocusMarker(
+      node: node,
+      child: widget.child,
     );
   }
 }
@@ -429,6 +426,18 @@ class _FocusScopeState extends _FocusState {
   FocusScopeNode _createNode() {
     return FocusScopeNode(
       debugLabel: widget.debugLabel,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    _focusAttachment.reparent();
+    return Semantics(
+      explicitChildNodes: true,
+      child: _FocusMarker(
+        node: node,
+        child: widget.child,
+      ),
     );
   }
 }
