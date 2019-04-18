@@ -88,10 +88,9 @@ class CupertinoTabController extends ChangeNotifier {
 /// to change the active tab.
 ///
 /// A [controller] can be used to provide an initialy selected tab index and manage
-/// subsequent tab changes. If set to null, [CupertinoTabScaffold] will keep
-/// using the current [CupertinoTabController] that exists in its internal state object,
-/// or create a new [CupertinoTabController] using the `currentIndex` of [tabBar]
-/// if there's no existing [CupertinoTabController].
+/// subsequent tab changes. If a [CupertinoTabController] is provided, it will
+/// always be used by this [CupertinoTabScaffold]. Otherwise the scaffold will
+/// create its own [CupertinoTabController] and manage it internally.
 ///
 /// Tabs' contents are built with the provided [tabBuilder] at the active
 /// tab index. The [tabBuilder] must be able to build the same number of
@@ -185,11 +184,10 @@ class CupertinoTabScaffold extends StatefulWidget {
   /// that lets the user switch between different tabs in the main content area
   /// when present.
   ///
-  /// The [CupertinoTabBar.currentIndex] property of [tabBar] is *overridden*
-  /// by the [CupertinoTabController.index] value in [controller] if [controller]
-  /// is not null or there's an existing controller in this [CupertinoTabScaffold]'s
-  /// internal state object. Otherwise, the scaffold will use [CupertinoTabBar.currentIndex]
-  /// as the index of the selected tab.
+  /// The [CupertinoTabBar.currentIndex] is only used as the the initial active
+  /// tab index when no [controller] is provided. Subsequently providing a different
+  /// [CupertinoTabBar.currentIndex] does not affect the scaffold or the tab bar's
+  /// active tab index.
   ///
   /// If [CupertinoTabBar.onTap] is provided, it will still be called.
   /// [CupertinoTabScaffold] automatically also listen to the
@@ -204,7 +202,9 @@ class CupertinoTabScaffold extends StatefulWidget {
   final CupertinoTabBar tabBar;
 
   /// Controls the current selected tab index of the [tabBar], as well as the
-  /// active tab index of the [tabBuilder].
+  /// active tab index of the [tabBuilder]. Providing a different [controller]
+  /// will also update the scaffold's current active index to the new controller's
+  /// index value.
   ///
   /// Defaults to null.
   final CupertinoTabController controller;
@@ -257,10 +257,8 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
     final CupertinoTabController newController =
       // User provided a new controller, update [_controller] with it.
       widget.controller
-      // User didn't provide a new controller, keep using [_controller].
-      ?? _controller
-      // This only happens in [initState]. If there's no existing controller,
-      // create one using [widget.tabBar.currentIndex] as its initial index.
+      // Always create this [_CupertinoTabScaffoldState]'s own controller,
+      // if oldWidget.controller != null && widget.controller == null
       ?? CupertinoTabController(initialIndex: widget.tabBar.currentIndex);
 
     if (newController == _controller) {
@@ -268,7 +266,7 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
     }
 
     _controller?.removeListener(_onCurrentIndexChange);
-    newController?.addListener(_onCurrentIndexChange);
+    newController.addListener(_onCurrentIndexChange);
     _controller = newController;
   }
 
@@ -289,10 +287,10 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
   @override
   void didUpdateWidget(CupertinoTabScaffold oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.controller != null && widget.controller != oldWidget.controller) {
+    if (widget.controller != oldWidget.controller) {
       _updateTabController();
     } else if (_controller.index >= widget.tabBar.items.length) {
-      // If a new [tabBar] is provided and it doesn't have enough items,
+      // If a new [tabBar] with less than (_controller.index + 1) items is provided,
       // clamp the current index.
       _controller.index = widget.tabBar.items.length - 1;
     }

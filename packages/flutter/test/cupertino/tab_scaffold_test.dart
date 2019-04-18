@@ -431,7 +431,7 @@ void main() {
 
     expect(tester.getRect(find.byType(Placeholder)), Rect.fromLTWH(0, 0, 800, 400));
     expect(MediaQuery.of(innerContext).padding.bottom, 0);
-});
+  });
 
   testWidgets('Deleting tabs after selecting them should switch to the last available tab', (WidgetTester tester) async {
     final List<int> tabsBuilt = <int>[];
@@ -500,6 +500,68 @@ void main() {
     expect(find.text('Page 1', skipOffstage: false), findsNothing);
     expect(find.text('Page 2', skipOffstage: false), findsNothing);
     expect(find.text('Page 4', skipOffstage: false), findsNothing);
+  });
+
+  testWidgets('If a controller is initially provided then the parent stops doing so for rebuilds, '
+              'a new instance of CupertinoTabController should be created and used by the widget',
+    (WidgetTester tester) async {
+      final List<int> tabsPainted = <int>[];
+      final CupertinoTabController oldController = CupertinoTabController(initialIndex: 0);
+
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoTabScaffold(
+            tabBar: CupertinoTabBar(
+              items: List<BottomNavigationBarItem>.generate(10, tabGenerator),
+            ),
+            controller: oldController,
+            tabBuilder: (BuildContext context, int index) {
+              return CustomPaint(
+                child: Text('Page ${index + 1}'),
+                painter: TestCallbackPainter(
+                  onPaint: () { tabsPainted.add(index); }
+                ),
+              );
+            }
+          ),
+        )
+      );
+
+      expect(tabsPainted, <int> [0]);
+
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoTabScaffold(
+            tabBar: CupertinoTabBar(
+              items: List<BottomNavigationBarItem>.generate(10, tabGenerator),
+            ),
+            controller: null,
+            tabBuilder:
+            (BuildContext context, int index) {
+              return CustomPaint(
+                child: Text('Page ${index + 1}'),
+                painter: TestCallbackPainter(
+                  onPaint: () { tabsPainted.add(index); }
+                ),
+              );
+            }
+          ),
+        )
+      );
+
+      expect(tabsPainted, <int> [0, 0]);
+
+      await tester.tap(find.text('Tab 2'));
+      await tester.pump();
+
+      // Tapping the tabs should still work.
+      expect(tabsPainted, <int>[0, 0, 1]);
+
+      oldController.index = 10;
+      await tester.pump();
+
+      // Changing [index] of the oldController should not work.
+      expect(tabsPainted, <int> [0, 0, 1]);
   });
 
   testWidgets('Assert when current tab index >= number of tabs', (WidgetTester tester) async {
