@@ -306,8 +306,12 @@ class ExpansionPanelList extends StatefulWidget {
 
   /// The callback that gets called whenever one of the expand/collapse buttons
   /// is pressed. The arguments passed to the callback are the index of the
-  /// to-be-expanded panel in the list and whether the panel is currently
-  /// expanded or not.
+  /// pressed panel and whether the panel is currently expanded or not.
+  ///
+  /// If ExpansionPanelList.radio is used, the callback may be called a
+  /// second time if a different panel was previously open. The arguments
+  /// passed to the second callback are the index of the closed panel and
+  /// false, marking that it will be closed.
   ///
   /// This callback is useful in order to keep track of the expanded/collapsed
   /// panels in a parent widget that may need to react to these changes.
@@ -349,10 +353,8 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
   void didUpdateWidget(ExpansionPanelList oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget._allowOnlyOnePanelOpen) {
-      // If widget is updated to ExpansionPanelList.radio
       assert(_allIdentifiersUnique(), 'All ExpansionPanelRadio identifier values are not unique.');
     } else if (oldWidget._allowOnlyOnePanelOpen) {
-      // If widget is updated to ExpansionPanelList
       _currentOpenPanel = null;
     }
   }
@@ -374,6 +376,9 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
   }
 
   void _handlePressed(bool isExpanded, int index) {
+    if (widget.expansionCallback != null)
+      widget.expansionCallback(index, isExpanded);
+
     if (widget._allowOnlyOnePanelOpen) {
       final ExpansionPanelRadio pressedChild = widget.children[index];
 
@@ -384,22 +389,13 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
         final ExpansionPanelRadio child = widget.children[childIndex];
         if (widget.expansionCallback != null &&
             childIndex != index &&
-            child.value == _currentOpenPanel?.value) {
-              widget.expansionCallback(childIndex, true);
-        }
-      }
-
-      if (widget.expansionCallback != null) {
-        widget.expansionCallback(index, isExpanded);
+            child.value == _currentOpenPanel?.value)
+              widget.expansionCallback(childIndex, false);
       }
 
       setState(() {
         _currentOpenPanel = isExpanded ? null : pressedChild;
       });
-    } else {
-      if (widget.expansionCallback != null) {
-        widget.expansionCallback(index, isExpanded);
-      }
     }
   }
 
