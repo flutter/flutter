@@ -5,8 +5,8 @@
 import 'package:meta/meta.dart';
 
 import '../application_package.dart';
-import '../base/os.dart';
 import '../base/io.dart';
+import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process_manager.dart';
 import '../build_info.dart';
