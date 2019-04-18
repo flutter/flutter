@@ -13,6 +13,7 @@
 #include "flutter/runtime/runtime_test.h"
 #include "flutter/testing/testing.h"
 #include "flutter/testing/thread_test.h"
+#include "third_party/tonic/converter/dart_converter.h"
 #include "third_party/tonic/scopes/dart_isolate_scope.h"
 
 namespace flutter {
@@ -317,6 +318,30 @@ TEST_F(DartIsolateTest, CanRegisterNativeCallback) {
                                       "canRegisterNativeCallback");
   ASSERT_TRUE(isolate);
   ASSERT_EQ(isolate->get()->GetPhase(), DartIsolate::Phase::Running);
+  latch.Wait();
+}
+
+TEST_F(DartIsolateTest, CanSaveCompilationTrace) {
+  if (DartVM::IsRunningPrecompiledCode()) {
+    // Can only save compilation traces in JIT modes.
+    GTEST_SKIP();
+    return;
+  }
+  fml::AutoResetWaitableEvent latch;
+  AddNativeCallback("NotifyNative",
+                    CREATE_NATIVE_ENTRY(([&latch](Dart_NativeArguments args) {
+                      ASSERT_TRUE(tonic::DartConverter<bool>::FromDart(
+                          Dart_GetNativeArgument(args, 0)));
+                      latch.Signal();
+                    })));
+
+  const auto settings = CreateSettingsForFixture();
+  auto vm_ref = DartVMRef::Create(settings);
+  auto isolate = RunDartCodeInIsolate(vm_ref, settings, GetThreadTaskRunner(),
+                                      "testCanSaveCompilationTrace");
+  ASSERT_TRUE(isolate);
+  ASSERT_EQ(isolate->get()->GetPhase(), DartIsolate::Phase::Running);
+
   latch.Wait();
 }
 

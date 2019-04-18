@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:isolate';
+import 'dart:ui';
 
 void main() {
 }
@@ -26,6 +27,18 @@ void canRegisterNativeCallback() async {
 
 void NotifyNative() native "NotifyNative";
 
-
 @pragma('vm:entry-point')
 void testIsolateShutdown() {  }
+
+@pragma('vm:entry-point')
+void testCanSaveCompilationTrace() {
+  List<int> trace = null;
+  try {
+    trace = saveCompilationTrace();
+  } catch (exception) {
+    print("Could not save compilation trace: " + exception);
+  }
+  NotifyResult(trace != null && trace.length > 0);
+}
+
+void NotifyResult(bool success) native "NotifyNative";
