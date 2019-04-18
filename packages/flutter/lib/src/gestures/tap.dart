@@ -125,7 +125,7 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
   ///
   /// The pointer is required to keep a consistent button throughout the
   /// gesture, i.e. subsequent [PointerMoveEvent]s must contain the same button
-  /// as the first [PointerDownEvent].
+  /// as the [PointerDownEvent].
   ///
   /// Also, it must contain one and only one button. For example, since a stylus
   /// touching the screen is also counted as a button, a stylus tap while

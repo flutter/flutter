@@ -165,30 +165,52 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
   // - The gesture arena decides we have been rejected wholesale
 
   /// Called when the user has tapped the screen at the same location twice in
-  /// quick succession by any button.
+  /// quick succession.
+  ///
+  /// This triggers when the pointer stops contacting the device after the 2nd tap,
+  /// immediately before [onDoubleTap].
+  /// 
+  /// It does not limit the button that triggers the tap. The callback should
+  /// decide which call to respond to based on the detail data.
+  ///
+  /// The pointer is required to keep a consistent button throughout the
+  /// gesture, i.e. subsequent [PointerDownEvent]s and [PointerMoveEvent]s
+  /// must contain the same button as the first [PointerDownEvent].
+  ///
+  /// Also, it must contain one and only one button. For example, since a stylus
+  /// touching the screen is also counted as a button, a stylus double tap while
+  /// pressing any physical button will not be recognized.
+  ///
+  /// See also:
+  ///
+  ///  * [onDoubleTap], a similar callback limited to a primary button and
+  ///    without details.
+  GestureDoubleTapUpCallback onAnyDoubleTapUp;
+
+  /// Called when the user has tapped the screen with a primary button at the
+  /// same location twice in quick succession.
   ///
   /// This triggers when the pointer stops contacting the device after the 2nd tap,
   /// immediately after [onDoubleTapUp].
   ///
   /// See also:
   ///
-  ///   * [onDoubleTapUp], triggers at the same time but with details.
+  ///  * [kPrimaryButton], the button this callback responds to.
+  ///  * [onDoubleTapUp], a similar callback but for any single button and
+  ///    with details.
   GestureDoubleTapCallback onDoubleTap;
-
-  /// Called when the user has tapped the screen at the same location twice in
-  /// quick succession by any button.
-  ///
-  /// This triggers when the pointer stops contacting the device after the 2nd tap,
-  /// immediately before [onDoubleTap].
-  ///
-  /// See also:
-  ///
-  ///   * [onDoubleTap], triggers at the same time but without details.
-  GestureDoubleTapUpCallback onDoubleTapUp;
 
   Timer _doubleTapTimer;
   _TapTracker _firstTap;
   final Map<int, _TapTracker> _trackers = <int, _TapTracker>{};
+
+  @override
+  bool isPointerAllowed(PointerEvent event) {
+    if (_firstTap == null && !isSingleButton(event.buttons)) {
+      return false;
+    }
+    return super.isPointerAllowed(event);
+  }
 
   @override
   void addAllowedPointer(PointerEvent event) {
@@ -296,12 +318,7 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
     tracker.entry.resolve(GestureDisposition.accepted);
     _freezeTracker(tracker);
     _trackers.remove(tracker.pointer);
-    if (onDoubleTapUp != null)
-      invokeCallback<void>('onDoubleTapUp', () {
-        return onDoubleTapUp(DoubleTapUpDetails(buttons: tracker.initialButtons));
-      });
-    if (onDoubleTap != null)
-      invokeCallback<void>('onDoubleTap', onDoubleTap);
+    _checkUp(tracker.initialButtons);
     _reset();
   }
 
@@ -322,6 +339,19 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
     if (_doubleTapTimer != null) {
       _doubleTapTimer.cancel();
       _doubleTapTimer = null;
+    }
+  }
+
+  void _checkUp(int buttons) {
+    if (onAnyDoubleTapUp != null)
+      invokeCallback<void>('onAnyDoubleTapUp',
+        () => onAnyDoubleTapUp(DoubleTapUpDetails(buttons: buttons)));
+    switch (buttons) {
+      case kPrimaryButton:
+        if (onDoubleTap != null)
+          invokeCallback<void>('onDoubleTap', onDoubleTap);
+        break;
+      default:
     }
   }
 

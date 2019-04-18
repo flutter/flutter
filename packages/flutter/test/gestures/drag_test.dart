@@ -849,6 +849,33 @@ void main() {
       recognized.clear();
     });
 
+    testGesture('A secondary drag should trigger any', (GestureTester tester) {
+      final TestPointer pointer = TestPointer(
+        5,
+        PointerDeviceKind.touch,
+        kSecondaryButton,
+      );
+      final PointerDownEvent down = pointer.down(const Offset(10.0, 10.0));
+      pan.addPointer(down);
+      tap.addPointer(down);
+      tester.closeArena(5);
+      tester.route(down);
+      expect(recognized, <String>['anyDown 2']);
+      recognized.clear();
+
+      tester.route(pointer.move(const Offset(20.0, 30.0)));
+      expect(recognized, <String>['anyStart 2']);
+      recognized.clear();
+
+      tester.route(pointer.move(const Offset(20.0, 25.0)));
+      expect(recognized, <String>['anyUpdate 2']);
+      recognized.clear();
+
+      tester.route(pointer.up());
+      expect(recognized, <String>['anyEnd 2']);
+      recognized.clear();
+    });
+
     testGesture('A drag with 0 buttons should trigger nothing', (GestureTester tester) {
       final TestPointer pointer = TestPointer(5, PointerDeviceKind.touch, 0);
 

@@ -167,8 +167,9 @@ class GestureDetector extends StatelessWidget {
     this.onTap,
     this.onTapCancel,
     this.onSecondaryTapDown,
+    this.onSecondaryTapUp,
+    this.onSecondaryTapCancel,
     this.onDoubleTap,
-    this.onDoubleTapUp,
     this.onLongPress,
     this.onLongPressStart,
     this.onLongPressMoveUpdate,
@@ -231,8 +232,8 @@ class GestureDetector extends StatelessWidget {
   /// {@macro flutter.widgets.child}
   final Widget child;
 
-  /// A pointer that might cause a tap has contacted the screen at a particular
-  /// location. Only responds to primary buttons.
+  /// A pointer that might cause a tap with a primary button has contacted the
+  /// screen at a particular location.
   ///
   /// This is called after a short timeout, even if the winning gesture has not
   /// yet been selected. If the tap gesture wins, [onTapUp] will be called,
@@ -240,241 +241,253 @@ class GestureDetector extends StatelessWidget {
   ///
   /// See also:
   ///
-  ///  * [kPrimaryButton], which is the buttons this callback responds to.
+  ///  * [kPrimaryButton], the button this callback responds to.
   final GestureTapDownCallback onTapDown;
 
-  /// A pointer that will trigger a tap has stopped contacting the screen at a
-  /// particular location. Only responds to primary buttons.
+  /// A pointer that will trigger a tap with a primary button has stopped
+  /// contacting the screen at a particular location.
   ///
   /// This triggers immediately before [onTap] in the case of the tap gesture
   /// winning. If the tap gesture did not win, [onTapCancel] is called instead.
   ///
   /// See also:
   ///
-  ///  * [kPrimaryButton], which is the buttons this callback responds to.
+  ///  * [kPrimaryButton], the button this callback responds to.
   final GestureTapUpCallback onTapUp;
 
-  /// A tap has occurred. Only responds to primary buttons.
+  /// A tap with a primary button has occurred.
   ///
   /// This triggers when the tap gesture wins. If the tap gesture did not win,
   /// [onTapCancel] is called instead.
   ///
   /// See also:
   ///
-  ///  * [kPrimaryButton], which is the buttons this callback responds to.
+  ///  * [kPrimaryButton], the button this callback responds to.
   ///  * [onTapUp], which is called at the same time but includes details
-  ///    regarding the pointer position and buttons.
+  ///    regarding the pointer position.
   final GestureTapCallback onTap;
 
   /// The pointer that previously triggered [onTapDown] will not end up causing
-  /// a tap. Responds to any buttons.
+  /// a tap.
   ///
   /// This is called after [onTapDown], and instead of [onTapUp] and [onTap], if
   /// the tap gesture did not win.
+  ///
+  /// See also:
+  ///
+  ///  * [kPrimaryButton], the button this callback responds to.
   final GestureTapCancelCallback onTapCancel;
 
-  /// A pointer that might cause a tap has contacted the screen at a particular
-  /// location. Only responds to secondary buttons.
+  /// A pointer that might cause a tap with a secondary button has contacted the
+  /// screen at a particular location.
   ///
   /// This is called after a short timeout, even if the winning gesture has not
-  /// yet been selected.
-  ///
-  /// It does not respond when a stylus touches the screen while its secondary button
-  /// is pressed, since screen touching is counted as a button and fails button
-  /// check.
+  /// yet been selected. If the tap gesture wins, [onSecondaryTapUp] will be
+  /// called, otherwise [onSecondaryTapCancel] will be called.
   ///
   /// See also:
   ///
-  ///  * [kSecondaryMouseButton], which is the button this callback responds to.
+  ///  * [kSecondaryButton], the button this callback responds to.
   final GestureTapDownCallback onSecondaryTapDown;
 
-  /// The user has tapped the screen at the same location twice in quick
-  /// succession. Only responds to primary buttons.
+  /// A pointer that will trigger a tap with a secondary button has stopped
+  /// contacting the screen at a particular location.
   ///
-  /// It triggers when the pointer stops contacting the device at the second tap.
-  ///
-  /// See also:
-  ///
-  ///  * [kPrimaryButton], which is the buttons this callback responds to.
-  ///  * [onDoubleTapUp], which is called at the same time but has no button
-  ///    limitation, and includes details regarding buttons.
-  final GestureDoubleTapCallback onDoubleTap;
-
-  /// The user has tapped the screen at the same location twice in quick
-  /// succession. Only responds to primary buttons.
-  ///
-  /// It triggers when the pointer stops contacting the device at the second tap.
+  /// This triggers in the case of the tap gesture winning. If the tap gesture
+  /// did not win, [onSecondaryTapCancel] is called instead.
   ///
   /// See also:
   ///
-  ///  * [kPrimaryButton], which is the buttons this callback responds to.
-  ///  * [onDoubleTapUp], which is called at the same time but doesn't include details.
-  final GestureDoubleTapUpCallback onDoubleTapUp;
+  ///  * [kSecondaryButton], the button this callback responds to.
+  final GestureTapUpCallback onSecondaryTapUp;
 
-  /// Called when a long press gesture has been recognized. Only responds to primary
-  /// buttons.
+  /// The pointer that previously triggered [onSecondaryTapDown] will not end up
+  /// causing a tap.
   ///
-  /// Triggered when a pointer has remained in contact with the screen at the
-  /// same location for a long period of time. Only responds to primary buttons.
+  /// This is called after [onSecondaryTapDown], and instead of
+  /// [onSecondaryTapUp], if the tap gesture did not win.
   ///
   /// See also:
   ///
-  ///  * [kPrimaryButton], which is the buttons this callback responds to.
-  ///  * [onLongPressStart], which has the same timing but has data for the
-  ///    press location and triggering buttons.
-  final GestureLongPressCallback onLongPress;
+  ///  * [kSecondaryButton], the button this callback responds to.
+  final GestureTapCancelCallback onSecondaryTapCancel;
 
-  /// Callback for long press start with gesture location. Only responds to primary
-  /// buttons.
+  /// The user has tapped the screen with a primary button at the same location
+  /// twice in quick succession.
+  ///
+  /// See also:
+  ///
+  ///  * [kPrimaryButton], the button this callback responds to.
+  final GestureTapCallback onDoubleTap;
+
+  /// Called when a long press gesture with a primary button has been recognized.
   ///
   /// Triggered when a pointer has remained in contact with the screen at the
   /// same location for a long period of time.
   ///
   /// See also:
   ///
-  ///  * [kPrimaryButton], which is the buttons this callback responds to.
-  ///  * [onLongPress], which has the same timing but without the details data.
+  ///  * [kPrimaryButton], the button this callback responds to.
+  ///  * [onLongPressStart], which has the same timing but has gesture details.
+  final GestureLongPressCallback onLongPress;
+
+  /// Called when a long press gesture with a primary button has been recognized.
+  ///
+  /// Triggered when a pointer has remained in contact with the screen at the
+  /// same location for a long period of time.
+  ///
+  /// See also:
+  ///
+  ///  * [kPrimaryButton], the button this callback responds to.
+  ///  * [onLongPress], which has the same timing but without the gesture details.
   final GestureLongPressStartCallback onLongPressStart;
 
-  /// A pointer has been drag-moved after a long press. Only responds to primary
-  /// buttons.
-  ///
+  /// A pointer has been drag-moved after a long press with a primary button.
+  /// 
   /// See also:
   ///
-  ///  * [kPrimaryButton], which is the buttons this callback responds to.
+  ///  * [kPrimaryButton], the button this callback responds to.
   final GestureLongPressMoveUpdateCallback onLongPressMoveUpdate;
 
-  /// A pointer that has triggered a long-press has stopped contacting the screen.
-  /// Only responds to primary buttons.
+  /// A pointer that has triggered a long-press with a primary button has
+  /// stopped contacting the screen.
   ///
   /// See also:
   ///
-  ///  * [kPrimaryButton], which is the buttons this callback responds to.
-  ///  * [onLongPressEnd], which has the same timing but has data for the up
-  ///    gesture location and triggering buttons.
+  ///  * [kPrimaryButton], the button this callback responds to.
+  ///  * [onLongPressEnd], which has the same timing but has gesture details.
   final GestureLongPressUpCallback onLongPressUp;
 
-  /// A pointer that has triggered a long-press has stopped contacting the screen.
-  /// Only responds to primary buttons.
+  /// A pointer that has triggered a long-press with a primary button has
+  /// stopped contacting the screen.
   ///
   /// See also:
   ///
-  ///  * [kPrimaryButton], which is the buttons this callback responds to.
-  ///  * [onLongPressUp], which has the same timing but without the location data.
+  ///  * [kPrimaryButton], the button this callback responds to.
+  ///  * [onLongPressUp], which has the same timing but without the gesture
+  ///    details.
   final GestureLongPressEndCallback onLongPressEnd;
 
-  /// A pointer has contacted the screen and might begin to move vertically.
-  /// Only responds to primary buttons.
+  /// A pointer has contacted the screen with a primary button and might begin
+  /// to move vertically.
   ///
   /// See also:
   ///
-  ///  * [kPrimaryButton], which is the buttons this callback responds to.
+  ///  * [kPrimaryButton], the button this callback responds to.
   final GestureDragDownCallback onVerticalDragDown;
 
-  /// A pointer has contacted the screen and has begun to move vertically.
-  /// Only responds to primary buttons.
+  /// A pointer has contacted the screen with a primary button and has begun to
+  /// move vertically.
   ///
   /// See also:
   ///
-  ///  * [kPrimaryButton], which is the buttons this callback responds to.
+  ///  * [kPrimaryButton], the button this callback responds to.
   final GestureDragStartCallback onVerticalDragStart;
 
-  /// A pointer that is in contact with the screen and moving vertically has
-  /// moved in the vertical direction. Only responds to primary buttons.
+  /// A pointer that is in contact with the screen with a primary button and
+  /// moving vertically has moved in the vertical direction.
   ///
   /// See also:
   ///
-  ///  * [kPrimaryButton], which is the buttons this callback responds to.
+  ///  * [kPrimaryButton], the button this callback responds to.
   final GestureDragUpdateCallback onVerticalDragUpdate;
 
-  /// A pointer that was previously in contact with the screen and moving
-  /// vertically is no longer in contact with the screen and was moving at a
-  /// specific velocity when it stopped contacting the screen.
-  /// Only responds to primary buttons.
+  /// A pointer that was previously in contact with the screen with a primary
+  /// button and moving vertically is no longer in contact with the screen and
+  /// was moving at a specific velocity when it stopped contacting the screen.
   ///
   /// See also:
   ///
-  ///  * [kPrimaryButton], which is the buttons this callback responds to.
+  ///  * [kPrimaryButton], the button this callback responds to.
   final GestureDragEndCallback onVerticalDragEnd;
 
   /// The pointer that previously triggered [onVerticalDragDown] did not
-  /// complete. Responds to any buttons.
+  /// complete.
+  ///
+  /// See also:
+  ///
+  ///  * [kPrimaryButton], the button this callback responds to.
   final GestureDragCancelCallback onVerticalDragCancel;
 
-  /// A pointer has contacted the screen and might begin to move horizontally.
-  /// Only responds to primary buttons.
+  /// A pointer has contacted the screen with a primary button and might begin
+  /// to move horizontally.
   ///
   /// See also:
   ///
-  ///  * [kPrimaryButton], which is the buttons this callback responds to.
+  ///  * [kPrimaryButton], the button this callback responds to.
   final GestureDragDownCallback onHorizontalDragDown;
 
-  /// A pointer has contacted the screen and has begun to move horizontally.
-  /// Only responds to primary buttons.
+  /// A pointer has contacted the screen with a primary button and has begun to
+  /// move horizontally.
   ///
   /// See also:
   ///
-  ///  * [kPrimaryButton], which is the buttons this callback responds to.
+  ///  * [kPrimaryButton], the button this callback responds to.
   final GestureDragStartCallback onHorizontalDragStart;
 
-  /// A pointer that is in contact with the screen and moving horizontally has
-  /// moved in the horizontal direction. Only responds to primary buttons.
+  /// A pointer that is in contact with the screen with a primary button and
+  /// moving horizontally has moved in the horizontal direction.
   ///
   /// See also:
   ///
-  ///  * [kPrimaryButton], which is the buttons this callback responds to.
+  ///  * [kPrimaryButton], the button this callback responds to.
   final GestureDragUpdateCallback onHorizontalDragUpdate;
 
-  /// A pointer that was previously in contact with the screen and moving
-  /// horizontally is no longer in contact with the screen and was moving at a
-  /// specific velocity when it stopped contacting the screen.
-  /// Only responds to primary buttons.
+  /// A pointer that was previously in contact with the screen with a primary
+  /// button and moving horizontally is no longer in contact with the screen and
+  /// was moving at a specific velocity when it stopped contacting the screen.
   ///
   /// See also:
   ///
-  ///  * [kPrimaryButton], which is the buttons this callback responds to.
+  ///  * [kPrimaryButton], the button this callback responds to.
   final GestureDragEndCallback onHorizontalDragEnd;
 
   /// The pointer that previously triggered [onHorizontalDragDown] did not
-  /// complete. Responds to any buttons.
+  /// complete.
+  ///
+  /// See also:
+  ///
+  ///  * [kPrimaryButton], the button this callback responds to.
   final GestureDragCancelCallback onHorizontalDragCancel;
 
-  /// A pointer has contacted the screen and might begin to move.
-  /// Only responds to primary buttons.
+  /// A pointer has contacted the screen with a primary button and might begin
+  /// to move.
   ///
   /// See also:
   ///
-  ///  * [kPrimaryButton], which is the buttons this callback responds to.
+  ///  * [kPrimaryButton], the button this callback responds to.
   final GestureDragDownCallback onPanDown;
 
-  /// A pointer has contacted the screen and has begun to move.
-  /// Only responds to primary buttons.
+  /// A pointer has contacted the screen with a primary button and has begun to
+  /// move.
   ///
   /// See also:
   ///
-  ///  * [kPrimaryButton], which is the buttons this callback responds to.
+  ///  * [kPrimaryButton], the button this callback responds to.
   final GestureDragStartCallback onPanStart;
 
-  /// A pointer that is in contact with the screen and moving has moved again.
-  /// Only responds to primary buttons.
+  /// A pointer that is in contact with the screen with a primary button and
+  /// moving has moved again.
   ///
   /// See also:
   ///
-  ///  * [kPrimaryButton], which is the buttons this callback responds to.
+  ///  * [kPrimaryButton], the button this callback responds to.
   final GestureDragUpdateCallback onPanUpdate;
 
-  /// A pointer that was previously in contact with the screen and moving
-  /// is no longer in contact with the screen and was moving at a specific
-  /// velocity when it stopped contacting the screen.
-  /// Only responds to primary buttons.
+  /// A pointer that was previously in contact with the screen with a primary
+  /// button and moving is no longer in contact with the screen and was moving
+  /// at a specific velocity when it stopped contacting the screen.
   ///
   /// See also:
   ///
-  ///  * [kPrimaryButton], which is the buttons this callback responds to.
+  ///  * [kPrimaryButton], the button this callback responds to.
   final GestureDragEndCallback onPanEnd;
 
   /// The pointer that previously triggered [onPanDown] did not complete.
-  /// Responds to any buttons.
+  ///
+  /// See also:
+  ///
+  ///  * [kPrimaryButton], the button this callback responds to.
   final GestureDragCancelCallback onPanCancel;
 
   /// The pointers in contact with the screen have established a focal point and
@@ -557,46 +570,36 @@ class GestureDetector extends StatelessWidget {
   Widget build(BuildContext context) {
     final Map<Type, GestureRecognizerFactory> gestures = <Type, GestureRecognizerFactory>{};
 
-    if (onTapDown != null || onTapUp != null || onTap != null || onTapCancel != null || onSecondaryTapDown != null) {
+    if (
+      onTapDown != null ||
+      onTapUp != null ||
+      onTap != null ||
+      onTapCancel != null ||
+      onSecondaryTapDown != null ||
+      onSecondaryTapUp != null ||
+      onSecondaryTapCancel != null
+    ) {
       gestures[TapGestureRecognizer] = GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
         () => TapGestureRecognizer(debugOwner: this),
         (TapGestureRecognizer instance) {
           instance
-            ..onTapDown = (TapDownDetails details) {
-              if (details.buttons == kPrimaryButton) {
-                if (onTapDown != null)
-                  onTapDown(details);
-              } else if (details.buttons == kSecondaryMouseButton) {
-                if (onSecondaryTapDown != null)
-                  onSecondaryTapDown(details);
-              }
-            }
-            ..onTapUp = (TapUpDetails details) {
-              if (details.buttons == kPrimaryButton) {
-                if (onTapUp != null)
-                  onTapUp(details);
-                if (onTap != null)
-                  onTap();
-              }
-            }
-            ..onTapCancel = onTapCancel;
+            ..onTapDown = onTapDown
+            ..onTapUp = onTapUp
+            ..onTap = onTap
+            ..onTapCancel = onTapCancel
+            ..onSecondaryTapDown = onSecondaryTapDown
+            ..onSecondaryTapUp = onSecondaryTapUp
+            ..onSecondaryTapCancel = onSecondaryTapCancel;
         },
       );
     }
 
-    if (onDoubleTap != null || onDoubleTapUp != null) {
+    if (onDoubleTap != null) {
       gestures[DoubleTapGestureRecognizer] = GestureRecognizerFactoryWithHandlers<DoubleTapGestureRecognizer>(
         () => DoubleTapGestureRecognizer(debugOwner: this),
         (DoubleTapGestureRecognizer instance) {
           instance
-            ..onDoubleTapUp = (DoubleTapUpDetails details) {
-              if (details.buttons == kPrimaryButton) {
-                if (onDoubleTapUp != null)
-                  onDoubleTapUp(details);
-                if (onDoubleTap != null)
-                  onDoubleTap();
-              }
-            };
+            ..onDoubleTap = onDoubleTap;
         },
       );
     }
@@ -610,26 +613,11 @@ class GestureDetector extends StatelessWidget {
         () => LongPressGestureRecognizer(debugOwner: this),
         (LongPressGestureRecognizer instance) {
           instance
-            ..onLongPressStart = (LongPressStartDetails details) {
-              if (details.buttons == kPrimaryButton) {
-                if (onLongPressStart != null)
-                  onLongPressStart(details);
-                if (onLongPress != null)
-                  onLongPress();
-              }
-            }
-            ..onLongPressMoveUpdate = onLongPressMoveUpdate == null ? null : (LongPressMoveUpdateDetails details) {
-              if (details.buttons == kPrimaryButton)
-                onLongPressMoveUpdate(details);
-            }
-            ..onLongPressEnd = (LongPressEndDetails details) {
-              if (details.buttons == kPrimaryButton) {
-                if (onLongPressEnd != null)
-                  onLongPressEnd(details);
-                if (onLongPressUp != null)
-                  onLongPressUp();
-              }
-            };
+            ..onLongPress = onLongPress
+            ..onLongPressStart = onLongPressStart
+            ..onLongPressMoveUpdate = onLongPressMoveUpdate
+            ..onLongPressEnd =onLongPressEnd
+            ..onLongPressUp = onLongPressUp;
         },
       );
     }
@@ -643,22 +631,10 @@ class GestureDetector extends StatelessWidget {
         () => VerticalDragGestureRecognizer(debugOwner: this),
         (VerticalDragGestureRecognizer instance) {
           instance
-            ..onDown = onVerticalDragDown == null ? null : (DragDownDetails details) {
-              if (details.buttons == kPrimaryButton)
-                onVerticalDragDown(details);
-            }
-            ..onStart = onVerticalDragStart == null ? null : (DragStartDetails details) {
-              if (details.buttons == kPrimaryButton)
-                onVerticalDragStart(details);
-            }
-            ..onUpdate = onVerticalDragUpdate == null ? null : (DragUpdateDetails details) {
-              if (details.buttons == kPrimaryButton)
-                onVerticalDragUpdate(details);
-            }
-            ..onEnd = onVerticalDragEnd == null ? null : (DragEndDetails details) {
-              if (details.buttons == kPrimaryButton)
-                onVerticalDragEnd(details);
-            }
+            ..onDown = onVerticalDragDown
+            ..onStart = onVerticalDragStart
+            ..onUpdate = onVerticalDragUpdate
+            ..onEnd = onVerticalDragEnd
             ..onCancel = onVerticalDragCancel
             ..dragStartBehavior = dragStartBehavior;
         },
@@ -674,22 +650,10 @@ class GestureDetector extends StatelessWidget {
         () => HorizontalDragGestureRecognizer(debugOwner: this),
         (HorizontalDragGestureRecognizer instance) {
           instance
-            ..onDown = onHorizontalDragDown == null ? null : (DragDownDetails details) {
-              if (details.buttons == kPrimaryButton)
-                onHorizontalDragDown(details);
-            }
-            ..onStart = onHorizontalDragStart == null ? null : (DragStartDetails details) {
-              if (details.buttons == kPrimaryButton)
-                onHorizontalDragStart(details);
-            }
-            ..onUpdate = onHorizontalDragUpdate == null ? null : (DragUpdateDetails details) {
-              if (details.buttons == kPrimaryButton)
-                onHorizontalDragUpdate(details);
-            }
-            ..onEnd = onHorizontalDragEnd == null ? null : (DragEndDetails details) {
-              if (details.buttons == kPrimaryButton)
-                onHorizontalDragEnd(details);
-            }
+            ..onDown = onHorizontalDragDown
+            ..onStart = onHorizontalDragStart
+            ..onUpdate = onHorizontalDragUpdate
+            ..onEnd = onHorizontalDragEnd
             ..onCancel = onHorizontalDragCancel
             ..dragStartBehavior = dragStartBehavior;
         },
@@ -705,22 +669,10 @@ class GestureDetector extends StatelessWidget {
         () => PanGestureRecognizer(debugOwner: this),
         (PanGestureRecognizer instance) {
           instance
-            ..onDown = onPanDown == null ? null : (DragDownDetails details) {
-              if (details.buttons == kPrimaryButton)
-                onPanDown(details);
-            }
-            ..onStart = onPanStart == null ? null : (DragStartDetails details) {
-              if (details.buttons == kPrimaryButton)
-                onPanStart(details);
-            }
-            ..onUpdate = onPanUpdate == null ? null : (DragUpdateDetails details) {
-              if (details.buttons == kPrimaryButton)
-                onPanUpdate(details);
-            }
-            ..onEnd = onPanEnd == null ? null : (DragEndDetails details) {
-              if (details.buttons == kPrimaryButton)
-                onPanEnd(details);
-            }
+            ..onDown = onPanDown
+            ..onStart = onPanStart
+            ..onUpdate = onPanUpdate
+            ..onEnd = onPanEnd
             ..onCancel = onPanCancel
             ..dragStartBehavior = dragStartBehavior;
         },
