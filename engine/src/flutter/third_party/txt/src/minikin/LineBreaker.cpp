@@ -32,8 +32,6 @@ using std::vector;
 
 namespace minikin {
 
-const int CHAR_TAB = 0x0009;
-
 // Large scores in a hierarchy; we prefer desperate breaks to an overfull line.
 // All these constants are larger than any reasonable actual width score.
 const float SCORE_INFTY = std::numeric_limits<float>::max();
@@ -159,22 +157,14 @@ float LineBreaker::addStyleRun(MinikinPaint* paint,
   size_t postSpaceCount = mSpaceCount;
   for (size_t i = start; i < end; i++) {
     uint16_t c = mTextBuf[i];
-    if (c == CHAR_TAB) {
-      mWidth = mPreBreak + mTabStops.nextTab(mWidth - mPreBreak);
-      if (mFirstTabIndex == INT_MAX) {
-        mFirstTabIndex = (int)i;
-      }
-      // fall back to greedy; other modes don't know how to deal with tabs
-      mStrategy = kBreakStrategy_Greedy;
-    } else {
-      if (isWordSpace(c))
-        mSpaceCount += 1;
-      mWidth += mCharWidths[i];
-      if (!isLineEndSpace(c)) {
-        postBreak = mWidth;
-        postSpaceCount = mSpaceCount;
-        afterWord = i + 1;
-      }
+    // libtxt: Tab handling was removed here.
+    if (isWordSpace(c))
+      mSpaceCount += 1;
+    mWidth += mCharWidths[i];
+    if (!isLineEndSpace(c)) {
+      postBreak = mWidth;
+      postSpaceCount = mSpaceCount;
+      afterWord = i + 1;
     }
     if (i + 1 == current) {
       size_t wordStart = mWordBreaker.wordStart();
