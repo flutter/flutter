@@ -2122,24 +2122,14 @@ class RenderTransform extends RenderProxyBox {
 
   @override
   bool hitTestChildren(HitTestResult result, { Offset position }) {
-    if (transformHitTests) {
-      assert(_effectiveTransform != null);
-      final Matrix4 inverse = Matrix4.tryInvert(
-        PointerEvent.paintTransformToPointerEventTransform(_effectiveTransform)
-      );
-      if (inverse == null) {
-        // We cannot invert the effective transform. That means the child
-        // doesn't appear on screen and cannot be hit.
-        return false;
-      }
-      position = MatrixUtils.transformPoint(inverse, position);
-      result.pushTransform(inverse);
-    }
-    final bool absorbed = super.hitTestChildren(result, position: position);
-    if (transformHitTests) {
-      result.popTransform();
-    }
-    return absorbed;
+    assert(!transformHitTests || _effectiveTransform != null);
+    return result.withPaintTransform(
+      transform: transformHitTests ? _effectiveTransform : null,
+      position: position,
+      hitTest: (HitTestResult result, Offset position) {
+        return super.hitTestChildren(result, position: position);
+      },
+    );
   }
 
   @override
@@ -2314,17 +2304,13 @@ class RenderFittedBox extends RenderProxyBox {
     if (size.isEmpty)
       return false;
     _updatePaintData();
-    final Matrix4 inverse = Matrix4.tryInvert(PointerEvent.paintTransformToPointerEventTransform(_transform));
-    if (inverse == null) {
-      // We cannot invert the effective transform. That means the child
-      // doesn't appear on screen and cannot be hit.
-      return false;
-    }
-    result.pushTransform(inverse);
-    position = MatrixUtils.transformPoint(inverse, position);
-    final bool absorbed = super.hitTestChildren(result, position: position);
-    result.popTransform();
-    return absorbed;
+    return result.withPaintTransform(
+      transform: _transform,
+      position: position,
+      hitTest: (HitTestResult result, Offset position) {
+        return super.hitTestChildren(result, position: position);
+      },
+    );
   }
 
   @override
@@ -2401,21 +2387,13 @@ class RenderFractionalTranslation extends RenderProxyBox {
   @override
   bool hitTestChildren(HitTestResult result, { Offset position }) {
     assert(!debugNeedsLayout);
-    if (transformHitTests) {
-      position = Offset(
-        position.dx - translation.dx * size.width,
-        position.dy - translation.dy * size.height,
-      );
-      result.pushTransform(Matrix4.tryInvert(PointerEvent.paintTransformToPointerEventTransform(Matrix4.identity()..translate(
-        translation.dx * size.width,
-        translation.dy * size.height,
-      ))));
-    }
-    final bool absorbed = super.hitTestChildren(result, position: position);
-    if (transformHitTests) {
-      result.popTransform();
-    }
-    return absorbed;
+    return result.withPaintTransform(
+      transform: transformHitTests ? Matrix4.translationValues(translation.dx * size.width, translation.dy * size.height, 0.0) : null,
+      position: position,
+      hitTest: (HitTestResult result, Offset position) {
+        return super.hitTestChildren(result, position: position);
+      },
+    );
   }
 
   @override
@@ -4718,17 +4696,13 @@ class RenderFollowerLayer extends RenderProxyBox {
 
   @override
   bool hitTestChildren(HitTestResult result, { Offset position }) {
-    final Matrix4 inverse = Matrix4.tryInvert(PointerEvent.paintTransformToPointerEventTransform(getCurrentTransform()));
-    if (inverse == null) {
-      // We cannot invert the effective transform. That means the child
-      // doesn't appear on screen and cannot be hit.
-      return false;
-    }
-    result.pushTransform(inverse);
-    position = MatrixUtils.transformPoint(inverse, position);
-    final bool absorbed = super.hitTestChildren(result, position: position);
-    result.popTransform();
-    return absorbed;
+    return result.withPaintTransform(
+      transform: getCurrentTransform(),
+      position: position,
+      hitTest: (HitTestResult result, Offset position) {
+        return super.hitTestChildren(result, position: position);
+      },
+    );
   }
 
   @override

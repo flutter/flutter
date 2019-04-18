@@ -94,11 +94,13 @@ class RenderRotatedBox extends RenderBox with RenderObjectWithChildMixin<RenderB
     assert(_paintTransform != null || debugNeedsLayout || child == null);
     if (child == null || _paintTransform == null)
       return false;
-    final Matrix4 inverse = Matrix4.inverted(PointerEvent.paintTransformToPointerEventTransform(_paintTransform));
-    result.pushTransform(inverse);
-    final bool absorbed = child.hitTest(result, position: MatrixUtils.transformPoint(inverse, position));
-    result.popTransform();
-    return absorbed;
+    return result.withPaintTransform(
+      transform: _paintTransform,
+      position: position,
+      hitTest: (HitTestResult result, Offset position) {
+        return super.hitTestChildren(result, position: position);
+      },
+    );
   }
 
   void _paintChild(PaintingContext context, Offset offset) {

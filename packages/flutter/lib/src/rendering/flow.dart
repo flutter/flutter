@@ -381,16 +381,13 @@ class RenderFlow extends RenderBox
       final Matrix4 transform = childParentData._transform;
       if (transform == null)
         continue;
-      final Matrix4 inverse = Matrix4.tryInvert(PointerEvent.paintTransformToPointerEventTransform(transform));
-      if (inverse == null) {
-        // We cannot invert the transform. That means the child doesn't appear
-        // on screen and cannot be hit.
-        continue;
-      }
-      final Offset childPosition = MatrixUtils.transformPoint(inverse, position);
-      result.pushTransform(inverse);
-      final bool absorbed = child.hitTest(result, position: childPosition);
-      result.popTransform();
+      final bool absorbed = result.withPaintTransform(
+        transform: transform,
+        position: position,
+        hitTest: (HitTestResult result, Offset position) {
+          return child.hitTest(result, position: position);
+        },
+      );
       if (absorbed)
         return true;
     }

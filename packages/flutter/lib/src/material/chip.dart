@@ -8,6 +8,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+import 'package:vector_math/vector_math_64.dart';
 
 import 'chip_theme.dart';
 import 'colors.dart';
@@ -1746,7 +1747,12 @@ class _RenderChipRedirectingHitDetection extends RenderConstrainedBox {
     // Only redirects hit detection which occurs above and below the render object.
     // In order to make this assumption true, I have removed the minimum width
     // constraints, since any reasonable chip would be at least that wide.
-    return child.hitTest(result, position: Offset(position.dx, size.height / 2));
+    final Matrix4 transform = Matrix4.identity()
+        ..setRow(1, Vector4(0, 0, 0, size.height / 2));
+    result.pushTransform(transform);
+    final bool absorbed = child.hitTest(result, position: MatrixUtils.transformPoint(transform, position));
+    result.popTransform();
+    return absorbed;
   }
 }
 
@@ -2276,7 +2282,17 @@ class _RenderChip extends RenderBox {
           hitTestChild = label ?? avatar;
         break;
     }
-    return hitTestChild?.hitTest(result, position: hitTestChild.size.center(Offset.zero)) ?? false;
+    if (hitTestChild != null) {
+      final Offset center = hitTestChild.size.center(Offset.zero);
+      final Matrix4 transform = Matrix4.identity()
+          ..setRow(0, Vector4(0, 0, 0, center.dx))
+          ..setRow(1, Vector4(0, 0, 0, center.dy));
+      result.pushTransform(transform);
+      final bool absorbed = hitTestChild.hitTest(result, position: MatrixUtils.transformPoint(transform, position));
+      result.popTransform();
+      return absorbed;
+    }
+    return false;
   }
 
   @override

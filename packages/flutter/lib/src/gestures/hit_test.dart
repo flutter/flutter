@@ -2,9 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/painting.dart';
+import 'package:meta/meta.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'events.dart';
+
+typedef HitTest = bool Function(HitTestResult result, Offset position);
 
 /// An object that can hit-test pointers.
 abstract class HitTestable {
@@ -130,7 +134,17 @@ class HitTestResult {
   /// }
   /// ```
   /// {@end-tool}
+  ///
+  /// See also:
+  ///
+  ///  * [withTransform], which is a convenient wrapper around [pushTransform]
+  ///    and [popTransform].
   void pushTransform(Matrix4 transform) {
+    assert(transform.getRow(2) == Vector4(0, 0, 1, 0) && transform.getColumn(2) == Vector4(0, 0, 1, 0),
+      'The third row and third column of a transfor matrix for pointer '
+      'events must be Vector4(0, 0, 1, 0). Did you forget to run the paint '
+      'matrix thorugh PointerEvent.paintTransformToPointerEventTransform?'
+    );
     _transforms.add(_transforms.isEmpty ? transform : _transforms.last * transform);
   }
 
@@ -143,9 +157,74 @@ class HitTestResult {
   ///
   ///  * [pushTransform], which has an example show-casing how to use these
   ///    methods.
+  ///  * [withTransform], which is a convenient wrapper around [pushTransform]
+  ///    and [popTransform].
   void popTransform() {
     assert(_transforms.isNotEmpty);
     _transforms.removeLast();
+  }
+
+  /// Convenience method to transform a position before hit-testing a child.
+  ///
+  /// This can be used instead of [pushTransform] and [popTransform].
+  ///
+  /// The provided paint [transform] from the child coordinate system to the
+  /// coordinate system of the caller, will be turned into a transform matrix
+  /// for pointer events. The inverted transformed matrix is used to transform
+  /// [position] from the parent coordinate system to the child coordinate system
+  /// before calling the provided [hitTest] callback.
+  ///
+  /// If the provided [transform] cannot be inverted, [hitTest] will not be
+  /// called and false is returned. Otherwise, the return value of [hitTest]
+  /// is returned.
+  ///
+  /// {@tool sample}
+  /// This method is often used in [RenderBox.hitTestChildren]:
+  ///
+  /// ```dart
+  /// abstract class Foo extends RenderBox {
+  ///
+  ///   final Matrix4 _effectiveTransform = Matrix4.rotationZ(50);
+  ///
+  ///   @override
+  ///   void applyPaintTransform(RenderBox child, Matrix4 transform) {
+  ///     transform.multiply(_effectiveTransform);
+  ///   }
+  ///
+  ///   @override
+  ///   bool hitTestChildren(HitTestResult result, { Offset position }) {
+  ///     return result.withTransform(
+  ///       transform: _effectiveTransform,
+  ///       position: position,
+  ///       hitTest: (HitTestResult result, Offset position) {
+  ///         return super.hitTestChildren(result, position: position);
+  ///       },
+  ///     );
+  ///   }
+  /// }
+  /// ```
+  /// {@end-tool}
+  bool withPaintTransform({
+    @required Matrix4 transform,
+    @required Offset position,
+    @required HitTest hitTest,
+  }) {
+    assert(position != null);
+    assert(hitTest != null);
+    if (transform != null) {
+      transform = Matrix4.tryInvert(PointerEvent.paintTransformToPointerEventTransform(transform));
+      if (transform == null) {
+        // Objects are not visible on screen and cannot be hit-tested.
+        return false;
+      }
+      pushTransform(transform);
+    }
+    final Offset transformedPosition = MatrixUtils.transformPoint(transform, position);
+    final bool absorbed = hitTest(this, transformedPosition);
+    if (transform != null) {
+      popTransform();
+    }
+    return absorbed;
   }
 
   /// Returns a matrix describing how [PointerEvent]s delivered to `entry`
