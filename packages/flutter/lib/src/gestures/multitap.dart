@@ -170,7 +170,7 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
   ///
   /// This triggers when the pointer stops contacting the device after the 2nd tap,
   /// immediately before [onDoubleTap].
-  /// 
+  ///
   /// It does not limit the button that triggers the tap. The callback should
   /// decide which call to respond to based on the detail data.
   ///

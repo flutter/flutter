@@ -343,7 +343,7 @@ class GestureDetector extends StatelessWidget {
   final GestureLongPressStartCallback onLongPressStart;
 
   /// A pointer has been drag-moved after a long press with a primary button.
-  /// 
+  ///
   /// See also:
   ///
   ///  * [kPrimaryButton], the button this callback responds to.

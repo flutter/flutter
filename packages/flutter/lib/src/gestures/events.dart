@@ -134,7 +134,7 @@ int nthStylusButton(int number) => (kPrimaryStylusButton << (number - 1)) & kMax
 ///
 /// A `buttons` is a bitfield where each set bit represents a button. This
 /// function returns the set bit closest to the least significant bit.
-/// 
+///
 /// It returns 0 for 0.
 ///
 /// Example:

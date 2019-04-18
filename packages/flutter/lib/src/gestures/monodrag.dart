@@ -117,7 +117,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   /// called on the initial touch down, if set to [DragStartBehavior.down] or
   /// when the drag gesture is first detected, if set to
   /// [DragStartBehavior.start].
-  /// 
+  ///
   /// {@macro flutter.dragGestureRecognizer.anyButton}
   ///
   /// See also:
@@ -130,7 +130,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   ///
   /// The distance travelled by the pointer since the last update is provided in
   /// the callback's `details` argument, which is a [DragUpdateDetails] object.
-  /// 
+  ///
   /// {@macro flutter.dragGestureRecognizer.anyButton}
   ///
   /// See also:
@@ -145,7 +145,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   ///
   /// The velocity is provided in the callback's `details` argument, which is a
   /// [DragEndDetails] object.
-  /// 
+  ///
   /// {@macro flutter.dragGestureRecognizer.anyButton}
   ///
   /// See also:
@@ -209,7 +209,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   ///  * [DragUpdateDetails], which is passed as an argument to this callback.
   GestureDragUpdateCallback onUpdate;
 
-  /// A pointer that was previously in contact with the screen with a primary 
+  /// A pointer that was previously in contact with the screen with a primary
   /// button and moving is no longer in contact with the screen and was moving
   /// at a specific velocity when it stopped contacting the screen.
   ///
