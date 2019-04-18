@@ -83,6 +83,7 @@ void ShellTest::SetSnapshotsAndAssets(Settings& settings) {
 
 Settings ShellTest::CreateSettingsForFixture() {
   Settings settings;
+  settings.leak_vm = false;
   settings.task_observer_add = [](intptr_t key, fml::closure handler) {
     fml::MessageLoop::GetCurrent().AddTaskObserver(key, handler);
   };

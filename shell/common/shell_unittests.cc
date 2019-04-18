@@ -83,6 +83,7 @@ static bool ValidateShell(Shell* shell) {
 }
 
 TEST_F(ShellTest, InitializeWithInvalidThreads) {
+  ASSERT_FALSE(DartVMRef::IsInstanceRunning());
   Settings settings = CreateSettingsForFixture();
   TaskRunners task_runners("test", nullptr, nullptr, nullptr, nullptr);
   auto shell = Shell::Create(
@@ -95,9 +96,11 @@ TEST_F(ShellTest, InitializeWithInvalidThreads) {
         return std::make_unique<Rasterizer>(shell.GetTaskRunners());
       });
   ASSERT_FALSE(shell);
+  ASSERT_FALSE(DartVMRef::IsInstanceRunning());
 }
 
 TEST_F(ShellTest, InitializeWithDifferentThreads) {
+  ASSERT_FALSE(DartVMRef::IsInstanceRunning());
   Settings settings = CreateSettingsForFixture();
   ThreadHost thread_host(
       "io.flutter.test." + ::testing::GetCurrentTestName() + ".",
@@ -117,9 +120,13 @@ TEST_F(ShellTest, InitializeWithDifferentThreads) {
         return std::make_unique<Rasterizer>(shell.GetTaskRunners());
       });
   ASSERT_TRUE(ValidateShell(shell.get()));
+  ASSERT_TRUE(DartVMRef::IsInstanceRunning());
+  shell.reset();
+  ASSERT_FALSE(DartVMRef::IsInstanceRunning());
 }
 
 TEST_F(ShellTest, InitializeWithSingleThread) {
+  ASSERT_FALSE(DartVMRef::IsInstanceRunning());
   Settings settings = CreateSettingsForFixture();
   ThreadHost thread_host(
       "io.flutter.test." + ::testing::GetCurrentTestName() + ".",
@@ -136,10 +143,14 @@ TEST_F(ShellTest, InitializeWithSingleThread) {
       [](Shell& shell) {
         return std::make_unique<Rasterizer>(shell.GetTaskRunners());
       });
+  ASSERT_TRUE(DartVMRef::IsInstanceRunning());
   ASSERT_TRUE(ValidateShell(shell.get()));
+  shell.reset();
+  ASSERT_FALSE(DartVMRef::IsInstanceRunning());
 }
 
 TEST_F(ShellTest, InitializeWithSingleThreadWhichIsTheCallingThread) {
+  ASSERT_FALSE(DartVMRef::IsInstanceRunning());
   Settings settings = CreateSettingsForFixture();
   fml::MessageLoop::EnsureInitializedForCurrentThread();
   auto task_runner = fml::MessageLoop::GetCurrent().GetTaskRunner();
@@ -155,10 +166,14 @@ TEST_F(ShellTest, InitializeWithSingleThreadWhichIsTheCallingThread) {
         return std::make_unique<Rasterizer>(shell.GetTaskRunners());
       });
   ASSERT_TRUE(ValidateShell(shell.get()));
+  ASSERT_TRUE(DartVMRef::IsInstanceRunning());
+  shell.reset();
+  ASSERT_FALSE(DartVMRef::IsInstanceRunning());
 }
 
 TEST_F(ShellTest,
        InitializeWithMultipleThreadButCallingThreadAsPlatformThread) {
+  ASSERT_FALSE(DartVMRef::IsInstanceRunning());
   Settings settings = CreateSettingsForFixture();
   ThreadHost thread_host(
       "io.flutter.test." + ::testing::GetCurrentTestName() + ".",
@@ -179,9 +194,13 @@ TEST_F(ShellTest,
         return std::make_unique<Rasterizer>(shell.GetTaskRunners());
       });
   ASSERT_TRUE(ValidateShell(shell.get()));
+  ASSERT_TRUE(DartVMRef::IsInstanceRunning());
+  shell.reset();
+  ASSERT_FALSE(DartVMRef::IsInstanceRunning());
 }
 
 TEST_F(ShellTest, InitializeWithGPUAndPlatformThreadsTheSame) {
+  ASSERT_FALSE(DartVMRef::IsInstanceRunning());
   Settings settings = CreateSettingsForFixture();
   ThreadHost thread_host(
       "io.flutter.test." + ::testing::GetCurrentTestName() + ".",
@@ -202,10 +221,14 @@ TEST_F(ShellTest, InitializeWithGPUAndPlatformThreadsTheSame) {
       [](Shell& shell) {
         return std::make_unique<Rasterizer>(shell.GetTaskRunners());
       });
+  ASSERT_TRUE(DartVMRef::IsInstanceRunning());
   ASSERT_TRUE(ValidateShell(shell.get()));
+  shell.reset();
+  ASSERT_FALSE(DartVMRef::IsInstanceRunning());
 }
 
 TEST_F(ShellTest, FixturesAreFunctional) {
+  ASSERT_FALSE(DartVMRef::IsInstanceRunning());
   const auto settings = CreateSettingsForFixture();
   auto shell = Shell::Create(
       GetTaskRunnersForFixture(), settings,
@@ -239,6 +262,9 @@ TEST_F(ShellTest, FixturesAreFunctional) {
 
   latch.Wait();
   main_latch.Wait();
+  ASSERT_TRUE(DartVMRef::IsInstanceRunning());
+  shell.reset();
+  ASSERT_FALSE(DartVMRef::IsInstanceRunning());
 }
 
 }  // namespace testing
