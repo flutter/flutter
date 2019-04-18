@@ -23,6 +23,7 @@ import 'floating_action_button.dart';
 import 'floating_action_button_location.dart';
 import 'material.dart';
 import 'snack_bar.dart';
+import 'snack_bar_theme.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
@@ -1846,9 +1847,10 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
     bool shouldShowFloatingSnackBar = false;
     if (_snackBars.isNotEmpty) {
-      final bool removeBottomPadding = widget.persistentFooterButtons != null ||
-        widget.bottomNavigationBar != null;
-      switch (themeData.snackBarBehavior) {
+      final SnackBarBehavior snackBarBehavior = _snackBars.first._widget.snackBarBehavior
+          ?? themeData.snackBarTheme.snackBarBehavior
+          ?? SnackBarBehavior.fixed;
+      switch (snackBarBehavior) {
         case SnackBarBehavior.floating:
           shouldShowFloatingSnackBar = true;
           break;

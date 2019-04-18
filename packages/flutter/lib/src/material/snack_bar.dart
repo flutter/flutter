@@ -9,10 +9,10 @@ import 'button_theme.dart';
 import 'flat_button.dart';
 import 'material.dart';
 import 'scaffold.dart';
+import 'snack_bar_theme.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
-const double _kSnackBarPadding = 24.0;
 const double _kSingleLineVerticalPadding = 14.0;
 const Color _kSnackBackground = Color(0xFF323232);
 
@@ -125,11 +125,15 @@ class _SnackBarActionState extends State<SnackBarAction> {
 
   @override
   Widget build(BuildContext context) {
+    final SnackBarThemeData snackBarTheme = Theme.of(context).snackBarTheme;
+    final Color textColor = widget.textColor ?? snackBarTheme.actionTextColor;
+    final Color disabledTextColor = widget.disabledTextColor ?? snackBarTheme.disabledActionTextColor;
+
     return FlatButton(
       onPressed: _haveTriggeredAction ? null : _handlePressed,
       child: Text(widget.label),
-      textColor: widget.textColor,
-      disabledTextColor: widget.disabledTextColor,
+      textColor: textColor,
+      disabledTextColor: disabledTextColor,
     );
   }
 }
@@ -158,15 +162,20 @@ class _SnackBarActionState extends State<SnackBarAction> {
 class SnackBar extends StatelessWidget {
   /// Creates a snack bar.
   ///
-  /// The [content] argument must be non-null.
+  /// The [content] argument must be non-null. The [elevation] must be null or
+  /// non-negative.
   const SnackBar({
     Key key,
     @required this.content,
     this.backgroundColor,
+    this.elevation,
+    this.shape,
+    this.snackBarBehavior,
     this.action,
     this.duration = _kSnackBarDisplayDuration,
     this.animation,
-  }) : assert(content != null),
+  }) : assert(elevation == null || elevation >= 0.0),
+       assert(content != null),
        assert(duration != null),
        super(key: key);
 
@@ -177,6 +186,34 @@ class SnackBar extends StatelessWidget {
 
   /// The Snackbar's background color. By default the color is dark grey.
   final Color backgroundColor;
+
+  /// The z-coordinate at which to place the snack bar. This controls the size
+  /// of the shadow below the snack bar.
+  ///
+  /// Defines the card's [Material.elevation].
+  ///
+  /// If this property is null, then [ThemeData.snackBarTheme.elevation] is
+  /// used, if that is also null, the default value is 6.0.
+  final double elevation;
+
+  /// The shape of the snack bar's [Material].
+  ///
+  /// Defines the snack bar's [Material.shape].
+  ///
+  /// If this property is null then [ThemeData.snackBarTheme.shape] is used.
+  /// If that's null then the shape will depend on the [SnackBarBehavior]. For
+  /// [SnackBarBehavior.fixed], it uses null. For [SnackBarBehavior.floating],
+  /// it uses a [RoundedRectangleBorder] with a circular corner radius of 4.0.
+  final ShapeBorder shape;
+
+  /// This defines the behavior and appearance of the snack bar.
+  ///
+  /// Controls whether the snack bar should be fixed to the bottom or floating
+  /// as described in the updated Material Design spec.
+  ///
+  /// If this property is null, then [ThemeData.snackBarTheme.snackBarBehavior]
+  /// is used. If that is null, then the default is [SnackBarBehavior.fixed].
+  final SnackBarBehavior snackBarBehavior;
 
   /// (optional) An action that the user can take based on the snack bar.
   ///
@@ -206,13 +243,25 @@ class SnackBar extends StatelessWidget {
     final MediaQueryData mediaQueryData = MediaQuery.of(context);
     assert(animation != null);
     final ThemeData theme = Theme.of(context);
+    final SnackBarThemeData snackBarTheme = theme.snackBarTheme;
     final ThemeData darkTheme = ThemeData(
       brightness: Brightness.dark,
       accentColor: theme.accentColor,
       accentColorBrightness: theme.accentColorBrightness,
+      snackBarTheme: snackBarTheme,
     );
+    double snackBarPadding = 0.0;
+    switch (snackBarTheme.snackBarBehavior) {
+      case SnackBarBehavior.fixed:
+        snackBarPadding = 24.0;
+        break;
+      case SnackBarBehavior.floating:
+        snackBarPadding = 16.0;
+        break;
+    }
+
     final List<Widget> children = <Widget>[
-      const SizedBox(width: _kSnackBarPadding),
+      SizedBox(width: snackBarPadding),
       Expanded(
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: _kSingleLineVerticalPadding),
@@ -225,12 +274,12 @@ class SnackBar extends StatelessWidget {
     ];
     if (action != null) {
       children.add(ButtonTheme.bar(
-        padding: const EdgeInsets.symmetric(horizontal: _kSnackBarPadding),
+        padding: EdgeInsets.symmetric(horizontal: snackBarPadding),
         textTheme: ButtonTextTheme.accent,
         child: action,
       ));
     } else {
-      children.add(const SizedBox(width: _kSnackBarPadding));
+      children.add(SizedBox(width: snackBarPadding));
     }
     final CurvedAnimation heightAnimation =
         CurvedAnimation(parent: animation, curve: _snackBarHeightCurve);
@@ -242,24 +291,28 @@ class SnackBar extends StatelessWidget {
       reverseCurve: const Threshold(0.0),
     );
 
-    final bool isFloatingSnackBar =
-        theme.snackBarBehavior == SnackBarBehavior.floating;
+    final SnackBarBehavior snackBarBehavior = this.snackBarBehavior ?? snackBarTheme.snackBarBehavior ?? SnackBarBehavior.fixed;
+    final bool isFloatingSnackBar = snackBarBehavior == SnackBarBehavior.floating;
 
     Widget snackBar = SafeArea(
       top: false,
-      bottom: isFloatingSnackBar ? false : true,
+      bottom: !isFloatingSnackBar,
       child: Row(
         children: children,
         crossAxisAlignment: CrossAxisAlignment.center,
       ),
     );
 
+    final double elevation = this.elevation ?? snackBarTheme.elevation ?? 6.0;
+    final Color backgroundColor = this.backgroundColor ?? snackBarTheme.backgroundColor ?? _kSnackBackground;
+    final ShapeBorder shape = this.shape
+        ?? snackBarTheme.shape
+        ?? (isFloatingSnackBar ? RoundedRectangleBorder(borderRadius: BorderRadius.circular(4.0)) : null);
+
     snackBar = Material(
-      shape: isFloatingSnackBar
-          ? RoundedRectangleBorder(borderRadius: BorderRadius.circular(4.0))
-          : null,
-      elevation: 6.0,
-      color: backgroundColor ?? _kSnackBackground,
+      shape: shape,
+      elevation: elevation,
+      color: backgroundColor,
       child: Theme(
         data: darkTheme,
         child: mediaQueryData.accessibleNavigation
@@ -345,6 +398,9 @@ class SnackBar extends StatelessWidget {
       key: key ?? fallbackKey,
       content: content,
       backgroundColor: backgroundColor,
+      elevation: elevation,
+      shape: shape,
+      snackBarBehavior: snackBarBehavior,
       action: action,
       duration: duration,
       animation: newAnimation,
