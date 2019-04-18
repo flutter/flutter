@@ -52,8 +52,6 @@ class PhysicalShapeLayer : public ContainerLayer {
   bool isRect_;
   SkRRect frameRRect_;
   Clip clip_behavior_;
-
-  friend class PhysicalShapeLayer_TotalElevation_Test;
 };
 
 }  // namespace flutter

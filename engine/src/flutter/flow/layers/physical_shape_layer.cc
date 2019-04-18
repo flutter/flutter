@@ -47,7 +47,6 @@ void PhysicalShapeLayer::Preroll(PrerollContext* context,
   total_elevation_ = context->total_elevation;
   SkRect child_paint_bounds;
   PrerollChildren(context, matrix, &child_paint_bounds);
-  context->total_elevation -= elevation_;
 
   if (elevation_ == 0) {
     set_paint_bounds(path_.getBounds());
