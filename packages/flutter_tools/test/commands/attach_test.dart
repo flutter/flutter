@@ -511,7 +511,7 @@ void main() {
       );
 
       final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(mdnsClient: client);
-      final int port = await (portDiscovery.query(applicationId: 'fiz')).port;
+      final int port = (await (portDiscovery.query(applicationId: 'fiz'))).port;
       expect(port, 321);
     });
 
