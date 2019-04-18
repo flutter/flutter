@@ -82,20 +82,21 @@ enum MaterialTapTargetSize {
   shrinkWrap,
 }
 
-/// Configures whether SnackBar should be fixed to the bottom or floating
-/// like described in Material Design spec.
+/// Configures whether [SnackBar] should be fixed to the bottom or floating
+/// like described in the Material Design spec.
 enum SnackBarBehavior {
-  /// Fixed the SnackBar position to the bottom of the Scaffold when possible.
-  /// One of the possible scenario where SnackBar will be shown above another
-  /// widget is SnackBar above BottomNavigationBar.
-  /// Other than that SnackBar will caused the other non-fixed widget inside
-  /// Scaffold to be pushed above (e.g. Floating Action Button).
+  /// Fixed the [SnackBar] position to the bottom of the [Scaffold] when
+  /// possible. One of the possible scenarios where [SnackBar] will be shown
+  /// above another widget is above a [BottomNavigationBar]. Other than that
+  /// [SnackBar] will cause other non-fixed widgets inside [Scaffold] to be
+  /// pushed above (e.g. [FloatingActionButton]).
   fixed,
 
-  /// Change the design and behavior of SnackBar to float like described in
+  /// Change the design and behavior of [SnackBar] to float as described in
   /// <https://material.io/design/components/snackbars.html>.
-  /// This behavior will cause SnackBar to be shown on top of other non-fixed
-  /// widget like Floating Action Button rather than pushing it above SnackBar.
+  /// This behavior will cause [SnackBar] to be shown on top of other non-fixed
+  /// widgets, such as [FloatingActionButton], rather than pushing it above
+  /// [SnackBar].
   floating
 }
 

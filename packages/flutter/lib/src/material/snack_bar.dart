@@ -247,6 +247,7 @@ class SnackBar extends StatelessWidget {
 
     Widget snackBar = SafeArea(
       top: false,
+      bottom: isFloatingSnackBar ? false : true,
       child: Row(
         children: children,
         crossAxisAlignment: CrossAxisAlignment.center,
