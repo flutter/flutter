@@ -460,11 +460,7 @@ class TextField extends StatefulWidget {
   /// {@end-tool}
   final InputCounterWidgetBuilder buildCounter;
 
-  /// The [ScrollPhysics] to use when vertically scrolling the TextField.
-  ///
-  /// If not specified, it will behave according to the current platform.
-  ///
-  /// See [Scrollable.physics].
+  /// {@macro flutter.widgets.edtiableText.scrollPhysics}
   final ScrollPhysics scrollPhysics;
 
   @override

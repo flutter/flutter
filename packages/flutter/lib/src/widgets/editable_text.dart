@@ -734,7 +734,13 @@ class EditableText extends StatefulWidget {
   /// {@macro flutter.widgets.scrollable.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
 
-  /// {@macro flutter.material.textField.scrollPhysics}
+  /// {@template flutter.widgets.editableText.scrollPhysics}
+  /// The [ScrollPhysics] to use when vertically scrolling the input.
+  ///
+  /// If not specified, it will behave according to the current platform.
+  ///
+  /// See [Scrollable.physics].
+  /// {@endtemplate}
   final ScrollPhysics scrollPhysics;
 
   /// {@macro flutter.rendering.editable.selectionEnabled}
