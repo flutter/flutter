@@ -318,8 +318,8 @@ class ExpansionPanelList extends StatefulWidget {
   ///
   /// For ExpansionPanelList, the callback needs to setState when it's notified
   /// about the closing/opening panel. On the other hand, the callback for
-  /// ExpansionPanelList.radio, is simply meant to inform the parent widget of
-  /// changes, as the panels' open/close states are managed internally.
+  /// ExpansionPanelList.radio is simply meant to inform the parent widget of
+  /// changes, as the radio panels' open/close states are managed internally.
   ///
   /// This callback is useful in order to keep track of the expanded/collapsed
   /// panels in a parent widget that may need to react to these changes.
