@@ -4,23 +4,23 @@
 
 #include "flutter/runtime/dart_vm.h"
 #include "flutter/runtime/dart_vm_lifecycle.h"
+#include "flutter/runtime/runtime_test.h"
 #include "gtest/gtest.h"
 
 namespace flutter {
+namespace testing {
 
-TEST(DartVM, SimpleInitialization) {
-  Settings settings = {};
-  settings.task_observer_add = [](intptr_t, fml::closure) {};
-  settings.task_observer_remove = [](intptr_t) {};
-  auto vm = DartVMRef::Create(settings);
+using DartVMTest = RuntimeTest;
+
+TEST_F(DartVMTest, SimpleInitialization) {
+  ASSERT_FALSE(DartVMRef::IsInstanceRunning());
+  auto vm = DartVMRef::Create(CreateSettingsForFixture());
   ASSERT_TRUE(vm);
 }
 
-TEST(DartVM, SimpleIsolateNameServer) {
-  Settings settings = {};
-  settings.task_observer_add = [](intptr_t, fml::closure) {};
-  settings.task_observer_remove = [](intptr_t) {};
-  auto vm = DartVMRef::Create(settings);
+TEST_F(DartVMTest, SimpleIsolateNameServer) {
+  ASSERT_FALSE(DartVMRef::IsInstanceRunning());
+  auto vm = DartVMRef::Create(CreateSettingsForFixture());
   ASSERT_TRUE(vm);
   ASSERT_TRUE(vm.GetVMData());
   auto ns = vm->GetIsolateNameServer();
@@ -32,4 +32,5 @@ TEST(DartVM, SimpleIsolateNameServer) {
   ASSERT_TRUE(ns->RemoveIsolateNameMapping("foobar"));
 }
 
+}  // namespace testing
 }  // namespace flutter
