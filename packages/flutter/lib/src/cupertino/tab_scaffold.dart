@@ -8,20 +8,20 @@ import 'theme.dart';
 
 /// Coordinates tab selection between a [CupertinoTabBar] and a [CupertinoTabScaffold].
 ///
-/// The [currentIndex] property is the index of the selected tab, changing its value updates
+/// The [index] property is the index of the selected tab. Changing its value updates
 /// the actively displayed tab of the [CupertinoTabScaffold] the [CupertinoTabController] controls,
 /// as well as the currently selected tab item of its [CupertinoTabBar].
 ///
 /// There're 2 ways to programmatically change the actively displayed tab of a [CupertinoTabScaffold]
 /// (and the selected tab item of the [CupertinoTabBar]):
-/// 1. Change the [currentIndex] of the existing controller of the [CupertinoTabScaffold],
+/// 1. Change the [index] of the existing controller of the [CupertinoTabScaffold],
 ///    see the example below.
 /// 2. Rebuild the [CupertinoTabScaffold] widget with a new [CupertinoTabController], whose
 ///    [currentIndex] is set to the new value.
 ///
 /// {@tool sample}
 ///
-/// `CupertionoTabController` can be used to switch tabs from ancestor widgets:
+/// [CupertinoTabController] can be used to switch tabs from ancestor widgets:
 ///
 /// ```dart
 /// class MyCupertinoTabScaffoldPage extends StatefulWidget {
@@ -38,14 +38,14 @@ import 'theme.dart';
 ///       tabBar: CupertinoTabBar(
 ///         items: <BottomNavigationBarItem> [
 ///           // ...
-///         ]
+///         ],
 ///       ),
 ///       controller: _controller,
 ///       tabBuilder: (BuildContext context, int index) {
 ///         return Center(
 ///           child: CupertinoButton(
 ///             child: const Text('Go to first tab'),
-///             onPressed: () => _controller.currentIndex = 0
+///             onPressed: () => _controller.currentIndex = 0,
 ///           )
 ///         );
 ///       }
@@ -56,22 +56,22 @@ import 'theme.dart';
 /// {@end-tool}
 ///
 /// see also:
-/// [CupertinoTabScaffold], a tabbed application root layout that can be controlled by a [CupertinoTabController].
+/// * [CupertinoTabScaffold], a tabbed application root layout that can be controlled by a [CupertinoTabController].
 class CupertinoTabController extends ValueNotifier<int> {
-  /// Creates an object that manages the index of the current selected tab required by a [CupertinoTabScaffold].
+  /// Creates a [CupertinoTabController] to control the tab index of [CupertinoTabScaffold] and [CupertinoTabBar].
   ///
-  /// [selectedIndex] must not be null and defaults to 0. The value must be greater than or equal to 0,
+  /// The [initialIndex] must not be null and defaults to 0. The value must be greater than or equal to 0,
   /// and less than the total number of tabs.
-  CupertinoTabController({ int selectedIndex = 0 }):
-  assert(selectedIndex != null && selectedIndex >= 0),
-  super(selectedIndex);
+  CupertinoTabController({ int initialIndex = 0 })
+    : assert(initialIndex != null && initialIndex >= 0),
+      super(initialIndex);
 
-  /// The index of the current selected tab. Changing the value of [currentIndex]
+  /// The index of the currently selected tab. Changing the value of [index]
   /// updates the actively displayed tab of the [CupertinoTabScaffold]
   /// controlled by this [CupertinoTabController], as well as the currently selected tab item
   /// of its [CupertinoTabScaffold.tabBar].
-  int get currentIndex => value;
-  set currentIndex(int value) => this.value = value;
+  int get index => value;
+  set index(int value) => this.value = value;
 }
 
 /// Implements a tabbed iOS application's root layout and behavior structure.
@@ -83,7 +83,7 @@ class CupertinoTabController extends ValueNotifier<int> {
 /// will automatically listen to the provided [CupertinoTabBar]'s tap callbacks
 /// to change the active tab.
 ///
-/// A [controller] can be supplied to update the actively displayed tab and manage
+/// A [controller] can be used to provide an initialy selected tab index and manage
 /// subsequent tab changes. If set to null, [CupertinoTabScaffold] will keep
 /// using the current [CupertinoTabController] that exists in its internal state object,
 /// or create a new [CupertinoTabController] using the 'currentIndex' of [tabBar]
@@ -184,7 +184,7 @@ class CupertinoTabScaffold extends StatefulWidget {
   /// when present.
   ///
   /// The [CupertinoTabBar.currentIndex] property of [tabBar] is *overridden*
-  /// by the [CupertinoTabController.currentIndex] value in [controller] if [controller]
+  /// by the [CupertinoTabController.index] value in [controller] if [controller]
   /// is not null or there's an existing controller in this [CupertinoTabScaffold]'s
   /// internal state object. Otherwise, the scaffold will use [CupertinoTabBar.currentIndex]
   /// as the index of the selected tab.
@@ -259,12 +259,12 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
       ?? _controller
       // This only happens in [initState]. If there's no existing controller,
       // create one using [widget.tabBar.currentIndex] as its initial index.
-      ?? CupertinoTabController(selectedIndex: widget.tabBar.currentIndex);
+      ?? CupertinoTabController(initialIndex: widget.tabBar.currentIndex);
 
     assert(() {
-        if (newController.currentIndex >= widget.tabBar.items.length) {
+        if (newController.index >= widget.tabBar.items.length) {
           throw FlutterError(
-            'current index ${newController.currentIndex} is out of bounds.'
+            'current index ${newController.index} is out of bounds.'
             'The total number of tabs is ${widget.tabBar.items.length} '
           );
         }
@@ -298,7 +298,7 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
     MediaQueryData newMediaQuery = MediaQuery.of(context);
 
     Widget content = _TabSwitchingView(
-      currentTabIndex: _controller.currentIndex,
+      currentTabIndex: _controller.index,
       tabNumber: widget.tabBar.items.length,
       tabBuilder: widget.tabBuilder,
     );
@@ -353,9 +353,9 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
         // our own listener to update the [_controller.currentIndex] on top of a possibly user
         // provided callback.
         child: widget.tabBar.copyWith(
-          currentIndex: _controller.currentIndex,
+          currentIndex: _controller.index,
           onTap: (int newIndex) {
-            _controller.currentIndex = newIndex;
+            _controller.index = newIndex;
             // Chain the user's original callback.
             if (widget.tabBar.onTap != null)
               widget.tabBar.onTap(newIndex);
