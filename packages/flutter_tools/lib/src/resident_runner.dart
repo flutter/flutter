@@ -1017,24 +1017,13 @@ abstract class ResidentRunner {
 }
 
 class OperationResult {
-  OperationResult(this.code, this.message, { this.hintMessage, this.hintId });
+  OperationResult(this.code, this.message);
 
   /// The result of the operation; a non-zero code indicates a failure.
   final int code;
 
   /// A user facing message about the results of the operation.
   final String message;
-
-  /// An optional hint about the results of the operation. This is used to provide
-  /// sidecar data about the operation results. For example, this is used when
-  /// a reload is successful but some changed program elements where not run after a
-  /// reassemble.
-  final String hintMessage;
-
-  /// A key used by tools to discriminate between different kinds of operation results.
-  /// For example, a successful reload might have a [code] of 0 and a [hintId] of
-  /// `'restartRecommended'`.
-  final String hintId;
 
   bool get isOk => code == 0;
 
