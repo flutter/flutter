@@ -178,7 +178,7 @@ void main() {
         await expectLater(
           createTestCommandRunner(command).run(<String>['attach', '--ipv6']),
           throwsToolExit(
-            message: 'When the --debug-port is unknown, this command determines '
+            message: 'When the --debug-port or --debug-uri is unknown, this command determines '
                      'the value of --ipv6 on its own.',
           ),
         );
@@ -193,7 +193,7 @@ void main() {
         await expectLater(
           createTestCommandRunner(command).run(<String>['attach', '--observatory-port', '100']),
           throwsToolExit(
-            message: 'When the --debug-port is unknown, this command does not use '
+            message: 'When the --debug-port or --debug-uri is unknown, this command does not use '
                      'the value of --observatory-port.',
           ),
         );
@@ -289,6 +289,7 @@ void main() {
 
         final Completer<void> completer = Completer<void>();
         final StreamSubscription<String> loggerSubscription = logger.stream.listen((String message) {
+          print("MESSAGE: $message");
           if (message == '[verbose] Connecting to service protocol: http://127.0.0.1:42/') {
             // Wait until resident_runner.dart tries to connect.
             // There's nothing to connect _to_, so that's as far as we care to go.
@@ -453,7 +454,7 @@ void main() {
       final MDnsClient client = getMockClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{});
 
       final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(mdnsClient: client);
-      final int port = (await portDiscovery.query()).port;
+      final int port = (await portDiscovery.query())?.port;
       expect(port, isNull);
     });
 
@@ -470,7 +471,7 @@ void main() {
       );
 
       final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(mdnsClient: client);
-      final int port = (await portDiscovery.query()).port;
+      final int port = (await portDiscovery.query())?.port;
       expect(port, 123);
     });
 
@@ -511,7 +512,7 @@ void main() {
       );
 
       final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(mdnsClient: client);
-      final int port = (await (portDiscovery.query(applicationId: 'fiz'))).port;
+      final int port = (await (portDiscovery.query(applicationId: 'fiz')))?.port;
       expect(port, 321);
     });
 
@@ -534,7 +535,7 @@ void main() {
       );
 
       final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(mdnsClient: client);
-      final int port = (await portDiscovery.query(applicationId: 'bar')).port;
+      final int port = (await portDiscovery.query(applicationId: 'bar'))?.port;
       expect(port, 1234);
     });
   });
