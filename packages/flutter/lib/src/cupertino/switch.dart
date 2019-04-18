@@ -54,17 +54,21 @@ import 'thumb_painter.dart';
 class CupertinoSwitch extends StatefulWidget {
   /// Creates an iOS-style switch.
   ///
-  /// [dragStartBehavior] must not be null.
+  /// The [value] parameter must not be null.
+  /// The [dragStartBehavior] parameter defaults to [DragStartBehavior.start] and must not be null.
   const CupertinoSwitch({
     Key key,
     @required this.value,
     @required this.onChanged,
     this.activeColor,
     this.dragStartBehavior = DragStartBehavior.start,
-  }) : assert(dragStartBehavior != null),
+  }) : assert(value != null),
+       assert(dragStartBehavior != null),
        super(key: key);
 
   /// Whether this switch is on or off.
+  ///
+  /// Must not be null.
   final bool value;
 
   /// Called when the user toggles with switch on or off.
@@ -73,7 +77,7 @@ class CupertinoSwitch extends StatefulWidget {
   /// change state until the parent widget rebuilds the switch with the new
   /// value.
   ///
-  /// If null, the switch will be displayed as disabled.
+  /// If null, the switch will be displayed as disabled, which has a reduced opacity.
   ///
   /// The callback provided to onChanged should update the state of the parent
   /// [StatefulWidget] using the [State.setState] method, so that the parent
@@ -131,12 +135,15 @@ class CupertinoSwitch extends StatefulWidget {
 class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
-    return _CupertinoSwitchRenderObjectWidget(
-      value: widget.value,
-      activeColor: widget.activeColor ?? CupertinoColors.activeGreen,
-      onChanged: widget.onChanged,
-      vsync: this,
-      dragStartBehavior: widget.dragStartBehavior,
+    return Opacity(
+      opacity: widget.onChanged == null ? _kCupertinoSwitchDisabledOpacity : 1.0,
+      child: _CupertinoSwitchRenderObjectWidget(
+        value: widget.value,
+        activeColor: widget.activeColor ?? CupertinoColors.activeGreen,
+        onChanged: widget.onChanged,
+        vsync: this,
+        dragStartBehavior: widget.dragStartBehavior,
+      ),
     );
   }
 }
@@ -189,6 +196,8 @@ const double _kTrackInnerEnd = _kTrackWidth - _kTrackInnerStart;
 const double _kTrackInnerLength = _kTrackInnerEnd - _kTrackInnerStart;
 const double _kSwitchWidth = 59.0;
 const double _kSwitchHeight = 39.0;
+// Opacity of a disabled switch, as eye-balled from iOS Simulator on Mac.
+const double _kCupertinoSwitchDisabledOpacity = 0.5;
 
 const Color _kTrackColor = CupertinoColors.lightBackgroundGray;
 const Duration _kReactionDuration = Duration(milliseconds: 300);

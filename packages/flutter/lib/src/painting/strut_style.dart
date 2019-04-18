@@ -44,6 +44,10 @@ import 'text_style.dart';
 /// leading plus ascent. Each line's spacing below the baseline will be at least as
 /// tall as the half leading plus descent.
 ///
+/// See also:
+///
+///  * [StrutStyle](https://api.flutter.dev/flutter/dart-ui/StrutStyle-class.html), the class in the [dart:ui] library.
+///
 /// ### Fields and their default values.
 
 // ///////////////////////////////////////////////////////////////////////////

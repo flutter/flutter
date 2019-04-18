@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:io' show Platform;
 
 import 'package:flutter/material.dart';
@@ -2253,6 +2254,41 @@ void main() {
     expect(getBorderRadius(tester), BorderRadius.zero);
     await tester.pumpAndSettle();
     expect(getBorderRadius(tester), BorderRadius.zero);
+  });
+
+  testWidgets('OutlineInputBorder async lerp', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/28724
+
+    final Completer<void> completer = Completer<void>();
+    bool waitIsOver = false;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return GestureDetector(
+              onTap: () async {
+                setState(() { waitIsOver = true; });
+                await completer.future;
+                setState(() { waitIsOver = false;  });
+              },
+              child: InputDecorator(
+                decoration: InputDecoration(
+                  labelText: 'Test',
+                  enabledBorder: !waitIsOver ? null : const OutlineInputBorder(borderSide: BorderSide(color: Colors.blue)),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(StatefulBuilder));
+    await tester.pumpAndSettle();
+
+    completer.complete();
+    await tester.pumpAndSettle();
   });
 
   test('InputBorder equality', () {

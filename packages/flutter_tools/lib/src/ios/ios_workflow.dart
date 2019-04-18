@@ -52,6 +52,9 @@ class IOSValidator extends DoctorValidator {
 
   String get iosDeployMinimumVersion => '1.9.4';
 
+  // ios-deploy <= v1.9.3 declares itself as v2.0.0
+  List<String> get iosDeployBadVersions => <String>['2.0.0'];
+
   Future<String> get iosDeployVersionText async => (await runAsync(<String>['ios-deploy', '--version'])).processResult.stdout.replaceAll('\n', '');
 
   bool get hasHomebrew => os.which('brew') != null;
@@ -63,7 +66,8 @@ class IOSValidator extends DoctorValidator {
       return false;
     try {
       final Version version = Version.parse(await iosDeployVersionText);
-      return version >= Version.parse(iosDeployMinimumVersion);
+      return version >= Version.parse(iosDeployMinimumVersion)
+          && !iosDeployBadVersions.map((String v) => Version.parse(v)).contains(version);
     } on FormatException catch (_) {
       return false;
     }

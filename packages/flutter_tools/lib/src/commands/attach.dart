@@ -216,6 +216,7 @@ class AttachCommand extends FlutterCommand {
         viewFilter: argResults['isolate-filter'],
         target: argResults['target'],
         targetModel: TargetModel(argResults['target-model']),
+        buildMode: getBuildMode(),
       );
       flutterDevice.observatoryUris = <Uri>[ observatoryUri ];
       final List<FlutterDevice> flutterDevices =  <FlutterDevice>[flutterDevice];

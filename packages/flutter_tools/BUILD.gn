@@ -14,8 +14,7 @@ dart_library("flutter_tools") {
   disable_analysis = true
 
   deps = [
-    "//third_party/dart/pkg/analyzer",
-    "//third_party/dart/third_party/pkg/linter",
+    "//third_party/dart-pkg/pub/analyzer",
     "//third_party/dart-pkg/pub/archive",
     "//third_party/dart-pkg/pub/args",
     "//third_party/dart-pkg/pub/bsdiff",
@@ -30,6 +29,7 @@ dart_library("flutter_tools") {
     # because it uses mirrors which Fuchsia's Dart VM doesn't support.
     "//third_party/dart-pkg/pub/json_rpc_2",
     "//third_party/dart-pkg/pub/json_schema",
+    "//third_party/dart-pkg/pub/linter",
     "//third_party/dart-pkg/pub/meta",
     "//third_party/dart-pkg/pub/multicast_dns",
     "//third_party/dart-pkg/pub/mustache",
@@ -252,5 +252,9 @@ dart_tool("fuchsia_attach") {
 
   deps = [
     ":flutter_tools",
+  ]
+
+  non_dart_deps = [
+    "//third_party/flutter/frontend_server:frontend_server_tool_snapshot($host_toolchain)",
   ]
 }
