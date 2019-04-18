@@ -72,6 +72,7 @@ void main() {
       r'C:\windows\build.bat',
       r'C:\',
       'release',
+      'no-track-widget-creation',
     ], runInShell: true)).thenAnswer((Invocation invocation) async {
       return mockProcess;
     });
