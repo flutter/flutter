@@ -19,6 +19,7 @@ class ParagraphImplTxt : public ParagraphImpl {
 
   double width() override;
   double height() override;
+  double tightWidth() override;
   double minIntrinsicWidth() override;
   double maxIntrinsicWidth() override;
   double alphabeticBaseline() override;
