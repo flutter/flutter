@@ -79,7 +79,7 @@ class MacOSDevice extends Device {
     final Process process = await processManager.start(<String>[
       package.executable(debuggingOptions.buildInfo.mode)
     ]);
-    if (debuggingOptions.buildInfo.isRelease) {
+    if (debuggingOptions.buildInfo?.isRelease == true) {
       return LaunchResult.succeeded();
     }
     final MacOSLogReader logReader = MacOSLogReader(package, process);

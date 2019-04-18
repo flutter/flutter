@@ -83,11 +83,6 @@ tester    17193   0.0  0.2  4791128  37820   ??  S     2:27PM   0:00.09 /Applica
         ]);
       });
 
-      test('fails without a prebuilt application', () async {
-        final LaunchResult result = await device.startApp(macOSApp, prebuiltApplication: false);
-        expect(result.started, false);
-      });
-
       testUsingContext('Can run from prebuilt application', () async {
         final LaunchResult result = await device.startApp(macOSApp, prebuiltApplication: true);
         expect(result.started, true);
