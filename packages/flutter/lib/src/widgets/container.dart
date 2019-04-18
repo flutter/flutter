@@ -183,11 +183,12 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
 /// see [Decoration.padding].
 ///
 /// {@tool sample}
-///
 /// This example shows a 48x48 amber square (placed inside a [Center] widget in
 /// case the parent widget has its own opinions regarding the size that the
 /// [Container] should take), with a margin so that it stays away from
 /// neighboring widgets:
+///
+/// ![An amber colored container with the dimensions of 48 square pixels.](https://flutter.github.io/assets-for-api-docs/assets/widgets/container_a.png)
 ///
 /// ```dart
 /// Center(
@@ -200,6 +201,7 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
 /// )
 /// ```
 /// {@end-tool}
+///
 /// {@tool sample}
 ///
 /// This example shows how to use many of the features of [Container] at once.
@@ -209,6 +211,9 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
 /// [color] makes the box blue. The [alignment] causes the [child] to be
 /// centered in the box. Finally, the [transform] applies a slight rotation to the
 /// entire contraption to complete the effect.
+///
+/// ![A blue rectangular container with 'Hello World' in the center, rotated
+/// slightly in the z axis.](https://flutter.github.io/assets-for-api-docs/assets/widgets/container_b.png)
 ///
 /// ```dart
 /// Container(
@@ -235,7 +240,7 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
 ///  * [Border], which has a sample which uses [Container] heavily.
 ///  * [Ink], which paints a [Decoration] on a [Material], allowing
 ///    [InkResponse] and [InkWell] splashes to paint over them.
-///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
+///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
 class Container extends StatelessWidget {
   /// Creates a widget that combines common painting, positioning, and sizing widgets.
   ///

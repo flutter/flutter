@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
@@ -1691,5 +1692,155 @@ void main() {
     );
 
     expect(tester.takeException(), isAssertionError);
+  });
+
+  testWidgets('Heroes fly on pushReplacement', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/28041.
+
+    const String heroTag = 'foo';
+    final GlobalKey<NavigatorState> navigator = GlobalKey();
+    final Key smallContainer = UniqueKey();
+    final Key largeContainer = UniqueKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorKey: navigator,
+        home: Center(
+          child: Card(
+            child: Hero(
+              tag: heroTag,
+              child: Container(
+                key: largeContainer,
+                color: Colors.red,
+                height: 200.0,
+                width: 200.0,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // The initial setup.
+    expect(find.byKey(largeContainer), isOnstage);
+    expect(find.byKey(largeContainer), isInCard);
+    expect(find.byKey(smallContainer, skipOffstage: false), findsNothing);
+
+    navigator.currentState.pushReplacement(
+      MaterialPageRoute<void>(
+          builder: (BuildContext context) {
+            return Center(
+              child: Card(
+                child: Hero(
+                  tag: heroTag,
+                  child: Container(
+                    key: smallContainer,
+                    color: Colors.red,
+                    height: 100.0,
+                    width: 100.0,
+                  ),
+                ),
+              ),
+            );
+          }
+      ),
+    );
+    await tester.pump();
+
+    // The second route exists offstage.
+    expect(find.byKey(largeContainer), isOnstage);
+    expect(find.byKey(largeContainer), isInCard);
+    expect(find.byKey(smallContainer, skipOffstage: false), isOffstage);
+    expect(find.byKey(smallContainer, skipOffstage: false), isInCard);
+
+    await tester.pump();
+
+    // The hero started flying.
+    expect(find.byKey(largeContainer), findsNothing);
+    expect(find.byKey(smallContainer), isOnstage);
+    expect(find.byKey(smallContainer), isNotInCard);
+
+    await tester.pump(const Duration(milliseconds: 100));
+
+    // The hero is in-flight.
+    expect(find.byKey(largeContainer), findsNothing);
+    expect(find.byKey(smallContainer), isOnstage);
+    expect(find.byKey(smallContainer), isNotInCard);
+    final Size size = tester.getSize(find.byKey(smallContainer));
+    expect(size.height, greaterThan(100));
+    expect(size.width, greaterThan(100));
+    expect(size.height, lessThan(200));
+    expect(size.width, lessThan(200));
+
+    await tester.pumpAndSettle();
+
+    // The transition has ended.
+    expect(find.byKey(largeContainer), findsNothing);
+    expect(find.byKey(smallContainer), isOnstage);
+    expect(find.byKey(smallContainer), isInCard);
+    expect(tester.getSize(find.byKey(smallContainer)), const Size(100,100));
+  });
+
+  testWidgets('On an iOS back swipe and snap, only a single flight should take place', (WidgetTester tester) async {
+    int shuttlesBuilt = 0;
+    final HeroFlightShuttleBuilder shuttleBuilder = (
+      BuildContext flightContext,
+      Animation<double> animation,
+      HeroFlightDirection flightDirection,
+      BuildContext fromHeroContext,
+      BuildContext toHeroContext,
+    ) {
+      shuttlesBuilt += 1;
+      return const Text("I'm flying in a jetplane");
+    };
+
+    final GlobalKey<NavigatorState> navigatorKey = GlobalKey();
+    await tester.pumpWidget(
+      CupertinoApp(
+        navigatorKey: navigatorKey,
+        home: Hero(
+          tag: navigatorKey,
+          // Since we're popping, only the destination route's builder is used.
+          flightShuttleBuilder: shuttleBuilder,
+          transitionOnUserGestures: true,
+          child: const Text('1')
+        ),
+      ),
+    );
+
+    final CupertinoPageRoute<void> route2 = CupertinoPageRoute<void>(
+      builder: (BuildContext context) {
+        return CupertinoPageScaffold(
+          child: Hero(
+            tag: navigatorKey,
+            transitionOnUserGestures: true,
+            child: const Text('2')
+          ),
+        );
+      }
+    );
+
+    navigatorKey.currentState.push(route2);
+    await tester.pumpAndSettle();
+
+    expect(shuttlesBuilt, 1);
+
+    final TestGesture gesture = await tester.startGesture(const Offset(5.0, 200.0));
+    await gesture.moveBy(const Offset(500.0, 0.0));
+    await tester.pump();
+    // Starting the back swipe creates a new hero shuttle.
+    expect(shuttlesBuilt, 2);
+
+    await gesture.up();
+    await tester.pump();
+    // After the lift, no additional shuttles should be created since it's the
+    // same hero flight.
+    expect(shuttlesBuilt, 2);
+
+    // Did go far enough to snap out of this route.
+    await tester.pump(const Duration(milliseconds: 301));
+    expect(find.text('2'), findsNothing);
+    // Still one shuttle.
+    expect(shuttlesBuilt, 2);
   });
 }

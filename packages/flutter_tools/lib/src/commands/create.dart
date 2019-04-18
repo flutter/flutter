@@ -245,7 +245,7 @@ class CreateCommand extends FlutterCommand {
       throwToolExit('Neither the --flutter-root command line flag nor the FLUTTER_ROOT environment '
         'variable was specified. Unable to find package:flutter.', exitCode: 2);
 
-    await Cache.instance.updateAll();
+    await Cache.instance.updateAll(<DevelopmentArtifact>{ DevelopmentArtifact.universal });
 
     final String flutterRoot = fs.path.absolute(Cache.flutterRoot);
 
@@ -407,7 +407,7 @@ Your $application code is in $relativeAppMain.
 Your plugin code is in $relativePluginMain.
 
 Host platform code is in the "android" and "ios" directories under $relativePluginPath.
-To edit platform code in an IDE see https://flutter.io/developing-packages/#edit-plugin-package.
+To edit platform code in an IDE see https://flutter.dev/developing-packages/#edit-plugin-package.
 ''');
         }
       } else {

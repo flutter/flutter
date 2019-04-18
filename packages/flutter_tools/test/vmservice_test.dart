@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -178,7 +179,7 @@ void main() {
     }, overrides: <Type, Generator>{
       Logger: () => StdoutLogger(),
       Stdio: () => mockStdio,
-      WebSocketConnector: () => (String url) async => throw const SocketException('test'),
+      WebSocketConnector: () => (String url, {CompressionOptions compression}) async => throw const SocketException('test'),
     });
 
     testUsingContext('refreshViews', () {

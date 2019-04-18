@@ -180,22 +180,19 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
     return nextRoute is CupertinoPageRoute && !nextRoute.fullscreenDialog;
   }
 
-  @override
-  void dispose() {
-    _popGestureInProgress.remove(this);
-    super.dispose();
-  }
-
-  /// True if a Cupertino pop gesture is currently underway for [route].
+  /// True if an iOS-style back swipe pop gesture is currently underway for [route].
+  ///
+  /// This just check the route's [NavigatorState.userGestureInProgress].
   ///
   /// See also:
   ///
   ///  * [popGestureEnabled], which returns true if a user-triggered pop gesture
   ///    would be allowed.
-  static bool isPopGestureInProgress(PageRoute<dynamic> route) => _popGestureInProgress.contains(route);
-  static final Set<PageRoute<dynamic>> _popGestureInProgress = <PageRoute<dynamic>>{};
+  static bool isPopGestureInProgress(PageRoute<dynamic> route) {
+    return route.navigator.userGestureInProgress;
+  }
 
-  /// True if a Cupertino pop gesture is currently underway for this route.
+  /// True if an iOS-style back swipe pop gesture is currently underway for this route.
   ///
   /// See also:
   ///
@@ -233,10 +230,15 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
     if (route.fullscreenDialog)
       return false;
     // If we're in an animation already, we cannot be manually swiped.
-    if (route.controller.status != AnimationStatus.completed)
+    if (route.animation.status != AnimationStatus.completed)
+      return false;
+    // If we're being popped into, we also cannot be swiped until the pop above
+    // it completes. This translates to our secondary animation being
+    // dismissed.
+    if (route.secondaryAnimation.status != AnimationStatus.dismissed)
       return false;
     // If we're in a gesture already, we cannot start another.
-    if (_popGestureInProgress.contains(route))
+    if (isPopGestureInProgress(route))
       return false;
 
     // Looks like a back gesture would be welcome!
@@ -266,21 +268,12 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
   // gesture is detected. The returned controller handles all of the subsequent
   // drag events.
   static _CupertinoBackGestureController<T> _startPopGesture<T>(PageRoute<T> route) {
-    assert(!_popGestureInProgress.contains(route));
     assert(_isPopGestureEnabled(route));
-    _popGestureInProgress.add(route);
 
-    _CupertinoBackGestureController<T> backController;
-    backController = _CupertinoBackGestureController<T>(
-      route: route,
+    return _CupertinoBackGestureController<T>(
+      navigator: route.navigator,
       controller: route.controller, // protected access
-      onEnded: () {
-        backController?.dispose();
-        backController = null;
-        _popGestureInProgress.remove(route);
-      },
     );
-    return backController;
   }
 
   /// Returns a [CupertinoFullscreenDialogTransition] if [route] is a full
@@ -313,9 +306,12 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
       return CupertinoPageTransition(
         primaryRouteAnimation: animation,
         secondaryRouteAnimation: secondaryAnimation,
+        // Check if the route has an animation that's currently participating
+        // in a back swipe gesture.
+        //
         // In the middle of a back gesture drag, let the transition be linear to
         // match finger motions.
-        linearTransition: _popGestureInProgress.contains(route),
+        linearTransition: isPopGestureInProgress(route),
         child: _CupertinoBackGestureDetector<T>(
           enabledCallback: () => _isPopGestureEnabled<T>(route),
           onStartPopGesture: () => _startPopGesture<T>(route),
@@ -354,28 +350,38 @@ class CupertinoPageTransition extends StatelessWidget {
     @required this.child,
     @required bool linearTransition,
   }) : assert(linearTransition != null),
-       _primaryPositionAnimation = (linearTransition ? primaryRouteAnimation :
-         // The curves below have been rigorously derived from plots of native
-         // iOS animation frames. Specifically, a video was taken of a page
-         // transition animation and the distance in each frame that the page
-         // moved was measured. A best fit bezier curve was the fitted to the
-         // point set, which is linearToEaseIn. Conversely, easeInToLinear is the
-         // reflection over the origin of linearToEaseIn.
-         CurvedAnimation(
-           parent: primaryRouteAnimation,
-           curve: Curves.linearToEaseOut,
-           reverseCurve: Curves.easeInToLinear,
-         )
-       ).drive(_kRightMiddleTween),
-       _secondaryPositionAnimation = CurvedAnimation(
-         parent: secondaryRouteAnimation,
-         curve: Curves.linearToEaseOut,
-         reverseCurve: Curves.easeInToLinear,
-       ).drive(_kMiddleLeftTween),
-       _primaryShadowAnimation = CurvedAnimation(
-         parent: primaryRouteAnimation,
-         curve: Curves.linearToEaseOut,
-       ).drive(_kGradientShadowTween),
+       _primaryPositionAnimation =
+           (linearTransition
+             ? primaryRouteAnimation
+             : CurvedAnimation(
+                 // The curves below have been rigorously derived from plots of native
+                 // iOS animation frames. Specifically, a video was taken of a page
+                 // transition animation and the distance in each frame that the page
+                 // moved was measured. A best fit bezier curve was the fitted to the
+                 // point set, which is linearToEaseIn. Conversely, easeInToLinear is the
+                 // reflection over the origin of linearToEaseIn.
+                 parent: primaryRouteAnimation,
+                 curve: Curves.linearToEaseOut,
+                 reverseCurve: Curves.easeInToLinear,
+               )
+           ).drive(_kRightMiddleTween),
+       _secondaryPositionAnimation =
+           (linearTransition
+             ? secondaryRouteAnimation
+             : CurvedAnimation(
+                 parent: secondaryRouteAnimation,
+                 curve: Curves.linearToEaseOut,
+                 reverseCurve: Curves.easeInToLinear,
+               )
+           ).drive(_kMiddleLeftTween),
+       _primaryShadowAnimation =
+           (linearTransition
+             ? primaryRouteAnimation
+             : CurvedAnimation(
+                 parent: primaryRouteAnimation,
+                 curve: Curves.linearToEaseOut,
+               )
+           ).drive(_kGradientShadowTween),
        super(key: key);
 
   // When this page is coming in to cover another page.
@@ -580,18 +586,15 @@ class _CupertinoBackGestureController<T> {
   ///
   /// The [navigator] and [controller] arguments must not be null.
   _CupertinoBackGestureController({
-    @required this.route,
+    @required this.navigator,
     @required this.controller,
-    @required this.onEnded,
-  }) : assert(route != null), assert(controller != null), assert(onEnded != null) {
-    route.navigator.didStartUserGesture();
+  }) : assert(navigator != null),
+       assert(controller != null) {
+    navigator.didStartUserGesture();
   }
 
-  final PageRoute<T> route;
   final AnimationController controller;
-  final VoidCallback onEnded;
-
-  bool _animating = false;
+  final NavigatorState navigator;
 
   /// The drag gesture has changed by [fractionalDelta]. The total range of the
   /// drag should be 0.0 to 1.0.
@@ -618,7 +621,6 @@ class _CupertinoBackGestureController<T> {
       animateForward = velocity > 0 ? false : true;
     else
       animateForward = controller.value > 0.5 ? true : false;
-
     if (animateForward) {
       // The closer the panel is to dismissing, the shorter the animation is.
       // We want to cap the animation time, but we want to use a linear curve
@@ -629,36 +631,28 @@ class _CupertinoBackGestureController<T> {
       );
       controller.animateTo(1.0, duration: Duration(milliseconds: droppedPageForwardAnimationTime), curve: animationCurve);
     } else {
-      final int droppedPageBackAnimationTime = lerpDouble(0, _kMaxDroppedSwipePageForwardAnimationTime, controller.value).floor();
-      controller.animateBack(0.0, duration: Duration(milliseconds: droppedPageBackAnimationTime), curve: animationCurve);
+      // This route is destined to pop at this point. Reuse navigator's pop.
+      navigator.pop();
+
+      // The popping may have finished inline if already at the target destination.
+      if (controller.isAnimating) {
+        // Otherwise, use a custom popping animation duration and curve.
+        final int droppedPageBackAnimationTime = lerpDouble(0, _kMaxDroppedSwipePageForwardAnimationTime, controller.value).floor();
+        controller.animateBack(0.0, duration: Duration(milliseconds: droppedPageBackAnimationTime), curve: animationCurve);
+      }
     }
 
     if (controller.isAnimating) {
-      // Don't end the gesture until the transition completes.
-      _animating = true;
-      controller.addStatusListener(_handleStatusChanged);
-    } else {
-      // Animate calls could return inline if already at the target destination
-      // value.
-      return _handleStatusChanged(controller.status);
+      // Keep the userGestureInProgress in true state so we don't change the
+      // curve of the page transition mid-flight since CupertinoPageTransition
+      // depends on userGestureInProgress.
+      AnimationStatusListener animationStatusCallback;
+      animationStatusCallback = (AnimationStatus status) {
+        navigator.didStopUserGesture();
+        controller.removeStatusListener(animationStatusCallback);
+      };
+      controller.addStatusListener(animationStatusCallback);
     }
-
-  }
-
-  void _handleStatusChanged(AnimationStatus status) {
-    if (_animating) {
-      controller.removeStatusListener(_handleStatusChanged);
-    }
-    _animating = false;
-    if (status == AnimationStatus.dismissed)
-      route.navigator.removeRoute(route); // this will cause the route to get disposed, which will dispose us
-    onEnded(); // this will call dispose if popping the route failed to do so
-  }
-
-  void dispose() {
-    if (_animating)
-      controller.removeStatusListener(_handleStatusChanged);
-    route.navigator?.didStopUserGesture();
   }
 }
 

@@ -128,24 +128,18 @@ class DartVm {
   /// Returns a [List] of [IsolateRef] objects whose name matches `pattern`.
   ///
   /// This is not limited to Isolates running Flutter, but to any Isolate on the
-  /// VM.
-  ///
-  /// `includeNonFlutterIsolates` makes sure to add non-flutter Dart isolates,
-  /// and defaults to `false`.
+  /// VM. Therefore, the [pattern] argument should be written to exclude
+  /// matching unintended isolates.
   Future<List<IsolateRef>> getMainIsolatesByPattern(
     Pattern pattern, {
     Duration timeout = _kRpcTimeout,
-    bool includeNonFlutterIsolates = false,
   }) async {
     final Map<String, dynamic> jsonVmRef =
         await invokeRpc('getVM', timeout: timeout);
     final List<IsolateRef> result = <IsolateRef>[];
     for (Map<String, dynamic> jsonIsolate in jsonVmRef['isolates']) {
       final String name = jsonIsolate['name'];
-      // `:main()` is included at the end of a flutter isolate, whereas the
-      // name of a dart Isolate is concluded as if the name were a function.
-      if (name.contains(pattern) &&
-          (includeNonFlutterIsolates || name.contains(RegExp(r':main\(\)')))) {
+      if (pattern.matchAsPrefix(name) != null) {
         _log.fine('Found Isolate matching "$pattern": "$name"');
         result.add(IsolateRef._fromJson(jsonIsolate, this));
       }

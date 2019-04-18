@@ -23,7 +23,7 @@ typedef _MessageHandler = Future<ByteData> Function(ByteData message);
 ///  * [MethodChannel], which provides platform communication using asynchronous
 ///    method calls.
 ///  * [EventChannel], which provides platform communication using event streams.
-///  * <https://flutter.io/platform-channels/>
+///  * <https://flutter.dev/platform-channels/>
 class BinaryMessages {
   BinaryMessages._();
 

@@ -294,6 +294,8 @@ typedef AsyncWidgetBuilder<T> = Widget Function(BuildContext context, AsyncSnaps
 /// Widget that builds itself based on the latest snapshot of interaction with
 /// a [Stream].
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=MkKEWHfy99Y}
+///
 /// Widget rebuilding is scheduled by each interaction, using [State.setState],
 /// but is otherwise decoupled from the timing of the stream. The [builder]
 /// is called at the discretion of the Flutter pipeline, and will thus receive a
@@ -435,6 +437,8 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
 ///
 /// A general guideline is to assume that every `build` method could get called
 /// every frame, and to treat omitted calls as an optimization.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=ek8ZPdWj4Qo}
 ///
 /// ## Timing
 ///

@@ -19,6 +19,7 @@ import '../base/user_messages.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../bundle.dart' as bundle;
+import '../cache.dart';
 import '../dart/package_map.dart';
 import '../dart/pub.dart';
 import '../device.dart';
@@ -26,7 +27,10 @@ import '../doctor.dart';
 import '../globals.dart';
 import '../project.dart';
 import '../usage.dart';
+import '../version.dart';
 import 'flutter_command_runner.dart';
+
+export '../cache.dart' show DevelopmentArtifact;
 
 enum ExitStatus {
   success,
@@ -461,6 +465,11 @@ abstract class FlutterCommand extends Command<void> {
     }
   }
 
+  /// Whether this feature should not be usable on stable branches.
+  ///
+  /// Defaults to false, meaning it is usable.
+  bool get isExperimental => false;
+
   /// Additional usage values to be sent with the usage ping.
   Future<Map<String, String>> get usageValues async => const <String, String>{};
 
@@ -530,8 +539,9 @@ abstract class FlutterCommand extends Command<void> {
 
     // Populate the cache. We call this before pub get below so that the sky_engine
     // package is available in the flutter cache for pub to find.
-    if (shouldUpdateCache)
-      await cache.updateAll();
+    if (shouldUpdateCache) {
+      await cache.updateAll(await requiredArtifacts);
+    }
 
     if (shouldRunPub) {
       await pubGet(context: PubContext.getVerifyContext(name));
@@ -548,6 +558,16 @@ abstract class FlutterCommand extends Command<void> {
 
     return await runCommand();
   }
+
+  /// The set of development artifacts required for this command.
+  ///
+  /// Defaults to [DevelopmentArtifact.universal],
+  /// [DevelopmentArtifact.android], and [DevelopmentArtifact.iOS].
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{
+    DevelopmentArtifact.universal,
+    DevelopmentArtifact.iOS,
+    DevelopmentArtifact.android,
+  };
 
   /// Subclasses must implement this to execute the command.
   /// Optionally provide a [FlutterCommandResult] to send more details about the
@@ -621,6 +641,12 @@ abstract class FlutterCommand extends Command<void> {
   @protected
   @mustCallSuper
   Future<void> validateCommand() async {
+    // If we're on a stable branch, then don't allow the usage of
+    // "experimental" features.
+    if (isExperimental && FlutterVersion.instance.isStable) {
+      throwToolExit('Experimental feature $name is not supported on stable branches');
+    }
+
     if (_requiresPubspecYaml && !PackageMap.isUsingCustomPackagesPath) {
       // Don't expect a pubspec.yaml file if the user passed in an explicit .packages file path.
       if (!fs.isFileSync('pubspec.yaml')) {
@@ -661,6 +687,90 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   ApplicationPackageStore applicationPackages;
+}
+
+/// A mixin which applies an implementation of [requiredArtifacts] that only
+/// downloads artifacts corresponding to an attached device.
+mixin DeviceBasedDevelopmentArtifacts on FlutterCommand {
+  @override
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async {
+    // If there are no attached devices, use the default configuration.
+    // Otherwise, only add development artifacts which correspond to a
+    // connected device.
+    final List<Device> devices = await deviceManager.getDevices().toList();
+    if (devices.isEmpty) {
+      return super.requiredArtifacts;
+    }
+    final Set<DevelopmentArtifact> artifacts = <DevelopmentArtifact>{
+      DevelopmentArtifact.universal,
+    };
+    for (Device device in devices) {
+      final TargetPlatform targetPlatform = await device.targetPlatform;
+      switch (targetPlatform) {
+        case TargetPlatform.android_arm:
+        case TargetPlatform.android_arm64:
+        case TargetPlatform.android_x64:
+        case TargetPlatform.android_x86:
+          artifacts.add(DevelopmentArtifact.android);
+          break;
+        case TargetPlatform.web:
+          artifacts.add(DevelopmentArtifact.web);
+          break;
+        case TargetPlatform.ios:
+          artifacts.add(DevelopmentArtifact.iOS);
+          break;
+        case TargetPlatform.darwin_x64:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.tester:
+        case TargetPlatform.windows_x64:
+        case TargetPlatform.linux_x64:
+          // No artifacts currently supported.
+          break;
+      }
+    }
+    return artifacts;
+  }
+}
+
+/// A mixin which applies an implementation of [requiredArtifacts] that only
+/// downloads artifacts corresponding to a target device.
+mixin TargetPlatformBasedDevelopmentArtifacts on FlutterCommand {
+  @override
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async {
+    // If there is no specified target device, fallback to the default
+    // confiugration.
+    final String rawTargetPlatform = argResults['target-platform'];
+    final TargetPlatform targetPlatform = getTargetPlatformForName(rawTargetPlatform);
+    if (targetPlatform == null) {
+      return super.requiredArtifacts;
+    }
+
+    final Set<DevelopmentArtifact> artifacts = <DevelopmentArtifact>{
+      DevelopmentArtifact.universal,
+    };
+    switch (targetPlatform) {
+      case TargetPlatform.android_arm:
+      case TargetPlatform.android_arm64:
+      case TargetPlatform.android_x64:
+      case TargetPlatform.android_x86:
+        artifacts.add(DevelopmentArtifact.android);
+        break;
+      case TargetPlatform.web:
+        artifacts.add(DevelopmentArtifact.web);
+        break;
+      case TargetPlatform.ios:
+        artifacts.add(DevelopmentArtifact.iOS);
+        break;
+      case TargetPlatform.darwin_x64:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.tester:
+      case TargetPlatform.windows_x64:
+      case TargetPlatform.linux_x64:
+        // No artifacts currently supported.
+        break;
+    }
+    return artifacts;
+  }
 }
 
 /// A command which runs less analytics and checks to speed up startup time.

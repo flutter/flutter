@@ -15,6 +15,312 @@ void main() {
     debugResetSemanticsIdCounter();
   });
 
+  testWidgets('MaterialButton defaults', (WidgetTester tester) async {
+    final Finder rawButtonMaterial = find.descendant(
+      of: find.byType(MaterialButton),
+      matching: find.byType(Material),
+    );
+
+    // Enabled MaterialButton
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MaterialButton(
+          onPressed: () { },
+          child: const Text('button'),
+        ),
+      ),
+    );
+    Material material = tester.widget<Material>(rawButtonMaterial);
+    expect(material.animationDuration, const Duration(milliseconds: 200));
+    expect(material.borderOnForeground, true);
+    expect(material.borderRadius, null);
+    expect(material.clipBehavior, Clip.none);
+    expect(material.color, null);
+    expect(material.elevation, 2.0);
+    expect(material.shadowColor, const Color(0xff000000));
+    expect(material.shape, RoundedRectangleBorder(borderRadius: BorderRadius.circular(2.0)));
+    expect(material.textStyle.color, const Color(0xdd000000));
+    expect(material.textStyle.fontFamily, 'Roboto');
+    expect(material.textStyle.fontSize, 14);
+    expect(material.textStyle.fontWeight, FontWeight.w500);
+    expect(material.type, MaterialType.transparency);
+
+    final Offset center = tester.getCenter(find.byType(MaterialButton));
+    await tester.startGesture(center);
+    await tester.pumpAndSettle();
+
+    // Only elevation changes when enabled and pressed.
+    material = tester.widget<Material>(rawButtonMaterial);
+    expect(material.animationDuration, const Duration(milliseconds: 200));
+    expect(material.borderOnForeground, true);
+    expect(material.borderRadius, null);
+    expect(material.clipBehavior, Clip.none);
+    expect(material.color, null);
+    expect(material.elevation, 8.0);
+    expect(material.shadowColor, const Color(0xff000000));
+    expect(material.shape, RoundedRectangleBorder(borderRadius: BorderRadius.circular(2.0)));
+    expect(material.textStyle.color, const Color(0xdd000000));
+    expect(material.textStyle.fontFamily, 'Roboto');
+    expect(material.textStyle.fontSize, 14);
+    expect(material.textStyle.fontWeight, FontWeight.w500);
+    expect(material.type, MaterialType.transparency);
+
+
+    // Disabled MaterialButton
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: MaterialButton(
+          onPressed: null,
+          child: Text('button'),
+        ),
+      ),
+    );
+    material = tester.widget<Material>(rawButtonMaterial);
+    expect(material.animationDuration, const Duration(milliseconds: 200));
+    expect(material.borderOnForeground, true);
+    expect(material.borderRadius, null);
+    expect(material.clipBehavior, Clip.none);
+    expect(material.color, null);
+    expect(material.elevation, 0.0);
+    expect(material.shadowColor, const Color(0xff000000));
+    expect(material.shape, RoundedRectangleBorder(borderRadius: BorderRadius.circular(2.0)));
+    expect(material.textStyle.color, const Color(0x61000000));
+    expect(material.textStyle.fontFamily, 'Roboto');
+    expect(material.textStyle.fontSize, 14);
+    expect(material.textStyle.fontWeight, FontWeight.w500);
+    expect(material.type, MaterialType.transparency);
+  });
+
+  testWidgets('FlatButton defaults', (WidgetTester tester) async {
+    final Finder rawButtonMaterial = find.descendant(
+      of: find.byType(FlatButton),
+      matching: find.byType(Material),
+    );
+
+    // Enabled FlatButton
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: FlatButton(
+          onPressed: () { },
+          child: const Text('button'),
+        ),
+      ),
+    );
+    Material material = tester.widget<Material>(rawButtonMaterial);
+    expect(material.animationDuration, const Duration(milliseconds: 200));
+    expect(material.borderOnForeground, true);
+    expect(material.borderRadius, null);
+    expect(material.clipBehavior, Clip.none);
+    expect(material.color, null);
+    expect(material.elevation, 0.0);
+    expect(material.shadowColor, const Color(0xff000000));
+    expect(material.shape, RoundedRectangleBorder(borderRadius: BorderRadius.circular(2.0)));
+    expect(material.textStyle.color, const Color(0xdd000000));
+    expect(material.textStyle.fontFamily, 'Roboto');
+    expect(material.textStyle.fontSize, 14);
+    expect(material.textStyle.fontWeight, FontWeight.w500);
+    expect(material.type, MaterialType.transparency);
+
+    final Offset center = tester.getCenter(find.byType(FlatButton));
+    await tester.startGesture(center);
+    await tester.pumpAndSettle();
+
+    material = tester.widget<Material>(rawButtonMaterial);
+    // No change vs enabled and not pressed.
+    expect(material.animationDuration, const Duration(milliseconds: 200));
+    expect(material.borderOnForeground, true);
+    expect(material.borderRadius, null);
+    expect(material.clipBehavior, Clip.none);
+    expect(material.color, null);
+    expect(material.elevation, 0.0);
+    expect(material.shadowColor, const Color(0xff000000));
+    expect(material.shape, RoundedRectangleBorder(borderRadius: BorderRadius.circular(2.0)));
+    expect(material.textStyle.color, const Color(0xdd000000));
+    expect(material.textStyle.fontFamily, 'Roboto');
+    expect(material.textStyle.fontSize, 14);
+    expect(material.textStyle.fontWeight, FontWeight.w500);
+    expect(material.type, MaterialType.transparency);
+
+    // Disabled FlatButton
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: FlatButton(
+          onPressed: null,
+          child: Text('button'),
+        ),
+      ),
+    );
+    material = tester.widget<Material>(rawButtonMaterial);
+    expect(material.animationDuration, const Duration(milliseconds: 200));
+    expect(material.borderOnForeground, true);
+    expect(material.borderRadius, null);
+    expect(material.clipBehavior, Clip.none);
+    expect(material.color, null);
+    expect(material.elevation, 0.0);
+    expect(material.shadowColor, const Color(0xff000000));
+    expect(material.shape, RoundedRectangleBorder(borderRadius: BorderRadius.circular(2.0)));
+    expect(material.textStyle.color, const Color(0x61000000));
+    expect(material.textStyle.fontFamily, 'Roboto');
+    expect(material.textStyle.fontSize, 14);
+    expect(material.textStyle.fontWeight, FontWeight.w500);
+    expect(material.type, MaterialType.transparency);
+  });
+
+  testWidgets('RaisedButton defaults', (WidgetTester tester) async {
+    final Finder rawButtonMaterial = find.descendant(
+      of: find.byType(RaisedButton),
+      matching: find.byType(Material),
+    );
+
+    // Enabled RaisedButton
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: RaisedButton(
+          onPressed: () { },
+          child: const Text('button'),
+        ),
+      ),
+    );
+    Material material = tester.widget<Material>(rawButtonMaterial);
+    expect(material.animationDuration, const Duration(milliseconds: 200));
+    expect(material.borderOnForeground, true);
+    expect(material.borderRadius, null);
+    expect(material.clipBehavior, Clip.none);
+    expect(material.color, const Color(0xffe0e0e0));
+    expect(material.elevation, 2.0);
+    expect(material.shadowColor, const Color(0xff000000));
+    expect(material.shape, RoundedRectangleBorder(borderRadius: BorderRadius.circular(2.0)));
+    expect(material.textStyle.color, const Color(0xdd000000));
+    expect(material.textStyle.fontFamily, 'Roboto');
+    expect(material.textStyle.fontSize, 14);
+    expect(material.textStyle.fontWeight, FontWeight.w500);
+    expect(material.type, MaterialType.button);
+
+    final Offset center = tester.getCenter(find.byType(RaisedButton));
+    await tester.startGesture(center);
+    await tester.pumpAndSettle();
+
+    // Only elevation changes when enabled and pressed.
+    material = tester.widget<Material>(rawButtonMaterial);
+    expect(material.animationDuration, const Duration(milliseconds: 200));
+    expect(material.borderOnForeground, true);
+    expect(material.borderRadius, null);
+    expect(material.clipBehavior, Clip.none);
+    expect(material.color, const Color(0xffe0e0e0));
+    expect(material.elevation, 8.0);
+    expect(material.shadowColor, const Color(0xff000000));
+    expect(material.shape, RoundedRectangleBorder(borderRadius: BorderRadius.circular(2.0)));
+    expect(material.textStyle.color, const Color(0xdd000000));
+    expect(material.textStyle.fontFamily, 'Roboto');
+    expect(material.textStyle.fontSize, 14);
+    expect(material.textStyle.fontWeight, FontWeight.w500);
+    expect(material.type, MaterialType.button);
+
+    // Disabled RaisedButton
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: RaisedButton(
+          onPressed: null,
+          child: Text('button'),
+        ),
+      ),
+    );
+    material = tester.widget<Material>(rawButtonMaterial);
+    expect(material.animationDuration, const Duration(milliseconds: 200));
+    expect(material.borderOnForeground, true);
+    expect(material.borderRadius, null);
+    expect(material.clipBehavior, Clip.none);
+    expect(material.color, const Color(0x61000000));
+    expect(material.elevation, 0.0);
+    expect(material.shadowColor, const Color(0xff000000));
+    expect(material.shape, RoundedRectangleBorder(borderRadius: BorderRadius.circular(2.0)));
+    expect(material.textStyle.color, const Color(0x61000000));
+    expect(material.textStyle.fontFamily, 'Roboto');
+    expect(material.textStyle.fontSize, 14);
+    expect(material.textStyle.fontWeight, FontWeight.w500);
+    expect(material.type, MaterialType.button);
+  });
+
+  testWidgets('OutlineButton defaults', (WidgetTester tester) async {
+    final Finder rawButtonMaterial = find.descendant(
+      of: find.byType(OutlineButton),
+      matching: find.byType(Material),
+    );
+
+    // Enabled OutlineButton
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: OutlineButton(
+          onPressed: () { },
+          child: const Text('button'),
+        ),
+      ),
+    );
+    Material material = tester.widget<Material>(rawButtonMaterial);
+    expect(material.animationDuration, const Duration(milliseconds: 75));
+    expect(material.borderOnForeground, true);
+    expect(material.borderRadius, null);
+    expect(material.clipBehavior, Clip.none);
+    expect(material.color, const Color(0x00000000));
+    expect(material.elevation, 0.0);
+    expect(material.shadowColor, const Color(0xff000000));
+    expect(material.textStyle.color, const Color(0xdd000000));
+    expect(material.textStyle.fontFamily, 'Roboto');
+    expect(material.textStyle.fontSize, 14);
+    expect(material.textStyle.fontWeight, FontWeight.w500);
+    expect(material.type, MaterialType.button);
+
+    final Offset center = tester.getCenter(find.byType(OutlineButton));
+    await tester.startGesture(center);
+    await tester.pumpAndSettle();
+
+    // No change vs enabled and not pressed.
+    material = tester.widget<Material>(rawButtonMaterial);
+    expect(material.animationDuration, const Duration(milliseconds: 75));
+    expect(material.borderOnForeground, true);
+    expect(material.borderRadius, null);
+    expect(material.clipBehavior, Clip.none);
+    expect(material.color, const Color(0x00000000));
+    expect(material.elevation, 0.0);
+    expect(material.shadowColor, const Color(0xff000000));
+    expect(material.textStyle.color, const Color(0xdd000000));
+    expect(material.textStyle.fontFamily, 'Roboto');
+    expect(material.textStyle.fontSize, 14);
+    expect(material.textStyle.fontWeight, FontWeight.w500);
+    expect(material.type, MaterialType.button);
+
+    // Disabled OutlineButton
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: OutlineButton(
+          onPressed: null,
+          child: Text('button'),
+        ),
+      ),
+    );
+    material = tester.widget<Material>(rawButtonMaterial);
+    expect(material.animationDuration, const Duration(milliseconds: 75));
+    expect(material.borderOnForeground, true);
+    expect(material.borderRadius, null);
+    expect(material.clipBehavior, Clip.none);
+    expect(material.color, const Color(0x00000000));
+    expect(material.elevation, 0.0);
+    expect(material.shadowColor, const Color(0xff000000));
+    expect(material.textStyle.color, const Color(0x61000000));
+    expect(material.textStyle.fontFamily, 'Roboto');
+    expect(material.textStyle.fontSize, 14);
+    expect(material.textStyle.fontWeight, FontWeight.w500);
+    expect(material.type, MaterialType.button);
+  });
+
   testWidgets('Does FlatButton contribute semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(
@@ -644,5 +950,28 @@ void main() {
       matching: find.byType(Material),
     );
     expect(tester.widget<Material>(rawButtonMaterial).shape, const StadiumBorder());
+  });
+
+  testWidgets('MaterialButton defaults', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/30012.
+
+    final Finder rawButtonMaterial = find.descendant(
+      of: find.byType(MaterialButton),
+      matching: find.byType(Material),
+    );
+
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: MaterialButton(
+          disabledColor: Color(0xff00ff00),
+          onPressed: null,
+          child: Text('button'),
+        ),
+      ),
+    );
+
+    final Material material = tester.widget<Material>(rawButtonMaterial);
+    expect(material.color, const Color(0xff00ff00));
   });
 }

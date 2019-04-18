@@ -20,8 +20,14 @@ import 'theme.dart';
 /// pages as there are [tabBar.items]. Inactive tabs will be moved [Offstage]
 /// and their animations disabled.
 ///
-/// Use [CupertinoTabView] as the content of each tab to support tabs with parallel
-/// navigation state and history.
+/// Use [CupertinoTabView] as the root widget of each tab to support tabs with
+/// parallel navigation state and history. Since each [CupertinoTabView] contains
+/// a [Navigator], rebuilding the [CupertinoTabView] with a different
+/// [WidgetBuilder] instance in [CupertinoTabView.builder] will not recreate
+/// the [CupertinoTabView]'s navigation stack or update its UI. To update the
+/// contents of the [CupertinoTabView] after it's built, trigger a rebuild
+/// (via [State.setState], for instance) from its descendant rather than from
+/// its ancestor.
 ///
 /// {@tool sample}
 ///

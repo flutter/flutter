@@ -111,8 +111,8 @@ class SawTooth extends Curve {
   }
 }
 
-/// A curve that is 0.0 until [begin], then curved (according to [curve] from
-/// 0.0 to 1.0 at [end], then 1.0.
+/// A curve that is 0.0 until [begin], then curved (according to [curve]) from
+/// 0.0 at [begin] to 1.0 at [end], then remains 1.0 past [end].
 ///
 /// An [Interval] can be used to delay an animation. For example, a six second
 /// animation that uses an [Interval] with its [begin] set to 0.5 and its [end]

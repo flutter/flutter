@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -59,10 +61,28 @@ class TabbedComponentDemoScaffold extends StatelessWidget {
     }
   }
 
-  void _showApiDocumentation(BuildContext context) {
+  Future<void> _showApiDocumentation(BuildContext context) async {
     final String url = demos[DefaultTabController.of(context).index].documentationUrl;
-    if (url != null) {
-      launch(url, forceWebView: true);
+    if (url == null)
+      return;
+
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      showDialog<void>(
+        context: context,
+        builder: (BuildContext context) {
+          return SimpleDialog(
+            title: const Text('Couldn\'t display URL:'),
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Text(url),
+              ),
+            ],
+          );
+        },
+      );
     }
   }
 
