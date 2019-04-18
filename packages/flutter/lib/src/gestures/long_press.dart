@@ -154,7 +154,7 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
   bool _longPressAccepted = false;
   Offset _longPressOrigin;
   // The buttons sent by `PointerDownEvent`. If a `PointerMoveEvent` comes with a
-  // different set of buttons, the gesture is rejected and canceled.
+  // different set of buttons, the gesture is canceled.
   int _initialButtons;
 
   /// Called when a long press gesture by any single button has been recognized.

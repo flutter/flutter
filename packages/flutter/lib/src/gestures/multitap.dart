@@ -51,7 +51,8 @@ typedef GestureMultiTapCancelCallback = void Function(int pointer);
 /// See also:
 ///
 ///  * [GestureDetector.onDoubleTapUp], which receives this information.
-///  * [DoubleTapGestureRecognizer], which passes this information to one of its callbacks.
+///  * [DoubleTapGestureRecognizer], which passes this information to one of its
+///    callbacks.
 class DoubleTapUpDetails {
   /// Creates details for a [GestureDoubleTapUpCallback].
   ///

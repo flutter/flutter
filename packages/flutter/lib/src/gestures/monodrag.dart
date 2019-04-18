@@ -254,6 +254,8 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   Offset _initialPosition;
   Offset _pendingDragOffset;
   Duration _lastPendingEventTimestamp;
+  // The buttons sent by `PointerDownEvent`. If a `PointerMoveEvent` comes with a
+  // different set of buttons, the gesture is canceled.
   int _initialButtons;
 
   bool _isFlingGesture(VelocityEstimate estimate);

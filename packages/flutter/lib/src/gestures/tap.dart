@@ -290,7 +290,7 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
   bool _wonArenaForPrimaryPointer = false;
   Offset _finalPosition;
   // The buttons sent by `PointerDownEvent`. If a `PointerMoveEvent` comes with a
-  // different set of buttons, the gesture is rejected and canceled.
+  // different set of buttons, the gesture is canceled.
   int _initialButtons;
 
   @override
