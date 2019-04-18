@@ -1,8 +1,8 @@
 // Copyright 2018 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-
 import 'dart:async';
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:file/file.dart';
@@ -12,6 +12,8 @@ import 'package:meta/meta.dart';
 
 import 'package:flutter_goldens_client/client.dart';
 export 'package:flutter_goldens_client/client.dart';
+//TODO(katelovett): Tests [flutter_goldens_test.dart] and inline documentation
+const String _kFlutterRootKey = 'FLUTTER_ROOT';
 
 /// Main method that can be used in a `flutter_test_config.dart` file to set
 /// [goldenFileComparator] to an instance of [FlutterGoldenFileComparator] that
@@ -25,12 +27,14 @@ Future<void> main(FutureOr<void> testMain()) async {
 ///
 /// Within the https://github.com/flutter/flutter repository, it's important
 /// not to check-in binaries in order to keep the size of the repository to a
-/// minimum. To satisfy this requirement, this comparator retrieves the golden
-/// files from a sibling repository, `flutter/goldens`.
+/// minimum. To satisfy this requirement, this comparator uses the
+/// [SkiaGoldClient] to upload widgets for golden tests and process results.
 ///
 /// This comparator will locally clone the `flutter/goldens` repository into
 /// the `$FLUTTER_ROOT/bin/cache/pkg/goldens` folder, then perform the comparison against
 /// the files therein.
+/// This comparator will instantiate the [SkiaGoldClient] and process the
+/// results of the test.
 class FlutterGoldenFileComparator implements GoldenFileComparator {
   /// Creates a [FlutterGoldenFileComparator] that will resolve golden file
   /// URIs relative to the specified [basedir].
@@ -49,48 +53,36 @@ class FlutterGoldenFileComparator implements GoldenFileComparator {
   @visibleForTesting
   final FileSystem fs;
 
+  /// Instance of the [SkiaGoldClient] for executing tests.
+  final SkiaGoldClient _skiaClient = SkiaGoldClient();
+
   /// Creates a new [FlutterGoldenFileComparator] that mirrors the relative
   /// path resolution of the default [goldenFileComparator].
   ///
-  /// By the time the future completes, the clone of the `flutter/goldens`
-  /// repository is guaranteed to be ready use.
-  ///
-  /// The [goldens] and [defaultComparator] parameters are visible for testing
+  /// The [defaultComparator] parameter is visible for testing
   /// purposes only.
   static Future<FlutterGoldenFileComparator> fromDefaultComparator({
-    GoldensClient goldens,
     LocalFileComparator defaultComparator,
   }) async {
     defaultComparator ??= goldenFileComparator;
 
-    // Prepare the goldens repo.
-    goldens ??= GoldensClient();
-    await goldens.prepare();
-
     // Calculate the appropriate basedir for the current test context.
-    final FileSystem fs = goldens.fs;
+    const FileSystem fs = LocalFileSystem();
     final Directory testDirectory = fs.directory(defaultComparator.basedir);
-    final String testDirectoryRelativePath = fs.path.relative(testDirectory.path, from: goldens.flutterRoot.path);
-    return FlutterGoldenFileComparator(goldens.repositoryRoot.childDirectory(testDirectoryRelativePath).uri);
+    final Directory flutterRoot = fs.directory(Platform.environment[_kFlutterRootKey]);
+    final Directory goldenRoot = flutterRoot.childDirectory(fs.path.join('bin', 'cache', 'pkg', 'goldens'));
+    final String testDirectoryRelativePath = fs.path.relative(testDirectory.path, from: flutterRoot.path);
+    return FlutterGoldenFileComparator(goldenRoot.childDirectory(testDirectoryRelativePath).uri);
   }
 
   @override
   Future<bool> compare(Uint8List imageBytes, Uri golden) async {
     final File goldenFile = _getGoldenFile(golden);
-    if (!goldenFile.existsSync()) {
-      throw TestFailure('Could not be compared against non-existent file: "$golden"');
-    }
-    final List<int> goldenBytes = await goldenFile.readAsBytes();
-    // TODO(tvolkert): Improve the intelligence of this comparison.
-    if (goldenBytes.length != imageBytes.length) {
-      return false;
-    }
-    for (int i = 0; i < goldenBytes.length; i++) {
-      if (goldenBytes[i] != imageBytes[i]) {
-        return false;
-      }
-    }
-    return true;
+
+    bool authorized = await _skiaClient.auth(fs.directory(basedir));
+    bool tested = await _skiaClient.imgtest(golden.path, goldenFile);
+    return true; // TEMP
+    //TODO(katelovett): Process results
   }
 
   @override
@@ -103,4 +95,5 @@ class FlutterGoldenFileComparator implements GoldenFileComparator {
   File _getGoldenFile(Uri uri) {
     return fs.directory(basedir).childFile(fs.file(uri).path);
   }
+
 }

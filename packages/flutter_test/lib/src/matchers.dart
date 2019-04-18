@@ -296,6 +296,16 @@ AsyncMatcher matchesGoldenFile(dynamic key) {
   throw ArgumentError('Unexpected type for golden file: ${key.runtimeType}');
 }
 
+/// TODO(katelovett): Documentation
+AsyncMatcher matchesSkiaGoldFile(dynamic key) {
+  if (key is Uri) {
+    return _MatchesSkiaGoldFile(key);
+  } else if (key is String) {
+    return _MatchesSkiaGoldFile.forStringPath(key);
+  }
+  throw ArgumentError('Unexpected type for Skia Gold file: ${key.runtimeType}');
+}
+
 /// Asserts that a [Finder], [Future<ui.Image>], or [ui.Image] matches a
 /// reference image identified by [image].
 ///
@@ -1686,6 +1696,53 @@ class _MatchesGoldenFile extends AsyncMatcher {
   @override
   Description describe(Description description) =>
       description.add('one widget whose rasterized image matches golden image "$key"');
+}
+
+class _MatchesSkiaGoldFile extends AsyncMatcher {
+  const _MatchesSkiaGoldFile(this.key);
+
+  _MatchesSkiaGoldFile.forStringPath(String path) : key = Uri.parse(path);
+
+  final Uri key;
+
+  @override
+  Future<String> matchAsync(dynamic item) async {
+    Future<ui.Image> imageFuture;
+    if (item is Future<ui.Image>) {
+      imageFuture = item;
+    }else if (item is ui.Image) {
+      imageFuture = Future<ui.Image>.value(item);
+    } else {
+      final Finder finder = item;
+      final Iterable<Element> elements = finder.evaluate();
+      if (elements.isEmpty) {
+        return 'could not be rendered because no widget was found.';
+      } else if (elements.length > 1) {
+        return 'matched too many widgets.';
+      }
+      imageFuture = _captureImage(elements.single);
+    }
+
+    final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
+    return binding.runAsync<String>(() async {
+      final ui.Image image = await imageFuture;
+      final ByteData bytes = await image.toByteData(format: ui.ImageByteFormat.png)
+        .timeout(const Duration(seconds: 10), onTimeout: () => null);
+      if (bytes == null)
+        return 'Failed to generate screenshot from engine within the 10,000ms timeout';
+      await goldenFileComparator.update(key, bytes.buffer.asUint8List());
+      try {
+        final bool success = await goldenFileComparator.compare(null, key);
+        return success ? null : 'Skia Gold test fail.';
+      } on TestFailure catch (ex) {
+        return ex.message;
+      }
+    }, additionalTime: const Duration(seconds: 11));
+  }
+
+  @override
+  Description describe(Description description) =>
+    description.add('one widget whose rasterized images matches Skia Gold image $key');
 }
 
 class _MatchesSemanticsData extends Matcher {
