@@ -1525,7 +1525,7 @@ abstract class RenderBox extends RenderObject {
           'The size setter was called from outside layout (neither performResize() nor performLayout() were being run for this object).'
         ));
         if (owner != null && owner.debugDoingLayout)
-          information.add(ErrorHint('Only the object itself can set its size. It is a contract violation for other objects to set it.'));
+          information.add(ErrorDescription('Only the object itself can set its size. It is a contract violation for other objects to set it.'));
       }
       if (sizedByParent)
         information.add(ErrorDescription('Because this RenderBox has sizedByParent set to true, it must set its size in performResize().'));
@@ -1727,7 +1727,7 @@ abstract class RenderBox extends RenderObject {
       if (!_size.isFinite) {
         final List<DiagnosticsNode> information = <DiagnosticsNode>[
           ErrorSummary('$runtimeType object was given an infinite size during layout.'),
-          ErrorHint(
+          ErrorDescription(
             'This probably means that it is a render object that tries to be '
             'as big as possible, but it was put inside another render object '
             'that allows its children to pick their own size.'
@@ -1749,7 +1749,7 @@ abstract class RenderBox extends RenderObject {
         }
         final List<DiagnosticsNode> errorParts = <DiagnosticsNode>[];
         errorParts.add(ErrorSummary('$runtimeType object was given an infinite size during layout.'));
-        errorParts.add(ErrorHint(
+        errorParts.add(ErrorDescription(
           'This probably means that it is a render object that tries to be '
           'as big as possible, but it was put inside another render object '
           'that allows its children to pick their own size.'
@@ -1757,7 +1757,7 @@ abstract class RenderBox extends RenderObject {
         errorParts.addAll(information);
         errorParts.add(DiagnosticsProperty<BoxConstraints>('The constraints that applied to the $runtimeType were', constraints, style: DiagnosticsTreeStyle.errorProperty));
         errorParts.add(DiagnosticsProperty<Size>('The exact size it was given was', _size, style: DiagnosticsTreeStyle.errorProperty));
-        errorParts.add(ErrorHint('See https://flutter.io/layout/ for more information.'));
+        errorParts.add(ErrorHint('See https://flutter.dev/docs/development/ui/layout/box-constraints for more information.'));
         throw FlutterError.fromParts(errorParts);
      }
       // verify that the size is within the constraints

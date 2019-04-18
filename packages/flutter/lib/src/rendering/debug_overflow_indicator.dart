@@ -201,7 +201,7 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
   void _reportOverflow(RelativeRect overflow, List<DiagnosticsNode> overflowHints) {
     overflowHints ??= <DiagnosticsNode>[];
     if (overflowHints.isEmpty) {
-      overflowHints.add(ErrorHint(
+      overflowHints.add(ErrorDescription(
         'The edge of the $runtimeType that is '
         'overflowing has been marked in the rendering with a yellow and black '
         'striped pattern. This is usually caused by the contents being too big '
@@ -243,7 +243,7 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
     // be visualized in debugging tools.
     FlutterError.reportError(
       FlutterErrorDetailsForRendering(
-        exception: 'A $runtimeType overflowed by $overflowText.',
+        exception: FlutterError('A $runtimeType overflowed by $overflowText.'),
         library: 'rendering library',
         context: ErrorDescription('during layout'),
         renderObject: this,

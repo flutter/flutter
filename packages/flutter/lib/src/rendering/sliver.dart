@@ -1062,7 +1062,7 @@ abstract class RenderSliver extends RenderObject {
       } else {
         violation = ErrorDescription('The geometry setter was called from outside layout (neither performResize() nor performLayout() were being run for this object).');
         if (owner != null && owner.debugDoingLayout)
-          hint = ErrorHint('Only the object itself can set its geometry. It is a contract violation for other objects to set it.');
+          hint = ErrorDescription('Only the object itself can set its geometry. It is a contract violation for other objects to set it.');
       }
       if (sizedByParent)
         contract = ErrorDescription('Because this RenderSliver has sizedByParent set to true, it must set its geometry in performResize().');

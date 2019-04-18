@@ -105,7 +105,10 @@ void main() {
       ),
     );
 
-    expect(tester.takeException(), startsWith('A RenderFlex overflowed by '));
+    final dynamic exception = tester.takeException();
+    expect(exception, isInstanceOf<FlutterError>());
+    expect(exception.diagnostics.first.level, DiagnosticLevel.summary);
+    expect(exception.diagnostics.first.toString(), startsWith('A RenderFlex overflowed by '));
     await expectLater(
       find.byKey(key),
       matchesGoldenFile('physical_model_overflow.png'),
