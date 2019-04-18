@@ -453,7 +453,7 @@ void main() {
       final MDnsClient client = getMockClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{});
 
       final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(mdnsClient: client);
-      final int port = await portDiscovery.query().port;
+      final int port = (await portDiscovery.query()).port;
       expect(port, isNull);
     });
 
@@ -470,7 +470,7 @@ void main() {
       );
 
       final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(mdnsClient: client);
-      final int port = await portDiscovery.query().port;
+      final int port = (await portDiscovery.query()).port;
       expect(port, 123);
     });
 
@@ -491,7 +491,7 @@ void main() {
       );
 
       final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(mdnsClient: client);
-      expect(() => portDiscovery.query().port, throwsToolExit());
+      expect(() => portDiscovery.query(), throwsToolExit());
     });
 
     testUsingContext('Multiple ports available, with appId', () async {
@@ -511,7 +511,7 @@ void main() {
       );
 
       final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(mdnsClient: client);
-      final int port = await portDiscovery.query(applicationId: 'fiz').port;
+      final int port = await (portDiscovery.query(applicationId: 'fiz')).port;
       expect(port, 321);
     });
 
@@ -534,7 +534,7 @@ void main() {
       );
 
       final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(mdnsClient: client);
-      final int port = await portDiscovery.query(applicationId: 'bar').port;
+      final int port = (await portDiscovery.query(applicationId: 'bar')).port;
       expect(port, 1234);
     });
   });
