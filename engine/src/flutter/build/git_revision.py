@@ -34,7 +34,7 @@ def main():
     'HEAD',
   ])
 
-  print version.strip()
+  print (version.strip())
 
   return 0
 
