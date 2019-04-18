@@ -50,6 +50,14 @@ DartVMRef DartVMRef::Create(Settings settings,
                             fml::RefPtr<DartSnapshot> shared_snapshot) {
   std::lock_guard<std::mutex> lifecycle_lock(gVMMutex);
 
+  if (!settings.leak_vm) {
+    FML_CHECK(!gVMLeak)
+        << "Launch settings indicated that the VM should shut down in the "
+           "process when done but a previous launch asked the VM to leak in "
+           "the same process. For proper VM shutdown, all VM launches must "
+           "indicate that they should shut down when done.";
+  }
+
   // If there is already a running VM in the process, grab a strong reference to
   // it.
   if (auto vm = gVM.lock()) {
