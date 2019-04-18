@@ -523,7 +523,7 @@ void main() {
                         setState(() {});
                       }
                     },
-                    children: [
+                    children: <ExpansionPanelRadio>[
                       ExpansionPanelRadio(
                         headerBuilder: (BuildContext context, bool isExpanded) {
                           return Text(isExpanded ? 'B' : 'A');
