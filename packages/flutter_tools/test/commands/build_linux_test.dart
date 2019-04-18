@@ -44,6 +44,7 @@ void main() {
     ), throwsA(isInstanceOf<ToolExit>()));
   }, overrides: <Type, Generator>{
     Platform: () => linuxPlatform,
+    FileSystem: () => memoryFilesystem,
   });
 
   testUsingContext('Linux build fails on non-linux platform', () async {
