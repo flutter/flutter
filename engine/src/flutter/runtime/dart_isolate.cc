@@ -679,11 +679,14 @@ DartIsolate::CreateDartVMAndEmbedderObjectPair(
   Dart_Isolate isolate = Dart_CreateIsolate(
       advisory_script_uri,         //
       advisory_script_entrypoint,  //
-      (*embedder_isolate)->GetIsolateSnapshot()->GetDataMapping(),
-      (*embedder_isolate)->GetIsolateSnapshot()->GetInstructionsMapping(),
-      (*embedder_isolate)->GetSharedSnapshot()->GetDataMapping(),
-      (*embedder_isolate)->GetSharedSnapshot()->GetInstructionsMapping(), flags,
-      embedder_isolate.get(), error);
+      (*embedder_isolate)
+          ->GetIsolateSnapshot()
+          ->GetData()
+          ->GetSnapshotPointer(),
+      (*embedder_isolate)->GetIsolateSnapshot()->GetInstructionsIfPresent(),
+      (*embedder_isolate)->GetSharedSnapshot()->GetDataIfPresent(),
+      (*embedder_isolate)->GetSharedSnapshot()->GetInstructionsIfPresent(),
+      flags, embedder_isolate.get(), error);
 
   if (isolate == nullptr) {
     FML_DLOG(ERROR) << *error;
