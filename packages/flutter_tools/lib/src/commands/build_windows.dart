@@ -66,6 +66,7 @@ class BuildWindowsCommand extends BuildSubCommand {
       flutterProject.windows.buildScript.path,
       Cache.flutterRoot,
       buildInfo.isDebug ? 'debug' : 'release',
+      buildInfo?.trackWidgetCreation == true ? 'track-widget-creation' : 'no-track-widget-creation',
     ], runInShell: true);
     process.stderr
       .transform(utf8.decoder)
