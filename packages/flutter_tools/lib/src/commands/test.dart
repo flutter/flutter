@@ -5,9 +5,11 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import '../asset.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/platform.dart';
+import '../bundle.dart';
 import '../cache.dart';
 import '../codegen.dart';
 import '../dart/pub.dart';
@@ -18,7 +20,6 @@ import '../test/coverage_collector.dart';
 import '../test/event_printer.dart';
 import '../test/runner.dart';
 import '../test/watcher.dart';
-
 class TestCommand extends FastFlutterCommand {
   TestCommand({ bool verboseHelp = false }) {
     requiresPubspecYaml();
@@ -83,7 +84,14 @@ class TestCommand extends FastFlutterCommand {
         abbr: 'j',
         defaultsTo: math.max<int>(1, platform.numberOfProcessors - 2).toString(),
         help: 'The number of concurrent test processes to run.',
-        valueHelp: 'jobs');
+        valueHelp: 'jobs'
+      )
+      ..addFlag('test-assets',
+        defaultsTo: true,
+        negatable: true,
+        help: 'Whether to build the assets bundle for testing.\n'
+              'Consider using --no-test-assets if assets are not required.',
+      );
   }
 
   @override
@@ -109,6 +117,10 @@ class TestCommand extends FastFlutterCommand {
     }
     if (shouldRunPub) {
       await pubGet(context: PubContext.getVerifyContext(name), skipPubspecYamlCheck: true);
+    }
+    final bool buildTestAssets = argResults['test-assets'];
+    if (buildTestAssets) {
+      await _buildTestAsset();
     }
     final List<String> names = argResults['name'];
     final List<String> plainNames = argResults['plain-name'];
@@ -195,6 +207,7 @@ class TestCommand extends FastFlutterCommand {
       trackWidgetCreation: argResults['track-widget-creation'],
       updateGoldens: argResults['update-goldens'],
       concurrency: jobs,
+      buildTestAssets: buildTestAssets,
       flutterProject: flutterProject,
     );
 
@@ -207,6 +220,15 @@ class TestCommand extends FastFlutterCommand {
     if (result != 0)
       throwToolExit(null);
     return const FlutterCommandResult(ExitStatus.success);
+  }
+
+  Future<void> _buildTestAsset() async {
+    final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
+    final int build = await assetBundle.build();
+    if (build != 0) {
+      throwToolExit('Error: Failed to build asset bundle');
+    }
+    await writeBundle(fs.directory(fs.path.join('build', 'unit_test_assets')), assetBundle.entries);
   }
 }
 
