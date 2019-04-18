@@ -4,6 +4,10 @@
 
 import 'dart:async';
 
+import '../commands/build_linux.dart';
+import '../commands/build_macos.dart';
+import '../commands/build_windows.dart';
+
 import '../runner/flutter_command.dart';
 import 'build_aot.dart';
 import 'build_apk.dart';
@@ -22,6 +26,9 @@ class BuildCommand extends FlutterCommand {
     addSubcommand(BuildFlxCommand());
     addSubcommand(BuildBundleCommand(verboseHelp: verboseHelp));
     addSubcommand(BuildWebCommand());
+    addSubcommand(BuildMacosCommand());
+    addSubcommand(BuildLinuxCommand());
+    addSubcommand(BuildWindowsCommand());
   }
 
   @override

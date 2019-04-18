@@ -8,11 +8,14 @@ import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process_manager.dart';
 import '../build_info.dart';
+import '../cache.dart';
 import '../convert.dart';
 import '../device.dart';
 import '../globals.dart';
 import '../macos/application_package.dart';
+import '../project.dart';
 import '../protocol_discovery.dart';
+import 'build_macos.dart';
 import 'macos_workflow.dart';
 
 /// A device that represents a desktop MacOS target.
@@ -66,16 +69,27 @@ class MacOSDevice extends Device {
     bool usesTerminalUi = true,
     bool ipv6 = false,
   }) async {
-    if (!prebuiltApplication) {
-      return LaunchResult.failed();
-    }
     // Stop any running applications with the same executable.
+    if (!prebuiltApplication) {
+      Cache.releaseLockEarly();
+      await buildMacOS(await FlutterProject.current(), debuggingOptions?.buildInfo);
+    }
+    // Make sure to call stop app after we've built.
     await stopApp(package);
-    final Process process = await processManager.start(<String>[package.executable]);
+    final Process process = await processManager.start(<String>[
+      package.executable(debuggingOptions?.buildInfo?.mode)
+    ]);
+    if (debuggingOptions?.buildInfo?.isRelease == true) {
+      return LaunchResult.succeeded();
+    }
     final MacOSLogReader logReader = MacOSLogReader(package, process);
     final ProtocolDiscovery observatoryDiscovery = ProtocolDiscovery.observatory(logReader);
     try {
       final Uri observatoryUri = await observatoryDiscovery.uri;
+      // Bring app to foreground.
+      await processManager.run(<String>[
+        'open', package.applicationBundle(debuggingOptions?.buildInfo?.mode),
+      ]);
       return LaunchResult.succeeded(observatoryUri: observatoryUri);
     } catch (error) {
       printError('Error waiting for a debug connection: $error');
@@ -91,6 +105,8 @@ class MacOSDevice extends Device {
   Future<bool> stopApp(covariant MacOSApp app) async {
     final RegExp whitespace = RegExp(r'\s+');
     bool succeeded = true;
+    // assume debug for now.
+    final String executable = app.executable(BuildMode.debug);
     try {
       final ProcessResult result = await processManager.run(<String>[
         'ps', 'aux',
@@ -100,7 +116,7 @@ class MacOSDevice extends Device {
       }
       final List<String> lines = result.stdout.split('\n');
       for (String line in lines) {
-        if (!line.contains(app.executable)) {
+        if (!line.contains(executable)) {
           continue;
         }
         final List<String> values = line.split(whitespace);
