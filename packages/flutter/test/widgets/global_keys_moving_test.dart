@@ -40,7 +40,7 @@ class KeyedWrapper extends StatelessWidget {
       key: key1,
       child: StatefulLeaf(
         key: key2,
-      )
+      ),
     );
   }
 }

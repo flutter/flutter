@@ -92,13 +92,17 @@ void main() {
       await tester.pumpWidget(MaterialApp(
           home: Scaffold(
             body: Center(
-              child: TextField(
-                controller: TextEditingController(text: 'this is a test'),
+              child: SizedBox(
+                width: 100,
+                child: TextField(
+                  controller: TextEditingController(text: 'this is a test'),
+                ),
               ),
             ),
           ),
         ),
       );
+      await tester.idle();
       await expectLater(tester, meetsGuideline(textContrastGuideline));
       handle.dispose();
     });
@@ -121,9 +125,9 @@ void main() {
       expect(result.reason,
         'SemanticsNode#21(Rect.fromLTRB(300.0, 200.0, 500.0, 400.0), label: "this is a test",'
         ' textDirection: ltr):\nExpected contrast ratio of at least '
-        '4.5 but found 0.88 for a font size of 14.0. '
-        'The computed foreground color was: Color(0xffffeb3b), '
-        'The computed background color was: Color(0xffffff00)\n'
+        '4.5 but found 1.17 for a font size of 14.0. The '
+        'computed foreground color was: Color(0xfffafafa), The computed background color was:'
+        ' Color(0xffffeb3b)\n'
         'See also: https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html');
       handle.dispose();
     });
@@ -163,7 +167,7 @@ void main() {
                   style: TextStyle(fontSize: 14.0, color: Colors.yellowAccent),
                 ),
               ),
-            )
+            ),
           ],
         )
       ));
@@ -182,7 +186,7 @@ void main() {
           width: 48.0,
           height: 48.0,
           child: GestureDetector(
-            onTap: () {},
+            onTap: () { },
           ),
         ),
       ));
@@ -197,7 +201,7 @@ void main() {
           width: 47.0,
           height: 48.0,
           child: GestureDetector(
-            onTap: () {},
+            onTap: () { },
           ),
         ),
       ));
@@ -212,7 +216,7 @@ void main() {
           width: 48.0,
           height: 47.0,
           child: GestureDetector(
-            onTap: () {},
+            onTap: () { },
           ),
         ),
       ));
@@ -229,7 +233,7 @@ void main() {
             width: 48.0,
             height: 48.0,
             child: GestureDetector(
-              onTap: () {},
+              onTap: () { },
             ),
           ),
         ),
@@ -245,7 +249,7 @@ void main() {
           width: 48.0,
           height: 47.0,
           child: GestureDetector(
-            onTap: () {},
+            onTap: () { },
           ),
         ),
       ));
@@ -264,7 +268,7 @@ void main() {
         width: 48.0,
         height: 47.0,
         child: GestureDetector(
-          onTap: () {},
+          onTap: () { },
         ),
       );
       await tester.pumpWidget(
@@ -347,12 +351,12 @@ void main() {
               child: Semantics(
                 container: true,
                 child: GestureDetector(
-                  onTap: () {},
+                  onTap: () { },
                   child: const SizedBox(width: 4.0, height: 4.0),
-                )
-              )
+                ),
+              ),
             ),
-          )
+          ),
         )
       ));
 
@@ -360,6 +364,81 @@ void main() {
       expect(overlappingRightResult.passed, true);
       handle.dispose();
     });
+  });
+
+  group('Labeled tappable node guideline', () {
+    testWidgets('Passes when node is labeled', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(_boilerplate(Semantics(
+        container: true,
+        child: const SizedBox(width: 10.0, height: 10.0),
+        onTap: () { },
+        label: 'test',
+      )));
+      final Evaluation result = await labeledTapTargetGuideline.evaluate(tester);
+      expect(result.passed, true);
+      handle.dispose();
+    });
+    testWidgets('Fails if long-press has no label', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(_boilerplate(Semantics(
+        container: true,
+        child: const SizedBox(width: 10.0, height: 10.0),
+        onLongPress: () { },
+        label: '',
+      )));
+      final Evaluation result = await labeledTapTargetGuideline.evaluate(tester);
+      expect(result.passed, false);
+      handle.dispose();
+    });
+
+    testWidgets('Fails if tap has no label', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(_boilerplate(Semantics(
+        container: true,
+        child: const SizedBox(width: 10.0, height: 10.0),
+        onTap: () { },
+        label: '',
+      )));
+      final Evaluation result = await labeledTapTargetGuideline.evaluate(tester);
+      expect(result.passed, false);
+      handle.dispose();
+    });
+
+    testWidgets('Passes if tap is merged into labeled node', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(_boilerplate(Semantics(
+        container: true,
+        onLongPress: () { },
+        label: '',
+        child: Semantics(
+          label: 'test',
+          child: const SizedBox(width: 10.0, height: 10.0),
+        ),
+      )));
+      final Evaluation result = await labeledTapTargetGuideline.evaluate(tester);
+      expect(result.passed, true);
+      handle.dispose();
+    });
+  });
+
+  testWidgets('regression test for material widget', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.light(),
+        home: Scaffold(
+          backgroundColor: Colors.white,
+          body: RaisedButton(
+            color: const Color(0xFFFBBC04),
+            elevation: 0,
+            onPressed: () {},
+            child: const Text('Button', style: TextStyle(color: Colors.black)),
+        ),
+      ),
+    ));
+    await expectLater(tester, meetsGuideline(textContrastGuideline));
+    handle.dispose();
   });
 }
 

@@ -17,7 +17,9 @@ import 'widget_tester.dart';
 /// The result of evaluating a semantics node by a [AccessibilityGuideline].
 class Evaluation {
   /// Create a passing evaluation.
-  const Evaluation.pass() : passed = true, reason = null;
+  const Evaluation.pass()
+    : passed = true,
+      reason = null;
 
   /// Create a failing evaluation, with an optional [reason] explaining the
   /// result.
@@ -106,11 +108,11 @@ class MinimumTapTargetGuideline extends AccessibilityGuideline {
       const double delta = 0.001;
       if (paintBounds.left <= delta
         || paintBounds.top <= delta
-        || (paintBounds.bottom - ui.window.physicalSize.height).abs() <= delta
-        || (paintBounds.right - ui.window.physicalSize.width).abs() <= delta)
+        || (paintBounds.bottom - tester.binding.window.physicalSize.height).abs() <= delta
+        || (paintBounds.right - tester.binding.window.physicalSize.width).abs() <= delta)
         return result;
       // shrink by device pixel ratio.
-      final Size candidateSize = paintBounds.size / ui.window.devicePixelRatio;
+      final Size candidateSize = paintBounds.size / tester.binding.window.devicePixelRatio;
       if (candidateSize.width < size.width || candidateSize.height < size.height)
         result += Evaluation.fail(
           '$node: expected tap target size of at least $size, but found $candidateSize\n'
@@ -122,6 +124,41 @@ class MinimumTapTargetGuideline extends AccessibilityGuideline {
 
   @override
   String get description => 'Tappable objects should be at least $size';
+}
+
+/// A guideline which enforces that all nodes with a tap or long press action
+/// also have a label.
+@visibleForTesting
+class LabeledTapTargetGuideline extends AccessibilityGuideline {
+  const LabeledTapTargetGuideline._();
+
+  @override
+  String get description => 'Tappable widgets should have a semantic label';
+
+  @override
+  FutureOr<Evaluation> evaluate(WidgetTester tester) {
+    final SemanticsNode root = tester.binding.pipelineOwner.semanticsOwner.rootSemanticsNode;
+    Evaluation traverse(SemanticsNode node) {
+      Evaluation result = const Evaluation.pass();
+      node.visitChildren((SemanticsNode child) {
+        result += traverse(child);
+        return true;
+      });
+      if (node.isMergedIntoParent || node.isInvisible || node.hasFlag(ui.SemanticsFlag.isHidden))
+        return result;
+      final SemanticsData data = node.getSemanticsData();
+      // Skip node if it has no actions, or is marked as hidden.
+      if (!data.hasAction(ui.SemanticsAction.longPress) && !data.hasAction(ui.SemanticsAction.tap))
+        return result;
+      if (data.label == null || data.label.isEmpty) {
+        result += Evaluation.fail(
+          '$node: expected tappable node to have semantic label, but none was found\n',
+        );
+      }
+      return result;
+    }
+    return traverse(root);
+  }
 }
 
 /// A guideline which verifies that all nodes that contribute semantics via text
@@ -160,25 +197,29 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
     final RenderView renderView = tester.binding.renderView;
     final OffsetLayer layer = renderView.layer;
     ui.Image image;
-    final ByteData byteData = await tester.binding.runAsync<ByteData>(() async  {
+    final ByteData byteData = await tester.binding.runAsync<ByteData>(() async {
       // Needs to be the same pixel ratio otherwise our dimensions won't match the
       // last transform layer.
-      image = await layer.toImage(renderView.paintBounds, pixelRatio: 1.0);
+      image = await layer.toImage(renderView.paintBounds, pixelRatio: 1 / 3);
       return image.toByteData();
     });
 
     Future<Evaluation> evaluateNode(SemanticsNode node) async {
+      Evaluation result = const Evaluation.pass();
+      if (node.isInvisible || node.isMergedIntoParent || node.hasFlag(ui.SemanticsFlag.isHidden))
+        return result;
       final SemanticsData data = node.getSemanticsData();
       final List<SemanticsNode> children = <SemanticsNode>[];
-      Evaluation result = const Evaluation.pass();
       node.visitChildren((SemanticsNode child) {
         children.add(child);
         return true;
       });
-      for (SemanticsNode child in children)
+      for (SemanticsNode child in children) {
         result += await evaluateNode(child);
-      if (_shouldSkipNode(data))
+      }
+      if (_shouldSkipNode(data)) {
         return result;
+      }
 
       // We need to look up the inherited text properties to determine the
       // contrast ratio based on text size/weight.
@@ -186,14 +227,22 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
       bool isBold;
       final String text = (data.label?.isEmpty == true) ? data.value : data.label;
       final List<Element> elements = find.text(text).hitTestable().evaluate().toList();
+      Rect paintBounds;
       if (elements.length == 1) {
         final Element element = elements.single;
+        final RenderBox renderObject = element.renderObject;
+        element.renderObject.paintBounds;
+        paintBounds = Rect.fromPoints(
+          renderObject.localToGlobal(element.renderObject.paintBounds.topLeft - const Offset(4.0, 4.0)),
+          renderObject.localToGlobal(element.renderObject.paintBounds.bottomRight + const Offset(4.0, 4.0)),
+        );
         final Widget widget = element.widget;
         final DefaultTextStyle defaultTextStyle = DefaultTextStyle.of(element);
         if (widget is Text) {
           TextStyle effectiveTextStyle = widget.style;
-          if (widget.style == null || widget.style.inherit)
+          if (widget.style == null || widget.style.inherit) {
             effectiveTextStyle = defaultTextStyle.style.merge(widget.style);
+          }
           fontSize = effectiveTextStyle.fontSize;
           isBold = effectiveTextStyle.fontWeight == FontWeight.bold;
         } else if (widget is EditableText) {
@@ -210,21 +259,14 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
         return result;
       }
 
-      // Transform local coordinate to screen coordinates.
-      Rect paintBounds = node.rect;
-      SemanticsNode current = node;
-      while (current != null && current.parent != null) {
-        if (current.transform != null)
-          paintBounds = MatrixUtils.transformRect(current.transform, paintBounds);
-        paintBounds = paintBounds.shift(current.parent?.rect?.topLeft ?? Offset.zero);
-        current = current.parent;
-      }
-      if (_isNodeOffScreen(paintBounds))
+      if (_isNodeOffScreen(paintBounds)) {
         return result;
+      }
       final List<int> subset = _subsetToRect(byteData, paintBounds, image.width, image.height);
       // Node was too far off screen.
-     if (subset.isEmpty)
-       return result;
+      if (subset.isEmpty) {
+        return result;
+      }
       final _ContrastReport report = _ContrastReport(subset);
       final double contrastRatio = report.contrastRatio();
       const double delta = -0.01;
@@ -303,8 +345,9 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
 class _ContrastReport {
   factory _ContrastReport(List<int> colors) {
     final Map<int, int> colorHistogram = <int, int>{};
-    for (int color in colors)
+    for (int color in colors) {
       colorHistogram[color] = (colorHistogram[color] ?? 0) + 1;
+    }
     if (colorHistogram.length == 1) {
       final Color hslColor = Color(colorHistogram.keys.first);
       return _ContrastReport._(hslColor, hslColor);
@@ -403,3 +446,7 @@ const AccessibilityGuideline iOSTapTargetGuideline = MinimumTapTargetGuideline._
 /// foreground and background colors. The contrast ratio is calculated from
 /// these colors according to the [WCAG](https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html#contrast-ratiodef)
 const AccessibilityGuideline textContrastGuideline = MinimumTextContrastGuideline._();
+
+/// A guideline which enforces that all nodes with a tap or long press action
+/// also have a label.
+const AccessibilityGuideline labeledTapTargetGuideline = LabeledTapTargetGuideline._();

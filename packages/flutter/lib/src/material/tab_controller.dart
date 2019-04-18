@@ -19,7 +19,7 @@ import 'constants.dart';
 /// ancestor, a [TabController] can be shared by providing a
 /// [DefaultTabController] inherited widget.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// This widget introduces a [Scaffold] with an [AppBar] and a [TabBar].
 ///
@@ -69,6 +69,7 @@ import 'constants.dart';
 ///   }
 /// }
 /// ```
+/// {@end-tool}
 class TabController extends ChangeNotifier {
   /// Creates an object that manages the state required by [TabBar] and a [TabBarView].
   ///
@@ -85,7 +86,7 @@ class TabController extends ChangeNotifier {
       _animationController = length < 2 ? null : AnimationController(
         value: initialIndex.toDouble(),
         upperBound: (length - 1).toDouble(),
-        vsync: vsync
+        vsync: vsync,
       );
 
   /// An animation whose value represents the current position of the [TabBar]'s
@@ -149,7 +150,12 @@ class TabController extends ChangeNotifier {
   int get previousIndex => _previousIndex;
   int _previousIndex;
 
-  /// True while we're animating from [previousIndex] to [index].
+  /// True while we're animating from [previousIndex] to [index] as a
+  /// consequence of calling [animateTo].
+  ///
+  /// This value is true during the [animateTo] animation that's triggered when
+  /// the user taps a [TabBar] tab. It is false when [offset] is changing as a
+  /// consequence of the user dragging (and "flinging") the [TabBarView].
   bool get indexIsChanging => _indexIsChangingCount != 0;
   int _indexIsChangingCount = 0;
 
@@ -192,7 +198,7 @@ class _TabControllerScope extends InheritedWidget {
     Key key,
     this.controller,
     this.enabled,
-    Widget child
+    Widget child,
   }) : super(key: key, child: child);
 
   final TabController controller;

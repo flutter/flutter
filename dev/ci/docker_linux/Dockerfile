@@ -1,4 +1,4 @@
-# Flutter (https://flutter.io) Developement Environment for Linux
+# Flutter (https://flutter.dev) Developement Environment for Linux
 # ===============================================================
 #
 # This environment passes all Linux Flutter Doctor checks and is sufficient
@@ -21,6 +21,7 @@ RUN apt-get install -y --no-install-recommends \
   git \
   wget \
   curl \
+  zip \
   unzip \
   ca-certificates \
   gnupg
@@ -34,6 +35,7 @@ RUN bash "${NODEJS_INSTALL}/nodejs_install.sh"
 # Install the rest of the dependencies.
 RUN apt-get install -y --no-install-recommends \
   locales \
+  golang \
   ruby \
   ruby-dev \
   nodejs \
@@ -56,7 +58,7 @@ RUN unzip -q -d "${ANDROID_TOOLS_ROOT}" "${ANDROID_SDK_ARCHIVE}"
 # Suppressing output of sdkmanager to keep log size down
 # (it prints install progress WAY too often).
 RUN yes "y" | "${ANDROID_TOOLS_ROOT}/tools/bin/sdkmanager" "tools" > /dev/null
-RUN yes "y" | "${ANDROID_TOOLS_ROOT}/tools/bin/sdkmanager" "build-tools;28.0.0" > /dev/null
+RUN yes "y" | "${ANDROID_TOOLS_ROOT}/tools/bin/sdkmanager" "build-tools;28.0.3" > /dev/null
 RUN yes "y" | "${ANDROID_TOOLS_ROOT}/tools/bin/sdkmanager" "platforms;android-28" > /dev/null
 RUN yes "y" | "${ANDROID_TOOLS_ROOT}/tools/bin/sdkmanager" "platform-tools" > /dev/null
 RUN yes "y" | "${ANDROID_TOOLS_ROOT}/tools/bin/sdkmanager" "extras;android;m2repository" > /dev/null
@@ -82,13 +84,26 @@ ENV PATH="$GRADLE_ROOT/bin:$PATH"
 ENV PATH="/usr/bin:${PATH}"
 RUN dpkg-query -L nodejs
 # Install Firebase
-RUN /usr/bin/npm install -g firebase-tools
+# This is why we need nodejs installed.
+RUN /usr/bin/npm --verbose install -g firebase-tools
+
+# Install dashing
+# This is why we need golang installed.
+RUN mkdir -p /opt/gopath/bin
+ENV GOPATH=/opt/gopath
+ENV PATH="${GOPATH}/bin:${PATH}"
+RUN go get -u github.com/technosophos/dashing
 
 # Set locale to en_US
 RUN locale-gen en_US "en_US.UTF-8" && dpkg-reconfigure locales
 ENV LANG en_US.UTF-8
 
 # Install coveralls and Firebase
-RUN gem install coveralls
-RUN gem install bundler
+# This is why we need ruby installed.
+# Skip all the documentation (-N) since it's just on CI.
+RUN gem install coveralls -N
+RUN gem install bundler -N
+# Install fastlane which is used on Linux to build and deploy Android
+# builds to the Play Store.
+RUN gem install fastlane -N
 

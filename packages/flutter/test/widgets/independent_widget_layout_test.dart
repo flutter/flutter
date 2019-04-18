@@ -9,7 +9,10 @@ import 'package:flutter/rendering.dart';
 const Size _kTestViewSize = Size(800.0, 600.0);
 
 class OffscreenRenderView extends RenderView {
-  OffscreenRenderView() : super(configuration: const ViewConfiguration(size: _kTestViewSize));
+  OffscreenRenderView() : super(
+    configuration: const ViewConfiguration(size: _kTestViewSize),
+    window: WidgetsBinding.instance.window,
+  );
 
   @override
   void compositeFrame() {
@@ -32,7 +35,7 @@ class OffscreenWidgetTree {
     root = RenderObjectToWidgetAdapter<RenderBox>(
       container: renderView,
       debugShortDescription: '[root]',
-      child: app
+      child: app,
     ).attachToRenderTree(buildOwner, root);
     pumpFrame();
   }

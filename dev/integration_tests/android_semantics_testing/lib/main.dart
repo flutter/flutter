@@ -26,7 +26,7 @@ Future<String> dataHandler(String message) async {
     final Completer<String> completer = Completer<String>();
     final int id = int.tryParse(message.split('#')[1]) ?? 0;
     Future<void> completeSemantics([Object _]) async {
-      final dynamic result = await kSemanticsChannel.invokeMethod('getSemanticsNode', <String, dynamic>{
+      final dynamic result = await kSemanticsChannel.invokeMethod<dynamic>('getSemanticsNode', <String, dynamic>{
         'id': id,
       });
       completer.complete(json.encode(result));

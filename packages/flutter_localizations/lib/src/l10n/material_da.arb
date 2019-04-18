@@ -50,5 +50,6 @@
   "collapsedIconTapHint": "Udvid",
   "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "Ét tegn tilbage",
-  "remainingTextFieldCharacterCountOther": "$remainingCount tegn tilbage"
+  "remainingTextFieldCharacterCountOther": "$remainingCount tegn tilbage",
+  "refreshIndicatorSemanticLabel": "Opdater"
 }

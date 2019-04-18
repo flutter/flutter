@@ -26,7 +26,7 @@ enum BorderStyle {
 /// A [Border] consists of four [BorderSide] objects: [Border.top],
 /// [Border.left], [Border.right], and [Border.bottom].
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// This sample shows how [BorderSide] objects can be used in a [Container], via
 /// a [BoxDecoration] and a [Border], to decorate some [Text]. In this example,
@@ -45,6 +45,7 @@ enum BorderStyle {
 ///   child: Text('Flutter in the sky', textAlign: TextAlign.center),
 /// )
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -120,7 +121,7 @@ class BorderSide {
   BorderSide copyWith({
     Color color,
     double width,
-    BorderStyle style
+    BorderStyle style,
   }) {
     assert(width == null || width >= 0.0);
     return BorderSide(
@@ -198,7 +199,7 @@ class BorderSide {
   ///
   /// The arguments must not be null.
   ///
-  /// {@macro flutter.painting.gradient.lerp}
+  /// {@macro dart.ui.shadow.lerp}
   static BorderSide lerp(BorderSide a, BorderSide b, double t) {
     assert(a != null);
     assert(b != null);
@@ -262,7 +263,18 @@ class BorderSide {
 
 /// Base class for shape outlines.
 ///
-/// This class handles how to add multiple borders together.
+/// This class handles how to add multiple borders together. Subclasses define
+/// various shapes, like circles ([CircleBorder]), rounded rectangles
+/// ([RoundedRectangleBorder]), continuous rectangles
+/// ([ContinuousRectangleBorder]), or beveled rectangles
+/// ([BeveledRectangleBorder]).
+///
+/// See also:
+///
+///  * [ShapeDecoration], which can be used with [DecoratedBox] to show a shape.
+///  * [Material] (and many other widgets in the Material library), which takes
+///    a [ShapeBorder] to define its shape.
+///  * [NotchedShape], which describes a shape with a hole in it.
 @immutable
 abstract class ShapeBorder {
   /// Abstract const constructor. This constructor enables subclasses to provide
@@ -404,7 +416,7 @@ abstract class ShapeBorder {
   /// function instead. If both return null, it returns `a` before `t=0.5`
   /// and `b` after `t=0.5`.
   ///
-  /// {@macro flutter.painting.gradient.lerp}
+  /// {@macro dart.ui.shadow.lerp}
   static ShapeBorder lerp(ShapeBorder a, ShapeBorder b, double t) {
     assert(t != null);
     ShapeBorder result;
@@ -640,7 +652,9 @@ class _CompoundBorder extends ShapeBorder {
 ///  * [Border], which uses this function to paint its border when the border is
 ///    not uniform.
 ///  * [BoxDecoration], which describes its border using the [Border] class.
-void paintBorder(Canvas canvas, Rect rect, {
+void paintBorder(
+  Canvas canvas,
+  Rect rect, {
   BorderSide top = BorderSide.none,
   BorderSide right = BorderSide.none,
   BorderSide bottom = BorderSide.none,

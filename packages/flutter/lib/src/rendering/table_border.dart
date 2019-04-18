@@ -147,7 +147,7 @@ class TableBorder {
   /// If a border is null, it is treated as having only [BorderSide.none]
   /// borders.
   ///
-  /// {@macro flutter.painting.gradient.lerp}
+  /// {@macro dart.ui.shadow.lerp}
   static TableBorder lerp(TableBorder a, TableBorder b, double t) {
     assert(t != null);
     if (a == null && b == null)
@@ -192,7 +192,9 @@ class TableBorder {
   ///
   /// The paint order is particularly notable in the case of
   /// partially-transparent borders.
-  void paint(Canvas canvas, Rect rect, {
+  void paint(
+    Canvas canvas,
+    Rect rect, {
     @required Iterable<double> rows,
     @required Iterable<double> columns,
   }) {

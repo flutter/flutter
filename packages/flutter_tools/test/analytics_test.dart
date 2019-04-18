@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:args/command_runner.dart';
+import 'package:flutter_tools/src/base/time.dart';
 import 'package:mockito/mockito.dart';
-import 'package:quiver/time.dart';
 
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -56,7 +56,7 @@ void main() {
       await runner.run(<String>['doctor']);
       expect(count, 0);
     }, overrides: <Type, Generator>{
-      FlutterVersion: () => FlutterVersion(const Clock()),
+      FlutterVersion: () => FlutterVersion(const SystemClock()),
       Usage: () => Usage(configDirOverride: tempDir.path),
     });
 
@@ -75,14 +75,14 @@ void main() {
       await runner.run(<String>['config']);
       expect(count, 0);
     }, overrides: <Type, Generator>{
-      FlutterVersion: () => FlutterVersion(const Clock()),
+      FlutterVersion: () => FlutterVersion(const SystemClock()),
       Usage: () => Usage(configDirOverride: tempDir.path),
     });
   });
 
   group('analytics with mocks', () {
     Usage mockUsage;
-    Clock mockClock;
+    SystemClock mockClock;
     Doctor mockDoctor;
     List<int> mockTimes;
 
@@ -107,10 +107,10 @@ void main() {
 
       expect(
         verify(mockUsage.sendTiming(captureAny, captureAny, captureAny, label: captureAnyNamed('label'))).captured,
-        <dynamic>['flutter', 'doctor', const Duration(milliseconds: 1000), 'success']
+        <dynamic>['flutter', 'doctor', const Duration(milliseconds: 1000), 'success'],
       );
     }, overrides: <Type, Generator>{
-      Clock: () => mockClock,
+      SystemClock: () => mockClock,
       Doctor: () => mockDoctor,
       Usage: () => mockUsage,
     });
@@ -126,10 +126,10 @@ void main() {
 
       expect(
         verify(mockUsage.sendTiming(captureAny, captureAny, captureAny, label: captureAnyNamed('label'))).captured,
-        <dynamic>['flutter', 'doctor', const Duration(milliseconds: 1000), 'warning']
+        <dynamic>['flutter', 'doctor', const Duration(milliseconds: 1000), 'warning'],
       );
     }, overrides: <Type, Generator>{
-      Clock: () => mockClock,
+      SystemClock: () => mockClock,
       Doctor: () => mockDoctor,
       Usage: () => mockUsage,
     });

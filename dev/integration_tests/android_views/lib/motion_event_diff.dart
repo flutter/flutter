@@ -10,7 +10,7 @@ const List<int> kPointerActions = <int>[
   0, // DOWN
   1, // UP
   5, // POINTER_DOWN
-  6 // POINTER_UP
+  6, // POINTER_UP
 ];
 
 const double kDoubleErrorMargin = 0.0001;
@@ -95,23 +95,6 @@ void diffPointerCoordsList(StringBuffer diffBuffer,
     return;
   }
 
-  if (isSinglePointerAction(originalEvent['action'])) {
-    final int idx = getPointerIdx(originalEvent['action']);
-    final Map<String, dynamic> expected =
-        expectedList[idx].cast<String, dynamic>();
-    final Map<String, dynamic> actual = actualList[idx].cast<String, dynamic>();
-    diffPointerCoords(expected, actual, idx, diffBuffer);
-    // For POINTER_UP and POINTER_DOWN events the engine drops the data for all pointers
-    // but for the pointer that was taken up/down.
-    // See: https://github.com/flutter/flutter/issues/19882
-    //
-    // Until that issue is resolved, we only compare the pointer for which the action
-    // applies to here.
-    //
-    // TODO(amirh): Compare all pointers once the issue mentioned above is resolved.
-    return;
-  }
-
   for (int i = 0; i < expectedList.length; i++) {
     final Map<String, dynamic> expected =
         expectedList[i].cast<String, dynamic>();
@@ -122,11 +105,7 @@ void diffPointerCoordsList(StringBuffer diffBuffer,
 
 void diffPointerCoords(Map<String, dynamic> expected,
     Map<String, dynamic> actual, int pointerIdx, StringBuffer diffBuffer) {
-  diffMaps(expected, actual, diffBuffer,
-      messagePrefix: '[pointerCoord $pointerIdx] ',
-      excludeKeys: <String>[
-        'size', // Currently the framework doesn't get the size from the engine.
-      ]);
+  diffMaps(expected, actual, diffBuffer, messagePrefix: '[pointerCoord $pointerIdx] ');
 }
 
 void diffMaps(
@@ -155,12 +134,6 @@ void diffMaps(
   }
 }
 
-bool isSinglePointerAction(int action) {
-  final int actionMasked = getActionMasked(action);
-  return actionMasked == 5 || // POINTER_DOWN
-      actionMasked == 6; // POINTER_UP
-}
-
 int getActionMasked(int action) => action & 0xff;
 
 int getPointerIdx(int action) => (action >> 8) & 0xff;
@@ -179,7 +152,7 @@ String getActionName(int actionMasked, int action) {
     'HOVER_ENTER',
     'HOVER_EXIT',
     'BUTTON_PRESS',
-    'BUTTON_RELEASE'
+    'BUTTON_RELEASE',
   ];
   if (actionMasked < actionNames.length)
     return '${actionNames[actionMasked]}($action)';

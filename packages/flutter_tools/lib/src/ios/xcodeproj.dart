@@ -23,7 +23,8 @@ final RegExp _settingExpr = RegExp(r'(\w+)\s*=\s*(.*)$');
 final RegExp _varExpr = RegExp(r'\$\(([^)]*)\)');
 
 String flutterFrameworkDir(BuildMode mode) {
-  return fs.path.normalize(fs.path.dirname(artifacts.getArtifactPath(Artifact.flutterFramework, TargetPlatform.ios, mode)));
+  return fs.path.normalize(fs.path.dirname(artifacts.getArtifactPath(
+      Artifact.flutterFramework, platform: TargetPlatform.ios, mode: mode)));
 }
 
 /// Writes or rewrites Xcode property files with the specified information.
@@ -49,34 +50,34 @@ Future<void> updateGeneratedXcodeProperties({
   if (targetOverride != null)
     localsBuffer.writeln('FLUTTER_TARGET=$targetOverride');
 
-  // The runtime mode for the current build.
-  localsBuffer.writeln('FLUTTER_BUILD_MODE=${buildInfo.modeName}');
-
   // The build outputs directory, relative to FLUTTER_APPLICATION_PATH.
   localsBuffer.writeln('FLUTTER_BUILD_DIR=${getBuildDirectory()}');
 
   localsBuffer.writeln('SYMROOT=\${SOURCE_ROOT}/../${getIosBuildDirectory()}');
 
-  if (!project.isApplication) {
-    // For application projects we do not want to write the FLUTTER_FRAMEWORK_DIR
+  if (!project.isModule) {
+    // For module projects we do not want to write the FLUTTER_FRAMEWORK_DIR
     // explicitly. Rather we rely on the xcode backend script and the Podfile
     // logic to derive it from FLUTTER_ROOT and FLUTTER_BUILD_MODE.
+    // However, this is necessary for regular projects using Cocoapods.
     localsBuffer.writeln('FLUTTER_FRAMEWORK_DIR=${flutterFrameworkDir(buildInfo.mode)}');
   }
 
-  final String buildName = buildInfo?.buildName ?? project.manifest.buildName;
+  final String buildName = validatedBuildNameForPlatform(TargetPlatform.ios, buildInfo?.buildName ?? project.manifest.buildName);
   if (buildName != null) {
     localsBuffer.writeln('FLUTTER_BUILD_NAME=$buildName');
   }
 
-  final int buildNumber = buildInfo?.buildNumber ?? project.manifest.buildNumber;
+  final String buildNumber = validatedBuildNumberForPlatform(TargetPlatform.ios, buildInfo?.buildNumber ?? project.manifest.buildNumber);
   if (buildNumber != null) {
     localsBuffer.writeln('FLUTTER_BUILD_NUMBER=$buildNumber');
   }
 
   if (artifacts is LocalEngineArtifacts) {
     final LocalEngineArtifacts localEngineArtifacts = artifacts;
-    localsBuffer.writeln('LOCAL_ENGINE=${localEngineArtifacts.engineOutPath}');
+    final String engineOutPath = localEngineArtifacts.engineOutPath;
+    localsBuffer.writeln('FLUTTER_ENGINE=${fs.path.dirname(fs.path.dirname(engineOutPath))}');
+    localsBuffer.writeln('LOCAL_ENGINE=${fs.path.basename(engineOutPath)}');
 
     // Tell Xcode not to build universal binaries for local engines, which are
     // single-architecture.
@@ -84,7 +85,7 @@ Future<void> updateGeneratedXcodeProperties({
     // NOTE: this assumes that local engine binary paths are consistent with
     // the conventions uses in the engine: 32-bit iOS engines are built to
     // paths ending in _arm, 64-bit builds are not.
-    final String arch = localEngineArtifacts.engineOutPath.endsWith('_arm') ? 'armv7' : 'arm64';
+    final String arch = engineOutPath.endsWith('_arm') ? 'armv7' : 'arm64';
     localsBuffer.writeln('ARCHS=$arch');
   }
 
@@ -122,7 +123,7 @@ class XcodeProjectInterpreter {
       _majorVersion = int.parse(components[0]);
       _minorVersion = components.length == 1 ? 0 : int.parse(components[1]);
     } on ProcessException {
-      // Ignore: leave values null.
+      // Ignored, leave values null.
     }
   }
 
@@ -156,16 +157,16 @@ class XcodeProjectInterpreter {
       fs.path.absolute(projectPath),
       '-target',
       target,
-      '-showBuildSettings'
+      '-showBuildSettings',
     ], workingDirectory: projectPath);
     return parseXcodeBuildSettings(out);
   }
 
-  XcodeProjectInfo getInfo(String projectPath) {
-    final String out = runCheckedSync(<String>[
+  Future<XcodeProjectInfo> getInfo(String projectPath) async {
+    final RunResult result = await runCheckedAsync(<String>[
       _executable, '-list',
     ], workingDirectory: projectPath);
-    return XcodeProjectInfo.fromXcodeBuildOutput(out);
+    return XcodeProjectInfo.fromXcodeBuildOutput(result.toString());
   }
 }
 
@@ -247,6 +248,17 @@ class XcodeProjectInfo {
       return baseConfiguration + '-$scheme';
   }
 
+  /// Checks whether the [buildConfigurations] contains the specified string, without
+  /// regard to case.
+  bool hasBuildConfiguratinForBuildMode(String buildMode) {
+    buildMode = buildMode.toLowerCase();
+    for (String name in buildConfigurations) {
+      if (name.toLowerCase() == buildMode) {
+        return true;
+      }
+    }
+    return false;
+  }
   /// Returns unique scheme matching [buildInfo], or null, if there is no unique
   /// best match.
   String schemeFor(BuildInfo buildInfo) {
@@ -262,7 +274,7 @@ class XcodeProjectInfo {
   /// null, if there is no unique best match.
   String buildConfigurationFor(BuildInfo buildInfo, String scheme) {
     final String expectedConfiguration = expectedBuildConfigurationFor(buildInfo, scheme);
-    if (buildConfigurations.contains(expectedConfiguration))
+    if (hasBuildConfiguratinForBuildMode(expectedConfiguration))
       return expectedConfiguration;
     final String baseConfiguration = _baseConfigurationFor(buildInfo);
     return _uniqueMatch(buildConfigurations, (String candidate) {
@@ -274,7 +286,13 @@ class XcodeProjectInfo {
     });
   }
 
-  static String _baseConfigurationFor(BuildInfo buildInfo) => buildInfo.isDebug ? 'Debug' : 'Release';
+  static String _baseConfigurationFor(BuildInfo buildInfo) {
+    if (buildInfo.isDebug)
+      return 'Debug';
+    if (buildInfo.isProfile)
+      return 'Profile';
+    return 'Release';
+  }
 
   static String _uniqueMatch(Iterable<String> strings, bool matches(String s)) {
     final List<String> options = strings.where(matches).toList();

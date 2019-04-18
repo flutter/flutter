@@ -28,8 +28,10 @@ import 'theme_data.dart';
 class RawMaterialButton extends StatefulWidget {
   /// Create a button based on [Semantics], [Material], and [InkWell] widgets.
   ///
-  /// The [shape], [elevation], [padding], [constraints], and [clipBehavior]
-  /// arguments must not be null.
+  /// The [shape], [elevation], [highlightElevation], [disabledElevation],
+  /// [padding], [constraints], and [clipBehavior] arguments must not be null.
+  /// Additionally, [elevation], [highlightElevation], and [disabledElevation]
+  /// must be non-negative.
   const RawMaterialButton({
     Key key,
     @required this.onPressed,
@@ -50,9 +52,9 @@ class RawMaterialButton extends StatefulWidget {
     this.child,
   }) : materialTapTargetSize = materialTapTargetSize ?? MaterialTapTargetSize.padded,
        assert(shape != null),
-       assert(elevation != null),
-       assert(highlightElevation != null),
-       assert(disabledElevation != null),
+       assert(elevation != null && elevation >= 0.0),
+       assert(highlightElevation != null && highlightElevation >= 0.0),
+       assert(disabledElevation != null && disabledElevation >= 0.0),
        assert(padding != null),
        assert(constraints != null),
        assert(animationDuration != null),
@@ -66,6 +68,10 @@ class RawMaterialButton extends StatefulWidget {
 
   /// Called by the underlying [InkWell] widget's [InkWell.onHighlightChanged]
   /// callback.
+  ///
+  /// If [onPressed] changes from null to non-null while a gesture is ongoing,
+  /// this can fire during the build phase (in which case calling
+  /// [State.setState] is not allowed).
   final ValueChanged<bool> onHighlightChanged;
 
   /// Defines the default text style, with [Material.textStyle], for the
@@ -84,7 +90,7 @@ class RawMaterialButton extends StatefulWidget {
   /// The elevation for the button's [Material] when the button
   /// is [enabled] but not pressed.
   ///
-  /// Defaults to 2.0.
+  /// Defaults to 2.0. The value is always non-negative.
   ///
   /// See also:
   ///
@@ -95,7 +101,7 @@ class RawMaterialButton extends StatefulWidget {
   /// The elevation for the button's [Material] when the button
   /// is [enabled] and pressed.
   ///
-  /// Defaults to 8.0.
+  /// Defaults to 8.0. The value is always non-negative.
   ///
   /// See also:
   ///
@@ -106,7 +112,9 @@ class RawMaterialButton extends StatefulWidget {
   /// The elevation for the button's [Material] when the button
   /// is not [enabled].
   ///
-  /// Defaults to 0.0.
+  /// Defaults to 0.0. The value is always non-negative.
+  ///
+  /// See also:
   ///
   ///  * [elevation], the default elevation.
   ///  * [highlightElevation], the elevation when the button is pressed.
@@ -146,7 +154,7 @@ class RawMaterialButton extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///   * [MaterialTapTargetSize], for a description of how this affects tap targets.
+  ///  * [MaterialTapTargetSize], for a description of how this affects tap targets.
   final MaterialTapTargetSize materialTapTargetSize;
 
   /// {@macro flutter.widgets.Clip}
@@ -159,11 +167,23 @@ class RawMaterialButton extends StatefulWidget {
 class _RawMaterialButtonState extends State<RawMaterialButton> {
   bool _highlight = false;
   void _handleHighlightChanged(bool value) {
-    setState(() {
-      _highlight = value;
+    if (_highlight != value) {
+      setState(() {
+        _highlight = value;
+        if (widget.onHighlightChanged != null)
+          widget.onHighlightChanged(value);
+      });
+    }
+  }
+
+  @override
+  void didUpdateWidget(RawMaterialButton oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (_highlight && !widget.enabled) {
+      _highlight = false;
       if (widget.onHighlightChanged != null)
-        widget.onHighlightChanged(value);
-    });
+        widget.onHighlightChanged(false);
+    }
   }
 
   @override
@@ -304,7 +324,7 @@ class _RenderInputPadding extends RenderShiftedBox {
   }
 
   @override
-  bool hitTest(HitTestResult result, {Offset position}) {
+  bool hitTest(HitTestResult result, { Offset position }) {
     return super.hitTest(result, position: position) ||
       child.hitTest(result, position: child.size.center(Offset.zero));
   }

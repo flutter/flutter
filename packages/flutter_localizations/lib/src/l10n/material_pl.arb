@@ -54,5 +54,6 @@
   "collapsedIconTapHint": "Rozwiń",
   "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "Jeszcze 1 znak",
-  "remainingTextFieldCharacterCountOther": "Jeszcze $remainingCount znaku"
+  "remainingTextFieldCharacterCountOther": "Jeszcze $remainingCount znaku",
+  "refreshIndicatorSemanticLabel": "Odśwież"
 }

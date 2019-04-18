@@ -4,12 +4,15 @@
 
 import 'simulation.dart';
 
+// Examples can assume:
+// AnimationController _controller;
+
 /// A simulation that applies a constant accelerating force.
 ///
 /// Models a particle that follows Newton's second law of motion. The simulation
 /// ends when the position reaches a defined point.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// This method triggers an [AnimationController] (a previously constructed
 /// `_controller` field) to simulate a fall of 300 pixels.
@@ -24,6 +27,7 @@ import 'simulation.dart';
 ///   ));
 /// }
 /// ```
+/// {@end-tool}
 ///
 /// This [AnimationController] could be used with an [AnimatedBuilder] to
 /// animate the position of a child as if it was falling.
@@ -51,7 +55,7 @@ class GravitySimulation extends Simulation {
     double acceleration,
     double distance,
     double endDistance,
-    double velocity
+    double velocity,
   ) : assert(acceleration != null),
       assert(distance != null),
       assert(velocity != null),

@@ -11,20 +11,20 @@ abstract class TestWatcher {
   ///
   /// If startPaused was true, the caller needs to resume in Observatory to
   /// start running the tests.
-  void handleStartedProcess(ProcessEvent event) {}
+  void handleStartedProcess(ProcessEvent event) { }
 
   /// Called after the tests finish but before the process exits.
   ///
   /// The child process won't exit until this method completes.
   /// Not called if the process died.
-  Future<void> handleFinishedTest(ProcessEvent event) async {}
+  Future<void> handleFinishedTest(ProcessEvent event) async { }
 
   /// Called when the test process crashed before connecting to test harness.
-  Future<void> handleTestCrashed(ProcessEvent event) async {}
+  Future<void> handleTestCrashed(ProcessEvent event) async { }
 
   /// Called if we timed out waiting for the test process to connect to test
   /// harness.
-  Future<void> handleTestTimedOut(ProcessEvent event) async {}
+  Future<void> handleTestTimedOut(ProcessEvent event) async { }
 }
 
 /// Describes a child process started during testing.

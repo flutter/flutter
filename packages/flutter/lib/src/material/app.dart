@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' as ui;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -68,6 +70,8 @@ const TextStyle _errorTextStyle = TextStyle(
 ///  * [Navigator], which is used to manage the app's stack of pages.
 ///  * [MaterialPageRoute], which defines an app page that transitions in a material-specific way.
 ///  * [WidgetsApp], which defines the basic app elements but does not depend on the material library.
+///  * The Flutter Internationalization Tutorial,
+///    <https://flutter.dev/tutorials/internationalization/>.
 class MaterialApp extends StatefulWidget {
   /// Creates a MaterialApp.
   ///
@@ -94,8 +98,10 @@ class MaterialApp extends StatefulWidget {
     this.onGenerateTitle,
     this.color,
     this.theme,
+    this.darkTheme,
     this.locale,
     this.localizationsDelegates,
+    this.localeListResolutionCallback,
     this.localeResolutionCallback,
     this.supportedLocales = const <Locale>[Locale('en', 'US')],
     this.debugShowMaterialGrid = false,
@@ -160,8 +166,43 @@ class MaterialApp extends StatefulWidget {
   /// This value is passed unmodified to [WidgetsApp.onGenerateTitle].
   final GenerateAppTitle onGenerateTitle;
 
-  /// The colors to use for the application's widgets.
+  /// Default visual properties, like colors fonts and shapes, for this app's
+  /// material widgets.
+  ///
+  /// A second [darkTheme] [ThemeData] value, which is used when the underlying
+  /// platform requests a "dark mode" UI, can also be specified.
+  ///
+  /// The default value of this property is the value of [ThemeData.light()].
+  ///
+  /// See also:
+  ///
+  ///  * [MediaQueryData.platformBrightness], which indicates the platform's
+  ///    desired brightness and is used to automatically toggle between [theme]
+  ///    and [darkTheme] in [MaterialApp].
+  ///  * [ThemeData.brightness], which indicates the [Brightness] of a theme's
+  ///    colors.
   final ThemeData theme;
+
+  /// The [ThemeData] to use when the platform specifically requests a dark
+  /// themed UI.
+  ///
+  /// Host platforms such as Android Pie can request a system-wide "dark mode"
+  /// when entering battery saver mode.
+  ///
+  /// When the host platform requests a [Brightness.dark] mode, you may want to
+  /// supply a [ThemeData.brightness] that's also [Brightness.dark].
+  ///
+  /// Uses [theme] instead when null. Defaults to the value of
+  /// [ThemeData.light()] when both [darkTheme] and [theme] are null.
+  ///
+  /// See also:
+  ///
+  ///  * [MediaQueryData.platformBrightness], which indicates the platform's
+  ///    desired brightness and is used to automatically toggle between [theme]
+  ///    and [darkTheme] in [MaterialApp].
+  ///  * [ThemeData.brightness], which is typically set to the value of
+  ///    [MediaQueryData.platformBrightness].
+  final ThemeData darkTheme;
 
   /// {@macro flutter.widgets.widgetsApp.color}
   final Color color;
@@ -170,6 +211,33 @@ class MaterialApp extends StatefulWidget {
   final Locale locale;
 
   /// {@macro flutter.widgets.widgetsApp.localizationsDelegates}
+  ///
+  /// Internationalized apps that require translations for one of the locales
+  /// listed in [GlobalMaterialLocalizations] should specify this parameter
+  /// and list the [supportedLocales] that the application can handle.
+  ///
+  /// ```dart
+  /// import 'package:flutter_localizations/flutter_localizations.dart';
+  /// MaterialApp(
+  ///   localizationsDelegates: [
+  ///     // ... app-specific localization delegate[s] here
+  ///     GlobalMaterialLocalizations.delegate,
+  ///     GlobalWidgetsLocalizations.delegate,
+  ///   ],
+  ///   supportedLocales: [
+  ///     const Locale('en', 'US'), // English
+  ///     const Locale('he', 'IL'), // Hebrew
+  ///     // ... other locales the app supports
+  ///   ],
+  ///   // ...
+  /// )
+  /// ```
+  ///
+  /// ## Adding localizations for a new locale
+  ///
+  /// The information that follows applies to the unusual case of an app
+  /// adding translations for a language not already supported by
+  /// [GlobalMaterialLocalizations].
   ///
   /// Delegates that produce [WidgetsLocalizations] and [MaterialLocalizations]
   /// are included automatically. Apps can provide their own versions of these
@@ -225,7 +293,20 @@ class MaterialApp extends StatefulWidget {
   ///   // ...
   /// )
   /// ```
+  /// See also:
+  ///
+  ///  * [supportedLocales], which must be specified along with
+  ///    [localizationsDelegates].
+  ///  * [GlobalMaterialLocalizations], a [localizationsDelegates] value
+  ///    which provides material localizations for many languages.
+  ///  * The Flutter Internationalization Tutorial,
+  ///    <https://flutter.dev/tutorials/internationalization/>.
   final Iterable<LocalizationsDelegate<dynamic>> localizationsDelegates;
+
+  /// {@macro flutter.widgets.widgetsApp.localeListResolutionCallback}
+  ///
+  /// This callback is passed along to the [WidgetsApp] built by this widget.
+  final LocaleListResolutionCallback localeListResolutionCallback;
 
   /// {@macro flutter.widgets.widgetsApp.localeResolutionCallback}
   ///
@@ -236,33 +317,21 @@ class MaterialApp extends StatefulWidget {
   ///
   /// It is passed along unmodified to the [WidgetsApp] built by this widget.
   ///
-  /// The material widgets include translations for locales with the following
-  /// language codes:
-  /// ```
-  /// ar - Arabic
-  /// de - German
-  /// en - English
-  /// es - Spanish
-  /// fa - Farsi (Persian)
-  /// fr - French
-  /// he - Hebrew
-  /// it - Italian
-  /// ja - Japanese
-  /// ps - Pashto
-  /// pt - Portugese
-  /// ro - Romanian
-  /// ru - Russian
-  /// sd - Sindhi
-  /// ur - Urdu
-  /// zh - Chinese (simplified)
-  /// ```
+  /// See also:
+  ///
+  ///  * [localizationsDelegates], which must be specified for localized
+  ///    applications.
+  ///  * [GlobalMaterialLocalizations], a [localizationsDelegates] value
+  ///    which provides material localizations for many languages.
+  ///  * The Flutter Internationalization Tutorial,
+  ///    <https://flutter.dev/tutorials/internationalization/>.
   final Iterable<Locale> supportedLocales;
 
   /// Turns on a performance overlay.
   ///
   /// See also:
   ///
-  ///  * <https://flutter.io/debugging/#performanceoverlay>
+  ///  * <https://flutter.dev/debugging/#performanceoverlay>
   final bool showPerformanceOverlay;
 
   /// Turns on checkerboarding of raster cache images.
@@ -285,7 +354,7 @@ class MaterialApp extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///  * <https://material.google.com/layout/metrics-keylines.html>
+  ///  * <https://material.io/design/layout/spacing-methods.html>
   final bool debugShowMaterialGrid;
 
   @override
@@ -350,7 +419,7 @@ class _MaterialAppState extends State<MaterialApp> {
       _navigatorObservers = List<NavigatorObserver>.from(widget.navigatorObservers)
         ..add(_heroController);
     } else {
-      _navigatorObservers = null;
+      _navigatorObservers = const <NavigatorObserver>[];
     }
   }
 
@@ -372,46 +441,80 @@ class _MaterialAppState extends State<MaterialApp> {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = widget.theme ?? ThemeData.fallback();
-    Widget result = AnimatedTheme(
-      data: theme,
-      isMaterialAppTheme: true,
-      child: WidgetsApp(
-        key: GlobalObjectKey(this),
-        navigatorKey: widget.navigatorKey,
-        navigatorObservers: _navigatorObservers,
-        // TODO(dnfield): when https://github.com/dart-lang/sdk/issues/34572 is resolved
-        // this can use type arguments again
-        pageRouteBuilder: (RouteSettings settings, WidgetBuilder builder) =>
-          MaterialPageRoute<dynamic>(settings: settings, builder: builder),
-        home: widget.home,
-        routes: widget.routes,
-        initialRoute: widget.initialRoute,
-        onGenerateRoute: widget.onGenerateRoute,
-        onUnknownRoute: widget.onUnknownRoute,
-        builder: widget.builder,
-        title: widget.title,
-        onGenerateTitle: widget.onGenerateTitle,
-        textStyle: _errorTextStyle,
-        // blue is the primary color of the default theme
-        color: widget.color ?? theme?.primaryColor ?? Colors.blue,
-        locale: widget.locale,
-        localizationsDelegates: _localizationsDelegates,
-        localeResolutionCallback: widget.localeResolutionCallback,
-        supportedLocales: widget.supportedLocales,
-        showPerformanceOverlay: widget.showPerformanceOverlay,
-        checkerboardRasterCacheImages: widget.checkerboardRasterCacheImages,
-        checkerboardOffscreenLayers: widget.checkerboardOffscreenLayers,
-        showSemanticsDebugger: widget.showSemanticsDebugger,
-        debugShowCheckedModeBanner: widget.debugShowCheckedModeBanner,
-        inspectorSelectButtonBuilder: (BuildContext context, VoidCallback onPressed) {
-          return FloatingActionButton(
-            child: const Icon(Icons.search),
-            onPressed: onPressed,
-            mini: true,
-          );
-        },
-      )
+    Widget result = WidgetsApp(
+      key: GlobalObjectKey(this),
+      navigatorKey: widget.navigatorKey,
+      navigatorObservers: _navigatorObservers,
+        pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) =>
+            MaterialPageRoute<T>(settings: settings, builder: builder),
+      home: widget.home,
+      routes: widget.routes,
+      initialRoute: widget.initialRoute,
+      onGenerateRoute: widget.onGenerateRoute,
+      onUnknownRoute: widget.onUnknownRoute,
+      builder: (BuildContext context, Widget child) {
+        // Use a light theme, dark theme, or fallback theme.
+        ThemeData theme;
+        final ui.Brightness platformBrightness = MediaQuery.platformBrightnessOf(context);
+        if (platformBrightness == ui.Brightness.dark && widget.darkTheme != null) {
+          theme = widget.darkTheme;
+        } else if (widget.theme != null) {
+          theme = widget.theme;
+        } else {
+          theme = ThemeData.fallback();
+        }
+
+        return AnimatedTheme(
+          data: theme,
+          isMaterialAppTheme: true,
+          child: widget.builder != null
+              ? Builder(
+                  builder: (BuildContext context) {
+                    // Why are we surrounding a builder with a builder?
+                    //
+                    // The widget.builder may contain code that invokes
+                    // Theme.of(), which should return the theme we selected
+                    // above in AnimatedTheme. However, if we invoke
+                    // widget.builder() directly as the child of AnimatedTheme
+                    // then there is no Context separating them, and the
+                    // widget.builder() will not find the theme. Therefore, we
+                    // surround widget.builder with yet another builder so that
+                    // a context separates them and Theme.of() correctly
+                    // resolves to the theme we passed to AnimatedTheme.
+                    return widget.builder(context, child);
+                  },
+                )
+              : child,
+        );
+      },
+      title: widget.title,
+      onGenerateTitle: widget.onGenerateTitle,
+      textStyle: _errorTextStyle,
+      // The color property is always pulled from the light theme, even if dark
+      // mode is activated. This was done to simplify the technical details
+      // of switching themes and it was deemed acceptable because this color
+      // property is only used on old Android OSes to color the app bar in
+      // Android's switcher UI.
+      //
+      // blue is the primary color of the default theme
+      color: widget.color ?? widget.theme?.primaryColor ?? Colors.blue,
+      locale: widget.locale,
+      localizationsDelegates: _localizationsDelegates,
+      localeResolutionCallback: widget.localeResolutionCallback,
+      localeListResolutionCallback: widget.localeListResolutionCallback,
+      supportedLocales: widget.supportedLocales,
+      showPerformanceOverlay: widget.showPerformanceOverlay,
+      checkerboardRasterCacheImages: widget.checkerboardRasterCacheImages,
+      checkerboardOffscreenLayers: widget.checkerboardOffscreenLayers,
+      showSemanticsDebugger: widget.showSemanticsDebugger,
+      debugShowCheckedModeBanner: widget.debugShowCheckedModeBanner,
+      inspectorSelectButtonBuilder: (BuildContext context, VoidCallback onPressed) {
+        return FloatingActionButton(
+          child: const Icon(Icons.search),
+          onPressed: onPressed,
+          mini: true,
+        );
+      },
     );
 
     assert(() {

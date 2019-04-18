@@ -9,6 +9,9 @@ import 'border_radius.dart';
 import 'borders.dart';
 import 'edge_insets.dart';
 
+// Examples can assume:
+// BuildContext context;
+
 /// The shape to use when rendering a [Border] or [BoxDecoration].
 ///
 /// Consider using [ShapeBorder] subclasses directly (with [ShapeDecoration]),
@@ -98,7 +101,7 @@ abstract class BoxBorder extends ShapeBorder {
   /// For a more flexible approach, consider [ShapeBorder.lerp], which would
   /// instead [add] the two sets of sides and interpolate them simultaneously.
   ///
-  /// {@macro flutter.painting.gradient.lerp}
+  /// {@macro dart.ui.shadow.lerp}
   static BoxBorder lerp(BoxBorder a, BoxBorder b, double t) {
     assert(t != null);
     if ((a is Border || a == null) && (b is Border || b == null))
@@ -193,7 +196,9 @@ abstract class BoxBorder extends ShapeBorder {
   ///
   ///  * [paintBorder], which is used if the border is not uniform.
   @override
-  void paint(Canvas canvas, Rect rect, {
+  void paint(
+    Canvas canvas,
+    Rect rect, {
     TextDirection textDirection,
     BoxShape shape = BoxShape.rectangle,
     BorderRadius borderRadius,
@@ -236,19 +241,23 @@ abstract class BoxBorder extends ShapeBorder {
 ///
 /// The sides are represented by [BorderSide] objects.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// All four borders the same, two-pixel wide solid white:
 ///
 /// ```dart
 /// Border.all(width: 2.0, color: const Color(0xFFFFFFFF))
 /// ```
+/// {@end-tool}
+/// {@tool sample}
 ///
 /// The border for a material design divider:
 ///
 /// ```dart
 /// Border(bottom: BorderSide(color: Theme.of(context).dividerColor))
 /// ```
+/// {@end-tool}
+/// {@tool sample}
 ///
 /// A 1990s-era "OK" button:
 ///
@@ -281,6 +290,7 @@ abstract class BoxBorder extends ShapeBorder {
 ///   ),
 /// )
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -304,6 +314,16 @@ class Border extends BoxBorder {
        assert(bottom != null),
        assert(left != null);
 
+  /// Creates a border whose sides are all the same.
+  ///
+  /// The `side` argument must not be null.
+  const Border.fromBorderSide(BorderSide side)
+      : assert(side != null),
+        top = side,
+        right = side,
+        bottom = side,
+        left = side;
+
   /// A uniform border with all sides the same color and width.
   ///
   /// The sides default to black solid borders, one logical pixel wide.
@@ -313,7 +333,7 @@ class Border extends BoxBorder {
     BorderStyle style = BorderStyle.solid,
   }) {
     final BorderSide side = BorderSide(color: color, width: width, style: style);
-    return Border(top: side, right: side, bottom: side, left: side);
+    return Border.fromBorderSide(side);
   }
 
   /// Creates a [Border] that represents the addition of the two given
@@ -421,7 +441,7 @@ class Border extends BoxBorder {
   /// If a border is null, it is treated as having four [BorderSide.none]
   /// borders.
   ///
-  /// {@macro flutter.painting.gradient.lerp}
+  /// {@macro dart.ui.shadow.lerp}
   static Border lerp(Border a, Border b, double t) {
     assert(t != null);
     if (a == null && b == null)
@@ -458,7 +478,9 @@ class Border extends BoxBorder {
   ///
   ///  * [paintBorder], which is used if the border is not uniform.
   @override
-  void paint(Canvas canvas, Rect rect, {
+  void paint(
+    Canvas canvas,
+    Rect rect, {
     TextDirection textDirection,
     BoxShape shape = BoxShape.rectangle,
     BorderRadius borderRadius,
@@ -711,7 +733,7 @@ class BorderDirectional extends BoxBorder {
   /// If a border is null, it is treated as having four [BorderSide.none]
   /// borders.
   ///
-  /// {@macro flutter.painting.gradient.lerp}
+  /// {@macro dart.ui.shadow.lerp}
   static BorderDirectional lerp(BorderDirectional a, BorderDirectional b, double t) {
     assert(t != null);
     if (a == null && b == null)
@@ -751,7 +773,9 @@ class BorderDirectional extends BoxBorder {
   ///
   ///  * [paintBorder], which is used if the border is not uniform.
   @override
-  void paint(Canvas canvas, Rect rect, {
+  void paint(
+    Canvas canvas,
+    Rect rect, {
     TextDirection textDirection,
     BoxShape shape = BoxShape.rectangle,
     BorderRadius borderRadius,

@@ -19,10 +19,10 @@ void main() {
             PageStorage.of(context).writeState(context, storedValue);
             setState = setter;
             return Center(
-              child: Text('storedValue: $storedValue')
+              child: Text('storedValue: $storedValue'),
             );
-          }
-        )
+          },
+        ),
       )
     );
 
@@ -49,10 +49,10 @@ void main() {
             PageStorage.of(context).writeState(context, storedValue, identifier: 123);
             setState = setter;
             return Center(
-              child: Text('storedValue: $storedValue')
+              child: Text('storedValue: $storedValue'),
             );
-          }
-        )
+          },
+        ),
       );
     }
 

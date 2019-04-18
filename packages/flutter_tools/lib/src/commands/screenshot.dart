@@ -3,11 +3,11 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/utils.dart';
+import '../convert.dart';
 import '../device.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
@@ -33,7 +33,7 @@ class ScreenshotCommand extends FlutterCommand {
       valueHelp: 'port',
       help: 'The observatory port to connect to.\n'
           'This is required when --$_kType is "$_kSkiaType" or "$_kRasterizerType".\n'
-          'To find the observatory port number, use "flutter run --verbose"\n'
+          'To find the observatory port number, use "flutter run --verbose" '
           'and look for "Forwarded host port ... for Observatory" in the output.',
     );
     argParser.addOption(
@@ -42,8 +42,8 @@ class ScreenshotCommand extends FlutterCommand {
       help: 'The type of screenshot to retrieve.',
       allowed: const <String>[_kDeviceType, _kSkiaType, _kRasterizerType],
       allowedHelp: const <String, String>{
-        _kDeviceType: 'Delegate to the device\'s native screenshot capabilities. This\n'
-            'screenshots the entire screen currently being displayed (including content\n'
+        _kDeviceType: 'Delegate to the device\'s native screenshot capabilities. This '
+            'screenshots the entire screen currently being displayed (including content '
             'not rendered by Flutter, like the device status bar).',
         _kSkiaType: 'Render the Flutter app as a Skia picture. Requires --$_kObservatoryPort',
         _kRasterizerType: 'Render the Flutter app using the rasterizer. Requires --$_kObservatoryPort',
@@ -64,7 +64,7 @@ class ScreenshotCommand extends FlutterCommand {
   Device device;
 
   @override
-  Future<FlutterCommandResult> verifyThenRunCommand() async {
+  Future<FlutterCommandResult> verifyThenRunCommand(String commandPath) async {
     device = await findTargetDevice();
     if (device == null)
       throwToolExit('Must have a connected device');
@@ -72,7 +72,7 @@ class ScreenshotCommand extends FlutterCommand {
       throwToolExit('Screenshot not supported for ${device.name}.');
     if (argResults[_kType] != _kDeviceType && argResults[_kObservatoryPort] == null)
       throwToolExit('Observatory port must be specified for screenshot type ${argResults[_kType]}');
-    return super.verifyThenRunCommand();
+    return super.verifyThenRunCommand(commandPath);
   }
 
   @override

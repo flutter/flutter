@@ -160,6 +160,7 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   ///
   /// If this changes the value, then a [UserScrollNotification] is dispatched.
   @protected
+  @visibleForTesting
   void updateUserScrollDirection(ScrollDirection value) {
     assert(value != null);
     if (userScrollDirection == value)
@@ -169,14 +170,15 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   }
 
   @override
-  Future<Null> animateTo(double to, {
+  Future<void> animateTo(
+    double to, {
     @required Duration duration,
     @required Curve curve,
   }) {
     if (nearEqual(to, pixels, physics.tolerance.distance)) {
       // Skip the animation, go straight to the position as we are already close.
       jumpTo(to);
-      return Future<Null>.value();
+      return Future<void>.value();
     }
 
     final DrivenScrollActivity activity = DrivenScrollActivity(

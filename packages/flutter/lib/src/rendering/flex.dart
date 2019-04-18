@@ -453,8 +453,8 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
           assert(verticalDirection != null, 'Vertical $runtimeType with $mainAxisAlignment has a null verticalDirection, so the alignment cannot be resolved.');
           break;
       }
-   }
-   if (crossAxisAlignment == CrossAxisAlignment.start ||
+    }
+    if (crossAxisAlignment == CrossAxisAlignment.start ||
         crossAxisAlignment == CrossAxisAlignment.end) {
       switch (direction) {
         case Axis.horizontal:
@@ -480,7 +480,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   double _getIntrinsicSize({
     Axis sizingDirection,
     double extent, // the extent in the direction that isn't the sizing direction
-    _ChildSizingFunction childSize // a method to find the size in the sizing direction
+    _ChildSizingFunction childSize, // a method to find the size in the sizing direction
   }) {
     if (_direction == sizingDirection) {
       // INTRINSIC MAIN SIZE
@@ -508,7 +508,6 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
       // Intrinsic cross size is the max of the intrinsic cross sizes of the
       // children, after the flexible children are fit into the available space,
       // with the children sized using their max intrinsic dimensions.
-      // TODO(ianh): Support baseline alignment.
 
       // Get inflexible space using the max intrinsic dimensions of fixed children in the main direction.
       final double availableMainSpace = extent;
@@ -563,7 +562,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     return _getIntrinsicSize(
       sizingDirection: Axis.horizontal,
       extent: height,
-      childSize: (RenderBox child, double extent) => child.getMinIntrinsicWidth(extent)
+      childSize: (RenderBox child, double extent) => child.getMinIntrinsicWidth(extent),
     );
   }
 
@@ -572,7 +571,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     return _getIntrinsicSize(
       sizingDirection: Axis.horizontal,
       extent: height,
-      childSize: (RenderBox child, double extent) => child.getMaxIntrinsicWidth(extent)
+      childSize: (RenderBox child, double extent) => child.getMaxIntrinsicWidth(extent),
     );
   }
 
@@ -581,7 +580,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     return _getIntrinsicSize(
       sizingDirection: Axis.vertical,
       extent: width,
-      childSize: (RenderBox child, double extent) => child.getMinIntrinsicHeight(extent)
+      childSize: (RenderBox child, double extent) => child.getMinIntrinsicHeight(extent),
     );
   }
 
@@ -590,7 +589,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     return _getIntrinsicSize(
       sizingDirection: Axis.vertical,
       extent: width,
-      childSize: (RenderBox child, double extent) => child.getMaxIntrinsicHeight(extent)
+      childSize: (RenderBox child, double extent) => child.getMaxIntrinsicHeight(extent),
     );
   }
 
@@ -683,7 +682,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
               information.write('  ');
               information.writeln(node.toStringShallow(joiner: '\n  '));
             }
-            information.writeln('See also: https://flutter.io/layout/');
+            information.writeln('See also: https://flutter.dev/layout/');
             addendum = information.toString();
           } else {
             return true;
@@ -704,10 +703,10 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
             '  $debugCreator\n'
             '$addendum'
             'If this message did not help you determine the problem, consider using debugDumpRenderTree():\n'
-            '  https://flutter.io/debugging/#rendering-layer\n'
+            '  https://flutter.dev/debugging/#rendering-layer\n'
             '  http://docs.flutter.io/flutter/rendering/debugDumpRenderTree.html\n'
             'If none of the above helps enough to fix this problem, please don\'t hesitate to file a bug:\n'
-            '  https://github.com/flutter/flutter/issues/new'
+            '  https://github.com/flutter/flutter/issues/new?template=BUG.md'
           );
         }());
         totalFlex += childParentData.flex;
@@ -750,6 +749,8 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     if (totalFlex > 0 || crossAxisAlignment == CrossAxisAlignment.baseline) {
       final double spacePerFlex = canFlex && totalFlex > 0 ? (freeSpace / totalFlex) : double.nan;
       child = firstChild;
+      double maxSizeAboveBaseline = 0;
+      double maxSizeBelowBaseline = 0;
       while (child != null) {
         final int flex = _getFlex(child);
         if (flex > 0) {
@@ -809,8 +810,18 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
             return true;
           }());
           final double distance = child.getDistanceToBaseline(textBaseline, onlyReal: true);
-          if (distance != null)
+          if (distance != null) {
             maxBaselineDistance = math.max(maxBaselineDistance, distance);
+            maxSizeAboveBaseline = math.max(
+              distance,
+              maxSizeAboveBaseline,
+            );
+            maxSizeBelowBaseline = math.max(
+              child.size.height - distance,
+              maxSizeBelowBaseline,
+            );
+            crossSize = maxSizeAboveBaseline + maxSizeBelowBaseline;
+          }
         }
         final FlexParentData childParentData = child.parentData;
         child = childParentData.nextSibling;

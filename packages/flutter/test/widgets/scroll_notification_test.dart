@@ -16,9 +16,9 @@ void main() {
           notification = value;
         return false;
       },
-      child: SingleChildScrollView(
-        child: const SizedBox(height: 1200.0)
-      )
+      child: const SingleChildScrollView(
+        child: SizedBox(height: 1200.0),
+      ),
     ));
 
     final TestGesture gesture = await tester.startGesture(const Offset(100.0, 100.0));
@@ -60,6 +60,7 @@ void main() {
         return false;
       },
       child: SingleChildScrollView(
+        dragStartBehavior: DragStartBehavior.down,
         child: SizedBox(
           height: 1200.0,
           child: NotificationListener<ScrollNotification>(
@@ -70,11 +71,14 @@ void main() {
             },
             child: Container(
               padding: const EdgeInsets.all(50.0),
-              child: SingleChildScrollView(child: const SizedBox(height: 1200.0))
-            )
-          )
-        )
-      )
+              child: const SingleChildScrollView(
+                child: SizedBox(height: 1200.0),
+                dragStartBehavior: DragStartBehavior.down,
+              ),
+            ),
+          ),
+        ),
+      ),
     ));
 
     final TestGesture gesture = await tester.startGesture(const Offset(100.0, 100.0));

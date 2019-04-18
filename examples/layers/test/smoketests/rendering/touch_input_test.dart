@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
+import 'package:test_api/test_api.dart' hide TypeMatcher, isInstanceOf;
 
 import '../../../rendering/touch_input.dart' as demo;
 

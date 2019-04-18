@@ -134,6 +134,20 @@ class CupertinoIcons {
   ///  * [check_mark_circled], which is similar, but not filled in.
   static const IconData check_mark_circled_solid = IconData(0xf3ff, fontFamily: iconFont, fontPackage: iconFontPackage);
 
+  /// An empty circle (a ring).  An un-selected radio button.
+  ///
+  /// See also:
+  ///
+  ///  * [circle_filled], which is similar but filled in.
+  static const IconData circle = IconData(0xf401, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A filled circle.  The circle is surrounded by a ring.  A selected radio button.
+  ///
+  /// See also:
+  ///
+  ///  * [circle], which is similar but not filled in.
+  static const IconData circle_filled = IconData(0xf400, fontFamily: iconFont, fontPackage: iconFontPackage);
+
   /// A thicker left chevron used in iOS for the navigation bar back button.
   static const IconData back = IconData(0xf3cf, fontFamily: iconFont, fontPackage: iconFontPackage, matchTextDirection: true);
 
@@ -446,7 +460,7 @@ class CupertinoIcons {
   ///  * [add_circled], which is similar, but not filled in.
   static const IconData add_circled_solid = IconData(0xf48b, fontFamily: iconFont, fontPackage: iconFontPackage);
 
-  /// A gear with eigth cogs. This icon is not filled in.
+  /// A gear with eight cogs. This icon is not filled in.
   ///
   /// See also:
   ///
@@ -455,7 +469,7 @@ class CupertinoIcons {
   ///  * [settings], which is another cogwheel with a different design.
   static const IconData gear = IconData(0xf43c, fontFamily: iconFont, fontPackage: iconFontPackage);
 
-  /// A gear with eigth cogs. This icon is filled in.
+  /// A gear with eight cogs. This icon is filled in.
   ///
   /// See also:
   ///
@@ -487,8 +501,19 @@ class CupertinoIcons {
   ///  * [gear_solid], which is another cogwheel with a different design.
   static const IconData settings_solid = IconData(0xf412, fontFamily: iconFont, fontPackage: iconFontPackage);
 
-  /// A symbol representing a single musical note.
+  /// A symbol representing a solid single musical note.
+  ///
+  /// See also:
+  ///
+  ///  * [double_music_note], which is similar, but with 2 connected notes.
   static const IconData music_note = IconData(0xf46b, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A symbol representing 2 connected musical notes.
+  ///
+  /// See also:
+  ///
+  ///  * [music_note], which is similar, but with a single note.
+  static const IconData double_music_note = IconData(0xf46c, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// A triangle facing to the right. This icon is not filled in.
   ///
@@ -504,14 +529,14 @@ class CupertinoIcons {
   ///  * [play_arrow], which is similar, but not filled in.
   static const IconData play_arrow_solid = IconData(0xf488, fontFamily: iconFont, fontPackage: iconFontPackage);
 
-  /// Two verticale rectangles. This icon is not filled in.
+  /// Two vertical rectangles. This icon is not filled in.
   ///
   /// See also:
   ///
   ///  * [pause_solid], which is similar, but filled in.
   static const IconData pause = IconData(0xf477, fontFamily: iconFont, fontPackage: iconFontPackage);
 
-  /// Two verticale rectangles. This icon is filled in.
+  /// Two vertical rectangles. This icon is filled in.
   ///
   /// See also:
   ///
@@ -624,22 +649,22 @@ class CupertinoIcons {
   ///  * [time_solid], which is similar, but without dots on the clock face.
   static const IconData clock_solid = IconData(0xf4bf, fontFamily: iconFont, fontPackage: iconFontPackage);
 
-  /// A circle with with a 90 degree angle shape in the center, resembeling a clock with hands showing 09:00.
+  /// A circle with with a 90 degree angle shape in the center, resembling a clock with hands showing 09:00.
   ///
   /// See also:
   ///
   ///  * [time_solid], which is similar, but filled in.
-  ///  * [clock], which is similar, but with dots on the clockface.
-  ///  * [clock_solid], which is similar, but filled in and with dots on the clockface.
+  ///  * [clock], which is similar, but with dots on the clock face.
+  ///  * [clock_solid], which is similar, but filled in and with dots on the clock face.
   static const IconData time = IconData(0xf402, fontFamily: iconFont, fontPackage: iconFontPackage);
 
-  /// A filled in circle with with a 90 degree angle shape in the center, resembeling a clock with hands showing 09:00.
+  /// A filled in circle with with a 90 degree angle shape in the center, resembling a clock with hands showing 09:00.
   ///
   /// See also:
   ///
   ///  * [time], which is similar, but not filled in.
-  ///  * [clock], which is similar, but not filled in and with dots on the clockface.
-  ///  * [clock_solid], which is similar, but with dots on the clockface.
+  ///  * [clock], which is similar, but not filled in and with dots on the clock face.
+  ///  * [clock_solid], which is similar, but with dots on the clock face.
   static const IconData time_solid = IconData(0xf403, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// An unlocked padlock.
@@ -669,4 +694,211 @@ class CupertinoIcons {
   ///
   ///  * [eye], which is similar, but not filled in.
   static const IconData eye_solid = IconData(0xf425, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A single person. This icon is not filled in.
+  ///
+  /// See also:
+  ///
+  ///  * [person_solid], which is similar, but filled in.
+  ///  * [person_add], which has an additional plus sign next to the person.
+  ///  * [group], which consists of three people.
+  static const IconData person = IconData(0xf47d, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A single person. This icon is filled in.
+  ///
+  /// See also:
+  ///
+  ///  * [person], which is similar, but not filled in.
+  ///  * [person_add_solid], which has an additional plus sign next to the person.
+  ///  * [group_solid], which consists of three people.
+  static const IconData person_solid = IconData(0xf47e, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A single person with a plus sign next to it. This icon is not filled in.
+  ///
+  /// See also:
+  ///
+  ///  * [person_add_solid], which is similar, but filled in.
+  ///  * [person], which is just the person.
+  ///  * [group], which consists of three people.
+  static const IconData person_add = IconData(0xf47f, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A single person with a plus sign next to it. This icon is filled in.
+  ///
+  /// See also:
+  ///
+  ///  * [person_add], which is similar, but not filled in.
+  ///  * [person_solid], which is just the person.
+  ///  * [group_solid], which consists of three people.
+  static const IconData person_add_solid = IconData(0xf480, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A group of three people. This icon is not filled in.
+  ///
+  /// See also:
+  ///
+  ///  * [group_solid], which is similar, but filled in.
+  ///  * [person], which is just a single person.
+  static const IconData group = IconData(0xf47b, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A group of three people. This icon is filled in.
+  ///
+  /// See also:
+  ///
+  ///  * [group], which is similar, but not filled in.
+  ///  * [person_solid], which is just a single person.
+  static const IconData group_solid = IconData(0xf47c, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// Outline of a closed mail envelope.
+  static const IconData mail = IconData(0xf422, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A closed mail envelope. This icon is filled in.
+  static const IconData mail_solid = IconData(0xf423, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// Outline of a location pin.
+  static const IconData location = IconData(0xf455, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A location pin. This icon is filled in.
+  static const IconData location_solid = IconData(0xf456, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// Outline of a sticker tag.
+  ///
+  /// See also:
+  ///
+  ///  * [tags], similar but with 2 overlapping tags.
+  static const IconData tag = IconData(0xf48c, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A sticker tag. This icon is filled in.
+  ///
+  /// See also:
+  ///
+  ///  * [tags_solid], similar but with 2 overlapping tags.
+  static const IconData tag_solid = IconData(0xf48d, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// Outlines of 2 overlapping sticker tags.
+  ///
+  /// See also:
+  ///
+  ///  * [tag], similar but with only one tag.
+  static const IconData tags = IconData(0xf48e, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// 2 overlapping sticker tags. This icon is filled in.
+  ///
+  /// See also:
+  ///
+  ///  * [tag_solid], similar but with only one tag.
+  static const IconData tags_solid = IconData(0xf48f, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A filled in bus.
+  static const IconData bus = IconData(0xf36d, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A filled in car.
+  ///
+  /// See also:
+  ///
+  ///  * [car_detailed], similar, but a more detailed and realistic representation.
+  static const IconData car = IconData(0xf36f, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A filled in detailed, realistic car.
+  ///
+  /// See also:
+  ///
+  ///  * [car], similar, but a more simple representation.
+  static const IconData car_detailed = IconData(0xf2c1, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A filled in train with a window divided in half and two headlights.
+  ///
+  /// See also:
+  ///
+  ///  * [train_style_two], similar, but with a full, undivided window and a single, centered headlight.
+  static const IconData train_style_one = IconData(0xf3af, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A filled in train with a window and a single, centered headlight.
+  ///
+  /// See also:
+  ///
+  ///  * [train_style_one], similar, but with a with a window divided in half and two headlights.
+  static const IconData train_style_two = IconData(0xf3b4, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// An outlined paw.
+  ///
+  /// See also:
+  ///
+  ///  * [paw_solid], similar, but filled in.
+  static const IconData paw = IconData(0xf479, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A filled in paw.
+  ///
+  /// See also:
+  ///
+  ///  * [paw], similar, but not filled in.
+  static const IconData paw_solid = IconData(0xf47a, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// An outlined game controller.
+  ///
+  /// See also:
+  ///
+  ///  * [game_controller_solid], similar, but filled in.
+  static const IconData game_controller = IconData(0xf43a, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A filled in game controller.
+  ///
+  /// See also:
+  ///
+  ///  * [game_controller], similar, but not filled in.
+  static const IconData game_controller_solid = IconData(0xf43b, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// An outlined lab flask.
+  ///
+  /// See also:
+  ///
+  ///  * [lab_flask_solid], similar, but filled in.
+  static const IconData lab_flask = IconData(0xf430, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A filled in lab flask.
+  ///
+  /// See also:
+  ///
+  ///  * [lab_flask], similar, but not filled in.
+  static const IconData lab_flask_solid = IconData(0xf431, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// An outlined heart shape. Can be used to indicate like or favorite states.
+  ///
+  /// See also:
+  ///
+  ///  * [heart_solid], same shape, but filled in.
+  static const IconData heart = IconData(0xf442, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A filled heart shape. Can be used to indicate like or favorite states.
+  ///
+  /// See also:
+  ///
+  ///  * [heart], same shape, but not filled in.
+  static const IconData heart_solid = IconData(0xf443, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// An outlined bell. Can be used to represent notifications.
+  ///
+  /// See also:
+  ///
+  ///  * [bell_solid], same shape, but filled in.
+  static const IconData bell = IconData(0xf3e1, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A filled bell. Can be used represent notifications.
+  ///
+  /// See also:
+  ///
+  ///  * [bell], same shape, but not filled in.
+  static const IconData bell_solid = IconData(0xf3e2, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// An outlined folded newspaper icon.
+  ///
+  /// See also:
+  ///
+  ///  * [news_solid], same shape, but filled in.
+  static const IconData news = IconData(0xf471, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A filled folded newspaper icon.
+  ///
+  /// See also:
+  ///
+  ///  * [news], same shape, but not filled in.
+  static const IconData news_solid = IconData(0xf472, fontFamily: iconFont, fontPackage: iconFontPackage);
 }

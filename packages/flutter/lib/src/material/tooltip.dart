@@ -22,6 +22,8 @@ const Duration _kShowDuration = Duration(milliseconds: 1500);
 /// show a label when the widget long pressed (or when the user takes some
 /// other appropriate action).
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=EeEfD5fI-5Q}
+///
 /// Many widgets, such as [IconButton], [FloatingActionButton], and
 /// [PopupMenuButton] have a `tooltip` property that, when non-null, causes the
 /// widget to include a [Tooltip] in its build.
@@ -32,7 +34,7 @@ const Duration _kShowDuration = Duration(milliseconds: 1500);
 ///
 /// See also:
 ///
-///  * <https://material.google.com/components/tooltips.html>
+///  * <https://material.io/design/components/tooltips.html>
 class Tooltip extends StatefulWidget {
   /// Creates a tooltip.
   ///
@@ -137,11 +139,11 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       padding: widget.padding,
       animation: CurvedAnimation(
         parent: _controller,
-        curve: Curves.fastOutSlowIn
+        curve: Curves.fastOutSlowIn,
       ),
       target: target,
       verticalOffset: widget.verticalOffset,
-      preferBelow: widget.preferBelow
+      preferBelow: widget.preferBelow,
     );
     _entry = OverlayEntry(builder: (BuildContext context) => overlay);
     Overlay.of(context, debugRequiredFor: widget).insert(_entry);

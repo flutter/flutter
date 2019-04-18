@@ -9,7 +9,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import '../painting/image_test_utils.dart';
 
-Future<Null> main() async {
+Future<void> main() async {
   // These must run outside test zone to complete
   final ui.Image targetImage = await createTestImage();
   final ui.Image placeholderImage = await createTestImage();
@@ -115,6 +115,94 @@ Future<Null> main() async {
 
       expect(displayedImage().image, isNot(same(placeholderImage))); // placeholder replaced
       expect(displayedImage().image, same(secondPlaceholderImage));
+    });
+
+    group('semanticLabel', () {
+
+      const String placeholderSemanticText = 'Test placeholder semantic label';
+      const String imageSemanticText = 'Test image semantic label';
+      const Duration animationDuration = Duration(milliseconds: 50);
+
+      testWidgets('assigned correctly according to placeholder or image', (WidgetTester tester) async {
+        // The semantics widget that is created
+        Semantics displayedWidget() => tester.widget(find.byType(Semantics));
+        // The placeholder is expected to be already loaded
+        final TestImageProvider placeholderProvider = TestImageProvider(placeholderImage);
+        // The image which takes long to load
+        final TestImageProvider imageProvider = TestImageProvider(targetImage);
+        // Test case: Image and Placeholder semantic texts are provided.
+        await tester.pumpWidget(FadeInImage(
+            placeholder: placeholderProvider,
+            image: imageProvider,
+            fadeOutDuration: animationDuration,
+            fadeInDuration: animationDuration,
+            imageSemanticLabel: imageSemanticText,
+            placeholderSemanticLabel: placeholderSemanticText,
+        ));
+
+        placeholderProvider.complete(); // load the placeholder
+        await tester.pump();
+        expect(displayedWidget().properties.label, same(placeholderSemanticText));
+
+        imageProvider.complete(); // load the image
+        for (int i = 0; i < 10; i += 1) {
+          await tester.pump(const Duration(milliseconds: 10)); // do the fadeout and fade in
+        }
+        expect(displayedWidget().properties.label, same(imageSemanticText));
+      });
+
+      testWidgets('assigned correctly with only one semantics text', (WidgetTester tester) async {
+        // The semantics widget that is created
+        Semantics displayedWidget() => tester.widget(find.byType(Semantics));
+        // The placeholder is expected to be already loaded
+        final TestImageProvider placeholderProvider = TestImageProvider(placeholderImage);
+        // The image which takes long to load
+        final TestImageProvider imageProvider = TestImageProvider(targetImage);
+        // Test case: Placeholder semantic text provided.
+        await tester.pumpWidget(FadeInImage(
+            placeholder: placeholderProvider,
+            image: imageProvider,
+            fadeOutDuration: animationDuration,
+            fadeInDuration: animationDuration,
+            placeholderSemanticLabel: placeholderSemanticText,
+        ));
+
+        placeholderProvider.complete(); // load the placeholder
+        await tester.pump();
+        expect(displayedWidget().properties.label, same(placeholderSemanticText));
+
+        imageProvider.complete(); // load the image
+        for (int i = 0; i < 10; i += 1) {
+          await tester.pump(const Duration(milliseconds: 10)); // do the fadeout and fade in
+        }
+        expect(displayedWidget().properties.label, same(''));
+      });
+
+      testWidgets('assigned correctly without any semantics text', (WidgetTester tester) async {
+        // The semantics widget that is created
+        Semantics displayedWidget() => tester.widget(find.byType(Semantics));
+        // The placeholder is expected to be already loaded
+        final TestImageProvider placeholderProvider = TestImageProvider(placeholderImage);
+        // The image which takes long to load
+        final TestImageProvider imageProvider = TestImageProvider(targetImage);
+        // Test case: No semantic text provided.
+        await tester.pumpWidget(FadeInImage(
+            placeholder: placeholderProvider,
+            image: imageProvider,
+            fadeOutDuration: animationDuration,
+            fadeInDuration: animationDuration,
+        ));
+
+        placeholderProvider.complete(); // load the placeholder
+        await tester.pump();
+        expect(displayedWidget().properties.label, same(''));
+
+        imageProvider.complete(); // load the image
+        for (int i = 0; i < 10; i += 1) {
+          await tester.pump(const Duration(milliseconds: 10)); // do the fadeout and fade in
+        }
+        expect(displayedWidget().properties.label, same(''));
+      });
     });
   });
 }

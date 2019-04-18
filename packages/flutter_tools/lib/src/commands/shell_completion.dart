@@ -26,9 +26,9 @@ class ShellCompletionCommand extends FlutterCommand {
 
   @override
   final String description = 'Output command line shell completion setup scripts.\n\n'
-      'This command prints the flutter command line completion setup script for Bash and Zsh. To\n'
-      'use it, specify an output file and follow the instructions in the generated output file to\n'
-      'install it in your shell environment. Once it is sourced, your shell will be able to\n'
+      'This command prints the flutter command line completion setup script for Bash and Zsh. To '
+      'use it, specify an output file and follow the instructions in the generated output file to '
+      'install it in your shell environment. Once it is sourced, your shell will be able to '
       'complete flutter commands and options.';
 
   @override
@@ -39,7 +39,7 @@ class ShellCompletionCommand extends FlutterCommand {
 
   /// Return null to disable analytics recording of the `bash-completion` command.
   @override
-  Future<String> get usagePath => null;
+  Future<String> get usagePath async => null;
 
   @override
   Future<FlutterCommandResult> runCommand() async {

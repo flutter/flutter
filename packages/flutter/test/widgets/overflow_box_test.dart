@@ -21,9 +21,9 @@ void main() {
           maxHeight: 50.0,
           child: Container(
             key: inner
-          )
-        )
-      )
+          ),
+        ),
+      ),
     ));
     final RenderBox box = inner.currentContext.findRenderObject();
     expect(box.localToGlobal(Offset.zero), equals(const Offset(745.0, 565.0)));
@@ -36,7 +36,7 @@ void main() {
       minWidth: 1.0,
       maxWidth: 2.0,
       minHeight: 3.0,
-      maxHeight: 4.0
+      maxHeight: 4.0,
     ).debugFillProperties(builder);
     final List<String> description = builder.properties
         .where((DiagnosticsNode n) => !n.isFiltered(DiagnosticLevel.info))
@@ -48,5 +48,51 @@ void main() {
       'minHeight: 3.0',
       'maxHeight: 4.0',
     ]);
+  });
+
+  testWidgets('SizedOverflowBox alignment', (WidgetTester tester) async {
+    final GlobalKey inner = GlobalKey();
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.rtl,
+      child: Center(
+        child: SizedOverflowBox(
+          size: const Size(100.0, 100.0),
+          alignment: Alignment.topRight,
+          child: Container(height: 50.0, width: 50.0, key: inner),
+        ),
+      ),
+    ));
+    final RenderBox box = inner.currentContext.findRenderObject();
+    expect(box.size, equals(const Size(50.0, 50.0)));
+    expect(
+      box.localToGlobal(box.size.center(Offset.zero)),
+      equals(const Offset(
+        (800.0 - 100.0) / 2.0 + 100.0 - 50.0 / 2.0,
+        (600.0 - 100.0) / 2.0 + 0.0 + 50.0 / 2.0,
+      )),
+    );
+  });
+
+  testWidgets('SizedOverflowBox alignment (direction-sensitive)', (WidgetTester tester) async {
+    final GlobalKey inner = GlobalKey();
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.rtl,
+      child: Center(
+        child: SizedOverflowBox(
+          size: const Size(100.0, 100.0),
+          alignment: AlignmentDirectional.bottomStart,
+          child: Container(height: 50.0, width: 50.0, key: inner),
+        ),
+      ),
+    ));
+    final RenderBox box = inner.currentContext.findRenderObject();
+    expect(box.size, equals(const Size(50.0, 50.0)));
+    expect(
+      box.localToGlobal(box.size.center(Offset.zero)),
+      equals(const Offset(
+        (800.0 - 100.0) / 2.0 + 100.0 - 50.0 / 2.0,
+        (600.0 - 100.0) / 2.0 + 100.0 - 50.0 / 2.0,
+      )),
+    );
   });
 }

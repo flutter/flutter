@@ -90,20 +90,20 @@ void main() {
     });
 
     group('editable Android host app', () {
-      testInMemory('fails on non-application', () async {
+      testInMemory('fails on non-module', () async {
         final FlutterProject project = await someProject();
         await expectLater(
           project.android.makeHostAppEditable(),
           throwsA(isInstanceOf<AssertionError>()),
         );
       });
-      testInMemory('exits on already editable application', () async {
-        final FlutterProject project = await anApplicationProject();
+      testInMemory('exits on already editable module', () async {
+        final FlutterProject project = await aModuleProject();
         await project.android.makeHostAppEditable();
         return expectToolExitLater(project.android.makeHostAppEditable(), contains('already editable'));
       });
       testInMemory('creates android/app folder in place of .android/app', () async {
-        final FlutterProject project = await anApplicationProject();
+        final FlutterProject project = await aModuleProject();
         await project.android.makeHostAppEditable();
         expectNotExists(project.directory.childDirectory('.android').childDirectory('app'));
         expect(
@@ -118,7 +118,7 @@ void main() {
         );
       });
       testInMemory('retains .android/Flutter folder and references it', () async {
-        final FlutterProject project = await anApplicationProject();
+        final FlutterProject project = await aModuleProject();
         await project.android.makeHostAppEditable();
         expectExists(project.directory.childDirectory('.android').childDirectory('Flutter'));
         expect(
@@ -127,7 +127,7 @@ void main() {
         );
       });
       testInMemory('can be redone after deletion', () async {
-        final FlutterProject project = await anApplicationProject();
+        final FlutterProject project = await aModuleProject();
         await project.android.makeHostAppEditable();
         project.directory.childDirectory('android').deleteSync(recursive: true);
         await project.android.makeHostAppEditable();
@@ -173,15 +173,15 @@ void main() {
         await project.ensureReadyForPlatformSpecificTooling();
         expectExists(project.android.hostAppGradleRoot.childFile('local.properties'));
       });
-      testInMemory('creates Android library in application', () async {
-        final FlutterProject project = await anApplicationProject();
+      testInMemory('creates Android library in module', () async {
+        final FlutterProject project = await aModuleProject();
         await project.ensureReadyForPlatformSpecificTooling();
         expectExists(project.android.hostAppGradleRoot.childFile('settings.gradle'));
         expectExists(project.android.hostAppGradleRoot.childFile('local.properties'));
         expectExists(androidPluginRegistrant(project.android.hostAppGradleRoot.childDirectory('Flutter')));
       });
-      testInMemory('creates iOS pod in application', () async {
-        final FlutterProject project = await anApplicationProject();
+      testInMemory('creates iOS pod in module', () async {
+        final FlutterProject project = await aModuleProject();
         await project.ensureReadyForPlatformSpecificTooling();
         final Directory flutter = project.ios.hostAppRoot.childDirectory('Flutter');
         expectExists(flutter.childFile('podhelper.rb'));
@@ -194,20 +194,20 @@ void main() {
       });
     });
 
-    group('application status', () {
-      testInMemory('is known for application', () async {
-        final FlutterProject project = await anApplicationProject();
-        expect(project.isApplication, isTrue);
-        expect(project.android.isApplication, isTrue);
-        expect(project.ios.isApplication, isTrue);
+    group('module status', () {
+      testInMemory('is known for module', () async {
+        final FlutterProject project = await aModuleProject();
+        expect(project.isModule, isTrue);
+        expect(project.android.isModule, isTrue);
+        expect(project.ios.isModule, isTrue);
         expect(project.android.hostAppGradleRoot.basename, '.android');
         expect(project.ios.hostAppRoot.basename, '.ios');
       });
-      testInMemory('is known for non-application', () async {
+      testInMemory('is known for non-module', () async {
         final FlutterProject project = await someProject();
-        expect(project.isApplication, isFalse);
-        expect(project.android.isApplication, isFalse);
-        expect(project.ios.isApplication, isFalse);
+        expect(project.isModule, isFalse);
+        expect(project.android.isModule, isFalse);
+        expect(project.ios.isModule, isFalse);
         expect(project.android.hostAppGradleRoot.basename, 'android');
         expect(project.ios.hostAppRoot.basename, 'ios');
       });
@@ -270,6 +270,21 @@ void main() {
         });
         when(mockIOSWorkflow.getPlistValueFromFile(any, any)).thenReturn('\$(PRODUCT_BUNDLE_IDENTIFIER).\$(SUFFIX)');
         expect(project.ios.productBundleIdentifier, 'io.flutter.someProject.suffix');
+      });
+      testWithMocks('empty surrounded by quotes', () async {
+        final FlutterProject project = await someProject();
+        addIosWithBundleId(project.directory, '', qualifier: '"');
+        expect(project.ios.productBundleIdentifier, '');
+      });
+      testWithMocks('surrounded by double quotes', () async {
+        final FlutterProject project = await someProject();
+        addIosWithBundleId(project.directory, 'io.flutter.someProject', qualifier: '"');
+        expect(project.ios.productBundleIdentifier, 'io.flutter.someProject');
+      });
+      testWithMocks('surrounded by single quotes', () async {
+        final FlutterProject project = await someProject();
+        addIosWithBundleId(project.directory, 'io.flutter.someProject', qualifier: '\'');
+        expect(project.ios.productBundleIdentifier, 'io.flutter.someProject');
       });
     });
 
@@ -351,13 +366,13 @@ flutter:
   return FlutterProject.fromDirectory(directory);
 }
 
-Future<FlutterProject> anApplicationProject() async {
-  final Directory directory = fs.directory('application_project');
+Future<FlutterProject> aModuleProject() async {
+  final Directory directory = fs.directory('module_project');
   directory.childFile('.packages').createSync(recursive: true);
   directory.childFile('pubspec.yaml').writeAsStringSync('''
-name: my_application
+name: my_module
 flutter:
-  application:
+  module:
     androidPackage: com.example
 ''');
   return FlutterProject.fromDirectory(directory);
@@ -425,13 +440,13 @@ void expectNotExists(FileSystemEntity entity) {
   expect(entity.existsSync(), isFalse);
 }
 
-void addIosWithBundleId(Directory directory, String id) {
+void addIosWithBundleId(Directory directory, String id, {String qualifier}) {
   directory
       .childDirectory('ios')
       .childDirectory('Runner.xcodeproj')
       .childFile('project.pbxproj')
         ..createSync(recursive: true)
-        ..writeAsStringSync(projectFileWithBundleId(id));
+    ..writeAsStringSync(projectFileWithBundleId(id, qualifier: qualifier));
 }
 
 void addAndroidWithApplicationId(Directory directory, String id) {
@@ -460,13 +475,13 @@ flutter:
   invalid:
 ''';
 
-String projectFileWithBundleId(String id) {
+String projectFileWithBundleId(String id, {String qualifier}) {
   return '''
 97C147061CF9000F007C117D /* Debug */ = {
   isa = XCBuildConfiguration;
   baseConfigurationReference = 9740EEB21CF90195004384FC /* Debug.xcconfig */;
   buildSettings = {
-    PRODUCT_BUNDLE_IDENTIFIER = $id;
+    PRODUCT_BUNDLE_IDENTIFIER = ${qualifier ?? ''}$id${qualifier ?? ''};
     PRODUCT_NAME = "\$(TARGET_NAME)";
   };
   name = Debug;
@@ -478,7 +493,7 @@ String gradleFileWithApplicationId(String id) {
   return '''
 apply plugin: 'com.android.application'
 android {
-    compileSdkVersion 27
+    compileSdkVersion 28
 
     defaultConfig {
         applicationId '$id'
@@ -495,7 +510,7 @@ version '1.0-SNAPSHOT'
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 27
+    compileSdkVersion 28
 }
 ''';
 }

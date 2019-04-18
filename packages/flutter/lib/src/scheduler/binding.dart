@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:collection';
 import 'dart:developer';
-import 'dart:ui' as ui show window;
 import 'dart:ui' show AppLifecycleState;
 
 import 'package:collection/collection.dart' show PriorityQueue, HeapPriorityQueue;
@@ -75,13 +74,17 @@ class _TaskEntry<T> {
   Completer<T> completer;
 
   void run() {
-    Timeline.timeSync(
-      debugLabel ?? 'Scheduled Task',
-      () {
-        completer.complete(task());
-      },
-      flow: flow != null ? Flow.step(flow.id) : null,
-    );
+    if (!kReleaseMode) {
+      Timeline.timeSync(
+        debugLabel ?? 'Scheduled Task',
+        () {
+          completer.complete(task());
+        },
+        flow: flow != null ? Flow.step(flow.id) : null,
+      );
+    } else {
+      completer.complete(task());
+    }
   }
 }
 
@@ -186,18 +189,15 @@ enum SchedulerPhase {
 /// * Non-rendering tasks, to be run between frames. These are given a
 ///   priority and are executed in priority order according to a
 ///   [schedulingStrategy].
-abstract class SchedulerBinding extends BindingBase with ServicesBinding {
-  // This class is intended to be used as a mixin, and should not be
-  // extended directly.
-  factory SchedulerBinding._() => null;
-
+mixin SchedulerBinding on BindingBase, ServicesBinding {
   @override
   void initInstances() {
     super.initInstances();
     _instance = this;
-    ui.window.onBeginFrame = _handleBeginFrame;
-    ui.window.onDrawFrame = _handleDrawFrame;
+    window.onBeginFrame = _handleBeginFrame;
+    window.onDrawFrame = _handleDrawFrame;
     SystemChannels.lifecycle.setMessageHandler(_handleLifecycleMessage);
+    readInitialLifecycleStateFromNativeWindow();
   }
 
   /// The current [SchedulerBinding], if one has been created.
@@ -207,13 +207,16 @@ abstract class SchedulerBinding extends BindingBase with ServicesBinding {
   @override
   void initServiceExtensions() {
     super.initServiceExtensions();
-    registerNumericServiceExtension(
-      name: 'timeDilation',
-      getter: () async => timeDilation,
-      setter: (double value) async {
-        timeDilation = value;
-      }
-    );
+
+    if (!kReleaseMode) {
+      registerNumericServiceExtension(
+        name: 'timeDilation',
+        getter: () async => timeDilation,
+        setter: (double value) async {
+          timeDilation = value;
+        },
+      );
+    }
   }
 
   /// Whether the application is visible, and if so, whether it is currently
@@ -226,6 +229,23 @@ abstract class SchedulerBinding extends BindingBase with ServicesBinding {
   /// [WidgetsBindingObserver.didChangeAppLifecycleState].
   AppLifecycleState get lifecycleState => _lifecycleState;
   AppLifecycleState _lifecycleState;
+
+  /// Initializes the [lifecycleState] with the [initialLifecycleState] from the
+  /// window.
+  ///
+  /// Once the [lifecycleState] is populated through any means (including this
+  /// method), this method will do nothing. This is because the
+  /// [initialLifecycleState] may already be stale and it no longer makes sense
+  /// to use the initial state at dart vm startup as the current state anymore.
+  ///
+  /// The latest state should be obtained by subscribing to
+  /// [WidgetsBindingObserver.didChangeAppLifecycleState].
+  @protected
+  void readInitialLifecycleStateFromNativeWindow() {
+    if (_lifecycleState == null && _parseAppLifecycleMessage(window.initialLifecycleState) != null) {
+      _handleLifecycleMessage(window.initialLifecycleState);
+    }
+  }
 
   /// Called when the application lifecycle state changes.
   ///
@@ -250,7 +270,7 @@ abstract class SchedulerBinding extends BindingBase with ServicesBinding {
     }
   }
 
-  Future<String> _handleLifecycleMessage(String message) {
+  Future<String> _handleLifecycleMessage(String message) async {
     handleAppLifecycleStateChanged(_parseAppLifecycleMessage(message));
     return null;
   }
@@ -298,7 +318,9 @@ abstract class SchedulerBinding extends BindingBase with ServicesBinding {
   /// [Priority.animation] won't run (at least, not with the
   /// [defaultSchedulingStrategy]; this can be configured using
   /// [schedulingStrategy]).
-  Future<T> scheduleTask<T>(TaskCallback<T> task, Priority priority, {
+  Future<T> scheduleTask<T>(
+    TaskCallback<T> task,
+    Priority priority, {
     String debugLabel,
     Flow flow,
   }) {
@@ -379,7 +401,7 @@ abstract class SchedulerBinding extends BindingBase with ServicesBinding {
               'exception was thrown), this was the stack:'
             );
             FlutterError.defaultStackFilter(callbackStack.toString().trimRight().split('\n')).forEach(information.writeln);
-          }
+          },
         ));
       }
       return _taskQueue.isNotEmpty;
@@ -408,15 +430,15 @@ abstract class SchedulerBinding extends BindingBase with ServicesBinding {
   ///
   /// If this is a one-off registration, ignore the `rescheduling` argument.
   ///
-  /// If this is a callback that will be reregistered each time it fires, then
-  /// when you reregister the callback, set the `rescheduling` argument to true.
-  /// This has no effect in release builds, but in debug builds, it ensures that
-  /// the stack trace that is stored for this callback is the original stack
-  /// trace for when the callback was _first_ registered, rather than the stack
-  /// trace for when the callback is reregistered. This makes it easier to track
-  /// down the original reason that a particular callback was called. If
-  /// `rescheduling` is true, the call must be in the context of a frame
-  /// callback.
+  /// If this is a callback that will be re-registered each time it fires, then
+  /// when you re-register the callback, set the `rescheduling` argument to
+  /// true. This has no effect in release builds, but in debug builds, it
+  /// ensures that the stack trace that is stored for this callback is the
+  /// original stack trace for when the callback was _first_ registered, rather
+  /// than the stack trace for when the callback is re-registered. This makes it
+  /// easier to track down the original reason that a particular callback was
+  /// called. If `rescheduling` is true, the call must be in the context of a
+  /// frame callback.
   ///
   /// Callbacks registered with this method can be canceled using
   /// [cancelFrameCallbackWithId].
@@ -488,7 +510,7 @@ abstract class SchedulerBinding extends BindingBase with ServicesBinding {
               information.writeln('── callback $id ──');
               FlutterError.defaultStackFilter(entry.debugStack.toString().trimRight().split('\n')).forEach(information.writeln);
             }
-          }
+          },
         ));
       }
       return true;
@@ -513,7 +535,7 @@ abstract class SchedulerBinding extends BindingBase with ServicesBinding {
   /// To call this function, use the following code:
   ///
   /// ```dart
-  ///   SchedulerBinding.debugPrintTransientCallbackRegistrationStack();
+  /// SchedulerBinding.debugPrintTransientCallbackRegistrationStack();
   /// ```
   static void debugPrintTransientCallbackRegistrationStack() {
     assert(() {
@@ -575,7 +597,7 @@ abstract class SchedulerBinding extends BindingBase with ServicesBinding {
     _postFrameCallbacks.add(callback);
   }
 
-  Completer<Null> _nextFrameCompleter;
+  Completer<void> _nextFrameCompleter;
 
   /// Returns a Future that completes after the frame completes.
   ///
@@ -586,11 +608,11 @@ abstract class SchedulerBinding extends BindingBase with ServicesBinding {
   /// If the device's screen is currently turned off, this may wait a very long
   /// time, since frames are not scheduled while the device's screen is turned
   /// off.
-  Future<Null> get endOfFrame {
+  Future<void> get endOfFrame {
     if (_nextFrameCompleter == null) {
       if (schedulerPhase == SchedulerPhase.idle)
         scheduleFrame();
-      _nextFrameCompleter = Completer<Null>();
+      _nextFrameCompleter = Completer<void>();
       addPostFrameCallback((Duration timeStamp) {
         _nextFrameCompleter.complete();
         _nextFrameCompleter = null;
@@ -682,7 +704,7 @@ abstract class SchedulerBinding extends BindingBase with ServicesBinding {
         debugPrintStack(label: 'scheduleFrame() called. Current phase is $schedulerPhase.');
       return true;
     }());
-    ui.window.scheduleFrame();
+    window.scheduleFrame();
     _hasScheduledFrame = true;
   }
 
@@ -713,7 +735,7 @@ abstract class SchedulerBinding extends BindingBase with ServicesBinding {
         debugPrintStack(label: 'scheduleForcedFrame() called. Current phase is $schedulerPhase.');
       return true;
     }());
-    ui.window.scheduleFrame();
+    window.scheduleFrame();
     _hasScheduledFrame = true;
   }
 
@@ -872,11 +894,11 @@ abstract class SchedulerBinding extends BindingBase with ServicesBinding {
     if (rawTimeStamp != null)
       _lastRawTimeStamp = rawTimeStamp;
 
-    profile(() {
+    if (!kReleaseMode) {
       _profileFrameNumber += 1;
       _profileFrameStopwatch.reset();
       _profileFrameStopwatch.start();
-    });
+    }
 
     assert(() {
       if (debugPrintBeginFrameBanner || debugPrintEndFrameBanner) {
@@ -939,10 +961,10 @@ abstract class SchedulerBinding extends BindingBase with ServicesBinding {
     } finally {
       _schedulerPhase = SchedulerPhase.idle;
       Timeline.finishSync(); // end the Frame
-      profile(() {
+      if (!kReleaseMode) {
         _profileFrameStopwatch.stop();
         _profileFramePostEvent();
-      });
+      }
       assert(() {
         if (debugPrintEndFrameBanner)
           debugPrint('▀' * _debugBanner.length);
@@ -957,7 +979,7 @@ abstract class SchedulerBinding extends BindingBase with ServicesBinding {
     postEvent('Flutter.Frame', <String, dynamic>{
       'number': _profileFrameNumber,
       'startTime': _currentFrameTimeStamp.inMicroseconds,
-      'elapsed': _profileFrameStopwatch.elapsedMicroseconds
+      'elapsed': _profileFrameStopwatch.elapsedMicroseconds,
     });
   }
 
@@ -1001,7 +1023,7 @@ abstract class SchedulerBinding extends BindingBase with ServicesBinding {
             'exception was thrown), this was the stack:'
           );
           FlutterError.defaultStackFilter(callbackStack.toString().trimRight().split('\n')).forEach(information.writeln);
-        }
+        },
       ));
     }
     assert(() { _FrameCallbackEntry.debugCurrentCallbackStack = null; return true; }());

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vector_math/vector_math_64.dart';
 
@@ -748,5 +749,79 @@ void main() {
 
     expect(sliver.paintBounds, expectedRect);
     expect(sliver.semanticBounds, expectedRect);
+  });
+
+  test('precedingScrollExtent is 0.0 for first Sliver in list', () {
+    const double viewportWidth = 800.0;
+    final RenderSliver sliver = RenderSliverToBoxAdapter(
+      child: RenderSizedBox(const Size(viewportWidth, 150.0)),
+    );
+    final RenderViewport root = RenderViewport(
+      axisDirection: AxisDirection.down,
+      crossAxisDirection: AxisDirection.right,
+      offset: ViewportOffset.zero(),
+      children: <RenderSliver>[
+        sliver,
+      ],
+    );
+    layout(root);
+
+    expect(sliver.constraints.precedingScrollExtent, 0.0);
+  });
+
+  test('precedingScrollExtent accumulates over multiple Slivers', () {
+    const double viewportWidth = 800.0;
+    final RenderSliver sliver1 = RenderSliverToBoxAdapter(
+      child: RenderSizedBox(const Size(viewportWidth, 150.0)),
+    );
+    final RenderSliver sliver2 = RenderSliverToBoxAdapter(
+      child: RenderSizedBox(const Size(viewportWidth, 150.0)),
+    );
+    final RenderSliver sliver3 = RenderSliverToBoxAdapter(
+      child: RenderSizedBox(const Size(viewportWidth, 150.0)),
+    );
+    final RenderViewport root = RenderViewport(
+      axisDirection: AxisDirection.down,
+      crossAxisDirection: AxisDirection.right,
+      offset: ViewportOffset.zero(),
+      children: <RenderSliver>[
+        sliver1,
+        sliver2,
+        sliver3,
+      ],
+    );
+    layout(root);
+
+    // The 3rd Sliver comes after 300.0px of preceding scroll extent by first 2 Slivers.
+    expect(sliver3.constraints.precedingScrollExtent, 300.0);
+  });
+
+  test('precedingScrollExtent is not impacted by scrollOffset', () {
+    const double viewportWidth = 800.0;
+    final RenderSliver sliver1 = RenderSliverToBoxAdapter(
+      child: RenderSizedBox(const Size(viewportWidth, 150.0)),
+    );
+    final RenderSliver sliver2 = RenderSliverToBoxAdapter(
+      child: RenderSizedBox(const Size(viewportWidth, 150.0)),
+    );
+    final RenderSliver sliver3 = RenderSliverToBoxAdapter(
+      child: RenderSizedBox(const Size(viewportWidth, 150.0)),
+    );
+    final RenderViewport root = RenderViewport(
+      axisDirection: AxisDirection.down,
+      crossAxisDirection: AxisDirection.right,
+      offset: ViewportOffset.fixed(100.0),
+      children: <RenderSliver>[
+        sliver1,
+        sliver2,
+        sliver3,
+      ],
+    );
+    layout(root);
+
+    // The 3rd Sliver comes after 300.0px of preceding scroll extent by first 2 Slivers.
+    // In this test a ViewportOffset is applied to simulate a scrollOffset. That
+    // offset is not expected to impact the precedingScrollExtent.
+    expect(sliver3.constraints.precedingScrollExtent, 300.0);
   });
 }

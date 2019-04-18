@@ -29,7 +29,7 @@ class FooMaterialLocalizations extends MaterialLocalizationEn {
 class FooMaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocalizations> {
   const FooMaterialLocalizationsDelegate({
     this.supportedLanguage = 'en',
-    this.backButtonTooltip = 'foo'
+    this.backButtonTooltip = 'foo',
   });
 
   final String supportedLanguage;
@@ -107,6 +107,7 @@ void main() {
     Widget buildLocaleFrame(Locale locale) {
       return buildFrame(
         locale: locale,
+        supportedLocales: <Locale>[locale],
         buildContent: (BuildContext context) {
           return Localizations.override(
             context: context,
@@ -120,7 +121,7 @@ void main() {
               },
             ),
           );
-        }
+        },
       );
     }
 
@@ -152,7 +153,7 @@ void main() {
               },
             ),
           );
-        }
+        },
       );
     }
 
@@ -176,16 +177,16 @@ void main() {
           const FooMaterialLocalizationsDelegate(supportedLanguage: 'de', backButtonTooltip: 'DE'),
         ],
         supportedLocales: const <Locale>[
-          Locale('en', ''),
-          Locale('fr', ''),
-          Locale('de', ''),
+          Locale('en'),
+          Locale('fr'),
+          Locale('de'),
         ],
         buildContent: (BuildContext context) {
           return Text(
             MaterialLocalizations.of(context).backButtonTooltip,
             key: textKey,
           );
-        }
+        },
       )
     );
 
@@ -216,7 +217,7 @@ void main() {
             MaterialLocalizations.of(context).backButtonTooltip,
             key: textKey,
           );
-        }
+        },
       )
     );
 
@@ -245,7 +246,7 @@ void main() {
             MaterialLocalizations.of(context).backButtonTooltip,
             key: textKey,
           );
-        }
+        },
       )
     );
 

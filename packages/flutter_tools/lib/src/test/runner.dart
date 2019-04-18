@@ -5,7 +5,7 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
-import 'package:test/src/executable.dart' as test; // ignore: implementation_imports
+import 'package:test_core/src/executable.dart' as test; // ignore: implementation_imports
 
 import '../artifacts.dart';
 import '../base/common.dart';
@@ -15,6 +15,7 @@ import '../base/process_manager.dart';
 import '../base/terminal.dart';
 import '../dart/package_map.dart';
 import '../globals.dart';
+import '../project.dart';
 import 'flutter_platform.dart' as loader;
 import 'watcher.dart';
 
@@ -34,6 +35,9 @@ Future<int> runTests(
   bool updateGoldens = false,
   TestWatcher watcher,
   @required int concurrency,
+  FlutterProject flutterProject,
+  String icudtlPath,
+  Directory coverageDirectory,
 }) async {
   // Compute the command-line arguments for package:test.
   final List<String> testArgs = <String>[];
@@ -80,6 +84,8 @@ Future<int> runTests(
     trackWidgetCreation: trackWidgetCreation,
     updateGoldens: updateGoldens,
     projectRootDirectory: fs.currentDirectory.uri,
+    flutterProject: flutterProject,
+    icudtlPath: icudtlPath,
   );
 
   // Make the global packages path absolute.

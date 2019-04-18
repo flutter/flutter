@@ -119,8 +119,10 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   final double maxHeight;
   final Widget child;
 
-  @override double get minExtent => minHeight;
-  @override double get maxExtent => math.max(maxHeight, minHeight);
+  @override
+  double get minExtent => minHeight;
+  @override
+  double get maxExtent => math.max(maxHeight, minHeight);
 
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
@@ -289,9 +291,6 @@ class _AllSectionsView extends AnimatedWidget {
   Widget _build(BuildContext context, BoxConstraints constraints) {
     final Size size = constraints.biggest;
 
-    // The layout's progress from from a column to a row. Its value is
-    // 0.0 when size.height equals the maxHeight, 1.0 when the size.height
-    // equals the midHeight.
     // The layout's progress from from a column to a row. Its value is
     // 0.0 when size.height equals the maxHeight, 1.0 when the size.height
     // equals the midHeight.
@@ -512,7 +511,7 @@ class _AnimationDemoHomeState extends State<AnimationDemoHome> {
             setState(() {
               _maybeScroll(midScrollOffset, index, xOffset);
             });
-          }
+          },
         ),
       ));
     }
@@ -617,7 +616,7 @@ class _AnimationDemoHomeState extends State<AnimationDemoHome> {
                   tooltip: 'Back',
                   onPressed: () {
                     _handleBackButton(appBarMidScrollOffset);
-                  }
+                  },
                 ),
               ),
             ),

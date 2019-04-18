@@ -13,7 +13,7 @@ import '../painting/fake_codec.dart';
 import '../painting/fake_image_provider.dart';
 import '../painting/image_data.dart';
 
-Future<Null> main() async {
+Future<void> main() async {
   final FakeCodec fakeCodec = await FakeCodec.fromData(Uint8List.fromList(kAnimatedGif));
   final FakeImageProvider fakeImageProvider = FakeImageProvider(fakeCodec);
 
@@ -22,9 +22,9 @@ Future<Null> main() async {
     await tester.pumpWidget(
       MaterialApp(
         home: Image(image: fakeImageProvider, excludeFromSemantics: true, key: imageKey),
-        routes: <String, WidgetBuilder> {
-          '/page': (BuildContext context) => Container()
-        }
+        routes: <String, WidgetBuilder>{
+          '/page': (BuildContext context) => Container(),
+        },
       )
     );
     final RenderImage renderImage = tester.renderObject(find.byType(Image));

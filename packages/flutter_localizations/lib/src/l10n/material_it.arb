@@ -50,5 +50,6 @@
   "collapsedIconTapHint": "Espandi",
   "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "1 carattere rimanente",
-  "remainingTextFieldCharacterCountOther": "$remainingCount caratteri rimanenti"
+  "remainingTextFieldCharacterCountOther": "$remainingCount caratteri rimanenti",
+  "refreshIndicatorSemanticLabel": "Aggiorna"
 }

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:mockito/mockito.dart';
@@ -12,16 +13,16 @@ import 'src/context.dart';
 
 class TestRunner extends ResidentRunner {
   TestRunner(List<FlutterDevice> devices)
-      : super(devices);
+    : super(devices);
 
   bool hasHelpBeenPrinted = false;
   String receivedCommand;
 
   @override
-  Future<void> cleanupAfterSignal() => null;
+  Future<void> cleanupAfterSignal() async { }
 
   @override
-  Future<void> cleanupAtFinish() => null;
+  Future<void> cleanupAtFinish() async { }
 
   @override
   Future<void> handleTerminalCommand(String code) async {
@@ -39,7 +40,13 @@ class TestRunner extends ResidentRunner {
     Completer<void> appStartedCompleter,
     String route,
     bool shouldBuild = true,
-  }) => null;
+  }) async => null;
+
+  @override
+  Future<int> attach({
+    Completer<DebugConnectionInfo> connectionInfoCompleter,
+    Completer<void> appStartedCompleter,
+  }) async => null;
 }
 
 void main() {
@@ -47,7 +54,7 @@ void main() {
     // TODO(jacobr): make these tests run with `trackWidgetCreation: true` as
     // well as the default flags.
     return TestRunner(
-      <FlutterDevice>[FlutterDevice(MockDevice(), trackWidgetCreation: false)],
+      <FlutterDevice>[FlutterDevice(MockDevice(), trackWidgetCreation: false, buildMode: BuildMode.debug)],
     );
   }
 

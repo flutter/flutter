@@ -26,7 +26,7 @@ void main() {
         'Download failed -- attempting retry 1 in 1 second...\n'
         'Download failed -- attempting retry 2 in 2 seconds...\n'
         'Download failed -- attempting retry 3 in 4 seconds...\n'
-        'Download failed -- attempting retry 4 in 8 seconds...\n'
+        'Download failed -- attempting retry 4 in 8 seconds...\n',
       );
     });
     expect(testLogger.errorText, isEmpty);
@@ -49,7 +49,7 @@ void main() {
         'Download failed -- attempting retry 1 in 1 second...\n'
         'Download failed -- attempting retry 2 in 2 seconds...\n'
         'Download failed -- attempting retry 3 in 4 seconds...\n'
-        'Download failed -- attempting retry 4 in 8 seconds...\n'
+        'Download failed -- attempting retry 4 in 8 seconds...\n',
       );
     });
     expect(testLogger.errorText, isEmpty);
@@ -72,7 +72,7 @@ void main() {
         'Download failed -- attempting retry 1 in 1 second...\n'
         'Download failed -- attempting retry 2 in 2 seconds...\n'
         'Download failed -- attempting retry 3 in 4 seconds...\n'
-        'Download failed -- attempting retry 4 in 8 seconds...\n'
+        'Download failed -- attempting retry 4 in 8 seconds...\n',
       );
     });
     expect(testLogger.errorText, isEmpty);
@@ -103,6 +103,30 @@ void main() {
       const io.HandshakeException('test exception handling'),
     ),
   });
+
+  testUsingContext('remote file non-existant', () async {
+    final Uri invalid = Uri.parse('http://example.invalid/');
+    final bool result = await doesRemoteFileExist(invalid);
+    expect(result, false);
+  }, overrides: <Type, Generator>{
+    HttpClientFactory: () => () => MockHttpClient(404),
+  });
+
+  testUsingContext('remote file server error', () async {
+    final Uri valid = Uri.parse('http://example.valid/');
+    final bool result = await doesRemoteFileExist(valid);
+    expect(result, false);
+  }, overrides: <Type, Generator>{
+    HttpClientFactory: () => () => MockHttpClient(500),
+  });
+
+  testUsingContext('remote file exists', () async {
+    final Uri valid = Uri.parse('http://example.valid/');
+    final bool result = await doesRemoteFileExist(valid);
+    expect(result, true);
+  }, overrides: <Type, Generator>{
+    HttpClientFactory: () => () => MockHttpClient(200),
+  });
 }
 
 class MockHttpClientThrowing implements io.HttpClient {
@@ -128,6 +152,11 @@ class MockHttpClient implements io.HttpClient {
 
   @override
   Future<io.HttpClientRequest> getUrl(Uri url) async {
+    return MockHttpClientRequest(statusCode);
+  }
+
+  @override
+  Future<io.HttpClientRequest> headUrl(Uri url) async {
     return MockHttpClientRequest(statusCode);
   }
 
@@ -163,8 +192,11 @@ class MockHttpClientResponse extends Stream<List<int>> implements io.HttpClientR
   String get reasonPhrase => '<reason phrase>';
 
   @override
-  StreamSubscription<List<int>> listen(void onData(List<int> event), {
-    Function onError, void onDone(), bool cancelOnError
+  StreamSubscription<List<int>> listen(
+    void onData(List<int> event), {
+    Function onError,
+    void onDone(),
+    bool cancelOnError,
   }) {
     return Stream<List<int>>.fromFuture(Future<List<int>>.error(const io.SocketException('test')))
       .listen(onData, onError: onError, onDone: onDone, cancelOnError: cancelOnError);

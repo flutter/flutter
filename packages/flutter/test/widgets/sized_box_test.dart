@@ -43,7 +43,7 @@ void main() {
       Center(
         child: SizedBox(
           key: patient,
-        )
+        ),
       )
     );
     expect(patient.currentContext.size, equals(const Size(0.0, 0.0)));
@@ -53,7 +53,7 @@ void main() {
         child: SizedBox(
           key: patient,
           height: 0.0,
-        )
+        ),
       )
     );
     expect(patient.currentContext.size, equals(const Size(0.0, 0.0)));
@@ -64,7 +64,7 @@ void main() {
           key: patient,
           width: 0.0,
           height: 0.0,
-        )
+        ),
       )
     );
     expect(patient.currentContext.size, equals(const Size(0.0, 0.0)));
@@ -75,7 +75,7 @@ void main() {
           key: patient,
           width: 100.0,
           height: 100.0,
-        )
+        ),
       )
     );
     expect(patient.currentContext.size, equals(const Size(100.0, 100.0)));
@@ -86,7 +86,7 @@ void main() {
           key: patient,
           width: 1000.0,
           height: 1000.0,
-        )
+        ),
       )
     );
     expect(patient.currentContext.size, equals(const Size(800.0, 600.0)));
@@ -95,7 +95,7 @@ void main() {
       Center(
         child: SizedBox.expand(
           key: patient,
-        )
+        ),
       )
     );
     expect(patient.currentContext.size, equals(const Size(800.0, 600.0)));
@@ -104,7 +104,7 @@ void main() {
       Center(
         child: SizedBox.shrink(
           key: patient,
-        )
+        ),
       )
     );
     expect(patient.currentContext.size, equals(const Size(0.0, 0.0)));
@@ -118,7 +118,7 @@ void main() {
         child: SizedBox(
           key: patient,
           child: Container(),
-        )
+        ),
       )
     );
     expect(patient.currentContext.size, equals(const Size(800.0, 600.0)));
@@ -129,7 +129,7 @@ void main() {
           key: patient,
           height: 0.0,
           child: Container(),
-        )
+        ),
       )
     );
     expect(patient.currentContext.size, equals(const Size(800.0, 0.0)));
@@ -141,7 +141,7 @@ void main() {
           width: 0.0,
           height: 0.0,
           child: Container(),
-        )
+        ),
       )
     );
     expect(patient.currentContext.size, equals(const Size(0.0, 0.0)));
@@ -153,7 +153,7 @@ void main() {
           width: 100.0,
           height: 100.0,
           child: Container(),
-        )
+        ),
       )
     );
     expect(patient.currentContext.size, equals(const Size(100.0, 100.0)));
@@ -165,7 +165,7 @@ void main() {
           width: 1000.0,
           height: 1000.0,
           child: Container(),
-        )
+        ),
       )
     );
     expect(patient.currentContext.size, equals(const Size(800.0, 600.0)));
@@ -175,7 +175,7 @@ void main() {
         child: SizedBox.expand(
           key: patient,
           child: Container(),
-        )
+        ),
       )
     );
     expect(patient.currentContext.size, equals(const Size(800.0, 600.0)));
@@ -185,7 +185,7 @@ void main() {
         child: SizedBox.shrink(
           key: patient,
           child: Container(),
-        )
+        ),
       )
     );
     expect(patient.currentContext.size, equals(const Size(0.0, 0.0)));

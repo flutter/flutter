@@ -18,7 +18,7 @@ class _FlavorState extends State<Flavor> {
   @override
   void initState() {
     super.initState();
-    const MethodChannel('flavor').invokeMethod('getFlavor').then((Object flavor) {
+    const MethodChannel('flavor').invokeMethod<String>('getFlavor').then((String flavor) {
       setState(() {
         _flavor = flavor;
       });

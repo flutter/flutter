@@ -9,7 +9,7 @@ import 'package:flutter/foundation.dart';
 class Priority {
   const Priority._(this._value);
 
-  /// The integer that describes this Priority value.
+  /// Integer that describes this Priority value.
   int get value => _value;
   final int _value;
 

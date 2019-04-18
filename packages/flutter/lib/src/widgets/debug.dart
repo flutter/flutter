@@ -30,6 +30,26 @@ import 'table.dart';
 /// See also the discussion at [WidgetsBinding.drawFrame].
 bool debugPrintRebuildDirtyWidgets = false;
 
+/// Signature for [debugOnRebuildDirtyWidget] implementations.
+typedef RebuildDirtyWidgetCallback = void Function(Element e, bool builtOnce);
+
+/// Callback invoked for every dirty widget built each frame.
+///
+/// This callback is only invoked in debug builds.
+///
+/// See also:
+///
+///  * [debugPrintRebuildDirtyWidgets], which does something similar but logs
+///    to the console instead of invoking a callback.
+///  * [debugOnProfilePaint], which does something similar for [RenderObject]
+///    painting.
+///  * [WidgetInspectorService], which uses the [debugOnRebuildDirtyWidget]
+///    callback to generate aggregate profile statistics describing which widget
+///    rebuilds occurred when the
+///    `ext.flutter.inspector.trackRebuildDirtyWidgets` service extension is
+///    enabled.
+RebuildDirtyWidgetCallback debugOnRebuildDirtyWidget;
+
 /// Log all calls to [BuildOwner.buildScope].
 ///
 /// Combined with [debugPrintScheduleBuildForStacks], this allows you to track
@@ -253,6 +273,14 @@ void debugWidgetBuilderValue(Widget widget, Widget built) {
         'Build functions must never return null. '
         'To return an empty space that causes the building widget to fill available room, return "new Container()". '
         'To return an empty space that takes as little room as possible, return "new Container(width: 0.0, height: 0.0)".'
+      );
+    }
+    if (widget == built) {
+      throw FlutterError(
+        'A build function returned context.widget.\n'
+        'The offending widget is: $widget\n'
+        'Build functions must never return their BuildContext parameter\'s widget or a child that contains "context.widget". '
+        'Doing so introduces a loop in the widget tree that can cause the app to crash.'
       );
     }
     return true;

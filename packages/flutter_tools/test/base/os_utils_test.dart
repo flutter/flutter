@@ -32,7 +32,7 @@ void main() {
         // rwxr--r--
         expect(mode.substring(0, 3), endsWith('x'));
       }
-    }, overrides: <Type, Generator> {
+    }, overrides: <Type, Generator>{
       OperatingSystemUtils: () => OperatingSystemUtils(),
     });
   });

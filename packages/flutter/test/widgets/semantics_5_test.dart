@@ -28,7 +28,7 @@ void main() {
             label: 'label', // (force a fork)
             textDirection: TextDirection.ltr,
           ),
-        ]
+        ],
       )
     );
 

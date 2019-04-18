@@ -179,5 +179,5 @@ void main() {
     expect(itemBottom(1), 100.0);
     expect(itemTop(2), 100.0);
     expect(itemBottom(2), 200.0);
-   });
+  });
 }

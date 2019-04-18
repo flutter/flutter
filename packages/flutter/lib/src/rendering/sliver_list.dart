@@ -93,8 +93,8 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
     // Find the last child that is at or before the scrollOffset.
     RenderBox earliestUsefulChild = firstChild;
     for (double earliestScrollOffset = childScrollOffset(earliestUsefulChild);
-         earliestScrollOffset > scrollOffset;
-         earliestScrollOffset = childScrollOffset(earliestUsefulChild)) {
+        earliestScrollOffset > scrollOffset;
+        earliestScrollOffset = childScrollOffset(earliestUsefulChild)) {
       // We have to add children before the earliestUsefulChild.
       earliestUsefulChild = insertAndLayoutLeadingChild(childConstraints, parentUsesSize: true);
 
@@ -119,7 +119,8 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
       }
 
       final double firstChildScrollOffset = earliestScrollOffset - paintExtentOf(firstChild);
-      if (firstChildScrollOffset < 0.0) {
+      // firstChildScrollOffset may contain double precision error
+      if (firstChildScrollOffset < -SliverGeometry.precisionErrorTolerance) {
         // The first child doesn't fit within the viewport (underflow) and
         // there may be additional children above it. Find the real first child
         // and then correct the scroll position so that there's room for all and

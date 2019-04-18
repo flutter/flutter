@@ -12,8 +12,8 @@ import 'icons.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'material_localizations.dart';
+import 'text_theme.dart';
 import 'theme.dart';
-import 'typography.dart';
 
 // TODO(dragostis): Missing functionality:
 //   * mobile horizontal mode with adding/removing steps
@@ -39,7 +39,7 @@ enum StepState {
   /// A step that is disabled and does not to react to taps.
   disabled,
 
-  /// A step that is currently having an error. e.g. the use has submitted wrong
+  /// A step that is currently having an error. e.g. the user has submitted wrong
   /// input.
   error,
 }
@@ -73,7 +73,7 @@ const double _kTriangleHeight = _kStepSize * 0.866025; // Triangle height. sqrt(
 /// See also:
 ///
 ///  * [Stepper]
-///  * <https://material.google.com/components/steppers.html>
+///  * <https://material.io/archive/guidelines/components/steppers.html>
 @immutable
 class Step {
   /// Creates a step for a [Stepper].
@@ -123,7 +123,7 @@ class Step {
 /// See also:
 ///
 ///  * [Step]
-///  * <https://material.google.com/components/steppers.html>
+///  * <https://material.io/archive/guidelines/components/steppers.html>
 class Stepper extends StatefulWidget {
   /// Creates a stepper from a list of steps.
   ///
@@ -135,11 +135,13 @@ class Stepper extends StatefulWidget {
   Stepper({
     Key key,
     @required this.steps,
+    this.physics,
     this.type = StepperType.vertical,
     this.currentStep = 0,
     this.onStepTapped,
     this.onStepContinue,
     this.onStepCancel,
+    this.controlsBuilder,
   }) : assert(steps != null),
        assert(type != null),
        assert(currentStep != null),
@@ -150,6 +152,15 @@ class Stepper extends StatefulWidget {
   ///
   /// The length of [steps] must not change.
   final List<Step> steps;
+
+  /// How the stepper's scroll view should respond to user input.
+  ///
+  /// For example, determines how the scroll view continues to
+  /// animate after the user stops dragging the scroll view.
+  ///
+  /// If the stepper is contained within another scrollable it
+  /// can be helpful to set this property to [ClampingScrollPhysics].
+  final ScrollPhysics physics;
 
   /// The type of stepper that determines the layout. In the case of
   /// [StepperType.horizontal], the content of the current step is displayed
@@ -173,6 +184,56 @@ class Stepper extends StatefulWidget {
   ///
   /// If null, the 'cancel' button will be disabled.
   final VoidCallback onStepCancel;
+
+  /// The callback for creating custom controls.
+  ///
+  /// If null, the default controls from the current theme will be used.
+  ///
+  /// This callback which takes in a context and two functions,[onStepContinue]
+  /// and [onStepCancel]. These can be used to control the stepper.
+  ///
+  /// {@tool snippet --template=stateless_widget_scaffold}
+  /// Creates a stepper control with custom buttons.
+  ///
+  /// ```dart
+  /// Widget build(BuildContext context) {
+  ///   return Stepper(
+  ///     controlsBuilder:
+  ///       (BuildContext context, {VoidCallback onStepContinue, VoidCallback onStepCancel}) {
+  ///          return Row(
+  ///            children: <Widget>[
+  ///              FlatButton(
+  ///                onPressed: onStepContinue,
+  ///                child: const Text('CONTINUE'),
+  ///              ),
+  ///              FlatButton(
+  ///                onPressed: onStepCancel,
+  ///                child: const Text('CANCEL'),
+  ///              ),
+  ///            ],
+  ///          );
+  ///       },
+  ///     steps: const <Step>[
+  ///       Step(
+  ///         title: Text('A'),
+  ///         content: SizedBox(
+  ///           width: 100.0,
+  ///           height: 100.0,
+  ///         ),
+  ///       ),
+  ///       Step(
+  ///         title: Text('B'),
+  ///         content: SizedBox(
+  ///           width: 100.0,
+  ///           height: 100.0,
+  ///         ),
+  ///       ),
+  ///     ],
+  ///   );
+  /// }
+  /// ```
+  /// {@end-tool}
+  final ControlsWidgetBuilder controlsBuilder;
 
   @override
   _StepperState createState() => _StepperState();
@@ -327,6 +388,9 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
   }
 
   Widget _buildVerticalControls() {
+    if (widget.controlsBuilder != null)
+      return widget.controlsBuilder(context, onStepContinue: widget.onStepContinue, onStepCancel: widget.onStepCancel);
+
     Color cancelColor;
 
     switch (Theme.of(context).brightness) {
@@ -441,7 +505,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
-      children: children
+      children: children,
     );
   }
 
@@ -457,14 +521,14 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
               _buildLine(!_isFirst(index)),
               _buildIcon(index),
               _buildLine(!_isLast(index)),
-            ]
+            ],
           ),
           Container(
             margin: const EdgeInsetsDirectional.only(start: 12.0),
-            child: _buildHeaderText(index)
-          )
-        ]
-      )
+            child: _buildHeaderText(index),
+          ),
+        ],
+      ),
     );
   }
 
@@ -533,16 +597,17 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
                 if (widget.onStepTapped != null)
                   widget.onStepTapped(i);
               } : null,
-              child: _buildVerticalHeader(i)
+              child: _buildVerticalHeader(i),
             ),
-            _buildVerticalBody(i)
-          ]
+            _buildVerticalBody(i),
+          ],
         )
       );
     }
 
     return ListView(
       shrinkWrap: true,
+      physics: widget.physics,
       children: children,
     );
   }
@@ -619,12 +684,13 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
+    assert(debugCheckHasMaterialLocalizations(context));
     assert(() {
       if (context.ancestorWidgetOfExactType(Stepper) != null)
         throw FlutterError(
           'Steppers must not be nested. The material specification advises '
           'that one should avoid embedding steppers within steppers. '
-          'https://material.google.com/components/steppers.html#steppers-usage\n'
+          'https://material.io/archive/guidelines/components/steppers.html#steppers-usage\n'
         );
       return true;
     }());
@@ -643,7 +709,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
 // top vertex the middle of its top.
 class _TrianglePainter extends CustomPainter {
   _TrianglePainter({
-    this.color
+    this.color,
   });
 
   final Color color;

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 
@@ -65,5 +66,152 @@ void main() {
     // initial position of E was 200 + 56 + cSize.height + cSize.height + 500
     // we've scrolled that up by 600.0, meaning it's at that minus 600 now:
     expect(tester.getTopLeft(find.text('E')), Offset(0.0, 200.0 + 56.0 + cSize.height * 2.0 + 500.0 - 600.0));
+  });
+
+  testWidgets('Does not crash when there is less than minExtent remainingPaintExtent', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/21887.
+    final ScrollController controller = ScrollController();
+    const double availableHeight = 50.0;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: Container(
+            height: availableHeight,
+            color: Colors.green,
+            child: CustomScrollView(
+              controller: controller,
+              slivers: <Widget>[
+                const SliverAppBar(
+                  pinned: true,
+                  floating: true,
+                  expandedHeight: 120.0,
+                ),
+                SliverList(
+                  delegate: SliverChildListDelegate(List<Widget>.generate(20, (int i) {
+                    return Container(
+                      child: Text('Tile $i'),
+                      height: 100.0,
+                    );
+                  })),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    final RenderSliverFloatingPinnedPersistentHeader render = tester.renderObject(find.byType(SliverAppBar));
+    expect(render.minExtent, greaterThan(availableHeight)); // Precondition
+    expect(render.geometry.scrollExtent, 120.0);
+    expect(render.geometry.paintExtent, availableHeight);
+    expect(render.geometry.layoutExtent, availableHeight);
+
+    controller.jumpTo(200.0);
+    await tester.pumpAndSettle();
+    expect(render.geometry.scrollExtent, 120.0);
+    expect(render.geometry.paintExtent, availableHeight);
+    expect(render.geometry.layoutExtent, 0.0);
+  });
+
+  testWidgets('Pinned and floating SliverAppBar sticks to top the content is scroll down', (WidgetTester tester) async {
+    const Key anchor = Key('drag');
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: Container(
+            height: 300,
+            color: Colors.green,
+            child: CustomScrollView(
+              physics: const BouncingScrollPhysics(),
+              slivers: <Widget>[
+                const SliverAppBar(
+                  pinned: true,
+                  floating: true,
+                  expandedHeight: 100.0,
+                ),
+                SliverToBoxAdapter(child: Container(key: anchor, color: Colors.red, height: 100)),
+                SliverToBoxAdapter(child: Container(height: 600, color: Colors.green)),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    final RenderSliverFloatingPinnedPersistentHeader render = tester.renderObject(find.byType(SliverAppBar));
+
+    const double scrollDistance = 40;
+    final TestGesture gesture = await tester.press(find.byKey(anchor));
+    await gesture.moveBy(const Offset(0, scrollDistance));
+    await tester.pump();
+
+    expect(render.geometry.paintOrigin, -scrollDistance);
+  });
+
+  testWidgets('Floating SliverAppBar sticks to top the content is scroll down', (WidgetTester tester) async {
+    const Key anchor = Key('drag');
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: Container(
+            height: 300,
+            color: Colors.green,
+            child: CustomScrollView(
+              physics: const BouncingScrollPhysics(),
+              slivers: <Widget>[
+                const SliverAppBar(
+                  pinned: false,
+                  floating: true,
+                  expandedHeight: 100.0,
+                ),
+                SliverToBoxAdapter(child: Container(key: anchor, color: Colors.red, height: 100)),
+                SliverToBoxAdapter(child: Container(height: 600, color: Colors.green)),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    final RenderSliverFloatingPersistentHeader render = tester.renderObject(find.byType(SliverAppBar));
+
+    const double scrollDistance = 40;
+    final TestGesture gesture = await tester.press(find.byKey(anchor));
+    await gesture.moveBy(const Offset(0, scrollDistance));
+    await tester.pump();
+
+    expect(render.geometry.paintOrigin, -scrollDistance);
+  });
+
+  testWidgets('Pinned SliverAppBar sticks to top the content is scroll down', (WidgetTester tester) async {
+    const Key anchor = Key('drag');
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: Container(
+            height: 300,
+            color: Colors.green,
+            child: CustomScrollView(
+              physics: const BouncingScrollPhysics(),
+              slivers: <Widget>[
+                const SliverAppBar(
+                  pinned: true,
+                  floating: false,
+                  expandedHeight: 100.0,
+                ),
+                SliverToBoxAdapter(child: Container(key: anchor, color: Colors.red, height: 100)),
+                SliverToBoxAdapter(child: Container(height: 600, color: Colors.green)),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    final RenderSliverPinnedPersistentHeader render = tester.renderObject(find.byType(SliverAppBar));
+
+    const double scrollDistance = 40;
+    final TestGesture gesture = await tester.press(find.byKey(anchor));
+    await gesture.moveBy(const Offset(0, scrollDistance));
+    await tester.pump();
+
+    expect(render.geometry.paintOrigin, -scrollDistance);
   });
 }

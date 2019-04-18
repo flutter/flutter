@@ -237,7 +237,7 @@ class MaxColumnWidth extends TableColumnWidth {
   double minIntrinsicWidth(Iterable<RenderBox> cells, double containerWidth) {
     return math.max(
       a.minIntrinsicWidth(cells, containerWidth),
-      b.minIntrinsicWidth(cells, containerWidth)
+      b.minIntrinsicWidth(cells, containerWidth),
     );
   }
 
@@ -245,7 +245,7 @@ class MaxColumnWidth extends TableColumnWidth {
   double maxIntrinsicWidth(Iterable<RenderBox> cells, double containerWidth) {
     return math.max(
       a.maxIntrinsicWidth(cells, containerWidth),
-      b.maxIntrinsicWidth(cells, containerWidth)
+      b.maxIntrinsicWidth(cells, containerWidth),
     );
   }
 
@@ -288,7 +288,7 @@ class MinColumnWidth extends TableColumnWidth {
   double minIntrinsicWidth(Iterable<RenderBox> cells, double containerWidth) {
     return math.min(
       a.minIntrinsicWidth(cells, containerWidth),
-      b.minIntrinsicWidth(cells, containerWidth)
+      b.minIntrinsicWidth(cells, containerWidth),
     );
   }
 
@@ -296,7 +296,7 @@ class MinColumnWidth extends TableColumnWidth {
   double maxIntrinsicWidth(Iterable<RenderBox> cells, double containerWidth) {
     return math.min(
       a.maxIntrinsicWidth(cells, containerWidth),
-      b.maxIntrinsicWidth(cells, containerWidth)
+      b.maxIntrinsicWidth(cells, containerWidth),
     );
   }
 
@@ -368,7 +368,7 @@ class RenderTable extends RenderBox {
     ImageConfiguration configuration = ImageConfiguration.empty,
     TableCellVerticalAlignment defaultVerticalAlignment = TableCellVerticalAlignment.top,
     TextBaseline textBaseline,
-    List<List<RenderBox>> children
+    List<List<RenderBox>> children,
   }) : assert(columns == null || columns >= 0),
        assert(rows == null || rows >= 0),
        assert(rows == null || children == null),
@@ -881,11 +881,11 @@ class RenderTable extends RenderBox {
         }
         assert(tableWidth >= targetWidth);
       }
-    } else // step 2 and 3 are mutually exclusive
+    } // step 2 and 3 are mutually exclusive
 
     // 3. if there were no flex columns, then grow the table to the
     //    minWidth.
-    if (tableWidth < minWidthConstraint) {
+    else if (tableWidth < minWidthConstraint) {
       final double delta = (minWidthConstraint - tableWidth) / columns;
       for (int x = 0; x < columns; x += 1)
         widths[x] += delta;
@@ -916,7 +916,10 @@ class RenderTable extends RenderBox {
       // columns shrinking them proportionally until we have no
       // available columns, then do the same to the non-flexible ones.
       int availableColumns = columns;
-      while (deficit > 0.0 && totalFlex > 0.0) {
+      // Handle double precision errors which causes this loop to become
+      // stuck in certain configurations.
+      const double minimumDeficit = 0.00000001;
+      while (deficit > minimumDeficit && totalFlex > minimumDeficit) {
         double newTotalFlex = 0.0;
         for (int x = 0; x < columns; x += 1) {
           if (flexes[x] != null) {
@@ -955,8 +958,8 @@ class RenderTable extends RenderBox {
                 deficit -= widths[x] - minWidths[x];
                 widths[x] = minWidths[x];
               } else {
-                deficit -= availableDelta;
-                widths[x] -= availableDelta;
+                deficit -= delta;
+                widths[x] -= delta;
                 newAvailableColumns += 1;
               }
             }
@@ -1135,7 +1138,7 @@ class RenderTable extends RenderBox {
           _rowDecorationPainters[y].paint(
             canvas,
             Offset(offset.dx, offset.dy + _rowTops[y]),
-            configuration.copyWith(size: Size(size.width, _rowTops[y+1] - _rowTops[y]))
+            configuration.copyWith(size: Size(size.width, _rowTops[y+1] - _rowTops[y])),
           );
         }
       }

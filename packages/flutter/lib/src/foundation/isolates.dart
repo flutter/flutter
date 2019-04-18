@@ -8,7 +8,7 @@ import 'dart:isolate';
 
 import 'package:meta/meta.dart';
 
-import 'profile.dart';
+import 'constants.dart';
 
 /// Signature for the callback passed to [compute].
 ///
@@ -18,7 +18,7 @@ import 'profile.dart';
 /// of classes, not closures or instance methods of objects.
 ///
 /// {@macro flutter.foundation.compute.limitations}
-typedef ComputeCallback<Q, R> = R Function(Q message);
+typedef ComputeCallback<Q, R> = FutureOr<R> Function(Q message);
 
 /// Spawn an isolate, run `callback` on that isolate, passing it `message`, and
 /// (eventually) return the value returned by `callback`.
@@ -45,14 +45,17 @@ typedef ComputeCallback<Q, R> = R Function(Q message);
 /// The `debugLabel` argument can be specified to provide a name to add to the
 /// [Timeline]. This is useful when profiling an application.
 Future<R> compute<Q, R>(ComputeCallback<Q, R> callback, Q message, { String debugLabel }) async {
-  profile(() { debugLabel ??= callback.toString(); });
+  if (!kReleaseMode) {
+    debugLabel ??= callback.toString();
+  }
   final Flow flow = Flow.begin();
   Timeline.startSync('$debugLabel: start', flow: flow);
   final ReceivePort resultPort = ReceivePort();
+  final ReceivePort errorPort = ReceivePort();
   Timeline.finishSync();
-  final Isolate isolate = await Isolate.spawn<_IsolateConfiguration<Q, R>>(
+  final Isolate isolate = await Isolate.spawn<_IsolateConfiguration<Q, FutureOr<R>>>(
     _spawn,
-    _IsolateConfiguration<Q, R>(
+    _IsolateConfiguration<Q, FutureOr<R>>(
       callback,
       message,
       resultPort.sendPort,
@@ -61,13 +64,32 @@ Future<R> compute<Q, R>(ComputeCallback<Q, R> callback, Q message, { String debu
     ),
     errorsAreFatal: true,
     onExit: resultPort.sendPort,
+    onError: errorPort.sendPort,
   );
-  final R result = await resultPort.first;
+  final Completer<R> result = Completer<R>();
+  errorPort.listen((dynamic errorData) {
+    assert(errorData is List<dynamic>);
+    assert(errorData.length == 2);
+    final Exception exception = Exception(errorData[0]);
+    final StackTrace stack = StackTrace.fromString(errorData[1]);
+    if (result.isCompleted) {
+      Zone.current.handleUncaughtError(exception, stack);
+    } else {
+      result.completeError(exception, stack);
+    }
+  });
+  resultPort.listen((dynamic resultData) {
+    assert(resultData == null || resultData is R);
+    if (!result.isCompleted)
+      result.complete(resultData);
+  });
+  await result.future;
   Timeline.startSync('$debugLabel: end', flow: Flow.end(flow.id));
   resultPort.close();
+  errorPort.close();
   isolate.kill();
   Timeline.finishSync();
-  return result;
+  return result.future;
 }
 
 @immutable
@@ -88,13 +110,11 @@ class _IsolateConfiguration<Q, R> {
   R apply() => callback(message);
 }
 
-void _spawn<Q, R>(_IsolateConfiguration<Q, R> configuration) {
+Future<void> _spawn<Q, R>(_IsolateConfiguration<Q, FutureOr<R>> configuration) async {
   R result;
-  Timeline.timeSync(
+  await Timeline.timeSync(
     '${configuration.debugLabel}',
-    () {
-      result = configuration.apply();
-    },
+    () async { result = await configuration.apply(); },
     flow: Flow.step(configuration.flowId),
   );
   Timeline.timeSync(

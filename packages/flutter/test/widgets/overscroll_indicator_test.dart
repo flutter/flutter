@@ -12,7 +12,7 @@ import '../rendering/mock_canvas.dart';
 
 final Matcher doesNotOverscroll = isNot(paints..circle());
 
-Future<Null> slowDrag(WidgetTester tester, Offset start, Offset offset) async {
+Future<void> slowDrag(WidgetTester tester, Offset start, Offset offset) async {
   final TestGesture gesture = await tester.startGesture(start);
   for (int index = 0; index < 10; index += 1) {
     await gesture.moveBy(offset);
@@ -24,10 +24,10 @@ Future<Null> slowDrag(WidgetTester tester, Offset start, Offset offset) async {
 void main() {
   testWidgets('Overscroll indicator color', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.ltr,
         child: CustomScrollView(
-          slivers: const <Widget>[
+          slivers: <Widget>[
             SliverToBoxAdapter(child: SizedBox(height: 2000.0)),
           ],
         ),
@@ -70,8 +70,8 @@ void main() {
             scrollDirection: Axis.horizontal,
             child: Container(
                 width: 600.0,
-                child: CustomScrollView(
-                  slivers: const <Widget>[
+                child: const CustomScrollView(
+                  slivers: <Widget>[
                       SliverToBoxAdapter(child: SizedBox(height: 2000.0)),
                   ],
                 ),
@@ -91,10 +91,10 @@ void main() {
 
   testWidgets('Overscroll indicator changes side when you drag on the other side', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.ltr,
         child: CustomScrollView(
-          slivers: const <Widget>[
+          slivers: <Widget>[
             SliverToBoxAdapter(child: SizedBox(height: 2000.0)),
           ],
         ),
@@ -129,10 +129,10 @@ void main() {
 
   testWidgets('Overscroll indicator changes side when you shift sides', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.ltr,
         child: CustomScrollView(
-          slivers: const <Widget>[
+          slivers: <Widget>[
             SliverToBoxAdapter(child: SizedBox(height: 2000.0)),
           ],
         ),
@@ -165,11 +165,11 @@ void main() {
   group('Flipping direction of scrollable doesn\'t change overscroll behavior', () {
     testWidgets('down', (WidgetTester tester) async {
       await tester.pumpWidget(
-        Directionality(
+        const Directionality(
           textDirection: TextDirection.ltr,
           child: CustomScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            slivers: const <Widget>[
+            physics: AlwaysScrollableScrollPhysics(),
+            slivers: <Widget>[
               SliverToBoxAdapter(child: SizedBox(height: 20.0)),
             ],
           ),
@@ -185,12 +185,12 @@ void main() {
 
     testWidgets('up', (WidgetTester tester) async {
       await tester.pumpWidget(
-        Directionality(
+        const Directionality(
           textDirection: TextDirection.ltr,
           child: CustomScrollView(
             reverse: true,
-            physics: const AlwaysScrollableScrollPhysics(),
-            slivers: const <Widget>[
+            physics: AlwaysScrollableScrollPhysics(),
+            slivers: <Widget>[
               SliverToBoxAdapter(child: SizedBox(height: 20.0)),
             ],
           ),
@@ -207,11 +207,11 @@ void main() {
 
   testWidgets('Overscroll in both directions', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.ltr,
         child: CustomScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          slivers: const <Widget>[
+          physics: AlwaysScrollableScrollPhysics(),
+          slivers: <Widget>[
             SliverToBoxAdapter(child: SizedBox(height: 20.0)),
           ],
         ),
@@ -230,12 +230,12 @@ void main() {
 
   testWidgets('Overscroll horizontally', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Directionality(
+      const Directionality(
         textDirection: TextDirection.ltr,
         child: CustomScrollView(
           scrollDirection: Axis.horizontal,
-          physics: const AlwaysScrollableScrollPhysics(),
-          slivers: const <Widget>[
+          physics: AlwaysScrollableScrollPhysics(),
+          slivers: <Widget>[
             SliverToBoxAdapter(child: SizedBox(height: 20.0)),
           ],
         ),
@@ -283,11 +283,11 @@ void main() {
         textDirection: TextDirection.ltr,
         child: ScrollConfiguration(
           behavior: TestScrollBehavior1(),
-          child: CustomScrollView(
+          child: const CustomScrollView(
             scrollDirection: Axis.horizontal,
-            physics: const AlwaysScrollableScrollPhysics(),
+            physics: AlwaysScrollableScrollPhysics(),
             reverse: true,
-            slivers: const <Widget>[
+            slivers: <Widget>[
               SliverToBoxAdapter(child: SizedBox(height: 20.0)),
             ],
           ),
@@ -305,10 +305,10 @@ void main() {
         textDirection: TextDirection.ltr,
         child: ScrollConfiguration(
           behavior: TestScrollBehavior2(),
-          child: CustomScrollView(
+          child: const CustomScrollView(
             scrollDirection: Axis.horizontal,
-            physics: const AlwaysScrollableScrollPhysics(),
-            slivers: const <Widget>[
+            physics: AlwaysScrollableScrollPhysics(),
+            slivers: <Widget>[
               SliverToBoxAdapter(child: SizedBox(height: 20.0)),
             ],
           ),

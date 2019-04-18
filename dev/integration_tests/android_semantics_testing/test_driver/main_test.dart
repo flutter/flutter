@@ -126,8 +126,6 @@ void main() {
           actions: <AndroidSemanticsAction>[
             AndroidSemanticsAction.click,
             AndroidSemanticsAction.accessibilityFocus,
-            AndroidSemanticsAction.setSelection,
-            AndroidSemanticsAction.copy,
           ],
         ));
 
@@ -143,8 +141,6 @@ void main() {
           actions: <AndroidSemanticsAction>[
             AndroidSemanticsAction.click,
             AndroidSemanticsAction.accessibilityFocus,
-            AndroidSemanticsAction.setSelection,
-            AndroidSemanticsAction.copy,
           ],
         ));
       });

@@ -43,7 +43,7 @@ void main() {
       'keymap': 'fuchsia',
       'hidUsage': 0x04,
       'codePoint': 0x64,
-      'modifiers': 0x08,
+      'modifiers': RawKeyEventDataFuchsia.modifierLeftMeta,
     });
     await tester.idle();
 
@@ -53,14 +53,14 @@ void main() {
     final RawKeyEventDataFuchsia typedData = events[0].data;
     expect(typedData.hidUsage, 0x04);
     expect(typedData.codePoint, 0x64);
-    expect(typedData.modifiers, 0x08);
+    expect(typedData.modifiers, RawKeyEventDataFuchsia.modifierLeftMeta);
+    expect(typedData.isModifierPressed(ModifierKey.metaModifier, side: KeyboardSide.left), isTrue);
 
     await tester.pumpWidget(Container());
     focusNode.dispose();
   });
 
-  testWidgets('Defunct listeners do not receive events',
-      (WidgetTester tester) async {
+  testWidgets('Defunct listeners do not receive events', (WidgetTester tester) async {
     final List<RawKeyEvent> events = <RawKeyEvent>[];
 
     final FocusNode focusNode = FocusNode();
@@ -79,7 +79,7 @@ void main() {
       'keymap': 'fuchsia',
       'hidUsage': 0x04,
       'codePoint': 0x64,
-      'modifiers': 0x08,
+      'modifiers': RawKeyEventDataFuchsia.modifierLeftMeta,
     });
     await tester.idle();
 
@@ -93,7 +93,7 @@ void main() {
       'keymap': 'fuchsia',
       'hidUsage': 0x04,
       'codePoint': 0x64,
-      'modifiers': 0x08,
+      'modifiers': RawKeyEventDataFuchsia.modifierLeftMeta,
     });
 
     await tester.idle();

@@ -24,20 +24,20 @@ void main() {
 
     await tester.pumpWidget(
       const Padding(
-        key: GlobalObjectKey<Null>(null),
+        key: GlobalObjectKey<State<StatefulWidget>>(null),
         padding: EdgeInsets.only(left: 1.0),
       ),
     );
     await tester.pumpWidget(const Directionality(
       textDirection: TextDirection.rtl,
       child: Padding(
-        key: GlobalObjectKey<Null>(null),
+        key: GlobalObjectKey<State<StatefulWidget>>(null),
         padding: EdgeInsetsDirectional.only(start: 1.0),
       ),
     ));
     await tester.pumpWidget(
       const Padding(
-        key: GlobalObjectKey<Null>(null),
+        key: GlobalObjectKey<State<StatefulWidget>>(null),
         padding: EdgeInsets.only(left: 1.0),
       ),
     );

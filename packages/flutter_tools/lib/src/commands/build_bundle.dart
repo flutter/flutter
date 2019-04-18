@@ -14,7 +14,10 @@ class BuildBundleCommand extends BuildSubCommand {
   BuildBundleCommand({bool verboseHelp = false}) {
     usesTargetOption();
     usesFilesystemOptions(hide: !verboseHelp);
-    addBuildModeFlags();
+    usesBuildNumberOption();
+    addBuildModeFlags(verboseHelp: verboseHelp);
+    addDynamicModeFlags(verboseHelp: verboseHelp);
+    addDynamicBaselineFlags(verboseHelp: verboseHelp);
     argParser
       ..addFlag('precompiled', negatable: false)
       // This option is still referenced by the iOS build scripts. We should
@@ -22,33 +25,14 @@ class BuildBundleCommand extends BuildSubCommand {
       ..addOption('asset-base', help: 'Ignored. Will be removed.', hide: !verboseHelp)
       ..addOption('manifest', defaultsTo: defaultManifestPath)
       ..addOption('private-key', defaultsTo: defaultPrivateKeyPath)
-      ..addOption('snapshot', defaultsTo: defaultSnapshotPath)
       ..addOption('depfile', defaultsTo: defaultDepfilePath)
-      ..addOption('kernel-file', defaultsTo: defaultApplicationKernelPath)
       ..addOption('target-platform',
         defaultsTo: 'android-arm',
-        allowed: <String>['android-arm', 'android-arm64', 'ios']
+        allowed: <String>['android-arm', 'android-arm64', 'android-x86', 'android-x64', 'ios'],
       )
       ..addFlag('track-widget-creation',
         hide: !verboseHelp,
         help: 'Track widget creation locations. Requires Dart 2.0 functionality.',
-      )
-      ..addOption('precompile',
-        hide: !verboseHelp,
-        help: 'Precompile functions specified in input file. This flag is only\n'
-              'allowed when using --dynamic. It takes a Dart compilation trace\n'
-              'file produced by the training run of the application. With this\n'
-              'flag, instead of using default Dart VM snapshot provided by the\n'
-              'engine, the application will use its own snapshot that includes\n'
-              'additional compiled functions.'
-      )
-      ..addFlag('hotupdate',
-        hide: !verboseHelp,
-        help: 'Build differential snapshot based on the last state of the build\n'
-              'tree and any changes to the application source code since then.\n'
-              'This flag is only allowed when using --dynamic. With this flag,\n'
-              'a partial VM snapshot is generated that is loaded on top of the\n'
-              'original VM snapshot that contains precompiled code.'
       )
       ..addMultiOption(FlutterOptions.kExtraFrontEndOptions,
         splitCommas: true,
@@ -79,8 +63,6 @@ class BuildBundleCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    await super.runCommand();
-
     final String targetPlatform = argResults['target-platform'];
     final TargetPlatform platform = getTargetPlatformForName(targetPlatform);
     if (platform == null)
@@ -88,21 +70,23 @@ class BuildBundleCommand extends BuildSubCommand {
 
     final BuildMode buildMode = getBuildMode();
 
+    final String buildNumber = argResults['build-number'] != null ? argResults['build-number'] : null;
+
     await build(
       platform: platform,
       buildMode: buildMode,
       mainPath: targetFile,
       manifestPath: argResults['manifest'],
-      snapshotPath: argResults['snapshot'],
-      applicationKernelFilePath: argResults['kernel-file'],
       depfilePath: argResults['depfile'],
       privateKeyPath: argResults['private-key'],
       assetDirPath: argResults['asset-dir'],
       precompiledSnapshot: argResults['precompiled'],
       reportLicensedPackages: argResults['report-licensed-packages'],
       trackWidgetCreation: argResults['track-widget-creation'],
-      compilationTraceFilePath: argResults['precompile'],
-      buildHotUpdate: argResults['hotupdate'],
+      compilationTraceFilePath: argResults['compilation-trace-file'],
+      createPatch: argResults['patch'],
+      buildNumber: buildNumber,
+      baselineDir: argResults['baseline-dir'],
       extraFrontEndOptions: argResults[FlutterOptions.kExtraFrontEndOptions],
       extraGenSnapshotOptions: argResults[FlutterOptions.kExtraGenSnapshotOptions],
       fileSystemScheme: argResults['filesystem-scheme'],

@@ -52,7 +52,7 @@ void main() {
         ..rrect(
           rrect: RRect.fromLTRBR(300.0, 270.0, 500.0, 330.0, const Radius.circular(6.0)),
           color: highlightColor,
-        )
+        ),
     );
 
     await gesture.up();
@@ -172,7 +172,7 @@ void main() {
       box,
       paints
         ..rect(rect: Rect.fromLTRB(300.0, 200.0, 500.0, 400.0), color: Color(Colors.blue.value))
-        ..circle(color: Color(Colors.green.value))
+        ..circle(color: Color(Colors.green.value)),
     );
 
     await tester.pumpWidget(
@@ -200,7 +200,7 @@ void main() {
       box,
       paints
         ..rect(rect: Rect.fromLTRB(300.0, 200.0, 500.0, 400.0), color: Color(Colors.red.value))
-        ..circle(color: Color(Colors.green.value))
+        ..circle(color: Color(Colors.green.value)),
     );
 
     await tester.pumpWidget(

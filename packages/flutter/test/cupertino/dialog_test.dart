@@ -74,7 +74,7 @@ void main() {
           CupertinoDialogAction(child: Text('Cancel')),
           CupertinoDialogAction(child: Text('OK')),
         ],
-      )
+      ),
     )));
 
     expect(
@@ -92,12 +92,18 @@ void main() {
                     label: 'Alert',
                     children: <TestSemantics>[
                       TestSemantics(
+                        flags: <SemanticsFlag>[
+                          SemanticsFlag.hasImplicitScrolling,
+                        ],
                         children: <TestSemantics>[
                           TestSemantics(label: 'The Title'),
                           TestSemantics(label: 'Content'),
                         ],
                       ),
                       TestSemantics(
+                        flags: <SemanticsFlag>[
+                          SemanticsFlag.hasImplicitScrolling,
+                        ],
                         children: <TestSemantics>[
                           TestSemantics(
                             flags: <SemanticsFlag>[SemanticsFlag.isButton],
@@ -120,7 +126,7 @@ void main() {
       ignoreId: true,
       ignoreRect: true,
       ignoreTransform: true,
-    )
+    ),
   );
 
     semantics.dispose();
@@ -672,14 +678,15 @@ void main() {
     // the dividers also paints a white background the size of Rect.largest.
     // That background ends up being clipped by the containing ScrollView.
     //
-    // Here we test that the largest Rect is contained within the painted Path.
+    // Here we test that the Rect(0.0, 0.0, renderBox.size.width, renderBox.size.height)
+    // is contained within the painted Path.
     // We don't test for exclusion because for some reason the Path is reporting
     // that even points beyond Rect.largest are within the Path. That's not an
     // issue for our use-case, so we don't worry about it.
     expect(actionsSectionBox, paints..path(
       includes: <Offset>[
-        Offset(Rect.largest.left, Rect.largest.top),
-        Offset(Rect.largest.right, Rect.largest.bottom),
+        const Offset(0.0, 0.0),
+        Offset(actionsSectionBox.size.width, actionsSectionBox.size.height),
       ],
     ));
   });
@@ -840,15 +847,11 @@ void main() {
     // Enter animation.
     await tester.pump();
     Transform transform = tester.widget(find.byType(Transform));
-    expect(transform.transform[0], closeTo(1.2, 0.01));
+    expect(transform.transform[0], closeTo(1.3, 0.01));
 
     await tester.pump(const Duration(milliseconds: 50));
     transform = tester.widget(find.byType(Transform));
-    expect(transform.transform[0], closeTo(1.182, 0.001));
-
-    await tester.pump(const Duration(milliseconds: 50));
-    transform = tester.widget(find.byType(Transform));
-    expect(transform.transform[0], closeTo(1.108, 0.001));
+    expect(transform.transform[0], closeTo(1.145, 0.001));
 
     await tester.pump(const Duration(milliseconds: 50));
     transform = tester.widget(find.byType(Transform));
@@ -856,11 +859,15 @@ void main() {
 
     await tester.pump(const Duration(milliseconds: 50));
     transform = tester.widget(find.byType(Transform));
-    expect(transform.transform[0], closeTo(1.015, 0.001));
+    expect(transform.transform[0], closeTo(1.013, 0.001));
 
     await tester.pump(const Duration(milliseconds: 50));
     transform = tester.widget(find.byType(Transform));
     expect(transform.transform[0], closeTo(1.003, 0.001));
+
+    await tester.pump(const Duration(milliseconds: 50));
+    transform = tester.widget(find.byType(Transform));
+    expect(transform.transform[0], closeTo(1.000, 0.001));
 
     await tester.pump(const Duration(milliseconds: 50));
     transform = tester.widget(find.byType(Transform));
@@ -944,23 +951,23 @@ void main() {
     // Exit animation, look at reverse FadeTransition.
     await tester.pump(const Duration(milliseconds: 25));
     transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1);
-    expect(transition.opacity.value, closeTo(0.358, 0.001));
+    expect(transition.opacity.value, closeTo(0.500, 0.001));
 
     await tester.pump(const Duration(milliseconds: 25));
     transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1);
-    expect(transition.opacity.value, closeTo(0.231, 0.001));
+    expect(transition.opacity.value, closeTo(0.332, 0.001));
 
     await tester.pump(const Duration(milliseconds: 25));
     transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1);
-    expect(transition.opacity.value, closeTo(0.128, 0.001));
+    expect(transition.opacity.value, closeTo(0.188, 0.001));
 
     await tester.pump(const Duration(milliseconds: 25));
     transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1);
-    expect(transition.opacity.value, closeTo(0.056, 0.001));
+    expect(transition.opacity.value, closeTo(0.081, 0.001));
 
     await tester.pump(const Duration(milliseconds: 25));
     transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1);
-    expect(transition.opacity.value, closeTo(0.013, 0.001));
+    expect(transition.opacity.value, closeTo(0.019, 0.001));
 
     await tester.pump(const Duration(milliseconds: 25));
     transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1);
@@ -984,7 +991,7 @@ RenderBox findScrollableActionsSectionRenderBox(WidgetTester tester) {
   return actionsSection;
 }
 
-Widget createAppWithButtonThatLaunchesDialog({WidgetBuilder dialogBuilder}) {
+Widget createAppWithButtonThatLaunchesDialog({ WidgetBuilder dialogBuilder }) {
   return MaterialApp(
     home: Material(
       child: Center(

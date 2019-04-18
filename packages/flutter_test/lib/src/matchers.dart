@@ -9,9 +9,9 @@ import 'dart:ui' as ui;
 import 'dart:ui';
 
 import 'package:meta/meta.dart';
-import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
-import 'package:test/test.dart' as test_package show TypeMatcher;
-import 'package:test/src/frontend/async_matcher.dart'; // ignore: implementation_imports
+import 'package:test_api/test_api.dart' hide TypeMatcher, isInstanceOf;
+import 'package:test_api/test_api.dart' as test_package show TypeMatcher;
+import 'package:test_api/src/frontend/async_matcher.dart'; // ignore: implementation_imports
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -155,6 +155,9 @@ const Matcher hasAGoodToStringDeep = _HasGoodToStringDeep();
 ///
 /// This is equivalent to `throwsA(isInstanceOf<FlutterError>())`.
 ///
+/// If you are trying to test whether a call to [WidgetTester.pumpWidget]
+/// results in a [FlutterError], see [TestWidgetsFlutterBinding.takeException].
+///
 /// See also:
 ///
 ///  * [throwsAssertionError], to test if a function throws any [AssertionError].
@@ -165,6 +168,10 @@ final Matcher throwsFlutterError = throwsA(isFlutterError);
 /// A matcher for functions that throw [AssertionError].
 ///
 /// This is equivalent to `throwsA(isInstanceOf<AssertionError>())`.
+///
+/// If you are trying to test whether a call to [WidgetTester.pumpWidget]
+/// results in an [AssertionError], see
+/// [TestWidgetsFlutterBinding.takeException].
 ///
 /// See also:
 ///
@@ -236,7 +243,7 @@ Matcher equalsIgnoringHashCodes(String value) {
 /// method [name] and [arguments].
 ///
 /// Arguments checking implements deep equality for [List] and [Map] types.
-Matcher isMethodCall(String name, {@required dynamic arguments}) {
+Matcher isMethodCall(String name, { @required dynamic arguments }) {
   return _IsMethodCall(name, arguments);
 }
 
@@ -249,7 +256,7 @@ Matcher isMethodCall(String name, {@required dynamic arguments}) {
 /// When using this matcher you typically want to use a rectangle larger than
 /// the area you expect to paint in for [areaToCompare] to catch errors where
 /// the path draws outside the expected area.
-Matcher coversSameAreaAs(Path expectedPath, {@required Rect areaToCompare, int sampleSize = 20})
+Matcher coversSameAreaAs(Path expectedPath, { @required Rect areaToCompare, int sampleSize = 20 })
   => _CoversSameAreaAs(expectedPath, areaToCompare: areaToCompare, sampleSize: sampleSize);
 
 /// Asserts that a [Finder], [Future<ui.Image>], or [ui.Image] matches the
@@ -355,6 +362,9 @@ Matcher matchesSemantics({
   TextDirection textDirection,
   Rect rect,
   Size size,
+  double elevation,
+  double thickness,
+  int platformViewId,
   // Flags //
   bool hasCheckedState = false,
   bool isChecked = false,
@@ -503,172 +513,12 @@ Matcher matchesSemantics({
     textDirection: textDirection,
     rect: rect,
     size: size,
+    elevation: elevation,
+    thickness: thickness,
+    platformViewId: platformViewId,
     customActions: customActions,
     hintOverrides: hintOverrides,
     children: children,
-  );
-}
-
-/// DEPRECATED: use [matchesSemantics] instead.
-@Deprecated('use matchesSemantics instead')
-Matcher matchesSemanticsData({
-  String label,
-  String hint,
-  String value,
-  String increasedValue,
-  String decreasedValue,
-  TextDirection textDirection,
-  Rect rect,
-  Size size,
-  // Flags //
-  bool hasCheckedState = false,
-  bool isChecked = false,
-  bool isSelected = false,
-  bool isButton = false,
-  bool isFocused = false,
-  bool isTextField = false,
-  bool hasEnabledState = false,
-  bool isEnabled = false,
-  bool isInMutuallyExclusiveGroup = false,
-  bool isHeader = false,
-  bool isObscured = false,
-  bool namesRoute = false,
-  bool scopesRoute = false,
-  bool isHidden = false,
-  bool isImage = false,
-  bool isLiveRegion = false,
-  bool hasToggledState = false,
-  bool isToggled = false,
-  bool hasImplicitScrolling = false,
-  // Actions //
-  bool hasTapAction = false,
-  bool hasLongPressAction = false,
-  bool hasScrollLeftAction = false,
-  bool hasScrollRightAction = false,
-  bool hasScrollUpAction = false,
-  bool hasScrollDownAction = false,
-  bool hasIncreaseAction = false,
-  bool hasDecreaseAction = false,
-  bool hasShowOnScreenAction = false,
-  bool hasMoveCursorForwardByCharacterAction = false,
-  bool hasMoveCursorBackwardByCharacterAction = false,
-  bool hasMoveCursorForwardByWordAction = false,
-  bool hasMoveCursorBackwardByWordAction = false,
-  bool hasSetSelectionAction = false,
-  bool hasCopyAction = false,
-  bool hasCutAction = false,
-  bool hasPasteAction = false,
-  bool hasDidGainAccessibilityFocusAction = false,
-  bool hasDidLoseAccessibilityFocusAction = false,
-  bool hasDismissAction = false,
-  // Custom actions and overrides
-  String onTapHint,
-  String onLongPressHint,
-  List<CustomSemanticsAction> customActions,
-}) {
-    final List<SemanticsFlag> flags = <SemanticsFlag>[];
-  if (hasCheckedState)
-    flags.add(SemanticsFlag.hasCheckedState);
-  if (isChecked)
-    flags.add(SemanticsFlag.isChecked);
-  if (isSelected)
-    flags.add(SemanticsFlag.isSelected);
-  if (isButton)
-    flags.add(SemanticsFlag.isButton);
-  if (isTextField)
-    flags.add(SemanticsFlag.isTextField);
-  if (isFocused)
-    flags.add(SemanticsFlag.isFocused);
-  if (hasEnabledState)
-    flags.add(SemanticsFlag.hasEnabledState);
-  if (isEnabled)
-    flags.add(SemanticsFlag.isEnabled);
-  if (isInMutuallyExclusiveGroup)
-    flags.add(SemanticsFlag.isInMutuallyExclusiveGroup);
-  if (isHeader)
-    flags.add(SemanticsFlag.isHeader);
-  if (isObscured)
-    flags.add(SemanticsFlag.isObscured);
-  if (namesRoute)
-    flags.add(SemanticsFlag.namesRoute);
-  if (scopesRoute)
-    flags.add(SemanticsFlag.scopesRoute);
-  if (isHidden)
-    flags.add(SemanticsFlag.isHidden);
-  if (isImage)
-    flags.add(SemanticsFlag.isImage);
-  if (isLiveRegion)
-    flags.add(SemanticsFlag.isLiveRegion);
-  if (hasToggledState)
-    flags.add(SemanticsFlag.hasToggledState);
-  if (isToggled)
-    flags.add(SemanticsFlag.isToggled);
-  if (hasImplicitScrolling)
-    flags.add(SemanticsFlag.hasImplicitScrolling);
-
-  final List<SemanticsAction> actions = <SemanticsAction>[];
-  if (hasTapAction)
-    actions.add(SemanticsAction.tap);
-  if (hasLongPressAction)
-    actions.add(SemanticsAction.longPress);
-  if (hasScrollLeftAction)
-    actions.add(SemanticsAction.scrollLeft);
-  if (hasScrollRightAction)
-    actions.add(SemanticsAction.scrollRight);
-  if (hasScrollUpAction)
-    actions.add(SemanticsAction.scrollUp);
-  if (hasScrollDownAction)
-    actions.add(SemanticsAction.scrollDown);
-  if (hasIncreaseAction)
-    actions.add(SemanticsAction.increase);
-  if (hasDecreaseAction)
-    actions.add(SemanticsAction.decrease);
-  if (hasShowOnScreenAction)
-    actions.add(SemanticsAction.showOnScreen);
-  if (hasMoveCursorForwardByCharacterAction)
-    actions.add(SemanticsAction.moveCursorForwardByCharacter);
-  if (hasMoveCursorBackwardByCharacterAction)
-    actions.add(SemanticsAction.moveCursorBackwardByCharacter);
-  if (hasSetSelectionAction)
-    actions.add(SemanticsAction.setSelection);
-  if (hasCopyAction)
-    actions.add(SemanticsAction.copy);
-  if (hasCutAction)
-    actions.add(SemanticsAction.cut);
-  if (hasPasteAction)
-    actions.add(SemanticsAction.paste);
-  if (hasDidGainAccessibilityFocusAction)
-    actions.add(SemanticsAction.didGainAccessibilityFocus);
-  if (hasDidLoseAccessibilityFocusAction)
-    actions.add(SemanticsAction.didLoseAccessibilityFocus);
-  if (customActions != null && customActions.isNotEmpty)
-    actions.add(SemanticsAction.customAction);
-  if (hasDismissAction)
-    actions.add(SemanticsAction.dismiss);
-  if (hasMoveCursorForwardByWordAction)
-    actions.add(SemanticsAction.moveCursorForwardByWord);
-  if (hasMoveCursorBackwardByWordAction)
-    actions.add(SemanticsAction.moveCursorBackwardByWord);
-  SemanticsHintOverrides hintOverrides;
-  if (onTapHint != null || onLongPressHint != null)
-    hintOverrides = SemanticsHintOverrides(
-      onTapHint: onTapHint,
-      onLongPressHint: onLongPressHint,
-    );
-
-  return _MatchesSemanticsData(
-    label: label,
-    hint: hint,
-    value: value,
-    increasedValue: increasedValue,
-    decreasedValue: decreasedValue,
-    actions: actions,
-    flags: flags,
-    textDirection: textDirection,
-    rect: rect,
-    size: size,
-    customActions: customActions,
-    hintOverrides: hintOverrides,
   );
 }
 
@@ -759,7 +609,7 @@ class _FindsWidgetMatcher extends Matcher {
     dynamic item,
     Description mismatchDescription,
     Map<dynamic, dynamic> matchState,
-    bool verbose
+    bool verbose,
   ) {
     final Finder finder = matchState[Finder];
     final int count = finder.evaluate().length;
@@ -907,7 +757,7 @@ class _EqualsIgnoringHashCodes extends Matcher {
     dynamic item,
     Description mismatchDescription,
     Map<dynamic, dynamic> matchState,
-    bool verbose
+    bool verbose,
   ) {
     if (matchState.containsKey(_mismatchedValueKey)) {
       final String actualValue = matchState[_mismatchedValueKey];
@@ -1040,7 +890,7 @@ class _HasGoodToStringDeep extends Matcher {
     dynamic item,
     Description mismatchDescription,
     Map<dynamic, dynamic> matchState,
-    bool verbose
+    bool verbose,
   ) {
     if (matchState.containsKey(_toStringDeepErrorDescriptionKey)) {
       return mismatchDescription.add(
@@ -1300,14 +1150,14 @@ const Matcher hasNoImmediateClip = _MatchAnythingExceptClip();
 /// Asserts that a [Finder] locates a single object whose root RenderObject
 /// is a [RenderClipRRect] with no clipper set, and border radius equals to
 /// [borderRadius], or an equivalent [RenderClipPath].
-Matcher clipsWithBoundingRRect({@required BorderRadius borderRadius}) {
+Matcher clipsWithBoundingRRect({ @required BorderRadius borderRadius }) {
   return _ClipsWithBoundingRRect(borderRadius: borderRadius);
 }
 
 /// Asserts that a [Finder] locates a single object whose root RenderObject
 /// is a [RenderClipPath] with a [ShapeBorderClipper] that clips to
 /// [shape].
-Matcher clipsWithShapeBorder({@required ShapeBorder shape}) {
+Matcher clipsWithShapeBorder({ @required ShapeBorder shape }) {
   return _ClipsWithShapeBorder(shape: shape);
 }
 
@@ -1365,10 +1215,10 @@ abstract class _FailWithDescriptionMatcher extends Matcher {
 
   @override
   Description describeMismatch(
-      dynamic item,
-      Description mismatchDescription,
-      Map<dynamic, dynamic> matchState,
-      bool verbose
+    dynamic item,
+    Description mismatchDescription,
+    Map<dynamic, dynamic> matchState,
+    bool verbose,
   ) {
     return mismatchDescription.add(matchState['failure']);
   }
@@ -1459,18 +1309,20 @@ class _RendersOnPhysicalModel extends _MatchRenderObject<RenderPhysicalShape, Re
       return false;
 
     if (
-      borderRadius == null
-      && shape == BoxShape.rectangle
-      && !assertRoundedRectangle(shapeClipper, BorderRadius.zero, matchState)
-    )
+      borderRadius == null &&
+      shape == BoxShape.rectangle &&
+      !assertRoundedRectangle(shapeClipper, BorderRadius.zero, matchState)
+    ) {
       return false;
+    }
 
     if (
-      borderRadius == null
-      && shape == BoxShape.circle
-      && !assertCircle(shapeClipper, matchState)
-    )
+      borderRadius == null &&
+      shape == BoxShape.circle &&
+      !assertCircle(shapeClipper, matchState)
+    ) {
       return false;
+    }
 
     if (elevation != null && renderObject.elevation != elevation)
       return failWithDescription(matchState, 'had elevation: ${renderObject.elevation}');
@@ -1479,18 +1331,18 @@ class _RendersOnPhysicalModel extends _MatchRenderObject<RenderPhysicalShape, Re
   }
 
   bool assertRoundedRectangle(ShapeBorderClipper shapeClipper, BorderRadius borderRadius, Map<dynamic, dynamic> matchState) {
-      if (shapeClipper.shape.runtimeType != RoundedRectangleBorder)
-        return failWithDescription(matchState, 'had shape border: ${shapeClipper.shape}');
-      final RoundedRectangleBorder border = shapeClipper.shape;
-      if (border.borderRadius != borderRadius)
-        return failWithDescription(matchState, 'had borderRadius: ${border.borderRadius}');
-      return true;
+    if (shapeClipper.shape.runtimeType != RoundedRectangleBorder)
+      return failWithDescription(matchState, 'had shape border: ${shapeClipper.shape}');
+    final RoundedRectangleBorder border = shapeClipper.shape;
+    if (border.borderRadius != borderRadius)
+      return failWithDescription(matchState, 'had borderRadius: ${border.borderRadius}');
+    return true;
   }
 
   bool assertCircle(ShapeBorderClipper shapeClipper, Map<dynamic, dynamic> matchState) {
-      if (shapeClipper.shape.runtimeType != CircleBorder)
-        return failWithDescription(matchState, 'had shape border: ${shapeClipper.shape}');
-      return true;
+    if (shapeClipper.shape.runtimeType != CircleBorder)
+      return failWithDescription(matchState, 'had shape border: ${shapeClipper.shape}');
+    return true;
   }
 
   @override
@@ -1506,7 +1358,7 @@ class _RendersOnPhysicalModel extends _MatchRenderObject<RenderPhysicalShape, Re
   }
 }
 
-class _RendersOnPhysicalShape extends _MatchRenderObject<RenderPhysicalShape, Null> {
+class _RendersOnPhysicalShape extends _MatchRenderObject<RenderPhysicalShape, RenderPhysicalModel> {
   const _RendersOnPhysicalShape({
     this.shape,
     this.elevation,
@@ -1607,7 +1459,7 @@ class _ClipsWithBoundingRRect extends _MatchRenderObject<RenderClipPath, RenderC
     description.add('clips with bounding rounded rectangle with borderRadius: $borderRadius');
 }
 
-class _ClipsWithShapeBorder extends _MatchRenderObject<RenderClipPath, Null> {
+class _ClipsWithShapeBorder extends _MatchRenderObject<RenderClipPath, RenderClipRRect> {
   const _ClipsWithShapeBorder({@required this.shape});
 
   final ShapeBorder shape;
@@ -1657,7 +1509,7 @@ class _CoversSameAreaAs extends Matcher {
       for (int j = 0; j < sampleSize; j += 1) {
         final Offset offset = Offset(
           i * (areaToCompare.width / sampleSize),
-          j * (areaToCompare.height / sampleSize)
+          j * (areaToCompare.height / sampleSize),
         );
 
         if (!_samplePoint(matchState, actualPath, offset))
@@ -1695,7 +1547,7 @@ class _CoversSameAreaAs extends Matcher {
     dynamic item,
     Description mismatchDescription,
     Map<dynamic, dynamic> matchState,
-    bool verbose
+    bool verbose,
   ) {
     return mismatchDescription.add(matchState['failure']);
   }
@@ -1848,6 +1700,9 @@ class _MatchesSemanticsData extends Matcher {
     this.textDirection,
     this.rect,
     this.size,
+    this.elevation,
+    this.thickness,
+    this.platformViewId,
     this.customActions,
     this.hintOverrides,
     this.children,
@@ -1865,6 +1720,9 @@ class _MatchesSemanticsData extends Matcher {
   final TextDirection textDirection;
   final Rect rect;
   final Size size;
+  final double elevation;
+  final double thickness;
+  final int platformViewId;
   final List<Matcher> children;
 
   @override
@@ -1890,6 +1748,12 @@ class _MatchesSemanticsData extends Matcher {
       description.add(' with rect: $rect');
     if (size != null)
       description.add(' with size: $size');
+    if (elevation != null)
+      description.add(' with elevation: $elevation');
+    if (thickness != null)
+      description.add(' with thickness: $thickness');
+    if (platformViewId != null)
+      description.add(' with platformViewId: $platformViewId');
     if (customActions != null)
       description.add(' with custom actions: $customActions');
     if (hintOverrides != null)
@@ -1926,6 +1790,12 @@ class _MatchesSemanticsData extends Matcher {
       return failWithDescription(matchState, 'rect was: ${data.rect}');
     if (size != null && size != data.rect.size)
       return failWithDescription(matchState, 'size was: ${data.rect.size}');
+    if (elevation != null && elevation != data.elevation)
+      return failWithDescription(matchState, 'elevation was: ${data.elevation}');
+    if (thickness != null && thickness != data.thickness)
+      return failWithDescription(matchState, 'thickness was: ${data.thickness}');
+    if (platformViewId != null && platformViewId != data.platformViewId)
+      return failWithDescription(matchState, 'platformViewId was: ${data.platformViewId}');
     if (actions != null) {
       int actionBits = 0;
       for (SemanticsAction action in actions)
@@ -1943,7 +1813,7 @@ class _MatchesSemanticsData extends Matcher {
       final List<CustomSemanticsAction> providedCustomActions = data.customSemanticsActionIds.map((int id) {
         return CustomSemanticsAction.getAction(id);
       }).toList();
-      final List<CustomSemanticsAction> expectedCustomActions = List<CustomSemanticsAction>.from(customActions ?? const <int>[]);
+      final List<CustomSemanticsAction> expectedCustomActions = customActions?.toList() ?? <CustomSemanticsAction>[];
       if (hintOverrides?.onTapHint != null)
         expectedCustomActions.add(CustomSemanticsAction.overridingAction(hint: hintOverrides.onTapHint, action: SemanticsAction.tap));
       if (hintOverrides?.onLongPressHint != null)
@@ -1992,11 +1862,11 @@ class _MatchesSemanticsData extends Matcher {
 
   @override
   Description describeMismatch(
-      dynamic item,
-      Description mismatchDescription,
-      Map<dynamic, dynamic> matchState,
-      bool verbose
-      ) {
+    dynamic item,
+    Description mismatchDescription,
+    Map<dynamic, dynamic> matchState,
+    bool verbose,
+  ) {
     return mismatchDescription.add(matchState['failure']);
   }
 }

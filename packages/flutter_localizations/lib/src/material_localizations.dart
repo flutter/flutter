@@ -8,15 +8,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' as intl;
 import 'package:intl/date_symbols.dart' as intl;
-import 'package:intl/date_symbol_data_custom.dart' as date_symbol_data_custom;
-import 'l10n/date_localizations.dart' as date_localizations;
 
-import 'l10n/localizations.dart';
+import 'l10n/generated_material_localizations.dart';
+import 'utils/date_localizations.dart' as util;
 import 'widgets_localizations.dart';
-
-// Watch out: the supported locales list in the doc comment below must be kept
-// in sync with the list we test, see test/translations_test.dart, and of course
-// the actual list of supported locales in _MaterialLocalizationsDelegate.
 
 /// Implementation of localized strings for the material widgets using the
 /// `intl` package for date and time formatting.
@@ -67,7 +62,7 @@ import 'widgets_localizations.dart';
 /// See also:
 ///
 ///  * The Flutter Internationalization Tutorial,
-///    <https://flutter.io/tutorials/internationalization/>.
+///    <https://flutter.dev/tutorials/internationalization/>.
 ///  * [DefaultMaterialLocalizations], which only provides US English translations.
 abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   /// Initializes an object that defines the material widgets' localized strings
@@ -252,7 +247,7 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   String get tabLabelRaw;
 
   @override
-  String tabLabel({int tabIndex, int tabCount}) {
+  String tabLabel({ int tabIndex, int tabCount }) {
     assert(tabIndex >= 1);
     assert(tabCount >= 1);
     final String template = tabLabelRaw;
@@ -502,18 +497,8 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
     ).replaceFirst(r'$remainingCount', formatDecimal(remainingCount));
   }
 
-  /// The script category used by [localTextGeometry]. Must be one of the strings
-  /// declared in [MaterialTextGeometry].
-  //
-  // TODO(ianh): make this return a TextTheme from MaterialTextGeometry.
-  // TODO(ianh): drop the constructor on MaterialTextGeometry.
-  // TODO(ianh): drop the strings on MaterialTextGeometry.
-  @protected
-  String get scriptCategory;
-
-  /// Looks up text geometry defined in [MaterialTextGeometry].
   @override
-  TextTheme get localTextGeometry => MaterialTextGeometry.forScriptCategory(scriptCategory);
+  ScriptCategory get scriptCategory;
 
   /// A [LocalizationsDelegate] that uses [GlobalMaterialLocalizations.load]
   /// to create an instance of this class.
@@ -573,37 +558,20 @@ class _MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocal
   @override
   bool isSupported(Locale locale) => kSupportedLanguages.contains(locale.languageCode);
 
-  /// Tracks if date i18n data has been loaded.
-  static bool _dateIntlDataInitialized = false;
-
-  /// Loads i18n data for dates if it hasn't be loaded yet.
-  ///
-  /// Only the first invocation of this function has the effect of loading the
-  /// data. Subsequent invocations have no effect.
-  static void _loadDateIntlDataIfNotLoaded() {
-    if (!_dateIntlDataInitialized) {
-      date_localizations.dateSymbols.forEach((String locale, dynamic data) {
-        assert(date_localizations.datePatterns.containsKey(locale));
-        final intl.DateSymbols symbols = intl.DateSymbols.deserializeFromMap(data);
-        date_symbol_data_custom.initializeDateFormattingCustom(
-          locale: locale,
-          symbols: symbols,
-          patterns: date_localizations.datePatterns[locale],
-        );
-      });
-      _dateIntlDataInitialized = true;
-    }
-  }
-
   static final Map<Locale, Future<MaterialLocalizations>> _loadedTranslations = <Locale, Future<MaterialLocalizations>>{};
 
   @override
   Future<MaterialLocalizations> load(Locale locale) {
     assert(isSupported(locale));
     return _loadedTranslations.putIfAbsent(locale, () {
-      _loadDateIntlDataIfNotLoaded();
+      util.loadDateIntlDataIfNotLoaded();
 
       final String localeName = intl.Intl.canonicalizedLocale(locale.toString());
+      assert(
+        locale.toString() == localeName,
+        'Flutter does not support the non-standard locale form $locale (which '
+        'might be $localeName',
+      );
 
       intl.DateFormat fullYearFormat;
       intl.DateFormat mediumDateFormat;
@@ -639,9 +607,7 @@ class _MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocal
         twoDigitZeroPaddedFormat = intl.NumberFormat('00');
       }
 
-      assert(locale.toString() == localeName, 'comparing "$locale" to "$localeName"');
-
-      return SynchronousFuture<MaterialLocalizations>(getTranslation(
+      return SynchronousFuture<MaterialLocalizations>(getMaterialTranslation(
         locale,
         fullYearFormat,
         mediumDateFormat,
@@ -655,4 +621,7 @@ class _MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocal
 
   @override
   bool shouldReload(_MaterialLocalizationsDelegate old) => false;
+
+  @override
+  String toString() => 'GlobalMaterialLocalizations.delegate(${kSupportedLanguages.length} locales)';
 }

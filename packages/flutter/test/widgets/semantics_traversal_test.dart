@@ -14,7 +14,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'semantics_tester.dart';
 
-typedef TraversalTestFunction = Future<Null> Function(TraversalTester tester);
+typedef TraversalTestFunction = Future<void> Function(TraversalTester tester);
 const Size tenByTen = Size(10.0, 10.0);
 
 void main() {
@@ -287,7 +287,7 @@ class TraversalTester {
   final WidgetTester tester;
   final SemanticsTester semantics;
 
-  Future<Null> test({
+  Future<void> test({
     TextDirection textDirection,
     Map<String, Rect> children,
     String expectedTraversal,
@@ -317,7 +317,7 @@ class TraversalTester {
                   }).toList(),
                 ),
               ),
-            )
+            ),
         )
     );
 
@@ -331,7 +331,7 @@ class TraversalTester {
                 label: label,
               );
             }).toList(),
-          )
+          ),
         ],
       ),
       ignoreTransform: true,

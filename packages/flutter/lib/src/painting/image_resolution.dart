@@ -105,14 +105,14 @@ const String _kAssetManifestFileName = 'AssetManifest.json';
 /// lib/backgrounds/background1.png
 /// lib/backgrounds/background2.png
 /// lib/backgrounds/background3.png
-///```
+/// ```
 ///
 /// To include, say the first image, the `pubspec.yaml` of the app should specify
 /// it in the `assets` section:
 ///
 /// ```yaml
-///  assets:
-///    - packages/fancy_backgrounds/backgrounds/background1.png
+///   assets:
+///     - packages/fancy_backgrounds/backgrounds/background1.png
 /// ```
 ///
 /// The `lib/` is implied, so it should not be included in the asset path.
@@ -128,7 +128,8 @@ class AssetImage extends AssetBundleImageProvider {
   /// from the set of images to choose from. The [package] argument must be
   /// non-null when fetching an asset that is included in package. See the
   /// documentation for the [AssetImage] class itself for details.
-  const AssetImage(this.assetName, {
+  const AssetImage(
+    this.assetName, {
     this.bundle,
     this.package,
   }) : assert(assetName != null);
@@ -176,13 +177,13 @@ class AssetImage extends AssetBundleImageProvider {
         final String chosenName = _chooseVariant(
           keyName,
           configuration,
-          manifest == null ? null : manifest[keyName]
+          manifest == null ? null : manifest[keyName],
         );
         final double chosenScale = _parseScale(chosenName);
         final AssetBundleImageKey key = AssetBundleImageKey(
           bundle: chosenBundle,
           name: chosenName,
-          scale: chosenScale
+          scale: chosenScale,
         );
         if (completer != null) {
           // We already returned from this function, which means we are in the
@@ -217,7 +218,7 @@ class AssetImage extends AssetBundleImageProvider {
 
   static Future<Map<String, List<String>>> _manifestParser(String jsonData) {
     if (jsonData == null)
-      return null;
+      return SynchronousFuture<Map<String, List<String>>>(null);
     // TODO(ianh): JSON decoding really shouldn't be on the main thread.
     final Map<String, dynamic> parsedJson = json.decode(jsonData);
     final Iterable<String> keys = parsedJson.keys;
@@ -260,8 +261,7 @@ class AssetImage extends AssetBundleImageProvider {
   static final RegExp _extractRatioRegExp = RegExp(r'/?(\d+(\.\d*)?)x$');
 
   double _parseScale(String key) {
-
-    if ( key == assetName){
+    if (key == assetName) {
       return _naturalResolution;
     }
 

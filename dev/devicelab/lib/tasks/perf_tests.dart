@@ -30,6 +30,30 @@ TaskFunction createTilesScrollPerfTest() {
   ).run;
 }
 
+TaskFunction createHomeScrollPerfTest() {
+  return PerfTest(
+    '${flutterDirectory.path}/examples/flutter_gallery',
+    'test_driver/scroll_perf.dart',
+    'home_scroll_perf',
+  ).run;
+}
+
+TaskFunction createCullOpacityPerfTest() {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test_driver/cull_opacity_perf.dart',
+    'cull_opacity_perf',
+  ).run;
+}
+
+TaskFunction createCubicBezierPerfTest() {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test_driver/cubic_bezier_perf.dart',
+    'cubic_bezier_perf',
+  ).run;
+}
+
 TaskFunction createFlutterGalleryStartupTest() {
   return StartupTest(
     '${flutterDirectory.path}/examples/flutter_gallery',
@@ -250,7 +274,7 @@ class CompileTest {
         await flutter('build', options: options);
         watch.stop();
         final String appPath =  '$cwd/build/ios/Release-iphoneos/Runner.app/';
-        // IPAs are created manually, https://flutter.io/ios-release/
+        // IPAs are created manually, https://flutter.dev/ios-release/
         await exec('tar', <String>['-zcf', 'build/app.ipa', appPath]);
         releaseSizeInBytes = await file('$cwd/build/app.ipa').length();
         if (reportPackageContentSizes)
@@ -351,16 +375,14 @@ class CompileTest {
       fileToMetadata[entry.path] = entry;
     }
 
-    final _UnzipListEntry icudtl = fileToMetadata['assets/flutter_shared/icudtl.dat'];
     final _UnzipListEntry libflutter = fileToMetadata['lib/armeabi-v7a/libflutter.so'];
     final _UnzipListEntry isolateSnapshotData = fileToMetadata['assets/isolate_snapshot_data'];
     final _UnzipListEntry isolateSnapshotInstr = fileToMetadata['assets/isolate_snapshot_instr'];
     final _UnzipListEntry vmSnapshotData = fileToMetadata['assets/vm_snapshot_data'];
     final _UnzipListEntry vmSnapshotInstr = fileToMetadata['assets/vm_snapshot_instr'];
+    final _UnzipListEntry license = fileToMetadata['assets/flutter_assets/LICENSE'];
 
     return <String, dynamic>{
-      'icudtl_uncompressed_bytes': icudtl.uncompressedSize,
-      'icudtl_compressed_bytes': icudtl.compressedSize,
       'libflutter_uncompressed_bytes': libflutter.uncompressedSize,
       'libflutter_compressed_bytes': libflutter.compressedSize,
       'snapshot_uncompressed_bytes': isolateSnapshotData.uncompressedSize +
@@ -371,6 +393,8 @@ class CompileTest {
           isolateSnapshotInstr.compressedSize +
           vmSnapshotData.compressedSize +
           vmSnapshotInstr.compressedSize,
+      'license_uncompressed_bytes': license.uncompressedSize,
+      'license_compressed_bytes': license.compressedSize,
     };
   }
 }
@@ -396,7 +420,7 @@ class MemoryTest {
     _receivedNextMessage = Completer<void>();
   }
 
-  int get iterationCount => 15;
+  int get iterationCount => 10;
 
   Device get device => _device;
   Device _device;

@@ -50,5 +50,6 @@
   "collapsedIconTapHint": "बड़ा करें",
   "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "एक वर्ण अाैर डाला जा सकता है",
-  "remainingTextFieldCharacterCountOther": "$remainingCount वर्ण अाैर डाले जा सकते हैं"
+  "remainingTextFieldCharacterCountOther": "$remainingCount वर्ण अाैर डाले जा सकते हैं",
+  "refreshIndicatorSemanticLabel": "रीफ़्रेश करें"
 }

@@ -243,7 +243,7 @@ void main() {
   });
 }
 
-Future<Null> slowDrag(WidgetTester tester, Key widget, Offset offset) async {
+Future<void> slowDrag(WidgetTester tester, Key widget, Offset offset) async {
   final Offset target = tester.getCenter(find.byKey(widget));
   final TestGesture gesture = await tester.startGesture(target);
   await gesture.moveBy(offset);

@@ -45,8 +45,8 @@ void main() {
       tryToDelete(tempDir);
     });
 
-    Future<String> createProjectWithPlugin(String plugin) async {
-      final String projectPath = await createProject(tempDir);
+    Future<String> createProjectWithPlugin(String plugin, { List<String> arguments }) async {
+      final String projectPath = await createProject(tempDir, arguments: arguments);
       final File pubspec = fs.file(fs.path.join(projectPath, 'pubspec.yaml'));
       String content = await pubspec.readAsString();
       content = content.replaceFirst(
@@ -82,7 +82,7 @@ void main() {
       expect(
         fs.file(fs.path.join(projectPath, relPath)).readAsStringSync(),
         contains(substring),
-        reason: '$projectPath/$relPath has unexpected content'
+        reason: '$projectPath/$relPath has unexpected content',
       );
     }
 
@@ -114,7 +114,7 @@ void main() {
       'android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
     ];
 
-    const List<String> applicationPluginRegistrants = <String>[
+    const List<String> modulePluginRegistrants = <String>[
       '.ios/Flutter/FlutterPluginRegistrant/Classes/GeneratedPluginRegistrant.h',
       '.ios/Flutter/FlutterPluginRegistrant/Classes/GeneratedPluginRegistrant.m',
       '.android/Flutter/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
@@ -125,7 +125,7 @@ void main() {
       'ios/Podfile',
     ];
 
-    const List<String> applicationPluginWitnesses = <String>[
+    const List<String> modulePluginWitnesses = <String>[
       '.flutter-plugins',
       '.ios/Podfile',
     ];
@@ -135,7 +135,7 @@ void main() {
       'ios/Flutter/Release.xcconfig': '#include "Pods/Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"',
     };
 
-    const Map<String, String> applicationPluginContentWitnesses = <String, String>{
+    const Map<String, String> modulePluginContentWitnesses = <String, String>{
       '.ios/Config/Debug.xcconfig': '#include "Pods/Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"',
       '.ios/Config/Release.xcconfig': '#include "Pods/Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"',
     };
@@ -147,13 +147,13 @@ void main() {
     }
 
     void expectZeroPluginsInjected(String projectPath) {
-      for (final String registrant in applicationPluginRegistrants) {
+      for (final String registrant in modulePluginRegistrants) {
         expectExists(projectPath, registrant);
       }
       for (final String witness in pluginWitnesses) {
         expectNotExists(projectPath, witness);
       }
-      applicationPluginContentWitnesses.forEach((String witness, String content) {
+      modulePluginContentWitnesses.forEach((String witness, String content) {
         expectNotContains(projectPath, witness, content);
       });
     }
@@ -170,14 +170,14 @@ void main() {
       });
     }
 
-    void expectApplicationPluginInjected(String projectPath) {
-      for (final String registrant in applicationPluginRegistrants) {
+    void expectModulePluginInjected(String projectPath) {
+      for (final String registrant in modulePluginRegistrants) {
         expectExists(projectPath, registrant);
       }
-      for (final String witness in applicationPluginWitnesses) {
+      for (final String witness in modulePluginWitnesses) {
         expectExists(projectPath, witness);
       }
-      applicationPluginContentWitnesses.forEach((String witness, String content) {
+      modulePluginContentWitnesses.forEach((String witness, String content) {
         expectContains(projectPath, witness, content);
       });
     }
@@ -185,7 +185,7 @@ void main() {
     void removeGeneratedFiles(String projectPath) {
       final Iterable<String> allFiles = <List<String>>[
         pubOutput,
-        applicationPluginRegistrants,
+        modulePluginRegistrants,
         pluginWitnesses,
       ].expand<String>((List<String> list) => list);
       for (String path in allFiles) {
@@ -196,7 +196,8 @@ void main() {
     }
 
     testUsingContext('get fetches packages', () async {
-      final String projectPath = await createProject(tempDir);
+      final String projectPath = await createProject(tempDir,
+        arguments: <String>['--no-pub', '--template=module']);
       removeGeneratedFiles(projectPath);
 
       await runCommandIn(projectPath, 'get');
@@ -206,7 +207,8 @@ void main() {
     }, timeout: allowForRemotePubInvocation);
 
     testUsingContext('get --offline fetches packages', () async {
-      final String projectPath = await createProject(tempDir);
+      final String projectPath = await createProject(tempDir,
+        arguments: <String>['--no-pub', '--template=module']);
       removeGeneratedFiles(projectPath);
 
       await runCommandIn(projectPath, 'get', args: <String>['--offline']);
@@ -216,7 +218,8 @@ void main() {
     }, timeout: allowForCreateFlutterProject);
 
     testUsingContext('upgrade fetches packages', () async {
-      final String projectPath = await createProject(tempDir);
+      final String projectPath = await createProject(tempDir,
+        arguments: <String>['--no-pub', '--template=module']);
       removeGeneratedFiles(projectPath);
 
       await runCommandIn(projectPath, 'upgrade');
@@ -226,13 +229,14 @@ void main() {
     }, timeout: allowForRemotePubInvocation);
 
     testUsingContext('get fetches packages and injects plugin', () async {
-      final String projectPath = await createProjectWithPlugin('path_provider');
+      final String projectPath = await createProjectWithPlugin('path_provider',
+        arguments: <String>['--no-pub', '--template=module']);
       removeGeneratedFiles(projectPath);
 
       await runCommandIn(projectPath, 'get');
 
       expectDependenciesResolved(projectPath);
-      expectApplicationPluginInjected(projectPath);
+      expectModulePluginInjected(projectPath);
     }, timeout: allowForRemotePubInvocation);
 
     testUsingContext('get fetches packages and injects plugin in plugin project', () async {
@@ -304,7 +308,7 @@ void main() {
       Stdio: () => mockStdio,
     });
 
-    testUsingContext('publish', () async {
+    testUsingContext('pub publish', () async {
       final PromptingProcess process = PromptingProcess();
       mockProcessManager.processFactory = (List<String> commands) => process;
       final Future<void> runPackages = createTestCommandRunner(PackagesCommand()).run(<String>['packages', 'pub', 'publish']);
@@ -326,6 +330,85 @@ void main() {
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
       Stdio: () => mockStdio,
+    });
+
+    testUsingContext('publish', () async {
+      await createTestCommandRunner(PackagesCommand()).run(<String>['packages', 'publish']);
+      final List<String> commands = mockProcessManager.commands;
+      expect(commands, hasLength(3));
+      expect(commands[0], matches(r'dart-sdk[\\/]bin[\\/]pub'));
+      expect(commands[1], '--trace');
+      expect(commands[2], 'publish');
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+      Stdio: () => mockStdio,
+      BotDetector: () => const AlwaysTrueBotDetector(),
+    });
+
+    testUsingContext('deps', () async {
+      await createTestCommandRunner(PackagesCommand()).run(<String>['packages', 'deps']);
+      final List<String> commands = mockProcessManager.commands;
+      expect(commands, hasLength(3));
+      expect(commands[0], matches(r'dart-sdk[\\/]bin[\\/]pub'));
+      expect(commands[1], '--trace');
+      expect(commands[2], 'deps');
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+      Stdio: () => mockStdio,
+      BotDetector: () => const AlwaysTrueBotDetector(),
+    });
+
+    testUsingContext('cache', () async {
+      await createTestCommandRunner(PackagesCommand()).run(<String>['packages', 'cache']);
+      final List<String> commands = mockProcessManager.commands;
+      expect(commands, hasLength(3));
+      expect(commands[0], matches(r'dart-sdk[\\/]bin[\\/]pub'));
+      expect(commands[1], '--trace');
+      expect(commands[2], 'cache');
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+      Stdio: () => mockStdio,
+      BotDetector: () => const AlwaysTrueBotDetector(),
+    });
+
+    testUsingContext('version', () async {
+      await createTestCommandRunner(PackagesCommand()).run(<String>['packages', 'version']);
+      final List<String> commands = mockProcessManager.commands;
+      expect(commands, hasLength(3));
+      expect(commands[0], matches(r'dart-sdk[\\/]bin[\\/]pub'));
+      expect(commands[1], '--trace');
+      expect(commands[2], 'version');
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+      Stdio: () => mockStdio,
+      BotDetector: () => const AlwaysTrueBotDetector(),
+    });
+
+    testUsingContext('uploader', () async {
+      await createTestCommandRunner(PackagesCommand()).run(<String>['packages', 'uploader']);
+      final List<String> commands = mockProcessManager.commands;
+      expect(commands, hasLength(3));
+      expect(commands[0], matches(r'dart-sdk[\\/]bin[\\/]pub'));
+      expect(commands[1], '--trace');
+      expect(commands[2], 'uploader');
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+      Stdio: () => mockStdio,
+      BotDetector: () => const AlwaysTrueBotDetector(),
+    });
+
+    testUsingContext('global', () async {
+      await createTestCommandRunner(PackagesCommand()).run(<String>['packages', 'global', 'list']);
+      final List<String> commands = mockProcessManager.commands;
+      expect(commands, hasLength(4));
+      expect(commands[0], matches(r'dart-sdk[\\/]bin[\\/]pub'));
+      expect(commands[1], '--trace');
+      expect(commands[2], 'global');
+      expect(commands[3], 'list');
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+      Stdio: () => mockStdio,
+      BotDetector: () => const AlwaysTrueBotDetector(),
     });
   });
 }

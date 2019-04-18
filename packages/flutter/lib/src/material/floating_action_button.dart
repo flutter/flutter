@@ -9,6 +9,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button.dart';
+import 'floating_action_button_theme.dart';
 import 'scaffold.dart';
 import 'theme.dart';
 import 'theme_data.dart';
@@ -41,24 +42,84 @@ class _DefaultHeroTag {
 /// to promote a primary action in the application. Floating action buttons are
 /// most commonly used in the [Scaffold.floatingActionButton] field.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=2uaoEDOgk_I}
+///
 /// Use at most a single floating action button per screen. Floating action
 /// buttons should be used for positive actions such as "create", "share", or
-/// "navigate".
+/// "navigate". (If more than one floating action button is used within a
+/// [Route], then make sure that each button has a unique [heroTag], otherwise
+/// an exception will be thrown.)
 ///
 /// If the [onPressed] callback is null, then the button will be disabled and
-/// will not react to touch.
+/// will not react to touch. It is highly discouraged to disable a floating
+/// action button as there is no indication to the user that the button is
+/// disabled. Consider changing the [backgroundColor] if disabling the floating
+/// action button.
+///
+/// {@tool snippet --template=stateless_widget_material}
+/// This example shows how to make a simple [FloatingActionButton] in a
+/// [Scaffold], with a pink [backgroundColor] and a thumbs up [Icon].
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     appBar: AppBar(
+///       title: Text('Floating Action Button Sample'),
+///     ),
+///     body: Center(
+///       child: Text('Press the button below!')
+///     ),
+///     floatingActionButton: FloatingActionButton(
+///       onPressed: () {
+///         // Add your onPressed code here!
+///       },
+///       child: Icon(Icons.thumb_up),
+///       backgroundColor: Colors.pink,
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
+/// {@tool snippet --template=stateless_widget_material}
+/// This example shows how to make an extended [FloatingActionButton] in a
+/// [Scaffold], with a  pink [backgroundColor] and a thumbs up [Icon] and a
+/// [Text] label.
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     appBar: AppBar(
+///       title: Text('Floating Action Button Sample'),
+///     ),
+///     body: Center(
+///       child: Text('Press the extended button below!'),
+///     ),
+///     floatingActionButton: FloatingActionButton.extended(
+///       onPressed: () {
+///         // Add your onPressed code here!
+///       },
+///       label: Text('Approve'),
+///       icon: Icon(Icons.thumb_up),
+///       backgroundColor: Colors.pink,
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
-///  * [Scaffold]
-///  * [RaisedButton]
-///  * [FlatButton]
-///  * <https://material.google.com/components/buttons-floating-action-button.html>
-class FloatingActionButton extends StatefulWidget {
+///  * [Scaffold], in which floating action buttons typically live.
+///  * [RaisedButton], another kind of button that appears to float above the
+///    content.
+///  * <https://material.io/design/components/buttons-floating-action-button.html>
+class FloatingActionButton extends StatelessWidget {
   /// Creates a circular floating action button.
   ///
-  /// The [elevation], [highlightElevation], [mini], [shape], and [clipBehavior]
-  /// arguments must not be null.
+  /// The [mini] and [clipBehavior] arguments must be non-null. Additionally,
+  /// [elevation], [highlightElevation], and [disabledElevation] (if specified)
+  /// must be non-negative.
   const FloatingActionButton({
     Key key,
     this.child,
@@ -66,62 +127,71 @@ class FloatingActionButton extends StatefulWidget {
     this.foregroundColor,
     this.backgroundColor,
     this.heroTag = const _DefaultHeroTag(),
-    this.elevation = 6.0,
-    this.highlightElevation = 12.0,
+    this.elevation,
+    this.highlightElevation,
+    this.disabledElevation,
     @required this.onPressed,
     this.mini = false,
-    this.shape = const CircleBorder(),
+    this.shape,
     this.clipBehavior = Clip.none,
     this.materialTapTargetSize,
     this.isExtended = false,
-  }) :  assert(elevation != null),
-        assert(highlightElevation != null),
-        assert(mini != null),
-        assert(shape != null),
-        assert(isExtended != null),
-        _sizeConstraints = mini ? _kMiniSizeConstraints : _kSizeConstraints,
-        super(key: key);
+  }) : assert(elevation == null || elevation >= 0.0),
+       assert(highlightElevation == null || highlightElevation >= 0.0),
+       assert(disabledElevation == null || disabledElevation >= 0.0),
+       assert(mini != null),
+       assert(isExtended != null),
+       _sizeConstraints = mini ? _kMiniSizeConstraints : _kSizeConstraints,
+       super(key: key);
 
-  /// Creates a wider [StadiumBorder] shaped floating action button with both
-  /// an [icon] and a [label].
+  /// Creates a wider [StadiumBorder]-shaped floating action button with
+  /// an optional [icon] and a [label].
   ///
-  /// The [label], [icon], [elevation], [highlightElevation], [clipBehavior]
-  /// and [shape] arguments must not be null.
+  /// The [label] and [clipBehavior] arguments must non-null. Additionally,
+  /// [elevation], [highlightElevation], and [disabledElevation] (if specified)
+  /// must be non-negative.
   FloatingActionButton.extended({
     Key key,
     this.tooltip,
     this.foregroundColor,
     this.backgroundColor,
     this.heroTag = const _DefaultHeroTag(),
-    this.elevation = 6.0,
-    this.highlightElevation = 12.0,
+    this.elevation,
+    this.highlightElevation,
+    this.disabledElevation,
     @required this.onPressed,
-    this.shape = const StadiumBorder(),
+    this.shape,
     this.isExtended = true,
     this.materialTapTargetSize,
     this.clipBehavior = Clip.none,
-    @required Widget icon,
+    Widget icon,
     @required Widget label,
-  }) :  assert(elevation != null),
-        assert(highlightElevation != null),
-        assert(shape != null),
-        assert(isExtended != null),
-        assert(clipBehavior != null),
-        _sizeConstraints = _kExtendedSizeConstraints,
-        mini = false,
-        child = _ChildOverflowBox(
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              const SizedBox(width: 16.0),
-              icon,
-              const SizedBox(width: 8.0),
-              label,
-              const SizedBox(width: 20.0),
-            ],
-          ),
-        ),
-        super(key: key);
+  }) : assert(elevation == null || elevation >= 0.0),
+       assert(highlightElevation == null || highlightElevation >= 0.0),
+       assert(disabledElevation == null || disabledElevation >= 0.0),
+       assert(isExtended != null),
+       assert(clipBehavior != null),
+       _sizeConstraints = _kExtendedSizeConstraints,
+       mini = false,
+       child = _ChildOverflowBox(
+         child: Row(
+           mainAxisSize: MainAxisSize.min,
+           children: icon == null
+             ? <Widget>[
+                 const SizedBox(width: 20.0),
+                 label,
+                 const SizedBox(width: 20.0),
+               ]
+             : <Widget>[
+                 const SizedBox(width: 16.0),
+                 icon,
+                 const SizedBox(width: 8.0),
+                 label,
+                 const SizedBox(width: 20.0),
+               ],
+         ),
+       ),
+       super(key: key);
 
   /// The widget below this widget in the tree.
   ///
@@ -163,30 +233,55 @@ class FloatingActionButton extends StatefulWidget {
   /// If this is set to null, the button will be disabled.
   final VoidCallback onPressed;
 
-  /// The z-coordinate at which to place this button. This controls the size of
-  /// the shadow below the floating action button.
+  /// The z-coordinate at which to place this button relative to its parent.
   ///
-  /// Defaults to 6, the appropriate elevation for floating action buttons.
+  /// This controls the size of the shadow below the floating action button.
+  ///
+  /// Defaults to 6, the appropriate elevation for floating action buttons. The
+  /// value is always non-negative.
+  ///
+  /// See also:
+  ///
+  ///  * [highlightElevation], the elevation when the button is pressed.
+  ///  * [disabledElevation], the elevation when the button is disabled.
   final double elevation;
 
-  /// The z-coordinate at which to place this button when the user is touching
-  /// the button. This controls the size of the shadow below the floating action
-  /// button.
+  /// The z-coordinate at which to place this button relative to its parent when
+  /// the user is touching the button.
+  ///
+  /// This controls the size of the shadow below the floating action button.
   ///
   /// Defaults to 12, the appropriate elevation for floating action buttons
-  /// while they are being touched.
+  /// while they are being touched. The value is always non-negative.
   ///
   /// See also:
   ///
   ///  * [elevation], the default elevation.
   final double highlightElevation;
 
+  /// The z-coordinate at which to place this button when the button is disabled
+  /// ([onPressed] is null).
+  ///
+  /// This controls the size of the shadow below the floating action button.
+  ///
+  /// Defaults to the same value as [elevation]. Setting this to zero makes the
+  /// floating action button work similar to a [RaisedButton] but the titular
+  /// "floating" effect is lost. The value is always non-negative.
+  ///
+  /// See also:
+  ///
+  ///  * [elevation], the default elevation.
+  ///  * [highlightElevation], the elevation when the button is pressed.
+  final double disabledElevation;
+
   /// Controls the size of this button.
   ///
   /// By default, floating action buttons are non-mini and have a height and
   /// width of 56.0 logical pixels. Mini floating action buttons have a height
   /// and width of 40.0 logical pixels with a layout width and height of 48.0
-  /// logical pixels.
+  /// logical pixels. (The extra 4 pixels of padding on each side are added as a
+  /// result of the floating action button having [MaterialTapTargetSize.padded]
+  /// set on the underlying [RawMaterialButton.materialTapTargetSize].)
   final bool mini;
 
   /// The shape of the button's [Material].
@@ -216,67 +311,84 @@ class FloatingActionButton extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///   * [MaterialTapTargetSize], for a description of how this affects tap targets.
+  ///  * [MaterialTapTargetSize], for a description of how this affects tap targets.
   final MaterialTapTargetSize materialTapTargetSize;
 
   final BoxConstraints _sizeConstraints;
 
-  @override
-  _FloatingActionButtonState createState() => _FloatingActionButtonState();
-}
-
-class _FloatingActionButtonState extends State<FloatingActionButton> {
-  bool _highlight = false;
-
-  void _handleHighlightChanged(bool value) {
-    setState(() {
-      _highlight = value;
-    });
-  }
+  static const double _defaultElevation = 6;
+  static const double _defaultHighlightElevation = 12;
+  static const ShapeBorder _defaultShape = CircleBorder();
+  static const ShapeBorder _defaultExtendedShape = StadiumBorder();
 
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final Color foregroundColor = widget.foregroundColor ?? theme.accentIconTheme.color;
+    final FloatingActionButtonThemeData floatingActionButtonTheme = theme.floatingActionButtonTheme;
+
+    final Color backgroundColor = this.backgroundColor
+      ?? floatingActionButtonTheme.backgroundColor
+      ?? theme.colorScheme.secondary;
+    final Color foregroundColor = this.foregroundColor
+      ?? floatingActionButtonTheme.foregroundColor
+      ?? theme.accentIconTheme.color
+      ?? theme.colorScheme.onSecondary;
+    final double elevation = this.elevation
+      ?? floatingActionButtonTheme.elevation
+      ?? _defaultElevation;
+    final double disabledElevation = this.disabledElevation
+      ?? floatingActionButtonTheme.disabledElevation
+      ?? elevation;
+    final double highlightElevation = this.highlightElevation
+      ?? floatingActionButtonTheme.highlightElevation
+      ?? _defaultHighlightElevation;
+    final MaterialTapTargetSize materialTapTargetSize = this.materialTapTargetSize
+      ?? theme.materialTapTargetSize;
+    final TextStyle textStyle = theme.accentTextTheme.button.copyWith(
+      color: foregroundColor,
+      letterSpacing: 1.2,
+    );
+    final ShapeBorder shape = this.shape
+      ?? floatingActionButtonTheme.shape
+      ?? (isExtended ? _defaultExtendedShape : _defaultShape);
+
     Widget result;
 
-    if (widget.child != null) {
+    if (child != null) {
       result = IconTheme.merge(
         data: IconThemeData(
           color: foregroundColor,
         ),
-        child: widget.child,
+        child: child,
       );
     }
 
     result = RawMaterialButton(
-      onPressed: widget.onPressed,
-      onHighlightChanged: _handleHighlightChanged,
-      elevation: _highlight ? widget.highlightElevation : widget.elevation,
-      constraints: widget._sizeConstraints,
-      materialTapTargetSize: widget.materialTapTargetSize ?? theme.materialTapTargetSize,
-      fillColor: widget.backgroundColor ?? theme.accentColor,
-      textStyle: theme.accentTextTheme.button.copyWith(
-        color: foregroundColor,
-        letterSpacing: 1.2,
-      ),
-      shape: widget.shape,
-      clipBehavior: widget.clipBehavior,
+      onPressed: onPressed,
+      elevation: elevation,
+      highlightElevation: highlightElevation,
+      disabledElevation: disabledElevation,
+      constraints: _sizeConstraints,
+      materialTapTargetSize: materialTapTargetSize,
+      fillColor: backgroundColor,
+      textStyle: textStyle,
+      shape: shape,
+      clipBehavior: clipBehavior,
       child: result,
     );
 
-    if (widget.tooltip != null) {
+    if (tooltip != null) {
       result = MergeSemantics(
         child: Tooltip(
-          message: widget.tooltip,
+          message: tooltip,
           child: result,
         ),
       );
     }
 
-    if (widget.heroTag != null) {
+    if (heroTag != null) {
       result = Hero(
-        tag: widget.heroTag,
+        tag: heroTag,
         child: result,
       );
     }

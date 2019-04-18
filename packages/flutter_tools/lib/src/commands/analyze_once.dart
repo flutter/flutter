@@ -87,16 +87,17 @@ class AnalyzeOnce extends AnalyzeBase {
       }
     });
     server.onErrors.listen((FileAnalysisErrors fileErrors) {
-      errors.addAll(fileErrors.errors);
+      // Record the issues found (but filter out to do comments).
+      errors.addAll(fileErrors.errors.where((AnalysisError error) => error.type != 'TODO'));
     });
 
     await server.start();
     // Completing the future in the callback can't fail.
-    server.onExit.then<void>((int exitCode) { // ignore: unawaited_futures
+    unawaited(server.onExit.then<void>((int exitCode) {
       if (!analysisCompleter.isCompleted) {
         analysisCompleter.completeError('analysis server exited: $exitCode');
       }
-    });
+    }));
 
     Cache.releaseLockEarly();
 
@@ -106,7 +107,7 @@ class AnalyzeOnce extends AnalyzeBase {
         ? '${directories.length} ${directories.length == 1 ? 'directory' : 'directories'}'
         : fs.path.basename(directories.first);
     final Status progress = argResults['preamble']
-        ? logger.startProgress('Analyzing $message...')
+        ? logger.startProgress('Analyzing $message...', timeout: timeoutConfiguration.slowOperation)
         : null;
 
     await analysisCompleter.future;
@@ -132,7 +133,7 @@ class AnalyzeOnce extends AnalyzeBase {
       printStatus('');
     errors.sort();
     for (AnalysisError error in errors)
-      printStatus(error.toString());
+      printStatus(error.toString(), hangingIndent: 7);
 
     final String seconds = (timer.elapsedMilliseconds / 1000.0).toStringAsFixed(1);
 
@@ -152,6 +153,10 @@ class AnalyzeOnce extends AnalyzeBase {
       } else {
         throwToolExit('$errorCount ${pluralize('issue', errorCount)} found. (ran in ${seconds}s)');
       }
+    }
+
+    if (server.didServerErrorOccur) {
+      throwToolExit('Server error(s) occurred. (ran in ${seconds}s)');
     }
 
     if (argResults['congratulate']) {

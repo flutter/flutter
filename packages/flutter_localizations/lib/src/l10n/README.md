@@ -7,7 +7,7 @@ linked with the rest of flutter_localizations package.
 
 If you're looking for information about internationalizing Flutter
 apps in general, see the
-[Internationalizing Flutter Apps](https://flutter.io/tutorials/internationalization/) tutorial.
+[Internationalizing Flutter Apps](https://flutter.dev/tutorials/internationalization/) tutorial.
 
 
 ### Translations for one locale: .arb files
@@ -41,8 +41,8 @@ class. For example:
 
 ```dart
 Widget build(BuildContext context) {
-  return new FlatButton(
-    child: new Text(
+  return FlatButton(
+    child: Text(
       MaterialLocalizations.of(context).cancelButtonLabel,
     ),
   );
@@ -138,23 +138,23 @@ It is converted to an enum value because the `material_en.arb` file
 has this value labeled as `"x-flutter-type": "icuShortTimePattern"`.
 
 The value of `scriptCategory` is based on the
-[Language categories reference](https://material.io/go/design-typography#typography-language-categories-reference)
-section in the Material spec. The `scriptCategory` value is used when looking up
-the `TextTheme`, see the
-[MaterialTextGeometry](https://docs.flutter.io/flutter/material/MaterialTextGeometry/forScriptCategory.html)
-class.
+[Language categories reference](https://material.io/design/typography/language-support.html#language-categories-reference)
+section in the Material spec. The Material theme uses the
+`scriptCategory` value to lookup a localized version of the default
+`TextTheme`, see
+[Typography.geometryThemeFor](https://docs.flutter.io/flutter/material/Typography/geometryThemeFor.html).
 
 
 ### Generated file localizations.dart: all of the localizations as a Map
 
 If you look at the comment at the top of `localizations.dart` you'll
-see that it was manually generated using a `dev/tools` app called
+see that it was manually generated using a `dev/tools/localization` app called
 `gen_localizations`.
 
 You can see what that script would generate by running this command:
 
 ```dart
-dart dev/tools/gen_localizations.dart packages/flutter_localizations/lib/src/l10n material
+dart dev/tools/localization/gen_localizations.dart packages/flutter_localizations/lib/src/l10n material
 ```
 
 The gen_localizations app just combines the contents of all of the
@@ -172,7 +172,7 @@ To in-place update the `localizations.dart` file using the default
 values, you can just run:
 
 ```dart
-dart dev/tools/gen_localizations.dart --overwrite
+dart dev/tools/localization/gen_localizations.dart --overwrite
 ```
 
 
@@ -184,12 +184,12 @@ translations for all the languages supported by this package.
 (Googlers, for more details see <go/flutter-l10n>.)
 
 If you have feedback about the translations please
-[file an issue on the Flutter github repo](https://github.com/flutter/flutter/issues/new).
+[file an issue on the Flutter github repo](https://github.com/flutter/flutter/issues/new?template=BUG.md).
 
 
 ### See Also
 
-The [Internationalizing Flutter Apps](https://flutter.io/tutorials/internationalization/)
+The [Internationalizing Flutter Apps](https://flutter.dev/tutorials/internationalization/)
 tutorial describes how to use the internationalization APIs in an
 ordinary Flutter app.
 

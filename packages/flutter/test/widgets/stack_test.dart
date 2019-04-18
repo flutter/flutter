@@ -12,9 +12,9 @@ class TestPaintingContext implements PaintingContext {
   final List<Invocation> invocations = <Invocation>[];
 
   @override
-    void noSuchMethod(Invocation invocation) {
-      invocations.add(invocation);
-    }
+  void noSuchMethod(Invocation invocation) {
+    invocations.add(invocation);
+  }
 }
 
 void main() {
@@ -535,7 +535,7 @@ void main() {
       '=1=',
       'BoxConstraints(w=3.0, h=7.0)',
       '=2=',
-      'BoxConstraints(2.0<=w<=3.0, 5.0<=h<=7.0)'
+      'BoxConstraints(2.0<=w<=3.0, 5.0<=h<=7.0)',
     ]);
   });
 

@@ -5,6 +5,12 @@
 import 'dart:async';
 
 import 'runner.dart' as runner;
+import 'src/base/context.dart';
+// The build_runner code generation is provided here to make it easier to
+// avoid introducing the dependency into google3. Not all build* packages
+// are synced internally.
+import 'src/build_runner/build_runner.dart';
+import 'src/codegen.dart';
 import 'src/commands/analyze.dart';
 import 'src/commands/attach.dart';
 import 'src/commands/build.dart';
@@ -18,7 +24,7 @@ import 'src/commands/doctor.dart';
 import 'src/commands/drive.dart';
 import 'src/commands/emulators.dart';
 import 'src/commands/format.dart';
-import 'src/commands/fuchsia_reload.dart';
+import 'src/commands/generate.dart';
 import 'src/commands/ide_config.dart';
 import 'src/commands/inject_plugins.dart';
 import 'src/commands/install.dart';
@@ -32,8 +38,10 @@ import 'src/commands/shell_completion.dart';
 import 'src/commands/stop.dart';
 import 'src/commands/test.dart';
 import 'src/commands/trace.dart';
+import 'src/commands/train.dart';
 import 'src/commands/update_packages.dart';
 import 'src/commands/upgrade.dart';
+import 'src/commands/version.dart';
 import 'src/runner/flutter_command.dart';
 
 /// Main entry point for commands.
@@ -56,14 +64,14 @@ Future<void> main(List<String> args) async {
     ChannelCommand(verboseHelp: verboseHelp),
     CleanCommand(),
     ConfigCommand(verboseHelp: verboseHelp),
-    CreateCommand(verboseHelp: verboseHelp),
+    CreateCommand(),
     DaemonCommand(hidden: !verboseHelp),
     DevicesCommand(),
     DoctorCommand(verbose: verbose),
     DriveCommand(),
     EmulatorsCommand(),
     FormatCommand(),
-    FuchsiaReloadCommand(),
+    GenerateCommand(),
     IdeConfigCommand(hidden: !verboseHelp),
     InjectPluginsCommand(hidden: !verboseHelp),
     InstallCommand(),
@@ -77,9 +85,16 @@ Future<void> main(List<String> args) async {
     StopCommand(),
     TestCommand(verboseHelp: verboseHelp),
     TraceCommand(),
+    TrainingCommand(),
     UpdatePackagesCommand(hidden: !verboseHelp),
     UpgradeCommand(),
+    VersionCommand(),
   ], verbose: verbose,
      muteCommandLogging: muteCommandLogging,
-     verboseHelp: verboseHelp);
+     verboseHelp: verboseHelp,
+     overrides: <Type, Generator>{
+       // The build runner instance is not supported in google3 because
+       // the build runner packages are not synced internally.
+       CodeGenerator: () => const BuildRunner(),
+     });
 }

@@ -12,17 +12,18 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
+import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/context_runner.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/ios/simulators.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
+import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/usage.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
-import 'package:quiver/time.dart';
 
 import 'common.dart';
 
@@ -37,7 +38,9 @@ MockDoctor get testDoctor => context[Doctor];
 typedef ContextInitializer = void Function(AppContext testContext);
 
 @isTest
-void testUsingContext(String description, dynamic testMethod(), {
+void testUsingContext(
+  String description,
+  dynamic testMethod(), {
   Timeout timeout,
   Map<Type, Generator> overrides = const <Type, Generator>{},
   bool initializeFlutterRoot = true,
@@ -76,12 +79,14 @@ void testUsingContext(String description, dynamic testMethod(), {
             when(mock.getAttachedDevices()).thenReturn(<IOSSimulator>[]);
             return mock;
           },
-          Logger: () => BufferLogger()..supportsColor = false,
+          OutputPreferences: () => OutputPreferences(showColor: false),
+          Logger: () => BufferLogger(),
           OperatingSystemUtils: () => MockOperatingSystemUtils(),
           SimControl: () => MockSimControl(),
           Usage: () => MockUsage(),
           XcodeProjectInterpreter: () => MockXcodeProjectInterpreter(),
           FileSystem: () => LocalFileSystemBlockingSetCurrentDirectory(),
+          TimeoutConfiguration: () => const TimeoutConfiguration(),
         },
         body: () {
           final String flutterRoot = getFlutterRoot();
@@ -177,6 +182,9 @@ class MockDeviceManager implements DeviceManager {
 
   @override
   Future<List<String>> getDeviceDiagnostics() async => <String>[];
+
+  @override
+  List<DeviceDiscovery> get deviceDiscoverers => <DeviceDiscovery>[];
 }
 
 class MockAndroidLicenseValidator extends AndroidLicenseValidator {
@@ -287,7 +295,7 @@ class MockXcodeProjectInterpreter implements XcodeProjectInterpreter {
   }
 
   @override
-  XcodeProjectInfo getInfo(String projectPath) {
+  Future<XcodeProjectInfo> getInfo(String projectPath) async {
     return XcodeProjectInfo(
       <String>['Runner'],
       <String>['Debug', 'Release'],
@@ -296,9 +304,12 @@ class MockXcodeProjectInterpreter implements XcodeProjectInterpreter {
   }
 }
 
-class MockFlutterVersion extends Mock implements FlutterVersion {}
+class MockFlutterVersion extends Mock implements FlutterVersion {
+  @override
+  bool get isStable => false;
+}
 
-class MockClock extends Mock implements Clock {}
+class MockClock extends Mock implements SystemClock {}
 
 class MockHttpClient extends Mock implements HttpClient {}
 

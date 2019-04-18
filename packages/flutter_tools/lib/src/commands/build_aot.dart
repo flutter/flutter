@@ -16,7 +16,7 @@ import '../resident_runner.dart';
 import '../runner/flutter_command.dart';
 import 'build.dart';
 
-class BuildAotCommand extends BuildSubCommand {
+class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmentArtifacts {
   BuildAotCommand() {
     usesTargetOption();
     addBuildModeFlags();
@@ -25,13 +25,18 @@ class BuildAotCommand extends BuildSubCommand {
       ..addOption('output-dir', defaultsTo: getAotBuildDirectory())
       ..addOption('target-platform',
         defaultsTo: 'android-arm',
-        allowed: <String>['android-arm', 'android-arm64', 'ios']
+        allowed: <String>['android-arm', 'android-arm64', 'ios'],
       )
       ..addFlag('quiet', defaultsTo: false)
       ..addFlag('build-shared-library',
         negatable: false,
         defaultsTo: false,
-        help: 'Compile to a *.so file (requires NDK when building for Android).'
+        help: 'Compile to a *.so file (requires NDK when building for Android).',
+      )
+      ..addFlag('report-timings',
+        negatable: false,
+        defaultsTo: false,
+        help: 'Report timing information about build steps in machine readable form,',
       )
       ..addMultiOption('ios-arch',
         splitCommas: true,
@@ -57,8 +62,6 @@ class BuildAotCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    await super.runCommand();
-
     final String targetPlatform = argResults['target-platform'];
     final TargetPlatform platform = getTargetPlatformForName(targetPlatform);
     if (platform == null)
@@ -70,20 +73,23 @@ class BuildAotCommand extends BuildSubCommand {
     if (!argResults['quiet']) {
       final String typeName = artifacts.getEngineType(platform, buildMode);
       status = logger.startProgress(
-        'Building AOT snapshot in ${getModeName(getBuildMode())} mode ($typeName)...',
-        expectSlowOperation: true,
+        'Building AOT snapshot in ${getFriendlyModeName(getBuildMode())} mode ($typeName)...',
+        timeout: timeoutConfiguration.slowOperation,
       );
     }
     final String outputPath = argResults['output-dir'] ?? getAotBuildDirectory();
+    final bool reportTimings = argResults['report-timings'];
     try {
       String mainPath = findMainDartFile(targetFile);
-      final AOTSnapshotter snapshotter = AOTSnapshotter();
+      final AOTSnapshotter snapshotter = AOTSnapshotter(reportTimings: reportTimings);
 
       // Compile to kernel.
       mainPath = await snapshotter.compileKernel(
         platform: platform,
         buildMode: buildMode,
         mainPath: mainPath,
+        packagesPath: PackageMap.globalPackagesPath,
+        trackWidgetCreation: false,
         outputPath: outputPath,
         extraFrontEndOptions: argResults[FlutterOptions.kExtraFrontEndOptions],
       );

@@ -24,7 +24,7 @@ class _GenerationTextState extends State<GenerationText> {
 
 // Creates a SliverList with `keys.length` children and each child having a key from `keys` and a text of `key:generation`.
 // The generation is increased with every call to this method.
-Future<Null> test(WidgetTester tester, double offset, List<int> keys) {
+Future<void> test(WidgetTester tester, double offset, List<int> keys) {
   globalGeneration += 1;
   return tester.pumpWidget(
     Directionality(

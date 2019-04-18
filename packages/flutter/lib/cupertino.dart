@@ -5,6 +5,8 @@
 /// Flutter widgets implementing the current iOS design language.
 ///
 /// To use, import `package:flutter/cupertino.dart`.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=3PdUaidHc-E}
 library cupertino;
 
 export 'src/cupertino/action_sheet.dart';
@@ -28,6 +30,9 @@ export 'src/cupertino/slider.dart';
 export 'src/cupertino/switch.dart';
 export 'src/cupertino/tab_scaffold.dart';
 export 'src/cupertino/tab_view.dart';
+export 'src/cupertino/text_field.dart';
 export 'src/cupertino/text_selection.dart';
+export 'src/cupertino/text_theme.dart';
+export 'src/cupertino/theme.dart';
 export 'src/cupertino/thumb_painter.dart';
 export 'widgets.dart';

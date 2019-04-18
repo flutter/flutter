@@ -27,8 +27,8 @@ Widget _buildScroller({ List<String> log }) {
 }
 
 void main() {
-  Completer<Null> animateTo(WidgetTester tester, double newScrollOffset, { @required Duration duration }) {
-    final Completer<Null> completer = Completer<Null>();
+  Completer<void> animateTo(WidgetTester tester, double newScrollOffset, { @required Duration duration }) {
+    final Completer<void> completer = Completer<void>();
     final ScrollableState scrollable = tester.state(find.byType(Scrollable));
     scrollable.position.animateTo(newScrollOffset, duration: duration, curve: Curves.linear).whenComplete(completer.complete);
     return completer;
@@ -63,7 +63,7 @@ void main() {
     await tester.pumpWidget(_buildScroller(log: log));
 
     expect(log, equals(<String>[]));
-    final Completer<Null> completer = animateTo(tester, 100.0, duration: const Duration(seconds: 1));
+    final Completer<void> completer = animateTo(tester, 100.0, duration: const Duration(seconds: 1));
     expect(completer.isCompleted, isFalse);
     expect(log, equals(<String>['scroll-start']));
     await tester.pump(const Duration(milliseconds: 100));
@@ -91,7 +91,7 @@ void main() {
     await tester.pumpWidget(_buildScroller(log: log));
 
     expect(log, equals(<String>[]));
-    final Completer<Null> completer = animateTo(tester, 100.0, duration: const Duration(seconds: 1));
+    final Completer<void> completer = animateTo(tester, 100.0, duration: const Duration(seconds: 1));
     expect(completer.isCompleted, isFalse);
     expect(log, equals(<String>['scroll-start']));
     await tester.pump(const Duration(milliseconds: 100));
@@ -116,7 +116,7 @@ void main() {
     await tester.pumpWidget(_buildScroller(log: log));
 
     expect(log, equals(<String>[]));
-    Completer<Null> completer = animateTo(tester, 100.0, duration: const Duration(seconds: 1));
+    Completer<void> completer = animateTo(tester, 100.0, duration: const Duration(seconds: 1));
     expect(completer.isCompleted, isFalse);
     expect(log, equals(<String>['scroll-start']));
     await tester.pump(const Duration(milliseconds: 100));

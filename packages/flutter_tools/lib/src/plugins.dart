@@ -221,7 +221,7 @@ Pod::Spec.new do |s|
   s.description      = <<-DESC
 Depends on all your plugins, and provides a function to register them.
                        DESC
-  s.homepage         = 'https://flutter.io'
+  s.homepage         = 'https://flutter.dev'
   s.license          = { :type => 'BSD' }
   s.author           = { 'Flutter Dev Team' => 'flutter-dev@googlegroups.com' }
   s.ios.deployment_target = '8.0'
@@ -248,7 +248,7 @@ Future<void> _writeIOSPluginRegistrant(FlutterProject project, List<Plugin> plug
   };
 
   final String registryDirectory = project.ios.pluginRegistrantHost.path;
-  if (project.isApplication) {
+  if (project.isModule) {
     final String registryClassesDirectory = fs.path.join(registryDirectory, 'Classes');
     _renderTemplateToFile(
       _iosPluginRegistrantPodspecTemplate,
@@ -297,10 +297,17 @@ Future<void> injectPlugins(FlutterProject project) async {
   final List<Plugin> plugins = findPlugins(project);
   await _writeAndroidPluginRegistrant(project, plugins);
   await _writeIOSPluginRegistrant(project, plugins);
-  if (!project.isApplication && project.ios.hostAppRoot.existsSync()) {
+  if (!project.isModule && project.ios.hostAppRoot.existsSync()) {
+    final IosProject iosProject = IosProject.fromFlutter(project);
     final CocoaPods cocoaPods = CocoaPods();
-    if (plugins.isNotEmpty)
+    if (plugins.isNotEmpty) {
       cocoaPods.setupPodfile(project.ios);
+    }
+    /// The user may have a custom maintained Podfile that they're running `pod install`
+    /// on themselves.
+    else if (iosProject.podfile.existsSync() && iosProject.podfileLock.existsSync()) {
+      cocoaPods.addPodsDependencyToFlutterXcconfig(iosProject);
+    }
   }
 }
 

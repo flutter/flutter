@@ -9,12 +9,12 @@ void main() {
   test('MaterialPointArcTween control test', () {
     final MaterialPointArcTween a = MaterialPointArcTween(
       begin: Offset.zero,
-      end: const Offset(0.0, 10.0)
+      end: const Offset(0.0, 10.0),
     );
 
     final MaterialPointArcTween b = MaterialPointArcTween(
       begin: Offset.zero,
-      end: const Offset(0.0, 10.0)
+      end: const Offset(0.0, 10.0),
     );
 
     expect(a, hasOneLineDescription);
@@ -24,12 +24,12 @@ void main() {
   test('MaterialRectArcTween control test', () {
     final MaterialRectArcTween a = MaterialRectArcTween(
       begin: Rect.fromLTWH(0.0, 0.0, 10.0, 10.0),
-      end: Rect.fromLTWH(0.0, 10.0, 10.0, 10.0)
+      end: Rect.fromLTWH(0.0, 10.0, 10.0, 10.0),
     );
 
     final MaterialRectArcTween b = MaterialRectArcTween(
       begin: Rect.fromLTWH(0.0, 0.0, 10.0, 10.0),
-      end: Rect.fromLTWH(0.0, 10.0, 10.0, 10.0)
+      end: Rect.fromLTWH(0.0, 10.0, 10.0, 10.0),
     );
     expect(a, hasOneLineDescription);
     expect(a.toString(), equals(b.toString()));
@@ -38,14 +38,14 @@ void main() {
   test('on-axis MaterialPointArcTween', () {
     MaterialPointArcTween tween = MaterialPointArcTween(
       begin: Offset.zero,
-      end: const Offset(0.0, 10.0)
+      end: const Offset(0.0, 10.0),
     );
     expect(tween.lerp(0.5), equals(const Offset(0.0, 5.0)));
     expect(tween, hasOneLineDescription);
 
     tween = MaterialPointArcTween(
       begin: Offset.zero,
-      end: const Offset(10.0, 0.0)
+      end: const Offset(10.0, 0.0),
     );
     expect(tween.lerp(0.5), equals(const Offset(5.0, 0.0)));
   });
@@ -53,14 +53,14 @@ void main() {
   test('on-axis MaterialRectArcTween', () {
     MaterialRectArcTween tween = MaterialRectArcTween(
       begin: Rect.fromLTWH(0.0, 0.0, 10.0, 10.0),
-      end: Rect.fromLTWH(0.0, 10.0, 10.0, 10.0)
+      end: Rect.fromLTWH(0.0, 10.0, 10.0, 10.0),
     );
     expect(tween.lerp(0.5), equals(Rect.fromLTWH(0.0, 5.0, 10.0, 10.0)));
     expect(tween, hasOneLineDescription);
 
     tween = MaterialRectArcTween(
       begin: Rect.fromLTWH(0.0, 0.0, 10.0, 10.0),
-      end: Rect.fromLTWH(10.0, 0.0, 10.0, 10.0)
+      end: Rect.fromLTWH(10.0, 0.0, 10.0, 10.0),
     );
     expect(tween.lerp(0.5), equals(Rect.fromLTWH(5.0, 0.0, 10.0, 10.0)));
   });

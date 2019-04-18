@@ -8,7 +8,7 @@ import 'package:flutter/widgets.dart';
 const Color kTitleColor = Color(0xFF333333);
 const String kTitleString = 'Hello World';
 
-Future<Null> pumpApp(WidgetTester tester, { GenerateAppTitle onGenerateTitle }) async {
+Future<void> pumpApp(WidgetTester tester, { GenerateAppTitle onGenerateTitle }) async {
   await tester.pumpWidget(
     WidgetsApp(
       supportedLocales: const <Locale>[

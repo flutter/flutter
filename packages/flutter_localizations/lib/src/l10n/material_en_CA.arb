@@ -50,5 +50,6 @@
   "collapsedIconTapHint": "Expand",
   "remainingTextFieldCharacterCountZero": "No characters remaining",
   "remainingTextFieldCharacterCountOne": "1 character remaining",
-  "remainingTextFieldCharacterCountOther": "$remainingCount characters remaining"
+  "remainingTextFieldCharacterCountOther": "$remainingCount characters remaining",
+  "refreshIndicatorSemanticLabel": "Refresh"
 }

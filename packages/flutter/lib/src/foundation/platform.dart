@@ -84,7 +84,7 @@ TargetPlatform get defaultTargetPlatform {
 /// (such as [ThemeData.platform] in the material library) instead.
 ///
 /// Setting [debugDefaultTargetPlatformOverride] (as opposed to, say,
-/// [ThemeData.platform]) will cause unexpected and undesireable effects. For
+/// [ThemeData.platform]) will cause unexpected and undesirable effects. For
 /// example, setting this to [TargetPlatform.iOS] when the application is
 /// running on Android will cause the TalkBack accessibility tool on Android to
 /// be confused because it would be receiving data intended for iOS VoiceOver.

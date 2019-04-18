@@ -11,6 +11,14 @@ import 'package:flutter_tools/src/base/process_manager.dart';
 
 import '../src/common.dart';
 
+/// Creates a temporary directory but resolves any symlinks to return the real
+/// underlying path to avoid issues with breakpoints/hot reload.
+/// https://github.com/flutter/flutter/pull/21741
+Directory createResolvedTempDirectorySync(String prefix) {
+  final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_$prefix');
+  return fs.directory(tempDir.resolveSymbolicLinksSync());
+}
+
 void writeFile(String path, String content) {
   fs.file(path)
     ..createSync(recursive: true)
@@ -36,7 +44,7 @@ Future<void> getPackages(String folder) async {
   final List<String> command = <String>[
     fs.path.join(getFlutterRoot(), 'bin', 'flutter'),
     'packages',
-    'get'
+    'get',
   ];
   final Process process = await processManager.start(command, workingDirectory: folder);
   final StringBuffer errorOutput = StringBuffer();

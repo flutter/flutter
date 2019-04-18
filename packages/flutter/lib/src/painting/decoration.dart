@@ -33,7 +33,7 @@ abstract class Decoration extends Diagnosticable {
   ///
   /// This is intended to be used as follows:
   /// ```dart
-  ///   assert(myDecoration.debugAssertIsValid());
+  /// assert(myDecoration.debugAssertIsValid());
   /// ```
   bool debugAssertIsValid() => true;
 
@@ -124,7 +124,7 @@ abstract class Decoration extends Diagnosticable {
   /// respectively to find a solution. If the two values can't directly be
   /// interpolated, then the interpolation is done via null (at `t == 0.5`).
   ///
-  /// {@macro flutter.painting.gradient.lerp}
+  /// {@macro dart.ui.shadow.lerp}
   static Decoration lerp(Decoration a, Decoration b, double t) {
     assert(t != null);
     if (a == null && b == null)
@@ -164,7 +164,7 @@ abstract class Decoration extends Diagnosticable {
   /// The `onChanged` argument configures [BoxPainter.onChanged]. It can be
   /// omitted if there is no chance that the painter will change (for example,
   /// if it is a [BoxDecoration] with definitely no [DecorationImage]).
-  BoxPainter createBoxPainter([VoidCallback onChanged]);
+  BoxPainter createBoxPainter([ VoidCallback onChanged ]);
 }
 
 /// A stateful class that can paint a particular [Decoration].

@@ -23,7 +23,7 @@ import 'rounded_rectangle_border.dart';
 /// optionally filling it with a color or a gradient, optionally painting an
 /// image into it, and optionally casting a shadow.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// The following example uses the [Container] widget from the widgets layer to
 /// draw a white rectangle with a 24-pixel multicolor outline, with the text
@@ -47,6 +47,7 @@ import 'rounded_rectangle_border.dart';
 ///   child: const Text('RGB', textAlign: TextAlign.center),
 /// )
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -204,7 +205,7 @@ class ShapeDecoration extends Decoration {
   /// fields are all null (including the [shape], which cannot normally be
   /// null).
   ///
-  /// {@macro flutter.painting.gradient.lerp}
+  /// {@macro dart.ui.shadow.lerp}
   ///
   /// See also:
   ///
@@ -274,7 +275,7 @@ class ShapeDecoration extends Decoration {
   }
 
   @override
-  _ShapeDecorationPainter createBoxPainter([VoidCallback onChanged]) {
+  _ShapeDecorationPainter createBoxPainter([ VoidCallback onChanged ]) {
     assert(onChanged != null || image == null);
     return _ShapeDecorationPainter(this, onChanged);
   }

@@ -2,7 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
+
 import 'package:flutter/widgets.dart';
+import 'package:flutter/foundation.dart';
 
 import 'colors.dart';
 import 'debug.dart';
@@ -41,7 +44,7 @@ class _AccountPictures extends StatelessWidget {
                     height: 48.0,
                     child: picture,
                  ),
-                )
+                ),
               );
             }).toList(),
           ),
@@ -53,7 +56,7 @@ class _AccountPictures extends StatelessWidget {
             child: SizedBox(
               width: 72.0,
               height: 72.0,
-              child: currentAccountPicture
+              child: currentAccountPicture,
             ),
           ),
         ),
@@ -62,7 +65,7 @@ class _AccountPictures extends StatelessWidget {
   }
 }
 
-class _AccountDetails extends StatelessWidget {
+class _AccountDetails extends StatefulWidget {
   const _AccountDetails({
     Key key,
     @required this.accountName,
@@ -77,14 +80,61 @@ class _AccountDetails extends StatelessWidget {
   final bool isOpen;
 
   @override
+  _AccountDetailsState createState() => _AccountDetailsState();
+}
+
+class _AccountDetailsState extends State<_AccountDetails> with SingleTickerProviderStateMixin {
+  Animation<double> _animation;
+  AnimationController _controller;
+  @override
+  void initState () {
+    super.initState();
+    _controller = AnimationController(
+      value: widget.isOpen ? 1.0 : 0.0,
+      duration: const Duration(milliseconds: 200),
+      vsync: this,
+    );
+    _animation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.fastOutSlowIn,
+      reverseCurve: Curves.fastOutSlowIn.flipped,
+    )
+      ..addListener(() => setState(() {
+        // [animation]'s value has changed here.
+      }));
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  void didUpdateWidget (_AccountDetails oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // If the state of the arrow did not change, there is no need to trigger the animation
+    if (oldWidget.isOpen == widget.isOpen) {
+      return;
+    }
+
+    if (widget.isOpen) {
+      _controller.forward();
+    } else {
+      _controller.reverse();
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     assert(debugCheckHasDirectionality(context));
+    assert(debugCheckHasMaterialLocalizations(context));
     assert(debugCheckHasMaterialLocalizations(context));
 
     final ThemeData theme = Theme.of(context);
     final List<Widget> children = <Widget>[];
 
-    if (accountName != null) {
+    if (widget.accountName != null) {
       final Widget accountNameLine = LayoutId(
         id: _AccountDetailsLayout.accountName,
         child: Padding(
@@ -92,14 +142,14 @@ class _AccountDetails extends StatelessWidget {
           child: DefaultTextStyle(
             style: theme.primaryTextTheme.body2,
             overflow: TextOverflow.ellipsis,
-            child: accountName,
+            child: widget.accountName,
           ),
         ),
       );
       children.add(accountNameLine);
     }
 
-    if (accountEmail != null) {
+    if (widget.accountEmail != null) {
       final Widget accountEmailLine = LayoutId(
         id: _AccountDetailsLayout.accountEmail,
         child: Padding(
@@ -107,31 +157,33 @@ class _AccountDetails extends StatelessWidget {
           child: DefaultTextStyle(
             style: theme.primaryTextTheme.body1,
             overflow: TextOverflow.ellipsis,
-            child: accountEmail,
+            child: widget.accountEmail,
           ),
         ),
       );
       children.add(accountEmailLine);
     }
-
-    if (onTap != null) {
+    if (widget.onTap != null) {
       final MaterialLocalizations localizations = MaterialLocalizations.of(context);
       final Widget dropDownIcon = LayoutId(
         id: _AccountDetailsLayout.dropdownIcon,
         child: Semantics(
           container: true,
           button: true,
-          onTap: onTap,
+          onTap: widget.onTap,
           child: SizedBox(
             height: _kAccountDetailsHeight,
             width: _kAccountDetailsHeight,
             child: Center(
-              child: Icon(
-                isOpen ? Icons.arrow_drop_up : Icons.arrow_drop_down,
-                color: Colors.white,
-                semanticLabel: isOpen
+              child: Transform.rotate(
+                angle: _animation.value * math.pi,
+                child: Icon(
+                  Icons.arrow_drop_down,
+                  color: Colors.white,
+                  semanticLabel: widget.isOpen
                     ? localizations.hideAccountsLabel
                     : localizations.showAccountsLabel,
+                ),
               ),
             ),
           ),
@@ -147,9 +199,9 @@ class _AccountDetails extends StatelessWidget {
       children: children,
     );
 
-    if (onTap != null) {
+    if (widget.onTap != null) {
       accountDetails = InkWell(
-        onTap: onTap,
+        onTap: widget.onTap,
         child: accountDetails,
         excludeFromSemantics: true,
       );
@@ -247,8 +299,8 @@ class _AccountDetailsLayout extends MultiChildLayoutDelegate {
 ///
 /// See also:
 ///
-///  * [DrawerHeader], for a drawer header that doesn't show user accounts
-///  * <https://material.google.com/patterns/navigation-drawer.html>
+///  * [DrawerHeader], for a drawer header that doesn't show user accounts.
+///  * <https://material.io/design/components/navigation-drawer.html#anatomy>
 class UserAccountsDrawerHeader extends StatefulWidget {
   /// Creates a material design drawer header.
   ///
@@ -261,7 +313,7 @@ class UserAccountsDrawerHeader extends StatefulWidget {
     this.otherAccountsPictures,
     @required this.accountName,
     @required this.accountEmail,
-    this.onDetailsPressed
+    this.onDetailsPressed,
   }) : super(key: key);
 
   /// The header's background. If decoration is null then a [BoxDecoration]
@@ -331,7 +383,7 @@ class _UserAccountsDrawerHeaderState extends State<UserAccountsDrawerHeader> {
                     currentAccountPicture: widget.currentAccountPicture,
                     otherAccountsPictures: widget.otherAccountsPictures,
                   ),
-                )
+                ),
               ),
               _AccountDetails(
                 accountName: widget.accountName,

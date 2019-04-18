@@ -17,19 +17,19 @@ void main() {
               onTap: () {
                 Scaffold.of(context).showSnackBar(const SnackBar(
                   content: Text(helloSnackBar),
-                  duration: Duration(seconds: 2)
+                  duration: Duration(seconds: 2),
                 ));
               },
               behavior: HitTestBehavior.opaque,
               child: Container(
                 height: 100.0,
                 width: 100.0,
-                key: tapTarget
-              )
+                key: tapTarget,
+              ),
             );
           }
-        )
-      )
+        ),
+      ),
     ));
     expect(find.text(helloSnackBar), findsNothing);
     await tester.tap(find.byKey(tapTarget));
@@ -63,19 +63,19 @@ void main() {
                 snackBarCount += 1;
                 Scaffold.of(context).showSnackBar(SnackBar(
                   content: Text('bar$snackBarCount'),
-                  duration: const Duration(seconds: 2)
+                  duration: const Duration(seconds: 2),
                 ));
               },
               behavior: HitTestBehavior.opaque,
               child: Container(
                 height: 100.0,
                 width: 100.0,
-                key: tapTarget
-              )
+                key: tapTarget,
+              ),
             );
           }
-        )
-      )
+        ),
+      ),
     ));
     expect(find.text('bar1'), findsNothing);
     expect(find.text('bar2'), findsNothing);
@@ -140,19 +140,19 @@ void main() {
                 snackBarCount += 1;
                 lastController = Scaffold.of(context).showSnackBar(SnackBar(
                   content: Text('bar$snackBarCount'),
-                  duration: Duration(seconds: time)
+                  duration: Duration(seconds: time),
                 ));
               },
               behavior: HitTestBehavior.opaque,
               child: Container(
                 height: 100.0,
                 width: 100.0,
-                key: tapTarget
-              )
+                key: tapTarget,
+              ),
             );
           }
-        )
-      )
+        ),
+      ),
     ));
     expect(find.text('bar1'), findsNothing);
     expect(find.text('bar2'), findsNothing);
@@ -224,19 +224,19 @@ void main() {
                 snackBarCount += 1;
                 Scaffold.of(context).showSnackBar(SnackBar(
                   content: Text('bar$snackBarCount'),
-                  duration: const Duration(seconds: 2)
+                  duration: const Duration(seconds: 2),
                 ));
               },
               behavior: HitTestBehavior.opaque,
               child: Container(
                 height: 100.0,
                 width: 100.0,
-                key: tapTarget
-              )
+                key: tapTarget,
+              ),
             );
           }
-        )
-      )
+        ),
+      ),
     ));
     expect(find.text('bar1'), findsNothing);
     expect(find.text('bar2'), findsNothing);
@@ -272,15 +272,15 @@ void main() {
                     label: 'ACTION',
                     onPressed: () {
                       ++tapCount;
-                    }
-                  )
+                    },
+                  ),
                 ));
               },
-              child: const Text('X')
+              child: const Text('X'),
             );
           }
-        )
-      )
+        ),
+      ),
     ));
     await tester.tap(find.text('X'));
     await tester.pump(); // start animation
@@ -294,6 +294,51 @@ void main() {
     await tester.pump();
     await tester.tap(find.text('ACTION'));
     expect(tapCount, equals(1));
+  });
+
+  testWidgets('Snackbar labels can be colored', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Builder(
+            builder: (BuildContext context) {
+              return GestureDetector(
+                onTap: () {
+                  Scaffold.of(context).showSnackBar(
+                    SnackBar(
+                      content: const Text('I am a snack bar.'),
+                      duration: const Duration(seconds: 2),
+                      action: SnackBarAction(
+                        textColor: Colors.lightBlue,
+                        disabledTextColor: Colors.red,
+                        label: 'ACTION',
+                        onPressed: () { },
+                      ),
+                    ),
+                  );
+                },
+                child: const Text('X'),
+              );
+            }
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('X'));
+    await tester.pump(); // start animation
+    await tester.pump(const Duration(milliseconds: 750));
+
+    final Element actionTextBox = tester.element(find.text('ACTION'));
+    final Widget textWidget = actionTextBox.widget;
+    final DefaultTextStyle defaultTextStyle = DefaultTextStyle.of(actionTextBox);
+    if (textWidget is Text) {
+      TextStyle effectiveStyle = textWidget.style;
+      effectiveStyle = defaultTextStyle.style.merge(textWidget.style);
+      expect(effectiveStyle.color, Colors.lightBlue);
+    } else {
+      expect(false, true);
+    }
   });
 
   testWidgets('SnackBar button text alignment', (WidgetTester tester) async {
@@ -315,10 +360,10 @@ void main() {
                   Scaffold.of(context).showSnackBar(SnackBar(
                     content: const Text('I am a snack bar.'),
                     duration: const Duration(seconds: 2),
-                    action: SnackBarAction(label: 'ACTION', onPressed: () {})
+                    action: SnackBarAction(label: 'ACTION', onPressed: () { }),
                   ));
                 },
-                child: const Text('X')
+                child: const Text('X'),
               );
             }
           ),
@@ -372,10 +417,10 @@ void main() {
                   Scaffold.of(context).showSnackBar(SnackBar(
                     content: const Text('I am a snack bar.'),
                     duration: const Duration(seconds: 2),
-                    action: SnackBarAction(label: 'ACTION', onPressed: () {})
+                    action: SnackBarAction(label: 'ACTION', onPressed: () { }),
                   ));
                 },
-                child: const Text('X')
+                child: const Text('X'),
               );
             }
           ),
@@ -638,17 +683,17 @@ void main() {
                     label: 'ACTION',
                     onPressed: () {
                       actionPressed = true;
-                    }
+                    },
                   ),
-                )).closed.then<Null>((SnackBarClosedReason reason) {
+                )).closed.then<void>((SnackBarClosedReason reason) {
                   closedReason = reason;
                 });
               },
-              child: const Text('X')
+              child: const Text('X'),
             );
           },
-        )
-      )
+        ),
+      ),
     ));
 
     // Pop up the snack bar and then press its action button.
@@ -698,44 +743,44 @@ void main() {
   });
 
   testWidgets('accessible navigation behavior with action', (WidgetTester tester) async {
-      final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
-      await tester.pumpWidget(MaterialApp(
-        home: MediaQuery(
-          data: const MediaQueryData(accessibleNavigation: true),
-          child: Scaffold(
-            key: scaffoldKey,
-            body: Builder(
-              builder: (BuildContext context) {
-                return GestureDetector(
-                  onTap: () {
-                    Scaffold.of(context).showSnackBar(SnackBar(
-                      content: const Text('snack'),
-                      duration: const Duration(seconds: 1),
-                      action: SnackBarAction(
-                        label: 'ACTION',
-                        onPressed: () {}
-                      ),
-                    ));
-                  },
-                  child: const Text('X')
-                );
-              },
-            )
-          )
-        )
-      ));
-      await tester.tap(find.text('X'));
-      await tester.pump();
-      // Find action immediately
-      expect(find.text('ACTION'), findsOneWidget);
-      // Snackbar doesn't close
-      await tester.pump(const Duration(seconds: 10));
-      expect(find.text('ACTION'), findsOneWidget);
-      await tester.tap(find.text('ACTION'));
-      await tester.pump();
-      // Snackbar closes immediately
-      expect(find.text('ACTION'), findsNothing);
+    await tester.pumpWidget(MaterialApp(
+      home: MediaQuery(
+        data: const MediaQueryData(accessibleNavigation: true),
+        child: Scaffold(
+          key: scaffoldKey,
+          body: Builder(
+            builder: (BuildContext context) {
+              return GestureDetector(
+                onTap: () {
+                  Scaffold.of(context).showSnackBar(SnackBar(
+                    content: const Text('snack'),
+                    duration: const Duration(seconds: 1),
+                    action: SnackBarAction(
+                      label: 'ACTION',
+                      onPressed: () { },
+                    ),
+                  ));
+                },
+                child: const Text('X'),
+              );
+            },
+          ),
+        ),
+      ),
+    ));
+    await tester.tap(find.text('X'));
+    await tester.pump();
+    // Find action immediately
+    expect(find.text('ACTION'), findsOneWidget);
+    // Snackbar doesn't close
+    await tester.pump(const Duration(seconds: 10));
+    expect(find.text('ACTION'), findsOneWidget);
+    await tester.tap(find.text('ACTION'));
+    await tester.pump();
+    // Snackbar closes immediately
+    expect(find.text('ACTION'), findsNothing);
   });
 
   testWidgets('contributes dismiss semantics', (WidgetTester tester) async {
@@ -756,16 +801,16 @@ void main() {
                             duration: const Duration(seconds: 1),
                             action: SnackBarAction(
                                 label: 'ACTION',
-                                onPressed: () {}
+                                onPressed: () { },
                             ),
                           ));
                         },
-                        child: const Text('X')
+                        child: const Text('X'),
                     );
                   },
-                )
-            )
-        )
+                ),
+            ),
+        ),
     ));
     await tester.tap(find.text('X'));
     await tester.pumpAndSettle();
@@ -791,19 +836,19 @@ void main() {
                   return GestureDetector(
                       onTap: () {
                         Scaffold.of(context).showSnackBar(const SnackBar(
-                            content: Text(helloSnackBar)
+                            content: Text(helloSnackBar),
                         ));
                       },
                       behavior: HitTestBehavior.opaque,
                       child: Container(
                           height: 100.0,
                           width: 100.0,
-                          key: tapTarget
-                      )
+                          key: tapTarget,
+                      ),
                   );
                 }
-            )
-        )
+            ),
+        ),
     ));
     expect(find.text(helloSnackBar), findsNothing);
     await tester.tap(find.byKey(tapTarget));
@@ -830,7 +875,7 @@ void main() {
   });
 
   testWidgets('SnackBar handles updates to accessibleNavigation', (WidgetTester tester) async {
-    Future<void> boilerplate({bool accessibleNavigation}) {
+    Future<void> boilerplate({ bool accessibleNavigation }) {
       return tester.pumpWidget(MaterialApp(
           home: MediaQuery(
               data: MediaQueryData(accessibleNavigation: accessibleNavigation),
@@ -841,16 +886,16 @@ void main() {
                             onTap: () {
                               Scaffold.of(context).showSnackBar(SnackBar(
                                   content: const Text('test'),
-                                  action: SnackBarAction(label: 'foo', onPressed: () {}),
+                                  action: SnackBarAction(label: 'foo', onPressed: () { }),
                               ));
                             },
                             behavior: HitTestBehavior.opaque,
                             child: const Text('X'),
                         );
                       }
-                  )
-              )
-          )
+                  ),
+              ),
+          ),
       ));
     }
 
@@ -877,4 +922,32 @@ void main() {
     expect(find.text('test'), findsNothing);
   });
 
+  testWidgets('Snackbar asserts if passed a null duration', (WidgetTester tester) async {
+    const Key tapTarget = Key('tap-target');
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Builder(
+          builder: (BuildContext context) {
+            return GestureDetector(
+              onTap: () {
+                Scaffold.of(context).showSnackBar(SnackBar(
+                  content: Text(nonconst('hello')),
+                  duration: null,
+                ));
+              },
+              behavior: HitTestBehavior.opaque,
+              child: Container(
+                height: 100.0,
+                width: 100.0,
+                key: tapTarget,
+              ),
+            );
+          },
+        ),
+      ),
+    ));
+
+    await tester.tap(find.byKey(tapTarget));
+    expect(tester.takeException(), isNotNull);
+  });
 }

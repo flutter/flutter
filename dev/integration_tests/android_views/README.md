@@ -5,7 +5,7 @@ Android view are equal to the motion events that originally hit the FlutterView.
 
 The test app's Android code listens to MotionEvents that get to FlutterView and
 to an embedded Android view and sends them over a platform channel to the Dart
-code, where the events are matched.
+code where the events are matched.
 
 This is what the app looks like:
 

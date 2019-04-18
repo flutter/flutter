@@ -51,6 +51,7 @@ TaskFunction createMicrobenchmarkTask() {
     final Map<String, double> allResults = <String, double>{};
     allResults.addAll(await _runMicrobench('lib/stocks/layout_bench.dart'));
     allResults.addAll(await _runMicrobench('lib/stocks/build_bench.dart'));
+    allResults.addAll(await _runMicrobench('lib/geometry/rrect_contains_bench.dart'));
     allResults.addAll(await _runMicrobench('lib/gestures/velocity_tracker_bench.dart'));
     allResults.addAll(await _runMicrobench('lib/stocks/animation_bench.dart'));
 
@@ -124,7 +125,7 @@ Future<Map<String, double>> _readJsonResults(Process process) {
       process.stdin.write('q');
       await process.stdin.flush();
       // Also send a kill signal in case the `q` above didn't work.
-      process.kill(ProcessSignal.sigint); // ignore: deprecated_member_use
+      process.kill(ProcessSignal.sigint);
       try {
         completer.complete(Map<String, double>.from(json.decode(jsonOutput)));
       } catch (ex) {

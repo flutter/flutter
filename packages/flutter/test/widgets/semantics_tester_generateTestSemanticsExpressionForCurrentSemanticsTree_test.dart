@@ -22,7 +22,7 @@ void _tests() {
     debugResetSemanticsIdCounter();
   });
 
-  Future<Null> pumpTestWidget(WidgetTester tester) async {
+  Future<void> pumpTestWidget(WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: ListView(
         children: <Widget>[
@@ -30,8 +30,8 @@ void _tests() {
           Semantics(
             selected: true,
             checked: true,
-            onTap: () {},
-            onDecrease: () {},
+            onTap: () { },
+            onDecrease: () { },
             value: 'test-value',
             increasedValue: 'test-increasedValue',
             decreasedValue: 'test-decreasedValue',
@@ -150,7 +150,7 @@ void _tests() {
         ignoreRect: true,
         ignoreTransform: true,
         ignoreId: true,
-      )
+      ),
     );
     semantics.dispose();
   });

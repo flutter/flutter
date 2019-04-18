@@ -15,8 +15,8 @@ Widget buildCard(BuildContext context, int index) {
     height: 100.0,
     child: DefaultTextStyle(
       style: TextStyle(fontSize: 2.0 + items.length.toDouble()),
-      child: Text('${items[index]}', textDirection: TextDirection.ltr)
-    )
+      child: Text('${items[index]}', textDirection: TextDirection.ltr),
+    ),
   );
 }
 

@@ -51,5 +51,6 @@
   "collapsedIconTapHint": "Développer",
   "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "1 caractère restant",
-  "remainingTextFieldCharacterCountOther": "$remainingCount caractères restants"
+  "remainingTextFieldCharacterCountOther": "$remainingCount caractères restants",
+  "refreshIndicatorSemanticLabel": "Actualiser"
 }

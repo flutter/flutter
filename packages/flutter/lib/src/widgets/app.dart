@@ -3,8 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:ui' as ui show window;
+import 'dart:collection' show HashMap;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
 import 'banner.dart';
@@ -23,15 +24,49 @@ import 'widget_inspector.dart';
 
 export 'dart:ui' show Locale;
 
+/// The signature of [WidgetsApp.localeListResolutionCallback].
+///
+/// A [LocaleListResolutionCallback] is responsible for computing the locale of the app's
+/// [Localizations] object when the app starts and when user changes the list of
+/// locales for the device.
+///
+/// The [locales] list is the device's preferred locales when the app started, or the
+/// device's preferred locales the user selected after the app was started. This list
+/// is in order of preference. If this list is null or empty, then Flutter has not yet
+/// received the locale information from the platform. The [supportedLocales] parameter
+/// is just the value of [WidgetsApp.supportedLocales].
+///
+/// See also:
+///
+///  * [LocaleResolutionCallback], which takes only one default locale (instead of a list)
+///    and is attempted only after this callback fails or is null. [LocaleListResolutionCallback]
+///    is recommended over [LocaleResolutionCallback].
+typedef LocaleListResolutionCallback = Locale Function(List<Locale> locales, Iterable<Locale> supportedLocales);
+
 /// The signature of [WidgetsApp.localeResolutionCallback].
 ///
-/// A `LocaleResolutionCallback` is responsible for computing the locale of the app's
-/// [Localizations] object when the app starts and when user changes the default
-/// locale for the device.
+/// It is recommended to provide a [LocaleListResolutionCallback] instead of a
+/// [LocaleResolutionCallback] when possible, as [LocaleResolutionCallback] only
+/// receives a subset of the information provided in [LocaleListResolutionCallback].
 ///
-/// The `locale` is the device's locale when the app started, or the device
-/// locale the user selected after the app was started. The `supportedLocales`
-/// parameter is just the value of [WidgetsApp.supportedLocales].
+/// A [LocaleResolutionCallback] is responsible for computing the locale of the app's
+/// [Localizations] object when the app starts and when user changes the default
+/// locale for the device after [LocaleListResolutionCallback] fails or is not provided.
+///
+/// This callback is also used if the app is created with a specific locale using
+/// the [new WidgetsApp] `locale` parameter.
+///
+/// The [locale] is either the value of [WidgetsApp.locale], or the device's default
+/// locale when the app started, or the device locale the user selected after the app
+/// was started. The default locale is the first locale in the list of preferred
+/// locales. If [locale] is null, then Flutter has not yet received the locale
+/// information from the platform. The [supportedLocales] parameter is just the value of
+/// [WidgetsApp.supportedLocales].
+///
+/// See also:
+///
+///  * [LocaleListResolutionCallback], which takes a list of preferred locales (instead of one locale).
+///    Resolutions by [LocaleListResolutionCallback] take precedence over [LocaleResolutionCallback].
 typedef LocaleResolutionCallback = Locale Function(Locale locale, Iterable<Locale> supportedLocales);
 
 /// The signature of [WidgetsApp.onGenerateTitle].
@@ -47,9 +82,7 @@ typedef GenerateAppTitle = String Function(BuildContext context);
 /// The signature of [WidgetsApp.pageRouteBuilder].
 ///
 /// Creates a [PageRoute] using the given [RouteSettings] and [WidgetBuilder].
-// TODO(dnfield): when https://github.com/dart-lang/sdk/issues/34572 is resolved
-// this can use type arguments again
-typedef PageRouteFactory = PageRoute<dynamic> Function(RouteSettings settings, WidgetBuilder builder);
+typedef PageRouteFactory = PageRoute<T> Function<T>(RouteSettings settings, WidgetBuilder builder);
 
 /// A convenience class that wraps a number of widgets that are commonly
 /// required for an application.
@@ -66,14 +99,39 @@ class WidgetsApp extends StatefulWidget {
   ///
   /// The boolean arguments, [color], and [navigatorObservers] must not be null.
   ///
-  /// If the [builder] is null, the [onGenerateRoute] and [pageRouteBuilder]
-  /// arguments are required. The [onGenerateRoute] parameter corresponds to
-  /// [Navigator.onGenerateRoute], and [pageRouteBuilder] will create a [PageRoute]
-  /// that wraps newly built routes. If the [builder] is non-null
-  /// and the [onGenerateRoute] argument is null, then the [builder] will not be
-  /// provided with a [Navigator]. If [onGenerateRoute] is not provided,
-  /// [navigatorKey], [onUnknownRoute], [navigatorObservers], and [initialRoute]
-  /// must have their default values, as they will have no effect.
+  /// Most callers will want to use the [home] or [routes] parameters, or both.
+  /// The [home] parameter is a convenience for the following [routes] map:
+  ///
+  /// ```dart
+  /// <String, WidgetBuilder>{ '/': (BuildContext context) => myWidget }
+  /// ```
+  ///
+  /// It is possible to specify both [home] and [routes], but only if [routes] does
+  ///  _not_ contain an entry for `'/'`.  Conversely, if [home] is omitted, [routes]
+  /// _must_ contain an entry for `'/'`.
+  ///
+  /// If [home] or [routes] are not null, the routing implementation needs to know how
+  /// appropriately build [PageRoutes]. This can be achieved by supplying the
+  /// [pageRouteBuilder] parameter.  The [pageRouteBuilder] is used by [MaterialApp]
+  /// and [CupertinoApp] to create [MaterialPageRoute]s and [CupertinoPageRoute],
+  /// respectively.
+  ///
+  /// The [builder] parameter is designed to provide the ability to wrap the visible
+  /// content of the app in some other widget. It is recommended that you use [home]
+  /// rather than [builder] if you intend to only display a single route in your app.
+  ///
+  /// [WidgetsApp] is also possible to provide a custom implementation of routing via the
+  /// [onGeneratedRoute] and [onUnknownRoute] parameters. These parameters correspond
+  /// to [Navigator.onGenerateRoute] and [Navigator.onUnknownRoute]. If [home], [routes],
+  /// and [builder] are null, or if they fail to create a requested route,
+  /// [onGeneratedRoute] will be invoked.  If that fails, [onUnknownRoute] will be invoked.
+  ///
+  /// The [pageRouteBuilder] will create a [PageRoute] that wraps newly built routes.
+  /// If the [builder] is non-null and the [onGenerateRoute] argument is null, then the
+  /// [builder] will not be provided only with the context and the child widget, whereas
+  /// the [pageRouteBuilder] will be provided with [RouteSettings]. If [onGenerateRoute]
+  /// is not provided, [navigatorKey], [onUnknownRoute], [navigatorObservers], and
+  /// [initialRoute] must have their default values, as they will have no effect.
   ///
   /// The `supportedLocales` argument must be a list of one or more elements.
   /// By default supportedLocales is `[const Locale('en', 'US')]`.
@@ -94,6 +152,7 @@ class WidgetsApp extends StatefulWidget {
     @required this.color,
     this.locale,
     this.localizationsDelegates,
+    this.localeListResolutionCallback,
     this.localeResolutionCallback,
     this.supportedLocales = const <Locale>[Locale('en', 'US')],
     this.showPerformanceOverlay = false,
@@ -143,10 +202,14 @@ class WidgetsApp extends StatefulWidget {
          'must have their initial values '
          '(null, null, and the empty list, respectively).'
        ),
-       assert(onGenerateRoute != null || pageRouteBuilder != null,
-         'If onGenerateRoute is not provided, the pageRouteBuilder must be specified '
-         'so that the default handler will know what kind of PageRoute transition '
-         'bo build.'),
+       assert(
+         builder != null ||
+         onGenerateRoute != null ||
+         pageRouteBuilder != null,
+         'If neither builder nor onGenerateRoute are provided, the '
+         'pageRouteBuilder must be specified so that the default handler '
+         'will know what kind of PageRoute transition to build.'
+       ),
        assert(title != null),
        assert(color != null),
        assert(supportedLocales != null && supportedLocales.isNotEmpty),
@@ -173,7 +236,7 @@ class WidgetsApp extends StatefulWidget {
   ///
   /// The [Navigator] is only built if [onGenerateRoute] is not null; if it is
   /// null, [navigatorKey] must also be null.
-  /// {@endTemplate}
+  /// {@endtemplate}
   final GlobalKey<NavigatorState> navigatorKey;
 
   /// {@template flutter.widgets.widgetsApp.onGenerateRoute}
@@ -233,7 +296,7 @@ class WidgetsApp extends StatefulWidget {
   /// APIs such as [Navigator.push] and [Navigator.pop] will work as expected.
   /// In contrast, the widget returned from [builder] is inserted _above_ the
   /// app's [Navigator] (if any).
-  /// {@endTemplate}
+  /// {@endtemplate}
   ///
   /// If this property is set, the [pageRouteBuilder] property must also be set
   /// so that the default route handler will know what kind of [PageRoute]s to
@@ -262,7 +325,7 @@ class WidgetsApp extends StatefulWidget {
   /// The [Navigator] is only built if routes are provided (either via [home],
   /// [routes], [onGenerateRoute], or [onUnknownRoute]); if they are not,
   /// [builder] must not be null.
-  /// {@endTemplate}
+  /// {@endtemplate}
   ///
   /// If the routes map is not empty, the [pageRouteBuilder] property must be set
   /// so that the default route handler will know what kind of [PageRoute]s to
@@ -408,10 +471,22 @@ class WidgetsApp extends StatefulWidget {
   final Color color;
 
   /// {@template flutter.widgets.widgetsApp.locale}
-  /// The initial locale for this app's [Localizations] widget.
+  /// The initial locale for this app's [Localizations] widget is based
+  /// on this value.
   ///
-  /// If the 'locale' is null the system's locale value is used.
+  /// If the 'locale' is null then the system's locale value is used.
+  ///
+  /// The value of [Localizations.locale] will equal this locale if
+  /// it matches one of the [supportedLocales]. Otherwise it will be
+  /// the first [supportedLocale].
   /// {@endtemplate}
+  ///
+  /// See also:
+  ///
+  ///  * [localeResolutionCallback], which can override the default
+  ///    [supportedLocales] matching algorithm.
+  ///  * [localizationsDelegates], which collectively define all of the localized
+  ///    resources used by this app.
   final Locale locale;
 
   /// {@template flutter.widgets.widgetsApp.localizationsDelegates}
@@ -422,29 +497,58 @@ class WidgetsApp extends StatefulWidget {
   /// {@endtemplate}
   final Iterable<LocalizationsDelegate<dynamic>> localizationsDelegates;
 
-  /// {@template flutter.widgets.widgetsApp.localeResolutionCallback}
+  /// {@template flutter.widgets.widgetsApp.localeListResolutionCallback}
   /// This callback is responsible for choosing the app's locale
   /// when the app is started, and when the user changes the
   /// device's locale.
   ///
-  /// The returned value becomes the locale of this app's [Localizations]
-  /// widget. The callback's `locale` parameter is the device's locale when
-  /// the app started, or the device locale the user selected after the app was
-  /// started. The callback's `supportedLocales` parameter is just the value
-  /// [supportedLocales].
+  /// When a [localeListResolutionCallback] is provided, Flutter will first attempt to
+  /// resolve the locale with the provided [localeListResolutionCallback]. If the
+  /// callback or result is null, it will fallback to trying the [localeResolutionCallback].
+  /// If both [localeResolutionCallback] and [localeListResolutionCallback] are left null
+  /// or fail to resolve (return null), the [WidgetsApp.basicLocaleListResolution]
+  /// fallback algorithm will be used.
   ///
-  /// If the callback is null or if it returns null then the resolved locale is:
+  /// The priority of each available fallback is:
   ///
-  /// - The callback's `locale` parameter if it's equal to a supported locale.
-  /// - The first supported locale with the same [Locale.languageCode] as the
-  ///   callback's `locale` parameter.
-  /// - The first locale in [supportedLocales].
+  ///  1. [localeListResolutionCallback] is attempted first.
+  ///  2. [localeResolutionCallback] is attempted second.
+  ///  3. Flutter's [WidgetsApp.basicLocaleListResolution] algorithm is attempted last.
+  ///
+  /// Properly localized projects should provide a more advanced algorithm than
+  /// [basicLocaleListResolution] as it does not implement a complete algorithm
+  /// (such as the one defined in [Unicode TR35](https://unicode.org/reports/tr35/#LanguageMatching))
+  /// and is optimized for speed at the detriment of some uncommon edge-cases.
   /// {@endtemplate}
+  ///
+  /// This callback considers the entire list of preferred locales.
+  ///
+  /// This algorithm should be able to handle a null or empty list of preferred locales,
+  /// which indicates Flutter has not yet received locale information from the platform.
+  ///
+  /// See also:
+  ///
+  ///  * [MaterialApp.localeListResolutionCallback], which sets the callback of the
+  ///    [WidgetsApp] it creates.
+  ///  * [basicLocaleListResolution], a static method that implements the locale resolution
+  ///    algorithm that is used when no custom locale resolution algorithm is provided.
+  final LocaleListResolutionCallback localeListResolutionCallback;
+
+  /// {@macro flutter.widgets.widgetsApp.localeListResolutionCallback}
+  ///
+  /// This callback considers only the default locale, which is the first locale
+  /// in the preferred locales list. It is preferred to set [localeListResolutionCallback]
+  /// over [localeResolutionCallback] as it provides the full preferred locales list.
+  ///
+  /// This algorithm should be able to handle a null locale, which indicates
+  /// Flutter has not yet received locale information from the platform.
   ///
   /// See also:
   ///
   ///  * [MaterialApp.localeResolutionCallback], which sets the callback of the
   ///    [WidgetsApp] it creates.
+  ///  * [basicLocaleListResolution], a static method that implements the locale resolution
+  ///    algorithm that is used when no custom locale resolution algorithm is provided.
   final LocaleResolutionCallback localeResolutionCallback;
 
   /// {@template flutter.widgets.widgetsApp.supportedLocales}
@@ -456,30 +560,72 @@ class WidgetsApp extends StatefulWidget {
   /// This list must not null. Its default value is just
   /// `[const Locale('en', 'US')]`.
   ///
-  /// The order of the list matters. By default, if the device's locale doesn't
-  /// exactly match a locale in [supportedLocales] then the first locale in
-  /// [supportedLocales] with a matching [Locale.languageCode] is used. If that
-  /// fails then the first locale in [supportedLocales] is used. The default
-  /// locale resolution algorithm can be overridden with [localeResolutionCallback].
+  /// The order of the list matters. The default locale resolution algorithm,
+  /// [basicLocaleListResolution], attempts to match by the following priority:
+  ///
+  ///  1. [Locale.languageCode], [Locale.scriptCode], and [Locale.countryCode]
+  ///  2. [Locale.languageCode] and [Locale.countryCode] only
+  ///  3. [Locale.languageCode] and [Locale.countryCode] only
+  ///  4. [Locale.languageCode] only
+  ///  6. [Locale.countryCode] only when all [preferredLocales] fail to match
+  ///  5. returns [supportedLocales.first] as a fallback
+  ///
+  /// When more than one supported locale matches one of these criteria, only the first
+  /// matching locale is returned. See [basicLocaleListResolution] for a complete
+  /// description of the algorithm.
+  ///
+  /// The default locale resolution algorithm can be overridden by providing a value for
+  /// [localeListResolutionCallback]. The provided [basicLocaleListResolution] is optimized
+  /// for speed and does not implement a full algorithm (such as the one defined in
+  /// [Unicode TR35](https://unicode.org/reports/tr35/#LanguageMatching)) that takes
+  /// distances between languages into account.
+  ///
+  /// When supporting languages with more than one script, it is recommended
+  /// to specify the [Locale.scriptCode] explicitly. Locales may also be defined without
+  /// [Locale.countryCode] to specify a generic fallback for a particular script.
+  ///
+  /// A fully supported language with multiple scripts should define a generic language-only
+  /// locale (e.g. 'zh'), language+script only locales (e.g. 'zh_Hans' and 'zh_Hant'),
+  /// and any language+script+country locales (e.g. 'zh_Hans_CN'). Fully defining all of
+  /// these locales as supported is not strictly required but allows for proper locale resolution in
+  /// the most number of cases. These locales can be specified with the [Locale.fromSubtags]
+  /// constructor:
+  ///
+  /// ```dart
+  /// // Full Chinese support for CN, TW, and HK
+  /// supportedLocales: [
+  ///   const Locale.fromSubtags(languageCode: 'zh'), // generic Chinese 'zh'
+  ///   const Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hans'), // generic simplified Chinese 'zh_Hans'
+  ///   const Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant'), // generic traditional Chinese 'zh_Hant'
+  ///   const Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hans', countryCode: 'CN'), // 'zh_Hans_CN'
+  ///   const Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant', countryCode: 'TW'), // 'zh_Hant_TW'
+  ///   const Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant', countryCode: 'HK'), // 'zh_Hant_HK'
+  /// ],
+  /// ```
+  ///
+  /// Omitting some these fallbacks may result in improperly resolved
+  /// edge-cases, for example, a simplified Chinese user in Taiwan ('zh_Hans_TW')
+  /// may resolve to traditional Chinese if 'zh_Hans' and 'zh_Hans_CN' are
+  /// omitted.
   /// {@endtemplate}
   ///
   /// See also:
   ///
   ///  * [MaterialApp.supportedLocales], which sets the `supportedLocales`
   ///    of the [WidgetsApp] it creates.
-  ///
   ///  * [localeResolutionCallback], an app callback that resolves the app's locale
   ///    when the device's locale changes.
-  ///
   ///  * [localizationsDelegates], which collectively define all of the localized
   ///    resources used by this app.
+  ///  * [basicLocaleListResolution], a static method that implements the locale resolution
+  ///    algorithm that is used when no custom locale resolution algorithm is provided.
   final Iterable<Locale> supportedLocales;
 
   /// Turns on a performance overlay.
   ///
   /// See also:
   ///
-  ///  * <https://flutter.io/debugging/#performanceoverlay>
+  ///  * <https://flutter.dev/debugging/#performanceoverlay>
   final bool showPerformanceOverlay;
 
   /// Checkerboards raster cache images.
@@ -563,7 +709,7 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
   void initState() {
     super.initState();
     _updateNavigator();
-    _locale = _resolveLocale(ui.window.locale, widget.supportedLocales);
+    _locale = _resolveLocales(WidgetsBinding.instance.window.locales, widget.supportedLocales);
     WidgetsBinding.instance.addObserver(this);
   }
 
@@ -597,19 +743,17 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
 
   Route<dynamic> _onGenerateRoute(RouteSettings settings) {
     final String name = settings.name;
-    WidgetBuilder builder;
-    if (name == Navigator.defaultRouteName && widget.home != null) {
-      builder = (BuildContext context) => widget.home;
-    } else {
-      builder = widget.routes[name];
-    }
-    if (builder != null) {
+    final WidgetBuilder pageContentBuilder = name == Navigator.defaultRouteName && widget.home != null
+        ? (BuildContext context) => widget.home
+        : widget.routes[name];
+
+    if (pageContentBuilder != null) {
       assert(widget.pageRouteBuilder != null,
         'The default onGenerateRoute handler for WidgetsApp must have a '
         'pageRouteBuilder set if the home or routes properties are set.');
-      final Route<dynamic> route = widget.pageRouteBuilder(
+      final Route<dynamic> route = widget.pageRouteBuilder<dynamic>(
         settings,
-        builder,
+        pageContentBuilder,
       );
       assert(route != null,
         'The pageRouteBuilder for WidgetsApp must return a valid non-null Route.');
@@ -675,30 +819,159 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
 
   // LOCALIZATION
 
+  /// This is the resolved locale, and is one of the supportedLocales.
   Locale _locale;
 
-  Locale _resolveLocale(Locale newLocale, Iterable<Locale> supportedLocales) {
-    if (widget.localeResolutionCallback != null) {
-      final Locale locale = widget.localeResolutionCallback(newLocale, widget.supportedLocales);
+  Locale _resolveLocales(List<Locale> preferredLocales, Iterable<Locale> supportedLocales) {
+    // Attempt to use localeListResolutionCallback.
+    if (widget.localeListResolutionCallback != null) {
+      final Locale locale = widget.localeListResolutionCallback(preferredLocales, widget.supportedLocales);
       if (locale != null)
         return locale;
     }
-
-    Locale matchesLanguageCode;
-    for (Locale locale in supportedLocales) {
-      if (locale == newLocale)
-        return newLocale;
-      if (locale.languageCode == newLocale.languageCode)
-        matchesLanguageCode ??= locale;
+    // localeListResolutionCallback failed, falling back to localeResolutionCallback.
+    if (widget.localeResolutionCallback != null) {
+      final Locale locale = widget.localeResolutionCallback(
+        preferredLocales != null && preferredLocales.isNotEmpty ? preferredLocales.first : null,
+        widget.supportedLocales,
+      );
+      if (locale != null)
+        return locale;
     }
-    return matchesLanguageCode ?? supportedLocales.first;
+    // Both callbacks failed, falling back to default algorithm.
+    return basicLocaleListResolution(preferredLocales, supportedLocales);
+  }
+
+  /// The default locale resolution algorithm.
+  ///
+  /// Custom resolution algorithms can be provided through [WidgetsApp.localeListResolutionCallback]
+  /// or [WidgetsApp.localeResolutionCallback].
+  ///
+  /// When no custom locale resolution algorithms are provided or if both fail to resolve,
+  /// Flutter will default to calling this algorithm.
+  ///
+  /// This algorithm prioritizes speed at the cost of slightly less appropriate
+  /// resolutions for edge cases.
+  ///
+  /// This algorithm will resolve to the earliest locale in [preferredLocales] that
+  /// matches the most fields, prioritizing in the order of perfect match,
+  /// languageCode+countryCode, languageCode+scriptCode, languageCode-only.
+  ///
+  /// In the case where a locale is matched by languageCode-only and is not the
+  /// default (first) locale, the next locale in preferredLocales with a
+  /// perfect match can supersede the languageCode-only match if it exists.
+  ///
+  /// When a preferredLocale matches more than one supported locale, it will resolve
+  /// to the first matching locale listed in the supportedLocales.
+  ///
+  /// When all [preferredLocales] have been exhausted without a match, the first countryCode only
+  /// match will be returned.
+  ///
+  /// When no match at all is found, the first (default) locale in [supportedLocales] will be
+  /// returned.
+  ///
+  /// To summarize, the main matching priority is:
+  ///
+  ///  1. [Locale.languageCode], [Locale.scriptCode], and [Locale.countryCode]
+  ///  2. [Locale.languageCode] and [Locale.countryCode] only
+  ///  3. [Locale.languageCode] and [Locale.countryCode] only
+  ///  4. [Locale.languageCode] only (with caveats, see above)
+  ///  6. [Locale.countryCode] only when all [preferredLocales] fail to match
+  ///  5. returns [supportedLocales.first] as a fallback
+  ///
+  /// This algorithm does not take language distance (how similar languages are to each other)
+  /// into account, and will not handle edge cases such as resolving `de` to `fr` rather than `zh`
+  /// when `de` is not supported and `zh` is listed before `fr` (German is closer to French
+  /// than Chinese).
+  static Locale basicLocaleListResolution(List<Locale> preferredLocales, Iterable<Locale> supportedLocales) {
+    // preferredLocales can be null when called before the platform has had a chance to
+    // initialize the locales. Platforms without locale passing support will provide an empty list.
+    // We default to the first supported locale in these cases.
+    if (preferredLocales == null || preferredLocales.isEmpty) {
+      return supportedLocales.first;
+    }
+    // Hash the supported locales because apps can support many locales and would
+    // be expensive to search through them many times.
+    final Map<String, Locale> allSupportedLocales = HashMap<String, Locale>();
+    final Map<String, Locale> languageAndCountryLocales = HashMap<String, Locale>();
+    final Map<String, Locale> languageAndScriptLocales = HashMap<String, Locale>();
+    final Map<String, Locale> languageLocales = HashMap<String, Locale>();
+    final Map<String, Locale> countryLocales = HashMap<String, Locale>();
+    for (Locale locale in supportedLocales) {
+      allSupportedLocales['${locale.languageCode}_${locale.scriptCode}_${locale.countryCode}'] ??= locale;
+      languageAndScriptLocales['${locale.languageCode}_${locale.scriptCode}'] ??= locale;
+      languageAndCountryLocales['${locale.languageCode}_${locale.countryCode}'] ??= locale;
+      languageLocales[locale.languageCode] ??= locale;
+      countryLocales[locale.countryCode] ??= locale;
+    }
+
+    // Since languageCode-only matches are possibly low quality, we don't return
+    // it instantly when we find such a match. We check to see if the next
+    // preferred locale in the list has a high accuracy match, and only return
+    // the languageCode-only match when a higher accuracy match in the next
+    // preferred locale cannot be found.
+    Locale matchesLanguageCode;
+    Locale matchesCountryCode;
+    // Loop over user's preferred locales
+    for (int localeIndex = 0; localeIndex < preferredLocales.length; localeIndex += 1) {
+      final Locale userLocale = preferredLocales[localeIndex];
+      // Look for perfect match.
+      if (allSupportedLocales.containsKey('${userLocale.languageCode}_${userLocale.scriptCode}_${userLocale.countryCode}')) {
+        return userLocale;
+      }
+      // Look for language+script match.
+      if (userLocale.scriptCode != null) {
+        final Locale match = languageAndScriptLocales['${userLocale.languageCode}_${userLocale.scriptCode}'];
+        if (match != null) {
+          return match;
+        }
+      }
+      // Look for language+country match.
+      if (userLocale.countryCode != null) {
+        final Locale match = languageAndCountryLocales['${userLocale.languageCode}_${userLocale.countryCode}'];
+        if (match != null) {
+          return match;
+        }
+      }
+      // If there was a languageCode-only match in the previous iteration's higher
+      // ranked preferred locale, we return it if the current userLocale does not
+      // have a better match.
+      if (matchesLanguageCode != null) {
+        return matchesLanguageCode;
+      }
+      // Look and store language-only match.
+      Locale match = languageLocales[userLocale.languageCode];
+      if (match != null) {
+        matchesLanguageCode = match;
+        // Since first (default) locale is usually highly preferred, we will allow
+        // a languageCode-only match to be instantly matched. If the next preferred
+        // languageCode is the same, we defer hastily returning until the next iteration
+        // since at worst it is the same and at best an improved match.
+        if (localeIndex == 0 &&
+            !(localeIndex + 1 < preferredLocales.length && preferredLocales[localeIndex + 1].languageCode == userLocale.languageCode)) {
+          return matchesLanguageCode;
+        }
+      }
+      // countryCode-only match. When all else except default supported locale fails,
+      // attempt to match by country only, as a user is likely to be familar with a
+      // language from their listed country.
+      if (matchesCountryCode == null && userLocale.countryCode != null) {
+        match = countryLocales[userLocale.countryCode];
+        if (match != null) {
+          matchesCountryCode = match;
+        }
+      }
+    }
+    // When there is no languageCode-only match. Fallback to matching countryCode only. Country
+    // fallback only applies on iOS. When there is no countryCode-only match, we return first
+    // suported locale.
+    final Locale resolvedLocale = matchesLanguageCode ?? matchesCountryCode ?? supportedLocales.first;
+    return resolvedLocale;
   }
 
   @override
-  void didChangeLocale(Locale locale) {
-    if (locale == _locale)
-      return;
-    final Locale newLocale = _resolveLocale(locale, widget.supportedLocales);
+  void didChangeLocales(List<Locale> locales) {
+    final Locale newLocale = _resolveLocales(locales, widget.supportedLocales);
     if (newLocale != _locale) {
       setState(() {
         _locale = newLocale;
@@ -722,7 +995,7 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
   @override
   void didChangeAccessibilityFeatures() {
     setState(() {
-      // The properties of ui.window have changed. We use them in our build
+      // The properties of window have changed. We use them in our build
       // function, so we need setState(), but we don't cache anything locally.
     });
   }
@@ -733,7 +1006,7 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
   @override
   void didChangeMetrics() {
     setState(() {
-      // The properties of ui.window have changed. We use them in our build
+      // The properties of window have changed. We use them in our build
       // function, so we need setState(), but we don't cache anything locally.
     });
   }
@@ -741,14 +1014,70 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
   @override
   void didChangeTextScaleFactor() {
     setState(() {
-      // The textScaleFactor property of ui.window has changed. We reference
-      // ui.window in our build function, so we need to call setState(), but
+      // The textScaleFactor property of window has changed. We reference
+      // window in our build function, so we need to call setState(), but
       // we don't need to cache anything locally.
     });
   }
 
+  // RENDERING
+  @override
+  void didChangePlatformBrightness() {
+    setState(() {
+      // The platformBrightness property of window has changed. We reference
+      // window in our build function, so we need to call setState(), but
+      // we don't need to cache anything locally.
+    });
+  }
 
   // BUILDER
+
+  bool _debugCheckLocalizations(Locale appLocale) {
+    assert(() {
+      final Set<Type> unsupportedTypes =
+        _localizationsDelegates.map<Type>((LocalizationsDelegate<dynamic> delegate) => delegate.type).toSet();
+      for (LocalizationsDelegate<dynamic> delegate in _localizationsDelegates) {
+        if (!unsupportedTypes.contains(delegate.type))
+          continue;
+        if (delegate.isSupported(appLocale))
+          unsupportedTypes.remove(delegate.type);
+      }
+      if (unsupportedTypes.isEmpty)
+        return true;
+
+      // Currently the Cupertino library only provides english localizations.
+      // Remove this when https://github.com/flutter/flutter/issues/23847
+      // is fixed.
+      if (listEquals(unsupportedTypes.map((Type type) => type.toString()).toList(), <String>['CupertinoLocalizations']))
+        return true;
+
+      final StringBuffer message = StringBuffer();
+      message.writeln('\u2550' * 8);
+      message.writeln(
+        'Warning: This application\'s locale, $appLocale, is not supported by all of its\n'
+        'localization delegates.'
+      );
+      for (Type unsupportedType in unsupportedTypes) {
+        // Currently the Cupertino library only provides english localizations.
+        // Remove this when https://github.com/flutter/flutter/issues/23847
+        // is fixed.
+        if (unsupportedType.toString() == 'CupertinoLocalizations')
+          continue;
+        message.writeln(
+          '> A $unsupportedType delegate that supports the $appLocale locale was not found.'
+        );
+      }
+      message.writeln(
+        'See https://flutter.dev/tutorials/internationalization/ for more\n'
+        'information about configuring an app\'s locale, supportedLocales,\n'
+        'and localizationsDelegates parameters.'
+      );
+      message.writeln('\u2550' * 8);
+      debugPrint(message.toString());
+      return true;
+    }());
+    return true;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -756,12 +1085,12 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
     if (_navigator != null) {
       navigator = Navigator(
         key: _navigator,
-        // If ui.window.defaultRouteName isn't '/', we should assume it was set
+        // If window.defaultRouteName isn't '/', we should assume it was set
         // intentionally via `setInitialRoute`, and should override whatever
         // is in [widget.initialRoute].
-        initialRoute: ui.window.defaultRouteName != Navigator.defaultRouteName
-            ? ui.window.defaultRouteName
-            : widget.initialRoute ?? ui.window.defaultRouteName,
+        initialRoute: WidgetsBinding.instance.window.defaultRouteName != Navigator.defaultRouteName
+            ? WidgetsBinding.instance.window.defaultRouteName
+            : widget.initialRoute ?? WidgetsBinding.instance.window.defaultRouteName,
         onGenerateRoute: _onGenerateRoute,
         onUnknownRoute: _onUnknownRoute,
         observers: widget.navigatorObservers,
@@ -806,7 +1135,7 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
         children: <Widget>[
           result,
           Positioned(top: 0.0, left: 0.0, right: 0.0, child: performanceOverlay),
-        ]
+        ],
       );
     }
 
@@ -855,10 +1184,16 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
       );
     }
 
+    final Locale appLocale = widget.locale != null
+      ? _resolveLocales(<Locale>[widget.locale], widget.supportedLocales)
+      : _locale;
+
+    assert(_debugCheckLocalizations(appLocale));
+
     return MediaQuery(
-      data: MediaQueryData.fromWindow(ui.window),
+      data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
       child: Localizations(
-        locale: widget.locale ?? _locale,
+        locale: appLocale,
         delegates: _localizationsDelegates.toList(),
         child: title,
       ),

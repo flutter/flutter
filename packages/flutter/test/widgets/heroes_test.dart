@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
@@ -14,24 +15,30 @@ Key homeRouteKey = const Key('homeRoute');
 Key routeTwoKey = const Key('routeTwo');
 Key routeThreeKey = const Key('routeThree');
 
+bool transitionFromUserGestures = false;
+
 final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
   '/': (BuildContext context) => Material(
     child: ListView(
       key: homeRouteKey,
       children: <Widget>[
         Container(height: 100.0, width: 100.0),
-        Card(child: Hero(tag: 'a', child: Container(height: 100.0, width: 100.0, key: firstKey))),
+        Card(child: Hero(
+          tag: 'a',
+          transitionOnUserGestures: transitionFromUserGestures,
+          child: Container(height: 100.0, width: 100.0, key: firstKey),
+        )),
         Container(height: 100.0, width: 100.0),
         FlatButton(
           child: const Text('two'),
-          onPressed: () { Navigator.pushNamed(context, '/two'); }
+          onPressed: () { Navigator.pushNamed(context, '/two'); },
         ),
         FlatButton(
           child: const Text('twoInset'),
-          onPressed: () { Navigator.pushNamed(context, '/twoInset'); }
+          onPressed: () { Navigator.pushNamed(context, '/twoInset'); },
         ),
-      ]
-    )
+      ],
+    ),
   ),
   '/two': (BuildContext context) => Material(
     child: ListView(
@@ -39,17 +46,21 @@ final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       children: <Widget>[
         FlatButton(
           child: const Text('pop'),
-          onPressed: () { Navigator.pop(context); }
+          onPressed: () { Navigator.pop(context); },
         ),
         Container(height: 150.0, width: 150.0),
-        Card(child: Hero(tag: 'a', child: Container(height: 150.0, width: 150.0, key: secondKey))),
+        Card(child: Hero(
+          tag: 'a',
+          transitionOnUserGestures: transitionFromUserGestures,
+          child: Container(height: 150.0, width: 150.0, key: secondKey),
+        )),
         Container(height: 150.0, width: 150.0),
         FlatButton(
           child: const Text('three'),
           onPressed: () { Navigator.push(context, ThreeRoute()); },
         ),
-      ]
-    )
+      ],
+    ),
   ),
   // This route is the same as /two except that Hero 'a' is shifted to the right by
   // 50 pixels. When the hero's in-flight bounds between / and /twoInset are animated
@@ -61,13 +72,17 @@ final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       children: <Widget>[
         FlatButton(
           child: const Text('pop'),
-          onPressed: () { Navigator.pop(context); }
+          onPressed: () { Navigator.pop(context); },
         ),
         Container(height: 150.0, width: 150.0),
         Card(
           child: Padding(
             padding: const EdgeInsets.only(left: 50.0),
-            child: Hero(tag: 'a', child: Container(height: 150.0, width: 150.0, key: secondKey))
+            child: Hero(
+              tag: 'a',
+              transitionOnUserGestures: transitionFromUserGestures,
+              child: Container(height: 150.0, width: 150.0, key: secondKey),
+            ),
           ),
         ),
         Container(height: 150.0, width: 150.0),
@@ -75,31 +90,32 @@ final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
           child: const Text('three'),
           onPressed: () { Navigator.push(context, ThreeRoute()); },
         ),
-      ]
-    )
+      ],
+    ),
   ),
-
 };
 
 class ThreeRoute extends MaterialPageRoute<void> {
-  ThreeRoute() : super(builder: (BuildContext context) {
-    return Material(
-      key: routeThreeKey,
-      child: ListView(
-        children: <Widget>[
-          Container(height: 200.0, width: 200.0),
-          Card(child: Hero(tag: 'a', child: Container(height: 200.0, width: 200.0, key: thirdKey))),
-          Container(height: 200.0, width: 200.0),
-        ]
-      )
-    );
-  });
+  ThreeRoute()
+    : super(builder: (BuildContext context) {
+        return Material(
+          key: routeThreeKey,
+          child: ListView(
+            children: <Widget>[
+              Container(height: 200.0, width: 200.0),
+              Card(child: Hero(tag: 'a', child: Container(height: 200.0, width: 200.0, key: thirdKey))),
+              Container(height: 200.0, width: 200.0),
+            ],
+          ),
+        );
+      });
 }
 
 class MutatingRoute extends MaterialPageRoute<void> {
-  MutatingRoute() : super(builder: (BuildContext context) {
-    return Hero(tag: 'a', child: const Text('MutatingRoute'), key: UniqueKey());
-  });
+  MutatingRoute()
+    : super(builder: (BuildContext context) {
+        return Hero(tag: 'a', child: const Text('MutatingRoute'), key: UniqueKey());
+      });
 
   void markNeedsBuild() {
     setState(() {
@@ -121,6 +137,10 @@ class MyStatefulWidgetState extends State<MyStatefulWidget> {
 }
 
 void main() {
+  setUp(() {
+    transitionFromUserGestures = false;
+  });
+
   testWidgets('Heroes animate', (WidgetTester tester) async {
 
     await tester.pumpWidget(MaterialApp(routes: routes));
@@ -235,10 +255,10 @@ void main() {
             const Hero(tag: 'a', child: Text('foo')),
             Builder(builder: (BuildContext context) {
               return FlatButton(child: const Text('two'), onPressed: () => Navigator.push(context, route));
-            })
-          ]
-        )
-      )
+            }),
+          ],
+        ),
+      ),
     ));
 
     await tester.tap(find.text('two'));
@@ -268,25 +288,25 @@ void main() {
     await tester.pump(duration * 0.25);
     expect(
       tester.getSize(find.byKey(secondKey)).height,
-      closeTo(curve.transform(0.25) * deltaHeight + initialHeight, epsilon)
+      closeTo(curve.transform(0.25) * deltaHeight + initialHeight, epsilon),
     );
 
     await tester.pump(duration * 0.25);
     expect(
       tester.getSize(find.byKey(secondKey)).height,
-      closeTo(curve.transform(0.50) * deltaHeight + initialHeight, epsilon)
+      closeTo(curve.transform(0.50) * deltaHeight + initialHeight, epsilon),
     );
 
     await tester.pump(duration * 0.25);
     expect(
       tester.getSize(find.byKey(secondKey)).height,
-      closeTo(curve.transform(0.75) * deltaHeight + initialHeight, epsilon)
+      closeTo(curve.transform(0.75) * deltaHeight + initialHeight, epsilon),
     );
 
     await tester.pump(duration * 0.25);
     expect(
       tester.getSize(find.byKey(secondKey)).height,
-      closeTo(curve.transform(1.0) * deltaHeight + initialHeight, epsilon)
+      closeTo(curve.transform(1.0) * deltaHeight + initialHeight, epsilon),
     );
   });
 
@@ -304,10 +324,10 @@ void main() {
             child: Container(
               width: 100.0,
               height: 100.0,
-              child: const Text('foo')
-            )
-          )
-        )
+              child: const Text('foo'),
+            ),
+          ),
+        ),
       ),
       routes: <String, WidgetBuilder>{
         '/next': (BuildContext context) {
@@ -322,13 +342,13 @@ void main() {
                 child: Container(
                   width: 100.0,
                   height: 150.0,
-                  child: const Text('bar')
-                )
-              )
-            )
+                  child: const Text('bar'),
+                ),
+              ),
+            ),
           );
-        }
-      }
+        },
+      },
     ));
 
     expect(log, isEmpty);
@@ -610,10 +630,10 @@ void main() {
               ),
               FlatButton(
                 child: const Text('POP'),
-                onPressed: () { Navigator.pop(context); }
+                onPressed: () { Navigator.pop(context); },
               ),
             ],
-          )
+          ),
         );
       },
     );
@@ -631,7 +651,7 @@ void main() {
                   ),
                   FlatButton(
                     child: const Text('PUSH'),
-                    onPressed: () { Navigator.push(context, route); }
+                    onPressed: () { Navigator.push(context, route); },
                   ),
                 ],
               );
@@ -704,15 +724,15 @@ void main() {
               // This container will appear at Y=100
               Container(
                 key: routeContainerKey,
-                child: Hero(tag: 'H', child: Container(key: routeHeroKey, height: 200.0, width: 200.0))
+                child: Hero(tag: 'H', child: Container(key: routeHeroKey, height: 200.0, width: 200.0)),
               ),
               FlatButton(
                 child: const Text('POP'),
-                onPressed: () { Navigator.pop(context); }
+                onPressed: () { Navigator.pop(context); },
               ),
               const SizedBox(height: 600.0),
             ],
-          )
+          ),
         );
       },
     );
@@ -732,7 +752,7 @@ void main() {
                   ),
                   FlatButton(
                     child: const Text('PUSH'),
-                    onPressed: () { Navigator.push(context, route); }
+                    onPressed: () { Navigator.push(context, route); },
                   ),
                   const SizedBox(height: 600.0),
                 ],
@@ -787,11 +807,11 @@ void main() {
               // This container will appear at Y=100
               Container(
                 key: routeContainerKey,
-                child: Hero(tag: 'H', child: Container(key: routeHeroKey, height: 200.0, width: 200.0))
+                child: Hero(tag: 'H', child: Container(key: routeHeroKey, height: 200.0, width: 200.0)),
               ),
               const SizedBox(height: 800.0),
             ],
-          )
+          ),
         );
       },
     );
@@ -811,7 +831,7 @@ void main() {
                   ),
                   FlatButton(
                     child: const Text('PUSH'),
-                    onPressed: () { Navigator.push(context, route); }
+                    onPressed: () { Navigator.push(context, route); },
                   ),
                 ],
               );
@@ -863,11 +883,11 @@ void main() {
             children: <Widget>[
               // This container will appear at Y=0
               Container(
-                child: Hero(tag: 'BC', child: Container(key: heroBCKey, height: 150.0))
+                child: Hero(tag: 'BC', child: Container(key: heroBCKey, height: 150.0)),
               ),
               const SizedBox(height: 800.0),
             ],
-          )
+          ),
         );
       },
     );
@@ -881,18 +901,18 @@ void main() {
               const SizedBox(height: 100.0),
               // This container will appear at Y=100
               Container(
-                child: Hero(tag: 'AB', child: Container(key: heroABKey, height: 200.0))
+                child: Hero(tag: 'AB', child: Container(key: heroABKey, height: 200.0)),
               ),
               FlatButton(
                 child: const Text('PUSH C'),
-                onPressed: () { Navigator.push(context, routeC); }
+                onPressed: () { Navigator.push(context, routeC); },
               ),
               Container(
-                child: Hero(tag: 'BC', child: Container(height: 150.0))
+                child: Hero(tag: 'BC', child: Container(height: 150.0)),
               ),
               const SizedBox(height: 800.0),
             ],
-          )
+          ),
         );
       },
     );
@@ -912,7 +932,7 @@ void main() {
                   ),
                   FlatButton(
                     child: const Text('PUSH B'),
-                    onPressed: () { Navigator.push(context, routeB); }
+                    onPressed: () { Navigator.push(context, routeB); },
                   ),
                 ],
               );
@@ -973,10 +993,10 @@ void main() {
               ),
               FlatButton(
                 child: const Text('POP'),
-                onPressed: () { Navigator.pop(context); }
+                onPressed: () { Navigator.pop(context); },
               ),
             ],
-          )
+          ),
         );
       },
     );
@@ -999,7 +1019,7 @@ void main() {
                   ),
                   FlatButton(
                     child: const Text('PUSH'),
-                    onPressed: () { Navigator.push(context, route); }
+                    onPressed: () { Navigator.push(context, route); },
                   ),
                 ],
               );
@@ -1056,10 +1076,10 @@ void main() {
             ),
             FlatButton(
               child: const Text('two'),
-              onPressed: () { Navigator.pushNamed(context, '/two'); }
+              onPressed: () { Navigator.pushNamed(context, '/two'); },
             ),
-          ]
-        )
+          ],
+        ),
       ),
       '/two': (BuildContext context) => Material(
         child: Column(
@@ -1069,7 +1089,7 @@ void main() {
               height: 200.0,
               child: FlatButton(
                 child: const Text('pop'),
-                onPressed: () { Navigator.pop(context); }
+                onPressed: () { Navigator.pop(context); },
               ),
             ),
             Hero(
@@ -1334,5 +1354,493 @@ void main() {
     expect(find.text('Wolverine'), findsOneWidget);
     expect(find.text('Venom'), findsOneWidget);
     expect(find.text('Joker'), findsOneWidget);
+  });
+
+  testWidgets('Heroes do not transition on back gestures by default', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(
+        platform: TargetPlatform.iOS,
+      ),
+      routes: routes,
+    ));
+
+    expect(find.byKey(firstKey), isOnstage);
+    expect(find.byKey(firstKey), isInCard);
+    expect(find.byKey(secondKey), findsNothing);
+
+    await tester.tap(find.text('two'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(find.byKey(firstKey), findsNothing);
+    expect(find.byKey(secondKey), isOnstage);
+    expect(find.byKey(secondKey), isInCard);
+
+    final TestGesture  gesture = await tester.startGesture(const Offset(5.0, 200.0));
+    await gesture.moveBy(const Offset(20.0, 0.0));
+    await gesture.moveBy(const Offset(180.0, 0.0));
+    await gesture.up();
+    await tester.pump();
+
+    await tester.pump();
+
+    // Both Heroes exist and are seated in their normal parents.
+    expect(find.byKey(firstKey), isOnstage);
+    expect(find.byKey(firstKey), isInCard);
+    expect(find.byKey(secondKey), isOnstage);
+    expect(find.byKey(secondKey), isInCard);
+
+    // To make sure the hero had all chances of starting.
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.byKey(firstKey), isOnstage);
+    expect(find.byKey(firstKey), isInCard);
+    expect(find.byKey(secondKey), isOnstage);
+    expect(find.byKey(secondKey), isInCard);
+  });
+
+  testWidgets('Heroes can transition on gesture in one frame', (WidgetTester tester) async {
+    transitionFromUserGestures = true;
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(
+        platform: TargetPlatform.iOS,
+      ),
+      routes: routes,
+    ));
+
+    await tester.tap(find.text('two'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(find.byKey(firstKey), findsNothing);
+    expect(find.byKey(secondKey), isOnstage);
+    expect(find.byKey(secondKey), isInCard);
+
+    final TestGesture gesture = await tester.startGesture(const Offset(5.0, 200.0));
+    await gesture.moveBy(const Offset(200.0, 0.0));
+    await tester.pump();
+
+    // We're going to page 1 so page 1's Hero is lifted into flight.
+    expect(find.byKey(firstKey), isOnstage);
+    expect(find.byKey(firstKey), isNotInCard);
+    expect(find.byKey(secondKey), findsNothing);
+
+    // Move further along.
+    await gesture.moveBy(const Offset(500.0, 0.0));
+    await tester.pump();
+
+    // Same results.
+    expect(find.byKey(firstKey), isOnstage);
+    expect(find.byKey(firstKey), isNotInCard);
+    expect(find.byKey(secondKey), findsNothing);
+
+    await gesture.up();
+    // Finish transition.
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    // Hero A is back in the card.
+    expect(find.byKey(firstKey), isOnstage);
+    expect(find.byKey(firstKey), isInCard);
+    expect(find.byKey(secondKey), findsNothing);
+  });
+
+  testWidgets('Handles transitions when a non-default initial route is set', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      routes: routes,
+      initialRoute: '/two',
+    ));
+    expect(find.text('two'), findsOneWidget);
+  });
+
+  testWidgets('Can push/pop on outer Navigator if nested Navigator contains Heroes', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/28042.
+
+    const String heroTag = 'You are my hero!';
+    final GlobalKey<NavigatorState> rootNavigator = GlobalKey();
+    final GlobalKey<NavigatorState> nestedNavigator = GlobalKey();
+    final Key nestedRouteHeroBottom = UniqueKey();
+    final Key nestedRouteHeroTop = UniqueKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorKey: rootNavigator,
+        home: Navigator(
+          key: nestedNavigator,
+          onGenerateRoute: (RouteSettings settings) {
+            return MaterialPageRoute<void>(
+              builder: (BuildContext context) {
+                return Hero(
+                  tag: heroTag,
+                  child: Placeholder(
+                    key: nestedRouteHeroBottom,
+                  ),
+                );
+              }
+            );
+          },
+        ),
+      )
+    );
+
+    nestedNavigator.currentState.push(MaterialPageRoute<void>(
+      builder: (BuildContext context) {
+        return Hero(
+          tag: heroTag,
+          child: Placeholder(
+            key: nestedRouteHeroTop,
+          ),
+        );
+      },
+    ));
+    await tester.pumpAndSettle();
+
+    // Both heroes are in the tree, one is offstage
+    expect(find.byKey(nestedRouteHeroTop), findsOneWidget);
+    expect(find.byKey(nestedRouteHeroBottom), findsNothing);
+    expect(find.byKey(nestedRouteHeroBottom, skipOffstage: false), findsOneWidget);
+
+    rootNavigator.currentState.push(MaterialPageRoute<void>(
+      builder: (BuildContext context) {
+        return const Text('Foo');
+      },
+    ));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Foo'), findsOneWidget);
+    // Both heroes are still in the tree, both are offstage.
+    expect(find.byKey(nestedRouteHeroBottom), findsNothing);
+    expect(find.byKey(nestedRouteHeroTop), findsNothing);
+    expect(find.byKey(nestedRouteHeroBottom, skipOffstage: false), findsOneWidget);
+    expect(find.byKey(nestedRouteHeroTop, skipOffstage: false), findsOneWidget);
+
+    // Doesn't crash.
+    expect(tester.takeException(), isNull);
+
+    rootNavigator.currentState.pop();
+    await tester.pumpAndSettle();
+
+    expect(find.text('Foo'), findsNothing);
+    // Both heroes are in the tree, one is offstage
+    expect(find.byKey(nestedRouteHeroTop), findsOneWidget);
+    expect(find.byKey(nestedRouteHeroBottom), findsNothing);
+    expect(find.byKey(nestedRouteHeroBottom, skipOffstage: false), findsOneWidget);
+  });
+
+  testWidgets('Can hero from route in root Navigator to route in nested Navigator', (WidgetTester tester) async {
+    const String heroTag = 'foo';
+    final GlobalKey<NavigatorState> rootNavigator = GlobalKey();
+    final Key smallContainer = UniqueKey();
+    final Key largeContainer = UniqueKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorKey: rootNavigator,
+        home: Center(
+          child: Card(
+            child: Hero(
+              tag: heroTag,
+              child: Container(
+                key: largeContainer,
+                color: Colors.red,
+                height: 200.0,
+                width: 200.0,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+
+    // The initial setup.
+    expect(find.byKey(largeContainer), isOnstage);
+    expect(find.byKey(largeContainer), isInCard);
+    expect(find.byKey(smallContainer, skipOffstage: false), findsNothing);
+
+    rootNavigator.currentState.push(
+      MaterialPageRoute<void>(
+        builder: (BuildContext context) {
+          return Center(
+            child: Card(
+              child: Hero(
+                tag: heroTag,
+                child: Container(
+                  key: smallContainer,
+                  color: Colors.red,
+                  height: 100.0,
+                  width: 100.0,
+                ),
+              ),
+            ),
+          );
+        }
+      ),
+    );
+    await tester.pump();
+
+    // The second route exists offstage.
+    expect(find.byKey(largeContainer), isOnstage);
+    expect(find.byKey(largeContainer), isInCard);
+    expect(find.byKey(smallContainer, skipOffstage: false), isOffstage);
+    expect(find.byKey(smallContainer, skipOffstage: false), isInCard);
+
+    await tester.pump();
+
+    // The hero started flying.
+    expect(find.byKey(largeContainer), findsNothing);
+    expect(find.byKey(smallContainer), isOnstage);
+    expect(find.byKey(smallContainer), isNotInCard);
+
+    await tester.pump(const Duration(milliseconds: 100));
+
+    // The hero is in-flight.
+    expect(find.byKey(largeContainer), findsNothing);
+    expect(find.byKey(smallContainer), isOnstage);
+    expect(find.byKey(smallContainer), isNotInCard);
+    final Size size = tester.getSize(find.byKey(smallContainer));
+    expect(size.height, greaterThan(100));
+    expect(size.width, greaterThan(100));
+    expect(size.height, lessThan(200));
+    expect(size.width, lessThan(200));
+
+    await tester.pumpAndSettle();
+
+    // The transition has ended.
+    expect(find.byKey(largeContainer), findsNothing);
+    expect(find.byKey(smallContainer), isOnstage);
+    expect(find.byKey(smallContainer), isInCard);
+    expect(tester.getSize(find.byKey(smallContainer)), const Size(100,100));
+  });
+
+  testWidgets('Hero within a Hero, throws', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: Hero(
+            tag: 'a',
+            child: Hero(
+              tag: 'b',
+              child: Text('Child of a Hero'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isAssertionError);
+  });
+
+  testWidgets('Hero within a Hero subtree, throws', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Container(
+            child: const Hero(
+              tag: 'a',
+              child: Hero(
+                tag: 'b',
+                child: Text('Child of a Hero'),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isAssertionError);
+  });
+
+  testWidgets('Hero within a Hero subtree with Builder, throws', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Hero(
+            tag: 'a',
+            child: Builder(
+              builder: (BuildContext context) {
+                return const Hero(
+                  tag: 'b',
+                  child: Text('Child of a Hero'),
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(),isAssertionError);
+  });
+
+  testWidgets('Hero within a Hero subtree with LayoutBuilder, throws', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Hero(
+            tag: 'a',
+            child: LayoutBuilder(
+              builder: (BuildContext context, BoxConstraints constraints) {
+                return const Hero(
+                  tag: 'b',
+                  child: Text('Child of a Hero'),
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isAssertionError);
+  });
+
+  testWidgets('Heroes fly on pushReplacement', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/28041.
+
+    const String heroTag = 'foo';
+    final GlobalKey<NavigatorState> navigator = GlobalKey();
+    final Key smallContainer = UniqueKey();
+    final Key largeContainer = UniqueKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorKey: navigator,
+        home: Center(
+          child: Card(
+            child: Hero(
+              tag: heroTag,
+              child: Container(
+                key: largeContainer,
+                color: Colors.red,
+                height: 200.0,
+                width: 200.0,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // The initial setup.
+    expect(find.byKey(largeContainer), isOnstage);
+    expect(find.byKey(largeContainer), isInCard);
+    expect(find.byKey(smallContainer, skipOffstage: false), findsNothing);
+
+    navigator.currentState.pushReplacement(
+      MaterialPageRoute<void>(
+          builder: (BuildContext context) {
+            return Center(
+              child: Card(
+                child: Hero(
+                  tag: heroTag,
+                  child: Container(
+                    key: smallContainer,
+                    color: Colors.red,
+                    height: 100.0,
+                    width: 100.0,
+                  ),
+                ),
+              ),
+            );
+          }
+      ),
+    );
+    await tester.pump();
+
+    // The second route exists offstage.
+    expect(find.byKey(largeContainer), isOnstage);
+    expect(find.byKey(largeContainer), isInCard);
+    expect(find.byKey(smallContainer, skipOffstage: false), isOffstage);
+    expect(find.byKey(smallContainer, skipOffstage: false), isInCard);
+
+    await tester.pump();
+
+    // The hero started flying.
+    expect(find.byKey(largeContainer), findsNothing);
+    expect(find.byKey(smallContainer), isOnstage);
+    expect(find.byKey(smallContainer), isNotInCard);
+
+    await tester.pump(const Duration(milliseconds: 100));
+
+    // The hero is in-flight.
+    expect(find.byKey(largeContainer), findsNothing);
+    expect(find.byKey(smallContainer), isOnstage);
+    expect(find.byKey(smallContainer), isNotInCard);
+    final Size size = tester.getSize(find.byKey(smallContainer));
+    expect(size.height, greaterThan(100));
+    expect(size.width, greaterThan(100));
+    expect(size.height, lessThan(200));
+    expect(size.width, lessThan(200));
+
+    await tester.pumpAndSettle();
+
+    // The transition has ended.
+    expect(find.byKey(largeContainer), findsNothing);
+    expect(find.byKey(smallContainer), isOnstage);
+    expect(find.byKey(smallContainer), isInCard);
+    expect(tester.getSize(find.byKey(smallContainer)), const Size(100,100));
+  });
+
+  testWidgets('On an iOS back swipe and snap, only a single flight should take place', (WidgetTester tester) async {
+    int shuttlesBuilt = 0;
+    final HeroFlightShuttleBuilder shuttleBuilder = (
+      BuildContext flightContext,
+      Animation<double> animation,
+      HeroFlightDirection flightDirection,
+      BuildContext fromHeroContext,
+      BuildContext toHeroContext,
+    ) {
+      shuttlesBuilt += 1;
+      return const Text("I'm flying in a jetplane");
+    };
+
+    final GlobalKey<NavigatorState> navigatorKey = GlobalKey();
+    await tester.pumpWidget(
+      CupertinoApp(
+        navigatorKey: navigatorKey,
+        home: Hero(
+          tag: navigatorKey,
+          // Since we're popping, only the destination route's builder is used.
+          flightShuttleBuilder: shuttleBuilder,
+          transitionOnUserGestures: true,
+          child: const Text('1')
+        ),
+      ),
+    );
+
+    final CupertinoPageRoute<void> route2 = CupertinoPageRoute<void>(
+      builder: (BuildContext context) {
+        return CupertinoPageScaffold(
+          child: Hero(
+            tag: navigatorKey,
+            transitionOnUserGestures: true,
+            child: const Text('2')
+          ),
+        );
+      }
+    );
+
+    navigatorKey.currentState.push(route2);
+    await tester.pumpAndSettle();
+
+    expect(shuttlesBuilt, 1);
+
+    final TestGesture gesture = await tester.startGesture(const Offset(5.0, 200.0));
+    await gesture.moveBy(const Offset(500.0, 0.0));
+    await tester.pump();
+    // Starting the back swipe creates a new hero shuttle.
+    expect(shuttlesBuilt, 2);
+
+    await gesture.up();
+    await tester.pump();
+    // After the lift, no additional shuttles should be created since it's the
+    // same hero flight.
+    expect(shuttlesBuilt, 2);
+
+    // Did go far enough to snap out of this route.
+    await tester.pump(const Duration(milliseconds: 301));
+    expect(find.text('2'), findsNothing);
+    // Still one shuttle.
+    expect(shuttlesBuilt, 2);
   });
 }

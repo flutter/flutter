@@ -85,7 +85,7 @@ abstract class AlignmentGeometry {
   /// representing a combination of both is returned. That object can be turned
   /// into a concrete [Alignment] using [resolve].
   ///
-  /// {@macro flutter.painting.gradient.lerp}
+  /// {@macro dart.ui.shadow.lerp}
   static AlignmentGeometry lerp(AlignmentGeometry a, AlignmentGeometry b, double t) {
     assert(t != null);
     if (a == null && b == null)
@@ -154,7 +154,15 @@ abstract class AlignmentGeometry {
 /// respect to the rectangle and vertically below the bottom of the rectangle by
 /// the height of the rectangle.
 ///
-/// [Alignment] use visual coordinates, which means increasing [x] moves the
+/// `Alignment(0.0, -0.5)` represents a point that is horizontally centered with
+/// respect to the rectangle and vertically half way between the top edge and
+/// the center.
+///
+/// `Alignment(x, y)` in a rectangle with height h and width w describes
+/// the point (x * w/2 + w/2, y * h/2 + h/2) in the coordinate system of the
+/// rectangle.
+///
+/// [Alignment] uses visual coordinates, which means increasing [x] moves the
 /// point from left to right. To support layouts with a right-to-left
 /// [TextDirection], consider using [AlignmentDirectional], in which the
 /// direction the point moves when increasing the horizontal value depends on
@@ -324,7 +332,7 @@ class Alignment extends AlignmentGeometry {
   ///
   /// If either is null, this function interpolates from [Alignment.center].
   ///
-  /// {@macro flutter.painting.gradient.lerp}
+  /// {@macro dart.ui.shadow.lerp}
   static Alignment lerp(Alignment a, Alignment b, double t) {
     assert(t != null);
     if (a == null && b == null)
@@ -505,7 +513,7 @@ class AlignmentDirectional extends AlignmentGeometry {
   ///
   /// If either is null, this function interpolates from [AlignmentDirectional.center].
   ///
-  /// {@macro flutter.painting.gradient.lerp}
+  /// {@macro dart.ui.shadow.lerp}
   static AlignmentDirectional lerp(AlignmentDirectional a, AlignmentDirectional b, double t) {
     assert(t != null);
     if (a == null && b == null)

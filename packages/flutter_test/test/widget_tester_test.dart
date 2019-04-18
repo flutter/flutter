@@ -10,8 +10,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:test/test.dart' as test_package;
-import 'package:test/src/frontend/async_matcher.dart' show AsyncMatcher;
+import 'package:test_api/test_api.dart' as test_package;
+import 'package:test_api/src/frontend/async_matcher.dart' show AsyncMatcher;
 
 const List<Widget> fooBarTexts = <Text>[
   Text('foo', textDirection: TextDirection.ltr),
@@ -23,23 +23,23 @@ void main() {
     testWidgets('completes when matcher completes', (WidgetTester tester) async {
       final Completer<void> completer = Completer<void>();
       final Future<void> future = expectLater(null, FakeMatcher(completer));
-      String value;
-      future.then<void>((void _) {
-        value = '123';
+      String result;
+      future.then<void>((void value) {
+        result = '123';
       });
-      test_package.expect(value, isNull);
+      test_package.expect(result, isNull);
       completer.complete();
-      test_package.expect(value, isNull);
+      test_package.expect(result, isNull);
       await future;
       await tester.pump();
-      test_package.expect(value, '123');
+      test_package.expect(result, '123');
     });
 
     testWidgets('respects the skip flag', (WidgetTester tester) async {
       final Completer<void> completer = Completer<void>();
       final Future<void> future = expectLater(null, FakeMatcher(completer), skip: 'testing skip');
       bool completed = false;
-      future.then<void>((void _) {
+      future.then<void>((_) {
         completed = true;
       });
       test_package.expect(completed, isFalse);
@@ -223,7 +223,7 @@ void main() {
       try {
         expect(find.descendant(
           of: find.widgetWithText(Column, 'foo'),
-          matching: find.text('bar')
+          matching: find.text('bar'),
         ), findsOneWidget);
       } catch (e) {
         failure = e;
@@ -330,7 +330,7 @@ void main() {
     });
   });
 
-  group('pageBack', (){
+  group('pageBack', () {
     testWidgets('fails when there are no back buttons', (WidgetTester tester) async {
       await tester.pumpWidget(Container());
 
@@ -411,7 +411,7 @@ void main() {
 
       await tester.pageBack();
       await tester.pump();
-      await tester.pump(const Duration(milliseconds: 400));
+      await tester.pumpAndSettle();
 
       expect(find.text('Next'), findsOneWidget);
       expect(find.text('Page 2'), findsNothing);
@@ -421,7 +421,7 @@ void main() {
   testWidgets('hasRunningAnimations control test', (WidgetTester tester) async {
     final AnimationController controller = AnimationController(
       duration: const Duration(seconds: 1),
-      vsync: const TestVSync()
+      vsync: const TestVSync(),
     );
     expect(tester.hasRunningAnimations, isFalse);
     controller.forward();
@@ -437,7 +437,7 @@ void main() {
   testWidgets('pumpAndSettle control test', (WidgetTester tester) async {
     final AnimationController controller = AnimationController(
       duration: const Duration(minutes: 525600),
-      vsync: const TestVSync()
+      vsync: const TestVSync(),
     );
     expect(await tester.pumpAndSettle(), 1);
     controller.forward();
@@ -492,7 +492,7 @@ void main() {
     testWidgets('disallows re-entry', (WidgetTester tester) async {
       final Completer<void> completer = Completer<void>();
       tester.runAsync<void>(() => completer.future);
-      expect(() => tester.runAsync(() async {}), throwsA(isInstanceOf<TestFailure>()));
+      expect(() => tester.runAsync(() async { }), throwsA(isInstanceOf<TestFailure>()));
       completer.complete();
     });
 
@@ -573,8 +573,8 @@ void main() {
           home: Scaffold(
             body: Container(
               child: OutlineButton(
-                  onPressed: () {},
-                  child: const Text('hello')
+                  onPressed: () { },
+                  child: const Text('hello'),
               ),
             ),
           ),
@@ -588,6 +588,27 @@ void main() {
       expect(semantics.hasFlag(SemanticsFlag.isButton), true);
       semanticsHandle.dispose();
     });
+
+    testWidgets('Can enable semantics for tests via semanticsEnabled', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Container(
+              child: OutlineButton(
+                  onPressed: () { },
+                  child: const Text('hello'),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final SemanticsNode node = tester.getSemantics(find.text('hello'));
+      final SemanticsData semantics = node.getSemanticsData();
+      expect(semantics.label, 'hello');
+      expect(semantics.hasAction(SemanticsAction.tap), true);
+      expect(semantics.hasFlag(SemanticsFlag.isButton), true);
+    }, semanticsEnabled: true);
 
     testWidgets('Returns merged SemanticsData', (WidgetTester tester) async {
       final SemanticsHandle semanticsHandle = tester.ensureSemantics();
@@ -605,7 +626,7 @@ void main() {
                   child: Container(),
                 ),
               ),
-            )
+            ),
           ),
         ),
       );
@@ -614,6 +635,30 @@ void main() {
       final SemanticsData semantics = node.getSemanticsData();
       expect(semantics.label, 'A\nB\nC');
       semanticsHandle.dispose();
+    });
+  });
+
+  group('ensureVisible', () {
+    testWidgets('scrolls to make widget visible', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: ListView.builder(
+              itemCount: 20,
+              shrinkWrap: true,
+              itemBuilder: (BuildContext context, int i) => ListTile(title: Text('Item $i')),
+           ),
+         ),
+        ),
+      );
+
+      // Make sure widget isn't on screen
+      expect(find.text('Item 15', skipOffstage: true), findsNothing);
+
+      await tester.ensureVisible(find.text('Item 15', skipOffstage: false));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Item 15', skipOffstage: true), findsOneWidget);
     });
   });
 }
@@ -625,7 +670,7 @@ class FakeMatcher extends AsyncMatcher {
 
   @override
   Future<String> matchAsync(dynamic object) {
-    return completer.future.then<String>((void _) {
+    return completer.future.then<String>((void value) {
       return object?.toString();
     });
   }

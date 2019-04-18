@@ -39,8 +39,9 @@ class _ListItem {
 class _ListDemoState extends State<ReorderableListDemo> {
   static final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
-  PersistentBottomSheetController<Null> _bottomSheet;
+  PersistentBottomSheetController<void> _bottomSheet;
   _ReorderableListType _itemType = _ReorderableListType.threeLine;
+  bool _reverse = false;
   bool _reverseSort = false;
   final List<_ListItem> _items = <String>[
     'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N',
@@ -51,14 +52,28 @@ class _ListDemoState extends State<ReorderableListDemo> {
       _itemType = type;
     });
     // Rebuild the bottom sheet to reflect the selected list view.
-    _bottomSheet?.setState(() { });
+    _bottomSheet?.setState(() {
+      // Trigger a rebuild.
+    });
+    // Close the bottom sheet to give the user a clear view of the list.
+    _bottomSheet?.close();
+  }
+
+  void changeReverse(bool newValue) {
+    setState(() {
+      _reverse = newValue;
+    });
+    // Rebuild the bottom sheet to reflect the selected list view.
+    _bottomSheet?.setState(() {
+      // Trigger a rebuild.
+    });
     // Close the bottom sheet to give the user a clear view of the list.
     _bottomSheet?.close();
   }
 
   void _showConfigurationSheet() {
     setState(() {
-      _bottomSheet = scaffoldKey.currentState.showBottomSheet((BuildContext bottomSheetContext) {
+      _bottomSheet = scaffoldKey.currentState.showBottomSheet<void>((BuildContext bottomSheetContext) {
         return DecoratedBox(
           decoration: const BoxDecoration(
             border: Border(top: BorderSide(color: Colors.black26)),
@@ -67,6 +82,12 @@ class _ListDemoState extends State<ReorderableListDemo> {
             shrinkWrap: true,
             primary: false,
             children: <Widget>[
+              CheckboxListTile(
+                dense: true,
+                title: const Text('Reverse'),
+                value: _reverse,
+                onChanged: changeReverse,
+              ),
               RadioListTile<_ReorderableListType>(
                 dense: true,
                 title: const Text('Horizontal Avatars'),
@@ -189,6 +210,7 @@ class _ListDemoState extends State<ReorderableListDemo> {
                   child: Text('Header of the list', style: Theme.of(context).textTheme.headline))
               : null,
           onReorder: _onReorder,
+          reverse: _reverse,
           scrollDirection: _itemType == _ReorderableListType.horizontalAvatar ? Axis.horizontal : Axis.vertical,
           padding: const EdgeInsets.symmetric(vertical: 8.0),
           children: _items.map<Widget>(buildListTile).toList(),

@@ -16,7 +16,8 @@ class _InputDropdown extends StatelessWidget {
     this.labelText,
     this.valueText,
     this.valueStyle,
-    this.onPressed }) : super(key: key);
+    this.onPressed,
+  }) : super(key: key);
 
   final String labelText;
   final String valueText;
@@ -39,7 +40,7 @@ class _InputDropdown extends StatelessWidget {
           children: <Widget>[
             Text(valueText, style: valueStyle),
             Icon(Icons.arrow_drop_down,
-              color: Theme.of(context).brightness == Brightness.light ? Colors.grey.shade700 : Colors.white70
+              color: Theme.of(context).brightness == Brightness.light ? Colors.grey.shade700 : Colors.white70,
             ),
           ],
         ),
@@ -55,7 +56,7 @@ class _DateTimePicker extends StatelessWidget {
     this.selectedDate,
     this.selectedTime,
     this.selectDate,
-    this.selectTime
+    this.selectTime,
   }) : super(key: key);
 
   final String labelText;
@@ -64,21 +65,21 @@ class _DateTimePicker extends StatelessWidget {
   final ValueChanged<DateTime> selectDate;
   final ValueChanged<TimeOfDay> selectTime;
 
-  Future<Null> _selectDate(BuildContext context) async {
+  Future<void> _selectDate(BuildContext context) async {
     final DateTime picked = await showDatePicker(
       context: context,
       initialDate: selectedDate,
       firstDate: DateTime(2015, 8),
-      lastDate: DateTime(2101)
+      lastDate: DateTime(2101),
     );
     if (picked != null && picked != selectedDate)
       selectDate(picked);
   }
 
-  Future<Null> _selectTime(BuildContext context) async {
+  Future<void> _selectTime(BuildContext context) async {
     final TimeOfDay picked = await showTimePicker(
       context: context,
-      initialTime: selectedTime
+      initialTime: selectedTime,
     );
     if (picked != null && picked != selectedTime)
       selectTime(picked);
