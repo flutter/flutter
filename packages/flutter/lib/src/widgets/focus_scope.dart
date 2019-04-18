@@ -37,7 +37,7 @@ import 'inherited_notifier.dart';
 ///
 /// To collect a sub-tree of nodes into a group, use a [FocusScope].
 ///
-/// {@tool snippet --template=stateful_widget_material}
+/// {@tool snippet --template=stateful_widget_scaffold}
 /// This example shows how to manage focus using the [Focus] and [FocusScope]
 /// widgets. See [FocusNode] for a similar example that doesn't use [Focus] or
 /// [FocusScope].
@@ -88,22 +88,29 @@ import 'inherited_notifier.dart';
 ///         debugLabel: 'Button',
 ///         child: Builder(
 ///           builder: (BuildContext context) {
-///             FocusNode focusNode = Focus.of(context);
+///             final FocusNode focusNode = Focus.of(context);
 ///             final bool hasFocus = focusNode.hasFocus;
-///             return RaisedButton(
-///               color: hasFocus ? _color : null,
-///               onPressed: () {
+///             return GestureDetector(
+///               onTap: () {
 ///                 if (hasFocus) {
-///                   setState((){
+///                   setState(() {
 ///                     focusNode.unfocus();
 ///                   });
 ///                 } else {
-///                   setState((){
+///                   setState(() {
 ///                     focusNode.requestFocus();
 ///                   });
 ///                 }
 ///               },
-///               child: Text(hasFocus ? "I'm in color! Press R,G,B!" : 'Press to focus'),
+///               child: Center(
+///                 child: Container(
+///                   width: 400,
+///                   height: 100,
+///                   alignment: Alignment.center,
+///                   color: hasFocus ? _color : Colors.white,
+///                   child: Text(hasFocus ? "I'm in color! Press R,G,B!" : 'Press to focus'),
+///                 ),
+///               ),
 ///             );
 ///           },
 ///         ),
@@ -350,11 +357,6 @@ class _FocusState extends State<Focus> {
 /// A [FocusScope] is similar to a [Focus], but also serves as a scope for other
 /// [Focus]s and [FocusScope]s, grouping them together.
 ///
-/// Managing a [FocusScopeNode] means managing its lifecycle, listening for
-/// changes in focus, and re-parenting it when the widget hierarchy changes. See
-/// [FocusNode] and [FocusScopeNode] for more information about the details of
-/// what node management entails if not using a [FocusScope] widget.
-///
 /// Like [Focus], [FocusScope] provides an [onFocusChange] as a way to be
 /// notified when the focus is given to or removed from this widget.
 ///
@@ -364,8 +366,15 @@ class _FocusState extends State<Focus> {
 /// ancestors of that node, stopping if one of them returns true from [onKey],
 /// indicating that it has handled the event.
 ///
+/// A [FocusScope] manages a [FocusScopeNode]. Managing a [FocusScopeNode] means
+/// managing its lifecycle, listening for changes in focus, and re-parenting it
+/// when the widget hierarchy changes. See [FocusNode] and [FocusScopeNode] for
+/// more information about the details of what node management entails if not
+/// using a [FocusScope] widget.
+///
 /// See also:
 ///
+///   * [FocusScopeNode], which represents a scope node in the focus hierarchy.
 ///   * [FocusNode], which represents a node in the focus hierarchy and has an
 ///     explanation of the focus system.
 ///   * [Focus], a widget that manages a [FocusNode] and allows easy access to

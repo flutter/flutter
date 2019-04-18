@@ -225,10 +225,6 @@ abstract class SearchDelegate<T> {
       ..pop(result);
   }
 
-  // The focus node to use for manipulating focus on the search page. This is
-  // managed, owned, and set by the _SearchPageRoute using this delegate.
-  FocusNode _focusNode;
-
   /// [Animation] triggered when the search pages fades in or out.
   ///
   /// This animation is commonly used to animate [AnimatedIcon]s of
@@ -236,6 +232,10 @@ abstract class SearchDelegate<T> {
   /// used to animate [IconButton]s contained within the route below the search
   /// page.
   Animation<double> get transitionAnimation => _proxyAnimation;
+
+  // The focus node to use for manipulating focus on the search page. This is
+  // managed, owned, and set by the _SearchPageRoute using this delegate.
+  FocusNode _focusNode;
 
   final TextEditingController _queryTextController = TextEditingController();
 
@@ -348,6 +348,8 @@ class _SearchPage<T> extends StatefulWidget {
 }
 
 class _SearchPageState<T> extends State<_SearchPage<T>> {
+  // This node is owned, but not hosted by, the search page. Hosting is done by
+  // the text field.
   FocusNode focusNode = FocusNode();
 
   @override

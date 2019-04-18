@@ -67,7 +67,7 @@ class FocusAttachment {
     assert(!isAttached);
   }
 
-  /// Ensures that the given [parent] node is the parent of the node which is
+  /// Ensures that the given [parent] node is the parent of the node that is
   /// attached at this attachment point, changing it if necessary.
   ///
   /// If [isAttached] is false, then calling this method does nothing.
@@ -80,8 +80,8 @@ class FocusAttachment {
   /// methods in case the widget is moved from one location in the tree to
   /// another location that has a different [FocusScope] or context.
   ///
-  /// The optional [parent] argument must be supplied if you are not using
-  /// [Focus] and [FocusScope] widgets to build the focus tree, or need to
+  /// The optional [parent] argument must be supplied when not using [Focus] and
+  /// [FocusScope] widgets to build the focus tree, or if there is a need to
   /// supply the parent explicitly (which are both uncommon).
   void reparent({FocusNode parent}) {
     assert(_node != null);
@@ -141,7 +141,7 @@ class FocusAttachment {
 /// part of a _focus tree_ that is a sparse representation of the widgets in the
 /// hierarchy that are interested in receiving keyboard events. They must be
 /// managed like other persistent state, which is typically done by a
-/// [StatefulWidget] which owns the node. A stateful widget that owns a focus
+/// [StatefulWidget] that owns the node. A stateful widget that owns a focus
 /// scope node must call [dispose] from its [State.dispose] method.
 ///
 /// Once created, a [FocusNode] must be attached to the widget tree via a
@@ -182,7 +182,7 @@ class FocusAttachment {
 /// [FocusManager.rootScope], the event is discarded.
 /// {@endtemplate}
 ///
-/// {@tool snippet --template=stateless_widget_material}
+/// {@tool snippet --template=stateless_widget_scaffold}
 /// This example shows how a FocusNode should be managed if not using the
 /// [Focus] or [FocusScope] widgets. See the [Focus] widget for a similar
 /// example using [Focus] and [FocusScope] widgets.
@@ -202,7 +202,7 @@ class FocusAttachment {
 /// class _ColorfulButtonState extends State<ColorfulButton> {
 ///   FocusNode _node;
 ///   FocusAttachment _nodeAttachment;
-///   Color _color;
+///   Color _color = Colors.white;
 ///
 ///   @override
 ///   void initState() {
@@ -246,10 +246,9 @@ class FocusAttachment {
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
-///     _nodeAttachment.reparent(Focus.of(context));
-///     return RaisedButton(
-///       color: _node.hasFocus ? _color : null,
-///       onPressed: () {
+///     _nodeAttachment.reparent();
+///     return GestureDetector(
+///       onTap: () {
 ///         if (_node.hasFocus) {
 ///           setState(() {
 ///             _node.unfocus();
@@ -260,7 +259,16 @@ class FocusAttachment {
 ///           });
 ///         }
 ///       },
-///       child: Text(_node.hasFocus ? "I'm in color! Press R,G,B!" : 'Press to focus'),
+///       child: Center(
+///         child: Container(
+///           width: 400,
+///           height: 100,
+///           color: _node.hasFocus ? _color : Colors.white,
+///           alignment: Alignment.center,
+///           child: Text(
+///               _node.hasFocus ? "I'm in color! Press R,G,B!" : 'Press to focus'),
+///         ),
+///       ),
 ///     );
 ///   }
 /// }
@@ -378,7 +386,13 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// A node that returns true for [hasFocus] will receive key events if none of
   /// its focused descendants returned true from their [onKey] handler.
   ///
-  /// This object notifies its listeners whenever this value changes.
+  /// This object is a [ChangeNotifier], and notifies its [Listenable] listeners
+  /// (registered via [addListener]) whenever this value changes.
+  ///
+  /// See also:
+  ///
+  ///   * [Focus.isAt], which is a static method that will return the focus
+  ///     state of the nearest ancestor [Focus] widget's focus node.
   bool get hasFocus {
     if (_manager?._currentFocus == null) {
       return false;
