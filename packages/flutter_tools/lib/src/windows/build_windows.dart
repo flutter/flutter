@@ -18,6 +18,7 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo) as
     windowsProject.buildScript.path,
     Cache.flutterRoot,
     buildInfo.isDebug ? 'debug' : 'release',
+    buildInfo?.trackWidgetCreation == true ? 'track-widget-creation' : 'no-track-widget-creation',
   ], runInShell: true);
   final Status status = logger.startProgress(
     'Building Windows application...',

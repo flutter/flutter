@@ -59,6 +59,7 @@ void main() {
     ), throwsA(isInstanceOf<ToolExit>()));
   }, overrides: <Type, Generator>{
     Platform: () => notLinuxPlatform,
+    FileSystem: () => memoryFilesystem,
   });
 
   testUsingContext('Linux build invokes build script', () async {
@@ -70,7 +71,8 @@ void main() {
     when(mockProcessManager.start(<String>[
       '/linux/build.sh',
       '/',
-      'release'
+      'release',
+      'no-track-widget-creation',
     ], runInShell: true)).thenAnswer((Invocation invocation) async {
       return mockProcess;
     });

@@ -18,6 +18,7 @@ Future<void> buildLinux(LinuxProject linuxProject, BuildInfo buildInfo) async {
     linuxProject.buildScript.path,
     Cache.flutterRoot,
     buildInfo?.isDebug == true ? 'debug' : 'release',
+    buildInfo?.trackWidgetCreation == true ? 'track-widget-creation' : 'no-track-widget-creation',
   ], runInShell: true);
   final Status status = logger.startProgress(
     'Building Linux application...',

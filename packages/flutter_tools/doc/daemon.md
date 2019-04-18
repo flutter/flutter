@@ -78,7 +78,7 @@ It is up to the client to decide how best to display the message; for some clien
 
 #### app.restart
 
-The `restart()` restarts the given application. It returns a Map of `{ int code, String message, String hintMessage, String hintId }` to indicate success or failure in restarting the app. A `code` of `0` indicates success, and non-zero indicates a failure. If `hintId` is non-null and equal to `restartRecommended`, that indicates that the reload was successful, but not all reloaded elements were executed during view reassembly (i.e., the user might not see all the changes in the current UI, and a restart could be necessary).
+The `restart()` restarts the given application. It returns a Map of `{ int code, String message }` to indicate success or failure in restarting the app. A `code` of `0` indicates success, and non-zero indicates a failure.
 
 - `appId`: the id of a previously started app; this is required.
 - `fullRestart`: optional; whether to do a full (rather than an incremental) restart of the application
