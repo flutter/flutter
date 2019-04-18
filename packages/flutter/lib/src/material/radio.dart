@@ -21,11 +21,48 @@ const double _kInnerRadius = 4.5;
 /// be selected. The values are of type `T`, the type parameter of the [Radio]
 /// class. Enums are commonly used for this purpose.
 ///
-/// The radio button itself does not maintain any state. Instead, when the state
-/// of the radio button changes, the widget calls the [onChanged] callback.
-/// Most widget that use a radio button will listen for the [onChanged]
-/// callback and rebuild the radio button with a new [groupValue] to update the
-/// visual appearance of the radio button.
+/// The radio button itself does not maintain any state. Instead, selecting the
+/// radio invokes the [onChanged] callback, passing [value] as a parameter. If
+/// [groupValue] and [value] match, this radio will be selected. Most widgets
+/// will listen to [onChanged] with setState to update the radio's visual
+/// appearance.
+///
+/// {@tool snippet --template=stateful_widget_scaffold}
+///
+/// Here is an example of [Radio] widgets wrapped in [ListTile]s.
+///
+/// ```dart preaamble
+/// enum SingingCharacter { lafayette, jefferson }
+/// ```
+///
+/// ```dart
+/// SingingCharacter _character = SingingCharacter.lafayette;
+///
+/// Widget build(BuildContext context) {
+///   return Center(
+///     child: Column(
+///       children: <Widget>[
+///         ListTile(
+///           title: const Text('Lafayette'),
+///           leading: Radio(
+///             value: SingingCharacter.lafayette,
+///             groupValue: _character,
+///             onChanged: (SingingCharacter value) { setState(() { _character = value; }); },
+///           ),
+///         ),
+///         ListTile(
+///           title: const Text('Thomas Jefferson'),
+///           leading: Radio(
+///             value: SingingCharacter.jefferson,
+///             groupValue: _character,
+///             onChanged: (SingingCharacter value) { setState(() { _character = value; }); },
+///           ),
+///         ),
+///       ],
+///     ),
+///   );
+/// }
+/// ```
 ///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
@@ -62,7 +99,7 @@ class Radio<T> extends StatefulWidget {
   /// The value represented by this radio button.
   final T value;
 
-  /// The currently selected value for this group of radio buttons.
+  /// The currently selected value for a group of radio buttons.
   ///
   /// This radio button is considered selected if its [value] matches the
   /// [groupValue].
