@@ -15,18 +15,13 @@ explicitly provided to attach via the command-line, e.g. `$ flutter attach
 1. If the app is already running and the platform is iOS, attach can use mDNS
 to lookup the observatory port via the application ID, with just `$ flutter
 attach`
-1. If the platform is Fuchsia and the app is not yet running, the module name
-must be provided, e.g. `$ flutter attach --module=mod_name`. Attach will then
-listen and wait for the mod to start
+1. If the platform is Fuchsia the module name must be provided, e.g. `$
+flutter attach --module=mod_name`. This can be called either before or after
+the application is started, attach will poll the device if it cannot
+immediately discover the port
 1. On other platforms (i.e. Android), if the app is not yet running attach
 will listen and wait for the app to be (manually) started with the default
 command: `$ flutter attach`
-
-## To-do
-
-Implmenting mDNS discovery for Android would be more reliable and simple for
-the user. Moving the implementations to the individual device classes would
-simplify the `AttachCommand` code.
 
 ## Source
 
