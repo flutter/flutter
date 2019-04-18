@@ -238,7 +238,10 @@ void LineBreaker::addWordBreak(size_t offset,
                                HyphenationType hyph) {
   Candidate cand;
   ParaWidth width = mCandidates.back().preBreak;
-  if (postBreak - width > currentLineWidth()) {
+  // libtxt: add a fudge factor to this comparison.  The currentLineWidth passed
+  // by the framework is based on maxIntrinsicWidth/Layout::measureText
+  // calculations that may not precisely match the postBreak width.
+  if (postBreak - width > currentLineWidth() + 0.00001) {
     // Add desperate breaks.
     // Note: these breaks are based on the shaping of the (non-broken) original
     // text; they are imprecise especially in the presence of kerning,
