@@ -205,8 +205,7 @@ void main() {
     expect(tester.getRect(find.byType(AnimatedSize).at(2)), Rect.fromLTWH(0.0, 56.0 + 1.0 + 56.0 + 16.0 + 16.0 + 48.0 + 16.0, 800.0, 100.0));
   });
 
-  testWidgets('Single Panel Open Test',  (WidgetTester tester) async {
-
+  testWidgets('Radio mode has max of one panel open at a time',  (WidgetTester tester) async {
     final List<ExpansionPanel> _demoItemsRadio = <ExpansionPanelRadio>[
       ExpansionPanelRadio(
         headerBuilder: (BuildContext context, bool isExpanded) {
@@ -346,6 +345,165 @@ void main() {
     expect(find.text('D'), findsNothing);
     expect(find.text('E'), findsOneWidget);
     expect(find.text('F'), findsNothing);
+  });
+
+  testWidgets('Radio mode calls expansionCallback once if other panels closed', (WidgetTester tester) async {
+    final List<ExpansionPanel> _demoItemsRadio = <ExpansionPanelRadio>[
+      ExpansionPanelRadio(
+        headerBuilder: (BuildContext context, bool isExpanded) {
+          return Text(isExpanded ? 'B' : 'A');
+        },
+        body: const SizedBox(height: 100.0),
+        value: 0,
+      ),
+      ExpansionPanelRadio(
+        headerBuilder: (BuildContext context, bool isExpanded) {
+          return Text(isExpanded ? 'D' : 'C');
+        },
+        body: const SizedBox(height: 100.0),
+        value: 1,
+      ),
+      ExpansionPanelRadio(
+        headerBuilder: (BuildContext context, bool isExpanded) {
+          return Text(isExpanded ? 'F' : 'E');
+        },
+        body: const SizedBox(height: 100.0),
+        value: 2,
+      ),
+    ];
+
+    final List<Map<String, dynamic>> callbackHistory = <Map<String, dynamic>>[];
+    Map<String, dynamic> latestCall;
+
+    final ExpansionPanelList _expansionListRadio = ExpansionPanelList.radio(
+      expansionCallback: (int _index, bool _isExpanded) {
+        callbackHistory.add(<String, dynamic>{
+          'index': _index,
+          'isExpanded': _isExpanded,
+        });
+      },
+      children: _demoItemsRadio,
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SingleChildScrollView(
+          child: _expansionListRadio,
+        ),
+      ),
+    );
+
+    // Initializes with all panels closed
+    expect(find.text('A'), findsOneWidget);
+    expect(find.text('B'), findsNothing);
+    expect(find.text('C'), findsOneWidget);
+    expect(find.text('D'), findsNothing);
+    expect(find.text('E'), findsOneWidget);
+    expect(find.text('F'), findsNothing);
+
+    // open one panel
+    await tester.tap(find.byType(ExpandIcon).at(1));
+    await tester.pumpAndSettle();
+
+    // callback is invoked once with appropriate arguments
+    expect(callbackHistory.length, equals(1));
+    latestCall = callbackHistory[callbackHistory.length - 1];
+    expect(latestCall['index'], equals(1));
+    expect(latestCall['isExpanded'], equals(false));
+
+    // close the same panel
+    await tester.tap(find.byType(ExpandIcon).at(1));
+    await tester.pumpAndSettle();
+
+    // callback is invoked once with appropriate arguments
+    expect(callbackHistory.length, equals(2));
+    latestCall = callbackHistory[callbackHistory.length - 1];
+    expect(latestCall['index'], equals(1));
+    expect(latestCall['isExpanded'], equals(true));
+  });
+
+  testWidgets('Radio mode calls expansionCallback twice if other panel open prior', (WidgetTester tester) async {
+    final List<ExpansionPanel> _demoItemsRadio = <ExpansionPanelRadio>[
+      ExpansionPanelRadio(
+        headerBuilder: (BuildContext context, bool isExpanded) {
+          return Text(isExpanded ? 'B' : 'A');
+        },
+        body: const SizedBox(height: 100.0),
+        value: 0,
+      ),
+      ExpansionPanelRadio(
+        headerBuilder: (BuildContext context, bool isExpanded) {
+          return Text(isExpanded ? 'D' : 'C');
+        },
+        body: const SizedBox(height: 100.0),
+        value: 1,
+      ),
+      ExpansionPanelRadio(
+        headerBuilder: (BuildContext context, bool isExpanded) {
+          return Text(isExpanded ? 'F' : 'E');
+        },
+        body: const SizedBox(height: 100.0),
+        value: 2,
+      ),
+    ];
+
+    final List<Map<String, dynamic>> callbackHistory = <Map<String, dynamic>>[];
+    Map<String, dynamic> callbackResults;
+
+    final ExpansionPanelList _expansionListRadio = ExpansionPanelList.radio(
+      expansionCallback: (int _index, bool _isExpanded) {
+        callbackHistory.add(<String, dynamic>{
+          'index': _index,
+          'isExpanded': _isExpanded,
+        });
+      },
+      children: _demoItemsRadio,
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SingleChildScrollView(
+          child: _expansionListRadio,
+        ),
+      ),
+    );
+
+    // Initializes with all panels closed
+    expect(find.text('A'), findsOneWidget);
+    expect(find.text('B'), findsNothing);
+    expect(find.text('C'), findsOneWidget);
+    expect(find.text('D'), findsNothing);
+    expect(find.text('E'), findsOneWidget);
+    expect(find.text('F'), findsNothing);
+
+    // open one panel
+    await tester.tap(find.byType(ExpandIcon).at(1));
+    await tester.pumpAndSettle();
+
+    // callback is invoked once with appropriate arguments
+    expect(callbackHistory.length, equals(1));
+    callbackResults = callbackHistory[callbackHistory.length - 1];
+    expect(callbackResults['index'], equals(1));
+    expect(callbackResults['isExpanded'], equals(false));
+
+    // close a different panel
+    await tester.tap(find.byType(ExpandIcon).at(2));
+    await tester.pumpAndSettle();
+
+    // callback is invoked the first time with correct arguments
+    expect(callbackHistory.length, equals(3));
+    callbackResults = callbackHistory[callbackHistory.length - 2];
+    expect(callbackResults['index'], equals(2));
+    expect(callbackResults['isExpanded'], equals(false));
+
+    // callback is invoked the second time with correct arguments
+    callbackResults = callbackHistory[callbackHistory.length - 1];
+    expect(callbackResults['index'], equals(1));
+    expect(callbackResults['isExpanded'], equals(false));
+  });
+
+  testWidgets('No duplicate global keys at layout/build time', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/13780
   });
 
   testWidgets('Panel header has semantics', (WidgetTester tester) async {

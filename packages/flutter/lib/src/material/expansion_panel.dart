@@ -390,7 +390,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
         if (widget.expansionCallback != null &&
             childIndex != index &&
             child.value == _currentOpenPanel?.value)
-              widget.expansionCallback(childIndex, false);
+          widget.expansionCallback(childIndex, false);
       }
 
       setState(() {
