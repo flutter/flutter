@@ -255,9 +255,10 @@ class SnackBar extends StatelessWidget {
     );
 
     snackBar = Material(
-      borderRadius:
-          isFloatingSnackBar ? BorderRadius.circular(2.0) : BorderRadius.zero,
-      elevation: isFloatingSnackBar ? 3.0 : 6.0,
+      shape: isFloatingSnackBar
+          ? RoundedRectangleBorder(borderRadius: BorderRadius.circular(4.0))
+          : null,
+      elevation: 6.0,
       color: backgroundColor ?? _kSnackBackground,
       child: Theme(
         data: darkTheme,
