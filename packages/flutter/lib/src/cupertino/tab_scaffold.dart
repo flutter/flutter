@@ -276,8 +276,8 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
     assert(() {
         if (_controller.index < 0 || _controller.index >= widget.tabBar.items.length) {
           throw FlutterError(
-            'current index ${_controller.index} is out of bounds.'
-            'The total number of tabs is ${widget.tabBar.items.length} '
+            "The CupertinoTabController's current index ${_controller.index} is"
+            'out of bounds for the tab bar with ${widget.tabBar.items.length} tabs'
           );
         }
         return true;

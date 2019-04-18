@@ -539,8 +539,8 @@ void main() {
     await tester.pump();
 
     final String message = tester.takeException().toString();
-    expect(message, contains('current index ${controller.index} is out of bounds'));
-    expect(message, contains('total number of tabs is 3'));
+    expect(message, contains('current index ${controller.index}'));
+    expect(message, contains('with 3 tabs'));
   });
 
   testWidgets('Current tab index cannot go below zero or be null', (WidgetTester tester) async {
