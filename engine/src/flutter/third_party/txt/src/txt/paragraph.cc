@@ -919,6 +919,8 @@ void Paragraph::Layout(double width, bool force) {
             [](const CodeUnitRun& a, const CodeUnitRun& b) {
               return a.code_units.start < b.code_units.start;
             });
+
+  tight_width_ = max_right_ - min_left_;
 }
 
 double Paragraph::GetLineXOffset(double line_total_advance) {
@@ -968,6 +970,10 @@ double Paragraph::GetHeight() const {
 
 double Paragraph::GetMaxWidth() const {
   return width_;
+}
+
+double Paragraph::GetTightWidth() const {
+  return tight_width_;
 }
 
 void Paragraph::SetParagraphStyle(const ParagraphStyle& style) {

@@ -22,6 +22,7 @@ IMPLEMENT_WRAPPERTYPEINFO(ui, Paragraph);
 #define FOR_EACH_BINDING(V)         \
   V(Paragraph, width)               \
   V(Paragraph, height)              \
+  V(Paragraph, tightWidth)          \
   V(Paragraph, minIntrinsicWidth)   \
   V(Paragraph, maxIntrinsicWidth)   \
   V(Paragraph, alphabeticBaseline)  \
@@ -54,6 +55,10 @@ double Paragraph::width() {
 
 double Paragraph::height() {
   return m_paragraphImpl->height();
+}
+
+double Paragraph::tightWidth() {
+  return m_paragraphImpl->tightWidth();
 }
 
 double Paragraph::minIntrinsicWidth() {

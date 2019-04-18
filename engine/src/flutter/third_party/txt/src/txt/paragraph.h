@@ -155,6 +155,12 @@ class Paragraph {
   // GetMaxWidth() >= GetLayoutWidth().
   double GetMaxWidth() const;
 
+  // Returns the tight width found in Layout(), which is defined as the
+  // horizontal distance from the left edge of the leftmost glyph to the right
+  // edge of the rightmost glyph. We expect that GetTightWidth() <=
+  // GetMaxWidth().
+  double GetTightWidth() const;
+
   // Distance from top of paragraph to the Alphabetic baseline of the first
   // line. Used for alphabetic fonts (A-Z, a-z, greek, etc.)
   double GetAlphabeticBaseline() const;
@@ -348,6 +354,7 @@ class Paragraph {
   // The max width of the paragraph as provided in the most recent Layout()
   // call.
   double width_ = -1.0f;
+  double tight_width_ = -1.0f;
   double max_intrinsic_width_ = 0;
   double min_intrinsic_width_ = 0;
   double alphabetic_baseline_ = FLT_MAX;
