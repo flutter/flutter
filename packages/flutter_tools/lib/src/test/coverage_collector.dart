@@ -23,7 +23,7 @@ import 'watcher.dart';
 class CoverageCollector extends TestWatcher {
   CoverageCollector({this.flutterProject, this.coverageDirectory});
 
-  Map<String, dynamic> globalHitmap;
+  Map<String, dynamic> _globalHitmap;
   final Directory coverageDirectory;
   final FlutterProject flutterProject;
 
@@ -34,10 +34,10 @@ class CoverageCollector extends TestWatcher {
   }
 
   void addHitmap(Map<String, dynamic> hitmap) {
-    if (globalHitmap == null) {
-      globalHitmap = hitmap;
+    if (_globalHitmap == null) {
+      _globalHitmap = hitmap;
     } else {
-      coverage.mergeHitmaps(hitmap, globalHitmap);
+      coverage.mergeHitmaps(hitmap, _globalHitmap);
     }
   }
 
@@ -92,7 +92,7 @@ class CoverageCollector extends TestWatcher {
     Directory coverageDirectory,
   }) async {
     printTrace('formating coverage data');
-    if (globalHitmap == null) {
+    if (_globalHitmap == null) {
       return null;
     }
     if (formatter == null) {
@@ -103,8 +103,8 @@ class CoverageCollector extends TestWatcher {
         : <String>[coverageDirectory.path];
       formatter = coverage.LcovFormatter(resolver, reportOn: reportOn, basePath: packagePath);
     }
-    final String result = await formatter.format(globalHitmap);
-    globalHitmap = null;
+    final String result = await formatter.format(_globalHitmap);
+    _globalHitmap = null;
     return result;
   }
 
