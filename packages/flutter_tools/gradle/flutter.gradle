@@ -142,10 +142,10 @@ class FlutterPlugin implements Plugin<Project> {
         } else {
             Path baseEnginePath = Paths.get(flutterRoot.absolutePath, "bin", "cache", "artifacts", "engine")
             String targetArch = 'arm'
-            if (project.hasProperty('target-platform') &&
-                project.property('target-platform') == 'android-arm64') {
-              targetArch = 'arm64'
-            }
+//            if (project.hasProperty('target-platform') &&
+//                project.property('target-platform') == 'android-arm64') {
+//              targetArch = 'arm64'
+//            }
             debugFlutterJar = baseEnginePath.resolve("android-${targetArch}").resolve("flutter.jar").toFile()
             profileFlutterJar = baseEnginePath.resolve("android-${targetArch}-profile").resolve("flutter.jar").toFile()
             releaseFlutterJar = baseEnginePath.resolve("android-${targetArch}-release").resolve("flutter.jar").toFile()

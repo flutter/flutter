@@ -37,9 +37,12 @@ function updateMTFlutter() {
     if [[ "$(cat "$FLUTTER_ROOT/version")" != "${MT_FLUTTER_VERSION}" ]]; then
       pushd ${FLUTTER_ROOT}
       echo "====download full flutter v$MT_FLUTTER_VERSION ====="
+      echo $FULL_FLUTTER
+      pushd ..
       curl -o flutter.zip ${FULL_FLUTTER}
-      unzip -o flutter.zip 'flutter/*' -d .
+      unzip -o flutter.zip -d .
       rm flutter.zip
+      popd
       popd
     # cache 版本不一致
     elif [[ "$(cat "$MTCACHE_PATH")" != "${MT_ENGINE_VERSION}" ]]; then
