@@ -504,6 +504,126 @@ void main() {
 
   testWidgets('No duplicate global keys at layout/build time', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/13780
+    await tester.pumpWidget(
+      StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return MaterialApp(
+            // wrapping with LayoutBuilder or other widgets that augment
+            // layout/build order should not create duplicate keys
+            home: LayoutBuilder(
+              builder: (BuildContext context, BoxConstraints constraints) {
+                return SingleChildScrollView(
+                  child: ExpansionPanelList.radio(
+                    expansionCallback: (int index, bool isExpanded) {
+                      if (!isExpanded) {
+                        // setState invocation required to trigger
+                        // _ExpansionPanelListState.didUpdateWidget,
+                        // which causes duplicate keys to be
+                        // generated in the regression
+                        setState(() {});
+                      }
+                    },
+                    children: [
+                      ExpansionPanelRadio(
+                        headerBuilder: (BuildContext context, bool isExpanded) {
+                          return Text(isExpanded ? 'B' : 'A');
+                        },
+                        body: const SizedBox(height: 100.0),
+                        value: 0,
+                      ),
+                      ExpansionPanelRadio(
+                        headerBuilder: (BuildContext context, bool isExpanded) {
+                          return Text(isExpanded ? 'D' : 'C');
+                        },
+                        body: const SizedBox(height: 100.0),
+                        value: 1,
+                      ),
+                      ExpansionPanelRadio(
+                        headerBuilder: (BuildContext context, bool isExpanded) {
+                          return Text(isExpanded ? 'F' : 'E');
+                        },
+                        body: const SizedBox(height: 100.0),
+                        value: 2,
+                      ),
+                    ],
+                  ),
+                );
+              }
+            ),
+          );
+        },
+      ),
+    );
+
+    // Initializes with all panels closed
+    expect(find.text('A'), findsOneWidget);
+    expect(find.text('B'), findsNothing);
+    expect(find.text('C'), findsOneWidget);
+    expect(find.text('D'), findsNothing);
+    expect(find.text('E'), findsOneWidget);
+    expect(find.text('F'), findsNothing);
+
+    // open a panel
+    await tester.tap(find.byType(ExpandIcon).at(1));
+    await tester.pumpAndSettle();
+
+    final List<bool> panelExpansionState = <bool>[false, false];
+
+    await tester.pumpWidget(
+      StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return MaterialApp(
+            home: Scaffold(
+              // wrapping with LayoutBuilder or other widgets that augment
+              // layout/build order should not create duplicate keys
+              body: LayoutBuilder(
+                builder: (BuildContext context, BoxConstraints constraints) {
+                  return SingleChildScrollView(
+                    child: ExpansionPanelList(
+                      expansionCallback: (int index, bool isExpanded) {
+                        // setState invocation required to trigger
+                        // _ExpansionPanelListState.didUpdateWidget, which
+                        // causes duplicate keys to be generated in the
+                        // regression
+                        setState(() {
+                          panelExpansionState[index] = !isExpanded;
+                        });
+                      },
+                      children: <ExpansionPanel>[
+                        ExpansionPanel(
+                          headerBuilder: (BuildContext context, bool isExpanded) {
+                            return Text(isExpanded ? 'B' : 'A');
+                          },
+                          body: const SizedBox(height: 100.0),
+                          isExpanded: panelExpansionState[0],
+                        ),
+                        ExpansionPanel(
+                          headerBuilder: (BuildContext context, bool isExpanded) {
+                            return Text(isExpanded ? 'D' : 'C');
+                          },
+                          body: const SizedBox(height: 100.0),
+                          isExpanded: panelExpansionState[1],
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ),
+          );
+        }
+      ),
+    );
+
+    // initializes with all panels closed
+    expect(find.text('A'), findsOneWidget);
+    expect(find.text('B'), findsNothing);
+    expect(find.text('C'), findsOneWidget);
+    expect(find.text('D'), findsNothing);
+
+    // open a panel
+    await tester.tap(find.byType(ExpandIcon).at(1));
+    await tester.pumpAndSettle();
   });
 
   testWidgets('Panel header has semantics', (WidgetTester tester) async {
