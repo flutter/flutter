@@ -139,6 +139,7 @@ abstract class PointerEvent extends Diagnosticable {
     this.platformData = 0,
     this.synthesized = false,
     this.transform,
+    this.original,
   }) : localPosition = localPosition ?? position,
        localDelta = localDelta ?? delta;
 
@@ -355,6 +356,9 @@ abstract class PointerEvent extends Diagnosticable {
   ///    space.
   final Matrix4 transform;
 
+  /// The original [PointerEvent] before it was transformed by [transform].
+  final PointerEvent original;
+
   /// Transforms the event from the global coordinate space into the coordinate
   /// space of an event receiver.
   ///
@@ -476,6 +480,7 @@ class PointerAddedEvent extends PointerEvent {
     double orientation = 0.0,
     double tilt = 0.0,
     Matrix4 transform,
+    PointerAddedEvent original,
   }) : super(
          timeStamp: timeStamp,
          kind: kind,
@@ -493,6 +498,7 @@ class PointerAddedEvent extends PointerEvent {
          orientation: orientation,
          tilt: tilt,
          transform: transform,
+         original: original,
        );
 
   @override
@@ -517,6 +523,7 @@ class PointerAddedEvent extends PointerEvent {
       orientation: orientation,
       tilt: tilt,
       transform: transform,
+      original: original ?? this,
     );
   }
 }
@@ -541,6 +548,7 @@ class PointerRemovedEvent extends PointerEvent {
     double radiusMin = 0.0,
     double radiusMax = 0.0,
     Matrix4 transform,
+    PointerRemovedEvent original,
   }) : super(
          timeStamp: timeStamp,
          kind: kind,
@@ -554,6 +562,7 @@ class PointerRemovedEvent extends PointerEvent {
          radiusMin: radiusMin,
          radiusMax: radiusMax,
          transform: transform,
+         original: original,
        );
 
   @override
@@ -573,6 +582,7 @@ class PointerRemovedEvent extends PointerEvent {
       radiusMin: radiusMin,
       radiusMax: radiusMax,
       transform: transform,
+      original: original ?? this,
     );
   }
 }
@@ -615,6 +625,7 @@ class PointerHoverEvent extends PointerEvent {
     double tilt = 0.0,
     bool synthesized = false,
     Matrix4 transform,
+    PointerHoverEvent original,
   }) : super(
          timeStamp: timeStamp,
          kind: kind,
@@ -640,6 +651,7 @@ class PointerHoverEvent extends PointerEvent {
          tilt: tilt,
          synthesized: synthesized,
          transform: transform,
+         original: original,
        );
 
   @override
@@ -677,6 +689,7 @@ class PointerHoverEvent extends PointerEvent {
       tilt: tilt,
       synthesized: synthesized,
       transform: transform,
+      original: original ?? this,
     );
   }
 }
@@ -719,6 +732,7 @@ class PointerEnterEvent extends PointerEvent {
     double tilt = 0.0,
     bool synthesized = false,
     Matrix4 transform,
+    PointerEnterEvent original,
   }) : super(
          timeStamp: timeStamp,
          kind: kind,
@@ -744,6 +758,7 @@ class PointerEnterEvent extends PointerEvent {
          tilt: tilt,
          synthesized: synthesized,
          transform: transform,
+         original: original,
        );
 
   /// Creates an enter event from a [PointerHoverEvent].
@@ -780,6 +795,7 @@ class PointerEnterEvent extends PointerEvent {
     tilt: event?.tilt,
     synthesized: event?.synthesized,
     transform: event?.transform,
+    original: event?.original,
   );
 
   @override
@@ -817,6 +833,7 @@ class PointerEnterEvent extends PointerEvent {
       tilt: tilt,
       synthesized: synthesized,
       transform: transform,
+      original: original ?? this,
     );
   }
 }
@@ -859,6 +876,7 @@ class PointerExitEvent extends PointerEvent {
     double tilt = 0.0,
     bool synthesized = false,
     Matrix4 transform,
+    PointerExitEvent original,
   }) : super(
          timeStamp: timeStamp,
          kind: kind,
@@ -884,6 +902,7 @@ class PointerExitEvent extends PointerEvent {
          tilt: tilt,
          synthesized: synthesized,
          transform: transform,
+         original: original,
        );
 
   /// Creates an exit event from a [PointerHoverEvent].
@@ -920,6 +939,7 @@ class PointerExitEvent extends PointerEvent {
     tilt: event?.tilt,
     synthesized: event?.synthesized,
     transform: event?.transform,
+    original: event?.original,
   );
 
   @override
@@ -957,6 +977,7 @@ class PointerExitEvent extends PointerEvent {
       tilt: tilt,
       synthesized: synthesized,
       transform: transform,
+      original: original ?? this,
     );
   }
 }
@@ -987,6 +1008,7 @@ class PointerDownEvent extends PointerEvent {
     double orientation = 0.0,
     double tilt = 0.0,
     Matrix4 transform,
+    PointerDownEvent original,
   }) : super(
          timeStamp: timeStamp,
          pointer: pointer,
@@ -1010,6 +1032,7 @@ class PointerDownEvent extends PointerEvent {
          orientation: orientation,
          tilt: tilt,
          transform: transform,
+         original: original,
        );
 
   @override
@@ -1038,6 +1061,7 @@ class PointerDownEvent extends PointerEvent {
       orientation: orientation,
       tilt: tilt,
       transform: transform,
+      original: original ?? this,
     );
   }
 }
@@ -1078,6 +1102,7 @@ class PointerMoveEvent extends PointerEvent {
     int platformData = 0,
     bool synthesized = false,
     Matrix4 transform,
+    PointerMoveEvent original,
   }) : super(
          timeStamp: timeStamp,
          pointer: pointer,
@@ -1105,6 +1130,7 @@ class PointerMoveEvent extends PointerEvent {
          platformData: platformData,
          synthesized: synthesized,
          transform: transform,
+         original: original,
        );
 
   @override
@@ -1144,6 +1170,7 @@ class PointerMoveEvent extends PointerEvent {
       platformData: platformData,
       synthesized: synthesized,
       transform: transform,
+      original: original ?? this,
     );
   }
 }
@@ -1175,6 +1202,7 @@ class PointerUpEvent extends PointerEvent {
     double orientation = 0.0,
     double tilt = 0.0,
     Matrix4 transform,
+    PointerUpEvent original,
   }) : super(
          timeStamp: timeStamp,
          pointer: pointer,
@@ -1198,6 +1226,7 @@ class PointerUpEvent extends PointerEvent {
          orientation: orientation,
          tilt: tilt,
          transform: transform,
+         original: original,
        );
 
   @override
@@ -1227,6 +1256,7 @@ class PointerUpEvent extends PointerEvent {
       orientation: orientation,
       tilt: tilt,
       transform: transform,
+      original: original ?? this,
     );
   }
 }
@@ -1247,6 +1277,7 @@ abstract class PointerSignalEvent extends PointerEvent {
     Offset position = Offset.zero,
     Offset localPosition,
     Matrix4 transform,
+    PointerSignalEvent original,
   }) : super(
          timeStamp: timeStamp,
          pointer: pointer,
@@ -1255,6 +1286,7 @@ abstract class PointerSignalEvent extends PointerEvent {
          position: position,
          localPosition: localPosition,
          transform: transform,
+         original: original,
        );
 }
 
@@ -1274,6 +1306,7 @@ class PointerScrollEvent extends PointerSignalEvent {
     Offset localPosition,
     this.scrollDelta = Offset.zero,
     Matrix4 transform,
+    PointerScrollEvent original,
   }) : assert(timeStamp != null),
        assert(kind != null),
        assert(device != null),
@@ -1286,6 +1319,7 @@ class PointerScrollEvent extends PointerSignalEvent {
          position: position,
          localPosition: localPosition,
          transform: transform,
+         original: original,
        );
 
   /// The amount to scroll, in logical pixels.
@@ -1304,6 +1338,7 @@ class PointerScrollEvent extends PointerSignalEvent {
       localPosition: PointerEvent.transformPosition(transform, position),
       scrollDelta: scrollDelta,
       transform: transform,
+      original: original ?? this,
     );
   }
 
@@ -1341,6 +1376,7 @@ class PointerCancelEvent extends PointerEvent {
     double orientation = 0.0,
     double tilt = 0.0,
     Matrix4 transform,
+    PointerCancelEvent original,
   }) : super(
          timeStamp: timeStamp,
          pointer: pointer,
@@ -1364,6 +1400,7 @@ class PointerCancelEvent extends PointerEvent {
          orientation: orientation,
          tilt: tilt,
          transform: transform,
+         original: original,
        );
 
   @override
@@ -1393,6 +1430,7 @@ class PointerCancelEvent extends PointerEvent {
       orientation: orientation,
       tilt: tilt,
       transform: transform,
+      original: original ?? this,
     );
   }
 }

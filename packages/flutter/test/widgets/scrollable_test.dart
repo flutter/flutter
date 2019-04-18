@@ -225,9 +225,6 @@ void main() {
 
   testWidgets('Scroll pointer signals are handled', (WidgetTester tester) async {
     await pumpTest(tester, TargetPlatform.fuchsia);
-
-//    debugDumpRenderTree();
-
     final Offset scrollEventLocation = tester.getCenter(find.byType(Viewport));
     final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
     // Create a hover event so that |testPointer| has a location when generating the scroll.

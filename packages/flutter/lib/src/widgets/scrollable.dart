@@ -534,7 +534,6 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
   }
 
   void _receivedPointerSignal(PointerSignalEvent event) {
-    print(event);
     if (event is PointerScrollEvent && position != null) {
       final double targetScrollOffset = _targetScrollOffsetForPointerScroll(event);
       // Only express interest in the event if it would actually result in a scroll.
