@@ -57,10 +57,6 @@ class AttachCommand extends FlutterCommand {
       ..addOption(
         'debug-port',
         help: 'Device port where the observatory is listening.',
-      )..addFlag('listen',
-        negatable: false,
-        help: 'Wait and listen for the app to start on a device (this is '
-              'enabled by default if you do not provide a debug port).'
       )..addOption(
         'app-id',
         help: 'The package name (Android) or bundle identifier (iOS) for the application. '
@@ -93,7 +89,7 @@ class AttachCommand extends FlutterCommand {
   final String name = 'attach';
 
   @override
-  final String description = 'Attach to a running application.'; // TODO
+  final String description = 'Attach to a running application.';
 
   int get debugPort {
     if (argResults['debug-port'] == null)
