@@ -76,8 +76,12 @@ class CupertinoTabController extends ChangeNotifier {
   /// and less than the total number of tabs.
   int get index => _index;
   set index(int value) {
+    if (value == _index) {
+      return;
+    }
     assert(value != null && value >= 0);
     _index = value;
+    notifyListeners();
   }
 }
 
@@ -175,7 +179,7 @@ class CupertinoTabScaffold extends StatefulWidget {
   /// Creates a layout for applications with a tab bar at the bottom.
   ///
   /// The [tabBar] and [tabBuilder] arguments must not be null.
-  const CupertinoTabScaffold({
+  CupertinoTabScaffold({
     Key key,
     @required this.tabBar,
     @required this.tabBuilder,
@@ -184,6 +188,7 @@ class CupertinoTabScaffold extends StatefulWidget {
     this.resizeToAvoidBottomInset = true,
   }) : assert(tabBar != null),
        assert(tabBuilder != null),
+       assert(controller == null || controller.index < tabBar.items.length),
        super(key: key);
 
   /// The [tabBar] is a [CupertinoTabBar] drawn at the bottom of the screen
@@ -268,16 +273,6 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
       // create one using [widget.tabBar.currentIndex] as its initial index.
       ?? CupertinoTabController(initialIndex: widget.tabBar.currentIndex);
 
-    assert(() {
-        if (newController.index >= widget.tabBar.items.length) {
-          throw FlutterError(
-            'current index ${newController.index} is out of bounds.'
-            'The total number of tabs is ${widget.tabBar.items.length} '
-          );
-        }
-        return true;
-      }());
-
     if (newController == _controller) {
       return;
     }
@@ -304,20 +299,13 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
   @override
   void didUpdateWidget(CupertinoTabScaffold oldWidget) {
     super.didUpdateWidget(oldWidget);
-
-    if (widget.controller == null || widget.controller == oldWidget.controller) {
-      assert(() {
-          if (oldWidget.controller.index >= widget.tabBar.items.length) {
-            throw FlutterError(
-              'current index ${oldWidget.controller.index} is out of bounds.'
-              'The total number of tabs is ${widget.tabBar.items.length} '
-            );
-          }
-          return true;
-        }());
-      return;
+    if (widget.controller != null && widget.controller != oldWidget.controller) {
+      _updateTabController();
+    } else if (_controller.index >= widget.tabBar.items.length) {
+      // If a new [tabBar] is provided and it doesn't have enough items,
+      // clamp the current index.
+      _controller.index = widget.tabBar.items.length - 1;
     }
-    _updateTabController();
   }
 
   @override

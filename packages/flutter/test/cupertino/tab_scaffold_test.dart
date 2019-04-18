@@ -15,6 +15,13 @@ void main() {
     selectedTabs = <int>[];
   });
 
+  BottomNavigationBarItem tabGenerator(int index) {
+    return BottomNavigationBarItem(
+      icon: const ImageIcon(TestImageProvider(24, 24)),
+      title: Text('Tab ${index + 1}'),
+    );
+  }
+
   testWidgets('Tab switching', (WidgetTester tester) async {
     final List<int> tabsPainted = <int>[];
 
@@ -424,17 +431,10 @@ void main() {
 
     expect(tester.getRect(find.byType(Placeholder)), Rect.fromLTWH(0, 0, 800, 400));
     expect(MediaQuery.of(innerContext).padding.bottom, 0);
-  });
+});
 
-  testWidgets('Deleting tabs after selecting them throws', (WidgetTester tester) async {
+  testWidgets('Deleting tabs after selecting them should switch to the last available tab', (WidgetTester tester) async {
     final List<int> tabsBuilt = <int>[];
-
-    BottomNavigationBarItem tabGenerator(int index) {
-      return BottomNavigationBarItem(
-        icon: const ImageIcon(TestImageProvider(24, 24)),
-        title: Text('Tab ${index + 1}'),
-      );
-    }
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -484,7 +484,81 @@ void main() {
       )
     );
 
-    expect(tester.takeException(), isAssertionError);
+    expect(tabsBuilt, <int>[0, 1]);
+    // We didn't tap on any additional tabs to invoke the onTap callback. We
+    // just deleted a tab.
+    expect(selectedTabs, <int>[3]);
+    // Tab 1 was previously built so it's rebuilt again, albeit offstage.
+    expect(find.text('Different page 1', skipOffstage: false), isOffstage);
+    // Since all the tabs after tab 2 are deleted, tab 2 is now the last tab and
+    // the actively shown tab.
+    expect(find.text('Different page 2'), findsOneWidget);
+    // No more tab 4 since it's deleted.
+    expect(find.text('Different page 4', skipOffstage: false), findsNothing);
+    // We also changed the builder so no tabs should be built with the old
+    // builder.
+    expect(find.text('Page 1', skipOffstage: false), findsNothing);
+    expect(find.text('Page 2', skipOffstage: false), findsNothing);
+    expect(find.text('Page 4', skipOffstage: false), findsNothing);
+  });
+
+  testWidgets('Assert when current tab index >= number of tabs', (WidgetTester tester) async {
+    final CupertinoTabController controller = CupertinoTabController(initialIndex: 2);
+
+    try {
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoTabScaffold(
+            tabBar: CupertinoTabBar(
+              items: List<BottomNavigationBarItem>.generate(2, tabGenerator),
+            ),
+            controller: controller,
+            tabBuilder: (BuildContext context, int index) => Text('Different page ${index + 1}'),
+          ),
+        )
+      );
+    } on AssertionError catch (e) {
+      expect(e.toString(), contains('index'));
+    }
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoTabScaffold(
+          tabBar: CupertinoTabBar(
+            items: List<BottomNavigationBarItem>.generate(3, tabGenerator),
+          ),
+          controller: controller,
+          tabBuilder: (BuildContext context, int index) => Text('Different page ${index + 1}'),
+        ),
+      )
+    );
+
+    expect(tester.takeException(), null);
+
+    controller.index = 10;
+    await tester.pump();
+
+    final String message = tester.takeException().toString();
+    expect(message, contains('current index ${controller.index} is out of bounds'));
+    expect(message, contains('total number of tabs is 3'));
+  });
+
+  testWidgets('Current tab index cannot go below zero or be null', (WidgetTester tester) async {
+    void expectAssertionError(VoidCallback callback, String errorMessage) {
+      try {
+        callback();
+      } on AssertionError catch (e) {
+        expect(e.toString(), contains(errorMessage));
+      }
+    }
+
+    expectAssertionError(() => CupertinoTabController(initialIndex: -1), '>= 0');
+    expectAssertionError(() => CupertinoTabController(initialIndex: null), '!= null');
+
+    final CupertinoTabController controller = CupertinoTabController();
+
+    expectAssertionError(() => controller.index = -1, '>= 0');
+    expectAssertionError(() => controller.index = null, '!= null');
   });
 
   testWidgets('Does not lose state when focusing on text input', (WidgetTester tester) async {
