@@ -219,7 +219,7 @@ class HitTestResult {
       }
       pushTransform(transform);
     }
-    final Offset transformedPosition = MatrixUtils.transformPoint(transform, position);
+    final Offset transformedPosition = transform == null ? position : MatrixUtils.transformPoint(transform, position);
     final bool absorbed = hitTest(this, transformedPosition);
     if (transform != null) {
       popTransform();

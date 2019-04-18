@@ -7,6 +7,7 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+import 'package:vector_math/vector_math_64.dart';
 
 import 'button_theme.dart';
 import 'constants.dart';
@@ -325,8 +326,16 @@ class _RenderInputPadding extends RenderShiftedBox {
 
   @override
   bool hitTest(HitTestResult result, { Offset position }) {
-    // TODO
-    return super.hitTest(result, position: position) ||
-      child.hitTest(result, position: child.size.center(Offset.zero));
+    if (super.hitTest(result, position: position)) {
+      return true;
+    }
+    final Offset center = child.size.center(Offset.zero);
+    final Matrix4 transform = Matrix4.identity()
+      ..setRow(0, Vector4(0, 0, 0, center.dx))
+      ..setRow(0, Vector4(0, 0, 0, center.dy));
+    result.pushTransform(transform);
+    final bool absorbed = child.hitTest(result, position: center);
+    result.popTransform();
+    return absorbed;
   }
 }
