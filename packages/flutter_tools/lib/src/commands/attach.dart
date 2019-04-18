@@ -448,23 +448,24 @@ class MDnsObservatoryDiscovery {
         .lookup<TxtResourceRecord>(
             ResourceRecordQuery.text(domainName),
         )
-        .toList();
+        .toList()
+      if (txt.isEmpty) {
+        return MDnsObservatoryDiscoveryResult(srv.first.port, '');
+      }
       String authCode = '';
-      if (txt.isNotEmpty) {
-        const String authCodePrefix = 'authCode=';
-        String raw = txt.first.text;
-        // TXT has a format of [<length byte>, text], so if the length is 2,
-        // that means that TXT is empty.
-        if (raw.length > 2) {
-          // Remove length byte from raw txt.
-          raw = raw.substring(1);
-          if (raw.startsWith(authCodePrefix)) {
-            authCode = raw.substring(authCodePrefix.length);
-            // The Observatory currently expects a trailing '/' as part of the
-            // URI, otherwise an invalid authentication code response is given.
-            if (!authCode.endsWith('/')) {
-              authCode += '/';
-            }
+      const String authCodePrefix = 'authCode=';
+      String raw = txt.first.text;
+      // TXT has a format of [<length byte>, text], so if the length is 2,
+      // that means that TXT is empty.
+      if (raw.length > 2) {
+        // Remove length byte from raw txt.
+        raw = raw.substring(1);
+        if (raw.startsWith(authCodePrefix)) {
+          authCode = raw.substring(authCodePrefix.length);
+          // The Observatory currently expects a trailing '/' as part of the
+          // URI, otherwise an invalid authentication code response is given.
+          if (!authCode.endsWith('/')) {
+            authCode += '/';
           }
         }
       }
