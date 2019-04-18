@@ -502,7 +502,7 @@ void main() {
   testWidgets('Floating SnackBar button text alignment', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(
-        snackBarBehavior: SnackBarBehavior.floating,
+        snackBarTheme: const SnackBarThemeData(snackBarBehavior: SnackBarBehavior.floating,)
       ),
       home: MediaQuery(
         data: const MediaQueryData(
@@ -546,17 +546,17 @@ void main() {
     final Offset snackBarBottomLeft = snackBarBox.localToGlobal(snackBarBox.size.bottomLeft(Offset.zero));
     final Offset snackBarBottomRight = snackBarBox.localToGlobal(snackBarBox.size.bottomRight(Offset.zero));
 
-    expect(textBottomLeft.dx - snackBarBottomLeft.dx, 39.0 + 10.0); // margin + left padding
-    expect(snackBarBottomLeft.dy - textBottomLeft.dy, 27.0 + 40.0); // margin + bottom padding
-    expect(actionTextBottomLeft.dx - textBottomRight.dx, 24.0);
-    expect(snackBarBottomRight.dx - actionTextBottomRight.dx, 39.0 + 30.0); // margin + right padding
-    expect(snackBarBottomRight.dy - actionTextBottomRight.dy, 27.0 + 40.0); // margin + bottom padding
+    expect(textBottomLeft.dx - snackBarBottomLeft.dx, 31.0 + 10.0); // margin + left padding
+    expect(snackBarBottomLeft.dy - textBottomLeft.dy, 27.0); // margin (with no bottom padding)
+    expect(actionTextBottomLeft.dx - textBottomRight.dx, 16.0);
+    expect(snackBarBottomRight.dx - actionTextBottomRight.dx, 31.0 + 30.0); // margin + right padding
+    expect(snackBarBottomRight.dy - actionTextBottomRight.dy, 27.0); // margin (with no bottom padding)
   });
 
   testWidgets('Floating SnackBar is positioned above BottomNavigationBar', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(
-        snackBarBehavior: SnackBarBehavior.floating,
+        snackBarTheme: const SnackBarThemeData(snackBarBehavior: SnackBarBehavior.floating,)
       ),
       home: MediaQuery(
         data: const MediaQueryData(
@@ -606,17 +606,17 @@ void main() {
     final Offset snackBarBottomLeft = snackBarBox.localToGlobal(snackBarBox.size.bottomLeft(Offset.zero));
     final Offset snackBarBottomRight = snackBarBox.localToGlobal(snackBarBox.size.bottomRight(Offset.zero));
 
-    expect(textBottomLeft.dx - snackBarBottomLeft.dx, 39.0 + 10.0); // margin + left padding
+    expect(textBottomLeft.dx - snackBarBottomLeft.dx, 31.0 + 10.0); // margin + left padding
     expect(snackBarBottomLeft.dy - textBottomLeft.dy, 27.0); // margin (with no bottom padding)
-    expect(actionTextBottomLeft.dx - textBottomRight.dx, 24.0);
-    expect(snackBarBottomRight.dx - actionTextBottomRight.dx, 39.0 + 30.0); // margin + right padding
+    expect(actionTextBottomLeft.dx - textBottomRight.dx, 16.0);
+    expect(snackBarBottomRight.dx - actionTextBottomRight.dx, 31.0 + 30.0); // margin + right padding
     expect(snackBarBottomRight.dy - actionTextBottomRight.dy, 27.0); // margin (with no bottom padding)
   });
 
   testWidgets('Floating SnackBar is positioned above FloatingActionButton', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(
-        snackBarBehavior: SnackBarBehavior.floating,
+        snackBarTheme: const SnackBarThemeData(snackBarBehavior: SnackBarBehavior.floating,)
       ),
       home: MediaQuery(
         data: const MediaQueryData(
