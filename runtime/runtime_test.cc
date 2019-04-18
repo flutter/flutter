@@ -80,6 +80,7 @@ void RuntimeTest::SetSnapshotsAndAssets(Settings& settings) {
 
 Settings RuntimeTest::CreateSettingsForFixture() {
   Settings settings;
+  settings.leak_vm = false;
   settings.task_observer_add = [](intptr_t, fml::closure) {};
   settings.task_observer_remove = [](intptr_t) {};
   settings.root_isolate_create_callback = [this]() {
