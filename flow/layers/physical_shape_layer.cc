@@ -110,7 +110,7 @@ void PhysicalShapeLayer::UpdateScene(SceneUpdateContext& context) {
   // Retained rendering: speedup by reusing a retained entity node if possible.
   // When an entity node is reused, no paint layer is added to the frame so we
   // won't call PhysicalShapeLayer::Paint.
-  LayerRasterCacheKey key(this, context.Matrix());
+  LayerRasterCacheKey key(unique_id(), context.Matrix());
   if (context.HasRetainedNode(key)) {
     const scenic::EntityNode& retained_node = context.GetRetainedNode(key);
     FML_DCHECK(context.top_entity());
