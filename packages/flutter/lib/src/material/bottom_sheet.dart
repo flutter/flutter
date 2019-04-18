@@ -376,7 +376,7 @@ Future<T> showModalBottomSheet<T>({
 /// The `context` argument is used to look up the [Scaffold] for the bottom
 /// sheet. It is only used when the method is called. Its corresponding widget
 /// can be safely removed from the tree before the bottom sheet is closed.
-/// 
+///
 /// The optional `backgroundColor` argument can be used to set a different
 /// background color for the bottom sheet. By default, the background color of
 /// the bottom sheet is the current theme's [ThemeData.canvasColor].
