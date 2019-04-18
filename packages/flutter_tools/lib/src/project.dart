@@ -555,7 +555,7 @@ class WindowsProject {
   File get buildScript => project.directory.childDirectory('windows').childFile('build.bat');
 
   // Note: The name script file exists as a temporary shim.
-  File get nameScript => project.directory.childDirectory('windows').childFile('name_output.sh');
+  File get nameScript => project.directory.childDirectory('windows').childFile('name_output.bat');
 }
 
 /// The Linux sub project.

@@ -144,7 +144,7 @@ final RegExp _whitespace = RegExp(r'\w+');
 @visibleForTesting
 List<String> runningProcess(String processName) {
   // Does this only work from powershell?
-  final ProcessResult result = processManager.runSync(<String>['Get-CimInstance Win32_Process']);
+  final ProcessResult result = processManager.runSync(<String>['powershell', '-script="Get-CimInstance Win32_Process"']);
   if (result.exitCode != 0) {
     return null;
   }
