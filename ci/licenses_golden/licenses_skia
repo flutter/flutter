@@ -1,4 +1,4 @@
-Signature: 69e8aeb209ca2d1f280e0b5fef4a35cb
+Signature: ea04142847537ef9dc501d7a2cdac241
 
 UNUSED LICENSES:
 
@@ -1342,7 +1342,6 @@ FILE: ../../../third_party/skia/src/opts/SkOpts_crc32.cpp
 FILE: ../../../third_party/skia/src/opts/SkOpts_sse42.cpp
 FILE: ../../../third_party/skia/src/opts/SkSwizzler_opts.h
 FILE: ../../../third_party/skia/src/pdf/SkBitmapKey.h
-FILE: ../../../third_party/skia/src/pdf/SkPDFConvertType1FontStream.h
 FILE: ../../../third_party/skia/src/pdf/SkPDFDocumentPriv.h
 FILE: ../../../third_party/skia/src/pdf/SkPDFMakeCIDGlyphWidthsArray.cpp
 FILE: ../../../third_party/skia/src/pdf/SkPDFMakeCIDGlyphWidthsArray.h
@@ -2949,7 +2948,6 @@ FILE: ../../../third_party/skia/src/gpu/ops/GrAAHairLinePathRenderer.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrAAHairLinePathRenderer.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrDefaultPathRenderer.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrDefaultPathRenderer.h
-FILE: ../../../third_party/skia/src/pdf/SkPDFConvertType1FontStream.cpp
 FILE: ../../../third_party/skia/src/pdf/SkPDFDevice.cpp
 FILE: ../../../third_party/skia/src/pdf/SkPDFDevice.h
 FILE: ../../../third_party/skia/src/pdf/SkPDFDocument.cpp
@@ -5701,6 +5699,8 @@ FILE: ../../../third_party/skia/src/gpu/effects/generated/GrComposeLerpRedEffect
 FILE: ../../../third_party/skia/src/gpu/effects/generated/GrComposeLerpRedEffect.h
 FILE: ../../../third_party/skia/src/pdf/SkPDFGraphicStackState.cpp
 FILE: ../../../third_party/skia/src/pdf/SkPDFGraphicStackState.h
+FILE: ../../../third_party/skia/src/pdf/SkPDFType1Font.cpp
+FILE: ../../../third_party/skia/src/pdf/SkPDFType1Font.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2019 Google LLC.
 
@@ -5736,6 +5736,7 @@ LIBRARY: skia
 ORIGIN: ../../../third_party/skia/experimental/wasm-skp-debugger/debugger_bindings.cpp + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/experimental/wasm-skp-debugger/debugger_bindings.cpp
+FILE: ../../../third_party/skia/gm/crbug_946965.cpp
 FILE: ../../../third_party/skia/gm/runtimecolorfilter.cpp
 FILE: ../../../third_party/skia/include/gpu/gl/GrGLAssembleHelpers.h
 FILE: ../../../third_party/skia/modules/canvaskit/WasmAliases.h
