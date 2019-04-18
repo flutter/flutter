@@ -11,6 +11,7 @@
 #include "flutter/common/settings.h"
 #include "flutter/fml/macros.h"
 #include "flutter/fml/memory/ref_counted.h"
+#include "flutter/runtime/dart_snapshot_buffer.h"
 
 namespace flutter {
 
@@ -33,16 +34,20 @@ class DartSnapshot : public fml::RefCountedThreadSafe<DartSnapshot> {
 
   bool IsValidForAOT() const;
 
-  const uint8_t* GetDataMapping() const;
+  const DartSnapshotBuffer* GetData() const;
 
-  const uint8_t* GetInstructionsMapping() const;
+  const DartSnapshotBuffer* GetInstructions() const;
+
+  const uint8_t* GetDataIfPresent() const;
+
+  const uint8_t* GetInstructionsIfPresent() const;
 
  private:
-  std::shared_ptr<const fml::Mapping> data_;
-  std::shared_ptr<const fml::Mapping> instructions_;
+  std::unique_ptr<DartSnapshotBuffer> data_;
+  std::unique_ptr<DartSnapshotBuffer> instructions_;
 
-  DartSnapshot(std::shared_ptr<const fml::Mapping> data,
-               std::shared_ptr<const fml::Mapping> instructions);
+  DartSnapshot(std::unique_ptr<DartSnapshotBuffer> data,
+               std::unique_ptr<DartSnapshotBuffer> instructions);
 
   ~DartSnapshot();
 
