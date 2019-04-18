@@ -57,7 +57,7 @@ class PrecacheCommand extends FlutterCommand {
         requiredArtifacts.add(artifact);
       }
     }
-    final bool forceUpdate = argResult['force'];
+    final bool forceUpdate = argResults['force'];
     if (forceUpdate || !cache.isUpToDate()) {
       await cache.updateAll(requiredArtifacts);
     } else {
