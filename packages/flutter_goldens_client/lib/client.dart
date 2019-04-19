@@ -14,7 +14,7 @@ import 'package:process/process.dart';
 // If you are here trying to figure out how to use golden files in the Flutter
 // repo itself, consider reading this wiki page:
 // https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package%3Aflutter
-//TODO(katelovett): Tests
+
 const String _kFlutterRootKey = 'FLUTTER_ROOT';
 const String _kGoldctlKey = 'GOLDCTL';
 const String _kServiceAccountKey = 'GOLD_SERVICE_ACCOUNT';
@@ -79,8 +79,10 @@ class SkiaGoldClient {
   Future<bool> auth(Directory workDirectory) async {
     _workDirectory = workDirectory;
     List<String> authArguments = <String>['auth'];
+    //TODO(katelovett): Cleanup for final CI implementation
     if(_serviceAccount == null)
-      throw const NonZeroExitCode(1, 'No Service Account found.');
+      return false;
+      //throw const NonZeroExitCode(1, 'No Service Account found.');
 
     authArguments += <String>[
       '--service-account', _serviceAccount,
@@ -98,7 +100,6 @@ class SkiaGoldClient {
     }
     return true;
   }
-
 
   Future<bool> imgtest(String testName, File goldenFile) async {
     List<String> imgtestArguments = <String>[

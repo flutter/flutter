@@ -296,7 +296,34 @@ AsyncMatcher matchesGoldenFile(dynamic key) {
   throw ArgumentError('Unexpected type for golden file: ${key.runtimeType}');
 }
 
-/// TODO(katelovett): Documentation
+/// Asserts that a [Finder], [Future<ui.Image>], or [ui.Image] matches the
+/// golden image file identified by [key] through Skia Gold.
+///
+/// For the case of a [Finder], the [Finder] must match exactly one widget and
+/// the rendered image of the first [RepaintBoundary] ancestor of the widget is
+/// treated as the image for the widget.
+///
+/// [key] may be either a [Uri] or a [String] representation of a URI.
+///
+/// This is an asynchronous matcher, meaning that callers should use
+/// [expectLater] when using this matcher and await the future returned by
+/// [expectLater].
+///
+/// ## Sample code
+///
+/// ```dart
+/// await expectLater(find.text('Save'), matchesSkiaGoldFile('save.png'));
+/// await expectLater(image, matchesSkiaGoldFile('save.png'));
+/// await expectLater(imageFuture, matchesSkiaGoldFile('save.png'));
+/// ```
+///
+/// See also:
+///
+///  * [FlutterGoldenFileComparator], which acts as the backend for this matcher.
+///  * [SkiaGoldClient], which the [FlutterGoldenFileComparator] uses to execute
+///    and process results of testing with Skia Gold.
+///  * [flutter_test] for a discussion of test configurations, whereby callers
+///    may swap out the backend for this matcher.
 AsyncMatcher matchesSkiaGoldFile(dynamic key) {
   if (key is Uri) {
     return _MatchesSkiaGoldFile(key);

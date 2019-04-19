@@ -14,7 +14,7 @@ import 'package:test_api/test_api.dart' as test_package show TestFailure;
 
 import 'package:flutter_goldens_client/client.dart';
 export 'package:flutter_goldens_client/client.dart';
-//TODO(katelovett): Tests
+
 const String _kFlutterRootKey = 'FLUTTER_ROOT';
 
 /// Main method that can be used in a `flutter_test_config.dart` file to set
@@ -80,6 +80,10 @@ class FlutterGoldenFileComparator implements GoldenFileComparator {
   @override
   Future<bool> compare(Uint8List imageBytes, Uri golden) async {
     final bool authorized = await _skiaClient.auth(fs.directory(basedir));
+    if(!authorized) {
+      //TODO(katelovett): Clean up for final CI implementation
+      return true;
+    }
     final File goldenFile = _getGoldenFile(golden);
     if(!goldenFile.existsSync()) {
       throw test_package.TestFailure('Could not be compared against non-existent file: "$golden"');
