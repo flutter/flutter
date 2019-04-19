@@ -1240,10 +1240,10 @@ class _RenderDecoration extends RenderBox {
       final Offset labelOffset = _boxParentData(label).offset;
       final double labelHeight = label.size.height;
       final double t = decoration.floatingLabelProgress;
-      // The center of the outline border label ends up a little below the
+      // The bottom of the outline border label ends up a little below the
       // center of the top border line.
       final bool isOutlineBorder = decoration.border != null && decoration.border.isOutline;
-      final double floatingY = isOutlineBorder ? -labelHeight * 0.25 : contentPadding.top;
+      final double floatingY = isOutlineBorder ? -labelHeight * 0.42 : contentPadding.top;
       final double scale = lerpDouble(1.0, 0.75, t);
       double dx;
       switch (textDirection) {
