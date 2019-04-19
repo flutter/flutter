@@ -6,6 +6,8 @@ import 'dart:collection';
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
+import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -709,7 +711,15 @@ class _RenderSegmentedControl<T> extends RenderBox
     while (child != null) {
       final _SegmentedControlContainerBoxParentData childParentData = child.parentData;
       if (childParentData.surroundingRect.contains(position)) {
-        return child.hitTest(result, position: (Offset.zero & child.size).center);
+        final Offset center = (Offset.zero & child.size).center;
+        result.withRawTransform(
+          transform: MatrixUtils.transformToOffset(center),
+          position: center, 
+          hitTest: (HitTestResult result, Offset position) {
+            assert(position == center);
+            return child.hitTest(result, position: center);
+          }
+        );
       }
       child = childParentData.previousSibling;
     }

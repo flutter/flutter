@@ -5,6 +5,8 @@
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
+import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:vector_math/vector_math_64.dart';
@@ -330,12 +332,13 @@ class _RenderInputPadding extends RenderShiftedBox {
       return true;
     }
     final Offset center = child.size.center(Offset.zero);
-    final Matrix4 transform = Matrix4.identity()
-      ..setRow(0, Vector4(0, 0, 0, center.dx))
-      ..setRow(0, Vector4(0, 0, 0, center.dy));
-    result.pushTransform(transform);
-    final bool absorbed = child.hitTest(result, position: center);
-    result.popTransform();
-    return absorbed;
+    return result.withRawTransform(
+      transform: MatrixUtils.transformToOffset(center),
+      position: center,
+      hitTest: (HitTestResult result, Offset position) {
+        assert(position == center);
+        return child.hitTest(result, position: center);
+      },
+    );
   }
 }

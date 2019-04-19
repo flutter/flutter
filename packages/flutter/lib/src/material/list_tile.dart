@@ -4,6 +4,7 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -1464,7 +1465,15 @@ class _RenderListTile extends RenderBox {
     assert(position != null);
     for (RenderBox child in _children) {
       final BoxParentData parentData = child.parentData;
-      if (child.hitTest(result, position: position - parentData.offset))
+      final bool isHit = result.withPaintOffset(
+        offset: parentData.offset,
+        position: position,
+        hitTest: (HitTestResult result, Offset transformed) {
+          assert(transformed == position - parentData.offset);
+          return child.hitTest(result, position: transformed);
+        }
+      );
+      if (isHit)
         return true;
     }
     return false;

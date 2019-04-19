@@ -6,6 +6,7 @@ import 'dart:collection';
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 
 import 'box.dart';
 import 'object.dart';
@@ -1110,7 +1111,15 @@ class RenderTable extends RenderBox {
       final RenderBox child = _children[index];
       if (child != null) {
         final BoxParentData childParentData = child.parentData;
-        if (child.hitTest(result, position: position - childParentData.offset))
+        final bool isHit = result.withPaintOffset(
+          offset: childParentData.offset,
+          position: position,
+          hitTest: (HitTestResult result, Offset transformed) {
+            assert(transformed == position - childParentData.offset);
+            return child.hitTest(result, position: transformed);
+          },
+        );
+        if (isHit)
           return true;
       }
     }

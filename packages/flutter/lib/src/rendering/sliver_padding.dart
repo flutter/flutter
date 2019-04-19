@@ -262,8 +262,20 @@ class RenderSliverPadding extends RenderSliver with RenderObjectWithChildMixin<R
 
   @override
   bool hitTestChildren(HitTestResult result, { @required double mainAxisPosition, @required double crossAxisPosition }) {
-    if (child != null && child.geometry.hitTestExtent > 0.0)
-      return child.hitTest(result, mainAxisPosition: mainAxisPosition - childMainAxisPosition(child), crossAxisPosition: crossAxisPosition - childCrossAxisPosition(child));
+    if (child != null && child.geometry.hitTestExtent > 0.0) {
+      final Matrix4 transform = Matrix4.identity();
+      applyPaintTransform(child, transform);
+      return result.withPaintTransform(
+        transform: transform,
+        position: null, // Sliver speak a different hit test protocol.
+        hitTest: (HitTestResult result, Offset _) {
+          return child.hitTest(result,
+            mainAxisPosition: mainAxisPosition - childMainAxisPosition(child),
+            crossAxisPosition: crossAxisPosition - childCrossAxisPosition(child),
+          );
+        },
+      );
+    }
     return false;
   }
 

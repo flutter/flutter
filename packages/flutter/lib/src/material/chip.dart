@@ -1747,12 +1747,15 @@ class _RenderChipRedirectingHitDetection extends RenderConstrainedBox {
     // Only redirects hit detection which occurs above and below the render object.
     // In order to make this assumption true, I have removed the minimum width
     // constraints, since any reasonable chip would be at least that wide.
-    final Matrix4 transform = Matrix4.identity()
-        ..setRow(1, Vector4(0, 0, 0, size.height / 2));
-    result.pushTransform(transform);
-    final bool absorbed = child.hitTest(result, position: MatrixUtils.transformPoint(transform, position));
-    result.popTransform();
-    return absorbed;
+    final Offset offset = Offset(position.dx, size.height / 2);
+    return result.withRawTransform(
+      transform: MatrixUtils.transformToOffset(offset),
+      position: position,
+      hitTest: (HitTestResult result, Offset position) {
+        assert(position == offset);
+        child.hitTest(result, position: offset);
+      },
+    );
   }
 }
 
@@ -2265,6 +2268,7 @@ class _RenderChip extends RenderBox {
 
   @override
   bool hitTest(HitTestResult result, { Offset position }) {
+    print('>>>>>>> _RenderChip');
     if (!size.contains(position))
       return false;
     RenderBox hitTestChild;
@@ -2284,13 +2288,14 @@ class _RenderChip extends RenderBox {
     }
     if (hitTestChild != null) {
       final Offset center = hitTestChild.size.center(Offset.zero);
-      final Matrix4 transform = Matrix4.identity()
-          ..setRow(0, Vector4(0, 0, 0, center.dx))
-          ..setRow(1, Vector4(0, 0, 0, center.dy));
-      result.pushTransform(transform);
-      final bool absorbed = hitTestChild.hitTest(result, position: MatrixUtils.transformPoint(transform, position));
-      result.popTransform();
-      return absorbed;
+      return result.withRawTransform(
+        transform: MatrixUtils.transformToOffset(center),
+        position: position,
+        hitTest: (HitTestResult result, Offset position) {
+          assert(position == center);
+          return hitTestChild.hitTest(result, position: center);
+        },
+      );
     }
     return false;
   }

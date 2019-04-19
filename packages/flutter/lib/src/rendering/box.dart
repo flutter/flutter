@@ -2253,7 +2253,15 @@ mixin RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, ParentDataTyp
     ChildType child = lastChild;
     while (child != null) {
       final ParentDataType childParentData = child.parentData;
-      if (child.hitTest(result, position: position - childParentData.offset))
+      final bool isHit = result.withPaintOffset(
+        offset: childParentData.offset,
+        position: position,
+        hitTest: (HitTestResult result, Offset transformed) {
+          assert(transformed == position - childParentData.offset);
+          return child.hitTest(result, position: transformed);
+        },
+      );
+      if (isHit)
         return true;
       child = childParentData.previousSibling;
     }

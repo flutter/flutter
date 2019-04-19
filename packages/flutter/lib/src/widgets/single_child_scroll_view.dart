@@ -4,6 +4,7 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 
@@ -557,8 +558,14 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
   @override
   bool hitTestChildren(HitTestResult result, { Offset position }) {
     if (child != null) {
-      final Offset transformed = position + -_paintOffset;
-      return child.hitTest(result, position: transformed);
+      return result.withPaintOffset(
+        offset: _paintOffset,
+        position: position,
+        hitTest: (HitTestResult result, Offset transformed) {
+          assert(transformed == position + -_paintOffset);
+          return child.hitTest(result, position: transformed);
+        },
+      );
     }
     return false;
   }

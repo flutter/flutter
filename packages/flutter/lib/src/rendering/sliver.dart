@@ -1497,20 +1497,39 @@ abstract class RenderSliverHelpers implements RenderSliver {
   @protected
   bool hitTestBoxChild(HitTestResult result, RenderBox child, { @required double mainAxisPosition, @required double crossAxisPosition }) {
     final bool rightWayUp = _getRightWayUp(constraints);
-    double absolutePosition = mainAxisPosition - childMainAxisPosition(child);
-    final double absoluteCrossAxisPosition = crossAxisPosition - childCrossAxisPosition(child);
+    double delta = childMainAxisPosition(child);
+    final double crossAxisDelta = childCrossAxisPosition(child);
+    double absolutePosition = mainAxisPosition - delta;
+    final double absoluteCrossAxisPosition = crossAxisPosition - crossAxisDelta;
+    Offset paintOffset, transformedPosition;
     assert(constraints.axis != null);
     switch (constraints.axis) {
       case Axis.horizontal:
-        if (!rightWayUp)
+        if (!rightWayUp) {
           absolutePosition = child.size.width - absolutePosition;
-        return child.hitTest(result, position: Offset(absolutePosition, absoluteCrossAxisPosition));
+          delta = geometry.paintExtent - child.size.width - delta;
+        }
+        paintOffset = Offset(delta, crossAxisDelta);
+        transformedPosition = Offset(absolutePosition, absoluteCrossAxisPosition);
+        break;
       case Axis.vertical:
-        if (!rightWayUp)
+        if (!rightWayUp) {
           absolutePosition = child.size.height - absolutePosition;
-        return child.hitTest(result, position: Offset(absoluteCrossAxisPosition, absolutePosition));
+          delta = geometry.paintExtent - child.size.height - delta;
+        }
+        paintOffset = Offset(crossAxisDelta, delta);
+        transformedPosition = Offset(absoluteCrossAxisPosition, absolutePosition);
+        break;
     }
-    return false;
+    assert(paintOffset != null);
+    assert(transformedPosition != null);
+    return result.withPaintOffset(
+      offset: paintOffset,
+      position: null, // Slivers speak a different hit test protocol.
+      hitTest: (HitTestResult result, Offset position) {
+        return child.hitTest(result, position: transformedPosition);
+      },
+    );
   }
 
   /// Utility function for [applyPaintTransform] for use when the children are

@@ -82,91 +82,24 @@ class HitTestResult {
 
   final List<Matrix4> _transforms = <Matrix4>[];
 
-  /// Push a new transform matrix that is to be applied to all future
-  /// [HitTestEntry]s added via [add] until it is removed via [popTransform].
-  ///
-  /// The provided `transform` matrix should describe how to transform
-  /// [PointerEvent]s from the coordinate space of the method caller to the
-  /// coordinate space of its children.
-  ///
-  /// [HitTestable]s should call this in their [HitTestable.hitTest] method
-  /// before hit testing their children if they apply any kind of paint
-  /// transform to their children. In most cases the `transform` provided is
-  /// derived from inverting the result of running
-  /// [RenderObject.applyPaintTransform] through
-  /// [PointerEvent.paintTransformToPointerEventTransform].
-  ///
-  /// {@tool sample}
-  /// The following code snippet shows how [pushTransform] and [popTransform]
-  /// can be called from [RenderBox.hitTestChildern].
-  ///
-  /// ```dart
-  /// abstract class Foo extends RenderBox {
-  ///
-  ///   final Matrix4 _effectiveTransform = Matrix4.rotationZ(50);
-  ///
-  ///   @override
-  ///   void applyPaintTransform(RenderBox child, Matrix4 transform) {
-  ///     transform.multiply(_effectiveTransform);
-  ///   }
-  ///
-  ///   @override
-  ///   bool hitTestChildren(HitTestResult result, { Offset position }) {
-  ///     final Matrix4 inverse = Matrix4.tryInvert(
-  ///       PointerEvent.paintTransformToPointerEventTransform(_effectiveTransform)
-  ///     );
-  ///
-  ///     if (inverse == null) {
-  ///       // We cannot invert the effective transform. That means the child
-  ///       // doesn't appear on screen and cannot be hit.
-  ///       return false;
-  ///     }
-  ///
-  ///     result.pushTransform(inverse);
-  ///
-  ///     position = MatrixUtils.transformPoint(inverse, position);
-  ///     final bool absorbed = super.hitTestChildren(result, position: position);
-  ///
-  ///     result.popTransform();
-  ///
-  ///     return absorbed;
-  ///   }
-  /// }
-  /// ```
-  /// {@end-tool}
-  ///
-  /// See also:
-  ///
-  ///  * [withTransform], which is a convenient wrapper around [pushTransform]
-  ///    and [popTransform].
-  void pushTransform(Matrix4 transform) {
-    assert(transform.getRow(2) == Vector4(0, 0, 1, 0) && transform.getColumn(2) == Vector4(0, 0, 1, 0),
-      'The third row and third column of a transfor matrix for pointer '
-      'events must be Vector4(0, 0, 1, 0). Did you forget to run the paint '
-      'matrix thorugh PointerEvent.paintTransformToPointerEventTransform?'
-    );
+  void _pushTransform(Matrix4 transform) {
+//    assert(transform.getRow(2) == Vector4(0, 0, 1, 0) && transform.getColumn(2) == Vector4(0, 0, 1, 0),
+//      'The third row and third column of a transform matrix for pointer '
+//      'events must be Vector4(0, 0, 1, 0). Did you forget to run the paint '
+//      'matrix through PointerEvent.paintTransformToPointerEventTransform?'
+//      'The provided matrix is:\n$transform'
+//    );
     _transforms.add(_transforms.isEmpty ? transform : _transforms.last * transform);
   }
 
-  /// Removes the last transform added via [pushTransform].
-  ///
-  /// This is usually called from within [HitTestable.hitTest] after hit testing
-  /// children that have a point transform applied to them.
-  ///
-  /// See also:
-  ///
-  ///  * [pushTransform], which has an example show-casing how to use these
-  ///    methods.
-  ///  * [withTransform], which is a convenient wrapper around [pushTransform]
-  ///    and [popTransform].
-  void popTransform() {
+  void _popTransform() {
     assert(_transforms.isNotEmpty);
     _transforms.removeLast();
   }
 
   /// Convenience method to transform a position before hit-testing a child.
   ///
-  /// This can be used instead of [pushTransform] and [popTransform].
+  /// This can be used instead of [_pushTransform] and [_popTransform].
   ///
   /// The provided paint [transform] from the child coordinate system to the
   /// coordinate system of the caller, will be turned into a transform matrix
@@ -209,7 +142,6 @@ class HitTestResult {
     @required Offset position,
     @required HitTest hitTest,
   }) {
-    assert(position != null);
     assert(hitTest != null);
     if (transform != null) {
       transform = Matrix4.tryInvert(PointerEvent.paintTransformToPointerEventTransform(transform));
@@ -217,12 +149,42 @@ class HitTestResult {
         // Objects are not visible on screen and cannot be hit-tested.
         return false;
       }
-      pushTransform(transform);
+      _pushTransform(transform);
     }
-    final Offset transformedPosition = transform == null ? position : MatrixUtils.transformPoint(transform, position);
+    final Offset transformedPosition = transform == null || position == null ? position : MatrixUtils.transformPoint(transform, position);
     final bool absorbed = hitTest(this, transformedPosition);
     if (transform != null) {
-      popTransform();
+      _popTransform();
+    }
+    return absorbed;
+  }
+
+  bool withPaintOffset({
+    @required Offset offset,
+    @required Offset position,
+    @required HitTest hitTest,
+  }) {
+    assert(hitTest != null);
+    return withRawTransform(
+      transform: offset != null ? Matrix4.translationValues(-offset.dx, -offset.dy, 0.0) : null,
+      position: position,
+      hitTest: hitTest,
+    );
+  }
+
+  bool withRawTransform({
+    @required Matrix4 transform,
+    @required Offset position,
+    @required HitTest hitTest,
+  }) {
+    assert(hitTest != null);
+    if (transform != null) {
+      _pushTransform(transform);
+    }
+    final Offset transformedPosition = transform == null || position == null ? position : MatrixUtils.transformPoint(transform, position);
+    final bool absorbed = hitTest(this, transformedPosition);
+    if (transform != null) {
+      _popTransform();
     }
     return absorbed;
   }
@@ -233,7 +195,7 @@ class HitTestResult {
   ///
   /// See also:
   ///
-  ///  * [pushTransform] and [popTransform], which are called during hit testing
+  ///  * [_pushTransform] and [_popTransform], which are called during hit testing
   ///    to build up the transform returned by this method.
   Matrix4 getTransform(HitTestEntry entry) {
     assert(_path.containsKey(entry));

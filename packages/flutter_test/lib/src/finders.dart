@@ -497,7 +497,9 @@ class _HitTestableFinder extends ChainedFinder {
       final Offset absoluteOffset = box.localToGlobal(alignment.alongSize(box.size));
       final HitTestResult hitResult = HitTestResult();
       WidgetsBinding.instance.hitTest(hitResult, absoluteOffset);
+      print(hitResult);
       for (final HitTestEntry entry in hitResult.path) {
+        print(candidate.renderObject);
         if (entry.target == candidate.renderObject) {
           yield candidate;
           break;

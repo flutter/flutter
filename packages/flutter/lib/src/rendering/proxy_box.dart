@@ -2388,7 +2388,9 @@ class RenderFractionalTranslation extends RenderProxyBox {
   bool hitTestChildren(HitTestResult result, { Offset position }) {
     assert(!debugNeedsLayout);
     return result.withPaintTransform(
-      transform: transformHitTests ? Matrix4.translationValues(translation.dx * size.width, translation.dy * size.height, 0.0) : null,
+      transform: transformHitTests
+          ? Matrix4.translationValues(translation.dx * size.width, translation.dy * size.height, 0.0)
+          : null,
       position: position,
       hitTest: (HitTestResult result, Offset position) {
         return super.hitTestChildren(result, position: position);

@@ -1573,6 +1573,8 @@ void main() {
       ),
     );
 
+    debugDumpRenderTree();
+
     expect(find.byType(InputChip).hitTestable(at: Alignment.center), findsOneWidget);
   });
 
