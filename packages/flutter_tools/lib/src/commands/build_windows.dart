@@ -5,15 +5,12 @@
 import 'dart:async';
 
 import '../base/common.dart';
-import '../base/io.dart';
 import '../base/platform.dart';
-import '../base/process_manager.dart';
 import '../build_info.dart';
 import '../cache.dart';
-import '../convert.dart';
-import '../globals.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart' show FlutterCommandResult;
+import '../windows/build_windows.dart';
 import 'build.dart';
 
 /// A command to build a windows desktop target through a build shell script.
@@ -62,24 +59,7 @@ class BuildWindowsCommand extends BuildSubCommand {
     if (!flutterProject.windows.existsSync()) {
       throwToolExit('No Windows desktop project configured.');
     }
-    final Process process = await processManager.start(<String>[
-      flutterProject.windows.buildScript.path,
-      Cache.flutterRoot,
-      buildInfo.isDebug ? 'debug' : 'release',
-      buildInfo?.trackWidgetCreation == true ? 'track-widget-creation' : 'no-track-widget-creation',
-    ], runInShell: true);
-    process.stderr
-      .transform(utf8.decoder)
-      .transform(const LineSplitter())
-      .listen(printError);
-    process.stdout
-      .transform(utf8.decoder)
-      .transform(const LineSplitter())
-      .listen(printStatus);
-    final int result = await process.exitCode;
-    if (result != 0) {
-      throwToolExit('Build process failed');
-    }
+    await buildWindows(flutterProject.windows, buildInfo);
     return null;
   }
 }

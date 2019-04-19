@@ -20,10 +20,12 @@ import 'build_info.dart';
 import 'globals.dart';
 import 'ios/ios_workflow.dart';
 import 'ios/plist_utils.dart' as plist;
+import 'linux/application_package.dart';
 import 'macos/application_package.dart';
 import 'project.dart';
 import 'tester/flutter_tester.dart';
 import 'web/web_device.dart';
+import 'windows/application_package.dart';
 
 class ApplicationPackageFactory {
   static ApplicationPackageFactory get instance => context[ApplicationPackageFactory];
@@ -51,12 +53,18 @@ class ApplicationPackageFactory {
         return FlutterTesterApp.fromCurrentDirectory();
       case TargetPlatform.darwin_x64:
         return applicationBinary == null
-          ? MacOSApp.fromMacOSProject((await FlutterProject.current()).macos)
-          : MacOSApp.fromPrebuiltApp(applicationBinary);
+            ? MacOSApp.fromMacOSProject((await FlutterProject.current()).macos)
+            : MacOSApp.fromPrebuiltApp(applicationBinary);
       case TargetPlatform.web:
         return WebApplicationPackage(await FlutterProject.current());
       case TargetPlatform.linux_x64:
+        return applicationBinary == null
+            ? LinuxApp.fromLinuxProject((await FlutterProject.current()).linux)
+            : LinuxApp.fromPrebuiltApp(applicationBinary);
       case TargetPlatform.windows_x64:
+        return applicationBinary == null
+            ? WindowsApp.fromWindowsProject((await FlutterProject.current()).windows)
+            : WindowsApp.fromPrebuiltApp(applicationBinary);
       case TargetPlatform.fuchsia:
         return null;
     }
