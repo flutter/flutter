@@ -107,7 +107,6 @@ class WidgetSpan extends PlaceholderSpan {
     InlineWidgetAlignment alignment = InlineWidgetAlignment.bottom,
     TextBaseline baseline,
     TextStyle style,
-    GestureRecognizer recognizer,
   }) : assert(widget != null),
        assert((alignment == InlineWidgetAlignment.aboveBaseline ||
                alignment == InlineWidgetAlignment.belowBaseline ||
@@ -121,7 +120,7 @@ class WidgetSpan extends PlaceholderSpan {
            alignment == InlineWidgetAlignment.top ? ui.PlaceholderAlignment.top :
            alignment == InlineWidgetAlignment.bottom ? ui.PlaceholderAlignment.bottom :
            alignment == InlineWidgetAlignment.middle ? ui.PlaceholderAlignment.middle : null,
-         baseline: baseline, style: style, recognizer: recognizer
+         baseline: baseline, style: style,
        );
 
   /// The widget to embed inline with text.
@@ -158,7 +157,7 @@ class WidgetSpan extends PlaceholderSpan {
   }
 
   /// Calls visitor on this [WidgetSpan]. There are no children spans to walk.
-  bool visitInlineSpan(bool visitor(InlineSpan span)) {
+  bool visitChildren(bool visitor(InlineSpan span)) {
     if (!visitor(this))
       return false;
     return true;
@@ -191,7 +190,7 @@ class WidgetSpan extends PlaceholderSpan {
       return RenderComparison.layout;
     if ((style == null) != (other.style == null))
       return RenderComparison.layout;
-    RenderComparison result = recognizer == other.recognizer ? RenderComparison.identical : RenderComparison.metadata;
+    RenderComparison result = RenderComparison.identical;
     if (style != null) {
       final RenderComparison candidate = style.compareTo(other.style);
       if (candidate.index > result.index)
@@ -212,8 +211,7 @@ class WidgetSpan extends PlaceholderSpan {
       return false;
     final WidgetSpan typedOther = other;
     return typedOther.widget == widget
-        && typedOther.style == style
-        && typedOther.recognizer == recognizer;
+        && typedOther.style == style;
   }
 
   /// Returns the text span that contains the given position in the text.
@@ -233,7 +231,7 @@ class WidgetSpan extends PlaceholderSpan {
   /// ```
   bool debugAssertIsValid() {
     assert(() {
-      if (!visitInlineSpan((InlineSpan span) {
+      if (!visitChildren((InlineSpan span) {
         if (span is WidgetSpan)
           return (span as WidgetSpan).widget != null;
         TextSpan textSpan = span;

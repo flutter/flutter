@@ -12,9 +12,15 @@ import 'basic_types.dart';
 import 'text_style.dart';
 import 'text_painter.dart';
 
-/// An immutable span of inline content which form a paragraph.
+/// An immutable span of inline content which forms a paragraph.
 ///
 /// The subclass [TextSpan] specifies text and may contain child [InlineSpan]s.
+///
+/// The subclass [PlaceholderSpan] represents a placeholder that may be
+/// filled with non-text content. [PlaceholderSpan] itself defines a
+/// [ui.PlaceholderAlignemnt] and a [TextBaseline]. To be useful,
+/// [PlaceholderSpan] should be extended to define content. An instance of
+/// this is the [WidgetSpan] class in the widgets library.
 ///
 /// The subclass [WidgetSpan] specifies embedded inline widgets. Specify a
 /// widget by wrapping the widget with a [WidgetSpan]. The widget will be
@@ -41,7 +47,7 @@ import 'text_painter.dart';
 ///         baseline: TextBaseline.alphabetic,
 ///         widget: ConstrainedBox(
 ///           constraints: BoxConstraints(maxWidth: 100),
-///           child: TextField,
+///           child: TextField(),
 ///         )
 ///       ),
 ///       TextSpan(
@@ -63,7 +69,6 @@ abstract class InlineSpan extends DiagnosticableTree {
   /// Creates a [InlineSpan] with the given values.
   const InlineSpan({
     this.style,
-    this.recognizer,
     this.semanticsLabel,
   });
 
@@ -72,82 +77,6 @@ abstract class InlineSpan extends DiagnosticableTree {
   /// The [style] is also applied to any child spans when this is an instance
   /// of [TextSpan].
   final TextStyle style;
-
-  /// A gesture recognizer that will receive events that hit this span.
-  ///
-  /// [InlineSpan] itself does not implement hit testing or event dispatch. The
-  /// object that manages the [InlineSpan] painting is also responsible for
-  /// dispatching events. In the rendering library, that is the
-  /// [RenderParagraph] object, which corresponds to the [RichText] widget in
-  /// the widgets layer; these objects do not bubble events in [InlineSpan]s, so a
-  /// [recognizer] is only effective for events that directly hit the [text] of
-  /// that [InlineSpan], not any of its [children].
-  ///
-  /// [InlineSpan] also does not manage the lifetime of the gesture recognizer.
-  /// The code that owns the [GestureRecognizer] object must call
-  /// [GestureRecognizer.dispose] when the [InlineSpan] object is no longer used.
-  ///
-  /// {@tool sample}
-  ///
-  /// This example shows how to manage the lifetime of a gesture recognizer
-  /// provided to a [InlineSpan] object. It defines a `BuzzingText` widget which
-  /// uses the [HapticFeedback] class to vibrate the device when the user
-  /// long-presses the "find the" span, which is underlined in wavy green. The
-  /// hit-testing is handled by the [RichText] widget.
-  ///
-  /// ```dart
-  /// class BuzzingText extends StatefulWidget {
-  ///   @override
-  ///   _BuzzingTextState createState() => _BuzzingTextState();
-  /// }
-  ///
-  /// class _BuzzingTextState extends State<BuzzingText> {
-  ///   LongPressGestureRecognizer _longPressRecognizer;
-  ///
-  ///   @override
-  ///   void initState() {
-  ///     super.initState();
-  ///     _longPressRecognizer = LongPressGestureRecognizer()
-  ///       ..onLongPress = _handlePress;
-  ///   }
-  ///
-  ///   @override
-  ///   void dispose() {
-  ///     _longPressRecognizer.dispose();
-  ///     super.dispose();
-  ///   }
-  ///
-  ///   void _handlePress() {
-  ///     HapticFeedback.vibrate();
-  ///   }
-  ///
-  ///   @override
-  ///   Widget build(BuildContext context) {
-  ///     return RichText(
-  ///       text: TextSpan(
-  ///         text: 'Can you ',
-  ///         style: TextStyle(color: Colors.black),
-  ///         children: <InlineSpan>[
-  ///           TextSpan(
-  ///             text: 'find the',
-  ///             style: TextStyle(
-  ///               color: Colors.green,
-  ///               decoration: TextDecoration.underline,
-  ///               decorationStyle: TextDecorationStyle.wavy,
-  ///             ),
-  ///             recognizer: _longPressRecognizer,
-  ///           ),
-  ///           TextSpan(
-  ///             text: ' secret?',
-  ///           ),
-  ///         ],
-  ///       ),
-  ///     );
-  ///   }
-  /// }
-  /// ```
-  /// {@end-tool}
-  final GestureRecognizer recognizer;
 
   /// An alternative semantics label for this text.
   ///
@@ -162,7 +91,7 @@ abstract class InlineSpan extends DiagnosticableTree {
   /// ```
   final String semanticsLabel;
 
-  /// Utility method to convert InlineSpan into [TextSpan] or [WidgetSpan].
+  /// Utility method to convert [InlineSpan] into [TextSpan] or [WidgetSpan].
   ///
   /// Will return null if span is not of type T or null. Otherwise, return
   /// the span cast as T. Values of T that are not subclasses of [InlineSpan]
@@ -178,14 +107,14 @@ abstract class InlineSpan extends DiagnosticableTree {
   /// [Canvas] objects.
   void build(ui.ParagraphBuilder builder, { double textScaleFactor = 1.0, List<PlaceholderDimensions> dimensions });
 
-  /// Walks this InlineSpan and any descendants in pre-order and calls [visitor]
+  /// Walks this [InlineSpan] and any descendants in pre-order and calls [visitor]
   /// for each span that has content.
   ///
   /// When [visitor] returns true, the walk will continue. When [visitor] returns
   /// false, then the walk will end.
   ///
   /// The type of the span may be checked using [asType].
-  bool visitInlineSpan(bool visitor(InlineSpan span));
+  bool visitChildren(bool visitor(InlineSpan span));
 
   /// Returns the text span that contains the given position in the text.
   InlineSpan getSpanForPosition(TextPosition position);
@@ -228,12 +157,11 @@ abstract class InlineSpan extends DiagnosticableTree {
       return false;
     final InlineSpan typedOther = other;
     return typedOther.style == style
-        && typedOther.recognizer == recognizer
         && typedOther.semanticsLabel == semanticsLabel;
   }
 
   @override
-  int get hashCode => hashValues(style, recognizer);
+  int get hashCode => hashValues(style, semanticsLabel);
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -243,12 +171,6 @@ abstract class InlineSpan extends DiagnosticableTree {
     // this InlineSpan.
     if (style != null)
       style.debugFillProperties(properties);
-
-    properties.add(DiagnosticsProperty<GestureRecognizer>(
-      'recognizer', recognizer,
-      description: recognizer?.runtimeType?.toString(),
-      defaultValue: null,
-    ));
 
     if (semanticsLabel != null) {
       properties.add(StringProperty('semanticsLabel', semanticsLabel));

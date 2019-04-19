@@ -65,9 +65,9 @@ class TextSpan extends InlineSpan {
     this.text,
     this.children,
     TextStyle style,
-    GestureRecognizer recognizer,
+    this.recognizer,
     String semanticsLabel,
-  }) : super(style: style, recognizer: recognizer, semanticsLabel: semanticsLabel);
+  }) : super(style: style, semanticsLabel: semanticsLabel);
 
   /// The text contained in the span.
   ///
@@ -85,6 +85,82 @@ class TextSpan extends InlineSpan {
   ///
   /// The list must not contain any nulls.
   final List<InlineSpan> children;
+
+  /// A gesture recognizer that will receive events that hit this span.
+  ///
+  /// [InlineSpan] itself does not implement hit testing or event dispatch. The
+  /// object that manages the [InlineSpan] painting is also responsible for
+  /// dispatching events. In the rendering library, that is the
+  /// [RenderParagraph] object, which corresponds to the [RichText] widget in
+  /// the widgets layer; these objects do not bubble events in [InlineSpan]s, so a
+  /// [recognizer] is only effective for events that directly hit the [text] of
+  /// that [InlineSpan], not any of its [children].
+  ///
+  /// [InlineSpan] also does not manage the lifetime of the gesture recognizer.
+  /// The code that owns the [GestureRecognizer] object must call
+  /// [GestureRecognizer.dispose] when the [InlineSpan] object is no longer used.
+  ///
+  /// {@tool sample}
+  ///
+  /// This example shows how to manage the lifetime of a gesture recognizer
+  /// provided to a [InlineSpan] object. It defines a `BuzzingText` widget which
+  /// uses the [HapticFeedback] class to vibrate the device when the user
+  /// long-presses the "find the" span, which is underlined in wavy green. The
+  /// hit-testing is handled by the [RichText] widget.
+  ///
+  /// ```dart
+  /// class BuzzingText extends StatefulWidget {
+  ///   @override
+  ///   _BuzzingTextState createState() => _BuzzingTextState();
+  /// }
+  ///
+  /// class _BuzzingTextState extends State<BuzzingText> {
+  ///   LongPressGestureRecognizer _longPressRecognizer;
+  ///
+  ///   @override
+  ///   void initState() {
+  ///     super.initState();
+  ///     _longPressRecognizer = LongPressGestureRecognizer()
+  ///       ..onLongPress = _handlePress;
+  ///   }
+  ///
+  ///   @override
+  ///   void dispose() {
+  ///     _longPressRecognizer.dispose();
+  ///     super.dispose();
+  ///   }
+  ///
+  ///   void _handlePress() {
+  ///     HapticFeedback.vibrate();
+  ///   }
+  ///
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return RichText(
+  ///       text: TextSpan(
+  ///         text: 'Can you ',
+  ///         style: TextStyle(color: Colors.black),
+  ///         children: <InlineSpan>[
+  ///           TextSpan(
+  ///             text: 'find the',
+  ///             style: TextStyle(
+  ///               color: Colors.green,
+  ///               decoration: TextDecoration.underline,
+  ///               decorationStyle: TextDecorationStyle.wavy,
+  ///             ),
+  ///             recognizer: _longPressRecognizer,
+  ///           ),
+  ///           TextSpan(
+  ///             text: ' secret?',
+  ///           ),
+  ///         ],
+  ///       ),
+  ///     );
+  ///   }
+  /// }
+  /// ```
+  /// {@end-tool}
+  final GestureRecognizer recognizer;
 
   /// Apply the [style], [text], and [children] of this object to the
   /// given [ParagraphBuilder], from which a [Paragraph] can be obtained.
@@ -113,14 +189,14 @@ class TextSpan extends InlineSpan {
   /// Walks this text span and its descendants in pre-order and calls [visitor]
   /// for each span that has text.
   @override
-  bool visitInlineSpan(bool visitor(InlineSpan span)) {
+  bool visitChildren(bool visitor(InlineSpan span)) {
     if (text != null) {
       if (!visitor(this))
         return false;
     }
     if (children != null) {
       for (InlineSpan child in children) {
-        if (!child.visitInlineSpan(visitor))
+        if (!child.visitChildren(visitor))
           return false;
       }
     }
@@ -134,7 +210,7 @@ class TextSpan extends InlineSpan {
     final int targetOffset = position.offset;
     int offset = 0;
     TextSpan result;
-    visitInlineSpan((InlineSpan span) {
+    visitChildren((InlineSpan span) {
       assert(result == null);
       TextSpan textSpan = InlineSpan.asType<TextSpan>(span);
       if (textSpan == null)
@@ -160,7 +236,7 @@ class TextSpan extends InlineSpan {
   String toPlainText({bool includeSemanticsLabels = true}) {
     assert(debugAssertIsValid());
     final StringBuffer buffer = StringBuffer();
-    visitInlineSpan((InlineSpan span) {
+    visitChildren((InlineSpan span) {
       TextSpan textSpan = InlineSpan.asType<TextSpan>(span);
       if (textSpan == null)
         return true;
@@ -182,7 +258,7 @@ class TextSpan extends InlineSpan {
       return null;
     int offset = 0;
     int result;
-    visitInlineSpan((InlineSpan span) {
+    visitChildren((InlineSpan span) {
       TextSpan textSpan = InlineSpan.asType<TextSpan>(span);
       if (textSpan == null)
         return true;
@@ -206,7 +282,7 @@ class TextSpan extends InlineSpan {
   /// ```
   bool debugAssertIsValid() {
     assert(() {
-      if (!visitInlineSpan((InlineSpan span) {
+      if (!visitChildren((InlineSpan span) {
         TextSpan textSpan = InlineSpan.asType<TextSpan>(span);
         if (textSpan == null)
           return true;
@@ -295,6 +371,12 @@ class TextSpan extends InlineSpan {
     properties.add(StringProperty('text', text, showName: false, defaultValue: null));
     if (style == null && text == null && children == null)
       properties.add(DiagnosticsNode.message('(empty)'));
+
+    properties.add(DiagnosticsProperty<GestureRecognizer>(
+      'recognizer', recognizer,
+      description: recognizer?.runtimeType?.toString(),
+      defaultValue: null,
+    ));
   }
 
   @override

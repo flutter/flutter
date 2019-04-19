@@ -125,7 +125,7 @@ class RenderParagraph extends RenderBox
   // child WidgetsSpans. Populates _placeholderSpans.
   void _extractPlaceholderSpans(InlineSpan span) {
     _placeholderSpans = [];
-    span.visitInlineSpan((InlineSpan span) {
+    span.visitChildren((InlineSpan span) {
       if (span is PlaceholderSpan) {
         PlaceholderSpan placeholderSpan = span;
         _placeholderSpans.add(placeholderSpan);
@@ -258,7 +258,11 @@ class RenderParagraph extends RenderBox
     if (_needsLayout) {
       _computeChildrenWidthWithMinIntrinsics(height);
       _layoutText();
-      _needsLayout = true; // Purposefully not markNeedsLayout(). Does not call super.
+      // Purposefully not markNeedsLayout(). markNeedsLayout() calls
+      // super.markNeedsLayout(), which we do not want to do as this
+      // layout run is temporary and not a real layout run. It does
+      // not effect the final layout of parents.
+      _needsLayout = true;
     }
     double minWidth = _textPainter.minIntrinsicWidth;
     return minWidth;
@@ -271,7 +275,11 @@ class RenderParagraph extends RenderBox
     if (_needsLayout) {
       _computeChildrenWidthWithMaxIntrinsics(height);
       _layoutText(); // layout with infinite width.
-      _needsLayout = true; // Purposefully not markNeedsLayout(). Does not call super.
+      // Purposefully not markNeedsLayout(). markNeedsLayout() calls
+      // super.markNeedsLayout(), which we do not want to do as this
+      // layout run is temporary and not a real layout run. It does
+      // not effect the final layout of parents.
+      _needsLayout = true;
     }
     double maxWidth = _textPainter.maxIntrinsicWidth;
     return maxWidth;
@@ -282,7 +290,11 @@ class RenderParagraph extends RenderBox
       return 0;
     _computeChildrenHeightWithMinIntrinsics(width);
     _layoutText(minWidth: width, maxWidth: width);
-    _needsLayout = true; // Purposefully not markNeedsLayout(). Does not call super.
+    // Purposefully not markNeedsLayout(). markNeedsLayout() calls
+    // super.markNeedsLayout(), which we do not want to do as this
+    // layout run is temporary and not a real layout run. It does
+    // not effect the final layout of parents.
+    _needsLayout = true;
     double height = _textPainter.height;
     return height;
   }
@@ -310,11 +322,20 @@ class RenderParagraph extends RenderBox
   /// alignments that require the baseline.
   bool _canComputeIntrinsics() {
     for (PlaceholderSpan span in _placeholderSpans) {
-      if (span.alignment == ui.PlaceholderAlignment.baseline ||
-          span.alignment == ui.PlaceholderAlignment.aboveBaseline ||
-          span.alignment == ui.PlaceholderAlignment.belowBaseline) {
-        assert(RenderObject.debugCheckingIntrinsics, 'Intrinsics are invalid');
-        return false;
+      switch (span.alignment) {
+        case ui.PlaceholderAlignment.baseline:
+        case ui.PlaceholderAlignment.aboveBaseline:
+        case ui.PlaceholderAlignment.belowBaseline: {
+          assert(RenderObject.debugCheckingIntrinsics,
+            'Intrinsics are not available for PlaceholderAlignment.baseline, '
+            'PlaceholderAlignment.aboveBaseline, PlaceholderAlignment.belowBaseline,');
+          return false;
+        }
+        case ui.PlaceholderAlignment.top:
+        case ui.PlaceholderAlignment.middle:
+        case ui.PlaceholderAlignment.bottom: {
+          continue;
+        }
       }
     }
     return true;
@@ -333,7 +354,7 @@ class RenderParagraph extends RenderBox
         baseline: _placeholderSpans[childIndex].baseline,
       );
       child = childAfter(child);
-      childIndex++;
+      childIndex += 1;
     }
     _textPainter.placeholderDimensions = placeholderDimensions;
   }
@@ -351,7 +372,7 @@ class RenderParagraph extends RenderBox
         baseline: _placeholderSpans[childIndex].baseline,
       );
       child = childAfter(child);
-      childIndex++;
+      childIndex += 1;
     }
     _textPainter.placeholderDimensions = placeholderDimensions;
   }
@@ -369,7 +390,7 @@ class RenderParagraph extends RenderBox
         baseline: _placeholderSpans[childIndex].baseline,
       );
       child = childAfter(child);
-      childIndex++;
+      childIndex += 1;
     }
     _textPainter.placeholderDimensions = placeholderDimensions;
   }
@@ -389,7 +410,7 @@ class RenderParagraph extends RenderBox
         return true;
       }
       child = childAfter(child);
-      childIndex++;
+      childIndex += 1;
     }
     return false;
   }
@@ -444,14 +465,25 @@ class RenderParagraph extends RenderBox
         ),
         parentUsesSize: true
       );
+      double baselineOffset;
+      switch (_placeholderSpans[childIndex].alignment) {
+        case ui.PlaceholderAlignment.baseline: {
+          baselineOffset = child.getDistanceToBaseline(_placeholderSpans[childIndex].baseline);
+          break;
+        }
+        default: {
+          baselineOffset = null;
+          break;
+        }
+      }
       placeholderDimensions[childIndex] = PlaceholderDimensions(
         size: child.size,
         alignment: _placeholderSpans[childIndex].alignment,
         baseline: _placeholderSpans[childIndex].baseline,
-        baselineOffset: _placeholderSpans[childIndex].alignment == ui.PlaceholderAlignment.baseline ? child.getDistanceToBaseline(TextBaseline.alphabetic) : null,
+        baselineOffset: baselineOffset,
       );
       child = childAfter(child);
-      childIndex++;
+      childIndex += 1;
     }
     _textPainter.placeholderDimensions = placeholderDimensions;
   }
@@ -468,7 +500,7 @@ class RenderParagraph extends RenderBox
         _textPainter.inlinePlaceholderBoxes[childIndex].top
       );
       child = childAfter(child);
-      childIndex++;
+      childIndex += 1;
     }
   }
 
@@ -595,7 +627,8 @@ class RenderParagraph extends RenderBox
 
     RenderBox child = firstChild;
     int childIndex = 0;
-    while (child != null && childIndex < _textPainter.inlinePlaceholderBoxes.length) {
+    while (child != null) {
+      assert(childIndex < _textPainter.inlinePlaceholderBoxes.length);
       TextParentData textParentData = child.parentData as TextParentData;
       context.paintChild(
         child,
@@ -685,11 +718,11 @@ class RenderParagraph extends RenderBox
     _recognizerOffsets.clear();
     _recognizers.clear();
     int offset = 0;
-    text.visitInlineSpan((InlineSpan span) {
+    text.visitChildren((InlineSpan span) {
       TextSpan textSpan = InlineSpan.asType<TextSpan>(span);
       if (textSpan == null)
         return true;
-      if (textSpan.recognizer != null && (textSpan.recognizer is TapGestureRecognizer || span.recognizer is LongPressGestureRecognizer)) {
+      if (textSpan.recognizer != null && (textSpan.recognizer is TapGestureRecognizer || textSpan.recognizer is LongPressGestureRecognizer)) {
         final int length = textSpan.semanticsLabel?.length ?? textSpan.text.length;
         _recognizerOffsets.add(offset);
         _recognizerOffsets.add(offset + length);

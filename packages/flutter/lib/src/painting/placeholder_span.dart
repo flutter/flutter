@@ -46,10 +46,9 @@ abstract class PlaceholderSpan extends InlineSpan {
     ui.PlaceholderAlignment alignment = ui.PlaceholderAlignment.bottom,
     TextBaseline baseline,
     TextStyle style,
-    GestureRecognizer recognizer,
   }) : alignment = alignment,
        baseline = baseline,
-       super(style: style, recognizer: recognizer);
+       super(style: style);
 
   /// How the placeholder aligns vertically with the text.
   ///
