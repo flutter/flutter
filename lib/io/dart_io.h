@@ -14,7 +14,6 @@ namespace flutter {
 class DartIO {
  public:
   static void InitForIsolate();
-  static bool EntropySource(uint8_t* buffer, intptr_t length);
 
  private:
   FML_DISALLOW_IMPLICIT_CONSTRUCTORS(DartIO);
