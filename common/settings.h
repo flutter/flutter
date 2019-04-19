@@ -145,8 +145,6 @@ struct Settings {
       fml::UniqueFD::traits_type::InvalidValue();
   std::string assets_path;
   std::string flx_path;
-
-  std::string ToString() const;
 };
 
 }  // namespace flutter
