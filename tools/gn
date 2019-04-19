@@ -237,6 +237,8 @@ def to_gn_args(args):
 
     if sys.platform == 'darwin':
       gn_args['mac_sdk_path'] = args.mac_sdk_path
+      if gn_args['mac_sdk_path'] == '':
+        gn_args['mac_sdk_path'] = os.getenv('FLUTTER_MAC_SDK_PATH', '')
 
     return gn_args
 
@@ -294,7 +296,8 @@ def parse_args(args):
   parser.add_argument('--no-full-dart-sdk', dest='full_dart_sdk', action='store_false')
 
   parser.add_argument('--mac-sdk-path', default='', type=str,
-                      help='On the mac, the SDK is inferred from the Xcode location unless this flag is specified.')
+                      help='On the mac, the SDK is inferred from the Xcode location unless this flag is specified. ' +
+                      ' Setting the FLUTTER_MAC_SDK_PATH environment variable achieves the same effect.')
 
   return parser.parse_args(args)
 
