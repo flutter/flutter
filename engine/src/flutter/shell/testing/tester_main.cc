@@ -251,8 +251,14 @@ int main(int argc, char* argv[]) {
     return EXIT_FAILURE;
   }
 
-  if (settings.icu_data_path.size() == 0) {
-    settings.icu_data_path = "icudtl.dat";
+  // Using command line arguments, the user can specify the ICU data as being
+  // present in either a file or a dynamic library. If no such specification has
+  // been, default to icudtl.dat.
+  if (!settings.icu_mapper) {
+    settings.icu_mapper = []() {
+      return fml::FileMapping::CreateReadOnly(fml::OpenDirectoryOfExecutable(),
+                                              "icudtl.dat");
+    };
   }
 
   // The tools that read logs get confused if there is a log tag specified.

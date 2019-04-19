@@ -370,7 +370,12 @@ FlutterEngineResult FlutterEngineRun(size_t version,
 
   PopulateSnapshotMappingCallbacks(args, settings);
 
-  settings.icu_data_path = icu_data_path;
+  if (!settings.icu_mapper) {
+    settings.icu_mapper = [icu_data_path]() {
+      return fml::FileMapping::CreateReadOnly(icu_data_path);
+    };
+  }
+
   settings.assets_path = args->assets_path;
 
   if (!flutter::DartVM::IsRunningPrecompiledCode()) {
