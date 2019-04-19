@@ -383,8 +383,6 @@ FILE: ../../../flutter/runtime/dart_service_isolate.h
 FILE: ../../../flutter/runtime/dart_service_isolate_unittests.cc
 FILE: ../../../flutter/runtime/dart_snapshot.cc
 FILE: ../../../flutter/runtime/dart_snapshot.h
-FILE: ../../../flutter/runtime/dart_snapshot_buffer.cc
-FILE: ../../../flutter/runtime/dart_snapshot_buffer.h
 FILE: ../../../flutter/runtime/dart_vm.cc
 FILE: ../../../flutter/runtime/dart_vm.h
 FILE: ../../../flutter/runtime/dart_vm_data.cc

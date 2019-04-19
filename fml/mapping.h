@@ -13,6 +13,7 @@
 #include "flutter/fml/build_config.h"
 #include "flutter/fml/file.h"
 #include "flutter/fml/macros.h"
+#include "flutter/fml/native_library.h"
 #include "flutter/fml/unique_fd.h"
 
 namespace fml {
@@ -31,7 +32,7 @@ class Mapping {
   FML_DISALLOW_COPY_AND_ASSIGN(Mapping);
 };
 
-class FileMapping : public Mapping {
+class FileMapping final : public Mapping {
  public:
   enum class Protection {
     kRead,
@@ -45,8 +46,10 @@ class FileMapping : public Mapping {
 
   ~FileMapping() override;
 
+  // |Mapping|
   size_t GetSize() const override;
 
+  // |Mapping|
   const uint8_t* GetMapping() const override;
 
   uint8_t* GetMutableMapping();
@@ -63,14 +66,16 @@ class FileMapping : public Mapping {
   FML_DISALLOW_COPY_AND_ASSIGN(FileMapping);
 };
 
-class DataMapping : public Mapping {
+class DataMapping final : public Mapping {
  public:
   DataMapping(std::vector<uint8_t> data);
 
   ~DataMapping() override;
 
+  // |Mapping|
   size_t GetSize() const override;
 
+  // |Mapping|
   const uint8_t* GetMapping() const override;
 
  private:
@@ -79,13 +84,15 @@ class DataMapping : public Mapping {
   FML_DISALLOW_COPY_AND_ASSIGN(DataMapping);
 };
 
-class NonOwnedMapping : public Mapping {
+class NonOwnedMapping final : public Mapping {
  public:
   NonOwnedMapping(const uint8_t* data, size_t size)
       : data_(data), size_(size) {}
 
+  // |Mapping|
   size_t GetSize() const override;
 
+  // |Mapping|
   const uint8_t* GetMapping() const override;
 
  private:
@@ -93,6 +100,26 @@ class NonOwnedMapping : public Mapping {
   const size_t size_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(NonOwnedMapping);
+};
+
+class SymbolMapping final : public Mapping {
+ public:
+  SymbolMapping(fml::RefPtr<fml::NativeLibrary> native_library,
+                const char* symbol_name);
+
+  ~SymbolMapping() override;
+
+  // |Mapping|
+  size_t GetSize() const override;
+
+  // |Mapping|
+  const uint8_t* GetMapping() const override;
+
+ private:
+  fml::RefPtr<fml::NativeLibrary> native_library_;
+  const uint8_t* mapping_ = nullptr;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(SymbolMapping);
 };
 
 }  // namespace fml
