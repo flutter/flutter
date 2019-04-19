@@ -81,7 +81,7 @@ void main() {
 
       final Future<VMExtensionEvent> navigationFuture = navigationEvents.first;
       // This tap triggers a navigation event.
-      device.tap(100, 100);
+      device.tap(100, 200);
       final VMExtensionEvent navigationEvent = await navigationFuture;
       // Validate that there are not any fields.
       expect(navigationEvent.data.isEmpty);
