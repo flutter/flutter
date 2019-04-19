@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
+import 'bottom_sheet_theme.dart';
 import 'colors.dart';
 import 'debug.dart';
 import 'material.dart';
@@ -56,14 +57,14 @@ class BottomSheet extends StatefulWidget {
     this.animationController,
     this.enableDrag = true,
     this.color,
-    this.elevation = 0.0,
+    this.elevation,
     this.shape,
     @required this.onClosing,
     @required this.builder,
   }) : assert(enableDrag != null),
        assert(onClosing != null),
        assert(builder != null),
-       assert(elevation != null && elevation >= 0.0),
+       assert(elevation == null || elevation >= 0.0),
        super(key: key);
 
   /// The animation that controls the bottom sheet's position.
@@ -162,11 +163,16 @@ class _BottomSheetState extends State<BottomSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final BottomSheetThemeData bottomSheetTheme = Theme.of(context).bottomSheetTheme;
+    final Color color = widget.color ?? bottomSheetTheme.backgroundColor;
+    final double elevation = widget.elevation ?? bottomSheetTheme.elevation ?? 0;
+    final ShapeBorder shape = widget.shape ?? bottomSheetTheme.shape;
+
     final Widget bottomSheet = Material(
       key: _childKey,
-      color: widget.color,
-      elevation: widget.elevation,
-      shape: widget.shape,
+      color: color,
+      elevation: elevation,
+      shape: shape,
       child: widget.builder(context),
     );
     return !widget.enableDrag ? bottomSheet : GestureDetector(
