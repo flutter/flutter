@@ -45,7 +45,6 @@ enum DatePickerMode {
   year,
 }
 
-const double _kDatePickerHeaderPortraitHeight = 100.0;
 const double _kDatePickerHeaderLandscapeWidth = 168.0;
 
 const Duration _kMonthScrollDuration = Duration(milliseconds: 200);
@@ -114,12 +113,10 @@ class _DatePickerHeader extends StatelessWidget {
     }
 
     double width;
-    double height;
     EdgeInsets padding;
     MainAxisAlignment mainAxisAlignment;
     switch (orientation) {
       case Orientation.portrait:
-        height = _kDatePickerHeaderPortraitHeight;
         padding = const EdgeInsets.symmetric(horizontal: 16.0);
         mainAxisAlignment = MainAxisAlignment.center;
         break;
@@ -158,7 +155,6 @@ class _DatePickerHeader extends StatelessWidget {
 
     return Container(
       width: width,
-      height: height,
       padding: padding,
       color: backgroundColor,
       child: Column(
