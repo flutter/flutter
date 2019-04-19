@@ -325,8 +325,6 @@ class IOSSimulator extends Device {
         ]);
       if (debuggingOptions.startPaused)
         args.add('--start-paused');
-      if (debuggingOptions.disableServiceAuthCodes)
-        args.add('--disable-service-auth-codes');
       if (debuggingOptions.skiaDeterministicRendering)
         args.add('--skia-deterministic-rendering');
       if (debuggingOptions.useTestFonts)

@@ -178,7 +178,7 @@ void main() {
         await expectLater(
           createTestCommandRunner(command).run(<String>['attach', '--ipv6']),
           throwsToolExit(
-            message: 'When the --debug-port or --debug-uri is unknown, this command determines '
+            message: 'When the --debug-port is unknown, this command determines '
                      'the value of --ipv6 on its own.',
           ),
         );
@@ -193,7 +193,7 @@ void main() {
         await expectLater(
           createTestCommandRunner(command).run(<String>['attach', '--observatory-port', '100']),
           throwsToolExit(
-            message: 'When the --debug-port or --debug-uri is unknown, this command does not use '
+            message: 'When the --debug-port is unknown, this command does not use '
                      'the value of --observatory-port.',
           ),
         );
@@ -438,7 +438,7 @@ void main() {
       final MDnsClient client = MockMDnsClient();
 
       when(client.lookup<PtrResourceRecord>(
-        ResourceRecordQuery.serverPointer(MDnsObservatoryDiscovery.dartObservatoryName),
+        ResourceRecordQuery.serverPointer(MDnsObservatoryPortDiscovery.dartObservatoryName),
       )).thenAnswer((_) => Stream<PtrResourceRecord>.fromIterable(ptrRecords));
 
       for (final MapEntry<String, List<SrvResourceRecord>> entry in srvResponse.entries) {
@@ -452,8 +452,8 @@ void main() {
     testUsingContext('No ports available', () async {
       final MDnsClient client = getMockClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{});
 
-      final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(mdnsClient: client);
-      final int port = (await portDiscovery.query())?.port;
+      final MDnsObservatoryPortDiscovery portDiscovery = MDnsObservatoryPortDiscovery(mdnsClient: client);
+      final int port = await portDiscovery.queryForPort();
       expect(port, isNull);
     });
 
@@ -469,8 +469,8 @@ void main() {
         },
       );
 
-      final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(mdnsClient: client);
-      final int port = (await portDiscovery.query())?.port;
+      final MDnsObservatoryPortDiscovery portDiscovery = MDnsObservatoryPortDiscovery(mdnsClient: client);
+      final int port = await portDiscovery.queryForPort();
       expect(port, 123);
     });
 
@@ -490,8 +490,8 @@ void main() {
         },
       );
 
-      final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(mdnsClient: client);
-      expect(() => portDiscovery.query(), throwsToolExit());
+      final MDnsObservatoryPortDiscovery portDiscovery = MDnsObservatoryPortDiscovery(mdnsClient: client);
+      expect(() => portDiscovery.queryForPort(), throwsToolExit());
     });
 
     testUsingContext('Multiple ports available, with appId', () async {
@@ -510,8 +510,8 @@ void main() {
         },
       );
 
-      final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(mdnsClient: client);
-      final int port = (await portDiscovery.query(applicationId: 'fiz'))?.port;
+      final MDnsObservatoryPortDiscovery portDiscovery = MDnsObservatoryPortDiscovery(mdnsClient: client);
+      final int port = await portDiscovery.queryForPort(applicationId: 'fiz');
       expect(port, 321);
     });
 
@@ -533,8 +533,8 @@ void main() {
         },
       );
 
-      final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(mdnsClient: client);
-      final int port = (await portDiscovery.query(applicationId: 'bar'))?.port;
+      final MDnsObservatoryPortDiscovery portDiscovery = MDnsObservatoryPortDiscovery(mdnsClient: client);
+      final int port = await portDiscovery.queryForPort(applicationId: 'bar');
       expect(port, 1234);
     });
   });

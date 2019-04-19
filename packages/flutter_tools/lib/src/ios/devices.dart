@@ -279,9 +279,6 @@ class IOSDevice extends Device {
     if (debuggingOptions.startPaused)
       launchArguments.add('--start-paused');
 
-    if (debuggingOptions.disableServiceAuthCodes)
-      launchArguments.add('--disable-service-auth-codes');
-
     if (debuggingOptions.useTestFonts)
       launchArguments.add('--use-test-fonts');
 

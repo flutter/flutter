@@ -21,8 +21,7 @@ void main() {
     section('Compile and run the tester app');
     Completer<void> firstNameFound = Completer<void>();
     Completer<void> secondNameFound = Completer<void>();
-    final Process runProcess = await _run(device: device, command:
-        <String>['run', '--disable-service-auth-codes'], stdoutListener: (String line) {
+    final Process runProcess = await _run(device: device, command: <String>['run'], stdoutListener: (String line) {
       if (line.contains(_kFirstIsolateName)) {
         firstNameFound.complete();
       } else if (line.contains(_kSecondIsolateName)) {

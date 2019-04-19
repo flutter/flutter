@@ -31,12 +31,6 @@ import '../runner/flutter_command.dart';
 /// With an application already running, a HotRunner can be attached to it
 /// with:
 /// ```
-/// $ flutter attach --debug-uri http://127.0.0.1:12345/QqL7EFEDNG0=/
-/// ```
-///
-/// If `--disable-service-auth-codes` was provided to the application at startup
-/// time, a HotRunner can be attached with just a port:
-/// ```
 /// $ flutter attach --debug-port 12345
 /// ```
 ///
@@ -62,14 +56,7 @@ class AttachCommand extends FlutterCommand {
     argParser
       ..addOption(
         'debug-port',
-        hide: !verboseHelp,
-        help: 'Device port where the observatory is listening. Requires '
-        '--disable-service-auth-codes to also be provided to the Flutter '
-        'application at launch, otherwise this command will fail to connect to '
-        'the application. In general, --debug-uri should be used instead.',
-      )..addOption(
-        'debug-uri',
-        help: 'The URI at which the observatory is listening.',
+        help: 'Device port where the observatory is listening.',
       )..addOption(
         'app-id',
         help: 'The package name (Android) or bundle identifier (iOS) for the application. '
@@ -115,17 +102,6 @@ class AttachCommand extends FlutterCommand {
     return null;
   }
 
-  Uri get debugUri {
-    if (argResults['debug-uri'] == null) {
-      return null;
-    }
-    final Uri uri = Uri.parse(argResults['debug-uri']);
-    if (!uri.hasPort) {
-      throwToolExit('Port not specified for `--debug-uri`: $uri');
-    }
-    return uri;
-  }
-
   String get appId {
     return argResults['app-id'];
   }
@@ -136,26 +112,24 @@ class AttachCommand extends FlutterCommand {
     if (await findTargetDevice() == null)
       throwToolExit(null);
     debugPort;
-    if (debugPort == null && debugUri == null && argResults.wasParsed(FlutterCommand.ipv6Flag)) {
+    if (debugPort == null && argResults.wasParsed(FlutterCommand.ipv6Flag)) {
       throwToolExit(
-        'When the --debug-port or --debug-uri is unknown, this command determines '
+        'When the --debug-port is unknown, this command determines '
         'the value of --ipv6 on its own.',
       );
     }
-    if (debugPort == null && debugUri == null && argResults.wasParsed(FlutterCommand.observatoryPortOption)) {
+    if (debugPort == null && argResults.wasParsed(FlutterCommand.observatoryPortOption)) {
       throwToolExit(
-        'When the --debug-port or --debug-uri is unknown, this command does not use '
+        'When the --debug-port is unknown, this command does not use '
         'the value of --observatory-port.',
       );
-    }
-    if (debugPort != null && debugUri != null) {
-      throwToolExit(
-        'Either --debugPort or --debugUri can be provided, not both.');
     }
   }
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+    final String ipv4Loopback = InternetAddress.loopbackIPv4.address;
+    final String ipv6Loopback = InternetAddress.loopbackIPv6.address;
     final FlutterProject flutterProject = await FlutterProject.current();
 
     Cache.releaseLockEarly();
@@ -173,6 +147,7 @@ class AttachCommand extends FlutterCommand {
       // simulators support it.
       // If/when we do this on Android or other platforms, we can update it here.
       if (device is IOSDevice || device is IOSSimulator) {
+        return MDnsObservatoryPortDiscovery().queryForPort(applicationId: appId);
       }
       return null;
     }
@@ -184,13 +159,9 @@ class AttachCommand extends FlutterCommand {
       : null;
 
     Uri observatoryUri;
-    bool usesIpv6 = ipv6;
-    final String ipv6Loopback = InternetAddress.loopbackIPv6.address;
-    final String ipv4Loopback = InternetAddress.loopbackIPv4.address;
-    final String hostname = usesIpv6 ? ipv6Loopback : ipv4Loopback;
-
+    bool usesIpv6 = false;
     bool attachLogger = false;
-    if (devicePort == null  && debugUri == null) {
+    if (devicePort == null) {
       if (device is FuchsiaDevice) {
         attachLogger = true;
         final String module = argResults['module'];
@@ -210,12 +181,7 @@ class AttachCommand extends FlutterCommand {
           }
           rethrow;
         }
-      } else if ((device is IOSDevice) || (device is IOSSimulator)) {
-        final MDnsObservatoryDiscoveryResult result = await MDnsObservatoryDiscovery().query(applicationId: appId);
-        observatoryUri = await _buildObservatoryUri(device, hostname, result.port, result.authCode);
-      }
-      // If MDNS discovery fails or we're not on iOS, fallback to ProtocolDiscovery.
-      if (observatoryUri == null) {
+      } else {
         ProtocolDiscovery observatoryDiscovery;
         try {
           observatoryDiscovery = ProtocolDiscovery.observatory(
@@ -232,8 +198,12 @@ class AttachCommand extends FlutterCommand {
         }
       }
     } else {
-      observatoryUri = await _buildObservatoryUri(device,
-          debugUri?.host ?? hostname, devicePort, debugUri?.path);
+      usesIpv6 = ipv6;
+      final int localPort = observatoryPort
+        ?? await device.portForwarder.forward(devicePort);
+      observatoryUri = usesIpv6
+        ? Uri.parse('http://[$ipv6Loopback]:$localPort/')
+        : Uri.parse('http://$ipv4Loopback:$localPort/');
     }
     try {
       final bool useHot = getBuildInfo().isDebug;
@@ -307,22 +277,6 @@ class AttachCommand extends FlutterCommand {
   }
 
   Future<void> _validateArguments() async { }
-
-  Future<Uri> _buildObservatoryUri(Device device,
-      String host, int devicePort, [String authCode]) async {
-    String path = '/';
-    if (authCode != null) {
-      path = authCode;
-    }
-    // Not having a trailing slash can cause problems in some situations.
-    // Ensure that there's one present.
-    if (!path.endsWith('/')) {
-      path += '/';
-    }
-    final int localPort = observatoryPort
-        ?? await device.portForwarder.forward(devicePort);
-    return Uri(scheme: 'http', host: host, port: localPort, path: path);
-  }
 }
 
 class HotRunnerFactory {
@@ -356,21 +310,15 @@ class HotRunnerFactory {
   );
 }
 
-class MDnsObservatoryDiscoveryResult {
-  MDnsObservatoryDiscoveryResult(this.port, this.authCode);
-  final int port;
-  final String authCode;
-}
-
-/// A wrapper around [MDnsClient] to find a Dart observatory instance.
-class MDnsObservatoryDiscovery {
-  /// Creates a new [MDnsObservatoryDiscovery] object.
+/// A wrapper around [MDnsClient] to find a Dart observatory port.
+class MDnsObservatoryPortDiscovery {
+  /// Creates a new [MDnsObservatoryPortDiscovery] object.
   ///
   /// The [client] parameter will be defaulted to a new [MDnsClient] if null.
   /// The [applicationId] parameter may be null, and can be used to
   /// automatically select which application to use if multiple are advertising
   /// Dart observatory ports.
-  MDnsObservatoryDiscovery({MDnsClient mdnsClient})
+  MDnsObservatoryPortDiscovery({MDnsClient mdnsClient})
     : client = mdnsClient ?? MDnsClient();
 
   /// The [MDnsClient] used to do a lookup.
@@ -378,14 +326,14 @@ class MDnsObservatoryDiscovery {
 
   static const String dartObservatoryName = '_dartobservatory._tcp.local';
 
-  /// Executes an mDNS query for a Dart Observatory.
+  /// Executes an mDNS query for a Dart Observatory port.
   ///
   /// The [applicationId] parameter may be used to specify which application
   /// to find.  For Android, it refers to the package name; on iOS, it refers to
   /// the bundle ID.
   ///
-  /// If it is not null, this method will find the port and authentication code
-  /// of the Dart Observatory for that application. If it cannot find a Dart
+  /// If it is not null, this method will find the port of the
+  /// Dart Observatory for that application. If it cannot find a Dart
   /// Observatory matching that application identifier, it will call
   /// [throwToolExit].
   ///
@@ -393,10 +341,9 @@ class MDnsObservatoryDiscovery {
   /// prompted with a list of available observatory ports and asked to select
   /// one.
   ///
-  /// If it is null and there is only one available instance of Observatory,
-  /// it will return that instance's information regardless of what application
-  /// the Observatory instance is for.
-  Future<MDnsObservatoryDiscoveryResult> query({String applicationId}) async {
+  /// If it is null and there is only one available port, it will return that
+  /// port regardless of what application the port is for.
+  Future<int> queryForPort({String applicationId}) async {
     printStatus('Checking for advertised Dart observatories...');
     try {
       await client.start();
@@ -431,7 +378,7 @@ class MDnsObservatoryDiscovery {
         buffer.writeln('There are multiple observatory ports available.');
         buffer.writeln('Rerun this command with one of the following passed in as the appId:');
         buffer.writeln('');
-         for (final String uniqueDomainName in uniqueDomainNames) {
+        for (final String uniqueDomainName in uniqueDomainNames) {
           buffer.writeln('  flutter attach --app-id ${uniqueDomainName.replaceAll('.$dartObservatoryName', '')}');
         }
         throwToolExit(buffer.toString());
@@ -452,33 +399,7 @@ class MDnsObservatoryDiscovery {
         printError('Unexpectedly found more than one observatory report for $domainName '
                    '- using first one (${srv.first.port}).');
       }
-      printStatus('Checking for authentication code for $domainName');
-      final List<TxtResourceRecord> txt = await client
-        .lookup<TxtResourceRecord>(
-            ResourceRecordQuery.text(domainName),
-        )
-        ?.toList();
-      if (txt == null || txt.isEmpty) {
-        return MDnsObservatoryDiscoveryResult(srv.first.port, '');
-      }
-      String authCode = '';
-      const String authCodePrefix = 'authCode=';
-      String raw = txt.first.text;
-      // TXT has a format of [<length byte>, text], so if the length is 2,
-      // that means that TXT is empty.
-      if (raw.length > 2) {
-        // Remove length byte from raw txt.
-        raw = raw.substring(1);
-        if (raw.startsWith(authCodePrefix)) {
-          authCode = raw.substring(authCodePrefix.length);
-          // The Observatory currently expects a trailing '/' as part of the
-          // URI, otherwise an invalid authentication code response is given.
-          if (!authCode.endsWith('/')) {
-            authCode += '/';
-          }
-        }
-      }
-      return MDnsObservatoryDiscoveryResult(srv.first.port, authCode);
+      return srv.first.port;
     } finally {
       client.stop();
     }

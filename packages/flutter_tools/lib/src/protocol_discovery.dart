@@ -59,7 +59,8 @@ class ProtocolDiscovery {
 
   void _handleLine(String line) {
     Uri uri;
-    final RegExp r = RegExp('${RegExp.escape(serviceName)} listening on ((http|\/\/)[a-zA-Z0-9:/=_\\-\.\\[\\]]+)');
+
+    final RegExp r = RegExp('${RegExp.escape(serviceName)} listening on ((http|\/\/)[a-zA-Z0-9:/=\.\\[\\]]+)');
     final Match match = r.firstMatch(line);
 
     if (match != null) {
