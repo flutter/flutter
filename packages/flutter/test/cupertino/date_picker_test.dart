@@ -853,21 +853,26 @@ void main() {
         )
       );
 
+//      await expectLater(
+//        find.byType(CupertinoDatePicker),
+//        matchesGoldenFile('date_picker_test.datetime.initial.png'),
+//        skip: !Platform.isLinux
+//      );
+
       await expectLater(
         find.byType(CupertinoDatePicker),
-        matchesGoldenFile('date_picker_test.datetime.initial.png'),
-        skip: !Platform.isLinux
+        matchesSkiaGoldFile('date_picker_test.datetime.initial.png'),
       );
 
       // Slightly drag the hour component to make the current hour off-center.
       await tester.drag(find.text('4'), Offset(0, _kRowOffset.dy / 2));
       await tester.pump();
 
-      await expectLater(
-        find.byType(CupertinoDatePicker),
-        matchesGoldenFile('date_picker_test.datetime.drag.png'),
-        skip: !Platform.isLinux
-      );
+//      await expectLater(
+//        find.byType(CupertinoDatePicker),
+//        matchesGoldenFile('date_picker_test.datetime.drag.png'),
+//        skip: !Platform.isLinux
+//      );
   });
 }
 
