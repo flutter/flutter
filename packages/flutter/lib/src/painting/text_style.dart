@@ -349,9 +349,7 @@ class TextStyle extends Diagnosticable {
   /// specification are resolved in [foreground]'s favor - i.e. if [foreground] is
   /// specified in one place, it will dominate [color] in another.
   ///
-  /// The Material specifications has a concept of a secondary text color.
-  /// This color is specified in [ThemeData] as the [ThemeData.accentColor]
-  /// field.
+  /// In [ThemeData], secondary color is referenced as [ThemeData.accentColor].
   final Color color;
 
   /// The color to use as the background for the text.

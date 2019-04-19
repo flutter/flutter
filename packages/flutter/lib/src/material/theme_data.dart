@@ -480,6 +480,7 @@ class ThemeData extends Diagnosticable {
   final Color canvasColor;
 
   /// The foreground color for widgets (knobs, text, overscroll edge effect, etc).
+  /// It is also known as the secondary color.
   final Color accentColor;
 
   /// The brightness of the [accentColor]. Used to determine the color of text
