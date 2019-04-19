@@ -38,7 +38,7 @@ import 'theme.dart';
 ///         return Center(
 ///           child: CupertinoButton(
 ///             child: const Text('Go to first tab'),
-///             onPressed: () => _controller.currentIndex = 0,
+///             onPressed: () => _controller.index = 0,
 ///           )
 ///         );
 ///       }
