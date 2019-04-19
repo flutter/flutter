@@ -1753,7 +1753,7 @@ class _RenderChipRedirectingHitDetection extends RenderConstrainedBox {
       position: position,
       hitTest: (HitTestResult result, Offset position) {
         assert(position == offset);
-        child.hitTest(result, position: offset);
+        return child.hitTest(result, position: offset);
       },
     );
   }
@@ -2268,7 +2268,6 @@ class _RenderChip extends RenderBox {
 
   @override
   bool hitTest(HitTestResult result, { Offset position }) {
-    print('>>>>>>> _RenderChip');
     if (!size.contains(position))
       return false;
     RenderBox hitTestChild;
