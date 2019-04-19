@@ -21,8 +21,4 @@ void DartIO::InitForIsolate() {
   }
 }
 
-bool DartIO::EntropySource(uint8_t* buffer, intptr_t length) {
-  return dart::bin::GetEntropy(buffer, length);
-}
-
 }  // namespace flutter

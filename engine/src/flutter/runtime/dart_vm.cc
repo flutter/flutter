@@ -383,7 +383,7 @@ DartVM::DartVM(std::shared_ptr<const DartVMData> vm_data,
         DartIsolate::DartIsolateCleanupCallback);
     params.thread_exit = ThreadExitCallback;
     params.get_service_assets = GetVMServiceAssetsArchiveCallback;
-    params.entropy_source = DartIO::EntropySource;
+    params.entropy_source = dart::bin::GetEntropy;
     char* init_error = Dart_Initialize(&params);
     if (init_error) {
       FML_LOG(FATAL) << "Error while initializing the Dart VM: " << init_error;
