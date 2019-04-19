@@ -26,7 +26,7 @@ void main() {
       print('run: starting...');
       final Process run = await startProcess(
         path.join(flutterDirectory.path, 'bin', 'flutter'),
-        <String>['run', '--verbose', '-d', device.deviceId, 'lib/main.dart'],
+        <String>['run', '--verbose', '--disable-service-auth-codes', '-d', device.deviceId, 'lib/main.dart'],
       );
       run.stdout
           .transform<String>(utf8.decoder)
