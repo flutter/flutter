@@ -69,7 +69,7 @@ abstract class InlineSpan extends DiagnosticableTree {
   /// Creates a [InlineSpan] with the given values.
   const InlineSpan({
     this.style,
-    this.semanticsLabel,
+    this.children,
   });
 
   /// The style to apply to this span.
@@ -78,18 +78,16 @@ abstract class InlineSpan extends DiagnosticableTree {
   /// of [TextSpan].
   final TextStyle style;
 
-  /// An alternative semantics label for this text.
+  /// Additional spans to include as children.
   ///
-  /// If present, the semantics of this span will contain this value instead
-  /// of the actual text.
+  /// If both [text] and [children] are non-null, the text will precede the
+  /// children.
   ///
-  /// This is useful for replacing abbreviations or shorthands with the full
-  /// text value:
+  /// Modifying the list after the [TextSpan] has been created is not
+  /// supported and may have unexpected results.
   ///
-  /// ```dart
-  /// TextSpan(text: r'$$', semanticsLabel: 'Double dollars')
-  /// ```
-  final String semanticsLabel;
+  /// The list must not contain any nulls.
+  final List<InlineSpan> children;
 
   /// Utility method to convert [InlineSpan] into [TextSpan] or [WidgetSpan].
   ///
@@ -156,12 +154,11 @@ abstract class InlineSpan extends DiagnosticableTree {
     if (other.runtimeType != runtimeType)
       return false;
     final InlineSpan typedOther = other;
-    return typedOther.style == style
-        && typedOther.semanticsLabel == semanticsLabel;
+    return typedOther.style == style;
   }
 
   @override
-  int get hashCode => hashValues(style, semanticsLabel);
+  int get hashCode => style.hashCode;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -171,9 +168,5 @@ abstract class InlineSpan extends DiagnosticableTree {
     // this InlineSpan.
     if (style != null)
       style.debugFillProperties(properties);
-
-    if (semanticsLabel != null) {
-      properties.add(StringProperty('semanticsLabel', semanticsLabel));
-    }
   }
 }

@@ -53,12 +53,10 @@ enum InlineWidgetAlignment {
 /// widget's responsibility to size itself appropriately, the text will
 /// not enforce any constraints.
 ///
-/// [WidgetSpan]s must be leaf nodes in the [TextSpan] tree. [WidgetSpan]s
-/// cannot have any [TextSpan] children. However, the [widget] property 
-/// may contain its own children, including [RichText] widgets which may
-/// include additional [WidgetSpan]s. Child [RichText] widgets will be
-/// laid out independently and occupy a rectangular space in the parent
-/// text layout.
+/// The [widget] property may contain its own children, including
+/// [RichText] widgets which may include additional [WidgetSpan]s. Child
+/// [RichText] widgets will be laid out independently and occupy a
+/// rectangular space in the parent text layout.
 ///
 /// [WidgetSpan]s will be ignored when passed into a [TextPainter] directly.
 /// To properly layout and paint the [widget], [WidgetSpan] should be passed
@@ -107,6 +105,7 @@ class WidgetSpan extends PlaceholderSpan {
     InlineWidgetAlignment alignment = InlineWidgetAlignment.bottom,
     TextBaseline baseline,
     TextStyle style,
+    List<InlineSpan> children,
   }) : assert(widget != null),
        assert((alignment == InlineWidgetAlignment.aboveBaseline ||
                alignment == InlineWidgetAlignment.belowBaseline ||
@@ -120,7 +119,7 @@ class WidgetSpan extends PlaceholderSpan {
            alignment == InlineWidgetAlignment.top ? ui.PlaceholderAlignment.top :
            alignment == InlineWidgetAlignment.bottom ? ui.PlaceholderAlignment.bottom :
            alignment == InlineWidgetAlignment.middle ? ui.PlaceholderAlignment.middle : null,
-         baseline: baseline, style: style,
+         baseline: baseline, style: style, children: children,
        );
 
   /// The widget to embed inline with text.
@@ -160,6 +159,12 @@ class WidgetSpan extends PlaceholderSpan {
   bool visitChildren(bool visitor(InlineSpan span)) {
     if (!visitor(this))
       return false;
+    if (children != null) {
+      for (InlineSpan child in children) {
+        if (!child.visitChildren(visitor))
+          return false;
+      }
+    }
     return true;
   }
 

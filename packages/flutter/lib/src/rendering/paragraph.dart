@@ -356,7 +356,7 @@ class RenderParagraph extends RenderBox
       child = childAfter(child);
       childIndex += 1;
     }
-    _textPainter.placeholderDimensions = placeholderDimensions;
+    _textPainter.setPlaceholderDimensions(placeholderDimensions);
   }
 
   void _computeChildrenWidthWithMinIntrinsics(double height) {
@@ -374,7 +374,7 @@ class RenderParagraph extends RenderBox
       child = childAfter(child);
       childIndex += 1;
     }
-    _textPainter.placeholderDimensions = placeholderDimensions;
+    _textPainter.setPlaceholderDimensions(placeholderDimensions);
   }
 
   void _computeChildrenHeightWithMinIntrinsics(double width) {
@@ -392,7 +392,7 @@ class RenderParagraph extends RenderBox
       child = childAfter(child);
       childIndex += 1;
     }
-    _textPainter.placeholderDimensions = placeholderDimensions;
+    _textPainter.setPlaceholderDimensions(placeholderDimensions);
   }
 
   @override
@@ -485,7 +485,7 @@ class RenderParagraph extends RenderBox
       child = childAfter(child);
       childIndex += 1;
     }
-    _textPainter.placeholderDimensions = placeholderDimensions;
+    _textPainter.setPlaceholderDimensions(placeholderDimensions);
   }
 
   // Iterate through the laid-out children and set the parentData offsets based

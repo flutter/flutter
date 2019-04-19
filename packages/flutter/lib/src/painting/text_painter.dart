@@ -24,37 +24,37 @@ export 'package:flutter/services.dart' show TextRange, TextSelection;
 ///
 /// See also:
 ///
-///  * [WidgetSpan] a subclass of [TextSpan] that represents an inline widget
-///    embedded within text. The space this widget takes is indicated by a
-///    placeholder.
-///  * [TextSpan] specifies the content. [WidgetSpan]s may be inserted as leaf
-///    nodes within a [TextSpan] tree.
-///  * [RichText] text widget that supports text inline widgets.
+///  * [WidgetSpan], a subclass of [InlineSpan] and [PlaceholderSpan] that
+///    represents an inline widget embedded within text. The space this
+///    widget takes is indicated by a placeholder.
+///  * [RichText], a text widget that supports text inline widgets.
+@immutable
 class PlaceholderDimensions {
-  PlaceholderDimensions({
+  const PlaceholderDimensions({
     @required this.size,
     @required this.alignment,
     this.baseline,
-    this.baselineOffset
+    this.baselineOffset,
   });
 
   /// Width and height dimensions of the placeholder.
-  Size size;
+  final Size size;
 
   /// How to align the placeholder with the text.
-  ui.PlaceholderAlignment alignment;
+  final ui.PlaceholderAlignment alignment;
 
   /// Distance of the alphabetic baseline from the upper edge of the placeholder.
   ///
   /// Only used when [alignment] is [ui.PlaceholderAlignment.baseline].
-  double baselineOffset;
+  final double baselineOffset;
 
   /// The [TextBaseline] to align to. Used with:
+  ///
   ///  * [ui.PlaceholderAlignment.baseline]
   ///  * [ui.PlaceholderAlignment.aboveBaseline]
   ///  * [ui.PlaceholderAlignment.underBaseline]
   ///  * [ui.PlaceholderAlignment.middle]
-  TextBaseline baseline;
+  final TextBaseline baseline;
 
   @override
   String toString() {
@@ -286,11 +286,16 @@ class TextPainter {
 
   ui.Paragraph _layoutTemplate;
 
-  List<TextBox> _inlinePlaceholderBoxes;
+  /// A ordered list of [TextBox]es that bound the positions of the placeholders
+  /// in the paragraph.
+  ///
+  /// Each box corresponds to a [PlaceholderSpan] in the order they were defined
+  /// in the [InlineSpan] tree.
   List<TextBox> get inlinePlaceholderBoxes => _inlinePlaceholderBoxes;
+  List<TextBox> _inlinePlaceholderBoxes;
 
   List<PlaceholderDimensions> _placeholderDimensions;
-  set placeholderDimensions(List<PlaceholderDimensions> value) {
+  void setPlaceholderDimensions(List<PlaceholderDimensions> value) {
     _placeholderDimensions = value;
     _needsLayout = true;
     _paragraph = null;

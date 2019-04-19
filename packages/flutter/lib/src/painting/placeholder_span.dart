@@ -16,15 +16,13 @@ import 'text_span.dart';
 
 /// An immutable placeholder that is embedded inline within text.
 ///
-/// [PlaceholderSpan] represents an abstract generic placeholder. [WidgetSpan] should be
-/// used instead to specify the contents of the placeholder. A [PlaceholderSpan]
-/// by itself does not contain useful information to change a TextSpan.
+/// [PlaceholderSpan] represents a placeholder that acts as a stand-in for other
+/// content. A [PlaceholderSpan] by itself does not contain useful
+/// information to change a [TextSpan]. Instead, this class should be extended
+/// to define contents.
 ///
-/// [PlaceholderSpan]s must be leaf nodes in the [TextSpan] tree. [PlaceholderSpan]s
-/// cannot have any [TextSpan] children.
-///
-/// [PlaceholderSpan]s will be ignored when passed into a [TextPainter] directly.
-/// A [WidgetSpan] should be passed into a [RichText] widget instead.
+/// [WidgetSpan] from the widgets library extends [PlaceholderSpan] and may be
+/// used instead to specify a widget as the contents of the placeholder.
 ///
 /// See also:
 ///
@@ -33,12 +31,8 @@ import 'text_span.dart';
 ///  * [Text], a widget for showing uniformly-styled text.
 ///  * [RichText], a widget for finer control of text rendering.
 ///  * [TextPainter], a class for painting [TextSpan] objects on a [Canvas].
-@immutable
 abstract class PlaceholderSpan extends InlineSpan {
   /// Creates a [PlaceholderSpan] with the given values.
-  ///
-  /// The [widget] property should be non-null. [PlaceholderSpan] cannot contain any
-  /// [TextSpan] or [PlaceholderSpan] children.
   ///
   /// A [TextStyle] may be provided with the [style] property, but only the
   /// decoration, foreground, background, and spacing options will be used.
@@ -46,9 +40,10 @@ abstract class PlaceholderSpan extends InlineSpan {
     ui.PlaceholderAlignment alignment = ui.PlaceholderAlignment.bottom,
     TextBaseline baseline,
     TextStyle style,
+    List<InlineSpan> children,
   }) : alignment = alignment,
        baseline = baseline,
-       super(style: style);
+       super(style: style, children: children);
 
   /// How the placeholder aligns vertically with the text.
   ///
@@ -65,8 +60,7 @@ abstract class PlaceholderSpan extends InlineSpan {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.defaultDiagnosticsTreeStyle = DiagnosticsTreeStyle.whitespace;
-    // Properties on style are added as if they were properties directly on
-    // this InlineSpan.
+
     properties.add(EnumProperty<ui.PlaceholderAlignment>('alignment', alignment, defaultValue: null));
     properties.add(EnumProperty<TextBaseline>('baseline', baseline, defaultValue: null));
   }

@@ -63,28 +63,17 @@ class TextSpan extends InlineSpan {
   /// [children] should be set.
   const TextSpan({
     this.text,
-    this.children,
+    List<InlineSpan> children,
     TextStyle style,
     this.recognizer,
-    String semanticsLabel,
-  }) : super(style: style, semanticsLabel: semanticsLabel);
+    this.semanticsLabel,
+  }) : super(style: style, children: children);
 
   /// The text contained in the span.
   ///
   /// If both [text] and [children] are non-null, the text will precede the
   /// children.
   final String text;
-
-  /// Additional spans to include as children.
-  ///
-  /// If both [text] and [children] are non-null, the text will precede the
-  /// children.
-  ///
-  /// Modifying the list after the [TextSpan] has been created is not
-  /// supported and may have unexpected results.
-  ///
-  /// The list must not contain any nulls.
-  final List<InlineSpan> children;
 
   /// A gesture recognizer that will receive events that hit this span.
   ///
@@ -161,6 +150,19 @@ class TextSpan extends InlineSpan {
   /// ```
   /// {@end-tool}
   final GestureRecognizer recognizer;
+
+  /// An alternative semantics label for this text.
+  ///
+  /// If present, the semantics of this span will contain this value instead
+  /// of the actual text.
+  ///
+  /// This is useful for replacing abbreviations or shorthands with the full
+  /// text value:
+  ///
+  /// ```dart
+  /// TextSpan(text: r'$$', semanticsLabel: 'Double dollars')
+  /// ```
+  final String semanticsLabel;
 
   /// Apply the [style], [text], and [children] of this object to the
   /// given [ParagraphBuilder], from which a [Paragraph] can be obtained.
@@ -377,6 +379,10 @@ class TextSpan extends InlineSpan {
       description: recognizer?.runtimeType?.toString(),
       defaultValue: null,
     ));
+
+    if (semanticsLabel != null) {
+      properties.add(StringProperty('semanticsLabel', semanticsLabel));
+    }
   }
 
   @override
