@@ -9,6 +9,7 @@ import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meta/meta.dart';
+import 'package:test_api/test_api.dart' as test_package show TestFailure;
 
 import 'package:flutter_goldens_client/client.dart';
 export 'package:flutter_goldens_client/client.dart';
@@ -77,12 +78,12 @@ class FlutterGoldenFileComparator implements GoldenFileComparator {
 
   @override
   Future<bool> compare(Uint8List imageBytes, Uri golden) async {
+    final bool authorized = await _skiaClient.auth(fs.directory(basedir));
     final File goldenFile = _getGoldenFile(golden);
 
-    bool authorized = await _skiaClient.auth(fs.directory(basedir));
-    bool tested = await _skiaClient.imgtest(golden.path, goldenFile);
-    return true; // TEMP
-    //TODO(katelovett): Process results
+    if (!authorized)
+      throw test_package.TestFailure('Could not authorize golctl.');
+    return await _skiaClient.imgtest(golden.path, goldenFile);
   }
 
   @override
