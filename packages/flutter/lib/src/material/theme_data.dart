@@ -243,12 +243,7 @@ class ThemeData extends Diagnosticable {
     highlightColor ??= isDark ? _kDarkThemeHighlightColor : _kLightThemeHighlightColor;
     splashColor ??= isDark ? _kDarkThemeSplashColor : _kLightThemeSplashColor;
 
-    sliderTheme ??= SliderThemeData.fromPrimaryColors(
-      primaryColor: primaryColor,
-      primaryColorLight: primaryColorLight,
-      primaryColorDark: primaryColorDark,
-      valueIndicatorTextStyle: accentTextTheme.body2,
-    );
+    sliderTheme ??= const SliderThemeData();
     tabBarTheme ??= const TabBarTheme();
     appBarTheme ??= const AppBarTheme();
     bottomAppBarTheme ??= const BottomAppBarTheme();

@@ -89,6 +89,7 @@ void installHook({
   Map<String, String> precompiledDillFiles,
   bool trackWidgetCreation = false,
   bool updateGoldens = false,
+  bool buildTestAssets = false,
   int observatoryPort,
   InternetAddressType serverType = InternetAddressType.IPv4,
   Uri projectRootDirectory,
@@ -112,6 +113,7 @@ void installHook({
       precompiledDillFiles: precompiledDillFiles,
       trackWidgetCreation: trackWidgetCreation,
       updateGoldens: updateGoldens,
+      buildTestAssets: buildTestAssets,
       projectRootDirectory: projectRootDirectory,
       flutterProject: flutterProject,
       icudtlPath: icudtlPath,
@@ -393,6 +395,7 @@ class _FlutterPlatform extends PlatformPlugin {
     this.precompiledDillFiles,
     this.trackWidgetCreation,
     this.updateGoldens,
+    this.buildTestAssets,
     this.projectRootDirectory,
     this.flutterProject,
     this.icudtlPath,
@@ -411,6 +414,7 @@ class _FlutterPlatform extends PlatformPlugin {
   final Map<String, String> precompiledDillFiles;
   final bool trackWidgetCreation;
   final bool updateGoldens;
+  final bool buildTestAssets;
   final Uri projectRootDirectory;
   final FlutterProject flutterProject;
   final String icudtlPath;
@@ -986,6 +990,10 @@ class _FlutterPlatform extends PlatformPlugin {
       'FONTCONFIG_FILE': _fontConfigFile.path,
       'SERVER_PORT': serverPort.toString(),
     };
+    if (buildTestAssets) {
+      environment['UNIT_TEST_ASSETS'] = fs.path.join(
+        flutterProject.directory.path, 'build', 'unit_test_assets');
+    }
     return processManager.start(command, environment: environment);
   }
 
