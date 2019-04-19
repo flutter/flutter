@@ -536,8 +536,14 @@ class MacOSProject {
 
   bool existsSync() => project.directory.childDirectory('macos').existsSync();
 
-  // Note: The build script file exists as a temporary shim.
-  File get buildScript => project.directory.childDirectory('macos').childFile('build.sh');
+  Directory get _editableDirectory => project.directory.childDirectory('macos');
+
+  /// Contains definitions for FLUTTER_ROOT, LOCAL_ENGINE, and more flags for
+  /// the Xcode build.
+  File get generatedXcodePropertiesFile => _editableDirectory.childDirectory('Flutter').childFile('Generated.xcconfig');
+
+  /// The Xcode project file.
+  Directory get xcodeProjectFile => _editableDirectory.childDirectory('Runner.xcodeproj');
 
   // Note: The name script file exists as a temporary shim.
   File get nameScript => project.directory.childDirectory('macos').childFile('name_output.sh');
