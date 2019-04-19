@@ -43,9 +43,9 @@ class FocusAttachment {
   /// by [FocusNode.attach].
   FocusAttachment._(this._node) : assert(_node != null);
 
-  // The focus node that this attachment manages an attachment for. The node not
-  // yet have a parent, or may have been detached from this attachment, so don't
-  // count on this node being in a usable state.
+  // The focus node that this attachment manages an attachment for. The node may
+  // not yet have a parent, or may have been detached from this attachment, so
+  // don't count on this node being in a usable state.
   final FocusNode _node;
 
   /// Returns true if the associated node is attached to this attachment.
@@ -54,7 +54,7 @@ class FocusAttachment {
   /// the focus tree (i.e. to not have a parent yet in the focus tree).
   bool get isAttached => _node._attachment == this;
 
-  /// Detaches the [_node] this attachment point is associated with from the
+  /// Detaches the [FocusNode] this attachment point is associated with from the
   /// focus tree, and disconnects it from this attachment point.
   ///
   /// Calling [FocusNode.dispose] will also automatically detach the node.
@@ -67,8 +67,14 @@ class FocusAttachment {
     assert(!isAttached);
   }
 
-  /// Ensures that the given [parent] node is the parent of the node that is
-  /// attached at this attachment point, changing it if necessary.
+  /// Ensures that the [FocusNode] attached at this attachment point has the
+  /// proper parent node, changing it if necessary.
+  ///
+  /// If given, ensures that the given [parent] node is the parent of the node
+  /// that is attached at this attachment point, changing it if necessary.
+  /// However, it is usually not necessary to supply an explicit parent, since
+  /// [reparent] will use [Focus.of] to determine the correct parent node for
+  /// the context given in [FocusNode.attach].
   ///
   /// If [isAttached] is false, then calling this method does nothing.
   ///

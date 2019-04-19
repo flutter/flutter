@@ -209,7 +209,7 @@ abstract class SearchDelegate<T> {
   ///  * [showResults] to show the search results.
   void showSuggestions(BuildContext context) {
     assert(_focusNode != null, '_focusNode must be set by route before showSuggestions is called.');
-    FocusScope.of(context).requestFocus(_focusNode);
+    _focusNode.requestFocus();
     _currentBody = _SearchBody.suggestions;
   }
 
