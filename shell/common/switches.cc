@@ -242,9 +242,20 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line) {
   command_line.GetOptionValue(FlagForSwitch(Switch::CacheDirPath),
                               &settings.temp_directory_path);
 
-  if (settings.icu_initialization_required) {
+  {
+    // ICU from a data file.
+    std::string icu_data_path;
     command_line.GetOptionValue(FlagForSwitch(Switch::ICUDataFilePath),
-                                &settings.icu_data_path);
+                                &icu_data_path);
+    if (icu_data_path.size() > 0) {
+      settings.icu_mapper = [icu_data_path]() {
+        return fml::FileMapping::CreateReadOnly(icu_data_path);
+      };
+    }
+  }
+
+  {
+    // ICU from a symbol in a dynamic library
     if (command_line.HasOption(FlagForSwitch(Switch::ICUSymbolPrefix))) {
       std::string icu_symbol_prefix, native_lib_path;
       command_line.GetOptionValue(FlagForSwitch(Switch::ICUSymbolPrefix),

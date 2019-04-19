@@ -13,9 +13,7 @@
 namespace fml {
 namespace icu {
 
-void InitializeICU(const std::string& icu_data_path = "");
-
-void InitializeICUFromMapping(std::unique_ptr<Mapping> mapping);
+void InitializeICU(std::unique_ptr<const Mapping> mapping);
 
 }  // namespace icu
 }  // namespace fml

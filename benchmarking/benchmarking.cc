@@ -10,7 +10,8 @@ namespace benchmarking {
 
 int Main(int argc, char** argv) {
   benchmark::Initialize(&argc, argv);
-  fml::icu::InitializeICU("icudtl.dat");
+  fml::icu::InitializeICU(fml::FileMapping::CreateReadOnly(
+      fml::OpenDirectoryOfExecutable(), "icudtl.dat"));
   ::benchmark::RunSpecifiedBenchmarks();
   return 0;
 }

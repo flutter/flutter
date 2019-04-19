@@ -59,10 +59,13 @@ static flutter::Settings DefaultSettingsForProcess(NSBundle* bundle = nil) {
   // defaults.
 
   // Flutter ships the ICU data file in the the bundle of the engine. Look for it there.
-  if (settings.icu_data_path.size() == 0) {
+  if (!settings.icu_mapper) {
     NSString* icuDataPath = [engineBundle pathForResource:@"icudtl" ofType:@"dat"];
     if (icuDataPath.length > 0) {
-      settings.icu_data_path = icuDataPath.UTF8String;
+      auto icu_data_path = std::string{icuDataPath.UTF8String};
+      settings.icu_mapper = [icu_data_path]() {
+        return fml::FileMapping::CreateReadOnly(icu_data_path);
+      };
     }
   }
 
