@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 // This program generates a getMaterialTranslation() and a
-// getCupertinoTranslation() function that looks up the translations provided by
+// getCupertinoTranslation() function that look up the translations provided by
 // the arb files. The returned value is a generated instance of a
 // GlobalMaterialLocalizations or a GlobalCupertinoLocalizations that
 // corresponds to a single locale.
