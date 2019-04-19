@@ -252,6 +252,16 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
   double _pageToUseOnStartup;
 
   @override
+  void dispose() {
+    // set pixels to 0 at dispose time to prevent dispose invocation with
+    // pixels set to null
+    if (pixels == null) {
+      correctPixels(0);
+    }
+    super.dispose();
+  }
+
+  @override
   double get viewportFraction => _viewportFraction;
   double _viewportFraction;
   set viewportFraction(double value) {
