@@ -295,6 +295,16 @@ class RenderEditable extends RenderBox {
   ValueListenable<bool> get selectionEndInViewport => _selectionEndInViewport;
   final ValueNotifier<bool> _selectionEndInViewport = ValueNotifier<bool>(true);
 
+  // Returns a bool indicating if the offset is within factor of being contained
+  // within the rect.
+  static bool _containsFuzzy(Rect rect, Offset offset, [double factor = 0.1]) {
+    return rect.contains(offset)
+      || rect.contains(offset + Offset(factor, factor))
+      || rect.contains(offset + Offset(factor, -factor))
+      || rect.contains(offset + Offset(-factor, factor))
+      || rect.contains(offset + Offset(-factor, -factor));
+  }
+
   void _updateSelectionExtentsVisibility(Offset effectiveOffset) {
     final Rect visibleRegion = Offset.zero & size;
 
@@ -302,15 +312,26 @@ class RenderEditable extends RenderBox {
       TextPosition(offset: _selection.start, affinity: _selection.affinity),
       Rect.zero,
     );
-
-    _selectionStartInViewport.value = visibleRegion.contains(startOffset + effectiveOffset);
+    final Offset offset = startOffset + effectiveOffset;
+    // Check if the caret is visible with an approximation because of an error
+    // in the engine that always reports that the caret extends above the input
+    // by a small amount. See paragraph.cc's implementation of GetRectsForRange.
+    const double kApproximateFactor = 0.1;
+    _selectionStartInViewport.value = _containsFuzzy(
+      visibleRegion,
+      startOffset + effectiveOffset,
+      kApproximateFactor,
+    );
 
     final Offset endOffset =  _textPainter.getOffsetForCaret(
       TextPosition(offset: _selection.end, affinity: _selection.affinity),
       Rect.zero,
     );
-
-    _selectionEndInViewport.value = visibleRegion.contains(endOffset + effectiveOffset);
+    _selectionEndInViewport.value = _containsFuzzy(
+      visibleRegion,
+      endOffset + effectiveOffset,
+      kApproximateFactor,
+    );
   }
 
   static const int _kLeftArrowCode = 21;
