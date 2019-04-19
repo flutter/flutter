@@ -1,7 +1,7 @@
 // Copyright 2018 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-//TODO(katelovett): Change to Skia Gold Client
+
 import 'dart:async';
 import 'dart:convert' as convert;
 import 'dart:io' as io;
@@ -14,7 +14,7 @@ import 'package:process/process.dart';
 // If you are here trying to figure out how to use golden files in the Flutter
 // repo itself, consider reading this wiki page:
 // https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package%3Aflutter
-//TODO(katelovett): Tests [flutter_goldens_test.dart] and inline documentation
+//TODO(katelovett): Tests
 const String _kFlutterRootKey = 'FLUTTER_ROOT';
 const String _kGoldctlKey = 'GOLDCTL';
 const String _kServiceAccountKey = 'GOLD_SERVICE_ACCOUNT';
@@ -31,7 +31,7 @@ class SkiaGoldClient {
 
   /// The file system to use for storing local files for running imgtests.
   ///
-  /// This is usefule in tests, where a local file system (the default) can be
+  /// This is useful in tests, where a local file system (the default) can be
   /// replaced by a memory file system.
   final FileSystem fs;
 
@@ -41,11 +41,11 @@ class SkiaGoldClient {
   /// replaced by a mock platform instance.
   final Platform platform;
 
-  /// A controller for launching subprocesses.
+  /// A controller for launching sub-processes.
   ///
   /// This is useful in tests, where the real process manager (the default) can
   /// be replaced by a mock process manager that doesn't really create
-  /// subprocesses.
+  /// sub-processes.
   final ProcessManager process;
 
   Directory _workDirectory;
@@ -70,7 +70,7 @@ class SkiaGoldClient {
   /// The local [Directory] where the Flutter repository is hosted.
   ///
   /// Uses the [fs] file system.
-  Directory get _flutterRoot => fs.directory(platform.environment[_kFlutterRootKey]);
+  Directory get flutterRoot => fs.directory(platform.environment[_kFlutterRootKey]);
 
   /// Prepares the local work space for golden file testing and initializes the
   /// goldctl authorization for executing tests.
@@ -145,12 +145,12 @@ class SkiaGoldClient {
   }
 
   Future<String> _getCommitHash() async {
-    if (!_flutterRoot.existsSync()) {
+    if (!flutterRoot.existsSync()) {
       return null;
     } else {
       final io.ProcessResult revParse = await process.run(
         <String>['git', 'rev-parse', 'HEAD'],
-        workingDirectory: _flutterRoot.path,
+        workingDirectory: flutterRoot.path,
       );
       return revParse.exitCode == 0 ? revParse.stdout.trim() : null;
     }
