@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io' as io;
 import 'dart:typed_data';
 
 import 'package:file/file.dart';
@@ -29,7 +28,7 @@ void main() {
     fs = MemoryFileSystem();
     platform = FakePlatform(environment: <String, String>{
       'FLUTTER_ROOT': _kFlutterRoot,
-      //TODO Add other env vars for testing
+      //TODO(katelovett): Add other env vars for testing
     });
     process = MockProcessManager();
     flutter = await fs.directory(_kFlutterRoot).create(recursive: true);
@@ -50,7 +49,9 @@ void main() {
     });
 
     group('auth', () {
-
+      // check for successful auth - return true
+      // check for unsuccessful auth - throw NonZeroExitCode
+      // check for unavailable auth (not on CI) - return false
     });
 
     group('imgtest', () {
@@ -88,18 +89,6 @@ void main() {
 
     group('compare', () {
 
-      test('throws if goldctl has not been authorized', () async {
-        // Create file
-        //final File goldenFile = fs.file('/path/to/flutter/bin/cache/goldens/test/foo/bar/test.png')
-        //s  ..createSync(recursive: true);
-        try {
-          await comparator.compare(Uint8List.fromList(<int>[1, 2, 3]), Uri.parse('test.png'));
-          fail('TestFailure expected but not thrown');
-        } on TestFailure catch (error) {
-          expect(error.message, contains('Could not authorize goldctl.'));
-        }
-      });
-
       test('throws if golden file is not found', () async {
         try {
           await comparator.compare(Uint8List.fromList(<int>[1, 2, 3]), Uri.parse('test.png'));
@@ -109,6 +98,18 @@ void main() {
         }
       });
 
+      // TODO(katelovett): This is currently disabled in flutter_goldens.dart
+//      test('throws if goldctl has not been authorized', () async {
+//        // See that preceding test does not leave auth behind [52]
+//        try {
+//          await comparator.compare(Uint8List.fromList(<int>[1, 2, 3]), Uri.parse('test.png'));
+//          fail('TestFailure expected but not thrown');
+//        } on TestFailure catch (error) {
+//          expect(error.message, contains('Could not authorize goldctl.'));
+//        }
+//      });
+      // TODO(katelovett): Add methods to Mock SkiaGoldClient to inform the comparator
+      // TODO... and test for proper behavior. See matcher_test.dart for model
 //      test('returns false if skia gold test fails', () async {
 //        final File goldenFile = fs.file('/path/to/flutter/bin/cache/goldens/test/foo/bar/test.png')
 //          ..createSync(recursive: true);
@@ -116,7 +117,7 @@ void main() {
 //        final bool result = await comparator.compare(Uint8List.fromList(<int>[1, 2, 3]), Uri.parse('test.png'));
 //        expect(result, isFalse);
 //      });
-
+//
 //      test('returns true if skia gold test passes', () async {
 //        final File goldenFile = fs.file('/path/to/flutter/bin/cache/goldens/test/foo/bar/test.png')
 //          ..createSync(recursive: true);
