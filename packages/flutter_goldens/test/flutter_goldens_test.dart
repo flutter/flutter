@@ -17,7 +17,7 @@ const String _kFlutterRoot = '/flutter';
 const String _kGoldenRoot = '$_kFlutterRoot/bin/cache/pkg/goldens';
 //const String _kVersionFile = '$_kFlutterRoot/bin/internal/goldens.version';
 //const String _kGoldensVersion = '123456abcdef';
-
+//TODO(katelovett): Finish testing
 void main() {
   MemoryFileSystem fs;
   FakePlatform platform;
@@ -27,7 +27,10 @@ void main() {
 
   setUp(() async {
     fs = MemoryFileSystem();
-    platform = FakePlatform(environment: <String, String>{'FLUTTER_ROOT': _kFlutterRoot});
+    platform = FakePlatform(environment: <String, String>{
+      'FLUTTER_ROOT': _kFlutterRoot,
+      //TODO Add other env vars for testing
+    });
     process = MockProcessManager();
     flutter = await fs.directory(_kFlutterRoot).create(recursive: true);
     golden = await fs.directory(_kGoldenRoot).create(recursive: true);
@@ -87,8 +90,8 @@ void main() {
 
       test('throws if goldctl has not been authorized', () async {
         // Create file
-        final File goldenFile = fs.file('/path/to/flutter/bin/cache/goldens/test/foo/bar/test.png')
-          ..createSync(recursive: true);
+        //final File goldenFile = fs.file('/path/to/flutter/bin/cache/goldens/test/foo/bar/test.png')
+        //s  ..createSync(recursive: true);
         try {
           await comparator.compare(Uint8List.fromList(<int>[1, 2, 3]), Uri.parse('test.png'));
           fail('TestFailure expected but not thrown');
