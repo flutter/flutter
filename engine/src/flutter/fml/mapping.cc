@@ -14,6 +14,55 @@ uint8_t* FileMapping::GetMutableMapping() {
   return mutable_mapping_;
 }
 
+std::unique_ptr<FileMapping> FileMapping::CreateReadOnly(
+    const std::string& path) {
+  return CreateReadOnly(OpenFile(path.c_str(), false, FilePermission::kRead),
+                        "");
+}
+
+std::unique_ptr<FileMapping> FileMapping::CreateReadOnly(
+    const fml::UniqueFD& base_fd,
+    const std::string& sub_path) {
+  if (sub_path.size() != 0) {
+    return CreateReadOnly(
+        OpenFile(base_fd, sub_path.c_str(), false, FilePermission::kRead), "");
+  }
+
+  auto mapping = std::make_unique<FileMapping>(
+      base_fd, std::initializer_list<Protection>{Protection::kRead});
+
+  if (mapping->GetSize() == 0 || mapping->GetMapping() == nullptr) {
+    return nullptr;
+  }
+
+  return mapping;
+}
+
+std::unique_ptr<FileMapping> FileMapping::CreateReadExecute(
+    const std::string& path) {
+  return CreateReadExecute(
+      OpenFile(path.c_str(), false, FilePermission::kRead));
+}
+
+std::unique_ptr<FileMapping> FileMapping::CreateReadExecute(
+    const fml::UniqueFD& base_fd,
+    const std::string& sub_path) {
+  if (sub_path.size() != 0) {
+    return CreateReadExecute(
+        OpenFile(base_fd, sub_path.c_str(), false, FilePermission::kRead), "");
+  }
+
+  auto mapping = std::make_unique<FileMapping>(
+      base_fd, std::initializer_list<Protection>{Protection::kRead,
+                                                 Protection::kExecute});
+
+  if (mapping->GetSize() == 0 || mapping->GetMapping() == nullptr) {
+    return nullptr;
+  }
+
+  return mapping;
+}
+
 // Data Mapping
 
 DataMapping::DataMapping(std::vector<uint8_t> data) : data_(std::move(data)) {}

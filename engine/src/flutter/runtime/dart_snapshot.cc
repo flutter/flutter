@@ -21,33 +21,13 @@ const char* DartSnapshot::kIsolateInstructionsSymbol =
     "kDartIsolateSnapshotInstructions";
 
 static std::unique_ptr<const fml::Mapping> GetFileMapping(
-    const std::string path,
+    const std::string& path,
     bool executable) {
-  fml::UniqueFD file =
-      fml::OpenFile(path.c_str(),               // file path
-                    false,                      // create file if necessary
-                    fml::FilePermission::kRead  // file permissions
-      );
-
-  if (!file.is_valid()) {
-    return nullptr;
-  }
-
-  using Prot = fml::FileMapping::Protection;
-  std::unique_ptr<fml::FileMapping> mapping;
   if (executable) {
-    mapping = std::make_unique<fml::FileMapping>(
-        file, std::initializer_list<Prot>{Prot::kRead, Prot::kExecute});
+    return fml::FileMapping::CreateReadExecute(path);
   } else {
-    mapping = std::make_unique<fml::FileMapping>(
-        file, std::initializer_list<Prot>{Prot::kRead});
+    return fml::FileMapping::CreateReadOnly(path);
   }
-
-  if (mapping->GetSize() == 0 || mapping->GetMapping() == nullptr) {
-    return nullptr;
-  }
-
-  return mapping;
 }
 
 // The first party embedders don't yet use the stable embedder API and depend on
