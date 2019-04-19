@@ -46,6 +46,4 @@ RunCommand "${FLUTTER_ROOT}/bin/flutter" --suppress-analytics               \
     --target-platform=darwin-x64                                            \
     --target="${target_path}"                                               \
     --${build_mode}                                                         \
-    ${flutter_engine_flag}                                                  \
-    ${local_engine_flag}                                                    \
     ${track_widget_creation_flag}
