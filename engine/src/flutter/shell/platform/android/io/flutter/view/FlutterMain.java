@@ -35,7 +35,6 @@ public class FlutterMain {
     private static final String AOT_VM_SNAPSHOT_INSTR_KEY = "vm-snapshot-instr";
     private static final String AOT_ISOLATE_SNAPSHOT_DATA_KEY = "isolate-snapshot-data";
     private static final String AOT_ISOLATE_SNAPSHOT_INSTR_KEY = "isolate-snapshot-instr";
-    private static final String FLX_KEY = "flx";
     private static final String FLUTTER_ASSETS_DIR_KEY = "flutter-assets-dir";
 
     // XML Attribute keys supported in AndroidManifest.xml
@@ -49,8 +48,6 @@ public class FlutterMain {
         FlutterMain.class.getName() + '.' + AOT_ISOLATE_SNAPSHOT_DATA_KEY;
     public static final String PUBLIC_AOT_ISOLATE_SNAPSHOT_INSTR_KEY =
         FlutterMain.class.getName() + '.' + AOT_ISOLATE_SNAPSHOT_INSTR_KEY;
-    public static final String PUBLIC_FLX_KEY =
-        FlutterMain.class.getName() + '.' + FLX_KEY;
     public static final String PUBLIC_FLUTTER_ASSETS_DIR_KEY =
         FlutterMain.class.getName() + '.' + FLUTTER_ASSETS_DIR_KEY;
 
@@ -60,7 +57,6 @@ public class FlutterMain {
     private static final String DEFAULT_AOT_VM_SNAPSHOT_INSTR = "vm_snapshot_instr";
     private static final String DEFAULT_AOT_ISOLATE_SNAPSHOT_DATA = "isolate_snapshot_data";
     private static final String DEFAULT_AOT_ISOLATE_SNAPSHOT_INSTR = "isolate_snapshot_instr";
-    private static final String DEFAULT_FLX = "app.flx";
     private static final String DEFAULT_LIBRARY = "libflutter.so";
     private static final String DEFAULT_KERNEL_BLOB = "kernel_blob.bin";
     private static final String DEFAULT_FLUTTER_ASSETS_DIR = "flutter_assets";
@@ -75,7 +71,6 @@ public class FlutterMain {
     private static String sAotVmSnapshotInstr = DEFAULT_AOT_VM_SNAPSHOT_INSTR;
     private static String sAotIsolateSnapshotData = DEFAULT_AOT_ISOLATE_SNAPSHOT_DATA;
     private static String sAotIsolateSnapshotInstr = DEFAULT_AOT_ISOLATE_SNAPSHOT_INSTR;
-    private static String sFlx = DEFAULT_FLX;
     private static String sFlutterAssetsDir = DEFAULT_FLUTTER_ASSETS_DIR;
 
     private static boolean sInitialized = false;
@@ -295,7 +290,6 @@ public class FlutterMain {
                 sAotVmSnapshotInstr = metadata.getString(PUBLIC_AOT_VM_SNAPSHOT_INSTR_KEY, DEFAULT_AOT_VM_SNAPSHOT_INSTR);
                 sAotIsolateSnapshotData = metadata.getString(PUBLIC_AOT_ISOLATE_SNAPSHOT_DATA_KEY, DEFAULT_AOT_ISOLATE_SNAPSHOT_DATA);
                 sAotIsolateSnapshotInstr = metadata.getString(PUBLIC_AOT_ISOLATE_SNAPSHOT_INSTR_KEY, DEFAULT_AOT_ISOLATE_SNAPSHOT_INSTR);
-                sFlx = metadata.getString(PUBLIC_FLX_KEY, DEFAULT_FLX);
                 sFlutterAssetsDir = metadata.getString(PUBLIC_FLUTTER_ASSETS_DIR_KEY, DEFAULT_FLUTTER_ASSETS_DIR);
             }
         } catch (PackageManager.NameNotFoundException e) {
@@ -334,7 +328,6 @@ public class FlutterMain {
         sResourceExtractor = new ResourceExtractor(context);
 
         sResourceExtractor
-            .addResource(fromFlutterAssets(sFlx))
             .addResource(fromFlutterAssets(sAotVmSnapshotData))
             .addResource(fromFlutterAssets(sAotVmSnapshotInstr))
             .addResource(fromFlutterAssets(sAotIsolateSnapshotData))
