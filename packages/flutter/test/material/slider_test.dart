@@ -298,8 +298,8 @@ void main() {
     );
 
     final List<Offset> expectedLog = <Offset>[
-      const Offset(16.0, 300.0),
-      const Offset(16.0, 300.0),
+      const Offset(24.0, 300.0),
+      const Offset(24.0, 300.0),
       const Offset(400.0, 300.0),
     ];
     final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byKey(sliderKey)));
@@ -313,20 +313,20 @@ void main() {
     await tester.pump(const Duration(milliseconds: 10));
     expect(value, equals(0.0));
     expect(log.length, 5);
-    expect(log.last.dx, closeTo(386.3, 0.1));
+    expect(log.last.dx, closeTo(386.6, 0.1));
     // With no more gesture or value changes, the thumb position should still
     // be redrawn in the animated position.
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 10));
     expect(value, equals(0.0));
     expect(log.length, 7);
-    expect(log.last.dx, closeTo(343.3, 0.1));
+    expect(log.last.dx, closeTo(344.5, 0.1));
     // Final position.
     await tester.pump(const Duration(milliseconds: 80));
-    expectedLog.add(const Offset(16.0, 300.0));
+    expectedLog.add(const Offset(24.0, 300.0));
     expect(value, equals(0.0));
     expect(log.length, 8);
-    expect(log.last.dx, closeTo(16.0, 0.1));
+    expect(log.last.dx, closeTo(24.0, 0.1));
     await gesture.up();
   });
 
@@ -409,8 +409,8 @@ void main() {
     );
 
     final List<Offset> expectedLog = <Offset>[
-      const Offset(16.0, 300.0),
-      const Offset(16.0, 300.0),
+      const Offset(24.0, 300.0),
+      const Offset(24.0, 300.0),
       const Offset(400.0, 300.0),
     ];
     final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byKey(sliderKey)));
@@ -424,20 +424,20 @@ void main() {
     await tester.pump(const Duration(milliseconds: 10));
     expect(value, equals(0.0));
     expect(log.length, 5);
-    expect(log.last.dx, closeTo(386.3, 0.1));
+    expect(log.last.dx, closeTo(386.6, 0.1));
     // With no more gesture or value changes, the thumb position should still
     // be redrawn in the animated position.
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 10));
     expect(value, equals(0.0));
     expect(log.length, 7);
-    expect(log.last.dx, closeTo(343.3, 0.1));
+    expect(log.last.dx, closeTo(344.5, 0.1));
     // Final position.
     await tester.pump(const Duration(milliseconds: 80));
-    expectedLog.add(const Offset(16.0, 300.0));
+    expectedLog.add(const Offset(24.0, 300.0));
     expect(value, equals(0.0));
     expect(log.length, 8);
-    expect(log.last.dx, closeTo(16.0, 0.1));
+    expect(log.last.dx, closeTo(24.0, 0.1));
     await gesture.up();
   });
 
@@ -546,6 +546,20 @@ void main() {
     final ThemeData theme = ThemeData(
       platform: TargetPlatform.android,
       primarySwatch: Colors.blue,
+      sliderTheme: const SliderThemeData(
+        disabledThumbColor: Color(0xff000001),
+        disabledActiveTickMarkColor: Color(0xff000002),
+        disabledActiveTrackColor: Color(0xff000003),
+        disabledInactiveTickMarkColor: Color(0xff000004),
+        disabledInactiveTrackColor: Color(0xff000005),
+        activeTrackColor: Color(0xff000006),
+        activeTickMarkColor: Color(0xff000007),
+        inactiveTrackColor: Color(0xff000008),
+        inactiveTickMarkColor: Color(0xff000009),
+        overlayColor: Color(0xff000010),
+        thumbColor: Color(0xff000011),
+        valueIndicatorColor: Color(0xff000012),
+      )
     );
     final SliderThemeData sliderTheme = theme.sliderTheme;
     double value = 0.45;
@@ -724,7 +738,7 @@ void main() {
       paints
         ..rect(color: customColor1) // active track
         ..rect(color: customColor2) // inactive track
-        ..circle(color: customColor1.withAlpha(0x29)) // overlay
+        ..circle(color: customColor1.withOpacity(0.12)) // overlay
         ..circle(color: customColor2) // 1st tick mark
         ..circle(color: customColor2) // 2nd tick mark
         ..circle(color: customColor2) // 3rd tick mark
@@ -858,7 +872,7 @@ void main() {
         ),
       ),
     ));
-    expect(tester.renderObject<RenderBox>(find.byType(Slider)).size, const Size(144.0 + 2.0 * 16.0, 600.0));
+    expect(tester.renderObject<RenderBox>(find.byType(Slider)).size, const Size(144.0 + 2.0 * 24.0, 600.0));
 
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
@@ -878,7 +892,7 @@ void main() {
         ),
       ),
     ));
-    expect(tester.renderObject<RenderBox>(find.byType(Slider)).size, const Size(144.0 + 2.0 * 16.0, 32.0));
+    expect(tester.renderObject<RenderBox>(find.byType(Slider)).size, const Size(144.0 + 2.0 * 24.0, 48.0));
   });
 
   testWidgets('Slider respects textScaleFactor', (WidgetTester tester) async {
@@ -1077,12 +1091,12 @@ void main() {
       expect(
         sliderBox,
         paints
-          ..circle(x: 17.0, y: 16.0, radius: 1.0)
-          ..circle(x: 208.5, y: 16.0, radius: 1.0)
-          ..circle(x: 400.0, y: 16.0, radius: 1.0)
-          ..circle(x: 591.5, y: 16.0, radius: 1.0)
-          ..circle(x: 783.0, y: 16.0, radius: 1.0)
-          ..circle(x: 16.0, y: 16.0, radius: 6.0),
+          ..circle(x: 25.0, y: 24.0, radius: 1.0)
+          ..circle(x: 212.5, y: 24.0, radius: 1.0)
+          ..circle(x: 400.0, y: 24.0, radius: 1.0)
+          ..circle(x: 587.5, y: 24.0, radius: 1.0)
+          ..circle(x: 775.0, y: 24.0, radius: 1.0)
+          ..circle(x: 24.0, y: 24.0, radius: 10.0),
       );
 
       gesture = await tester.startGesture(center);
@@ -1093,13 +1107,13 @@ void main() {
       expect(
         sliderBox,
         paints
-          ..circle(x: 105.0625, y: 16.0, radius: 3.791776657104492)
-          ..circle(x: 17.0, y: 16.0, radius: 1.0)
-          ..circle(x: 208.5, y: 16.0, radius: 1.0)
-          ..circle(x: 400.0, y: 16.0, radius: 1.0)
-          ..circle(x: 591.5, y: 16.0, radius: 1.0)
-          ..circle(x: 783.0, y: 16.0, radius: 1.0)
-          ..circle(x: 105.0625, y: 16.0, radius: 6.0),
+          ..circle(x: 111.20703125, y: 24.0, radius: 5.687664985656738)
+          ..circle(x: 25.0, y: 24.0, radius: 1.0)
+          ..circle(x: 212.5, y: 24.0, radius: 1.0)
+          ..circle(x: 400.0, y: 24.0, radius: 1.0)
+          ..circle(x: 587.5, y: 24.0, radius: 1.0)
+          ..circle(x: 775.0, y: 24.0, radius: 1.0)
+          ..circle(x: 111.20703125, y: 24.0, radius: 10.0),
       );
 
       // Reparenting in the middle of an animation should do nothing.
@@ -1113,13 +1127,13 @@ void main() {
       expect(
         sliderBox,
         paints
-          ..circle(x: 185.5457763671875, y: 16.0, radius: 8.0)
-          ..circle(x: 17.0, y: 16.0, radius: 1.0)
-          ..circle(x: 208.5, y: 16.0, radius: 1.0)
-          ..circle(x: 400.0, y: 16.0, radius: 1.0)
-          ..circle(x: 591.5, y: 16.0, radius: 1.0)
-          ..circle(x: 783.0, y: 16.0, radius: 1.0)
-          ..circle(x: 185.5457763671875, y: 16.0, radius: 6.0),
+          ..circle(x: 190.0135726928711, y: 24.0, radius: 12.0)
+          ..circle(x: 25.0, y: 24.0, radius: 1.0)
+          ..circle(x: 212.5, y: 24.0, radius: 1.0)
+          ..circle(x: 400.0, y: 24.0, radius: 1.0)
+          ..circle(x: 587.5, y: 24.0, radius: 1.0)
+          ..circle(x: 775.0, y: 24.0, radius: 1.0)
+          ..circle(x: 190.0135726928711, y: 24.0, radius: 10.0),
       );
       // Wait for animations to finish.
       await tester.pumpAndSettle();
@@ -1127,13 +1141,13 @@ void main() {
       expect(
         sliderBox,
         paints
-          ..circle(x: 400.0, y: 16.0, radius: 16.0)
-          ..circle(x: 17.0, y: 16.0, radius: 1.0)
-          ..circle(x: 208.5, y: 16.0, radius: 1.0)
-          ..circle(x: 400.0, y: 16.0, radius: 1.0)
-          ..circle(x: 591.5, y: 16.0, radius: 1.0)
-          ..circle(x: 783.0, y: 16.0, radius: 1.0)
-          ..circle(x: 400.0, y: 16.0, radius: 6.0),
+          ..circle(x: 400.0, y: 24.0, radius: 24.0)
+          ..circle(x: 25.0, y: 24.0, radius: 1.0)
+          ..circle(x: 212.5, y: 24.0, radius: 1.0)
+          ..circle(x: 400.0, y: 24.0, radius: 1.0)
+          ..circle(x: 587.5, y: 24.0, radius: 1.0)
+          ..circle(x: 775.0, y: 24.0, radius: 1.0)
+          ..circle(x: 400.0, y: 24.0, radius: 10.0),
       );
       await gesture.up();
       await tester.pumpAndSettle();
@@ -1141,12 +1155,12 @@ void main() {
       expect(
         sliderBox,
         paints
-          ..circle(x: 17.0, y: 16.0, radius: 1.0)
-          ..circle(x: 208.5, y: 16.0, radius: 1.0)
-          ..circle(x: 400.0, y: 16.0, radius: 1.0)
-          ..circle(x: 591.5, y: 16.0, radius: 1.0)
-          ..circle(x: 783.0, y: 16.0, radius: 1.0)
-          ..circle(x: 400.0, y: 16.0, radius: 6.0),
+          ..circle(x: 25.0, y: 24.0, radius: 1.0)
+          ..circle(x: 212.5, y: 24.0, radius: 1.0)
+          ..circle(x: 400.0, y: 24.0, radius: 1.0)
+          ..circle(x: 587.5, y: 24.0, radius: 1.0)
+          ..circle(x: 775.0, y: 24.0, radius: 1.0)
+          ..circle(x: 400.0, y: 24.0, radius: 10.0),
       );
     }
 
