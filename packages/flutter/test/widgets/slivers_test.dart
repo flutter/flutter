@@ -195,4 +195,19 @@ void main() {
     expect(find.text('B'), findsNothing);
     expect(find.text('BOTTOM'), findsOneWidget);
   });
+
+  testWidgets('Can override ErrorWidget.build', (WidgetTester tester) async {
+    const Text errorText = Text('error');
+    final ErrorWidgetBuilder oldBuilder = ErrorWidget.builder;
+    ErrorWidget.builder = (FlutterErrorDetails details) => errorText;
+    final SliverChildBuilderDelegate builderThrowsDelegate = SliverChildBuilderDelegate(
+      (_, __) => throw 'builder',
+      addAutomaticKeepAlives: false,
+      addRepaintBoundaries: false,
+      addSemanticIndexes: false,
+    );
+    expect(builderThrowsDelegate.build(null, 0), errorText);
+    expect(tester.takeException(), 'builder');
+    ErrorWidget.builder = oldBuilder;
+  });
 }

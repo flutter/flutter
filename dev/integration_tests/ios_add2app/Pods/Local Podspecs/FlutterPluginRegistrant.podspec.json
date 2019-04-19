@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "summary": "Registers plugins with your flutter app",
   "description": "Depends on all your plugins, and provides a function to register them.",
-  "homepage": "https://flutter.io",
+  "homepage": "https://flutter.dev",
   "license": {
     "type": "BSD"
   },

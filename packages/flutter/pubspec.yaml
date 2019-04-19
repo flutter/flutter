@@ -1,7 +1,7 @@
 name: flutter
 author: Flutter Authors <flutter-dev@googlegroups.com>
 description: A framework for writing Flutter applications
-homepage: http://flutter.io
+homepage: http://flutter.dev
 
 environment:
   # The pub client defaults to an <2.0.0 sdk constraint which we need to explicitly overwrite.

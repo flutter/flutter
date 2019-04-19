@@ -15,22 +15,22 @@
 
   "datePickerDateOrder": "mdy",
   "@datePickerDateOrder": {
-    "description": "The standard order for the locale to arrange day, month and year in a date. Options are dmy, mdy, ymd and ydm."
+    "description": "Choose a standard order for the locale to arrange day, month and year in a date. Do not transliterate the abbreviations themselves. The only options are dmy, mdy, ymd and ydm. For instance, in French, use dmy (for day month year) but do not translate into jma (for jour mois année). "
   },
 
   "datePickerDateTimeOrder": "date_time_dayPeriod",
   "@datePickerDateTimeOrder": {
-    "description": "The standard order for the locale to arrange date, time and am/pm in a datetime. Options are date_time_dayPeriod, date_dayPeriod_time, time_dayPeriod_date and dayPeriod_time_date where 'dayPeriod' is am/pm."
+    "description": "Choose a standard order for the locale to arrange date, time and am/pm in a datetime. Do not transliterate the choices themselves. The only options are date_time_dayPeriod, date_dayPeriod_time, time_dayPeriod_date and dayPeriod_time_date where 'dayPeriod' is am/pm. You can ignore the position of dayPeriod if the locale uses 24h time only. For instance, in French, use date_time_dayPeriod, but do not translate into date_heure_périodeDuJour or some such."
   },
 
   "anteMeridiemAbbreviation": "AM",
   "@anteMeridiemAbbreviation": {
-    "description": "The abbreviation for ante meridiem (before noon) shown in the time picker when it's not using the 24h format."
+    "description": "The abbreviation for ante meridiem (before noon) shown in the time picker when it's not using the 24h format. Reference the text iOS uses such as in the iOS clock app."
   },
 
   "postMeridiemAbbreviation": "PM",
   "@postMeridiemAbbreviation": {
-    "description": "The abbreviation for post meridiem (after noon) shown in the time picker when it's not using the 24h format."
+    "description": "The abbreviation for post meridiem (after noon) shown in the time picker when it's not using the 24h format. Reference the text iOS uses such as in the iOS clock app."
   },
 
   "alertDialogLabel": "Alert",

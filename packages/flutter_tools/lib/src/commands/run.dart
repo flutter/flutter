@@ -20,7 +20,7 @@ import '../runner/flutter_command.dart';
 import '../tracing.dart';
 import 'daemon.dart';
 
-abstract class RunCommandBase extends FlutterCommand {
+abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
   // Used by run and drive commands.
   RunCommandBase({ bool verboseHelp = false }) {
     addBuildModeFlags(defaultToRelease: false, verboseHelp: verboseHelp);
@@ -64,6 +64,7 @@ abstract class RunCommandBase extends FlutterCommand {
   }
 
   bool get traceStartup => argResults['trace-startup'];
+
   String get route => argResults['route'];
 }
 
@@ -168,6 +169,11 @@ class RunCommand extends RunCommandBase {
               'results out to "refresh_benchmark.json", and exit. This flag is '
               'intended for use in generating automated flutter benchmarks.',
       )
+      ..addFlag('disable-service-auth-codes',
+        negatable: false,
+        hide: !verboseHelp,
+        help: 'No longer require an authentication code to connect to the VM '
+              'service (not recommended).')
       ..addOption(FlutterOptions.kExtraFrontEndOptions, hide: true)
       ..addOption(FlutterOptions.kExtraGenSnapshotOptions, hide: true)
       ..addMultiOption(FlutterOptions.kEnableExperiment,
@@ -215,7 +221,7 @@ class RunCommand extends RunCommandBase {
       printStatus("Run 'flutter emulators' to list and start any available device emulators.");
       printStatus('');
       printStatus('If you expected your device to be detected, please run "flutter doctor" to diagnose');
-      printStatus('potential issues, or visit https://flutter.io/setup/ for troubleshooting tips.');
+      printStatus('potential issues, or visit https://flutter.dev/setup/ for troubleshooting tips.');
     }
   }
 
@@ -261,6 +267,7 @@ class RunCommand extends RunCommandBase {
       return DebuggingOptions.enabled(
         buildInfo,
         startPaused: argResults['start-paused'],
+        disableServiceAuthCodes: argResults['disable-service-auth-codes'],
         useTestFonts: argResults['use-test-fonts'],
         enableSoftwareRendering: argResults['enable-software-rendering'],
         skiaDeterministicRendering: argResults['skia-deterministic-rendering'],
@@ -368,6 +375,7 @@ class RunCommand extends RunCommandBase {
         viewFilter: argResults['isolate-filter'],
         experimentalFlags: expFlags,
         target: argResults['target'],
+        buildMode: getBuildMode(),
       );
       flutterDevices.add(flutterDevice);
     }

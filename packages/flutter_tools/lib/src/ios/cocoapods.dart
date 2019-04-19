@@ -23,7 +23,7 @@ import 'xcodeproj.dart';
 const String noCocoaPodsConsequence = '''
   CocoaPods is used to retrieve the iOS platform side's plugin code that responds to your plugin usage on the Dart side.
   Without resolving iOS dependencies with CocoaPods, plugins will not work on iOS.
-  For more info, see https://flutter.io/platform-plugins''';
+  For more info, see https://flutter.dev/platform-plugins''';
 
 const String unknownCocoaPodsConsequence = '''
   Flutter is unable to determine the installed CocoaPods's version.
