@@ -1,4 +1,4 @@
-Signature: b81db5fcd6895228a93af32d2315e2c1
+Signature: 60d8d8f89167f18c7f8302cc7bbe217f
 
 UNUSED LICENSES:
 
@@ -2458,6 +2458,7 @@ FILE: ../../../third_party/skia/site/user/api/METADATA
 FILE: ../../../third_party/skia/site/user/api/catalog.htm
 FILE: ../../../third_party/skia/site/user/modules/METADATA
 FILE: ../../../third_party/skia/site/user/modules/PathKit_effects.png
+FILE: ../../../third_party/skia/specs/web-img-decode/current/index.html
 FILE: ../../../third_party/skia/src/compute/hs/cl/intel/gen8/u32/hs_kernels.bin
 FILE: ../../../third_party/skia/src/compute/hs/cl/intel/gen8/u32/hs_kernels.bin.len.xxd
 FILE: ../../../third_party/skia/src/compute/hs/cl/intel/gen8/u32/hs_kernels.bin.xxd
