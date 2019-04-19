@@ -46,6 +46,19 @@ class FileMapping final : public Mapping {
 
   ~FileMapping() override;
 
+  static std::unique_ptr<FileMapping> CreateReadOnly(const std::string& path);
+
+  static std::unique_ptr<FileMapping> CreateReadOnly(
+      const fml::UniqueFD& base_fd,
+      const std::string& sub_path = "");
+
+  static std::unique_ptr<FileMapping> CreateReadExecute(
+      const std::string& path);
+
+  static std::unique_ptr<FileMapping> CreateReadExecute(
+      const fml::UniqueFD& base_fd,
+      const std::string& sub_path = "");
+
   // |Mapping|
   size_t GetSize() const override;
 

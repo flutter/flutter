@@ -15,32 +15,6 @@ RuntimeTest::RuntimeTest()
 
 RuntimeTest::~RuntimeTest() = default;
 
-static std::unique_ptr<fml::Mapping> GetMapping(const fml::UniqueFD& directory,
-                                                const char* path,
-                                                bool executable) {
-  fml::UniqueFD file = fml::OpenFile(directory, path, false /* create */,
-                                     fml::FilePermission::kRead);
-  if (!file.is_valid()) {
-    return nullptr;
-  }
-
-  using Prot = fml::FileMapping::Protection;
-  std::unique_ptr<fml::FileMapping> mapping;
-  if (executable) {
-    mapping = std::make_unique<fml::FileMapping>(
-        file, std::initializer_list<Prot>{Prot::kRead, Prot::kExecute});
-  } else {
-    mapping = std::make_unique<fml::FileMapping>(
-        file, std::initializer_list<Prot>{Prot::kRead});
-  }
-
-  if (mapping->GetSize() == 0 || mapping->GetMapping() == nullptr) {
-    return nullptr;
-  }
-
-  return mapping;
-}
-
 void RuntimeTest::SetSnapshotsAndAssets(Settings& settings) {
   if (!assets_dir_.is_valid()) {
     return;
@@ -52,27 +26,30 @@ void RuntimeTest::SetSnapshotsAndAssets(Settings& settings) {
   // don't need to be explicitly suppiled by the embedder.
   if (DartVM::IsRunningPrecompiledCode()) {
     settings.vm_snapshot_data = [this]() {
-      return GetMapping(assets_dir_, "vm_snapshot_data", false);
+      return fml::FileMapping::CreateReadOnly(assets_dir_, "vm_snapshot_data");
     };
 
     settings.isolate_snapshot_data = [this]() {
-      return GetMapping(assets_dir_, "isolate_snapshot_data", false);
+      return fml::FileMapping::CreateReadOnly(assets_dir_,
+                                              "isolate_snapshot_data");
     };
 
     if (DartVM::IsRunningPrecompiledCode()) {
       settings.vm_snapshot_instr = [this]() {
-        return GetMapping(assets_dir_, "vm_snapshot_instr", true);
+        return fml::FileMapping::CreateReadExecute(assets_dir_,
+                                                   "vm_snapshot_instr");
       };
 
       settings.isolate_snapshot_instr = [this]() {
-        return GetMapping(assets_dir_, "isolate_snapshot_instr", true);
+        return fml::FileMapping::CreateReadExecute(assets_dir_,
+                                                   "isolate_snapshot_instr");
       };
     }
   } else {
     settings.application_kernels = [this]() {
       std::vector<std::unique_ptr<const fml::Mapping>> kernel_mappings;
       kernel_mappings.emplace_back(
-          GetMapping(assets_dir_, "kernel_blob.bin", false));
+          fml::FileMapping::CreateReadOnly(assets_dir_, "kernel_blob.bin"));
       return kernel_mappings;
     };
   }

@@ -9,46 +9,21 @@
 namespace flutter {
 namespace testing {
 
-static std::unique_ptr<fml::Mapping> GetMapping(const fml::UniqueFD& directory,
-                                                const char* path,
-                                                bool executable) {
-  fml::UniqueFD file = fml::OpenFile(directory, path, false /* create */,
-                                     fml::FilePermission::kRead);
-  if (!file.is_valid()) {
-    return nullptr;
-  }
-
-  using Prot = fml::FileMapping::Protection;
-  std::unique_ptr<fml::FileMapping> mapping;
-  if (executable) {
-    mapping = std::make_unique<fml::FileMapping>(
-        file, std::initializer_list<Prot>{Prot::kRead, Prot::kExecute});
-  } else {
-    mapping = std::make_unique<fml::FileMapping>(
-        file, std::initializer_list<Prot>{Prot::kRead});
-  }
-
-  if (mapping->GetSize() == 0 || mapping->GetMapping() == nullptr) {
-    return nullptr;
-  }
-
-  return mapping;
-}
-
 EmbedderContext::EmbedderContext(std::string assets_path)
     : assets_path_(std::move(assets_path)),
       native_resolver_(std::make_shared<::testing::TestDartNativeResolver>()) {
   auto assets_dir = fml::OpenDirectory(assets_path_.c_str(), false,
                                        fml::FilePermission::kRead);
-  vm_snapshot_data_ = GetMapping(assets_dir, "vm_snapshot_data", false);
+  vm_snapshot_data_ =
+      fml::FileMapping::CreateReadOnly(assets_dir, "vm_snapshot_data");
   isolate_snapshot_data_ =
-      GetMapping(assets_dir, "isolate_snapshot_data", false);
+      fml::FileMapping::CreateReadOnly(assets_dir, "isolate_snapshot_data");
 
   if (flutter::DartVM::IsRunningPrecompiledCode()) {
     vm_snapshot_instructions_ =
-        GetMapping(assets_dir, "vm_snapshot_instr", true);
-    isolate_snapshot_instructions_ =
-        GetMapping(assets_dir, "isolate_snapshot_instr", true);
+        fml::FileMapping::CreateReadExecute(assets_dir, "vm_snapshot_instr");
+    isolate_snapshot_instructions_ = fml::FileMapping::CreateReadExecute(
+        assets_dir, "isolate_snapshot_instr");
   }
 
   isolate_create_callbacks_.push_back(
