@@ -84,7 +84,8 @@ class _SnackBarDemoState extends State<SnackBarDemo> {
         builder: buildBody
       ),
       floatingActionButton: FloatingActionButton(
-        child: const Icon(Icons.send),
+        child: const Icon(Icons.add),
+        tooltip: 'Create',
         onPressed: () {}
       ),
     );
