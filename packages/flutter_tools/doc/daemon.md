@@ -63,16 +63,21 @@ The `daemon.connected` event is sent when the daemon starts. The `params` field 
 - `version`: The protocol version. This is the same version returned by the `version()` command.
 - `pid`: The `pid` of the daemon process.
 
-#### daemon.logMessage
+#### daemon.log
 
-The `daemon.logMessage` event is sent whenever a log message is created - either a status level message or an error. The JSON message will contain an `event` field with the value `daemon.logMessage`, and an `params` field containing a map with `level`, `message`, and (optionally) `stackTrace` fields.
-
+This is sent when user-facing output is received. The `params` field will be a map with the field `log`. The `log` field is a string with the output text. If the output indicates an error, an `error` boolean field will be present, and set to `true`.
 
 #### daemon.showMessage
 
 The `daemon.showMessage` event is sent by the daemon when some if would be useful to show a message to the user. This could be an error notification or a notification that some development tools are not configured or not installed. The JSON message will contain an `event` field with the value `daemon.showMessage`, and an `params` field containing a map with `level`, `title`, and `message` fields. The valid options for `level` are `info`, `warning`, and `error`.
 
 It is up to the client to decide how best to display the message; for some clients, it may map well to a toast style notification. There is an implicit contract that the daemon will not send too many messages over some reasonable period of time.
+
+#### daemon.logMessage
+
+The `daemon.logMessage` event is sent whenever a log message is created - either a status level message or an error. The JSON message will contain an `event` field with the value `daemon.logMessage`, and an `params` field containing a map with `level`, `message`, and (optionally) `stackTrace` fields.
+
+Generally, clients won't display content from `daemon.logMessage` events unless they're set to a more verbose output mode.
 
 ### app domain
 
@@ -202,6 +207,7 @@ The following subset of the daemon domain is available in `flutter run --machine
   - [`shutdown`](#daemonshutdown)
 - Events
   - [`connected`](#daemonconnected)
+  - [`log`](#daemonlog)
   - [`logMessage`](#daemonlogmessage)
 
 ### app domain
