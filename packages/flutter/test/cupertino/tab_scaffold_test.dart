@@ -204,7 +204,7 @@ void main() {
     );
   });
 
-  testWidgets('Programmatic tab switching by changing currentIndex of an existing controller', (WidgetTester tester) async {
+  testWidgets('Programmatic tab switching by changing the index of an existing controller', (WidgetTester tester) async {
     final CupertinoTabController controller = CupertinoTabController(initialIndex: 1);
     final List<int> tabsPainted = <int>[];
 
