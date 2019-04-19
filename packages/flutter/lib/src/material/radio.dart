@@ -29,9 +29,9 @@ const double _kInnerRadius = 4.5;
 ///
 /// {@tool snippet --template=stateful_widget_scaffold}
 ///
-/// Here is an example of [Radio] widgets wrapped in [ListTile]s.
+/// Here is an example of Radio widgets wrapped in ListTiles.
 ///
-/// ```dart preaamble
+/// ```dart preamble
 /// enum SingingCharacter { lafayette, jefferson }
 /// ```
 ///
@@ -63,6 +63,7 @@ const double _kInnerRadius = 4.5;
 ///   );
 /// }
 /// ```
+/// {@end-tool}
 ///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
