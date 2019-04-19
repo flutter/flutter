@@ -3,46 +3,47 @@
 // found in the LICENSE file.
 
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/os.dart';
-import 'package:flutter_tools/src/fuchsia/fuchsia_sdk.dart';
+import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/fuchsia/fuchsia_workflow.dart';
 import 'package:mockito/mockito.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
 
-class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {}
-class MockFile extends Mock implements File {}
-
 void main() {
-  group('android workflow', () {
-    final MockFile devFinder = MockFile();
-    final MockFile sshConfig = MockFile();
-    when(devFinder.absolute).thenReturn(devFinder);
-    when(sshConfig.absolute).thenReturn(sshConfig);
+  group('Fuchsia workflow', () {
+    final MockPlatform linux = MockPlatform();
+    final MockCache cacheWithFuchsia = MockCache();
+    final MockCache cacheWithoutFuchsia = MockCache();
+    final MockDirectory fuchsiaArtifacts = MockDirectory();
+    final MockDirectory missingFuchsiaArtifacts = MockDirectory();
+    when(cacheWithFuchsia.getArtifactDirectory('fuchsia')).thenReturn(fuchsiaArtifacts);
+    when(cacheWithoutFuchsia.getArtifactDirectory('fuchsia')).thenReturn(missingFuchsiaArtifacts);
+    when(fuchsiaArtifacts.existsSync()).thenReturn(true);
+    when(missingFuchsiaArtifacts.existsSync()).thenReturn(false);
+    when(linux.isLinux).thenReturn(true);
 
-    testUsingContext('can not list and launch devices if there is not ssh config and dev finder', () {
+    testUsingContext('can not list and launch devices if the fuchsia artifacts are not cached', () {
       expect(fuchsiaWorkflow.canLaunchDevices, false);
       expect(fuchsiaWorkflow.canListDevices, false);
       expect(fuchsiaWorkflow.canListEmulators, false);
     }, overrides: <Type, Generator>{
-      FuchsiaArtifacts: () => FuchsiaArtifacts(devFinder: null, sshConfig: null),
+      Cache: () => cacheWithoutFuchsia,
+      Platform: () => linux,
     });
 
-    testUsingContext('can not list and launch devices if there is not ssh config and dev finder', () {
-      expect(fuchsiaWorkflow.canLaunchDevices, false);
-      expect(fuchsiaWorkflow.canListDevices, true);
-      expect(fuchsiaWorkflow.canListEmulators, false);
-    }, overrides: <Type, Generator>{
-      FuchsiaArtifacts: () => FuchsiaArtifacts(devFinder: devFinder, sshConfig: null),
-    });
-
-    testUsingContext('can list and launch devices supported if there is a `fx` command', () {
+    testUsingContext('can list and launch devices if the fuchsia artifacts are cached', () {
       expect(fuchsiaWorkflow.canLaunchDevices, true);
       expect(fuchsiaWorkflow.canListDevices, true);
       expect(fuchsiaWorkflow.canListEmulators, false);
     }, overrides: <Type, Generator>{
-      FuchsiaArtifacts: () => FuchsiaArtifacts(devFinder: devFinder, sshConfig: sshConfig),
+      Cache: () => cacheWithFuchsia,
+      Platform: () => linux,
     });
   });
 }
+
+class MockCache extends Mock implements Cache {}
+class MockDirectory extends Mock implements Directory {}
+class MockPlatform extends Mock implements Platform {}

@@ -4,8 +4,10 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/base/platform.dart';
+
+import '../artifacts.dart';
 import '../base/context.dart';
-import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/process.dart';
 import '../base/process_manager.dart';
@@ -14,9 +16,6 @@ import '../globals.dart';
 
 /// The [FuchsiaSdk] instance.
 FuchsiaSdk get fuchsiaSdk => context[FuchsiaSdk];
-
-/// The [FuchsiaArtifacts] instance.
-FuchsiaArtifacts get fuchsiaArtifacts => context[FuchsiaArtifacts];
 
 /// The Fuchsia SDK shell commands.
 ///
@@ -30,9 +29,14 @@ class FuchsiaSdk {
   ///    > 192.168.42.56 paper-pulp-bush-angel
   Future<String> listDevices() async {
     try {
-      final String path = fuchsiaArtifacts.devFinder.absolute.path;
-      final RunResult process = await runAsync(<String>[path, 'list', '-full']);
-      return process.stdout.trim();
+      if (platform.isLinux) {
+        final String path = artifacts.getArtifactPath(Artifact.devFinder);
+        final RunResult process = await runAsync(<String>[path, 'list', '-full']);
+        return process.stdout.trim();
+      } else {
+        printError('Fuchsia device discovery is only supported on Linux');
+        return '';
+      }
     } catch (exception) {
       printTrace('$exception');
     }
@@ -62,18 +66,4 @@ class FuchsiaSdk {
     }
     return null;
   }
-}
-
-/// Fuchsia-specific artifacts used to interact with a device.
-class FuchsiaArtifacts {
-  /// Creates a new [FuchsiaArtifacts].
-  FuchsiaArtifacts({this.sshConfig, this.devFinder});
-
-  /// The location of the SSH configuration file used to interact with a
-  /// Fuchsia device.
-  final File sshConfig;
-
-  /// The location of the dev finder tool used to locate connected
-  /// Fuchsia devices.
-  final File devFinder;
 }

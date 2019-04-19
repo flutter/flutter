@@ -11,10 +11,11 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/attach.dart';
 import 'package:flutter_tools/src/commands/doctor.dart';
-import 'package:flutter_tools/src/fuchsia/fuchsia_sdk.dart';
+import 'package:flutter_tools/src/fuchsia/fuchsia_workflow.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 
 final ArgParser parser = ArgParser()
@@ -105,13 +106,15 @@ Future<void> main(List<String> args) async {
     muteCommandLogging: false,
     verboseHelp: false,
     overrides: <Type, Generator>{
-      FuchsiaArtifacts: () => FuchsiaArtifacts(sshConfig: sshConfig, devFinder: devFinder),
+      FuchsiaWorkflow: () => const _FuchsiaWorkflow(),
       Artifacts: () => OverrideArtifacts(
         parent: CachedArtifacts(),
         frontendServer: frontendServer,
         engineDartBinary: dartSdk,
         platformKernelDill: platformKernelDill,
         flutterPatchedSdk: flutterPatchedSdk,
+        devFinder: devFinder,
+        fuchsiaSshConfig: sshConfig,
       ),
     },
   );
@@ -146,4 +149,20 @@ class _FuchsiaAttachCommand extends AttachCommand {
     Cache.flutterRoot = '$originalWorkingDirectory/third_party/dart-pkg/git/flutter';
     return super.runCommand();
   }
+}
+
+class _FuchsiaWorkflow implements FuchsiaWorkflow {
+  const _FuchsiaWorkflow();
+
+  @override
+  bool get appliesToHostPlatform => platform.isLinux || platform.isMacOS;
+
+  @override
+  bool get canListDevices => true;
+
+  @override
+  bool get canLaunchDevices => true;
+
+  @override
+  bool get canListEmulators => false;
 }

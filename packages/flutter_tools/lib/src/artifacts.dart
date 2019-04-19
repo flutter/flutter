@@ -29,6 +29,8 @@ enum Artifact {
   dart2jsSnapshot,
   kernelWorkerSnapshot,
   flutterWebSdk,
+  devFinder,
+  fuchsiaSshConfig,
 }
 
 String _artifactToFileName(Artifact artifact, [ TargetPlatform platform, BuildMode mode ]) {
@@ -80,6 +82,11 @@ String _artifactToFileName(Artifact artifact, [ TargetPlatform platform, BuildMo
       return 'dart2js.dart.snapshot';
     case Artifact.kernelWorkerSnapshot:
       return 'kernel_worker.dart.snapshot';
+    case Artifact.devFinder:
+      return 'dev_finder';
+    case Artifact.fuchsiaSshConfig:
+      assert(false, 'This artifact is not currently supported');
+      return null;
   }
   assert(false, 'Invalid artifact $artifact.');
   return null;
@@ -212,6 +219,9 @@ class CachedArtifacts extends Artifacts {
         return fs.path.join(dartSdkPath, 'bin', 'snapshots', _artifactToFileName(artifact));
       case Artifact.kernelWorkerSnapshot:
         return fs.path.join(dartSdkPath, 'bin', 'snapshots', _artifactToFileName(artifact));
+      case Artifact.devFinder:
+         final String fuchsiaArtifactsPath = cache.getArtifactDirectory('fuchsia').path;
+         return fs.path.join(fuchsiaArtifactsPath, 'tools', _artifactToFileName(artifact));
       default:
         assert(false, 'Artifact $artifact not available for platform $platform.');
         return null;
@@ -298,6 +308,10 @@ class LocalEngineArtifacts extends Artifacts {
         return fs.path.join(_hostEngineOutPath, 'dart-sdk', 'bin', 'snapshots', _artifactToFileName(artifact));
       case Artifact.kernelWorkerSnapshot:
         return fs.path.join(_hostEngineOutPath, 'dart-sdk', 'bin', 'snapshots', _artifactToFileName(artifact));
+      case Artifact.devFinder:
+      case Artifact.fuchsiaSshConfig:
+        assert(false, 'Fuchsia artifacts are not supported in local engine builds');
+        return null;
     }
     assert(false, 'Invalid artifact $artifact.');
     return null;
@@ -353,6 +367,8 @@ class OverrideArtifacts implements Artifacts {
     this.engineDartBinary,
     this.platformKernelDill,
     this.flutterPatchedSdk,
+    this.devFinder,
+    this.fuchsiaSshConfig,
   }) : assert(parent != null);
 
   final Artifacts parent;
@@ -360,6 +376,8 @@ class OverrideArtifacts implements Artifacts {
   final File engineDartBinary;
   final File platformKernelDill;
   final File flutterPatchedSdk;
+  final File devFinder;
+  final File fuchsiaSshConfig;
 
   @override
   String getArtifactPath(Artifact artifact, { TargetPlatform platform, BuildMode mode }) {
@@ -374,6 +392,12 @@ class OverrideArtifacts implements Artifacts {
     }
     if (artifact == Artifact.flutterPatchedSdkPath && flutterPatchedSdk != null) {
       return flutterPatchedSdk.path;
+    }
+    if (artifact == Artifact.devFinder && devFinder != null) {
+      return devFinder.path;
+    }
+    if (artifact == Artifact.fuchsiaSshConfig && fuchsiaSshConfig != null) {
+      return fuchsiaSshConfig.path;
     }
     return parent.getArtifactPath(artifact, platform: platform, mode: mode);
   }

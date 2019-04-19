@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 
 import '../application_package.dart';
+import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -257,8 +258,9 @@ class FuchsiaDevice extends Device {
 
   /// Run `command` on the Fuchsia device shell.
   Future<String> shell(String command) async {
+    final String sshConfigPath = artifacts.getArtifactPath(Artifact.fuchsiaSshConfig);
     final RunResult result = await runAsync(<String>[
-      'ssh', '-F', fuchsiaArtifacts.sshConfig.absolute.path, id, command]);
+      'ssh', '-F', sshConfigPath, id, command]);
     if (result.exitCode != 0) {
       throwToolExit('Command failed: $command\nstdout: ${result.stdout}\nstderr: ${result.stderr}');
       return null;
@@ -402,8 +404,9 @@ class _FuchsiaPortForwarder extends DevicePortForwarder {
     hostPort ??= await _findPort();
     // Note: the provided command works around a bug in -N, see US-515
     // for more explanation.
+    final String sshConfigPath = artifacts.getArtifactPath(Artifact.fuchsiaSshConfig);
     final List<String> command = <String>[
-      'ssh', '-6', '-F', fuchsiaArtifacts.sshConfig.absolute.path, '-nNT', '-vvv', '-f',
+      'ssh', '-6', '-F', sshConfigPath, '-nNT', '-vvv', '-f',
       '-L', '$hostPort:$_ipv4Loopback:$devicePort', device.id, 'true',
     ];
     final Process process = await processManager.start(command);
@@ -426,8 +429,9 @@ class _FuchsiaPortForwarder extends DevicePortForwarder {
     _forwardedPorts.remove(forwardedPort);
     final Process process = _processes.remove(forwardedPort.hostPort);
     process?.kill();
+    final String sshConfigPath = artifacts.getArtifactPath(Artifact.fuchsiaSshConfig);
     final List<String> command = <String>[
-        'ssh', '-F', fuchsiaArtifacts.sshConfig.absolute.path, '-O', 'cancel', '-vvv',
+        'ssh', '-F', sshConfigPath, '-O', 'cancel', '-vvv',
         '-L', '${forwardedPort.hostPort}:$_ipv4Loopback:${forwardedPort.devicePort}', device.id];
     final ProcessResult result = await processManager.run(command);
     if (result.exitCode != 0) {
