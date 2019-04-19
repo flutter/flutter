@@ -79,18 +79,16 @@ class FlutterGoldenFileComparator implements GoldenFileComparator {
 
   @override
   Future<bool> compare(Uint8List imageBytes, Uri golden) async {
-    final bool authorized = await _skiaClient.auth(fs.directory(basedir));
-    if(!authorized) {
-      //TODO(katelovett): Clean up for final CI implementation
-      return true;
-    }
     final File goldenFile = _getGoldenFile(golden);
     if(!goldenFile.existsSync()) {
       throw test_package.TestFailure('Could not be compared against non-existent file: "$golden"');
     }
-
-    if (!authorized)
-      throw test_package.TestFailure('Could not authorize golctl.');
+    final bool authorized = await _skiaClient.auth(fs.directory(basedir));
+    if (!authorized) {
+      //TODO(katelovett): Clean up for final implementation
+      return true;
+      //throw test_package.TestFailure('Could not authorize golctl.');
+    }
     return await _skiaClient.imgtest(golden.path, goldenFile);
   }
 
