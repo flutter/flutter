@@ -207,6 +207,7 @@ The following subset of the daemon domain is available in `flutter run --machine
   - [`shutdown`](#daemonshutdown)
 - Events
   - [`connected`](#daemonconnected)
+  - [`log`](#daemonlog)
   - [`logMessage`](#daemonlogmessage)
 
 ### app domain
