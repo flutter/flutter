@@ -310,9 +310,18 @@ class AttachCommand extends FlutterCommand {
 
   Future<Uri> _buildObservatoryUri(Device device,
       String host, int devicePort, [String authCode]) async {
+    String path = '/';
+    if (authCode != null) {
+      path = authCode;
+    }
+    // Not having a trailing slash can cause problems in some situations.
+    // Ensure that there's one present.
+    if (!path.endsWith('/')) {
+      path += '/';
+    }
     final int localPort = observatoryPort
         ?? await device.portForwarder.forward(devicePort);
-    return Uri(scheme: 'http', host: host, port: localPort, path: authCode);
+    return Uri(scheme: 'http', host: host, port: localPort, path: path);
   }
 }
 
@@ -348,9 +357,9 @@ class HotRunnerFactory {
 }
 
 class MDnsObservatoryDiscoveryResult {
+  MDnsObservatoryDiscoveryResult(this.port, this.authCode);
   final int port;
   final String authCode;
-  MDnsObservatoryDiscoveryResult(this.port, this.authCode);
 }
 
 /// A wrapper around [MDnsClient] to find a Dart observatory instance.
@@ -448,8 +457,8 @@ class MDnsObservatoryDiscovery {
         .lookup<TxtResourceRecord>(
             ResourceRecordQuery.text(domainName),
         )
-        .toList();
-      if (txt.isEmpty) {
+        ?.toList();
+      if (txt == null || txt.isEmpty) {
         return MDnsObservatoryDiscoveryResult(srv.first.port, '');
       }
       String authCode = '';

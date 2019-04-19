@@ -289,7 +289,6 @@ void main() {
 
         final Completer<void> completer = Completer<void>();
         final StreamSubscription<String> loggerSubscription = logger.stream.listen((String message) {
-          print("MESSAGE: $message");
           if (message == '[verbose] Connecting to service protocol: http://127.0.0.1:42/') {
             // Wait until resident_runner.dart tries to connect.
             // There's nothing to connect _to_, so that's as far as we care to go.
@@ -512,7 +511,7 @@ void main() {
       );
 
       final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(mdnsClient: client);
-      final int port = (await (portDiscovery.query(applicationId: 'fiz')))?.port;
+      final int port = (await portDiscovery.query(applicationId: 'fiz'))?.port;
       expect(port, 321);
     });
 

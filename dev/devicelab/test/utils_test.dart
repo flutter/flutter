@@ -18,8 +18,8 @@ void main() {
   });
 
   group('parse service', () {
-    final String badOutput = 'No uri here';
-    final String sampleOutput = 'An Observatory debugger and profiler on '
+    const String badOutput = 'No uri here';
+    const String sampleOutput = 'An Observatory debugger and profiler on '
       'Pixel 3 XL is available at: http://127.0.0.1:9090/LpjUpsdEjqI=/';
 
     test('uri', () {
