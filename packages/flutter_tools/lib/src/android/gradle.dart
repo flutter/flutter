@@ -26,7 +26,7 @@ import '../usage.dart';
 import 'android_sdk.dart';
 import 'android_studio.dart';
 
-const String gradleVersion = '4.10.2';
+const String gradleVersion = '5.4';
 final RegExp _assembleTaskPattern = RegExp(r'assemble(\S+)');
 
 GradleProject _cachedGradleProject;

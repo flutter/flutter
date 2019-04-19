@@ -110,7 +110,7 @@ Stream<RunningProcessInfo> windowsRunningProcesses(String processName) async* {
 /// E.g.:
 /// ProcessId CreationDate          CommandLine
 /// --------- ------------          -----------
-///      2904 3/11/2019 11:01:54 AM "C:\Program Files\Android\Android Studio\jre\bin\java.exe" -Xmx1536M -Dfile.encoding=windows-1252 -Duser.country=US -Duser.language=en -Duser.variant -cp C:\Users\win1\.gradle\wrapper\dists\gradle-4.10.2-all\9fahxiiecdb76a5g3aw9oi8rv\gradle-4.10.2\lib\gradle-launcher-4.10.2.jar org.gradle.launcher.daemon.bootstrap.GradleDaemon 4.10.2
+///      2904 3/11/2019 11:01:54 AM "C:\Program Files\Android\Android Studio\jre\bin\java.exe" -Xmx1536M -Dfile.encoding=windows-1252 -Duser.country=US -Duser.language=en -Duser.variant -cp C:\Users\win1\.gradle\wrapper\dists\gradle-5.4-all\9fahxiiecdb76a5g3aw9oi8rv\gradle-5.4\lib\gradle-launcher-5.4.jar org.gradle.launcher.daemon.bootstrap.GradleDaemon 4.10.2
 @visibleForTesting
 Iterable<RunningProcessInfo> processPowershellOutput(String output) sync* {
   if (output == null) {
