@@ -105,7 +105,7 @@ abstract class Artifacts {
   }
 
   // Returns the requested [artifact] for the [platform] and [mode] combination.
-  String getArtifactPath(Artifact artifact, [ TargetPlatform platform, BuildMode mode ]);
+  String getArtifactPath(Artifact artifact, { TargetPlatform platform, BuildMode mode });
 
   // Returns which set of engine artifacts is currently used for the [platform]
   // and [mode] combination.
@@ -116,7 +116,7 @@ abstract class Artifacts {
 class CachedArtifacts extends Artifacts {
 
   @override
-  String getArtifactPath(Artifact artifact, [ TargetPlatform platform, BuildMode mode ]) {
+  String getArtifactPath(Artifact artifact, { TargetPlatform platform, BuildMode mode }) {
     platform ??= _currentHostPlatform;
     switch (platform) {
       case TargetPlatform.android_arm:
@@ -173,9 +173,10 @@ class CachedArtifacts extends Artifacts {
     }
   }
 
-  String _getFlutterPatchedSdkPath() {
+  String _getFlutterPatchedSdkPath(BuildMode mode) {
     final String engineArtifactsPath = cache.getArtifactDirectory('engine').path;
-    return fs.path.join(engineArtifactsPath, 'common', 'flutter_patched_sdk');
+    return fs.path.join(engineArtifactsPath, 'common',
+        mode == BuildMode.release ? 'flutter_patched_sdk_product' : 'flutter_patched_sdk');
   }
 
   String _getFlutterWebSdkPath() {
@@ -200,11 +201,11 @@ class CachedArtifacts extends Artifacts {
       case Artifact.engineDartBinary:
         return fs.path.join(dartSdkPath, 'bin', _artifactToFileName(artifact));
       case Artifact.platformKernelDill:
-        return fs.path.join(_getFlutterPatchedSdkPath(), _artifactToFileName(artifact));
+        return fs.path.join(_getFlutterPatchedSdkPath(mode), _artifactToFileName(artifact));
       case Artifact.platformLibrariesJson:
-        return fs.path.join(_getFlutterPatchedSdkPath(), 'lib', _artifactToFileName(artifact));
+        return fs.path.join(_getFlutterPatchedSdkPath(mode), 'lib', _artifactToFileName(artifact));
       case Artifact.flutterPatchedSdkPath:
-        return _getFlutterPatchedSdkPath();
+        return _getFlutterPatchedSdkPath(mode);
       case Artifact.flutterWebSdk:
         return _getFlutterWebSdkPath();
       case Artifact.dart2jsSnapshot:
@@ -262,7 +263,7 @@ class LocalEngineArtifacts extends Artifacts {
   String _hostEngineOutPath;
 
   @override
-  String getArtifactPath(Artifact artifact, [ TargetPlatform platform, BuildMode mode ]) {
+  String getArtifactPath(Artifact artifact, { TargetPlatform platform, BuildMode mode }) {
     switch (artifact) {
       case Artifact.snapshotDart:
         return fs.path.join(_engineSrcPath, 'flutter', 'lib', 'snapshot', _artifactToFileName(artifact));
@@ -274,13 +275,17 @@ class LocalEngineArtifacts extends Artifacts {
       case Artifact.vmSnapshotData:
         return fs.path.join(engineOutPath, 'gen', 'flutter', 'lib', 'snapshot', _artifactToFileName(artifact));
       case Artifact.platformKernelDill:
-        return fs.path.join(_getFlutterPatchedSdkPath(), _artifactToFileName(artifact));
+        return fs.path.join(_getFlutterPatchedSdkPath(mode), _artifactToFileName(artifact));
       case Artifact.platformLibrariesJson:
-        return fs.path.join(_getFlutterPatchedSdkPath(), 'lib', _artifactToFileName(artifact));
+        return fs.path.join(_getFlutterPatchedSdkPath(mode), 'lib', _artifactToFileName(artifact));
       case Artifact.flutterFramework:
         return fs.path.join(engineOutPath, _artifactToFileName(artifact));
       case Artifact.flutterPatchedSdkPath:
-        return _getFlutterPatchedSdkPath();
+        // When using local engine always use [BuildMode.debug] regardless of
+        // what was specified in [mode] argument because local engine will
+        // have only one flutter_patched_sdk in standard location, that
+        // is happen to be what debug(non-release) mode is using.
+        return _getFlutterPatchedSdkPath(BuildMode.debug);
       case Artifact.flutterWebSdk:
         return _getFlutterWebSdkPath();
       case Artifact.frontendServerSnapshotForEngineDartSdk:
@@ -303,8 +308,9 @@ class LocalEngineArtifacts extends Artifacts {
     return fs.path.basename(engineOutPath);
   }
 
-  String _getFlutterPatchedSdkPath() {
-    return fs.path.join(engineOutPath, 'flutter_patched_sdk');
+  String _getFlutterPatchedSdkPath(BuildMode buildMode) {
+    return fs.path.join(engineOutPath,
+        buildMode == BuildMode.release ? 'flutter_patched_sdk_product' : 'flutter_patched_sdk');
   }
 
   String _getFlutterWebSdkPath() {
@@ -356,7 +362,7 @@ class OverrideArtifacts implements Artifacts {
   final File flutterPatchedSdk;
 
   @override
-  String getArtifactPath(Artifact artifact, [ TargetPlatform platform, BuildMode mode ]) {
+  String getArtifactPath(Artifact artifact, { TargetPlatform platform, BuildMode mode }) {
     if (artifact == Artifact.frontendServerSnapshotForEngineDartSdk && frontendServer != null) {
       return frontendServer.path;
     }
@@ -369,7 +375,7 @@ class OverrideArtifacts implements Artifacts {
     if (artifact == Artifact.flutterPatchedSdkPath && flutterPatchedSdk != null) {
       return flutterPatchedSdk.path;
     }
-    return parent.getArtifactPath(artifact, platform, mode);
+    return parent.getArtifactPath(artifact, platform: platform, mode: mode);
   }
 
   @override

@@ -21,7 +21,7 @@ import 'watcher.dart';
 
 /// A class that's used to collect coverage data during tests.
 class CoverageCollector extends TestWatcher {
-  CoverageCollector(this.flutterProject, {this.coverageDirectory});
+  CoverageCollector({this.flutterProject, this.coverageDirectory});
 
   Map<String, dynamic> _globalHitmap;
   final Directory coverageDirectory;
@@ -34,10 +34,11 @@ class CoverageCollector extends TestWatcher {
   }
 
   void _addHitmap(Map<String, dynamic> hitmap) {
-    if (_globalHitmap == null)
+    if (_globalHitmap == null) {
       _globalHitmap = hitmap;
-    else
+    } else {
       coverage.mergeHitmaps(hitmap, _globalHitmap);
+    }
   }
 
   /// Collects coverage for the given [Process] using the given `port`.
@@ -61,6 +62,9 @@ class CoverageCollector extends TestWatcher {
       // If we have a specified coverage directory or could not find the package name, then
       // accept all libraries.
       if (coverageDirectory != null) {
+        return true;
+      }
+      if (flutterProject == null) {
         return true;
       }
       return libraryName.contains(flutterProject.manifest.appName);
@@ -88,8 +92,9 @@ class CoverageCollector extends TestWatcher {
     Directory coverageDirectory,
   }) async {
     printTrace('formating coverage data');
-    if (_globalHitmap == null)
+    if (_globalHitmap == null) {
       return null;
+    }
     if (formatter == null) {
       final coverage.Resolver resolver = coverage.Resolver(packagesPath: PackageMap.globalPackagesPath);
       final String packagePath = fs.currentDirectory.path;
@@ -216,6 +221,10 @@ void _buildCoverageMap(
     final Map<String, dynamic> sourceReport = sourceReports[scriptId];
     for (Map<String, dynamic> range in sourceReport['ranges']) {
       final Map<String, dynamic> coverage = range['coverage'];
+      // Coverage reports may sometimes be null for a Script.
+      if (coverage == null) {
+        continue;
+      }
       final Map<String, dynamic> scriptRef = sourceReport['scripts'][range['scriptIndex']];
       final String uri = scriptRef['uri'];
 
@@ -224,6 +233,10 @@ void _buildCoverageMap(
       final List<dynamic> hits = coverage['hits'];
       final List<dynamic> misses = coverage['misses'];
       final List<dynamic> tokenPositions = scripts[scriptRef['id']]['tokenPosTable'];
+      // The token positions can be null if the script has no coverable lines.
+      if (tokenPositions == null) {
+        continue;
+      }
       if (hits != null) {
         for (int hit in hits) {
           final int line = _lineAndColumn(hit, tokenPositions)[0];

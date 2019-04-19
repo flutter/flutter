@@ -114,7 +114,8 @@ void main() {
       mockXcode = MockXcode();
       bufferLogger = BufferLogger();
       for (BuildMode mode in BuildMode.values) {
-        when(mockArtifacts.getArtifactPath(Artifact.snapshotDart, any, mode)).thenReturn(kSnapshotDart);
+        when(mockArtifacts.getArtifactPath(Artifact.snapshotDart,
+            platform: anyNamed('platform'), mode: mode)).thenReturn(kSnapshotDart);
       }
     });
 
@@ -552,9 +553,11 @@ void main() {
       mockArtifacts = MockArtifacts();
 
       for (BuildMode mode in BuildMode.values) {
-        when(mockArtifacts.getArtifactPath(Artifact.vmSnapshotData, null, mode))
+        when(mockArtifacts.getArtifactPath(Artifact.vmSnapshotData,
+            platform: anyNamed('platform'), mode: mode))
             .thenReturn(kEngineVmSnapshotData);
-        when(mockArtifacts.getArtifactPath(Artifact.isolateSnapshotData, null, mode))
+        when(mockArtifacts.getArtifactPath(Artifact.isolateSnapshotData,
+            platform: anyNamed('platform'), mode: mode))
             .thenReturn(kEngineIsolateSnapshotData);
       }
     });

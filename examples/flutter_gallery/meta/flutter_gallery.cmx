@@ -16,8 +16,7 @@
             "fuchsia.testing.runner.TestRunner",
             "fuchsia.ui.input.ImeService",
             "fuchsia.ui.policy.Presenter",
-            "fuchsia.ui.scenic.Scenic",
-            "fuchsia.ui.viewsv1.ViewManager"
+            "fuchsia.ui.scenic.Scenic"
         ]
     }
 }

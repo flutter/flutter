@@ -282,7 +282,8 @@ Information about project "Runner":
     }
 
     testUsingOsxContext('sets ARCHS=armv7 when armv7 local engine is set', () async {
-      when(mockArtifacts.getArtifactPath(Artifact.flutterFramework, TargetPlatform.ios, any)).thenReturn('engine');
+      when(mockArtifacts.getArtifactPath(Artifact.flutterFramework,
+          platform: TargetPlatform.ios, mode: anyNamed('mode'))).thenReturn('engine');
       when(mockArtifacts.engineOutPath).thenReturn(fs.path.join('out', 'ios_profile_arm'));
 
       const BuildInfo buildInfo = BuildInfo(BuildMode.debug, null, targetPlatform: TargetPlatform.ios);
@@ -300,7 +301,8 @@ Information about project "Runner":
     });
 
     testUsingOsxContext('sets TRACK_WIDGET_CREATION=true when trackWidgetCreation is true', () async {
-      when(mockArtifacts.getArtifactPath(Artifact.flutterFramework, TargetPlatform.ios, any)).thenReturn('engine');
+      when(mockArtifacts.getArtifactPath(Artifact.flutterFramework,
+          platform: TargetPlatform.ios, mode: anyNamed('mode'))).thenReturn('engine');
       when(mockArtifacts.engineOutPath).thenReturn(fs.path.join('out', 'ios_profile_arm'));
       const BuildInfo buildInfo = BuildInfo(BuildMode.debug, null, trackWidgetCreation: true, targetPlatform: TargetPlatform.ios);
       final FlutterProject project = await FlutterProject.fromPath('path/to/project');
@@ -317,7 +319,8 @@ Information about project "Runner":
     });
 
     testUsingOsxContext('does not set TRACK_WIDGET_CREATION when trackWidgetCreation is false', () async {
-      when(mockArtifacts.getArtifactPath(Artifact.flutterFramework, TargetPlatform.ios, any)).thenReturn('engine');
+      when(mockArtifacts.getArtifactPath(Artifact.flutterFramework,
+          platform: TargetPlatform.ios, mode: anyNamed('mode'))).thenReturn('engine');
       when(mockArtifacts.engineOutPath).thenReturn(fs.path.join('out', 'ios_profile_arm'));
       const BuildInfo buildInfo = BuildInfo(BuildMode.debug, null, targetPlatform: TargetPlatform.ios);
       final FlutterProject project = await FlutterProject.fromPath('path/to/project');
@@ -334,7 +337,8 @@ Information about project "Runner":
     });
 
     testUsingOsxContext('sets ARCHS=armv7 when armv7 local engine is set', () async {
-      when(mockArtifacts.getArtifactPath(Artifact.flutterFramework, TargetPlatform.ios, any)).thenReturn('engine');
+      when(mockArtifacts.getArtifactPath(Artifact.flutterFramework,
+          platform: TargetPlatform.ios, mode: anyNamed('mode'))).thenReturn('engine');
       when(mockArtifacts.engineOutPath).thenReturn(fs.path.join('out', 'ios_profile'));
       const BuildInfo buildInfo = BuildInfo(BuildMode.debug, null, targetPlatform: TargetPlatform.ios);
 
@@ -366,7 +370,8 @@ Information about project "Runner":
       String expectedBuildName,
       String expectedBuildNumber,
     }) async {
-      when(mockArtifacts.getArtifactPath(Artifact.flutterFramework, TargetPlatform.ios, any)).thenReturn('engine');
+      when(mockArtifacts.getArtifactPath(Artifact.flutterFramework,
+          platform: TargetPlatform.ios, mode: anyNamed('mode'))).thenReturn('engine');
       when(mockArtifacts.engineOutPath).thenReturn(fs.path.join('out', 'ios'));
 
       final File manifestFile = fs.file('path/to/project/pubspec.yaml');
