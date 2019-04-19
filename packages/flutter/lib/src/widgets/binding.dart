@@ -302,6 +302,16 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
           };
         },
       );
+
+      // Expose the ability to send Widget rebuilds as [Timeline] events.
+      registerBoolServiceExtension(
+        name: 'profileWidgetBuilds',
+        getter: () async => debugProfileBuildsEnabled,
+        setter: (bool value) async {
+          if (debugProfileBuildsEnabled != value)
+            debugProfileBuildsEnabled = value;
+        },
+      );
     }
 
     assert(() {
@@ -313,16 +323,6 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
             return Future<void>.value();
           WidgetsApp.debugAllowBannerOverride = value;
           return _forceRebuild();
-        },
-      );
-
-      // Expose the ability to send Widget rebuilds as [Timeline] events.
-      registerBoolServiceExtension(
-        name: 'profileWidgetBuilds',
-        getter: () async => debugProfileBuildsEnabled,
-        setter: (bool value) async {
-          if (debugProfileBuildsEnabled != value)
-            debugProfileBuildsEnabled = value;
         },
       );
 
