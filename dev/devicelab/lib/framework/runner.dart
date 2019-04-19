@@ -89,8 +89,8 @@ Future<Map<String, dynamic>> runTask(String taskName, { bool silent = false }) a
 }
 
 Future<VMIsolateRef> _connectToRunnerIsolate(Uri vmServiceUri) async {
-  final pathSegments = <String>[];
-  if (vmServiceUri.pathSegments.length > 0) {
+  final List<String> pathSegments = <String>[];
+  if (vmServiceUri.pathSegments.isNotEmpty) {
     // Add authentication code.
     pathSegments.add(vmServiceUri.pathSegments[0]);
   }
