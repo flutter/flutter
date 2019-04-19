@@ -387,7 +387,7 @@ void main() {
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
-    await runner.run(<String>['create', '--no-pub', projectDir.path]);
+    await runner.run(<String>['create', '--no-pub', '--androidx', projectDir.path]);
 
     void expectExists(String relPath) {
       expect(fs.isFileSync('${projectDir.path}/$relPath'), true);
@@ -429,7 +429,7 @@ void main() {
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
-    await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', '--androidx', projectDir.path]);
 
     void expectExists(String relPath) {
       expect(fs.isFileSync('${projectDir.path}/$relPath'), true);
