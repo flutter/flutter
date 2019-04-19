@@ -64,10 +64,6 @@ class TestFocusState extends State<TestFocus> {
 }
 
 void main() {
-  setUp(() {
-    // Reset the focus manager between tests, to avoid leaking state.
-    WidgetsBinding.instance.focusManager.reset();
-  });
   group(FocusScope, () {
     testWidgets('Can focus', (WidgetTester tester) async {
       final GlobalKey<TestFocusState> key = GlobalKey();

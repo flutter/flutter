@@ -172,7 +172,6 @@ void main() {
 
   setUp(() {
     debugResetSemanticsIdCounter();
-    WidgetsBinding.instance.focusManager.reset();
   });
 
   final Key textFieldKey = UniqueKey();

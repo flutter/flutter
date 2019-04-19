@@ -690,6 +690,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     FlutterError.onError = _oldExceptionHandler;
     _pendingExceptionDetails = null;
     _parentZone = null;
+    buildOwner.focusManager = FocusManager();
   }
 }
 

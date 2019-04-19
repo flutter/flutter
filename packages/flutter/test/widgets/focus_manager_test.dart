@@ -19,10 +19,6 @@ void sendFakeKeyEvent(Map<String, dynamic> data) {
 
 void main() {
   final GlobalKey widgetKey = GlobalKey();
-  setUp(() {
-    // Reset the focus manager between tests, to avoid leaking state.
-    WidgetsBinding.instance.focusManager.reset();
-  });
   Future<BuildContext> setupWidget(WidgetTester tester) async {
     await tester.pumpWidget(Container(key: widgetKey));
     return widgetKey.currentContext;
