@@ -616,6 +616,13 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
 /// ancestor to the ink well). The [MaterialType.transparency] material
 /// kind can be used for this purpose.
 ///
+/// ### The ink splashes are clipping or animating unpleasantly!
+///
+/// If the layout changes, a LayoutChangedNotification must be dispatched at
+/// the relevant subtree. This means that Transitions should not be placed
+/// inside Material. Otherwise, in-progress ink features (e.g., ink splashes
+/// and ink highlights) won't move to account for the new layout.
+///
 /// See also:
 ///
 ///  * [GestureDetector], for listening for gestures without ink splashes.
