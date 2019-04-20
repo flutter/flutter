@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
@@ -1778,5 +1779,68 @@ void main() {
     expect(find.byKey(smallContainer), isOnstage);
     expect(find.byKey(smallContainer), isInCard);
     expect(tester.getSize(find.byKey(smallContainer)), const Size(100,100));
+  });
+
+  testWidgets('On an iOS back swipe and snap, only a single flight should take place', (WidgetTester tester) async {
+    int shuttlesBuilt = 0;
+    final HeroFlightShuttleBuilder shuttleBuilder = (
+      BuildContext flightContext,
+      Animation<double> animation,
+      HeroFlightDirection flightDirection,
+      BuildContext fromHeroContext,
+      BuildContext toHeroContext,
+    ) {
+      shuttlesBuilt += 1;
+      return const Text("I'm flying in a jetplane");
+    };
+
+    final GlobalKey<NavigatorState> navigatorKey = GlobalKey();
+    await tester.pumpWidget(
+      CupertinoApp(
+        navigatorKey: navigatorKey,
+        home: Hero(
+          tag: navigatorKey,
+          // Since we're popping, only the destination route's builder is used.
+          flightShuttleBuilder: shuttleBuilder,
+          transitionOnUserGestures: true,
+          child: const Text('1')
+        ),
+      ),
+    );
+
+    final CupertinoPageRoute<void> route2 = CupertinoPageRoute<void>(
+      builder: (BuildContext context) {
+        return CupertinoPageScaffold(
+          child: Hero(
+            tag: navigatorKey,
+            transitionOnUserGestures: true,
+            child: const Text('2')
+          ),
+        );
+      }
+    );
+
+    navigatorKey.currentState.push(route2);
+    await tester.pumpAndSettle();
+
+    expect(shuttlesBuilt, 1);
+
+    final TestGesture gesture = await tester.startGesture(const Offset(5.0, 200.0));
+    await gesture.moveBy(const Offset(500.0, 0.0));
+    await tester.pump();
+    // Starting the back swipe creates a new hero shuttle.
+    expect(shuttlesBuilt, 2);
+
+    await gesture.up();
+    await tester.pump();
+    // After the lift, no additional shuttles should be created since it's the
+    // same hero flight.
+    expect(shuttlesBuilt, 2);
+
+    // Did go far enough to snap out of this route.
+    await tester.pump(const Duration(milliseconds: 301));
+    expect(find.text('2'), findsNothing);
+    // Still one shuttle.
+    expect(shuttlesBuilt, 2);
   });
 }
