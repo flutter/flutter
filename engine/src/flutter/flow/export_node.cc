@@ -11,9 +11,8 @@ namespace {
 using ExportNodeBindings =
     std::unordered_map<zx_koid_t, std::unique_ptr<flutter::ExportNode>>;
 
-FML_THREAD_LOCAL fml::ThreadLocal tls_export_node_bindings([](intptr_t value) {
-  delete reinterpret_cast<ExportNodeBindings*>(value);
-});
+FML_THREAD_LOCAL fml::ThreadLocalUniquePtr<ExportNodeBindings>
+    tls_export_node_bindings;
 
 }  // namespace
 
@@ -27,13 +26,11 @@ ExportNode::ExportNode(zx::eventpair export_token)
 void ExportNode::Create(zx_koid_t id, zx::eventpair export_token) {
   // This GPU thread contains at least 1 ViewHolder.  Initialize the per-thread
   // bindings.
-  if (tls_export_node_bindings.Get() == 0) {
-    tls_export_node_bindings.Set(
-        reinterpret_cast<intptr_t>(new ExportNodeBindings()));
+  if (tls_export_node_bindings.get() == nullptr) {
+    tls_export_node_bindings.reset(new ExportNodeBindings());
   }
 
-  auto* bindings =
-      reinterpret_cast<ExportNodeBindings*>(tls_export_node_bindings.Get());
+  auto* bindings = tls_export_node_bindings.get();
   FML_DCHECK(bindings);
   FML_DCHECK(bindings->find(id) == bindings->end());
 
@@ -43,16 +40,14 @@ void ExportNode::Create(zx_koid_t id, zx::eventpair export_token) {
 }
 
 void ExportNode::Destroy(zx_koid_t id) {
-  auto* bindings =
-      reinterpret_cast<ExportNodeBindings*>(tls_export_node_bindings.Get());
+  auto* bindings = tls_export_node_bindings.get();
   FML_DCHECK(bindings);
 
   bindings->erase(id);
 }
 
 ExportNode* ExportNode::FromId(zx_koid_t id) {
-  auto* bindings =
-      reinterpret_cast<ExportNodeBindings*>(tls_export_node_bindings.Get());
+  auto* bindings = tls_export_node_bindings.get();
   if (!bindings) {
     return nullptr;
   }

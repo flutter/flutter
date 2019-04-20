@@ -15,12 +15,10 @@
 
 namespace fml {
 
-FML_THREAD_LOCAL ThreadLocal tls_message_loop([](intptr_t value) {
-  delete reinterpret_cast<MessageLoop*>(value);
-});
+FML_THREAD_LOCAL ThreadLocalUniquePtr<MessageLoop> tls_message_loop;
 
 MessageLoop& MessageLoop::GetCurrent() {
-  auto* loop = reinterpret_cast<MessageLoop*>(tls_message_loop.Get());
+  auto* loop = tls_message_loop.get();
   FML_CHECK(loop != nullptr)
       << "MessageLoop::EnsureInitializedForCurrentThread was not called on "
          "this thread prior to message loop use.";
@@ -28,15 +26,15 @@ MessageLoop& MessageLoop::GetCurrent() {
 }
 
 void MessageLoop::EnsureInitializedForCurrentThread() {
-  if (tls_message_loop.Get() != 0) {
+  if (tls_message_loop.get() != nullptr) {
     // Already initialized.
     return;
   }
-  tls_message_loop.Set(reinterpret_cast<intptr_t>(new MessageLoop()));
+  tls_message_loop.reset(new MessageLoop());
 }
 
 bool MessageLoop::IsInitializedForCurrentThread() {
-  return tls_message_loop.Get() != 0;
+  return tls_message_loop.get() != nullptr;
 }
 
 MessageLoop::MessageLoop()

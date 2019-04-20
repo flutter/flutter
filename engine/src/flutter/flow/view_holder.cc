@@ -11,9 +11,8 @@ namespace {
 using ViewHolderBindings =
     std::unordered_map<zx_koid_t, std::unique_ptr<flutter::ViewHolder>>;
 
-FML_THREAD_LOCAL fml::ThreadLocal tls_view_holder_bindings([](intptr_t value) {
-  delete reinterpret_cast<ViewHolderBindings*>(value);
-});
+FML_THREAD_LOCAL fml::ThreadLocalUniquePtr<ViewHolderBindings>
+    tls_view_holder_bindings;
 
 fuchsia::ui::gfx::ViewProperties ToViewProperties(float width,
                                                   float height,
@@ -65,13 +64,11 @@ void ViewHolder::Create(zx_koid_t id,
                         BindCallback on_bind_callback) {
   // This GPU thread contains at least 1 ViewHolder.  Initialize the per-thread
   // bindings.
-  if (tls_view_holder_bindings.Get() == 0) {
-    tls_view_holder_bindings.Set(
-        reinterpret_cast<intptr_t>(new ViewHolderBindings()));
+  if (tls_view_holder_bindings.get() == nullptr) {
+    tls_view_holder_bindings.reset(new ViewHolderBindings());
   }
 
-  auto* bindings =
-      reinterpret_cast<ViewHolderBindings*>(tls_view_holder_bindings.Get());
+  auto* bindings = tls_view_holder_bindings.get();
   FML_DCHECK(bindings);
   FML_DCHECK(bindings->find(id) == bindings->end());
 
@@ -82,16 +79,14 @@ void ViewHolder::Create(zx_koid_t id,
 }
 
 void ViewHolder::Destroy(zx_koid_t id) {
-  auto* bindings =
-      reinterpret_cast<ViewHolderBindings*>(tls_view_holder_bindings.Get());
+  auto* bindings = tls_view_holder_bindings.get();
   FML_DCHECK(bindings);
 
   bindings->erase(id);
 }
 
 ViewHolder* ViewHolder::FromId(zx_koid_t id) {
-  auto* bindings =
-      reinterpret_cast<ViewHolderBindings*>(tls_view_holder_bindings.Get());
+  auto* bindings = tls_view_holder_bindings.get();
   if (!bindings) {
     return nullptr;
   }
