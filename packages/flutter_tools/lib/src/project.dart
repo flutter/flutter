@@ -162,8 +162,12 @@ class FlutterProject {
     if (!directory.existsSync() || hasExampleApp)
       return;
     refreshPluginsList(this);
-    await android.ensureReadyForPlatformSpecificTooling();
-    await ios.ensureReadyForPlatformSpecificTooling();
+    if (android.existsSync()) {
+      await android.ensureReadyForPlatformSpecificTooling();
+    }
+    if (ios.existsSync()) {
+      await ios.ensureReadyForPlatformSpecificTooling();
+    }
     if (flutterWebEnabled) {
       await web.ensureReadyForPlatformSpecificTooling();
     }
@@ -202,6 +206,8 @@ class IosProject {
 
   Directory get _ephemeralDirectory => parent.directory.childDirectory('.ios');
   Directory get _editableDirectory => parent.directory.childDirectory('ios');
+
+  bool existsSync() => hostAppRoot.existsSync();
 
   /// This parent folder of `Runner.xcodeproj`.
   Directory get hostAppRoot {
@@ -381,6 +387,8 @@ class AndroidProject {
     return _ephemeralDirectory;
   }
 
+  bool existsSync() => _flutterLibGradleRoot.existsSync();
+
   /// The Gradle root directory of the Android wrapping of Flutter and plugins.
   /// This is the same as [hostAppGradleRoot] except when the project is
   /// a Flutter module with an editable host app.
@@ -485,6 +493,8 @@ class WebProject {
   WebProject._(this.parent);
 
   final FlutterProject parent;
+
+  bool existsSync() => parent.directory.childDirectory('web').existsSync();
 
   Future<void> ensureReadyForPlatformSpecificTooling() async {
     /// Generate index.html in build/web. Eventually we could support

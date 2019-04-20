@@ -286,8 +286,9 @@ Future<void> _writeIOSPluginRegistrant(FlutterProject project, List<Plugin> plug
 void refreshPluginsList(FlutterProject project) {
   final List<Plugin> plugins = findPlugins(project);
   final bool changed = _writeFlutterPluginsList(project, plugins);
-  if (changed)
+  if (changed && project.ios.existsSync()) {
     cocoaPods.invalidatePodInstallOutput(project.ios);
+  }
 }
 
 /// Injects plugins found in `pubspec.yaml` into the platform-specific projects.
