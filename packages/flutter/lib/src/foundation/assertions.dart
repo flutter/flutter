@@ -8,11 +8,6 @@ import 'basic_types.dart';
 import 'diagnostics.dart';
 import 'print.dart';
 
-// Examples can assume:
-// dynamic element;
-// dynamic color;
-// dynamic _ErrorDiagnostic;
-
 /// Signature for [FlutterError.onError] handler.
 typedef FlutterExceptionHandler = void Function(FlutterErrorDetails details);
 
@@ -42,30 +37,28 @@ abstract class _ErrorDiagnostic extends DiagnosticsProperty<List<Object>> {
   /// In debug builds, a kernel transformer rewrites calls to the default
   /// constructors for [ErrorSummary], [ErrorDetails], and [ErrorHint] to use
   /// this constructor.
-  ///
-  /// {@tool sample}
-  /// ```dart
-  /// _ErrorDiagnostic('Element $element must be $color')
-  /// ```
-  /// Desugars to:
-  /// ```dart
-  /// _ErrorDiagnostic.fromParts(<Object>['Element ', element, ' must be ', color])
-  /// ```
-  ///
-  /// Slightly more complex case:
-  /// ```dart
-  /// _ErrorDiagnostic('Element ${element.runtimeType} must be $color')
-  /// ```
-  /// Desugars to:
-  ///```dart
-  /// _ErrorDiagnostic.fromParts(<Object>[
-  ///   'Element ',
-  ///   DiagnosticsProperty(null, element, description: element.runtimeType?.toString()),
-  ///   ' must be ',
-  ///   color,
-  /// ])
-  /// ```
-  /// {@end-tool}
+  //
+  // ```dart
+  // _ErrorDiagnostic('Element $element must be $color')
+  // ```
+  // Desugars to:
+  // ```dart
+  // _ErrorDiagnostic.fromParts(<Object>['Element ', element, ' must be ', color])
+  // ```
+  //
+  // Slightly more complex case:
+  // ```dart
+  // _ErrorDiagnostic('Element ${element.runtimeType} must be $color')
+  // ```
+  // Desugars to:
+  //```dart
+  // _ErrorDiagnostic.fromParts(<Object>[
+  //   'Element ',
+  //   DiagnosticsProperty(null, element, description: element.runtimeType?.toString()),
+  //   ' must be ',
+  //   color,
+  // ])
+  // ```
   _ErrorDiagnostic._fromParts(
     List<Object> messageParts, {
     DiagnosticsTreeStyle style = DiagnosticsTreeStyle.flat,

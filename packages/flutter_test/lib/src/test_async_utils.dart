@@ -78,9 +78,8 @@ class TestAsyncUtils {
         closedScope = _scopeStack.removeLast();
         if (closedScope == scope)
           break;
-        // TODO(jacobr): what is the ErrorSummary for this error?
         if (!leaked) {
-          information.add(ErrorDescription('Asynchronous call to guarded function leaked.'));
+          information.add(ErrorSummary('Asynchronous call to guarded function leaked.'));
           information.add(ErrorHint('You must use "await" with all Future-returning test APIs.'));
           leaked = true;
         }
