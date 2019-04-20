@@ -392,7 +392,7 @@ FILE: ../../../flutter/runtime/dart_vm_lifecycle.h
 FILE: ../../../flutter/runtime/dart_vm_unittests.cc
 FILE: ../../../flutter/runtime/embedder_resources.cc
 FILE: ../../../flutter/runtime/embedder_resources.h
-FILE: ../../../flutter/runtime/fixtures/simple_main.dart
+FILE: ../../../flutter/runtime/fixtures/runtime_test.dart
 FILE: ../../../flutter/runtime/runtime_controller.cc
 FILE: ../../../flutter/runtime/runtime_controller.h
 FILE: ../../../flutter/runtime/runtime_delegate.cc
@@ -409,7 +409,7 @@ FILE: ../../../flutter/shell/common/animator.cc
 FILE: ../../../flutter/shell/common/animator.h
 FILE: ../../../flutter/shell/common/engine.cc
 FILE: ../../../flutter/shell/common/engine.h
-FILE: ../../../flutter/shell/common/fixtures/main.dart
+FILE: ../../../flutter/shell/common/fixtures/shell_test.dart
 FILE: ../../../flutter/shell/common/isolate_configuration.cc
 FILE: ../../../flutter/shell/common/isolate_configuration.h
 FILE: ../../../flutter/shell/common/persistent_cache.cc

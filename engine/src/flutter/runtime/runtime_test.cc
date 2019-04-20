@@ -60,7 +60,7 @@ Settings RuntimeTest::CreateSettingsForFixture() {
   settings.leak_vm = false;
   settings.task_observer_add = [](intptr_t, fml::closure) {};
   settings.task_observer_remove = [](intptr_t) {};
-  settings.root_isolate_create_callback = [this]() {
+  settings.isolate_create_callback = [this]() {
     native_resolver_->SetNativeResolverForIsolate();
   };
   SetSnapshotsAndAssets(settings);

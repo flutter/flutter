@@ -7,7 +7,9 @@
 #include <mutex>
 #include <vector>
 
+#include "flutter/fml/logging.h"
 #include "flutter/fml/synchronization/thread_annotations.h"
+#include "third_party/tonic/logging/dart_error.h"
 #include "tonic/converter/dart_converter.h"
 
 namespace testing {
@@ -44,6 +46,7 @@ Dart_NativeFunction TestDartNativeResolver::DartNativeEntryResolverCallback(
   std::lock_guard<std::mutex> lock(gIsolateResolversMutex);
   auto found = gIsolateResolvers.find(Dart_CurrentIsolate());
   if (found == gIsolateResolvers.end()) {
+    FML_LOG(ERROR) << "Could not resolve native method for :" << name;
     return nullptr;
   }
 
@@ -53,6 +56,7 @@ Dart_NativeFunction TestDartNativeResolver::DartNativeEntryResolverCallback(
     gIsolateResolvers.erase(found);
   }
 
+  FML_LOG(ERROR) << "Could not resolve native method for :" << name;
   return nullptr;
 }
 
@@ -62,13 +66,12 @@ static const uint8_t* DartNativeEntrySymbolCallback(
 }
 
 void TestDartNativeResolver::SetNativeResolverForIsolate() {
+  FML_CHECK(!Dart_IsError(Dart_RootLibrary()));
   auto result = Dart_SetNativeResolver(Dart_RootLibrary(),
                                        DartNativeEntryResolverCallback,
                                        DartNativeEntrySymbolCallback);
-
-  if (Dart_IsError(result)) {
-    return;
-  }
+  FML_CHECK(!tonic::LogIfError(result))
+      << "Could not set native resolver in test.";
 
   std::lock_guard<std::mutex> lock(gIsolateResolversMutex);
   gIsolateResolvers[Dart_CurrentIsolate()] = shared_from_this();

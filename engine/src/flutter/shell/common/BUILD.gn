@@ -148,7 +148,7 @@ shell_gpu_configuration("shell_unittests_gpu_configuration") {
 }
 
 test_fixtures("shell_unittests_fixtures") {
-  fixtures = [ "fixtures/main.dart" ]
+  fixtures = [ "fixtures/shell_test.dart" ]
 }
 
 shell_host_executable("shell_unittests") {
