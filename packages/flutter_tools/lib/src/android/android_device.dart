@@ -438,6 +438,8 @@ class AndroidDevice extends Device {
       }
       if (debuggingOptions.startPaused)
         cmd.addAll(<String>['--ez', 'start-paused', 'true']);
+      if (debuggingOptions.disableServiceAuthCodes)
+        cmd.addAll(<String>['--ez', 'disable-service-auth-codes', 'true']);
       if (debuggingOptions.useTestFonts)
         cmd.addAll(<String>['--ez', 'use-test-fonts', 'true']);
       if (debuggingOptions.verboseSystemLogs) {

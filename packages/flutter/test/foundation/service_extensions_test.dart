@@ -117,7 +117,7 @@ Future<Map<String, dynamic>> hasReassemble(Future<Map<String, dynamic>> pendingR
 void main() {
   final List<String> console = <String>[];
 
-  test('Service extensions - pretest', () async {
+  setUpAll(() async {
     binding = TestServiceExtensionsBinding();
     expect(binding.frameScheduled, isTrue);
 
@@ -142,10 +142,25 @@ void main() {
     };
   });
 
+  tearDownAll(() async {
+    // See widget_inspector_test.dart for tests of the ext.flutter.inspector
+    // service extensions included in this count.
+    int widgetInspectorExtensionCount = 15;
+    if (WidgetInspectorService.instance.isWidgetCreationTracked()) {
+      // Some inspector extensions are only exposed if widget creation locations
+      // are tracked.
+      widgetInspectorExtensionCount += 2;
+    }
+
+    // If you add a service extension... TEST IT! :-)
+    // ...then increment this number.
+    expect(binding.extensions.length, 26 + widgetInspectorExtensionCount);
+
+    expect(console, isEmpty);
+    debugPrint = debugPrintThrottled;
+  });
+
   // The following list is alphabetical, one test per extension.
-  //
-  // The order doesn't really matter except that the pretest and posttest tests
-  // must be first and last respectively.
 
   test('Service extensions - debugAllowBanner', () async {
     Map<String, dynamic> result;
@@ -167,6 +182,34 @@ void main() {
     result = await binding.testExtension('debugAllowBanner', <String, String>{});
     expect(result, <String, String>{'enabled': 'true'});
     expect(WidgetsApp.debugAllowBannerOverride, true);
+    expect(binding.frameScheduled, isFalse);
+  });
+
+  test('Service extensions - debugCheckElevationsEnabled', () async {
+    expect(binding.frameScheduled, isFalse);
+    expect(debugCheckElevationsEnabled, false);
+
+    bool lastValue = false;
+    Future<void> _updateAndCheck(bool newValue) async {
+      Map<String, dynamic> result;
+      binding.testExtension(
+        'debugCheckElevationsEnabled',
+        <String, String>{'enabled': '$newValue'}
+      ).then((Map<String, dynamic> answer) => result = answer);
+      await binding.flushMicrotasks();
+      expect(binding.frameScheduled, lastValue != newValue);
+      await binding.doFrame();
+      await binding.flushMicrotasks();
+      expect(result, <String, String>{'enabled': '$newValue'});
+      expect(debugCheckElevationsEnabled, newValue);
+      lastValue = newValue;
+    }
+
+    await _updateAndCheck(false);
+    await _updateAndCheck(true);
+    await _updateAndCheck(true);
+    await _updateAndCheck(false);
+    await _updateAndCheck(false);
     expect(binding.frameScheduled, isFalse);
   });
 
@@ -616,23 +659,5 @@ void main() {
     expect(trace, contains('dart:core,Object,Object.\n'));
     expect(trace, contains('package:test_api/test_api.dart,::,test\n'));
     expect(trace, contains('service_extensions_test.dart,::,main\n'));
-  });
-
-  test('Service extensions - posttest', () async {
-    // See widget_inspector_test.dart for tests of the ext.flutter.inspector
-    // service extensions included in this count.
-    int widgetInspectorExtensionCount = 15;
-    if (WidgetInspectorService.instance.isWidgetCreationTracked()) {
-      // Some inspector extensions are only exposed if widget creation locations
-      // are tracked.
-      widgetInspectorExtensionCount += 2;
-    }
-
-    // If you add a service extension... TEST IT! :-)
-    // ...then increment this number.
-    expect(binding.extensions.length, 25 + widgetInspectorExtensionCount);
-
-    expect(console, isEmpty);
-    debugPrint = debugPrintThrottled;
   });
 }

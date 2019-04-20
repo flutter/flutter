@@ -43,7 +43,7 @@ class GenSnapshot {
 
   static String getSnapshotterPath(SnapshotType snapshotType) {
     return artifacts.getArtifactPath(
-        Artifact.genSnapshot, snapshotType.platform, snapshotType.mode);
+        Artifact.genSnapshot, platform: snapshotType.platform, mode: snapshotType.mode);
   }
 
   Future<int> run({
@@ -317,7 +317,7 @@ class AOTSnapshotter {
     final String depfilePath = fs.path.join(outputPath, 'kernel_compile.d');
     final KernelCompiler kernelCompiler = await kernelCompilerFactory.create(flutterProject);
     final CompilerOutput compilerOutput = await _timedStep('frontend', () => kernelCompiler.compile(
-      sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
+      sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath, mode: buildMode),
       mainPath: mainPath,
       packagesPath: packagesPath,
       outputFilePath: getKernelPathForTransformerOptions(
@@ -391,8 +391,8 @@ class JITSnapshotter {
     final Directory outputDir = fs.directory(outputPath);
     outputDir.createSync(recursive: true);
 
-    final String engineVmSnapshotData = artifacts.getArtifactPath(Artifact.vmSnapshotData, null, buildMode);
-    final String engineIsolateSnapshotData = artifacts.getArtifactPath(Artifact.isolateSnapshotData, null, buildMode);
+    final String engineVmSnapshotData = artifacts.getArtifactPath(Artifact.vmSnapshotData, mode: buildMode);
+    final String engineIsolateSnapshotData = artifacts.getArtifactPath(Artifact.isolateSnapshotData, mode: buildMode);
     final String isolateSnapshotData = fs.path.join(outputDir.path, 'isolate_snapshot_data');
     final String isolateSnapshotInstructions = fs.path.join(outputDir.path, 'isolate_snapshot_instr');
 
