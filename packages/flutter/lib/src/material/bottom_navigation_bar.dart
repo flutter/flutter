@@ -147,8 +147,13 @@ class BottomNavigationBar extends StatefulWidget {
   /// The [iconSize], [selectedFontSize], [unselectedFontSize], and [elevation]
   /// arguments must be non-null and non-negative.
   ///
-  /// The [selectedLabelStyle.color] and [unselectedLabelStyle.color] values
-  /// will be ignored in favor of [selectedItemColor] and [unselectedItemColor].
+  /// If [selectedLabelStyle.color] and [unselectedLabelStyle.color] values
+  /// are non-null, they will be used instead of [selectedItemColor] and
+  /// [unselectedItemColor].
+  ///
+  /// If custom [IconThemData]s are used, you must provide both
+  /// [selectedIconTheme] and [unselectedIconTheme], and both
+  /// [IconThemeData.color] and [IconThemeData.size] must be set.
   ///
   /// If both [selectedLabelStyle.fontSize] and [selectedFontSize] are set,
   /// [selectedLabelStyle.fontSize] will be used.
@@ -174,6 +179,8 @@ class BottomNavigationBar extends StatefulWidget {
     this.iconSize = 24.0,
     Color selectedItemColor,
     this.unselectedItemColor,
+    this.selectedIconTheme = const IconThemeData(),
+    this.unselectedIconTheme = const IconThemeData(),
     double selectedFontSize = 14.0,
     double unselectedFontSize = 12.0,
     TextStyle selectedLabelStyle = const TextStyle(inherit: false),
@@ -196,10 +203,8 @@ class BottomNavigationBar extends StatefulWidget {
        assert(selectedFontSize != null && selectedFontSize >= 0.0),
        assert(unselectedFontSize != null && unselectedFontSize >= 0.0),
        assert(selectedLabelStyle != null),
-       assert(selectedLabelStyle.color == null, 'Color of the label is determined by $selectedItemColor'),
        selectedLabelStyle = _defaultTextStyle(selectedLabelStyle, selectedFontSize),
        assert(unselectedLabelStyle != null),
-       assert(unselectedLabelStyle.color == null, 'Color of the label is determined by $unselectedItemColor'),
        unselectedLabelStyle = _defaultTextStyle(unselectedLabelStyle, unselectedFontSize),
        assert(showSelectedLabels != null),
        type = _type(type, items),
@@ -263,6 +268,28 @@ class BottomNavigationBar extends StatefulWidget {
   ///
   /// If null then the [TextTheme.caption]'s color is used.
   final Color unselectedItemColor;
+
+  /// The size, opacity, and color of the icon in the currently selected
+  /// [BottomNavigationBarItem.icon].
+  ///
+  /// If this is not provided, the size will default to [iconSize], the color
+  /// will default to [selectedItemColor].
+  ///
+  /// It this field is provided, it must contain non-null [IconThemeData.size]
+  /// and [IconThemeData.color] properties. Also, if this field is supplied,
+  /// [unselectedIconTheme] must be provided.
+  final IconThemeData selectedIconTheme;
+
+  /// The size, opacity, and color of the icon in the currently unselected
+  /// [BottomNavigationBarItem.icon]s
+  ///
+  /// If this is not provided, the size will default to [iconSize], the color
+  /// will default to [unselectedItemColor].
+  ///
+  /// It this field is provided, it must contain non-null [IconThemeData.size]
+  /// and [IconThemeData.color] properties. Also, if this field is supplied,
+  /// [unselectedIconTheme] must be provided.
+  final IconThemeData unselectedIconTheme;
 
   /// The [TextStyle] of the [BottomNavigationBarItem] labels when they are
   /// selected.
@@ -339,6 +366,8 @@ class _BottomNavigationTile extends StatelessWidget {
     this.selected = false,
     @required this.selectedLabelStyle,
     @required this.unselectedLabelStyle,
+    @required this.selectedIconTheme,
+    @required this.unselectedIconTheme,
     this.showSelectedLabels,
     this.showUnselectedLabels,
     this.indexLabel,
@@ -357,6 +386,8 @@ class _BottomNavigationTile extends StatelessWidget {
   final ColorTween colorTween;
   final double flex;
   final bool selected;
+  final IconThemeData selectedIconTheme;
+  final IconThemeData unselectedIconTheme;
   final TextStyle selectedLabelStyle;
   final TextStyle unselectedLabelStyle;
   final String indexLabel;
@@ -373,8 +404,20 @@ class _BottomNavigationTile extends StatelessWidget {
 
     final double selectedFontSize = selectedLabelStyle.fontSize;
 
-    double bottomPadding = selectedFontSize / 2.0;
-    double topPadding = selectedFontSize / 2.0;
+
+    final double selectedIconSize = selectedIconTheme?.size ?? iconSize;
+    final double unselectedIconSize = unselectedIconTheme?.size ?? iconSize;
+    final double selectedIconDiff = math.max(selectedIconSize - unselectedIconSize, 0);
+    final double unselectedIconDiff = math.max(unselectedIconSize - selectedIconSize, 0);
+
+    double bottomPadding = Tween<double>(
+      begin: selectedFontSize / 2.0 + selectedIconDiff / 2.0,
+      end: selectedFontSize / 2.0 + unselectedIconDiff / 2.0,
+    ).evaluate(animation);
+    double topPadding = Tween<double>(
+      begin: selectedFontSize / 2.0 + selectedIconDiff / 2.0,
+      end: selectedFontSize / 2.0 + unselectedIconDiff / 2.0,
+    ).evaluate(animation);
 
     // Defines the padding for the animating icons + labels.
     //
@@ -395,19 +438,25 @@ class _BottomNavigationTile extends StatelessWidget {
     // =======
     if (showSelectedLabels && !showUnselectedLabels) {
       bottomPadding = Tween<double>(
-        begin: 0.0,
-        end: selectedFontSize / 2.0,
+        begin: selectedIconDiff / 2.0,
+        end: selectedFontSize / 2.0 - unselectedIconDiff / 2.0,
       ).evaluate(animation);
       topPadding = Tween<double>(
-        begin: selectedFontSize,
-        end: selectedFontSize / 2.0,
+        begin: selectedFontSize + selectedIconDiff / 2.0,
+        end: selectedFontSize / 2.0 - unselectedIconDiff / 2.0,
       ).evaluate(animation);
     }
 
     // Center all icons if no labels are shown.
     if (!showSelectedLabels && !showUnselectedLabels) {
-      bottomPadding = 0.0;
-      topPadding = selectedFontSize;
+      bottomPadding = Tween<double>(
+        begin: selectedIconDiff / 2.0,
+        end: unselectedIconDiff / 2.0,
+      ).evaluate(animation);
+      topPadding = Tween<double>(
+        begin: selectedFontSize + selectedIconDiff / 2.0,
+        end: selectedFontSize + unselectedIconDiff / 2.0,
+      ).evaluate(animation);
     }
 
     switch (type) {
@@ -442,6 +491,8 @@ class _BottomNavigationTile extends StatelessWidget {
                       iconSize: iconSize,
                       selected: selected,
                       item: item,
+                      selectedIconTheme: selectedIconTheme,
+                      unselectedIconTheme: unselectedIconTheme,
                     ),
                     _Label(
                       colorTween: colorTween,
@@ -475,6 +526,8 @@ class _TileIcon extends StatelessWidget {
     @required this.iconSize,
     @required this.selected,
     @required this.item,
+    @required this.selectedIconTheme,
+    @required this.unselectedIconTheme,
   }) : assert(selected != null),
        assert(item != null),
        super(key: key);
@@ -484,19 +537,28 @@ class _TileIcon extends StatelessWidget {
   final double iconSize;
   final bool selected;
   final BottomNavigationBarItem item;
+  final IconThemeData selectedIconTheme;
+  final IconThemeData unselectedIconTheme;
 
   @override
   Widget build(BuildContext context) {
     final Color iconColor = colorTween.evaluate(animation);
+    final IconThemeData defaultIconTheme = IconThemeData(
+      color: iconColor,
+      size: iconSize,
+    );
+    final IconThemeData iconThemeData = IconThemeData.lerp(
+      defaultIconTheme.merge(unselectedIconTheme),
+      defaultIconTheme.merge(selectedIconTheme),
+      animation.value,
+    );
+
     return Align(
       alignment: Alignment.topCenter,
       heightFactor: 1.0,
       child: Container(
         child: IconTheme(
-          data: IconThemeData(
-            color: iconColor,
-            size: iconSize,
-          ),
+          data: iconThemeData,
           child: selected ? item.activeIcon : item.icon,
         ),
       ),
@@ -749,6 +811,8 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
         widget.items[i],
         _animations[i],
         widget.iconSize,
+        selectedIconTheme: widget.selectedIconTheme,
+        unselectedIconTheme: widget.unselectedIconTheme,
         selectedLabelStyle: widget.selectedLabelStyle,
         unselectedLabelStyle: widget.unselectedLabelStyle,
         onTap: () {
