@@ -773,7 +773,8 @@ class PointerUpEvent extends PointerEvent {
     Offset position = Offset.zero,
     int buttons = 0,
     bool obscured = false,
-    // PointerUpEvent can contain non-zero pressure. https://github.com/flutter/flutter/pull/30874
+    // Allow pressure customization here because PointerUpEvent can contain
+    // non-zero pressure. See https://github.com/flutter/flutter/issues/31340
     double pressure = 0.0,
     double pressureMin = 1.0,
     double pressureMax = 1.0,
