@@ -98,8 +98,9 @@ bool _writeFlutterPluginsList(FlutterProject project, List<Plugin> plugins) {
   if (pluginManifest.isNotEmpty) {
     pluginsFile.writeAsStringSync('$pluginManifest\n', flush: true);
   } else {
-    if (pluginsFile.existsSync())
+    if (pluginsFile.existsSync()) {
       pluginsFile.deleteSync();
+    }
   }
   final String newContents = _readFlutterPluginsList(project);
   return oldContents != newContents;
@@ -296,18 +297,21 @@ void refreshPluginsList(FlutterProject project) {
 /// Assumes [refreshPluginsList] has been called since last change to `pubspec.yaml`.
 Future<void> injectPlugins(FlutterProject project) async {
   final List<Plugin> plugins = findPlugins(project);
-  await _writeAndroidPluginRegistrant(project, plugins);
-  await _writeIOSPluginRegistrant(project, plugins);
+  if (project.android.existsSync()) {
+    await _writeAndroidPluginRegistrant(project, plugins);
+  }
+  if (project.ios.existsSync()) {
+    await _writeIOSPluginRegistrant(project, plugins);
+  }
   if (!project.isModule && project.ios.hostAppRoot.existsSync()) {
-    final IosProject iosProject = IosProject.fromFlutter(project);
     final CocoaPods cocoaPods = CocoaPods();
     if (plugins.isNotEmpty) {
       cocoaPods.setupPodfile(project.ios);
     }
     /// The user may have a custom maintained Podfile that they're running `pod install`
     /// on themselves.
-    else if (iosProject.podfile.existsSync() && iosProject.podfileLock.existsSync()) {
-      cocoaPods.addPodsDependencyToFlutterXcconfig(iosProject);
+    else if (project.ios.podfile.existsSync() && project.ios.podfileLock.existsSync()) {
+      cocoaPods.addPodsDependencyToFlutterXcconfig(project.ios);
     }
   }
 }
