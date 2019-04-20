@@ -191,7 +191,7 @@ class CupertinoTabScaffold extends StatefulWidget {
   ///
   /// If [CupertinoTabBar.onTap] is provided, it will still be called.
   /// [CupertinoTabScaffold] automatically also listen to the
-  /// [CupertinoTabBar]'s `onTap` to change the [controller]'s `currentIndex`
+  /// [CupertinoTabBar]'s `onTap` to change the [controller]'s `index`
   /// and change the actively displayed tab in [CupertinoTabScaffold]'s own
   /// main content area.
   ///
