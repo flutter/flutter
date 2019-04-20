@@ -12,6 +12,17 @@ import 'package:flutter/painting.dart';
 import '../rendering/mock_canvas.dart';
 
 void main() {
+  testWidgets('Slider theme is built by ThemeData', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(
+      platform: TargetPlatform.android,
+      primarySwatch: Colors.red,
+    );
+    final SliderThemeData sliderTheme = theme.sliderTheme;
+
+    expect(sliderTheme.activeTrackColor.value, equals(Colors.red.value));
+    expect(sliderTheme.inactiveTrackColor.value, equals(Colors.red.withAlpha(0x3d).value));
+  });
+
   testWidgets('Slider uses ThemeData slider theme if present', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(
       platform: TargetPlatform.android,
@@ -52,6 +63,20 @@ void main() {
     );
   });
 
+  testWidgets('SliderThemeData assigns the correct default shapes', (WidgetTester tester) async {
+    final SliderThemeData sliderTheme = ThemeData().sliderTheme;
+    expect(sliderTheme.trackShape, equals(isInstanceOf<RectangularSliderTrackShape>()));
+    expect(sliderTheme.tickMarkShape, equals(isInstanceOf<RoundSliderTickMarkShape>()));
+    expect(sliderTheme.thumbShape, equals(isInstanceOf<RoundSliderThumbShape>()));
+    expect(sliderTheme.valueIndicatorShape, equals(isInstanceOf<PaddleSliderValueIndicatorShape>()));
+    expect(sliderTheme.overlayShape, equals(isInstanceOf<RoundSliderOverlayShape>()));
+  });
+
+  testWidgets('SliderThemeData assigns the correct default flags', (WidgetTester tester) async {
+    final SliderThemeData sliderTheme = ThemeData().sliderTheme;
+    expect(sliderTheme.showValueIndicator, equals(ShowValueIndicator.onlyForDiscrete));
+  });
+
   testWidgets('SliderThemeData generates correct opacities for fromPrimaryColors', (WidgetTester tester) async {
     const Color customColor1 = Color(0xcafefeed);
     const Color customColor2 = Color(0xdeadbeef);
@@ -75,7 +100,7 @@ void main() {
     expect(sliderTheme.disabledInactiveTickMarkColor, equals(customColor2.withAlpha(0x1f)));
     expect(sliderTheme.thumbColor, equals(customColor1.withAlpha(0xff)));
     expect(sliderTheme.disabledThumbColor, equals(customColor2.withAlpha(0x52)));
-    expect(sliderTheme.overlayColor, equals(customColor1.withAlpha(0x1f)));
+    expect(sliderTheme.overlayColor, equals(customColor1.withAlpha(0x29)));
     expect(sliderTheme.valueIndicatorColor, equals(customColor1.withAlpha(0xff)));
     expect(sliderTheme.valueIndicatorTextStyle.color, equals(customColor4));
   });
@@ -107,7 +132,7 @@ void main() {
     expect(lerp.disabledInactiveTickMarkColor, equals(middleGrey.withAlpha(0x1f)));
     expect(lerp.thumbColor, equals(middleGrey.withAlpha(0xff)));
     expect(lerp.disabledThumbColor, equals(middleGrey.withAlpha(0x52)));
-    expect(lerp.overlayColor, equals(middleGrey.withAlpha(0x1f)));
+    expect(lerp.overlayColor, equals(middleGrey.withAlpha(0x29)));
     expect(lerp.valueIndicatorColor, equals(middleGrey.withAlpha(0xff)));
     expect(lerp.valueIndicatorTextStyle.color, equals(middleGrey.withAlpha(0xff)));
   });
@@ -127,8 +152,8 @@ void main() {
     expect(
       sliderBox,
       paints
-        ..rect(rect: Rect.fromLTRB(25.0, 299.0, 202.0, 301.0), color: sliderTheme.activeTrackColor)
-        ..rect(rect: Rect.fromLTRB(222.0, 299.0, 776.0, 301.0), color: sliderTheme.inactiveTrackColor),
+        ..rect(rect: Rect.fromLTRB(16.0, 299.0, 208.0, 301.0), color: sliderTheme.activeTrackColor)
+        ..rect(rect: Rect.fromLTRB(208.0, 299.0, 784.0, 301.0), color: sliderTheme.inactiveTrackColor),
     );
 
     await tester.pumpWidget(_buildApp(sliderTheme, value: 0.25, enabled: false));
@@ -143,8 +168,8 @@ void main() {
     expect(
       sliderBox,
       paints
-        ..rect(rect: Rect.fromLTRB(25.0, 299.0, 202.0, 301.0), color: sliderTheme.disabledActiveTrackColor)
-        ..rect(rect: Rect.fromLTRB(222.0, 299.0, 776.0, 301.0), color: sliderTheme.disabledInactiveTrackColor),
+        ..rect(rect: Rect.fromLTRB(16.0, 299.0, 202.0, 301.0), color: sliderTheme.disabledActiveTrackColor)
+        ..rect(rect: Rect.fromLTRB(214.0, 299.0, 784.0, 301.0), color: sliderTheme.disabledInactiveTrackColor),
     );
   });
 
@@ -164,9 +189,9 @@ void main() {
       paints
         ..circle(
           color: sliderTheme.thumbColor,
-          x: 212.0,
+          x: 208.0,
           y: 300.0,
-          radius: 10.0,
+          radius: 6.0,
         ),
     );
 
@@ -181,15 +206,15 @@ void main() {
       paints
         ..circle(
           color: sliderTheme.overlayColor,
-          x: 212.0,
+          x: 208.0,
           y: 300.0,
-          radius: 24.0,
+          radius: 16.0,
         )
         ..circle(
           color: sliderTheme.thumbColor,
-          x: 212.0,
+          x: 208.0,
           y: 300.0,
-          radius: 10.0,
+          radius: 6.0,
         ),
     );
 
@@ -202,9 +227,9 @@ void main() {
       paints
         ..circle(
           color: sliderTheme.thumbColor,
-          x: 212.0,
+          x: 208.0,
           y: 300.0,
-          radius: 10.0,
+          radius: 6.0,
         ),
     );
   });
@@ -219,12 +244,12 @@ void main() {
     await tester.pumpWidget(_buildApp(sliderTheme, value: 0.45));
     final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
 
-    expect(sliderBox, paints..circle(color: sliderTheme.thumbColor, radius: 10.0));
+    expect(sliderBox, paints..circle(color: sliderTheme.thumbColor, radius: 6.0));
 
     await tester.pumpWidget(_buildApp(sliderTheme, value: 0.45, enabled: false));
     await tester.pumpAndSettle(); // wait for disable animation
 
-    expect(sliderBox, paints..circle(color: sliderTheme.disabledThumbColor, radius: 10.0));
+    expect(sliderBox, paints..circle(color: sliderTheme.disabledThumbColor, radius: 4.0));
 
     await tester.pumpWidget(_buildApp(sliderTheme, value: 0.45, divisions: 3));
     await tester.pumpAndSettle(); // wait for enable animation
@@ -236,7 +261,7 @@ void main() {
         ..circle(color: sliderTheme.activeTickMarkColor)
         ..circle(color: sliderTheme.inactiveTickMarkColor)
         ..circle(color: sliderTheme.inactiveTickMarkColor)
-        ..circle(color: sliderTheme.thumbColor, radius: 10.0),
+        ..circle(color: sliderTheme.thumbColor, radius: 6.0),
     );
 
     await tester.pumpWidget(_buildApp(sliderTheme, value: 0.45, divisions: 3, enabled: false));
@@ -249,7 +274,7 @@ void main() {
         ..circle(color: sliderTheme.disabledInactiveTickMarkColor)
         ..circle(color: sliderTheme.disabledInactiveTickMarkColor)
         ..circle(color: sliderTheme.disabledInactiveTickMarkColor)
-        ..circle(color: sliderTheme.disabledThumbColor, radius: 10.0),
+        ..circle(color: sliderTheme.disabledThumbColor, radius: 4.0),
     );
   });
 
@@ -343,10 +368,10 @@ void main() {
           color: sliderTheme.valueIndicatorColor,
           includes: <Offset>[
             const Offset(0.0, -40.0),
-            const Offset(92.0, -40.0),
+            const Offset(98.0, -40.0),
             const Offset(-16.0, -40.0),
           ],
-          excludes: <Offset>[const Offset(98.1, -40.0), const Offset(-20.1, -40.0)],
+          excludes: <Offset>[const Offset(98.1, -40.0), const Offset(-16.1, -40.0)],
         ),
     );
     await gesture.up();
@@ -365,9 +390,9 @@ void main() {
           includes: <Offset>[
             const Offset(0.0, -40.0),
             const Offset(16.0, -40.0),
-            const Offset(-92.0, -40.0),
+            const Offset(-98.0, -40.0),
           ],
-          excludes: <Offset>[const Offset(20.1, -40.0), const Offset(-98.1, -40.0)],
+          excludes: <Offset>[const Offset(16.1, -40.0), const Offset(-98.1, -40.0)],
         ),
     );
     await gesture.up();
@@ -385,14 +410,14 @@ void main() {
           color: sliderTheme.valueIndicatorColor,
           includes: <Offset>[
             const Offset(0.0, -49.0),
-            const Offset(68.0, -49.0),
+            const Offset(90.0, -49.0),
             const Offset(-24.0, -49.0),
           ],
           excludes: <Offset>[
             const Offset(98.0, -32.0),  // inside full size, outside small
-            const Offset(-40.0, -32.0),  // inside full size, outside small
+            const Offset(-16.0, -32.0),  // inside full size, outside small
             const Offset(90.1, -49.0),
-            const Offset(-40.1, -49.0),
+            const Offset(-24.1, -49.0),
           ],
         ),
     );
@@ -411,9 +436,10 @@ void main() {
           color: sliderTheme.valueIndicatorColor,
           includes: <Offset>[
             const Offset(0.0, -38.8),
-            const Offset(92.0, -38.8),
-            const Offset(8.0, -23.0), // Inside large, outside scale=1.0
-            const Offset(-2.0, -23.0), // Inside large, outside scale=1.0
+            const Offset(98.0, -38.8),
+            const Offset(-16.0, -38.8),
+            const Offset(10.0, -23.0), // Inside large, outside scale=1.0
+            const Offset(-4.0, -23.0), // Inside large, outside scale=1.0
           ],
           excludes: <Offset>[
             const Offset(98.5, -38.8),
@@ -435,8 +461,8 @@ void main() {
     expect(
       sliderBox,
       paints
-        ..rect(rect: Rect.fromLTRB(32.0, 292.0, 202.0, 308.0), color: sliderTheme.activeTrackColor)
-        ..rect(rect: Rect.fromLTRB(222.0, 292.0, 776.0, 308.0), color: sliderTheme.inactiveTrackColor),
+        ..rect(rect: Rect.fromLTRB(16.0, 292.0, 208.0, 308.0), color: sliderTheme.activeTrackColor)
+        ..rect(rect: Rect.fromLTRB(208.0, 292.0, 784.0, 308.0), color: sliderTheme.inactiveTrackColor),
     );
 
     await tester.pumpWidget(_buildApp(sliderTheme, value: 0.25, enabled: false));
@@ -447,8 +473,8 @@ void main() {
     expect(
       sliderBox,
       paints
-        ..rect(rect: Rect.fromLTRB(32.0, 292.0, 202.0, 308.0), color: sliderTheme.disabledActiveTrackColor)
-        ..rect(rect: Rect.fromLTRB(222.0, 292.0, 776.0, 308.0), color: sliderTheme.disabledInactiveTrackColor),
+        ..rect(rect: Rect.fromLTRB(16.0, 292.0, 202.0, 308.0), color: sliderTheme.disabledActiveTrackColor)
+        ..rect(rect: Rect.fromLTRB(214.0, 292.0, 784.0, 308.0), color: sliderTheme.disabledInactiveTrackColor),
     );
   });
 
@@ -465,7 +491,7 @@ void main() {
 
     expect(
       sliderBox,
-      paints..circle(x: 212, y: 300, radius: 7, color: sliderTheme.thumbColor),
+      paints..circle(x: 208, y: 300, radius: 7, color: sliderTheme.thumbColor),
     );
 
     await tester.pumpWidget(_buildApp(sliderTheme, value: 0.25, enabled: false));
@@ -473,7 +499,7 @@ void main() {
 
     expect(
       sliderBox,
-      paints..circle(x: 212, y: 300, radius: 11, color: sliderTheme.disabledThumbColor),
+      paints..circle(x: 208, y: 300, radius: 11, color: sliderTheme.disabledThumbColor),
     );
   });
 
@@ -489,21 +515,26 @@ void main() {
 
     expect(
       sliderBox,
-      paints..circle(x: 212, y: 300, radius: 9, color: sliderTheme.thumbColor),
+      paints..circle(x: 208, y: 300, radius: 9, color: sliderTheme.thumbColor),
     );
 
     await tester.pumpWidget(_buildApp(sliderTheme, value: 0.25, enabled: false));
     await tester.pumpAndSettle(); // wait for disable animation
+    // Radius should be 6, or 2/3 of 9. 2/3 because the default disabled thumb
+    // radius is 4 and the default enabled thumb radius is 6.
+    // TODO(clocksmith): This ratio will change once thumb sizes are updated to spec.
     expect(
       sliderBox,
-      paints..circle(x: 212, y: 300, radius: 9, color: sliderTheme.disabledThumbColor),
+      paints..circle(x: 208, y: 300, radius: 6, color: sliderTheme.disabledThumbColor),
     );
   });
 
 
   testWidgets('The default slider tick mark shape size can be overridden', (WidgetTester tester) async {
     final SliderThemeData sliderTheme = ThemeData().sliderTheme.copyWith(
-      tickMarkShape: const RoundSliderTickMarkShape(tickMarkRadius: 5),
+      tickMarkShape: const RoundSliderTickMarkShape(
+        tickMarkRadius: 5
+      ),
       activeTickMarkColor: const Color(0xfadedead),
       inactiveTickMarkColor: const Color(0xfadebeef),
       disabledActiveTickMarkColor: const Color(0xfadecafe),
@@ -517,9 +548,9 @@ void main() {
     expect(
       sliderBox,
       paints
-        ..circle(x: 29, y: 300, radius: 5, color: sliderTheme.activeTickMarkColor)
+        ..circle(x: 21, y: 300, radius: 5, color: sliderTheme.activeTickMarkColor)
         ..circle(x: 400, y: 300, radius: 5, color: sliderTheme.activeTickMarkColor)
-        ..circle(x: 771, y: 300, radius: 5, color: sliderTheme.inactiveTickMarkColor),
+        ..circle(x: 779, y: 300, radius: 5, color: sliderTheme.inactiveTickMarkColor),
     );
 
     await tester.pumpWidget(_buildApp(sliderTheme, value: 0.5, divisions: 2,  enabled: false));
@@ -528,9 +559,9 @@ void main() {
     expect(
       sliderBox,
       paints
-        ..circle(x: 29, y: 300, radius: 5, color: sliderTheme.disabledActiveTickMarkColor)
+        ..circle(x: 21, y: 300, radius: 5, color: sliderTheme.disabledActiveTickMarkColor)
         ..circle(x: 400, y: 300, radius: 5, color: sliderTheme.disabledActiveTickMarkColor)
-        ..circle(x: 771, y: 300, radius: 5, color: sliderTheme.disabledInactiveTickMarkColor),
+        ..circle(x: 779, y: 300, radius: 5, color: sliderTheme.disabledInactiveTickMarkColor),
     );
   });
 
