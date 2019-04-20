@@ -1018,79 +1018,81 @@ void main() {
     expect(controller.text, 'abc d${testValue}ef ghi');
   });
 
-  testWidgets('Cannot interact when using TextField at the top of the screen',
-          (WidgetTester tester) async {
-    // This is a regression test for
-    // https://github.com/flutter/flutter/issues/29808
-    final TextEditingController controller = TextEditingController();
+  testWidgets(
+    'Check the toolbar appears below the TextField when there is not enough space above the TextField to show it',
+    (WidgetTester tester) async {
+      // This is a regression test for
+      // https://github.com/flutter/flutter/issues/29808
+      final TextEditingController controller = TextEditingController();
 
-    await tester.pumpWidget(MaterialApp(
-      home: Scaffold(
-        body: Padding(
-          padding: const EdgeInsets.all(30.0),
-          child: TextField(
-            controller: controller,
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          body: Padding(
+            padding: const EdgeInsets.all(30.0),
+            child: TextField(
+              controller: controller,
+              ),
             ),
           ),
         ),
-      ),
-    );
+      );
 
-    const String testValue = 'abc def ghi';
-    await tester.enterText(find.byType(TextField), testValue);
-    await skipPastScrollingAnimation(tester);
+      const String testValue = 'abc def ghi';
+      await tester.enterText(find.byType(TextField), testValue);
+      await skipPastScrollingAnimation(tester);
 
-    // Tap the selection handle to bring up the "paste / select all" menu.
-    await tester.tapAt(textOffsetToPosition(tester, testValue.indexOf('e')));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
-    RenderEditable renderEditable = findRenderEditable(tester);
-    List<TextSelectionPoint> endpoints = globalize(
-      renderEditable.getEndpointsForSelection(controller.selection),
-      renderEditable,
-    );
-    await tester.tapAt(endpoints[0].point + const Offset(1.0, 1.0));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
+      // Tap the selection handle to bring up the "paste / select all" menu.
+      await tester.tapAt(textOffsetToPosition(tester, testValue.indexOf('e')));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
+      RenderEditable renderEditable = findRenderEditable(tester);
+      List<TextSelectionPoint> endpoints = globalize(
+        renderEditable.getEndpointsForSelection(controller.selection),
+        renderEditable,
+      );
+      await tester.tapAt(endpoints[0].point + const Offset(1.0, 1.0));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
 
-    // Verify the selection toolbar position
-    Offset toolbarTopLeft = tester.getTopLeft(find.text('SELECT ALL'));
-    Offset textFieldTopLeft = tester.getTopLeft(find.byType(TextField));
-    expect(textFieldTopLeft.dy, lessThan(toolbarTopLeft.dy));
+      // Verify the selection toolbar position
+      Offset toolbarTopLeft = tester.getTopLeft(find.text('SELECT ALL'));
+      Offset textFieldTopLeft = tester.getTopLeft(find.byType(TextField));
+      expect(textFieldTopLeft.dy, lessThan(toolbarTopLeft.dy));
 
-    await tester.pumpWidget(MaterialApp(
-      home: Scaffold(
-        body: Padding(
-          padding: const EdgeInsets.all(150.0),
-          child: TextField(
-            controller: controller,
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          body: Padding(
+            padding: const EdgeInsets.all(150.0),
+            child: TextField(
+              controller: controller,
+              ),
             ),
           ),
         ),
-      ),
-    );
+      );
 
-    await tester.enterText(find.byType(TextField), testValue);
-    await skipPastScrollingAnimation(tester);
+      await tester.enterText(find.byType(TextField), testValue);
+      await skipPastScrollingAnimation(tester);
 
-    // Tap the selection handle to bring up the "paste / select all" menu.
-    await tester.tapAt(textOffsetToPosition(tester, testValue.indexOf('e')));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
-    renderEditable = findRenderEditable(tester);
-    endpoints = globalize(
-      renderEditable.getEndpointsForSelection(controller.selection),
-      renderEditable,
-    );
-    await tester.tapAt(endpoints[0].point + const Offset(1.0, 1.0));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
+      // Tap the selection handle to bring up the "paste / select all" menu.
+      await tester.tapAt(textOffsetToPosition(tester, testValue.indexOf('e')));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
+      renderEditable = findRenderEditable(tester);
+      endpoints = globalize(
+        renderEditable.getEndpointsForSelection(controller.selection),
+        renderEditable,
+      );
+      await tester.tapAt(endpoints[0].point + const Offset(1.0, 1.0));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
 
-    // Verify the selection toolbar position
-    toolbarTopLeft = tester.getTopLeft(find.text('SELECT ALL'));
-    textFieldTopLeft = tester.getTopLeft(find.byType(TextField));
-    expect(toolbarTopLeft.dy, lessThan(textFieldTopLeft.dy));
-  });
+      // Verify the selection toolbar position
+      toolbarTopLeft = tester.getTopLeft(find.text('SELECT ALL'));
+      textFieldTopLeft = tester.getTopLeft(find.byType(TextField));
+      expect(toolbarTopLeft.dy, lessThan(textFieldTopLeft.dy));
+    }
+  );
 
   testWidgets('Selection toolbar fades in', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController();

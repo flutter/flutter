@@ -97,12 +97,20 @@ abstract class TextSelectionControls {
   /// Builds a toolbar near a text selection.
   ///
   /// Typically displays buttons for copying and pasting text.
+  ///
+  /// [globalEditableRegion] is the TextField size of the global coordinate system
+  /// in logical pixels.
+  ///
+  /// The [position] is a general calculation midpoint parameter of the toolbar.
+  /// If you want more detailed position information, can use [endpoints]
+  /// to calculate it.
   Widget buildToolbar(
-      BuildContext context,
-      Rect globalEditableRegion,
-      TextSelectionPoint leftTextSelectionPoint,
-      TextSelectionPoint rightTextSelectionPoint,
-      TextSelectionDelegate delegate);
+    BuildContext context,
+    Rect globalEditableRegion,
+    Offset position,
+    List<TextSelectionPoint> endpoints,
+    TextSelectionDelegate delegate,
+  );
 
   /// Returns the size of the selection handle.
   Size get handleSize;
@@ -424,18 +432,19 @@ class TextSelectionOverlay {
     if (selectionControls == null)
       return Container();
 
+    // Find the horizontal midpoint, just above the selected text.
+    final List<TextSelectionPoint> endpoints = renderObject.getEndpointsForSelection(_selection);
+    final Offset midpoint = Offset(
+      (endpoints.length == 1) ?
+      endpoints[0].point.dx :
+      (endpoints[0].point.dx + endpoints[1].point.dx) / 2.0,
+      endpoints[0].point.dy - renderObject.preferredLineHeight,
+    );
+
     final Rect editingRegion = Rect.fromPoints(
       renderObject.localToGlobal(Offset.zero),
       renderObject.localToGlobal(renderObject.size.bottomRight(Offset.zero)),
     );
-
-    // Send points to a specific implementation to
-    // find the horizontal midpoint, just above the selected text.
-    final List<TextSelectionPoint> endpoints = renderObject.getEndpointsForSelection(_selection);
-    final TextSelectionPoint leftTextSelectionPoint = endpoints[0];
-    final TextSelectionPoint rightTextSelectionPoint = (endpoints.length > 1)
-        ? endpoints[1]
-        : null;
 
     return FadeTransition(
       opacity: _toolbarOpacity,
@@ -443,7 +452,13 @@ class TextSelectionOverlay {
         link: layerLink,
         showWhenUnlinked: false,
         offset: -editingRegion.topLeft,
-        child: selectionControls.buildToolbar(context, editingRegion, leftTextSelectionPoint, rightTextSelectionPoint, selectionDelegate),
+        child: selectionControls.buildToolbar(
+          context,
+          editingRegion,
+          midpoint,
+          endpoints,
+          selectionDelegate,
+        ),
       ),
     );
   }

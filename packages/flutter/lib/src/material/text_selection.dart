@@ -133,25 +133,29 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
   /// Builder for material-style copy/paste text selection toolbar.
   @override
   Widget buildToolbar(
-      BuildContext context,
-      Rect globalEditableRegion,
-      TextSelectionPoint leftTextSelectionPoint,
-      TextSelectionPoint rightTextSelectionPoint,
-      TextSelectionDelegate delegate) {
+    BuildContext context,
+    Rect globalEditableRegion,
+    Offset position,
+    List<TextSelectionPoint> endpoints,
+    TextSelectionDelegate delegate,
+  ) {
     assert(debugCheckHasMediaQuery(context));
     assert(debugCheckHasMaterialLocalizations(context));
 
-    // If the distance from the top is less than a certain value,
-    // the toolbar should be displayed below the input box.
-    // FIX https://github.com/flutter/flutter/issues/29808
-    final double x = (rightTextSelectionPoint == null)
-        ? leftTextSelectionPoint.point.dx
-        : (leftTextSelectionPoint.point.dx + rightTextSelectionPoint.point.dx) / 2.0;
+    // The toolbar should appear below the TextField
+    // when there is not enough space above the TextField to show it.
+    final TextSelectionPoint startTextSelectionPoint = endpoints[0];
+    final TextSelectionPoint endTextSelectionPoint = (endpoints.length > 1)
+        ? endpoints[1]
+        : null;
+    final double x = (endTextSelectionPoint == null)
+        ? startTextSelectionPoint.point.dx
+        : (startTextSelectionPoint.point.dx + endTextSelectionPoint.point.dx) / 2.0;
     final double availableHeight
-    = globalEditableRegion.top - MediaQuery.of(context).padding.top - _kToolbarScreenPadding;
+        = globalEditableRegion.top - MediaQuery.of(context).padding.top - _kToolbarScreenPadding;
     final double y = (availableHeight < _kToolbarHeight)
-        ? leftTextSelectionPoint.point.dy + globalEditableRegion.height + _kToolbarHeight + _kToolbarScreenPadding
-        : leftTextSelectionPoint.point.dy - globalEditableRegion.height;
+        ? startTextSelectionPoint.point.dy + globalEditableRegion.height + _kToolbarHeight + _kToolbarScreenPadding
+        : startTextSelectionPoint.point.dy - globalEditableRegion.height;
     final Offset position = Offset(x, y);
 
     return ConstrainedBox(

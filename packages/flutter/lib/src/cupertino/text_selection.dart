@@ -41,19 +41,18 @@ const TextStyle _kToolbarButtonFontStyle = TextStyle(
   color: CupertinoColors.white,
 );
 
-/// The direction of the triangle next to the toolbar.
+/// The direction of the triangle attached to the toolbar.
 ///
-/// If the remaining space at the top shows the toolbar properly,
-/// the direction of the triangle will be [down],
-/// otherwise the toolbar will appear at the bottom of the input box and
-/// the triangle will be [up].
+/// Defaults to showing the triangle downwards if sufficient space is available
+/// to show the toolbar above the text field. Otherwise, the toolbar will
+/// appear below the text field and the triangle's direction will be [up].
 enum _ArrowDirection { up, down }
 
 /// Paints a triangle below the toolbar.
 class _TextSelectionToolbarNotchPainter extends CustomPainter {
   const _TextSelectionToolbarNotchPainter(
-      this.arrowDirection
-      ): assert(arrowDirection != null);
+    this.arrowDirection
+  ) : assert (arrowDirection != null);
 
   final _ArrowDirection arrowDirection;
 
@@ -268,28 +267,32 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
   /// Builder for iOS-style copy/paste text selection toolbar.
   @override
   Widget buildToolbar(
-      BuildContext context,
-      Rect globalEditableRegion,
-      TextSelectionPoint leftTextSelectionPoint,
-      TextSelectionPoint rightTextSelectionPoint,
-      TextSelectionDelegate delegate) {
+    BuildContext context,
+    Rect globalEditableRegion,
+    Offset position,
+    List<TextSelectionPoint> endpoints,
+    TextSelectionDelegate delegate,
+  ) {
     assert(debugCheckHasMediaQuery(context));
 
-    // If the distance from the top is less than a certain value,
-    // the toolbar should be displayed below the input box.
-    // FIX https://github.com/flutter/flutter/issues/29808
+    // The toolbar should appear below the TextField
+    // when there is not enough space above the TextField to show it.
     final double availableHeight
         = globalEditableRegion.top - MediaQuery.of(context).padding.top - _kToolbarScreenPadding;
     final _ArrowDirection direction = (availableHeight > _kToolbarHeight)
         ? _ArrowDirection.down
         : _ArrowDirection.up;
 
-    final double x = (rightTextSelectionPoint == null)
-        ? leftTextSelectionPoint.point.dx
-        : (leftTextSelectionPoint.point.dx + rightTextSelectionPoint.point.dx) / 2.0;
+    final TextSelectionPoint startTextSelectionPoint = endpoints[0];
+    final TextSelectionPoint endTextSelectionPoint = (endpoints.length > 1)
+        ? endpoints[1]
+        : null;
+    final double x = (endTextSelectionPoint == null)
+        ? startTextSelectionPoint.point.dx
+        : (startTextSelectionPoint.point.dx + endTextSelectionPoint.point.dx) / 2.0;
     final double y = (direction == _ArrowDirection.up)
-        ? leftTextSelectionPoint.point.dy + globalEditableRegion.height + _kToolbarHeight
-        : leftTextSelectionPoint.point.dy - globalEditableRegion.height;
+        ? startTextSelectionPoint.point.dy + globalEditableRegion.height + _kToolbarHeight
+        : startTextSelectionPoint.point.dy - globalEditableRegion.height;
     final Offset position = Offset(x, y);
 
     return ConstrainedBox(
