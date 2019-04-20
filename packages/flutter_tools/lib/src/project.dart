@@ -388,7 +388,7 @@ class AndroidProject {
     return _ephemeralDirectory;
   }
 
-  bool existsSync() => _flutterLibGradleRoot.existsSync();
+  bool existsSync() => _flutterLibGradleRoot.existsSync() || isModule;
 
   /// The Gradle root directory of the Android wrapping of Flutter and plugins.
   /// This is the same as [hostAppGradleRoot] except when the project is
