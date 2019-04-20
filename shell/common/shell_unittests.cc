@@ -10,6 +10,7 @@
 
 #include "flutter/fml/make_copyable.h"
 #include "flutter/fml/message_loop.h"
+#include "flutter/fml/synchronization/count_down_latch.h"
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/shell/common/platform_view.h"
 #include "flutter/shell/common/rasterizer.h"
@@ -262,6 +263,44 @@ TEST_F(ShellTest, FixturesAreFunctional) {
 
   latch.Wait();
   main_latch.Wait();
+  ASSERT_TRUE(DartVMRef::IsInstanceRunning());
+  shell.reset();
+  ASSERT_FALSE(DartVMRef::IsInstanceRunning());
+}
+
+TEST_F(ShellTest, SecondaryIsolateBindingsAreSetupViaShellSettings) {
+  ASSERT_FALSE(DartVMRef::IsInstanceRunning());
+  const auto settings = CreateSettingsForFixture();
+  auto shell = Shell::Create(
+      GetTaskRunnersForFixture(), settings,
+      [](Shell& shell) {
+        return std::make_unique<TestPlatformView>(shell,
+                                                  shell.GetTaskRunners());
+      },
+      [](Shell& shell) {
+        return std::make_unique<Rasterizer>(shell.GetTaskRunners());
+      });
+  ASSERT_TRUE(ValidateShell(shell.get()));
+
+  auto configuration = RunConfiguration::InferFromSettings(settings);
+  ASSERT_TRUE(configuration.IsValid());
+  configuration.SetEntrypoint("testCanLaunchSecondaryIsolate");
+
+  fml::CountDownLatch latch(2);
+  AddNativeCallback("NotifyNative", CREATE_NATIVE_ENTRY([&latch](auto args) {
+                      latch.CountDown();
+                    }));
+
+  fml::TaskRunner::RunNowOrPostTask(
+      shell->GetTaskRunners().GetUITaskRunner(),
+      fml::MakeCopyable([config = std::move(configuration),
+                         engine = shell->GetEngine()]() mutable {
+        ASSERT_TRUE(engine);
+        ASSERT_EQ(engine->Run(std::move(config)), Engine::RunStatus::Success);
+      }));
+
+  latch.Wait();
+
   ASSERT_TRUE(DartVMRef::IsInstanceRunning());
   shell.reset();
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());

@@ -42,3 +42,16 @@ void testCanSaveCompilationTrace() {
 }
 
 void NotifyResult(bool success) native "NotifyNative";
+void PassMessage(String message) native "PassMessage";
+
+void secondaryIsolateMain(String message) {
+  print("Secondary isolate got message: " + message);
+  PassMessage("Hello from code is secondary isolate.");
+  NotifyNative();
+}
+
+@pragma('vm:entry-point')
+void testCanLaunchSecondaryIsolate() {
+  Isolate.spawn(secondaryIsolateMain, "Hello from root isolate.");
+  NotifyNative();
+}

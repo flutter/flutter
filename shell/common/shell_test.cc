@@ -67,7 +67,7 @@ Settings ShellTest::CreateSettingsForFixture() {
   settings.task_observer_remove = [](intptr_t key) {
     fml::MessageLoop::GetCurrent().RemoveTaskObserver(key);
   };
-  settings.root_isolate_create_callback = [this]() {
+  settings.isolate_create_callback = [this]() {
     native_resolver_->SetNativeResolverForIsolate();
   };
   SetSnapshotsAndAssets(settings);

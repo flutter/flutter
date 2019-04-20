@@ -37,7 +37,9 @@ class RuntimeController final : public WindowClient {
                     fml::WeakPtr<IOManager> io_manager,
                     std::string advisory_script_uri,
                     std::string advisory_script_entrypoint,
-                    std::function<void(int64_t)> idle_notification_callback);
+                    std::function<void(int64_t)> idle_notification_callback,
+                    fml::closure isolate_create_callback,
+                    fml::closure isolate_shutdown_callback);
 
   ~RuntimeController() override;
 
@@ -132,6 +134,8 @@ class RuntimeController final : public WindowClient {
   WindowData window_data_;
   std::weak_ptr<DartIsolate> root_isolate_;
   std::pair<bool, uint32_t> root_isolate_return_code_ = {false, 0};
+  const fml::closure isolate_create_callback_;
+  const fml::closure isolate_shutdown_callback_;
 
   RuntimeController(RuntimeDelegate& client,
                     DartVM* vm,
@@ -143,7 +147,9 @@ class RuntimeController final : public WindowClient {
                     std::string advisory_script_uri,
                     std::string advisory_script_entrypoint,
                     std::function<void(int64_t)> idle_notification_callback,
-                    WindowData data);
+                    WindowData data,
+                    fml::closure isolate_create_callback,
+                    fml::closure isolate_shutdown_callback);
 
   Window* GetWindowIfAvailable();
 
