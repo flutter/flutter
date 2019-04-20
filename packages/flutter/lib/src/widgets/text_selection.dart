@@ -436,8 +436,8 @@ class TextSelectionOverlay {
     final List<TextSelectionPoint> endpoints = renderObject.getEndpointsForSelection(_selection);
     final Offset midpoint = Offset(
       (endpoints.length == 1) ?
-      endpoints[0].point.dx :
-      (endpoints[0].point.dx + endpoints[1].point.dx) / 2.0,
+        endpoints[0].point.dx :
+        (endpoints[0].point.dx + endpoints[1].point.dx) / 2.0,
       endpoints[0].point.dy - renderObject.preferredLineHeight,
     );
 
