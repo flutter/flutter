@@ -13,6 +13,8 @@ task:
     ENGINE_PATH: "/tmp/clean_engine"
     DEPOT_TOOLS: "/tmp/depot_tools"
     PATH: "$DEPOT_TOOLS:$PATH"
+    FLUTTER_ENGINE: "/tmp/clean_engine/src"
+    FRAMEWORK_PATH: "/tmp/master_framework"
   depot_tools_script:
     git clone --depth 1 https://chromium.googlesource.com/chromium/tools/depot_tools.git $DEPOT_TOOLS
   gclient_sync_script: |
@@ -31,6 +33,13 @@ task:
         ./flutter/tools/gn --unoptimized
         ninja -C out/host_debug_unopt
       test_host_script: cd $ENGINE_PATH/src && ./flutter/testing/run_tests.sh host_debug_unopt
+      fetch_framework_script: |
+        mkdir -p $FRAMEWORK_PATH
+        cd $FRAMEWORK_PATH
+        git clone https://github.com/flutter/flutter.git
+      framework_test_script: |
+        cd $FRAMEWORK_PATH/flutter/packages/flutter
+        ../../bin/flutter test --local-engine=host_debug_unopt
     - name: build_and_test_host_profile
       compile_host_script: |
         cd $ENGINE_PATH/src
