@@ -261,6 +261,8 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     if (widget.steps.length == oldWidget.steps.length) {
       for (int i = 0; i < oldWidget.steps.length; i += 1)
         _oldStates[i] = oldWidget.steps[i].state;
+    } else {
+      initState();
     }
   }
 
