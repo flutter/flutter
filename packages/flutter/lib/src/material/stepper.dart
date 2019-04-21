@@ -243,9 +243,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
   List<GlobalKey> _keys;
   final Map<int, StepState> _oldStates = <int, StepState>{};
 
-  @override
-  void initState() {
-    super.initState();
+  void initStepsKeysAndState() {
     _keys = List<GlobalKey>.generate(
       widget.steps.length,
       (int i) => GlobalKey(),
@@ -256,13 +254,19 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
   }
 
   @override
+  void initState() {
+    super.initState();
+    _initStepsKeysAndState();
+  }
+
+  @override
   void didUpdateWidget(Stepper oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.steps.length == oldWidget.steps.length) {
       for (int i = 0; i < oldWidget.steps.length; i += 1)
         _oldStates[i] = oldWidget.steps[i].state;
     } else {
-      initState();
+      _initStepsKeysAndState();
     }
   }
 
