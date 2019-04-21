@@ -706,6 +706,7 @@ TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(JustifyRTL)) {
   txt::ParagraphStyle paragraph_style;
   paragraph_style.max_lines = 14;
   paragraph_style.text_align = TextAlign::justify;
+  paragraph_style.text_direction = TextDirection::rtl;
   txt::ParagraphBuilder builder(paragraph_style, GetTestFontCollection());
 
   txt::TextStyle text_style;
@@ -725,15 +726,32 @@ TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(JustifyRTL)) {
 
   paragraph->Paint(GetCanvas(), 0, 0);
 
-  ASSERT_TRUE(Snapshot());
-
   auto glyph_line_width = [&paragraph](int index) {
     size_t second_to_last_position_index =
-        paragraph->glyph_lines_[index].positions.size() - 2;
+        paragraph->glyph_lines_[index].positions.size() - 1;
     return paragraph->glyph_lines_[index]
         .positions[second_to_last_position_index]
         .x_pos.end;
   };
+
+  SkPaint paint;
+  paint.setStyle(SkPaint::kStroke_Style);
+  paint.setAntiAlias(true);
+  paint.setStrokeWidth(1);
+
+  // Tests for GetRectsForRange()
+  Paragraph::RectHeightStyle rect_height_style =
+      Paragraph::RectHeightStyle::kMax;
+  Paragraph::RectWidthStyle rect_width_style =
+      Paragraph::RectWidthStyle::kTight;
+  paint.setColor(SK_ColorRED);
+  std::vector<txt::Paragraph::TextBox> boxes =
+      paragraph->GetRectsForRange(0, 100, rect_height_style, rect_width_style);
+  for (size_t i = 0; i < boxes.size(); ++i) {
+    GetCanvas()->drawRect(boxes[i].rect, paint);
+  }
+  ASSERT_EQ(boxes.size(), 5ull);
+  ASSERT_TRUE(Snapshot());
 
   // All lines except the last should be justified to the width of the
   // paragraph.
@@ -967,6 +985,74 @@ TEST_F(ParagraphTest, DISABLED_ArabicParagraph) {
   for (size_t i = 0; i < u16_text.length(); i++) {
     ASSERT_EQ(paragraph->text_[i], u16_text[u16_text.length() - i]);
   }
+
+  ASSERT_TRUE(Snapshot());
+}
+
+// Checks if the rects are in the correct positions after typing spaces in
+// Arabic.
+TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(ArabicRectsParagraph)) {
+  const char* text = "بمباركة التقليدية قام عن. تصفح يد    ";
+  auto icu_text = icu::UnicodeString::fromUTF8(text);
+  std::u16string u16_text(icu_text.getBuffer(),
+                          icu_text.getBuffer() + icu_text.length());
+
+  txt::ParagraphStyle paragraph_style;
+  paragraph_style.max_lines = 14;
+  paragraph_style.text_align = TextAlign::right;
+  paragraph_style.text_direction = TextDirection::rtl;
+  txt::ParagraphBuilder builder(paragraph_style, GetTestFontCollection());
+
+  txt::TextStyle text_style;
+  text_style.font_families = std::vector<std::string>(1, "Noto Naskh Arabic");
+  text_style.font_size = 26;
+  text_style.letter_spacing = 1;
+  text_style.word_spacing = 5;
+  text_style.color = SK_ColorBLACK;
+  text_style.height = 1;
+  text_style.decoration = TextDecoration::kUnderline;
+  text_style.decoration_color = SK_ColorBLACK;
+  builder.PushStyle(text_style);
+
+  builder.AddText(u16_text);
+
+  builder.Pop();
+
+  auto paragraph = builder.Build();
+  paragraph->Layout(GetTestCanvasWidth() - 100);
+
+  paragraph->Paint(GetCanvas(), 0, 0);
+
+  SkPaint paint;
+  paint.setStyle(SkPaint::kStroke_Style);
+  paint.setAntiAlias(true);
+  paint.setStrokeWidth(1);
+
+  // Tests for GetRectsForRange()
+  Paragraph::RectHeightStyle rect_height_style =
+      Paragraph::RectHeightStyle::kMax;
+  Paragraph::RectWidthStyle rect_width_style =
+      Paragraph::RectWidthStyle::kTight;
+  paint.setColor(SK_ColorRED);
+  std::vector<txt::Paragraph::TextBox> boxes =
+      paragraph->GetRectsForRange(0, 100, rect_height_style, rect_width_style);
+  for (size_t i = 0; i < boxes.size(); ++i) {
+    GetCanvas()->drawRect(boxes[i].rect, paint);
+  }
+  EXPECT_EQ(boxes.size(), 2ull);
+
+  EXPECT_FLOAT_EQ(boxes[0].rect.left(), 556.54688);
+  EXPECT_FLOAT_EQ(boxes[0].rect.top(), -0.26855469);
+  EXPECT_FLOAT_EQ(boxes[0].rect.right(), 900);
+  EXPECT_FLOAT_EQ(boxes[0].rect.bottom(), 44);
+
+  EXPECT_FLOAT_EQ(boxes[1].rect.left(), 510.09375);
+  EXPECT_FLOAT_EQ(boxes[1].rect.top(), -0.26855469);
+  EXPECT_FLOAT_EQ(boxes[1].rect.right(), 557.04688);
+  EXPECT_FLOAT_EQ(boxes[1].rect.bottom(), 44);
+
+  ASSERT_EQ(paragraph_style.text_align,
+            paragraph->GetParagraphStyle().text_align);
 
   ASSERT_TRUE(Snapshot());
 }
