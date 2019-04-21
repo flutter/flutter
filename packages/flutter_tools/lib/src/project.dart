@@ -158,21 +158,21 @@ class FlutterProject {
 
   /// Generates project files necessary to make Gradle builds work on Android
   /// and CocoaPods+Xcode work on iOS, for app and module projects only.
-  Future<void> ensureReadyForPlatformSpecificTooling() async {
+  Future<void> ensureReadyForPlatformSpecificTooling({bool checkProjects = false}) async {
     if (!directory.existsSync() || hasExampleApp) {
       return;
     }
     refreshPluginsList(this);
-    if (android.existsSync()) {
+    if ((android.existsSync() && checkProjects) || !checkProjects) {
       await android.ensureReadyForPlatformSpecificTooling();
     }
-    if (ios.existsSync()) {
+    if ((ios.existsSync() && checkProjects) || !checkProjects) {
       await ios.ensureReadyForPlatformSpecificTooling();
     }
     if (flutterWebEnabled) {
       await web.ensureReadyForPlatformSpecificTooling();
     }
-    await injectPlugins(this);
+    await injectPlugins(this, checkProjects: checkProjects);
   }
 
   /// Return the set of builders used by this package.
