@@ -243,7 +243,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
   List<GlobalKey> _keys;
   final Map<int, StepState> _oldStates = <int, StepState>{};
 
-  void initStepsKeysAndState() {
+  void _initStepsKeysAndState() {
     _keys = List<GlobalKey>.generate(
       widget.steps.length,
       (int i) => GlobalKey(),
