@@ -258,10 +258,10 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
   @override
   void didUpdateWidget(Stepper oldWidget) {
     super.didUpdateWidget(oldWidget);
-    assert(widget.steps.length == oldWidget.steps.length);
-
-    for (int i = 0; i < oldWidget.steps.length; i += 1)
-      _oldStates[i] = oldWidget.steps[i].state;
+    if (widget.steps.length == oldWidget.steps.length) {
+      for (int i = 0; i < oldWidget.steps.length; i += 1)
+        _oldStates[i] = oldWidget.steps[i].state;
+    }
   }
 
   bool _isFirst(int index) {
