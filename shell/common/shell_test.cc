@@ -14,7 +14,7 @@ namespace flutter {
 namespace testing {
 
 ShellTest::ShellTest()
-    : native_resolver_(std::make_shared<::testing::TestDartNativeResolver>()) {}
+    : native_resolver_(std::make_shared<TestDartNativeResolver>()) {}
 
 ShellTest::~ShellTest() = default;
 
@@ -87,10 +87,10 @@ TaskRunners ShellTest::GetTaskRunnersForFixture() {
 // |testing::ThreadTest|
 void ShellTest::SetUp() {
   ThreadTest::SetUp();
-  assets_dir_ = fml::OpenDirectory(::testing::GetFixturesPath(), false,
-                                   fml::FilePermission::kRead);
+  assets_dir_ =
+      fml::OpenDirectory(GetFixturesPath(), false, fml::FilePermission::kRead);
   thread_host_ = std::make_unique<ThreadHost>(
-      "io.flutter.test." + ::testing::GetCurrentTestName() + ".",
+      "io.flutter.test." + GetCurrentTestName() + ".",
       ThreadHost::Type::Platform | ThreadHost::Type::IO | ThreadHost::Type::UI |
           ThreadHost::Type::GPU);
 }
@@ -105,6 +105,31 @@ void ShellTest::TearDown() {
 void ShellTest::AddNativeCallback(std::string name,
                                   Dart_NativeFunction callback) {
   native_resolver_->AddNativeCallback(std::move(name), callback);
+}
+
+ShellTestPlatformView::ShellTestPlatformView(PlatformView::Delegate& delegate,
+                                             TaskRunners task_runners)
+    : PlatformView(delegate, std::move(task_runners)) {}
+
+ShellTestPlatformView::~ShellTestPlatformView() = default;
+
+// |PlatformView|
+std::unique_ptr<Surface> ShellTestPlatformView::CreateRenderingSurface() {
+  return std::make_unique<GPUSurfaceSoftware>(this);
+}
+
+// |GPUSurfaceSoftwareDelegate|
+sk_sp<SkSurface> ShellTestPlatformView::AcquireBackingStore(
+    const SkISize& size) {
+  SkImageInfo image_info = SkImageInfo::MakeN32Premul(
+      size.width(), size.height(), SkColorSpace::MakeSRGB());
+  return SkSurface::MakeRaster(image_info);
+}
+
+// |GPUSurfaceSoftwareDelegate|
+bool ShellTestPlatformView::PresentBackingStore(
+    sk_sp<SkSurface> backing_store) {
+  return true;
 }
 
 }  // namespace testing

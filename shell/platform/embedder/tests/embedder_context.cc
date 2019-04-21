@@ -11,7 +11,7 @@ namespace testing {
 
 EmbedderContext::EmbedderContext(std::string assets_path)
     : assets_path_(std::move(assets_path)),
-      native_resolver_(std::make_shared<::testing::TestDartNativeResolver>()) {
+      native_resolver_(std::make_shared<TestDartNativeResolver>()) {
   auto assets_dir = fml::OpenDirectory(assets_path_.c_str(), false,
                                        fml::FilePermission::kRead);
   vm_snapshot_data_ =
@@ -27,8 +27,8 @@ EmbedderContext::EmbedderContext(std::string assets_path)
   }
 
   isolate_create_callbacks_.push_back(
-      [weak_resolver = std::weak_ptr<::testing::TestDartNativeResolver>{
-           native_resolver_}]() {
+      [weak_resolver =
+           std::weak_ptr<TestDartNativeResolver>{native_resolver_}]() {
         if (auto resolver = weak_resolver.lock()) {
           resolver->SetNativeResolverForIsolate();
         }

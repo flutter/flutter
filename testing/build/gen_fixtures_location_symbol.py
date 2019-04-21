@@ -19,7 +19,7 @@ def main():
   args = parser.parse_args()
 
   with open(args.fixtures_location_file, 'w') as file:
-    file.write('namespace testing {const char* GetFixturesPath() {return "%s";}}'
+    file.write('namespace flutter {namespace testing {const char* GetFixturesPath() {return "%s";}}}'
       % args.fixtures_location)
 
 

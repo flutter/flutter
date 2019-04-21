@@ -14,7 +14,7 @@
 
 #define CREATE_NATIVE_ENTRY(native_entry)                                   \
   ([&]() {                                                                  \
-    static ::testing::NativeEntry closure;                                  \
+    static ::flutter::testing::NativeEntry closure;                         \
     static Dart_NativeFunction entrypoint = [](Dart_NativeArguments args) { \
       closure(args);                                                        \
     };                                                                      \
@@ -22,6 +22,7 @@
     return entrypoint;                                                      \
   })()
 
+namespace flutter {
 namespace testing {
 
 using NativeEntry = std::function<void(Dart_NativeArguments)>;
@@ -51,5 +52,6 @@ class TestDartNativeResolver
 };
 
 }  // namespace testing
+}  // namespace flutter
 
 #endif  // FLUTTER_TESTING_TEST_DART_NATIVE_RESOLVER_H_

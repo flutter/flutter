@@ -4,10 +4,12 @@
 
 #include "testing.h"
 
+namespace flutter {
 namespace testing {
 
 std::string GetCurrentTestName() {
-  return UnitTest::GetInstance()->current_test_info()->name();
+  return ::testing::UnitTest::GetInstance()->current_test_info()->name();
 }
 
 }  // namespace testing
+}  // namespace flutter

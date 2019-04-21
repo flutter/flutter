@@ -12,6 +12,7 @@
 #include "third_party/tonic/logging/dart_error.h"
 #include "tonic/converter/dart_converter.h"
 
+namespace flutter {
 namespace testing {
 
 TestDartNativeResolver::TestDartNativeResolver() = default;
@@ -89,3 +90,4 @@ void TestDartNativeResolver::SetNativeResolverForIsolate() {
 }
 
 }  // namespace testing
+}  // namespace flutter

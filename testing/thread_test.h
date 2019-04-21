@@ -13,9 +13,10 @@
 #include "flutter/fml/thread.h"
 #include "gtest/gtest.h"
 
+namespace flutter {
 namespace testing {
 
-class ThreadTest : public Test {
+class ThreadTest : public ::testing::Test {
  public:
   fml::RefPtr<fml::TaskRunner> GetCurrentTaskRunner();
 
@@ -35,5 +36,6 @@ class ThreadTest : public Test {
 };
 
 }  // namespace testing
+}  // namespace flutter
 
 #endif  // FLUTTER_TESTING_THREAD_TEST_H_
