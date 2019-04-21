@@ -12,7 +12,7 @@ EmbedderTest::EmbedderTest() = default;
 EmbedderTest::~EmbedderTest() = default;
 
 std::string EmbedderTest::GetFixturesDirectory() const {
-  return ::testing::GetFixturesPath();
+  return GetFixturesPath();
 }
 
 EmbedderContext& EmbedderTest::GetEmbedderContext() {

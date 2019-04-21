@@ -29,11 +29,11 @@ TEST_F(DartIsolateTest, RootIsolateCreationAndShutdown) {
   ASSERT_TRUE(vm_ref);
   auto vm_data = vm_ref.GetVMData();
   ASSERT_TRUE(vm_data);
-  TaskRunners task_runners(::testing::GetCurrentTestName(),  //
-                           GetCurrentTaskRunner(),           //
-                           GetCurrentTaskRunner(),           //
-                           GetCurrentTaskRunner(),           //
-                           GetCurrentTaskRunner()            //
+  TaskRunners task_runners(GetCurrentTestName(),    //
+                           GetCurrentTaskRunner(),  //
+                           GetCurrentTaskRunner(),  //
+                           GetCurrentTaskRunner(),  //
+                           GetCurrentTaskRunner()   //
   );
   auto weak_isolate = DartIsolate::CreateRootIsolate(
       vm_data->GetSettings(),             // settings
@@ -62,11 +62,11 @@ TEST_F(DartIsolateTest, IsolateShutdownCallbackIsInIsolateScope) {
   ASSERT_TRUE(vm_ref);
   auto vm_data = vm_ref.GetVMData();
   ASSERT_TRUE(vm_data);
-  TaskRunners task_runners(::testing::GetCurrentTestName(),  //
-                           GetCurrentTaskRunner(),           //
-                           GetCurrentTaskRunner(),           //
-                           GetCurrentTaskRunner(),           //
-                           GetCurrentTaskRunner()            //
+  TaskRunners task_runners(GetCurrentTestName(),    //
+                           GetCurrentTaskRunner(),  //
+                           GetCurrentTaskRunner(),  //
+                           GetCurrentTaskRunner(),  //
+                           GetCurrentTaskRunner()   //
   );
   auto weak_isolate = DartIsolate::CreateRootIsolate(
       vm_data->GetSettings(),             // settings
@@ -164,11 +164,11 @@ static void RunDartCodeInIsolate(DartVMRef& vm_ref,
     return;
   }
 
-  TaskRunners task_runners(::testing::GetCurrentTestName(),  //
-                           task_runner,                      //
-                           task_runner,                      //
-                           task_runner,                      //
-                           task_runner                       //
+  TaskRunners task_runners(GetCurrentTestName(),  //
+                           task_runner,           //
+                           task_runner,           //
+                           task_runner,           //
+                           task_runner            //
   );
 
   auto vm_data = vm_ref.GetVMData();
@@ -206,8 +206,8 @@ static void RunDartCodeInIsolate(DartVMRef& vm_ref,
   }
 
   if (!DartVM::IsRunningPrecompiledCode()) {
-    auto kernel_file_path = fml::paths::JoinPaths(
-        {::testing::GetFixturesPath(), "kernel_blob.bin"});
+    auto kernel_file_path =
+        fml::paths::JoinPaths({GetFixturesPath(), "kernel_blob.bin"});
 
     if (!fml::IsFile(kernel_file_path)) {
       FML_LOG(ERROR) << "Could not locate kernel file.";

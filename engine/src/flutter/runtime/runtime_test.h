@@ -15,7 +15,7 @@
 namespace flutter {
 namespace testing {
 
-class RuntimeTest : public ::testing::ThreadTest {
+class RuntimeTest : public ThreadTest {
  public:
   RuntimeTest();
 
@@ -34,7 +34,7 @@ class RuntimeTest : public ::testing::ThreadTest {
 
  private:
   fml::UniqueFD assets_dir_;
-  std::shared_ptr<::testing::TestDartNativeResolver> native_resolver_;
+  std::shared_ptr<TestDartNativeResolver> native_resolver_;
 
   void SetSnapshotsAndAssets(Settings& settings);
 };

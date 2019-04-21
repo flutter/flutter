@@ -34,7 +34,7 @@ TEST_F(Embedder11yTest, A11yTreeIsConsistent) {
       })));
 
   // Called by test fixture on UI thread to pass data back to this test.
-  ::testing::NativeEntry callback;
+  NativeEntry callback;
   context.AddNativeCallback(
       "NotifyTestData",
       CREATE_NATIVE_ENTRY(([&callback](Dart_NativeArguments args) {
