@@ -110,68 +110,6 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
   /// Creates a tap gesture recognizer.
   TapGestureRecognizer({ Object debugOwner }) : super(deadline: kPressTimeout, debugOwner: debugOwner);
 
-  /// A pointer that might cause a tap has contacted the screen at a particular
-  /// location.
-  ///
-  /// This triggers once a short timeout ([deadline]) has elapsed, or once
-  /// the gestures has won the arena, whichever comes first.
-  ///
-  /// If the gesture doesn't win the arena, [onAnyTapCancel] is called next.
-  /// Otherwise, [onAnyTapUp] is called next.
-  ///
-  /// {@template flutter.tapGestureRecognizer.anyButton}
-  /// It does not limit the button that triggers the tap. The callback should
-  /// decide which call to respond to based on the detail data.
-  ///
-  /// The pointer is required to keep a consistent button throughout the
-  /// gesture, i.e. subsequent [PointerMoveEvent]s must contain the same button
-  /// as the [PointerDownEvent].
-  ///
-  /// Also, it must contain one and only one button. For example, since a stylus
-  /// touching the screen is also counted as a button, a stylus tap while
-  /// pressing any physical button will not be recognized.
-  /// {@endtemplate}
-  ///
-  /// See also:
-  ///
-  ///  * [onPrimaryTapDown], a similar callback limited to a primary button.
-  ///  * [onSecondaryTapDown], a similar callback limited to a secondary button.
-  ///  * [TapDownDetails], which is passed as an argument to this callback.
-  GestureTapDownCallback onAnyTapDown;
-
-  /// A pointer that will trigger a tap of any single button has stopped
-  /// contacting the screen at a particular location.
-  ///
-  /// This triggers once the gesture has won the arena.
-  ///
-  /// If the gesture doesn't win the arena, [onAnyTapCancel] is called instead.
-  ///
-  /// {@macro flutter.tapGestureRecognizer.consistentButtons}
-  ///
-  /// See also:
-  ///
-  ///  * [onPrimaryTapUp], a similar callback limited to a primary button.
-  ///  * [onSecondaryTapUp], a similar callback limited to a secondary button.
-  ///  * [TapUpDetails], which is passed as an argument to this callback.
-  GestureTapUpCallback onAnyTapUp;
-
-  /// The pointer that previously triggered [onAnyTapDown] will not end up
-  /// causing a tap.
-  ///
-  /// This triggers if the gesture loses the arena.
-  ///
-  /// If the gesture wins the arena, [onAnyTapUp] is called instead.
-  ///
-  /// It does not send any details. However, it's guaranteed that [onAnyTapDown]
-  /// is called before it, which can be used to determine the button of the
-  /// canceled tap.
-  ///
-  /// See also:
-  ///
-  ///  * [onPrimaryTapCancel], a similar callback limited to a primary button.
-  ///  * [onSecondaryTapCancel], a similar callback limited to a secondary button.
-  GestureTapCancelCallback onAnyTapCancel;
-
   /// A pointer that might cause a tap of a primary button has contacted the
   /// screen at a particular location.
   ///
@@ -185,7 +123,6 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
   ///
   ///  * [kPrimaryButton], the button this callback responds to.
   ///  * [onSecondaryTapDown], a similar callback but for a secondary button.
-  ///  * [onAnyTapDown], a similar callback but for any single button.
   ///  * [TapDownDetails], which is passed as an argument to this callback.
   ///  * [GestureDetector.onTapDown], which exposes this callback.
   GestureTapDownCallback onTapDown;
@@ -202,7 +139,6 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
   ///
   ///  * [kPrimaryButton], the button this callback responds to.
   ///  * [onSecondaryTapUp], a similar callback but for a secondary button.
-  ///  * [onAnyTapUp], a similar callback but for any single button.
   ///  * [TapUpDetails], which is passed as an argument to this callback.
   ///  * [GestureDetector.onTapUp], which exposes this callback.
   GestureTapUpCallback onTapUp;
@@ -232,7 +168,6 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
   ///
   ///  * [kPrimaryButton], the button this callback responds to.
   ///  * [onSecondaryTapCancel], a similar callback but for a secondary button.
-  ///  * [onAnyTapCancel], a similar callback but for any single button.
   ///  * [GestureDetector.onTapCancel], which exposes this callback.
   GestureTapCancelCallback onTapCancel;
 
@@ -249,7 +184,6 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
   ///
   ///  * [kSecondaryButton], the button this callback responds to.
   ///  * [onPrimaryTapDown], a similar callback but for a primary button.
-  ///  * [onAnyTapDown], a similar callback but for any single button.
   ///  * [TapDownDetails], which is passed as an argument to this callback.
   ///  * [GestureDetector.onSecondaryTapDown], which exposes this callback.
   GestureTapDownCallback onSecondaryTapDown;
@@ -266,7 +200,6 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
   ///
   ///  * [kSecondaryButton], the button this callback responds to.
   ///  * [onPrimaryTapUp], a similar callback but for a primary button.
-  ///  * [onAnyTapUp], a similar callback but for any single button.
   ///  * [TapUpDetails], which is passed as an argument to this callback.
   ///  * [GestureDetector.onSecondaryTapUp], which exposes this callback.
   GestureTapUpCallback onSecondaryTapUp;
@@ -282,7 +215,6 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
   ///
   ///  * [kSecondaryButton], the button this callback responds to.
   ///  * [onPrimaryTapCancel], a similar callback but for a primary button.
-  ///  * [onAnyTapCancel], a similar callback but for any single button.
   ///  * [GestureDetector.onTapCancel], which exposes this callback.
   GestureTapCancelCallback onSecondaryTapCancel;
 
@@ -295,8 +227,22 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
 
   @override
   bool isPointerAllowed(PointerDownEvent event) {
-    if (!isSingleButton(event.buttons)) {
-      return false;
+    switch (event.buttons) {
+      case kPrimaryButton:
+        if (onTapDown == null &&
+            onTap == null &&
+            onTapUp == null &&
+            onTapCancel == null)
+          return false;
+        break;
+      case kSecondaryButton:
+        if (onSecondaryTapDown == null &&
+            onSecondaryTapUp == null &&
+            onSecondaryTapCancel == null)
+          return false;
+        break;
+      default:
+        return false;
     }
     return super.isPointerAllowed(event);
   }
@@ -375,8 +321,6 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
       globalPosition: initialPosition,
       buttons: _initialButtons,
     );
-    if (onAnyTapDown != null)
-      invokeCallback<void>('onAnyTapDown', () => onAnyTapDown(details));
     switch (_initialButtons) {
       case kPrimaryButton:
         if (onTapDown != null)
@@ -400,8 +344,6 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
       globalPosition: _finalPosition,
       buttons: _initialButtons,
     );
-    if (onAnyTapUp != null)
-      invokeCallback<void>('onAnyTapUp', () => onAnyTapUp(details));
     switch (_initialButtons) {
       case kPrimaryButton:
         if (onTapUp != null)
@@ -420,8 +362,6 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
   }
 
   void _checkCancel(String note) {
-    if (onAnyTapCancel != null)
-      invokeCallback<void>('${note}onAnyTapCancel', onAnyTapCancel);
     switch (_initialButtons) {
       case kPrimaryButton:
         if (onTapCancel != null)
