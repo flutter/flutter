@@ -10,7 +10,8 @@ import 'package:flutter/widgets.dart';
 import 'theme.dart';
 
 /// Configures whether [SnackBar] should be fixed to the bottom or floating
-/// above other widgets fixed to the bottom, such as [FloatingActionButton].
+/// above (on the y-axis) other widgets that are fixed to the bottom, such as
+/// [FloatingActionButton].
 enum SnackBarBehavior {
   /// Fixed the [SnackBar] position to the bottom of the [Scaffold] when
   /// possible. One of the possible scenarios where [SnackBar] will be shown
@@ -27,7 +28,7 @@ enum SnackBarBehavior {
   floating
 }
 
-/// Defines default property values for [SnackBar] widgets.
+/// Customizes default property values for [SnackBar] widgets.
 ///
 /// Descendant widgets obtain the current [SnackBarThemeData] object using
 /// `Theme.of(context).snackBarTheme`. Instances of [SnackBarThemeData] can be
@@ -54,7 +55,7 @@ class SnackBarThemeData extends Diagnosticable {
     this.disabledActionTextColor,
     this.elevation,
     this.shape,
-    this.behavior = SnackBarBehavior.fixed,
+    this.behavior,
   }) : assert(elevation == null || elevation >= 0.0);
 
   /// Default value for [SnackBar.backgroundColor].

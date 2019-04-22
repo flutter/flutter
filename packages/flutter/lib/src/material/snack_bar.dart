@@ -325,18 +325,17 @@ class SnackBar extends StatelessWidget {
       container: true,
       liveRegion: true,
       onDismiss: () {
-        Scaffold.of(context)
-            .removeCurrentSnackBar(reason: SnackBarClosedReason.dismiss);
+        Scaffold.of(context).removeCurrentSnackBar(reason: SnackBarClosedReason.dismiss);
       },
       child: Dismissible(
-          key: const Key('dismissible'),
-          direction: DismissDirection.down,
-          resizeDuration: null,
-          onDismissed: (DismissDirection direction) {
-            Scaffold.of(context)
-                .removeCurrentSnackBar(reason: SnackBarClosedReason.swipe);
-          },
-          child: snackBar),
+        key: const Key('dismissible'),
+        direction: DismissDirection.down,
+        resizeDuration: null,
+        onDismissed: (DismissDirection direction) {
+          Scaffold.of(context).removeCurrentSnackBar(reason: SnackBarClosedReason.swipe);
+        },
+        child: snackBar,
+      ),
     );
 
     Widget snackBarTransition;
@@ -366,8 +365,7 @@ class SnackBar extends StatelessWidget {
 
   // API for Scaffold.addSnackBar():
 
-  /// Creates an animation controller useful for driving a snack bar's entrance
-  /// and exit animation.
+  /// Creates an animation controller useful for driving a snack bar's entrance and exit animation.
   static AnimationController createAnimationController({ @required TickerProvider vsync }) {
     return AnimationController(
       duration: _kSnackBarTransitionDuration,
