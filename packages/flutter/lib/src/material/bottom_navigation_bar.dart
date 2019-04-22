@@ -404,38 +404,34 @@ class _BottomNavigationTile extends StatelessWidget {
 
     final double selectedFontSize = selectedLabelStyle.fontSize;
 
-
     final double selectedIconSize = selectedIconTheme?.size ?? iconSize;
     final double unselectedIconSize = unselectedIconTheme?.size ?? iconSize;
+    // The amount that the selected icon is bigger than the unselected icons,
+    // (or zero if the selected icon is not bigger than the unselected icons).
     final double selectedIconDiff = math.max(selectedIconSize - unselectedIconSize, 0);
+    // The amount that the unselected icons are bigger than the selected icon,
+    // (or zero if the unselected icons are not any bigger than the selected icon).
     final double unselectedIconDiff = math.max(unselectedIconSize - selectedIconSize, 0);
-
-    double bottomPadding = Tween<double>(
-      begin: selectedFontSize / 2.0 + selectedIconDiff / 2.0,
-      end: selectedFontSize / 2.0 + unselectedIconDiff / 2.0,
-    ).evaluate(animation);
-    double topPadding = Tween<double>(
-      begin: selectedFontSize / 2.0 + selectedIconDiff / 2.0,
-      end: selectedFontSize / 2.0 + unselectedIconDiff / 2.0,
-    ).evaluate(animation);
 
     // Defines the padding for the animating icons + labels.
     //
     // The animations go from "Unselected":
     // =======
-    // |      <-- Padding equal to the text height.
+    // |      <-- Padding equal to the text height + 1/2 selectedIconDiff.
     // |  ☆
-    // | text <-- Invisible text.
+    // | text <-- Invisible text + padding equal to 1/2 selectedIconDiff.
     // =======
     //
     // To "Selected":
     //
     // =======
-    // |      <-- Padding equal to 1/2 text height.
+    // |      <-- Padding equal to 1/2 text height + 1/2 unselectedIconDiff.
     // |  ☆
     // | text
-    // |      <-- Padding equal to 1/2 text height.
+    // |      <-- Padding equal to 1/2 text height + 1/2 unselectedIconDiff.
     // =======
+    double bottomPadding;
+    double topPadding;
     if (showSelectedLabels && !showUnselectedLabels) {
       bottomPadding = Tween<double>(
         begin: selectedIconDiff / 2.0,
@@ -445,10 +441,7 @@ class _BottomNavigationTile extends StatelessWidget {
         begin: selectedFontSize + selectedIconDiff / 2.0,
         end: selectedFontSize / 2.0 - unselectedIconDiff / 2.0,
       ).evaluate(animation);
-    }
-
-    // Center all icons if no labels are shown.
-    if (!showSelectedLabels && !showUnselectedLabels) {
+    } else if (!showSelectedLabels && !showUnselectedLabels) {
       bottomPadding = Tween<double>(
         begin: selectedIconDiff / 2.0,
         end: unselectedIconDiff / 2.0,
@@ -456,6 +449,15 @@ class _BottomNavigationTile extends StatelessWidget {
       topPadding = Tween<double>(
         begin: selectedFontSize + selectedIconDiff / 2.0,
         end: selectedFontSize + unselectedIconDiff / 2.0,
+      ).evaluate(animation);
+    } else {
+      bottomPadding = Tween<double>(
+        begin: selectedFontSize / 2.0 + selectedIconDiff / 2.0,
+        end: selectedFontSize / 2.0 + unselectedIconDiff / 2.0,
+      ).evaluate(animation);
+      topPadding = Tween<double>(
+        begin: selectedFontSize / 2.0 + selectedIconDiff / 2.0,
+        end: selectedFontSize / 2.0 + unselectedIconDiff / 2.0,
       ).evaluate(animation);
     }
 
