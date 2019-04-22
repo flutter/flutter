@@ -208,7 +208,7 @@ class IosProject {
   Directory get _ephemeralDirectory => parent.directory.childDirectory('.ios');
   Directory get _editableDirectory => parent.directory.childDirectory('ios');
 
-  bool existsSync() => hostAppRoot.existsSync();
+  bool existsSync() => parent.isModule || _editableDirectory.existsSync();
 
   /// This parent folder of `Runner.xcodeproj`.
   Directory get hostAppRoot {
@@ -388,7 +388,7 @@ class AndroidProject {
     return _ephemeralDirectory;
   }
 
-  bool existsSync() => _flutterLibGradleRoot.existsSync() || isModule;
+  bool existsSync() => parent.isModule || _flutterLibGradleRoot.existsSync();
 
   /// The Gradle root directory of the Android wrapping of Flutter and plugins.
   /// This is the same as [hostAppGradleRoot] except when the project is
