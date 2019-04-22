@@ -74,7 +74,6 @@ public class FlutterMain {
     private static String sFlutterAssetsDir = DEFAULT_FLUTTER_ASSETS_DIR;
 
     private static boolean sInitialized = false;
-    private static ResourceUpdater sResourceUpdater;
     private static ResourceExtractor sResourceExtractor;
     private static boolean sIsPrecompiledAsBlobs;
     private static boolean sIsPrecompiledAsSharedLibrary;
@@ -152,17 +151,7 @@ public class FlutterMain {
         initAot(applicationContext);
         initResources(applicationContext);
 
-        if (sResourceUpdater == null) {
-            System.loadLibrary("flutter");
-        } else {
-            sResourceExtractor.waitForCompletion();
-            File lib = new File(PathUtils.getDataDirectory(applicationContext), DEFAULT_LIBRARY);
-            if (lib.exists()) {
-                System.load(lib.getAbsolutePath());
-            } else {
-                System.loadLibrary("flutter");
-            }
-        }
+        System.loadLibrary("flutter");
 
         // We record the initialization time using SystemClock because at the start of the
         // initialization we have not yet loaded the native library to call into dart_tools_api.h.
@@ -310,21 +299,6 @@ public class FlutterMain {
             Log.e(TAG, "Unable to read application info", e);
         }
 
-        if (metaData != null && metaData.getBoolean("DynamicPatching")) {
-            sResourceUpdater = new ResourceUpdater(context);
-            // Also checking for ON_RESUME here since it's more efficient than waiting for actual
-            // onResume. Even though actual onResume is imminent when the app has just restarted,
-            // it's better to start downloading now, in parallel with the rest of initialization,
-            // and avoid a second application restart a bit later when actual onResume happens.
-            if (sResourceUpdater.getDownloadMode() == ResourceUpdater.DownloadMode.ON_RESTART ||
-                sResourceUpdater.getDownloadMode() == ResourceUpdater.DownloadMode.ON_RESUME) {
-                sResourceUpdater.startUpdateDownloadOnce();
-                if (sResourceUpdater.getInstallMode() == ResourceUpdater.InstallMode.IMMEDIATE) {
-                    sResourceUpdater.waitForDownloadCompletion();
-                }
-            }
-        }
-
         sResourceExtractor = new ResourceExtractor(context);
 
         sResourceExtractor
@@ -346,20 +320,7 @@ public class FlutterMain {
             .addResource(sAotIsolateSnapshotInstr);
         }
 
-        if (sResourceUpdater != null) {
-          sResourceExtractor
-            .addResource(DEFAULT_LIBRARY);
-        }
-
         sResourceExtractor.start();
-    }
-
-    public static void onResume(Context context) {
-        if (sResourceUpdater != null) {
-            if (sResourceUpdater.getDownloadMode() == ResourceUpdater.DownloadMode.ON_RESUME) {
-                sResourceUpdater.startUpdateDownloadOnce();
-            }
-        }
     }
 
     /**
@@ -401,15 +362,6 @@ public class FlutterMain {
         String dataDirectory = PathUtils.getDataDirectory(applicationContext);
         File appBundle = new File(dataDirectory, sFlutterAssetsDir);
         return appBundle.exists() ? appBundle.getPath() : null;
-    }
-
-    /**
-     * Returns the main internal interface for the dynamic patching subsystem.
-     *
-     * If this is null, it means that dynamic patching is disabled in this app.
-     */
-    public static ResourceUpdater getResourceUpdater() {
-        return sResourceUpdater;
     }
 
     /**
