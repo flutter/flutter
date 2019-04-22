@@ -312,7 +312,6 @@ class RenderEditable extends RenderBox {
       TextPosition(offset: _selection.start, affinity: _selection.affinity),
       Rect.zero,
     );
-    final Offset offset = startOffset + effectiveOffset;
     // Check if the caret is visible with an approximation because of an error
     // in the engine that always reports that the caret extends above the input
     // by a small amount. See paragraph.cc's implementation of GetRectsForRange.
