@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/python -u
 # Copyright 2018 The Dart project authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -32,8 +32,10 @@ import subprocess
 import sys
 
 DART_REVISION_ENTRY = 'dart_revision'
-FLUTTER_RUN  = ['flutter', 'run']
-FLUTTER_TEST = ['{}/bin/flutter'.format(FLUTTER_HOME), 'test', '--coverage']
+FLUTTER = '{}/bin/flutter'.format(FLUTTER_HOME)
+FLUTTER_DOCTOR = [FLUTTER, 'doctor']
+FLUTTER_RUN    = [FLUTTER, 'run']
+FLUTTER_TEST   = [FLUTTER, 'test', '--coverage']
 
 MAX_GCLIENT_RETRIES = 3
 
@@ -129,8 +131,6 @@ def build():
     'host_release',
     'host_profile',
     'android_debug_unopt',
-    'android_debug',
-    'android_profile_unopt',
     'android_profile',
     'android_release'
   ]
@@ -148,6 +148,18 @@ def build():
                   config +
                   '". Aborting roll.')
       sys.exit(ERROR_BUILD_FAILED)
+
+
+def run_flutter_doctor():
+  print_status('Running flutter doctor')
+  engine_src_path = '--local-engine-src-path={}'.format(ENGINE_HOME)
+  p = subprocess.Popen(FLUTTER_DOCTOR + ['--local-engine=host_debug_unopt',
+                                         engine_src_path],
+                       cwd=package_flutter_path())
+  result = p.wait()
+  if result != 0:
+    print_error('flutter doctor failed. Aborting roll.')
+    sys.exit(ERROR_FLUTTER_DOCTOR_FAILED)
 
 
 def run_tests():
@@ -311,6 +323,9 @@ def main():
   original_revision = None
   updated_revision = args.dart_sdk_revision
 
+  # Disable buffering of log output
+  os.environ["PYTHONUNBUFFERED"] = "1"
+
   update_roots(args)
 
   print_status('Starting Dart SDK roll')
@@ -322,6 +337,8 @@ def main():
   if not args.no_build:
     run_gn()
     build()
+  if ((not args.no_test) or (not args.no_hot_reload)):
+    run_flutter_doctor()
   if not args.no_test:
     run_tests()
   if not args.no_hot_reload:

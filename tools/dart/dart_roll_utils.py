@@ -19,6 +19,8 @@ FLUTTER_HOME  = env_var('FLUTTER_HOME')
 ENGINE_HOME   = env_var('ENGINE_HOME')
 DART_SDK_HOME = env_var('DART_SDK_HOME')
 
+NO_COLOR = env_var('TERM') == 'dumb'
+
 ERROR_ROLL_SUCCESS           = 0
 ERROR_GCLIENT_SYNC_FAILED    = 1
 ERROR_BUILD_FAILED           = 2
@@ -28,18 +30,34 @@ ERROR_MISSING_ROOTS          = 5
 ERROR_LICENSE_SCRIPT_FAILED  = 6
 ERROR_NO_SUITABLE_COMMIT     = 7
 ERROR_OLD_COMMIT_PROVIDED    = 8
+ERROR_FLUTTER_DOCTOR_FAILED  = 9
 
 class DartAutorollerException(Exception):
   pass
 
-CGREEN  = '\033[92m'
-CYELLOW = '\033[93m'
-CRED    = '\033[91m'
-CEND    = '\033[0m'
+def c_green():
+  if NO_COLOR:
+    return ''
+  return '\033[92m'
 
-STATUS_LABEL  = CGREEN  + '[STATUS, {}]  ' + CEND
-WARNING_LABEL = CYELLOW + '[WARNING, {}] ' + CEND
-ERROR_LABEL   = CRED    + '[ERROR, {}]   ' + CEND
+def c_yellow():
+  if NO_COLOR:
+    return ''
+  return '\033[93m'
+
+def c_red():
+  if NO_COLOR:
+    return ''
+  return '\033[91m'
+
+def c_end():
+  if NO_COLOR:
+    return ''
+  return '\033[0m'
+
+STATUS_LABEL  = c_green()  + '[STATUS, {}]  ' + c_end()
+WARNING_LABEL = c_yellow() + '[WARNING, {}] ' + c_end()
+ERROR_LABEL   = c_red()    + '[ERROR, {}]   ' + c_end()
 
 
 def get_timestamp():

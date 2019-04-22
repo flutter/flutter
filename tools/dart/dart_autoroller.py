@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/python -u
 # Copyright 2019 The Dart project authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
@@ -41,8 +41,10 @@ from dart_roll_utils import *
 from git import Repo
 from github import Github, GithubException
 import argparse
+import atexit
 import datetime
 import os
+import signal
 import shutil
 import subprocess
 import sys
@@ -59,14 +61,19 @@ PULL_REQUEST_DESCRIPTION = (
 
 FLAG_skip_wait_for_artifacts = False
 
+CURRENT_SUBPROCESS = None
+
 def run_dart_roll_helper(most_recent_commit, extra_args):
+  global CURRENT_SUBPROCESS
+  os.environ["PYTHONUNBUFFERED"] = "1"
   args = ['python',
           os.path.join(os.path.dirname(__file__), 'dart_roll_helper.py'),
-          '--create-commit',
           '--no-hot-reload',
           most_recent_commit] + extra_args
-  p = subprocess.Popen(args)
-  return p.wait()
+  CURRENT_SUBPROCESS = subprocess.Popen(args)
+  result = CURRENT_SUBPROCESS.wait()
+  CURRENT_SUBPROCESS = None
+  return result
 
 
 # TODO(bkonyi): uncomment if we decide to roll into the framework.
@@ -251,6 +258,20 @@ def merge_on_success(github_repo, local_repo, pull_request):
 # Flutter framework to be green to submit.
 #   return True
 
+# Determines if any failures are actual failures from the PR or are just
+# failures from the engine builders.
+def is_only_engine_build_failing(commit):
+  BUILD = '-build'
+  LUCI_ENGINE = 'luci-engine'
+  statuses = commit.get_statuses()
+  for status in statuses:
+    if (not ((BUILD in status.context) or
+             (LUCI_ENGINE == status.context)) and
+            (status.state == GITHUB_STATUS_FAILURE)):
+        return False
+  print_status("An engine builder is still failing...")
+  return True
+
 
 def wait_for_status(commit):
   if FLAG_skip_wait_for_artifacts:
@@ -272,7 +293,9 @@ def wait_for_status(commit):
     status = commit.get_combined_status().state
     if status == GITHUB_STATUS_SUCCESS:
       break
-    elif status == GITHUB_STATUS_FAILURE:
+    # If the only the engine builders are red, keep trying.
+    elif ((status == GITHUB_STATUS_FAILURE) and
+          (not is_only_engine_build_failing(commit))):
       return False
     time.sleep(5)
 
@@ -285,6 +308,12 @@ def wait_for_status(commit):
   # print_status('Flutter build passing!')
   return True
 
+def sys_exit(signal, frame):
+  sys.exit()
+
+def cleanup_children():
+  if CURRENT_SUBPROCESS != None:
+    CURRENT_SUBPROCESS.kill()
 
 def main():
   global FLAG_skip_wait_for_artifacts
@@ -315,9 +344,12 @@ def main():
   parser.add_argument('--skip-update-licenses',
                       help='Skip updating the licenses for the Flutter engine',
                       action='store_true')
+  parser.add_argument('--skip-pull-request',
+                      help="Skip creating a pull request and don't commit",
+                      action='store_true')
+
   args = parser.parse_args()
   FLAG_skip_wait_for_artifacts = args.skip_wait_for_artifacts
-
   github_api_key = os.getenv('GITHUB_API_KEY')
   dart_sdk_path  = os.getenv('DART_SDK_HOME')
   flutter_path   = os.getenv('FLUTTER_HOME')
@@ -332,6 +364,9 @@ def main():
   github = Github(github_api_key)
   github_engine_repo  = github.get_repo('flutter/engine')
   github_flutter_repo = github.get_repo('flutter/flutter')
+
+  atexit.register(cleanup_children)
+  signal.signal(signal.SIGTERM, sys_exit)
 
   if not args.no_update_repos:
     print_status('Cleaning and updating local trees...')
@@ -359,6 +394,8 @@ def main():
       dart_roll_helper_args.append('--no-build')
     if args.skip_update_licenses:
       dart_roll_helper_args.append('--no-update-licenses')
+    if not args.skip_pull_request:
+      dart_roll_helper_args.append('--create-commit')
 
 
     # Will exit with code ERROR_OLD_COMMIT_PROVIDED if `most_recent_commit` is
@@ -369,26 +406,26 @@ def main():
   else:
     print_warning('Skipping roll step!')
 
-  # If the local roll was successful, try to merge into the engine.
-  print_status('Creating flutter/engine pull request')
-  current_date = datetime.datetime.today().strftime('%Y-%m-%d')
+  if not args.skip_pull_request:
+    # If the local roll was successful, try to merge into the engine.
+    print_status('Creating flutter/engine pull request')
+    current_date = datetime.datetime.today().strftime('%Y-%m-%d')
 
-  try:
-    pr = create_pull_request(github_engine_repo,
-                        local_engine_flutter_repo,
-                        get_pr_title(local_engine_flutter_repo),
-                        'dart-sdk-roll-{}'.format(current_date))
-  except DartAutorollerException as e:
-    print_error(('Error while creating flutter/engine pull request: {}.'
-                 ' Aborting roll.').format(e))
-    sys.exit(1)
+    try:
+      pr = create_pull_request(github_engine_repo,
+                          local_engine_flutter_repo,
+                          get_pr_title(local_engine_flutter_repo),
+                          'dart-sdk-roll-{}'.format(current_date))
+    except DartAutorollerException as e:
+      print_error(('Error while creating flutter/engine pull request: {}.'
+                   ' Aborting roll.').format(e))
+      sys.exit(1)
 
-  if not FLAG_skip_wait_for_artifacts:
     print_status('Waiting for PR checks to complete...')
     merge_on_success(github_engine_repo, local_engine_flutter_repo, pr)
     print_status('PR checks complete!')
   else:
-    print_warning('Skipping wait for PR checks!')
+    print_warning('Not creating flutter/engine PR!')
 
   # TODO(bkonyi): uncomment if we decide to roll the engine into the framework.
   # print_status('Starting roll of flutter/engine into flutter/flutter')
