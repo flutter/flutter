@@ -244,6 +244,7 @@ class SnackBar extends StatelessWidget {
     assert(animation != null);
     final ThemeData theme = Theme.of(context);
     final SnackBarThemeData snackBarTheme = theme.snackBarTheme;
+    // TODO(rami-a): Use a light theme if the app has a dark theme, https://github.com/flutter/flutter/issues/31418
     final ThemeData darkTheme = ThemeData(
       brightness: Brightness.dark,
       accentColor: theme.accentColor,
