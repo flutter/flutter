@@ -165,6 +165,7 @@ class TextField extends StatefulWidget {
     this.enableInteractiveSelection,
     this.onTap,
     this.buildCounter,
+    this.scrollPhysics,
   }) : assert(textAlign != null),
        assert(autofocus != null),
        assert(obscureText != null),
@@ -459,6 +460,9 @@ class TextField extends StatefulWidget {
   /// {@end-tool}
   final InputCounterWidgetBuilder buildCounter;
 
+  /// {@macro flutter.widgets.edtiableText.scrollPhysics}
+  final ScrollPhysics scrollPhysics;
+
   @override
   _TextFieldState createState() => _TextFieldState();
 
@@ -489,6 +493,7 @@ class TextField extends StatefulWidget {
     properties.add(DiagnosticsProperty<Brightness>('keyboardAppearance', keyboardAppearance, defaultValue: null));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('scrollPadding', scrollPadding, defaultValue: const EdgeInsets.all(20.0)));
     properties.add(FlagProperty('selectionEnabled', value: selectionEnabled, defaultValue: true, ifFalse: 'selection disabled'));
+    properties.add(DiagnosticsProperty<ScrollPhysics>('scrollPhysics', scrollPhysics, defaultValue: null));
   }
 }
 
@@ -892,6 +897,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         keyboardAppearance: keyboardAppearance,
         enableInteractiveSelection: widget.enableInteractiveSelection,
         dragStartBehavior: widget.dragStartBehavior,
+        scrollPhysics: widget.scrollPhysics,
       ),
     );
 
