@@ -158,16 +158,21 @@ class FlutterProject {
 
   /// Generates project files necessary to make Gradle builds work on Android
   /// and CocoaPods+Xcode work on iOS, for app and module projects only.
-  Future<void> ensureReadyForPlatformSpecificTooling() async {
-    if (!directory.existsSync() || hasExampleApp)
+  Future<void> ensureReadyForPlatformSpecificTooling({bool checkProjects = false}) async {
+    if (!directory.existsSync() || hasExampleApp) {
       return;
+    }
     refreshPluginsList(this);
-    await android.ensureReadyForPlatformSpecificTooling();
-    await ios.ensureReadyForPlatformSpecificTooling();
+    if ((android.existsSync() && checkProjects) || !checkProjects) {
+      await android.ensureReadyForPlatformSpecificTooling();
+    }
+    if ((ios.existsSync() && checkProjects) || !checkProjects) {
+      await ios.ensureReadyForPlatformSpecificTooling();
+    }
     if (flutterWebEnabled) {
       await web.ensureReadyForPlatformSpecificTooling();
     }
-    await injectPlugins(this);
+    await injectPlugins(this, checkProjects: checkProjects);
   }
 
   /// Return the set of builders used by this package.
@@ -202,6 +207,8 @@ class IosProject {
 
   Directory get _ephemeralDirectory => parent.directory.childDirectory('.ios');
   Directory get _editableDirectory => parent.directory.childDirectory('ios');
+
+  bool existsSync() => parent.isModule || _editableDirectory.existsSync();
 
   /// This parent folder of `Runner.xcodeproj`.
   Directory get hostAppRoot {
@@ -385,6 +392,8 @@ class AndroidProject {
       return _editableHostAppDirectory;
     return _ephemeralDirectory;
   }
+
+  bool existsSync() => parent.isModule || _flutterLibGradleRoot.existsSync();
 
   /// The Gradle root directory of the Android wrapping of Flutter and plugins.
   /// This is the same as [hostAppGradleRoot] except when the project is
