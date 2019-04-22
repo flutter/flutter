@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 
+import 'base/common.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/io.dart' show SocketException;
@@ -272,8 +273,7 @@ class Cache {
       try {
         await _downloadFile(url, cachedFile);
       } catch (e) {
-        printError('Failed to fetch third-party artifact $url: $e');
-        rethrow;
+        throwToolExit('Failed to fetch third-party artifact $url: $e');
       }
     }
 
