@@ -529,7 +529,7 @@ void main() {
       expect(recognized, <String>['tapSecondary']);
     });
 
-    testGesture('A primary tap recognizer forms competion with a primary tap recognizer', (GestureTester tester) {
+    testGesture('A primary long press recognizer forms competion with a primary tap recognizer', (GestureTester tester) {
       longPress.addPointer(down);
       tapPrimary.addPointer(down);
       tester.closeArena(down.pointer);
@@ -541,7 +541,6 @@ void main() {
       expect(recognized, <String>['tapPrimary']);
     });
   });
-
 
   group('Dispatch to different callbacks per buttons:', () {
     final List<String> recognized = <String>[];
@@ -603,7 +602,7 @@ void main() {
       expect(recognized, <String>['primaryEnd 1', 'primaryUp']);
     });
 
-    testGesture('A secondary long press should not trigger any callbacks', (GestureTester tester) {
+    testGesture('A secondary long press should not trigger primary', (GestureTester tester) {
       const PointerDownEvent down2 = PointerDownEvent(
         pointer: 2,
         buttons: kSecondaryButton,

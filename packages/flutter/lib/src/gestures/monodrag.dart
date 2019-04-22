@@ -84,87 +84,6 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   /// at (510.0, 500.0).
   DragStartBehavior dragStartBehavior;
 
-  /// A pointer has contacted the screen and might begin to move.
-  ///
-  /// The position of the pointer is provided in the callback's `details`
-  /// argument, which is a [DragDownDetails] object.
-  ///
-  /// {@template flutter.dragGestureRecognizer.anyButton}
-  /// It does not limit the button that triggers the drag. The callback should
-  /// decide which call to respond to based on the detail data.
-  ///
-  /// The pointer is required to keep a consistent button throughout the
-  /// gesture, i.e. subsequent [PointerMoveEvent]s must contain the same button
-  /// as the [PointerDownEvent].
-  ///
-  /// Also, it must contain one and only one button. For example, since a stylus
-  /// touching the screen is also counted as a button, a stylus drag while
-  /// pressing any physical button will not be recognized.
-  /// {@endtemplate}
-  ///
-  /// See also:
-  ///
-  ///  * [onDown], a similar callback limited to a primary button.
-  ///  * [DragDownDetails], which is passed as an argument to this callback.
-  GestureDragDownCallback onAnyDown;
-
-  /// A pointer has contacted the screen and has begun to move.
-  ///
-  /// The position of the pointer is provided in the callback's `details`
-  /// argument, which is a [DragStartDetails] object.
-  ///
-  /// Depending on the value of [dragStartBehavior], this function will be
-  /// called on the initial touch down, if set to [DragStartBehavior.down] or
-  /// when the drag gesture is first detected, if set to
-  /// [DragStartBehavior.start].
-  ///
-  /// {@macro flutter.dragGestureRecognizer.anyButton}
-  ///
-  /// See also:
-  ///
-  ///  * [onStart], a similar callback limited to a primary button.
-  ///  * [DragStartDetails], which is passed as an argument to this callback.
-  GestureDragStartCallback onAnyStart;
-
-  /// A pointer that is in contact with the screen and moving has moved again.
-  ///
-  /// The distance travelled by the pointer since the last update is provided in
-  /// the callback's `details` argument, which is a [DragUpdateDetails] object.
-  ///
-  /// {@macro flutter.dragGestureRecognizer.anyButton}
-  ///
-  /// See also:
-  ///
-  ///  * [onUpdate], a similar callback limited to a primary button.
-  ///  * [DragUpdateDetails], which is passed as an argument to this callback.
-  GestureDragUpdateCallback onAnyUpdate;
-
-  /// A pointer that was previously in contact with the screen and moving is no
-  /// longer in contact with the screen and was moving at a specific velocity
-  /// when it stopped contacting the screen.
-  ///
-  /// The velocity is provided in the callback's `details` argument, which is a
-  /// [DragEndDetails] object.
-  ///
-  /// {@macro flutter.dragGestureRecognizer.anyButton}
-  ///
-  /// See also:
-  ///
-  ///  * [onEnd], a similar callback limited to a primary button.
-  ///  * [DragEndDetails], which is passed as an argument to this callback.
-  GestureDragEndCallback onAnyEnd;
-
-  /// The pointer that previously triggered [onAnyDown] did not complete.
-  ///
-  /// It does not send any details. However, it's guaranteed that [onAnyDown]
-  /// is called before it, which can be used to determine the button of the
-  /// canceled drag.
-  ///
-  /// See also:
-  ///
-  ///  * [onCancel], a similar callback limited to a primary button.
-  GestureDragCancelCallback onAnyCancel;
-
   /// A pointer has contacted the screen with a primary button and might begin
   /// to move.
   ///
@@ -174,7 +93,6 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   /// See also:
   ///
   ///  * [kPrimaryButton], the button this callback responds to.
-  ///  * [onAnyDown], a similar callback but for any single button.
   ///  * [DragDownDetails], which is passed as an argument to this callback.
   GestureDragDownCallback onDown;
 
@@ -192,7 +110,6 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   /// See also:
   ///
   ///  * [kPrimaryButton], the button this callback responds to.
-  ///  * [onAnyStart], a similar callback but for any single button.
   ///  * [DragStartDetails], which is passed as an argument to this callback.
   GestureDragStartCallback onStart;
 
@@ -205,7 +122,6 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   /// See also:
   ///
   ///  * [kPrimaryButton], the button this callback responds to.
-  ///  * [onAnyUpdate], a similar callback but for any single button.
   ///  * [DragUpdateDetails], which is passed as an argument to this callback.
   GestureDragUpdateCallback onUpdate;
 
@@ -219,7 +135,6 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   /// See also:
   ///
   ///  * [kPrimaryButton], the button this callback responds to.
-  ///  * [onAnyEnd], a similar callback but for any single button.
   ///  * [DragEndDetails], which is passed as an argument to this callback.
   GestureDragEndCallback onEnd;
 
@@ -228,7 +143,6 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   /// See also:
   ///
   ///  * [kPrimaryButton], the button this callback responds to.
-  ///  * [onAnyCancel], a similar callback but for any single button.
   GestureDragCancelCallback onCancel;
 
   /// The minimum distance an input pointer drag must have moved to
@@ -268,10 +182,20 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   @override
   bool isPointerAllowed(PointerEvent event) {
     if (_initialButtons == null) {
-      if (!isSingleButton(event.buttons)) {
-        return false;
+      switch (event.buttons) {
+        case kPrimaryButton:
+          if (onDown == null &&
+              onStart == null &&
+              onUpdate == null &&
+              onEnd == null &&
+              onCancel == null)
+            return false;
+          break;
+        default:
+          return false;
       }
     } else {
+      // There can be multiple drags simultaneously. Their effects are combined.
       if (event.buttons != _initialButtons) {
         return false;
       }
@@ -390,8 +314,6 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
       globalPosition: _initialPosition,
       buttons: _initialButtons,
     );
-    if (onAnyDown != null)
-      invokeCallback<void>('onAnyDown', () => onAnyDown(details));
     switch (_initialButtons) {
       case kPrimaryButton:
         if (onDown != null)
@@ -407,8 +329,6 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
       globalPosition: _initialPosition,
       buttons: _initialButtons,
     );
-    if (onAnyStart != null)
-      invokeCallback<void>('onAnyStart', () => onAnyStart(details));
     switch (_initialButtons) {
       case kPrimaryButton:
         if (onStart != null)
@@ -431,8 +351,6 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
       globalPosition: globalPosition,
       buttons: _initialButtons,
     );
-    if (onAnyUpdate != null)
-      invokeCallback<void>('onAnyUpdate', () => onAnyUpdate(details));
     switch (_initialButtons) {
       case kPrimaryButton:
         if (onUpdate != null)
@@ -473,8 +391,6 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
         return '$estimate; judged to not be a fling.';
       };
     }
-    if (onAnyEnd != null)
-      invokeCallback<void>('onAnyEnd', () => onAnyEnd(details), debugReport: debugReport);
     switch (_initialButtons) {
       case kPrimaryButton:
         if (onEnd != null)
@@ -485,8 +401,6 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   }
 
   void _checkCancel() {
-    if (onAnyCancel != null)
-      invokeCallback<void>('onAnyCancel', onAnyCancel);
     switch (_initialButtons) {
       case kPrimaryButton:
         if (onCancel != null)
