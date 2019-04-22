@@ -350,6 +350,12 @@ abstract class PointerEvent extends Diagnosticable {
   /// This value affects what is returned by [localPosition] and [localDelta].
   /// If this value is null, it is treated as the identity transformation.
   ///
+  /// Unlike a paint transform, this transform usually does not contain any
+  /// "perspective" component, meaning that the third row and the third column
+  /// of the matrix should be equal to "0, 0, 1, 0". This ensures that
+  /// [localPosition] describes the point in the local coordinate system of the
+  /// event receiver at which the user is actually touching the screen.
+  ///
   /// See also:
   ///
   ///  * [transformed], which transforms this event into a different coordinate
@@ -447,6 +453,12 @@ abstract class PointerEvent extends Diagnosticable {
 
   /// Takes a transform matrix meant for painting and returns a matrix that can
   /// be used to transform [PointerEvent]s for hit testing.
+  ///
+  /// This method removes the "perspective" component from `paintTransform` by
+  /// setting the third column and third row of the matrix to "0, 0, 1, 0".
+  /// The resulting matrix can be used to determine the point in the local
+  /// coordinate system of the transformed component that is exactly under the
+  /// user's finger when the user is touching the screen.
   static Matrix4 paintTransformToPointerEventTransform(Matrix4 paintTransform) {
     final Vector4 vector = Vector4(0, 0, 1, 0);
     return paintTransform.clone()

@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/painting.dart';
+import 'dart:collection';
+
 import 'package:meta/meta.dart';
 import 'package:vector_math/vector_math_64.dart';
 
@@ -60,9 +61,6 @@ class HitTestEntry {
 
 /// The result of performing a hit test.
 class HitTestResult {
-  /// Creates an empty hit test result.
-  HitTestResult();
-
   /// An unmodifiable list of [HitTestEntry] objects recorded during the hit test.
   ///
   /// The first entry in the path is the most specific, typically the one at
@@ -80,39 +78,34 @@ class HitTestResult {
     _path[entry] = _transforms.isEmpty ? null : _transforms.last;
   }
 
-  final List<Matrix4> _transforms = <Matrix4>[];
-
-  void _pushTransform(Matrix4 transform) {
-//    assert(transform.getRow(2) == Vector4(0, 0, 1, 0) && transform.getColumn(2) == Vector4(0, 0, 1, 0),
-//      'The third row and third column of a transform matrix for pointer '
-//      'events must be Vector4(0, 0, 1, 0). Did you forget to run the paint '
-//      'matrix through PointerEvent.paintTransformToPointerEventTransform?'
-//      'The provided matrix is:\n$transform'
-//    );
-    _transforms.add(_transforms.isEmpty ? transform : _transforms.last * transform);
-  }
-
-  void _popTransform() {
-    assert(_transforms.isNotEmpty);
-    _transforms.removeLast();
-  }
-
-  /// Convenience method to transform a position before hit-testing a child.
+  /// Transforms `position` to the local coordinate system of a child before
+  /// hit-testing the child.
   ///
-  /// This can be used instead of [_pushTransform] and [_popTransform].
+  /// The provided paint `transform` from the child coordinate system to the
+  /// coordinate system of the caller will be turned into a transform matrix
+  /// for pointer events. For this, the "perspective" component of the transform
+  /// is removed by calling [PointerEvent.paintTransformToPointerEventTransform].
+  /// The inverted transformed matrix is then used to transform `position` from
+  /// the parent coordinate system to the child coordinate system
+  /// before calling the provided `hitTest` callback, which needs to implement
+  /// the actual hit testing on the child. The [Offset] provided
+  /// to the `hitTest` callback is the position exactly under the user's
+  /// finger on the touch screen (or any other pointer device) in the local
+  /// coordinate system of the child.
   ///
-  /// The provided paint [transform] from the child coordinate system to the
-  /// coordinate system of the caller, will be turned into a transform matrix
-  /// for pointer events. The inverted transformed matrix is used to transform
-  /// [position] from the parent coordinate system to the child coordinate system
-  /// before calling the provided [hitTest] callback.
+  /// If `transform` is null it will be treated as the identity transform ad
+  /// `position` is provided to the `hitTest` callback as-is. If `transform`
+  /// cannot be inverted, the `hitTest` callback is not invoked and false is
+  /// returned. Otherwise, the return value of the `hitTest` callback is
+  /// returned.
   ///
-  /// If the provided [transform] cannot be inverted, [hitTest] will not be
-  /// called and false is returned. Otherwise, the return value of [hitTest]
-  /// is returned.
+  /// The `position` argument may be null, which will be forwarded to the
+  /// `hitTest` callback as-is. Using null as the position can be useful if
+  /// the child speaks a different hit test protocol then the parent and the
+  /// position is not required to do the actual hit testing in that protocol.
   ///
   /// {@tool sample}
-  /// This method is often used in [RenderBox.hitTestChildren]:
+  /// This method is used in [RenderBox.hitTestChildren]:
   ///
   /// ```dart
   /// abstract class Foo extends RenderBox {
@@ -137,6 +130,13 @@ class HitTestResult {
   /// }
   /// ```
   /// {@end-tool}
+  ///
+  /// See also:
+  ///
+  ///  * [withPaintOffset], which can be used for `transform`s that are just
+  ///    simple matrix translations by an [Offset].
+  ///  * [withRawTransform], which takes a transform matrix that is directly
+  ///    used to transform the position without any pre-processing.
   bool withPaintTransform({
     @required Matrix4 transform,
     @required Offset position,
@@ -151,7 +151,7 @@ class HitTestResult {
       }
       _pushTransform(transform);
     }
-    final Offset transformedPosition = transform == null || position == null ? position : MatrixUtils.transformPoint(transform, position);
+    final Offset transformedPosition = position == null ? position : PointerEvent.transformPosition(transform, position);
     final bool absorbed = hitTest(this, transformedPosition);
     if (transform != null) {
       _popTransform();
@@ -159,6 +159,18 @@ class HitTestResult {
     return absorbed;
   }
 
+  /// Convenience method for hit testing children, that are translated by
+  /// an [Offset].
+  ///
+  /// This method can be used as a convenience over [withPaintTransform] if
+  /// a parent paints a child at an `offset`.
+  ///
+  /// A null value for `position` is treated as if [Offset.zero] was provided.
+  ///
+  /// Se also:
+  ///
+  ///  * [withPaintTransform], which takes a generic paint transform matrix and
+  ///    documents the intended usage of this API in mor detail.
   bool withPaintOffset({
     @required Offset offset,
     @required Offset position,
@@ -172,6 +184,16 @@ class HitTestResult {
     );
   }
 
+  /// Transforms `position` to the local coordinate system of a child before
+  /// hit-testing the child.
+  ///
+  /// Unlike [withPaintTransform], the provided `transform` matrix is used
+  /// directly to transform `position` without any pre-processing.
+  ///
+  /// Se also:
+  ///
+  ///  * [withPaintTransform], which accomplishes the same thing, but takes a
+  ///    *paint* transform matrix.
   bool withRawTransform({
     @required Matrix4 transform,
     @required Offset position,
@@ -181,7 +203,7 @@ class HitTestResult {
     if (transform != null) {
       _pushTransform(transform);
     }
-    final Offset transformedPosition = transform == null || position == null ? position : MatrixUtils.transformPoint(transform, position);
+    final Offset transformedPosition = position == null ? position : PointerEvent.transformPosition(transform, position);
     final bool absorbed = hitTest(this, transformedPosition);
     if (transform != null) {
       _popTransform();
@@ -200,6 +222,24 @@ class HitTestResult {
   Matrix4 getTransform(HitTestEntry entry) {
     assert(_path.containsKey(entry));
     return _path[entry];
+  }
+
+  final Queue<Matrix4> _transforms = Queue<Matrix4>();
+
+  void _pushTransform(Matrix4 transform) {
+    // TODO(goderbauer): It needs to be "moreOrLessEqualTo" due to rounding errors.
+//    assert(transform.getRow(2) == Vector4(0, 0, 1, 0) && transform.getColumn(2) == Vector4(0, 0, 1, 0),
+//      'The third row and third column of a transform matrix for pointer '
+//      'events must be Vector4(0, 0, 1, 0). Did you forget to run the paint '
+//      'matrix through PointerEvent.paintTransformToPointerEventTransform?'
+//      'The provided matrix is:\n$transform'
+//    );
+    _transforms.add(_transforms.isEmpty ? transform : _transforms.last * transform);
+  }
+
+  void _popTransform() {
+    assert(_transforms.isNotEmpty);
+    _transforms.removeLast();
   }
 
   @override
