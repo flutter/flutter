@@ -218,9 +218,21 @@ class _ModalBottomSheetLayout extends SingleChildLayoutDelegate {
 }
 
 class _ModalBottomSheet<T> extends StatefulWidget {
-  const _ModalBottomSheet({ Key key, this.route }) : super(key: key);
+  const _ModalBottomSheet({
+    Key key,
+    this.route,
+    this.color,
+    this.elevation,
+    this.shape,
+  }) : super(key: key);
 
   final _ModalBottomSheetRoute<T> route;
+
+  final Color color;
+
+  final double elevation;
+
+  final ShapeBorder shape;
 
   @override
   _ModalBottomSheetState<T> createState() => _ModalBottomSheetState<T>();
@@ -263,6 +275,9 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
                   animationController: widget.route._animationController,
                   onClosing: () => Navigator.pop(context),
                   builder: widget.route.builder,
+                  color: widget.color,
+                  elevation: widget.elevation,
+                  shape: widget.shape,
                 ),
               ),
             ),
@@ -278,6 +293,9 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
     this.builder,
     this.theme,
     this.barrierLabel,
+    this.color,
+    this.elevation,
+    this.shape,
     RouteSettings settings,
   }) : super(settings: settings);
 
@@ -298,6 +316,12 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
 
   AnimationController _animationController;
 
+  final Color color;
+
+  final double elevation;
+
+  final ShapeBorder shape;
+
   @override
   AnimationController createAnimationController() {
     assert(_animationController == null);
@@ -312,7 +336,12 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
     Widget bottomSheet = MediaQuery.removePadding(
       context: context,
       removeTop: true,
-      child: _ModalBottomSheet<T>(route: this),
+      child: _ModalBottomSheet<T>(
+        route: this,
+        color: color,
+        elevation: elevation,
+        shape: shape,
+      ),
     );
     if (theme != null)
       bottomSheet = Theme(data: theme, child: bottomSheet);
@@ -349,6 +378,9 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
 Future<T> showModalBottomSheet<T>({
   @required BuildContext context,
   @required WidgetBuilder builder,
+  Color color,
+  double elevation,
+  ShapeBorder shape,
 }) {
   assert(context != null);
   assert(builder != null);
@@ -357,6 +389,9 @@ Future<T> showModalBottomSheet<T>({
     builder: builder,
     theme: Theme.of(context, shadowThemeOnly: true),
     barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+    color: color,
+    elevation: elevation,
+    shape: shape,
   ));
 }
 
