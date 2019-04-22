@@ -72,7 +72,7 @@ Future<void> updateGeneratedXcodeProperties({
   if (symrootOverride != null) {
     localsBuffer.writeln('SYMROOT=$symrootOverride');
   } else {
-    localsBuffer.writeln('SYMROOT=/\${SOURCE_ROOT}/../$buildDirectory');
+    localsBuffer.writeln('SYMROOT=\${SOURCE_ROOT}/../$buildDirectory');
   }
 
   if (!project.isModule) {
