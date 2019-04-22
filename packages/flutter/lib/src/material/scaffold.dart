@@ -1847,8 +1847,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
     bool shouldShowFloatingSnackBar = false;
     if (_snackBars.isNotEmpty) {
-      final SnackBarBehavior snackBarBehavior = _snackBars.first._widget.snackBarBehavior
-          ?? themeData.snackBarTheme.snackBarBehavior
+      final SnackBarBehavior snackBarBehavior = _snackBars.first._widget.behavior
+          ?? themeData.snackBarTheme.behavior
           ?? SnackBarBehavior.fixed;
       switch (snackBarBehavior) {
         case SnackBarBehavior.floating:

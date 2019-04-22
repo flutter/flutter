@@ -10,7 +10,7 @@ import 'package:flutter/widgets.dart';
 import 'theme.dart';
 
 /// Configures whether [SnackBar] should be fixed to the bottom or floating
-/// like described in the Material Design spec.
+/// above other widgets fixed to the bottom, such as [FloatingActionButton].
 enum SnackBarBehavior {
   /// Fixed the [SnackBar] position to the bottom of the [Scaffold] when
   /// possible. One of the possible scenarios where [SnackBar] will be shown
@@ -54,12 +54,12 @@ class SnackBarThemeData extends Diagnosticable {
     this.disabledActionTextColor,
     this.elevation,
     this.shape,
-    this.snackBarBehavior = SnackBarBehavior.fixed,
+    this.behavior = SnackBarBehavior.fixed,
   }) : assert(elevation == null || elevation >= 0.0);
 
   /// Default value for [SnackBar.backgroundColor].
   ///
-  /// If null, [SnackBar] provides a default value.
+  /// If null, [SnackBar] defaults to `Color(0xFF323232)`.
   final Color backgroundColor;
 
   /// Default value for [SnackBarAction.textColor].
@@ -86,10 +86,10 @@ class SnackBarThemeData extends Diagnosticable {
   /// circular corner radius of 4.0.
   final ShapeBorder shape;
 
-  /// Default value for [SnackBar.snackBarBehavior].
+  /// Default value for [SnackBar.behavior].
   ///
   /// If null, [SnackBar] will default to [SnackBarBehavior.fixed].
-  final SnackBarBehavior snackBarBehavior;
+  final SnackBarBehavior behavior;
 
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
@@ -99,7 +99,7 @@ class SnackBarThemeData extends Diagnosticable {
     Color disabledActionTextColor,
     double elevation,
     ShapeBorder shape,
-    SnackBarBehavior snackBarBehavior,
+    SnackBarBehavior behavior,
   }) {
     return SnackBarThemeData(
       backgroundColor: backgroundColor ?? this.backgroundColor,
@@ -107,7 +107,7 @@ class SnackBarThemeData extends Diagnosticable {
       disabledActionTextColor: disabledActionTextColor ?? this.disabledActionTextColor,
       elevation: elevation ?? this.elevation,
       shape: shape ?? this.shape,
-      snackBarBehavior: snackBarBehavior ?? this.snackBarBehavior,
+      behavior: behavior ?? this.behavior,
     );
   }
 
@@ -124,7 +124,7 @@ class SnackBarThemeData extends Diagnosticable {
       disabledActionTextColor: Color.lerp(a?.disabledActionTextColor, b?.disabledActionTextColor, t),
       elevation: lerpDouble(a?.elevation, b?.elevation, t),
       shape: ShapeBorder.lerp(a?.shape, b?.shape, t),
-      snackBarBehavior: t < 0.5 ? a.snackBarBehavior : b.snackBarBehavior,
+      behavior: t < 0.5 ? a.behavior : b.behavior,
     );
   }
 
@@ -136,7 +136,7 @@ class SnackBarThemeData extends Diagnosticable {
       disabledActionTextColor,
       elevation,
       shape,
-      snackBarBehavior,
+      behavior,
     );
   }
 
@@ -152,7 +152,7 @@ class SnackBarThemeData extends Diagnosticable {
         && typedOther.disabledActionTextColor == disabledActionTextColor
         && typedOther.elevation == elevation
         && typedOther.shape == shape
-        && typedOther.snackBarBehavior == snackBarBehavior;
+        && typedOther.behavior == behavior;
   }
 
   @override
@@ -163,6 +163,6 @@ class SnackBarThemeData extends Diagnosticable {
     properties.add(DiagnosticsProperty<Color>('disabledActionTextColor', disabledActionTextColor, defaultValue: null));
     properties.add(DiagnosticsProperty<double>('elevation', elevation, defaultValue: null));
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
-    properties.add(DiagnosticsProperty<SnackBarBehavior>('snackBarBehavior', snackBarBehavior, defaultValue: null));
+    properties.add(DiagnosticsProperty<SnackBarBehavior>('behavior', behavior, defaultValue: null));
   }
 }

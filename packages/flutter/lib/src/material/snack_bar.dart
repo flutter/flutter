@@ -14,7 +14,7 @@ import 'theme.dart';
 import 'theme_data.dart';
 
 const double _kSingleLineVerticalPadding = 14.0;
-const Color _kSnackBackground = Color(0xFF323232);
+const Color _kSnackBarBackgroundColor = Color(0xFF323232);
 
 // TODO(ianh): We should check if the given text and actions are going to fit on
 // one line or not, and if they are, use the single-line layout, and if not, use
@@ -170,7 +170,7 @@ class SnackBar extends StatelessWidget {
     this.backgroundColor,
     this.elevation,
     this.shape,
-    this.snackBarBehavior,
+    this.behavior,
     this.action,
     this.duration = _kSnackBarDisplayDuration,
     this.animation,
@@ -211,9 +211,9 @@ class SnackBar extends StatelessWidget {
   /// Controls whether the snack bar should be fixed to the bottom or floating
   /// as described in the updated Material Design spec.
   ///
-  /// If this property is null, then [ThemeData.snackBarTheme.snackBarBehavior]
+  /// If this property is null, then [ThemeData.snackBarTheme.behavior]
   /// is used. If that is null, then the default is [SnackBarBehavior.fixed].
-  final SnackBarBehavior snackBarBehavior;
+  final SnackBarBehavior behavior;
 
   /// (optional) An action that the user can take based on the snack bar.
   ///
@@ -250,15 +250,9 @@ class SnackBar extends StatelessWidget {
       accentColorBrightness: theme.accentColorBrightness,
       snackBarTheme: snackBarTheme,
     );
-    double snackBarPadding = 0.0;
-    switch (snackBarTheme.snackBarBehavior) {
-      case SnackBarBehavior.fixed:
-        snackBarPadding = 24.0;
-        break;
-      case SnackBarBehavior.floating:
-        snackBarPadding = 16.0;
-        break;
-    }
+    final SnackBarBehavior snackBarBehavior = behavior ?? snackBarTheme.behavior ?? SnackBarBehavior.fixed;
+    final bool isFloatingSnackBar = snackBarBehavior == SnackBarBehavior.floating;
+    final double snackBarPadding = isFloatingSnackBar ? 16.0 : 24.0;
 
     final List<Widget> children = <Widget>[
       SizedBox(width: snackBarPadding),
@@ -281,18 +275,13 @@ class SnackBar extends StatelessWidget {
     } else {
       children.add(SizedBox(width: snackBarPadding));
     }
-    final CurvedAnimation heightAnimation =
-        CurvedAnimation(parent: animation, curve: _snackBarHeightCurve);
-    final CurvedAnimation fadeInAnimation =
-        CurvedAnimation(parent: animation, curve: _snackBarFadeInCurve);
+    final CurvedAnimation heightAnimation = CurvedAnimation(parent: animation, curve: _snackBarHeightCurve);
+    final CurvedAnimation fadeInAnimation = CurvedAnimation(parent: animation, curve: _snackBarFadeInCurve);
     final CurvedAnimation fadeOutAnimation = CurvedAnimation(
       parent: animation,
       curve: _snackBarFadeOutCurve,
       reverseCurve: const Threshold(0.0),
     );
-
-    final SnackBarBehavior snackBarBehavior = this.snackBarBehavior ?? snackBarTheme.snackBarBehavior ?? SnackBarBehavior.fixed;
-    final bool isFloatingSnackBar = snackBarBehavior == SnackBarBehavior.floating;
 
     Widget snackBar = SafeArea(
       top: false,
@@ -304,7 +293,7 @@ class SnackBar extends StatelessWidget {
     );
 
     final double elevation = this.elevation ?? snackBarTheme.elevation ?? 6.0;
-    final Color backgroundColor = this.backgroundColor ?? snackBarTheme.backgroundColor ?? _kSnackBackground;
+    final Color backgroundColor = this.backgroundColor ?? snackBarTheme.backgroundColor ?? _kSnackBarBackgroundColor;
     final ShapeBorder shape = this.shape
         ?? snackBarTheme.shape
         ?? (isFloatingSnackBar ? RoundedRectangleBorder(borderRadius: BorderRadius.circular(4.0)) : null);
@@ -378,9 +367,7 @@ class SnackBar extends StatelessWidget {
 
   /// Creates an animation controller useful for driving a snack bar's entrance
   /// and exit animation.
-  static AnimationController createAnimationController({
-    @required TickerProvider vsync,
-  }) {
+  static AnimationController createAnimationController({ @required TickerProvider vsync }) {
     return AnimationController(
       duration: _kSnackBarTransitionDuration,
       debugLabel: 'SnackBar',
@@ -388,19 +375,18 @@ class SnackBar extends StatelessWidget {
     );
   }
 
-  /// Creates a copy of this snack bar but with the animation replaced with
-  /// the given animation.
+  /// Creates a copy of this snack bar but with the animation replaced with the given animation.
   ///
   /// If the original snack bar lacks a key, the newly created snack bar will
   /// use the given fallback key.
-  SnackBar withAnimation(Animation<double> newAnimation, {Key fallbackKey}) {
+  SnackBar withAnimation(Animation<double> newAnimation, { Key fallbackKey }) {
     return SnackBar(
       key: key ?? fallbackKey,
       content: content,
       backgroundColor: backgroundColor,
       elevation: elevation,
       shape: shape,
-      snackBarBehavior: snackBarBehavior,
+      behavior: behavior,
       action: action,
       duration: duration,
       animation: newAnimation,
