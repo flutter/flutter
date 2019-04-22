@@ -14,9 +14,10 @@ import '../ios/xcodeproj.dart';
 import '../project.dart';
 
 /// Builds the macOS project through xcode build.
+// TODO(jonahwilliams): support target option.
+// TODO(jonahwilliams): refactor to share code with the existing iOS code.
 Future<void> buildMacOS(FlutterProject flutterProject, BuildInfo buildInfo) async {
   // Write configuration to an xconfig file in a standard location.
-  // TODO(jonahwilliams): support target option.
   await updateGeneratedXcodeProperties(
     project: flutterProject,
     buildInfo: buildInfo,
