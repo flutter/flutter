@@ -17,8 +17,6 @@
 #include "paragraph.h"
 
 #include <hb.h>
-#include <minikin/Layout.h>
-
 #include <algorithm>
 #include <limits>
 #include <map>
@@ -26,6 +24,7 @@
 #include <utility>
 #include <vector>
 
+#include <minikin/Layout.h>
 #include "flutter/fml/logging.h"
 #include "font_collection.h"
 #include "font_skia.h"
@@ -35,6 +34,9 @@
 #include "minikin/LayoutUtils.h"
 #include "minikin/LineBreaker.h"
 #include "minikin/MinikinFont.h"
+#include "unicode/ubidi.h"
+#include "unicode/utf16.h"
+
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkFont.h"
 #include "third_party/skia/include/core/SkFontMetrics.h"
@@ -44,8 +46,6 @@
 #include "third_party/skia/include/core/SkTypeface.h"
 #include "third_party/skia/include/effects/SkDashPathEffect.h"
 #include "third_party/skia/include/effects/SkDiscretePathEffect.h"
-#include "unicode/ubidi.h"
-#include "unicode/utf16.h"
 
 namespace txt {
 namespace {
@@ -552,8 +552,14 @@ void Paragraph::Layout(double width, bool force) {
     // Find the runs comprising this line.
     std::vector<BidiRun> line_runs;
     for (const BidiRun& bidi_run : bidi_runs) {
+      if (bidi_run.start() < line_end_index &&
+          bidi_run.end() > line_range.start) {
+        line_runs.emplace_back(std::max(bidi_run.start(), line_range.start),
+                               std::min(bidi_run.end(), line_end_index),
+                               bidi_run.direction(), bidi_run.style());
+      }
       // A "ghost" run is a run that does not impact the layout, breaking,
-      // alignment, width, etc but is still "visible" through getRectsForRange.
+      // alignment, width, etc but is still "visible" though getRectsForRange.
       // For example, trailing whitespace on centered text can be scrolled
       // through with the caret but will not wrap the line.
       //
@@ -561,30 +567,13 @@ void Paragraph::Layout(double width, bool force) {
       // let it impact metrics. After layout of the whitespace run, we do not
       // add its width into the x-offset adjustment, effectively nullifying its
       // impact on the layout.
-      std::unique_ptr<BidiRun> ghost_run = nullptr;
       if (paragraph_style_.ellipsis.empty() &&
           line_range.end_excluding_whitespace < line_range.end &&
           bidi_run.start() <= line_range.end &&
           bidi_run.end() > line_end_index) {
-        ghost_run = std::make_unique<BidiRun>(
-            std::max(bidi_run.start(), line_end_index),
-            std::min(bidi_run.end(), line_range.end), bidi_run.direction(),
-            bidi_run.style(), true);
-      }
-      // Include the ghost run before normal run if RTL
-      if (bidi_run.direction() == TextDirection::rtl && ghost_run != nullptr) {
-        line_runs.push_back(*ghost_run);
-      }
-      // Emplace a normal line run.
-      if (bidi_run.start() < line_end_index &&
-          bidi_run.end() > line_range.start) {
-        line_runs.emplace_back(std::max(bidi_run.start(), line_range.start),
-                               std::min(bidi_run.end(), line_end_index),
-                               bidi_run.direction(), bidi_run.style());
-      }
-      // Include the ghost run after normal run if LTR
-      if (bidi_run.direction() == TextDirection::ltr && ghost_run != nullptr) {
-        line_runs.push_back(*ghost_run);
+        line_runs.emplace_back(std::max(bidi_run.start(), line_end_index),
+                               std::min(bidi_run.end(), line_range.end),
+                               bidi_run.direction(), bidi_run.style(), true);
       }
     }
     bool line_runs_all_rtl =
@@ -671,17 +660,6 @@ void Paragraph::Layout(double width, bool force) {
 
       if (layout.nGlyphs() == 0)
         continue;
-
-      // When laying out RTL ghost runs, shift the run_x_offset here by the
-      // advance so that the ghost run is positioned to the left of the first
-      // real run of text in the line. However, since we do not want it to
-      // impact the layout of real text, this advance is subsequently added
-      // back into the run_x_offset after the ghost run positions have been
-      // calcuated and before the next real run of text is laid out, ensuring
-      // later runs are laid out in the same position as if there were no ghost
-      // run.
-      if (run.is_ghost() && run.is_rtl())
-        run_x_offset -= layout.getAdvance();
 
       std::vector<float> layout_advances(text_count);
       layout.getAdvances(layout_advances.data());
@@ -830,7 +808,6 @@ void Paragraph::Layout(double width, bool force) {
                   [](const GlyphPosition& a, const GlyphPosition& b) {
                     return a.code_units.start < b.code_units.start;
                   });
-
         line_code_unit_runs.emplace_back(
             std::move(code_unit_positions),
             Range<size_t>(run.start(), run.end()),
@@ -838,17 +815,14 @@ void Paragraph::Layout(double width, bool force) {
                           glyph_positions.back().x_pos.end),
             line_number, metrics, run.direction());
 
-        if (!run.is_ghost()) {
-          min_left_ = std::min(min_left_, glyph_positions.front().x_pos.start);
-          max_right_ = std::max(max_right_, glyph_positions.back().x_pos.end);
-        }
+        min_left_ = std::min(min_left_, glyph_positions.front().x_pos.start);
+        max_right_ = std::max(max_right_, glyph_positions.back().x_pos.end);
       }  // for each in glyph_blobs
-      // Do not increase x offset for LTR trailing ghost runs as it should not
-      // impact the layout of visible glyphs. RTL tailing ghost runs have the
-      // advance subtracted, so we do add the advance here to reset the
-      // run_x_offset. We do keep the record though so GetRectsForRange() can
-      // find metrics for trailing spaces.
-      if (!run.is_ghost() || run.is_rtl()) {
+
+      // Do not increase x offset for trailing ghost runs as it should not
+      // impact the layout of visible glyphs. We do keep the record though so
+      // GetRectsForRange() can find metrics for trailing spaces.
+      if (!run.is_ghost()) {
         run_x_offset += layout.getAdvance();
       }
     }  // for each in line_runs
