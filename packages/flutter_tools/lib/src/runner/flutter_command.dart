@@ -259,54 +259,6 @@ abstract class FlutterCommand extends Command<void> {
               '--dynamic builds such as \'flutter build apk --dynamic\' to precompile\n'
               'some code by the offline compiler.',
     );
-    argParser.addFlag('patch',
-        hide: !verboseHelp,
-        negatable: false,
-        help: 'Generate dynamic patch for current changes from baseline.\n'
-              'Dynamic patch is generated relative to baseline package.\n'
-              'This flag is only allowed when using --dynamic.\n',
-    );
-  }
-
-  void addDynamicPatchingFlags({ bool verboseHelp = false }) {
-    argParser.addOption('patch-number',
-        hide: !verboseHelp,
-        help: 'An integer used as an internal version number for dynamic patch.\n'
-              'Each update may have a unique number to differentiate from previous\n'
-              'patches for same \'versionCode\' on Android or \'CFBundleVersion\' on iOS.\n'
-              'This optional setting allows several dynamic patches to coexist\n'
-              'for same baseline build, and is useful for canary and A-B testing\n'
-              'of dynamic patches.\n'
-              'This flag is only used when --dynamic --patch is specified.\n',
-    );
-    argParser.addOption('patch-dir',
-        defaultsTo: 'public',
-        hide: !verboseHelp,
-        help: 'The directory where to store generated dynamic patches.\n'
-              'This directory can be deployed to a CDN such as Firebase Hosting.\n'
-              'It is recommended to store this directory in version control.\n'
-              'This flag is only used when --dynamic --patch is specified.\n',
-    );
-    argParser.addFlag('baseline',
-        hide: !verboseHelp,
-        negatable: false,
-        help: 'Save built package as baseline for future dynamic patching.\n'
-            'Built package, such as APK file on Android, is saved and '
-            'can be used to generate dynamic patches in later builds.\n'
-            'This flag is only allowed when using --dynamic.\n',
-    );
-
-    addDynamicBaselineFlags(verboseHelp: verboseHelp);
-  }
-
-  void addDynamicBaselineFlags({ bool verboseHelp = false }) {
-    argParser.addOption('baseline-dir',
-        defaultsTo: '.baseline',
-        hide: !verboseHelp,
-        help: 'The directory where to store and find generated baseline packages.\n'
-              'It is recommended to store this directory in version control.\n'
-              'This flag is only used when --dynamic --baseline is specified.\n',
-    );
   }
 
   void usesFuchsiaOptions({ bool hide = false }) {
@@ -382,16 +334,6 @@ abstract class FlutterCommand extends Command<void> {
         ? argResults['build-number']
         : null;
 
-    int patchNumber;
-    try {
-      patchNumber = argParser.options.containsKey('patch-number') && argResults['patch-number'] != null
-          ? int.parse(argResults['patch-number'])
-          : null;
-    } catch (e) {
-      throw UsageException(
-          '--patch-number (${argResults['patch-number']}) must be an int.', null);
-    }
-
     String extraFrontEndOptions =
         argParser.options.containsKey(FlutterOptions.kExtraFrontEndOptions)
             ? argResults[FlutterOptions.kExtraFrontEndOptions]
@@ -415,19 +357,6 @@ abstract class FlutterCommand extends Command<void> {
       trackWidgetCreation: trackWidgetCreation,
       compilationTraceFilePath: argParser.options.containsKey('compilation-trace-file')
           ? argResults['compilation-trace-file']
-          : null,
-      createBaseline: argParser.options.containsKey('baseline')
-          ? argResults['baseline']
-          : false,
-      createPatch: argParser.options.containsKey('patch')
-          ? argResults['patch']
-          : false,
-      patchNumber: patchNumber,
-      patchDir: argParser.options.containsKey('patch-dir')
-          ? argResults['patch-dir']
-          : null,
-      baselineDir: argParser.options.containsKey('baseline-dir')
-          ? argResults['baseline-dir']
           : null,
       extraFrontEndOptions: extraFrontEndOptions,
       extraGenSnapshotOptions: argParser.options.containsKey(FlutterOptions.kExtraGenSnapshotOptions)
@@ -670,20 +599,6 @@ abstract class FlutterCommand extends Command<void> {
       if (!fs.isFileSync(targetPath))
         throw ToolExit(userMessages.flutterTargetFileMissing(targetPath));
     }
-
-    final String compilationTraceFilePath = argParser.options.containsKey('compilation-trace-file')
-        ? argResults['compilation-trace-file'] : null;
-    final bool createBaseline = argParser.options.containsKey('baseline')
-        ? argResults['baseline'] : false;
-    final bool createPatch = argParser.options.containsKey('patch')
-        ? argResults['patch'] : false;
-
-    if (createBaseline && createPatch)
-      throw ToolExit(userMessages.flutterBasePatchFlagsExclusive);
-    if (createBaseline && compilationTraceFilePath == null)
-      throw ToolExit(userMessages.flutterBaselineRequiresTraceFile);
-    if (createPatch && compilationTraceFilePath == null)
-      throw ToolExit(userMessages.flutterPatchRequiresTraceFile);
   }
 
   ApplicationPackageStore applicationPackages;
