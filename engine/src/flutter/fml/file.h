@@ -46,8 +46,6 @@ fml::UniqueFD OpenDirectory(const fml::UniqueFD& base_directory,
                             bool create_if_necessary,
                             FilePermission permission);
 
-fml::UniqueFD OpenDirectoryOfExecutable();
-
 fml::UniqueFD Duplicate(fml::UniqueFD::element_type descriptor);
 
 bool IsDirectory(const fml::UniqueFD& directory);
