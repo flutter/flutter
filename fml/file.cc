@@ -5,7 +5,6 @@
 #include "flutter/fml/file.h"
 
 #include "flutter/fml/logging.h"
-#include "flutter/fml/paths.h"
 
 namespace fml {
 
@@ -57,16 +56,6 @@ ScopedTemporaryDirectory::~ScopedTemporaryDirectory() {
       FML_LOG(ERROR) << "Could not remove directory: " << path_;
     }
   }
-}
-
-fml::UniqueFD OpenDirectoryOfExecutable() {
-  auto result = paths::GetExecutableDirectoryPath();
-
-  if (!result.first) {
-    return {};
-  }
-
-  return OpenFile(result.second.c_str(), false, FilePermission::kRead);
 }
 
 }  // namespace fml
