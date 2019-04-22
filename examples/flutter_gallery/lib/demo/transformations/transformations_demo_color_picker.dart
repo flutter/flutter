@@ -7,15 +7,15 @@ class ColorPicker extends StatelessWidget {
     @required this.colors,
     @required this.selectedColor,
     this.onColorSelection,
-  }) : assert(colors != null),
-       assert(selectedColor != null);
+  })  : assert(colors != null),
+        assert(selectedColor != null);
 
   final Set<Color> colors;
   final Color selectedColor;
   final ValueChanged<Color> onColorSelection;
 
   @override
-  Widget build (BuildContext context) {
+  Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: colors.map((Color color) {
@@ -40,15 +40,15 @@ class _ColorPickerSwatch extends StatelessWidget {
     @required this.color,
     @required this.selected,
     this.onTap,
-  }) : assert(color != null),
-       assert(selected != null);
+  })  : assert(color != null),
+        assert(selected != null);
 
   final Color color;
   final bool selected;
   final Function onTap;
 
   @override
-  Widget build (BuildContext context) {
+  Widget build(BuildContext context) {
     return Container(
       width: 60.0,
       height: 60.0,
@@ -60,10 +60,12 @@ class _ColorPickerSwatch extends StatelessWidget {
             onTap();
           }
         },
-        child: !selected ? null : const Icon(
-          Icons.check,
-          color: Colors.white,
-        ),
+        child: !selected
+            ? null
+            : const Icon(
+                Icons.check,
+                color: Colors.white,
+              ),
       ),
     );
   }

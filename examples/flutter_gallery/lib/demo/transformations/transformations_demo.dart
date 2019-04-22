@@ -9,8 +9,10 @@ class TransformationsDemo extends StatefulWidget {
 
   static const String routeName = '/transformations';
 
-  @override _TransformationsDemoState createState() => _TransformationsDemoState();
+  @override
+  _TransformationsDemoState createState() => _TransformationsDemoState();
 }
+
 class _TransformationsDemoState extends State<TransformationsDemo> {
   // The radius of a hexagon tile in pixels.
   static const double _kHexagonRadius = 32.0;
@@ -27,7 +29,7 @@ class _TransformationsDemoState extends State<TransformationsDemo> {
   );
 
   @override
-  Widget build (BuildContext context) {
+  Widget build(BuildContext context) {
     final BoardPainter painter = BoardPainter(
       board: _board,
     );
@@ -102,9 +104,7 @@ class _TransformationsDemoState extends State<TransformationsDemo> {
       actions: <Widget>[
         FlatButton(
           child: const Text('OK'),
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
+          onPressed: () { Navigator.of(context).pop(); },
         ),
       ],
     );

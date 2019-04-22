@@ -612,9 +612,9 @@ class _ListModel {
     @required this.listKey,
     @required this.removedItemBuilder,
     Iterable<int> initialItems,
-  }) : assert(listKey != null),
-       assert(removedItemBuilder != null),
-       _items = initialItems?.toList() ?? <int>[];
+  })  : assert(listKey != null),
+        assert(removedItemBuilder != null),
+        _items = initialItems?.toList() ?? <int>[];
 
   final GlobalKey<AnimatedListState> listKey;
   final dynamic removedItemBuilder;

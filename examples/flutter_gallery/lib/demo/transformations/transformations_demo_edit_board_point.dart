@@ -9,14 +9,14 @@ class EditBoardPoint extends StatelessWidget {
     Key key,
     @required this.boardPoint,
     this.onColorSelection,
-  }) : assert(boardPoint != null),
-       super(key: key);
+  })  : assert(boardPoint != null),
+        super(key: key);
 
   final BoardPoint boardPoint;
   final ValueChanged<Color> onColorSelection;
 
   @override
-  Widget build (BuildContext context) {
+  Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
