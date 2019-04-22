@@ -488,6 +488,11 @@ class RenderParagraph extends RenderBox {
         rect = rect.expandToInclude(textBox.toRect());
         currentDirection = textBox.direction;
       }
+      
+      if (rect == null) {
+        return null;
+      }
+      
       // round the current rectangle to make this API testable and add some
       // padding so that the accessibility rects do not overlap with the text.
       // TODO(jonahwilliams): implement this for all text accessibility rects.
@@ -510,12 +515,14 @@ class RenderParagraph extends RenderBox {
       if (current != start) {
         final SemanticsNode node = SemanticsNode();
         final SemanticsConfiguration configuration = buildSemanticsConfig(current, start);
+        if (configuration == null) break;
         node.updateWith(config: configuration);
         node.rect = currentRect;
         newChildren.add(node);
       }
       final SemanticsNode node = SemanticsNode();
       final SemanticsConfiguration configuration = buildSemanticsConfig(start, end);
+      if (configuration == null) break;
       final GestureRecognizer recognizer = _recognizers[j];
       if (recognizer is TapGestureRecognizer) {
         configuration.onTap = recognizer.onTap;
@@ -532,9 +539,11 @@ class RenderParagraph extends RenderBox {
     if (current < rawLabel.length) {
       final SemanticsNode node = SemanticsNode();
       final SemanticsConfiguration configuration = buildSemanticsConfig(current, rawLabel.length);
-      node.updateWith(config: configuration);
-      node.rect = currentRect;
-      newChildren.add(node);
+      if (configuration != null) {
+        node.updateWith(config: configuration);
+        node.rect = currentRect;
+        newChildren.add(node);
+      }
     }
     node.updateWith(config: config, childrenInInversePaintOrder: newChildren);
   }
