@@ -208,8 +208,6 @@ class IosProject {
   Directory get _ephemeralDirectory => parent.directory.childDirectory('.ios');
   Directory get _editableDirectory => parent.directory.childDirectory('ios');
 
-  bool existsSync() => parent.isModule || _editableDirectory.existsSync();
-
   /// This parent folder of `Runner.xcodeproj`.
   Directory get hostAppRoot {
     if (!isModule || _editableDirectory.existsSync())
