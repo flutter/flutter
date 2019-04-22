@@ -2913,12 +2913,13 @@ class Vertices extends NativeFieldWrapperClass2 {
     final Int32List encodedColors = colors != null
       ? _encodeColorList(colors)
       : null;
-    final Int32List encodedIndices = indices != null
-      ? new Int32List.fromList(indices)
+    final Uint16List encodedIndices = indices != null
+      ? new Uint16List.fromList(indices)
       : null;
 
     _constructor();
-    _init(mode.index, encodedPositions, encodedTextureCoordinates, encodedColors, encodedIndices);
+    if (!_init(mode.index, encodedPositions, encodedTextureCoordinates, encodedColors, encodedIndices))
+      throw new ArgumentError('Invalid configuration for vertices.');
   }
 
   Vertices.raw(
@@ -2926,7 +2927,7 @@ class Vertices extends NativeFieldWrapperClass2 {
     Float32List positions, {
     Float32List textureCoordinates,
     Int32List colors,
-    Int32List indices,
+    Uint16List indices,
   }) : assert(mode != null),
        assert(positions != null) {
     if (textureCoordinates != null && textureCoordinates.length != positions.length)
@@ -2937,16 +2938,17 @@ class Vertices extends NativeFieldWrapperClass2 {
       throw new ArgumentError('"indices" values must be valid indices in the positions list.');
 
     _constructor();
-    _init(mode.index, positions, textureCoordinates, colors, indices);
+    if (!_init(mode.index, positions, textureCoordinates, colors, indices))
+      throw new ArgumentError('Invalid configuration for vertices.');
   }
 
   void _constructor() native 'Vertices_constructor';
 
-  void _init(int mode,
+  bool _init(int mode,
              Float32List positions,
              Float32List textureCoordinates,
              Int32List colors,
-             Int32List indices) native 'Vertices_init';
+             Uint16List indices) native 'Vertices_init';
 }
 
 /// Defines how a list of points is interpreted when drawing a set of points.

@@ -1,4 +1,4 @@
-Signature: cb9e296575fc050579bacb3a1c06c9b5
+Signature: b4f8888f322c420b204e79450f0692ae
 
 UNUSED LICENSES:
 
@@ -18086,6 +18086,7 @@ FILE: ../../../third_party/tonic/scopes/dart_isolate_scope.cc
 FILE: ../../../third_party/tonic/scopes/dart_isolate_scope.h
 FILE: ../../../third_party/tonic/typed_data/dart_byte_data.h
 FILE: ../../../third_party/tonic/typed_data/int32_list.h
+FILE: ../../../third_party/tonic/typed_data/uint16_list.h
 FILE: ../../../third_party/tonic/typed_data/uint8_list.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2016 The Fuchsia Authors. All rights reserved.
@@ -18223,6 +18224,7 @@ FILE: ../../../third_party/tonic/typed_data/float32_list.h
 FILE: ../../../third_party/tonic/typed_data/float64_list.cc
 FILE: ../../../third_party/tonic/typed_data/float64_list.h
 FILE: ../../../third_party/tonic/typed_data/int32_list.cc
+FILE: ../../../third_party/tonic/typed_data/uint16_list.cc
 FILE: ../../../third_party/tonic/typed_data/uint8_list.cc
 ----------------------------------------------------------------------------------------------------
 Copyright 2015 The Fuchsia Authors. All rights reserved.
