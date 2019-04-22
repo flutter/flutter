@@ -7,13 +7,8 @@ import 'dart:ui';
 import 'package:test/test.dart';
 
 void main() {
-  test('toString test', () {
-    const Rect r = Rect.fromLTRB(1.0, 3.0, 5.0, 7.0);
-    expect(r.toString(), 'Rect.fromLTRB(1.0, 3.0, 5.0, 7.0)');
-  });
-
   test('rect accessors', () {
-    const Rect r = Rect.fromLTRB(1.0, 3.0, 5.0, 7.0);
+    final Rect r = Rect.fromLTRB(1.0, 3.0, 5.0, 7.0);
     expect(r.left, equals(1.0));
     expect(r.top, equals(3.0));
     expect(r.right, equals(5.0));
@@ -21,7 +16,7 @@ void main() {
   });
 
   test('rect created by width and height', () {
-    const Rect r = Rect.fromLTWH(1.0, 3.0, 5.0, 7.0);
+    final Rect r = Rect.fromLTWH(1.0, 3.0, 5.0, 7.0);
     expect(r.left, equals(1.0));
     expect(r.top, equals(3.0));
     expect(r.right, equals(6.0));
@@ -31,8 +26,8 @@ void main() {
   });
 
   test('rect intersection', () {
-    const Rect r1 = Rect.fromLTRB(0.0, 0.0, 100.0, 100.0);
-    const Rect r2 = Rect.fromLTRB(50.0, 50.0, 200.0, 200.0);
+    final Rect r1 = Rect.fromLTRB(0.0, 0.0, 100.0, 100.0);
+    final Rect r2 = Rect.fromLTRB(50.0, 50.0, 200.0, 200.0);
     final Rect r3 = r1.intersect(r2);
     expect(r3.left, equals(50.0));
     expect(r3.top, equals(50.0));
@@ -43,8 +38,8 @@ void main() {
   });
 
   test('rect expandToInclude overlapping rects', () {
-    const Rect r1 = Rect.fromLTRB(0.0, 0.0, 100.0, 100.0);
-    const Rect r2 = Rect.fromLTRB(50.0, 50.0, 200.0, 200.0);
+    final Rect r1 = Rect.fromLTRB(0.0, 0.0, 100.0, 100.0);
+    final Rect r2 = Rect.fromLTRB(50.0, 50.0, 200.0, 200.0);
     final Rect r3 = r1.expandToInclude(r2);
     expect(r3.left, equals(0.0));
     expect(r3.top, equals(0.0));
@@ -55,8 +50,8 @@ void main() {
   });
 
   test('rect expandToInclude crossing rects', () {
-    const Rect r1 = Rect.fromLTRB(50.0, 0.0, 50.0, 200.0);
-    const Rect r2 = Rect.fromLTRB(0.0, 50.0, 200.0, 50.0);
+    final Rect r1 = Rect.fromLTRB(50.0, 0.0, 50.0, 200.0);
+    final Rect r2 = Rect.fromLTRB(0.0, 50.0, 200.0, 50.0);
     final Rect r3 = r1.expandToInclude(r2);
     expect(r3.left, equals(0.0));
     expect(r3.top, equals(0.0));
@@ -75,7 +70,7 @@ void main() {
   });
 
   test('rounded rect created from rect and radii', () {
-    const Rect baseRect = Rect.fromLTWH(1.0, 3.0, 5.0, 7.0);
+    final Rect baseRect = Rect.fromLTWH(1.0, 3.0, 5.0, 7.0);
     final RRect r = RRect.fromRectXY(baseRect, 1.0, 1.0);
     expect(r.left, equals(1.0));
     expect(r.top, equals(3.0));

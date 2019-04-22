@@ -98,7 +98,7 @@ class SceneBuilder extends NativeFieldWrapperClass2 {
   EngineLayer pushClipRRect(RRect rrect, {Clip clipBehavior = Clip.antiAlias}) {
     assert(clipBehavior != null);
     assert(clipBehavior != Clip.none);
-    return _pushClipRRect(rrect._value32, clipBehavior.index);
+    return _pushClipRRect(rrect._value, clipBehavior.index);
   }
   EngineLayer _pushClipRRect(Float32List rrect, int clipBehavior) native 'SceneBuilder_pushClipRRect';
 
