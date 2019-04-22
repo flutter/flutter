@@ -7,6 +7,11 @@ import 'dart:ui';
 import 'package:test/test.dart';
 
 void main() {
+  test('toString test', () {
+    const Rect r = Rect.fromLTRB(1.0, 3.0, 5.0, 7.0);
+    expect(r.toString(), 'Rect.fromLTRB(1.0, 3.0, 5.0, 7.0)');
+  });
+
   test('rect accessors', () {
     const Rect r = Rect.fromLTRB(1.0, 3.0, 5.0, 7.0);
     expect(r.left, equals(1.0));

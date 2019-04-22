@@ -879,7 +879,7 @@ class Rect {
   int get hashCode => hashValues(left, top, right, bottom);
 
   @override
-  String toString() => 'Rect.fromLTRB(${left.toStringAsFixed(1)} ${top.toStringAsFixed(1)}, ${right.toStringAsFixed(1)}, ${bottom.toStringAsFixed(1)})';
+  String toString() => 'Rect.fromLTRB(${left.toStringAsFixed(1)}, ${top.toStringAsFixed(1)}, ${right.toStringAsFixed(1)}, ${bottom.toStringAsFixed(1)})';
 }
 
 /// A radius for either circular or elliptical shapes.
