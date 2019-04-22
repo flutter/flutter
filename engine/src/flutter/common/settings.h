@@ -146,6 +146,8 @@ struct Settings {
   fml::UniqueFD::element_type assets_dir =
       fml::UniqueFD::traits_type::InvalidValue();
   std::string assets_path;
+
+  std::string ToString() const;
 };
 
 }  // namespace flutter
