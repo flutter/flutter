@@ -191,4 +191,37 @@ void main() {
     expect(find.text('showModalBottomSheet'), findsNothing);
     expect(find.byKey(bottomSheetKey), findsNothing);
   });
+
+  testWidgets('Verify that visual properties are passed through', (WidgetTester tester) async {
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    const Color color = Colors.pink;
+    const double elevation = 9.0;
+    final ShapeBorder shape = BeveledRectangleBorder(borderRadius: BorderRadius.circular(12));
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        key: scaffoldKey,
+        body: const Center(child: Text('body')),
+      ),
+    ));
+
+    scaffoldKey.currentState.showBottomSheet<void>((BuildContext context) {
+      return ListView(
+        shrinkWrap: true,
+        primary: false,
+        children: <Widget>[
+          Container(height: 100.0, child: const Text('One')),
+          Container(height: 100.0, child: const Text('Two')),
+          Container(height: 100.0, child: const Text('Three')),
+        ],
+      );
+    }, color: color, elevation: elevation, shape: shape);
+
+    await tester.pumpAndSettle();
+
+    final BottomSheet bottomSheet = tester.widget(find.byType(BottomSheet));
+    expect(bottomSheet.color, color);
+    expect(bottomSheet.elevation, elevation);
+    expect(bottomSheet.shape, shape);
+  });
 }

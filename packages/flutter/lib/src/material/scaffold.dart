@@ -1462,7 +1462,11 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     }
   }
 
-  PersistentBottomSheetController<T> _buildBottomSheet<T>(WidgetBuilder builder, AnimationController controller, bool isLocalHistoryEntry) {
+  PersistentBottomSheetController<T> _buildBottomSheet<T>(WidgetBuilder builder, AnimationController controller, bool isLocalHistoryEntry, {
+    Color color,
+    double elevation,
+    ShapeBorder shape,
+  }) {
     final Completer<T> completer = Completer<T>();
     final GlobalKey<_PersistentBottomSheetState> bottomSheetKey = GlobalKey<_PersistentBottomSheetState>();
     _PersistentBottomSheet bottomSheet;
@@ -1503,6 +1507,9 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         }
       },
       builder: builder,
+      color: color,
+      elevation: elevation,
+      shape: shape,
     );
 
     if (isLocalHistoryEntry)
@@ -1551,12 +1558,16 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   ///    sheet.
   ///  * [Scaffold.of], for information about how to obtain the [ScaffoldState].
   ///  * <https://material.io/design/components/sheets-bottom.html#standard-bottom-sheet>
-  PersistentBottomSheetController<T> showBottomSheet<T>(WidgetBuilder builder) {
+  PersistentBottomSheetController<T> showBottomSheet<T>(WidgetBuilder builder, {
+    Color color,
+    double elevation,
+    ShapeBorder shape,
+  }) {
     _closeCurrentBottomSheet();
     final AnimationController controller = BottomSheet.createAnimationController(this)
       ..forward();
     setState(() {
-      _currentBottomSheet = _buildBottomSheet<T>(builder, controller, true);
+      _currentBottomSheet = _buildBottomSheet<T>(builder, controller, true, color: color, elevation: elevation, shape: shape);
     });
     return _currentBottomSheet;
   }
@@ -2008,6 +2019,9 @@ class _PersistentBottomSheet extends StatefulWidget {
     this.onClosing,
     this.onDismissed,
     this.builder,
+    this.color,
+    this.elevation,
+    this.shape,
   }) : super(key: key);
 
   final AnimationController animationController; // we control it, but it must be disposed by whoever created it
@@ -2015,6 +2029,9 @@ class _PersistentBottomSheet extends StatefulWidget {
   final VoidCallback onClosing;
   final VoidCallback onDismissed;
   final WidgetBuilder builder;
+  final Color color;
+  final double elevation;
+  final ShapeBorder shape;
 
   @override
   _PersistentBottomSheetState createState() => _PersistentBottomSheetState();
@@ -2066,6 +2083,9 @@ class _PersistentBottomSheetState extends State<_PersistentBottomSheet> {
           enableDrag: widget.enableDrag,
           onClosing: widget.onClosing,
           builder: widget.builder,
+          color: widget.color,
+          elevation: widget.elevation,
+          shape: widget.shape,
         ),
       ),
     );
