@@ -542,10 +542,11 @@ int parseServicePort(String line, {
   Pattern prefix,
 }) {
   prefix ??= _obsRegExp;
-  final Match prefixMatch = prefix.matchAsPrefix(line);
-  if (prefixMatch == null) {
+  final Iterable<Match> matchesIter = prefix.allMatches(line);
+  if (matchesIter.isEmpty) {
     return null;
   }
+  final Match prefixMatch = matchesIter.first;
   final List<Match> matches =
     _obsPortRegExp.allMatches(line, prefixMatch.end).toList();
   return matches.isEmpty ? null : int.parse(matches[0].group(2));
@@ -559,10 +560,11 @@ Uri parseServiceUri(String line, {
   Pattern prefix,
 }) {
   prefix ??= _obsRegExp;
-  final Match prefixMatch = prefix.matchAsPrefix(line);
-  if (prefixMatch == null) {
+  final Iterable<Match> matchesIter = prefix.allMatches(line);
+  if (matchesIter.isEmpty) {
     return null;
   }
+  final Match prefixMatch = matchesIter.first;
   final List<Match> matches =
     _obsUriRegExp.allMatches(line, prefixMatch.end).toList();
   return matches.isEmpty ? null : Uri.parse(matches[0].group(0));

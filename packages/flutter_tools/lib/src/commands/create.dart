@@ -443,7 +443,7 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
         offline: argResults['offline'],
       );
       final FlutterProject project = await FlutterProject.fromDirectory(directory);
-      await project.ensureReadyForPlatformSpecificTooling();
+      await project.ensureReadyForPlatformSpecificTooling(checkProjects: false);
     }
     return generatedCount;
   }
@@ -510,7 +510,7 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
 
     if (argResults['pub']) {
       await pubGet(context: PubContext.create, directory: directory.path, offline: argResults['offline']);
-      await project.ensureReadyForPlatformSpecificTooling();
+      await project.ensureReadyForPlatformSpecificTooling(checkProjects: false);
     }
 
     gradle.updateLocalProperties(project: project, requireAndroidSdk: false);

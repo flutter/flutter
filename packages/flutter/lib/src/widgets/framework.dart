@@ -149,6 +149,13 @@ abstract class GlobalKey<T extends State<StatefulWidget>> extends Key {
     assert(() {
       assert(parent != null);
       if (_debugReservations.containsKey(this) && _debugReservations[this] != parent) {
+        // Reserving a new parent while the old parent is not attached is ok.
+        // This can happen when a renderObject detaches and re-attaches to rendering
+        // tree multiple times.
+        if (_debugReservations[this].renderObject?.attached == false) {
+          _debugReservations[this] = parent;
+          return true;
+        }
         // It's possible for an element to get built multiple times in one
         // frame, in which case it'll reserve the same child's key multiple
         // times. We catch multiple children of one widget having the same key
@@ -2117,7 +2124,7 @@ class BuildOwner {
   /// the [FocusScopeNode] for a given [BuildContext].
   ///
   /// See [FocusManager] for more details.
-  final FocusManager focusManager = FocusManager();
+  FocusManager focusManager = FocusManager();
 
   /// Adds an element to the dirty elements list so that it will be rebuilt
   /// when [WidgetsBinding.drawFrame] calls [buildScope].
