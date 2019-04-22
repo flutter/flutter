@@ -342,6 +342,11 @@ class BottomNavigationBar extends StatefulWidget {
     return false;
   }
 
+  // Used by the [BottomNavigation] constructor to set the `selectedLabelStyle`
+  // and `unselectedLabelStyle` parameters.
+  //
+  // If the given [TextStyle] has a non-null `fontSize`, it should be used.
+  // Otherwise, the [selectedFontSize] parameter should be used.
   static TextStyle _defaultTextStyle(TextStyle textStyle, double fontSize) {
     textStyle ??= const TextStyle(inherit: false);
     // Prefer the font size on textStyle if present.
