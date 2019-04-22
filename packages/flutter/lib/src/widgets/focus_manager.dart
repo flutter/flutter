@@ -542,17 +542,6 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     }
   }
 
-  // Resets this node back to a base configuration. This is only used by tests
-  // to clear the root node. Do not call in other contexts, as it doesn't
-  // properly detach children.
-  @mustCallSuper
-  void _clear() {
-    _manager?._dirtyNodes?.remove(this);
-    _manager = null;
-    _parent = null;
-    _children.clear();
-  }
-
   // Removes the given FocusNode and its children as a child of this node.
   @mustCallSuper
   void _removeChild(FocusNode node) {
@@ -871,12 +860,6 @@ class FocusScopeNode extends FocusNode {
     } else {
       primaryFocus.requestFocus();
     }
-  }
-
-  @override
-  void _clear() {
-    super._clear();
-    _focusedChildren.clear();
   }
 
   @override
