@@ -17,7 +17,6 @@ class BuildBundleCommand extends BuildSubCommand {
     usesBuildNumberOption();
     addBuildModeFlags(verboseHelp: verboseHelp);
     addDynamicModeFlags(verboseHelp: verboseHelp);
-    addDynamicBaselineFlags(verboseHelp: verboseHelp);
     argParser
       ..addFlag('precompiled', negatable: false)
       // This option is still referenced by the iOS build scripts. We should
@@ -70,8 +69,6 @@ class BuildBundleCommand extends BuildSubCommand {
 
     final BuildMode buildMode = getBuildMode();
 
-    final String buildNumber = argResults['build-number'] != null ? argResults['build-number'] : null;
-
     await build(
       platform: platform,
       buildMode: buildMode,
@@ -84,9 +81,6 @@ class BuildBundleCommand extends BuildSubCommand {
       reportLicensedPackages: argResults['report-licensed-packages'],
       trackWidgetCreation: argResults['track-widget-creation'],
       compilationTraceFilePath: argResults['compilation-trace-file'],
-      createPatch: argResults['patch'],
-      buildNumber: buildNumber,
-      baselineDir: argResults['baseline-dir'],
       extraFrontEndOptions: argResults[FlutterOptions.kExtraFrontEndOptions],
       extraGenSnapshotOptions: argResults[FlutterOptions.kExtraGenSnapshotOptions],
       fileSystemScheme: argResults['filesystem-scheme'],

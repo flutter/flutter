@@ -4,8 +4,6 @@
 
 import 'dart:async';
 
-import 'package:archive/archive.dart';
-import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 
 import '../android/android_sdk.dart';
@@ -378,9 +376,6 @@ class JITSnapshotter {
     @required String packagesPath,
     @required String outputPath,
     @required String compilationTraceFilePath,
-    @required bool createPatch,
-    String buildNumber,
-    String baselineDir,
     List<String> extraGenSnapshotOptions = const <String>[],
   }) async {
     if (!_isValidJitPlatform(platform)) {
@@ -400,83 +395,6 @@ class JITSnapshotter {
       mainPath, compilationTraceFilePath, engineVmSnapshotData, engineIsolateSnapshotData,
     ];
 
-    if (createPatch) {
-      inputPaths.add(isolateSnapshotInstructions);
-
-      if (buildNumber == null) {
-        printError('Error: Dynamic patching requires --build-number specified');
-        return 1;
-      }
-      if (baselineDir == null) {
-        printError('Error: Dynamic patching requires --baseline-dir specified');
-        return 1;
-      }
-
-      final File baselineApk = fs.directory(baselineDir).childFile('$buildNumber.apk');
-      if (!baselineApk.existsSync()) {
-        printError('Error: Could not find baseline package ${baselineApk.path}.');
-        return 1;
-      }
-
-      final Archive baselinePkg = ZipDecoder().decodeBytes(baselineApk.readAsBytesSync());
-
-      {
-        final File f = fs.file(isolateSnapshotInstructions);
-        final ArchiveFile af = baselinePkg.findFile(
-            fs.path.join('assets/flutter_assets/isolate_snapshot_instr'));
-        if (af == null) {
-          printError('Error: Invalid baseline package ${baselineApk.path}.');
-          return 1;
-        }
-
-        // When building an update, gen_snapshot expects to find the original isolate
-        // snapshot instructions from the previous full build, so we need to extract
-        // it from saves baseline APK.
-        if (!f.existsSync()) {
-          f.writeAsBytesSync(af.content, flush: true);
-        } else {
-          // But if this file is already extracted, we make sure that it's identical.
-          final Function contentEquals = const ListEquality<int>().equals;
-          if (!contentEquals(f.readAsBytesSync(), af.content)) {
-            printError('Error: Detected changes unsupported by dynamic patching.');
-            return 1;
-          }
-        }
-      }
-
-      {
-        final File f = fs.file(engineVmSnapshotData);
-        final ArchiveFile af = baselinePkg.findFile(
-            fs.path.join('assets/flutter_assets/vm_snapshot_data'));
-        if (af == null) {
-          printError('Error: Invalid baseline package ${baselineApk.path}.');
-          return 1;
-        }
-
-        // If engine snapshot artifact doesn't exist, gen_snapshot below will fail
-        // with a friendly error, so we don't need to handle this case here too.
-        if (f.existsSync()) {
-          // But if engine snapshot exists, its content must match the engine snapshot
-          // in baseline APK. Otherwise, we're trying to build an update at an engine
-          // version that might be binary incompatible with baseline APK.
-          final Function contentEquals = const ListEquality<int>().equals;
-          if (!contentEquals(f.readAsBytesSync(), af.content)) {
-            printError('Error: Detected engine changes unsupported by dynamic patching.');
-            return 1;
-          }
-        }
-      }
-
-      {
-        final ArchiveFile af = baselinePkg.findFile(
-            fs.path.join('assets/flutter_assets/vm_snapshot_instr'));
-        if (af != null) {
-          printError('Error: Invalid baseline package ${baselineApk.path}.');
-          return 1;
-        }
-      }
-    }
-
     final String depfilePath = fs.path.join(outputDir.path, 'snapshot.d');
     final List<String> genSnapshotArgs = <String>[
       '--deterministic',
@@ -490,10 +408,7 @@ class JITSnapshotter {
     }
 
     final Set<String> outputPaths = <String>{};
-    outputPaths.addAll(<String>[isolateSnapshotData]);
-    if (!createPatch) {
-      outputPaths.add(isolateSnapshotInstructions);
-    }
+    outputPaths.addAll(<String>[isolateSnapshotData, isolateSnapshotInstructions]);
 
     // There are a couple special cases below where we create a snapshot
     // with only the data section, which only contains interpreted code.
@@ -520,11 +435,7 @@ class JITSnapshotter {
       '--isolate_snapshot_data=$isolateSnapshotData',
     ]);
 
-    if (!createPatch) {
-      genSnapshotArgs.add('--isolate_snapshot_instructions=$isolateSnapshotInstructions');
-    } else {
-      genSnapshotArgs.add('--reused_instructions=$isolateSnapshotInstructions');
-    }
+    genSnapshotArgs.add('--isolate_snapshot_instructions=$isolateSnapshotInstructions');
 
     if (platform == TargetPlatform.android_arm) {
       // Use softfp for Android armv7 devices.
@@ -552,7 +463,6 @@ class JITSnapshotter {
         'buildMode': buildMode.toString(),
         'targetPlatform': platform.toString(),
         'entryPoint': mainPath,
-        'createPatch': createPatch.toString(),
         'extraGenSnapshotOptions': extraGenSnapshotOptions.join(' '),
       },
       depfilePaths: <String>[],
