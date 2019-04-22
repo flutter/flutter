@@ -1930,6 +1930,8 @@ class CustomMultiChildLayout extends MultiChildRenderObjectWidget {
 /// sizes itself to fit the parent. It is equivalent to setting [width] and
 /// [height] to [double.infinity].
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=EHPu_DzRfqA}
+///
 /// {@tool sample}
 ///
 /// This snippet makes the child widget (a [Card] with some [Text]) have the
