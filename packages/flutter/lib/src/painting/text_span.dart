@@ -214,9 +214,9 @@ class TextSpan extends InlineSpan {
     TextSpan result;
     visitChildren((InlineSpan span) {
       assert(result == null);
-      TextSpan textSpan = InlineSpan.asType<TextSpan>(span);
-      if (textSpan == null)
+      if (span is! TextSpan)
         return true;
+      TextSpan textSpan = span as TextSpan;
       final int endOffset = offset + textSpan.text.length;
       if (targetOffset == offset && affinity == TextAffinity.downstream ||
           targetOffset > offset && targetOffset < endOffset ||
@@ -239,9 +239,9 @@ class TextSpan extends InlineSpan {
     assert(debugAssertIsValid());
     final StringBuffer buffer = StringBuffer();
     visitChildren((InlineSpan span) {
-      TextSpan textSpan = InlineSpan.asType<TextSpan>(span);
-      if (textSpan == null)
+      if (span is! TextSpan)
         return true;
+      TextSpan textSpan = span as TextSpan;
       if (textSpan.semanticsLabel != null && includeSemanticsLabels) {
         buffer.write(textSpan.semanticsLabel);
       } else {
@@ -261,9 +261,9 @@ class TextSpan extends InlineSpan {
     int offset = 0;
     int result;
     visitChildren((InlineSpan span) {
-      TextSpan textSpan = InlineSpan.asType<TextSpan>(span);
-      if (textSpan == null)
+      if (span is! TextSpan)
         return true;
+      TextSpan textSpan = span as TextSpan;
       if (index - offset < textSpan.text.length) {
         result = textSpan.text.codeUnitAt(index - offset);
         return false;
@@ -285,11 +285,8 @@ class TextSpan extends InlineSpan {
   bool debugAssertIsValid() {
     assert(() {
       if (!visitChildren((InlineSpan span) {
-        TextSpan textSpan = InlineSpan.asType<TextSpan>(span);
-        if (textSpan == null)
-          return true;
-        if (textSpan.children != null) {
-          for (InlineSpan child in textSpan.children) {
+        if (span.children != null) {
+          for (InlineSpan child in span.children) {
             if (child == null)
               return false;
           }

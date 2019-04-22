@@ -89,17 +89,6 @@ abstract class InlineSpan extends DiagnosticableTree {
   /// The list must not contain any nulls.
   final List<InlineSpan> children;
 
-  /// Utility method to convert [InlineSpan] into [TextSpan] or [WidgetSpan].
-  ///
-  /// Will return null if span is not of type T or null. Otherwise, return
-  /// the span cast as T. Values of T that are not subclasses of [InlineSpan]
-  /// will result in null.
-  static T asType<T>(InlineSpan span) {
-    if (span is! T)
-      return null;
-    return span as T;
-  }
-
   /// Apply the properties of this object to the given [ParagraphBuilder], from
   /// which a [Paragraph] can be obtained. [Paragraph] objects can be drawn on
   /// [Canvas] objects.
@@ -110,8 +99,6 @@ abstract class InlineSpan extends DiagnosticableTree {
   ///
   /// When [visitor] returns true, the walk will continue. When [visitor] returns
   /// false, then the walk will end.
-  ///
-  /// The type of the span may be checked using [asType].
   bool visitChildren(bool visitor(InlineSpan span));
 
   /// Returns the text span that contains the given position in the text.

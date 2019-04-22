@@ -4807,9 +4807,9 @@ class RichText extends MultiChildRenderObjectWidget {
   static List<Widget> _extractChildren(InlineSpan span) {
     List<Widget> result = [];
     span.visitChildren((InlineSpan span) {
-      WidgetSpan widgetSpan = InlineSpan.asType<WidgetSpan>(span);
-      if (widgetSpan == null)
+      if (span is! WidgetSpan)
         return true;
+      WidgetSpan widgetSpan = span as WidgetSpan;
       if (widgetSpan.widget != null) {
         result.add(widgetSpan.widget);
       }

@@ -296,7 +296,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       }
       // State type is private, hence using dynamic.
       dynamic getInspectorState() => inspectorKey.currentState;
-      String paragraphText(RenderParagraph paragraph) => InlineSpan.asType<TextSpan>(paragraph.text).text;
+      String paragraphText(RenderParagraph paragraph) => (paragraph.text as TextSpan).text;
 
       await tester.pumpWidget(
         Directionality(

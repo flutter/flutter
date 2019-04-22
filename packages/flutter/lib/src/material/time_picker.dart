@@ -961,7 +961,7 @@ class _DialPainter extends CustomPainter {
           properties: SemanticsProperties(
             sortKey: OrdinalSortKey(i.toDouble() + ordinalOffset),
             selected: label.value == selectedValue,
-            value: InlineSpan.asType<TextSpan>(labelPainter.text)?.text,
+            value: (labelPainter.text as TextSpan)?.text,
             textDirection: textDirection,
             onTap: label.onTap,
           ),

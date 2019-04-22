@@ -687,7 +687,7 @@ void main() {
     expect(caretOffset.dx, 168);
 
     // We provide dimensions for the widgets
-    painter.placeholderDimensions = <PlaceholderDimensions>[
+    painter.setPlaceholderDimensions(<PlaceholderDimensions>[
       PlaceholderDimensions(size: Size(50, 30), baselineOffset: 25),
       PlaceholderDimensions(size: Size(50, 30), baselineOffset: 25),
       PlaceholderDimensions(size: Size(50, 30), baselineOffset: 25),
@@ -702,7 +702,7 @@ void main() {
       PlaceholderDimensions(size: Size(50, 30), baselineOffset: 25),
       PlaceholderDimensions(size: Size(51, 30), baselineOffset: 25),
       PlaceholderDimensions(size: Size(50, 30), baselineOffset: 25),
-    ];
+    ]);
 
     painter.layout(maxWidth: 500);
 
