@@ -105,6 +105,11 @@ class LinuxDevice extends Device {
   // to uninstall the application.
   @override
   Future<bool> uninstallApp(ApplicationPackage app) async => true;
+
+  @override
+  bool isSupportedForProject(FlutterProject flutterProject) {
+    return flutterProject.linux.existsSync();
+  }
 }
 
 class LinuxDevices extends PollingDeviceDiscovery {

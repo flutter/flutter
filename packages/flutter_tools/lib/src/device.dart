@@ -19,6 +19,7 @@ import 'ios/devices.dart';
 import 'ios/simulators.dart';
 import 'linux/linux_device.dart';
 import 'macos/macos_device.dart';
+import 'project.dart';
 import 'tester/flutter_tester.dart';
 import 'web/web_device.dart';
 import 'windows/windows_device.dart';
@@ -56,6 +57,7 @@ class DeviceManager {
   }
 
   String _specifiedDeviceId;
+  FlutterProject _flutterProject;
 
   /// A user-specified device ID.
   String get specifiedDeviceId {
@@ -68,12 +70,30 @@ class DeviceManager {
     _specifiedDeviceId = id;
   }
 
+  /// Filters the set of devices to those supported by the current project.
+  set specifiedFlutterProject(FlutterProject value) {
+    _flutterProject = value;
+  }
+
   /// True when the user has specified a single specific device.
   bool get hasSpecifiedDeviceId => specifiedDeviceId != null;
+
+  /// True when the user has specified a specific flutter project.
+  bool get hasSpecifiedFlutterProject => _flutterProject != null;
 
   /// True when the user has specified all devices by setting
   /// specifiedDeviceId = 'all'.
   bool get hasSpecifiedAllDevices => _specifiedDeviceId == 'all';
+
+  /// Filter the set of active devices into those supported by the current
+  /// project.
+  Stream<Device> getDevicesByProject(FlutterProject flutterProject) async* {
+    await for (Device device in getAllConnectedDevices()) {
+      if (device.isSupportedForProject(flutterProject)) {
+        yield device;
+      }
+    }
+  }
 
   Stream<Device> getDevicesById(String deviceId) async* {
     final List<Device> devices = await getAllConnectedDevices().toList();
@@ -99,9 +119,13 @@ class DeviceManager {
 
   /// Return the list of connected devices, filtered by any user-specified device id.
   Stream<Device> getDevices() {
-    return hasSpecifiedDeviceId
-        ? getDevicesById(specifiedDeviceId)
-        : getAllConnectedDevices();
+    if (hasSpecifiedDeviceId) {
+      return getDevicesById(specifiedDeviceId);
+    }
+    if (hasSpecifiedFlutterProject) {
+      return getDevicesByProject(_flutterProject);
+    }
+    return getAllConnectedDevices();
   }
 
   Iterable<DeviceDiscovery> get _platformDiscoverers {
@@ -234,6 +258,9 @@ abstract class Device {
         return false;
     }
   }
+
+  /// Whether the device is supported for the current project directory.
+  bool isSupportedForProject(FlutterProject flutterProject);
 
   /// Check if a version of the given app is already installed
   Future<bool> isAppInstalled(ApplicationPackage app);

@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/project.dart';
 import 'package:meta/meta.dart';
 
 import '../application_package.dart';
@@ -192,6 +193,9 @@ class FlutterTesterDevice extends Device {
 
   @override
   Future<bool> uninstallApp(ApplicationPackage app) async => true;
+
+  @override
+  bool isSupportedForProject(FlutterProject flutterProject) => true;
 }
 
 class FlutterTesterDevices extends PollingDeviceDiscovery {

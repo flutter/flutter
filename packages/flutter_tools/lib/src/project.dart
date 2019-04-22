@@ -254,6 +254,11 @@ class IosProject {
   /// Xcode workspace shared workspace settings file for the host app.
   File get xcodeWorkspaceSharedSettings => xcodeWorkspaceSharedData.childFile('WorkspaceSettings.xcsettings');
 
+  /// Whether the current flutter project has an iOS subproject.
+  bool existsSync()  {
+    return parent.isModule || _editableDirectory.existsSync();
+  }
+
   /// The product bundle identifier of the host app, or null if not set or if
   /// iOS tooling needed to read it is not installed.
   String get productBundleIdentifier {
@@ -408,6 +413,11 @@ class AndroidProject {
     return fs.directory(fs.path.join(hostAppGradleRoot.path, 'app', 'build', 'outputs', 'bundle'));
   }
 
+  /// Whether the current flutter project has an Android sub-project.
+  bool existsSync() {
+    return parent.isModule || _editableHostAppDirectory.existsSync();
+  }
+
   bool get isUsingGradle {
     return hostAppGradleRoot.childFile('build.gradle').existsSync();
   }
@@ -485,6 +495,11 @@ class WebProject {
   WebProject._(this.parent);
 
   final FlutterProject parent;
+
+  /// Whether this flutter project has a web sub-project.
+  bool existsSync() {
+    return parent.directory.childDirectory('web').existsSync();
+  }
 
   Future<void> ensureReadyForPlatformSpecificTooling() async {
     /// Generate index.html in build/web. Eventually we could support

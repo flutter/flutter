@@ -5,6 +5,8 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:flutter_tools/src/project.dart';
+
 import '../application_package.dart';
 import '../base/common.dart';
 import '../base/context.dart';
@@ -472,6 +474,11 @@ class IOSSimulator extends Device {
   @override
   Future<void> takeScreenshot(File outputFile) {
     return SimControl.instance.takeScreenshot(id, outputFile.path);
+  }
+
+  @override
+  bool isSupportedForProject(FlutterProject flutterProject) {
+    return flutterProject.ios.existsSync();
   }
 }
 

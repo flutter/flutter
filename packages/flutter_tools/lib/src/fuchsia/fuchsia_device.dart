@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/project.dart';
 import 'package:meta/meta.dart';
 
 import '../application_package.dart';
@@ -302,6 +303,9 @@ class FuchsiaDevice extends Device {
   }
 
   FuchsiaIsolateDiscoveryProtocol  getIsolateDiscoveryProtocol(String isolateName) => FuchsiaIsolateDiscoveryProtocol(this, isolateName);
+
+  @override
+  bool isSupportedForProject(FlutterProject flutterProject) => true;
 }
 
 class FuchsiaIsolateDiscoveryProtocol {
