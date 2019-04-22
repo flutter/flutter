@@ -382,6 +382,11 @@ String getIosBuildDirectory() {
   return fs.path.join(getBuildDirectory(), 'ios');
 }
 
+/// Returns the macOS build output directory.
+String getMacOSBuildDirectory() {
+  return fs.path.join(getBuildDirectory(), 'macos');
+}
+
 /// Returns the web build output directory.
 String getWebBuildDirectory() {
   return fs.path.join(getBuildDirectory(), 'web');
