@@ -537,7 +537,6 @@ void main() {
     final List<String> recognized = <String>[];
     TapGestureRecognizer tap;
     setUp(() {
-      recognized.clear();
       tap = TapGestureRecognizer()
         ..onTapDown = (TapDownDetails details) {
           recognized.add('down ${details.buttons}');
@@ -552,6 +551,7 @@ void main() {
 
     tearDown(() {
       tap.dispose();
+      recognized.clear();
     });
 
     testGesture('changing buttons before TapDown should terminate gesture without sending cancel', (GestureTester tester) {
@@ -631,8 +631,8 @@ void main() {
   });
 
   group('Recognizers listening on different buttons do not form competition:', () {
-    // If a tap gesture has competitors, a pointer down event triggers onTapDown
-    // immediately; if there are no competitors, onTapDown is triggered
+    // If a tap gesture has no competitors, a pointer down event triggers
+    // onTapDown immediately; if there are competitors, onTapDown is triggered
     // after a timeout. The following tests make sure that tap recognizers
     // listening on different buttons do not form competition.
 
@@ -647,9 +647,6 @@ void main() {
         }
         ..onTapUp = (TapUpDetails details) {
           recognized.add('primaryUp');
-        }
-        ..onTapCancel = () {
-          recognized.add('primaryCancel');
         };
       primary2 = TapGestureRecognizer()
         ..onTapDown = (TapDownDetails details) {
@@ -657,9 +654,6 @@ void main() {
         }
         ..onTapUp = (TapUpDetails details) {
           recognized.add('primary2Up');
-        }
-        ..onTapCancel = () {
-          recognized.add('primary2Cancel');
         };
       secondary = TapGestureRecognizer()
         ..onSecondaryTapDown = (TapDownDetails details) {
@@ -667,9 +661,6 @@ void main() {
         }
         ..onSecondaryTapUp = (TapUpDetails details) {
           recognized.add('secondaryUp');
-        }
-        ..onSecondaryTapCancel = () {
-          recognized.add('secondaryCancel');
         };
     });
 
@@ -684,7 +675,6 @@ void main() {
       primary.addPointer(down1);
       secondary.addPointer(down1);
       tester.closeArena(1);
-      expect(recognized, <String>[]);
 
       tester.route(down1);
       expect(recognized, <String>['primaryDown 1']);
@@ -699,7 +689,6 @@ void main() {
       primary.addPointer(down1);
       primary2.addPointer(down1);
       tester.closeArena(1);
-      expect(recognized, <String>[]);
 
       tester.route(down1);
       expect(recognized, <String>[]);
