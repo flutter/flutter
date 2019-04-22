@@ -69,7 +69,7 @@ class AlwaysKeepAliveState extends State<AlwaysKeepAliveWidget>
 class _NestedTabBarContainer extends StatelessWidget {
   final TabController tabController;
 
-  _NestedTabBarContainer({
+  const _NestedTabBarContainer({
     this.tabController,
   });
 
@@ -81,9 +81,9 @@ class _NestedTabBarContainer extends StatelessWidget {
         children: <Widget>[
           TabBar(
             controller: tabController,
-            tabs: [
-              Tab(text: "Yellow"),
-              Tab(text: "Grey"),
+            tabs: const <Tab>[
+              Tab(text: 'Yellow'),
+              Tab(text: 'Grey'),
             ],
           ),
           Expanded(
