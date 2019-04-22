@@ -930,7 +930,8 @@ class FocusManager with DiagnosticableTreeMixin {
   ///
   /// This field is rarely used directly. To find the nearest [FocusScopeNode]
   /// for a given [FocusNode], call [FocusNode.nearestScope].
-  final FocusScopeNode rootScope = FocusScopeNode(debugLabel: 'Root Focus Scope');
+  FocusScopeNode get rootScope => _rootScope;
+  FocusScopeNode _rootScope = FocusScopeNode(debugLabel: 'Root Focus Scope');
 
   void _handleRawKeyEvent(RawKeyEvent event) {
     // Walk the current focus from the leaf to the root, calling each one's
@@ -950,6 +951,18 @@ class FocusManager with DiagnosticableTreeMixin {
         break;
       }
     }
+  }
+
+  /// Resets the FocusManager to a base state.
+  ///
+  /// This is used by test infrastructure to reset the state between tests.
+  /// It is not meant for regular production use.
+  void reset() {
+    _currentFocus = null;
+    _nextFocus = null;
+    _haveScheduledUpdate = false;
+    _rootScope = FocusScopeNode(debugLabel: 'Root Focus Scope');
+    rootScope._manager = this;
   }
 
   // The node that currently has the primary focus.
