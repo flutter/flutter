@@ -222,6 +222,23 @@ Matcher moreOrLessEquals(double value, { double epsilon = 1e-10 }) {
   return _MoreOrLessEquals(value, epsilon);
 }
 
+/// Asserts that two [Rect]s are equal, within some tolerated error.
+///
+/// Two values are considered equal if the difference between them is within
+/// 1e-10 of the larger one. This is an arbitrary value which can be adjusted
+/// using the `epsilon` argument. This matcher is intended to compare floating
+/// point numbers that are the result of different sequences of operations, such
+/// that they may have accumulated slightly different errors.
+///
+/// See also:
+///
+///  * [moreOrLessEquals], which is for [double]s.
+///  * [within], which offers a generic version of this functionality that can
+///    be used to match [Rect]s as well as other types.
+Matcher rectMoreOrLessEquals(Rect value, { double epsilon = 1e-10 }) {
+  return _IsWithinDistance<Rect>(_rectDistance, value, epsilon);
+}
+
 /// Asserts that two [String]s are equal after normalizing likely hash codes.
 ///
 /// A `#` followed by 5 hexadecimal digits is assumed to be a short hash code
@@ -1004,6 +1021,8 @@ double _sizeDistance(Size a, Size b) {
 ///
 ///  * [moreOrLessEquals], which is similar to this function, but specializes in
 ///    [double]s and has an optional `epsilon` parameter.
+///  * [rectMoreOrLessEquals], which is similar to this function, but
+///    specializes in [Rect]s and has an optional `epsilon` parameter.
 ///  * [closeTo], which specializes in numbers only.
 Matcher within<T>({
   @required num distance,

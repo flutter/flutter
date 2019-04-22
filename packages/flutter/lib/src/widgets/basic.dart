@@ -991,6 +991,11 @@ class PhysicalShape extends SingleChildRenderObjectWidget {
 
 /// A widget that applies a transformation before painting its child.
 ///
+/// Unlike [RotatedBox], which applies a rotation prior to layout, this object
+/// applies its transformation just prior to painting, which means the
+/// transformation is not taken into account when calculating how much space
+/// this widget's child (and thus this widget) consumes.
+///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=9z_YNlRlWfA}
 ///
 /// {@tool sample}
@@ -1929,6 +1934,8 @@ class CustomMultiChildLayout extends MultiChildRenderObjectWidget {
 /// The [new SizedBox.expand] constructor can be used to make a [SizedBox] that
 /// sizes itself to fit the parent. It is equivalent to setting [width] and
 /// [height] to [double.infinity].
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=EHPu_DzRfqA}
 ///
 /// {@tool sample}
 ///
