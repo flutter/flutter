@@ -417,6 +417,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     await _setupProcess(
       <String>[
         'run',
+	'--disable-service-auth-codes',
         '--machine',
         '-d',
         'flutter-tester',
@@ -511,6 +512,9 @@ class FlutterRunTestDriver extends FlutterTestDriver {
   }
 
   Future<int> detach() async {
+    if (_process == null) {
+      return 0;
+    }
     if (_vmService != null) {
       _debugPrint('Closing VM service...');
       _vmService.dispose();
@@ -604,6 +608,7 @@ class FlutterTestTestDriver extends FlutterTestDriver {
   }) async {
     await _setupProcess(<String>[
         'test',
+	'--disable-service-auth-codes',
         '--machine',
         '-d',
         'flutter-tester',

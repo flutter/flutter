@@ -45,15 +45,14 @@ String _artifactToFileName(Artifact artifact, [ TargetPlatform platform, BuildMo
     case Artifact.flutterFramework:
       return 'Flutter.framework';
     case Artifact.vmSnapshotData:
-      // Flutter debug and dynamic profile modes for all target platforms use Dart
+      // Flutter 'debug' and 'dynamic profile' modes for all target platforms use Dart
       // RELEASE VM snapshot that comes from host debug build and has the metadata
+      // related to development tools. Flutter 'dynamic release' mode uses Dart PRODUCT
+      // VM snapshot from host dynamic release build that strips out the metadata
       // related to development tools.
       if (mode == BuildMode.dynamicRelease) {
         return 'product_vm_isolate_snapshot.bin';
       }
-      // Flutter dynamic release mode for all target platforms uses Dart PRODUCT
-      // VM snapshot from host dynamic release build that strips out the metadata
-      // related to development tools.
       return 'vm_isolate_snapshot.bin';
     case Artifact.isolateSnapshotData:
       if (mode == BuildMode.dynamicRelease) {

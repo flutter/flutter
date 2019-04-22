@@ -83,11 +83,13 @@ void installHook({
   bool enableObservatory = false,
   bool machine = false,
   bool startPaused = false,
+  bool disableServiceAuthCodes = false,
   int port = 0,
   String precompiledDillPath,
   Map<String, String> precompiledDillFiles,
   bool trackWidgetCreation = false,
   bool updateGoldens = false,
+  bool buildTestAssets = false,
   int observatoryPort,
   InternetAddressType serverType = InternetAddressType.IPv4,
   Uri projectRootDirectory,
@@ -103,6 +105,7 @@ void installHook({
       machine: machine,
       enableObservatory: enableObservatory,
       startPaused: startPaused,
+      disableServiceAuthCodes: disableServiceAuthCodes,
       explicitObservatoryPort: observatoryPort,
       host: _kHosts[serverType],
       port: port,
@@ -110,6 +113,7 @@ void installHook({
       precompiledDillFiles: precompiledDillFiles,
       trackWidgetCreation: trackWidgetCreation,
       updateGoldens: updateGoldens,
+      buildTestAssets: buildTestAssets,
       projectRootDirectory: projectRootDirectory,
       flutterProject: flutterProject,
       icudtlPath: icudtlPath,
@@ -383,6 +387,7 @@ class _FlutterPlatform extends PlatformPlugin {
     this.enableObservatory,
     this.machine,
     this.startPaused,
+    this.disableServiceAuthCodes,
     this.explicitObservatoryPort,
     this.host,
     this.port,
@@ -390,6 +395,7 @@ class _FlutterPlatform extends PlatformPlugin {
     this.precompiledDillFiles,
     this.trackWidgetCreation,
     this.updateGoldens,
+    this.buildTestAssets,
     this.projectRootDirectory,
     this.flutterProject,
     this.icudtlPath,
@@ -400,6 +406,7 @@ class _FlutterPlatform extends PlatformPlugin {
   final bool enableObservatory;
   final bool machine;
   final bool startPaused;
+  final bool disableServiceAuthCodes;
   final int explicitObservatoryPort;
   final InternetAddress host;
   final int port;
@@ -407,6 +414,7 @@ class _FlutterPlatform extends PlatformPlugin {
   final Map<String, String> precompiledDillFiles;
   final bool trackWidgetCreation;
   final bool updateGoldens;
+  final bool buildTestAssets;
   final Uri projectRootDirectory;
   final FlutterProject flutterProject;
   final String icudtlPath;
@@ -581,6 +589,7 @@ class _FlutterPlatform extends PlatformPlugin {
         packages: PackageMap.globalPackagesPath,
         enableObservatory: enableObservatory,
         startPaused: startPaused,
+        disableServiceAuthCodes: disableServiceAuthCodes,
         observatoryPort: explicitObservatoryPort,
         serverPort: server.port,
       );
@@ -928,6 +937,7 @@ class _FlutterPlatform extends PlatformPlugin {
     String packages,
     bool enableObservatory = false,
     bool startPaused = false,
+    bool disableServiceAuthCodes = false,
     int observatoryPort,
     int serverPort,
   }) {
@@ -948,6 +958,9 @@ class _FlutterPlatform extends PlatformPlugin {
         command.add('--observatory-port=$observatoryPort');
       if (startPaused) {
         command.add('--start-paused');
+      }
+      if (disableServiceAuthCodes) {
+        command.add('--disable-service-auth-codes');
       }
     } else {
       command.add('--disable-observatory');
@@ -977,6 +990,10 @@ class _FlutterPlatform extends PlatformPlugin {
       'FONTCONFIG_FILE': _fontConfigFile.path,
       'SERVER_PORT': serverPort.toString(),
     };
+    if (buildTestAssets) {
+      environment['UNIT_TEST_ASSETS'] = fs.path.join(
+        flutterProject.directory.path, 'build', 'unit_test_assets');
+    }
     return processManager.start(command, environment: environment);
   }
 

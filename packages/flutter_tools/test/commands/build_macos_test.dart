@@ -71,6 +71,7 @@ void main() {
       '/macos/build.sh',
       '/',
       'release',
+      'no-track-widget-creation',
     ], runInShell: true)).thenAnswer((Invocation invocation) async {
       return mockProcess;
     });

@@ -11,7 +11,7 @@ export 'dart:ui' show Offset, PointerDeviceKind;
 /// The bit of [PointerEvent.buttons] that corresponds to a cross-device
 /// behavior of "primary operation".
 ///
-/// It is equivalent to:
+/// More specifially, it includes:
 ///
 ///  * [kTouchContact]: The pointer contacts the touch screen.
 ///  * [kStylusContact]: The stylus contacts the screen.
@@ -757,7 +757,7 @@ class PointerDownEvent extends PointerEvent {
     PointerDeviceKind kind = PointerDeviceKind.touch,
     int device = 0,
     Offset position = Offset.zero,
-    int buttons = 0,
+    int buttons = kPrimaryButton,
     bool obscured = false,
     double pressure = 1.0,
     double pressureMin = 1.0,
@@ -812,7 +812,7 @@ class PointerMoveEvent extends PointerEvent {
     int device = 0,
     Offset position = Offset.zero,
     Offset delta = Offset.zero,
-    int buttons = 0,
+    int buttons = kPrimaryButton,
     bool obscured = false,
     double pressure = 1.0,
     double pressureMin = 1.0,
