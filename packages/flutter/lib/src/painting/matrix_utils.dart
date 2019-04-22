@@ -248,7 +248,7 @@ class MatrixUtils {
   }
 
   /// Returns a matrix that transforms every point to [offset].
-  static Matrix4 transformToOffset(Offset offset) {
+  static Matrix4 forceToPoint(Offset offset) {
     return Matrix4.identity()
       ..setRow(0, Vector4(0, 0, 0, offset.dx))
       ..setRow(1, Vector4(0, 0, 0, offset.dy));

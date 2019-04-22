@@ -230,7 +230,8 @@ class HitTestResult {
     // TODO(goderbauer): It needs to be "moreOrLessEqualTo" due to rounding errors.
 //    assert(transform.getRow(2) == Vector4(0, 0, 1, 0) && transform.getColumn(2) == Vector4(0, 0, 1, 0),
 //      'The third row and third column of a transform matrix for pointer '
-//      'events must be Vector4(0, 0, 1, 0). Did you forget to run the paint '
+//      'events must be Vector4(0, 0, 1, 0) to ensure that a transformed '
+//      point is directly under the pointer device. Did you forget to run the paint '
 //      'matrix through PointerEvent.paintTransformToPointerEventTransform?'
 //      'The provided matrix is:\n$transform'
 //    );

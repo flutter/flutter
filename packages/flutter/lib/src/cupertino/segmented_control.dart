@@ -711,7 +711,7 @@ class _RenderSegmentedControl<T> extends RenderBox
       if (childParentData.surroundingRect.contains(position)) {
         final Offset center = (Offset.zero & child.size).center;
         result.withRawTransform(
-          transform: MatrixUtils.transformToOffset(center),
+          transform: MatrixUtils.forceToPoint(center),
           position: center, 
           hitTest: (HitTestResult result, Offset position) {
             assert(position == center);
