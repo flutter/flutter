@@ -94,7 +94,7 @@ class CreateCommand extends FlutterCommand {
         'documentation website (http://docs.flutter.dev). An example can be found at '
         'https://master-api.flutter.dev/flutter/widgets/SingleChildScrollView-class.html',
       defaultsTo: null,
-      valueHelp: '',
+      valueHelp: 'id',
     );
     argParser.addOption(
       'list-samples',
