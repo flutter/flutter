@@ -1876,6 +1876,12 @@ abstract class RenderBox extends RenderObject {
   /// This [RenderBox] is responsible for checking whether the given position is
   /// within its bounds.
   ///
+  /// If transforming is necessary, [HitTestResult.withPaintTransform],
+  /// [HitTestResult.withPaintOffset], or [HitTestResult.withRawTransform] need
+  /// to be invoked by the caller to record the required transform operations
+  /// in the [HitTestResult]. These methods will also help with applying the
+  /// transform to `position`.
+  ///
   /// Hit testing requires layout to be up-to-date but does not require painting
   /// to be up-to-date. That means a render object can rely upon [performLayout]
   /// having been called in [hitTest] but cannot rely upon [paint] having been
@@ -1943,6 +1949,12 @@ abstract class RenderBox extends RenderObject {
   /// coordinates to its location relative to the origin of this [RenderBox].
   /// This [RenderBox] is responsible for checking whether the given position is
   /// within its bounds.
+  ///
+  /// If transforming is necessary, [HitTestResult.withPaintTransform],
+  /// [HitTestResult.withPaintOffset], or [HitTestResult.withRawTransform] need
+  /// to be invoked by the caller to record the required transform operations
+  /// in the [HitTestResult]. These methods will also help with applying the
+  /// transform to `position`.
   ///
   /// Used by [hitTest]. If you override [hitTest] and do not call this
   /// function, then you don't need to implement this function.

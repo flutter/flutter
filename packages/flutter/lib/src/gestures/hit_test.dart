@@ -170,7 +170,7 @@ class HitTestResult {
   /// Se also:
   ///
   ///  * [withPaintTransform], which takes a generic paint transform matrix and
-  ///    documents the intended usage of this API in mor detail.
+  ///    documents the intended usage of this API in more detail.
   bool withPaintOffset({
     @required Offset offset,
     @required Offset position,
@@ -193,7 +193,7 @@ class HitTestResult {
   /// Se also:
   ///
   ///  * [withPaintTransform], which accomplishes the same thing, but takes a
-  ///    *paint* transform matrix.
+  ///    _paint_ transform matrix.
   bool withRawTransform({
     @required Matrix4 transform,
     @required Offset position,
@@ -217,7 +217,7 @@ class HitTestResult {
   ///
   /// See also:
   ///
-  ///  * [_pushTransform] and [_popTransform], which are called during hit testing
+  ///  * [withPaintTransform], which is used during hit testing
   ///    to build up the transform returned by this method.
   Matrix4 getTransform(HitTestEntry entry) {
     assert(_path.containsKey(entry));

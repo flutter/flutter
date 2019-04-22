@@ -206,7 +206,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
         _lastPendingEventTimestamp = event.timeStamp;
         _lastTransform = event.transform;
         final Offset movedLocally = _getDeltaForDetails(event.localDelta);
-        final Matrix4 localToGlobalTransform = event.transform == null ? null : Matrix4.inverted(event.transform);
+        final Matrix4 localToGlobalTransform = event.transform == null ? null : Matrix4.tryInvert(event.transform);
         _globalDistanceMoved += PointerEvent.transformDeltaViaPositions(
           transform: localToGlobalTransform,
           untransformedDelta: movedLocally,

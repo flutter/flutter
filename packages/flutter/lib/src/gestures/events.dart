@@ -351,7 +351,7 @@ abstract class PointerEvent extends Diagnosticable {
   /// If this value is null, it is treated as the identity transformation.
   ///
   /// Unlike a paint transform, this transform usually does not contain any
-  /// "perspective" component, meaning that the third row and the third column
+  /// "perspective" components, meaning that the third row and the third column
   /// of the matrix should be equal to "0, 0, 1, 0". This ensures that
   /// [localPosition] describes the point in the local coordinate system of the
   /// event receiver at which the user is actually touching the screen.
