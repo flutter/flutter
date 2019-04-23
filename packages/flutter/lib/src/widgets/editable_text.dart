@@ -787,7 +787,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   final LayerLink _layerLink = LayerLink();
   bool _didAutoFocus = false;
-  FocusAttachment _focusAttachment;
 
   // This value is an eyeball estimation of the time it takes for the iOS cursor
   // to ease in and out.
@@ -810,7 +809,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   void initState() {
     super.initState();
     widget.controller.addListener(_didChangeTextEditingValue);
-    _focusAttachment = widget.focusNode.attach(context);
     widget.focusNode.addListener(_handleFocusChanged);
     _scrollController.addListener(() { _selectionOverlay?.updateForScroll(); });
     _cursorBlinkOpacityController = AnimationController(vsync: this, duration: _fadeDuration);
@@ -838,8 +836,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
     if (widget.focusNode != oldWidget.focusNode) {
       oldWidget.focusNode.removeListener(_handleFocusChanged);
-      _focusAttachment?.detach();
-      _focusAttachment = widget.focusNode.attach(context);
       widget.focusNode.addListener(_handleFocusChanged);
       updateKeepAlive();
     }
@@ -856,7 +852,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     assert(_cursorTimer == null);
     _selectionOverlay?.dispose();
     _selectionOverlay = null;
-    _focusAttachment.detach();
     widget.focusNode.removeListener(_handleFocusChanged);
     super.dispose();
   }
@@ -1096,7 +1091,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (_hasFocus) {
       _openInputConnection();
     } else {
-      widget.focusNode.requestFocus();
+      final List<FocusScopeNode> ancestorScopes = FocusScope.ancestorsOf(context);
+      for (int i = ancestorScopes.length - 1; i >= 1; i -= 1)
+        ancestorScopes[i].setFirstFocus(ancestorScopes[i - 1]);
+      FocusScope.of(context).requestFocus(widget.focusNode);
     }
   }
 
@@ -1402,7 +1400,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
-    _focusAttachment.reparent();
+    FocusScope.of(context).reparentIfNeeded(widget.focusNode);
     super.build(context); // See AutomaticKeepAliveClientMixin.
 
     final TextSelectionControls controls = widget.selectionControls;
