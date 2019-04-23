@@ -196,10 +196,11 @@ class AOTSnapshotter {
       },
       depfilePaths: <String>[],
     );
-    if (await fingerprinter.doesFingerprintMatch()) {
-      printTrace('Skipping AOT snapshot build. Fingerprint match.');
-      return 0;
-    }
+    // TODO(jonahwilliams): re-enable once this can be proved correct.
+    // if (await fingerprinter.doesFingerprintMatch()) {
+    //   printTrace('Skipping AOT snapshot build. Fingerprint match.');
+    //   return 0;
+    // }
 
     final SnapshotType snapshotType = SnapshotType(platform, buildMode);
     final int genSnapshotExitCode = await _timedStep('gen_snapshot', () => genSnapshot.run(
@@ -467,10 +468,11 @@ class JITSnapshotter {
       },
       depfilePaths: <String>[],
     );
-    if (await fingerprinter.doesFingerprintMatch()) {
-      printTrace('Skipping JIT snapshot build. Fingerprint match.');
-      return 0;
-    }
+    // TODO(jonahwilliams): re-enable once this can be proved correct.
+    // if (await fingerprinter.doesFingerprintMatch()) {
+    //   printTrace('Skipping JIT snapshot build. Fingerprint match.');
+    //   return 0;
+    // }
 
     final SnapshotType snapshotType = SnapshotType(platform, buildMode);
     final int genSnapshotExitCode = await genSnapshot.run(
