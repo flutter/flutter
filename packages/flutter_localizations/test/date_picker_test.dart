@@ -223,6 +223,63 @@ void main() {
 
     await tester.tap(find.text('ANNULER'));
   });
+
+  group('device configurations', () {
+
+    Future<void> _showPicker(WidgetTester tester, Locale locale) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Builder(
+            builder: (BuildContext context) {
+              return Localizations(
+                locale: locale,
+                delegates: GlobalMaterialLocalizations.delegates,
+                child: RaisedButton(
+                  child: const Text('X'),
+                  onPressed: () {
+                    showDatePicker(
+                      context: context,
+                      initialDate: initialDate,
+                      firstDate: firstDate,
+                      lastDate: lastDate,
+                    );
+                  },
+                ),
+              );
+            },
+          ),
+        )
+      );
+      await tester.tap(find.text('X'));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('should display on Pixel portrait, Chinese', (WidgetTester tester) async {
+      _applyConfig(tester, _TestDeviceConfigs.Pixel);
+      await _showPicker(tester, const Locale('zh', 'CN'));
+    });
+
+    testWidgets('should display on Pixel landscape, Chinese', (WidgetTester tester) async {
+      _applyConfig(tester, _TestDeviceConfigs.Pixel.copyWith(
+        orientation: Orientation.landscape,
+      ));
+      await _showPicker(tester, const Locale('zh', 'CN'));
+    });
+
+    testWidgets('should display on Pixel portrait, Japanese', (WidgetTester tester) async {
+      _applyConfig(tester, _TestDeviceConfigs.Pixel);
+      await _showPicker(tester, const Locale('ja', 'JA'));
+    });
+
+    testWidgets('should display on Pixel landcape, Japanese', (WidgetTester tester) async {
+      _applyConfig(tester, _TestDeviceConfigs.Pixel.copyWith(
+        orientation: Orientation.landscape,
+      ));
+      await _showPicker(tester, const Locale('ja', 'JA'));
+    });
+
+  });
+
 }
 
 Future<void> _pumpBoilerplate(
@@ -239,4 +296,65 @@ Future<void> _pumpBoilerplate(
       child: child,
     ),
   ));
+}
+
+class _TestDeviceConfig {
+
+  const _TestDeviceConfig({
+    this.size = Size.zero,
+    this.devicePixelRatio = 1.0,
+    this.orientation = Orientation.portrait,
+    this.textScaleFactor = 1.0,
+    this.locale,
+  });
+
+  final Size size;
+  final double devicePixelRatio;
+  final Orientation orientation;
+  final double textScaleFactor;
+  final Locale locale;
+
+  _TestDeviceConfig copyWith({
+    Size size,
+    double devicePixelRatio,
+    Orientation orientation,
+    double textScaleFactor,
+  }) {
+    return _TestDeviceConfig(
+      size: size ?? this.size,
+      devicePixelRatio: devicePixelRatio ?? this.devicePixelRatio,
+      orientation: orientation ?? this.orientation,
+      textScaleFactor: textScaleFactor ?? this.textScaleFactor,
+    );
+  }
+
+  Size get orientedSize {
+    final Orientation sizeOrientation = size.width <= size.height
+        ? Orientation.portrait
+        : Orientation.landscape;
+    if (sizeOrientation != orientation) {
+      return Size(size.height, size.width);
+    }
+    return size;
+  }
+}
+
+class _TestDeviceConfigs {
+  _TestDeviceConfigs._();
+
+  static const _TestDeviceConfig Pixel = _TestDeviceConfig(
+    size: Size(411.4, 683.4),
+    devicePixelRatio: 2.6,
+  );
+
+  static const _TestDeviceConfig SmallDisplay = _TestDeviceConfig(
+    size: Size(320, 521),
+    devicePixelRatio: 1.0,
+  );
+}
+
+void _applyConfig(WidgetTester tester, _TestDeviceConfig config) {
+  tester.binding.window.physicalSizeTestValue = config.orientedSize * config.devicePixelRatio;
+  tester.binding.window.devicePixelRatioTestValue = config.devicePixelRatio;
+  tester.binding.window.textScaleFactorTestValue = config.textScaleFactor;
 }

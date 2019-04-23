@@ -17,6 +17,9 @@ void main() {
   group('showDatePicker', () {
     _tests();
   });
+  group('showDatePicker - display configs', () {
+    _displayConfigTests();
+  });
 }
 
 void _tests() {
@@ -773,4 +776,146 @@ void _tests() {
     // button and the right edge of the 800 wide window.
     expect(tester.getBottomLeft(find.text('OK')).dx, 800 - ltrOkRight);
   });
+}
+
+class _TestDeviceConfig {
+
+  const _TestDeviceConfig({
+    this.size = Size.zero,
+    this.devicePixelRatio = 1.0,
+    this.orientation = Orientation.portrait,
+    this.textScaleFactor = 1.0,
+  });
+
+  final Size size;
+  final double devicePixelRatio;
+  final Orientation orientation;
+  final double textScaleFactor;
+
+  _TestDeviceConfig copyWith({
+    Size size,
+    double devicePixelRatio,
+    Orientation orientation,
+    double textScaleFactor,
+    Locale locale,
+  }) {
+    return _TestDeviceConfig(
+      size: size ?? this.size,
+      devicePixelRatio: devicePixelRatio ?? this.devicePixelRatio,
+      orientation: orientation ?? this.orientation,
+      textScaleFactor: textScaleFactor ?? this.textScaleFactor,
+    );
+  }
+
+  Size get orientedSize {
+    final Orientation sizeOrientation = size.width <= size.height
+        ? Orientation.portrait
+        : Orientation.landscape;
+    if (sizeOrientation != orientation) {
+      return Size(size.height, size.width);
+    }
+    return size;
+  }
+}
+
+class _TestDeviceConfigs {
+  _TestDeviceConfigs._();
+
+  static const _TestDeviceConfig Pixel = _TestDeviceConfig(
+    size: Size(411.4, 683.4),
+    devicePixelRatio: 2.6,
+  );
+
+  static const _TestDeviceConfig SmallDisplay = _TestDeviceConfig(
+    size: Size(320, 521),
+    devicePixelRatio: 1.0,
+  );
+}
+
+void _applyConfig(WidgetTester tester, _TestDeviceConfig config) {
+  tester.binding.window.physicalSizeTestValue = config.orientedSize * config.devicePixelRatio;
+  tester.binding.window.devicePixelRatioTestValue = config.devicePixelRatio;
+  tester.binding.window.textScaleFactorTestValue = config.textScaleFactor;
+}
+
+void _displayConfigTests() {
+
+  Future<void> _showPicker(WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            return RaisedButton(
+              child: const Text('X'),
+              onPressed: () {
+                showDatePicker(
+                  context: context,
+                  initialDate: DateTime(2018, 12, 30),
+                  firstDate: DateTime(2018),
+                  lastDate: DateTime(2030),
+                );
+              },
+            );
+          },
+        ),
+      ),
+    );
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+  }
+
+  testWidgets('should display on Pixel portrait', (WidgetTester tester) async {
+    _applyConfig(tester, _TestDeviceConfigs.Pixel);
+    await _showPicker(tester);
+  });
+
+  testWidgets('should display on Pixel landscape', (WidgetTester tester) async {
+    _applyConfig(tester, _TestDeviceConfigs.Pixel.copyWith(
+      orientation: Orientation.landscape,
+    ));
+    await _showPicker(tester);
+  });
+
+  testWidgets('should display on Pixel portrait, textScale 1.3', (WidgetTester tester) async {
+    _applyConfig(tester, _TestDeviceConfigs.Pixel.copyWith(
+      textScaleFactor: 1.3,
+    ));
+    await _showPicker(tester);
+  });
+
+  testWidgets('should display on Pixel landscape, textScale 1.3', (WidgetTester tester) async {
+    _applyConfig(tester, _TestDeviceConfigs.Pixel.copyWith(
+      orientation: Orientation.landscape,
+      textScaleFactor: 1.3,
+    ));
+    await _showPicker(tester);
+  });
+
+  testWidgets('should display on small display portrait', (WidgetTester tester) async {
+    _applyConfig(tester, _TestDeviceConfigs.SmallDisplay);
+    await _showPicker(tester);
+  });
+
+  testWidgets('should display on small display portrait, textScale 1.3', (WidgetTester tester) async {
+    _applyConfig(tester, _TestDeviceConfigs.SmallDisplay.copyWith(
+      textScaleFactor: 1.3,
+    ));
+    await _showPicker(tester);
+  });
+
+  testWidgets('should display on small display landscape', (WidgetTester tester) async {
+    _applyConfig(tester, _TestDeviceConfigs.SmallDisplay.copyWith(
+      orientation: Orientation.landscape,
+    ));
+    await _showPicker(tester);
+  });
+
+  testWidgets('should display on small display orientation, textScale 1.3', (WidgetTester tester) async {
+    _applyConfig(tester, _TestDeviceConfigs.SmallDisplay.copyWith(
+      orientation: Orientation.landscape,
+      textScaleFactor: 1.3,
+    ));
+    await _showPicker(tester);
+  });
+
 }
