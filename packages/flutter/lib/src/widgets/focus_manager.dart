@@ -837,7 +837,7 @@ class FocusScopeNode extends FocusNode {
       }
       assert(node.ancestors.contains(this),
         'Autofocus was requested for a node that is not a descendant of the scope from which it was requested.');
-      node.requestFocus();
+      node._doRequestFocus(isFromPolicy: false);
     }
   }
 

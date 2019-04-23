@@ -2773,7 +2773,6 @@ void main() {
           ),
         ),
       );
-      focusNode.requestFocus();
       await tester.pump();
     }
 
