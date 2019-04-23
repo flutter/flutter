@@ -616,12 +616,24 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
 /// ancestor to the ink well). The [MaterialType.transparency] material
 /// kind can be used for this purpose.
 ///
-/// ### The ink splashes are unpleasantly animating with transitioning widgets!
+/// ### The ink splashes don't track the size of an animated container
+/// When nesting an InkWell in a widget that changes size or animates,
+/// you may notice that ink splashes may clip and result in unusually cut
+/// circles. An example of this situation is as follows:
 ///
-/// If the layout changes, a LayoutChangedNotification must be dispatched at
-/// the relevant subtree. This means that transitions should not be placed
-/// inside Material. Otherwise, in-progress ink features (e.g., ink splashes
-/// and ink highlights) won't move to account for the new layout.
+/// ```dart
+/// InkWell(
+///   child: new AnimatedContainer(
+///     height: someGrowingFunction(),
+///     duration: ...
+///   )
+/// )
+/// ```
+///
+/// An InkWell's splashes will not change to conform to changes in the size
+/// of its underlying [Material], where the splashes are rendered. Hence, you
+/// should not create InkWells within [Material] widgets with sizes that change
+/// as they are animating.
 ///
 /// See also:
 ///
