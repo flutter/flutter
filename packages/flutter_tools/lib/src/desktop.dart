@@ -2,7 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'base/io.dart';
 import 'base/platform.dart';
+import 'base/process_manager.dart';
 import 'version.dart';
 
 // Only launch or display desktop embedding devices if
@@ -12,3 +14,36 @@ bool get flutterDesktopEnabled {
   return _flutterDesktopEnabled && !FlutterVersion.instance.isStable;
 }
 bool _flutterDesktopEnabled;
+
+/// Kills a process on linux or macOS.
+Future<bool> killProcess(String executable) async {
+  final RegExp whitespace = RegExp(r'\s+');
+  bool succeeded = true;
+  try {
+    final ProcessResult result = await processManager.run(<String>[
+      'ps', 'aux',
+    ]);
+    if (result.exitCode != 0) {
+      return false;
+    }
+    final List<String> lines = result.stdout.split('\n');
+    for (String line in lines) {
+      if (!line.contains(executable)) {
+        continue;
+      }
+      final List<String> values = line.split(whitespace);
+      if (values.length < 2) {
+        continue;
+      }
+      final String pid = values[1];
+      final ProcessResult killResult = await processManager.run(<String>[
+        'kill', pid,
+      ]);
+      succeeded &= killResult.exitCode == 0;
+    }
+    return true;
+  } on ArgumentError {
+    succeeded = false;
+  }
+  return succeeded;
+}

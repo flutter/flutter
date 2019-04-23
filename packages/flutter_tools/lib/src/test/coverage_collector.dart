@@ -34,10 +34,11 @@ class CoverageCollector extends TestWatcher {
   }
 
   void _addHitmap(Map<String, dynamic> hitmap) {
-    if (_globalHitmap == null)
+    if (_globalHitmap == null) {
       _globalHitmap = hitmap;
-    else
+    } else {
       coverage.mergeHitmaps(hitmap, _globalHitmap);
+    }
   }
 
   /// Collects coverage for the given [Process] using the given `port`.
@@ -91,8 +92,9 @@ class CoverageCollector extends TestWatcher {
     Directory coverageDirectory,
   }) async {
     printTrace('formating coverage data');
-    if (_globalHitmap == null)
+    if (_globalHitmap == null) {
       return null;
+    }
     if (formatter == null) {
       final coverage.Resolver resolver = coverage.Resolver(packagesPath: PackageMap.globalPackagesPath);
       final String packagePath = fs.currentDirectory.path;
