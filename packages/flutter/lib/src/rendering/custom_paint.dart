@@ -162,7 +162,7 @@ abstract class CustomPainter extends Listenable {
   /// clipped. It may sometimes be difficult to guarantee that a certain
   /// operation is inside the bounds (e.g., drawing a rectangle whose size is
   /// determined by user inputs). In that case, consider calling
-  /// [Canvas.clipRect] in the beginning of [paint] so everything that follows
+  /// [Canvas.clipRect] at the beginning of [paint] so everything that follows
   /// will be guaranteed to only draw within the clipped area.
   ///
   /// Implementations should be wary of correctly pairing any calls to
