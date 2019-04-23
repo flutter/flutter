@@ -140,11 +140,12 @@ abstract class InlineSpan extends DiagnosticableTree {
     if (other.runtimeType != runtimeType)
       return false;
     final InlineSpan typedOther = other;
-    return typedOther.style == style;
+    return typedOther.style == style
+        && listEquals<InlineSpan>(typedOther.children, children);
   }
 
   @override
-  int get hashCode => style.hashCode;
+  int get hashCode => hashValues(style, hashList(children));
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

@@ -70,9 +70,8 @@ void main() {
 
     expect(boxes.any((ui.TextBox box) => box.left == 250 && box.top == 0), isTrue);
     expect(boxes.any((ui.TextBox box) => box.right == 100 && box.top == 10), isTrue);
-  },
   // Ahem-based tests don't yet quite work on Windows or some MacOS environments
-  skip: Platform.isWindows || Platform.isMacOS);
+  }, skip: Platform.isWindows || Platform.isMacOS);
 
   test('getWordBoundary control test', () {
     final RenderParagraph paragraph = RenderParagraph(
@@ -361,9 +360,8 @@ void main() {
     expect(boxes[2], TextBox.fromLTRBD(24.0, 0.0, 38.0, 14.0, TextDirection.ltr));
     expect(boxes[3], TextBox.fromLTRBD(38.0, 4.0, 48.0, 14.0, TextDirection.ltr));
     expect(boxes[4], TextBox.fromLTRBD(48.0, 0.0, 62.0, 14.0, TextDirection.ltr));
-  },
   // Ahem-based tests don't yet quite work on Windows or some MacOS environments
-  skip: Platform.isWindows || Platform.isMacOS);
+  }, skip: Platform.isWindows || Platform.isMacOS);
 
   test('inline widgets multiline test', () {
     final TextSpan text = const TextSpan(
@@ -414,7 +412,6 @@ void main() {
     // Wraps
     expect(boxes[7], TextBox.fromLTRBD(0.0, 28.0, 14.0, 42.0, TextDirection.ltr));
     expect(boxes[8], TextBox.fromLTRBD(14.0, 28.0, 28.0, 42.0 , TextDirection.ltr));
-  },
   // Ahem-based tests don't yet quite work on Windows or some MacOS environments
-  skip: Platform.isWindows || Platform.isMacOS);
+  }, skip: Platform.isWindows || Platform.isMacOS);
 }

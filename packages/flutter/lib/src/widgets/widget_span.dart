@@ -140,7 +140,8 @@ class WidgetSpan extends PlaceholderSpan {
     final bool hasStyle = style != null;
     if (hasStyle)
       builder.pushStyle(style.getTextStyle(textScaleFactor: textScaleFactor));
-    if (dimensions != null && builder.placeholderCount < dimensions.length) {
+    if (dimensions != null) {
+      assert(builder.placeholderCount < dimensions.length);
       PlaceholderDimensions currentDimensions = dimensions[builder.placeholderCount];
       builder.addPlaceholder(
         currentDimensions.size.width,
@@ -158,12 +159,7 @@ class WidgetSpan extends PlaceholderSpan {
   bool visitChildren(bool visitor(InlineSpan span)) {
     if (!visitor(this))
       return false;
-    if (children != null) {
-      for (InlineSpan child in children) {
-        if (!child.visitChildren(visitor))
-          return false;
-      }
-    }
+    assert(children == null);
     return true;
   }
 
@@ -187,11 +183,9 @@ class WidgetSpan extends PlaceholderSpan {
   RenderComparison compareTo(InlineSpan other) {
     if (identical(this, other))
       return RenderComparison.identical;
-    if (other.runtimeType is! WidgetSpan)
+    if (other.runtimeType != runtimeType)
       return RenderComparison.layout;
     final WidgetSpan typedOther = other;
-    if (typedOther.child != child)
-      return RenderComparison.layout;
     if ((style == null) != (other.style == null))
       return RenderComparison.layout;
     RenderComparison result = RenderComparison.identical;
@@ -202,8 +196,6 @@ class WidgetSpan extends PlaceholderSpan {
       if (result == RenderComparison.layout)
         return result;
     }
-    // WidgetSpans are always a leaf node in the TextSpan tree, and have
-    // no children.
     return result;
   }
 
@@ -225,37 +217,17 @@ class WidgetSpan extends PlaceholderSpan {
   }
 
 
-  /// In checked mode, throws an exception if the object is not in a
+  /// In debug mode, throws an exception if the object is not in a
   /// valid configuration. Otherwise, returns true.
   ///
   /// This is intended to be used as follows:
   ///
   /// ```dart
-  /// assert(myTextSpan.debugAssertIsValid());
+  /// assert(myWidgetSpan.debugAssertIsValid());
   /// ```
   bool debugAssertIsValid() {
-    assert(() {
-      if (!visitChildren((InlineSpan span) {
-        if (span is WidgetSpan)
-          return (span as WidgetSpan).child != null;
-        InlineSpan inlineSpan = span;
-        if (inlineSpan.children != null) {
-          for (InlineSpan child in inlineSpan.children) {
-            if (child == null)
-              return false;
-          }
-        }
-        return true;
-      })) {
-        throw FlutterError(
-          'TextSpan contains a null child.\n'
-          'A TextSpan object with a non-null child list should not have any nulls in its child list.\n'
-          'The full text in question was:\n'
-          '${toStringDeep(prefixLineOne: '  ')}'
-        );
-      }
-      return true;
-    }());
+    // WidgetSpans are always valid as asserts prevent invalid WidgetSpans
+    // from being constructed.
     return true;
   }
 }
