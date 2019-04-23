@@ -331,10 +331,10 @@ void main() {
       text: 'a',
       style: TextStyle(fontSize: 10.0),
       children: <InlineSpan>[
-        WidgetSpan(widget: SizedBox(width: 21, height: 21)),
-        WidgetSpan(widget: SizedBox(width: 21, height: 21)),
+        WidgetSpan(child: SizedBox(width: 21, height: 21)),
+        WidgetSpan(child: SizedBox(width: 21, height: 21)),
         TextSpan(text: 'a'),
-        WidgetSpan(widget: SizedBox(width: 21, height: 21)),
+        WidgetSpan(child: SizedBox(width: 21, height: 21)),
       ],
     );
     // Fake the render boxes that correspond to the WidgetSpans. We use
@@ -370,14 +370,14 @@ void main() {
       text: 'a',
       style: TextStyle(fontSize: 10.0),
       children: <InlineSpan>[
-        WidgetSpan(widget: SizedBox(width: 21, height: 21)),
-        WidgetSpan(widget: SizedBox(width: 21, height: 21)),
+        WidgetSpan(child: SizedBox(width: 21, height: 21)),
+        WidgetSpan(child: SizedBox(width: 21, height: 21)),
         TextSpan(text: 'a'),
-        WidgetSpan(widget: SizedBox(width: 21, height: 21)),
-        WidgetSpan(widget: SizedBox(width: 21, height: 21)),
-        WidgetSpan(widget: SizedBox(width: 21, height: 21)),
-        WidgetSpan(widget: SizedBox(width: 21, height: 21)),
-        WidgetSpan(widget: SizedBox(width: 21, height: 21)),
+        WidgetSpan(child: SizedBox(width: 21, height: 21)),
+        WidgetSpan(child: SizedBox(width: 21, height: 21)),
+        WidgetSpan(child: SizedBox(width: 21, height: 21)),
+        WidgetSpan(child: SizedBox(width: 21, height: 21)),
+        WidgetSpan(child: SizedBox(width: 21, height: 21)),
       ],
     );
     // Fake the render boxes that correspond to the WidgetSpans. We use

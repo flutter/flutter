@@ -544,14 +544,14 @@ void main() {
                       ),
                       children: <InlineSpan>[
                         WidgetSpan(
-                          widget: Checkbox(value: true, onChanged: (bool value) {}),
+                          child: Checkbox(value: true, onChanged: (bool value) {}),
                         ),
                         WidgetSpan(
-                          widget: Checkbox(value: false, onChanged: (bool value) {}),
+                          child: Checkbox(value: false, onChanged: (bool value) {}),
                         ),
                         TextSpan(text: 'He ', style: TextStyle(fontSize: 20)),
                         WidgetSpan(
-                          widget: SizedBox(
+                          child: SizedBox(
                             width: 50.0,
                             height: 55.0,
                             child: DecoratedBox(
@@ -574,29 +574,29 @@ void main() {
                         ),
                         TextSpan(text: 'hello world! sieze the day!'),
                         WidgetSpan(
-                          widget: Checkbox(value: false, onChanged: (bool value) {}),
+                          child: Checkbox(value: false, onChanged: (bool value) {}),
                         ),
                         WidgetSpan(
-                          widget: SizedBox(
+                          child: SizedBox(
                             width: 20,
                             height: 20,
                             child: Checkbox(value: true, onChanged: (bool value) {}),
                           )
                         ),
                         WidgetSpan(
-                          widget: Checkbox(value: false, onChanged: (bool value) {}),
+                          child: Checkbox(value: false, onChanged: (bool value) {}),
                           alignment: InlineWidgetAlignment.baseline,
                           baseline: TextBaseline.alphabetic
                         ),
                         WidgetSpan(
-                          widget: SizedBox(
+                          child: SizedBox(
                             width: 20,
                             height: 20,
                             child: Checkbox(value: true, onChanged: (bool value) {}),
                           )
                         ),
                         WidgetSpan(
-                          widget: Text('embedded'),
+                          child: Text('embedded'),
                         ),
                       ],
                     ),
@@ -637,11 +637,11 @@ void main() {
                       ),
                       children: <InlineSpan>[
                         WidgetSpan(
-                          widget: SizedBox(width: 70, height: 25, child: TextField()),
+                          child: SizedBox(width: 70, height: 25, child: TextField()),
                         ),
                         TextSpan(text: ', and my favorite city is: ', style: TextStyle(fontSize: 20)),
                         WidgetSpan(
-                          widget: SizedBox(width: 70, height: 25, child: TextField()),
+                          child: SizedBox(width: 70, height: 25, child: TextField()),
                         ),
                       ],
                     ),
@@ -683,19 +683,19 @@ void main() {
                       ),
                       children: <InlineSpan>[
                         WidgetSpan(
-                          widget: RichText(
+                          child: RichText(
                             text: TextSpan(
                               text: 'inner',
                               style: TextStyle(color: Color(0xff402f4ff)),
                               children: <InlineSpan>[
                                 WidgetSpan(
-                                  widget: RichText(
+                                  child: RichText(
                                     text: TextSpan(
                                       text: 'inner2',
                                       style: TextStyle(color: Color(0xff003ffff)),
                                       children: <InlineSpan>[
                                         WidgetSpan(
-                                          widget: SizedBox(
+                                          child: SizedBox(
                                             width: 50.0,
                                             height: 55.0,
                                             child: DecoratedBox(
@@ -721,7 +721,7 @@ void main() {
                                   ),
                                 ),
                                 WidgetSpan(
-                                  widget: SizedBox(
+                                  child: SizedBox(
                                     width: 50.0,
                                     height: 55.0,
                                     child: DecoratedBox(
@@ -748,10 +748,10 @@ void main() {
                         ),
                         TextSpan(text: 'outer', style: TextStyle(fontSize: 20)),
                         WidgetSpan(
-                          widget: SizedBox(width: 70, height: 25, child: TextField()),
+                          child: SizedBox(width: 70, height: 25, child: TextField()),
                         ),
                         WidgetSpan(
-                          widget: SizedBox(
+                          child: SizedBox(
                             width: 50.0,
                             height: 55.0,
                             child: DecoratedBox(
@@ -814,16 +814,16 @@ void main() {
                         WidgetSpan(
                           alignment: InlineWidgetAlignment.baseline,
                           baseline: TextBaseline.alphabetic,
-                          widget: Checkbox(value: true, onChanged: (bool value) {}),
+                          child: Checkbox(value: true, onChanged: (bool value) {}),
                         ),
                         WidgetSpan(
-                          widget: Checkbox(value: false, onChanged: (bool value) {}),
+                          child: Checkbox(value: false, onChanged: (bool value) {}),
                         ),
                         TextSpan(text: 'He ', style: TextStyle(fontSize: 20)),
                         WidgetSpan(
                           alignment: InlineWidgetAlignment.baseline,
                           baseline: TextBaseline.alphabetic,
-                          widget: SizedBox(
+                          child: SizedBox(
                             width: 50.0,
                             height: 55.0,
                             child: DecoratedBox(
@@ -848,12 +848,12 @@ void main() {
                         WidgetSpan(
                           alignment: InlineWidgetAlignment.baseline,
                           baseline: TextBaseline.alphabetic,
-                          widget: Checkbox(value: false, onChanged: (bool value) {}),
+                          child: Checkbox(value: false, onChanged: (bool value) {}),
                         ),
                         WidgetSpan(
                           alignment: InlineWidgetAlignment.baseline,
                           baseline: TextBaseline.alphabetic,
-                          widget: SizedBox(
+                          child: SizedBox(
                             width: 20,
                             height: 20,
                             child: Checkbox(value: true, onChanged: (bool value) {}),
@@ -862,12 +862,12 @@ void main() {
                         WidgetSpan(
                           alignment: InlineWidgetAlignment.baseline,
                           baseline: TextBaseline.alphabetic,
-                          widget: Checkbox(value: false, onChanged: (bool value) {}),
+                          child: Checkbox(value: false, onChanged: (bool value) {}),
                         ),
                         WidgetSpan(
                           alignment: InlineWidgetAlignment.baseline,
                           baseline: TextBaseline.alphabetic,
-                          widget: SizedBox(
+                          child: SizedBox(
                             width: 20,
                             height: 20,
                             child: Checkbox(value: true, onChanged: (bool value) {}),
@@ -876,7 +876,7 @@ void main() {
                         WidgetSpan(
                           alignment: InlineWidgetAlignment.baseline,
                           baseline: TextBaseline.alphabetic,
-                          widget: Text('embedded'),
+                          child: Text('embedded'),
                         ),
                         TextSpan(text: 'ref'),
                       ],
@@ -921,16 +921,16 @@ void main() {
                         WidgetSpan(
                           alignment: InlineWidgetAlignment.aboveBaseline,
                           baseline: TextBaseline.alphabetic,
-                          widget: Checkbox(value: true, onChanged: (bool value) {}),
+                          child: Checkbox(value: true, onChanged: (bool value) {}),
                         ),
                         WidgetSpan(
-                          widget: Checkbox(value: false, onChanged: (bool value) {}),
+                          child: Checkbox(value: false, onChanged: (bool value) {}),
                         ),
                         TextSpan(text: 'He ', style: TextStyle(fontSize: 20)),
                         WidgetSpan(
                           alignment: InlineWidgetAlignment.aboveBaseline,
                           baseline: TextBaseline.alphabetic,
-                          widget: SizedBox(
+                          child: SizedBox(
                             width: 50.0,
                             height: 55.0,
                             child: DecoratedBox(
@@ -955,12 +955,12 @@ void main() {
                         WidgetSpan(
                           alignment: InlineWidgetAlignment.aboveBaseline,
                           baseline: TextBaseline.alphabetic,
-                          widget: Checkbox(value: false, onChanged: (bool value) {}),
+                          child: Checkbox(value: false, onChanged: (bool value) {}),
                         ),
                         WidgetSpan(
                           alignment: InlineWidgetAlignment.aboveBaseline,
                           baseline: TextBaseline.alphabetic,
-                          widget: SizedBox(
+                          child: SizedBox(
                             width: 20,
                             height: 20,
                             child: Checkbox(value: true, onChanged: (bool value) {}),
@@ -969,12 +969,12 @@ void main() {
                         WidgetSpan(
                           alignment: InlineWidgetAlignment.aboveBaseline,
                           baseline: TextBaseline.alphabetic,
-                          widget: Checkbox(value: false, onChanged: (bool value) {}),
+                          child: Checkbox(value: false, onChanged: (bool value) {}),
                         ),
                         WidgetSpan(
                           alignment: InlineWidgetAlignment.aboveBaseline,
                           baseline: TextBaseline.alphabetic,
-                          widget: SizedBox(
+                          child: SizedBox(
                             width: 20,
                             height: 20,
                             child: Checkbox(value: true, onChanged: (bool value) {}),
@@ -983,7 +983,7 @@ void main() {
                         WidgetSpan(
                           alignment: InlineWidgetAlignment.aboveBaseline,
                           baseline: TextBaseline.alphabetic,
-                          widget: Text('embedded'),
+                          child: Text('embedded'),
                         ),
                         TextSpan(text: 'ref'),
                       ],
@@ -1028,16 +1028,16 @@ void main() {
                         WidgetSpan(
                           alignment: InlineWidgetAlignment.belowBaseline,
                           baseline: TextBaseline.alphabetic,
-                          widget: Checkbox(value: true, onChanged: (bool value) {}),
+                          child: Checkbox(value: true, onChanged: (bool value) {}),
                         ),
                         WidgetSpan(
-                          widget: Checkbox(value: false, onChanged: (bool value) {}),
+                          child: Checkbox(value: false, onChanged: (bool value) {}),
                         ),
                         TextSpan(text: 'He ', style: TextStyle(fontSize: 20)),
                         WidgetSpan(
                           alignment: InlineWidgetAlignment.belowBaseline,
                           baseline: TextBaseline.alphabetic,
-                          widget: SizedBox(
+                          child: SizedBox(
                             width: 50.0,
                             height: 55.0,
                             child: DecoratedBox(
@@ -1062,12 +1062,12 @@ void main() {
                         WidgetSpan(
                           alignment: InlineWidgetAlignment.belowBaseline,
                           baseline: TextBaseline.alphabetic,
-                          widget: Checkbox(value: false, onChanged: (bool value) {}),
+                          child: Checkbox(value: false, onChanged: (bool value) {}),
                         ),
                         WidgetSpan(
                           alignment: InlineWidgetAlignment.belowBaseline,
                           baseline: TextBaseline.alphabetic,
-                          widget: SizedBox(
+                          child: SizedBox(
                             width: 20,
                             height: 20,
                             child: Checkbox(value: true, onChanged: (bool value) {}),
@@ -1076,12 +1076,12 @@ void main() {
                         WidgetSpan(
                           alignment: InlineWidgetAlignment.belowBaseline,
                           baseline: TextBaseline.alphabetic,
-                          widget: Checkbox(value: false, onChanged: (bool value) {}),
+                          child: Checkbox(value: false, onChanged: (bool value) {}),
                         ),
                         WidgetSpan(
                           alignment: InlineWidgetAlignment.belowBaseline,
                           baseline: TextBaseline.alphabetic,
-                          widget: SizedBox(
+                          child: SizedBox(
                             width: 20,
                             height: 20,
                             child: Checkbox(value: true, onChanged: (bool value) {}),
@@ -1090,7 +1090,7 @@ void main() {
                         WidgetSpan(
                           alignment: InlineWidgetAlignment.belowBaseline,
                           baseline: TextBaseline.alphabetic,
-                          widget: Text('embedded'),
+                          child: Text('embedded'),
                         ),
                         TextSpan(text: 'ref'),
                       ],
@@ -1135,16 +1135,16 @@ void main() {
                         WidgetSpan(
                           alignment: InlineWidgetAlignment.top,
                           baseline: TextBaseline.alphabetic,
-                          widget: Checkbox(value: true, onChanged: (bool value) {}),
+                          child: Checkbox(value: true, onChanged: (bool value) {}),
                         ),
                         WidgetSpan(
-                          widget: Checkbox(value: false, onChanged: (bool value) {}),
+                          child: Checkbox(value: false, onChanged: (bool value) {}),
                         ),
                         TextSpan(text: 'He ', style: TextStyle(fontSize: 20)),
                         WidgetSpan(
                           alignment: InlineWidgetAlignment.top,
                           baseline: TextBaseline.alphabetic,
-                          widget: SizedBox(
+                          child: SizedBox(
                             width: 50.0,
                             height: 55.0,
                             child: DecoratedBox(
@@ -1169,12 +1169,12 @@ void main() {
                         WidgetSpan(
                           alignment: InlineWidgetAlignment.top,
                           baseline: TextBaseline.alphabetic,
-                          widget: Checkbox(value: false, onChanged: (bool value) {}),
+                          child: Checkbox(value: false, onChanged: (bool value) {}),
                         ),
                         WidgetSpan(
                           alignment: InlineWidgetAlignment.top,
                           baseline: TextBaseline.alphabetic,
-                          widget: SizedBox(
+                          child: SizedBox(
                             width: 20,
                             height: 20,
                             child: Checkbox(value: true, onChanged: (bool value) {}),
@@ -1183,12 +1183,12 @@ void main() {
                         WidgetSpan(
                           alignment: InlineWidgetAlignment.top,
                           baseline: TextBaseline.alphabetic,
-                          widget: Checkbox(value: false, onChanged: (bool value) {}),
+                          child: Checkbox(value: false, onChanged: (bool value) {}),
                         ),
                         WidgetSpan(
                           alignment: InlineWidgetAlignment.top,
                           baseline: TextBaseline.alphabetic,
-                          widget: SizedBox(
+                          child: SizedBox(
                             width: 20,
                             height: 20,
                             child: Checkbox(value: true, onChanged: (bool value) {}),
@@ -1197,7 +1197,7 @@ void main() {
                         WidgetSpan(
                           alignment: InlineWidgetAlignment.top,
                           baseline: TextBaseline.alphabetic,
-                          widget: Text('embedded'),
+                          child: Text('embedded'),
                         ),
                         TextSpan(text: 'ref'),
                       ],
@@ -1242,16 +1242,16 @@ void main() {
                         WidgetSpan(
                           alignment: InlineWidgetAlignment.middle,
                           baseline: TextBaseline.alphabetic,
-                          widget: Checkbox(value: true, onChanged: (bool value) {}),
+                          child: Checkbox(value: true, onChanged: (bool value) {}),
                         ),
                         WidgetSpan(
-                          widget: Checkbox(value: false, onChanged: (bool value) {}),
+                          child: Checkbox(value: false, onChanged: (bool value) {}),
                         ),
                         TextSpan(text: 'He ', style: TextStyle(fontSize: 20)),
                         WidgetSpan(
                           alignment: InlineWidgetAlignment.middle,
                           baseline: TextBaseline.alphabetic,
-                          widget: SizedBox(
+                          child: SizedBox(
                             width: 50.0,
                             height: 55.0,
                             child: DecoratedBox(
@@ -1276,12 +1276,12 @@ void main() {
                         WidgetSpan(
                           alignment: InlineWidgetAlignment.middle,
                           baseline: TextBaseline.alphabetic,
-                          widget: Checkbox(value: false, onChanged: (bool value) {}),
+                          child: Checkbox(value: false, onChanged: (bool value) {}),
                         ),
                         WidgetSpan(
                           alignment: InlineWidgetAlignment.middle,
                           baseline: TextBaseline.alphabetic,
-                          widget: SizedBox(
+                          child: SizedBox(
                             width: 20,
                             height: 20,
                             child: Checkbox(value: true, onChanged: (bool value) {}),
@@ -1290,12 +1290,12 @@ void main() {
                         WidgetSpan(
                           alignment: InlineWidgetAlignment.middle,
                           baseline: TextBaseline.alphabetic,
-                          widget: Checkbox(value: false, onChanged: (bool value) {}),
+                          child: Checkbox(value: false, onChanged: (bool value) {}),
                         ),
                         WidgetSpan(
                           alignment: InlineWidgetAlignment.middle,
                           baseline: TextBaseline.alphabetic,
-                          widget: SizedBox(
+                          child: SizedBox(
                             width: 20,
                             height: 20,
                             child: Checkbox(value: true, onChanged: (bool value) {}),
@@ -1304,7 +1304,7 @@ void main() {
                         WidgetSpan(
                           alignment: InlineWidgetAlignment.middle,
                           baseline: TextBaseline.alphabetic,
-                          widget: Text('embedded'),
+                          child: Text('embedded'),
                         ),
                         TextSpan(text: 'ref'),
                       ],
