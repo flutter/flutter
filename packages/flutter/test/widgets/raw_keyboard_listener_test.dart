@@ -12,7 +12,7 @@ void sendFakeKeyEvent(Map<String, dynamic> data) {
   BinaryMessages.handlePlatformMessage(
     SystemChannels.keyEvent.name,
     SystemChannels.keyEvent.codec.encodeMessage(data),
-    (ByteData data) {},
+    (ByteData data) { },
   );
 }
 
@@ -29,15 +29,13 @@ void main() {
 
     final FocusNode focusNode = FocusNode();
 
-    await tester.pumpWidget(
-      RawKeyboardListener(
-        focusNode: focusNode,
-        onKey: events.add,
-        child: Container(),
-      ),
-    );
+    await tester.pumpWidget(RawKeyboardListener(
+      focusNode: focusNode,
+      onKey: events.add,
+      child: Container(),
+    ));
 
-    focusNode.requestFocus();
+    tester.binding.focusManager.rootScope.requestFocus(focusNode);
     await tester.idle();
 
     sendFakeKeyEvent(<String, dynamic>{
@@ -67,15 +65,13 @@ void main() {
 
     final FocusNode focusNode = FocusNode();
 
-    await tester.pumpWidget(
-      RawKeyboardListener(
-        focusNode: focusNode,
-        onKey: events.add,
-        child: Container(),
-      ),
-    );
+    await tester.pumpWidget(RawKeyboardListener(
+      focusNode: focusNode,
+      onKey: events.add,
+      child: Container(),
+    ));
 
-    focusNode.requestFocus();
+    tester.binding.focusManager.rootScope.requestFocus(focusNode);
     await tester.idle();
 
     sendFakeKeyEvent(<String, dynamic>{
