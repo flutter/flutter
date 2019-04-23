@@ -8,19 +8,25 @@ import 'package:flutter/widgets.dart';
 import 'colors.dart';
 import 'localizations.dart';
 import 'picker.dart';
+import 'theme.dart';
 
 // Default aesthetic values obtained by comparing with iOS pickers.
 const double _kItemExtent = 32.0;
 const double _kPickerWidth = 330.0;
 const bool _kUseMagnifier = true;
-const double _kMagnification = 1.05;
+const double _kMagnification = 1.08;
 const double _kDatePickerPadSize = 12.0;
+const double _kSqueeze = 1.25;
 // Considers setting the default background color from the theme, in the future.
 const Color _kBackgroundColor = CupertinoColors.white;
 
 const TextStyle _kDefaultPickerTextStyle = TextStyle(
   letterSpacing: -0.83,
 );
+
+TextStyle _themeTextStyle(BuildContext context) {
+  return CupertinoTheme.of(context).textTheme.dateTimePickerTextStyle;
+}
 
 // Lays out the date picker based on how much space each single column needs.
 //
@@ -321,7 +327,7 @@ class CupertinoDatePicker extends StatefulWidget {
 
     final TextPainter painter = TextPainter(
       text: TextSpan(
-        style: DefaultTextStyle.of(context).style,
+        style: _themeTextStyle(context),
         text: longestText,
       ),
       textDirection: Directionality.of(context),
@@ -462,6 +468,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
       useMagnifier: _kUseMagnifier,
       magnification: _kMagnification,
       backgroundColor: _kBackgroundColor,
+      squeeze: _kSqueeze,
       onSelectedItemChanged: (int index) {
         selectedDayFromInitial = index;
         widget.onDateTimeChanged(_getDateTime());
@@ -478,9 +485,21 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
         if (widget.maximumDate != null && dateTime.isAfter(widget.maximumDate))
           return null;
 
+        final DateTime now = DateTime.now();
+        String dateText;
+
+        if (dateTime == DateTime(now.year, now.month, now.day)) {
+          dateText = localizations.todayLabel;
+        } else {
+          dateText = localizations.datePickerMediumDate(dateTime);
+        }
+
         return itemPositioningBuilder(
           context,
-          Text(localizations.datePickerMediumDate(dateTime)),
+          Text(
+            dateText,
+            style: _themeTextStyle(context),
+          ),
         );
       },
     );
@@ -494,6 +513,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
       useMagnifier: _kUseMagnifier,
       magnification: _kMagnification,
       backgroundColor: _kBackgroundColor,
+      squeeze: _kSqueeze,
       onSelectedItemChanged: (int index) {
         if (widget.use24hFormat) {
           selectedHour = index;
@@ -531,6 +551,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
           Text(
             localizations.datePickerHour(hour),
             semanticsLabel: localizations.datePickerHourSemanticsLabel(hour),
+            style: _themeTextStyle(context),
           ),
         );
       }),
@@ -546,6 +567,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
       useMagnifier: _kUseMagnifier,
       magnification: _kMagnification,
       backgroundColor: _kBackgroundColor,
+      squeeze: _kSqueeze,
       onSelectedItemChanged: (int index) {
         selectedMinute = index * widget.minuteInterval;
         widget.onDateTimeChanged(_getDateTime());
@@ -557,6 +579,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
           Text(
             localizations.datePickerMinute(minute),
             semanticsLabel: localizations.datePickerMinuteSemanticsLabel(minute),
+            style: _themeTextStyle(context),
           ),
         );
       }),
@@ -572,6 +595,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
       useMagnifier: _kUseMagnifier,
       magnification: _kMagnification,
       backgroundColor: _kBackgroundColor,
+      squeeze: _kSqueeze,
       onSelectedItemChanged: (int index) {
         selectedAmPm = index;
         widget.onDateTimeChanged(_getDateTime());
@@ -582,7 +606,8 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
           Text(
             index == 0
               ? localizations.anteMeridiemAbbreviation
-              : localizations.postMeridiemAbbreviation
+              : localizations.postMeridiemAbbreviation,
+            style: _themeTextStyle(context),
           ),
         );
       }),
@@ -630,9 +655,9 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
     for (int i = 0; i < columnWidths.length; i++) {
       double offAxisFraction = 0.0;
       if (i == 0)
-        offAxisFraction = -0.5 * textDirectionFactor;
+        offAxisFraction = -0.45 * textDirectionFactor;
       else if (i >= 2 || columnWidths.length == 2)
-        offAxisFraction = 0.5 * textDirectionFactor;
+        offAxisFraction = 0.45 * textDirectionFactor;
 
       EdgeInsets padding = const EdgeInsets.only(right: _kDatePickerPadSize);
       if (i == columnWidths.length - 1)
@@ -735,6 +760,7 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
       useMagnifier: _kUseMagnifier,
       magnification: _kMagnification,
       backgroundColor: _kBackgroundColor,
+      squeeze: _kSqueeze,
       onSelectedItemChanged: (int index) {
         selectedDay = index + 1;
         if (DateTime(selectedYear, selectedMonth, selectedDay).day == selectedDay)
@@ -765,6 +791,7 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
       useMagnifier: _kUseMagnifier,
       magnification: _kMagnification,
       backgroundColor: _kBackgroundColor,
+      squeeze: _kSqueeze,
       onSelectedItemChanged: (int index) {
         selectedMonth = index + 1;
         if (DateTime(selectedYear, selectedMonth, selectedDay).day == selectedDay)
@@ -1067,6 +1094,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
       offAxisFraction: -0.5 * textDirectionFactor,
       itemExtent: _kItemExtent,
       backgroundColor: _kBackgroundColor,
+      squeeze: _kSqueeze,
       onSelectedItemChanged: (int index) {
         setState(() {
           selectedHour = index;
@@ -1145,6 +1173,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
       offAxisFraction: offAxisFraction,
       itemExtent: _kItemExtent,
       backgroundColor: _kBackgroundColor,
+      squeeze: _kSqueeze,
       onSelectedItemChanged: (int index) {
         setState(() {
           selectedMinute = index * widget.minuteInterval;
@@ -1257,6 +1286,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
       offAxisFraction: offAxisFraction,
       itemExtent: _kItemExtent,
       backgroundColor: _kBackgroundColor,
+      squeeze: _kSqueeze,
       onSelectedItemChanged: (int index) {
         setState(() {
           selectedSecond = index * widget.secondInterval;

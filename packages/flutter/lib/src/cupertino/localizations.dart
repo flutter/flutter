@@ -142,6 +142,10 @@ abstract class CupertinoLocalizations {
   // The global version uses the translated string from the arb file.
   String get postMeridiemAbbreviation;
 
+  /// Label shown in date pickers when the date is today.
+  // The global version uses the translated string from the arb file.
+  String get todayLabel;
+
   /// The term used by the system to announce dialog alerts.
   // The global version uses the translated string from the arb file.
   String get alertDialogLabel;
@@ -337,6 +341,9 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
 
   @override
   String get postMeridiemAbbreviation => 'PM';
+
+  @override
+  String get todayLabel => 'Today';
 
   @override
   String get alertDialogLabel => 'Alert';

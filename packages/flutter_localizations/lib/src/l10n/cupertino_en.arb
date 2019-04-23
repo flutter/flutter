@@ -33,6 +33,11 @@
     "description": "The abbreviation for post meridiem (after noon) shown in the time picker when it's not using the 24h format. Reference the text iOS uses such as in the iOS clock app."
   },
 
+  "todayLabel": "Today",
+  "@todayLabel": {
+    "description": "A label shown in the date picker when the date is today."
+  },
+
   "alertDialogLabel": "Alert",
   "@alertDialogLabel": {
     "description": "The accessibility audio announcement made when an iOS style alert dialog is opened."

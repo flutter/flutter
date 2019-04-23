@@ -7,13 +7,16 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
+import 'theme.dart';
+
 /// Color of the 'magnifier' lens border.
 const Color _kHighlighterBorder = Color(0xFF7F7F7F);
 const Color _kDefaultBackground = Color(0xFFD2D4DB);
 // Eyeballed values comparing with a native picker.
 // Values closer to PI produces denser flatter lists.
-const double _kDefaultDiameterRatio = 1.35;
-const double _kDefaultPerspective = 0.004;
+const double _kDefaultDiameterRatio = 1.07;
+const double _kDefaultPerspective = 0.003;
+const double _kSqueeze = 1.45;
 /// Opacity fraction value that hides the wheel above and below the 'magnifier'
 /// lens with the same color as the background.
 const double _kForegroundScreenOpacityFraction = 0.7;
@@ -58,6 +61,7 @@ class CupertinoPicker extends StatefulWidget {
     this.useMagnifier = false,
     this.magnification = 1.0,
     this.scrollController,
+    this.squeeze = _kSqueeze,
     @required this.itemExtent,
     @required this.onSelectedItemChanged,
     @required List<Widget> children,
@@ -68,6 +72,8 @@ class CupertinoPicker extends StatefulWidget {
        assert(magnification > 0),
        assert(itemExtent != null),
        assert(itemExtent > 0),
+       assert(squeeze != null),
+       assert(squeeze > 0),
        childDelegate = looping
                        ? ListWheelChildLoopingListDelegate(children: children)
                        : ListWheelChildListDelegate(children: children),
@@ -98,6 +104,7 @@ class CupertinoPicker extends StatefulWidget {
     this.useMagnifier = false,
     this.magnification = 1.0,
     this.scrollController,
+    this.squeeze = _kSqueeze,
     @required this.itemExtent,
     @required this.onSelectedItemChanged,
     @required IndexedWidgetBuilder itemBuilder,
@@ -108,6 +115,8 @@ class CupertinoPicker extends StatefulWidget {
        assert(magnification > 0),
        assert(itemExtent != null),
        assert(itemExtent > 0),
+       assert(squeeze != null),
+       assert(squeeze > 0),
        childDelegate = ListWheelChildBuilderDelegate(builder: itemBuilder, childCount: childCount),
        super(key: key);
 
@@ -150,6 +159,11 @@ class CupertinoPicker extends StatefulWidget {
   /// All children will be given the [BoxConstraints] to match this exact
   /// height. Must not be null and must be positive.
   final double itemExtent;
+
+  /// {@macro flutter.rendering.wheelList.squeeze}
+  ///
+  /// Defaults to `1.45` fo visually mimic iOS.
+  final double squeeze;
 
   /// An option callback when the currently centered item changes.
   ///
@@ -313,28 +327,32 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
 
   @override
   Widget build(BuildContext context) {
-    Widget result = Stack(
-      children: <Widget>[
-        Positioned.fill(
-          child: _CupertinoPickerSemantics(
-            scrollController: widget.scrollController ?? _controller,
-            child: ListWheelScrollView.useDelegate(
-              controller: widget.scrollController ?? _controller,
-              physics: const FixedExtentScrollPhysics(),
-              diameterRatio: widget.diameterRatio,
-              perspective: _kDefaultPerspective,
-              offAxisFraction: widget.offAxisFraction,
-              useMagnifier: widget.useMagnifier,
-              magnification: widget.magnification,
-              itemExtent: widget.itemExtent,
-              onSelectedItemChanged: _handleSelectedItemChanged,
-              childDelegate: widget.childDelegate,
+    Widget result = DefaultTextStyle(
+      style: CupertinoTheme.of(context).textTheme.pickerTextStyle,
+      child: Stack(
+        children: <Widget>[
+          Positioned.fill(
+            child: _CupertinoPickerSemantics(
+              scrollController: widget.scrollController ?? _controller,
+              child: ListWheelScrollView.useDelegate(
+                controller: widget.scrollController ?? _controller,
+                physics: const FixedExtentScrollPhysics(),
+                diameterRatio: widget.diameterRatio,
+                perspective: _kDefaultPerspective,
+                offAxisFraction: widget.offAxisFraction,
+                useMagnifier: widget.useMagnifier,
+                magnification: widget.magnification,
+                itemExtent: widget.itemExtent,
+                squeeze: widget.squeeze,
+                onSelectedItemChanged: _handleSelectedItemChanged,
+                childDelegate: widget.childDelegate,
+              ),
             ),
           ),
-        ),
-        _buildGradientScreen(),
-        _buildMagnifierScreen(),
-      ],
+          _buildGradientScreen(),
+          _buildMagnifierScreen(),
+        ],
+      ),
     );
     // Adds the appropriate opacity under the magnifier if the background
     // color is transparent.
