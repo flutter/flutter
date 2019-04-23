@@ -7,7 +7,6 @@ import 'package:flutter/services.dart';
 
 import 'basic.dart';
 import 'focus_manager.dart';
-import 'focus_scope.dart';
 import 'framework.dart';
 
 export 'package:flutter/services.dart' show RawKeyEvent;
@@ -113,5 +112,5 @@ class _RawKeyboardListenerState extends State<RawKeyboardListener> {
   }
 
   @override
-  Widget build(BuildContext context) => Focus(focusNode: widget.focusNode, child: widget.child);
+  Widget build(BuildContext context) => widget.child;
 }

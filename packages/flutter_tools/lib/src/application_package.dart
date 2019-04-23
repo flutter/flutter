@@ -306,8 +306,13 @@ abstract class IOSApp extends ApplicationPackage {
   }
 
   factory IOSApp.fromIosProject(IosProject project) {
-    if (getCurrentHostPlatform() != HostPlatform.darwin_x64)
+    if (getCurrentHostPlatform() != HostPlatform.darwin_x64) {
       return null;
+    }
+    // TODO(jonahwilliams): do more verification in this check.
+    if (!project.exists) {
+      return null;
+    }
     return BuildableIOSApp(project);
   }
 
