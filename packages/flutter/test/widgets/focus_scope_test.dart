@@ -596,34 +596,36 @@ void main() {
       // This checks both FocusScopes that have their own nodes, as well as those
       // that use external nodes.
       await tester.pumpWidget(
-        Column(
-          children: <Widget>[
-            FocusScope(
-              key: scopeKeyA,
-              node: parentFocusScope,
-              child: Column(
-                children: <Widget>[
-                  TestFocus(
-                    debugLabel: 'Child A',
-                    key: keyA,
-                    name: 'a',
-                  ),
-                ],
+        DefaultFocusTraversal(
+          child: Column(
+            children: <Widget>[
+              FocusScope(
+                key: scopeKeyA,
+                node: parentFocusScope,
+                child: Column(
+                  children: <Widget>[
+                    TestFocus(
+                      debugLabel: 'Child A',
+                      key: keyA,
+                      name: 'a',
+                    ),
+                  ],
+                ),
               ),
-            ),
-            FocusScope(
-              key: scopeKeyB,
-              child: Column(
-                children: <Widget>[
-                  TestFocus(
-                    debugLabel: 'Child B',
-                    key: keyB,
-                    name: 'b',
-                  ),
-                ],
+              FocusScope(
+                key: scopeKeyB,
+                child: Column(
+                  children: <Widget>[
+                    TestFocus(
+                      debugLabel: 'Child B',
+                      key: keyB,
+                      name: 'b',
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       );
 
@@ -647,41 +649,133 @@ void main() {
       expect(WidgetsBinding.instance.focusManager.rootScope.children, isEmpty);
     });
 
-    // Arguably, this isn't correct behavior, but it is what happens now.
-    testWidgets("Removing unpinned focused scope doesn't move focus to focused widget within next FocusScope", (WidgetTester tester) async {
+    // By "pinned", it means kept in the tree by a GlobalKey.
+    testWidgets('Removing pinned focused scope moves focus to focused widget within next FocusScope', (WidgetTester tester) async {
+      final GlobalKey<TestFocusState> keyA = GlobalKey();
+      final GlobalKey<TestFocusState> keyB = GlobalKey();
+      final GlobalKey<TestFocusState> scopeKeyA = GlobalKey();
+      final GlobalKey<TestFocusState> scopeKeyB = GlobalKey();
+      final FocusScopeNode parentFocusScope1 = FocusScopeNode(debugLabel: 'Parent Scope 1');
+      final FocusScopeNode parentFocusScope2 = FocusScopeNode(debugLabel: 'Parent Scope 2');
+
+      await tester.pumpWidget(
+        DefaultFocusTraversal(
+          child: Column(
+            children: <Widget>[
+              FocusScope(
+                key: scopeKeyA,
+                node: parentFocusScope1,
+                child: Column(
+                  children: <Widget>[
+                    TestFocus(
+                      debugLabel: 'Child A',
+                      key: keyA,
+                      name: 'a',
+                    ),
+                  ],
+                ),
+              ),
+              FocusScope(
+                key: scopeKeyB,
+                node: parentFocusScope2,
+                child: Column(
+                  children: <Widget>[
+                    TestFocus(
+                      debugLabel: 'Child B',
+                      key: keyB,
+                      name: 'b',
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      FocusScope.of(keyB.currentContext).requestFocus(keyB.currentState.focusNode);
+      FocusScope.of(keyA.currentContext).requestFocus(keyA.currentState.focusNode);
+      final FocusScopeNode bScope = FocusScope.of(keyB.currentContext);
+      final FocusScopeNode aScope = FocusScope.of(keyA.currentContext);
+      WidgetsBinding.instance.focusManager.rootScope.setFirstFocus(bScope);
+      WidgetsBinding.instance.focusManager.rootScope.setFirstFocus(aScope);
+
+      await tester.pumpAndSettle();
+
+      expect(FocusScope.of(keyA.currentContext).isFirstFocus, isTrue);
+      expect(keyA.currentState.focusNode.hasFocus, isTrue);
+      expect(find.text('A FOCUSED'), findsOneWidget);
+      expect(keyB.currentState.focusNode.hasFocus, isFalse);
+      expect(find.text('b'), findsOneWidget);
+
+      // Since the FocusScope widgets are pinned with GlobalKeys, when the first
+      // one gets removed, the second one stays registered with the focus
+      // manager and ends up getting the focus since it remains as part of the
+      // focus tree.
+      await tester.pumpWidget(
+        DefaultFocusTraversal(
+          child: Column(
+            children: <Widget>[
+              FocusScope(
+                key: scopeKeyB,
+                node: parentFocusScope2,
+                child: Column(
+                  children: <Widget>[
+                    TestFocus(
+                      key: keyB,
+                      name: 'b',
+                      autofocus: true,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      await tester.pump();
+
+      expect(keyB.currentState.focusNode.hasFocus, isTrue);
+      expect(find.text('B FOCUSED'), findsOneWidget);
+    });
+
+    testWidgets('Removing unpinned focused scope moves focus to focused widget within next FocusScope', (WidgetTester tester) async {
       final GlobalKey<TestFocusState> keyA = GlobalKey();
       final GlobalKey<TestFocusState> keyB = GlobalKey();
       final FocusScopeNode parentFocusScope1 = FocusScopeNode(debugLabel: 'Parent Scope 1');
       final FocusScopeNode parentFocusScope2 = FocusScopeNode(debugLabel: 'Parent Scope 2');
 
       await tester.pumpWidget(
-        Column(
-          children: <Widget>[
-            FocusScope(
-              node: parentFocusScope1,
-              child: Column(
-                children: <Widget>[
-                  TestFocus(
-                    debugLabel: 'Child A',
-                    key: keyA,
-                    name: 'a',
-                  ),
-                ],
+        DefaultFocusTraversal(
+          child: Column(
+            children: <Widget>[
+              FocusScope(
+                node: parentFocusScope1,
+                child: Column(
+                  children: <Widget>[
+                    TestFocus(
+                      debugLabel: 'Child A',
+                      key: keyA,
+                      name: 'a',
+                    ),
+                  ],
+                ),
               ),
-            ),
-            FocusScope(
-              node: parentFocusScope2,
-              child: Column(
-                children: <Widget>[
-                  TestFocus(
-                    debugLabel: 'Child B',
-                    key: keyB,
-                    name: 'b',
-                  ),
-                ],
+              FocusScope(
+                node: parentFocusScope2,
+                child: Column(
+                  children: <Widget>[
+                    TestFocus(
+                      debugLabel: 'Child B',
+                      key: keyB,
+                      name: 'b',
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       );
 
@@ -705,27 +799,29 @@ void main() {
       // "B" test widget, and in the process, the focus manager loses track of the
       // focus.
       await tester.pumpWidget(
-        Column(
-          children: <Widget>[
-            FocusScope(
-              node: parentFocusScope2,
-              child: Column(
-                children: <Widget>[
-                  TestFocus(
-                    key: keyB,
-                    name: 'b',
-                    autofocus: true,
-                  ),
-                ],
+        DefaultFocusTraversal(
+          child: Column(
+            children: <Widget>[
+              FocusScope(
+                node: parentFocusScope2,
+                child: Column(
+                  children: <Widget>[
+                    TestFocus(
+                      key: keyB,
+                      name: 'b',
+                      autofocus: true,
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       );
       await tester.pump();
 
-      expect(keyB.currentState.focusNode.hasFocus, isFalse);
-      expect(find.text('b'), findsOneWidget);
+      expect(keyB.currentState.focusNode.hasFocus, isTrue);
+      expect(find.text('B FOCUSED'), findsOneWidget);
     });
 
     testWidgets('Moving widget from one scope to another retains focus', (WidgetTester tester) async {

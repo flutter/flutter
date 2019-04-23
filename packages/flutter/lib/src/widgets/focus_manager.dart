@@ -11,6 +11,7 @@ import 'package:flutter/services.dart';
 
 import 'binding.dart';
 import 'focus_scope.dart';
+import 'focus_traversal.dart';
 import 'framework.dart';
 
 /// Signature of a callback used by [Focus.onKey] and [FocusScope.onKey]
@@ -191,6 +192,24 @@ class FocusAttachment {
 /// [FocusManager.rootScope], the event is discarded.
 /// {@endtemplate}
 ///
+/// ## Focus Traversal
+///
+/// To give focus to the logical _next_ or _previous_ widget in the UI, consider
+/// calling the [nextFocus], [previousFocus], and [focusInDirection] methods.
+///
+/// The policy for what the _next_ or _previous_ widget is, or the widget in a
+/// particular direction, is determined by the [FocusTraversalPolicy] in force.
+///
+/// The ambient policy is determined by looking up the widget hierarchy for a
+/// [DefaultFocusTraversal] widget, and obtaining the focus traversal policy
+/// from it. Different focus nodes can have difference policies, so part of the
+/// app can go in widget order, and part can go in reading order, depending upon
+/// the use case.
+///
+/// Predefined policies include [WidgetOrderFocusTraversalPolicy],
+/// [ReadingOrderTraversalPolicy], and [DirectionalFocusTraversalPolicyMixin],
+/// but custom policies can be built based upon these policies.
+///
 /// {@tool snippet --template=stateless_widget_scaffold}
 /// This example shows how a FocusNode should be managed if not using the
 /// [Focus] or [FocusScope] widgets. See the [Focus] widget for a similar
@@ -304,6 +323,10 @@ class FocusAttachment {
 ///     widget tree.
 ///   * [FocusManager], a singleton that manages the focus and distributes key
 ///     events to focused nodes.
+///   * [FocusTraversalPolicy], a class used to determine how to move the focus
+///     to other nodes.
+///   * [DefaultFocusTraversal], a widget used to configure the default focus
+///     traversal policy for a widget subtree.
 class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// Creates a focus node.
   ///
@@ -632,6 +655,12 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     notifyListeners();
   }
 
+  /// Requests that this node is focused from a [FocusTraversalPolicy].
+  ///
+  /// The only difference between this and [requestFocus] is that the policy data
+  /// is not cleared.
+  void requestFocusFromPolicy() => _doRequestFocus(isFromPolicy: true);
+
   /// Requests the primary focus for this node, or for a supplied [node], which
   /// will also give focus to its [ancestors].
   ///
@@ -668,6 +697,9 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     if (hasPrimaryFocus) {
       return;
     }
+    if (!isFromPolicy) {
+      enclosingScope?.policyData = null;
+    }
     _hasKeyboardToken = true;
     _markAsDirty(newFocus: this);
   }
@@ -690,6 +722,18 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
       scopeFocus = ancestor;
     }
   }
+
+  /// Request that the widget move the focus to the next focus node, by
+  /// calling the [FocusTraversalPolicy.next] method.
+  bool nextFocus() => DefaultFocusTraversal.of(context).next(this);
+
+  /// Request that the widget move the focus to the previous focus node, by
+  /// calling the [FocusTraversalPolicy.previous] method.
+  bool previousFocus() => DefaultFocusTraversal.of(context).previous(this);
+
+  /// Request that the widget move the focus to the previous focus node, by
+  /// calling the [FocusTraversalPolicy.inDirection] method.
+  bool focusInDirection(TraversalDirection direction) => DefaultFocusTraversal.of(context).inDirection(this, direction);
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -770,6 +814,17 @@ class FocusScopeNode extends FocusNode {
   // last (which is the top of the stack).
   final List<FocusNode> _focusedChildren = <FocusNode>[];
 
+  @override
+  void _reparent(FocusNode child) {
+    final FocusScopeNode previousEnclosingScope = child.enclosingScope;
+    super._reparent(child);
+    final FocusScopeNode currentEnclosingScope = child.enclosingScope;
+    // If the child moved scopes, then the policy data is invalid.
+    if (previousEnclosingScope != currentEnclosingScope) {
+      policyData = null;
+    }
+  }
+
   /// Make the given [scope] the active child scope for this scope.
   ///
   /// If the given [scope] is not yet a part of the focus tree, then add it to
@@ -823,13 +878,35 @@ class FocusScopeNode extends FocusNode {
       primaryFocus = scope.focusedChild;
     }
     if (primaryFocus is FocusScopeNode) {
+      if (!isFromPolicy) {
+        primaryFocus.policyData = null;
+      }
       // We didn't find a FocusNode at the leaf, so we're focusing the scope.
       _setAsFocusedChild();
       _markAsDirty(newFocus: primaryFocus);
     } else {
-      primaryFocus.requestFocus();
+      // We found a FocusScope at the leaf, so ask it to focus itself instead of
+      // this scope. That will cause this scope to return true from hasFocus,
+      // but false from hasPrimaryFocus.
+      if (isFromPolicy) {
+        primaryFocus.requestFocusFromPolicy();
+      } else {
+        primaryFocus.requestFocus();
+      }
     }
   }
+
+  /// Holds the [PolicyData] used by the scope's [FocusTraversalPolicy].
+  ///
+  /// This is set on scope nodes by the traversal policy to keep data that it
+  /// may need later.  For instance, the last focused node in a direction is
+  /// kept here so that directional navigation can avoid hysteresis when
+  /// returning in the direction it just came from.
+  ///
+  /// This data will be cleared if the node moves to another scope, or if the
+  /// focus is set using [requestFocus] instead of [requestFocusFromPolicy]. The
+  /// [policyData] is meant to be short-lived and disposable.
+  Object policyData;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -956,7 +1033,9 @@ class FocusManager with DiagnosticableTreeMixin {
     _haveScheduledUpdate = false;
     final FocusNode previousFocus = _currentFocus;
     if (_currentFocus == null && _nextFocus == null) {
-      _nextFocus = rootScope;
+      // If we don't have any current focus, and nobody has asked to focus yet,
+      // then pick a first one using widget order as a default.
+      _nextFocus = const WidgetOrderFocusTraversalPolicy().findFirstFocus(rootScope);
     }
     if (_nextFocus != null && _nextFocus != _currentFocus) {
       _currentFocus = _nextFocus;

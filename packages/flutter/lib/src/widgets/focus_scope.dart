@@ -132,6 +132,10 @@ import 'inherited_notifier.dart';
 ///     traversal.
 ///   * [FocusManager], a singleton that manages the primary focus and
 ///     distributes key events to focused nodes.
+///   * [FocusTraversalPolicy], an object used to determine how to move the
+///     focus to other nodes.
+///   * [DefaultFocusTraversal], a widget used to configure the default focus
+///     traversal policy for a widget subtree.
 class Focus extends StatefulWidget {
   /// Creates a widget that manages a [FocusNode].
   ///
@@ -375,6 +379,21 @@ class _FocusState extends State<Focus> {
 /// more information about the details of what node management entails if not
 /// using a [FocusScope] widget.
 ///
+/// [FocusScopeNode]s group together their children, using the
+/// [FocusTraversalPolicy] defined by the nearest enclosing
+/// [DefaultFocusTraversal] widget above them in the widget hierarchy to
+/// traverse their children.
+///
+/// [FocusScopeNode]s remember the last [FocusNode] that was focused within
+/// their descendants, and can move that focus to the next/previous node, or a
+/// node in a particular direction when the [FocusNode.nextFocus],
+/// [FocusNode.previousFocus], or [FocusNode.focusInDirection] are called on a
+/// [FocusNode] or [FocusScopeNode].
+///
+/// To manipulate the focus traversal, use methods on [FocusScopeNode]. For
+/// instance, to move the focus to the next node, call
+/// `Focus.of(context).nextFocus()`.
+///
 /// See also:
 ///
 ///   * [FocusScopeNode], which represents a scope node in the focus hierarchy.
@@ -384,6 +403,10 @@ class _FocusState extends State<Focus> {
 ///     managing focus without having to manage the node.
 ///   * [FocusManager], a singleton that manages the focus and distributes key
 ///     events to focused nodes.
+///   * [FocusTraversalPolicy], an object used to determine how to move the
+///     focus to other nodes.
+///   * [DefaultFocusTraversal], a widget used to configure the default focus
+///     traversal policy for a widget subtree.
 class FocusScope extends Focus {
   /// Creates a widget that manages a [FocusScopeNode].
   ///
