@@ -1242,6 +1242,12 @@ class TransformLayer extends OffsetLayer {
 /// When debugging, setting [debugDisableOpacityLayers] to true will cause this
 /// layer to be skipped (directly replaced by its children). This can be helpful
 /// to track down the cause of performance problems.
+///
+// Try to avoid an [OpacityLayer] with no children. Painting an [OpacityLayer]
+// in the Flutter engine is very costly due to the creation of an offscreen
+// buffer and render target switches. If there's no child, having the
+// OpacityLayer or not has the same effect. If [OpacityLayer] has no child, its
+// [addToScene] will skip pushing it to the engine.
 class OpacityLayer extends ContainerLayer {
   /// Creates an opacity layer.
   ///
