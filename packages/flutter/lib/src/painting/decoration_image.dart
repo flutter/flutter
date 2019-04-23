@@ -154,6 +154,10 @@ class DecorationImage {
   @override
   int get hashCode => hashValues(image, colorFilter, fit, alignment, centerSlice, repeat, matchTextDirection);
 
+  ImageProvider getImage() {
+    return image;
+  }
+
   @override
   String toString() {
     final List<String> properties = <String>[];
@@ -194,6 +198,7 @@ class DecorationImagePainter {
 
   ImageStream _imageStream;
   ImageInfo _image;
+  ImageProvider _imageProvider;
 
   /// Draw the image onto the given canvas.
   ///
@@ -236,8 +241,8 @@ class DecorationImagePainter {
         flipHorizontally = true;
     }
 
-    final ImageStream newImageStream = _details.image.resolve(configuration);
-    if (newImageStream.key != _imageStream?.key) {
+    if ((_imageStream == null || _imageStream.key == null) || (_imageProvider.hashCode != _details.getImage().hashCode)) {
+      final ImageStream newImageStream = _details.image.resolve(configuration);
       _imageStream?.removeListener(_imageListener);
       _imageStream = newImageStream;
       _imageStream.addListener(_imageListener);
