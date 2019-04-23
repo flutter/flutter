@@ -462,7 +462,8 @@ void main() {
     );
 
     final TapGestureRecognizer tap = TapGestureRecognizer();
-    final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer();
+    final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer()
+      ..onStart = (_) {}; // Need a callback to compete
 
     final List<String> recognized = <String>[];
     tap.onTapDown = (_) {
@@ -647,6 +648,9 @@ void main() {
         }
         ..onTapUp = (TapUpDetails details) {
           recognized.add('primaryUp');
+        }
+        ..onTapCancel = () {
+          recognized.add('primaryCancel');
         };
       primary2 = TapGestureRecognizer()
         ..onTapDown = (TapDownDetails details) {
@@ -654,6 +658,9 @@ void main() {
         }
         ..onTapUp = (TapUpDetails details) {
           recognized.add('primary2Up');
+        }
+        ..onTapCancel = () {
+          recognized.add('primary2Cancel');
         };
       secondary = TapGestureRecognizer()
         ..onSecondaryTapDown = (TapDownDetails details) {
@@ -661,6 +668,9 @@ void main() {
         }
         ..onSecondaryTapUp = (TapUpDetails details) {
           recognized.add('secondaryUp');
+        }
+        ..onSecondaryTapCancel = () {
+          recognized.add('secondaryCancel');
         };
     });
 
@@ -681,11 +691,10 @@ void main() {
       recognized.clear();
 
       tester.route(up1);
-      GestureBinding.instance.gestureArena.sweep(1);
       expect(recognized, <String>['primaryUp']);
     });
 
-    testGesture('A primary tap recognizer forms competion with a primary tap recognizer', (GestureTester tester) {
+    testGesture('A primary tap recognizer forms competion with another primary tap recognizer', (GestureTester tester) {
       primary.addPointer(down1);
       primary2.addPointer(down1);
       tester.closeArena(1);
@@ -695,11 +704,6 @@ void main() {
 
       tester.async.elapse(const Duration(milliseconds: 500));
       expect(recognized, <String>['primaryDown 1', 'primary2Down 1']);
-      recognized.clear();
-
-      tester.route(up1);
-      GestureBinding.instance.gestureArena.sweep(1);
-      expect(recognized, <String>['primaryUp', 'primary2Cancel']);
     });
   });
 
