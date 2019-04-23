@@ -384,12 +384,12 @@ Future<XcodeBuildResult> buildXcodeProject({
       ],
       properties: <String, String>{},
     );
-    // TODO(jonahwilliams): re-enable once this can be proved correct.
+
     final bool didPodInstall = await cocoaPods.processPods(
       iosProject: project.ios,
       iosEngineDir: flutterFrameworkDir(buildInfo.mode),
       isSwift: project.ios.isSwift,
-      dependenciesChanged: true,
+      dependenciesChanged: !await fingerprinter.doesFingerprintMatch(),
     );
     if (didPodInstall)
       await fingerprinter.writeFingerprint();
