@@ -57,7 +57,6 @@ class DeviceManager {
   }
 
   String _specifiedDeviceId;
-  FlutterProject _flutterProject;
 
   /// A user-specified device ID.
   String get specifiedDeviceId {
@@ -70,30 +69,12 @@ class DeviceManager {
     _specifiedDeviceId = id;
   }
 
-  /// Filters the set of devices to those supported by the current project.
-  set specifiedFlutterProject(FlutterProject value) {
-    _flutterProject = value;
-  }
-
   /// True when the user has specified a single specific device.
   bool get hasSpecifiedDeviceId => specifiedDeviceId != null;
-
-  /// True when the user has specified a specific flutter project.
-  bool get hasSpecifiedFlutterProject => _flutterProject != null;
 
   /// True when the user has specified all devices by setting
   /// specifiedDeviceId = 'all'.
   bool get hasSpecifiedAllDevices => _specifiedDeviceId == 'all';
-
-  /// Filter the set of active devices into those supported by the current
-  /// project.
-  Stream<Device> getDevicesByProject(FlutterProject flutterProject) async* {
-    await for (Device device in getAllConnectedDevices()) {
-      if (device.isSupportedForProject(flutterProject)) {
-        yield device;
-      }
-    }
-  }
 
   Stream<Device> getDevicesById(String deviceId) async* {
     final List<Device> devices = await getAllConnectedDevices().toList();
@@ -119,13 +100,9 @@ class DeviceManager {
 
   /// Return the list of connected devices, filtered by any user-specified device id.
   Stream<Device> getDevices() {
-    if (hasSpecifiedDeviceId) {
-      return getDevicesById(specifiedDeviceId);
-    }
-    if (hasSpecifiedFlutterProject) {
-      return getDevicesByProject(_flutterProject);
-    }
-    return getAllConnectedDevices();
+    return hasSpecifiedDeviceId
+        ? getDevicesById(specifiedDeviceId)
+        : getAllConnectedDevices();
   }
 
   Iterable<DeviceDiscovery> get _platformDiscoverers {

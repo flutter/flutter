@@ -148,9 +148,6 @@ This is sent when an app is stopped or detached from. The `params` field will be
 
 Return a list of all connected devices. The `params` field will be a List; each item is a map with the fields `id`, `name`, `platform`, and `emulator` (a boolean).
 
-a `projectDirectory` field containing the path to the project root can optionally
-be provided. This will filter the list of devices to those that are supported by the current project. This is defined by the method `Device.isSupportedForProject`.
-
 #### device.enable
 
 Turn on device polling. This will poll for newly connected devices, and fire `device.added` and `device.removed` events.

@@ -368,11 +368,6 @@ class RunCommand extends RunCommandBase {
     final FlutterProject flutterProject = await FlutterProject.current();
     final String applicationBinaryPath = argResults['use-application-binary'];
     for (Device device in devices) {
-      // Filter out the list of supported devices if the project does not
-      // not support it and we're not running from an application binary.
-      if (!device.isSupportedForProject(flutterProject) && applicationBinaryPath == null) {
-        continue;
-      }
       final FlutterDevice flutterDevice = await FlutterDevice.create(
         device,
         flutterProject: flutterProject,

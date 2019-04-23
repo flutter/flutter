@@ -527,6 +527,13 @@ abstract class FlutterCommand extends Command<void> {
     }
 
     devices = devices.where((Device device) => device.isSupported()).toList();
+    // If the user has not specified all devices and has multiple connected
+    // then filter then list by those supported in the current project. If
+    // this ends up with a single device we can proceed as normal.
+    if (devices.length > 1 && !deviceManager.hasSpecifiedAllDevices && !deviceManager.hasSpecifiedDeviceId) {
+      final FlutterProject flutterProject = await FlutterProject.current();
+      devices.removeWhere((Device device) => !device.isSupportedForProject(flutterProject));
+    }
 
     if (devices.isEmpty) {
       printStatus(userMessages.flutterNoSupportedDevices);

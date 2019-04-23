@@ -614,22 +614,11 @@ class DeviceDomain extends Domain {
 
   /// Return a list of the current devices, with each device represented as a map
   /// of properties (id, name, platform, ...).
-  ///
-  /// Optionally takes a directory path, which will filter down the list of
-  /// devices to only those supported by the current project.
   Future<List<Map<String, dynamic>>> getDevices([ Map<String, dynamic> args ]) async {
     final List<Map<String, dynamic>> devicesInfo = <Map<String, dynamic>>[];
 
-    FlutterProject flutterProject;
-    if (args.containsKey('projectDirectory')) {
-      final Directory projectDirectory = fs.directory(args['projectDirectory']);
-      flutterProject = await FlutterProject.fromDirectory(projectDirectory);
-    }
     for (PollingDeviceDiscovery discoverer in _discoverers) {
       for (Device device in await discoverer.devices) {
-        if (flutterProject != null && !device.isSupportedForProject(flutterProject)) {
-          continue;
-        }
         devicesInfo.add(await _deviceToMap(device));
       }
     }
