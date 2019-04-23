@@ -8,13 +8,14 @@ import 'theme.dart';
 
 /// Coordinates tab selection between a [CupertinoTabBar] and a [CupertinoTabScaffold].
 ///
-/// The [index] property is the index of the selected tab. Changing its value updates
-/// the actively displayed tab of the [CupertinoTabScaffold] the [CupertinoTabController] controls,
-/// as well as the currently selected tab item of its [CupertinoTabBar].
+/// The [index] property is the index of the selected tab. Changing its value
+/// updates the actively displayed tab of the [CupertinoTabScaffold] the
+/// [CupertinoTabController] controls, as well as the currently selected tab item of
+/// its [CupertinoTabBar].
 ///
 /// {@tool sample}
 ///
-/// [CupertinoTabController] can be used to switch tabs from ancestor widgets:
+/// [CupertinoTabController] can be used to switch tabs:
 ///
 /// ```dart
 /// class MyCupertinoTabScaffoldPage extends StatefulWidget {
@@ -49,12 +50,15 @@ import 'theme.dart';
 /// {@end-tool}
 ///
 /// See also:
-/// * [CupertinoTabScaffold], a tabbed application root layout that can be controlled by a [CupertinoTabController].
+///
+/// * [CupertinoTabScaffold], a tabbed application root layout that can be
+///   controlled by a [CupertinoTabController].
 class CupertinoTabController extends ChangeNotifier {
-  /// Creates a [CupertinoTabController] to control the tab index of [CupertinoTabScaffold] and [CupertinoTabBar].
+  /// Creates a [CupertinoTabController] to control the tab index of [CupertinoTabScaffold]
+  /// and [CupertinoTabBar].
   ///
-  /// The [initialIndex] must not be null and defaults to 0. The value must be greater than or equal to 0,
-  /// and less than the total number of tabs.
+  /// The [initialIndex] must not be null and defaults to 0. The value must be
+  /// greater than or equal to 0, and less than the total number of tabs.
   CupertinoTabController({ int initialIndex = 0 })
     : assert(initialIndex != null && initialIndex >= 0),
       _index = initialIndex;
@@ -62,8 +66,8 @@ class CupertinoTabController extends ChangeNotifier {
   int _index;
   /// The index of the currently selected tab. Changing the value of [index]
   /// updates the actively displayed tab of the [CupertinoTabScaffold]
-  /// controlled by this [CupertinoTabController], as well as the currently selected tab item
-  /// of its [CupertinoTabScaffold.tabBar].
+  /// controlled by this [CupertinoTabController], as well as the currently
+  /// selected tab item of its [CupertinoTabScaffold.tabBar].
   ///
   /// The value must be greater than or equal to 0,
   /// and less than the total number of tabs.
@@ -255,9 +259,9 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
 
   void _updateTabController() {
     final CupertinoTabController newController =
-      // User provided a new controller, update [_controller] with it.
+      // User provided a new controller, update `_controller` with it.
       widget.controller
-      // Always create this [_CupertinoTabScaffoldState]'s own controller,
+      // Always create this `_CupertinoTabScaffoldState`'s own controller,
       // if oldWidget.controller != null && widget.controller == null
       ?? CupertinoTabController(initialIndex: widget.tabBar.currentIndex);
 
@@ -272,15 +276,17 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
 
   void _onCurrentIndexChange() {
     assert(() {
-        if (_controller.index < 0 || _controller.index >= widget.tabBar.items.length) {
-          throw FlutterError(
-            "The CupertinoTabController's current index ${_controller.index} is"
-            'out of bounds for the tab bar with ${widget.tabBar.items.length} tabs'
-          );
-        }
-        return true;
+      if (_controller.index < 0 || _controller.index >= widget.tabBar.items.length) {
+        throw FlutterError(
+          "The CupertinoTabController's current index ${_controller.index} is "
+          'out of bounds for the tab bar with ${widget.tabBar.items.length} tabs'
+        );
+      }
+      return true;
       }());
 
+    // The value of `_controller.index` has already been updated at this point.
+    // Calling `setState` to rebuild using the new index.
     setState(() {});
   }
 

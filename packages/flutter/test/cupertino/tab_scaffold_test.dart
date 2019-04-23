@@ -503,7 +503,8 @@ void main() {
   });
 
   testWidgets('If a controller is initially provided then the parent stops doing so for rebuilds, '
-              'a new instance of CupertinoTabController should be created and used by the widget',
+              'a new instance of CupertinoTabController should be created and used by the widget, '
+              "while preserving the previous controller's tab index",
     (WidgetTester tester) async {
       final List<int> tabsPainted = <int>[];
       final CupertinoTabController oldController = CupertinoTabController(initialIndex: 0);
