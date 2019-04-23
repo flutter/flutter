@@ -231,6 +231,9 @@ class IosProject {
   /// True, if the parent Flutter project is a module project.
   bool get isModule => parent.isModule;
 
+  /// Whether the flutter application has an iOS project.
+  bool get exists => hostAppRoot.existsSync();
+
   /// The xcode config file for [mode].
   File xcodeConfigFor(String mode) => _flutterLibRoot.childDirectory('Flutter').childFile('$mode.xcconfig');
 
