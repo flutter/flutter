@@ -600,74 +600,6 @@ void main() {
     drag.dispose();
   });
 
-  group('Recognizers listening on different buttons do not form competition:', () {
-    // This test is assisted by tap recognizers. If a tap gesture has
-    // no competing recognizers, a pointer down event triggers its onTapDown
-    // immediately; if there are competitors, onTapDown is triggered after a
-    // timeout.
-    // The following tests make sure that drag recognizers do not form
-    // competition with a tap gesture recognizer listening on a different button.
-
-    final List<String> recognized = <String>[];
-    TapGestureRecognizer tapPrimary;
-    TapGestureRecognizer tapSecondary;
-    PanGestureRecognizer pan;
-    setUp(() {
-      tapPrimary = TapGestureRecognizer()
-        ..onTapDown = (TapDownDetails details) {
-          recognized.add('tapPrimary');
-        };
-      tapSecondary = TapGestureRecognizer()
-        ..onSecondaryTapDown = (TapDownDetails details) {
-          recognized.add('tapSecondary');
-        };
-      pan = PanGestureRecognizer()
-        ..onStart = (_) {
-          recognized.add('drag');
-        };
-    });
-
-    tearDown(() {
-      recognized.clear();
-      tapPrimary.dispose();
-      tapSecondary.dispose();
-      pan.dispose();
-    });
-
-    testGesture('A primary pan recognizer does not form competion with a secondary tap recognizer', (GestureTester tester) {
-      final TestPointer pointer = TestPointer(
-        1,
-        PointerDeviceKind.touch,
-        kSecondaryButton,
-      );
-      final PointerDownEvent down = pointer.down(const Offset(10, 10));
-      pan.addPointer(down);
-      tapSecondary.addPointer(down);
-      tester.closeArena(down.pointer);
-
-      tester.route(down);
-      expect(recognized, <String>['tapSecondary']);
-    });
-
-    testGesture('A primary pan recognizer forms competion with a primary tap recognizer', (GestureTester tester) {
-      final TestPointer pointer = TestPointer(
-        1,
-        PointerDeviceKind.touch,
-        kPrimaryButton,
-      );
-      final PointerDownEvent down = pointer.down(const Offset(10, 10));
-      pan.addPointer(down);
-      tapPrimary.addPointer(down);
-      tester.closeArena(down.pointer);
-
-      tester.route(down);
-      expect(recognized, <String>[]);
-
-      tester.route(pointer.up());
-      expect(recognized, <String>['tapPrimary']);
-    });
-  });
-
   group('Enforce consistent-button restriction:', () {
     PanGestureRecognizer pan;
     TapGestureRecognizer tap;
@@ -805,80 +737,114 @@ void main() {
     });
   });
 
-  group('Dispatch to different callbacks per buttons:', () {
+  group('Recognizers listening on different buttons do not form competition:', () {
+    // This test is assisted by tap recognizers. If a tap gesture has
+    // no competing recognizers, a pointer down event triggers its onTapDown
+    // immediately; if there are competitors, onTapDown is triggered after a
+    // timeout.
+    // The following tests make sure that drag recognizers do not form
+    // competition with a tap gesture recognizer listening on a different button.
+
     final List<String> recognized = <String>[];
+    TapGestureRecognizer tapPrimary;
+    TapGestureRecognizer tapSecondary;
     PanGestureRecognizer pan;
-    TapGestureRecognizer tap;
     setUp(() {
-      tap = TapGestureRecognizer()
-        ..onTap = () {}; // Need a listener to enable competetion.
+      tapPrimary = TapGestureRecognizer()
+        ..onTapDown = (TapDownDetails details) {
+          recognized.add('tapPrimary');
+        };
+      tapSecondary = TapGestureRecognizer()
+        ..onSecondaryTapDown = (TapDownDetails details) {
+          recognized.add('tapSecondary');
+        };
       pan = PanGestureRecognizer()
-        ..onDown = (DragDownDetails details) {
-          recognized.add('primaryDown ${details.buttons}');
-        }
-        ..onStart = (DragStartDetails details) {
-          recognized.add('primaryStart ${details.buttons}');
-        }
-        ..onUpdate = (DragUpdateDetails details) {
-          recognized.add('primaryUpdate ${details.buttons}');
-        }
-        ..onEnd = (DragEndDetails details) {
-          recognized.add('primaryEnd ${details.buttons}');
-        }
-        ..onCancel = () {
-          recognized.add('primaryCancel');
+        ..onStart = (_) {
+          recognized.add('drag');
         };
     });
 
     tearDown(() {
+      recognized.clear();
+      tapPrimary.dispose();
+      tapSecondary.dispose();
       pan.dispose();
-      tap.dispose();
-      recognized.clear();
     });
 
-    testGesture('A primary drag should trigger primary', (GestureTester tester) {
+    testGesture('A primary pan recognizer does not form competion with a secondary tap recognizer', (GestureTester tester) {
       final TestPointer pointer = TestPointer(
-        5,
-        PointerDeviceKind.touch,
-        kPrimaryButton,
-      );
-      final PointerDownEvent down = pointer.down(const Offset(10.0, 10.0));
-      pan.addPointer(down);
-      tap.addPointer(down);
-      tester.closeArena(5);
-      tester.route(down);
-      expect(recognized, <String>['primaryDown 1']);
-      recognized.clear();
-
-      tester.route(pointer.move(const Offset(20.0, 30.0)));
-      expect(recognized, <String>['primaryStart 1']);
-      recognized.clear();
-
-      tester.route(pointer.move(const Offset(20.0, 25.0)));
-      expect(recognized, <String>['primaryUpdate 1']);
-      recognized.clear();
-
-      tester.route(pointer.up());
-      expect(recognized, <String>['primaryEnd 1']);
-      recognized.clear();
-    });
-
-    testGesture('A secondary drag should not trigger primary', (GestureTester tester) {
-      final TestPointer pointer = TestPointer(
-        5,
+        1,
         PointerDeviceKind.touch,
         kSecondaryButton,
       );
-      final PointerDownEvent down = pointer.down(const Offset(10.0, 10.0));
+      final PointerDownEvent down = pointer.down(const Offset(10, 10));
       pan.addPointer(down);
-      tap.addPointer(down);
-      tester.closeArena(5);
+      tapSecondary.addPointer(down);
+      tester.closeArena(down.pointer);
+
       tester.route(down);
-      tester.route(pointer.move(const Offset(20.0, 30.0)));
-      tester.route(pointer.move(const Offset(20.0, 25.0)));
-      tester.route(pointer.up());
-      expect(recognized, <String>[]);
-      recognized.clear();
+      expect(recognized, <String>['tapSecondary']);
     });
+
+    testGesture('A primary pan recognizer forms competion with a primary tap recognizer', (GestureTester tester) {
+      final TestPointer pointer = TestPointer(
+        1,
+        PointerDeviceKind.touch,
+        kPrimaryButton,
+      );
+      final PointerDownEvent down = pointer.down(const Offset(10, 10));
+      pan.addPointer(down);
+      tapPrimary.addPointer(down);
+      tester.closeArena(down.pointer);
+
+      tester.route(down);
+      expect(recognized, <String>[]);
+
+      tester.route(pointer.up());
+      expect(recognized, <String>['tapPrimary']);
+    });
+  });
+
+  testGesture('A secondary drag should not trigger primary', (GestureTester tester) {
+    final List<String> recognized = <String>[];
+    final TapGestureRecognizer tap = TapGestureRecognizer()
+      ..onTap = () {}; // Need a listener to enable competetion.
+    final PanGestureRecognizer pan = PanGestureRecognizer()
+      ..onDown = (DragDownDetails details) {
+        recognized.add('primaryDown ${details.buttons}');
+      }
+      ..onStart = (DragStartDetails details) {
+        recognized.add('primaryStart ${details.buttons}');
+      }
+      ..onUpdate = (DragUpdateDetails details) {
+        recognized.add('primaryUpdate ${details.buttons}');
+      }
+      ..onEnd = (DragEndDetails details) {
+        recognized.add('primaryEnd ${details.buttons}');
+      }
+      ..onCancel = () {
+        recognized.add('primaryCancel');
+      };
+
+    final TestPointer pointer = TestPointer(
+      5,
+      PointerDeviceKind.touch,
+      kSecondaryButton,
+    );
+
+    final PointerDownEvent down = pointer.down(const Offset(10.0, 10.0));
+    pan.addPointer(down);
+    tap.addPointer(down);
+    tester.closeArena(5);
+    tester.route(down);
+    tester.route(pointer.move(const Offset(20.0, 30.0)));
+    tester.route(pointer.move(const Offset(20.0, 25.0)));
+    tester.route(pointer.up());
+    expect(recognized, <String>[]);
+    recognized.clear();
+
+    pan.dispose();
+    tap.dispose();
+    recognized.clear();
   });
 }

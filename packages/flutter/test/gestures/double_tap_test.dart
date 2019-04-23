@@ -619,7 +619,7 @@ void main() {
     tap.dispose();
   });
 
-  group('Enforce consistent-button restriction for onAnyDoubleTap:', () {
+  group('Enforce consistent-button restriction:', () {
     testGesture('Button change should interrupt existing sequence', (GestureTester tester) {
       // Down1 -> down6 (different button from 1) -> down2 (same button as 1)
       // Down1 and down2 could've been a double tap, but is interrupted by down 6.
@@ -631,7 +631,7 @@ void main() {
       final DoubleTapGestureRecognizer tap = DoubleTapGestureRecognizer();
 
       bool doubleTapRecognized = false;
-      tap.onAnyDoubleTapUp = (DoubleTapUpDetails details) {
+      tap.onDoubleTap = () {
         doubleTapRecognized = true;
       };
 
@@ -673,7 +673,7 @@ void main() {
       final DoubleTapGestureRecognizer tap = DoubleTapGestureRecognizer();
 
       bool doubleTapRecognized = false;
-      tap.onAnyDoubleTapUp = (DoubleTapUpDetails details) {
+      tap.onDoubleTap = () {
         doubleTapRecognized = true;
       };
 
@@ -706,146 +706,95 @@ void main() {
     });
   });
 
-  group('Dispatch to different callbacks per buttons:', () {
+  group('Recognizers listening on different buttons do not form competition:', () {
+    // This test is assisted by tap recognizers. If a tap gesture has
+    // no competing recognizers, a pointer down event triggers its onTapDown
+    // immediately; if there are competitors, onTapDown is triggered after a
+    // timeout.
+    // The following tests make sure that double tap recognizers do not form
+    // competition with a tap gesture recognizer listening on a different button.
+
     final List<String> recognized = <String>[];
+    TapGestureRecognizer tapPrimary;
+    TapGestureRecognizer tapSecondary;
     DoubleTapGestureRecognizer doubleTap;
     setUp(() {
+      tapPrimary = TapGestureRecognizer()
+        ..onTapDown = (TapDownDetails details) {
+          recognized.add('tapPrimary');
+        };
+      tapSecondary = TapGestureRecognizer()
+        ..onSecondaryTapDown = (TapDownDetails details) {
+          recognized.add('tapSecondary');
+        };
       doubleTap = DoubleTapGestureRecognizer()
-        ..onAnyDoubleTapUp = (DoubleTapUpDetails details) {
-          recognized.add('anyUp ${details.buttons}');
-        }
         ..onDoubleTap = () {
-          recognized.add('primary');
+          recognized.add('doubleTap');
         };
     });
 
     tearDown(() {
       recognized.clear();
+      tapPrimary.dispose();
+      tapSecondary.dispose();
       doubleTap.dispose();
     });
 
-    testGesture('A primary double tap should trigger any and primary', (GestureTester tester) {
-      doubleTap.addPointer(down1);
-      tester.closeArena(1);
-      tester.route(down1);
-      tester.route(up1);
-      GestureBinding.instance.gestureArena.sweep(1);
-
-      tester.async.elapse(const Duration(milliseconds: 100));
-      doubleTap.addPointer(down2);
-      tester.closeArena(2);
-      tester.route(down2);
-      expect(recognized, <String>[]);
-      tester.route(up2);
-      expect(recognized, <String>['anyUp 1', 'primary']);
-      GestureBinding.instance.gestureArena.sweep(2);
-    });
-
-    testGesture('A secondary double tap should trigger any', (GestureTester tester) {
-      // Down/up pair 7: normal tap sequence close to pair 6
-      const PointerDownEvent down7 = PointerDownEvent(
-        pointer: 7,
-        position: Offset(10.0, 10.0),
-        buttons: kSecondaryMouseButton,
-      );
-
-      const PointerUpEvent up7 = PointerUpEvent(
-        pointer: 7,
-        position: Offset(11.0, 9.0),
-      );
-
+    testGesture('A primary double tap recognizer does not form competion with a secondary tap recognizer', (GestureTester tester) {
       doubleTap.addPointer(down6);
-      tester.closeArena(6);
+      tapSecondary.addPointer(down6);
+      tester.closeArena(down6.pointer);
+
       tester.route(down6);
-      tester.route(up6);
-      GestureBinding.instance.gestureArena.sweep(6);
-
-      tester.async.elapse(const Duration(milliseconds: 100));
-      doubleTap.addPointer(down7);
-      tester.closeArena(7);
-      tester.route(down7);
-      expect(recognized, <String>[]);
-      tester.route(up7);
-      expect(recognized, <String>['anyUp 2']);
-      GestureBinding.instance.gestureArena.sweep(7);
+      expect(recognized, <String>['tapSecondary']);
     });
 
-    testGesture('A double tap with 0 buttons should trigger nothing', (GestureTester tester) {
-      // Down/up pair 7: normal tap sequence but with 0 buttons
-      const PointerDownEvent down7 = PointerDownEvent(
-        pointer: 7,
-        position: Offset(10.0, 10.0),
-        buttons: 0,
-      );
+    testGesture('A primary double tap recognizer forms competion with a primary tap recognizer', (GestureTester tester) {
+      doubleTap.addPointer(down1);
+      tapPrimary.addPointer(down1);
+      tester.closeArena(down1.pointer);
 
-      const PointerUpEvent up7 = PointerUpEvent(
-        pointer: 7,
-        position: Offset(11.0, 9.0),
-      );
-      // Down/up pair 8: normal tap sequence close to pair 7
-      const PointerDownEvent down8 = PointerDownEvent(
-        pointer: 8,
-        position: Offset(10.0, 10.0),
-        buttons: 0,
-      );
-
-      const PointerUpEvent up8 = PointerUpEvent(
-        pointer: 8,
-        position: Offset(11.0, 9.0),
-      );
-
-      doubleTap.addPointer(down7);
-      tester.closeArena(7);
-      tester.route(down7);
-      tester.route(up7);
-      GestureBinding.instance.gestureArena.sweep(7);
-
-      tester.async.elapse(const Duration(milliseconds: 100));
-      doubleTap.addPointer(down8);
-      tester.closeArena(8);
-      tester.route(down8);
-      tester.route(up8);
+      tester.route(down1);
       expect(recognized, <String>[]);
-      GestureBinding.instance.gestureArena.sweep(7);
+
+      tester.async.elapse(const Duration(milliseconds: 300));
+      expect(recognized, <String>['tapPrimary']);
     });
+  });
 
-    testGesture('A double tap with 2 buttons should trigger nothing', (GestureTester tester) {
-      // Down/up pair 7: normal tap sequence but with 2 buttons
-      const PointerDownEvent down7 = PointerDownEvent(
-        pointer: 7,
-        position: Offset(10.0, 10.0),
-        buttons: kPrimaryButton | kSecondaryButton,
-      );
+  testGesture('A secondary double tap should not trigger primary', (GestureTester tester) {
+    final List<String> recognized = <String>[];
+    final DoubleTapGestureRecognizer doubleTap = DoubleTapGestureRecognizer()
+      ..onDoubleTap = () {
+        recognized.add('primary');
+      };
 
-      const PointerUpEvent up7 = PointerUpEvent(
-        pointer: 7,
-        position: Offset(11.0, 9.0),
-      );
-      // Down/up pair 8: normal tap sequence close to pair 7
-      const PointerDownEvent down8 = PointerDownEvent(
-        pointer: 8,
-        position: Offset(10.0, 10.0),
-        buttons: kPrimaryButton | kSecondaryButton,
-      );
+    // Down/up pair 7: normal tap sequence close to pair 6
+    const PointerDownEvent down7 = PointerDownEvent(
+      pointer: 7,
+      position: Offset(10.0, 10.0),
+      buttons: kSecondaryMouseButton,
+    );
 
-      const PointerUpEvent up8 = PointerUpEvent(
-        pointer: 8,
-        position: Offset(11.0, 9.0),
-      );
+    const PointerUpEvent up7 = PointerUpEvent(
+      pointer: 7,
+      position: Offset(11.0, 9.0),
+    );
 
-      doubleTap.addPointer(down7);
-      tester.closeArena(7);
-      tester.route(down7);
-      tester.route(up7);
-      GestureBinding.instance.gestureArena.sweep(7);
+    doubleTap.addPointer(down6);
+    tester.closeArena(6);
+    tester.route(down6);
+    tester.route(up6);
+    GestureBinding.instance.gestureArena.sweep(6);
 
-      tester.async.elapse(const Duration(milliseconds: 100));
-      doubleTap.addPointer(down8);
-      tester.closeArena(8);
-      tester.route(down8);
-      tester.route(up8);
-      expect(recognized, <String>[]);
-      GestureBinding.instance.gestureArena.sweep(7);
-    });
+    tester.async.elapse(const Duration(milliseconds: 100));
+    doubleTap.addPointer(down7);
+    tester.closeArena(7);
+    tester.route(down7);
+    tester.route(up7);
+    expect(recognized, <String>[]);
+
+    recognized.clear();
+    doubleTap.dispose();
   });
 }

@@ -542,91 +542,50 @@ void main() {
     });
   });
 
-  group('Dispatch to different callbacks per buttons:', () {
+  testGesture('A secondary long press should not trigger primary', (GestureTester tester) {
     final List<String> recognized = <String>[];
-    LongPressGestureRecognizer longPress;
-    setUp(() {
-      longPress = LongPressGestureRecognizer()
-        ..onLongPressStart = (LongPressStartDetails details) {
-          recognized.add('primaryStart ${details.buttons}');
-        }
-        ..onLongPress = () {
-          recognized.add('primary');
-        }
-        ..onLongPressMoveUpdate = (LongPressMoveUpdateDetails details) {
-          recognized.add('primaryUpdate ${details.buttons}');
-        }
-        ..onLongPressEnd = (LongPressEndDetails details) {
-          recognized.add('primaryEnd ${details.buttons}');
-        }
-        ..onLongPressUp = () {
-          recognized.add('primaryUp');
-        };
-    });
+    final LongPressGestureRecognizer longPress = LongPressGestureRecognizer()
+      ..onLongPressStart = (LongPressStartDetails details) {
+        recognized.add('primaryStart ${details.buttons}');
+      }
+      ..onLongPress = () {
+        recognized.add('primary');
+      }
+      ..onLongPressMoveUpdate = (LongPressMoveUpdateDetails details) {
+        recognized.add('primaryUpdate ${details.buttons}');
+      }
+      ..onLongPressEnd = (LongPressEndDetails details) {
+        recognized.add('primaryEnd ${details.buttons}');
+      }
+      ..onLongPressUp = () {
+        recognized.add('primaryUp');
+      };
 
-    tearDown(() {
-      longPress.dispose();
-      recognized.clear();
-    });
+    const PointerDownEvent down2 = PointerDownEvent(
+      pointer: 2,
+      buttons: kSecondaryButton,
+      position: Offset(30.0, 30.0),
+    );
 
-    testGesture('A primary long press should trigger primary', (GestureTester tester) {
-      const PointerDownEvent down2 = PointerDownEvent(
-        pointer: 2,
-        buttons: kPrimaryButton,
-        position: Offset(30.0, 30.0),
-      );
+    const PointerMoveEvent move2 = PointerMoveEvent(
+      pointer: 2,
+      buttons: kSecondaryButton,
+      position: Offset(100, 200),
+    );
 
-      const PointerMoveEvent move2 = PointerMoveEvent(
-        pointer: 2,
-        buttons: kPrimaryButton,
-        position: Offset(100, 200),
-      );
+    const PointerUpEvent up2 = PointerUpEvent(
+      pointer: 2,
+      position: Offset(100, 201),
+    );
 
-      const PointerUpEvent up2 = PointerUpEvent(
-        pointer: 2,
-        position: Offset(100, 201),
-      );
-
-      longPress.addPointer(down2);
-      tester.closeArena(2);
-      tester.route(down2);
-      tester.async.elapse(const Duration(milliseconds: 700));
-      expect(recognized, <String>['primaryStart 1', 'primary']);
-      recognized.clear();
-
-      tester.route(move2);
-      expect(recognized, <String>['primaryUpdate 1']);
-      recognized.clear();
-
-      tester.route(up2);
-      expect(recognized, <String>['primaryEnd 1', 'primaryUp']);
-    });
-
-    testGesture('A secondary long press should not trigger primary', (GestureTester tester) {
-      const PointerDownEvent down2 = PointerDownEvent(
-        pointer: 2,
-        buttons: kSecondaryButton,
-        position: Offset(30.0, 30.0),
-      );
-
-      const PointerMoveEvent move2 = PointerMoveEvent(
-        pointer: 2,
-        buttons: kSecondaryButton,
-        position: Offset(100, 200),
-      );
-
-      const PointerUpEvent up2 = PointerUpEvent(
-        pointer: 2,
-        position: Offset(100, 201),
-      );
-
-      longPress.addPointer(down2);
-      tester.closeArena(2);
-      tester.route(down2);
-      tester.async.elapse(const Duration(milliseconds: 700));
-      tester.route(move2);
-      tester.route(up2);
-      expect(recognized, <String>[]);
-    });
+    longPress.addPointer(down2);
+    tester.closeArena(2);
+    tester.route(down2);
+    tester.async.elapse(const Duration(milliseconds: 700));
+    tester.route(move2);
+    tester.route(up2);
+    expect(recognized, <String>[]);
+    longPress.dispose();
+    recognized.clear();
   });
 }

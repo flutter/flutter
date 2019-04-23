@@ -22,15 +22,6 @@ import 'tap.dart';
 ///  * [GestureDetector.onDoubleTap], which matches this signature.
 typedef GestureDoubleTapCallback = void Function();
 
-/// Signature for callback when the user has tapped the screen at the same
-/// location twice in quick succession.
-///
-/// See also:
-///
-///  * [GestureDetector.onDoubleTapUp], which matches this signature
-///  * [DoubleTapGestureRecognizer], which uses this signature in one of its callbacks.
-typedef GestureDoubleTapUpCallback = void Function(DoubleTapUpDetails details);
-
 /// Signature used by [MultiTapGestureRecognizer] for when a pointer that might
 /// cause a tap has contacted the screen at a particular location.
 typedef GestureMultiTapDownCallback = void Function(int pointer, TapDownDetails details);
@@ -45,25 +36,6 @@ typedef GestureMultiTapCallback = void Function(int pointer);
 /// Signature for when the pointer that previously triggered a
 /// [GestureMultiTapDownCallback] will not end up causing a tap.
 typedef GestureMultiTapCancelCallback = void Function(int pointer);
-
-/// Details for [GestureDoubleTapUpCallback], such as buttons.
-///
-/// See also:
-///
-///  * [GestureDetector.onDoubleTapUp], which receives this information.
-///  * [DoubleTapGestureRecognizer], which passes this information to one of its
-///    callbacks.
-class DoubleTapUpDetails {
-  /// Creates details for a [GestureDoubleTapUpCallback].
-  ///
-  /// The [globalPosition] and [buttons] arguments must not be null.
-  DoubleTapUpDetails({ this.buttons = kPrimaryButton })
-    : assert(buttons != null);
-
-  /// The buttons pressed when the pointer first contacted the screen (changing
-  /// buttons during a double tap cancels the gesture.)
-  final int buttons;
-}
 
 /// CountdownZoned tracks whether the specified duration has elapsed since
 /// creation, honoring [Zone].
@@ -165,29 +137,6 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
   // - The long timer between taps expires
   // - The gesture arena decides we have been rejected wholesale
 
-  /// Called when the user has tapped the screen at the same location twice in
-  /// quick succession.
-  ///
-  /// This triggers when the pointer stops contacting the device after the 2nd tap,
-  /// immediately before [onDoubleTap].
-  ///
-  /// It does not limit the button that triggers the tap. The callback should
-  /// decide which call to respond to based on the detail data.
-  ///
-  /// The pointer is required to keep a consistent button throughout the
-  /// gesture, i.e. subsequent [PointerDownEvent]s and [PointerMoveEvent]s
-  /// must contain the same button as the first [PointerDownEvent].
-  ///
-  /// Also, it must contain one and only one button. For example, since a stylus
-  /// touching the screen is also counted as a button, a stylus double tap while
-  /// pressing any physical button will not be recognized.
-  ///
-  /// See also:
-  ///
-  ///  * [onDoubleTap], a similar callback limited to a primary button and
-  ///    without details.
-  GestureDoubleTapUpCallback onAnyDoubleTapUp;
-
   /// Called when the user has tapped the screen with a primary button at the
   /// same location twice in quick succession.
   ///
@@ -197,8 +146,6 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
   /// See also:
   ///
   ///  * [kPrimaryButton], the button this callback responds to.
-  ///  * [onDoubleTapUp], a similar callback but for any single button and
-  ///    with details.
   GestureDoubleTapCallback onDoubleTap;
 
   Timer _doubleTapTimer;
@@ -207,8 +154,15 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
 
   @override
   bool isPointerAllowed(PointerEvent event) {
-    if (_firstTap == null && !isSingleButton(event.buttons)) {
-      return false;
+    if (_firstTap == null) {
+      switch (event.buttons) {
+        case kPrimaryButton:
+          if (onDoubleTap == null)
+            return false;
+          break;
+        default:
+          return false;
+      }
     }
     return super.isPointerAllowed(event);
   }
@@ -344,9 +298,6 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
   }
 
   void _checkUp(int buttons) {
-    if (onAnyDoubleTapUp != null)
-      invokeCallback<void>('onAnyDoubleTapUp',
-        () => onAnyDoubleTapUp(DoubleTapUpDetails(buttons: buttons)));
     switch (buttons) {
       case kPrimaryButton:
         if (onDoubleTap != null)
