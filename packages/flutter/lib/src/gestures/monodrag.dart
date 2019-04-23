@@ -312,7 +312,6 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   void _checkDown() {
     final DragDownDetails details = DragDownDetails(
       globalPosition: _initialPosition,
-      buttons: _initialButtons,
     );
     switch (_initialButtons) {
       case kPrimaryButton:
@@ -327,7 +326,6 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     final DragStartDetails details = DragStartDetails(
       sourceTimeStamp: timestamp,
       globalPosition: _initialPosition,
-      buttons: _initialButtons,
     );
     switch (_initialButtons) {
       case kPrimaryButton:
@@ -349,7 +347,6 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
       delta: delta,
       primaryDelta: primaryDelta,
       globalPosition: globalPosition,
-      buttons: _initialButtons,
     );
     switch (_initialButtons) {
       case kPrimaryButton:
@@ -374,7 +371,6 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
       details = DragEndDetails(
         velocity: velocity,
         primaryVelocity: _getPrimaryValueFromOffset(velocity.pixelsPerSecond),
-        buttons: _initialButtons,
       );
       debugReport = () {
         return '$estimate; fling at $velocity.';
@@ -383,7 +379,6 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
       details = DragEndDetails(
         velocity: Velocity.zero,
         primaryVelocity: 0.0,
-        buttons: _initialButtons,
       );
       debugReport = () {
         if (estimate == null)

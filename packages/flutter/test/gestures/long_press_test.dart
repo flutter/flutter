@@ -360,10 +360,10 @@ void main() {
     setUp(() {
       longPress = LongPressGestureRecognizer()
         ..onLongPressStart = (LongPressStartDetails details) {
-          recognized.add('start ${details.buttons}');
+          recognized.add('start');
         }
         ..onLongPressEnd = (LongPressEndDetails details) {
-          recognized.add('end ${details.buttons}');
+          recognized.add('end');
         };
     });
 
@@ -401,11 +401,11 @@ void main() {
       tester.closeArena(down2.pointer);
       tester.route(down2);
       tester.async.elapse(const Duration(milliseconds: 1000));
-      expect(recognized, <String>['start 1']);
+      expect(recognized, <String>['start']);
       recognized.clear();
 
       tester.route(up2);
-      expect(recognized, <String>['end 1']);
+      expect(recognized, <String>['end']);
     });
 
     testGesture('Should cancel long press when buttons change after acceptance', (GestureTester tester) {
@@ -414,7 +414,7 @@ void main() {
       tester.closeArena(down.pointer);
       tester.route(down);
       tester.async.elapse(const Duration(milliseconds: 1000));
-      expect(recognized, <String>['start 1']);
+      expect(recognized, <String>['start']);
       recognized.clear();
 
       tester.route(moveR);
@@ -438,11 +438,11 @@ void main() {
       tester.closeArena(down2.pointer);
       tester.route(down2);
       tester.async.elapse(const Duration(milliseconds: 1000));
-      expect(recognized, <String>['start 1']);
+      expect(recognized, <String>['start']);
       recognized.clear();
 
       tester.route(up2);
-      expect(recognized, <String>['end 1']);
+      expect(recognized, <String>['end']);
     });
   });
 
@@ -546,16 +546,16 @@ void main() {
     final List<String> recognized = <String>[];
     final LongPressGestureRecognizer longPress = LongPressGestureRecognizer()
       ..onLongPressStart = (LongPressStartDetails details) {
-        recognized.add('primaryStart ${details.buttons}');
+        recognized.add('primaryStart');
       }
       ..onLongPress = () {
         recognized.add('primary');
       }
       ..onLongPressMoveUpdate = (LongPressMoveUpdateDetails details) {
-        recognized.add('primaryUpdate ${details.buttons}');
+        recognized.add('primaryUpdate');
       }
       ..onLongPressEnd = (LongPressEndDetails details) {
-        recognized.add('primaryEnd ${details.buttons}');
+        recognized.add('primaryEnd');
       }
       ..onLongPressUp = () {
         recognized.add('primaryUp');

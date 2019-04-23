@@ -50,18 +50,12 @@ typedef GestureLongPressEndCallback = void Function(LongPressEndDetails details)
 class LongPressStartDetails {
   /// Creates the details for a [GestureLongPressStartCallback].
   ///
-  /// The [globalPosition] and [buttons] arguments must not be null.
-  const LongPressStartDetails({
-    this.globalPosition = Offset.zero,
-    this.buttons = kPrimaryButton,
-  }) : assert(globalPosition != null),
-       assert(buttons != null);
+  /// The [globalPosition] argument must not be null.
+  const LongPressStartDetails({ this.globalPosition = Offset.zero })
+    : assert(globalPosition != null);
 
   /// The global position at which the pointer contacted the screen.
   final Offset globalPosition;
-
-  /// The buttons pressed when the pointer contacted the screen.
-  final int buttons;
 }
 
 /// Details for callbacks that use [GestureLongPressMoveUpdateCallback].
@@ -74,14 +68,12 @@ class LongPressStartDetails {
 class LongPressMoveUpdateDetails {
   /// Creates the details for a [GestureLongPressMoveUpdateCallback].
   ///
-  /// The [globalPosition], [offsetFromOrigin], and [buttons] arguments must not be null.
+  /// The [globalPosition] and [offsetFromOrigin] arguments must not be null.
   const LongPressMoveUpdateDetails({
     this.globalPosition = Offset.zero,
     this.offsetFromOrigin = Offset.zero,
-    this.buttons = kPrimaryButton,
   }) : assert(globalPosition != null),
-       assert(offsetFromOrigin != null),
-       assert(buttons != null);
+       assert(offsetFromOrigin != null);
 
   /// The global position of the pointer when it triggered this update.
   final Offset globalPosition;
@@ -90,10 +82,6 @@ class LongPressMoveUpdateDetails {
   /// the screen to the point where the pointer is currently located (the
   /// present [globalPosition]) when this callback is triggered.
   final Offset offsetFromOrigin;
-
-  /// The buttons pressed when the pointer contacted the screen (changing buttons
-  /// during a long press cancels the gesture.)
-  final int buttons;
 }
 
 /// Details for callbacks that use [GestureLongPressEndCallback].
@@ -106,19 +94,12 @@ class LongPressMoveUpdateDetails {
 class LongPressEndDetails {
   /// Creates the details for a [GestureLongPressEndCallback].
   ///
-  /// The [globalPosition] and [buttons] arguments must not be null.
-  const LongPressEndDetails({
-    this.globalPosition = Offset.zero,
-    this.buttons = kPrimaryButton,
-  }) : assert(globalPosition != null),
-       assert(buttons != null);
+  /// The [globalPosition] argument must not be null.
+  const LongPressEndDetails({ this.globalPosition = Offset.zero })
+    : assert(globalPosition != null);
 
   /// The global position at which the pointer lifted from the screen.
   final Offset globalPosition;
-
-  /// The buttons pressed when the pointer contacted the screen (changing buttons
-  /// during a long press cancels the gesture.)
-  final int buttons;
 }
 
 /// Recognizes when the user has pressed down at the same location for a long
@@ -260,7 +241,6 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
   void _checkLongPressStart() {
     final LongPressStartDetails details = LongPressStartDetails(
       globalPosition: _longPressOrigin,
-      buttons: _initialButtons,
     );
     switch (_initialButtons) {
       case kPrimaryButton:
@@ -278,7 +258,6 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
     final LongPressMoveUpdateDetails details = LongPressMoveUpdateDetails(
       globalPosition: event.position,
       offsetFromOrigin: event.position - _longPressOrigin,
-      buttons: _initialButtons,
     );
     switch (_initialButtons) {
       case kPrimaryButton:
@@ -293,7 +272,6 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
   void _checkLongPressEnd(PointerEvent event) {
     final LongPressEndDetails details = LongPressEndDetails(
       globalPosition: event.position,
-      buttons: _initialButtons,
     );
     switch (_initialButtons) {
       case kPrimaryButton:

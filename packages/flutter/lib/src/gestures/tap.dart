@@ -9,7 +9,7 @@ import 'constants.dart';
 import 'events.dart';
 import 'recognizer.dart';
 
-/// Details for [GestureTapDownCallback], such as position and buttons.
+/// Details for [GestureTapDownCallback], such as position
 ///
 /// See also:
 ///
@@ -18,15 +18,12 @@ import 'recognizer.dart';
 class TapDownDetails {
   /// Creates details for a [GestureTapDownCallback].
   ///
-  /// The [globalPosition] and [buttons] arguments must not be null.
-  TapDownDetails({ this.globalPosition = Offset.zero, this.buttons = kPrimaryButton })
-    : assert(globalPosition != null), assert(buttons != null);
+  /// The [globalPosition] argument must not be null.
+  TapDownDetails({ this.globalPosition = Offset.zero })
+    : assert(globalPosition != null);
 
   /// The global position at which the pointer contacted the screen.
   final Offset globalPosition;
-
-  /// The buttons pressed when the pointer contacted the screen.
-  final int buttons;
 }
 
 /// Signature for when a pointer that might cause a tap has contacted the
@@ -41,25 +38,19 @@ class TapDownDetails {
 ///  * [TapGestureRecognizer], which uses this signature in one of its callbacks.
 typedef GestureTapDownCallback = void Function(TapDownDetails details);
 
-/// Details for [GestureTapUpCallback], such as position and buttons.
+/// Details for [GestureTapUpCallback], such as position.
 ///
 /// See also:
 ///
 ///  * [GestureDetector.onTapUp], which receives this information.
 ///  * [TapGestureRecognizer], which passes this information to one of its callbacks.
 class TapUpDetails {
-  /// Creates details for a [GestureTapUpCallback].
-  ///
-  /// The [globalPosition] and [buttons] arguments must not be null.
-  TapUpDetails({ this.globalPosition = Offset.zero, this.buttons = kPrimaryButton })
-    : assert(globalPosition != null), assert(buttons != null);
+  /// The [globalPosition] argument must not be null.
+  TapUpDetails({ this.globalPosition = Offset.zero })
+    : assert(globalPosition != null);
 
   /// The global position at which the pointer contacted the screen.
   final Offset globalPosition;
-
-  /// The buttons pressed when the pointer contacted the screen (changing buttons
-  /// during a tap cancels the gesture.)
-  final int buttons;
 }
 
 /// Signature for when a pointer that will trigger a tap has stopped contacting
@@ -319,7 +310,6 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
     }
     final TapDownDetails details = TapDownDetails(
       globalPosition: initialPosition,
-      buttons: _initialButtons,
     );
     switch (_initialButtons) {
       case kPrimaryButton:
@@ -342,7 +332,6 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
     }
     final TapUpDetails details = TapUpDetails(
       globalPosition: _finalPosition,
-      buttons: _initialButtons,
     );
     switch (_initialButtons) {
       case kPrimaryButton:

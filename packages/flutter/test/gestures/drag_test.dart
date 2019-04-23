@@ -610,19 +610,19 @@ void main() {
         ..onTap = () {}; // Need a callback to enable competition
       pan = PanGestureRecognizer()
         ..onStart = (DragStartDetails details) {
-          logs.add('start ${details.buttons}');
+          logs.add('start');
         }
         ..onDown = (DragDownDetails details) {
-          logs.add('down ${details.buttons}');
+          logs.add('down');
         }
         ..onUpdate = (DragUpdateDetails details) {
-          logs.add('update ${details.buttons}');
+          logs.add('update');
         }
         ..onCancel = () {
           logs.add('cancel');
         }
         ..onEnd = (DragEndDetails details) {
-          logs.add('end ${details.buttons}');
+          logs.add('end');
         };
     });
 
@@ -640,11 +640,11 @@ void main() {
       tester.closeArena(5);
 
       tester.route(down);
-      expect(logs, <String>['down 1']);
+      expect(logs, <String>['down']);
       pointer.buttons = kSecondaryButton;
       // Move out of slop so make sure button changes takes priority over slops
       tester.route(pointer.move(const Offset(30.0, 30.0)));
-      expect(logs, <String>['down 1', 'cancel']);
+      expect(logs, <String>['down', 'cancel']);
 
       tester.route(pointer.up());
     });
@@ -661,7 +661,7 @@ void main() {
         pointer.buttons = kSecondaryButton;
         tester.route(pointer.move(const Offset(10.0, 10.0)));
         tester.route(pointer.up());
-        expect(logs, <String>['down 1', 'cancel']);
+        expect(logs, <String>['down', 'cancel']);
       }
       logs.clear();
 
@@ -671,13 +671,13 @@ void main() {
       tap.addPointer(down2);
       tester.closeArena(down2.pointer);
       tester.route(down2);
-      expect(logs, <String>['down 1']);
+      expect(logs, <String>['down']);
 
       tester.route(pointer2.move(const Offset(30.0, 30.0)));
-      expect(logs, <String>['down 1', 'start 1']);
+      expect(logs, <String>['down', 'start']);
 
       tester.route(pointer2.up());
-      expect(logs, <String>['down 1', 'start 1', 'end 1']);
+      expect(logs, <String>['down', 'start', 'end']);
     });
 
     testGesture('Button change after acceptance should lead to immediate end', (GestureTester tester) {
@@ -688,16 +688,16 @@ void main() {
       tester.closeArena(down.pointer);
 
       tester.route(down);
-      expect(logs, <String>['down 1']);
+      expect(logs, <String>['down']);
       tester.route(pointer.move(const Offset(30.0, 30.0)));
-      expect(logs, <String>['down 1', 'start 1']);
+      expect(logs, <String>['down', 'start']);
       pointer.buttons = kSecondaryButton;
       tester.route(pointer.move(const Offset(30.0, 30.0)));
-      expect(logs, <String>['down 1', 'start 1', 'end 1']);
+      expect(logs, <String>['down', 'start', 'end']);
 
       // Make sure no further updates are sent
       tester.route(pointer.move(const Offset(50.0, 50.0)));
-      expect(logs, <String>['down 1', 'start 1', 'end 1']);
+      expect(logs, <String>['down', 'start', 'end']);
 
       tester.route(pointer.up());
     });
@@ -717,7 +717,7 @@ void main() {
 
         tester.route(pointer.move(const Offset(30.0, 31.0)));
         tester.route(pointer.up());
-        expect(logs, <String>['down 1', 'start 1', 'end 1']);
+        expect(logs, <String>['down', 'start', 'end']);
       }
       logs.clear();
 
@@ -727,13 +727,13 @@ void main() {
       tap.addPointer(down2);
       tester.closeArena(down2.pointer);
       tester.route(down2);
-      expect(logs, <String>['down 1']);
+      expect(logs, <String>['down']);
 
       tester.route(pointer2.move(const Offset(30.0, 30.0)));
-      expect(logs, <String>['down 1', 'start 1']);
+      expect(logs, <String>['down', 'start']);
 
       tester.route(pointer2.up());
-      expect(logs, <String>['down 1', 'start 1', 'end 1']);
+      expect(logs, <String>['down', 'start', 'end']);
     });
   });
 
@@ -811,16 +811,16 @@ void main() {
       ..onTap = () {}; // Need a listener to enable competetion.
     final PanGestureRecognizer pan = PanGestureRecognizer()
       ..onDown = (DragDownDetails details) {
-        recognized.add('primaryDown ${details.buttons}');
+        recognized.add('primaryDown');
       }
       ..onStart = (DragStartDetails details) {
-        recognized.add('primaryStart ${details.buttons}');
+        recognized.add('primaryStart');
       }
       ..onUpdate = (DragUpdateDetails details) {
-        recognized.add('primaryUpdate ${details.buttons}');
+        recognized.add('primaryUpdate');
       }
       ..onEnd = (DragEndDetails details) {
-        recognized.add('primaryEnd ${details.buttons}');
+        recognized.add('primaryEnd');
       }
       ..onCancel = () {
         recognized.add('primaryCancel');

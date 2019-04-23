@@ -6,7 +6,6 @@ import 'dart:ui' show Offset;
 
 import 'package:flutter/foundation.dart';
 
-import 'events.dart' show kPrimaryButton;
 import 'velocity_tracker.dart';
 
 /// Details object for callbacks that use [GestureDragDownCallback].
@@ -20,17 +19,14 @@ import 'velocity_tracker.dart';
 class DragDownDetails {
   /// Creates details for a [GestureDragDownCallback].
   ///
-  /// The [globalPosition] and [buttons] arguments must not be null.
-  DragDownDetails({ this.globalPosition = Offset.zero, this.buttons = kPrimaryButton })
-    : assert(globalPosition != null), assert(buttons != null);
+  /// The [globalPosition] argument must not be null.
+  DragDownDetails({ this.globalPosition = Offset.zero })
+    : assert(globalPosition != null);
 
   /// The global position at which the pointer contacted the screen.
   ///
   /// Defaults to the origin if not specified in the constructor.
   final Offset globalPosition;
-
-  /// The buttons pressed when the pointer contacted the screen.
-  final int buttons;
 
   @override
   String toString() => '$runtimeType($globalPosition)';
@@ -55,13 +51,9 @@ typedef GestureDragDownCallback = void Function(DragDownDetails details);
 class DragStartDetails {
   /// Creates details for a [GestureDragStartCallback].
   ///
-  /// The [globalPosition] and [buttons] arguments must not be null.
-  DragStartDetails({
-    this.sourceTimeStamp,
-    this.globalPosition = Offset.zero,
-    this.buttons = kPrimaryButton,
-  }) : assert(globalPosition != null),
-       assert(buttons != null);
+  /// The [globalPosition] argument must not be null.
+  DragStartDetails({ this.sourceTimeStamp, this.globalPosition = Offset.zero })
+    : assert(globalPosition != null);
 
   /// Recorded timestamp of the source pointer event that triggered the drag
   /// event.
@@ -73,10 +65,6 @@ class DragStartDetails {
   ///
   /// Defaults to the origin if not specified in the constructor.
   final Offset globalPosition;
-
-  /// The buttons pressed when the pointer contacted the screen (changing buttons
-  /// during a drag cancels the gesture.)
-  final int buttons;
 
   // TODO(ianh): Expose the current position, so that you can have a no-jump
   // drag even when disambiguating (though of course it would lag the finger
@@ -116,12 +104,10 @@ class DragUpdateDetails {
     this.delta = Offset.zero,
     this.primaryDelta,
     @required this.globalPosition,
-    this.buttons = kPrimaryButton,
   }) : assert(delta != null),
        assert(primaryDelta == null
            || (primaryDelta == delta.dx && delta.dy == 0.0)
-           || (primaryDelta == delta.dy && delta.dx == 0.0)),
-       assert(buttons != null);
+           || (primaryDelta == delta.dy && delta.dx == 0.0));
 
   /// Recorded timestamp of the source pointer event that triggered the drag
   /// event.
@@ -153,10 +139,6 @@ class DragUpdateDetails {
   /// The pointer's global position when it triggered this update.
   final Offset globalPosition;
 
-  /// The buttons pressed when the pointer contacted the screen (changing buttons
-  /// during a drag cancels the gesture).
-  final int buttons;
-
   @override
   String toString() => '$runtimeType($delta)';
 }
@@ -185,12 +167,10 @@ class DragEndDetails {
   DragEndDetails({
     this.velocity = Velocity.zero,
     this.primaryVelocity,
-    this.buttons = kPrimaryButton,
   }) : assert(velocity != null),
        assert(primaryVelocity == null
            || primaryVelocity == velocity.pixelsPerSecond.dx
-           || primaryVelocity == velocity.pixelsPerSecond.dy),
-       assert(buttons != null);
+           || primaryVelocity == velocity.pixelsPerSecond.dy);
 
   /// The velocity the pointer was moving when it stopped contacting the screen.
   ///
@@ -208,10 +188,6 @@ class DragEndDetails {
   ///
   /// Defaults to null if not specified in the constructor.
   final double primaryVelocity;
-
-  /// The buttons pressed when the pointer contacted the screen (changing buttons
-  /// during a drag cancels the gesture).
-  final int buttons;
 
   @override
   String toString() => '$runtimeType($velocity)';

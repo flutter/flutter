@@ -540,7 +540,7 @@ void main() {
     setUp(() {
       tap = TapGestureRecognizer()
         ..onTapDown = (TapDownDetails details) {
-          recognized.add('down ${details.buttons}');
+          recognized.add('down');
         }
         ..onTapUp = (TapUpDetails details) {
           recognized.add('up');
@@ -585,7 +585,7 @@ void main() {
       tester.closeArena(2);
       tester.async.elapse(const Duration(milliseconds: 1000));
       tester.route(up2);
-      expect(recognized, <String>['down 1', 'up']);
+      expect(recognized, <String>['down', 'up']);
 
       tap.dispose();
     });
@@ -595,16 +595,16 @@ void main() {
       tester.closeArena(1);
       expect(recognized, <String>[]);
       tester.async.elapse(const Duration(milliseconds: 1000));
-      expect(recognized, <String>['down 1']);
+      expect(recognized, <String>['down']);
 
       tester.route(move1lr);
-      expect(recognized, <String>['down 1', 'cancel']);
+      expect(recognized, <String>['down', 'cancel']);
 
       tester.route(move1r);
-      expect(recognized, <String>['down 1', 'cancel']);
+      expect(recognized, <String>['down', 'cancel']);
 
       tester.route(up1);
-      expect(recognized, <String>['down 1', 'cancel']);
+      expect(recognized, <String>['down', 'cancel']);
 
       tap.dispose();
     });
@@ -618,14 +618,14 @@ void main() {
       tester.route(move1r);
       tester.route(up1);
       GestureBinding.instance.gestureArena.sweep(1);
-      expect(recognized, <String>['down 1', 'cancel']);
+      expect(recognized, <String>['down', 'cancel']);
 
       tap.addPointer(down2);
       tester.closeArena(2);
       tester.async.elapse(const Duration(milliseconds: 1000));
       tester.route(up2);
       GestureBinding.instance.gestureArena.sweep(2);
-      expect(recognized, <String>['down 1', 'cancel', 'down 1', 'up']);
+      expect(recognized, <String>['down', 'cancel', 'down', 'up']);
 
       tap.dispose();
     });
@@ -644,7 +644,7 @@ void main() {
     setUp(() {
       primary = TapGestureRecognizer()
         ..onTapDown = (TapDownDetails details) {
-          recognized.add('primaryDown ${details.buttons}');
+          recognized.add('primaryDown');
         }
         ..onTapUp = (TapUpDetails details) {
           recognized.add('primaryUp');
@@ -654,7 +654,7 @@ void main() {
         };
       primary2 = TapGestureRecognizer()
         ..onTapDown = (TapDownDetails details) {
-          recognized.add('primary2Down ${details.buttons}');
+          recognized.add('primary2Down');
         }
         ..onTapUp = (TapUpDetails details) {
           recognized.add('primary2Up');
@@ -664,7 +664,7 @@ void main() {
         };
       secondary = TapGestureRecognizer()
         ..onSecondaryTapDown = (TapDownDetails details) {
-          recognized.add('secondaryDown ${details.buttons}');
+          recognized.add('secondaryDown');
         }
         ..onSecondaryTapUp = (TapUpDetails details) {
           recognized.add('secondaryUp');
@@ -687,7 +687,7 @@ void main() {
       tester.closeArena(1);
 
       tester.route(down1);
-      expect(recognized, <String>['primaryDown 1']);
+      expect(recognized, <String>['primaryDown']);
       recognized.clear();
 
       tester.route(up1);
@@ -703,7 +703,7 @@ void main() {
       expect(recognized, <String>[]);
 
       tester.async.elapse(const Duration(milliseconds: 500));
-      expect(recognized, <String>['primaryDown 1', 'primary2Down 1']);
+      expect(recognized, <String>['primaryDown', 'primary2Down']);
     });
   });
 
@@ -720,22 +720,22 @@ void main() {
     setUp(() {
       tap = TapGestureRecognizer()
         ..onTapDown = (TapDownDetails details) {
-          recognized.add('primaryDown ${details.buttons}');
+          recognized.add('primaryDown');
         }
         ..onTap = () {
           recognized.add('primary');
         }
         ..onTapUp = (TapUpDetails details) {
-          recognized.add('primaryUp ${details.buttons}');
+          recognized.add('primaryUp');
         }
         ..onTapCancel = () {
           recognized.add('primaryCancel');
         }
         ..onSecondaryTapDown = (TapDownDetails details) {
-          recognized.add('secondaryDown ${details.buttons}');
+          recognized.add('secondaryDown');
         }
         ..onSecondaryTapUp = (TapUpDetails details) {
-          recognized.add('secondaryUp ${details.buttons}');
+          recognized.add('secondaryUp');
         }
         ..onSecondaryTapCancel = () {
           recognized.add('secondaryCancel');
@@ -752,11 +752,11 @@ void main() {
       tester.closeArena(down1.pointer);
       expect(recognized, <String>[]);
       tester.async.elapse(const Duration(milliseconds: 500));
-      expect(recognized, <String>['primaryDown 1']);
+      expect(recognized, <String>['primaryDown']);
       recognized.clear();
 
       tester.route(up1);
-      expect(recognized, <String>['primaryUp 1', 'primary']);
+      expect(recognized, <String>['primaryUp', 'primary']);
       GestureBinding.instance.gestureArena.sweep(down1.pointer);
     });
 
@@ -765,7 +765,7 @@ void main() {
       tester.closeArena(down1.pointer);
       expect(recognized, <String>[]);
       tester.async.elapse(const Duration(milliseconds: 500));
-      expect(recognized, <String>['primaryDown 1']);
+      expect(recognized, <String>['primaryDown']);
       recognized.clear();
 
       tester.route(cancel1);
@@ -778,12 +778,12 @@ void main() {
       tester.closeArena(down5.pointer);
       expect(recognized, <String>[]);
       tester.async.elapse(const Duration(milliseconds: 500));
-      expect(recognized, <String>['secondaryDown 2']);
+      expect(recognized, <String>['secondaryDown']);
       recognized.clear();
 
       tester.route(up5);
       GestureBinding.instance.gestureArena.sweep(down5.pointer);
-      expect(recognized, <String>['secondaryUp 2']);
+      expect(recognized, <String>['secondaryUp']);
     });
 
     testGesture('A secondary tap cancel should trigger secondary callbacks', (GestureTester tester) {
@@ -791,7 +791,7 @@ void main() {
       tester.closeArena(down5.pointer);
       expect(recognized, <String>[]);
       tester.async.elapse(const Duration(milliseconds: 500));
-      expect(recognized, <String>['secondaryDown 2']);
+      expect(recognized, <String>['secondaryDown']);
       recognized.clear();
 
       tester.route(cancel5);
