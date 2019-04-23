@@ -5,7 +5,6 @@
 
 # TODO(jonahwilliams): refactor this and xcode_backend.sh into one script
 # once macOS supports the same configuration as iOS.
-
 RunCommand() {
   if [[ -n "$VERBOSE_SCRIPT_LOGGING" ]]; then
     echo "♦ $*"
@@ -41,9 +40,10 @@ if [[ -n "$TRACK_WIDGET_CREATION" ]]; then
 fi
 
 # Copy the framework and handle local engine builds.
+framework_name = "FlutterMacOS.framework"
 derived_dir="${SOURCE_ROOT}/../build/macos/Build/Products/flutter_framework"
 framework_path="${FLUTTER_ROOT}/bin/cache/artifacts/engine/darwin-x64"
-flutter_framework="${framework_path}/FlutterMacOS.framework"
+flutter_framework="${framework_path}/${framework_name}"
 
 if [[ -n "$FLUTTER_ENGINE" ]]; then
   flutter_engine_flag="--local-engine-src-path=${FLUTTER_ENGINE}"
@@ -63,13 +63,12 @@ if [[ -n "$LOCAL_ENGINE" ]]; then
     exit -1
   fi
   local_engine_flag="--local-engine=${LOCAL_ENGINE}"
-  flutter_framework="${FLUTTER_ENGINE}/out/${LOCAL_ENGINE}/FlutterMacOS.framework"
+  flutter_framework="${FLUTTER_ENGINE}/out/${LOCAL_ENGINE}/${framework_name}"
 fi
 
 RunCommand mkdir -p -- "$derived_dir"
-RunCommand rm -rf -- "${derived_dir}/FlutterMacOS.framework"
-RunCommand cp -r -- "${flutter_framework}" "${derived_dir}"
-RunCommand find "${derived_dir}/FlutterMacOS.framework" -type f -exec chmod a-w "{}" \;
+RunCommand rm -rf -- "${derived_dir}/${framework_name}"
+RunCommand cp -R -- "${flutter_framework}" "${derived_dir}"
 
 # Set the build mode
 build_mode="$(echo "${FLUTTER_BUILD_MODE:-${CONFIGURATION}}" | tr "[:upper:]" "[:lower:]")"
