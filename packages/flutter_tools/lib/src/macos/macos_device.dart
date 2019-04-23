@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import '../application_package.dart';
 import '../base/io.dart';
 import '../base/os.dart';
@@ -27,7 +29,10 @@ class MacOSDevice extends Device {
   void clearLogs() { }
 
   @override
-  DeviceLogReader getLogReader({ ApplicationPackage app }) => NoOpDeviceLogReader('macos');
+  DeviceLogReader getLogReader({ ApplicationPackage app }) {
+    return _deviceLogReader;
+  }
+  final _MacOSLogReader _deviceLogReader = _MacOSLogReader();
 
   // Since the host and target devices are the same, no work needs to be done
   // to install the application.
@@ -83,8 +88,8 @@ class MacOSDevice extends Device {
     if (debuggingOptions?.buildInfo?.isRelease == true) {
       return LaunchResult.succeeded();
     }
-    final MacOSLogReader logReader = MacOSLogReader(package, process);
-    final ProtocolDiscovery observatoryDiscovery = ProtocolDiscovery.observatory(logReader);
+    _deviceLogReader._initializeProcess(process);
+    final ProtocolDiscovery observatoryDiscovery = ProtocolDiscovery.observatory(_deviceLogReader);
     try {
       final Uri observatoryUri = await observatoryDiscovery.uri;
       // Bring app to foreground.
@@ -140,17 +145,20 @@ class MacOSDevices extends PollingDeviceDiscovery {
   Future<List<String>> getDiagnostics() async => const <String>[];
 }
 
-class MacOSLogReader extends DeviceLogReader {
-  MacOSLogReader(this.macOSApp, this.process);
+class _MacOSLogReader extends DeviceLogReader {
+  final StreamController<String> _inputController = StreamController<String>.broadcast();
 
-  final MacOSApp macOSApp;
-  final Process process;
-
-  @override
-  Stream<String> get logLines {
-    return process.stdout.transform(utf8.decoder);
+  void _initializeProcess(Process process) {
+    _inputController.addStream(process.stdout
+      .transform(utf8.decoder)
+      .transform(const LineSplitter()));
   }
 
   @override
-  String get name => macOSApp.displayName;
+  Stream<String> get logLines {
+    return _inputController.stream;
+  }
+
+  @override
+  String get name => 'macOS';
 }
