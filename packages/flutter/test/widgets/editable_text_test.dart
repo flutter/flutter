@@ -17,8 +17,8 @@ import 'editable_text_utils.dart';
 import 'semantics_tester.dart';
 
 final TextEditingController controller = TextEditingController();
-final FocusNode focusNode = FocusNode();
-final FocusScopeNode focusScopeNode = FocusScopeNode();
+final FocusNode focusNode = FocusNode(debugLabel: 'EditableText Node');
+final FocusScopeNode focusScopeNode = FocusScopeNode(debugLabel: 'EditableText Scope Node');
 const TextStyle textStyle = TextStyle();
 const Color cursorColor = Color.fromARGB(0xFF, 0xFF, 0x00, 0x00);
 
@@ -955,6 +955,9 @@ void main() {
       ),
     ));
 
+    focusNode.requestFocus();
+    await tester.pump();
+
     expect(
       semantics,
       includesNodeWith(
@@ -1512,6 +1515,8 @@ void main() {
       ),
     );
 
+    focusNode.requestFocus();
+
     // Now change it to make it obscure text.
     await tester.pumpWidget(MaterialApp(
       home: EditableText(
@@ -1884,7 +1889,7 @@ void main() {
         composing: TextRange(start: 5, end: 14),
       ),
     );
-    final FocusNode focusNode = FocusNode();
+    final FocusNode focusNode = FocusNode(debugLabel: 'Test Focus Node');
 
     await tester.pumpWidget(MaterialApp( // So we can show overlays.
       home: EditableText(

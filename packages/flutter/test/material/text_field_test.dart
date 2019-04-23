@@ -2754,29 +2754,31 @@ void main() {
       controller = TextEditingController();
     });
 
-    MaterialApp setupWidget() {
-
+    Future<void> setupWidget(WidgetTester tester) async {
       final FocusNode focusNode = FocusNode();
       controller = TextEditingController();
 
-      return MaterialApp(
-        home:  Material(
-          child: RawKeyboardListener(
-            focusNode: focusNode,
-            onKey: null,
-            child: TextField(
-              controller: controller,
-              maxLines: 3,
-              strutStyle: StrutStyle.disabled,
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: RawKeyboardListener(
+              focusNode: focusNode,
+              onKey: null,
+              child: TextField(
+                controller: controller,
+                maxLines: 3,
+                strutStyle: StrutStyle.disabled,
+              ),
             ),
-          ) ,
+          ),
         ),
       );
+      focusNode.requestFocus();
+      await tester.pump();
     }
 
     testWidgets('Shift test 1', (WidgetTester tester) async {
-
-      await tester.pumpWidget(setupWidget());
+      await setupWidget(tester);
       const String testValue = 'a big house';
       await tester.enterText(find.byType(TextField), testValue);
 
@@ -2789,7 +2791,7 @@ void main() {
     });
 
     testWidgets('Control Shift test', (WidgetTester tester) async {
-      await tester.pumpWidget(setupWidget());
+      await setupWidget(tester);
       const String testValue = 'their big house';
       await tester.enterText(find.byType(TextField), testValue);
 
@@ -2805,7 +2807,7 @@ void main() {
     });
 
     testWidgets('Down and up test', (WidgetTester tester) async {
-      await tester.pumpWidget(setupWidget());
+      await setupWidget(tester);
       const String testValue = 'a big house';
       await tester.enterText(find.byType(TextField), testValue);
 
@@ -2827,7 +2829,7 @@ void main() {
     });
 
     testWidgets('Down and up test 2', (WidgetTester tester) async {
-      await tester.pumpWidget(setupWidget());
+      await setupWidget(tester);
       const String testValue = 'a big house\njumped over a mouse\nOne more line yay'; // 11 \n 19
       await tester.enterText(find.byType(TextField), testValue);
 
@@ -2914,6 +2916,8 @@ void main() {
         ),
       ),
     );
+    focusNode.requestFocus();
+    await tester.pump();
 
     const String testValue = 'a big house\njumped over a mouse'; // 11 \n 19
     await tester.enterText(find.byType(TextField), testValue);
@@ -2984,6 +2988,8 @@ void main() {
         ),
       ),
     );
+    focusNode.requestFocus();
+    await tester.pump();
 
     const String testValue = 'a big house\njumped over a mouse'; // 11 \n 19
     await tester.enterText(find.byType(TextField), testValue);
@@ -3093,6 +3099,8 @@ void main() {
         ),
       ),
     );
+    focusNode.requestFocus();
+    await tester.pump();
 
     const String testValue = 'a big house\njumped over a mouse'; // 11 \n 19
     await tester.enterText(find.byType(TextField), testValue);
