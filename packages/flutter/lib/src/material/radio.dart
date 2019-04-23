@@ -29,7 +29,18 @@ const double _kInnerRadius = 4.5;
 ///
 /// {@tool snippet --template=stateful_widget_scaffold}
 ///
-/// Here is an example of Radio widgets wrapped in ListTiles.
+/// Here is an example of Radio widgets wrapped in ListTiles, which is similar
+/// to what you could get with the RadioListTile widget.
+///
+/// The currently selected character is passed into `groupValue`, which is
+/// maintained by the example's `State`. In this case, the first `Radio`
+/// will start off selected because `_character` is initialized to
+/// `SingingCharacter.lafayette`.
+///
+/// If the second radio button is pressed, the example's state is updated
+/// with `setState`, updating `_character` to `SingingCharacter.jefferson`.
+/// This causes the buttons to rebuild with the updated `groupValue`, and
+/// therefore the selection of the second button.
 ///
 /// ```dart preamble
 /// enum SingingCharacter { lafayette, jefferson }
