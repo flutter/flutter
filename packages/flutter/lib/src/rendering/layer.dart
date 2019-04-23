@@ -1281,9 +1281,9 @@ class OpacityLayer extends ContainerLayer {
 
   @override
   ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
-    bool enabled = true;
+    bool enabled = firstChild != null;  // don't add this layer if there's no child
     assert(() {
-      enabled = !debugDisableOpacityLayers;
+      enabled = enabled && !debugDisableOpacityLayers;
       return true;
     }());
     if (enabled)
