@@ -105,7 +105,6 @@ class WidgetSpan extends PlaceholderSpan {
     InlineWidgetAlignment alignment = InlineWidgetAlignment.bottom,
     TextBaseline baseline,
     TextStyle style,
-    List<InlineSpan> children,
   }) : assert(widget != null),
        assert((alignment == InlineWidgetAlignment.aboveBaseline ||
                alignment == InlineWidgetAlignment.belowBaseline ||
@@ -119,7 +118,7 @@ class WidgetSpan extends PlaceholderSpan {
            alignment == InlineWidgetAlignment.top ? ui.PlaceholderAlignment.top :
            alignment == InlineWidgetAlignment.bottom ? ui.PlaceholderAlignment.bottom :
            alignment == InlineWidgetAlignment.middle ? ui.PlaceholderAlignment.middle : null,
-         baseline: baseline, style: style, children: children,
+         baseline: baseline, style: style,
        );
 
   /// The widget to embed inline with text.
@@ -220,7 +219,7 @@ class WidgetSpan extends PlaceholderSpan {
   }
 
   /// Returns the text span that contains the given position in the text.
-  TextSpan getSpanForPosition(TextPosition position) {
+  InlineSpan getSpanForPosition(TextPosition position) {
     assert(debugAssertIsValid());
     return null;
   }

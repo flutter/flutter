@@ -59,7 +59,6 @@ abstract class PlaceholderSpan extends InlineSpan {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.defaultDiagnosticsTreeStyle = DiagnosticsTreeStyle.whitespace;
 
     properties.add(EnumProperty<ui.PlaceholderAlignment>('alignment', alignment, defaultValue: null));
     properties.add(EnumProperty<TextBaseline>('baseline', baseline, defaultValue: null));

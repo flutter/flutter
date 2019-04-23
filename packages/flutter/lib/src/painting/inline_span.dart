@@ -23,8 +23,7 @@ import 'text_painter.dart';
 /// this is the [WidgetSpan] class in the widgets library.
 ///
 /// The subclass [WidgetSpan] specifies embedded inline widgets. Specify a
-/// widget by wrapping the widget with a [WidgetSpan]. The widget will be
-/// laid out inline within the paragraph.
+/// widget by wrapping the widget with a [WidgetSpan].
 ///
 /// Only [TextSpan] may contain children, so in order to include multiple
 /// [InlineSpan]s, the root node must be a [TextSpan]. Leaving the

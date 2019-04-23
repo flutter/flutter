@@ -206,7 +206,7 @@ class TextSpan extends InlineSpan {
   }
 
   /// Returns the text span that contains the given position in the text.
-  TextSpan getSpanForPosition(TextPosition position) {
+  InlineSpan getSpanForPosition(TextPosition position) {
     assert(debugAssertIsValid());
     final TextAffinity affinity = position.affinity;
     final int targetOffset = position.offset;
@@ -316,7 +316,7 @@ class TextSpan extends InlineSpan {
   RenderComparison compareTo(InlineSpan other) {
     if (identical(this, other))
       return RenderComparison.identical;
-    if (!(other is TextSpan))
+    if (other is! TextSpan)
       return RenderComparison.layout;
     TextSpan textSpan = other;
     if (textSpan.text != text ||
@@ -358,7 +358,7 @@ class TextSpan extends InlineSpan {
   }
 
   @override
-  int get hashCode => hashValues(style, text, recognizer, semanticsLabel, hashList(children));
+  int get hashCode => hashValues(text, style, recognizer, semanticsLabel, hashList(children));
 
   @override
   String toStringShort() => '$runtimeType';
