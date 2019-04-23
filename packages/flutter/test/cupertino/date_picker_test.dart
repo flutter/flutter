@@ -797,6 +797,65 @@ void main() {
 
       expect(date, DateTime(2018, 1, 1, 15, 59));
     });
+
+    testWidgets('date picker given too narrow space horizontally shows message', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(
+            child: SizedBox(
+              // This is too small to draw the picker out fully.
+              width: 100,
+              child: CupertinoDatePicker(
+                mode: CupertinoDatePickerMode.dateAndTime,
+                initialDateTime: DateTime(2019, 1, 1, 4),
+                onDateTimeChanged: (_) {},
+              )
+            ),
+          )
+        )
+      );
+
+      final dynamic exception = tester.takeException();
+      expect(exception, isAssertionError);
+      expect(
+        exception.toString(),
+        contains('Insufficient horizontal space to render the CupertinoDatePicker'),
+      );
+    });
+
+    testWidgets('DatePicker golden tests', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(
+            child: SizedBox(
+              width: 400,
+              height: 400,
+              child: CupertinoDatePicker(
+                mode: CupertinoDatePickerMode.dateAndTime,
+                initialDateTime: DateTime(2019, 1, 1, 4),
+                onDateTimeChanged: (_) {},
+              )
+            ),
+          )
+        )
+      );
+
+      await expectLater(
+        find.byType(CupertinoDatePicker),
+        matchesGoldenFile('date_picker_test.datetime.initial.png'),
+        skip: !Platform.isLinux
+      );
+
+      // Slightly drag the hour component to make the current hour off-center.
+      await tester.drag(find.text('4'), Offset(0, _kRowOffset.dy / 2));
+      await tester.pump();
+
+      await expectLater(
+        find.byType(CupertinoDatePicker),
+        matchesGoldenFile('date_picker_test.datetime.drag.png'),
+        skip: !Platform.isLinux
+      );
+    });
   });
 
   testWidgets('scrollController can be removed or added', (WidgetTester tester) async {
@@ -871,39 +930,6 @@ void main() {
     ));
     expect(lastSelectedItem, 1);
     handle.dispose();
-  });
-
-  testWidgets('DatePicker golden tests', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        CupertinoApp(
-          home: Center(
-            child: SizedBox(
-              width: 200,
-              child: CupertinoDatePicker(
-                mode: CupertinoDatePickerMode.dateAndTime,
-                initialDateTime: DateTime(2019, 1, 1, 4),
-                onDateTimeChanged: (_) {},
-              )
-            ),
-          )
-        )
-      );
-
-      await expectLater(
-        find.byType(CupertinoDatePicker),
-        matchesGoldenFile('date_picker_test.datetime.initial.png'),
-        skip: !Platform.isLinux
-      );
-
-      // Slightly drag the hour component to make the current hour off-center.
-      await tester.drag(find.text('4'), Offset(0, _kRowOffset.dy / 2));
-      await tester.pump();
-
-      await expectLater(
-        find.byType(CupertinoDatePicker),
-        matchesGoldenFile('date_picker_test.datetime.drag.png'),
-        skip: !Platform.isLinux
-      );
   });
 }
 

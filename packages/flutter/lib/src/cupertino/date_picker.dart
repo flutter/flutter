@@ -66,6 +66,12 @@ class _DatePickerLayoutDelegate extends MultiChildLayoutDelegate {
       if (index == 0 || index == columnWidths.length - 1)
         childWidth += remainingWidth / 2;
 
+      assert(
+        childWidth >= 0,
+        'Insufficient horizontal space to render the CupertinoDatePicker.\n'
+        'An additional ${-remainingWidth}px is needed to avoid overlapping '
+        'columns.',
+      );
       layoutChild(index, BoxConstraints.tight(Size(childWidth, size.height)));
       positionChild(index, Offset(currentHorizontalOffset, 0.0));
 
@@ -142,7 +148,8 @@ enum _PickerColumnType {
 /// Can be used with [showCupertinoModalPopup] to display the picker modally at
 /// the bottom of the screen.
 ///
-/// Sizes itself to its parent. Content texts are shown with
+/// Sizes itself to its parent and may not render correctly if not given the
+/// full screen width. Content texts are shown with
 /// [CupertinoTextThemeData.dateTimePickerTextStyle].
 ///
 /// See also:
