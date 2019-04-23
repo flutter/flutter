@@ -86,19 +86,17 @@ class BottomSheetThemeData extends Diagnosticable {
       return true;
     if (other.runtimeType != runtimeType)
       return false;
-    final BottomSheetThemeData otherData = other;
-    return otherData.backgroundColor == backgroundColor
-        && otherData.elevation == elevation
-        && otherData.shape == shape;
+    final BottomSheetThemeData typedOther = other;
+    return typedOther.backgroundColor == backgroundColor
+        && typedOther.elevation == elevation
+        && typedOther.shape == shape;
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    const BottomSheetThemeData defaultData = BottomSheetThemeData();
-
-    properties.add(DiagnosticsProperty<Color>('backgroundColor', backgroundColor, defaultValue: defaultData.backgroundColor));
-    properties.add(DiagnosticsProperty<double>('elevation', elevation, defaultValue: defaultData.elevation));
-    properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: defaultData.shape));
+    properties.add(DiagnosticsProperty<Color>('backgroundColor', backgroundColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<double>('elevation', elevation, defaultValue: null));
+    properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
   }
 }

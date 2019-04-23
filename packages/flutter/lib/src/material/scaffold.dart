@@ -1462,7 +1462,10 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     }
   }
 
-  PersistentBottomSheetController<T> _buildBottomSheet<T>(WidgetBuilder builder, AnimationController controller, bool isLocalHistoryEntry, {
+  PersistentBottomSheetController<T> _buildBottomSheet<T>(
+    WidgetBuilder builder,
+    AnimationController controller,
+    bool isLocalHistoryEntry, {
     Color color,
     double elevation,
     ShapeBorder shape,
@@ -1558,7 +1561,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   ///    sheet.
   ///  * [Scaffold.of], for information about how to obtain the [ScaffoldState].
   ///  * <https://material.io/design/components/sheets-bottom.html#standard-bottom-sheet>
-  PersistentBottomSheetController<T> showBottomSheet<T>(WidgetBuilder builder, {
+  PersistentBottomSheetController<T> showBottomSheet<T>(
+    WidgetBuilder builder, {
     Color color,
     double elevation,
     ShapeBorder shape,

@@ -96,7 +96,7 @@ class BottomSheet extends StatefulWidget {
   ///
   /// Defines the bottom sheet's [Material.color].
   ///
-  /// Defaults to [Colors.white].
+  /// Defaults to null and falls back to [Material]'s default.
   final Color color;
 
   /// The z-coordinate at which to place this material relative to its parent.
@@ -106,11 +106,11 @@ class BottomSheet extends StatefulWidget {
   /// Defaults to 0. The value is non-negative.
   final double elevation;
 
-  /// The shape of the bottom sheet's [Material].
+  /// The shape of the bottom sheet.
   ///
   /// Defines the bottom sheet's [Material.shape].
   ///
-  /// Defaults to null.
+  /// Defaults to null and falls back to [Material]'s default.
   final ShapeBorder shape;
 
   @override
