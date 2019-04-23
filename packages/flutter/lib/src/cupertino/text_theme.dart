@@ -83,6 +83,7 @@ const TextStyle _kDefaultLargeTitleDarkTextStyle = TextStyle(
   color: CupertinoColors.white,
 );
 
+// Eyeballed value since it's not documented in https://developer.apple.com/design/resources/.
 const TextStyle _kDefaultPickerLightTextStyle = TextStyle(
   inherit: false,
   fontFamily: '.SF Pro Display',
@@ -92,6 +93,7 @@ const TextStyle _kDefaultPickerLightTextStyle = TextStyle(
   color: CupertinoColors.black,
 );
 
+// Eyeballed value since it's not documented in https://developer.apple.com/design/resources/.
 const TextStyle _kDefaultPickerDarkTextStyle = TextStyle(
   inherit: false,
   fontFamily: '.SF Pro Display',
@@ -101,6 +103,7 @@ const TextStyle _kDefaultPickerDarkTextStyle = TextStyle(
   color: CupertinoColors.white,
 );
 
+// Eyeballed value since it's not documented in https://developer.apple.com/design/resources/.
 const TextStyle _kDefaultDateTimePickerLightTextStyle = TextStyle(
   inherit: false,
   fontFamily: '.SF Pro Display',
@@ -110,6 +113,7 @@ const TextStyle _kDefaultDateTimePickerLightTextStyle = TextStyle(
   color: CupertinoColors.black,
 );
 
+// Eyeballed value since it's not documented in https://developer.apple.com/design/resources/.
 const TextStyle _kDefaultDateTimePickerDarkTextStyle = TextStyle(
   inherit: false,
   fontFamily: '.SF Pro Display',

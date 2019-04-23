@@ -16,6 +16,8 @@ const double _kPickerWidth = 330.0;
 const bool _kUseMagnifier = true;
 const double _kMagnification = 1.08;
 const double _kDatePickerPadSize = 12.0;
+// The density of a date picker is different from a generic picker.
+// Eyeballed from iOS.
 const double _kSqueeze = 1.25;
 // Considers setting the default background color from the theme, in the future.
 const Color _kBackgroundColor = CupertinoColors.white;
@@ -345,6 +347,10 @@ class CupertinoDatePicker extends StatefulWidget {
 typedef _ColumnBuilder = Widget Function(double offAxisFraction, TransitionBuilder itemPositioningBuilder);
 
 class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
+  // Fraction of the farthest column's vanishing point vs its width. Eyeballed
+  // vs iOS.
+  static const double _kMaximumOffAxisFraction = 0.45;
+
   int textDirectionFactor;
   CupertinoLocalizations localizations;
 
@@ -655,9 +661,9 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
     for (int i = 0; i < columnWidths.length; i++) {
       double offAxisFraction = 0.0;
       if (i == 0)
-        offAxisFraction = -0.45 * textDirectionFactor;
+        offAxisFraction = -_kMaximumOffAxisFraction * textDirectionFactor;
       else if (i >= 2 || columnWidths.length == 2)
-        offAxisFraction = 0.45 * textDirectionFactor;
+        offAxisFraction = _kMaximumOffAxisFraction * textDirectionFactor;
 
       EdgeInsets padding = const EdgeInsets.only(right: _kDatePickerPadSize);
       if (i == columnWidths.length - 1)
