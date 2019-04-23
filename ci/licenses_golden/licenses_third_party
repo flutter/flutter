@@ -1,4 +1,4 @@
-Signature: b4f8888f322c420b204e79450f0692ae
+Signature: 3148f7013f9e386044199df46bac2b3a
 
 UNUSED LICENSES:
 
@@ -4706,11 +4706,6 @@ FILE: ../../../third_party/dart/runtime/bin/io_buffer.h
 FILE: ../../../third_party/dart/runtime/bin/io_natives.h
 FILE: ../../../third_party/dart/runtime/bin/isolate_data.h
 FILE: ../../../third_party/dart/runtime/bin/lockers.h
-FILE: ../../../third_party/dart/runtime/bin/log.h
-FILE: ../../../third_party/dart/runtime/bin/log_android.cc
-FILE: ../../../third_party/dart/runtime/bin/log_linux.cc
-FILE: ../../../third_party/dart/runtime/bin/log_macos.cc
-FILE: ../../../third_party/dart/runtime/bin/log_win.cc
 FILE: ../../../third_party/dart/runtime/bin/main.cc
 FILE: ../../../third_party/dart/runtime/bin/platform.cc
 FILE: ../../../third_party/dart/runtime/bin/platform.h
@@ -4728,7 +4723,6 @@ FILE: ../../../third_party/dart/runtime/bin/run_vm_tests.cc
 FILE: ../../../third_party/dart/runtime/bin/secure_socket_patch.dart
 FILE: ../../../third_party/dart/runtime/bin/secure_socket_unsupported.cc
 FILE: ../../../third_party/dart/runtime/bin/socket_android.cc
-FILE: ../../../third_party/dart/runtime/bin/socket_base_android.cc
 FILE: ../../../third_party/dart/runtime/bin/socket_base_android.h
 FILE: ../../../third_party/dart/runtime/bin/socket_base_linux.h
 FILE: ../../../third_party/dart/runtime/bin/socket_base_macos.h
@@ -4802,8 +4796,15 @@ FILE: ../../../third_party/dart/runtime/platform/floating_point_win.h
 FILE: ../../../third_party/dart/runtime/platform/globals.h
 FILE: ../../../third_party/dart/runtime/platform/hashmap.cc
 FILE: ../../../third_party/dart/runtime/platform/hashmap.h
+FILE: ../../../third_party/dart/runtime/platform/syslog.h
+FILE: ../../../third_party/dart/runtime/platform/syslog_android.cc
+FILE: ../../../third_party/dart/runtime/platform/syslog_linux.cc
+FILE: ../../../third_party/dart/runtime/platform/syslog_macos.cc
+FILE: ../../../third_party/dart/runtime/platform/syslog_win.cc
 FILE: ../../../third_party/dart/runtime/platform/text_buffer.cc
 FILE: ../../../third_party/dart/runtime/platform/text_buffer.h
+FILE: ../../../third_party/dart/runtime/platform/unicode.cc
+FILE: ../../../third_party/dart/runtime/platform/unicode.h
 FILE: ../../../third_party/dart/runtime/platform/utils.cc
 FILE: ../../../third_party/dart/runtime/platform/utils.h
 FILE: ../../../third_party/dart/runtime/platform/utils_android.cc
@@ -4980,7 +4981,6 @@ FILE: ../../../third_party/dart/runtime/vm/thread_pool_test.cc
 FILE: ../../../third_party/dart/runtime/vm/thread_test.cc
 FILE: ../../../third_party/dart/runtime/vm/token.h
 FILE: ../../../third_party/dart/runtime/vm/unicode.cc
-FILE: ../../../third_party/dart/runtime/vm/unicode.h
 FILE: ../../../third_party/dart/runtime/vm/unit_test.cc
 FILE: ../../../third_party/dart/runtime/vm/utils_test.cc
 FILE: ../../../third_party/dart/runtime/vm/version.h
@@ -5129,7 +5129,10 @@ FILE: ../../../third_party/dart/runtime/bin/entrypoints_verification_test_extens
 FILE: ../../../third_party/dart/runtime/bin/entrypoints_verification_test_extension_dllmain_win.cc
 FILE: ../../../third_party/dart/runtime/bin/ffi_test_dynamic_library.cc
 FILE: ../../../third_party/dart/runtime/bin/ffi_test_functions.cc
+FILE: ../../../third_party/dart/runtime/bin/ifaddrs-android.cc
+FILE: ../../../third_party/dart/runtime/bin/ifaddrs-android.h
 FILE: ../../../third_party/dart/runtime/bin/namespace_fuchsia.h
+FILE: ../../../third_party/dart/runtime/bin/socket_base_android.cc
 FILE: ../../../third_party/dart/runtime/lib/ffi.cc
 FILE: ../../../third_party/dart/runtime/lib/ffi_dynamic_library.cc
 FILE: ../../../third_party/dart/runtime/lib/ffi_dynamic_library_patch.dart
@@ -5560,7 +5563,6 @@ FILE: ../../../third_party/dart/runtime/bin/file_support.cc
 FILE: ../../../third_party/dart/runtime/bin/file_system_watcher_fuchsia.cc
 FILE: ../../../third_party/dart/runtime/bin/loader.cc
 FILE: ../../../third_party/dart/runtime/bin/loader.h
-FILE: ../../../third_party/dart/runtime/bin/log_fuchsia.cc
 FILE: ../../../third_party/dart/runtime/bin/platform_fuchsia.cc
 FILE: ../../../third_party/dart/runtime/bin/process_fuchsia.cc
 FILE: ../../../third_party/dart/runtime/bin/reference_counting.h
@@ -5725,6 +5727,7 @@ FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/top_ret
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/type_arguments.dart
 FILE: ../../../third_party/dart/runtime/observatory/web/timeline_message_handler.js
 FILE: ../../../third_party/dart/runtime/platform/atomic_fuchsia.h
+FILE: ../../../third_party/dart/runtime/platform/syslog_fuchsia.cc
 FILE: ../../../third_party/dart/runtime/platform/utils_fuchsia.cc
 FILE: ../../../third_party/dart/runtime/platform/utils_fuchsia.h
 FILE: ../../../third_party/dart/runtime/vm/clustered_snapshot.cc
