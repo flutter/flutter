@@ -401,7 +401,10 @@ sk_sp<SkImage> MultiFrameCodec::GetNextFrameImage(
                         : SkBitmap();
   const bool frameAlreadyCached = bitmap.getPixels();
   if (!frameAlreadyCached) {
-    const SkImageInfo info = codec_->getInfo().makeColorType(kN32_SkColorType);
+    SkImageInfo info = codec_->getInfo().makeColorType(kN32_SkColorType);
+    if (info.alphaType() == kUnpremul_SkAlphaType) {
+      info = info.makeAlphaType(kPremul_SkAlphaType);
+    }
     bitmap.allocPixels(info);
 
     SkCodec::Options options;
