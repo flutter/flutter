@@ -47,7 +47,9 @@ const double _kInnerRadius = 4.5;
 ///           leading: Radio(
 ///             value: SingingCharacter.lafayette,
 ///             groupValue: _character,
-///             onChanged: (SingingCharacter value) { setState(() { _character = value; }); },
+///             onChanged: (SingingCharacter value) {
+///               setState(() { _character = value; });
+///             },
 ///           ),
 ///         ),
 ///         ListTile(
@@ -55,7 +57,9 @@ const double _kInnerRadius = 4.5;
 ///           leading: Radio(
 ///             value: SingingCharacter.jefferson,
 ///             groupValue: _character,
-///             onChanged: (SingingCharacter value) { setState(() { _character = value; }); },
+///             onChanged: (SingingCharacter value) {
+///               setState(() { _character = value; });
+///             },
 ///           ),
 ///         ),
 ///       ],
