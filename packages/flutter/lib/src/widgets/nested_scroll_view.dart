@@ -498,7 +498,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
 
   bool get hasScrolledBody {
     for (_NestedScrollPosition position in _innerPositions) {
-      if (position.pixels > position.minScrollExtent)
+      if (position.minScrollExtent != null && position.pixels > position.minScrollExtent)
         return true;
     }
     return false;
