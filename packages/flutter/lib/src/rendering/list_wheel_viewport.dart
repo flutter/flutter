@@ -399,6 +399,9 @@ class RenderListWheelViewport
   /// RenderListWheelViewport. With a [squeeze] of 2, 10 items would be shown
   /// in the RenderListWheelViewport.
   ///
+  /// Changing this value will change the number of children built and shown
+  /// inside the wheel.
+  ///
   /// Must not be null and must be positive.
   /// {@endtemplate}
   ///
@@ -412,6 +415,7 @@ class RenderListWheelViewport
       return;
     _squeeze = value;
     markNeedsLayout();
+    markNeedsSemanticsUpdate();
   }
 
   /// {@template flutter.rendering.wheelList.clipToSize}

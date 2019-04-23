@@ -139,6 +139,12 @@ enum _PickerColumnType {
 ///  * US-English: [July | 13 | 2012]
 ///  * Vietnamese: [13 | Tháng 7 | 2012]
 ///
+/// Can be used with [showCupertinoModalPopup] to display the picker modally at
+/// the bottom of the screen.
+///
+/// Sizes itself to its parent. Content texts are shown with
+/// [CupertinoTextThemeData.dateTimePickerTextStyle].
+///
 /// See also:
 ///
 ///  * [CupertinoTimerPicker], the class that implements the iOS-style timer picker.
@@ -994,6 +1000,8 @@ enum CupertinoTimerPickerMode {
 /// The duration is bound between 0 and 23 hours 59 minutes 59 seconds.
 ///
 /// There are several modes of the timer picker listed in [CupertinoTimerPickerMode].
+///
+/// Sizes itself to its parent.
 ///
 /// See also:
 ///

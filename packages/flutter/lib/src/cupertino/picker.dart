@@ -12,8 +12,8 @@ import 'theme.dart';
 /// Color of the 'magnifier' lens border.
 const Color _kHighlighterBorder = Color(0xFF7F7F7F);
 const Color _kDefaultBackground = Color(0xFFD2D4DB);
-// Eyeballed values comparing with a native picker.
-// Values closer to PI produces denser flatter lists.
+// Eyeballed values comparing with a native picker to produce the right
+// curvatures and densities.
 const double _kDefaultDiameterRatio = 1.07;
 const double _kDefaultPerspective = 0.003;
 const double _kSqueeze = 1.45;
@@ -28,6 +28,11 @@ const double _kForegroundScreenOpacityFraction = 0.7;
 ///
 /// Can be used with [showCupertinoModalPopup] to display the picker modally at the
 /// bottom of the screen.
+///
+/// Sizes itself to its parent. All children are sized to the same size based
+/// on [itemExtent].
+///
+/// By default, descendent texts are shown with [CupertinoTextThemeData.pickerTextStyle].
 ///
 /// See also:
 ///
