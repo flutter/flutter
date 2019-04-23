@@ -617,9 +617,10 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
 /// kind can be used for this purpose.
 ///
 /// ### The ink splashes don't track the size of an animated container
-/// When nesting an InkWell in a widget that changes size or animates,
-/// you may notice that ink splashes may clip and result in unusually cut
-/// circles. An example of this situation is as follows:
+/// When you wrap an animating widget with an InkWell, you may notice that ink
+/// splashes may clip and result in unusually cut circles.
+///
+/// An example of this situation is as follows:
 ///
 /// ```dart
 /// InkWell(
