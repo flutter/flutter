@@ -50,15 +50,15 @@
     "plural": "hour"
   },
 
-  "timerPickerMinuteLabelOne": "min",
-  "timerPickerMinuteLabelOther": "min",
+  "timerPickerMinuteLabelOne": "min.",
+  "timerPickerMinuteLabelOther": "min.",
   "@timerPickerMinuteLabel": {
     "description": "The label adjacent to a minute integer number in a countdown timer. The reference abbreviation is what iOS does in the stock clock app's countdown timer.",
     "plural": "minute"
   },
 
-  "timerPickerSecondLabelOne": "sec",
-  "timerPickerSecondLabelOther": "sec",
+  "timerPickerSecondLabelOne": "sec.",
+  "timerPickerSecondLabelOther": "sec.",
   "@timerPickerSecondLabel": {
     "description": "The label adjacent to a second integer number in a countdown timer. The reference abbreviation is what iOS does in the stock clock app's countdown timer.",
     "plural": "second"

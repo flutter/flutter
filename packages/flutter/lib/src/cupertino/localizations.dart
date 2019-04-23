@@ -361,10 +361,10 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
   String timerPickerHourLabel(int hour) => hour == 1 ? 'hour' : 'hours';
 
   @override
-  String timerPickerMinuteLabel(int minute) => 'min';
+  String timerPickerMinuteLabel(int minute) => 'min.';
 
   @override
-  String timerPickerSecondLabel(int second) => 'sec';
+  String timerPickerSecondLabel(int second) => 'sec.';
 
   @override
   String get cutButtonLabel => 'Cut';

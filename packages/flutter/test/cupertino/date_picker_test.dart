@@ -123,13 +123,13 @@ void main() {
       expect(tester.getTopLeft(find.text('30')).dx > lastOffset.dx, true);
       lastOffset = tester.getTopLeft(find.text('30'));
 
-      expect(tester.getTopLeft(find.text('min')).dx > lastOffset.dx, true);
-      lastOffset = tester.getTopLeft(find.text('min'));
+      expect(tester.getTopLeft(find.text('min.')).dx > lastOffset.dx, true);
+      lastOffset = tester.getTopLeft(find.text('min.'));
 
       expect(tester.getTopLeft(find.text('59')).dx > lastOffset.dx, true);
       lastOffset = tester.getTopLeft(find.text('59'));
 
-      expect(tester.getTopLeft(find.text('sec')).dx > lastOffset.dx, true);
+      expect(tester.getTopLeft(find.text('sec.')).dx > lastOffset.dx, true);
     });
 
     testWidgets('columns are ordered correctly when text direction is rtl', (WidgetTester tester) async {
@@ -153,13 +153,13 @@ void main() {
       expect(tester.getTopLeft(find.text('30')).dx > lastOffset.dx, false);
       lastOffset = tester.getTopLeft(find.text('30'));
 
-      expect(tester.getTopLeft(find.text('min')).dx > lastOffset.dx, false);
-      lastOffset = tester.getTopLeft(find.text('min'));
+      expect(tester.getTopLeft(find.text('min.')).dx > lastOffset.dx, false);
+      lastOffset = tester.getTopLeft(find.text('min.'));
 
       expect(tester.getTopLeft(find.text('59')).dx > lastOffset.dx, false);
       lastOffset = tester.getTopLeft(find.text('59'));
 
-      expect(tester.getTopLeft(find.text('sec')).dx > lastOffset.dx, false);
+      expect(tester.getTopLeft(find.text('sec.')).dx > lastOffset.dx, false);
     });
 
     testWidgets('width of picker is consistent', (WidgetTester tester) async {
@@ -178,7 +178,7 @@ void main() {
 
       // Distance between the first column and the last column.
       final double distance =
-        tester.getCenter(find.text('sec')).dx - tester.getCenter(find.text('12')).dx;
+        tester.getCenter(find.text('sec.')).dx - tester.getCenter(find.text('12')).dx;
 
       await tester.pumpWidget(
         CupertinoApp(
@@ -195,7 +195,7 @@ void main() {
 
       // Distance between the first and the last column should be the same.
       expect(
-        tester.getCenter(find.text('sec')).dx - tester.getCenter(find.text('12')).dx,
+        tester.getCenter(find.text('sec.')).dx - tester.getCenter(find.text('12')).dx,
         distance,
       );
     });

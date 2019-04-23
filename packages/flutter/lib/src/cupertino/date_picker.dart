@@ -773,15 +773,15 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
           widget.onDateTimeChanged(DateTime(selectedYear, selectedMonth, selectedDay));
       },
       children: List<Widget>.generate(31, (int index) {
-        TextStyle disableTextStyle; // Null if not out of range.
+        TextStyle textStyle = _themeTextStyle(context);
         if (index >= daysInCurrentMonth) {
-          disableTextStyle = const TextStyle(color: CupertinoColors.inactiveGray);
+          textStyle = textStyle.copyWith(color: CupertinoColors.inactiveGray);
         }
         return itemPositioningBuilder(
           context,
           Text(
             localizations.datePickerDayOfMonth(index + 1),
-            style: disableTextStyle,
+            style: textStyle,
           ),
         );
       }),
@@ -806,7 +806,10 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
       children: List<Widget>.generate(12, (int index) {
         return itemPositioningBuilder(
           context,
-          Text(localizations.datePickerMonth(index + 1)),
+          Text(
+            localizations.datePickerMonth(index + 1),
+            style: _themeTextStyle(context),
+          ),
         );
       }),
       looping: true,
@@ -835,7 +838,10 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
 
         return itemPositioningBuilder(
           context,
-          Text(localizations.datePickerYear(index)),
+          Text(
+            localizations.datePickerYear(index),
+            style: _themeTextStyle(context),
+          ),
         );
       },
     );
@@ -1078,7 +1084,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
   Widget _buildLabel(String text) {
     return Text(
       text,
-      textScaleFactor: 0.8,
+      textScaleFactor: 0.9,
       style: const TextStyle(fontWeight: FontWeight.w600),
     );
   }
