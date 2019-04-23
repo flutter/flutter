@@ -132,10 +132,10 @@ int nthStylusButton(int number) => (kPrimaryStylusButton << (number - 1)) & kMax
 
 /// Returns the button of `buttons` with the smallest integer.
 ///
-/// A `buttons` is a bitfield where each set bit represents a button. This
-/// function returns the set bit closest to the least significant bit.
+/// The `buttons` parameter is a bitfield where each set bit represents a button.
+/// This function returns the set bit closest to the least significant bit.
 ///
-/// It returns 0 for 0.
+/// It returns zero when `buttons` is zero.
 ///
 /// Example:
 ///
@@ -150,12 +150,12 @@ int nthStylusButton(int number) => (kPrimaryStylusButton << (number - 1)) & kMax
 ///   * [isSingleButton], which checks if a `buttons` contains exactly one button.
 int smallestButton(int buttons) => buttons & (-buttons);
 
-/// Returns whether [buttons] contains one and only one button.
+/// Returns whether `buttons` contains one and only one button.
 ///
-/// A `buttons` is a bitfield where each set bit represents a button. This
-/// function returns whether there is only one set bit in the given integer.
+/// The `buttons` parameter is a bitfield where each set bit represents a button.
+/// This function returns whether there is only one set bit in the given integer.
 ///
-/// It returns false for 0.
+/// It returns false when `buttons` is zero.
 ///
 /// Example:
 ///
@@ -167,8 +167,8 @@ int smallestButton(int buttons) => buttons & (-buttons);
 ///
 /// See also:
 ///
-///   * [smallestButton], which returns the button in a `buttons` with the
-///     smallest integer.
+///   * [smallestButton], which returns the button in a `buttons` bitfield with
+///     the smallest integer button.
 bool isSingleButton(int buttons) => buttons != 0 && (smallestButton(buttons) == buttons);
 
 /// Base class for touch, stylus, or mouse events.
