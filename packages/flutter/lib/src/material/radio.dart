@@ -24,8 +24,8 @@ const double _kInnerRadius = 4.5;
 /// The radio button itself does not maintain any state. Instead, selecting the
 /// radio invokes the [onChanged] callback, passing [value] as a parameter. If
 /// [groupValue] and [value] match, this radio will be selected. Most widgets
-/// will listen to [onChanged] with setState to update the radio's visual
-/// appearance.
+/// will respond to [onChanged] by calling [State.setState] to update the
+/// radio button's [groupValue].
 ///
 /// {@tool snippet --template=stateful_widget_scaffold}
 ///
