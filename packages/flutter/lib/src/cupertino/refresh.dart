@@ -249,9 +249,9 @@ typedef RefreshCallback = Future<void> Function();
 ///
 /// Can only be used in downward-scrolling vertical lists that overscrolls. In
 /// other words, refreshes can't be triggered with [Scrollable]s using
-/// [ClampingScrollPhysics] which is the default on Android.
-/// To allow overscroll on Android, use an overscrolling physics such as
-/// [BouncingScrollPhysics]. This can be done via:
+/// [ClampingScrollPhysics] which is the default on Android. To allow overscroll
+/// on Android, use an overscrolling physics such as [BouncingScrollPhysics].
+/// This can be done via:
 ///
 ///  * Providing a [BouncingScrollPhysics] (possibly in combination with a
 ///    [AlwaysScrollableScrollPhysics]) while constructing the scrollable.
