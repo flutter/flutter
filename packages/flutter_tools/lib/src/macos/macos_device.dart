@@ -32,7 +32,7 @@ class MacOSDevice extends Device {
   DeviceLogReader getLogReader({ ApplicationPackage app }) {
     return _deviceLogReader;
   }
-  final _MacOSLogReader _deviceLogReader = _MacOSLogReader();
+  final DesktopLogReader _deviceLogReader = DesktopLogReader();
 
   // Since the host and target devices are the same, no work needs to be done
   // to install the application.
@@ -143,22 +143,4 @@ class MacOSDevices extends PollingDeviceDiscovery {
 
   @override
   Future<List<String>> getDiagnostics() async => const <String>[];
-}
-
-class _MacOSLogReader extends DeviceLogReader {
-  final StreamController<String> _inputController = StreamController<String>.broadcast();
-
-  void _initializeProcess(Process process) {
-    _inputController.addStream(process.stdout
-      .transform(utf8.decoder)
-      .transform(const LineSplitter()));
-  }
-
-  @override
-  Stream<String> get logLines {
-    return _inputController.stream;
-  }
-
-  @override
-  String get name => 'macOS';
 }
