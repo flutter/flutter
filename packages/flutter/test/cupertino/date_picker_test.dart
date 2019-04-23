@@ -830,10 +830,12 @@ void main() {
             child: SizedBox(
               width: 400,
               height: 400,
-              child: CupertinoDatePicker(
-                mode: CupertinoDatePickerMode.dateAndTime,
-                initialDateTime: DateTime(2019, 1, 1, 4),
-                onDateTimeChanged: (_) {},
+              child: RepaintBoundary(
+                child: CupertinoDatePicker(
+                  mode: CupertinoDatePickerMode.dateAndTime,
+                  initialDateTime: DateTime(2019, 1, 1, 4),
+                  onDateTimeChanged: (_) {},
+                ),
               )
             ),
           )
