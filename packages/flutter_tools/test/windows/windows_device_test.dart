@@ -64,7 +64,7 @@ void main() {
     testUsingContext('isSupportedForProject is true with editable host app', () async {
       fs.file('pubspec.yaml').createSync();
       fs.file('.packages').createSync();
-      fs.directory('macos').createSync();
+      fs.directory('windows').createSync();
       final FlutterProject flutterProject = await FlutterProject.current();
 
       expect(WindowsDevice().isSupportedForProject(flutterProject), true);
