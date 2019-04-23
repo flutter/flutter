@@ -19,6 +19,7 @@ import 'color_scheme.dart';
 import 'colors.dart';
 import 'dialog_theme.dart';
 import 'floating_action_button_theme.dart';
+import 'focus_highlight.dart';
 import 'ink_splash.dart';
 import 'ink_well.dart' show InteractiveInkFeatureFactory;
 import 'input_decorator.dart';
@@ -169,6 +170,7 @@ class ThemeData extends Diagnosticable {
     CupertinoThemeData cupertinoOverrideTheme,
     SnackBarThemeData snackBarTheme,
     BottomSheetThemeData bottomSheetTheme,
+    FocusHighlightThemeData focusTheme,
   }) {
     brightness ??= Brightness.light;
     final bool isDark = brightness == Brightness.dark;
@@ -268,6 +270,7 @@ class ThemeData extends Diagnosticable {
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
     snackBarTheme ??= const SnackBarThemeData();
     bottomSheetTheme ??= const BottomSheetThemeData();
+    focusTheme ??= const FocusHighlightThemeData();
 
     return ThemeData.raw(
       brightness: brightness,
@@ -325,6 +328,7 @@ class ThemeData extends Diagnosticable {
       cupertinoOverrideTheme: cupertinoOverrideTheme,
       snackBarTheme: snackBarTheme,
       bottomSheetTheme: bottomSheetTheme,
+      focusHighlightTheme: focusTheme,
     );
   }
 
@@ -337,7 +341,7 @@ class ThemeData extends Diagnosticable {
   /// [new ThemeData] constructor.
   const ThemeData.raw({
     // Warning: make sure these properties are in the exact same order as in
-    // operator == and in the hashValues method and in the order of fields
+    // operator == and in the hashCode method and in the order of fields
     // in this class, and in the lerp() method.
     @required this.brightness,
     @required this.primaryColor,
@@ -394,6 +398,7 @@ class ThemeData extends Diagnosticable {
     @required this.cupertinoOverrideTheme,
     @required this.snackBarTheme,
     @required this.bottomSheetTheme,
+    @required this.focusHighlightTheme,
   }) : assert(brightness != null),
        assert(primaryColor != null),
        assert(primaryColorBrightness != null),
@@ -446,10 +451,11 @@ class ThemeData extends Diagnosticable {
        assert(floatingActionButtonTheme != null),
        assert(typography != null),
        assert(snackBarTheme != null),
-       assert(bottomSheetTheme != null);
+       assert(bottomSheetTheme != null),
+       assert(focusHighlightTheme != null);
 
   // Warning: make sure these properties are in the exact same order as in
-  // hashValues() and in the raw constructor and in the order of fields in
+  // hashCode() and in the raw constructor and in the order of fields in
   // the class and in the lerp() method.
 
   /// A default light blue theme.
@@ -703,9 +709,6 @@ class ThemeData extends Diagnosticable {
   /// that is possible without significant backwards compatibility breaks.
   final ColorScheme colorScheme;
 
-  /// A theme for customizing colors, shape, elevation, and behavior of a [SnackBar].
-  final SnackBarThemeData snackBarTheme;
-
   /// A theme for customizing the shape of a dialog.
   final DialogTheme dialogTheme;
 
@@ -731,6 +734,17 @@ class ThemeData extends Diagnosticable {
 
   /// A theme for customizing the color, elevation, and shape of a bottom sheet.
   final BottomSheetThemeData bottomSheetTheme;
+
+  /// A theme for customizing colors, shape, elevation, and behavior of a [SnackBar].
+  final SnackBarThemeData snackBarTheme;
+
+  /// Defines the appearance of [Focus]s.
+  ///
+  /// This property is used to define the value of [ThemeData.focusHighlightTheme].
+  ///
+  /// The [Focus] widget uses the current focus theme to initialize some
+  /// [Focus] properties (like [Focus.focusedDecoration]).
+  final FocusHighlightThemeData focusHighlightTheme;
 
   /// Creates a copy of this theme but with the given fields replaced with the new values.
   ThemeData copyWith({
@@ -789,6 +803,7 @@ class ThemeData extends Diagnosticable {
     CupertinoThemeData cupertinoOverrideTheme,
     SnackBarThemeData snackBarTheme,
     BottomSheetThemeData bottomSheetTheme,
+    FocusHighlightThemeData focusHighlightTheme,
   }) {
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
     return ThemeData.raw(
@@ -847,6 +862,7 @@ class ThemeData extends Diagnosticable {
       cupertinoOverrideTheme: cupertinoOverrideTheme ?? this.cupertinoOverrideTheme,
       snackBarTheme: snackBarTheme ?? this.snackBarTheme,
       bottomSheetTheme: bottomSheetTheme ?? this.bottomSheetTheme,
+      focusHighlightTheme: focusHighlightTheme ?? this.focusHighlightTheme,
     );
   }
 
@@ -925,7 +941,7 @@ class ThemeData extends Diagnosticable {
     assert(b != null);
     assert(t != null);
     // Warning: make sure these properties are in the exact same order as in
-    // hashValues() and in the raw constructor and in the order of fields in
+    // hashCode() and in the raw constructor and in the order of fields in
     // the class and in the lerp() method.
     return ThemeData.raw(
       brightness: t < 0.5 ? a.brightness : b.brightness,
@@ -983,6 +999,7 @@ class ThemeData extends Diagnosticable {
       cupertinoOverrideTheme: t < 0.5 ? a.cupertinoOverrideTheme : b.cupertinoOverrideTheme,
       snackBarTheme: SnackBarThemeData.lerp(a.snackBarTheme, b.snackBarTheme, t),
       bottomSheetTheme: BottomSheetThemeData.lerp(a.bottomSheetTheme, b.bottomSheetTheme, t),
+      focusHighlightTheme: FocusHighlightThemeData.lerp(a.focusHighlightTheme, b.focusHighlightTheme, t),
     );
   }
 
@@ -992,61 +1009,62 @@ class ThemeData extends Diagnosticable {
       return false;
     final ThemeData otherData = other;
     // Warning: make sure these properties are in the exact same order as in
-    // hashValues() and in the raw constructor and in the order of fields in
+    // hashCode() and in the raw constructor and in the order of fields in
     // the class and in the lerp() method.
-    return (otherData.brightness == brightness) &&
-           (otherData.primaryColor == primaryColor) &&
-           (otherData.primaryColorBrightness == primaryColorBrightness) &&
-           (otherData.primaryColorLight == primaryColorLight) &&
-           (otherData.primaryColorDark == primaryColorDark) &&
-           (otherData.accentColor == accentColor) &&
-           (otherData.accentColorBrightness == accentColorBrightness) &&
-           (otherData.canvasColor == canvasColor) &&
-           (otherData.scaffoldBackgroundColor == scaffoldBackgroundColor) &&
-           (otherData.bottomAppBarColor == bottomAppBarColor) &&
-           (otherData.cardColor == cardColor) &&
-           (otherData.dividerColor == dividerColor) &&
-           (otherData.highlightColor == highlightColor) &&
-           (otherData.splashColor == splashColor) &&
-           (otherData.splashFactory == splashFactory) &&
-           (otherData.selectedRowColor == selectedRowColor) &&
-           (otherData.unselectedWidgetColor == unselectedWidgetColor) &&
-           (otherData.disabledColor == disabledColor) &&
-           (otherData.buttonTheme == buttonTheme) &&
-           (otherData.buttonColor == buttonColor) &&
-           (otherData.secondaryHeaderColor == secondaryHeaderColor) &&
-           (otherData.textSelectionColor == textSelectionColor) &&
-           (otherData.cursorColor == cursorColor) &&
-           (otherData.textSelectionHandleColor == textSelectionHandleColor) &&
-           (otherData.backgroundColor == backgroundColor) &&
-           (otherData.dialogBackgroundColor == dialogBackgroundColor) &&
-           (otherData.indicatorColor == indicatorColor) &&
-           (otherData.hintColor == hintColor) &&
-           (otherData.errorColor == errorColor) &&
-           (otherData.toggleableActiveColor == toggleableActiveColor) &&
-           (otherData.textTheme == textTheme) &&
-           (otherData.primaryTextTheme == primaryTextTheme) &&
-           (otherData.accentTextTheme == accentTextTheme) &&
-           (otherData.inputDecorationTheme == inputDecorationTheme) &&
-           (otherData.iconTheme == iconTheme) &&
-           (otherData.primaryIconTheme == primaryIconTheme) &&
-           (otherData.accentIconTheme == accentIconTheme) &&
-           (otherData.sliderTheme == sliderTheme) &&
-           (otherData.tabBarTheme == tabBarTheme) &&
-           (otherData.cardTheme == cardTheme) &&
-           (otherData.chipTheme == chipTheme) &&
-           (otherData.platform == platform) &&
-           (otherData.materialTapTargetSize == materialTapTargetSize) &&
-           (otherData.pageTransitionsTheme == pageTransitionsTheme) &&
-           (otherData.appBarTheme == appBarTheme) &&
-           (otherData.bottomAppBarTheme == bottomAppBarTheme) &&
-           (otherData.colorScheme == colorScheme) &&
-           (otherData.dialogTheme == dialogTheme) &&
-           (otherData.floatingActionButtonTheme == floatingActionButtonTheme) &&
-           (otherData.typography == typography) &&
-           (otherData.cupertinoOverrideTheme == cupertinoOverrideTheme) &&
-           (otherData.snackBarTheme == snackBarTheme) &&
-           (otherData.bottomSheetTheme == bottomSheetTheme);
+    return (otherData.brightness == brightness)
+        && (otherData.primaryColor == primaryColor)
+        && (otherData.primaryColorBrightness == primaryColorBrightness)
+        && (otherData.primaryColorLight == primaryColorLight)
+        && (otherData.primaryColorDark == primaryColorDark)
+        && (otherData.accentColor == accentColor)
+        && (otherData.accentColorBrightness == accentColorBrightness)
+        && (otherData.canvasColor == canvasColor)
+        && (otherData.scaffoldBackgroundColor == scaffoldBackgroundColor)
+        && (otherData.bottomAppBarColor == bottomAppBarColor)
+        && (otherData.cardColor == cardColor)
+        && (otherData.dividerColor == dividerColor)
+        && (otherData.highlightColor == highlightColor)
+        && (otherData.splashColor == splashColor)
+        && (otherData.splashFactory == splashFactory)
+        && (otherData.selectedRowColor == selectedRowColor)
+        && (otherData.unselectedWidgetColor == unselectedWidgetColor)
+        && (otherData.disabledColor == disabledColor)
+        && (otherData.buttonTheme == buttonTheme)
+        && (otherData.buttonColor == buttonColor)
+        && (otherData.secondaryHeaderColor == secondaryHeaderColor)
+        && (otherData.textSelectionColor == textSelectionColor)
+        && (otherData.cursorColor == cursorColor)
+        && (otherData.textSelectionHandleColor == textSelectionHandleColor)
+        && (otherData.backgroundColor == backgroundColor)
+        && (otherData.dialogBackgroundColor == dialogBackgroundColor)
+        && (otherData.indicatorColor == indicatorColor)
+        && (otherData.hintColor == hintColor)
+        && (otherData.errorColor == errorColor)
+        && (otherData.toggleableActiveColor == toggleableActiveColor)
+        && (otherData.textTheme == textTheme)
+        && (otherData.primaryTextTheme == primaryTextTheme)
+        && (otherData.accentTextTheme == accentTextTheme)
+        && (otherData.inputDecorationTheme == inputDecorationTheme)
+        && (otherData.iconTheme == iconTheme)
+        && (otherData.primaryIconTheme == primaryIconTheme)
+        && (otherData.accentIconTheme == accentIconTheme)
+        && (otherData.sliderTheme == sliderTheme)
+        && (otherData.tabBarTheme == tabBarTheme)
+        && (otherData.cardTheme == cardTheme)
+        && (otherData.chipTheme == chipTheme)
+        && (otherData.platform == platform)
+        && (otherData.materialTapTargetSize == materialTapTargetSize)
+        && (otherData.pageTransitionsTheme == pageTransitionsTheme)
+        && (otherData.appBarTheme == appBarTheme)
+        && (otherData.bottomAppBarTheme == bottomAppBarTheme)
+        && (otherData.colorScheme == colorScheme)
+        && (otherData.dialogTheme == dialogTheme)
+        && (otherData.floatingActionButtonTheme == floatingActionButtonTheme)
+        && (otherData.typography == typography)
+        && (otherData.cupertinoOverrideTheme == cupertinoOverrideTheme)
+        && (otherData.snackBarTheme == snackBarTheme)
+        && (otherData.bottomSheetTheme == bottomSheetTheme)
+        && (otherData.focusHighlightTheme == focusHighlightTheme);
   }
 
   @override
@@ -1170,6 +1188,7 @@ class ThemeData extends Diagnosticable {
     properties.add(DiagnosticsProperty<CupertinoThemeData>('cupertinoOverrideTheme', cupertinoOverrideTheme, defaultValue: defaultData.cupertinoOverrideTheme));
     properties.add(DiagnosticsProperty<SnackBarThemeData>('snackBarTheme', snackBarTheme, defaultValue: defaultData.snackBarTheme));
     properties.add(DiagnosticsProperty<BottomSheetThemeData>('bottomSheetTheme', bottomSheetTheme, defaultValue: defaultData.bottomSheetTheme));
+    properties.add(DiagnosticsProperty<FocusHighlightThemeData>('focusHighlightTheme', focusHighlightTheme, defaultValue: defaultData.focusHighlightTheme));
   }
 }
 

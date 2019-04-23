@@ -967,7 +967,9 @@ class FocusManager with DiagnosticableTreeMixin {
     }
 
     for (FocusNode node in allNodes(_currentFocus)) {
-      if (node.onKey != null && node.onKey(node, event)) {
+      // Specifically compare result against true, in case the onKey call
+      // forgets to return anything.
+      if (node.onKey != null && node.onKey(node, event) == true) {
         break;
       }
     }
