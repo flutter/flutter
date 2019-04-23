@@ -86,7 +86,7 @@ class MacOSDevice extends Device {
     if (debuggingOptions?.buildInfo?.isRelease == true) {
       return LaunchResult.succeeded();
     }
-    _deviceLogReader._initializeProcess(process);
+    _deviceLogReader.initializeProcess(process);
     final ProtocolDiscovery observatoryDiscovery = ProtocolDiscovery.observatory(_deviceLogReader);
     try {
       final Uri observatoryUri = await observatoryDiscovery.uri;
