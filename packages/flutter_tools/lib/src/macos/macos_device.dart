@@ -9,7 +9,6 @@ import '../base/platform.dart';
 import '../base/process_manager.dart';
 import '../build_info.dart';
 import '../cache.dart';
-import '../convert.dart';
 import '../desktop.dart';
 import '../device.dart';
 import '../globals.dart';
