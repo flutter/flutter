@@ -83,7 +83,7 @@ has values in the following ranges.
 
   - **0x01 0000 0000 - 0x01 FFFF FFFF**: For keys that are defined by the USB HID
     standard, the key code consists of the 32 bit USB extended usage code. For
-    example, the Enter key would have code 0x0 0007 0028. Only keys that fall
+    example, the Enter key would have code 0x01 0007 0028. Only keys that fall
     into collections "Keyboard", "Keypad", and "Tablet PC System Controls" are
     considered for this API; for example, a mixing desk with multiple
     collections of volume controls would not be exposed via DOWN and UP events,
