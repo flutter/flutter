@@ -224,9 +224,13 @@ void main() {
     await tester.tap(find.text('ANNULER'));
   });
 
-  group('device configurations', () {
+  group('screen configurations', () {
 
-    Future<void> _showPicker(WidgetTester tester, Locale locale) async {
+    const Size kPixel1Portrait = Size(1070, 1770);
+    const Size kPixel1Landscape = Size(1770, 1070);
+    Future<void> _showPicker(WidgetTester tester, Locale locale, Size size) async {
+      tester.binding.window.physicalSizeTestValue = size;
+      tester.binding.window.devicePixelRatioTestValue = 1.0;
       await tester.pumpWidget(
         MaterialApp(
           home: Builder(
@@ -254,30 +258,22 @@ void main() {
       await tester.pumpAndSettle();
     }
 
-    testWidgets('should display on Pixel portrait, Chinese', (WidgetTester tester) async {
-      _applyConfig(tester, _TestDeviceConfigs.Pixel);
-      await _showPicker(tester, const Locale('zh', 'CN'));
+    // Regression test for https://github.com/flutter/flutter/issues/20171
+    testWidgets('display on Pixel1 - portrait - Chinese', (WidgetTester tester) async {
+      await _showPicker(tester, const Locale('zh', 'CN'), kPixel1Portrait);
     });
 
-    testWidgets('should display on Pixel landscape, Chinese', (WidgetTester tester) async {
-      _applyConfig(tester, _TestDeviceConfigs.Pixel.copyWith(
-        orientation: Orientation.landscape,
-      ));
-      await _showPicker(tester, const Locale('zh', 'CN'));
+    testWidgets('display on Pixel1 - landscape - Chinese', (WidgetTester tester) async {
+      await _showPicker(tester, const Locale('zh', 'CN'), kPixel1Landscape);
     });
 
-    testWidgets('should display on Pixel portrait, Japanese', (WidgetTester tester) async {
-      _applyConfig(tester, _TestDeviceConfigs.Pixel);
-      await _showPicker(tester, const Locale('ja', 'JA'));
+    testWidgets('display on Pixel1 - portrait - Japanese', (WidgetTester tester) async {
+      await _showPicker(tester, const Locale('ja', 'JA'), kPixel1Portrait);
     });
 
-    testWidgets('should display on Pixel landcape, Japanese', (WidgetTester tester) async {
-      _applyConfig(tester, _TestDeviceConfigs.Pixel.copyWith(
-        orientation: Orientation.landscape,
-      ));
-      await _showPicker(tester, const Locale('ja', 'JA'));
+    testWidgets('display on Pixel1 - landscape - Japanese', (WidgetTester tester) async {
+      await _showPicker(tester, const Locale('ja', 'JA'), kPixel1Landscape);
     });
-
   });
 
 }
@@ -296,65 +292,4 @@ Future<void> _pumpBoilerplate(
       child: child,
     ),
   ));
-}
-
-class _TestDeviceConfig {
-
-  const _TestDeviceConfig({
-    this.size = Size.zero,
-    this.devicePixelRatio = 1.0,
-    this.orientation = Orientation.portrait,
-    this.textScaleFactor = 1.0,
-    this.locale,
-  });
-
-  final Size size;
-  final double devicePixelRatio;
-  final Orientation orientation;
-  final double textScaleFactor;
-  final Locale locale;
-
-  _TestDeviceConfig copyWith({
-    Size size,
-    double devicePixelRatio,
-    Orientation orientation,
-    double textScaleFactor,
-  }) {
-    return _TestDeviceConfig(
-      size: size ?? this.size,
-      devicePixelRatio: devicePixelRatio ?? this.devicePixelRatio,
-      orientation: orientation ?? this.orientation,
-      textScaleFactor: textScaleFactor ?? this.textScaleFactor,
-    );
-  }
-
-  Size get orientedSize {
-    final Orientation sizeOrientation = size.width <= size.height
-        ? Orientation.portrait
-        : Orientation.landscape;
-    if (sizeOrientation != orientation) {
-      return Size(size.height, size.width);
-    }
-    return size;
-  }
-}
-
-class _TestDeviceConfigs {
-  _TestDeviceConfigs._();
-
-  static const _TestDeviceConfig Pixel = _TestDeviceConfig(
-    size: Size(411.4, 683.4),
-    devicePixelRatio: 2.6,
-  );
-
-  static const _TestDeviceConfig SmallDisplay = _TestDeviceConfig(
-    size: Size(320, 521),
-    devicePixelRatio: 1.0,
-  );
-}
-
-void _applyConfig(WidgetTester tester, _TestDeviceConfig config) {
-  tester.binding.window.physicalSizeTestValue = config.orientedSize * config.devicePixelRatio;
-  tester.binding.window.devicePixelRatioTestValue = config.devicePixelRatio;
-  tester.binding.window.textScaleFactorTestValue = config.textScaleFactor;
 }
