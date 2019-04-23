@@ -37,6 +37,9 @@ String flutterMacOSFrameworkDir(BuildMode mode) {
 /// useMacOSConfig: Optional parameter that controls whether we use the macOS
 /// project file instead. Defaults to false.
 ///
+/// symrootOverride: Optional parameter to specifify the symroot instead of
+/// the default relative path.
+///
 /// targetOverride: Optional parameter, if null or unspecified the default value
 /// from xcode_backend.sh is used 'lib/main.dart'.
 Future<void> updateGeneratedXcodeProperties({
@@ -44,6 +47,7 @@ Future<void> updateGeneratedXcodeProperties({
   @required BuildInfo buildInfo,
   String targetOverride,
   bool useMacOSConfig = false,
+  String symrootOverride,
 }) async {
   final StringBuffer localsBuffer = StringBuffer();
 
@@ -65,7 +69,11 @@ Future<void> updateGeneratedXcodeProperties({
   final String buildDirectory = useMacOSConfig
       ? getMacOSBuildDirectory()
       : getIosBuildDirectory();
-  localsBuffer.writeln('SYMROOT=\${SOURCE_ROOT}/../$buildDirectory');
+  if (symrootOverride != null) {
+    localsBuffer.writeln('SYMROOT=$symrootOverride');
+  } else {
+    localsBuffer.writeln('SYMROOT=\${SOURCE_ROOT}/../$buildDirectory');
+  }
 
   if (!project.isModule) {
     // For module projects we do not want to write the FLUTTER_FRAMEWORK_DIR

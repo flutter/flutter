@@ -90,7 +90,7 @@ import 'package:flutter/foundation.dart';
 ///                 onTap: () {
 ///                   FocusScope.of(context).requestFocus(_focusNode);
 ///                 },
-///                 child: const Text('Tap to focus'),
+///                 child: Text('Tap to focus'),
 ///               );
 ///             }
 ///             return Text(_message ?? 'Press a key');
