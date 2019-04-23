@@ -120,7 +120,7 @@ class FlutterManifest {
   }
 
   bool get usesAndroidX {
-    return _flutterDescriptor['module']['androidx'] ?? false;
+    return _flutterDescriptor['module']['androidX'] ?? false;
   }
 
   /// True if this manifest declares a Flutter module project.
