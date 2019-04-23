@@ -480,7 +480,13 @@ class ThemeData extends Diagnosticable {
   final Color canvasColor;
 
   /// The foreground color for widgets (knobs, text, overscroll edge effect, etc).
-  /// It is also known as the secondary color.
+  ///
+  /// Accent color can also known as the secondary color.
+  ///
+  /// The theme's [colorScheme] property contains [ColorScheme.secondary], as
+  /// well as a color that contrasts well with the secondary color called
+  /// [ColorScheme.onSecondary]. These may be more convenient alternatives, as
+  /// they already follow the baseline Material color schemes.
   final Color accentColor;
 
   /// The brightness of the [accentColor]. Used to determine the color of text
