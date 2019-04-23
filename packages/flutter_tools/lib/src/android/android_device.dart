@@ -885,12 +885,12 @@ class _AndroidDevicePortForwarder extends DevicePortForwarder {
         process.throwException('adb did not report forwarded port');
       hostPort = int.tryParse(process.stdout) ?? (throw 'adb returned invalid port number:\n${process.stdout}');
     } else {
-      // dantup: stdout may be empty, or the port we asked it to forward
+      // dantup: stdout may be empty or the port we asked it to forward,
       // depending on some factors I do not understand. On MacOS it's always
-      // empty for Flutter, yet at the terminal it returns the port number
-      // if it forwarded, and nothing if it was already being forwarded. On CrOS
-      // it returns the port number even to Flutter, which results in a failure
-      // even though everything worked fine.
+      // empty for Flutter, yet at the terminal it prints the port number
+      // only if it forwarded (nothing if it was already being forwarded).
+      // On CrOS it prints the port number even for Flutter, which results in a
+      // failure unless we allow the hostPort in the output here.
       if (process.stdout.isNotEmpty && process.stdout.trim() != '$hostPort')
         process.throwException('adb returned error:\n${process.stdout}');
     }
