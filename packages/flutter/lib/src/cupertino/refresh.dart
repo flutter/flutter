@@ -248,15 +248,17 @@ typedef RefreshCallback = Future<void> Function();
 /// and the indicator sliver has retracted at least 90% of the way back.
 ///
 /// Can only be used in downward-scrolling vertical lists that overscrolls. In
-/// other words, refreshes can't be triggered with sliver lists using
-/// [ClampingScrollPhysics]. It will not work on Android unless a [ScrollPhysics]
-/// that allows the list to overscroll (e.g., a combination
-/// of [BouncingScrollPhysics] and [AlwaysScrollableScrollPhysics]) is used
-/// by the sliver list, such is the case for `CupertinoApp`.
-/// Common ways to achieve this include:
+/// other words, refreshes can't be triggered with [Scrollable]s using
+/// [ClampingScrollPhysics] which is the default on Android.
+/// To allow overscroll on Android, use an overscrolling physics such as
+/// [BouncingScrollPhysics]. This can be done via:
 ///
-///  * By providing such [ScrollPhysics] in the sliver list's constructor.
-///  * By using such [ScrollPhysics] in the ambient [ScrollConfiguration] widget.
+///  * Providing a [BouncingScrollPhysics] (possibly in combination with a
+///    [AlwaysScrollableScrollPhysics]) while constructing the scrollable.
+///  * By inserting a [ScrollConfiguration] with [BouncingScrollPhysics] above
+///    the scrollable.
+///  * By using [CupertinoApp], which always uses a [ScrollConfiguration]
+///    with [BouncingScrollPhysics] regardless of platform.
 ///
 /// In a typical application, this sliver should be inserted between the app bar
 /// sliver such as [CupertinoSliverNavigationBar] and your main scrollable
