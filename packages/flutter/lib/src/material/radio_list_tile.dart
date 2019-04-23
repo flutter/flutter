@@ -228,7 +228,13 @@ class RadioListTile<T> extends StatelessWidget {
           isThreeLine: isThreeLine,
           dense: dense,
           enabled: onChanged != null,
-          onTap: onChanged != null ? () { onChanged(value); } : null,
+          onTap: onChanged != null ?
+            () {
+              if (!checked) {
+                onChanged(value);
+              }
+            } :
+            null,
           selected: selected,
         ),
       ),
