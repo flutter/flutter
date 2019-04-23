@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:flutter_tools/src/project.dart';
 import 'package:meta/meta.dart';
 
 import '../application_package.dart';
@@ -18,6 +17,7 @@ import '../build_info.dart';
 import '../convert.dart';
 import '../device.dart';
 import '../globals.dart';
+import '../project.dart';
 import '../protocol_discovery.dart';
 import 'code_signing.dart';
 import 'ios_workflow.dart';

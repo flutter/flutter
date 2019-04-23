@@ -5,8 +5,6 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:flutter_tools/src/project.dart';
-
 import '../application_package.dart';
 import '../base/common.dart';
 import '../base/context.dart';
@@ -21,6 +19,7 @@ import '../bundle.dart' as bundle;
 import '../convert.dart';
 import '../device.dart';
 import '../globals.dart';
+import '../project.dart';
 import '../protocol_discovery.dart';
 import 'ios_workflow.dart';
 import 'mac.dart';

@@ -375,6 +375,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   if (hasPlugins(project) || (project.isModule && project.ios.podfile.existsSync())) {
     // If the Xcode project, Podfile, or Generated.xcconfig have changed since
     // last run, pods should be updated.
+    // TODO(jonahwilliams): write integration tests that exercise this fingerprinter.
     final Fingerprinter fingerprinter = Fingerprinter(
       fingerprintPath: fs.path.join(getIosBuildDirectory(), 'pod_inputs.fingerprint'),
       paths: <String>[

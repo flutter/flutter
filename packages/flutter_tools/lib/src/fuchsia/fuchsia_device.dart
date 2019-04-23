@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:flutter_tools/src/project.dart';
 import 'package:meta/meta.dart';
 
 import '../application_package.dart';
@@ -18,6 +17,7 @@ import '../base/time.dart';
 import '../build_info.dart';
 import '../device.dart';
 import '../globals.dart';
+import '../project.dart';
 import '../vmservice.dart';
 
 import 'fuchsia_sdk.dart';
