@@ -648,7 +648,7 @@ mixin TargetPlatformBasedDevelopmentArtifacts on FlutterCommand {
     };
     final DevelopmentArtifact developmentArtifact = _artifactFromTargetPlatform(targetPlatform);
     if (developmentArtifact != null) {
-      artifacts.add(developmentArtifact); 
+      artifacts.add(developmentArtifact);
     }
     return artifacts;
   }
