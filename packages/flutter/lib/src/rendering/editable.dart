@@ -295,16 +295,6 @@ class RenderEditable extends RenderBox {
   ValueListenable<bool> get selectionEndInViewport => _selectionEndInViewport;
   final ValueNotifier<bool> _selectionEndInViewport = ValueNotifier<bool>(true);
 
-  // Returns a bool indicating if the offset is within factor of being contained
-  // within the rect.
-  static bool _containsFuzzy(Rect rect, Offset offset, [double factor = 0.1]) {
-    return rect.contains(offset)
-      || rect.contains(offset + Offset(factor, factor))
-      || rect.contains(offset + Offset(factor, -factor))
-      || rect.contains(offset + Offset(-factor, factor))
-      || rect.contains(offset + Offset(-factor, -factor));
-  }
-
   void _updateSelectionExtentsVisibility(Offset effectiveOffset) {
     final Rect visibleRegion = Offset.zero & size;
 
@@ -312,25 +302,24 @@ class RenderEditable extends RenderBox {
       TextPosition(offset: _selection.start, affinity: _selection.affinity),
       Rect.zero,
     );
-    // Check if the caret is visible with an approximation because of an error
-    // in the engine that always reports that the caret extends above the input
-    // by a small amount. See paragraph.cc's implementation of GetRectsForRange.
+    // Check if the caret is visible with an approximation because a difference
+    // between rounded and unrounded values causes the caret to be reported as
+    // having a very slightly negative y offset. This rounding happens in
+    // paragraph.cc's layout and TextPainer's _applyFloatingPointHack. Ideally,
+    // the rounding mismatch will be fixed and this can be changed to be a
+    // strict check instead of an approximation.
     const double kApproximateFactor = 0.1;
-    _selectionStartInViewport.value = _containsFuzzy(
-      visibleRegion,
-      startOffset + effectiveOffset,
-      kApproximateFactor,
-    );
+    _selectionStartInViewport.value = visibleRegion
+      .inflate(kApproximateFactor)
+      .contains(startOffset + effectiveOffset);
 
     final Offset endOffset =  _textPainter.getOffsetForCaret(
       TextPosition(offset: _selection.end, affinity: _selection.affinity),
       Rect.zero,
     );
-    _selectionEndInViewport.value = _containsFuzzy(
-      visibleRegion,
-      endOffset + effectiveOffset,
-      kApproximateFactor,
-    );
+    _selectionEndInViewport.value = visibleRegion
+      .inflate(kApproximateFactor)
+      .contains(endOffset + effectiveOffset);
   }
 
   static const int _kLeftArrowCode = 21;
