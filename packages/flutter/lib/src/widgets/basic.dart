@@ -8,8 +8,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 
 import 'debug.dart';
 import 'framework.dart';
@@ -3684,12 +3682,6 @@ class Flex extends MultiChildRenderObjectWidget {
        assert(crossAxisAlignment != null),
        assert(verticalDirection != null),
        assert(crossAxisAlignment != CrossAxisAlignment.baseline || textBaseline != null),
-       assert(
-         !children.any((Widget widget) =>
-           direction == Axis.horizontal && (widget is TextField || widget is CupertinoTextField)
-         ),
-         'TextField cannot have an unbounded width. If you want it to take up the leftover space inside its parent, try wrapping it in a Flexible.',
-       ),
        super(key: key, children: children);
 
   /// The direction to use as the main axis.

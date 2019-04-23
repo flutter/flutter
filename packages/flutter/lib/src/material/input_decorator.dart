@@ -836,7 +836,13 @@ class _RenderDecoration extends RenderBox {
   _RenderDecorationLayout _layout(BoxConstraints layoutConstraints) {
     assert(
       layoutConstraints.maxWidth < double.infinity,
-      'A text input cannot have an unbounded width. If you want it to take up the leftover space inside its parent, try wrapping it in a Flexible.',
+      'An InputDecorator, which is typically created by a TextField, cannot '
+      'have an unbounded width.\n'
+      'This happens when the parent widget does not provide a finite width '
+      'constraint. For example, if the InputDecorator is contained by a Row, '
+      'then its width must be constrained. An Expanded widget or a SizedBox '
+      'can be used to constrain the width of the InputDecorator or the '
+      'TextField that contains it.',
     );
 
     // Margin on each side of subtext (counter and helperError)
