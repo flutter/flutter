@@ -22,6 +22,10 @@ final FocusScopeNode focusScopeNode = FocusScopeNode();
 const TextStyle textStyle = TextStyle();
 const Color cursorColor = Color.fromARGB(0xFF, 0xFF, 0x00, 0x00);
 
+enum HandlePositionInViewport {
+  leftEdge, rightEdge, within,
+}
+
 void main() {
   setUp(() {
     debugResetSemanticsIdCounter();
@@ -470,14 +474,10 @@ void main() {
   });
 
   testWidgets('Fires onChanged when text changes via TextSelectionOverlay', (WidgetTester tester) async {
-    final GlobalKey<EditableTextState> editableTextKey =
-        GlobalKey<EditableTextState>();
-
     String changedValue;
     final Widget widget = MaterialApp(
       home: EditableText(
         backgroundCursorColor: Colors.grey,
-        key: editableTextKey,
         controller: TextEditingController(),
         focusNode: FocusNode(),
         style: Typography(platform: TargetPlatform.android).black.subhead,
@@ -501,7 +501,7 @@ void main() {
       });
 
     // Long-press to bring up the text editing controls.
-    final Finder textFinder = find.byKey(editableTextKey);
+    final Finder textFinder = find.byType(EditableText);
     await tester.longPress(textFinder);
     tester.state<EditableTextState>(textFinder).showToolbar();
     await tester.pump();
@@ -513,14 +513,11 @@ void main() {
   });
 
   testWidgets('Does not lose focus by default when "next" action is pressed', (WidgetTester tester) async {
-    final GlobalKey<EditableTextState> editableTextKey =
-        GlobalKey<EditableTextState>();
     final FocusNode focusNode = FocusNode();
 
     final Widget widget = MaterialApp(
       home: EditableText(
         backgroundCursorColor: Colors.grey,
-        key: editableTextKey,
         controller: TextEditingController(),
         focusNode: focusNode,
         style: Typography(platform: TargetPlatform.android).black.subhead,
@@ -532,7 +529,7 @@ void main() {
     await tester.pumpWidget(widget);
 
     // Select EditableText to give it focus.
-    final Finder textFinder = find.byKey(editableTextKey);
+    final Finder textFinder = find.byType(EditableText);
     await tester.tap(textFinder);
     await tester.pump();
 
@@ -546,14 +543,11 @@ void main() {
   });
 
   testWidgets('Does not lose focus by default when "done" action is pressed and onEditingComplete is provided', (WidgetTester tester) async {
-    final GlobalKey<EditableTextState> editableTextKey =
-        GlobalKey<EditableTextState>();
     final FocusNode focusNode = FocusNode();
 
     final Widget widget = MaterialApp(
       home: EditableText(
         backgroundCursorColor: Colors.grey,
-        key: editableTextKey,
         controller: TextEditingController(),
         focusNode: focusNode,
         style: Typography(platform: TargetPlatform.android).black.subhead,
@@ -568,7 +562,7 @@ void main() {
     await tester.pumpWidget(widget);
 
     // Select EditableText to give it focus.
-    final Finder textFinder = find.byKey(editableTextKey);
+    final Finder textFinder = find.byType(EditableText);
     await tester.tap(textFinder);
     await tester.pump();
 
@@ -583,8 +577,6 @@ void main() {
   });
 
   testWidgets('When "done" is pressed callbacks are invoked: onEditingComplete > onSubmitted', (WidgetTester tester) async {
-    final GlobalKey<EditableTextState> editableTextKey =
-        GlobalKey<EditableTextState>();
     final FocusNode focusNode = FocusNode();
 
     bool onEditingCompleteCalled = false;
@@ -593,7 +585,6 @@ void main() {
     final Widget widget = MaterialApp(
       home: EditableText(
         backgroundCursorColor: Colors.grey,
-        key: editableTextKey,
         controller: TextEditingController(),
         focusNode: focusNode,
         style: Typography(platform: TargetPlatform.android).black.subhead,
@@ -611,7 +602,7 @@ void main() {
     await tester.pumpWidget(widget);
 
     // Select EditableText to give it focus.
-    final Finder textFinder = find.byKey(editableTextKey);
+    final Finder textFinder = find.byType(EditableText);
     await tester.tap(textFinder);
     await tester.pump();
 
@@ -626,8 +617,6 @@ void main() {
   });
 
   testWidgets('When "next" is pressed callbacks are invoked: onEditingComplete > onSubmitted', (WidgetTester tester) async {
-    final GlobalKey<EditableTextState> editableTextKey =
-        GlobalKey<EditableTextState>();
     final FocusNode focusNode = FocusNode();
 
     bool onEditingCompleteCalled = false;
@@ -636,7 +625,6 @@ void main() {
     final Widget widget = MaterialApp(
       home: EditableText(
         backgroundCursorColor: Colors.grey,
-        key: editableTextKey,
         controller: TextEditingController(),
         focusNode: focusNode,
         style: Typography(platform: TargetPlatform.android).black.subhead,
@@ -654,7 +642,7 @@ void main() {
     await tester.pumpWidget(widget);
 
     // Select EditableText to give it focus.
-    final Finder textFinder = find.byKey(editableTextKey);
+    final Finder textFinder = find.byType(EditableText);
     await tester.tap(textFinder);
     await tester.pump();
 
@@ -669,8 +657,6 @@ void main() {
   });
 
   testWidgets('When "newline" action is called on a Editable text with maxLines == 1 callbacks are invoked: onEditingComplete > onSubmitted', (WidgetTester tester) async {
-    final GlobalKey<EditableTextState> editableTextKey =
-        GlobalKey<EditableTextState>();
     final FocusNode focusNode = FocusNode();
 
     bool onEditingCompleteCalled = false;
@@ -679,7 +665,6 @@ void main() {
     final Widget widget = MaterialApp(
       home: EditableText(
         backgroundCursorColor: Colors.grey,
-        key: editableTextKey,
         controller: TextEditingController(),
         focusNode: focusNode,
         style: Typography(platform: TargetPlatform.android).black.subhead,
@@ -698,7 +683,7 @@ void main() {
     await tester.pumpWidget(widget);
 
     // Select EditableText to give it focus.
-    final Finder textFinder = find.byKey(editableTextKey);
+    final Finder textFinder = find.byType(EditableText);
     await tester.tap(textFinder);
     await tester.pump();
 
@@ -712,8 +697,6 @@ void main() {
   });
 
   testWidgets('When "newline" action is called on a Editable text with maxLines != 1, onEditingComplete and onSubmitted callbacks are not invoked.', (WidgetTester tester) async {
-    final GlobalKey<EditableTextState> editableTextKey =
-        GlobalKey<EditableTextState>();
     final FocusNode focusNode = FocusNode();
 
     bool onEditingCompleteCalled = false;
@@ -722,7 +705,6 @@ void main() {
     final Widget widget = MaterialApp(
       home: EditableText(
         backgroundCursorColor: Colors.grey,
-        key: editableTextKey,
         controller: TextEditingController(),
         focusNode: focusNode,
         style: Typography(platform: TargetPlatform.android).black.subhead,
@@ -739,7 +721,7 @@ void main() {
     await tester.pumpWidget(widget);
 
     // Select EditableText to give it focus.
-    final Finder textFinder = find.byKey(editableTextKey);
+    final Finder textFinder = find.byType(EditableText);
     await tester.tap(textFinder);
     await tester.pump();
 
@@ -755,8 +737,6 @@ void main() {
   });
 
   testWidgets('Changing controller updates EditableText', (WidgetTester tester) async {
-    final GlobalKey<EditableTextState> editableTextKey =
-        GlobalKey<EditableTextState>();
     final TextEditingController controller1 =
         TextEditingController(text: 'Wibble');
     final TextEditingController controller2 =
@@ -776,7 +756,6 @@ void main() {
                 child: Material(
                   child: EditableText(
                     backgroundCursorColor: Colors.grey,
-                    key: editableTextKey,
                     controller: currentController,
                     focusNode: FocusNode(),
                     style: Typography(platform: TargetPlatform.android)
@@ -1905,15 +1884,12 @@ void main() {
         composing: TextRange(start: 5, end: 14),
       ),
     );
-    final GlobalKey<EditableTextState> editableTextKey =
-        GlobalKey<EditableTextState>();
     final FocusNode focusNode = FocusNode();
 
     await tester.pumpWidget(MaterialApp( // So we can show overlays.
       home: EditableText(
         autofocus: true,
         backgroundCursorColor: Colors.grey,
-        key: editableTextKey,
         controller: controller,
         focusNode: focusNode,
         style: textStyle,
@@ -1944,9 +1920,6 @@ void main() {
   });
 
   testWidgets('text selection handle visibility', (WidgetTester tester) async {
-    final GlobalKey<EditableTextState> editableTextKey =
-        GlobalKey<EditableTextState>();
-
     const String testText = 'XXXXX          XXXXX';
     final TextEditingController controller = TextEditingController(text: testText);
 
@@ -1956,7 +1929,6 @@ void main() {
         child: SizedBox(
           width: 100,
           child: EditableText(
-            key: editableTextKey,
             controller: controller,
             focusNode: FocusNode(),
             style: Typography(platform: TargetPlatform.android).black.subhead,
@@ -1980,10 +1952,10 @@ void main() {
     bool rightVisibleBefore = false;
 
     Future<void> verifyVisibility(
+      HandlePositionInViewport leftPosition,
       bool leftVisible,
-      Symbol leftPosition,
+      HandlePositionInViewport rightPosition,
       bool rightVisible,
-      Symbol rightPosition,
     ) async {
       await tester.pump();
 
@@ -2023,21 +1995,27 @@ void main() {
       leftVisibleBefore = leftVisible;
       rightVisibleBefore = rightVisible;
 
-      // Check that the handles' positions are correct (clamped within the
-      // viewport but not stuck).
+      // Check that the handles' positions are correct.
 
       final List<Positioned> positioned =
         find.byType(Positioned).evaluate().map((Element e) => e.widget).cast<Positioned>().toList();
 
       final Size viewport = renderEditable.size;
 
-      void testPosition(double pos, Symbol expected) {
-        if (expected == #left)
-          expect(pos, equals(0.0));
-        if (expected == #right)
-          expect(pos, equals(viewport.width));
-        if (expected == #middle)
-          expect(pos, inExclusiveRange(0.0, viewport.width));
+      void testPosition(double pos, HandlePositionInViewport expected) {
+        switch (expected) {
+          case HandlePositionInViewport.leftEdge:
+            expect(pos, equals(0.0));
+            break;
+          case HandlePositionInViewport.rightEdge:
+            expect(pos, equals(viewport.width));
+            break;
+          case HandlePositionInViewport.within:
+            expect(pos, inExclusiveRange(0.0, viewport.width));
+            break;
+          default:
+            throw TestFailure('HandlePositionInViewport can\'t be null.');
+        }
       }
 
       testPosition(positioned[0].left, leftPosition);
@@ -2048,44 +2026,43 @@ void main() {
     await tester.tapAt(const Offset(20, 10));
     renderEditable.selectWord(cause: SelectionChangedCause.longPress);
     await tester.pump();
-    await verifyVisibility(true, #left, true, #middle);
+    await verifyVisibility(HandlePositionInViewport.leftEdge, true, HandlePositionInViewport.within, true);
 
     // Drag the text slightly so the first word is partially visible. Only the
     // right handle should be visible.
     scrollable.controller.jumpTo(20.0);
-    await verifyVisibility(false, #left, true, #middle);
+    await verifyVisibility(HandlePositionInViewport.leftEdge, false, HandlePositionInViewport.within, true);
 
     // Drag the text all the way to the left so the first word is not visible at
     // all (and the second word is fully visible). Both handles should be
     // invisible now.
     scrollable.controller.jumpTo(200.0);
-    await verifyVisibility(false, #left, false, #left);
+    await verifyVisibility(HandlePositionInViewport.leftEdge, false, HandlePositionInViewport.leftEdge, false);
 
     // Tap to unselect.
-    await tester.tap(find.byKey(editableTextKey));
+    await tester.tap(find.byType(EditableText));
     await tester.pump();
 
     // Now that the second word has been dragged fully into view, select it.
     await tester.tapAt(const Offset(80, 10));
     renderEditable.selectWord(cause: SelectionChangedCause.longPress);
     await tester.pump();
-    await verifyVisibility(true, #middle, true, #middle);
+    await verifyVisibility(HandlePositionInViewport.within, true, HandlePositionInViewport.within, true);
 
     // Drag the text slightly to the right. Only the left handle should be
     // visible.
     scrollable.controller.jumpTo(150);
-    await verifyVisibility(true, #middle, false, #right);
+    await verifyVisibility(HandlePositionInViewport.within, true, HandlePositionInViewport.rightEdge, false);
 
     // Drag the text all the way to the right, so the second word is not visible
     // at all. Again, both handles should be invisible.
     scrollable.controller.jumpTo(0);
-    await verifyVisibility(false, #right, false, #right);
+    await verifyVisibility(HandlePositionInViewport.rightEdge, false, HandlePositionInViewport.rightEdge, false);
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/31287
   testWidgets('iOS text selection handle visibility', (WidgetTester tester) async {
     debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
-    final GlobalKey<EditableTextState> editableTextKey =
-        GlobalKey<EditableTextState>();
 
     const String testText = 'XXXXX          XXXXX';
     final TextEditingController controller = TextEditingController(text: testText);
@@ -2097,7 +2074,6 @@ void main() {
           child: SizedBox(
             width: 100,
             child: EditableText(
-              key: editableTextKey,
               controller: controller,
               focusNode: FocusNode(),
               style: Typography(platform: TargetPlatform.iOS).black.subhead,
@@ -2122,10 +2098,10 @@ void main() {
     bool rightVisibleBefore = false;
 
     Future<void> verifyVisibility(
+      HandlePositionInViewport leftPosition,
       bool leftVisible,
-      Symbol leftPosition,
+      HandlePositionInViewport rightPosition,
       bool rightVisible,
-      Symbol rightPosition,
     ) async {
       await tester.pump();
 
@@ -2165,21 +2141,27 @@ void main() {
       leftVisibleBefore = leftVisible;
       rightVisibleBefore = rightVisible;
 
-      // Check that the handles' positions are correct (clamped within the
-      // viewport but not stuck).
+      // Check that the handles' positions are correct.
 
       final List<Positioned> positioned =
         find.byType(Positioned).evaluate().map((Element e) => e.widget).cast<Positioned>().toList();
 
       final Size viewport = renderEditable.size;
 
-      void testPosition(double pos, Symbol expected) {
-        if (expected == #left)
-          expect(pos, equals(0.0));
-        if (expected == #right)
-          expect(pos, equals(viewport.width));
-        if (expected == #middle)
-          expect(pos, inExclusiveRange(0.0, viewport.width));
+      void testPosition(double pos, HandlePositionInViewport expected) {
+        switch (expected) {
+          case HandlePositionInViewport.leftEdge:
+            expect(pos, equals(0.0));
+            break;
+          case HandlePositionInViewport.rightEdge:
+            expect(pos, equals(viewport.width));
+            break;
+          case HandlePositionInViewport.within:
+            expect(pos, inExclusiveRange(0.0, viewport.width));
+            break;
+          default:
+            throw TestFailure('HandlePositionInViewport can\'t be null.');
+        }
       }
 
       testPosition(positioned[1].left, leftPosition);
@@ -2190,38 +2172,38 @@ void main() {
     await tester.tapAt(const Offset(20, 10));
     renderEditable.selectWord(cause: SelectionChangedCause.longPress);
     await tester.pump();
-    await verifyVisibility(true, #left, true, #middle);
+    await verifyVisibility(HandlePositionInViewport.leftEdge, true, HandlePositionInViewport.within, true);
 
     // Drag the text slightly so the first word is partially visible. Only the
     // right handle should be visible.
     scrollable.controller.jumpTo(20.0);
-    await verifyVisibility(false, #left, true, #middle);
+    await verifyVisibility(HandlePositionInViewport.leftEdge, false, HandlePositionInViewport.within, true);
 
     // Drag the text all the way to the left so the first word is not visible at
     // all (and the second word is fully visible). Both handles should be
     // invisible now.
     scrollable.controller.jumpTo(200.0);
-    await verifyVisibility(false, #left, false, #left);
+    await verifyVisibility(HandlePositionInViewport.leftEdge, false, HandlePositionInViewport.leftEdge, false);
 
     // Tap to unselect.
-    await tester.tap(find.byKey(editableTextKey));
+    await tester.tap(find.byType(EditableText));
     await tester.pump();
 
     // Now that the second word has been dragged fully into view, select it.
     await tester.tapAt(const Offset(80, 10));
     renderEditable.selectWord(cause: SelectionChangedCause.longPress);
     await tester.pump();
-    await verifyVisibility(true, #middle, true, #middle);
+    await verifyVisibility(HandlePositionInViewport.within, true, HandlePositionInViewport.within, true);
 
     // Drag the text slightly to the right. Only the left handle should be
     // visible.
     scrollable.controller.jumpTo(150);
-    await verifyVisibility(true, #middle, false, #right);
+    await verifyVisibility(HandlePositionInViewport.within, true, HandlePositionInViewport.rightEdge, false);
 
     // Drag the text all the way to the right, so the second word is not visible
     // at all. Again, both handles should be invisible.
     scrollable.controller.jumpTo(0);
-    await verifyVisibility(false, #right, false, #right);
+    await verifyVisibility(HandlePositionInViewport.rightEdge, false, HandlePositionInViewport.rightEdge, false);
 
     debugDefaultTargetPlatformOverride = null;
   });

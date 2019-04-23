@@ -308,9 +308,9 @@ class RenderEditable extends RenderBox {
     // paragraph.cc's layout and TextPainer's _applyFloatingPointHack. Ideally,
     // the rounding mismatch will be fixed and this can be changed to be a
     // strict check instead of an approximation.
-    const double kApproximateFactor = 0.1;
+    const double visibleRegionSlop = 0.1;
     _selectionStartInViewport.value = visibleRegion
-      .inflate(kApproximateFactor)
+      .inflate(visibleRegionSlop)
       .contains(startOffset + effectiveOffset);
 
     final Offset endOffset =  _textPainter.getOffsetForCaret(
@@ -318,7 +318,7 @@ class RenderEditable extends RenderBox {
       Rect.zero,
     );
     _selectionEndInViewport.value = visibleRegion
-      .inflate(kApproximateFactor)
+      .inflate(visibleRegionSlop)
       .contains(endOffset + effectiveOffset);
   }
 
