@@ -621,26 +621,9 @@ mixin DeviceBasedDevelopmentArtifacts on FlutterCommand {
     };
     for (Device device in devices) {
       final TargetPlatform targetPlatform = await device.targetPlatform;
-      switch (targetPlatform) {
-        case TargetPlatform.android_arm:
-        case TargetPlatform.android_arm64:
-        case TargetPlatform.android_x64:
-        case TargetPlatform.android_x86:
-          artifacts.add(DevelopmentArtifact.android);
-          break;
-        case TargetPlatform.web:
-          artifacts.add(DevelopmentArtifact.web);
-          break;
-        case TargetPlatform.ios:
-          artifacts.add(DevelopmentArtifact.iOS);
-          break;
-        case TargetPlatform.darwin_x64:
-        case TargetPlatform.fuchsia:
-        case TargetPlatform.tester:
-        case TargetPlatform.windows_x64:
-        case TargetPlatform.linux_x64:
-          // No artifacts currently supported.
-          break;
+      final DevelopmentArtifact developmentArtifact = _artifactFromTargetPlatform(targetPlatform);
+      if (developmentArtifact != null) {
+        artifacts.add(developmentArtifact);
       }
     }
     return artifacts;
@@ -663,29 +646,48 @@ mixin TargetPlatformBasedDevelopmentArtifacts on FlutterCommand {
     final Set<DevelopmentArtifact> artifacts = <DevelopmentArtifact>{
       DevelopmentArtifact.universal,
     };
-    switch (targetPlatform) {
-      case TargetPlatform.android_arm:
-      case TargetPlatform.android_arm64:
-      case TargetPlatform.android_x64:
-      case TargetPlatform.android_x86:
-        artifacts.add(DevelopmentArtifact.android);
-        break;
-      case TargetPlatform.web:
-        artifacts.add(DevelopmentArtifact.web);
-        break;
-      case TargetPlatform.ios:
-        artifacts.add(DevelopmentArtifact.iOS);
-        break;
-      case TargetPlatform.darwin_x64:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.tester:
-      case TargetPlatform.windows_x64:
-      case TargetPlatform.linux_x64:
-        // No artifacts currently supported.
-        break;
+    final DevelopmentArtifact developmentArtifact = _artifactFromTargetPlatform(targetPlatform);
+    if (developmentArtifact != null) {
+      artifacts.add(developmentArtifact);
     }
     return artifacts;
   }
+}
+
+// Returns the development artifact for the target platform, or null
+// if none is supported
+DevelopmentArtifact _artifactFromTargetPlatform(TargetPlatform targetPlatform) {
+  switch (targetPlatform) {
+    case TargetPlatform.android_arm:
+    case TargetPlatform.android_arm64:
+    case TargetPlatform.android_x64:
+    case TargetPlatform.android_x86:
+      return DevelopmentArtifact.android;
+    case TargetPlatform.web:
+      return DevelopmentArtifact.web;
+    case TargetPlatform.ios:
+      return DevelopmentArtifact.iOS;
+    case TargetPlatform.darwin_x64:
+      if (!FlutterVersion.instance.isStable) {
+        return DevelopmentArtifact.macOS;
+      }
+      return null;
+    case TargetPlatform.windows_x64:
+      if (!FlutterVersion.instance.isStable) {
+        return DevelopmentArtifact.windows;
+      }
+      return null;
+    case TargetPlatform.linux_x64:
+      if (!FlutterVersion.instance.isStable) {
+        return DevelopmentArtifact.linux;
+      }
+      return null;
+    case TargetPlatform.fuchsia:
+    case TargetPlatform.tester:
+      // No artifacts currently supported.
+      return null;
+  }
+  return null;
 }
 
 /// A command which runs less analytics and checks to speed up startup time.
