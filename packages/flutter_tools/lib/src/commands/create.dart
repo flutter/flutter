@@ -91,7 +91,8 @@ class CreateCommand extends FlutterCommand {
       abbr: 's',
       help: 'Specifies the Flutter code sample to use as the main.dart for an application. Implies '
         '--template=app. The value should be the sample ID of the desired sample from the API '
-        'documentation website (http://docs.flutter.io).',
+        'documentation website (http://docs.flutter.dev). An example can be found at '
+        'https://master-api.flutter.dev/flutter/widgets/SingleChildScrollView-class.html',
       defaultsTo: null,
       valueHelp: 'id',
     );
