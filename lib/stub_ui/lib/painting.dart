@@ -23,13 +23,13 @@ part of ui;
 
 bool _rectIsValid(Rect rect) {
   assert(rect != null, 'Rect argument was null.');
-  assert(!rect._value.any((double value) => value.isNaN), 'Rect argument contained a NaN value.');
+  assert(!rect.hasNaN, 'Rect argument contained a NaN value.');
   return true;
 }
 
 bool _rrectIsValid(RRect rrect) {
   assert(rrect != null, 'RRect argument was null.');
-  assert(!rrect._value.any((double value) => value.isNaN), 'RRect argument contained a NaN value.');
+  assert(!rrect.hasNaN, 'RRect argument contained a NaN value.');
   return true;
 }
 
