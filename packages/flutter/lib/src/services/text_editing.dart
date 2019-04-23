@@ -57,12 +57,25 @@ class TextRange {
   /// The text before this range.
   String textBefore(String text) {
     assert(isNormalized);
+    if(text.isNotEmpty && start > 0 && start < text.length ){
+      final int startCodeUnit = text.codeUnitAt(start);
+      if( startCodeUnit & 0x8C00 == 0x8C00 ){
+        return text.substring(0,start -1);
+      }
+    }
+
     return text.substring(0, start);
   }
 
   /// The text after this range.
   String textAfter(String text) {
     assert(isNormalized);
+    if(text.isNotEmpty && end > 0 && end < text.length){
+      final int endCodeUnit = text.codeUnitAt(end);
+      if(endCodeUnit & 0x8C00 == 0x8C00 ){
+        return text.substring(end -1);
+      }
+    }
     return text.substring(end);
   }
 
