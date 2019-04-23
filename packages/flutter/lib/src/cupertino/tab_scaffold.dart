@@ -180,9 +180,11 @@ class CupertinoTabScaffold extends StatefulWidget {
     this.resizeToAvoidBottomInset = true,
   }) : assert(tabBar != null),
        assert(tabBuilder != null),
-       assert(controller == null || controller.index < tabBar.items.length,
+       assert(
+         controller == null || controller.index < tabBar.items.length,
          "The CupertinoTabController's current index ${controller.index} is "
-         'out of bounds for the tab bar with ${tabBar.items.length} tabs'),
+         'out of bounds for the tab bar with ${tabBar.items.length} tabs'
+       ),
        super(key: key);
 
   /// The [tabBar] is a [CupertinoTabBar] drawn at the bottom of the screen
@@ -276,9 +278,11 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
   }
 
   void _onCurrentIndexChange() {
-    assert(_controller.index < 0 || _controller.index >= widget.tabBar.items.length,
+    assert(
+      _controller.index < 0 || _controller.index >= widget.tabBar.items.length,
       "The CupertinoTabController's current index ${_controller.index} is "
-      'out of bounds for the tab bar with ${widget.tabBar.items.length} tabs');
+      'out of bounds for the tab bar with ${widget.tabBar.items.length} tabs'
+    );
 
     // The value of `_controller.index` has already been updated at this point.
     // Calling `setState` to rebuild using the new index.
