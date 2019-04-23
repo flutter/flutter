@@ -109,6 +109,10 @@ class LongPressEndDetails {
 /// until it's recognized. Once the gesture is accepted, the finger can be
 /// moved, triggering [onLongPressMoveUpdate] callbacks, unless the
 /// [postAcceptSlopTolerance] constructor argument is specified.
+///
+/// [LongPressGestureRecognizer] competes on pointer events of [kPrimaryButton]
+/// only when it has at least one non-null callback. If it has no callbacks, it
+/// is a no-op.
 class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
   /// Creates a long-press gesture recognizer.
   ///

@@ -43,6 +43,10 @@ typedef GestureDragCancelCallback = void Function();
 /// consider using one of its subclasses to recognize specific types for drag
 /// gestures.
 ///
+/// [DragGestureRecognizer] competes on pointer events of [kPrimaryButton]
+/// only when it has at least one non-null callback. If it has no callbacks, it
+/// is a no-op.
+///
 /// See also:
 ///
 ///  * [HorizontalDragGestureRecognizer], for left and right drags.

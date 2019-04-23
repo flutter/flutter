@@ -108,6 +108,10 @@ class _TapTracker {
 
 /// Recognizes when the user has tapped the screen at the same location twice in
 /// quick succession.
+///
+/// [DoubleTapGestureRecognizer] competes on pointer events of [kPrimaryButton]
+/// only when it has a non-null callback. If it has no callbacks, it is a no-op.
+///
 class DoubleTapGestureRecognizer extends GestureRecognizer {
   /// Create a gesture recognizer for double taps.
   ///

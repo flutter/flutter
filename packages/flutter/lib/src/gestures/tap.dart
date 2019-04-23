@@ -93,6 +93,11 @@ typedef GestureTapCancelCallback = void Function();
 /// pointer interactions during a tap sequence are not recognized as additional
 /// taps. For example, down-1, down-2, up-1, up-2 produces only one tap on up-1.
 ///
+/// [TapGestureRecognizer] competes on pointer events of [kPrimaryButton] only
+/// when it has at least one non-null `onTap*` callback, and events of
+/// [kSecondaryButton] only when it has at least one non-null `onSecondaryTap*`
+/// callback. If it has no callbacks, it is a no-op.
+///
 /// See also:
 ///
 ///  * [GestureDetector.onTap], which uses this recognizer.
