@@ -68,7 +68,7 @@ fi
 
 RunCommand mkdir -p -- "$derived_dir"
 RunCommand rm -rf -- "${derived_dir}/${framework_name}"
-RunCommand cp -R -- "${flutter_framework}" "${derived_dir}"
+RunCommand cp -Rp -- "${flutter_framework}" "${derived_dir}"
 
 # Set the build mode
 build_mode="$(echo "${FLUTTER_BUILD_MODE:-${CONFIGURATION}}" | tr "[:upper:]" "[:lower:]")"
