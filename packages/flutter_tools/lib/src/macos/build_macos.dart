@@ -18,6 +18,7 @@ import '../project.dart';
 // TODO(jonahwilliams): refactor to share code with the existing iOS code.
 Future<void> buildMacOS(FlutterProject flutterProject, BuildInfo buildInfo) async {
   final Directory flutterBuildDir = fs.directory(getMacOSBuildDirectory());
+  final String symrootOverride = fs.path.join(flutterBuildDir.absolute.path, 'Build', 'Products');
   if (!flutterBuildDir.existsSync()) {
     flutterBuildDir.createSync(recursive: true);
   }
@@ -26,7 +27,7 @@ Future<void> buildMacOS(FlutterProject flutterProject, BuildInfo buildInfo) asyn
     project: flutterProject,
     buildInfo: buildInfo,
     useMacOSConfig: true,
-    symrootOverride: fs.path.join(flutterBuildDir.absolute.path, 'Build', 'Products'),
+    symrootOverride: symrootOverride,
   );
   // Set debug or release mode.
   String config = 'Debug';
@@ -43,7 +44,7 @@ Future<void> buildMacOS(FlutterProject flutterProject, BuildInfo buildInfo) asyn
     '-scheme', 'Runner',
     '-derivedDataPath', flutterBuildDir.absolute.path,
     'OBJROOT=${fs.path.join(flutterBuildDir.absolute.path, 'Build', 'Intermediates.noindex')}',
-    'SYMROOT=${fs.path.join(flutterBuildDir.absolute.path, 'Build', 'Products')}',
+    'SYMROOT=$symrootOverride',
   ], runInShell: true);
   final Status status = logger.startProgress(
     'Building macOS application...',
