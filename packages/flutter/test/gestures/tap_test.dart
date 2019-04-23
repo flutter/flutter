@@ -555,7 +555,7 @@ void main() {
       recognized.clear();
     });
 
-    testGesture('changing buttons before TapDown should terminate gesture without sending cancel', (GestureTester tester) {
+    testGesture('changing buttons before TapDown should cancel gesture without sending cancel', (GestureTester tester) {
       tap.addPointer(down1);
       tester.closeArena(1);
       expect(recognized, <String>[]);
@@ -590,7 +590,7 @@ void main() {
       tap.dispose();
     });
 
-    testGesture('changing buttons after TapDown should terminate gesture and send cancel', (GestureTester tester) {
+    testGesture('changing buttons after TapDown should cancel gesture and send cancel', (GestureTester tester) {
       tap.addPointer(down1);
       tester.closeArena(1);
       expect(recognized, <String>[]);

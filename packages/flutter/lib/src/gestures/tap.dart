@@ -267,7 +267,7 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
   @override
   void resolve(GestureDisposition disposition) {
     if (_wonArenaForPrimaryPointer && disposition == GestureDisposition.rejected) {
-      // This can happen if the gesture has been terminated. For example, when
+      // This can happen if the gesture has been canceled. For example, when
       // the pointer has exceeded the touch slop, the buttons have been changed,
       // or if the recognizer is disposed.
       assert(_sentTapDown);

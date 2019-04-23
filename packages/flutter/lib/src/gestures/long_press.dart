@@ -293,7 +293,7 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
   @override
   void resolve(GestureDisposition disposition) {
     if (_longPressAccepted && disposition == GestureDisposition.rejected) {
-      // This can happen if the gesture has been terminated. For example when
+      // This can happen if the gesture has been canceled. For example when
       // the buttons have changed.
       _reset();
     }
