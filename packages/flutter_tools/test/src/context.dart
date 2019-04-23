@@ -186,17 +186,6 @@ class MockDeviceManager implements DeviceManager {
 
   @override
   List<DeviceDiscovery> get deviceDiscoverers => <DeviceDiscovery>[];
-
-  @override
-  bool hasSpecifiedFlutterProject;
-
-  @override
-  Stream<Device> getDevicesByProject(FlutterProject flutterProject) {
-    return getDevices();
-  }
-
-  @override
-  set specifiedFlutterProject(FlutterProject value) {}
 }
 
 class MockAndroidLicenseValidator extends AndroidLicenseValidator {
