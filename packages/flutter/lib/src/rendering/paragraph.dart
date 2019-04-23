@@ -49,7 +49,7 @@ class RenderParagraph extends RenderBox {
     TextOverflow overflow = TextOverflow.clip,
     double textScaleFactor = 1.0,
     int maxLines,
-    TextWidthType widthType = TextWidthType.full,
+    TextWidthBasis textWidthBasis = TextWidthBasis.parent,
     Locale locale,
     StrutStyle strutStyle,
   }) : assert(text != null),
@@ -60,7 +60,7 @@ class RenderParagraph extends RenderBox {
        assert(overflow != null),
        assert(textScaleFactor != null),
        assert(maxLines == null || maxLines > 0),
-       assert(widthType != null),
+       assert(textWidthBasis != null),
        _softWrap = softWrap,
        _overflow = overflow,
        _textPainter = TextPainter(
@@ -72,7 +72,7 @@ class RenderParagraph extends RenderBox {
          ellipsis: overflow == TextOverflow.ellipsis ? _kEllipsis : null,
          locale: locale,
          strutStyle: strutStyle,
-         widthType: widthType,
+         textWidthBasis: textWidthBasis,
        );
 
   final TextPainter _textPainter;
@@ -215,13 +215,13 @@ class RenderParagraph extends RenderBox {
     markNeedsLayout();
   }
 
-  /// {@macro flutter.widgets.basic.TextWidthType}
-  TextWidthType get widthType => _textPainter.widthType;
-  set widthType(TextWidthType value) {
+  /// {@macro flutter.widgets.basic.TextWidthBasis}
+  TextWidthBasis get textWidthBasis => _textPainter.textWidthBasis;
+  set textWidthBasis(TextWidthBasis value) {
     assert(value != null);
-    if (_textPainter.widthType == value)
+    if (_textPainter.textWidthBasis == value)
       return;
-    _textPainter.widthType = value;
+    _textPainter.textWidthBasis = value;
     _overflowShader = null;
     markNeedsLayout();
   }

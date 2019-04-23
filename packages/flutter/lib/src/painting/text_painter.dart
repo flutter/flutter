@@ -16,15 +16,16 @@ import 'text_span.dart';
 export 'package:flutter/services.dart' show TextRange, TextSelection;
 
 /// The different ways of considering the width of a Text widget.
-enum TextWidthType {
-  /// The width will take up as much space as is given to it. This is useful for
-  /// most common use cases, like a series of several paragraphs in a column.
-  full,
+enum TextWidthBasis {
+  /// Multiline text will take up the full width given by the parent. For single
+  /// line text, only the minimum amount of width needed to contain the text
+  /// will be used. A common use case for this is a standard series of
+  /// paragraphs.
+  parent,
 
-  /// The width will be as small as possible, even when the text wraps on to
-  /// multiple lines. For example, this is useful when wrapping text in chat
-  /// bubbles.
-  tight,
+  /// The width will be exactly enough to contain the longest line and no
+  /// longer. A common use case for this is chat bubbles.
+  longestLine,
 }
 
 class _CaretMetrics {
@@ -72,12 +73,12 @@ class TextPainter {
     String ellipsis,
     Locale locale,
     StrutStyle strutStyle,
-    TextWidthType widthType = TextWidthType.full,
+    TextWidthBasis textWidthBasis = TextWidthBasis.parent,
   }) : assert(text == null || text.debugAssertIsValid()),
        assert(textAlign != null),
        assert(textScaleFactor != null),
        assert(maxLines == null || maxLines > 0),
-       assert(widthType != null),
+       assert(textWidthBasis != null),
        _text = text,
        _textAlign = textAlign,
        _textDirection = textDirection,
@@ -86,7 +87,7 @@ class TextPainter {
        _ellipsis = ellipsis,
        _locale = locale,
        _strutStyle = strutStyle,
-       _widthType = widthType;
+       _textWidthBasis = textWidthBasis;
 
   ui.Paragraph _paragraph;
   bool _needsLayout = true;
@@ -248,14 +249,14 @@ class TextPainter {
     _needsLayout = true;
   }
 
-  /// {@macro flutter.dart:ui.text.TextWidthType}
-  TextWidthType get widthType => _widthType;
-  TextWidthType _widthType;
-  set widthType(TextWidthType value) {
+  /// {@macro flutter.dart:ui.text.TextWidthBasis}
+  TextWidthBasis get textWidthBasis => _textWidthBasis;
+  TextWidthBasis _textWidthBasis;
+  set textWidthBasis(TextWidthBasis value) {
     assert(value != null);
-    if (_widthType == value)
+    if (_textWidthBasis == value)
       return;
-    _widthType = value;
+    _textWidthBasis = value;
     _paragraph = null;
     _needsLayout = true;
   }
@@ -345,7 +346,7 @@ class TextPainter {
   double get width {
     assert(!_needsLayout);
     return _applyFloatingPointHack(
-      widthType == TextWidthType.tight ? _paragraph.tightWidth : _paragraph.width,
+      textWidthBasis == TextWidthBasis.longestLine ? _paragraph.tightWidth : _paragraph.width,
     );
   }
 

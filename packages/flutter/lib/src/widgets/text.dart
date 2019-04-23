@@ -33,14 +33,14 @@ class DefaultTextStyle extends InheritedWidget {
     this.softWrap = true,
     this.overflow = TextOverflow.clip,
     this.maxLines,
-    this.widthType = TextWidthType.full,
+    this.textWidthBasis = TextWidthBasis.parent,
     @required Widget child,
   }) : assert(style != null),
        assert(softWrap != null),
        assert(overflow != null),
        assert(maxLines == null || maxLines > 0),
        assert(child != null),
-       assert(widthType != null),
+       assert(textWidthBasis != null),
        super(key: key, child: child);
 
   /// A const-constructible default text style that provides fallback values.
@@ -55,7 +55,7 @@ class DefaultTextStyle extends InheritedWidget {
       softWrap = true,
       maxLines = null,
       overflow = TextOverflow.clip,
-      widthType = TextWidthType.full;
+      textWidthBasis = TextWidthBasis.parent;
 
   /// Creates a default text style that overrides the text styles in scope at
   /// this point in the widget tree.
@@ -80,7 +80,7 @@ class DefaultTextStyle extends InheritedWidget {
     bool softWrap,
     TextOverflow overflow,
     int maxLines,
-    TextWidthType widthType,
+    TextWidthBasis textWidthBasis,
     @required Widget child,
   }) {
     assert(child != null);
@@ -94,7 +94,7 @@ class DefaultTextStyle extends InheritedWidget {
           softWrap: softWrap ?? parent.softWrap,
           overflow: overflow ?? parent.overflow,
           maxLines: maxLines ?? parent.maxLines,
-          widthType: widthType ?? parent.widthType,
+          textWidthBasis: textWidthBasis ?? parent.textWidthBasis,
           child: child,
         );
       },
@@ -127,8 +127,8 @@ class DefaultTextStyle extends InheritedWidget {
   final int maxLines;
 
   /// The strategy to use when calculating the width of the Text. See
-  /// [TextWidthType] for possible values and their implications.
-  final TextWidthType widthType;
+  /// [TextWidthBasis] for possible values and their implications.
+  final TextWidthBasis textWidthBasis;
 
   /// The closest instance of this class that encloses the given context.
   ///
@@ -151,7 +151,7 @@ class DefaultTextStyle extends InheritedWidget {
         softWrap != oldWidget.softWrap ||
         overflow != oldWidget.overflow ||
         maxLines != oldWidget.maxLines ||
-        widthType != oldWidget.widthType;
+        textWidthBasis != oldWidget.textWidthBasis;
   }
 
   @override
@@ -162,7 +162,7 @@ class DefaultTextStyle extends InheritedWidget {
     properties.add(FlagProperty('softWrap', value: softWrap, ifTrue: 'wrapping at box width', ifFalse: 'no wrapping except at line break characters', showName: true));
     properties.add(EnumProperty<TextOverflow>('overflow', overflow, defaultValue: null));
     properties.add(IntProperty('maxLines', maxLines, defaultValue: null));
-    properties.add(EnumProperty<TextWidthType>('widthType', widthType, defaultValue: TextWidthType.full));
+    properties.add(EnumProperty<TextWidthBasis>('textWidthBasis', textWidthBasis, defaultValue: TextWidthBasis.parent));
   }
 }
 
@@ -248,7 +248,7 @@ class Text extends StatelessWidget {
     this.textScaleFactor,
     this.maxLines,
     this.semanticsLabel,
-    this.widthType,
+    this.textWidthBasis,
   }) : assert(
          data != null,
          'A non-null String must be provided to a Text widget.',
@@ -272,7 +272,7 @@ class Text extends StatelessWidget {
     this.textScaleFactor,
     this.maxLines,
     this.semanticsLabel,
-    this.widthType,
+    this.textWidthBasis,
   }) : assert(
          textSpan != null,
          'A non-null TextSpan must be provided to a Text.rich widget.',
@@ -372,8 +372,8 @@ class Text extends StatelessWidget {
   /// ```
   final String semanticsLabel;
 
-  /// {@macro flutter.dart:ui.text.TextWidthType}
-  final TextWidthType widthType;
+  /// {@macro flutter.dart:ui.text.TextWidthBasis}
+  final TextWidthBasis textWidthBasis;
 
   @override
   Widget build(BuildContext context) {
@@ -392,7 +392,7 @@ class Text extends StatelessWidget {
       textScaleFactor: textScaleFactor ?? MediaQuery.textScaleFactorOf(context),
       maxLines: maxLines ?? defaultTextStyle.maxLines,
       strutStyle: strutStyle,
-      widthType: widthType ?? defaultTextStyle.widthType,
+      textWidthBasis: textWidthBasis ?? defaultTextStyle.textWidthBasis,
       text: TextSpan(
         style: effectiveTextStyle,
         text: data,

@@ -4802,14 +4802,14 @@ class RichText extends LeafRenderObjectWidget {
     this.maxLines,
     this.locale,
     this.strutStyle,
-    this.widthType = TextWidthType.full,
+    this.textWidthBasis = TextWidthBasis.parent,
   }) : assert(text != null),
        assert(textAlign != null),
        assert(softWrap != null),
        assert(overflow != null),
        assert(textScaleFactor != null),
        assert(maxLines == null || maxLines > 0),
-       assert(widthType != null),
+       assert(textWidthBasis != null),
        super(key: key);
 
   /// The text to display in this widget.
@@ -4868,8 +4868,8 @@ class RichText extends LeafRenderObjectWidget {
   /// {@macro flutter.painting.textPainter.strutStyle}
   final StrutStyle strutStyle;
 
-  /// {@macro flutter.widgets.text.DefaultTextStyle.widthType}
-  final TextWidthType widthType;
+  /// {@macro flutter.widgets.text.DefaultTextStyle.textWidthBasis}
+  final TextWidthBasis textWidthBasis;
 
   @override
   RenderParagraph createRenderObject(BuildContext context) {
@@ -4882,7 +4882,7 @@ class RichText extends LeafRenderObjectWidget {
       textScaleFactor: textScaleFactor,
       maxLines: maxLines,
       strutStyle: strutStyle,
-      widthType: widthType,
+      textWidthBasis: textWidthBasis,
       locale: locale ?? Localizations.localeOf(context, nullOk: true),
     );
   }
@@ -4899,7 +4899,7 @@ class RichText extends LeafRenderObjectWidget {
       ..textScaleFactor = textScaleFactor
       ..maxLines = maxLines
       ..strutStyle = strutStyle
-      ..widthType = widthType
+      ..textWidthBasis = textWidthBasis
       ..locale = locale ?? Localizations.localeOf(context, nullOk: true);
   }
 
@@ -4912,7 +4912,7 @@ class RichText extends LeafRenderObjectWidget {
     properties.add(EnumProperty<TextOverflow>('overflow', overflow, defaultValue: TextOverflow.clip));
     properties.add(DoubleProperty('textScaleFactor', textScaleFactor, defaultValue: 1.0));
     properties.add(IntProperty('maxLines', maxLines, ifNull: 'unlimited'));
-    properties.add(EnumProperty<TextWidthType>('widthType', widthType, defaultValue: TextWidthType.full));
+    properties.add(EnumProperty<TextWidthBasis>('textWidthBasis', textWidthBasis, defaultValue: TextWidthBasis.parent));
     properties.add(StringProperty('text', text.toPlainText()));
   }
 }

@@ -366,7 +366,7 @@ void main() {
   });
 
   testWidgets('Text respects textScaleFactor with default font size', (WidgetTester tester) async {
-    Future<void> createText(TextWidthType widthType) {
+    Future<void> createText(TextWidthBasis textWidthBasis) {
       return tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -376,7 +376,7 @@ void main() {
                 // wrap onto two lines, but leave a lot of extra space.
                 child: Text('twowordsthateachtakeupmorethanhalfof alineoftextsothattheywrapwithlotsofextraspace',
                   textDirection: TextDirection.ltr,
-                  widthType: widthType,
+                  textWidthBasis: textWidthBasis,
                 ),
               ),
             ),
@@ -388,18 +388,18 @@ void main() {
     const double fontHeight = 14.0;
     const double screenWidth = 800.0;
 
-    // When widthType is full, takes up full screen width
-    await createText(TextWidthType.full);
-    final Size textSizeFull = tester.getSize(find.byType(Text));
-    expect(textSizeFull.width, equals(screenWidth));
-    expect(textSizeFull.height, equals(fontHeight * 2));
+    // When textWidthBasis is parent, takes up full screen width.
+    await createText(TextWidthBasis.parent);
+    final Size textSizeParent = tester.getSize(find.byType(Text));
+    expect(textSizeParent.width, equals(screenWidth));
+    expect(textSizeParent.height, equals(fontHeight * 2));
 
-    // When widthType is tight, sets the width to as small as possible for the
-    // two lines.
-    await createText(TextWidthType.tight);
-    final Size textSizeTight = tester.getSize(find.byType(Text));
-    expect(textSizeTight.width, equals(630.0));
-    expect(textSizeTight.height, equals(fontHeight * 2));
+    // When textWidthBasis is longestLine, sets the width to as small as
+    // possible for the two lines.
+    await createText(TextWidthBasis.longestLine);
+    final Size textSizeLongestLine = tester.getSize(find.byType(Text));
+    expect(textSizeLongestLine.width, equals(630.0));
+    expect(textSizeLongestLine.height, equals(fontHeight * 2));
   });
 }
 
