@@ -246,6 +246,7 @@ class DecorationImagePainter {
       _imageStream?.removeListener(_imageListener);
       _imageStream = newImageStream;
       _imageStream.addListener(_imageListener);
+      _imageProvider = _details.image;
     }
     if (_image == null)
       return;
@@ -290,6 +291,7 @@ class DecorationImagePainter {
   @mustCallSuper
   void dispose() {
     _imageStream?.removeListener(_imageListener);
+    _imageProvider = null;
   }
 
   @override
