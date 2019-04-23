@@ -316,7 +316,7 @@ class TextSpan extends InlineSpan {
   RenderComparison compareTo(InlineSpan other) {
     if (identical(this, other))
       return RenderComparison.identical;
-    if (other is! TextSpan)
+    if (other.runtimeType != runtimeType)
       return RenderComparison.layout;
     TextSpan textSpan = other;
     if (textSpan.text != text ||

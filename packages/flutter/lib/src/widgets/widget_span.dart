@@ -101,15 +101,15 @@ class WidgetSpan extends PlaceholderSpan {
   /// A [TextStyle] may be provided with the [style] property, but only the
   /// decoration, foreground, background, and spacing options will be used.
   const WidgetSpan({
-    Widget widget,
+    Widget child,
     InlineWidgetAlignment alignment = InlineWidgetAlignment.bottom,
     TextBaseline baseline,
     TextStyle style,
-  }) : assert(widget != null),
+  }) : assert(child != null),
        assert((alignment == InlineWidgetAlignment.aboveBaseline ||
                alignment == InlineWidgetAlignment.belowBaseline ||
                alignment == InlineWidgetAlignment.baseline) ? baseline != null : true),
-       widget = widget,
+       child = child,
        super(alignment:
            // Convert InlineWidgetAlignment to PlaceholderAlignment in a const fashion.
            alignment == InlineWidgetAlignment.baseline ? ui.PlaceholderAlignment.baseline :
@@ -122,7 +122,7 @@ class WidgetSpan extends PlaceholderSpan {
        );
 
   /// The widget to embed inline with text.
-  final Widget widget;
+  final Widget child;
 
   /// Adds a placeholder box to the paragraph builder if a size has been
   /// calculated for the widget.
@@ -168,7 +168,7 @@ class WidgetSpan extends PlaceholderSpan {
   }
 
   String toPlainText() {
-    return widget.toString();
+    return child.toString();
   }
 
   int codeUnitAt(int index) {
@@ -190,7 +190,7 @@ class WidgetSpan extends PlaceholderSpan {
     if (other.runtimeType is! WidgetSpan)
       return RenderComparison.layout;
     final WidgetSpan typedOther = other;
-    if (typedOther.widget != widget)
+    if (typedOther.child != child)
       return RenderComparison.layout;
     if ((style == null) != (other.style == null))
       return RenderComparison.layout;
@@ -214,7 +214,7 @@ class WidgetSpan extends PlaceholderSpan {
     if (other.runtimeType != runtimeType)
       return false;
     final WidgetSpan typedOther = other;
-    return typedOther.widget == widget
+    return typedOther.child == child
         && typedOther.style == style;
   }
 
@@ -237,10 +237,10 @@ class WidgetSpan extends PlaceholderSpan {
     assert(() {
       if (!visitChildren((InlineSpan span) {
         if (span is WidgetSpan)
-          return (span as WidgetSpan).widget != null;
-        TextSpan textSpan = span;
-        if (textSpan.children != null) {
-          for (InlineSpan child in textSpan.children) {
+          return (span as WidgetSpan).child != null;
+        InlineSpan inlineSpan = span;
+        if (inlineSpan.children != null) {
+          for (InlineSpan child in inlineSpan.children) {
             if (child == null)
               return false;
           }

@@ -4810,8 +4810,8 @@ class RichText extends MultiChildRenderObjectWidget {
       if (span is! WidgetSpan)
         return true;
       WidgetSpan widgetSpan = span as WidgetSpan;
-      if (widgetSpan.widget != null) {
-        result.add(widgetSpan.widget);
+      if (widgetSpan.child != null) {
+        result.add(widgetSpan.child);
       }
       return true;
     });
