@@ -67,5 +67,5 @@ class DesktopLogReader extends DeviceLogReader {
   }
 
   @override
-  String get name => 'macOS';
+  String get name => 'desktop';
 }
