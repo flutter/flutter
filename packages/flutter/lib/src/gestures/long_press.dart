@@ -239,49 +239,37 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
   }
 
   void _checkLongPressStart() {
+    assert(_initialButtons == kPrimaryButton);
     final LongPressStartDetails details = LongPressStartDetails(
       globalPosition: _longPressOrigin,
     );
-    switch (_initialButtons) {
-      case kPrimaryButton:
-        if (onLongPressStart != null)
-          invokeCallback<void>('onLongPressStart',
-            () => onLongPressStart(details));
-        if (onLongPress != null)
-          invokeCallback<void>('onLongPress', onLongPress);
-        break;
-      default:
-    }
+    if (onLongPressStart != null)
+      invokeCallback<void>('onLongPressStart',
+        () => onLongPressStart(details));
+    if (onLongPress != null)
+      invokeCallback<void>('onLongPress', onLongPress);
   }
 
   void _checkLongPressMoveUpdate(PointerEvent event) {
+    assert(_initialButtons == kPrimaryButton);
     final LongPressMoveUpdateDetails details = LongPressMoveUpdateDetails(
       globalPosition: event.position,
       offsetFromOrigin: event.position - _longPressOrigin,
     );
-    switch (_initialButtons) {
-      case kPrimaryButton:
-        if (onLongPressMoveUpdate != null)
-          invokeCallback<void>('onLongPressMoveUpdate',
-            () => onLongPressMoveUpdate(details));
-        break;
-      default:
-    }
+    if (onLongPressMoveUpdate != null)
+      invokeCallback<void>('onLongPressMoveUpdate',
+        () => onLongPressMoveUpdate(details));
   }
 
   void _checkLongPressEnd(PointerEvent event) {
+    assert(_initialButtons == kPrimaryButton);
     final LongPressEndDetails details = LongPressEndDetails(
       globalPosition: event.position,
     );
-    switch (_initialButtons) {
-      case kPrimaryButton:
-        if (onLongPressEnd != null)
-          invokeCallback<void>('onLongPressEnd', () => onLongPressEnd(details));
-        if (onLongPressUp != null)
-          invokeCallback<void>('onLongPressUp', onLongPressUp);
-        break;
-      default:
-    }
+    if (onLongPressEnd != null)
+      invokeCallback<void>('onLongPressEnd', () => onLongPressEnd(details));
+    if (onLongPressUp != null)
+      invokeCallback<void>('onLongPressUp', onLongPressUp);
   }
 
   void _reset() {

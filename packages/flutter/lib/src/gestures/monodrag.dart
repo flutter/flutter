@@ -310,30 +310,22 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   }
 
   void _checkDown() {
+    assert(_initialButtons == kPrimaryButton);
     final DragDownDetails details = DragDownDetails(
       globalPosition: _initialPosition,
     );
-    switch (_initialButtons) {
-      case kPrimaryButton:
-        if (onDown != null)
-          invokeCallback<void>('onDown', () => onDown(details));
-        break;
-      default:
-    }
+    if (onDown != null)
+      invokeCallback<void>('onDown', () => onDown(details));
   }
 
   void _checkStart(Duration timestamp) {
+    assert(_initialButtons == kPrimaryButton);
     final DragStartDetails details = DragStartDetails(
       sourceTimeStamp: timestamp,
       globalPosition: _initialPosition,
     );
-    switch (_initialButtons) {
-      case kPrimaryButton:
-        if (onStart != null)
-          invokeCallback<void>('onStart', () => onStart(details));
-        break;
-      default:
-    }
+    if (onStart != null)
+      invokeCallback<void>('onStart', () => onStart(details));
   }
 
   void _checkUpdate({
@@ -342,22 +334,22 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     double primaryDelta,
     Offset globalPosition,
   }) {
+    assert(_initialButtons == kPrimaryButton);
     final DragUpdateDetails details = DragUpdateDetails(
       sourceTimeStamp: sourceTimeStamp,
       delta: delta,
       primaryDelta: primaryDelta,
       globalPosition: globalPosition,
     );
-    switch (_initialButtons) {
-      case kPrimaryButton:
-        if (onUpdate != null)
-          invokeCallback<void>('onUpdate', () => onUpdate(details));
-        break;
-      default:
-    }
+    if (onUpdate != null)
+      invokeCallback<void>('onUpdate', () => onUpdate(details));
   }
 
   void _checkEnd(int pointer) {
+    assert(_initialButtons == kPrimaryButton);
+    if (onEnd == null)
+      return;
+
     final VelocityTracker tracker = _velocityTrackers[pointer];
     assert(tracker != null);
 
@@ -386,23 +378,13 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
         return '$estimate; judged to not be a fling.';
       };
     }
-    switch (_initialButtons) {
-      case kPrimaryButton:
-        if (onEnd != null)
-          invokeCallback<void>('onEnd', () => onEnd(details), debugReport: debugReport);
-        break;
-      default:
-    }
+    invokeCallback<void>('onEnd', () => onEnd(details), debugReport: debugReport);
   }
 
   void _checkCancel() {
-    switch (_initialButtons) {
-      case kPrimaryButton:
-        if (onCancel != null)
-          invokeCallback<void>('onCancel', onCancel);
-        break;
-      default:
-    }
+    assert(_initialButtons == kPrimaryButton);
+    if (onCancel != null)
+      invokeCallback<void>('onCancel', onCancel);
   }
 
   @override

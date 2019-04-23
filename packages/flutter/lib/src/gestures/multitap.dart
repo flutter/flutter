@@ -298,13 +298,9 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
   }
 
   void _checkUp(int buttons) {
-    switch (buttons) {
-      case kPrimaryButton:
-        if (onDoubleTap != null)
-          invokeCallback<void>('onDoubleTap', onDoubleTap);
-        break;
-      default:
-    }
+    assert(buttons == kPrimaryButton);
+    if (onDoubleTap != null)
+      invokeCallback<void>('onDoubleTap', onDoubleTap);
   }
 
   @override
