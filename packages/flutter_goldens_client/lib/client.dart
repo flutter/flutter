@@ -137,7 +137,7 @@ class SkiaGoldClient {
       buf
         ..writeln('Flutter + Skia Gold imgtest failed.')
         ..writeln('If this is the first execution of this test, it may need to be triaged.')
-        ..writeln('\tIn this case, re-run the test after triage is completed.')
+        ..writeln('In this case, re-run the test after triage is completed.\n')
         ..writeln('stdout: ${imgtestResult.stdout}')
         ..writeln('stderr: ${imgtestResult.stderr}');
       throw NonZeroExitCode(imgtestResult.exitCode, buf.toString());
