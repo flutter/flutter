@@ -933,6 +933,10 @@ void restoreVmServiceConnectFunction() {
   vmServiceConnectFunction = _waitAndConnect;
 }
 
+void _unhandledJsonRpcError(dynamic error, dynamic stack) {
+
+}
+
 /// Waits for a real Dart VM service to become available, then connects using
 /// the [VMServiceClient].
 Future<VMServiceClientConnection> _waitAndConnect(String url) async {
@@ -954,7 +958,7 @@ Future<VMServiceClientConnection> _waitAndConnect(String url) async {
       ws2 = await WebSocket.connect(uri.toString());
       return VMServiceClientConnection(
         VMServiceClient(IOWebSocketChannel(ws1).cast()),
-        rpc.Peer(IOWebSocketChannel(ws2).cast())..listen(),
+        rpc.Peer(IOWebSocketChannel(ws2).cast(), onUnhandledError: _unhandledJsonRpcError)..listen(),
       );
     } catch (e) {
       await ws1?.close();
