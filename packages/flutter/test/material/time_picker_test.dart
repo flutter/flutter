@@ -138,9 +138,12 @@ void _tests() {
     TimeOfDay result;
 
     final Offset center = await startPicker(tester, (TimeOfDay time) { result = time; });
-    await tester.tapAt(Offset(center.dx, center.dy + 50.0));
+    final Offset hour6 = Offset(center.dx, center.dy + 50.0); // 6:00
+    final Offset min45 = Offset(center.dx - 50.0, center.dy); // 45 mins (or 9:00 hours)
+
+    await tester.tapAt(hour6);
     await tester.pump(const Duration(milliseconds: 50));
-    await tester.tapAt(Offset(center.dx - 50, center.dy));
+    await tester.tapAt(min45);
     await finishPicker(tester);
     expect(result, equals(const TimeOfDay(hour: 6, minute: 45)));
   });

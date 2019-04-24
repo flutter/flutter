@@ -1001,7 +1001,9 @@ class _Dial extends StatefulWidget {
     @required this.use24HourDials,
     @required this.onChanged,
     @required this.onHourSelected,
-  }) : assert(selectedTime != null);
+  }) : assert(selectedTime != null),
+       assert(mode != null),
+       assert(use24HourDials != null);
 
   final TimeOfDay selectedTime;
   final _TimePickerMode mode;
@@ -1172,7 +1174,9 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
     _center = null;
     _animateTo(_getThetaForTime(widget.selectedTime));
     if (widget.mode == _TimePickerMode.hour) {
-      widget.onHourSelected();
+      if (widget.onHourSelected != null) {
+        widget.onHourSelected();
+      }
     }
   }
 
@@ -1188,7 +1192,9 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
       } else {
         _announceToAccessibility(context, localizations.formatDecimal(newTime.hourOfPeriod));
       }
-      widget.onHourSelected();
+      if (widget.onHourSelected != null) {
+        widget.onHourSelected();
+      }
     } else {
       _announceToAccessibility(context, localizations.formatDecimal(newTime.minute));
     }
