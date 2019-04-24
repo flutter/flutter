@@ -630,14 +630,6 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
 /// ```dart
 /// double sideLength = 50;
 ///
-/// void updateSideLength() {
-///   setState(() {
-///     sideLength == 50
-///       ? sideLength = 100
-///       : sideLength = 50;
-///   });
-/// }
-///
 /// Widget build(BuildContext context) {
 ///   return Center(
 ///     child: AnimatedContainer(
@@ -645,10 +637,14 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
 ///       width: sideLength,
 ///       duration: Duration(seconds: 2),
 ///       curve: Curves.easeIn,
-///       child: Ink(
+///       child: Material(
 ///         color: Colors.yellow,
 ///         child: InkWell(
-///           onTap: updateSideLength,
+///           onTap: () {
+///             setState(() {
+///               sideLength == 50 ? sideLength = 100 : sideLength = 50;
+///             });
+///           },
 ///         ),
 ///       ),
 ///     ),
