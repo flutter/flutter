@@ -277,6 +277,14 @@ void main() {
       expect(iosApp.id, 'fooBundleId');
       expect(iosApp.bundleName, 'bundle.app');
     }, overrides: overrides);
+
+    testUsingContext('returns null when there is no ios or .ios directory', () async {
+      fs.file('pubspec.yaml').createSync();
+      fs.file('.packages').createSync();
+      final BuildableIOSApp iosApp = IOSApp.fromIosProject((await FlutterProject.fromDirectory(fs.currentDirectory)).ios);
+
+      expect(iosApp, null);
+    }, overrides: overrides);
   });
 }
 

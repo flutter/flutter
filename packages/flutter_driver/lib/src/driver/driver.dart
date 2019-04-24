@@ -937,8 +937,14 @@ void restoreVmServiceConnectFunction() {
 /// the [VMServiceClient].
 Future<VMServiceClientConnection> _waitAndConnect(String url) async {
   Uri uri = Uri.parse(url);
+  final List<String> pathSegments = <String>[];
+  // If there's an authentication code (default), we need to add it to our path.
+  if (uri.pathSegments.isNotEmpty) {
+    pathSegments.add(uri.pathSegments.first);
+  }
+  pathSegments.add('ws');
   if (uri.scheme == 'http')
-    uri = uri.replace(scheme: 'ws', path: '/ws');
+    uri = uri.replace(scheme: 'ws', pathSegments: pathSegments);
   int attempts = 0;
   while (true) {
     WebSocket ws1;
