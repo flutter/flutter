@@ -313,7 +313,7 @@ def sys_exit(signal, frame):
 
 def cleanup_children():
   if CURRENT_SUBPROCESS != None:
-    CURRENT_SUBPROCESS.kill()
+    CURRENT_SUBPROCESS.terminate()
 
 def main():
   global FLAG_skip_wait_for_artifacts

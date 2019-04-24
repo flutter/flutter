@@ -23,10 +23,12 @@
 
 from dart_roll_utils import *
 import argparse
+import atexit
 import datetime
 import fileinput
 import os
 import platform
+import signal
 import shutil
 import subprocess
 import sys
@@ -45,6 +47,8 @@ LICENSE_SCRIPT_OKAY       = 0
 LICENSE_SCRIPT_UPDATES    = 1
 # Returned when either 'pub' or 'dart' isn't in the path.
 LICENSE_SCRIPT_EXIT_ERROR = 127
+
+CURRENT_SUBPROCESS = None
 
 def update_dart_revision(dart_revision):
   original_revision = ''
@@ -65,17 +69,23 @@ def update_dart_revision(dart_revision):
   write_deps(content)
   return original_revision
 
+def run_process(args, cwd=None, stdout=None):
+  global CURRENT_SUBPROCESS
+  CURRENT_SUBPROCESS = subprocess.Popen(args, cwd=cwd, stdout=stdout)
+  exit_code = CURRENT_SUBPROCESS.wait()
+  CURRENT_SUBPROCESS = None
+  return exit_code
 
 def gclient_sync():
+  global CURRENT_SUBPROCESS
   exit_code = None
   num_retries = 0
 
   while ((exit_code != 0) and not (num_retries >= MAX_GCLIENT_RETRIES)):
     print_status('Running gclient sync (Attempt {}/{})'
                  .format(num_retries + 1, MAX_GCLIENT_RETRIES))
-    p = subprocess.Popen(['gclient', 'sync', '--delete_unversioned_trees'],
-                         cwd=ENGINE_HOME)
-    exit_code = p.wait()
+    exit_code = run_process(['gclient', 'sync', '--delete_unversioned_trees'],
+                            cwd=ENGINE_HOME)
     if exit_code != 0:
       num_retries += 1
   if num_retries == MAX_GCLIENT_RETRIES:
@@ -91,8 +101,7 @@ def get_deps():
 
 def update_deps():
   print_status('Updating Dart dependencies')
-  p = subprocess.Popen([update_dart_deps_path()], cwd=ENGINE_HOME)
-  p.wait()
+  run_process([update_dart_deps_path()], cwd=ENGINE_HOME)
 
 
 def write_deps(newdeps):
@@ -112,15 +121,12 @@ def run_gn():
 
   for mode in runtime_modes:
     if set(mode) != set(release):
-      p = subprocess.Popen(common + android + unopt + mode, cwd=ENGINE_HOME)
-      p.wait()
-    q = subprocess.Popen(common + android + mode, cwd=ENGINE_HOME)
+      run_process(common + android + unopt + mode, cwd=ENGINE_HOME)
+    run_process(common + android + mode, cwd=ENGINE_HOME)
     host = common[:]
     if set(mode) == set(debug):
       host += unopt
-    r = subprocess.Popen(host + mode, cwd=ENGINE_HOME)
-    q.wait()
-    r.wait()
+    run_process(host + mode, cwd=ENGINE_HOME)
 
 
 def build():
@@ -140,9 +146,8 @@ def build():
     build_dir = 'xcodebuild'
 
   for config in configs:
-    p = subprocess.Popen(command + ['-C', os.path.join(build_dir, config)],
-                         cwd=ENGINE_HOME)
-    error_code = p.wait()
+    error_code = run_process(command + ['-C', os.path.join(build_dir, config)],
+                             cwd=ENGINE_HOME)
     if error_code != 0:
       print_error('Build failure for configuration "' +
                   config +
@@ -153,10 +158,9 @@ def build():
 def run_flutter_doctor():
   print_status('Running flutter doctor')
   engine_src_path = '--local-engine-src-path={}'.format(ENGINE_HOME)
-  p = subprocess.Popen(FLUTTER_DOCTOR + ['--local-engine=host_debug_unopt',
-                                         engine_src_path],
-                       cwd=package_flutter_path())
-  result = p.wait()
+  result = run_process(FLUTTER_DOCTOR + ['--local-engine=host_debug_unopt',
+                                    engine_src_path],
+                                    cwd=package_flutter_path())
   if result != 0:
     print_error('flutter doctor failed. Aborting roll.')
     sys.exit(ERROR_FLUTTER_DOCTOR_FAILED)
@@ -165,19 +169,17 @@ def run_flutter_doctor():
 def run_tests():
   print_status('Running tests in packages/flutter')
   engine_src_path = '--local-engine-src-path={}'.format(ENGINE_HOME)
-  p = subprocess.Popen(FLUTTER_TEST + ['--local-engine=host_debug_unopt',
+  result = run_process(FLUTTER_TEST + ['--local-engine=host_debug_unopt',
                                        engine_src_path],
-                       cwd=package_flutter_path())
-  result = p.wait()
+                                       cwd=package_flutter_path())
   if result != 0:
     print_error('package/flutter tests failed. Aborting roll.')
     sys.exit(ERROR_PKG_FLUTTER_FAILED)
 
   print_status('Running tests in examples/flutter_gallery')
-  p = subprocess.Popen(FLUTTER_TEST + ['--local-engine=host_debug_unopt',
+  result = run_process(FLUTTER_TEST + ['--local-engine=host_debug_unopt',
                                        engine_src_path],
-                       cwd=flutter_gallery_path());
-  p.wait()
+                                       cwd=flutter_gallery_path());
   if result != 0:
     print_error('flutter_gallery tests failed. Aborting roll.')
     sys.exit(ERROR_FLUTTER_GALLERY_FAILED)
@@ -186,21 +188,19 @@ def run_tests():
 def run_hot_reload_configurations():
   print_status('Running flutter gallery release')
   engine_src_path = '--local-engine-src-path={}'.format(ENGINE_HOME)
-  p = subprocess.Popen(FLUTTER_RUN + ['--release',
-                                      '--local-engine=android_release',
-                                      engine_src_path],
-                       cwd=flutter_gallery_path())
-  p.wait()
+  run_process(FLUTTER_RUN + ['--release',
+                             '--local-engine=android_release',
+                             engine_src_path],
+                             cwd=flutter_gallery_path())
   print_status('Running flutter gallery debug')
-  p = subprocess.Popen(FLUTTER_RUN + ['--local-engine=android_debug_unopt',
-                                      engine_src_path],
-                       cwd=flutter_gallery_path())
-  p.wait()
+  run_process(FLUTTER_RUN + ['--local-engine=android_debug_unopt',
+                             engine_src_path],
+                             cwd=flutter_gallery_path())
 
 
 def update_licenses():
   print_status('Updating Flutter licenses')
-  p = subprocess.Popen([engine_license_script_path()], cwd=ENGINE_HOME)
+  result = run_process([engine_license_script_path()], cwd=ENGINE_HOME)
   result = p.wait()
   if result == LICENSE_SCRIPT_EXIT_ERROR:
     print_error('License script failed to run. Is the Dart SDK (specifically' +
@@ -217,18 +217,16 @@ def update_licenses():
     path = os.path.join(license_script_output_path(), f)
     if os.path.isfile(path):
       shutil.copy(path, engine_golden_licenses_path())
-  p = subprocess.Popen(['pub', 'get'], cwd=engine_license_script_package_path())
-  p.wait()
+  run_process(['pub', 'get'], cwd=engine_license_script_package_path())
   gclient_sync()
 
   # Update the LICENSE file.
   with open(sky_license_file_path(), 'w') as sky_license:
-    p = subprocess.Popen(['dart', os.path.join('lib', 'main.dart'),
-                          '--release', '--src', ENGINE_HOME,
-                          '--out', engine_license_script_output_path()],
-                          cwd=engine_license_script_package_path(),
-                          stdout=sky_license)
-    p.wait()
+    run_process(['dart', os.path.join('lib', 'main.dart'),
+                 '--release', '--src', ENGINE_HOME,
+                 '--out', engine_license_script_output_path()],
+                 cwd=engine_license_script_package_path(),
+                 stdout=sky_license)
 
 
 def get_commit_range(start, finish):
@@ -260,8 +258,7 @@ def git_commit(original_revision, updated_revision):
                         get_short_rev(updated_revision), num_commits))
   commit_msg += '\n\n' + sdk_log
   commit_cmd = ['git', 'commit', '-a', '-m', commit_msg]
-  p = subprocess.Popen(commit_cmd, cwd=engine_flutter_path())
-  p.wait()
+  run_process(commit_cmd, cwd=engine_flutter_path())
 
 
 def update_roots(args):
@@ -295,6 +292,13 @@ def update_roots(args):
     sys.exit(ERROR_MISSING_ROOTS)
 
 
+def sys_exit(signal, frame):
+  sys.exit()
+
+def cleanup_children():
+  if CURRENT_SUBPROCESS != None:
+    CURRENT_SUBPROCESS.terminate()
+
 def main():
   parser = argparse.ArgumentParser(description='Automate most Dart SDK roll tasks.')
   parser.add_argument('--dart-sdk-home', help='Path to the Dart SDK ' +
@@ -319,6 +323,9 @@ def main():
                       help='Skip updating licenses')
 
   args = parser.parse_args()
+
+  atexit.register(cleanup_children)
+  signal.signal(signal.SIGTERM, sys_exit)
 
   original_revision = None
   updated_revision = args.dart_sdk_revision
