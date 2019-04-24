@@ -584,11 +584,10 @@ class LinuxProject {
 
   final FlutterProject project;
 
-  bool existsSync() => project.directory.childDirectory('linux').existsSync();
+  Directory get editableHostAppDirectory => project.directory.childDirectory('linux');
 
-  // Note: The build script file exists as a temporary shim.
-  File get buildScript => project.directory.childDirectory('linux').childFile('build.sh');
+  bool existsSync() => editableHostAppDirectory.existsSync();
 
-  // Note: The name script file exists as a temporary shim.
-  File get nameScript => project.directory.childDirectory('linux').childFile('name_output.sh');
+  /// The Linux project makefile.
+  File get makeFile => editableHostAppDirectory.childFile('Makefile');
 }

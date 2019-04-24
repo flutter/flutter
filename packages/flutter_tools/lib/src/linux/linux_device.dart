@@ -71,6 +71,7 @@ class LinuxDevice extends Device {
     bool usesTerminalUi = true,
     bool ipv6 = false,
   }) async {
+    _lastBuiltMode = debuggingOptions.buildInfo.mode;
     if (!prebuiltApplication) {
       await buildLinux((await FlutterProject.current()).linux, debuggingOptions.buildInfo);
     }
@@ -96,8 +97,7 @@ class LinuxDevice extends Device {
 
   @override
   Future<bool> stopApp(covariant LinuxApp app) async {
-    // Assume debug for now.
-    return killProcess(app.executable(BuildMode.debug));
+    return killProcess(app.executable(_lastBuiltMode));
   }
 
   @override
@@ -107,6 +107,9 @@ class LinuxDevice extends Device {
   // to uninstall the application.
   @override
   Future<bool> uninstallApp(ApplicationPackage app) async => true;
+
+  // Track the last built mode from startApp.
+  BuildMode _lastBuiltMode;
 }
 
 class LinuxDevices extends PollingDeviceDiscovery {
