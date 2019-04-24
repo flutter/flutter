@@ -288,7 +288,8 @@ void main() {
     );
     await expectLater(
       find.byType(RepaintBoundary).first,
-      matchesGoldenFile('clip.ClipRect.1.png'),
+      matchesSkiaGoldFile('clip.ClipRect.png'),
+//      matchesGoldenFile('clip.ClipRect.1.png'),
     );
   });
 
@@ -328,7 +329,8 @@ void main() {
     );
     await expectLater(
       find.byType(RepaintBoundary).first,
-      matchesGoldenFile('clip.ClipRectOverlay.1.png'),
+      matchesSkiaGoldFile('clip.ClipRectOverlay.png')
+//      matchesGoldenFile('clip.ClipRectOverlay.1.png'),
     );
   });
 
@@ -377,7 +379,8 @@ void main() {
     );
     await expectLater(
       find.byType(RepaintBoundary).first,
-      matchesGoldenFile('clip.ClipRRect.1.png'),
+      matchesSkiaGoldFile('clip.ClipRRect.png'),
+//      matchesGoldenFile('clip.ClipRRect.1.png'),
     );
   });
 
@@ -420,7 +423,8 @@ void main() {
     );
     await expectLater(
       find.byType(RepaintBoundary).first,
-      matchesGoldenFile('clip.ClipOval.1.png'),
+      matchesSkiaGoldFile('clip.ClipOval.png'),
+//      matchesGoldenFile('clip.ClipOval.1.png'),
     );
   });
 
@@ -468,7 +472,8 @@ void main() {
     );
     await expectLater(
       find.byType(RepaintBoundary).first,
-      matchesGoldenFile('clip.ClipPath.1.png'),
+      matchesSkiaGoldFile('clip.ClipPath.png'),
+//      matchesGoldenFile('clip.ClipPath.1.png'),
     );
   });
 
@@ -513,7 +518,8 @@ void main() {
     await tester.pumpWidget(genPhysicalModel(Clip.antiAlias));
     await expectLater(
       find.byType(RepaintBoundary).first,
-      matchesGoldenFile('clip.PhysicalModel.antiAlias.1.png'),
+      matchesSkiaGoldFile('clip.PhysicalModel.antiAlias.png'),
+//      matchesGoldenFile('clip.PhysicalModel.antiAlias.1.png'),
     );
   });
 
@@ -521,7 +527,8 @@ void main() {
     await tester.pumpWidget(genPhysicalModel(Clip.hardEdge));
     await expectLater(
       find.byType(RepaintBoundary).first,
-      matchesGoldenFile('clip.PhysicalModel.hardEdge.1.png'),
+      matchesSkiaGoldFile('clip.PhysicalModel.hardEdge.png'),
+//      matchesGoldenFile('clip.PhysicalModel.hardEdge.1.png'),
     );
   });
 
@@ -531,7 +538,8 @@ void main() {
     await tester.pumpWidget(genPhysicalModel(Clip.antiAliasWithSaveLayer));
     await expectLater(
       find.byType(RepaintBoundary).first,
-      matchesGoldenFile('clip.PhysicalModel.antiAliasWithSaveLayer.png'),
+      matchesSkiaGoldFile('clip.PhysicalModel.antiAliasWithSaveLayer.png'),
+//      matchesGoldenFile('clip.PhysicalModel.antiAliasWithSaveLayer.png'),
     );
   });
 
@@ -573,7 +581,8 @@ void main() {
     );
     await expectLater(
       find.byType(RepaintBoundary).first,
-      matchesGoldenFile('clip.PhysicalModel.default.1.png'),
+      matchesSkiaGoldFile('clip.PhysicalModel.default.png'),
+//      matchesGoldenFile('clip.PhysicalModel.default.1.png'),
     );
   });
 
@@ -622,7 +631,8 @@ void main() {
     await tester.pumpWidget(genPhysicalShape(Clip.antiAlias));
     await expectLater(
       find.byType(RepaintBoundary).first,
-      matchesGoldenFile('clip.PhysicalShape.antiAlias.1.png'),
+      matchesSkiaGoldFile('clip.PhysicalShape.antiAlias.png'),
+//      matchesGoldenFile('clip.PhysicalShape.antiAlias.1.png'),
     );
   });
 
@@ -630,7 +640,8 @@ void main() {
     await tester.pumpWidget(genPhysicalShape(Clip.hardEdge));
     await expectLater(
       find.byType(RepaintBoundary).first,
-      matchesGoldenFile('clip.PhysicalShape.hardEdge.1.png'),
+      matchesSkiaGoldFile('clip.PhysicalShape.hardEdge.png'),
+//      matchesGoldenFile('clip.PhysicalShape.hardEdge.1.png'),
     );
   });
 
@@ -638,7 +649,8 @@ void main() {
     await tester.pumpWidget(genPhysicalShape(Clip.antiAliasWithSaveLayer));
     await expectLater(
       find.byType(RepaintBoundary).first,
-      matchesGoldenFile('clip.PhysicalShape.antiAliasWithSaveLayer.png'),
+      matchesSkiaGoldFile('clip.PhysicalShape.antiAliasWithSaveLayer.png'),
+//      matchesGoldenFile('clip.PhysicalShape.antiAliasWithSaveLayer.png'),
     );
   });
 
@@ -684,7 +696,8 @@ void main() {
     );
     await expectLater(
       find.byType(RepaintBoundary).first,
-      matchesGoldenFile('clip.PhysicalShape.default.1.png'),
+      matchesSkiaGoldFile('clip.PhysicalShape.default.png'),
+//      matchesGoldenFile('clip.PhysicalShape.default.1.png'),
     );
   });
 
