@@ -52,55 +52,6 @@ void main() {
       expect(tester.binding.transientCallbackCount, 0);
     });
 
-    testWidgets('moves fab from center to end and back with hide', (WidgetTester tester) async {
-      final GlobalKey fabKey = GlobalKey(debugLabel: 'fabKey');
-      void fabExists({bool visible = true}) {
-        expect(find.byKey(fabKey), findsOneWidget);
-        expect(find.byKey(fabKey).hitTestable(), visible ? findsOneWidget : findsNothing);
-      }
-      await tester.pumpWidget(buildFrame(
-        location: FloatingActionButtonLocation.endFloat,
-        fab: FloatingActionButton(key: fabKey, child: const Text('1'), onPressed: () {})));
-
-      expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(756.0, 356.0));
-
-      await tester.pumpWidget(buildFrame(
-        location: FloatingActionButtonLocation.centerFloat,
-        fab: FloatingActionButton(key: fabKey, child: const Text('1'), onPressed: () {})));
-
-      // FAB should be visible
-      fabExists();
-
-      Scaffold.of(fabKey.currentContext).hideFloatingActionButton();
-
-      await tester.pumpAndSettle();
-
-      // FAB should not be visible
-      fabExists(visible: false);
-      expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(400.0, 356.0));
-
-      await tester.pumpWidget(buildFrame(
-        location: FloatingActionButtonLocation.centerFloat,
-        fab: FloatingActionButton(key: fabKey, child: const Text('1'), onPressed: () {})));
-
-      // FAB should not be visible - rebuilt in same location
-      fabExists(visible: false);
-
-      await tester.pumpWidget(buildFrame(
-        location: FloatingActionButtonLocation.endFloat,
-        fab: FloatingActionButton(key: fabKey, child: const Text('1'), onPressed: () {})));
-
-      await tester.pumpAndSettle();
-
-      // FAB should NOT be visible (rebuilding scaffold with new location)
-      fabExists(visible: false);
-
-      Scaffold.of(fabKey.currentContext).showFloatingActionButton();
-      await tester.pumpAndSettle();
-      fabExists(visible: true);
-      expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(756.0, 356.0));
-    });
-
     testWidgets('moves to and from custom-defined positions', (WidgetTester tester) async {
       await tester.pumpWidget(buildFrame(location: const _StartTopFloatingActionButtonLocation()));
 
