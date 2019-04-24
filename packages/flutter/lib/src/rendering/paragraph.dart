@@ -719,16 +719,21 @@ class RenderParagraph extends RenderBox
     _recognizers.clear();
     int offset = 0;
     text.visitChildren((InlineSpan span) {
-      if (span is! TextSpan)
-        return true;
-      TextSpan textSpan = span as TextSpan;
-      if (textSpan.recognizer != null && (textSpan.recognizer is TapGestureRecognizer || textSpan.recognizer is LongPressGestureRecognizer)) {
-        final int length = textSpan.semanticsLabel?.length ?? textSpan.text.length;
+      if (span is TextSpan) {
+        TextSpan textSpan = span as TextSpan;
+        if (textSpan.recognizer != null && (textSpan.recognizer is TapGestureRecognizer || textSpan.recognizer is LongPressGestureRecognizer)) {
+          final int length = textSpan.semanticsLabel?.length ?? textSpan.text.length;
+          _recognizerOffsets.add(offset);
+          _recognizerOffsets.add(offset + length);
+          _recognizers.add(textSpan.recognizer);
+        }
+        offset += textSpan.text != null ? textSpan.text.length : 0;
+      } else if (span is PlaceholderSpan) {
         _recognizerOffsets.add(offset);
-        _recognizerOffsets.add(offset + length);
-        _recognizers.add(textSpan.recognizer);
+        _recognizerOffsets.add(offset + 1);
+        _recognizers.add(null);
+        offset += 1;
       }
-      offset += textSpan.text != null ? textSpan.text.length : 0;
       return true;
     });
     if (_recognizerOffsets.isNotEmpty) {
@@ -745,7 +750,6 @@ class RenderParagraph extends RenderBox
     assert(_recognizerOffsets.isNotEmpty);
     assert(_recognizerOffsets.length.isEven);
     assert(_recognizers.isNotEmpty);
-    assert(children.isEmpty);
     final List<SemanticsNode> newChildren = <SemanticsNode>[];
     final String rawLabel = text.toPlainText();
     int current = 0;
@@ -753,7 +757,7 @@ class RenderParagraph extends RenderBox
     TextDirection currentDirection = textDirection;
     Rect currentRect;
 
-    SemanticsConfiguration buildSemanticsConfig(int start, int end) {
+    SemanticsConfiguration buildSemanticsConfig(int start, int end, { bool includeText = true }) {
       final TextDirection initialDirection = currentDirection;
       final TextSelection selection = TextSelection(baseOffset: start, extentOffset: end);
       final List<ui.TextBox> rects = getBoxesForSelection(selection);
@@ -773,15 +777,20 @@ class RenderParagraph extends RenderBox
         rect.bottom.ceilToDouble() + 4.0,
       );
       order += 1;
-      return SemanticsConfiguration()
+      SemanticsConfiguration configuration = SemanticsConfiguration()
         ..sortKey = OrdinalSortKey(order)
-        ..textDirection = initialDirection
-        ..label = rawLabel.substring(start, end);
+        ..textDirection = initialDirection;
+      if (includeText) {
+        configuration.label = rawLabel.substring(start, end);
+      }
+      return configuration;
     }
 
+    int childIndex = 0;
     for (int i = 0, j = 0; i < _recognizerOffsets.length; i += 2, j++) {
       final int start = _recognizerOffsets[i];
       final int end = _recognizerOffsets[i + 1];
+      // Add semantics for any text between the previous recognizer/widget and this one.
       if (current != start) {
         final SemanticsNode node = SemanticsNode();
         final SemanticsConfiguration configuration = buildSemanticsConfig(current, start);
@@ -789,19 +798,25 @@ class RenderParagraph extends RenderBox
         node.rect = currentRect;
         newChildren.add(node);
       }
-      final SemanticsNode node = SemanticsNode();
-      final SemanticsConfiguration configuration = buildSemanticsConfig(start, end);
+      // Add semantics for this recognizer/widget
       final GestureRecognizer recognizer = _recognizers[j];
-      if (recognizer is TapGestureRecognizer) {
-        configuration.onTap = recognizer.onTap;
-      } else if (recognizer is LongPressGestureRecognizer) {
-        configuration.onLongPress = recognizer.onLongPress;
-      } else {
-        assert(false);
+      final SemanticsConfiguration configuration = buildSemanticsConfig(start, end, includeText: false);
+      if (recognizer != null) {
+        final SemanticsNode node = SemanticsNode();
+        if (recognizer is TapGestureRecognizer) {
+          configuration.onTap = recognizer.onTap;
+        } else if (recognizer is LongPressGestureRecognizer) {
+          configuration.onLongPress = recognizer.onLongPress;
+        } else {
+          assert(false);
+        }
+        node.updateWith(config: configuration);
+        node.rect = currentRect;
+        newChildren.add(node);
+      } else if (childIndex < children.length) {
+        newChildren.add(children.elementAt(childIndex));
+        childIndex += 1;
       }
-      node.updateWith(config: configuration);
-      node.rect = currentRect;
-      newChildren.add(node);
       current = end;
     }
     if (current < rawLabel.length) {
