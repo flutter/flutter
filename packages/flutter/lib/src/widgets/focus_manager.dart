@@ -784,9 +784,8 @@ class FocusScopeNode extends FocusNode {
   /// Make the given [scope] the active child scope for this scope.
   ///
   /// If the given [scope] is not yet a part of the focus tree, then add it to
-  /// the tree as a child of this scope.
-  ///
-  /// The given scope must be a descendant of this scope.
+  /// the tree as a child of this scope. If it is already part of the focus
+  /// tree, the given scope must be a descendant of this scope.
   void setFirstFocus(FocusScopeNode scope) {
     assert(scope != null);
     if (scope._parent == null) {
@@ -901,8 +900,7 @@ class FocusManager with DiagnosticableTreeMixin {
   ///
   /// This field is rarely used directly. To find the nearest [FocusScopeNode]
   /// for a given [FocusNode], call [FocusNode.nearestScope].
-  FocusScopeNode get rootScope => _rootScope;
-  FocusScopeNode _rootScope = FocusScopeNode(debugLabel: 'Root Focus Scope');
+  final FocusScopeNode rootScope = FocusScopeNode(debugLabel: 'Root Focus Scope');
 
   void _handleRawKeyEvent(RawKeyEvent event) {
     // Walk the current focus from the leaf to the root, calling each one's
@@ -922,18 +920,6 @@ class FocusManager with DiagnosticableTreeMixin {
         break;
       }
     }
-  }
-
-  /// Resets the FocusManager to a base state.
-  ///
-  /// This is used by test infrastructure to reset the state between tests.
-  /// It is not meant for regular production use.
-  void reset() {
-    _currentFocus = null;
-    _nextFocus = null;
-    _haveScheduledUpdate = false;
-    _rootScope = FocusScopeNode(debugLabel: 'Root Focus Scope');
-    rootScope._manager = this;
   }
 
   // The node that currently has the primary focus.
