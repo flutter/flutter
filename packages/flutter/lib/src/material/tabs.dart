@@ -537,7 +537,7 @@ class _TabBarScrollController extends ScrollController {
 ///
 /// Uses values from [TabBarTheme] if it is set in the current context.
 ///
-/// To see sample implementation, visit the [TabController] documentation.
+/// To see a sample implementation, visit the [TabController] documentation.
 ///
 /// See also:
 ///
@@ -1077,7 +1077,7 @@ class _TabBarState extends State<TabBar> {
 /// The tab controller's [TabController.length] must equal the length of the
 /// [children] list and the length of the [TabBar.tabs] list.
 ///
-/// To see sample implementation, visit the [TabController] documentation.
+/// To see a sample implementation, visit the [TabController] documentation.
 class TabBarView extends StatefulWidget {
   /// Creates a page view with one child per tab.
   ///
