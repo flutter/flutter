@@ -1148,8 +1148,9 @@ void main() {
       await tester.pump(const Duration(milliseconds: 30));
       await expectLater(
         find.byType(BottomNavigationBar),
-        matchesGoldenFile('bottom_navigation_bar.shifting_transition.2.$pump.png'),
-	      skip: !Platform.isLinux,
+        matchesSkiaGoldFile('bottom_navigation_bar.shifting_transition.$pump.png'),
+        // matchesGoldenFile('bottom_navigation_bar.shifting_transition.2.$pump.png'),
+	      // skip: !Platform.isLinux,
       );
     }
   });

@@ -141,8 +141,9 @@ void main() {
     assert(tester.renderObject(buttonFinder).attached);
     await expectLater(
       find.ancestor(of: buttonFinder, matching: find.byType(RepaintBoundary)).first,
-      matchesGoldenFile('dropdown_test.default.0.png'),
-      skip: !Platform.isLinux,
+      matchesSkiaGoldFile('dropdown_test.default.png'),
+      // matchesGoldenFile('dropdown_test.default.0.png'),
+      // skip: !Platform.isLinux,
     );
   });
 
@@ -154,8 +155,9 @@ void main() {
     assert(tester.renderObject(buttonFinder).attached);
     await expectLater(
       find.ancestor(of: buttonFinder, matching: find.byType(RepaintBoundary)).first,
-      matchesGoldenFile('dropdown_test.expanded.0.png'),
-      skip: !Platform.isLinux,
+      matchesSkiaGoldFile('dropdown_test.expanded.png'),
+      // matchesGoldenFile('dropdown_test.expanded.0.png'),
+      // skip: !Platform.isLinux,
     );
   });
 

@@ -73,15 +73,19 @@ void main() {
     await pump(FloatingActionButtonLocation.endDocked);
     await expectLater(
       find.byKey(key),
-      matchesGoldenFile('bottom_app_bar.custom_shape.1.png'),
+      // matchesGoldenFile('bottom_app_bar.custom_shape.1.png'),
+      matchesSkiaGoldFile('bottom_app_bar.custom_shape.1.png'),
     );
     await pump(FloatingActionButtonLocation.centerDocked);
     await tester.pumpAndSettle();
     await expectLater(
       find.byKey(key),
-      matchesGoldenFile('bottom_app_bar.custom_shape.2.png'),
+      // matchesGoldenFile('bottom_app_bar.custom_shape.2.png'),
+      matchesSkiaGoldFile('bottom_app_bar.custom_shape.2.png'),
     );
-  }, skip: !Platform.isLinux);
+  },
+  //  skip: !Platform.isLinux
+  );
 
   testWidgets('color defaults to Theme.bottomAppBarColor', (WidgetTester tester) async {
     await tester.pumpWidget(

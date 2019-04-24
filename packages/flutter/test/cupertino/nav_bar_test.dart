@@ -801,12 +801,13 @@ void main() {
 
       await expectLater(
         find.byType(RepaintBoundary).last,
-        matchesGoldenFile('nav_bar_test.standard_title.1.png'),
+        //matchesGoldenFile('nav_bar_test.standard_title.1.png'),
+        matchesSkiaGoldFile('nav_bar_test.standard_title.png'),
       );
     },
     // TODO(xster): remove once https://github.com/flutter/flutter/issues/17483
     // is fixed.
-    skip: !Platform.isLinux,
+    // skip: !Platform.isLinux,
   );
 
   testWidgets(
@@ -835,12 +836,13 @@ void main() {
 
       await expectLater(
         find.byType(RepaintBoundary).last,
-        matchesGoldenFile('nav_bar_test.large_title.1.png'),
+        // matchesGoldenFile('nav_bar_test.large_title.1.png'),
+        matchesSkiaGoldFile('nav_bar_test.large_title.png'),
       );
     },
     // TODO(xster): remove once https://github.com/flutter/flutter/issues/17483
     // is fixed.
-    skip: !Platform.isLinux,
+    // skip: !Platform.isLinux,
    );
 
 
