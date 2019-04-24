@@ -379,6 +379,9 @@ class MockAndroidDevice extends Mock implements AndroidDevice {
 
   @override
   bool isSupported() => true;
+
+  @override
+  bool isSupportedForProject(FlutterProject flutterProject) => true;
 }
 
 class MockIOSDevice extends Mock implements IOSDevice {
@@ -387,6 +390,9 @@ class MockIOSDevice extends Mock implements IOSDevice {
 
   @override
   bool isSupported() => true;
+
+  @override
+  bool isSupportedForProject(FlutterProject flutterProject) => true;
 }
 
 class MockIOSSimulator extends Mock implements IOSSimulator {
@@ -395,6 +401,9 @@ class MockIOSSimulator extends Mock implements IOSSimulator {
 
   @override
   bool isSupported() => true;
+
+  @override
+  bool isSupportedForProject(FlutterProject flutterProject) => true;
 }
 
 class MockDeviceLogReader extends DeviceLogReader {
