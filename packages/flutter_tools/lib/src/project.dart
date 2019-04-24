@@ -99,6 +99,15 @@ class FlutterProject {
   /// The web sub project of this project.
   WebProject get web => WebProject._(this);
 
+  /// The macos sub project of this project.
+  MacOSProject get macos => MacOSProject._(this);
+
+  /// The linux sub project of this project.
+  LinuxProject get linux => LinuxProject._(this);
+
+  /// The windows sub project of this project.
+  WindowsProject get windows => WindowsProject._(this);
+
   /// The `pubspec.yaml` file of this project.
   File get pubspecFile => directory.childFile('pubspec.yaml');
 
@@ -149,16 +158,21 @@ class FlutterProject {
 
   /// Generates project files necessary to make Gradle builds work on Android
   /// and CocoaPods+Xcode work on iOS, for app and module projects only.
-  Future<void> ensureReadyForPlatformSpecificTooling() async {
-    if (!directory.existsSync() || hasExampleApp)
+  Future<void> ensureReadyForPlatformSpecificTooling({bool checkProjects = false}) async {
+    if (!directory.existsSync() || hasExampleApp) {
       return;
+    }
     refreshPluginsList(this);
-    await android.ensureReadyForPlatformSpecificTooling();
-    await ios.ensureReadyForPlatformSpecificTooling();
+    if ((android.existsSync() && checkProjects) || !checkProjects) {
+      await android.ensureReadyForPlatformSpecificTooling();
+    }
+    if ((ios.existsSync() && checkProjects) || !checkProjects) {
+      await ios.ensureReadyForPlatformSpecificTooling();
+    }
     if (flutterWebEnabled) {
       await web.ensureReadyForPlatformSpecificTooling();
     }
-    await injectPlugins(this);
+    await injectPlugins(this, checkProjects: checkProjects);
   }
 
   /// Return the set of builders used by this package.
@@ -194,6 +208,8 @@ class IosProject {
   Directory get _ephemeralDirectory => parent.directory.childDirectory('.ios');
   Directory get _editableDirectory => parent.directory.childDirectory('ios');
 
+  bool existsSync() => parent.isModule || _editableDirectory.existsSync();
+
   /// This parent folder of `Runner.xcodeproj`.
   Directory get hostAppRoot {
     if (!isModule || _editableDirectory.existsSync())
@@ -214,6 +230,9 @@ class IosProject {
 
   /// True, if the parent Flutter project is a module project.
   bool get isModule => parent.isModule;
+
+  /// Whether the flutter application has an iOS project.
+  bool get exists => hostAppRoot.existsSync();
 
   /// The xcode config file for [mode].
   File xcodeConfigFor(String mode) => _flutterLibRoot.childDirectory('Flutter').childFile('$mode.xcconfig');
@@ -372,6 +391,8 @@ class AndroidProject {
     return _ephemeralDirectory;
   }
 
+  bool existsSync() => parent.isModule || _flutterLibGradleRoot.existsSync();
+
   /// The Gradle root directory of the Android wrapping of Flutter and plugins.
   /// This is the same as [hostAppGradleRoot] except when the project is
   /// a Flutter module with an editable host app.
@@ -477,6 +498,8 @@ class WebProject {
 
   final FlutterProject parent;
 
+  bool existsSync() => parent.directory.childDirectory('web').existsSync();
+
   Future<void> ensureReadyForPlatformSpecificTooling() async {
     /// Generate index.html in build/web. Eventually we could support
     /// a custom html under the web sub directory.
@@ -517,4 +540,55 @@ Match _firstMatchInFile(File file, RegExp regExp) {
     }
   }
   return null;
+}
+
+/// The macOS sub project.
+class MacOSProject {
+  MacOSProject._(this.project);
+
+  final FlutterProject project;
+
+  bool existsSync() => project.directory.childDirectory('macos').existsSync();
+
+  Directory get _editableDirectory => project.directory.childDirectory('macos');
+
+  /// Contains definitions for FLUTTER_ROOT, LOCAL_ENGINE, and more flags for
+  /// the Xcode build.
+  File get generatedXcodePropertiesFile => _editableDirectory.childDirectory('Flutter').childFile('Generated.xcconfig');
+
+  /// The Xcode project file.
+  Directory get xcodeProjectFile => _editableDirectory.childDirectory('Runner.xcodeproj');
+
+  // Note: The name script file exists as a temporary shim.
+  File get nameScript => project.directory.childDirectory('macos').childFile('name_output.sh');
+}
+
+/// The Windows sub project
+class WindowsProject {
+  WindowsProject._(this.project);
+
+  final FlutterProject project;
+
+  bool existsSync() => project.directory.childDirectory('windows').existsSync();
+
+  // Note: The build script file exists as a temporary shim.
+  File get buildScript => project.directory.childDirectory('windows').childFile('build.bat');
+
+  // Note: The name script file exists as a temporary shim.
+  File get nameScript => project.directory.childDirectory('windows').childFile('name_output.bat');
+}
+
+/// The Linux sub project.
+class LinuxProject {
+  LinuxProject._(this.project);
+
+  final FlutterProject project;
+
+  bool existsSync() => project.directory.childDirectory('linux').existsSync();
+
+  // Note: The build script file exists as a temporary shim.
+  File get buildScript => project.directory.childDirectory('linux').childFile('build.sh');
+
+  // Note: The name script file exists as a temporary shim.
+  File get nameScript => project.directory.childDirectory('linux').childFile('name_output.sh');
 }

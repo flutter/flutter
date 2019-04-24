@@ -293,10 +293,6 @@ void main() {
         jsonEncodeObject(OperationResult(1, 'foo')),
         '{"code":1,"message":"foo"}',
       );
-      expect(
-        jsonEncodeObject(OperationResult(0, 'foo', hintMessage: 'my hint', hintId: 'myId')),
-        '{"code":0,"message":"foo","hintMessage":"my hint","hintId":"myId"}',
-      );
     });
   });
 }
