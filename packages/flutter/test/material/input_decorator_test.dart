@@ -2020,15 +2020,17 @@ void main() {
       await tester.pumpWidget(buildFrame(TextDirection.ltr));
       await expectLater(
         find.byType(InputDecorator),
-        matchesGoldenFile('input_decorator.outline_icon_label.ltr.png'),
-        skip: !Platform.isLinux,
+        matchesSkiaGoldFile('input_decorator.outline_icon_label.ltr.png'),
+        // matchesGoldenFile('input_decorator.outline_icon_label.ltr.png'),
+        // skip: !Platform.isLinux,
       );
 
       await tester.pumpWidget(buildFrame(TextDirection.rtl));
       await expectLater(
         find.byType(InputDecorator),
-        matchesGoldenFile('input_decorator.outline_icon_label.rtl.png'),
-        skip: !Platform.isLinux,
+        matchesSkiaGoldFile('input_decorator.outline_icon_label.rtl.png'),
+        // matchesGoldenFile('input_decorator.outline_icon_label.rtl.png'),
+        // skip: !Platform.isLinux,
       );
     },
     skip: !Platform.isLinux,

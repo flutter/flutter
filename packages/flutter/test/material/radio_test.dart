@@ -277,8 +277,9 @@ void main() {
     await tester.pumpAndSettle();
     await expectLater(
       find.byKey(painterKey),
-      matchesGoldenFile('radio.ink_ripple.png'),
-      skip: !Platform.isLinux,
+      matchesSkiaGoldFile('radio.ink_ripple.png'),
+      // matchesGoldenFile('radio.ink_ripple.png'),
+      // skip: !Platform.isLinux,
     );
   });
 }

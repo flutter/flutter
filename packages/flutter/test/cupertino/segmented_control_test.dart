@@ -1327,9 +1327,11 @@ void main() {
 
     await expectLater(
       find.byType(RepaintBoundary),
-      matchesGoldenFile('segmented_control_test.0.0.png'),
+      // matchesGoldenFile('segmented_control_test.0.0.png'),
+      matchesSkiaGoldFile('segmented_control_test.0.png'),
     );
-  }, skip: !Platform.isLinux);
+  }, //skip: !Platform.isLinux
+  );
 
   testWidgets('Golden Test Pressed State', (WidgetTester tester) async {
     final Map<int, Widget> children = <int, Widget>{};
@@ -1365,7 +1367,10 @@ void main() {
 
     await expectLater(
       find.byType(RepaintBoundary),
-      matchesGoldenFile('segmented_control_test.1.0.png'),
+      // matchesGoldenFile('segmented_control_test.1.0.png'),
+      matchesSkiaGoldFile('segmented_control_test.1.png'),
     );
-  }, skip: !Platform.isLinux);
+  },
+  //  skip: !Platform.isLinux
+  );
 }
