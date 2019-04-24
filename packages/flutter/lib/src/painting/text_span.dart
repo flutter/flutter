@@ -66,8 +66,8 @@ class TextSpan extends InlineSpan {
     List<InlineSpan> children,
     TextStyle style,
     this.recognizer,
-    this.semanticsLabel,
-  }) : super(style: style, children: children);
+    String semanticsLabel,
+  }) : super(style: style, children: children, semanticsLabel: semanticsLabel);
 
   /// The text contained in the span.
   ///
@@ -151,19 +151,6 @@ class TextSpan extends InlineSpan {
   /// {@end-tool}
   final GestureRecognizer recognizer;
 
-  /// An alternative semantics label for this text.
-  ///
-  /// If present, the semantics of this span will contain this value instead
-  /// of the actual text.
-  ///
-  /// This is useful for replacing abbreviations or shorthands with the full
-  /// text value:
-  ///
-  /// ```dart
-  /// TextSpan(text: r'$$', semanticsLabel: 'Double dollars')
-  /// ```
-  final String semanticsLabel;
-
   /// Apply the [style], [text], and [children] of this object to the
   /// given [ParagraphBuilder], from which a [Paragraph] can be obtained.
   /// [Paragraph] objects can be drawn on [Canvas] objects.
@@ -191,7 +178,7 @@ class TextSpan extends InlineSpan {
   /// Walks this text span and its descendants in pre-order and calls [visitor]
   /// for each span that has text.
   @override
-  bool visitChildren(bool visitor(InlineSpan span)) {
+  bool visitChildren(InlineSpanVisitor visitor) {
     if (text != null) {
       if (!visitor(this))
         return false;
@@ -214,17 +201,17 @@ class TextSpan extends InlineSpan {
     TextSpan result;
     visitChildren((InlineSpan span) {
       assert(result == null);
-      if (span is! TextSpan)
-        return true;
-      TextSpan textSpan = span as TextSpan;
-      final int endOffset = offset + textSpan.text.length;
-      if (targetOffset == offset && affinity == TextAffinity.downstream ||
-          targetOffset > offset && targetOffset < endOffset ||
-          targetOffset == endOffset && affinity == TextAffinity.upstream) {
-        result = span;
-        return false;
+      if (span is TextSpan) {
+        TextSpan textSpan = span as TextSpan;
+        final int endOffset = offset + textSpan.text.length;
+        if (targetOffset == offset && affinity == TextAffinity.downstream ||
+            targetOffset > offset && targetOffset < endOffset ||
+            targetOffset == endOffset && affinity == TextAffinity.upstream) {
+          result = span;
+          return false;
+        }
+        offset = endOffset;
       }
-      offset = endOffset;
       return true;
     });
     return result;
@@ -238,17 +225,16 @@ class TextSpan extends InlineSpan {
   String toPlainText({bool includeSemanticsLabels = true}) {
     assert(debugAssertIsValid());
     final StringBuffer buffer = StringBuffer();
-    visitChildren((InlineSpan span) {
-      if (span is! TextSpan)
-        return true;
-      TextSpan textSpan = span as TextSpan;
-      if (textSpan.semanticsLabel != null && includeSemanticsLabels) {
-        buffer.write(textSpan.semanticsLabel);
-      } else {
-        buffer.write(textSpan.text);
+    if (semanticsLabel != null && includeSemanticsLabels) {
+      buffer.write(semanticsLabel);
+    } else if (text != null) {
+      buffer.write(text);
+    }
+    if (children != null) {
+      for (InlineSpan child in children) {
+        buffer.write(child.toPlainText(includeSemanticsLabels: includeSemanticsLabels));
       }
-      return true;
-    });
+    }
     return buffer.toString();
   }
 
@@ -376,10 +362,6 @@ class TextSpan extends InlineSpan {
       description: recognizer?.runtimeType?.toString(),
       defaultValue: null,
     ));
-
-    if (semanticsLabel != null) {
-      properties.add(StringProperty('semanticsLabel', semanticsLabel));
-    }
   }
 
   @override

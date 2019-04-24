@@ -41,9 +41,10 @@ abstract class PlaceholderSpan extends InlineSpan {
     TextBaseline baseline,
     TextStyle style,
     List<InlineSpan> children,
+    String semanticsLabel
   }) : alignment = alignment,
        baseline = baseline,
-       super(style: style, children: children);
+       super(style: style, children: children, semanticsLabel: semanticsLabel);
 
   /// How the placeholder aligns vertically with the text.
   ///

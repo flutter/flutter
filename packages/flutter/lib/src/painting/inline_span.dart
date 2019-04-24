@@ -12,6 +12,12 @@ import 'basic_types.dart';
 import 'text_style.dart';
 import 'text_painter.dart';
 
+/// Called on each span as [InlineSpan.visitChildren] walks the InlineSpan tree.
+///
+/// Returns true when the walk should continue, and false to stop visiting further
+/// [InlineSpan]s.
+typedef InlineSpanVisitor = bool Function(InlineSpan span);
+
 /// An immutable span of inline content which forms a paragraph.
 ///
 /// The subclass [TextSpan] specifies text and may contain child [InlineSpan]s.
@@ -25,10 +31,8 @@ import 'text_painter.dart';
 /// The subclass [WidgetSpan] specifies embedded inline widgets. Specify a
 /// widget by wrapping the widget with a [WidgetSpan].
 ///
-/// Only [TextSpan] may contain children, so in order to include multiple
-/// [InlineSpan]s, the root node must be a [TextSpan]. Leaving the
-/// [TextSpan.text] field null results in the [TextSpan] acting as an empty
-/// node with a list of children.
+/// Leaving the [TextSpan.text] field null results in the [TextSpan] acting
+/// as an empty node with a list of children.
 ///
 /// {@tool sample}
 ///
@@ -69,6 +73,7 @@ abstract class InlineSpan extends DiagnosticableTree {
   const InlineSpan({
     this.style,
     this.children,
+    this.semanticsLabel,
   });
 
   /// The style to apply to this span.
@@ -88,6 +93,19 @@ abstract class InlineSpan extends DiagnosticableTree {
   /// The list must not contain any nulls.
   final List<InlineSpan> children;
 
+  /// An alternative semantics label for this InlineSpan.
+  ///
+  /// If present, the semantics of this span will contain this value instead
+  /// of the actual content.
+  ///
+  /// This is useful for replacing abbreviations or shorthands with the full
+  /// text value:
+  ///
+  /// ```dart
+  /// TextSpan(text: r'$$', semanticsLabel: 'Double dollars')
+  /// ```
+  final String semanticsLabel;
+
   /// Apply the properties of this object to the given [ParagraphBuilder], from
   /// which a [Paragraph] can be obtained. [Paragraph] objects can be drawn on
   /// [Canvas] objects.
@@ -98,15 +116,17 @@ abstract class InlineSpan extends DiagnosticableTree {
   ///
   /// When [visitor] returns true, the walk will continue. When [visitor] returns
   /// false, then the walk will end.
-  bool visitChildren(bool visitor(InlineSpan span));
+  bool visitChildren(InlineSpanVisitor visitor);
 
-  /// Returns the text span that contains the given position in the text.
+  /// Returns the text span that contains the given position in the text. 
   InlineSpan getSpanForPosition(TextPosition position);
 
   /// Flattens the [InlineSpan] tree into a single string.
   ///
-  /// Styles are not honored in this process.
-  String toPlainText();
+  /// Styles are not honored in this process. If `includeSemanticsLabels` is
+  /// true, then the text returned will include the [TextStyle.semanticsLabel]s
+  /// instead of the text contents for [TextSpan]s.
+  String toPlainText({bool includeSemanticsLabels = true});
 
   /// Returns the UTF-16 code unit at the given index in the flattened string.
   ///
@@ -141,6 +161,7 @@ abstract class InlineSpan extends DiagnosticableTree {
       return false;
     final InlineSpan typedOther = other;
     return typedOther.style == style
+        && typedOther.semanticsLabel == semanticsLabel
         && listEquals<InlineSpan>(typedOther.children, children);
   }
 
@@ -153,7 +174,12 @@ abstract class InlineSpan extends DiagnosticableTree {
     properties.defaultDiagnosticsTreeStyle = DiagnosticsTreeStyle.whitespace;
     // Properties on style are added as if they were properties directly on
     // this InlineSpan.
-    if (style != null)
+    if (style != null) {
       style.debugFillProperties(properties);
+    }
+
+    if (semanticsLabel != null) {
+      properties.add(StringProperty('semanticsLabel', semanticsLabel));
+    }
   }
 }

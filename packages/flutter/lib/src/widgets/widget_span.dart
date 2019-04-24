@@ -85,6 +85,12 @@ enum InlineWidgetAlignment {
 /// ```
 /// {@end-tool}
 ///
+/// The [semanticsLabel] argument may be provided to supply a description of
+/// this [WidgetSpan] within the [toPlainText]. The semantics label of the
+/// overall [InlineSpan] tree will not mention [WidgetSpan]s unless
+/// [semanticsLabel] is provided. Semantics for the widget itself will still
+/// function independently from the [InlineSpan] semantics label.
+///
 /// See also:
 ///
 ///  * [TextSpan], a node that represents text in a [TextSpan] tree.
@@ -105,6 +111,7 @@ class WidgetSpan extends PlaceholderSpan {
     InlineWidgetAlignment alignment = InlineWidgetAlignment.bottom,
     TextBaseline baseline,
     TextStyle style,
+    String semanticsLabel,
   }) : assert(child != null),
        assert((alignment == InlineWidgetAlignment.aboveBaseline ||
                alignment == InlineWidgetAlignment.belowBaseline ||
@@ -118,7 +125,7 @@ class WidgetSpan extends PlaceholderSpan {
            alignment == InlineWidgetAlignment.top ? ui.PlaceholderAlignment.top :
            alignment == InlineWidgetAlignment.bottom ? ui.PlaceholderAlignment.bottom :
            alignment == InlineWidgetAlignment.middle ? ui.PlaceholderAlignment.middle : null,
-         baseline: baseline, style: style,
+         baseline: baseline, style: style, semanticsLabel: semanticsLabel, children: null,
        );
 
   /// The widget to embed inline with text.
@@ -156,15 +163,15 @@ class WidgetSpan extends PlaceholderSpan {
   }
 
   /// Calls visitor on this [WidgetSpan]. There are no children spans to walk.
-  bool visitChildren(bool visitor(InlineSpan span)) {
+  bool visitChildren(InlineSpanVisitor visitor) {
     if (!visitor(this))
       return false;
     assert(children == null);
     return true;
   }
 
-  String toPlainText() {
-    return child.toString();
+  String toPlainText({bool includeSemanticsLabels = true}) {
+    return includeSemanticsLabels && semanticsLabel != null ? semanticsLabel : "";
   }
 
   int codeUnitAt(int index) {
@@ -207,7 +214,8 @@ class WidgetSpan extends PlaceholderSpan {
       return false;
     final WidgetSpan typedOther = other;
     return typedOther.child == child
-        && typedOther.style == style;
+        && typedOther.style == style
+        && typedOther.semanticsLabel == semanticsLabel;
   }
 
   /// Returns the text span that contains the given position in the text.
@@ -215,7 +223,6 @@ class WidgetSpan extends PlaceholderSpan {
     assert(debugAssertIsValid());
     return null;
   }
-
 
   /// In debug mode, throws an exception if the object is not in a
   /// valid configuration. Otherwise, returns true.
