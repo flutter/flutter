@@ -2033,7 +2033,7 @@ void main() {
         // skip: !Platform.isLinux,
       );
     },
-    skip: !Platform.isLinux,
+//    skip: !Platform.isLinux,
   );
 
   testWidgets('InputDecorationTheme.toString()', (WidgetTester tester) async {

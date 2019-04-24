@@ -72,8 +72,9 @@ void main() {
 
     await expectLater(
       find.byType(RepaintBoundary),
-      matchesGoldenFile('continuous_rectangle_border.golden_test_even_radii.png'),
-      skip: !Platform.isLinux,
+      matchesSkiaGoldFile('continuous_rectangle_border.golden_test_even_radii.png'),
+//      matchesGoldenFile('continuous_rectangle_border.golden_test_even_radii.png'),
+//      skip: !Platform.isLinux,
     );
   });
 
@@ -94,8 +95,9 @@ void main() {
 
     await expectLater(
       find.byType(RepaintBoundary),
-      matchesGoldenFile('continuous_rectangle_border.golden_test_varying_radii.png'),
-      skip: !Platform.isLinux,
+      matchesSkiaGoldFile('continuous_rectangle_border.golden_test_varying_radii.png'),
+//      matchesGoldenFile('continuous_rectangle_border.golden_test_varying_radii.png'),
+//      skip: !Platform.isLinux,
     );
   });
 
@@ -113,8 +115,9 @@ void main() {
 
     await expectLater(
       find.byType(RepaintBoundary),
-      matchesGoldenFile('continuous_rectangle_border.golden_test_large_radii.png'),
-      skip: !Platform.isLinux,
+      matchesSkiaGoldFile('continuous_rectangle_border.golden_test_large_radii.png'),
+//      matchesGoldenFile('continuous_rectangle_border.golden_test_large_radii.png'),
+//      skip: !Platform.isLinux,
     );
   });
 
