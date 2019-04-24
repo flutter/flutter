@@ -8,7 +8,6 @@ import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process_manager.dart';
 import '../build_info.dart';
-import '../convert.dart';
 import '../desktop.dart';
 import '../device.dart';
 import '../globals.dart';
@@ -26,7 +25,10 @@ class LinuxDevice extends Device {
   void clearLogs() { }
 
   @override
-  DeviceLogReader getLogReader({ ApplicationPackage app }) => NoOpDeviceLogReader('linux');
+  DeviceLogReader getLogReader({ ApplicationPackage app }) {
+    return _logReader;
+  }
+  final DesktopLogReader _logReader = DesktopLogReader();
 
   // Since the host and target devices are the same, no work needs to be done
   // to install the application.
@@ -79,8 +81,8 @@ class LinuxDevice extends Device {
     if (debuggingOptions?.buildInfo?.isRelease == true) {
       return LaunchResult.succeeded();
     }
-    final LinuxLogReader logReader = LinuxLogReader(package, process);
-    final ProtocolDiscovery observatoryDiscovery = ProtocolDiscovery.observatory(logReader);
+    _logReader.initializeProcess(process);
+    final ProtocolDiscovery observatoryDiscovery = ProtocolDiscovery.observatory(_logReader);
     try {
       final Uri observatoryUri = await observatoryDiscovery.uri;
       return LaunchResult.succeeded(observatoryUri: observatoryUri);
@@ -128,19 +130,4 @@ class LinuxDevices extends PollingDeviceDiscovery {
 
   @override
   Future<List<String>> getDiagnostics() async => const <String>[];
-}
-
-class LinuxLogReader extends DeviceLogReader {
-  LinuxLogReader(this.linuxApp, this.process);
-
-  final LinuxApp linuxApp;
-  final Process process;
-
-  @override
-  Stream<String> get logLines {
-    return process.stdout.transform(utf8.decoder);
-  }
-
-  @override
-  String get name => linuxApp.displayName;
 }
