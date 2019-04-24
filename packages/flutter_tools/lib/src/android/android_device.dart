@@ -385,7 +385,7 @@ class AndroidDevice extends Device {
     }
     // There was a failure parsing the android project information.
     if (package == null) {
-      throwToolExit('Error in AndroidManifest.');
+      throwToolExit('');
     }
 
     printTrace("Stopping app '${package.name}' on $name.");

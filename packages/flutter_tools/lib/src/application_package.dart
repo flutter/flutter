@@ -168,7 +168,7 @@ class AndroidApk extends ApplicationPackage {
 
     if (!manifest.existsSync()) {
       printError('AndroidManifest.xml could not be found.');
-      printError('Please check ${manifest?.path ?? '??'} for errors.');
+      printError('Please check ${manifest.path} for errors.');
       return null;
     }
 
@@ -191,7 +191,7 @@ class AndroidApk extends ApplicationPackage {
     final Iterable<xml.XmlElement> manifests = document.findElements('manifest');
     if (manifests.isEmpty) {
       printError('AndroidManifest.xml has no manifest element.');
-      printError('Please check ${manifest?.path ?? 'AndroidManifest.xml'} for errors.');
+      printError('Please check ${manifest.path} for errors.');
       return null;
     }
     final String packageId = manifests.first.getAttribute('package');
@@ -228,7 +228,7 @@ class AndroidApk extends ApplicationPackage {
 
     if (packageId == null || launchActivity == null) {
       printError('package identifier or launch activity not found.');
-      printError('Please check ${manifest?.path ?? 'AndroidManifest.xml'} for errors.');
+      printError('Please check ${manifest.path} for errors.');
       return null;
     }
 
