@@ -106,7 +106,7 @@ class TabController extends ChangeNotifier {
   /// This is useful for [DefaultTabController], for example when
   /// [DefaultTabController.length] is updated, this method is called so that a
   /// new [TabController] is created without having to create a new [AnimationController].
-  TabController copyWith({ int index, int length }) {
+  TabController _copyWith({ int index, int length }) {
     return TabController._(
       index: index ?? _index,
       length: length ?? this.length,
@@ -354,7 +354,7 @@ class _DefaultTabControllerState extends State<DefaultTabController> with Single
       if (_controller.index >= widget.length) {
         newIndex = widget.length - 1;
       }
-      _controller = _controller.copyWith(length: widget.length, index: newIndex);
+      _controller = _controller._copyWith(length: widget.length, index: newIndex);
     }
   }
 }
