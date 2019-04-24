@@ -23,7 +23,9 @@ import 'floating_action_button.dart';
 import 'floating_action_button_location.dart';
 import 'material.dart';
 import 'snack_bar.dart';
+import 'snack_bar_theme.dart';
 import 'theme.dart';
+import 'theme_data.dart';
 
 // Examples can assume:
 // TabController tabController;
@@ -355,6 +357,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     @required this.currentFloatingActionButtonLocation,
     @required this.floatingActionButtonMoveAnimationProgress,
     @required this.floatingActionButtonMotionAnimator,
+    @required this.isSnackBarFloating,
     @required this.extendBody,
   }) : assert(minInsets != null),
        assert(textDirection != null),
@@ -372,6 +375,8 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
   final FloatingActionButtonLocation currentFloatingActionButtonLocation;
   final double floatingActionButtonMoveAnimationProgress;
   final FloatingActionButtonAnimator floatingActionButtonMotionAnimator;
+
+  final bool isSnackBarFloating;
 
   @override
   void performLayout(Size size) {
@@ -447,6 +452,12 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     Size bottomSheetSize = Size.zero;
     Size snackBarSize = Size.zero;
 
+    // Set the size of the SnackBar early if the behavior is fixed so
+    // the FAB can be positioned correctly.
+    if (hasChild(_ScaffoldSlot.snackBar) && !isSnackBarFloating) {
+      snackBarSize = layoutChild(_ScaffoldSlot.snackBar, fullWidthConstraints);
+    }
+
     if (hasChild(_ScaffoldSlot.bottomSheet)) {
       final BoxConstraints bottomSheetConstraints = BoxConstraints(
         maxWidth: fullWidthConstraints.maxWidth,
@@ -454,11 +465,6 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
       );
       bottomSheetSize = layoutChild(_ScaffoldSlot.bottomSheet, bottomSheetConstraints);
       positionChild(_ScaffoldSlot.bottomSheet, Offset((size.width - bottomSheetSize.width) / 2.0, contentBottom - bottomSheetSize.height));
-    }
-
-    if (hasChild(_ScaffoldSlot.snackBar)) {
-      snackBarSize = layoutChild(_ScaffoldSlot.snackBar, fullWidthConstraints);
-      positionChild(_ScaffoldSlot.snackBar, Offset(0.0, contentBottom - snackBarSize.height));
     }
 
     Rect floatingActionButtonRect;
@@ -486,6 +492,16 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
       );
       positionChild(_ScaffoldSlot.floatingActionButton, fabOffset);
       floatingActionButtonRect = fabOffset & fabSize;
+    }
+
+    if (hasChild(_ScaffoldSlot.snackBar)) {
+      if (snackBarSize == Size.zero) {
+        snackBarSize = layoutChild(_ScaffoldSlot.snackBar, fullWidthConstraints);
+      }
+      final double snackBarYOffsetBase = floatingActionButtonRect != null && isSnackBarFloating
+        ? floatingActionButtonRect.top
+        : contentBottom;
+      positionChild(_ScaffoldSlot.snackBar, Offset(0.0, snackBarYOffsetBase - snackBarSize.height));
     }
 
     if (hasChild(_ScaffoldSlot.statusBar)) {
@@ -1828,7 +1844,13 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       );
     }
 
+    bool isSnackBarFloating = false;
     if (_snackBars.isNotEmpty) {
+      final SnackBarBehavior snackBarBehavior = _snackBars.first._widget.behavior
+        ?? themeData.snackBarTheme.behavior
+        ?? SnackBarBehavior.fixed;
+      isSnackBarFloating = snackBarBehavior == SnackBarBehavior.floating;
+
       _addIfNonNull(
         children,
         _snackBars.first._widget,
@@ -1973,6 +1995,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
                 geometryNotifier: _geometryNotifier,
                 previousFloatingActionButtonLocation: _previousFloatingActionButtonLocation,
                 textDirection: textDirection,
+                isSnackBarFloating: isSnackBarFloating,
               ),
             );
           }),
