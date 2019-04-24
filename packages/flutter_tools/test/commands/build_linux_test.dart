@@ -9,6 +9,8 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
+import 'package:flutter_tools/src/linux/makefile.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 
@@ -62,17 +64,19 @@ void main() {
     FileSystem: () => memoryFilesystem,
   });
 
-  testUsingContext('Linux build invokes build script', () async {
+  testUsingContext('Linux build invokes make', () async {
     final BuildCommand command = BuildCommand();
     applyMocksToCommand(command);
     fs.file('linux/build.sh').createSync(recursive: true);
     fs.file('pubspec.yaml').createSync();
     fs.file('.packages').createSync();
     when(mockProcessManager.start(<String>[
-      '/linux/build.sh',
-      '/',
-      'release',
-      'no-track-widget-creation',
+      'make',
+      '-C',
+      '/linux',
+      'BUILD=release',
+      'FLUTTER_ROOT=/',
+      'FLUTTER_BUNDLE_FLAGS=',
     ], runInShell: true)).thenAnswer((Invocation invocation) async {
       return mockProcess;
     });
@@ -85,6 +89,21 @@ void main() {
     ProcessManager: () => mockProcessManager,
     Platform: () => linuxPlatform,
   });
+
+  testUsingContext('linux can extract binary name from Makefile', () async {
+    fs.file('linux/Makefile')
+      ..createSync(recursive: true)
+      ..writeAsStringSync(r'''
+# Comment
+SOMETHING_ELSE=FOO
+BINARY_NAME=fizz_bar
+''');
+    fs.file('pubspec.yaml').createSync();
+    fs.file('.packages').createSync();
+    final FlutterProject flutterProject = await FlutterProject.current();
+
+    expect(makefileExecutableName(flutterProject.linux), 'fizz_bar');
+  }, overrides: <Type, Generator>{FileSystem: () => MemoryFileSystem()});
 }
 
 class MockProcessManager extends Mock implements ProcessManager {}
