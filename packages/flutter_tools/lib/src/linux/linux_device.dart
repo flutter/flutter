@@ -97,7 +97,6 @@ class LinuxDevice extends Device {
 
   @override
   Future<bool> stopApp(covariant LinuxApp app) async {
-    // Assume debug for now.
     return killProcess(app.executable(_lastBuiltMode));
   }
 

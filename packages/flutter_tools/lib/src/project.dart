@@ -588,6 +588,6 @@ class LinuxProject {
 
   bool existsSync() => editableHostAppDirectory.existsSync();
 
-  /// The linux project makefile.
+  /// The Linux project makefile.
   File get makeFile => editableHostAppDirectory.childFile('Makefile');
 }

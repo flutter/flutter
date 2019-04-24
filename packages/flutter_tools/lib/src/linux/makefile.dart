@@ -5,15 +5,15 @@
 import '../project.dart';
 
 // The setting that controls the executable name in the linux makefile.
-const String _kBinaryName = 'BINARY_NAME=';
+const String _kBinaryNameVariable = 'BINARY_NAME=';
 
 /// Extracts the `BINARY_NAME` from a linux project Makefile.
 ///
 /// Returns `null` if it cannot be found.
 String makefileExecutableName(LinuxProject project) {
   for (String line in project.makeFile.readAsLinesSync()) {
-    if (line.startsWith(_kBinaryName)) {
-      return line.split(_kBinaryName).last.trim();
+    if (line.startsWith(_kBinaryNameVariable)) {
+      return line.split(_kBinaryNameVariable).last.trim();
     }
   }
   return null;
