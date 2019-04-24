@@ -2146,7 +2146,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/15008.
-  testWidgets('Number of tabs can be updated dynamically', (WidgetTester tester) async {
+  testWidgets('TabBar with one has correct color', (WidgetTester tester) async {
     const Tab tab = Tab(text: 'A');
     const Color selectedTabColor = Color(1);
     const Color unselectedTabColor = Color(2);
