@@ -653,8 +653,8 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
 /// ```
 /// {@end-tool}
 ///
-/// An InkWell's splashes will not properly update to conform to changes in the
-/// size of its underlying [Material], where the splashes are rendered,
+/// An InkWell's splashes will not properly update to conform to changes if the
+/// size of its underlying [Material], where the splashes are rendered, is
 /// mid-animation. Hence, you should avoid using InkWells within [Material]
 /// widgets that are changing size.
 ///
