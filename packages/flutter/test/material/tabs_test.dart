@@ -2144,4 +2144,25 @@ void main() {
     expect(controller.index, 0);
     expect(controller.length, 2);
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/15008.
+  testWidgets('Number of tabs can be updated dynamically', (WidgetTester tester) async {
+    const Tab tab = Tab(text: 'A');
+    const Color selectedTabColor = Color(1);
+    const Color unselectedTabColor = Color(2);
+
+    await tester.pumpWidget(boilerplate(
+      child: DefaultTabController(
+        length: 1,
+        child: TabBar(
+          tabs: const <Tab>[tab],
+          labelColor: selectedTabColor,
+          unselectedLabelColor: unselectedTabColor,
+        ),
+      ),
+    ));
+
+    final IconThemeData iconTheme = IconTheme.of(tester.element(find.text('A')));
+    expect(iconTheme.color, equals(selectedTabColor));
+  });
 }
