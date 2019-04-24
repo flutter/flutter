@@ -1007,7 +1007,7 @@ class _Dial extends StatefulWidget {
   final _TimePickerMode mode;
   final bool use24HourDials;
   final ValueChanged<TimeOfDay> onChanged;
-  final Function onHourSelected;
+  final VoidCallback onHourSelected;
 
   @override
   _DialState createState() => _DialState();
