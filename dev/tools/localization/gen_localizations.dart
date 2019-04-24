@@ -531,32 +531,36 @@ Future<void> main(List<String> rawArgs) async {
     exitWithError('$exception');
   }
 
-  final String materialLocalizations = generateArbBasedLocalizationSubclasses(
-    localeToResources: materialLocaleToResources,
-    localeToResourceAttributes: materialLocaleToResourceAttributes,
-    generatedClassPrefix: 'MaterialLocalization',
-    baseClass: 'GlobalMaterialLocalizations',
-    generateHeader: generateMaterialHeader,
-    generateConstructor: generateMaterialConstructor,
-    factoryName: materialFactoryName,
-    factoryDeclaration: materialFactoryDeclaration,
-    factoryArguments: materialFactoryArguments,
-    supportedLanguagesConstant: materialSupportedLanguagesConstant,
-    supportedLanguagesDocMacro: materialSupportedLanguagesDocMacro,
-  );
-  final String cupertinoLocalizations = generateArbBasedLocalizationSubclasses(
-    localeToResources: cupertinoLocaleToResources,
-    localeToResourceAttributes: cupertinoLocaleToResourceAttributes,
-    generatedClassPrefix: 'CupertinoLocalization',
-    baseClass: 'GlobalCupertinoLocalizations',
-    generateHeader: generateCupertinoHeader,
-    generateConstructor: generateCupertinoConstructor,
-    factoryName: cupertinoFactoryName,
-    factoryDeclaration: cupertinoFactoryDeclaration,
-    factoryArguments: cupertinoFactoryArguments,
-    supportedLanguagesConstant: cupertinoSupportedLanguagesConstant,
-    supportedLanguagesDocMacro: cupertinoSupportedLanguagesDocMacro,
-  );
+  final String materialLocalizations = options.writeToFile || !options.cupertinoOnly
+      ? generateArbBasedLocalizationSubclasses(
+        localeToResources: materialLocaleToResources,
+        localeToResourceAttributes: materialLocaleToResourceAttributes,
+        generatedClassPrefix: 'MaterialLocalization',
+        baseClass: 'GlobalMaterialLocalizations',
+        generateHeader: generateMaterialHeader,
+        generateConstructor: generateMaterialConstructor,
+        factoryName: materialFactoryName,
+        factoryDeclaration: materialFactoryDeclaration,
+        factoryArguments: materialFactoryArguments,
+        supportedLanguagesConstant: materialSupportedLanguagesConstant,
+        supportedLanguagesDocMacro: materialSupportedLanguagesDocMacro,
+      )
+      : null;
+  final String cupertinoLocalizations = options.writeToFile || !options.materialOnly
+      ? generateArbBasedLocalizationSubclasses(
+        localeToResources: cupertinoLocaleToResources,
+        localeToResourceAttributes: cupertinoLocaleToResourceAttributes,
+        generatedClassPrefix: 'CupertinoLocalization',
+        baseClass: 'GlobalCupertinoLocalizations',
+        generateHeader: generateCupertinoHeader,
+        generateConstructor: generateCupertinoConstructor,
+        factoryName: cupertinoFactoryName,
+        factoryDeclaration: cupertinoFactoryDeclaration,
+        factoryArguments: cupertinoFactoryArguments,
+        supportedLanguagesConstant: cupertinoSupportedLanguagesConstant,
+        supportedLanguagesDocMacro: cupertinoSupportedLanguagesDocMacro,
+      )
+      : null;
 
   if (options.writeToFile) {
     final File materialLocalizationsFile = File(path.join(directory.path, 'generated_material_localizations.dart'));
@@ -564,13 +568,11 @@ Future<void> main(List<String> rawArgs) async {
     final File cupertinoLocalizationsFile = File(path.join(directory.path, 'generated_cupertino_localizations.dart'));
     cupertinoLocalizationsFile.writeAsStringSync(cupertinoLocalizations, flush: true);
   } else {
-    stdout.writeln('========================================================');
-    stdout.writeln('Material Localizations');
-    stdout.writeln('========================================================');
-    stdout.write(materialLocalizations);
-    stdout.writeln('========================================================');
-    stdout.writeln('Cupertino Localizations');
-    stdout.writeln('========================================================');
-    stdout.write(cupertinoLocalizations);
+    if (!options.cupertinoOnly) {
+      stdout.write(materialLocalizations);
+    }
+    if (!options.materialOnly) {
+      stdout.write(cupertinoLocalizations);
+    }
   }
 }
