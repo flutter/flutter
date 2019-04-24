@@ -457,6 +457,36 @@ void main() {
     gesture.up();
   });
 
+  testWidgets('Tooltip stays around when hovered', (WidgetTester tester) async {
+    const Duration waitDuration = Duration(milliseconds: 600);
+    const Duration showDuration = Duration(milliseconds: 1500);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: Tooltip(
+            message: tooltipText,
+            showDuration: showDuration,
+            waitDuration: waitDuration,
+            child: Container(
+              width: 100.0,
+              height: 100.0,
+              color: Colors.green[500],
+            ),
+          ),
+        ),
+      )
+    );
+
+    final Finder tooltip = find.byType(Tooltip);
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.moveTo(Offset.zero);
+    await tester.pump();
+    await gesture.moveTo(tester.getCenter(tooltip));
+    await tester.pump(waitDuration);
+    await tester.pump(const Duration(milliseconds: 10));
+    expect(find.text(tooltipText), findsOneWidget);
+  });
+
   testWidgets('Does tooltip contribute semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
