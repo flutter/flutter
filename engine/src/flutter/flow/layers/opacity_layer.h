@@ -25,7 +25,7 @@ class OpacityLayer : public ContainerLayer {
 
   void Paint(PaintContext& context) const override;
 
-  // TODO(chinmaygarde): Once MZ-139 is addressed, introduce a new node in the
+  // TODO(chinmaygarde): Once SCN-139 is addressed, introduce a new node in the
   // session scene hierarchy.
 
  private:

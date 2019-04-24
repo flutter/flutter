@@ -75,7 +75,7 @@ void SceneUpdateContext::CreateFrame(
 
   // Add a part which represents the frame's geometry for clipping purposes
   // and possibly for its texture.
-  // TODO(MZ-137): Need to be able to express the radii as vectors.
+  // TODO(SCN-137): Need to be able to express the radii as vectors.
   SkRect shape_bounds = rrect.getBounds();
   scenic::RoundedRectangle shape(
       session_,                                      // session
@@ -244,7 +244,7 @@ SceneUpdateContext::Transform::Transform(SceneUpdateContext& context,
       previous_scale_x_(context.top_scale_x_),
       previous_scale_y_(context.top_scale_y_) {
   if (!transform.isIdentity()) {
-    // TODO(MZ-192): The perspective and shear components in the matrix
+    // TODO(SCN-192): The perspective and shear components in the matrix
     // are not handled correctly.
     MatrixDecomposition decomposition(transform);
     if (decomposition.IsValid()) {
