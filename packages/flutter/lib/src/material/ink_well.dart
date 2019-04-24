@@ -622,19 +622,45 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
 ///
 /// An example of this situation is as follows:
 ///
-/// ```dart
-/// InkWell(
-///   child: new AnimatedContainer(
-///     height: someGrowingFunction(),
-///     duration: ...
-///   )
-/// )
-/// ```
+/// {@tool snippet --template=stateful_widget_scaffold}
 ///
-/// An InkWell's splashes will not change to conform to changes in the size
-/// of its underlying [Material], where the splashes are rendered. Hence, you
-/// should not create InkWells within [Material] widgets with sizes that change
-/// as they are animating.
+/// Tap the container to cause it to grow. Then, tap it again and hold before
+/// the widget reaches its maximum size to observe the clipped ink splash.
+///
+/// ```dart
+/// double sideLength = 50;
+///
+/// void updateSideLength() {
+///   setState(() {
+///     sideLength == 50
+///       ? sideLength = 100
+///       : sideLength = 50;
+///   });
+/// }
+///
+/// Widget build(BuildContext context) {
+///   return Center(
+///     child: AnimatedContainer(
+///       height: sideLength,
+///       width: sideLength,
+///       duration: Duration(seconds: 2),
+///       curve: Curves.easeIn,
+///       child: Ink(
+///         color: Colors.yellow,
+///         child: InkWell(
+///           onTap: updateSideLength,
+///         ),
+///       ),
+///     ),
+///   ),
+/// }
+/// ```
+/// {@end-tool}
+///
+/// An InkWell's splashes will not properly update to conform to changes in the
+/// size of its underlying [Material], where the splashes are rendered,
+/// mid-animation. Hence, you should avoid using InkWells within [Material]
+/// widgets that are changing size.
 ///
 /// See also:
 ///
