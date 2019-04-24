@@ -419,7 +419,9 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
 /// painters are expected to paint within a rectangle starting at the origin and
 /// encompassing a region of the given size. (If the painters paint outside
 /// those bounds, there might be insufficient memory allocated to rasterize the
-/// painting commands and the resulting behavior is undefined.)
+/// painting commands and the resulting behavior is undefined.) To enforce
+/// painting within those bounds, consider wrapping this [CustomPaint] with a
+/// [ClipRect] widget.
 ///
 /// Painters are implemented by subclassing [CustomPainter].
 ///
