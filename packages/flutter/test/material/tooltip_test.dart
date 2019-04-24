@@ -457,8 +457,8 @@ void main() {
     gesture.up();
   });
 
-  testWidgets('Tooltip stays around when hovered', (WidgetTester tester) async {
-    const Duration waitDuration = Duration(milliseconds: 600);
+  testWidgets('Tooltip shows/hides when hovered', (WidgetTester tester) async {
+    const Duration waitDuration = Duration(milliseconds: 0);
     const Duration showDuration = Duration(milliseconds: 1500);
     await tester.pumpWidget(
       MaterialApp(

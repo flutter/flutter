@@ -12,9 +12,10 @@ import 'feedback.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
-const Duration _kFadeDuration = Duration(milliseconds: 200);
-const Duration _kShowDuration = Duration(milliseconds: 1500);
-const Duration _kWaitDuration = Duration(milliseconds: 600);
+const Duration _kFadeInDuration = Duration(milliseconds: 150);
+const Duration _kFadeOutDuration = Duration(milliseconds: 75);
+const Duration _kDefaultShowDuration = Duration(milliseconds: 1500);
+const Duration _kDefaultWaitDuration = Duration(milliseconds: 0);
 
 /// A material design tooltip.
 ///
@@ -51,8 +52,8 @@ class Tooltip extends StatefulWidget {
     this.verticalOffset = 24.0,
     this.preferBelow = true,
     this.excludeFromSemantics = false,
-    this.waitDuration = _kWaitDuration,
-    this.showDuration = _kShowDuration,
+    this.waitDuration = _kDefaultWaitDuration,
+    this.showDuration = _kDefaultShowDuration,
     this.child,
   })  : assert(message != null),
         assert(height != null),
@@ -67,7 +68,8 @@ class Tooltip extends StatefulWidget {
   /// The text to display in the tooltip.
   final String message;
 
-  /// The amount of vertical space the tooltip should occupy (inside its padding).
+  /// The amount of vertical space the tooltip should occupy (inside its
+  /// padding).
   final double height;
 
   /// The amount of space by which to inset the child.
@@ -75,7 +77,8 @@ class Tooltip extends StatefulWidget {
   /// Defaults to 16.0 logical pixels in each direction.
   final EdgeInsetsGeometry padding;
 
-  /// The amount of vertical distance between the widget and the displayed tooltip.
+  /// The amount of vertical distance between the widget and the displayed
+  /// tooltip.
   final double verticalOffset;
 
   /// Whether the tooltip defaults to being displayed below the widget.
@@ -97,7 +100,7 @@ class Tooltip extends StatefulWidget {
   /// The amount of time that a pointer must hover over the widget before it
   /// will show a tooltip.
   ///
-  /// Defaults to 600 milliseconds.
+  /// Defaults to 0 milliseconds (tooltips show immediately upon hover).
   final Duration waitDuration;
 
   /// The amount of time that the tooltip will be shown once it has appeared.
@@ -114,8 +117,8 @@ class Tooltip extends StatefulWidget {
     properties.add(StringProperty('message', message, showName: false));
     properties.add(DoubleProperty('vertical offset', verticalOffset));
     properties.add(FlagProperty('position', value: preferBelow, ifTrue: 'below', ifFalse: 'above', showName: true));
-    properties.add(DiagnosticsProperty<Duration>('waitDuration', waitDuration, defaultValue: _kWaitDuration));
-    properties.add(DiagnosticsProperty<Duration>('showDuration', showDuration, defaultValue: _kShowDuration));
+    properties.add(DiagnosticsProperty<Duration>('waitDuration', waitDuration, defaultValue: _kDefaultWaitDuration));
+    properties.add(DiagnosticsProperty<Duration>('showDuration', showDuration, defaultValue: _kDefaultShowDuration));
   }
 }
 
@@ -128,18 +131,17 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(duration: _kFadeDuration, vsync: this)..addStatusListener(_handleStatusChanged);
+    _controller = AnimationController(duration: _kFadeInDuration, vsync: this)
+      ..addStatusListener(_handleStatusChanged);
   }
 
   void _handleStatusChanged(AnimationStatus status) {
-    print('Animation status changed to $status');
     if (status == AnimationStatus.dismissed) {
       _hideTooltip(immediately: true);
     }
   }
 
   void _hideTooltip({bool immediately = false}) {
-    print('Hiding tooltip${immediately ? ' immediately' : ' in ${widget.showDuration}'}');
     _showTimer?.cancel();
     _showTimer = null;
     if (immediately) {
@@ -150,7 +152,6 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   }
 
   void _showTooltip({bool immediately = false}) {
-    print('Showing tooltip${immediately ? ' immediately' : ' in ${widget.waitDuration}'}');
     _hideTimer?.cancel();
     _hideTimer = null;
     if (immediately) {
@@ -170,12 +171,10 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       // Stop trying to hide, if we were.
       _hideTimer?.cancel();
       _hideTimer = null;
-      print('Showing existing entry');
       _controller.forward();
       return false; // Already visible.
     }
     _createNewEntry();
-    print('Showing new entry');
     _controller.forward();
     return true;
   }
@@ -194,6 +193,11 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       animation: CurvedAnimation(
         parent: _controller,
         curve: Curves.fastOutSlowIn,
+        reverseCurve: Interval(
+          0.0,
+          _kFadeOutDuration.inMilliseconds / _kFadeInDuration.inMilliseconds,
+          curve: Curves.fastOutSlowIn,
+        ),
       ),
       target: target,
       verticalOffset: widget.verticalOffset,
@@ -206,7 +210,6 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   }
 
   void _removeEntry() {
-    print('Removing entry');
     _hideTimer?.cancel();
     _hideTimer = null;
     _entry?.remove();
@@ -225,7 +228,6 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
 
   @override
   void deactivate() {
-    print('deactivating');
     if (_entry != null) {
       _hideTooltip(immediately: true);
     }
@@ -237,7 +239,6 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     if (_entry != null) {
       _removeEntry();
     }
-    print('disposing controller');
     _controller.dispose();
     super.dispose();
   }
@@ -354,21 +355,18 @@ class _TooltipOverlay extends StatelessWidget {
           ),
           child: FadeTransition(
             opacity: animation,
-            child: Opacity(
-              opacity: 0.9,
-              child: ConstrainedBox(
-                constraints: BoxConstraints(minHeight: height),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: darkTheme.backgroundColor,
-                    borderRadius: BorderRadius.circular(2.0),
-                  ),
-                  padding: padding,
-                  child: Center(
-                    widthFactor: 1.0,
-                    heightFactor: 1.0,
-                    child: Text(message, style: darkTheme.textTheme.body1),
-                  ),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minHeight: height),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: darkTheme.backgroundColor,
+                  borderRadius: BorderRadius.circular(2.0),
+                ),
+                padding: padding,
+                child: Center(
+                  widthFactor: 1.0,
+                  heightFactor: 1.0,
+                  child: Text(message, style: darkTheme.textTheme.body1),
                 ),
               ),
             ),
