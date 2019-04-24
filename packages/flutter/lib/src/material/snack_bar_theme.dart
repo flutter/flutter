@@ -9,23 +9,24 @@ import 'package:flutter/widgets.dart';
 
 import 'theme.dart';
 
-/// Configures whether [SnackBar] should be fixed to the bottom or floating
-/// above (on the y-axis) other widgets that are fixed to the bottom, such as
-/// [FloatingActionButton].
+/// Defines where a [SnackBar] should appear within a [Scaffold] and how its
+/// location should be adjusted when the scaffold also includes a
+/// [FloatingActionButton] or a [BottomNavigationBar].
 enum SnackBarBehavior {
-  /// Fixed the [SnackBar] position to the bottom of the [Scaffold] when
-  /// possible. One of the possible scenarios where [SnackBar] will be shown
-  /// above another widget is above a [BottomNavigationBar]. Other than that
-  /// [SnackBar] will cause other non-fixed widgets inside [Scaffold] to be
-  /// pushed above (e.g. [FloatingActionButton]).
+  /// Fixes the [SnackBar] at the bottom of the [Scaffold].
+  ///
+  /// The exception is that the [SnackBar] will be shown above a
+  /// [BottomNavigationBar]. Additionally, the [SnackBar] will cause other
+  /// non-fixed widgets inside [Scaffold] to be pushed above (for example, the
+  /// [FloatingActionButton]).
   fixed,
 
-  /// Change the design and behavior of [SnackBar] to float as described in
-  /// <https://material.io/design/components/snackbars.html>.
-  /// This behavior will cause [SnackBar] to be shown on top of other non-fixed
-  /// widgets, such as [FloatingActionButton], rather than pushing it above
-  /// [SnackBar].
-  floating
+  /// This behavior will cause [SnackBar] to be shown above other widgets in the
+  /// [Scaffold]. This includes being displayed above a [BottomNavigationBar]
+  /// and a [FloatingActionButton].
+  ///
+  /// See <https://material.io/design/components/snackbars.html> for more details.
+  floating,
 }
 
 /// Customizes default property values for [SnackBar] widgets.
@@ -35,7 +36,8 @@ enum SnackBarBehavior {
 /// customized with [SnackBarThemeData.copyWith].
 ///
 /// Typically a [SnackBarThemeData] is specified as part of the overall [Theme]
-/// with [ThemeData.snackBarTheme].
+/// with [ThemeData.snackBarTheme]. The default for [ThemeData.snackBarTheme]
+/// provides all `null` properties.
 ///
 /// All [SnackBarThemeData] properties are `null` by default. When null, the
 /// [SnackBar] will provide its own defaults.
@@ -60,18 +62,19 @@ class SnackBarThemeData extends Diagnosticable {
 
   /// Default value for [SnackBar.backgroundColor].
   ///
-  /// If null, [SnackBar] defaults to `Color(0xFF323232)`.
+  /// If null, [SnackBar] defaults to dark grey: `Color(0xFF323232)`.
   final Color backgroundColor;
 
   /// Default value for [SnackBarAction.textColor].
   ///
-  /// If null, [SnackBarAction] defaults to [ThemeData.accentColor].
+  /// If null, [SnackBarAction] defaults to [ThemeData.colorScheme.secondaryColor].
   final Color actionTextColor;
 
   /// Default value for [SnackBarAction.disabledTextColor].
   ///
   /// If null, [SnackBarAction] defaults to [ColorScheme.onSurface] with its
-  /// opacity set to 0.30 if [Brightness] is dark, 0.38 otherwise.
+  /// opacity set to 0.30 if the [Theme]'s brightness is [Brightness.dark], 0.38
+  /// otherwise.
   final Color disabledActionTextColor;
 
   /// Default value for [SnackBar.elevation].
@@ -82,7 +85,8 @@ class SnackBarThemeData extends Diagnosticable {
   /// Default value for [SnackBar.shape].
   ///
   /// If null, [SnackBar] provides different defaults depending on the
-  /// [SnackBarBehavior]. For [SnackBarBehavior.fixed], it uses null. For
+  /// [SnackBarBehavior]. For [SnackBarBehavior.fixed], no overriding shape is
+  /// specified, so the [SnackBar] is rectangular. For
   /// [SnackBarBehavior.floating], it uses a [RoundedRectangleBorder] with a
   /// circular corner radius of 4.0.
   final ShapeBorder shape;

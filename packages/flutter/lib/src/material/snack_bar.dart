@@ -13,8 +13,8 @@ import 'snack_bar_theme.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
-const double _kSingleLineVerticalPadding = 14.0;
-const Color _kSnackBarBackgroundColor = Color(0xFF323232);
+const double _singleLineVerticalPadding = 14.0;
+const Color _snackBarBackgroundColor = Color(0xFF323232);
 
 // TODO(ianh): We should check if the given text and actions are going to fit on
 // one line or not, and if they are, use the single-line layout, and if not, use
@@ -22,8 +22,8 @@ const Color _kSnackBarBackgroundColor = Color(0xFF323232);
 
 // TODO(ianh): Implement the Tablet version of snackbar if we're "on a tablet".
 
-const Duration _kSnackBarTransitionDuration = Duration(milliseconds: 250);
-const Duration _kSnackBarDisplayDuration = Duration(milliseconds: 4000);
+const Duration _snackBarTransitionDuration = Duration(milliseconds: 250);
+const Duration _snackBarDisplayDuration = Duration(milliseconds: 4000);
 const Curve _snackBarHeightCurve = Curves.fastOutSlowIn;
 const Curve _snackBarFadeInCurve = Interval(0.45, 1.0, curve: Curves.fastOutSlowIn);
 const Curve _snackBarFadeOutCurve = Interval(0.72, 1.0, curve: Curves.fastOutSlowIn);
@@ -172,7 +172,7 @@ class SnackBar extends StatelessWidget {
     this.shape,
     this.behavior,
     this.action,
-    this.duration = _kSnackBarDisplayDuration,
+    this.duration = _snackBarDisplayDuration,
     this.animation,
   }) : assert(elevation == null || elevation >= 0.0),
        assert(content != null),
@@ -202,14 +202,16 @@ class SnackBar extends StatelessWidget {
   ///
   /// If this property is null then [ThemeData.snackBarTheme.shape] is used.
   /// If that's null then the shape will depend on the [SnackBarBehavior]. For
-  /// [SnackBarBehavior.fixed], it uses null. For [SnackBarBehavior.floating],
-  /// it uses a [RoundedRectangleBorder] with a circular corner radius of 4.0.
+  /// [SnackBarBehavior.fixed], no overriding shape is specified, so the
+  /// [SnackBar] is rectangular. For [SnackBarBehavior.floating], it uses a
+  /// [RoundedRectangleBorder] with a circular corner radius of 4.0.
   final ShapeBorder shape;
 
-  /// This defines the behavior and appearance of the snack bar.
+  /// This defines the behavior and location of the snack bar.
   ///
-  /// Controls whether the snack bar should be fixed to the bottom or floating
-  /// as described in the updated Material Design spec.
+  /// Defines where a [SnackBar] should appear within a [Scaffold] and how its
+  /// location should be adjusted when the scaffold also includes a
+  /// [FloatingActionButton] or a [BottomNavigationBar]
   ///
   /// If this property is null, then [ThemeData.snackBarTheme.behavior]
   /// is used. If that is null, then the default is [SnackBarBehavior.fixed].
@@ -259,7 +261,7 @@ class SnackBar extends StatelessWidget {
       SizedBox(width: snackBarPadding),
       Expanded(
         child: Container(
-          padding: const EdgeInsets.symmetric(vertical: _kSingleLineVerticalPadding),
+          padding: const EdgeInsets.symmetric(vertical: _singleLineVerticalPadding),
           child: DefaultTextStyle(
             style: darkTheme.textTheme.subhead,
             child: content,
@@ -294,10 +296,10 @@ class SnackBar extends StatelessWidget {
     );
 
     final double elevation = this.elevation ?? snackBarTheme.elevation ?? 6.0;
-    final Color backgroundColor = this.backgroundColor ?? snackBarTheme.backgroundColor ?? _kSnackBarBackgroundColor;
+    final Color backgroundColor = this.backgroundColor ?? snackBarTheme.backgroundColor ?? _snackBarBackgroundColor;
     final ShapeBorder shape = this.shape
-        ?? snackBarTheme.shape
-        ?? (isFloatingSnackBar ? RoundedRectangleBorder(borderRadius: BorderRadius.circular(4.0)) : null);
+      ?? snackBarTheme.shape
+      ?? (isFloatingSnackBar ? RoundedRectangleBorder(borderRadius: BorderRadius.circular(4.0)) : null);
 
     snackBar = Material(
       shape: shape,
@@ -315,8 +317,8 @@ class SnackBar extends StatelessWidget {
     );
 
     if (isFloatingSnackBar) {
-      snackBar = Container(
-        margin: const EdgeInsets.fromLTRB(15.0, 5.0, 15.0, 10.0),
+      snackBar = Padding(
+        padding: const EdgeInsets.fromLTRB(15.0, 5.0, 15.0, 10.0),
         child: snackBar,
       );
     }
@@ -368,7 +370,7 @@ class SnackBar extends StatelessWidget {
   /// Creates an animation controller useful for driving a snack bar's entrance and exit animation.
   static AnimationController createAnimationController({ @required TickerProvider vsync }) {
     return AnimationController(
-      duration: _kSnackBarTransitionDuration,
+      duration: _snackBarTransitionDuration,
       debugLabel: 'SnackBar',
       vsync: vsync,
     );

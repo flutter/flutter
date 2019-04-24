@@ -372,18 +372,14 @@ void main() {
     ));
     await tester.tap(find.text('X'));
     await tester.pump(); // start animation
-    await tester.pump(const Duration(milliseconds: 750));
+    await tester.pump(const Duration(milliseconds: 750)); // Animation last frame.
 
-    final RenderBox textBox = tester.firstRenderObject(find.text('I am a snack bar.'));
-    final RenderBox actionTextBox = tester.firstRenderObject(find.text('ACTION'));
-    final RenderBox snackBarBox = tester.firstRenderObject(find.byType(SnackBar));
-
-    final Offset textBottomLeft = textBox.localToGlobal(textBox.size.bottomLeft(Offset.zero));
-    final Offset textBottomRight = textBox.localToGlobal(textBox.size.bottomRight(Offset.zero));
-    final Offset actionTextBottomLeft = actionTextBox.localToGlobal(actionTextBox.size.bottomLeft(Offset.zero));
-    final Offset actionTextBottomRight = actionTextBox.localToGlobal(actionTextBox.size.bottomRight(Offset.zero));
-    final Offset snackBarBottomLeft = snackBarBox.localToGlobal(snackBarBox.size.bottomLeft(Offset.zero));
-    final Offset snackBarBottomRight = snackBarBox.localToGlobal(snackBarBox.size.bottomRight(Offset.zero));
+    final Offset textBottomLeft = tester.getBottomLeft(find.text('I am a snack bar.'));
+    final Offset textBottomRight = tester.getBottomRight(find.text('I am a snack bar.'));
+    final Offset actionTextBottomLeft = tester.getBottomLeft(find.text('ACTION'));
+    final Offset actionTextBottomRight = tester.getBottomRight(find.text('ACTION'));
+    final Offset snackBarBottomLeft = tester.getBottomLeft(find.byType(SnackBar));
+    final Offset snackBarBottomRight = tester.getBottomRight(find.byType(SnackBar));
 
     expect(textBottomLeft.dx - snackBarBottomLeft.dx, 24.0 + 10.0); // margin + left padding
     expect(snackBarBottomLeft.dy - textBottomLeft.dy, 17.0 + 40.0); // margin + bottom padding
@@ -429,18 +425,14 @@ void main() {
     ));
     await tester.tap(find.text('X'));
     await tester.pump(); // start animation
-    await tester.pump(const Duration(milliseconds: 750));
+    await tester.pump(const Duration(milliseconds: 750)); // Animation last frame.
 
-    final RenderBox textBox = tester.firstRenderObject(find.text('I am a snack bar.'));
-    final RenderBox actionTextBox = tester.firstRenderObject(find.text('ACTION'));
-    final RenderBox snackBarBox = tester.firstRenderObject(find.byType(SnackBar));
-
-    final Offset textBottomLeft = textBox.localToGlobal(textBox.size.bottomLeft(Offset.zero));
-    final Offset textBottomRight = textBox.localToGlobal(textBox.size.bottomRight(Offset.zero));
-    final Offset actionTextBottomLeft = actionTextBox.localToGlobal(actionTextBox.size.bottomLeft(Offset.zero));
-    final Offset actionTextBottomRight = actionTextBox.localToGlobal(actionTextBox.size.bottomRight(Offset.zero));
-    final Offset snackBarBottomLeft = snackBarBox.localToGlobal(snackBarBox.size.bottomLeft(Offset.zero));
-    final Offset snackBarBottomRight = snackBarBox.localToGlobal(snackBarBox.size.bottomRight(Offset.zero));
+    final Offset textBottomLeft = tester.getBottomLeft(find.text('I am a snack bar.'));
+    final Offset textBottomRight = tester.getBottomRight(find.text('I am a snack bar.'));
+    final Offset actionTextBottomLeft = tester.getBottomLeft(find.text('ACTION'));
+    final Offset actionTextBottomRight = tester.getBottomRight(find.text('ACTION'));
+    final Offset snackBarBottomLeft = tester.getBottomLeft(find.byType(SnackBar));
+    final Offset snackBarBottomRight = tester.getBottomRight(find.byType(SnackBar));
 
     expect(textBottomLeft.dx - snackBarBottomLeft.dx, 24.0 + 10.0); // margin + left padding
     expect(snackBarBottomLeft.dy - textBottomLeft.dy, 17.0); // margin (with no bottom padding)
@@ -482,18 +474,15 @@ void main() {
         ),
       ),
     ));
-    final RenderBox floatingActionButtonOriginBox= tester.firstRenderObject(find.byType(FloatingActionButton));
-    final Offset floatingActionButtonOriginBottomCenter = floatingActionButtonOriginBox.localToGlobal(floatingActionButtonOriginBox.size.bottomCenter(Offset.zero));
+
+    final Offset floatingActionButtonOriginBottomCenter = tester.getCenter(find.byType(FloatingActionButton));
 
     await tester.tap(find.text('X'));
     await tester.pump(); // start animation
-    await tester.pump(const Duration(milliseconds: 750));
+    await tester.pump(const Duration(milliseconds: 750)); // Animation last frame.
 
-    final RenderBox snackBarBox = tester.firstRenderObject(find.byType(SnackBar));
-    final RenderBox floatingActionButtonBox = tester.firstRenderObject(find.byType(FloatingActionButton));
-
-    final Offset snackBarTopCenter = snackBarBox.localToGlobal(snackBarBox.size.topCenter(Offset.zero));
-    final Offset floatingActionButtonBottomCenter = floatingActionButtonBox.localToGlobal(floatingActionButtonBox.size.bottomCenter(Offset.zero));
+    final Offset snackBarTopCenter = tester.getCenter(find.byType(SnackBar));
+    final Offset floatingActionButtonBottomCenter = tester.getCenter(find.byType(FloatingActionButton));
 
     expect(floatingActionButtonOriginBottomCenter.dy > floatingActionButtonBottomCenter.dy, true);
     expect(snackBarTopCenter.dy > floatingActionButtonBottomCenter.dy, true);
@@ -533,18 +522,14 @@ void main() {
     ));
     await tester.tap(find.text('X'));
     await tester.pump(); // start animation
-    await tester.pump(const Duration(milliseconds: 750));
+    await tester.pump(const Duration(milliseconds: 750)); // Animation last frame.
 
-    final RenderBox textBox = tester.firstRenderObject(find.text('I am a snack bar.'));
-    final RenderBox actionTextBox = tester.firstRenderObject(find.text('ACTION'));
-    final RenderBox snackBarBox = tester.firstRenderObject(find.byType(SnackBar));
-
-    final Offset textBottomLeft = textBox.localToGlobal(textBox.size.bottomLeft(Offset.zero));
-    final Offset textBottomRight = textBox.localToGlobal(textBox.size.bottomRight(Offset.zero));
-    final Offset actionTextBottomLeft = actionTextBox.localToGlobal(actionTextBox.size.bottomLeft(Offset.zero));
-    final Offset actionTextBottomRight = actionTextBox.localToGlobal(actionTextBox.size.bottomRight(Offset.zero));
-    final Offset snackBarBottomLeft = snackBarBox.localToGlobal(snackBarBox.size.bottomLeft(Offset.zero));
-    final Offset snackBarBottomRight = snackBarBox.localToGlobal(snackBarBox.size.bottomRight(Offset.zero));
+    final Offset textBottomLeft = tester.getBottomLeft(find.text('I am a snack bar.'));
+    final Offset textBottomRight = tester.getBottomRight(find.text('I am a snack bar.'));
+    final Offset actionTextBottomLeft = tester.getBottomLeft(find.text('ACTION'));
+    final Offset actionTextBottomRight = tester.getBottomRight(find.text('ACTION'));
+    final Offset snackBarBottomLeft = tester.getBottomLeft(find.byType(SnackBar));
+    final Offset snackBarBottomRight = tester.getBottomRight(find.byType(SnackBar));
 
     expect(textBottomLeft.dx - snackBarBottomLeft.dx, 31.0 + 10.0); // margin + left padding
     expect(snackBarBottomLeft.dy - textBottomLeft.dy, 27.0); // margin (with no bottom padding)
@@ -593,18 +578,14 @@ void main() {
     ));
     await tester.tap(find.text('X'));
     await tester.pump(); // start animation
-    await tester.pump(const Duration(milliseconds: 750));
+    await tester.pump(const Duration(milliseconds: 750)); // Animation last frame.
 
-    final RenderBox textBox = tester.firstRenderObject(find.text('I am a snack bar.'));
-    final RenderBox actionTextBox = tester.firstRenderObject(find.text('ACTION'));
-    final RenderBox snackBarBox = tester.firstRenderObject(find.byType(SnackBar));
-
-    final Offset textBottomLeft = textBox.localToGlobal(textBox.size.bottomLeft(Offset.zero));
-    final Offset textBottomRight = textBox.localToGlobal(textBox.size.bottomRight(Offset.zero));
-    final Offset actionTextBottomLeft = actionTextBox.localToGlobal(actionTextBox.size.bottomLeft(Offset.zero));
-    final Offset actionTextBottomRight = actionTextBox.localToGlobal(actionTextBox.size.bottomRight(Offset.zero));
-    final Offset snackBarBottomLeft = snackBarBox.localToGlobal(snackBarBox.size.bottomLeft(Offset.zero));
-    final Offset snackBarBottomRight = snackBarBox.localToGlobal(snackBarBox.size.bottomRight(Offset.zero));
+    final Offset textBottomLeft = tester.getBottomLeft(find.text('I am a snack bar.'));
+    final Offset textBottomRight = tester.getBottomRight(find.text('I am a snack bar.'));
+    final Offset actionTextBottomLeft = tester.getBottomLeft(find.text('ACTION'));
+    final Offset actionTextBottomRight = tester.getBottomRight(find.text('ACTION'));
+    final Offset snackBarBottomLeft = tester.getBottomLeft(find.byType(SnackBar));
+    final Offset snackBarBottomRight = tester.getBottomRight(find.byType(SnackBar));
 
     expect(textBottomLeft.dx - snackBarBottomLeft.dx, 31.0 + 10.0); // margin + left padding
     expect(snackBarBottomLeft.dy - textBottomLeft.dy, 27.0); // margin (with no bottom padding)
@@ -651,13 +632,10 @@ void main() {
     ));
     await tester.tap(find.text('X'));
     await tester.pump(); // start animation
-    await tester.pump(const Duration(milliseconds: 750));
+    await tester.pump(const Duration(milliseconds: 750)); // Animation last frame.
 
-    final RenderBox snackBarBox = tester.firstRenderObject(find.byType(SnackBar));
-    final RenderBox floatingActionButtonBox = tester.firstRenderObject(find.byType(FloatingActionButton));
-
-    final Offset snackBarBottomCenter = snackBarBox.localToGlobal(snackBarBox.size.bottomCenter(Offset.zero));
-    final Offset floatingActionButtonTopCenter = floatingActionButtonBox.localToGlobal(floatingActionButtonBox.size.topCenter(Offset.zero));
+    final Offset snackBarBottomCenter = tester.getBottomLeft(find.byType(SnackBar));
+    final Offset floatingActionButtonTopCenter = tester.getTopLeft(find.byType(FloatingActionButton));
 
     // Since padding and margin is handled inside snackBarBox,
     // the bottom offset of snackbar should equal with top offset of FAB

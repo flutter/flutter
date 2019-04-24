@@ -453,7 +453,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     Size snackBarSize = Size.zero;
 
     // Set the size of the SnackBar early if the behavior is fixed so
-    // the FAB can be positioned based on SnackBar availability.
+    // the FAB can be positioned correctly.
     if (hasChild(_ScaffoldSlot.snackBar) && !isSnackBarFloating) {
       snackBarSize = layoutChild(_ScaffoldSlot.snackBar, fullWidthConstraints);
     }
@@ -499,10 +499,9 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
         snackBarSize = layoutChild(_ScaffoldSlot.snackBar, fullWidthConstraints);
       }
       final double snackBarYOffsetBase = floatingActionButtonRect != null && isSnackBarFloating
-          ? floatingActionButtonRect.top
-          : contentBottom;
-      positionChild(_ScaffoldSlot.snackBar,
-          Offset(0.0, snackBarYOffsetBase - snackBarSize.height));
+        ? floatingActionButtonRect.top
+        : contentBottom;
+      positionChild(_ScaffoldSlot.snackBar, Offset(0.0, snackBarYOffsetBase - snackBarSize.height));
     }
 
     if (hasChild(_ScaffoldSlot.statusBar)) {
@@ -1848,15 +1847,10 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     bool isSnackBarFloating = false;
     if (_snackBars.isNotEmpty) {
       final SnackBarBehavior snackBarBehavior = _snackBars.first._widget.behavior
-          ?? themeData.snackBarTheme.behavior
-          ?? SnackBarBehavior.fixed;
-      switch (snackBarBehavior) {
-        case SnackBarBehavior.floating:
-          isSnackBarFloating = true;
-          break;
-        default:
-          break;
-      }
+        ?? themeData.snackBarTheme.behavior
+        ?? SnackBarBehavior.fixed;
+      isSnackBarFloating = snackBarBehavior == SnackBarBehavior.floating;
+
       _addIfNonNull(
         children,
         _snackBars.first._widget,

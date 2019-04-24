@@ -12,6 +12,54 @@ void main() {
     expect(const SnackBarThemeData().hashCode, const SnackBarThemeData().copyWith().hashCode);
   });
 
+  test('SnackBarThemeData null fields by default', () {
+    const SnackBarThemeData snackBarTheme = SnackBarThemeData();
+    expect(snackBarTheme.backgroundColor, null);
+    expect(snackBarTheme.actionTextColor, null);
+    expect(snackBarTheme.disabledActionTextColor, null);
+    expect(snackBarTheme.elevation, null);
+    expect(snackBarTheme.shape, null);
+    expect(snackBarTheme.behavior, null);
+  });
+
+  testWidgets('Default SnackBarThemeData debugFillProperties', (WidgetTester tester) async {
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    const SnackBarThemeData().debugFillProperties(builder);
+
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
+
+    expect(description, <String>[]);
+  });
+
+  testWidgets('SnackBarThemeData implements debugFillProperties', (WidgetTester tester) async {
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    SnackBarThemeData(
+      backgroundColor: const Color(0xFFFFFFFF),
+      actionTextColor: const Color(0xFF0000AA),
+      disabledActionTextColor: const Color(0xFF00AA00),
+      elevation: 2.0,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(2.0)),
+      behavior: SnackBarBehavior.floating,
+    ).debugFillProperties(builder);
+
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
+
+    expect(description, <String>[
+      'backgroundColor: Color(0xffffffff)',
+      'actionTextColor: Color(0xff0000aa)',
+      'disabledActionTextColor: Color(0xff00aa00)',
+      'elevation: 2.0',
+      'shape: RoundedRectangleBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none), BorderRadius.circular(2.0))',
+      'behavior: SnackBarBehavior.floating'
+    ]);
+  });
+
   testWidgets('Passing no SnackBarThemeData returns defaults', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
