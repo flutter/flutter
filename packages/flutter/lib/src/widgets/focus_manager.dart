@@ -781,18 +781,6 @@ class FocusScopeNode extends FocusNode {
   // last (which is the top of the stack).
   final List<FocusNode> _focusedChildren = <FocusNode>[];
 
-  @override
-  void _reparent(FocusNode child) {
-    final bool hadChildren = _children.isNotEmpty;
-    super._reparent(child);
-    final FocusScopeNode currentEnclosingScope = child.enclosingScope;
-    // If we just added our first child to this scope, and this scope had the
-    // focus, then focus the child.
-    if (!hadChildren && currentEnclosingScope.focusedChild == null && currentEnclosingScope.hasFocus) {
-      child.requestFocus();
-    }
-  }
-
   /// Make the given [scope] the active child scope for this scope.
   ///
   /// If the given [scope] is not yet a part of the focus tree, then add it to

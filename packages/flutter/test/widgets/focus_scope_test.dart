@@ -282,8 +282,8 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      expect(key.currentState.focusNode.hasFocus, isTrue);
-      expect(find.text('A FOCUSED'), findsOneWidget);
+      expect(key.currentState.focusNode.hasFocus, isFalse);
+      expect(find.text('a'), findsOneWidget);
 
       // Now remove the child focus scope.
       await tester.pumpWidget(
@@ -302,8 +302,8 @@ void main() {
       );
 
       await tester.pumpAndSettle();
-      expect(key.currentState.focusNode.hasFocus, isTrue);
-      expect(find.text('A FOCUSED'), findsOneWidget);
+      expect(key.currentState.focusNode.hasFocus, isFalse);
+      expect(find.text('a'), findsOneWidget);
 
       // Must detach the child because we had to attach it in order to call
       // setFirstFocus before adding to the widget.
