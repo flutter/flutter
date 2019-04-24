@@ -617,8 +617,9 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
 /// kind can be used for this purpose.
 ///
 /// ### The ink splashes don't track the size of an animated container
-/// When you wrap an animating widget with an InkWell, you may notice that ink
-/// splashes may clip and result in unusually cut circles.
+/// If the size of an InkWell's [Material] ancestor changes while the InkWell's
+/// splashes are expanding, you may notice that the splashes aren't clipped
+/// correctly. This can't be avoided.
 ///
 /// An example of this situation is as follows:
 ///
@@ -654,9 +655,9 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
 /// {@end-tool}
 ///
 /// An InkWell's splashes will not properly update to conform to changes if the
-/// size of its underlying [Material], where the splashes are rendered, is
-/// mid-animation. Hence, you should avoid using InkWells within [Material]
-/// widgets that are changing size.
+/// size of its underlying [Material], where the splashes are rendered, changes
+/// during animation. You should avoid using InkWells within [Material] widgets
+/// that are changing size.
 ///
 /// See also:
 ///
