@@ -146,7 +146,7 @@ class _SliderDemoState extends State<SliderDemo> {
             Column(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                Slider(
+                Slider.adaptive(
                   value: _value,
                   min: 0.0,
                   max: 100.0,
@@ -165,7 +165,7 @@ class _SliderDemoState extends State<SliderDemo> {
                 Row(
                   children: <Widget>[
                     Expanded(
-                      child: Slider(
+                      child: Slider.adaptive(
                         value: _value,
                         min: 0.0,
                         max: 100.0,
@@ -205,14 +205,14 @@ class _SliderDemoState extends State<SliderDemo> {
             Column(
               mainAxisSize: MainAxisSize.min,
               children: const <Widget>[
-                Slider(value: 0.25, onChanged: null),
+                Slider.adaptive(value: 0.25, onChanged: null),
                 Text('Disabled'),
               ],
             ),
             Column(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                Slider(
+                Slider.adaptive(
                   value: _discreteValue,
                   min: 0.0,
                   max: 200.0,
