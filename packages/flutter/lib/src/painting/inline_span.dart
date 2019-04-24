@@ -73,7 +73,6 @@ abstract class InlineSpan extends DiagnosticableTree {
   const InlineSpan({
     this.style,
     this.children,
-    this.semanticsLabel,
   });
 
   /// The style to apply to this span.
@@ -92,19 +91,6 @@ abstract class InlineSpan extends DiagnosticableTree {
   ///
   /// The list must not contain any nulls.
   final List<InlineSpan> children;
-
-  /// An alternative semantics label for this InlineSpan.
-  ///
-  /// If present, the semantics of this span will contain this value instead
-  /// of the actual content.
-  ///
-  /// This is useful for replacing abbreviations or shorthands with the full
-  /// text value:
-  ///
-  /// ```dart
-  /// TextSpan(text: r'$$', semanticsLabel: 'Double dollars')
-  /// ```
-  final String semanticsLabel;
 
   /// Apply the properties of this object to the given [ParagraphBuilder], from
   /// which a [Paragraph] can be obtained. [Paragraph] objects can be drawn on
@@ -161,7 +147,6 @@ abstract class InlineSpan extends DiagnosticableTree {
       return false;
     final InlineSpan typedOther = other;
     return typedOther.style == style
-        && typedOther.semanticsLabel == semanticsLabel
         && listEquals<InlineSpan>(typedOther.children, children);
   }
 
@@ -176,10 +161,6 @@ abstract class InlineSpan extends DiagnosticableTree {
     // this InlineSpan.
     if (style != null) {
       style.debugFillProperties(properties);
-    }
-
-    if (semanticsLabel != null) {
-      properties.add(StringProperty('semanticsLabel', semanticsLabel));
     }
   }
 }

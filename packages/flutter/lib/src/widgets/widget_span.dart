@@ -111,7 +111,6 @@ class WidgetSpan extends PlaceholderSpan {
     InlineWidgetAlignment alignment = InlineWidgetAlignment.bottom,
     TextBaseline baseline,
     TextStyle style,
-    String semanticsLabel,
   }) : assert(child != null),
        assert((alignment == InlineWidgetAlignment.aboveBaseline ||
                alignment == InlineWidgetAlignment.belowBaseline ||
@@ -125,7 +124,7 @@ class WidgetSpan extends PlaceholderSpan {
            alignment == InlineWidgetAlignment.top ? ui.PlaceholderAlignment.top :
            alignment == InlineWidgetAlignment.bottom ? ui.PlaceholderAlignment.bottom :
            alignment == InlineWidgetAlignment.middle ? ui.PlaceholderAlignment.middle : null,
-         baseline: baseline, style: style, semanticsLabel: semanticsLabel, children: null,
+         baseline: baseline, style: style, children: null,
        );
 
   /// The widget to embed inline with text.
@@ -170,8 +169,10 @@ class WidgetSpan extends PlaceholderSpan {
     return true;
   }
 
+  /// [WidgetSpan]s are flattened to a `0xFFFC` object replacement character in the
+  /// plain text representation.
   String toPlainText({bool includeSemanticsLabels = true}) {
-    return includeSemanticsLabels && semanticsLabel != null ? semanticsLabel : "";
+    return '\u{FFFC}';
   }
 
   int codeUnitAt(int index) {
@@ -214,8 +215,7 @@ class WidgetSpan extends PlaceholderSpan {
       return false;
     final WidgetSpan typedOther = other;
     return typedOther.child == child
-        && typedOther.style == style
-        && typedOther.semanticsLabel == semanticsLabel;
+        && typedOther.style == style;
   }
 
   /// Returns the text span that contains the given position in the text.

@@ -66,8 +66,8 @@ class TextSpan extends InlineSpan {
     List<InlineSpan> children,
     TextStyle style,
     this.recognizer,
-    String semanticsLabel,
-  }) : super(style: style, children: children, semanticsLabel: semanticsLabel);
+    this.semanticsLabel,
+  }) : super(style: style, children: children);
 
   /// The text contained in the span.
   ///
@@ -150,6 +150,19 @@ class TextSpan extends InlineSpan {
   /// ```
   /// {@end-tool}
   final GestureRecognizer recognizer;
+
+  /// An alternative semantics label for this TextSpan.
+  ///
+  /// If present, the semantics of this span will contain this value instead
+  /// of the actual text.
+  ///
+  /// This is useful for replacing abbreviations or shorthands with the full
+  /// text value:
+  ///
+  /// ```dart
+  /// TextSpan(text: r'$$', semanticsLabel: 'Double dollars')
+  /// ```
+  final String semanticsLabel;
 
   /// Apply the [style], [text], and [children] of this object to the
   /// given [ParagraphBuilder], from which a [Paragraph] can be obtained.
@@ -362,6 +375,10 @@ class TextSpan extends InlineSpan {
       description: recognizer?.runtimeType?.toString(),
       defaultValue: null,
     ));
+
+    if (semanticsLabel != null) {
+      properties.add(StringProperty('semanticsLabel', semanticsLabel));
+    }
   }
 
   @override
