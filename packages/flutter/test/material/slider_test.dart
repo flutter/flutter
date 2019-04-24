@@ -4,6 +4,7 @@
 
 import 'dart:ui';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -1435,5 +1436,53 @@ void main() {
     await tester.pumpWidget(Container());
     expect(await tester.pumpAndSettle(const Duration(milliseconds: 100)), equals(1));
     await gesture.up();
+  });
+
+  testWidgets('Slider.adaptive', (WidgetTester tester) async {
+    double value = 0.5;
+
+    Widget buildFrame(TargetPlatform platform) {
+      return MaterialApp(
+        theme: ThemeData(platform: platform),
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Material(
+              child: Center(
+                child: Slider.adaptive(
+                  value: value,
+                  onChanged: (double newValue) {
+                    setState(() {
+                      value = newValue;
+                    });
+                  },
+                ),
+              ),
+            );
+          },
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(TargetPlatform.iOS));
+    expect(find.byType(Slider), findsOneWidget);
+    expect(find.byType(CupertinoSlider), findsOneWidget);
+
+    expect(value, 0.5);
+    TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(CupertinoSlider)));
+    // Drag to the right end of the track.
+    await gesture.moveBy(const Offset(600.0, 0.0));
+    expect(value, 1.0);
+
+    value = 0.5;
+    await tester.pumpWidget(buildFrame(TargetPlatform.android));
+    await tester.pumpAndSettle(); // Finish the theme change animation.
+    expect(find.byType(Slider), findsOneWidget);
+    expect(find.byType(CupertinoSlider), findsNothing);
+
+    expect(value, 0.5);
+    gesture = await tester.startGesture(tester.getCenter(find.byType(Slider)));
+    // Drag to the right end of the track.
+    await gesture.moveBy(const Offset(600.0, 0.0));
+    expect(value, 1.0);
   });
 }
