@@ -94,14 +94,16 @@ Future<void> _verifyInternationalizations() async {
   final EvalResult materialGenResult = await _evalCommand(
     dart,
     <String>[
-      path.join('dev', 'tools', 'localization', 'gen_localizations.dart', '--material'),
+      path.join('dev', 'tools', 'localization', 'gen_localizations.dart'),
+      '--material',
     ],
     workingDirectory: flutterRoot,
   );
   final EvalResult cupertinoGenResult = await _evalCommand(
     dart,
     <String>[
-      path.join('dev', 'tools', 'localization', 'gen_localizations.dart', '--cupertino'),
+      path.join('dev', 'tools', 'localization', 'gen_localizations.dart'),
+      '--cupertino',
     ],
     workingDirectory: flutterRoot,
   );
@@ -135,7 +137,6 @@ Future<void> _verifyInternationalizations() async {
       ..writeln('Did you forget to run gen_localizations.dart after updating a .arb file?');
     exit(1);
   }
-  print('Contents of $materialLocalizationsFile and $cupertinoLocalizationsFile match the output of gen_localizations.dart script.');
 }
 
 Future<String> _getCommitRange() async {
