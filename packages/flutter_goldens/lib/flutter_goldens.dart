@@ -30,11 +30,9 @@ Future<void> main(FutureOr<void> testMain()) async {
 /// Within the https://github.com/flutter/flutter repository, it's important
 /// not to check-in binaries in order to keep the size of the repository to a
 /// minimum. To satisfy this requirement, this comparator uses the
-/// [SkiaGoldClient] to upload widgets for golden tests and process results.
+/// [SkiaGoldClient] to upload widgets for framework-related golden tests and
+/// process results.
 ///
-/// This comparator will locally clone the `flutter/goldens` repository into
-/// the `$FLUTTER_ROOT/bin/cache/pkg/goldens` folder, then perform the comparison against
-/// the files therein.
 /// This comparator will instantiate the [SkiaGoldClient] and process the
 /// results of the test.
 class FlutterGoldenFileComparator implements GoldenFileComparator {
@@ -71,9 +69,14 @@ class FlutterGoldenFileComparator implements GoldenFileComparator {
     // Calculate the appropriate basedir for the current test context.
     const FileSystem fs = LocalFileSystem();
     final Directory testDirectory = fs.directory(defaultComparator.basedir);
+    //print('test: $testDirectory');
     final Directory flutterRoot = fs.directory(Platform.environment[_kFlutterRootKey]);
+    //print('flutter: $flutterRoot');
     final Directory goldenRoot = flutterRoot.childDirectory(fs.path.join('bin', 'cache', 'pkg', 'goldens'));
+    //print('golden: $goldenRoot');
     final String testDirectoryRelativePath = fs.path.relative(testDirectory.path, from: flutterRoot.path);
+    //print('testDRP: $testDirectoryRelativePath');
+    //print('FGFC instantiated with:${goldenRoot.childDirectory(testDirectoryRelativePath).uri}');
     return FlutterGoldenFileComparator(goldenRoot.childDirectory(testDirectoryRelativePath).uri);
   }
 

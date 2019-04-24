@@ -142,20 +142,22 @@ class SkiaGoldClient {
         ..writeln('stderr: ${imgtestResult.stderr}');
       throw NonZeroExitCode(imgtestResult.exitCode, buf.toString());
     }
+    print('PASS');
     return true;
   }
 
   Future<String> _getCommitHash() async {
-    if (!flutterRoot.existsSync()) {
-      return null;
-    } else {
-      final io.ProcessResult revParse = await process.run(
-        <String>['git', 'rev-parse', 'HEAD'],
-        workingDirectory: flutterRoot.path,
-      );
-      return revParse.exitCode == 0 ? revParse.stdout.trim() : null;
+    // TODO: Remove after baseline is established and pre-commit works
+    return 'b27b3d744670bb9312824ec94353b93e7d0424ea';
+//    if (!flutterRoot.existsSync()) {
+//      return null;
+//    } else {
+//      final io.ProcessResult revParse = await process.run(
+//        <String>['git', 'rev-parse', 'HEAD'],
+//        workingDirectory: flutterRoot.path,
+//      );
+//      return revParse.exitCode == 0 ? revParse.stdout.trim() : null;
     }
-  }
 
   String _getKeysJSON() {
     return convert.json.encode(
