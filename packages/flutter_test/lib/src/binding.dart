@@ -1109,7 +1109,6 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   @override
   void initInstances() {
     super.initInstances();
-    assert(!autoUpdateGoldenFiles);
   }
 
   @override
