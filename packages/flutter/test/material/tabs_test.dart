@@ -2152,10 +2152,10 @@ void main() {
     const Color unselectedTabColor = Color(2);
 
     await tester.pumpWidget(boilerplate(
-      child: DefaultTabController(
+      child: const DefaultTabController(
         length: 1,
         child: TabBar(
-          tabs: const <Tab>[tab],
+          tabs: <Tab>[tab],
           labelColor: selectedTabColor,
           unselectedLabelColor: unselectedTabColor,
         ),
