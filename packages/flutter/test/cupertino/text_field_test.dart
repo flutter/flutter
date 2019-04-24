@@ -2111,8 +2111,7 @@ void main() {
     final RenderEditable renderEditable =
       tester.state<EditableTextState>(find.byType(EditableText)).renderEditable;
 
-    final Offset ePos = textOffsetToPosition(tester, 5);
-    await tester.tapAt(ePos);
+    await tester.tapAt(textOffsetToPosition(tester, 5));
     renderEditable.selectWord(cause: SelectionChangedCause.longPress);
     await tester.pumpAndSettle();
 

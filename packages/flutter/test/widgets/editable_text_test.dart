@@ -1947,22 +1947,22 @@ void main() {
     final RenderEditable renderEditable = state.renderEditable;
     final Scrollable scrollable = tester.widget<Scrollable>(find.byType(Scrollable));
 
-    bool leftVisibleBefore = false;
-    bool rightVisibleBefore = false;
+    bool expectedLeftVisibleBefore = false;
+    bool expectedRightVisibleBefore = false;
 
     Future<void> verifyVisibility(
       HandlePositionInViewport leftPosition,
-      bool leftVisible,
+      bool expectedLeftVisible,
       HandlePositionInViewport rightPosition,
-      bool rightVisible,
+      bool expectedRightVisible,
     ) async {
       await tester.pump();
 
       // Check the signal from RenderEditable about whether they're within the
       // viewport.
 
-      expect(renderEditable.selectionStartInViewport.value, equals(leftVisible));
-      expect(renderEditable.selectionEndInViewport.value, equals(rightVisible));
+      expect(renderEditable.selectionStartInViewport.value, equals(expectedLeftVisible));
+      expect(renderEditable.selectionEndInViewport.value, equals(expectedRightVisible));
 
       // Check that the animations are functional and going in the right
       // direction.
@@ -1974,27 +1974,27 @@ void main() {
       final FadeTransition left = transitions[1];
       final FadeTransition right = transitions[2];
 
-      if (leftVisibleBefore)
+      if (expectedLeftVisibleBefore)
         expect(left.opacity.value, equals(1.0));
-      if (rightVisibleBefore)
+      if (expectedRightVisibleBefore)
         expect(right.opacity.value, equals(1.0));
 
       await tester.pump(TextSelectionOverlay.fadeDuration ~/ 2);
 
-      if (leftVisible != leftVisibleBefore)
+      if (expectedLeftVisible != expectedLeftVisibleBefore)
         expect(left.opacity.value, equals(0.5));
-      if (rightVisible != rightVisibleBefore)
+      if (expectedRightVisible != expectedRightVisibleBefore)
         expect(right.opacity.value, equals(0.5));
 
       await tester.pump(TextSelectionOverlay.fadeDuration ~/ 2);
 
-      if (leftVisible)
+      if (expectedLeftVisible)
         expect(left.opacity.value, equals(1.0));
-      if (rightVisible)
+      if (expectedRightVisible)
         expect(right.opacity.value, equals(1.0));
 
-      leftVisibleBefore = leftVisible;
-      rightVisibleBefore = rightVisible;
+      expectedLeftVisibleBefore = expectedLeftVisible;
+      expectedRightVisibleBefore = expectedRightVisible;
 
       // Check that the handles' positions are correct.
 
@@ -2061,6 +2061,45 @@ void main() {
     await verifyVisibility(HandlePositionInViewport.rightEdge, false, HandlePositionInViewport.rightEdge, false);
   });
 
+  testWidgets('text selection handle visibility RTL', (WidgetTester tester) async {
+    // Text with two separate words to select.
+    const String testText = 'XXXXX          XXXXX';
+    final TextEditingController controller = TextEditingController(text: testText);
+
+    await tester.pumpWidget(MaterialApp(
+      home: Align(
+        alignment: Alignment.topLeft,
+        child: SizedBox(
+          width: 100,
+          child: EditableText(
+            controller: controller,
+            focusNode: FocusNode(),
+            style: Typography(platform: TargetPlatform.android).black.subhead,
+            cursorColor: Colors.blue,
+            backgroundCursorColor: Colors.grey,
+            selectionControls: materialTextSelectionControls,
+            keyboardType: TextInputType.text,
+            textAlign: TextAlign.right,
+          ),
+        ),
+      ),
+    ));
+
+    final EditableTextState state =
+        tester.state<EditableTextState>(find.byType(EditableText));
+
+    // Select the first word. Both handles should be visible.
+    await tester.tapAt(const Offset(20, 10));
+    state.renderEditable.selectWord(cause: SelectionChangedCause.longPress);
+    await tester.pump();
+    final List<Positioned> positioned =
+      find.byType(Positioned).evaluate().map((Element e) => e.widget).cast<Positioned>().toList();
+    expect(positioned[0].left, 0.0);
+    expect(positioned[1].left, 70.0);
+    expect(controller.selection.base.offset, 0);
+    expect(controller.selection.extent.offset, 5);
+  });
+
   // Regression test for https://github.com/flutter/flutter/issues/31287
   testWidgets('iOS text selection handle visibility', (WidgetTester tester) async {
     debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
@@ -2094,22 +2133,22 @@ void main() {
     final RenderEditable renderEditable = state.renderEditable;
     final Scrollable scrollable = tester.widget<Scrollable>(find.byType(Scrollable));
 
-    bool leftVisibleBefore = false;
-    bool rightVisibleBefore = false;
+    bool expectedLeftVisibleBefore = false;
+    bool expectedRightVisibleBefore = false;
 
     Future<void> verifyVisibility(
       HandlePositionInViewport leftPosition,
-      bool leftVisible,
+      bool expectedLeftVisible,
       HandlePositionInViewport rightPosition,
-      bool rightVisible,
+      bool expectedRightVisible,
     ) async {
       await tester.pump();
 
       // Check the signal from RenderEditable about whether they're within the
       // viewport.
 
-      expect(renderEditable.selectionStartInViewport.value, equals(leftVisible));
-      expect(renderEditable.selectionEndInViewport.value, equals(rightVisible));
+      expect(renderEditable.selectionStartInViewport.value, equals(expectedLeftVisible));
+      expect(renderEditable.selectionEndInViewport.value, equals(expectedRightVisible));
 
       // Check that the animations are functional and going in the right
       // direction.
@@ -2119,27 +2158,27 @@ void main() {
       final FadeTransition left = transitions[0];
       final FadeTransition right = transitions[1];
 
-      if (leftVisibleBefore)
+      if (expectedLeftVisibleBefore)
         expect(left.opacity.value, equals(1.0));
-      if (rightVisibleBefore)
+      if (expectedRightVisibleBefore)
         expect(right.opacity.value, equals(1.0));
 
       await tester.pump(TextSelectionOverlay.fadeDuration ~/ 2);
 
-      if (leftVisible != leftVisibleBefore)
+      if (expectedLeftVisible != expectedLeftVisibleBefore)
         expect(left.opacity.value, equals(0.5));
-      if (rightVisible != rightVisibleBefore)
+      if (expectedRightVisible != expectedRightVisibleBefore)
         expect(right.opacity.value, equals(0.5));
 
       await tester.pump(TextSelectionOverlay.fadeDuration ~/ 2);
 
-      if (leftVisible)
+      if (expectedLeftVisible)
         expect(left.opacity.value, equals(1.0));
-      if (rightVisible)
+      if (expectedRightVisible)
         expect(right.opacity.value, equals(1.0));
 
-      leftVisibleBefore = leftVisible;
-      rightVisibleBefore = rightVisible;
+      expectedLeftVisibleBefore = expectedLeftVisible;
+      expectedRightVisibleBefore = expectedRightVisible;
 
       // Check that the handles' positions are correct.
 
