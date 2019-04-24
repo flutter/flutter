@@ -50,7 +50,7 @@ typedef ScrollableWidgetBuilder = Widget Function(
 /// By default, the widget will expand its non-occupied area to fill availble
 /// space in the parent. If this is not desired, e.g. because the parent wants
 /// to position sheet based on the space it is taking, the [expand] property
-/// may be set ot false.
+/// may be set to false.
 ///
 /// {@tool sample}
 ///
@@ -136,7 +136,7 @@ class DraggableScrollableSheet extends StatefulWidget {
   ///
   /// In most cases, this should be true. However, in the case of a parent
   /// widget that will position this one based on its desired size (such as a
-  /// [MultiChildLayoutDelegate]), this should be set to false.
+  /// [Center]), this should be set to false.
   ///
   /// The default value is true.
   final bool expand;
@@ -150,31 +150,32 @@ class DraggableScrollableSheet extends StatefulWidget {
   _DraggableScrollableSheetState createState() => _DraggableScrollableSheetState();
 }
 
-/// A [Notification] related to the position of the [DraggableScrollableSheet].
+/// A [Notification] related to the size and scroll offset of the
+/// [DraggableScrollableSheet].
 ///
-/// [DraggableScrollableSheet] widgets notify their ancestors about layout
-/// related changes. When the extent of the sheet changes via a drag,
+/// [DraggableScrollableSheet] widgets notify their ancestors when the size of
+/// the sheet changes. When the extent of the sheet changes via a drag,
 /// this notification bubbles up through the tree, which means a given
 /// [NotificationListener] will recieve notifications for all descendant
-/// [DraggableScrollableSheet] widgets. To focus on notifications form the
+/// [DraggableScrollableSheet] widgets. To focus on notifications from the
 /// nearest [DraggableScorllableSheet] descendant, check that the [depth]
 /// property of the notification is zero.
 ///
-/// When a extent notification is received by a [NotificationListener], the
+/// When a extent notification is received by an [NotificationListener], the
 /// listener will already have completed build and layout, and it is therefore
 /// too late for that widget to call [State.setState]. Any attempt to adjust the
 /// build or layout based on an extent notification would result in a layout
 /// that lagged one frame behind, which is a poor user experience. Extent
 /// notifications are used primarily to drive animations. The [Scaffold] widget
 /// is an example of driving animations for the [FloatingActionButton] as the
-/// sheet scrolls up.
-class ExtentNotification extends Notification with ViewportNotificationMixin {
+/// bottom sheet scrolls up.
+class DraggableScrollableNotification extends Notification with ViewportNotificationMixin {
   /// Creates a notification that the extent of a [DraggableScrollableSheet] has
   /// changed.
   ///
   /// All parameters are required. The [minExtent] must be >= 0.  The [maxExtent]
   /// must be <= 1.0.  The [extent] must be between [minExtent] and [maxExtent].
-  ExtentNotification({
+  DraggableScrollableNotification({
     @required this.extent,
     @required this.minExtent,
     @required this.maxExtent,
@@ -205,7 +206,8 @@ class ExtentNotification extends Notification with ViewportNotificationMixin {
   /// The build context of the widget that fired this notification.
   ///
   /// This can be used to find the sheet's render objects to determine the size
-  /// of the viewport, for instance.
+  /// of the viewport, for instance. A listener can only assume this context
+  /// is live when it first gets the notification.
   final BuildContext context;
 
   @override
@@ -260,8 +262,11 @@ class _DraggableSheetExtent {
   /// The scroll position gets inputs in terms of pixels, but the extent is
   /// expected to be expressed as a number between 0..1.
   void addPixelDelta(double delta, BuildContext context) {
+    if (availablePixels == 0) {
+      return;
+    }
     currentExtent += delta / availablePixels;
-    ExtentNotification(
+    DraggableScrollableNotification(
       minExtent: minExtent,
       maxExtent: maxExtent,
       extent: currentExtent,
@@ -487,21 +492,22 @@ class _DraggableScrollableSheetScrollPosition
 /// A widget that notifies a descendent [DraggableScrollableSheet] that it
 /// should reset its position to the initial state.
 ///
-/// The [Scaffold] uses this widget to notify a persistententbottom sheet that
+/// The [Scaffold] uses this widget to notify a persistentent bottom sheet that
 /// the user has tapped back if the sheet has started to cover more of the body
 /// than when at its initial position. This is important for users of assistive
 /// technology, where dragging may be difficult to communicate.
-class DraggableScrollableSheetResetter extends StatelessWidget {
+class DraggableScrollableActuator extends StatelessWidget {
   /// Creates a widget that can notify descendent [DraggableScrollableSheet]s
   /// to reset to their initial position.
   ///
   /// The [child] parameter is required.
-  DraggableScrollableSheetResetter({
+  DraggableScrollableActuator({
     Key key,
     @required this.child
   }) : super(key: key);
 
-  /// The child to build that may contain a [DraggableScrollableSheet].
+  /// This child's [DraggableScrollableSheet] descendant will be reset when the
+  /// [reset] method is applied to a context that includes it.
   ///
   /// Must not be null.
   final Widget child;
@@ -511,7 +517,7 @@ class DraggableScrollableSheetResetter extends StatelessWidget {
   /// Notifies any descendant [DraggableScrollableSheet] that it should reset
   /// to its initial position.
   ///
-  /// Returns `true` if a [DraggableScrollableSheetResetter] is available and
+  /// Returns `true` if a [DraggableScrollableActuator] is available and
   /// some [DraggableScrollableSheet] is listening for updates, `false`
   /// otherwise.
   static bool reset(BuildContext context) {

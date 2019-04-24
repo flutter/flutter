@@ -175,25 +175,6 @@ void main() {
     expect(tester.binding.transientCallbackCount, greaterThan(0));
   });
 
-  testWidgets('Floating action button show/hide', (WidgetTester tester) async {
-    final GlobalKey one = GlobalKey(debugLabel: 'one');
-    await tester.pumpWidget(MaterialApp(home: Scaffold(
-      floatingActionButton: FloatingActionButton(
-        key: one,
-        onPressed: null,
-        child: const Text('1'),
-      ),
-    )));
-
-    expect(find.text('1').hitTestable(), findsOneWidget);
-    Scaffold.of(one.currentContext).hideFloatingActionButton();
-    await tester.pumpAndSettle();
-    expect(find.text('1').hitTestable(), findsNothing);
-    Scaffold.of(one.currentContext).showFloatingActionButton();
-    await tester.pumpAndSettle();
-    expect(find.text('1').hitTestable(), findsOneWidget);
-  });
-
   testWidgets('Floating action button directionality', (WidgetTester tester) async {
     Widget build(TextDirection textDirection) {
       return Directionality(

@@ -1278,6 +1278,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
   double _appBarMaxHeight;
   /// The max height the [Scaffold.appBar] uses.
+  ///
+  /// This is based on the appBar preferred height plus the top padding.
   double get appBarMaxHeight => _appBarMaxHeight;
   bool _drawerOpened = false;
   bool _endDrawerOpened = false;
@@ -1471,15 +1473,15 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       // support drag or swipe to dismiss.
       final AnimationController animationController = BottomSheet.createAnimationController(this)..value = 1.0;
       LocalHistoryEntry _persistentSheetHistoryEntry;
-      bool _persistentBottomSheetExtentChanged(ExtentNotification notification) {
+      bool _persistentBottomSheetExtentChanged(DraggableScrollableNotification notification) {
         if (notification.extent > notification.initialExtent) {
           if (_persistentSheetHistoryEntry == null) {
             _persistentSheetHistoryEntry = LocalHistoryEntry(onRemove: () {
               if (notification.extent > notification.initialExtent) {
-                DraggableScrollableSheetResetter.reset(notification.context);
+                DraggableScrollableActuator.reset(notification.context);
               }
               showBodyScrim(false, 0.0);
-              floatingActionButtonVisibilityValue = 1.0;
+              _floatingActionButtonVisibilityValue = 1.0;
               _persistentSheetHistoryEntry = null;
             });
             ModalRoute.of(context).addLocalHistoryEntry(_persistentSheetHistoryEntry);
@@ -1492,9 +1494,9 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
       _currentBottomSheet = _buildBottomSheet<void>(
         (BuildContext context) {
-          return NotificationListener<ExtentNotification>(
+          return NotificationListener<DraggableScrollableNotification>(
             onNotification: _persistentBottomSheetExtentChanged,
-            child: DraggableScrollableSheetResetter(
+            child: DraggableScrollableActuator(
               child: widget.bottomSheet,
             ),
           );
@@ -1548,7 +1550,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       }
       assert(_currentBottomSheet._widget == bottomSheet);
       assert(bottomSheetKey.currentState != null);
-      showFloatingActionButton();
+      _showFloatingActionButton();
 
       void _closed(void value) {
         setState(() {
@@ -1624,13 +1626,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   /// Returns a controller that can be used to close and otherwise manipulate the
   /// bottom sheet.
   ///
-  /// The `isScrollControlled` parameter specifies whether to create a bottom
-  /// sheet that will utilize [BottomSheet.scrollController]. If you wish
-  /// to have a bottom sheet that has a scrollable child such as a [ListView] or
-  /// a [GridView], you should set this parameter to true. In such a case, the
-  /// `initialHeightPercentage` specifies how much of the available screen space
-  /// the sheet should take at the start.
-  ///
   /// To rebuild the bottom sheet (e.g. if it is stateful), call
   /// [PersistentBottomSheetController.setState] on the controller returned by
   /// this method.
@@ -1699,11 +1694,11 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
   /// Gets the current value of the visibility animation for the
   /// [Scaffold.floatingActionButton].
-  double get floatingActionButtonVisibilityValue => _floatingActionButtonVisibilityController.value;
+  double get _floatingActionButtonVisibilityValue => _floatingActionButtonVisibilityController.value;
 
   /// Sets the current value of the visibility animation for the
   /// [Scaffold.floatingActionButton].  This value must not be null.
-  set floatingActionButtonVisibilityValue(double newValue) {
+  set _floatingActionButtonVisibilityValue(double newValue) {
     assert(newValue != null);
     _floatingActionButtonVisibilityController.value = newValue.clamp(
       _floatingActionButtonVisibilityController.lowerBound,
@@ -1711,13 +1706,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     );
   }
 
-  /// Hides the [Scaffold.floatingActionButton].
-  TickerFuture hideFloatingActionButton() {
-    return _floatingActionButtonVisibilityController.reverse();
-  }
-
   /// Shows the [Scaffold.floatingActionButton].
-  TickerFuture showFloatingActionButton() {
+  TickerFuture _showFloatingActionButton() {
     return _floatingActionButtonVisibilityController.forward();
   }
 
@@ -1930,7 +1920,10 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   Color _bodyScrimColor = Colors.black;
 
   /// Whether to show a [ModalBarrier] over the body of the scaffold.
+  ///
+  /// The `value` parameter must not be null.
   void showBodyScrim(bool value, double opacity) {
+    assert(value != null);
     if (_showBodyScrim == value && _bodyScrimColor.opacity == opacity) {
       return;
     }
@@ -1982,7 +1975,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       removeBottomPadding: widget.bottomNavigationBar != null || widget.persistentFooterButtons != null,
       removeBottomInset: _resizeToAvoidBottomInset,
     );
-    if (_showBodyScrim == true) {
+    if (_showBodyScrim) {
       _addIfNonNull(
         children,
         ModalBarrier(
@@ -2203,7 +2196,7 @@ class _StandardBottomSheet extends StatefulWidget {
     this.bottomSheetColor,
   }) : super(key: key);
 
-  final AnimationController animationController; // we control it, but it must be disposed by whoever crated it.
+  final AnimationController animationController; // we control it, but it must be disposed by whoever created it.
   final bool enableDrag;
   final VoidCallback onClosing;
   final VoidCallback onDismissed;
@@ -2234,7 +2227,9 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
   Future<void> close() {
     assert(widget.animationController != null);
     widget.animationController.reverse();
-    widget.onClosing?.call();
+    if (widget.onClosing != null) {
+      widget.onClosing();
+    }
     return null;
   }
 
@@ -2244,17 +2239,17 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
     }
   }
 
-  bool extentChanged(ExtentNotification notification) {
+  bool extentChanged(DraggableScrollableNotification notification) {
     final double extentRemaining = 1.0 - notification.extent;
     final ScaffoldState scaffold = Scaffold.of(context);
     if (extentRemaining < _kBottomSheetDominatesPercentage) {
-      scaffold.floatingActionButtonVisibilityValue = extentRemaining * _kBottomSheetDominatesPercentage * 10;
+      scaffold._floatingActionButtonVisibilityValue = extentRemaining * _kBottomSheetDominatesPercentage * 10;
       scaffold.showBodyScrim(true,  math.max(
         _kMinBottomSheetScrimOpacity,
-        _kMaxBottomSheetScrimOpacity - scaffold.floatingActionButtonVisibilityValue,
+        _kMaxBottomSheetScrimOpacity - scaffold._floatingActionButtonVisibilityValue,
       ));
     } else {
-      scaffold.floatingActionButtonVisibilityValue = 1.0;
+      scaffold._floatingActionButtonVisibilityValue = 1.0;
       scaffold.showBodyScrim(false, 0.0);
     }
     // If the Scaffold.bottomSheet != null, we're a persistent bottom sheet.
@@ -2268,7 +2263,7 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
     return Semantics(
       container: true,
       onDismiss: close,
-      child:  NotificationListener<ExtentNotification>(
+      child:  NotificationListener<DraggableScrollableNotification>(
         onNotification: extentChanged,
         child: bottomSheet,
       )
