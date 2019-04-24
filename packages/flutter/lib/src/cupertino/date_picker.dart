@@ -68,7 +68,8 @@ class _DatePickerLayoutDelegate extends MultiChildLayoutDelegate {
 
       assert(
         childWidth >= 0,
-        'Insufficient horizontal space to render the CupertinoDatePicker.\n'
+        'Insufficient horizontal space to render the CupertinoDatePicker '
+        'because the parent is too narrow at ${size.width}px.\n'
         'An additional ${-remainingWidth}px is needed to avoid overlapping '
         'columns.',
       );
