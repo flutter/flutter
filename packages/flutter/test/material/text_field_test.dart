@@ -419,7 +419,8 @@ void main() {
     expect(state.showToolbar(), true);
 
     // This is needed for the AnimatedOpacity to turn from 0 to 1 so the toolbar is visible.
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
 
     // Sanity check that the toolbar widget exists.
     expect(find.text('PASTE'), findsOneWidget);
