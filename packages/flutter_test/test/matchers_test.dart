@@ -185,6 +185,23 @@ void main() {
     expect(-11.0, moreOrLessEquals(11.0, epsilon: 100.0));
   });
 
+  test('rectMoreOrLessEquals', () {
+    expect(
+      Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
+      rectMoreOrLessEquals(Rect.fromLTRB(1e-11, 0.0, 10.0, 10.0000000001)),
+    );
+
+    expect(
+      Rect.fromLTRB(11.0, 11.0, 20.0, 20.0),
+      isNot(rectMoreOrLessEquals(Rect.fromLTRB(-11.0, -11.0, 20.0, 20.0), epsilon: 1.0)),
+    );
+
+    expect(
+      Rect.fromLTRB(11.0, 11.0, 20.0, 20.0),
+      rectMoreOrLessEquals(Rect.fromLTRB(-11.0, -11.0, 20.0, 20.0), epsilon: 100.0),
+    );
+  });
+
   test('within', () {
     expect(0.0, within<double>(distance: 0.1, from: 0.05));
     expect(0.0, isNot(within<double>(distance: 0.1, from: 0.2)));

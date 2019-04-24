@@ -9,7 +9,7 @@ import '../base/platform.dart';
 import '../base/process_manager.dart';
 import '../build_info.dart';
 import '../cache.dart';
-import '../convert.dart';
+import '../desktop.dart';
 import '../device.dart';
 import '../globals.dart';
 import '../macos/application_package.dart';
@@ -26,7 +26,10 @@ class MacOSDevice extends Device {
   void clearLogs() { }
 
   @override
-  DeviceLogReader getLogReader({ ApplicationPackage app }) => NoOpDeviceLogReader('macos');
+  DeviceLogReader getLogReader({ ApplicationPackage app }) {
+    return _deviceLogReader;
+  }
+  final DesktopLogReader _deviceLogReader = DesktopLogReader();
 
   // Since the host and target devices are the same, no work needs to be done
   // to install the application.
@@ -82,8 +85,8 @@ class MacOSDevice extends Device {
     if (debuggingOptions?.buildInfo?.isRelease == true) {
       return LaunchResult.succeeded();
     }
-    final MacOSLogReader logReader = MacOSLogReader(package, process);
-    final ProtocolDiscovery observatoryDiscovery = ProtocolDiscovery.observatory(logReader);
+    _deviceLogReader.initializeProcess(process);
+    final ProtocolDiscovery observatoryDiscovery = ProtocolDiscovery.observatory(_deviceLogReader);
     try {
       final Uri observatoryUri = await observatoryDiscovery.uri;
       // Bring app to foreground.
@@ -103,37 +106,8 @@ class MacOSDevice extends Device {
   // currently we rely on killing the isolate taking down the application.
   @override
   Future<bool> stopApp(covariant MacOSApp app) async {
-    final RegExp whitespace = RegExp(r'\s+');
-    bool succeeded = true;
-    // assume debug for now.
-    final String executable = app.executable(BuildMode.debug);
-    try {
-      final ProcessResult result = await processManager.run(<String>[
-        'ps', 'aux',
-      ]);
-      if (result.exitCode != 0) {
-        return false;
-      }
-      final List<String> lines = result.stdout.split('\n');
-      for (String line in lines) {
-        if (!line.contains(executable)) {
-          continue;
-        }
-        final List<String> values = line.split(whitespace);
-        if (values.length < 2) {
-          continue;
-        }
-        final String pid = values[1];
-        final ProcessResult killResult = await processManager.run(<String>[
-          'kill', pid,
-        ]);
-        succeeded &= killResult.exitCode == 0;
-      }
-      return true;
-    } on ArgumentError {
-      succeeded = false;
-    }
-    return succeeded;
+    // Assume debug for now.
+    return killProcess(app.executable(BuildMode.debug));
   }
 
   @override
@@ -166,19 +140,4 @@ class MacOSDevices extends PollingDeviceDiscovery {
 
   @override
   Future<List<String>> getDiagnostics() async => const <String>[];
-}
-
-class MacOSLogReader extends DeviceLogReader {
-  MacOSLogReader(this.macOSApp, this.process);
-
-  final MacOSApp macOSApp;
-  final Process process;
-
-  @override
-  Stream<String> get logLines {
-    return process.stdout.transform(utf8.decoder);
-  }
-
-  @override
-  String get name => macOSApp.displayName;
 }

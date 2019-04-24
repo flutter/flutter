@@ -38,6 +38,12 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
         defaultsTo: false,
         help: 'Report timing information about build steps in machine readable form,',
       )
+      // track-widget-creation is exposed as a flag here but ignored to deal with build
+      // invalidation issues - there are no plans to support it for AOT mode.
+      ..addFlag('track-widget-creation',
+        defaultsTo: false,
+        hide: true,
+      )
       ..addMultiOption('ios-arch',
         splitCommas: true,
         defaultsTo: defaultIOSArchs.map<String>(getNameForIOSArch),

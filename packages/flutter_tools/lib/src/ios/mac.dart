@@ -384,6 +384,7 @@ Future<XcodeBuildResult> buildXcodeProject({
       ],
       properties: <String, String>{},
     );
+
     final bool didPodInstall = await cocoaPods.processPods(
       iosProject: project.ios,
       iosEngineDir: flutterFrameworkDir(buildInfo.mode),

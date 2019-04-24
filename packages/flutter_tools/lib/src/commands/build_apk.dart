@@ -14,7 +14,6 @@ class BuildApkCommand extends BuildSubCommand {
     usesTargetOption();
     addBuildModeFlags(verboseHelp: verboseHelp);
     addDynamicModeFlags(verboseHelp: verboseHelp);
-    addDynamicPatchingFlags(verboseHelp: verboseHelp);
     usesFlavorOption();
     usesPubOption();
     usesBuildNumberOption();

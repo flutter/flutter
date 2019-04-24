@@ -160,7 +160,7 @@ class Hero extends StatefulWidget {
   ///
   /// If this property is null, the default, then the value of
   /// [HeroController.createRectTween] is used. The [HeroController] created by
-  /// [MaterialApp] creates a [MaterialRectAreTween].
+  /// [MaterialApp] creates a [MaterialRectArcTween].
   final CreateRectTween createRectTween;
 
   /// The widget subtree that will "fly" from one route to another during a

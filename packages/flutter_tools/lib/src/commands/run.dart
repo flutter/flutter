@@ -25,7 +25,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   RunCommandBase({ bool verboseHelp = false }) {
     addBuildModeFlags(defaultToRelease: false, verboseHelp: verboseHelp);
     addDynamicModeFlags(verboseHelp: verboseHelp);
-    addDynamicPatchingFlags(verboseHelp: verboseHelp);
     usesFlavorOption();
     argParser
       ..addFlag('trace-startup',
@@ -169,6 +168,11 @@ class RunCommand extends RunCommandBase {
               'results out to "refresh_benchmark.json", and exit. This flag is '
               'intended for use in generating automated flutter benchmarks.',
       )
+      ..addFlag('disable-service-auth-codes',
+        negatable: false,
+        hide: !verboseHelp,
+        help: 'No longer require an authentication code to connect to the VM '
+              'service (not recommended).')
       ..addOption(FlutterOptions.kExtraFrontEndOptions, hide: true)
       ..addOption(FlutterOptions.kExtraGenSnapshotOptions, hide: true)
       ..addMultiOption(FlutterOptions.kEnableExperiment,
@@ -262,6 +266,7 @@ class RunCommand extends RunCommandBase {
       return DebuggingOptions.enabled(
         buildInfo,
         startPaused: argResults['start-paused'],
+        disableServiceAuthCodes: argResults['disable-service-auth-codes'],
         useTestFonts: argResults['use-test-fonts'],
         enableSoftwareRendering: argResults['enable-software-rendering'],
         skiaDeterministicRendering: argResults['skia-deterministic-rendering'],
