@@ -302,9 +302,10 @@ class RenderEditable extends RenderBox {
       TextPosition(offset: _selection.start, affinity: _selection.affinity),
       Rect.zero,
     );
+    // TODO(justinmc): https://github.com/flutter/flutter/issues/31495
     // Check if the caret is visible with an approximation because a difference
     // between rounded and unrounded values causes the caret to be reported as
-    // having a very slightly negative y offset. This rounding happens in
+    // having a slightly (< 0.1) negative y offset. This rounding happens in
     // paragraph.cc's layout and TextPainer's _applyFloatingPointHack. Ideally,
     // the rounding mismatch will be fixed and this can be changed to be a
     // strict check instead of an approximation.

@@ -1920,10 +1920,11 @@ void main() {
   });
 
   testWidgets('text selection handle visibility', (WidgetTester tester) async {
+    // Text with two separate words to select.
     const String testText = 'XXXXX          XXXXX';
     final TextEditingController controller = TextEditingController(text: testText);
 
-    final Widget widget = MaterialApp(
+    await tester.pumpWidget(MaterialApp(
       home: Align(
         alignment: Alignment.topLeft,
         child: SizedBox(
@@ -1939,9 +1940,7 @@ void main() {
           ),
         ),
       ),
-    );
-
-    await tester.pumpWidget(widget);
+    ));
 
     final EditableTextState state =
         tester.state<EditableTextState>(find.byType(EditableText));
@@ -1970,6 +1969,8 @@ void main() {
 
       final List<Widget> transitions =
         find.byType(FadeTransition).evaluate().map((Element e) => e.widget).toList();
+      // On Android, an empty app contains a single FadeTransition. The following
+      // two are the left and right text selection handles, respectively.
       final FadeTransition left = transitions[1];
       final FadeTransition right = transitions[2];
 
@@ -2064,10 +2065,11 @@ void main() {
   testWidgets('iOS text selection handle visibility', (WidgetTester tester) async {
     debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
 
+    // Text with two separate words to select.
     const String testText = 'XXXXX          XXXXX';
     final TextEditingController controller = TextEditingController(text: testText);
 
-    final Widget widget = MaterialApp(
+    await tester.pumpWidget(MaterialApp(
       home: Align(
         alignment: Alignment.topLeft,
         child: Container(
@@ -2085,9 +2087,7 @@ void main() {
           ),
         ),
       ),
-    );
-
-    await tester.pumpWidget(widget);
+    ));
 
     final EditableTextState state =
         tester.state<EditableTextState>(find.byType(EditableText));

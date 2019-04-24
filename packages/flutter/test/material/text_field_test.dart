@@ -5698,6 +5698,8 @@ void main() {
 
     final List<Widget> transitions =
       find.byType(FadeTransition).evaluate().map((Element e) => e.widget).toList();
+    // On Android, an empty app contains a single FadeTransition. The following
+    // two are the left and right text selection handles, respectively.
     expect(transitions.length, 3);
     final FadeTransition left = transitions[1];
     final FadeTransition right = transitions[2];
