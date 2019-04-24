@@ -34,13 +34,18 @@ class BoxShadow extends ui.Shadow {
     Offset offset = Offset.zero,
     double blurRadius = 0.0,
     this.spreadRadius = 0.0,
+    this.blurStyle = BlurStyle.normal,
   }) : super(color: color, offset: offset, blurRadius: blurRadius);
 
   /// The amount the box should be inflated prior to applying the blur.
   final double spreadRadius;
 
+  /// The BlurStyle.
+  final BlurStyle blurStyle;
+
   /// Create the [Paint] object that corresponds to this shadow description.
   ///
+  /// The [blurStyle] is used in the MaskFilter.
   /// The [offset] and [spreadRadius] are not represented in the [Paint] object.
   /// To honor those as well, the shape should be inflated by [spreadRadius] pixels
   /// in every direction and then translated by [offset] before being filled using
@@ -49,7 +54,7 @@ class BoxShadow extends ui.Shadow {
   Paint toPaint() {
     final Paint result = Paint()
       ..color = color
-      ..maskFilter = MaskFilter.blur(BlurStyle.normal, blurSigma);
+      ..maskFilter = MaskFilter.blur(this.blurStyle, blurSigma);
     assert(() {
       if (debugDisableShadows)
         result.maskFilter = null;
