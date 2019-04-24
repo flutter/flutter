@@ -470,7 +470,6 @@ void main() {
             child: Container(
               width: 100.0,
               height: 100.0,
-              color: Colors.green[500],
             ),
           ),
         ),
@@ -482,9 +481,24 @@ void main() {
     await gesture.moveTo(Offset.zero);
     await tester.pump();
     await gesture.moveTo(tester.getCenter(tooltip));
+    await tester.pump();
+    // Wait for it to appear.
     await tester.pump(waitDuration);
-    await tester.pump(const Duration(milliseconds: 10));
     expect(find.text(tooltipText), findsOneWidget);
+
+    // Wait a looong time to make sure that it doesn't go away if the mouse is
+    // still over the widget.
+    await tester.pump(const Duration(days: 1));
+    await tester.pumpAndSettle();
+    expect(find.text(tooltipText), findsOneWidget);
+
+    await gesture.moveTo(Offset.zero);
+    await tester.pump();
+
+    // Wait for it to disappear.
+    await tester.pump(showDuration);
+    await tester.pumpAndSettle();
+    expect(find.text(tooltipText), findsNothing);
   });
 
   testWidgets('Does tooltip contribute semantics', (WidgetTester tester) async {

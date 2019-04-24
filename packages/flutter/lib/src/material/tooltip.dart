@@ -132,12 +132,14 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   }
 
   void _handleStatusChanged(AnimationStatus status) {
+    print('Animation status changed to $status');
     if (status == AnimationStatus.dismissed) {
       _hideTooltip(immediately: true);
     }
   }
 
   void _hideTooltip({bool immediately = false}) {
+    print('Hiding tooltip${immediately ? ' immediately' : ' in ${widget.showDuration}'}');
     _showTimer?.cancel();
     _showTimer = null;
     if (immediately) {
@@ -148,6 +150,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   }
 
   void _showTooltip({bool immediately = false}) {
+    print('Showing tooltip${immediately ? ' immediately' : ' in ${widget.waitDuration}'}');
     _hideTimer?.cancel();
     _hideTimer = null;
     if (immediately) {
@@ -167,10 +170,12 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       // Stop trying to hide, if we were.
       _hideTimer?.cancel();
       _hideTimer = null;
+      print('Showing existing entry');
       _controller.forward();
       return false; // Already visible.
     }
     _createNewEntry();
+    print('Showing new entry');
     _controller.forward();
     return true;
   }
@@ -201,6 +206,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   }
 
   void _removeEntry() {
+    print('Removing entry');
     _hideTimer?.cancel();
     _hideTimer = null;
     _entry?.remove();
@@ -219,6 +225,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
 
   @override
   void deactivate() {
+    print('deactivating');
     if (_entry != null) {
       _hideTooltip(immediately: true);
     }
@@ -230,6 +237,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     if (_entry != null) {
       _removeEntry();
     }
+    print('disposing controller');
     _controller.dispose();
     super.dispose();
   }
