@@ -880,7 +880,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       // This RichText widget is created by the build method of the Text widget
       // thus the creation location is in text.dart not basic.dart
       final List<String> pathSegmentsFramework = Uri.parse(creationLocation['file']).pathSegments;
-      expect(pathSegmentsFramework.join('/'), endsWith('/packages/flutter/lib/src/widgets/text.dart'));
+      expect(pathSegmentsFramework.join('/'), endsWith('/flutter/lib/src/widgets/text.dart'));
 
       // Strip off /src/widgets/text.dart.
       final String pubRootFramework = '/' + pathSegmentsFramework.take(pathSegmentsFramework.length - 3).join('/');
@@ -1406,7 +1406,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       // This RichText widget is created by the build method of the Text widget
       // thus the creation location is in text.dart not basic.dart
       final List<String> pathSegmentsFramework = Uri.parse(creationLocation['file']).pathSegments;
-      expect(pathSegmentsFramework.join('/'), endsWith('/packages/flutter/lib/src/widgets/text.dart'));
+      expect(pathSegmentsFramework.join('/'), endsWith('/flutter/lib/src/widgets/text.dart'));
 
       // Strip off /src/widgets/text.dart.
       final String pubRootFramework = '/' + pathSegmentsFramework.take(pathSegmentsFramework.length - 3).join('/');
