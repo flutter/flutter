@@ -252,7 +252,8 @@ void main() {
     for (int i = 0; i < 8; i += 1) {
       final double angle = start + i.toDouble() * math.pi / 4.0;
       // These values should be truncated so that double precision rounding
-      // issues won't impact the heights/widths and throw off the
+      // issues won't impact the heights/widths and throw off the traversal
+      // ordering.
       final double dx = (math.cos(angle) * 15.0) / 10.0;
       final double dy = (math.sin(angle) * 15.0) / 10.0;
 
