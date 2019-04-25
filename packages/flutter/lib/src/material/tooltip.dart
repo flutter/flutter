@@ -43,7 +43,7 @@ class Tooltip extends StatefulWidget {
   /// By default, tooltips prefer to appear below the [child] widget when the
   /// user long presses on the widget.
   ///
-  /// All of the arguments except [child] must not be null.
+  /// All of the arguments except [child] and [decoration] must not be null.
   const Tooltip({
     Key key,
     @required this.message,
@@ -52,6 +52,7 @@ class Tooltip extends StatefulWidget {
     this.verticalOffset = 24.0,
     this.preferBelow = true,
     this.excludeFromSemantics = false,
+    this.decoration,
     this.waitDuration = _kDefaultWaitDuration,
     this.showDuration = _kDefaultShowDuration,
     this.child,
@@ -96,6 +97,12 @@ class Tooltip extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.child}
   final Widget child;
+
+  /// Specifies the decoration of the tooltip window.
+  ///
+  /// If not specified, defaults to a rounded rectangle with a border radius of
+  /// 4.0, and a color derived from the text theme.
+  final Decoration decoration;
 
   /// The amount of time that a pointer must hover over the widget before it
   /// will show a tooltip.
@@ -190,6 +197,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       message: widget.message,
       height: widget.height,
       padding: widget.padding,
+      decoration: widget.decoration,
       animation: CurvedAnimation(
         parent: _controller,
         curve: Curves.fastOutSlowIn,
@@ -236,18 +244,16 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
 
   @override
   void dispose() {
-    if (_entry != null) {
+    if (_entry != null)
       _removeEntry();
-    }
     _controller.dispose();
     super.dispose();
   }
 
   void _handleLongPress() {
     final bool tooltipCreated = ensureTooltipVisible();
-    if (tooltipCreated) {
+    if (tooltipCreated)
       Feedback.forLongPress(context);
-    }
   }
 
   @override
@@ -313,7 +319,9 @@ class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
 
   @override
   bool shouldRelayout(_TooltipPositionDelegate oldDelegate) {
-    return target != oldDelegate.target || verticalOffset != oldDelegate.verticalOffset || preferBelow != oldDelegate.preferBelow;
+    return target != oldDelegate.target
+        || verticalOffset != oldDelegate.verticalOffset
+        || preferBelow != oldDelegate.preferBelow;
   }
 }
 
@@ -323,6 +331,7 @@ class _TooltipOverlay extends StatelessWidget {
     this.message,
     this.height,
     this.padding,
+    this.decoration,
     this.animation,
     this.target,
     this.verticalOffset,
@@ -332,6 +341,7 @@ class _TooltipOverlay extends StatelessWidget {
   final String message;
   final double height;
   final EdgeInsetsGeometry padding;
+  final Decoration decoration;
   final Animation<double> animation;
   final Offset target;
   final double verticalOffset;
@@ -358,9 +368,9 @@ class _TooltipOverlay extends StatelessWidget {
             child: ConstrainedBox(
               constraints: BoxConstraints(minHeight: height),
               child: Container(
-                decoration: BoxDecoration(
-                  color: darkTheme.backgroundColor,
-                  borderRadius: BorderRadius.circular(2.0),
+                decoration: decoration ?? BoxDecoration(
+                  color: darkTheme.backgroundColor.withOpacity(0.9),
+                  borderRadius: BorderRadius.circular(4.0),
                 ),
                 padding: padding,
                 child: Center(
