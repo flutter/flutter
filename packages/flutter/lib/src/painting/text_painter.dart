@@ -294,12 +294,20 @@ class TextPainter {
   List<TextBox> get inlinePlaceholderBoxes => _inlinePlaceholderBoxes;
   List<TextBox> _inlinePlaceholderBoxes;
 
-  List<PlaceholderDimensions> _placeholderDimensions;
+  /// Sets the dimensions of each placeholder in [text].
+  /// 
+  /// The number of [PlaceholderDimensions] provided should be the same as the
+  /// number of [PlaceholderSpan]s in text.
+  /// 
+  /// If [layout] is attempted without setting the placeholder dimensions, the
+  /// placeholders will be ignored in the text layout and no valid
+  /// [inlinePlaceholderBoxes] will be returned.
   void setPlaceholderDimensions(List<PlaceholderDimensions> value) {
     _placeholderDimensions = value;
     _needsLayout = true;
     _paragraph = null;
   }
+  List<PlaceholderDimensions> _placeholderDimensions;
 
   ui.ParagraphStyle _createParagraphStyle([ TextDirection defaultTextDirection ]) {
     // The defaultTextDirection argument is used for preferredLineHeight in case

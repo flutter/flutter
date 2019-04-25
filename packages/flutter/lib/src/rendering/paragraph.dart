@@ -319,7 +319,8 @@ class RenderParagraph extends RenderBox
   }
 
   /// Intrinsics cannot be calculated without a full layout for
-  /// alignments that require the baseline.
+  /// alignments that require the baseline (baseline, aboveBaseline,
+  /// belowBaseline).
   bool _canComputeIntrinsics() {
     for (PlaceholderSpan span in _placeholderSpans) {
       switch (span.alignment) {
@@ -446,9 +447,10 @@ class RenderParagraph extends RenderBox
     _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
   }
 
-  // Layout the child inline widgets. Optionally, we pass the dimensions of the
+  // Layout the child inline widgets. We then pass the dimensions of the
   // children to _textPainter so that appropriate placeholders can be inserted
-  // into the LibTxt layout.
+  // into the LibTxt layout. This does not do anything if no inline widgets were
+  // specified.
   void _layoutChildren(BoxConstraints constraints) {
     RenderBox child = firstChild;
     List<PlaceholderDimensions> placeholderDimensions = List(childCount);
