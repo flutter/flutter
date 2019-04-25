@@ -2663,6 +2663,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   @protected
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<dynamic>('creator', debugCreator, defaultValue: null, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<ParentData>('parentData', parentData, tooltip: _debugCanParentUseSize == true ? 'can use size' : null, missingIfNull: true));
     properties.add(DiagnosticsProperty<Constraints>('constraints', constraints, missingIfNull: true));

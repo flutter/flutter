@@ -32,7 +32,7 @@ void main() {
 
     testUsingContext('defaults', () async {
       final MockMacOSApp mockMacOSApp = MockMacOSApp();
-      when(mockMacOSApp.executable).thenReturn('foo');
+      when(mockMacOSApp.executable(any)).thenReturn('foo');
       expect(await device.targetPlatform, TargetPlatform.darwin_x64);
       expect(device.name, 'macOS');
       expect(await device.installApp(mockMacOSApp), true);
@@ -49,7 +49,7 @@ void main() {
 tester    17193   0.0  0.2  4791128  37820   ??  S     2:27PM   0:00.09 /Applications/foo
 ''';
       final MockMacOSApp mockMacOSApp = MockMacOSApp();
-      when(mockMacOSApp.executable).thenReturn('/Applications/foo');
+      when(mockMacOSApp.executable(any)).thenReturn('/Applications/foo');
       when(mockProcessManager.run(<String>['ps', 'aux'])).thenAnswer((Invocation invocation) async {
         return ProcessResult(1, 0, psOut, '');
       });
@@ -68,7 +68,7 @@ tester    17193   0.0  0.2  4791128  37820   ??  S     2:27PM   0:00.09 /Applica
       final MockProcessManager mockProcessManager = MockProcessManager();
       final MockFile mockFile = MockFile();
       final MockProcess mockProcess = MockProcess();
-      when(macOSApp.executable).thenReturn('test');
+      when(macOSApp.executable(any)).thenReturn('test');
       when(mockFileSystem.file('test')).thenReturn(mockFile);
       when(mockFile.existsSync()).thenReturn(true);
       when(mockProcessManager.start(<String>['test'])).thenAnswer((Invocation invocation) async {
@@ -81,11 +81,6 @@ tester    17193   0.0  0.2  4791128  37820   ??  S     2:27PM   0:00.09 /Applica
         return Stream<List<int>>.fromIterable(<List<int>>[
           utf8.encode('Observatory listening on http://127.0.0.1/0'),
         ]);
-      });
-
-      test('fails without a prebuilt application', () async {
-        final LaunchResult result = await device.startApp(macOSApp, prebuiltApplication: false);
-        expect(result.started, false);
       });
 
       testUsingContext('Can run from prebuilt application', () async {

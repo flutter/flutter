@@ -160,7 +160,7 @@ class Hero extends StatefulWidget {
   ///
   /// If this property is null, the default, then the value of
   /// [HeroController.createRectTween] is used. The [HeroController] created by
-  /// [MaterialApp] creates a [MaterialRectAreTween].
+  /// [MaterialApp] creates a [MaterialRectArcTween].
   final CreateRectTween createRectTween;
 
   /// The widget subtree that will "fly" from one route to another during a
@@ -620,7 +620,10 @@ class HeroController extends NavigatorObserver {
   void didPop(Route<dynamic> route, Route<dynamic> previousRoute) {
     assert(navigator != null);
     assert(route != null);
-    _maybeStartHeroTransition(route, previousRoute, HeroFlightDirection.pop, false);
+    // Don't trigger another flight when a pop is committed as a user gesture
+    // back swipe is snapped.
+    if (!navigator.userGestureInProgress)
+      _maybeStartHeroTransition(route, previousRoute, HeroFlightDirection.pop, false);
   }
 
   @override

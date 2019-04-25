@@ -53,7 +53,7 @@ class FlutterLogoDecoration extends Decoration {
        assert(textColor != null),
        assert(style != null),
        assert(margin != null),
-       _position = style == FlutterLogoStyle.markOnly ? 0.0 : style == FlutterLogoStyle.horizontal ? 1.0 : -1.0, // ignore: CONST_EVAL_TYPE_BOOL_NUM_STRING
+       _position = identical(style, FlutterLogoStyle.markOnly) ? 0.0 : identical(style, FlutterLogoStyle.horizontal) ? 1.0 : -1.0,
        // (see https://github.com/dart-lang/sdk/issues/26980 for details about that ignore statement)
        _opacity = 1.0;
 

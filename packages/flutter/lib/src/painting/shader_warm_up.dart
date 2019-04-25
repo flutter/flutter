@@ -87,9 +87,8 @@ abstract class ShaderWarmUp {
     final ui.Picture picture = recorder.endRecording();
     final TimelineTask shaderWarmUpTask = TimelineTask();
     shaderWarmUpTask.start('Warm-up shader');
-    picture.toImage(size.width.ceil(), size.height.ceil()).then((ui.Image image) {
-      shaderWarmUpTask.finish();
-    });
+    await picture.toImage(size.width.ceil(), size.height.ceil());
+    shaderWarmUpTask.finish();
   }
 }
 

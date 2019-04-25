@@ -129,5 +129,108 @@ void main() {
       expect(exit.position, equals(const Offset(400.0, 300.0)));
       expect(tester.binding.mouseTracker.isAnnotationAttached(renderListener.hoverAnnotation), isFalse);
     });
+    testWidgets('Hover transfers between two listeners', (WidgetTester tester) async {
+      final UniqueKey key1 = UniqueKey();
+      final UniqueKey key2 = UniqueKey();
+      final List<PointerEnterEvent> enter1 = <PointerEnterEvent>[];
+      final List<PointerHoverEvent> move1 = <PointerHoverEvent>[];
+      final List<PointerExitEvent> exit1 = <PointerExitEvent>[];
+      final List<PointerEnterEvent> enter2 = <PointerEnterEvent>[];
+      final List<PointerHoverEvent> move2 = <PointerHoverEvent>[];
+      final List<PointerExitEvent> exit2 = <PointerExitEvent>[];
+      void clearLists() {
+        enter1.clear();
+        move1.clear();
+        exit1.clear();
+        enter2.clear();
+        move2.clear();
+        exit2.clear();
+      }
+
+      await tester.pumpWidget(Container());
+      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await gesture.moveTo(const Offset(400.0, 0.0));
+      await tester.pump();
+      await tester.pumpWidget(
+        Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            Listener(
+              key: key1,
+              child: Container(
+                width: 100.0,
+                height: 100.0,
+              ),
+              onPointerEnter: (PointerEnterEvent details) => enter1.add(details),
+              onPointerHover: (PointerHoverEvent details) => move1.add(details),
+              onPointerExit: (PointerExitEvent details) => exit1.add(details),
+            ),
+            Listener(
+              key: key2,
+              child: Container(
+                width: 100.0,
+                height: 100.0,
+              ),
+              onPointerEnter: (PointerEnterEvent details) => enter2.add(details),
+              onPointerHover: (PointerHoverEvent details) => move2.add(details),
+              onPointerExit: (PointerExitEvent details) => exit2.add(details),
+            ),
+          ],
+        ),
+      );
+      final RenderPointerListener renderListener1 = tester.renderObject(find.byKey(key1));
+      final RenderPointerListener renderListener2 = tester.renderObject(find.byKey(key2));
+      final Offset center1 = tester.getCenter(find.byKey(key1));
+      final Offset center2 = tester.getCenter(find.byKey(key2));
+      await gesture.moveTo(center1);
+      await tester.pump();
+      expect(move1, isNotEmpty);
+      expect(move1.last.position, equals(center1));
+      expect(enter1, isNotEmpty);
+      expect(enter1.last.position, equals(center1));
+      expect(exit1, isEmpty);
+      expect(move2, isEmpty);
+      expect(enter2, isEmpty);
+      expect(exit2, isEmpty);
+      expect(tester.binding.mouseTracker.isAnnotationAttached(renderListener1.hoverAnnotation), isTrue);
+      expect(tester.binding.mouseTracker.isAnnotationAttached(renderListener2.hoverAnnotation), isTrue);
+      clearLists();
+      await gesture.moveTo(center2);
+      await tester.pump();
+      expect(move1, isEmpty);
+      expect(enter1, isEmpty);
+      expect(exit1, isNotEmpty);
+      expect(exit1.last.position, equals(center2));
+      expect(move2, isNotEmpty);
+      expect(move2.last.position, equals(center2));
+      expect(enter2, isNotEmpty);
+      expect(enter2.last.position, equals(center2));
+      expect(exit2, isEmpty);
+      expect(tester.binding.mouseTracker.isAnnotationAttached(renderListener1.hoverAnnotation), isTrue);
+      expect(tester.binding.mouseTracker.isAnnotationAttached(renderListener2.hoverAnnotation), isTrue);
+      clearLists();
+      await gesture.moveTo(const Offset(400.0, 450.0));
+      await tester.pump();
+      expect(move1, isEmpty);
+      expect(enter1, isEmpty);
+      expect(exit1, isEmpty);
+      expect(move2, isEmpty);
+      expect(enter2, isEmpty);
+      expect(exit2, isNotEmpty);
+      expect(exit2.last.position, equals(const Offset(400.0, 450.0)));
+      expect(tester.binding.mouseTracker.isAnnotationAttached(renderListener1.hoverAnnotation), isTrue);
+      expect(tester.binding.mouseTracker.isAnnotationAttached(renderListener2.hoverAnnotation), isTrue);
+      clearLists();
+      await tester.pumpWidget(Container());
+      expect(move1, isEmpty);
+      expect(enter1, isEmpty);
+      expect(exit1, isEmpty);
+      expect(move2, isEmpty);
+      expect(enter2, isEmpty);
+      expect(exit2, isEmpty);
+      expect(tester.binding.mouseTracker.isAnnotationAttached(renderListener1.hoverAnnotation), isFalse);
+      expect(tester.binding.mouseTracker.isAnnotationAttached(renderListener2.hoverAnnotation), isFalse);
+    });
   });
 }
