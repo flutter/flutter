@@ -89,7 +89,7 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesSkiaGoldFile('shadow.PhysicalModel.disabled.png'),
+      matchesSkiaGoldFile('shadow.PhysicalModel.disabled.0.png'),
 //      matchesGoldenFile('shadow.PhysicalModel.disabled.png'),
     );
     debugDisableShadows = false;
@@ -129,7 +129,7 @@ void main() {
       await tester.pumpWidget(build(elevation.toDouble()));
       await expectLater(
         find.byType(Container),
-        matchesSkiaGoldFile('shadow.PhysicalModel.disabled.png'),
+        matchesSkiaGoldFile('shadow.PhysicalModel.disabled.1.png'),
 //        matchesGoldenFile('shadow.PhysicalModel.disabled.png'),
       );
     }
