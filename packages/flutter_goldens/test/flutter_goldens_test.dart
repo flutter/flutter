@@ -52,6 +52,13 @@ void main() {
       // check for successful auth - return true
       // check for unsuccessful auth - throw NonZeroExitCode
       // check for unavailable auth (not on CI) - return false
+      // check for redundant work
+    });
+
+    group('init', () {
+      // check for successful init - return true
+      // check for unsuccessful init - throw NonZeroExitCode
+      // Check for redundant work
     });
 
     group('imgtest', () {
