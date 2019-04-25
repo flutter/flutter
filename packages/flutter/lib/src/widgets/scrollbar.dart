@@ -232,8 +232,6 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
         _paintThumb(_lastMetrics.extentAfter, _lastMetrics.extentInside, _lastMetrics.extentBefore, size.width, canvas, size, _paintHorizontalThumb);
         break;
     }
-
-    _paintThumb(_lastMetrics.extentBefore, _lastMetrics.extentInside, _lastMetrics.extentAfter, size.height, canvas, size, _paintVerticalThumb);
   }
 
   // Scrollbars are (currently) not interactive.

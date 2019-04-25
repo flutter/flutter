@@ -216,7 +216,7 @@ class PageMetrics extends FixedScrollMetrics {
 
   /// The current page displayed in the [PageView].
   double get page {
-    return math.max(0.0, pixels.clamp(minScrollExtent, maxScrollExtent)) /
+    return (pixels.clamp(minScrollExtent, maxScrollExtent) - minScrollExtent) /
            math.max(1.0, viewportDimension * viewportFraction);
   }
 
