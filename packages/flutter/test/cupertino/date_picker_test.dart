@@ -844,7 +844,7 @@ void main() {
 
       await expectLater(
         find.byType(CupertinoDatePicker),
-        matchesGoldenFile('date_picker_test.datetime.initial.png'),
+        matchesGoldenFile('date_picker_test.datetime.initial.1.png'),
         skip: !Platform.isLinux
       );
 
@@ -854,7 +854,7 @@ void main() {
 
       await expectLater(
         find.byType(CupertinoDatePicker),
-        matchesGoldenFile('date_picker_test.datetime.drag.png'),
+        matchesGoldenFile('date_picker_test.datetime.drag.1.png'),
         skip: !Platform.isLinux
       );
     });
