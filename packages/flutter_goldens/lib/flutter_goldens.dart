@@ -91,7 +91,7 @@ class FlutterGoldenFileComparator implements GoldenFileComparator {
     }
     final bool authorized = await _skiaClient.auth(fs.directory(basedir));
     if (!authorized) {
-      //TODO(katelovett): Clean up for final implementation on CI
+      // TODO(Piinks): Clean up for final implementation on CI, https://github.com/flutter/flutter/pull/31630
       return true;
       //throw test_package.TestFailure('Could not authorize golctl.');
     }
