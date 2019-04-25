@@ -34,11 +34,7 @@ export 'package:flutter/physics.dart' show Simulation, ScrollSpringSimulation, T
 /// determine the scroll position for the widget.
 ///
 /// Instead of creating your own subclasses, [parent] can be used to combine
-/// [ScrollPhysics] objects of differnt types to get the desired scroll physics.
-///
-/// See also:
-///  * [parent], the parent [ScrollPhysics] that determines the default
-///    behavior for each method.
+/// [ScrollPhysics] objects of different types to get the desired scroll physics.
 @immutable
 class ScrollPhysics {
   /// Creates an object with the default scroll physics.
