@@ -383,6 +383,10 @@ class AndroidDevice extends Device {
       // activity name from the .apk.
       package = await AndroidApk.fromAndroidProject(project.android);
     }
+    // There was a failure parsing the android project information.
+    if (package == null) {
+      throwToolExit('Problem building Android application: see above error(s).');
+    }
 
     printTrace("Stopping app '${package.name}' on $name.");
     await stopApp(package);
