@@ -82,7 +82,7 @@ Future<StreamChannel<String>> _defaultOpenChannel(Uri uri, {io.CompressionOption
       delay *= 2;
   }
 
-  final WebSocketConnector constructor = context[WebSocketConnector] ?? io.WebSocket.connect;
+  final WebSocketConnector constructor = context.get<WebSocketConnector>() ?? io.WebSocket.connect;
   while (socket == null) {
     attempts += 1;
     try {

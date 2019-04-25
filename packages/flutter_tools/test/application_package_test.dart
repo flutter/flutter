@@ -146,21 +146,21 @@ void main() {
     testUsingContext('Error when parsing manifest with no Activity that has enabled set to true nor has no value for its enabled field', () {
       final ApkManifestData data = ApkManifestData.parseFromXmlDump(_aaptDataWithNoEnabledActivity);
       expect(data, isNull);
-      final BufferLogger logger = context[Logger];
+      final BufferLogger logger = context.get<Logger>();
       expect(
           logger.errorText, 'Error running io.flutter.examples.hello_world. Default activity not found\n');
     }, overrides: noColorTerminalOverride);
     testUsingContext('Error when parsing manifest with no Activity that has action set to android.intent.action.MAIN', () {
       final ApkManifestData data = ApkManifestData.parseFromXmlDump(_aaptDataWithNoMainActivity);
       expect(data, isNull);
-      final BufferLogger logger = context[Logger];
+      final BufferLogger logger = context.get<Logger>();
       expect(
           logger.errorText, 'Error running io.flutter.examples.hello_world. Default activity not found\n');
     }, overrides: noColorTerminalOverride);
     testUsingContext('Error when parsing manifest with no Activity that has category set to android.intent.category.LAUNCHER', () {
       final ApkManifestData data = ApkManifestData.parseFromXmlDump(_aaptDataWithNoLauncherActivity);
       expect(data, isNull);
-      final BufferLogger logger = context[Logger];
+      final BufferLogger logger = context.get<Logger>();
       expect(
           logger.errorText, 'Error running io.flutter.examples.hello_world. Default activity not found\n');
     }, overrides: noColorTerminalOverride);
@@ -176,7 +176,7 @@ void main() {
       final PrebuiltIOSApp iosApp =
           IOSApp.fromPrebuiltApp(fs.file('not_existing.ipa'));
       expect(iosApp, isNull);
-      final BufferLogger logger = context[Logger];
+      final BufferLogger logger = context.get<Logger>();
       expect(
         logger.errorText,
         'File "not_existing.ipa" does not exist. Use an app bundle or an ipa.\n',
@@ -187,7 +187,7 @@ void main() {
       final PrebuiltIOSApp iosApp =
           IOSApp.fromPrebuiltApp(fs.file('regular_folder'));
       expect(iosApp, isNull);
-      final BufferLogger logger = context[Logger];
+      final BufferLogger logger = context.get<Logger>();
       expect(
           logger.errorText, 'Folder "regular_folder" is not an app bundle.\n');
     }, overrides: overrides);
@@ -195,7 +195,7 @@ void main() {
       fs.directory('bundle.app').createSync();
       final PrebuiltIOSApp iosApp = IOSApp.fromPrebuiltApp(fs.file('bundle.app'));
       expect(iosApp, isNull);
-      final BufferLogger logger = context[Logger];
+      final BufferLogger logger = context.get<Logger>();
       expect(
         logger.errorText,
         'Invalid prebuilt iOS app. Does not contain Info.plist.\n',
@@ -206,7 +206,7 @@ void main() {
       fs.file('bundle.app/Info.plist').writeAsStringSync(badPlistData);
       final PrebuiltIOSApp iosApp = IOSApp.fromPrebuiltApp(fs.file('bundle.app'));
       expect(iosApp, isNull);
-      final BufferLogger logger = context[Logger];
+      final BufferLogger logger = context.get<Logger>();
       expect(
         logger.errorText,
         contains(
@@ -217,7 +217,7 @@ void main() {
       fs.directory('bundle.app').createSync();
       fs.file('bundle.app/Info.plist').writeAsStringSync(plistData);
       final PrebuiltIOSApp iosApp = IOSApp.fromPrebuiltApp(fs.file('bundle.app'));
-      final BufferLogger logger = context[Logger];
+      final BufferLogger logger = context.get<Logger>();
       expect(logger.errorText, isEmpty);
       expect(iosApp.bundleDir.path, 'bundle.app');
       expect(iosApp.id, 'fooBundleId');
@@ -228,7 +228,7 @@ void main() {
       when(os.unzip(fs.file('app.ipa'), any)).thenAnswer((Invocation _) { });
       final PrebuiltIOSApp iosApp = IOSApp.fromPrebuiltApp(fs.file('app.ipa'));
       expect(iosApp, isNull);
-      final BufferLogger logger = context[Logger];
+      final BufferLogger logger = context.get<Logger>();
       expect(
         logger.errorText,
         'Invalid prebuilt iOS ipa. Does not contain a "Payload" directory.\n',
@@ -251,7 +251,7 @@ void main() {
       });
       final PrebuiltIOSApp iosApp = IOSApp.fromPrebuiltApp(fs.file('app.ipa'));
       expect(iosApp, isNull);
-      final BufferLogger logger = context[Logger];
+      final BufferLogger logger = context.get<Logger>();
       expect(logger.errorText,
           'Invalid prebuilt iOS ipa. Does not contain a single app bundle.\n');
     }, overrides: overrides);
@@ -271,7 +271,7 @@ void main() {
             .writeAsStringSync(plistData);
       });
       final PrebuiltIOSApp iosApp = IOSApp.fromPrebuiltApp(fs.file('app.ipa'));
-      final BufferLogger logger = context[Logger];
+      final BufferLogger logger = context.get<Logger>();
       expect(logger.errorText, isEmpty);
       expect(iosApp.bundleDir.path, endsWith('bundle.app'));
       expect(iosApp.id, 'fooBundleId');

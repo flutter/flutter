@@ -8,7 +8,7 @@ import '../doctor.dart';
 import 'fuchsia_sdk.dart';
 
 /// The [FuchsiaWorkflow] instance.
-FuchsiaWorkflow get fuchsiaWorkflow => context[FuchsiaWorkflow];
+FuchsiaWorkflow get fuchsiaWorkflow => context.get<FuchsiaWorkflow>();
 
 /// The Fuchsia-specific implementation of a [Workflow].
 ///
