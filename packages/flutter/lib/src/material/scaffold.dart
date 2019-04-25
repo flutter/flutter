@@ -465,6 +465,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
       );
       layoutChild(_ScaffoldSlot.bodyScrim, bottomSheetScrimConstraints);
       positionChild(_ScaffoldSlot.bodyScrim, Offset.zero);
+    }
 
     // Set the size of the SnackBar early if the behavior is fixed so
     // the FAB can be positioned correctly.
