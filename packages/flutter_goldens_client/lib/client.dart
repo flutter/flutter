@@ -51,7 +51,12 @@ class SkiaGoldClient {
 
   Directory _workDirectory;
 
-  //TODO(katelovett): Environment variables swapped out for CI implementation
+  //TODO(katelovett): Environment variables are temporary for local testing
+  /// The local [Directory] where the Flutter repository is hosted.
+  ///
+  /// Uses the [fs] file system.
+  Directory get flutterRoot => fs.directory(platform.environment[_kFlutterRootKey]);
+
   /// The [path] to the local [Directory] where the goldctl tool is hosted.
   ///
   /// Uses the [platform] [environment] in this iteration.
@@ -68,11 +73,6 @@ class SkiaGoldClient {
   /// Uses the [platform] [environment] in this iteration.
   String get _skiaGoldInstance => platform.environment[_kSkiaGoldInstance];
 
-  /// The local [Directory] where the Flutter repository is hosted.
-  ///
-  /// Uses the [fs] file system.
-  Directory get flutterRoot => fs.directory(platform.environment[_kFlutterRootKey]);
-
   /// Prepares the local work space for golden file testing and initializes the
   /// goldctl authorization for executing tests.
   ///
@@ -81,18 +81,24 @@ class SkiaGoldClient {
     _workDirectory = workDirectory;
 
     //TODO(katelovett): Cleanup for final CI implementation
-    if(_serviceAccount == null)
-      return false; // We are not in the proper environment for running these tests.
+    if (_serviceAccount == null)
+      return false; // Not in the proper environment for golden file testing.
 
-    final File authFile = io.File(path.join(_workDirectory.path, 'temp', 'auth_opt.json'));
-    if(!authFile.existsSync()) {
+    final File authFile = _workDirectory.childFile(fs.path.join(
+      'temp',
+      'auth_opt.json'
+    ));
+    if (!authFile.existsSync()) {
       final List<String> authArguments = <String>[
         'auth',
         '--service-account', _serviceAccount,
         '--work-dir', _workDirectory.childDirectory('temp').path,
       ];
 
-      final io.ProcessResult authResults = io.Process.runSync(_goldctl, authArguments);
+      final io.ProcessResult authResults = io.Process.runSync(
+        _goldctl,
+        authArguments
+      );
       if (authResults.exitCode != 0) {
         final StringBuffer buf = StringBuffer();
         buf
@@ -101,13 +107,14 @@ class SkiaGoldClient {
           ..writeln('stderr: ${authResults.stderr}');
         throw NonZeroExitCode(authResults.exitCode, buf.toString());
       }
-    } else {
-      print('The file is already here, skipping auth.');
     }
-    // Run init
-    final File keysFile = io.File(path.join(_workDirectory.path, 'keys.json'));
-    if(!keysFile.existsSync()) {
+    return true;
+  }
 
+  Future<void> imgtestInit() async {
+    final File keysFile = _workDirectory.childFile('keys.json');
+
+    if(!keysFile.existsSync() || await _isNewCommit()) {
       final String commitHash = await _getCommitHash();
       final String keys = '${_workDirectory.path}keys.json';
       final String failures = '${_workDirectory.path}failures.json';
@@ -124,6 +131,7 @@ class SkiaGoldClient {
         '--failure-file', failures,
         '--passfail',
       ];
+
       if(imgtestInitArguments.contains(null)) {
         final StringBuffer buf = StringBuffer();
         buf.writeln('Null argument for Skia Gold imgtest init:');
@@ -133,8 +141,9 @@ class SkiaGoldClient {
 
       final io.ProcessResult imgtestInitResult = io.Process.runSync(
         _goldctl,
-        imgtestInitArguments
+        imgtestInitArguments,
       );
+
       if (imgtestInitResult.exitCode != 0) {
         final StringBuffer buf = StringBuffer();
         buf
@@ -143,14 +152,10 @@ class SkiaGoldClient {
           ..writeln('stderr: ${imgtestInitResult.stderr}');
         throw NonZeroExitCode(imgtestInitResult.exitCode, buf.toString());
       }
-    } else{
-      print('Already init, skipping.');
     }
-    return true;
   }
 
-  Future<bool> imgtest(String testName, File goldenFile) async {
-
+  Future<bool> imgtestAdd(String testName, File goldenFile) async {
     final List<String> imgtestArguments = <String>[
       'imgtest', 'add',
       '--work-dir', _workDirectory.childDirectory('temp').path,
@@ -165,7 +170,10 @@ class SkiaGoldClient {
       throw NonZeroExitCode(1, buf.toString());
     }
 
-    final io.ProcessResult imgtestResult = io.Process.runSync(_goldctl, imgtestArguments);
+    final io.ProcessResult imgtestResult = io.Process.runSync(
+      _goldctl,
+      imgtestArguments,
+    );
     if (imgtestResult.exitCode != 0) {
       final StringBuffer buf = StringBuffer();
       buf
@@ -176,13 +184,12 @@ class SkiaGoldClient {
         ..writeln('stderr: ${imgtestResult.stderr}');
       throw NonZeroExitCode(imgtestResult.exitCode, buf.toString());
     }
-    // print('PASS');
     return true;
   }
 
   Future<String> _getCommitHash() async {
-    // TODO(katelovett): Remove after pre-commit tests can be ingested
-    return '0572f158fb10505b840281124d07f8785d4f13f0';
+    // TODO(katelovett): Remove after pre-commit tests can be ingested by Skia Gold
+    return 'd4e4726ac262b9f78b002b696f915f552fed3fc8';
 //    if (!flutterRoot.existsSync()) {
 //      return null;
 //    } else {
@@ -191,7 +198,20 @@ class SkiaGoldClient {
 //        workingDirectory: flutterRoot.path,
 //      );
 //      return revParse.exitCode == 0 ? revParse.stdout.trim() : null;
-    }
+  }
+
+  Future<bool> _isNewCommit() async {
+    // auth file is there, need to check if we are on a new commit
+    final File resultFile = _workDirectory.childFile(fs.path.join(
+      'temp',
+      'result-state.json'
+    ));
+    final String contents = await resultFile.readAsString();
+    final Map<String, dynamic> resultJSON = convert.json.decode(contents);
+    final String lastTestedCommit = resultJSON['SharedConfig']['gitHash'];
+    final String currentCommit = await _getCommitHash();
+    return lastTestedCommit == currentCommit ? false : true;
+  }
 
   String _getKeysJSON() {
     // TODO(katelovett): Parse out cleaner key information

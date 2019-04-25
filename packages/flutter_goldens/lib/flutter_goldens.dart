@@ -69,14 +69,17 @@ class FlutterGoldenFileComparator implements GoldenFileComparator {
     // Calculate the appropriate basedir for the current test context.
     const FileSystem fs = LocalFileSystem();
     final Directory testDirectory = fs.directory(defaultComparator.basedir);
-    print('test: $testDirectory');
     final Directory flutterRoot = fs.directory(Platform.environment[_kFlutterRootKey]);
-    print('flutter: $flutterRoot');
-    final Directory goldenRoot = flutterRoot.childDirectory(fs.path.join('bin', 'cache', 'pkg', 'goldens'));
-    print('golden: $goldenRoot');
-    final String testDirectoryRelativePath = fs.path.relative(testDirectory.path, from: flutterRoot.path);
-    print('testDRP: $testDirectoryRelativePath');
-    print('FGFC instantiated with:${goldenRoot.childDirectory(testDirectoryRelativePath).uri}');
+    final Directory goldenRoot = flutterRoot.childDirectory(fs.path.join(
+      'bin',
+      'cache',
+      'pkg',
+      'goldens',
+    ));
+    final String testDirectoryRelativePath = fs.path.relative(
+      testDirectory.path,
+      from: flutterRoot.path,
+    );
     return FlutterGoldenFileComparator(goldenRoot.childDirectory(testDirectoryRelativePath).uri);
   }
 
@@ -88,11 +91,13 @@ class FlutterGoldenFileComparator implements GoldenFileComparator {
     }
     final bool authorized = await _skiaClient.auth(fs.directory(basedir));
     if (!authorized) {
-      //TODO(katelovett): Clean up for final implementation
+      //TODO(katelovett): Clean up for final implementation on CI
       return true;
       //throw test_package.TestFailure('Could not authorize golctl.');
     }
-    return await _skiaClient.imgtest(golden.path, goldenFile);
+    await _skiaClient.imgtestInit();
+
+    return await _skiaClient.imgtestAdd(golden.path, goldenFile);
   }
 
   @override
