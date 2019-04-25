@@ -934,7 +934,8 @@ void restoreVmServiceConnectFunction() {
 }
 
 void _unhandledJsonRpcError(dynamic error, dynamic stack) {
-
+  _log.trace('Unhandled RPC error:\n$error\n$stack');
+  assert(false);
 }
 
 /// Waits for a real Dart VM service to become available, then connects using
