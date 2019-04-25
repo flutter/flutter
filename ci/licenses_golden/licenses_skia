@@ -1,4 +1,4 @@
-Signature: cb0dc4a6d2b4f54b27085fcfb3302490
+Signature: 5924f585f00089f00b6d107419c4f1b5
 
 UNUSED LICENSES:
 
@@ -5287,6 +5287,7 @@ FILE: ../../../third_party/skia/docs/examples/Text_Size.cpp
 FILE: ../../../third_party/skia/docs/examples/Text_Skew_X.cpp
 FILE: ../../../third_party/skia/docs/examples/Typeface_Methods.cpp
 FILE: ../../../third_party/skia/docs/examples/Xor.cpp
+FILE: ../../../third_party/skia/experimental/editor/editor_application.cpp
 FILE: ../../../third_party/skia/gm/crbug_918512.cpp
 FILE: ../../../third_party/skia/src/gpu/GrPersistentCacheUtils.h
 FILE: ../../../third_party/skia/src/gpu/effects/GrComposeLerpEffect.fp
