@@ -277,7 +277,7 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
               child: CustomSingleChildLayout(
                 delegate: _ModalBottomSheetLayout(animationValue, widget.isScrollControlled),
                 child: BottomSheet(
-                  color: widget.route.backgorundColor,
+                  color: widget.route.backgroundColor,
                   animationController: widget.route._animationController,
                   onClosing: () {
                     if (widget.route.isCurrent) {
@@ -301,7 +301,7 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
     this.theme,
     this.barrierLabel,
     @required this.isScrollControlled,
-    this.backgorundColor,
+    this.backgroundColor,
     RouteSettings settings,
   }) : assert(isScrollControlled != null),
        super(settings: settings);
@@ -309,7 +309,7 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
   final WidgetBuilder builder;
   final ThemeData theme;
   final bool isScrollControlled;
-  final Color backgorundColor;
+  final Color backgroundColor;
 
   @override
   Duration get transitionDuration => _bottomSheetDuration;
@@ -395,7 +395,7 @@ Future<T> showModalBottomSheet<T>({
     builder: builder,
     theme: Theme.of(context, shadowThemeOnly: true),
     isScrollControlled: isScrollControlled,
-    backgorundColor: backgroundColor,
+    backgroundColor: backgroundColor,
     barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
   ));
 }
@@ -437,7 +437,7 @@ Future<T> showModalBottomSheet<T>({
 PersistentBottomSheetController<T> showBottomSheet<T>({
   @required BuildContext context,
   @required WidgetBuilder builder,
-  Color backgorundColor,
+  Color backgroundColor,
 }) {
   assert(context != null);
   assert(builder != null);
@@ -445,6 +445,6 @@ PersistentBottomSheetController<T> showBottomSheet<T>({
 
   return Scaffold.of(context).showBottomSheet<T>(
     builder,
-    backgorundColor: backgorundColor,
+    backgroundColor: backgroundColor,
   );
 }

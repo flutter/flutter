@@ -1540,7 +1540,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     WidgetBuilder builder,
     bool isPersistent, {
     AnimationController animationController,
-    Color backgorundColor,
+    Color backgroundColor,
   }) {
     assert(() {
       if (widget.bottomSheet != null && isPersistent && _currentBottomSheet != null) {
@@ -1618,7 +1618,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       },
       builder: builder,
       isPersistent: isPersistent,
-      backgorundColor: backgorundColor,
+      backgroundColor: backgroundColor,
     );
 
     if (!isPersistent)
@@ -1672,7 +1672,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   ///  * <https://material.io/design/components/sheets-bottom.html#standard-bottom-sheet>
   PersistentBottomSheetController<T> showBottomSheet<T>(
     WidgetBuilder builder, {
-    Color backgorundColor,
+    Color backgroundColor,
   }) {
     assert(() {
       if (widget.bottomSheet != null) {
@@ -1693,7 +1693,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         builder,
         false,
         animationController: controller,
-        backgorundColor: backgorundColor,
+        backgroundColor: backgroundColor,
       );
     });
     return _currentBottomSheet;
@@ -2215,7 +2215,7 @@ class _StandardBottomSheet extends StatefulWidget {
     this.onDismissed,
     this.builder,
     this.isPersistent = false,
-    this.backgorundColor,
+    this.backgroundColor,
   }) : super(key: key);
 
   final AnimationController animationController; // we control it, but it must be disposed by whoever created it.
@@ -2224,7 +2224,7 @@ class _StandardBottomSheet extends StatefulWidget {
   final VoidCallback onDismissed;
   final WidgetBuilder builder;
   final bool isPersistent;
-  final Color backgorundColor;
+  final Color backgroundColor;
 
   @override
   _StandardBottomSheetState createState() => _StandardBottomSheetState();
@@ -2310,7 +2310,7 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
             enableDrag: widget.enableDrag,
             onClosing: widget.onClosing,
             builder: widget.builder,
-            color: widget.backgorundColor,
+            color: widget.backgroundColor,
           ),
         ),
       );
@@ -2320,7 +2320,7 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
       BottomSheet(
         onClosing: widget.onClosing,
         builder: widget.builder,
-        color: widget.backgorundColor,
+        color: widget.backgroundColor,
       ),
     );
   }
