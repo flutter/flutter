@@ -155,6 +155,7 @@ void main() {
       Platform: () => FakePlatform(
         operatingSystem: 'linux',
         environment: <String, String>{
+          'HOME': '/',
           'FLUTTER_CRASH_SERVER_BASE_URL': 'https://localhost:12345/fake_server',
         },
         script: Uri(scheme: 'data'),

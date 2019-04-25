@@ -15,7 +15,6 @@ import 'keyboard_key.dart';
 const Map<int, LogicalKeyboardKey> kAndroidToLogicalKey = <int, LogicalKeyboardKey>{
   0: LogicalKeyboardKey.none,
   119: LogicalKeyboardKey.fn,
-  219: LogicalKeyboardKey.launchAssistant,
   223: LogicalKeyboardKey.sleep,
   224: LogicalKeyboardKey.wakeUp,
   29: LogicalKeyboardKey.keyA,
@@ -155,6 +154,7 @@ const Map<int, LogicalKeyboardKey> kAndroidToLogicalKey = <int, LogicalKeyboardK
   65: LogicalKeyboardKey.launchMail,
   207: LogicalKeyboardKey.launchContacts,
   208: LogicalKeyboardKey.launchCalendar,
+  219: LogicalKeyboardKey.launchAssistant,
   128: LogicalKeyboardKey.close,
   84: LogicalKeyboardKey.browserSearch,
   125: LogicalKeyboardKey.browserForward,
@@ -382,9 +382,9 @@ const Map<int, LogicalKeyboardKey> kFuchsiaToLogicalKey = <int, LogicalKeyboardK
   0x100000014: LogicalKeyboardKey.suspend,
   0x100000015: LogicalKeyboardKey.resume,
   0x100000016: LogicalKeyboardKey.turbo,
-  0x100000017: LogicalKeyboardKey.launchAssistant,
   0x100010082: LogicalKeyboardKey.sleep,
   0x100010083: LogicalKeyboardKey.wakeUp,
+  0x1000100b5: LogicalKeyboardKey.displayToggleIntExt,
   0x100070000: LogicalKeyboardKey.usbReserved,
   0x100070001: LogicalKeyboardKey.usbErrorRollOver,
   0x100070002: LogicalKeyboardKey.usbPostFail,
@@ -586,6 +586,7 @@ const Map<int, LogicalKeyboardKey> kFuchsiaToLogicalKey = <int, LogicalKeyboardK
   0x1000c01ab: LogicalKeyboardKey.spellCheck,
   0x1000c01ae: LogicalKeyboardKey.launchKeyboardLayout,
   0x1000c01b1: LogicalKeyboardKey.launchScreenSaver,
+  0x1000c01cb: LogicalKeyboardKey.launchAssistant,
   0x1000c01b7: LogicalKeyboardKey.launchAudioBrowser,
   0x1000c0201: LogicalKeyboardKey.newKey,
   0x1000c0203: LogicalKeyboardKey.close,
@@ -605,6 +606,7 @@ const Map<int, LogicalKeyboardKey> kFuchsiaToLogicalKey = <int, LogicalKeyboardK
   0x1000c0289: LogicalKeyboardKey.mailReply,
   0x1000c028b: LogicalKeyboardKey.mailForward,
   0x1000c028c: LogicalKeyboardKey.mailSend,
+  0x1000c029f: LogicalKeyboardKey.showAllWindows,
 };
 
 /// Maps Fuchsia-specific USB HID Usage IDs to the matching
@@ -618,9 +620,9 @@ const Map<int, PhysicalKeyboardKey> kFuchsiaToPhysicalKey = <int, PhysicalKeyboa
   0x00000014: PhysicalKeyboardKey.suspend,
   0x00000015: PhysicalKeyboardKey.resume,
   0x00000016: PhysicalKeyboardKey.turbo,
-  0x00000017: PhysicalKeyboardKey.launchAssistant,
   0x00010082: PhysicalKeyboardKey.sleep,
   0x00010083: PhysicalKeyboardKey.wakeUp,
+  0x000100b5: PhysicalKeyboardKey.displayToggleIntExt,
   0x00070000: PhysicalKeyboardKey.usbReserved,
   0x00070001: PhysicalKeyboardKey.usbErrorRollOver,
   0x00070002: PhysicalKeyboardKey.usbPostFail,
@@ -822,6 +824,7 @@ const Map<int, PhysicalKeyboardKey> kFuchsiaToPhysicalKey = <int, PhysicalKeyboa
   0x000c01ab: PhysicalKeyboardKey.spellCheck,
   0x000c01ae: PhysicalKeyboardKey.launchKeyboardLayout,
   0x000c01b1: PhysicalKeyboardKey.launchScreenSaver,
+  0x000c01cb: PhysicalKeyboardKey.launchAssistant,
   0x000c01b7: PhysicalKeyboardKey.launchAudioBrowser,
   0x000c0201: PhysicalKeyboardKey.newKey,
   0x000c0203: PhysicalKeyboardKey.close,
@@ -841,9 +844,12 @@ const Map<int, PhysicalKeyboardKey> kFuchsiaToPhysicalKey = <int, PhysicalKeyboa
   0x000c0289: PhysicalKeyboardKey.mailReply,
   0x000c028b: PhysicalKeyboardKey.mailForward,
   0x000c028c: PhysicalKeyboardKey.mailSend,
+  0x000c029f: PhysicalKeyboardKey.showAllWindows,
 };
 
 /// Maps macOS-specific key code values representing [PhysicalKeyboardKey].
+///
+/// MacOS doesn't provide a scan code, but a virtual keycode to represent a physical key.
 const Map<int, PhysicalKeyboardKey> kMacOsToPhysicalKey = <int, PhysicalKeyboardKey>{
   0x00000000: PhysicalKeyboardKey.keyA,
   0x0000000b: PhysicalKeyboardKey.keyB,
@@ -1127,9 +1133,9 @@ const Map<int, LogicalKeyboardKey> kGlfwNumpadMap = <int, LogicalKeyboardKey>{
 
 /// Maps XKB specific key code values representing [PhysicalKeyboardKey].
 const Map<int, PhysicalKeyboardKey> kLinuxToPhysicalKey = <int, PhysicalKeyboardKey>{
-  0x0000024f: PhysicalKeyboardKey.launchAssistant,
   0x00000096: PhysicalKeyboardKey.sleep,
   0x00000097: PhysicalKeyboardKey.wakeUp,
+  0x000000eb: PhysicalKeyboardKey.displayToggleIntExt,
   0x00000026: PhysicalKeyboardKey.keyA,
   0x00000038: PhysicalKeyboardKey.keyB,
   0x00000036: PhysicalKeyboardKey.keyC,
@@ -1317,6 +1323,7 @@ const Map<int, PhysicalKeyboardKey> kLinuxToPhysicalKey = <int, PhysicalKeyboard
   0x000001b8: PhysicalKeyboardKey.spellCheck,
   0x0000017e: PhysicalKeyboardKey.launchKeyboardLayout,
   0x0000024d: PhysicalKeyboardKey.launchScreenSaver,
+  0x0000024f: PhysicalKeyboardKey.launchAssistant,
   0x00000190: PhysicalKeyboardKey.launchAudioBrowser,
   0x000000bd: PhysicalKeyboardKey.newKey,
   0x000000d6: PhysicalKeyboardKey.close,
@@ -1331,9 +1338,11 @@ const Map<int, PhysicalKeyboardKey> kLinuxToPhysicalKey = <int, PhysicalKeyboard
   0x000000a4: PhysicalKeyboardKey.browserFavorites,
   0x000001aa: PhysicalKeyboardKey.zoomIn,
   0x000001ab: PhysicalKeyboardKey.zoomOut,
+  0x0000017c: PhysicalKeyboardKey.zoomToggle,
   0x000000be: PhysicalKeyboardKey.redo,
   0x000000f0: PhysicalKeyboardKey.mailReply,
   0x000000f1: PhysicalKeyboardKey.mailForward,
   0x000000ef: PhysicalKeyboardKey.mailSend,
+  0x00000080: PhysicalKeyboardKey.showAllWindows,
 };
 

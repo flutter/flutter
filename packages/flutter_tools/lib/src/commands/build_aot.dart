@@ -16,7 +16,7 @@ import '../resident_runner.dart';
 import '../runner/flutter_command.dart';
 import 'build.dart';
 
-class BuildAotCommand extends BuildSubCommand {
+class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmentArtifacts {
   BuildAotCommand() {
     usesTargetOption();
     addBuildModeFlags();
@@ -32,6 +32,17 @@ class BuildAotCommand extends BuildSubCommand {
         negatable: false,
         defaultsTo: false,
         help: 'Compile to a *.so file (requires NDK when building for Android).',
+      )
+      ..addFlag('report-timings',
+        negatable: false,
+        defaultsTo: false,
+        help: 'Report timing information about build steps in machine readable form,',
+      )
+      // track-widget-creation is exposed as a flag here but ignored to deal with build
+      // invalidation issues - there are no plans to support it for AOT mode.
+      ..addFlag('track-widget-creation',
+        defaultsTo: false,
+        hide: true,
       )
       ..addMultiOption('ios-arch',
         splitCommas: true,
@@ -73,9 +84,10 @@ class BuildAotCommand extends BuildSubCommand {
       );
     }
     final String outputPath = argResults['output-dir'] ?? getAotBuildDirectory();
+    final bool reportTimings = argResults['report-timings'];
     try {
       String mainPath = findMainDartFile(targetFile);
-      final AOTSnapshotter snapshotter = AOTSnapshotter();
+      final AOTSnapshotter snapshotter = AOTSnapshotter(reportTimings: reportTimings);
 
       // Compile to kernel.
       mainPath = await snapshotter.compileKernel(

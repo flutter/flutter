@@ -68,7 +68,6 @@ Future<void> main(List<String> rawArgs) async {
   final Map<String, File> symbolFiles = _listIntlData(dateSymbolsDirectory);
   final Directory datePatternsDirectory = Directory(path.join(pathToIntl, 'src', 'data', 'dates', 'patterns'));
   final Map<String, File> patternFiles = _listIntlData(datePatternsDirectory);
-  final List<String> materialLocales = _materialLocales().toList();
   final StringBuffer buffer = StringBuffer();
 
   buffer.writeln(
@@ -88,7 +87,7 @@ Future<void> main(List<String> rawArgs) async {
 /// supported by flutter_localizations.''');
   buffer.writeln('const Map<String, dynamic> dateSymbols = <String, dynamic> {');
   symbolFiles.forEach((String locale, File data) {
-    if (materialLocales.contains(locale))
+    if (_supportedLocales().contains(locale))
       buffer.writeln(_jsonToMapEntry(locale, json.decode(data.readAsStringSync())));
   });
   buffer.writeln('};');
@@ -100,7 +99,7 @@ Future<void> main(List<String> rawArgs) async {
 /// supported by flutter_localizations.''');
   buffer.writeln('const Map<String, Map<String, String>> datePatterns = <String, Map<String, String>> {');
   patternFiles.forEach((String locale, File data) {
-    if (materialLocales.contains(locale)) {
+    if (_supportedLocales().contains(locale)) {
       final Map<String, dynamic> patterns = json.decode(data.readAsStringSync());
       buffer.writeln("'$locale': <String, String>{");
       patterns.forEach((String key, dynamic value) {
@@ -154,14 +153,16 @@ String _jsonToMap(dynamic json) {
   throw 'Unsupported JSON type ${json.runtimeType} of value $json.';
 }
 
-Iterable<String> _materialLocales() sync* {
-  final RegExp filenameRE = RegExp(r'material_(\w+)\.arb$');
-  final Directory materialLocalizationsDirectory = Directory(path.join('packages', 'flutter_localizations', 'lib', 'src', 'l10n'));
-  for (FileSystemEntity entity in materialLocalizationsDirectory.listSync()) {
+Set<String> _supportedLocales() {
+  final Set<String> supportedLocales = <String>{};
+  final RegExp filenameRE = RegExp(r'(?:material|cupertino)_(\w+)\.arb$');
+  final Directory supportedLocalesDirectory = Directory(path.join('packages', 'flutter_localizations', 'lib', 'src', 'l10n'));
+  for (FileSystemEntity entity in supportedLocalesDirectory.listSync()) {
     final String filePath = entity.path;
     if (FileSystemEntity.isFileSync(filePath) && filenameRE.hasMatch(filePath))
-      yield filenameRE.firstMatch(filePath)[1];
+      supportedLocales.add(filenameRE.firstMatch(filePath)[1]);
   }
+  return supportedLocales;
 }
 
 Map<String, File> _listIntlData(Directory directory) {

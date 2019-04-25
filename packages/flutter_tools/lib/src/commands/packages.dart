@@ -15,6 +15,14 @@ class PackagesCommand extends FlutterCommand {
     addSubcommand(PackagesGetCommand('get', false));
     addSubcommand(PackagesGetCommand('upgrade', true));
     addSubcommand(PackagesTestCommand());
+    addSubcommand(PackagesForwardCommand('downgrade', 'Downgrade packages in a Flutter project', requiresPubspec: true));
+    addSubcommand(PackagesForwardCommand('publish', 'Publish the current package to pub.dartlang.org', requiresPubspec: true));
+    addSubcommand(PackagesForwardCommand('deps', 'Print package dependencies', requiresPubspec: true));
+    addSubcommand(PackagesForwardCommand('run', 'Run an executable from a package', requiresPubspec: true));
+    addSubcommand(PackagesForwardCommand('cache', 'Work with the Pub system cache'));
+    addSubcommand(PackagesForwardCommand('version', 'Print Pub version'));
+    addSubcommand(PackagesForwardCommand('uploader', 'Manage uploaders for a package on pub.dartlang.org'));
+    addSubcommand(PackagesForwardCommand('global', 'Work with Pub global packages'));
     addSubcommand(PackagesPassthroughCommand());
   }
 
@@ -26,6 +34,11 @@ class PackagesCommand extends FlutterCommand {
 
   @override
   final String description = 'Commands for managing Flutter packages.';
+
+  @override
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{
+    DevelopmentArtifact.universal,
+  };
 
   @override
   Future<FlutterCommandResult> runCommand() async => null;
@@ -81,13 +94,13 @@ class PackagesGetCommand extends FlutterCommand {
 
     await _runPubGet(target);
     final FlutterProject rootProject = await FlutterProject.fromPath(target);
-    await rootProject.ensureReadyForPlatformSpecificTooling();
+    await rootProject.ensureReadyForPlatformSpecificTooling(checkProjects: true);
 
     // Get/upgrade packages in example app as well
     if (rootProject.hasExampleApp) {
       final FlutterProject exampleProject = rootProject.example;
       await _runPubGet(exampleProject.directory.path);
-      await exampleProject.ensureReadyForPlatformSpecificTooling();
+      await exampleProject.ensureReadyForPlatformSpecificTooling(checkProjects: true);
     }
 
     return null;
@@ -122,6 +135,37 @@ class PackagesTestCommand extends FlutterCommand {
     await pub(<String>['run', 'test']..addAll(argResults.rest), context: PubContext.runTest, retry: false);
     return null;
   }
+}
+
+class PackagesForwardCommand extends FlutterCommand {
+  PackagesForwardCommand(this._commandName, this._description, {bool requiresPubspec = false}) {
+    if (requiresPubspec) {
+      requiresPubspecYaml();
+    }
+  }
+  final String _commandName;
+  final String _description;
+
+  @override
+  String get name => _commandName;
+
+  @override
+  String get description {
+    return '$_description.\n'
+           'This runs the "pub" tool in a Flutter context.';
+  }
+
+  @override
+  String get invocation {
+    return '${runner.executableName} packages $_commandName [<arguments...>]';
+  }
+
+  @override
+  Future<FlutterCommandResult> runCommand() async {
+    await pub(<String>[_commandName]..addAll(argResults.rest), context: PubContext.pubForward, retry: false);
+    return null;
+  }
+
 }
 
 class PackagesPassthroughCommand extends FlutterCommand {

@@ -289,14 +289,10 @@ class FuchsiaRemoteConnection {
   /// If there are no live Dart VM's or the Isolate cannot be found, waits until
   /// either `timeout` is reached, or a Dart VM starts up with a name that
   /// matches `pattern`.
-  ///
-  /// `includeNonFlutterIsolates` can be set to true to include all isolates
-  /// found instead of just Flutter Isolates.
   Future<List<IsolateRef>> getMainIsolatesByPattern(
     Pattern pattern, {
     Duration timeout = _kIsolateFindTimeout,
     Duration vmConnectionTimeout = _kDartVmConnectionTimeout,
-    bool includeNonFlutterIsolates = false,
   }) async {
     // If for some reason there are no Dart VM's that are alive, wait for one to
     // start with the Isolate in question.
@@ -315,10 +311,7 @@ class FuchsiaRemoteConnection {
       if (vmService == null) {
         continue;
       }
-      isolates.add(vmService.getMainIsolatesByPattern(
-        pattern,
-        includeNonFlutterIsolates: includeNonFlutterIsolates,
-      ));
+      isolates.add(vmService.getMainIsolatesByPattern(pattern));
     }
     final List<IsolateRef> result =
       await Future.wait<List<IsolateRef>>(isolates)

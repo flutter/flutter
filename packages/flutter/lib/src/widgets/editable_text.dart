@@ -301,6 +301,7 @@ class EditableText extends StatefulWidget {
     this.keyboardAppearance = Brightness.light,
     this.dragStartBehavior = DragStartBehavior.start,
     this.enableInteractiveSelection,
+    this.scrollPhysics,
   }) : assert(controller != null),
        assert(focusNode != null),
        assert(obscureText != null),
@@ -596,7 +597,7 @@ class EditableText extends StatefulWidget {
   /// Called when the user initiates a change to the TextField's
   /// value: when they have inserted or deleted text.
   ///
-  /// This callback does run not when the TextField's text is changed
+  /// This callback doesn't run when the TextField's text is changed
   /// programmatically, via the TextField's [controller]. Typically it
   /// isn't necessary to be notified of such changes, since they're
   /// initiated by the app itself.
@@ -733,6 +734,15 @@ class EditableText extends StatefulWidget {
   /// {@macro flutter.widgets.scrollable.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
 
+  /// {@template flutter.widgets.editableText.scrollPhysics}
+  /// The [ScrollPhysics] to use when vertically scrolling the input.
+  ///
+  /// If not specified, it will behave according to the current platform.
+  ///
+  /// See [Scrollable.physics].
+  /// {@endtemplate}
+  final ScrollPhysics scrollPhysics;
+
   /// {@macro flutter.rendering.editable.selectionEnabled}
   bool get selectionEnabled {
     return enableInteractiveSelection ?? !obscureText;
@@ -758,6 +768,7 @@ class EditableText extends StatefulWidget {
     properties.add(DiagnosticsProperty<bool>('expands', expands, defaultValue: false));
     properties.add(DiagnosticsProperty<bool>('autofocus', autofocus, defaultValue: false));
     properties.add(DiagnosticsProperty<TextInputType>('keyboardType', keyboardType, defaultValue: null));
+    properties.add(DiagnosticsProperty<ScrollPhysics>('scrollPhysics', scrollPhysics, defaultValue: null));
   }
 }
 
@@ -914,6 +925,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   void updateFloatingCursor(RawFloatingCursorPoint point) {
     switch(point.state){
       case FloatingCursorDragState.Start:
+        if (_floatingCursorResetController.isAnimating) {
+          _floatingCursorResetController.stop();
+          _onFloatingCursorResetTick();
+        }
         final TextPosition currentTextPosition = TextPosition(offset: renderEditable.selection.baseOffset);
         _startCaretRect = renderEditable.getLocalRectForCaret(currentTextPosition);
         renderEditable.setFloatingCursor(point.state, _startCaretRect.center - _floatingCursorOffset, currentTextPosition);
@@ -1393,7 +1408,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       excludeFromSemantics: true,
       axisDirection: _isMultiline ? AxisDirection.down : AxisDirection.right,
       controller: _scrollController,
-      physics: const ClampingScrollPhysics(),
+      physics: widget.scrollPhysics,
       dragStartBehavior: widget.dragStartBehavior,
       viewportBuilder: (BuildContext context, ViewportOffset offset) {
         return CompositedTransformTarget(

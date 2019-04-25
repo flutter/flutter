@@ -349,6 +349,51 @@ void main() {
       // value of childCount should be 4.
       expect(viewport.childCount, 4);
     });
+
+    testWidgets('a tighter squeeze lays out more children', (WidgetTester tester) async {
+      final FixedExtentScrollController controller =
+        FixedExtentScrollController(initialItem: 10);
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: ListWheelScrollView(
+            controller: controller,
+            itemExtent: 100.0,
+            onSelectedItemChanged: (_) { },
+            children: List<Widget>.generate(20, (int index) {
+              return Text(index.toString());
+            }),
+          ),
+        )
+      );
+
+      final RenderListWheelViewport viewport = tester.firstRenderObject(find.byType(Text)).parent.parent;
+
+      // The screen is vertically 600px. Since the middle item is centered,
+      // half of the first and last items are visible, making 7 children visible.
+      expect(viewport.childCount, 7);
+
+      // Pump the same widget again but with double the squeeze.
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: ListWheelScrollView(
+            controller: controller,
+            itemExtent: 100.0,
+            squeeze: 2,
+            onSelectedItemChanged: (_) { },
+            children: List<Widget>.generate(20, (int index) {
+              return Text(index.toString());
+            }),
+          ),
+        )
+      );
+
+      // 12 instead of 6 children are laid out + 1 because the middle item is
+      // centered.
+      expect(viewport.childCount, 13);
+    });
   });
 
   group('pre-transform viewport', () {

@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -16,6 +17,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart' show TestWindow;
 import 'package:quiver/testing/async.dart';
 import 'package:quiver/time.dart';
+import 'package:path/path.dart' as path;
 import 'package:test_api/test_api.dart' as test_package;
 import 'package:stack_trace/stack_trace.dart' as stack_trace;
 import 'package:vector_math/vector_math_64.dart';
@@ -168,6 +170,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   }
 
   @override
+  // ignore: MUST_CALL_SUPER
   void initLicenses() {
     // Do not include any licenses, because we're a test, and the LICENSE file
     // doesn't get generated for tests.
@@ -583,6 +586,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
 
     final bool autoUpdateGoldensBeforeTest = autoUpdateGoldenFiles;
     final TestExceptionReporter reportTestExceptionBeforeTest = reportTestException;
+    final ErrorWidgetBuilder errorWidgetBuilderBeforeTest = ErrorWidget.builder;
 
     // run the test
     await testBody();
@@ -597,6 +601,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       invariantTester();
       _verifyAutoUpdateGoldensUnset(autoUpdateGoldensBeforeTest);
       _verifyReportTestExceptionUnset(reportTestExceptionBeforeTest);
+      _verifyErrorWidgetBuilderUnset(errorWidgetBuilderBeforeTest);
       _verifyInvariants();
     }
 
@@ -666,6 +671,21 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     }());
   }
 
+  void _verifyErrorWidgetBuilderUnset(ErrorWidgetBuilder valueBeforeTest) {
+    assert(() {
+      if (ErrorWidget.builder != valueBeforeTest) {
+        FlutterError.reportError(FlutterErrorDetails(
+          exception: FlutterError(
+              'The value of ErrorWidget.builder was changed by the test.',
+          ),
+          stack: StackTrace.current,
+          library: 'Flutter test framework',
+        ));
+      }
+      return true;
+    }());
+  }
+
   /// Called by the [testWidgets] function after a test is executed.
   void postTest() {
     assert(inTest);
@@ -689,6 +709,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     super.initInstances();
     window.onBeginFrame = null;
     window.onDrawFrame = null;
+    _mockFlutterAssets();
   }
 
   FakeAsync _currentFakeAsync; // set in runTest; cleared in postTest
@@ -717,6 +738,40 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   @override
   int get microtaskCount => _currentFakeAsync.microtaskCount;
+
+  static Set<String> _allowedKeys;
+
+  void _mockFlutterAssets() {
+    if (!Platform.environment.containsKey('UNIT_TEST_ASSETS')) {
+      return;
+    }
+    final String assetFolderPath = Platform.environment['UNIT_TEST_ASSETS'];
+    _ensureInitialized(assetFolderPath);
+    BinaryMessages.setMockMessageHandler('flutter/assets', (ByteData message) {
+      final String key = utf8.decode(message.buffer.asUint8List());
+      if (_allowedKeys.contains(key)) {
+        final File asset = File(path.join(assetFolderPath, key));
+        final Uint8List encoded = Uint8List.fromList(asset.readAsBytesSync());
+        return Future<ByteData>.value(encoded.buffer.asByteData());
+      }
+    });
+  }
+
+  void _ensureInitialized(String assetFolderPath) {
+    if (_allowedKeys == null) {
+      final File manifestFile = File(
+          path.join(assetFolderPath, 'AssetManifest.json'));
+      final Map<String, dynamic> manifest = json.decode(
+          manifestFile.readAsStringSync());
+      _allowedKeys = <String>{
+        'AssetManifest.json',
+      };
+      for (List<dynamic> value in manifest.values) {
+        final List<String> strList = List<String>.from(value);
+        _allowedKeys.addAll(strList);
+      }
+    }
+  }
 
   @override
   Future<void> pump([ Duration duration, EnginePhase newPhase = EnginePhase.sendSemanticsUpdate ]) {
@@ -1051,12 +1106,6 @@ enum LiveTestWidgetsFlutterBindingFramePolicy {
 /// doesn't trigger a paint, since then you could not see anything
 /// anyway.)
 class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
-  @override
-  void initInstances() {
-    super.initInstances();
-    assert(!autoUpdateGoldenFiles);
-  }
-
   @override
   bool get inTest => _inTest;
   bool _inTest = false;

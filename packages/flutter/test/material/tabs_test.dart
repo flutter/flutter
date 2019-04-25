@@ -61,6 +61,7 @@ class AlwaysKeepAliveState extends State<AlwaysKeepAliveWidget>
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Text(AlwaysKeepAliveWidget.text);
   }
 }

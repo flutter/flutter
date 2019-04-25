@@ -91,7 +91,8 @@ class CreateCommand extends FlutterCommand {
       abbr: 's',
       help: 'Specifies the Flutter code sample to use as the main.dart for an application. Implies '
         '--template=app. The value should be the sample ID of the desired sample from the API '
-        'documentation website (http://docs.flutter.io).',
+        'documentation website (http://docs.flutter.dev). An example can be found at '
+        'https://master-api.flutter.dev/flutter/widgets/SingleChildScrollView-class.html',
       defaultsTo: null,
       valueHelp: 'id',
     );
@@ -407,7 +408,7 @@ Your $application code is in $relativeAppMain.
 Your plugin code is in $relativePluginMain.
 
 Host platform code is in the "android" and "ios" directories under $relativePluginPath.
-To edit platform code in an IDE see https://flutter.io/developing-packages/#edit-plugin-package.
+To edit platform code in an IDE see https://flutter.dev/developing-packages/#edit-plugin-package.
 ''');
         }
       } else {
@@ -443,7 +444,7 @@ To edit platform code in an IDE see https://flutter.io/developing-packages/#edit
         offline: argResults['offline'],
       );
       final FlutterProject project = await FlutterProject.fromDirectory(directory);
-      await project.ensureReadyForPlatformSpecificTooling();
+      await project.ensureReadyForPlatformSpecificTooling(checkProjects: false);
     }
     return generatedCount;
   }
@@ -510,7 +511,7 @@ To edit platform code in an IDE see https://flutter.io/developing-packages/#edit
 
     if (argResults['pub']) {
       await pubGet(context: PubContext.create, directory: directory.path, offline: argResults['offline']);
-      await project.ensureReadyForPlatformSpecificTooling();
+      await project.ensureReadyForPlatformSpecificTooling(checkProjects: false);
     }
 
     gradle.updateLocalProperties(project: project, requireAndroidSdk: false);
