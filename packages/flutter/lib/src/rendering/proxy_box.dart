@@ -2543,7 +2543,7 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
   /// no longer directed towards this receiver.
   PointerCancelEventListener onPointerCancel;
 
-  /// Called when a pointer signal occures over this object.
+  /// Called when a pointer signal occurs over this object.
   PointerSignalEventListener onPointerSignal;
 
   // Object used for annotation of the layer used for hover hit detection.
@@ -2557,6 +2557,8 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
   MouseTrackerAnnotation get hoverAnnotation => _hoverAnnotation;
 
   void _updateAnnotations() {
+    assert(_onPointerEnter != _hoverAnnotation.onEnter || _onPointerHover != _hoverAnnotation.onHover || _onPointerExit != _hoverAnnotation.onExit,
+    "Shouldn't call _updateAnnotations if nothing has changed.");
     if (_hoverAnnotation != null && attached) {
       RendererBinding.instance.mouseTracker.detachAnnotation(_hoverAnnotation);
     }
@@ -2572,6 +2574,9 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
     } else {
       _hoverAnnotation = null;
     }
+    // Needs to paint in any case, in order to insert/remove the annotation
+    // layer associated with the updated _hoverAnnotation.
+    markNeedsPaint();
   }
 
   @override

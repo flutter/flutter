@@ -35,7 +35,7 @@ class VersionCommand extends FlutterCommand {
 
   Future<List<String>> getTags() async {
     final RunResult runResult = await runCheckedAsync(
-      <String>['git', 'tag', '-l', 'v*'],
+      <String>['git', 'tag', '-l', 'v*', '--sort=-creatordate'],
       workingDirectory: Cache.flutterRoot,
     );
     return runResult.toString().split('\n');

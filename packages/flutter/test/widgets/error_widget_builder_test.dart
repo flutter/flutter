@@ -7,6 +7,7 @@ import 'package:flutter/widgets.dart';
 
 void main() {
   testWidgets('ErrorWidget.builder', (WidgetTester tester) async {
+    final ErrorWidgetBuilder oldBuilder = ErrorWidget.builder;
     ErrorWidget.builder = (FlutterErrorDetails details) {
       return const Text('oopsie!', textDirection: TextDirection.ltr);
     };
@@ -21,5 +22,6 @@ void main() {
     );
     expect(tester.takeException().toString(), 'test');
     expect(find.text('oopsie!'), findsOneWidget);
+    ErrorWidget.builder = oldBuilder;
   });
 }

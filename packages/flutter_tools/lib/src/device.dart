@@ -367,6 +367,7 @@ class DebuggingOptions {
   DebuggingOptions.enabled(
     this.buildInfo, {
     this.startPaused = false,
+    this.disableServiceAuthCodes = false,
     this.enableSoftwareRendering = false,
     this.skiaDeterministicRendering = false,
     this.traceSkia = false,
@@ -381,6 +382,7 @@ class DebuggingOptions {
     : debuggingEnabled = false,
       useTestFonts = false,
       startPaused = false,
+      disableServiceAuthCodes = false,
       enableSoftwareRendering = false,
       skiaDeterministicRendering = false,
       traceSkia = false,
@@ -393,6 +395,7 @@ class DebuggingOptions {
 
   final BuildInfo buildInfo;
   final bool startPaused;
+  final bool disableServiceAuthCodes;
   final bool enableSoftwareRendering;
   final bool skiaDeterministicRendering;
   final bool traceSkia;
