@@ -13,6 +13,7 @@ import '../cache.dart';
 import '../device.dart';
 import '../globals.dart';
 import '../ios/mac.dart';
+import '../project.dart';
 import '../resident_runner.dart';
 import '../run_cold.dart';
 import '../run_hot.dart';
@@ -364,9 +365,11 @@ class RunCommand extends RunCommandBase {
       expFlags = argResults[FlutterOptions.kEnableExperiment];
     }
     final List<FlutterDevice> flutterDevices = <FlutterDevice>[];
+    final FlutterProject flutterProject = await FlutterProject.current();
     for (Device device in devices) {
       final FlutterDevice flutterDevice = await FlutterDevice.create(
         device,
+        flutterProject: flutterProject,
         trackWidgetCreation: argResults['track-widget-creation'],
         dillOutputPath: argResults['output-dill'],
         fileSystemRoots: argResults['filesystem-root'],

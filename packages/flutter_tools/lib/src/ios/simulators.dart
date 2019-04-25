@@ -19,6 +19,7 @@ import '../bundle.dart' as bundle;
 import '../convert.dart';
 import '../device.dart';
 import '../globals.dart';
+import '../project.dart';
 import '../protocol_discovery.dart';
 import 'ios_workflow.dart';
 import 'mac.dart';
@@ -472,6 +473,11 @@ class IOSSimulator extends Device {
   @override
   Future<void> takeScreenshot(File outputFile) {
     return SimControl.instance.takeScreenshot(id, outputFile.path);
+  }
+
+  @override
+  bool isSupportedForProject(FlutterProject flutterProject) {
+    return flutterProject.ios.existsSync();
   }
 }
 

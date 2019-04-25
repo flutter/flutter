@@ -19,6 +19,7 @@ import 'ios/devices.dart';
 import 'ios/simulators.dart';
 import 'linux/linux_device.dart';
 import 'macos/macos_device.dart';
+import 'project.dart';
 import 'tester/flutter_tester.dart';
 import 'web/web_device.dart';
 import 'windows/windows_device.dart';
@@ -234,6 +235,9 @@ abstract class Device {
         return false;
     }
   }
+
+  /// Whether the device is supported for the current project directory.
+  bool isSupportedForProject(FlutterProject flutterProject);
 
   /// Check if a version of the given app is already installed
   Future<bool> isAppInstalled(ApplicationPackage app);
