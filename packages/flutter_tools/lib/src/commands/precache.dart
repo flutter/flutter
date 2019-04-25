@@ -13,6 +13,8 @@ class PrecacheCommand extends FlutterCommand {
   PrecacheCommand() {
     argParser.addFlag('all-platforms', abbr: 'a', negatable: false,
         help: 'Precache artifacts for all platforms.');
+    argParser.addFlag('force', abbr: 'f', negatable: false,
+        help: 'Force downloading of artifacts.');
     argParser.addFlag('android', negatable: true, defaultsTo: true,
         help: 'Precache artifacts for Android development');
     argParser.addFlag('ios', negatable: true, defaultsTo: true,
@@ -25,6 +27,10 @@ class PrecacheCommand extends FlutterCommand {
         help: 'Precache artifacts for windows desktop development');
     argParser.addFlag('macos', negatable: true, defaultsTo: false,
         help: 'Precache artifacts for macOS desktop development');
+    argParser.addFlag('fuchsia', negatable: true, defaultsTo: false,
+        help: 'Precache artifacts for Fuchsia development');
+    argParser.addFlag('universal', negatable: true, defaultsTo: true,
+        help: 'Precache artifacts required for all developments');
   }
 
   @override
@@ -41,32 +47,21 @@ class PrecacheCommand extends FlutterCommand {
     if (argResults['all-platforms']) {
       cache.includeAllPlatforms = true;
     }
-    final Set<DevelopmentArtifact> requiredArtifacts = <DevelopmentArtifact>{ DevelopmentArtifact.universal };
-    if (argResults['android']) {
-      requiredArtifacts.add(DevelopmentArtifact.android);
-    }
-    if (argResults['ios']) {
-      requiredArtifacts.add(DevelopmentArtifact.iOS);
-    }
-    if (!FlutterVersion.instance.isStable) {
-      if (argResults['web']) {
-        requiredArtifacts.add(DevelopmentArtifact.web);
+    final Set<DevelopmentArtifact> requiredArtifacts = <DevelopmentArtifact>{};
+    for (DevelopmentArtifact artifact in DevelopmentArtifact.values) {
+      // Don't include unstable artifacts on stable branches.
+      if (FlutterVersion.instance.isStable && artifact.unstable) {
+        continue;
       }
-      if (argResults['linux']) {
-        requiredArtifacts.add(DevelopmentArtifact.linux);
-      }
-      if (argResults['windows']) {
-        requiredArtifacts.add(DevelopmentArtifact.windows);
-      }
-      if (argResults['macos']) {
-        requiredArtifacts.add(DevelopmentArtifact.macOS);
+      if (argResults[artifact.name]) {
+        requiredArtifacts.add(artifact);
       }
     }
-
-    if (cache.isUpToDate()) {
-      printStatus('Already up-to-date.');
-    } else {
+    final bool forceUpdate = argResults['force'];
+    if (forceUpdate || !cache.isUpToDate()) {
       await cache.updateAll(requiredArtifacts);
+    } else {
+      printStatus('Already up-to-date.');
     }
     return null;
   }

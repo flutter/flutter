@@ -5348,6 +5348,7 @@ void main() {
       cursorColor: Color(0xff00ff00),
       keyboardAppearance: Brightness.dark,
       scrollPadding: EdgeInsets.zero,
+      scrollPhysics: ClampingScrollPhysics(),
       enableInteractiveSelection: false,
     ).debugFillProperties(builder);
 
@@ -5374,6 +5375,7 @@ void main() {
       'keyboardAppearance: Brightness.dark',
       'scrollPadding: EdgeInsets.zero',
       'selection disabled',
+      'scrollPhysics: ClampingScrollPhysics',
     ]);
   });
 

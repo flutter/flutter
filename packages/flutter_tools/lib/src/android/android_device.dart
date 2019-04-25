@@ -383,6 +383,10 @@ class AndroidDevice extends Device {
       // activity name from the .apk.
       package = await AndroidApk.fromAndroidProject(project.android);
     }
+    // There was a failure parsing the android project information.
+    if (package == null) {
+      throwToolExit('Problem building Android application: see above error(s).');
+    }
 
     printTrace("Stopping app '${package.name}' on $name.");
     await stopApp(package);
@@ -438,6 +442,8 @@ class AndroidDevice extends Device {
       }
       if (debuggingOptions.startPaused)
         cmd.addAll(<String>['--ez', 'start-paused', 'true']);
+      if (debuggingOptions.disableServiceAuthCodes)
+        cmd.addAll(<String>['--ez', 'disable-service-auth-codes', 'true']);
       if (debuggingOptions.useTestFonts)
         cmd.addAll(<String>['--ez', 'use-test-fonts', 'true']);
       if (debuggingOptions.verboseSystemLogs) {

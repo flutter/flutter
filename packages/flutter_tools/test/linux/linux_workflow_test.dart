@@ -13,7 +13,7 @@ void main() {
   group(LinuxWorkflow, () {
     final MockPlatform linux = MockPlatform();
     final MockPlatform linuxWithFde = MockPlatform()
-      ..environment['FLUTTER_DESKTOP_EMBEDDING'] = 'true';
+      ..environment['ENABLE_FLUTTER_DESKTOP'] = 'true';
     final MockPlatform notLinux = MockPlatform();
     when(linux.isLinux).thenReturn(true);
     when(linuxWithFde.isLinux).thenReturn(true);
