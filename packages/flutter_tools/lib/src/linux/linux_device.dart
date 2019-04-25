@@ -108,6 +108,11 @@ class LinuxDevice extends Device {
   @override
   Future<bool> uninstallApp(ApplicationPackage app) async => true;
 
+  @override
+  bool isSupportedForProject(FlutterProject flutterProject) {
+    return flutterProject.linux.existsSync();
+  }
+
   // Track the last built mode from startApp.
   BuildMode _lastBuiltMode;
 }

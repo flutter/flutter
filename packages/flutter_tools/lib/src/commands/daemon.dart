@@ -19,6 +19,7 @@ import '../convert.dart';
 import '../device.dart';
 import '../emulator.dart';
 import '../globals.dart';
+import '../project.dart';
 import '../resident_runner.dart';
 import '../run_cold.dart';
 import '../run_hot.dart';
@@ -344,9 +345,11 @@ class AppDomain extends Domain {
     // We change the current working directory for the duration of the `start` command.
     final Directory cwd = fs.currentDirectory;
     fs.currentDirectory = fs.directory(projectDirectory);
+    final FlutterProject flutterProject = await FlutterProject.current();
 
     final FlutterDevice flutterDevice = await FlutterDevice.create(
       device,
+      flutterProject: flutterProject,
       trackWidgetCreation: trackWidgetCreation,
       dillOutputPath: dillOutputPath,
       viewFilter: isolateFilter,

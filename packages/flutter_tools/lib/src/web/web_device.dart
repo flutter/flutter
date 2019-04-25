@@ -166,6 +166,11 @@ class WebDevice extends Device {
     await request.response.addStream(file.openRead());
     await request.response.close();
   }
+
+  @override
+  bool isSupportedForProject(FlutterProject flutterProject) {
+    return flutterProject.web.existsSync();
+  }
 }
 
 class WebDevices extends PollingDeviceDiscovery {
