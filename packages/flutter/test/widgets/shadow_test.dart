@@ -129,7 +129,7 @@ void main() {
       await tester.pumpWidget(build(elevation.toDouble()));
       await expectLater(
         find.byType(Container),
-        matchesSkiaGoldFile('shadow.PhysicalModel.disabled.1.png'),
+        matchesSkiaGoldFile('shadow.PhysicalModel.disabled.1.$elevation.png'),
 //        matchesGoldenFile('shadow.PhysicalModel.disabled.png'),
       );
     }

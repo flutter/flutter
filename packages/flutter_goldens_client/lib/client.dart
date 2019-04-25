@@ -8,6 +8,7 @@ import 'dart:io' as io;
 
 import 'package:file/file.dart';
 import 'package:file/local.dart';
+import 'package:path/path.dart' as path;
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
@@ -78,55 +79,88 @@ class SkiaGoldClient {
   /// This ensures that the goldctl tool is authorized and ready for testing.
   Future<bool> auth(Directory workDirectory) async {
     _workDirectory = workDirectory;
-    List<String> authArguments = <String>['auth'];
+
     //TODO(katelovett): Cleanup for final CI implementation
     if(_serviceAccount == null)
-      return false;
-      //throw const NonZeroExitCode(1, 'No Service Account found.');
+      return false; // We are not in the proper environment for running these tests.
 
-    authArguments += <String>[
-      '--service-account', _serviceAccount,
-      '--work-dir', _workDirectory.childDirectory('temp').path,
-    ];
+    final File authFile = io.File(path.join(_workDirectory.path, 'temp', 'auth_opt.json'));
+    if(!authFile.existsSync()) {
+      final List<String> authArguments = <String>[
+        'auth',
+        '--service-account', _serviceAccount,
+        '--work-dir', _workDirectory.childDirectory('temp').path,
+      ];
 
-    final io.ProcessResult authResults = io.Process.runSync(_goldctl, authArguments);
-    if (authResults.exitCode != 0) {
-      final StringBuffer buf = StringBuffer();
-      buf
-        ..writeln('Flutter + Skia Gold auth failed.')
-        ..writeln('stdout: ${authResults.stdout}')
-        ..writeln('stderr: ${authResults.stderr}');
-      throw NonZeroExitCode(authResults.exitCode, buf.toString());
+      final io.ProcessResult authResults = io.Process.runSync(_goldctl, authArguments);
+      if (authResults.exitCode != 0) {
+        final StringBuffer buf = StringBuffer();
+        buf
+          ..writeln('Flutter + Skia Gold auth failed.')
+          ..writeln('stdout: ${authResults.stdout}')
+          ..writeln('stderr: ${authResults.stderr}');
+        throw NonZeroExitCode(authResults.exitCode, buf.toString());
+      }
+    } else {
+      print('The file is already here, skipping auth.');
+    }
+    // Run init
+    final File keysFile = io.File(path.join(_workDirectory.path, 'keys.json'));
+    if(!keysFile.existsSync()) {
+
+      final String commitHash = await _getCommitHash();
+      final String keys = '${_workDirectory.path}keys.json';
+      final String failures = '${_workDirectory.path}failures.json';
+
+      await io.File(keys).writeAsString(_getKeysJSON());
+      await io.File(failures).create();
+
+      final List<String> imgtestInitArguments = <String>[
+        'imgtest', 'init',
+        '--instance', _skiaGoldInstance,
+        '--work-dir', _workDirectory.childDirectory('temp').path,
+        '--commit', commitHash,
+        '--keys-file', keys,
+        '--failure-file', failures,
+        '--passfail',
+      ];
+      if(imgtestInitArguments.contains(null)) {
+        final StringBuffer buf = StringBuffer();
+        buf.writeln('Null argument for Skia Gold imgtest init:');
+        imgtestInitArguments.forEach(buf.writeln);
+        throw NonZeroExitCode(1, buf.toString());
+      }
+
+      final io.ProcessResult imgtestInitResult = io.Process.runSync(
+        _goldctl,
+        imgtestInitArguments
+      );
+      if (imgtestInitResult.exitCode != 0) {
+        final StringBuffer buf = StringBuffer();
+        buf
+          ..writeln('Flutter + Skia Gold imgtest init failed.')
+          ..writeln('stdout: ${imgtestInitResult.stdout}')
+          ..writeln('stderr: ${imgtestInitResult.stderr}');
+        throw NonZeroExitCode(imgtestInitResult.exitCode, buf.toString());
+      }
+    } else{
+      print('Already init, skipping.');
     }
     return true;
   }
 
   Future<bool> imgtest(String testName, File goldenFile) async {
-    List<String> imgtestArguments = <String>[
-      'imgtest',
-      'add',
-    ];
 
-    final String commitHash = await _getCommitHash();
-    final String keys = '${_workDirectory.path}keys.json';
-    final String failures = '${_workDirectory.path}failures.json';
-    await io.File(keys).writeAsString(_getKeysJSON());
-    await io.File(failures).create();
-
-    imgtestArguments += <String>[
-      '--instance', _skiaGoldInstance,
+    final List<String> imgtestArguments = <String>[
+      'imgtest', 'add',
       '--work-dir', _workDirectory.childDirectory('temp').path,
-      '--commit', commitHash,
       '--test-name', testName,
       '--png-file', goldenFile.path,
-      '--keys-file', keys,
-      '--failure-file', failures,
-      '--passfail',
     ];
 
     if(imgtestArguments.contains(null)) {
       final StringBuffer buf = StringBuffer();
-      buf.writeln('null argument for Skia Gold imgtest:');
+      buf.writeln('Null argument for Skia Gold imgtest add:');
       imgtestArguments.forEach(buf.writeln);
       throw NonZeroExitCode(1, buf.toString());
     }
@@ -135,20 +169,20 @@ class SkiaGoldClient {
     if (imgtestResult.exitCode != 0) {
       final StringBuffer buf = StringBuffer();
       buf
-        ..writeln('Flutter + Skia Gold imgtest failed.')
+        ..writeln('Flutter + Skia Gold imgtest add failed.')
         ..writeln('If this is the first execution of this test, it may need to be triaged.')
         ..writeln('In this case, re-run the test after triage is completed.\n')
         ..writeln('stdout: ${imgtestResult.stdout}')
         ..writeln('stderr: ${imgtestResult.stderr}');
       throw NonZeroExitCode(imgtestResult.exitCode, buf.toString());
     }
-    print('PASS');
+    // print('PASS');
     return true;
   }
 
   Future<String> _getCommitHash() async {
-    // TODO: Remove after baseline is established and pre-commit works
-    return '96f15c74adebb221eb044d3fc71b2d62da0046c0';
+    // TODO(katelovett): Remove after pre-commit tests can be ingested
+    return '0572f158fb10505b840281124d07f8785d4f13f0';
 //    if (!flutterRoot.existsSync()) {
 //      return null;
 //    } else {
@@ -160,6 +194,7 @@ class SkiaGoldClient {
     }
 
   String _getKeysJSON() {
+    // TODO(katelovett): Parse out cleaner key information
     return convert.json.encode(
       <String, dynamic>{
         'Operating System' : io.Platform.operatingSystem,
