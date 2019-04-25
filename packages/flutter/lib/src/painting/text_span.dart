@@ -23,7 +23,9 @@ import 'text_painter.dart';
 /// only partially) override the [style] of this object. If a
 /// [TextSpan] has both [text] and [children], then the [text] is
 /// treated as if it was an unstyled [TextSpan] at the start of the
-/// [children] list.
+/// [children] list. Leaving the [TextSpan.text] field null results
+/// in the [TextSpan] acting as an empty node in the [InlineSpan]
+/// tree with a list of children.
 ///
 /// To paint a [TextSpan] on a [Canvas], use a [TextPainter]. To display a text
 /// span in a widget, use a [RichText]. For text with a single style, consider
@@ -44,14 +46,12 @@ import 'text_painter.dart';
 /// _There is some more detailed sample code in the documentation for the
 /// [recognizer] property._
 ///
-/// Widgets may be embedded inline. Specify a widget within the [children]
-/// tree by wrapping the widget with a [WidgetSpan]. The widget will be laid
-/// out inline within the paragraph.
-///
 /// See also:
 ///
 ///  * [WidgetSpan], a leaf node that represents an embedded inline widget
-///    in a [TextSpan] tree.
+///    in a [InlineSpan] tree. Specify a widget within the [children]
+///    list by wrapping the widget with a [WidgetSpan]. The widget will be
+///    laid out inline within the paragraph.
 ///  * [Text], a widget for showing uniformly-styled text.
 ///  * [RichText], a widget for finer control of text rendering.
 ///  * [TextPainter], a class for painting [TextSpan] objects on a [Canvas].
@@ -235,6 +235,9 @@ class TextSpan extends InlineSpan {
   /// Styles are not honored in this process. If `includeSemanticsLabels` is
   /// true, then the text returned will include the [semanticsLabel]s instead of
   /// the text contents when they are present.
+  ///
+  /// When [includePlaceholders] is true, [PlaceholderSpan]s in the tree will be
+  /// represented as a 0xFFFC 'object replacement character'.
   String toPlainText({bool includeSemanticsLabels = true, bool includePlaceholders = true}) {
     assert(debugAssertIsValid());
     final StringBuffer buffer = StringBuffer();
@@ -256,7 +259,7 @@ class TextSpan extends InlineSpan {
 
   /// Returns the UTF-16 code unit at the given index in the flattened string.
   ///
-  /// This only accounts for the TextSpan.text values and ignores PlaceholderSpans.
+  /// This only accounts for the [TextSpan.text] values and ignores [PlaceholderSpans].
   ///
   /// Returns null if the index is out of bounds.
   int codeUnitAt(int index) {

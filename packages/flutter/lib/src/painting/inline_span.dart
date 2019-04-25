@@ -12,7 +12,7 @@ import 'basic_types.dart';
 import 'text_style.dart';
 import 'text_painter.dart';
 
-/// Called on each span as [InlineSpan.visitChildren] walks the InlineSpan tree.
+/// Called on each span as [InlineSpan.visitChildren] walks the [InlineSpan] tree.
 ///
 /// Returns true when the walk should continue, and false to stop visiting further
 /// [InlineSpan]s.
@@ -20,19 +20,14 @@ typedef InlineSpanVisitor = bool Function(InlineSpan span);
 
 /// An immutable span of inline content which forms a paragraph.
 ///
-/// The subclass [TextSpan] specifies text and may contain child [InlineSpan]s.
-///
-/// The subclass [PlaceholderSpan] represents a placeholder that may be
-/// filled with non-text content. [PlaceholderSpan] itself defines a
-/// [ui.PlaceholderAlignemnt] and a [TextBaseline]. To be useful,
-/// [PlaceholderSpan] should be extended to define content. An instance of
-/// this is the [WidgetSpan] class in the widgets library.
-///
-/// The subclass [WidgetSpan] specifies embedded inline widgets. Specify a
-/// widget by wrapping the widget with a [WidgetSpan].
-///
-/// Leaving the [TextSpan.text] field null results in the [TextSpan] acting
-/// as an empty node with a list of children.
+///  * The subclass [TextSpan] specifies text and may contain child [InlineSpan]s.
+///  * The subclass [PlaceholderSpan] represents a placeholder that may be
+///    filled with non-text content. [PlaceholderSpan] itself defines a
+///    [ui.PlaceholderAlignemnt] and a [TextBaseline]. To be useful,
+///    [PlaceholderSpan] should be extended to define content. An instance of
+///    this is the [WidgetSpan] class in the widgets library.
+///  * The subclass [WidgetSpan] specifies embedded inline widgets. Specify an
+///    inline widget by wrapping the widget with a [WidgetSpan].
 ///
 /// {@tool sample}
 ///
@@ -118,6 +113,8 @@ abstract class InlineSpan extends DiagnosticableTree {
   String toPlainText({bool includeSemanticsLabels = true, bool includePlaceholders = true});
 
   /// Returns the UTF-16 code unit at the given index in the flattened string.
+  ///
+  /// This only accounts for the [TextSpan.text] values and ignores [PlaceholderSpans].
   ///
   /// Returns null if the index is out of bounds.
   int codeUnitAt(int index);

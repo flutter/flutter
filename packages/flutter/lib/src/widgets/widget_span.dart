@@ -49,11 +49,11 @@ enum InlineWidgetAlignment {
 
 /// An immutable widget that is embedded inline within text.
 ///
-/// The [widget] property is the widget that will be embedded. It is the
+/// The [child] property is the widget that will be embedded. It is the
 /// widget's responsibility to size itself appropriately, the text will
 /// not enforce any constraints.
 ///
-/// The [widget] property may contain its own children, including
+/// The [child] property may contain its own children, including
 /// [RichText] widgets which may include additional [WidgetSpan]s. Child
 /// [RichText] widgets will be laid out independently and occupy a
 /// rectangular space in the parent text layout.
@@ -93,16 +93,16 @@ enum InlineWidgetAlignment {
 ///
 /// See also:
 ///
-///  * [TextSpan], a node that represents text in a [TextSpan] tree.
+///  * [TextSpan], a node that represents text in a [InlineSpan] tree.
 ///  * [Text], a widget for showing uniformly-styled text.
 ///  * [RichText], a widget for finer control of text rendering.
-///  * [TextPainter], a class for painting [TextSpan] objects on a [Canvas].
+///  * [TextPainter], a class for painting [InlineSpan] objects on a [Canvas].
 @immutable
 class WidgetSpan extends PlaceholderSpan {
   /// Creates a [WidgetSpan] with the given values.
   ///
-  /// The [widget] property should be non-null. [WidgetSpan] cannot contain any
-  /// [TextSpan] or [WidgetSpan] children.
+  /// The [child] property should be non-null. [WidgetSpan] is a leaf node in
+  /// the [InlineSpan] tree
   ///
   /// A [TextStyle] may be provided with the [style] property, but only the
   /// decoration, foreground, background, and spacing options will be used.
@@ -127,7 +127,7 @@ class WidgetSpan extends PlaceholderSpan {
          baseline: baseline, style: style, children: null,
        );
 
-  /// The widget to embed inline with text.
+  /// The widget to embed inline within text.
   final Widget child;
 
   /// Adds a placeholder box to the paragraph builder if a size has been
@@ -173,7 +173,7 @@ class WidgetSpan extends PlaceholderSpan {
     return null;
   }
 
-  /// Describe the difference between this widget span and another [TextSpan],
+  /// Describe the difference between this widget span and another [InlineSpan],
   /// in terms of how much damage it will make to the rendering. The comparison
   /// is deep.
   ///
