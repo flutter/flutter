@@ -31,9 +31,9 @@ import 'xcodeproj.dart';
 const int kXcodeRequiredVersionMajor = 9;
 const int kXcodeRequiredVersionMinor = 0;
 
-IMobileDevice get iMobileDevice => context[IMobileDevice];
-PlistBuddy get plistBuddy => context[PlistBuddy];
-Xcode get xcode => context[Xcode];
+IMobileDevice get iMobileDevice => context.get<IMobileDevice>();
+PlistBuddy get plistBuddy => context.get<PlistBuddy>();
+Xcode get xcode => context.get<Xcode>();
 
 class PlistBuddy {
   const PlistBuddy();

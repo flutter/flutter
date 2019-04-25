@@ -28,7 +28,7 @@ import 'web/web_device.dart';
 import 'windows/application_package.dart';
 
 class ApplicationPackageFactory {
-  static ApplicationPackageFactory get instance => context[ApplicationPackageFactory];
+  static ApplicationPackageFactory get instance => context.get<ApplicationPackageFactory>();
 
   Future<ApplicationPackage> getPackageForPlatform(
     TargetPlatform platform, {

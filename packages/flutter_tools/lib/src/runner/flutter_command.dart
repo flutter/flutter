@@ -77,7 +77,7 @@ abstract class FlutterCommand extends Command<void> {
   /// The currently executing command (or sub-command).
   ///
   /// Will be `null` until the top-most command has begun execution.
-  static FlutterCommand get current => context[FlutterCommand];
+  static FlutterCommand get current => context.get<FlutterCommand>();
 
   /// The option name for a custom observatory port.
   static const String observatoryPortOption = 'observatory-port';

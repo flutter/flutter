@@ -23,7 +23,7 @@ const AssetBundleFactory _kManifestFactory = _ManifestAssetBundleFactory();
 /// Injected factory class for spawning [AssetBundle] instances.
 abstract class AssetBundleFactory {
   /// The singleton instance, pulled from the [AppContext].
-  static AssetBundleFactory get instance => context[AssetBundleFactory];
+  static AssetBundleFactory get instance => context.get<AssetBundleFactory>();
 
   static AssetBundleFactory get defaultInstance => _kManifestFactory;
 
