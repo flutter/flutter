@@ -148,7 +148,7 @@ class SkiaGoldClient {
 
   Future<String> _getCommitHash() async {
     // TODO: Remove after baseline is established and pre-commit works
-    return 'b27b3d744670bb9312824ec94353b93e7d0424ea';
+    return '96f15c74adebb221eb044d3fc71b2d62da0046c0';
 //    if (!flutterRoot.existsSync()) {
 //      return null;
 //    } else {
