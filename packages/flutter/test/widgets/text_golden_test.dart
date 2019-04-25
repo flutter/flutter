@@ -267,7 +267,7 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesSkiaGoldFile('text_golden.Strut.1.png')
+      matchesSkiaGoldFile('text_golden.Strut.1.png'),
     );
   },);
 
@@ -295,7 +295,7 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesSkiaGoldFile('text_golden.Strut.2.png')
+      matchesSkiaGoldFile('text_golden.Strut.2.png'),
     );
   },);
 
@@ -346,7 +346,7 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesSkiaGoldFile('text_golden.Strut.3.png')
+      matchesSkiaGoldFile('text_golden.Strut.3.png'),
     );
   },);
 

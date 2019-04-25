@@ -854,7 +854,7 @@ void main() {
 
       await expectLater(
         find.byType(CupertinoDatePicker),
-        matchesSkiaGoldFile('date_picker_test.datetime.initial.png')
+        matchesSkiaGoldFile('date_picker_test.datetime.initial.png'),
       );
 
       // Slightly drag the hour component to make the current hour off-center.
