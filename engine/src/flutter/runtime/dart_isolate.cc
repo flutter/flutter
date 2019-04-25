@@ -791,6 +791,14 @@ void DartIsolate::AddIsolateShutdownCallback(fml::closure closure) {
 }
 
 void DartIsolate::OnShutdownCallback() {
+  {
+    tonic::DartApiScope api_scope;
+    Dart_Handle sticky_error = Dart_GetStickyError();
+    if (!Dart_IsNull(sticky_error) && !Dart_IsFatalError(sticky_error)) {
+      FML_LOG(ERROR) << Dart_GetError(sticky_error);
+    }
+  }
+
   shutdown_callbacks_.clear();
   if (isolate_shutdown_callback_) {
     isolate_shutdown_callback_();
