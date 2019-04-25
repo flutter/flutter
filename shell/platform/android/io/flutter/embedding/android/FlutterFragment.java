@@ -4,6 +4,8 @@
 
 package io.flutter.embedding.android;
 
+import static android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW;
+
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
@@ -24,8 +26,6 @@ import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.embedding.engine.renderer.OnFirstFrameRenderedListener;
 import io.flutter.plugin.platform.PlatformPlugin;
 import io.flutter.view.FlutterMain;
-
-import static android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW;
 
 /**
  * {@code Fragment} which displays a Flutter UI that takes up all available {@code Fragment} space.
@@ -228,7 +228,7 @@ public class FlutterFragment extends Fragment {
     public <T extends FlutterFragment> T build() {
       try {
         @SuppressWarnings("unchecked")
-        T frag = (T) fragmentClass.newInstance();
+        T frag = (T) fragmentClass.getDeclaredConstructor().newInstance();
         if (frag == null) {
           throw new RuntimeException("The FlutterFragment subclass sent in the constructor ("
               + fragmentClass.getCanonicalName() + ") does not match the expected return type.");
