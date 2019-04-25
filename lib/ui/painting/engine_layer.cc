@@ -24,9 +24,7 @@ size_t EngineLayer::GetAllocationSize() {
   // Provide an approximation of the total memory impact of this object to the
   // Dart GC.  The ContainerLayer may hold references to a tree of other layers,
   // which in turn may contain Skia objects.
-  // TODO(https://github.com/flutter/flutter/issues/31498): calculate the cost
-  // of the layer more accurately.
-  return 200000;
+  return 3000;
 };
 
 IMPLEMENT_WRAPPERTYPEINFO(ui, EngineLayer);
