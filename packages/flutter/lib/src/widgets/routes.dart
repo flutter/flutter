@@ -911,7 +911,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 
   @override
   TickerFuture didPush() {
-    if (_scopeKey?.currentState != null) {
+    if (_scopeKey.currentState != null) {
       navigator.focusScopeNode.setFirstFocus(_scopeKey.currentState.focusScopeNode);
     }
     return super.didPush();

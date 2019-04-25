@@ -791,7 +791,7 @@ class FocusScopeNode extends FocusNode {
     if (scope._parent == null) {
       _reparent(scope);
     }
-    assert(scope.ancestors.contains(this));
+    assert(scope.ancestors.contains(this), '$FocusScopeNode $scope must be a child of $this to set it as first focus.');
     // Move down the tree, checking each focusedChild until we get to a node
     // that either isn't a scope node, or has no focused child, and then request
     // focus on that node.
