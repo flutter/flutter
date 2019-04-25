@@ -649,7 +649,7 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
 ///         ),
 ///       ),
 ///     ),
-///   ),
+///   );
 /// }
 /// ```
 /// {@end-tool}
