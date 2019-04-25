@@ -6252,7 +6252,7 @@ typedef StatefulWidgetBuilder = Widget Function(BuildContext context, StateSette
 /// also has state.
 ///
 /// ```dart
-/// showDialog(
+/// await showDialog<void>(
 ///   context: context,
 ///   builder: (BuildContext context) {
 ///     int selectedRadio = 0;
@@ -6262,7 +6262,7 @@ typedef StatefulWidgetBuilder = Widget Function(BuildContext context, StateSette
 ///           return Column(
 ///             mainAxisSize: MainAxisSize.min,
 ///             children: List<Widget>.generate(4, (int index) {
-///               return Radio(
+///               return Radio<int>(
 ///                 value: index,
 ///                 groupValue: selectedRadio,
 ///                 onChanged: (int value) {
