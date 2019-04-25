@@ -665,7 +665,7 @@ void _defineTests() {
 
     const CustomPainterSemantics testSemantics2 = CustomPainterSemantics(
       rect: Rect.fromLTRB(1.0, 1.0, 2.0, 2.0),
-      properties: const SemanticsProperties(
+      properties: SemanticsProperties(
         label: 'background',
         textDirection: TextDirection.rtl,
       ),
