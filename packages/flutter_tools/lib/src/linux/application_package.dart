@@ -5,12 +5,10 @@
 import 'package:meta/meta.dart';
 
 import '../application_package.dart';
-import '../base/common.dart';
 import '../base/file_system.dart';
-import '../base/io.dart';
-import '../base/process_manager.dart';
 import '../build_info.dart';
 import '../project.dart';
+import 'makefile.dart';
 
 abstract class LinuxApp extends ApplicationPackage {
   LinuxApp({@required String projectBundleId}) : super(id: projectBundleId);
@@ -59,14 +57,12 @@ class BuildableLinuxApp extends LinuxApp {
 
   @override
   String executable(BuildMode buildMode) {
-    final ProcessResult result = processManager.runSync(<String>[
-      project.nameScript.path,
-      buildMode == BuildMode.debug ? 'debug' : 'release',
-    ]);
-    if (result.exitCode != 0) {
-      throwToolExit('Failed to find Linux project name');
+    final String binaryName = makefileExecutableName(project);
+    if (buildMode == BuildMode.debug) {
+      return fs.path.join(getLinuxBuildDirectory(), 'debug', binaryName);
+    } else {
+      return fs.path.join(getLinuxBuildDirectory(), 'release', binaryName);
     }
-    return result.stdout.toString().trim();
   }
 
   @override

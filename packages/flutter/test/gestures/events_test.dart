@@ -96,4 +96,18 @@ void main() {
       expect(event.synthesized, hover.synthesized);
     });
   });
+
+  group('Default values of PointerEvents:', () {
+    // Some parameters are intentionally set to a non-trivial value.
+
+    test('PointerDownEvent', () {
+      const PointerDownEvent event = PointerDownEvent();
+      expect(event.buttons, kPrimaryButton);
+    });
+
+    test('PointerMoveEvent', () {
+      const PointerMoveEvent event = PointerMoveEvent();
+      expect(event.buttons, kPrimaryButton);
+    });
+  });
 }
