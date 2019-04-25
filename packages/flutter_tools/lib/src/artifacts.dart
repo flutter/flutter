@@ -112,6 +112,9 @@ abstract class Artifacts {
   // Returns which set of engine artifacts is currently used for the [platform]
   // and [mode] combination.
   String getEngineType(TargetPlatform platform, [ BuildMode mode ]);
+
+  /// Get the root path to the artifacts for the `platform` and `mode` combination.
+  String getEngineArtifactsPath(TargetPlatform platform, [ BuildMode mode ]);
 }
 
 /// Manages the engine artifacts downloaded to the local cache.
@@ -142,11 +145,11 @@ class CachedArtifacts extends Artifacts {
 
   @override
   String getEngineType(TargetPlatform platform, [ BuildMode mode ]) {
-    return fs.path.basename(_getEngineArtifactsPath(platform, mode));
+    return fs.path.basename(getEngineArtifactsPath(platform, mode));
   }
 
   String _getAndroidArtifactPath(Artifact artifact, TargetPlatform platform, BuildMode mode) {
-    final String engineDir = _getEngineArtifactsPath(platform, mode);
+    final String engineDir = getEngineArtifactsPath(platform, mode);
     switch (artifact) {
       case Artifact.frontendServerSnapshotForEngineDartSdk:
         assert(mode != BuildMode.debug, 'Artifact $artifact only available in non-debug mode.');
@@ -162,7 +165,7 @@ class CachedArtifacts extends Artifacts {
   }
 
   String _getIosArtifactPath(Artifact artifact, TargetPlatform platform, BuildMode mode) {
-    final String engineDir = _getEngineArtifactsPath(platform, mode);
+    final String engineDir = getEngineArtifactsPath(platform, mode);
     switch (artifact) {
       case Artifact.genSnapshot:
       case Artifact.snapshotDart:
@@ -224,7 +227,8 @@ class CachedArtifacts extends Artifacts {
     }
   }
 
-  String _getEngineArtifactsPath(TargetPlatform platform, [ BuildMode mode ]) {
+  @override
+  String getEngineArtifactsPath(TargetPlatform platform, [ BuildMode mode ]) {
     final String engineDir = cache.getArtifactDirectory('engine').path;
     final String platformName = getNameForTargetPlatform(platform);
     switch (platform) {
@@ -346,6 +350,9 @@ class LocalEngineArtifacts extends Artifacts {
     }
     throw Exception('Unsupported platform $platform.');
   }
+
+  @override
+  String getEngineArtifactsPath(TargetPlatform platform, [ BuildMode mode ]) => engineOutPath;
 }
 
 /// An implementation of [Artifacts] that provides individual overrides.
@@ -388,4 +395,7 @@ class OverrideArtifacts implements Artifacts {
 
   @override
   String getEngineType(TargetPlatform platform, [ BuildMode mode ]) => parent.getEngineType(platform, mode);
+
+  @override
+  String getEngineArtifactsPath(TargetPlatform platform, [BuildMode mode]) => parent.getEngineArtifactsPath(platform, mode);
 }
