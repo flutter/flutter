@@ -88,14 +88,16 @@ class TabController extends ChangeNotifier {
         vsync: vsync,
       );
 
-  // Private constructor used by `copyWith`. This allows a new TabController to
+  // Private constructor used by `_copyWith`. This allows a new TabController to
   // be created without having to create a new animationController.
   TabController._({
     int index,
     int previousIndex,
     AnimationController animationController,
     @required this.length,
-  }) : _index = index, _previousIndex = previousIndex, _animationController = animationController;
+  }) : _index = index,
+       _previousIndex = previousIndex,
+       _animationController = animationController;
 
 
   /// Creates a new [TabController] with `index` and `length` if they are
