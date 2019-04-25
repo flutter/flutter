@@ -303,12 +303,12 @@ class RenderEditable extends RenderBox {
       Rect.zero,
     );
     // TODO(justinmc): https://github.com/flutter/flutter/issues/31495
-    // Check if the caret is visible with an approximation because a difference
-    // between rounded and unrounded values causes the caret to be reported as
-    // having a slightly (< 0.5) negative y offset. This rounding happens in
-    // paragraph.cc's layout and TextPainer's _applyFloatingPointHack. Ideally,
-    // the rounding mismatch will be fixed and this can be changed to be a
-    // strict check instead of an approximation.
+    // Check if the selection is visible with an approximation because a
+    // difference between rounded and unrounded values causes the caret to be
+    // reported as having a slightly (< 0.5) negative y offset. This rounding
+    // happens in paragraph.cc's layout and TextPainer's
+    // _applyFloatingPointHack. Ideally, the rounding mismatch will be fixed and
+    // this can be changed to be a strict check instead of an approximation.
     const double visibleRegionSlop = 0.5;
     _selectionStartInViewport.value = visibleRegion
       .inflate(visibleRegionSlop)

@@ -5675,7 +5675,7 @@ void main() {
     expect(topLeft.dx, equals(383)); // Should be same as equivalent in 'Caret center position'
   });
 
-  testWidgets('shows selection carets', (WidgetTester tester) async {
+  testWidgets('selection handles are rendered and not faded away', (WidgetTester tester) async {
     const String testText = 'lorem ipsum';
     final TextEditingController controller = TextEditingController(text: testText);
 
@@ -5708,7 +5708,7 @@ void main() {
     expect(right.opacity.value, equals(1.0));
   });
 
-  testWidgets('iOS shows selection carets', (WidgetTester tester) async {
+  testWidgets('iOS selection handles are rendered and not faded away', (WidgetTester tester) async {
     debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
     const String testText = 'lorem ipsum';
     final TextEditingController controller = TextEditingController(text: testText);

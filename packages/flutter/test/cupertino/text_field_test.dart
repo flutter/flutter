@@ -2092,7 +2092,7 @@ void main() {
     expect(editableText.cursorColor, const Color(0xFFF44336));
   });
 
-  testWidgets('iOS shows selection carets', (WidgetTester tester) async {
+  testWidgets('iOS shows selection handles', (WidgetTester tester) async {
     debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
     const String testText = 'lorem ipsum';
     final TextEditingController controller = TextEditingController(text: testText);
