@@ -140,7 +140,9 @@ void _drawFrame() {
 }
 
 // ignore: unused_element
-void _runMainZoned(Function startMainIsolateFunction, Function userMainFunction) {
+void _runMainZoned(Function startMainIsolateFunction,
+                   Function userMainFunction,
+                   List<String> args) {
   startMainIsolateFunction((){
     runZoned<Future<void>>(() {
       userMainFunction();

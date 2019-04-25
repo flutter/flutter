@@ -185,16 +185,17 @@ typedef _BinaryFunction(Null args, Null message);
 
 @pragma('vm:entry-point')
 // ignore: unused_element
-void _runMainZoned(Function startMainIsolateFunction, Function userMainFunction) {
+void _runMainZoned(Function startMainIsolateFunction,
+                   Function userMainFunction,
+                   List<String> args) {
   startMainIsolateFunction((){
     runZoned<Future<void>>(() {
-      const List<String> empty_args = <String>[];
       if (userMainFunction is _BinaryFunction) {
         // This seems to be undocumented but supported by the command line VM.
         // Let's do the same in case old entry-points are ported to Flutter.
-        (userMainFunction as dynamic)(empty_args, '');
+        (userMainFunction as dynamic)(args, '');
       } else if (userMainFunction is _UnaryFunction) {
-        (userMainFunction as dynamic)(empty_args);
+        (userMainFunction as dynamic)(args);
       } else {
         userMainFunction();
       }

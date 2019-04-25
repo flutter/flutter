@@ -179,13 +179,15 @@ Engine::RunStatus Engine::PrepareAndLaunchIsolate(
   }
 
   if (configuration.GetEntrypointLibrary().empty()) {
-    if (!isolate->Run(configuration.GetEntrypoint())) {
+    if (!isolate->Run(configuration.GetEntrypoint(),
+                      settings_.dart_entrypoint_args)) {
       FML_LOG(ERROR) << "Could not run the isolate.";
       return RunStatus::Failure;
     }
   } else {
     if (!isolate->RunFromLibrary(configuration.GetEntrypointLibrary(),
-                                 configuration.GetEntrypoint())) {
+                                 configuration.GetEntrypoint(),
+                                 settings_.dart_entrypoint_args)) {
       FML_LOG(ERROR) << "Could not run the isolate.";
       return RunStatus::Failure;
     }
