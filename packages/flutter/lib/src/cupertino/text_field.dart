@@ -469,17 +469,11 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
   FocusNode _focusNode;
   FocusNode get _effectiveFocusNode => widget.focusNode ?? (_focusNode ??= FocusNode());
 
-  PointerDeviceKind _lastUsedDeviceKind;
-
   // The selection overlay should only be shown when the user is interacting
   // through a touch screen (via either a finger or a stylus). A mouse shouldn't
   // trigger the selection overlay.
   // For backwards-compatibility, we treat a null kind the same as touch.
-  bool get _shouldShowSelectionOverlay {
-    return _lastUsedDeviceKind == null
-        || _lastUsedDeviceKind == PointerDeviceKind.touch
-        || _lastUsedDeviceKind == PointerDeviceKind.stylus;
-  }
+  bool _shouldShowSelectionOverlay = true;
 
   @override
   void initState() {
@@ -523,6 +517,16 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
 
   void _handleTapDown(TapDownDetails details) {
     _renderEditable.handleTapDown(details);
+
+    // The selection overlay should only be shown when the user is interacting
+    // through a touch screen (via either a finger or a stylus). A mouse shouldn't
+    // trigger the selection overlay.
+    // For backwards-compatibility, we treat a null kind the same as touch.
+    final PointerDeviceKind kind = details.kind;
+    _shouldShowSelectionOverlay =
+        kind == null ||
+        kind == PointerDeviceKind.touch ||
+        kind == PointerDeviceKind.stylus;
   }
 
   void _handleForcePressStarted(ForcePressDetails details) {
@@ -584,9 +588,6 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
     if (cause == SelectionChangedCause.keyboard)
       return false;
 
-    if (cause == SelectionChangedCause.longPress)
-      return true;
-
     if (_effectiveController.text.isNotEmpty)
       return true;
 
@@ -620,7 +621,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
       _editableText?.bringIntoView(selection.base);
     }
     if (_shouldShowHandles(cause)) {
-      _editableText.showHandles();
+      _editableText?.showHandles();
     }
   }
 
@@ -744,10 +745,6 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
     );
   }
 
-  void _updateLastUsedDeviceKind(PointerDownEvent event) {
-    _lastUsedDeviceKind = event.kind;
-  }
-
   @override
   Widget build(BuildContext context) {
     super.build(context); // See AutomaticKeepAliveClientMixin.
@@ -825,23 +822,20 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
                 : CupertinoTheme.of(context).brightness == Brightness.light
                     ? _kDisabledBackground
                     : CupertinoColors.darkBackgroundGray,
-            child: Listener(
-              onPointerDown: _updateLastUsedDeviceKind,
-              child: TextSelectionGestureDetector(
-                onTapDown: _handleTapDown,
-                onForcePressStart: _handleForcePressStarted,
-                onForcePressEnd: _handleForcePressEnded,
-                onSingleTapUp: _handleSingleTapUp,
-                onSingleLongTapStart: _handleSingleLongTapStart,
-                onSingleLongTapMoveUpdate: _handleSingleLongTapMoveUpdate,
-                onSingleLongTapEnd: _handleSingleLongTapEnd,
-                onDoubleTapDown: _handleDoubleTapDown,
-                onDragSelectionStart: _handleMouseDragSelectionStart,
-                onDragSelectionUpdate: _handleMouseDragSelectionUpdate,
-                onDragSelectionEnd: _handleMouseDragSelectionEnd,
-                behavior: HitTestBehavior.translucent,
-                child: _addTextDependentAttachments(paddedEditable, textStyle, placeholderStyle),
-              ),
+            child: TextSelectionGestureDetector(
+              onTapDown: _handleTapDown,
+              onForcePressStart: _handleForcePressStarted,
+              onForcePressEnd: _handleForcePressEnded,
+              onSingleTapUp: _handleSingleTapUp,
+              onSingleLongTapStart: _handleSingleLongTapStart,
+              onSingleLongTapMoveUpdate: _handleSingleLongTapMoveUpdate,
+              onSingleLongTapEnd: _handleSingleLongTapEnd,
+              onDoubleTapDown: _handleDoubleTapDown,
+              onDragSelectionStart: _handleMouseDragSelectionStart,
+              onDragSelectionUpdate: _handleMouseDragSelectionUpdate,
+              onDragSelectionEnd: _handleMouseDragSelectionEnd,
+              behavior: HitTestBehavior.translucent,
+              child: _addTextDependentAttachments(paddedEditable, textStyle, placeholderStyle),
             ),
           ),
         ),

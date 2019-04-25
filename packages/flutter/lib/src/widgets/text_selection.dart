@@ -402,7 +402,7 @@ class TextSelectionOverlay {
   /// Whether the toolbar is currently visible.
   bool get toolbarIsVisible => _toolbar != null;
 
-  /// Hides the overlay.
+  /// Hides the entire overlay including the toolbar and the handles.
   void hide() {
     if (_handles != null) {
       _handles[0].remove();
@@ -414,7 +414,9 @@ class TextSelectionOverlay {
     }
   }
 
-  /// Hides the toolbar.
+  /// Hides the toolbar part of the overlay.
+  ///
+  /// To hide the whole overlay, see [hide].
   void hideToolbar() {
     assert(_toolbar != null);
     _toolbarController.stop();

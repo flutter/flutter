@@ -513,17 +513,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     && widget.decoration != null
     && widget.decoration.counterText == null;
 
-  PointerDeviceKind _lastUsedDeviceKind;
-
-  // The selection overlay should only be shown when the user is interacting
-  // through a touch screen (via either a finger or a stylus). A mouse shouldn't
-  // trigger the selection overlay.
-  // For backwards-compatibility, we treat a null kind the same as touch.
-  bool get _shouldShowSelectionOverlay {
-    return _lastUsedDeviceKind == null
-        || _lastUsedDeviceKind == PointerDeviceKind.touch
-        || _lastUsedDeviceKind == PointerDeviceKind.stylus;
-  }
+  bool _shouldShowSelectionOverlay = true;
 
   InputDecoration _getEffectiveDecoration() {
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
@@ -706,6 +696,16 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
   void _handleTapDown(TapDownDetails details) {
     _renderEditable.handleTapDown(details);
     _startSplash(details.globalPosition);
+
+    // The selection overlay should only be shown when the user is interacting
+    // through a touch screen (via either a finger or a stylus). A mouse shouldn't
+    // trigger the selection overlay.
+    // For backwards-compatibility, we treat a null kind the same as touch.
+    final PointerDeviceKind kind = details.kind;
+    _shouldShowSelectionOverlay =
+        kind == null ||
+        kind == PointerDeviceKind.touch ||
+        kind == PointerDeviceKind.stylus;
   }
 
   void _handleForcePressStarted(ForcePressDetails details) {
@@ -811,10 +811,6 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
       to: updateDetails.globalPosition,
       cause: SelectionChangedCause.drag,
     );
-  }
-
-  void _updateLastUsedDeviceKind(PointerDownEvent event) {
-    _lastUsedDeviceKind = event.kind;
   }
 
   void _startSplash(Offset globalPosition) {
@@ -978,22 +974,19 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
       },
       child: IgnorePointer(
         ignoring: !(widget.enabled ?? widget.decoration?.enabled ?? true),
-        child: Listener(
-          onPointerDown: _updateLastUsedDeviceKind,
-          child: TextSelectionGestureDetector(
-            onTapDown: _handleTapDown,
-            onForcePressStart: forcePressEnabled ? _handleForcePressStarted : null,
-            onSingleTapUp: _handleSingleTapUp,
-            onSingleTapCancel: _handleSingleTapCancel,
-            onSingleLongTapStart: _handleSingleLongTapStart,
-            onSingleLongTapMoveUpdate: _handleSingleLongTapMoveUpdate,
-            onSingleLongTapEnd: _handleSingleLongTapEnd,
-            onDoubleTapDown: _handleDoubleTapDown,
-            onDragSelectionStart: _handleMouseDragSelectionStart,
-            onDragSelectionUpdate: _handleMouseDragSelectionUpdate,
-            behavior: HitTestBehavior.translucent,
-            child: child,
-          ),
+        child: TextSelectionGestureDetector(
+          onTapDown: _handleTapDown,
+          onForcePressStart: forcePressEnabled ? _handleForcePressStarted : null,
+          onSingleTapUp: _handleSingleTapUp,
+          onSingleTapCancel: _handleSingleTapCancel,
+          onSingleLongTapStart: _handleSingleLongTapStart,
+          onSingleLongTapMoveUpdate: _handleSingleLongTapMoveUpdate,
+          onSingleLongTapEnd: _handleSingleLongTapEnd,
+          onDoubleTapDown: _handleDoubleTapDown,
+          onDragSelectionStart: _handleMouseDragSelectionStart,
+          onDragSelectionUpdate: _handleMouseDragSelectionUpdate,
+          behavior: HitTestBehavior.translucent,
+          child: child,
         ),
       ),
     );
