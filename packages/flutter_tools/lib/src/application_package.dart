@@ -318,8 +318,13 @@ abstract class IOSApp extends ApplicationPackage {
     if (getCurrentHostPlatform() != HostPlatform.darwin_x64) {
       return null;
     }
-    // TODO(jonahwilliams): do more verification in this check.
     if (!project.exists) {
+      // If the project doesn't exist at all the existing hint to run flutter
+      // create is accurate.
+      return null;
+    }
+    if (!project.xcodeProject.existsSync()) {
+      printError('Expected ios/Runner.xcodeproj but this file is missing.');
       return null;
     }
     return BuildableIOSApp(project);
