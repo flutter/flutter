@@ -353,11 +353,6 @@ class RunCommand extends RunCommandBase {
       }
     }
 
-    if (argResults['train'] &&
-        getBuildMode() != BuildMode.debug && getBuildMode() != BuildMode.dynamicProfile)
-      throwToolExit('Error: --train is only allowed when running as --dynamic --profile '
-          '(recommended) or --debug (may include unwanted debug symbols).');
-
     List<String> expFlags;
     if (argParser.options.containsKey(FlutterOptions.kEnableExperiment) &&
         argResults[FlutterOptions.kEnableExperiment].isNotEmpty) {

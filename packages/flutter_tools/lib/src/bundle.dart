@@ -73,11 +73,7 @@ Future<void> build({
   final FlutterProject flutterProject = await FlutterProject.current();
 
   if (compilationTraceFilePath != null) {
-    if (buildMode != BuildMode.dynamicProfile && buildMode != BuildMode.dynamicRelease) {
-      // Silently ignore JIT snapshotting for those builds that don't support it.
-      compilationTraceFilePath = null;
-
-    } else if (compilationTraceFilePath.isEmpty) {
+    if (compilationTraceFilePath.isEmpty) {
       // Disable JIT snapshotting if flag is empty.
       printStatus('Code snapshot will be disabled for this build.');
       compilationTraceFilePath = null;

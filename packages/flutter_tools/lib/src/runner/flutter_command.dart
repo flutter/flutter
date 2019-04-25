@@ -244,10 +244,6 @@ abstract class FlutterCommand extends Command<void> {
     argParser.addFlag('release',
       negatable: false,
       help: 'Build a release version of your app${defaultToRelease ? ' (default mode)' : ''}.');
-    argParser.addFlag('dynamic',
-      hide: !verboseHelp,
-      negatable: false,
-      help: 'Enable dynamic code. Only allowed with --release or --profile.');
   }
 
   void addDynamicModeFlags({ bool verboseHelp = false }) {
@@ -284,29 +280,18 @@ abstract class FlutterCommand extends Command<void> {
 
   BuildMode getBuildMode() {
     final List<bool> modeFlags = <bool>[argResults['debug'], argResults['profile'], argResults['release']];
-    if (modeFlags.where((bool flag) => flag).length > 1)
+    if (modeFlags.where((bool flag) => flag).length > 1) {
       throw UsageException('Only one of --debug, --profile, or --release can be specified.', null);
-    final bool dynamicFlag = argParser.options.containsKey('dynamic')
-        ? argResults['dynamic']
-        : false;
-
+    }
     if (argResults['debug']) {
-      if (dynamicFlag)
-        throw ToolExit('Error: --dynamic requires --release or --profile.');
       return BuildMode.debug;
     }
-    if (argResults['profile'])
-      return dynamicFlag ? BuildMode.dynamicProfile : BuildMode.profile;
-    if (argResults['release'])
-      return dynamicFlag ? BuildMode.dynamicRelease : BuildMode.release;
-
-    if (_defaultBuildMode == BuildMode.debug && dynamicFlag)
-      throw ToolExit('Error: --dynamic requires --release or --profile.');
-    if (_defaultBuildMode == BuildMode.release && dynamicFlag)
-      return BuildMode.dynamicRelease;
-    if (_defaultBuildMode == BuildMode.profile && dynamicFlag)
-      return BuildMode.dynamicProfile;
-
+    if (argResults['profile']) {
+      return BuildMode.profile;
+    }
+    if (argResults['release']) {
+      return BuildMode.release;
+    }
     return _defaultBuildMode;
   }
 

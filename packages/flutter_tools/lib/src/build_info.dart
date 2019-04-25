@@ -72,8 +72,6 @@ class BuildInfo {
   static const BuildInfo debug = BuildInfo(BuildMode.debug, null);
   static const BuildInfo profile = BuildInfo(BuildMode.profile, null);
   static const BuildInfo release = BuildInfo(BuildMode.release, null);
-  static const BuildInfo dynamicProfile = BuildInfo(BuildMode.dynamicProfile, null);
-  static const BuildInfo dynamicRelease = BuildInfo(BuildMode.dynamicRelease, null);
 
   /// Returns whether a debug build is requested.
   ///
@@ -83,15 +81,12 @@ class BuildInfo {
   /// Returns whether a profile build is requested.
   ///
   /// Exactly one of [isDebug], [isProfile], or [isRelease] is true.
-  bool get isProfile => mode == BuildMode.profile || mode == BuildMode.dynamicProfile;
+  bool get isProfile => mode == BuildMode.profile;
 
   /// Returns whether a release build is requested.
   ///
   /// Exactly one of [isDebug], [isProfile], or [isRelease] is true.
-  bool get isRelease => mode == BuildMode.release || mode == BuildMode.dynamicRelease;
-
-  /// Returns whether a dynamic build is requested.
-  bool get isDynamic => mode == BuildMode.dynamicProfile || mode == BuildMode.dynamicRelease;
+  bool get isRelease => mode == BuildMode.release;
 
   bool get usesAot => isAotBuildMode(mode);
   bool get supportsEmulator => isEmulatorBuildMode(mode);
@@ -114,8 +109,6 @@ enum BuildMode {
   debug,
   profile,
   release,
-  dynamicProfile,
-  dynamicRelease
 }
 
 String validatedBuildNumberForPlatform(TargetPlatform targetPlatform, String buildNumber) {
@@ -208,9 +201,7 @@ bool isAotBuildMode(BuildMode mode) {
 
 // Returns true if the given build mode can be used on emulators / simulators.
 bool isEmulatorBuildMode(BuildMode mode) {
-  return mode == BuildMode.debug ||
-    mode == BuildMode.dynamicRelease ||
-    mode == BuildMode.dynamicProfile;
+  return mode == BuildMode.debug;
 }
 
 enum HostPlatform {
