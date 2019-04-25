@@ -112,7 +112,10 @@ abstract class InlineSpan extends DiagnosticableTree {
   /// Styles are not honored in this process. If `includeSemanticsLabels` is
   /// true, then the text returned will include the [TextStyle.semanticsLabel]s
   /// instead of the text contents for [TextSpan]s.
-  String toPlainText({bool includeSemanticsLabels = true});
+  ///
+  /// When [includePlaceholders] is true, [PlaceholderSpan]s in the tree will be
+  /// represented as a 0xFFFC 'object replacement character'.
+  String toPlainText({bool includeSemanticsLabels = true, bool includePlaceholders = true});
 
   /// Returns the UTF-16 code unit at the given index in the flattened string.
   ///

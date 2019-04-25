@@ -169,12 +169,6 @@ class WidgetSpan extends PlaceholderSpan {
     return true;
   }
 
-  /// [WidgetSpan]s are flattened to a `0xFFFC` object replacement character in the
-  /// plain text representation.
-  String toPlainText({bool includeSemanticsLabels = true}) {
-    return '\u{FFFC}';
-  }
-
   int codeUnitAt(int index) {
     return null;
   }

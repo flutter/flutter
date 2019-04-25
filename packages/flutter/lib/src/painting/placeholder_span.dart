@@ -56,6 +56,12 @@ abstract class PlaceholderSpan extends InlineSpan {
   /// This is ignored when using other alignment modes.
   final TextBaseline baseline;
 
+  /// [PlaceholderSpan]s are flattened to a `0xFFFC` object replacement character in the
+  /// plain text representation when [includePlaceholders] is true.
+  String toPlainText({bool includeSemanticsLabels = true, bool includePlaceholders = true}) {
+    return includePlaceholders ? '\uFFFC' : '';
+  }
+
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);

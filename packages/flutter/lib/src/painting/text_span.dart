@@ -235,7 +235,7 @@ class TextSpan extends InlineSpan {
   /// Styles are not honored in this process. If `includeSemanticsLabels` is
   /// true, then the text returned will include the [semanticsLabel]s instead of
   /// the text contents when they are present.
-  String toPlainText({bool includeSemanticsLabels = true}) {
+  String toPlainText({bool includeSemanticsLabels = true, bool includePlaceholders = true}) {
     assert(debugAssertIsValid());
     final StringBuffer buffer = StringBuffer();
     if (semanticsLabel != null && includeSemanticsLabels) {
@@ -245,13 +245,18 @@ class TextSpan extends InlineSpan {
     }
     if (children != null) {
       for (InlineSpan child in children) {
-        buffer.write(child.toPlainText(includeSemanticsLabels: includeSemanticsLabels));
+        buffer.write(child.toPlainText(
+          includeSemanticsLabels: includeSemanticsLabels,
+          includePlaceholders: includePlaceholders,
+        ));
       }
     }
     return buffer.toString();
   }
 
   /// Returns the UTF-16 code unit at the given index in the flattened string.
+  ///
+  /// This only accounts for the TextSpan.text values and ignores PlaceholderSpans.
   ///
   /// Returns null if the index is out of bounds.
   int codeUnitAt(int index) {
@@ -260,14 +265,14 @@ class TextSpan extends InlineSpan {
     int offset = 0;
     int result;
     visitChildren((InlineSpan span) {
-      if (span is! TextSpan)
-        return true;
-      TextSpan textSpan = span as TextSpan;
-      if (index - offset < textSpan.text.length) {
-        result = textSpan.text.codeUnitAt(index - offset);
-        return false;
+      if (span is TextSpan) {
+        TextSpan textSpan = span as TextSpan;
+        if (index - offset < textSpan.text.length) {
+          result = textSpan.text.codeUnitAt(index - offset);
+          return false;
+        }
+        offset += textSpan.text.length;
       }
-      offset += textSpan.text.length;
       return true;
     });
     return result;

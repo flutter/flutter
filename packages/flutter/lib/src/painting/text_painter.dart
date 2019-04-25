@@ -526,7 +526,7 @@ class TextPainter {
   // TODO(garyq): Use actual extended grapheme cluster length instead of
   // an increasing cluster length amount to achieve deterministic performance.
   Rect _getRectFromUpstream(int offset, Rect caretPrototype) {
-    final String flattenedText = _text.toPlainText();
+    final String flattenedText = _text.toPlainText(includePlaceholders: false);
     final int prevCodeUnit = _text.codeUnitAt(max(0, offset - 1));
     if (prevCodeUnit == null)
       return null;
@@ -542,10 +542,12 @@ class TextPainter {
       if (boxes.isEmpty) {
         // When we are at the beginning of the line, a non-surrogate position will
         // return empty boxes. We break and try from downstream instead.
-        if (!needsSearch)
+        if (!needsSearch) {
           break; // Only perform one iteration if no search is required.
-        if (prevRuneOffset < -flattenedText.length)
+        }
+        if (prevRuneOffset < -flattenedText.length) {
           break; // Stop iterating when beyond the max length of the text.
+        }
         // Multiply by two to log(n) time cover the entire text span. This allows
         // faster discovery of very long clusters and reduces the possibility
         // of certain large clusters taking much longer than others, which can
@@ -573,7 +575,7 @@ class TextPainter {
   // TODO(garyq): Use actual extended grapheme cluster length instead of
   // an increasing cluster length amount to achieve deterministic performance.
   Rect _getRectFromDownstream(int offset, Rect caretPrototype) {
-    final String flattenedText = _text.toPlainText();
+    final String flattenedText = _text.toPlainText(includePlaceholders: false);
     // We cap the offset at the final index of the _text.
     final int nextCodeUnit = _text.codeUnitAt(min(offset, flattenedText == null ? 0 : flattenedText.length - 1));
     if (nextCodeUnit == null)
@@ -589,10 +591,12 @@ class TextPainter {
       if (boxes.isEmpty) {
         // When we are at the end of the line, a non-surrogate position will
         // return empty boxes. We break and try from upstream instead.
-        if (!needsSearch)
+        if (!needsSearch) {
           break; // Only perform one iteration if no search is required.
-        if (nextRuneOffset >= flattenedText.length << 1)
+        }
+        if (nextRuneOffset >= flattenedText.length << 1) {
           break; // Stop iterating when beyond the max length of the text.
+        }
         // Multiply by two to log(n) time cover the entire text span. This allows
         // faster discovery of very long clusters and reduces the possibility
         // of certain large clusters taking much longer than others, which can
