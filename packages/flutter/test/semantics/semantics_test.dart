@@ -39,7 +39,7 @@ void main() {
       final Set<SemanticsTag> tags = <SemanticsTag>{tag1, tag2};
 
       final SemanticsNode node = SemanticsNode()
-        ..rect = Rect.fromLTRB(0.0, 0.0, 10.0, 10.0)
+        ..rect = const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0)
         ..tags = tags;
 
       expect(node.getSemanticsData().tags, tags);
@@ -55,7 +55,7 @@ void main() {
         childrenInInversePaintOrder: <SemanticsNode>[
           SemanticsNode()
             ..isMergedIntoParent = true
-            ..rect = Rect.fromLTRB(5.0, 5.0, 10.0, 10.0)
+            ..rect = const Rect.fromLTRB(5.0, 5.0, 10.0, 10.0)
             ..tags = tags,
         ],
       );
@@ -108,11 +108,11 @@ void main() {
 
   test('toStringDeep() does not throw with transform == null', () {
     final SemanticsNode child1 = SemanticsNode()
-      ..rect = Rect.fromLTRB(0.0, 0.0, 5.0, 5.0);
+      ..rect = const Rect.fromLTRB(0.0, 0.0, 5.0, 5.0);
     final SemanticsNode child2 = SemanticsNode()
-      ..rect = Rect.fromLTRB(5.0, 0.0, 10.0, 5.0);
+      ..rect = const Rect.fromLTRB(5.0, 0.0, 10.0, 5.0);
     final SemanticsNode root = SemanticsNode()
-      ..rect = Rect.fromLTRB(0.0, 0.0, 10.0, 5.0);
+      ..rect = const Rect.fromLTRB(0.0, 0.0, 10.0, 5.0);
     root.updateWith(
       config: null,
       childrenInInversePaintOrder: <SemanticsNode>[child1, child2],
@@ -187,11 +187,11 @@ void main() {
 
   test('toStringDeep respects childOrder parameter', () {
     final SemanticsNode child1 = SemanticsNode()
-      ..rect = Rect.fromLTRB(15.0, 0.0, 20.0, 5.0);
+      ..rect = const Rect.fromLTRB(15.0, 0.0, 20.0, 5.0);
     final SemanticsNode child2 = SemanticsNode()
-      ..rect = Rect.fromLTRB(10.0, 0.0, 15.0, 5.0);
+      ..rect = const Rect.fromLTRB(10.0, 0.0, 15.0, 5.0);
     final SemanticsNode root = SemanticsNode()
-      ..rect = Rect.fromLTRB(0.0, 0.0, 20.0, 5.0);
+      ..rect = const Rect.fromLTRB(0.0, 0.0, 20.0, 5.0);
     root.updateWith(
       config: null,
       childrenInInversePaintOrder: <SemanticsNode>[child1, child2],
@@ -233,19 +233,19 @@ void main() {
     );
 
     final SemanticsNode child3 = SemanticsNode()
-      ..rect = Rect.fromLTRB(0.0, 0.0, 10.0, 5.0);
+      ..rect = const Rect.fromLTRB(0.0, 0.0, 10.0, 5.0);
     child3.updateWith(
       config: null,
       childrenInInversePaintOrder: <SemanticsNode>[
         SemanticsNode()
-          ..rect = Rect.fromLTRB(5.0, 0.0, 10.0, 5.0),
+          ..rect = const Rect.fromLTRB(5.0, 0.0, 10.0, 5.0),
         SemanticsNode()
-          ..rect = Rect.fromLTRB(0.0, 0.0, 5.0, 5.0),
+          ..rect = const Rect.fromLTRB(0.0, 0.0, 5.0, 5.0),
       ],
     );
 
     final SemanticsNode rootComplex = SemanticsNode()
-      ..rect = Rect.fromLTRB(0.0, 0.0, 25.0, 5.0);
+      ..rect = const Rect.fromLTRB(0.0, 0.0, 25.0, 5.0);
     rootComplex.updateWith(
         config: null,
         childrenInInversePaintOrder: <SemanticsNode>[child1, child2, child3],
@@ -369,7 +369,7 @@ void main() {
       ..textDirection = TextDirection.rtl
       ..sortKey = const OrdinalSortKey(1.0);
     final SemanticsNode allProperties = SemanticsNode()
-      ..rect = Rect.fromLTWH(50.0, 10.0, 20.0, 30.0)
+      ..rect = const Rect.fromLTWH(50.0, 10.0, 20.0, 30.0)
       ..transform = Matrix4.translation(Vector3(10.0, 10.0, 0.0))
       ..updateWith(config: config, childrenInInversePaintOrder: null);
     expect(
@@ -393,7 +393,7 @@ void main() {
     );
 
     final SemanticsNode scaled = SemanticsNode()
-      ..rect = Rect.fromLTWH(50.0, 10.0, 20.0, 30.0)
+      ..rect = const Rect.fromLTWH(50.0, 10.0, 20.0, 30.0)
       ..transform = Matrix4.diagonal3(Vector3(10.0, 10.0, 1.0));
     expect(
       scaled.toStringDeep(),

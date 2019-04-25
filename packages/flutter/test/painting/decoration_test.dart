@@ -210,7 +210,7 @@ void main() {
       colorFilter: colorFilter,
       fit: BoxFit.contain,
       alignment: Alignment.bottomLeft,
-      centerSlice: Rect.fromLTWH(10.0, 20.0, 30.0, 40.0),
+      centerSlice: const Rect.fromLTWH(10.0, 20.0, 30.0, 40.0),
       repeat: ImageRepeat.repeatY,
     );
 
@@ -223,8 +223,8 @@ void main() {
     expect(call.isMethod, isTrue);
     expect(call.positionalArguments, hasLength(4));
     expect(call.positionalArguments[0], isInstanceOf<TestImage>());
-    expect(call.positionalArguments[1], Rect.fromLTRB(10.0, 20.0, 40.0, 60.0));
-    expect(call.positionalArguments[2], Rect.fromLTRB(0.0, 0.0, 100.0, 100.0));
+    expect(call.positionalArguments[1], const Rect.fromLTRB(10.0, 20.0, 40.0, 60.0));
+    expect(call.positionalArguments[2], const Rect.fromLTRB(0.0, 0.0, 100.0, 100.0));
     expect(call.positionalArguments[3], isInstanceOf<Paint>());
     expect(call.positionalArguments[3].isAntiAlias, false);
     expect(call.positionalArguments[3].colorFilter, colorFilter);
@@ -347,7 +347,7 @@ void main() {
     for (double scale = 1.0; scale <= 4.0; scale += 1.0) {
       final TestCanvas canvas = TestCanvas(<Invocation>[]);
 
-      final Rect outputRect = Rect.fromLTWH(30.0, 30.0, 250.0, 250.0);
+      const Rect outputRect = Rect.fromLTWH(30.0, 30.0, 250.0, 250.0);
       final ui.Image image = TestImage();
 
       paintImage(
@@ -391,7 +391,7 @@ void main() {
       final TestCanvas canvas = TestCanvas(<Invocation>[]);
 
       // container size > scaled image size
-      final Rect outputRect = Rect.fromLTWH(30.0, 30.0, 250.0, 250.0);
+      const Rect outputRect = Rect.fromLTWH(30.0, 30.0, 250.0, 250.0);
       final ui.Image image = TestImage();
 
       paintImage(
@@ -434,7 +434,7 @@ void main() {
     final TestCanvas canvas = TestCanvas(<Invocation>[]);
 
     // container height (20 px) < scaled image height (50 px)
-    final Rect outputRect = Rect.fromLTWH(30.0, 30.0, 250.0, 20.0);
+    const Rect outputRect = Rect.fromLTWH(30.0, 30.0, 250.0, 20.0);
     final ui.Image image = TestImage();
 
     paintImage(
@@ -486,7 +486,7 @@ void main() {
     for (BoxFit boxFit in boxFits) {
       final TestCanvas canvas = TestCanvas(<Invocation>[]);
 
-      final Rect outputRect = Rect.fromLTWH(30.0, 30.0, 250.0, 250.0);
+      const Rect outputRect = Rect.fromLTWH(30.0, 30.0, 250.0, 250.0);
       final ui.Image image = TestImage();
 
       paintImage(

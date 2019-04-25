@@ -12,7 +12,7 @@ import 'package:flutter/painting.dart' show DefaultShaderWarmUp;
 Future<void> beginFrame(Duration timeStamp) async {
   // PAINT
   final ui.PictureRecorder recorder = ui.PictureRecorder();
-  final ui.Rect paintBounds = ui.Rect.fromLTRB(0, 0, 1000, 1000);
+  const ui.Rect paintBounds = ui.Rect.fromLTRB(0, 0, 1000, 1000);
   final ui.Canvas canvas = ui.Canvas(recorder, paintBounds);
   final ui.Paint backgroundPaint = ui.Paint()..color = Colors.white;
   canvas.drawRect(paintBounds, backgroundPaint);
