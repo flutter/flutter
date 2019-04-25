@@ -92,7 +92,7 @@ static std::shared_ptr<DartIsolate> CreateAndRunRootIsolate(
     return nullptr;
   }
 
-  if (!isolate->Run(entrypoint, settings.root_isolate_create_callback)) {
+  if (!isolate->Run(entrypoint, {}, settings.root_isolate_create_callback)) {
     FML_LOG(ERROR) << "Could not run entrypoint: " << entrypoint << ".";
     return nullptr;
   }

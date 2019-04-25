@@ -55,3 +55,8 @@ void testCanLaunchSecondaryIsolate() {
   Isolate.spawn(secondaryIsolateMain, "Hello from root isolate.");
   NotifyNative();
 }
+
+@pragma('vm:entry-point')
+void testCanRecieveArguments(List<String> args) {
+  NotifyResult(args != null && args.length == 1 && args[0] == "arg1");
+}

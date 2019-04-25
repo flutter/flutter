@@ -446,7 +446,8 @@ bool DartIsolate::MarkIsolateRunnable() {
 }
 
 FML_WARN_UNUSED_RESULT
-static bool InvokeMainEntrypoint(Dart_Handle user_entrypoint_function) {
+static bool InvokeMainEntrypoint(Dart_Handle user_entrypoint_function,
+                                 Dart_Handle args) {
   if (tonic::LogIfError(user_entrypoint_function)) {
     FML_LOG(ERROR) << "Could not resolve main entrypoint function.";
     return false;
@@ -463,7 +464,7 @@ static bool InvokeMainEntrypoint(Dart_Handle user_entrypoint_function) {
 
   if (tonic::LogIfError(tonic::DartInvokeField(
           Dart_LookupLibrary(tonic::ToDart("dart:ui")), "_runMainZoned",
-          {start_main_isolate_function, user_entrypoint_function}))) {
+          {start_main_isolate_function, user_entrypoint_function, args}))) {
     FML_LOG(ERROR) << "Could not invoke the main entrypoint.";
     return false;
   }
@@ -472,7 +473,9 @@ static bool InvokeMainEntrypoint(Dart_Handle user_entrypoint_function) {
 }
 
 FML_WARN_UNUSED_RESULT
-bool DartIsolate::Run(const std::string& entrypoint_name, fml::closure on_run) {
+bool DartIsolate::Run(const std::string& entrypoint_name,
+                      const std::vector<std::string>& args,
+                      fml::closure on_run) {
   TRACE_EVENT0("flutter", "DartIsolate::Run");
   if (phase_ != Phase::Ready) {
     return false;
@@ -483,7 +486,9 @@ bool DartIsolate::Run(const std::string& entrypoint_name, fml::closure on_run) {
   auto user_entrypoint_function =
       Dart_GetField(Dart_RootLibrary(), tonic::ToDart(entrypoint_name.c_str()));
 
-  if (!InvokeMainEntrypoint(user_entrypoint_function)) {
+  auto entrypoint_args = tonic::ToDart(args);
+
+  if (!InvokeMainEntrypoint(user_entrypoint_function, entrypoint_args)) {
     return false;
   }
 
@@ -499,6 +504,7 @@ bool DartIsolate::Run(const std::string& entrypoint_name, fml::closure on_run) {
 FML_WARN_UNUSED_RESULT
 bool DartIsolate::RunFromLibrary(const std::string& library_name,
                                  const std::string& entrypoint_name,
+                                 const std::vector<std::string>& args,
                                  fml::closure on_run) {
   TRACE_EVENT0("flutter", "DartIsolate::RunFromLibrary");
   if (phase_ != Phase::Ready) {
@@ -511,7 +517,9 @@ bool DartIsolate::RunFromLibrary(const std::string& library_name,
       Dart_GetField(Dart_LookupLibrary(tonic::ToDart(library_name.c_str())),
                     tonic::ToDart(entrypoint_name.c_str()));
 
-  if (!InvokeMainEntrypoint(user_entrypoint_function)) {
+  auto entrypoint_args = tonic::ToDart(args);
+
+  if (!InvokeMainEntrypoint(user_entrypoint_function, entrypoint_args)) {
     return false;
   }
 

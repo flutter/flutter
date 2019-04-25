@@ -157,7 +157,8 @@ static void RunDartCodeInIsolate(DartVMRef& vm_ref,
                                  std::unique_ptr<AutoIsolateShutdown>& result,
                                  const Settings& settings,
                                  fml::RefPtr<fml::TaskRunner> task_runner,
-                                 std::string entrypoint) {
+                                 std::string entrypoint,
+                                 const std::vector<std::string>& args) {
   FML_CHECK(task_runner->RunsTasksOnCurrentThread());
 
   if (!vm_ref) {
@@ -248,7 +249,7 @@ static void RunDartCodeInIsolate(DartVMRef& vm_ref,
     return;
   }
 
-  if (!root_isolate->get()->Run(entrypoint,
+  if (!root_isolate->get()->Run(entrypoint, args,
                                 settings.root_isolate_create_callback)) {
     FML_LOG(ERROR) << "Could not run the method \"" << entrypoint
                    << "\" in the isolate.";
@@ -265,12 +266,14 @@ static std::unique_ptr<AutoIsolateShutdown> RunDartCodeInIsolate(
     DartVMRef& vm_ref,
     const Settings& settings,
     fml::RefPtr<fml::TaskRunner> task_runner,
-    std::string entrypoint) {
+    std::string entrypoint,
+    const std::vector<std::string>& args) {
   std::unique_ptr<AutoIsolateShutdown> result;
   fml::AutoResetWaitableEvent latch;
   fml::TaskRunner::RunNowOrPostTask(
       task_runner, fml::MakeCopyable([&]() mutable {
-        RunDartCodeInIsolate(vm_ref, result, settings, task_runner, entrypoint);
+        RunDartCodeInIsolate(vm_ref, result, settings, task_runner, entrypoint,
+                             args);
         latch.Signal();
       }));
   latch.Wait();
@@ -281,8 +284,8 @@ TEST_F(DartIsolateTest, IsolateCanLoadAndRunDartCode) {
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());
   const auto settings = CreateSettingsForFixture();
   auto vm_ref = DartVMRef::Create(settings);
-  auto isolate =
-      RunDartCodeInIsolate(vm_ref, settings, GetCurrentTaskRunner(), "main");
+  auto isolate = RunDartCodeInIsolate(vm_ref, settings, GetCurrentTaskRunner(),
+                                      "main", {});
   ASSERT_TRUE(isolate);
   ASSERT_EQ(isolate->get()->GetPhase(), DartIsolate::Phase::Running);
 }
@@ -292,7 +295,7 @@ TEST_F(DartIsolateTest, IsolateCannotLoadAndRunUnknownDartEntrypoint) {
   const auto settings = CreateSettingsForFixture();
   auto vm_ref = DartVMRef::Create(settings);
   auto isolate = RunDartCodeInIsolate(vm_ref, settings, GetCurrentTaskRunner(),
-                                      "thisShouldNotExist");
+                                      "thisShouldNotExist", {});
   ASSERT_FALSE(isolate);
 }
 
@@ -300,8 +303,8 @@ TEST_F(DartIsolateTest, CanRunDartCodeCodeSynchronously) {
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());
   const auto settings = CreateSettingsForFixture();
   auto vm_ref = DartVMRef::Create(settings);
-  auto isolate =
-      RunDartCodeInIsolate(vm_ref, settings, GetCurrentTaskRunner(), "main");
+  auto isolate = RunDartCodeInIsolate(vm_ref, settings, GetCurrentTaskRunner(),
+                                      "main", {});
 
   ASSERT_TRUE(isolate);
   ASSERT_EQ(isolate->get()->GetPhase(), DartIsolate::Phase::Running);
@@ -325,7 +328,7 @@ TEST_F(DartIsolateTest, CanRegisterNativeCallback) {
   const auto settings = CreateSettingsForFixture();
   auto vm_ref = DartVMRef::Create(settings);
   auto isolate = RunDartCodeInIsolate(vm_ref, settings, GetThreadTaskRunner(),
-                                      "canRegisterNativeCallback");
+                                      "canRegisterNativeCallback", {});
   ASSERT_TRUE(isolate);
   ASSERT_EQ(isolate->get()->GetPhase(), DartIsolate::Phase::Running);
   latch.Wait();
@@ -348,7 +351,7 @@ TEST_F(DartIsolateTest, CanSaveCompilationTrace) {
   const auto settings = CreateSettingsForFixture();
   auto vm_ref = DartVMRef::Create(settings);
   auto isolate = RunDartCodeInIsolate(vm_ref, settings, GetThreadTaskRunner(),
-                                      "testCanSaveCompilationTrace");
+                                      "testCanSaveCompilationTrace", {});
   ASSERT_TRUE(isolate);
   ASSERT_EQ(isolate->get()->GetPhase(), DartIsolate::Phase::Running);
 
@@ -371,7 +374,26 @@ TEST_F(DartIsolateTest, CanLaunchSecondaryIsolates) {
   const auto settings = CreateSettingsForFixture();
   auto vm_ref = DartVMRef::Create(settings);
   auto isolate = RunDartCodeInIsolate(vm_ref, settings, GetThreadTaskRunner(),
-                                      "testCanLaunchSecondaryIsolate");
+                                      "testCanLaunchSecondaryIsolate", {});
+  ASSERT_TRUE(isolate);
+  ASSERT_EQ(isolate->get()->GetPhase(), DartIsolate::Phase::Running);
+
+  latch.Wait();
+}
+
+TEST_F(DartIsolateTest, CanRecieveArguments) {
+  fml::AutoResetWaitableEvent latch;
+  AddNativeCallback("NotifyNative",
+                    CREATE_NATIVE_ENTRY(([&latch](Dart_NativeArguments args) {
+                      ASSERT_TRUE(tonic::DartConverter<bool>::FromDart(
+                          Dart_GetNativeArgument(args, 0)));
+                      latch.Signal();
+                    })));
+
+  const auto settings = CreateSettingsForFixture();
+  auto vm_ref = DartVMRef::Create(settings);
+  auto isolate = RunDartCodeInIsolate(vm_ref, settings, GetThreadTaskRunner(),
+                                      "testCanRecieveArguments", {"arg1"});
   ASSERT_TRUE(isolate);
   ASSERT_EQ(isolate->get()->GetPhase(), DartIsolate::Phase::Running);
 

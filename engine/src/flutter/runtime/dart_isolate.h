@@ -89,11 +89,14 @@ class DartIsolate : public UIDartState {
       std::vector<std::unique_ptr<const fml::Mapping>> kernels);
 
   FML_WARN_UNUSED_RESULT
-  bool Run(const std::string& entrypoint, fml::closure on_run = nullptr);
+  bool Run(const std::string& entrypoint,
+           const std::vector<std::string>& args,
+           fml::closure on_run = nullptr);
 
   FML_WARN_UNUSED_RESULT
   bool RunFromLibrary(const std::string& library_name,
                       const std::string& entrypoint,
+                      const std::vector<std::string>& args,
                       fml::closure on_run = nullptr);
 
   FML_WARN_UNUSED_RESULT
