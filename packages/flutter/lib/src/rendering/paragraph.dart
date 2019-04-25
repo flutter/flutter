@@ -709,34 +709,38 @@ class RenderParagraph extends RenderBox
     return _textPainter.size;
   }
 
-  final List<int> _recognizerOffsets = <int>[];
-  final List<GestureRecognizer> _recognizers = <GestureRecognizer>[];
+  // The byte offsets for each span that requires custom semantics.
+  final List<int> _inlineSemanticsOffsets = <int>[];
+  // Holds either [GestureRecognizer] or null (for placeholders) to generate
+  // proper semnatics configurations.
+  final List<dynamic> _inlineSemanticsElements = <dynamic>[];
 
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
-    _recognizerOffsets.clear();
-    _recognizers.clear();
+    _inlineSemanticsOffsets.clear();
+    _inlineSemanticsElements.clear();
     int offset = 0;
     text.visitChildren((InlineSpan span) {
       if (span is TextSpan) {
         TextSpan textSpan = span as TextSpan;
         if (textSpan.recognizer != null && (textSpan.recognizer is TapGestureRecognizer || textSpan.recognizer is LongPressGestureRecognizer)) {
           final int length = textSpan.semanticsLabel?.length ?? textSpan.text.length;
-          _recognizerOffsets.add(offset);
-          _recognizerOffsets.add(offset + length);
-          _recognizers.add(textSpan.recognizer);
+          _inlineSemanticsOffsets.add(offset);
+          _inlineSemanticsOffsets.add(offset + length);
+          _inlineSemanticsElements.add(textSpan.recognizer);
         }
         offset += textSpan.text != null ? textSpan.text.length : 0;
       } else if (span is PlaceholderSpan) {
-        _recognizerOffsets.add(offset);
-        _recognizerOffsets.add(offset + 1);
-        _recognizers.add(null);
+        // Add this to the list of inline elements that need custom semantics.
+        _inlineSemanticsOffsets.add(offset);
+        _inlineSemanticsOffsets.add(offset + 1);
+        _inlineSemanticsElements.add(null); // null indicates this is a placeholder.
         offset += 1;
       }
       return true;
     });
-    if (_recognizerOffsets.isNotEmpty) {
+    if (_inlineSemanticsOffsets.isNotEmpty) {
       config.explicitChildNodes = true;
       config.isSemanticBoundary = true;
     } else {
@@ -747,9 +751,9 @@ class RenderParagraph extends RenderBox
 
   @override
   void assembleSemanticsNode(SemanticsNode node, SemanticsConfiguration config, Iterable<SemanticsNode> children) {
-    assert(_recognizerOffsets.isNotEmpty);
-    assert(_recognizerOffsets.length.isEven);
-    assert(_recognizers.isNotEmpty);
+    assert(_inlineSemanticsOffsets.isNotEmpty);
+    assert(_inlineSemanticsOffsets.length.isEven);
+    assert(_inlineSemanticsElements.isNotEmpty);
     final List<SemanticsNode> newChildren = <SemanticsNode>[];
     final String rawLabel = text.toPlainText();
     int current = 0;
@@ -787,9 +791,9 @@ class RenderParagraph extends RenderBox
     }
 
     int childIndex = 0;
-    for (int i = 0, j = 0; i < _recognizerOffsets.length; i += 2, j++) {
-      final int start = _recognizerOffsets[i];
-      final int end = _recognizerOffsets[i + 1];
+    for (int i = 0, j = 0; i < _inlineSemanticsOffsets.length; i += 2, j++) {
+      final int start = _inlineSemanticsOffsets[i];
+      final int end = _inlineSemanticsOffsets[i + 1];
       // Add semantics for any text between the previous recognizer/widget and this one.
       if (current != start) {
         final SemanticsNode node = SemanticsNode();
@@ -798,14 +802,16 @@ class RenderParagraph extends RenderBox
         node.rect = currentRect;
         newChildren.add(node);
       }
-      // Add semantics for this recognizer/widget
-      final GestureRecognizer recognizer = _recognizers[j];
+      final dynamic inlineElement = _inlineSemanticsElements[j];
       final SemanticsConfiguration configuration = buildSemanticsConfig(start, end, includeText: false);
-      if (recognizer != null) {
+      if (inlineElement != null) {
+        // Add semantics for this recognizer.
         final SemanticsNode node = SemanticsNode();
-        if (recognizer is TapGestureRecognizer) {
+        if (inlineElement is TapGestureRecognizer) {
+          final TapGestureRecognizer recognizer = inlineElement as GestureRecognizer;
           configuration.onTap = recognizer.onTap;
-        } else if (recognizer is LongPressGestureRecognizer) {
+        } else if (inlineElement is LongPressGestureRecognizer) {
+          final LongPressGestureRecognizer recognizer = inlineElement as GestureRecognizer;
           configuration.onLongPress = recognizer.onLongPress;
         } else {
           assert(false);
@@ -814,6 +820,8 @@ class RenderParagraph extends RenderBox
         node.rect = currentRect;
         newChildren.add(node);
       } else if (childIndex < children.length) {
+        // Add semantics for this placeholder. Semantics are precomputed in the children
+        // argument.
         newChildren.add(children.elementAt(childIndex));
         childIndex += 1;
       }
