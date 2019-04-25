@@ -207,7 +207,7 @@ class CupertinoTextThemeData extends Diagnosticable {
   }
 
   final TextStyle _dateTimePickerTextStyle;
-  /// Typography of pickers.
+  /// Typography of date time pickers.
   TextStyle get dateTimePickerTextStyle {
     return _dateTimePickerTextStyle ??
         (_isLight ? _kDefaultDateTimePickerLightTextStyle : _kDefaultDateTimePickerDarkTextStyle);
