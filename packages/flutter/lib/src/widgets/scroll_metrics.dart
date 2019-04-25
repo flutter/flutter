@@ -111,7 +111,7 @@ abstract class ScrollMetrics {
   double get extentInside {
     return math.min(pixels, maxScrollExtent) -
            math.max(pixels, minScrollExtent) +
-           math.min(viewportDimension, viewportDimension + maxScrollExtent - minScrollExtent);
+           viewportDimension;
   }
 
   /// The quantity of content conceptually "below" the currently visible content

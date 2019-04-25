@@ -197,10 +197,8 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
       }
     }
 
-    final double fractionPast = before / (before + after);
-    final double thumbOffset = (before + after > 0.0)
-        ? fractionPast * (viewport - thumbExtent - 2 * mainAxisMargin) + mainAxisMargin
-        : mainAxisMargin;
+    final double fractionPast = (before + after > 0.0) ? before / (before + after) : 0;
+    final double thumbOffset = fractionPast * (viewport - thumbExtent - 2 * mainAxisMargin) + mainAxisMargin;
 
     painter(canvas, size, thumbOffset, thumbExtent);
   }
@@ -220,16 +218,48 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 
     switch (_lastAxisDirection) {
       case AxisDirection.down:
-        _paintThumb(_lastMetrics.extentBefore, _lastMetrics.extentInside, _lastMetrics.extentAfter, size.height, canvas, size, _paintVerticalThumb);
+      _paintThumb(
+        _lastMetrics.extentBefore + padding.top,
+        math.max(0, _lastMetrics.extentInside - padding.vertical),
+        _lastMetrics.extentAfter + padding.bottom,
+        math.max(0, size.height - padding.vertical),
+        canvas,
+        size,
+        _paintVerticalThumb
+      );
         break;
       case AxisDirection.up:
-        _paintThumb(_lastMetrics.extentAfter, _lastMetrics.extentInside, _lastMetrics.extentBefore, size.height, canvas, size, _paintVerticalThumb);
+      _paintThumb(
+        _lastMetrics.extentAfter + padding.bottom,
+        math.max(0, _lastMetrics.extentInside - padding.vertical),
+        _lastMetrics.extentBefore + padding.top,
+        math.max(0, size.height - padding.vertical),
+        canvas,
+        size,
+        _paintVerticalThumb
+      );
         break;
       case AxisDirection.right:
-        _paintThumb(_lastMetrics.extentBefore, _lastMetrics.extentInside, _lastMetrics.extentAfter, size.width, canvas, size, _paintHorizontalThumb);
+      _paintThumb(
+        _lastMetrics.extentBefore + padding.left,
+        math.max(0, _lastMetrics.extentInside - padding.horizontal),
+        _lastMetrics.extentAfter + padding.right,
+        math.max(0, size.width - padding.horizontal),
+        canvas,
+        size,
+        _paintHorizontalThumb
+      );
         break;
       case AxisDirection.left:
-        _paintThumb(_lastMetrics.extentAfter, _lastMetrics.extentInside, _lastMetrics.extentBefore, size.width, canvas, size, _paintHorizontalThumb);
+      _paintThumb(
+        _lastMetrics.extentAfter + padding.right,
+        math.max(0, _lastMetrics.extentInside - padding.horizontal),
+        _lastMetrics.extentBefore + padding.left,
+        math.max(0, size.width - padding.horizontal),
+        canvas,
+        size,
+        _paintHorizontalThumb
+      );
         break;
     }
   }
