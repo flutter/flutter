@@ -383,8 +383,8 @@ class RunCommand extends RunCommandBase {
     }
 
     ResidentRunner runner;
+    final String applicationBinaryPath = argResults['use-application-binary'];
     if (hotMode) {
-      final String applicationBinaryPath = argResults['use-application-binary'];
       runner = HotRunner(
         flutterDevices,
         target: targetFile,
