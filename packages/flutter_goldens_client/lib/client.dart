@@ -189,7 +189,7 @@ class SkiaGoldClient {
 
   Future<String> _getCommitHash() async {
     // TODO(katelovett): Remove after pre-commit tests can be ingested by Skia Gold
-    return 'd4e4726ac262b9f78b002b696f915f552fed3fc8';
+    return 'e51947241b37790a9e4e33bfdef59aaa9b930851';
 //    if (!flutterRoot.existsSync()) {
 //      return null;
 //    } else {

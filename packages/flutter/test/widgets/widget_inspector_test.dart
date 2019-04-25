@@ -1999,9 +1999,10 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       );
       // Add a margin so that the clip icon shows up in the screenshot.
       // This golden image is platform dependent due to the clip icon.
+      final String platform = Platform.operatingSystem;
       await expectLater(
         clipRectScreenshot,
-        matchesSkiaGoldFile('inspector.clipRect_debugPaint_margin.png'),
+        matchesSkiaGoldFile('inspector.clipRect_debugPaint_margin.$platform.png'),
       );
 
       // Verify we get the same image if we go through the service extension
