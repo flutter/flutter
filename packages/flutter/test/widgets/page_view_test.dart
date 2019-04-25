@@ -715,8 +715,8 @@ void main() {
 
   testWidgets('PageMetrics', (WidgetTester tester) async {
     final PageMetrics page = PageMetrics(
-      minScrollExtent: 100.0,
-      maxScrollExtent: 200.0,
+      minScrollExtent: 0.0,
+      maxScrollExtent: 100.0,
       pixels: 150.0,
       viewportDimension: 25.0,
       axisDirection: AxisDirection.right,

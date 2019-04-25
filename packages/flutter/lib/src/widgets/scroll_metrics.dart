@@ -60,23 +60,31 @@ abstract class ScrollMetrics {
   ///
   /// The actual [pixels] value might be [outOfRange].
   ///
-  /// This value can be negative infinity, if the scroll is unbounded.
+  /// This value must not be null and must be equal to or less than 0.
+  /// It can be negative infinity, if the scroll is unbounded.
   double get minScrollExtent;
 
   /// The maximum in-range value for [pixels].
   ///
   /// The actual [pixels] value might be [outOfRange].
   ///
-  /// This value can be infinity, if the scroll is unbounded.
+  /// This value must not be null and must be equal to or greater than 0.
+  /// It can be infinity, if the scroll is unbounded.
   double get maxScrollExtent;
 
   /// The current scroll position, in logical pixels along the [axisDirection].
+  ///
+  /// Must not be null.
   double get pixels;
 
   /// The extent of the viewport along the [axisDirection].
+  ///
+  /// Must not be null.
   double get viewportDimension;
 
   /// The direction in which the scroll view scrolls.
+  ///
+  /// Must not be null.
   AxisDirection get axisDirection;
 
   /// The axis in which the scroll view scrolls.
@@ -103,7 +111,7 @@ abstract class ScrollMetrics {
   double get extentInside {
     return math.min(pixels, maxScrollExtent) -
            math.max(pixels, minScrollExtent) +
-           math.min(viewportDimension, maxScrollExtent - minScrollExtent);
+           math.min(viewportDimension, viewportDimension + maxScrollExtent - minScrollExtent);
   }
 
   /// The quantity of content conceptually "below" the currently visible content
@@ -123,7 +131,13 @@ class FixedScrollMetrics extends ScrollMetrics {
     @required this.pixels,
     @required this.viewportDimension,
     @required this.axisDirection,
-  });
+  }) : assert(minScrollExtent != null),
+       assert(minScrollExtent <= 0),
+       assert(maxScrollExtent != null),
+       assert(minScrollExtent <= 0),
+       assert(pixels != null),
+       assert(viewportDimension != null),
+       assert(axisDirection != null);
 
   @override
   final double minScrollExtent;

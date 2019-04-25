@@ -43,6 +43,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     @required this.textDirection,
     @required this.thickness,
     @required this.fadeoutOpacityAnimation,
+    this.padding = EdgeInsets.zero,
     this.mainAxisMargin = 0.0,
     this.crossAxisMargin = 0.0,
     this.radius,
@@ -54,7 +55,8 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
        assert(fadeoutOpacityAnimation != null),
        assert(mainAxisMargin != null),
        assert(crossAxisMargin != null),
-       assert(minLength != null) {
+       assert(minLength != null),
+       assert(padding != null) {
     fadeoutOpacityAnimation.addListener(notifyListeners);
   }
 
@@ -85,6 +87,8 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   ///
   /// Scrollbar will be rectangular if [radius] is null.
   final Radius radius;
+
+  final EdgeInsets padding;
 
   /// The smallest size the scrollbar can shrink to when the total scrollable
   /// extent is large and the current visible viewport is small, and the
@@ -213,6 +217,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
         || _lastMetrics == null
         || fadeoutOpacityAnimation.value == 0.0)
       return;
+
     switch (_lastAxisDirection) {
       case AxisDirection.down:
         _paintThumb(_lastMetrics.extentBefore, _lastMetrics.extentInside, _lastMetrics.extentAfter, size.height, canvas, size, _paintVerticalThumb);
@@ -227,6 +232,8 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
         _paintThumb(_lastMetrics.extentAfter, _lastMetrics.extentInside, _lastMetrics.extentBefore, size.width, canvas, size, _paintHorizontalThumb);
         break;
     }
+
+    _paintThumb(_lastMetrics.extentBefore, _lastMetrics.extentInside, _lastMetrics.extentAfter, size.height, canvas, size, _paintVerticalThumb);
   }
 
   // Scrollbars are (currently) not interactive.
