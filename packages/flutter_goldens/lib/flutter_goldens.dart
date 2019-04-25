@@ -69,14 +69,14 @@ class FlutterGoldenFileComparator implements GoldenFileComparator {
     // Calculate the appropriate basedir for the current test context.
     const FileSystem fs = LocalFileSystem();
     final Directory testDirectory = fs.directory(defaultComparator.basedir);
-    //print('test: $testDirectory');
+    print('test: $testDirectory');
     final Directory flutterRoot = fs.directory(Platform.environment[_kFlutterRootKey]);
-    //print('flutter: $flutterRoot');
+    print('flutter: $flutterRoot');
     final Directory goldenRoot = flutterRoot.childDirectory(fs.path.join('bin', 'cache', 'pkg', 'goldens'));
-    //print('golden: $goldenRoot');
+    print('golden: $goldenRoot');
     final String testDirectoryRelativePath = fs.path.relative(testDirectory.path, from: flutterRoot.path);
-    //print('testDRP: $testDirectoryRelativePath');
-    //print('FGFC instantiated with:${goldenRoot.childDirectory(testDirectoryRelativePath).uri}');
+    print('testDRP: $testDirectoryRelativePath');
+    print('FGFC instantiated with:${goldenRoot.childDirectory(testDirectoryRelativePath).uri}');
     return FlutterGoldenFileComparator(goldenRoot.childDirectory(testDirectoryRelativePath).uri);
   }
 
