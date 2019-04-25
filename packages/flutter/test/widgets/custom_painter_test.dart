@@ -665,7 +665,7 @@ void _defineTests() {
 
     const CustomPainterSemantics testSemantics2 = CustomPainterSemantics(
       rect: Rect.fromLTRB(1.0, 1.0, 2.0, 2.0),
-      properties: SemanticsProperties(
+      properties: const SemanticsProperties(
         label: 'background',
         textDirection: TextDirection.rtl,
       ),
@@ -675,8 +675,8 @@ void _defineTests() {
       semantics: testSemantics2,
     )));
     expect(_PainterWithSemantics.shouldRebuildSemanticsCallCount, 2);
-    expect(_PainterWithSemantics.buildSemanticsCallCount, 2);
-    expect(_PainterWithSemantics.semanticsBuilderCallCount, 5);
+    expect(_PainterWithSemantics.buildSemanticsCallCount, 1);
+    expect(_PainterWithSemantics.semanticsBuilderCallCount, 4);
 
     semanticsTester.dispose();
   });
