@@ -188,7 +188,7 @@ void main() {
   test('rectMoreOrLessEquals', () {
     expect(
       Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
-      rectMoreOrLessEquals(Rect.fromLTRB(1e-11, 0.0, 10.0, 10.0000000001)),
+      rectMoreOrLessEquals(Rect.fromLTRB(0.0, 0.0, 10.0, 10.00000000001)),
     );
 
     expect(
