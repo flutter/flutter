@@ -1107,11 +1107,6 @@ enum LiveTestWidgetsFlutterBindingFramePolicy {
 /// anyway.)
 class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   @override
-  void initInstances() {
-    super.initInstances();
-  }
-
-  @override
   bool get inTest => _inTest;
   bool _inTest = false;
 
