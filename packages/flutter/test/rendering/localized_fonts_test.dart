@@ -49,7 +49,7 @@ void main() {
 
       await expectLater(
         find.byType(RichText),
-      matchesSkiaGoldFile('localized_fonts.rich_text.styled_text_span.png'),
+        matchesSkiaGoldFile('localized_fonts.rich_text.styled_text_span.png'),
       );
     },
   );
