@@ -294,6 +294,15 @@ void main() {
 
       expect(iosApp, null);
     }, overrides: overrides);
+
+    testUsingContext('returns null when there is no Runner.xcodeproj/project.pbxproj', () async {
+      fs.file('pubspec.yaml').createSync();
+      fs.file('.packages').createSync();
+      fs.file('ios/Runner.xcodeproj').createSync(recursive: true);
+      final BuildableIOSApp iosApp = IOSApp.fromIosProject((await FlutterProject.fromDirectory(fs.currentDirectory)).ios);
+
+      expect(iosApp, null);
+    }, overrides: overrides);
   });
 }
 
