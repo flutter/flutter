@@ -51,7 +51,7 @@ class SkiaGoldClient {
 
   Directory _workDirectory;
 
-  //TODO(katelovett): Environment variables are temporary for local testing
+  // TODO(Piinks): Environment variables are temporary for local testing, https://github.com/flutter/flutter/pull/31630
   /// The local [Directory] where the Flutter repository is hosted.
   ///
   /// Uses the [fs] file system.
@@ -80,7 +80,7 @@ class SkiaGoldClient {
   Future<bool> auth(Directory workDirectory) async {
     _workDirectory = workDirectory;
 
-    //TODO(katelovett): Cleanup for final CI implementation
+    // TODO(Piinks): Cleanup for final CI implementation, https://github.com/flutter/flutter/pull/31630
     if (_serviceAccount == null)
       return false; // Not in the proper environment for golden file testing.
 
@@ -188,7 +188,7 @@ class SkiaGoldClient {
   }
 
   Future<String> _getCommitHash() async {
-    // TODO(katelovett): Remove after pre-commit tests can be ingested by Skia Gold
+    // TODO(Piinks): Remove after pre-commit tests can be ingested by Skia Gold, https://github.com/flutter/flutter/pull/31630
     return 'e51947241b37790a9e4e33bfdef59aaa9b930851';
 //    if (!flutterRoot.existsSync()) {
 //      return null;
@@ -214,7 +214,7 @@ class SkiaGoldClient {
   }
 
   String _getKeysJSON() {
-    // TODO(katelovett): Parse out cleaner key information
+    // TODO(Piinks): Parse out cleaner key information, https://github.com/flutter/flutter/pull/31630
     return convert.json.encode(
       <String, dynamic>{
         'Operating System' : io.Platform.operatingSystem,

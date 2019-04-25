@@ -13,35 +13,36 @@ import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
 const String _kFlutterRoot = '/flutter';
-const String _kGoldenRoot = '$_kFlutterRoot/bin/cache/pkg/goldens';
+//const String _kGoldenRoot = '$_kFlutterRoot/bin/cache/pkg/goldens';
 //const String _kVersionFile = '$_kFlutterRoot/bin/internal/goldens.version';
 //const String _kGoldensVersion = '123456abcdef';
-//TODO(katelovett): Finish testing
+// TODO(Piinks): Finish testing, https://github.com/flutter/flutter/pull/31630
 void main() {
   MemoryFileSystem fs;
   FakePlatform platform;
   MockProcessManager process;
-  Directory flutter;
-  Directory golden;
+  //Directory flutter;
+  //Directory golden;
 
   setUp(() async {
     fs = MemoryFileSystem();
     platform = FakePlatform(environment: <String, String>{
       'FLUTTER_ROOT': _kFlutterRoot,
-      //TODO(katelovett): Add other env vars for testing
+      // TODO(Piinks): Add other env vars for testing, https://github.com/flutter/flutter/pull/31630
     });
     process = MockProcessManager();
-    flutter = await fs.directory(_kFlutterRoot).create(recursive: true);
-    golden = await fs.directory(_kGoldenRoot).create(recursive: true);
+    //flutter = await fs.directory(_kFlutterRoot).create(recursive: true);
+    //golden = await fs.directory(_kGoldenRoot).create(recursive: true);
     //fs.file(_kVersionFile).createSync(recursive: true);
     //fs.file(_kVersionFile).writeAsStringSync(_kGoldensVersion);
   });
 
   group('SkiaGoldClient', () {
-    SkiaGoldClient skiaGold;
+    //SkiaGoldClient skiaGold;
 
     setUp(() {
-      skiaGold = SkiaGoldClient(
+      //skiaGold =
+        SkiaGoldClient(
         fs: fs,
         platform: platform,
         process: process,
@@ -105,7 +106,7 @@ void main() {
         }
       });
 
-      // TODO(katelovett): This is currently disabled in flutter_goldens.dart
+      // TODO(Piinks): This is currently disabled in flutter_goldens.dart, https://github.com/flutter/flutter/pull/31630
 //      test('throws if goldctl has not been authorized', () async {
 //        // See that preceding test does not leave auth behind [52]
 //        try {
@@ -115,8 +116,7 @@ void main() {
 //          expect(error.message, contains('Could not authorize goldctl.'));
 //        }
 //      });
-      // TODO(katelovett): Add methods to Mock SkiaGoldClient to inform the comparator
-      // TODO... and test for proper behavior. See matcher_test.dart for model
+      // TODO(Piinks): Add methods to Mock SkiaGoldClient to inform the comparator and test for proper behavior. See matcher_test.dart for model, https://github.com/flutter/flutter/pull/31630
 //      test('returns false if skia gold test fails', () async {
 //        final File goldenFile = fs.file('/path/to/flutter/bin/cache/goldens/test/foo/bar/test.png')
 //          ..createSync(recursive: true);
