@@ -366,7 +366,6 @@ class RunCommand extends RunCommandBase {
     }
     final List<FlutterDevice> flutterDevices = <FlutterDevice>[];
     final FlutterProject flutterProject = await FlutterProject.current();
-    final String applicationBinaryPath = argResults['use-application-binary'];
     for (Device device in devices) {
       final FlutterDevice flutterDevice = await FlutterDevice.create(
         device,
@@ -385,6 +384,7 @@ class RunCommand extends RunCommandBase {
 
     ResidentRunner runner;
     if (hotMode) {
+      final String applicationBinaryPath = argResults['use-application-binary'];
       runner = HotRunner(
         flutterDevices,
         target: targetFile,
