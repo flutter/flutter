@@ -201,6 +201,9 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       animation: CurvedAnimation(
         parent: _controller,
         curve: Curves.fastOutSlowIn,
+        // Add an interval here to make the fade out use a different (shorter)
+        // duration than the fade in. If _kFadeOutDuration is made longer than
+        // _kFadeInDuration, then the equation below will need to change.
         reverseCurve: Interval(
           0.0,
           _kFadeOutDuration.inMilliseconds / _kFadeInDuration.inMilliseconds,
