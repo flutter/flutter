@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io' show Platform;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -2021,19 +2020,14 @@ void main() {
       await expectLater(
         find.byType(InputDecorator),
         matchesSkiaGoldFile('input_decorator.outline_icon_label.ltr.png'),
-        // matchesGoldenFile('input_decorator.outline_icon_label.ltr.png'),
-        // skip: !Platform.isLinux,
       );
 
       await tester.pumpWidget(buildFrame(TextDirection.rtl));
       await expectLater(
         find.byType(InputDecorator),
         matchesSkiaGoldFile('input_decorator.outline_icon_label.rtl.png'),
-        // matchesGoldenFile('input_decorator.outline_icon_label.rtl.png'),
-        // skip: !Platform.isLinux,
       );
     },
-//    skip: !Platform.isLinux,
   );
 
   testWidgets('InputDecorationTheme.toString()', (WidgetTester tester) async {

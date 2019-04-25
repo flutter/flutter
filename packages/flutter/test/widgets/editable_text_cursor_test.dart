@@ -90,11 +90,8 @@ void main() {
     await expectLater(
       find.byKey(const ValueKey<int>(1)),
       matchesSkiaGoldFile('editable_text_test.0.png'),
-//      matchesGoldenFile('editable_text_test.0.0.png'),
     );
-  },
-    //skip: !Platform.isLinux
-  );
+  },);
 
   testWidgets('cursor layout has correct radius', (WidgetTester tester) async {
     final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();
@@ -144,10 +141,8 @@ void main() {
     await expectLater(
       find.byKey(const ValueKey<int>(1)),
       matchesSkiaGoldFile('editable_text_test.1.png'),
-//      matchesGoldenFile('editable_text_test.1.0.png'),
     );
-  }, //skip: !Platform.isLinux
-  );
+  },);
 
   testWidgets('Cursor animates on iOS', (WidgetTester tester) async {
     final Widget widget = MaterialApp(

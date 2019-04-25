@@ -681,8 +681,6 @@ void main() {
     await expectLater(
       find.byKey(key),
       matchesSkiaGoldFile('floating_action_button_test.clip.png'),
-      // matchesGoldenFile('floating_action_button_test.clip.2.png'), // .clip.1.png is obsolete and can be removed
-      // skip: !Platform.isLinux,
     );
   });
 
