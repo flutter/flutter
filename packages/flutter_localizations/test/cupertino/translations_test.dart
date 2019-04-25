@@ -90,9 +90,9 @@ void main() {
   }
 
   testWidgets('Spot check French', (WidgetTester tester) async {
-    Locale locale = const Locale.fromSubtags(languageCode: 'fr', scriptCode: null, countryCode: null);
+    const Locale locale = Locale.fromSubtags(languageCode: 'fr', scriptCode: null, countryCode: null);
     expect(GlobalCupertinoLocalizations.delegate.isSupported(locale), isTrue);
-    CupertinoLocalizations localizations = await GlobalCupertinoLocalizations.delegate.load(locale);
+    final CupertinoLocalizations localizations = await GlobalCupertinoLocalizations.delegate.load(locale);
     expect(localizations is CupertinoLocalizationFr, true);
     expect(localizations.alertDialogLabel, 'Alerte');
     expect(localizations.datePickerHourSemanticsLabel(1), 'une heure');
