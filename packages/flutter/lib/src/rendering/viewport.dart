@@ -1584,7 +1584,6 @@ class RenderShrinkWrappingViewport extends RenderViewportBase<SliverLogicalConta
           size = Size(constraints.minWidth, constraints.maxHeight);
           break;
       }
-
       offset.applyViewportDimension(0.0);
       _maxScrollExtent = 0.0;
       _shrinkWrapExtent = 0.0;
