@@ -29,12 +29,18 @@ class _CompilationRequest {
 /// This class is a wrapper around compiler that allows multiple isolates to
 /// enqueue compilation requests, but ensures only one compilation at a time.
 class TestCompiler {
+  /// Creates a new [TestCompiler] which acts as a frontend_server proxy.
+  ///
+  /// [trackWidgetCreation] configures whether the kernel transform is applied
+  /// to the output. This also changes the output file to include a '.track`
+  /// extension.
+  ///
+  /// [flutterProject] is the project for which we are running tests.
   TestCompiler(
     this.trackWidgetCreation,
-    Uri projectRootDirectory,
     this.flutterProject,
   ) : testFilePath = getKernelPathForTransformerOptions(
-        fs.path.join(fs.path.fromUri(projectRootDirectory), getBuildDirectory(), 'testfile.dill'),
+        fs.path.join(flutterProject.directory.path, getBuildDirectory(), 'testfile.dill'),
         trackWidgetCreation: trackWidgetCreation,
       ) {
     // Compiler maintains and updates single incremental dill file.

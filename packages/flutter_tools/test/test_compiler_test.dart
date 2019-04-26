@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/compile.dart';
@@ -22,7 +21,6 @@ void main() {
       final MockResidentCompiler residentCompiler = MockResidentCompiler();
       final TestCompiler testCompiler = FakeTestCompiler(
         false,
-        fs.currentDirectory.uri,
         await FlutterProject.current(),
         residentCompiler,
       );
@@ -48,7 +46,6 @@ void main() {
       final MockResidentCompiler residentCompiler = MockResidentCompiler();
       final TestCompiler testCompiler = FakeTestCompiler(
         false,
-        fs.currentDirectory.uri,
         await FlutterProject.current(),
         residentCompiler,
       );
@@ -73,10 +70,9 @@ void main() {
 class FakeTestCompiler extends TestCompiler {
   FakeTestCompiler(
     bool trackWidgetCreation,
-    Uri projectRootDirectory,
     FlutterProject flutterProject,
     this.residentCompiler,
-  ) : super(trackWidgetCreation, projectRootDirectory, flutterProject);
+  ) : super(trackWidgetCreation, flutterProject);
 
   final MockResidentCompiler residentCompiler;
 
