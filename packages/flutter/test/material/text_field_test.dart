@@ -5899,11 +5899,13 @@ void main() {
       ),
     );
 
-    final RenderEditable renderEditable =
-      tester.state<EditableTextState>(find.byType(EditableText)).renderEditable;
+    final EditableTextState state =
+      tester.state<EditableTextState>(find.byType(EditableText));
+    final RenderEditable renderEditable = state.renderEditable;
 
     await tester.tapAt(const Offset(20, 10));
     renderEditable.selectWord(cause: SelectionChangedCause.longPress);
+    state.showHandles();
     await tester.pumpAndSettle();
 
     final List<Widget> transitions =

@@ -2011,6 +2011,7 @@ void main() {
     // Now that the second word has been dragged fully into view, select it.
     await tester.tapAt(const Offset(80, 10));
     renderEditable.selectWord(cause: SelectionChangedCause.longPress);
+    state.showHandles();
     await tester.pump();
     await verifyVisibility(HandlePositionInViewport.within, true, HandlePositionInViewport.within, true);
 
@@ -2055,6 +2056,7 @@ void main() {
     // Select the first word. Both handles should be visible.
     await tester.tapAt(const Offset(20, 10));
     state.renderEditable.selectWord(cause: SelectionChangedCause.longPress);
+    state.showHandles();
     await tester.pump();
     final List<Positioned> positioned =
       find.byType(Positioned).evaluate().map((Element e) => e.widget).cast<Positioned>().toList();
@@ -2174,6 +2176,7 @@ void main() {
     // Select the first word. Both handles should be visible.
     await tester.tapAt(const Offset(20, 10));
     renderEditable.selectWord(cause: SelectionChangedCause.longPress);
+    state.showHandles();
     await tester.pump();
     await verifyVisibility(HandlePositionInViewport.leftEdge, true, HandlePositionInViewport.within, true);
 
