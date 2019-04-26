@@ -154,15 +154,12 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
   /// Builder for material-style text selection handles.
   @override
   Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textHeight) {
-    final Widget handle = Padding(
-      padding: const EdgeInsets.only(right: 26.0, bottom: 26.0),
-      child: SizedBox(
-        width: _kHandleSize,
-        height: _kHandleSize,
-        child: CustomPaint(
-          painter: _TextSelectionHandlePainter(
-            color: Theme.of(context).textSelectionHandleColor
-          ),
+    final Widget handle = SizedBox(
+      width: _kHandleSize,
+      height: _kHandleSize,
+      child: CustomPaint(
+        painter: _TextSelectionHandlePainter(
+          color: Theme.of(context).textSelectionHandleColor
         ),
       ),
     );
@@ -173,19 +170,38 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
     switch (type) {
       case TextSelectionHandleType.left: // points up-right
         return Transform(
-          transform: Matrix4.rotationZ(math.pi / 2.0),
+          transform: Matrix4.identity()
+            ..translate(_kHandleSize / 2, _kHandleSize / 2)
+            ..rotateZ(math.pi / 2.0)
+            ..translate(-_kHandleSize / 2, -_kHandleSize / 2),
           child: handle,
         );
       case TextSelectionHandleType.right: // points up-left
         return handle;
       case TextSelectionHandleType.collapsed: // points up
         return Transform(
-          transform: Matrix4.rotationZ(math.pi / 4.0),
+          transform: Matrix4.identity()
+            ..translate(_kHandleSize / 2, _kHandleSize / 2)
+            ..rotateZ(math.pi / 4.0)
+            ..translate(-_kHandleSize / 2, -_kHandleSize / 2),
           child: handle,
         );
     }
     assert(type != null);
     return null;
+  }
+
+  /// Gets anchor for material-style text selection handles.
+  @override
+  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
+    switch (type) {
+      case TextSelectionHandleType.left:
+        return Offset(_kHandleSize, 0);
+      case TextSelectionHandleType.right:
+        return Offset(0, 0);
+      case TextSelectionHandleType.collapsed:
+        return Offset(_kHandleSize / 2, 0);
+    }
   }
 }
 

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show kDoubleTapTimeout, kDoubleTapSlop;
@@ -10,6 +11,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/material.dart';
 
 import 'basic.dart';
 import 'container.dart';
@@ -93,6 +95,11 @@ abstract class TextSelectionControls {
   /// The top left corner of this widget is positioned at the bottom of the
   /// selection position.
   Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight);
+
+  /// Get the anchor point of the handle relative to itself. The anchor point is
+  /// the point that is aligned with a specific point in the text. A handle
+  /// often visually "points to" that location.
+  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight);
 
   /// Builds a toolbar near a text selection.
   ///
@@ -612,32 +619,93 @@ class _TextSelectionHandleOverlayState
       point.dy.clamp(0.0, viewport.height),
     );
 
+    final Widget handle = widget.selectionControls.buildHandle(
+      context,
+      type,
+      widget.renderObject.preferredLineHeight,
+    );
+    final Offset handleAnchor = widget.selectionControls.getHandleAnchor(type, widget.renderObject.preferredLineHeight);
+    final Offset superPoint = point - handleAnchor;
+    final Size handleSize = widget.selectionControls.handleSize;
+    Rect handleRect = Rect.fromLTWH(
+      // Put handleAnchor on top of point
+      point.dx - handleAnchor.dx,
+      point.dy - handleAnchor.dy,
+      handleSize.width,
+      handleSize.height,
+    );
+
+    // Make sure the GestureDetector includes a minimum of 48px of interactive
+    // space for each handle.
+    const double minInteractiveSize = 48.0;
+    Rect interactiveRect = handleRect;
+    Rect interactivePadding = Rect.fromLTRB(0, 0, 0, 0);
+    if (interactiveRect.width < minInteractiveSize) {
+      interactiveRect = Rect.fromLTWH(
+        interactiveRect.left - (minInteractiveSize - interactiveRect.width) / 2,
+        interactiveRect.top,
+        minInteractiveSize,
+        interactiveRect.height,
+      );
+      interactivePadding = Rect.fromLTRB(
+        (minInteractiveSize - handleRect.width) / 2,
+        interactivePadding.top,
+        (minInteractiveSize - handleRect.width) / 2,
+        interactivePadding.bottom,
+      );
+    }
+    if (interactiveRect.height < minInteractiveSize) {
+      interactiveRect = Rect.fromLTWH(
+        interactiveRect.left,
+        interactiveRect.top - (minInteractiveSize - interactiveRect.height) / 2,
+        interactiveRect.width,
+        minInteractiveSize,
+      );
+      interactivePadding = Rect.fromLTRB(
+        interactivePadding.left,
+        (minInteractiveSize - handleRect.height) / 2,
+        interactivePadding.right,
+        (minInteractiveSize - handleRect.height) / 2,
+      );
+    }
+
     return CompositedTransformFollower(
       link: widget.layerLink,
       showWhenUnlinked: false,
       child: FadeTransition(
         opacity: _opacity,
-        child: GestureDetector(
-          dragStartBehavior: widget.dragStartBehavior,
-          onPanStart: _handleDragStart,
-          onPanUpdate: _handleDragUpdate,
-          onTap: _handleTap,
-          child: Stack(
-            // Always let the selection handles draw outside of the conceptual
-            // box where (0,0) is the top left corner of the RenderEditable.
-            overflow: Overflow.visible,
-            children: <Widget>[
-              Positioned(
-                left: point.dx,
-                top: point.dy,
-                child: widget.selectionControls.buildHandle(
-                  context,
-                  type,
-                  widget.renderObject.preferredLineHeight,
+        child: Stack(
+          overflow: Overflow.visible,
+          children: <Widget>[
+            Positioned(
+              top: interactiveRect.top,
+              left: interactiveRect.left,
+              width: interactiveRect.width,
+              height: interactiveRect.height,
+              child: Container(
+                color: Colors.pinkAccent.withOpacity(0.3),
+                child: GestureDetector(
+                  dragStartBehavior: widget.dragStartBehavior,
+                  onPanStart: _handleDragStart,
+                  onPanUpdate: _handleDragUpdate,
+                  onTap: _handleTap,
+                  child: Padding(
+                    padding: EdgeInsets.only(
+                      left: interactivePadding.left,
+                      top: interactivePadding.top,
+                      right: interactivePadding.right,
+                      bottom: interactivePadding.bottom,
+                    ),
+                    child: widget.selectionControls.buildHandle(
+                      context,
+                      type,
+                      widget.renderObject.preferredLineHeight,
+                    ),
+                  ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

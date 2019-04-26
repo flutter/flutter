@@ -305,6 +305,35 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
     assert(type != null);
     return null;
   }
+
+  /// Gets anchor for material-style text selection handles.
+  @override
+  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
+    // TODO(justinmc): dedupe with above
+    final Size desiredSize = Size(
+      2.0 * _kHandlesPadding,
+      textLineHeight + 2.0 * _kHandlesPadding,
+    );
+
+    // TODO(justinmc): more complicated I think...
+    return Offset(desiredSize.width / 2, desiredSize.height / 2);
+    /*
+    switch (type) {
+      case TextSelectionHandleType.left:
+        return Offset(
+          _kHandleSize.width,
+          _kHandleSize.height,
+        );
+      case TextSelectionHandleType.right:
+        return Offset(0, 0);
+      case TextSelectionHandleType.collapsed:
+        return Offset(
+          _kHandleSize.width / 2,
+          _kHandleSize.height / 2,
+        );
+    }
+    */
+  }
 }
 
 /// Text selection controls that follows iOS design conventions.
