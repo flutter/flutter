@@ -2,10 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/windows/application_package.dart';
 import 'package:flutter_tools/src/windows/windows_device.dart';
 import 'package:flutter_tools/src/device.dart';
@@ -57,6 +59,27 @@ void main() {
       expect(await WindowsDevices().devices, <Device>[]);
     }, overrides: <Type, Generator>{
       Platform: () => notWindows,
+    });
+
+    testUsingContext('isSupportedForProject is true with editable host app', () async {
+      fs.file('pubspec.yaml').createSync();
+      fs.file('.packages').createSync();
+      fs.directory('windows').createSync();
+      final FlutterProject flutterProject = await FlutterProject.current();
+
+      expect(WindowsDevice().isSupportedForProject(flutterProject), true);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem(),
+    });
+
+    testUsingContext('isSupportedForProject is false with no host app', () async {
+      fs.file('pubspec.yaml').createSync();
+      fs.file('.packages').createSync();
+      final FlutterProject flutterProject = await FlutterProject.current();
+
+      expect(WindowsDevice().isSupportedForProject(flutterProject), false);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem(),
     });
   });
 }

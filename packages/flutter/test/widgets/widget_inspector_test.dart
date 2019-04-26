@@ -2066,7 +2066,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           height: 300.0,
           debugPaint: true,
         ),
-        matchesGoldenFile('inspector.sizedBox_debugPaint.png'),
+        matchesGoldenFile('inspector.sizedBox_debugPaint.1.png'),
         skip: !Platform.isLinux,
       );
 

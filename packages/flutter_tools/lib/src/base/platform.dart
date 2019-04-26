@@ -14,7 +14,7 @@ export 'package:platform/platform.dart';
 const Platform _kLocalPlatform = LocalPlatform();
 const String _kRecordingType = 'platform';
 
-Platform get platform => context[Platform] ?? _kLocalPlatform;
+Platform get platform => context.get<Platform>() ?? _kLocalPlatform;
 
 /// Serializes the current [platform] to the specified base recording
 /// [location].

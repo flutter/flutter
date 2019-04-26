@@ -100,7 +100,7 @@ class EngineBuildPaths {
 
 // Manages the engine artifacts of Flutter.
 abstract class Artifacts {
-  static Artifacts get instance => context[Artifacts];
+  static Artifacts get instance => context.get<Artifacts>();
 
   static LocalEngineArtifacts getLocalEngine(String engineSrcPath, EngineBuildPaths engineBuildPaths) {
     return LocalEngineArtifacts(engineSrcPath, engineBuildPaths.targetEngine, engineBuildPaths.hostEngine);

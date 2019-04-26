@@ -21,9 +21,9 @@ import 'android_sdk.dart';
 const int kAndroidSdkMinVersion = 28;
 final Version kAndroidSdkBuildToolsMinVersion = Version(28, 0, 3);
 
-AndroidWorkflow get androidWorkflow => context[AndroidWorkflow];
-AndroidValidator get androidValidator => context[AndroidValidator];
-AndroidLicenseValidator get androidLicenseValidator => context[AndroidLicenseValidator];
+AndroidWorkflow get androidWorkflow => context.get<AndroidWorkflow>();
+AndroidValidator get androidValidator => context.get<AndroidValidator>();
+AndroidLicenseValidator get androidLicenseValidator => context.get<AndroidLicenseValidator>();
 
 enum LicensesAccepted {
   none,

@@ -74,7 +74,7 @@ final Map<InternetAddressType, InternetAddress> _kHosts = <InternetAddressType, 
 
 /// Configure the `test` package to work with Flutter.
 ///
-/// On systems where each [_FlutterPlatform] is only used to run one test suite
+/// On systems where each [FlutterPlatform] is only used to run one test suite
 /// (that is, one Dart file with a `*_test.dart` file name and a single `void
 /// main()`), you can set an observatory port explicitly.
 void installHook({
@@ -99,25 +99,27 @@ void installHook({
   assert(enableObservatory || (!startPaused && observatoryPort == null));
   hack.registerPlatformPlugin(
     <Runtime>[Runtime.vm],
-    () => _FlutterPlatform(
-      shellPath: shellPath,
-      watcher: watcher,
-      machine: machine,
-      enableObservatory: enableObservatory,
-      startPaused: startPaused,
-      disableServiceAuthCodes: disableServiceAuthCodes,
-      explicitObservatoryPort: observatoryPort,
-      host: _kHosts[serverType],
-      port: port,
-      precompiledDillPath: precompiledDillPath,
-      precompiledDillFiles: precompiledDillFiles,
-      trackWidgetCreation: trackWidgetCreation,
-      updateGoldens: updateGoldens,
-      buildTestAssets: buildTestAssets,
-      projectRootDirectory: projectRootDirectory,
-      flutterProject: flutterProject,
-      icudtlPath: icudtlPath,
-    ),
+    () {
+      return FlutterPlatform(
+        shellPath: shellPath,
+        watcher: watcher,
+        machine: machine,
+        enableObservatory: enableObservatory,
+        startPaused: startPaused,
+        disableServiceAuthCodes: disableServiceAuthCodes,
+        explicitObservatoryPort: observatoryPort,
+        host: _kHosts[serverType],
+        port: port,
+        precompiledDillPath: precompiledDillPath,
+        precompiledDillFiles: precompiledDillFiles,
+        trackWidgetCreation: trackWidgetCreation,
+        updateGoldens: updateGoldens,
+        buildTestAssets: buildTestAssets,
+        projectRootDirectory: projectRootDirectory,
+        flutterProject: flutterProject,
+        icudtlPath: icudtlPath,
+      );
+    }
   );
 }
 
@@ -380,8 +382,9 @@ class _Compiler {
   }
 }
 
-class _FlutterPlatform extends PlatformPlugin {
-  _FlutterPlatform({
+/// The flutter test platform used to integrate with package:test.
+class FlutterPlatform extends PlatformPlugin {
+  FlutterPlatform({
     @required this.shellPath,
     this.watcher,
     this.enableObservatory,
@@ -462,14 +465,16 @@ class _FlutterPlatform extends PlatformPlugin {
   }
 
   @override
-  StreamChannel<dynamic> loadChannel(String testPath, SuitePlatform platform) {
+  StreamChannel<dynamic> loadChannel(String path, SuitePlatform platform) {
     if (_testCount > 0) {
       // Fail if there will be a port conflict.
-      if (explicitObservatoryPort != null)
+      if (explicitObservatoryPort != null) {
         throwToolExit('installHook() was called with an observatory port or debugger mode enabled, but then more than one test suite was run.');
+      }
       // Fail if we're passing in a precompiled entry-point.
-      if (precompiledDillPath != null)
+      if (precompiledDillPath != null) {
         throwToolExit('installHook() was called with a precompiled test entry-point, but then more than one test suite was run.');
+      }
     }
     final int ourTestCount = _testCount;
     _testCount += 1;
@@ -488,7 +493,7 @@ class _FlutterPlatform extends PlatformPlugin {
       localController.stream,
       remoteSink,
     );
-    testCompleteCompleter.complete(_startTest(testPath, localChannel, ourTestCount));
+    testCompleteCompleter.complete(_startTest(path, localChannel, ourTestCount));
     return remoteChannel;
   }
 

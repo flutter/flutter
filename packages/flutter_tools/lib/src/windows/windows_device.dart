@@ -114,6 +114,11 @@ class WindowsDevice extends Device {
   // to uninstall the application.
   @override
   Future<bool> uninstallApp(ApplicationPackage app) async => true;
+
+  @override
+  bool isSupportedForProject(FlutterProject flutterProject) {
+    return flutterProject.windows.existsSync();
+  }
 }
 
 class WindowsDevices extends PollingDeviceDiscovery {

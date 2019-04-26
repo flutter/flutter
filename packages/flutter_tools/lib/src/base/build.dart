@@ -21,7 +21,7 @@ import 'file_system.dart';
 import 'fingerprint.dart';
 import 'process.dart';
 
-GenSnapshot get genSnapshot => context[GenSnapshot];
+GenSnapshot get genSnapshot => context.get<GenSnapshot>();
 
 /// A snapshot build configuration.
 class SnapshotType {

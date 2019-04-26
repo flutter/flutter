@@ -243,6 +243,7 @@ class AttachCommand extends FlutterCommand {
       final bool useHot = getBuildInfo().isDebug;
       final FlutterDevice flutterDevice = await FlutterDevice.create(
         device,
+        flutterProject: flutterProject,
         trackWidgetCreation: argResults['track-widget-creation'],
         dillOutputPath: argResults['output-dill'],
         fileSystemRoots: argResults['filesystem-root'],
