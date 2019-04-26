@@ -1,4 +1,4 @@
-Signature: 93711c49172a51c38a92f872300401ad
+Signature: 952fa634eed03c26cf3e31a7594bd100
 
 UNUSED LICENSES:
 
@@ -5185,6 +5185,7 @@ FILE: ../../../third_party/dart/runtime/vm/constants_x64.cc
 FILE: ../../../third_party/dart/runtime/vm/frame_layout.h
 FILE: ../../../third_party/dart/runtime/vm/intrusive_dlist.h
 FILE: ../../../third_party/dart/runtime/vm/intrusive_dlist_test.cc
+FILE: ../../../third_party/dart/runtime/vm/libfuzzer/dart_libfuzzer.cc
 FILE: ../../../third_party/dart/runtime/vm/longjump.h
 FILE: ../../../third_party/dart/runtime/vm/pointer_tagging.h
 FILE: ../../../third_party/dart/runtime/vm/static_type_exactness_state.h
