@@ -14,11 +14,13 @@
 
 import 'dart:async';
 
+import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/services.dart';
 
+import 'barcode_scanner_utils.dart';
 import 'colors.dart';
 
 class CameraApp extends StatefulWidget {
@@ -27,38 +29,60 @@ class CameraApp extends StatefulWidget {
 }
 
 class _CameraAppState extends State<CameraApp> {
-  CameraController controller;
+  CameraController _controller;
+  BarcodeDetector _detector;
+  bool _isDetecting = false;
 
   @override
   void initState() {
     super.initState();
-    _openCamera();
+    SystemChrome.setEnabledSystemUIOverlays(<SystemUiOverlay>[]);
+    _startScanningBarcodes();
   }
 
-  Future<void> _openCamera() async {
-    SystemChrome.setEnabledSystemUIOverlays(<SystemUiOverlay>[]);
+  Future<void> _startScanningBarcodes() async {
+    final CameraDescription camera = await getCamera(CameraLensDirection.back);
+    await _openCamera(camera);
+    await _streamImages(camera);
+  }
 
-    final List<CameraDescription> cameras = await availableCameras();
-
-    final CameraDescription camera =
-        cameras.firstWhere((CameraDescription description) {
-      return description.lensDirection == CameraLensDirection.front;
-    });
-
+  Future<void> _openCamera(CameraDescription camera) async {
     final ResolutionPreset preset =
         defaultTargetPlatform == TargetPlatform.android
             ? ResolutionPreset.medium
             : ResolutionPreset.low;
 
-    controller = CameraController(camera, preset);
-    await controller.initialize();
+    _controller = CameraController(camera, preset);
+    await _controller.initialize();
 
     setState(() {});
   }
 
+  Future<void> _streamImages(CameraDescription camera) async {
+    _detector = FirebaseVision.instance.barcodeDetector();
+
+    _controller.startImageStream((CameraImage image) {
+      if (_isDetecting) {
+        return;
+      }
+      _isDetecting = true;
+
+      final ImageRotation rotation = rotationIntToImageRotation(
+        camera.sensorOrientation,
+      );
+
+      detect(image, _detector.detectInImage, rotation).then(
+        (dynamic result) {
+          final List<Barcode> barcodes = result;
+          if (barcodes.isNotEmpty) print(barcodes[0].rawValue);
+        },
+      ).whenComplete(() => _isDetecting = false);
+    });
+  }
+
   @override
   void dispose() {
-    controller?.dispose();
+    _controller?.dispose();
     super.dispose();
   }
 
@@ -67,11 +91,11 @@ class _CameraAppState extends State<CameraApp> {
     final double deviceRatio = size.width / size.height;
 
     return Transform.scale(
-      scale: controller.value.aspectRatio / deviceRatio,
+      scale: _controller.value.aspectRatio / deviceRatio,
       child: Center(
         child: AspectRatio(
-          aspectRatio: controller.value.aspectRatio,
-          child: CameraPreview(controller),
+          aspectRatio: _controller.value.aspectRatio,
+          child: CameraPreview(_controller),
         ),
       ),
     );
@@ -79,7 +103,7 @@ class _CameraAppState extends State<CameraApp> {
 
   @override
   Widget build(BuildContext context) {
-    if (controller == null || !controller.value.isInitialized) {
+    if (_controller == null || !_controller.value.isInitialized) {
       return Container();
     }
 
