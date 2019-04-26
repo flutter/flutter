@@ -66,7 +66,7 @@ void main() {
     log.add('4');
     navigator.pop();
     log.add('5');
-    expect(await tester.pumpAndSettle(const Duration(minutes: 1)), 3);
+    expect(await tester.pumpAndSettle(const Duration(minutes: 1)), 2);
     log.add('6');
     flipStatefulWidget(tester);
     expect(await tester.pumpAndSettle(), 1);

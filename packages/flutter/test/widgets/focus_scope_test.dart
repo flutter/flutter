@@ -650,7 +650,7 @@ void main() {
     });
 
     // By "pinned", it means kept in the tree by a GlobalKey.
-    testWidgets('Removing pinned focused scope moves focus to focused widget within next FocusScope', (WidgetTester tester) async {
+    testWidgets("Removing pinned focused scope doesn't move focus to focused widget within next FocusScope", (WidgetTester tester) async {
       final GlobalKey<TestFocusState> keyA = GlobalKey();
       final GlobalKey<TestFocusState> keyB = GlobalKey();
       final GlobalKey<TestFocusState> scopeKeyA = GlobalKey();
@@ -708,10 +708,6 @@ void main() {
       expect(keyB.currentState.focusNode.hasFocus, isFalse);
       expect(find.text('b'), findsOneWidget);
 
-      // Since the FocusScope widgets are pinned with GlobalKeys, when the first
-      // one gets removed, the second one stays registered with the focus
-      // manager and ends up getting the focus since it remains as part of the
-      // focus tree.
       await tester.pumpWidget(
         DefaultFocusTraversal(
           child: Column(
@@ -736,11 +732,11 @@ void main() {
 
       await tester.pump();
 
-      expect(keyB.currentState.focusNode.hasFocus, isTrue);
-      expect(find.text('B FOCUSED'), findsOneWidget);
+      expect(keyB.currentState.focusNode.hasFocus, isFalse);
+      expect(find.text('b'), findsOneWidget);
     });
 
-    testWidgets('Removing unpinned focused scope moves focus to focused widget within next FocusScope', (WidgetTester tester) async {
+    testWidgets("Removing unpinned focused scope doesn't move focus to focused widget within next FocusScope", (WidgetTester tester) async {
       final GlobalKey<TestFocusState> keyA = GlobalKey();
       final GlobalKey<TestFocusState> keyB = GlobalKey();
       final FocusScopeNode parentFocusScope1 = FocusScopeNode(debugLabel: 'Parent Scope 1');
@@ -794,10 +790,6 @@ void main() {
       expect(keyB.currentState.focusNode.hasFocus, isFalse);
       expect(find.text('b'), findsOneWidget);
 
-      // If the FocusScope widgets are not pinned with GlobalKeys, then the first
-      // one remains and gets its guts replaced with the parentFocusScope2 and the
-      // "B" test widget, and in the process, the focus manager loses track of the
-      // focus.
       await tester.pumpWidget(
         DefaultFocusTraversal(
           child: Column(
@@ -820,8 +812,8 @@ void main() {
       );
       await tester.pump();
 
-      expect(keyB.currentState.focusNode.hasFocus, isTrue);
-      expect(find.text('B FOCUSED'), findsOneWidget);
+      expect(keyB.currentState.focusNode.hasFocus, isFalse);
+      expect(find.text('b'), findsOneWidget);
     });
 
     testWidgets('Moving widget from one scope to another retains focus', (WidgetTester tester) async {

@@ -1035,7 +1035,7 @@ class FocusManager with DiagnosticableTreeMixin {
     if (_currentFocus == null && _nextFocus == null) {
       // If we don't have any current focus, and nobody has asked to focus yet,
       // then pick a first one using widget order as a default.
-      _nextFocus = const WidgetOrderFocusTraversalPolicy().findFirstFocus(rootScope);
+      _nextFocus = rootScope;
     }
     if (_nextFocus != null && _nextFocus != _currentFocus) {
       _currentFocus = _nextFocus;
