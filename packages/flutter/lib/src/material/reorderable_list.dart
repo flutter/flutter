@@ -256,7 +256,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
 
   @override
   void didChangeDependencies() {
-    _scrollController = PrimaryScrollController.of(context) ?? ScrollController();
+    _scrollController = ScrollController();
     super.didChangeDependencies();
   }
 
