@@ -106,4 +106,52 @@ void main() {
 
     semantics.dispose();
   });
+
+  testWidgets('Drawer scrimDrawerColor test', (WidgetTester tester) async {
+    const Key containerKey = Key('container');
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          drawerScrimColor: const Color(0xFF323232),
+          drawer: Drawer(
+            child: ListView(
+              children: <Widget>[
+                DrawerHeader(
+                  child: Container(
+                    key: containerKey,
+                    child: const Text('header'),
+                  ),
+                ),
+                const ListTile(
+                  leading: Icon(Icons.archive),
+                  title: Text('Archive'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final ScaffoldState state = tester.firstState(find.byType(Scaffold));
+    state.openDrawer();
+
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    final Container container = _getContainerScaffold(tester);
+    final BoxDecoration decoration = container.decoration;
+    expect(decoration.color, const Color(0xFF323232));
+    expect(decoration.shape,  BoxShape.rectangle);
+  });
+}
+
+Container _getContainerScaffold(WidgetTester tester) {
+    return tester.widget<Container>(
+    find.descendant(
+      of: find.byType(Scaffold),
+      matching: find.byType(Container),
+    ).first,
+  );
 }
