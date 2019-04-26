@@ -353,7 +353,7 @@ abstract class FlutterCommand extends Command<void> {
             ? args.readOption(FlutterOptions.kExtraFrontEndOptions)
             : null;
     if (argParser.options.containsKey(FlutterOptions.kEnableExperiment) &&
-        args.readOption(FlutterOptions.kEnableExperiment) != null) {
+        args.readMultiOption(FlutterOptions.kEnableExperiment) != null) {
       for (String expFlag in args.readMultiOption(FlutterOptions.kEnableExperiment)) {
         final String flag = '--enable-experiment=' + expFlag;
         if (extraFrontEndOptions != null) {
