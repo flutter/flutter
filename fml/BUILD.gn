@@ -106,6 +106,8 @@ source_set("fml") {
       "platform/darwin/scoped_block.mm",
       "platform/darwin/scoped_nsobject.h",
       "platform/darwin/scoped_nsobject.mm",
+      "platform/darwin/string_range_sanitization.h",
+      "platform/darwin/string_range_sanitization.mm",
     ]
 
     libs += [ "Foundation.framework" ]
@@ -188,6 +190,7 @@ executable("fml_unittests") {
     "message_loop_unittests.cc",
     "message_unittests.cc",
     "paths_unittests.cc",
+    "platform/darwin/string_range_sanitization_unittests.mm",
     "string_view_unittest.cc",
     "synchronization/count_down_latch_unittests.cc",
     "synchronization/semaphore_unittest.cc",
