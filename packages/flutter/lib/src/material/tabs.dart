@@ -954,7 +954,7 @@ class _TabBarState extends State<TabBar> {
       if (_controller.length != widget.tabs.length) {
         throw FlutterError(
           'Controller\'s length property (${_controller.length}) does not match the \n'
-          'number of tab elements (${widget.tabs.length}) present in TabBar\'s tabs property.'
+          'number of tabs (${widget.tabs.length}) present in TabBar\'s tabs property.'
         );
       }
       return true;
@@ -1261,7 +1261,7 @@ class _TabBarViewState extends State<TabBarView> {
       if (_controller.length != widget.children.length) {
         throw FlutterError(
           'Controller\'s length property (${_controller.length}) does not match the \n'
-          'number of tab elements (${widget.children.length}) present in TabBar\'s tabs property.'
+          'number of tabs (${widget.children.length}) present in TabBar\'s tabs property.'
         );
       }
       return true;

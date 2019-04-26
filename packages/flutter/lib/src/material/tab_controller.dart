@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math';
+
 import 'package:flutter/widgets.dart';
 
 import 'constants.dart';
@@ -289,6 +291,8 @@ class DefaultTabController extends StatefulWidget {
     this.initialIndex = 0,
     @required this.child,
   }) : assert(initialIndex != null),
+       assert(length >= 0),
+       assert(initialIndex >= 0 && initialIndex < length),
        super(key: key);
 
   /// The total number of tabs. Typically greater than one. Must match
@@ -359,7 +363,7 @@ class _DefaultTabControllerState extends State<DefaultTabController> with Single
       // automatically update the index of the controller to be the new last tab.
       int newIndex;
       if (_controller.index >= widget.length) {
-        newIndex = widget.length - 1;
+        newIndex = max(0, widget.length - 1);
       }
       _controller = _controller._copyWith(length: widget.length, index: newIndex);
     }
