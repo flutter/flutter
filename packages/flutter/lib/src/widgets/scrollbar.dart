@@ -130,9 +130,9 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     assert(textDirection != null);
     switch (textDirection) {
       case TextDirection.rtl:
-        return crossAxisMargin;
+        return crossAxisMargin + padding.left;
       case TextDirection.ltr:
-        return size.width - thickness - crossAxisMargin;
+        return size.width - thickness - crossAxisMargin - padding.right;
     }
     return null;
   }
