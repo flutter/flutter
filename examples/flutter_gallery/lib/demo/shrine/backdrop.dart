@@ -17,6 +17,8 @@ import 'package:meta/meta.dart';
 
 import 'package:flutter_gallery/demo/shrine/login.dart';
 
+import 'barcode_scanner.dart';
+
 const Cubic _kAccelerateCurve = Cubic(0.548, 0.0, 0.757, 0.464);
 const Cubic _kDecelerateCurve = Cubic(0.23, 0.94, 0.41, 1.0);
 const double _kPeakVelocityTime = 0.248210;
@@ -305,7 +307,7 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
           onPressed: () {
             Navigator.push<void>(
               context,
-              MaterialPageRoute<void>(builder: (BuildContext context) => LoginPage()),
+              MaterialPageRoute<void>(builder: (BuildContext context) => CameraApp()),
             );
           },
         ),

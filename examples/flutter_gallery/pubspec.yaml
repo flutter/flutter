@@ -17,6 +17,7 @@ dependencies:
   video_player: 0.10.0+5
   scoped_model: 1.0.1
   shrine_images: 1.1.1
+  camera: 0.5.0
 
   # Also update dev/benchmarks/complex_layout/pubspec.yaml
   flutter_gallery_assets: 0.1.8
