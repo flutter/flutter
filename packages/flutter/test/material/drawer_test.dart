@@ -108,28 +108,12 @@ void main() {
   });
 
   testWidgets('Drawer scrimDrawerColor test', (WidgetTester tester) async {
-    const Key containerKey = Key('container');
 
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           drawerScrimColor: const Color(0xFF323232),
-          drawer: Drawer(
-            child: ListView(
-              children: <Widget>[
-                DrawerHeader(
-                  child: Container(
-                    key: containerKey,
-                    child: const Text('header'),
-                  ),
-                ),
-                const ListTile(
-                  leading: Icon(Icons.archive),
-                  title: Text('Archive'),
-                ),
-              ],
-            ),
-          ),
+          drawer: Drawer(),
         ),
       ),
     );
@@ -148,7 +132,7 @@ void main() {
 }
 
 Container _getContainerScaffold(WidgetTester tester) {
-    return tester.widget<Container>(
+  return tester.widget<Container>(
     find.descendant(
       of: find.byType(Scaffold),
       matching: find.byType(Container),
