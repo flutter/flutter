@@ -674,7 +674,7 @@ class ListWheelScrollView extends StatefulWidget {
   /// {@macro flutter.rendering.wheelList.useMagnifier}
   final bool useMagnifier;
 
-  /// {@macro RenderListWheelViewport.magnification}
+  /// {@macro flutter.rendering.wheelList.magnification}
   final double magnification;
 
   /// Size of each child in the main axis. Must not be null and must be
