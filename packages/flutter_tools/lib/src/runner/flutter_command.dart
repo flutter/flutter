@@ -94,10 +94,13 @@ abstract class FlutterCommand extends Command<void> {
   }
   TypedArgResults _typedResults;
 
+  /// The parsed argument results for all commands.
+  ///
+  /// Use this instead of `globalArgs` to avoid implicit downcasts.
   TypedArgResults get globalArgs {
-     return _typedGloabalArgs ??= TypedArgResults(globalResults);
+     return _typedGlobalArgs ??= TypedArgResults(globalResults);
   }
-  TypedArgResults _typedGloabalArgs;
+  TypedArgResults _typedGlobalArgs;
 
   @override
   ArgParser get argParser => _argParser;
