@@ -15,8 +15,8 @@ TransformLayer::~TransformLayer() = default;
 void TransformLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
   // Checks (in some degree) that SkMatrix transform_ is valid and initialized.
   //
-  // We need this even if is_set_ is true since one can call set_transform with
-  // an uninitialized SkMatrix.
+  // We need this even if transform_ is initialized to identity since one can
+  // call set_transform with an uninitialized SkMatrix.
   //
   // If transform_ is uninitialized, this assert may look flaky as it doesn't
   // fail all the time, and some rerun may make it pass. But don't ignore it and
