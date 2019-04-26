@@ -6,11 +6,11 @@ import 'dart:async';
 
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
-import 'package:flutter_tools/src/base/args.dart';
 import 'package:meta/meta.dart';
 import 'package:quiver/strings.dart';
 
 import '../application_package.dart';
+import '../base/args.dart';
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
