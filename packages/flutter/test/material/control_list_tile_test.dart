@@ -37,42 +37,45 @@ void main() {
   testWidgets('RadioListTile should initialize according to groupValue', (WidgetTester tester) async {
     final List<int> values = <int>[0, 1, 2];
     int selectedValue;
-    // Input parameters are required for [RadioListTile], but they are
+    // Constructor parameters are required for [RadioListTile], but they are
     // irrelevant when searching with [find.byType].
     final Type radioListTileType = const RadioListTile<int>(
       value: 0,
       groupValue: 0,
       onChanged: null,
     ).runtimeType;
+
     List<RadioListTile<int>> generatedRadioListTiles;
-
-    await tester.pumpWidget(wrap(
-      child: StatefulBuilder(
-        builder: (BuildContext context, StateSetter setState) {
-          return Scaffold(
-            body: ListView.builder(
-              itemCount: values.length,
-              itemBuilder: (BuildContext context, int index) => RadioListTile<int>(
-                onChanged: (int value) {
-                  setState(() { selectedValue = value; });
-                },
-                value: values[index],
-                groupValue: selectedValue,
-                title: Text(values[index].toString()),
-              ),
-            ),
-          );
-        },
-      ),
-    ));
-
-    generatedRadioListTiles = find
+    List<RadioListTile<int>> findTiles() => find
       .byType(radioListTileType)
       .evaluate()
-      .map((Element element) {
-        final RadioListTile<int> tile = element.widget;
-        return tile;
-      }).toList();
+      .map<RadioListTile<int>>((Element element) => element.widget)
+      .toList();
+
+    Widget buildFrame() {
+      return wrap(
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Scaffold(
+              body: ListView.builder(
+                itemCount: values.length,
+                itemBuilder: (BuildContext context, int index) => RadioListTile<int>(
+                  onChanged: (int value) {
+                    setState(() { selectedValue = value; });
+                  },
+                  value: values[index],
+                  groupValue: selectedValue,
+                  title: Text(values[index].toString()),
+                ),
+              ),
+            );
+          },
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame());
+    generatedRadioListTiles = findTiles();
 
     expect(generatedRadioListTiles[0].checked, equals(false));
     expect(generatedRadioListTiles[1].checked, equals(false));
@@ -80,33 +83,8 @@ void main() {
 
     selectedValue = 1;
 
-    await tester.pumpWidget(wrap(
-      child: StatefulBuilder(
-        builder: (BuildContext context, StateSetter setState) {
-          return Scaffold(
-            body: ListView.builder(
-              itemCount: values.length,
-              itemBuilder: (BuildContext context, int index) => RadioListTile<int>(
-                onChanged: (int value) {
-                  setState(() { selectedValue = value; });
-                },
-                value: values[index],
-                groupValue: selectedValue,
-                title: Text(values[index].toString()),
-              ),
-            ),
-          );
-        },
-      ),
-    ));
-
-    generatedRadioListTiles = find
-      .byType(radioListTileType)
-      .evaluate()
-      .map((Element element) {
-        final RadioListTile<int> tile = element.widget;
-        return tile;
-      }).toList();
+    await tester.pumpWidget(buildFrame());
+    generatedRadioListTiles = findTiles();
 
     expect(generatedRadioListTiles[0].checked, equals(false));
     expect(generatedRadioListTiles[1].checked, equals(true));
@@ -116,7 +94,7 @@ void main() {
   testWidgets('RadioListTile control tests', (WidgetTester tester) async {
     final List<int> values = <int>[0, 1, 2];
     int selectedValue;
-    // Input parameters are required for [Radio], but they are irrelevant
+    // Constructor parameters are required for [Radio], but they are irrelevant
     // when searching with [find.byType].
     final Type radioType = const Radio<int>(
       value: 0,
@@ -125,28 +103,31 @@ void main() {
     ).runtimeType;
     final List<dynamic> log = <dynamic>[];
 
-    // Tests for tapping between [Radio] and [ListTile]
-    await tester.pumpWidget(wrap(
-      child: StatefulBuilder(
-        builder: (BuildContext context, StateSetter setState) {
-          return Scaffold(
-            body: ListView.builder(
-              itemCount: values.length,
-              itemBuilder: (BuildContext context, int index) => RadioListTile<int>(
-                onChanged: (int value) {
-                  log.add(value);
-                  setState(() { selectedValue = value; });
-                },
-                value: values[index],
-                groupValue: selectedValue,
-                title: Text(values[index].toString()),
+    Widget buildFrame() {
+      return wrap(
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Scaffold(
+              body: ListView.builder(
+                itemCount: values.length,
+                itemBuilder: (BuildContext context, int index) => RadioListTile<int>(
+                  onChanged: (int value) {
+                    log.add(value);
+                    setState(() { selectedValue = value; });
+                  },
+                  value: values[index],
+                  groupValue: selectedValue,
+                  title: Text(values[index].toString()),
+                ),
               ),
-            ),
-          );
-        },
-      ),
-    ));
+            );
+          },
+        ),
+      );
+    }
 
+    // Tests for tapping between [Radio] and [ListTile]
+    await tester.pumpWidget(buildFrame());
     await tester.tap(find.text('1'));
     log.add('-');
     await tester.tap(find.byType(radioType).at(2));
@@ -158,27 +139,7 @@ void main() {
     selectedValue = null;
 
     // Tests for tapping across [Radio]s exclusively
-    await tester.pumpWidget(wrap(
-      child: StatefulBuilder(
-        builder: (BuildContext context, StateSetter setState) {
-          return Scaffold(
-            body: ListView.builder(
-              itemCount: values.length,
-              itemBuilder: (BuildContext context, int index) => RadioListTile<int>(
-                onChanged: (int value) {
-                  log.add(value);
-                  setState(() { selectedValue = value; });
-                },
-                value: values[index],
-                groupValue: selectedValue,
-                title: Text(values[index].toString()),
-              ),
-            ),
-          );
-        },
-      ),
-    ));
-
+    await tester.pumpWidget(buildFrame());
     await tester.tap(find.byType(radioType).at(1));
     log.add('-');
     await tester.tap(find.byType(radioType).at(2));
@@ -188,27 +149,7 @@ void main() {
     selectedValue = null;
 
     // Tests for tapping across [ListTile]s exclusively
-    await tester.pumpWidget(wrap(
-      child: StatefulBuilder(
-        builder: (BuildContext context, StateSetter setState) {
-          return Scaffold(
-            body: ListView.builder(
-              itemCount: values.length,
-              itemBuilder: (BuildContext context, int index) => RadioListTile<int>(
-                onChanged: (int value) {
-                  log.add(value);
-                  setState(() { selectedValue = value; });
-                },
-                value: values[index],
-                groupValue: selectedValue,
-                title: Text(values[index].toString()),
-              ),
-            ),
-          );
-        },
-      ),
-    ));
-
+    await tester.pumpWidget(buildFrame());
     await tester.tap(find.text('1'));
     log.add('-');
     await tester.tap(find.text('2'));
@@ -218,7 +159,7 @@ void main() {
   testWidgets('Selected RadioListTile should not trigger onChanged', (WidgetTester tester) async {
     final List<int> values = <int>[0, 1, 2];
     int selectedValue;
-    // Input parameters are required for [Radio], but they are irrelevant
+    // Constructor parameters are required for [Radio], but they are irrelevant
     // when searching with [find.byType].
     final Type radioType = const Radio<int>(
       value: 0,
@@ -227,14 +168,14 @@ void main() {
     ).runtimeType;
     final List<dynamic> log = <dynamic>[];
 
-    await tester.pumpWidget(wrap(
-      child: StatefulBuilder(
-        builder: (BuildContext context, StateSetter setState) {
-          return Scaffold(
-            body: ListView.builder(
-              itemCount: values.length,
-              itemBuilder: (BuildContext context, int index) {
-                return RadioListTile<int>(
+    Widget buildFrame() {
+      return wrap(
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Scaffold(
+              body: ListView.builder(
+                itemCount: values.length,
+                itemBuilder: (BuildContext context, int index) => RadioListTile<int>(
                   onChanged: (int value) {
                     log.add(value);
                     setState(() { selectedValue = value; });
@@ -242,13 +183,15 @@ void main() {
                   value: values[index],
                   groupValue: selectedValue,
                   title: Text(values[index].toString()),
-                );
-              }
-            ),
-          );
-        },
-      ),
-    ));
+                ),
+              ),
+            );
+          },
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame());
 
     await tester.tap(find.text('0'));
     await tester.pump();
