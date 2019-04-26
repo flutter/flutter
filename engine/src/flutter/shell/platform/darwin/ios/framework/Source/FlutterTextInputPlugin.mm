@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputPlugin.h"
+#include "flutter/fml/platform/darwin/string_range_sanitization.h"
 
 #include <Foundation/Foundation.h>
 #include <UIKit/UIKit.h>
@@ -283,7 +284,13 @@ static UIReturnKeyType ToUIReturnKeyType(NSString* inputType) {
 - (void)setSelectedTextRange:(UITextRange*)selectedTextRange updateEditingState:(BOOL)update {
   if (_selectedTextRange != selectedTextRange) {
     UITextRange* oldSelectedRange = _selectedTextRange;
-    _selectedTextRange = [selectedTextRange copy];
+    if (self.hasText) {
+      FlutterTextRange* flutterTextRange = (FlutterTextRange*)selectedTextRange;
+      _selectedTextRange = [[FlutterTextRange
+          rangeWithNSRange:fml::RangeForCharactersInRange(self.text, flutterTextRange.range)] copy];
+    } else {
+      _selectedTextRange = [selectedTextRange copy];
+    }
     [oldSelectedRange release];
 
     if (update)
@@ -415,20 +422,12 @@ static UIReturnKeyType ToUIReturnKeyType(NSString* inputType) {
   return [FlutterTextRange rangeWithNSRange:NSMakeRange(fromIndex, toIndex - fromIndex)];
 }
 
-/** Returns the range of the character sequence at the specified index in the
- * text. */
-- (NSRange)rangeForCharacterAtIndex:(NSUInteger)index {
-  if (index < self.text.length)
-    return [self.text rangeOfComposedCharacterSequenceAtIndex:index];
-  return NSMakeRange(index, 0);
-}
-
 - (NSUInteger)decrementOffsetPosition:(NSUInteger)position {
-  return [self rangeForCharacterAtIndex:MAX(0, position - 1)].location;
+  return fml::RangeForCharacterAtIndex(self.text, MAX(0, position - 1)).location;
 }
 
 - (NSUInteger)incrementOffsetPosition:(NSUInteger)position {
-  NSRange charRange = [self rangeForCharacterAtIndex:position];
+  NSRange charRange = fml::RangeForCharacterAtIndex(self.text, position);
   return MIN(position + charRange.length, self.text.length);
 }
 
@@ -565,7 +564,7 @@ static UIReturnKeyType ToUIReturnKeyType(NSString* inputType) {
 - (UITextRange*)characterRangeAtPoint:(CGPoint)point {
   // TODO(cbracken) Implement.
   NSUInteger currentIndex = ((FlutterTextPosition*)_selectedTextRange.start).index;
-  return [FlutterTextRange rangeWithNSRange:[self rangeForCharacterAtIndex:currentIndex]];
+  return [FlutterTextRange rangeWithNSRange:fml::RangeForCharacterAtIndex(self.text, currentIndex)];
 }
 
 - (void)beginFloatingCursorAtPoint:(CGPoint)point {
