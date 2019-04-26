@@ -125,17 +125,17 @@ class TestCommand extends FastFlutterCommand {
     if (shouldRunPub) {
       await pubGet(context: PubContext.getVerifyContext(name), skipPubspecYamlCheck: true);
     }
-    final bool buildTestAssets = args.getFlag('test-assets');
+    final bool buildTestAssets = args.readFlag('test-assets');
     if (buildTestAssets) {
       await _buildTestAsset();
     }
-    final List<String> names = args.getMultiOption('name');
-    final List<String> plainNames = args.getMultiOption('plain-name');
+    final List<String> names = args.readMultiOption('name');
+    final List<String> plainNames = args.readMultiOption('plain-name');
     final FlutterProject flutterProject = await FlutterProject.current();
 
     List<String> files = args.rest.map<String>((String testPath) => fs.path.absolute(testPath)).toList();
 
-    final bool startPaused = args.getFlag('start-paused');
+    final bool startPaused = args.readFlag('start-paused');
     if (startPaused && files.length != 1) {
       throwToolExit(
         'When using --start-paused, you must specify a single test file to run.',
@@ -143,7 +143,7 @@ class TestCommand extends FastFlutterCommand {
       );
     }
 
-    final int jobs = int.tryParse(args.getOption('concurrency'));
+    final int jobs = int.tryParse(args.readOption('concurrency'));
     if (jobs == null || jobs <= 0 || !jobs.isFinite) {
       throwToolExit(
         'Could not parse -j/--concurrency argument. It must be an integer greater than zero.'
@@ -167,13 +167,13 @@ class TestCommand extends FastFlutterCommand {
     }
 
     CoverageCollector collector;
-    if (args.getFlag('coverage') || args.getFlag('merge-coverage')) {
+    if (args.readFlag('coverage') || args.readFlag('merge-coverage')) {
       collector = CoverageCollector(
         flutterProject: await FlutterProject.current(),
       );
     }
 
-    final bool machine = args.getFlag('machine');
+    final bool machine = args.readFlag('machine');
     if (collector != null && machine) {
       throwToolExit("The test command doesn't support --machine and coverage together");
     }
@@ -201,7 +201,7 @@ class TestCommand extends FastFlutterCommand {
       }
     }
 
-    final bool disableServiceAuthCodes = args.getFlag('disable-service-auth-codes');
+    final bool disableServiceAuthCodes = args.readFlag('disable-service-auth-codes');
     final int result = await runTests(
       files,
       workDir: workDir,
@@ -211,18 +211,18 @@ class TestCommand extends FastFlutterCommand {
       enableObservatory: collector != null || startPaused,
       startPaused: startPaused,
       disableServiceAuthCodes: disableServiceAuthCodes,
-      ipv6: args.getFlag('ipv6'),
+      ipv6: args.readFlag('ipv6'),
       machine: machine,
-      trackWidgetCreation: args.getFlag('track-widget-creation'),
-      updateGoldens: args.getFlag('update-goldens'),
+      trackWidgetCreation: args.readFlag('track-widget-creation'),
+      updateGoldens: args.readFlag('update-goldens'),
       concurrency: jobs,
       buildTestAssets: buildTestAssets,
       flutterProject: flutterProject,
     );
 
     if (collector != null && !await collector.collectCoverageData(
-      args.getOption('coverage-path'),
-      mergeCoverageData: args.getFlag('merge-coverage'))) {
+      args.readOption('coverage-path'),
+      mergeCoverageData: args.readFlag('merge-coverage'))) {
       throwToolExit(null);
     }
 

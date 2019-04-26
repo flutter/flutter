@@ -82,7 +82,7 @@ class DriveCommand extends RunCommandBase {
 
   Device _device;
   Device get device => _device;
-  bool get shouldBuild => args.getFlag('build');
+  bool get shouldBuild => args.readFlag('build');
 
   /// Subscription to log messages printed on the device or simulator.
   // ignore: cancel_subscriptions
@@ -102,7 +102,7 @@ class DriveCommand extends RunCommandBase {
       throwToolExit('Test file not found: $testFile');
 
     String observatoryUri;
-    if (args.getOption('use-existing-app') == null) {
+    if (args.readOption('use-existing-app') == null) {
       printStatus('Starting application: $targetFile');
 
       if (getBuildInfo().isRelease) {
@@ -121,7 +121,7 @@ class DriveCommand extends RunCommandBase {
       observatoryUri = result.observatoryUri.toString();
     } else {
       printStatus('Will connect to already running application instance.');
-      observatoryUri = args.getOption('use-existing-app');
+      observatoryUri = args.readOption('use-existing-app');
     }
 
     Cache.releaseLockEarly();
@@ -133,7 +133,7 @@ class DriveCommand extends RunCommandBase {
         rethrow;
       throwToolExit('CAUGHT EXCEPTION: $error\n$stackTrace');
     } finally {
-      if (args.getFlag('keep-app-running') ?? (args.getOption('use-existing-app') != null)) {
+      if (args.readFlag('keep-app-running') ?? (args.readOption('use-existing-app') != null)) {
         printStatus('Leaving the application running.');
       } else {
         printStatus('Stopping application instance.');
@@ -145,8 +145,8 @@ class DriveCommand extends RunCommandBase {
   }
 
   String _getTestFile() {
-    if (args.getOption('driver') != null)
-      return args.getOption('driver');
+    if (args.readOption('driver') != null)
+      return args.readOption('driver');
 
     // If the --driver argument wasn't provided, then derive the value from
     // the target file.

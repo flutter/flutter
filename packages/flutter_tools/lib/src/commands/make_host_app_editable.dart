@@ -45,8 +45,8 @@ class MakeHostAppEditableCommand extends FlutterCommand {
   Future<FlutterCommandResult> runCommand() async {
     await _project.ensureReadyForPlatformSpecificTooling(checkProjects: false);
 
-    final bool isAndroidRequested = args.getFlag('android');
-    final bool isIOSRequested = args.getFlag('ios');
+    final bool isAndroidRequested = args.readFlag('android');
+    final bool isIOSRequested = args.readFlag('ios');
 
     if (isAndroidRequested == isIOSRequested) {
       // No flags provided, or both flags provided. Make Android and iOS host

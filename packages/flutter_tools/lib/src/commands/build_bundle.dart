@@ -72,7 +72,7 @@ class BuildBundleCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final String targetPlatform = args.getOption('target-platform');
+    final String targetPlatform = args.readOption('target-platform');
     final TargetPlatform platform = getTargetPlatformForName(targetPlatform);
     if (platform == null) {
       throwToolExit('Unknown platform: $targetPlatform');
@@ -96,18 +96,18 @@ class BuildBundleCommand extends BuildSubCommand {
       platform: platform,
       buildMode: buildMode,
       mainPath: targetFile,
-      manifestPath: args.getOption('manifest'),
-      depfilePath: args.getOption('depfile'),
-      privateKeyPath: args.getOption('private-key'),
-      assetDirPath: args.getOption('asset-dir'),
-      precompiledSnapshot: args.getFlag('precompiled'),
-      reportLicensedPackages: args.getFlag('report-licensed-packages'),
-      trackWidgetCreation: args.getFlag('track-widget-creation'),
-      compilationTraceFilePath: args.getOption('compilation-trace-file'),
-      extraFrontEndOptions: args.getMultiOption(FlutterOptions.kExtraFrontEndOptions),
-      extraGenSnapshotOptions: args.getMultiOption(FlutterOptions.kExtraGenSnapshotOptions),
-      fileSystemScheme: args.getOption('filesystem-scheme'),
-      fileSystemRoots: args.getMultiOption('filesystem-root'),
+      manifestPath: args.readOption('manifest'),
+      depfilePath: args.readOption('depfile'),
+      privateKeyPath: args.readOption('private-key'),
+      assetDirPath: args.readOption('asset-dir'),
+      precompiledSnapshot: args.readFlag('precompiled'),
+      reportLicensedPackages: args.readFlag('report-licensed-packages'),
+      trackWidgetCreation: args.readFlag('track-widget-creation'),
+      compilationTraceFilePath: args.readOption('compilation-trace-file'),
+      extraFrontEndOptions: args.readMultiOption(FlutterOptions.kExtraFrontEndOptions),
+      extraGenSnapshotOptions: args.readMultiOption(FlutterOptions.kExtraGenSnapshotOptions),
+      fileSystemScheme: args.readOption('filesystem-scheme'),
+      fileSystemRoots: args.readMultiOption('filesystem-root'),
     );
     return null;
   }

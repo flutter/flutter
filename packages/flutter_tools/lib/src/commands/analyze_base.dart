@@ -24,9 +24,9 @@ abstract class AnalyzeBase {
   Future<void> analyze();
 
   void dumpErrors(Iterable<String> errors) {
-    if (argResults.getOption('write') != null) {
+    if (argResults.readOption('write') != null) {
       try {
-        final RandomAccessFile resultsFile = fs.file(argResults.getOption('write')).openSync(mode: FileMode.write);
+        final RandomAccessFile resultsFile = fs.file(argResults.readOption('write')).openSync(mode: FileMode.write);
         try {
           resultsFile.lockSync();
           resultsFile.writeStringSync(errors.join('\n'));
@@ -34,7 +34,7 @@ abstract class AnalyzeBase {
           resultsFile.close();
         }
       } catch (e) {
-        printError('Failed to save output to "${argResults.getOption('write')}": $e');
+        printError('Failed to save output to "${argResults.readOption('write')}": $e');
       }
     }
   }
@@ -50,7 +50,7 @@ abstract class AnalyzeBase {
     printStatus('Analysis benchmark written to $benchmarkOut ($data).');
   }
 
-  bool get isBenchmarking => argResults.getFlag('benchmark');
+  bool get isBenchmarking => argResults.readFlag('benchmark');
 }
 
 /// Return true if [fileList] contains a path that resides inside the Flutter repository.

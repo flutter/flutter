@@ -11,13 +11,13 @@ class TypedArgResults {
   final ArgResults _argResults;
 
   /// Returns the value of the command line flag `name`.
-  bool getFlag(String name) => _argResults[name] as bool;
+  bool readFlag(String name) => _argResults[name] as bool;
 
   /// Returns the value of the command line option `name`.
-  String getOption(String name) => _argResults[name] as String;
+  String readOption(String name) => _argResults[name] as String;
 
   /// Returns the list of values of the command line multi-option `name`.
-  List<String> getMultiOption(String name) => _argResults[name] as List<String>;
+  List<String> readMultiOption(String name) => _argResults[name] as List<String>;
 
   /// Whether the argument parser saw `name` in the command arguments.
   bool wasParsed(String name) => _argResults.wasParsed(name);

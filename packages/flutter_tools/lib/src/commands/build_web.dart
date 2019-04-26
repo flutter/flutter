@@ -39,7 +39,7 @@ class BuildWebCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final String target = args.getOption('target');
+    final String target = args.readOption('target');
     final Status status = logger.startProgress('Compiling $target to JavaScript...', timeout: null);
     final int result = await webCompiler.compile(target: target);
     status.stop();

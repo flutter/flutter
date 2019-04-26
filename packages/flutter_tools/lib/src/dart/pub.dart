@@ -97,7 +97,7 @@ Future<void> pubGet({
       timeout: timeoutConfiguration.slowOperation,
     );
     final List<String> args = <String>['--verbosity=warning'];
-    if (FlutterCommand.current != null && FlutterCommand.current.globalArgs.getFlag('verbose'))
+    if (FlutterCommand.current != null && FlutterCommand.current.globalArgs.readFlag('verbose'))
       args.add('--verbose');
     args.addAll(<String>[command, '--no-precompile']);
     if (offline)

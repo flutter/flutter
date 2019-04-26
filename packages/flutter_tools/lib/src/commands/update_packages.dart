@@ -111,11 +111,11 @@ class UpdatePackagesCommand extends FlutterCommand {
   Future<FlutterCommandResult> runCommand() async {
     final List<Directory> packages = runner.getRepoPackages();
 
-    final bool upgrade = args.getFlag('force-upgrade');
-    final bool isPrintPaths = args.getFlag('paths');
-    final bool isPrintTransitiveClosure = args.getFlag('transitive-closure');
-    final bool isVerifyOnly = args.getFlag('verify-only');
-    final bool isConsumerOnly = args.getFlag('consumer-only');
+    final bool upgrade = args.readFlag('force-upgrade');
+    final bool isPrintPaths = args.readFlag('paths');
+    final bool isPrintTransitiveClosure = args.readFlag('transitive-closure');
+    final bool isVerifyOnly = args.readFlag('verify-only');
+    final bool isConsumerOnly = args.readFlag('consumer-only');
 
     // "consumer" packages are those that constitute our public API (e.g. flutter, flutter_test, flutter_driver, flutter_localizations).
     if (isConsumerOnly) {
@@ -299,7 +299,7 @@ class UpdatePackagesCommand extends FlutterCommand {
       }
 
       if (isPrintPaths) {
-        showDependencyPaths(from: args.getOption('from'), to: args.getOption('to'), tree: tree);
+        showDependencyPaths(from: args.readOption('from'), to: args.readOption('to'), tree: tree);
         return null;
       }
 

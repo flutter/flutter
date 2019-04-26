@@ -47,14 +47,14 @@ class TraceCommand extends FlutterCommand {
   Future<FlutterCommandResult> runCommand() async {
     int observatoryPort;
     if (args.wasParsed('debug-port')) {
-      observatoryPort = int.tryParse(args.getOption('debug-port'));
+      observatoryPort = int.tryParse(args.readOption('debug-port'));
     }
     if (observatoryPort == null) {
       throwToolExit('The --debug-port argument must be specified.');
     }
 
-    bool start = args.getFlag('start');
-    bool stop = args.getFlag('stop');
+    bool start = args.readFlag('start');
+    bool stop = args.readFlag('stop');
     if (!start && !stop) {
       start = true;
       stop = true;
@@ -64,7 +64,7 @@ class TraceCommand extends FlutterCommand {
     Duration duration;
     if (args.wasParsed('duration')) {
       try {
-        duration = Duration(seconds: int.parse(args.getOption('duration')));
+        duration = Duration(seconds: int.parse(args.readOption('duration')));
       } on FormatException {
         throwToolExit('Invalid duration passed to --duration; it should be a positive number of seconds.');
       }
@@ -99,8 +99,8 @@ class TraceCommand extends FlutterCommand {
     final Map<String, dynamic> timeline = await tracing.stopTracingAndDownloadTimeline();
     File localFile;
 
-    if (args.getOption('out') != null) {
-      localFile = fs.file(args.getOption('out'));
+    if (args.readOption('out') != null) {
+      localFile = fs.file(args.readOption('out'));
     } else {
       localFile = getUniqueFile(fs.currentDirectory, 'trace', 'json');
     }

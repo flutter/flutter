@@ -33,7 +33,7 @@ class DoctorCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     if (args.wasParsed('check-for-remote-artifacts')) {
-      final String engineRevision = args.getOption('check-for-remote-artifacts');
+      final String engineRevision = args.readOption('check-for-remote-artifacts');
       if (engineRevision.startsWith(RegExp(r'[a-f0-9]{1,40}'))) {
         final bool success = await doctor.checkRemoteArtifacts(engineRevision);
         if (!success) {
@@ -45,7 +45,7 @@ class DoctorCommand extends FlutterCommand {
             'git hash.');
       }
     }
-    final bool success = await doctor.diagnose(androidLicenses: args.getFlag('android-licenses'), verbose: verbose);
+    final bool success = await doctor.diagnose(androidLicenses: args.readFlag('android-licenses'), verbose: verbose);
     return FlutterCommandResult(success ? ExitStatus.success : ExitStatus.warning);
   }
 }

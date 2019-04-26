@@ -51,15 +51,15 @@ class AnalyzeOnce extends AnalyzeBase {
       }
     }
 
-    if (argResults.getFlag('flutter-repo')) {
+    if (argResults.readFlag('flutter-repo')) {
       // check for conflicting dependencies
       final PackageDependencyTracker dependencies = PackageDependencyTracker();
       dependencies.checkForConflictingDependencies(repoPackages, dependencies);
       directories.addAll(repoRoots);
-      if (argResults.wasParsed('current-package') && argResults.getFlag('current-package'))
+      if (argResults.wasParsed('current-package') && argResults.readFlag('current-package'))
         directories.add(currentDirectory);
     } else {
-      if (argResults.getFlag('current-package'))
+      if (argResults.readFlag('current-package'))
         directories.add(currentDirectory);
     }
 
@@ -70,7 +70,7 @@ class AnalyzeOnce extends AnalyzeBase {
     final Completer<void> analysisCompleter = Completer<void>();
     final List<AnalysisError> errors = <AnalysisError>[];
 
-    final String sdkPath = argResults.getOption('dart-sdk') ?? sdk.dartSdkPath;
+    final String sdkPath = argResults.readOption('dart-sdk') ?? sdk.dartSdkPath;
 
     final AnalysisServer server = AnalysisServer(
       sdkPath,
@@ -105,7 +105,7 @@ class AnalyzeOnce extends AnalyzeBase {
     final String message = directories.length > 1
         ? '${directories.length} ${directories.length == 1 ? 'directory' : 'directories'}'
         : fs.path.basename(directories.first);
-    final Status progress = argResults.getFlag('preamble')
+    final Status progress = argResults.readFlag('preamble')
         ? logger.startProgress('Analyzing $message...', timeout: timeoutConfiguration.slowOperation)
         : null;
 
@@ -117,7 +117,7 @@ class AnalyzeOnce extends AnalyzeBase {
     final int undocumentedMembers = errors.where((AnalysisError error) {
       return error.code == 'public_member_api_docs';
     }).length;
-    if (!argResults.getFlag('dartdocs')) {
+    if (!argResults.readFlag('dartdocs')) {
       errors.removeWhere((AnalysisError error) => error.code == 'public_member_api_docs');
     }
 
@@ -129,7 +129,7 @@ class AnalyzeOnce extends AnalyzeBase {
     dumpErrors(errors.map<String>((AnalysisError error) => error.toLegacyString()));
 
     // report errors
-    if (errors.isNotEmpty && argResults.getFlag('preamble'))
+    if (errors.isNotEmpty && argResults.readFlag('preamble'))
       printStatus('');
     errors.sort();
     for (AnalysisError error in errors)
@@ -159,7 +159,7 @@ class AnalyzeOnce extends AnalyzeBase {
       throwToolExit('Server error(s) occurred. (ran in ${seconds}s)');
     }
 
-    if (argResults.getFlag('congratulate')) {
+    if (argResults.readFlag('congratulate')) {
       if (undocumentedMembers > 0) {
         printStatus('No issues found! (ran in ${seconds}s; $dartdocMessage)');
       } else {

@@ -120,7 +120,7 @@ abstract class FlutterCommand extends Command<void> {
 
   bool _usesIpv6Flag = false;
 
-  bool get shouldRunPub => _usesPubOption && args.getFlag('pub');
+  bool get shouldRunPub => _usesPubOption && args.readFlag('pub');
 
   bool get shouldUpdateCache => true;
 
@@ -143,7 +143,7 @@ abstract class FlutterCommand extends Command<void> {
 
   String get targetFile {
     if (args.wasParsed('target'))
-      return args.getOption('target');
+      return args.readOption('target');
     else if (args.rest.isNotEmpty)
       return args.rest.first;
     else
@@ -195,11 +195,11 @@ abstract class FlutterCommand extends Command<void> {
   ///
   /// If no port is set, returns null.
   int get observatoryPort {
-    if (!_usesPortOption || args.getOption('observatory-port') == null) {
+    if (!_usesPortOption || args.readOption('observatory-port') == null) {
       return null;
     }
     try {
-      return int.parse(args.getOption('observatory-port'));
+      return int.parse(args.readOption('observatory-port'));
     } catch (error) {
       throwToolExit('Invalid port for `--observatory-port`: $error');
     }
@@ -217,7 +217,7 @@ abstract class FlutterCommand extends Command<void> {
     _usesIpv6Flag = true;
   }
 
-  bool get ipv6 => _usesIpv6Flag ? args.getFlag('ipv6') : null;
+  bool get ipv6 => _usesIpv6Flag ? args.readFlag('ipv6') : null;
 
   void usesBuildNumberOption() {
     argParser.addOption('build-number',
@@ -297,21 +297,21 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   BuildMode getBuildMode() {
-    final List<bool> modeFlags = <bool>[args.getFlag('debug'), args.getFlag('profile'), args.getFlag('release')];
+    final List<bool> modeFlags = <bool>[args.readFlag('debug'), args.readFlag('profile'), args.readFlag('release')];
     if (modeFlags.where((bool flag) => flag).length > 1)
       throw UsageException('Only one of --debug, --profile, or --release can be specified.', null);
     final bool dynamicFlag = argParser.options.containsKey('dynamic')
-        ? args.getFlag('dynamic')
+        ? args.readFlag('dynamic')
         : false;
 
-    if (args.getFlag('debug')) {
+    if (args.readFlag('debug')) {
       if (dynamicFlag)
         throw ToolExit('Error: --dynamic requires --release or --profile.');
       return BuildMode.debug;
     }
-    if (args.getFlag('profile'))
+    if (args.readFlag('profile'))
       return dynamicFlag ? BuildMode.dynamicProfile : BuildMode.profile;
-    if (args.getFlag('release'))
+    if (args.readFlag('release'))
       return dynamicFlag ? BuildMode.dynamicRelease : BuildMode.release;
 
     if (_defaultBuildMode == BuildMode.debug && dynamicFlag)
@@ -336,25 +336,25 @@ abstract class FlutterCommand extends Command<void> {
   BuildInfo getBuildInfo() {
     TargetPlatform targetPlatform;
     if (argParser.options.containsKey('target-platform') &&
-        args.getOption('target-platform') != 'default') {
-      targetPlatform = getTargetPlatformForName(args.getOption('target-platform'));
+        args.readOption('target-platform') != 'default') {
+      targetPlatform = getTargetPlatformForName(args.readOption('target-platform'));
     }
 
     final bool trackWidgetCreation = argParser.options.containsKey('track-widget-creation')
-        ? args.getFlag('track-widget-creation')
+        ? args.readFlag('track-widget-creation')
         : false;
 
-    final String buildNumber = argParser.options.containsKey('build-number') && args.getOption('build-number') != null
-        ? args.getOption('build-number')
+    final String buildNumber = argParser.options.containsKey('build-number') && args.readOption('build-number') != null
+        ? args.readOption('build-number')
         : null;
 
     String extraFrontEndOptions =
         argParser.options.containsKey(FlutterOptions.kExtraFrontEndOptions)
-            ? args.getOption(FlutterOptions.kExtraFrontEndOptions)
+            ? args.readOption(FlutterOptions.kExtraFrontEndOptions)
             : null;
     if (argParser.options.containsKey(FlutterOptions.kEnableExperiment) &&
-        args.getOption(FlutterOptions.kEnableExperiment) != null) {
-      for (String expFlag in args.getMultiOption(FlutterOptions.kEnableExperiment)) {
+        args.readOption(FlutterOptions.kEnableExperiment) != null) {
+      for (String expFlag in args.readMultiOption(FlutterOptions.kEnableExperiment)) {
         final String flag = '--enable-experiment=' + expFlag;
         if (extraFrontEndOptions != null) {
           extraFrontEndOptions += ',' + flag;
@@ -366,27 +366,27 @@ abstract class FlutterCommand extends Command<void> {
 
     return BuildInfo(getBuildMode(),
       argParser.options.containsKey('flavor')
-        ? args.getOption('flavor')
+        ? args.readOption('flavor')
         : null,
       trackWidgetCreation: trackWidgetCreation,
       compilationTraceFilePath: argParser.options.containsKey('compilation-trace-file')
-          ? args.getOption('compilation-trace-file')
+          ? args.readOption('compilation-trace-file')
           : null,
       extraFrontEndOptions: extraFrontEndOptions,
       extraGenSnapshotOptions: argParser.options.containsKey(FlutterOptions.kExtraGenSnapshotOptions)
-          ? args.getOption(FlutterOptions.kExtraGenSnapshotOptions)
+          ? args.readOption(FlutterOptions.kExtraGenSnapshotOptions)
           : null,
       buildSharedLibrary: argParser.options.containsKey('build-shared-library')
-        ? args.getOption('build-shared-library')
+        ? args.readOption('build-shared-library')
         : false,
       targetPlatform: targetPlatform,
       fileSystemRoots: argParser.options.containsKey(FlutterOptions.kFileSystemRoot)
-          ? args.getMultiOption(FlutterOptions.kFileSystemRoot) : null,
+          ? args.readMultiOption(FlutterOptions.kFileSystemRoot) : null,
       fileSystemScheme: argParser.options.containsKey(FlutterOptions.kFileSystemScheme)
-          ? args.getOption(FlutterOptions.kFileSystemScheme) : null,
+          ? args.readOption(FlutterOptions.kFileSystemScheme) : null,
       buildNumber: buildNumber,
       buildName: argParser.options.containsKey('build-name')
-          ? args.getOption('build-name')
+          ? args.readOption('build-name')
           : null,
     );
   }
@@ -608,7 +608,7 @@ abstract class FlutterCommand extends Command<void> {
       }
 
       // Validate the current package map only if we will not be running "pub get" later.
-      if (parent?.name != 'packages' && !(_usesPubOption && args.getFlag('pub'))) {
+      if (parent?.name != 'packages' && !(_usesPubOption && args.readFlag('pub'))) {
         final String error = PackageMap(PackageMap.globalPackagesPath).checkValid();
         if (error != null)
           throw ToolExit(error);
@@ -658,7 +658,7 @@ mixin TargetPlatformBasedDevelopmentArtifacts on FlutterCommand {
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async {
     // If there is no specified target device, fallback to the default
     // confiugration.
-    final String rawTargetPlatform = args.getOption('target-platform');
+    final String rawTargetPlatform = args.readOption('target-platform');
     final TargetPlatform targetPlatform = getTargetPlatformForName(rawTargetPlatform);
     if (targetPlatform == null) {
       return super.requiredArtifacts;

@@ -53,7 +53,7 @@ class ShellCompletionCommand extends FlutterCommand {
     }
 
     final File outputFile = fs.file(args.rest.first);
-    if (outputFile.existsSync() && !args.getFlag('overwrite')) {
+    if (outputFile.existsSync() && !args.readFlag('overwrite')) {
       throwToolExit(
         'Output file ${outputFile.path} already exists, will not overwrite. '
             'Use --overwrite to force overwriting existing output file.',

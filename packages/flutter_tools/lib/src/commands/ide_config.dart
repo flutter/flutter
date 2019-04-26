@@ -163,7 +163,7 @@ class IdeConfigCommand extends FlutterCommand {
           manifest.add('$relativePath${Template.copyTemplateExtension}');
           continue;
         }
-        if (args.getFlag('overwrite')) {
+        if (args.readFlag('overwrite')) {
           finalDestinationFile.deleteSync();
           printStatus('  $relativeDestination (overwritten)');
         } else {
@@ -184,7 +184,7 @@ class IdeConfigCommand extends FlutterCommand {
     }
 
     // If we're not overwriting, then we're not going to remove missing items either.
-    if (!args.getFlag('overwrite')) {
+    if (!args.readFlag('overwrite')) {
       return;
     }
 
@@ -228,7 +228,7 @@ class IdeConfigCommand extends FlutterCommand {
 
     await Cache.instance.updateAll(<DevelopmentArtifact>{ DevelopmentArtifact.universal });
 
-    if (args.getFlag('update-templates')) {
+    if (args.readFlag('update-templates')) {
       _handleTemplateUpdate();
       return null;
     }
@@ -246,7 +246,7 @@ class IdeConfigCommand extends FlutterCommand {
     printStatus('Updating IDE configuration for Flutter tree at $dirPath...');
     int generatedCount = 0;
     generatedCount += _renderTemplate(_ideName, dirPath, <String, dynamic>{
-      'withRootModule': args.getFlag('with-root-module'),
+      'withRootModule': args.readFlag('with-root-module'),
     });
 
     printStatus('Wrote $generatedCount files.');
@@ -262,7 +262,7 @@ class IdeConfigCommand extends FlutterCommand {
     return template.render(
       fs.directory(dirPath),
       context,
-      overwriteExisting: args.getFlag('overwrite'),
+      overwriteExisting: args.readFlag('overwrite'),
     );
   }
 }
