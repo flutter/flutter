@@ -72,7 +72,7 @@ class BuildBundleCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final String targetPlatform = argResults['target-platform'];
+    final String targetPlatform = args.getOption('target-platform');
     final TargetPlatform platform = getTargetPlatformForName(targetPlatform);
     if (platform == null) {
       throwToolExit('Unknown platform: $targetPlatform');
@@ -96,18 +96,18 @@ class BuildBundleCommand extends BuildSubCommand {
       platform: platform,
       buildMode: buildMode,
       mainPath: targetFile,
-      manifestPath: argResults['manifest'],
-      depfilePath: argResults['depfile'],
-      privateKeyPath: argResults['private-key'],
-      assetDirPath: argResults['asset-dir'],
-      precompiledSnapshot: argResults['precompiled'],
-      reportLicensedPackages: argResults['report-licensed-packages'],
-      trackWidgetCreation: argResults['track-widget-creation'],
-      compilationTraceFilePath: argResults['compilation-trace-file'],
-      extraFrontEndOptions: argResults[FlutterOptions.kExtraFrontEndOptions],
-      extraGenSnapshotOptions: argResults[FlutterOptions.kExtraGenSnapshotOptions],
-      fileSystemScheme: argResults['filesystem-scheme'],
-      fileSystemRoots: argResults['filesystem-root'],
+      manifestPath: args.getOption('manifest'),
+      depfilePath: args.getOption('depfile'),
+      privateKeyPath: args.getOption('private-key'),
+      assetDirPath: args.getOption('asset-dir'),
+      precompiledSnapshot: args.getFlag('precompiled'),
+      reportLicensedPackages: args.getFlag('report-licensed-packages'),
+      trackWidgetCreation: args.getFlag('track-widget-creation'),
+      compilationTraceFilePath: args.getOption('compilation-trace-file'),
+      extraFrontEndOptions: args.getMultiOption(FlutterOptions.kExtraFrontEndOptions),
+      extraGenSnapshotOptions: args.getMultiOption(FlutterOptions.kExtraGenSnapshotOptions),
+      fileSystemScheme: args.getOption('filesystem-scheme'),
+      fileSystemRoots: args.getMultiOption('filesystem-root'),
     );
     return null;
   }

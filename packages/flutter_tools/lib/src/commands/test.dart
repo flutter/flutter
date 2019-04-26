@@ -125,17 +125,17 @@ class TestCommand extends FastFlutterCommand {
     if (shouldRunPub) {
       await pubGet(context: PubContext.getVerifyContext(name), skipPubspecYamlCheck: true);
     }
-    final bool buildTestAssets = argResults['test-assets'];
+    final bool buildTestAssets = args.getFlag('test-assets');
     if (buildTestAssets) {
       await _buildTestAsset();
     }
-    final List<String> names = argResults['name'];
-    final List<String> plainNames = argResults['plain-name'];
+    final List<String> names = args.getMultiOption('name');
+    final List<String> plainNames = args.getMultiOption('plain-name');
     final FlutterProject flutterProject = await FlutterProject.current();
 
-    Iterable<String> files = argResults.rest.map<String>((String testPath) => fs.path.absolute(testPath)).toList();
+    List<String> files = args.rest.map<String>((String testPath) => fs.path.absolute(testPath)).toList();
 
-    final bool startPaused = argResults['start-paused'];
+    final bool startPaused = args.getFlag('start-paused');
     if (startPaused && files.length != 1) {
       throwToolExit(
         'When using --start-paused, you must specify a single test file to run.',
@@ -143,7 +143,7 @@ class TestCommand extends FastFlutterCommand {
       );
     }
 
-    final int jobs = int.tryParse(argResults['concurrency']);
+    final int jobs = int.tryParse(args.getOption('concurrency'));
     if (jobs == null || jobs <= 0 || !jobs.isFinite) {
       throwToolExit(
         'Could not parse -j/--concurrency argument. It must be an integer greater than zero.'
@@ -167,13 +167,13 @@ class TestCommand extends FastFlutterCommand {
     }
 
     CoverageCollector collector;
-    if (argResults['coverage'] || argResults['merge-coverage']) {
+    if (args.getFlag('coverage') || args.getFlag('merge-coverage')) {
       collector = CoverageCollector(
         flutterProject: await FlutterProject.current(),
       );
     }
 
-    final bool machine = argResults['machine'];
+    final bool machine = args.getFlag('machine');
     if (collector != null && machine) {
       throwToolExit("The test command doesn't support --machine and coverage together");
     }
@@ -201,9 +201,7 @@ class TestCommand extends FastFlutterCommand {
       }
     }
 
-    final bool disableServiceAuthCodes =
-      argResults['disable-service-auth-codes'];
-
+    final bool disableServiceAuthCodes = args.getFlag('disable-service-auth-codes');
     final int result = await runTests(
       files,
       workDir: workDir,
@@ -213,19 +211,19 @@ class TestCommand extends FastFlutterCommand {
       enableObservatory: collector != null || startPaused,
       startPaused: startPaused,
       disableServiceAuthCodes: disableServiceAuthCodes,
-      ipv6: argResults['ipv6'],
+      ipv6: args.getFlag('ipv6'),
       machine: machine,
-      trackWidgetCreation: argResults['track-widget-creation'],
-      updateGoldens: argResults['update-goldens'],
+      trackWidgetCreation: args.getFlag('track-widget-creation'),
+      updateGoldens: args.getFlag('update-goldens'),
       concurrency: jobs,
       buildTestAssets: buildTestAssets,
       flutterProject: flutterProject,
     );
 
-    if (collector != null) {
-      if (!await collector.collectCoverageData(
-          argResults['coverage-path'], mergeCoverageData: argResults['merge-coverage']))
-        throwToolExit(null);
+    if (collector != null && !await collector.collectCoverageData(
+      args.getOption('coverage-path'),
+      mergeCoverageData: args.getFlag('merge-coverage'))) {
+      throwToolExit(null);
     }
 
     if (result != 0)

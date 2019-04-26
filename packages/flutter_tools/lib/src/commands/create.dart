@@ -223,17 +223,17 @@ class CreateCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    if (argResults['list-samples'] != null) {
-      await _writeSamplesJson(argResults['list-samples']);
+    if (args.getOption('list-samples') != null) {
+      await _writeSamplesJson(args.getOption('list-samples'));
       return null;
     }
 
-    if (argResults.rest.isEmpty)
+    if (args.rest.isEmpty)
       throwToolExit('No option specified for the output directory.\n$usage', exitCode: 2);
 
-    if (argResults.rest.length > 1) {
+    if (args.rest.length > 1) {
       String message = 'Multiple output directories specified.';
-      for (String arg in argResults.rest) {
+      for (String arg in args.rest) {
         if (arg.startsWith('-')) {
           message += '\nTry moving $arg to be immediately following $name';
           break;
@@ -259,25 +259,25 @@ class CreateCommand extends FlutterCommand {
     if (!fs.isFileSync(fs.path.join(flutterDriverPackagePath, 'pubspec.yaml')))
       throwToolExit('Unable to find package:flutter_driver in $flutterDriverPackagePath', exitCode: 2);
 
-    final Directory projectDir = fs.directory(argResults.rest.first);
+    final Directory projectDir = fs.directory(args.rest.first);
     final String projectDirPath = fs.path.normalize(projectDir.absolute.path);
 
     String sampleCode;
-    if (argResults['sample'] != null) {
-      if (argResults['template'] != null &&
-        _stringToProjectType(argResults['template'] ?? 'app') != _ProjectType.app) {
+    if (args.getOption('sample') != null) {
+      if (args.getOption('template') != null &&
+        _stringToProjectType(args.getOption('template') ?? 'app') != _ProjectType.app) {
         throwToolExit('Cannot specify --sample with a project type other than '
           '"${getEnumName(_ProjectType.app)}"');
       }
       // Fetch the sample from the server.
-      sampleCode = await _fetchSampleFromServer(argResults['sample']);
+      sampleCode = await _fetchSampleFromServer(args.getOption('sample'));
     }
 
     _ProjectType template;
     _ProjectType detectedProjectType;
     final bool metadataExists = projectDir.absolute.childFile('.metadata').existsSync();
-    if (argResults['template'] != null) {
-      template = _stringToProjectType(argResults['template']);
+    if (args.getOption('template') != null) {
+      template = _stringToProjectType(args.getOption('template'));
     } else {
       if (projectDir.existsSync() && projectDir.listSync().isNotEmpty) {
         detectedProjectType = _determineTemplateType(projectDir);
@@ -302,8 +302,8 @@ class CreateCommand extends FlutterCommand {
     final bool generatePlugin = template == _ProjectType.plugin;
     final bool generatePackage = template == _ProjectType.package;
 
-    String organization = argResults['org'];
-    if (!argResults.wasParsed('org')) {
+    String organization = args.getOption('org');
+    if (!args.wasParsed('org')) {
       final FlutterProject project = await FlutterProject.fromDirectory(projectDir);
       final Set<String> existingOrganizations = project.organizationNames;
       if (existingOrganizations.length == 1) {
@@ -316,11 +316,11 @@ class CreateCommand extends FlutterCommand {
       }
     }
 
-    String error = _validateProjectDir(projectDirPath, flutterRoot: flutterRoot, overwrite: argResults['overwrite']);
+    String error = _validateProjectDir(projectDirPath, flutterRoot: flutterRoot, overwrite: args.getFlag('overwrite'));
     if (error != null)
       throwToolExit(error);
 
-    final String projectName = argResults['project-name'] ?? fs.path.basename(projectDirPath);
+    final String projectName = args.getOption('project-name') ?? fs.path.basename(projectDirPath);
     error = _validateProjectName(projectName);
     if (error != null)
       throwToolExit(error);
@@ -328,19 +328,19 @@ class CreateCommand extends FlutterCommand {
     final Map<String, dynamic> templateContext = _templateContext(
       organization: organization,
       projectName: projectName,
-      projectDescription: argResults['description'],
+      projectDescription: args.getOption('description'),
       flutterRoot: flutterRoot,
-      renderDriverTest: argResults['with-driver-test'],
+      renderDriverTest: args.getFlag('with-driver-test'),
       withPluginHook: generatePlugin,
-      androidLanguage: argResults['android-language'],
-      iosLanguage: argResults['ios-language'],
+      androidLanguage:  args.getOption('android-language'),
+      iosLanguage: args.getOption('ios-language'),
     );
 
     final String relativeDirPath = fs.path.relative(projectDirPath);
     if (!projectDir.existsSync() || projectDir.listSync().isEmpty) {
       printStatus('Creating project $relativeDirPath...');
     } else {
-      if (sampleCode != null && !argResults['overwrite']) {
+      if (sampleCode != null && !args.getFlag('overwrite')) {
         throwToolExit('Will not overwrite existing project in $relativeDirPath: '
           'must specify --overwrite for samples to overwrite.');
       }
@@ -351,16 +351,16 @@ class CreateCommand extends FlutterCommand {
     int generatedFileCount = 0;
     switch (template) {
       case _ProjectType.app:
-        generatedFileCount += await _generateApp(relativeDir, templateContext, overwrite: argResults['overwrite']);
+        generatedFileCount += await _generateApp(relativeDir, templateContext, overwrite: args.getFlag('overwrite'));
         break;
       case _ProjectType.module:
-        generatedFileCount += await _generateModule(relativeDir, templateContext, overwrite: argResults['overwrite']);
+        generatedFileCount += await _generateModule(relativeDir, templateContext, overwrite: args.getFlag('overwrite'));
         break;
       case _ProjectType.package:
-        generatedFileCount += await _generatePackage(relativeDir, templateContext, overwrite: argResults['overwrite']);
+        generatedFileCount += await _generatePackage(relativeDir, templateContext, overwrite: args.getFlag('overwrite'));
         break;
       case _ProjectType.plugin:
-        generatedFileCount += await _generatePlugin(relativeDir, templateContext, overwrite: argResults['overwrite']);
+        generatedFileCount += await _generatePlugin(relativeDir, templateContext, overwrite: args.getFlag('overwrite'));
         break;
     }
     if (sampleCode != null) {
@@ -432,16 +432,16 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
 
   Future<int> _generateModule(Directory directory, Map<String, dynamic> templateContext, { bool overwrite = false }) async {
     int generatedCount = 0;
-    final String description = argResults.wasParsed('description')
-        ? argResults['description']
+    final String description = args.wasParsed('description')
+        ? args.getFlag('description')
         : 'A new flutter module project.';
     templateContext['description'] = description;
     generatedCount += _renderTemplate(fs.path.join('module', 'common'), directory, templateContext, overwrite: overwrite);
-    if (argResults['pub']) {
+    if (args.getFlag('pub')) {
       await pubGet(
         context: PubContext.create,
         directory: directory.path,
-        offline: argResults['offline'],
+        offline: args.getFlag('offline'),
       );
       final FlutterProject project = await FlutterProject.fromDirectory(directory);
       await project.ensureReadyForPlatformSpecificTooling(checkProjects: false);
@@ -451,16 +451,16 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
 
   Future<int> _generatePackage(Directory directory, Map<String, dynamic> templateContext, { bool overwrite = false }) async {
     int generatedCount = 0;
-    final String description = argResults.wasParsed('description')
-        ? argResults['description']
+    final String description = args.wasParsed('description')
+        ? args.getFlag('description')
         : 'A new Flutter package project.';
     templateContext['description'] = description;
     generatedCount += _renderTemplate('package', directory, templateContext, overwrite: overwrite);
-    if (argResults['pub']) {
+    if (args.getFlag('offline')) {
       await pubGet(
         context: PubContext.createPackage,
         directory: directory.path,
-        offline: argResults['offline'],
+        offline: args.getFlag('offline'),
       );
     }
     return generatedCount;
@@ -468,16 +468,16 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
 
   Future<int> _generatePlugin(Directory directory, Map<String, dynamic> templateContext, { bool overwrite = false }) async {
     int generatedCount = 0;
-    final String description = argResults.wasParsed('description')
-        ? argResults['description']
+    final String description = args.wasParsed('description')
+        ? args.getFlag('description')
         : 'A new flutter plugin project.';
     templateContext['description'] = description;
     generatedCount += _renderTemplate('plugin', directory, templateContext, overwrite: overwrite);
-    if (argResults['pub']) {
+    if (args.getFlag('pub')) {
       await pubGet(
         context: PubContext.createPlugin,
         directory: directory.path,
-        offline: argResults['offline'],
+        offline: args.getFlag('offline'),
       );
     }
     final FlutterProject project = await FlutterProject.fromDirectory(directory);
@@ -504,13 +504,13 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
     final FlutterProject project = await FlutterProject.fromDirectory(directory);
     generatedCount += _injectGradleWrapper(project);
 
-    if (argResults['with-driver-test']) {
+    if (args.getFlag('with-driver-test')) {
       final Directory testDirectory = directory.childDirectory('test_driver');
       generatedCount += _renderTemplate('driver', testDirectory, templateContext, overwrite: overwrite);
     }
 
-    if (argResults['pub']) {
-      await pubGet(context: PubContext.create, directory: directory.path, offline: argResults['offline']);
+    if (args.getFlag('pub')) {
+      await pubGet(context: PubContext.create, directory: directory.path, offline: args.getFlag('offline'));
       await project.ensureReadyForPlatformSpecificTooling(checkProjects: false);
     }
 

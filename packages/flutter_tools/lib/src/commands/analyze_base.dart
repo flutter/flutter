@@ -4,9 +4,9 @@
 
 import 'dart:async';
 
-import 'package:args/args.dart';
 import 'package:yaml/yaml.dart' as yaml;
 
+import '../base/args.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/utils.dart';
@@ -18,15 +18,15 @@ abstract class AnalyzeBase {
   AnalyzeBase(this.argResults);
 
   /// The parsed argument results for execution.
-  final ArgResults argResults;
+  final TypedArgResults argResults;
 
   /// Called by [AnalyzeCommand] to start the analysis process.
   Future<void> analyze();
 
   void dumpErrors(Iterable<String> errors) {
-    if (argResults['write'] != null) {
+    if (argResults.getOption('write') != null) {
       try {
-        final RandomAccessFile resultsFile = fs.file(argResults['write']).openSync(mode: FileMode.write);
+        final RandomAccessFile resultsFile = fs.file(argResults.getOption('write')).openSync(mode: FileMode.write);
         try {
           resultsFile.lockSync();
           resultsFile.writeStringSync(errors.join('\n'));
@@ -34,7 +34,7 @@ abstract class AnalyzeBase {
           resultsFile.close();
         }
       } catch (e) {
-        printError('Failed to save output to "${argResults['write']}": $e');
+        printError('Failed to save output to "${argResults.getOption('write')}": $e');
       }
     }
   }
@@ -50,7 +50,7 @@ abstract class AnalyzeBase {
     printStatus('Analysis benchmark written to $benchmarkOut ($data).');
   }
 
-  bool get isBenchmarking => argResults['benchmark'];
+  bool get isBenchmarking => argResults.getFlag('benchmark');
 }
 
 /// Return true if [fileList] contains a path that resides inside the Flutter repository.

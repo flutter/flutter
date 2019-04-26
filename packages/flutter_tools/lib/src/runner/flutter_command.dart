@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
+import 'package:flutter_tools/src/base/args.dart';
 import 'package:meta/meta.dart';
 import 'package:quiver/strings.dart';
 
@@ -85,6 +86,19 @@ abstract class FlutterCommand extends Command<void> {
   /// The flag name for whether or not to use ipv6.
   static const String ipv6Flag = 'ipv6';
 
+  /// The parsed argument results for the command.
+  ///
+  /// Use this instead of `argResults` to avoid implicit downcasts.
+  TypedArgResults get args {
+    return _typedResults ??= TypedArgResults(argResults);
+  }
+  TypedArgResults _typedResults;
+
+  TypedArgResults get globalArgs {
+     return _typedGloabalArgs ??= TypedArgResults(globalResults);
+  }
+  TypedArgResults _typedGloabalArgs;
+
   @override
   ArgParser get argParser => _argParser;
   final ArgParser _argParser = ArgParser(
@@ -106,7 +120,7 @@ abstract class FlutterCommand extends Command<void> {
 
   bool _usesIpv6Flag = false;
 
-  bool get shouldRunPub => _usesPubOption && argResults['pub'];
+  bool get shouldRunPub => _usesPubOption && args.getFlag('pub');
 
   bool get shouldUpdateCache => true;
 
@@ -128,10 +142,10 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   String get targetFile {
-    if (argResults.wasParsed('target'))
-      return argResults['target'];
-    else if (argResults.rest.isNotEmpty)
-      return argResults.rest.first;
+    if (args.wasParsed('target'))
+      return args.getOption('target');
+    else if (args.rest.isNotEmpty)
+      return args.rest.first;
     else
       return bundle.defaultMainPath;
   }
@@ -181,11 +195,11 @@ abstract class FlutterCommand extends Command<void> {
   ///
   /// If no port is set, returns null.
   int get observatoryPort {
-    if (!_usesPortOption || argResults['observatory-port'] == null) {
+    if (!_usesPortOption || args.getOption('observatory-port') == null) {
       return null;
     }
     try {
-      return int.parse(argResults['observatory-port']);
+      return int.parse(args.getOption('observatory-port'));
     } catch (error) {
       throwToolExit('Invalid port for `--observatory-port`: $error');
     }
@@ -203,7 +217,7 @@ abstract class FlutterCommand extends Command<void> {
     _usesIpv6Flag = true;
   }
 
-  bool get ipv6 => _usesIpv6Flag ? argResults['ipv6'] : null;
+  bool get ipv6 => _usesIpv6Flag ? args.getFlag('ipv6') : null;
 
   void usesBuildNumberOption() {
     argParser.addOption('build-number',
@@ -283,21 +297,21 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   BuildMode getBuildMode() {
-    final List<bool> modeFlags = <bool>[argResults['debug'], argResults['profile'], argResults['release']];
+    final List<bool> modeFlags = <bool>[args.getFlag('debug'), args.getFlag('profile'), args.getFlag('release')];
     if (modeFlags.where((bool flag) => flag).length > 1)
       throw UsageException('Only one of --debug, --profile, or --release can be specified.', null);
     final bool dynamicFlag = argParser.options.containsKey('dynamic')
-        ? argResults['dynamic']
+        ? args.getOption('dynamic')
         : false;
 
-    if (argResults['debug']) {
+    if (args.getFlag('debug')) {
       if (dynamicFlag)
         throw ToolExit('Error: --dynamic requires --release or --profile.');
       return BuildMode.debug;
     }
-    if (argResults['profile'])
+    if (args.getFlag('profile'))
       return dynamicFlag ? BuildMode.dynamicProfile : BuildMode.profile;
-    if (argResults['release'])
+    if (args.getFlag('release'))
       return dynamicFlag ? BuildMode.dynamicRelease : BuildMode.release;
 
     if (_defaultBuildMode == BuildMode.debug && dynamicFlag)
@@ -322,25 +336,25 @@ abstract class FlutterCommand extends Command<void> {
   BuildInfo getBuildInfo() {
     TargetPlatform targetPlatform;
     if (argParser.options.containsKey('target-platform') &&
-        argResults['target-platform'] != 'default') {
-      targetPlatform = getTargetPlatformForName(argResults['target-platform']);
+        args.getOption('target-platform') != 'default') {
+      targetPlatform = getTargetPlatformForName(args.getOption('target-platform'));
     }
 
     final bool trackWidgetCreation = argParser.options.containsKey('track-widget-creation')
-        ? argResults['track-widget-creation']
+        ? args.getOption('track-widget-creation')
         : false;
 
-    final String buildNumber = argParser.options.containsKey('build-number') && argResults['build-number'] != null
-        ? argResults['build-number']
+    final String buildNumber = argParser.options.containsKey('build-number') && args.getOption('build-number') != null
+        ? args.getOption('build-number')
         : null;
 
     String extraFrontEndOptions =
         argParser.options.containsKey(FlutterOptions.kExtraFrontEndOptions)
-            ? argResults[FlutterOptions.kExtraFrontEndOptions]
+            ? args.getOption(FlutterOptions.kExtraFrontEndOptions)
             : null;
     if (argParser.options.containsKey(FlutterOptions.kEnableExperiment) &&
-        argResults[FlutterOptions.kEnableExperiment] != null) {
-      for (String expFlag in argResults[FlutterOptions.kEnableExperiment]) {
+        args.getOption(FlutterOptions.kEnableExperiment) != null) {
+      for (String expFlag in args.getMultiOption(FlutterOptions.kEnableExperiment)) {
         final String flag = '--enable-experiment=' + expFlag;
         if (extraFrontEndOptions != null) {
           extraFrontEndOptions += ',' + flag;
@@ -352,27 +366,27 @@ abstract class FlutterCommand extends Command<void> {
 
     return BuildInfo(getBuildMode(),
       argParser.options.containsKey('flavor')
-        ? argResults['flavor']
+        ? args.getOption('flavor')
         : null,
       trackWidgetCreation: trackWidgetCreation,
       compilationTraceFilePath: argParser.options.containsKey('compilation-trace-file')
-          ? argResults['compilation-trace-file']
+          ? args.getOption('compilation-trace-file')
           : null,
       extraFrontEndOptions: extraFrontEndOptions,
       extraGenSnapshotOptions: argParser.options.containsKey(FlutterOptions.kExtraGenSnapshotOptions)
-          ? argResults[FlutterOptions.kExtraGenSnapshotOptions]
+          ? args.getOption(FlutterOptions.kExtraGenSnapshotOptions)
           : null,
       buildSharedLibrary: argParser.options.containsKey('build-shared-library')
-        ? argResults['build-shared-library']
+        ? args.getOption('build-shared-library')
         : false,
       targetPlatform: targetPlatform,
       fileSystemRoots: argParser.options.containsKey(FlutterOptions.kFileSystemRoot)
-          ? argResults[FlutterOptions.kFileSystemRoot] : null,
+          ? args.getMultiOption(FlutterOptions.kFileSystemRoot) : null,
       fileSystemScheme: argParser.options.containsKey(FlutterOptions.kFileSystemScheme)
-          ? argResults[FlutterOptions.kFileSystemScheme] : null,
+          ? args.getOption(FlutterOptions.kFileSystemScheme) : null,
       buildNumber: buildNumber,
       buildName: argParser.options.containsKey('build-name')
-          ? argResults['build-name']
+          ? args.getOption('build-name')
           : null,
     );
   }
@@ -594,7 +608,7 @@ abstract class FlutterCommand extends Command<void> {
       }
 
       // Validate the current package map only if we will not be running "pub get" later.
-      if (parent?.name != 'packages' && !(_usesPubOption && argResults['pub'])) {
+      if (parent?.name != 'packages' && !(_usesPubOption && args.getFlag('pub'))) {
         final String error = PackageMap(PackageMap.globalPackagesPath).checkValid();
         if (error != null)
           throw ToolExit(error);
@@ -644,7 +658,7 @@ mixin TargetPlatformBasedDevelopmentArtifacts on FlutterCommand {
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async {
     // If there is no specified target device, fallback to the default
     // confiugration.
-    final String rawTargetPlatform = argResults['target-platform'];
+    final String rawTargetPlatform = args.getOption('target-platform');
     final TargetPlatform targetPlatform = getTargetPlatformForName(rawTargetPlatform);
     if (targetPlatform == null) {
       return super.requiredArtifacts;

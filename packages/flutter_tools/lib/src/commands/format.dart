@@ -49,7 +49,7 @@ class FormatCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    if (argResults.rest.isEmpty) {
+    if (args.rest.isEmpty) {
       throwToolExit(
         'No files specified to be formatted.\n'
         '\n'
@@ -63,21 +63,21 @@ class FormatCommand extends FlutterCommand {
     final String dartfmt = sdkBinaryName('dartfmt');
     final List<String> command = <String>[dartfmt];
 
-    if (argResults['dry-run']) {
+    if (args.getFlag('dry-run')) {
       command.add('-n');
     }
-    if (argResults['machine']) {
+    if (args.getFlag('machine')) {
       command.add('-m');
     }
-    if (!argResults['dry-run'] && !argResults['machine']) {
+    if (!args.getFlag('dry-run') && !args.getFlag('machine')) {
       command.add('-w');
     }
 
-    if (argResults['set-exit-if-changed']) {
+    if (args.getFlag('set-exit-if-changed')) {
       command.add('--set-exit-if-changed');
     }
 
-    command..addAll(argResults.rest);
+    command..addAll(args.rest);
 
     final int result = await runCommandAndStreamOutput(command);
     if (result != 0)

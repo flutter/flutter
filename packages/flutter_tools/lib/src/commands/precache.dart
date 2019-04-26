@@ -44,7 +44,7 @@ class PrecacheCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    if (argResults['all-platforms']) {
+    if (args.getFlag('all-platforms')) {
       cache.includeAllPlatforms = true;
     }
     final Set<DevelopmentArtifact> requiredArtifacts = <DevelopmentArtifact>{};
@@ -53,11 +53,11 @@ class PrecacheCommand extends FlutterCommand {
       if (FlutterVersion.instance.isStable && artifact.unstable) {
         continue;
       }
-      if (argResults[artifact.name]) {
+      if (args.getFlag(artifact.name)) {
         requiredArtifacts.add(artifact);
       }
     }
-    final bool forceUpdate = argResults['force'];
+    final bool forceUpdate = args.getFlag('force');
     if (forceUpdate || !cache.isUpToDate()) {
       await cache.updateAll(requiredArtifacts);
     } else {

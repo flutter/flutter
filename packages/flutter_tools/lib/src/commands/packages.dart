@@ -72,23 +72,23 @@ class PackagesGetCommand extends FlutterCommand {
     await pubGet(context: PubContext.pubGet,
       directory: directory,
       upgrade: upgrade ,
-      offline: argResults['offline'],
+      offline: args.getFlag('offline'),
       checkLastModified: false,
     );
   }
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    if (argResults.rest.length > 1)
+    if (args.rest.length > 1)
       throwToolExit('Too many arguments.\n$usage');
 
     final String target = findProjectRoot(
-      argResults.rest.length == 1 ? argResults.rest[0] : null
+      args.rest.length == 1 ? args.rest[0] : null
     );
     if (target == null) {
       throwToolExit(
        'Expected to find project root in '
-       '${ argResults.rest.length == 1 ? argResults.rest[0] : "current working directory" }.'
+       '${ args.rest.length == 1 ? args.rest[0] : "current working directory" }.'
       );
     }
 
@@ -132,7 +132,7 @@ class PackagesTestCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    await pub(<String>['run', 'test']..addAll(argResults.rest), context: PubContext.runTest, retry: false);
+    await pub(<String>['run', 'test']..addAll(args.rest), context: PubContext.runTest, retry: false);
     return null;
   }
 }
@@ -162,7 +162,7 @@ class PackagesForwardCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    await pub(<String>[_commandName]..addAll(argResults.rest), context: PubContext.pubForward, retry: false);
+    await pub(<String>[_commandName]..addAll(args.rest), context: PubContext.pubForward, retry: false);
     return null;
   }
 
@@ -189,7 +189,7 @@ class PackagesPassthroughCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    await pubInteractively(argResults.rest);
+    await pubInteractively(args.rest);
     return null;
   }
 }

@@ -66,30 +66,30 @@ class ConfigCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    if (argResults['machine']) {
+    if (args.getFlag('machine')) {
       await handleMachine();
       return null;
     }
 
-    if (argResults.wasParsed('analytics')) {
-      final bool value = argResults['analytics'];
+    if (args.wasParsed('analytics')) {
+      final bool value = args.getFlag('analytics');
       flutterUsage.enabled = value;
       printStatus('Analytics reporting ${value ? 'enabled' : 'disabled'}.');
     }
 
-    if (argResults.wasParsed('gradle-dir'))
-      _updateConfig('gradle-dir', argResults['gradle-dir']);
+    if (args.wasParsed('gradle-dir'))
+      _updateConfig('gradle-dir', args.getOption('gradle-dir'));
 
-    if (argResults.wasParsed('android-sdk'))
-      _updateConfig('android-sdk', argResults['android-sdk']);
+    if (args.wasParsed('android-sdk'))
+      _updateConfig('android-sdk', args.getOption('android-sdk'));
 
-    if (argResults.wasParsed('android-studio-dir'))
-      _updateConfig('android-studio-dir', argResults['android-studio-dir']);
+    if (args.wasParsed('android-studio-dir'))
+      _updateConfig('android-studio-dir', args.getOption('android-studio-dir'));
 
-    if (argResults.wasParsed('clear-ios-signing-cert'))
+    if (args.wasParsed('clear-ios-signing-cert'))
       _updateConfig('ios-signing-cert', '');
 
-    if (argResults.arguments.isEmpty)
+    if (args.arguments.isEmpty)
       printStatus(usage);
 
     return null;

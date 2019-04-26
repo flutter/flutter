@@ -44,11 +44,11 @@ class VersionCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     final List<String> tags = await getTags();
-    if (argResults.rest.isEmpty) {
+    if (args.rest.isEmpty) {
       tags.forEach(printStatus);
       return const FlutterCommandResult(ExitStatus.success);
     }
-    final String version = argResults.rest[0].replaceFirst('v', '');
+    final String version = args.rest[0].replaceFirst('v', '');
     if (!tags.contains('v$version')) {
       printError('There is no version: $version');
     }
@@ -57,7 +57,7 @@ class VersionCommand extends FlutterCommand {
     final Version targetVersion = Version.parse(version);
     bool withForce = false;
     if (targetVersion < minSupportedVersion) {
-      if (!argResults['force']) {
+      if (!args.getFlag('force')) {
         printError(
           'Version command is not supported in $targetVersion and it is supported since version $minSupportedVersion'
           'which means if you switch to version $minSupportedVersion then you can not use version command.'

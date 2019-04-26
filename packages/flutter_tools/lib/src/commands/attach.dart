@@ -109,10 +109,10 @@ class AttachCommand extends FlutterCommand {
   final String description = 'Attach to a running application.';
 
   int get debugPort {
-    if (argResults['debug-port'] == null)
+    if (args.getOption('debug-port') == null)
       return null;
     try {
-      return int.parse(argResults['debug-port']);
+      return int.parse(args.getOption('debug-port'));
     } catch (error) {
       throwToolExit('Invalid port for `--debug-port`: $error');
     }
@@ -120,10 +120,10 @@ class AttachCommand extends FlutterCommand {
   }
 
   Uri get debugUri {
-    if (argResults['debug-uri'] == null) {
+    if (args.getOption('debug-uri') == null) {
       return null;
     }
-    final Uri uri = Uri.parse(argResults['debug-uri']);
+    final Uri uri = Uri.parse(args.getOption('debug-uri'));
     if (!uri.hasPort) {
       throwToolExit('Port not specified for `--debug-uri`: $uri');
     }
@@ -131,7 +131,7 @@ class AttachCommand extends FlutterCommand {
   }
 
   String get appId {
-    return argResults['app-id'];
+    return args.getOption('app-id');
   }
 
   @override
@@ -140,13 +140,13 @@ class AttachCommand extends FlutterCommand {
     if (await findTargetDevice() == null)
       throwToolExit(null);
     debugPort;
-    if (debugPort == null && debugUri == null && argResults.wasParsed(FlutterCommand.ipv6Flag)) {
+    if (debugPort == null && debugUri == null && args.wasParsed(FlutterCommand.ipv6Flag)) {
       throwToolExit(
         'When the --debug-port or --debug-uri is unknown, this command determines '
         'the value of --ipv6 on its own.',
       );
     }
-    if (debugPort == null && debugUri == null && argResults.wasParsed(FlutterCommand.observatoryPortOption)) {
+    if (debugPort == null && debugUri == null && args.wasParsed(FlutterCommand.observatoryPortOption)) {
       throwToolExit(
         'When the --debug-port or --debug-uri is unknown, this command does not use '
         'the value of --observatory-port.',
@@ -166,7 +166,7 @@ class AttachCommand extends FlutterCommand {
 
     await _validateArguments();
 
-    writePidFile(argResults['pid-file']);
+    writePidFile(args.getOption('pid-file'));
 
     final Device device = await findTargetDevice();
     Future<int> getDevicePort() async {
@@ -182,7 +182,7 @@ class AttachCommand extends FlutterCommand {
     }
     final int devicePort = await getDevicePort();
 
-    final Daemon daemon = argResults['machine']
+    final Daemon daemon = args.getFlag('machine')
       ? Daemon(stdinCommandStream, stdoutCommandResponse,
             notifyingLogger: NotifyingLogger(), logToStdout: true)
       : null;
@@ -197,7 +197,7 @@ class AttachCommand extends FlutterCommand {
     if (devicePort == null  && debugUri == null) {
       if (device is FuchsiaDevice) {
         attachLogger = true;
-        final String module = argResults['module'];
+        final String module = args.getOption('module');
         if (module == null)
           throwToolExit('\'--module\' is required for attaching to a Fuchsia device');
         usesIpv6 = device.ipv6;
@@ -244,13 +244,13 @@ class AttachCommand extends FlutterCommand {
       final FlutterDevice flutterDevice = await FlutterDevice.create(
         device,
         flutterProject: flutterProject,
-        trackWidgetCreation: argResults['track-widget-creation'],
-        dillOutputPath: argResults['output-dill'],
-        fileSystemRoots: argResults['filesystem-root'],
-        fileSystemScheme: argResults['filesystem-scheme'],
-        viewFilter: argResults['isolate-filter'],
-        target: argResults['target'],
-        targetModel: TargetModel(argResults['target-model']),
+        trackWidgetCreation: args.getFlag('track-widget-creation'),
+        dillOutputPath: args.getOption('output-dill'),
+        fileSystemRoots: args.getMultiOption('filesystem-root'),
+        fileSystemScheme: args.getOption('filesystem-scheme'),
+        viewFilter: args.getOption('isolate-filter'),
+        target: args.getOption('target'),
+        targetModel: TargetModel(args.getOption('target-model')),
         buildMode: getBuildMode(),
       );
       flutterDevice.observatoryUris = <Uri>[ observatoryUri ];
@@ -261,10 +261,10 @@ class AttachCommand extends FlutterCommand {
             flutterDevices,
             target: targetFile,
             debuggingOptions: debuggingOptions,
-            packagesFilePath: globalResults['packages'],
+            packagesFilePath: globalArgs.getOption('packages'),
             usesTerminalUI: daemon == null,
-            projectRootPath: argResults['project-root'],
-            dillOutputPath: argResults['output-dill'],
+            projectRootPath: args.getOption('project-root'),
+            dillOutputPath: args.getOption('output-dill'),
             ipv6: usesIpv6,
             flutterProject: flutterProject,
           )

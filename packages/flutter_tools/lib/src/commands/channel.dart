@@ -36,15 +36,15 @@ class ChannelCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    switch (argResults.rest.length) {
+    switch (args.rest.length) {
       case 0:
         await _listChannels(
-          showAll: argResults['all'],
-          verbose: globalResults['verbose'],
+          showAll: args.getFlag('all'),
+          verbose: globalArgs.getFlag('verbose'),
         );
         return null;
       case 1:
-        await _switchChannel(argResults.rest[0]);
+        await _switchChannel(args.rest[0]);
         return null;
       default:
         throw ToolExit('Too many arguments.\n$usage');

@@ -68,7 +68,7 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final String targetPlatform = argResults['target-platform'];
+    final String targetPlatform = args.getOption('target-platform');
     final TargetPlatform platform = getTargetPlatformForName(targetPlatform);
     if (platform == null)
       throwToolExit('Unknown platform: $targetPlatform');
@@ -76,15 +76,15 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
     final BuildMode buildMode = getBuildMode();
 
     Status status;
-    if (!argResults['quiet']) {
+    if (!args.getFlag('quiet')) {
       final String typeName = artifacts.getEngineType(platform, buildMode);
       status = logger.startProgress(
         'Building AOT snapshot in ${getFriendlyModeName(getBuildMode())} mode ($typeName)...',
         timeout: timeoutConfiguration.slowOperation,
       );
     }
-    final String outputPath = argResults['output-dir'] ?? getAotBuildDirectory();
-    final bool reportTimings = argResults['report-timings'];
+    final String outputPath = args.getOption('output-dir') ?? getAotBuildDirectory();
+    final bool reportTimings = args.getFlag('report-timings');
     try {
       String mainPath = findMainDartFile(targetFile);
       final AOTSnapshotter snapshotter = AOTSnapshotter(reportTimings: reportTimings);
@@ -97,7 +97,7 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
         packagesPath: PackageMap.globalPackagesPath,
         trackWidgetCreation: false,
         outputPath: outputPath,
-        extraFrontEndOptions: argResults[FlutterOptions.kExtraFrontEndOptions],
+        extraFrontEndOptions: args.getMultiOption(FlutterOptions.kExtraFrontEndOptions),
       );
       if (mainPath == null) {
         throwToolExit('Compiler terminated unexpectedly.');
@@ -107,7 +107,7 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
       // Build AOT snapshot.
       if (platform == TargetPlatform.ios) {
         // Determine which iOS architectures to build for.
-        final Iterable<IOSArch> buildArchs = argResults['ios-arch'].map<IOSArch>(getIOSArchForName);
+        final Iterable<IOSArch> buildArchs = args.getMultiOption('ios-arch').map<IOSArch>(getIOSArchForName);
         final Map<IOSArch, String> iosBuilds = <IOSArch, String>{};
         for (IOSArch arch in buildArchs)
           iosBuilds[arch] = fs.path.join(outputPath, getNameForIOSArch(arch));
@@ -123,7 +123,7 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
             packagesPath: PackageMap.globalPackagesPath,
             outputPath: outputPath,
             buildSharedLibrary: false,
-            extraGenSnapshotOptions: argResults[FlutterOptions.kExtraGenSnapshotOptions],
+            extraGenSnapshotOptions: args.getMultiOption(FlutterOptions.kExtraGenSnapshotOptions),
           ).then<int>((int buildExitCode) {
             return buildExitCode;
           });
@@ -152,8 +152,8 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
           mainPath: mainPath,
           packagesPath: PackageMap.globalPackagesPath,
           outputPath: outputPath,
-          buildSharedLibrary: argResults['build-shared-library'],
-          extraGenSnapshotOptions: argResults[FlutterOptions.kExtraGenSnapshotOptions],
+          buildSharedLibrary: args.getFlag('build-shared-library'),
+          extraGenSnapshotOptions: args.getMultiOption(FlutterOptions.kExtraGenSnapshotOptions),
         );
         if (snapshotExitCode != 0) {
           status?.cancel();
@@ -172,7 +172,7 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
       throwToolExit(null);
 
     final String builtMessage = 'Built to $outputPath${fs.path.separator}.';
-    if (argResults['quiet']) {
+    if (args.getFlag('quiet')) {
       printTrace(builtMessage);
     } else {
       printStatus(builtMessage);

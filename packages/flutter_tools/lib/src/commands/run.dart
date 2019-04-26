@@ -63,9 +63,9 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     usesIsolateFilterOption(hide: !verboseHelp);
   }
 
-  bool get traceStartup => argResults['trace-startup'];
+  bool get traceStartup => args.getFlag('trace-startup');
 
-  String get route => argResults['route'];
+  String get route => args.getOption('route');
 }
 
 class RunCommand extends RunCommandBase {
@@ -235,16 +235,16 @@ class RunCommand extends RunCommandBase {
   }
 
   bool shouldUseHotMode() {
-    final bool hotArg = argResults['hot'] ?? false;
+    final bool hotArg = args.getFlag('hot') ?? false;
     final bool shouldUseHotMode = hotArg && !traceStartup;
     return getBuildInfo().isDebug && shouldUseHotMode;
   }
 
   bool get runningWithPrebuiltApplication =>
-      argResults['use-application-binary'] != null;
+      args.getFlag('use-application-binary') != null;
 
-  bool get stayResident => argResults['resident'];
-  bool get awaitFirstFrameWhenTracing => argResults['await-first-frame-when-tracing'];
+  bool get stayResident => args.getFlag('resident');
+  bool get awaitFirstFrameWhenTracing => args.getFlag('await-first-frame-when-tracing');
 
   @override
   Future<void> validateCommand() async {
@@ -266,16 +266,16 @@ class RunCommand extends RunCommandBase {
     } else {
       return DebuggingOptions.enabled(
         buildInfo,
-        startPaused: argResults['start-paused'],
-        disableServiceAuthCodes: argResults['disable-service-auth-codes'],
-        useTestFonts: argResults['use-test-fonts'],
-        enableSoftwareRendering: argResults['enable-software-rendering'],
-        skiaDeterministicRendering: argResults['skia-deterministic-rendering'],
-        traceSkia: argResults['trace-skia'],
-        traceSystrace: argResults['trace-systrace'],
-        dumpSkpOnShaderCompilation: argResults['dump-skp-on-shader-compilation'],
+        startPaused: args.getFlag('start-paused'),
+        disableServiceAuthCodes: args.getFlag('disable-service-auth-codes'),
+        useTestFonts: args.getFlag('use-test-fonts'),
+        enableSoftwareRendering: args.getFlag('enable-software-rendering'),
+        skiaDeterministicRendering: args.getFlag('skia-deterministic-rendering'),
+        traceSkia: args.getFlag('trace-skia'),
+        traceSystrace: args.getFlag('trace-systrace'),
+        dumpSkpOnShaderCompilation: args.getFlag('dump-skp-on-shader-compilation'),
         observatoryPort: observatoryPort,
-        verboseSystemLogs: argResults['verbose-system-logs'],
+        verboseSystemLogs: args.getFlag('verbose-system-logs'),
       );
     }
   }
@@ -288,26 +288,26 @@ class RunCommand extends RunCommandBase {
     // debug mode.
     final bool hotMode = shouldUseHotMode();
 
-    writePidFile(argResults['pid-file']);
+    writePidFile(args.getOption('pid-file'));
 
-    if (argResults['machine']) {
+    if (args.getFlag('machine')) {
       if (devices.length > 1)
         throwToolExit('--machine does not support -d all.');
       final Daemon daemon = Daemon(stdinCommandStream, stdoutCommandResponse,
           notifyingLogger: NotifyingLogger(), logToStdout: true);
       AppInstance app;
       try {
-        final String applicationBinaryPath = argResults['use-application-binary'];
+        final String applicationBinaryPath = args.getOption('use-application-binary');
         app = await daemon.appDomain.startApp(
           devices.first, fs.currentDirectory.path, targetFile, route,
           _createDebuggingOptions(), hotMode,
           applicationBinary: applicationBinaryPath == null
               ? null
               : fs.file(applicationBinaryPath),
-          trackWidgetCreation: argResults['track-widget-creation'],
-          projectRootPath: argResults['project-root'],
-          packagesFilePath: globalResults['packages'],
-          dillOutputPath: argResults['output-dill'],
+          trackWidgetCreation: args.getFlag('track-widget-creation'),
+          projectRootPath: args.getOption('project-root'),
+          packagesFilePath: args.getOption('packages'),
+          dillOutputPath: args.getOption('output-dill'),
           ipv6: ipv6,
         );
       } catch (error) {
@@ -327,7 +327,7 @@ class RunCommand extends RunCommandBase {
     for (Device device in devices) {
       if (await device.isLocalEmulator) {
         if (await device.supportsHardwareRendering) {
-          final bool enableSoftwareRendering = argResults['enable-software-rendering'] == true;
+          final bool enableSoftwareRendering = args.getFlag('enable-software-rendering') == true;
           if (enableSoftwareRendering) {
             printStatus(
               'Using software rendering with device ${device.name}. You may get better performance '
@@ -354,15 +354,15 @@ class RunCommand extends RunCommandBase {
       }
     }
 
-    if (argResults['train'] &&
+    if (args.getFlag('train') &&
         getBuildMode() != BuildMode.debug && getBuildMode() != BuildMode.dynamicProfile)
       throwToolExit('Error: --train is only allowed when running as --dynamic --profile '
           '(recommended) or --debug (may include unwanted debug symbols).');
 
     List<String> expFlags;
     if (argParser.options.containsKey(FlutterOptions.kEnableExperiment) &&
-        argResults[FlutterOptions.kEnableExperiment].isNotEmpty) {
-      expFlags = argResults[FlutterOptions.kEnableExperiment];
+        args.getMultiOption(FlutterOptions.kEnableExperiment).isNotEmpty) {
+      expFlags = args.getMultiOption(FlutterOptions.kEnableExperiment);
     }
     final List<FlutterDevice> flutterDevices = <FlutterDevice>[];
     final FlutterProject flutterProject = await FlutterProject.current();
@@ -370,33 +370,33 @@ class RunCommand extends RunCommandBase {
       final FlutterDevice flutterDevice = await FlutterDevice.create(
         device,
         flutterProject: flutterProject,
-        trackWidgetCreation: argResults['track-widget-creation'],
-        dillOutputPath: argResults['output-dill'],
-        fileSystemRoots: argResults['filesystem-root'],
-        fileSystemScheme: argResults['filesystem-scheme'],
-        viewFilter: argResults['isolate-filter'],
+        trackWidgetCreation: args.getFlag('track-widget-creation'),
+        dillOutputPath: args.getOption('output-dill'),
+        fileSystemRoots: args.getMultiOption('filesystem-root'),
+        fileSystemScheme: args.getOption('filesystem-scheme'),
+        viewFilter: args.getOption('isolate-filter'),
         experimentalFlags: expFlags,
-        target: argResults['target'],
+        target: args.getOption('target'),
         buildMode: getBuildMode(),
       );
       flutterDevices.add(flutterDevice);
     }
 
     ResidentRunner runner;
-    final String applicationBinaryPath = argResults['use-application-binary'];
+    final String applicationBinaryPath = args.getOption('use-application-binary');
     if (hotMode) {
       runner = HotRunner(
         flutterDevices,
         target: targetFile,
         debuggingOptions: _createDebuggingOptions(),
-        benchmarkMode: argResults['benchmark'],
+        benchmarkMode: args.getFlag('benchmark'),
         applicationBinary: applicationBinaryPath == null
             ? null
             : fs.file(applicationBinaryPath),
-        projectRootPath: argResults['project-root'],
-        packagesFilePath: globalResults['packages'],
-        dillOutputPath: argResults['output-dill'],
-        saveCompilationTrace: argResults['train'],
+        projectRootPath: args.getOption('project-root'),
+        packagesFilePath: globalArgs.getOption('packages'),
+        dillOutputPath: args.getOption('output-dill'),
+        saveCompilationTrace: args.getFlag('train'),
         stayResident: stayResident,
         ipv6: ipv6,
       );
@@ -410,7 +410,7 @@ class RunCommand extends RunCommandBase {
         applicationBinary: applicationBinaryPath == null
             ? null
             : fs.file(applicationBinaryPath),
-        saveCompilationTrace: argResults['train'],
+        saveCompilationTrace: args.getFlag('train'),
         stayResident: stayResident,
         ipv6: ipv6,
       );
@@ -430,7 +430,7 @@ class RunCommand extends RunCommandBase {
     final int result = await runner.run(
       appStartedCompleter: appStartedTimeRecorder,
       route: route,
-      shouldBuild: !runningWithPrebuiltApplication && argResults['build'],
+      shouldBuild: !runningWithPrebuiltApplication && args.getFlag('build'),
     );
     if (result != 0)
       throwToolExit(null, exitCode: result);

@@ -163,7 +163,7 @@ class IdeConfigCommand extends FlutterCommand {
           manifest.add('$relativePath${Template.copyTemplateExtension}');
           continue;
         }
-        if (argResults['overwrite']) {
+        if (args.getFlag('overwrite')) {
           finalDestinationFile.deleteSync();
           printStatus('  $relativeDestination (overwritten)');
         } else {
@@ -184,7 +184,7 @@ class IdeConfigCommand extends FlutterCommand {
     }
 
     // If we're not overwriting, then we're not going to remove missing items either.
-    if (!argResults['overwrite']) {
+    if (!args.getFlag('overwrite')) {
       return;
     }
 
@@ -222,13 +222,13 @@ class IdeConfigCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    if (argResults.rest.isNotEmpty) {
+    if (args.rest.isNotEmpty) {
       throwToolExit('Currently, the only supported IDE is IntelliJ\n$usage', exitCode: 2);
     }
 
     await Cache.instance.updateAll(<DevelopmentArtifact>{ DevelopmentArtifact.universal });
 
-    if (argResults['update-templates']) {
+    if (args.getFlag('update-templates')) {
       _handleTemplateUpdate();
       return null;
     }
@@ -246,7 +246,7 @@ class IdeConfigCommand extends FlutterCommand {
     printStatus('Updating IDE configuration for Flutter tree at $dirPath...');
     int generatedCount = 0;
     generatedCount += _renderTemplate(_ideName, dirPath, <String, dynamic>{
-      'withRootModule': argResults['with-root-module'],
+      'withRootModule': args.getFlag('with-root-module'),
     });
 
     printStatus('Wrote $generatedCount files.');
@@ -262,7 +262,7 @@ class IdeConfigCommand extends FlutterCommand {
     return template.render(
       fs.directory(dirPath),
       context,
-      overwriteExisting: argResults['overwrite'],
+      overwriteExisting: args.getFlag('overwrite'),
     );
   }
 }

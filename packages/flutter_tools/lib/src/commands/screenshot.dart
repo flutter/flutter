@@ -68,20 +68,20 @@ class ScreenshotCommand extends FlutterCommand {
     device = await findTargetDevice();
     if (device == null)
       throwToolExit('Must have a connected device');
-    if (argResults[_kType] == _kDeviceType && !device.supportsScreenshot)
+    if (args.getOption(_kType) == _kDeviceType && !device.supportsScreenshot)
       throwToolExit('Screenshot not supported for ${device.name}.');
-    if (argResults[_kType] != _kDeviceType && argResults[_kObservatoryPort] == null)
-      throwToolExit('Observatory port must be specified for screenshot type ${argResults[_kType]}');
+    if (args.getOption(_kType) != _kDeviceType && args.getOption(_kObservatoryPort) == null)
+      throwToolExit('Observatory port must be specified for screenshot type ${args.getOption(_kType)}');
     return super.verifyThenRunCommand(commandPath);
   }
 
   @override
   Future<FlutterCommandResult> runCommand() async {
     File outputFile;
-    if (argResults.wasParsed(_kOut))
-      outputFile = fs.file(argResults[_kOut]);
+    if (args.wasParsed(_kOut))
+      outputFile = fs.file(args.getOption(_kOut));
 
-    switch (argResults[_kType]) {
+    switch (args.getOption(_kType)) {
       case _kDeviceType:
         await runScreenshot(outputFile);
         return null;
@@ -128,7 +128,7 @@ class ScreenshotCommand extends FlutterCommand {
 
   Future<Map<String, dynamic>> _invokeVmServiceRpc(String method) async {
     final Uri observatoryUri = Uri(scheme: 'http', host: '127.0.0.1',
-        port: int.parse(argResults[_kObservatoryPort]));
+        port: int.parse(args.getOption(_kObservatoryPort)));
     final VMService vmService = await VMService.connect(observatoryUri);
     return await vmService.vm.invokeRpcRaw(method);
   }

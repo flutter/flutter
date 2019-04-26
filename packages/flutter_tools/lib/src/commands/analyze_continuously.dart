@@ -4,8 +4,7 @@
 
 import 'dart:async';
 
-import 'package:args/args.dart';
-
+import '../base/args.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -19,7 +18,7 @@ import '../globals.dart';
 import 'analyze_base.dart';
 
 class AnalyzeContinuously extends AnalyzeBase {
-  AnalyzeContinuously(ArgResults argResults, this.repoRoots, this.repoPackages) : super(argResults);
+  AnalyzeContinuously(TypedArgResults argResults, this.repoRoots, this.repoPackages) : super(argResults);
 
   final List<String> repoRoots;
   final List<Directory> repoPackages;
@@ -36,7 +35,7 @@ class AnalyzeContinuously extends AnalyzeBase {
   Future<void> analyze() async {
     List<String> directories;
 
-    if (argResults['flutter-repo']) {
+    if (argResults.getFlag('flutter-repo')) {
       final PackageDependencyTracker dependencies = PackageDependencyTracker();
       dependencies.checkForConflictingDependencies(repoPackages, dependencies);
 
@@ -52,7 +51,7 @@ class AnalyzeContinuously extends AnalyzeBase {
       analysisTarget = fs.currentDirectory.path;
     }
 
-    final String sdkPath = argResults['dart-sdk'] ?? sdk.dartSdkPath;
+    final String sdkPath = argResults.getOption('dart-sdk') ?? sdk.dartSdkPath;
 
     final AnalysisServer server = AnalysisServer(sdkPath, directories);
     server.onAnalyzing.listen((bool isAnalyzing) => _handleAnalysisStatus(server, isAnalyzing));
@@ -103,7 +102,7 @@ class AnalyzeContinuously extends AnalyzeBase {
       final int undocumentedMembers = errors.where((AnalysisError error) {
         return error.code == 'public_member_api_docs';
       }).length;
-      if (!argResults['dartdocs']) {
+      if (!argResults.getFlag('dartdocs')) {
         errors.removeWhere((AnalysisError error) => error.code == 'public_member_api_docs');
         issueCount -= undocumentedMembers;
       }

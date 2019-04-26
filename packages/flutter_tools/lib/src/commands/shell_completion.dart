@@ -43,17 +43,17 @@ class ShellCompletionCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    if (argResults.rest.length > 1) {
+    if (args.rest.length > 1) {
       throwToolExit('Too many arguments given to bash-completion command.', exitCode: 1);
     }
 
-    if (argResults.rest.isEmpty || argResults.rest.first == '-') {
+    if (args.rest.isEmpty || args.rest.first == '-') {
       stdout.write(generateCompletionScript(<String>['flutter']));
       return null;
     }
 
-    final File outputFile = fs.file(argResults.rest.first);
-    if (outputFile.existsSync() && !argResults['overwrite']) {
+    final File outputFile = fs.file(args.rest.first);
+    if (outputFile.existsSync() && !args.getFlag('overwrite')) {
       throwToolExit(
         'Output file ${outputFile.path} already exists, will not overwrite. '
             'Use --overwrite to force overwriting existing output file.',
