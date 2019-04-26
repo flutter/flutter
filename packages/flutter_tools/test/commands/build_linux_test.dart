@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -64,12 +65,15 @@ void main() {
     FileSystem: () => memoryFilesystem,
   });
 
-  testUsingContext('Linux build invokes make', () async {
+  testUsingContext('Linux build invokes make and writes temporary files', () async {
     final BuildCommand command = BuildCommand();
     applyMocksToCommand(command);
     fs.file('linux/build.sh').createSync(recursive: true);
     fs.file('pubspec.yaml').createSync();
     fs.file('.packages').createSync();
+    fs.file('/bin/cache/linux-sdk.stamp')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('abc');
     when(mockProcessManager.start(<String>[
       'make',
       '-C',
@@ -77,6 +81,7 @@ void main() {
       'BUILD=release',
       'FLUTTER_ROOT=/',
       'FLUTTER_BUNDLE_FLAGS=',
+      'FLUTTER_ARTIFACT_CACHE_DIR=/bin/cache/artifacts/engine/linux-x64'
     ], runInShell: true)).thenAnswer((Invocation invocation) async {
       return mockProcess;
     });
@@ -84,10 +89,46 @@ void main() {
     await createTestCommandRunner(command).run(
       const <String>['build', 'linux']
     );
+    expect(fs.file('linux/.generated_flutter_root').readAsStringSync(), '/');
+    expect(fs.file('linux/.generated_engine_stamp').readAsStringSync(), 'abc');
   }, overrides: <Type, Generator>{
     FileSystem: () => memoryFilesystem,
     ProcessManager: () => mockProcessManager,
     Platform: () => linuxPlatform,
+  });
+
+  testUsingContext('Linux build invokes make and writes stamp from local artifacts', () async {
+    final BuildCommand command = BuildCommand();
+    applyMocksToCommand(command);
+    fs.file('linux/build.sh').createSync(recursive: true);
+    fs.file('pubspec.yaml').createSync();
+    fs.file('.packages').createSync();
+    fs.file('/bin/cache/linux-sdk.stamp')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('abc');
+    fs.file('libflutter_linux.so').createSync();
+    when(mockProcessManager.start(<String>[
+      'make',
+      '-C',
+      '/linux',
+      'BUILD=release',
+      'FLUTTER_ROOT=/',
+      'FLUTTER_BUNDLE_FLAGS=',
+      'FLUTTER_ARTIFACT_CACHE_DIR='
+    ], runInShell: true)).thenAnswer((Invocation invocation) async {
+      return mockProcess;
+    });
+
+    await createTestCommandRunner(command).run(
+      const <String>['build', 'linux']
+    );
+    expect(fs.file('linux/.generated_flutter_root').readAsStringSync(), '/');
+    expect(fs.file('linux/.generated_engine_stamp').readAsStringSync(), fs.file('libflutter_linux.so').statSync().modified.toIso8601String());
+  }, overrides: <Type, Generator>{
+    FileSystem: () => memoryFilesystem,
+    ProcessManager: () => mockProcessManager,
+    Platform: () => linuxPlatform,
+    Artifacts: () => LocalEngineArtifacts('', '', '')
   });
 
   testUsingContext('linux can extract binary name from Makefile', () async {
