@@ -341,7 +341,7 @@ abstract class FlutterCommand extends Command<void> {
     }
 
     final bool trackWidgetCreation = argParser.options.containsKey('track-widget-creation')
-        ? args.getOption('track-widget-creation')
+        ? args.getFlag('track-widget-creation')
         : false;
 
     final String buildNumber = argParser.options.containsKey('build-number') && args.getOption('build-number') != null
