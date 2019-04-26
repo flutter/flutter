@@ -150,7 +150,8 @@ class DraggableScrollableSheet extends StatefulWidget {
   _DraggableScrollableSheetState createState() => _DraggableScrollableSheetState();
 }
 
-/// A [Notification] related to the size and scroll offset of the
+/// A [Notification] related to the extent, which is the size, and scroll
+/// offset, which is the position of the child list, of the
 /// [DraggableScrollableSheet].
 ///
 /// [DraggableScrollableSheet] widgets notify their ancestors when the size of
@@ -161,14 +162,14 @@ class DraggableScrollableSheet extends StatefulWidget {
 /// nearest [DraggableScorllableSheet] descendant, check that the [depth]
 /// property of the notification is zero.
 ///
-/// When a extent notification is received by an [NotificationListener], the
+/// When an extent notification is received by a [NotificationListener], the
 /// listener will already have completed build and layout, and it is therefore
 /// too late for that widget to call [State.setState]. Any attempt to adjust the
 /// build or layout based on an extent notification would result in a layout
 /// that lagged one frame behind, which is a poor user experience. Extent
 /// notifications are used primarily to drive animations. The [Scaffold] widget
-/// is an example of driving animations for the [FloatingActionButton] as the
-/// bottom sheet scrolls up.
+/// listens for extent notifications and responds by driving animations for the
+/// [FloatingActionButton] as the bottom sheet scrolls up.
 class DraggableScrollableNotification extends Notification with ViewportNotificationMixin {
   /// Creates a notification that the extent of a [DraggableScrollableSheet] has
   /// changed.
@@ -188,7 +189,9 @@ class DraggableScrollableNotification extends Notification with ViewportNotifica
        assert(0.0 <= minExtent),
        assert(maxExtent <= 1.0),
        assert(minExtent <= extent),
+       assert(minExtent <= initialExtent),
        assert(extent <= maxExtent),
+       assert(initialExtent <= maxExtent),
        assert(context != null);
 
   /// The current value of the extent, between [minExtent] and [maxExtent].
@@ -489,7 +492,7 @@ class _DraggableScrollableSheetScrollPosition
   }
 }
 
-/// A widget that notifies a descendent [DraggableScrollableSheet] that it
+/// A widget that can notify a descendent [DraggableScrollableSheet] that it
 /// should reset its position to the initial state.
 ///
 /// The [Scaffold] uses this widget to notify a persistentent bottom sheet that

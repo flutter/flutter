@@ -113,7 +113,7 @@ void main() {
     expect(showBottomSheetThenCalled, isTrue);
     expect(find.text('BottomSheet'), findsOneWidget);
 
-     await tester.pump(); // bottom sheet dismiss animation starts
+    await tester.pump(); // bottom sheet dismiss animation starts
 
     expect(showBottomSheetThenCalled, isTrue);
     expect(find.text('BottomSheet'), findsOneWidget);

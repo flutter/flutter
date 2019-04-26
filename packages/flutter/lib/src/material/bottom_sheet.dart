@@ -57,7 +57,7 @@ class BottomSheet extends StatefulWidget {
     this.animationController,
     this.enableDrag = true,
     this.elevation = 0.0,
-    this.color,
+    this.backgroundColor,
     @required this.onClosing,
     @required this.builder,
   }) : assert(enableDrag != null),
@@ -102,7 +102,7 @@ class BottomSheet extends StatefulWidget {
   /// The color for the [Material] of the bottom sheet.
   ///
   /// Defaults to [Colors.white]. The value must not be null.
-  final Color color;
+  final Color backgroundColor;
 
   @override
   _BottomSheetState createState() => _BottomSheetState();
@@ -172,7 +172,7 @@ class _BottomSheetState extends State<BottomSheet> {
   Widget build(BuildContext context) {
     final Widget bottomSheet = Material(
       key: _childKey,
-      color: widget.color,
+      color: widget.backgroundColor,
       elevation: widget.elevation,
       child: NotificationListener<DraggableScrollableNotification>(
         onNotification: extentChanged,
@@ -252,6 +252,8 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
 
   @override
   Widget build(BuildContext context) {
+    assert(debugCheckHasMediaQuery(context));
+    assert(debugCheckHasMaterialLocalizations(context));
     final MediaQueryData mediaQuery = MediaQuery.of(context);
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final String routeLabel = _getRouteLabel(localizations);
@@ -277,7 +279,7 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
               child: CustomSingleChildLayout(
                 delegate: _ModalBottomSheetLayout(animationValue, widget.isScrollControlled),
                 child: BottomSheet(
-                  color: widget.route.backgroundColor,
+                  backgroundColor: widget.route.backgroundColor,
                   animationController: widget.route._animationController,
                   onClosing: () {
                     if (widget.route.isCurrent) {
