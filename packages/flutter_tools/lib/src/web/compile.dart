@@ -15,7 +15,7 @@ import '../convert.dart';
 import '../globals.dart';
 
 /// The [WebCompiler] instance.
-WebCompiler get webCompiler => context[WebCompiler];
+WebCompiler get webCompiler => context.get<WebCompiler>();
 
 /// A wrapper around dart2js for web compilation.
 class WebCompiler {

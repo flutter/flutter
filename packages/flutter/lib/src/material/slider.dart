@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:math' as math;
 import 'dart:math';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
@@ -29,6 +30,8 @@ import 'theme.dart';
 ///
 ///  * [Slider.semanticFormatterCallback], which shows an example use case.
 typedef SemanticFormatterCallback = String Function(double value);
+
+enum _SliderType { material, adaptive }
 
 /// A Material Design slider.
 ///
@@ -89,7 +92,7 @@ typedef SemanticFormatterCallback = String Function(double value);
 ///  * <https://material.io/design/components/sliders.html>
 ///  * [MediaQuery], from which the text scale factor is obtained.
 class Slider extends StatefulWidget {
-  /// Creates a material design slider.
+  /// Creates a Material Design slider.
   ///
   /// The slider itself does not maintain any state. Instead, when the state of
   /// the slider changes, the widget calls the [onChanged] callback. Most
@@ -121,7 +124,37 @@ class Slider extends StatefulWidget {
     this.activeColor,
     this.inactiveColor,
     this.semanticFormatterCallback,
-  }) : assert(value != null),
+  }) : _sliderType = _SliderType.material,
+       assert(value != null),
+       assert(min != null),
+       assert(max != null),
+       assert(min <= max),
+       assert(value >= min && value <= max),
+       assert(divisions == null || divisions > 0),
+       super(key: key);
+
+  /// Creates a [CupertinoSlider] if the target platform is iOS, creates a
+  /// Material Design slider otherwise.
+  ///
+  /// If a [CupertinoSlider] is created, the following parameters are
+  /// ignored: [label], [inactiveColor], [semanticFormatterCallback].
+  ///
+  /// The target platform is based on the current [Theme]: [ThemeData.platform].
+  const Slider.adaptive({
+    Key key,
+    @required this.value,
+    @required this.onChanged,
+    this.onChangeStart,
+    this.onChangeEnd,
+    this.min = 0.0,
+    this.max = 1.0,
+    this.divisions,
+    this.label,
+    this.activeColor,
+    this.inactiveColor,
+    this.semanticFormatterCallback,
+  }) : _sliderType = _SliderType.adaptive,
+       assert(value != null),
        assert(min != null),
        assert(max != null),
        assert(min <= max),
@@ -273,6 +306,8 @@ class Slider extends StatefulWidget {
   ///
   /// If null, then the value indicator will not be displayed.
   ///
+  /// Ignored if this slider is created with [Slider.adaptive].
+  ///
   /// See also:
   ///
   ///  * [SliderComponentShape] for how to create a custom value indicator
@@ -300,6 +335,8 @@ class Slider extends StatefulWidget {
   ///
   /// Using a [SliderTheme] gives much more fine-grained control over the
   /// appearance of various components of the slider.
+  ///
+  /// Ignored if this slider is created with [Slider.adaptive].
   final Color inactiveColor;
 
   /// The callback used to create a semantic value from a slider value.
@@ -331,7 +368,11 @@ class Slider extends StatefulWidget {
   ///  )
   /// ```
   /// {@end-tool}
+  ///
+  /// Ignored if this slider is created with [Slider.adaptive]
   final SemanticFormatterCallback semanticFormatterCallback;
+
+  final _SliderType _sliderType ;
 
   @override
   _SliderState createState() => _SliderState();
@@ -428,27 +469,73 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     return widget.max > widget.min ? (value - widget.min) / (widget.max - widget.min) : 0.0;
   }
 
+  static const double _defaultTrackHeight = 2;
+  static const SliderTrackShape _defaultTrackShape = RoundedRectSliderTrackShape();
+  static const SliderTickMarkShape _defaultTickMarkShape = RoundSliderTickMarkShape();
+  static const SliderComponentShape _defaultOverlayShape = RoundSliderOverlayShape();
+  static const SliderComponentShape _defaultThumbShape = RoundSliderThumbShape();
+  static const SliderComponentShape _defaultValueIndicatorShape = PaddleSliderValueIndicatorShape();
+  static const ShowValueIndicator _defaultShowValueIndicator = ShowValueIndicator.onlyForDiscrete;
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     assert(debugCheckHasMediaQuery(context));
 
+    switch (widget._sliderType) {
+      case _SliderType.material:
+        return _buildMaterialSlider(context);
+
+      case _SliderType.adaptive: {
+        final ThemeData theme = Theme.of(context);
+        assert(theme.platform != null);
+        switch (theme.platform) {
+          case TargetPlatform.android:
+          case TargetPlatform.fuchsia:
+            return _buildMaterialSlider(context);
+          case TargetPlatform.iOS:
+            return _buildCupertinoSlider(context);
+        }
+      }
+    }
+    assert(false);
+    return null;
+  }
+
+  Widget _buildMaterialSlider(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
     SliderThemeData sliderTheme = SliderTheme.of(context);
 
     // If the widget has active or inactive colors specified, then we plug them
     // in to the slider theme as best we can. If the developer wants more
-    // control than that, then they need to use a SliderTheme.
-    if (widget.activeColor != null || widget.inactiveColor != null) {
-      sliderTheme = sliderTheme.copyWith(
-        activeTrackColor: widget.activeColor,
-        inactiveTrackColor: widget.inactiveColor,
-        activeTickMarkColor: widget.inactiveColor,
-        inactiveTickMarkColor: widget.activeColor,
-        thumbColor: widget.activeColor,
-        valueIndicatorColor: widget.activeColor,
-        overlayColor: widget.activeColor?.withAlpha(0x29),
-      );
-    }
+    // control than that, then they need to use a SliderTheme. The default
+    // colors come from the ThemeData.colorScheme. These colors, along with
+    // the default shapes and text styles are aligned to the Material
+    // Guidelines.
+    sliderTheme = sliderTheme.copyWith(
+      trackHeight: sliderTheme.trackHeight ?? _defaultTrackHeight,
+      activeTrackColor: widget.activeColor ?? sliderTheme.activeTrackColor ?? theme.colorScheme.primary,
+      inactiveTrackColor: widget.inactiveColor ?? sliderTheme.inactiveTrackColor ?? theme.colorScheme.primary.withOpacity(0.24),
+      disabledActiveTrackColor: sliderTheme.disabledActiveTrackColor ?? theme.colorScheme.onSurface.withOpacity(0.32),
+      disabledInactiveTrackColor: sliderTheme.disabledInactiveTrackColor ?? theme.colorScheme.onSurface.withOpacity(0.12),
+      activeTickMarkColor: widget.inactiveColor ?? sliderTheme.activeTickMarkColor ?? theme.colorScheme.onPrimary.withOpacity(0.54),
+      inactiveTickMarkColor: widget.activeColor ?? sliderTheme.inactiveTickMarkColor ?? theme.colorScheme.primary.withOpacity(0.54),
+      disabledActiveTickMarkColor: sliderTheme.disabledActiveTickMarkColor ?? theme.colorScheme.onPrimary.withOpacity(0.12),
+      disabledInactiveTickMarkColor: sliderTheme.disabledInactiveTickMarkColor ?? theme.colorScheme.onSurface.withOpacity(0.12),
+      thumbColor: widget.activeColor ?? sliderTheme.thumbColor ?? theme.colorScheme.primary,
+      disabledThumbColor: sliderTheme.disabledThumbColor ?? theme.colorScheme.onSurface.withOpacity(0.38),
+      overlayColor: widget.activeColor?.withOpacity(0.12) ?? sliderTheme.overlayColor ?? theme.colorScheme.primary.withOpacity(0.12),
+      valueIndicatorColor: widget.activeColor ?? sliderTheme.valueIndicatorColor ?? theme.colorScheme.primary,
+      trackShape: sliderTheme.trackShape ?? _defaultTrackShape,
+      tickMarkShape: sliderTheme.tickMarkShape ?? _defaultTickMarkShape,
+      thumbShape: sliderTheme.thumbShape ?? _defaultThumbShape,
+      overlayShape: sliderTheme.overlayShape ?? _defaultOverlayShape,
+      valueIndicatorShape: sliderTheme.valueIndicatorShape ?? _defaultValueIndicatorShape,
+      showValueIndicator: sliderTheme.showValueIndicator ?? _defaultShowValueIndicator,
+      valueIndicatorTextStyle: sliderTheme.valueIndicatorTextStyle ?? theme.textTheme.body2.copyWith(
+        color: theme.colorScheme.onPrimary,
+      ),
+    );
 
     return _SliderRenderObjectWidget(
       value: _unlerp(widget.value),
@@ -461,6 +548,25 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
       onChangeEnd: widget.onChangeEnd != null ? _handleDragEnd : null,
       state: this,
       semanticFormatterCallback: widget.semanticFormatterCallback,
+    );
+  }
+
+  Widget _buildCupertinoSlider(BuildContext context) {
+    // The render box of a slider has a fixed height but takes up the available
+    // width. Wrapping the [CupertinoSlider] in this manner will help maintain
+    // the same size.
+    return SizedBox(
+      width: double.infinity,
+      child: CupertinoSlider(
+        value: widget.value,
+        onChanged: widget.onChanged,
+        onChangeStart: widget.onChangeStart,
+        onChangeEnd: widget.onChangeEnd,
+        min: widget.min,
+        max: widget.max,
+        divisions: widget.divisions,
+        activeColor: widget.activeColor,
+      ),
     );
   }
 }
@@ -498,7 +604,6 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
       divisions: divisions,
       label: label,
       sliderTheme: sliderTheme,
-      theme: Theme.of(context),
       mediaQueryData: mediaQueryData,
       onChanged: onChanged,
       onChangeStart: onChangeStart,
@@ -536,7 +641,6 @@ class _RenderSlider extends RenderBox {
     int divisions,
     String label,
     SliderThemeData sliderTheme,
-    ThemeData theme,
     MediaQueryData mediaQueryData,
     TargetPlatform platform,
     ValueChanged<double> onChanged,
@@ -554,7 +658,6 @@ class _RenderSlider extends RenderBox {
        _value = value,
        _divisions = divisions,
        _sliderTheme = sliderTheme,
-       _theme = theme,
        _mediaQueryData = mediaQueryData,
        _onChanged = onChanged,
        _state = state,
@@ -983,7 +1086,6 @@ class _RenderSlider extends RenderBox {
       isEnabled: isInteractive,
     );
 
-    // TODO(closkmith): Move this to paint after the thumb.
     if (!_overlayAnimation.isDismissed) {
       _sliderTheme.overlayShape.paint(
         context,
@@ -1000,7 +1102,6 @@ class _RenderSlider extends RenderBox {
     }
 
     if (isDiscrete) {
-      // TODO(clocksmith): Align tick mark centers to ends of track by not subtracting diameter from length.
       final double tickMarkWidth = _sliderTheme.tickMarkShape.getPreferredSize(
         isEnabled: isInteractive,
         sliderTheme: _sliderTheme,

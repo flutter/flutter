@@ -113,10 +113,11 @@ class MinimumTapTargetGuideline extends AccessibilityGuideline {
         return result;
       // shrink by device pixel ratio.
       final Size candidateSize = paintBounds.size / tester.binding.window.devicePixelRatio;
-      if (candidateSize.width < size.width || candidateSize.height < size.height)
+      if (candidateSize.width < size.width - delta || candidateSize.height < size.height - delta) {
         result += Evaluation.fail(
           '$node: expected tap target size of at least $size, but found $candidateSize\n'
           'See also: $link');
+      }
       return result;
     }
     return traverse(root);

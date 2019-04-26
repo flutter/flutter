@@ -181,31 +181,6 @@
       "glfw": null
     }
   },
-  "launchAssistant": {
-    "names": {
-      "domkey": "LaunchAssistant",
-      "android": [
-        "ASSIST"
-      ],
-      "english": "Launch Assistant",
-      "chromium": "launchAssistant",
-      "glfw": null
-    },
-    "scanCodes": {
-      "android": null,
-      "usb": 23,
-      "linux": 583,
-      "xkb": 591,
-      "windows": null,
-      "macos": null
-    },
-    "keyCodes": {
-      "android": [
-        219
-      ],
-      "glfw": null
-    }
-  },
   "sleep": {
     "names": {
       "domkey": "Sleep",
@@ -257,6 +232,27 @@
       "android": [
         224
       ],
+      "glfw": null
+    }
+  },
+  "displayToggleIntExt": {
+    "names": {
+      "domkey": "DisplayToggleIntExt",
+      "android": null,
+      "english": "Display Toggle Int Ext",
+      "chromium": "displayToggleIntExt",
+      "glfw": null
+    },
+    "scanCodes": {
+      "android": null,
+      "usb": 65717,
+      "linux": 227,
+      "xkb": 235,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": null,
       "glfw": null
     }
   },
@@ -5844,6 +5840,31 @@
       "glfw": null
     }
   },
+  "launchAssistant": {
+    "names": {
+      "domkey": "LaunchAssistant",
+      "android": [
+        "ASSIST"
+      ],
+      "english": "Launch Assistant",
+      "chromium": "launchAssistant",
+      "glfw": null
+    },
+    "scanCodes": {
+      "android": null,
+      "usb": 786891,
+      "linux": 583,
+      "xkb": 591,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": [
+        219
+      ],
+      "glfw": null
+    }
+  },
   "launchAudioBrowser": {
     "names": {
       "domkey": null,
@@ -6193,8 +6214,8 @@
     "scanCodes": {
       "android": null,
       "usb": 786994,
-      "linux": null,
-      "xkb": null,
+      "linux": 372,
+      "xkb": 380,
       "windows": null,
       "macos": null
     },
@@ -6285,6 +6306,27 @@
       "usb": 787084,
       "linux": 231,
       "xkb": 239,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": null,
+      "glfw": null
+    }
+  },
+  "showAllWindows": {
+    "names": {
+      "domkey": "ShowAllWindows",
+      "android": null,
+      "english": "Show All Windows",
+      "chromium": "showAllWindows",
+      "glfw": null
+    },
+    "scanCodes": {
+      "android": null,
+      "usb": 787103,
+      "linux": 120,
+      "xkb": 128,
       "windows": null,
       "macos": null
     },

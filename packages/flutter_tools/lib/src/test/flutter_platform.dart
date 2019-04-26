@@ -74,7 +74,7 @@ final Map<InternetAddressType, InternetAddress> _kHosts = <InternetAddressType, 
 
 /// Configure the `test` package to work with Flutter.
 ///
-/// On systems where each [_FlutterPlatform] is only used to run one test suite
+/// On systems where each [FlutterPlatform] is only used to run one test suite
 /// (that is, one Dart file with a `*_test.dart` file name and a single `void
 /// main()`), you can set an observatory port explicitly.
 void installHook({
@@ -83,11 +83,13 @@ void installHook({
   bool enableObservatory = false,
   bool machine = false,
   bool startPaused = false,
+  bool disableServiceAuthCodes = false,
   int port = 0,
   String precompiledDillPath,
   Map<String, String> precompiledDillFiles,
   bool trackWidgetCreation = false,
   bool updateGoldens = false,
+  bool buildTestAssets = false,
   int observatoryPort,
   InternetAddressType serverType = InternetAddressType.IPv4,
   Uri projectRootDirectory,
@@ -97,23 +99,27 @@ void installHook({
   assert(enableObservatory || (!startPaused && observatoryPort == null));
   hack.registerPlatformPlugin(
     <Runtime>[Runtime.vm],
-    () => _FlutterPlatform(
-      shellPath: shellPath,
-      watcher: watcher,
-      machine: machine,
-      enableObservatory: enableObservatory,
-      startPaused: startPaused,
-      explicitObservatoryPort: observatoryPort,
-      host: _kHosts[serverType],
-      port: port,
-      precompiledDillPath: precompiledDillPath,
-      precompiledDillFiles: precompiledDillFiles,
-      trackWidgetCreation: trackWidgetCreation,
-      updateGoldens: updateGoldens,
-      projectRootDirectory: projectRootDirectory,
-      flutterProject: flutterProject,
-      icudtlPath: icudtlPath,
-    ),
+    () {
+      return FlutterPlatform(
+        shellPath: shellPath,
+        watcher: watcher,
+        machine: machine,
+        enableObservatory: enableObservatory,
+        startPaused: startPaused,
+        disableServiceAuthCodes: disableServiceAuthCodes,
+        explicitObservatoryPort: observatoryPort,
+        host: _kHosts[serverType],
+        port: port,
+        precompiledDillPath: precompiledDillPath,
+        precompiledDillFiles: precompiledDillFiles,
+        trackWidgetCreation: trackWidgetCreation,
+        updateGoldens: updateGoldens,
+        buildTestAssets: buildTestAssets,
+        projectRootDirectory: projectRootDirectory,
+        flutterProject: flutterProject,
+        icudtlPath: icudtlPath,
+      );
+    }
   );
 }
 
@@ -376,13 +382,15 @@ class _Compiler {
   }
 }
 
-class _FlutterPlatform extends PlatformPlugin {
-  _FlutterPlatform({
+/// The flutter test platform used to integrate with package:test.
+class FlutterPlatform extends PlatformPlugin {
+  FlutterPlatform({
     @required this.shellPath,
     this.watcher,
     this.enableObservatory,
     this.machine,
     this.startPaused,
+    this.disableServiceAuthCodes,
     this.explicitObservatoryPort,
     this.host,
     this.port,
@@ -390,6 +398,7 @@ class _FlutterPlatform extends PlatformPlugin {
     this.precompiledDillFiles,
     this.trackWidgetCreation,
     this.updateGoldens,
+    this.buildTestAssets,
     this.projectRootDirectory,
     this.flutterProject,
     this.icudtlPath,
@@ -400,6 +409,7 @@ class _FlutterPlatform extends PlatformPlugin {
   final bool enableObservatory;
   final bool machine;
   final bool startPaused;
+  final bool disableServiceAuthCodes;
   final int explicitObservatoryPort;
   final InternetAddress host;
   final int port;
@@ -407,6 +417,7 @@ class _FlutterPlatform extends PlatformPlugin {
   final Map<String, String> precompiledDillFiles;
   final bool trackWidgetCreation;
   final bool updateGoldens;
+  final bool buildTestAssets;
   final Uri projectRootDirectory;
   final FlutterProject flutterProject;
   final String icudtlPath;
@@ -454,14 +465,16 @@ class _FlutterPlatform extends PlatformPlugin {
   }
 
   @override
-  StreamChannel<dynamic> loadChannel(String testPath, SuitePlatform platform) {
+  StreamChannel<dynamic> loadChannel(String path, SuitePlatform platform) {
     if (_testCount > 0) {
       // Fail if there will be a port conflict.
-      if (explicitObservatoryPort != null)
+      if (explicitObservatoryPort != null) {
         throwToolExit('installHook() was called with an observatory port or debugger mode enabled, but then more than one test suite was run.');
+      }
       // Fail if we're passing in a precompiled entry-point.
-      if (precompiledDillPath != null)
+      if (precompiledDillPath != null) {
         throwToolExit('installHook() was called with a precompiled test entry-point, but then more than one test suite was run.');
+      }
     }
     final int ourTestCount = _testCount;
     _testCount += 1;
@@ -480,7 +493,7 @@ class _FlutterPlatform extends PlatformPlugin {
       localController.stream,
       remoteSink,
     );
-    testCompleteCompleter.complete(_startTest(testPath, localChannel, ourTestCount));
+    testCompleteCompleter.complete(_startTest(path, localChannel, ourTestCount));
     return remoteChannel;
   }
 
@@ -581,6 +594,7 @@ class _FlutterPlatform extends PlatformPlugin {
         packages: PackageMap.globalPackagesPath,
         enableObservatory: enableObservatory,
         startPaused: startPaused,
+        disableServiceAuthCodes: disableServiceAuthCodes,
         observatoryPort: explicitObservatoryPort,
         serverPort: server.port,
       );
@@ -928,6 +942,7 @@ class _FlutterPlatform extends PlatformPlugin {
     String packages,
     bool enableObservatory = false,
     bool startPaused = false,
+    bool disableServiceAuthCodes = false,
     int observatoryPort,
     int serverPort,
   }) {
@@ -948,6 +963,9 @@ class _FlutterPlatform extends PlatformPlugin {
         command.add('--observatory-port=$observatoryPort');
       if (startPaused) {
         command.add('--start-paused');
+      }
+      if (disableServiceAuthCodes) {
+        command.add('--disable-service-auth-codes');
       }
     } else {
       command.add('--disable-observatory');
@@ -977,6 +995,10 @@ class _FlutterPlatform extends PlatformPlugin {
       'FONTCONFIG_FILE': _fontConfigFile.path,
       'SERVER_PORT': serverPort.toString(),
     };
+    if (buildTestAssets) {
+      environment['UNIT_TEST_ASSETS'] = fs.path.join(
+        flutterProject.directory.path, 'build', 'unit_test_assets');
+    }
     return processManager.start(command, environment: environment);
   }
 
