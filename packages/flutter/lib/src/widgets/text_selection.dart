@@ -612,7 +612,6 @@ class _TextSelectionHandleOverlayState
       point.dy.clamp(0.0, viewport.height),
     );
 
-
     return CompositedTransformFollower(
       link: widget.layerLink,
       showWhenUnlinked: false,

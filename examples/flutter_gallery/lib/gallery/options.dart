@@ -391,9 +391,9 @@ class GalleryOptionsPage extends StatelessWidget {
   List<Widget> _enabledDiagnosticItems() {
     // Boolean showFoo options with a value of null: don't display
     // the showFoo option at all.
-    if (null == options.showOffscreenLayersCheckerboard
-             ?? options.showRasterCacheImagesCheckerboard
-             ?? options.showPerformanceOverlay)
+    if (options.showOffscreenLayersCheckerboard == null &&
+        options.showRasterCacheImagesCheckerboard == null &&
+        options.showPerformanceOverlay == null)
       return const <Widget>[];
 
     final List<Widget> items = <Widget>[

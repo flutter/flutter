@@ -28,7 +28,7 @@ import 'web/web_device.dart';
 import 'windows/application_package.dart';
 
 class ApplicationPackageFactory {
-  static ApplicationPackageFactory get instance => context[ApplicationPackageFactory];
+  static ApplicationPackageFactory get instance => context.get<ApplicationPackageFactory>();
 
   Future<ApplicationPackage> getPackageForPlatform(
     TargetPlatform platform, {
@@ -166,8 +166,11 @@ class AndroidApk extends ApplicationPackage {
 
     final File manifest = androidProject.appManifestFile;
 
-    if (!manifest.existsSync())
+    if (!manifest.existsSync()) {
+      printError('AndroidManifest.xml could not be found.');
+      printError('Please check ${manifest.path} for errors.');
       return null;
+    }
 
     final String manifestString = manifest.readAsStringSync();
     xml.XmlDocument document;
@@ -186,8 +189,11 @@ class AndroidApk extends ApplicationPackage {
     }
 
     final Iterable<xml.XmlElement> manifests = document.findElements('manifest');
-    if (manifests.isEmpty)
+    if (manifests.isEmpty) {
+      printError('AndroidManifest.xml has no manifest element.');
+      printError('Please check ${manifest.path} for errors.');
       return null;
+    }
     final String packageId = manifests.first.getAttribute('package');
 
     String launchActivity;
@@ -220,8 +226,11 @@ class AndroidApk extends ApplicationPackage {
       }
     }
 
-    if (packageId == null || launchActivity == null)
+    if (packageId == null || launchActivity == null) {
+      printError('package identifier or launch activity not found.');
+      printError('Please check ${manifest.path} for errors.');
       return null;
+    }
 
     return AndroidApk(
       id: packageId,
@@ -309,8 +318,17 @@ abstract class IOSApp extends ApplicationPackage {
     if (getCurrentHostPlatform() != HostPlatform.darwin_x64) {
       return null;
     }
-    // TODO(jonahwilliams): do more verification in this check.
     if (!project.exists) {
+      // If the project doesn't exist at all the current hint to run flutter
+      // create is accurate.
+      return null;
+    }
+    if (!project.xcodeProject.existsSync()) {
+      printError('Expected ios/Runner.xcodeproj but this file is missing.');
+      return null;
+    }
+    if (!project.xcodeProjectInfoFile.existsSync()) {
+      printError('Expected ios/Runner.xcodeproj/project.pbxproj but this file is missing.');
       return null;
     }
     return BuildableIOSApp(project);
