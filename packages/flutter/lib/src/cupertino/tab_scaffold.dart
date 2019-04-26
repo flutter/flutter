@@ -304,7 +304,7 @@ class _TabSwitchingViewState extends State<_TabSwitchingView> {
     tabs = List<Widget>(widget.tabNumber);
     tabFocusNodes = List<FocusScopeNode>.generate(
       widget.tabNumber,
-      (int index) => FocusScopeNode(),
+      (int index) => FocusScopeNode(debugLabel: 'Tab Focus Scope $index'),
     );
   }
 
@@ -327,7 +327,7 @@ class _TabSwitchingViewState extends State<_TabSwitchingView> {
   @override
   void dispose() {
     for (FocusScopeNode focusScopeNode in tabFocusNodes) {
-      focusScopeNode.detach();
+      focusScopeNode.dispose();
     }
     super.dispose();
   }

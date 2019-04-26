@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 
@@ -156,6 +157,44 @@ Use the 'android' tool to install them:
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
     });
+  });
+
+  testUsingContext('isSupportedForProject is true on module project', () async {
+    fs.file('pubspec.yaml')
+      ..createSync()
+      ..writeAsStringSync(r'''
+name: example
+
+flutter:
+  module: {}
+''');
+    fs.file('.packages').createSync();
+    final FlutterProject flutterProject = await FlutterProject.current();
+
+    expect(AndroidDevice('test').isSupportedForProject(flutterProject), true);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => MemoryFileSystem(),
+  });
+
+  testUsingContext('isSupportedForProject is true with editable host app', () async {
+    fs.file('pubspec.yaml').createSync();
+    fs.file('.packages').createSync();
+    fs.directory('android').createSync();
+    final FlutterProject flutterProject = await FlutterProject.current();
+
+    expect(AndroidDevice('test').isSupportedForProject(flutterProject), true);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => MemoryFileSystem(),
+  });
+
+  testUsingContext('isSupportedForProject is false with no host app and no module', () async {
+    fs.file('pubspec.yaml').createSync();
+    fs.file('.packages').createSync();
+    final FlutterProject flutterProject = await FlutterProject.current();
+
+    expect(AndroidDevice('test').isSupportedForProject(flutterProject), false);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => MemoryFileSystem(),
   });
 }
 

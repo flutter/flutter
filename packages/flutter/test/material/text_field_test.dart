@@ -2754,29 +2754,30 @@ void main() {
       controller = TextEditingController();
     });
 
-    MaterialApp setupWidget() {
-
+    Future<void> setupWidget(WidgetTester tester) async {
       final FocusNode focusNode = FocusNode();
       controller = TextEditingController();
 
-      return MaterialApp(
-        home:  Material(
-          child: RawKeyboardListener(
-            focusNode: focusNode,
-            onKey: null,
-            child: TextField(
-              controller: controller,
-              maxLines: 3,
-              strutStyle: StrutStyle.disabled,
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: RawKeyboardListener(
+              focusNode: focusNode,
+              onKey: null,
+              child: TextField(
+                controller: controller,
+                maxLines: 3,
+                strutStyle: StrutStyle.disabled,
+              ),
             ),
-          ) ,
+          ),
         ),
       );
+      await tester.pump();
     }
 
     testWidgets('Shift test 1', (WidgetTester tester) async {
-
-      await tester.pumpWidget(setupWidget());
+      await setupWidget(tester);
       const String testValue = 'a big house';
       await tester.enterText(find.byType(TextField), testValue);
 
@@ -2789,7 +2790,7 @@ void main() {
     });
 
     testWidgets('Control Shift test', (WidgetTester tester) async {
-      await tester.pumpWidget(setupWidget());
+      await setupWidget(tester);
       const String testValue = 'their big house';
       await tester.enterText(find.byType(TextField), testValue);
 
@@ -2805,7 +2806,7 @@ void main() {
     });
 
     testWidgets('Down and up test', (WidgetTester tester) async {
-      await tester.pumpWidget(setupWidget());
+      await setupWidget(tester);
       const String testValue = 'a big house';
       await tester.enterText(find.byType(TextField), testValue);
 
@@ -2827,7 +2828,7 @@ void main() {
     });
 
     testWidgets('Down and up test 2', (WidgetTester tester) async {
-      await tester.pumpWidget(setupWidget());
+      await setupWidget(tester);
       const String testValue = 'a big house\njumped over a mouse\nOne more line yay'; // 11 \n 19
       await tester.enterText(find.byType(TextField), testValue);
 
@@ -2914,6 +2915,8 @@ void main() {
         ),
       ),
     );
+    focusNode.requestFocus();
+    await tester.pump();
 
     const String testValue = 'a big house\njumped over a mouse'; // 11 \n 19
     await tester.enterText(find.byType(TextField), testValue);
@@ -2984,6 +2987,8 @@ void main() {
         ),
       ),
     );
+    focusNode.requestFocus();
+    await tester.pump();
 
     const String testValue = 'a big house\njumped over a mouse'; // 11 \n 19
     await tester.enterText(find.byType(TextField), testValue);
@@ -3093,6 +3098,8 @@ void main() {
         ),
       ),
     );
+    focusNode.requestFocus();
+    await tester.pump();
 
     const String testValue = 'a big house\njumped over a mouse'; // 11 \n 19
     await tester.enterText(find.byType(TextField), testValue);
@@ -5675,5 +5682,72 @@ void main() {
       editable.getLocalRectForCaret(const TextPosition(offset: 1)).topLeft,
     );
     expect(topLeft.dx, equals(383)); // Should be same as equivalent in 'Caret center position'
+  });
+
+  testWidgets('selection handles are rendered and not faded away', (WidgetTester tester) async {
+    const String testText = 'lorem ipsum';
+    final TextEditingController controller = TextEditingController(text: testText);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: TextField(
+            controller: controller,
+          ),
+        ),
+      ),
+    );
+
+    final RenderEditable renderEditable =
+      tester.state<EditableTextState>(find.byType(EditableText)).renderEditable;
+
+    await tester.tapAt(const Offset(20, 10));
+    renderEditable.selectWord(cause: SelectionChangedCause.longPress);
+    await tester.pumpAndSettle();
+
+    final List<Widget> transitions =
+      find.byType(FadeTransition).evaluate().map((Element e) => e.widget).toList();
+    // On Android, an empty app contains a single FadeTransition. The following
+    // two are the left and right text selection handles, respectively.
+    expect(transitions.length, 3);
+    final FadeTransition left = transitions[1];
+    final FadeTransition right = transitions[2];
+
+    expect(left.opacity.value, equals(1.0));
+    expect(right.opacity.value, equals(1.0));
+  });
+
+  testWidgets('iOS selection handles are rendered and not faded away', (WidgetTester tester) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+    const String testText = 'lorem ipsum';
+    final TextEditingController controller = TextEditingController(text: testText);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: TextField(
+            controller: controller,
+          ),
+        ),
+      ),
+    );
+
+    final RenderEditable renderEditable =
+      tester.state<EditableTextState>(find.byType(EditableText)).renderEditable;
+
+    await tester.tapAt(const Offset(20, 10));
+    renderEditable.selectWord(cause: SelectionChangedCause.longPress);
+    await tester.pumpAndSettle();
+
+    final List<Widget> transitions =
+      find.byType(FadeTransition).evaluate().map((Element e) => e.widget).toList();
+    expect(transitions.length, 2);
+    final FadeTransition left = transitions[0];
+    final FadeTransition right = transitions[1];
+
+    expect(left.opacity.value, equals(1.0));
+    expect(right.opacity.value, equals(1.0));
+
+    debugDefaultTargetPlatformOverride = null;
   });
 }

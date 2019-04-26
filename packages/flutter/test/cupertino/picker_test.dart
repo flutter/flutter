@@ -3,10 +3,47 @@
 // found in the LICENSE file.
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  testWidgets('Picker respects theme styling', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Align(
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            height: 300.0,
+            width: 300.0,
+            child: CupertinoPicker(
+              itemExtent: 50.0,
+              onSelectedItemChanged: (_) { },
+              children: List<Widget>.generate(3, (int index) {
+                return Container(
+                  height: 50.0,
+                  width: 300.0,
+                  child: Text(index.toString()),
+                );
+              }),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final RenderParagraph paragraph = tester.renderObject(find.text('1'));
+
+    expect(paragraph.text.style, const TextStyle(
+      inherit: false,
+      fontFamily: '.SF Pro Display',
+      fontSize: 25.0,
+      fontWeight: FontWeight.w400,
+      letterSpacing: -0.41,
+      color: CupertinoColors.black,
+    ));
+  });
+
   group('layout', () {
     testWidgets('selected item is in the middle', (WidgetTester tester) async {
       final FixedExtentScrollController controller =

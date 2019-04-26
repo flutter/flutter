@@ -16,6 +16,10 @@ import 'src/context.dart';
 import 'src/mocks.dart';
 
 class MockPeer implements rpc.Peer {
+
+  @override
+  rpc.ErrorCallback get onUnhandledError => null;
+
   @override
   Future<dynamic> get done async {
     throw 'unexpected call to done';

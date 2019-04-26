@@ -94,16 +94,19 @@ class CupertinoLocalizationEn extends GlobalCupertinoLocalizations {
   String get timerPickerHourLabelOther => r'hours';
 
   @override
-  String get timerPickerMinuteLabelOne => r'min';
+  String get timerPickerMinuteLabelOne => r'min.';
 
   @override
-  String get timerPickerMinuteLabelOther => r'min';
+  String get timerPickerMinuteLabelOther => r'min.';
 
   @override
-  String get timerPickerSecondLabelOne => r'sec';
+  String get timerPickerSecondLabelOne => r'sec.';
 
   @override
-  String get timerPickerSecondLabelOther => r'sec';
+  String get timerPickerSecondLabelOther => r'sec.';
+
+  @override
+  String get todayLabel => r'Today';
 }
 
 /// The translations for French (`fr`).
@@ -189,6 +192,9 @@ class CupertinoLocalizationFr extends GlobalCupertinoLocalizations {
 
   @override
   String get timerPickerSecondLabelOther => r's';
+
+  @override
+  String get todayLabel => r'aujourd' "'" r'hui';
 }
 
 /// The set of supported languages, as language code strings.

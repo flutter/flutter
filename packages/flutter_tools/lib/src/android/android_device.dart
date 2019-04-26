@@ -535,6 +535,11 @@ class AndroidDevice extends Device {
     await runCheckedAsync(adbCommandForDevice(<String>['pull', remotePath, outputFile.path]));
     await runCheckedAsync(adbCommandForDevice(<String>['shell', 'rm', remotePath]));
   }
+
+  @override
+  bool isSupportedForProject(FlutterProject flutterProject) {
+    return flutterProject.android.existsSync();
+  }
 }
 
 Map<String, String> parseAdbDeviceProperties(String str) {

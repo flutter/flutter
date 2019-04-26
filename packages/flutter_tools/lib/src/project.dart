@@ -208,8 +208,6 @@ class IosProject {
   Directory get _ephemeralDirectory => parent.directory.childDirectory('.ios');
   Directory get _editableDirectory => parent.directory.childDirectory('ios');
 
-  bool existsSync() => parent.isModule || _editableDirectory.existsSync();
-
   /// This parent folder of `Runner.xcodeproj`.
   Directory get hostAppRoot {
     if (!isModule || _editableDirectory.existsSync())
@@ -263,6 +261,11 @@ class IosProject {
 
   /// Xcode workspace shared workspace settings file for the host app.
   File get xcodeWorkspaceSharedSettings => xcodeWorkspaceSharedData.childFile('WorkspaceSettings.xcsettings');
+
+  /// Whether the current flutter project has an iOS subproject.
+  bool existsSync()  {
+    return parent.isModule || _editableDirectory.existsSync();
+  }
 
   /// The product bundle identifier of the host app, or null if not set or if
   /// iOS tooling needed to read it is not installed.
@@ -391,8 +394,6 @@ class AndroidProject {
     return _ephemeralDirectory;
   }
 
-  bool existsSync() => parent.isModule || _flutterLibGradleRoot.existsSync();
-
   /// The Gradle root directory of the Android wrapping of Flutter and plugins.
   /// This is the same as [hostAppGradleRoot] except when the project is
   /// a Flutter module with an editable host app.
@@ -418,6 +419,11 @@ class AndroidProject {
 
   Directory get gradleAppBundleOutV1Directory {
     return fs.directory(fs.path.join(hostAppGradleRoot.path, 'app', 'build', 'outputs', 'bundle'));
+  }
+
+  /// Whether the current flutter project has an Android sub-project.
+  bool existsSync() {
+    return parent.isModule || _editableHostAppDirectory.existsSync();
   }
 
   bool get isUsingGradle {
@@ -498,7 +504,10 @@ class WebProject {
 
   final FlutterProject parent;
 
-  bool existsSync() => parent.directory.childDirectory('web').existsSync();
+  /// Whether this flutter project has a web sub-project.
+  bool existsSync() {
+    return parent.directory.childDirectory('web').existsSync();
+  }
 
   Future<void> ensureReadyForPlatformSpecificTooling() async {
     /// Generate index.html in build/web. Eventually we could support

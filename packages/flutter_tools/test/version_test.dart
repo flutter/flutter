@@ -414,7 +414,7 @@ void main() {
 }
 
 void _expectVersionMessage(String message) {
-  final BufferLogger logger = context[Logger];
+  final BufferLogger logger = context.get<Logger>();
   expect(logger.statusText.trim(), message.trim());
   logger.clear();
 }
