@@ -2310,7 +2310,7 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
             enableDrag: widget.enableDrag,
             onClosing: widget.onClosing,
             builder: widget.builder,
-            color: widget.backgroundColor,
+            backgroundColor: widget.backgroundColor,
           ),
         ),
       );
@@ -2320,7 +2320,7 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
       BottomSheet(
         onClosing: widget.onClosing,
         builder: widget.builder,
-        color: widget.backgroundColor,
+        backgroundColor: widget.backgroundColor,
       ),
     );
   }
