@@ -16,21 +16,17 @@ import 'package:test_core/src/runner/suite.dart'; // ignore: implementation_impo
 import 'package:test_core/src/runner/plugin/platform_helpers.dart'; // ignore: implementation_imports
 import 'package:test_core/src/runner/environment.dart'; // ignore: implementation_imports
 
-import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/process_manager.dart';
-import '../base/terminal.dart';
-import '../build_info.dart';
-import '../bundle.dart';
-import '../codegen.dart';
 import '../compile.dart';
 import '../convert.dart';
 import '../dart/package_map.dart';
 import '../globals.dart';
 import '../project.dart';
 import '../vmservice.dart';
+import 'test_compiler.dart';
 import 'watcher.dart';
 
 /// The timeout we give the test process to connect to the test harness
@@ -231,156 +227,11 @@ void main() {
   return buffer.toString();
 }
 
-enum _InitialResult { crashed, timedOut, connected }
-enum _TestResult { crashed, harnessBailed, testBailed }
-typedef _Finalizer = Future<void> Function();
+enum InitialResult { crashed, timedOut, connected }
 
-class _CompilationRequest {
-  _CompilationRequest(this.path, this.result);
-  String path;
-  Completer<String> result;
-}
+enum TestResult { crashed, harnessBailed, testBailed }
 
-// This class is a wrapper around compiler that allows multiple isolates to
-// enqueue compilation requests, but ensures only one compilation at a time.
-class _Compiler {
-  _Compiler(bool trackWidgetCreation, Uri projectRootDirectory, FlutterProject flutterProject) {
-    // Compiler maintains and updates single incremental dill file.
-    // Incremental compilation requests done for each test copy that file away
-    // for independent execution.
-    final Directory outputDillDirectory = fs.systemTempDirectory.createTempSync('flutter_test_compiler.');
-    final File outputDill = outputDillDirectory.childFile('output.dill');
-
-    printTrace('Compiler will use the following file as its incremental dill file: ${outputDill.path}');
-
-    bool suppressOutput = false;
-    void reportCompilerMessage(String message, {bool emphasis, TerminalColor color}) {
-      if (suppressOutput) {
-        return;
-      }
-
-      if (message.startsWith('Error: Could not resolve the package \'flutter_test\'')) {
-        printTrace(message);
-        printError('\n\nFailed to load test harness. Are you missing a dependency on flutter_test?\n',
-          emphasis: emphasis,
-          color: color,
-        );
-        suppressOutput = true;
-        return;
-      }
-
-      printError('$message');
-    }
-
-    final String testFilePath = getKernelPathForTransformerOptions(
-      fs.path.join(fs.path.fromUri(projectRootDirectory), getBuildDirectory(), 'testfile.dill'),
-      trackWidgetCreation: trackWidgetCreation,
-    );
-
-    Future<ResidentCompiler> createCompiler() async {
-      if (flutterProject.hasBuilders) {
-        return CodeGeneratingResidentCompiler.create(
-          flutterProject: flutterProject,
-          trackWidgetCreation: trackWidgetCreation,
-          compilerMessageConsumer: reportCompilerMessage,
-          initializeFromDill: testFilePath,
-          // We already ran codegen once at the start, we only need to
-          // configure builders.
-          runCold: true,
-        );
-      }
-      return ResidentCompiler(
-        artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
-        packagesPath: PackageMap.globalPackagesPath,
-        trackWidgetCreation: trackWidgetCreation,
-        compilerMessageConsumer: reportCompilerMessage,
-        initializeFromDill: testFilePath,
-        unsafePackageSerialization: false,
-      );
-    }
-
-    printTrace('Listening to compiler controller...');
-    compilerController.stream.listen((_CompilationRequest request) async {
-      final bool isEmpty = compilationQueue.isEmpty;
-      compilationQueue.add(request);
-      // Only trigger processing if queue was empty - i.e. no other requests
-      // are currently being processed. This effectively enforces "one
-      // compilation request at a time".
-      if (isEmpty) {
-        while (compilationQueue.isNotEmpty) {
-          final _CompilationRequest request = compilationQueue.first;
-          printTrace('Compiling ${request.path}');
-          final Stopwatch compilerTime = Stopwatch()..start();
-          bool firstCompile = false;
-          if (compiler == null) {
-            compiler = await createCompiler();
-            firstCompile = true;
-          }
-          suppressOutput = false;
-          final CompilerOutput compilerOutput = await compiler.recompile(
-            request.path,
-            <Uri>[Uri.parse(request.path)],
-            outputPath: outputDill.path,
-          );
-          final String outputPath = compilerOutput?.outputFilename;
-
-          // In case compiler didn't produce output or reported compilation
-          // errors, pass [null] upwards to the consumer and shutdown the
-          // compiler to avoid reusing compiler that might have gotten into
-          // a weird state.
-          if (outputPath == null || compilerOutput.errorCount > 0) {
-            request.result.complete(null);
-            await _shutdown();
-          } else {
-            final File outputFile = fs.file(outputPath);
-            final File kernelReadyToRun = await outputFile.copy('${request.path}.dill');
-            final File testCache = fs.file(testFilePath);
-            if (firstCompile || !testCache.existsSync() || (testCache.lengthSync() < outputFile.lengthSync())) {
-              // The idea is to keep the cache file up-to-date and include as
-              // much as possible in an effort to re-use as many packages as
-              // possible.
-              ensureDirectoryExists(testFilePath);
-              await outputFile.copy(testFilePath);
-            }
-            request.result.complete(kernelReadyToRun.path);
-            compiler.accept();
-            compiler.reset();
-          }
-          printTrace('Compiling ${request.path} took ${compilerTime.elapsedMilliseconds}ms');
-          // Only remove now when we finished processing the element
-          compilationQueue.removeAt(0);
-        }
-      }
-    }, onDone: () {
-      printTrace('Deleting ${outputDillDirectory.path}...');
-      outputDillDirectory.deleteSync(recursive: true);
-    });
-  }
-
-  final StreamController<_CompilationRequest> compilerController = StreamController<_CompilationRequest>();
-  final List<_CompilationRequest> compilationQueue = <_CompilationRequest>[];
-  ResidentCompiler compiler;
-
-  Future<String> compile(String mainDart) {
-    final Completer<String> completer = Completer<String>();
-    compilerController.add(_CompilationRequest(mainDart, completer));
-    return completer.future;
-  }
-
-  Future<void> _shutdown() async {
-    // Check for null in case this instance is shut down before the
-    // lazily-created compiler has been created.
-    if (compiler != null) {
-      await compiler.shutdown();
-      compiler = null;
-    }
-  }
-
-  Future<void> dispose() async {
-    await _shutdown();
-    await compilerController.close();
-  }
-}
+typedef Finalizer = Future<void> Function();
 
 /// The flutter test platform used to integrate with package:test.
 class FlutterPlatform extends PlatformPlugin {
@@ -423,7 +274,12 @@ class FlutterPlatform extends PlatformPlugin {
   final String icudtlPath;
 
   Directory fontsDirectory;
-  _Compiler compiler;
+
+  /// The test compiler produces dill files for each test main.
+  ///
+  /// To speed up compilation, each compile is intialized from an existing
+  /// dill file from previous runs, if possible.
+  TestCompiler compiler;
 
   // Each time loadChannel() is called, we spin up a local WebSocket server,
   // then spin up the engine in a subprocess. We pass the engine a Dart file
@@ -525,11 +381,9 @@ class FlutterPlatform extends PlatformPlugin {
   ) async {
     printTrace('test $ourTestCount: starting test $testPath');
 
-    _AsyncError
-        outOfBandError; // error that we couldn't send to the harness that we need to send via our future
+    _AsyncError outOfBandError; // error that we couldn't send to the harness that we need to send via our future
 
-    final List<_Finalizer> finalizers =
-        <_Finalizer>[]; // Will be run in reverse order.
+    final List<Finalizer> finalizers = <Finalizer>[]; // Will be run in reverse order.
     bool subprocessActive = false;
     bool controllerSinkClosed = false;
     try {
@@ -545,10 +399,9 @@ class FlutterPlatform extends PlatformPlugin {
         await server.close(force: true);
       });
       final Completer<WebSocket> webSocket = Completer<WebSocket>();
-      server.listen(
-        (HttpRequest request) {
-          if (!webSocket.isCompleted)
-            webSocket.complete(WebSocketTransformer.upgrade(request));
+      server.listen((HttpRequest request) {
+        if (!webSocket.isCompleted)
+          webSocket.complete(WebSocketTransformer.upgrade(request));
         },
         onError: (dynamic error, dynamic stack) {
           // If you reach here, it's unlikely we're going to be able to really handle this well.
@@ -574,12 +427,11 @@ class FlutterPlatform extends PlatformPlugin {
       } else if (precompiledDillFiles != null) {
         mainDart = precompiledDillFiles[testPath];
       }
-      mainDart ??=
-          _createListenerDart(finalizers, ourTestCount, testPath, server);
+      mainDart ??= _createListenerDart(finalizers, ourTestCount, testPath, server);
 
       if (precompiledDillPath == null && precompiledDillFiles == null) {
         // Lazily instantiate compiler so it is built only if it is actually used.
-        compiler ??= _Compiler(trackWidgetCreation, projectRootDirectory, flutterProject);
+        compiler ??= TestCompiler(trackWidgetCreation, flutterProject);
         mainDart = await compiler.compile(mainDart);
 
         if (mainDart == null) {
@@ -655,7 +507,7 @@ class FlutterPlatform extends PlatformPlugin {
               ProcessEvent(ourTestCount, process, processObservatoryUri));
         },
         startTimeoutTimer: () {
-          Future<_InitialResult>.delayed(_kTestStartupTimeout)
+          Future<InitialResult>.delayed(_kTestStartupTimeout)
               .then<void>((_) => timeout.complete());
         },
       );
@@ -664,25 +516,20 @@ class FlutterPlatform extends PlatformPlugin {
       // The engine could crash, in which case process.exitCode will complete.
       // The engine could connect to us, in which case webSocket.future will complete.
       // The local test harness could get bored of us.
-
       printTrace('test $ourTestCount: awaiting initial result for pid ${process.pid}');
-      final _InitialResult initialResult =
-          await Future.any<_InitialResult>(<Future<_InitialResult>>[
-        process.exitCode
-            .then<_InitialResult>((int exitCode) => _InitialResult.crashed),
-        timeout.future
-            .then<_InitialResult>((void value) => _InitialResult.timedOut),
-        Future<_InitialResult>.delayed(
-            _kTestProcessTimeout, () => _InitialResult.timedOut),
-        gotProcessObservatoryUri.future.then<_InitialResult>((void value) {
-          return webSocket.future.then<_InitialResult>(
-            (WebSocket webSocket) => _InitialResult.connected,
+      final InitialResult initialResult = await Future.any<InitialResult>(<Future<InitialResult>>[
+        process.exitCode.then<InitialResult>((int exitCode) => InitialResult.crashed),
+        timeout.future.then<InitialResult>((void value) => InitialResult.timedOut),
+        Future<InitialResult>.delayed(_kTestProcessTimeout, () => InitialResult.timedOut),
+        gotProcessObservatoryUri.future.then<InitialResult>((void value) {
+          return webSocket.future.then<InitialResult>(
+            (WebSocket webSocket) => InitialResult.connected,
           );
         }),
       ]);
 
       switch (initialResult) {
-        case _InitialResult.crashed:
+        case InitialResult.crashed:
           printTrace('test $ourTestCount: process with pid ${process.pid} crashed before connecting to test harness');
           final int exitCode = await process.exitCode;
           subprocessActive = false;
@@ -698,7 +545,7 @@ class FlutterPlatform extends PlatformPlugin {
           await controller.sink.done;
           await watcher?.handleTestCrashed(ProcessEvent(ourTestCount, process));
           break;
-        case _InitialResult.timedOut:
+        case InitialResult.timedOut:
           // Could happen either if the process takes a long time starting
           // (_kTestProcessTimeout), or if once Dart code starts running, it takes a
           // long time to open the WebSocket connection (_kTestStartupTimeout).
@@ -712,7 +559,7 @@ class FlutterPlatform extends PlatformPlugin {
           await watcher
               ?.handleTestTimedOut(ProcessEvent(ourTestCount, process));
           break;
-        case _InitialResult.connected:
+        case InitialResult.connected:
           printTrace('test $ourTestCount: process with pid ${process.pid} connected to test harness');
           final WebSocket testSocket = await webSocket.future;
 
@@ -758,16 +605,15 @@ class FlutterPlatform extends PlatformPlugin {
           );
 
           printTrace('test $ourTestCount: awaiting test result for pid ${process.pid}');
-          final _TestResult testResult =
-              await Future.any<_TestResult>(<Future<_TestResult>>[
-            process.exitCode.then<_TestResult>((int exitCode) {
-              return _TestResult.crashed;
+          final TestResult testResult = await Future.any<TestResult>(<Future<TestResult>>[
+            process.exitCode.then<TestResult>((int exitCode) {
+              return TestResult.crashed;
             }),
-            harnessDone.future.then<_TestResult>((void value) {
-              return _TestResult.harnessBailed;
+            harnessDone.future.then<TestResult>((void value) {
+              return TestResult.harnessBailed;
             }),
-            testDone.future.then<_TestResult>((void value) {
-              return _TestResult.testBailed;
+            testDone.future.then<TestResult>((void value) {
+              return TestResult.testBailed;
             }),
           ]);
 
@@ -777,7 +623,7 @@ class FlutterPlatform extends PlatformPlugin {
           ]);
 
           switch (testResult) {
-            case _TestResult.crashed:
+            case TestResult.crashed:
               printTrace('test $ourTestCount: process with pid ${process.pid} crashed');
               final int exitCode = await process.exitCode;
               subprocessActive = false;
@@ -792,12 +638,12 @@ class FlutterPlatform extends PlatformPlugin {
               printTrace('test $ourTestCount: waiting for controller sink to close');
               await controller.sink.done;
               break;
-            case _TestResult.harnessBailed:
-            case _TestResult.testBailed:
-              if (testResult == _TestResult.harnessBailed) {
+            case TestResult.harnessBailed:
+            case TestResult.testBailed:
+              if (testResult == TestResult.harnessBailed) {
                 printTrace('test $ourTestCount: process with pid ${process.pid} no longer needed by test harness');
               } else {
-                assert(testResult == _TestResult.testBailed);
+                assert(testResult == TestResult.testBailed);
                 printTrace('test $ourTestCount: process with pid ${process.pid} no longer needs test harness');
               }
               await watcher?.handleFinishedTest(
@@ -817,7 +663,7 @@ class FlutterPlatform extends PlatformPlugin {
     } finally {
       printTrace('test $ourTestCount: cleaning up...');
       // Finalizers are treated like a stack; run them in reverse order.
-      for (_Finalizer finalizer in finalizers.reversed) {
+      for (Finalizer finalizer in finalizers.reversed) {
         try {
           await finalizer();
         } catch (error, stack) {
@@ -848,7 +694,7 @@ class FlutterPlatform extends PlatformPlugin {
   }
 
   String _createListenerDart(
-    List<_Finalizer> finalizers,
+    List<Finalizer> finalizers,
     int ourTestCount,
     String testPath,
     HttpServer server,
