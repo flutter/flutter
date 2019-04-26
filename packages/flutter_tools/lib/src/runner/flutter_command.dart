@@ -377,7 +377,7 @@ abstract class FlutterCommand extends Command<void> {
           ? args.readOption(FlutterOptions.kExtraGenSnapshotOptions)
           : null,
       buildSharedLibrary: argParser.options.containsKey('build-shared-library')
-        ? args.readOption('build-shared-library')
+        ? args.readFlag('build-shared-library')
         : false,
       targetPlatform: targetPlatform,
       fileSystemRoots: argParser.options.containsKey(FlutterOptions.kFileSystemRoot)
