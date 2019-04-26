@@ -85,8 +85,8 @@ class RenderParagraph extends RenderBox
          locale: locale,
          strutStyle: strutStyle,
        ) {
-   addAll(children);
-   _extractPlaceholderSpans(text);
+    addAll(children);
+    _extractPlaceholderSpans(text);
   }
 
   @override

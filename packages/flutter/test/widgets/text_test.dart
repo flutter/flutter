@@ -5,6 +5,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 
 import '../rendering/mock_canvas.dart';
@@ -293,6 +294,69 @@ void main() {
     semantics.dispose();
   }, skip: true); // TODO(jonahwilliams): correct once https://github.com/flutter/flutter/issues/20891 is resolved.
 
+  testWidgets('inline widgets generate semantic nodes', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    const TextStyle textStyle = TextStyle(fontFamily: 'Ahem');
+    await tester.pumpWidget(
+      Text.rich(
+        TextSpan(
+          children: <InlineSpan>[
+            const TextSpan(text: 'a '),
+            TextSpan(text: 'pebble', recognizer: TapGestureRecognizer()..onTap = () { }),
+            const TextSpan(text: ' in the '),
+            WidgetSpan(
+              child: SizedBox(
+                width: 20,
+                height: 40,
+                child: Card(
+                  child: RichText(
+                    text: TextSpan(text: 'INTERRUPTION'),
+                    textDirection: TextDirection.rtl,
+                  ),
+                ),
+              ),
+            ),
+            const TextSpan(text: 'sky'),
+          ],
+          style: textStyle,
+        ),
+        textDirection: TextDirection.ltr,
+      ),
+    );
+    final TestSemantics expectedSemantics = TestSemantics.root(
+      children: <TestSemantics>[
+        TestSemantics.rootChild(
+          children: <TestSemantics>[
+            TestSemantics(
+              label: 'a ',
+              textDirection: TextDirection.ltr,
+            ),
+            TestSemantics(
+              label: 'pebble',
+              textDirection: TextDirection.ltr,
+              actions: <SemanticsAction>[
+                SemanticsAction.tap,
+              ],
+            ),
+            TestSemantics(
+              label: ' in the ',
+              textDirection: TextDirection.ltr,
+            ),
+            TestSemantics(
+              label: 'INTERRUPTION',
+              textDirection: TextDirection.rtl,
+            ),
+            TestSemantics(
+              label: 'sky',
+              textDirection: TextDirection.ltr,
+            ),
+          ],
+        ),
+      ],
+    );
+    expect(semantics, hasSemantics(expectedSemantics, ignoreTransform: true, ignoreId: true, ignoreRect: true));
+    semantics.dispose();
+  });
 
   testWidgets('Overflow is clipping correctly - short text with overflow: clip', (WidgetTester tester) async {
     await _pumpTextWidget(
