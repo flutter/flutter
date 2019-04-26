@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math';
+import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
 
@@ -363,7 +363,7 @@ class _DefaultTabControllerState extends State<DefaultTabController> with Single
       // automatically update the index of the controller to be the new last tab.
       int newIndex;
       if (_controller.index >= widget.length) {
-        newIndex = max(0, widget.length - 1);
+        newIndex = math.max(0, widget.length - 1);
       }
       _controller = _controller._copyWith(length: widget.length, index: newIndex);
     }
