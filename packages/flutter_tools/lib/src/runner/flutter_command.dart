@@ -301,7 +301,7 @@ abstract class FlutterCommand extends Command<void> {
     if (modeFlags.where((bool flag) => flag).length > 1)
       throw UsageException('Only one of --debug, --profile, or --release can be specified.', null);
     final bool dynamicFlag = argParser.options.containsKey('dynamic')
-        ? args.getOption('dynamic')
+        ? args.getFlag('dynamic')
         : false;
 
     if (args.getFlag('debug')) {
