@@ -877,7 +877,7 @@ class Scaffold extends StatefulWidget {
     this.primary = true,
     this.drawerDragStartBehavior = DragStartBehavior.start,
     this.extendBody = false,
-    this.scrimColor,
+    this.drawerScrimColor,
   }) : assert(primary != null),
        assert(extendBody != null),
        assert(drawerDragStartBehavior != null),
@@ -1736,7 +1736,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
           child: widget.endDrawer,
           drawerCallback: _endDrawerOpenedCallback,
           dragStartBehavior: widget.drawerDragStartBehavior,
-          scrimColor: widget.scrimColor,
+          scrimColor: widget.drawerScrimColor,
         ),
         _ScaffoldSlot.endDrawer,
         // remove the side padding from the side we're not touching
@@ -1759,7 +1759,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
           child: widget.drawer,
           drawerCallback: _drawerOpenedCallback,
           dragStartBehavior: widget.drawerDragStartBehavior,
-          scrimColor: widget.scrimColor,
+          scrimColor: widget.drawerScrimColor,
         ),
         _ScaffoldSlot.drawer,
         // remove the side padding from the side we're not touching
