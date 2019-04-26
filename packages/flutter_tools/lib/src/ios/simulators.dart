@@ -19,6 +19,7 @@ import '../bundle.dart' as bundle;
 import '../convert.dart';
 import '../device.dart';
 import '../globals.dart';
+import '../project.dart';
 import '../protocol_discovery.dart';
 import 'ios_workflow.dart';
 import 'mac.dart';
@@ -40,7 +41,7 @@ class IOSSimulators extends PollingDeviceDiscovery {
 
 class IOSSimulatorUtils {
   /// Returns [IOSSimulatorUtils] active in the current app context (i.e. zone).
-  static IOSSimulatorUtils get instance => context[IOSSimulatorUtils];
+  static IOSSimulatorUtils get instance => context.get<IOSSimulatorUtils>();
 
   List<IOSSimulator> getAttachedDevices() {
     if (!xcode.isInstalledAndMeetsVersionCheck)
@@ -55,7 +56,7 @@ class IOSSimulatorUtils {
 /// A wrapper around the `simctl` command line tool.
 class SimControl {
   /// Returns [SimControl] active in the current app context (i.e. zone).
-  static SimControl get instance => context[SimControl];
+  static SimControl get instance => context.get<SimControl>();
 
   /// Runs `simctl list --json` and returns the JSON of the corresponding
   /// [section].
@@ -472,6 +473,11 @@ class IOSSimulator extends Device {
   @override
   Future<void> takeScreenshot(File outputFile) {
     return SimControl.instance.takeScreenshot(id, outputFile.path);
+  }
+
+  @override
+  bool isSupportedForProject(FlutterProject flutterProject) {
+    return flutterProject.ios.existsSync();
   }
 }
 

@@ -22,7 +22,7 @@ const String kMultiRootScheme = 'org-dartlang-app';
 ///
 /// If [experimentalBuildEnabled] is false, this will contain an unsupported
 /// implementation.
-CodeGenerator get codeGenerator => context[CodeGenerator];
+CodeGenerator get codeGenerator => context.get<CodeGenerator>();
 
 /// A wrapper for a build_runner process which delegates to a generated
 /// build script.
