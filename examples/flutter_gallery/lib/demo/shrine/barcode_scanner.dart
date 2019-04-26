@@ -13,10 +13,13 @@
 // limitations under the License.
 
 import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/services.dart';
+
+import 'colors.dart';
 
 class CameraApp extends StatefulWidget {
   @override
@@ -76,7 +79,7 @@ class _CameraAppState extends State<CameraApp> {
 
   @override
   Widget build(BuildContext context) {
-    if (controller == null) {
+    if (controller == null || !controller.value.isInitialized) {
       return Container();
     }
 
@@ -89,9 +92,45 @@ class _CameraAppState extends State<CameraApp> {
             child: CustomPaint(
               painter: WindowPainter(
                 windowSize: Size(256, 256),
-                windowFrameColor: Colors.white30,
+                windowFrameColor: Colors.white54,
               ),
             ),
+          ),
+          Positioned(
+            left: 0.0,
+            bottom: 0.0,
+            right: 0.0,
+            height: 56,
+            child: Container(
+              color: kShrinePink50,
+              child: Center(
+                child: Text('Point your camera at a barcode'),
+              ),
+            ),
+          ),
+          AppBar(
+            leading: IconButton(
+              icon: Icon(Icons.close, color: Colors.white),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+            backgroundColor: Colors.transparent,
+            elevation: 0.0,
+            actions: <Widget>[
+              IconButton(
+                icon: Icon(
+                  Icons.flash_off,
+                  color: Colors.white,
+                ),
+                onPressed: () {},
+              ),
+              IconButton(
+                icon: Icon(
+                  Icons.help_outline,
+                  color: Colors.white,
+                ),
+                onPressed: () {},
+              ),
+            ],
           ),
         ],
       ),
