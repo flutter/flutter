@@ -335,7 +335,6 @@ void main() {
         ),
       ),
     );
-
     await tester.tap(find.text('X'));
     await tester.pump(); // start animation
     await tester.pump(const Duration(seconds: 1));
