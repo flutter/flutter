@@ -93,17 +93,18 @@ class _ScrollbarState extends State<Scrollbar> with TickerProviderStateMixin {
       case TargetPlatform.fuchsia:
         _themeColor = theme.highlightColor.withOpacity(1.0);
         _textDirection = Directionality.of(context);
-        _materialPainter = _buildMaterialScrollbarPainter();
+        _materialPainter = _buildMaterialScrollbarPainter(MediaQuery.of(context).padding);
         break;
     }
   }
 
-  ScrollbarPainter _buildMaterialScrollbarPainter() {
+  ScrollbarPainter _buildMaterialScrollbarPainter(EdgeInsets padding) {
     return ScrollbarPainter(
         color: _themeColor,
         textDirection: _textDirection,
         thickness: _kScrollbarThickness,
         fadeoutOpacityAnimation: _fadeoutOpacityAnimation,
+        padding: padding,
       );
   }
 

@@ -76,11 +76,11 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
   void didChangeDependencies() {
     super.didChangeDependencies();
     _textDirection = Directionality.of(context);
-    _painter = _buildCupertinoScrollbarPainter();
+    _painter = _buildCupertinoScrollbarPainter(MediaQuery.of(context).padding);
   }
 
   /// Returns a [ScrollbarPainter] visually styled like the iOS scrollbar.
-  ScrollbarPainter _buildCupertinoScrollbarPainter() {
+  ScrollbarPainter _buildCupertinoScrollbarPainter(EdgeInsets padding) {
     return ScrollbarPainter(
       color: _kScrollbarColor,
       textDirection: _textDirection,
@@ -89,6 +89,7 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
       mainAxisMargin: _kScrollbarMainAxisMargin,
       crossAxisMargin: _kScrollbarCrossAxisMargin,
       radius: _kScrollbarRadius,
+      padding: padding,
       minLength: _kScrollbarMinLength,
       minOverscrollLength: _kScrollbarMinOverscrollLength,
     );

@@ -56,7 +56,11 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
        assert(mainAxisMargin != null),
        assert(crossAxisMargin != null),
        assert(minLength != null),
-       assert(padding != null) {
+       assert(padding != null),
+       assert(padding.top >= 0),
+       assert(padding.right >= 0),
+       assert(padding.bottom >= 0),
+       assert(padding.left >= 0) {
     fadeoutOpacityAnimation.addListener(notifyListeners);
   }
 
@@ -88,6 +92,8 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   /// Scrollbar will be rectangular if [radius] is null.
   final Radius radius;
 
+  /// The amount of space by which to inset the scroll bar's scrollable area.
+  /// Only the padding along the scroll direction will be taken into account.
   final EdgeInsets padding;
 
   /// The smallest size the scrollbar can shrink to when the total scrollable
@@ -152,27 +158,40 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   }
 
   void _paintThumb(
+    double beforeInset,
     double before,
     double inside,
+    double afterInset,
     double after,
     double viewport,
     Canvas canvas,
     Size size,
     void painter(Canvas canvas, Size size, double thumbOffset, double thumbExtent),
   ) {
+    final double totalInset = beforeInset + afterInset;
+
+    if (viewport <= totalInset) {
+      // Skip painting if there's not enough space.
+      return;
+    }
+
     // Establish the minimum size possible.
     double thumbExtent = math.min(viewport, minOverscrollLength);
+
+    final double effectiveInside = inside - totalInset;
+    // viewport <= inside so this is guaranteed to be greater than 0.
+    final double effectiveViewport = viewport - totalInset;
 
     if (before + inside + after > 0.0) {
       // Thumb extent reflects fraction of content visible, as long as this
       // isn't less than the absolute minimum size.
-      final double fractionVisible = inside / (before + inside + after);
+      final double fractionVisible = effectiveInside / (before + inside + after);
       thumbExtent = math.max(
         thumbExtent,
-        viewport * fractionVisible - 2 * mainAxisMargin,
+        effectiveViewport * fractionVisible - 2 * mainAxisMargin,
       );
       // Thumb extent is no smaller than minLength if scrolling normally.
-      if (before != 0.0 && after != 0.0) {
+      if (before > 0 && after > 0) {
         thumbExtent = math.max(
           minLength,
           thumbExtent,
@@ -192,13 +211,13 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
       else {
         thumbExtent = math.max(
           thumbExtent,
-          minLength * (((inside / viewport) - 0.8) / 0.2),
+          minLength * (((effectiveInside / effectiveViewport) - 0.8) / 0.2),
         );
       }
     }
 
     final double fractionPast = (before + after > 0.0) ? before / (before + after) : 0;
-    final double thumbOffset = fractionPast * (viewport - thumbExtent - 2 * mainAxisMargin) + mainAxisMargin;
+    final double thumbOffset = fractionPast * (effectiveViewport - thumbExtent - 2 * mainAxisMargin) + mainAxisMargin + beforeInset;
 
     painter(canvas, size, thumbOffset, thumbExtent);
   }
@@ -218,48 +237,56 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 
     switch (_lastAxisDirection) {
       case AxisDirection.down:
-      _paintThumb(
-        _lastMetrics.extentBefore + padding.top,
-        math.max(0, _lastMetrics.extentInside - padding.vertical),
-        _lastMetrics.extentAfter + padding.bottom,
-        math.max(0, size.height - padding.vertical),
-        canvas,
-        size,
-        _paintVerticalThumb
-      );
+        _paintThumb(
+          padding.top,
+          _lastMetrics.extentBefore,
+          _lastMetrics.extentInside,
+          padding.bottom,
+          _lastMetrics.extentAfter,
+          size.height,
+          canvas,
+          size,
+          _paintVerticalThumb
+        );
         break;
       case AxisDirection.up:
-      _paintThumb(
-        _lastMetrics.extentAfter + padding.bottom,
-        math.max(0, _lastMetrics.extentInside - padding.vertical),
-        _lastMetrics.extentBefore + padding.top,
-        math.max(0, size.height - padding.vertical),
-        canvas,
-        size,
-        _paintVerticalThumb
-      );
+        _paintThumb(
+          padding.bottom,
+          _lastMetrics.extentAfter,
+          _lastMetrics.extentInside,
+          padding.top,
+          _lastMetrics.extentBefore,
+          size.height,
+          canvas,
+          size,
+          _paintVerticalThumb
+        );
         break;
       case AxisDirection.right:
-      _paintThumb(
-        _lastMetrics.extentBefore + padding.left,
-        math.max(0, _lastMetrics.extentInside - padding.horizontal),
-        _lastMetrics.extentAfter + padding.right,
-        math.max(0, size.width - padding.horizontal),
-        canvas,
-        size,
-        _paintHorizontalThumb
-      );
+        _paintThumb(
+          padding.left,
+          _lastMetrics.extentBefore,
+          _lastMetrics.extentInside,
+          padding.right,
+          _lastMetrics.extentAfter,
+          size.width,
+          canvas,
+          size,
+          _paintHorizontalThumb
+        );
         break;
       case AxisDirection.left:
-      _paintThumb(
-        _lastMetrics.extentAfter + padding.right,
-        math.max(0, _lastMetrics.extentInside - padding.horizontal),
-        _lastMetrics.extentBefore + padding.left,
-        math.max(0, size.width - padding.horizontal),
-        canvas,
-        size,
-        _paintHorizontalThumb
-      );
+        _paintThumb(
+          padding.right,
+          _lastMetrics.extentAfter,
+          _lastMetrics.extentInside,
+          padding.left,
+          _lastMetrics.extentBefore,
+          size.width,
+          canvas,
+          size,
+          _paintHorizontalThumb
+        );
         break;
     }
   }
@@ -278,7 +305,8 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
         || mainAxisMargin != old.mainAxisMargin
         || crossAxisMargin != old.crossAxisMargin
         || radius != old.radius
-        || minLength != old.minLength;
+        || minLength != old.minLength
+        || padding != old.padding;
   }
 
   @override

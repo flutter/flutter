@@ -717,15 +717,15 @@ void main() {
     final PageMetrics page = PageMetrics(
       minScrollExtent: 0.0,
       maxScrollExtent: 100.0,
-      pixels: 50.0,
+      pixels: 150.0,
       viewportDimension: 25.0,
       axisDirection: AxisDirection.right,
       viewportFraction: 1.0,
     );
-    expect(page.page, 2);
+    expect(page.page, 4);
     final PageMetrics page2 = page.copyWith(
       pixels: page.pixels - 100.0,
     );
-    expect(page2.page, 6.0);
+    expect(page2.page, 2.0);
   });
 }

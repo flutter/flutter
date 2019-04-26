@@ -106,9 +106,20 @@ abstract class ScrollMetrics {
   /// The quantity of visible content.
   ///
   /// If [extentBefore] and [extentAfter] are non-zero, then this is typically
-  /// the height of the viewport. It could be less if there is less content
-  /// visible than the size of the viewport.
+  /// the height of the viewport. The value will always be greater than or equal
+  /// to the size of the viewport.
+  ///
+  /// The implementation assumes [maxScrollExtent] is greater than or equal to
+  /// 0 and [minScrollExtent] is less than or equal to 0.
+  ///
+  /// See also:
+  ///
+  /// * [ViewportOffset.applyContentDimensions]
   double get extentInside {
+    assert(maxScrollExtent != null);
+    assert(minScrollExtent != null);
+    assert(minScrollExtent <= 0);
+    assert(maxScrollExtent >= 0);
     return math.min(pixels, maxScrollExtent) -
            math.max(pixels, minScrollExtent) +
            viewportDimension;
