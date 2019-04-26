@@ -158,7 +158,6 @@ void main() {
 
   testWidgets('Selected RadioListTile should not trigger onChanged', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/30311
-
     final List<int> values = <int>[0, 1, 2];
     int selectedValue;
     // Constructor parameters are required for [Radio], but they are irrelevant
@@ -194,7 +193,6 @@ void main() {
     }
 
     await tester.pumpWidget(buildFrame());
-
     await tester.tap(find.text('0'));
     await tester.pump();
     expect(log, equals(<int>[0]));
