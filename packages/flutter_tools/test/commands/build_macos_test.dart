@@ -7,8 +7,10 @@ import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 
@@ -49,7 +51,6 @@ void main() {
   testUsingContext('macOS build fails on non-macOS platform', () async {
     final BuildCommand command = BuildCommand();
     applyMocksToCommand(command);
-    fs.file('macos/build.sh').createSync(recursive: true);
     fs.file('pubspec.yaml').createSync();
     fs.file('.packages').createSync();
 
@@ -64,14 +65,22 @@ void main() {
   testUsingContext('macOS build invokes build script', () async {
     final BuildCommand command = BuildCommand();
     applyMocksToCommand(command);
-    fs.file('macos/build.sh').createSync(recursive: true);
+    fs.directory('macos').createSync();
     fs.file('pubspec.yaml').createSync();
     fs.file('.packages').createSync();
+    final FlutterProject flutterProject = await FlutterProject.fromDirectory(fs.currentDirectory);
+    final Directory flutterBuildDir = fs.directory(getMacOSBuildDirectory());
+
     when(mockProcessManager.start(<String>[
-      '/macos/build.sh',
-      '/',
-      'release',
-      'no-track-widget-creation',
+      '/usr/bin/env',
+      'xcrun',
+      'xcodebuild',
+      '-project', flutterProject.macos.xcodeProjectFile.path,
+      '-configuration', 'Debug',
+      '-scheme', 'Runner',
+      '-derivedDataPath', flutterBuildDir.absolute.path,
+      'OBJROOT=${fs.path.join(flutterBuildDir.absolute.path, 'Build', 'Intermediates.noindex')}',
+      'SYMROOT=${fs.path.join(flutterBuildDir.absolute.path, 'Build', 'Products')}',
     ], runInShell: true)).thenAnswer((Invocation invocation) async {
       return mockProcess;
     });

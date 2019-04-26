@@ -18,6 +18,7 @@ import '../convert.dart';
 import '../dart/package_map.dart';
 import '../device.dart';
 import '../globals.dart';
+import '../project.dart';
 import '../protocol_discovery.dart';
 import '../version.dart';
 
@@ -192,6 +193,9 @@ class FlutterTesterDevice extends Device {
 
   @override
   Future<bool> uninstallApp(ApplicationPackage app) async => true;
+
+  @override
+  bool isSupportedForProject(FlutterProject flutterProject) => true;
 }
 
 class FlutterTesterDevices extends PollingDeviceDiscovery {

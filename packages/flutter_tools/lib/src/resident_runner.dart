@@ -52,6 +52,7 @@ class FlutterDevice {
   /// Create a [FlutterDevice] with optional code generation enabled.
   static Future<FlutterDevice> create(
     Device device, {
+    @required FlutterProject flutterProject,
     @required bool trackWidgetCreation,
     String dillOutputPath,
     List<String> fileSystemRoots,
@@ -64,7 +65,6 @@ class FlutterDevice {
     @required BuildMode buildMode,
   }) async {
     ResidentCompiler generator;
-    final FlutterProject flutterProject = await FlutterProject.current();
     if (flutterProject.hasBuilders) {
       generator = await CodeGeneratingResidentCompiler.create(
         flutterProject: flutterProject,

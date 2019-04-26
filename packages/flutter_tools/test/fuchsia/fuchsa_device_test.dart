@@ -53,6 +53,7 @@ void main() {
       expect(device.supportsHotReload, true);
       expect(device.supportsHotRestart, false);
       expect(device.supportsStopApp, false);
+      expect(device.isSupportedForProject(null), true);
       expect(await device.stopApp(null), false);
     });
   });

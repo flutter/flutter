@@ -4,7 +4,9 @@
 
 import 'dart:convert';
 
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/context.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 
@@ -105,6 +107,27 @@ tester    17193   0.0  0.2  4791128  37820   ??  S     2:27PM   0:00.09 /Applica
       expect(await MacOSDevices().devices, <Device>[]);
     }, overrides: <Type, Generator>{
       Platform: () => notMac,
+    });
+
+    testUsingContext('isSupportedForProject is true with editable host app', () async {
+      fs.file('pubspec.yaml').createSync();
+      fs.file('.packages').createSync();
+      fs.directory('macos').createSync();
+      final FlutterProject flutterProject = await FlutterProject.current();
+
+      expect(MacOSDevice().isSupportedForProject(flutterProject), true);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem(),
+    });
+
+    testUsingContext('isSupportedForProject is false with no host app', () async {
+      fs.file('pubspec.yaml').createSync();
+      fs.file('.packages').createSync();
+      final FlutterProject flutterProject = await FlutterProject.current();
+
+      expect(MacOSDevice().isSupportedForProject(flutterProject), false);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem(),
     });
   });
 }
