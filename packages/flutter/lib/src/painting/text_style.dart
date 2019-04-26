@@ -348,9 +348,6 @@ class TextStyle extends Diagnosticable {
   /// In [merge], [apply], and [lerp], conflicts between [color] and [foreground]
   /// specification are resolved in [foreground]'s favor - i.e. if [foreground] is
   /// specified in one place, it will dominate [color] in another.
-  ///
-  /// In [ThemeData], secondary color is referenced as
-  /// [ThemeData.colorScheme.secondary].
   final Color color;
 
   /// The color to use as the background for the text.
