@@ -68,12 +68,13 @@ class _ToolbarContainerLayout extends SingleChildLayoutDelegate {
 /// menu").
 ///
 /// App bars are typically used in the [Scaffold.appBar] property, which places
-/// the app bar as a fixed-height widget at the top of the screen. [Scaffold] also
-/// removes the bottom padding of the [MediaQuery] the app bar inherits from. When used
-/// without a [Scaffold], or wrapped in a [Hero], place the app bar in a [MediaQuery]
-/// to take care of the paddings around content of the app bar. For a scrollable
+/// the app bar as a fixed-height widget at the top of the screen. For a scrollable
 /// app bar, see [SliverAppBar], which embeds an [AppBar] in a sliver for use in
 /// a [CustomScrollView].
+///
+/// When not used as [Scaffold.appBar], or when wrapped in a [Hero], place the app
+/// bar in a [MediaQuery] to take care of the padding around the content of the
+/// app bar if needed, as the padding will not be handled by [Scaffold].
 ///
 /// The AppBar displays the toolbar widgets, [leading], [title], and [actions],
 /// above the [bottom] (if any). The [bottom] is usually used for a [TabBar]. If
