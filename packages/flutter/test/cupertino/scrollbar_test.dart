@@ -7,16 +7,29 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
 
+Widget _buildSingleChildScrollViewWithCupertinoScrollbar({
+    TextDirection textDirection = TextDirection.ltr,
+    EdgeInsets padding = EdgeInsets.zero,
+    Widget child}
+) {
+  return Directionality(
+    textDirection: textDirection,
+    child: MediaQuery(
+      data: MediaQueryData(padding: padding),
+      child: CupertinoScrollbar(
+        child: SingleChildScrollView(child: child)
+      )
+    )
+  );
+}
+
 void main() {
   testWidgets('Scrollbar never goes away until finger lift', (WidgetTester tester) async {
-    await tester.pumpWidget(const Directionality(
-      textDirection: TextDirection.ltr,
-      child: CupertinoScrollbar(
-        child: SingleChildScrollView(
-          child: SizedBox(width: 4000.0, height: 4000.0),
-        ),
-      ),
-    ));
+    await tester.pumpWidget(
+      _buildSingleChildScrollViewWithCupertinoScrollbar(
+        child: const SizedBox(width: 4000.0, height: 4000.0)
+      )
+    );
     final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(SingleChildScrollView)));
     await gesture.moveBy(const Offset(0.0, -10.0));
     await tester.pump();
@@ -44,14 +57,12 @@ void main() {
   });
 
   testWidgets('Scrollbar is not smaller than minLength with large scroll views', (WidgetTester tester) async {
-    await tester.pumpWidget(const Directionality(
-      textDirection: TextDirection.ltr,
-      child: CupertinoScrollbar(
-        child: SingleChildScrollView(
-          child: SizedBox(width: 800.0, height: 20000.0),
-        ),
-      ),
-    ));
+    await tester.pumpWidget(
+      _buildSingleChildScrollViewWithCupertinoScrollbar(
+        child: const SizedBox(width: 800.0, height: 20000.0),
+      )
+    );
+
     final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(SingleChildScrollView)));
     await gesture.moveBy(const Offset(0.0, -10.0));
     await tester.pump();

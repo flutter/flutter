@@ -7,15 +7,26 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
 
+Widget _buildSingleChildScrollViewWithCupertinoScrollbar({
+    TextDirection textDirection = TextDirection.ltr,
+    EdgeInsets padding = EdgeInsets.zero,
+    Widget child}
+) {
+  return Directionality(
+    textDirection: textDirection,
+    child: MediaQuery(
+      data: MediaQueryData(padding: padding),
+      child: CupertinoScrollbar(
+        child: SingleChildScrollView(child: child)
+      )
+    )
+  );
+}
+
 void main() {
   testWidgets('Paints iOS spec', (WidgetTester tester) async {
-    await tester.pumpWidget(const Directionality(
-      textDirection: TextDirection.ltr,
-      child: CupertinoScrollbar(
-        child: SingleChildScrollView(
-          child: SizedBox(width: 4000.0, height: 4000.0),
-        ),
-      ),
+    await tester.pumpWidget(_buildSingleChildScrollViewWithCupertinoScrollbar(
+        child: const SizedBox(width: 4000.0, height: 4000.0),
     ));
     expect(find.byType(CupertinoScrollbar), isNot(paints..rrect()));
     final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(SingleChildScrollView)));

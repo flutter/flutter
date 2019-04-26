@@ -452,8 +452,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
         _didChangeViewportDimensionOrReceiveCorrection) {
       assert(minScrollExtent != null);
       assert(maxScrollExtent != null);
-      assert(minScrollExtent <= 0);
-      assert(maxScrollExtent >= 0);
+      assert(minScrollExtent <= maxScrollExtent);
       _minScrollExtent = minScrollExtent;
       _maxScrollExtent = maxScrollExtent;
       _haveDimensions = true;

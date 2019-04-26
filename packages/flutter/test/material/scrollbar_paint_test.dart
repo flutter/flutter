@@ -7,15 +7,26 @@ import 'package:flutter/material.dart';
 
 import '../rendering/mock_canvas.dart';
 
+Widget _buildSingleChildScrollViewWithScrollbar({
+    TextDirection textDirection = TextDirection.ltr,
+    EdgeInsets padding = EdgeInsets.zero,
+    Widget child}
+) {
+  return Directionality(
+    textDirection: textDirection,
+    child: MediaQuery(
+      data: MediaQueryData(padding: padding),
+      child: Scrollbar(
+        child: SingleChildScrollView(child: child)
+      )
+    )
+  );
+}
+
 void main() {
   testWidgets('Viewport basic test (LTR)', (WidgetTester tester) async {
-    await tester.pumpWidget(const Directionality(
-      textDirection: TextDirection.ltr,
-      child: Scrollbar(
-        child: SingleChildScrollView(
-          child: SizedBox(width: 4000.0, height: 4000.0),
-        ),
-      ),
+    await tester.pumpWidget(_buildSingleChildScrollViewWithScrollbar(
+      child: const SizedBox(width: 4000.0, height: 4000.0),
     ));
     expect(find.byType(Scrollbar), isNot(paints..rect()));
     await tester.fling(find.byType(SingleChildScrollView), const Offset(0.0, -10.0), 10.0);
@@ -23,13 +34,9 @@ void main() {
   });
 
   testWidgets('Viewport basic test (RTL)', (WidgetTester tester) async {
-    await tester.pumpWidget(const Directionality(
+    await tester.pumpWidget(_buildSingleChildScrollViewWithScrollbar(
       textDirection: TextDirection.rtl,
-      child: Scrollbar(
-        child: SingleChildScrollView(
-          child: SizedBox(width: 4000.0, height: 4000.0),
-        ),
-      ),
+      child: const SizedBox(width: 4000.0, height: 4000.0),
     ));
     expect(find.byType(Scrollbar), isNot(paints..rect()));
     await tester.fling(find.byType(SingleChildScrollView), const Offset(0.0, -10.0), 10.0);
