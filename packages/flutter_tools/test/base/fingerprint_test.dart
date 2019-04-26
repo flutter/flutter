@@ -5,6 +5,7 @@
 import 'dart:convert' show json;
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/fingerprint.dart';
@@ -191,6 +192,46 @@ void main() {
       await fingerprinter.writeFingerprint();
       expect(await fingerprinter.doesFingerprintMatch(), isTrue);
     }, overrides: contextOverrides);
+
+    final Platform mockPlatformDisabledCache = MockPlatform();
+    mockPlatformDisabledCache.environment['DISABLE_FLUTTER_BUILD_CACHE']  = 'true';
+    testUsingContext('can be disabled with an environment variable', () async {
+      await fs.file('a.dart').create();
+      await fs.file('b.dart').create();
+
+      final Fingerprinter fingerprinter = Fingerprinter(
+        fingerprintPath: 'out.fingerprint',
+        paths: <String>['a.dart', 'b.dart'],
+        properties: <String, String>{
+          'bar': 'baz',
+          'wobble': 'womble',
+        },
+      );
+      await fingerprinter.writeFingerprint();
+      expect(await fingerprinter.doesFingerprintMatch(), isFalse);
+    }, overrides: <Type, Generator>{
+      Platform: () => mockPlatformDisabledCache,
+    }..addAll(contextOverrides));
+
+    final Platform mockPlatformEnabledCache = MockPlatform();
+    mockPlatformEnabledCache.environment['DISABLE_FLUTTER_BUILD_CACHE']  = 'false';
+    testUsingContext('can be not-disabled with an environment variable', () async {
+      await fs.file('a.dart').create();
+      await fs.file('b.dart').create();
+
+      final Fingerprinter fingerprinter = Fingerprinter(
+        fingerprintPath: 'out.fingerprint',
+        paths: <String>['a.dart', 'b.dart'],
+        properties: <String, String>{
+          'bar': 'baz',
+          'wobble': 'womble',
+        },
+      );
+      await fingerprinter.writeFingerprint();
+      expect(await fingerprinter.doesFingerprintMatch(), isTrue);
+    }, overrides: <Type, Generator>{
+      Platform: () => mockPlatformEnabledCache,
+    }..addAll(contextOverrides));
 
     testUsingContext('fails to write fingerprint if inputs are missing', () async {
       final Fingerprinter fingerprinter = Fingerprinter(
@@ -470,4 +511,9 @@ void main() {
       ]));
     }, overrides: contextOverrides);
   });
+}
+
+class MockPlatform extends Mock implements Platform {
+  @override
+  Map<String, String> environment = <String, String>{};
 }

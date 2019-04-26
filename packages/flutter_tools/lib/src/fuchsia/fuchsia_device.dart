@@ -17,6 +17,7 @@ import '../base/time.dart';
 import '../build_info.dart';
 import '../device.dart';
 import '../globals.dart';
+import '../project.dart';
 import '../vmservice.dart';
 
 import 'fuchsia_sdk.dart';
@@ -302,6 +303,9 @@ class FuchsiaDevice extends Device {
   }
 
   FuchsiaIsolateDiscoveryProtocol  getIsolateDiscoveryProtocol(String isolateName) => FuchsiaIsolateDiscoveryProtocol(this, isolateName);
+
+  @override
+  bool isSupportedForProject(FlutterProject flutterProject) => true;
 }
 
 class FuchsiaIsolateDiscoveryProtocol {
