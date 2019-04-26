@@ -134,12 +134,24 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   OverlayEntry _entry;
   Timer _hideTimer;
   Timer _showTimer;
+  bool _mouseIsConnected;
 
   @override
   void initState() {
     super.initState();
+    _mouseIsConnected = RendererBinding.instance.mouseTracker.mouseIsConnected;
     _controller = AnimationController(duration: _kFadeInDuration, vsync: this)
       ..addStatusListener(_handleStatusChanged);
+    RendererBinding.instance.mouseTracker.addListener(_handleMouseTrackerChange);
+  }
+
+  // Forces a rebuild if a mouse has been added or removed.
+  void _handleMouseTrackerChange() {
+    if (mounted) {
+      setState((){
+        _mouseIsConnected = RendererBinding.instance.mouseTracker.mouseIsConnected;
+      });
+    }
   }
 
   void _handleStatusChanged(AnimationStatus status) {
@@ -247,6 +259,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
 
   @override
   void dispose() {
+    RendererBinding.instance.mouseTracker.removeListener(_handleMouseTrackerChange);
     if (_entry != null)
       _removeEntry();
     _controller.dispose();
@@ -262,19 +275,26 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     assert(Overlay.of(context, debugRequiredFor: widget) != null);
-    return Listener(
-      onPointerEnter: (PointerEnterEvent event) => _showTooltip(),
-      onPointerExit: (PointerExitEvent event) => _hideTooltip(),
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onLongPress: _handleLongPress,
-        excludeFromSemantics: true,
-        child: Semantics(
-          label: widget.excludeFromSemantics ? null : widget.message,
-          child: widget.child,
-        ),
+    Widget result = GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onLongPress: _handleLongPress,
+      excludeFromSemantics: true,
+      child: Semantics(
+        label: widget.excludeFromSemantics ? null : widget.message,
+        child: widget.child,
       ),
     );
+
+    // Only check for hovering if there is a mouse connected.
+    if (_mouseIsConnected) {
+      result = Listener(
+        onPointerEnter: (PointerEnterEvent event) => _showTooltip(),
+        onPointerExit: (PointerExitEvent event) => _hideTooltip(),
+        child: result,
+      );
+    }
+
+    return result;
   }
 }
 

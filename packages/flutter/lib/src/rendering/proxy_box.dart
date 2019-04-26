@@ -2566,11 +2566,14 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
 
   void _updateAnnotations() {
     assert(_onPointerEnter != _hoverAnnotation.onEnter || _onPointerHover != _hoverAnnotation.onHover || _onPointerExit != _hoverAnnotation.onExit,
-    "Shouldn't call _updateAnnotations if nothing has changed.");
+      "Shouldn't call _updateAnnotations if nothing has changed.");
+    bool changed = false;
     if (_hoverAnnotation != null && attached) {
       RendererBinding.instance.mouseTracker.detachAnnotation(_hoverAnnotation);
+      changed = true;
     }
-    if (_onPointerEnter != null || _onPointerHover != null || _onPointerExit != null) {
+    if (RendererBinding.instance.mouseTracker.mouseIsConnected &&
+        (_onPointerEnter != null || _onPointerHover != null || _onPointerExit != null)) {
       _hoverAnnotation = MouseTrackerAnnotation(
         onEnter: _onPointerEnter,
         onHover: _onPointerHover,
@@ -2578,18 +2581,21 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
       );
       if (attached) {
         RendererBinding.instance.mouseTracker.attachAnnotation(_hoverAnnotation);
+        changed = true;
       }
     } else {
       _hoverAnnotation = null;
     }
-    // Needs to paint in any case, in order to insert/remove the annotation
-    // layer associated with the updated _hoverAnnotation.
-    markNeedsPaint();
+    if (changed) {
+      markNeedsPaint();
+    }
   }
 
   @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
+    // Add a listener to listen for changes in mouseIsConnected.
+    RendererBinding.instance.mouseTracker.addListener(_updateAnnotations);
     if (_hoverAnnotation != null) {
       RendererBinding.instance.mouseTracker.attachAnnotation(_hoverAnnotation);
     }
@@ -2600,6 +2606,7 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
     if (_hoverAnnotation != null) {
       RendererBinding.instance.mouseTracker.detachAnnotation(_hoverAnnotation);
     }
+    RendererBinding.instance.mouseTracker.removeListener(_updateAnnotations);
     super.detach();
   }
 

@@ -4,7 +4,7 @@
 
 import 'dart:ui';
 
-import 'package:flutter/foundation.dart' show visibleForTesting;
+import 'package:flutter/foundation.dart' show ChangeNotifier, visibleForTesting;
 import 'package:flutter/scheduler.dart';
 
 import 'events.dart';
@@ -84,8 +84,11 @@ typedef MouseDetectorAnnotationFinder = MouseTrackerAnnotation Function(Offset o
 /// and notifies them when a mouse pointer enters, moves, or leaves an annotated
 /// region that they are interested in.
 ///
+/// This class is a [ChangeNotifier] that notifies its listeners if the value of
+/// [mouseIsConnected] changes.
+///
 /// Owned by the [RendererBinding] class.
-class MouseTracker {
+class MouseTracker extends ChangeNotifier {
   /// Creates a mouse tracker to keep track of mouse locations.
   ///
   /// All of the parameters must not be null.
@@ -143,11 +146,11 @@ class MouseTracker {
       // If we're not tracking anything, then there is no point in registering a
       // frame callback or scheduling a frame. By definition there are no active
       // annotations that need exiting, either.
-      _lastMouseEvent.remove(deviceId);
+      _removeMouseEvent(deviceId);
       return;
     }
     if (event is PointerRemovedEvent) {
-      _lastMouseEvent.remove(deviceId);
+      _removeMouseEvent(deviceId);
       // If the mouse was removed, then we need to schedule one more check to
       // exit any annotations that were active.
       _scheduleMousePositionCheck();
@@ -158,7 +161,7 @@ class MouseTracker {
           // location of the mouse has changed.
           _scheduleMousePositionCheck();
         }
-        _lastMouseEvent[deviceId] = event;
+        _addMouseEvent(deviceId, event);
       }
     }
   }
@@ -257,6 +260,22 @@ class MouseTracker {
           trackedAnnotation.activeDevices.remove(deviceId);
         }
       }
+    }
+  }
+
+  void _addMouseEvent(int deviceId, PointerEvent event) {
+    final bool wasConnected = mouseIsConnected;
+    _lastMouseEvent[deviceId] = event;
+    if (mouseIsConnected != wasConnected) {
+      notifyListeners();
+    }
+  }
+
+  void _removeMouseEvent(int deviceId) {
+    final bool wasConnected = mouseIsConnected;
+    _lastMouseEvent.remove(deviceId);
+    if (mouseIsConnected != wasConnected) {
+      notifyListeners();
     }
   }
 
