@@ -221,8 +221,8 @@ class DrawerController extends StatefulWidget {
   /// {@endtemplate}
   final DragStartBehavior dragStartBehavior;
 
-  /// Set a color to use for the scrim that obscures primary content
-  /// while a drawer is open.
+  /// The color to use for the scrim that obscures primary content while a drawer is open.
+  /// By default, the color is [Colors.black54]
   final Color scrimColor;
 
   @override
