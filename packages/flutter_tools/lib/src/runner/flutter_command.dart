@@ -6,11 +6,11 @@ import 'dart:async';
 
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
-import 'package:flutter_tools/src/base/args.dart';
 import 'package:meta/meta.dart';
 import 'package:quiver/strings.dart';
 
 import '../application_package.dart';
+import '../base/args.dart';
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
@@ -301,7 +301,7 @@ abstract class FlutterCommand extends Command<void> {
     if (modeFlags.where((bool flag) => flag).length > 1)
       throw UsageException('Only one of --debug, --profile, or --release can be specified.', null);
     final bool dynamicFlag = argParser.options.containsKey('dynamic')
-        ? args.getOption('dynamic')
+        ? args.getFlag('dynamic')
         : false;
 
     if (args.getFlag('debug')) {
