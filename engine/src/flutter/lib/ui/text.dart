@@ -1319,7 +1319,7 @@ class Paragraph extends NativeFieldWrapperClass2 {
   /// the rightmost glyph in the paragraph.
   ///
   /// Valid only after [layout] has been called.
-  double get tightWidth native 'Paragraph_tightWidth';
+  double get longestLine native 'Paragraph_longestLine';
 
   /// The minimum width that this paragraph could be without failing to paint
   /// its contents within itself.

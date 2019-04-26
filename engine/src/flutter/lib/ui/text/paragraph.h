@@ -33,7 +33,7 @@ class Paragraph : public RefCountedDartWrappable<Paragraph> {
 
   double width();
   double height();
-  double tightWidth();
+  double longestLine();
   double minIntrinsicWidth();
   double maxIntrinsicWidth();
   double alphabeticBaseline();
