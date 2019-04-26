@@ -2111,7 +2111,6 @@ void main() {
       return boilerplate(
         child: DefaultTabController(
           key: key,
-          initialIndex: 1,
           length: tabs.length,
           child: TabBar(
             tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
@@ -2122,14 +2121,16 @@ void main() {
     TabController getController() => DefaultTabController.of(tester.element(find.text('A')));
 
     await tester.pumpWidget(buildTabs(threeTabs));
+    await tester.tap(find.text('B'));
+    await tester.pump();
     TabController controller = getController();
-    expect(controller.previousIndex, 1);
+    expect(controller.previousIndex, 0);
     expect(controller.index, 1);
     expect(controller.length, 3);
 
     await tester.pumpWidget(buildTabs(twoTabs));
     controller = getController();
-    expect(controller.previousIndex, 1);
+    expect(controller.previousIndex, 0);
     expect(controller.index, 1);
     expect(controller.length, 2);
 

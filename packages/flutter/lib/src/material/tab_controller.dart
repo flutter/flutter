@@ -104,20 +104,20 @@ class TabController extends ChangeNotifier {
        _animationController = animationController;
 
 
-  /// Creates a new [TabController] with `index` and `length` if they are
-  /// non-null.
+  /// Creates a new [TabController] with `index`, `previousIndex`, and `length`
+  /// if they are non-null.
   ///
-  /// This will reuse the existing [_previousIndex] and [_animationController].
+  /// This will reuse the existing [_animationController].
   ///
   /// This is useful for [DefaultTabController], for example when
   /// [DefaultTabController.length] is updated, this method is called so that a
   /// new [TabController] is created without having to create a new [AnimationController].
-  TabController _copyWith({ int index, int length }) {
+  TabController _copyWith({ int index, int length, int previousIndex }) {
     return TabController._(
       index: index ?? _index,
       length: length ?? this.length,
       animationController: _animationController,
-      previousIndex: _previousIndex,
+      previousIndex: previousIndex ?? _previousIndex,
     );
   }
 
@@ -362,10 +362,16 @@ class _DefaultTabControllerState extends State<DefaultTabController> with Single
       // If the length is shortened while the last tab is selected, we should
       // automatically update the index of the controller to be the new last tab.
       int newIndex;
+      int previousIndex = _controller.previousIndex;
       if (_controller.index >= widget.length) {
         newIndex = math.max(0, widget.length - 1);
+        previousIndex = _controller.index;
       }
-      _controller = _controller._copyWith(length: widget.length, index: newIndex);
+      _controller = _controller._copyWith(
+        length: widget.length,
+        index: newIndex,
+        previousIndex: previousIndex,
+      );
     }
   }
 }
