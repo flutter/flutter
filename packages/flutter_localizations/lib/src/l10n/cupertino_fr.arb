@@ -1,9 +1,10 @@
 {
-  "datePickerHourSemanticsLabelOne": "une heure",
-  "datePickerHourSemanticsLabelOther": "$hour heures",
-  "datePickerMinuteSemanticsLabelOne": "une minute",
-  "datePickerMinuteSemanticsLabelOther": "$minute minutes",
-  "datePickerDateOrder": "dmy",
+  "timerPickerSecondLabelOne": "s",
+  "datePickerHourSemanticsLabelOne": "$hour h",
+  "datePickerHourSemanticsLabelOther": "$hour h",
+  "datePickerMinuteSemanticsLabelOne": "1 minute",
+  "datePickerMinuteSemanticsLabelOther": "$minute minutes",
+  "datePickerDateOrder": "mja",
   "datePickerDateTimeOrder": "date_time_dayPeriod",
   "anteMeridiemAbbreviation": "AM",
   "postMeridiemAbbreviation": "PM",
@@ -11,11 +12,11 @@
   "alertDialogLabel": "Alerte",
   "timerPickerHourLabelOne": "heure",
   "timerPickerHourLabelOther": "heures",
-  "timerPickerMinuteLabelOne": "minute",
-  "timerPickerMinuteLabelOther": "minutes",
+  "timerPickerMinuteLabelOne": "min",
+  "timerPickerMinuteLabelOther": "min",
   "timerPickerSecondLabelOther": "s",
   "cutButtonLabel": "Couper",
   "copyButtonLabel": "Copier",
   "pasteButtonLabel": "Coller",
-  "selectAllButtonLabel": "Tout sélect."
+  "selectAllButtonLabel": "Tout sélectionner"
 }

@@ -1,0 +1,21 @@
+{
+  "datePickerHourSemanticsLabelOne": "$hour ακριβώς",
+  "datePickerHourSemanticsLabelOther": "$hour ακριβώς",
+  "datePickerMinuteSemanticsLabelOne": "1 λεπτό",
+  "datePickerMinuteSemanticsLabelOther": "$minute λεπτά",
+  "datePickerDateOrder": "μηε",
+  "datePickerDateTimeOrder": "date_time_dayPeriod",
+  "anteMeridiemAbbreviation": "π.μ.",
+  "postMeridiemAbbreviation": "μ.μ.",
+  "alertDialogLabel": "Ειδοποίηση",
+  "timerPickerHourLabelOne": "ώρα",
+  "timerPickerHourLabelOther": "ώρες",
+  "timerPickerMinuteLabelOne": "λεπτό",
+  "timerPickerMinuteLabelOther": "λεπτά",
+  "timerPickerSecondLabelOne": "δευτερόλεπτο",
+  "timerPickerSecondLabelOther": "δευτερόλεπτα",
+  "cutButtonLabel": "Αποκοπή",
+  "copyButtonLabel": "Αντιγραφή",
+  "pasteButtonLabel": "Επικόλληση",
+  "selectAllButtonLabel": "Επιλογή όλων"
+}
