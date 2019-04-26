@@ -405,7 +405,10 @@ abstract class Widget extends DiagnosticableTree {
   /// A short, textual description of this widget.
   @override
   String toStringShort() {
-    return key == null ? '$runtimeType' : '$runtimeType-$key';
+    if (!kReleaseMode) {
+      return key == null ? '$runtimeType' : '$runtimeType-$key';
+    }
+    return '[Widget widget]';
   }
 
   @override

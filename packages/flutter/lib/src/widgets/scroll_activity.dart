@@ -507,7 +507,7 @@ class BallisticScrollActivity extends ScrollActivity {
     TickerProvider vsync,
   ) : super(delegate) {
     _controller = AnimationController.unbounded(
-      debugLabel: '$runtimeType',
+      debugLabel: kReleaseMode ? null : '$runtimeType',
       vsync: vsync,
     )
       ..addListener(_tick)
