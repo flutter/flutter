@@ -676,6 +676,20 @@ void main() {
     await gesture.up();
     debugDefaultTargetPlatformOverride = null;
   });
+
+  testWidgets('NestedScrollView build with ListView body', (WidgetTester tester) async {
+    // See https://github.com/flutter/flutter/issues/31195
+    await tester.pumpWidget(MaterialApp(
+      onGenerateRoute: (RouteSettings settings) => MaterialPageRoute<dynamic>(
+          settings: settings,
+          builder: (_) => NestedScrollView(
+                headerSliverBuilder: (_, __) => const <Widget>[],
+                body: ListView(
+                  children: const <Widget>[]),
+          ))),
+          null, // duration
+          EnginePhase.build);
+  });
 }
 
 class TestHeader extends SliverPersistentHeaderDelegate {
