@@ -19,7 +19,7 @@ class ParagraphImpl {
 
   virtual double height() = 0;
 
-  virtual double tightWidth() = 0;
+  virtual double longestLine() = 0;
 
   virtual double minIntrinsicWidth() = 0;
 

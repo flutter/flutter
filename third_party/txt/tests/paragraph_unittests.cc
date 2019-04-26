@@ -265,17 +265,17 @@ TEST_F(ParagraphTest, BoldParagraph) {
   ASSERT_EQ(paragraph->records_[0].style().color, text_style.color);
   ASSERT_TRUE(Snapshot());
 
-  // width_ takes the full available space, but tight_width_ is only the width
+  // width_ takes the full available space, but longest_line_ is only the width
   // of the text, which is less than one line.
   ASSERT_DOUBLE_EQ(paragraph->width_, GetTestCanvasWidth());
-  ASSERT_TRUE(paragraph->tight_width_ < paragraph->width_);
+  ASSERT_TRUE(paragraph->longest_line_ < paragraph->width_);
   Paragraph::RectHeightStyle rect_height_style =
       Paragraph::RectHeightStyle::kMax;
   Paragraph::RectWidthStyle rect_width_style =
       Paragraph::RectWidthStyle::kTight;
   std::vector<txt::Paragraph::TextBox> boxes = paragraph->GetRectsForRange(
       0, strlen(text), rect_height_style, rect_width_style);
-  ASSERT_DOUBLE_EQ(paragraph->tight_width_,
+  ASSERT_DOUBLE_EQ(paragraph->longest_line_,
                    boxes[boxes.size() - 1].rect.right() - boxes[0].rect.left());
 }
 
@@ -446,13 +446,13 @@ TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(RightAlignParagraph)) {
           paragraph->breaker_.getWidths()[paragraph->records_[0].line()],
       2.0);
 
-  // width_ takes the full available space, while tight_width_ wraps the glyphs
+  // width_ takes the full available space, while longest_line_ wraps the glyphs
   // as tightly as possible. Even though this text is more than one line long,
-  // no line perfectly spans the width of the full line, so tight_width_ is less
-  // than width_.
+  // no line perfectly spans the width of the full line, so longest_line_ is
+  // less than width_.
   ASSERT_DOUBLE_EQ(paragraph->width_, available_width);
-  ASSERT_TRUE(paragraph->tight_width_ < available_width);
-  ASSERT_DOUBLE_EQ(paragraph->tight_width_, 880.765625);
+  ASSERT_TRUE(paragraph->longest_line_ < available_width);
+  ASSERT_DOUBLE_EQ(paragraph->longest_line_, 880.765625);
 
   ASSERT_TRUE(paragraph->records_[2].style().equals(text_style));
   ASSERT_DOUBLE_EQ(paragraph->records_[2].offset().y(), expected_y);
