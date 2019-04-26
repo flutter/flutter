@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async' show Timer;
 import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
@@ -31,7 +32,8 @@ const Color _kHandlesColor = Color(0xFF136FE0);
 const Size _kSelectionOffset = Size(20.0, 30.0);
 const Size _kToolbarTriangleSize = Size(18.0, 9.0);
 const EdgeInsets _kToolbarButtonPadding = EdgeInsets.symmetric(vertical: 10.0, horizontal: 18.0);
-const BorderRadius _kToolbarBorderRadius = BorderRadius.all(Radius.circular(7.5));
+const double _kToolbarBorderRadiusValue = 7.5;
+const BorderRadius _kToolbarBorderRadius = BorderRadius.all(Radius.circular(_kToolbarBorderRadiusValue));
 
 const TextStyle _kToolbarButtonFontStyle = TextStyle(
   inherit: false,
@@ -51,33 +53,39 @@ enum _ArrowDirection { up, down }
 /// Paints a triangle below the toolbar.
 class _TextSelectionToolbarNotchPainter extends CustomPainter {
   const _TextSelectionToolbarNotchPainter(
-    this.arrowDirection
-  ) : assert (arrowDirection != null);
+    this.arrowDirection,
+    this.triangleOffsetX,
+  ) : assert (arrowDirection != null),
+      assert (triangleOffsetX != null);
 
   final _ArrowDirection arrowDirection;
+  final double triangleOffsetX;
 
   @override
   void paint(Canvas canvas, Size size) {
     final Paint paint = Paint()
-        ..color = _kToolbarBackgroundColor
-        ..style = PaintingStyle.fill;
+      ..color = _kToolbarBackgroundColor
+      ..style = PaintingStyle.fill;
     final double triangleBottomY = (arrowDirection == _ArrowDirection.down)
-        ? 0.0
-        : _kToolbarTriangleSize.height;
+      ? 0.0
+      : _kToolbarTriangleSize.height;
     final Path triangle = Path()
-        ..lineTo(_kToolbarTriangleSize.width / 2, triangleBottomY)
-        ..lineTo(0.0, _kToolbarTriangleSize.height)
-        ..lineTo(-(_kToolbarTriangleSize.width / 2), triangleBottomY)
-        ..close();
+      ..moveTo(triangleOffsetX, 0)
+      ..lineTo(triangleOffsetX + _kToolbarTriangleSize.width / 2, triangleBottomY)
+      ..lineTo(triangleOffsetX + 0.0, _kToolbarTriangleSize.height)
+      ..lineTo(triangleOffsetX -(_kToolbarTriangleSize.width / 2), triangleBottomY)
+      ..close();
     canvas.drawPath(triangle, paint);
   }
 
   @override
-  bool shouldRepaint(_TextSelectionToolbarNotchPainter oldPainter) => false;
+  bool shouldRepaint(_TextSelectionToolbarNotchPainter oldPainter) {
+    return triangleOffsetX != oldPainter.triangleOffsetX;
+  }
 }
 
 /// Manages a copy/paste text selection toolbar.
-class _TextSelectionToolbar extends StatelessWidget {
+class _TextSelectionToolbar extends StatefulWidget {
   const _TextSelectionToolbar({
     Key key,
     this.handleCut,
@@ -94,31 +102,50 @@ class _TextSelectionToolbar extends StatelessWidget {
   final _ArrowDirection arrowDirection;
 
   @override
+  _TextSelectionToolbarState createState() => _TextSelectionToolbarState();
+}
+
+class _TextSelectionToolbarState extends State<_TextSelectionToolbar> {
+  double _triangleOffsetX = double.nan;
+  Timer _timer;
+
+  @override
+  void dispose() {
+    _cancelTimer();
+
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    if (_triangleOffsetX == double.nan) {
+      return Container();
+    }
+
     final List<Widget> items = <Widget>[];
     final Widget onePhysicalPixelVerticalDivider =
     SizedBox(width: 1.0 / MediaQuery.of(context).devicePixelRatio);
     final CupertinoLocalizations localizations = CupertinoLocalizations.of(context);
 
-    if (handleCut != null)
-      items.add(_buildToolbarButton(localizations.cutButtonLabel, handleCut));
+    if (widget.handleCut != null)
+      items.add(_buildToolbarButton(localizations.cutButtonLabel, widget.handleCut));
 
-    if (handleCopy != null) {
+    if (widget.handleCopy != null) {
       if (items.isNotEmpty)
         items.add(onePhysicalPixelVerticalDivider);
-      items.add(_buildToolbarButton(localizations.copyButtonLabel, handleCopy));
+      items.add(_buildToolbarButton(localizations.copyButtonLabel, widget.handleCopy));
     }
 
-    if (handlePaste != null) {
+    if (widget.handlePaste != null) {
       if (items.isNotEmpty)
         items.add(onePhysicalPixelVerticalDivider);
-      items.add(_buildToolbarButton(localizations.pasteButtonLabel, handlePaste));
+      items.add(_buildToolbarButton(localizations.pasteButtonLabel, widget.handlePaste));
     }
 
-    if (handleSelectAll != null) {
+    if (widget.handleSelectAll != null) {
       if (items.isNotEmpty)
         items.add(onePhysicalPixelVerticalDivider);
-      items.add(_buildToolbarButton(localizations.selectAllButtonLabel, handleSelectAll));
+      items.add(_buildToolbarButton(localizations.selectAllButtonLabel, widget.handleSelectAll));
     }
 
     const Widget padding = Padding(padding: EdgeInsets.only(bottom: 10.0));
@@ -126,7 +153,7 @@ class _TextSelectionToolbar extends StatelessWidget {
     final Widget triangle = SizedBox.fromSize(
       size: _kToolbarTriangleSize,
       child: CustomPaint(
-        painter: _TextSelectionToolbarNotchPainter(arrowDirection),
+        painter: _TextSelectionToolbarNotchPainter(widget.arrowDirection, _triangleOffsetX),
       ),
     );
 
@@ -144,20 +171,17 @@ class _TextSelectionToolbar extends StatelessWidget {
       ),
     );
 
-    final List<Widget> menus = (arrowDirection == _ArrowDirection.down)
-        ? <Widget>[
-            toolbar,
-            // TODO(xster): Position the triangle based on the layout delegate, and
-            // avoid letting the triangle line up with any dividers.
-            // https://github.com/flutter/flutter/issues/11274
-            triangle,
-            padding,
-          ]
-        : <Widget>[
-            padding,
-            triangle,
-            toolbar,
-          ];
+    final List<Widget> menus = (widget.arrowDirection == _ArrowDirection.down)
+      ? <Widget>[
+          toolbar,
+          triangle,
+          padding,
+        ]
+      : <Widget>[
+          padding,
+          triangle,
+          toolbar,
+        ];
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -177,12 +201,36 @@ class _TextSelectionToolbar extends StatelessWidget {
       onPressed: onPressed,
     );
   }
+
+  /// Update the exact position of the triangle
+  void updateTriangleOffsetX(double triangleOffsetX) {
+    _triangleOffsetX = triangleOffsetX;
+    _cancelTimer();
+
+    /// If the setState method is called immediately,
+    /// the toolbar display position is wrong.
+    _timer = Timer(const Duration(milliseconds: 50), () {
+      setState(() {});
+    });
+  }
+
+  void _cancelTimer() {
+    if (_timer != null) {
+      _timer.cancel();
+      _timer = null;
+    }
+  }
 }
 
 /// Centers the toolbar around the given position, ensuring that it remains on
 /// screen.
 class _TextSelectionToolbarLayout extends SingleChildLayoutDelegate {
-  _TextSelectionToolbarLayout(this.screenSize, this.globalEditableRegion, this.position);
+  _TextSelectionToolbarLayout(
+    this.screenSize,
+    this.globalEditableRegion,
+    this.position,
+    this.updateTriangleOffsetX,
+  );
 
   /// The size of the screen at the time that the toolbar was last laid out.
   final Size screenSize;
@@ -195,6 +243,10 @@ class _TextSelectionToolbarLayout extends SingleChildLayoutDelegate {
   /// [globalEditableRegion].
   final Offset position;
 
+  /// Calculate the exact position of the triangle that tracks the
+  /// selected cursor and synchronize the position to the displayed location.
+  final void Function(double triangleOffsetX) updateTriangleOffsetX;
+
   @override
   BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
     return constraints.loosen();
@@ -206,11 +258,22 @@ class _TextSelectionToolbarLayout extends SingleChildLayoutDelegate {
 
     double x = globalPosition.dx - childSize.width / 2.0;
     double y = globalPosition.dy - childSize.height;
+    double triangleOffsetX = _kToolbarTriangleSize.width / 2.0;
 
-    if (x < _kToolbarScreenPadding)
+    if (x < _kToolbarScreenPadding) {
+      triangleOffsetX += x - _kToolbarScreenPadding;
       x = _kToolbarScreenPadding;
-    else if (x + childSize.width > screenSize.width - _kToolbarScreenPadding)
+    } else if (x + childSize.width > screenSize.width - _kToolbarScreenPadding) {
+      triangleOffsetX
+        += x + childSize.width + _kToolbarScreenPadding - screenSize.width;
       x = screenSize.width - childSize.width - _kToolbarScreenPadding;
+    }
+    triangleOffsetX
+      = math.max(triangleOffsetX, -childSize.width / 2.0 + _kToolbarBorderRadiusValue + _kToolbarTriangleSize.width);
+    triangleOffsetX
+      = math.min(triangleOffsetX, childSize.width / 2.0 - _kToolbarBorderRadiusValue);
+    /// Synchronize the exact position to the displayed location.
+    updateTriangleOffsetX(triangleOffsetX);
 
     if (y < _kToolbarScreenPadding)
       y = _kToolbarScreenPadding;
@@ -261,6 +324,9 @@ class _TextSelectionHandlePainter extends CustomPainter {
 }
 
 class _CupertinoTextSelectionControls extends TextSelectionControls {
+  final GlobalKey<_TextSelectionToolbarState> _toolbarStateGlobalKey
+    = GlobalKey<_TextSelectionToolbarState>();
+
   @override
   Size handleSize = _kSelectionOffset; // Used for drag selection offset.
 
@@ -302,8 +368,10 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
           MediaQuery.of(context).size,
           globalEditableRegion,
           position,
+          _updateTriangleOffsetX,
         ),
         child: _TextSelectionToolbar(
+          key: _toolbarStateGlobalKey,
           handleCut: canCut(delegate) ? () => handleCut(delegate) : null,
           handleCopy: canCopy(delegate) ? () => handleCopy(delegate) : null,
           handlePaste: canPaste(delegate) ? () => handlePaste(delegate) : null,
@@ -362,6 +430,12 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
     }
     assert(type != null);
     return null;
+  }
+
+  void _updateTriangleOffsetX(double triangleOffsetX) {
+    if (_toolbarStateGlobalKey.currentState != null) {
+      _toolbarStateGlobalKey.currentState.updateTriangleOffsetX(triangleOffsetX);
+    }
   }
 }
 
