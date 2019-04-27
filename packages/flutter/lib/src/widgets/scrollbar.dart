@@ -92,8 +92,15 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   /// Scrollbar will be rectangular if [radius] is null.
   final Radius radius;
 
-  /// The amount of space by which to inset the scroll bar's scrollable area.
-  /// Only the padding along the scroll direction will be taken into account.
+  /// The amount of space by which to inset the scrollbar's start and end, as
+  /// well as its side to the nearest edge, in pixels.
+  ///
+  /// This is typically set to the current [MediaQueryData.padding] to avoid
+  /// partial obstructions such as display notches. If you want additonal
+  /// margins around the scrollbar, see [mainAxisMargin] or [crossAxisMargin].
+  ///
+  /// Defaults to [EdgeInsets.zero]. Must not be null and offsets from all four
+  /// directions must be greater than or equal to zero.
   final EdgeInsets padding;
 
   /// The smallest size the scrollbar can shrink to when the total scrollable
