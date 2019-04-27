@@ -115,6 +115,15 @@ class LinuxDevice extends Device {
 
   // Track the last built mode from startApp.
   BuildMode _lastBuiltMode;
+
+  @override
+  Future<Uri> attach({
+    bool ipv6,
+    String isolateFilter,
+    String applicationId,
+  }) {
+    throw UnsupportedError('Linux devices must specify an observatory uri');
+  }
 }
 
 class LinuxDevices extends PollingDeviceDiscovery {

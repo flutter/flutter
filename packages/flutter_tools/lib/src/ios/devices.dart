@@ -22,6 +22,7 @@ import '../protocol_discovery.dart';
 import 'code_signing.dart';
 import 'ios_workflow.dart';
 import 'mac.dart';
+import 'mdns_observatory.dart';
 
 const String _kIdeviceinstallerInstructions =
     'To work with iOS devices, please install ideviceinstaller. To install, run:\n'
@@ -406,6 +407,20 @@ class IOSDevice extends Device {
   @override
   bool isSupportedForProject(FlutterProject flutterProject) {
     return flutterProject.ios.existsSync();
+  }
+
+  @override
+  Future<Uri> attach({
+    bool ipv6,
+    String isolateFilter,
+    String applicationId,
+  }) async {
+    final MDnsObservatoryDiscoveryResult result = await MDnsObservatoryDiscovery().query(applicationId: applicationId);
+    return buildObservatoryUri(
+      ipv6: ipv6,
+      devicePort: result.port,
+      authCode: result.authCode,
+    );
   }
 }
 

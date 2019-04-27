@@ -302,10 +302,33 @@ class FuchsiaDevice extends Device {
     return null;
   }
 
-  FuchsiaIsolateDiscoveryProtocol  getIsolateDiscoveryProtocol(String isolateName) => FuchsiaIsolateDiscoveryProtocol(this, isolateName);
+  FuchsiaIsolateDiscoveryProtocol _getIsolateDiscoveryProtocol(String isolateName) => FuchsiaIsolateDiscoveryProtocol(this, isolateName);
 
   @override
   bool isSupportedForProject(FlutterProject flutterProject) => true;
+
+  @override
+  Future<Uri> attach({
+    bool ipv6,
+    String isolateFilter,
+    String applicationId,
+  }) async {
+    Uri observatoryUri;
+    FuchsiaIsolateDiscoveryProtocol isolateDiscoveryProtocol;
+    try {
+      isolateDiscoveryProtocol = _getIsolateDiscoveryProtocol(isolateFilter);
+      observatoryUri = await isolateDiscoveryProtocol.uri;
+      printStatus('Done.'); // FYI, this message is used as a sentinel in tests.
+    } catch (_) {
+      isolateDiscoveryProtocol?.dispose();
+      final List<ForwardedPort> ports = portForwarder.forwardedPorts.toList();
+      for (ForwardedPort port in ports) {
+        await portForwarder.unforward(port);
+      }
+      rethrow;
+    }
+    return observatoryUri;
+  }
 }
 
 class FuchsiaIsolateDiscoveryProtocol {

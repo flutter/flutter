@@ -540,6 +540,30 @@ class AndroidDevice extends Device {
   bool isSupportedForProject(FlutterProject flutterProject) {
     return flutterProject.android.existsSync();
   }
+
+  @override
+  Future<Uri> attach({
+    bool ipv6,
+    String isolateFilter,
+    String applicationId,
+    int observatoryPort,
+  }) async {
+    ProtocolDiscovery observatoryDiscovery;
+    Uri observatoryUri;
+    try {
+      observatoryDiscovery = ProtocolDiscovery.observatory(
+        getLogReader(),
+        portForwarder: portForwarder,
+        ipv6: ipv6,
+      );
+      printStatus('Waiting for a connection from Flutter on $name...');
+      observatoryUri = await observatoryDiscovery.uri;
+      printStatus('Done.'); // FYI, this message is used as a sentinel in tests.
+    } finally {
+      await observatoryDiscovery?.cancel();
+    }
+    return observatoryUri;
+  }
 }
 
 Map<String, String> parseAdbDeviceProperties(String str) {

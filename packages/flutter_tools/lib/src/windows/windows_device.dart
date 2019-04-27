@@ -119,6 +119,15 @@ class WindowsDevice extends Device {
   bool isSupportedForProject(FlutterProject flutterProject) {
     return flutterProject.windows.existsSync();
   }
+
+  @override
+  Future<Uri> attach({
+    bool ipv6,
+    String isolateFilter,
+    String applicationId,
+  }) {
+    throw UnsupportedError('Windows devices must specify an observatory uri');
+  }
 }
 
 class WindowsDevices extends PollingDeviceDiscovery {

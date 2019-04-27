@@ -196,6 +196,15 @@ class FlutterTesterDevice extends Device {
 
   @override
   bool isSupportedForProject(FlutterProject flutterProject) => true;
+
+  @override
+  Future<Uri> attach({
+    bool ipv6,
+    String isolateFilter,
+    String applicationId,
+  }) {
+    throw UnsupportedError('flutter_tester devices must specify an observatory uri');
+  }
 }
 
 class FlutterTesterDevices extends PollingDeviceDiscovery {

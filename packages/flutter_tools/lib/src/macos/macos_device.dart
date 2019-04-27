@@ -122,6 +122,15 @@ class MacOSDevice extends Device {
   bool isSupportedForProject(FlutterProject flutterProject) {
     return flutterProject.macos.existsSync();
   }
+
+  @override
+  Future<Uri> attach({
+    bool ipv6,
+    String isolateFilter,
+    String applicationId,
+  }) {
+    throw UnsupportedError('macOS devices must specify an observatory uri');
+  }
 }
 
 class MacOSDevices extends PollingDeviceDiscovery {

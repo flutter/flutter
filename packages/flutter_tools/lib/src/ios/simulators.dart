@@ -23,6 +23,7 @@ import '../project.dart';
 import '../protocol_discovery.dart';
 import 'ios_workflow.dart';
 import 'mac.dart';
+import 'mdns_observatory.dart';
 
 const String _xcrunPath = '/usr/bin/xcrun';
 
@@ -478,6 +479,20 @@ class IOSSimulator extends Device {
   @override
   bool isSupportedForProject(FlutterProject flutterProject) {
     return flutterProject.ios.existsSync();
+  }
+
+  @override
+  Future<Uri> attach({
+    String isolateFilter,
+    String applicationId,
+    bool ipv6,
+  }) async {
+    final MDnsObservatoryDiscoveryResult result = await MDnsObservatoryDiscovery().query(applicationId: applicationId);
+    return buildObservatoryUri(
+      ipv6: ipv6,
+      devicePort: result.port,
+      authCode: result.authCode,
+    );
   }
 }
 

@@ -9,6 +9,7 @@ import 'android/android_device.dart';
 import 'application_package.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
+import 'base/io.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
 import 'desktop.dart';
@@ -251,6 +252,13 @@ abstract class Device {
   /// Uninstall an app package from the current device
   Future<bool> uninstallApp(ApplicationPackage app);
 
+  /// Attach to an application running on this device.
+  Future<Uri> attach({
+    bool ipv6,
+    String isolateFilter,
+    String applicationId,
+  });
+
   /// Check if the device is supported by Flutter
   bool isSupported();
 
@@ -323,6 +331,27 @@ abstract class Device {
     if (other is! Device)
       return false;
     return id == other.id;
+  }
+
+  Future<Uri> buildObservatoryUri({bool ipv6, int devicePort, String authCode}) async {
+    String path = '/';
+    if (authCode != null) {
+      path = authCode;
+    }
+    // Not having a trailing slash can cause problems in some situations.
+    // Ensure that there's one present.
+    if (!path.endsWith('/')) {
+      path += '/';
+    }
+    final int localPort = await portForwarder.forward(devicePort);
+    return Uri(
+      scheme: 'http',
+      host: ipv6
+          ? InternetAddress.loopbackIPv6.address
+          : InternetAddress.loopbackIPv4.address,
+      port: localPort,
+      path: path,
+    );
   }
 
   @override

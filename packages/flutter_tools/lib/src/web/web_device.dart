@@ -171,6 +171,17 @@ class WebDevice extends Device {
   bool isSupportedForProject(FlutterProject flutterProject) {
     return flutterProject.web.existsSync();
   }
+
+  @override
+  Future<Uri> attach({
+    bool ipv6,
+    String isolateFilter,
+    String applicationId,
+    String authCode,
+    int observatoryPort,
+  }) {
+    throw UnsupportedError('web devices must specify an observatory uri');
+  }
 }
 
 class WebDevices extends PollingDeviceDiscovery {
