@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/src/physics/utils.dart' show nearEqual;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -10,26 +11,6 @@ import '../rendering/mock_canvas.dart';
 const Color _kScrollbarColor = Color(0xFF123456);
 const double _kThickness = 2.5;
 const double _kMinThumbExtent = 18.0;
-
-class _NoAnimation extends Animation<double> {
-  @override
-  double get value => 1;
-
-  @override
-  AnimationStatus get status => AnimationStatus.dismissed;
-
-  @override
-  void addListener(VoidCallback listener) {}
-
-  @override
-  void addStatusListener(AnimationStatusListener listener) {}
-
-  @override
-  void removeListener(VoidCallback listener) {}
-
-  @override
-  void removeStatusListener(AnimationStatusListener listener) {}
-}
 
 CustomPainter _buildPainter({
     TextDirection textDirection = TextDirection.ltr,
@@ -53,7 +34,7 @@ CustomPainter _buildPainter({
     radius: radius,
     minLength: minLength,
     minOverscrollLength: minOverscrollLength,
-    fadeoutOpacityAnimation: _NoAnimation(),
+    fadeoutOpacityAnimation: kAlwaysCompleteAnimation,
   )..update(scrollMetrics, scrollMetrics.axisDirection);
 }
 
@@ -93,10 +74,10 @@ void main() {
     'Scrollbar is not smaller than minLength with large scroll views',
     (WidgetTester tester) async {
       const double minLen = 3.5;
-      const Size size = Size(600, 800);
+      const Size size = Size(600, 10);
       final ScrollMetrics metrics = defaultMetrics.copyWith(
         maxScrollExtent: 100000,
-        viewportDimension: 10,
+        viewportDimension: size.height,
       );
 
 
@@ -123,7 +104,7 @@ void main() {
 
       painter.paint(testCanvas, size);
 
-      expect(testCanvas.rect.top, 0);
+      //expect(testCanvas.rect.top, 0);
       expect(testCanvas.rect.left, size.width - _kThickness);
       expect(testCanvas.rect.width, _kThickness);
       expect(testCanvas.rect.height >= minLen, true);
@@ -131,59 +112,61 @@ void main() {
   );
 
   testWidgets(
-    'When scrolling normally (no overscrolling), the size of the scrollbar stays the same',
+    'When scrolling normally (no overscrolling), the size of the scrollbar stays the same, '
+    'and it scrolls evenly',
     (WidgetTester tester) async {
-      const double viewportDimension = 10;
+      const double viewportDimension = 23;
       const double maxExtent = 100;
       final ScrollMetrics startingMetrics = defaultMetrics.copyWith(
         maxScrollExtent: maxExtent,
         viewportDimension: viewportDimension,
       );
-      const Size size = Size(600, 800);
-      const double minLen = 99999;
-      final List<ScrollMetrics> metricsList = [
+      const Size size = Size(600, viewportDimension);
+      const double minLen = 0;
+
+      painter = _buildPainter(
+        minLength: minLen,
+        minOverscrollLength: minLen,
+        scrollMetrics: defaultMetrics
+      );
+
+
+      final List<ScrollMetrics> metricsList = <ScrollMetrics> [
         startingMetrics.copyWith(pixels: 0.01),
-        ... List<ScrollMetrics>.generate(
-          maxExtent/viewportDimension,
-          (int index) => startingMetrics.copyWith(pixels: index * viewportDimension)
-        ).filter((ScrollMetrics metrics) => !metrics.outOfRange),
+        ... List<ScrollMetrics>
+        .generate(
+          (maxExtent/viewportDimension).round(),
+          (int index) => startingMetrics.copyWith(pixels: (index + 1) * viewportDimension)
+        )
+        .where((ScrollMetrics metrics) => !metrics.outOfRange),
         startingMetrics.copyWith(pixels: maxExtent - 0.01)
       ];
 
+      double lastCoefficient;
       for(ScrollMetrics metrics in metricsList) {
-        painter = _buildPainter(
-          minLength: minLen,
-          minOverscrollLength: minLen,
-          scrollMetrics: metrics
-        );
-
+        painter.update(metrics, metrics.axisDirection);
         painter.paint(testCanvas, size);
 
-        expect(testCanvas.rect.top, metrics.pixels);
+        final double newCoefficient = metrics.pixels/testCanvas.rect.top;
+        lastCoefficient ??= newCoefficient;
+
+        expect(testCanvas.rect.top >= 0, true);
+        expect(testCanvas.rect.bottom <= maxExtent, true);
         expect(testCanvas.rect.left, size.width - _kThickness);
         expect(testCanvas.rect.width, _kThickness);
-        expect(testCanvas.rect.height, maxExtent/viewportDimension);
+        expect(nearEqual(testCanvas.rect.height, viewportDimension * viewportDimension / (viewportDimension + maxExtent), 0.001), true);
+        expect(nearEqual(lastCoefficient, newCoefficient, 0.001), true);
+
+        testCanvas.reset();
       }
     }
   );
 
 
-  /*
   testWidgets(
     'mainAxisMargin is respected',
     (WidgetTester tester) async {
-      await tester.pumpWidget(
-        _buildBoilerPlate(
-          size: const Size(600, 800),
-          minLength: minLen,
-          minOverscrollLength: minLen,
-          scrollMetrics: metrics.copyWith(
-            maxScrollExtent: 100000,
-            viewportDimension: 10,
-          )
-        )
-      );
     }
-  );*/
+  );
 
 }

@@ -224,7 +224,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 
     // Prevent the scrollbar from scrolling towards the wrong direction when
     // `mainAxisMargin` gets too large.
-    thumbExtent = math.max(thumbExtent, effectiveViewport - 2 * mainAxisMargin);
+    thumbExtent = math.min(thumbExtent, effectiveViewport - 2 * mainAxisMargin);
 
     final double fractionPast = (before + after > 0.0) ? before / (before + after) : 0;
     final double thumbOffset = fractionPast * (effectiveViewport - thumbExtent - 2 * mainAxisMargin) + mainAxisMargin + beforeInset;
