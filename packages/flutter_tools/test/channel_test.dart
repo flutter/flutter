@@ -8,10 +8,10 @@ import 'dart:io' hide File;
 
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/channel.dart';
-import 'package:flutter_tools/src/version.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 
@@ -195,12 +195,9 @@ void main() {
         environment: anyNamed('environment'),
       )).thenAnswer((_) => Future<Process>.value(createMockProcess()));
 
-      final File versionCheckFile = Cache.instance.getStampFileFor(
-        VersionCheckStamp.flutterVersionCheckStampFile,
-      );
-
       /// Create a bogus "leftover" version check file to make sure it gets
       /// removed when the channel changes. The content doesn't matter.
+      final File versionCheckFile = fs.file('bin/cache/flutter_version_check.stamp');
       versionCheckFile.createSync(recursive: true);
       versionCheckFile.writeAsStringSync('''
         {
@@ -228,10 +225,9 @@ void main() {
         workingDirectory: anyNamed('workingDirectory'),
         environment: anyNamed('environment'),
       )).called(1);
-
       expect(testLogger.statusText, isNot(contains('A new version of Flutter')));
       expect(testLogger.errorText, hasLength(0));
-      expect(versionCheckFile.existsSync(), isFalse);
+      expect(versionCheckFile.existsSync(), false);
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
       FileSystem: () => MemoryFileSystem(),

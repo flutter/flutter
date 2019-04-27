@@ -433,7 +433,7 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
   Future<int> _generateModule(Directory directory, Map<String, dynamic> templateContext, { bool overwrite = false }) async {
     int generatedCount = 0;
     final String description = args.wasParsed('description')
-        ? args.readFlag('description')
+        ? args.readOption('description')
         : 'A new flutter module project.';
     templateContext['description'] = description;
     generatedCount += _renderTemplate(fs.path.join('module', 'common'), directory, templateContext, overwrite: overwrite);
@@ -452,7 +452,7 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
   Future<int> _generatePackage(Directory directory, Map<String, dynamic> templateContext, { bool overwrite = false }) async {
     int generatedCount = 0;
     final String description = args.wasParsed('description')
-        ? args.readFlag('description')
+        ? args.readOption('description')
         : 'A new Flutter package project.';
     templateContext['description'] = description;
     generatedCount += _renderTemplate('package', directory, templateContext, overwrite: overwrite);
@@ -469,7 +469,7 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
   Future<int> _generatePlugin(Directory directory, Map<String, dynamic> templateContext, { bool overwrite = false }) async {
     int generatedCount = 0;
     final String description = args.wasParsed('description')
-        ? args.readFlag('description')
+        ? args.readOption('description')
         : 'A new flutter plugin project.';
     templateContext['description'] = description;
     generatedCount += _renderTemplate('plugin', directory, templateContext, overwrite: overwrite);
