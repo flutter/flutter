@@ -456,7 +456,7 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
         : 'A new Flutter package project.';
     templateContext['description'] = description;
     generatedCount += _renderTemplate('package', directory, templateContext, overwrite: overwrite);
-    if (args.readFlag('offline')) {
+    if (args.readFlag('pub')) {
       await pubGet(
         context: PubContext.createPackage,
         directory: directory.path,
