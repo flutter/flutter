@@ -17,9 +17,6 @@ void main() {
   group('showDatePicker', () {
     _tests();
   });
-  group('showDatePicker - display configs', () {
-    _screenConfigTests();
-  });
 }
 
 void _tests() {
@@ -776,71 +773,88 @@ void _tests() {
     // button and the right edge of the 800 wide window.
     expect(tester.getBottomLeft(find.text('OK')).dx, 800 - ltrOkRight);
   });
-}
 
-void _screenConfigTests() {
+  group('screen configurations', () {
+    // Test various combinations of screen sizes, orientations and text scales
+    // to ensure the layout doesn't overflow and cause an exception to be thrown.
 
-  const Size kPixel1Portrait = Size(1070, 1770);
-  const Size kPixel1Landscape = Size(1770, 1070);
-  const Size kSmallScreenPortrait = Size(320, 521);
-  const Size kSmallScreenLandscape = Size(521, 320);
+    // Regression tests for https://github.com/flutter/flutter/issues/21383
+    // Regression tests for https://github.com/flutter/flutter/issues/19744
+    // Regression tests for https://github.com/flutter/flutter/issues/17745
 
-  Future<void> _showPicker(WidgetTester tester, Size size, [double textScaleFactor = 1.0]) async {
-    tester.binding.window.physicalSizeTestValue = size;
-    tester.binding.window.devicePixelRatioTestValue = 1.0;
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Builder(
-          builder: (BuildContext context) {
-            return RaisedButton(
-              child: const Text('X'),
-              onPressed: () {
-                showDatePicker(
-                  context: context,
-                  initialDate: DateTime(2018, DateTime.december, 30),
-                  firstDate: DateTime(2018),
-                  lastDate: DateTime(2030),
-                );
-              },
-            );
-          },
+    // Common screen size roughly based on a Pixel 1
+    const Size kCommonScreenSizePortrait = Size(1070, 1770);
+    const Size kCommonScreenSizeLandscape = Size(1770, 1070);
+
+    // Small screen size based on a LG K130
+    const Size kSmallScreenSizePortrait = Size(320, 521);
+    const Size kSmallScreenSizeLandscape = Size(521, 320);
+
+    Future<void> _showPicker(WidgetTester tester, Size size, [double textScaleFactor = 1.0]) async {
+      tester.binding.window.physicalSizeTestValue = size;
+      tester.binding.window.devicePixelRatioTestValue = 1.0;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Builder(
+            builder: (BuildContext context) {
+              return RaisedButton(
+                child: const Text('X'),
+                onPressed: () {
+                  showDatePicker(
+                    context: context,
+                    initialDate: initialDate,
+                    firstDate: firstDate,
+                    lastDate: lastDate,
+                  );
+                },
+              );
+            },
+          ),
         ),
-      ),
-    );
-    await tester.tap(find.text('X'));
-    await tester.pumpAndSettle();
-  }
+      );
+      await tester.tap(find.text('X'));
+      await tester.pumpAndSettle();
+    }
 
-  testWidgets('display on Pixel1 - portrait', (WidgetTester tester) async {
-    await _showPicker(tester, kPixel1Portrait);
-  });
+    testWidgets('common screen size - portrait', (WidgetTester tester) async {
+      await _showPicker(tester, kCommonScreenSizePortrait);
+      expect(tester.takeException(), isNull);
+    });
 
-  testWidgets('display on Pixel1 - landscape', (WidgetTester tester) async {
-    await _showPicker(tester, kPixel1Landscape);
-  });
+    testWidgets('common screen size - landscape', (WidgetTester tester) async {
+      await _showPicker(tester, kCommonScreenSizeLandscape);
+      expect(tester.takeException(), isNull);
+    });
 
-  testWidgets('display on Pixel1 - portrait - textScale 1.3', (WidgetTester tester) async {
-    await _showPicker(tester, kPixel1Portrait, 1.3);
-  });
+    testWidgets('common screen size - portrait - textScale 1.3', (WidgetTester tester) async {
+      await _showPicker(tester, kCommonScreenSizePortrait, 1.3);
+      expect(tester.takeException(), isNull);
+    });
 
-  testWidgets('display on Pixel1 - landscape - textScale 1.3', (WidgetTester tester) async {
-    await _showPicker(tester, kPixel1Landscape, 1.3);
-  });
+    testWidgets('common screen size - landscape - textScale 1.3', (WidgetTester tester) async {
+      await _showPicker(tester, kCommonScreenSizeLandscape, 1.3);
+      expect(tester.takeException(), isNull);
+    });
 
-  testWidgets('display on small screen - portrait', (WidgetTester tester) async {
-    await _showPicker(tester, kSmallScreenPortrait);
-  });
+    testWidgets('small screen size - portrait', (WidgetTester tester) async {
+      await _showPicker(tester, kSmallScreenSizePortrait);
+      expect(tester.takeException(), isNull);
+    });
 
-  testWidgets('display on small screen - landscape', (WidgetTester tester) async {
-    await _showPicker(tester, kSmallScreenLandscape);
-  });
+    testWidgets('small screen size - landscape', (WidgetTester tester) async {
+      await _showPicker(tester, kSmallScreenSizeLandscape);
+      expect(tester.takeException(), isNull);
+    });
 
-  testWidgets('display on small screen - portrait -textScale 1.3', (WidgetTester tester) async {
-    await _showPicker(tester, kSmallScreenPortrait, 1.3);
-  });
+    testWidgets('small screen size - portrait -textScale 1.3', (WidgetTester tester) async {
+      await _showPicker(tester, kSmallScreenSizePortrait, 1.3);
+      expect(tester.takeException(), isNull);
+    });
 
-  testWidgets('display on small screen - landscape - textScale 1.3', (WidgetTester tester) async {
-    await _showPicker(tester, kSmallScreenLandscape, 1.3);
+    testWidgets('small screen size - landscape - textScale 1.3', (WidgetTester tester) async {
+      await _showPicker(tester, kSmallScreenSizeLandscape, 1.3);
+      expect(tester.takeException(), isNull);
+    });
   });
 
 }

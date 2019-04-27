@@ -676,6 +676,8 @@ class _MonthPickerState extends State<MonthPicker> with SingleTickerProviderStat
   @override
   Widget build(BuildContext context) {
     return SizedBox(
+      // The month picker just adds month navigation to the day picker, so make
+      // it the same height as the DayPicker
       height: _kMaxDayPickerHeight,
       child: Stack(
         children: <Widget>[
