@@ -109,7 +109,8 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   final double minLength;
 
   /// The smallest size the scrollbar can shrink to when viewport is
-  /// overscrolled. Mustn't be null.
+  /// overscrolled. Mustn't be null and the value is typically less than
+  /// or equal to [minLength].
   final double minOverscrollLength;
 
   ScrollMetrics _lastMetrics;
@@ -177,51 +178,53 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   ) {
     final double totalInset = beforeInset + afterInset;
 
-    if (viewport <= totalInset) {
-      // Skip painting if there's not enough space.
+    // Skip painting if there's not enough space.
+    if (viewport <= totalInset || viewport <= totalInset + 2 * mainAxisMargin) {
       return;
     }
 
-    // Establish the minimum size possible.
-    double thumbExtent = math.min(viewport, minOverscrollLength);
-
     final double effectiveInside = inside - totalInset;
-    // viewport <= inside so this is guaranteed to be greater than 0.
+    // Because viewport <= inside this is guaranteed to be greater than or equal to 0.
     final double effectiveViewport = viewport - totalInset;
 
-    if (before + inside + after > 0.0) {
-      // Thumb extent reflects fraction of content visible, as long as this
-      // isn't less than the absolute minimum size.
-      final double fractionVisible = effectiveInside / (before + inside + after);
+    // Establish the minimum size possible.
+    double thumbExtent = math.min(effectiveViewport, minOverscrollLength);
+
+    // Thumb extent reflects fraction of content visible, as long as this
+    // isn't less than the absolute minimum size.
+    final double fractionVisible = effectiveInside / (before + inside + after);
+    thumbExtent = math.max(
+      thumbExtent,
+      effectiveViewport * fractionVisible - 2 * mainAxisMargin,
+    );
+    // Thumb extent is no smaller than minLength if scrolling normally.
+    if (before > 0 && after > 0) {
+      thumbExtent = math.max(
+        minLength,
+        thumbExtent,
+      );
+    }
+    // User is overscrolling. Thumb extent can be less than minLength
+    // but no smaller than minOverscrollLength. We can't use the
+    // fractionVisible to produce intermediate values between minLength and
+    // minOverscrollLength when the user is transitioning from regular
+    // scrolling to overscrolling, so we instead use the percentage of the
+    // content that is still in the viewport to determine the size of the
+    // thumb. iOS behavior appears to have the thumb reach its minimum size
+    // with ~20% of overscroll. We map the percentage of minLength from
+    // [0.8, 1.0] to [0.0, 1.0], so 0% to 20% of overscroll will produce
+    // values for the thumb that range between minLength and the smallest
+    // possible value, minOverscrollLength.
+    else {
       thumbExtent = math.max(
         thumbExtent,
-        effectiveViewport * fractionVisible - 2 * mainAxisMargin,
+        minLength * (((effectiveInside / effectiveViewport) - 0.8) / 0.2),
       );
-      // Thumb extent is no smaller than minLength if scrolling normally.
-      if (before > 0 && after > 0) {
-        thumbExtent = math.max(
-          minLength,
-          thumbExtent,
-        );
-      }
-      // User is overscrolling. Thumb extent can be less than minLength
-      // but no smaller than minOverscrollLength. We can't use the
-      // fractionVisible to produce intermediate values between minLength and
-      // minOverscrollLength when the user is transitioning from regular
-      // scrolling to overscrolling, so we instead use the percentage of the
-      // content that is still in the viewport to determine the size of the
-      // thumb. iOS behavior appears to have the thumb reach its minimum size
-      // with ~20% of overscroll. We map the percentage of minLength from
-      // [0.8, 1.0] to [0.0, 1.0], so 0% to 20% of overscroll will produce
-      // values for the thumb that range between minLength and the smallest
-      // possible value, minOverscrollLength.
-      else {
-        thumbExtent = math.max(
-          thumbExtent,
-          minLength * (((effectiveInside / effectiveViewport) - 0.8) / 0.2),
-        );
-      }
     }
+
+    // Prevent the scrollbar from scrolling towards the wrong direction when
+    // `mainAxisMargin` gets too large.
+    thumbExtent = math.max(thumbExtent, effectiveViewport - 2 * mainAxisMargin);
 
     final double fractionPast = (before + after > 0.0) ? before / (before + after) : 0;
     final double thumbOffset = fractionPast * (effectiveViewport - thumbExtent - 2 * mainAxisMargin) + mainAxisMargin + beforeInset;

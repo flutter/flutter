@@ -11,7 +11,7 @@ void main() {
   testWidgets('Scrollbar never goes away until finger lift', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
-        textDirection: textDirection,
+        textDirection: TextDirection.ltr,
         child: MediaQuery(
           data: MediaQueryData(),
           child: CupertinoScrollbar(
