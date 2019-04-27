@@ -306,7 +306,7 @@ class RunCommand extends RunCommandBase {
               : fs.file(applicationBinaryPath),
           trackWidgetCreation: args.readFlag('track-widget-creation'),
           projectRootPath: args.readOption('project-root'),
-          packagesFilePath: args.readOption('packages'),
+          packagesFilePath: globalArgs.readOption('packages'),
           dillOutputPath: args.readOption('output-dill'),
           ipv6: ipv6,
         );
