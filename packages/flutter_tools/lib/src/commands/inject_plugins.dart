@@ -29,8 +29,8 @@ class InjectPluginsCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     final FlutterProject project = await FlutterProject.current();
-    refreshPluginsList(project);
-    await injectPlugins(project);
+    refreshPluginsList(project, checkProjects: true);
+    await injectPlugins(project, checkProjects: true);
     final bool result = hasPlugins(project);
     if (result) {
       printStatus('GeneratedPluginRegistrants successfully written.');

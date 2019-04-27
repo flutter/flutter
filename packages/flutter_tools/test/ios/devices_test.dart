@@ -5,12 +5,14 @@
 import 'dart:async';
 
 import 'package:file/file.dart';
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:mockito/mockito.dart';
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
@@ -182,5 +184,43 @@ f577a7903cc54959be2e34bc4f7f80b7009efcf4
     }, overrides: <Type, Generator>{
       IMobileDevice: () => mockIMobileDevice,
     });
+  });
+
+  testUsingContext('IOSDevice.isSupportedForProject is true on module project', () async {
+    fs.file('pubspec.yaml')
+      ..createSync()
+      ..writeAsStringSync(r'''
+name: example
+
+flutter:
+  module: {}
+''');
+    fs.file('.packages').createSync();
+    final FlutterProject flutterProject = await FlutterProject.current();
+
+    expect(IOSDevice('test').isSupportedForProject(flutterProject), true);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => MemoryFileSystem(),
+  });
+
+  testUsingContext('IOSDevice.isSupportedForProject is true with editable host app', () async {
+    fs.file('pubspec.yaml').createSync();
+    fs.file('.packages').createSync();
+    fs.directory('ios').createSync();
+    final FlutterProject flutterProject = await FlutterProject.current();
+
+    expect(IOSDevice('test').isSupportedForProject(flutterProject), true);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => MemoryFileSystem(),
+  });
+
+  testUsingContext('IOSDevice.isSupportedForProject is false with no host app and no module', () async {
+    fs.file('pubspec.yaml').createSync();
+    fs.file('.packages').createSync();
+    final FlutterProject flutterProject = await FlutterProject.current();
+
+    expect(IOSDevice('test').isSupportedForProject(flutterProject), false);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => MemoryFileSystem(),
   });
 }

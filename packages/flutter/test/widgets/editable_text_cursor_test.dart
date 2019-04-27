@@ -91,7 +91,7 @@ void main() {
 
     await expectLater(
       find.byKey(const ValueKey<int>(1)),
-      matchesGoldenFile('editable_text_test.0.1.png'),
+      matchesGoldenFile('editable_text_test.0.3.png'),
     );
   }, skip: !Platform.isLinux);
 
@@ -142,7 +142,7 @@ void main() {
 
     await expectLater(
       find.byKey(const ValueKey<int>(1)),
-      matchesGoldenFile('editable_text_test.1.1.png'),
+      matchesGoldenFile('editable_text_test.1.3.png'),
     );
   }, skip: !Platform.isLinux);
 

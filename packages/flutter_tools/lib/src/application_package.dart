@@ -20,13 +20,15 @@ import 'build_info.dart';
 import 'globals.dart';
 import 'ios/ios_workflow.dart';
 import 'ios/plist_utils.dart' as plist;
+import 'linux/application_package.dart';
 import 'macos/application_package.dart';
 import 'project.dart';
 import 'tester/flutter_tester.dart';
 import 'web/web_device.dart';
+import 'windows/application_package.dart';
 
 class ApplicationPackageFactory {
-  static ApplicationPackageFactory get instance => context[ApplicationPackageFactory];
+  static ApplicationPackageFactory get instance => context.get<ApplicationPackageFactory>();
 
   Future<ApplicationPackage> getPackageForPlatform(
     TargetPlatform platform, {
@@ -50,13 +52,19 @@ class ApplicationPackageFactory {
       case TargetPlatform.tester:
         return FlutterTesterApp.fromCurrentDirectory();
       case TargetPlatform.darwin_x64:
-        return applicationBinary != null
-          ? MacOSApp.fromPrebuiltApp(applicationBinary)
-          : null;
+        return applicationBinary == null
+            ? MacOSApp.fromMacOSProject((await FlutterProject.current()).macos)
+            : MacOSApp.fromPrebuiltApp(applicationBinary);
       case TargetPlatform.web:
         return WebApplicationPackage(await FlutterProject.current());
       case TargetPlatform.linux_x64:
+        return applicationBinary == null
+            ? LinuxApp.fromLinuxProject((await FlutterProject.current()).linux)
+            : LinuxApp.fromPrebuiltApp(applicationBinary);
       case TargetPlatform.windows_x64:
+        return applicationBinary == null
+            ? WindowsApp.fromWindowsProject((await FlutterProject.current()).windows)
+            : WindowsApp.fromPrebuiltApp(applicationBinary);
       case TargetPlatform.fuchsia:
         return null;
     }
@@ -158,8 +166,11 @@ class AndroidApk extends ApplicationPackage {
 
     final File manifest = androidProject.appManifestFile;
 
-    if (!manifest.existsSync())
+    if (!manifest.existsSync()) {
+      printError('AndroidManifest.xml could not be found.');
+      printError('Please check ${manifest.path} for errors.');
       return null;
+    }
 
     final String manifestString = manifest.readAsStringSync();
     xml.XmlDocument document;
@@ -178,8 +189,11 @@ class AndroidApk extends ApplicationPackage {
     }
 
     final Iterable<xml.XmlElement> manifests = document.findElements('manifest');
-    if (manifests.isEmpty)
+    if (manifests.isEmpty) {
+      printError('AndroidManifest.xml has no manifest element.');
+      printError('Please check ${manifest.path} for errors.');
       return null;
+    }
     final String packageId = manifests.first.getAttribute('package');
 
     String launchActivity;
@@ -212,8 +226,11 @@ class AndroidApk extends ApplicationPackage {
       }
     }
 
-    if (packageId == null || launchActivity == null)
+    if (packageId == null || launchActivity == null) {
+      printError('package identifier or launch activity not found.');
+      printError('Please check ${manifest.path} for errors.');
       return null;
+    }
 
     return AndroidApk(
       id: packageId,
@@ -298,8 +315,22 @@ abstract class IOSApp extends ApplicationPackage {
   }
 
   factory IOSApp.fromIosProject(IosProject project) {
-    if (getCurrentHostPlatform() != HostPlatform.darwin_x64)
+    if (getCurrentHostPlatform() != HostPlatform.darwin_x64) {
       return null;
+    }
+    if (!project.exists) {
+      // If the project doesn't exist at all the current hint to run flutter
+      // create is accurate.
+      return null;
+    }
+    if (!project.xcodeProject.existsSync()) {
+      printError('Expected ios/Runner.xcodeproj but this file is missing.');
+      return null;
+    }
+    if (!project.xcodeProjectInfoFile.existsSync()) {
+      printError('Expected ios/Runner.xcodeproj/project.pbxproj but this file is missing.');
+      return null;
+    }
     return BuildableIOSApp(project);
   }
 

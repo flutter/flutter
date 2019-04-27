@@ -183,4 +183,14 @@ void main() {
       skip: !Platform.isLinux,
     );
   });
+
+  testWidgets('empty opacity does not crash', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      RepaintBoundary(child: Opacity(opacity: 0.5, child: Container())),
+    );
+    final Element element = find.byType(RepaintBoundary).first.evaluate().single;
+    // The following line will send the layer to engine and cause crash if an
+    // empty opacity layer is sent.
+    await element.renderObject.layer.toImage(Rect.fromLTRB(0.0, 0.0, 1.0, 1.0));
+  });
 }
