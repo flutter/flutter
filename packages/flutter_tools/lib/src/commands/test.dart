@@ -132,7 +132,7 @@ class TestCommand extends FastFlutterCommand {
     }
     final List<String> names = argResults['name'];
     final List<String> plainNames = argResults['plain-name'];
-    final FlutterProject flutterProject = await FlutterProject.current();
+    final FlutterProject flutterProject = FlutterProject.current();
 
     Iterable<String> files = argResults.rest.map<String>((String testPath) => fs.path.absolute(testPath)).toList();
 
@@ -170,7 +170,7 @@ class TestCommand extends FastFlutterCommand {
     CoverageCollector collector;
     if (argResults['coverage'] || argResults['merge-coverage']) {
       collector = CoverageCollector(
-        flutterProject: await FlutterProject.current(),
+        flutterProject: FlutterProject.current(),
       );
     }
 

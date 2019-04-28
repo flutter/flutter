@@ -345,7 +345,7 @@ class AppDomain extends Domain {
     // We change the current working directory for the duration of the `start` command.
     final Directory cwd = fs.currentDirectory;
     fs.currentDirectory = fs.directory(projectDirectory);
-    final FlutterProject flutterProject = await FlutterProject.current();
+    final FlutterProject flutterProject = FlutterProject.current();
 
     final FlutterDevice flutterDevice = await FlutterDevice.create(
       device,
