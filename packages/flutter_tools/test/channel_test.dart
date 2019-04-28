@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/channel.dart';
+import 'package:flutter_tools/src/version.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 
@@ -198,7 +199,9 @@ void main() {
 
       /// Create a bogus "leftover" version check file to make sure it gets
       /// removed when the channel changes. The content doesn't matter.
-      final File versionCheckFile = fs.file('bin/cache/flutter_version_check.stamp');
+       final File versionCheckFile = Cache.instance.getStampFileFor(
+        VersionCheckStamp.flutterVersionCheckStampFile,
+      );
       versionCheckFile.createSync(recursive: true);
       versionCheckFile.writeAsStringSync('''
         {
