@@ -45,19 +45,80 @@ class _UpdateCountedClipRect extends ClipRect with UpdateCount {
     : super(clipBehavior: clipBehavior);
 }
 
+class _UpdateCountedClipRRect extends ClipRRect with UpdateCount {
+  _UpdateCountedClipRRect({Clip clipBehavior = Clip.antiAlias})
+      : super(clipBehavior: clipBehavior, borderRadius: BorderRadius.circular(1.0));
+}
+
+class _UpdateCountedClipOval extends ClipOval with UpdateCount {
+  _UpdateCountedClipOval({Clip clipBehavior = Clip.antiAlias})
+      : super(clipBehavior: clipBehavior);
+}
+
+class _UpdateCountedClipPath extends ClipPath with UpdateCount {
+  _UpdateCountedClipPath({Clip clipBehavior = Clip.antiAlias})
+      : super(clipBehavior: clipBehavior);
+}
+
 void main() {
   testWidgets('ClipRect updates clipBehavior in updateRenderObject', (WidgetTester tester) async {
     await tester.pumpWidget(_UpdateCountedClipRect());
 
-    final RenderClipRect renderClipRect = tester.allRenderObjects.firstWhere((RenderObject object) => object is RenderClipRect);
+    final RenderClipRect renderClip = tester.allRenderObjects.whereType<RenderClipRect>().first;
 
-    expect(renderClipRect.clipBehavior, equals(Clip.antiAlias));
-    expect(UpdateCount.updateCount, equals(0));
+    UpdateCount.value = 0;
+    expect(UpdateCount.value, equals(0));
+    expect(renderClip.clipBehavior, equals(Clip.antiAlias));
 
     await tester.pumpWidget(_UpdateCountedClipRect(clipBehavior: Clip.hardEdge));
 
-    expect(UpdateCount.updateCount, equals(1));  // Check that updateRenderObject is called.
-    expect(renderClipRect.clipBehavior, equals(Clip.hardEdge));
+    expect(UpdateCount.value, equals(1));  // Check that updateRenderObject is called.
+    expect(renderClip.clipBehavior, equals(Clip.hardEdge));
+  });
+
+  testWidgets('ClipRRect updates clipBehavior in updateRenderObject', (WidgetTester tester) async {
+    await tester.pumpWidget(_UpdateCountedClipRRect());
+
+    final RenderClipRRect renderClip = tester.allRenderObjects.whereType<RenderClipRRect>().first;
+
+    UpdateCount.value = 0;
+    expect(UpdateCount.value, equals(0));
+    expect(renderClip.clipBehavior, equals(Clip.antiAlias));
+
+    await tester.pumpWidget(_UpdateCountedClipRRect(clipBehavior: Clip.hardEdge));
+
+    expect(UpdateCount.value, equals(1));  // Check that updateRenderObject is called.
+    expect(renderClip.clipBehavior, equals(Clip.hardEdge));
+  });
+
+  testWidgets('ClipOval updates clipBehavior in updateRenderObject', (WidgetTester tester) async {
+    await tester.pumpWidget(_UpdateCountedClipOval());
+
+    final RenderClipOval renderClip = tester.allRenderObjects.whereType<RenderClipOval>().first;
+
+    UpdateCount.value = 0;
+    expect(UpdateCount.value, equals(0));
+    expect(renderClip.clipBehavior, equals(Clip.antiAlias));
+
+    await tester.pumpWidget(_UpdateCountedClipOval(clipBehavior: Clip.hardEdge));
+
+    expect(UpdateCount.value, equals(1));  // Check that updateRenderObject is called.
+    expect(renderClip.clipBehavior, equals(Clip.hardEdge));
+  });
+
+  testWidgets('ClipPath updates clipBehavior in updateRenderObject', (WidgetTester tester) async {
+    await tester.pumpWidget(_UpdateCountedClipPath());
+
+    final RenderClipPath renderClip = tester.allRenderObjects.whereType<RenderClipPath>().first;
+
+    UpdateCount.value = 0;
+    expect(UpdateCount.value, equals(0));
+    expect(renderClip.clipBehavior, equals(Clip.antiAlias));
+
+    await tester.pumpWidget(_UpdateCountedClipPath(clipBehavior: Clip.hardEdge));
+
+    expect(UpdateCount.value, equals(1));  // Check that updateRenderObject is called.
+    expect(renderClip.clipBehavior, equals(Clip.hardEdge));
   });
 
   testWidgets('ClipPath', (WidgetTester tester) async {

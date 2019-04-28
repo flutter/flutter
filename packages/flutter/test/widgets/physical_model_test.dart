@@ -15,24 +15,48 @@ class _UpdateCountedPhysicalModel extends PhysicalModel with UpdateCount {
     : super(clipBehavior: clipBehavior, color: Colors.red);
 }
 
+class _UpdateCountedPhysicalShape extends PhysicalShape with UpdateCount {
+  _UpdateCountedPhysicalShape({Clip clipBehavior = Clip.none})
+      : super(clipBehavior: clipBehavior, color: Colors.red, clipper: ShapeBorderClipper(shape: CircleBorder()));
+}
+
 void main() {
   testWidgets('PhysicalModel updates clipBehavior in updateRenderObject', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(home: _UpdateCountedPhysicalModel()),
     );
 
-    final RenderPhysicalModel renderPhysicalModel =
-        tester.allRenderObjects.firstWhere((RenderObject object) => object is RenderPhysicalModel);
+    final RenderPhysicalModel renderPhysicalModel = tester.allRenderObjects.whereType<RenderPhysicalModel>().first;
 
-    expect(UpdateCount.updateCount, equals(0));
+    UpdateCount.value = 0;
+    expect(UpdateCount.value, equals(0));
     expect(renderPhysicalModel.clipBehavior, equals(Clip.none));
 
     await tester.pumpWidget(
       MaterialApp(home: _UpdateCountedPhysicalModel(clipBehavior: Clip.antiAlias)),
     );
 
-    expect(UpdateCount.updateCount, equals(1));  // Check that updateRenderObject is called.
+    expect(UpdateCount.value, equals(1));  // Check that updateRenderObject is called.
     expect(renderPhysicalModel.clipBehavior, equals(Clip.antiAlias));
+  });
+
+  testWidgets('PhysicalShape updates clipBehavior in updateRenderObject', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(home: _UpdateCountedPhysicalShape()),
+    );
+
+    final RenderPhysicalShape renderPhysicalShape = tester.allRenderObjects.whereType<RenderPhysicalShape>().first;
+
+    UpdateCount.value = 0;
+    expect(UpdateCount.value, equals(0));
+    expect(renderPhysicalShape.clipBehavior, equals(Clip.none));
+
+    await tester.pumpWidget(
+      MaterialApp(home: _UpdateCountedPhysicalShape(clipBehavior: Clip.antiAlias)),
+    );
+
+    expect(UpdateCount.value, equals(1));  // Check that updateRenderObject is called.
+    expect(renderPhysicalShape.clipBehavior, equals(Clip.antiAlias));
   });
 
   testWidgets('PhysicalModel - creates a physical model layer when it needs compositing', (WidgetTester tester) async {

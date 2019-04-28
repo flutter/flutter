@@ -763,13 +763,13 @@ class _TestTicker extends Ticker {
   }
 }
 
-mixin UpdateCount on SingleChildRenderObjectWidget {
+mixin UpdateCount on RenderObjectWidget {
   /// How many times that [updateRenderObject] is called.
-  static int updateCount = 0;
+  static int value = 0;
 
   @override
   void updateRenderObject(BuildContext context, RenderObject renderObject) {
-    updateCount += 1;
+    value += 1;
     super.updateRenderObject(context, renderObject);
   }
 }
