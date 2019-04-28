@@ -6,8 +6,6 @@ import 'package:flutter/src/physics/utils.dart' show nearEqual;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/mock_canvas.dart';
-
 const Color _kScrollbarColor = Color(0xFF123456);
 const double _kThickness = 2.5;
 const double _kMinThumbExtent = 18.0;
@@ -79,7 +77,6 @@ void main() {
         maxScrollExtent: 100000,
         viewportDimension: size.height,
       );
-
 
       // When overscroll.
       painter = _buildPainter(
@@ -253,7 +250,7 @@ void main() {
     }
   );
 
-  group('Padding workds for all directions', () {
+  group('Padding works for all directions', () {
     const EdgeInsets padding = EdgeInsets.fromLTRB(1, 2, 3, 4);
     const Size size = Size(60, 80);
     final ScrollMetrics metrics = defaultMetrics.copyWith(

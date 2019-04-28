@@ -715,17 +715,17 @@ void main() {
 
   testWidgets('PageMetrics', (WidgetTester tester) async {
     final PageMetrics page = PageMetrics(
-      minScrollExtent: 0.0,
-      maxScrollExtent: 100.0,
+      minScrollExtent: 100.0,
+      maxScrollExtent: 200.0,
       pixels: 150.0,
       viewportDimension: 25.0,
       axisDirection: AxisDirection.right,
       viewportFraction: 1.0,
     );
-    expect(page.page, 4);
+    expect(page.page, 6);
     final PageMetrics page2 = page.copyWith(
       pixels: page.pixels - 100.0,
     );
-    expect(page2.page, 2.0);
+    expect(page2.page, 4.0);
   });
 }

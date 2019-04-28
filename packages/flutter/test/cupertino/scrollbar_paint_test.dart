@@ -51,32 +51,4 @@ void main() {
       ),
     ));
   });
-
-  testWidgets('Respects TextDirection', (WidgetTester tester) async {
-      await tester.pumpWidget(_buildSingleChildScrollViewWithCupertinoScrollbar(
-          textDirection: TextDirection.rtl,
-          child: const SizedBox(width: 4000.0, height: 4000.0),
-      ));
-
-      expect(find.byType(CupertinoScrollbar), isNot(paints..rrect()));
-      final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(SingleChildScrollView)));
-      await gesture.moveBy(const Offset(0.0, -10.0));
-      // Move back to original position.
-      await gesture.moveBy(const Offset(0.0, 10.0));
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 500));
-      expect(find.byType(CupertinoScrollbar), paints..rrect(
-          color: _kScrollbarColor,
-          rrect: RRect.fromRectAndRadius(
-            Rect.fromLTWH(
-              2.5, // Margin .
-              4.0, // Initial position is the top margin.
-              2.5, // Thickness.
-              // Fraction in viewport * scrollbar height - top, bottom margin.
-              600.0 / 4000.0 * 600.0 - 4.0 - 4.0,
-            ),
-            const Radius.circular(1.25),
-          ),
-      ));
-  });
 }
