@@ -10,7 +10,41 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+class _UpdateCountedPhysicalModel extends PhysicalModel {
+  _UpdateCountedPhysicalModel({Clip clipBehavior = Clip.none})
+    : super(clipBehavior: clipBehavior, color: Colors.red);
+
+  static int updateCount = 0;
+
+  @override
+  void updateRenderObject(BuildContext context, RenderPhysicalModel renderObject) {
+    updateCount += 1;
+    super.updateRenderObject(context, renderObject);
+  }
+}
+
 void main() {
+  testWidgets('PhysicalModel updates clipBehavior in updateRenderObject', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(home: _UpdateCountedPhysicalModel()),
+    );
+
+    final RenderPhysicalModel renderPhysicalModel =
+        tester.allRenderObjects.firstWhere((RenderObject object) => object is RenderPhysicalModel);
+
+    expect(_UpdateCountedPhysicalModel.updateCount, equals(0));
+    expect(renderPhysicalModel.clipBehavior, equals(Clip.none));
+
+    await tester.pumpWidget(
+      MaterialApp(home: _UpdateCountedPhysicalModel(clipBehavior: Clip.antiAlias)),
+    );
+
+    // Check that updateRenderObject is called.
+    expect(_UpdateCountedPhysicalModel.updateCount, equals(1));
+
+    expect(renderPhysicalModel.clipBehavior, equals(Clip.antiAlias));
+  });
+
   testWidgets('PhysicalModel - creates a physical model layer when it needs compositing', (WidgetTester tester) async {
     debugDisableShadows = false;
     await tester.pumpWidget(
