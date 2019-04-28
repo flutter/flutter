@@ -13,16 +13,16 @@ const double _kThickness = 2.5;
 const double _kMinThumbExtent = 18.0;
 
 CustomPainter _buildPainter({
-    TextDirection textDirection = TextDirection.ltr,
-    EdgeInsets padding = EdgeInsets.zero,
-    Color color = _kScrollbarColor,
-    double thickness = _kThickness,
-    double mainAxisMargin = 0.0,
-    double crossAxisMargin = 0.0,
-    Radius radius,
-    double minLength = _kMinThumbExtent,
-    double minOverscrollLength = _kMinThumbExtent,
-    ScrollMetrics scrollMetrics,
+  TextDirection textDirection = TextDirection.ltr,
+  EdgeInsets padding = EdgeInsets.zero,
+  Color color = _kScrollbarColor,
+  double thickness = _kThickness,
+  double mainAxisMargin = 0.0,
+  double crossAxisMargin = 0.0,
+  Radius radius,
+  double minLength = _kMinThumbExtent,
+  double minOverscrollLength = _kMinThumbExtent,
+  ScrollMetrics scrollMetrics,
 }) {
   return ScrollbarPainter(
     color: color,
@@ -70,9 +70,9 @@ void main() {
     axisDirection: AxisDirection.down
   );
 
-  testWidgets(
+  test(
     'Scrollbar is not smaller than minLength with large scroll views',
-    (WidgetTester tester) async {
+    () {
       const double minLen = 3.5;
       const Size size = Size(600, 10);
       final ScrollMetrics metrics = defaultMetrics.copyWith(
@@ -104,17 +104,16 @@ void main() {
 
       painter.paint(testCanvas, size);
 
-      //expect(testCanvas.rect.top, 0);
       expect(testCanvas.rect.left, size.width - _kThickness);
       expect(testCanvas.rect.width, _kThickness);
       expect(testCanvas.rect.height >= minLen, true);
     }
   );
 
-  testWidgets(
+  test(
     'When scrolling normally (no overscrolling), the size of the scrollbar stays the same, '
     'and it scrolls evenly',
-    (WidgetTester tester) async {
+    () {
       const double viewportDimension = 23;
       const double maxExtent = 100;
       final ScrollMetrics startingMetrics = defaultMetrics.copyWith(
@@ -129,7 +128,6 @@ void main() {
         minOverscrollLength: minLen,
         scrollMetrics: defaultMetrics
       );
-
 
       final List<ScrollMetrics> metricsList = <ScrollMetrics> [
         startingMetrics.copyWith(pixels: 0.01),
@@ -162,9 +160,9 @@ void main() {
     }
   );
 
-  testWidgets(
+  test(
     'mainAxisMargin is respected',
-    (WidgetTester tester) async {
+    () {
       const double viewportDimension = 23;
       const double maxExtent = 100;
       final ScrollMetrics startingMetrics = defaultMetrics.copyWith(
@@ -207,137 +205,237 @@ void main() {
     }
   );
 
+  test(
+    'crossAxisMargin & text direction is respected',
+    () {
+      const double viewportDimension = 23;
+      const double maxExtent = 100;
+      final ScrollMetrics startingMetrics = defaultMetrics.copyWith(
+        maxScrollExtent: maxExtent,
+        viewportDimension: viewportDimension,
+      );
+      const Size size = Size(600, viewportDimension);
+      const double margin = 4;
+
+      for(TextDirection textDirection in TextDirection.values) {
+        painter = _buildPainter(
+          crossAxisMargin: margin,
+          scrollMetrics: startingMetrics,
+          textDirection: textDirection
+        );
+
+        for(AxisDirection direction in AxisDirection.values) {
+          painter.update(
+            startingMetrics.copyWith(axisDirection: direction),
+            direction
+          );
+
+          painter.paint(testCanvas, size);
+          switch (direction) {
+            case AxisDirection.up:
+            case AxisDirection.down:
+            expect(
+              margin,
+              textDirection == TextDirection.ltr
+              ? size.width - testCanvas.rect.right
+              : testCanvas.rect.left
+            );
+            break;
+            case AxisDirection.left:
+            case AxisDirection.right:
+            expect(margin, size.height - testCanvas.rect.bottom);
+            break;
+          }
+
+          testCanvas.reset();
+        }
+      }
+    }
+  );
+
   group('Padding workds for all directions', () {
-   const EdgeInsets padding = EdgeInsets.fromLTRB(1, 2, 3, 4);
-   const Size size = Size(60, 80);
-   final ScrollMetrics metrics = defaultMetrics.copyWith(
-     minScrollExtent: -100,
-     maxScrollExtent: 240,
-     axisDirection: AxisDirection.down
-   );
+    const EdgeInsets padding = EdgeInsets.fromLTRB(1, 2, 3, 4);
+    const Size size = Size(60, 80);
+    final ScrollMetrics metrics = defaultMetrics.copyWith(
+      minScrollExtent: -100,
+      maxScrollExtent: 240,
+      axisDirection: AxisDirection.down
+    );
 
-   final ScrollbarPainter p = _buildPainter(
-     padding: padding,
-     scrollMetrics: metrics
-   );
+    final ScrollbarPainter p = _buildPainter(
+      padding: padding,
+      scrollMetrics: metrics
+    );
 
-   testWidgets('down', (WidgetTester tester) async {
-       p.update(
-         metrics.copyWith(
-           pixels: double.negativeInfinity,
-         ),
-         AxisDirection.down
-       );
+    testWidgets('down', (WidgetTester tester) async {
+      p.update(
+        metrics.copyWith(
+          pixels: double.negativeInfinity,
+        ),
+        AxisDirection.down
+      );
 
-       // Top overscroll.
-       p.paint(testCanvas, size);
-       expect(testCanvas.rect.top, padding.top);
-       expect(size.width - testCanvas.rect.right, padding.right);
+      // Top overscroll.
+      p.paint(testCanvas, size);
+      expect(testCanvas.rect.top, padding.top);
+      expect(size.width - testCanvas.rect.right, padding.right);
 
-       testCanvas.reset();
+      testCanvas.reset();
 
-       // Bottom overscroll.
-       p.update(
-         metrics.copyWith(
-           pixels: double.infinity,
-         ),
-         AxisDirection.down
-       );
+      // Bottom overscroll.
+      p.update(
+        metrics.copyWith(
+          pixels: double.infinity,
+        ),
+        AxisDirection.down
+      );
 
-       p.paint(testCanvas, size);
-       expect(size.height - testCanvas.rect.bottom, padding.bottom);
-       expect(size.width - testCanvas.rect.right, padding.right);
-   });
+      p.paint(testCanvas, size);
+      expect(size.height - testCanvas.rect.bottom, padding.bottom);
+      expect(size.width - testCanvas.rect.right, padding.right);
+    });
 
-   testWidgets('up', (WidgetTester tester) async {
-       p.update(
-         metrics.copyWith(
-           pixels: double.infinity,
-           axisDirection: AxisDirection.up
-         ),
-         AxisDirection.up
-       );
+    testWidgets('up', (WidgetTester tester) async {
+      p.update(
+        metrics.copyWith(
+          pixels: double.infinity,
+          axisDirection: AxisDirection.up
+        ),
+        AxisDirection.up
+      );
 
-       // Top overscroll.
-       p.paint(testCanvas, size);
-       expect(testCanvas.rect.top, padding.top);
-       expect(size.width - testCanvas.rect.right, padding.right);
+      // Top overscroll.
+      p.paint(testCanvas, size);
+      expect(testCanvas.rect.top, padding.top);
+      expect(size.width - testCanvas.rect.right, padding.right);
 
-       testCanvas.reset();
+      testCanvas.reset();
 
-       // Bottom overscroll.
-       p.update(
-         metrics.copyWith(
-           pixels: double.negativeInfinity,
-           axisDirection: AxisDirection.up
-         ),
-         AxisDirection.up
-       );
+      // Bottom overscroll.
+      p.update(
+        metrics.copyWith(
+          pixels: double.negativeInfinity,
+          axisDirection: AxisDirection.up
+        ),
+        AxisDirection.up
+      );
 
-       p.paint(testCanvas, size);
-       expect(size.height - testCanvas.rect.bottom, padding.bottom);
-       expect(size.width - testCanvas.rect.right, padding.right);
-   });
+      p.paint(testCanvas, size);
+      expect(size.height - testCanvas.rect.bottom, padding.bottom);
+      expect(size.width - testCanvas.rect.right, padding.right);
+    });
 
-   testWidgets('left', (WidgetTester tester) async {
-       p.update(
-         metrics.copyWith(
-           pixels: double.negativeInfinity,
-           axisDirection: AxisDirection.left
-         ),
-         AxisDirection.left
-       );
+    testWidgets('left', (WidgetTester tester) async {
+      p.update(
+        metrics.copyWith(
+          pixels: double.negativeInfinity,
+          axisDirection: AxisDirection.left
+        ),
+        AxisDirection.left
+      );
 
-       // Right overscroll.
-       p.paint(testCanvas, size);
-       expect(size.height - testCanvas.rect.bottom, padding.bottom);
-       expect(size.width - testCanvas.rect.right, padding.right);
+      // Right overscroll.
+      p.paint(testCanvas, size);
+      expect(size.height - testCanvas.rect.bottom, padding.bottom);
+      expect(size.width - testCanvas.rect.right, padding.right);
 
-       testCanvas.reset();
+      testCanvas.reset();
 
-       // Left overscroll
-       p.update(
-         metrics.copyWith(
-           pixels: double.infinity,
-           axisDirection: AxisDirection.left
-         ),
-         AxisDirection.left
-       );
+      // Left overscroll
+      p.update(
+        metrics.copyWith(
+          pixels: double.infinity,
+          axisDirection: AxisDirection.left
+        ),
+        AxisDirection.left
+      );
 
-       p.paint(testCanvas, size);
-       expect(size.height - testCanvas.rect.bottom, padding.bottom);
-       expect(testCanvas.rect.left, padding.left);
-   });
+      p.paint(testCanvas, size);
+      expect(size.height - testCanvas.rect.bottom, padding.bottom);
+      expect(testCanvas.rect.left, padding.left);
+    });
 
-   testWidgets('right', (WidgetTester tester) async {
-       p.update(
-         metrics.copyWith(
-           pixels: double.infinity,
-           axisDirection: AxisDirection.right
-         ),
-         AxisDirection.right
-       );
+    testWidgets('right', (WidgetTester tester) async {
+      p.update(
+        metrics.copyWith(
+          pixels: double.infinity,
+          axisDirection: AxisDirection.right
+        ),
+        AxisDirection.right
+      );
 
-       // Right overscroll.
-       p.paint(testCanvas, size);
-       expect(size.height - testCanvas.rect.bottom, padding.bottom);
-       expect(size.width - testCanvas.rect.right, padding.right);
+      // Right overscroll.
+      p.paint(testCanvas, size);
+      expect(size.height - testCanvas.rect.bottom, padding.bottom);
+      expect(size.width - testCanvas.rect.right, padding.right);
 
-       testCanvas.reset();
+      testCanvas.reset();
 
-       // Left overscroll.
-       p.update(
-         metrics.copyWith(
-           pixels: double.negativeInfinity,
-           axisDirection: AxisDirection.right
-         ),
-         AxisDirection.right
-       );
+      // Left overscroll.
+      p.update(
+        metrics.copyWith(
+          pixels: double.negativeInfinity,
+          axisDirection: AxisDirection.right
+        ),
+        AxisDirection.right
+      );
 
-       p.paint(testCanvas, size);
-       expect(size.height - testCanvas.rect.bottom, padding.bottom);
-       expect(testCanvas.rect.left, padding.left);
-   });
+      p.paint(testCanvas, size);
+      expect(size.height - testCanvas.rect.bottom, padding.bottom);
+      expect(testCanvas.rect.left, padding.left);
+    });
+  });
 
-});
+  test('the scrollbar should scroll towards the right direction',
+    () {
+      const Size size = Size(60, 80);
+      const double maxScrollExtent = 240;
+      const double minScrollExtent = -100;
+      final ScrollMetrics startingMetrics = defaultMetrics.copyWith(
+        minScrollExtent: minScrollExtent,
+        maxScrollExtent: maxScrollExtent,
+        axisDirection: AxisDirection.down,
+        viewportDimension: size.height
+      );
+
+      for(double minLength in <double> [_kMinThumbExtent, double.infinity]) {
+        // Disregard `minLength` and `minOverscrollLength` to keep
+        // scroll direction correct, if needed
+        painter = _buildPainter(
+          minLength: minLength,
+          minOverscrollLength: minLength,
+          scrollMetrics: startingMetrics
+        );
+
+        final Iterable<ScrollMetrics> metricsList = Iterable<ScrollMetrics>.generate(
+          9999,
+          (int index) => startingMetrics.copyWith(pixels: minScrollExtent + index * size.height / 3)
+        )
+        .takeWhile((ScrollMetrics metrics) => !metrics.outOfRange);
+
+        Rect previousRect;
+
+        for(ScrollMetrics metrics in metricsList) {
+          painter.update(metrics, metrics.axisDirection);
+          painter.paint(testCanvas, size);
+
+          if (previousRect != null) {
+            if (testCanvas.rect.height == size.height) {
+              // Size of the scrollbar is too large.
+              expect(previousRect.top <= testCanvas.rect.top, true);
+              expect(previousRect.bottom <= testCanvas.rect.bottom, true);
+            } else {
+              // The scrollbar can fit in the view port.
+              expect(previousRect.top < testCanvas.rect.top, true);
+              expect(previousRect.bottom < testCanvas.rect.bottom, true);
+            }
+          }
+
+          previousRect = testCanvas.rect;
+          testCanvas.reset();
+        }
+      }
+    }
+  );
+
 }
