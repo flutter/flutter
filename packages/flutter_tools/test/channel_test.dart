@@ -35,10 +35,11 @@ Process createMockProcess({ int exitCode = 0, String stdout = '', String stderr 
 
 void main() {
   group('channel', () {
-    final MockProcessManager mockProcessManager = MockProcessManager();
+    MockProcessManager mockProcessManager;
 
     setUpAll(() {
       Cache.disableLocking();
+      mockProcessManager = MockProcessManager();
     });
 
     Future<void> simpleChannelTest(List<String> args) async {

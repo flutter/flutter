@@ -523,7 +523,7 @@ void main() {
   }, timeout: allowForCreateFlutterProject);
 
   testUsingContext('has correct application id for android and bundle id for ios', () async {
-    Cache.flutterRoot = '../..';
+    //Cache.flutterRoot = '../..';
     when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
     when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 

@@ -89,18 +89,12 @@ abstract class FlutterCommand extends Command<void> {
   /// The parsed argument results for the command.
   ///
   /// Use this instead of [argResults] to avoid implicit downcasts.
-  TypedArgResults get args {
-    return _typedResults ??= TypedArgResults(argResults);
-  }
-  TypedArgResults _typedResults;
+  TypedArgResults get args => TypedArgResults(argResults);
 
   /// The parsed argument results for all commands.
   ///
   /// Use this instead of [globalResults] to avoid implicit downcasts.
-  TypedArgResults get globalArgs {
-     return _typedGlobalArgs ??= TypedArgResults(globalResults);
-  }
-  TypedArgResults _typedGlobalArgs;
+  TypedArgResults get globalArgs => TypedArgResults(globalResults);
 
   @override
   ArgParser get argParser => _argParser;
