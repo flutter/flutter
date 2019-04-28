@@ -10,17 +10,9 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class _UpdateCountedPhysicalModel extends PhysicalModel {
+class _UpdateCountedPhysicalModel extends PhysicalModel with UpdateCount {
   _UpdateCountedPhysicalModel({Clip clipBehavior = Clip.none})
     : super(clipBehavior: clipBehavior, color: Colors.red);
-
-  static int updateCount = 0;
-
-  @override
-  void updateRenderObject(BuildContext context, RenderPhysicalModel renderObject) {
-    updateCount += 1;
-    super.updateRenderObject(context, renderObject);
-  }
 }
 
 void main() {
@@ -32,16 +24,14 @@ void main() {
     final RenderPhysicalModel renderPhysicalModel =
         tester.allRenderObjects.firstWhere((RenderObject object) => object is RenderPhysicalModel);
 
-    expect(_UpdateCountedPhysicalModel.updateCount, equals(0));
+    expect(UpdateCount.updateCount, equals(0));
     expect(renderPhysicalModel.clipBehavior, equals(Clip.none));
 
     await tester.pumpWidget(
       MaterialApp(home: _UpdateCountedPhysicalModel(clipBehavior: Clip.antiAlias)),
     );
 
-    // Check that updateRenderObject is called.
-    expect(_UpdateCountedPhysicalModel.updateCount, equals(1));
-
+    expect(UpdateCount.updateCount, equals(1));  // Check that updateRenderObject is called.
     expect(renderPhysicalModel.clipBehavior, equals(Clip.antiAlias));
   });
 

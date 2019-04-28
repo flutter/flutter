@@ -40,39 +40,24 @@ class ValueClipper<T> extends CustomClipper<T> {
   }
 }
 
-mixin UpdateCount on SingleChildRenderObjectWidget {
-  static int updateCount = 0;
-
-  @override
-  void updateRenderObject(BuildContext context, RenderObject renderObject) {
-    updateCount += 1;
-    super.updateRenderObject(context, renderObject);
-  }
-}
-
 class _UpdateCountedClipRect extends ClipRect with UpdateCount {
-  _UpdateCountedClipRect({Key key, Clip clipBehavior = Clip.hardEdge})
-    : super(key: key, clipBehavior: clipBehavior);
+  _UpdateCountedClipRect({Clip clipBehavior = Clip.antiAlias})
+    : super(clipBehavior: clipBehavior);
 }
 
 void main() {
   testWidgets('ClipRect updates clipBehavior in updateRenderObject', (WidgetTester tester) async {
-    final GlobalKey key = GlobalKey();
-    await tester.pumpWidget(ClipRect(key: key));
+    await tester.pumpWidget(_UpdateCountedClipRect());
 
-    final ClipRect widget = tester.firstWidget(find.byKey(key));
-    final RenderClipRect renderClipRect = tester.renderObject(find.byWidget(widget));
-//    final RenderClipRect renderClipRect =
-//    tester.allRenderObjects.firstWhere((RenderObject object) => object is RenderClipRect);
+    final RenderClipRect renderClipRect = tester.allRenderObjects.firstWhere((RenderObject object) => object is RenderClipRect);
 
-    expect(renderClipRect.clipBehavior, equals(Clip.hardEdge));
-
-    expect(UpdateCount.updateCount, equals(0));
-    await tester.pumpWidget(ClipRect(key: key, clipBehavior: Clip.antiAlias));
-    await tester.pump();
-
-    expect(UpdateCount.updateCount, equals(1));
     expect(renderClipRect.clipBehavior, equals(Clip.antiAlias));
+    expect(UpdateCount.updateCount, equals(0));
+
+    await tester.pumpWidget(_UpdateCountedClipRect(clipBehavior: Clip.hardEdge));
+
+    expect(UpdateCount.updateCount, equals(1));  // Check that updateRenderObject is called.
+    expect(renderClipRect.clipBehavior, equals(Clip.hardEdge));
   });
 
   testWidgets('ClipPath', (WidgetTester tester) async {
