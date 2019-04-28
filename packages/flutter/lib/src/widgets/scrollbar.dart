@@ -134,31 +134,38 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
         color.withOpacity(color.opacity * fadeoutOpacityAnimation.value);
   }
 
-  double _getThumbX(Size size) {
-    assert(textDirection != null);
-    switch (textDirection) {
-      case TextDirection.rtl:
-        return crossAxisMargin + padding.left;
-      case TextDirection.ltr:
-        return size.width - thickness - crossAxisMargin - padding.right;
+  void _paintThumbCrossAxis(Canvas canvas, Size size, double thumbOffset, double thumbExtent, AxisDirection direction) {
+    double x, y;
+    Size thumbSize;
+
+    switch (direction) {
+      case AxisDirection.down:
+        thumbSize = Size(thickness, thumbExtent);
+        x = textDirection == TextDirection.rtl
+          ? crossAxisMargin + padding.left
+          : size.width - thickness - crossAxisMargin - padding.right;
+        y = thumbOffset;
+        break;
+      case AxisDirection.up:
+        thumbSize = Size(thickness, thumbExtent);
+        x = textDirection == TextDirection.rtl
+        ? crossAxisMargin + padding.left
+        : size.width - thickness - crossAxisMargin - padding.right;
+        y = thumbOffset;
+        break;
+      case AxisDirection.left:
+        thumbSize = Size(thumbExtent, thickness);
+        x = thumbOffset;
+        y = size.height - thickness - crossAxisMargin - padding.bottom;
+        break;
+      case AxisDirection.right:
+        thumbSize = Size(thumbExtent, thickness);
+        x = thumbOffset;
+        y = size.height - thickness - crossAxisMargin - padding.bottom;
+        break;
     }
-    return null;
-  }
 
-  void _paintVerticalThumb(Canvas canvas, Size size, double thumbOffset, double thumbExtent) {
-    final Offset thumbOrigin = Offset(_getThumbX(size), thumbOffset);
-    final Size thumbSize = Size(thickness, thumbExtent);
-    final Rect thumbRect = thumbOrigin & thumbSize;
-    if (radius == null)
-      canvas.drawRect(thumbRect, _paint);
-    else
-      canvas.drawRRect(RRect.fromRectAndRadius(thumbRect, radius), _paint);
-  }
-
-  void _paintHorizontalThumb(Canvas canvas, Size size, double thumbOffset, double thumbExtent) {
-    final Offset thumbOrigin = Offset(thumbOffset, size.height - thickness);
-    final Size thumbSize = Size(thumbExtent, thickness);
-    final Rect thumbRect = thumbOrigin & thumbSize;
+    final Rect thumbRect = Offset(x, y) & thumbSize;
     if (radius == null)
       canvas.drawRect(thumbRect, _paint);
     else
@@ -174,7 +181,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     double viewport,
     Canvas canvas,
     Size size,
-    void painter(Canvas canvas, Size size, double thumbOffset, double thumbExtent),
+    AxisDirection direction,
   ) {
     final double totalInset = beforeInset + afterInset;
 
@@ -192,7 +199,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 
     // Thumb extent reflects fraction of content visible, as long as this
     // isn't less than the absolute minimum size.
-    final double fractionVisible = effectiveInside / (before + inside + after);
+    final double fractionVisible = (effectiveInside / (before + inside + after)).clamp(0.0, 1.0);
     thumbExtent = math.max(
       thumbExtent,
       effectiveViewport * fractionVisible - 2 * mainAxisMargin,
@@ -218,7 +225,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     else {
       thumbExtent = math.max(
         thumbExtent,
-        minLength * (((effectiveInside / effectiveViewport) - 0.8) / 0.2),
+        minLength * (((effectiveInside / effectiveViewport) - 0.8).clamp(0.0, 0.2) / 0.2),
       );
     }
 
@@ -226,10 +233,10 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     // `mainAxisMargin` gets too large.
     thumbExtent = math.min(thumbExtent, effectiveViewport - 2 * mainAxisMargin);
 
-    final double fractionPast = (before + after > 0.0) ? before / (before + after) : 0;
+    final double fractionPast = (before + after > 0.0) ? (before / (before + after)).clamp(0.0, 1.0) : 0;
     final double thumbOffset = fractionPast * (effectiveViewport - thumbExtent - 2 * mainAxisMargin) + mainAxisMargin + beforeInset;
 
-    painter(canvas, size, thumbOffset, thumbExtent);
+    _paintThumbCrossAxis(canvas, size, thumbOffset, thumbExtent, direction);
   }
 
   @override
@@ -256,20 +263,20 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
           size.height,
           canvas,
           size,
-          _paintVerticalThumb
+          _lastAxisDirection
         );
         break;
       case AxisDirection.up:
         _paintThumb(
-          padding.bottom,
+          padding.top,
           _lastMetrics.extentAfter,
           _lastMetrics.extentInside,
-          padding.top,
+          padding.bottom,
           _lastMetrics.extentBefore,
           size.height,
           canvas,
           size,
-          _paintVerticalThumb
+          _lastAxisDirection
         );
         break;
       case AxisDirection.right:
@@ -282,20 +289,20 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
           size.width,
           canvas,
           size,
-          _paintHorizontalThumb
+          _lastAxisDirection
         );
         break;
       case AxisDirection.left:
         _paintThumb(
-          padding.right,
+          padding.left,
           _lastMetrics.extentAfter,
           _lastMetrics.extentInside,
-          padding.left,
+          padding.right,
           _lastMetrics.extentBefore,
           size.width,
           canvas,
           size,
-          _paintHorizontalThumb
+          _lastAxisDirection
         );
         break;
     }

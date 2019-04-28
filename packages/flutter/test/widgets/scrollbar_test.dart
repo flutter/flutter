@@ -162,11 +162,182 @@ void main() {
     }
   );
 
-
   testWidgets(
     'mainAxisMargin is respected',
     (WidgetTester tester) async {
+      const double viewportDimension = 23;
+      const double maxExtent = 100;
+      final ScrollMetrics startingMetrics = defaultMetrics.copyWith(
+        maxScrollExtent: maxExtent,
+        viewportDimension: viewportDimension,
+      );
+      const Size size = Size(600, viewportDimension);
+      const double minLen = 0;
+
+      const List<double> margins = <double> [-10, 1, viewportDimension/2 - 0.01];
+      for(double margin in margins) {
+        painter = _buildPainter(
+          mainAxisMargin: margin,
+          minLength: minLen,
+          minOverscrollLength: minLen,
+          scrollMetrics: defaultMetrics
+        );
+
+        // Overscroll to double.negativeInfinity
+        painter.update(
+          startingMetrics.copyWith(pixels: double.negativeInfinity),
+          startingMetrics.axisDirection
+        );
+
+        painter.paint(testCanvas, size);
+        expect(testCanvas.rect.top, margin);
+
+        // Overscroll to double.infinity
+        testCanvas.reset();
+        painter.update(
+          startingMetrics.copyWith(pixels: double.infinity),
+          startingMetrics.axisDirection
+        );
+
+        painter.paint(testCanvas, size);
+        expect(size.height - testCanvas.rect.bottom, margin);
+
+        testCanvas.reset();
+      }
     }
   );
 
+  group('Padding workds for all directions', () {
+   const EdgeInsets padding = EdgeInsets.fromLTRB(1, 2, 3, 4);
+   const Size size = Size(60, 80);
+   final ScrollMetrics metrics = defaultMetrics.copyWith(
+     minScrollExtent: -100,
+     maxScrollExtent: 240,
+     axisDirection: AxisDirection.down
+   );
+
+   final ScrollbarPainter p = _buildPainter(
+     padding: padding,
+     scrollMetrics: metrics
+   );
+
+   testWidgets('down', (WidgetTester tester) async {
+       p.update(
+         metrics.copyWith(
+           pixels: double.negativeInfinity,
+         ),
+         AxisDirection.down
+       );
+
+       // Top overscroll.
+       p.paint(testCanvas, size);
+       expect(testCanvas.rect.top, padding.top);
+       expect(size.width - testCanvas.rect.right, padding.right);
+
+       testCanvas.reset();
+
+       // Bottom overscroll.
+       p.update(
+         metrics.copyWith(
+           pixels: double.infinity,
+         ),
+         AxisDirection.down
+       );
+
+       p.paint(testCanvas, size);
+       expect(size.height - testCanvas.rect.bottom, padding.bottom);
+       expect(size.width - testCanvas.rect.right, padding.right);
+   });
+
+   testWidgets('up', (WidgetTester tester) async {
+       p.update(
+         metrics.copyWith(
+           pixels: double.infinity,
+           axisDirection: AxisDirection.up
+         ),
+         AxisDirection.up
+       );
+
+       // Top overscroll.
+       p.paint(testCanvas, size);
+       expect(testCanvas.rect.top, padding.top);
+       expect(size.width - testCanvas.rect.right, padding.right);
+
+       testCanvas.reset();
+
+       // Bottom overscroll.
+       p.update(
+         metrics.copyWith(
+           pixels: double.negativeInfinity,
+           axisDirection: AxisDirection.up
+         ),
+         AxisDirection.up
+       );
+
+       p.paint(testCanvas, size);
+       expect(size.height - testCanvas.rect.bottom, padding.bottom);
+       expect(size.width - testCanvas.rect.right, padding.right);
+   });
+
+   testWidgets('left', (WidgetTester tester) async {
+       p.update(
+         metrics.copyWith(
+           pixels: double.negativeInfinity,
+           axisDirection: AxisDirection.left
+         ),
+         AxisDirection.left
+       );
+
+       // Right overscroll.
+       p.paint(testCanvas, size);
+       expect(size.height - testCanvas.rect.bottom, padding.bottom);
+       expect(size.width - testCanvas.rect.right, padding.right);
+
+       testCanvas.reset();
+
+       // Left overscroll
+       p.update(
+         metrics.copyWith(
+           pixels: double.infinity,
+           axisDirection: AxisDirection.left
+         ),
+         AxisDirection.left
+       );
+
+       p.paint(testCanvas, size);
+       expect(size.height - testCanvas.rect.bottom, padding.bottom);
+       expect(testCanvas.rect.left, padding.left);
+   });
+
+   testWidgets('right', (WidgetTester tester) async {
+       p.update(
+         metrics.copyWith(
+           pixels: double.infinity,
+           axisDirection: AxisDirection.right
+         ),
+         AxisDirection.right
+       );
+
+       // Right overscroll.
+       p.paint(testCanvas, size);
+       expect(size.height - testCanvas.rect.bottom, padding.bottom);
+       expect(size.width - testCanvas.rect.right, padding.right);
+
+       testCanvas.reset();
+
+       // Left overscroll.
+       p.update(
+         metrics.copyWith(
+           pixels: double.negativeInfinity,
+           axisDirection: AxisDirection.right
+         ),
+         AxisDirection.right
+       );
+
+       p.paint(testCanvas, size);
+       expect(size.height - testCanvas.rect.bottom, padding.bottom);
+       expect(testCanvas.rect.left, padding.left);
+   });
+
+});
 }
