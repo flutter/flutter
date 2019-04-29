@@ -497,11 +497,8 @@ flutter:
 ''';
       final dynamic flutterManifest = FlutterManifest.createFromString(manifest);
 
-      expect(flutterManifest, isNull);
+      expect(flutterManifest, null);
       expect(logger.errorText, contains('Expected "fonts" to either be null or a list.'));
-
-    }, overrides: <Type, Generator>{
-      Logger: () => BufferLogger(),
     });
   });
 
