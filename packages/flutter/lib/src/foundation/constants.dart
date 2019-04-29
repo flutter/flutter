@@ -25,7 +25,7 @@ const bool kProfileMode = bool.fromEnvironment('dart.vm.profile', defaultValue: 
 /// A constant that is true if the application was compiled in debug mode.
 ///
 /// More specifically, this is a constant that is true if the application was
-/// not compiled with '-Ddart.vm.product=true' or '-Ddart.vm.profile=true'.
+/// not compiled with '-Ddart.vm.product=true' and '-Ddart.vm.profile=true'.
 ///
 /// Since this is a const value, it can be used to indicate to the compiler that
 /// a particular block of code will not be executed in debug mode, and hence
