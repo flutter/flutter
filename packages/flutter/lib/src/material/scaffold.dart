@@ -26,6 +26,7 @@ import 'snack_bar.dart';
 import 'snack_bar_theme.dart';
 import 'theme.dart';
 import 'theme_data.dart';
+import 'colors.dart';
 
 // Examples can assume:
 // TabController tabController;
@@ -893,7 +894,7 @@ class Scaffold extends StatefulWidget {
     this.primary = true,
     this.drawerDragStartBehavior = DragStartBehavior.start,
     this.extendBody = false,
-    this.drawerScrimColor,
+    this.drawerScrimColor = Colors.black54,
   }) : assert(primary != null),
        assert(extendBody != null),
        assert(drawerDragStartBehavior != null),

@@ -181,7 +181,7 @@ class DrawerController extends StatefulWidget {
     @required this.alignment,
     this.drawerCallback,
     this.dragStartBehavior = DragStartBehavior.start,
-    this.scrimColor = Colors.black54,
+    this.scrimColor,
   }) : assert(child != null),
        assert(dragStartBehavior != null),
        assert(alignment != null),
@@ -237,6 +237,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   @override
   void initState() {
     super.initState();
+    print("scrimColor: ${widget.scrimColor}");
     _color = ColorTween(begin: Colors.transparent, end: widget.scrimColor);
     _controller = AnimationController(duration: _kBaseSettleDuration, vsync: this)
       ..addListener(_animationChanged)
