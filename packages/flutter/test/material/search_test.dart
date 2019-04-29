@@ -664,7 +664,7 @@ class _TestSearchDelegate extends SearchDelegate<String> {
   ThemeData appBarTheme(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     return theme.copyWith(
-      inputDecorationTheme: InputDecorationTheme(hintStyle: TextStyle(color: hintTextColor))
+      inputDecorationTheme: InputDecorationTheme(hintStyle: TextStyle(color: hintTextColor)),
     );
   }
 
