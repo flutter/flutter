@@ -379,10 +379,10 @@ class _FocusState extends State<Focus> {
 /// more information about the details of what node management entails if not
 /// using a [FocusScope] widget.
 ///
-/// [FocusScopeNode]s group together their children, using the
-/// [FocusTraversalPolicy] defined by the nearest enclosing
-/// [DefaultFocusTraversal] widget above them in the widget hierarchy to
-/// traverse their children.
+/// A [DefaultTraversalPolicy] widget provides the [FocusTraversalPolicy] for
+/// the [FocusScopeNode]s owned by its descendant widgets. Each [FocusScopeNode]
+/// has [FocusNode] descendants. The traversal policy defines what "previous
+/// focus", "next focus", and "move focus in this direction" means for them.
 ///
 /// [FocusScopeNode]s remember the last [FocusNode] that was focused within
 /// their descendants, and can move that focus to the next/previous node, or a
@@ -390,9 +390,8 @@ class _FocusState extends State<Focus> {
 /// [FocusNode.previousFocus], or [FocusNode.focusInDirection] are called on a
 /// [FocusNode] or [FocusScopeNode].
 ///
-/// To manipulate the focus traversal, use methods on [FocusScopeNode]. For
-/// instance, to move the focus to the next node, call
-/// `Focus.of(context).nextFocus()`.
+/// To move the focus, use methods on [FocusScopeNode]. For instance, to move
+/// the focus to the next node, call `Focus.of(context).nextFocus()`.
 ///
 /// See also:
 ///

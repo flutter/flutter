@@ -15,29 +15,21 @@ import 'framework.dart';
 /// direction to traverse in.
 enum TraversalDirection {
   /// Indicates a direction above the currently focused widget.
-  ///
-  /// Zero is at the bottom and positive values are above it: ⇈
   up,
 
   /// Indicates a direction to the right of the currently focused widget.
   ///
   /// This direction is unaffected by the [Directionality] of the current
   /// context.
-  ///
-  /// Zero is on the left and positive values are to the right of it: ⇉
   right,
 
   /// Indicates a direction below the currently focused widget.
-  ///
-  /// Zero is at the top and positive values are below it: ⇊
   down,
 
   /// Indicates a direction to the left of the currently focused widget.
   ///
   /// This direction is unaffected by the [Directionality] of the current
   /// context.
-  ///
-  /// Zero is to the right and positive values are to the left of it: ⇇
   left,
 
   // TODO(gspencer): Add diagonal traversal directions used by TV remotes and
@@ -67,7 +59,7 @@ enum TraversalDirection {
 ///     focus traversal in a direction.
 abstract class FocusTraversalPolicy {
   /// Returns the node that should receive focus if there is no current focus
-  /// in the scope to which the [currentNode] belongs.
+  /// in the [FocusScopeNode] that [currentNode] belongs to.
   ///
   /// This is used by [next]/[previous]/[inDirection] to determine which node to
   /// focus if they are called, but no node is currently focused.
@@ -93,8 +85,8 @@ abstract class FocusTraversalPolicy {
 
   /// Clears the data associated with the given [FocusScopeNode] for this object.
   ///
-  /// This is used to indicate that the focus policy has changed mode, and so
-  /// any cached policy data should be invalidated. For example, changing the
+  /// This is used to indicate that the focus policy has changed its mode, and
+  /// so any cached policy data should be invalidated. For example, changing the
   /// direction in which focus is moving, or changing from directional to
   /// next/previous navigation modes.
   ///
@@ -145,10 +137,6 @@ abstract class FocusTraversalPolicy {
   /// [FocusNode.requestFocus] on the node that has been selected.
   ///
   /// Returns true if it successfully found a node and requested focus.
-  ///
-  /// If this function returns true when called by the subclass, then the
-  /// subclass should immediately return true and not request focus from any
-  /// other node.
   ///
   /// All arguments must not be null.
   bool inDirection(FocusNode currentNode, TraversalDirection direction);
@@ -238,7 +226,7 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
     return null;
   }
 
-  FocusNode _sortAndFindInitial(FocusNode currentNode, {bool vertical, bool first}) {
+  FocusNode _sortAndFindInitial(FocusNode currentNode, { bool vertical, bool first }) {
     final Iterable<FocusNode> nodes = currentNode.nearestScope.descendants;
     final List<FocusNode> sorted = nodes.toList();
     sorted.sort((FocusNode a, FocusNode b) {
@@ -738,7 +726,7 @@ class ReadingOrderTraversalPolicy extends FocusTraversalPolicy with DirectionalF
 /// A widget that describes an inherited focus policy for focus traversal.
 ///
 /// By default, traverses in widget order using
-/// [WidgetOrderFocusTraversalPolicy].
+/// [ReadingOrderFocusTraversalPolicy].
 ///
 /// See also:
 ///
@@ -779,13 +767,11 @@ class DefaultFocusTraversal extends InheritedWidget {
   /// [BuildContext].
   ///
   /// The [context] argument must not be null.
-  static FocusTraversalPolicy of(BuildContext context, {bool ifAny = false}) {
-    if (context == null) {
-      return null;
-    }
+  static FocusTraversalPolicy of(BuildContext context, { bool nullOk = false }) {
+    assert(context != null);
     final DefaultFocusTraversal inherited = context.inheritFromWidgetOfExactType(DefaultFocusTraversal);
     assert(() {
-      if (ifAny) {
+      if (nullOk) {
         return true;
       }
       if (inherited == null) {
@@ -805,7 +791,5 @@ class DefaultFocusTraversal extends InheritedWidget {
   }
 
   @override
-  bool updateShouldNotify(InheritedWidget oldWidget) {
-    return false;
-  }
+  bool updateShouldNotify(DefaultFocusTraversal oldWidget) => policy != oldWidget.policy;
 }

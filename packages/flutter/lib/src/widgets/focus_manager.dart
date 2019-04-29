@@ -194,17 +194,23 @@ class FocusAttachment {
 ///
 /// ## Focus Traversal
 ///
-/// To give focus to the logical _next_ or _previous_ widget in the UI, consider
-/// calling the [nextFocus], [previousFocus], and [focusInDirection] methods.
+/// The term _traversal_, sometimes called _tab traversal_, refers to moving the
+/// focus from one widget to the next in a particular order (also sometimes
+/// referred to as the _tab order_, since the TAB key is often bound to the
+/// action to move to the next widget).
+///
+/// To give focus to the logical _next_ or _previous_ widget in the UI, call the
+/// [nextFocus] or [previousFocus] methods. To give the focus to a widget in a
+/// particular direction, call the [focusInDirection] method.
 ///
 /// The policy for what the _next_ or _previous_ widget is, or the widget in a
 /// particular direction, is determined by the [FocusTraversalPolicy] in force.
 ///
 /// The ambient policy is determined by looking up the widget hierarchy for a
 /// [DefaultFocusTraversal] widget, and obtaining the focus traversal policy
-/// from it. Different focus nodes can have difference policies, so part of the
-/// app can go in widget order, and part can go in reading order, depending upon
-/// the use case.
+/// from it. Different focus nodes can inherit difference policies, so part of
+/// the app can go in widget order, and part can go in reading order, depending
+/// upon the use case.
 ///
 /// Predefined policies include [WidgetOrderFocusTraversalPolicy],
 /// [ReadingOrderTraversalPolicy], and [DirectionalFocusTraversalPolicyMixin],
@@ -617,8 +623,8 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
       // Update the focus chain for the current focus without changing it.
       _manager?._currentFocus?._setAsFocusedChild();
     }
-    if (child.enclosingScope != oldScope) {
-      DefaultFocusTraversal.of(context).changedScope(node: this, oldScope: oldScope);
+    if (oldScope != null && child.context != null && child.enclosingScope != oldScope) {
+      DefaultFocusTraversal.of(child.context, nullOk: true)?.changedScope(node: child, oldScope: oldScope);
     }
   }
 
@@ -717,20 +723,20 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     }
   }
 
-  /// Request that the widget move the focus to the next focus node, by
-  /// calling the [FocusTraversalPolicy.next] method.
+  /// Request to move the focus to the next focus node, by calling the
+  /// [FocusTraversalPolicy.next] method.
   ///
   /// Returns true if it successfully found a node and requested focus.
   bool nextFocus() => DefaultFocusTraversal.of(context).next(this);
 
-  /// Request that the widget move the focus to the previous focus node, by
-  /// calling the [FocusTraversalPolicy.previous] method.
+  /// Request to move the focus to the previous focus node, by calling the
+  /// [FocusTraversalPolicy.previous] method.
   ///
   /// Returns true if it successfully found a node and requested focus.
   bool previousFocus() => DefaultFocusTraversal.of(context).previous(this);
 
-  /// Request that the widget move the focus to the previous focus node, by
-  /// calling the [FocusTraversalPolicy.inDirection] method.
+  /// Request to move the focus to the nearest focus node in the given
+  /// direction, by calling the [FocusTraversalPolicy.inDirection] method.
   ///
   /// Returns true if it successfully found a node and requested focus.
   bool focusInDirection(TraversalDirection direction) => DefaultFocusTraversal.of(context).inDirection(this, direction);
@@ -826,7 +832,7 @@ class FocusScopeNode extends FocusNode {
     }
     assert(scope.ancestors.contains(this), '$FocusScopeNode $scope must be a child of $this to set it as first focus.');
     if (hasFocus) {
-      scope._doRequestFocus(isFromPolicy: false);
+      scope._doRequestFocus();
     } else {
       scope._setAsFocusedChild();
     }
