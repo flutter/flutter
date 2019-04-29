@@ -221,7 +221,7 @@ void main() {
 
     final BoxShadow boxShadow = kElevationToShadow[2][0];
     final RRect rrect = kMaterialEdges[MaterialType.card].toRRect(
-      Rect.fromLTRB(0.0, 0.0, 800.0, 100.0)
+      const Rect.fromLTRB(0.0, 0.0, 800.0, 100.0)
     );
     expect(
       find.byType(MergeableMaterial),

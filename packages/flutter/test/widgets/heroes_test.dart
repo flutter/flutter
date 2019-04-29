@@ -1230,8 +1230,8 @@ void main() {
     const Duration duration = Duration(milliseconds: 300);
     const Curve curve = Curves.fastOutSlowIn;
     final RectTween pushRectTween = RectTween(
-      begin: Rect.fromLTWH(leftPadding, 0.0, 100.0, 100.0),
-      end: Rect.fromLTWH(350.0 + leftPadding / 2, 200.0, 100.0, 200.0),
+      begin: const Rect.fromLTWH(leftPadding, 0.0, 100.0, 100.0),
+      end: const Rect.fromLTWH(350.0 + leftPadding / 2, 200.0, 100.0, 200.0),
     );
 
     await tester.tap(find.text('two'));
@@ -1268,8 +1268,8 @@ void main() {
     await tester.pump(); // begin navigation
 
     final RectTween popRectTween = RectTween(
-      begin: Rect.fromLTWH(350.0 + leftPadding / 2, 200.0, 100.0, 200.0),
-      end: Rect.fromLTWH(leftPadding, 0.0, 100.0, 100.0),
+      begin: const Rect.fromLTWH(350.0 + leftPadding / 2, 200.0, 100.0, 200.0),
+      end: const Rect.fromLTWH(leftPadding, 0.0, 100.0, 100.0),
     );
     await tester.pump();
     expect(tester.getCenter(find.byKey(firstKey)), const Offset(400.0 + leftPadding / 2, 300.0));

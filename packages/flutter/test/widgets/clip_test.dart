@@ -16,7 +16,7 @@ class PathClipper extends CustomClipper<Path> {
   Path getClip(Size size) {
     log.add('getClip');
     return Path()
-      ..addRect(Rect.fromLTWH(50.0, 50.0, 100.0, 100.0));
+      ..addRect(const Rect.fromLTWH(50.0, 50.0, 100.0, 100.0));
   }
   @override
   bool shouldReclip(PathClipper oldClipper) => false;
@@ -113,7 +113,7 @@ void main() {
           width: 100.0,
           height: 100.0,
           child: ClipRect(
-            clipper: ValueClipper<Rect>('a', Rect.fromLTWH(5.0, 5.0, 10.0, 10.0)),
+            clipper: ValueClipper<Rect>('a', const Rect.fromLTWH(5.0, 5.0, 10.0, 10.0)),
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
               onTap: () { log.add('tap'); },
@@ -137,7 +137,7 @@ void main() {
           width: 100.0,
           height: 100.0,
           child: ClipRect(
-            clipper: ValueClipper<Rect>('a', Rect.fromLTWH(5.0, 5.0, 10.0, 10.0)),
+            clipper: ValueClipper<Rect>('a', const Rect.fromLTWH(5.0, 5.0, 10.0, 10.0)),
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
               onTap: () { log.add('tap'); },
@@ -155,7 +155,7 @@ void main() {
           width: 200.0,
           height: 200.0,
           child: ClipRect(
-            clipper: ValueClipper<Rect>('a', Rect.fromLTWH(5.0, 5.0, 10.0, 10.0)),
+            clipper: ValueClipper<Rect>('a', const Rect.fromLTWH(5.0, 5.0, 10.0, 10.0)),
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
               onTap: () { log.add('tap'); },
@@ -173,7 +173,7 @@ void main() {
           width: 200.0,
           height: 200.0,
           child: ClipRect(
-            clipper: ValueClipper<Rect>('a', Rect.fromLTWH(5.0, 5.0, 10.0, 10.0)),
+            clipper: ValueClipper<Rect>('a', const Rect.fromLTWH(5.0, 5.0, 10.0, 10.0)),
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
               onTap: () { log.add('tap'); },
@@ -191,7 +191,7 @@ void main() {
           width: 200.0,
           height: 200.0,
           child: ClipRect(
-            clipper: ValueClipper<Rect>('b', Rect.fromLTWH(5.0, 5.0, 10.0, 10.0)),
+            clipper: ValueClipper<Rect>('b', const Rect.fromLTWH(5.0, 5.0, 10.0, 10.0)),
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
               onTap: () { log.add('tap'); },
@@ -209,7 +209,7 @@ void main() {
           width: 200.0,
           height: 200.0,
           child: ClipRect(
-            clipper: ValueClipper<Rect>('c', Rect.fromLTWH(25.0, 25.0, 10.0, 10.0)),
+            clipper: ValueClipper<Rect>('c', const Rect.fromLTWH(25.0, 25.0, 10.0, 10.0)),
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
               onTap: () { log.add('tap'); },
@@ -235,7 +235,7 @@ void main() {
     );
     expect(tester.renderObject(find.byType(ClipRect)).paint, paints
       ..save()
-      ..clipRect(rect: Rect.fromLTRB(0.0, 0.0, 800.0, 600.0))
+      ..clipRect(rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0))
       ..save()
       ..path() // Placeholder
       ..restore()
@@ -243,7 +243,7 @@ void main() {
     );
     debugPaintSizeEnabled = true;
     expect(tester.renderObject(find.byType(ClipRect)).debugPaint, paints
-      ..rect(rect: Rect.fromLTRB(0.0, 0.0, 800.0, 600.0))
+      ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0))
       ..paragraph(),
     );
     debugPaintSizeEnabled = false;

@@ -98,7 +98,7 @@ void main() {
       children: <TestSemantics>[
         TestSemantics.rootChild(
           id: 1,
-          rect: Rect.fromLTWH(0.0, 0.0, 800.0, 56.0),
+          rect: const Rect.fromLTWH(0.0, 0.0, 800.0, 56.0),
           transform: null,
           flags: <SemanticsFlag>[
             SemanticsFlag.hasToggledState,
@@ -111,7 +111,7 @@ void main() {
         ),
         TestSemantics.rootChild(
           id: 3,
-          rect: Rect.fromLTWH(0.0, 0.0, 800.0, 56.0),
+          rect: const Rect.fromLTWH(0.0, 0.0, 800.0, 56.0),
           transform: Matrix4.translationValues(0.0, 56.0, 0.0),
           flags: <SemanticsFlag>[
             SemanticsFlag.hasCheckedState,
@@ -124,7 +124,7 @@ void main() {
         ),
         TestSemantics.rootChild(
           id: 5,
-          rect: Rect.fromLTWH(0.0, 0.0, 800.0, 56.0),
+          rect: const Rect.fromLTWH(0.0, 0.0, 800.0, 56.0),
           transform: Matrix4.translationValues(0.0, 112.0, 0.0),
           flags: <SemanticsFlag>[
             SemanticsFlag.hasCheckedState,
