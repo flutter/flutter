@@ -30,7 +30,7 @@ void main() {
         outputPath: testCompiler.outputDill.path,
       )).thenAnswer((Invocation invocation) async {
         fs.file('abc.dill').createSync();
-        return CompilerOutput('abc.dill', 0, <Uri>[]);
+        return const CompilerOutput('abc.dill', 0, <Uri>[]);
       });
 
       expect(await testCompiler.compile('test/foo.dart'), 'test/foo.dart.dill');
@@ -55,7 +55,7 @@ void main() {
         outputPath: testCompiler.outputDill.path,
       )).thenAnswer((Invocation invocation) async {
         fs.file('abc.dill').createSync();
-        return CompilerOutput('abc.dill', 1, <Uri>[]);
+        return const CompilerOutput('abc.dill', 1, <Uri>[]);
       });
 
       expect(await testCompiler.compile('test/foo.dart'), null);

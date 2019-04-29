@@ -93,7 +93,7 @@ void main() {
     editable.layout(BoxConstraints.loose(const Size(1000.0, 1000.0)));
     expect(
       (Canvas canvas) => editable.paint(TestRecordingPaintingContext(canvas), Offset.zero),
-      paints..clipRect(rect: Rect.fromLTRB(0.0, 0.0, 1000.0, 10.0)),
+      paints..clipRect(rect: const Rect.fromLTRB(0.0, 0.0, 1000.0, 10.0)),
     );
   });
 
@@ -134,7 +134,7 @@ void main() {
 
     expect(editable, paints..rect(
       color: const Color.fromARGB(0xFF, 0xFF, 0x00, 0x00),
-      rect: Rect.fromLTWH(40, 0, 1, 10),
+      rect: const Rect.fromLTWH(40, 0, 1, 10),
     ));
 
     // Now change to a rounded caret.
@@ -146,7 +146,7 @@ void main() {
     expect(editable, paints..rrect(
       color: const Color.fromARGB(0xFF, 0x00, 0x00, 0xFF),
       rrect: RRect.fromRectAndRadius(
-        Rect.fromLTWH(40, 0, 4, 10),
+        const Rect.fromLTWH(40, 0, 4, 10),
         const Radius.circular(3),
       ),
     ));
@@ -158,7 +158,7 @@ void main() {
     expect(editable, paints..rrect(
       color: const Color.fromARGB(0xFF, 0x00, 0x00, 0xFF),
       rrect: RRect.fromRectAndRadius(
-        Rect.fromLTWH(80, 0, 4, 20),
+        const Rect.fromLTWH(80, 0, 4, 20),
         const Radius.circular(3),
       ),
     ));
@@ -207,7 +207,7 @@ void main() {
 
     expect(editable, paints..rect(
       color: const Color.fromARGB(0xFF, 0xFF, 0x00, 0x00),
-      rect: Rect.fromLTWH(40, 0, 1, 10),
+      rect: const Rect.fromLTWH(40, 0, 1, 10),
     ));
 
     // Now change to a rounded caret.
@@ -219,7 +219,7 @@ void main() {
     expect(editable, paints..rrect(
       color: const Color.fromARGB(0xFF, 0x00, 0x00, 0xFF),
       rrect: RRect.fromRectAndRadius(
-        Rect.fromLTWH(40, 0, 4, 10),
+        const Rect.fromLTWH(40, 0, 4, 10),
         const Radius.circular(3),
       ),
     ));
@@ -231,7 +231,7 @@ void main() {
     expect(editable, paints..rrect(
       color: const Color.fromARGB(0xFF, 0x00, 0x00, 0xFF),
       rrect: RRect.fromRectAndRadius(
-        Rect.fromLTWH(80, 0, 4, 20),
+        const Rect.fromLTWH(80, 0, 4, 20),
         const Radius.circular(3),
       ),
     ));
