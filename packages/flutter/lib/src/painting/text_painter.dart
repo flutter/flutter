@@ -346,7 +346,7 @@ class TextPainter {
   double get width {
     assert(!_needsLayout);
     return _applyFloatingPointHack(
-      textWidthBasis == TextWidthBasis.longestLine ? _paragraph.tightWidth : _paragraph.width,
+      textWidthBasis == TextWidthBasis.longestLine ? _paragraph.longestLine : _paragraph.width,
     );
   }
 
