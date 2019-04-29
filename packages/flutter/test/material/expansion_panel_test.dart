@@ -448,20 +448,20 @@ void main() {
     expect(find.text('E'), findsOneWidget);
     expect(find.text('F'), findsNothing);
 
-    // open one panel
+    // Open one panel
     await tester.tap(find.byType(ExpandIcon).at(1));
     await tester.pumpAndSettle();
 
-    // callback is invoked once with appropriate arguments
+    // Callback is invoked once with appropriate arguments
     expect(callbackHistory.length, equals(1));
     expect(callbackHistory.last['index'], equals(1));
     expect(callbackHistory.last['isExpanded'], equals(false));
 
-    // close the same panel
+    // Close the same panel
     await tester.tap(find.byType(ExpandIcon).at(1));
     await tester.pumpAndSettle();
 
-    // callback is invoked once with appropriate arguments
+    // Callback is invoked once with appropriate arguments
     expect(callbackHistory.length, equals(2));
     expect(callbackHistory.last['index'], equals(1));
     expect(callbackHistory.last['isExpanded'], equals(true));
@@ -521,27 +521,27 @@ void main() {
     expect(find.text('E'), findsOneWidget);
     expect(find.text('F'), findsNothing);
 
-    // open one panel
+    // Open one panel
     await tester.tap(find.byType(ExpandIcon).at(1));
     await tester.pumpAndSettle();
 
-    // callback is invoked once with appropriate arguments
+    // Callback is invoked once with appropriate arguments
     expect(callbackHistory.length, equals(1));
     callbackResults = callbackHistory[callbackHistory.length - 1];
     expect(callbackResults['index'], equals(1));
     expect(callbackResults['isExpanded'], equals(false));
 
-    // close a different panel
+    // Close a different panel
     await tester.tap(find.byType(ExpandIcon).at(2));
     await tester.pumpAndSettle();
 
-    // callback is invoked the first time with correct arguments
+    // Callback is invoked the first time with correct arguments
     expect(callbackHistory.length, equals(3));
     callbackResults = callbackHistory[callbackHistory.length - 2];
     expect(callbackResults['index'], equals(2));
     expect(callbackResults['isExpanded'], equals(false));
 
-    // callback is invoked the second time with correct arguments
+    // Callback is invoked the second time with correct arguments
     callbackResults = callbackHistory[callbackHistory.length - 1];
     expect(callbackResults['index'], equals(1));
     expect(callbackResults['isExpanded'], equals(false));
@@ -680,7 +680,7 @@ void main() {
       StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
           return MaterialApp(
-            // wrapping with LayoutBuilder or other widgets that augment
+            // Wrapping with LayoutBuilder or other widgets that augment
             // layout/build order should not create duplicate keys
             home: LayoutBuilder(
               builder: (BuildContext context, BoxConstraints constraints) {
@@ -735,7 +735,7 @@ void main() {
     expect(find.text('E'), findsOneWidget);
     expect(find.text('F'), findsNothing);
 
-    // open a panel
+    // Open a panel
     await tester.tap(find.byType(ExpandIcon).at(1));
     await tester.pumpAndSettle();
 
@@ -746,7 +746,7 @@ void main() {
         builder: (BuildContext context, StateSetter setState) {
           return MaterialApp(
             home: Scaffold(
-              // wrapping with LayoutBuilder or other widgets that augment
+              // Wrapping with LayoutBuilder or other widgets that augment
               // layout/build order should not create duplicate keys
               body: LayoutBuilder(
                 builder: (BuildContext context, BoxConstraints constraints) {
