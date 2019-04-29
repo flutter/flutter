@@ -302,15 +302,25 @@ class RenderEditable extends RenderBox {
       TextPosition(offset: _selection.start, affinity: _selection.affinity),
       Rect.zero,
     );
-
-    _selectionStartInViewport.value = visibleRegion.contains(startOffset + effectiveOffset);
+    // TODO(justinmc): https://github.com/flutter/flutter/issues/31495
+    // Check if the selection is visible with an approximation because a
+    // difference between rounded and unrounded values causes the caret to be
+    // reported as having a slightly (< 0.5) negative y offset. This rounding
+    // happens in paragraph.cc's layout and TextPainer's
+    // _applyFloatingPointHack. Ideally, the rounding mismatch will be fixed and
+    // this can be changed to be a strict check instead of an approximation.
+    const double visibleRegionSlop = 0.5;
+    _selectionStartInViewport.value = visibleRegion
+      .inflate(visibleRegionSlop)
+      .contains(startOffset + effectiveOffset);
 
     final Offset endOffset =  _textPainter.getOffsetForCaret(
       TextPosition(offset: _selection.end, affinity: _selection.affinity),
       Rect.zero,
     );
-
-    _selectionEndInViewport.value = visibleRegion.contains(endOffset + effectiveOffset);
+    _selectionEndInViewport.value = visibleRegion
+      .inflate(visibleRegionSlop)
+      .contains(endOffset + effectiveOffset);
   }
 
   static const int _kLeftArrowCode = 21;
@@ -1455,7 +1465,8 @@ class RenderEditable extends RenderBox {
   }
 
   TextSelection _selectWordAtOffset(TextPosition position) {
-    assert(_textLayoutLastWidth == constraints.maxWidth);
+    assert(_textLayoutLastWidth == constraints.maxWidth,
+      'Last width ($_textLayoutLastWidth) not the same as max width constraint (${constraints.maxWidth}).');
     final TextRange word = _textPainter.getWordBoundary(position);
     // When long-pressing past the end of the text, we want a collapsed cursor.
     if (position.offset >= word.end)
@@ -1527,7 +1538,8 @@ class RenderEditable extends RenderBox {
   }
 
   void _paintCaret(Canvas canvas, Offset effectiveOffset, TextPosition textPosition) {
-    assert(_textLayoutLastWidth == constraints.maxWidth);
+    assert(_textLayoutLastWidth == constraints.maxWidth,
+      'Last width ($_textLayoutLastWidth) not the same as max width constraint (${constraints.maxWidth}).');
 
     // If the floating cursor is enabled, the text cursor's color is [backgroundCursorColor] while
     // the floating cursor's color is _cursorColor;
@@ -1593,7 +1605,8 @@ class RenderEditable extends RenderBox {
   }
 
   void _paintFloatingCaret(Canvas canvas, Offset effectiveOffset) {
-    assert(_textLayoutLastWidth == constraints.maxWidth);
+    assert(_textLayoutLastWidth == constraints.maxWidth,
+      'Last width ($_textLayoutLastWidth) not the same as max width constraint (${constraints.maxWidth}).');
     assert(_floatingCursorOn);
 
     // We always want the floating cursor to render at full opacity.
@@ -1680,7 +1693,8 @@ class RenderEditable extends RenderBox {
   }
 
   void _paintSelection(Canvas canvas, Offset effectiveOffset) {
-    assert(_textLayoutLastWidth == constraints.maxWidth);
+    assert(_textLayoutLastWidth == constraints.maxWidth,
+      'Last width ($_textLayoutLastWidth) not the same as max width constraint (${constraints.maxWidth}).');
     assert(_selectionRects != null);
     final Paint paint = Paint()..color = _selectionColor;
     for (ui.TextBox box in _selectionRects)
@@ -1688,7 +1702,8 @@ class RenderEditable extends RenderBox {
   }
 
   void _paintContents(PaintingContext context, Offset offset) {
-    assert(_textLayoutLastWidth == constraints.maxWidth);
+    assert(_textLayoutLastWidth == constraints.maxWidth,
+      'Last width ($_textLayoutLastWidth) not the same as max width constraint (${constraints.maxWidth}).');
     final Offset effectiveOffset = offset + _paintOffset;
 
     bool showSelection = false;

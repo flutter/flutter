@@ -692,6 +692,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     FlutterError.onError = _oldExceptionHandler;
     _pendingExceptionDetails = null;
     _parentZone = null;
+    buildOwner.focusManager = FocusManager();
   }
 }
 
@@ -1106,12 +1107,6 @@ enum LiveTestWidgetsFlutterBindingFramePolicy {
 /// doesn't trigger a paint, since then you could not see anything
 /// anyway.)
 class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
-  @override
-  void initInstances() {
-    super.initInstances();
-    assert(!autoUpdateGoldenFiles);
-  }
-
   @override
   bool get inTest => _inTest;
   bool _inTest = false;
