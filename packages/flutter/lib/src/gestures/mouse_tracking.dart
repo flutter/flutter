@@ -132,8 +132,13 @@ class MouseTracker extends ChangeNotifier {
   }
 
   void _scheduleMousePositionCheck() {
-    SchedulerBinding.instance.addPostFrameCallback((Duration _) => collectMousePositions());
-    SchedulerBinding.instance.scheduleFrame();
+    // If we're not tracking anything, then there is no point in registering a
+    // frame callback or scheduling a frame. By definition there are no active
+    // annotations that need exiting, either.
+    if (_trackedAnnotations.isNotEmpty) {
+      SchedulerBinding.instance.addPostFrameCallback((Duration _) => collectMousePositions());
+      SchedulerBinding.instance.scheduleFrame();
+    }
   }
 
   // Handler for events coming from the PointerRouter.
@@ -142,11 +147,8 @@ class MouseTracker extends ChangeNotifier {
       return;
     }
     final int deviceId = event.device;
-    if (_trackedAnnotations.isEmpty) {
-      // If we're not tracking anything, then there is no point in registering a
-      // frame callback or scheduling a frame. By definition there are no active
-      // annotations that need exiting, either.
-      _removeMouseEvent(deviceId);
+    if (event is PointerAddedEvent) {
+      _addMouseEvent(deviceId, event);
       return;
     }
     if (event is PointerRemovedEvent) {
@@ -158,7 +160,7 @@ class MouseTracker extends ChangeNotifier {
       if (event is PointerMoveEvent || event is PointerHoverEvent || event is PointerDownEvent) {
         if (!_lastMouseEvent.containsKey(deviceId) || _lastMouseEvent[deviceId].position != event.position) {
           // Only schedule a frame if we have our first event, or if the
-          // location of the mouse has changed.
+          // location of the mouse has changed, and only if there are tracked annotations.
           _scheduleMousePositionCheck();
         }
         _addMouseEvent(deviceId, event);

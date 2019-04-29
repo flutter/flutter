@@ -135,6 +135,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   Timer _hideTimer;
   Timer _showTimer;
   bool _mouseIsConnected;
+  bool _longPressActivated = false;
 
   @override
   void initState() {
@@ -142,7 +143,11 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     _mouseIsConnected = RendererBinding.instance.mouseTracker.mouseIsConnected;
     _controller = AnimationController(duration: _kFadeInDuration, vsync: this)
       ..addStatusListener(_handleStatusChanged);
+    // Listen to see when a mouse is added.
     RendererBinding.instance.mouseTracker.addListener(_handleMouseTrackerChange);
+    // Listen to global pointer events so that we can hide a tooltip immediately
+    // if some other control is clicked on.
+    GestureBinding.instance.pointerRouter.addGlobalRoute(_handlePointerEvent);
   }
 
   // Forces a rebuild if a mouse has been added or removed.
@@ -167,7 +172,15 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       _removeEntry();
       return;
     }
-    _hideTimer ??= Timer(widget.showDuration, _controller.reverse);
+    if (_longPressActivated) {
+      // Tool tips activated by long press should stay around for 1.5s.
+      _hideTimer ??= Timer(widget.showDuration, _controller.reverse);
+    } else {
+      // Tool tips activated by hover should disappear as soon as the mouse
+      // leaves the control.
+      _controller.reverse();
+    }
+    _longPressActivated = false;
   }
 
   void _showTooltip({bool immediately = false}) {
@@ -228,7 +241,6 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     );
     _entry = OverlayEntry(builder: (BuildContext context) => overlay);
     Overlay.of(context, debugRequiredFor: widget).insert(_entry);
-    GestureBinding.instance.pointerRouter.addGlobalRoute(_handlePointerEvent);
     SemanticsService.tooltip(widget.message);
   }
 
@@ -237,11 +249,12 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     _hideTimer = null;
     _entry?.remove();
     _entry = null;
-    GestureBinding.instance.pointerRouter.removeGlobalRoute(_handlePointerEvent);
   }
 
   void _handlePointerEvent(PointerEvent event) {
-    assert(_entry != null);
+    if (_entry == null) {
+      return;
+    }
     if (event is PointerUpEvent || event is PointerCancelEvent) {
       _hideTooltip();
     } else if (event is PointerDownEvent) {
@@ -259,6 +272,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
 
   @override
   void dispose() {
+    GestureBinding.instance.pointerRouter.removeGlobalRoute(_handlePointerEvent);
     RendererBinding.instance.mouseTracker.removeListener(_handleMouseTrackerChange);
     if (_entry != null)
       _removeEntry();
@@ -267,6 +281,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   }
 
   void _handleLongPress() {
+    _longPressActivated = true;
     final bool tooltipCreated = ensureTooltipVisible();
     if (tooltipCreated)
       Feedback.forLongPress(context);

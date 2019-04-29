@@ -537,6 +537,11 @@ void main() {
   testWidgets('Tooltip shows/hides when hovered', (WidgetTester tester) async {
     const Duration waitDuration = Duration(milliseconds: 0);
     const Duration showDuration = Duration(milliseconds: 1500);
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.moveTo(const Offset(1.0, 1.0));
+    await tester.pump();
+    await gesture.moveTo(Offset.zero);
+
     await tester.pumpWidget(
       MaterialApp(
         home: Center(
@@ -554,7 +559,6 @@ void main() {
     );
 
     final Finder tooltip = find.byType(Tooltip);
-    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.moveTo(Offset.zero);
     await tester.pump();
     await gesture.moveTo(tester.getCenter(tooltip));
@@ -575,6 +579,7 @@ void main() {
     // Wait for it to disappear.
     await tester.pump(showDuration);
     await tester.pumpAndSettle();
+    await gesture.removePointer();
     expect(find.text(tooltipText), findsNothing);
   });
 
