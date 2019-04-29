@@ -103,14 +103,19 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   /// directions must be greater than or equal to zero.
   final EdgeInsets padding;
 
-  /// The smallest size the scrollbar can shrink to when the total scrollable
-  /// extent is large and the current visible viewport is small, and the
-  /// viewport is not overscrolled. Mustn't be null.
+  /// The preferred smallest size the scrollbar can shrink to when the total
+  /// scrollable extent is large and the current visible viewport is small, and the
+  /// viewport is not overscrolled.
+  ///
+  /// Mustn't be null and the value is typically greater than or equal to
+  /// [minOverscrollLength].
   final double minLength;
 
-  /// The smallest size the scrollbar can shrink to when viewport is
-  /// overscrolled. Mustn't be null and the value is typically less than
-  /// or equal to [minLength].
+  /// The preferred smallest size the scrollbar can shrink to when viewport is
+  /// overscrolled.
+  ///
+  /// Mustn't be null and the value is typically less than or equal to
+  /// [minLength].
   final double minOverscrollLength;
 
   ScrollMetrics _lastMetrics;
@@ -229,8 +234,8 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
       );
     }
 
-    // Prevent the scrollbar from scrolling towards the wrong direction when
-    // `mainAxisMargin` gets too large.
+    // Disregard `minLength` or `minOverscrollLength` if the scrollbar is too large,
+    // to prevent the scrollbar from scrolling towards the wrong direction.
     thumbExtent = math.min(thumbExtent, effectiveViewport - 2 * mainAxisMargin);
 
     final double fractionPast = (before + after > 0.0) ? (before / (before + after)).clamp(0.0, 1.0) : 0;

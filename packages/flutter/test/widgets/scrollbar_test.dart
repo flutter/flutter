@@ -42,8 +42,8 @@ class _DrawRectOnceCanvas implements Canvas {
   @override
   void noSuchMethod(Invocation invocation) {
     assert(invocation.memberName == #drawRect);
-    // Must call reset before redraw. This is to catch redundant
-    // drawRect calls.
+    // Must call reset before redraw. This is for catching redundant
+    // `drawRect` calls.
     assert(rect == null);
     assert(invocation.positionalArguments[0] is Rect);
     rect = invocation.positionalArguments[0];
@@ -69,7 +69,8 @@ void main() {
   );
 
   test(
-    'Scrollbar is not smaller than minLength with large scroll views',
+    'Scrollbar is not smaller than minLength with large scroll views, '
+    'if minLength is small ',
     () {
       const double minLen = 3.5;
       const Size size = Size(600, 10);
@@ -178,7 +179,7 @@ void main() {
           scrollMetrics: defaultMetrics
         );
 
-        // Overscroll to double.negativeInfinity
+        // Overscroll to double.negativeInfinity (top).
         painter.update(
           startingMetrics.copyWith(pixels: double.negativeInfinity),
           startingMetrics.axisDirection
@@ -187,7 +188,7 @@ void main() {
         painter.paint(testCanvas, size);
         expect(testCanvas.rect.top, margin);
 
-        // Overscroll to double.infinity
+        // Overscroll to double.infinity (down).
         testCanvas.reset();
         painter.update(
           startingMetrics.copyWith(pixels: double.infinity),
@@ -203,7 +204,7 @@ void main() {
   );
 
   test(
-    'crossAxisMargin & text direction is respected',
+    'crossAxisMargin & text direction are respected',
     () {
       const double viewportDimension = 23;
       const double maxExtent = 100;
@@ -231,17 +232,17 @@ void main() {
           switch (direction) {
             case AxisDirection.up:
             case AxisDirection.down:
-            expect(
-              margin,
-              textDirection == TextDirection.ltr
-              ? size.width - testCanvas.rect.right
-              : testCanvas.rect.left
-            );
-            break;
+              expect(
+                margin,
+                textDirection == TextDirection.ltr
+                ? size.width - testCanvas.rect.right
+                : testCanvas.rect.left
+              );
+              break;
             case AxisDirection.left:
             case AxisDirection.right:
-            expect(margin, size.height - testCanvas.rect.bottom);
-            break;
+              expect(margin, size.height - testCanvas.rect.bottom);
+              break;
           }
 
           testCanvas.reset();
@@ -250,7 +251,7 @@ void main() {
     }
   );
 
-  group('Padding works for all directions', () {
+  group('Padding works for all scroll directions', () {
     const EdgeInsets padding = EdgeInsets.fromLTRB(1, 2, 3, 4);
     const Size size = Size(60, 80);
     final ScrollMetrics metrics = defaultMetrics.copyWith(
@@ -338,7 +339,7 @@ void main() {
 
       testCanvas.reset();
 
-      // Left overscroll
+      // Left overscroll.
       p.update(
         metrics.copyWith(
           pixels: double.infinity,
@@ -383,7 +384,7 @@ void main() {
     });
   });
 
-  test('the scrollbar should scroll towards the right direction',
+  test('should scroll towards the right direction',
     () {
       const Size size = Size(60, 80);
       const double maxScrollExtent = 240;
@@ -418,7 +419,7 @@ void main() {
 
           if (previousRect != null) {
             if (testCanvas.rect.height == size.height) {
-              // Size of the scrollbar is too large.
+              // Size of the scrollbar is too large for the view port
               expect(previousRect.top <= testCanvas.rect.top, true);
               expect(previousRect.bottom <= testCanvas.rect.bottom, true);
             } else {
