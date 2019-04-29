@@ -456,9 +456,8 @@ void main() {
 
     // callback is invoked once with appropriate arguments
     expect(callbackHistory.length, equals(1));
-    latestCall = callbackHistory[callbackHistory.length - 1];
-    expect(latestCall['index'], equals(1));
-    expect(latestCall['isExpanded'], equals(false));
+    expect(callbackHistory.last['index'], equals(1));
+    expect(callbackHistory.last['isExpanded'], equals(false));
 
     // close the same panel
     await tester.tap(find.byType(ExpandIcon).at(1));
@@ -466,9 +465,8 @@ void main() {
 
     // callback is invoked once with appropriate arguments
     expect(callbackHistory.length, equals(2));
-    latestCall = callbackHistory[callbackHistory.length - 1];
-    expect(latestCall['index'], equals(1));
-    expect(latestCall['isExpanded'], equals(true));
+    expect(callbackHistory.last['index'], equals(1));
+    expect(callbackHistory.last['isExpanded'], equals(true));
   });
 
   testWidgets('Radio mode calls expansionCallback twice if other panel open prior', (WidgetTester tester) async {
@@ -560,65 +558,73 @@ void main() {
       false,
     ];
 
+    ExpansionPanelList buildRadioExpansionPanelList() {
+      return ExpansionPanelList.radio(
+        initialOpenPanelValue: 2,
+        children: <ExpansionPanelRadio>[
+          ExpansionPanelRadio(
+            headerBuilder: (BuildContext context, bool isExpanded) {
+              return Text(isExpanded ? 'B' : 'A');
+            },
+            body: const SizedBox(height: 100.0),
+            value: 0,
+          ),
+          ExpansionPanelRadio(
+            headerBuilder: (BuildContext context, bool isExpanded) {
+              return Text(isExpanded ? 'D' : 'C');
+            },
+            body: const SizedBox(height: 100.0),
+            value: 1,
+          ),
+          ExpansionPanelRadio(
+            headerBuilder: (BuildContext context, bool isExpanded) {
+              return Text(isExpanded ? 'F' : 'E');
+            },
+            body: const SizedBox(height: 100.0),
+            value: 2,
+          ),
+        ],
+      );
+    }
+
+    ExpansionPanelList buildExpansionPanelList(Function setState) {
+      return ExpansionPanelList(
+        expansionCallback: (int index, _) => setState(() { _panelExpansionState[index] = !_panelExpansionState[index]; }),
+        children: <ExpansionPanel>[
+          ExpansionPanel(
+            isExpanded: _panelExpansionState[0],
+            headerBuilder: (BuildContext context, bool isExpanded) {
+              return Text(isExpanded ? 'B' : 'A');
+            },
+            body: const SizedBox(height: 100.0),
+          ),
+          ExpansionPanel(
+            isExpanded: _panelExpansionState[1],
+            headerBuilder: (BuildContext context, bool isExpanded) {
+              return Text(isExpanded ? 'D' : 'C');
+            },
+            body: const SizedBox(height: 100.0),
+          ),
+          ExpansionPanel(
+            isExpanded: _panelExpansionState[2],
+            headerBuilder: (BuildContext context, bool isExpanded) {
+              return Text(isExpanded ? 'F' : 'E');
+            },
+            body: const SizedBox(height: 100.0),
+          ),
+        ],
+      );
+    }
+
     await tester.pumpWidget(
       StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
           return MaterialApp(
             home: Scaffold(
               body: SingleChildScrollView(
-                child: isRadioList ?
-                  ExpansionPanelList.radio(
-                    initialOpenPanelValue: 2,
-                    children: <ExpansionPanelRadio>[
-                      ExpansionPanelRadio(
-                        headerBuilder: (BuildContext context, bool isExpanded) {
-                          return Text(isExpanded ? 'B' : 'A');
-                        },
-                        body: const SizedBox(height: 100.0),
-                        value: 0,
-                      ),
-                      ExpansionPanelRadio(
-                        headerBuilder: (BuildContext context, bool isExpanded) {
-                          return Text(isExpanded ? 'D' : 'C');
-                        },
-                        body: const SizedBox(height: 100.0),
-                        value: 1,
-                      ),
-                      ExpansionPanelRadio(
-                        headerBuilder: (BuildContext context, bool isExpanded) {
-                          return Text(isExpanded ? 'F' : 'E');
-                        },
-                        body: const SizedBox(height: 100.0),
-                        value: 2,
-                      ),
-                    ],
-                  ) :
-                  ExpansionPanelList(
-                    expansionCallback: (int index, _) => setState(() { _panelExpansionState[index] = !_panelExpansionState[index]; }),
-                    children: <ExpansionPanel>[
-                      ExpansionPanel(
-                        isExpanded: _panelExpansionState[0],
-                        headerBuilder: (BuildContext context, bool isExpanded) {
-                          return Text(isExpanded ? 'B' : 'A');
-                        },
-                        body: const SizedBox(height: 100.0),
-                      ),
-                      ExpansionPanel(
-                        isExpanded: _panelExpansionState[1],
-                        headerBuilder: (BuildContext context, bool isExpanded) {
-                          return Text(isExpanded ? 'D' : 'C');
-                        },
-                        body: const SizedBox(height: 100.0),
-                      ),
-                      ExpansionPanel(
-                        isExpanded: _panelExpansionState[2],
-                        headerBuilder: (BuildContext context, bool isExpanded) {
-                          return Text(isExpanded ? 'F' : 'E');
-                        },
-                        body: const SizedBox(height: 100.0),
-                      ),
-                    ],
-                  ),
+                child: isRadioList
+                ? buildRadioExpansionPanelList()
+                : buildExpansionPanelList(setState)
               ),
               floatingActionButton: FloatingActionButton(
                 onPressed: () => setState(() { isRadioList = !isRadioList; }),

@@ -373,7 +373,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
 
     if (widget._allowOnlyOnePanelOpen) {
       assert(_allIdentifiersUnique(), 'All ExpansionPanelRadio identifier values must be unique.');
-      // If previous widget was non-radio ExpansionPanelList, initialize the
+      // If the previous widget was non-radio ExpansionPanelList, initialize the
       // open panel to widget.initialOpenPanelValue
       if (!oldWidget._allowOnlyOnePanelOpen) {
         _currentOpenPanel = searchPanelByValue(widget.children, widget.initialOpenPanelValue);
@@ -406,9 +406,8 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
     if (widget._allowOnlyOnePanelOpen) {
       final ExpansionPanelRadio pressedChild = widget.children[index];
 
-      // Determine if an ExpansionPanelRadio was opened prior, invoking
-      // expansionCallback if not null for that panel with isExpanded set to
-      // false
+      // If another ExpansionPanelRadio was already open, apply its
+      // expansionCallback (if any) to false, because it's closing.
       for (int childIndex = 0; childIndex < widget.children.length; childIndex += 1) {
         final ExpansionPanelRadio child = widget.children[childIndex];
         if (widget.expansionCallback != null &&
