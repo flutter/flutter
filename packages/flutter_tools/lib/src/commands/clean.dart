@@ -27,7 +27,7 @@ class CleanCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final FlutterProject flutterProject = await FlutterProject.current();
+    final FlutterProject flutterProject = FlutterProject.current();
     final Directory buildDir = fs.directory(getBuildDirectory());
 
     printStatus("Deleting '${buildDir.path}${fs.path.separator}'.");

@@ -170,7 +170,7 @@ flutter:
   module: {}
 ''');
     fs.file('.packages').createSync();
-    final FlutterProject flutterProject = await FlutterProject.current();
+    final FlutterProject flutterProject = FlutterProject.current();
 
     expect(AndroidDevice('test').isSupportedForProject(flutterProject), true);
   }, overrides: <Type, Generator>{
@@ -181,7 +181,7 @@ flutter:
     fs.file('pubspec.yaml').createSync();
     fs.file('.packages').createSync();
     fs.directory('android').createSync();
-    final FlutterProject flutterProject = await FlutterProject.current();
+    final FlutterProject flutterProject = FlutterProject.current();
 
     expect(AndroidDevice('test').isSupportedForProject(flutterProject), true);
   }, overrides: <Type, Generator>{
@@ -191,7 +191,7 @@ flutter:
   testUsingContext('isSupportedForProject is false with no host app and no module', () async {
     fs.file('pubspec.yaml').createSync();
     fs.file('.packages').createSync();
-    final FlutterProject flutterProject = await FlutterProject.current();
+    final FlutterProject flutterProject = FlutterProject.current();
 
     expect(AndroidDevice('test').isSupportedForProject(flutterProject), false);
   }, overrides: <Type, Generator>{

@@ -365,7 +365,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   // copied over to a location that is suitable for Xcodebuild to find them.
   await _addServicesToBundle(app.project.hostAppRoot);
 
-  final FlutterProject project = await FlutterProject.current();
+  final FlutterProject project = FlutterProject.current();
   await updateGeneratedXcodeProperties(
     project: project,
     targetOverride: targetOverride,

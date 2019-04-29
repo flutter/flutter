@@ -230,7 +230,7 @@ class KernelCompiler {
     );
     FlutterProject flutterProject;
     if (fs.file('pubspec.yaml').existsSync()) {
-      flutterProject = await FlutterProject.current();
+      flutterProject = FlutterProject.current();
     }
 
     // TODO(cbracken): eliminate pathFilter.
