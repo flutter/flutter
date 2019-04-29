@@ -23,6 +23,7 @@ import '../runner/flutter_command.dart';
 const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
   // Add pinned packages here.
   'flutter_gallery_assets': '0.1.8', // See //examples/flutter_gallery/pubspec.yaml
+  'build_modules': '1.0.9', // TODO(jonahwilliams): migrate https://cirrus-ci.com/task/5747941259083776
 };
 
 class UpdatePackagesCommand extends FlutterCommand {
@@ -83,6 +84,11 @@ class UpdatePackagesCommand extends FlutterCommand {
 
   @override
   final bool hidden;
+
+  @override
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
+    DevelopmentArtifact.universal,
+  };
 
   Future<void> _downloadCoverageData() async {
     final Status status = logger.startProgress(

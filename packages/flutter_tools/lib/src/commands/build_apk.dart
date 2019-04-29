@@ -6,7 +6,7 @@ import 'dart:async';
 
 import '../android/apk.dart';
 import '../project.dart';
-import '../runner/flutter_command.dart' show FlutterCommandResult;
+import '../runner/flutter_command.dart' show DevelopmentArtifact, FlutterCommandResult;
 import 'build.dart';
 
 class BuildApkCommand extends BuildSubCommand {
@@ -14,7 +14,6 @@ class BuildApkCommand extends BuildSubCommand {
     usesTargetOption();
     addBuildModeFlags(verboseHelp: verboseHelp);
     addDynamicModeFlags(verboseHelp: verboseHelp);
-    addDynamicPatchingFlags(verboseHelp: verboseHelp);
     usesFlavorOption();
     usesPubOption();
     usesBuildNumberOption();
@@ -33,6 +32,12 @@ class BuildApkCommand extends BuildSubCommand {
 
   @override
   final String name = 'apk';
+
+  @override
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{
+    DevelopmentArtifact.universal,
+    DevelopmentArtifact.android,
+  };
 
   @override
   final String description = 'Build an Android APK file from your app.\n\n'

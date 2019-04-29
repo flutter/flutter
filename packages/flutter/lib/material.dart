@@ -6,9 +6,11 @@
 ///
 /// To use, import `package:flutter/material.dart`.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=DL0Ix1lnC4w}
+///
 /// See also:
 ///
-///  * [flutter.io/widgets](https://flutter.io/widgets/)
+///  * [flutter.dev/widgets](https://flutter.dev/widgets/)
 ///    for a catalog of commonly-used Flutter widgets.
 ///  * [material.io/design](https://material.io/design/)
 ///    for an introduction to Material Design.
@@ -92,6 +94,7 @@ export 'src/material/shadows.dart';
 export 'src/material/slider.dart';
 export 'src/material/slider_theme.dart';
 export 'src/material/snack_bar.dart';
+export 'src/material/snack_bar_theme.dart';
 export 'src/material/stepper.dart';
 export 'src/material/switch.dart';
 export 'src/material/switch_list_tile.dart';

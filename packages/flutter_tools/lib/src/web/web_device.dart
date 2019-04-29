@@ -13,15 +13,16 @@ import '../build_info.dart';
 import '../device.dart';
 import '../globals.dart';
 import '../project.dart';
+import '../version.dart';
 import '../web/compile.dart';
 
-ChromeLauncher get chromeLauncher => context[ChromeLauncher];
+ChromeLauncher get chromeLauncher => context.get<ChromeLauncher>();
 
 /// Only launch or display web devices if `FLUTTER_WEB`
 /// environment variable is set to true.
 bool get flutterWebEnabled {
   _flutterWebEnabled = platform.environment['FLUTTER_WEB']?.toLowerCase() == 'true';
-  return _flutterWebEnabled;
+  return _flutterWebEnabled && !FlutterVersion.instance.isStable;
 }
 bool _flutterWebEnabled;
 
@@ -164,6 +165,11 @@ class WebDevice extends Device {
     }
     await request.response.addStream(file.openRead());
     await request.response.close();
+  }
+
+  @override
+  bool isSupportedForProject(FlutterProject flutterProject) {
+    return flutterProject.web.existsSync();
   }
 }
 

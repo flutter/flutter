@@ -7,6 +7,7 @@ import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/usage.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
+import 'package:flutter_tools/src/version.dart';
 import 'package:mockito/mockito.dart';
 
 import '../src/common.dart';
@@ -155,4 +156,43 @@ void main() {
     });
 
   });
+
+  group('Experimental commands', () {
+    final MockVersion stableVersion = MockVersion();
+    final MockVersion betaVersion = MockVersion();
+    final FakeCommand fakeCommand = FakeCommand();
+    when(stableVersion.isStable).thenReturn(true);
+    when(betaVersion.isStable).thenReturn(false);
+
+    testUsingContext('Can be disabled on stable branch', () async {
+      expect(() => fakeCommand.run(), throwsA(isA<ToolExit>()));
+    }, overrides: <Type, Generator>{
+      FlutterVersion: () => stableVersion,
+    });
+
+    testUsingContext('Works normally on regular branches', () async {
+      expect(fakeCommand.run(), completes);
+    }, overrides: <Type, Generator>{
+      FlutterVersion: () => betaVersion,
+    });
+  });
 }
+
+
+class FakeCommand extends FlutterCommand {
+  @override
+  String get description => null;
+
+  @override
+  String get name => 'fake';
+
+  @override
+  bool get isExperimental => true;
+
+  @override
+  Future<FlutterCommandResult> runCommand() async {
+    return null;
+  }
+}
+
+class MockVersion extends Mock implements FlutterVersion {}
