@@ -386,7 +386,6 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
     properties.add(FlagProperty('wonArenaForPrimaryPointer', value: _wonArenaForPrimaryPointer, ifTrue: 'won arena'));
     properties.add(DiagnosticsProperty<Offset>('finalPosition', _finalPosition, defaultValue: null));
     properties.add(FlagProperty('sentTapDown', value: _sentTapDown, ifTrue: 'sent tap down'));
-    // TODO(tongmu): Uncomment this line and update related tests.
-    // properties.add(IntProperty('initialButtons', _initialButtons));
+    // TODO(tongmu): Add property _initialButtons and update related tests
   }
 }
