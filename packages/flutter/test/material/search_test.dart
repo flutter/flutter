@@ -99,13 +99,10 @@ void main() {
     ));
     await tester.tap(find.byTooltip('Search'));
     await tester.pumpAndSettle();
-    expect(
-        tester
-            .widget<TextField>(find.byType(TextField))
-            .decoration
-            .hintStyle
-            .color,
-        delegate.hintTextColor);
+
+    final TextField textField = tester.widget<TextField>(find.byType(TextField));
+    final Color hintColor = textField.decoration.hintStyle.color;
+    expect(hintColor, delegate.hintTextColor);
   });
 
   testWidgets('Requests suggestions', (WidgetTester tester) async {
@@ -667,8 +664,8 @@ class _TestSearchDelegate extends SearchDelegate<String> {
   ThemeData appBarTheme(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     return theme.copyWith(
-        inputDecorationTheme:
-            InputDecorationTheme(hintStyle: TextStyle(color: hintTextColor)));
+      inputDecorationTheme: InputDecorationTheme(hintStyle: TextStyle(color: hintTextColor))
+    );
   }
 
   @override
