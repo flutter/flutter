@@ -360,12 +360,9 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
   void initState() {
     super.initState();
     if (widget._allowOnlyOnePanelOpen) {
-      assert(_allIdentifiersUnique(), 'All ExpansionPanelRadio identifier values are not unique.');
+      assert(_allIdentifiersUnique(), 'All ExpansionPanelRadio identifier values must be unique.');
       if (widget.initialOpenPanelValue != null) {
-        for (ExpansionPanelRadio child in widget.children) {
-          if (child.value == widget.initialOpenPanelValue)
-            _currentOpenPanel = child;
-        }
+        _currentOpenPanel = searchPanelByValue(widget.children, widget.initialOpenPanelValue);
       }
     }
   }
@@ -373,9 +370,15 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
   @override
   void didUpdateWidget(ExpansionPanelList oldWidget) {
     super.didUpdateWidget(oldWidget);
+
     if (widget._allowOnlyOnePanelOpen) {
-      assert(_allIdentifiersUnique(), 'All ExpansionPanelRadio identifier values are not unique.');
-    } else if (oldWidget._allowOnlyOnePanelOpen) {
+      assert(_allIdentifiersUnique(), 'All ExpansionPanelRadio identifier values must be unique.');
+      // If previous widget was non-radio ExpansionPanelList, initialize the
+      // open panel to widget.initialOpenPanelValue
+      if (!oldWidget._allowOnlyOnePanelOpen) {
+        _currentOpenPanel = searchPanelByValue(widget.children, widget.initialOpenPanelValue);
+      }
+    } else {
       _currentOpenPanel = null;
     }
   }
@@ -418,6 +421,14 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
         _currentOpenPanel = isExpanded ? null : pressedChild;
       });
     }
+  }
+
+  ExpansionPanelRadio searchPanelByValue(List<ExpansionPanelRadio> panels, Object value)  {
+    for (ExpansionPanelRadio panel in panels) {
+      if (panel.value == value)
+        return panel;
+    }
+    return null;
   }
 
   @override
