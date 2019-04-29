@@ -384,8 +384,8 @@ void main() {
   testWidgets('cursor android golden', (WidgetTester tester) async {
     final Widget widget = overlay(
       child: const RepaintBoundary(
-        key: const ValueKey<int>(1),
-        child: const TextField(
+        key: ValueKey<int>(1),
+        child: TextField(
           cursorColor: Colors.blue,
           cursorWidth: 15,
           cursorRadius: Radius.circular(3.0),
@@ -412,8 +412,8 @@ void main() {
 
     final Widget widget = overlay(
       child: const RepaintBoundary(
-        key: const ValueKey<int>(1),
-        child: const TextField(
+        key: ValueKey<int>(1),
+        child: TextField(
           cursorColor: Colors.blue,
           cursorWidth: 15,
           cursorRadius: Radius.circular(3.0),
