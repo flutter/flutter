@@ -29,9 +29,12 @@ class CameraApp extends StatefulWidget {
 }
 
 class _CameraAppState extends State<CameraApp> {
+  static const double validRectSideLength = 256;
+
   CameraController _controller;
   BarcodeDetector _detector;
   bool _isDetecting = false;
+  String scannerHint;
 
   @override
   void initState() {
@@ -61,10 +64,13 @@ class _CameraAppState extends State<CameraApp> {
   Future<void> _streamImages(CameraDescription camera) async {
     _detector = FirebaseVision.instance.barcodeDetector();
 
+    final Size size = MediaQuery.of(context).size;
+
     _controller.startImageStream((CameraImage image) {
       if (_isDetecting) {
         return;
       }
+
       _isDetecting = true;
 
       final ImageRotation rotation = rotationIntToImageRotation(
@@ -73,8 +79,44 @@ class _CameraAppState extends State<CameraApp> {
 
       detect(image, _detector.detectInImage, rotation).then(
         (dynamic result) {
+          final double widthScale = image.height / size.width;
+          final double heightScale = image.width / size.height;
+
+          final Offset center = size.center(Offset.zero);
+          const double halfRectSideLength = validRectSideLength / 2;
+
+          final Rect validRect = Rect.fromLTWH(
+            widthScale * (center.dx - halfRectSideLength),
+            heightScale * (center.dy - halfRectSideLength),
+            widthScale * validRectSideLength,
+            heightScale * validRectSideLength,
+          );
+
           final List<Barcode> barcodes = result;
-          if (barcodes.isNotEmpty) print(barcodes[0].rawValue);
+          if (barcodes.isNotEmpty) {
+            for (Barcode barcode in barcodes) {
+              final Rect intersection =
+                  validRect.intersect(barcode.boundingBox);
+
+              final bool doesContain = intersection == barcode.boundingBox;
+
+              if (doesContain) {
+                setState(() {
+                  scannerHint = 'Loading information...';
+                });
+                return;
+              } else if (validRect.overlaps(barcode.boundingBox)) {
+                setState(() {
+                  scannerHint = 'Move closer to the barcode';
+                });
+                return;
+              }
+            }
+          }
+
+          setState(() {
+            scannerHint = null;
+          });
         },
       ).whenComplete(() => _isDetecting = false);
     });
@@ -115,7 +157,7 @@ class _CameraAppState extends State<CameraApp> {
             constraints: BoxConstraints.expand(),
             child: CustomPaint(
               painter: WindowPainter(
-                windowSize: Size(256, 256),
+                windowSize: Size(validRectSideLength, validRectSideLength),
                 windowFrameColor: Colors.white54,
               ),
             ),
@@ -143,7 +185,19 @@ class _CameraAppState extends State<CameraApp> {
             child: Container(
               color: kShrinePink50,
               child: Center(
-                child: Text('Point your camera at a barcode'),
+                child: Text(scannerHint ?? 'Point your camera at a barcode'),
+              ),
+            ),
+          ),
+          Container(
+            constraints: BoxConstraints.expand(),
+            child: Center(
+              child: Container(
+                width: validRectSideLength,
+                height: validRectSideLength,
+                decoration: BoxDecoration(
+                  border: Border.all(width: 3, color: kShrineBrown600),
+                ),
               ),
             ),
           ),
@@ -178,10 +232,15 @@ class _CameraAppState extends State<CameraApp> {
 }
 
 class WindowPainter extends CustomPainter {
-  WindowPainter({@required this.windowSize, @required this.windowFrameColor});
+  WindowPainter({
+    @required this.windowSize,
+    @required this.windowFrameColor,
+    this.closeWindow = false,
+  });
 
   final Size windowSize;
   final Color windowFrameColor;
+  final bool closeWindow;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -220,7 +279,6 @@ class WindowPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(CustomPainter oldDelegate) {
-    return false;
-  }
+  bool shouldRepaint(WindowPainter oldDelegate) =>
+      oldDelegate.closeWindow != closeWindow;
 }
