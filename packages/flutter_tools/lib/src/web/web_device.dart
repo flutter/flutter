@@ -16,7 +16,7 @@ import '../project.dart';
 import '../version.dart';
 import '../web/compile.dart';
 
-ChromeLauncher get chromeLauncher => context[ChromeLauncher];
+ChromeLauncher get chromeLauncher => context.get<ChromeLauncher>();
 
 /// Only launch or display web devices if `FLUTTER_WEB`
 /// environment variable is set to true.

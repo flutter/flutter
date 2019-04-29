@@ -23,7 +23,7 @@ const FileSystem _kLocalFs = LocalFileSystem();
 ///
 /// By default it uses local disk-based implementation. Override this in tests
 /// with [MemoryFileSystem].
-FileSystem get fs => context[FileSystem] ?? _kLocalFs;
+FileSystem get fs => context.get<FileSystem>() ?? _kLocalFs;
 
 /// Gets a [FileSystem] that will record file system activity to the specified
 /// base recording [location].

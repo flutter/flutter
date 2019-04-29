@@ -28,7 +28,7 @@ import 'web/web_device.dart';
 import 'windows/application_package.dart';
 
 class ApplicationPackageFactory {
-  static ApplicationPackageFactory get instance => context[ApplicationPackageFactory];
+  static ApplicationPackageFactory get instance => context.get<ApplicationPackageFactory>();
 
   Future<ApplicationPackage> getPackageForPlatform(
     TargetPlatform platform, {
@@ -43,27 +43,27 @@ class ApplicationPackageFactory {
           await checkGradleDependencies();
         }
         return applicationBinary == null
-            ? await AndroidApk.fromAndroidProject((await FlutterProject.current()).android)
+            ? await AndroidApk.fromAndroidProject(FlutterProject.current().android)
             : AndroidApk.fromApk(applicationBinary);
       case TargetPlatform.ios:
         return applicationBinary == null
-            ? IOSApp.fromIosProject((await FlutterProject.current()).ios)
+            ? IOSApp.fromIosProject(FlutterProject.current().ios)
             : IOSApp.fromPrebuiltApp(applicationBinary);
       case TargetPlatform.tester:
         return FlutterTesterApp.fromCurrentDirectory();
       case TargetPlatform.darwin_x64:
         return applicationBinary == null
-            ? MacOSApp.fromMacOSProject((await FlutterProject.current()).macos)
+            ? MacOSApp.fromMacOSProject(FlutterProject.current().macos)
             : MacOSApp.fromPrebuiltApp(applicationBinary);
       case TargetPlatform.web:
-        return WebApplicationPackage(await FlutterProject.current());
+        return WebApplicationPackage(FlutterProject.current());
       case TargetPlatform.linux_x64:
         return applicationBinary == null
-            ? LinuxApp.fromLinuxProject((await FlutterProject.current()).linux)
+            ? LinuxApp.fromLinuxProject(FlutterProject.current().linux)
             : LinuxApp.fromPrebuiltApp(applicationBinary);
       case TargetPlatform.windows_x64:
         return applicationBinary == null
-            ? WindowsApp.fromWindowsProject((await FlutterProject.current()).windows)
+            ? WindowsApp.fromWindowsProject(FlutterProject.current().windows)
             : WindowsApp.fromPrebuiltApp(applicationBinary);
       case TargetPlatform.fuchsia:
         return null;
@@ -319,12 +319,16 @@ abstract class IOSApp extends ApplicationPackage {
       return null;
     }
     if (!project.exists) {
-      // If the project doesn't exist at all the existing hint to run flutter
+      // If the project doesn't exist at all the current hint to run flutter
       // create is accurate.
       return null;
     }
     if (!project.xcodeProject.existsSync()) {
       printError('Expected ios/Runner.xcodeproj but this file is missing.');
+      return null;
+    }
+    if (!project.xcodeProjectInfoFile.existsSync()) {
+      printError('Expected ios/Runner.xcodeproj/project.pbxproj but this file is missing.');
       return null;
     }
     return BuildableIOSApp(project);
@@ -391,10 +395,10 @@ class ApplicationPackageStore {
       case TargetPlatform.android_arm64:
       case TargetPlatform.android_x64:
       case TargetPlatform.android_x86:
-        android ??= await AndroidApk.fromAndroidProject((await FlutterProject.current()).android);
+        android ??= await AndroidApk.fromAndroidProject(FlutterProject.current().android);
         return android;
       case TargetPlatform.ios:
-        iOS ??= IOSApp.fromIosProject((await FlutterProject.current()).ios);
+        iOS ??= IOSApp.fromIosProject(FlutterProject.current().ios);
         return iOS;
       case TargetPlatform.darwin_x64:
       case TargetPlatform.linux_x64:

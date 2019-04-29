@@ -24,7 +24,7 @@ import 'tester/flutter_tester.dart';
 import 'web/web_device.dart';
 import 'windows/windows_device.dart';
 
-DeviceManager get deviceManager => context[DeviceManager];
+DeviceManager get deviceManager => context.get<DeviceManager>();
 
 /// A class to get all available devices.
 class DeviceManager {

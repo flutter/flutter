@@ -33,7 +33,7 @@ void main() {
         // This test is written to fail if our bots get Android SDKs in the future: shouldBeToolExit
         // will be null and our expectation would fail. That would remind us to make these tests
         // hermetic before adding Android SDKs to the bots.
-        updateLocalProperties(project: await FlutterProject.current());
+        updateLocalProperties(project: FlutterProject.current());
       } on Exception catch (e) {
         shouldBeToolExit = e;
       }
@@ -264,7 +264,7 @@ someOtherTask
       writeEmptySchemaFile(fs);
 
       updateLocalProperties(
-        project: await FlutterProject.fromPath('path/to/project'),
+        project: FlutterProject.fromPath('path/to/project'),
         buildInfo: buildInfo,
         requireAndroidSdk: false,
       );

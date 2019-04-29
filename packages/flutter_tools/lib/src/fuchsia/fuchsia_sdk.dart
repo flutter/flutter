@@ -13,10 +13,10 @@ import '../convert.dart';
 import '../globals.dart';
 
 /// The [FuchsiaSdk] instance.
-FuchsiaSdk get fuchsiaSdk => context[FuchsiaSdk];
+FuchsiaSdk get fuchsiaSdk => context.get<FuchsiaSdk>();
 
 /// The [FuchsiaArtifacts] instance.
-FuchsiaArtifacts get fuchsiaArtifacts => context[FuchsiaArtifacts];
+FuchsiaArtifacts get fuchsiaArtifacts => context.get<FuchsiaArtifacts>();
 
 /// The Fuchsia SDK shell commands.
 ///
