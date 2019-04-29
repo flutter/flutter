@@ -429,8 +429,9 @@ void main() {
       // The toolbar exists in the Overlay above the MaterialApp.
       find.byType(Overlay),
       matchesGoldenFile('text_field_opacity_test.0.0.png'),
+      skip: !Platform.isLinux,
     );
-  }, skip: !Platform.isLinux);
+  });
 
   // TODO(hansmuller): restore these tests after the fix for #24876 has landed.
   /*
