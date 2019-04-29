@@ -113,7 +113,7 @@ tester    17193   0.0  0.2  4791128  37820   ??  S     2:27PM   0:00.09 /Applica
       fs.file('pubspec.yaml').createSync();
       fs.file('.packages').createSync();
       fs.directory('macos').createSync();
-      final FlutterProject flutterProject = await FlutterProject.current();
+      final FlutterProject flutterProject = FlutterProject.current();
 
       expect(MacOSDevice().isSupportedForProject(flutterProject), true);
     }, overrides: <Type, Generator>{
@@ -123,7 +123,7 @@ tester    17193   0.0  0.2  4791128  37820   ??  S     2:27PM   0:00.09 /Applica
     testUsingContext('isSupportedForProject is false with no host app', () async {
       fs.file('pubspec.yaml').createSync();
       fs.file('.packages').createSync();
-      final FlutterProject flutterProject = await FlutterProject.current();
+      final FlutterProject flutterProject = FlutterProject.current();
 
       expect(MacOSDevice().isSupportedForProject(flutterProject), false);
     }, overrides: <Type, Generator>{

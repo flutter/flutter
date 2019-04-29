@@ -19,14 +19,14 @@ void main() {
 
     setUp(() {
       testbed = Testbed(
-        setup: () async {
+        setup: () {
           fs.file('pubspec.yaml').createSync();
           fs.file('.packages').createSync();
           fs.file('test/foo.dart').createSync(recursive: true);
           residentCompiler = MockResidentCompiler();
           testCompiler = FakeTestCompiler(
             false,
-            await FlutterProject.current(),
+            FlutterProject.current(),
             residentCompiler,
           );
         },

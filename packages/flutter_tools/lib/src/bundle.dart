@@ -70,7 +70,7 @@ Future<void> build({
   assetDirPath ??= getAssetBuildDirectory();
   packagesPath ??= fs.path.absolute(PackageMap.globalPackagesPath);
   applicationKernelFilePath ??= getDefaultApplicationKernelPath(trackWidgetCreation: trackWidgetCreation);
-  final FlutterProject flutterProject = await FlutterProject.current();
+  final FlutterProject flutterProject = FlutterProject.current();
 
   if (compilationTraceFilePath != null) {
     if (buildMode != BuildMode.dynamicProfile && buildMode != BuildMode.dynamicRelease) {

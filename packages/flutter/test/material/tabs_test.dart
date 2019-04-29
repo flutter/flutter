@@ -641,7 +641,7 @@ void main() {
     expect(tabController.previousIndex, 1);
     expect(tabController.indexIsChanging, false);
     expect(tabController.animation.value, 1.0);
-    expect(tabController.animation.status, AnimationStatus.completed);
+    expect(tabController.animation.status, AnimationStatus.forward);
 
     tabController.index = 0;
     await tester.pump(const Duration(milliseconds: 500));
@@ -2099,5 +2099,72 @@ void main() {
 
     expect(tester.hasRunningAnimations, isFalse);
     expect(await tester.pumpAndSettle(), 1); // no more frames are scheduled.
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/20292.
+  testWidgets('Number of tabs can be updated dynamically', (WidgetTester tester) async {
+    final List<String> threeTabs = <String>['A', 'B', 'C'];
+    final List<String> twoTabs = <String>['A', 'B'];
+    final List<String> oneTab = <String>['A'];
+    final Key key = UniqueKey();
+    Widget buildTabs(List<String> tabs) {
+      return boilerplate(
+        child: DefaultTabController(
+          key: key,
+          length: tabs.length,
+          child: TabBar(
+            tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
+          ),
+        ),
+      );
+    }
+    TabController getController() => DefaultTabController.of(tester.element(find.text('A')));
+
+    await tester.pumpWidget(buildTabs(threeTabs));
+    await tester.tap(find.text('B'));
+    await tester.pump();
+    TabController controller = getController();
+    expect(controller.previousIndex, 0);
+    expect(controller.index, 1);
+    expect(controller.length, 3);
+
+    await tester.pumpWidget(buildTabs(twoTabs));
+    controller = getController();
+    expect(controller.previousIndex, 0);
+    expect(controller.index, 1);
+    expect(controller.length, 2);
+
+    await tester.pumpWidget(buildTabs(oneTab));
+    controller = getController();
+    expect(controller.previousIndex, 1);
+    expect(controller.index, 0);
+    expect(controller.length, 1);
+
+    await tester.pumpWidget(buildTabs(twoTabs));
+    controller = getController();
+    expect(controller.previousIndex, 1);
+    expect(controller.index, 0);
+    expect(controller.length, 2);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/15008.
+  testWidgets('TabBar with one tab has correct color', (WidgetTester tester) async {
+    const Tab tab = Tab(text: 'A');
+    const Color selectedTabColor = Color(1);
+    const Color unselectedTabColor = Color(2);
+
+    await tester.pumpWidget(boilerplate(
+      child: const DefaultTabController(
+        length: 1,
+        child: TabBar(
+          tabs: <Tab>[tab],
+          labelColor: selectedTabColor,
+          unselectedLabelColor: unselectedTabColor,
+        ),
+      ),
+    ));
+
+    final IconThemeData iconTheme = IconTheme.of(tester.element(find.text('A')));
+    expect(iconTheme.color, equals(selectedTabColor));
   });
 }

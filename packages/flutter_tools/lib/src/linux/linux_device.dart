@@ -73,7 +73,7 @@ class LinuxDevice extends Device {
   }) async {
     _lastBuiltMode = debuggingOptions.buildInfo.mode;
     if (!prebuiltApplication) {
-      await buildLinux((await FlutterProject.current()).linux, debuggingOptions.buildInfo);
+      await buildLinux(FlutterProject.current().linux, debuggingOptions.buildInfo);
     }
     await stopApp(package);
     final Process process = await processManager.start(<String>[
