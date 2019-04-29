@@ -21,7 +21,7 @@ void main() {
       final MockResidentCompiler residentCompiler = MockResidentCompiler();
       final TestCompiler testCompiler = FakeTestCompiler(
         false,
-        await FlutterProject.current(),
+        FlutterProject.current(),
         residentCompiler,
       );
       when(residentCompiler.recompile(
@@ -46,7 +46,7 @@ void main() {
       final MockResidentCompiler residentCompiler = MockResidentCompiler();
       final TestCompiler testCompiler = FakeTestCompiler(
         false,
-        await FlutterProject.current(),
+        FlutterProject.current(),
         residentCompiler,
       );
       when(residentCompiler.recompile(

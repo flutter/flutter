@@ -373,7 +373,7 @@ class AndroidDevice extends Device {
 
     if (!prebuiltApplication || androidSdk.licensesAvailable && androidSdk.latestVersion == null) {
       printTrace('Building APK');
-      final FlutterProject project = await FlutterProject.current();
+      final FlutterProject project = FlutterProject.current();
       await buildApk(
           project: project,
           target: mainPath,
