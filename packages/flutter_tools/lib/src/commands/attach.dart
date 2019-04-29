@@ -160,7 +160,7 @@ class AttachCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final FlutterProject flutterProject = await FlutterProject.current();
+    final FlutterProject flutterProject = FlutterProject.current();
 
     Cache.releaseLockEarly();
 
