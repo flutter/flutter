@@ -365,7 +365,7 @@ void main() {
     expect(find.byType(Text), isNot(paints..clipRect()));
   });
 
-  testWidgets('Text respects textScaleFactor with default font size', (WidgetTester tester) async {
+  testWidgets('textWidthBasis affects the width of a Text widget', (WidgetTester tester) async {
     Future<void> createText(TextWidthBasis textWidthBasis) {
       return tester.pumpWidget(
         MaterialApp(
