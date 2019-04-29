@@ -428,7 +428,7 @@ void main() {
     await expectLater(
       // The toolbar exists in the Overlay above the MaterialApp.
       find.byType(Overlay),
-      matchesGoldenFile('text_field_opacity_test.0.0.png'),
+      matchesGoldenFile('text_field_opacity_test.0.1.png'),
       skip: !Platform.isLinux,
     );
   });
