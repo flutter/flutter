@@ -45,8 +45,6 @@ enum DatePickerMode {
   year,
 }
 
-const double _kDatePickerHeaderLandscapeWidth = 168.0;
-
 const Duration _kMonthScrollDuration = Duration(milliseconds: 200);
 const double _kDayPickerRowHeight = 42.0;
 const int _kMaxDayPickerRowCount = 6; // A 31 day month that starts on Saturday.
@@ -106,8 +104,6 @@ class _DatePickerHeader extends StatelessWidget {
         break;
     }
 
-    double width;
-    double height;
     EdgeInsets padding;
     MainAxisAlignment mainAxisAlignment;
     switch (orientation) {
@@ -116,7 +112,6 @@ class _DatePickerHeader extends StatelessWidget {
         mainAxisAlignment = MainAxisAlignment.center;
         break;
       case Orientation.landscape:
-        width = _kDatePickerHeaderLandscapeWidth;
         padding = const EdgeInsets.all(8.0);
         mainAxisAlignment = MainAxisAlignment.start;
         break;
@@ -149,8 +144,6 @@ class _DatePickerHeader extends StatelessWidget {
     );
 
     return Container(
-      width: width,
-      height: height,
       padding: padding,
       color: backgroundColor,
       child: Column(
@@ -1020,10 +1013,11 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
               return Container(
                 color: theme.dialogBackgroundColor,
                 child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: <Widget>[
                     header,
-                    Expanded(child: picker),
+                    Flexible(child: picker),
                     actions,
                   ],
                 ),
@@ -1032,12 +1026,17 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
               return Container(
                 color: theme.dialogBackgroundColor,
                 child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: <Widget>[
-                    header,
-                    Expanded(
+                    Flexible(child: header),
+                    Flexible(
+                      flex: 2, // have the picker take up 2/3 of the dialog width
                       child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: <Widget>[
-                          Expanded(child: picker),
+                          Flexible(child: picker),
                           actions
                         ],
                       ),
