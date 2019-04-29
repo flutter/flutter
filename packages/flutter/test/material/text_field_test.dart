@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io';
 import 'dart:math' as math;
 import 'dart:ui' as ui show window;
 
@@ -379,6 +380,61 @@ void main() {
     expect(textField.cursorWidth, 2.0);
     expect(textField.cursorRadius, const Radius.circular(3.0));
   });
+
+  testWidgets('cursor android golden', (WidgetTester tester) async {
+    final Widget widget = overlay(
+      child: RepaintBoundary(
+        key: const ValueKey<int>(1),
+        child: const TextField(
+          cursorColor: Colors.blue,
+          cursorWidth: 15,
+          cursorRadius: Radius.circular(3.0),
+        ),
+      ),
+    );
+    await tester.pumpWidget(widget);
+
+    const String testValue = 'A short phrase';
+    await tester.enterText(find.byType(TextField), testValue);
+    await skipPastScrollingAnimation(tester);
+
+    await tester.tapAt(textOffsetToPosition(tester, testValue.length));
+    await tester.pump();
+
+    await expectLater(
+      find.byKey(const ValueKey<int>(1)),
+      matchesGoldenFile('text_field_cursor_test.0.0.png'),
+    );
+  }, skip: !Platform.isLinux);
+
+  testWidgets('cursor iOS golden', (WidgetTester tester) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+
+    final Widget widget = overlay(
+      child: RepaintBoundary(
+        key: const ValueKey<int>(1),
+        child: const TextField(
+          cursorColor: Colors.blue,
+          cursorWidth: 15,
+          cursorRadius: Radius.circular(3.0),
+        ),
+      ),
+    );
+    await tester.pumpWidget(widget);
+
+    const String testValue = 'A short phrase';
+    await tester.enterText(find.byType(TextField), testValue);
+    await skipPastScrollingAnimation(tester);
+
+    await tester.tapAt(textOffsetToPosition(tester, testValue.length));
+    await tester.pump();
+
+    debugDefaultTargetPlatformOverride = null;
+    await expectLater(
+      find.byKey(const ValueKey<int>(1)),
+      matchesGoldenFile('text_field_cursor_test.1.0.png'),
+    );
+  }, skip: !Platform.isLinux);
 
   // TODO(hansmuller): restore these tests after the fix for #24876 has landed.
   /*
