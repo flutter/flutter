@@ -383,7 +383,7 @@ void main() {
 
   testWidgets('cursor android golden', (WidgetTester tester) async {
     final Widget widget = overlay(
-      child: RepaintBoundary(
+      child: const RepaintBoundary(
         key: const ValueKey<int>(1),
         child: const TextField(
           cursorColor: Colors.blue,
@@ -411,7 +411,7 @@ void main() {
     debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
 
     final Widget widget = overlay(
-      child: RepaintBoundary(
+      child: const RepaintBoundary(
         key: const ValueKey<int>(1),
         child: const TextField(
           cursorColor: Colors.blue,

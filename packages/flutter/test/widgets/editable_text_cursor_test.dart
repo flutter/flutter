@@ -675,7 +675,7 @@ void main() {
         key: const ValueKey<int>(1),
         child: Column(
           children: <Widget>[
-            SizedBox(width: 10, height: 10),
+            const SizedBox(width: 10, height: 10),
             EditableText(
               backgroundCursorColor: Colors.grey,
               key: editableTextKey,
