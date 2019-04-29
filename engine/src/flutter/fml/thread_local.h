@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_FML_THREAD_LOCAL_UNIQUE_PTR_H_
-#define FLUTTER_FML_THREAD_LOCAL_UNIQUE_PTR_H_
+#ifndef FLUTTER_FML_THREAD_LOCAL_H_
+#define FLUTTER_FML_THREAD_LOCAL_H_
 
 #include <memory>
 
@@ -84,4 +84,4 @@ class ThreadLocalUniquePtr {
 
 }  // namespace fml
 
-#endif  // FLUTTER_FML_THREAD_LOCAL_UNIQUE_PTR_H_
+#endif  // FLUTTER_FML_THREAD_LOCAL_H_
