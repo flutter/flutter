@@ -33,11 +33,11 @@ import 'version.dart';
 import 'vscode/vscode_validator.dart';
 import 'windows/windows_workflow.dart';
 
-Doctor get doctor => context[Doctor];
+Doctor get doctor => context.get<Doctor>();
 
 abstract class DoctorValidatorsProvider {
   /// The singleton instance, pulled from the [AppContext].
-  static DoctorValidatorsProvider get instance => context[DoctorValidatorsProvider];
+  static DoctorValidatorsProvider get instance => context.get<DoctorValidatorsProvider>();
 
   static final DoctorValidatorsProvider defaultInstance = _DefaultDoctorValidatorsProvider();
 

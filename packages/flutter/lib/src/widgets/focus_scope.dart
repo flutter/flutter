@@ -296,6 +296,12 @@ class _FocusState extends State<Focus> {
   }
 
   @override
+  void deactivate() {
+    super.deactivate();
+    _didAutofocus = false;
+  }
+
+  @override
   void didUpdateWidget(Focus oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.debugLabel != widget.debugLabel && _internalNode != null) {

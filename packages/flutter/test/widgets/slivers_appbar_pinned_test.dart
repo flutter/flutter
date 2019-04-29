@@ -258,9 +258,9 @@ void main() {
           physics: const BouncingScrollPhysics(),
           slivers: <Widget>[
             SliverPersistentHeader(delegate: TestDelegate(), pinned: true),
-            SliverList(
+            const SliverList(
               delegate: SliverChildListDelegate(<Widget>[
-                const SizedBox(
+                SizedBox(
                   height: 300.0,
                   child: Text('X'),
                 ),

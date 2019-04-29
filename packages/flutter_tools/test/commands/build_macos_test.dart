@@ -68,7 +68,7 @@ void main() {
     fs.directory('macos').createSync();
     fs.file('pubspec.yaml').createSync();
     fs.file('.packages').createSync();
-    final FlutterProject flutterProject = await FlutterProject.fromDirectory(fs.currentDirectory);
+    final FlutterProject flutterProject = FlutterProject.fromDirectory(fs.currentDirectory);
     final Directory flutterBuildDir = fs.directory(getMacOSBuildDirectory());
 
     when(mockProcessManager.start(<String>[

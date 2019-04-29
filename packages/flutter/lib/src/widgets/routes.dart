@@ -595,14 +595,18 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
     if (widget.route.secondaryAnimation != null)
       animations.add(widget.route.secondaryAnimation);
     _listenable = Listenable.merge(animations);
-    widget.route._grabFocusIfNeeded(focusScopeNode);
+    if (widget.route.isCurrent) {
+      widget.route.navigator.focusScopeNode.setFirstFocus(focusScopeNode);
+    }
   }
 
   @override
   void didUpdateWidget(_ModalScope<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
     assert(widget.route == oldWidget.route);
-    widget.route._grabFocusIfNeeded(focusScopeNode);
+    if (widget.route.isCurrent) {
+      widget.route.navigator.focusScopeNode.setFirstFocus(focusScopeNode);
+    }
   }
 
   @override
@@ -619,8 +623,8 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
 
   @override
   void dispose() {
-    super.dispose();
     focusScopeNode.dispose();
+    super.dispose();
   }
 
   // This should be called to wrap any changes to route.isCurrent, route.canPop,
@@ -905,17 +909,11 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     _secondaryAnimationProxy = ProxyAnimation(super.secondaryAnimation);
   }
 
-  bool _wantsFocus = false;
-  void _grabFocusIfNeeded(FocusScopeNode node) {
-    if (_wantsFocus) {
-      _wantsFocus = false;
-      navigator.focusScopeNode.setFirstFocus(node);
-    }
-  }
-
   @override
   TickerFuture didPush() {
-    _wantsFocus = true;
+    if (_scopeKey.currentState != null) {
+      navigator.focusScopeNode.setFirstFocus(_scopeKey.currentState.focusScopeNode);
+    }
     return super.didPush();
   }
 

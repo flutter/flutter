@@ -17,6 +17,7 @@ import '../build_info.dart';
 import '../convert.dart';
 import '../device.dart';
 import '../globals.dart';
+import '../project.dart';
 import '../protocol_discovery.dart';
 import 'code_signing.dart';
 import 'ios_workflow.dart';
@@ -400,6 +401,11 @@ class IOSDevice extends Device {
   @override
   Future<void> takeScreenshot(File outputFile) async {
     await iMobileDevice.takeScreenshot(outputFile);
+  }
+
+  @override
+  bool isSupportedForProject(FlutterProject flutterProject) {
+    return flutterProject.ios.existsSync();
   }
 }
 

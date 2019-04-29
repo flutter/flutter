@@ -781,30 +781,17 @@ class FocusScopeNode extends FocusNode {
   // last (which is the top of the stack).
   final List<FocusNode> _focusedChildren = <FocusNode>[];
 
-  @override
-  void _reparent(FocusNode child) {
-    final bool hadChildren = _children.isNotEmpty;
-    super._reparent(child);
-    final FocusScopeNode currentEnclosingScope = child.enclosingScope;
-    // If we just added our first child to this scope, and this scope had the
-    // focus, then focus the child.
-    if (!hadChildren && currentEnclosingScope.focusedChild == null && currentEnclosingScope.hasFocus) {
-      child.requestFocus();
-    }
-  }
-
   /// Make the given [scope] the active child scope for this scope.
   ///
   /// If the given [scope] is not yet a part of the focus tree, then add it to
-  /// the tree as a child of this scope.
-  ///
-  /// The given scope must be a descendant of this scope.
+  /// the tree as a child of this scope. If it is already part of the focus
+  /// tree, the given scope must be a descendant of this scope.
   void setFirstFocus(FocusScopeNode scope) {
     assert(scope != null);
     if (scope._parent == null) {
       _reparent(scope);
     }
-    assert(scope.ancestors.contains(this));
+    assert(scope.ancestors.contains(this), '$FocusScopeNode $scope must be a child of $this to set it as first focus.');
     // Move down the tree, checking each focusedChild until we get to a node
     // that either isn't a scope node, or has no focused child, and then request
     // focus on that node.
@@ -837,7 +824,7 @@ class FocusScopeNode extends FocusNode {
       }
       assert(node.ancestors.contains(this),
         'Autofocus was requested for a node that is not a descendant of the scope from which it was requested.');
-      node.requestFocus();
+      node._doRequestFocus(isFromPolicy: false);
     }
   }
 
@@ -913,8 +900,7 @@ class FocusManager with DiagnosticableTreeMixin {
   ///
   /// This field is rarely used directly. To find the nearest [FocusScopeNode]
   /// for a given [FocusNode], call [FocusNode.nearestScope].
-  FocusScopeNode get rootScope => _rootScope;
-  FocusScopeNode _rootScope = FocusScopeNode(debugLabel: 'Root Focus Scope');
+  final FocusScopeNode rootScope = FocusScopeNode(debugLabel: 'Root Focus Scope');
 
   void _handleRawKeyEvent(RawKeyEvent event) {
     // Walk the current focus from the leaf to the root, calling each one's
@@ -934,18 +920,6 @@ class FocusManager with DiagnosticableTreeMixin {
         break;
       }
     }
-  }
-
-  /// Resets the FocusManager to a base state.
-  ///
-  /// This is used by test infrastructure to reset the state between tests.
-  /// It is not meant for regular production use.
-  void reset() {
-    _currentFocus = null;
-    _nextFocus = null;
-    _haveScheduledUpdate = false;
-    _rootScope = FocusScopeNode(debugLabel: 'Root Focus Scope');
-    rootScope._manager = this;
   }
 
   // The node that currently has the primary focus.

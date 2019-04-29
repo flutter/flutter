@@ -21,7 +21,7 @@ import 'file_system.dart';
 import 'fingerprint.dart';
 import 'process.dart';
 
-GenSnapshot get genSnapshot => context[GenSnapshot];
+GenSnapshot get genSnapshot => context.get<GenSnapshot>();
 
 /// A snapshot build configuration.
 class SnapshotType {
@@ -88,7 +88,7 @@ class AOTSnapshotter {
   }) async {
     FlutterProject flutterProject;
     if (fs.file('pubspec.yaml').existsSync()) {
-      flutterProject = await FlutterProject.current();
+      flutterProject = FlutterProject.current();
     }
     if (!_isValidAotPlatform(platform, buildMode)) {
       printError('${getNameForTargetPlatform(platform)} does not support AOT compilation.');
@@ -196,10 +196,11 @@ class AOTSnapshotter {
       },
       depfilePaths: <String>[],
     );
-    if (await fingerprinter.doesFingerprintMatch()) {
-      printTrace('Skipping AOT snapshot build. Fingerprint match.');
-      return 0;
-    }
+    // TODO(jonahwilliams): re-enable once this can be proved correct.
+    // if (await fingerprinter.doesFingerprintMatch()) {
+    //   printTrace('Skipping AOT snapshot build. Fingerprint match.');
+    //   return 0;
+    // }
 
     final SnapshotType snapshotType = SnapshotType(platform, buildMode);
     final int genSnapshotExitCode = await _timedStep('gen_snapshot', () => genSnapshot.run(
@@ -303,7 +304,7 @@ class AOTSnapshotter {
     @required bool trackWidgetCreation,
     List<String> extraFrontEndOptions = const <String>[],
   }) async {
-    final FlutterProject flutterProject = await FlutterProject.current();
+    final FlutterProject flutterProject = FlutterProject.current();
     final Directory outputDir = fs.directory(outputPath);
     outputDir.createSync(recursive: true);
 
@@ -467,10 +468,11 @@ class JITSnapshotter {
       },
       depfilePaths: <String>[],
     );
-    if (await fingerprinter.doesFingerprintMatch()) {
-      printTrace('Skipping JIT snapshot build. Fingerprint match.');
-      return 0;
-    }
+    // TODO(jonahwilliams): re-enable once this can be proved correct.
+    // if (await fingerprinter.doesFingerprintMatch()) {
+    //   printTrace('Skipping JIT snapshot build. Fingerprint match.');
+    //   return 0;
+    // }
 
     final SnapshotType snapshotType = SnapshotType(platform, buildMode);
     final int genSnapshotExitCode = await genSnapshot.run(

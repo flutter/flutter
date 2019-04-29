@@ -2091,4 +2091,39 @@ void main() {
     final EditableText editableText = tester.firstWidget(find.byType(EditableText));
     expect(editableText.cursorColor, const Color(0xFFF44336));
   });
+
+  testWidgets('iOS shows selection handles', (WidgetTester tester) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+    const String testText = 'lorem ipsum';
+    final TextEditingController controller = TextEditingController(text: testText);
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        theme: const CupertinoThemeData(),
+        home: Center(
+          child: CupertinoTextField(
+            controller: controller,
+          ),
+        ),
+      ),
+    );
+
+    final RenderEditable renderEditable =
+      tester.state<EditableTextState>(find.byType(EditableText)).renderEditable;
+
+    await tester.tapAt(textOffsetToPosition(tester, 5));
+    renderEditable.selectWord(cause: SelectionChangedCause.longPress);
+    await tester.pumpAndSettle();
+
+    final List<Widget> transitions =
+      find.byType(FadeTransition).evaluate().map((Element e) => e.widget).toList();
+    expect(transitions.length, 2);
+    final FadeTransition left = transitions[0];
+    final FadeTransition right = transitions[1];
+
+    expect(left.opacity.value, equals(1.0));
+    expect(right.opacity.value, equals(1.0));
+
+    debugDefaultTargetPlatformOverride = null;
+  });
 }
