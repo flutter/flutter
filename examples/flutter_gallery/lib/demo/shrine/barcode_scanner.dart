@@ -121,6 +121,21 @@ class _CameraAppState extends State<CameraApp> {
             ),
           ),
           Positioned(
+            left: 0,
+            right: 0,
+            top: 0,
+            child: Container(
+              height: 56,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: const <Color>[Colors.black87, Colors.transparent],
+                ),
+              ),
+            ),
+          ),
+          Positioned(
             left: 0.0,
             bottom: 0.0,
             right: 0.0,
