@@ -237,7 +237,6 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   @override
   void initState() {
     super.initState();
-    print("scrimColor: ${widget.scrimColor}");
     _color = ColorTween(begin: Colors.transparent, end: widget.scrimColor);
     _controller = AnimationController(duration: _kBaseSettleDuration, vsync: this)
       ..addListener(_animationChanged)
