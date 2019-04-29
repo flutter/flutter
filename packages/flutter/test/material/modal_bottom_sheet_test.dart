@@ -38,7 +38,7 @@ void main() {
     expect(find.text('BottomSheet'), findsOneWidget);
     expect(showBottomSheetThenCalled, isFalse);
 
-    // Tap on the bottom sheet itself to dismiss it
+    // Tap on the bottom sheet itself to dismiss it.
     await tester.tap(find.text('BottomSheet'));
     await tester.pump(); // bottom sheet dismiss animation starts
     expect(showBottomSheetThenCalled, isTrue);
@@ -169,6 +169,7 @@ void main() {
         child: MediaQuery(
           data: const MediaQueryData(
             padding: EdgeInsets.all(50.0),
+            size: Size(400.0, 600.0),
           ),
           child: Navigator(
             onGenerateRoute: (_) {
@@ -240,6 +241,68 @@ void main() {
                 TestSemantics(
                   label: 'BottomSheet',
                   textDirection: TextDirection.ltr,
+                ),
+              ],
+            ),
+          ],
+        ),
+      ],
+    ), ignoreTransform: true, ignoreRect: true, ignoreId: true));
+    semantics.dispose();
+  });
+
+  testWidgets('modal BottomSheet with scrollController has semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        key: scaffoldKey,
+        body: const Center(child: Text('body'))
+      )
+    ));
+
+
+    showModalBottomSheet<void>(
+      context: scaffoldKey.currentContext,
+      builder: (BuildContext context) {
+        return DraggableScrollableSheet(
+          expand: false,
+          builder: (_, ScrollController controller) {
+            return SingleChildScrollView(
+              controller: controller,
+              child: Container(
+                child: const Text('BottomSheet'),
+              ),
+            );
+          },
+        );
+      },
+    );
+
+    await tester.pump(); // bottom sheet show animation starts
+    await tester.pump(const Duration(seconds: 1)); // animation done
+
+    expect(semantics, hasSemantics(TestSemantics.root(
+      children: <TestSemantics>[
+        TestSemantics.rootChild(
+          children: <TestSemantics>[
+            TestSemantics(
+              label: 'Dialog',
+              textDirection: TextDirection.ltr,
+              flags: <SemanticsFlag>[
+                SemanticsFlag.scopesRoute,
+                SemanticsFlag.namesRoute,
+              ],
+              children: <TestSemantics>[
+                TestSemantics(
+                  flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+                  children: <TestSemantics>[
+                    TestSemantics(
+                      label: 'BottomSheet',
+                      textDirection: TextDirection.ltr,
+                    ),
+                  ],
                 ),
               ],
             ),

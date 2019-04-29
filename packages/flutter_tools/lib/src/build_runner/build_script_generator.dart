@@ -242,8 +242,8 @@ class BuildScriptGenerator {
   }
 
   /// An expression creating a [BuilderOptions] from a json string.
-  Expression _constructBuilderOptions(BuilderOptions options) {
-    return refer('BuilderOptions', 'package:build/build.dart').newInstance(<Expression>[literalMap(options.config)]);
+  Expression _constructBuilderOptions(Map<String, dynamic> options) {
+    return refer('BuilderOptions', 'package:build/build.dart').newInstance(<Expression>[literalMap(options)]);
   }
 
   /// Put [builders] into an order such that any builder which specifies

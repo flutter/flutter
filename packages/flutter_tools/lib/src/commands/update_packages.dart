@@ -76,6 +76,9 @@ class UpdatePackagesCommand extends FlutterCommand {
   }
 
   @override
+  bool get isExperimental => true;
+
+  @override
   final String name = 'update-packages';
 
   @override

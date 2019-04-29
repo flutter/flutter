@@ -49,7 +49,7 @@ class BotDetector {
 }
 
 bool get isRunningOnBot {
-  final BotDetector botDetector = context[BotDetector] ?? _kBotDetector;
+  final BotDetector botDetector = context.get<BotDetector>() ?? _kBotDetector;
   return botDetector.isRunningOnBot;
 }
 

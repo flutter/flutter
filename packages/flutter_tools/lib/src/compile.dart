@@ -23,7 +23,7 @@ import 'dart/package_map.dart';
 import 'globals.dart';
 import 'project.dart';
 
-KernelCompilerFactory get kernelCompilerFactory => context[KernelCompilerFactory];
+KernelCompilerFactory get kernelCompilerFactory => context.get<KernelCompilerFactory>();
 
 class KernelCompilerFactory {
   const KernelCompilerFactory();
@@ -230,7 +230,7 @@ class KernelCompiler {
     );
     FlutterProject flutterProject;
     if (fs.file('pubspec.yaml').existsSync()) {
-      flutterProject = await FlutterProject.current();
+      flutterProject = FlutterProject.current();
     }
 
     // TODO(cbracken): eliminate pathFilter.
