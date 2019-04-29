@@ -66,10 +66,6 @@ enum TraversalDirection {
 ///   * [DirectionalFocusTraversalPolicyMixin] a mixin class that implements
 ///     focus traversal in a direction.
 abstract class FocusTraversalPolicy {
-  /// Abstract const constructor. This constructor enables subclasses to provide
-  /// const constructors so that they can be used in const expressions.
-  const FocusTraversalPolicy();
-
   /// Returns the node that should receive focus if there is no current focus
   /// in the scope to which the [currentNode] belongs.
   ///
@@ -94,6 +90,28 @@ abstract class FocusTraversalPolicy {
   ///
   /// All arguments must not be null.
   FocusNode findFirstFocusInDirection(FocusNode currentNode, TraversalDirection direction);
+
+  /// Clears the data associated with the given [FocusScopeNode] for this object.
+  ///
+  /// This is used to indicate that the focus policy has changed mode, and so
+  /// any cached policy data should be invalidated. For example, changing the
+  /// direction in which focus is moving, or changing from directional to
+  /// next/previous navigation modes.
+  ///
+  /// The default implementation does nothing.
+  @mustCallSuper
+  @protected
+  void invalidateScopeData(FocusScopeNode node) {}
+
+  /// This is called whenever the given [node] is reparented into a new scope,
+  /// so that the policy has a chance to update or invalidate any cached data
+  /// that it maintains per scope about the node.
+  ///
+  /// The [oldScope] is the previous scope that this node belonged to, if any.
+  ///
+  /// The default implementation does nothing.
+  @mustCallSuper
+  void changedScope({FocusNode node, FocusScopeNode oldScope}) {}
 
   /// Focuses the next widget in the focus scope that contains the given
   /// [currentNode].
@@ -138,12 +156,12 @@ abstract class FocusTraversalPolicy {
 
 /// A policy data object for use by the [DirectionalFocusTraversalPolicyMixin]
 class _DirectionalPolicyDataEntry {
-  const _DirectionalPolicyDataEntry({@required this.previousDirection, @required this.previousNode})
-      : assert(previousDirection != null),
-        assert(previousNode != null);
+  const _DirectionalPolicyDataEntry({@required this.direction, @required this.node})
+      : assert(direction != null),
+        assert(node != null);
 
-  final TraversalDirection previousDirection;
-  final FocusNode previousNode;
+  final TraversalDirection direction;
+  final FocusNode node;
 }
 
 class _DirectionalPolicyData {
@@ -181,6 +199,24 @@ class _DirectionalPolicyData {
 ///   * [ReadingOrderTraversalPolicy], a policy that describes the order as the
 ///     natural "reading order" for the current [Directionality].
 mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
+  final Map<FocusScopeNode, _DirectionalPolicyData> _policyData = <FocusScopeNode, _DirectionalPolicyData>{};
+
+  @override
+  void invalidateScopeData(FocusScopeNode node) {
+    super.invalidateScopeData(node);
+    _policyData.remove(node);
+  }
+
+  @override
+  void changedScope({FocusNode node, FocusScopeNode oldScope}) {
+    super.changedScope(node: node, oldScope: oldScope);
+    if (oldScope != null) {
+      _policyData[oldScope]?.history?.removeWhere((_DirectionalPolicyDataEntry entry) {
+        return entry.node == node;
+      });
+    }
+  }
+
   @override
   FocusNode findFirstFocusInDirection(FocusNode currentNode, TraversalDirection direction) {
     assert(direction != null);
@@ -284,59 +320,55 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
   //
   // Returns true if focus was requested on a previous node.
   bool _popPolicyDataIfNeeded(TraversalDirection direction, FocusScopeNode nearestScope, FocusNode focusedChild) {
-    _DirectionalPolicyData policyData;
-    if (nearestScope.policyData != null && nearestScope.policyData is _DirectionalPolicyData) {
-      policyData = nearestScope.policyData;
-    } else {
-      return false;
-    }
-    if (policyData != null && policyData.history.isNotEmpty && policyData.history.first.previousDirection != direction) {
+    final _DirectionalPolicyData policyData = _policyData[nearestScope];
+    if (policyData != null && policyData.history.isNotEmpty && policyData.history.first.direction != direction) {
       switch (direction) {
         case TraversalDirection.down:
         case TraversalDirection.up:
-          switch (policyData.history.first.previousDirection) {
+          switch (policyData.history.first.direction) {
             case TraversalDirection.left:
             case TraversalDirection.right:
               // Reset the policy data if we change directions.
-              nearestScope.policyData = null;
+              invalidateScopeData(nearestScope);
               break;
             case TraversalDirection.up:
             case TraversalDirection.down:
-              policyData.history.removeLast().previousNode.requestFocusFromPolicy();
+              policyData.history.removeLast().node.requestFocus();
               return true;
           }
           break;
         case TraversalDirection.left:
         case TraversalDirection.right:
-          switch (policyData.history.first.previousDirection) {
+          switch (policyData.history.first.direction) {
             case TraversalDirection.left:
             case TraversalDirection.right:
-              policyData.history.removeLast().previousNode.requestFocusFromPolicy();
+              policyData.history.removeLast().node.requestFocus();
               return true;
             case TraversalDirection.up:
             case TraversalDirection.down:
               // Reset the policy data if we change directions.
-              nearestScope.policyData = null;
+              invalidateScopeData(nearestScope);
               break;
           }
       }
     }
     if (policyData != null && policyData.history.isEmpty) {
-      nearestScope.policyData = null;
+      // Reset the policy data if we change directions.
+      invalidateScopeData(nearestScope);
     }
     return false;
   }
 
   void _pushPolicyData(TraversalDirection direction, FocusScopeNode nearestScope, FocusNode focusedChild) {
-    final _DirectionalPolicyData policyData = nearestScope.policyData;
+    final _DirectionalPolicyData policyData = _policyData[nearestScope];
     if (policyData != null && policyData is! _DirectionalPolicyData) {
       return;
     }
-    final _DirectionalPolicyDataEntry newEntry = _DirectionalPolicyDataEntry(previousNode: focusedChild, previousDirection: direction);
+    final _DirectionalPolicyDataEntry newEntry = _DirectionalPolicyDataEntry(node: focusedChild, direction: direction);
     if (policyData != null) {
       policyData.history.add(newEntry);
     } else {
-      nearestScope.policyData = _DirectionalPolicyData(history: <_DirectionalPolicyDataEntry>[newEntry]);
+      _policyData[nearestScope] = _DirectionalPolicyData(history: <_DirectionalPolicyDataEntry>[newEntry]);
     }
   }
 
@@ -427,7 +459,7 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
     }
     if (found != null) {
       _pushPolicyData(direction, nearestScope, focusedChild);
-      found.requestFocusFromPolicy();
+      found.requestFocus();
       return true;
     }
     return false;
@@ -451,7 +483,7 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
 ///     focus traversal in a direction.
 class WidgetOrderFocusTraversalPolicy extends FocusTraversalPolicy with DirectionalFocusTraversalPolicyMixin {
   /// Creates a const [WidgetOrderFocusTraversalPolicy].
-  const WidgetOrderFocusTraversalPolicy();
+  WidgetOrderFocusTraversalPolicy();
 
   @override
   FocusNode findFirstFocus(FocusNode currentNode) {
@@ -483,10 +515,10 @@ class WidgetOrderFocusTraversalPolicy extends FocusTraversalPolicy with Directio
       return false;
     }
     final FocusScopeNode nearestScope = node.nearestScope;
-    nearestScope.policyData = null;
+    invalidateScopeData(nearestScope);
     final FocusNode focusedChild = nearestScope.focusedChild;
     if (focusedChild == null) {
-      findFirstFocus(node).requestFocusFromPolicy();
+      findFirstFocus(node).requestFocus();
       return true;
     }
     FocusNode previousNode;
@@ -500,12 +532,12 @@ class WidgetOrderFocusTraversalPolicy extends FocusTraversalPolicy with Directio
         }
         if (forward) {
           if (previousNode == focusedChild) {
-            visited.requestFocusFromPolicy();
+            visited.requestFocus();
             return false; // short circuit the traversal.
           }
         } else {
           if (previousNode != null && visited == focusedChild) {
-            previousNode.requestFocusFromPolicy();
+            previousNode.requestFocus();
             return false; // short circuit the traversal.
           }
         }
@@ -518,12 +550,12 @@ class WidgetOrderFocusTraversalPolicy extends FocusTraversalPolicy with Directio
     if (visit(nearestScope)) {
       if (forward) {
         if (firstNode != null) {
-          firstNode.requestFocusFromPolicy();
+          firstNode.requestFocus();
           return true;
         }
       } else {
         if (lastNode != null) {
-          lastNode.requestFocusFromPolicy();
+          lastNode.requestFocus();
           return true;
         }
       }
@@ -570,9 +602,6 @@ class _SortData {
 ///   * [DirectionalFocusTraversalPolicyMixin] a mixin class that implements
 ///     focus traversal in a direction.
 class ReadingOrderTraversalPolicy extends FocusTraversalPolicy with DirectionalFocusTraversalPolicyMixin {
-  /// Creates a const ReadingOrderTraversalPolicy.
-  const ReadingOrderTraversalPolicy();
-
   @override
   FocusNode findFirstFocus(FocusNode currentNode) {
     assert(currentNode != null);
@@ -671,19 +700,19 @@ class ReadingOrderTraversalPolicy extends FocusTraversalPolicy with DirectionalF
   // value of the forward argument.
   bool _move(FocusNode currentNode, {@required bool forward}) {
     final FocusScopeNode nearestScope = currentNode.nearestScope;
-    nearestScope.policyData = null;
+    invalidateScopeData(nearestScope);
     final FocusNode focusedChild = nearestScope.focusedChild;
     if (focusedChild == null) {
-      findFirstFocus(currentNode).requestFocusFromPolicy();
+      findFirstFocus(currentNode).requestFocus();
       return true;
     }
     final List<FocusNode> sortedNodes = _sortByGeometry(nearestScope).toList();
     if (forward && focusedChild == sortedNodes.last) {
-      sortedNodes.first.requestFocusFromPolicy();
+      sortedNodes.first.requestFocus();
       return true;
     }
     if (!forward && focusedChild == sortedNodes.first) {
-      sortedNodes.last.requestFocusFromPolicy();
+      sortedNodes.last.requestFocus();
       return true;
     }
 
@@ -691,7 +720,7 @@ class ReadingOrderTraversalPolicy extends FocusTraversalPolicy with DirectionalF
     FocusNode previousNode;
     for (FocusNode node in maybeFlipped) {
       if (previousNode == focusedChild) {
-        node.requestFocusFromPolicy();
+        node.requestFocus();
         return true;
       }
       previousNode = node;
@@ -723,18 +752,17 @@ class ReadingOrderTraversalPolicy extends FocusTraversalPolicy with DirectionalF
 class DefaultFocusTraversal extends InheritedWidget {
   /// Creates a FocusTraversal object.
   ///
-  /// The [policy] and [child] arguments must not be null.
+  /// The [child] argument must not be null.
   const DefaultFocusTraversal({
     Key key,
-    this.policy = const WidgetOrderFocusTraversalPolicy(),
+    this.policy,
     @required Widget child,
-  })  : assert(policy != null),
-        super(key: key, child: child);
+  }) : super(key: key, child: child);
 
   /// The policy used to move the focus from one focus node to another.
   ///
-  /// By default, traverses in widget order using
-  /// [WidgetOrderFocusTraversalPolicy].
+  /// If not specified, traverses in reading order using
+  /// [ReadingOrderTraversalPolicy].
   ///
   /// See also:
   ///
@@ -773,7 +801,7 @@ class DefaultFocusTraversal extends InheritedWidget {
       }
       return true;
     }());
-    return inherited?.policy;
+    return inherited?.policy ?? ReadingOrderTraversalPolicy();
   }
 
   @override

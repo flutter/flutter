@@ -1192,7 +1192,7 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
     assert(_debugCheckLocalizations(appLocale));
 
     return DefaultFocusTraversal(
-      policy: const ReadingOrderTraversalPolicy(),
+      policy: ReadingOrderTraversalPolicy(),
       child: MediaQuery(
         data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
         child: Localizations(

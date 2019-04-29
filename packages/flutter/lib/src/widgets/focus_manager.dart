@@ -607,6 +607,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     }
     assert(_manager == null || child != _manager.rootScope, "Reparenting the root node isn't allowed.");
     assert(!ancestors.contains(child), 'The supplied child is already an ancestor of this node. Loops are not allowed.');
+    final FocusScopeNode oldScope = child.enclosingScope;
     final bool hadFocus = child.hasFocus;
     child._parent?._removeChild(child);
     _children.add(child);
@@ -615,6 +616,9 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     if (hadFocus) {
       // Update the focus chain for the current focus without changing it.
       _manager?._currentFocus?._setAsFocusedChild();
+    }
+    if (child.enclosingScope != oldScope) {
+      DefaultFocusTraversal.of(context).changedScope(node: this, oldScope: oldScope);
     }
   }
 
@@ -655,12 +659,6 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     notifyListeners();
   }
 
-  /// Requests that this node is focused from a [FocusTraversalPolicy].
-  ///
-  /// The only difference between this and [requestFocus] is that the policy data
-  /// is not cleared.
-  void requestFocusFromPolicy() => _doRequestFocus(isFromPolicy: true);
-
   /// Requests the primary focus for this node, or for a supplied [node], which
   /// will also give focus to its [ancestors].
   ///
@@ -684,21 +682,17 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
       }
       assert(node.ancestors.contains(this),
         'Focus was requested for a node that is not a descendant of the scope from which it was requested.');
-      node._doRequestFocus(isFromPolicy: false);
+      node._doRequestFocus();
       return;
     }
-    _doRequestFocus(isFromPolicy: false);
+    _doRequestFocus();
   }
 
   // Note that this is overridden in FocusScopeNode.
-  void _doRequestFocus({@required bool isFromPolicy}) {
-    assert(isFromPolicy != null);
+  void _doRequestFocus() {
     _setAsFocusedChild();
     if (hasPrimaryFocus) {
       return;
-    }
-    if (!isFromPolicy) {
-      enclosingScope?.policyData = null;
     }
     _hasKeyboardToken = true;
     _markAsDirty(newFocus: this);
@@ -725,14 +719,20 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
 
   /// Request that the widget move the focus to the next focus node, by
   /// calling the [FocusTraversalPolicy.next] method.
+  ///
+  /// Returns true if it successfully found a node and requested focus.
   bool nextFocus() => DefaultFocusTraversal.of(context).next(this);
 
   /// Request that the widget move the focus to the previous focus node, by
   /// calling the [FocusTraversalPolicy.previous] method.
+  ///
+  /// Returns true if it successfully found a node and requested focus.
   bool previousFocus() => DefaultFocusTraversal.of(context).previous(this);
 
   /// Request that the widget move the focus to the previous focus node, by
   /// calling the [FocusTraversalPolicy.inDirection] method.
+  ///
+  /// Returns true if it successfully found a node and requested focus.
   bool focusInDirection(TraversalDirection direction) => DefaultFocusTraversal.of(context).inDirection(this, direction);
 
   @override
@@ -814,17 +814,6 @@ class FocusScopeNode extends FocusNode {
   // last (which is the top of the stack).
   final List<FocusNode> _focusedChildren = <FocusNode>[];
 
-  @override
-  void _reparent(FocusNode child) {
-    final FocusScopeNode previousEnclosingScope = child.enclosingScope;
-    super._reparent(child);
-    final FocusScopeNode currentEnclosingScope = child.enclosingScope;
-    // If the child moved scopes, then the policy data is invalid.
-    if (previousEnclosingScope != currentEnclosingScope) {
-      policyData = null;
-    }
-  }
-
   /// Make the given [scope] the active child scope for this scope.
   ///
   /// If the given [scope] is not yet a part of the focus tree, then add it to
@@ -860,13 +849,12 @@ class FocusScopeNode extends FocusNode {
       }
       assert(node.ancestors.contains(this),
         'Autofocus was requested for a node that is not a descendant of the scope from which it was requested.');
-      node._doRequestFocus(isFromPolicy: false);
+      node._doRequestFocus();
     }
   }
 
   @override
-  void _doRequestFocus({@required bool isFromPolicy}) {
-    assert(isFromPolicy != null);
+  void _doRequestFocus() {
     // Start with the primary focus as the focused child of this scope, if there
     // is one. Otherwise start with this node itself.
     FocusNode primaryFocus = focusedChild ?? this;
@@ -878,9 +866,6 @@ class FocusScopeNode extends FocusNode {
       primaryFocus = scope.focusedChild;
     }
     if (primaryFocus is FocusScopeNode) {
-      if (!isFromPolicy) {
-        primaryFocus.policyData = null;
-      }
       // We didn't find a FocusNode at the leaf, so we're focusing the scope.
       _setAsFocusedChild();
       _markAsDirty(newFocus: primaryFocus);
@@ -888,25 +873,9 @@ class FocusScopeNode extends FocusNode {
       // We found a FocusScope at the leaf, so ask it to focus itself instead of
       // this scope. That will cause this scope to return true from hasFocus,
       // but false from hasPrimaryFocus.
-      if (isFromPolicy) {
-        primaryFocus.requestFocusFromPolicy();
-      } else {
-        primaryFocus.requestFocus();
-      }
+      primaryFocus.requestFocus();
     }
   }
-
-  /// Holds the [PolicyData] used by the scope's [FocusTraversalPolicy].
-  ///
-  /// This is set on scope nodes by the traversal policy to keep data that it
-  /// may need later.  For instance, the last focused node in a direction is
-  /// kept here so that directional navigation can avoid hysteresis when
-  /// returning in the direction it just came from.
-  ///
-  /// This data will be cleared if the node moves to another scope, or if the
-  /// focus is set using [requestFocus] instead of [requestFocusFromPolicy]. The
-  /// [policyData] is meant to be short-lived and disposable.
-  Object policyData;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
